@@ -9,41 +9,49 @@ BuildSubtreeItems::BuildSubtreeItems(
     RowLocationAdapter const &rowLocationAdapter)
     : m_adaptedMainModel(adaptedModel), m_rowLocations(rowLocationAdapter) {}
 
-void BuildSubtreeItems::operator()(RowLocation const &parentOfSubtreeRoot,
-                                   int index, Subtree const &subtree) {
-  if (!subtree.empty()) {
-    buildRecursively(index, parentOfSubtreeRoot, 0, subtree.cbegin(),
-                     subtree.cend());
-  }
-}
-
-auto BuildSubtreeItems::buildRecursively(int index, RowLocation const &parent,
-                                         int depth,
+auto BuildSubtreeItems::buildRecursively(int insertionIndex,
+                                         RowLocation const &parent,
                                          SubtreeConstIterator current,
                                          SubtreeConstIterator end)
     -> SubtreeConstIterator {
-  auto insertedRow = m_adaptedMainModel.insertChildRow(
-      m_rowLocations.indexAt(parent), index, (*current).cells());
-  ++current;
+  auto lastRowInsertedAtThisDepth = QModelIndexForMainModel();
+  auto const insertionDepth = (*current).location().depth();
   while (current != end) {
     auto currentRow = (*current).location();
     auto currentDepth = currentRow.depth();
+    // `currentDepth` tracks the depth of the currentRow whearas
+    // `insertionDepth` tracks
+    // the depth of the locations this recursive call will insert at.
 
-    if (depth < currentDepth) {
+    if (insertionDepth < currentDepth) {
       current = buildRecursively(currentRow.rowRelativeToParent(),
-                                 parent.child(insertedRow.row()), depth + 1,
+                                 parent.child(lastRowInsertedAtThisDepth.row()),
                                  current, end);
-    } else if (depth > currentDepth) {
+    } else if (insertionDepth > currentDepth) {
       return current;
     } else {
-      m_adaptedMainModel.appendChildRow(m_rowLocations.indexAt(parent),
-                                        (*current).cells());
+      lastRowInsertedAtThisDepth = m_adaptedMainModel.insertChildRow(
+          modelIndexAt(parent), insertionIndex, (*current).cells());
+      ++insertionIndex;
       ++current;
     }
   }
   return end;
 }
 
+void BuildSubtreeItems::operator()(RowLocation const &parentOfSubtreeRoot,
+                                   int firstInsertionIndex,
+                                   Subtree const &subtree) {
+  if (!subtree.empty()) {
+    buildRecursively(firstInsertionIndex, parentOfSubtreeRoot, subtree.cbegin(),
+                     subtree.cend());
+  }
+}
+
+QModelIndexForMainModel
+BuildSubtreeItems::modelIndexAt(RowLocation const &parent) const {
+  return m_rowLocations.indexAt(parent);
+}
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt

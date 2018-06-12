@@ -35,7 +35,7 @@ using Jobs = boost::variant<UnslicedReductionJobs, SlicedReductionJobs>;
 void appendEmptyRow(Jobs &jobs, int groupIndex);
 void insertEmptyRow(Jobs &jobs, int groupIndex, int beforeRow);
 void removeRow(Jobs &jobs, int groupIndex, int rowIndex);
-void updateRow(Jobs &jobs, int groupIndex, int rowIndex, boost::optional<RowVariant> newValue);
+void updateRow(Jobs &jobs, int groupIndex, int rowIndex, boost::optional<RowVariant> const& newValue);
 
 void appendEmptyGroup(Jobs &jobs);
 void insertEmptyGroup(Jobs &jobs, int beforeGroup);

@@ -23,6 +23,11 @@ std::vector<std::string> const &Row<ReducedWorkspaceNames>::runNumbers() const {
 }
 
 template <typename ReducedWorkspaceNames>
+std::pair<std::string, std::string> const &Row<ReducedWorkspaceNames>::transmissionWorkspaceNames() const {
+  return m_transmissionRuns;
+}
+
+template <typename ReducedWorkspaceNames>
 template <typename WorkspaceNamesFactory>
 Row<ReducedWorkspaceNames> Row<ReducedWorkspaceNames>::withExtraRunNumbers(
     std::vector<std::string> const &extraRunNumbers,
@@ -79,13 +84,37 @@ bool operator!=(Row<ReducedWorkspaceNames> const &lhs,
   return !(lhs == rhs);
 }
 
-class ThetaVisitor : boost::static_visitor<double> {
-public:
-  template <typename Row>
-  double operator()(Row const& row) const {
-    return row.theta();
+SlicedRow slice(UnslicedRow const &row, Slicing const &slicing) {
+  return SlicedRow(
+      row.runNumbers(), row.theta(), row.transmissionWorkspaceNames(),
+      row.qRange(), row.scaleFactor(), row.reductionOptions(),
+      workspaceNamesForSliced(row.runNumbers(),
+                              row.transmissionWorkspaceNames(), slicing));
+}
+
+UnslicedRow unslice(SlicedRow const &row) {
+  return UnslicedRow(row.runNumbers(), row.theta(),
+                     row.transmissionWorkspaceNames(), row.qRange(),
+                     row.scaleFactor(), row.reductionOptions(),
+                     workspaceNamesForUnsliced(
+                         row.runNumbers(), row.transmissionWorkspaceNames()));
+}
+
+boost::optional<UnslicedRow> unslice(boost::optional<SlicedRow> const &row) {
+  if (row.is_initialized()) {
+    return unslice(row.get());
+  } else {
+    return boost::none;
   }
-};
+}
+
+boost::optional<SlicedRow> slice(boost::optional<UnslicedRow> const &row) {
+  if (row.is_initialized()) {
+    return slice(row.get());
+  } else {
+    return boost::none;
+  }
+}
 
 template class Row<SlicedReductionWorkspaces>;
 template bool operator==(SlicedRow const &, SlicedRow const &);

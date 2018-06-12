@@ -26,7 +26,7 @@ bool ReductionJobs<Group>::hasGroupWithName(
   return std::find_if(m_groups.crbegin(), m_groups.crend(),
                       [&groupName](Group const &group) -> bool {
                         return group.name() == groupName;
-                      }) == m_groups.crend();
+                      }) != m_groups.crend();
 }
 
 template <typename Group> void ReductionJobs<Group>::removeGroup(int index) {

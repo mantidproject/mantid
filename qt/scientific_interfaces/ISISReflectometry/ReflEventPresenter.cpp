@@ -9,15 +9,21 @@ namespace CustomInterfaces {
 
 /** Constructor
 * @param view :: The view we are handling
+* @param gropu :: The group on the parent tab this belongs to
 */
-ReflEventPresenter::ReflEventPresenter(IReflEventView *view)
-    : m_view(view), m_sliceType(SliceType::UniformEven) {
+ReflEventPresenter::ReflEventPresenter(IReflEventView *view, int group)
+    : m_view(view), m_sliceType(SliceType::UniformEven), m_group(group) {
   m_view->enableSliceType(m_sliceType);
 }
 
 /** Destructor
 */
 ReflEventPresenter::~ReflEventPresenter() {}
+
+void ReflEventPresenter::acceptTabPresenter(
+    IReflEventTabPresenter *tabPresenter) {
+  m_tabPresenter = tabPresenter;
+}
 
 /** Returns the time-slicing values
 * @return :: The time-slicing values
@@ -80,6 +86,10 @@ void ReflEventPresenter::notifySliceTypeChanged(SliceType newSliceType) {
   m_view->disableSliceType(m_sliceType);
   m_view->enableSliceType(newSliceType);
   m_sliceType = newSliceType;
+}
+
+void ReflEventPresenter::notifySettingsChanged() {
+  m_tabPresenter->settingsChanged(m_group);
 }
 }
 }

@@ -15,6 +15,8 @@ ISIS Reflectometry Interface
 New features
 ############
 
+- Fully-automatic processing has been added to the interface. Click ``Autoprocess`` to process all of the runs for an investigation and to start polling for new runs. Whenever new runs are found, they will automatically be added to the table and processed.
+
 Improvements
 ############
 
@@ -34,6 +36,11 @@ Algorithms
 New features
 ############
 
+- Algorithms for reflectometry reduction at ILL have been added. These handle the basic reduction in SumInLambda mode. Included algorithms:
+    - :ref:`algm-ReflectometryILLPreprocess`
+    - :ref:`algm-ReflectometryILLSumForeground`
+    - :ref:`algm-ReflectometryILLPolarizationCor`
+    - :ref:`algm-ReflectometryILLConvertToQ`
 - A new algorithm :ref:`algm-ReflectometryMomentumTransfer` provides conversion to momentum transfer and :math:`Q_{z}` resolution calculation for relfectivity workspaces.
 
 Improvements

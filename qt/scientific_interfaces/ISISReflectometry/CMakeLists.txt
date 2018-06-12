@@ -22,6 +22,7 @@ set ( SRC_FILES
     ReflCatalogSearcher.cpp
     ReflAsciiSaver.cpp
     IReflAsciiSaver.cpp
+    ReflAutoreduction.cpp
     ReflDataProcessorPresenter.cpp
     ReflEventPresenter.cpp
     ReflEventTabPresenter.cpp
@@ -72,6 +73,7 @@ set ( INC_FILES
     QtReflSettingsTabView.h
     QtReflSettingsView.h
     QWidgetGroup.h
+    ReflAutoreduction.h
     ReflCatalogSearcher.h
     ReflAsciiSaver.h
     IReflAsciiSaver.h

@@ -4,6 +4,8 @@
 #include "GSASIIRefineFitPeaksOutputProperties.h"
 #include "GSASIIRefineFitPeaksParameters.h"
 
+#include "MantidAPI/IAlgorithm_fwd.h"
+
 #include <QObject>
 
 /**
@@ -27,9 +29,11 @@ public slots:
   void doRefinements();
 
 signals:
-  void refinementsComplete();
+  void refinementsComplete(Mantid::API::IAlgorithm_sptr,
+                           std::vector<GSASIIRefineFitPeaksOutputProperties>);
 
-  void refinementSuccessful(GSASIIRefineFitPeaksOutputProperties);
+  void refinementSuccessful(Mantid::API::IAlgorithm_sptr alg,
+                            GSASIIRefineFitPeaksOutputProperties);
 
   void refinementFailed(std::string);
 

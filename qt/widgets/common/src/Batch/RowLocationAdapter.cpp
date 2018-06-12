@@ -21,21 +21,25 @@ RowLocationAdapter::atIndex(QModelIndexForMainModel const &index) const {
   }
 }
 
+QModelIndex RowLocationAdapter::walkFromRootToParentIndexOf(
+    RowLocation const &location) const {
+  auto parentIndex = QModelIndex();
+  auto &path = location.path();
+  for (auto it = path.cbegin(); it != path.cend() - 1; ++it)
+    parentIndex = m_model.index(*it, 0, parentIndex);
+  return parentIndex;
+}
+
 boost::optional<QModelIndexForMainModel>
 RowLocationAdapter::indexIfExistsAt(RowLocation const &location,
                                     int column) const {
-  auto parentIndex = QModelIndex();
   if (location.isRoot()) {
-    return fromMainModel(parentIndex, m_model);
+    return fromMainModel(QModelIndex(), m_model);
   } else {
-    auto &path = location.path();
-    for (auto it = path.cbegin(); it != path.cend() - 1; ++it)
-      parentIndex = m_model.index(*it, 0, parentIndex);
-
-    if (m_model.hasIndex(location.rowRelativeToParent(), column, parentIndex))
-      return fromMainModel(
-          m_model.index(location.rowRelativeToParent(), column, parentIndex),
-          m_model);
+    auto const parentIndex = walkFromRootToParentIndexOf(location);
+    auto const row = location.rowRelativeToParent();
+    if (m_model.hasIndex(row, column, parentIndex))
+      return fromMainModel(m_model.index(row, column, parentIndex), m_model);
     else
       return boost::none;
   }

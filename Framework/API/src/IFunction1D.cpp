@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/IFunction1D.tcc"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/IFunctionWithLocation.h"
 #include "MantidAPI/IConstraint.h"
@@ -85,8 +86,12 @@ void IFunction1D::derivative1D(double *out, const double *xValues, size_t nData,
 
 void IFunction1D::functionDeriv1D(Jacobian *jacobian, const double *xValues,
                                   const size_t nData) {
-  FunctionDomain1DView domain(xValues, nData);
-  this->calNumericalDeriv(domain, *jacobian);
+  auto evalMethod =
+      [this](double *out, const double *xValues, const size_t nData) {
+        this->function1D(out, xValues, nData);
+      };
+  this->calcNumericalDerivative1D(jacobian, std::move(evalMethod), xValues,
+                                  nData);
 }
 
 /// Calculate histogram data for the given bin boundaries.

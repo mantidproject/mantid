@@ -125,6 +125,7 @@ set ( SRC_FILES
 	src/MuonFunctionBrowser.cpp
 	src/PeriodicTableWidget.cpp
 	src/ProcessingAlgoWidget.cpp
+        src/ProgressableView.cpp
   src/ProjectSavePresenter.cpp
   src/ProjectSaveModel.cpp
 	src/PropertyHandler.cpp
@@ -378,7 +379,6 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/ProgressPresenter.h
   inc/MantidQtWidgets/Common/ProjectSavePresenter.h
   inc/MantidQtWidgets/Common/ProjectSaveModel.h
-  inc/MantidQtWidgets/Common/ProgressableView.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ViewNotifiable.h
@@ -576,6 +576,7 @@ set( TEST_FILES
   test/ParseKeyValueStringTest.h
   test/DataProcessorUI/QOneLevelTreeModelTest.h
   test/DataProcessorUI/QTwoLevelTreeModelTest.h
+  test/ProgressableViewTest.h
   test/ProjectSaveModelTest.h
   test/ProjectSavePresenterTest.h
   test/WorkspacePresenter/ADSAdapterTest.h

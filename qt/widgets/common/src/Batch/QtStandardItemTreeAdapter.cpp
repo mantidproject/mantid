@@ -32,7 +32,7 @@ QModelIndexForMainModel QtStandardItemTreeModelAdapter::appendEmptySiblingRow(
 }
 
 QModelIndexForMainModel QtStandardItemTreeModelAdapter::appendSiblingRow(
-    QModelIndexForMainModel const &index, std::vector<Cell> cells) {
+    QModelIndexForMainModel const &index, std::vector<Cell> const &cells) {
   auto newIndex = appendChildRow(index.parent(), cells);
   return newIndex.sibling(newIndex.row(), index.column());
 }
@@ -43,7 +43,7 @@ QModelIndexForMainModel QtStandardItemTreeModelAdapter::appendEmptyChildRow(
 }
 
 QModelIndexForMainModel QtStandardItemTreeModelAdapter::appendChildRow(
-    QModelIndexForMainModel const &parent, std::vector<Cell> cells) {
+    QModelIndexForMainModel const &parent, std::vector<Cell> const &cells) {
   auto parentRow = QModelIndexForMainModel(firstCellOnRowOf(parent.untyped()));
   auto *const parentItem = modelItemFromIndex(m_model, parentRow);
   parentItem->appendRow(rowItemsFromCells(cells));
@@ -51,7 +51,8 @@ QModelIndexForMainModel QtStandardItemTreeModelAdapter::appendChildRow(
 }
 
 QModelIndexForMainModel QtStandardItemTreeModelAdapter::insertChildRow(
-    QModelIndexForMainModel const &parent, int row, std::vector<Cell> cells) {
+    QModelIndexForMainModel const &parent, int row,
+    std::vector<Cell> const &cells) {
   auto *const parentItem = modelItemFromIndex(m_model, parent);
   parentItem->insertRow(row, rowItemsFromCells(cells));
   return QModelIndexForMainModel(m_model.index(row, 0, parent.untyped()));

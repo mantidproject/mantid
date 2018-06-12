@@ -28,7 +28,7 @@ public:
       ReducedWorkspaceNames reducedWorkspaceNames);
 
   std::vector<std::string> const &runNumbers() const;
-  std::pair<std::string, std::string> transmissionWorkspaceNames() const;
+  std::pair<std::string, std::string> const& transmissionWorkspaceNames() const;
   double theta() const;
   boost::optional<RangeInQ> const &qRange() const;
   boost::optional<double> scaleFactor() const;
@@ -74,37 +74,10 @@ operator!=(UnslicedRow const &, UnslicedRow const &);
 
 using RowVariant = boost::variant<SlicedRow, UnslicedRow>;
 
-SlicedRow slice(UnslicedRow const &row, Slicing const &slicing) {
-  return SlicedRow(
-      row.runNumbers(), row.theta(), row.transmissionWorkspaceNames(),
-      row.qRange(), row.scaleFactor(), row.reductionOptions(),
-      workspaceNamesForSliced(row.runNumbers(),
-                              row.transmissionWorkspaceNames(), slicing));
-}
-
-UnslicedRow unslice(SlicedRow const &row) {
-  return UnslicedRow(row.runNumbers(), row.theta(),
-                     row.transmissionWorkspaceNames(), row.qRange(),
-                     row.scaleFactor(), row.reductionOptions(),
-                     workspaceNamesForUnsliced(
-                         row.runNumbers(), row.transmissionWorkspaceNames()));
-}
-
-boost::optional<UnslicedRow> unslice(boost::optional<SlicedRow> const &row) {
-  if (row.is_initialized()) {
-    return unslice(row.get());
-  } else {
-    return boost::none;
-  }
-}
-
-boost::optional<SlicedRow> slice(boost::optional<UnslicedRow> const &row) {
-  if (row.is_initialized()) {
-    return slice(row.get());
-  } else {
-    return boost::none;
-  }
-}
+SlicedRow slice(UnslicedRow const &row, Slicing const &slicing);
+UnslicedRow unslice(SlicedRow const &row);
+boost::optional<UnslicedRow> unslice(boost::optional<SlicedRow> const &row);
+boost::optional<SlicedRow> slice(boost::optional<UnslicedRow> const &row);
 
 // class RowTemplate {
 // public:

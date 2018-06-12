@@ -11,6 +11,8 @@
 
 #include "ui_ReflRunsTabWidget.h"
 
+#include <QBasicTimer>
+
 namespace MantidQt {
 
 namespace MantidWidgets {
@@ -80,12 +82,14 @@ public:
                             tableCommands) override;
   void setRowCommands(std::vector<std::unique_ptr<DataProcessor::Command>>
                           rowCommands) override;
-  void setAllSearchRowsSelected() override;
   void clearCommands() override;
   void updateMenuEnabledState(bool isProcessing) override;
   void setAutoreduceButtonEnabled(bool enabled) override;
+  void setAutoreducePauseButtonEnabled(bool enabled) override;
   void setTransferButtonEnabled(bool enabled) override;
   void setInstrumentComboEnabled(bool enabled) override;
+  void setSearchTextEntryEnabled(bool enabled) override;
+  void setSearchButtonEnabled(bool enabled) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -94,6 +98,7 @@ public:
 
   // Accessor methods
   std::set<int> getSelectedSearchRows() const override;
+  std::set<int> getAllSearchRows() const override;
   std::string getSearchInstrument() const override;
   std::string getSearchString() const override;
   int getSelectedGroup() const override;
@@ -102,11 +107,20 @@ public:
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
 
+  // Timer methods
+  void startTimer(const int millisecs) override;
+  void stopTimer() override;
+
+  // Start an ICAT search
+  void startIcatSearch() override;
+
 private:
   /// initialise the interface
   void initLayout();
   // Adds an action (command) to a menu
   void addToMenu(QMenu *menu, std::unique_ptr<DataProcessor::Command> command);
+  // Implement our own timer event to trigger autoreduction
+  void timerEvent(QTimerEvent *event) override;
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
   // the presenter
@@ -120,6 +134,8 @@ private:
   Ui::ReflRunsTabWidget ui;
   // the slit calculator
   SlitCalculator *m_calculator;
+  // Timer for triggering periodic autoreduction
+  QBasicTimer m_timer;
 
   std::vector<IBatchView*> m_tableViews;
 
@@ -128,13 +144,13 @@ private:
 private slots:
   void on_actionSearch_triggered();
   void on_actionAutoreduce_triggered();
+  void on_actionAutoreducePause_triggered();
   void on_actionTransfer_triggered();
   void slitCalculatorTriggered();
   void icatSearchComplete();
   void instrumentChanged(int index);
   void groupChanged();
   void showSearchContextMenu(const QPoint &pos);
-  void newAutoreduction();
 };
 
 } // namespace Mantid

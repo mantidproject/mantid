@@ -6,12 +6,14 @@ namespace CustomInterfaces {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
+* @param group :: [input] The group on the parent tab this belongs to
 * @param parent :: [input] The parent of this widget
 */
-QtReflEventView::QtReflEventView(QWidget *parent) {
+QtReflEventView::QtReflEventView(int group, QWidget *parent) {
   UNUSED_ARG(parent);
   initLayout();
-  m_presenter.reset(new ReflEventPresenter(this));
+  m_presenter.reset(new ReflEventPresenter(this, group));
+  registerEventWidgets();
 }
 
 QtReflEventView::~QtReflEventView() {}
@@ -145,6 +147,32 @@ void QtReflEventView::toggleCustom(bool isChecked) {
 void QtReflEventView::toggleLogValue(bool isChecked) {
   if (isChecked)
     m_presenter->notifySliceTypeChanged(SliceType::LogValue);
+}
+
+void QtReflEventView::notifySettingsChanged() {
+  m_presenter->notifySettingsChanged();
+}
+
+void QtReflEventView::connectSettingsChange(QLineEdit &edit) {
+  connect(&edit, SIGNAL(textChanged(QString const &)), this,
+          SLOT(notifySettingsChanged()));
+}
+
+void QtReflEventView::connectSettingsChange(QGroupBox &edit) {
+  connect(&edit, SIGNAL(toggled(bool)), this, SLOT(notifySettingsChanged()));
+}
+
+void QtReflEventView::registerEventWidgets() {
+  connectSettingsChange(*m_ui.uniformGroup);
+  connectSettingsChange(*m_ui.uniformEvenEdit);
+  connectSettingsChange(*m_ui.uniformEdit);
+
+  connectSettingsChange(*m_ui.customGroup);
+  connectSettingsChange(*m_ui.customEdit);
+
+  connectSettingsChange(*m_ui.logValueGroup);
+  connectSettingsChange(*m_ui.logValueEdit);
+  connectSettingsChange(*m_ui.logValueTypeEdit);
 }
 } // namespace CustomInterfaces
 } // namespace Mantid

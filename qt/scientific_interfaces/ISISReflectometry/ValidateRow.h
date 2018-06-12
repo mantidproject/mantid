@@ -105,6 +105,8 @@ extern template class MANTIDQT_ISISREFLECTOMETRY_DLL
     RowValidationResult<SlicedRow>;
 extern template class MANTIDQT_ISISREFLECTOMETRY_DLL
     RowValidationResult<UnslicedRow>;
+extern template class MANTIDQT_ISISREFLECTOMETRY_DLL
+    RowValidationResult<RowVariant>;
 }
 }
 #endif // MANTID_CUSTOMINTERFACES_VALIDATEROW_H_

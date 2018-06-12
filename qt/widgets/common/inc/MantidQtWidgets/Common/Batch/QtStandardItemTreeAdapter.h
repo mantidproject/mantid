@@ -1,3 +1,28 @@
+/**
+See the developer documentation for Batch Widget at
+developer.mantidproject.org/BatchWidget/index.html
+
+Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
+
+This file is part of Mantid.
+
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+File change history is stored at: <https://github.com/mantidproject/mantid>.
+Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 #ifndef MANTIDQTMANTIDWIDGETS_TREEITEMMODELADAPTER_H_
 #define MANTIDQTMANTIDWIDGETS_TREEITEMMODELADAPTER_H_
 #include "MantidQtWidgets/Common/DllOption.h"
@@ -29,17 +54,18 @@ public:
                           Cell const &newCellProperties);
 
   QModelIndexForMainModel appendSiblingRow(QModelIndexForMainModel const &index,
-                                           std::vector<Cell> cells);
+                                           std::vector<Cell> const &cells);
   QModelIndexForMainModel
   appendEmptySiblingRow(QModelIndexForMainModel const &index);
 
   QModelIndexForMainModel appendChildRow(QModelIndexForMainModel const &parent,
-                                         std::vector<Cell> cells);
+                                         std::vector<Cell> const &cells);
   QModelIndexForMainModel
   appendEmptyChildRow(QModelIndexForMainModel const &parent);
 
   QModelIndexForMainModel insertChildRow(QModelIndexForMainModel const &parent,
-                                         int column, std::vector<Cell> cells);
+                                         int row,
+                                         std::vector<Cell> const &cells);
   QModelIndexForMainModel
   insertEmptyChildRow(QModelIndexForMainModel const &parent, int column);
 
@@ -56,12 +82,16 @@ private:
   Cell m_emptyCellStyle;
 };
 
+/**
+ * Enumerates the first `columnCount` number of cells to the right of
+ * startAtCell, moving left to right.
+ */
 template <typename Action>
 void QtStandardItemTreeModelAdapter::enumerateCellsInRow(
-    QModelIndexForMainModel const &startIndex, int columns,
+    QModelIndexForMainModel const &startAtCell, int columnCount,
     Action const &action) const {
-  for (auto i = 0; i < columns; i++) {
-    auto cellIndex = startIndex.sibling(startIndex.row(), i);
+  for (auto i = 0; i < columnCount; i++) {
+    auto cellIndex = startAtCell.sibling(startAtCell.row(), i);
     action(cellIndex, i);
   }
 }

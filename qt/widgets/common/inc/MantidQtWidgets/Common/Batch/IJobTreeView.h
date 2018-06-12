@@ -6,6 +6,7 @@
 #include "MantidQtWidgets/Common/HintStrategy.h"
 #include "MantidQtWidgets/Common/Batch/Cell.h"
 #include "MantidQtWidgets/Common/Batch/Row.h"
+#include "MantidQtWidgets/Common/Batch/Subtree.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <boost/optional.hpp>
 

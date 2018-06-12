@@ -104,6 +104,8 @@ public:
   // The following methods are public for testing purposes only
   // Add entry for the number of slices for all rows in a group
   void addNumGroupSlicesEntry(int groupID, size_t numSlices);
+  // end reduction
+  void endReduction(const bool success) override;
 
   void
   completedRowReductionSuccessfully(GroupData const &groupData,
@@ -111,11 +113,14 @@ public:
   void completedGroupReductionSuccessfully(
       GroupData const &groupData, std::string const &workspaceName) override;
 
+protected slots:
+  void threadFinished(const int exitCode) override;
+
 private:
   // Get the processing options for this row
   OptionsMap getProcessingOptions(RowData_sptr data) override;
-  // Process selected rows
-  void process() override;
+  // Process given items
+  void process(TreeData itemsToProcess) override;
   // Plotting
   void plotRow() override;
   void plotGroup() override;
@@ -147,6 +152,10 @@ private:
   QString takeSlice(const QString &runNo, TimeSlicingInfo &slicing,
                     size_t sliceIndex);
 
+  void setReductionResumed();
+  void setReductionPaused() override;
+  void setReductionCompleted();
+
   Mantid::API::IEventWorkspace_sptr
   retrieveWorkspaceOrCritical(QString const &name) const;
 
@@ -157,8 +166,14 @@ private:
   bool proceedIfWSTypeInADS(
       const MantidQt::MantidWidgets::DataProcessor::TreeData &data,
       const bool findEventWS);
+  void handleError(RowData_sptr rowData, const std::string &error);
+  void handleError(const int groupIndex, const std::string &error);
+  bool
+  workspaceIsOutputOfGroup(const GroupData &groupData,
+                           const std::string &workspaceName) const override;
 
   std::map<int, size_t> m_numGroupSlicesMap;
+  bool m_processingAsEventData;
 };
 }
 }

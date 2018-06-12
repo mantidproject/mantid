@@ -7,6 +7,7 @@
 #include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
@@ -39,6 +40,7 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 namespace MantidQt {
 namespace CustomInterfaces {
 
+// unnamed namespace
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
@@ -47,6 +49,34 @@ QStringList fromStdStringVector(std::vector<std::string> const &inVec) {
   std::transform(inVec.begin(), inVec.end(), std::back_inserter(outVec),
                  &QString::fromStdString);
   return outVec;
+}
+
+/** Get the error message associated with the given run
+ * @param run : the run number as a string
+ * @param invalidRuns : the list of invalid runs as a map of description
+ * to error message, where the description may contain a list of run numbers
+ * separated by a '+' character
+ */
+std::string getRunErrorMessage(
+    const std::string &searchRun,
+    const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns) {
+
+  // Loop through the list of invalid rows
+  for (auto row : invalidRuns) {
+    // Loop through all entries in the error map for this row
+    for (auto errorPair : row) {
+      // Extract the run numbers for this row
+      auto const runNumbers = errorPair.first;
+      StringTokenizer tokenizer(runNumbers, "+", StringTokenizer::TOK_TRIM);
+      auto const runList = tokenizer.asVector();
+
+      // If the requested run is in the list, return the error message
+      if (std::find(runList.begin(), runList.end(), searchRun) != runList.end())
+        return errorPair.second;
+    }
+  }
+
+  return std::string();
 }
 }
 
@@ -108,28 +138,33 @@ Used by the view to tell the presenter something has changed
 void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   switch (flag) {
   case IReflRunsTabPresenter::SearchFlag:
-    search();
+    // Start the search algorithm. If it is not started, make sure
+    // autoreduction is not left running
+    if (!search())
+      stopAutoreduction();
     break;
-  case IReflRunsTabPresenter::NewAutoreductionFlag:
-    autoreduce(true);
+  case IReflRunsTabPresenter::StartAutoreductionFlag:
+    startNewAutoreduction();
     break;
-  case IReflRunsTabPresenter::ResumeAutoreductionFlag:
-    autoreduce(false);
+  case IReflRunsTabPresenter::PauseAutoreductionFlag:
+    pauseAutoreduction();
+    break;
+  case IReflRunsTabPresenter::TimerEventFlag:
+    checkForNewRuns();
     break;
   case IReflRunsTabPresenter::ICATSearchCompleteFlag: {
-    auto algRunner = m_view->getAlgorithmRunner();
-    IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
-    populateSearch(searchAlg);
+    icatSearchComplete();
     break;
   }
   case IReflRunsTabPresenter::TransferFlag:
-    transfer();
+    transfer(m_view->getSelectedSearchRows(), selectedGroup(),
+             TransferMatch::Any);
     break;
   case IReflRunsTabPresenter::InstrumentChangedFlag:
     changeInstrument();
     break;
   case IReflRunsTabPresenter::GroupChangedFlag:
-    pushCommands();
+    changeGroup();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -147,38 +182,39 @@ void ReflRunsTabPresenter::completedRowReductionSuccessfully(
 }
 
 /** Pushes the list of commands (actions) */
-void ReflRunsTabPresenter::pushCommands() {
+void ReflRunsTabPresenter::pushCommands(int) {
 
-  m_view->clearCommands();
-
-  // The expected number of commands
-  const size_t nCommands = 31;
-  auto commands = std::vector<MantidWidgets::DataProcessor::Command_uptr>();
-  //      m_tablePresenters.at(m_view->getSelectedGroup())->publishCommands();
-  if (commands.size() != nCommands) {
-    throw std::runtime_error("Invalid list of commands");
-  }
-  // The index at which "row" commands start
-  const size_t rowCommStart = 10u;
-  // We want to have two menus
-  // Populate the "Reflectometry" menu
-  std::vector<MantidWidgets::DataProcessor::Command_uptr> tableCommands;
-  for (size_t i = 0; i < rowCommStart; i++)
-    tableCommands.push_back(std::move(commands[i]));
-  m_view->setTableCommands(std::move(tableCommands));
-  // Populate the "Edit" menu
-  std::vector<MantidWidgets::DataProcessor::Command_uptr> rowCommands;
-  for (size_t i = rowCommStart; i < nCommands; i++)
-    rowCommands.push_back(std::move(commands[i]));
-  m_view->setRowCommands(std::move(rowCommands));
+//  m_view->clearCommands();
+//
+//  // The expected number of commands
+//  const size_t nCommands = 31;
+//  //auto commands = getTablePresenter(group)->publishCommands();
+//  if (commands.size() != nCommands) {
+//    throw std::runtime_error("Invalid list of commands");
+//  }
+//  // The index at which "row" commands start
+//  const size_t rowCommStart = 10u;
+//  // We want to have two menus
+//  // Populate the "Reflectometry" menu
+//  std::vector<MantidWidgets::DataProcessor::Command_uptr> tableCommands;
+//  for (size_t i = 0; i < rowCommStart; i++)
+//    tableCommands.push_back(std::move(commands[i]));
+//  m_view->setTableCommands(std::move(tableCommands));
+//  // Populate the "Edit" menu
+//  std::vector<MantidWidgets::DataProcessor::Command_uptr> rowCommands;
+//  for (size_t i = rowCommStart; i < nCommands; i++)
+//    rowCommands.push_back(std::move(commands[i]));
+//  m_view->setRowCommands(std::move(rowCommands));
 }
 
-/** Searches for runs that can be used */
-void ReflRunsTabPresenter::search() {
+/** Searches for runs that can be used
+ * @return : true if the search algorithm was started successfully, false if
+ * there was a problem */
+bool ReflRunsTabPresenter::search() {
   auto const searchString = m_view->getSearchString();
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
-    return;
+    return false;
 
   // This is breaking the abstraction provided by IReflSearcher, but provides a
   // nice usability win
@@ -194,6 +230,7 @@ void ReflRunsTabPresenter::search() {
     } catch (std::runtime_error &e) {
       m_mainPresenter->giveUserCritical(
           "Error Logging in:\n" + std::string(e.what()), "login failed");
+      return false;
     }
   }
   std::string sessionId;
@@ -207,7 +244,7 @@ void ReflRunsTabPresenter::search() {
     m_mainPresenter->giveUserInfo(
         "Error Logging in: Please press 'Search' to try again.",
         "Login Failed");
-    return;
+    return false;
   }
   auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
   algSearch->initialize();
@@ -218,221 +255,304 @@ void ReflRunsTabPresenter::search() {
   algSearch->setProperty("InvestigationId", searchString);
   auto algRunner = m_view->getAlgorithmRunner();
   algRunner->startAlgorithm(algSearch);
+
+  return true;
 }
 
 /** Populates the search results table
 * @param searchAlg : [input] The search algorithm
 */
 void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
-  if (searchAlg->isExecuted()) {
-    ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
-    m_instrumentChanged = false;
-    m_searchModel = ReflSearchModel_sptr(
-        new ReflSearchModel(results, m_view->getSearchInstrument()));
+  if (!searchAlg->isExecuted())
+    return;
+
+  // Get the results from the algorithm
+  ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
+
+  // Update the state and model
+  m_instrumentChanged = false;
+
+  if (shouldUpdateExistingSearchResults()) {
+    m_searchModel->addDataFromTable(results,
+                                    m_view->getSearchInstrument());
+  } else {
+    // Create a new search results list and display it on the view
+    m_searchModel = boost::make_shared<ReflSearchModel>(results, m_view->getSearchInstrument());
     m_view->showSearch(m_searchModel);
   }
 }
 
 /** Searches ICAT for runs with given instrument and investigation id, transfers
-* runs to table and processes them
-* @param startNew : Boolean on whether to start a new autoreduction
+* runs to table and processes them. Clears any existing table data first.
 */
-void ReflRunsTabPresenter::autoreduce(bool startNew) {
-  m_autoSearchString = m_view->getSearchString();
-  auto &tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
+void ReflRunsTabPresenter::startNewAutoreduction() {
 
-  // If a new autoreduction is being made, we must remove all existing rows and
-  // transfer the new ones (obtained by ICAT search) in
-  //  if (startNew) {
-  //    notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
-  //
-  //    // Select all rows / groups in existing table and delete them
-  //    tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
-  //    tablePresenter->notify(DataProcessorPresenter::DeleteGroupFlag);
-  //
-  //    // Select and transfer all rows to the table
-  //    m_view->setAllSearchRowsSelected();
-  //    if (m_view->getSelectedSearchRows().size() > 0)
-  //      transfer();
-  //  }
-  //
-  //  tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
-  //  if (tablePresenter->selectedParents().size() > 0)
-  //    tablePresenter->notifyProcessRequested();
+  auto const group = selectedGroup();
+
+  // if (requireNewAutoreduction()) {
+  //   // If starting a brand new autoreduction, delete all rows / groups in
+  //   // existing table first
+  //   // We'll prompt the user to check it's ok to delete existing rows
+  //   auto tablePresenter = getTablePresenter(group);
+  //   tablePresenter->setPromptUser(false);
+  //   try {
+  //     tablePresenter->notify(DataProcessorPresenter::DeleteAllFlag);
+  //   } catch (const DataProcessorPresenter::DeleteAllRowsCancelledException &) {
+  //     return;
+  //   }
+  // }
+
+  if (setupNewAutoreduction(group, m_view->getSearchString()))
+    checkForNewRuns();
 }
 
-struct SearchResult {
-  std::string run, description, location;
-};
+/** Determines whether to start a new autoreduction. Starts a new one if the
+* either the search number, transfer method or instrument has changed
+* @return : Boolean on whether to start a new autoreduction
+*/
+bool ReflRunsTabPresenter::requireNewAutoreduction() const {
+  bool searchNumChanged =
+      m_autoreduction.searchStringChanged(m_view->getSearchString());
 
-std::vector<SearchResult>
-resultsFromSearchModel(boost::shared_ptr<ReflSearchModel> searchResultModel,
-                       std::set<int> selectedRows) {
-  auto results = std::vector<SearchResult>();
-  results.reserve(selectedRows.size());
+  return searchNumChanged || m_instrumentChanged;
+}
 
-  for (const auto &row : selectedRows) {
-    auto run = searchResultModel->data(searchResultModel->index(row, 0))
-                   .toString()
-                   .toStdString();
+bool ReflRunsTabPresenter::setupNewAutoreduction(
+    int group, const std::string &searchString) {
+  return m_autoreduction.setupNewAutoreduction(group, searchString);
+}
 
-    auto description = searchResultModel->data(searchResultModel->index(row, 1))
-                           .toString()
-                           .toStdString();
+/** Start a single autoreduction process. Called periodially to add and process
+ *  any new runs in the table.
+ */
+void ReflRunsTabPresenter::checkForNewRuns() {
+  // Stop notifications during processing
+  m_view->stopTimer();
 
-    auto location = searchResultModel->data(searchResultModel->index(row, 2))
-                        .toString()
-                        .toStdString();
+  // Initially we just need to start an ICat search and the reduction will be
+  // run when the search completes
+  m_view->startIcatSearch();
+}
 
-    results.emplace_back({run, description, location});
+/** Run an autoreduction process based on the latest search results
+ */
+void ReflRunsTabPresenter::autoreduceNewRuns() {
+
+  m_autoreduction.setSearchResultsExist();
+  auto rowsToTransfer = m_view->getAllSearchRows();
+
+  if (rowsToTransfer.size() > 0) {
+    transfer(rowsToTransfer, autoreductionGroup(), TransferMatch::Strict);
+//    auto tablePresenter = getTablePresenter(autoreductionGroup());
+//    tablePresenter->setPromptUser(false);
+//    tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
+  } else {
+    confirmReductionCompleted(autoreductionGroup());
   }
-  return results;
 }
 
-/** Transfers the selected runs in the search results to the processing table
-* @return : The runs to transfer as a vector of maps
-*/
-void ReflRunsTabPresenter::transfer() {
-  // Build the input for the transfer strategy
-  auto selectedRows = m_view->getSelectedSearchRows();
+void ReflRunsTabPresenter::pauseAutoreduction() {
+//  if (isAutoreducing())
+//    getTablePresenter(autoreductionGroup())
+//        ->notify(DataProcessorPresenter::PauseFlag);
+}
 
-  // Do not begin transfer if nothing is selected or if the transfer method does
-  // not match the one used for populating search
-  if (selectedRows.size() == 0) {
+void ReflRunsTabPresenter::stopAutoreduction() {
+  m_view->stopTimer();
+  m_autoreduction.stop();
+}
+
+bool ReflRunsTabPresenter::isAutoreducing() const {
+  return m_autoreduction.running();
+}
+
+bool ReflRunsTabPresenter::isAutoreducing(int group) const {
+  return isAutoreducing() && m_autoreduction.group() == group;
+}
+
+int ReflRunsTabPresenter::autoreductionGroup() const {
+  return m_autoreduction.group();
+}
+
+bool ReflRunsTabPresenter::isProcessing(int group) const {
+//  return getTablePresenter(group)->isProcessing();
+  return false;
+}
+
+bool ReflRunsTabPresenter::isProcessing() const {
+  auto const numberOfGroups = static_cast<int>(m_tablePresenters.size());
+  for (int group = 0; group < numberOfGroups; ++group) {
+    if (isProcessing(group))
+      return true;
+  }
+  return false;
+}
+
+void ReflRunsTabPresenter::icatSearchComplete() {
+  // Populate the search results
+  auto algRunner = m_view->getAlgorithmRunner();
+  IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
+  populateSearch(searchAlg);
+
+  if (isAutoreducing()) {
+    autoreduceNewRuns();
+  }
+}
+
+BatchPresenter *
+ReflRunsTabPresenter::getTablePresenter(int group) const {
+  if (group < 0 || group > static_cast<int>(m_tablePresenters.size()))
+    throw std::runtime_error("Invalid group number " + std::to_string(group));
+
+  return m_tablePresenters.at(group).get();
+}
+
+int ReflRunsTabPresenter::selectedGroup() const {
+  return m_view->getSelectedGroup();
+}
+
+bool ReflRunsTabPresenter::shouldUpdateExistingSearchResults() const {
+  // Existing search results should be updated rather than replaced if
+  // autoreduction is running and has valid results
+  return m_searchModel && isAutoreducing() &&
+         m_autoreduction.searchResultsExist();
+}
+
+/** Check that the given rows are valid for a transfer and warn the user if not
+ * @param rowsToTransfer : a set of row indices to transfer
+ * @return : true if valid, false if not
+ */
+bool ReflRunsTabPresenter::validateRowsToTransfer(
+    const std::set<int> &rowsToTransfer) {
+  // Check that we have something to transfer
+  if (rowsToTransfer.size() == 0) {
     m_mainPresenter->giveUserCritical(
         "Error: Please select at least one run to transfer.",
         "No runs selected");
-    return;
+    return false;
   }
-
-  ProgressPresenter progress(0, static_cast<double>(selectedRows.size()),
-                             static_cast<int64_t>(selectedRows.size()),
-                             this->m_progressView);
-
-  auto results = resultsFromSearchModel(m_searchModel, selectedRows);
-
-  auto jobs = Jobs(UnslicedReductionJobs());
-
-  for (const auto &row : results) {
-    static boost::regex descriptionFormatRegex("(.*)(th[:=]([0-9.]+))(.*)");
-    boost::smatch matches;
-
-    if (boost::regex_search(row.description, matches, descriptionFormatRegex)) {
-      constexpr auto preThetaGroup = 1;
-      constexpr auto thetaValueGroup = 3;
-      constexpr auto postThetaGroup = 4;
-      // We have theta. Let's get a clean description
-      const auto theta = matches[thetaValueGroup].str();
-      const auto preTheta = matches[preThetaGroup].str();
-      const auto postTheta = matches[postThetaGroup].str();
-
-      auto slicing = Slicing(boost::blank());
-      auto resultRow =
-          validateRowFromRunAndTheta(jobs, slicing, row.run, theta);
-      if (resultRow.is_initialized()) {
-        mergeRowIntoGroup(jobs, resultRow.get(), /*thetaTolerance=*/0.001,
-                          preTheta, WorkspaceNameFactory(slicing));
-      } else {
-        // Add error to search model.
-      }
-    }
-  }
-
-  prettyPrintModel(jobs);
-
-  /*
-    TransferResults results = getTransferStrategy()->transferRuns(runs,
-    progress);
-
-    auto invalidRuns =
-        results.getErrorRuns(); // grab our invalid runs from the transfer
-
-    // iterate through invalidRuns to set the 'invalid transfers' in the search
-    // model
-    if (!invalidRuns.empty()) { // check if we have any invalid runs
-      for (auto invalidRowIt = invalidRuns.begin();
-           invalidRowIt != invalidRuns.end(); ++invalidRowIt) {
-        auto &error = *invalidRowIt; // grab row from vector
-        // iterate over row containing run number and reason why it's invalid
-        for (auto errorRowIt = error.begin(); errorRowIt != error.end();
-             ++errorRowIt) {
-          const std::string runNumber = errorRowIt->first; // grab run number
-
-          // iterate over rows that are selected in the search table
-          for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
-               ++rowIt) {
-            const int row = *rowIt;
-            // get the run number from that selected row
-            const auto searchRun =
-                m_searchModel->data(m_searchModel->index(row, 0))
-                    .toString()
-                    .toStdString();
-            if (searchRun == runNumber) { // if search run number is the same as
-                                          // our invalid run number
-
-              // add this error to the member of m_searchModel that holds
-    errors.
-              m_searchModel->m_errors.push_back(error);
-            }
-          }
-        }
-      }
-    }
-  */
-  // m_tablePresenters.at(m_view->getSelectedGroup())
-  //    ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(
-  //        results.getTransferRuns()));
+  return true;
 }
 
-/**
-* Select and make a transfer strategy on demand based. Pick up the
-* user-provided transfer strategy to do this.
-* @return new TransferStrategy
-*/
-std::unique_ptr<ReflTransferStrategy>
-ReflRunsTabPresenter::getTransferStrategy() {
-  std::unique_ptr<ReflTransferStrategy> rtnStrategy;
-  if (m_currentTransferMethod == MeasureTransferMethod) {
+/** Get the data for a cell in the search results model as a string
+ */
+std::string ReflRunsTabPresenter::searchModelData(const int row,
+                                                  const int column) {
+  return m_searchModel->data(m_searchModel->index(row, column))
+      .toString()
+      .toStdString();
+}
 
-    // We need catalog info overrides from the user-based config service
-    std::unique_ptr<CatalogConfigService> catConfigService(
-        makeCatalogConfigServiceAdapter(ConfigService::Instance()));
+/** Get the details of runs to transfer from the search results table
+ * @param rowsToTransfer : a set of row indices
+ * @return : a map of run name to a SearchResult struct containing details
+ * for that run
+ */
+SearchResultMap ReflRunsTabPresenter::getSearchResultRunDetails(
+    const std::set<int> &rowsToTransfer) {
 
-    // We make a user-based Catalog Info object for the transfer
-    std::unique_ptr<ICatalogInfo> catInfo = make_unique<UserCatalogInfo>(
-        ConfigService::Instance().getFacility().catalogInfo(),
-        *catConfigService);
-
-    // We are going to load from disk to pick up the meta data, so provide the
-    // right repository to do this.
-    std::unique_ptr<ReflMeasurementItemSource> source =
-        make_unique<ReflNexusMeasurementItemSource>();
-
-    // Finally make and return the Measure based transfer strategy.
-    rtnStrategy = Mantid::Kernel::make_unique<ReflMeasureTransferStrategy>(
-        std::move(catInfo), std::move(source));
-    return rtnStrategy;
-  } else if (m_currentTransferMethod == LegacyTransferMethod) {
-    rtnStrategy = make_unique<ReflLegacyTransferStrategy>();
-    return rtnStrategy;
-  } else {
-    throw std::runtime_error("Unknown tranfer method selected: " +
-                             m_currentTransferMethod);
+  SearchResultMap runDetails;
+  for (const auto &row : rowsToTransfer) {
+    const auto run = searchModelData(row, 0);
+    const auto description = searchModelData(row, 1);
+    const auto location = searchModelData(row, 2);
+    runDetails[run] = SearchResult{description, location};
   }
+
+  return runDetails;
+}
+
+/** Iterate through the rows to transfer and set/clear the error state
+ * in the search results model
+ * @param rowsToTransfer : row indices of all rows to transfer
+ * @param invalidRuns : details of runs that are invalid
+ */
+void ReflRunsTabPresenter::updateErrorStateInSearchModel(
+    const std::set<int> &rowsToTransfer,
+    const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns) {
+
+  // The run number is in column 0 in the search results table
+  int const columnIndex = 0;
+
+  // Loop through all the rows we want to transfer
+  for (auto rowIndex : rowsToTransfer) {
+    auto const runToTransfer = searchModelData(rowIndex, columnIndex);
+    auto const errorMessage = getRunErrorMessage(runToTransfer, invalidRuns);
+
+    // Set or clear the error in the model for this run
+    if (errorMessage.empty())
+      m_searchModel->clearError(runToTransfer);
+    else
+      m_searchModel->addError(runToTransfer, errorMessage);
+  }
+}
+
+/** Set up the progress bar
+ */
+ProgressPresenter
+ReflRunsTabPresenter::setupProgressBar(const std::set<int> &rowsToTransfer) {
+
+  auto start = double(0.0);
+  auto end = static_cast<double>(rowsToTransfer.size());
+  auto nsteps = static_cast<int64_t>(rowsToTransfer.size());
+  auto progress = ProgressPresenter(start, end, nsteps, this->m_progressView);
+
+  if (isAutoreducing())
+    progress.setAsEndlessIndicator();
+  else
+    progress.setAsPercentageIndicator();
+
+  return progress;
+}
+
+/** Transfers the selected runs in the search results to the processing table
+ * @param rowsToTransfer : a set of row indices in the search results to
+ * transfer
+ * @param group : the group number of the table to transfer to
+ * @param matchType : an enum specifying how strictly to match runs against
+ * the transfer criteria
+ * @return : The runs to transfer as a vector of maps
+*/
+void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
+                                    int group, const TransferMatch matchType) {
+  if (!validateRowsToTransfer(rowsToTransfer))
+    return;
+
+  auto progress = setupProgressBar(rowsToTransfer);
+
+  // Extract details of runs to transfer
+  auto runDetails = getSearchResultRunDetails(rowsToTransfer);
+
+  // Apply the transfer strategy
+//  TransferResults transferDetails =
+//      getTransferStrategy()->transferRuns(runDetails, progress, matchType);
+
+  // Handle any runs that cannot be transferred
+//  updateErrorStateInSearchModel(rowsToTransfer, transferDetails.getErrorRuns());
+
+  // Do the transfer
+// getTablePresenter(group)
+//     ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(
+//         transferDetails.getTransferRuns()));
 }
 
 /** Used to tell the presenter something has changed in the ADS
 *
 * @param workspaceList :: the list of table workspaces in the ADS that could be
 * loaded into the interface
+* @param group :: the group that the notification came from
 */
-void ReflRunsTabPresenter::notifyADSChanged(
-    const QSet<QString> &workspaceList) {
+void ReflRunsTabPresenter::notifyADSChanged(const QSet<QString> &workspaceList,
+                                            int group) {
 
   UNUSED_ARG(workspaceList);
-  pushCommands();
-  //  m_view->updateMenuEnabledState(
-  //     m_tablePresenters.at(m_view->getSelectedGroup())->isProcessing());
+
+  // All groups pass on notifications about ADS changes. We only push commands
+  // for the active group.
+  if (group == selectedGroup())
+    pushCommands(group);
+
+  m_view->updateMenuEnabledState(isProcessing(group));
 }
 
 /** Requests global pre-processing options. Options are supplied by
@@ -443,15 +563,16 @@ void ReflRunsTabPresenter::notifyADSChanged(
   * the main presenter.
   * @return :: Global pre-processing options
   */
-ColumnOptionsQMap ReflRunsTabPresenter::getPreprocessingOptions() const {
+ColumnOptionsQMap
+ReflRunsTabPresenter::getPreprocessingOptions(int group) const {
   ColumnOptionsQMap result;
   assert(m_mainPresenter != nullptr &&
          "The main presenter must be set with acceptMainPresenter.");
 
   // Note that there are no options for the Run(s) column so just add
   // Transmission Run(s)
-  auto transmissionOptions = OptionsQMap(
-      m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup()));
+  auto transmissionOptions =
+      OptionsQMap(m_mainPresenter->getTransmissionOptions(group));
   result["Transmission Run(s)"] = transmissionOptions;
 
   return result;
@@ -461,10 +582,10 @@ ColumnOptionsQMap ReflRunsTabPresenter::getPreprocessingOptions() const {
 * presenter
 * @return :: Global processing options
 */
-OptionsQMap ReflRunsTabPresenter::getProcessingOptions() const {
+OptionsQMap ReflRunsTabPresenter::getProcessingOptions(int group) const {
   assert(m_mainPresenter != nullptr &&
          "The main presenter must be set with acceptMainPresenter.");
-  return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
+  return m_mainPresenter->getReductionOptions(group);
 }
 
 /** Requests global post-processing options as a string. Options are supplied by
@@ -472,87 +593,107 @@ OptionsQMap ReflRunsTabPresenter::getProcessingOptions() const {
 * presenter
 * @return :: Global post-processing options as a string
 */
-QString ReflRunsTabPresenter::getPostprocessingOptionsAsString() const {
+QString
+ReflRunsTabPresenter::getPostprocessingOptionsAsString(int group) const {
 
-  return QString::fromStdString(
-      m_mainPresenter->getStitchOptions(m_view->getSelectedGroup()));
+  return QString::fromStdString(m_mainPresenter->getStitchOptions(group));
 }
 
 /** Requests time-slicing values. Values are supplied by the main presenter
 * @return :: Time-slicing values
 */
-QString ReflRunsTabPresenter::getTimeSlicingValues() const {
-  return QString::fromStdString(
-      m_mainPresenter->getTimeSlicingValues(m_view->getSelectedGroup()));
+QString ReflRunsTabPresenter::getTimeSlicingValues(int group) const {
+  return QString::fromStdString(m_mainPresenter->getTimeSlicingValues(group));
 }
 
 /** Requests time-slicing type. Type is supplied by the main presenter
 * @return :: Time-slicing values
 */
-QString ReflRunsTabPresenter::getTimeSlicingType() const {
-  return QString::fromStdString(
-      m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
+QString ReflRunsTabPresenter::getTimeSlicingType(int group) const {
+  return QString::fromStdString(m_mainPresenter->getTimeSlicingType(group));
 }
 
 /** Requests transmission runs for a particular run angle. Values are supplied
 * by the main presenter
 * @return :: Transmission run(s) as a comma-separated list
 */
-OptionsQMap ReflRunsTabPresenter::getOptionsForAngle(const double angle) const {
-  return m_mainPresenter->getOptionsForAngle(m_view->getSelectedGroup(), angle);
+OptionsQMap ReflRunsTabPresenter::getOptionsForAngle(const double angle,
+                                                     int group) const {
+  return m_mainPresenter->getOptionsForAngle(group, angle);
 }
 
 /** Check whether there are per-angle transmission runs in the settings
  * @return :: true if there are per-angle transmission runs
  */
-bool ReflRunsTabPresenter::hasPerAngleOptions() const {
-  return m_mainPresenter->hasPerAngleOptions(m_view->getSelectedGroup());
+bool ReflRunsTabPresenter::hasPerAngleOptions(int group) const {
+  return m_mainPresenter->hasPerAngleOptions(group);
 }
 
 /** Tells the view to update the enabled/disabled state of all relevant widgets
  * based on whether processing is in progress or not.
- * @param isProcessing :: true if processing is in progress
  *
  */
-void ReflRunsTabPresenter::updateWidgetEnabledState(
-    const bool isProcessing) const {
-  // Update the menus
-  m_view->updateMenuEnabledState(isProcessing);
+void ReflRunsTabPresenter::updateWidgetEnabledState() const {
+  auto const processing = isProcessing();
+  auto const autoreducing = isAutoreducing();
+  auto const processingActiveGroup = isProcessing(selectedGroup());
 
-  // Update specific buttons
-  m_view->setAutoreduceButtonEnabled(!isProcessing);
-  m_view->setTransferButtonEnabled(!isProcessing);
-  m_view->setInstrumentComboEnabled(!isProcessing);
+  // Update the menus
+  m_view->updateMenuEnabledState(processing);
+
+  // Update components
+  m_view->setTransferButtonEnabled(!processing && !autoreducing);
+  m_view->setInstrumentComboEnabled(!processing && !autoreducing);
+  m_view->setAutoreducePauseButtonEnabled(autoreducing);
+  m_view->setSearchTextEntryEnabled(!autoreducing);
+  m_view->setSearchButtonEnabled(!autoreducing);
+  m_view->setAutoreduceButtonEnabled(!autoreducing && !processingActiveGroup);
 }
 
 /** Tells view to update the enabled/disabled state of all relevant widgets
  * based on the fact that processing is not in progress
 */
-void ReflRunsTabPresenter::pause() const { updateWidgetEnabledState(false); }
+void ReflRunsTabPresenter::pause(int group) {
+  if (m_autoreduction.pause(group)) {
+    m_view->stopTimer();
+    m_progressView->setAsPercentageIndicator();
+  }
 
-/** Tells view to update the enabled/disabled state of all relevant widgets
- * based on the fact that processing is in progress
-*/
-void ReflRunsTabPresenter::resume() const { updateWidgetEnabledState(true); }
+  // If processing has already finished, confirm reduction is paused; otherwise
+  // leave it to finish
+  if (!isProcessing(group))
+    confirmReductionPaused(group);
+}
 
-/** Determines whether to start a new autoreduction. Starts a new one if the
-* either the search number, transfer method or instrument has changed
-* @return : Boolean on whether to start a new autoreduction
+void ReflRunsTabPresenter::resume(int group) const { UNUSED_ARG(group); }
+
+/** Notifies main presenter that data reduction is confirmed to be finished
+* i.e. after all rows have been reduced
 */
-bool ReflRunsTabPresenter::startNewAutoreduction() const {
-  bool searchNumChanged = m_autoSearchString != m_view->getSearchString();
-  return searchNumChanged || m_instrumentChanged;
+void ReflRunsTabPresenter::confirmReductionCompleted(int group) {
+  UNUSED_ARG(group);
+  m_view->startTimer(10000);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be paused
+* via a user command to pause reduction
 */
 void ReflRunsTabPresenter::confirmReductionPaused(int group) {
+  updateWidgetEnabledState();
   m_mainPresenter->notifyReductionPaused(group);
+
+  // We need to notify back to the table presenter to update the widget
+  // state. This must be done from here otherwise there is no notification to
+  // the table to update when autoprocessing is paused.
+
+//  if (!isAutoreducing(group))
+//    getTablePresenter(group)->confirmReductionPaused();
 }
 
 /** Notifies main presenter that data reduction is confirmed to be resumed
 */
 void ReflRunsTabPresenter::confirmReductionResumed(int group) {
+  updateWidgetEnabledState();
   m_mainPresenter->notifyReductionResumed(group);
 }
 
@@ -568,5 +709,12 @@ void ReflRunsTabPresenter::changeInstrument() {
   g_log.information() << "Instrument changed to " << instrument;
   m_instrumentChanged = true;
 }
+
+void ReflRunsTabPresenter::changeGroup() {
+  updateWidgetEnabledState();
+  // Update the current menu commands based on the current group
+  pushCommands(selectedGroup());
+}
+
 }
 }

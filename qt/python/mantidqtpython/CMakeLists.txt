@@ -107,6 +107,10 @@ mtd_add_sip_module (
     Qwt5
     ${PYTHON_LIBRARIES}
   FOLDER Qt4
+  OSX_INSTALL_RPATH
+    @loader_path/../Contents/MacOS
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../${LIB_DIR}"
 )
 
 if ( MSVC )

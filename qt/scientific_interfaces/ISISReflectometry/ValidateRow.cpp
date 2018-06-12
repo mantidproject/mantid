@@ -168,8 +168,6 @@ boost::optional<Row> const &RowValidationResult<Row>::validRowElseNone() const {
   return m_validRow;
 }
 
-template class RowValidationResult<UnslicedRow>;
-template class RowValidationResult<SlicedRow>;
 
 boost::optional<std::vector<std::string>>
 parseRunNumbers(std::string const &runNumberString) {
@@ -409,5 +407,9 @@ validateRowFromRunAndTheta(Jobs const &jobs, Slicing const &slicing,
              ValidateRowVisitor({run, theta, "", "", "", "", "", ""}, slicing),
              jobs).validRowElseNone();
 }
+
+template class RowValidationResult<UnslicedRow>;
+template class RowValidationResult<SlicedRow>;
+template class RowValidationResult<RowVariant>;
 }
 }

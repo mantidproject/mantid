@@ -113,5 +113,47 @@ public:
     auto *secondChildItem = subtreeRootItem->child(1);
     TS_ASSERT_EQUALS(secondChildItem->text(), "Child 2");
   }
+
+  void testBuildSubtreeItemsWithRootAndTwoChildrenWithAChildEach() {
+    auto model = emptyModel();
+    auto adaptedModel = adapt(model.get());
+    auto build = BuildSubtreeItems(adaptedModel, RowLocationAdapter(*model));
+    auto positionRelativeToMainTree = RowLocation();
+
+    auto subtree =
+        Subtree({Row(RowLocation(), cells("Root")),
+                 Row(RowLocation({0}), cells("1st Child")),
+                 Row(RowLocation({0, 0}), cells("Child of 1st Child")),
+                 Row(RowLocation({1}), cells("2nd Child")),
+                 Row(RowLocation({1, 0}), cells("Child of 2nd Child"))});
+
+    build(positionRelativeToMainTree, 0, subtree);
+
+    auto *invisibleRootItem = model->invisibleRootItem();
+    TS_ASSERT_EQUALS(invisibleRootItem->rowCount(), 1);
+    auto *subtreeRootItem = invisibleRootItem->child(0);
+    TS_ASSERT_EQUALS(subtreeRootItem->text(), "Root");
+    TS_ASSERT_EQUALS(subtreeRootItem->rowCount(), 2);
+
+    {
+      auto *firstChildItem = subtreeRootItem->child(0);
+      TS_ASSERT_EQUALS(firstChildItem->text(), "1st Child");
+      TS_ASSERT_EQUALS(firstChildItem->rowCount(), 1);
+
+      auto *childOfChildItem = firstChildItem->child(0);
+      TS_ASSERT_EQUALS(childOfChildItem->text(), "Child of 1st Child");
+      TS_ASSERT_EQUALS(childOfChildItem->rowCount(), 0);
+    }
+
+    {
+      auto *secondChildItem = subtreeRootItem->child(1);
+      TS_ASSERT_EQUALS(secondChildItem->text(), "2nd Child");
+      TS_ASSERT_EQUALS(secondChildItem->rowCount(), 1);
+
+      auto *childOfChildItem = secondChildItem->child(0);
+      TS_ASSERT_EQUALS(childOfChildItem->text(), "Child of 2nd Child");
+      TS_ASSERT_EQUALS(childOfChildItem->rowCount(), 0);
+    }
+  }
 };
 #endif

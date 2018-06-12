@@ -15,6 +15,7 @@ set ( TEST_PY_FILES
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
+  ConvertWANDSCDtoQTest.py
   CompareSampleLogsTest.py
   ComputeCalibrationCoefVanTest.py
   ComputeIncoherentDOSTest.py
@@ -35,6 +36,8 @@ set ( TEST_PY_FILES
   EnggFitDIFCFromPeaksTest.py
   EnggFitPeaksTest.py
   EnggFocusTest.py
+  EnggSaveGSASIIFitResultsToHDF5Test.py
+  EnggSaveSinglePeakFitResultsToHDF5Test.py
   EnggVanadiumCorrectionsTest.py
   ExportSpectraMaskTest.py
   FilterLogByTimeTest.py
@@ -55,6 +58,7 @@ set ( TEST_PY_FILES
   LoadNMoldyn3AsciiTest.py
   LoadNMoldyn4Ascii1DTest.py
   LoadNMoldyn4AsciiTest.py
+  LoadWANDSCDTest.py
   LRPeakSelectionTest.py
   MaskAngleTest.py
   MaskBTPTest.py

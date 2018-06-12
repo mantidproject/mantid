@@ -57,7 +57,7 @@ public:
     std::transform(
         properties.cbegin(), properties.cend(), std::back_inserter(hints),
         [](Mantid::Kernel::Property *property) -> Hint {
-          return Hint(property->name(), property->briefDocumentation());
+          return Hint(property->name(), property->documentation());
         });
 
     return hints;

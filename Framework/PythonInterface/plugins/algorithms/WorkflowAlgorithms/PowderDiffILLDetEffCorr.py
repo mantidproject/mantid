@@ -3,11 +3,12 @@ from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np
 import numpy.ma as ma
-from mantid.kernel import StringListValidator, Direction, IntArrayBoundedValidator, IntArrayProperty, \
-    CompositeValidator, IntArrayLengthValidator, IntArrayOrderedPairsValidator, FloatArrayOrderedPairsValidator, \
-    FloatArrayProperty, VisibleWhenProperty, PropertyCriterion, IntBoundedValidator
-from mantid.api import PythonAlgorithm, FileProperty, FileAction, Progress, MatrixWorkspaceProperty, PropertyMode, \
-    MultipleFileProperty
+from mantid.kernel import CompositeValidator, Direction, FloatArrayLengthValidator, FloatArrayOrderedPairsValidator, \
+    FloatArrayProperty, IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, \
+    IntArrayOrderedPairsValidator, IntBoundedValidator, PropertyCriterion, StringListValidator, VisibleWhenProperty
+from mantid.api import FileAction, FileProperty, MatrixWorkspaceProperty, MultipleFileProperty, Progress, \
+    PropertyMode, PythonAlgorithm
+
 from mantid.simpleapi import *
 
 
@@ -65,6 +66,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
     _n_pixels_per_tube = None   # number of pixels per tube in D2B (=128)
     _n_iterations = None        # number of iterations (=1); used for D2B
     _pixels_to_trim = None      # number of pixels to trim from top and bottom of tubes for chi2 calculation (D2B)
+    _mask_criterion = None      # the range of efficiency constant values, outside of which they should be set to 0
 
     def _hide(self, name):
         return '__' + self._out_name + '_' + name
@@ -146,6 +148,16 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
                              validator=IntBoundedValidator(lower=0, upper=10),
                              doc='Number of iterations to perform (D2B only): 0 means auto; that is, the '
                                  'iterations will terminate after reaching some Chi2/NdoF.')
+
+        maskCriterionValidator = CompositeValidator()
+        arrayLengthTwo = FloatArrayLengthValidator()
+        arrayLengthTwo.setLengthMax(2)
+        orderedPairs = FloatArrayOrderedPairsValidator()
+        maskCriterionValidator.add(arrayLengthTwo)
+        maskCriterionValidator.add(orderedPairs)
+
+        self.declareProperty(FloatArrayProperty(name='MaskCriterion', values=[], validator=maskCriterionValidator),
+                             doc='Efficiency constants outside this range will be set to zero.')
 
     def validateInputs(self):
         issues = dict()
@@ -318,6 +330,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         self._out_response = self.getPropertyValue('OutputResponseWorkspace')
         self._out_name = self.getPropertyValue('OutputWorkspace')
         self._n_iterations = self.getProperty('NumberOfIterations').value
+        self._mask_criterion = self.getProperty('MaskCriterion').value
 
     def _configure_sequential(self, raw_ws):
         """
@@ -446,6 +459,21 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             if not self._live_pixels[pixel]:
                 mtd[constants_ws].dataY(pixel)[0] = 1.
                 mtd[constants_ws].dataE(pixel)[0] = 0.
+
+    def _mask_outside_range(self, constants_ws):
+        """
+            Sets the efficiencies to zero, if they are outside the given range
+        """
+        y = mtd[constants_ws].extractY()
+        x = mtd[constants_ws].extractX()
+        e = mtd[constants_ws].extractE()
+        lower = self._mask_criterion[0]
+        upper = self._mask_criterion[1]
+        y[y<lower]=0.
+        y[y>upper]=0.
+        self.log().information('Masking pixels with constant outisde ({0},{1})'.format(lower, upper))
+        CreateWorkspace(DataY=y, DataX=x, DataE=e, NSpec=mtd[constants_ws].getNumberHistograms(),
+                        OutputWorkspace=constants_ws, ParentWorkspace=constants_ws)
 
     def _derive_calibration_sequential(self, ws_2d, constants_ws, response_ws):
         """
@@ -750,6 +778,9 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             if self._n_scan_files < 2:
                 raise RuntimeError('At least two overlapping scan files needed for the global method')
             self._process_global()
+
+        if self._mask_criterion.any():
+            self._mask_outside_range(constants_ws)
 
         # set output workspace[s]
         RenameWorkspace(InputWorkspace=constants_ws, OutputWorkspace=self._out_name)

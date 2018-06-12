@@ -98,8 +98,7 @@ EnggDiffFittingPresenter::EnggDiffFittingPresenter(
     boost::shared_ptr<IEnggDiffractionParam> mainParam)
     : m_fittingFinishedOK(false), m_workerThread(nullptr),
       m_mainCalib(mainCalib), m_mainParam(mainParam), m_view(view),
-      m_model(std::move(model)), m_viewHasClosed(false), m_multiRunMode(false) {
-}
+      m_model(std::move(model)), m_viewHasClosed(false) {}
 
 EnggDiffFittingPresenter::~EnggDiffFittingPresenter() { cleanup(); }
 
@@ -192,8 +191,18 @@ EnggDiffFittingPresenter::currentCalibration() const {
 }
 
 Poco::Path
-EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) {
+EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) const {
   return m_mainParam->outFilesUserDir(addToDir);
+}
+
+std::string
+EnggDiffFittingPresenter::userHDFRunFilename(const int runNumber) const {
+  return m_mainParam->userHDFRunFilename(runNumber);
+}
+
+std::string EnggDiffFittingPresenter::userHDFMultiRunFilename(
+    const std::vector<RunLabel> &runLabels) const {
+  return m_mainParam->userHDFMultiRunFilename(runLabels);
 }
 
 void EnggDiffFittingPresenter::startAsyncFittingWorker(
@@ -243,10 +252,8 @@ void EnggDiffFittingPresenter::fittingFinished() {
       m_view->setFittingListWidgetCurrentRow(0);
     }
 
-    if (m_multiRunMode) {
-      m_model->addAllFitResultsToADS();
-      m_model->addAllFittedPeaksToADS();
-    }
+    m_model->addAllFitResultsToADS();
+    m_model->addAllFittedPeaksToADS();
 
     try {
       // should now plot the focused workspace when single peak fitting
@@ -283,7 +290,6 @@ void EnggDiffFittingPresenter::fittingFinished() {
   // enable the GUI
   m_view->enableFitAllButton(m_model->getNumFocusedWorkspaces() > 1);
   m_view->enableCalibrateFocusFitUserActions(true);
-  m_multiRunMode = false;
 }
 
 void EnggDiffFittingPresenter::processSelectRun() { updatePlot(); }
@@ -361,7 +367,6 @@ void EnggDiffFittingPresenter::processRemoveRun() {
 }
 
 void EnggDiffFittingPresenter::processFitAllPeaks() {
-  m_multiRunMode = true;
   std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
   const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
@@ -471,39 +476,40 @@ void EnggDiffFittingPresenter::validateFittingInputs(
   }
 }
 
-void EnggDiffFittingPresenter::doFitting(const RunLabel &runLabel,
+void EnggDiffFittingPresenter::doFitting(const std::vector<RunLabel> &runLabels,
                                          const std::string &expectedPeaks) {
-  g_log.notice() << "EnggDiffraction GUI: starting new fitting with run "
-                 << runLabel.runNumber << " and bank " << runLabel.bank
-                 << ". This may take a few seconds... \n";
-
   m_fittingFinishedOK = false;
 
-  // load the focused workspace file to perform single peak fits
+  for (const auto &runLabel : runLabels) {
+    g_log.notice() << "EnggDiffraction GUI: starting new fitting with run "
+                   << runLabel.runNumber << " and bank " << runLabel.bank
+                   << ". This may take a few seconds... \n";
 
-  // apply calibration to the focused workspace
-  m_model->setDifcTzero(runLabel, currentCalibration());
+    // apply calibration to the focused workspace
+    m_model->setDifcTzero(runLabel, currentCalibration());
 
-  // run the algorithm EnggFitPeaks with workspace loaded above
-  // requires unit in Time of Flight
-  try {
-    m_model->enggFitPeaks(runLabel, expectedPeaks);
-  } catch (const std::runtime_error &exc) {
-    g_log.error() << "Could not run the algorithm EnggFitPeaks successfully."
-                  << exc.what();
-    m_view->userError("Could not run the algorithm EnggFitPeaks successfully",
-                      exc.what());
-    return;
+    // run the algorithm EnggFitPeaks with workspace loaded above
+    // requires unit in Time of Flight
+    try {
+      m_model->enggFitPeaks(runLabel, expectedPeaks);
+    } catch (const std::runtime_error &exc) {
+      g_log.error() << "Could not run the algorithm EnggFitPeaks successfully."
+                    << exc.what();
+      m_view->userError("Could not run the algorithm EnggFitPeaks successfully",
+                        exc.what());
+      return;
+    }
+
+    const auto outFilename = userHDFRunFilename(runLabel.runNumber);
+    m_model->saveFitResultsToHDF5({runLabel}, outFilename);
+
+    m_model->createFittedPeaksWS(runLabel);
   }
 
-  const auto outFilename = m_view->getCurrentInstrument() +
-                           std::to_string(runLabel.runNumber) +
-                           "_Single_Peak_Fitting.csv";
-  auto saveDirectory = outFilesUserDir("SinglePeakFitting");
-  saveDirectory.append(outFilename);
-  m_model->saveDiffFittingAscii(runLabel, saveDirectory.toString());
-
-  m_model->createFittedPeaksWS(runLabel);
+  if (runLabels.size() > 1) {
+    m_model->saveFitResultsToHDF5(runLabels,
+                                  userHDFMultiRunFilename(runLabels));
+  }
   m_fittingFinishedOK = true;
 }
 

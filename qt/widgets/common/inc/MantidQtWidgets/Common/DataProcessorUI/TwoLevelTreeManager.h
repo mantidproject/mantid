@@ -63,6 +63,8 @@ public:
   void deleteRow() override;
   /// Delete a group
   void deleteGroup() override;
+  /// Delete all rows and group
+  void deleteAll() override;
   /// Group rows
   void groupRows() override;
   /// Expand selection
@@ -81,6 +83,8 @@ public:
 
   /// Return selected data
   TreeData selectedData(bool prompt) override;
+  /// Return all data
+  TreeData allData(bool prompt) override;
   /// Transfer new data to model
   void transfer(const std::vector<std::map<QString, QString>> &runs) override;
   /// Update row with new data
@@ -99,6 +103,12 @@ public:
   /// Set the 'process' status of a data item
   void setProcessed(bool processed, int position) override;
   void setProcessed(bool processed, int position, int parent) override;
+  /// Check whether reduction failed for an item
+  bool reductionFailed(int position) const override;
+  bool reductionFailed(int position, int parent) const override;
+  /// Set the error message of a data item
+  void setError(const std::string &error, int position) override;
+  void setError(const std::string &error, int position, int parent) override;
   void invalidateAllProcessed() override;
 
   /// Validate a table workspace

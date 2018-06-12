@@ -140,6 +140,15 @@ public:
     auto ancestor = RowLocation({0, 1});
     TS_ASSERT_EQUALS(RowLocation({2, 3, 4, 10}), node.relativeTo(ancestor));
   }
+
+  void testPathSameUntilDepth() {
+    TS_ASSERT(pathsSameUntilDepth(1, RowLocation({1}), RowLocation({1})));
+    TS_ASSERT(!pathsSameUntilDepth(1, RowLocation({1}), RowLocation({2})));
+
+    TS_ASSERT(pathsSameUntilDepth(1, RowLocation({1, 1}), RowLocation({1, 2})));
+    TS_ASSERT(
+        !pathsSameUntilDepth(1, RowLocation({1, 1}), RowLocation({2, 2})));
+  }
 };
 
 #endif // MANTID_MANTIDWIDGETS_ROWLOCATIONTEST_H

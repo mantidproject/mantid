@@ -72,19 +72,19 @@ bool JobTreeView::edit(const QModelIndex &index, EditTrigger trigger,
 Cell JobTreeView::deadCell() const { return g_deadCell; }
 
 boost::optional<std::vector<Subtree>> JobTreeView::selectedSubtrees() const {
-  auto rows = selectedRowLocations();
-  std::sort(rows.begin(), rows.end());
+  auto selected = selectedRowLocations();
+  std::sort(selected.begin(), selected.end());
 
-  auto selectedRowData = std::vector<std::vector<Cell>>();
-  selectedRowData.reserve(rows.size());
+  auto selectedRows = std::vector<Row>();
+  selectedRows.reserve(selected.size());
 
-  std::transform(rows.cbegin(), rows.cend(),
-                 std::back_inserter(selectedRowData),
+  std::transform(selected.cbegin(), selected.cend(),
+                 std::back_inserter(selectedRows),
                  [&](RowLocation const &location)
-                     -> std::vector<Cell> { return cellsAt(location); });
+                     -> Row { return Row(location, cellsAt(location)); });
 
   auto extractSubtrees = ExtractSubtrees();
-  return extractSubtrees(rows, selectedRowData);
+  return extractSubtrees(selectedRows);
 }
 
 boost::optional<std::vector<RowLocation>>
@@ -104,13 +104,13 @@ bool JobTreeView::hasNoSelectedDescendants(QModelIndex const &index) const {
   return true;
 }
 
-void JobTreeView::appendAllDescendants(QModelIndexList &descendantsList,
-                                       QModelIndex const &index) const {
+void JobTreeView::appendAllUnselectedDescendants(
+    QModelIndexList &descendantsList, QModelIndex const &index) const {
   for (auto row = 0; row < m_filteredModel.rowCount(index); ++row) {
     auto childIndex = m_filteredModel.index(row, 0, index);
     if (!selectionModel()->isSelected(childIndex))
       descendantsList.append(childIndex);
-    appendAllDescendants(descendantsList, childIndex);
+    appendAllUnselectedDescendants(descendantsList, childIndex);
   }
 }
 
@@ -128,9 +128,9 @@ JobTreeView::findImplicitlySelected(QModelIndexList const &selectedRows) const {
   for (auto &&row : selectedRows) {
     if (isExpanded(row)) {
       if (hasNoSelectedDescendants(row))
-        appendAllDescendants(implicitlySelected, row);
+        appendAllUnselectedDescendants(implicitlySelected, row);
     } else {
-      appendAllDescendants(implicitlySelected, row);
+      appendAllUnselectedDescendants(implicitlySelected, row);
     }
   }
   return implicitlySelected;
@@ -532,14 +532,27 @@ QModelIndex
 JobTreeView::applyNavigationResult(QtTreeCursorNavigationResult const &result) {
   auto shouldMakeNewRowBelow = result.first;
   if (shouldMakeNewRowBelow) {
+    // `newCellIndex` is the model index of the cell in the new row with a
+    // column which matches
+    // the column currently selected by the user. To correctly get the
+    // RowLocation we need the
+    // model index of the first cell in the new row.
     auto newCellIndex = m_adaptedMainModel.appendEmptySiblingRow(
         mapToMainModel(fromFilteredModel(result.second)));
     auto newRowIndex = fromMainModel(firstCellOnRowOf(newCellIndex.untyped()));
-    resetFilter();
-    auto newRowLocation = rowLocation().atIndex(newRowIndex);
 
+    // Resetting the filter ensures that the new row is visible and has a
+    // corresponding index in
+    // the filtered model.
+    resetFilter();
+
+    auto newRowLocation = rowLocation().atIndex(newRowIndex);
     m_notifyee->notifyRowInserted(newRowLocation);
 
+    // The subscriber is entitled to remove the row at `newRowIndex` when we
+    // call
+    // `notifyRowInserted` hence we have to assume they did and try to get the
+    // index again.
     auto maybeIndexOfNewRow = rowLocation().indexIfExistsAt(newRowLocation);
     if (maybeIndexOfNewRow.is_initialized()) {
       return expanded(mapToFilteredModel(maybeIndexOfNewRow.get())).untyped();
