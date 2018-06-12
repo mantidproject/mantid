@@ -1,4 +1,5 @@
 #include "MantidDataHandling/LoadILLSANS.h"
+#include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -105,9 +106,15 @@ void LoadILLSANS::exec() {
     PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
                                                         reductionManager);
   }
+  // If the load algorithm isn't in the reduction properties, add it
+  if (!reductionManager->existsProperty("LoadAlgorithm")) {
+    auto algProp = make_unique<AlgorithmProperty>("LoadAlgorithm");
+    algProp->setValue(toString());
+    reductionManager->declareProperty(std::move(algProp));
+  }
 
   bool moveToBeamCenter = false;
-  double center_x, center_y = 0.;
+  double center_x = 0., center_y = 0.;
   if (reductionManager->existsProperty("LatestBeamCenterX") &&
       reductionManager->existsProperty("LatestBeamCenterY")) {
     moveToBeamCenter = true;
@@ -125,6 +132,10 @@ void LoadILLSANS::exec() {
   const std::string instrumentPath =
       m_loader.findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
+  if (!reductionManager->existsProperty("InstrumentName"))
+    reductionManager->declareProperty(
+        make_unique<PropertyWithValue<std::string>>("InstrumentName",
+                                                    m_instrumentName));
   Progress progress(this, 0.0, 1.0, 4);
 
   if (m_instrumentName == "D33") {
