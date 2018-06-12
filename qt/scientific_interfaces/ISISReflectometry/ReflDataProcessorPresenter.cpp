@@ -273,6 +273,7 @@ ReflDataProcessorPresenter::~ReflDataProcessorPresenter() {}
 void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
 
   m_itemsToProcess = itemsToProcess;
+  m_processingAsEventData = false;
 
   // Don't continue if there are no items to process
   if (m_itemsToProcess.empty()) {
@@ -337,7 +338,6 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
           errors = true;
 
       } else {
-        m_processingAsEventData = false;
         // Process the group
         if (processGroupAsNonEventWS(groupIndex, groupData))
           errors = true;
@@ -863,9 +863,7 @@ void ReflDataProcessorPresenter::plotRow() {
     return;
 
   // If slicing values are empty plot normally
-  auto timeSlicingValues =
-      m_mainPresenter->getTimeSlicingValues(m_group).toStdString();
-  if (timeSlicingValues.empty()) {
+  if (!m_processingAsEventData) {
     GenericDataProcessorPresenter::plotRow();
     return;
   }
@@ -912,8 +910,7 @@ void ReflDataProcessorPresenter::plotGroup() {
     return;
 
   // If slicing values are empty plot normally
-  auto timeSlicingValues = m_mainPresenter->getTimeSlicingValues(m_group);
-  if (timeSlicingValues.isEmpty()) {
+  if (!m_processingAsEventData) {
     GenericDataProcessorPresenter::plotGroup();
     return;
   }
@@ -1133,6 +1130,32 @@ void ReflDataProcessorPresenter::threadFinished(const int exitCode) {
     m_progressReporter->clear();
     endReduction(false);
   }
+}
+
+/** Check whether the given workspace name is an output of the given
+ * group. This override checks all child slices if time slicing data or calls
+ * the base class if not.
+ */
+bool ReflDataProcessorPresenter::workspaceIsOutputOfGroup(
+    const GroupData &groupData, const std::string &workspaceName) const {
+
+  // If not time slicing, call base class
+  if (!m_processingAsEventData) {
+    return GenericDataProcessorPresenter::workspaceIsOutputOfGroup(
+        groupData, workspaceName);
+  }
+
+  if (!hasPostprocessing())
+    return false;
+
+  auto const numberOfSlices = getMinimumSlicesForGroup(groupData);
+  for (size_t sliceIndex = 0; sliceIndex < numberOfSlices; ++sliceIndex) {
+    if (getPostprocessedWorkspaceName(groupData, sliceIndex).toStdString() ==
+        workspaceName)
+      return true;
+  }
+
+  return false;
 }
 }
 }

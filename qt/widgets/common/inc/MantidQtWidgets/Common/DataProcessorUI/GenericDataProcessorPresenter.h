@@ -274,8 +274,9 @@ protected:
   void resetProcessedState(const std::string &workspaceName);
   void resetProcessedState();
   void updateWidgetEnabledState(const bool isProcessing) const;
-
   virtual void setReductionPaused();
+  virtual bool workspaceIsOutputOfGroup(const GroupData &groupData,
+                                        const std::string &workspaceName) const;
 
 protected slots:
   void reductionError(const QString &ex);
@@ -398,8 +399,6 @@ private:
                       int parentColumn) override;
   int getNumberOfRows() override;
   void clearTable() override;
-  bool workspaceIsOutputOfGroup(const GroupData &groupData,
-                                const std::string &workspaceName) const;
   bool workspaceIsOutputOfRow(RowData_sptr rowData,
                               const std::string &workspaceName) const;
   bool workspaceIsBeingReduced(const std::string &workspaceName) const;

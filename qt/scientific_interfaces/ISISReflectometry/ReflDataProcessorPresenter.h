@@ -168,6 +168,9 @@ private:
       const bool findEventWS);
   void handleError(RowData_sptr rowData, const std::string &error);
   void handleError(const int groupIndex, const std::string &error);
+  bool
+  workspaceIsOutputOfGroup(const GroupData &groupData,
+                           const std::string &workspaceName) const override;
 
   std::map<int, size_t> m_numGroupSlicesMap;
   bool m_processingAsEventData;
