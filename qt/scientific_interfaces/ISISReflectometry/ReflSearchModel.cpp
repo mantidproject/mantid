@@ -2,11 +2,18 @@
 #include "ReflTransferStrategy.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include <boost/regex.hpp>
 #include <QColor>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 using namespace Mantid::API;
+
+bool ReflSearchModel::knownFileType(std::string const& filename) const {
+  boost::regex pattern("raw$", boost::regex::icase);
+  boost::smatch match; // Unused.
+  return boost::regex_search(filename, match, pattern);
+}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -14,8 +21,7 @@ using namespace Mantid::API;
 @param tableWorkspace : The table workspace to copy data from
 @param instrument : instrument name
 */
-ReflSearchModel::ReflSearchModel(const ReflTransferStrategy &transferMethod,
-                                 ITableWorkspace_sptr tableWorkspace,
+ReflSearchModel::ReflSearchModel(ITableWorkspace_sptr tableWorkspace,
                                  const std::string &instrument) {
   // Copy the data from the input table workspace
   for (size_t i = 0; i < tableWorkspace->rowCount(); ++i) {
@@ -37,7 +43,7 @@ ReflSearchModel::ReflSearchModel(const ReflTransferStrategy &transferMethod,
       numZeros++;
     run = run.substr(numZeros, run.size() - numZeros);
 
-    if (transferMethod.knownFileType(runFile)) {
+    if (knownFileType(runFile)) {
       m_runs.push_back(run);
       const std::string description = tableWorkspace->String(i, 6);
       m_descriptions[run] = description;
@@ -49,11 +55,6 @@ ReflSearchModel::ReflSearchModel(const ReflTransferStrategy &transferMethod,
   // By sorting the vector of runs, we sort the entire table
   std::sort(m_runs.begin(), m_runs.end());
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ReflSearchModel::~ReflSearchModel() {}
 
 /**
 @return the row count.

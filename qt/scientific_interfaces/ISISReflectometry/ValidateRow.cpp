@@ -2,9 +2,22 @@
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/variant.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+template <typename Param>
+bool allInitialized(boost::optional<Param> const &param) {
+  return param.is_initialized();
+}
+
+template <typename FirstParam, typename SecondParam, typename... Params>
+bool allInitialized(boost::optional<FirstParam> const &first,
+                    boost::optional<SecondParam> const &second,
+                    boost::optional<Params> const &... params) {
+  return first.is_initialized() && allInitialized(second, params...);
+}
 
 boost::optional<double> parseDouble(std::string string) {
   boost::trim(string);
@@ -155,7 +168,7 @@ boost::optional<Row> const &RowValidationResult<Row>::validRowElseNone() const {
   return m_validRow;
 }
 
-template class RowValidationResult<SingleRow>;
+template class RowValidationResult<UnslicedRow>;
 template class RowValidationResult<SlicedRow>;
 
 boost::optional<std::vector<std::string>>
@@ -308,18 +321,6 @@ RowValidator<Row>::parseOptions(std::vector<std::string> const &cellText) {
   return options;
 }
 
-template <typename Param>
-bool allInitialized(boost::optional<Param> const &param) {
-  return param.is_initialized();
-}
-
-template <typename FirstParam, typename SecondParam, typename... Params>
-bool allInitialized(boost::optional<FirstParam> const &first,
-                    boost::optional<SecondParam> const &second,
-                    boost::optional<Params> const &... params) {
-  return first.is_initialized() && allInitialized(second, params...);
-}
-
 template <typename Result, typename... Params>
 boost::optional<Result>
 makeIfAllInitialized(boost::optional<Params> const &... params) {
@@ -330,29 +331,83 @@ makeIfAllInitialized(boost::optional<Params> const &... params) {
 }
 
 template <typename Row>
-RowValidationResult<Row> RowValidator<Row>::
-operator()(std::vector<std::string> const &cellText) {
-  auto maybeRow = makeIfAllInitialized<Row>(
-      parseRunNumbers(cellText), parseTheta(cellText),
-      parseTransmissionRuns(cellText), parseQRange(cellText),
-      parseScaleFactor(cellText), parseOptions(cellText),
-      boost::optional<boost::optional<typename Row::WorkspaceNames>>(
-          boost::optional<typename Row::WorkspaceNames>()));
-  if (maybeRow.is_initialized())
-    return RowValidationResult<Row>(maybeRow.get());
-  else
-    return RowValidationResult<Row>(m_invalidColumns);
+template <typename WorkspaceNameFactory>
+RowValidationResult<boost::variant<SlicedRow, UnslicedRow>> RowValidator<Row>::
+operator()(std::vector<std::string> const &cellText,
+           WorkspaceNameFactory workspaceNames) {
+  using RowVariant = boost::variant<SlicedRow, UnslicedRow>;
+
+  auto maybeRunNumbers = parseRunNumbers(cellText);
+  auto maybeTheta = parseTheta(cellText);
+  auto maybeTransmissionRuns = parseTransmissionRuns(cellText);
+  auto maybeQRange = parseQRange(cellText);
+  auto maybeScaleFactor = parseScaleFactor(cellText);
+  auto maybeOptions = parseOptions(cellText);
+
+  if (allInitialized(maybeRunNumbers, maybeTransmissionRuns)) {
+    auto wsNames =
+        workspaceNames(maybeRunNumbers.get(), maybeTransmissionRuns.get());
+    auto maybeRow = makeIfAllInitialized<Row>(
+        maybeRunNumbers, maybeTheta, maybeTransmissionRuns, maybeQRange,
+        maybeScaleFactor, maybeOptions, wsNames);
+    if (maybeRow.is_initialized())
+      return RowValidationResult<RowVariant>(maybeRow.get());
+    else
+      return RowValidationResult<RowVariant>(m_invalidColumns);
+  } else {
+    return RowValidationResult<RowVariant>(m_invalidColumns);
+  }
 }
 
-template <typename Row>
-RowValidationResult<Row> validateRow(std::vector<std::string> const &cellText) {
-  auto validate = RowValidator<Row>();
-  return validate(cellText);
+class ValidateRowVisitor
+    : boost::static_visitor<RowValidationResult<RowVariant>> {
+public:
+  ValidateRowVisitor(std::vector<std::string> const &cells,
+                     Slicing const &slicing)
+      : m_cells(cells), m_slicing(slicing) {}
+
+  RowValidationResult<RowVariant>
+  operator()(ReductionJobs<SlicedGroup> const &) const {
+    auto validate = RowValidator<SlicedRow>();
+    return validate(
+        m_cells,
+        [this](std::vector<std::string> const &runNumbers,
+               std::pair<std::string, std::string> const &transmissionRuns)
+            -> boost::optional<SlicedReductionWorkspaces> {
+              return workspaceNamesForSliced(runNumbers, transmissionRuns,
+                                             m_slicing);
+            });
+  }
+
+  RowValidationResult<RowVariant>
+  operator()(ReductionJobs<UnslicedGroup> const &) const {
+    auto validate = RowValidator<UnslicedRow>();
+    return validate(
+        m_cells,
+        [this](std::vector<std::string> const &runNumbers,
+               std::pair<std::string, std::string> const &transmissionRuns)
+            -> boost::optional<ReductionWorkspaces> {
+              return workspaceNamesForUnsliced(runNumbers, transmissionRuns);
+            });
+  }
+
+private:
+  std::vector<std::string> const &m_cells;
+  Slicing const &m_slicing;
+};
+
+RowValidationResult<RowVariant>
+validateRow(Jobs const &jobs, Slicing const &slicing,
+            std::vector<std::string> const &cells) {
+  return boost::apply_visitor(ValidateRowVisitor(cells, slicing), jobs);
 }
 
-template RowValidationResult<SingleRow>
-validateRow(std::vector<std::string> const &);
-template RowValidationResult<SlicedRow>
-validateRow(std::vector<std::string> const &);
+boost::optional<RowVariant>
+validateRowFromRunAndTheta(Jobs const &jobs, Slicing const &slicing,
+                           std::string const &run, std::string const &theta) {
+  return boost::apply_visitor(
+             ValidateRowVisitor({run, theta, "", "", "", "", "", ""}, slicing),
+             jobs).validRowElseNone();
+}
 }
 }

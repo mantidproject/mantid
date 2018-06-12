@@ -13,7 +13,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter
     : public BatchViewSubscriber {
 public:
   BatchPresenter(IBatchView *view, std::vector<std::string> const &instruments,
-                 ReductionJobs reductionJobs);
+                 Jobs reductionJobs);
 
   void notifyProcessRequested() override;
   void notifyPauseRequested() override;
@@ -37,8 +37,7 @@ public:
   void notifyDeleteRowRequested() override;
   void notifyDeleteGroupRequested() override;
 
-  ReductionJobs const& reductionJobs() const;
-
+  Jobs const& reductionJobs() const;
 private:
   bool isGroupLocation(MantidWidgets::Batch::RowLocation const &location) const;
   bool isRowLocation(MantidWidgets::Batch::RowLocation const &location) const;
@@ -90,7 +89,7 @@ private:
   std::vector<std::string> m_instruments;
   boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
       m_clipboard;
-  ReductionJobs m_model;
+  Jobs m_model;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenterFactory {

@@ -98,10 +98,8 @@ ReflLegacyTransferStrategy::clone() const {
 }
 
 bool MantidQt::CustomInterfaces::ReflLegacyTransferStrategy::knownFileType(
-    const std::string &filename) const {
-  boost::regex pattern("raw$", boost::regex::icase);
-  boost::smatch match; // Unused.
-  return boost::regex_search(filename, match, pattern);
+    const std::string &) const {
+  return true;
 }
 }
 }

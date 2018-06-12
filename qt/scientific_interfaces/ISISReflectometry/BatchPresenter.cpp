@@ -1,6 +1,7 @@
 #include "BatchPresenter.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "Reduction/Group.h"
+#include "Reduction/Slicing.h"
 #include "ValidateRow.h"
 
 #include <iostream>
@@ -13,20 +14,17 @@ BatchPresenterFactory::BatchPresenterFactory(
 
 std::unique_ptr<BatchPresenter> BatchPresenterFactory::
 operator()(IBatchView *view) const {
-  return std::make_unique<BatchPresenter>(view, m_instruments, ReductionJobs());
+  return std::make_unique<BatchPresenter>(view, m_instruments, ReductionJobs<SlicedGroup>());
 }
 
 BatchPresenter::BatchPresenter(IBatchView *view,
                                std::vector<std::string> const &instruments,
-                               ReductionJobs reductionJobs)
-    : m_view(view), m_instruments(instruments),
-      m_model(std::move(reductionJobs)) {
+                               Jobs jobs)
+    : m_view(view), m_instruments(instruments), m_model(std::move(jobs)) {
   m_view->subscribe(this);
 }
 
-ReductionJobs const& BatchPresenter::reductionJobs() const {
-  return m_model;
-}
+Jobs const &BatchPresenter::reductionJobs() const { return m_model; }
 
 void BatchPresenter::removeRowsFromModel(
     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rows) {
@@ -34,7 +32,7 @@ void BatchPresenter::removeRowsFromModel(
   for (auto row = rows.crbegin(); row != rows.crend(); ++row) {
     auto const groupIndex = groupOf(*row);
     auto const rowIndex = rowOf(*row);
-    m_model.groups()[groupIndex].removeRow(rowIndex);
+    removeRow(m_model, groupIndex, rowIndex);
   }
 }
 
@@ -75,27 +73,13 @@ void BatchPresenter::removeGroupsFromModel(
     std::vector<int> const &groupIndicesOrderedLowToHigh) {
   for (auto it = groupIndicesOrderedLowToHigh.crbegin();
        it < groupIndicesOrderedLowToHigh.crend(); ++it)
-    m_model.removeGroup(*it);
+    removeGroup(m_model, *it);
 }
 
 void BatchPresenter::notifyPauseRequested() {}
 
 void BatchPresenter::notifyProcessRequested() {
-  for (auto &&group : m_model.groups()) {
-    std::cout << "Group (" << group.name() << ")\n";
-    for (auto &&row : group.rows()) {
-      if (row.is_initialized()) {
-        if (row.get().runNumbers().empty())
-          std::cout << "  Row (empty)\n";
-        else
-          std::cout << "  Row (run number: " << row.get().runNumbers()[0]
-                    << ")\n";
-      } else {
-        std::cout << "  Row (invalid)\n";
-      }
-    }
-  }
-  std::cout << std::endl;
+  prettyPrintModel(m_model);
 }
 
 template <typename T>
@@ -144,7 +128,7 @@ void BatchPresenter::appendRowsToGroupsInView(
 void BatchPresenter::appendRowsToGroupsInModel(
     std::vector<int> const &groupIndices) {
   for (auto &&groupIndex : groupIndices)
-    m_model.groups()[groupIndex].appendEmptyRow();
+    appendEmptyRow(m_model, groupIndex);
 }
 
 void BatchPresenter::notifyInsertGroupRequested() {
@@ -161,8 +145,7 @@ void BatchPresenter::notifyInsertGroupRequested() {
 }
 
 void BatchPresenter::appendEmptyGroupInModel() {
-  m_model.appendGroup(UnslicedGroup(
-      std::string(), std::vector<boost::optional<SingleRow>>(), std::string()));
+  appendEmptyGroup(m_model);
 }
 
 void BatchPresenter::appendEmptyGroupInView() {
@@ -173,14 +156,11 @@ void BatchPresenter::appendEmptyGroupInView() {
 }
 
 void BatchPresenter::insertEmptyGroupInModel(int beforeGroup) {
-  m_model.insertGroup(UnslicedGroup(std::string(),
-                                    std::vector<boost::optional<SingleRow>>(),
-                                    std::string()),
-                      beforeGroup);
+  insertEmptyGroup(m_model, beforeGroup);
 }
 
 void BatchPresenter::insertEmptyRowInModel(int groupIndex, int beforeRow) {
-  m_model.groups()[groupIndex].insertRow(boost::none, beforeRow);
+  insertEmptyRow(m_model, groupIndex, beforeRow);
 }
 
 void BatchPresenter::insertEmptyGroupInView(int beforeGroup) {
@@ -240,14 +220,15 @@ void BatchPresenter::notifyCellTextChanged(
     std::string const &oldValue, std::string const &newValue) {
   if (isGroupLocation(itemIndex)) {
     auto const groupIndex = groupOf(itemIndex);
-    m_model.groups()[groupIndex].setName(newValue);
+    setGroupName(m_model, groupIndex, newValue);
   } else {
     auto const groupIndex = groupOf(itemIndex);
     auto const rowIndex = rowOf(itemIndex);
+    auto slicing = Slicing(boost::blank());
     auto rowValidationResult =
-        validateRow<SingleRow>(cellTextFromViewAt(itemIndex));
-    m_model.groups()[groupIndex].updateRow(
-        rowIndex, rowValidationResult.validRowElseNone());
+        validateRow(m_model, slicing, cellTextFromViewAt(itemIndex));
+    updateRow(m_model, groupIndex, rowIndex,
+              rowValidationResult.validRowElseNone());
     if (rowValidationResult.isValid()) {
       showAllCellsOnRowAsValid(itemIndex);
     } else {
@@ -314,9 +295,9 @@ void BatchPresenter::removeRowsAndGroupsFromModel(std::vector<
     auto const groupIndex = groupOf(*location);
     if (isRowLocation(*location)) {
       auto const rowIndex = rowOf(*location);
-      m_model.groups()[groupIndex].removeRow(rowIndex);
+      removeRow(m_model, groupIndex, rowIndex);
     } else if (isGroupLocation(*location)) {
-      m_model.removeGroup(groupIndex);
+      removeGroup(m_model, groupIndex);
     }
   }
 }

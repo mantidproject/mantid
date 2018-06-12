@@ -29,6 +29,8 @@
 #include <algorithm>
 #include <iterator>
 
+#include "Reduction/Slicing.h"
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
@@ -73,15 +75,6 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)
     m_searcher.reset(new ReflCatalogSearcher());
-
-  // Set the possible tranfer methods
-  std::set<std::string> methods;
-  methods.insert(LegacyTransferMethod);
-  methods.insert(MeasureTransferMethod);
-  m_view->setTransferMethods(methods);
-
-  // Set current transfer method
-  m_currentTransferMethod = m_view->getTransferMethod();
 }
 
 ReflRunsTabPresenter::~ReflRunsTabPresenter() {}
@@ -234,9 +227,8 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   if (searchAlg->isExecuted()) {
     ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
     m_instrumentChanged = false;
-    m_currentTransferMethod = m_view->getTransferMethod();
-    m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
-        *getTransferStrategy(), results, m_view->getSearchInstrument()));
+    m_searchModel = ReflSearchModel_sptr(
+        new ReflSearchModel(results, m_view->getSearchInstrument()));
     m_view->showSearch(m_searchModel);
   }
 }
@@ -269,12 +261,39 @@ void ReflRunsTabPresenter::autoreduce(bool startNew) {
   //    tablePresenter->notifyProcessRequested();
 }
 
+struct SearchResult {
+  std::string run, description, location;
+};
+
+std::vector<SearchResult>
+resultsFromSearchModel(boost::shared_ptr<ReflSearchModel> searchResultModel,
+                       std::set<int> selectedRows) {
+  auto results = std::vector<SearchResult>();
+  results.reserve(selectedRows.size());
+
+  for (const auto &row : selectedRows) {
+    auto run = searchResultModel->data(searchResultModel->index(row, 0))
+                   .toString()
+                   .toStdString();
+
+    auto description = searchResultModel->data(searchResultModel->index(row, 1))
+                           .toString()
+                           .toStdString();
+
+    auto location = searchResultModel->data(searchResultModel->index(row, 2))
+                        .toString()
+                        .toStdString();
+
+    results.emplace_back({run, description, location});
+  }
+  return results;
+}
+
 /** Transfers the selected runs in the search results to the processing table
 * @return : The runs to transfer as a vector of maps
 */
 void ReflRunsTabPresenter::transfer() {
   // Build the input for the transfer strategy
-  SearchResultMap runs;
   auto selectedRows = m_view->getSelectedSearchRows();
 
   // Do not begin transfer if nothing is selected or if the transfer method does
@@ -284,72 +303,82 @@ void ReflRunsTabPresenter::transfer() {
         "Error: Please select at least one run to transfer.",
         "No runs selected");
     return;
-  } else if (m_currentTransferMethod != m_view->getTransferMethod()) {
-    m_mainPresenter->giveUserCritical(
-        "Error: Method selected for transferring runs (" +
-            m_view->getTransferMethod() +
-            ") must match the method used for searching runs (" +
-            m_currentTransferMethod + ").",
-        "Transfer method mismatch");
-    return;
-  }
-
-  for (const auto &row : selectedRows) {
-    const auto run = m_searchModel->data(m_searchModel->index(row, 0))
-                         .toString()
-                         .toStdString();
-    SearchResult searchResult;
-
-    searchResult.description = m_searchModel->data(m_searchModel->index(row, 1))
-                                   .toString()
-                                   .toStdString();
-
-    searchResult.location = m_searchModel->data(m_searchModel->index(row, 2))
-                                .toString()
-                                .toStdString();
-    runs[run] = searchResult;
   }
 
   ProgressPresenter progress(0, static_cast<double>(selectedRows.size()),
                              static_cast<int64_t>(selectedRows.size()),
                              this->m_progressView);
 
-  TransferResults results = getTransferStrategy()->transferRuns(runs, progress);
+  auto results = resultsFromSearchModel(m_searchModel, selectedRows);
 
-  auto invalidRuns =
-      results.getErrorRuns(); // grab our invalid runs from the transfer
+  auto jobs = Jobs(UnslicedReductionJobs());
 
-  // iterate through invalidRuns to set the 'invalid transfers' in the search
-  // model
-  if (!invalidRuns.empty()) { // check if we have any invalid runs
-    for (auto invalidRowIt = invalidRuns.begin();
-         invalidRowIt != invalidRuns.end(); ++invalidRowIt) {
-      auto &error = *invalidRowIt; // grab row from vector
-      // iterate over row containing run number and reason why it's invalid
-      for (auto errorRowIt = error.begin(); errorRowIt != error.end();
-           ++errorRowIt) {
-        const std::string runNumber = errorRowIt->first; // grab run number
+  for (const auto &row : results) {
+    static boost::regex descriptionFormatRegex("(.*)(th[:=]([0-9.]+))(.*)");
+    boost::smatch matches;
 
-        // iterate over rows that are selected in the search table
-        for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
-             ++rowIt) {
-          const int row = *rowIt;
-          // get the run number from that selected row
-          const auto searchRun =
-              m_searchModel->data(m_searchModel->index(row, 0))
-                  .toString()
-                  .toStdString();
-          if (searchRun == runNumber) { // if search run number is the same as
-                                        // our invalid run number
+    if (boost::regex_search(row.description, matches, descriptionFormatRegex)) {
+      constexpr auto preThetaGroup = 1;
+      constexpr auto thetaValueGroup = 3;
+      constexpr auto postThetaGroup = 4;
+      // We have theta. Let's get a clean description
+      const auto theta = matches[thetaValueGroup].str();
+      const auto preTheta = matches[preThetaGroup].str();
+      const auto postTheta = matches[postThetaGroup].str();
 
-            // add this error to the member of m_searchModel that holds errors.
-            m_searchModel->m_errors.push_back(error);
-          }
-        }
+      auto slicing = Slicing(boost::blank());
+      auto resultRow =
+          validateRowFromRunAndTheta(jobs, slicing, row.run, theta);
+      if (resultRow.is_initialized()) {
+        mergeRowIntoGroup(jobs, resultRow.get(), /*thetaTolerance=*/0.001,
+                          preTheta, WorkspaceNameFactory(slicing));
+      } else {
+        // Add error to search model.
       }
     }
   }
 
+  prettyPrintModel(jobs);
+
+  /*
+    TransferResults results = getTransferStrategy()->transferRuns(runs,
+    progress);
+
+    auto invalidRuns =
+        results.getErrorRuns(); // grab our invalid runs from the transfer
+
+    // iterate through invalidRuns to set the 'invalid transfers' in the search
+    // model
+    if (!invalidRuns.empty()) { // check if we have any invalid runs
+      for (auto invalidRowIt = invalidRuns.begin();
+           invalidRowIt != invalidRuns.end(); ++invalidRowIt) {
+        auto &error = *invalidRowIt; // grab row from vector
+        // iterate over row containing run number and reason why it's invalid
+        for (auto errorRowIt = error.begin(); errorRowIt != error.end();
+             ++errorRowIt) {
+          const std::string runNumber = errorRowIt->first; // grab run number
+
+          // iterate over rows that are selected in the search table
+          for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
+               ++rowIt) {
+            const int row = *rowIt;
+            // get the run number from that selected row
+            const auto searchRun =
+                m_searchModel->data(m_searchModel->index(row, 0))
+                    .toString()
+                    .toStdString();
+            if (searchRun == runNumber) { // if search run number is the same as
+                                          // our invalid run number
+
+              // add this error to the member of m_searchModel that holds
+    errors.
+              m_searchModel->m_errors.push_back(error);
+            }
+          }
+        }
+      }
+    }
+  */
   // m_tablePresenters.at(m_view->getSelectedGroup())
   //    ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(
   //        results.getTransferRuns()));
@@ -512,10 +541,7 @@ void ReflRunsTabPresenter::resume() const { updateWidgetEnabledState(true); }
 */
 bool ReflRunsTabPresenter::startNewAutoreduction() const {
   bool searchNumChanged = m_autoSearchString != m_view->getSearchString();
-  bool transferMethodChanged =
-      m_currentTransferMethod != m_view->getTransferMethod();
-
-  return searchNumChanged || transferMethodChanged || m_instrumentChanged;
+  return searchNumChanged || m_instrumentChanged;
 }
 
 /** Notifies main presenter that data reduction is confirmed to be paused
@@ -542,8 +568,5 @@ void ReflRunsTabPresenter::changeInstrument() {
   g_log.information() << "Instrument changed to " << instrument;
   m_instrumentChanged = true;
 }
-
-const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";
-const std::string ReflRunsTabPresenter::LegacyTransferMethod = "Description";
 }
 }

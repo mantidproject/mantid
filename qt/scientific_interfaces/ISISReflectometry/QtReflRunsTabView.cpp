@@ -198,16 +198,6 @@ void QtReflRunsTabView::setInstrumentComboEnabled(bool enabled) {
   ui.comboSearchInstrument->setEnabled(enabled);
 }
 
-/**
-* Set all possible tranfer methods
-* @param methods : All possible transfer methods.
-*/
-void QtReflRunsTabView::setTransferMethods(
-    const std::set<std::string> &methods) {
-  for (auto method = methods.begin(); method != methods.end(); ++method) {
-    ui.comboTransferMethod->addItem((*method).c_str());
-  }
-}
 
 /**
 Set the list of available instruments to search for and updates the list of
@@ -381,13 +371,6 @@ Get the string the user wants to search for.
 */
 std::string QtReflRunsTabView::getSearchString() const {
   return ui.textSearch->text().toStdString();
-}
-
-/**
-* @return the transfer method selected.
-*/
-std::string QtReflRunsTabView::getTransferMethod() const {
-  return ui.comboTransferMethod->currentText().toStdString();
 }
 
 /**

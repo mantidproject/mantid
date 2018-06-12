@@ -64,7 +64,6 @@ public:
   // Setter methods
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
                                  int defaultInstrumentIndex) = 0;
-  virtual void setTransferMethods(const std::set<std::string> &methods) = 0;
   virtual void setTableCommands(
       std::vector<std::unique_ptr<DataProcessor::Command>> tableCommands) = 0;
   virtual void setRowCommands(
@@ -80,7 +79,6 @@ public:
   virtual std::set<int> getSelectedSearchRows() const = 0;
   virtual std::string getSearchInstrument() const = 0;
   virtual std::string getSearchString() const = 0;
-  virtual std::string getTransferMethod() const = 0;
   virtual int getSelectedGroup() const = 0;
 
   virtual IReflRunsTabPresenter *getPresenter() const = 0;

@@ -114,12 +114,6 @@ private:
   IReflMainWindowPresenter *m_mainPresenter;
   /// The search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
-  /// The current transfer method
-  std::string m_currentTransferMethod;
-  /// Legacy transfer method
-  static const std::string LegacyTransferMethod;
-  /// Measure transfer method
-  static const std::string MeasureTransferMethod;
   /// The current search string used for autoreduction
   std::string m_autoSearchString;
   /// Whether the instrument has been changed before a search was made with it
@@ -132,8 +126,6 @@ private:
   void autoreduce(bool startNew);
   void transfer();
   void pushCommands();
-  /// transfer strategy
-  std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   /// change the instrument
   void changeInstrument();
   /// enable/disable widgets on the view

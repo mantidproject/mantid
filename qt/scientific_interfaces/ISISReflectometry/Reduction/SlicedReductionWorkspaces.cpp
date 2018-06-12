@@ -13,8 +13,16 @@ std::string const &SlicedReductionWorkspaces::inputWorkspace() const {
   return m_inputWorkspace;
 }
 
-std::vector<ReductionWorkspaces> const &SlicedReductionWorkspaces::sliceWorkspaces() const {
+std::vector<ReductionWorkspaces> const &
+SlicedReductionWorkspaces::sliceWorkspaces() const {
   return m_sliceWorkspaces;
+}
+
+SlicedReductionWorkspaces workspaceNamesForSliced(
+    std::vector<std::string> const &summedRunNumbers,
+    std::pair<std::string, std::string> const &transmissionRuns,
+    Slicing const &slicing) {
+  return SlicedReductionWorkspaces("", {});
 }
 
 bool operator==(SlicedReductionWorkspaces const &lhs,

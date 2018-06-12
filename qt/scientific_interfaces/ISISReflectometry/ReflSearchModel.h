@@ -40,10 +40,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class ReflSearchModel : public QAbstractTableModel {
   Q_OBJECT
 public:
-  ReflSearchModel(const ReflTransferStrategy &transferMethod,
-                  Mantid::API::ITableWorkspace_sptr tableWorkspace,
+  ReflSearchModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
                   const std::string &instrument);
-  ~ReflSearchModel() override;
+  ~ReflSearchModel() = default;
   // row and column counts
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -59,6 +58,7 @@ public:
   std::vector<std::map<std::string, std::string>> m_errors;
   /// clear the model
   void clear();
+  bool knownFileType(std::string const &filename) const;
 
 protected:
   // vector of the run numbers

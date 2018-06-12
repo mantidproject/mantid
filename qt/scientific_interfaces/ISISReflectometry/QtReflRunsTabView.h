@@ -76,7 +76,6 @@ public:
   // Setter methods
   void setInstrumentList(const std::vector<std::string> &instruments,
                          int defaultInstrumentIndex) override;
-  void setTransferMethods(const std::set<std::string> &methods) override;
   void setTableCommands(std::vector<std::unique_ptr<DataProcessor::Command>>
                             tableCommands) override;
   void setRowCommands(std::vector<std::unique_ptr<DataProcessor::Command>>
@@ -97,7 +96,6 @@ public:
   std::set<int> getSelectedSearchRows() const override;
   std::string getSearchInstrument() const override;
   std::string getSearchString() const override;
-  std::string getTransferMethod() const override;
   int getSelectedGroup() const override;
 
   IReflRunsTabPresenter *getPresenter() const override;

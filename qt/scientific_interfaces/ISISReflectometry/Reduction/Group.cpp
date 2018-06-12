@@ -10,14 +10,23 @@ Group<Row>::Group(std::string name, std::vector<boost::optional<Row>> rows,
 
 template <typename Row>
 Group<Row>::Group(std::string name)
-    : m_name(std::move(name)), m_rows(),
-      m_postprocessedWorkspaceName() {}
+    : m_name(std::move(name)), m_rows(), m_postprocessedWorkspaceName() {}
 
 template <typename Row> std::string const &Group<Row>::name() const {
   return m_name;
 }
 
-template <typename Row> void Group<Row>::setName(std::string const& name) {
+template <typename Row>
+Row const *Group<Row>::findRowWithTheta(double theta, double tolerance) const {
+  return &(*std::find_if(
+               m_rows.cbegin(), m_rows.cend(),
+               [theta, tolerance](boost::optional<Row> const &row) -> bool {
+                 return row.is_initialized() &&
+                        std::abs(row.get().theta() - theta) < tolerance;
+               })).get();
+}
+
+template <typename Row> void Group<Row>::setName(std::string const &name) {
   m_name = name;
 }
 
@@ -41,7 +50,8 @@ template <typename Row> void Group<Row>::appendEmptyRow() {
 }
 
 template <typename Row>
-void Group<Row>::insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) {
+void Group<Row>::insertRow(boost::optional<Row> const &row,
+                           int beforeRowAtIndex) {
   m_rows.insert(m_rows.begin() + beforeRowAtIndex, row);
 }
 
@@ -57,6 +67,32 @@ void Group<Row>::updateRow(int rowIndex, boost::optional<Row> const &row) {
 template <typename Row>
 boost::optional<Row> const &Group<Row>::operator[](int rowIndex) const {
   return m_rows[rowIndex];
+}
+
+UnslicedGroup unslice(SlicedGroup const &slicedGroup) {
+  using UnsliceFunctionPtr =
+      boost::optional<UnslicedRow>(*)(boost::optional<SlicedRow> const &);
+
+  auto unslicedRows = std::vector<boost::optional<UnslicedRow>>();
+  auto const &slicedRows = slicedGroup.rows();
+  std::transform(slicedRows.begin(), slicedRows.end(),
+                 std::back_inserter(unslicedRows),
+                 static_cast<UnsliceFunctionPtr>(&unslice));
+  return UnslicedGroup(slicedGroup.name(), std::move(unslicedRows),
+                       slicedGroup.postprocessedWorkspaceName());
+}
+
+SlicedGroup slice(UnslicedGroup const &unslicedGroup) {
+  using SliceFunctionPtr =
+      boost::optional<SlicedRow>(*)(boost::optional<UnslicedRow> const &);
+
+  auto slicedRows = std::vector<boost::optional<SlicedRow>>();
+  auto const &unslicedRows = unslicedGroup.rows();
+  std::transform(unslicedRows.begin(), unslicedRows.end(),
+                 std::back_inserter(slicedRows),
+                 static_cast<SliceFunctionPtr>(&slice));
+  return SlicedGroup(unslicedGroup.name(), std::move(slicedRows),
+                     unslicedGroup.postprocessedWorkspaceName());
 }
 }
 }

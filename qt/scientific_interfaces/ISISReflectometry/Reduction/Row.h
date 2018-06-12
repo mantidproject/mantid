@@ -8,6 +8,7 @@
 #include "RangeInQ.h"
 #include "ReductionWorkspaces.h"
 #include "SlicedReductionWorkspaces.h"
+#include "Slicing.h"
 #include "../DllConfig.h"
 
 namespace MantidQt {
@@ -21,17 +22,22 @@ public:
   using WorkspaceNames = ReducedWorkspaceNames;
 
   Row(std::vector<std::string> number, double theta,
-      std::pair<std::string, std::string> tranmissionRuns, boost::optional<RangeInQ> qRange,
-      boost::optional<double> scaleFactor,
+      std::pair<std::string, std::string> tranmissionRuns,
+      boost::optional<RangeInQ> qRange, boost::optional<double> scaleFactor,
       ReductionOptionsMap reductionOptions,
-      boost::optional<ReducedWorkspaceNames> reducedWorkspaceNames);
+      ReducedWorkspaceNames reducedWorkspaceNames);
+
   std::vector<std::string> const &runNumbers() const;
-  std::pair<std::string, std::string> transmissionWorkspaceNames();
+  std::pair<std::string, std::string> transmissionWorkspaceNames() const;
   double theta() const;
   boost::optional<RangeInQ> const &qRange() const;
   boost::optional<double> scaleFactor() const;
   ReductionOptionsMap const &reductionOptions() const;
-  boost::optional<ReducedWorkspaceNames> const &reducedWorkspaceNames() const;
+  ReducedWorkspaceNames const &reducedWorkspaceNames() const;
+
+  template <typename WorkspaceNamesFactory>
+  Row withExtraRunNumbers(std::vector<std::string> const &runNumbers,
+                          WorkspaceNamesFactory const &workspaceNames) const;
 
 private:
   std::vector<std::string> m_runNumbers;
@@ -39,7 +45,7 @@ private:
   boost::optional<RangeInQ> m_qRange;
   boost::optional<double> m_scaleFactor;
   std::pair<std::string, std::string> m_transmissionRuns;
-  boost::optional<ReducedWorkspaceNames> m_reducedWorkspaceNames;
+  ReducedWorkspaceNames m_reducedWorkspaceNames;
   ReductionOptionsMap m_reductionOptions;
 };
 
@@ -60,11 +66,45 @@ extern template MANTIDQT_ISISREFLECTOMETRY_DLL bool
 operator!=(SlicedRow const &, SlicedRow const &);
 
 extern template class MANTIDQT_ISISREFLECTOMETRY_DLL Row<ReductionWorkspaces>;
-using SingleRow = Row<ReductionWorkspaces>;
+using UnslicedRow = Row<ReductionWorkspaces>;
 extern template MANTIDQT_ISISREFLECTOMETRY_DLL bool
-operator==(SingleRow const &, SingleRow const &);
+operator==(UnslicedRow const &, UnslicedRow const &);
 extern template MANTIDQT_ISISREFLECTOMETRY_DLL bool
-operator!=(SingleRow const &, SingleRow const &);
+operator!=(UnslicedRow const &, UnslicedRow const &);
+
+using RowVariant = boost::variant<SlicedRow, UnslicedRow>;
+
+SlicedRow slice(UnslicedRow const &row, Slicing const &slicing) {
+  return SlicedRow(
+      row.runNumbers(), row.theta(), row.transmissionWorkspaceNames(),
+      row.qRange(), row.scaleFactor(), row.reductionOptions(),
+      workspaceNamesForSliced(row.runNumbers(),
+                              row.transmissionWorkspaceNames(), slicing));
+}
+
+UnslicedRow unslice(SlicedRow const &row) {
+  return UnslicedRow(row.runNumbers(), row.theta(),
+                     row.transmissionWorkspaceNames(), row.qRange(),
+                     row.scaleFactor(), row.reductionOptions(),
+                     workspaceNamesForUnsliced(
+                         row.runNumbers(), row.transmissionWorkspaceNames()));
+}
+
+boost::optional<UnslicedRow> unslice(boost::optional<SlicedRow> const &row) {
+  if (row.is_initialized()) {
+    return unslice(row.get());
+  } else {
+    return boost::none;
+  }
+}
+
+boost::optional<SlicedRow> slice(boost::optional<UnslicedRow> const &row) {
+  if (row.is_initialized()) {
+    return slice(row.get());
+  } else {
+    return boost::none;
+  }
+}
 
 // class RowTemplate {
 // public:

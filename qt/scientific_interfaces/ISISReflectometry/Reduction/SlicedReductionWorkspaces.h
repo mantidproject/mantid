@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "ReductionWorkspaces.h"
+#include "Slicing.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -20,10 +21,18 @@ private:
   std::vector<ReductionWorkspaces> m_sliceWorkspaces;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(SlicedReductionWorkspaces const &lhs,
-                                               SlicedReductionWorkspaces const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(SlicedReductionWorkspaces const &lhs,
-                                               SlicedReductionWorkspaces const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL SlicedReductionWorkspaces
+workspaceNamesForSliced(
+    std::vector<std::string> const &summedRunNumbers,
+    std::pair<std::string, std::string> const &transmissionRuns,
+    Slicing const &slicing);
+
+MANTIDQT_ISISREFLECTOMETRY_DLL bool
+operator==(SlicedReductionWorkspaces const &lhs,
+           SlicedReductionWorkspaces const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool
+operator!=(SlicedReductionWorkspaces const &lhs,
+           SlicedReductionWorkspaces const &rhs);
 }
 }
 #endif // MANTID_CUSTOMINTERFACES_SLICEDREDUCTIONWORKSPACES_H_

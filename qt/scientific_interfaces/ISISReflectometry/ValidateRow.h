@@ -1,6 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_VALIDATEROW_H_
 #define MANTID_CUSTOMINTERFACES_VALIDATEROW_H_
 #include "Reduction/Row.h"
+#include "Reduction/ReductionJobs.h"
 #include "DllConfig.h"
 
 namespace MantidQt {
@@ -71,7 +72,10 @@ private:
 
 template <typename Row> class MANTIDQT_ISISREFLECTOMETRY_DLL RowValidator {
 public:
-  RowValidationResult<Row> operator()(std::vector<std::string> const &cellText);
+  template <typename WorkspaceNameFactory>
+  RowValidationResult<boost::variant<SlicedRow, UnslicedRow>>
+  operator()(std::vector<std::string> const &cellText,
+             WorkspaceNameFactory workspaceNames);
 
 private:
   boost::optional<std::vector<std::string>>
@@ -89,18 +93,18 @@ private:
   std::vector<int> m_invalidColumns;
 };
 
-template <typename Row>
-RowValidationResult<Row> validateRow(std::vector<std::string> const &cellText);
+RowValidationResult<boost::variant<SlicedRow, UnslicedRow>>
+validateRow(Jobs const &jobs, Slicing const &slicing,
+            std::vector<std::string> const &cellText);
+
+boost::optional<boost::variant<SlicedRow, UnslicedRow>>
+validateRowFromRunAndTheta(Jobs const &jobs, Slicing const &slicing,
+                           std::string const &run, std::string const &theta);
 
 extern template class MANTIDQT_ISISREFLECTOMETRY_DLL
     RowValidationResult<SlicedRow>;
 extern template class MANTIDQT_ISISREFLECTOMETRY_DLL
-    RowValidationResult<SingleRow>;
-extern template MANTIDQT_ISISREFLECTOMETRY_DLL RowValidationResult<SlicedRow>
-validateRow(std::vector<std::string> const &);
-extern template MANTIDQT_ISISREFLECTOMETRY_DLL RowValidationResult<SingleRow>
-validateRow(std::vector<std::string> const &);
-
+    RowValidationResult<UnslicedRow>;
 }
 }
 #endif // MANTID_CUSTOMINTERFACES_VALIDATEROW_H_
