@@ -92,6 +92,11 @@ void LoadAndApplyMuonDetectorGrouping::init() {
                   "A list of periods to subtract in multiperiod data.",
                   Direction::Input);
 
+  declareProperty(
+      make_unique<WorkspaceProperty<TableWorkspace>>(
+          "DeadTimeTable", "", Direction::Input, PropertyMode::Optional),
+      "Table with dead time information, used to apply dead time corrction.");
+
   // Perform Group Associations.
 
   std::string analysisGrp("Analysis Options");
@@ -99,6 +104,7 @@ void LoadAndApplyMuonDetectorGrouping::init() {
   setPropertyGroup("TimeOffset", analysisGrp);
   setPropertyGroup("SummedPeriods", analysisGrp);
   setPropertyGroup("SubtractedPeriods", analysisGrp);
+  setPropertyGroup("DeadTimeTable", analysisGrp);
 }
 
 /**
@@ -278,6 +284,11 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
     alg->setProperty("TimeOffset", options.loadedTimeZero - options.timeZero);
     alg->setProperty("SummedPeriods", options.summedPeriods);
     alg->setProperty("SubtractedPeriods", options.subtractedPeriods);
+    TableWorkspace_sptr DTC = getProperty("DeadTimeTable");
+    if (DTC) {
+      alg->setProperty("ApplyDeadTimeCorrection", true);
+      alg->setProperty("DeadTimeTable", DTC);
+    }
     alg->execute();
   }
 };
@@ -315,6 +326,11 @@ void LoadAndApplyMuonDetectorGrouping::addPairingToADS(
     alg->setProperty("TimeOffset", options.loadedTimeZero - options.timeZero);
     alg->setProperty("SummedPeriods", options.summedPeriods);
     alg->setProperty("SubtractedPeriods", options.subtractedPeriods);
+    TableWorkspace_sptr DTC = getProperty("DeadTimeTable");
+    if (DTC) {
+      alg->setProperty("ApplyDeadTimeCorrection", true);
+      alg->setProperty("DeadTimeTable", DTC);
+    }
     alg->execute();
   };
 };

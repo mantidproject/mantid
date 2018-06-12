@@ -334,6 +334,35 @@ public:
   static constexpr const char *groupWSName = "inputGroup";
 };
 
+/**
+ * Create a simple dead time TableWorkspace with two columns (spectrum number
+ * and dead time).
+ * @param nspec :: The number of spectra (rows in table).
+ * @param deadTimes ::  The dead times for each spectra.
+ * @return TableWorkspace with dead times appropriate for pairing algorithm.
+ */
+ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
+                                         std::vector<double> &deadTimes) {
+
+  auto deadTimeTable = boost::dynamic_pointer_cast<ITableWorkspace>(
+      WorkspaceFactory::Instance().createTable("TableWorkspace"));
+
+  deadTimeTable->addColumn("int", "Spectrum Number");
+  deadTimeTable->addColumn("double", "Dead Time");
+
+  if (deadTimes.size() != nspec) {
+    return deadTimeTable;
+  }
+
+  for (size_t spec = 0; spec < deadTimes.size(); spec++) {
+    TableRow newRow = deadTimeTable->appendRow();
+    newRow << static_cast<int>(spec) + 1;
+    newRow << deadTimes[spec];
+  }
+
+  return deadTimeTable;
+}
+
 } // namespace
 
 class LoadAndApplyMuonDetectorGroupingTest : public CxxTest::TestSuite {
@@ -639,61 +668,98 @@ public:
     auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
-	TS_ASSERT_DELTA(wsOut->readY(0)[0], 26, 0.1);
-	TS_ASSERT_DELTA(wsOut->readY(0)[1], 30, 0.001);
-	TS_ASSERT_DELTA(wsOut->readY(0)[4], 42, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 26, 0.1);
+    TS_ASSERT_DELTA(wsOut->readY(0)[1], 30, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 42, 0.001);
 
-	wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-		wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
+    wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
 
-	TS_ASSERT_DELTA(wsOut->readY(0)[0], 106, 0.1);
-	TS_ASSERT_DELTA(wsOut->readY(0)[1], 110, 0.001);
-	TS_ASSERT_DELTA(wsOut->readY(0)[4], 122, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 106, 0.1);
+    TS_ASSERT_DELTA(wsOut->readY(0)[1], 110, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 122, 0.001);
 
     wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
-	// Asymmetry on group 1 and 2
-	TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.6061, 0.1);
-	TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.5714, 0.001);
-	TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.4878, 0.001);
-
+    // Asymmetry on group 1 and 2
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.6061, 0.1);
+    TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.5714, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.4878, 0.001);
   }
 
   void test_multiple_period_data_subtracting_periods_gives_correct_result() {
 
-	  auto ws = createMultiPeriodWorkspaceGroup(2, 4, 10, "MuonAnalysis");
-	  setUpADSWithWorkspace setup(ws);
-	  auto file = createXMLwithPairsAndGroups(2, 2);
+    auto ws = createMultiPeriodWorkspaceGroup(2, 4, 10, "MuonAnalysis");
+    setUpADSWithWorkspace setup(ws);
+    auto file = createXMLwithPairsAndGroups(2, 2);
 
-	  auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
-	  alg->setProperty("SummedPeriods", "1");
-	  alg->setProperty("SubtractedPeriods", "2");
-	  alg->execute();
+    auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
+    alg->setProperty("SummedPeriods", "1");
+    alg->setProperty("SubtractedPeriods", "2");
+    alg->execute();
 
-	  WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
-		  AnalysisDataService::Instance().retrieve("EMU00012345"));
+    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        AnalysisDataService::Instance().retrieve("EMU00012345"));
 
-	  auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-		  wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
-	  TS_ASSERT_DELTA(wsOut->readY(0)[0], -2, 0.1);
-	  TS_ASSERT_DELTA(wsOut->readY(0)[1], -2, 0.001);
-	  TS_ASSERT_DELTA(wsOut->readY(0)[4], -2, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -2, 0.1);
+    TS_ASSERT_DELTA(wsOut->readY(0)[1], -2, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -2, 0.001);
 
-	  wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-		  wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
+    wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
 
-	  TS_ASSERT_DELTA(wsOut->readY(0)[0], -2, 0.1);
-	  TS_ASSERT_DELTA(wsOut->readY(0)[1], -2, 0.001);
-	  TS_ASSERT_DELTA(wsOut->readY(0)[4], -2, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -2, 0.1);
+    TS_ASSERT_DELTA(wsOut->readY(0)[1], -2, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -2, 0.001);
 
-	  wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-		  wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+    wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
 
-	  TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.03676, 0.001);
-	  TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.03268, 0.001);
-	  TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.02382, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.03676, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.03268, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.02382, 0.001);
+  }
 
+  void test_dead_time_correction_is_applied_correctly() {
+
+    auto ws = createAsymmetryWorkspace(4, 10, yDataAsymmetry(1.5, 0.1));
+    setUpADSWithWorkspace setup(ws);
+    auto file = createXMLwithPairsAndGroups(2, 2);
+
+    // Apply same dead time to every spectra
+    std::vector<double> deadTimes(4, 0.0025);
+    ITableWorkspace_sptr deadTimeTable = createDeadTimeTable(4, deadTimes);
+
+    auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
+    alg->setProperty("DeadTimeTable", deadTimeTable);
+    alg->execute();
+
+    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        AnalysisDataService::Instance().retrieve("EMU00012345"));
+
+    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 39.2846, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[1], 32.9165, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 2.30412, 0.001);
+
+    wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
+
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 95.8873, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[1], 75.7566, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.71041, 0.001);
+
+    wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.41874, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.39421, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.52868, 0.001);
   }
 };
 
