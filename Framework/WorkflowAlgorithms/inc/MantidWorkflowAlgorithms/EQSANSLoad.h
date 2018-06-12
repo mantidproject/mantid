@@ -13,7 +13,7 @@ namespace Mantid {
 namespace WorkflowAlgorithms {
 /**
 
-    Subtract dark current for EQSANS.
+    Loads EQSANS data.
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
    National Laboratory & European Spallation Source
@@ -61,7 +61,9 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override { return "Workflow\\SANS"; }
+  const std::string category() const override {
+    return "Workflow\\SANS\\UsesPropertyManager";
+  }
 
 private:
   /// Initialisation code

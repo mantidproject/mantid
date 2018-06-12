@@ -107,6 +107,8 @@ private:
   double calculateQ(const double lambda, const double twoTheta) const;
   std::pair<double, double> calculateQMaxQMin();
   void setFinalProperties(const std::string &filename);
+  void moveBeamCenter(const std::string &component, double center_x,
+                      double center_y);
 };
 
 } // namespace DataHandling

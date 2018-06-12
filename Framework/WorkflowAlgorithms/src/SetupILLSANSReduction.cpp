@@ -455,7 +455,7 @@ void SetupILLSANSReduction::init() {
                   "Number of I(q) bins when binning is not specified");
   declareProperty("IQLogBinning", false,
                   "I(q) log binning when binning is not specified");
-  declareProperty("ComputeResolution", true,
+  declareProperty("ComputeResolution", false,
                   "If true the Q resolution will be computed");
 
   declareProperty("Do2DReduction", false);
@@ -495,10 +495,6 @@ void SetupILLSANSReduction::exec() {
       boost::make_shared<PropertyManager>();
   PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
                                                       reductionManager);
-
-  // Store name of the instrument
-  reductionManager->declareProperty(
-      make_unique<PropertyWithValue<std::string>>("InstrumentName", "D33"));
 
   // Store additional (and optional) process information
   const std::string processInfo = getProperty("ProcessInfo");

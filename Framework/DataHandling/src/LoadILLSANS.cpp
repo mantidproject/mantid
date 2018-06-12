@@ -11,6 +11,8 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <cmath>
@@ -47,12 +49,12 @@ int LoadILLSANS::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLSANS::category() const {
-  return "DataHandling\\Nexus;ILL\\SANS";
+  return "DataHandling\\Nexus;ILL\\SANS;Workflow\\SANS\\UsesPropertyManager";
 }
 
 /// Algorithm's summary. @see Algorithm::summery
 const std::string LoadILLSANS::summary() const {
-  return "Loads a ILL nexus files for SANS instruments D11, D22, D33.";
+  return "Loads ILL nexus files for SANS instruments D11, D22, D33.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -81,6 +83,8 @@ void LoadILLSANS::init() {
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
       "Name of the nexus file to load");
+  declareProperty("ReductionProperties", "__sans_reduction_properties",
+                  Direction::Input);
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name to use for the output workspace");
@@ -90,6 +94,31 @@ void LoadILLSANS::init() {
 /** Execute the algorithm.
  */
 void LoadILLSANS::exec() {
+  // Reduction property manager
+  const std::string reductionManagerName = getProperty("ReductionProperties");
+  boost::shared_ptr<PropertyManager> reductionManager;
+  if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
+    reductionManager =
+        PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+  } else {
+    reductionManager = boost::make_shared<PropertyManager>();
+    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
+                                                        reductionManager);
+  }
+
+  bool moveToBeamCenter = false;
+  double center_x, center_y = 0.;
+  if (reductionManager->existsProperty("LatestBeamCenterX") &&
+      reductionManager->existsProperty("LatestBeamCenterY")) {
+    moveToBeamCenter = true;
+    center_x = reductionManager->getProperty("LatestBeamCenterX");
+    center_y = reductionManager->getProperty("LatestBeamCenterY");
+    g_log.debug("Beam center found: X=" + std::to_string(center_x) + "; Y=" +
+                std::to_string(center_y));
+  } else {
+    g_log.debug("No beam center information found in the manager.");
+  }
+
   const std::string filename = getPropertyValue("Filename");
   NXRoot root(filename);
   NXEntry firstEntry = root.openFirstEntry();
@@ -111,6 +140,9 @@ void LoadILLSANS::exec() {
       adjustTOF();
       moveSource();
     }
+    if (moveToBeamCenter) {
+        //TODO: move all the panels
+    }
   } else {
     progress.report("Initializing the workspace for " + m_instrumentName);
     initWorkSpace(firstEntry, instrumentPath);
@@ -129,8 +161,10 @@ void LoadILLSANS::exec() {
           firstEntry, instrumentPath + "/detector/dan_actual");
       rotateD22(angle, "detector");*/
     }
+    if (moveToBeamCenter) {
+        moveBeamCenter("detector", center_x, center_y);
+    }
   }
-
   progress.report("Setting sample logs");
   setFinalProperties(filename);
   setProperty("OutputWorkspace", m_localWorkspace);
@@ -713,6 +747,33 @@ void LoadILLSANS::moveSource() {
   mover->setProperty("Z", -m_sourcePos);
   mover->setProperty("RelativePosition", false);
   mover->executeAsChildAlg();
+}
+
+/**
+  * Moves the component such that the pixel with center_x, center_y coordinates moves to
+  * x=0, y=0 (i.e. z axis).
+  * @param center_x : beam center x coord (in pixels)
+  * @param center_y : beam center y coord (in pixels)
+  */
+void LoadILLSANS::moveBeamCenter(const std::string &component, double center_x,
+                                 double center_y) {
+
+  const auto &instrument = m_localWorkspace->getInstrument();
+  double xPixels = instrument->getNumberParameter("number-of-x-pixels")[0];
+  double yPixels = instrument->getNumberParameter("number-of-y-pixels")[0];
+  double xPixelSize = instrument->getNumberParameter("x-pixel-size")[0];
+  double yPixelSize = instrument->getNumberParameter("y-pixel-size")[0];
+  const double xOffset = -(center_x - (xPixels - 1) / 2.) * xPixelSize;
+  const double yOffset = -(center_y - (yPixels - 1) / 2.) * yPixelSize;
+  IAlgorithm_sptr mvAlg = createChildAlgorithm("MoveInstrumentComponent");
+  mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+  mvAlg->setProperty("ComponentName", component);
+  mvAlg->setProperty("X", xOffset / 1000.);
+  mvAlg->setProperty("Y", yOffset / 1000.);
+  mvAlg->setProperty("RelativePosition", true);
+  mvAlg->executeAsChildAlg();
+  g_log.debug() << "Moved beam center with dX=" << xOffset
+                << "mm; dY=" << yOffset << "mm.\n";
 }
 
 } // namespace DataHandling
