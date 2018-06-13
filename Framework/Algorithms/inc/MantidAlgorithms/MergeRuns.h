@@ -94,6 +94,7 @@ private:
   void init() override;
   void exec() override;
   void execEvent();
+  void execHistogram(const std::vector<std::string> &inputs);
   void buildAdditionTables();
   // Overriden MultiPeriodGroupAlgorithm method.
   std::string fetchInputPropertyName() const override;

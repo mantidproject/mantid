@@ -92,22 +92,6 @@ void MergeRuns::exec() {
   // Check that all input workspaces exist and match in certain important ways
   const std::vector<std::string> inputs_orig = getProperty("InputWorkspaces");
 
-  const std::string sampleLogsSum = getProperty(SampleLogsBehaviour::SUM_PROP);
-  const std::string sampleLogsTimeSeries =
-      getProperty(SampleLogsBehaviour::TIME_SERIES_PROP);
-  const std::string sampleLogsList =
-      getProperty(SampleLogsBehaviour::LIST_PROP);
-  const std::string sampleLogsWarn =
-      getProperty(SampleLogsBehaviour::WARN_PROP);
-  const std::string sampleLogsWarnTolerances =
-      getProperty(SampleLogsBehaviour::WARN_TOL_PROP);
-  const std::string sampleLogsFail =
-      getProperty(SampleLogsBehaviour::FAIL_PROP);
-  const std::string sampleLogsFailTolerances =
-      getProperty(SampleLogsBehaviour::FAIL_TOL_PROP);
-
-  const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
-
   // This will hold the inputs, with the groups separated off
   std::vector<std::string> inputs =
       RunCombinationHelper::unWrapGroups(inputs_orig);
@@ -121,64 +105,7 @@ void MergeRuns::exec() {
     this->execEvent();
   } else {
     // At least one is not event workspace ----------------
-
-    // This gets the list of workspaces
-    RunCombinationHelper combHelper;
-    m_inMatrixWS = combHelper.validateInputWorkspaces(inputs, g_log);
-    const auto rebinParams = checkRebinning();
-
-    // Take the first input workspace as the first argument to the addition
-    MatrixWorkspace_sptr outWS(m_inMatrixWS.front()->clone());
-    if (rebinParams) {
-      outWS = this->rebinInput(outWS, *rebinParams);
-    }
-    Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
-        *outWS, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
-        sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
-        sampleLogsFailTolerances);
-
-    auto isScanning = outWS->detectorInfo().isScanning();
-
-    const size_t numberOfWSs = m_inMatrixWS.size();
-    m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numberOfWSs - 1);
-    // Note that the iterator is incremented before first pass so that 1st
-    // workspace isn't added to itself
-    auto it = m_inMatrixWS.begin();
-    for (++it; it != m_inMatrixWS.end(); ++it) {
-      MatrixWorkspace_sptr addee;
-      if (rebinParams) {
-        addee = this->rebinInput(*it, *rebinParams);
-      } else {
-        addee = *it;
-      }
-
-      // Add the current workspace to the total
-      // Update the sample logs
-      try {
-        sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
-        sampleLogsBehaviour.removeSampleLogsFromWorkspace(*addee);
-        if (isScanning)
-          outWS = buildScanningOutputWorkspace(outWS, addee);
-        else
-          outWS = outWS + addee;
-        sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
-        sampleLogsBehaviour.readdSampleLogToWorkspace(*addee);
-      } catch (std::invalid_argument &e) {
-        if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
-          g_log.error()
-              << "Could not merge run: " << it->get()->getName()
-              << ". Reason: \"" << e.what()
-              << "\". MergeRuns will continue but this run will be skipped.\n";
-          sampleLogsBehaviour.resetSampleLogs(*outWS);
-        } else {
-          throw std::invalid_argument(e);
-        }
-      }
-      m_progress->report();
-    }
-
-    // Set the final workspace to the output property
-    setProperty("OutputWorkspace", outWS);
+    this->execHistogram(inputs);
   }
 }
 
@@ -405,6 +332,82 @@ void MergeRuns::execEvent() {
 
   // Set the final workspace to the output property
   setProperty("OutputWorkspace", std::move(outWS));
+}
+
+void MergeRuns::execHistogram(const std::vector<std::string> &inputs) {
+  const std::string sampleLogsSum = getProperty(SampleLogsBehaviour::SUM_PROP);
+  const std::string sampleLogsTimeSeries =
+      getProperty(SampleLogsBehaviour::TIME_SERIES_PROP);
+  const std::string sampleLogsList =
+      getProperty(SampleLogsBehaviour::LIST_PROP);
+  const std::string sampleLogsWarn =
+      getProperty(SampleLogsBehaviour::WARN_PROP);
+  const std::string sampleLogsWarnTolerances =
+      getProperty(SampleLogsBehaviour::WARN_TOL_PROP);
+  const std::string sampleLogsFail =
+      getProperty(SampleLogsBehaviour::FAIL_PROP);
+  const std::string sampleLogsFailTolerances =
+      getProperty(SampleLogsBehaviour::FAIL_TOL_PROP);
+
+  const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
+
+  // This gets the list of workspaces
+  RunCombinationHelper combHelper;
+  m_inMatrixWS = combHelper.validateInputWorkspaces(inputs, g_log);
+  const auto rebinParams = checkRebinning();
+
+  // Take the first input workspace as the first argument to the addition
+  MatrixWorkspace_sptr outWS(m_inMatrixWS.front()->clone());
+  if (rebinParams) {
+    outWS = this->rebinInput(outWS, *rebinParams);
+  }
+  Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
+      *outWS, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
+      sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
+      sampleLogsFailTolerances);
+
+  auto isScanning = outWS->detectorInfo().isScanning();
+
+  const size_t numberOfWSs = m_inMatrixWS.size();
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numberOfWSs - 1);
+  // Note that the iterator is incremented before first pass so that 1st
+  // workspace isn't added to itself
+  auto it = m_inMatrixWS.begin();
+  for (++it; it != m_inMatrixWS.end(); ++it) {
+    MatrixWorkspace_sptr addee;
+    if (rebinParams) {
+      addee = this->rebinInput(*it, *rebinParams);
+    } else {
+      addee = *it;
+    }
+
+    // Add the current workspace to the total
+    // Update the sample logs
+    try {
+      sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
+      sampleLogsBehaviour.removeSampleLogsFromWorkspace(*addee);
+      if (isScanning)
+        outWS = buildScanningOutputWorkspace(outWS, addee);
+      else
+        outWS = outWS + addee;
+      sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
+      sampleLogsBehaviour.readdSampleLogToWorkspace(*addee);
+    } catch (std::invalid_argument &e) {
+      if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
+        g_log.error()
+            << "Could not merge run: " << it->get()->getName() << ". Reason: \""
+            << e.what()
+            << "\". MergeRuns will continue but this run will be skipped.\n";
+        sampleLogsBehaviour.resetSampleLogs(*outWS);
+      } else {
+        throw std::invalid_argument(e);
+      }
+    }
+    m_progress->report();
+  }
+
+  // Set the final workspace to the output property
+  setProperty("OutputWorkspace", outWS);
 }
 
 //------------------------------------------------------------------------------------------------
