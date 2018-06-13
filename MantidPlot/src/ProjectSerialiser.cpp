@@ -11,6 +11,7 @@
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
 #include "Mantid/MantidMatrixFunction.h"
 #include "Mantid/MantidUI.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
@@ -44,6 +45,20 @@ ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window)
 ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder)
     : window(window), m_currentFolder(folder), m_windowCount(0),
       m_saveAll(true) {}
+
+bool MantidQt::API::ProjectSerialiser::checkAllWorkspacesInAds(const std::vector<std::string>& expectedWsNames) const
+{
+	bool allInAds = true;
+	for (const auto &wsName : expectedWsNames) {
+		if (!Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
+			allInAds = false;
+			break;
+		}
+	}
+
+	return allInAds;
+}
+
 
 void ProjectSerialiser::save(const QString &projectName,
                              const std::vector<std::string> &wsNames,
@@ -639,6 +654,9 @@ void ProjectSerialiser::openScriptWindow(const QStringList &files) {
 void ProjectSerialiser::populateMantidTreeWidget(const QString &lines) {
   QStringList list = lines.split("\t");
   QStringList::const_iterator line = list.begin();
+
+  std::vector<std::string> expectedWorkspaces;
+
   for (++line; line != list.end(); ++line) {
     if ((*line)
             .contains(',')) // ...it is a group and more work needs to be done
@@ -652,6 +670,7 @@ void ProjectSerialiser::populateMantidTreeWidget(const QString &lines) {
       // vectorgroup (ignore group name, start at 1)
       for (int i = 1; i < groupWorkspaces.size(); i++) {
         std::string wsName = groupWorkspaces[i].toStdString();
+		expectedWorkspaces.push_back(wsName);
         loadWsToMantidTree(wsName);
         inputWsVec.push_back(wsName);
       }
@@ -708,8 +727,18 @@ void ProjectSerialiser::populateMantidTreeWidget(const QString &lines) {
       }
     } else // ...not a group so just load the workspace
     {
-      loadWsToMantidTree((*line).toStdString());
+		std::string wsName = line->toStdString();
+		expectedWorkspaces.push_back(wsName);
+		loadWsToMantidTree(wsName);
     }
+
+	// Check everything was loaded before continuing, as we might need to open a window
+	// for a workspace which did not load in
+	if (!checkAllWorkspacesInAds(expectedWorkspaces)) {
+		QMessageBox::critical(window, "MantidPlot - Algorithm error",
+			" The workspaces associated with this project could not be loaded. Aborting project loading.");
+		throw std::runtime_error("Failed to load all required workspaces. Aborting project loading.");
+	}
   }
 }
 

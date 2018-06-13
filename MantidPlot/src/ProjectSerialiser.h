@@ -2,6 +2,7 @@
 #define PROJECT_SERIALISER_H
 
 #include <string>
+#include <vector>
 
 #include <QFile>
 #include <QFileInfo>
@@ -55,6 +56,8 @@ public:
   /// Create a new serialiser with the current application window
   explicit ProjectSerialiser(ApplicationWindow *window);
   explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder);
+
+  bool checkAllWorkspacesInAds(const std::vector<std::string> &expectedWsNames) const;
 
   /// Save the current state of the project to disk
   void save(const QString &projectName, const std::vector<std::string> &wsNames,

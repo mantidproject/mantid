@@ -4669,7 +4669,14 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
 
   // Open as a top level folder
   ProjectSerialiser serialiser(this);
-  serialiser.load(lines, fileVersion);
+  try {
+	  serialiser.load(lines, fileVersion);
+  }
+  catch (std::runtime_error &e) {
+	  g_log.error(e.what());
+	  // We failed to load - bail out
+	  return this;
+  }
 
   if (d_loaded_current)
     curFolder = d_loaded_current;
@@ -14148,7 +14155,15 @@ Folder *ApplicationWindow::appendProject(const QString &fn,
 
   // Open folders
   ProjectSerialiser serialiser(this);
-  serialiser.load(lines, fileVersion);
+
+  try {
+	  serialiser.load(lines, fileVersion);
+  }
+  catch (std::runtime_error &e) {
+	  g_log.error(e.what());
+	  // We failed to load - bail out
+	  return nullptr;
+  }
 
   // Restore the selected folder
   folders->setCurrentItem(curFolder->folderListItem());
