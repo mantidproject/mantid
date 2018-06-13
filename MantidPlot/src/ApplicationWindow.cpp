@@ -4670,12 +4670,11 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
   // Open as a top level folder
   ProjectSerialiser serialiser(this);
   try {
-	  serialiser.load(lines, fileVersion);
-  }
-  catch (std::runtime_error &e) {
-	  g_log.error(e.what());
-	  // We failed to load - bail out
-	  return this;
+    serialiser.load(lines, fileVersion);
+  } catch (std::runtime_error &e) {
+    g_log.error(e.what());
+    // We failed to load - bail out
+    return this;
   }
 
   if (d_loaded_current)
@@ -14157,12 +14156,11 @@ Folder *ApplicationWindow::appendProject(const QString &fn,
   ProjectSerialiser serialiser(this);
 
   try {
-	  serialiser.load(lines, fileVersion);
-  }
-  catch (std::runtime_error &e) {
-	  g_log.error(e.what());
-	  // We failed to load - bail out
-	  return nullptr;
+    serialiser.load(lines, fileVersion);
+  } catch (std::runtime_error &e) {
+    g_log.error(e.what());
+    // We failed to load - bail out
+    return nullptr;
   }
 
   // Restore the selected folder
