@@ -249,7 +249,6 @@ def fitTOFCoordinate(box, peak, padeCoefficients, dtSpread=0.03, minFracPixels=0
     yFit = mtd['fit_Workspace'].readY(1)
 
     yScaled = (yFit - bg) / np.max(yFit - bg)
-    goodIDX = yScaled > fracStop
 
     interpF = interp1d(x, yFit, kind='cubic')
     tofxx = np.linspace(tofWS.readX(0).min(), tofWS.readX(0).max(), 1000)

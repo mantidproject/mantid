@@ -931,8 +931,8 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
                 wavelength = peak.getWavelength()  # in Angstrom
                 energy = 81.804 / wavelength**2 / 1000.0  # in eV
                 flightPath = peak.getL1() + peak.getL2()  # in m
-                print( '---fitting peak ' + 
-                       str(i) + '  Num events: ' + 
+                print( '---fitting peak ' +
+                       str(i) + '  Num events: ' +
                        str(Box.getNEvents()), ' ', peak.getHKL())
                 if Box.getNEvents() < 1 or np.all(np.abs(peak.getHKL()) == 0):
                     print("Peak %i has 0 events or is HKL=000. Skipping!" % i)

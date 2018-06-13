@@ -11,8 +11,8 @@ from mantid.api import *
 from mantid.simpleapi import *
 import numpy as np
 
-class IntegratePeaksProfileFitting(PythonAlgorithm):
 
+class IntegratePeaksProfileFitting(PythonAlgorithm):
 
     def summary(self):
         return 'Fits a series fo peaks using 3D profile fitting as an Ikeda-Carpenter function by a bivariate gaussian.'
