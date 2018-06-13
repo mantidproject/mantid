@@ -31,13 +31,25 @@ Usage
 
    import os
 
-   # The result of a previous isis_powder reduction for GEM
-   # Produced by gem.focus(run_number="83605", ...)
-   input_ws = Load("ISIS_Powder-GEM83605_FocusSempty.nxs")
+   # Here we do a very rough-and-ready diffraction focusing
+   # The workspace input_group has the same format as the result of a reduction from isis_pwoder
+   input_ws = Load(Filename=FileFinder.getFullPath("HRP39180.raw"))
+   focused_ws = DiffractionFocussing(InputWorkspace=input_ws,
+                                     GroupingFileName=FileFinder.getFullPath("hrpd_new_072_01_corr.cal"),
+				     OutputWorkspace="focused_ws")
+
+   spectra = []
+   for spec_num in range(3):
+       spec = ExtractSingleSpectrum(InputWorkspace=focused_ws,
+                                    WorkspaceIndex=spec_num,
+				    OutputWorkspace="spectrum_{}".format(spec_num))
+       spectra.append(spec)
+
+   input_group = GroupWorkspaces(InputWorkspaces=spectra)
 
    output_file = os.path.join(config["defaultsave.directory"], "grouping.new")
 
-   SaveBankScatteringAngles(InputWorkspace=input_ws, Filename=output_file)
+   SaveBankScatteringAngles(InputWorkspace=input_group, Filename=output_file)
 
    with open(output_file) as f:
        contents = f.read().rstrip().split("\n")
@@ -55,9 +67,6 @@ Output:
 .. testoutput:: SaveBankScatteringAngles
 
     File contents:
-    bank :    0  group:     2    0.2712910448    -90.0000000000
-    bank :    1  group:     3    2.0938487711    90.0000000000
-    bank :    2  group:     4    0.0000000000    0.0000000000
-    bank :    3  group:     5    0.0000000000    0.0000000000
-    bank :    4  group:     6    180.0000000000    0.0000000000
-    bank :    5  group:     7    179.9958124886    141.4634299494
+    bank :    0  group:     1    180.0000000000    0.0000000000
+    bank :    1  group:     2    138.2823007994    180.0000000000
+    bank :    2  group:     3    29.5674502659    0.0000000000
