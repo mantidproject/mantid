@@ -456,10 +456,18 @@ void SetupILLSANSReduction::init() {
                   "I(q) log binning when binning is not specified");
   declareProperty("ComputeResolution", false,
                   "If true the Q resolution will be computed");
-
   declareProperty("Do2DReduction", false);
   declareProperty("IQ2DNumberOfBins", 100, positiveInt,
                   "Number of I(qx,qy) bins.");
+  declareProperty("NumberOfWedges", 0, positiveInt,
+                  "Number of wedges to compute the I(Q) for");
+  auto wedgeSize = boost::make_shared<BoundedValidator<double>>();
+  wedgeSize->setLower(0.);
+  wedgeSize->setUpper(360.);
+  declareProperty("WedgeAngle", 0., wedgeSize,
+                  "Angular opening of the wedges [degrees]");
+  declareProperty("WedgeOffset", 0.,
+                  "Angular offset of the first wedge [degrees]");
 
   // -- Define group --
   setPropertyGroup("DoAzimuthalAverage", iq1d_grp);
@@ -468,6 +476,9 @@ void SetupILLSANSReduction::init() {
   setPropertyGroup("ComputeResolution", iq1d_grp);
   setPropertyGroup("Do2DReduction", iq1d_grp);
   setPropertyGroup("IQ2DNumberOfBins", iq1d_grp);
+  setPropertyGroup("NumberOfWedges", iq1d_grp);
+  setPropertyGroup("WedgeAngle", iq1d_grp);
+  setPropertyGroup("WedgeOffset", iq1d_grp);
 
   // Outputs
   const std::string out_grp = "Output";
@@ -671,12 +682,17 @@ void SetupILLSANSReduction::exec() {
     const std::string nBins = getPropertyValue("IQNumberOfBins");
     const bool logBinning = getProperty("IQLogBinning");
     const bool computeResolution = getProperty("ComputeResolution");
+    const int numberOfWedges = getProperty("NumberOfWedges");
+    const double wedgeAngle = getProperty("WedgeAngle");
+    const double wedgeOffset = getProperty("WedgeOffset");
 
     IAlgorithm_sptr iqAlg = createChildAlgorithm("SANSAzimuthalAverage1D");
     iqAlg->setPropertyValue("NumberOfBins", nBins);
     iqAlg->setProperty("LogBinning", logBinning);
     iqAlg->setProperty("ComputeResolution", computeResolution);
-    iqAlg->setPropertyValue("NumberOfWedges", "0");
+    iqAlg->setPropertyValue("NumberOfWedges", std::to_string(numberOfWedges));
+    iqAlg->setProperty("WedgeAngle", wedgeAngle);
+    iqAlg->setProperty("WedgeOffset", wedgeOffset);
     iqAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
     auto iqalgProp = make_unique<AlgorithmProperty>("IQAlgorithm");
