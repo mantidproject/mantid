@@ -273,9 +273,7 @@ void ISISEnergyTransfer::run() {
       createMapFile(m_uiForm.cbGroupingOptions->currentText());
   reductionAlg->setProperty("GroupingMethod", grouping.first.toStdString());
 
-  if (grouping.first == "Workspace")
-    reductionRuntimeProps["GroupingWorkspace"] = grouping.second.toStdString();
-  else if (grouping.first == "File")
+  if (grouping.first == "File")
     reductionAlg->setProperty("MapFile", grouping.second.toStdString());
   else if (grouping.first == "Custom")
     reductionAlg->setProperty("GroupingString", grouping.second.toStdString());
@@ -443,8 +441,8 @@ void ISISEnergyTransfer::mappingOptionSelected(const QString &groupType) {
  * @return path to mapping file, or an empty string if file could not be
  * created.
  */
-QPair<QString, QString>
-ISISEnergyTransfer::createMapFile(const QString &groupType) {
+std::pair<std::string, std::string>
+ISISEnergyTransfer::createMapFile(const std::string &groupType) {
   QString specRange =
       m_uiForm.spSpectraMin->text() + "," + m_uiForm.spSpectraMax->text();
 
@@ -453,40 +451,36 @@ ISISEnergyTransfer::createMapFile(const QString &groupType) {
     if (groupFile == "")
       emit showMessageBox("You must enter a path to the .map file.");
 
-    return qMakePair(QString("File"), groupFile);
+    return std::make_pair("File", groupFile.toStdString());
   } else if (groupType == "Groups") {
-    QString groupWS = "Grouping";
-    createDetectorGroupingWorkspace(groupWS);
-    return qMakePair(QString("Workspace"), groupWS);
+    return std::make_pair("Custom", createDetectorGroupingString());
   } else if (groupType == "Default")
-      return qMakePair(QString("IPF"), QString());
+      return std::make_pair("IPF", "");
     else if (groupType == "Custom")
-      return qMakePair(QString("Custom"), m_uiForm.leCustomGroups->text());
+      return std::make_pair("Custom", m_uiForm.leCustomGroups->text().toStdString());
     else {
     // Catch All and Individual
     return qMakePair(groupType, QString());
   }
 }
 
-void ISISEnergyTransfer::createDetectorGroupingWorkspace(const QString &groupWS) {
+const std::string ISISEnergyTransfer::createDetectorGroupingString() {
 
-  IAlgorithm_sptr groupingAlg =
-    AlgorithmManager::Instance().create("CreateGroupingWorkspace");
-  groupingAlg->initialize();
+  const int nGroups = m_uiForm.spNumberGroups->value();
+  const int nSpectra = m_uiForm.spSpectraMax->value() - m_uiForm.spSpectraMin->value();
+  const int groupSize = nSpectra / nGroups;
+  auto n = groupSize;
+  std::stringstream groupingString;
+  groupingString << "0-" << std::to_string(n);
+  for (auto i = 1u; i < nGroups; ++i) {
+    groupingString << ", " << std::to_string(n + 1) << "-";
+    n += groupSize;
+    groupingString << std::to_string(n);
+  }
+  if ( n != nSpectra) // add remainder as extra group
+    groupingString << ", " << std::to_string(n + 1) << "-" << std::to_string(nSpectra);
 
-  groupingAlg->setProperty("FixedGroupCount",
-    m_uiForm.spNumberGroups->value());
-  groupingAlg->setProperty(
-    "InstrumentName",
-    getInstrumentConfiguration()->getInstrumentName().toStdString());
-  groupingAlg->setProperty(
-    "ComponentName",
-    getInstrumentConfiguration()->getAnalyserName().toStdString());
-  groupingAlg->setProperty("OutputWorkspace", groupWS.toStdString());
-
-  groupingAlg->execute();
-
-  //m_batchAlgoRunner->addAlgorithm(groupingAlg);
+  return groupingString.str();
 }
 
 /**
