@@ -170,7 +170,10 @@ class PlotSelectorPresenterTest(unittest.TestCase):
     def test_double_clicking_plot_brings_to_front(self):
         self.view.get_currently_selected_plot_name = mock.Mock(return_value="Plot2")
         self.presenter.list_double_clicked()
+        self.model.make_plot_active.assert_called_once_with("Plot2")
 
+    def test_make_plot_active_brings_to_front(self):
+        self.presenter.make_plot_active("Plot2")
         self.model.make_plot_active.assert_called_once_with("Plot2")
 
 

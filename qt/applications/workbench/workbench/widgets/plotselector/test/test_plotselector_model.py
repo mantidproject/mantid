@@ -126,7 +126,7 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.model.make_plot_active("Plot1")
         self.assertEqual(self.figure_manager.show.call_count, 1)
 
-    def test_make_plot_active_for_invalid_name_does_nothing(self):
+    def test_make_plot_active_for_invalid_name_raises_value_error(self):
         self.assertRaises(ValueError, self.model.make_plot_active, "NotAPlot")
         self.figure_manager.show.assert_not_called()
 

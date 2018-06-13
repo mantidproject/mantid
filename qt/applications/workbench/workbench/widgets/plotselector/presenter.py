@@ -163,4 +163,15 @@ class PlotSelectorPresenter(object):
         to bring the selected plot to the front
         """
         plot_name = self.view.get_currently_selected_plot_name()
-        self.model.make_plot_active(plot_name)
+        self.make_plot_active(plot_name)
+
+    def make_plot_active(self, plot_name):
+        """
+        Make the plot with the given name active - bring it to the
+        front and make it the choice for overplotting
+        :param plot_name: The name of the plot
+        """
+        try:
+            self.model.make_plot_active(plot_name)
+        except ValueError as e:
+            print(e)

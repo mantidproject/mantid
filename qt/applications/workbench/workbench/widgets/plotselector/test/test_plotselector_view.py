@@ -162,6 +162,15 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         plots_selected_new = self.view.get_all_selected_plot_names()
         self.assertEquals(plots_selected_old, plots_selected_new)
 
+    def test_context_menu_close_plot(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        widget = self.get_NameWidget_by_row_number(1)
+        widget.context_menu.actions()[0].trigger()
+
+        self.presenter.close_single_plot.assert_called_once_with("Plot2")
+
     # ----------------------- Plot Filtering ------------------------
 
     def test_filter_text_typing_calls_presenter_and_sets_filter_text(self):
@@ -188,6 +197,15 @@ class PlotSelectorWidgetTest(unittest.TestCase):
 
         self.assertEqual(self.presenter.list_double_clicked.call_count, 1)
         self.assertEqual(self.view.get_currently_selected_plot_name(), plot_names[1])
+
+    def test_context_menu_make_active(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        widget = self.get_NameWidget_by_row_number(1)
+        widget.context_menu.actions()[0].trigger()
+
+        self.presenter.make_plot_active.assert_called_once_with("Plot2")
 
 
 if __name__ == '__main__':

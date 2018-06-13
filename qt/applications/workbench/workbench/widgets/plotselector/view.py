@@ -18,7 +18,7 @@ from __future__ import absolute_import, print_function
 
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import (QAbstractItemView, QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem,
+from qtpy.QtWidgets import (QAbstractItemView, QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, QMenu,
                             QPushButton, QVBoxLayout, QWidget)
 
 from workbench.plotting.figuremanager import QAppThreadCall
@@ -107,12 +107,13 @@ class PlotSelectorView(QWidget):
         list_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
         list_widget.installEventFilter(self)
+
         return list_widget
 
     # ------------------------ Plot Updates ------------------------
 
     def _add_to_plot_list(self, plot_name):
-        real_item = NameWidgetWithCloseButton(self.presenter, plot_name)
+        real_item = PlotNameWidget(self.presenter, plot_name, self)
         widget_item = QListWidgetItem()
         size_hint = real_item.sizeHint()
         widget_item.setSizeHint(size_hint)
@@ -183,9 +184,9 @@ class PlotSelectorView(QWidget):
         return self.filter_box.text()
 
 
-class NameWidgetWithCloseButton(QWidget):
+class PlotNameWidget(QWidget):
     def __init__(self, presenter, text="", parent=None):
-        super(NameWidgetWithCloseButton, self).__init__(parent)
+        super(PlotNameWidget, self).__init__(parent)
 
         self.presenter = presenter
 
@@ -194,7 +195,7 @@ class NameWidgetWithCloseButton(QWidget):
         self.x_button = QPushButton(self.x_icon, "")
         self.x_button.setFlat(True)
         self.x_button.setMaximumWidth(self.x_button.sizeHint().width())
-        self.x_button.pressed.connect(lambda: self.x_pressed(self.label.text()))
+        self.x_button.pressed.connect(lambda: self.close_pressed(self.label.text()))
 
         self.layout = QHBoxLayout()
         self.layout.addWidget(self.label)
@@ -208,5 +209,22 @@ class NameWidgetWithCloseButton(QWidget):
         margins = self.layout.contentsMargins()
         self.layout.setContentsMargins(margins.left(), 0, margins.right(), 0)
 
-    def x_pressed(self, plot_name):
+        # Add the context menu
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.context_menu = self._make_context_menu()
+        self.customContextMenuRequested.connect(self.context_menu_opened)
+
+    def make_active_pressed(self, plot_name):
+        self.presenter.make_plot_active(plot_name)
+
+    def close_pressed(self, plot_name):
         self.presenter.close_single_plot(plot_name)
+
+    def _make_context_menu(self):
+        context_menu = QMenu()
+        context_menu.addAction("Make Active", lambda: self.make_active_pressed(self.label.text()))
+        context_menu.addAction("Close", lambda: self.close_pressed(self.label.text()))
+        return context_menu
+
+    def context_menu_opened(self, position):
+        self.context_menu.exec_(self.mapToGlobal(position))

@@ -119,9 +119,6 @@ class PlotSelectorModel(object):
         :param plot_name: A string with the name of the plot
                           (figure title)
         """
-        if plot_name not in self.plot_list:
-            raise ValueError('Error, could not find a plot with the name {}.'.format(plot_name))
-
         figure_manager = self.GlobalFigureManager.get_figure_manager_from_name(plot_name)
         if figure_manager is not None:
             figure_manager.show()
