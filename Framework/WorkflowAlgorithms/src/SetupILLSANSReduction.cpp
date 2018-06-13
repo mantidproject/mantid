@@ -77,7 +77,7 @@ void SetupILLSANSReduction::init() {
   declareProperty(
       make_unique<API::FileProperty>(
           "DarkCurrentFile", "", API::FileProperty::OptionalLoad, ".nxs"),
-      "The name of the input event Nexus file to load as dark current.");
+      "The name of the input Nexus file to load as dark current.");
   setPropertyGroup("DarkCurrentFile", dark_grp);
 
   // Normalisation
@@ -86,9 +86,9 @@ void SetupILLSANSReduction::init() {
   incidentBeamNormOptions.emplace_back("None");
   // The data will be normalised to the monitor counts
   incidentBeamNormOptions.emplace_back("Monitor");
-  // The data will be normalised to the total charge only (no beam profile)
+  // The data will be normalised to the acquisition time
   incidentBeamNormOptions.emplace_back("Timer");
-  this->declareProperty(
+  declareProperty(
       "Normalisation", "None",
       boost::make_shared<StringListValidator>(incidentBeamNormOptions),
       "Options for data normalisation");
@@ -407,28 +407,27 @@ void SetupILLSANSReduction::init() {
   setPropertySettings("AbsoluteScalingFactor",
                       make_unique<VisibleWhenProperty>("AbsoluteScaleMethod",
                                                        IS_EQUAL_TO, "Value"));
-
   declareProperty(
-      make_unique<API::FileProperty>("AbsoluteScalingReferenceFilename", "",
-                                     API::FileProperty::OptionalLoad, ".xml"));
-  setPropertySettings("AbsoluteScalingReferenceFilename",
+      make_unique<API::FileProperty>("AbsoluteScalingReferenceDataFilename", "",
+                                     API::FileProperty::OptionalLoad, ".nxs"));
+  setPropertySettings("AbsoluteScalingReferenceDataFilename",
                       make_unique<VisibleWhenProperty>(
                           "AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
   declareProperty(
-      "AbsoluteScalingBeamDiameter", 0.0,
-      "Beamstop diameter for computing the absolute scale factor [mm]. "
-      "Read from file if not supplied.");
+      "AbsoluteScalingBeamDiameter", 100.,
+      "Beamstop diameter for computing the absolute scale factor [mm]. ");
   setPropertySettings("AbsoluteScalingBeamDiameter",
                       make_unique<VisibleWhenProperty>(
                           "AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
   declareProperty(
-      "AbsoluteScalingAttenuatorTrans", 1.0,
-      "Attenuator transmission value for computing the absolute scale factor");
+      "AbsoluteScalingAttenuatorTrans", 0.,
+      "Attenuator transmission value for computing the absolute scale factor;"
+      "Defalut value of 0 means that it will be read from the nexus file.");
   setPropertySettings("AbsoluteScalingAttenuatorTrans",
                       make_unique<VisibleWhenProperty>(
                           "AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
   declareProperty("AbsoluteScalingApplySensitivity", false,
-                  "Apply sensitivity correction to the reference data "
+                  "Apply sensitivity correction to the empty beam data "
                   "when computing the absolute scale factor");
   setPropertySettings("AbsoluteScalingApplySensitivity",
                       make_unique<VisibleWhenProperty>(
@@ -436,7 +435,7 @@ void SetupILLSANSReduction::init() {
 
   setPropertyGroup("AbsoluteScaleMethod", abs_scale_grp);
   setPropertyGroup("AbsoluteScalingFactor", abs_scale_grp);
-  setPropertyGroup("AbsoluteScalingReferenceFilename", abs_scale_grp);
+  setPropertyGroup("AbsoluteScalingReferenceDataFilename", abs_scale_grp);
   setPropertyGroup("AbsoluteScalingBeamDiameter", abs_scale_grp);
   setPropertyGroup("AbsoluteScalingAttenuatorTrans", abs_scale_grp);
   setPropertyGroup("AbsoluteScalingApplySensitivity", abs_scale_grp);
@@ -647,7 +646,7 @@ void SetupILLSANSReduction::exec() {
     reductionManager->declareProperty(std::move(absScaleAlgProp));
   } else if (boost::iequals(absScaleMethod, "ReferenceData")) {
     const std::string absRefFile =
-        getPropertyValue("AbsoluteScalingReferenceFilename");
+        getPropertyValue("AbsoluteScalingReferenceDataFilename");
     const double beamDiam = getProperty("AbsoluteScalingBeamDiameter");
     const double attTrans = getProperty("AbsoluteScalingAttenuatorTrans");
     const bool applySensitivity =

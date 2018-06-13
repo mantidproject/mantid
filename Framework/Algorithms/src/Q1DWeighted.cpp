@@ -105,7 +105,7 @@ void Q1DWeighted::exec() {
       WorkspaceFactory::Instance().create(inputWS, 1, sizeOut, sizeOut - 1);
   outputWS->getAxis(0)->unit() =
       UnitFactory::Instance().create("MomentumTransfer");
-  outputWS->setYUnitLabel("1/cm");
+  outputWS->setYUnitLabel("I (1/cm)");
   outputWS->setDistribution(true);
   setProperty("OutputWorkspace", outputWS);
 
@@ -149,7 +149,7 @@ void Q1DWeighted::exec() {
         WorkspaceFactory::Instance().create(inputWS, 1, sizeOut, sizeOut - 1);
     wedge_ws->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
-    wedge_ws->setYUnitLabel("1/cm");
+    wedge_ws->setYUnitLabel("I (1/cm)");
     wedge_ws->setDistribution(true);
     wedge_ws->setBinEdges(0, XOut);
     wedge_ws->mutableRun().addProperty("wedge_angle", center_angle, "degrees",

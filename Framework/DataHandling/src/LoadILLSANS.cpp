@@ -147,6 +147,7 @@ void LoadILLSANS::exec() {
         getDetectorPositionD33(firstEntry, instrumentPath);
     progress.report("Moving detectors");
     moveDetectorsD33(std::move(detPos));
+    setL2SampleLog(detPos.distanceSampleRear);
     if (m_isTOF) {
       adjustTOF();
       moveSource();
@@ -163,6 +164,7 @@ void LoadILLSANS::exec() {
         firstEntry, instrumentPath + "/detector/det_calc");
     progress.report("Moving detectors");
     moveDetectorDistance(distance, "detector");
+    setL2SampleLog(distance);
     if (m_instrumentName == "D22") {
       double offset = m_loader.getDoubleFromNexusPath(
           firstEntry, instrumentPath + "/detector/dtr_actual");
@@ -785,6 +787,16 @@ void LoadILLSANS::moveBeamCenter(const std::string &component, double center_x,
   mvAlg->executeAsChildAlg();
   g_log.debug() << "Moved beam center with dX=" << xOffset
                 << "mm; dY=" << yOffset << "mm.\n";
+}
+
+/**
+ * Sets a sample log for L2 distance [mm], needed later for reduction
+ * Note, for D33 it is the rear detector
+ * @param z : the sample-detector-distance in [m]
+ */
+void LoadILLSANS::setL2SampleLog(const double z) {
+  API::Run &runDetails = m_localWorkspace->mutableRun();
+  runDetails.addProperty<double>("sample_detector_distance", z * 1000);
 }
 
 } // namespace DataHandling

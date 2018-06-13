@@ -109,6 +109,7 @@ private:
   void setFinalProperties(const std::string &filename);
   void moveBeamCenter(const std::string &component, double center_x,
                       double center_y);
+  void setL2SampleLog(const double z);
 };
 
 } // namespace DataHandling
