@@ -95,6 +95,11 @@ void SaveBankScatteringAngles::exec() {
   }
 
   outFile.close();
+
+  if (outFile.fail()) {
+    g_log.error(strerror(errno));
+    throw Kernel::Exception::FileError("Failed to save file", filename);
+  }
 }
 
 std::map<std::string, std::string> SaveBankScatteringAngles::validateInputs() {
