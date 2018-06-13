@@ -33,9 +33,9 @@ Usage
 
    # Here we do a very rough-and-ready diffraction focusing
    # The workspace input_group has the same format as the result of a reduction from isis_pwoder
-   input_ws = Load(Filename=FileFinder.getFullPath("HRP39180.raw"))
+   input_ws = Load(Filename="HRP39180.RAW")
    focused_ws = DiffractionFocussing(InputWorkspace=input_ws,
-                                     GroupingFileName=FileFinder.getFullPath("hrpd_new_072_01_corr.cal"),
+                                     GroupingFileName="hrpd_new_072_01_corr.cal",
 				     OutputWorkspace="focused_ws")
 
    spectra = []
