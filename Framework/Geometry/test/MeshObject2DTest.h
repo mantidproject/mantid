@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Objects/MeshObject2D.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
 
@@ -150,7 +151,7 @@ public:
     TSM_ASSERT("Just outside", !mesh.isValid(V3D{1, 1 + delta, 0}));
   }
 
-  void test_isOnTriangle_Approach() {
+  void test_isOnTriangle() {
     auto p1 = V3D{-1, -1, 0};
     auto p2 = V3D{1, -1, 0};
     auto p3 = V3D{0, 1, 0};
@@ -164,6 +165,22 @@ public:
     TS_ASSERT(!MeshObject2D::isOnTriangle(p2 - V3D(0, 0.0001, 0), p1, p2, p3));
     TS_ASSERT(!MeshObject2D::isOnTriangle(p3 + V3D(0.0001, 0, 0), p1, p2, p3));
     TS_ASSERT(!MeshObject2D::isOnTriangle(p3 + V3D(0, 0.0001, 0), p1, p2, p3));
+  }
+
+  void test_interceptSurface() {
+
+    auto mesh = makeSimpleTriangleMesh();
+
+    Mantid::Geometry::Track onTargetTrack(V3D{0.5, 0.5, -1},
+                                          V3D{0, 0, 1} /*along z*/);
+    TS_ASSERT_EQUALS(mesh.interceptSurface(onTargetTrack), 1);
+    TS_ASSERT_EQUALS(onTargetTrack.count(), 1);
+
+    Mantid::Geometry::Track missTargetTrack(
+        V3D{50, 0.5, -1},
+        V3D{0, 0, 1} /*along z*/); // Intersects plane but no triangles
+    TS_ASSERT_EQUALS(mesh.interceptSurface(missTargetTrack), 0);
+    TS_ASSERT_EQUALS(missTargetTrack.count(), 0);
   }
 };
 

@@ -1,4 +1,5 @@
 #include "MantidGeometry/Objects/MeshObject2D.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Material.h"
 
@@ -84,6 +85,8 @@ bool MeshObject2D::isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &a,
   // ii) v0.v1 = u*v0.v1 + v*v1.v1
   // solve for u, v and check u and v >= 0 and u+v <=1
 
+  // TODO see MeshObject::rayIntersectsTriangle and compare!
+
   auto v0 = c - a;
   auto v1 = b - a;
   auto v2 = point - a;
@@ -144,6 +147,8 @@ void MeshObject2D::initialize() {
   parameters.c = surfaceNormal.Z() / n_mag;
   parameters.k =
       parameters.a * v0.X() + parameters.b * v0.Y() + parameters.c * v0.Z();
+  parameters.normal = surfaceNormal;
+  parameters.p0 = v0;
   m_planeParameters = parameters;
 
   if (m_vertices.size() > std::numeric_limits<uint16_t>::max()) {
@@ -183,6 +188,39 @@ bool MeshObject2D::isValid(const Kernel::V3D &point) const {
 
 bool MeshObject2D::isOnSide(const Kernel::V3D &point) const {
   return isValid(point);
+}
+
+/**
+* Given a track, fill the track with valid section
+* @param ut :: Initial track
+* @return Number of segments added
+*/
+int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
+
+  int originalCount = ut.count(); // Number of intersections original track
+
+  const auto &norm = m_planeParameters.normal;
+  auto t = -(ut.startPoint().scalar_prod(norm) +
+             m_planeParameters.p0.scalar_prod(norm)) /
+           ut.direction().scalar_prod(norm);
+
+  // Intersects infinite plane
+  if (t >= 0) {
+    auto pIntersects = ut.startPoint() + ut.direction();
+    for (size_t i = 0; i < m_vertices.size(); i += 3) {
+      // Need to know that this corresponds to a finite segment
+      if (isOnTriangle(pIntersects, m_vertices[i], m_vertices[i + 1],
+                       m_vertices[i + 2])) {
+        IObject *const hack = nullptr;
+        ut.addPoint(-1 /*HACK as exit*/, pIntersects, *hack /*HACK*/);
+        ut.buildLink();
+        // All vertices on plane. So only one triangle intersection possible
+        break;
+      }
+    }
+  }
+
+  return ut.count() - originalCount;
 }
 
 double MeshObject2D::volume() const {

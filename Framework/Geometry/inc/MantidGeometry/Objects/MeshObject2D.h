@@ -3,14 +3,13 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/V3D.h"
 #include <vector>
 
 namespace Mantid {
-namespace Kernel {
-class V3D;
-}
 
 namespace Geometry {
+class Track;
 
 /** MeshObject2D :
 
@@ -61,6 +60,7 @@ public:
   double distanceToPlane(const Kernel::V3D &point) const;
   bool isValid(const Kernel::V3D &point) const; ///< Check if a point is inside
   bool isOnSide(const Kernel::V3D &) const;
+  int interceptSurface(Geometry::Track &ut) const;
 
 private:
   struct PlaneParameters {
@@ -68,6 +68,8 @@ private:
     double b;
     double c;
     double k;
+    Kernel::V3D normal;
+    Kernel::V3D p0;
   } m_planeParameters;
 
   void initialize();

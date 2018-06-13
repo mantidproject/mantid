@@ -98,8 +98,7 @@ public:
   bool
   isValid(const Kernel::V3D &) const override; ///< Check if a point is inside
   bool isOnSide(const Kernel::V3D &) const override;
-  int calcValidType(const Kernel::V3D &Pt,
-                    const Kernel::V3D &uVec) const override;
+  int calcValidType(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const;
 
   // INTERSECTION
   int interceptSurface(Geometry::Track &) const override;
