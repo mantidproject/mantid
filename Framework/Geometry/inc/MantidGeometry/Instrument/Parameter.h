@@ -10,7 +10,6 @@
 #include <typeinfo>
 #include <vector>
 #include <stdexcept>
-#include <iomanip>
 
 namespace Mantid {
 
@@ -186,7 +185,6 @@ template <class T> void Parameter::set(const T &t) {
  */
 template <class Type> std::string ParameterType<Type>::asString() const {
   std::ostringstream str;
-  str << std::setprecision(std::numeric_limits<Type>::digits10);
   str << m_value;
   return str.str();
 }
