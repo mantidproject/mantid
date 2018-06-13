@@ -9,6 +9,9 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace_fwd.h"
 
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/AnalysisDataService.h"
+
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -27,7 +30,6 @@ constexpr double MUON_LIFETIME_MICROSECONDS{
 }
 
 namespace Mantid {
-
 using namespace Kernel;
 using std::size_t;
 
@@ -91,9 +93,16 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram,
   auto iyN = std::next(yData.rawData().begin(), iN);
   double summation = std::accumulate(iy0, iyN, 0.0);
   double denominator = 0.0;
+  /* this replaces (from doc):
+        delta_t/tau(exp(-t_N/tau) - exp(-t_0/tau))
+     with trapezium rule (convert it to integral first):
+        1/(sum_{j=0}{N} exp(-t_j/tau)) - 0.5*(exp(-t_0/tau)+exp(-t_N/tau))
+  */
   for (size_t k = i0; k < iN; k++) {
     denominator += exp(-xData[k] / MUON_LIFETIME_MICROSECONDS);
   }
+  denominator -= 0.5 * (exp(-xData[i0] / MUON_LIFETIME_MICROSECONDS));
+  denominator -= 0.5 * (exp(-xData[iN] / MUON_LIFETIME_MICROSECONDS));
   return summation / (denominator * numGoodFrames);
 }
 /**
@@ -106,12 +115,12 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram,
 size_t startIndexFromTime(const HistogramData::BinEdges &xData,
                           const double startX) {
   auto upper =
-      std::upper_bound(xData.rawData().begin(), xData.rawData().end(), startX);
-  return std::distance(xData.rawData().begin(), upper);
+      std::lower_bound(xData.rawData().begin(), xData.rawData().end(), startX);
+  return std::distance(xData.rawData().begin(), upper + 1);
 }
 /**
 * find the first index in bin edges that is after
-* the endtime.
+* the end time.
 * @param xData :: [input] HistogramData as bin edges
 * @param endX :: [input] the end time
 * @returns :: The last index to  include in calculations
@@ -122,4 +131,34 @@ size_t endIndexFromTime(const HistogramData::BinEdges &xData,
       std::upper_bound(xData.rawData().begin(), xData.rawData().end(), endX);
   return std::distance(xData.rawData().begin(), lower - 1);
 }
+
+/*****
+ The following functions are for manipulating the normalisation table
+******/
+void updateNormalizationTable(Mantid::API::ITableWorkspace_sptr &table,
+                              const std::vector<std::string> &wsNames,
+                              const std::vector<double> &norms,
+                              const std::vector<std::string> &methods) {
+
+  for (size_t j = 0; j < wsNames.size(); j++) {
+    bool updated = false;
+    std::string tmp = wsNames[j];
+    std::replace(tmp.begin(), tmp.end(), ' ', ';');
+    for (size_t row = 0; row < table->rowCount(); row++) {
+
+      if (table->String(row, 1) == tmp) {
+        table->removeRow(row);
+        table->insertRow(row);
+        Mantid::API::TableRow tableRow = table->getRow(row);
+        tableRow << static_cast<double>(norms[j]) << tmp << methods[j];
+        updated = true;
+      }
+    }
+    if (!updated) {
+      Mantid::API::TableRow tableRow = table->appendRow();
+      tableRow << static_cast<double>(norms[j]) << tmp << methods[j];
+    }
+  }
+}
+
 } // namespace Mantid
