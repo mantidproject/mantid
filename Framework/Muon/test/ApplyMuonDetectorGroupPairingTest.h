@@ -269,7 +269,7 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
-  void test_checkNonAlphanumericPairNamesNotAllowed() {
+  void test_nonAlphanumericPairNamesNotAllowed() {
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
@@ -286,7 +286,7 @@ public:
     }
   }
 
-  void test_checkZeroOrNegativeAlphaNotAllowed() {
+  void test_zeroOrNegativeAlphaNotAllowed() {
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
@@ -302,7 +302,7 @@ public:
     }
   }
 
-  void test_checkThrowsIfTwoGroupsAreIdentical() {
+  void test_throwsIfTwoGroupsAreIdentical() {
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
@@ -321,7 +321,7 @@ public:
     }
   }
 
-  void test_checkThrowsIfTimeMinGreaterThanTimeMax() {
+  void test_throwsIfTimeMinGreaterThanTimeMax() {
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
@@ -335,7 +335,7 @@ public:
     TS_ASSERT(!alg.isExecuted());
   }
 
-  void test_checkThrowsIfPeriodOutOfRange() {
+  void test_throwsIfPeriodOutOfRange() {
     // If inputWS is a matrixWorkspace then the summed/subtracted
     // periods are set to "1" and "" and so no checks are needed.
     int nPeriods = 2;
@@ -539,7 +539,7 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.06679145, 0.0001);
   }
 
-  void test_CheckAsymmetryValuesCorrectWhenEnteringWorkspacesByHand() {
+  void test_asymmetryValuesCorrectWhenEnteringWorkspacesByHand() {
 
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);

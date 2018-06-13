@@ -75,10 +75,7 @@ public:
 
   /// return a workspace for a pair of detector groups, specified in options.
   API::MatrixWorkspace_sptr
-  createPairWorkspaceManually(API::Workspace_sptr inputWS, bool noRebin);
-
-  /// Allow WorkspaceGroup property to function correctly.
-  bool checkGroups() override;
+  createPairWorkspaceManually(API::Workspace_sptr inputWS, const bool noRebin);
 
   /// Store the input properties in options.
   Muon::AnalysisOptions ApplyMuonDetectorGroupPairing::getUserInput();
@@ -106,6 +103,9 @@ public:
   /// Set time properties of MuonProcess according to the given options.
   void setMuonProcessAlgorithmTimeProperties(
       IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
+
+  /// Allow WorkspaceGroup property to function correctly.
+  bool checkGroups() override;
 
 private:
   /// Initialisation code
