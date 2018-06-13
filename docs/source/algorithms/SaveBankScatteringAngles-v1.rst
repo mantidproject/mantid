@@ -2,7 +2,11 @@
 
 .. summary::
 
+<<<<<<< HEAD
 .. relatedalgorithm::
+=======
+.. relatedalgorithms::
+>>>>>>> 22456_gem_texture_focusing_step_1
 
 .. properties::
 
@@ -30,19 +34,21 @@ Usage
 .. testcode:: SaveBankScatteringAngles
 
    import os
-  
-   input_ws = Load("ENGINX_277208_focused_bank_2.nxs")
-   group = GroupWorkspaces(InputWorkspaces=[input_ws])
+
+   # The result of a previous isis_powder reduction for GEM
+   # Produced by gem.focus(run_number="83605", ...)
+   input_ws = Load("ISIS_Powder-GEM83605_FocusSempty.nxs")
 
    output_file = os.path.join(config["defaultsave.directory"], "grouping.new")
 
-   SaveBankScatteringAngles(InputWorkspace=group, Filename=output_file)
+   SaveBankScatteringAngles(InputWorkspace=input_ws, Filename=output_file)
 
    with open(output_file) as f:
-       contents = f.read().split("\n")
+       contents = f.read().rstrip().split("\n")
 
-   print("File contents (there is only one line as we only bothered saving one spectra):")
-   print(contents[0])
+   print("File contents:")
+   for line in contents:
+       print(line)
 
 .. testcleanup:: SaveBankScatteringAngles
 
@@ -52,6 +58,10 @@ Output:
        
 .. testoutput:: SaveBankScatteringAngles
 
-   File contents (there is only one line as we only bothered saving one spectra):
-   bank :    0  group:     1201    89.9396035211    180.0000000000
-		
+    File contents:
+    bank :    0  group:     2    0.2712910448    -90.0000000000
+    bank :    1  group:     3    2.0938487711    90.0000000000
+    bank :    2  group:     4    0.0000000000    0.0000000000
+    bank :    3  group:     5    0.0000000000    0.0000000000
+    bank :    4  group:     6    180.0000000000    0.0000000000
+    bank :    5  group:     7    179.9958124886    141.4634299494
