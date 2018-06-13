@@ -15,15 +15,22 @@ class ConvertWANDSCDtoQTest(stresstesting.MantidStressTest):
 
         ConvertWANDSCDtoQTest_peaks=FindPeaksMD(InputWorkspace=ConvertWANDSCDtoQTest_Q, PeakDistanceThreshold=2,
                                                 CalculateGoniometerForCW=True, Wavelength=1.488)
-        FindUBUsingLatticeParameters(ConvertWANDSCDtoQTest_peaks, a=5.64, b=5.64, c=5.64, alpha=90, beta=90, gamma=90)
-        UB = ConvertWANDSCDtoQTest_peaks.sample().getOrientedLattice().getUB()
-        self.assertTrue(np.allclose(UB, [[-2.73152432e-17,  1.77061974e-01, -9.27942487e-03],
-                                         [ 1.77304965e-01,  0.00000000e+00,  0.00000000e+00],
-                                         [ 1.23032284e-17, -9.27942487e-03, -1.77061974e-01]]))
+
+        self.assertEqual(ConvertWANDSCDtoQTest_peaks.getNumberPeaks(), 14)
+
+        peak = ConvertWANDSCDtoQTest_peaks.getPeak(0)
+        self.assertTrue(np.allclose(peak.getQSampleFrame(), [2.40072,0.00130686,4.32033]))
+        self.assertDelta(peak.getWavelength(), 1.488, 1e-5)
+
+        peak = ConvertWANDSCDtoQTest_peaks.getPeak(13)
+        self.assertTrue(np.allclose(peak.getQSampleFrame(), [6.56011,0.00130687,-2.52058]))
+        self.assertDelta(peak.getWavelength(), 1.488, 1e-5)
+
+        SetUB('ConvertWANDSCDtoQTest_data', UB="-2.7315243158024499e-17,1.7706197424726486e-01,-9.2794248657701375e-03,"
+              "1.773049645390071e-01,0.,0.,1.2303228382369809e-17,-9.2794248657701254e-03,-1.7706197424726489e-01")
 
         ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQTest_data',
                           NormalisationWorkspace='ConvertWANDSCDtoQTest_norm',
-                          UBWorkspace=ConvertWANDSCDtoQTest_peaks,
                           Frame='HKL',
                           BinningDim0='-0.62,0.62,31',
                           BinningDim1='-2.02,7.02,226',
