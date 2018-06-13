@@ -245,10 +245,7 @@ def fitTOFCoordinate(box, peak, padeCoefficients, dtSpread=0.03, minFracPixels=0
     for bgRow in bgParamsRows[::-1]:  # reverse for numpy order
         bgCoeffs.append(mtd['fit_Parameters'].row(bgRow)['Value'])
     x = tofWS.readX(0)
-    bg = np.polyval(bgCoeffs, x)
     yFit = mtd['fit_Workspace'].readY(1)
-
-    yScaled = (yFit - bg) / np.max(yFit - bg)
 
     interpF = interp1d(x, yFit, kind='cubic')
     tofxx = np.linspace(tofWS.readX(0).min(), tofWS.readX(0).max(), 1000)
