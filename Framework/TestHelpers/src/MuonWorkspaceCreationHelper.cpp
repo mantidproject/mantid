@@ -1,7 +1,6 @@
 #include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
-//#include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidMuon/MuonAlgorithmHelper.h"
@@ -68,24 +67,19 @@ template <typename Function>
 MatrixWorkspace_sptr createAsymmetryWorkspace(std::size_t nspec,
                                               std::size_t maxt,
                                               Function dataGenerator) {
-
   MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceFromFunction(
           dataGenerator, static_cast<int>(nspec), 0.0, 1.0,
           (1.0 / static_cast<double>(maxt)), true, eData());
-
-  ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(
-      static_cast<int>(nspec)));
 
   for (auto g = 0u; g < nspec; ++g) {
     auto &spec = ws->getSpectrum(g);
     spec.addDetectorID(g + 1);
     spec.setSpectrumNo(g + 1);
   }
-
   // Add number of good frames (required for Asymmetry calculation)
   ws->mutableRun().addProperty("goodfrm", 10);
-
+  // Add instrument and run number
   boost::shared_ptr<Geometry::Instrument> inst1 =
       boost::make_shared<Geometry::Instrument>();
   inst1->setName("EMU");
@@ -128,12 +122,14 @@ MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
     ws->mutableY(g) += seed;
   }
 
+  // Add number of good frames (required for Asymmetry calculation)
+  ws->mutableRun().addProperty("goodfrm", 10);
+  // Add instrument and run number
   boost::shared_ptr<Geometry::Instrument> inst1 =
-      boost::make_shared<Geometry::Instrument>();
+	  boost::make_shared<Geometry::Instrument>();
   inst1->setName("EMU");
   ws->setInstrument(inst1);
   ws->mutableRun().addProperty("run_number", 12345);
-  ws->mutableRun().addProperty("goodfrm", 10);
 
   return ws;
 }

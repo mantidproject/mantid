@@ -2,6 +2,7 @@
 #define MANTID_MUON_LOADANDAPPLYMUONDETECTORGROUPINGTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <iostream>
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/GroupingLoader.h"
@@ -86,7 +87,8 @@ public:
     AnalysisDataService::Instance().addOrReplace("inputData", ws);
     AnalysisDataService::Instance().addOrReplace("inputGroup", wsGroup);
 
-    auto file = MuonWorkspaceCreationHelper::createGroupingXMLSingleGroup("test", "1,2,3");
+    auto file = MuonWorkspaceCreationHelper::createGroupingXMLSingleGroup(
+        "test", "1,2,3");
     std::string filename = file.getFileName();
 
     Muon::LoadAndApplyMuonDetectorGrouping alg;
@@ -232,9 +234,35 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("LHC12345"));
   }
 
-  void test_correctGroupingTableProduced() {
-    // Check that the entries in "MuonGroupings" in the ADS
-    // match the input group from file
+  void test_grouping_table_produced_with_correct_groups() {
+
+    auto ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
+        4, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.5, 0.1));
+    setUpADSWithWorkspace setup(ws);
+    auto file = MuonWorkspaceCreationHelper::createXMLwithPairsAndGroups(2, 2);
+
+    auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
+    alg->execute();
+
+    ITableWorkspace_sptr wsGroupings =
+        boost::dynamic_pointer_cast<ITableWorkspace>(
+            AnalysisDataService::Instance().retrieve("MuonGroupings"));
+
+	// Col1 : Names, Col2 : Detector IDs
+	std::string name1 = wsGroupings->String(0, 0);
+	std::string name2 = wsGroupings->String(1, 0);
+	TS_ASSERT_EQUALS(name1, "group1");
+	TS_ASSERT_EQUALS(name2, "group2");
+
+	std::vector<int> group1 = wsGroupings->cell<std::vector<int>>(0, 1);
+	std::stringstream group1String;
+	std::copy(group1.begin(), group1.end(), std::ostream_iterator<int>(group1String, ","));
+	TS_ASSERT_EQUALS(group1String.str(), "1,2,");
+
+	std::vector<int> group2 = wsGroupings->cell<std::vector<int>>(1, 1);
+	std::stringstream group2String;
+	std::copy(group2.begin(), group2.end(), std::ostream_iterator<int>(group2String, ","));
+	TS_ASSERT_EQUALS(group2String.str(), "3,4,");
   }
 
   void test_throws_if_group_name_not_valid() {
@@ -242,7 +270,8 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
         4, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.5, 0.1));
     setUpADSWithWorkspace setup(ws);
-    auto file = MuonWorkspaceCreationHelper::createGroupingXMLSingleGroup("group_", "1-2");
+    auto file = MuonWorkspaceCreationHelper::createGroupingXMLSingleGroup(
+        "group_", "1-2");
 
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
@@ -253,7 +282,8 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
         2, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.5, 0.1));
     setUpADSWithWorkspace setup(ws);
-    auto file = MuonWorkspaceCreationHelper::createGroupingXMLSinglePair("pair1", "nonExistantGroup");
+    auto file = MuonWorkspaceCreationHelper::createGroupingXMLSinglePair(
+        "pair1", "nonExistantGroup");
 
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
     TS_ASSERT_THROWS(alg->execute(), Mantid::Kernel::Exception::FileError);
@@ -264,7 +294,8 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createCountsWorkspace(5, 3, 0.0);
     setUpADSWithWorkspace setup(ws);
     std::string group = "1-10";
-    auto file = MuonWorkspaceCreationHelper::createGroupingXMLSingleGroup("test", group);
+    auto file = MuonWorkspaceCreationHelper::createGroupingXMLSingleGroup(
+        "test", group);
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
 
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
