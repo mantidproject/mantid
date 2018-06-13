@@ -91,7 +91,6 @@ Here is an example of fitting a 2D histogram:
 
 
 
-
 .. categories::
 
 .. sourcelink::
