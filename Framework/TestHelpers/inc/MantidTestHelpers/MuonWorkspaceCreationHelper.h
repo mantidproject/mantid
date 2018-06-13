@@ -10,7 +10,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
+
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 namespace MuonWorkspaceCreationHelper {
@@ -92,14 +94,29 @@ createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
                                 const std::string &wsGroupName);
 
 /**
-* Create a simple dead time TableWorkspace with two columns (spectrum number
-* and dead time).
-* @param nspec :: The number of spectra (rows in table).
-* @param deadTimes ::  The dead times for each spectra.
-* @return TableWorkspace with dead times appropriate for pairing algorithm.
-*/
-Mantid::API::ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
-	std::vector<double> &deadTimes);
+ * Create a simple dead time TableWorkspace with two columns (spectrum number
+ * and dead time).
+ * @param nspec :: The number of spectra (rows in table).
+ * @param deadTimes ::  The dead times for each spectra.
+ * @return TableWorkspace with dead times appropriate for pairing algorithm.
+ */
+Mantid::API::ITableWorkspace_sptr
+createDeadTimeTable(const size_t &nspec, std::vector<double> &deadTimes);
+
+// Simplest possible grouping file, with only a single group
+ScopedFileHelper::ScopedFile createGroupingXMLSingleGroup(const std::string &groupName,
+                                                  const std::string &group);
+
+// Create an XML with two simple groups and a pair made from them. groupName
+// applies only to the pairing so that we can test a failure case.
+ScopedFileHelper::ScopedFile createGroupingXMLSinglePair(const std::string &pairName,
+	const std::string &groupName);
+
+// Create an XML file with grouping/pairing information. With nGroups = 3 and
+// nDetectorPerGroup = 5 the grouping would be {"1-5","6-10","11-15"}.
+ScopedFileHelper::ScopedFile
+createXMLwithPairsAndGroups(const int &nGroups = 1,
+	const int &nDetectorsPerGroup = 1);
 
 } // namespace MuonWorkspaceCreationHelper
 

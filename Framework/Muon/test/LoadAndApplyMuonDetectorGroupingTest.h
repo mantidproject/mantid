@@ -25,94 +25,6 @@ using namespace Mantid::DataHandling;
 
 namespace {
 
-// Simplest possible grouping file, with only a single group
-ScopedFileHelper::ScopedFile createXMLSingleGroup(const std::string &groupName,
-                                                  const std::string &group) {
-  std::string fileContents("");
-  fileContents += "<detector-grouping description=\"test XML file\"> \n";
-  fileContents += "\t<group name=\"" + groupName + "\"> \n";
-  fileContents += "\t\t<ids val=\"" + group + "\"/>\n";
-  fileContents += "\t</group>\n";
-  fileContents += "\t<default name=\"" + groupName + "\"/>\n";
-  fileContents += "</detector-grouping>";
-
-  ScopedFileHelper::ScopedFile file(fileContents, "testXML_1.xml");
-  return file;
-}
-
-// Create an XML with two simple groups and a pair made from them. groupName
-// applies only to the pairing so that we can test a failure case
-ScopedFileHelper::ScopedFile createXMLSinglePair(const std::string &pairName,
-                                                 const std::string &groupName) {
-
-  std::string fileContents("");
-
-  fileContents += "<detector-grouping description=\"test XML file\"> \n";
-  fileContents += "\t<group name=\"group1\"> \n";
-  fileContents += "\t\t<ids val=\"1\"/>\n";
-  fileContents += "\t</group>\n";
-
-  fileContents += "<detector-grouping description=\"test XML file\"> \n";
-  fileContents += "\t<group name=\"group2\"> \n";
-  fileContents += "\t\t<ids val=\"2\"/>\n";
-  fileContents += "\t</group>\n";
-
-  fileContents += "\t<pair name=\"" + pairName + "\"> \n";
-  fileContents += "\t\t<forward-group val=\"group1\"/>\n";
-  fileContents += "\t\t<backward-group val=\"" + groupName + "\"/>\n";
-  fileContents += "\t\t<alpha val=\"1\"/>\n";
-  fileContents += "\t</pair>\n";
-
-  fileContents += "\t<default name=\"" + groupName + "\"/>\n";
-  fileContents += "</detector-grouping>";
-
-  ScopedFileHelper::ScopedFile file(fileContents, "testXML_1.xml");
-
-  return file;
-}
-
-/**
- * Create an XML file with grouping/pairing information. With nGroups = 3 and
- * nDetectorPerGroup = 5 the grouping would be {"1-5","6-10","11-15"}.
- *
- * @param nGroups :: The number of groups to produce
- * @param nDetectorsPerGroup ::  The number of detector IDs per group
- * @return ScopedFile.
- */
-ScopedFileHelper::ScopedFile
-createXMLwithPairsAndGroups(const int &nGroups = 1,
-                            const int &nDetectorsPerGroup = 1) {
-
-  API::Grouping grouping;
-  std::string groupIDs;
-  // groups
-  for (auto group = 1; group <= nGroups; group++) {
-    std::string groupName = "group" + std::to_string(group);
-    if (nGroups == 1) {
-      groupIDs = "1";
-    } else {
-      groupIDs = std::to_string((group - 1) * nDetectorsPerGroup + 1) + "-" +
-                 std::to_string(group * nDetectorsPerGroup);
-    }
-    grouping.groupNames.emplace_back(groupName);
-    grouping.groups.emplace_back(groupIDs);
-  }
-  // pairs
-  for (auto pair = 1; pair < nGroups; pair++) {
-    std::string pairName = "pair" + std::to_string(pair);
-    std::pair<size_t, size_t> pairIndices;
-    pairIndices.first = 0;
-    pairIndices.second = pair;
-    grouping.pairNames.emplace_back(pairName);
-    grouping.pairAlphas.emplace_back(1.0);
-    grouping.pairs.emplace_back(pairIndices);
-  }
-
-  auto fileContents = MuonAlgorithmHelper::groupingToXML(grouping);
-  ScopedFileHelper::ScopedFile file(fileContents, "testXML_1.xml");
-  return file;
-}
-
 // Set algorithm properties
 Mantid::API::IAlgorithm_sptr
 algorithmWithPropertiesSet(const std::string &inputWSName,
@@ -174,7 +86,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("inputData", ws);
     AnalysisDataService::Instance().addOrReplace("inputGroup", wsGroup);
 
-    auto file = createXMLSingleGroup("test", "1,2,3");
+    auto file = MuonWorkspaceCreationHelper::createGroupingXMLSingleGroup("test", "1,2,3");
     std::string filename = file.getFileName();
 
     Muon::LoadAndApplyMuonDetectorGrouping alg;
@@ -198,7 +110,7 @@ public:
 
     auto ws = MuonWorkspaceCreationHelper::createCountsWorkspace(10, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    auto file = createXMLwithPairsAndGroups(2, 5);
+    auto file = MuonWorkspaceCreationHelper::createXMLwithPairsAndGroups(2, 5);
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
     alg->execute();
 
@@ -219,7 +131,7 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
         4, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.5, 0.1));
     setUpADSWithWorkspace setup(ws);
-    auto file = createXMLwithPairsAndGroups(2, 2);
+    auto file = MuonWorkspaceCreationHelper::createXMLwithPairsAndGroups(2, 2);
 
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
     alg->execute();
@@ -272,7 +184,7 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
         1, 10, MuonWorkspaceCreationHelper::yDataAsymmetry());
     setUpADSWithWorkspace setup(ws);
-    auto file = createXMLwithPairsAndGroups(1, 1);
+    auto file = MuonWorkspaceCreationHelper::createXMLwithPairsAndGroups(1, 1);
 
     // Add workspaces which should be overwritten
     auto &ads = AnalysisDataService::Instance();
@@ -309,7 +221,7 @@ public:
     inst1->setName("LHC");
     ws->setInstrument(inst1);
 
-    auto file = createXMLwithPairsAndGroups(2, 2);
+    auto file = MuonWorkspaceCreationHelper::createXMLwithPairsAndGroups(2, 2);
 
     setUpADSWithWorkspace setup(ws);
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
@@ -330,7 +242,7 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
         4, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.5, 0.1));
     setUpADSWithWorkspace setup(ws);
-    auto file = createXMLSingleGroup("group_", "1-2");
+    auto file = MuonWorkspaceCreationHelper::createGroupingXMLSingleGroup("group_", "1-2");
 
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
@@ -341,7 +253,7 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
         2, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.5, 0.1));
     setUpADSWithWorkspace setup(ws);
-    auto file = createXMLSinglePair("pair1", "nonExistantGroup");
+    auto file = MuonWorkspaceCreationHelper::createGroupingXMLSinglePair("pair1", "nonExistantGroup");
 
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
     TS_ASSERT_THROWS(alg->execute(), Mantid::Kernel::Exception::FileError);
@@ -352,7 +264,7 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createCountsWorkspace(5, 3, 0.0);
     setUpADSWithWorkspace setup(ws);
     std::string group = "1-10";
-    auto file = createXMLSingleGroup("test", group);
+    auto file = MuonWorkspaceCreationHelper::createGroupingXMLSingleGroup("test", group);
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
 
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
@@ -363,7 +275,7 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
         4, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.5, 0.1));
     setUpADSWithWorkspace setup(ws);
-    auto file = createXMLwithPairsAndGroups(2, 2);
+    auto file = MuonWorkspaceCreationHelper::createXMLwithPairsAndGroups(2, 2);
 
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
     alg->setProperty("RebinArgs", "0.2");
@@ -406,7 +318,7 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
         4, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.5, 0.1));
     setUpADSWithWorkspace setup(ws);
-    auto file = createXMLwithPairsAndGroups(2, 2);
+    auto file = MuonWorkspaceCreationHelper::createXMLwithPairsAndGroups(2, 2);
 
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
     alg->setProperty("TimeOffset", "0.5");
@@ -449,7 +361,7 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(
         2, 4, 10, "MuonAnalysis");
     setUpADSWithWorkspace setup(ws);
-    auto file = createXMLwithPairsAndGroups(2, 2);
+    auto file = MuonWorkspaceCreationHelper::createXMLwithPairsAndGroups(2, 2);
 
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
     alg->setProperty("SummedPeriods", "1,2");
@@ -485,7 +397,7 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(
         2, 4, 10, "MuonAnalysis");
     setUpADSWithWorkspace setup(ws);
-    auto file = createXMLwithPairsAndGroups(2, 2);
+    auto file = MuonWorkspaceCreationHelper::createXMLwithPairsAndGroups(2, 2);
 
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
     alg->setProperty("SummedPeriods", "1");
@@ -522,7 +434,7 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
         4, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.5, 0.1));
     setUpADSWithWorkspace setup(ws);
-    auto file = createXMLwithPairsAndGroups(2, 2);
+    auto file = MuonWorkspaceCreationHelper::createXMLwithPairsAndGroups(2, 2);
 
     // Apply same dead time to every spectra
     std::vector<double> deadTimes(4, 0.0025);

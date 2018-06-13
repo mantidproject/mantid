@@ -1,7 +1,10 @@
 #include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
+//#include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include "MantidMuon/MuonAlgorithmHelper.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/GroupingLoader.h"
@@ -14,11 +17,11 @@
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace ScopedFileHelper;
 
 namespace MuonWorkspaceCreationHelper {
 
@@ -98,109 +101,208 @@ Mantid::API::MatrixWorkspace_sptr createAsymmetryWorkspace(size_t nspec,
 }
 
 /**
-* Create a matrix workspace appropriate for Group Counts. One detector per
-* spectra, numbers starting from 1. The detector ID and spectrum number are
-* equal. Y values increase from 0 in integer steps.
-* @param nspec :: The number of spectra
-* @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
-* Number of bins = maxt - 1 .
-* @param seed :: Number added to all y-values.
-* @return Pointer to the workspace.
-*/
+ * Create a matrix workspace appropriate for Group Counts. One detector per
+ * spectra, numbers starting from 1. The detector ID and spectrum number are
+ * equal. Y values increase from 0 in integer steps.
+ * @param nspec :: The number of spectra
+ * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
+ * Number of bins = maxt - 1 .
+ * @param seed :: Number added to all y-values.
+ * @return Pointer to the workspace.
+ */
 MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
-	double seed,
-	size_t detectorIDseed) {
+                                           double seed, size_t detectorIDseed) {
 
-	MatrixWorkspace_sptr ws =
-		WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-			yDataCounts2(), static_cast<int>(nspec), 0.0, 1.0,
-			(1.0 / static_cast<double>(maxt)), true, eData());
+  MatrixWorkspace_sptr ws =
+      WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+          yDataCounts2(), static_cast<int>(nspec), 0.0, 1.0,
+          (1.0 / static_cast<double>(maxt)), true, eData());
 
-	ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(
-		static_cast<int>(nspec)));
+  ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(
+      static_cast<int>(nspec)));
 
-	for (int g = 0; g < static_cast<int>(nspec); g++) {
-		auto &spec = ws->getSpectrum(g);
-		spec.addDetectorID(g + 1);
-		spec.setSpectrumNo(g + 1);
-		ws->mutableY(g) += seed;
-	}
+  for (int g = 0; g < static_cast<int>(nspec); g++) {
+    auto &spec = ws->getSpectrum(g);
+    spec.addDetectorID(g + 1);
+    spec.setSpectrumNo(g + 1);
+    ws->mutableY(g) += seed;
+  }
 
-	boost::shared_ptr<Geometry::Instrument> inst1 =
-		boost::make_shared<Geometry::Instrument>();
-	inst1->setName("EMU");
-	ws->setInstrument(inst1);
-	ws->mutableRun().addProperty("run_number", 12345);
-	ws->mutableRun().addProperty("goodfrm", 10);
+  boost::shared_ptr<Geometry::Instrument> inst1 =
+      boost::make_shared<Geometry::Instrument>();
+  inst1->setName("EMU");
+  ws->setInstrument(inst1);
+  ws->mutableRun().addProperty("run_number", 12345);
+  ws->mutableRun().addProperty("goodfrm", 10);
 
-	return ws;
+  return ws;
 }
 
 /**
-* Create a WorkspaceGroup and add to the ADS, populate with MatrixWorkspaces
-* simulating periods as used in muon analysis. Workspace for period i has a
-* name ending _i.
-* @param nPeriods :: The number of periods (independent workspaces)
-* @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
-* Number of bins = maxt - 1 .
-* @param wsGroupName :: Name of the workspace group containing the period
-* workspaces.
-* @return Pointer to the workspace group.
-*/
+ * Create a WorkspaceGroup and add to the ADS, populate with MatrixWorkspaces
+ * simulating periods as used in muon analysis. Workspace for period i has a
+ * name ending _i.
+ * @param nPeriods :: The number of periods (independent workspaces)
+ * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
+ * Number of bins = maxt - 1 .
+ * @param wsGroupName :: Name of the workspace group containing the period
+ * workspaces.
+ * @return Pointer to the workspace group.
+ */
 WorkspaceGroup_sptr
 createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
-	const std::string &wsGroupName) {
+                                const std::string &wsGroupName) {
 
-	WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
-	AnalysisDataService::Instance().addOrReplace(wsGroupName, wsGroup);
+  WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
+  AnalysisDataService::Instance().addOrReplace(wsGroupName, wsGroup);
 
-	std::string wsNameStem = "MuonDataPeriod_";
-	std::string wsName;
+  std::string wsNameStem = "MuonDataPeriod_";
+  std::string wsName;
 
-	boost::shared_ptr<Geometry::Instrument> inst1 =
-		boost::make_shared<Geometry::Instrument>();
-	inst1->setName("EMU");
+  boost::shared_ptr<Geometry::Instrument> inst1 =
+      boost::make_shared<Geometry::Instrument>();
+  inst1->setName("EMU");
 
-	for (int period = 1; period < nPeriods + 1; period++) {
-		// Period 1 yvalues : 1,2,3,4,5,6,7,8,9,10
-		// Period 2 yvalues : 2,3,4,5,6,7,8,9,10,11 etc..
-		MatrixWorkspace_sptr ws = createCountsWorkspace(nspec, maxt, period);
+  for (int period = 1; period < nPeriods + 1; period++) {
+    // Period 1 yvalues : 1,2,3,4,5,6,7,8,9,10
+    // Period 2 yvalues : 2,3,4,5,6,7,8,9,10,11 etc..
+    MatrixWorkspace_sptr ws = createCountsWorkspace(nspec, maxt, period);
 
-		wsGroup->addWorkspace(ws);
-		wsName = wsNameStem + std::to_string(period);
-		AnalysisDataService::Instance().addOrReplace(wsName, ws);
-	}
+    wsGroup->addWorkspace(ws);
+    wsName = wsNameStem + std::to_string(period);
+    AnalysisDataService::Instance().addOrReplace(wsName, ws);
+  }
 
-	return wsGroup;
+  return wsGroup;
 }
 
 /**
-* Create a simple dead time TableWorkspace with two columns (spectrum number
-* and dead time).
-* @param nspec :: The number of spectra (rows in table).
-* @param deadTimes ::  The dead times for each spectra.
-* @return TableWorkspace with dead times appropriate for pairing algorithm.
-*/
+ * Create a simple dead time TableWorkspace with two columns (spectrum number
+ * and dead time).
+ * @param nspec :: The number of spectra (rows in table).
+ * @param deadTimes ::  The dead times for each spectra.
+ * @return TableWorkspace with dead times appropriate for pairing algorithm.
+ */
 ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
-	std::vector<double> &deadTimes) {
+                                         std::vector<double> &deadTimes) {
 
-	auto deadTimeTable = boost::dynamic_pointer_cast<ITableWorkspace>(
-		WorkspaceFactory::Instance().createTable("TableWorkspace"));
+  auto deadTimeTable = boost::dynamic_pointer_cast<ITableWorkspace>(
+      WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
-	deadTimeTable->addColumn("int", "Spectrum Number");
-	deadTimeTable->addColumn("double", "Dead Time");
+  deadTimeTable->addColumn("int", "Spectrum Number");
+  deadTimeTable->addColumn("double", "Dead Time");
 
-	if (deadTimes.size() != nspec) {
-		return deadTimeTable;
-	}
+  if (deadTimes.size() != nspec) {
+    return deadTimeTable;
+  }
 
-	for (size_t spec = 0; spec < deadTimes.size(); spec++) {
-		TableRow newRow = deadTimeTable->appendRow();
-		newRow << static_cast<int>(spec) + 1;
-		newRow << deadTimes[spec];
-	}
+  for (size_t spec = 0; spec < deadTimes.size(); spec++) {
+    TableRow newRow = deadTimeTable->appendRow();
+    newRow << static_cast<int>(spec) + 1;
+    newRow << deadTimes[spec];
+  }
 
-	return deadTimeTable;
+  return deadTimeTable;
+}
+
+/**
+ * Simplest possible grouping file, with only a single group.
+ * @param groupName :: Name of the group.
+ * @param group :: Detector grouping string (e.g. "1-4,5,6-10").
+ * @return ScopedFile object.
+ */
+ScopedFileHelper::ScopedFile
+createGroupingXMLSingleGroup(const std::string &groupName,
+                             const std::string &group) {
+  std::string fileContents("");
+  fileContents += "<detector-grouping description=\"test XML file\"> \n";
+  fileContents += "\t<group name=\"" + groupName + "\"> \n";
+  fileContents += "\t\t<ids val=\"" + group + "\"/>\n";
+  fileContents += "\t</group>\n";
+  fileContents += "\t<default name=\"" + groupName + "\"/>\n";
+  fileContents += "</detector-grouping>";
+
+  ScopedFileHelper::ScopedFile file(fileContents, "testXML_1.xml");
+  return file;
+}
+
+/**
+ * Grouping file with two groups (group1 and group2), combined into one pair.
+ * @param pairName :: Name of the pair.
+ * @param groupName :: Override the name of the second group of the pair, used
+ * to test a possible failure case.
+ * @return ScopedFile object.
+ */
+ScopedFileHelper::ScopedFile
+createGroupingXMLSinglePair(const std::string &pairName,
+                            const std::string &groupName) {
+
+  std::string fileContents("");
+
+  fileContents += "<detector-grouping description=\"test XML file\"> \n";
+  fileContents += "\t<group name=\"group1\"> \n";
+  fileContents += "\t\t<ids val=\"1\"/>\n";
+  fileContents += "\t</group>\n";
+
+  fileContents += "<detector-grouping description=\"test XML file\"> \n";
+  fileContents += "\t<group name=\"group2\"> \n";
+  fileContents += "\t\t<ids val=\"2\"/>\n";
+  fileContents += "\t</group>\n";
+
+  fileContents += "\t<pair name=\"" + pairName + "\"> \n";
+  fileContents += "\t\t<forward-group val=\"group1\"/>\n";
+  fileContents += "\t\t<backward-group val=\"" + groupName + "\"/>\n";
+  fileContents += "\t\t<alpha val=\"1\"/>\n";
+  fileContents += "\t</pair>\n";
+
+  fileContents += "\t<default name=\"" + groupName + "\"/>\n";
+  fileContents += "</detector-grouping>";
+
+  ScopedFileHelper::ScopedFile file(fileContents, "testXML_1.xml");
+
+  return file;
+}
+
+/**
+ * Create an XML file with grouping/pairing information. With nGroups = 3 and
+ * nDetectorPerGroup = 5 the grouping would be {"1-5","6-10","11-15"}.
+ *
+ * @param nGroups :: The number of groups to produce
+ * @param nDetectorsPerGroup ::  The number of detector IDs per group
+ * @return ScopedFile.
+ */
+ScopedFileHelper::ScopedFile
+createXMLwithPairsAndGroups(const int &nGroups,
+                            const int &nDetectorsPerGroup) {
+
+  API::Grouping grouping;
+  std::string groupIDs;
+  // groups
+  for (auto group = 1; group <= nGroups; group++) {
+    std::string groupName = "group" + std::to_string(group);
+    if (nGroups == 1) {
+      groupIDs = "1";
+    } else {
+      groupIDs = std::to_string((group - 1) * nDetectorsPerGroup + 1) + "-" +
+                 std::to_string(group * nDetectorsPerGroup);
+    }
+    grouping.groupNames.emplace_back(groupName);
+    grouping.groups.emplace_back(groupIDs);
+  }
+  // pairs
+  for (auto pair = 1; pair < nGroups; pair++) {
+    std::string pairName = "pair" + std::to_string(pair);
+    std::pair<size_t, size_t> pairIndices;
+    pairIndices.first = 0;
+    pairIndices.second = pair;
+    grouping.pairNames.emplace_back(pairName);
+    grouping.pairAlphas.emplace_back(1.0);
+    grouping.pairs.emplace_back(pairIndices);
+  }
+
+  auto fileContents = MuonAlgorithmHelper::groupingToXML(grouping);
+  ScopedFileHelper::ScopedFile file(fileContents, "testXML_1.xml");
+  return file;
 }
 
 } // namespace MuonWorkspaceCreationHelper
