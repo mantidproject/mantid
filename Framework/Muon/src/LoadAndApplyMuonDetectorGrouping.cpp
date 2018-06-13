@@ -108,11 +108,22 @@ void LoadAndApplyMuonDetectorGrouping::init() {
 
 /**
  * Performs validation of inputs to the algorithm.
- * -
+ * - Check the input workspace and WorkspaceGroup are not the same
  */
 std::map<std::string, std::string>
 LoadAndApplyMuonDetectorGrouping::validateInputs() {
   std::map<std::string, std::string> errors;
+
+  //if (!this->isDefault("InputWorkspaceGroup")) {
+
+  //  WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
+  //  Workspace_sptr inputWS = getProperty("InputWorkspace");
+
+  //  if (groupedWS && groupedWS->getName() == inputWS->getName()) {
+  //    errors["InputWorkspaceGroup"] = "The InputWorkspaceGroup should not have "
+  //                                    "the same name as InputWorkspace.";
+  //  }
+  //}
 
   return errors;
 }
@@ -164,8 +175,18 @@ void LoadAndApplyMuonDetectorGrouping::checkDetectorIDsInWorkspace(
 WorkspaceGroup_sptr
 LoadAndApplyMuonDetectorGrouping::addGroupedWSWithDefaultName(
     Workspace_sptr workspace) {
+  auto &ads = AnalysisDataService::Instance();
   std::string groupedWSName = MuonAlgorithmHelper::getRunLabel(workspace);
-  WorkspaceGroup_sptr groupedWS = boost::make_shared<WorkspaceGroup>();
+
+  WorkspaceGroup_sptr groupedWS;
+  if (ads.doesExist(groupedWSName)) {
+    if (groupedWS = boost::dynamic_pointer_cast<WorkspaceGroup>(
+            ads.retrieve(groupedWSName))) {
+      return groupedWS;
+    }
+  }
+
+  groupedWS = boost::make_shared<WorkspaceGroup>();
   AnalysisDataService::Instance().addOrReplace(groupedWSName, groupedWS);
   return groupedWS;
 }
@@ -198,8 +219,9 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingInformationToADS(
   for (auto i = 0; i < numGroups; i++) {
     TableRow newRow = groupingTable->appendRow();
     newRow << grouping.groupNames[i];
-	std::vector<int> detectorIDs = Kernel::Strings::parseRange(grouping.groups[i]);
-	std::sort(detectorIDs.begin(), detectorIDs.end());
+    std::vector<int> detectorIDs =
+        Kernel::Strings::parseRange(grouping.groups[i]);
+    std::sort(detectorIDs.begin(), detectorIDs.end());
     newRow << detectorIDs;
   }
 
