@@ -13,6 +13,7 @@ import numpy as np
 
 class IntegratePeaksProfileFitting(PythonAlgorithm):
 
+
     def summary(self):
         return 'Fits a series fo peaks using 3D profile fitting as an Ikeda-Carpenter function by a bivariate gaussian.'
 
@@ -58,7 +59,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                              extensions=[".pkl"]))
         self.declareProperty("IntensityCutoff", defaultValue=0., doc="Minimum number of counts to force a profile")
         edgeDocString = 'Pixels within EdgeCutoff from a detector edge will be have a profile forced.  Currently for Anger cameras only.'
-        self.declareProperty("EdgeCutoff", defaultValue=0., doc=edgeDocString) 
+        self.declareProperty("EdgeCutoff", defaultValue=0., doc=edgeDocString)
         self.declareProperty("FracHKL", defaultValue=0.5, validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Fraction of HKL to consider for profile fitting.")
         self.declareProperty("FracStop", defaultValue=0.05, validator=FloatBoundedValidator(lower=0., exclusive=True),
@@ -69,7 +70,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
 
         self.declareProperty("MinpplFrac", defaultValue=0.7, doc="Min fraction of predicted background level to check")
         self.declareProperty("MaxpplFrac", defaultValue=1.5, doc="Max fraction of predicted background level to check")
-        self.declareProperty("MindtBinWidth", defaultValue=15, doc="Smallest spacing (in microseconds) between data points for TOF profile fitting.")
+        mindtBinWidthDocString = "Smallest spacing (in microseconds) between data points for TOF profile fitting."
+        self.declareProperty("MindtBinWidth", defaultValue=15, doc=mindtBinWidthDocString)
 
         self.declareProperty("NTheta", defaultValue=50, doc="Number of bins for bivarite Gaussian along the scattering angle.")
         self.declareProperty("NPhi", defaultValue=50,  doc="Number of bins for bivariate Gaussian along the azimuthal angle.")
@@ -193,8 +195,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             except KeyboardInterrupt:
                 raise
             except:
-                raise
-                #numerrors += 1
+                # raise
+                numerrors += 1
                 peak.setIntensity(0.0)
                 peak.setSigmaIntensity(1.0)
 

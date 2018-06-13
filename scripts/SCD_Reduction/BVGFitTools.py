@@ -250,9 +250,6 @@ def fitTOFCoordinate(box, peak, padeCoefficients, dtSpread=0.03, minFracPixels=0
 
     yScaled = (yFit - bg) / np.max(yFit - bg)
     goodIDX = yScaled > fracStop
-    if np.sum(goodIDX) > 0:
-        iStart = np.min(np.where(goodIDX))
-        iStop = np.max(np.where(goodIDX))
 
     interpF = interp1d(x, yFit, kind='cubic')
     tofxx = np.linspace(tofWS.readX(0).min(), tofWS.readX(0).max(), 1000)
@@ -523,7 +520,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         m = BivariateGaussian.BivariateGaussian()
         m.init()
         m['A'] = 0.1
-        
         #m['muX'] = np.average(thCenters,weights=np.sum(h,axis=1))
         #m['muY'] = np.average(phCenters,weights=np.sum(h,axis=0))
 

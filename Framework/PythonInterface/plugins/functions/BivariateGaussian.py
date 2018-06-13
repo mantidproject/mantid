@@ -3,7 +3,7 @@ from mantid.api import IFunction1D, FunctionFactory
 from matplotlib.mlab import bivariate_normal
 
 
-class BivariateGaussian(IFunction1D): 
+class BivariateGaussian(IFunction1D):
     """
     BivariateGaussian implements a bivariate gaussian (BivariateGaussian) in Mantid (M) as a 1D function.  This is done so that it can be
     fit in a straightforward fashion using Mantid's Fit() function.  To achieve this, we use the flattened
