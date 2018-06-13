@@ -170,9 +170,10 @@ void GenerateEventsFilter::init() {
 
   declareProperty("NumberOfThreads", EMPTY_INT(),
                   "Number of threads forced to use in the parallel mode. ");
-  declareProperty(
-    "RemoveDuplicates", true,
-    "Whether to remove duplicate time entries in the log before processing, this give a more accurate result, but can take longer. This only affects log value filters.");
+  declareProperty("RemoveDuplicates", true,
+                  "Whether to remove duplicate time entries in the log before "
+                  "processing, this give a more accurate result, but can take "
+                  "longer. This only affects log value filters.");
 }
 
 /** Main execute body
