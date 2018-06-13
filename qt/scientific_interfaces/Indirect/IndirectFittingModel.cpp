@@ -281,6 +281,16 @@ IndirectFittingModel::IndirectFittingModel(IndirectFittingModel &&model)
       m_previousModelSelected(model.m_previousModelSelected),
       m_fittingMode(model.m_fittingMode) {}
 
+void IndirectFittingModel::swap(IndirectFittingModel &model) {
+  std::swap(m_fitOutput, model.m_fitOutput);
+  std::swap(m_fittingData, model.m_fittingData);
+  std::swap(m_activeFunction, model.m_activeFunction);
+  std::swap(m_fitFunction, model.m_fitFunction);
+  std::swap(m_defaultParameters, model.m_defaultParameters);
+  std::swap(m_previousModelSelected, model.m_previousModelSelected);
+  std::swap(m_fittingMode, model.m_fittingMode);
+}
+
 MatrixWorkspace_sptr
 IndirectFittingModel::getWorkspace(std::size_t index) const {
   if (index < m_fittingData.size())

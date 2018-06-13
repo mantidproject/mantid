@@ -100,6 +100,7 @@ protected:
   void addNewWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                        const Spectra &spectra);
   void removeFittingData(std::size_t index);
+  void swap(IndirectFittingModel &model);
 
 private:
   IndirectFittingModel(IndirectFittingModel &&model);
