@@ -108,7 +108,7 @@ public:
   /// @name Wrapped ADS calls
   //@{
 
-  /// Invokes the ADS to sort group members by orkspace name
+  /// Invokes the ADS to sort group members by workspace name
   void sortByName() {
     AnalysisDataService::Instance().sortGroupByName(this->getName());
   }

@@ -27,7 +27,6 @@ import sys
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
-MPL_BACKEND = 'module://workbench.plotting.backend_workbench'
 SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
 ORIGINAL_STDOUT = sys.stdout
@@ -43,7 +42,7 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QTimer)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QTimer, QCoreApplication)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
@@ -65,6 +64,7 @@ def qapplication():
     """
     app = QApplication.instance()
     if app is None:
+        QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
         app = QApplication(['Mantid Workbench'])
     return app
 
@@ -125,6 +125,7 @@ class MainWindow(QMainWindow):
         self.workspacewidget = None
         self.editor = None
         self.algorithm_selector = None
+        self.plot_selector = None
         self.widgets = []
 
         # Widget layout map: required for use in Qt.connection
@@ -162,6 +163,12 @@ class MainWindow(QMainWindow):
         self.algorithm_selector = AlgorithmSelector(self)
         self.algorithm_selector.register_plugin()
         self.widgets.append(self.algorithm_selector)
+
+        self.set_splash("Loading Plot Selector")
+        from workbench.plugins.plotselectorwidget import PlotSelector
+        self.plot_selector = PlotSelector(self)
+        self.plot_selector.register_plugin()
+        self.widgets.append(self.plot_selector)
 
         self.set_splash("Loading code editing widget")
         from workbench.plugins.editor import MultiFileEditor
@@ -278,10 +285,11 @@ class MainWindow(QMainWindow):
         workspacewidget = self.workspacewidget
         editor = self.editor
         algorithm_selector = self.algorithm_selector
+        plot_selector = self.plot_selector
         default_layout = {
             'widgets': [
                 # column 0
-                [[workspacewidget], [algorithm_selector]],
+                [[workspacewidget], [algorithm_selector, plot_selector]],
                 # column 1
                 [[editor, ipython]],
                 # column 2
@@ -379,17 +387,11 @@ def start_workbench(app):
     # changing anything!
     main_window = MainWindow()
 
-    # Load matplotlib as early as possible.
+    # Load matplotlib as early as possible and set our defaults
     # Setup our custom backend and monkey patch in custom current figure manager
     main_window.set_splash('Preloading matplotlib')
-    mpl = importlib.import_module('matplotlib')
-    # Replace vanilla Gcf with our custom instance
-    _pylab_helpers = importlib.import_module('matplotlib._pylab_helpers')
-    currentfigure = importlib.import_module('workbench.plotting.currentfigure')
-    setattr(_pylab_helpers, 'Gcf', getattr(currentfigure, 'CurrentFigure'))
-    # Set up out custom matplotlib backend early. It must be done on
-    # the main thread
-    mpl.use(MPL_BACKEND)
+    from workbench.plotting.config import initialize_matplotlib  # noqa
+    initialize_matplotlib()
 
     # Setup widget layouts etc. mantid cannot be imported before this
     # or the log messages don't get through

@@ -744,6 +744,12 @@ double FitOneSinglePeak::fitFunctionMD(IFunction_sptr fitfunc,
   boost::shared_ptr<MultiDomainFunction> funcmd =
       boost::make_shared<MultiDomainFunction>();
 
+  // After a change of the default value of NumDeriv in MultiDomainFunction
+  // this needs to be set to false to preserve the original behaviour.
+  // Results of this algorithm as well as algorithms that use it
+  // seem to be very sensitive to the accuracy of the derivatives.
+  funcmd->setAttributeValue("NumDeriv", false);
+
   // Set function first
   funcmd->addFunction(fitfunc);
 

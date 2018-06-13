@@ -261,6 +261,7 @@ private slots:
   void updateNormalization(QString name);
 
 private:
+  void moveUnNormWS(const std::string &name, std::vector<std::string> &wsNames);
   bool getIfTFAsymmStore() const;
   /// Initialize local Python environment
   void initLocalPython() override;
@@ -301,6 +302,7 @@ private:
   Mantid::API::Workspace_sptr createAnalysisWorkspace(Muon::ItemType itemType,
                                                       int tableRow,
                                                       Muon::PlotType plotType,
+                                                      std::string wsName,
                                                       bool isRaw = false);
 
   /// Returns PlotType as chosen using given selector
