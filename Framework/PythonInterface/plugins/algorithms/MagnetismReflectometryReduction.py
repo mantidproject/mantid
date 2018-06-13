@@ -275,7 +275,11 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         x_pixel_map = x_pixel_map[0,:,:]
 
         pixel_width = float(workspace.getInstrument().getNumberParameter("pixel-width")[0]) / 1000.0
-        det_distance = workspace.getRun()['SampleDetDis'].getStatistics().mean / 1000.0
+        det_distance = workspace.getRun()['SampleDetDis'].getStatistics().mean
+        # Check units
+        if not workspace.getRun()['SampleDetDis'].units in ['m', 'meter']:
+            det_distance /= 1000.0
+
         round_up = self.getProperty("RoundUpPixel").value
         ref_pix = self.getProperty("SpecularPixel").value
         if round_up:
@@ -378,8 +382,13 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
         # Get the distance fromthe moderator to the detector
         run_object = workspace.getRun()
-        sample_detector_distance = run_object['SampleDetDis'].getStatistics().mean / 1000.0
-        source_sample_distance = run_object['ModeratorSamDis'].getStatistics().mean / 1000.0
+        sample_detector_distance = run_object['SampleDetDis'].getStatistics().mean
+        source_sample_distance = run_object['ModeratorSamDis'].getStatistics().mean
+        # Check units
+        if not run_object['SampleDetDis'].units in ['m', 'meter']:
+            sample_detector_distance /= 1000.0
+        if not run_object['ModeratorSamDis'].units in ['m', 'meter']:
+            source_sample_distance /= 1000.0
         source_detector_distance = source_sample_distance + sample_detector_distance
 
         # Convert to Q

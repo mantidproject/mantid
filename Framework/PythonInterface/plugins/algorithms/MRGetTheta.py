@@ -76,7 +76,7 @@ class MRGetTheta(PythonAlgorithm):
                   }
         prop = ws.getRun().getProperty(name)
         value = prop.getStatistics().mean
-        
+
         # If the property has units we don't recognize, use the assumed units
         units = prop.units if prop.units in _units else assumed_units
 

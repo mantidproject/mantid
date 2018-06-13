@@ -215,8 +215,14 @@ class DataInfo(object):
             :param workspace ws: workspace to work with
         """
         run_object = ws.getRun()
-        sample_detector_distance = run_object['SampleDetDis'].getStatistics().mean / 1000.0
-        source_sample_distance = run_object['ModeratorSamDis'].getStatistics().mean / 1000.0
+        sample_detector_distance = run_object['SampleDetDis'].getStatistics().mean
+        source_sample_distance = run_object['ModeratorSamDis'].getStatistics().mean
+        # Check units
+        if not run_object['SampleDetDis'].units in ['m', 'meter']:
+            sample_detector_distance /= 1000.0
+        if not run_object['ModeratorSamDis'].units in ['m', 'meter']:
+            source_sample_distance /= 1000.0
+
         source_detector_distance = source_sample_distance + sample_detector_distance
 
         h = 6.626e-34  # m^2 kg s^-1
