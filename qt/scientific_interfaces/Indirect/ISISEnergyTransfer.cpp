@@ -269,14 +269,14 @@ void ISISEnergyTransfer::run() {
   if (m_uiForm.ckCm1Units->isChecked())
     reductionAlg->setProperty("UnitX", "DeltaE_inWavenumber");
 
-  QPair<QString, QString> grouping =
-      createMapFile(m_uiForm.cbGroupingOptions->currentText());
-  reductionAlg->setProperty("GroupingMethod", grouping.first.toStdString());
+  std::pair<std::string, std::string> grouping =
+      createMapFile(m_uiForm.cbGroupingOptions->currentText().toStdString());
+  reductionAlg->setProperty("GroupingMethod", grouping.first);
 
   if (grouping.first == "File")
-    reductionAlg->setProperty("MapFile", grouping.second.toStdString());
+    reductionAlg->setProperty("MapFile", grouping.second);
   else if (grouping.first == "Custom")
-    reductionAlg->setProperty("GroupingString", grouping.second.toStdString());
+    reductionAlg->setProperty("GroupingString", grouping.second);
 
   reductionAlg->setProperty("FoldMultipleFrames", m_uiForm.ckFold->isChecked());
   reductionAlg->setProperty("OutputWorkspace",
@@ -452,16 +452,16 @@ ISISEnergyTransfer::createMapFile(const std::string &groupType) {
       emit showMessageBox("You must enter a path to the .map file.");
 
     return std::make_pair("File", groupFile.toStdString());
-  } else if (groupType == "Groups") {
+  } else if (groupType == "Groups")
     return std::make_pair("Custom", createDetectorGroupingString());
-  } else if (groupType == "Default")
+  else if (groupType == "Default")
     return std::make_pair("IPF", "");
   else if (groupType == "Custom")
     return std::make_pair("Custom",
                           m_uiForm.leCustomGroups->text().toStdString());
   else {
     // Catch All and Individual
-    return qMakePair(groupType, QString());
+    return std::make_pair(groupType, "");
   }
 }
 
