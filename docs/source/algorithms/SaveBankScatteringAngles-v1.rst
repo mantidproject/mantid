@@ -2,11 +2,7 @@
 
 .. summary::
 
-<<<<<<< HEAD
-.. relatedalgorithm::
-=======
 .. relatedalgorithms::
->>>>>>> 22456_gem_texture_focusing_step_1
 
 .. properties::
 
