@@ -391,7 +391,7 @@ public:
     do_testResampleXWorkspace2D(true, false);
   }
 
-  void xtestWorkspace2D_NotInPlace_NoDistribution() {
+  void testWorkspace2D_NotInPlace_NoDistribution() {
     do_testResampleXWorkspace2D(false, false);
   }
 
