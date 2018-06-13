@@ -417,7 +417,7 @@ public:
 
     // The error calculation as per Issue #5035
     TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.04212, 0.00001);
-    //TS_ASSERT_DELTA(wsOut->readE(0)[4], -0.00000, 0.00001);
+    // TS_ASSERT_DELTA(wsOut->readE(0)[4], -0.00000, 0.00001);
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.06946, 0.00001);
   }
 
@@ -535,7 +535,7 @@ public:
     TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.63497325, 0.001);
 
     TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.03856093, 0.0001);
-    //TS_ASSERT_DELTA(wsOut->readE(0)[4], -0.0000000, 0.0001);
+    // TS_ASSERT_DELTA(wsOut->readE(0)[4], -0.0000000, 0.0001);
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.06679145, 0.0001);
   }
 

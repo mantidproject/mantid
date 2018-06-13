@@ -398,8 +398,8 @@ bool checkValidPair(const std::string &WSname1, const std::string &WSname2) {
   }
 
   if (group1.plotType != Muon::PlotType::Counts ||
-	  group2.plotType != Muon::PlotType::Counts) {
-	  throw std::invalid_argument("Workspaces must be of Group type (not Asym)");
+      group2.plotType != Muon::PlotType::Counts) {
+    throw std::invalid_argument("Workspaces must be of Group type (not Asym)");
   }
 
   return true;

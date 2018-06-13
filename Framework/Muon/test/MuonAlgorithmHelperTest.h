@@ -490,12 +490,12 @@ public:
   }
 
   void test_checkValidPair_does_not_throw_if_same_group() {
-	  const std::string validWorkspaceName =
-		  "EMU000015189; Group; fwd; Counts; 1+2; #1";
-	  const std::string invalidWorkspaceName =
-		  "EMU000015189; Group; fwd; Counts; 1+2; #1";
-	  TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName),
-		  std::invalid_argument);
+    const std::string validWorkspaceName =
+        "EMU000015189; Group; fwd; Counts; 1+2; #1";
+    const std::string invalidWorkspaceName =
+        "EMU000015189; Group; fwd; Counts; 1+2; #1";
+    TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName),
+                     std::invalid_argument);
   }
 };
 
