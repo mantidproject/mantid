@@ -170,6 +170,9 @@ void GenerateEventsFilter::init() {
 
   declareProperty("NumberOfThreads", EMPTY_INT(),
                   "Number of threads forced to use in the parallel mode. ");
+  declareProperty(
+    "RemoveDuplicates", true,
+    "Whether to remove duplicate time entries in the log before processing, this give a more accurate result, but can take longer. This only affects log value filters.");
 }
 
 /** Main execute body
@@ -507,15 +510,20 @@ void GenerateEventsFilter::setFilterByLogValue(std::string logname) {
   }
 
   //  Clear duplicate value and extend to run end
+  bool removeDuplicates = this->getProperty("RemoveDuplicates");
   if (m_dblLog) {
-    g_log.debug("Attempting to remove duplicates in double series log.");
     if (m_runEndTime > m_dblLog->lastTime())
       m_dblLog->addValue(m_runEndTime, 0.);
-    m_dblLog->eliminateDuplicates();
+    if (removeDuplicates) {
+      g_log.debug("Attempting to remove duplicates in double series log.");
+      m_dblLog->eliminateDuplicates();
+    }
   } else {
-    g_log.debug("Attempting to remove duplicates in integer series log.");
     m_intLog->addValue(m_runEndTime, 0);
-    m_intLog->eliminateDuplicates();
+    if (removeDuplicates) {
+      g_log.debug("Attempting to remove duplicates in integer series log.");
+      m_intLog->eliminateDuplicates();
+    }
   }
 
   // Process input properties related to filter with log value
