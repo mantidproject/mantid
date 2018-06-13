@@ -61,6 +61,10 @@ public:
   bool isValid(const Kernel::V3D &point) const; ///< Check if a point is inside
   bool isOnSide(const Kernel::V3D &) const;
   int interceptSurface(Geometry::Track &ut) const;
+  MeshObject2D *clone() const;
+  MeshObject2D *cloneWithMaterial(const Kernel::Material &material) const;
+
+  bool operator==(const MeshObject2D &other) const;
 
 private:
   struct PlaneParameters {

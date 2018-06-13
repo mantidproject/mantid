@@ -2,6 +2,7 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Material.h"
+#include "MantidGeometry/Objects/IObject.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -221,6 +222,27 @@ int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
   }
 
   return ut.count() - originalCount;
+}
+
+MeshObject2D *MeshObject2D::clone() const {
+  return new MeshObject2D(this->m_triangles, this->m_vertices,
+                          this->m_material);
+}
+
+MeshObject2D *
+MeshObject2D::cloneWithMaterial(const Kernel::Material &material) const {
+  return new MeshObject2D(this->m_triangles, this->m_vertices, material);
+}
+
+bool MeshObject2D::operator==(const MeshObject2D &other) const {
+  return m_vertices.size() == other.m_vertices.size() &&
+         m_triangles.size() == other.m_triangles.size() &&
+         m_planeParameters.a == other.m_planeParameters.a &&
+         m_planeParameters.b == other.m_planeParameters.b &&
+         m_planeParameters.c == other.m_planeParameters.c &&
+         m_planeParameters.k == other.m_planeParameters.k &&
+         m_planeParameters.p0 == other.m_planeParameters.p0 &&
+         m_material.name() == other.m_material.name();
 }
 
 double MeshObject2D::volume() const {

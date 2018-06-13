@@ -182,6 +182,36 @@ public:
     TS_ASSERT_EQUALS(mesh.interceptSurface(missTargetTrack), 0);
     TS_ASSERT_EQUALS(missTargetTrack.count(), 0);
   }
+
+  void test_equals() {
+
+    auto a = makeTrapezoidMesh(V3D{0, 0, 0}, V3D{0, 1, 0}, V3D{1, 1, 0},
+                               V3D{1, 0, 0});
+    auto b = makeTrapezoidMesh(V3D{0, 0, 0}, V3D{0, 1, 0}, V3D{1, 1, 0},
+                               V3D{1, 0, 0});
+    auto c = makeTrapezoidMesh(V3D{0.1, 0, 0}, V3D{0, 1, 0}, V3D{1, 1, 0},
+                               V3D{1, 0, 0});
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT_DIFFERS(a, c);
+  }
+
+  void test_clone() {
+    auto mesh = makeSimpleTriangleMesh();
+    auto clone = mesh.clone();
+    TS_ASSERT_EQUALS(*clone, mesh);
+  }
+
+  void test_clone_with_material() {
+    using namespace Mantid::Kernel;
+    auto a = makeSimpleTriangleMesh();
+    // Use a different material
+    auto b = a.cloneWithMaterial(
+        Material("hydrogen", Material::parseChemicalFormula("H"), 3));
+    TS_ASSERT_DIFFERS(a, *b);
+    // Use same material
+    auto c = a.cloneWithMaterial(Material{}); // same empty material
+    TS_ASSERT_EQUALS(a, *c);
+  }
 };
 
 #endif /* MANTID_GEOMETRY_MESH2DOBJECTTEST_H_ */
