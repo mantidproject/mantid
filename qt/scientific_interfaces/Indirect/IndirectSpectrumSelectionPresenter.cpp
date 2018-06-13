@@ -107,7 +107,7 @@ void IndirectSpectrumSelectionPresenter::updateSpectra() {
                          m_model->getSpectra(m_activeIndex));
     enableView();
   } else {
-    m_view->clearView();
+    m_view->clear();
     disableView();
   }
 }
