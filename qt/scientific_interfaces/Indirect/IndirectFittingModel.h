@@ -20,6 +20,7 @@ class DLLExport IndirectFittingModel {
 public:
   IndirectFittingModel();
   IndirectFittingModel(IndirectFittingModel &&model);
+  IndirectFittingModel(const IndirectFittingModel &model);
   virtual ~IndirectFittingModel() = default;
 
   Mantid::API::MatrixWorkspace_sptr getWorkspace(std::size_t index) const;
