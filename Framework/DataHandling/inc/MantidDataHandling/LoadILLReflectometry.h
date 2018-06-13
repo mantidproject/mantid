@@ -54,6 +54,7 @@ public:
     return "Loads an ILL reflectometry Nexus file (instrument D17 or "
            "Figaro).";
   }
+  double doubleFromRun(const std::string &entryName) const;
 
 private:
   /// ID tags for supported instruments.
@@ -66,7 +67,6 @@ private:
   void initNames(NeXus::NXEntry &entry);
   void initPixelWidth();
   void loadDataDetails(NeXus::NXEntry &entry);
-  double doubleFromRun(const std::string &entryName) const;
   std::vector<double> getXValues();
   void convertTofToWavelength();
   double reflectometryPeak();

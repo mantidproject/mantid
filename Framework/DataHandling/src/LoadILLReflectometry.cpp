@@ -415,17 +415,6 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
     m_channelWidth = static_cast<double>(timeOfFlight[0]);
     m_numberOfChannels = size_t(timeOfFlight[1]);
     m_tofDelay = timeOfFlight[2];
-    if (m_instrument == Supported::Figaro) {
-      try { // Valid from 2018.
-        NXFloat eDelay = entry.openNXFloat("instrument/Distance/edelay_delay");
-        eDelay.load();
-        m_tofDelay += static_cast<double>(eDelay[0]);
-      } catch (...) { // Valid 2017.
-        NXFloat eDelay = entry.openNXFloat("instrument/Theta/edelay_delay");
-        eDelay.load();
-        m_tofDelay += static_cast<double>(eDelay[0]);
-      }
-    }
   } else { // monochromatic mode
     m_numberOfChannels = 1;
   }
@@ -442,7 +431,6 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
                    "of histograms): " << m_numberOfHistograms << '\n';
   g_log.debug() << "Number of time channels: " << m_numberOfChannels << '\n';
   g_log.debug() << "Channel width: " << m_channelWidth << " 1e-6 sec\n";
-  g_log.debug() << "TOF delay: " << m_tofDelay << '\n';
 }
 
 double LoadILLReflectometry::doubleFromRun(const std::string &entryName) const {
@@ -493,6 +481,14 @@ std::vector<double> LoadILLReflectometry::getXValues() {
   xVals.reserve(m_numberOfChannels + 1); // reserve memory
   try {
     if (m_acqMode) {
+      if (m_instrument == Supported::Figaro) {
+        if (m_localWorkspace->run().hasProperty(
+                "Distance.edelay_delay")) // Valid from 2018.
+          m_tofDelay += doubleFromRun("Distance.edelay_delay");
+        else // Valid 2017.
+          m_tofDelay += doubleFromRun("Theta.edelay_delay");
+      }
+      g_log.debug() << "TOF delay: " << m_tofDelay << '\n';
       std::string chopper{"Chopper"};
       double chop1Speed{0.0}, chop1Phase{0.0}, chop2Speed{0.0}, chop2Phase{0.0};
       if (m_instrument == Supported::D17) {
@@ -820,11 +816,11 @@ void LoadILLReflectometry::placeSlits() {
     // NeXus files of Figaro. Using a hard-coded distance; should be fixed
     // when the NeXus files are
     double slitSeparation;
-    try { // Valid from 2018.
-      slitSeparation = inMeter(doubleFromRun("Distances.inter-slit_distance"));
-    } catch (...) {
+    if (m_localWorkspace->run().hasProperty(
+            "Distance.inter-slit_distance")) // Valid from 2018.
+      slitSeparation = inMeter(doubleFromRun("Distance.inter-slit_distance"));
+    else // Valid 2017.
       slitSeparation = inMeter(doubleFromRun("Theta.inter-slit_distance"));
-    } // Valid 2017.
     slit2ToSample = 0.368 + offset;
     slit1ToSample = slit2ToSample + slitSeparation;
   } else {
@@ -840,11 +836,10 @@ void LoadILLReflectometry::placeSlits() {
 /// Update source position.
 void LoadILLReflectometry::placeSource() {
   double dist;
-  try { // Valid from 2018.
+  if (m_localWorkspace->run().hasProperty("Distance.D0")) // Valid from 2018.
     dist = inMeter(doubleFromRun("Distance.D0"));
-  } catch (...) { // Valid 2017.
+  else // Valid 2017.
     dist = sourceSampleDistance();
-  }
   g_log.debug() << "Source-sample distance " << dist << "m.\n";
   const std::string source = "chopper1";
   const V3D newPos{0.0, 0.0, -dist};
@@ -918,11 +913,11 @@ double LoadILLReflectometry::sampleHorizontalOffset() const {
   if (m_instrument != Supported::Figaro) {
     return 0.;
   }
-  try { // Valid from 2018.
+  if (m_localWorkspace->run().hasProperty(
+          "Distance.sampleHorizontalOffset")) // Valid from 2018.
     return inMeter(doubleFromRun("Distance.sampleHorizontalOffset"));
-  } catch (...) { // Valid 2017.
+  else // Valid 2017.
     return inMeter(doubleFromRun("Theta.sampleHorizontalOffset"));
-  }
 }
 
 /** Return the source to sample distance for the current instrument.
