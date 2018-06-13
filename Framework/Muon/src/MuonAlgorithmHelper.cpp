@@ -392,6 +392,11 @@ bool checkValidPair(const std::string &WSname1, const std::string &WSname2) {
         "Group workspaces named with different instruments.");
   }
 
+  if (group1.itemName == group2.itemName) {
+	  throw std::invalid_argument(
+		  "Groups used for pairing must have differnt names.");
+  }
+
   if (group1.itemType != Muon::ItemType::Group ||
       group2.itemType != Muon::ItemType::Group) {
     throw std::invalid_argument("Workspaces must be of Group type (not Asym)");
