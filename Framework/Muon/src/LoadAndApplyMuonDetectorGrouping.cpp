@@ -1,5 +1,4 @@
 #include "MantidMuon/LoadAndApplyMuonDetectorGrouping.h"
-#include "MantidMuon/ApplyMuonDetectorGrouping.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
 #include "MantidAPI/Algorithm.h"
@@ -199,7 +198,9 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingInformationToADS(
   for (auto i = 0; i < numGroups; i++) {
     TableRow newRow = groupingTable->appendRow();
     newRow << grouping.groupNames[i];
-    newRow << Kernel::Strings::parseRange(grouping.groups[i]);
+	std::vector<int> detectorIDs = Kernel::Strings::parseRange(grouping.groups[i]);
+	std::sort(detectorIDs.begin(), detectorIDs.end());
+    newRow << detectorIDs;
   }
 
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
