@@ -25,7 +25,7 @@ Usage
 -----
 **Example - Copy parameters that contain the movement of 3 detectors**
 
-.. include:: ../usagedata-note.txt
+.. include:: ../usagedata-note.txt 
 
 .. testcode:: ExCopyInstrumentParametersSimple
 
@@ -42,16 +42,16 @@ Usage
    # Show positions in 1st workspace
    for i in spectra:
         det = ws1.getDetector(i)
-        print("Position of Detector ID={} in 1st workspace: {:.0f},{:.0f},{:.0f}".
+        print("Position of Detector ID={} in 1st workspace: {:.0f},{:.0f},{:.0f}". 
                format(det.getID(), det.getPos().X(), det.getPos().Y(), det.getPos().Z()))
-
+                
    # Show positions in 2nd workspace before CopyInstrumrentParameters
    for i in spectra:
         det = ws2.getDetector(i)
-        print("Position of Detector ID=%i in 2nd workspace before CopyInstrumentParameters: %.0f,%.0f,%.0f" % (det.getID(),
+        print("Position of Detector ID=%i in 2nd workspace before CopyInstrumentParameters: %.0f,%.0f,%.0f" % (det.getID(), 
                 det.getPos().X(), det.getPos().Y(), det.getPos().Z()))
-
-
+  
+  
    # Copy paremeters from 1st workspace to 2nd workspace
    CopyInstrumentParameters( ws1, ws2 )
 
@@ -72,7 +72,7 @@ Output:
    Position of Detector ID=1100 in 2nd workspace before CopyInstrumentParameters: 0,0,-1
    Position of Detector ID=1101 in 2nd workspace before CopyInstrumentParameters: 0,0,-1
    Position of Detector ID=1103 in 2nd workspace before CopyInstrumentParameters: 0,0,-1
-   Position of Detector ID=1100 in 2nd workspace after CopyInstrumentParameters: 9,0,-0
+   Position of Detector ID=1100 in 2nd workspace after CopyInstrumentParameters: 9,0,0
    Position of Detector ID=1101 in 2nd workspace after CopyInstrumentParameters: 10,3,0
    Position of Detector ID=1103 in 2nd workspace after CopyInstrumentParameters: 12,3,6
 
