@@ -46,7 +46,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.assertEqual(len(plot_names), len(self.view.list_widget))
         for index in range(len(self.view.list_widget)):
             widget = self.get_NameWidget_by_row_number(index)
-            self.assertEqual(widget.label.text(), plot_names[index])
+            self.assertEqual(widget.plot_name, plot_names[index])
 
     # ------------------------ Plot Updates ------------------------
 
@@ -133,15 +133,15 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         QTest.keyClick(self.view.close_button, Qt.Key_Delete)
         self.assertEquals(self.presenter.close_action_called.call_count, 2)
 
-    def test_x_button_pressed_calls_presenter(self):
+    def test_name_widget_close_button_pressed_calls_presenter(self):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
 
         widget = self.get_NameWidget_by_row_number(1)
-        QTest.mouseClick(widget.x_button, Qt.LeftButton)
+        QTest.mouseClick(widget.close_button, Qt.LeftButton)
         self.presenter.close_single_plot.assert_called_once_with("Plot2")
 
-    def test_x_button_pressed_leaves_selection_unchanged(self):
+    def test_name_widget_close_button_pressed_leaves_selection_unchanged(self):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
 
@@ -153,7 +153,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.assertEquals(plots_selected_old, ["Plot1", "Plot3"])
 
         widget = self.get_NameWidget_by_row_number(1)
-        QTest.mouseClick(widget.x_button, Qt.LeftButton)
+        QTest.mouseClick(widget.close_button, Qt.LeftButton)
 
         # We need to actually update the plot list, as the presenter would
         self.view.remove_from_plot_list("Plot2")
@@ -167,7 +167,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.view.set_plot_list(plot_names)
 
         widget = self.get_NameWidget_by_row_number(1)
-        widget.context_menu.actions()[0].trigger()
+        widget.context_menu.actions()[2].trigger()
 
         self.presenter.close_single_plot.assert_called_once_with("Plot2")
 

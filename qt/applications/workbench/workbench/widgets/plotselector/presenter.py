@@ -101,6 +101,22 @@ class PlotSelectorPresenter(object):
         except ValueError as e:
             print(e)
 
+    def rename_figure(self, new_name, old_name):
+        """
+        Replaces a name in the plot list
+        :param new_name: The new plot name
+        :param old_name: The name of the plot to be replaced
+        """
+        if new_name == old_name:
+            return
+
+        try:
+            self.model.rename_figure(new_name, old_name)
+        except ValueError as e:
+            # We need to undo the rename in the view
+            self.view.rename_in_plot_list(old_name, old_name)
+            print(e)
+
     # ------------------------ Plot Closing -------------------------
 
     def close_action_called(self):

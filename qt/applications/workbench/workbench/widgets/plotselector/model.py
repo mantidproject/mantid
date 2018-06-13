@@ -76,6 +76,13 @@ class PlotSelectorModel(object):
 
         self.plot_list = [new_name if plot_name == old_name else plot_name for plot_name in self.plot_list]
 
+    def rename_figure(self, new_name, old_name):
+        if new_name in self.plot_list:
+            raise ValueError('Error renaming, name {} already in use.'.format(new_name))
+
+        figure = self.GlobalFigureManager.get_figure_manager_from_name(old_name)
+        figure.set_window_title(new_name)
+
     def notify(self, action, plot_name):
         """
         This is called by GlobalFigureManager when plots are created

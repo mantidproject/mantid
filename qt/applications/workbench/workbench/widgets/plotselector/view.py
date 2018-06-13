@@ -136,7 +136,7 @@ class PlotSelectorView(QWidget):
         for row in range(len(self.list_widget)):
             item = self.list_widget.item(row)
             widget = self.list_widget.itemWidget(item)
-            if widget.label.text() == label_text:
+            if widget.plot_name == label_text:
                 return row, widget
 
     def remove_from_plot_list(self, plot_name):
@@ -147,7 +147,7 @@ class PlotSelectorView(QWidget):
 
     def rename_in_plot_list(self, new_name, old_name):
         row, widget = self._get_row_and_widget_from_label_text(old_name)
-        widget.label.setText(new_name)
+        widget.set_plot_name(new_name)
 
     # ----------------------- Plot Selection ------------------------
 
@@ -161,7 +161,7 @@ class PlotSelectorView(QWidget):
         selected_plots = []
         for item in selected:
             widget = self.list_widget.itemWidget(item)
-            selected_plots.append(widget.label.text())
+            selected_plots.append(widget.plot_name)
         return selected_plots
 
     def get_currently_selected_plot_name(self):
@@ -174,7 +174,7 @@ class PlotSelectorView(QWidget):
         widget = self.list_widget.itemWidget(item)
         if widget is None:
             return None
-        return widget.label.text()
+        return widget.plot_name
 
     def get_filter_text(self):
         """
@@ -185,21 +185,35 @@ class PlotSelectorView(QWidget):
 
 
 class PlotNameWidget(QWidget):
-    def __init__(self, presenter, text="", parent=None):
+    def __init__(self, presenter, plot_name="", parent=None):
         super(PlotNameWidget, self).__init__(parent)
 
         self.presenter = presenter
+        self.plot_name = plot_name
 
-        self.label = QLabel(text)
-        self.x_icon = QIcon.fromTheme('window-close')
-        self.x_button = QPushButton(self.x_icon, "")
-        self.x_button.setFlat(True)
-        self.x_button.setMaximumWidth(self.x_button.sizeHint().width())
-        self.x_button.pressed.connect(lambda: self.close_pressed(self.label.text()))
+        self.line_edit = QLineEdit(self.plot_name)
+        self.line_edit.setReadOnly(True)
+        self.line_edit.setFrame(False)
+        self.line_edit.setStyleSheet("* { background-color: rgba(0, 0, 0, 0); }")
+        self.line_edit.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+        self.line_edit.editingFinished.connect(self.rename_plot)
+
+        self.rename_icon = QIcon.fromTheme('insert-text')
+        self.rename_button = QPushButton(self.rename_icon, "")
+        self.rename_button.setFlat(True)
+        self.rename_button.setMaximumWidth(self.rename_button.sizeHint().width())
+        self.rename_button.pressed.connect(self.toggle_plot_name_editable)
+
+        self.close_icon = QIcon.fromTheme('window-close')
+        self.close_button = QPushButton(self.close_icon, "")
+        self.close_button.setFlat(True)
+        self.close_button.setMaximumWidth(self.close_button.sizeHint().width())
+        self.close_button.clicked.connect(lambda: self.close_pressed(self.line_edit.text()))
 
         self.layout = QHBoxLayout()
-        self.layout.addWidget(self.label)
-        self.layout.addWidget(self.x_button)
+        self.layout.addWidget(self.line_edit)
+        self.layout.addWidget(self.rename_button)
+        self.layout.addWidget(self.close_button)
 
         self.layout.sizeHint()
         self.setLayout(self.layout)
@@ -214,16 +228,34 @@ class PlotNameWidget(QWidget):
         self.context_menu = self._make_context_menu()
         self.customContextMenuRequested.connect(self.context_menu_opened)
 
+    def set_plot_name(self, new_name):
+        self.plot_name = new_name
+        self.line_edit.setText(new_name)
+
     def make_active_pressed(self, plot_name):
         self.presenter.make_plot_active(plot_name)
 
     def close_pressed(self, plot_name):
         self.presenter.close_single_plot(plot_name)
 
+    def toggle_plot_name_editable(self, editable=None):
+        if editable is None:
+            editable = self.line_edit.isReadOnly()
+        self.line_edit.setReadOnly(not editable)
+        self.line_edit.setAttribute(Qt.WA_TransparentForMouseEvents, not editable)
+        if editable:
+            self.line_edit.setFocus()
+            self.line_edit.selectAll()
+
+    def rename_plot(self):
+        self.presenter.rename_figure(self.line_edit.text(), self.plot_name)
+        self.toggle_plot_name_editable(False)
+
     def _make_context_menu(self):
         context_menu = QMenu()
-        context_menu.addAction("Make Active", lambda: self.make_active_pressed(self.label.text()))
-        context_menu.addAction("Close", lambda: self.close_pressed(self.label.text()))
+        context_menu.addAction("Make Active", lambda: self.make_active_pressed(self.plot_name))
+        context_menu.addAction("Rename", lambda: self.toggle_plot_name_editable(True))
+        context_menu.addAction("Close", lambda: self.close_pressed(self.plot_name))
         return context_menu
 
     def context_menu_opened(self, position):
