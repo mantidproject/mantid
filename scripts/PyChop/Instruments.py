@@ -177,7 +177,7 @@ class ChopperSystem(object):
                          self.numDisk, self.sam_det, self.chop_sam, source_rep, self.emission_time,
                          self.overlap_ei_frac, self.isPhaseIndependent]
         if self.isFermi:
-            self.package = self.packages.keys()[0]
+            self.package = list(self.packages.keys())[0]
 
     def _parse_variants(self):
         if 'variants' not in self.__dict__:
@@ -192,7 +192,7 @@ class ChopperSystem(object):
         for key in set(variant_keys):
             self._variant_defaults[key] = copy.deepcopy(getattr(self, key))
         if '_variant' not in self.__dict__:
-            self._default_variant = self.variants.keys()[0]
+            self._default_variant = list(self.variants.keys())[0]
             warnings.warn('No default variants defined. Using ''%s'' as default' % (self._default_variant), SyntaxWarning)
             self.variant = self._default_variant
 
@@ -222,8 +222,8 @@ class ChopperSystem(object):
         return self.package if self.isFermi else self.variant
 
     def getChopperNames(self):
-        choppers = self.packages.keys() if self.isFermi else []
-        return sorted(set(choppers + (self.variants.keys() if hasattr(self, 'variants') else [])))
+        choppers = list(self.packages.keys()) if self.isFermi else []
+        return sorted(set(choppers + (list(self.variants.keys()) if hasattr(self, 'variants') else [])))
 
     def setFrequency(self, *args, **kwargs):
         """

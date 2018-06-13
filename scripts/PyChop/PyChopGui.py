@@ -46,7 +46,7 @@ class PyChopGui(QtGui.QMainWindow):
                 self.minE[instobj.name] = max([instobj.emin, 0.01])
                 self.maxE[instobj.name] = instobj.emax
         self.drawLayout()
-        self.setInstrument(self.instruments.keys()[0])
+        self.setInstrument(list(self.instruments.keys())[0])
         self.resaxes_xlim = 0
         self.qeaxes_xlim = 0
         self.isFramePlotted = 0
