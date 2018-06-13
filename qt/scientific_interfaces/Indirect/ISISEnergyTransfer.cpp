@@ -455,33 +455,38 @@ ISISEnergyTransfer::createMapFile(const QString &groupType) {
 
     return qMakePair(QString("File"), groupFile);
   } else if (groupType == "Groups") {
-    QString groupWS = "__Grouping";
-
-    IAlgorithm_sptr groupingAlg =
-        AlgorithmManager::Instance().create("CreateGroupingWorkspace");
-    groupingAlg->initialize();
-
-    groupingAlg->setProperty("FixedGroupCount",
-                             m_uiForm.spNumberGroups->value());
-    groupingAlg->setProperty(
-        "InstrumentName",
-        getInstrumentConfiguration()->getInstrumentName().toStdString());
-    groupingAlg->setProperty(
-        "ComponentName",
-        getInstrumentConfiguration()->getAnalyserName().toStdString());
-    groupingAlg->setProperty("OutputWorkspace", groupWS.toStdString());
-
-    m_batchAlgoRunner->addAlgorithm(groupingAlg);
-
+    QString groupWS = "Grouping";
+    createDetectorGroupingWorkspace(groupWS);
     return qMakePair(QString("Workspace"), groupWS);
-  } else if (groupType == "Default") {
-    return qMakePair(QString("IPF"), QString());
-  } else if (groupType == "Custom") {
-    return qMakePair(QString("Custom"), m_uiForm.leCustomGroups->text());
-  } else {
+  } else if (groupType == "Default")
+      return qMakePair(QString("IPF"), QString());
+    else if (groupType == "Custom")
+      return qMakePair(QString("Custom"), m_uiForm.leCustomGroups->text());
+    else {
     // Catch All and Individual
     return qMakePair(groupType, QString());
   }
+}
+
+void ISISEnergyTransfer::createDetectorGroupingWorkspace(const QString &groupWS) {
+
+  IAlgorithm_sptr groupingAlg =
+    AlgorithmManager::Instance().create("CreateGroupingWorkspace");
+  groupingAlg->initialize();
+
+  groupingAlg->setProperty("FixedGroupCount",
+    m_uiForm.spNumberGroups->value());
+  groupingAlg->setProperty(
+    "InstrumentName",
+    getInstrumentConfiguration()->getInstrumentName().toStdString());
+  groupingAlg->setProperty(
+    "ComponentName",
+    getInstrumentConfiguration()->getAnalyserName().toStdString());
+  groupingAlg->setProperty("OutputWorkspace", groupWS.toStdString());
+
+  groupingAlg->execute();
+
+  //m_batchAlgoRunner->addAlgorithm(groupingAlg);
 }
 
 /**
