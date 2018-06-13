@@ -10,21 +10,18 @@ Introduction to Matplotlib in Mantid
 
 .. raw :: html
 
-    <span class="larger_font">Mantid now can use <a href="https://matplotlib.org/"> Matplotlib </a> to produce figures. 
+    Mantid now can use <a href="https://matplotlib.org/"> Matplotlib </a> to produce figures. 
     There are several advantages of using this software package:
-    </span>
     <br>
     <br>
     <ul>
-    <span class="larger_font">
     <li> it is Python based, so it can easily be incorporated into Mantid scripts</li>
     <li> there is a large user community, and therefore excellent documentation and examples are available</li>
     <li> it is easy to change from plotting on the screen to produce publication quality plots in various image formats </li>
-    </span>
     </ul>
     <br>
     <br>
-    <span class="larger_font">While Matplotlib is using data arrays for inputs in the plotting routines,
+    While Matplotlib is using data arrays for inputs in the plotting routines,
     it is now possible to also use several types on Mantid workspaces instead.
     For a detailed list of functions that use workspaces, see the documentaion
     of the :ref:`mantid.plots <mantid.plots>` module. 
@@ -37,7 +34,6 @@ Introduction to Matplotlib in Mantid
 
     To understand the matplotlib vocabulary, a useful tool is the 
     <a href="https://matplotlib.org/examples/showcase/anatomy.html"> anatomy of a figure </a>, also shown below.
-    </span>
 
 .. plot::
    

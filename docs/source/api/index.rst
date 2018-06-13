@@ -5,9 +5,7 @@
 =====
 .. raw :: html
 
-    <span class="larger_font">
     The following subsections document the defined APIs for the Mantid libraries.
-    </span>
 
 Bindings
 --------
