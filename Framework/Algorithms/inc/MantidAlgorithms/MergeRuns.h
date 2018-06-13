@@ -8,6 +8,8 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/System.h"
 
+#include <boost/optional.hpp>
+
 namespace Mantid {
 namespace API {
 class WorkspaceGroup;
@@ -128,7 +130,7 @@ private:
   using Mantid::API::Algorithm::validateInputs;
   bool validateInputsForEventWorkspaces(
       const std::vector<std::string> &inputWorkspaces);
-  std::pair<bool, std::vector<double>> checkRebinning();
+  boost::optional<std::vector<double>> checkRebinning();
   static std::vector<double>
   calculateRebinParams(const std::vector<double> &bins1,
                        const std::vector<double> &bins2);

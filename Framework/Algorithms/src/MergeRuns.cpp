@@ -125,14 +125,12 @@ void MergeRuns::exec() {
     // This gets the list of workspaces
     RunCombinationHelper combHelper;
     m_inMatrixWS = combHelper.validateInputWorkspaces(inputs, g_log);
-    bool rebinningNeeded{false};
-    std::vector<double> rebinParams;
-    std::tie(rebinningNeeded, rebinParams) = checkRebinning();
+    const auto rebinParams = checkRebinning();
 
     // Take the first input workspace as the first argument to the addition
     MatrixWorkspace_sptr outWS(m_inMatrixWS.front()->clone());
-    if (rebinningNeeded) {
-      outWS = this->rebinInput(outWS, rebinParams);
+    if (rebinParams) {
+      outWS = this->rebinInput(outWS, *rebinParams);
     }
     Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
         *outWS, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
@@ -148,8 +146,8 @@ void MergeRuns::exec() {
     auto it = m_inMatrixWS.begin();
     for (++it; it != m_inMatrixWS.end(); ++it) {
       MatrixWorkspace_sptr addee;
-      if (rebinningNeeded) {
-        addee = this->rebinInput(*it, rebinParams);
+      if (rebinParams) {
+        addee = this->rebinInput(*it, *rebinParams);
       } else {
         addee = *it;
       }
@@ -459,10 +457,10 @@ bool MergeRuns::validateInputsForEventWorkspaces(
 
 /** Checks if the workspaces need to be rebinned and if so, returns the
  *  rebinning parameters for the Rebin algorithm.
- *  @return :: A bool signifying if rebinning is needed and the parameters as a
- *pair.
+ *  @return :: An optional object containing the rebinning params or none
+ *  if rebinning is not needed.
  */
-std::pair<bool, std::vector<double>> MergeRuns::checkRebinning() {
+boost::optional<std::vector<double>> MergeRuns::checkRebinning() {
   const std::string rebinBehaviour = getProperty("RebinBehaviour");
   const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
   std::list<MatrixWorkspace_sptr> inputsSortedByX{m_inMatrixWS};
@@ -495,7 +493,11 @@ std::pair<bool, std::vector<double>> MergeRuns::checkRebinning() {
       VectorHelper::createAxisFromRebinParams(rebinParams, bins);
     }
   }
-  return std::make_pair(rebinningNeeded, rebinParams);
+  if (rebinningNeeded) {
+    return rebinParams;
+  } else {
+    return boost::none;
+  }
 }
 
 //------------------------------------------------------------------------------------------------
