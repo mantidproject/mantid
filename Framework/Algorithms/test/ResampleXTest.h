@@ -185,11 +185,6 @@ public:
         WorkspaceCreationHelper::createEventWorkspace2(ylen, xlen);
     test_in->switchEventType(eventType);
 
-    // Check the size of the input workspace
-    TS_ASSERT_EQUALS(test_in->x(0).size(), xlen + 1);
-    TS_ASSERT_EQUALS(test_in->y(0).size(), xlen);
-    TS_ASSERT_EQUALS(test_in->e(0).size(), xlen);
-
     std::string inName("test_inEvent");
     std::string outName("test_inEvent_output");
     if (inPlace)
@@ -320,13 +315,6 @@ public:
                         Counts(xlen, countVal)));
     ws->setDistribution(withDistribution);
     AnalysisDataService::Instance().add(inName, ws);
-
-    // Check the size of the input workspace
-    for (int yIndex = 0; yIndex < ylen; ++yIndex) {
-      TS_ASSERT_EQUALS(ws->x(yIndex).size(), xlen + 1);
-      TS_ASSERT_EQUALS(ws->y(yIndex).size(), xlen);
-      TS_ASSERT_EQUALS(ws->e(yIndex).size(), xlen);
-    }
 
     ResampleX alg;
     alg.initialize();
