@@ -73,7 +73,7 @@ Output:
    Position of Detector ID=1101 in 2nd workspace before CopyInstrumentParameters: 0,0,-1
    Position of Detector ID=1103 in 2nd workspace before CopyInstrumentParameters: 0,0,-1
    Position of Detector ID=1100 in 2nd workspace after CopyInstrumentParameters: 9,0,-0
-   Position of Detector ID=1101 in 2nd workspace after CopyInstrumentParameters: 10,3,-0
+   Position of Detector ID=1101 in 2nd workspace after CopyInstrumentParameters: 10,3,0
    Position of Detector ID=1103 in 2nd workspace after CopyInstrumentParameters: 12,3,6
 
 .. categories::
