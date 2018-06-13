@@ -103,8 +103,6 @@ protected:
   void swap(IndirectFittingModel &model);
 
 private:
-  IndirectFittingModel(IndirectFittingModel &&model);
-
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function,
                       const std::string &input,

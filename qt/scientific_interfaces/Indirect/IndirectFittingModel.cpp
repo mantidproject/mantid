@@ -272,15 +272,6 @@ namespace IDA {
 IndirectFittingModel::IndirectFittingModel()
     : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL) {}
 
-IndirectFittingModel::IndirectFittingModel(IndirectFittingModel &&model)
-    : m_fitOutput(std::move(model.m_fitOutput)),
-      m_fittingData(std::move(model.m_fittingData)),
-      m_activeFunction(std::move(model.m_activeFunction)),
-      m_fitFunction(std::move(model.m_fitFunction)),
-      m_defaultParameters(std::move(model.m_defaultParameters)),
-      m_previousModelSelected(model.m_previousModelSelected),
-      m_fittingMode(model.m_fittingMode) {}
-
 void IndirectFittingModel::swap(IndirectFittingModel &model) {
   std::swap(m_fitOutput, model.m_fitOutput);
   std::swap(m_fittingData, model.m_fittingData);
