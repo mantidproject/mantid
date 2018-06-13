@@ -48,10 +48,12 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                              doc="The side length of each voxel in the non-MD histogram used for fitting (1/Angstrom)")
 
         self.declareProperty(FileProperty(name="UBFile",defaultValue="",action=FileAction.OptionalLoad,
-                             extensions=[".mat"]))
+                             extensions=[".mat"]),
+                             doc="File containing the UB Matrix in ISAW format.")
         self.declareProperty(FileProperty(name="ModeratorCoefficientsFile",
                              defaultValue="",action=FileAction.OptionalLoad,
-                             extensions=[".dat"]))
+                             extensions=[".dat"]),
+                             doc="File containing the Pade coefficients describing moderator emission versus energy.")
         self.declareProperty(FileProperty("StrongPeakParamsFile",defaultValue="",action=FileAction.OptionalLoad,
                              extensions=[".pkl"]))
         self.declareProperty("IntensityCutoff", defaultValue=0., doc="Minimum number of counts to force a profile")
@@ -63,7 +65,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                              doc="Fraction of max counts to include in peak selection.")
         self.declareProperty(FloatArrayProperty("PredPplCoefficients", values=np.array([6.12,  8.87 , -0.09]),
                                                 direction=Direction.Input),
-                             "Coefficients for estimating the background.  This can vary wildly between datasets.")
+                             doc="Coefficients for estimating the background.  This can vary wildly between datasets.")
 
         self.declareProperty("MinpplFrac", defaultValue=0.7, doc="Min fraction of predicted background level to check")
         self.declareProperty("MaxpplFrac", defaultValue=1.5, doc="Max fraction of predicted background level to check")
