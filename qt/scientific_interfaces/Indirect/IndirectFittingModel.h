@@ -101,8 +101,6 @@ protected:
   void removeFittingData(std::size_t index);
 
 private:
-  IndirectFittingModel(IndirectFittingModel &&model);
-
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function,
                       const std::string &input,
