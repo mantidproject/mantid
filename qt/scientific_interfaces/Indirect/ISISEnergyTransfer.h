@@ -70,7 +70,7 @@ private:
   Ui::ISISEnergyTransfer m_uiForm;
 
   std::pair<std::string, std::string> createMapFile(
-       const std::string &
+      const std::string &
           groupType); ///< create the mapping file with which to group results
   std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
   std::vector<std::string>

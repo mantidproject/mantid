@@ -455,10 +455,11 @@ ISISEnergyTransfer::createMapFile(const std::string &groupType) {
   } else if (groupType == "Groups") {
     return std::make_pair("Custom", createDetectorGroupingString());
   } else if (groupType == "Default")
-      return std::make_pair("IPF", "");
-    else if (groupType == "Custom")
-      return std::make_pair("Custom", m_uiForm.leCustomGroups->text().toStdString());
-    else {
+    return std::make_pair("IPF", "");
+  else if (groupType == "Custom")
+    return std::make_pair("Custom",
+                          m_uiForm.leCustomGroups->text().toStdString());
+  else {
     // Catch All and Individual
     return qMakePair(groupType, QString());
   }
@@ -467,7 +468,8 @@ ISISEnergyTransfer::createMapFile(const std::string &groupType) {
 const std::string ISISEnergyTransfer::createDetectorGroupingString() {
 
   const int nGroups = m_uiForm.spNumberGroups->value();
-  const int nSpectra = m_uiForm.spSpectraMax->value() - m_uiForm.spSpectraMin->value();
+  const int nSpectra =
+      m_uiForm.spSpectraMax->value() - m_uiForm.spSpectraMin->value();
   const int groupSize = nSpectra / nGroups;
   auto n = groupSize;
   std::stringstream groupingString;
@@ -477,8 +479,9 @@ const std::string ISISEnergyTransfer::createDetectorGroupingString() {
     n += groupSize;
     groupingString << std::to_string(n);
   }
-  if ( n != nSpectra) // add remainder as extra group
-    groupingString << ", " << std::to_string(n + 1) << "-" << std::to_string(nSpectra);
+  if (n != nSpectra) // add remainder as extra group
+    groupingString << ", " << std::to_string(n + 1) << "-"
+                   << std::to_string(nSpectra);
 
   return groupingString.str();
 }
