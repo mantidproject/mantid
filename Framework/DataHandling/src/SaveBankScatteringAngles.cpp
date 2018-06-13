@@ -13,8 +13,7 @@
 namespace {
 
 double radToDeg(const double rad) {
-  const static double PI = 4 * atan(1.0);
-  const static double radToDegFactor = 180 / PI;
+  const double radToDegFactor = 180 / M_PI;
   return rad * radToDegFactor;
 }
 } // anonymous namespace
