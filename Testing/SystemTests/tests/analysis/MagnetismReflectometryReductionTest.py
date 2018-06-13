@@ -4,6 +4,7 @@ from mantid import *
 from mantid.simpleapi import *
 import math
 
+
 class MagnetismReflectometryReductionTest(stresstesting.MantidStressTest):
     def runTest(self):
         MagnetismReflectometryReduction(RunNumbers=['24949',],
@@ -180,6 +181,7 @@ class MRInspectionTest(stresstesting.MantidStressTest):
     def validate(self):
         # Simple test to verify that we flagged the data correctly
         return mtd["r_24949"].getRun().getProperty("is_direct_beam").value == "False"
+
 
 class MRGetThetaTest(stresstesting.MantidStressTest):
     """ Test that the MRGetTheta algorithm produces correct results """

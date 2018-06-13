@@ -6,7 +6,11 @@ from mantid.api import *
 from mantid.kernel import *
 import mantid.simpleapi as api
 
+
 def extract_times(times, is_start, is_sf1=False, is_sf2=False, is_veto1=False, is_veto2=False):
+    """
+        Extract a list of times
+    """
     return [(times[i], is_start, [is_sf1, is_sf2, is_veto1, is_veto2]) for i in range(len(times))]
 
 
