@@ -393,8 +393,8 @@ bool checkValidPair(const std::string &WSname1, const std::string &WSname2) {
   }
 
   if (group1.itemName == group2.itemName) {
-	  throw std::invalid_argument(
-		  "Groups used for pairing must have differnt names.");
+    throw std::invalid_argument(
+        "Groups used for pairing must have differnt names.");
   }
 
   if (group1.itemType != Muon::ItemType::Group ||
