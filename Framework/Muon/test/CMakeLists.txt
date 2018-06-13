@@ -23,6 +23,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/TearDownWorld.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/ParallelRunner.cpp
+			../../TestHelpers/src/MuonWorkspaceCreationHelper.cpp
                         )
   cxxtest_add_test ( MuonTest ${TEST_FILES} )
   target_link_libraries ( MuonTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
