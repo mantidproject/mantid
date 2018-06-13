@@ -137,11 +137,10 @@ private:
   static void noOverlapParams(const HistogramData::HistogramX &X1,
                               const HistogramData::HistogramX &X2,
                               std::vector<double> &params);
-  static void intersectionParams(const HistogramData::HistogramX &X1,
-                                 int64_t &i,
+  static void intersectionParams(const HistogramData::HistogramX &X1, size_t &i,
                                  const HistogramData::HistogramX &X2,
                                  std::vector<double> &params);
-  static void inclusionParams(const HistogramData::HistogramX &X1, int64_t &i,
+  static void inclusionParams(const HistogramData::HistogramX &X1, size_t &i,
                               const HistogramData::HistogramX &X2,
                               std::vector<double> &params);
   API::MatrixWorkspace_sptr

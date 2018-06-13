@@ -463,41 +463,41 @@ bool MergeRuns::validateInputsForEventWorkspaces(
 boost::optional<std::vector<double>> MergeRuns::checkRebinning() {
   const std::string rebinBehaviour = getProperty("RebinBehaviour");
   const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
-  std::list<MatrixWorkspace_sptr> inputsSortedByX{m_inMatrixWS};
-  inputsSortedByX.sort(
+  // To properly cover all X spans of the input workspaces, one needs to
+  // sort the workspaces in ascending X before figuring out the rebinning.
+  std::vector<MatrixWorkspace_sptr> inputsSortedByX(m_inMatrixWS.cbegin(),
+                                                    m_inMatrixWS.cend());
+  std::sort(
+      inputsSortedByX.begin(), inputsSortedByX.end(),
       [](const MatrixWorkspace_sptr &ws1, const MatrixWorkspace_sptr &ws2) {
         return ws1->x(0).front() < ws2->x(0).front();
       });
   auto it = inputsSortedByX.cbegin();
-  std::vector<double> rebinParams;
+  g_log.notice() << "Using run '" << (*it)->getName()
+                 << "' as a reference to determine possible rebinning.\n";
+  boost::optional<std::vector<double>> rebinParams{boost::none};
   std::vector<double> bins{(*it)->x(0).rawData()};
-  bool rebinningNeeded{false};
   for (++it; it != inputsSortedByX.cend(); ++it) {
     if (!WorkspaceHelpers::matchingBins(*inputsSortedByX.front(), **it, true)) {
       if (rebinBehaviour != REBIN_BEHAVIOUR) {
         if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
           g_log.error() << "Could not merge run: " << (*it)->getName()
-                        << ". Binning is different from first workspace. "
+                        << ". Binning is different from the reference run. "
                            "MergeRuns will continue but this run will be "
                            "skipped.\n";
           m_inMatrixWS.remove(*it);
           continue;
         } else {
           throw std::invalid_argument(
-              "Could not merge run: " + it->get()->getName() +
-              ". Binning is different from first workspace.");
+              "Could not merge run: " + (*it)->getName() +
+              ". Binning is different from the reference run.");
         }
       }
-      rebinningNeeded = true;
       rebinParams = this->calculateRebinParams(bins, (*it)->x(0).rawData());
-      VectorHelper::createAxisFromRebinParams(rebinParams, bins);
+      VectorHelper::createAxisFromRebinParams(*rebinParams, bins);
     }
   }
-  if (rebinningNeeded) {
-    return rebinParams;
-  } else {
-    return boost::none;
-  }
+  return rebinParams;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -529,7 +529,7 @@ MergeRuns::calculateRebinParams(const std::vector<double> &bins1,
   } else {
     // Add the bins up to the start of the overlap
     newParams.emplace_back(smallerX.front());
-    int64_t i;
+    size_t i;
     for (i = 1; smallerX[i] <= start2; ++i) {
       newParams.emplace_back(smallerX[i] - smallerX[i - 1]);
       newParams.emplace_back(smallerX[i]);
@@ -583,22 +583,22 @@ void MergeRuns::noOverlapParams(const HistogramX &X1, const HistogramX &X2,
  *  @param X2 ::     The bin boundaries from the second workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
-void MergeRuns::intersectionParams(const HistogramX &X1, int64_t &i,
+void MergeRuns::intersectionParams(const HistogramX &X1, size_t &i,
                                    const HistogramX &X2,
                                    std::vector<double> &params) {
   // First calculate the number of bins in each workspace that are in the
   // overlap region
-  int64_t const overlapbins1 = X1.size() - i;
-  const auto iterX2 = std::lower_bound(X2.cbegin(), X2.cend(), X1.back());
+  auto const overlapbins1 = X1.size() - i;
+  auto const iterX2 = std::lower_bound(X2.cbegin(), X2.cend(), X1.back());
   if (iterX2 == X2.end()) {
     throw std::runtime_error("MergerRuns::intersectionParams: no intersection "
                              "between the histograms.");
   }
-  int64_t const overlapbins2 = std::distance(X2.cbegin(), iterX2);
+  auto const overlapbins2 = std::distance(X2.cbegin(), iterX2);
   // We want to use whichever one has the larger bins (on average)
-  if (overlapbins1 < overlapbins2) {
+  if (static_cast<decltype(overlapbins2)>(overlapbins1) < overlapbins2) {
     // In this case we want the rest of the bins from the first workspace.....
-    for (; i < static_cast<int64_t>(X1.size()); ++i) {
+    for (; i < X1.size(); ++i) {
       params.emplace_back(X1[i] - X1[i - 1]);
       params.emplace_back(X1[i]);
     }
@@ -630,7 +630,7 @@ void MergeRuns::intersectionParams(const HistogramX &X1, int64_t &i,
  *  @param X2 ::     The bin boundaries from the second workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
-void MergeRuns::inclusionParams(const HistogramX &X1, int64_t &i,
+void MergeRuns::inclusionParams(const HistogramX &X1, size_t &i,
                                 const HistogramX &X2,
                                 std::vector<double> &params) {
   // First calculate the number of bins in each workspace that are in the
@@ -640,15 +640,15 @@ void MergeRuns::inclusionParams(const HistogramX &X1, int64_t &i,
     throw std::runtime_error(
         "MergeRuns::inclusionParams: no overlap between the histograms");
   }
-  int64_t const overlapbins1 = std::distance(X1.cbegin(), iterX1) - i;
-  int64_t const overlapbins2 = X2.size() - 1;
+  auto const overlapbins1 = std::distance(X1.cbegin(), iterX1) - i;
+  auto const overlapbins2 = X2.size() - 1;
 
   // In the overlap region, we want to use whichever one has the larger bins (on
   // average)
   if (overlapbins1 + 1 <= overlapbins2) {
     // In the case where the first workspace has larger bins it's easy
     // - just add the rest of X1's bins
-    for (; i < static_cast<int64_t>(X1.size()); ++i) {
+    for (; i < X1.size(); ++i) {
       params.emplace_back(X1[i] - X1[i - 1]);
       params.emplace_back(X1[i]);
     }
@@ -661,7 +661,7 @@ void MergeRuns::inclusionParams(const HistogramX &X1, int64_t &i,
     }
     // And now those from X1 that lie above the overlap region
     i += overlapbins1;
-    for (; i < static_cast<int64_t>(X1.size()); ++i) {
+    for (; i < X1.size(); ++i) {
       params.emplace_back(X1[i] - params.back());
       params.emplace_back(X1[i]);
     }
