@@ -66,6 +66,7 @@ void SaveBankScatteringAngles::exec() {
   std::ofstream outFile(filename.c_str());
 
   if (!outFile) {
+    g_log.error(strerror(errno));
     throw Kernel::Exception::FileError("Unable to create file: ", filename);
   }
 
