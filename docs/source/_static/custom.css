@@ -6,13 +6,6 @@
 
 .navbar-version { display: none; }
 
-/*-------------------- $ROW WIDTH --------------------*/
-
-.row {
-   word-wrap: break-word;
-   width: 800px;
-}
-
 /*-------------------- $LINKS --------------------*/
 
 a {
