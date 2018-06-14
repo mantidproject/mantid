@@ -87,7 +87,6 @@ def _energyBinning(ws, algorithmLogging):
     """Create common (but nonequidistant) binning for a DeltaE workspace."""
     xs = ws.extractX()
     minXIndex = numpy.nanargmin(xs[:, 0])
-    # TODO Fix logging.
     dx = BinWidthAtX(InputWorkspace=ws,
                      X=0.0,
                      EnableLogging=algorithmLogging)
@@ -447,18 +446,19 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def _outputWSConvertedToTheta(self, mainWS, wsNames, wsCleanup,
                                   subalgLogging):
-        """If requested, convert the spectrum axis to theta and save the result
+        """
+        If requested, convert the spectrum axis to theta and save the result
         into the proper output property.
         """
-        thetaWSName = self.getProperty(common.PROP_OUTPUT_THETA_W_WS).valueAsStr
-        if thetaWSName:
-            thetaWSName = self.getProperty(common.PROP_OUTPUT_THETA_W_WS).value
+        if not self.getProperty(common.PROP_OUTPUT_THETA_W_WS).isDefault:
+            thetaWSName = wsNames.withSuffix('in_theta_energy_for_output')
             thetaWS = ConvertSpectrumAxis(InputWorkspace=mainWS,
                                           OutputWorkspace=thetaWSName,
                                           Target='Theta',
                                           EMode='Direct',
                                           EnableLogging=subalgLogging)
             self.setProperty(common.PROP_OUTPUT_THETA_W_WS, thetaWS)
+            wsCleanup.cleanup(thetaWS)
 
     def _rebinInW(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Rebin the horizontal axis of a workspace."""
@@ -482,10 +482,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if self.getProperty(common.PROP_BINNING_PARAMS_Q).isDefault:
             qMin, qMax = _minMaxQ(mainWS)
             dq = _deltaQ(mainWS)
-            intFactor = 10**numpy.ceil(numpy.abs(numpy.log10(0.034)))
-            dq = numpy.ceil(dq * intFactor) / intFactor
+            e = numpy.ceil(-numpy.log10(dq)) + 1
+            dq = (5. * ((dq*10**e) // 5 + 1.))*10**-e
             params = [qMin, dq, qMax]
-            report.notice('Binned momentum transfer axis to bin width {0}.'.format(dq))
+            report.notice('Binned momentum transfer axis to bin width {0} A-1.'.format(dq))
         else:
             params = self.getProperty(common.PROP_BINNING_PARAMS_Q).value
             if len(params) == 1:
