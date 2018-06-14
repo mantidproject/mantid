@@ -496,14 +496,14 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.01528882, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.01297522, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.01075352, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.0153, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.0130, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.0108, 0.0001);
 
     // The error calculation as per Issue #5035
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.06185703, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0584598, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.05491692, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0619, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0585, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0550, 0.0001);
   }
 
   void test_applyingDeadTimeCorrectionGivesCorrectAsymmetryValues() {
@@ -533,13 +533,13 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
 
     // Dead time applied before asymmetry
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.51813228, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -1.05389309, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.63497325, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.5181, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -1.0539, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.6350, 0.0001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.03856093, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0386, 0.0001);
     // TS_ASSERT_DELTA(wsOut->readE(0)[4], -0.0000000, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.06679145, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0668, 0.0001);
   }
 
   void test_asymmetryValuesCorrectWhenEnteringWorkspacesByHand() {
