@@ -467,10 +467,10 @@ ISISEnergyTransfer::createMapFile(const std::string &groupType) {
 
 const std::string ISISEnergyTransfer::createDetectorGroupingString() {
 
-  const int nGroups = m_uiForm.spNumberGroups->value();
-  const int nSpectra =
+  const unsigned int nGroups = m_uiForm.spNumberGroups->value();
+  const unsigned int nSpectra =
       m_uiForm.spSpectraMax->value() - m_uiForm.spSpectraMin->value();
-  const int groupSize = nSpectra / nGroups;
+  const unsigned int groupSize = nSpectra / nGroups;
   auto n = groupSize;
   std::stringstream groupingString;
   groupingString << "0-" << std::to_string(n);
