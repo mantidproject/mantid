@@ -46,6 +46,7 @@ CompositeFunction_sptr shallowCopy(CompositeFunction_sptr composite) {
   CompositeFunction_sptr copy(new CompositeFunction);
   for (auto i = 0u; i < composite->nFunctions(); ++i)
     copy->addFunction(composite->getFunction(i));
+  copy->addTies(composite->writeTies());
   return copy;
 }
 
