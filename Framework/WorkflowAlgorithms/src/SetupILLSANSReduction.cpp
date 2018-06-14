@@ -541,7 +541,7 @@ void SetupILLSANSReduction::exec() {
   const std::string darkCurrentFile = getPropertyValue("DarkCurrentFile");
   if (!darkCurrentFile.empty()) {
     IAlgorithm_sptr darkAlg =
-        createChildAlgorithm("EQSANSDarkCurrentSubtraction");
+        createChildAlgorithm("HFIRDarkCurrentSubtraction");
     darkAlg->setProperty("Filename", darkCurrentFile);
     darkAlg->setProperty("OutputDarkCurrentWorkspace", "");
     darkAlg->setPropertyValue("ReductionProperties", reductionManagerName);
