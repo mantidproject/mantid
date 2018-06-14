@@ -16,6 +16,8 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, print_function
 
+import os
+
 from .model import PlotSelectorModel
 from .view import PlotSelectorView
 
@@ -198,5 +200,6 @@ class PlotSelectorPresenter(object):
 
     # ---------------------- Plot Exporting -------------------------
 
-    def export_plot(self, plot_name, extension):
-        self.model.export_plot(plot_name, plot_name + extension)
+    def export_plot(self, plot_name, path, extension):
+        filename = os.path.join(path, plot_name + extension)
+        self.model.export_plot(plot_name, filename)

@@ -18,7 +18,7 @@ from __future__ import absolute_import, print_function
 
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import (QAbstractItemView, QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, QMenu,
+from qtpy.QtWidgets import (QAbstractItemView, QFileDialog, QHBoxLayout, QLineEdit, QListWidget, QListWidgetItem, QMenu,
                             QPushButton, QVBoxLayout, QWidget)
 
 from mantidqt.utils.flowlayout import FlowLayout
@@ -123,8 +123,10 @@ class PlotSelectorView(QWidget):
         return export_button
 
     def export_plot(self, extension):
-        for plot_name in self.get_all_selected_plot_names():
-            self.presenter.export_plot(plot_name, extension)
+        path = QFileDialog.getExistingDirectory(None, 'Select folder for exported plots')
+        if path:
+            for plot_name in self.get_all_selected_plot_names():
+                self.presenter.export_plot(plot_name, path, extension)
 
     # ------------------------ Plot Updates ------------------------
 
