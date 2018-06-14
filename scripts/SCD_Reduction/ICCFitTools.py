@@ -372,7 +372,7 @@ def getBGRemovedIndices(n_events, zBG=1.96, calc_pp_lambda=False, neigh_length_m
             except KeyboardInterrupt:
                 sys.exit()
             except:
-                raise
+                #raise
                 pplmin_frac -= 0.4
     print('ERROR WITH ICCFT:getBGRemovedIndices!')
 

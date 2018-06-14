@@ -160,9 +160,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                     # First we get the peak intensity
                     peakIDX = Y3D/Y3D.max() > fracStop
                     intensity = np.sum(Y3D[peakIDX])
-                    
-                    print("-----------------------")
-                    print(params)
 
                     # Now the number of background counts under the peak assuming a constant bg across the box
                     n_events = box.getNumEventsArray()
@@ -198,7 +195,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             except KeyboardInterrupt:
                 raise
             except:
-                raise
+                #raise
                 numerrors += 1
                 peak.setIntensity(0.0)
                 peak.setSigmaIntensity(1.0)
