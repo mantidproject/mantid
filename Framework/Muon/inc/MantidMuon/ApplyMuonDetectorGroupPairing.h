@@ -78,7 +78,7 @@ public:
   createPairWorkspaceManually(API::Workspace_sptr inputWS, const bool noRebin);
 
   /// Store the input properties in options.
-  Muon::AnalysisOptions ApplyMuonDetectorGroupPairing::getUserInput();
+  Muon::AnalysisOptions getUserInput();
 
   /// Set MuonProcess properties (input workspace and period properties).
   void
