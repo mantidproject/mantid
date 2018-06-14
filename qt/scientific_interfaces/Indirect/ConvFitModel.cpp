@@ -430,11 +430,10 @@ std::string ConvFitModel::singleFitOutputName(std::size_t index,
 Mantid::API::IFunction_sptr ConvFitModel::getFittingFunction() const {
   auto function = shallowCopy(IndirectFittingModel::getFittingFunction());
   auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
-  auto backgroundIndex = getFirstInCategory(composite, "Background");
 
   IFunction_sptr background(nullptr);
-  if (composite && backgroundIndex)
-    background = removeFunction(composite, *backgroundIndex);
+  if (composite && m_backgroundIndex)
+    background = removeFunction(composite, *m_backgroundIndex);
   return createConvolutionFitModel(function, background, m_temperature);
 }
 
@@ -467,12 +466,12 @@ CompositeFunction_sptr ConvFitModel::getMultiDomainFunction() const {
 
 void ConvFitModel::setFitFunction(IFunction_sptr function) {
   auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
-  auto backgroundIndex = getFirstInCategory(composite, "Background");
-  setParameterNameChanges(*function, backgroundIndex);
+  m_backgroundIndex = getFirstInCategory(composite, "Background");
+  setParameterNameChanges(*function, m_backgroundIndex);
 
   IFunction_sptr background(nullptr);
-  if (composite && backgroundIndex)
-    background = composite->getFunction(*backgroundIndex);
+  if (composite && m_backgroundIndex)
+    background = composite->getFunction(*m_backgroundIndex);
   m_backgroundString = background ? backgroundString(background) : "";
 
   IndirectFittingModel::setFitFunction(function);

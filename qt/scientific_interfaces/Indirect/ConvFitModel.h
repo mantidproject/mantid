@@ -77,6 +77,7 @@ private:
   std::vector<std::string> m_extendedResolution;
   std::unordered_map<std::string, std::string> m_parameterNameChanges;
   boost::optional<double> m_temperature;
+  boost::optional<std::size_t> m_backgroundIndex;
   std::string m_backgroundString;
   std::string m_fitType;
 };
