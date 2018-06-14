@@ -52,7 +52,7 @@ public:
   std::size_t numberOfWorkspaces() const;
   std::size_t getNumberOfSpectra(std::size_t index) const;
   std::vector<std::string> getFitParameterNames() const;
-  Mantid::API::IFunction_sptr getFittingFunction() const;
+  virtual Mantid::API::IFunction_sptr getFittingFunction() const;
 
   void setFittingData(PrivateFittingData &&fittingData);
   void setSpectra(Spectra &&spectra, std::size_t dataIndex);

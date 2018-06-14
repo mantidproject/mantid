@@ -12,6 +12,7 @@
 using namespace Mantid::API;
 
 namespace {
+
 boost::optional<std::size_t>
 getFirstInCategory(CompositeFunction_const_sptr composite,
                    const std::string &category) {
@@ -23,6 +24,15 @@ getFirstInCategory(CompositeFunction_const_sptr composite,
       return i;
   }
   return boost::none;
+}
+
+IFunction_sptr
+getFirstFunctionInCategory(CompositeFunction_const_sptr composite,
+                           const std::string &category) {
+  const auto index = getFirstInCategory(composite, category);
+  if (index)
+    return composite->getFunction(*index);
+  return nullptr;
 }
 
 IFunction_sptr removeFunction(CompositeFunction_sptr composite,
@@ -418,6 +428,17 @@ std::string ConvFitModel::singleFitOutputName(std::size_t index,
       "%1%_conv_" + m_fitType + m_backgroundString + "_s%2%", index, spectrum);
 }
 
+Mantid::API::IFunction_sptr ConvFitModel::getFittingFunction() const {
+  auto function = shallowCopy(IndirectFittingModel::getFittingFunction());
+  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto backgroundIndex = getFirstInCategory(composite, "Background");
+
+  IFunction_sptr background(nullptr);
+  if (composite && backgroundIndex)
+    background = removeFunction(composite, *backgroundIndex);
+  return createConvolutionFitModel(function, background, m_temperature);
+}
+
 boost::optional<double>
 ConvFitModel::getInstrumentResolution(std::size_t dataIndex) const {
   if (dataIndex < numberOfWorkspaces())
@@ -446,18 +467,16 @@ CompositeFunction_sptr ConvFitModel::getMultiDomainFunction() const {
 }
 
 void ConvFitModel::setFitFunction(IFunction_sptr function) {
-  function = shallowCopy(function);
   auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
   auto backgroundIndex = getFirstInCategory(composite, "Background");
   setParameterNameChanges(*function, backgroundIndex);
 
   IFunction_sptr background(nullptr);
   if (composite && backgroundIndex)
-    background = removeFunction(composite, *backgroundIndex);
+    background = composite->getFunction(*backgroundIndex);
   m_backgroundString = background ? backgroundString(background) : "";
 
-  IndirectFittingModel::setFitFunction(
-      createConvolutionFitModel(function, background, m_temperature));
+  IndirectFittingModel::setFitFunction(function);
 }
 
 void ConvFitModel::setTemperature(const boost::optional<double> &temperature) {
