@@ -155,20 +155,16 @@ void SaveGDA::exec() {
     const auto &d = matrixWS->x(0);
     const auto &bankCalibParams = calibParams[groupingScheme[i] - 1];
 
-    std::vector<double> tof;
-    tof.reserve(d.size());
-    std::transform(d.begin(), d.end(), std::back_inserter(tof),
+    std::vector<double> tofScaled;
+    tofScaled.reserve(d.size());
+    std::transform(d.begin(), d.end(), std::back_inserter(tofScaled),
                    [&bankCalibParams](const double dVal) {
                      return (dVal * bankCalibParams.difa +
                              dVal * dVal * bankCalibParams.difc +
-                             bankCalibParams.tzero);
+                             bankCalibParams.tzero) *
+                            32;
                    });
-    const auto averageDeltaTByT = computeAverageDeltaTByT(tof);
-
-    std::vector<double> tofScaled;
-    tofScaled.reserve(tof.size());
-    std::transform(tof.begin(), tof.end(), std::back_inserter(tofScaled),
-                   [](const double t) { return t * 32; });
+    const auto averageDeltaTByT = computeAverageDeltaTByT(tofScaled);
 
     const auto &intensity = matrixWS->y(0);
     const auto &error = matrixWS->e(0);
