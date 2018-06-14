@@ -15,12 +15,12 @@ class IkedaCarpenterConvoluted(IFunction1D):
         self.declareParameter("B") #Beta
         self.declareParameter("R") #R - ratio of fast to slow neutrons
         self.declareParameter("T0") #T0 - time offset
-        self.declareParameter("scale") #amplitude
-        self.declareParameter("hatWidth") #width of square wave
-        self.declareParameter("k_conv") #k_conv for Gaussian
+        self.declareParameter("Scale") #amplitude
+        self.declareParameter("HatWidth") #width of square wave
+        self.declareParameter("KConv") #KConv for Gaussian
 
     #n.b. pass penalty=None to not use default mantid penalty - useful for development
-    def setPenalizedConstraints(self, A0=None, B0=None, R0=None, T00=None, scale0=None, hatWidth0=None, k_conv0=None, penalty=1.0e20):
+    def setPenalizedConstraints(self, A0=None, B0=None, R0=None, T00=None, Scale0=None, HatWidth0=None, KConv0=None, penalty=1.0e20):
         if A0 is not None:
             self.addConstraints("{:4.4e} < A < {:4.4e}".format(A0[0], A0[1]))
             if penalty is not None:
@@ -37,30 +37,30 @@ class IkedaCarpenterConvoluted(IFunction1D):
             self.addConstraints("{:4.4e} < T0 < {:4.4e}".format(T00[0], T00[1]))
             if penalty is not None:
                 self.setConstraintPenaltyFactor("T0", penalty)
-        if scale0 is not None:
-            self.addConstraints("{:4.4e} < scale < {:4.4e}".format(scale0[0], scale0[1]))
+        if Scale0 is not None:
+            self.addConstraints("{:4.4e} < Scale < {:4.4e}".format(Scale0[0], Scale0[1]))
             if penalty is not None:
-                self.setConstraintPenaltyFactor("scale", penalty)
-        if hatWidth0 is not None:
-            self.addConstraints("{:4.4e} < hatWidth < {:4.4e}".format(hatWidth0[0], hatWidth0[1]))
+                self.setConstraintPenaltyFactor("Scale", penalty)
+        if HatWidth0 is not None:
+            self.addConstraints("{:4.4e} < HatWidth < {:4.4e}".format(HatWidth0[0], HatWidth0[1]))
             if penalty is not None:
-                self.setConstraintPenaltyFactor("hatWidth", penalty)
-        if k_conv0 is not None:
-            self.addConstraints("{:4.4e} < k_conv < {:4.4e}".format(k_conv0[0], k_conv0[1]))
+                self.setConstraintPenaltyFactor("HatWidth", penalty)
+        if KConv0 is not None:
+            self.addConstraints("{:4.4e} < KConv < {:4.4e}".format(KConv0[0], KConv0[1]))
             if penalty is not None:
-                self.setConstraintPenaltyFactor("k_conv", penalty)
+                self.setConstraintPenaltyFactor("KConv", penalty)
 
     def function1D(self, t):
         A  = self.getParamValue(0)
         B  = self.getParamValue(1)
         R  = self.getParamValue(2)
         T0 = self.getParamValue(3)
-        scale = self.getParamValue(4)
-        hatWidth  = self.getParamValue(5)
-        k_conv  = self.getParamValue(6)
+        Scale = self.getParamValue(4)
+        HatWidth  = self.getParamValue(5)
+        KConv  = self.getParamValue(6)
 
-        # A/2 scale factor has been removed to make A and scale independent
-        f_int = scale*((1-R)*np.power((A*(t-T0)),2)*
+        # A/2 Scale factor has been removed to make A and Scale independent
+        f_int = Scale*((1-R)*np.power((A*(t-T0)),2)*
                        np.exp(-A*(t-T0))+2*R*A**2*B/np.power((A-B),3) *
                        (np.exp(-B*(t-T0))-np.exp(-A*(t-T0))*(1+(A-B)*(t-T0)+0.5*np.power((A-B),2)*np.power((t-T0),2))))
         f_int[t<T0] = 0
@@ -68,15 +68,15 @@ class IkedaCarpenterConvoluted(IFunction1D):
         mid_point_hat = len(f_int)//2
         gc_x = np.array(range(len(f_int))).astype(float)
         ppd = 0.0*gc_x
-        lowIDX  = int(np.floor(np.max([mid_point_hat-np.abs(hatWidth),0])))
-        highIDX = int(np.ceil(np.min([mid_point_hat+np.abs(hatWidth),len(gc_x)])))
+        lowIDX  = int(np.floor(np.max([mid_point_hat-np.abs(HatWidth),0])))
+        highIDX = int(np.ceil(np.min([mid_point_hat+np.abs(HatWidth),len(gc_x)])))
 
         ppd[lowIDX:highIDX] = 1.0
         ppd = ppd/sum(ppd)
 
         gc_x = np.array(range(len(f_int))).astype(float)
         gc_x = 2*(gc_x-np.min(gc_x))/(np.max(gc_x)-np.min(gc_x))-1
-        gc_f = np.exp(-k_conv*np.power(gc_x,2))
+        gc_f = np.exp(-KConv*np.power(gc_x,2))
         gc_f = gc_f/np.sum(gc_f)
 
         npad = len(f_int) - 1

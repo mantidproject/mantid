@@ -125,8 +125,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         numerrors = 0
 
         # Create the parameters workspace
-        keys =  ['peakNumber','Alpha', 'Beta', 'R', 'T0', 'bgBVG', 'chiSq3d', 'dQ', 'k_conv', 'muPH',
-                 'muTH', 'newQ', 'scale', 'scale3d', 'sigP', 'sigX', 'sigY', 'Intens3d', 'SigInt3d']
+        keys =  ['peakNumber','Alpha', 'Beta', 'R', 'T0', 'bgBVG', 'chiSq3d', 'dQ', 'KConv', 'muPH',
+                 'muTH', 'newQ', 'Scale', 'scale3d', 'SigP', 'SigX', 'SigY', 'Intens3d', 'SigInt3d']
         datatypes = ['float']*len(keys)
         datatypes[np.where(np.array(keys)=='newQ')[0][0]] = 'V3D'
         params_ws = CreateEmptyTableWorkspace()
