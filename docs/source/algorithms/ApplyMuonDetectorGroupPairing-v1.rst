@@ -112,7 +112,7 @@ Usage
 
 Output:
 
-.. testoutput:: ExCountsOffsetAndRebin
+.. testoutput:: ExMUSRPairAsymmetry
 
    -0.0176193517359
 
