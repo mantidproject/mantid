@@ -40,6 +40,8 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
   std::string rebinParamsAsString();
+  API::MatrixWorkspace_sptr calculateIntermediateWorkspace(API::MatrixWorkspace_sptr workspace, std::string rebinParams);
+  MatrixWorkspace_sptr calculateIqt(MatrixWorkspace_sptr workspace, MatrixWorkspace_sptr resolutionWorkspace, std::string rebinParams)
 
 };
 
