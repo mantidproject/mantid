@@ -90,7 +90,9 @@ The peak intensity :math:`I`, is given by summing :math:`Y_{model}(\vec{q})` ove
 
 .. math::
     \sigma(I) = \sqrt{\Sigma N_{obs} + \Sigma N_{BG} + \frac{\Sigma N_{obs}(N_{obs}-N_{model})^2}{\Sigma N_{obs}}}
-where the first two terms come from Poissionian statistics and the final term is the variance of the fit. Those sums are over the same voxels used to calculate intensity.
+
+where the first two terms come from Poissionian statistics and the final term is the variance of the fit. Those 
+sums are over the same voxels used to calculate intensity.
 
  
 Usage
