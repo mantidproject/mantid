@@ -155,7 +155,9 @@ boost::optional<double> instrumentResolution(MatrixWorkspace_sptr workspace) {
       return analyser->getNumberParameter("resolution")[0];
     else
       return workspace->getInstrument()->getNumberParameter("resolution")[0];
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
+  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
+    return boost::none;
+  } catch (const std::invalid_argument &) {
     return boost::none;
   }
 }

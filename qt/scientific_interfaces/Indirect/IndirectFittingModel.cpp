@@ -269,18 +269,20 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+PrivateFittingData::PrivateFittingData() : m_data() {}
+
+PrivateFittingData::PrivateFittingData(
+    std::vector<std::unique_ptr<IndirectFitData>> &&data)
+    : m_data(std::move(data)) {}
+
+PrivateFittingData &PrivateFittingData::
+operator=(PrivateFittingData &&fittingData) {
+  m_data = std::move(fittingData.m_data);
+  return *this;
+}
+
 IndirectFittingModel::IndirectFittingModel()
     : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL) {}
-
-void IndirectFittingModel::swap(IndirectFittingModel &model) {
-  std::swap(m_fitOutput, model.m_fitOutput);
-  std::swap(m_fittingData, model.m_fittingData);
-  std::swap(m_activeFunction, model.m_activeFunction);
-  std::swap(m_fitFunction, model.m_fitFunction);
-  std::swap(m_defaultParameters, model.m_defaultParameters);
-  std::swap(m_previousModelSelected, model.m_previousModelSelected);
-  std::swap(m_fittingMode, model.m_fittingMode);
-}
 
 MatrixWorkspace_sptr
 IndirectFittingModel::getWorkspace(std::size_t index) const {
@@ -345,21 +347,21 @@ bool IndirectFittingModel::isPreviouslyFit(std::size_t dataIndex,
   return m_fitOutput->isSpectrumFit(fitData, spectrum);
 }
 
-boost::optional<std::string> IndirectFittingModel::isInvalidFunction() const {
-  if (!m_activeFunction)
-    return "No fit function has been defined.";
-
-  const auto composite =
-      boost::dynamic_pointer_cast<CompositeFunction>(m_activeFunction);
-  if (composite && composite->nFunctions() == 0)
-    return "No fit function has been defined.";
-  return boost::none;
-}
-
 bool IndirectFittingModel::hasZeroSpectra(std::size_t dataIndex) const {
   if (m_fittingData.size() > dataIndex)
     return m_fittingData[dataIndex]->zeroSpectra();
   return true;
+}
+
+boost::optional<std::string> IndirectFittingModel::isInvalidFunction() const {
+  if (!m_activeFunction)
+    return "No fit function has been defined";
+
+  const auto composite =
+      boost::dynamic_pointer_cast<CompositeFunction>(m_activeFunction);
+  if (composite && (composite->nFunctions() == 0 || composite->nParams() == 0))
+    return "No fitting functions have been defined.";
+  return boost::none;
 }
 
 std::size_t IndirectFittingModel::numberOfWorkspaces() const {
@@ -378,6 +380,10 @@ std::vector<std::string> IndirectFittingModel::getFitParameterNames() const {
 
 Mantid::API::IFunction_sptr IndirectFittingModel::getFittingFunction() const {
   return m_activeFunction;
+}
+
+void IndirectFittingModel::setFittingData(PrivateFittingData &&fittingData) {
+  m_fittingData = std::move(fittingData.m_data);
 }
 
 void IndirectFittingModel::setSpectra(Spectra &&spectra,
@@ -466,9 +472,9 @@ void IndirectFittingModel::removeFittingData(std::size_t index) {
   m_defaultParameters.erase(m_defaultParameters.begin() + index);
 }
 
-void IndirectFittingModel::clearWorkspaces() {
-  m_fittingData.clear();
+PrivateFittingData IndirectFittingModel::clearWorkspaces() {
   m_fitOutput.reset();
+  return std::move(m_fittingData);
 }
 
 void IndirectFittingModel::setFittingMode(FittingMode mode) {

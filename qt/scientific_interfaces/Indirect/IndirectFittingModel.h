@@ -16,6 +16,19 @@ namespace IDA {
 
 enum class FittingMode { SEQUENTIAL, SIMULTANEOUS };
 
+class IndirectFittingModel;
+
+struct PrivateFittingData {
+  friend class IndirectFittingModel;
+public:
+  PrivateFittingData();
+  PrivateFittingData &operator=(PrivateFittingData &&fittingData);
+
+private:
+  PrivateFittingData(std::vector<std::unique_ptr<IndirectFitData>> &&data);
+  std::vector<std::unique_ptr<IndirectFitData>> m_data;
+};
+
 class DLLExport IndirectFittingModel {
 public:
   IndirectFittingModel();
@@ -35,12 +48,13 @@ public:
   bool isMultiFit() const;
   bool isPreviouslyFit(std::size_t dataIndex, std::size_t spectrum) const;
   bool hasZeroSpectra(std::size_t dataIndex) const;
-  boost::optional<std::string> isInvalidFunction() const;
+  virtual boost::optional<std::string> isInvalidFunction() const;
   std::size_t numberOfWorkspaces() const;
   std::size_t getNumberOfSpectra(std::size_t index) const;
   std::vector<std::string> getFitParameterNames() const;
   Mantid::API::IFunction_sptr getFittingFunction() const;
 
+  void setFittingData(PrivateFittingData &&fittingData);
   void setSpectra(Spectra &&spectra, std::size_t dataIndex);
   void setSpectra(const Spectra &spectra, std::size_t dataIndex);
   void setStartX(double startX, std::size_t dataIndex, std::size_t spectrum);
@@ -53,7 +67,7 @@ public:
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                             const Spectra &spectra);
   virtual void removeWorkspace(std::size_t index);
-  void clearWorkspaces();
+  PrivateFittingData clearWorkspaces();
   void setFittingMode(FittingMode mode);
   virtual void setFitFunction(Mantid::API::IFunction_sptr function);
   void setDefaultParameterValue(const std::string &name, double value,
@@ -100,7 +114,6 @@ protected:
   void addNewWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                        const Spectra &spectra);
   void removeFittingData(std::size_t index);
-  void swap(IndirectFittingModel &model);
 
 private:
   Mantid::API::IAlgorithm_sptr
