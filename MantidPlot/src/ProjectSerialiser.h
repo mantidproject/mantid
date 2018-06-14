@@ -57,9 +57,6 @@ public:
   explicit ProjectSerialiser(ApplicationWindow *window);
   explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder);
 
-  bool checkAllWorkspacesInAds(
-      const std::vector<std::string> &expectedWsNames) const;
-
   /// Save the current state of the project to disk
   void save(const QString &projectName, const std::vector<std::string> &wsNames,
             const std::vector<std::string> &windowNames, bool compress = false);

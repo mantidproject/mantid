@@ -396,6 +396,16 @@ public:
     }
   }
 
+  /// Checks all elements within the specified vector exist in the ADS
+  bool doAllWsExist(const std::vector<std::string> &listOfNames) {
+	  for (const auto &wsName : listOfNames) {
+		  if (!doesExist(wsName))
+			  return false;
+	  }
+	  return true;
+  }
+
+
   /// Check to see if a data object exists in the store
   bool doesExist(const std::string &name) const {
     // Make DataService access thread-safe
