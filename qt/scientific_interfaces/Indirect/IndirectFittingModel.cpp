@@ -621,7 +621,7 @@ IndirectFittingModel::getDefaultParameters(std::size_t index) const {
 std::unordered_map<std::string, std::string>
 IndirectFittingModel::mapDefaultParameterNames() const {
   if (m_activeFunction)
-    return shortToLongParameterNames(m_activeFunction);
+    return shortToLongParameterNames(getFittingFunction());
   return std::unordered_map<std::string, std::string>();
 }
 
@@ -658,7 +658,7 @@ WorkspaceGroup_sptr IndirectFittingModel::getResultGroup() const {
 }
 
 bool IndirectFittingModel::isPreviousModelSelected() const {
-  return m_fitFunction && equivalentFunctions(m_activeFunction, m_fitFunction);
+  return m_fitFunction && equivalentFunctions(getFittingFunction(), m_fitFunction);
 }
 
 CompositeFunction_sptr IndirectFittingModel::getMultiDomainFunction() const {
@@ -680,7 +680,7 @@ IAlgorithm_sptr IndirectFittingModel::getSingleFit(std::size_t dataIndex,
   const auto exclude = fitData->excludeRegionsVector(spectrum);
 
   auto fitAlgorithm = simultaneousFitAlgorithm();
-  fitAlgorithm->setProperty("Function", m_activeFunction);
+  fitAlgorithm->setProperty("Function", getFittingFunction());
   addInputDataToSimultaneousFit(fitAlgorithm, workspace, spectrum, range,
                                 exclude, "");
   fitAlgorithm->setProperty("OutputWorkspace",
