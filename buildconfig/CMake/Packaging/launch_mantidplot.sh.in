@@ -5,8 +5,8 @@
 # Script is configured by CMake
 
 # Find out where we are
-SCRIPTFILE=$(readlink -f "$0")
-INSTALLDIR=$(echo $SCRIPTFILE | sed -r -e 's|^(.*)/(.*)$|\1|g') #.* is greedy and eats up until the final slash
+THISFILE=$(readlink -f "$0")
+INSTALLDIR=$(echo $THISFILE | sed -r -e 's|^(.*)/(.*)$|\1|g') #.* is greedy and eats up until the final slash
 
 # Define extra libraries and load paths
 LOCAL_PRELOAD=@TCMALLOC_RUNTIME_LIB@
@@ -51,4 +51,4 @@ fi
 # Launch
 LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
     TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD=${TCM_REPORT} QT_API=pyqt \
-    @WRAPPER_PREFIX@$VGLRUN $GDB $INSTALLDIR/@MANTIDPLOT_EXEC@ $*@WRAPPER_POSTFIX@
+    @WRAPPER_PREFIX@$VGLRUN $GDB $INSTALLDIR/@MANTIDPLOT_EXEC@ $*@WRAPPER_POSTFIX@ || python @SCRIPTSDIR@/ErrorReporter/error_dialog_app.py --exitcode=$? --directory=$INSTALLDIR

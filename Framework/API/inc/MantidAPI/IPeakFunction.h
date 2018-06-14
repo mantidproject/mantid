@@ -70,9 +70,9 @@ public:
   /// Function evaluation method to be implemented in the inherited classes
   virtual void functionLocal(double *out, const double *xValues,
                              const size_t nData) const = 0;
-  /// Derivative evaluation method to be implemented in the inherited classes
-  virtual void functionDerivLocal(Jacobian *out, const double *xValues,
-                                  const size_t nData) = 0;
+  /// Derivative evaluation method. Default is to calculate numerically
+  virtual void functionDerivLocal(Jacobian *jacobian, const double *xValues,
+                                  const size_t nData);
 
   /// Get name of parameter that is associated to centre.
   std::string getCentreParameterName() const;

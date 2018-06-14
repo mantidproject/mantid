@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 import os
 import pip
@@ -8,6 +10,17 @@ import urllib2
 import zipfile
 
 
+FAILED_DOWNLOAD_MESSAGE = "Could not download the GSAS installation package. " \
+                          "This can occur for many reasons, one of which is " \
+                          "that your computer is not connected to the internet.\n" \
+                          "A common reason is that your version of SSL is out of date " \
+                          "(often seen on OSX). From a Python shell, run " \
+                          "'import ssl; print(ssl.OPENSSL_VERSION)'\n" \
+                          "If you see a version number less than 1.0, you need to either " \
+                          "upgrade SSL (contact the Mantid team or seek help online) " \
+                          "or do a manual installation from the GSAS-II website.\n" \
+                          "If neither of these solutions yield anything useful, please " \
+                          "get in contact with the Mantid team."
 GSAS_SVN_URL = "https://subversion.xray.aps.anl.gov/pyGSAS/install/GSASIIproxy.zip"
 GSAS_BOOTSTRAP_URL = "https://subversion.xray.aps.anl.gov/pyGSAS/install/bootstrap.py"
 GSAS_PROXY_FILE_NAME = "GSASIIProxy.zip"
