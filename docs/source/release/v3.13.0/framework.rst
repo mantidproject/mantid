@@ -41,6 +41,8 @@ New Algorithms
 - :ref:`ExportSampleLogsToHDF5 <algm-ExportSampleLogsToHDF5>` saves a
   workspace's samples logs to an HDF5 file
 
+- :ref:`SaveGDA <algm-SaveGDA>` saves a focused diffraction workspace to MAUD-readable ``.gda`` format
+
 Improved
 ########
 
