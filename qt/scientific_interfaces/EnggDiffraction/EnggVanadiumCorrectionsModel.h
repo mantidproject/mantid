@@ -38,10 +38,10 @@ private:
                     Mantid::API::MatrixWorkspace_sptr>
   calculateCorrectionWorkspaces(const std::string &vanadiumRunNumber) const;
 
-  boost::optional<Mantid::API::MatrixWorkspace_sptr>
+  Mantid::API::MatrixWorkspace_sptr
   fetchCachedCurvesWorkspace(const std::string &vanadiumRunNumber) const;
 
-  boost::optional<Mantid::API::ITableWorkspace_sptr>
+  Mantid::API::ITableWorkspace_sptr
   fetchCachedIntegratedWorkspace(const std::string &vanadiumRunNumber) const;
 
   std::string

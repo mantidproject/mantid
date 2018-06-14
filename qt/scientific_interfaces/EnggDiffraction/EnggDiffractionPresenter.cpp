@@ -1,4 +1,7 @@
 #include "EnggDiffractionPresenter.h"
+#include "EnggDiffractionPresWorker.h"
+#include "EnggVanadiumCorrectionsModel.h"
+#include "IEnggDiffractionView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -7,9 +10,6 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
-#include "EnggDiffractionPresWorker.h"
-#include "EnggVanadiumCorrectionsModel.h"
-#include "IEnggDiffractionView.h"
 
 #include <algorithm>
 #include <cctype>
@@ -1076,8 +1076,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   m_vanadiumCorrectionsModel->setCurrentInstrument(m_view->currentInstrument());
   const auto vanadiumCorrectionWorkspaces =
       m_vanadiumCorrectionsModel->fetchCorrectionWorkspaces(vanNo);
-  const auto vanIntegWS = vanadiumCorrectionWorkspaces.first;
-  const auto vanCurvesWS = vanadiumCorrectionWorkspaces.second;
+  const auto &vanIntegWS = vanadiumCorrectionWorkspaces.first;
+  const auto &vanCurvesWS = vanadiumCorrectionWorkspaces.second;
 
   try {
     auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
@@ -1731,8 +1731,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   const auto vanadiumCorrectionWorkspaces =
       m_vanadiumCorrectionsModel->fetchCorrectionWorkspaces(
           m_view->currentVanadiumNo());
-  const auto vanIntegWS = vanadiumCorrectionWorkspaces.first;
-  const auto vanCurvesWS = vanadiumCorrectionWorkspaces.second;
+  const auto &vanIntegWS = vanadiumCorrectionWorkspaces.first;
+  const auto &vanCurvesWS = vanadiumCorrectionWorkspaces.second;
 
   const std::string inWSName = "engggui_focusing_input_ws";
   const std::string instStr = m_view->currentInstrument();
@@ -1863,6 +1863,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   g_log.notice() << "Saved focused workspace as file: " << fullFilename << '\n';
 
   copyFocusedToUserAndAll(fullFilename);
+
+  exportSampleLogsToHDF5(outWSName, userHDFRunFilename(std::stoi(runNo)));
 
   bool saveOutputFiles = m_view->saveFocusedOutputFiles();
 
@@ -2337,6 +2339,17 @@ void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
   copyToGeneral(saveDir, comp);
 }
 
+void EnggDiffractionPresenter::exportSampleLogsToHDF5(
+    const std::string &inputWorkspace, const std::string &filename) const {
+  auto saveAlg = Mantid::API::AlgorithmManager::Instance().create(
+      "ExportSampleLogsToHDF5");
+  saveAlg->initialize();
+  saveAlg->setProperty("InputWorkspace", inputWorkspace);
+  saveAlg->setProperty("Filename", filename);
+  saveAlg->setProperty("Blacklist", "bankid");
+  saveAlg->execute();
+}
+
 /**
 * Generates the required file name of the output files
 *
@@ -2570,7 +2583,7 @@ std::string EnggDiffractionPresenter::outFitParamsTblNameGenerator(
 * "Focus"
 */
 Poco::Path
-EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) {
+EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) const {
   std::string rbn = m_view->getRBNumber();
   Poco::Path dir = outFilesRootDir();
 
@@ -2592,6 +2605,25 @@ EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) {
                   << dir.toString() << ". Error details: " << re.what() << '\n';
   }
   return dir;
+}
+
+std::string
+EnggDiffractionPresenter::userHDFRunFilename(const int runNumber) const {
+  auto userOutputDir = outFilesUserDir("Runs");
+  userOutputDir.append(std::to_string(runNumber) + ".hdf5");
+  return userOutputDir.toString();
+}
+
+std::string EnggDiffractionPresenter::userHDFMultiRunFilename(
+    const std::vector<RunLabel> &runLabels) const {
+  const auto &begin = runLabels.cbegin();
+  const auto &end = runLabels.cend();
+  const auto minLabel = std::min_element(begin, end);
+  const auto maxLabel = std::max_element(begin, end);
+  auto userOutputDir = outFilesUserDir("Runs");
+  userOutputDir.append(std::to_string(minLabel->runNumber) + "_" +
+                       std::to_string(maxLabel->runNumber) + ".hdf5");
+  return userOutputDir.toString();
 }
 
 /**
@@ -2629,7 +2661,7 @@ EnggDiffractionPresenter::outFilesGeneralDir(const std::string &addComponent) {
 /**
  * Produces the root path where output files are going to be written.
  */
-Poco::Path EnggDiffractionPresenter::outFilesRootDir() {
+Poco::Path EnggDiffractionPresenter::outFilesRootDir() const {
   // TODO decide whether to move into settings or use mantid's default directory
   // after discussion with users
   const std::string rootDir = "EnginX_Mantid";
@@ -2637,11 +2669,11 @@ Poco::Path EnggDiffractionPresenter::outFilesRootDir() {
 
   try {
 // takes to the root of directory according to the platform
-#ifdef __unix__
-    dir = Poco::Path().home();
-#else
+#ifdef _WIN32
     const std::string ROOT_DRIVE = "C:/";
     dir.assign(ROOT_DRIVE);
+#else
+    dir = Poco::Path().home();
 #endif
     dir.append(rootDir);
 

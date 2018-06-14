@@ -110,7 +110,7 @@ void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results,
 /// Initialize
 void EstimatePeakErrors::init() {
 
-  declareProperty(make_unique<FunctionProperty>("Function"),
+  declareProperty(make_unique<FunctionProperty>("Function", Direction::InOut),
                   "Fitting function containing peaks. Must have a covariance "
                   "matrix attached.");
 
