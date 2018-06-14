@@ -59,19 +59,19 @@ boost::optional<std::vector<std::string>>
 getParamLinesFromGSASFile(const std::string &paramsFilename) {
   std::ifstream paramsFile;
   paramsFile.open(paramsFilename);
-  std::vector<std::string> paramLines;
 
   if (paramsFile.is_open()) {
+    std::vector<std::string> paramLines;
     std::string line;
     while (std::getline(paramsFile, line)) {
       if (line.find("ICONS") != std::string::npos) {
         paramLines.emplace_back(line);
       }
     }
+    return paramLines;
   } else {
     return boost::none;
   }
-  return paramLines;
 }
 
 } // anonymous namespace
