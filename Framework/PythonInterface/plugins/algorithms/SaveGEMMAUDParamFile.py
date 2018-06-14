@@ -67,7 +67,9 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
             template = template_file.read()
 
         num_banks = input_ws.getNumberOfEntries()
-        create_empty_param_list = lambda default_value="0": "\n".join(default_value for _ in range(num_banks))
+
+        def create_empty_param_list(default_value="0"):
+            return "\n".join(default_value for _ in range(num_banks))
 
         with open(self.getProperty(self.PROP_OUTPUT_FILE).value, "w") as output_file:
             output_file.write(template.format(gsas_prm_file=gsas_filename,
@@ -167,5 +169,6 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
 
         return distances, difas, difcs, tzeros, alpha_zeros, alpha_ones, \
             beta_zeros, beta_ones, sigma_zeros, sigma_ones, sigma_twos
+
 
 AlgorithmFactory.subscribe(SaveGEMMAUDParamFile)
