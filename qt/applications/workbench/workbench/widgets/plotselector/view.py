@@ -24,6 +24,14 @@ from qtpy.QtWidgets import (QAbstractItemView, QFileDialog, QHBoxLayout, QLineEd
 from mantidqt.utils.flowlayout import FlowLayout
 from workbench.plotting.figuremanager import QAppThreadCall
 
+export_types = [
+    ('Export to EPS', '.eps'),
+    ('Export to PDF', '.pdf'),
+    ('Export to PNG', '.png'),
+    ('Export to SVG', '.svg')
+]
+
+
 class PlotSelectorView(QWidget):
     """
     The view to the plot selector, a PyQt widget.
@@ -32,14 +40,17 @@ class PlotSelectorView(QWidget):
     # A signal to capture when delete is pressed
     deleteKeyPressed = Signal(int)
 
-    def __init__(self, presenter, parent=None):
+    def __init__(self, presenter, parent=None, is_run_as_unit_test=False):
         """
         Initialise a new instance of PlotSelectorWidget
         :param presenter: The presenter controlling this view
         :param parent: Optional - the parent QWidget
+        :param is_run_as_unit_test: Optional - True if this is
+        running as a unit test, in which case skip file dialogs
         """
         super(PlotSelectorView, self).__init__(parent)
         self.presenter = presenter
+        self.is_run_as_unit_test = is_run_as_unit_test
 
         self.close_button = QPushButton('Close')
         self.export_button = self._make_export_button()
@@ -115,23 +126,21 @@ class PlotSelectorView(QWidget):
     def _make_export_button(self):
         export_button = QPushButton("Export")
         export_menu = QMenu()
-        export_menu.addAction("Export to EPS", lambda: self.export_plot(".eps"))
-        export_menu.addAction("Export to PDF", lambda: self.export_plot(".pdf"))
-        export_menu.addAction("Export to PNG", lambda: self.export_plot(".png"))
-        export_menu.addAction("Export to SVG", lambda: self.export_plot(".svg"))
+        for text, extension in export_types:
+            export_menu.addAction(text, lambda ext=extension: self.export_plot(ext))
         export_button.setMenu(export_menu)
         return export_button
 
     def export_plot(self, extension):
-        path = QFileDialog.getExistingDirectory(None, 'Select folder for exported plots')
-        if path:
-            for plot_name in self.get_all_selected_plot_names():
-                self.presenter.export_plot(plot_name, path, extension)
+        path = ""
+        if not self.is_run_as_unit_test:
+            path = QFileDialog.getExistingDirectory(None, 'Select folder for exported plots')
+        self.presenter.export_plots(path, extension)
 
     # ------------------------ Plot Updates ------------------------
 
     def _add_to_plot_list(self, plot_name):
-        real_item = PlotNameWidget(self.presenter, plot_name, self)
+        real_item = PlotNameWidget(self.presenter, plot_name, self, self.is_run_as_unit_test)
         widget_item = QListWidgetItem()
         size_hint = real_item.sizeHint()
         widget_item.setSizeHint(size_hint)
@@ -203,11 +212,12 @@ class PlotSelectorView(QWidget):
 
 
 class PlotNameWidget(QWidget):
-    def __init__(self, presenter, plot_name="", parent=None):
+    def __init__(self, presenter, plot_name="", parent=None, is_run_as_unit_test=False):
         super(PlotNameWidget, self).__init__(parent)
 
         self.presenter = presenter
         self.plot_name = plot_name
+        self.is_run_as_unit_test = is_run_as_unit_test
 
         self.line_edit = QLineEdit(self.plot_name)
         self.line_edit.setReadOnly(True)
@@ -248,7 +258,7 @@ class PlotNameWidget(QWidget):
 
         # Add the context menu
         self.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.context_menu = self._make_context_menu()
+        self.context_menu, self.export_menu = self._make_context_menu()
         self.customContextMenuRequested.connect(self.context_menu_opened)
 
     def set_plot_name(self, new_name):
@@ -291,8 +301,20 @@ class PlotNameWidget(QWidget):
         context_menu = QMenu()
         context_menu.addAction("Make Active", lambda: self.make_active_pressed(self.plot_name))
         context_menu.addAction("Rename", lambda: self.toggle_plot_name_editable(True))
+
+        export_menu = context_menu.addMenu("Export")
+        for text, extension in export_types:
+            export_menu.addAction(text, lambda ext=extension: self.export_plot(ext))
+
         context_menu.addAction("Close", lambda: self.close_pressed(self.plot_name))
-        return context_menu
+        return context_menu, export_menu
 
     def context_menu_opened(self, position):
         self.context_menu.exec_(self.mapToGlobal(position))
+
+    def export_plot(self, extension):
+        path = ""
+        if not self.is_run_as_unit_test:
+            path = QFileDialog.getExistingDirectory(None, 'Select folder for exported plot')
+        self.presenter.export_plot(self.plot_name, path, extension)
+

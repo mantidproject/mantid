@@ -22,7 +22,7 @@ from qtpy.QtTest import QTest
 from mantidqt.utils.qt.testing import requires_qapp
 
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
-from workbench.widgets.plotselector.view import PlotSelectorView
+from workbench.widgets.plotselector.view import export_types, PlotSelectorView
 
 import unittest
 try:
@@ -36,7 +36,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
 
     def setUp(self):
         self.presenter = mock.Mock(spec=PlotSelectorPresenter)
-        self.view = PlotSelectorView(self.presenter)
+        self.view = PlotSelectorView(self.presenter, is_run_as_unit_test=True)
 
     def get_NameWidget_by_row_number(self, row_number):
         item = self.view.list_widget.item(row_number)
@@ -167,7 +167,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.view.set_plot_list(plot_names)
 
         widget = self.get_NameWidget_by_row_number(1)
-        widget.context_menu.actions()[2].trigger()
+        widget.context_menu.actions()[3].trigger()
 
         self.presenter.close_single_plot.assert_called_once_with("Plot2")
 
@@ -206,6 +206,30 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         widget.context_menu.actions()[0].trigger()
 
         self.presenter.make_plot_active.assert_called_once_with("Plot2")
+
+    # ---------------------- Plot Exporting -------------------------
+
+    def test_export_button_pressed(self):
+        for i in range(len(export_types)):
+            self.view.export_button.menu().actions()[i].trigger()
+
+        for i in range(len(export_types)):
+            print(i, export_types[i][1])
+            self.assertEqual(self.presenter.export_plots.mock_calls[i],
+                             mock.call("", export_types[i][1]))
+
+    def test_export_context_menu(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        widget = self.get_NameWidget_by_row_number(1)
+
+        for i in range(len(export_types)):
+            widget.export_menu.actions()[i].trigger()
+
+        for i in range(len(export_types)):
+            self.assertEqual(self.presenter.export_plot.mock_calls[i],
+                             mock.call("Plot2", "", export_types[i][1]))
 
 
 if __name__ == '__main__':

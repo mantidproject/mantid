@@ -130,6 +130,12 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.assertRaises(ValueError, self.model.make_plot_active, "NotAPlot")
         self.figure_manager.show.assert_not_called()
 
+    # ---------------------- Plot Exporting -------------------------
+
+    def test_make_plot_active_calls_current_figure(self):
+        self.model.export_plot("Plot1", "/home/Documents/Figure1.pdf")
+        self.figure_manager.canvas.figure.savefig.assert_called_once_with("/home/Documents/Figure1.pdf")
+
 
 if __name__ == '__main__':
     unittest.main()

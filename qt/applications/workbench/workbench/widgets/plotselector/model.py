@@ -131,3 +131,9 @@ class PlotSelectorModel(object):
             figure_manager.show()
         else:
             raise ValueError('Error, could not find a plot with the name {}.'.format(plot_name))
+
+    # ---------------------- Plot Exporting -------------------------
+
+    def export_plot(self, plot_name, save_path):
+        figure_manager = self.GlobalFigureManager.get_figure_manager_from_name(plot_name)
+        figure_manager.canvas.figure.savefig(save_path)

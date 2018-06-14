@@ -200,6 +200,19 @@ class PlotSelectorPresenter(object):
 
     # ---------------------- Plot Exporting -------------------------
 
+    def export_plots(self, path, extension):
+        for plot_name in self.view.get_all_selected_plot_names():
+            filename = os.path.join(path, plot_name + extension)
+            self.model.export_plot(plot_name, filename)
+
     def export_plot(self, plot_name, path, extension):
-        filename = os.path.join(path, plot_name + extension)
-        self.model.export_plot(plot_name, filename)
+        if path:
+            filename = os.path.join(path, plot_name + extension)
+            try:
+                self.model.export_plot(plot_name, filename)
+            except AttributeError as e:
+                print("Error, could not find plot with name {}.".format(plot_name))
+            except IOError as e:
+                print("Error, could not save plot with name {} because the filename is invalid. "
+                      "Please remove any characters in the plot name that cannot be used in filenames."
+                      .format(plot_name))

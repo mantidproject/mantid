@@ -20,6 +20,8 @@ from workbench.widgets.plotselector.model import PlotSelectorModel
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
 from workbench.widgets.plotselector.view import PlotSelectorView
 
+import os
+
 import unittest
 try:
     from unittest import mock
@@ -175,6 +177,19 @@ class PlotSelectorPresenterTest(unittest.TestCase):
     def test_make_plot_active_brings_to_front(self):
         self.presenter.make_plot_active("Plot2")
         self.model.make_plot_active.assert_called_once_with("Plot2")
+
+    # ---------------------- Plot Exporting -------------------------
+
+    def test_exporting_single_plot_generates_correct_filename(self):
+        self.presenter.export_plot('Plot1', '/home/Documents', '.xyz')
+        self.model.export_plot.assert_called_once_with('Plot1', '/home/Documents' + os.sep + 'Plot1.xyz')
+
+    def test_exporting_single_plot_generates_correct_filename(self):
+        self.view.get_all_selected_plot_names = mock.Mock(return_value=["Plot0", "Plot1", "Plot2"])
+        self.presenter.export_plots('/home/Documents', '.xyz')
+        for i in range(len(self.model.export_plot.mock_calls)):
+            self.assertEqual(self.model.export_plot.mock_calls[i],
+                             mock.call('Plot{}'.format(i), '/home/Documents' + os.sep + 'Plot{}.xyz'.format(i)))
 
 
 if __name__ == '__main__':
