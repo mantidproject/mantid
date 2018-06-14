@@ -243,7 +243,6 @@ void ReflectometryReductionOneAuto2::exec() {
 
   IAlgorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
   alg->initialize();
-
   // Mandatory properties
   alg->setProperty("SummationType", getPropertyValue("SummationType"));
   alg->setProperty("ReductionType", getPropertyValue("ReductionType"));
@@ -829,6 +828,7 @@ void ReflectometryReductionOneAuto2::applyPolarizationCorrection(std::string con
   Algorithm_sptr polAlg =
       createChildAlgorithm("PolarizationEfficiencyCor");
   polAlg->setChild(false);
+  polAlg->setRethrows(true);
   polAlg->setProperty("OutputWorkspace", outputIvsLam);
   polAlg->setProperty("Efficiencies", efficiencies);
   polAlg->setProperty("CorrectionMethod", correctionMethod);

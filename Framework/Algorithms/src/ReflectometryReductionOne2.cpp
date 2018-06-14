@@ -184,7 +184,6 @@ translateInstructions(const std::string &instructions) {
     throw std::runtime_error("Invalid processing instructions: " +
                              instructions);
   }
-
   return outGroups;
 }
 
@@ -649,6 +648,10 @@ ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
       !backgroundMaxProperty->isDefault()) {
     const bool integratedMonitors =
         getProperty("NormalizeByIntegratedMonitors");
+    int index = getProperty("I0MonitorIndex");
+    if (!m_spectrumInfo->isMonitor(index)) {
+      throw std::invalid_argument("A monitor is expected at spectrum index " + std::to_string(index));
+    }
     const auto monitorWS = makeMonitorWS(m_runWS, integratedMonitors);
     if (!integratedMonitors)
       detectorWS = rebinDetectorsToMonitors(detectorWS, monitorWS);
@@ -872,6 +875,11 @@ void ReflectometryReductionOne2::findDetectorGroups() {
 
   for (const auto &group : m_detectorGroups) {
     for (const auto &spIdx : group) {
+      if (m_spectrumInfo->isMonitor(spIdx)) {
+        throw std::invalid_argument("A detector is expected at spectrum " +
+                                    std::to_string(spIdx) +
+                                    ", found a monitor");
+      }
       if (spIdx > m_spectrumInfo->size() - 1) {
         throw std::runtime_error(
             "ProcessingInstructions contains an out-of-range index: " +

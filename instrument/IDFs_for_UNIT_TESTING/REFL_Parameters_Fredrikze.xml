@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="REFLECTOMETRY" valid-from="forever">
+<parameter-file instrument="REFL" valid-from="forever">
 
-<component-link name="REFLECTOMETRY" >
+<component-link name="REFL" >
+
   <parameter name="polarization_correction_method" type="string">
     <value val="Fredrikze" />
   </parameter>
@@ -11,7 +12,7 @@
   </parameter>
 
   <parameter name="efficiency_lambda" type="string">
-    <value val="0 1 2 3 4 5" />
+    <value val="0 3 6 10 15 20" />
     <description is="The wavelengths at which the efficiencies are sampled."/>
   </parameter>
 

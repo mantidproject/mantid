@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument name="REFLECTOMETRY" valid-from   ="1900-01-31 23:59:59"
+<instrument name="REFL" valid-from   ="1900-01-31 23:59:59"
                         valid-to     ="2100-01-31 23:59:59"
         last-modified="2010-10-01 09:56:20.177358">
 
@@ -65,14 +65,32 @@
     <algebra val="shape" />
   </type>
 
+  <component type="point-detector" idlist="point-detector">
+     <location z="3.19" /> 
+  </component>   
+
+  <type name="point-detector" is="detector">
+    <cylinder id="shape">
+      <centre-of-bottom-base x="-0.05" y="0.0" z="0.0" />
+      <axis x="1.0" y="0.0" z="0.0" /> 
+      <radius val="0.005" />
+      <height val="0.1" />
+    </cylinder> 
+    <algebra val="shape" />
+  </type>    
+
   <!-- DETECTOR and MONITOR ID LISTS -->
 
   <idlist idname="monitor1">
-    <id val="1000" />  
+    <id val="1" />  
   </idlist>
 
   <idlist idname="LinearDetector">
-    <id start="1" end="256" />
+    <id start="1001" end="1256" />
+  </idlist>
+
+  <idlist idname="point-detector">
+    <id val="2000" />
   </idlist>
 
 </instrument>

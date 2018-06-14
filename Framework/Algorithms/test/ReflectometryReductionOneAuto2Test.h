@@ -7,11 +7,16 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/CreateWorkspace.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadParameterFile.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -30,6 +35,7 @@ class ReflectometryReductionOneAuto2Test : public CxxTest::TestSuite {
 private:
   MatrixWorkspace_sptr m_notTOF;
   MatrixWorkspace_sptr m_TOF;
+  AnalysisDataServiceImpl &ADS = AnalysisDataService::Instance();
 
   MatrixWorkspace_sptr loadRun(const std::string &run) {
 
@@ -577,32 +583,17 @@ public:
     TS_ASSERT_DELTA(outQ->x(0)[7], 0.5962, 0.0001);
   }
 
-  void test_polarization_correction() {
-
-    auto &ADS = AnalysisDataService::Instance();
-
-    MatrixWorkspace_sptr first =  createHistoWS(10, 1, 4, 0.9);
-    ADS.addOrReplace("input_1", first);
-    MatrixWorkspace_sptr second = createHistoWS(10, 1, 4, 0.8);
-    ADS.addOrReplace("input_2", second);
-    MatrixWorkspace_sptr third =  createHistoWS(10, 1, 4, 0.7);
-    ADS.addOrReplace("input_3", third);
-    MatrixWorkspace_sptr fourth = createHistoWS(10, 1, 4, 0.6);
-    ADS.addOrReplace("input_4", fourth);
-
-    GroupWorkspaces mkGroup;
-    mkGroup.initialize();
-    mkGroup.setProperty("InputWorkspaces", "input_1, input_2, input_3, input_4");
-    mkGroup.setProperty("OutputWorkspace", "input");
-    mkGroup.execute();
+  void test_polarization_correction_PA() {
+    std::string const name = "input";
+    prepareInputGroup(name);
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace", "input");
+    alg.setPropertyValue("InputWorkspace", name);
     alg.setProperty("WavelengthMin", 1.0);
-    alg.setProperty("WavelengthMax", 5.0);
+    alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("ThetaIn", 10.0);
-    alg.setProperty("ProcessingInstructions", "0");
+    alg.setProperty("ProcessingInstructions", "1");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setProperty("PolarizationAnalysis", "PA");
     alg.setProperty("Pp", "1,1,2");
@@ -613,80 +604,152 @@ public:
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     alg.execute();
-    auto outQGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
-    auto outLamGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsLam");
 
-    TS_ASSERT(outQGroup);
-    TS_ASSERT(outLamGroup);
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
 
-    if (!outQGroup || !outLamGroup)
-      return;
+    TS_ASSERT_EQUALS(outQGroup.size(), 4);
+    TS_ASSERT_EQUALS(outLamGroup.size(), 4);
 
-    TS_ASSERT_EQUALS(outQGroup->size(), 4);
-    TS_ASSERT_EQUALS(outLamGroup->size(), 4);
-
-    auto outLam0 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(0));
-    auto outLam1 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(1));
-    auto outLam2 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(2));
-    auto outLam3 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(3));
-
-    TS_ASSERT_EQUALS(outLam0->blocksize(), 10);
+    TS_ASSERT_EQUALS(outLamGroup[0]->blocksize(), 9);
     // X range in outLam
-    TS_ASSERT_DELTA(outLam0->x(0).front(), 1.0, 0.0001);
-    TS_ASSERT_DELTA(outLam0->x(0).back(), 4.0, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
 
-    TS_ASSERT_DELTA(outLam0->y(0)[0], 0.8101767718, 0.0001);
-    TS_ASSERT_DELTA(outLam1->y(0)[0], 0.7893217144, 0.0001);
-    TS_ASSERT_DELTA(outLam2->y(0)[0], 0.7836941583, 0.0001);
-    TS_ASSERT_DELTA(outLam3->y(0)[0], 0.7628391019, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.8127852881, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 0.8074941448, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[2]->y(0)[0], 0.8083315026, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[3]->y(0)[0], 0.8030403573, 0.0001);
 
-    auto IvsQ0 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(0));
-    auto IvsQ1 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(1));
-    auto IvsQ2 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(2));
-    auto IvsQ3 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(3));
+    TS_ASSERT_EQUALS(outQGroup[0]->blocksize(), 9);
 
-    TS_ASSERT_EQUALS(IvsQ0->blocksize(), 10);
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.8373565748, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.8370971542, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], 0.8372901304, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], 0.8370307108, 0.0001);
 
-    TS_ASSERT_DELTA(IvsQ0->y(0)[0], 0.8182525527, 0.0001);
-    TS_ASSERT_DELTA(IvsQ1->y(0)[0], 0.8153535819, 0.0001);
-    TS_ASSERT_DELTA(IvsQ2->y(0)[0], 0.8162703504, 0.0001);
-    TS_ASSERT_DELTA(IvsQ3->y(0)[0], 0.8133713796, 0.0001);
+    ADS.clear();
+  }
+
+  void test_polarization_correction_PNR_wrong_input() {
+    std::string const name = "input";
+    prepareInputGroup(name);
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", "PNR");
+    alg.setProperty("Pp", "1,1,2");
+    alg.setProperty("Ap", "1,1,2");
+    alg.setProperty("Rho", "1,1");
+    alg.setProperty("Alpha", "1");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), std::invalid_argument & e, std::string(e.what()),
+        "For PNR analysis, input group must have 2 periods.");
+  }
+
+  void test_polarization_correction_PNR() {
+    std::string const name = "input";
+    prepareInputGroup(name, "", 2);
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", "PNR");
+    alg.setProperty("Pp", "1,1,2");
+    alg.setProperty("Rho", "1,1");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
+
+    TS_ASSERT_EQUALS(outQGroup.size(), 2);
+    TS_ASSERT_EQUALS(outLamGroup.size(), 2);
+
+    TS_ASSERT_EQUALS(outLamGroup[0]->blocksize(), 9);
+    // X range in outLam
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.8800698581, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 0.8778429658, 0.0001);
+
+    TS_ASSERT_EQUALS(outQGroup[0]->blocksize(), 9);
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.8936134321, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.8935802109, 0.0001);
 
     ADS.clear();
   }
 
   void test_polarization_correction_default() {
 
-    auto &ADS = AnalysisDataService::Instance();
-
-    MatrixWorkspace_sptr first =  createHistoWS(10, 1, 4, 0.9);
-    ADS.addOrReplace("input_1", first);
-    MatrixWorkspace_sptr second = createHistoWS(10, 1, 4, 0.8);
-    ADS.addOrReplace("input_2", second);
-    MatrixWorkspace_sptr third =  createHistoWS(10, 1, 4, 0.7);
-    ADS.addOrReplace("input_3", third);
-    MatrixWorkspace_sptr fourth = createHistoWS(10, 1, 4, 0.6);
-    ADS.addOrReplace("input_4", fourth);
-
-    GroupWorkspaces mkGroup;
-    mkGroup.initialize();
-    mkGroup.setProperty("InputWorkspaces", "input_1, input_2, input_3, input_4");
-    mkGroup.setProperty("OutputWorkspace", "input");
-    mkGroup.execute();
+    std::string const name = "input";
+    prepareInputGroup(name, "Fredrikze");
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace", "input");
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("ThetaIn", 0.01);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", "ParameterFile");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
+
+    TS_ASSERT_EQUALS(outQGroup.size(), 4);
+    TS_ASSERT_EQUALS(outLamGroup.size(), 4);
+
+    TS_ASSERT_EQUALS(outLamGroup[0]->blocksize(), 9);
+    // X range in outLam
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.8127852881, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 0.8074941448, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[2]->y(0)[0], 0.8083315026, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[3]->y(0)[0], 0.8030403573, 0.0001);
+
+    TS_ASSERT_EQUALS(outQGroup[0]->blocksize(), 9);
+
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.8373565748, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.8370971542, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], 0.8372901304, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], 0.8370307108, 0.0001);
+
+    ADS.clear();
+  }
+
+  void test_monitor_index_in_group() {
+    std::string const name = "input";
+    prepareInputGroup(name);
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
     alg.setProperty("ThetaIn", 10.0);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 5.0);
@@ -696,78 +759,121 @@ public:
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    auto outQGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
-    auto outLamGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsLam");
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), std::invalid_argument & e, std::string(e.what()),
+        "A detector is expected at spectrum 0, found a monitor");
+  }
 
-    TS_ASSERT(outQGroup);
-    TS_ASSERT(outLamGroup);
+  void test_I0MonitorIndex_is_detector() {
+    std::string const name = "input";
+    prepareInputGroup(name);
 
-    if (!outQGroup || !outLamGroup)
-      return;
-
-    TS_ASSERT_EQUALS(outQGroup->size(), 4);
-    TS_ASSERT_EQUALS(outLamGroup->size(), 4);
-
-    auto outLam0 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(0));
-    auto outLam1 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(1));
-    auto outLam2 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(2));
-    auto outLam3 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(3));
-
-    TS_ASSERT_EQUALS(outLam0->blocksize(), 10);
-    // X range in outLam
-    TS_ASSERT_DELTA(outLam0->x(0).front(), 1.0, 0.0001);
-    TS_ASSERT_DELTA(outLam0->x(0).back(), 4.0, 0.0001);
-
-    TS_ASSERT_DELTA(outLam0->y(0)[0], 0.901752, 0.0001);
-    TS_ASSERT_DELTA(outLam1->y(0)[0], 0.797947, 0.0001);
-    TS_ASSERT_DELTA(outLam2->y(0)[0], 0.697277, 0.0001);
-    TS_ASSERT_DELTA(outLam3->y(0)[0], 0.593471, 0.0001);
-
-    auto IvsQ0 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(0));
-    auto IvsQ1 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(1));
-    auto IvsQ2 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(2));
-    auto IvsQ3 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(3));
-
-    TS_ASSERT_EQUALS(IvsQ0->blocksize(), 10);
-
-    TS_ASSERT_DELTA(IvsQ0->y(0)[0], 0.9012838, 0.0001);
-    TS_ASSERT_DELTA(IvsQ1->y(0)[0], 0.797947, 0.0001);
-    TS_ASSERT_DELTA(IvsQ2->y(0)[0], 0.697734, 0.0001);
-    TS_ASSERT_DELTA(IvsQ3->y(0)[0], 0.594403, 0.0001);
-
-    ADS.clear();
+    ReflectometryReductionOneAuto2 alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 5.0);
+    alg.setPropertyValue("I0MonitorIndex", "1");
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", "ParameterFile");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), std::invalid_argument & e, std::string(e.what()),
+        "A monitor is expected at spectrum index 1");
   }
 
 private:
-  MatrixWorkspace_sptr createHistoWS(size_t size, double startX,
-                                     double endX, double value) const {
-    double const dX = (endX - startX) / double(size);
-    BinEdges xVals(size + 1, LinearGenerator(startX, dX));
-    Counts yVals(size, value);
-    auto workspace = boost::make_shared<Workspace2D>();
-    workspace->initialize(1, Histogram(xVals, yVals));
-    workspace->getAxis(0)->setUnit("Wavelength");
 
-    LoadInstrument loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/REFLECTOMETRY_Definition.xml");
-    loader.setProperty("Workspace", workspace);
-    loader.setProperty("RewriteSpectraMap", OptionalBool(true));
-    loader.execute();
+  MatrixWorkspace_sptr createWSTOF(size_t nBins, double startX, double endX,
+                                std::vector<double> values, std::string const &paramsType) const {
+    std::string const &unitX("TOF");
+    double const dX = (endX - startX) / double(nBins);
+    BinEdges xVals(nBins + 1, LinearGenerator(startX, dX));
+    size_t nSpec = values.size();
+    std::vector<double> yVals(nSpec * nBins);
+    for (size_t i = 0; i < nSpec; ++i) {
+      std::fill(yVals.begin() + i * nBins, yVals.begin() + (i + 1) * nBins,
+                values[i]);
+    }
+
+    CreateWorkspace creator;
+    creator.setChild(true);
+    creator.initialize();
+    creator.setProperty("DataX", xVals.rawData());
+    creator.setProperty("DataY", yVals);
+    creator.setProperty("NSpec", int(nSpec));
+    creator.setProperty("UnitX", unitX);
+    creator.setPropertyValue("OutputWorkspace", "dummy");
+    creator.execute();
+    MatrixWorkspace_sptr workspace = creator.getProperty("OutputWorkspace");
+
+    LoadInstrument instrumentLoader;
+    instrumentLoader.initialize();
+    instrumentLoader.setPropertyValue("Filename",
+                                      "IDFs_for_UNIT_TESTING/REFL_Definition.xml");
+    instrumentLoader.setProperty("Workspace", workspace);
+    instrumentLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
+    instrumentLoader.execute();
+
+    if (!paramsType.empty()) {
+      LoadParameterFile paramLoader;
+      paramLoader.initialize();
+      paramLoader.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/REFL_Parameters_" + paramsType + ".xml");
+      paramLoader.setProperty("Workspace", workspace);
+      paramLoader.execute();
+    }
 
     return workspace;
+  }
+
+  void prepareInputGroup(std::string const &name,
+                         std::string const &paramsType = "", size_t size = 4,
+                         double const startX = 5000.0,
+                         double const endX = 100000.0) {
+    double monitorValue = 99.0;
+    double detectorValue = 0.9;
+    std::string names;
+
+    for (size_t i = 0; i < size; ++i) {
+      std::vector<double> values(257, detectorValue);
+      values[0] = monitorValue;
+      MatrixWorkspace_sptr ws = createWSTOF(
+          10, startX, endX, values, paramsType);
+      std::string const name1 = name + "_" + std::to_string(i + 1);
+      ADS.addOrReplace(name1, ws);
+      monitorValue -= 1.0;
+      detectorValue -= 0.1;
+      if (i > 0)
+        names.append(",");
+      names.append(name1);
+    }
+
+    GroupWorkspaces mkGroup;
+    mkGroup.initialize();
+    mkGroup.setProperty("InputWorkspaces", names);
+    mkGroup.setProperty("OutputWorkspace", name);
+    mkGroup.execute();
+  }
+
+  std::vector<MatrixWorkspace_sptr> retrieveOutWS(std::string const name) {
+    std::vector<MatrixWorkspace_sptr> out;
+    auto group =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
+    TS_ASSERT(group);
+    if (!group)
+      return out;
+
+    for (size_t i = 0; i < group->size(); ++i) {
+      out.emplace_back(
+          boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i)));
+    }
+
+    return out;
   }
 };
 
