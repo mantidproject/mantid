@@ -21,6 +21,7 @@ from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import (QAbstractItemView, QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, QMenu,
                             QPushButton, QVBoxLayout, QWidget)
 
+from mantidqt.utils.flowlayout import FlowLayout
 from workbench.plotting.figuremanager import QAppThreadCall
 
 class PlotSelectorView(QWidget):
@@ -41,12 +42,13 @@ class PlotSelectorView(QWidget):
         self.presenter = presenter
 
         self.close_button = QPushButton('Close')
+        self.export_button = self._make_export_button()
         self.filter_box = self._make_filter_box()
         self.list_widget = self._make_list_widget()
 
-        buttons_layout = QHBoxLayout()
+        buttons_layout = FlowLayout()
         buttons_layout.addWidget(self.close_button)
-        buttons_layout.setStretch(1, 1)
+        buttons_layout.addWidget(self.export_button)
 
         filter_layout = QHBoxLayout()
         filter_layout.addWidget(self.filter_box)
@@ -109,6 +111,20 @@ class PlotSelectorView(QWidget):
         list_widget.installEventFilter(self)
 
         return list_widget
+
+    def _make_export_button(self):
+        export_button = QPushButton("Export")
+        export_menu = QMenu()
+        export_menu.addAction("Export to EPS", lambda: self.export_plot(".eps"))
+        export_menu.addAction("Export to PDF", lambda: self.export_plot(".pdf"))
+        export_menu.addAction("Export to PNG", lambda: self.export_plot(".png"))
+        export_menu.addAction("Export to SVG", lambda: self.export_plot(".svg"))
+        export_button.setMenu(export_menu)
+        return export_button
+
+    def export_plot(self, extension):
+        for plot_name in self.get_all_selected_plot_names():
+            self.presenter.export_plot(plot_name, extension)
 
     # ------------------------ Plot Updates ------------------------
 
@@ -218,7 +234,7 @@ class PlotNameWidget(QWidget):
         # some natural margin anyway. Get rid of right margin and
         # reduce spacing to get buttons closer together.
         margins = self.layout.contentsMargins()
-        self.layout.setContentsMargins(margins.left(), 0, 0, 0)
+        self.layout.setContentsMargins(5, 0, 0, 0)
         self.layout.setSpacing(0)
 
         self.layout.addWidget(self.line_edit)

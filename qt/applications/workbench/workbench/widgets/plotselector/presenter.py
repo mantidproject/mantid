@@ -195,3 +195,8 @@ class PlotSelectorPresenter(object):
             self.model.make_plot_active(plot_name)
         except ValueError as e:
             print(e)
+
+    # ---------------------- Plot Exporting -------------------------
+
+    def export_plot(self, plot_name, extension):
+        self.model.export_plot(plot_name, plot_name + extension)
