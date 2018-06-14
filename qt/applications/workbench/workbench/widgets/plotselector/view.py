@@ -201,7 +201,7 @@ class PlotNameWidget(QWidget):
         rename_icon = QIcon.fromTheme('insert-text')
         self.rename_button = QPushButton(rename_icon, "")
         self.rename_button.setFlat(True)
-        self.rename_button.setMaximumWidth(self.rename_button.sizeHint().width())
+        self.rename_button.setMaximumWidth(self.rename_button.iconSize().width() * 2)
         self.rename_button.setCheckable(True)
         self.rename_button.toggled.connect(self.toggle_rename_button)
         self.skip_next_toggle = False
@@ -209,21 +209,24 @@ class PlotNameWidget(QWidget):
         close_icon = QIcon.fromTheme('window-close')
         self.close_button = QPushButton(close_icon, "")
         self.close_button.setFlat(True)
-        self.close_button.setMaximumWidth(self.close_button.sizeHint().width())
+        self.close_button.setMaximumWidth(self.close_button.iconSize().width() * 2)
         self.close_button.clicked.connect(lambda: self.close_pressed(self.line_edit.text()))
 
         self.layout = QHBoxLayout()
+
+        # Get rid of the top and bottom margins - the button provides
+        # some natural margin anyway. Get rid of right margin and
+        # reduce spacing to get buttons closer together.
+        margins = self.layout.contentsMargins()
+        self.layout.setContentsMargins(margins.left(), 0, 0, 0)
+        self.layout.setSpacing(0)
+
         self.layout.addWidget(self.line_edit)
         self.layout.addWidget(self.rename_button)
         self.layout.addWidget(self.close_button)
 
         self.layout.sizeHint()
         self.setLayout(self.layout)
-
-        # Get rid of the top and bottom margins - the button provides
-        # some natural margin anyway
-        margins = self.layout.contentsMargins()
-        self.layout.setContentsMargins(margins.left(), 0, margins.right(), 0)
 
         # Add the context menu
         self.setContextMenuPolicy(Qt.CustomContextMenu)

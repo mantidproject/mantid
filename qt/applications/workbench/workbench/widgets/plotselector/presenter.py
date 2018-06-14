@@ -116,6 +116,10 @@ class PlotSelectorPresenter(object):
             # We need to undo the rename in the view
             self.view.rename_in_plot_list(old_name, old_name)
             print(e)
+        except AttributeError as e:
+            print("Error, could not find the plot to rename. Removing this plot from the list.")
+            self.view.rename_in_plot_list(old_name, old_name)
+            self.remove_from_plot_list(old_name)
 
     # ------------------------ Plot Closing -------------------------
 
