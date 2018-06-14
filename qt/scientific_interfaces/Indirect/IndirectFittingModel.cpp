@@ -635,12 +635,12 @@ bool IndirectFittingModel::isPreviousModelSelected() const {
 }
 
 CompositeFunction_sptr IndirectFittingModel::getMultiDomainFunction() const {
-  return createMultiDomainFunction(m_activeFunction, numberOfWorkspaces());
+  return createMultiDomainFunction(getFittingFunction(), numberOfWorkspaces());
 }
 
 IAlgorithm_sptr IndirectFittingModel::getFittingAlgorithm() const {
   if (m_fittingMode == FittingMode::SEQUENTIAL)
-    return createSequentialFit(m_activeFunction);
+    return createSequentialFit(getFittingFunction());
   else
     return createSimultaneousFit(getMultiDomainFunction());
 }
