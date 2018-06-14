@@ -101,7 +101,7 @@ void CalculateIqt::exec() {
   const MatrixWorkspace_sptr sampleWorkspace = getProperty("InputWorkspace");
   const MatrixWorkspace_sptr inputResolutionWorkspace = getProperty("ResolutionWorkspace");
   const auto resolutionWorkspace = calculateIntermediateWorkspace(sampleWorkspace, rebinString);
-  const auto outputWorkspace = calculateIqt(sampleWorkspace, resolutionWorkspace, rebinString);
+  auto outputWorkspace = calculateIqt(sampleWorkspace, resolutionWorkspace, rebinString);
 }
 
 std::string CalculateIqt::rebinParamsAsString() {
