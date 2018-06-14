@@ -15,7 +15,7 @@ Data Reduction Interfaces
 -------------------------
 
 - Added 'Sum Files' checkbox to ISIS Calibration, to sum a specified range of input files on load.
-- Detector grouping in ISISEnergyTransfer:  add custom grouping method to allow specific spectra or ranges, and
+- Detector grouping in ISISEnergyTransfer:  added custom grouping method to allow specific spectra or ranges, and
   the 'groups' method now includes all spectra including remainder.
 
 
