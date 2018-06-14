@@ -7,7 +7,6 @@ import shutil
 import site
 import subprocess
 import urllib2
-import zipfile
 
 
 FAILED_DOWNLOAD_MESSAGE = "Could not download the GSAS installation package. " \
