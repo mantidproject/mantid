@@ -417,6 +417,11 @@ void MantidMatrix::copySelection() {
   QString eol = applicationWindow()->endOfLine();
   if (!selModel->hasSelection()) {
     QModelIndex index = selModel->currentIndex();
+	if (!index.isValid()) {
+		// No text boxes were selected. So we cannot copy anything
+		return;
+	}
+
     s = text(index.row(), index.column());
   } else {
     QItemSelection sel = selModel->selection();
