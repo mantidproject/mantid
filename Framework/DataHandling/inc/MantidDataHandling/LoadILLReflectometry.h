@@ -55,6 +55,9 @@ public:
            "Figaro).";
   }
   double doubleFromRun(const std::string &entryName) const;
+  double sampleDetectorDistance() const;
+  double sampleHorizontalOffset() const;
+  double sourceSampleDistance() const;
 
 private:
   /// ID tags for supported instruments.
@@ -87,9 +90,6 @@ private:
   double detectorAngle() const;
   double offsetAngle(const double peakCentre, const double detectorCentre,
                      const double detectorDistance) const;
-  double sampleDetectorDistance() const;
-  double sampleHorizontalOffset() const;
-  double sourceSampleDistance() const;
   API::MatrixWorkspace_sptr m_localWorkspace;
 
   Supported m_instrument{Supported::D17}; ///< Name of the instrument
