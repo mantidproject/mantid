@@ -153,7 +153,7 @@ void SaveGDA::exec() {
     const auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
 
     const auto &d = matrixWS->x(0);
-    const auto &bankCalibParams = calibParams[groupingScheme[i]];
+    const auto &bankCalibParams = calibParams[groupingScheme[i] - 1];
 
     std::vector<double> tof;
     tof.reserve(d.size());

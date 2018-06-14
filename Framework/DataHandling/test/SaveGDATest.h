@@ -132,7 +132,7 @@ public:
     testAlg.initialize();
     testAlg.setProperty("InputWorkspace", INPUT_GROUP_NAME);
     testAlg.setProperty("GSASParamFile", m_paramsFile.path());
-    testAlg.setProperty("GroupingScheme", std::vector<int>({1, 2}));
+    testAlg.setProperty("GroupingScheme", std::vector<int>({2, 3}));
     Poco::TemporaryFile tempFile;
     const std::string &tempFileName = tempFile.path();
     testAlg.setProperty("Filename", tempFileName);
@@ -191,7 +191,7 @@ public:
     testAlg.initialize();
     testAlg.setProperty("InputWorkspace", INPUT_GROUP_NAME);
     testAlg.setProperty("GSASParamFile", m_paramsFile.path());
-    testAlg.setProperty("GroupingScheme", std::vector<int>({1, 2}));
+    testAlg.setProperty("GroupingScheme", std::vector<int>({2, 3}));
     Poco::TemporaryFile tempFile;
     const std::string &tempFileName = tempFile.path();
     testAlg.setProperty("Filename", tempFileName);

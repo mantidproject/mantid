@@ -91,8 +91,8 @@ Usage
    SaveGDA(InputWorkspace=input_group,
            Filename=output_file,
 	   GSASParamFile="GEM_PF1_PROFILE.IPF",
-           # Assign spectra 1, 2 and 3 to bank 1 in calib file, and spectrum 4 to bank 2
-	   GroupingScheme=[1, 1, 1, 2])
+           # Assign spectra 1, 2 and 3 to bank 2 in calib file, and spectrum 4 to bank 3
+	   GroupingScheme=[2, 2, 2, 3])
 
    with open(output_file) as f:
        file_contents = f.read().split("\n")
