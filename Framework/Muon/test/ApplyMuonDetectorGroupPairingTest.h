@@ -313,7 +313,7 @@ public:
     std::vector<std::string> badGroup1 = {"1-5", "1-5", "1-5", "1-5"};
     std::vector<std::string> badGroup2 = {"1-5", "1,2,3,4,5", "5,4,3,2,1",
                                           "1,2,2,3,4,5,5,5"};
-    for (auto i = 0; i < badGroup1.size(); i++) {
+    for (size_t i = 0; i < badGroup1.size(); i++) {
       alg.setProperty("Group1", badGroup1[i]);
       alg.setProperty("Group2", badGroup2[i]);
       TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
