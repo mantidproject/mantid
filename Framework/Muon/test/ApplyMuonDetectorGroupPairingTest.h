@@ -242,8 +242,8 @@ public:
   ~setUpADSWithWorkspace() { AnalysisDataService::Instance().clear(); };
   WorkspaceGroup_sptr wsGroup;
 
-  static constexpr const char *inputWSName = "inputData";
-  static constexpr const char *groupWSName = "inputGroup";
+  const std::string inputWSName = "inputData";
+  const std::string groupWSName = "inputGroup";
 };
 
 } // namespace
