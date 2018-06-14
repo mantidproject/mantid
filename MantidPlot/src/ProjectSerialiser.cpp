@@ -721,7 +721,8 @@ void ProjectSerialiser::populateMantidTreeWidget(const QString &lines) {
     // Check everything was loaded before continuing, as we might need to open a
     // window
     // for a workspace which did not load in
-    if (!Mantid::API::AnalysisDataService::Instance().doAllWsExist(expectedWorkspaces)) {
+    if (!Mantid::API::AnalysisDataService::Instance().doAllWsExist(
+            expectedWorkspaces)) {
       QMessageBox::critical(window, "MantidPlot - Algorithm error",
                             " The workspaces associated with this project "
                             "could not be loaded. Aborting project loading.");
