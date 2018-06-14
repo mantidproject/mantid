@@ -50,7 +50,7 @@ public:
   int version() const override { return (1); }
   /// Algorithm's category for identification
   const std::string category() const override {
-    return "DataHandling\\Grouping;Transforms\\Grouping";
+	return "Muon\\DataHandling";
   }
   /// Algorithm's summary for identification
   const std::string summary() const override {

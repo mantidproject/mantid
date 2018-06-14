@@ -16,7 +16,7 @@ The result of the calculation are stored in the provided **WorkspaceGroup** usin
 Analysis
 ########
 
-This algorithm performs the *PairAsymmetry* option of the :ref:`algm-MuonProcess` algorithm, requiring two items of data; spectra corresponding to the groups of detector IDs. This can be given directly to the algorithm via the **InputWorkspace1** and **InputWorkspace2** properties, which accept MatrixWorkspaces with single spectra and identical binning. The pair asymmetry is calculated between the times **TimeMin** and **TimeMax**, and using the **Alpha** parameter (see :ref:`algm-MuonAsymmetry` for details).
+This algorithm performs the *PairAsymmetry* option of the :ref:`algm-MuonProcess` algorithm, requiring two items of data; spectra corresponding to the groups of detector IDs. This can be given directly to the algorithm via the **InputWorkspace1** and **InputWorkspace2** properties, which accept MatrixWorkspaces with single spectra and identical binning. The pair asymmetry is calculated between the times **TimeMin** and **TimeMax**, and using the **Alpha** parameter (see :ref:`algm-CalculateMuonAsymmetry` for details).
 
 Alternatively by checking setting **SpecifyGroupsManually** to true the groupings can be performed as part of the algorithm (requiring the full, ungrouped, data in **InputWorkspace**). 
 

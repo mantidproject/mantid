@@ -50,7 +50,7 @@ public:
   int version() const override { return (1); }
   /// Algorithm's category for identification
   const std::string category() const override {
-    return "DataHandling\\Grouping;Transforms\\Grouping";
+    return "Muon\\DataHandling";
   }
   /// Algorithm's summary for identification
   const std::string summary() const override {
@@ -96,7 +96,7 @@ public:
                                          API::MatrixWorkspace_sptr inputWS2,
                                          const double &alpha);
 
-  /// Set grouping properies of MuonProcess
+  /// Set grouping properties of MuonProcess
   void setMuonProcessAlgorithmGroupingProperties(
       IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
 

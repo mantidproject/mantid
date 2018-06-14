@@ -571,13 +571,13 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.13876491, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.28995348, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.02261807, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.1388, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.2900, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.02262, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.24211334, 0.001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.47372239, 0.001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.39502973, 0.001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.2421, 0.001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.4737, 0.001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.3950, 0.001);
   }
 
   void test_inputWorkspaceWithMultipleSpectraFails() {

@@ -110,10 +110,10 @@ void ApplyMuonDetectorGroupPairing::init() {
                       make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_NOT_DEFAULT, ""));
 
-  declareProperty(
-      "TimeMin", 0.1,
-      "Start time for the data in ms. Only used with the asymmetry analysis.",
-      Direction::Input);
+  declareProperty("TimeMin", 0.1,
+                  "Start time for the data in micro seconds. Only used with "
+                  "the asymmetry analysis.",
+                  Direction::Input);
   setPropertySettings("TimeMin",
                       make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_NOT_DEFAULT, ""));
@@ -121,10 +121,10 @@ void ApplyMuonDetectorGroupPairing::init() {
                       make_unique<Kernel::VisibleWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_NOT_DEFAULT, ""));
 
-  declareProperty(
-      "TimeMax", 32.0,
-      "End time for the data in ms. Only used with the asymmetry analysis.",
-      Direction::Input);
+  declareProperty("TimeMax", 32.0,
+                  "End time for the data in micro seconds. Only used with the "
+                  "asymmetry analysis.",
+                  Direction::Input);
   setPropertySettings("TimeMax",
                       make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_NOT_DEFAULT, ""));
@@ -144,7 +144,7 @@ void ApplyMuonDetectorGroupPairing::init() {
 
   declareProperty("TimeOffset", 0.0,
                   "Shift the times of all data by a fixed amount. The value "
-                  "given corresponds to the bin that will become 0.0 seconds.",
+                  "given corresponds to the bin that will become time 0.0.",
                   Direction::Input);
   setPropertySettings("TimeOffset",
                       make_unique<Kernel::EnabledWhenProperty>(
