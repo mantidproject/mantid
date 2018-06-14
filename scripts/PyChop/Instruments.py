@@ -513,7 +513,7 @@ class Moderator(object):
             self.flux_interp = interp1d(self.measured_flux['wavelength'], self.measured_flux['flux'], kind='cubic')
             self.fmn, self.fmx = (min(self.measured_flux['wavelength']), max(self.measured_flux['wavelength']))
         if hasattr(self, 'measured_width') and self.measured_width:
-            self.width_interp = interp1d(self.measured_width['wavelength'], self.measured_width['width'], kind='cubic')
+            self.width_interp = interp1d(self.measured_width['wavelength'], self.measured_width['width'], kind='slinear')
             self.wmn, self.wmx = (min(self.measured_width['wavelength']), max(self.measured_width['wavelength']))
             if 'isSigma' not in self.measured_width.keys():
                 self.measured_width['isSigma'] = False
@@ -525,7 +525,7 @@ class Moderator(object):
         """ Returns the squared time gaussian FWHM width due to the sample in s^2 """
         if hasattr(self, 'width_interp'):
             wavelength = [min(max(l, self.wmn), self.wmx) for l in np.sqrt(E2L / np.array(Ei if hasattr(Ei, '__len__') else [Ei]))]
-            width = self.width_interp(wavelength)**2
+            width = self.width_interp(wavelength)[0]**2 / 1e12
             return (width * SIGMA2FWHMSQ) if self.measured_width['isSigma'] else width
         if self.imod == 0:
             # CHOP outputs the Gaussian sigma^2 in s^2, we want FWHM^2 in s^2
@@ -551,7 +551,7 @@ class Moderator(object):
         """ Calculates the moderator time width in seconds for a given neutron energy (Ei) """
         if hasattr(self, 'width_interp'):
             wavelength = [min(max(l, self.wmn), self.wmx) for l in np.sqrt(E2L / np.array(Ei if hasattr(Ei, '__len__') else [Ei]))]
-            width = self.width_interp(wavelength)
+            width = self.width_interp(wavelength)[0] / 1e6  # Table has widths in microseconds
             return width * SIGMA2FWHM if self.measured_width['isSigma'] else width
         if self.imod == 3:
             # Mode for LET - output of polynomial is FWHM in us

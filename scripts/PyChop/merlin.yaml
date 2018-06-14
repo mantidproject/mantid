@@ -84,6 +84,10 @@ moderator:
   mod_pars: [80.0, 0.5226]      # Parameters for time profile
   theta: 26.7                   # Angle beamline makes with moderator face (degrees)
   source_rep: 50                # Frequency of source (Hz)
+  measured_width:               # Table of measured moderator time widths in microseconds. If present will overide imod and mod_pars
+    isSigma: False              # Indicates measurements are FWHM
+    wavelength: [3.81238, 5.38791, 2.20214, 2.69636, 3.25068, 1.70664, 1.9078, 1.4425, 3.11379, 2.41294, 2.47528, 1.27219, 2.07682, 1.05882, 1.55818]
+    width: [49, 56, 34, 37, 42, 29, 30, 25, 40, 34, 35, 21, 31, 18, 26]
   measured_flux:                # Table of measured flux vs wavelength. Wavelength in Angstrom. Flux in n/cm^2/s/uA/Angstrom
     wavelength: [1.5000e-01, 2.5000e-01, 3.5000e-01, 4.5000e-01, 5.5000e-01, 6.5000e-01, 7.5000e-01, 8.5000e-01, 9.5000e-01, 1.0500e+00,
                  1.1500e+00, 1.2500e+00, 1.3500e+00, 1.4500e+00, 1.5500e+00, 1.6500e+00, 1.7500e+00, 1.8500e+00, 1.9500e+00, 2.0500e+00,

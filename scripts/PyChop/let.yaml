@@ -116,6 +116,10 @@ moderator:
   theta: 32.0                   # Angle beamline makes with moderator face (degrees)
   source_rep: 10                # Frequency of source (Hz)
   emission_time: 3500           # Time width of source pulse in microseconds (only used to determine spurious reps in multi-rep mode)
+  measured_width:               # Table of measured moderator time widths in microseconds. If present will overide imod and mod_pars
+    isSigma: False              # Indicates measurements are FWHM
+    wavelength: [3.8063, 2.1961, 6.2121, 5.3820, 1.4371, 1.7010, 2.6920, 1.9013]
+    width: [90.4, 40.8, 154.4, 131.2, 22.4, 25.6, 52.4, 32.4]
   measured_flux:                # Table of measured flux vs wavelength. Wavelength in Angstrom. Flux in n/cm^2/s/uA/Angstrom
     scale_factor: 63276.8362    # A factor to scale the flux values below by
     wavelength: [0.5,   0.6,   0.7,   0.8,   0.9,   1. ,   1.1,   1.2,   1.3,
