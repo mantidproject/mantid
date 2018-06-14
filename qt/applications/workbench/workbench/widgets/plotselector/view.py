@@ -198,14 +198,16 @@ class PlotNameWidget(QWidget):
         self.line_edit.setAttribute(Qt.WA_TransparentForMouseEvents, True)
         self.line_edit.editingFinished.connect(self.rename_plot)
 
-        self.rename_icon = QIcon.fromTheme('insert-text')
-        self.rename_button = QPushButton(self.rename_icon, "")
+        rename_icon = QIcon.fromTheme('insert-text')
+        self.rename_button = QPushButton(rename_icon, "")
         self.rename_button.setFlat(True)
         self.rename_button.setMaximumWidth(self.rename_button.sizeHint().width())
-        self.rename_button.pressed.connect(self.toggle_plot_name_editable)
+        self.rename_button.setCheckable(True)
+        self.rename_button.toggled.connect(self.toggle_rename_button)
+        self.skip_next_toggle = False
 
-        self.close_icon = QIcon.fromTheme('window-close')
-        self.close_button = QPushButton(self.close_icon, "")
+        close_icon = QIcon.fromTheme('window-close')
+        self.close_button = QPushButton(close_icon, "")
         self.close_button.setFlat(True)
         self.close_button.setMaximumWidth(self.close_button.sizeHint().width())
         self.close_button.clicked.connect(lambda: self.close_pressed(self.line_edit.text()))
@@ -238,14 +240,27 @@ class PlotNameWidget(QWidget):
     def close_pressed(self, plot_name):
         self.presenter.close_single_plot(plot_name)
 
-    def toggle_plot_name_editable(self, editable=None):
-        if editable is None:
-            editable = self.line_edit.isReadOnly()
+    def toggle_rename_button(self, checked):
+        if checked:
+            self.toggle_plot_name_editable(True, toggle_rename_button=False)
+
+    def toggle_plot_name_editable(self, editable, toggle_rename_button=True):
         self.line_edit.setReadOnly(not editable)
         self.line_edit.setAttribute(Qt.WA_TransparentForMouseEvents, not editable)
+
+        # This is a sneaky way to avoid the issue of two calls to
+        # this toggle method, by effectively disabling the button
+        # press in edit mode.
+        self.rename_button.setAttribute(Qt.WA_TransparentForMouseEvents, editable)
+
+        if toggle_rename_button:
+            self.rename_button.setChecked(editable)
+
         if editable:
             self.line_edit.setFocus()
             self.line_edit.selectAll()
+        else:
+            self.line_edit.setSelection(0, 0)
 
     def rename_plot(self):
         self.presenter.rename_figure(self.line_edit.text(), self.plot_name)
