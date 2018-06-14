@@ -153,7 +153,7 @@ void LoadILLSANS::exec() {
       moveSource();
     }
     if (moveToBeamCenter) {
-        //TODO: move all the panels
+      // TODO: move all the panels
     }
   } else {
     progress.report("Initializing the workspace for " + m_instrumentName);
@@ -175,7 +175,7 @@ void LoadILLSANS::exec() {
       rotateD22(angle, "detector");*/
     }
     if (moveToBeamCenter) {
-        moveBeamCenter("detector", center_x, center_y);
+      moveBeamCenter("detector", center_x, center_y);
     }
   }
   progress.report("Setting sample logs");
@@ -763,7 +763,8 @@ void LoadILLSANS::moveSource() {
 }
 
 /**
-  * Moves the component such that the pixel with center_x, center_y coordinates moves to
+  * Moves the component such that the pixel with center_x, center_y coordinates
+ * moves to
   * x=0, y=0 (i.e. z axis).
   * @param center_x : beam center x coord (in pixels)
   * @param center_y : beam center y coord (in pixels)

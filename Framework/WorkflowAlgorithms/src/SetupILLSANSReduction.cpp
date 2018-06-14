@@ -48,8 +48,8 @@ void SetupILLSANSReduction::init() {
 
   //    Option 2: Find it (expose properties from FindCenterOfMass)
   declareProperty(
-      make_unique<API::FileProperty>(
-          "BeamCenterFile", "", API::FileProperty::OptionalLoad, ".nxs"),
+      make_unique<API::FileProperty>("BeamCenterFile", "",
+                                     API::FileProperty::OptionalLoad, ".nxs"),
       "The name of the beam center file to load");
   setPropertySettings("BeamCenterFile",
                       make_unique<VisibleWhenProperty>(
@@ -75,8 +75,8 @@ void SetupILLSANSReduction::init() {
   // Dark current
   const std::string dark_grp = "Dark Current (Cd/B4C)";
   declareProperty(
-      make_unique<API::FileProperty>(
-          "DarkCurrentFile", "", API::FileProperty::OptionalLoad, ".nxs"),
+      make_unique<API::FileProperty>("DarkCurrentFile", "",
+                                     API::FileProperty::OptionalLoad, ".nxs"),
       "The name of the input Nexus file to load as dark current.");
   setPropertyGroup("DarkCurrentFile", dark_grp);
 
@@ -101,10 +101,12 @@ void SetupILLSANSReduction::init() {
   declareProperty(
       make_unique<ArrayProperty<int>>("MaskedEdges"),
       "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
-  declareProperty("MaskedComponent","","Component names to mask the edges of.");
+  declareProperty("MaskedComponent", "",
+                  "Component names to mask the edges of.");
   declareProperty(make_unique<ArrayProperty<int>>("MaskedDetectorList"),
                   "List of detector IDs to be masked");
-  declareProperty("MaskedFullComponent", "", "Component name to mask entirely.");
+  declareProperty("MaskedFullComponent", "",
+                  "Component name to mask entirely.");
   setPropertyGroup("MaskedWorkspace", mask_grp);
   setPropertyGroup("MaskedEdges", mask_grp);
   setPropertyGroup("MaskedComponent", mask_grp);
@@ -125,8 +127,8 @@ void SetupILLSANSReduction::init() {
   // Sensitivity
   const std::string eff_grp = "Sensitivity";
   declareProperty(
-      make_unique<API::FileProperty>(
-          "SensitivityFile", "", API::FileProperty::OptionalLoad, ".nxs"),
+      make_unique<API::FileProperty>("SensitivityFile", "",
+                                     API::FileProperty::OptionalLoad, ".nxs"),
       "Flood field or sensitivity file.");
   declareProperty(
       "MinEfficiency", EMPTY_DBL(), positiveDouble,
@@ -137,10 +139,10 @@ void SetupILLSANSReduction::init() {
   declareProperty("UseDefaultDC", true, "If true, the dark current subtracted "
                                         "from the sample data will also be "
                                         "subtracted from the flood field.");
-  declareProperty(make_unique<API::FileProperty>(
-                      "SensitivityDarkCurrentFile", "",
-                      API::FileProperty::OptionalLoad, ".nxs"),
-                  "The name of the input file to load as dark current.");
+  declareProperty(
+      make_unique<API::FileProperty>("SensitivityDarkCurrentFile", "",
+                                     API::FileProperty::OptionalLoad, ".nxs"),
+      "The name of the input file to load as dark current.");
   // - sensitivity beam center
   declareProperty("SensitivityBeamCenterMethod", "None",
                   boost::make_shared<StringListValidator>(centerOptions),
@@ -630,8 +632,9 @@ void SetupILLSANSReduction::exec() {
   const std::string maskedDetList = getPropertyValue("MaskedDetectorList");
   const std::string maskedEdges = getPropertyValue("MaskedEdges");
   const std::string maskedComponent = getPropertyValue("MaskedComponent");
-  const std::string maskedFullComponent = getPropertyValue("MaskedFullComponent");
-  API::MatrixWorkspace_sptr maskedWorkspace = getProperty("MaskedWorkspace");  
+  const std::string maskedFullComponent =
+      getPropertyValue("MaskedFullComponent");
+  API::MatrixWorkspace_sptr maskedWorkspace = getProperty("MaskedWorkspace");
   maskAlg->setPropertyValue("Facility", "SNS");
   maskAlg->setPropertyValue("MaskedDetectorList", maskedDetList);
   maskAlg->setPropertyValue("MaskedEdges", maskedEdges);
