@@ -327,12 +327,12 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if not qBinProp.isDefault:
             qBinning = qBinProp.value
             if (len(qBinning) - 1) % 2 != 0:
-                issues[common.PROP_BINNING_PARAMS_Q] = 'Invalid Q rebinning parameters.'
+                issues[common.PROP_BINNING_PARAMS_Q] = 'Invalid Q binning parameters.'
         eBinProp = self.getProperty(common.PROP_REBINNING_PARAMS_W)
         if not eBinProp.isDefault:
             eBinning = eBinProp.value
             if (len(eBinning) - 1) % 2 != 0:
-                issues[common.PROP_REBINNING_PARAMS_E] = 'Invalid energy rebinning parameters.'
+                issues[common.PROP_REBINNING_PARAMS_W] = 'Invalid energy rebinning parameters.'
         return issues
 
     def _applyDiagnostics(self, mainWS, wsNames, wsCleanup, subalgLogging):
