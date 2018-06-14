@@ -31,24 +31,11 @@ Usage
 
    import os
 
-   # Here we do a very rough-and-ready diffraction focusing
-   # The workspace input_group has the same format as the result of a reduction from isis_pwoder
-   input_ws = Load(Filename="HRP39180.RAW")
-   focused_ws = DiffractionFocussing(InputWorkspace=input_ws,
-                                     GroupingFileName="hrpd_new_072_01_corr.cal",
-				     OutputWorkspace="focused_ws")
-
-   spectra = []
-   for spec_num in range(3):
-       spec = ExtractSingleSpectrum(InputWorkspace=focused_ws,
-                                    WorkspaceIndex=spec_num,
-				    OutputWorkspace="spectrum_{}".format(spec_num))
-       spectra.append(spec)
-
-   input_group = GroupWorkspaces(InputWorkspaces=spectra)
+   # Banks 1 to 4 of a previous texture focus in isis_powder
+   # We don't use the full 160 banks as the test becomes too slow
+   input_group = Load("GEM61785_D_texture_banks_1_to_4.nxs")
 
    output_file = os.path.join(config["defaultsave.directory"], "grouping.new")
-
    SaveBankScatteringAngles(InputWorkspace=input_group, Filename=output_file)
 
    with open(output_file) as f:
@@ -67,6 +54,7 @@ Output:
 .. testoutput:: SaveBankScatteringAngles
 
     File contents:
-    bank :    0  group:     1    180.0000000000    0.0000000000
-    bank :    1  group:     2    138.2823007994    180.0000000000
-    bank :    2  group:     3    29.5674502659    0.0000000000
+    bank :    0  group:     4    9.1216000000    0.0000000000
+    bank :    1  group:     5    8.1558400000    30.0000000000
+    bank :    2  group:     6    8.0351679921    150.0000000000
+    bank :    3  group:     7    9.0611418426    180.0000000000
