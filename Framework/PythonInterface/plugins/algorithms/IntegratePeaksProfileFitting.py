@@ -125,8 +125,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         numerrors = 0
 
         # Create the parameters workspace
-        keys =  ['peakNumber','Alpha', 'Beta', 'R', 'T0', 'bgBVG', 'chiSq3d', 'dQ', 'KConv', 'muPH',
-                 'muTH', 'newQ', 'Scale', 'scale3d', 'SigP', 'SigX', 'SigY', 'Intens3d', 'SigInt3d']
+        keys =  ['peakNumber','Alpha', 'Beta', 'R', 'T0', 'bgBVG', 'chiSq3d', 'dQ', 'KConv', 'MuPH',
+                 'MuTH', 'newQ', 'Scale', 'scale3d', 'SigP', 'SigX', 'SigY', 'Intens3d', 'SigInt3d']
         datatypes = ['float']*len(keys)
         datatypes[np.where(np.array(keys)=='newQ')[0][0]] = 'V3D'
         params_ws = CreateEmptyTableWorkspace()
@@ -160,6 +160,9 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                     # First we get the peak intensity
                     peakIDX = Y3D/Y3D.max() > fracStop
                     intensity = np.sum(Y3D[peakIDX])
+                    
+                    print("-----------------------")
+                    print(params)
 
                     # Now the number of background counts under the peak assuming a constant bg across the box
                     n_events = box.getNumEventsArray()
@@ -195,7 +198,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             except KeyboardInterrupt:
                 raise
             except:
-                # raise
+                raise
                 numerrors += 1
                 peak.setIntensity(0.0)
                 peak.setSigmaIntensity(1.0)

@@ -372,7 +372,7 @@ def getBGRemovedIndices(n_events, zBG=1.96, calc_pp_lambda=False, neigh_length_m
             except KeyboardInterrupt:
                 sys.exit()
             except:
-                # raise
+                raise
                 pplmin_frac -= 0.4
     print('ERROR WITH ICCFT:getBGRemovedIndices!')
 
@@ -841,21 +841,21 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
                          [nPts//3:2*nPts//3])/np.max(fICC.function1D(x)[nPts//3:2*nPts//3])
     x0[4] = x0[4]*scaleFactor
     fICC.setParameter(4, x0[4])
-    #fICC.setPenalizedConstraints(A0=[0.01, 1.0], B0=[0.005, 1.5], R0=[0.01, 1.0], T00=[0,1.0e10], k_conv0=[10,500],penalty=1.0e20)
+    #fICC.setPenalizedConstraints(A0=[0.01, 1.0], B0=[0.005, 1.5], R0=[0.01, 1.0], T00=[0,1.0e10], KConv0=[10,500],penalty=1.0e20)
     if constraintScheme == 1:
         try:
             fICC.setPenalizedConstraints(A0=[0.5*x0[0], 1.5*x0[0]], B0=[0.5*x0[1], 1.5*x0[1]], R0=[
-                                         0.5*x0[2], 1.5*x0[2]], T00=[0., 1.e10], k_conv0=[100, 140], penalty=1.0e10)
+                                         0.5*x0[2], 1.5*x0[2]], T00=[0., 1.e10], KConv0=[100, 140], penalty=1.0e10)
         except:
             fICC.setPenalizedConstraints(A0=[0.5*x0[0], 1.5*x0[0]], B0=[0.5*x0[1], 1.5*x0[1]], R0=[
-                                         0.5*x0[2], 1.5*x0[2]], T00=[0., 1.e10], k_conv0=[100, 140], penalty=None)
+                                         0.5*x0[2], 1.5*x0[2]], T00=[0., 1.e10], KConv0=[100, 140], penalty=None)
     if constraintScheme == 2:
         try:
-            fICC.setPenalizedConstraints(A0=[0.0001, 1.0], B0=[0.005, 1.5], R0=[0.00, 1.], scale0=[
-                                         0.0, 1.0e10], T00=[0, 1.0e10], k_conv0=[100., 140.], penalty=1.0e20)
+            fICC.setPenalizedConstraints(A0=[0.0001, 1.0], B0=[0.005, 1.5], R0=[0.00, 1.], Scale0=[
+                                         0.0, 1.0e10], T00=[0, 1.0e10], KConv0=[100., 140.], penalty=1.0e20)
         except:
-            fICC.setPenalizedConstraints(A0=[0.0001, 1.0], B0=[0.005, 1.5], R0=[0.00, 1.], scale0=[
-                                         0.0, 1.0e10], T00=[0, 1.0e10], k_conv0=[100, 140.], penalty=None)
+            fICC.setPenalizedConstraints(A0=[0.0001, 1.0], B0=[0.005, 1.5], R0=[0.00, 1.], Scale0=[
+                                         0.0, 1.0e10], T00=[0, 1.0e10], KConv0=[100, 140.], penalty=None)
     f = FunctionWrapper(fICC)
     bg = Polynomial(n=fitOrder)
 
