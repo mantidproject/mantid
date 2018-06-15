@@ -49,12 +49,12 @@ class SaveGEMMAUDParamFileTest(unittest.TestCase):
         self._test_all_values_in_segment_equal(segment_header, 0)
 
     def test_values_saved_correctly(self):
-        # Bank IDs
+        # Bank IDs, generated from the number of spectra
         self._test_file_segment_matches("_instrument_counter_bank_ID",
                                         ["Bank{}".format(i + 1) for i in range(5)],
                                         val_type=str)
 
-        # Conversion factors
+        # Conversion factors, read from GSAS param file
         self._test_file_segment_matches("_instrument_bank_difc",
                                         [746.96, 746.96, 1468.19, 2788.34])
         self._test_file_segment_matches("_instrument_bank_difa",
@@ -62,20 +62,20 @@ class SaveGEMMAUDParamFileTest(unittest.TestCase):
         self._test_file_segment_matches("_instrument_bank_zero",
                                         [-9.78, -9.78, 8.95, 16.12])
 
-        # Scattering angles
+        # Scattering angles, read from detector 0 if each spectrum
         self._test_file_segment_matches("_instrument_bank_tof_theta",
                                         [9.1216, 8.15584, 8.03516799206, 9.06114184264])
         self._test_file_segment_matches("_instrument_bank_eta",
                                         [0, 30, 150, 180])
 
-        # Distance
+        # Distance, read from GSAS param file
         self._test_file_segment_matches("_pd_instr_dist_spec/detc",
                                         [2.3696, 2.3696, 1.7714, 1.445])
 
-        # Function type
+        # Function type, always 1
         self._test_all_values_in_segment_equal("_riet_par_TOF_function_type", 1)
                                         
-        # Profile coefficients, function 1
+        # Profile coefficients for function 1, read from GSAS param file
         self._test_all_zeros("_riet_par_TOF_func1_alpha0")
         self._test_all_values_in_segment_equal("_riet_par_TOF_func1_alpha1", 0.16359)
         self._test_all_values_in_segment_equal("_riet_par_TOF_func1_beta0", 0.0265)
@@ -87,7 +87,7 @@ class SaveGEMMAUDParamFileTest(unittest.TestCase):
         self._test_file_segment_matches("_riet_par_TOF_func1_sigma2",
                                         [0, 0, 10.32, 13.63])
 
-        # Profile coefficients, function 2
+        # Profile coefficients for function 2, read from GSAS param file (but always 0)
         prof_coeffs_func_2 = {"alpha0", "alpha1", "beta", "switch", "sigma0",
                               "sigma1", "sigma2", "gamma0", "gamma1", "gamma2"}
         for param in prof_coeffs_func_2:
