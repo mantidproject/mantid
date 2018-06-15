@@ -119,6 +119,15 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         selected_plot = self.view.get_currently_selected_plot_name()
         self.assertEquals(selected_plot, None)
 
+    def test_select_all_button(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        QTest.mouseClick(self.view.select_all_button, Qt.LeftButton)
+
+        selected_plot_names = self.view.get_all_selected_plot_names()
+        self.assertEqual(plot_names, selected_plot_names)
+
     # ------------------------ Plot Closing -------------------------
 
     def test_close_button_pressed_calls_presenter(self):
@@ -194,8 +203,26 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         QTest.mouseClick(self.view.list_widget.viewport(), Qt.LeftButton, pos=item_center)
         QTest.mouseDClick(self.view.list_widget.viewport(), Qt.LeftButton, pos=item_center)
 
-        self.assertEqual(self.presenter.list_double_clicked.call_count, 1)
+        self.assertEqual(self.presenter.make_single_selected_active.call_count, 1)
         self.assertEqual(self.view.get_currently_selected_plot_name(), plot_names[1])
+
+    def test_make_plot_active_by_pressing_activate_button(self):
+        QTest.mouseClick(self.view.make_active_button, Qt.LeftButton)
+        self.assertEquals(self.presenter.make_multiple_selected_active.call_count, 1)
+        QTest.mouseClick(self.view.make_active_button, Qt.LeftButton)
+        self.assertEquals(self.presenter.make_multiple_selected_active.call_count, 2)
+
+    def test_make_plot_active_by_pressing_enter_key(self):
+        QTest.keyClick(self.view, Qt.Key_Enter)
+        self.assertEquals(self.presenter.make_multiple_selected_active.call_count, 1)
+        QTest.keyClick(self.view, Qt.Key_Enter)
+        self.assertEquals(self.presenter.make_multiple_selected_active.call_count, 2)
+
+    def test_make_plot_active_by_pressing_return_key(self):
+        QTest.keyClick(self.view, Qt.Key_Return)
+        self.assertEquals(self.presenter.make_multiple_selected_active.call_count, 1)
+        QTest.keyClick(self.view, Qt.Key_Return)
+        self.assertEquals(self.presenter.make_multiple_selected_active.call_count, 2)
 
     def test_make_active_context_menu(self):
         plot_names = ["Plot1", "Plot2", "Plot3"]

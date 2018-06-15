@@ -53,6 +53,8 @@ class PlotSelectorView(QWidget):
         self.presenter = presenter
         self.is_run_as_unit_test = is_run_as_unit_test
 
+        self.make_active_button = QPushButton('Activate')
+        self.select_all_button = QPushButton('Select All')
         self.close_button = QPushButton('Close')
         self.export_button = self._make_export_button()
         self.filter_box = self._make_filter_box()
@@ -64,6 +66,9 @@ class PlotSelectorView(QWidget):
         self.list_widget.customContextMenuRequested.connect(self.context_menu_opened)
 
         buttons_layout = FlowLayout()
+        buttons_layout.setSpacing(1)
+        buttons_layout.addWidget(self.make_active_button)
+        buttons_layout.addWidget(self.select_all_button)
         buttons_layout.addWidget(self.close_button)
         buttons_layout.addWidget(self.export_button)
 
@@ -90,6 +95,8 @@ class PlotSelectorView(QWidget):
         # Connect presenter methods to things in the view
         self.list_widget.doubleClicked.connect(self.presenter.make_single_selected_active)
         self.filter_box.textChanged.connect(self.presenter.filter_text_changed)
+        self.make_active_button.clicked.connect(self.presenter.make_multiple_selected_active)
+        self.select_all_button.clicked.connect(self.list_widget.selectAll)
         self.close_button.clicked.connect(self.presenter.close_action_called)
         self.deleteKeyPressed.connect(self.presenter.close_action_called)
         self.enterKeyPressed.connect(self.presenter.make_multiple_selected_active)
@@ -139,7 +146,7 @@ class PlotSelectorView(QWidget):
 
     def _make_context_menu(self):
         context_menu = QMenu()
-        context_menu.addAction("Make Active", self.presenter.make_multiple_selected_active)
+        context_menu.addAction("Activate", self.presenter.make_multiple_selected_active)
         context_menu.addAction("Rename", self.rename_selected_in_context_menu)
 
         export_menu = context_menu.addMenu("Export")
