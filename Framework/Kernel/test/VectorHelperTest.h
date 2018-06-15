@@ -167,6 +167,18 @@ public:
                      const std::runtime_error)
   }
 
+  void test_createAxisFromRebinParams_throwsOnInfiniteVal() {
+	  const std::vector<double> params = { 1.0, INFINITY };
+	  std::vector<double> axis;
+	  TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(params, axis), const std::runtime_error);
+  }
+
+  void test_createAxisFromRebinParams_throwsOnNaNVal() {
+	  const std::vector<double> params = { 1.0, NAN };
+	  std::vector<double> axis;
+	  TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(params, axis), const std::runtime_error);
+  }
+
   void test_CreateAxisFromRebinParams_xMinXMaxHints() {
     const std::vector<double> rbParams = {1.0};
     std::vector<double> axis;
