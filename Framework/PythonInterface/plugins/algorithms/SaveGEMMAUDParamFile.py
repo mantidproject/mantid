@@ -16,7 +16,7 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
     PROP_OUTPUT_FILE = "OutputFilename"
 
     #BANK_GROUPING = ([0] * 7) + ([1] * 8) + ([2] * 20) + ([3] * 42) + ([4] * 54) + ([5] * 35)
-    BANK_GROUPING = ([0] * 6) + [1,2]
+    BANK_GROUPING = ([1] * 6) + [2, 3]
     BANK_PARAMS_LINE = "^INS  [0-9]BNKPAR"
     DIFFRACTOMETER_CONSTANTS_LINE = "^INS  [0-9] ICONS"
     PROFILE_COEFFS_LINE_1 = "^INS  [0-9]PRCF 1"
@@ -103,7 +103,7 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
                                               ))
 
     def _expand_to_texture_bank(self, bank_param_list, spectrum_numbers):
-        return (bank_param_list[self.BANK_GROUPING[spec_num]] for spec_num in spectrum_numbers)
+        return (bank_param_list[self.BANK_GROUPING[spec_num] - 1] for spec_num in spectrum_numbers)
 
     def _find_isis_powder_dir(self):
         script_dirs = config["pythonscripts.directories"].split(";")
