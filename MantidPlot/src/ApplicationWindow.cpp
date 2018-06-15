@@ -212,6 +212,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/make_unique.h"
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -4628,26 +4629,15 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
 
   d_opening_file = true;
 
-  QFile file(filename);
-  QFileInfo fileInfo(filename);
+  // Open as a top level folder
+  ProjectSerialiser serialiser(this);
+  serialiser.load(filename.toStdString(), fileVersion);
 
-  if (!file.open(QIODevice::ReadOnly))
-    throw std::runtime_error("Couldn't open project file");
-
-  QTextStream fileTS(&file);
-  fileTS.setCodec(QTextCodec::codecForName("UTF-8"));
-
-  QString baseName = fileInfo.fileName();
-
-  // Skip mantid version line
-  fileTS.readLine();
-
-  // Skip the <scripting-lang> line. We only really use python now anyway.
-  fileTS.readLine();
   setScriptingLanguage("Python");
 
-  // Skip the <windows> line.
-  fileTS.readLine();
+  // These checks have been performed by the load mechanism
+  QFileInfo fileInfo(filename);
+  QString baseName = fileInfo.fileName();
 
   folders->blockSignals(true);
   blockSignals(true);
@@ -4662,21 +4652,9 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
   item->setText(0, fileInfo.baseName());
   item->folder()->setObjectName(fileInfo.baseName());
 
-  // Read the rest of the project file in for parsing
-  std::string lines = fileTS.readAll().toUtf8().constData();
-
-  d_loaded_current = nullptr;
-
-  // Open as a top level folder
-  ProjectSerialiser serialiser(this);
-  serialiser.load(lines, fileVersion);
-
-  if (d_loaded_current)
-    curFolder = d_loaded_current;
-
   {
     // WHY use another fileinfo?
-    QFileInfo fi2(file);
+    QFileInfo fi2(filename);
     QString fileName = fi2.absoluteFilePath();
     recentProjects.removeAll(filename);
     recentProjects.push_front(filename);
@@ -4701,6 +4679,7 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
 
   return this;
 }
+
 bool ApplicationWindow::setScriptingLanguage(const QString &lang) {
   if (lang.isEmpty())
     return false;
@@ -6018,7 +5997,6 @@ bool ApplicationWindow::saveProject(bool compress) {
       projectname.endsWith(".ogg", Qt::CaseInsensitive)) {
     saveProjectAs();
     return true;
-    ;
   }
 
   ProjectSerialiser serialiser(this);
@@ -11713,6 +11691,11 @@ void ApplicationWindow::createActions() {
   connect(actionNewTiledWindow, SIGNAL(triggered()), this,
           SLOT(newTiledWindow()));
 
+  actionGetRecoveryHandle = new MantidQt::MantidWidgets::TrackedAction(
+      tr("Get recovery handle"), this);
+  connect(actionGetRecoveryHandle, SIGNAL(triggered()), this,
+          SLOT(getRecoveryHandle()));
+
   actionNewMatrix = new MantidQt::MantidWidgets::TrackedAction(
       QIcon(getQPixmap("new_matrix_xpm")), tr("New &Matrix"), this);
   actionNewMatrix->setShortcut(tr("Ctrl+M"));
@@ -16749,4 +16732,10 @@ void ApplicationWindow::dropInTiledWindow(MdiSubWindow *w, QPoint pos) {
 bool ApplicationWindow::isOfType(const QObject *obj,
                                  const char *toCompare) const {
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
+}
+
+ProjectRecoveryAdaptor *ApplicationWindow::getRecoveryHandle() {
+  auto adaptorHandle =
+      Mantid::Kernel::make_unique<MantidQt::API::ProjectRecoveryAdaptor>(this);
+  return adaptorHandle.release();
 }

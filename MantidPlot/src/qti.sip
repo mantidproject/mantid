@@ -1128,6 +1128,7 @@ public:
   Matrix* newMatrix(const QString&, int=32, int=32);
 
   TiledWindow *newTiledWindow();
+  ProjectRecoveryAdaptor* getRecoveryHandle();
 
   MultiLayer *plot(const QString&) /PyName=graph/;
 %MethodCode
@@ -1511,4 +1512,19 @@ public:
    MantidQt::MantidWidgets::FitPropertyBrowser* fitFunctionBrowser();
 private:
   MantidUI(const MantidUI &);
+};
+
+class ProjectRecoveryAdaptor : public QObject {
+
+%TypeHeaderCode
+#include "src/ProjectRecoveryAdaptor.h"
+using namespace MantidQt::API;
+%End
+
+public:
+    void saveOpenWindows(std::string);
+    void loadOpenWindows(std::string);
+
+private:
+    ProjectRecoveryAdaptor();
 };

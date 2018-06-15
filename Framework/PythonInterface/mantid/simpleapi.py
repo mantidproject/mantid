@@ -1437,3 +1437,14 @@ def write_workspace_history(ws, filename=None):
         for i in range(len(hist.getAlgorithmHistories())):
             f.write('%s(%s) # %s \n' % (names[i], pv_string[i], dates[i]))
 
+# Save out a project file - 
+# TODO: this assumes that MantidPlot is open, we need to add a check later
+    # Swap .py extension for .project
+    project_filename = filename.strip(".py")
+    project_filename += ".project"
+
+    # TODO: Remove this terrible workaround. It must NOT be merged into master
+    from pymantidplot import get_project_recovery_handle
+
+    project_writer = get_project_recovery_handle()
+    project_writer.saveOpenWindows(project_filename)
