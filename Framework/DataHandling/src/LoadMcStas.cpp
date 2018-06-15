@@ -280,7 +280,7 @@ std::vector<std::string> LoadMcStas::readEventData(
   // create vector container all the event output workspaces needed
   const size_t numEventEntries = eventEntries.size();
   std::string nameOfGroupWS = getProperty("OutputWorkspace");
-  const auto eventDataTotalName = std::string("EventData_") + nameOfGroupWS;
+  const auto eventDataTotalName = "EventData_" + nameOfGroupWS;
   std::vector<std::pair<EventWorkspace_sptr, std::string>> allEventWS = {
       {eventWS, eventDataTotalName}};
   // if numEventEntries > 1 also create separate event workspaces
@@ -291,7 +291,7 @@ std::vector<std::string> LoadMcStas::readEventData(
       const std::string &dataName = eventEntry.first;
       // create container to hold partial event data
       // plus the name users will see for it
-      const auto ws_name = dataName + std::string("_") + nameOfGroupWS;
+      const auto ws_name = dataName + "_" + nameOfGroupWS;
       allEventWS.emplace_back(eventWS->clone(), ws_name);
     }
   }
@@ -571,9 +571,7 @@ std::vector<std::string> LoadMcStas::readHistogramData(
 
     // ensure that specified name is given to workspace (eventWS) when added to
     // outputGroup
-    std::string nameUserSee = std::string(nameAttrValueTITLE)
-                                  .append("_")
-                                  .append(getProperty("OutputWorkspace"));
+    std::string nameUserSee = nameAttrValueTITLE + "_" + getProperty("OutputWorkspace");
     AnalysisDataService::Instance().addOrReplace(nameUserSee, ws);
 
     histoWSNames.emplace_back(ws->getName());
