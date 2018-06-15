@@ -15,7 +15,8 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
     PROP_GSAS_PARAM_FILE = "GSASParamFile"
     PROP_OUTPUT_FILE = "OutputFilename"
 
-    BANK_GROUPING = ([0] * 7) + ([1] * 8) + ([2] * 20) + ([3] * 42) + ([4] * 54) + ([5] * 35)
+    #BANK_GROUPING = ([0] * 7) + ([1] * 8) + ([2] * 20) + ([3] * 42) + ([4] * 54) + ([5] * 35)
+    BANK_GROUPING = ([0] * 6) + [1,2]
     BANK_PARAMS_LINE = "^INS  [0-9]BNKPAR"
     DIFFRACTOMETER_CONSTANTS_LINE = "^INS  [0-9] ICONS"
     PROFILE_COEFFS_LINE_1 = "^INS  [0-9]PRCF 1"
