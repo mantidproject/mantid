@@ -72,6 +72,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         # vanadium runs & comment
         self.vanRuns  = ''
         self.vanCmnt  = ''
+        self.vanTemp  = ''
 
         # empty can runs, comment, and factor
         self.ecRuns   = ''
@@ -118,8 +119,9 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('prefix',      self.prefix)
         put('data_dir',    self.dataDir)
 
-        put('van_runs',    self.vanRuns)
-        put('van_comment', self.vanCmnt)
+        put('van_runs',        self.vanRuns)
+        put('van_comment',     self.vanCmnt)
+        put('van_temperature', self.vanTemp)
 
         put('ec_runs',     self.ecRuns)
         put('ec_factor',   self.ecFactor)
@@ -189,6 +191,7 @@ class TOFTOFScriptElement(BaseScriptElement):
 
             self.vanRuns  = get_str('van_runs')
             self.vanCmnt  = get_str('van_comment')
+            self.vanTemp  = get_str('van_temperature')
 
             self.ecRuns   = get_str('ec_runs')
             self.ecFactor = get_flt('ec_factor', self.DEF_ecFactor)
@@ -298,7 +301,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             wsVan    = self.prefix + 'Van'
 
             self.l("# vanadium runs")
-            self.merge_runs(wsRawVan, self.vanRuns, wsVan, self.vanCmnt)
+            self.merge_runs(wsRawVan, self.vanRuns, wsVan, self.vanCmnt, self.vanTemp)
             allGroup.append(wsVan)
 
         # empty can runs

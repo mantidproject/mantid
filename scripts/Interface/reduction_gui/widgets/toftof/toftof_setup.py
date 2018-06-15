@@ -27,6 +27,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
     TIP_vanRuns = ''
     TIP_vanCmnt = ''
+    TIP_vanTemp = 'Temperature in [K]. only required if none in data given'
 
     TIP_ecRuns = ''
     TIP_ecFactor = ''
@@ -94,6 +95,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
         self.vanRuns   = tip(QLineEdit(), self.TIP_vanRuns)
         self.vanCmnt   = tip(QLineEdit(), self.TIP_vanCmnt)
+        self.vanTemp   = tip(QLineEdit(), self.TIP_vanTemp)
 
         self.ecRuns    = tip(QLineEdit(), self.TIP_ecRuns)
         self.ecFactor  = tip(QDoubleSpinBox(), self.TIP_ecFactor)
@@ -222,7 +224,9 @@ class TOFTOFSetupWidget(BaseWidget):
         grid.addWidget(QLabel('Vanadium runs'), 0, 0)
         grid.addWidget(self.vanRuns,            0, 1, 1, 3)
         grid.addWidget(QLabel('Van. comment'),  1, 0)
-        grid.addWidget(self.vanCmnt,            1, 1, 1, 3)
+        grid.addWidget(self.vanCmnt,            1, 1, 1, 1)
+        grid.addWidget(QLabel('Van. Temp.'),    1, 2)
+        grid.addWidget(self.vanTemp,            1, 3, 1, 1)
         grid.addWidget(QLabel('Empty can runs'),2, 0)
         grid.addWidget(self.ecRuns,             2, 1)
         grid.addWidget(QLabel('EC factor'),     2, 2)
@@ -320,6 +324,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
         elem.vanRuns       = line_text(self.vanRuns)
         elem.vanCmnt       = line_text(self.vanCmnt)
+        elem.vanTemp       = line_text(self.vanTemp)
 
         elem.ecRuns        = line_text(self.ecRuns)
         elem.ecFactor      = self.ecFactor.value()
@@ -368,6 +373,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
         self.vanRuns.setText(elem.vanRuns)
         self.vanCmnt.setText(elem.vanCmnt)
+        self.vanTemp.setText(elem.vanTemp)
 
         self.ecRuns.setText(elem.ecRuns)
         self.ecFactor.setValue(elem.ecFactor)
