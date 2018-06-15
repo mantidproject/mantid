@@ -491,8 +491,9 @@ void ConvFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
   if (m_resolution.size() < dataSize)
     m_resolution.emplace_back(MatrixWorkspace_sptr());
   else if (m_resolution.size() == dataSize &&
+           m_resolution[dataSize - 1].lock() &&
            m_extendedResolution.size() < dataSize)
-    addExtendedResolution(numberOfWorkspaces() - 1);
+    addExtendedResolution(dataSize - 1);
 }
 
 void ConvFitModel::removeWorkspace(std::size_t index) {
