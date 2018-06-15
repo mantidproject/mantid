@@ -12,11 +12,10 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
 
     PROP_INPUT_WS = "InputWorkspace"
     PROP_TEMPLATE_FILE = "TemplateFilename"
+    PROP_GROUPING_SCHEME = "GroupingScheme"
     PROP_GSAS_PARAM_FILE = "GSASParamFile"
     PROP_OUTPUT_FILE = "OutputFilename"
 
-    #BANK_GROUPING = ([0] * 7) + ([1] * 8) + ([2] * 20) + ([3] * 42) + ([4] * 54) + ([5] * 35)
-    BANK_GROUPING = [1, 1, 2, 3]
     BANK_PARAMS_LINE = "^INS  [0-9]BNKPAR"
     DIFFRACTOMETER_CONSTANTS_LINE = "^INS  [0-9] ICONS"
     PROFILE_COEFFS_LINE_1 = "^INS  [0-9]PRCF 1"
@@ -48,6 +47,10 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
                                           defaultValue=self._find_isis_powder_dir()),
                              doc="Template for the .maud file")
 
+        self.declareProperty(IntArrayProperty(name=self.PROP_GROUPING_SCHEME),
+                             doc="An array of bank IDs, where the value at element i is the ID of the bank in " +
+                                 self.PROP_GSAS_PARAM_FILE + " to associate spectrum i with")
+
         self.declareProperty(FileProperty(name=self.PROP_OUTPUT_FILE,
                                           action=FileAction.Save,
                                           defaultValue=""),
@@ -58,8 +61,11 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
         num_banks = input_ws.getNumberOfEntries()
 
         gsas_filename = self.getProperty(self.PROP_GSAS_PARAM_FILE).value
+        grouping_scheme = self.getProperty(self.PROP_GROUPING_SCHEME).value
         distances, difas, difcs, tzeros, alpha_zeros, alpha_ones, beta_zeros, beta_ones, sigma_zeros, sigma_ones, \
-            sigma_twos = map(lambda param: self._expand_to_texture_bank(param, range(num_banks)),
+            sigma_twos = map(lambda param: self._expand_to_texture_bank(bank_param_list=param,
+                                                                        spectrum_numbers=range(num_banks),
+                                                                        grouping_scheme=grouping_scheme),
                              self._parse_gsas_param_file(gsas_filename))
 
         two_thetas, phis = zip(*[self._get_two_theta_and_phi(bank) for bank in input_ws])
@@ -100,8 +106,8 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
                                               function_types=create_empty_param_list("1")
                                               ))
 
-    def _expand_to_texture_bank(self, bank_param_list, spectrum_numbers):
-        return (bank_param_list[self.BANK_GROUPING[spec_num] - 1] for spec_num in spectrum_numbers)
+    def _expand_to_texture_bank(self, bank_param_list, spectrum_numbers, grouping_scheme):
+        return (bank_param_list[grouping_scheme[spec_num] - 1] for spec_num in spectrum_numbers)
 
     def _find_isis_powder_dir(self):
         script_dirs = config["pythonscripts.directories"].split(";")

@@ -25,7 +25,8 @@ class SaveGEMMAUDParamFileTest(unittest.TestCase):
         run_algorithm(self.ALG_NAME,
                       InputWorkspace=self.INPUT_WS_NAME,
                       GSASParamFile=self.GSAS_PARAM_FILE,
-                      OutputFilename=self.OUTPUT_FILE_NAME)
+                      OutputFilename=self.OUTPUT_FILE_NAME,
+                      GroupingScheme=[1, 1, 2, 3])
         with open(self.OUTPUT_FILE_NAME) as output_file:
             self.file_contents = output_file.read().split("\n")
 
