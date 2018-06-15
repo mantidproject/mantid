@@ -27,10 +27,10 @@ class TOFTOFSetupWidget(BaseWidget):
 
     TIP_vanRuns = ''
     TIP_vanCmnt = ''
-    TIP_vanTemp = 'Temperature in [K]. only required if none is in data given'
+    TIP_vanTemp = 'Temperature in [K]. only required if none is given in data'
 
     TIP_ecRuns = ''
-    TIP_ecTemp = 'Temperature in [K]. only required if none is in data given'
+    TIP_ecTemp = 'Temperature in [K]. only required if none is given in data'
     TIP_ecFactor = ''
 
     TIP_binEon = ''
@@ -227,11 +227,11 @@ class TOFTOFSetupWidget(BaseWidget):
         grid.addWidget(self.vanRuns,            0, 1, 1, 3)
         grid.addWidget(QLabel('Van. comment'),  1, 0)
         grid.addWidget(self.vanCmnt,            1, 1, 1, 1)
-        grid.addWidget(QLabel('Van. Temp.'),    1, 2)
+        grid.addWidget(QLabel('Temp.'),         1, 2)
         grid.addWidget(self.vanTemp,            1, 3, 1, 1)
         grid.addWidget(QLabel('Empty can runs'),2, 0)
         grid.addLayout(hbox(self.ecRuns, QLabel('EC factor'), self.ecFactor), 2, 1, 1, 1)
-        grid.addWidget(QLabel('EC Temp.'),      2, 2)
+        grid.addWidget(QLabel('Temp.'),         2, 2)
         grid.addWidget(self.ecTemp,             2, 3)
         grid.addWidget(QLabel('Mask detectors'),3, 0)
         grid.addWidget(self.maskDetectors,      3, 1, 1, 3)
