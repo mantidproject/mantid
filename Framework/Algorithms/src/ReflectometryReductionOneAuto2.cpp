@@ -57,9 +57,6 @@ ReflectometryReductionOneAuto2::validateInputs() {
 
   std::map<std::string, std::string> results;
 
-  const auto output = validateOutputWorkspaces();
-  results.insert(output.begin(), output.end());
-
   // Validate transmission runs only if our input workspace is a group
   if (!checkGroups())
     return results;
@@ -113,31 +110,16 @@ ReflectometryReductionOneAuto2::validateInputs() {
   return results;
 }
 
-/** Validate output workspaces.
- */
-std::map<std::string, std::string>
-ReflectometryReductionOneAuto2::validateOutputWorkspaces() const {
-  std::map<std::string, std::string> results;
-  bool const isDebug = getProperty("Debug");
-  if (!isDebug && !isChild()) {
-    if (isDefault("OutputWorkspaceBinned")) {
-      results["OutputWorkspaceBinned"] =
-          "OutputWorkspace property must be set when Debug is not enabled.";
-    }
-  }
-  return results;
-}
-
 // Set default names for output workspaces
 void ReflectometryReductionOneAuto2::setDefaultOutputWorkspaceNames() {
   bool const isDebug = getProperty("Debug");
+  MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
+  auto const runNumber = getRunNumber(*ws);
+  if (isDefault("OutputWorkspaceBinned")) {
+    setPropertyValue("OutputWorkspaceBinned",
+                      OUTPUT_WORKSPACE_BINNED_DEFAULT_PREFIX + runNumber);
+  }
   if (isDebug) {
-    MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
-    auto const runNumber = getRunNumber(*ws);
-    if (isDefault("OutputWorkspaceBinned")) {
-      setPropertyValue("OutputWorkspaceBinned",
-                       OUTPUT_WORKSPACE_BINNED_DEFAULT_PREFIX + runNumber);
-    }
     if (isDefault("OutputWorkspace")) {
       setPropertyValue("OutputWorkspace",
                        OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);

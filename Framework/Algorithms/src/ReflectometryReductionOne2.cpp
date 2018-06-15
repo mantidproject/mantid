@@ -430,41 +430,21 @@ ReflectometryReductionOne2::validateInputs() {
   const auto transmission = validateTransmissionProperties();
   results.insert(transmission.begin(), transmission.end());
 
-  const auto output = validateOutputWorkspaces();
-  results.insert(output.begin(), output.end());
-
-  return results;
-}
-
-/** Validate output workspaces.
- */
-std::map<std::string, std::string>
-ReflectometryReductionOne2::validateOutputWorkspaces() const {
-  std::map<std::string, std::string> results;
-  bool const isDebug = getProperty("Debug");
-  if (!isDebug && !isChild()) {
-    if (isDefault("OutputWorkspace")) {
-      results["OutputWorkspace"] =
-          "OutputWorkspace property must be set when Debug is not enabled.";
-    }
-  }
   return results;
 }
 
 // Set default names for output workspaces
 void ReflectometryReductionOne2::setDefaultOutputWorkspaceNames() {
   bool const isDebug = getProperty("Debug");
-  if (isDebug) {
-    MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
-    auto const runNumber = getRunNumber(*ws);
-    if (isDefault("OutputWorkspace")) {
-      setPropertyValue("OutputWorkspace",
-                       OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
-    }
-    if (isDefault("OutputWorkspaceWavelength")) {
-      setPropertyValue("OutputWorkspaceWavelength",
-                       OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX + runNumber);
-    }
+  MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
+  auto const runNumber = getRunNumber(*ws);
+  if (isDefault("OutputWorkspace")) {
+    setPropertyValue("OutputWorkspace",
+                      OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
+  }
+  if (isDebug && isDefault("OutputWorkspaceWavelength")) {
+    setPropertyValue("OutputWorkspaceWavelength",
+                      OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX + runNumber);
   }
 }
 

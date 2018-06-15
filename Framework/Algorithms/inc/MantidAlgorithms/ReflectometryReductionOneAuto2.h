@@ -56,8 +56,6 @@ public:
 private:
   void init() override;
   void exec() override;
-  // Validate output workspaces
-  std::map<std::string, std::string> validateOutputWorkspaces() const;
   // Set default names for output workspaces
   void setDefaultOutputWorkspaceNames();
   /// Get the name of the detectors of interest based on processing instructions

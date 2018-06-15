@@ -71,8 +71,6 @@ private:
   void exec() override;
   // Validate inputs
   std::map<std::string, std::string> validateInputs() override;
-  // Validate output workspaces
-  std::map<std::string, std::string> validateOutputWorkspaces() const;
   // Set default names for output workspaces
   void setDefaultOutputWorkspaceNames();
   // Create a direct beam workspace from input workspace in wavelength

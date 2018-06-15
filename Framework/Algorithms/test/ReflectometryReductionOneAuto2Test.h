@@ -610,7 +610,7 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void test_default_outputs() {
+  void test_default_outputs_debug() {
     auto inter = loadRun("INTER00013460.nxs");
     const double theta = 0.7;
 
@@ -627,6 +627,27 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned_13460"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_13460"));
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_default_outputs_no_debug() {
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    // Use the default correction type, which is a vertical shift
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inter);
+    alg.setProperty("ThetaIn", theta);
+    alg.setProperty("CorrectionAlgorithm", "None");
+    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("Debug", false);
+    alg.execute();
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned_13460"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsQ_13460"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam_13460"));
 
     AnalysisDataService::Instance().clear();
   }
@@ -649,6 +670,28 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam"));
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_default_outputs_no_run_number_no_debug() {
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+    inter->mutableRun().removeProperty("run_number");
+
+    // Use the default correction type, which is a vertical shift
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inter);
+    alg.setProperty("ThetaIn", theta);
+    alg.setProperty("CorrectionAlgorithm", "None");
+    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("Debug", false);
+    alg.execute();
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsQ"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam"));
 
     AnalysisDataService::Instance().clear();
   }

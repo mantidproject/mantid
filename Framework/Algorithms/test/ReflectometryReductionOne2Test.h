@@ -718,7 +718,12 @@ public:
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("Debug", false);
     alg.setPropertyValue("ProcessingInstructions", "1+2");
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    alg.execute();
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam"));
+
+    AnalysisDataService::Instance().clear();
   }
 
   void test_debug_true_default_OutputWorkspace_no_run_number() {
