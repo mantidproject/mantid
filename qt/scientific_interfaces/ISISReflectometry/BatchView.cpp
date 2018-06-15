@@ -2,6 +2,7 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
+#include <QMessageBox>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -26,6 +27,43 @@ BatchView::BatchView(std::vector<std::string> const &instruments,
 
   connect(m_ui.filterBox, SIGNAL(textEdited(QString const &)), this,
           SLOT(onFilterChanged(QString const &)));
+}
+
+void BatchView::invalidSelectionForCopy() {
+  QMessageBox::critical(this, "Bad selection for copy",
+                        "All selected rows must share a common group.");
+}
+
+void BatchView::invalidSelectionForPaste() {
+  QMessageBox::critical(this, "Bad selection for paste",
+                        "All selected rows must share a common group.");
+}
+
+void BatchView::invalidSelectionForCut() {
+  QMessageBox::critical(this, "Bad selection for cut",
+                        "All selected rows must share a common group.");
+}
+
+void BatchView::mustSelectRow() {
+  QMessageBox::critical(this, "No Row Selected",
+                        "To delete a row you must select one or more rows.");
+}
+
+void BatchView::mustSelectGroup() {
+  QMessageBox::critical(
+      this, "No Group Selected",
+      "To insert a row you must select a group to add it to.");
+}
+
+void BatchView::mustNotSelectGroup() {
+  QMessageBox::critical(this, "Group Selected",
+                        "To delete rows you should not deselect any groups.");
+}
+
+void BatchView::mustSelectGroupOrRow() {
+  QMessageBox::critical(
+      this, "No Group Selected",
+      "Select the group or rows of one or more groups you wish to delete.");
 }
 
 void BatchView::onFilterChanged(QString const &filter) {

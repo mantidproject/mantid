@@ -21,6 +21,14 @@ public:
   void resetFilterBox() override;
   MantidQt::MantidWidgets::Batch::IJobTreeView &jobs() override;
 
+  void invalidSelectionForCopy() override;
+  void invalidSelectionForPaste() override;
+  void invalidSelectionForCut() override;
+  void mustSelectRow() override;
+  void mustSelectGroup() override;
+  void mustNotSelectGroup() override;
+  void mustSelectGroupOrRow() override;
+
 private slots:
   void onProcessPressed(bool);
   void onPausePressed(bool);

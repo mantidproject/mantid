@@ -1,3 +1,4 @@
+#include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include "ReductionJobs.h"
 #include <iostream>
 namespace MantidQt {
@@ -9,7 +10,8 @@ ReductionJobs<Group>::ReductionJobs(std::vector<Group> groups)
 
 template <typename Group>
 Group &ReductionJobs<Group>::appendGroup(Group group) {
-  assert(!hasGroupWithName(group.name()));
+  assertOrThrow(group.name().empty() || !hasGroupWithName(group.name()),
+                "Cannot have multiple groups with a matching non-empty name.");
   m_groups.emplace_back(std::move(group));
   return m_groups.back();
 }

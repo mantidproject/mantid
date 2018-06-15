@@ -61,10 +61,10 @@ void BatchPresenter::notifyDeleteRowRequested() {
       removeRowsAndGroupsFromView(selected);
       removeRowsFromModel(selected);
     } else {
-      // TODO: m_view->mustNotSelectGroupError();
+      m_view->mustNotSelectGroup();
     }
   } else {
-    // TODO: m_view->mustSelectRowError();
+    m_view->mustSelectRow();
   }
 }
 
@@ -75,7 +75,7 @@ void BatchPresenter::notifyDeleteGroupRequested() {
     removeGroupsFromModel(groupIndicesOrderedLowToHigh);
     removeGroupsFromView(groupIndicesOrderedLowToHigh);
   } else {
-    // TODO: m_view->mustSelectGroupOrRowError();
+    m_view->mustSelectGroupOrRow();
   }
 }
 
@@ -130,7 +130,7 @@ void BatchPresenter::notifyInsertRowRequested() {
     appendRowsToGroupsInModel(groups);
     appendRowsToGroupsInView(groups);
   } else {
-    // TODO: m_view->mustSelectGroupError();
+    m_view->mustSelectGroup();
   }
 }
 
@@ -367,8 +367,7 @@ void BatchPresenter::notifyCopyRowsRequested() {
   if (m_clipboard.is_initialized())
     m_view->jobs().clearSelection();
   else
-    // TODO: m_view->invalidSelectionForCopy();
-    return;
+    m_view->invalidSelectionForCopy();
 }
 
 void BatchPresenter::notifyCutRowsRequested() {
@@ -377,7 +376,7 @@ void BatchPresenter::notifyCutRowsRequested() {
     m_view->jobs().removeRows(m_view->jobs().selectedRowLocations());
     m_view->jobs().clearSelection();
   } else {
-    // TODO: m_view->invalidSelectionForCut();
+    m_view->invalidSelectionForCut();
   }
 }
 
@@ -391,7 +390,7 @@ void BatchPresenter::notifyPasteRowsRequested() {
       m_view->jobs().appendSubtreesAt(
           MantidQt::MantidWidgets::Batch::RowLocation(), m_clipboard.get());
   } else {
-    // TODO: m_view->invalidSelectionForPaste();
+    m_view->invalidSelectionForPaste();
   }
 }
 }
