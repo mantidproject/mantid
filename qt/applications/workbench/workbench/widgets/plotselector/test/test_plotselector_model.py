@@ -106,6 +106,30 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.model.notify(FigureAction.Unknown, "")
         self.presenter.update_plot_list.assert_called_once_with()
 
+    # ---------------------- Plot Activation ------------------------
+
+    def test_make_plot_active_calls_current_figure(self):
+        self.model.make_plot_active("Plot1")
+        self.assertEqual(self.figure_manager.show.call_count, 1)
+
+    def test_make_plot_active_for_invalid_name_raises_value_error(self):
+        self.assertRaises(ValueError, self.model.make_plot_active, "NotAPlot")
+        self.figure_manager.show.assert_not_called()
+
+    # ------------------------ Plot Renaming ------------------------
+
+    def test_renaming_calls_set_window_title(self):
+        self.model.rename_figure("NewName", "Plot1")
+        self.figure_manager.set_window_title.assert_called_once_with("NewName")
+
+    def test_renaming_calls_with_invalid_name_raises_value_error(self):
+        self.assertRaises(ValueError, self.model.rename_figure, "NewName", "NotAPlot")
+        self.figure_manager.set_window_title.assert_not_called()
+
+    def test_renaming_calls_with_duplicate_new_name_raises_value_error(self):
+        self.assertRaises(ValueError, self.model.rename_figure, "Plot2", "Plot1")
+        self.figure_manager.set_window_title.assert_not_called()
+
     # ------------------------ Plot Closing -------------------------
 
     def test_notify_for_closing_plot_calls_remove_in_presenter(self):
@@ -119,16 +143,6 @@ class PlotSelectorModelTest(unittest.TestCase):
     def test_close_plot_calls_destroy_in_current_figure(self):
         self.model.close_plot("Plot1")
         self.global_figure_manager.destroy.assert_called_once_with(42)
-
-    # ---------------------- Plot Activation ------------------------
-
-    def test_make_plot_active_calls_current_figure(self):
-        self.model.make_plot_active("Plot1")
-        self.assertEqual(self.figure_manager.show.call_count, 1)
-
-    def test_make_plot_active_for_invalid_name_raises_value_error(self):
-        self.assertRaises(ValueError, self.model.make_plot_active, "NotAPlot")
-        self.figure_manager.show.assert_not_called()
 
     # ---------------------- Plot Exporting -------------------------
 

@@ -76,13 +76,6 @@ class PlotSelectorModel(object):
 
         self.plot_list = [new_name if plot_name == old_name else plot_name for plot_name in self.plot_list]
 
-    def rename_figure(self, new_name, old_name):
-        if new_name in self.plot_list:
-            raise ValueError('Error renaming, name {} already in use.'.format(new_name))
-
-        figure = self.GlobalFigureManager.get_figure_manager_from_name(old_name)
-        figure.set_window_title(new_name)
-
     def notify(self, action, plot_name):
         """
         This is called by GlobalFigureManager when plots are created
@@ -99,6 +92,33 @@ class PlotSelectorModel(object):
             self.presenter.rename_in_plot_list(new_name, old_name)
         if action == FigureAction.Unknown:
             self.presenter.update_plot_list()
+
+    # ---------------------- Plot Activation ------------------------
+
+    def make_plot_active(self, plot_name):
+        """
+        For a given plot name make this plot active - bring it to the
+        front and make it the destination for overplotting
+        :param plot_name: A string with the name of the plot
+                          (figure title)
+        """
+        figure_manager = self.GlobalFigureManager.get_figure_manager_from_name(plot_name)
+        if figure_manager is not None:
+            figure_manager.show()
+        else:
+            raise ValueError('Error, could not find a plot with the name {}.'.format(plot_name))
+
+    # ------------------------ Plot Renaming ------------------------
+
+    def rename_figure(self, new_name, old_name):
+        if old_name not in self.plot_list:
+            raise ValueError('Error renaming, could not find a plot with the name {}.'.format(old_name))
+
+        if new_name in self.plot_list:
+            raise ValueError('Error renaming, name {} already in use.'.format(new_name))
+
+        figure = self.GlobalFigureManager.get_figure_manager_from_name(old_name)
+        figure.set_window_title(new_name)
 
     # ------------------------ Plot Closing -------------------------
 
@@ -117,23 +137,17 @@ class PlotSelectorModel(object):
         if figure_number_to_close is not None:
             self.GlobalFigureManager.destroy(figure_number_to_close)
 
-    # ---------------------- Plot Activation ------------------------
-
-    def make_plot_active(self, plot_name):
-        """
-        For a given plot name make this plot active - bring it to the
-        front and make it the destination for overplotting
-        :param plot_name: A string with the name of the plot
-                          (figure title)
-        """
-        figure_manager = self.GlobalFigureManager.get_figure_manager_from_name(plot_name)
-        if figure_manager is not None:
-            figure_manager.show()
-        else:
-            raise ValueError('Error, could not find a plot with the name {}.'.format(plot_name))
-
     # ---------------------- Plot Exporting -------------------------
 
     def export_plot(self, plot_name, save_path):
+        if plot_name not in self.plot_list:
+            raise ValueError('Error renaming, could not find a plot with the name {}.'.format(plot_name))
+
         figure_manager = self.GlobalFigureManager.get_figure_manager_from_name(plot_name)
-        figure_manager.canvas.figure.savefig(save_path)
+
+        try:
+            figure_manager.canvas.figure.savefig(save_path)
+        except IOError as e:
+            raise ValueError("Error, could not save plot with name {} because the filename is invalid. "
+                             "Please remove any characters in the plot name that cannot be used in filenames."
+                             .format(plot_name))

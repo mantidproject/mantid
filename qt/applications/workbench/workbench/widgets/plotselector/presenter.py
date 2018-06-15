@@ -103,55 +103,6 @@ class PlotSelectorPresenter(object):
         except ValueError as e:
             print(e)
 
-    def rename_figure(self, new_name, old_name):
-        """
-        Replaces a name in the plot list
-        :param new_name: The new plot name
-        :param old_name: The name of the plot to be replaced
-        """
-        if new_name == old_name:
-            return
-
-        try:
-            self.model.rename_figure(new_name, old_name)
-        except ValueError as e:
-            # We need to undo the rename in the view
-            self.view.rename_in_plot_list(old_name, old_name)
-            print(e)
-        except AttributeError as e:
-            print("Error, could not find the plot to rename. Removing this plot from the list.")
-            self.view.rename_in_plot_list(old_name, old_name)
-            self.remove_from_plot_list(old_name)
-
-    # ------------------------ Plot Closing -------------------------
-
-    def close_action_called(self):
-        """
-        This is called by the view when closing plots is requested
-        (e.g. pressing close or delete).
-        """
-        selected_plots = self.view.get_all_selected_plot_names()
-        self._close_plots(selected_plots)
-
-    def close_single_plot(self, plot_name):
-        """
-        This is used to close plots when a close action is called
-        that does not refer to the selected plot(s)
-        :param plot_name: Name of the plot to close
-        """
-        self._close_plots([plot_name])
-
-    def _close_plots(self, list_of_plots):
-        """
-        Accepts a list of plot names to close
-        :param list_of_plots: A list of strings containing plot names
-        """
-        for plot_name in list_of_plots:
-            try:
-                self.model.close_plot(plot_name)
-            except ValueError as e:
-                print(e)
-
     # ----------------------- Plot Filtering ------------------------
 
     def filter_text_changed(self):
@@ -203,6 +154,53 @@ class PlotSelectorPresenter(object):
         except ValueError as e:
             print(e)
 
+    # ------------------------ Plot Renaming ------------------------
+
+    def rename_figure(self, new_name, old_name):
+        """
+        Replaces a name in the plot list
+        :param new_name: The new plot name
+        :param old_name: The name of the plot to be replaced
+        """
+        if new_name == old_name:
+            return
+
+        try:
+            self.model.rename_figure(new_name, old_name)
+        except ValueError as e:
+            # We need to undo the rename in the view
+            self.view.rename_in_plot_list(old_name, old_name)
+            print(e)
+
+    # ------------------------ Plot Closing -------------------------
+
+    def close_action_called(self):
+        """
+        This is called by the view when closing plots is requested
+        (e.g. pressing close or delete).
+        """
+        selected_plots = self.view.get_all_selected_plot_names()
+        self._close_plots(selected_plots)
+
+    def close_single_plot(self, plot_name):
+        """
+        This is used to close plots when a close action is called
+        that does not refer to the selected plot(s)
+        :param plot_name: Name of the plot to close
+        """
+        self._close_plots([plot_name])
+
+    def _close_plots(self, list_of_plots):
+        """
+        Accepts a list of plot names to close
+        :param list_of_plots: A list of strings containing plot names
+        """
+        for plot_name in list_of_plots:
+            try:
+                self.model.close_plot(plot_name)
+            except ValueError as e:
+                print(e)
+
     # ---------------------- Plot Exporting -------------------------
 
     def export_plots(self, path, extension):
@@ -214,9 +212,5 @@ class PlotSelectorPresenter(object):
             filename = os.path.join(path, plot_name + extension)
             try:
                 self.model.export_plot(plot_name, filename)
-            except AttributeError as e:
-                print("Error, could not find plot with name {}.".format(plot_name))
-            except IOError as e:
-                print("Error, could not save plot with name {} because the filename is invalid. "
-                      "Please remove any characters in the plot name that cannot be used in filenames."
-                      .format(plot_name))
+            except ValueError as e:
+                print(e)

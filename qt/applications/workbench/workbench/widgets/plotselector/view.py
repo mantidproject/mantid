@@ -116,16 +116,6 @@ class PlotSelectorView(QWidget):
         elif event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
             self.enterKeyPressed.emit(event.key())
 
-    def _make_filter_box(self):
-        """
-        Make the text box to filter the plots by name
-        :return: A QLineEdit object with placeholder text and a
-                 clear button
-        """
-        text_box = QLineEdit(self)
-        text_box.setPlaceholderText("Filter Plots")
-        text_box.setClearButtonEnabled(True)
-        return text_box
 
     def _make_list_widget(self):
         """
@@ -135,14 +125,6 @@ class PlotSelectorView(QWidget):
         list_widget = QListWidget(self)
         list_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)
         return list_widget
-
-    def _make_export_button(self):
-        export_button = QPushButton("Export")
-        export_menu = QMenu()
-        for text, extension in export_types:
-            export_menu.addAction(text, lambda ext=extension: self.export_plots(ext))
-        export_button.setMenu(export_menu)
-        return export_button
 
     def _make_context_menu(self):
         context_menu = QMenu()
@@ -156,19 +138,8 @@ class PlotSelectorView(QWidget):
         context_menu.addAction("Close", self.presenter.close_action_called)
         return context_menu, export_menu
 
-    def rename_selected_in_context_menu(self):
-        plot_name = self.get_currently_selected_plot_name()
-        row, widget = self._get_row_and_widget_from_label_text(plot_name)
-        widget.toggle_plot_name_editable(True)
-
     def context_menu_opened(self, position):
         self.context_menu.exec_(self.mapToGlobal(position))
-
-    def export_plots(self, extension):
-        path = ""
-        if not self.is_run_as_unit_test:
-            path = QFileDialog.getExistingDirectory(None, 'Select folder for exported plots')
-        self.presenter.export_plots(path, extension)
 
     # ------------------------ Plot Updates ------------------------
 
@@ -242,6 +213,42 @@ class PlotSelectorView(QWidget):
         :return: A string with current filter text
         """
         return self.filter_box.text()
+
+    # ----------------------- Plot Filtering ------------------------
+
+    def _make_filter_box(self):
+        """
+        Make the text box to filter the plots by name
+        :return: A QLineEdit object with placeholder text and a
+                 clear button
+        """
+        text_box = QLineEdit(self)
+        text_box.setPlaceholderText("Filter Plots")
+        text_box.setClearButtonEnabled(True)
+        return text_box
+
+    # ------------------------ Plot Renaming ------------------------
+
+    def rename_selected_in_context_menu(self):
+        plot_name = self.get_currently_selected_plot_name()
+        row, widget = self._get_row_and_widget_from_label_text(plot_name)
+        widget.toggle_plot_name_editable(True)
+
+    # ---------------------- Plot Exporting -------------------------
+
+    def _make_export_button(self):
+        export_button = QPushButton("Export")
+        export_menu = QMenu()
+        for text, extension in export_types:
+            export_menu.addAction(text, lambda ext=extension: self.export_plots(ext))
+        export_button.setMenu(export_menu)
+        return export_button
+
+    def export_plots(self, extension):
+        path = ""
+        if not self.is_run_as_unit_test:
+            path = QFileDialog.getExistingDirectory(None, 'Select folder for exported plots')
+        self.presenter.export_plots(path, extension)
 
 
 class PlotNameWidget(QWidget):

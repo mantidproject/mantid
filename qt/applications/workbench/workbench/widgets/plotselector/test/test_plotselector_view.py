@@ -42,6 +42,13 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         item = self.view.list_widget.item(row_number)
         return self.view.list_widget.itemWidget(item)
 
+    def click_to_select_by_row_number(self, row_number):
+        # It would be nice to avoid this, but could not find a way to
+        # get the list item as a QWidget
+        model_index = self.view.list_widget.model().index(row_number, 0)
+        item_center = self.view.list_widget.visualRect(model_index).center()
+        QTest.mouseClick(self.view.list_widget.viewport(), Qt.LeftButton, pos=item_center)
+
     def assert_list_of_plots_is_set_in_widget(self, plot_names):
         self.assertEqual(len(plot_names), len(self.view.list_widget))
         for index in range(len(self.view.list_widget)):
@@ -103,11 +110,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
 
-        # It would be nice to avoid this, but could not find a way to
-        # get the list item as a QWidget
-        model_index = self.view.list_widget.model().index(1, 0)
-        item_center = self.view.list_widget.visualRect(model_index).center()
-        QTest.mouseClick(self.view.list_widget.viewport(), Qt.LeftButton, pos=item_center)
+        self.click_to_select_by_row_number(1)
 
         selected_plot = self.view.get_currently_selected_plot_name()
         self.assertEquals(selected_plot, plot_names[1])
@@ -127,57 +130,6 @@ class PlotSelectorWidgetTest(unittest.TestCase):
 
         selected_plot_names = self.view.get_all_selected_plot_names()
         self.assertEqual(plot_names, selected_plot_names)
-
-    # ------------------------ Plot Closing -------------------------
-
-    def test_close_button_pressed_calls_presenter(self):
-        QTest.mouseClick(self.view.close_button, Qt.LeftButton)
-        self.assertEquals(self.presenter.close_action_called.call_count, 1)
-        QTest.mouseClick(self.view.close_button, Qt.LeftButton)
-        self.assertEquals(self.presenter.close_action_called.call_count, 2)
-
-    def test_delete_key_pressed_calls_presenter(self):
-        QTest.keyClick(self.view.close_button, Qt.Key_Delete)
-        self.assertEquals(self.presenter.close_action_called.call_count, 1)
-        QTest.keyClick(self.view.close_button, Qt.Key_Delete)
-        self.assertEquals(self.presenter.close_action_called.call_count, 2)
-
-    def test_name_widget_close_button_pressed_calls_presenter(self):
-        plot_names = ["Plot1", "Plot2", "Plot3"]
-        self.view.set_plot_list(plot_names)
-
-        widget = self.get_NameWidget_by_row_number(1)
-        QTest.mouseClick(widget.close_button, Qt.LeftButton)
-        self.presenter.close_single_plot.assert_called_once_with("Plot2")
-
-    def test_name_widget_close_button_pressed_leaves_selection_unchanged(self):
-        plot_names = ["Plot1", "Plot2", "Plot3"]
-        self.view.set_plot_list(plot_names)
-
-        # Set the selected items by clicking with control held
-        for row in [0, 2]:
-            widget = self.get_NameWidget_by_row_number(row)
-            QTest.mouseClick(widget, Qt.LeftButton, Qt.ControlModifier)
-        plots_selected_old = self.view.get_all_selected_plot_names()
-        self.assertEquals(plots_selected_old, ["Plot1", "Plot3"])
-
-        widget = self.get_NameWidget_by_row_number(1)
-        QTest.mouseClick(widget.close_button, Qt.LeftButton)
-
-        # We need to actually update the plot list, as the presenter would
-        self.view.remove_from_plot_list("Plot2")
-        self.presenter.close_single_plot.assert_called_once_with("Plot2")
-
-        plots_selected_new = self.view.get_all_selected_plot_names()
-        self.assertEquals(plots_selected_old, plots_selected_new)
-
-    def test_close_plot_context_menu(self):
-        plot_names = ["Plot1", "Plot2", "Plot3"]
-        self.view.set_plot_list(plot_names)
-
-        self.view.context_menu.actions()[3].trigger()
-
-        self.presenter.close_action_called.assert_called_once_with()
 
     # ----------------------- Plot Filtering ------------------------
 
@@ -231,6 +183,93 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.view.context_menu.actions()[0].trigger()
 
         self.presenter.make_multiple_selected_active.assert_called_once_with()
+
+    # ------------------------ Plot Renaming ------------------------
+
+    def test_rename_button_pressed_makes_line_editable(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        name_widget = self.get_NameWidget_by_row_number(0)
+        QTest.mouseClick(name_widget.rename_button, Qt.LeftButton)
+
+        self.assertFalse(name_widget.line_edit.isReadOnly())
+        self.assertTrue(name_widget.rename_button.isChecked())
+
+    def test_rename_context_menu_makes_line_editable(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        self.click_to_select_by_row_number(1)
+        self.view.context_menu.actions()[1].trigger()
+
+        name_widget = self.get_NameWidget_by_row_number(1)
+        self.assertFalse(name_widget.line_edit.isReadOnly())
+        self.assertTrue(name_widget.rename_button.isChecked())
+
+    def test_rename_finishing_editing_makes_line_uneditable_and_calls_presenter(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        name_widget = self.get_NameWidget_by_row_number(1)
+        QTest.mouseClick(name_widget.rename_button, Qt.LeftButton)
+        QTest.keyPress(name_widget.line_edit, Qt.Key_Return)
+
+        self.presenter.rename_figure.assert_called_once_with("Plot2", "Plot2")
+
+        self.assertTrue(name_widget.line_edit.isReadOnly())
+        self.assertFalse(name_widget.rename_button.isChecked())
+
+    # ------------------------ Plot Closing -------------------------
+
+    def test_close_button_pressed_calls_presenter(self):
+        QTest.mouseClick(self.view.close_button, Qt.LeftButton)
+        self.assertEquals(self.presenter.close_action_called.call_count, 1)
+        QTest.mouseClick(self.view.close_button, Qt.LeftButton)
+        self.assertEquals(self.presenter.close_action_called.call_count, 2)
+
+    def test_delete_key_pressed_calls_presenter(self):
+        QTest.keyClick(self.view.close_button, Qt.Key_Delete)
+        self.assertEquals(self.presenter.close_action_called.call_count, 1)
+        QTest.keyClick(self.view.close_button, Qt.Key_Delete)
+        self.assertEquals(self.presenter.close_action_called.call_count, 2)
+
+    def test_name_widget_close_button_pressed_calls_presenter(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        widget = self.get_NameWidget_by_row_number(1)
+        QTest.mouseClick(widget.close_button, Qt.LeftButton)
+        self.presenter.close_single_plot.assert_called_once_with("Plot2")
+
+    def test_name_widget_close_button_pressed_leaves_selection_unchanged(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        # Set the selected items by clicking with control held
+        for row in [0, 2]:
+            widget = self.get_NameWidget_by_row_number(row)
+            QTest.mouseClick(widget, Qt.LeftButton, Qt.ControlModifier)
+        plots_selected_old = self.view.get_all_selected_plot_names()
+        self.assertEquals(plots_selected_old, ["Plot1", "Plot3"])
+
+        widget = self.get_NameWidget_by_row_number(1)
+        QTest.mouseClick(widget.close_button, Qt.LeftButton)
+
+        # We need to actually update the plot list, as the presenter would
+        self.view.remove_from_plot_list("Plot2")
+        self.presenter.close_single_plot.assert_called_once_with("Plot2")
+
+        plots_selected_new = self.view.get_all_selected_plot_names()
+        self.assertEquals(plots_selected_old, plots_selected_new)
+
+    def test_close_plot_context_menu(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        self.view.context_menu.actions()[3].trigger()
+
+        self.presenter.close_action_called.assert_called_once_with()
 
     # ---------------------- Plot Exporting -------------------------
 

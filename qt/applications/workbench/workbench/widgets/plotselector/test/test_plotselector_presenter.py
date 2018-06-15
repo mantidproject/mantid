@@ -103,6 +103,57 @@ class PlotSelectorPresenterTest(unittest.TestCase):
         self.model.rename_in_plot_list.assert_not_called()
         self.view.rename_in_plot_list.assert_not_called()
 
+    # ----------------------- Plot Filtering ------------------------
+
+    def test_no_filtering_displays_all_plots(self):
+        self.presenter.filter_text_changed()
+        self.view.set_plot_list.assert_called_once_with(["Plot1", "Plot2", "Plot3", "Graph99"])
+
+    def test_plots_filtered_on_full_name(self):
+        self.view.get_filter_text = mock.Mock(return_value="Plot1")
+        self.presenter.filter_text_changed()
+
+        self.view.set_plot_list.assert_called_once_with(["Plot1"])
+
+    def test_plots_filtered_on_substring(self):
+        self.view.get_filter_text = mock.Mock(return_value="lot")
+        self.presenter.filter_text_changed()
+
+        self.view.set_plot_list.assert_called_once_with(["Plot1", "Plot2", "Plot3"])
+
+    def test_filtering_case_invariant(self):
+        self.view.get_filter_text = mock.Mock(return_value="pLOT1")
+        self.presenter.filter_text_changed()
+
+        self.view.set_plot_list.assert_called_once_with(["Plot1"])
+
+    # ---------------------- Plot Activation ------------------------
+
+    def test_double_clicking_plot_brings_to_front(self):
+        self.view.get_currently_selected_plot_name = mock.Mock(return_value="Plot2")
+        self.presenter.make_single_selected_active()
+        self.model.make_plot_active.assert_called_once_with("Plot2")
+
+    def test_make_plot_active_brings_to_front(self):
+        self.presenter.make_plot_active("Plot2")
+        self.model.make_plot_active.assert_called_once_with("Plot2")
+
+    # ------------------------ Plot Renaming ------------------------
+
+    def test_rename_figure_calls_rename_in_model(self):
+        self.presenter.rename_figure("NewName", "Plot1")
+        self.model.rename_figure.assert_called_once_with("NewName", "Plot1")
+
+    def test_rename_figure_with_same_old_and_new_name_does_nothing(self):
+        self.presenter.rename_figure("Plot1", "Plot1")
+        self.model.rename_figure.assert_not_called()
+
+    def test_rename_figure_raising_a_value_error_undoes_rename_in_view(self):
+        self.model.rename_figure.side_effect = ValueError("Some problem")
+        self.presenter.rename_figure("NewName", "Plot1")
+        self.model.rename_figure.assert_called_once_with("NewName", "Plot1")
+        self.view.rename_in_plot_list.assert_called_once_with("Plot1", "Plot1")
+
     # ------------------------ Plot Closing -------------------------
 
     def test_close_action_single_plot(self):
@@ -142,41 +193,6 @@ class PlotSelectorPresenterTest(unittest.TestCase):
     def test_close_single_plot_called(self):
         self.presenter.close_single_plot("Plot2")
         self.model.close_plot.assert_called_once_with("Plot2")
-
-    # ----------------------- Plot Filtering ------------------------
-
-    def test_no_filtering_displays_all_plots(self):
-        self.presenter.filter_text_changed()
-        self.view.set_plot_list.assert_called_once_with(["Plot1", "Plot2", "Plot3", "Graph99"])
-
-    def test_plots_filtered_on_full_name(self):
-        self.view.get_filter_text = mock.Mock(return_value="Plot1")
-        self.presenter.filter_text_changed()
-
-        self.view.set_plot_list.assert_called_once_with(["Plot1"])
-
-    def test_plots_filtered_on_substring(self):
-        self.view.get_filter_text = mock.Mock(return_value="lot")
-        self.presenter.filter_text_changed()
-
-        self.view.set_plot_list.assert_called_once_with(["Plot1", "Plot2", "Plot3"])
-
-    def test_filtering_case_invariant(self):
-        self.view.get_filter_text = mock.Mock(return_value="pLOT1")
-        self.presenter.filter_text_changed()
-
-        self.view.set_plot_list.assert_called_once_with(["Plot1"])
-
-    # ---------------------- Plot Activation ------------------------
-
-    def test_double_clicking_plot_brings_to_front(self):
-        self.view.get_currently_selected_plot_name = mock.Mock(return_value="Plot2")
-        self.presenter.make_single_selected_active()
-        self.model.make_plot_active.assert_called_once_with("Plot2")
-
-    def test_make_plot_active_brings_to_front(self):
-        self.presenter.make_plot_active("Plot2")
-        self.model.make_plot_active.assert_called_once_with("Plot2")
 
     # ---------------------- Plot Exporting -------------------------
 
