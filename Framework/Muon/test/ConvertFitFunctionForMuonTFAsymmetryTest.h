@@ -62,7 +62,7 @@ IAlgorithm_sptr setUpAlg(std::vector<std::string> wsNames,
   asymmAlg->setChild(true);
   asymmAlg->setProperty("WorkspaceList", wsNames);
   ITableWorkspace_sptr table = genTable();
-  asymmAlg->setProperty("NormalisationTable", table);
+  asymmAlg->setProperty("NormalizationTable", table);
   asymmAlg->setProperty("InputFunction", func);
   return asymmAlg;
 }
