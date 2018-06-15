@@ -1,9 +1,11 @@
 #include "BatchPresenter.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
+#include "MantidQtWidgets/Common/Batch/RowPredicate.h"
 #include "Reduction/Group.h"
 #include "Reduction/Slicing.h"
 #include "ValidateRow.h"
 
+#include <boost/regex.hpp>
 #include <iostream>
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -14,17 +16,33 @@ BatchPresenterFactory::BatchPresenterFactory(
 
 std::unique_ptr<BatchPresenter> BatchPresenterFactory::
 operator()(IBatchView *view) const {
-  return std::make_unique<BatchPresenter>(view, m_instruments, ReductionJobs<SlicedGroup>());
+  return std::make_unique<BatchPresenter>(view, m_instruments,
+                                          UnslicedReductionJobs());
 }
 
 BatchPresenter::BatchPresenter(IBatchView *view,
                                std::vector<std::string> const &instruments,
                                Jobs jobs)
-    : m_view(view), m_instruments(instruments), m_model(std::move(jobs)) {
+    : m_view(view), m_instruments(instruments), m_model(std::move(jobs)),
+      m_jobViewUpdater(m_view->jobs()), m_workspaceNameFactory(Slicing()) {
   m_view->subscribe(this);
 }
 
 Jobs const &BatchPresenter::reductionJobs() const { return m_model; }
+
+void BatchPresenter::mergeAdditionalJobs(Jobs const &additionalJobs) {
+  std::cout << "Before Transfer:" << std::endl;
+  prettyPrintModel(m_model);
+
+  std::cout << "Transfering:" << std::endl;
+  prettyPrintModel(additionalJobs);
+
+  mergeJobsInto(m_model, additionalJobs, 0.0001, m_workspaceNameFactory,
+                m_jobViewUpdater);
+
+  std::cout << "After Transfer:" << std::endl;
+  prettyPrintModel(m_model);
+}
 
 void BatchPresenter::removeRowsFromModel(
     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rows) {
@@ -78,9 +96,7 @@ void BatchPresenter::removeGroupsFromModel(
 
 void BatchPresenter::notifyPauseRequested() {}
 
-void BatchPresenter::notifyProcessRequested() {
-  prettyPrintModel(m_model);
-}
+void BatchPresenter::notifyProcessRequested() { prettyPrintModel(m_model); }
 
 template <typename T>
 void sortAndRemoveDuplicatesInplace(std::vector<T> &items) {
@@ -118,6 +134,35 @@ void BatchPresenter::notifyInsertRowRequested() {
   }
 }
 
+void BatchPresenter::notifyFilterChanged(std::string const &filterValue) {
+  try {
+    auto regexFilter = boost::regex(filterValue);
+    m_view->jobs().filterRowsBy(
+        MantidQt::MantidWidgets::Batch::makeFilterFromLambda(
+            [this, filterValue, regexFilter](
+                MantidQt::MantidWidgets::Batch::RowLocation const &location)
+                -> bool {
+                  if (location.isRoot()) {
+                    return true;
+                  } else if (isGroupLocation(location)) {
+                    auto cellText =
+                        m_view->jobs().cellAt(location, 0).contentText();
+                    return boost::regex_search(cellText, regexFilter);
+                  } else {
+                    assert(isRowLocation(location));
+                    auto cellText =
+                        m_view->jobs().cellAt(location, 0).contentText();
+                    auto groupText = groupName(m_model, groupOf(location));
+                    return boost::regex_search(cellText, regexFilter) ||
+                           boost::regex_search(groupText, regexFilter);
+                  }
+                }));
+  } catch (boost::regex_error &) {
+  }
+}
+
+void BatchPresenter::notifyFilterReset() { m_view->resetFilterBox(); }
+
 void BatchPresenter::appendRowsToGroupsInView(
     std::vector<int> const &groupIndices) {
   for (auto &&groupIndex : groupIndices)
@@ -144,9 +189,7 @@ void BatchPresenter::notifyInsertGroupRequested() {
   }
 }
 
-void BatchPresenter::appendEmptyGroupInModel() {
-  appendEmptyGroup(m_model);
-}
+void BatchPresenter::appendEmptyGroupInModel() { appendEmptyGroup(m_model); }
 
 void BatchPresenter::appendEmptyGroupInView() {
   auto location = m_view->jobs().appendChildRowOf(
@@ -220,7 +263,11 @@ void BatchPresenter::notifyCellTextChanged(
     std::string const &oldValue, std::string const &newValue) {
   if (isGroupLocation(itemIndex)) {
     auto const groupIndex = groupOf(itemIndex);
-    setGroupName(m_model, groupIndex, newValue);
+    if (!setGroupName(m_model, groupIndex, newValue)) {
+      auto cell = m_view->jobs().cellAt(itemIndex, column);
+      cell.setContentText(oldValue);
+      m_view->jobs().setCellAt(itemIndex, column, cell);
+    }
   } else {
     auto const groupIndex = groupOf(itemIndex);
     auto const rowIndex = rowOf(itemIndex);
@@ -347,7 +394,5 @@ void BatchPresenter::notifyPasteRowsRequested() {
     // TODO: m_view->invalidSelectionForPaste();
   }
 }
-
-void BatchPresenter::notifyFilterReset() {}
 }
 }

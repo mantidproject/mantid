@@ -31,8 +31,13 @@ public:
     ON_CALL(mockJobs, selectedRowLocations()).WillByDefault(Return(locations));
   }
 
-  void jobsViewIs(MantidQt::MantidWidgets::Batch::IJobTreeView &jobsView, MockBatchView& view) {
+  void jobsViewIs(MantidQt::MantidWidgets::Batch::IJobTreeView &jobsView,
+                  MockBatchView &view) {
     ON_CALL(view, jobs()).WillByDefault(::testing::ReturnRef(jobsView));
+  }
+
+  UnslicedReductionJobs const& unslicedJobsFromPresenter(BatchPresenter &presenter) {
+    return boost::get<UnslicedReductionJobs>(presenter.reductionJobs());
   }
 
   template <typename... Args>
@@ -47,7 +52,7 @@ public:
     jobsViewIs(jobs, view);
     EXPECT_CALL(jobs, expandAll());
 
-    BatchPresenter presenter(&view, {}, ReductionJobs());
+    BatchPresenter presenter(&view, {}, UnslicedReductionJobs());
     presenter.notifyExpandAllRequested();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -60,15 +65,15 @@ public:
     jobsViewIs(jobs, view);
     EXPECT_CALL(jobs, collapseAll());
 
-    BatchPresenter presenter(&view, {}, ReductionJobs());
+    BatchPresenter presenter(&view, {}, UnslicedReductionJobs());
     presenter.notifyCollapseAllRequested();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&jobs));
   }
 
-  ReductionJobs twoEmptyGroupsModel() {
-    auto reductionJobs = ReductionJobs();
+  UnslicedReductionJobs twoEmptyGroupsModel() {
+    auto reductionJobs = UnslicedReductionJobs();
     reductionJobs.appendGroup(UnslicedGroup("Group 1"));
     reductionJobs.appendGroup(UnslicedGroup("Group 2"));
     return reductionJobs;
@@ -105,7 +110,7 @@ public:
     BatchPresenter presenter(&view, {}, std::move(reductionJobs));
     presenter.notifyInsertGroupRequested();
 
-    auto &groups = presenter.reductionJobs().groups();
+    auto &groups = unslicedJobsFromPresenter(presenter).groups();
 
     TS_ASSERT(groups.size() == 3);
     TS_ASSERT_EQUALS(groups[0].name(), "Group 1");
@@ -148,7 +153,7 @@ public:
     BatchPresenter presenter(&view, {}, std::move(reductionJobs));
     presenter.notifyInsertGroupRequested();
 
-    auto &groups = presenter.reductionJobs().groups();
+    auto &groups = unslicedJobsFromPresenter(presenter).groups();
 
     TS_ASSERT(groups.size() == 3);
     TS_ASSERT_EQUALS(groups[0].name(), "Group 1");
@@ -173,7 +178,7 @@ public:
     BatchPresenter presenter(&view, {}, std::move(reductionJobs));
     presenter.notifyInsertGroupRequested();
 
-    auto &groups = presenter.reductionJobs().groups();
+    auto &groups = unslicedJobsFromPresenter(presenter).groups();
 
     TS_ASSERT(groups.size() == 3);
     TS_ASSERT_EQUALS(groups[0].name(), "Group 1");
@@ -183,10 +188,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&jobs));
   }
-
-
-
-
 };
 
 #endif // MANTID_CUSTOMINTERFACES_REFLBATCHPRESENTERTEST_H_

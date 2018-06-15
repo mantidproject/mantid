@@ -16,8 +16,6 @@
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "ReflCatalogSearcher.h"
 #include "ReflFromStdStringMap.h"
-#include "ReflLegacyTransferStrategy.h"
-#include "ReflMeasureTransferStrategy.h"
 #include "ReflNexusMeasurementItemSource.h"
 #include "ReflSearchModel.h"
 
@@ -30,7 +28,11 @@
 #include <algorithm>
 #include <iterator>
 
+#include <iostream>
+
 #include "Reduction/Slicing.h"
+#include "Reduction/WorkspaceNamesFactory.h"
+#include "ValidateRow.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -49,34 +51,6 @@ QStringList fromStdStringVector(std::vector<std::string> const &inVec) {
   std::transform(inVec.begin(), inVec.end(), std::back_inserter(outVec),
                  &QString::fromStdString);
   return outVec;
-}
-
-/** Get the error message associated with the given run
- * @param run : the run number as a string
- * @param invalidRuns : the list of invalid runs as a map of description
- * to error message, where the description may contain a list of run numbers
- * separated by a '+' character
- */
-std::string getRunErrorMessage(
-    const std::string &searchRun,
-    const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns) {
-
-  // Loop through the list of invalid rows
-  for (auto row : invalidRuns) {
-    // Loop through all entries in the error map for this row
-    for (auto errorPair : row) {
-      // Extract the run numbers for this row
-      auto const runNumbers = errorPair.first;
-      StringTokenizer tokenizer(runNumbers, "+", StringTokenizer::TOK_TRIM);
-      auto const runList = tokenizer.asVector();
-
-      // If the requested run is in the list, return the error message
-      if (std::find(runList.begin(), runList.end(), searchRun) != runList.end())
-        return errorPair.second;
-    }
-  }
-
-  return std::string();
 }
 }
 
@@ -106,8 +80,6 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   if (!m_searcher)
     m_searcher.reset(new ReflCatalogSearcher());
 }
-
-ReflRunsTabPresenter::~ReflRunsTabPresenter() {}
 
 /** Accept a main presenter
 * @param mainPresenter :: [input] A main presenter
@@ -157,8 +129,8 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     break;
   }
   case IReflRunsTabPresenter::TransferFlag:
-    transfer(m_view->getSelectedSearchRows(), selectedGroup(),
-             TransferMatch::Any);
+//    transfer(m_view->getSelectedSearchRows(), selectedGroup(),
+//             TransferMatch::Any);
     break;
   case IReflRunsTabPresenter::InstrumentChangedFlag:
     changeInstrument();
@@ -184,27 +156,27 @@ void ReflRunsTabPresenter::completedRowReductionSuccessfully(
 /** Pushes the list of commands (actions) */
 void ReflRunsTabPresenter::pushCommands(int) {
 
-//  m_view->clearCommands();
-//
-//  // The expected number of commands
-//  const size_t nCommands = 31;
-//  //auto commands = getTablePresenter(group)->publishCommands();
-//  if (commands.size() != nCommands) {
-//    throw std::runtime_error("Invalid list of commands");
-//  }
-//  // The index at which "row" commands start
-//  const size_t rowCommStart = 10u;
-//  // We want to have two menus
-//  // Populate the "Reflectometry" menu
-//  std::vector<MantidWidgets::DataProcessor::Command_uptr> tableCommands;
-//  for (size_t i = 0; i < rowCommStart; i++)
-//    tableCommands.push_back(std::move(commands[i]));
-//  m_view->setTableCommands(std::move(tableCommands));
-//  // Populate the "Edit" menu
-//  std::vector<MantidWidgets::DataProcessor::Command_uptr> rowCommands;
-//  for (size_t i = rowCommStart; i < nCommands; i++)
-//    rowCommands.push_back(std::move(commands[i]));
-//  m_view->setRowCommands(std::move(rowCommands));
+  //  m_view->clearCommands();
+  //
+  //  // The expected number of commands
+  //  const size_t nCommands = 31;
+  //  //auto commands = getTablePresenter(group)->publishCommands();
+  //  if (commands.size() != nCommands) {
+  //    throw std::runtime_error("Invalid list of commands");
+  //  }
+  //  // The index at which "row" commands start
+  //  const size_t rowCommStart = 10u;
+  //  // We want to have two menus
+  //  // Populate the "Reflectometry" menu
+  //  std::vector<MantidWidgets::DataProcessor::Command_uptr> tableCommands;
+  //  for (size_t i = 0; i < rowCommStart; i++)
+  //    tableCommands.push_back(std::move(commands[i]));
+  //  m_view->setTableCommands(std::move(tableCommands));
+  //  // Populate the "Edit" menu
+  //  std::vector<MantidWidgets::DataProcessor::Command_uptr> rowCommands;
+  //  for (size_t i = rowCommStart; i < nCommands; i++)
+  //    rowCommands.push_back(std::move(commands[i]));
+  //  m_view->setRowCommands(std::move(rowCommands));
 }
 
 /** Searches for runs that can be used
@@ -273,11 +245,11 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   m_instrumentChanged = false;
 
   if (shouldUpdateExistingSearchResults()) {
-    m_searchModel->addDataFromTable(results,
-                                    m_view->getSearchInstrument());
+    m_searchModel->addDataFromTable(results, m_view->getSearchInstrument());
   } else {
     // Create a new search results list and display it on the view
-    m_searchModel = boost::make_shared<ReflSearchModel>(results, m_view->getSearchInstrument());
+    m_searchModel = boost::make_shared<ReflSearchModel>(
+        results, m_view->getSearchInstrument());
     m_view->showSearch(m_searchModel);
   }
 }
@@ -297,7 +269,8 @@ void ReflRunsTabPresenter::startNewAutoreduction() {
   //   tablePresenter->setPromptUser(false);
   //   try {
   //     tablePresenter->notify(DataProcessorPresenter::DeleteAllFlag);
-  //   } catch (const DataProcessorPresenter::DeleteAllRowsCancelledException &) {
+  //   } catch (const DataProcessorPresenter::DeleteAllRowsCancelledException &)
+  //   {
   //     return;
   //   }
   // }
@@ -342,19 +315,19 @@ void ReflRunsTabPresenter::autoreduceNewRuns() {
   auto rowsToTransfer = m_view->getAllSearchRows();
 
   if (rowsToTransfer.size() > 0) {
-    transfer(rowsToTransfer, autoreductionGroup(), TransferMatch::Strict);
-//    auto tablePresenter = getTablePresenter(autoreductionGroup());
-//    tablePresenter->setPromptUser(false);
-//    tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
+    //transfer(rowsToTransfer, autoreductionGroup(), TransferMatch::Strict);
+    //    auto tablePresenter = getTablePresenter(autoreductionGroup());
+    //    tablePresenter->setPromptUser(false);
+    //    tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
   } else {
     confirmReductionCompleted(autoreductionGroup());
   }
 }
 
 void ReflRunsTabPresenter::pauseAutoreduction() {
-//  if (isAutoreducing())
-//    getTablePresenter(autoreductionGroup())
-//        ->notify(DataProcessorPresenter::PauseFlag);
+  //  if (isAutoreducing())
+  //    getTablePresenter(autoreductionGroup())
+  //        ->notify(DataProcessorPresenter::PauseFlag);
 }
 
 void ReflRunsTabPresenter::stopAutoreduction() {
@@ -375,7 +348,7 @@ int ReflRunsTabPresenter::autoreductionGroup() const {
 }
 
 bool ReflRunsTabPresenter::isProcessing(int group) const {
-//  return getTablePresenter(group)->isProcessing();
+  //  return getTablePresenter(group)->isProcessing();
   return false;
 }
 
@@ -399,8 +372,7 @@ void ReflRunsTabPresenter::icatSearchComplete() {
   }
 }
 
-BatchPresenter *
-ReflRunsTabPresenter::getTablePresenter(int group) const {
+BatchPresenter *ReflRunsTabPresenter::getTablePresenter(int group) const {
   if (group < 0 || group > static_cast<int>(m_tablePresenters.size()))
     throw std::runtime_error("Invalid group number " + std::to_string(group));
 
@@ -434,59 +406,6 @@ bool ReflRunsTabPresenter::validateRowsToTransfer(
   return true;
 }
 
-/** Get the data for a cell in the search results model as a string
- */
-std::string ReflRunsTabPresenter::searchModelData(const int row,
-                                                  const int column) {
-  return m_searchModel->data(m_searchModel->index(row, column))
-      .toString()
-      .toStdString();
-}
-
-/** Get the details of runs to transfer from the search results table
- * @param rowsToTransfer : a set of row indices
- * @return : a map of run name to a SearchResult struct containing details
- * for that run
- */
-SearchResultMap ReflRunsTabPresenter::getSearchResultRunDetails(
-    const std::set<int> &rowsToTransfer) {
-
-  SearchResultMap runDetails;
-  for (const auto &row : rowsToTransfer) {
-    const auto run = searchModelData(row, 0);
-    const auto description = searchModelData(row, 1);
-    const auto location = searchModelData(row, 2);
-    runDetails[run] = SearchResult{description, location};
-  }
-
-  return runDetails;
-}
-
-/** Iterate through the rows to transfer and set/clear the error state
- * in the search results model
- * @param rowsToTransfer : row indices of all rows to transfer
- * @param invalidRuns : details of runs that are invalid
- */
-void ReflRunsTabPresenter::updateErrorStateInSearchModel(
-    const std::set<int> &rowsToTransfer,
-    const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns) {
-
-  // The run number is in column 0 in the search results table
-  int const columnIndex = 0;
-
-  // Loop through all the rows we want to transfer
-  for (auto rowIndex : rowsToTransfer) {
-    auto const runToTransfer = searchModelData(rowIndex, columnIndex);
-    auto const errorMessage = getRunErrorMessage(runToTransfer, invalidRuns);
-
-    // Set or clear the error in the model for this run
-    if (errorMessage.empty())
-      m_searchModel->clearError(runToTransfer);
-    else
-      m_searchModel->addError(runToTransfer, errorMessage);
-  }
-}
-
 /** Set up the progress bar
  */
 ProgressPresenter
@@ -505,6 +424,29 @@ ReflRunsTabPresenter::setupProgressBar(const std::set<int> &rowsToTransfer) {
   return progress;
 }
 
+struct RunDescriptionMetadata {
+  std::string groupName;
+  std::string theta;
+};
+
+RunDescriptionMetadata metadataFromDescription(std::string const &description) {
+  static boost::regex descriptionFormatRegex("(.*)(th[:=]([0-9.]+))(.*)");
+  boost::smatch matches;
+  if (boost::regex_search(description, matches, descriptionFormatRegex)) {
+    constexpr auto preThetaGroup = 1;
+    constexpr auto thetaValueGroup = 3;
+    constexpr auto postThetaGroup = 4;
+
+    const auto theta = matches[thetaValueGroup].str();
+    const auto preTheta = matches[preThetaGroup].str();
+    const auto postTheta = matches[postThetaGroup].str();
+
+    return RunDescriptionMetadata{preTheta, theta};
+  } else {
+    return RunDescriptionMetadata{description, ""};
+  }
+}
+
 /** Transfers the selected runs in the search results to the processing table
  * @param rowsToTransfer : a set of row indices in the search results to
  * transfer
@@ -520,25 +462,29 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
 
   auto progress = setupProgressBar(rowsToTransfer);
 
-  // Extract details of runs to transfer
-  auto runDetails = getSearchResultRunDetails(rowsToTransfer);
+  auto jobs = Jobs(UnslicedReductionJobs());
+  auto slicing = Slicing();
 
-  // Apply the transfer strategy
-//  TransferResults transferDetails =
-//      getTransferStrategy()->transferRuns(runDetails, progress, matchType);
+  for (auto rowIndex : rowsToTransfer) {
+    auto &result = (*m_searchModel)[rowIndex];
+    auto resultMetadata = metadataFromDescription(result.description);
+    auto row = validateRowFromRunAndTheta(jobs, slicing, result.runNumber,
+                                          resultMetadata.theta);
+    if (row.is_initialized()) {
+      mergeRowIntoGroup(jobs, row.get(), 0.001, resultMetadata.groupName,
+                      WorkspaceNamesFactory(slicing));
+    } else {
+      m_searchModel->setError(rowIndex, "Theta was not specified in the description.");
+    }
+  }
 
-  // Handle any runs that cannot be transferred
-//  updateErrorStateInSearchModel(rowsToTransfer, transferDetails.getErrorRuns());
-
-  // Do the transfer
-// getTablePresenter(group)
-//     ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(
-//         transferDetails.getTransferRuns()));
+  getTablePresenter(0)->mergeAdditionalJobs(jobs);
 }
 
 /** Used to tell the presenter something has changed in the ADS
 *
-* @param workspaceList :: the list of table workspaces in the ADS that could be
+* @param workspaceList :: the list of table workspaces in the ADS that could
+*be
 * loaded into the interface
 * @param group :: the group that the notification came from
 */
@@ -588,7 +534,8 @@ OptionsQMap ReflRunsTabPresenter::getProcessingOptions(int group) const {
   return m_mainPresenter->getReductionOptions(group);
 }
 
-/** Requests global post-processing options as a string. Options are supplied by
+/** Requests global post-processing options as a string. Options are supplied
+* by
 * the main
 * presenter
 * @return :: Global post-processing options as a string
@@ -629,7 +576,8 @@ bool ReflRunsTabPresenter::hasPerAngleOptions(int group) const {
   return m_mainPresenter->hasPerAngleOptions(group);
 }
 
-/** Tells the view to update the enabled/disabled state of all relevant widgets
+/** Tells the view to update the enabled/disabled state of all relevant
+ *widgets
  * based on whether processing is in progress or not.
  *
  */
@@ -659,7 +607,8 @@ void ReflRunsTabPresenter::pause(int group) {
     m_progressView->setAsPercentageIndicator();
   }
 
-  // If processing has already finished, confirm reduction is paused; otherwise
+  // If processing has already finished, confirm reduction is paused;
+  // otherwise
   // leave it to finish
   if (!isProcessing(group))
     confirmReductionPaused(group);
@@ -686,8 +635,8 @@ void ReflRunsTabPresenter::confirmReductionPaused(int group) {
   // state. This must be done from here otherwise there is no notification to
   // the table to update when autoprocessing is paused.
 
-//  if (!isAutoreducing(group))
-//    getTablePresenter(group)->confirmReductionPaused();
+  //  if (!isAutoreducing(group))
+  //    getTablePresenter(group)->confirmReductionPaused();
 }
 
 /** Notifies main presenter that data reduction is confirmed to be resumed
@@ -697,7 +646,8 @@ void ReflRunsTabPresenter::confirmReductionResumed(int group) {
   m_mainPresenter->notifyReductionResumed(group);
 }
 
-/** Changes the current instrument in the data processor widget. Also clears the
+/** Changes the current instrument in the data processor widget. Also clears
+* the
 * and the table selection model and updates the config service, printing an
 * information message
 */
@@ -715,6 +665,5 @@ void ReflRunsTabPresenter::changeGroup() {
   // Update the current menu commands based on the current group
   pushCommands(selectedGroup());
 }
-
 }
 }

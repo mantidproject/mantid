@@ -12,6 +12,13 @@
   </property>
   <layout class="QVBoxLayout" name="mainLayout">
    <item>
+    <widget class="QLineEdit" name="filterBox">
+     <property name="placeholderText">
+      <string>Filter By Run Or Group</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QToolBar" name="toolBar">
      <property name="styleSheet">
       <string>QToolBar{border: none;}</string>

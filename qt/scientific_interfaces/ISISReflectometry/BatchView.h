@@ -18,6 +18,7 @@ public:
             int defaultInstrumentIndex);
   void subscribe(BatchViewSubscriber *notifyee) override;
   void setProgress(int value) override;
+  void resetFilterBox() override;
   MantidQt::MantidWidgets::Batch::IJobTreeView &jobs() override;
 
 private slots:
@@ -32,6 +33,7 @@ private slots:
   void onCopyPressed(bool);
   void onCutPressed(bool);
   void onPastePressed(bool);
+  void onFilterChanged(QString const&);
 
 private:
   void addToolbarActions();

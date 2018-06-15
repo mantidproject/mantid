@@ -1,5 +1,6 @@
 #include "Row.h"
 #include <boost/variant.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -15,7 +16,9 @@ Row<ReducedWorkspaceNames>::Row(
       m_qRange(std::move(qRange)), m_scaleFactor(std::move(scaleFactor)),
       m_transmissionRuns(std::move(transmissionRuns)),
       m_reducedWorkspaceNames(std::move(reducedWorkspaceNames)),
-      m_reductionOptions(std::move(reductionOptions)) {}
+      m_reductionOptions(std::move(reductionOptions)) {
+  std::sort(m_runNumbers.begin(), m_runNumbers.end());
+}
 
 template <typename ReducedWorkspaceNames>
 std::vector<std::string> const &Row<ReducedWorkspaceNames>::runNumbers() const {
@@ -23,22 +26,9 @@ std::vector<std::string> const &Row<ReducedWorkspaceNames>::runNumbers() const {
 }
 
 template <typename ReducedWorkspaceNames>
-std::pair<std::string, std::string> const &Row<ReducedWorkspaceNames>::transmissionWorkspaceNames() const {
+std::pair<std::string, std::string> const &
+Row<ReducedWorkspaceNames>::transmissionWorkspaceNames() const {
   return m_transmissionRuns;
-}
-
-template <typename ReducedWorkspaceNames>
-template <typename WorkspaceNamesFactory>
-Row<ReducedWorkspaceNames> Row<ReducedWorkspaceNames>::withExtraRunNumbers(
-    std::vector<std::string> const &extraRunNumbers,
-    WorkspaceNamesFactory const &workspaceNames) const {
-  auto newRunNumbers = m_runNumbers;
-  newRunNumbers.reserve(newRunNumbers.size() + extraRunNumbers.size());
-  newRunNumbers.insert(newRunNumbers.end(), extraRunNumbers.begin(),
-                       extraRunNumbers.end());
-  auto wsNames = workspaceNames(newRunNumbers, transmissionWorkspaceNames());
-  return Row(newRunNumbers, theta(), qRange(), transmissionWorkspaceNames(),
-             scaleFactor(), reductionOptions(), wsNames);
 }
 
 template <typename ReducedWorkspaceNames>
@@ -84,6 +74,14 @@ bool operator!=(Row<ReducedWorkspaceNames> const &lhs,
   return !(lhs == rhs);
 }
 
+template <typename ReducedWorkspaceNames>
+std::ostream &operator<<(std::ostream &os,
+                         Row<ReducedWorkspaceNames> const &row) {
+  auto runNumbers = boost::join(row.runNumbers(), "+");
+  os << "Row (runs: " << runNumbers << ", theta: " << row.theta() << ")";
+  return os;
+}
+
 SlicedRow slice(UnslicedRow const &row, Slicing const &slicing) {
   return SlicedRow(
       row.runNumbers(), row.theta(), row.transmissionWorkspaceNames(),
@@ -119,9 +117,11 @@ boost::optional<SlicedRow> slice(boost::optional<UnslicedRow> const &row) {
 template class Row<SlicedReductionWorkspaces>;
 template bool operator==(SlicedRow const &, SlicedRow const &);
 template bool operator!=(SlicedRow const &, SlicedRow const &);
+template std::ostream &operator<<(std::ostream &, SlicedRow const &);
 
 template class Row<ReductionWorkspaces>;
 template bool operator==(UnslicedRow const &, UnslicedRow const &);
 template bool operator!=(UnslicedRow const &, UnslicedRow const &);
+template std::ostream &operator<<(std::ostream &, UnslicedRow const &);
 }
 }

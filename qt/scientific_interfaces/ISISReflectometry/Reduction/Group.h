@@ -26,7 +26,8 @@ public:
   void removeRow(int rowIndex);
   void updateRow(int rowIndex, boost::optional<Row> const &row);
 
-  Row const *findRowWithTheta(double angle, double tolerance) const;
+  boost::optional<int> indexOfRowWithTheta(double angle,
+                                           double tolerance) const;
 
   boost::optional<Row> const &operator[](int rowIndex) const;
   std::vector<boost::optional<Row>> const &rows() const;
@@ -38,11 +39,18 @@ private:
   std::string m_postprocessedWorkspaceName;
 };
 
-template class MANTIDQT_ISISREFLECTOMETRY_DLL Group<SlicedRow>;
-using SlicedGroup = Group<SlicedRow>;
+template <typename Row>
+std::ostream &operator<<(std::ostream &os, Group<Row> const &group);
 
-template class MANTIDQT_ISISREFLECTOMETRY_DLL Group<UnslicedRow>;
+extern template class MANTIDQT_ISISREFLECTOMETRY_DLL Group<SlicedRow>;
+using SlicedGroup = Group<SlicedRow>;
+extern template MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
+operator<<(std::ostream &, SlicedGroup const &);
+
+extern template class MANTIDQT_ISISREFLECTOMETRY_DLL Group<UnslicedRow>;
 using UnslicedGroup = Group<UnslicedRow>;
+extern template MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
+operator<<(std::ostream &, UnslicedGroup const &);
 
 UnslicedGroup unslice(SlicedGroup const &slicedGroup);
 SlicedGroup slice(UnslicedGroup const &unslicedGroup);

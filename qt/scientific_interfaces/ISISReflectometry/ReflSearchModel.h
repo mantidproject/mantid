@@ -1,9 +1,9 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLSEARCHMODEL_H_
 #define MANTID_ISISREFLECTOMETRY_REFLSEARCHMODEL_H_
 
+#include "SearchResult.h"
 #include "DllConfig.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "ReflTransferStrategy.h"
 #include <QAbstractTableModel>
 #include <boost/shared_ptr.hpp>
 #include <map>
@@ -60,22 +60,18 @@ public:
   void clear();
   bool knownFileType(std::string const &filename) const;
   /// Add details of an error
-  void addError(const std::string &run, const std::string &errorMessage);
-  void clearError(const std::string &run);
+  std::vector<SearchResult> const& results() const;
+
+  SearchResult const& operator[](int index) const;
+
+  void setError(int index, std::string const& error);
 
 protected:
-  // vector of the run numbers
-  std::vector<std::string> m_runs;
   // map of run numbers to search result details
-  SearchResultMap m_runDetails;
+  std::vector<SearchResult> m_runDetails;
 
 private:
-  bool runHasDetails(const std::string &run) const;
-  SearchResult runDetails(const std::string &run) const;
-  bool runHasError(const std::string &run) const;
-  std::string runError(const std::string &run) const;
-  std::string runDescription(const std::string &run) const;
-  std::string runLocation(const std::string &run) const;
+  bool runHasError(const SearchResult &run) const;
 };
 
 /// Typedef for a shared pointer to \c ReflSearchModel

@@ -16,7 +16,6 @@
 #include "../ISISReflectometry/IReflSettingsTabPresenter.h"
 #include "../ISISReflectometry/IReflSettingsView.h"
 #include "../ISISReflectometry/InstrumentOptionDefaults.h"
-#include "../ISISReflectometry/ReflLegacyTransferStrategy.h"
 #include "../ISISReflectometry/ReflSearchModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -39,7 +38,7 @@ GCC_DIAG_OFF_SUGGEST_OVERRIDE
 class MockReflSearchModel : public ReflSearchModel {
 public:
   MockReflSearchModel()
-      : ReflSearchModel(ReflLegacyTransferStrategy(), ITableWorkspace_sptr(),
+      : ReflSearchModel(ITableWorkspace_sptr(),
                         std::string()) {}
   ~MockReflSearchModel() override {}
   MOCK_CONST_METHOD2(data, QVariant(const QModelIndex &, int role));
@@ -90,7 +89,6 @@ public:
   MOCK_METHOD1(setInstrumentComboEnabled, void(bool));
   MOCK_METHOD1(subscribe, void(IReflRunsTabPresenter*));
   MOCK_CONST_METHOD0(tableViews, std::vector<IBatchView*> const&());
-  MOCK_METHOD1(setTransferMethodComboEnabled, void(bool));
   MOCK_METHOD1(setSearchTextEntryEnabled, void(bool));
   MOCK_METHOD1(setSearchButtonEnabled, void(bool));
   MOCK_METHOD1(startTimer, void(const int));

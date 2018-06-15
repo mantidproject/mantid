@@ -15,6 +15,7 @@ public:
   virtual void notifyInsertGroupRequested() = 0;
   virtual void notifyDeleteRowRequested() = 0;
   virtual void notifyDeleteGroupRequested() = 0;
+  virtual void notifyFilterChanged(std::string const& filterValue) = 0;
 
   virtual void notifyExpandAllRequested() = 0;
   virtual void notifyCollapseAllRequested() = 0;
@@ -25,6 +26,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL IBatchView {
 public:
   virtual void subscribe(BatchViewSubscriber *notifyee) = 0;
   virtual void setProgress(int value) = 0;
+  virtual void resetFilterBox() = 0;
   virtual MantidQt::MantidWidgets::Batch::IJobTreeView &jobs() = 0;
 };
 }

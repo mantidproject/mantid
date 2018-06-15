@@ -11,7 +11,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class ReductionWorkspaces {
+class MANTIDQT_ISISREFLECTOMETRY_DLL ReductionWorkspaces {
 public:
   ReductionWorkspaces(std::vector<std::string> timeOfFlight,
                       std::pair<std::string, std::string> transmissionRuns,

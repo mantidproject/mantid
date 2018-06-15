@@ -1,4 +1,5 @@
 #include "ValidateRow.h"
+#include "Reduction/WorkspaceNamesFactory.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>
@@ -167,7 +168,6 @@ template <typename Row>
 boost::optional<Row> const &RowValidationResult<Row>::validRowElseNone() const {
   return m_validRow;
 }
-
 
 boost::optional<std::vector<std::string>>
 parseRunNumbers(std::string const &runNumberString) {
@@ -372,8 +372,9 @@ public:
         [this](std::vector<std::string> const &runNumbers,
                std::pair<std::string, std::string> const &transmissionRuns)
             -> boost::optional<SlicedReductionWorkspaces> {
-              return workspaceNamesForSliced(runNumbers, transmissionRuns,
-                                             m_slicing);
+              return WorkspaceNamesFactory(m_slicing)
+                  .makeNames<SlicedReductionWorkspaces>(runNumbers,
+                                                        transmissionRuns);
             });
   }
 
@@ -385,7 +386,8 @@ public:
         [this](std::vector<std::string> const &runNumbers,
                std::pair<std::string, std::string> const &transmissionRuns)
             -> boost::optional<ReductionWorkspaces> {
-              return workspaceNamesForUnsliced(runNumbers, transmissionRuns);
+              return WorkspaceNamesFactory(m_slicing)
+                  .makeNames<ReductionWorkspaces>(runNumbers, transmissionRuns);
             });
   }
 
@@ -404,7 +406,7 @@ boost::optional<RowVariant>
 validateRowFromRunAndTheta(Jobs const &jobs, Slicing const &slicing,
                            std::string const &run, std::string const &theta) {
   return boost::apply_visitor(
-             ValidateRowVisitor({run, theta, "", "", "", "", "", ""}, slicing),
+             ValidateRowVisitor({run, theta, "", "", "", "", "", "", ""}, slicing),
              jobs).validRowElseNone();
 }
 

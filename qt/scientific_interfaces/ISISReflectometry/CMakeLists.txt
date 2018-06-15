@@ -28,9 +28,7 @@ set ( SRC_FILES
     ReflEventTabPresenter.cpp
     ReflFromStdStringMap.cpp
     ReflGenericDataProcessorPresenterFactory.cpp
-    ReflLegacyTransferStrategy.cpp
     ReflMainWindowPresenter.cpp
-    ReflMeasureTransferStrategy.cpp
     ReflNexusMeasurementItemSource.cpp
     ReflRunsTabPresenter.cpp
     ReflSaveTabPresenter.cpp
@@ -83,9 +81,7 @@ set ( INC_FILES
     ReflEventTabPresenter.h
     ReflFromStdStringMap.h
     ReflGenericDataProcessorPresenterFactory.h
-    ReflLegacyTransferStrategy.h
     ReflMainWindowPresenter.h
-    ReflMeasureTransferStrategy.h
     ReflMeasurementItemSource.h
     ReflNexusMeasurementItemSource.h
     ReflRunsTabPresenter.h
@@ -94,7 +90,6 @@ set ( INC_FILES
     ReflSettingsPresenter.h
     ReflSettingsTabPresenter.h
     ReflTableSchema.h
-    ReflTransferStrategy.h
     TransferResults.h
     GetInstrumentParameter.h
     ExperimentOptionDefaults.h

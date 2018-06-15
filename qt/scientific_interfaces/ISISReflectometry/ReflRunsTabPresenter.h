@@ -8,8 +8,8 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "ReflAutoreduction.h"
-#include "ReflTransferStrategy.h"
 #include <boost/shared_ptr.hpp>
+#include "SearchResult.h"
 
 class ProgressPresenter;
 
@@ -34,6 +34,12 @@ class ReflTransferStrategy;
 
 using MantidWidgets::ProgressableView;
 using MantidWidgets::DataProcessor::DataProcessorPresenter;
+
+enum class TransferMatch {
+  Any,        // any that match the regex
+  ValidTheta, // any that match and have a valid theta value
+  Strict      // only those that exactly match all parts of the regex
+};
 
 /** @class ReflRunsTabPresenter
 
@@ -68,11 +74,11 @@ public:
   ReflRunsTabPresenter(IReflRunsTabView *mainView,
                        ProgressableView *progressView,
                        BatchPresenterFactory makeBatchPresenter,
-                       std::vector<std::string> const& instruments,
+                       std::vector<std::string> const &instruments,
                        int defaultInstrumentIndex,
                        boost::shared_ptr<IReflSearcher> searcher =
                            boost::shared_ptr<IReflSearcher>());
-  ~ReflRunsTabPresenter() override;
+
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
   void notifyADSChanged(const QSet<QString> &workspaceList, int group) override;
@@ -133,7 +139,6 @@ private:
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
 
-
   /// searching
   bool search();
   void icatSearchComplete();
@@ -165,12 +170,8 @@ private:
   /// Check that a given set of row indices are valid to transfer
   bool validateRowsToTransfer(const std::set<int> &rowsToTransfer);
   /// Get runs to transfer from row indices
-  SearchResultMap
+  std::vector<SearchResult>
   getSearchResultRunDetails(const std::set<int> &rowsToTransfer);
-  /// Deal with rows that are invalid for transfer
-  void updateErrorStateInSearchModel(
-      const std::set<int> &rowsToTransfer,
-      const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns);
   /// Get the data for a cell in the search results table as a string
   std::string searchModelData(const int row, const int column);
 };

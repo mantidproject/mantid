@@ -15,6 +15,20 @@ Group &ReductionJobs<Group>::appendGroup(Group group) {
 }
 
 template <typename Group>
+boost::optional<int>
+ReductionJobs<Group>::indexOfGroupWithName(std::string const &groupName) {
+  auto groupWithNameIt = std::find_if(m_groups.rbegin(), m_groups.rend(),
+                                      [&groupName](Group const &group) -> bool {
+                                        return group.name() == groupName;
+                                      });
+  if (groupWithNameIt != m_groups.rend())
+    return static_cast<int>(
+        std::distance(m_groups.begin(), groupWithNameIt.base() - 1));
+  else
+    return boost::none;
+}
+
+template <typename Group>
 Group &ReductionJobs<Group>::insertGroup(Group group, int beforeIndex) {
   assert(!hasGroupWithName(group.name()));
   return *m_groups.insert(m_groups.begin() + beforeIndex, std::move(group));
@@ -23,10 +37,9 @@ Group &ReductionJobs<Group>::insertGroup(Group group, int beforeIndex) {
 template <typename Group>
 bool ReductionJobs<Group>::hasGroupWithName(
     std::string const &groupName) const {
-  return std::find_if(m_groups.crbegin(), m_groups.crend(),
-                      [&groupName](Group const &group) -> bool {
-                        return group.name() == groupName;
-                      }) != m_groups.crend();
+  return std::count_if(m_groups.crbegin(), m_groups.crend(),
+                       [&groupName](Group const &group)
+                           -> bool { return group.name() == groupName; }) != 0;
 }
 
 template <typename Group> void ReductionJobs<Group>::removeGroup(int index) {
@@ -156,26 +169,26 @@ public:
 
   template <typename Group>
   Group &findOrMakeGroupWithName(ReductionJobs<Group> &jobs,
-                                 std::string const &groupName) {
-    if (jobs.hasGroupWithName(groupName))
-      return jobs.appendGroup(Group(groupName));
+                                 std::string const &groupName) const {
+    auto maybeGroupIndex = jobs.indexOfGroupWithName(groupName);
+    if (maybeGroupIndex.is_initialized())
+      return jobs.groups()[maybeGroupIndex.get()];
     else
-      return jobs.findGroupByName(groupName);
+      return jobs.appendGroup(Group(groupName));
   }
 
   template <typename Group> void operator()(ReductionJobs<Group> &jobs) const {
-    auto &group = findOrMakeGroupWithName(m_groupName);
+    auto &group = findOrMakeGroupWithName(jobs, m_groupName);
+    auto const &row = boost::get<typename Group::RowType>(m_row);
+    auto indexOfRowToUpdate =
+        group.indexOfRowWithTheta(row.theta(), m_thetaTolerance);
 
-    auto const &row = boost::get<typename Group::Row>(m_row);
-    auto findRowResult = group.findRowWithTheta(row.theta(), m_thetaTolerance);
-    auto existRowIndex = findRowResult.first;
-    auto *existingRowPtr = findRowResult.second;
-    if (existingRowPtr == nullptr) {
-      group.appendRow(m_row);
+    if (indexOfRowToUpdate.is_initialized()) {
+      auto newRowValue = mergedRow(group[indexOfRowToUpdate.get()].get(), row,
+                                   m_workspaceNames);
+      group.updateRow(indexOfRowToUpdate.get(), newRowValue);
     } else {
-      auto newRowValue = existingRowPtr->withExtraRunNumbers(row.runNumbers(),
-                                                             m_workspaceNames);
-      group.updateRow(existRowIndex, newRowValue);
+      group.appendRow(row);
     }
   }
 
@@ -186,13 +199,13 @@ private:
   WorkspaceNamesFactory const &m_workspaceNames;
 };
 
-template <typename WorkspaceNameFactory>
 void mergeRowIntoGroup(Jobs &jobs, RowVariant const &row, double thetaTolerance,
                        std::string const &groupName,
-                       WorkspaceNameFactory workspaceNames) {
-  boost::apply_visitor(MergeRowIntoGroupVisitor<WorkspaceNameFactory>(
-                           row, thetaTolerance, groupName, workspaceNames),
-                       jobs);
+                       WorkspaceNamesFactory const &workspaceNamesFactory) {
+  boost::apply_visitor(
+      MergeRowIntoGroupVisitor<WorkspaceNamesFactory>(
+          row, thetaTolerance, groupName, workspaceNamesFactory),
+      jobs);
 }
 
 class RemoveRowVisitor : boost::static_visitor<> {
@@ -219,7 +232,14 @@ public:
       : m_groupIndex(groupIndex), m_newName(newName) {}
 
   template <typename T> bool operator()(ReductionJobs<T> &jobs) const {
-    jobs.groups()[m_groupIndex].setName(m_newName);
+    auto &group = jobs.groups()[m_groupIndex];
+    if (group.name() != m_newName) {
+      if (m_newName.empty() || !jobs.hasGroupWithName(m_newName)) {
+        group.setName(m_newName);
+      } else {
+        return false;
+      }
+    }
     return true;
   }
 
@@ -232,22 +252,37 @@ bool setGroupName(Jobs &jobs, int groupIndex, std::string const &newValue) {
   return boost::apply_visitor(SetGroupNameVisitor(groupIndex, newValue), jobs);
 }
 
+class GroupNameVisitor : boost::static_visitor<std::string> {
+public:
+  GroupNameVisitor(int groupIndex) : m_groupIndex(groupIndex) {}
+
+  template <typename T>
+  std::string operator()(ReductionJobs<T> const &jobs) const {
+    return jobs[m_groupIndex].name();
+  }
+
+private:
+  int m_groupIndex;
+};
+
+std::string groupName(Jobs const &jobs, int groupIndex) {
+  return boost::apply_visitor(GroupNameVisitor(groupIndex), jobs);
+}
+
 class PrettyPrintVisitor : boost::static_visitor<> {
 public:
-  template <typename T> void operator()(ReductionJobs<T> const &jobs) const {
+  void operator()(SlicedReductionJobs const &jobs) const {
+    std::cout << "Sliced Jobs:";
     for (auto &&group : jobs.groups()) {
-      std::cout << "Group (" << group.name() << ")\n";
-      for (auto &&row : group.rows()) {
-        if (row.is_initialized()) {
-          if (row.get().runNumbers().empty())
-            std::cout << "  Row (empty)\n";
-          else
-            std::cout << "  Row (run number: " << row.get().runNumbers()[0]
-                      << ")\n";
-        } else {
-          std::cout << "  Row (invalid)\n";
-        }
-      }
+      std::cout << group;
+    }
+    std::cout << std::endl;
+  }
+
+  void operator()(UnslicedReductionJobs const &jobs) const {
+    std::cout << "Unsliced Jobs:\n";
+    for (auto &&group : jobs.groups()) {
+      std::cout << group;
     }
     std::cout << std::endl;
   }

@@ -17,13 +17,18 @@ template <typename Row> std::string const &Group<Row>::name() const {
 }
 
 template <typename Row>
-Row const *Group<Row>::findRowWithTheta(double theta, double tolerance) const {
-  return &(*std::find_if(
-               m_rows.cbegin(), m_rows.cend(),
-               [theta, tolerance](boost::optional<Row> const &row) -> bool {
-                 return row.is_initialized() &&
-                        std::abs(row.get().theta() - theta) < tolerance;
-               })).get();
+boost::optional<int> Group<Row>::indexOfRowWithTheta(double theta,
+                                                     double tolerance) const {
+  auto maybeItemIt =
+      std::find_if(m_rows.cbegin(), m_rows.cend(),
+                   [theta, tolerance](boost::optional<Row> const &row) -> bool {
+                     return row.is_initialized() &&
+                            std::abs(row.get().theta() - theta) < tolerance;
+                   });
+  if (maybeItemIt != m_rows.cend())
+    return static_cast<int>(std::distance(m_rows.cbegin(), maybeItemIt));
+  else
+    return boost::none;
 }
 
 template <typename Row> void Group<Row>::setName(std::string const &name) {
@@ -94,5 +99,23 @@ SlicedGroup slice(UnslicedGroup const &unslicedGroup) {
   return SlicedGroup(unslicedGroup.name(), std::move(slicedRows),
                      unslicedGroup.postprocessedWorkspaceName());
 }
+
+template <typename Row>
+std::ostream &operator<<(std::ostream &os, Group<Row> const &group) {
+  os << "  Group (name: " << group.name() << ")\n";
+  for (auto &&row : group.rows()) {
+    if (row.is_initialized())
+      os << "    " << row.get() << '\n';
+    else
+      os << "    Row (invalid)\n";
+  }
+  return os;
+}
+
+template class Group<SlicedRow>;
+template std::ostream &operator<<(std::ostream &, SlicedGroup const &);
+
+template class Group<UnslicedRow>;
+template std::ostream &operator<<(std::ostream &, UnslicedGroup const &);
 }
 }

@@ -422,15 +422,8 @@ public:
 private:
   class ReflRunsTabPresenterFriend : public ReflRunsTabPresenter {
     friend class ReflRunsTabPresenterTest;
-
   public:
-    ReflRunsTabPresenterFriend(
-        IReflRunsTabView *mainView, ProgressableView *progressView,
-        std::vector<DataProcessorPresenter *> tablePresenter,
-        boost::shared_ptr<IReflSearcher> searcher =
-            boost::shared_ptr<IReflSearcher>())
-        : ReflRunsTabPresenter(mainView, progressView, tablePresenter,
-                               searcher) {}
+    using ReflRunsTabPresenter::ReflRunsTabPresenter;
   };
 
   using MockRunsTabView_uptr = std::unique_ptr<NiceMock<MockRunsTabView>>;
@@ -471,7 +464,7 @@ private:
     // Create the presenter
     ReflRunsTabPresenterFriend presenter(
         m_mockRunsTabView.get(), m_mockProgress.get(), batchPresenterFactory(),
-        tablePresenters);
+        m_instruments, 0);
     presenter.acceptMainPresenter(m_mockMainPresenter.get());
     return presenter;
   }
@@ -549,8 +542,6 @@ private:
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockRunsTabView, setInstrumentComboEnabled(!isProcessing))
         .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setTransferMethodComboEnabled(
-                                        !isAutoreducing)).Times(Exactly(1));
     EXPECT_CALL(*m_mockRunsTabView, setSearchTextEntryEnabled(!isAutoreducing))
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockRunsTabView, setSearchButtonEnabled(!isAutoreducing))
