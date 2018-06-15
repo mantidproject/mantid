@@ -143,7 +143,6 @@ class DataInfo(object):
     n_y_pixel = 256
     peak_range_offset = 0
     tolerance = 0.02
-    pixel_width = 0.0007
     huber_x_cut = 4.95
 
     def __init__(self, ws, cross_section='', use_roi=True, update_peak_range=False, use_roi_bck=False,
@@ -216,8 +215,14 @@ class DataInfo(object):
             :param workspace ws: workspace to work with
         """
         run_object = ws.getRun()
-        sample_detector_distance = run_object['SampleDetDis'].getStatistics().mean / 1000.0
-        source_sample_distance = run_object['ModeratorSamDis'].getStatistics().mean / 1000.0
+        sample_detector_distance = run_object['SampleDetDis'].getStatistics().mean
+        source_sample_distance = run_object['ModeratorSamDis'].getStatistics().mean
+        # Check units
+        if not run_object['SampleDetDis'].units in ['m', 'meter']:
+            sample_detector_distance /= 1000.0
+        if not run_object['ModeratorSamDis'].units in ['m', 'meter']:
+            source_sample_distance /= 1000.0
+
         source_detector_distance = source_sample_distance + sample_detector_distance
 
         h = 6.626e-34  # m^2 kg s^-1
@@ -320,7 +325,7 @@ class DataInfo(object):
             logger.notice("Forcing background ROI: %s" % self.forced_bck_roi)
             self.roi_background = self.forced_bck_roi
 
-    def determine_peak_range(self, ws, specular=True, max_pixel=250):
+    def determine_peak_range(self, ws, specular=True, max_pixel=304):
         """
             Find the reflectivity peak
             :param workspace ws: workspace to work with
@@ -383,23 +388,6 @@ class DataInfo(object):
         peak_width = math.fabs(3.0*coeff[2])
         return peak_position, peak_width
 
-    @classmethod
-    def scattering_angle(cls, ws, peak_position=None):
-        """
-            Determine the scattering angle
-            :param workspace ws: Workspace to inspect
-            :param float peak_position: reflectivity peak position
-        """
-        dangle = ws.getRun().getProperty("DANGLE").getStatistics().mean
-        dangle0 = ws.getRun().getProperty("DANGLE0").getStatistics().mean
-        direct_beam_pix = ws.getRun().getProperty("DIRPIX").getStatistics().mean
-        det_distance = ws.getRun().getProperty("SampleDetDis").getStatistics().mean / 1000.0
-
-        peak_pos = peak_position if peak_position is not None else direct_beam_pix
-        theta_d = (dangle - dangle0) / 2.0
-        theta_d += ((direct_beam_pix - peak_pos) * cls.pixel_width) * 180.0 / math.pi / (2.0 * det_distance)
-        return theta_d
-
     def check_direct_beam(self, ws, peak_position=None):
         """
             Determine whether this data is a direct beam
@@ -407,9 +395,8 @@ class DataInfo(object):
             :param float peak_position: reflectivity peak position
         """
         huber_x = ws.getRun().getProperty("HuberX").getStatistics().mean
-        #dangle = ws.getRun().getProperty("DANGLE").getStatistics().mean
         sangle = ws.getRun().getProperty("SANGLE").getStatistics().mean
-        self.theta_d = self.scattering_angle(ws, peak_position)
+        self.theta_d = 180.0 / math.pi * mantid.simpleapi.MRGetTheta(ws, SpecularPixel=peak_position)
         return not ((self.theta_d > self.tolerance or sangle > self.tolerance) and huber_x < self.huber_x_cut)
 
     def determine_data_type(self, ws):
@@ -523,7 +510,7 @@ class DataInfo(object):
             self.background = [int(bck_range[0]), int(bck_range[1])]
 
         # Computed scattering angle
-        self.calculated_scattering_angle = self.scattering_angle(ws, peak_position)
+        self.calculated_scattering_angle = 180.0 / math.pi * mantid.simpleapi.MRGetTheta(ws, SpecularPixel=peak_position)
 
         # Determine whether we have a direct beam
         self.is_direct_beam = self.check_direct_beam(ws, peak_position)

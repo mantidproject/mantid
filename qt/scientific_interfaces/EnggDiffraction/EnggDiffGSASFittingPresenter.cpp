@@ -195,7 +195,7 @@ void EnggDiffGSASFittingPresenter::notifyRefinementFailed(
 }
 
 void EnggDiffGSASFittingPresenter::notifyRefinementSuccessful(
-    const Mantid::API::IAlgorithm_sptr alg,
+    const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
     const GSASIIRefineFitPeaksOutputProperties &refinementResults) {
   if (!m_viewHasClosed) {
     m_view->showStatus("Saving refinement results");
@@ -203,7 +203,8 @@ void EnggDiffGSASFittingPresenter::notifyRefinementSuccessful(
         refinementResults.runLabel.runNumber);
 
     try {
-      m_model->saveRefinementResultsToHDF5(alg, {refinementResults}, filename);
+      m_model->saveRefinementResultsToHDF5(successfulAlgorithm,
+                                           {refinementResults}, filename);
     } catch (std::exception &e) {
       m_view->userWarning(
           "Could not save refinement results",

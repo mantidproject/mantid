@@ -36,17 +36,19 @@ New Algorithms
 
 - :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>` replaces *MultipleScatteringCylinderAbsorption* and uses :ref:`CalculateCarpenterSampleCorrection <algm-CalculateCarpenterSampleCorrection>` for calculating its corrections. 
 
+- :ref:`SaveBankScatteringAngles <algm-SaveBankScatteringAngles>` was added to save theta and phi values for diffraction banks to a MAUD-readable `grouping.new` file format
+
+- :ref:`ExportSampleLogsToHDF5 <algm-ExportSampleLogsToHDF5>` saves a
+  workspace's samples logs to an HDF5 file
+
 Improved
 ########
 
 - :ref:`Maxent <algm-Maxent>` when outputting the results of the iterations, it no longer pads with zeroes but
   returns as many items as iterations done for each spectrum, making the iterations easy to count.
-- :ref:`ConvertToPointData <algm-ConvertToPointData>` and :ref:`ConvertToHistogram <algm-ConvertToHistogram>` now propagate the Dx errors to the output.
-- The algorithm :ref:`CreateWorkspace <algm-CreateWorkspace>` can now optionally receive the Dx errors.
-
-- :ref:`ConjoinXRuns <algm-ConjoinXRuns>` joins Dx errors if present
-- The algorithm :ref:`SortXAxis <algm-SortXAxis>` has a new input option that allows ascending (default) and descending sorting. Furthermore, Dx values will be considered if present. The documentation needed to be corrected.
-
+- XError values (Dx) can now be treated by the following algorithms: :ref:`ConjoinXRuns <algm-ConjoinXRuns>`, :ref:`ConvertToHistogram <algm-ConvertToHistogram>`, :ref:`ConvertToPointData <algm-ConvertToPointData>`, :ref:`CreateWorkspace <algm-CreateWorkspace>`, :ref:`SortXAxis <algm-SortXAxis>`, :ref:`algm-Stitch1D` and :ref:`algm-Stitch1DMany` (both with repect to point data).
+- :ref:`Stitch1D <algm-Stitch1D>` can treat point data.
+- The algorithm :ref:`SortXAxis <algm-SortXAxis>` has a new input option that allows ascending (default) and descending sorting. The documentation needed to be corrected in general.
 
 Bug fixes
 #########
@@ -57,6 +59,7 @@ Bug fixes
 - :ref:`ConvertToMD <algm-ConvertToMD>` can now be used with workspaces that aren't in the ADS. 
 - Fixed :ref:`SumSpectra <algm-SumSpectra>` to avoid a crash when validation of inputs was called with a WorkspaceGroup.
 - Fixed a bug in TableWorkspaces where vector column data was set to 0 when the table was viewed    
+- The output workspace of :ref:`LineProfile <algm-LineProfile>` now has correct sample logs, instrument and history.
 
 New
 ###

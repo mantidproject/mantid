@@ -121,7 +121,7 @@ public:
   void checkAndUpdateFitLabel(bool sequentialFit);
   /// Generate names of workspaces to be created
   std::vector<std::string> generateWorkspaceNames(bool overwrite) const;
-  void storeNormalization(std::string wsName, bool addToTable) const;
+
 signals:
   void setChosenGroupSignal(const QString &group);
   void setChosenPeriodSignal(const QString &period);
