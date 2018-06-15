@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -71,8 +72,10 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"AsymmetryCalc"};
+    return {"Fit", "ConvertFitFunctionForMuonTFAsymmetry",
+            "EstimateMuonAsymmetryFromCounts"};
   }
+
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Muon"; }
 
@@ -81,10 +84,9 @@ private:
   void init() override;
   void exec() override;
   // calculate Muon normalisation constant
-  double getNormConstant(API::MatrixWorkspace_sptr ws, int wsIndex,
-                         const double estNormConst, const double startX,
-                         const double endX);
+  std::vector<double> getNormConstants(std::vector<std::string> wsNames);
   std::map<std::string, std::string> validateInputs() override;
+  double getNormValue(API::CompositeFunction_sptr &func);
 };
 
 } // namespace Algorithm

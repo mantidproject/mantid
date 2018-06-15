@@ -21,34 +21,42 @@ import atexit
 import gc
 
 # 3rdparty imports
-from six import itervalues
+import six
 
 
-class CurrentFigure(object):
-    """A singleton manager of all figures created through it. Analogous to _pylab_helpers.Gcf.
+class GlobalFigureManager(object):
+    """
+    Singleton to manage a set of integer-numbered figures. It replaces
+    matplotlib._pylab_helpers.Gcf as the global figure manager.
 
-    Each figure has a hold/active button attached to it:
-      - active toggled = next plot operation should replace this figure
-      - hold toggled = next plot operation should produce a new figure
+    This class is never instantiated; it consists of two class
+    attributes (a list and a dictionary), and a set of static
+    methods that operate on those attributes, accessing them
+    directly as class attributes.
 
     Attributes:
 
-        *_active*:
-          A reference to the figure that is set as active, can be None
-
         *figs*:
           dictionary of the form {*num*: *manager*, ...}
+
+        *_activeQue*:
+          list of *managers*, with active one at the end
+
     """
-    _active = None
+    _activeQue = []
     figs = {}
+    observers = []
 
     @classmethod
-    def get_fig_manager(cls, _):
+    def get_fig_manager(cls, num):
         """
-        If an active figure manager exists return it; otherwise
-        return *None*.
+        If figure manager *num* exists, make it the active
+        figure and return the manager; otherwise return *None*.
         """
-        return cls.get_active()
+        manager = cls.figs.get(num, None)
+        if manager is not None:
+            cls.set_active(manager)
+        return manager
 
     @classmethod
     def destroy(cls, num):
@@ -63,17 +71,24 @@ class CurrentFigure(object):
         manager = cls.figs[num]
         manager.canvas.mpl_disconnect(manager._cidgcf)
 
-        if cls._active.num == num:
-            cls._active = None
+        # There must be a good reason for the following careful
+        # rebuilding of the activeQue; what is it?
+        oldQue = cls._activeQue[:]
+        cls._activeQue = []
+        for f in oldQue:
+            if f != manager:
+                cls._activeQue.append(f)
+
         del cls.figs[num]
         manager.destroy()
         gc.collect(1)
+        cls.notify_observers()
 
     @classmethod
     def destroy_fig(cls, fig):
         "*fig* is a Figure instance"
         num = None
-        for manager in itervalues(cls.figs):
+        for manager in six.itervalues(cls.figs):
             if manager.canvas.figure == fig:
                 num = manager.num
                 break
@@ -89,7 +104,7 @@ class CurrentFigure(object):
             manager.canvas.mpl_disconnect(manager._cidgcf)
             manager.destroy()
 
-        cls._active = None
+        cls._activeQue = []
         cls.figs.clear()
         gc.collect(1)
 
@@ -119,23 +134,24 @@ class CurrentFigure(object):
         """
         Return the manager of the active figure, or *None*.
         """
-        if cls._active is not None:
-            cls._active.canvas.figure.clf()
-        return cls._active
+        if len(cls._activeQue) == 0:
+            return None
+        else:
+            return cls._activeQue[-1]
 
     @classmethod
     def set_active(cls, manager):
         """
         Make the figure corresponding to *manager* the active one.
-
-        Notifies all other figures to disable their active status.
         """
-        cls._active = manager
-        active_num = manager.num
-        cls.figs[active_num] = manager
-        for manager in itervalues(cls.figs):
-            if manager.num != active_num:
-                manager.hold()
+        oldQue = cls._activeQue[:]
+        cls._activeQue = []
+        for m in oldQue:
+            if m != manager:
+                cls._activeQue.append(m)
+        cls._activeQue.append(manager)
+        cls.figs[manager.num] = manager
+        cls.notify_observers()
 
     @classmethod
     def draw_all(cls, force=False):
@@ -150,9 +166,50 @@ class CurrentFigure(object):
     # ------------------ Our additional interface -----------------
 
     @classmethod
-    def set_hold(cls, manager):
-        """If this manager is active then set inactive"""
-        if cls._active == manager:
-            cls._active = None
+    def get_figure_number_from_name(cls, figure_title):
+        """
+        Returns the figure number corresponding to the figure title
+        passed in as a string
+        :param figure_title: A String containing the figure title
+        :return: The figure number (int)
+        """
+        for num, figure_manager in cls.figs.items():
+            if figure_manager.get_window_title() == figure_title:
+                return num
+        return None
 
-atexit.register(CurrentFigure.destroy_all)
+    @classmethod
+    def get_figure_manager_from_name(cls, figure_title):
+        """
+        Returns the figure manager corresponding to the figure title
+        passed in as a string
+        :param figure_title: A String containing the figure title
+        :return: The figure manager
+        """
+        for figure_manager in cls.figs.values():
+            if figure_manager.get_window_title() == figure_title:
+                return figure_manager
+        return None
+
+    # ---------------------- Observer methods ---------------------
+    # This is currently very simple as the only observer is
+    # permanently registered to this class.
+
+    @classmethod
+    def add_observer(cls, observer):
+        """
+        Add an observer to this class - this can be any class with a
+        notify() method
+        :param observer: A class with a notify method
+        """
+        cls.observers.append(observer)
+
+    @classmethod
+    def notify_observers(cls):
+        """
+        Calls notify method on all observers
+        """
+        for observer in cls.observers:
+            observer.notify()
+
+atexit.register(GlobalFigureManager.destroy_all)
