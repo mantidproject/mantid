@@ -56,5 +56,6 @@ Liquids Reflectometer
 Magnetism Reflectometer
 -----------------------
 * Added live data information to Facilities.xml
+* Added algorithm to compute scattering angle from a workspace.
 
 :ref:`Release 3.13.0 <v3.13.0>`

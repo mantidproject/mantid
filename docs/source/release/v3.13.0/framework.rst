@@ -36,6 +36,8 @@ New Algorithms
 
 - :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>` replaces *MultipleScatteringCylinderAbsorption* and uses :ref:`CalculateCarpenterSampleCorrection <algm-CalculateCarpenterSampleCorrection>` for calculating its corrections. 
 
+- :ref:`SaveBankScatteringAngles <algm-SaveBankScatteringAngles>` was added to save theta and phi values for diffraction banks to a MAUD-readable `grouping.new` file format
+
 - :ref:`ExportSampleLogsToHDF5 <algm-ExportSampleLogsToHDF5>` saves a
   workspace's samples logs to an HDF5 file
 
