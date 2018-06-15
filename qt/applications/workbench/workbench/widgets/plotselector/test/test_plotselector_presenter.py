@@ -127,16 +127,18 @@ class PlotSelectorPresenterTest(unittest.TestCase):
 
         self.view.set_plot_list.assert_called_once_with(["Plot1"])
 
-    # ---------------------- Plot Activation ------------------------
+    # ------------------------ Plot Showing ------------------------
 
-    def test_double_clicking_plot_brings_to_front(self):
+    def test_show_single_plot_shows_it(self):
         self.view.get_currently_selected_plot_name = mock.Mock(return_value="Plot2")
-        self.presenter.make_single_selected_active()
-        self.model.make_plot_active.assert_called_once_with("Plot2")
+        self.presenter.show_single_selected()
+        self.model.show_plot.assert_called_once_with("Plot2")
 
-    def test_make_plot_active_brings_to_front(self):
-        self.presenter.make_plot_active("Plot2")
-        self.model.make_plot_active.assert_called_once_with("Plot2")
+    def test_show_multiple_plots_shows_them(self):
+        self.view.get_all_selected_plot_names = mock.Mock(return_value=["Plot2", "Plot3"])
+        self.presenter.show_multiple_selected()
+        self.assertEqual(self.model.show_plot.mock_calls[0], mock.call("Plot2"))
+        self.assertEqual(self.model.show_plot.mock_calls[1], mock.call("Plot3"))
 
     # ------------------------ Plot Renaming ------------------------
 

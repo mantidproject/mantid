@@ -93,9 +93,9 @@ class PlotSelectorModel(object):
         if action == FigureAction.Unknown:
             self.presenter.update_plot_list()
 
-    # ---------------------- Plot Activation ------------------------
+    # ------------------------ Plot Showing ------------------------
 
-    def make_plot_active(self, plot_name):
+    def show_plot(self, plot_name):
         """
         For a given plot name make this plot active - bring it to the
         front and make it the destination for overplotting

@@ -53,7 +53,7 @@ class PlotSelectorView(QWidget):
         self.presenter = presenter
         self.is_run_as_unit_test = is_run_as_unit_test
 
-        self.make_active_button = QPushButton('Activate')
+        self.show_button = QPushButton('Show')
         self.select_all_button = QPushButton('Select All')
         self.close_button = QPushButton('Close')
         self.export_button = self._make_export_button()
@@ -67,7 +67,7 @@ class PlotSelectorView(QWidget):
 
         buttons_layout = FlowLayout()
         buttons_layout.setSpacing(1)
-        buttons_layout.addWidget(self.make_active_button)
+        buttons_layout.addWidget(self.show_button)
         buttons_layout.addWidget(self.select_all_button)
         buttons_layout.addWidget(self.close_button)
         buttons_layout.addWidget(self.export_button)
@@ -93,13 +93,13 @@ class PlotSelectorView(QWidget):
         self.remove_from_plot_list = QAppThreadCall(self.remove_from_plot_list_orig)
 
         # Connect presenter methods to things in the view
-        self.list_widget.doubleClicked.connect(self.presenter.make_single_selected_active)
+        self.list_widget.doubleClicked.connect(self.presenter.show_single_selected)
         self.filter_box.textChanged.connect(self.presenter.filter_text_changed)
-        self.make_active_button.clicked.connect(self.presenter.make_multiple_selected_active)
+        self.show_button.clicked.connect(self.presenter.show_multiple_selected)
         self.select_all_button.clicked.connect(self.list_widget.selectAll)
         self.close_button.clicked.connect(self.presenter.close_action_called)
         self.deleteKeyPressed.connect(self.presenter.close_action_called)
-        self.enterKeyPressed.connect(self.presenter.make_multiple_selected_active)
+        self.enterKeyPressed.connect(self.presenter.show_multiple_selected)
 
     def keyPressEvent(self, event):
         """
@@ -116,7 +116,6 @@ class PlotSelectorView(QWidget):
         elif event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
             self.enterKeyPressed.emit(event.key())
 
-
     def _make_list_widget(self):
         """
         Make a list showing the names of the plots, with close buttons
@@ -128,7 +127,7 @@ class PlotSelectorView(QWidget):
 
     def _make_context_menu(self):
         context_menu = QMenu()
-        context_menu.addAction("Activate", self.presenter.make_multiple_selected_active)
+        context_menu.addAction("Show", self.presenter.show_multiple_selected)
         context_menu.addAction("Rename", self.rename_selected_in_context_menu)
 
         export_menu = context_menu.addMenu("Export")
@@ -300,8 +299,8 @@ class PlotNameWidget(QWidget):
         self.plot_name = new_name
         self.line_edit.setText(new_name)
 
-    def make_active_pressed(self, plot_name):
-        self.presenter.make_plot_active(plot_name)
+    def show_pressed(self, plot_name):
+        self.presenter.show_plot(plot_name)
 
     def close_pressed(self, plot_name):
         self.presenter.close_single_plot(plot_name)

@@ -143,7 +143,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.assertEquals(self.presenter.filter_text_changed.call_count, 1)
         self.assertEquals(self.view.get_filter_text(), 'plot1')
 
-    # ---------------------- Plot Activation ------------------------
+    # ------------------------ Plot Showing ------------------------
 
     def test_plot_name_double_clicked_calls_presenter_and_makes_plot_current(self):
         plot_names = ["Plot1", "Plot2", "Plot3"]
@@ -155,34 +155,34 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         QTest.mouseClick(self.view.list_widget.viewport(), Qt.LeftButton, pos=item_center)
         QTest.mouseDClick(self.view.list_widget.viewport(), Qt.LeftButton, pos=item_center)
 
-        self.assertEqual(self.presenter.make_single_selected_active.call_count, 1)
+        self.assertEqual(self.presenter.show_single_selected.call_count, 1)
         self.assertEqual(self.view.get_currently_selected_plot_name(), plot_names[1])
 
-    def test_make_plot_active_by_pressing_activate_button(self):
-        QTest.mouseClick(self.view.make_active_button, Qt.LeftButton)
-        self.assertEquals(self.presenter.make_multiple_selected_active.call_count, 1)
-        QTest.mouseClick(self.view.make_active_button, Qt.LeftButton)
-        self.assertEquals(self.presenter.make_multiple_selected_active.call_count, 2)
+    def test_show_plot_by_pressing_show_button(self):
+        QTest.mouseClick(self.view.show_button, Qt.LeftButton)
+        self.assertEquals(self.presenter.show_multiple_selected.call_count, 1)
+        QTest.mouseClick(self.view.show_button, Qt.LeftButton)
+        self.assertEquals(self.presenter.show_multiple_selected.call_count, 2)
 
-    def test_make_plot_active_by_pressing_enter_key(self):
+    def test_show_plot_by_pressing_enter_key(self):
         QTest.keyClick(self.view, Qt.Key_Enter)
-        self.assertEquals(self.presenter.make_multiple_selected_active.call_count, 1)
+        self.assertEquals(self.presenter.show_multiple_selected.call_count, 1)
         QTest.keyClick(self.view, Qt.Key_Enter)
-        self.assertEquals(self.presenter.make_multiple_selected_active.call_count, 2)
+        self.assertEquals(self.presenter.show_multiple_selected.call_count, 2)
 
-    def test_make_plot_active_by_pressing_return_key(self):
+    def test_show_plot_by_pressing_return_key(self):
         QTest.keyClick(self.view, Qt.Key_Return)
-        self.assertEquals(self.presenter.make_multiple_selected_active.call_count, 1)
+        self.assertEquals(self.presenter.show_multiple_selected.call_count, 1)
         QTest.keyClick(self.view, Qt.Key_Return)
-        self.assertEquals(self.presenter.make_multiple_selected_active.call_count, 2)
+        self.assertEquals(self.presenter.show_multiple_selected.call_count, 2)
 
-    def test_make_active_context_menu(self):
+    def test_show_context_menu(self):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
 
         self.view.context_menu.actions()[0].trigger()
 
-        self.presenter.make_multiple_selected_active.assert_called_once_with()
+        self.presenter.show_multiple_selected.assert_called_once_with()
 
     # ------------------------ Plot Renaming ------------------------
 

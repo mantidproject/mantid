@@ -106,14 +106,14 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.model.notify(FigureAction.Unknown, "")
         self.presenter.update_plot_list.assert_called_once_with()
 
-    # ---------------------- Plot Activation ------------------------
+    # ------------------------ Plot Showing ------------------------
 
-    def test_make_plot_active_calls_current_figure(self):
-        self.model.make_plot_active("Plot1")
+    def test_show_plot_calls_current_figure(self):
+        self.model.show_plot("Plot1")
         self.assertEqual(self.figure_manager.show.call_count, 1)
 
-    def test_make_plot_active_for_invalid_name_raises_value_error(self):
-        self.assertRaises(ValueError, self.model.make_plot_active, "NotAPlot")
+    def test_show_plot_for_invalid_name_raises_value_error(self):
+        self.assertRaises(ValueError, self.model.show_plot, "NotAPlot")
         self.figure_manager.show.assert_not_called()
 
     # ------------------------ Plot Renaming ------------------------
@@ -146,7 +146,7 @@ class PlotSelectorModelTest(unittest.TestCase):
 
     # ---------------------- Plot Exporting -------------------------
 
-    def test_make_plot_active_calls_current_figure(self):
+    def test_export_plot_calls_savefig_on_figure(self):
         self.model.export_plot("Plot1", "/home/Documents/Figure1.pdf")
         self.figure_manager.canvas.figure.savefig.assert_called_once_with("/home/Documents/Figure1.pdf")
 

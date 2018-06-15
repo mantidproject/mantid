@@ -128,9 +128,9 @@ class PlotSelectorPresenter(object):
                     filtered_plot_list.append(plot_name)
             self.view.set_plot_list(filtered_plot_list)
 
-    # ---------------------- Plot Activation ------------------------
+    # ------------------------ Plot Showing ------------------------
 
-    def make_single_selected_active(self):
+    def show_single_selected(self):
         """
         When a list item is double clicked the view calls this method
         to bring the selected plot to the front
@@ -138,7 +138,7 @@ class PlotSelectorPresenter(object):
         plot_name = self.view.get_currently_selected_plot_name()
         self.make_plot_active(plot_name)
 
-    def make_multiple_selected_active(self):
+    def show_multiple_selected(self):
         selected_plots = self.view.get_all_selected_plot_names()
         for plot_name in selected_plots:
             self.make_plot_active(plot_name)
@@ -150,7 +150,7 @@ class PlotSelectorPresenter(object):
         :param plot_name: The name of the plot
         """
         try:
-            self.model.make_plot_active(plot_name)
+            self.model.show_plot(plot_name)
         except ValueError as e:
             print(e)
 
