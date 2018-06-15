@@ -16,7 +16,7 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
     PROP_OUTPUT_FILE = "OutputFilename"
 
     #BANK_GROUPING = ([0] * 7) + ([1] * 8) + ([2] * 20) + ([3] * 42) + ([4] * 54) + ([5] * 35)
-    BANK_GROUPING = ([1] * 6) + [2, 3]
+    BANK_GROUPING = [1, 1, 2, 3]
     BANK_PARAMS_LINE = "^INS  [0-9]BNKPAR"
     DIFFRACTOMETER_CONSTANTS_LINE = "^INS  [0-9] ICONS"
     PROFILE_COEFFS_LINE_1 = "^INS  [0-9]PRCF 1"
@@ -55,19 +55,17 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
 
     def PyExec(self):
         input_ws = mtd[self.getPropertyValue(self.PROP_INPUT_WS)]
-        spectrum_numbers = [bank.getSpectrum(0).getSpectrumNo() for bank in input_ws]
+        num_banks = input_ws.getNumberOfEntries()
 
         gsas_filename = self.getProperty(self.PROP_GSAS_PARAM_FILE).value
         distances, difas, difcs, tzeros, alpha_zeros, alpha_ones, beta_zeros, beta_ones, sigma_zeros, sigma_ones, \
-            sigma_twos = map(lambda param: self._expand_to_texture_bank(param, spectrum_numbers),
+            sigma_twos = map(lambda param: self._expand_to_texture_bank(param, range(num_banks)),
                              self._parse_gsas_param_file(gsas_filename))
 
         two_thetas, phis = zip(*[self._get_two_theta_and_phi(bank) for bank in input_ws])
 
         with open(self.getProperty(self.PROP_TEMPLATE_FILE).value) as template_file:
             template = template_file.read()
-
-        num_banks = input_ws.getNumberOfEntries()
 
         def create_empty_param_list(default_value="0"):
             return "\n".join(default_value for _ in range(num_banks))
