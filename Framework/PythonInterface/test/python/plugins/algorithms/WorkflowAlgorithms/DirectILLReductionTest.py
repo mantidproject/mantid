@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import collections
 from mantid.api import mtd
+import numpy
 import numpy.testing
 from scipy import constants
 from testhelpers import illhelpers, run_algorithm
@@ -75,8 +76,9 @@ class DirectILLReductionTest(unittest.TestCase):
         groupedWSName = outWSName + '_grouped_detectors_'
         self.assertTrue(groupedWSName in mtd)
         groupedWS = mtd[groupedWSName]
-        self.assertEqual(groupedWS.getNumberHistograms(), 1)
-        groupIds = groupedWS.getDetector(0).getDetectorIDs()
+        self.assertEqual(groupedWS.getNumberHistograms(), 2)
+        groupIds = list(groupedWS.getDetector(0).getDetectorIDs())
+        groupIds += groupedWS.getDetector(1).getDetectorIDs()
         self.assertEqual(collections.Counter(detectorIds), collections.Counter(groupIds))
 
     def testOutputIsDistribution(self):
@@ -176,12 +178,15 @@ def _groupingTestDetectors(ws):
     }
     run_algorithm('MaskDetectors', **kwargs)
     referenceDetector = ws.getDetector(indexBegin)
-    reference2Theta = ws.detectorTwoTheta(referenceDetector)
+    reference2Theta1 = ws.detectorTwoTheta(referenceDetector)
+    referenceDetector = ws.getDetector(indexBegin + 256)
+    reference2Theta2 = ws.detectorTwoTheta(referenceDetector)
     mask = list()
+    tolerance = numpy.deg2rad(0.01)
     for i in range(indexBegin + 1, indexBegin + 10000):
         det = ws.getDetector(i)
         twoTheta = ws.detectorTwoTheta(det)
-        if abs(reference2Theta - twoTheta) >= 0.01 / 180 * constants.pi:
+        if abs(reference2Theta1 - twoTheta) >= tolerance and abs(reference2Theta2 - twoTheta) >= tolerance:
             mask.append(i)
     kwargs = {
         'Workspace': ws,
