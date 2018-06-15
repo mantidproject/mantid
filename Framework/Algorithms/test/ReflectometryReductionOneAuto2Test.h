@@ -604,8 +604,8 @@ public:
     alg.execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsQ"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam"));
 
     AnalysisDataService::Instance().clear();
   }

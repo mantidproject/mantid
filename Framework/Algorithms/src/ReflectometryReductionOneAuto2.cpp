@@ -333,12 +333,10 @@ void ReflectometryReductionOneAuto2::exec() {
 
   MatrixWorkspace_sptr IvsQ = alg->getProperty("OutputWorkspace");
 
-  if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
+  bool const isDebug = getProperty("Debug");
+  if (isDebug || isChild()) {
     MatrixWorkspace_sptr IvsLam = alg->getProperty("OutputWorkspaceWavelength");
     setProperty("OutputWorkspaceWavelength", IvsLam);
-  }
-
-  if (!isDefault("OutputWorkspace") || isChild()) {
     setProperty("OutputWorkspace", IvsQ);
   }
 
