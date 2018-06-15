@@ -179,13 +179,18 @@ class PlotSelectorPresenter(object):
 
     # ---------------------- Plot Activation ------------------------
 
-    def list_double_clicked(self):
+    def make_single_selected_active(self):
         """
         When a list item is double clicked the view calls this method
         to bring the selected plot to the front
         """
         plot_name = self.view.get_currently_selected_plot_name()
         self.make_plot_active(plot_name)
+
+    def make_multiple_selected_active(self):
+        selected_plots = self.view.get_all_selected_plot_names()
+        for plot_name in selected_plots:
+            self.make_plot_active(plot_name)
 
     def make_plot_active(self, plot_name):
         """
@@ -202,8 +207,7 @@ class PlotSelectorPresenter(object):
 
     def export_plots(self, path, extension):
         for plot_name in self.view.get_all_selected_plot_names():
-            filename = os.path.join(path, plot_name + extension)
-            self.model.export_plot(plot_name, filename)
+            self.export_plot(plot_name, path, extension)
 
     def export_plot(self, plot_name, path, extension):
         if path:

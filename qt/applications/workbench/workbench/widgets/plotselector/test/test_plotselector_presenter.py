@@ -171,7 +171,7 @@ class PlotSelectorPresenterTest(unittest.TestCase):
 
     def test_double_clicking_plot_brings_to_front(self):
         self.view.get_currently_selected_plot_name = mock.Mock(return_value="Plot2")
-        self.presenter.list_double_clicked()
+        self.presenter.make_single_selected_active()
         self.model.make_plot_active.assert_called_once_with("Plot2")
 
     def test_make_plot_active_brings_to_front(self):
@@ -181,7 +181,7 @@ class PlotSelectorPresenterTest(unittest.TestCase):
     # ---------------------- Plot Exporting -------------------------
 
     def test_exporting_single_plot_generates_correct_filename(self):
-        self.presenter.export_plot('Plot1', '/home/Documents', '.xyz')
+        self.presenter.export_plots('Plot1', '/home/Documents', '.xyz')
         self.model.export_plot.assert_called_once_with('Plot1', '/home/Documents' + os.sep + 'Plot1.xyz')
 
     def test_exporting_single_plot_generates_correct_filename(self):

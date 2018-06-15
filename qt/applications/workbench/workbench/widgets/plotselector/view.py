@@ -37,8 +37,9 @@ class PlotSelectorView(QWidget):
     The view to the plot selector, a PyQt widget.
     """
 
-    # A signal to capture when delete is pressed
+    # A signal to capture when keys are pressed
     deleteKeyPressed = Signal(int)
+    enterKeyPressed = Signal(int)
 
     def __init__(self, presenter, parent=None, is_run_as_unit_test=False):
         """
@@ -56,6 +57,11 @@ class PlotSelectorView(QWidget):
         self.export_button = self._make_export_button()
         self.filter_box = self._make_filter_box()
         self.list_widget = self._make_list_widget()
+
+        # Add the context menu
+        self.list_widget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.context_menu, self.export_menu = self._make_context_menu()
+        self.list_widget.customContextMenuRequested.connect(self.context_menu_opened)
 
         buttons_layout = FlowLayout()
         buttons_layout.addWidget(self.close_button)
@@ -82,10 +88,11 @@ class PlotSelectorView(QWidget):
         self.remove_from_plot_list = QAppThreadCall(self.remove_from_plot_list_orig)
 
         # Connect presenter methods to things in the view
-        self.list_widget.doubleClicked.connect(self.presenter.list_double_clicked)
+        self.list_widget.doubleClicked.connect(self.presenter.make_single_selected_active)
         self.filter_box.textChanged.connect(self.presenter.filter_text_changed)
         self.close_button.clicked.connect(self.presenter.close_action_called)
         self.deleteKeyPressed.connect(self.presenter.close_action_called)
+        self.enterKeyPressed.connect(self.presenter.make_multiple_selected_active)
 
     def keyPressEvent(self, event):
         """
@@ -99,6 +106,8 @@ class PlotSelectorView(QWidget):
         super(PlotSelectorView, self).keyPressEvent(event)
         if event.key() == Qt.Key_Delete:
             self.deleteKeyPressed.emit(event.key())
+        elif event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
+            self.enterKeyPressed.emit(event.key())
 
     def _make_filter_box(self):
         """
@@ -118,20 +127,37 @@ class PlotSelectorView(QWidget):
         """
         list_widget = QListWidget(self)
         list_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)
-
-        list_widget.installEventFilter(self)
-
         return list_widget
 
     def _make_export_button(self):
         export_button = QPushButton("Export")
         export_menu = QMenu()
         for text, extension in export_types:
-            export_menu.addAction(text, lambda ext=extension: self.export_plot(ext))
+            export_menu.addAction(text, lambda ext=extension: self.export_plots(ext))
         export_button.setMenu(export_menu)
         return export_button
 
-    def export_plot(self, extension):
+    def _make_context_menu(self):
+        context_menu = QMenu()
+        context_menu.addAction("Make Active", self.presenter.make_multiple_selected_active)
+        context_menu.addAction("Rename", self.rename_selected_in_context_menu)
+
+        export_menu = context_menu.addMenu("Export")
+        for text, extension in export_types:
+            export_menu.addAction(text, lambda ext=extension: self.export_plots(ext))
+
+        context_menu.addAction("Close", self.presenter.close_action_called)
+        return context_menu, export_menu
+
+    def rename_selected_in_context_menu(self):
+        plot_name = self.get_currently_selected_plot_name()
+        row, widget = self._get_row_and_widget_from_label_text(plot_name)
+        widget.toggle_plot_name_editable(True)
+
+    def context_menu_opened(self, position):
+        self.context_menu.exec_(self.mapToGlobal(position))
+
+    def export_plots(self, extension):
         path = ""
         if not self.is_run_as_unit_test:
             path = QFileDialog.getExistingDirectory(None, 'Select folder for exported plots')
@@ -231,7 +257,7 @@ class PlotNameWidget(QWidget):
         self.rename_button.setFlat(True)
         self.rename_button.setMaximumWidth(self.rename_button.iconSize().width() * 2)
         self.rename_button.setCheckable(True)
-        self.rename_button.toggled.connect(self.toggle_rename_button)
+        self.rename_button.toggled.connect(self.rename_button_toggled)
         self.skip_next_toggle = False
 
         close_icon = QIcon.fromTheme('window-close')
@@ -256,11 +282,6 @@ class PlotNameWidget(QWidget):
         self.layout.sizeHint()
         self.setLayout(self.layout)
 
-        # Add the context menu
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.context_menu, self.export_menu = self._make_context_menu()
-        self.customContextMenuRequested.connect(self.context_menu_opened)
-
     def set_plot_name(self, new_name):
         self.plot_name = new_name
         self.line_edit.setText(new_name)
@@ -271,7 +292,7 @@ class PlotNameWidget(QWidget):
     def close_pressed(self, plot_name):
         self.presenter.close_single_plot(plot_name)
 
-    def toggle_rename_button(self, checked):
+    def rename_button_toggled(self, checked):
         if checked:
             self.toggle_plot_name_editable(True, toggle_rename_button=False)
 
@@ -297,24 +318,9 @@ class PlotNameWidget(QWidget):
         self.presenter.rename_figure(self.line_edit.text(), self.plot_name)
         self.toggle_plot_name_editable(False)
 
-    def _make_context_menu(self):
-        context_menu = QMenu()
-        context_menu.addAction("Make Active", lambda: self.make_active_pressed(self.plot_name))
-        context_menu.addAction("Rename", lambda: self.toggle_plot_name_editable(True))
-
-        export_menu = context_menu.addMenu("Export")
-        for text, extension in export_types:
-            export_menu.addAction(text, lambda ext=extension: self.export_plot(ext))
-
-        context_menu.addAction("Close", lambda: self.close_pressed(self.plot_name))
-        return context_menu, export_menu
-
-    def context_menu_opened(self, position):
-        self.context_menu.exec_(self.mapToGlobal(position))
-
     def export_plot(self, extension):
         path = ""
         if not self.is_run_as_unit_test:
             path = QFileDialog.getExistingDirectory(None, 'Select folder for exported plot')
-        self.presenter.export_plot(self.plot_name, path, extension)
+        self.presenter.export_plots(self.plot_name, path, extension)
 
