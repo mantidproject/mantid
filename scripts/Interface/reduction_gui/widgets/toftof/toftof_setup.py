@@ -27,9 +27,10 @@ class TOFTOFSetupWidget(BaseWidget):
 
     TIP_vanRuns = ''
     TIP_vanCmnt = ''
-    TIP_vanTemp = 'Temperature in [K]. only required if none in data given'
+    TIP_vanTemp = 'Temperature in [K]. only required if none is in data given'
 
     TIP_ecRuns = ''
+    TIP_ecTemp = 'Temperature in [K]. only required if none is in data given'
     TIP_ecFactor = ''
 
     TIP_binEon = ''
@@ -98,6 +99,7 @@ class TOFTOFSetupWidget(BaseWidget):
         self.vanTemp   = tip(QLineEdit(), self.TIP_vanTemp)
 
         self.ecRuns    = tip(QLineEdit(), self.TIP_ecRuns)
+        self.ecTemp    = tip(QLineEdit(), self.TIP_ecTemp)
         self.ecFactor  = tip(QDoubleSpinBox(), self.TIP_ecFactor)
 
         set_spin(self.ecFactor, 0, 1)
@@ -164,10 +166,10 @@ class TOFTOFSetupWidget(BaseWidget):
                     box.addStretch(wgt)
             return box
 
-        def hbox(widgets):
+        def hbox(*widgets):
             return _box(QHBoxLayout, widgets)
 
-        def vbox(widgets):
+        def vbox(*widgets):
             return _box(QVBoxLayout, widgets)
 
         def label(text, tip):
@@ -187,11 +189,11 @@ class TOFTOFSetupWidget(BaseWidget):
         box = QVBoxLayout()
         self._layout.addLayout(box)
 
-        box.addLayout(hbox((gbDataDir, gbPrefix)))
-        box.addLayout(hbox((vbox((gbInputs, gbBinning, gbOptions, 1)), vbox((gbData, gbSave)))))
+        box.addLayout(hbox(gbDataDir, gbPrefix))
+        box.addLayout(hbox(vbox(gbInputs, gbBinning, gbOptions, 1), vbox(gbData, gbSave)))
 
-        gbDataDir.setLayout(hbox((self.dataDir, self.btnDataDir)))
-        gbPrefix.setLayout(hbox((self.prefix,)))
+        gbDataDir.setLayout(hbox(self.dataDir, self.btnDataDir))
+        gbPrefix.setLayout(hbox(self.prefix,))
 
         grid = QGridLayout()
         grid.addWidget(self.chkSubtractECVan,   0, 0, 1, 4)
@@ -228,9 +230,9 @@ class TOFTOFSetupWidget(BaseWidget):
         grid.addWidget(QLabel('Van. Temp.'),    1, 2)
         grid.addWidget(self.vanTemp,            1, 3, 1, 1)
         grid.addWidget(QLabel('Empty can runs'),2, 0)
-        grid.addWidget(self.ecRuns,             2, 1)
-        grid.addWidget(QLabel('EC factor'),     2, 2)
-        grid.addWidget(self.ecFactor,           2, 3)
+        grid.addLayout(hbox(self.ecRuns, QLabel('EC factor'), self.ecFactor), 2, 1, 1, 1)
+        grid.addWidget(QLabel('EC Temp.'),      2, 2)
+        grid.addWidget(self.ecTemp,             2, 3)
         grid.addWidget(QLabel('Mask detectors'),3, 0)
         grid.addWidget(self.maskDetectors,      3, 1, 1, 3)
 
@@ -259,7 +261,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
         gbBinning.setLayout(grid)
 
-        gbData.setLayout(hbox((self.dataRunsView,)))
+        gbData.setLayout(hbox(self.dataRunsView))
 
         grid = QGridLayout()
         grid.addWidget(QLabel('Workspaces'),  0, 0)
@@ -274,7 +276,7 @@ class TOFTOFSetupWidget(BaseWidget):
         # disable save Ascii, it is not available for the moment
         self.chkAscii.setEnabled(False)
 
-        gbSave.setLayout(vbox((label('Directory',''), hbox((self.saveDir, self.btnSaveDir)), grid)))
+        gbSave.setLayout(vbox(label('Directory',''), hbox(self.saveDir, self.btnSaveDir), grid))
 
         # handle signals
         self.btnDataDir.clicked.connect(self._onDataDir)
@@ -327,6 +329,7 @@ class TOFTOFSetupWidget(BaseWidget):
         elem.vanTemp       = line_text(self.vanTemp)
 
         elem.ecRuns        = line_text(self.ecRuns)
+        elem.ecTemp        = line_text(self.ecTemp)
         elem.ecFactor      = self.ecFactor.value()
 
         elem.dataRuns      = self.runDataModel.tableData
@@ -376,6 +379,7 @@ class TOFTOFSetupWidget(BaseWidget):
         self.vanTemp.setText(elem.vanTemp)
 
         self.ecRuns.setText(elem.ecRuns)
+        self.ecTemp.setText(elem.ecTemp)
         self.ecFactor.setValue(elem.ecFactor)
 
         self.runDataModel.tableData = elem.dataRuns

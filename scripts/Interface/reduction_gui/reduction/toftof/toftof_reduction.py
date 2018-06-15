@@ -76,6 +76,7 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         # empty can runs, comment, and factor
         self.ecRuns   = ''
+        self.ecTemp   = ''
         self.ecFactor = self.DEF_ecFactor
 
         # data runs: [(runs,comment, temperature), ...]
@@ -124,6 +125,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('van_temperature', self.vanTemp)
 
         put('ec_runs',     self.ecRuns)
+        put('ec_temp',     self.ecTemp)
         put('ec_factor',   self.ecFactor)
 
         for (runs, cmnt, temp) in self.dataRuns:
@@ -194,6 +196,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.vanTemp  = get_str('van_temperature')
 
             self.ecRuns   = get_str('ec_runs')
+            self.ecTemp   = get_str('ec_temp')
             self.ecFactor = get_flt('ec_factor', self.DEF_ecFactor)
 
             dataRuns = get_strlst('data_runs')
@@ -310,7 +313,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             wsEC    = self.prefix + 'EC'
 
             self.l("# empty can runs")
-            self.merge_runs(wsRawEC, self.ecRuns, wsEC, 'EC')
+            self.merge_runs(wsRawEC, self.ecRuns, wsEC, 'EC', self.ecTemp)
             allGroup.append(wsEC)
 
         # data runs
