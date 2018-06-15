@@ -6,6 +6,11 @@
 TOFTOF reduction workflow gui.
 """
 from __future__ import (absolute_import, division, print_function)
+try:
+    from itertools import zip_longest as zip_longest
+except:
+    from itertools import izip_longest as zip_longest
+
 import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement, BaseReductionScripter
@@ -72,7 +77,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         self.ecRuns   = ''
         self.ecFactor = self.DEF_ecFactor
 
-        # data runs: [(runs,comment), ...]
+        # data runs: [(runs,comment, temperature), ...]
         self.dataRuns = []
 
         # additional parameters
@@ -119,9 +124,10 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('ec_runs',     self.ecRuns)
         put('ec_factor',   self.ecFactor)
 
-        for (runs, cmnt) in self.dataRuns:
+        for (runs, cmnt, temp) in self.dataRuns:
             put('data_runs',    runs)
             put('data_comment', cmnt)
+            put('data_temperature', temp)
 
         put('rebin_energy_on',    self.binEon)
         put('rebin_energy_start', self.binEstart)
@@ -172,6 +178,9 @@ class TOFTOFScriptElement(BaseScriptElement):
             def get_strlst(tag):
                 return BaseScriptElement.getStringList(dom, tag)
 
+            def get_float_list(tag):
+                return BaseScriptElement.getFloatList(dom, tag)
+
             def get_bol(tag, default):
                 return BaseScriptElement.getBoolElement(dom, tag, default=default)
 
@@ -186,8 +195,10 @@ class TOFTOFScriptElement(BaseScriptElement):
 
             dataRuns = get_strlst('data_runs')
             dataCmts = get_strlst('data_comment')
-            for i in range(min(len(dataRuns), len(dataCmts))):
-                self.dataRuns.append((dataRuns[i], dataCmts[i]))
+            dataTemps = get_float_list('data_temperature')
+
+            for dataRun in zip_longest(dataRuns, dataCmts, dataTemps, fillvalue=''):
+                self.dataRuns.append(list(dataRun))
 
             self.binEon    = get_bol('rebin_energy_on',    self.DEF_binEon)
             self.binEstart = get_flt('rebin_energy_start', self.DEF_binEstart)
@@ -265,11 +276,14 @@ class TOFTOFScriptElement(BaseScriptElement):
     def get_log(workspace, tag):
         return "{}.getRun().getLogData('{}').value".format(workspace, tag)
 
-    def merge_runs(self, ws_raw, raw_runs, outws, comment):
+    def merge_runs(self, ws_raw, raw_runs, outws, comment, temperature=None):
         self.l("{} = Load(Filename='{}')" .format(ws_raw, raw_runs))
         self.l("{} = MergeRuns({})" .format(outws, ws_raw))
         self.l("{}.setComment('{}')" .format(outws, comment))
-        self.l("temperature = np.mean({})".format(self.get_log(outws,'temperature')))
+        if not temperature:
+            self.l("temperature = np.mean({})".format(self.get_log(outws,'temperature')))
+        else:
+            self.l("temperature = {}".format(temperature))
         self.l("AddSampleLog({}, LogName='temperature', LogText=str(temperature), LogType='Number', LogUnit='K')"
                .format(outws))
         if not self.keepSteps:
@@ -297,7 +311,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             allGroup.append(wsEC)
 
         # data runs
-        for i, (runs, cmnt) in enumerate(self.dataRuns):
+        for i, (runs, cmnt, temp) in enumerate(self.dataRuns):
             if not runs:
                 self.error('missing data runs value')
             if not cmnt:
@@ -313,7 +327,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             allGroup.append(wsData)
 
             self.l("# data runs {}"           .format(postfix))
-            self.merge_runs(wsRawData, runs, wsData, cmnt)
+            self.merge_runs(wsRawData, runs, wsData, cmnt, temp)
 
     def delete_workspaces(self, workspaces):
         if not self.keepSteps:

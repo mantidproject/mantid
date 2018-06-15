@@ -120,7 +120,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
         self.maskDetectors = tip(QLineEdit(), self.TIP_maskDetectors)
 
-        headers = ('Data runs', 'Comment')
+        headers = ('Data runs', 'Comment', "Temperature [K]")
         self.dataRunsView  = tip(DataTableView(self, headers), self.TIP_dataRunsView)
         self.dataRunsView.horizontalHeader().setStretchLastSection(True)
         self.dataRunsView.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
