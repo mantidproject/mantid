@@ -744,7 +744,26 @@ QStringList FunctionBrowser::getGlobalParameters() const {
   }
   return out;
 }
-
+/**
+* Get a list of names of global parameters
+*/
+void FunctionBrowser::setGlobalParameters(QStringList &globals){
+	for (auto propIt = m_properties.begin(); propIt != m_properties.end();
+		++propIt) {
+		QtProperty *prop = propIt->prop;
+		QString tmp = getIndex(prop) + prop->propertyName();
+		auto asdf = tmp.toStdString();
+		for (auto global :globals) {
+			auto easf = global.toStdString();
+			auto a = 1;
+			if (tmp == global) {
+			//out <<;
+				prop->setOption(globalOptionName, true);
+		}
+		}
+	}
+	//return out;
+}
 /**
  * Get a list of names of local parameters
  */

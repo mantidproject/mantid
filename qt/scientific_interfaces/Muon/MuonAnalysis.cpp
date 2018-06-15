@@ -2266,7 +2266,7 @@ void MuonAnalysis::loadFittings() {
   // Add Function browser widget to the fit tab
   m_functionBrowser = new MuonFunctionBrowser(nullptr, true);
   m_functionBrowser->sizePolicy().setVerticalStretch(10);
-  m_uiForm.fitBrowser->addExtraWidget(m_functionBrowser);
+  m_uiForm.fitBrowser->addFitBrowserWidget(m_functionBrowser,m_functionBrowser);
   // Add Data Selector widget to the fit tab
   m_dataSelector = new MuonFitDataSelector(m_uiForm.fitBrowser);
   m_dataSelector->sizePolicy().setVerticalStretch(0);
@@ -2673,12 +2673,9 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
       m_uiForm.fitBrowser->updatePeriods();
     }
-    if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry &&
-        isItGroup) {
-      m_uiForm.fitBrowser->setTFAsymm(true);
-    } else {
+
       m_uiForm.fitBrowser->setTFAsymm(false);
-    }
+ 
     m_uiForm.fitBrowser->checkFitEnabled();
 
   } else if (newTab == m_uiForm.ResultsTable) {

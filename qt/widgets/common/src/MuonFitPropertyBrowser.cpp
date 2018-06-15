@@ -954,6 +954,7 @@ void MuonFitPropertyBrowser::runFit() {
     return;
   }
   try {
+	  auto fa = m_compositeFunction->asString();
     m_initialParameters.resize(compositeFunction()->nParams());
     for (size_t i = 0; i < compositeFunction()->nParams(); i++) {
       m_initialParameters[i] = compositeFunction()->getParameter(i);
@@ -1258,7 +1259,85 @@ bool MuonFitPropertyBrowser::isMultiFittingMode() const {
 */
 void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
   modifyFitMenu(m_fitActionTFAsymm, enabled);
+  // set new fit func
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ConvertFitFunctionForMuonTFAsymmetry");
+  if (AnalysisDataService::Instance().doesExist("MuonAnalysisTFNormalizations") && m_compositeFunction->nFunctions()>0) {
+	  alg->initialize();
 
+
+	  IFunction_sptr old = boost::dynamic_pointer_cast<IFunction>(
+		  m_compositeFunction);
+	  QStringList globals; 
+
+
+      if (m_TFAsymmMode) {
+		  //manually set the function values
+		 old= m_functionBrowser->getGlobalFunction();
+		 globals= m_functionBrowser->getGlobalParameters();
+	  }
+	  if (!enabled) {
+		  //auto tmp = boost::dynamic_pointer_cast<CompositeFunction>(old);
+		  //old = tmp->getFunction(0);
+	  }
+	  alg->setProperty("InputFunction", old);
+	  alg->setProperty("NormalizationTable", "MuonAnalysisTFNormalizations");
+	  alg->setProperty("WorkspaceList", m_workspacesToFit);
+	  std::string mode = (enabled) ? "Construct" : "Extract";
+	  alg->setProperty("Mode",mode);
+	  alg->execute();
+	  IFunction_sptr func = alg->getProperty("OutputFunction");
+	 
+
+	  //single fit
+	  FitPropertyBrowser::clear();
+	  auto h = FitPropertyBrowser::addFunction(func->asString());
+	  
+	//multiple fit
+	  /*FitPropertyBrowser::clear();
+	  auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(func);
+	  auto adfdsaf = tmp->asString();
+	  auto comp = boost::dynamic_pointer_cast<CompositeFunction>(tmp->getFunction(0));
+	  auto adfdsasdaf = comp->asString();
+	  //auto multi = boost::make_shared<MultiDomainFunction>();
+	  //multi->setDomainIndex(0, 0);
+	  //multi->addFunction(tmp->getFunction(0));
+	  m_functionBrowser->clear();*/
+	  QStringList newGlobals;
+	  const std::string INSERT_FUNCTION{ "f0.f1.f1." };
+	  if (enabled) {
+		  for (auto global : globals) {
+			  newGlobals << "f0.f1.f1." + global;
+		  }
+	  }
+	  else {
+		  for (auto global : globals) {
+			  newGlobals << global.remove(0,9);
+		  }
+	  }
+	  auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(func);
+	  old = tmp->getFunction(0);
+	  m_functionBrowser->setFunction(old);
+	  m_functionBrowser->updateMultiDatasetParameters(*func);
+	 
+	  m_functionBrowser->setGlobalParameters(newGlobals);
+	  // if multi data set we need to do the ties manually
+	  
+		  auto originalNames = func->getParameterNames();
+		  for (auto name : originalNames) {
+			  auto index = func->parameterIndex(name);
+			  auto sfad = func->asString();
+			  auto originalTie = func->getTie(index);
+			  if (originalTie) {
+				  auto stringTie = originalTie->asString();
+				  //get domain
+				  auto index = stringTie.find_first_of(".");
+				  std::string domainStr = stringTie.substr(1, index);
+				  int domain = std::stoi(domainStr);
+				  m_functionBrowser->setLocalParameterTie(QString::fromStdString(name), 1, QString::fromStdString(stringTie));
+			  }
+		  }
+			  
+  }
   // Show or hide the TFAsymmetry fit
   if (enabled) {
     m_settingsGroup->property()->addSubProperty(m_normalization);
@@ -1270,6 +1349,20 @@ void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
     m_multiFitSettingsGroup->property()->removeSubProperty(m_normalization);
     m_settingsGroup->property()->removeSubProperty(m_keepNorm);
   }
+
+
+}
+/**
+ * Adds an extra widget in between the fit buttons and the browser
+ * @param widget :: [input] Pointer to widget to add
+ */
+void MuonFitPropertyBrowser::addFitBrowserWidget(QWidget *widget, MantidQt::MantidWidgets::FunctionBrowser *functionBrowser) {
+	widget->setSizePolicy(QSizePolicy::Policy::Expanding,
+	QSizePolicy::Policy::Expanding);
+	if (m_widgetSplitter) {
+	   m_widgetSplitter->addWidget(widget);
+	}
+		m_functionBrowser = functionBrowser;
 }
 /**
  * The pre-fit checks have been successfully completed. Continue by emitting a

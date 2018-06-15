@@ -915,11 +915,7 @@ void FitPropertyBrowser::popupMenu(const QPoint &) {
         !isParameter && ci->property()->propertyName() == "Lower Bound";
     bool isUpperBound =
         !isParameter && ci->property()->propertyName() == "Upper Bound";
-    bool isType = isParameter && ci->property()->propertyName() == "Type";
-    if (isType) {
-      isParameter = false;
-    }
-
+    
     if (isTie) {
       action = new QAction("Remove", this);
       connect(action, SIGNAL(triggered()), this, SLOT(deleteTie()));
@@ -1250,21 +1246,7 @@ void FitPropertyBrowser::enumChanged(QtProperty *prop) {
     workspaceChange(QString::fromStdString(workspaceName()));
     setWorkspaceProperties();
     m_storedWorkspaceName = workspaceName();
-  } else if (prop->propertyName() == "Type") {
-    disableUndo();
-    PropertyHandler *h = getHandler()->findHandler(prop);
-    if (!h)
-      return;
-    // if (!h->parentHandler()) return;
-    auto f = h->changeType(prop);
-    if (!h->parentHandler()) {
-      m_compositeFunction =
-          boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(f);
-    }
-    if (f)
-      setCurrentFunction(f);
-    emit functionChanged();
-  } else if (prop == m_minimizer) {
+  }  else if (prop == m_minimizer) {
     minimizerChanged();
   } else if (prop == m_evaluationType) {
     storeSettings = true;

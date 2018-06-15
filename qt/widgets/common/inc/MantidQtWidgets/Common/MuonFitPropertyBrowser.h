@@ -4,7 +4,7 @@
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/IMuonFitDataModel.h"
 #include "MantidQtWidgets/Common/IMuonFitFunctionModel.h"
-
+#include "MantidQtWidgets/Common/MuonFunctionBrowser.h"
 #include <QMap>
 /* Forward declarations */
 class QDockWidget;
@@ -57,6 +57,7 @@ public:
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
   /// Add an extra widget into the browser
   void addExtraWidget(QWidget *widget);
+  void addFitBrowserWidget(QWidget *widget, MantidQt::MantidWidgets::FunctionBrowser *functionBrowser);
   /// Set function externally
   void setFunction(const Mantid::API::IFunction_sptr func) override;
   /// Run a non-sequential fit
@@ -234,7 +235,7 @@ private:
   QDialog *m_groupWindow;
   QDialog *m_periodWindow;
   QDialog *m_comboWindow;
-
+  MantidQt::MantidWidgets::FunctionBrowser *m_functionBrowser;
   std::vector<std::string> m_groupsList;
 
   // stores if this is in multi fitting mode
