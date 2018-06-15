@@ -9,7 +9,6 @@
 from __future__ import (absolute_import, division, print_function)
 from mantiddoc.directives.base import AlgorithmBaseDirective, algorithm_name_and_version #pylint: disable=unused-import
 from sphinx.util.osutil import relative_uri
-import os
 import posixpath
 from six import iteritems, itervalues
 
@@ -20,7 +19,8 @@ CATEGORIES_DIR = "categories"
 # List of category names that are considered the index for everything in that type
 # When this category is encountered an additional index.html is written to both the
 # directory of the document and the category directory
-INDEX_CATEGORIES = ["Algorithms", "FitFunctions", "Concepts", "Techniques", "Interfaces"]
+INDEX_CATEGORIES = ["Algorithm Index", "FitFunctions", "Concepts", "Techniques", "Interfaces"]
+
 
 class LinkItem(object):
     """
@@ -76,6 +76,7 @@ class LinkItem(object):
 
 # endclass
 
+
 class PageRef(LinkItem):
     """
     Store details of a single page reference
@@ -85,6 +86,7 @@ class PageRef(LinkItem):
         super(PageRef, self).__init__(name, location)
 
 #endclass
+
 
 class Category(LinkItem):
     """
@@ -183,7 +185,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
         Returns:
           list: A list of strings containing the required categories
         """
-        category_list = ["Algorithms"]
+        category_list = ["Algorithm Index"]
         alg_cats = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version()).categories()
         for cat in alg_cats:
             # double up the category separators so they are not treated as escape characters
@@ -301,6 +303,7 @@ def to_unix_style_path(path):
 
 #---------------------------------------------------------------------------------
 
+
 def html_collect_pages(app):
     """
     Callback for the 'html-collect-pages' Sphinx event. Adds category
@@ -318,6 +321,7 @@ def html_collect_pages(app):
     for name, context, template in create_category_pages(app):
         yield (name, context, template)
 # enddef
+
 
 def create_category_pages(app):
     """
@@ -367,9 +371,36 @@ def create_category_pages(app):
             category_html_path_noext = posixpath.join(document_dir, 'index')
             context['outpath'] = category_html_path_noext + '.html'
             yield (category_html_path_noext, context, template)
-# enddef
 
+    #create a Top level category page
+    # Intitalise the lists
+    all_top_categories = []
+    top_context = {}
+    top_html_path_noext = ""
+    # If the category is a top catergory it will not contain "\\"
+    for top_name, top_category in iteritems(categories):
+        if "\\" not in top_name and top_category not in all_top_categories:
+            all_top_categories.append(top_category)
+
+        template = CATEGORY_PAGE_TEMPLATE
+        top_context["text_page"] = "algorithm_categories.html"
+        top_context["subcategories"] = sorted(all_top_categories, key = lambda x: x.name)
+        #top_html_path_noext = ""
+        # Set up the positions in the toc tree
+        top_category_html_dir = posixpath.join(top_category.name.lower(), 'categories')
+        top_document_dir = posixpath.dirname(top_category_html_dir)
+        top_category_html_path_noext = posixpath.join(top_document_dir, 'index')
+        top_context['outpath'] = "../" + top_category_html_path_noext + '.html'
+        top_context["pages"] = []
+        if top_category.name == "Algorithm Index":
+            top_context["title"] = top_category.name
+            top_html_dir = posixpath.join(top_category.name.lower(), 'Algorithms')
+            top_html_path_noext = posixpath.join(top_html_dir, 'Algorithms')
+
+        yield (top_html_path_noext, top_context, template)
+# enddef
 #-----------------------------------------------------------------------------------------------------------
+
 
 def purge_categories(app, env, docname):
     """
@@ -396,6 +427,8 @@ def purge_categories(app, env, docname):
             pages.remove(deadref)
 
 #------------------------------------------------------------------------------
+
+
 def setup(app):
     # Add categories directive
     app.add_directive('categories', CategoriesDirective)

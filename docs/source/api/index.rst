@@ -3,8 +3,9 @@
 =====
  API
 =====
+.. raw :: html
 
-The following subsections document the defined APIs for the Mantid libraries.
+    The following subsections document the defined APIs for the Mantid libraries.
 
 Bindings
 --------
