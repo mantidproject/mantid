@@ -615,8 +615,10 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.l("# calculate momentum transfer Q for sample data")
             self.l("rebinQ = '{:.3f}, {:.3f}, {:.3f}'"
                    .format(self.binQstart, self.binQstep, self.binQend))
-            self.l("{} = SofQW3({}, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei, ReplaceNaNs={})"
-                   .format(gDataBinQ, gLast, self.replaceNaNs))
+            self.l("{} = SofQW3({}, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei, ReplaceNaNs=False)"
+                   .format(gDataBinQ, gLast))
+            if self.replaceNaNs:
+                self.l("%s = ReplaceSpecialValues(%s, NaNValue=0, NaNError=1)" % (gDataBinQ, gDataBinQ))
             self.l()
             if self.saveSofQW:
                 self.save_wsgroup(gDataBinQ, "'_SQW'")
