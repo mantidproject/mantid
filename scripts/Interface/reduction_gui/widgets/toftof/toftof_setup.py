@@ -189,8 +189,7 @@ class TOFTOFSetupWidget(BaseWidget):
         box = QVBoxLayout()
         self._layout.addLayout(box)
 
-        box.addLayout(hbox(gbDataDir, gbPrefix))
-        box.addLayout(hbox(vbox(gbInputs, gbBinning, gbOptions, 1), vbox(gbData, gbSave)))
+        box.addLayout(hbox(vbox(gbDataDir, gbInputs, gbBinning, gbOptions, 1), vbox(gbPrefix, gbData, gbSave)))
 
         gbDataDir.setLayout(hbox(self.dataDir, self.btnDataDir))
         gbPrefix.setLayout(hbox(self.prefix,))
