@@ -134,6 +134,7 @@ void CreateTransmissionWorkspace2::exec() {
     stitch->execute();
     MatrixWorkspace_sptr outWS = stitch->getProperty("OutputWorkspace");
     setProperty("OutputWorkspace", outWS);
+    storeStitchedTransitionWorkspace(outWS);
   } else {
     setProperty("OutputWorkspace", firstTransWS);
   }
@@ -214,6 +215,19 @@ void CreateTransmissionWorkspace2::storeTransitionRun(int which,
     auto const name = TRANS_LAM_PREFIX + runNumber;
     AnalysisDataService::Instance().addOrReplace(name, ws);
   }
+}
+
+/** Store the stitched transition workspace run in ADS
+ * @param ws A workspace to store.
+ */
+void CreateTransmissionWorkspace2::storeStitchedTransitionWorkspace(API::MatrixWorkspace_sptr ws) {
+  if (m_firstTransmissionRunNumber.empty() || m_secondTransmissionRunNumber.empty()) {
+    return;
+  }
+  auto const &runNumbers =
+      m_firstTransmissionRunNumber + "_" + m_secondTransmissionRunNumber;
+
+  AnalysisDataService::Instance().addOrReplace(TRANS_LAM_PREFIX + runNumbers, ws);
 }
 
 } // namespace Algorithms

@@ -56,6 +56,8 @@ private:
   void getRunNumbers();
   /// Store a transition run in ADS
   void storeTransitionRun(int which, API::MatrixWorkspace_sptr ws);
+  /// Store the stitched transition workspace run in ADS
+  void storeStitchedTransitionWorkspace(API::MatrixWorkspace_sptr ws);
 
   std::string m_firstTransmissionRunNumber;
   std::string m_secondTransmissionRunNumber;

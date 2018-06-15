@@ -367,6 +367,11 @@ public:
     TS_ASSERT_EQUALS(secondLam->getAxis(0)->unit()->unitID(), "Wavelength");
     TS_ASSERT(secondLam->x(0).front() >= 3.0);
     TS_ASSERT(secondLam->x(0).back() <= 12.0);
+
+    MatrixWorkspace_sptr stitchedLam =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "TRANS_LAM_1234_4321");
+    TS_ASSERT(stitchedLam);
   }
 };
 
