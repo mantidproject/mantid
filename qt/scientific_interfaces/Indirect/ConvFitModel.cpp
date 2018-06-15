@@ -166,7 +166,9 @@ boost::optional<double> instrumentResolution(MatrixWorkspace_sptr workspace) {
       return analyser->getNumberParameter("resolution")[0];
     else
       return workspace->getInstrument()->getNumberParameter("resolution")[0];
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
+  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
+    return boost::none;
+  } catch (const std::invalid_argument &) {
     return boost::none;
   }
 }
@@ -489,8 +491,9 @@ void ConvFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
   if (m_resolution.size() < dataSize)
     m_resolution.emplace_back(MatrixWorkspace_sptr());
   else if (m_resolution.size() == dataSize &&
+           m_resolution[dataSize - 1].lock() &&
            m_extendedResolution.size() < dataSize)
-    addExtendedResolution(numberOfWorkspaces() - 1);
+    addExtendedResolution(dataSize - 1);
 }
 
 void ConvFitModel::removeWorkspace(std::size_t index) {
