@@ -618,7 +618,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.l("{} = SofQW3({}, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei, ReplaceNaNs=False)"
                    .format(gDataBinQ, gLast))
             if self.replaceNaNs:
-                self.l("%s = ReplaceSpecialValues(%s, NaNValue=0, NaNError=1)" % (gDataBinQ, gDataBinQ))
+                self.l("{} = ReplaceSpecialValues({}, NaNValue=0, NaNError=1)".format(gDataBinQ, gDataBinQ))
             self.l()
             if self.saveSofQW:
                 self.save_wsgroup(gDataBinQ, "'_SQW'")
