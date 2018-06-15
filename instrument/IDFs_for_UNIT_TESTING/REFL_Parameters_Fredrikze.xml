@@ -17,22 +17,22 @@
   </parameter>
 
   <parameter name="Pp" type="string">
-    <value val="0.991 0.992 0.993 0.994 0.995 0.996" />
+    <value val="0.9 0.9 0.9 0.9 0.9 0.9" />
     <description is="The values of the Pp efficiency."/>
   </parameter>
 
   <parameter name="Ap" type="string">
-    <value val="0.981 0.982 0.983 0.984 0.985 0.986" />
+    <value val="0.8 0.8 0.8 0.8 0.8 0.8" />
     <description is="The values of the Ap efficiency."/>
   </parameter>
 
   <parameter name="Rho" type="string">
-    <value val="0.971 0.972 0.973 0.974 0.975 0.976" />
+    <value val="0.778 0.778 0.778 0.778 0.778 0.778" />
     <description is="The values of the Rho efficiency."/>
   </parameter>
 
   <parameter name="Alpha" type="string">
-    <value val="0.961 0.962 0.963 0.964 0.965 0.966" />
+    <value val="0.75 0.75 0.75 0.75 0.75 0.75" />
     <description is="The values of the Alpha efficiency."/>
   </parameter>
 

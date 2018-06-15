@@ -643,7 +643,7 @@ ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
   Property *backgroundMinProperty =
       getProperty("MonitorBackgroundWavelengthMin");
   Property *backgroundMaxProperty =
-      getProperty("MonitorBackgroundWavelengthMin");
+      getProperty("MonitorBackgroundWavelengthMax");
   if (!monProperty->isDefault() && !backgroundMinProperty->isDefault() &&
       !backgroundMaxProperty->isDefault()) {
     const bool integratedMonitors =
