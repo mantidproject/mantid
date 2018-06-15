@@ -117,7 +117,7 @@ void ReflectometryReductionOneAuto2::setDefaultOutputWorkspaceNames() {
   auto const runNumber = getRunNumber(*ws);
   if (isDefault("OutputWorkspaceBinned")) {
     setPropertyValue("OutputWorkspaceBinned",
-                      OUTPUT_WORKSPACE_BINNED_DEFAULT_PREFIX + runNumber);
+                     OUTPUT_WORKSPACE_BINNED_DEFAULT_PREFIX + runNumber);
   }
   if (isDebug) {
     if (isDefault("OutputWorkspace")) {

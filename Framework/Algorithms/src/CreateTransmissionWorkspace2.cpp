@@ -220,14 +220,17 @@ void CreateTransmissionWorkspace2::storeTransitionRun(int which,
 /** Store the stitched transition workspace run in ADS
  * @param ws A workspace to store.
  */
-void CreateTransmissionWorkspace2::storeStitchedTransitionWorkspace(API::MatrixWorkspace_sptr ws) {
-  if (m_firstTransmissionRunNumber.empty() || m_secondTransmissionRunNumber.empty()) {
+void CreateTransmissionWorkspace2::storeStitchedTransitionWorkspace(
+    API::MatrixWorkspace_sptr ws) {
+  if (m_firstTransmissionRunNumber.empty() ||
+      m_secondTransmissionRunNumber.empty()) {
     return;
   }
   auto const &runNumbers =
       m_firstTransmissionRunNumber + "_" + m_secondTransmissionRunNumber;
 
-  AnalysisDataService::Instance().addOrReplace(TRANS_LAM_PREFIX + runNumbers, ws);
+  AnalysisDataService::Instance().addOrReplace(TRANS_LAM_PREFIX + runNumbers,
+                                               ws);
 }
 
 } // namespace Algorithms

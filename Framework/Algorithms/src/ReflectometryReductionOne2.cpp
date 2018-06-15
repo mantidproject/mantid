@@ -440,11 +440,11 @@ void ReflectometryReductionOne2::setDefaultOutputWorkspaceNames() {
   auto const runNumber = getRunNumber(*ws);
   if (isDefault("OutputWorkspace")) {
     setPropertyValue("OutputWorkspace",
-                      OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
+                     OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
   }
   if (isDebug && isDefault("OutputWorkspaceWavelength")) {
     setPropertyValue("OutputWorkspaceWavelength",
-                      OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX + runNumber);
+                     OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX + runNumber);
   }
 }
 
