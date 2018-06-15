@@ -78,7 +78,10 @@ createAxisFromRebinParams(const std::vector<double> &params,
       // Someone gave a 0-sized step! What a dope.
       throw std::runtime_error(
           "Invalid binning step provided! Can't creating binning axis.");
-    }
+	}
+	else if (!std::isfinite(xs)) {
+		throw std::runtime_error("An infinite or NaN value was found in the binning parameters.");
+	}
 
     if ((xcurr + xs * (1.0 + lastBinCoef)) <= fullParams[ibound]) {
       // If we can still fit current bin _plus_ specified portion of a last bin,
