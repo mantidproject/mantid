@@ -8,6 +8,7 @@ from mantid.kernel import *
 import mantid.simpleapi as mantid
 from testhelpers import run_algorithm
 
+
 class SaveGEMMAUDParamFileTest(unittest.TestCase):
 
     ALG_NAME = "SaveGEMMAUDParamFile"
@@ -18,10 +19,10 @@ class SaveGEMMAUDParamFileTest(unittest.TestCase):
                                     "SaveGEMMAUDParamFileTest_outputFile.maud")
 
     file_contents = None
-    
+
     def setUp(self):
-        focused_ws = mantid.Load(Filename=self.INPUT_FILE_NAME,
-                                 OutputWorkspace=self.INPUT_WS_NAME)
+        mantid.Load(Filename=self.INPUT_FILE_NAME,
+                    OutputWorkspace=self.INPUT_WS_NAME)
         run_algorithm(self.ALG_NAME,
                       InputWorkspace=self.INPUT_WS_NAME,
                       GSASParamFile=self.GSAS_PARAM_FILE,
@@ -44,7 +45,7 @@ class SaveGEMMAUDParamFileTest(unittest.TestCase):
 
     def _test_all_values_in_segment_equal(self, segment_header, val_to_match):
         self._test_file_segment_matches(segment_header, [val_to_match] * 4)
-            
+
     def _test_all_zeros(self, segment_header):
         self._test_all_values_in_segment_equal(segment_header, 0)
 
@@ -74,7 +75,7 @@ class SaveGEMMAUDParamFileTest(unittest.TestCase):
 
         # Function type, always 1
         self._test_all_values_in_segment_equal("_riet_par_TOF_function_type", 1)
-                                        
+
         # Profile coefficients for function 1, read from GSAS param file
         self._test_all_zeros("_riet_par_TOF_func1_alpha0")
         self._test_all_values_in_segment_equal("_riet_par_TOF_func1_alpha1", 0.16359)
