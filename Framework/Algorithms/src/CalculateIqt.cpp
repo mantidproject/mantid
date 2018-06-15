@@ -1,15 +1,19 @@
 #include "MantidAlgorithms/CalculateIqt.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/MersenneTwister.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+
+typedef std::function<MatrixWorkspace_sptr (MatrixWorkspace_sptr)> calculateIqtFunc;
 
 namespace {
   constexpr int DEFAULT_ITERATIONS = 10;
   constexpr int DEFAULT_SEED = 23021997;
 
-  MatrixWorkspace_sptr rebin(MatrixWorkspace_sptr workspace, std::string params) {
+  MatrixWorkspace_sptr rebin(MatrixWorkspace_sptr workspace, const std::string &params) {
     IAlgorithm_sptr rebinAlgorithm = AlgorithmManager::Instance().create("Rebin");
     rebinAlgorithm->setChild(true);
     rebinAlgorithm->initialize();
@@ -56,6 +60,23 @@ namespace {
     rebinAlgorithm->execute();
     return rebinAlgorithm->getProperty("OutputWorkspace");
   }
+
+  std::string createRebinString(double minimum, double maximum, double width) {
+    std::stringstream rebinStream;
+    rebinStream.precision(14);
+    rebinStream << minimum << ", " << width << ", " << maximum;
+    return rebinStream.str();
+  }
+
+  MatrixWorkspace_sptr randomizeYWithinError(MatrixWorkspace_sptr workspace,
+    const int seed, const int errorMin, const int errorMax) {
+    MersenneTwister rng(seed, errorMin, errorMax);
+    const double randomValue = rng.nextValue();
+    for (auto i = 0u; i < workspace->getNumberHistograms(); ++i) {
+      workspace->mutableY(i) += randomValue;
+      return workspace;
+    }
+  }
 }
 
 namespace Mantid {
@@ -97,31 +118,32 @@ void CalculateIqt::init() {
 }
 
 void CalculateIqt::exec() {
-  auto rebinString = rebinParamsAsString();
+  const auto rebinParams = rebinParamsAsString();
   const MatrixWorkspace_sptr sampleWorkspace = getProperty("InputWorkspace");
-  const MatrixWorkspace_sptr inputResolutionWorkspace = getProperty("ResolutionWorkspace");
-  const auto resolutionWorkspace = calculateIntermediateWorkspace(sampleWorkspace, rebinString);
-  auto outputWorkspace = calculateIqt(sampleWorkspace, resolutionWorkspace, rebinString);
+  MatrixWorkspace_sptr resolutionWorkspace = getProperty("ResolutionWorkspace");
+  resolutionWorkspace = normalizedFourierTransform(resolutionWorkspace, rebinParams);
+
+  //create function which only needs sampleWorkspace as input
+  calculateIqtFunc calculateIqtFunction = [this, resolutionWorkspace, &rebinParams](MatrixWorkspace_sptr workspace) {
+    return this->calculateIqt(workspace, resolutionWorkspace, rebinParams); };
+
+  monteCarloErrorCalculation(sampleWorkspace, calculateIqtFunction);
 }
 
 std::string CalculateIqt::rebinParamsAsString() {
   const double e_min = getProperty("EnergyMin");
   const double e_max = getProperty("EnergyMax");
   const double e_width = getProperty("EnergyWidth");
-
-  std::stringstream rebinStream;
-  rebinStream.precision(14);
-  rebinStream << e_min << ", " << e_width << ", " << e_max;
-  std::string rebinString = rebinStream.str();
+  return createRebinString(e_min, e_max, e_width);
 }
 
 MatrixWorkspace_sptr CalculateIqt::calculateIqt(MatrixWorkspace_sptr workspace,
-  MatrixWorkspace_sptr resolutionWorkspace, std::string rebinParams) {
-  workspace = calculateIntermediateWorkspace(workspace, rebinParams);
+  MatrixWorkspace_sptr resolutionWorkspace, const std::string &rebinParams) {
+  workspace = normalizedFourierTransform(workspace, rebinParams);
   return divide(workspace, resolutionWorkspace);
 }
 
-MatrixWorkspace_sptr CalculateIqt::calculateIntermediateWorkspace(MatrixWorkspace_sptr workspace, std::string rebinParams) {
+MatrixWorkspace_sptr CalculateIqt::normalizedFourierTransform(MatrixWorkspace_sptr workspace, const std::string &rebinParams) {
   workspace = rebin(workspace, rebinParams);
   auto workspace_int = integration(workspace);
   workspace = convertToPointData(workspace);
@@ -129,6 +151,26 @@ MatrixWorkspace_sptr CalculateIqt::calculateIntermediateWorkspace(MatrixWorkspac
   workspace = divide(workspace, workspace_int);
   return workspace;
 }
+
+void CalculateIqt::monteCarloErrorCalculation(MatrixWorkspace_sptr sample, 
+  const calculateIqtFunc &calculateIqtFunction) {
+  auto outputWorkspace = calculateIqtFunction(sample);
+  const unsigned int nIterations = getProperty("NumberOfIterations");
+  const unsigned int seed = getProperty("SeedValue");
+  const int energyMax = getProperty("EnergyMax");
+  const int energyMin = getProperty("EnergyMin");
+  std::vector<MatrixWorkspace_sptr> simulatedWorkspaces;
+  simulatedWorkspaces.reserve(nIterations);
+  simulatedWorkspaces.emplace_back(outputWorkspace);
+
+  for (auto i = 0u; i < nIterations - 1; ++i) {
+    auto simulatedWorkspace = randomizeYWithinError(sample->clone(), seed, energyMin, energyMax);
+    simulatedWorkspace = calculateIqtFunction(simulatedWorkspace);
+    simulatedWorkspaces.emplace_back(simulatedWorkspace);
+  }
+
+}
+
 
 std::map<std::string, std::string> CalculateIqt::validateInputs() {
   std::map<std::string, std::string> emptyMap;

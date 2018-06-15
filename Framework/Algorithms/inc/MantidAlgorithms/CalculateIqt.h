@@ -40,9 +40,13 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
   std::string rebinParamsAsString();
-  API::MatrixWorkspace_sptr calculateIntermediateWorkspace(API::MatrixWorkspace_sptr workspace, std::string rebinParams);
+  API::MatrixWorkspace_sptr normalizedFourierTransform(API::MatrixWorkspace_sptr workspace, const std::string &rebinParams);
   API::MatrixWorkspace_sptr calculateIqt(API::MatrixWorkspace_sptr workspace, 
-    API::MatrixWorkspace_sptr resolutionWorkspace, std::string rebinParams);
+    API::MatrixWorkspace_sptr resolutionWorkspace, const std::string &rebinParams);
+  void CalculateIqt::monteCarloErrorCalculation(API::MatrixWorkspace_sptr sample,
+    const calculateIqtFunc &calculateIqtFunction);
+  API::MatrixWorkspace_sptr randomizeYWithinError(API::MatrixWorkspace_sptr workspace, 
+    const int seed, const int errorMin, const int errorMax);
 
 };
 
