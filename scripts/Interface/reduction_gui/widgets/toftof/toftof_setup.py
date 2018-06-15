@@ -9,6 +9,7 @@ from PyQt4.QtGui  import *
 
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement
+from reduction_gui.widgets.data_table_view import DataTableView
 
 #-------------------------------------------------------------------------------
 
@@ -16,131 +17,6 @@ from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement
 class TOFTOFSetupWidget(BaseWidget):
     ''' The one and only tab page. '''
     name = 'TOFTOF Reduction'
-
-    class DataRunModel(QAbstractTableModel):
-        ''' The list of data runs and corresponding comments. '''
-
-        def __init__(self, parent):
-            QAbstractTableModel.__init__(self, parent)
-            self.dataRuns = [] # [(runs, comment), ...]
-
-        def _numRows(self):
-            return len(self.dataRuns)
-
-        def _getRow(self, row):
-            return self.dataRuns[row] if row < self._numRows() else ('', '')
-
-        def _isRowEmpty(self, row):
-            (runs, comment) = self._getRow(row)
-            return not runs.strip() and not comment.strip()
-
-        def _removeTrailingEmptyRows(self):
-            for row in reversed(range(self._numRows())):
-                if self._isRowEmpty(row):
-                    del self.dataRuns[row]
-                else:
-                    break
-
-        def _removeEmptyRows(self):
-            for row in reversed(range(self._numRows())):
-                if self._isRowEmpty(row):
-                    del self.dataRuns[row]
-
-        def _ensureHasRows(self, numRows):
-            while self._numRows() < numRows:
-                self.dataRuns.append(('', ''))
-
-        def _setCellText(self, row, col, text):
-            self._ensureHasRows(row + 1)
-            (runText, comment) = self.dataRuns[row]
-
-            text = text.strip()
-            if col == 0:
-                runText = text
-            else:
-                comment = text
-
-            self.dataRuns[row] = (runText, comment)
-
-        def _getCellText(self, row, col):
-            return self._getRow(row)[col].strip()
-
-        # reimplemented QAbstractTableModel methods
-
-        headers    = ('Data runs', 'Comment')
-        selectCell = pyqtSignal(QModelIndex)
-
-        def emptyCells(self, indexes):
-            for index in indexes:
-                row = index.row()
-                col = index.column()
-
-                self._setCellText(row, col, '')
-
-            self._removeEmptyRows()
-            self.reset()
-            # indexes is never empty
-            self.selectCell.emit(indexes[0])
-
-        def rowCount(self, _ = QModelIndex()):
-            # one additional row for new data
-            return self._numRows() + 1
-
-        def columnCount(self, _ = QModelIndex()):
-            return 2
-
-        def headerData(self, section, orientation, role):
-            if Qt.Horizontal == orientation and Qt.DisplayRole == role:
-                return self.headers[section]
-
-            return None
-
-        def data(self, index, role):
-            if Qt.DisplayRole == role or Qt.EditRole == role:
-                return self._getCellText(index.row(), index.column())
-
-            return None
-
-        def setData(self, index, text, _):
-            row = index.row()
-            col = index.column()
-
-            self._setCellText(row, col, text)
-            self._removeTrailingEmptyRows()
-
-            # signal the attached view
-            self.reset()
-
-            # move selection to the next column or row
-            col = col + 1
-
-            if col >= 2:
-                row = row + 1
-                col = 0
-
-            row = min(row, self.rowCount() - 1)
-
-            self.selectCell.emit(self.index(row, col))
-
-            return True
-
-        def flags(self, _):
-            return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
-
-    class DataRunView(QTableView):
-
-        def keyPressEvent(self, QKeyEvent):
-            if self.state() == QAbstractItemView.EditingState:
-                index = self.currentIndex()
-                if QKeyEvent.key() in [Qt.Key_Down, Qt.Key_Up]:
-                    self.setFocus()
-                    self.setCurrentIndex(self.model().index(index.row(), index.column()))
-                else:
-                    QTableView.keyPressEvent(self, QKeyEvent)
-            if QKeyEvent.key() in [Qt.Key_Delete, Qt.Key_Backspace]:
-                self.model().emptyCells(self.selectedIndexes())
-            else:
-                QTableView.keyPressEvent(self, QKeyEvent)
 
     # tooltips
     TIP_prefix  = ''
@@ -244,12 +120,12 @@ class TOFTOFSetupWidget(BaseWidget):
 
         self.maskDetectors = tip(QLineEdit(), self.TIP_maskDetectors)
 
-        self.dataRunsView  = tip(self.DataRunView(self), self.TIP_dataRunsView)
+        headers = ('Data runs', 'Comment')
+        self.dataRunsView  = tip(DataTableView(self, headers), self.TIP_dataRunsView)
         self.dataRunsView.horizontalHeader().setStretchLastSection(True)
         self.dataRunsView.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
-        self.runDataModel = TOFTOFSetupWidget.DataRunModel(self)
-        self.dataRunsView.setModel(self.runDataModel)
+        self.runDataModel = self.dataRunsView.model()
 
         # ui controls
         self.btnDataDir          = tip(QPushButton('Browse'), self.TIP_btnDataDir)
@@ -448,7 +324,7 @@ class TOFTOFSetupWidget(BaseWidget):
         elem.ecRuns        = line_text(self.ecRuns)
         elem.ecFactor      = self.ecFactor.value()
 
-        elem.dataRuns      = self.runDataModel.dataRuns
+        elem.dataRuns      = self.runDataModel.tableData
 
         elem.binEon        = self.binEon.isChecked()
         elem.binEstart     = self.binEstart.value()
@@ -496,7 +372,7 @@ class TOFTOFSetupWidget(BaseWidget):
         self.ecRuns.setText(elem.ecRuns)
         self.ecFactor.setValue(elem.ecFactor)
 
-        self.runDataModel.dataRuns = elem.dataRuns
+        self.runDataModel.tableData = elem.dataRuns
         self.runDataModel.reset()
 
         self.binEon.setChecked(elem.binEon)
