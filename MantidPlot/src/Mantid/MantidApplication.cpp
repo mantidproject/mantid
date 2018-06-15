@@ -57,6 +57,8 @@ void MantidApplication::errorHandling(bool continueWork, int share,
 bool MantidApplication::notify(QObject *receiver, QEvent *event) {
   bool res = false;
   bool error = false;
+  bool known_exception = false;
+  std::string unexpected_exception;
   try {
     res = QApplication::notify(receiver, event);
   } catch (std::exception &e) {
@@ -71,18 +73,48 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
 
     g_log.fatal() << "Unexpected exception: " << e.what() << "\n";
     error = true;
+    known_exception = true;
+    unexpected_exception = e.what();
   } catch (...) {
 
     g_log.fatal() << "Unknown exception\n";
     error = true;
   }
 
-  if (error) {
-    QString pythonCode("from ErrorReporter.errorreport import "
-                       "CrashReportPage\npage = "
-                       "CrashReportPage()\npage.show()");
+  if (error && Mantid::Kernel::UsageService::Instance().isEnabled()) {
+    QString pythonCode("from ErrorReporter.error_report_presenter import "
+                       "ErrorReporterPresenter"
+                       "\nfrom ErrorReporter.errorreport import CrashReportPage"
+                       "\npage = CrashReportPage(show_continue_terminate=True)"
+                       "\npresenter = ErrorReporterPresenter(page, '')");
 
     emit runAsPythonScript(pythonCode);
+  } else if (error) {
+    QMessageBox ask;
+    QAbstractButton *terminateButton =
+        ask.addButton(tr("Terminate"), QMessageBox::ActionRole);
+    ask.addButton(tr("Continue"), QMessageBox::ActionRole);
+    if (known_exception) {
+      ask.setText(
+          "Sorry, MantidPlot has caught an unexpected exception:\n\n" +
+          QString::fromStdString(unexpected_exception) +
+          "\n\nWould you like to terminate MantidPlot or try to continue "
+          "working?\nIf you choose to continue it is advisable to save "
+          "your data and restart the application.");
+    } else {
+      ask.setText(
+          "Sorry, MantidPlot has caught an unknown exception"
+          "\n\nWould you like to terminate MantidPlot or try to continue "
+          "working?\nIf you choose to continue it is advisable to save "
+          "your data and restart the application.");
+    }
+    ask.setIcon(QMessageBox::Critical);
+    ask.exec();
+    if (ask.clickedButton() == terminateButton) {
+      g_log.fatal("Terminated by user.");
+      quit();
+    } else
+      g_log.fatal("Continue working.");
   }
 
   return res;

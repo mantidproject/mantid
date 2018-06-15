@@ -5,6 +5,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/make_unique.h"
 
@@ -54,9 +55,33 @@ std::string generateBankHeader(int bank, int minT, size_t numberBins,
   return stream.str();
 }
 
+boost::optional<std::vector<std::string>>
+getParamLinesFromGSASFile(const std::string &paramsFilename) {
+  std::ifstream paramsFile;
+  paramsFile.open(paramsFilename);
+
+  if (paramsFile.is_open()) {
+    std::vector<std::string> paramLines;
+    std::string line;
+    while (std::getline(paramsFile, line)) {
+      if (line.find("ICONS") != std::string::npos) {
+        paramLines.emplace_back(line);
+      }
+    }
+    return paramLines;
+  } else {
+    return boost::none;
+  }
+}
+
 } // anonymous namespace
 
 DECLARE_ALGORITHM(SaveGDA)
+
+SaveGDA::CalibrationParams::CalibrationParams(const double _difa,
+                                              const double _difc,
+                                              const double _tzero)
+    : difa(_difa), difc(_difc), tzero(_tzero) {}
 
 const std::string SaveGDA::name() const { return "SaveGDA"; }
 
@@ -67,16 +92,20 @@ const std::string SaveGDA::summary() const {
 int SaveGDA::version() const { return 1; }
 
 const std::vector<std::string> SaveGDA::seeAlso() const {
-  return {"SaveBankScatteringAngles", "SaveGSS", "SaveFocusedXYE"};
+  return {"SaveBankScatteringAngles", "AlignDetectors"};
 }
 
 const std::string SaveGDA::category() const {
   return "DataHandling\\Text;Diffraction\\DataHandling";
 }
 
-const std::string SaveGDA::PROP_FILENAME = "Filename";
+const std::string SaveGDA::PROP_OUTPUT_FILENAME = "Filename";
 
 const std::string SaveGDA::PROP_INPUT_WS = "InputWorkspace";
+
+const std::string SaveGDA::PROP_PARAMS_FILENAME = "GSASParamFile";
+
+const std::string SaveGDA::PROP_GROUPING_SCHEME = "GroupingScheme";
 
 void SaveGDA::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
@@ -85,14 +114,27 @@ void SaveGDA::init() {
                   "single-spectra focused run corresponding to a particular "
                   "bank");
 
-  const static std::vector<std::string> exts{".gda"};
-  declareProperty(Kernel::make_unique<FileProperty>(PROP_FILENAME, "",
-                                                    FileProperty::Save, exts),
+  const static std::vector<std::string> outExts{".gda"};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      PROP_OUTPUT_FILENAME, "", FileProperty::Save, outExts),
                   "The name of the file to save to");
+
+  const static std::vector<std::string> paramsExts{".ipf", ".prm", ".parm",
+                                                   ".iprm"};
+  declareProperty(
+      Kernel::make_unique<FileProperty>(PROP_PARAMS_FILENAME, "",
+                                        FileProperty::Load, paramsExts),
+      "GSAS calibration file containing conversion factors from D to TOF");
+
+  declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<int>>(PROP_GROUPING_SCHEME),
+      "An array of bank IDs, where the value at element i is the "
+      "ID of the bank in " +
+          PROP_PARAMS_FILENAME + " to associate spectrum i with");
 }
 
 void SaveGDA::exec() {
-  const std::string filename = getProperty(PROP_FILENAME);
+  const std::string filename = getProperty(PROP_OUTPUT_FILENAME);
   std::ofstream outFile(filename.c_str());
 
   if (!outFile) {
@@ -103,22 +145,32 @@ void SaveGDA::exec() {
 
   const API::WorkspaceGroup_sptr inputWS = getProperty(PROP_INPUT_WS);
   const auto numBanks = inputWS->getNumberOfEntries();
+  const auto calibParams = parseParamsFile();
+  const std::vector<int> groupingScheme = getProperty(PROP_GROUPING_SCHEME);
+
   for (int i = 0; i < numBanks; ++i) {
     const auto ws = inputWS->getItem(i);
     const auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
 
-    const auto &tof = matrixWS->x(0);
+    const auto &d = matrixWS->x(0);
+    const auto &bankCalibParams = calibParams[groupingScheme[i] - 1];
+
     std::vector<double> tofScaled;
-    tofScaled.reserve(tof.size());
-    std::transform(tof.begin(), tof.end(), std::back_inserter(tofScaled),
-                   [](const double t) { return t * 32; });
+    tofScaled.reserve(d.size());
+    std::transform(d.begin(), d.end(), std::back_inserter(tofScaled),
+                   [&bankCalibParams](const double dVal) {
+                     return (dVal * bankCalibParams.difa +
+                             dVal * dVal * bankCalibParams.difc +
+                             bankCalibParams.tzero) *
+                            32;
+                   });
+    const auto averageDeltaTByT = computeAverageDeltaTByT(tofScaled);
 
     const auto &intensity = matrixWS->y(0);
     const auto &error = matrixWS->e(0);
     const auto numPoints =
         std::min({tofScaled.size(), intensity.size(), error.size()});
 
-    const auto averageDeltaTByT = computeAverageDeltaTByT(tof);
     const auto header =
         generateBankHeader(numBanks - i, (int)std::round(tofScaled[0]),
                            numPoints, averageDeltaTByT);
@@ -154,11 +206,11 @@ std::map<std::string, std::string> SaveGDA::validateInputs() {
                        " has the wrong number of histograms. It "
                        "should contain data for a single focused "
                        "spectra";
-      } else if (matrixWS->getAxis(0)->unit()->unitID() != "TOF") {
+      } else if (matrixWS->getAxis(0)->unit()->unitID() != "dSpacing") {
         inputWSIssue = "The workspace " + matrixWS->getName() +
                        " has incorrect units. SaveGDA "
                        "expects input workspaces with "
-                       "units of TOF";
+                       "units of D-spacing";
       }
     } else { // not matrixWS
       inputWSIssue = "The workspace " + ws->getName() +
@@ -168,7 +220,40 @@ std::map<std::string, std::string> SaveGDA::validateInputs() {
   if (inputWSIssue) {
     issues[PROP_INPUT_WS] = *inputWSIssue;
   }
+
+  const std::vector<int> groupingScheme = getProperty(PROP_GROUPING_SCHEME);
+  const auto numSpectraInGroupingScheme = groupingScheme.size();
+  const auto numSpectraInWS =
+      static_cast<size_t>(inputWS->getNumberOfEntries());
+  if (numSpectraInGroupingScheme != numSpectraInWS) {
+    issues[PROP_GROUPING_SCHEME] =
+        "The grouping scheme must contain one entry for every focused spectrum "
+        "in the input workspace. " +
+        PROP_GROUPING_SCHEME + " has " +
+        std::to_string(numSpectraInGroupingScheme) + " entries whereas " +
+        PROP_INPUT_WS + " has " + std::to_string(numSpectraInWS);
+  }
+
   return issues;
+}
+
+std::vector<SaveGDA::CalibrationParams> SaveGDA::parseParamsFile() const {
+  const std::string paramsFilename = getProperty(PROP_PARAMS_FILENAME);
+  const auto paramLines = getParamLinesFromGSASFile(paramsFilename);
+  if (!paramLines) {
+    g_log.error(strerror(errno));
+    throw Kernel::Exception::FileError("Could not read GSAS parameter file",
+                                       paramsFilename);
+  }
+  std::vector<CalibrationParams> calibParams;
+  for (const auto &paramLine : *paramLines) {
+    std::vector<std::string> lineItems;
+    boost::algorithm::split(lineItems, paramLine, boost::is_any_of("\t "),
+                            boost::token_compress_on);
+    calibParams.emplace_back(std::stod(lineItems[3]), std::stod(lineItems[4]),
+                             std::stod(lineItems[5]));
+  }
+  return calibParams;
 }
 
 } // DataHandling

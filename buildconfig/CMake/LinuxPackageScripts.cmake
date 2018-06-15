@@ -149,6 +149,7 @@ endif ()
 
 if (ENABLE_MANTIDPLOT)
   set ( MANTIDPLOT_EXEC MantidPlot )
+  set ( SCRIPTSDIR ${CMAKE_HOME_DIRECTORY}/scripts)
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
                    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh @ONLY )
   # Needs to be executable
@@ -177,6 +178,7 @@ endif ()
 
 if (ENABLE_MANTIDPLOT)
   set ( MANTIDPLOT_EXEC MantidPlot_exe )
+  set ( SCRIPTSDIR "\${INSTALLDIR}/../scripts")
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
                    ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install @ONLY )
   install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install

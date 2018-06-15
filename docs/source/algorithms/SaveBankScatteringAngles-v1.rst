@@ -30,19 +30,20 @@ Usage
 .. testcode:: SaveBankScatteringAngles
 
    import os
-  
-   input_ws = Load("ENGINX_277208_focused_bank_2.nxs")
-   group = GroupWorkspaces(InputWorkspaces=[input_ws])
+
+   # Banks 1 to 4 of a previous texture focus in isis_powder
+   # We don't use the full 160 banks as the test becomes too slow
+   input_group = Load("GEM61785_D_texture_banks_1_to_4.nxs")
 
    output_file = os.path.join(config["defaultsave.directory"], "grouping.new")
-
-   SaveBankScatteringAngles(InputWorkspace=group, Filename=output_file)
+   SaveBankScatteringAngles(InputWorkspace=input_group, Filename=output_file)
 
    with open(output_file) as f:
-       contents = f.read().split("\n")
+       contents = f.read().rstrip().split("\n")
 
-   print("File contents (there is only one line as we only bothered saving one spectra):")
-   print(contents[0])
+   print("File contents:")
+   for line in contents:
+       print(line)
 
 .. testcleanup:: SaveBankScatteringAngles
 
@@ -52,6 +53,8 @@ Output:
        
 .. testoutput:: SaveBankScatteringAngles
 
-   File contents (there is only one line as we only bothered saving one spectra):
-   bank :    0  group:     1201    89.9396035211    180.0000000000
-		
+    File contents:
+    bank :    0  group:     4    9.1216000000    0.0000000000
+    bank :    1  group:     5    8.1558400000    30.0000000000
+    bank :    2  group:     6    8.0351679921    150.0000000000
+    bank :    3  group:     7    9.0611418426    180.0000000000

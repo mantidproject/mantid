@@ -13,8 +13,7 @@
 namespace {
 
 double radToDeg(const double rad) {
-  const static double PI = 4 * atan(1.0);
-  const static double radToDegFactor = 180 / PI;
+  const double radToDegFactor = 180 / M_PI;
   return rad * radToDegFactor;
 }
 } // anonymous namespace
@@ -67,6 +66,7 @@ void SaveBankScatteringAngles::exec() {
   std::ofstream outFile(filename.c_str());
 
   if (!outFile) {
+    g_log.error(strerror(errno));
     throw Kernel::Exception::FileError("Unable to create file: ", filename);
   }
 
@@ -95,6 +95,11 @@ void SaveBankScatteringAngles::exec() {
   }
 
   outFile.close();
+
+  if (outFile.fail()) {
+    g_log.error(strerror(errno));
+    throw Kernel::Exception::FileError("Failed to save file", filename);
+  }
 }
 
 std::map<std::string, std::string> SaveBankScatteringAngles::validateInputs() {

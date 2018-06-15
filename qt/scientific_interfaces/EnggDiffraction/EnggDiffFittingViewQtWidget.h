@@ -1,10 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEWQTWIDGET_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEWQTWIDGET_H_
 
-#include "MantidAPI/IPeakFunction.h"
 #include "DllConfig.h"
 #include "IEnggDiffFittingPresenter.h"
 #include "IEnggDiffFittingView.h"
+#include "MantidAPI/IPeakFunction.h"
 
 #include "ui_EnggDiffractionQtTabFitting.h"
 
@@ -124,14 +124,6 @@ public:
 
   void setFittingRunNumVec(std::vector<std::string> assignVec) override;
 
-  bool getFittingMultiRunMode() override;
-
-  void setFittingMultiRunMode(bool mode) override;
-
-  bool getFittingSingleRunMode() override;
-
-  void setFittingSingleRunMode(bool mode) override;
-
   double getPeakCentre() const override;
 
   bool peakPickerEnabled() const override;
@@ -173,7 +165,6 @@ signals:
 private slots:
   // slot of the fitting peaks per part of the interface
   void browseFitFocusedRun();
-  void resetFittingMode();
   void setPeakPick();
   void clearPeakList();
   void loadClicked();
@@ -205,12 +196,6 @@ private:
   static const std::string g_settingsGroup;
 
   static const std::string g_peaksListExt;
-
-  /// indentifier for fitting multi-run or single run input
-  static bool m_fittingMutliRunMode;
-
-  /// indentifier for fitting multi-run or single run input
-  static bool m_fittingSingleRunMode;
 
   // vector holding directory of focused bank file
   static std::vector<std::string> m_fitting_runno_dir_vec;

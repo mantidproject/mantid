@@ -113,6 +113,4 @@ private:
   }
 };
 
-#include <cxxtest/TestSuite.h>
-
 #endif // MANTID_DATAHANDLING_SAVEBANKSCATTERINGANGLESTEST_H_

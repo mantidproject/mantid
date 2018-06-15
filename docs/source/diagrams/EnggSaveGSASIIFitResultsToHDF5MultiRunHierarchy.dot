@@ -1,0 +1,26 @@
+graph {
+      file[label="123456-123457.hdf5" shape="box"];
+
+      run1[label="Run 123456" shape="box"];
+      run2[label="Run 123457" shape="box"];
+
+      bank1[label="Bank 1" shape="box"];
+      fitgroup1[label="GSAS-II Fitting" shape="box"];
+      latticeparams1[label="Lattice Parameters" shape="box"];
+      profcoeffs1[label="Profile Coefficients" shape="box"];
+      refineparams1[label="Refinement Parameters" shape="box"];
+      rwp1[label="Rwp" shape="box"];
+
+      bank2[label="Bank 2" shape="box"];
+      fitgroup2[label="Fit results, as for Bank 1" shape="box"];
+
+      bank3[label="Bank 1" shape="box"];
+      fitgroup3[label="Fit results, as for 123456" shape="box"];
+
+      file -- run1 -- bank1 -- fitgroup1 -- latticeparams1;
+                               fitgroup1 -- profcoeffs1;
+			       fitgroup1 -- refineparams1;
+			       fitgroup1 -- rwp1;
+	      run1 -- bank2 -- fitgroup2;
+      file -- run2 -- bank3 -- fitgroup3;
+}
