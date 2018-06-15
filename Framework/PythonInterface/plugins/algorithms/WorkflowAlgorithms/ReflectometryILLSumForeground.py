@@ -3,10 +3,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direction, IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty,
-                           Property, StringListValidator)
+from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayLengthValidator, FloatArrayProperty,
+                           IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, Property, StringListValidator)
 from mantid.simpleapi import (AddSampleLog, ConvertToDistribution, CreateWorkspace, Divide, ExtractSingleSpectrum, Multiply,
-                              RebinToWorkspace)
+                              RebinToWorkspace, ReflectometrySumInQ)
 import numpy
 import ReflectometryILL_common as common
 from scipy import constants
@@ -20,6 +20,7 @@ class Prop:
     OUTPUT_WS = 'OutputWorkspace'
     SUBALG_LOGGING = 'SubalgorithmLogging'
     SUM_TYPE = 'SummationType'
+    WAVELENGTH_RANGE = 'WavelengthRange'
 
 
 class SumType:
@@ -67,9 +68,12 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         sumType = self._sumType()
         if sumType == SumType.IN_LAMBDA:
             ws = self._sumForegroundInLambda(ws)
-            ws = self._reflectivity(ws)
+            ws = self._divideByDirect(ws)
+            self._addSumTypeToLogs(ws, SumType.IN_LAMBDA)
         else:
-            raise RuntimeError('Summation in Q is not yet supported.')
+            ws = self._divideByDirect(ws)
+            ws = self._sumForegroundInQ(ws)
+            self._addSumTypeToLogs(ws, SumType.IN_Q)
 
         self._finalize(ws)
 
@@ -80,6 +84,11 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         nonnegativeInts = IntArrayBoundedValidator()
         nonnegativeInts.setLower(0)
         threeNonnegativeInts.add(nonnegativeInts)
+        nonnegativeFloatArray = FloatArrayBoundedValidator()
+        nonnegativeFloatArray.setLower(0.)
+        twoNonnegativeFloats = CompositeValidator()
+        twoNonnegativeFloats.add(FloatArrayLengthValidator(length=2))
+        twoNonnegativeFloats.add(nonnegativeFloatArray)
 
         self.declareProperty(MatrixWorkspaceProperty(Prop.INPUT_WS,
                                                      defaultValue='',
@@ -112,6 +121,31 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                                               values=[Property.EMPTY_INT, Property.EMPTY_INT, Property.EMPTY_INT],
                                               validator=threeNonnegativeInts),
                              doc='A three element array of foreground start, centre and end workspace indices.')
+        self.declareProperty(FloatArrayProperty(Prop.WAVELENGTH_RANGE,
+                                                values=[0, Property.EMPTY_DBL],
+                                                validator=twoNonnegativeFloats),
+                             doc='The wavelength bounds when summing in Q.')
+
+    def validateInputs(self):
+        """Validate the algorithm's input properties."""
+        issues = dict()
+        if self.getProperty(Prop.SUM_TYPE).value == SumType.IN_Q:
+            if self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
+                issues[Prop.DIRECT_FOREGROUND_WS] = 'Direct foreground workspace is needed for summing in Q.'
+        if not self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
+            directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
+            if directWS.getNumberHistograms() != 1:
+                issues[Prop.DIRECT_FOREGROUND_WS] = 'The workspace has histograms != 1. Was foreground summation forgotten?'
+        return issues
+
+    def _addSumTypeToLogs(self, ws, sumType):
+        """Add a sum type entry to sample logs."""
+        AddSampleLog(
+            Workspace=ws,
+            LogName=common.SampleLogs.SUM_TYPE,
+            LogText=sumType,
+            LogType='String',
+            EnableLogging=self._subalgLogging)
 
     def _correctForChopperOpenings(self, ws, directWS):
         """Correct reflectivity values if chopper openings between RB and DB differ."""
@@ -144,6 +178,28 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         self._cleanup.cleanup(ws)
         return correctedWS
 
+    def _divideByDirect(self, ws):
+        "Divide ws by the direct beam."
+        if self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
+            return ws
+        directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
+        rebinnedWSName = self._names.withSuffix('rebinned')
+        rebinnedWS = RebinToWorkspace(WorkspaceToRebin=ws,
+                                      WorkspaceToMatch=directWS,
+                                      OutputWorkspace=rebinnedWSName,
+                                      EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(ws)
+        reflectivityWSName = self._names.withSuffix('reflectivity')
+        reflectivityWS = Divide(LHSWorkspace=rebinnedWS,
+                                RHSWorkspace=directWS,
+                                OutputWorkspace=reflectivityWSName,
+                                EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(rebinnedWS)
+        reflectivityWS = self._correctForChopperOpenings(reflectivityWS, directWS)
+        reflectivityWS.setYUnit('Reflectivity')
+        reflectivityWS.setYUnitLabel('Reflectivity')
+        return reflectivityWS
+
     def _finalize(self, ws):
         """Set OutputWorkspace to ws and clean up."""
         self.setProperty(Prop.OUTPUT_WS, ws)
@@ -173,28 +229,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         self._cleanup.protect(ws)
         return ws
 
-    def _reflectivity(self, ws):
-        "Divide ws by the direct beam."
-        if self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
-            return ws
-        directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
-        rebinnedDirectWSName = self._names.withSuffix('rebinned')
-        rebinnedDirectWS = RebinToWorkspace(WorkspaceToRebin=directWS,
-                                            WorkspaceToMatch=ws,
-                                            OutputWorkspace=rebinnedDirectWSName,
-                                            EnableLogging=self._subalgLogging)
-        reflectivityWSName = self._names.withSuffix('reflectivity')
-        reflectivityWS = Divide(LHSWorkspace=ws,
-                                RHSWorkspace=rebinnedDirectWS,
-                                OutputWorkspace=reflectivityWSName,
-                                EnableLogging=self._subalgLogging)
-        self._cleanup.cleanup(rebinnedDirectWS)
-        self._cleanup.cleanup(ws)
-        reflectivityWS = self._correctForChopperOpenings(reflectivityWS, directWS)
-        reflectivityWS.setYUnit('Reflectivity')
-        reflectivityWS.setYUnitLabel('Reflectivity')
-        return reflectivityWS
-
     def _sumForegroundInLambda(self, ws):
         """Sum the foreground region into a single histogram."""
         foreground = self._foregroundIndices(ws)
@@ -220,15 +254,29 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             foregroundEs += es**2
         numpy.sqrt(foregroundEs, out=foregroundEs)
         self._cleanup.cleanup(ws)
-        AddSampleLog(
-            Workspace=foregroundWS,
-            LogName=common.SampleLogs.SUM_TYPE,
-            LogText=SumType.IN_LAMBDA,
-            LogType='String',
-            EnableLogging=self._subalgLogging)
-        ConvertToDistribution(Workspace=foregroundWS,
-                              EnableLogging=self._subalgLogging)
         return foregroundWS
+
+    def _sumForegroundInQ(self, ws):
+        """Sum the foreground region into a single histogram using the coherent method."""
+        foreground = self._foregroundIndices(ws)
+        sumIndices = [i for i in range(foreground[0], foreground[2] + 1)]
+        beamPosIndex = foreground[1]
+        wavelengthLimits = self.getProperty(Prop.WAVELENGTH_RANGE).value
+        if self.getProperty(Prop.WAVELENGTH_RANGE).isDefault:
+            Xs = ws.readX(beamPosIndex)
+            wavelengthLimits[0] = Xs[0]
+            wavelengthLimits[1] = Xs[-1]
+        sumWSName = self._names.withSuffix('summed_in_Q')
+        sumWS = ReflectometrySumInQ(
+            InputWorkspace=ws,
+            OutputWorkspace=sumWSName,
+            InputWorkspaceIndexSet=sumIndices,
+            BeamCentre=beamPosIndex,
+            WavelengthMin=wavelengthLimits[0],
+            WavelengthMax=wavelengthLimits[1],
+            EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(ws)
+        return sumWS
 
     def _sumType(self):
         return self.getProperty(Prop.SUM_TYPE).value
