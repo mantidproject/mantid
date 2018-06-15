@@ -74,7 +74,7 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
         with open(self.getProperty(self.PROP_OUTPUT_FILE).value, "w") as output_file:
             output_file.write(template.format(gsas_prm_file=gsas_filename,
                                               inst_counter_bank="Bank1",
-                                              bank_ids="\n".join("Bank{}".format(160 - i) for i in range(num_banks)),
+                                              bank_ids="\n".join("Bank{}".format(i + 1) for i in range(num_banks)),
                                               difcs=self._format_param_list(difcs),
                                               difas=self._format_param_list(difas),
                                               tzeros=self._format_param_list(tzeros),
