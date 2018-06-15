@@ -796,7 +796,7 @@ public:
   /** last splitter is before first entry
    * @brief test_splitByTimeVectorEarlySplitter
    */
-  void Throw_test_splitByTimeVectorEarlySplitter() {
+  void test_splitByTimeVectorEarlySplitter() {
     // create the splitters
     std::vector<DateAndTime> split_time_vec;
     split_time_vec.push_back(DateAndTime("2007-11-30T16:00:10"));

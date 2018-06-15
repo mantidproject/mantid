@@ -100,7 +100,6 @@ std::unique_ptr<TimeSeriesProperty<double>>
 TimeSeriesProperty<std::string>::getDerivative() const {
   throw std::runtime_error(
       "Time series property derivative is not defined for strings");
-  // return nullptr;
 }
 
 /**
@@ -517,8 +516,6 @@ void TimeSeriesProperty<TYPE>::splitByTime(
         dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
     if (myOutput) {
       myOutput->m_size = myOutput->realSize();
-      // g_log.notice() << "[DB] Final output size = " << myOutput->size() <<
-      // "\n";
     }
   }
 }
@@ -526,7 +523,7 @@ void TimeSeriesProperty<TYPE>::splitByTime(
 /// Split this TimeSeriresProperty by a vector of time with N entries,
 /// and by the target workspace index defined by target_vec
 /// Requirements:
-/// 1. vector outputs must be defined before this method is called;
+/// vector outputs must be defined before this method is called
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::splitByTimeVector(
     std::vector<DateAndTime> &splitter_time_vec, std::vector<int> &target_vec,
@@ -560,6 +557,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   size_t index_splitter = 0;
   size_t index_tsp_time = 0;
 
+  // tsp_time is start time of time series property
   DateAndTime tsp_time = tsp_time_vec[index_tsp_time];
   DateAndTime split_start_time = splitter_time_vec[index_splitter];
   DateAndTime split_stop_time = splitter_time_vec[index_splitter + 1];
@@ -572,7 +570,6 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   std::vector<DateAndTime>::iterator splitter_iter;
   splitter_iter = std::lower_bound(splitter_time_vec.begin(),
                                    splitter_time_vec.end(), tsp_time);
-  // tps_time is start time of time series property
   if (splitter_iter == splitter_time_vec.begin()) {
     // do nothing as the first TimeSeriesProperty entry's time is before any
     // splitters
@@ -605,7 +602,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
       // it.
       // so the index for tsp_time_iter is the first TSP entry in the splitter
       index_tsp_time = tsp_time_iter - tsp_time_vec.begin();
-      tsp_time = *tsp_time_iter; // tsp_time_vec[index_splitter];
+      tsp_time = *tsp_time_iter;
     }
   } else {
     // no entry in range is true, which corresponding to the previous case
@@ -615,7 +612,6 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     ;
   }
 
-  //
   if (no_entry_in_range && first_splitter_after_last_entry) {
     // initialize all the splitters with the last value
     DateAndTime last_entry_time = this->lastTime();
@@ -692,7 +688,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     ++outer_while_counter;
   } // END-OF-WHILE
 
-  // It was in 'continue search'-while-loop.  But the TSP runs over before
+  // Still in 'continue search'-while-loop.  But the TSP runs over before
   // splitters.
   // Therefore, the rest of the chopper must have one more entry added!
   if (partial_target_filled) {

@@ -493,7 +493,6 @@ void FilterEvents::groupOutputWorkspace() {
   std::string groupname = m_outputWSNameBase;
   API::IAlgorithm_sptr groupws =
       createChildAlgorithm("GroupWorkspaces", 0.95, 1.00, true);
-  // groupws->initialize();
   groupws->setAlwaysStoreInADS(true);
   groupws->setProperty("InputWorkspaces", m_wsNames);
   groupws->setProperty("OutputWorkspace", groupname);
@@ -1194,7 +1193,6 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     // workspace name
     std::stringstream wsname;
     if (wsgroup > 0) {
-      //  std::string target_name = m_wsGroupIndexTargetMap[wsgroup];
       int target_name = m_wsGroupdYMap[wsgroup];
       wsname << m_outputWSNameBase << "_" << target_name;
     } else {
@@ -1208,9 +1206,6 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     // Clear Run without copying first.
     optws->setSharedRun(Kernel::make_cow<Run>());
     m_outputWorkspacesMap.emplace(wsgroup, optws);
-
-    // TODO/ISSUE/NOW - How about comment and info similar to
-    // createOutputWorkspaces()?
 
     // add to output workspace property
     std::stringstream propertynamess;
