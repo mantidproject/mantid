@@ -1259,8 +1259,10 @@ bool MuonFitPropertyBrowser::isMultiFittingMode() const {
 */
 void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
   modifyFitMenu(m_fitActionTFAsymm, enabled);
+
   // set new fit func
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ConvertFitFunctionForMuonTFAsymmetry");
+  // do not preserve the ties
   if (AnalysisDataService::Instance().doesExist("MuonAnalysisTFNormalizations") && m_compositeFunction->nFunctions()>0) {
 	  alg->initialize();
 
@@ -1270,14 +1272,15 @@ void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
 	  QStringList globals; 
 
 
-      if (m_TFAsymmMode) {
+      if (enabled && m_isMultiFittingMode) {
 		  //manually set the function values
 		 old= m_functionBrowser->getGlobalFunction();
 		 globals= m_functionBrowser->getGlobalParameters();
 	  }
-	  if (!enabled) {
-		  //auto tmp = boost::dynamic_pointer_cast<CompositeFunction>(old);
-		  //old = tmp->getFunction(0);
+	  else if (!enabled && !m_isMultiFittingMode) {
+		  // to extract in single fit we have an extra composite -> so remove it
+		  auto tmp = boost::dynamic_pointer_cast<CompositeFunction>(old);
+		  old = tmp->getFunction(0);
 	  }
 	  alg->setProperty("InputFunction", old);
 	  alg->setProperty("NormalizationTable", "MuonAnalysisTFNormalizations");
@@ -1288,55 +1291,49 @@ void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
 	  IFunction_sptr func = alg->getProperty("OutputFunction");
 	 
 
-	  //single fit
-	  FitPropertyBrowser::clear();
-	  auto h = FitPropertyBrowser::addFunction(func->asString());
-	  
-	//multiple fit
-	  /*FitPropertyBrowser::clear();
-	  auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(func);
-	  auto adfdsaf = tmp->asString();
-	  auto comp = boost::dynamic_pointer_cast<CompositeFunction>(tmp->getFunction(0));
-	  auto adfdsasdaf = comp->asString();
-	  //auto multi = boost::make_shared<MultiDomainFunction>();
-	  //multi->setDomainIndex(0, 0);
-	  //multi->addFunction(tmp->getFunction(0));
-	  m_functionBrowser->clear();*/
-	  QStringList newGlobals;
-	  const std::string INSERT_FUNCTION{ "f0.f1.f1." };
-	  if (enabled) {
-		  for (auto global : globals) {
-			  newGlobals << "f0.f1.f1." + global;
+	  //multiple fit
+	  if (m_isMultiFittingMode) {
+		  //update values in browser
+		  auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(func);
+		  old = tmp->getFunction(0);
+		  m_functionBrowser->setFunction(old);
+		  //preserve global parameters
+		  QStringList newGlobals;
+		  const std::string INSERT_FUNCTION{ "f0.f1.f1." };
+		  if (enabled) {
+			  for (auto global : globals) {
+				  newGlobals << QString::fromStdString(INSERT_FUNCTION) + global;
+			  }
 		  }
-	  }
-	  else {
-		  for (auto global : globals) {
-			  newGlobals << global.remove(0,9);
+		  else {
+			  for (auto global : globals) {
+				  newGlobals << global.remove(0, 9);
+			  }
 		  }
-	  }
-	  auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(func);
-	  old = tmp->getFunction(0);
-	  m_functionBrowser->setFunction(old);
-	  m_functionBrowser->updateMultiDatasetParameters(*func);
-	 
-	  m_functionBrowser->setGlobalParameters(newGlobals);
-	  // if multi data set we need to do the ties manually
-	  
+		  m_functionBrowser->updateMultiDatasetParameters(*func);
+
+		  m_functionBrowser->setGlobalParameters(newGlobals);
+		  // if multi data set we need to do the fixes manually
 		  auto originalNames = func->getParameterNames();
 		  for (auto name : originalNames) {
 			  auto index = func->parameterIndex(name);
-			  auto sfad = func->asString();
-			  auto originalTie = func->getTie(index);
-			  if (originalTie) {
-				  auto stringTie = originalTie->asString();
+			  if (func->isFixed(index)) {
 				  //get domain
-				  auto index = stringTie.find_first_of(".");
-				  std::string domainStr = stringTie.substr(1, index);
+				  auto index = name.find_first_of(".");
+				  std::string domainStr = name.substr(1, index - 1);
 				  int domain = std::stoi(domainStr);
-				  m_functionBrowser->setLocalParameterTie(QString::fromStdString(name), 1, QString::fromStdString(stringTie));
+				  //remove domain from name
+				  auto newName = name.substr(index + 1);
+				  //set fix
+				  m_functionBrowser->setLocalParameterFixed(QString::fromStdString(newName), domain, true);
 			  }
 		  }
-			  
+	  }//single fit
+	  else {
+		  FitPropertyBrowser::clear();
+		  FitPropertyBrowser::addFunction(func->asString());
+	  }
+		  
   }
   // Show or hide the TFAsymmetry fit
   if (enabled) {
