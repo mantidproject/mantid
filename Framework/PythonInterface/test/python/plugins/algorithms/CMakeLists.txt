@@ -36,8 +36,10 @@ set ( TEST_PY_FILES
   EnggFitDIFCFromPeaksTest.py
   EnggFitPeaksTest.py
   EnggFocusTest.py
+  EnggSaveGSASIIFitResultsToHDF5Test.py
   EnggSaveSinglePeakFitResultsToHDF5Test.py
   EnggVanadiumCorrectionsTest.py
+  ExportSampleLogsToHDF5Test.py
   ExportSpectraMaskTest.py
   FilterLogByTimeTest.py
   FindEPPTest.py

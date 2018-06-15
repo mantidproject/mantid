@@ -1155,11 +1155,7 @@ void FitPeaks::calculateFittedPeaks(std::vector<
 
     for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
       // get and set the peak function parameters
-      size_t row_index =
-          (static_cast<size_t>(iws) - m_startWorkspaceIndex) * m_numPeaksToFit +
-          ipeak;
-      double chi2 = m_fittedParamTable->cell<double>(
-          row_index, num_peakfunc_params + num_bkgdfunc_params + 2);
+      const double chi2 = fit_result_i->getCost(ipeak);
       if (chi2 > 10.e10)
         continue;
 
@@ -1182,7 +1178,7 @@ void FitPeaks::calculateFittedPeaks(std::vector<
           std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.second);
 
       if (start_x_iter == stop_x_iter)
-        throw std::runtime_error("Range size is zero");
+        throw std::runtime_error("Range size is zero in calculateFittedPeaks");
 
       FunctionDomain1DVector domain(start_x_iter, stop_x_iter);
       FunctionValues values(domain);
@@ -1297,7 +1293,7 @@ int FitPeaks::estimatePeakParameters(
 
   // calculate background
   if (start_index == stop_index)
-    throw std::runtime_error("Range size is zero");
+    throw std::runtime_error("Range size is zero in estimatePeakParameters");
   FunctionDomain1DVector domain(start_iter, stop_iter);
   FunctionValues bkgd_values(domain);
   bkgdfunction->function(domain, bkgd_values);
@@ -2033,15 +2029,24 @@ void FitPeaks::estimateLinearBackground(const Histogram &histogram,
                                         double left_window_boundary,
                                         double right_window_boundary,
                                         double &bkgd_a0, double &bkgd_a1) {
-  const auto &vecX = histogram.points();
-  size_t istart = findXIndex(vecX.rawData(), left_window_boundary);
-  size_t istop = findXIndex(vecX.rawData(), right_window_boundary);
+  bkgd_a0 = 0.;
+  bkgd_a1 = 0.;
 
-  double bg2, chisq;
-  //  HistogramData::estimatePolynomial(1, histogram, istart, istop, bkgd_a0,
-  //                                    bkgd_a1, bg2, chisq);
-  HistogramData::estimateBackground(1, histogram, istart, istop, istart + 10,
-                                    istop - 10, bkgd_a0, bkgd_a1, bg2, chisq);
+  const auto &vecX = histogram.points();
+  const size_t istart = findXIndex(vecX.rawData(), left_window_boundary);
+  const size_t istop = findXIndex(vecX.rawData(), right_window_boundary);
+
+  // 10 is a magic number that worked in a variety of situations
+  const size_t iback_start = istart + 10;
+  const size_t iback_stop = istop - 10;
+
+  // there aren't enough bins in the window to try to estimate so just leave the
+  // estimate at zero
+  if (iback_start < iback_stop) {
+    double bg2, chisq;
+    HistogramData::estimateBackground(1, histogram, istart, istop, iback_start,
+                                      iback_stop, bkgd_a0, bkgd_a1, bg2, chisq);
+  }
 }
 
 //----------------------------------------------------------------------------------------------
