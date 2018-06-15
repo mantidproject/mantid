@@ -106,6 +106,18 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
                                               function_types=create_empty_param_list("1")
                                               ))
 
+    def validateInputs(self):
+        issues = {}
+
+        input_ws = mtd[self.getPropertyValue(self.PROP_INPUT_WS)]
+        grouping_scheme = self.getProperty(self.PROP_GROUPING_SCHEME).value
+        if len(grouping_scheme) != input_ws.getNumberOfEntries():
+            issues[self.PROP_GROUPING_SCHEME] = ("Number of entries in {} does not match number of spectra in {}. "
+                                                 "You must assign a bank to every focused spectrum in the input workspace".
+                                                 format(self.PROP_GROUPING_SCHEME, self.PROP_INPUT_WS))
+
+        return issues
+
     def _expand_to_texture_bank(self, bank_param_list, spectrum_numbers, grouping_scheme):
         return (bank_param_list[grouping_scheme[spec_num] - 1] for spec_num in spectrum_numbers)
 
