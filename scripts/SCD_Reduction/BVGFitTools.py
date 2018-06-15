@@ -44,9 +44,9 @@ def get3DPeak(peak, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxT
         fICC['B'] = fICCParams[6]
         fICC['R'] = fICCParams[7]
         fICC['T0'] = fICCParams[8]
-        fICC['scale'] = fICCParams[9]
-        fICC['hatWidth'] = fICCParams[10]
-        fICC['k_conv'] = fICCParams[11]
+        fICC['Scale'] = fICCParams[9]
+        fICC['HatWidth'] = fICCParams[10]
+        fICC['KConv'] = fICCParams[11]
         goodIDX, _ = ICCFT.getBGRemovedIndices(
             n_events, pp_lambda=pp_lambda, qMask=qMask)
 
@@ -126,13 +126,13 @@ def get3DPeak(peak, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxT
     retParams['Beta'] = fICC['B']
     retParams['R'] = fICC['R']
     retParams['T0'] = fICC['T0']
-    retParams['scale'] = fICC['scale']
-    retParams['k_conv'] = fICC['k_conv']
-    retParams['muTH'] = mu0
-    retParams['muPH'] = mu1
-    retParams['sigX'] = sigX
-    retParams['sigY'] = sigY
-    retParams['sigP'] = p
+    retParams['Scale'] = fICC['Scale']
+    retParams['KConv'] = fICC['KConv']
+    retParams['MuTH'] = mu0
+    retParams['MuPH'] = mu1
+    retParams['SigX'] = sigX
+    retParams['SigY'] = sigY
+    retParams['SigP'] = p
     retParams['bgBVG'] = bgBVG
     retParams['scale3d'] = scaleFactor
     retParams['chiSq3d'] = redChiSq
@@ -238,7 +238,7 @@ def fitTOFCoordinate(box, peak, padeCoefficients, dtSpread=0.03, minFracPixels=0
     fitResults, fICC = ICCFT.doICCFit(tofWS, energy, flightPath,
                                       padeCoefficients, fitOrder=bgPolyOrder, constraintScheme=1)
 
-    for i, param in enumerate(['A', 'B', 'R', 'T0', 'scale', 'hatWidth', 'k_conv']):
+    for i, param in enumerate(['A', 'B', 'R', 'T0', 'Scale', 'HatWidth', 'KConv']):
         fICC[param] = mtd['fit_Parameters'].row(i)['Value']
     bgParamsRows = [7 + i for i in range(bgPolyOrder + 1)]
     bgCoeffs = []
@@ -327,12 +327,12 @@ def getBVGResult(box, params, nTheta=200, nPhi=200, fracBoxToHistogram=1.0):
     m = BivariateGaussian.BivariateGaussian()
     m.init()
     m['A'] = params[0]
-    m['muX'] = params[1]
-    m['muY'] = params[2]
-    m['sigX'] = params[3]
-    m['sigY'] = params[4]
-    m['sigP'] = params[5]
-    m['bg'] = params[6]
+    m['MuX'] = params[1]
+    m['MuY'] = params[2]
+    m['SigX'] = params[3]
+    m['SigY'] = params[4]
+    m['SigP'] = params[5]
+    m['Bg'] = params[6]
     m.setAttributeValue('nX', h.shape[0])
     m.setAttributeValue('nY', h.shape[1])
 
@@ -444,27 +444,27 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         # Set some constraints
         boundsDict = {}
         boundsDict['A'] = [0.0, np.inf]
-        boundsDict['muX'] = [thBins[thBins.size // 2 - dth],
+        boundsDict['MuX'] = [thBins[thBins.size // 2 - dth],
                              thBins[thBins.size // 2 + dth]]
-        boundsDict['muY'] = [phBins[phBins.size // 2 - dph],
+        boundsDict['MuY'] = [phBins[phBins.size // 2 - dph],
                              phBins[phBins.size // 2 + dph]]
         # boundsDict['sigX'] = [0.7*sigX0, 1.3*sigX0]
-        boundsDict['sigX'] = [0., 0.02]
-        boundsDict['sigY'] = [0., 0.02]
-        boundsDict['sigP'] = [-1., 1.]
-        boundsDict['bg'] = [0, np.inf]
+        boundsDict['SigX'] = [0., 0.02]
+        boundsDict['SigY'] = [0., 0.02]
+        boundsDict['SigP'] = [-1., 1.]
+        boundsDict['Bg'] = [0, np.inf]
 
         # Set our initial guess
         m = BivariateGaussian.BivariateGaussian()
         m.init()
         m['A'] = 1.
-        #m['muX'] = meanTH
-        #m['muY'] = meanPH
-        m['muX'] = TH[np.unravel_index(h.argmax(), h.shape)]
-        m['muY'] = PH[np.unravel_index(h.argmax(), h.shape)]
-        m['sigX'] = sigX0
-        m['sigY'] = sigY0
-        m['sigP'] = sigP0
+        #m['MuX'] = meanTH
+        #m['MuY'] = meanPH
+        m['MuX'] = TH[np.unravel_index(h.argmax(), h.shape)]
+        m['MuY'] = PH[np.unravel_index(h.argmax(), h.shape)]
+        m['SigX'] = sigX0
+        m['SigY'] = sigY0
+        m['SigP'] = sigP0
         m.setAttributeValue('nX', h.shape[0])
         m.setAttributeValue('nY', h.shape[1])
         m.setConstraints(boundsDict)
@@ -505,13 +505,13 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
 
         boundsDict = {}
         boundsDict['A'] = [0.0, np.inf]
-        boundsDict['muX'] = [thBins[thBins.size // 2 - dth],
+        boundsDict['MuX'] = [thBins[thBins.size // 2 - dth],
                              thBins[thBins.size // 2 + dth]]
-        boundsDict['muY'] = [phBins[phBins.size // 2 - dph],
+        boundsDict['MuY'] = [phBins[phBins.size // 2 - dph],
                              phBins[phBins.size // 2 + dph]]
-        boundsDict['sigX'] = [bounds[0][3], bounds[1][3]]
-        boundsDict['sigY'] = [bounds[0][4], bounds[1][4]]
-        boundsDict['sigP'] = [bounds[0][5], bounds[1][5]]
+        boundsDict['SigX'] = [bounds[0][3], bounds[1][3]]
+        boundsDict['SigY'] = [bounds[0][4], bounds[1][4]]
+        boundsDict['SigP'] = [bounds[0][5], bounds[1][5]]
         # Set our initial guess
         m = BivariateGaussian.BivariateGaussian()
         m.init()
@@ -521,11 +521,11 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
 
         #m['muX'] = TH.mean()
         #m['muY'] = PH.mean()
-        m['muX'] = TH[np.unravel_index(h.argmax(), h.shape)]
-        m['muY'] = PH[np.unravel_index(h.argmax(), h.shape)]
-        m['sigX'] = forceParams[5]
-        m['sigY'] = forceParams[6]
-        m['sigP'] = forceParams[7]
+        m['MuX'] = TH[np.unravel_index(h.argmax(), h.shape)]
+        m['MuY'] = PH[np.unravel_index(h.argmax(), h.shape)]
+        m['SigX'] = forceParams[5]
+        m['SigY'] = forceParams[6]
+        m['SigP'] = forceParams[7]
         m.setAttributeValue('nX', h.shape[0])
         m.setAttributeValue('nY', h.shape[1])
         m.setConstraints(boundsDict)
@@ -545,18 +545,18 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
     m = BivariateGaussian.BivariateGaussian()
     m.init()
     m['A'] = mtd['bvgfit_Parameters'].row(0)['Value']
-    m['muX'] = mtd['bvgfit_Parameters'].row(1)['Value']
-    m['muY'] = mtd['bvgfit_Parameters'].row(2)['Value']
-    m['sigX'] = mtd['bvgfit_Parameters'].row(3)['Value']
-    m['sigY'] = mtd['bvgfit_Parameters'].row(4)['Value']
-    m['sigP'] = mtd['bvgfit_Parameters'].row(5)['Value']
-    m['bg'] = mtd['bvgfit_Parameters'].row(6)['Value']
+    m['MuX'] = mtd['bvgfit_Parameters'].row(1)['Value']
+    m['MuY'] = mtd['bvgfit_Parameters'].row(2)['Value']
+    m['SigX'] = mtd['bvgfit_Parameters'].row(3)['Value']
+    m['SigY'] = mtd['bvgfit_Parameters'].row(4)['Value']
+    m['SigP'] = mtd['bvgfit_Parameters'].row(5)['Value']
+    m['Bg'] = mtd['bvgfit_Parameters'].row(6)['Value']
 
     m.setAttributeValue('nX', h.shape[0])
     m.setAttributeValue('nY', h.shape[1])
     chiSq = fitResults[1]
-    params = [[m['A'], m['muX'], m['muY'], m['sigX'],
-               m['sigY'], m['sigP'], m['bg']], chiSq]
+    params = [[m['A'], m['MuX'], m['MuY'], m['SigX'],
+               m['SigY'], m['SigP'], m['Bg']], chiSq]
     # print params
     return params, h, thBins, phBins
 
