@@ -571,8 +571,9 @@ std::vector<std::string> LoadMcStas::readHistogramData(
 
     // ensure that specified name is given to workspace (eventWS) when added to
     // outputGroup
-    std::string nameUserSee =
-        nameAttrValueTITLE + "_" + getProperty("OutputWorkspace");
+    const std::string outputWS = getProperty("OutputWorkspace");
+    const std::string nameUserSee =
+        nameAttrValueTITLE + "_" + outputWS;
     AnalysisDataService::Instance().addOrReplace(nameUserSee, ws);
 
     histoWSNames.emplace_back(ws->getName());
