@@ -12,7 +12,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
-#include "BatchView.h"
+#include "Views/BatchView.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

@@ -5,10 +5,12 @@ set ( SRC_FILES
     Reduction/Row.cpp
     Reduction/SlicedReductionWorkspaces.cpp
     Reduction/ReductionJobs.cpp
-    BatchView.cpp
+    Presenters/RegexRowFilter.cpp
+    Presenters/RowLocation.cpp
+    Views/BatchView.cpp
     ValidateRow.cpp
-    BatchPresenter.cpp
-    BatchPresenterFactory.cpp
+    Presenters/BatchPresenter.cpp
+    Presenters/BatchPresenterFactory.cpp
     MeasurementItem.cpp
     InstrumentOptionDefaults.cpp
     InstrumentParameters.cpp
@@ -45,10 +47,12 @@ set ( SRC_FILES
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
     DllConfig.h
-    IBatchView.h
-    BatchView.h
-    BatchPresenter.h
-    BatchPresenterFactory.h
+    Views/IBatchView.h
+    Views/BatchView.h
+    Presenters/RegexRowFilter.h
+    Presenters/RowLocation.h
+    Presenters/BatchPresenter.h
+    Presenters/BatchPresenterFactory.h
     InstrumentParameters.h
     IReflEventPresenter.h
     IReflEventTabPresenter.h
@@ -108,7 +112,7 @@ set ( MOC_FILES
     QtReflSettingsTabView.h
     QtReflSettingsView.h
     QtReflMainWindowView.h
-    BatchView.h
+    Views/BatchView.h
 )
 
 set ( UI_FILES
@@ -120,7 +124,7 @@ set ( UI_FILES
    ReflSettingsTabWidget.ui
    ReflSettingsWidget.ui
    ReflWindow.ui
-   BatchView.ui
+   Views/BatchView.ui
 )
 
 mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISReflectometry

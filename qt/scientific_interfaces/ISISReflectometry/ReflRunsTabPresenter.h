@@ -3,11 +3,11 @@
 
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
-#include "BatchPresenter.h"
+#include "Presenters/BatchPresenter.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
-#include "BatchPresenterFactory.h"
+#include "Presenters/BatchPresenterFactory.h"
 #include "ReflAutoreduction.h"
 #include <boost/shared_ptr.hpp>
 #include "SearchResult.h"

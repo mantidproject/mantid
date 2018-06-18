@@ -1,7 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLBATCHPRESENTERTEST_H_
 #define MANTID_CUSTOMINTERFACES_REFLBATCHPRESENTERTEST_H_
 
-#include "../ISISReflectometry/BatchPresenter.h"
+#include "../ISISReflectometry/Presenters/BatchPresenter.h"
 #include "MockBatchView.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 

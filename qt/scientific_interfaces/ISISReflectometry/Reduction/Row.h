@@ -69,7 +69,8 @@ Row<ReducedWorkspaceNames> Row<ReducedWorkspaceNames>::withExtraRunNumbers(
     WorkspaceNamesFactory const &workspaceNamesFactory) const {
   auto newRunNumbers = std::vector<std::string>();
   newRunNumbers.reserve(m_runNumbers.size() + extraRunNumbers.size());
-  boost::range::set_union(m_runNumbers, extraRunNumbers, std::back_inserter(newRunNumbers));
+  boost::range::set_union(m_runNumbers, extraRunNumbers,
+                          std::back_inserter(newRunNumbers));
   auto wsNames =
       workspaceNamesFactory.template makeNames<ReducedWorkspaceNames>(
           newRunNumbers, transmissionWorkspaceNames());
@@ -92,10 +93,10 @@ operator==(UnslicedRow const &, UnslicedRow const &);
 extern template MANTIDQT_ISISREFLECTOMETRY_DLL bool
 operator!=(UnslicedRow const &, UnslicedRow const &);
 
-extern template MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream&
-operator<<(std::ostream&, UnslicedRow const &);
-extern template MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream&
-operator<<(std::ostream&, SlicedRow const &);
+extern template MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
+operator<<(std::ostream &, UnslicedRow const &);
+extern template MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
+operator<<(std::ostream &, SlicedRow const &);
 
 using RowVariant = boost::variant<SlicedRow, UnslicedRow>;
 
@@ -104,13 +105,6 @@ UnslicedRow unslice(SlicedRow const &row);
 boost::optional<UnslicedRow> unslice(boost::optional<SlicedRow> const &row);
 boost::optional<SlicedRow> slice(boost::optional<UnslicedRow> const &row);
 
-// class RowTemplate {
-// public:
-//  std::pair<std::string, std::string> TransmissionRowNumbers;
-//  RangeInQ QRange;
-//  double ScaleFactor;
-//  std::string ProcessingInstructions;
-//};
 }
 }
 #endif // MANTID_CUSTOMINTERFACE_RUN_H_

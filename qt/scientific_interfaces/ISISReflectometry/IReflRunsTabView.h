@@ -4,7 +4,7 @@
 #include <set>
 #include <string>
 #include <boost/shared_ptr.hpp>
-#include "IBatchView.h"
+#include "Views/IBatchView.h"
 
 namespace MantidQt {
 

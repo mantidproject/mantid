@@ -1,6 +1,6 @@
 #ifndef MANTID_CUSTOMINTERFACES_IBATCHVIEW_H_
 #define MANTID_CUSTOMINTERFACES_IBATCHVIEW_H_
-#include "DllConfig.h"
+#include "../DllConfig.h"
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 
 namespace MantidQt {

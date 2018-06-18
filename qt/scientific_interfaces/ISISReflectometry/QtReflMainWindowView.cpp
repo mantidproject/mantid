@@ -7,7 +7,7 @@
 #include "ReflMainWindowPresenter.h"
 #include "ReflAsciiSaver.h"
 #include "MantidKernel/make_unique.h"
-#include "BatchPresenter.h"
+#include "Presenters/BatchPresenter.h"
 #include "ReflRunsTabPresenter.h"
 
 #include <QMessageBox>

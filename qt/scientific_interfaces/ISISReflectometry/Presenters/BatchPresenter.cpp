@@ -4,6 +4,9 @@
 #include "Reduction/Group.h"
 #include "Reduction/Slicing.h"
 #include "ValidateRow.h"
+#include "Map.h"
+#include "RegexRowFilter.h"
+#include "RowLocation.h"
 
 #include <boost/regex.hpp>
 #include <iostream>
@@ -88,31 +91,6 @@ void BatchPresenter::notifyPauseRequested() {}
 
 void BatchPresenter::notifyProcessRequested() { prettyPrintModel(m_model); }
 
-template <typename T>
-void sortAndRemoveDuplicatesInplace(std::vector<T> &items) {
-  std::sort(items.begin(), items.end());
-  auto eraseBegin = std::unique(items.begin(), items.end());
-  items.erase(eraseBegin, items.end());
-}
-
-std::vector<int> BatchPresenter::mapToContainingGroups(
-    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
-        mustNotContainRoot) const {
-  auto groups = std::vector<int>();
-  std::transform(mustNotContainRoot.cbegin(), mustNotContainRoot.cend(),
-                 std::back_inserter(groups),
-                 [this](MantidWidgets::Batch::RowLocation const &location)
-                     -> int { return groupOf(location); });
-  return groups;
-}
-
-std::vector<int> BatchPresenter::groupIndexesFromSelection(
-    std::vector<MantidWidgets::Batch::RowLocation> const &selected) const {
-  auto groups = mapToContainingGroups(selected);
-  sortAndRemoveDuplicatesInplace(groups);
-  return groups;
-}
-
 void BatchPresenter::notifyInsertRowRequested() {
   auto selected = m_view->jobs().selectedRowLocations();
   if (selected.size() > 0) {
@@ -124,29 +102,11 @@ void BatchPresenter::notifyInsertRowRequested() {
   }
 }
 
-void BatchPresenter::notifyFilterChanged(std::string const &filterValue) {
+void BatchPresenter::notifyFilterChanged(std::string const &filterString) {
   try {
-    auto regexFilter = boost::regex(filterValue);
-    m_view->jobs().filterRowsBy(
-        MantidQt::MantidWidgets::Batch::makeFilterFromLambda(
-            [this, filterValue, regexFilter](
-                MantidQt::MantidWidgets::Batch::RowLocation const &location)
-                -> bool {
-                  if (location.isRoot()) {
-                    return true;
-                  } else if (isGroupLocation(location)) {
-                    auto cellText =
-                        m_view->jobs().cellAt(location, 0).contentText();
-                    return boost::regex_search(cellText, regexFilter);
-                  } else {
-                    assert(isRowLocation(location));
-                    auto cellText =
-                        m_view->jobs().cellAt(location, 0).contentText();
-                    auto groupText = groupName(m_model, groupOf(location));
-                    return boost::regex_search(cellText, regexFilter) ||
-                           boost::regex_search(groupText, regexFilter);
-                  }
-                }));
+    auto regexFilter =
+        filterFromRegexString(filterString, m_view->jobs(), m_model);
+    m_view->jobs().filterRowsBy(regexFilter.get());
   } catch (boost::regex_error &) {
   }
 }
@@ -208,19 +168,11 @@ void BatchPresenter::notifyCollapseAllRequested() {
   m_view->jobs().collapseAll();
 }
 
-std::vector<std::string> BatchPresenter::mapToContentText(
-    std::vector<MantidWidgets::Batch::Cell> const &cells) const {
-  std::vector<std::string> cellText;
-  cellText.reserve(cells.size());
-  std::transform(cells.cbegin(), cells.cend(), std::back_inserter(cellText),
-                 [](MantidWidgets::Batch::Cell const &cell)
-                     -> std::string { return cell.contentText(); });
-  return cellText;
-}
-
 std::vector<std::string> BatchPresenter::cellTextFromViewAt(
     MantidWidgets::Batch::RowLocation const &location) const {
-  return mapToContentText(m_view->jobs().cellsAt(location));
+  return map(m_view->jobs().cellsAt(location),
+             [](MantidWidgets::Batch::Cell const &cell)
+                 -> std::string { return cell.contentText(); });
 }
 
 void BatchPresenter::showAllCellsOnRowAsValid(
@@ -237,70 +189,54 @@ void BatchPresenter::showCellsAsInvalidInView(
     MantidWidgets::Batch::RowLocation const &itemIndex,
     std::vector<int> const &invalidColumns) {
   auto cells = m_view->jobs().cellsAt(itemIndex);
-  for (auto &&cell : cells) {
+  for (auto &cell : cells) {
     cell.setIconFilePath("");
     cell.setBorderColor("darkGrey");
   }
-  for (auto &&column : invalidColumns) {
+  for (auto &column : invalidColumns) {
     cells[column].setIconFilePath(":/invalid.png");
     cells[column].setBorderColor("darkRed");
   }
   m_view->jobs().setCellsAt(itemIndex, cells);
 }
 
-void BatchPresenter::notifyCellTextChanged(
+void BatchPresenter::updateGroupName(
     MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int column,
     std::string const &oldValue, std::string const &newValue) {
-  if (isGroupLocation(itemIndex)) {
-    auto const groupIndex = groupOf(itemIndex);
-    if (!setGroupName(m_model, groupIndex, newValue)) {
-      auto cell = m_view->jobs().cellAt(itemIndex, column);
-      cell.setContentText(oldValue);
-      m_view->jobs().setCellAt(itemIndex, column, cell);
-    }
-  } else {
-    auto const groupIndex = groupOf(itemIndex);
-    auto const rowIndex = rowOf(itemIndex);
-    auto slicing = Slicing(boost::blank());
-    auto rowValidationResult =
-        validateRow(m_model, slicing, cellTextFromViewAt(itemIndex));
-    updateRow(m_model, groupIndex, rowIndex,
-              rowValidationResult.validRowElseNone());
-    if (rowValidationResult.isValid()) {
-      showAllCellsOnRowAsValid(itemIndex);
-    } else {
-      showCellsAsInvalidInView(itemIndex, rowValidationResult.invalidColumns());
-    }
+  assertOrThrow(column == 0,
+                "Changed value of cell which should be uneditable");
+  auto const groupIndex = groupOf(itemIndex);
+  if (!setGroupName(m_model, groupIndex, newValue)) {
+    auto cell = m_view->jobs().cellAt(itemIndex, column);
+    cell.setContentText(oldValue);
+    m_view->jobs().setCellAt(itemIndex, column, cell);
   }
 }
 
-bool BatchPresenter::isGroupLocation(
-    MantidQt::MantidWidgets::Batch::RowLocation const &location) const {
-  return location.depth() == 1;
+void BatchPresenter::updateRowField(
+    MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int column,
+    std::string const &, std::string const &newValue) {
+  auto const groupIndex = groupOf(itemIndex);
+  auto const rowIndex = rowOf(itemIndex);
+  auto slicing = Slicing(boost::blank());
+  auto rowValidationResult =
+      validateRow(m_model, slicing, cellTextFromViewAt(itemIndex));
+  updateRow(m_model, groupIndex, rowIndex,
+            rowValidationResult.validRowElseNone());
+  if (rowValidationResult.isValid()) {
+    showAllCellsOnRowAsValid(itemIndex);
+  } else {
+    showCellsAsInvalidInView(itemIndex, rowValidationResult.invalidColumns());
+  }
 }
 
-bool BatchPresenter::isRowLocation(
-    MantidWidgets::Batch::RowLocation const &location) const {
-  return location.depth() == 2;
-}
-
-int BatchPresenter::groupOf(
-    MantidWidgets::Batch::RowLocation const &location) const {
-  return location.path()[0];
-}
-
-int BatchPresenter::rowOf(
-    MantidWidgets::Batch::RowLocation const &location) const {
-  return location.path()[1];
-}
-
-bool BatchPresenter::containsGroups(
-    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &locations)
-    const {
-  return std::count_if(
-             locations.cbegin(), locations.cend(),
-             [this](MantidQt::MantidWidgets::Batch::RowLocation const &location)
-                 -> bool { return isGroupLocation(location); }) > 0;
+void BatchPresenter::notifyCellTextChanged(
+    MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int column,
+    std::string const &oldValue, std::string const &newValue) {
+  if (isGroupLocation(itemIndex))
+    updateGroupName(itemIndex, column, oldValue, newValue);
+  else
+    updateRowField(itemIndex, column, oldValue, newValue);
 }
 
 void BatchPresenter::applyGroupStyling(

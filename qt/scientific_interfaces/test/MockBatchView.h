@@ -1,7 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_MOCKBATCHVIEW_H_
 #define MANTID_CUSTOMINTERFACES_MOCKBATCHVIEW_H_
 #include "DllConfig.h"
-#include "IBatchView.h"
+#include "Views/IBatchView.h"
 #include <gmock/gmock.h>
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 #include "MantidKernel/WarningSuppressions.h"

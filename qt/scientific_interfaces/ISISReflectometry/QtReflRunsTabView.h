@@ -6,8 +6,8 @@
 #include "DllConfig.h"
 #include "IReflRunsTabView.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
-#include "BatchPresenter.h"
-#include "BatchView.h"
+#include "Presenters/BatchPresenter.h"
+#include "Views/BatchView.h"
 
 #include "ui_ReflRunsTabWidget.h"
 
