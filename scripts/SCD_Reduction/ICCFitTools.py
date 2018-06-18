@@ -10,7 +10,6 @@ import ICConvoluted as ICC
 import itertools
 from functools import reduce
 from scipy.ndimage.filters import convolve
-reload(ICC)
 plt.ion()
 
 
