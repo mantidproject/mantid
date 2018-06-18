@@ -139,7 +139,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(view.get_user_file_path.call_count, 3)
         self.assertEqual(view.get_batch_file_path.call_count, 2)
         self.assertEqual(view.get_cell.call_count, 66)
-        self.assertEqual(view.get_number_of_rows.call_count, 5)
+        self.assertEqual(view.get_number_of_rows.call_count, 3)
 
         # clean up
         remove_file(user_file_path)
@@ -444,6 +444,27 @@ class RunTabPresenterTest(unittest.TestCase):
         result = presenter.get_processing_options()
 
         self.assertEqual(expected_result, result)
+
+    def test_on_data_changed_does_nothing_during_processing(self):
+        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_1)
+        presenter._masking_table_presenter = mock.MagicMock()
+        presenter._beam_centre_presenter = mock.MagicMock()
+        presenter._processing = True
+
+        presenter.on_data_changed()
+
+        presenter._masking_table_presenter.on_update_rows.assert_not_called()
+        presenter._beam_centre_presenter.on_update_rows.assert_not_called()
+
+    def test_on_data_changed_calls_update_rows(self):
+        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_1)
+        presenter._masking_table_presenter = mock.MagicMock()
+        presenter._beam_centre_presenter = mock.MagicMock()
+
+        presenter.on_data_changed()
+
+        presenter._masking_table_presenter.on_update_rows.assert_called_once_with()
+        presenter._beam_centre_presenter.on_update_rows.assert_called_once_with()
 
     @staticmethod
     def _clear_property_manager_data_service():

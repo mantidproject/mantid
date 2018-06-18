@@ -481,19 +481,6 @@ class RunTabPresenter(object):
         self.sans_logger.information("The generation of all states took {}s".format(time_taken))
         return states
 
-    def get_state_model_table_workspace_number_of_rows_instrument(self):
-        # 1. Update the state model
-        state_model_with_view_update = self._get_state_model_with_view_update()
-
-        # 2. Update the table model
-        table_model = self._get_table_model()
-
-        instrument = self._view.instrument
-
-        number_of_rows = self._view.get_number_of_rows()
-
-        return state_model_with_view_update, table_model, number_of_rows, instrument
-
     def get_row_indices(self):
         """
         Gets the indices of row which are not empty.
