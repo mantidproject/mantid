@@ -746,11 +746,8 @@ of each focused bank to the 4-column MAUD format (the old
 ``grouping.new`` format) using :ref:`SaveBankScatteringAngles
 <algm-SaveBankScatteringAngles>`.
 
-On GEM this is set to the following:
-
-.. code-block:: python
-
-   save_angles: False
+If:ref:`texture_mode_isis-powder-diffraction-ref` is set to **True**
+this is enabled, and disabled if it is set to **False**.
 
 .. _save_maud_calib_gem_isis-powder-diffraction-ref:
 
