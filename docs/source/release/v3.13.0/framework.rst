@@ -43,6 +43,9 @@ New Algorithms
 
 - :ref:`SaveGDA <algm-SaveGDA>` saves a focused diffraction workspace to MAUD-readable ``.gda`` format
 
+- :ref:`SaveGEMMAUDParamFile <algm-SaveGEMMAUDParamFile>`, which acts as a partner to :ref:`SaveGDA <algm-SaveGDA>`,
+  saves a MAUD calibration file to convert the output of **SaveGDA** back to d-spacing
+
 Improved
 ########
 
