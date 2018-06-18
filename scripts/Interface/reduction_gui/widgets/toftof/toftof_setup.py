@@ -13,8 +13,9 @@ from reduction_gui.widgets.data_table_view import DataTableView, DataTableModel
 
 #-------------------------------------------------------------------------------
 
+
 class SmallQLineEdit(QLineEdit):
-    '''just a smaller QLineEdit'''  
+    '''just a smaller QLineEdit'''
     def sizeHint(self):
         '''overriding the sizeHint() function to get a smaller lineEdit'''
         sh = super(SmallQLineEdit, self).sizeHint()
@@ -32,7 +33,7 @@ class TOFTOFSetupWidget(BaseWidget):
         def _dataToText(self, row, col, value):
             """
             converts the stored data to a displayable text.
-            Override this function if you need data types other than str in your table. 
+            Override this function if you need data types other than str in your table.
             """
             if col == 2:
                 return str(value) if value is not None else ''
@@ -42,7 +43,7 @@ class TOFTOFSetupWidget(BaseWidget):
         def _textToData(self, row, col, text):
             """
             converts a displayable text back to stored data.
-            Override this function if you need data types other than str in your table. 
+            Override this function if you need data types other than str in your table.
             """
             if col == 2:
                 return float(text) if text else None
