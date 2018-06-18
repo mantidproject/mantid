@@ -685,6 +685,54 @@ On GEM this is set to the following:
   # texture_mode = True
   grouping_file_name: "offsets_xie_test_2.cal"
 
+.. _gsas_calib_filename_gem_isis-powder-diffraction-ref:
+
+gsas_calib_filename
+^^^^^^^^^^^^^^^^^^^
+The name of the GSAS calibration file used to generate MAUD input
+files when running a focus in :ref:`texture_mode_isis-powder-diffraction-ref`.
+
+on GEM this is set to the following (this file is distributed with Mantid):
+
+.. code-block:: python
+
+  gsas_calib_filename: "GEM_PF1_PROFILE.IPF"
+
+.. _maud_grouping_scheme_gem_isis-powder-diffraction-ref:
+
+maud_grouping_scheme
+^^^^^^^^^^^^^^^^^^^^
+When saving MAUD files (typically only done when running in
+:ref:`texture_mode_isis-powder-diffraction-ref`), there are too many banks to have
+calibration parameters for each bank. Instead, the normal 6-bank calibration file is used
+(see :ref:`gsas_calib_filename_gem_isis-powder-diffraction-ref`), and each of the 160
+texture banks is assigned the calibration parameters of one of the 6 banks in the file.
+
+This parameter associates each of the 160 banks to one of the big banks. It is a list of bank IDs,
+where the value at element ``i`` is a number between 1 and 6, indicating which of the 6 banks to
+associate texture bank ``i`` with.
+
+On GEM this is set to the following:
+
+.. code-block:: python
+
+  maud_grouping_scheme: [1] * 3 + [2] * 8 + [3] * 20 + [4] * 42 + [5] * 52 + [6] * 35
+
+.. _maud_template_filename_gem_isis-powder-diffraction-ref:
+
+maud_template_filename
+^^^^^^^^^^^^^^^^^^^^^^
+The name of the template to use when generating a MAUD calibration file.
+This has quite a specific format due to the behaviour of
+:ref:`SaveGEMMAUDParamFile <algm-SaveGEMMAUDParamFile>`, so you should consult
+the development team before changing this to make sure all the boxes are filled.
+
+On GEM this is set to the following (this file is distributed with Mantid):
+
+.. code-block:: python
+
+  maud_template_filename: "maud_param_template.maud"
+
 .. _raw_tof_cropping_values_gem_isis-powder-diffraction-ref:
 
 raw_tof_cropping_values

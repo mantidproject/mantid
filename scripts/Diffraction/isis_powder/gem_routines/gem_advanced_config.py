@@ -90,6 +90,9 @@ texture_vanadium_cropping_values = [(75, 34933), (65, 22887), (65, 22230), (73, 
                                     (100, 19993), (100, 20034), (100, 20026), (100, 20033)]
 
 all_adv_variables = {
+    "gsas_calib_filename": "GEM_PF1_PROFILE.IPF",
+    "maud_grouping_scheme": [1] * 3 + [2] * 8 + [3] * 20 + [4] * 42 + [5] * 52 + [6] * 35,
+    "maud_template_filename": "maud_param_template.maud",
     "raw_tof_cropping_values": gem_adv_config_params
 }
 
