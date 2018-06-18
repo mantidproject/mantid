@@ -6,10 +6,12 @@ fitting for integrating peaks.
 
 # This __future__ import is for Python 2/3 compatibility
 from __future__ import (absolute_import, division, print_function)
+import sys
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 import numpy as np
+
 
 
 class IntegratePeaksProfileFitting(PythonAlgorithm):
@@ -109,7 +111,10 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         mtd['MDdata'] = MDdata
 
         padeCoefficients = ICCFT.getModeratorCoefficients(padeFile)
-        strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'))
+        if sys.version_info[0] == 3:
+            strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'),encoding='latin1')
+        else:
+            strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'))
         predpplCoefficients = self.getProperty('PredPplCoefficients').value
         nTheta = self.getProperty('NTheta').value
         nPhi = self.getProperty('NPhi').value
