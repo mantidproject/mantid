@@ -5,22 +5,22 @@
 #include "ApplicationWindow.h"
 #include "globals.h"
 #include "Folder.h"
-#include "ProjectRecoveryAdaptor.h"
+#include "ProjectRecoveryThread.h"
 #include "ProjectSerialiser.h"
 
 namespace MantidQt {
 namespace API {
 
-ProjectRecoveryAdaptor::ProjectRecoveryAdaptor(ApplicationWindow *windowHandle)
+ProjectRecoveryThread::ProjectRecoveryThread(ApplicationWindow *windowHandle)
     : m_windowPtr(windowHandle) {}
 
-void ProjectRecoveryAdaptor::saveOpenWindows(std::string projectFilepath) {
+void ProjectRecoveryThread::saveOpenWindows(std::string projectFilepath) {
   const bool isRecovery = true;
   ProjectSerialiser projectWriter(m_windowPtr, isRecovery);
   projectWriter.save(QString::fromStdString(projectFilepath));
 }
 
-void ProjectRecoveryAdaptor::loadOpenWindows(std::string projectFilePath) {
+void ProjectRecoveryThread::loadOpenWindows(std::string projectFilePath) {
   const bool isRecovery = true;
   ProjectSerialiser projectWriter(m_windowPtr, isRecovery);
 

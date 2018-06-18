@@ -247,31 +247,21 @@ void file_uncompress(const char *file);
 }
 
 ApplicationWindow::ApplicationWindow(bool factorySettings)
-    : QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),
-      blockWindowActivation(false), m_enableQtiPlotFitting(false),
-      m_exitCode(0),
-#ifdef Q_OS_MAC // Mac
-      settings(QSettings::IniFormat, QSettings::UserScope, "Mantid",
-               "MantidPlot")
-#else
-      settings("Mantid", "MantidPlot")
-#endif
-{
-  QStringList empty;
-  init(factorySettings, empty);
-}
+// Delegate with an empty string list for the arguments
+	: ApplicationWindow(factorySettings, QStringList{}) {}
 
 ApplicationWindow::ApplicationWindow(bool factorySettings,
-                                     const QStringList &args)
-    : QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),
-      blockWindowActivation(false), m_enableQtiPlotFitting(false),
-      m_exitCode(0),
+	const QStringList &args)
+	: QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),
+	blockWindowActivation(false), m_enableQtiPlotFitting(false),
+	m_exitCode(0), 
 #ifdef Q_OS_MAC // Mac
       settings(QSettings::IniFormat, QSettings::UserScope, "Mantid",
-               "MantidPlot")
+               "MantidPlot"),
 #else
-      settings("Mantid", "MantidPlot")
+      settings("Mantid", "MantidPlot"),
 #endif
+	m_projectRecoveryThread(this)
 {
   init(factorySettings, args);
 }
@@ -279,7 +269,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings,
 /**
  * This function is responsible for copying the old configuration
  * information from the ISIS\MantidPlot area to the new Mantid\MantidPlot
- * area. The old area is deleted once the trnasfer is complete. On subsequent
+ * area. The old area is deleted once the transfer is complete. On subsequent
  * runs, if the old configuration area is missing or empty, the copying
  * is ignored.
  */
@@ -11691,11 +11681,6 @@ void ApplicationWindow::createActions() {
   connect(actionNewTiledWindow, SIGNAL(triggered()), this,
           SLOT(newTiledWindow()));
 
-  actionGetRecoveryHandle = new MantidQt::MantidWidgets::TrackedAction(
-      tr("Get recovery handle"), this);
-  connect(actionGetRecoveryHandle, SIGNAL(triggered()), this,
-          SLOT(getRecoveryHandle()));
-
   actionNewMatrix = new MantidQt::MantidWidgets::TrackedAction(
       QIcon(getQPixmap("new_matrix_xpm")), tr("New &Matrix"), this);
   actionNewMatrix->setShortcut(tr("Ctrl+M"));
@@ -16732,10 +16717,4 @@ void ApplicationWindow::dropInTiledWindow(MdiSubWindow *w, QPoint pos) {
 bool ApplicationWindow::isOfType(const QObject *obj,
                                  const char *toCompare) const {
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
-}
-
-ProjectRecoveryAdaptor *ApplicationWindow::getRecoveryHandle() {
-  auto adaptorHandle =
-      Mantid::Kernel::make_unique<MantidQt::API::ProjectRecoveryAdaptor>(this);
-  return adaptorHandle.release();
 }

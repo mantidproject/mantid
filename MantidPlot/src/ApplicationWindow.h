@@ -45,7 +45,7 @@ Description          : QtiPlot's main window
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
-#include "ProjectRecoveryAdaptor.h"
+#include "ProjectRecoveryThread.h"
 #include "ProjectSaveView.h"
 #include "Script.h"
 #include "Scripted.h"
@@ -1123,8 +1123,6 @@ public slots:
 
   bool isOfType(const QObject *obj, const char *toCompare) const;
 
-  MantidQt::API::ProjectRecoveryAdaptor *getRecoveryHandle();
-
 signals:
   void modified();
   void shutting_down();
@@ -1604,7 +1602,6 @@ private:
   QAction *actionPanPlot;
   QAction *actionWaterfallPlot;
   QAction *actionNewTiledWindow;
-  QAction *actionGetRecoveryHandle;
 
   QList<QAction *> d_user_actions;
   QList<QMenu *> d_user_menus; // Mantid
@@ -1630,6 +1627,10 @@ private:
   bool blockWindowActivation;
   ///
   bool m_enableQtiPlotFitting;
+
+  /// Owns a thread which automatically triggers project recovery for the GUI
+  MantidQt::API::ProjectRecoveryThread m_projectRecoveryThread;
+
 
 #ifdef SHARED_MENUBAR
   QMenuBar *m_sharedMenuBar; ///< Pointer to the shared menubar
