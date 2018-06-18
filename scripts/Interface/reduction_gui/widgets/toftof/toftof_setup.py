@@ -13,6 +13,12 @@ from reduction_gui.widgets.data_table_view import DataTableView
 
 #-------------------------------------------------------------------------------
 
+class SmallQLineEdit(QLineEdit):
+    '''just a smaller QLineEdit'''  
+    def sizeHint(self):
+        '''overriding the sizeHint() function to get a smaller lineEdit'''
+        return super(SmallQLineEdit, self).sizeHint() // 2
+
 
 class TOFTOFSetupWidget(BaseWidget):
     ''' The one and only tab page. '''
@@ -96,10 +102,10 @@ class TOFTOFSetupWidget(BaseWidget):
 
         self.vanRuns   = tip(QLineEdit(), self.TIP_vanRuns)
         self.vanCmnt   = tip(QLineEdit(), self.TIP_vanCmnt)
-        self.vanTemp   = tip(QLineEdit(), self.TIP_vanTemp)
+        self.vanTemp   = tip(SmallQLineEdit(), self.TIP_vanTemp)
 
-        self.ecRuns    = tip(QLineEdit(), self.TIP_ecRuns)
-        self.ecTemp    = tip(QLineEdit(), self.TIP_ecTemp)
+        self.ecRuns    = tip(SmallQLineEdit(), self.TIP_ecRuns)
+        self.ecTemp    = tip(SmallQLineEdit(), self.TIP_ecTemp)
         self.ecFactor  = tip(QDoubleSpinBox(), self.TIP_ecFactor)
 
         set_spin(self.ecFactor, 0, 1)
@@ -225,13 +231,12 @@ class TOFTOFSetupWidget(BaseWidget):
         grid.addWidget(QLabel('Vanadium runs'), 0, 0)
         grid.addWidget(self.vanRuns,            0, 1, 1, 3)
         grid.addWidget(QLabel('Van. comment'),  1, 0)
-        grid.addWidget(self.vanCmnt,            1, 1, 1, 1)
-        grid.addWidget(QLabel('Temp.'),         1, 2)
-        grid.addWidget(self.vanTemp,            1, 3, 1, 1)
+        grid.addWidget(self.vanCmnt,            1, 1, 1, 2)
+        grid.addLayout(hbox(QLabel('Temp.'), self.vanTemp),         1, 3)
         grid.addWidget(QLabel('Empty can runs'),2, 0)
-        grid.addLayout(hbox(self.ecRuns, QLabel('EC factor'), self.ecFactor), 2, 1, 1, 1)
-        grid.addWidget(QLabel('Temp.'),         2, 2)
-        grid.addWidget(self.ecTemp,             2, 3)
+        grid.addWidget(self.ecRuns,             2, 1, 1, 1)
+        grid.addLayout(hbox(QLabel('EC factor'), self.ecFactor), 2, 2, 1, 1)
+        grid.addLayout(hbox(QLabel('Temp.'), self.ecTemp),         2, 3)
         grid.addWidget(QLabel('Mask detectors'),3, 0)
         grid.addWidget(self.maskDetectors,      3, 1, 1, 3)
 
