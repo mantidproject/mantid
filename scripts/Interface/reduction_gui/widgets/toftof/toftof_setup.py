@@ -9,7 +9,7 @@ from PyQt4.QtGui  import *
 
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement
-from reduction_gui.widgets.data_table_view import DataTableView
+from reduction_gui.widgets.data_table_view import DataTableView, DataTableModel
 
 #-------------------------------------------------------------------------------
 
@@ -24,6 +24,28 @@ class TOFTOFSetupWidget(BaseWidget):
     ''' The one and only tab page. '''
     name = 'TOFTOF Reduction'
 
+    class TofTofDataTableModel(DataTableModel):
+
+        def _dataToText(self, row, col, value):
+            """
+            converts the stored data to a displayable text.
+            Override this function if you need data types other than str in your table. 
+            """
+            if col == 2:
+                return str(value) if value is not None else ''
+            else:
+                return str(value) # just return the value, it is already str.
+
+        def _textToData(self, row, col, text):
+            """
+            converts a displayable text back to stored data.
+            Override this function if you need data types other than str in your table. 
+            """
+            if col == 2:
+                return float(text) if text else None
+            else:
+                return text # just return the value, it is already str.
+
     # tooltips
     TIP_prefix  = ''
     TIP_dataDir = ''
@@ -33,10 +55,10 @@ class TOFTOFSetupWidget(BaseWidget):
 
     TIP_vanRuns = ''
     TIP_vanCmnt = ''
-    TIP_vanTemp = 'Temperature in [K]. only required if none is given in data'
+    TIP_vanTemp = 'Temperature (K). Optional.'
 
     TIP_ecRuns = ''
-    TIP_ecTemp = 'Temperature in [K]. only required if none is given in data'
+    TIP_ecTemp = 'Temperature (K). Optional.'
     TIP_ecFactor = ''
 
     TIP_binEon = ''
@@ -131,10 +153,9 @@ class TOFTOFSetupWidget(BaseWidget):
         self.maskDetectors = tip(QLineEdit(), self.TIP_maskDetectors)
 
         headers = ('Data runs', 'Comment', 'Temperature [K]')
-        self.dataRunsView  = tip(DataTableView(self, headers), self.TIP_dataRunsView)
+        self.dataRunsView = tip(DataTableView(self, headers, TOFTOFSetupWidget.TofTofDataTableModel), self.TIP_dataRunsView)
         self.dataRunsView.horizontalHeader().setStretchLastSection(True)
         self.dataRunsView.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-
         self.runDataModel = self.dataRunsView.model()
 
         # ui controls
@@ -322,6 +343,9 @@ class TOFTOFSetupWidget(BaseWidget):
         def line_text(lineEdit):
             return lineEdit.text().strip()
 
+        def float_or_none(string):
+            float(string) if string else None
+
         elem.facility_name   = self._settings.facility_name
         elem.instrument_name = self._settings.instrument_name
 
@@ -330,10 +354,10 @@ class TOFTOFSetupWidget(BaseWidget):
 
         elem.vanRuns       = line_text(self.vanRuns)
         elem.vanCmnt       = line_text(self.vanCmnt)
-        elem.vanTemp       = line_text(self.vanTemp)
+        elem.vanTemp       = float_or_none(line_text(self.vanTemp))
 
         elem.ecRuns        = line_text(self.ecRuns)
-        elem.ecTemp        = line_text(self.ecTemp)
+        elem.ecTemp        = float_or_none(line_text(self.ecTemp))
         elem.ecFactor      = self.ecFactor.value()
 
         elem.dataRuns      = self.runDataModel.tableData
@@ -380,10 +404,10 @@ class TOFTOFSetupWidget(BaseWidget):
 
         self.vanRuns.setText(elem.vanRuns)
         self.vanCmnt.setText(elem.vanCmnt)
-        self.vanTemp.setText(elem.vanTemp)
+        self.vanTemp.setText(str(elem.vanTemp) if elem.vanTemp is not None else '')
 
         self.ecRuns.setText(elem.ecRuns)
-        self.ecTemp.setText(elem.ecTemp)
+        self.ecTemp.setText(str(elem.ecTemp) if elem.ecTemp is not None else '')
         self.ecFactor.setValue(elem.ecFactor)
 
         self.runDataModel.tableData = elem.dataRuns

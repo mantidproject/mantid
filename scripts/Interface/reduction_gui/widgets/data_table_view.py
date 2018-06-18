@@ -77,6 +77,20 @@ class DataTableModel(QtCore.QAbstractTableModel):
 		while self._numRows() < numRows:
 			self.tableData.append([""] * self.columnCount())
 
+	def _dataToText(self, row, col, value):
+		"""
+		converts the stored data to a displayable text.
+		Override this function if you need data types other than str in your table. 
+		"""
+		return str(value)
+
+	def _textToData(self, row, col, text):
+		"""
+		converts a displayable text back to stored data.
+		Override this function if you need data types other than str in your table. 
+		"""
+		return text # just return the value, it is already str.
+
 	def _setCellText(self, row, col, text):
 		"""
 		set the text of a cell
@@ -85,7 +99,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
 		:param text: text for the cell
 		"""
 		self._ensureHasRows(row + 1)
-		self.tableData[row][col] = str(text).strip()
+		self.tableData[row][col] = self._textToData(row, col, str(text).strip())
 
 	def _getCellText(self, row, col):
 		"""
@@ -95,7 +109,8 @@ class DataTableModel(QtCore.QAbstractTableModel):
 		:return: text of the cell
 		"""
 		rowData = self._getRow(row)
-		return str(rowData[col]).strip() if len(rowData) > col else None
+		return self._dataToText(row, col, rowData[col]).strip() \
+			   if len(rowData) > col else None
 
 	# reimplemented QAbstractTableModel methods
 
@@ -195,15 +210,17 @@ class DataTableView(QtWidgets.QTableView):
 	"""
 	DataTable Widget for data runs.
 	"""
-	def __init__(self, parent, headers, model=None):
+	def __init__(self, parent, headers, model_cls=None):
 		"""
 		:param headers: tuple of strings of the column headers
 		:param model: a DataTableModel if an external model should be used. if not specified a new DataTableModel is created
 		:return: a brand new DataTableView
 		"""
 		super(DataTableView, self).__init__(parent)
-		if model is None:
-			model = DataTableModel(self, headers)
+		if model_cls is None:
+			model_cls = DataTableModel
+		model = model_cls(self, headers)
+
 		self.setModel(model)
 		self.verticalHeader().setVisible(False);
 		self.horizontalHeader().setStretchLastSection(True)
