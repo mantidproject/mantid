@@ -161,7 +161,7 @@ public:
     alg->setPropertyValue("MaxIterations", "1");
     alg->setProperty("DataLinearAdj", ws);
     alg->setProperty("DataConstAdj", ws);
-    alg->setProperty("PerSpectrumReconstruction", false);
+    alg->setProperty("PerSpectrumImage", false);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
     alg->setPropertyValue("EvolChi", "evolChi");
@@ -294,7 +294,7 @@ public:
     // in the input workspace even though images are summed.
     alg->setProperty("DataLinearAdj", ws1);
     alg->setProperty("DataConstAdj", ws1);
-    alg->setProperty("PerSpectrumReconstruction", false);
+    alg->setProperty("PerSpectrumImage", false);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
     alg->setPropertyValue("EvolChi", "evolChi");
@@ -659,7 +659,7 @@ public:
     alg->setProperty("A", 0.01);
     alg->setProperty("DataLinearAdj", linAdj);
     alg->setProperty("DataConstAdj", constAdj);
-    alg->setProperty("PerSpectrumReconstruction", false);
+    alg->setProperty("PerSpectrumImage", false);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
     alg->setPropertyValue("EvolChi", "evolChi");

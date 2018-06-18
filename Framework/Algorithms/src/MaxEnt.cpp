@@ -223,9 +223,10 @@ void MaxEnt::init() {
       "The data in this workspace is complex in the same manner as complex "
       "input data");
   declareProperty(
-      "PerSpectrumReconstruction", true,
+      "PerSpectrumImage", true,
       "Reconstruction is done independently on each spectrum. "
-      "If false, all the spectra are added together in the reconstruction.");
+      "If false, all the spectra use one summed image and the reconstructions."
+      "differ only through their adjustments");
 
   declareProperty(
       make_unique<WorkspaceProperty<>>("EvolChi", "", Direction::Output),
@@ -269,7 +270,7 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
   // Check linear adjustments, we expect and even number of histograms
   // and if any, they must be sufficient for all spectra in input workspace,
   // if per spectrum reconstruction is done.
-  bool perSpec = getProperty("PerSpectrumReconstruction");
+  bool perSpec = getProperty("PerSpectrumImage");
   MatrixWorkspace_sptr linAdj = getProperty("DataLinearAdj");
   size_t nAHistograms = 0;
   if (linAdj)
@@ -347,7 +348,7 @@ void MaxEnt::exec() {
   // Constant adjustment of calculated data
   MatrixWorkspace_const_sptr dataConstAdj = getProperty("DataConstAdj");
   // Add spectra in reconstruction if false
-  const bool sumSpectra = !getProperty("PerSpectrumReconstruction");
+  const bool sumSpectra = !getProperty("PerSpectrumImage");
 
   // For now have the requirement that data must have non-zero
   // (and positive!) errors
