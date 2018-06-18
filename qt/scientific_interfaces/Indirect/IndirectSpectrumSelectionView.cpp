@@ -151,11 +151,13 @@ void IndirectSpectrumSelectionView::setMaskString(
 }
 
 void IndirectSpectrumSelectionView::setSpectraRangeMaxiMin(int value) {
+  MantidQt::API::SignalBlocker<QObject> blocker(this);
   m_selector->spMinimumSpectrum->setMaximum(value);
   m_selector->spMaskSpectrum->setMaximum(value);
 }
 
 void IndirectSpectrumSelectionView::setSpectraRangeMiniMax(int value) {
+  MantidQt::API::SignalBlocker<QObject> blocker(this);
   m_selector->spMaximumSpectrum->setMinimum(value);
   m_selector->spMaskSpectrum->setMinimum(value);
 }
@@ -225,7 +227,7 @@ void IndirectSpectrumSelectionView::clearMaskString() {
 }
 
 void IndirectSpectrumSelectionView::enableMaskLineEdit(int doEnable) {
-  if (doEnable >= 0)
+  if (doEnable >= 0 || selectionMode() == SpectrumSelectionMode::RANGE)
     m_selector->leMaskBins->setEnabled(true);
   else
     m_selector->leMaskBins->setEnabled(false);
