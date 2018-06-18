@@ -18,7 +18,6 @@ attr_mapping = \
      ParamMapEntry(ext_name="gsas_calib_filename",       int_name="gsas_calib_filename"),
      ParamMapEntry(ext_name="input_mode",                int_name="input_batching", enum_class=INPUT_BATCHING),
      ParamMapEntry(ext_name="maud_grouping_scheme",      int_name="maud_grouping_scheme"),
-     ParamMapEntry(ext_name="maud_template_filename",    int_name="maud_template_filename"),
      ParamMapEntry(ext_name="mode",                      int_name="mode",           enum_class=GEM_CHOPPER_MODES),
      ParamMapEntry(ext_name="multiple_scattering",       int_name="multiple_scattering"),
      ParamMapEntry(ext_name="raw_tof_cropping_values",   int_name="raw_tof_cropping_values"),

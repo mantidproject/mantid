@@ -718,21 +718,6 @@ On GEM this is set to the following:
 
   maud_grouping_scheme: [1] * 3 + [2] * 8 + [3] * 20 + [4] * 42 + [5] * 52 + [6] * 35
 
-.. _maud_template_filename_gem_isis-powder-diffraction-ref:
-
-maud_template_filename
-^^^^^^^^^^^^^^^^^^^^^^
-The name of the template to use when generating a MAUD calibration file.
-This has quite a specific format due to the behaviour of
-:ref:`SaveGEMMAUDParamFile <algm-SaveGEMMAUDParamFile>`, so you should consult
-the development team before changing this to make sure all the boxes are filled.
-
-On GEM this is set to the following (this file is distributed with Mantid):
-
-.. code-block:: python
-
-  maud_template_filename: "maud_param_template.maud"
-
 .. _raw_tof_cropping_values_gem_isis-powder-diffraction-ref:
 
 raw_tof_cropping_values
