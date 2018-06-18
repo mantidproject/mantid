@@ -225,7 +225,7 @@ void IndirectSpectrumSelectionView::clearMaskString() {
 }
 
 void IndirectSpectrumSelectionView::enableMaskLineEdit(int doEnable) {
-  if (doEnable >= 0)
+  if (doEnable >= 0 || selectionMode() == SpectrumSelectionMode::RANGE)
     m_selector->leMaskBins->setEnabled(true);
   else
     m_selector->leMaskBins->setEnabled(false);
