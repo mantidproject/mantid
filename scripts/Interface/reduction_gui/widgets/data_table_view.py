@@ -109,8 +109,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
         :return: text of the cell
         """
         rowData = self._getRow(row)
-        return self._dataToText(row, col, rowData[col]).strip() \
-               if len(rowData) > col else None
+        return self._dataToText(row, col, rowData[col]).strip() if len(rowData) > col else None
 
     # reimplemented QAbstractTableModel methods
 
