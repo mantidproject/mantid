@@ -632,19 +632,20 @@ def get_standard_output_workspace_name(state, reduction_data_type, transmission 
         period_as_string = ""
 
     # 3. Detector name
-    move = state.move
-    detectors = move.detectors
-    if reduction_data_type is ISISReductionMode.Merged:
-        detector_name_short = "merged"
-    elif reduction_data_type is ISISReductionMode.HAB:
-        det_name = detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short
-        detector_name_short = det_name if det_name is not None else "hab"
-    elif reduction_data_type is ISISReductionMode.LAB:
-        det_name = detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short
-        detector_name_short = det_name if det_name is not None else "lab"
-    else:
-        raise RuntimeError("SANSStateFunctions: Unknown reduction data type {0} cannot be used to "
-                           "create an output name".format(reduction_data_type))
+    if not transmission:
+        move = state.move
+        detectors = move.detectors
+        if reduction_data_type is ISISReductionMode.Merged:
+            detector_name_short = "merged"
+        elif reduction_data_type is ISISReductionMode.HAB:
+            det_name = detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short
+            detector_name_short = det_name if det_name is not None else "hab"
+        elif reduction_data_type is ISISReductionMode.LAB:
+            det_name = detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short
+            detector_name_short = det_name if det_name is not None else "lab"
+        else:
+            raise RuntimeError("SANSStateFunctions: Unknown reduction data type {0} cannot be used to "
+                               "create an output name".format(reduction_data_type))
 
     # 4. Dimensionality
     reduction = state.reduction
