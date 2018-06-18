@@ -101,7 +101,6 @@ def get_mode_specific_variables(is_texture_mode):
                 "vanadium_cropping_values": texture_vanadium_cropping_values,
                 "grouping_file_name": "offsets_xie_test_2.cal",
                 "save_angles": True,
-                "save_gda": True,
                 "save_maud": True,
                 "save_maud_calib": True}
     else:
@@ -109,7 +108,6 @@ def get_mode_specific_variables(is_texture_mode):
                 "vanadium_cropping_values": vanadium_cropping_values,
                 "grouping_file_name": "GEM_Instrument_grouping.cal",
                 "save_angles": False,
-                "save_gda": False,
                 "save_maud": False,
                 "save_maud_calib": False}
 

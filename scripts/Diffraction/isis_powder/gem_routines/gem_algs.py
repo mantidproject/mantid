@@ -63,11 +63,3 @@ def save_maud_calib(d_spacing_group, output_path, gsas_calib_filename, grouping_
                                 GSASParamFile=gsas_calib_filename,
                                 GroupingScheme=grouping_scheme,
                                 OutputFilename=output_path)
-
-
-def save_gda(d_spacing_group, output_path, gsas_calib_filename, grouping_scheme):
-    cropped = mantid.CropWorkspace(InputWorkspace=d_spacing_group, XMax=10, StoreInADS=False)
-    mantid.SaveGDA(InputWorkspace=cropped,
-                   GSASParamFile=gsas_calib_filename,
-                   GroupingScheme=grouping_scheme,
-                   Filename=output_path)
