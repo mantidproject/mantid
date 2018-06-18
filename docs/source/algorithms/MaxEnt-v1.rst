@@ -67,6 +67,20 @@ one step closer to the solution:
 
 .. math:: \mathbf{x} = \mathbf{x} + \delta \mathbf{x}
 
+If *DataLinearAdj* :math:`l_m` and *DataConstAdj* :math:`c_m` are set 
+then the reconstructed data is adjusted to
+
+.. math:: d_m = \frac{l_m}{N} \sum_{j=0}^{N-1} x_j e^{i 2\pi m j / N} + c_m
+
+If *PerSpectrumImage* is set false, then chi squared is calculated for all spectra together to form a single image
+
+.. math:: \chi^2 = \frac{1}{N'}\sum_{m,k} \frac{\left(d_{m,k} - d_{m,k}^c\right)^2}{\sigma_{m,k}^2} \leq \chi^2_{target}
+
+then the reconstructed data are calculated from this single image and the adjustments are applied for each spectrum:
+
+.. math:: d_{m,k} = \frac{l_{m,k}}{N} \sum_{j=0}^{N-1} x_j e^{i 2\pi m j / N} + c_{m,k}
+
+
 Output Workspaces
 -----------------
 
@@ -625,7 +639,7 @@ Output:
    and the other three spectra are the imaginary parts.
    
 This can also be done with the spectra in the reconstructed data and image summed together. 
-This is done by setting the *PerSpectrumReconstruction* property to *false*.
+This is done by setting the *PerSpectrumImage* property to *false*.
 
 .. testcode:: ExAdjustmentSummed
 
@@ -683,7 +697,7 @@ This is done by setting the *PerSpectrumReconstruction* property to *false*.
         
    CreateWorkspace(OutputWorkspace='constadj',DataX=Xlin, DataY=Yconst, DataE=Zeroes, NSpec=2)
 
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', DataLinearAdj='linadj', DataConstAdj='constadj',A=0.001, PerSpectrumReconstruction=False)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', DataLinearAdj='linadj', DataConstAdj='constadj',A=0.001, PerSpectrumImage=False)
 
    print("Summed Reconstruction at 05: {:.3f}".format(data.readY(0)[5]))
    print("Summed Reconstruction at 10: {:.3f}".format(data.readY(0)[10]))

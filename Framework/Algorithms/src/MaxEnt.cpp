@@ -211,7 +211,7 @@ void MaxEnt::init() {
       "Adjusts the calculated data by multiplying each value by the "
       "corresponding Y value of this workspace. "
       "The data in this workspace is complex in the same manner as complex "
-      "input data");
+      "input data.");
   declareProperty(
       make_unique<WorkspaceProperty<>>(
           "DataConstAdj", "", Direction::Input, PropertyMode::Optional,
@@ -221,12 +221,12 @@ void MaxEnt::init() {
       "If DataLinearAdj is also specified, this addition is done after its "
       "multiplication. "
       "The data in this workspace is complex in the same manner as complex "
-      "input data");
+      "input data.");
   declareProperty(
       "PerSpectrumImage", true,
       "Reconstruction is done independently on each spectrum. "
-      "If false, all the spectra use one summed image and the reconstructions."
-      "differ only through their adjustments");
+      "If false, all the spectra use one image and the reconstructions "
+      "differ only through their adjustments.");
 
   declareProperty(
       make_unique<WorkspaceProperty<>>("EvolChi", "", Direction::Output),
