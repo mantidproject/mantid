@@ -59,8 +59,7 @@ def save_angles(d_spacing_group, output_path):
 
 
 def save_maud_calib(d_spacing_group, output_path, gsas_calib_filename, grouping_scheme):
-    input_ws_cropped = mantid.CropWorkspace(InputWorkspace=d_spacing_group, XMax=10, StoreInADS=False)
-    mantid.SaveGEMMAUDParamFile(InputWorkspace=input_ws_cropped,
+    mantid.SaveGEMMAUDParamFile(InputWorkspace=d_spacing_group,
                                 GSASParamFile=gsas_calib_filename,
                                 GroupingScheme=grouping_scheme,
                                 OutputFilename=output_path)
