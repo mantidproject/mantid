@@ -75,6 +75,5 @@ class GuiStateDirectorTest(unittest.TestCase):
         self.assertEqual(state.scale.thickness, 78.0)
 
 
-
 if __name__ == '__main__':
     unittest.main()

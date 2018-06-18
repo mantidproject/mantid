@@ -997,6 +997,7 @@ class RunTabPresenter(object):
         file_information_factory = SANSFileInformationFactory()
         file_information = file_information_factory.create_sans_file_information(sample_scatter)
         sample_thickness = file_information._thickness
+        user_file = get_string_entry(BatchReductionEntry.UserFile, row)
 
         # If one of the periods is not null, then we should switch the view to multi-period view
         if any ((sample_scatter_period, sample_transmission_period, sample_direct_period, can_scatter_period,
@@ -1008,29 +1009,30 @@ class RunTabPresenter(object):
         if self._view.is_multi_period_view():
             row_entry = "SampleScatter:{},ssp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
                         "CanScatter:{},csp:{},CanTrans:{},ctp:{}," \
-                        "CanDirect:{},cdp:{},OutputName:{},Sample Thickness:{}".format(sample_scatter,
-                                                                                       get_string_period(sample_scatter_period),
-                                                                                       sample_transmission,
-                                                                                       get_string_period(sample_transmission_period),
-                                                                                       sample_direct,
-                                                                                       get_string_period(sample_direct_period),
-                                                                                       can_scatter,
-                                                                                       get_string_period(can_scatter_period),
-                                                                                       can_transmission,
-                                                                                       get_string_period(can_transmission_period),
-                                                                                       can_direct,
-                                                                                       get_string_period(can_direct_period),
-                                                                                       output_name, sample_thickness)
+                        "CanDirect:{},cdp:{},OutputName:{},User File:{}," \
+                        "Sample Thickness:{}".format(sample_scatter,
+                                                     get_string_period(sample_scatter_period),
+                                                     sample_transmission,
+                                                     get_string_period(sample_transmission_period),
+                                                     sample_direct,
+                                                     get_string_period(sample_direct_period),
+                                                     can_scatter,
+                                                     get_string_period(can_scatter_period),
+                                                     can_transmission,
+                                                     get_string_period(can_transmission_period),
+                                                     can_direct,
+                                                     get_string_period(can_direct_period),
+                                                     output_name, user_file, sample_thickness)
         else:
             row_entry = "SampleScatter:{},SampleTrans:{},SampleDirect:{}," \
                         "CanScatter:{},CanTrans:{}," \
-                        "CanDirect:{},OutputName:{},Sample Thickness:{}".format(sample_scatter,
-                                                                                sample_transmission,
-                                                                                sample_direct,
-                                                                                can_scatter,
-                                                                                can_transmission,
-                                                                                can_direct,
-                                                                                output_name, sample_thickness)
+                        "CanDirect:{},OutputName:{},User File:{},Sample Thickness:{}".format(sample_scatter,
+                                                                                             sample_transmission,
+                                                                                             sample_direct,
+                                                                                             can_scatter,
+                                                                                             can_transmission,
+                                                                                             can_direct,
+                                                                                             output_name, user_file,sample_thickness)
 
         self._view.add_row(row_entry)
 

@@ -58,6 +58,7 @@ This example is for converting a function.
    fit_output =    Fit(Function=str(returnFunc),InputWorkspace=ws,MaxIterations=0,Output="return_params")
 
    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
+
    if paramTable.column(1)[0] == paramTable.column(1)[2]:
        print("Constant tie has been preserved")
    else:

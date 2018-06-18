@@ -2,6 +2,7 @@
 #define PROJECT_SERIALISER_H
 
 #include <string>
+#include <vector>
 
 #include <QFile>
 #include <QFileInfo>

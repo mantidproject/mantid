@@ -6,8 +6,8 @@
 
 #include <MantidAPI/MatrixWorkspace_fwd.h>
 
-#include <QWidget>
 #include <QMenu>
+#include <QWidget>
 
 class QTreeWidgetItem;
 class QSignalMapper;
@@ -58,17 +58,22 @@ public:
 
 signals:
   void plotSpectrumClicked(const QStringList &workspaceName);
+  void overplotSpectrumClicked(const QStringList &workspaceName);
   void plotSpectrumWithErrorsClicked(const QStringList &workspaceName);
+  void overplotSpectrumWithErrorsClicked(const QStringList &workspaceName);
   void plotColorfillClicked(const QStringList &workspaceName);
 
 private slots:
   void onPlotSpectrumClicked();
+  void onOverplotSpectrumClicked();
   void onPlotSpectrumWithErrorsClicked();
+  void onOverplotSpectrumWithErrorsClicked();
   void onPlotColorfillClicked();
 
 private:
-  QAction *m_plotSpectrum, *m_plotSpectrumWithErrs, *m_plotColorfill;
+  QAction *m_plotSpectrum, *m_overplotSpectrum, *m_plotSpectrumWithErrs,
+      *m_overplotSpectrumWithErrs, *m_plotColorfill;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGETSIMPLE_H
