@@ -7,6 +7,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include "BatchPresenterFactory.h"
 #include "ReflAutoreduction.h"
 #include <boost/shared_ptr.hpp>
 #include "SearchResult.h"

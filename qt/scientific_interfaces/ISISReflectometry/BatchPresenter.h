@@ -191,14 +191,6 @@ private:
   WorkspaceNamesFactory m_workspaceNameFactory;
 };
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenterFactory {
-public:
-  BatchPresenterFactory(std::vector<std::string> const &instruments);
-  std::unique_ptr<BatchPresenter> operator()(IBatchView *view) const;
-
-private:
-  std::vector<std::string> m_instruments;
-};
 }
 }
 #endif // MANTID_CUSTOMINTERFACES_BATCHVIEWPRESENTER_H_

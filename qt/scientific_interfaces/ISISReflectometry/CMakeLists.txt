@@ -8,6 +8,7 @@ set ( SRC_FILES
     BatchView.cpp
     ValidateRow.cpp
     BatchPresenter.cpp
+    BatchPresenterFactory.cpp
     MeasurementItem.cpp
     InstrumentOptionDefaults.cpp
     InstrumentParameters.cpp
@@ -47,6 +48,7 @@ set ( INC_FILES
     IBatchView.h
     BatchView.h
     BatchPresenter.h
+    BatchPresenterFactory.h
     InstrumentParameters.h
     IReflEventPresenter.h
     IReflEventTabPresenter.h

@@ -26,6 +26,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL IBatchView {
 public:
   virtual void invalidSelectionForCopy() = 0;
   virtual void invalidSelectionForPaste() = 0;
+
   virtual void invalidSelectionForCut() = 0;
   virtual void mustSelectRow() = 0;
   virtual void mustSelectGroup() = 0;

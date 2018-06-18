@@ -17,6 +17,15 @@ public:
   MOCK_METHOD1(setProgress, void(int));
   MOCK_METHOD0(jobs, MantidQt::MantidWidgets::Batch::IJobTreeView &());
   MOCK_METHOD0(resetFilterBox, void());
+
+  MOCK_METHOD0(invalidSelectionForCopy, void());
+  MOCK_METHOD0(invalidSelectionForPaste, void());
+  MOCK_METHOD0(invalidSelectionForCut, void());
+
+  MOCK_METHOD0(mustSelectRow, void());
+  MOCK_METHOD0(mustSelectGroup, void());
+  MOCK_METHOD0(mustNotSelectGroup, void());
+  MOCK_METHOD0(mustSelectGroupOrRow, void());
 };
 
 }
