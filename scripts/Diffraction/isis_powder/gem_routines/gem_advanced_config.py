@@ -107,7 +107,7 @@ def get_mode_specific_variables(is_texture_mode):
         return {"focused_cropping_values": focused_cropping_values,
                 "vanadium_cropping_values": vanadium_cropping_values,
                 "grouping_file_name": "GEM_Instrument_grouping.cal",
-                "save_angles": True,
+                "save_angles": False,
                 "save_maud": False,
                 "save_maud_calib": False}
 
