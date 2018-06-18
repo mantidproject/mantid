@@ -613,7 +613,7 @@ bool LoadNexusMonitors2::createOutputWorkspace(
   const std::string loadType = getProperty("LoadOnly");
   if (loadType == LOAD_EVENTS) {
     useEventMon = true;
-    if (numEventMon <= 0) { // make sure there are some
+    if (numEventMon == 0) { // make sure there are some
       throw std::runtime_error(
           "Loading event data. Trying to load event data but failed to "
           "find event monitors. This file may be corrupted or it may not be "
@@ -621,7 +621,7 @@ bool LoadNexusMonitors2::createOutputWorkspace(
     }
   } else if (loadType == LOAD_HISTO) {
     useEventMon = false;
-    if (numHistoMon <= 0) { // make sure there are some
+    if (numHistoMon == 0) { // make sure there are some
       throw std::runtime_error(
           "Not loading event data. Trying to load histogram data but failed to "
           "find monitors with histogram data or could not interpret the data. "
