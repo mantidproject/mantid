@@ -155,7 +155,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
         self.maskDetectors = tip(QLineEdit(), self.TIP_maskDetectors)
 
-        headers = ('Data runs', 'Comment', 'Temperature [K]')
+        headers = ('Data runs', 'Comment', 'T (K)')
         self.dataRunsView = tip(DataTableView(self, headers, TOFTOFSetupWidget.TofTofDataTableModel), self.TIP_dataRunsView)
         self.dataRunsView.horizontalHeader().setStretchLastSection(True)
         self.dataRunsView.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -256,11 +256,11 @@ class TOFTOFSetupWidget(BaseWidget):
         grid.addWidget(self.vanRuns,            0, 1, 1, 3)
         grid.addWidget(QLabel('Van. comment'),  1, 0)
         grid.addWidget(self.vanCmnt,            1, 1, 1, 2)
-        grid.addLayout(hbox(QLabel('Temp.'), self.vanTemp),         1, 3)
+        grid.addLayout(hbox(QLabel('T (K)'), self.vanTemp),         1, 3)
         grid.addWidget(QLabel('Empty can runs'),2, 0)
         grid.addWidget(self.ecRuns,             2, 1, 1, 1)
         grid.addLayout(hbox(QLabel('EC factor'), self.ecFactor), 2, 2, 1, 1)
-        grid.addLayout(hbox(QLabel('Temp.'), self.ecTemp),         2, 3)
+        grid.addLayout(hbox(QLabel('T (K)'), self.ecTemp),         2, 3)
         grid.addWidget(QLabel('Mask detectors'),3, 0)
         grid.addWidget(self.maskDetectors,      3, 1, 1, 3)
 
