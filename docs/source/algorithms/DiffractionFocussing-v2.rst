@@ -37,6 +37,12 @@ The DiffractionFocussing algorithm uses GroupDetectors algorithm to
 combine data from several spectra according to GroupingFileName file
 which is a `CalFile <http://www.mantidproject.org/CalFile>`_.
 
+The CheckForMask option is to allow for turning off the masked detector check that is on by default.
+If all the detectors in a group of the grouping scheme are masked, then the OutputWorkspace
+will not include a histogram for that group (i.e. if you specify 5 histograms in the grouping, 
+only 4 histograms would be returned in the OutputWorkspace). Setting CheckForMask == False overrides 
+this behavior, ensuring the number of histograms in grouping == number of histograms in OutputWorkspace.
+
 For EventWorkspaces
 ###################
 

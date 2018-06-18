@@ -96,8 +96,26 @@ public:
     dotestEventWorkspace(false, 1, false);
   }
 
+  void test_EventWorkspace_OneGroup_maskGroupTest() {
+    dotestEventWorkspace(false, 1, true, true);
+  }
+
+  void test_EventWorkspace_TwoGroup_maskGroupTest() {
+    dotestEventWorkspace(false, 2, true, true);
+  }
+
+  void test_EventWorkspace_TwoGroup_maskGroupTest_dontCheckMask() {
+    dotestEventWorkspace(false, 2, true, true, false);
+  }
+
+  void test_EventWorkspace_TwoGroup_maskGroupTest_dontCheckMask_dontPreserveEvents() {
+    dotestEventWorkspace(false, 2, false, true, false);
+  }
+
   void dotestEventWorkspace(bool inplace, size_t numgroups,
                             bool preserveEvents = true,
+                            bool maskGroupTest = false,
+                            bool checkForMask = true,
                             int bankWidthInPixels = 16) {
     std::string nxsWSname("DiffractionFocussing2Test_ws");
 
@@ -134,10 +152,27 @@ public:
     if (numgroups == 1)
       GroupNames = "bank3";
     std::string groupWSName("DiffractionFocussing2Test_group");
+
     FrameworkManager::Instance().exec("CreateGroupingWorkspace", 6,
                                       "InputWorkspace", nxsWSname.c_str(),
                                       "GroupNames", GroupNames.c_str(),
                                       "OutputWorkspace", groupWSName.c_str());
+
+    // ------ Setup test where entire group is masked -------
+    if (maskGroupTest) {
+      FrameworkManager::Instance().exec("MaskDetectors", 4,
+                                        "Workspace", nxsWSname.c_str(),
+                                        "ComponentList", "bank3");
+    }
+
+    // ------ Reduce number of groups if mask test and checking for mask ------
+    if (maskGroupTest && checkForMask ) {
+      if (numgroups > 1)
+        numgroups -= 1;
+      else
+        return;
+    }
+      
 
     // ------------ Create a grouping workspace by name -------------
     DiffractionFocussing2 focus;
@@ -145,6 +180,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         focus.setPropertyValue("InputWorkspace", nxsWSname));
     std::string outputws = nxsWSname + "_focussed";
+    TS_ASSERT_THROWS_NOTHING(
+        focus.setProperty("CheckForMask", checkForMask));
     if (inplace)
       outputws = nxsWSname;
     TS_ASSERT_THROWS_NOTHING(
@@ -190,12 +227,16 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(1)->length(), numgroups);
     TS_ASSERT_EQUALS(output->getSpectrum(0).getSpectrumNo(), 1);
 
+    // Setup different expected number of events if entire group masked but kept empty group
+    size_t expectedNumberEvents;
+    if (maskGroupTest && !checkForMask)
+      expectedNumberEvents = (numgroups-1) * bankWidthInPixels * bankWidthInPixels;
+    else
+      expectedNumberEvents = numgroups * bankWidthInPixels * bankWidthInPixels;
+
     // Events in these two banks alone
     if (preserveEvents)
-      TS_ASSERT_EQUALS(outputEvent->getNumberEvents(),
-                       (numgroups == 2)
-                           ? (bankWidthInPixels * bankWidthInPixels * 2)
-                           : bankWidthInPixels * bankWidthInPixels);
+      TS_ASSERT_EQUALS(outputEvent->getNumberEvents(), expectedNumberEvents);
 
     // Now let's test the grouping of detector UDETS to groups
     for (size_t wi = 0; wi < output->getNumberHistograms(); wi++) {
@@ -230,11 +271,7 @@ public:
           events_after_binning += outputEvent->dataY(workspace_index)[i];
       }
       // The count sums up to the same as the number of events
-      TS_ASSERT_DELTA(events_after_binning,
-                      (numgroups == 2)
-                          ? double(bankWidthInPixels * bankWidthInPixels) * 2.0
-                          : double(bankWidthInPixels * bankWidthInPixels),
-                      1e-4);
+      TS_ASSERT_DELTA(events_after_binning, double(expectedNumberEvents), 1e-4);
     }
   }
 
