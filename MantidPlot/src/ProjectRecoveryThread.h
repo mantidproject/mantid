@@ -1,6 +1,8 @@
 #ifndef PROJECT_RECOVERY_THREAD_H_
 #define PROJECT_RECOVERY_THREAD_H_
 
+#include <chrono>
+#include <thread>
 #include <string>
 
 // Forward declarations
@@ -38,11 +40,24 @@ namespace API {
 class ProjectRecoveryThread {
 public:
   explicit ProjectRecoveryThread(ApplicationWindow *windowHandle);
+  ~ProjectRecoveryThread();
 
-  void saveOpenWindows(std::string projectFilepath);
-  void loadOpenWindows(std::string projectFilePath);
+  void startProjectSaving();
+  void stopProjectSaving();
+
 
 private:
+	std::thread createBackgroundThread();
+	void projectSavingThread(bool &runThread);
+	void saveOpenWindows(std::string projectFilepath);
+	void saveWsHistories(std::string historyFilePath);
+	void loadOpenWindows(std::string projectFilePath);
+
+  /// Flag to toggle the threads operation.
+  bool m_runProjectSaving; // Does not need to be atomic, as we only read in worker
+
+  std::thread m_backgroundSavingThread;
+
   ApplicationWindow *m_windowPtr;
 };
 
