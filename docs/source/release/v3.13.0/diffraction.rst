@@ -31,6 +31,8 @@ New Features
 - :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` is extended to provide automatic masking of the pixels with spurious calibration constants.
 - :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` is extended to provide initial masking of the top and bottom parts of the tubes, and final masking of the 2D outputs.
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` performs powder diffraction data reduction for WAND² with calibration, monitor normalisation and background subtraction.
+- :ref:`DiffractionFocussing <algm-DiffractionFocussing2>` is extended to have the mask check on detectors as optional using CheckForMask.
+
 
 Engineering Diffraction
 -----------------------

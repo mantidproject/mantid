@@ -108,7 +108,8 @@ public:
     dotestEventWorkspace(false, 2, true, true, false);
   }
 
-  void test_EventWorkspace_TwoGroup_maskGroupTest_dontCheckMask_dontPreserveEvents() {
+  void
+  test_EventWorkspace_TwoGroup_maskGroupTest_dontCheckMask_dontPreserveEvents() {
     dotestEventWorkspace(false, 2, false, true, false);
   }
 
@@ -160,19 +161,18 @@ public:
 
     // ------ Setup test where entire group is masked -------
     if (maskGroupTest) {
-      FrameworkManager::Instance().exec("MaskDetectors", 4,
-                                        "Workspace", nxsWSname.c_str(),
-                                        "ComponentList", "bank3");
+      FrameworkManager::Instance().exec("MaskDetectors", 4, "Workspace",
+                                        nxsWSname.c_str(), "ComponentList",
+                                        "bank3");
     }
 
     // ------ Reduce number of groups if mask test and checking for mask ------
-    if (maskGroupTest && checkForMask ) {
+    if (maskGroupTest && checkForMask) {
       if (numgroups > 1)
         numgroups -= 1;
       else
         return;
     }
-      
 
     // ------------ Create a grouping workspace by name -------------
     DiffractionFocussing2 focus;
@@ -180,8 +180,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         focus.setPropertyValue("InputWorkspace", nxsWSname));
     std::string outputws = nxsWSname + "_focussed";
-    TS_ASSERT_THROWS_NOTHING(
-        focus.setProperty("CheckForMask", checkForMask));
+    TS_ASSERT_THROWS_NOTHING(focus.setProperty("CheckForMask", checkForMask));
     if (inplace)
       outputws = nxsWSname;
     TS_ASSERT_THROWS_NOTHING(
@@ -227,10 +226,12 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(1)->length(), numgroups);
     TS_ASSERT_EQUALS(output->getSpectrum(0).getSpectrumNo(), 1);
 
-    // Setup different expected number of events if entire group masked but kept empty group
+    // Setup different expected number of events if entire group masked but kept
+    // empty group
     size_t expectedNumberEvents;
     if (maskGroupTest && !checkForMask)
-      expectedNumberEvents = (numgroups-1) * bankWidthInPixels * bankWidthInPixels;
+      expectedNumberEvents =
+          (numgroups - 1) * bankWidthInPixels * bankWidthInPixels;
     else
       expectedNumberEvents = numgroups * bankWidthInPixels * bankWidthInPixels;
 

@@ -60,9 +60,9 @@ void DiffractionFocussing2::init() {
                   "If false, then the workspace gets converted to a "
                   "Workspace2D histogram.");
 
-  declareProperty("CheckForMask", true,
-                  "OutputWorkspace will only have spectrum that are not completely masked.");
-
+  declareProperty("CheckForMask", true, "OutputWorkspace will only have "
+                                        "spectrum that are not completely "
+                                        "masked.");
 }
 
 //=============================================================================
@@ -553,7 +553,8 @@ void DiffractionFocussing2::determineRebinParameters() {
 
   // Will override the checkForMask to False
   bool globalCheckForMask = getProperty("CheckForMask");
-  if (!globalCheckForMask) checkForMask = false;
+  if (!globalCheckForMask)
+    checkForMask = false;
 
   const auto &spectrumInfo = m_matrixInputW->spectrumInfo();
 
