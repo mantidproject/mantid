@@ -178,12 +178,11 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
 
                     sigma = np.sqrt(intensity + bgEvents + varFit)
 
-                    compStr = 'peak {:d}; original: {:4.2f} +- {:4.2f};  new: {:4.2f} +- {:4.2f}'.format(peakNumber, 
+                    compStr = 'peak {:d}; original: {:4.2f} +- {:4.2f};  new: {:4.2f} +- {:4.2f}'.format(peakNumber,
                                                                                                          peak.getIntensity(),
                                                                                                          peak.getSigmaIntensity(),
                                                                                                          intensity, sigma)
                     logger.information(compStr)
-
 
                     # Save the results
                     params['peakNumber'] = peakNumber
