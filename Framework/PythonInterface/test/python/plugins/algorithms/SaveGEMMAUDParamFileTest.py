@@ -38,8 +38,8 @@ class SaveGEMMAUDParamFileTest(unittest.TestCase):
         line_index = self.file_contents.index(segment_header) + 1
         expected_vals_index = 0
         while self.file_contents[line_index]:
-            self.assertEquals(val_type(self.file_contents[line_index]),
-                              expected_values[expected_vals_index])
+            self.assertAlmostEquals(val_type(self.file_contents[line_index]),
+                                    expected_values[expected_vals_index])
             line_index += 1
             expected_vals_index += 1
 
