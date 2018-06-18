@@ -193,7 +193,6 @@ def fitScaling(n_events, box, YTOF, YBVG, goodIDX=None, neigh_length_m=3):
     YRET = A1 * YJOINT + A0
     chiSqRed = fitResultsScaling[1]
 
-    #logger.information( '{:2.2f} is chiSqRed'.format(chiSq))
     return YRET, chiSqRed, A1
 
 
@@ -469,7 +468,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         m.setAttributeValue('nX', h.shape[0])
         m.setAttributeValue('nY', h.shape[1])
         m.setConstraints(boundsDict)
-        # logger.information('before: ' + str(m))
         # Do the fit
         bvgWS = CreateWorkspace(OutputWorkspace='bvgWS', DataX=pos.ravel(
         ), DataY=H.ravel(), DataE=np.sqrt(H.ravel()))
@@ -477,7 +475,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         fitResults = Fit(Function=m, InputWorkspace='bvgWS', Output='bvgfit',
                          Minimizer='Levenberg-MarquardtMD')
 
-        #logger.information('after' + str(m))
     elif forceParams is not None:
         p0 = np.zeros(7)
         p0[0] = np.max(h)
@@ -528,7 +525,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         m.setAttributeValue('nX', h.shape[0])
         m.setAttributeValue('nY', h.shape[1])
         m.setConstraints(boundsDict)
-        #logger.information('before: ' + str(m))
 
         # Do the fit
         #plt.figure(18); plt.clf(); plt.imshow(m.function2D(pos)); plt.title('BVG Initial guess')
@@ -537,7 +533,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         fitResults = Fit(Function=fitFun, InputWorkspace=bvgWS,
                          Output='bvgfit', Minimizer='Levenberg-MarquardtMD')
 
-        #system.logger('after: ' + str(m))
     # Recover the result
     m = BivariateGaussian.BivariateGaussian()
     m.init()
