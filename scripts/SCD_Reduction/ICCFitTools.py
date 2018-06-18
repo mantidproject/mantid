@@ -1,13 +1,14 @@
+from __future__ import (absolute_import, division, print_function)
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
-import os
 from scipy.misc import factorial
 from scipy.optimize import curve_fit
 from mantid.simpleapi import *
 from mantid.kernel import V3D
 import ICConvoluted as ICC
 import itertools
+from functools import reduce
 from scipy.ndimage.filters import convolve
 reload(ICC)
 plt.ion()
@@ -48,7 +49,6 @@ def calcSomeTOF(box, peak, refitIDX=None, q_frame='sample'):
             'ICCFT:calcSomeTOF - q_frame must be either \'lab\' or \'sample\'; %s was provided' % q_frame)
     PIXELFACTOR = np.ones_like(QX) * (peak.getL1() + peak.getL2()) * np.sin(0.5 * peak.getScattering())
     for i, x in enumerate(qx):
-        print(i)
         for j, y in enumerate(qy):
             for k, z in enumerate(qz):
                 if refitIDX[i, j, k]:
@@ -291,11 +291,11 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
             break
         except KeyboardInterrupt:
             sys.exit()
-    #print( '\n'.join([str(v)
+    #logger.information( '\n'.join([str(v)
     #                 for v in zip(chiSqList[:i+1], ISIGList[:i+1], IList[:i+1])]))
     use_ppl = np.argmin(np.abs(chiSqList[:i+1]-1.0))
     pp_lambda = pp_lambda_toCheck[use_ppl]
-    #print('USING PP_LAMBDA', pp_lambda, 'WITH CHISQ:', chiSqList[use_ppl])
+    #logger.information('USING PP_LAMBDA', pp_lambda, 'WITH CHISQ:', chiSqList[use_ppl])
     goodIDX, _ = getBGRemovedIndices(n_events, pp_lambda=pp_lambda)
     chiSq, h, intens, sigma = getQuickTOFWS(box, peak, padeCoefficients, goodIDX=goodIDX, qMask=qMask,
                                             pp_lambda=pp_lambda, minppl_frac=minppl_frac, maxppl_frac=maxppl_frac,
@@ -335,12 +335,10 @@ def getBGRemovedIndices(n_events, zBG=1.96, calc_pp_lambda=False, neigh_length_m
     """
 
     if calc_pp_lambda is True and pp_lambda is not None:
-        import sys
         sys.exit(
             'Error in ICCFT:getBGRemovedIndices: You should not calculate and specify pp_lambda.')
 
     if calc_pp_lambda is True and padeCoefficients is None:
-        import sys
         sys.exit(
             'Error in ICCFT:getBGRemovedIndices: calc_pp_lambda is True, but no moderator coefficients are provided.')
 
@@ -374,7 +372,7 @@ def getBGRemovedIndices(n_events, zBG=1.96, calc_pp_lambda=False, neigh_length_m
             except:
                 #raise
                 pplmin_frac -= 0.4
-    print('ERROR WITH ICCFT:getBGRemovedIndices!')
+    logger.warning('ERROR WITH ICCFT:getBGRemovedIndices!')
 
 
 def getDQFracHKL(UB, frac=0.5):
@@ -488,7 +486,7 @@ def integratePeak(x, yFit, yData, bg, pp_lambda=0, fracStop=0.01, totEvents=1, b
         xStart = x[iStart]
         xStop = x[iStop]
     else:
-        print('ICCFITTOOLS:integratePeak - NO GOOD START/STOP POINT!!')
+        logger.warning('ICCFITTOOLS:integratePeak - NO GOOD START/STOP POINT!!')
         return 0.0, 1.0, x[0], x[-1]
 
     # Do the integration
@@ -497,7 +495,6 @@ def integratePeak(x, yFit, yData, bg, pp_lambda=0, fracStop=0.01, totEvents=1, b
     # Calculate the background sigma = sqrt(var(Fit) + sum(BG))
     # sigma = np.sqrt(totEvents + bgEvents)
     sigma = np.sqrt(intensity + 2.0*bgEvents + varFit)
-    #print('Intensity: ', intensity, 'Sigma: ', sigma, 'pp_lambda:', pp_lambda)
     return intensity, sigma, xStart, xStop
 
 
@@ -711,7 +708,7 @@ def getSample(run, DetCalFile,  workDir, fileName, qLow=-25, qHigh=25, q_frame='
     """
 
     # data
-    print('Loading file' + fileName)
+    logger.information('Loading file' + fileName)
     data = Load(Filename=fileName)
     if DetCalFile is not None:
         LoadIsawDetCal(InputWorkspace=data, Filename=DetCalFile)
@@ -931,11 +928,9 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
                 wavelength = peak.getWavelength()  # in Angstrom
                 energy = 81.804 / wavelength**2 / 1000.0  # in eV
                 flightPath = peak.getL1() + peak.getL2()  # in m
-                print( '---fitting peak ' +
-                       str(i) + '  Num events: ' +
-                       str(Box.getNEvents()), ' ', peak.getHKL())
+                logger.information( '---fitting peak {:d}'.format(i))
                 if Box.getNEvents() < 1 or np.all(np.abs(peak.getHKL()) == 0):
-                    print("Peak %i has 0 events or is HKL=000. Skipping!" % i)
+                    logger.information("Peak {:d} has 0 events or is HKL=000. Skipping!".format(p))
                     peak.setIntensity(0)
                     peak.setSigmaIntensity(1)
                     paramLisg.append([i, energy, 0.0, 1.0e10, 1.0e10] +
@@ -992,26 +987,19 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
                         [r.readX(0), r.readY(0), r.readY(1), r.readY(2)])
                 paramList.append([i, energy, np.sum(icProfile), 0.0, chiSq] +
                                  [param.row(i)['Value'] for i in range(param.rowCount())]+[pp_lambda])
-                if param.row(2)['Value'] < 0:
-                    print(i, [param.row(i)['Value']
-                              for i in range(param.rowCount())])
                 mtd.remove('MDbox_'+str(run)+'_'+str(i))
 
             except KeyboardInterrupt:
-                print('KeyboardInterrupt: Exiting Program!!!!!!!')
+                logger.warning('KeyboardInterrupt: Exiting Program!!!!!!!')
                 sys.exit()
             except:  # Error with fitting
                 # raise
-                import sys
                 peak.setIntensity(0)
                 peak.setSigmaIntensity(1)
-                print('Error with peak ' + str(i))
+                logger.warning('Error with peak ' + str(i))
                 paramList.append(
                     [i, energy, 0.0, 1.0e10, 1.0e10] + [0 for i in range(10)]+[0])
                 #paramList.append([i, energy, 0.0, 1.0e10,1.0e10] + [0 for i in range(mtd['fit_parameters'].rowCount())]+[0])
                 continue
-                exc_type, exc_obj, exc_tb = sys.exc_info()
-                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                print(exc_type, fname, exc_tb.tb_lineno)
         mtd.remove('MDbox_'+str(run)+'_'+str(i))
     return peaks_ws, paramList, fitDict

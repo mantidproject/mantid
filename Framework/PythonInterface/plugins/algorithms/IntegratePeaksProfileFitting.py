@@ -15,7 +15,7 @@ import numpy as np
 class IntegratePeaksProfileFitting(PythonAlgorithm):
 
     def summary(self):
-        return 'Fits a series fo peaks using 3D profile fitting as an Ikeda-Carpenter function by a bivariate gaussian.'
+        return 'Fits a series of peaks using 3D profile fitting as an Ikeda-Carpenter function by a bivariate gaussian.'
 
     def category(self):
         # defines the category the algorithm will be put in the algorithm browser
@@ -178,9 +178,12 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
 
                     sigma = np.sqrt(intensity + bgEvents + varFit)
 
-                    #print('peak %i; original: %4.2f +- %4.2f;  new: %4.2f +- %4.2f'%(peakNumber, peak.getIntensity(),
-                    #                                                                 peak.getSigmaIntensity(),
-                    #                                                                 intensity, sigma))
+                    compStr = 'peak {:d}; original: {:4.2f} +- {:4.2f};  new: {:4.2f} +- {:4.2f}'.format(peakNumber, 
+                                                                                                         peak.getIntensity(),
+                                                                                                         peak.getSigmaIntensity(),
+                                                                                                         intensity, sigma)
+                    logger.information(compStr)
+
 
                     # Save the results
                     params['peakNumber'] = peakNumber

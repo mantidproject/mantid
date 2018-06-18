@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 from matplotlib.mlab import bivariate_normal
@@ -123,11 +124,11 @@ class BivariateGaussian(IFunction1D):
                     constraintString = "{:4.4e} < {:s} < {:4.4e}".format(boundsDict[param][0], param, boundsDict[param][1])
                     self.addConstraints(constraintString)
                 else:
-                    print 'Setting constraints on mbvg; reversing bounds'
+                    self.log().information('Setting constraints on mbvg; reversing bounds')
                     self.addConstraints("{:4.4e} < A < {:4.4e}".format(boundsDict[param][1], boundsDict[param][0]))
             except ValueError:
-                print 'Cannot set parameter {:s} for mbvg.  Valid choices are', \
-                      '(\'A\', \'MuX\', \'MuY\', \'SigX\', \'SigY\', \'SigP\', \'Bg\')'.format(param)
+                self.log().warning('Cannot set parameter {:s} for mbvg.  Valid choices are ' +
+                                   '(\'A\', \'MuX\', \'MuY\', \'SigX\', \'SigY\', \'SigP\', \'Bg\')'.format(param))
 
     def function2D(self, t):
         """
