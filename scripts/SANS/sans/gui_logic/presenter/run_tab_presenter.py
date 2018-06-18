@@ -472,8 +472,8 @@ class RunTabPresenter(object):
 
         # 3. Go through each row and construct a state object
         if table_model and state_model_with_view_update:
-            states = create_states(state_model_with_view_update, table_model, self._view.instrument,
-                                   self._view.get_number_of_rows(), self._facility, row_index, file_lookup=file_lookup)
+            states = create_states(state_model_with_view_update, table_model, self._view.instrument
+                                   , self._facility, row_index, file_lookup=file_lookup)
         else:
             states = None
         stop_time_state_generation = time.time()

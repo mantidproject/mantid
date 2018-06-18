@@ -22,6 +22,9 @@ class GuiStateDirector(object):
         self._state_gui_model = state_gui_model
         self._facility = facility
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def create_state(self, row, file_lookup=True, instrument=SANSInstrument.SANS2D):
         # 1. Get the data settings, such as sample_scatter, etc... and create the data state.
         table_index_model = self._table_model.get_table_entry(row)
