@@ -20,7 +20,7 @@ std::string generateDifferenceMessage(const std::string &item,
   stringstream << "Item \"" << item
                << "\" has different values in workspaces! Found: " << wsValue
                << " in workspace " << wsName
-               << " but value in first workspace value was: " << firstValue
+               << " but the value in the first workspace was: " << firstValue
                << "." << std::endl;
   return stringstream.str();
 }
@@ -690,7 +690,7 @@ void SampleLogsBehaviour::readdSampleLogToWorkspace(MatrixWorkspace &addeeWS) {
  */
 void SampleLogsBehaviour::resetSampleLogs(MatrixWorkspace &ws) {
   for (auto const &item : m_logMap) {
-    std::string propertyToReset = item.first.first;
+    std::string const &propertyToReset = item.first.first;
 
     if (item.first.second == MergeLogType::TimeSeries) {
       auto property =
