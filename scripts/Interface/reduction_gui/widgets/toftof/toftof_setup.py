@@ -120,6 +120,11 @@ class TOFTOFSetupWidget(BaseWidget):
                 widget.setToolTip(text)
             return widget
 
+        def DoubleEdit():
+            edit = SmallQLineEdit()
+            edit.setValidator(QDoubleValidator())
+            return edit
+
         # ui data elements
         self.prefix    = tip(QLineEdit(), self.TIP_prefix)
         self.dataDir   = tip(QLineEdit(), self.TIP_dataDir)
@@ -127,10 +132,10 @@ class TOFTOFSetupWidget(BaseWidget):
 
         self.vanRuns   = tip(QLineEdit(), self.TIP_vanRuns)
         self.vanCmnt   = tip(QLineEdit(), self.TIP_vanCmnt)
-        self.vanTemp   = tip(SmallQLineEdit(), self.TIP_vanTemp)
+        self.vanTemp   = tip(DoubleEdit(), self.TIP_vanTemp)
 
         self.ecRuns    = tip(SmallQLineEdit(), self.TIP_ecRuns)
-        self.ecTemp    = tip(SmallQLineEdit(), self.TIP_ecTemp)
+        self.ecTemp    = tip(DoubleEdit(), self.TIP_ecTemp)
         self.ecFactor  = tip(QDoubleSpinBox(), self.TIP_ecFactor)
 
         set_spin(self.ecFactor, 0, 1)
