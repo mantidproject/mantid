@@ -53,11 +53,11 @@ namespace DataHandling {
 namespace LoadNexusMonitorsAlg {
 // spectrum  is implicit in the structure as index + 1 - TODO was spectrumNo
 struct MonitorInfo {
-  std::string name{ "" }; ///< name of the group in the nexus file - TODO was
+  std::string name{""}; ///< name of the group in the nexus file - TODO was
   /// monitorName
-  detid_t detNum{ 0 }; ///< detector number for monitor - TODO was monIndex
-  bool hasEvent{ false };
-  bool hasHisto{ false };
+  detid_t detNum{0}; ///< detector number for monitor - TODO was monIndex
+  bool hasEvent{false};
+  bool hasHisto{false};
 };
 }
 

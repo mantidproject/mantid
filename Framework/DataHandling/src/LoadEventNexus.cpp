@@ -211,7 +211,7 @@ void LoadEventNexus::init() {
                                                        Direction::Input),
                   "Load the monitors from the file (optional, default False).");
 
-  std::vector<std::string> options{ "", "Events", "Histogram" };
+  std::vector<std::string> options{"", "Events", "Histogram"};
   declareProperty("MonitorsLoadOnly", "",
                   boost::make_shared<Kernel::StringListValidator>(options),
                   "If multiple repesentations exist, which one to load. "
@@ -1155,7 +1155,7 @@ void LoadEventNexus::runLoadMonitors() {
     if (mons) {
       // create the output workspace property on the fly
       this->declareProperty(
-          Kernel::make_unique<WorkspaceProperty<MatrixWorkspace> >(
+          Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
               "MonitorWorkspace", mon_wsname, Direction::Output),
           "Monitors from the Event NeXus file");
       this->setProperty("MonitorWorkspace", mons);

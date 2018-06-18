@@ -129,11 +129,11 @@ void LoadNexusMonitors2::init() {
       "The name of the output workspace in which to load the NeXus monitors.");
 
   declareProperty(
-      Kernel::make_unique<Kernel::PropertyWithValue<std::string> >(
+      Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(
           "NXentryName", "", Kernel::Direction::Input),
       "Optional: Name of the NXentry to load if it's not the default.");
 
-  std::vector<std::string> options{ "", LOAD_EVENTS, LOAD_HISTO };
+  std::vector<std::string> options{"", LOAD_EVENTS, LOAD_HISTO};
   declareProperty("LoadOnly", "",
                   boost::make_shared<Kernel::StringListValidator>(options),
                   "If multiple repesentations exist, which one to load. "
@@ -592,14 +592,14 @@ size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
   // this takes care of the fact that SNS monitors have negative numbers
   std::sort(m_monitorInfo.begin(), m_monitorInfo.end(),
             [](const MonitorInfo &left, const MonitorInfo &right) {
-    return std::abs(left.detNum) < std::abs(right.detNum);
-  });
+              return std::abs(left.detNum) < std::abs(right.detNum);
+            });
 
   return m_monitorInfo.size();
 }
 
-bool
-LoadNexusMonitors2::createOutputWorkspace(std::vector<bool> &loadMonitorFlags) {
+bool LoadNexusMonitors2::createOutputWorkspace(
+    std::vector<bool> &loadMonitorFlags) {
   loadMonitorFlags.clear();
 
   size_t numEventMon =
