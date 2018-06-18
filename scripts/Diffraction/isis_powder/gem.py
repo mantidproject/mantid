@@ -73,6 +73,27 @@ class Gem(AbstractInst):
 
         return out_file_names
 
+    def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
+        """
+        Takes a list of focused workspace banks and saves them out in an instrument appropriate format.
+        :param processed_spectra: The list of workspace banks to save out
+        :param run_details: The run details associated with this run
+        :param output_mode: Optional - Sets additional saving/grouping behaviour depending on the instrument
+        :return: d-spacing and TOF groups of the processed output workspaces
+        """
+        d_spacing_group, tof_group = super(Gem, self)._output_focused_ws(processed_spectra=processed_spectra,
+                                                                         run_details=run_details,
+                                                                         output_mode=output_mode)
+
+        output_paths = self._generate_out_file_paths(run_details=run_details)
+        if "maud_filename" in output_paths:
+            gem_algs.save_maud(d_spacing_group, output_paths["maud_filename"])
+
+        if "angles_filename" in output_paths:
+            gem_algs.save_angles(d_spacing_group, output_paths["angles_filename"])
+
+        return d_spacing_group, tof_group
+
     @staticmethod
     def _generate_input_file_name(run_number):
         return _gem_generate_inst_name(run_number=run_number)
