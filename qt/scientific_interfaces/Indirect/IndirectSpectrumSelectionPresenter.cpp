@@ -60,7 +60,8 @@ const std::string MASK_LIST =
 
 IndirectSpectrumSelectionPresenter::IndirectSpectrumSelectionPresenter(
     IndirectFittingModel *model, IndirectSpectrumSelectionView *view)
-    : QObject(nullptr), m_model(model), m_view(view) {
+    : QObject(nullptr), m_model(model), m_view(view), m_activeIndex(0),
+      m_maskIndex(0) {
   connect(m_view.get(), SIGNAL(selectedSpectraChanged(const std::string &)),
           this, SLOT(updateSpectraList(const std::string &)));
   connect(m_view.get(), SIGNAL(selectedSpectraChanged(const std::string &)),
