@@ -59,17 +59,16 @@ namespace {
 // Anonymous helper functions.
 void parseToken(std::vector<std::vector<unsigned int>> &parsedRuns,
                 const std::string &token);
-std::vector<std::vector<unsigned int>> generateRange(unsigned int from,
-                                                     unsigned int to,
-                                                     unsigned int stepSize,
-                                                     bool addRuns);
+std::vector<std::vector<unsigned int>>
+generateRange(const unsigned int from, const unsigned int to,
+              const unsigned int stepSize, const bool addRuns);
 void validateToken(const std::string &token);
 bool matchesFully(const std::string &stringToMatch,
-                  const std::string &regexString, bool caseless = false);
+                  const std::string &regexString, const bool caseless = false);
 std::string getMatchingString(const std::string &regexString,
                               const std::string &toParse,
-                              bool caseless = false);
-std::string pad(unsigned int run, const std::string &instString);
+                              const bool caseless = false);
+std::string pad(const unsigned int run, const std::string &instString);
 
 std::set<std::pair<unsigned int, unsigned int>> &
 mergeAdjacentRanges(std::set<std::pair<unsigned int, unsigned int>> &ranges,
@@ -77,10 +76,10 @@ mergeAdjacentRanges(std::set<std::pair<unsigned int, unsigned int>> &ranges,
 
 // Helper functor.
 struct RangeContainsRun {
-  bool operator()(std::pair<unsigned int, unsigned int> range,
-                  unsigned int run);
-  bool operator()(unsigned int run,
-                  std::pair<unsigned int, unsigned int> range);
+  bool operator()(const std::pair<unsigned int, unsigned int> &range,
+                  const unsigned int run);
+  bool operator()(const unsigned int run,
+                  const std::pair<unsigned int, unsigned int> &range);
 };
 
 std::string toString(const RunRangeList &runRangeList);
@@ -138,8 +137,7 @@ parseMultiRunString(std::string runString) {
 
 /**
  * Suggests a workspace name for the given vector of file names (which, because
- *they
- * are in the same vector, we will assume they are to be added.)  Example:
+ * they are in the same vector, we will assume they are to be added.)  Example:
  *
  * Parsing ["INST_4.ext", "INST_5.ext", "INST_6.ext", "INST_8.ext"] will return
  * "INST_4_to_6_and_8" as a suggested workspace name.
@@ -170,19 +168,19 @@ std::string suggestWorkspaceName(const std::vector<std::string> &fileNames) {
 
 /**
  * Comparator for the set that holds instrument names in Parser.  This is
- * reversed
- * since we want to come across the longer instrument names first.  It is
- * caseless
- * so we don't get "inst" coming before "INSTRUMENT" - though this is probably
- * overkill.
+ * reversed since we want to come across the longer instrument names first.
+ * It is caseless so we don't get "inst" coming before "INSTRUMENT" -
+ * though this is probably overkill.
  */
 bool ReverseCaselessCompare::operator()(const std::string &a,
                                         const std::string &b) const {
-  std::string lowerA(a);
-  std::string lowerB(b);
+  std::string lowerA;
+  lowerA.resize(a.size());
+  std::string lowerB;
+  lowerB.resize(b.size());
 
-  std::transform(lowerA.begin(), lowerA.end(), lowerA.begin(), tolower);
-  std::transform(lowerB.begin(), lowerB.end(), lowerB.begin(), tolower);
+  std::transform(a.cbegin(), a.cend(), lowerA.begin(), tolower);
+  std::transform(b.cbegin(), b.cend(), lowerB.begin(), tolower);
 
   return lowerA > lowerB;
 }
@@ -199,9 +197,9 @@ Parser::Parser()
       m_validInstNames() {
   ConfigServiceImpl &config = ConfigService::Instance();
 
-  auto facilities = config.getFacilities();
-  for (auto &facility : facilities) {
-    const std::vector<InstrumentInfo> instruments = (*facility).instruments();
+  const auto facilities = config.getFacilities();
+  for (const auto facility : facilities) {
+    const std::vector<InstrumentInfo> instruments = facility->instruments();
 
     for (const auto &instrument : instruments) {
       m_validInstNames.insert(instrument.name());
@@ -273,12 +271,12 @@ void Parser::split() {
   // combinations of special characters, for example double commas.)
 
   // Get the extension, if there is one.
-  size_t lastDot = m_multiFileName.find_last_of('.');
+  const size_t lastDot = m_multiFileName.find_last_of('.');
   if (lastDot != std::string::npos)
     m_extString = m_multiFileName.substr(lastDot);
 
   // Get the directory, if there is one.
-  size_t lastSeparator = m_multiFileName.find_last_of("/\\");
+  const size_t lastSeparator = m_multiFileName.find_last_of("/\\");
   if (lastSeparator != std::string::npos)
     m_dirString = m_multiFileName.substr(0, lastSeparator + 1);
 
@@ -323,8 +321,7 @@ void Parser::split() {
   if (base.empty())
     throw std::runtime_error("There does not appear to be any runs present.");
 
-  InstrumentInfo instInfo =
-      ConfigService::Instance().getInstrument(m_instString);
+  const auto &instInfo = ConfigService::Instance().getInstrument(m_instString);
   // why?
   // m_instString = instInfo.shortName(); // Make sure we're using the shortened
   // form of the isntrument name.
@@ -384,7 +381,7 @@ operator()(const std::vector<unsigned int> &runs) {
  *
  * @returns the generated vector of file names.
  */
-std::string GenerateFileName::operator()(unsigned int run) {
+std::string GenerateFileName::operator()(const unsigned int run) {
   std::stringstream fileName;
 
   fileName << m_prefix << pad(run, m_instString) << m_suffix;
@@ -406,7 +403,7 @@ RunRangeList::RunRangeList() : m_rangeList() {}
  *
  * @param run :: the run to add.
  */
-void RunRangeList::addRun(unsigned int run) {
+void RunRangeList::addRun(const unsigned int run) {
   // If the run is inside one of the ranges, do nothing.
   if (std::binary_search(m_rangeList.begin(), m_rangeList.end(), run,
                          RangeContainsRun()))
@@ -437,7 +434,8 @@ void RunRangeList::addRunRange(unsigned int from, unsigned int to) {
  *
  * @param range :: the range to add
  */
-void RunRangeList::addRunRange(std::pair<unsigned int, unsigned int> range) {
+void RunRangeList::addRunRange(
+    const std::pair<unsigned int, unsigned int> &range) {
   addRunRange(range.first, range.second);
 }
 
@@ -543,10 +541,9 @@ void parseToken(std::vector<std::vector<unsigned int>> &parsedRuns,
  * @returns a vector of vectors of runs.
  * @throws std::runtime_error if a step size of zero is specified.
  */
-std::vector<std::vector<unsigned int>> generateRange(unsigned int from,
-                                                     unsigned int to,
-                                                     unsigned int stepSize,
-                                                     bool addRuns) {
+std::vector<std::vector<unsigned int>>
+generateRange(unsigned int const from, unsigned int const to,
+              unsigned int const stepSize, bool const addRuns) {
   if (stepSize == 0)
     throw std::runtime_error(
         "Unable to generate a range with a step size of zero.");
@@ -558,9 +555,9 @@ std::vector<std::vector<unsigned int>> generateRange(unsigned int from,
     limit = ConfigService::Instance().getFacility().multiFileLimit();
   }
 
-  unsigned int orderedTo = from > to ? from : to;
-  unsigned int orderedFrom = from > to ? to : from;
-  unsigned int numberOfFiles = (orderedTo - orderedFrom) / stepSize;
+  unsigned int const orderedTo = from > to ? from : to;
+  unsigned int const orderedFrom = from > to ? to : from;
+  unsigned int const numberOfFiles = (orderedTo - orderedFrom) / stepSize;
   if (numberOfFiles > limit) {
     std::stringstream sstream;
     sstream << "The range from " << orderedFrom << " to " << orderedTo
@@ -580,11 +577,11 @@ std::vector<std::vector<unsigned int>> generateRange(unsigned int from,
     while (currentRun <= to) {
       if (addRuns) {
         if (runs.empty())
-          runs.push_back(std::vector<unsigned int>(1, currentRun));
+          runs.emplace_back(std::vector<unsigned int>(1, currentRun));
         else
-          runs.at(0).push_back(currentRun);
+          runs.front().emplace_back(currentRun);
       } else {
-        runs.push_back(std::vector<unsigned int>(1, currentRun));
+        runs.emplace_back(std::vector<unsigned int>(1, currentRun));
       }
 
       currentRun += stepSize;
@@ -595,11 +592,11 @@ std::vector<std::vector<unsigned int>> generateRange(unsigned int from,
     while (currentRun >= to) {
       if (addRuns) {
         if (runs.empty())
-          runs.push_back(std::vector<unsigned int>(1, currentRun));
+          runs.emplace_back(std::vector<unsigned int>(1, currentRun));
         else
-          runs.at(0).push_back(currentRun);
+          runs.front().emplace_back(currentRun);
       } else {
-        runs.push_back(std::vector<unsigned int>(1, currentRun));
+        runs.emplace_back(std::vector<unsigned int>(1, currentRun));
       }
 
       // Guard against case where stepSize would take us into negative
@@ -649,7 +646,7 @@ void validateToken(const std::string &token) {
  * @returns true if the string matches fully, or false otherwise.
  */
 bool matchesFully(const std::string &stringToMatch,
-                  const std::string &regexString, bool caseless) {
+                  const std::string &regexString, const bool caseless) {
   boost::regex regex;
 
   if (caseless)
@@ -670,7 +667,7 @@ bool matchesFully(const std::string &stringToMatch,
  * @returns the part (if any) of the given string that matches the given regex
  */
 std::string getMatchingString(const std::string &regexString,
-                              const std::string &toParse, bool caseless) {
+                              const std::string &toParse, const bool caseless) {
   boost::regex regex;
   if (caseless) {
     regex = boost::regex(regexString, boost::regex::icase);
@@ -695,8 +692,9 @@ std::string getMatchingString(const std::string &regexString,
  * @returns the string, padded to the required length.
  * @throws std::runtime_error if run is longer than size of count.
  */
-std::string pad(unsigned int run, const std::string &instString) {
-  InstrumentInfo instInfo = ConfigService::Instance().getInstrument(instString);
+std::string pad(const unsigned int run, const std::string &instString) {
+  InstrumentInfo const instInfo =
+      ConfigService::Instance().getInstrument(instString);
   std::string prefix;
   if (!instInfo.facility().noFilePrefix())
     prefix = instInfo.filePrefix(run) + instInfo.delimiter();
@@ -720,12 +718,14 @@ std::string pad(unsigned int run, const std::string &instString) {
  * is
  * inside the range.
  */
-bool RangeContainsRun::operator()(std::pair<unsigned int, unsigned int> range,
-                                  unsigned int run) {
+bool RangeContainsRun::
+operator()(const std::pair<unsigned int, unsigned int> &range,
+           const unsigned int run) {
   return range.second < run;
 }
-bool RangeContainsRun::operator()(unsigned int run,
-                                  std::pair<unsigned int, unsigned int> range) {
+bool RangeContainsRun::
+operator()(const unsigned int run,
+           const std::pair<unsigned int, unsigned int> &range) {
   return run < range.first;
 }
 
