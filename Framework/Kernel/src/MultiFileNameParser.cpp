@@ -37,18 +37,17 @@ const std::string SINGLE = "(" + INST + "*[0-9]+)";
 const std::string RANGE = "(" + SINGLE + COLON + SINGLE + ")";
 const std::string STEP_RANGE =
     "(" + SINGLE + COLON + SINGLE + COLON + SINGLE + ")";
-const std::string ADD_LIST = "(" + SINGLE + "(" + PLUS + SINGLE + ")+" + ")";
 const std::string ADD_RANGE = "(" + SINGLE + MINUS + SINGLE + ")";
-const std::string ADD_RANGES = "(" + ADD_RANGE + PLUS + ADD_RANGE + ")";
-const std::string ADD_SINGLE_TO_RANGE = "(" + SINGLE + PLUS + ADD_RANGE + ")";
-const std::string ADD_RANGE_TO_SINGLE = "(" + ADD_RANGE + PLUS + SINGLE + ")";
 const std::string ADD_STEP_RANGE =
     "(" + SINGLE + MINUS + SINGLE + COLON + SINGLE + ")";
+const std::string SINGLE_OR_STEP_OR_ADD_RANGE =
+    "(" + SINGLE + "|" + ADD_STEP_RANGE + "|" + ADD_RANGE + ")";
+const std::string ADD_LIST = "(" + SINGLE_OR_STEP_OR_ADD_RANGE + "(" + PLUS +
+                             SINGLE_OR_STEP_OR_ADD_RANGE + ")+" + ")";
 
-const std::string ANY = "(" + ADD_STEP_RANGE + "|" + ADD_RANGES + "|" +
-                        ADD_SINGLE_TO_RANGE + "|" + ADD_RANGE_TO_SINGLE + "|" +
-                        ADD_RANGE + "|" + ADD_LIST + "|" + STEP_RANGE + "|" +
-                        RANGE + "|" + SINGLE + ")";
+const std::string ANY = "(" + ADD_STEP_RANGE + "|" + ADD_LIST + "|" +
+                        ADD_RANGE + "|" + STEP_RANGE + "|" + RANGE + "|" +
+                        SINGLE + ")";
 const std::string LIST = "(" + ANY + "(" + COMMA + ANY + ")*" + ")";
 } // namespace Regexs
 
@@ -58,9 +57,8 @@ const std::string LIST = "(" + ANY + "(" + COMMA + ANY + ")*" + ")";
 
 namespace {
 // Anonymous helper functions.
-std::vector<std::vector<unsigned int>> &
-parseToken(std::vector<std::vector<unsigned int>> &parsedRuns,
-           const std::string &token);
+void parseToken(std::vector<std::vector<unsigned int>> &parsedRuns,
+                const std::string &token);
 std::vector<std::vector<unsigned int>> generateRange(unsigned int from,
                                                      unsigned int to,
                                                      unsigned int stepSize,
@@ -95,18 +93,14 @@ std::string &accumulateString(std::string &output,
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * Parses a string containing a comma separated list of run "tokens", where each
- *run
- * token is of one of the allowed forms (a single run or a range of runs or an
- *added
- * range of runs, etc.)
+ * Parses a string containing a comma separated list of run "tokens", where
+ * each run token is of one of the allowed forms (a single run or a range
+ * of runs or an added range of runs, etc.)
  *
  * @param runString :: a string containing the runs to parse, in the correct
  *format.
- *
  * @returns a vector of vectors of unsigned ints, one int for each run, where
- *runs
- *    to be added are contained in the same sub-vector.
+ *runs to be added are contained in the same sub-vector.
  * @throws std::runtime_error when runString provided is in an incorrect format.
  */
 std::vector<std::vector<unsigned int>>
@@ -135,8 +129,11 @@ parseMultiRunString(std::string runString) {
   std::for_each(tokens.begin(), tokens.end(), validateToken);
 
   // Parse each token, accumulate the results, and return them.
-  return std::accumulate(tokens.begin(), tokens.end(),
-                         std::vector<std::vector<unsigned int>>(), parseToken);
+  std::vector<std::vector<unsigned int>> runGroups;
+  for (auto const &token : tokens) {
+    parseToken(runGroups, token);
+  }
+  return runGroups;
 }
 
 /**
@@ -340,8 +337,7 @@ void Parser::split() {
 
   m_runString = getMatchingString("^" + Regexs::LIST, base);
 
-  const std::string remainder = base.substr(m_runString.size(), base.size());
-  if (!remainder.empty()) {
+  if (m_runString.size() != base.size()) {
     throw std::runtime_error("There is an unparsable token present.");
   }
 }
@@ -461,96 +457,75 @@ namespace // anonymous
  *
  * @param parsedRuns :: the vector of vectors of runs parsed so far.
  * @param token      :: the token to parse.
- *
- * @returns the newly parsed runs appended to the previously parsed runs.
- * @throws std::runtime_error if
  */
-std::vector<std::vector<unsigned int>> &
-parseToken(std::vector<std::vector<unsigned int>> &parsedRuns,
-           const std::string &token) {
-  // Tokenise further, on plus, minus or colon.
+void parseToken(std::vector<std::vector<unsigned int>> &parsedRuns,
+                const std::string &token) {
+  std::vector<std::vector<unsigned int>> runs;
+  // Tokenise further on plus.
   std::vector<std::string> subTokens;
-  subTokens = boost::split(subTokens, token, boost::is_any_of("+-:"));
-
-  std::vector<unsigned int> rangeDetails;
-
-  // Convert the sub tokens to uInts.
-  std::vector<std::string>::iterator iter;
-
-  for (iter = subTokens.begin(); iter != subTokens.end(); ++iter) {
-    try {
-      rangeDetails.push_back(boost::lexical_cast<unsigned int>(*iter));
-    } catch (boost::bad_lexical_cast &) {
-      rangeDetails.push_back(0);
+  boost::split(subTokens, token, boost::is_any_of("+"));
+  std::vector<unsigned int> runsToAdd;
+  for (auto const &subToken : subTokens) {
+    // E.g. "2012".
+    if (matchesFully(subToken, Regexs::SINGLE)) {
+      runsToAdd.emplace_back(std::stoi(subToken));
+    }
+    // E.g. "2012:2020".
+    else if (matchesFully(subToken, Regexs::RANGE)) {
+      // Fill in runs directly.
+      constexpr bool addRuns{false};
+      std::vector<std::string> rangeDetails;
+      rangeDetails.reserve(2);
+      boost::split(rangeDetails, subToken, boost::is_any_of(":"));
+      runs = generateRange(std::stoi(rangeDetails.front()),
+                           std::stoi(rangeDetails.back()), 1, addRuns);
+    }
+    // E.g. "2012:2020:4".
+    else if (matchesFully(subToken, Regexs::STEP_RANGE)) {
+      // Fill in runs directly.
+      constexpr bool addRuns{false};
+      std::vector<std::string> rangeDetails;
+      rangeDetails.reserve(3);
+      boost::split(rangeDetails, subToken, boost::is_any_of(":"));
+      runs =
+          generateRange(std::stoi(rangeDetails[0]), std::stoi(rangeDetails[1]),
+                        std::stoi(rangeDetails[2]), addRuns);
+    }
+    // E.g. "2012-2020".
+    else if (matchesFully(subToken, Regexs::ADD_RANGE)) {
+      constexpr bool addRuns{true};
+      std::vector<std::string> rangeDetails;
+      rangeDetails.reserve(2);
+      boost::split(rangeDetails, subToken, boost::is_any_of("-"));
+      const auto generated =
+          generateRange(std::stoi(rangeDetails.front()),
+                        std::stoi(rangeDetails.back()), 1, addRuns);
+      std::copy(generated.front().cbegin(), generated.front().cend(),
+                back_inserter(runsToAdd));
+    }
+    // E.g. "2012-2020:4".
+    else if (matchesFully(subToken, Regexs::ADD_STEP_RANGE)) {
+      constexpr bool addRuns{true};
+      std::vector<std::string> rangeDetails;
+      rangeDetails.reserve(3);
+      boost::split(rangeDetails, subToken, boost::is_any_of("-:"));
+      const auto generated =
+          generateRange(std::stoi(rangeDetails[0]), std::stoi(rangeDetails[1]),
+                        std::stoi(rangeDetails[2]), addRuns);
+      std::copy(generated.front().cbegin(), generated.front().cend(),
+                back_inserter(runsToAdd));
+    } else {
+      // We should never reach here - the validation done on the token
+      // previously
+      // should prevent any other possible scenario.
+      assert(false);
     }
   }
-
-  // We should always end up with at least 1 unsigned int here.
-  assert(!rangeDetails.empty());
-
-  std::vector<std::vector<unsigned int>> runs;
-
-  // E.g. "2012".
-  if (matchesFully(token, Regexs::SINGLE)) {
-    runs.push_back(std::vector<unsigned int>(1, rangeDetails[0]));
+  if (!runsToAdd.empty()) {
+    runs.emplace_back(runsToAdd);
   }
-  // E.g. "2012:2020".
-  else if (matchesFully(token, Regexs::RANGE)) {
-    runs = generateRange(rangeDetails[0], rangeDetails[1], 1, false);
-  }
-  // E.g. "2012:2020:4".
-  else if (matchesFully(token, Regexs::STEP_RANGE)) {
-    runs =
-        generateRange(rangeDetails[0], rangeDetails[1], rangeDetails[2], false);
-  }
-  // E.g. "2012+2013+2014+2015".
-  else if (matchesFully(token, Regexs::ADD_LIST)) {
-    // No need to generate the range here, it's already there for us.
-    runs = std::vector<std::vector<unsigned int>>(1, rangeDetails);
-  }
-  // E.g. "2012-2020".
-  else if (matchesFully(token, Regexs::ADD_RANGE)) {
-    runs = generateRange(rangeDetails[0], rangeDetails[1], 1, true);
-  }
-  // E.g. "2018-2020+2022-2023"
-  else if (matchesFully(token, Regexs::ADD_RANGES)) {
-    const auto lhs = generateRange(rangeDetails[0], rangeDetails[1], 1, true);
-    const auto rhs = generateRange(rangeDetails[2], rangeDetails[3], 1, true);
-    runs.resize(1);
-    auto it = std::back_inserter(runs.front());
-    std::copy(lhs.front().cbegin(), lhs.front().cend(), it);
-    std::copy(rhs.front().cbegin(), rhs.front().cend(), it);
-  }
-  // E.g. "2018+2020-2023"
-  else if (matchesFully(token, Regexs::ADD_SINGLE_TO_RANGE)) {
-    runs.resize(1);
-    runs.front().emplace_back(rangeDetails[0]);
-    const auto rhs = generateRange(rangeDetails[1], rangeDetails[2], 1, true);
-    auto it = std::back_inserter(runs.front());
-    std::copy(rhs.front().cbegin(), rhs.front().cend(), it);
-  }
-  // E.g. "2018-2020+2023"
-  else if (matchesFully(token, Regexs::ADD_RANGE_TO_SINGLE)) {
-    runs.resize(1);
-    const auto lhs = generateRange(rangeDetails[0], rangeDetails[1], 1, true);
-    auto it = std::back_inserter(runs.front());
-    std::copy(lhs.front().cbegin(), lhs.front().cend(), it);
-    runs.front().emplace_back(rangeDetails[2]);
-  }
-  // E.g. "2012-2020:4".
-  else if (matchesFully(token, Regexs::ADD_STEP_RANGE)) {
-    runs =
-        generateRange(rangeDetails[0], rangeDetails[1], rangeDetails[2], true);
-  } else {
-    // We should never reach here - the validation done on the token previously
-    // should prevent any other possible scenario.
-    assert(false);
-  }
-
   // Add the runs on to the end of parsedRuns, and return it.
   std::copy(runs.begin(), runs.end(), std::back_inserter(parsedRuns));
-
-  return parsedRuns;
 }
 
 /**
