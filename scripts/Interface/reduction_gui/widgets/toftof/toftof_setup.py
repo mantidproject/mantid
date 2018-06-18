@@ -347,7 +347,7 @@ class TOFTOFSetupWidget(BaseWidget):
             return lineEdit.text().strip()
 
         def float_or_none(string):
-            float(string) if string else None
+            return float(string) if string else None
 
         elem.facility_name   = self._settings.facility_name
         elem.instrument_name = self._settings.instrument_name

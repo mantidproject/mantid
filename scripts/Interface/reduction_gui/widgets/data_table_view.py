@@ -49,7 +49,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
 		:param row: int of the row to check
 		:return: true if row is empty
 		"""
-		return all(not str(v).strip() for v in self._getRow(row))
+		return all((v is None or not str(v).strip()) for v in self._getRow(row))
 
 	def _removeTrailingEmptyRows(self):
 		"""
