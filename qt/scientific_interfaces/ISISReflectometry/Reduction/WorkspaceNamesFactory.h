@@ -44,16 +44,6 @@ public:
 private:
   Slicing const &m_slicing;
 };
-/*
-template MANTIDQT_ISISREFLECTOMETRY_DLL ReductionWorkspaces WorkspaceNamesFactory::makeNames<ReductionWorkspaces>(
-    std::vector<std::string> const &,
-    std::pair<std::string, std::string> const &) const;
-
-template MANTIDQT_ISISREFLECTOMETRY_DLL SlicedReductionWorkspaces WorkspaceNamesFactory::makeNames<SlicedReductionWorkspaces>(
-    std::vector<std::string> const &,
-    std::pair<std::string, std::string> const &) const;
-*/
-
 }
 }
 #endif // MANTID_CUSTOMINTERFACES_WORKSPACENAMESFACTORY_H_

@@ -52,7 +52,7 @@ public:
     jobsViewIs(jobs, view);
     EXPECT_CALL(jobs, expandAll());
 
-    BatchPresenter presenter(&view, {}, UnslicedReductionJobs());
+    BatchPresenter presenter(&view, {}, 0.01, UnslicedReductionJobs());
     presenter.notifyExpandAllRequested();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -65,7 +65,7 @@ public:
     jobsViewIs(jobs, view);
     EXPECT_CALL(jobs, collapseAll());
 
-    BatchPresenter presenter(&view, {}, UnslicedReductionJobs());
+    BatchPresenter presenter(&view, {}, 0.01, UnslicedReductionJobs());
     presenter.notifyCollapseAllRequested();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -89,7 +89,7 @@ public:
     EXPECT_CALL(jobs, insertChildRowOf(location(), 1))
         .WillOnce(Return(location(1)));
 
-    BatchPresenter presenter(&view, {}, std::move(reductionJobs));
+    BatchPresenter presenter(&view, {}, 0.01, std::move(reductionJobs));
     presenter.notifyInsertGroupRequested();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -107,7 +107,7 @@ public:
     ON_CALL(jobs, insertChildRowOf(location(), 1))
         .WillByDefault(Return(location(1)));
 
-    BatchPresenter presenter(&view, {}, std::move(reductionJobs));
+    BatchPresenter presenter(&view, {}, 0.01, std::move(reductionJobs));
     presenter.notifyInsertGroupRequested();
 
     auto &groups = unslicedJobsFromPresenter(presenter).groups();
@@ -132,7 +132,7 @@ public:
     EXPECT_CALL(jobs, appendChildRowOf(location()))
         .WillOnce(Return(location(2)));
 
-    BatchPresenter presenter(&view, {}, std::move(reductionJobs));
+    BatchPresenter presenter(&view, {}, 0.01, std::move(reductionJobs));
     presenter.notifyInsertGroupRequested();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -150,7 +150,7 @@ public:
     ON_CALL(jobs, insertChildRowOf(location(), 1))
         .WillByDefault(Return(location(1)));
 
-    BatchPresenter presenter(&view, {}, std::move(reductionJobs));
+    BatchPresenter presenter(&view, {}, 0.01, std::move(reductionJobs));
     presenter.notifyInsertGroupRequested();
 
     auto &groups = unslicedJobsFromPresenter(presenter).groups();
@@ -175,7 +175,7 @@ public:
     ON_CALL(jobs, insertChildRowOf(location(), 2))
         .WillByDefault(Return(location(2)));
 
-    BatchPresenter presenter(&view, {}, std::move(reductionJobs));
+    BatchPresenter presenter(&view, {}, 0.01, std::move(reductionJobs));
     presenter.notifyInsertGroupRequested();
 
     auto &groups = unslicedJobsFromPresenter(presenter).groups();

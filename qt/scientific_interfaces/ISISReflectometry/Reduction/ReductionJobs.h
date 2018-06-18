@@ -46,7 +46,7 @@ void insertEmptyGroup(Jobs &jobs, int beforeGroup);
 void removeGroup(Jobs &jobs, int groupIndex);
 
 bool setGroupName(Jobs &jobs, int groupIndex, std::string const &newValue);
-std::string groupName(Jobs const& jobs, int groupIndex);
+std::string groupName(Jobs const &jobs, int groupIndex);
 void prettyPrintModel(Jobs const &jobs);
 
 void mergeRowIntoGroup(Jobs &jobs, RowVariant const &row, double thetaTolerance,
@@ -119,7 +119,7 @@ public:
 
   template <typename Group>
   bool operator()(ReductionJobs<Group> &intoHere,
-                ReductionJobs<Group> const &fromHere) const {
+                  ReductionJobs<Group> const &fromHere) const {
     mergeJobsInto(intoHere, fromHere, m_thetaTolerance, m_workspaceNamesFactory,
                   m_listener);
     return true;
@@ -127,7 +127,7 @@ public:
 
   template <typename ErrorGroupA, typename ErrorGroupB>
   bool operator()(ReductionJobs<ErrorGroupA> &,
-                ReductionJobs<ErrorGroupB> const &) const {
+                  ReductionJobs<ErrorGroupB> const &) const {
     return false;
   }
 
@@ -137,12 +137,14 @@ private:
   ModificationListener &m_listener;
 };
 
-template <typename WorkspaceNamesFactory,
-          typename ModificationListener>
+template <typename WorkspaceNamesFactory, typename ModificationListener>
 bool mergeJobsInto(Jobs &intoHere, Jobs const &fromHere, double thetaTolerance,
                    WorkspaceNamesFactory const &workspaceNamesFactory,
                    ModificationListener &listener) {
-  return boost::apply_visitor(MergeJobsMultivisitor<WorkspaceNamesFactory, ModificationListener>(thetaTolerance, workspaceNamesFactory, listener), intoHere, fromHere);
+  return boost::apply_visitor(
+      MergeJobsMultivisitor<WorkspaceNamesFactory, ModificationListener>(
+          thetaTolerance, workspaceNamesFactory, listener),
+      intoHere, fromHere);
 }
 
 UnslicedReductionJobs unsliced(SlicedReductionJobs const &slicedJobs);

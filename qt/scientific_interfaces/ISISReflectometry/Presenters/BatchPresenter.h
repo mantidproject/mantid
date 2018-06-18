@@ -17,7 +17,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter
     : public BatchViewSubscriber {
 public:
   BatchPresenter(IBatchView *view, std::vector<std::string> const &instruments,
-                 Jobs reductionJobs);
+                 double thetaTolerance, Jobs reductionJobs);
 
   void notifyProcessRequested() override;
   void notifyPauseRequested() override;
@@ -46,7 +46,13 @@ public:
   Jobs const &reductionJobs() const;
 
 private:
-  void applyGroupStyling(MantidWidgets::Batch::RowLocation const &location);
+  void
+  applyGroupStylingToRow(MantidWidgets::Batch::RowLocation const &location);
+  void clearInvalidCellStyling(
+      std::vector<MantidQt::MantidWidgets::Batch::Cell> &cells);
+  void clearInvalidCellStyling(MantidQt::MantidWidgets::Batch::Cell &cell);
+  void applyInvalidCellStyling(MantidQt::MantidWidgets::Batch::Cell &cell);
+
   void
   removeGroupsFromView(std::vector<int> const &groupIndicesOrderedLowToHigh);
   void
@@ -89,6 +95,7 @@ private:
   boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
       m_clipboard;
   Jobs m_model;
+  double m_thetaTolerance;
   BatchViewJobsUpdater m_jobViewUpdater;
   WorkspaceNamesFactory m_workspaceNameFactory;
 };

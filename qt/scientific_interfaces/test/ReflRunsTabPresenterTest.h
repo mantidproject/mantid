@@ -40,7 +40,7 @@ public:
         m_defaultInstrument(0) {}
 
   BatchPresenterFactory batchPresenterFactory() const {
-    return BatchPresenterFactory(m_instruments);
+    return BatchPresenterFactory(m_instruments, 0.01);
   }
 
   void test_constructor_sets_possible_transfer_methods() {
@@ -463,7 +463,7 @@ private:
       tablePresenters.push_back(tablePresenter.get());
     // Create the presenter
     ReflRunsTabPresenterFriend presenter(
-        m_mockRunsTabView.get(), m_mockProgress.get(), batchPresenterFactory(),
+        m_mockRunsTabView.get(), m_mockProgress.get(), batchPresenterFactory(), 0.01,
         m_instruments, 0);
     presenter.acceptMainPresenter(m_mockMainPresenter.get());
     return presenter;

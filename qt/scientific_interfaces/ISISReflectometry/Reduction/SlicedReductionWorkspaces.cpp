@@ -22,6 +22,7 @@ SlicedReductionWorkspaces workspaceNamesForSliced(
     std::vector<std::string> const &summedRunNumbers,
     std::pair<std::string, std::string> const &transmissionRuns,
     Slicing const &slicing) {
+  // TODO: Implement this correctly.
   return SlicedReductionWorkspaces("", {});
 }
 

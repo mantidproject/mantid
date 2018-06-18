@@ -62,12 +62,12 @@ QStringList fromStdStringVector(std::vector<std::string> const &inVec) {
 */
 ReflRunsTabPresenter::ReflRunsTabPresenter(
     IReflRunsTabView *mainView, ProgressableView *progressableView,
-    BatchPresenterFactory makeBatchPresenter,
+    BatchPresenterFactory makeBatchPresenter, double thetaTolerance,
     std::vector<std::string> const &instruments, int defaultInstrumentIndex,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
       m_makeBatchPresenter(makeBatchPresenter), m_mainPresenter(nullptr),
-      m_searcher(searcher), m_instrumentChanged(false) {
+      m_searcher(searcher), m_instrumentChanged(false), m_thetaTolerance(thetaTolerance) {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);

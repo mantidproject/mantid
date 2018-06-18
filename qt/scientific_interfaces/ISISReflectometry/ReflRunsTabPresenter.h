@@ -75,6 +75,7 @@ public:
   ReflRunsTabPresenter(IReflRunsTabView *mainView,
                        ProgressableView *progressView,
                        BatchPresenterFactory makeBatchPresenter,
+                       double thetaTolerance,
                        std::vector<std::string> const &instruments,
                        int defaultInstrumentIndex,
                        boost::shared_ptr<IReflSearcher> searcher =
@@ -139,6 +140,7 @@ private:
   static const std::string MeasureTransferMethod;
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
+  double m_thetaTolerance;
 
   /// searching
   bool search();

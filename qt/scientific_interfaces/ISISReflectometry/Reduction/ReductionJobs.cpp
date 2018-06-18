@@ -1,5 +1,7 @@
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include "ReductionJobs.h"
+#include "../Map.h"
+#include "../IndexOf.h"
 #include <iostream>
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -19,15 +21,8 @@ Group &ReductionJobs<Group>::appendGroup(Group group) {
 template <typename Group>
 boost::optional<int>
 ReductionJobs<Group>::indexOfGroupWithName(std::string const &groupName) {
-  auto groupWithNameIt = std::find_if(m_groups.rbegin(), m_groups.rend(),
-                                      [&groupName](Group const &group) -> bool {
-                                        return group.name() == groupName;
-                                      });
-  if (groupWithNameIt != m_groups.rend())
-    return static_cast<int>(
-        std::distance(m_groups.begin(), groupWithNameIt.base() - 1));
-  else
-    return boost::none;
+  return indexOf(m_groups, [&groupName](Group const &group)
+                               -> bool { return group.name() == groupName; });
 }
 
 template <typename Group>
@@ -39,9 +34,9 @@ Group &ReductionJobs<Group>::insertGroup(Group group, int beforeIndex) {
 template <typename Group>
 bool ReductionJobs<Group>::hasGroupWithName(
     std::string const &groupName) const {
-  return std::count_if(m_groups.crbegin(), m_groups.crend(),
-                       [&groupName](Group const &group)
-                           -> bool { return group.name() == groupName; }) != 0;
+  return std::any_of(m_groups.crbegin(), m_groups.crend(),
+                     [&groupName](Group const &group)
+                         -> bool { return group.name() == groupName; });
 }
 
 template <typename Group> void ReductionJobs<Group>::removeGroup(int index) {
@@ -295,20 +290,18 @@ void prettyPrintModel(Jobs const &jobs) {
 }
 
 SlicedReductionJobs sliced(UnslicedReductionJobs const &unslicedJobs) {
-  auto slicedGroups = std::vector<SlicedGroup>();
   auto const &unslicedGroups = unslicedJobs.groups();
-  std::transform(unslicedGroups.begin(), unslicedGroups.end(),
-                 std::back_inserter(slicedGroups),
-                 static_cast<SlicedGroup (*)(UnslicedGroup const &)>(&slice));
+  auto slicedGroups =
+      map(unslicedGroups,
+          static_cast<SlicedGroup (*)(UnslicedGroup const &)>(&slice));
   return SlicedReductionJobs(std::move(slicedGroups));
 }
 
 UnslicedReductionJobs unsliced(SlicedReductionJobs const &slicedJobs) {
-  auto unslicedGroups = std::vector<UnslicedGroup>();
   auto const &slicedGroups = slicedJobs.groups();
-  std::transform(slicedGroups.begin(), slicedGroups.end(),
-                 std::back_inserter(unslicedGroups),
-                 static_cast<UnslicedGroup (*)(SlicedGroup const &)>(&unslice));
+  auto unslicedGroups =
+      map(slicedGroups,
+          static_cast<UnslicedGroup (*)(SlicedGroup const &)>(&unslice));
   return UnslicedReductionJobs(std::move(unslicedGroups));
 }
 

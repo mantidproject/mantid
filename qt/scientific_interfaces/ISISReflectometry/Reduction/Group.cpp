@@ -1,4 +1,6 @@
 #include "Group.h"
+#include "../Map.h"
+#include "../IndexOf.h"
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -19,16 +21,11 @@ template <typename Row> std::string const &Group<Row>::name() const {
 template <typename Row>
 boost::optional<int> Group<Row>::indexOfRowWithTheta(double theta,
                                                      double tolerance) const {
-  auto maybeItemIt =
-      std::find_if(m_rows.cbegin(), m_rows.cend(),
-                   [theta, tolerance](boost::optional<Row> const &row) -> bool {
-                     return row.is_initialized() &&
-                            std::abs(row.get().theta() - theta) < tolerance;
-                   });
-  if (maybeItemIt != m_rows.cend())
-    return static_cast<int>(std::distance(m_rows.cbegin(), maybeItemIt));
-  else
-    return boost::none;
+  return indexOf(m_rows,
+                 [theta, tolerance](boost::optional<Row> const &row) -> bool {
+                   return row.is_initialized() &&
+                          std::abs(row.get().theta() - theta) < tolerance;
+                 });
 }
 
 template <typename Row> void Group<Row>::setName(std::string const &name) {
@@ -77,12 +74,9 @@ boost::optional<Row> const &Group<Row>::operator[](int rowIndex) const {
 UnslicedGroup unslice(SlicedGroup const &slicedGroup) {
   using UnsliceFunctionPtr =
       boost::optional<UnslicedRow>(*)(boost::optional<SlicedRow> const &);
-
-  auto unslicedRows = std::vector<boost::optional<UnslicedRow>>();
   auto const &slicedRows = slicedGroup.rows();
-  std::transform(slicedRows.begin(), slicedRows.end(),
-                 std::back_inserter(unslicedRows),
-                 static_cast<UnsliceFunctionPtr>(&unslice));
+  auto unslicedRows =
+      map(slicedRows, static_cast<UnsliceFunctionPtr>(&unslice));
   return UnslicedGroup(slicedGroup.name(), std::move(unslicedRows),
                        slicedGroup.postprocessedWorkspaceName());
 }
@@ -90,12 +84,8 @@ UnslicedGroup unslice(SlicedGroup const &slicedGroup) {
 SlicedGroup slice(UnslicedGroup const &unslicedGroup) {
   using SliceFunctionPtr =
       boost::optional<SlicedRow>(*)(boost::optional<UnslicedRow> const &);
-
-  auto slicedRows = std::vector<boost::optional<SlicedRow>>();
   auto const &unslicedRows = unslicedGroup.rows();
-  std::transform(unslicedRows.begin(), unslicedRows.end(),
-                 std::back_inserter(slicedRows),
-                 static_cast<SliceFunctionPtr>(&slice));
+  auto slicedRows = map(unslicedRows, static_cast<SliceFunctionPtr>(&slice));
   return SlicedGroup(unslicedGroup.name(), std::move(slicedRows),
                      unslicedGroup.postprocessedWorkspaceName());
 }

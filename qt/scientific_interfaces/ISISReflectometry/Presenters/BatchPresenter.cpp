@@ -15,9 +15,10 @@ namespace CustomInterfaces {
 
 BatchPresenter::BatchPresenter(IBatchView *view,
                                std::vector<std::string> const &instruments,
-                               Jobs jobs)
+                               double thetaTolerance, Jobs jobs)
     : m_view(view), m_instruments(instruments), m_model(std::move(jobs)),
-      m_jobViewUpdater(m_view->jobs()), m_workspaceNameFactory(Slicing()) {
+      m_thetaTolerance(thetaTolerance), m_jobViewUpdater(m_view->jobs()),
+      m_workspaceNameFactory(Slicing()) {
   m_view->subscribe(this);
 }
 
@@ -30,8 +31,8 @@ void BatchPresenter::mergeAdditionalJobs(Jobs const &additionalJobs) {
   std::cout << "Transfering:" << std::endl;
   prettyPrintModel(additionalJobs);
 
-  mergeJobsInto(m_model, additionalJobs, 0.0001, m_workspaceNameFactory,
-                m_jobViewUpdater);
+  mergeJobsInto(m_model, additionalJobs, m_thetaTolerance,
+                m_workspaceNameFactory, m_jobViewUpdater);
 
   std::cout << "After Transfer:" << std::endl;
   prettyPrintModel(m_model);
@@ -115,14 +116,14 @@ void BatchPresenter::notifyFilterReset() { m_view->resetFilterBox(); }
 
 void BatchPresenter::appendRowsToGroupsInView(
     std::vector<int> const &groupIndices) {
-  for (auto &&groupIndex : groupIndices)
+  for (auto const &groupIndex : groupIndices)
     m_view->jobs().appendChildRowOf(
         MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}));
 }
 
 void BatchPresenter::appendRowsToGroupsInModel(
     std::vector<int> const &groupIndices) {
-  for (auto &&groupIndex : groupIndices)
+  for (auto const &groupIndex : groupIndices)
     appendEmptyRow(m_model, groupIndex);
 }
 
@@ -144,7 +145,7 @@ void BatchPresenter::appendEmptyGroupInModel() { appendEmptyGroup(m_model); }
 void BatchPresenter::appendEmptyGroupInView() {
   auto location = m_view->jobs().appendChildRowOf(
       MantidQt::MantidWidgets::Batch::RowLocation());
-  applyGroupStyling(location);
+  applyGroupStylingToRow(location);
   // TODO: Consider using the other version of appendChildRowOf
 }
 
@@ -159,7 +160,7 @@ void BatchPresenter::insertEmptyRowInModel(int groupIndex, int beforeRow) {
 void BatchPresenter::insertEmptyGroupInView(int beforeGroup) {
   auto location = m_view->jobs().insertChildRowOf(
       MantidQt::MantidWidgets::Batch::RowLocation(), beforeGroup);
-  applyGroupStyling(location);
+  applyGroupStylingToRow(location);
 }
 
 void BatchPresenter::notifyExpandAllRequested() { m_view->jobs().expandAll(); }
@@ -175,28 +176,36 @@ std::vector<std::string> BatchPresenter::cellTextFromViewAt(
                  -> std::string { return cell.contentText(); });
 }
 
+void BatchPresenter::clearInvalidCellStyling(
+    std::vector<MantidWidgets::Batch::Cell> &cells) {
+  for (auto &cell : cells)
+    clearInvalidCellStyling(cell);
+}
+
+void BatchPresenter::clearInvalidCellStyling(MantidWidgets::Batch::Cell &cell) {
+  cell.setIconFilePath("");
+  cell.setBorderColor("darkGrey");
+}
+
 void BatchPresenter::showAllCellsOnRowAsValid(
     MantidWidgets::Batch::RowLocation const &itemIndex) {
   auto cells = m_view->jobs().cellsAt(itemIndex);
-  for (auto &&cell : cells) {
-    cell.setIconFilePath("");
-    cell.setBorderColor("darkGrey");
-  }
+  clearInvalidCellStyling(cells);
   m_view->jobs().setCellsAt(itemIndex, cells);
+}
+
+void BatchPresenter::applyInvalidCellStyling(MantidWidgets::Batch::Cell &cell) {
+  cell.setIconFilePath(":/invalid.png");
+  cell.setBorderColor("darkRed");
 }
 
 void BatchPresenter::showCellsAsInvalidInView(
     MantidWidgets::Batch::RowLocation const &itemIndex,
     std::vector<int> const &invalidColumns) {
   auto cells = m_view->jobs().cellsAt(itemIndex);
-  for (auto &cell : cells) {
-    cell.setIconFilePath("");
-    cell.setBorderColor("darkGrey");
-  }
-  for (auto &column : invalidColumns) {
-    cells[column].setIconFilePath(":/invalid.png");
-    cells[column].setBorderColor("darkRed");
-  }
+  clearInvalidCellStyling(cells);
+  for (auto &column : invalidColumns)
+    applyInvalidCellStyling(cells[column]);
   m_view->jobs().setCellsAt(itemIndex, cells);
 }
 
@@ -239,7 +248,7 @@ void BatchPresenter::notifyCellTextChanged(
     updateRowField(itemIndex, column, oldValue, newValue);
 }
 
-void BatchPresenter::applyGroupStyling(
+void BatchPresenter::applyGroupStylingToRow(
     MantidWidgets::Batch::RowLocation const &location) {
   auto cells = m_view->jobs().cellsAt(location);
   for (auto i = 1u; i < cells.size(); ++i) {
@@ -254,7 +263,7 @@ void BatchPresenter::notifyRowInserted(
     m_view->jobs().removeRowAt(newRowLocation);
   } else if (isGroupLocation(newRowLocation)) {
     insertEmptyGroupInModel(groupOf(newRowLocation));
-    applyGroupStyling(newRowLocation);
+    applyGroupStylingToRow(newRowLocation);
   } else if (isRowLocation(newRowLocation)) {
     insertEmptyRowInModel(groupOf(newRowLocation), rowOf(newRowLocation));
   }

@@ -34,7 +34,6 @@ public:
 
 private:
   std::string m_name;
-  // TODO Don't have this as an optional.
   std::vector<boost::optional<Row>> m_rows;
   std::string m_postprocessedWorkspaceName;
 };

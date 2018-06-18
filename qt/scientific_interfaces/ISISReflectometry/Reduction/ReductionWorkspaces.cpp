@@ -1,4 +1,6 @@
 #include "ReductionWorkspaces.h"
+#include "../Map.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 ReductionWorkspaces::ReductionWorkspaces(
@@ -81,12 +83,9 @@ ReductionWorkspaces workspaceNamesForUnsliced(
     std::vector<std::string> const &summedRunNumbers,
     std::pair<std::string, std::string> const &transmissionRuns) {
 
-  auto tofWorkspaces = std::vector<std::string>();
-  tofWorkspaces.reserve(summedRunNumbers.size());
-  std::transform(summedRunNumbers.cbegin(), summedRunNumbers.cend(),
-                 std::back_inserter(tofWorkspaces),
-                 [](std::string const &runNumber)
-                     -> std::string { return "TOF_" + runNumber; });
+  auto tofWorkspaces =
+      map(summedRunNumbers, [](std::string const &runNumber)
+                                -> std::string { return "TOF_" + runNumber; });
 
   auto joinedRuns = boost::algorithm::join(summedRunNumbers, "+");
   auto iVsLambda = "IvsLam_" + joinedRuns;
