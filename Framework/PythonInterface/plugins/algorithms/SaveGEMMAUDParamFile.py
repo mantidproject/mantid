@@ -58,15 +58,19 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
 
     def PyExec(self):
         input_ws = mtd[self.getPropertyValue(self.PROP_INPUT_WS)]
-        num_banks = input_ws.getNumberOfEntries()
-
         gsas_filename = self.getProperty(self.PROP_GSAS_PARAM_FILE).value
+
+        num_banks = input_ws.getNumberOfEntries()
         grouping_scheme = self.getProperty(self.PROP_GROUPING_SCHEME).value
+
+        # closure around self._expand_to_texture_bank, capturing num_banks and grouping_scheme
+        def expand_to_texture_bank(bank_param_list):
+            return self._expand_to_texture_bank(bank_param_list=bank_param_list,
+                                                spectrum_numbers=range(num_banks),
+                                                grouping_scheme=grouping_scheme)
+
         distances, difas, difcs, tzeros, alpha_zeros, alpha_ones, beta_zeros, beta_ones, sigma_zeros, sigma_ones, \
-            sigma_twos = map(lambda param: self._expand_to_texture_bank(bank_param_list=param,
-                                                                        spectrum_numbers=range(num_banks),
-                                                                        grouping_scheme=grouping_scheme),
-                             self._parse_gsas_param_file(gsas_filename))
+            sigma_twos = map(expand_to_texture_bank, self._parse_gsas_param_file(gsas_filename))
 
         two_thetas, phis = zip(*[self._get_two_theta_and_phi(bank) for bank in input_ws])
 
@@ -119,6 +123,15 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
         return issues
 
     def _expand_to_texture_bank(self, bank_param_list, spectrum_numbers, grouping_scheme):
+        """
+        :param bank_param_list: a list of n values for some parameter, such as DIFC
+        :param spectrum_numbers: a list of m bank IDs, one for each focused spectrum
+        :param grouping_scheme: a list of m indexes, to index bank_param_list, where
+        the element at item i is the bank number in bank_param_list to associate
+        focused spectrum i with
+        :return: a list of m values, where each value is the assigned parameter for the
+        corresponding bank
+        """
         return (bank_param_list[grouping_scheme[spec_num] - 1] for spec_num in spectrum_numbers)
 
     def _find_isis_powder_dir(self):
