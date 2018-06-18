@@ -149,7 +149,7 @@ public:
 
   void test_complex_data_adjustments_summed() {
     // Run one iteration, we just want to test the output workspaces' dimensions
-    int nHist = 2;
+    int nHist = 6;
     int nBins = 10;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
 
@@ -176,8 +176,8 @@ public:
 
     TS_ASSERT_EQUALS(data->getNumberHistograms(), nHist);
     TS_ASSERT_EQUALS(image->getNumberHistograms(), nHist);
-    TS_ASSERT_EQUALS(chi->getNumberHistograms(), nHist / 2);
-    TS_ASSERT_EQUALS(angle->getNumberHistograms(), nHist / 2);
+    TS_ASSERT_EQUALS(chi->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(angle->getNumberHistograms(), 1);
 
     TS_ASSERT_EQUALS(data->blocksize(), nBins);
     TS_ASSERT_EQUALS(image->blocksize(), nBins);
@@ -271,6 +271,30 @@ public:
     alg->setProperty("ComplexData", false);
     alg->setPropertyValue("MaxIterations", "1");
     alg->setProperty("DataConstAdj", ws); // We need twice as many histograms
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+  }
+
+  void test_adjustments_summed_too_few_spectra() {
+
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(6, 10);
+    auto ws1 = WorkspaceCreationHelper::create2DWorkspace(2, 10);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", true);
+    alg->setPropertyValue("MaxIterations", "1");
+    // We need as many spectra in the adjustments as
+    // in the input workspace even though images are summed.
+    alg->setProperty("DataLinearAdj", ws1);
+    alg->setProperty("DataConstAdj", ws1);
+    alg->setProperty("PerSpectrumReconstruction", false);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
     alg->setPropertyValue("EvolChi", "evolChi");
@@ -625,8 +649,8 @@ public:
   void test_adjustments_three_spectra_summed() {
 
     auto ws = createWorkspaceReal(10, 0.0, 3);
-    auto linAdj = createWorkspaceAdjustments(10, 1.05, 0.00, 0.0, 1);
-    auto constAdj = createWorkspaceAdjustments(10, 0.0, 0.1, 0.2, 1);
+    auto linAdj = createWorkspaceAdjustments(10, 1.05, 0.00, 0.0, 3);
+    auto constAdj = createWorkspaceAdjustments(10, 0.0, 0.1, 0.2, 3);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
