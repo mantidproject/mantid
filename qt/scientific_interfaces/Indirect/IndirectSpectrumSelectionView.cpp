@@ -151,11 +151,13 @@ void IndirectSpectrumSelectionView::setMaskString(
 }
 
 void IndirectSpectrumSelectionView::setSpectraRangeMaxiMin(int value) {
+  MantidQt::API::SignalBlocker<QObject> blocker(this);
   m_selector->spMinimumSpectrum->setMaximum(value);
   m_selector->spMaskSpectrum->setMaximum(value);
 }
 
 void IndirectSpectrumSelectionView::setSpectraRangeMiniMax(int value) {
+  MantidQt::API::SignalBlocker<QObject> blocker(this);
   m_selector->spMaximumSpectrum->setMinimum(value);
   m_selector->spMaskSpectrum->setMinimum(value);
 }
