@@ -30,6 +30,9 @@ double mean(const std::vector<double> &values) {
          static_cast<double>(values.size());
 }
 
+// Compute the mean resolution of the x axis of the input workspace
+// Resolution is calculated as the difference between adjacent pairs of values,
+// normalised by the second of the two
 double computeAverageDeltaTByT(const HistogramData::HistogramX &tValues) {
   std::vector<double> deltaTByT;
   deltaTByT.reserve(tValues.size() - 1);
@@ -47,7 +50,8 @@ double computeAverageDeltaTByT(const HistogramData::HistogramX &tValues) {
 std::string generateBankHeader(int bank, int minT, size_t numberBins,
                                double deltaTByT) {
   std::stringstream stream;
-  const auto numberLines = (int)std::ceil((double)numberBins / POINTS_PER_LINE);
+  const auto numberLines =
+      (size_t)std::ceil((double)numberBins / POINTS_PER_LINE);
 
   stream << std::setprecision(2) << "BANK " << bank << " " << numberBins << "  "
          << numberLines << " RALF  " << minT << "  96  " << minT << " "
@@ -57,6 +61,8 @@ std::string generateBankHeader(int bank, int minT, size_t numberBins,
 
 boost::optional<std::vector<std::string>>
 getParamLinesFromGSASFile(const std::string &paramsFilename) {
+  // ICONS signifies that a line contains TOF to D conversion factors
+  const static std::string paramLineDelimiter = "ICONS";
   std::ifstream paramsFile;
   paramsFile.open(paramsFilename);
 
@@ -64,7 +70,7 @@ getParamLinesFromGSASFile(const std::string &paramsFilename) {
     std::vector<std::string> paramLines;
     std::string line;
     while (std::getline(paramsFile, line)) {
-      if (line.find("ICONS") != std::string::npos) {
+      if (line.find(paramLineDelimiter) != std::string::npos) {
         paramLines.emplace_back(line);
       }
     }
@@ -155,6 +161,8 @@ void SaveGDA::exec() {
     const auto &d = matrixWS->x(0);
     const auto &bankCalibParams = calibParams[groupingScheme[i] - 1];
 
+    // For historic reasons, TOF is scaled by 32 in MAUD
+    const static double tofScale = 32;
     std::vector<double> tofScaled;
     tofScaled.reserve(d.size());
     std::transform(d.begin(), d.end(), std::back_inserter(tofScaled),
@@ -162,7 +170,7 @@ void SaveGDA::exec() {
                      return (dVal * bankCalibParams.difa +
                              dVal * dVal * bankCalibParams.difc +
                              bankCalibParams.tzero) *
-                            32;
+                            tofScale;
                    });
     const auto averageDeltaTByT = computeAverageDeltaTByT(tofScaled);
 
