@@ -893,7 +893,7 @@ public:
     // check
     for (int i = 0; i < 4; ++i) {
       TimeSeriesProperty<int> *out_i = outputs[i];
-      TS_ASSERT_EQUALS(out_i->size(), 0);
+      TS_ASSERT_EQUALS(out_i->size(), 1);
     }
   }
 
@@ -969,6 +969,51 @@ public:
     // cleanup
     for (auto &it : outputs)
       delete it;
+  }
+
+  //----------------------------------------------------------------------------
+  /** Extreme case 1: the last entry of time series property is before the first
+   * splitter.  The test case is extracted from issue #21836, in which
+   * the last entry is before the first splitter
+   * @brief test_SplitByTimeExtremeCase1.
+   */
+  void test_SplitByTimeExtremeCase1() {
+    // create test log
+    TimeSeriesProperty<int> int_log("test int log 21836");
+    int_log.addValue(DateAndTime("2017-11-10T03:12:06"), 1);
+    int_log.addValue(DateAndTime("2017-11-10T03:12:31"), 3);
+    int_log.addValue(DateAndTime("2017-11-10T03:12:40"), 2);
+
+    TimeSeriesProperty<double> dbl_log("test double log 21836");
+    dbl_log.addValue(DateAndTime("2017-11-10T03:12:06"), 1.0);
+    dbl_log.addValue(DateAndTime("2017-11-10T03:12:31"), 3.0);
+    dbl_log.addValue(DateAndTime("2017-11-10T03:12:40"), 2.0);
+
+    // create the splitters
+    std::vector<DateAndTime> split_time_vec;
+    split_time_vec.push_back(DateAndTime("2017-11-10T03:13:06.814538624"));
+    split_time_vec.push_back(DateAndTime("2017-11-10T03:14:07.764311936"));
+    split_time_vec.push_back(DateAndTime("2017-11-10T03:15:07.697312000"));
+    split_time_vec.push_back(DateAndTime("2017-11-10T03:16:08.827971840"));
+    split_time_vec.push_back(DateAndTime("2017-11-10T03:17:08.745746688"));
+    split_time_vec.push_back(DateAndTime("2017-11-10T03:20:10.757950208"));
+
+    // create the target vector
+    std::vector<int> split_target_vec(5);
+    for (size_t i = 0; i < 5; ++i)
+      split_target_vec[i] = (i + 1) % 2;
+
+    // Initialze the 2 splitters
+    std::vector<TimeSeriesProperty<int> *> outputs;
+    for (int itarget = 0; itarget < 2; ++itarget) {
+      TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>("target");
+      outputs.push_back(tsp);
+    }
+
+    // split
+    int_log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
+
+    return;
   }
 
   //----------------------------------------------------------------------------

@@ -40,6 +40,7 @@ struct AnalysisOptions {
   std::string groupPairName; /// Name of group or pair to use
   const Mantid::API::Grouping grouping; /// Grouping to use
   PlotType plotType = {};               /// Type of analysis to perform
+  std::string wsName = "";              /// Name of the ws
   explicit AnalysisOptions(const Mantid::API::Grouping &g) : grouping(g) {}
 };
 } // namespace Muon

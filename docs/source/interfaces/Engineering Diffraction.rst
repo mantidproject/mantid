@@ -372,7 +372,6 @@ Peaks:
   peaks. These peaks can be manually written or imported by selecting a
   (*CSV*) file.
 
-
 Output
 ^^^^^^
 
@@ -525,6 +524,13 @@ To do a refinement, take the following steps:
 
    - You can also click **Refine All** to run refinement on all runs
      loaded into GSAS tab
+
+During the Fit process, :ref:`EnggSaveGSASIIFitResultsToHDF5
+<algm-EnggSaveGSASIIFitResultsToHDF5>` algorithm will be utilised to
+save the fit results, and also the parameters used, as a `hdf5`
+file. There will be one file per run, indexed by bank ID, and the file
+will be found in the **Runs** directory of the user's output
+directory.
 
 You can toggle the fitted peaks on and off with the **Plot Fitted
 Peaks** checkbox, remove runs from the list with the **Remove Run**

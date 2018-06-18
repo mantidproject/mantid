@@ -484,6 +484,9 @@
 
    <instrument name="REF_M" beamline="4A">
       <technique>Reflectometry</technique>
+      <livedata>
+      <connection name="event" address="bl4a-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
+      </livedata>
    </instrument>
 
    <instrument name="REF_L" beamline="4B">
