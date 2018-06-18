@@ -13,7 +13,6 @@ from mantid.simpleapi import *
 import numpy as np
 
 
-
 class IntegratePeaksProfileFitting(PythonAlgorithm):
 
     def summary(self):
