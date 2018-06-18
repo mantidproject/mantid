@@ -101,12 +101,14 @@ def get_mode_specific_variables(is_texture_mode):
         return {"focused_cropping_values": texture_focused_cropping_values,
                 "vanadium_cropping_values": texture_vanadium_cropping_values,
                 "grouping_file_name": "offsets_xie_test_2.cal",
-                "save_maud": True}
+                "save_maud": True,
+                "save_maud_calib": True}
     else:
         return {"focused_cropping_values": focused_cropping_values,
                 "vanadium_cropping_values": vanadium_cropping_values,
                 "grouping_file_name": "GEM_Instrument_grouping.cal",
-                "save_maud": False}
+                "save_maud": False,
+                "save_maud_calib": False}
 
 
 def get_all_adv_variables():

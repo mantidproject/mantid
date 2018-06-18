@@ -752,6 +752,19 @@ On GEM this is set to the following:
 
    save_angles: False
 
+.. _save_maud_calib_gem_isis-powder-diffraction-ref:
+
+save_maud_calib
+^^^^^^^^^^^^^^^
+
+If set to **True**, this uses the focus output and
+:ref:`gsas_calib_filename_gem_isis-powder-diffraction-ref`
+to create a MAUD calibration file, using
+:ref:`SaveGEMMAUDParamFile <algm-SaveGEMMAUDParamFile>`.
+
+If:ref:`texture_mode_isis-powder-diffraction-ref` is set to **True**
+this is enabled, and disabled if it is set to **False**.
+
 .. _save_maud_gem_isis-powder-diffraction-ref:
 
 save_maud
