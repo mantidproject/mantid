@@ -50,7 +50,7 @@ def __create_row_state(director, row, instrument, file_lookup=True):
 
 
 def __is_empty_row(row, table):
-    for key, value in table._table_entries[row].__dict__.iteritems():
+    for key, value in table._table_entries[row].__dict__.items():
         if value and key not in ['index', 'options_column_model', 'sample_thickness']:
             return False
     return True
