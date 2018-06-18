@@ -14,18 +14,27 @@ It first groups the input workspace according to the spectra numbers
 provided as *ForwardSpectra* and *BackwardSpectra*. If these properties
 are not supplied, the algorithm assumes that the first spectrum in the
 workspace is the forward group and the second one is the backward
-group. It then calculates the asymmetry as:
+group. It then calculates the asymmetry, :math:`A`, as:
 
-.. math:: Asymmetry = \frac{F-\alpha B}{F+\alpha B}
+.. math:: A = \frac{F-\alpha B}{F+\alpha B},
 
-, where :math:`F` is the front spectra, :math:`B` is the back spectra
+where :math:`F` is the front spectra, :math:`B` is the back spectra
 and :math:`\alpha` is the balance parameter [1]_.
 
-The errors in :math:`F-\alpha B` and :math:`F+\alpha B` are calculated
-by adding the errors in :math:`F` and :math:`B` in quadrature; any
-errors in :math:`\alpha` are ignored. The errors for the asymmetry are
-then calculated using the fractional error method with the values for
-the errors in :math:`F-\alpha B` and :math:`F+\alpha B`.
+The error in :math:`A`, :math:`\sigma_A` is calculated using standard error propagation. First the errors in :math:`F-\alpha B` and :math:`F+\alpha B` are calculated first
+by adding the errors in :math:`F` and :math:`B` in quadrature (:math:`\alpha` is assumed to have no error);
+
+.. math:: \sigma_{F + \alpha B} = \sigma_{F - \alpha B} = \sqrt{ \sigma_F^2 + \alpha^2 \sigma_B^2  },
+
+Then the error in the asymmetry is given by;
+
+.. math:: \sigma_A = A \sqrt{ \left( \frac{\sigma_{F + \alpha B} }{F + \alpha B} \right)^2 + \left( \frac{\sigma_{F- \alpha B}}{ F - \alpha B} \right)^2    },
+
+using the fact that the errors on counts :math:`F,B` can be taken to be Poisson errors (:math:`\sigma_{F} = \sqrt{F}`, :math:`\sigma_{B} = \sqrt{B}`), this can be simplified to
+
+.. math:: \sigma_A = \frac{\sqrt{ F + \alpha^2 B} \sqrt{1 + A^2} }{F + \alpha B}.
+
+If any bins have :math:`F=B=0`, then the result is :math:`A=0.0, \sigma_A =1.0`.
 
 The output workspace contains one set of data for the time of flight:
 the asymmetry and the asymmetry errors.
