@@ -146,6 +146,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
 
         # And we're off!
         peaks_ws_out = peaks_ws.clone()
+        np.warnings.filterwarnings('ignore') # There can be a lot of warnings for bad solutions that get rejected.
         for peakNumber in peaksToFit:#range(peaks_ws.getNumberPeaks()):
             peak = peaks_ws_out.getPeak(peakNumber)
             try:
@@ -200,6 +201,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                     numgood += 1
 
             except KeyboardInterrupt:
+                np.warnings.filterwarnings('default') # Re-enable on exit
                 raise
             except:
                 #raise
@@ -211,6 +213,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         for wsName in mtd.getObjectNames():
             if 'fit_' in wsName or 'bvgWS' in wsName or  'tofWS' in wsName or 'scaleWS' in wsName:
                 mtd.remove(wsName)
+        np.warnings.filterwarnings('default') # Re-enable on exit
         # Set the output
         self.setProperty('OutputPeaksWorkspace', peaks_ws_out)
         self.setProperty('OutputParamsWorkspace', params_ws)
