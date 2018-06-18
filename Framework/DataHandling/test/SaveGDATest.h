@@ -167,6 +167,7 @@ public:
       }
     }
 
+    TS_ASSERT_EQUALS(headerItems.size(), 11);
     const auto expectedNumPoints = std::stoi(headerItems[2]);
     TS_ASSERT_EQUALS(expectedNumPoints, numPoints);
 

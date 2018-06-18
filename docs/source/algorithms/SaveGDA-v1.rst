@@ -85,7 +85,8 @@ Usage
 
    # Banks 1 to 4 of a previous texture focus in isis_powder
    # We don't use the full 160 banks as the test becomes too slow
-   input_group = Load("GEM61785_D_texture_banks_1_to_4.nxs")
+   input_group = Load(Filename="GEM61785_D_texture_banks_1_to_4.nxs",
+                      OutputWorkspace="SaveGDAtest_GEM61785")
 
    output_file = os.path.join(config["defaultsave.directory"], "GEM61785.gda")
    SaveGDA(InputWorkspace=input_group,
@@ -106,6 +107,7 @@ Usage
 .. testcleanup:: SaveGDA
 
    os.remove(output_file)
+   mtd.remove("SaveGDAtest_GEM61785")
 
 Output:
 
