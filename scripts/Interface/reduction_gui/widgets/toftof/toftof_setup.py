@@ -17,7 +17,10 @@ class SmallQLineEdit(QLineEdit):
     '''just a smaller QLineEdit'''  
     def sizeHint(self):
         '''overriding the sizeHint() function to get a smaller lineEdit'''
-        return super(SmallQLineEdit, self).sizeHint() // 2
+        sh = super(SmallQLineEdit, self).sizeHint()
+        sh.setWidth(sh.width() // 2)
+        sh.setHeight(sh.height() // 2)
+        return sh
 
 
 class TOFTOFSetupWidget(BaseWidget):
