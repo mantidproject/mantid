@@ -7,6 +7,7 @@ try:
 except:
     from PyQt4 import QtCore
     from PyQt4 import QtGui as QtWidgets
+    QtCore.Signal = QtCore.pyqtSignal
 Qt = QtCore.Qt
 
 
@@ -113,7 +114,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
 
     # reimplemented QAbstractTableModel methods
 
-    selectCell = QtCore.pyqtSignal(QtCore.QModelIndex)
+    selectCell = QtCore.Signal(QtCore.QModelIndex)
 
     def emptyCells(self, indexes):
         """
