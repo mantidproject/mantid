@@ -282,11 +282,18 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[9], ws->readX(0)[9] + shift, 0.001);
   }
 
-  void test_detectorIDsNotInWorkspaceFails() {
-    // If the input detector IDs are not in the input workspace the algorithm
-    // should not execute
+  void test_throwsIfRequestedDetectorIDsNotInWorkspace() {
 
-    // Add this once Load algorithm is merged and use the new helper methods
+    MatrixWorkspace_sptr ws =
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(5, 10);
+    setUpADSWithWorkspace setup(ws);
+
+    ApplyMuonDetectorGroupPairing alg;
+    alg.initialize();
+	// Expects 10 IDs
+    setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
+
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
   void test_summingPeriodsGivesCorrectAsymmetryValues() {

@@ -53,9 +53,10 @@ void ApplyMuonDetectorGroupPairing::init() {
           PropertyMode::Mandatory),
       "The workspace group to which the output will be added.");
 
-  declareProperty("PairName", emptyString, "The name of the pair. Must "
-                                           "contain at least one alphanumeric "
-                                           "character.",
+  declareProperty("PairName", emptyString,
+                  "The name of the pair. Must "
+                  "contain at least one alphanumeric "
+                  "character.",
                   Direction::Input);
 
   declareProperty("Alpha", 1.0,
@@ -399,6 +400,8 @@ MatrixWorkspace_sptr ApplyMuonDetectorGroupPairing::createPairWorkspaceManually(
   if (noRebin)
     options.rebinArgs = "";
 
+  checkDetectorIDsInWorkspace(options.grouping, inputWS);
+
   setMuonProcessPeriodProperties(*alg, inputWS, options);
   setMuonProcessAlgorithmProperties(*alg, options);
   alg->execute();
@@ -437,6 +440,20 @@ Muon::AnalysisOptions ApplyMuonDetectorGroupPairing::getUserInput() {
   options.groupPairName = this->getPropertyValue("PairName");
 
   return options;
+}
+
+// Checks that the detector IDs in grouping are in the workspace
+void ApplyMuonDetectorGroupPairing::checkDetectorIDsInWorkspace(
+    API::Grouping &grouping, Workspace_sptr workspace) {
+  bool check =
+      MuonAlgorithmHelper::checkGroupDetectorsInWorkspace(grouping, workspace);
+  if (!check) {
+    g_log.error("One or more detector IDs specified in the groups is not "
+                "contained in the InputWorkspace");
+    throw std::runtime_error(
+        "One or more detector IDs specified in the groups is not "
+        "contained in the InputWorkspace");
+  }
 }
 
 /**
