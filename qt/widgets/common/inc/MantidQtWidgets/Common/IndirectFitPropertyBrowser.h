@@ -124,9 +124,10 @@ public:
 
   void removeFunction(PropertyHandler *handler) override;
 
+  void setWorkspaceIndex(int i) override;
+
 public slots:
   void fit() override;
-
   void sequentialFit() override;
 
 protected slots:

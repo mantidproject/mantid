@@ -428,7 +428,7 @@ void IndirectFitPropertyBrowser::updateTie(std::size_t index) {
 void IndirectFitPropertyBrowser::addTie(const QString &tieString) {
   const auto index = tieString.split(".").first().right(1).toInt();
   const auto handler = getHandler()->getHandler(index);
-  
+
   if (handler)
     handler->addTie(tieString);
 }
@@ -931,6 +931,11 @@ void IndirectFitPropertyBrowser::customFunctionRemoved(QtProperty *prop) {
             SLOT(enumChanged(QtProperty *)));
     FitPropertyBrowser::enumChanged(prop);
   }
+}
+
+void IndirectFitPropertyBrowser::setWorkspaceIndex(int i) {
+  FitPropertyBrowser::setWorkspaceIndex(i);
+  
 }
 
 /**
