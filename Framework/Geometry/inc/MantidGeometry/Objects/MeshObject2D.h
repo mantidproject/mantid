@@ -63,7 +63,10 @@ public:
   int interceptSurface(Geometry::Track &ut) const;
   MeshObject2D *clone() const;
   MeshObject2D *cloneWithMaterial(const Kernel::Material &material) const;
-
+  int getName() const;
+  double solidAngle(const Kernel::V3D &observer) const;
+  double solidAngle(const Kernel::V3D &observer,
+                    const Kernel::V3D &scaleFactor) const;
   bool operator==(const MeshObject2D &other) const;
 
 private:

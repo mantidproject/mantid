@@ -30,7 +30,7 @@ Kernel::V3D surfaceNormal(const std::vector<Kernel::V3D> &vertices) {
 bool allCoplanar(const std::vector<Kernel::V3D> &vertices,
                  const Kernel::V3D normal) {
   bool in_plane = true;
-  auto v0 = vertices[1] - vertices[0];
+  auto v0 = vertices[0];
   const auto nx = normal[0];
   const auto ny = normal[1];
   const auto nz = normal[2];
@@ -65,6 +65,45 @@ validatePointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices) {
   if (!allCoplanar(vertices, normal))
     throw std::invalid_argument("Vertices do not define a plane");
   return normal;
+}
+}
+
+namespace {
+using Mantid::Kernel::V3D;
+
+/**
+* Find the solid angle of a triangle defined by vectors a,b,c from point
+*"observer"
+*
+* formula (Oosterom) O=2atan([a,b,c]/(abc+(a.b)c+(a.c)b+(b.c)a))
+*
+* @param a :: first point of triangle
+* @param b :: second point of triangle
+* @param c :: third point of triangle
+* @param observer :: point from which solid angle is required
+* @return :: solid angle of triangle in Steradians.
+*
+* This duplicates code in CSGOjbect both need a place to be merged.
+* To aid this, this function has been defined as a non-member.
+*/
+double getTriangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
+                             const V3D &observer) {
+  const V3D ao = a - observer;
+  const V3D bo = b - observer;
+  const V3D co = c - observer;
+  const double modao = ao.norm();
+  const double modbo = bo.norm();
+  const double modco = co.norm();
+  const double aobo = ao.scalar_prod(bo);
+  const double aoco = ao.scalar_prod(co);
+  const double boco = bo.scalar_prod(co);
+  const double scalTripProd = ao.scalar_prod(bo.cross_prod(co));
+  const double denom =
+      modao * modbo * modco + modco * aobo + modbo * aoco + modao * boco;
+  if (denom != 0.0)
+    return 2.0 * atan2(scalTripProd, denom);
+  else
+    return 0.0; // not certain this is correct
 }
 }
 
@@ -232,6 +271,40 @@ MeshObject2D *MeshObject2D::clone() const {
 MeshObject2D *
 MeshObject2D::cloneWithMaterial(const Kernel::Material &material) const {
   return new MeshObject2D(this->m_triangles, this->m_vertices, material);
+}
+
+int MeshObject2D::getName() const {
+  return 0; // This is a hack. See how "names" are assigned in
+            // InstrumentDefinitionParser. Also see vtkGeometryCacheReader for
+  // where this is used.
+}
+
+double MeshObject2D::solidAngle(const Kernel::V3D &observer) const {
+  double solidAngleSum(0), solidAngleNegativeSum(0);
+  for (size_t i = 0; i < m_vertices.size(); i += 3) {
+    auto sa = getTriangleSolidAngle(m_vertices[m_triangles[i]],
+                                    m_vertices[m_triangles[i + 1]],
+                                    m_vertices[m_triangles[i + 2]], observer);
+    if (sa > 0.0) {
+      solidAngleSum += sa;
+    } else {
+      solidAngleNegativeSum += sa;
+    }
+  }
+  return 0.5 * (solidAngleSum - solidAngleNegativeSum);
+}
+
+double MeshObject2D::solidAngle(const Kernel::V3D &observer,
+                                const Kernel::V3D &scaleFactor) const {
+  std::vector<V3D> scaledVertices;
+  scaledVertices.reserve(m_vertices.size());
+  for (const auto &vertex : m_vertices) {
+    scaledVertices.emplace_back(scaleFactor.X() * vertex.X(),
+                                scaleFactor.Y() * vertex.Y(),
+                                scaleFactor.Z() * vertex.Z());
+  }
+  MeshObject2D scaledObject(m_triangles, scaledVertices, m_material);
+  return scaledObject.solidAngle(observer);
 }
 
 bool MeshObject2D::operator==(const MeshObject2D &other) const {
