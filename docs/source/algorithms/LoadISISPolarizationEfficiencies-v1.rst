@@ -2,6 +2,8 @@
 
 .. summary::
 
+.. relatedalgorithms::
+
 .. properties::
 
 Description

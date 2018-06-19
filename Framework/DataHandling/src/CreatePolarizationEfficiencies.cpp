@@ -48,6 +48,10 @@ const std::string CreatePolarizationEfficiencies::summary() const {
          "efficiencies.";
 }
 
+const std::vector<std::string> CreatePolarizationEfficiencies::seeAlso() const {
+  return {"JoinISISPolarizationEfficiencies", "LoadISISPolarizationEfficiencies", "PolarizationEfficiencyCor"};
+}
+
 void CreatePolarizationEfficiencies::init() {
   declareProperty(make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),

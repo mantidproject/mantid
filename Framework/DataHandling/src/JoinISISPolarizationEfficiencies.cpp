@@ -39,6 +39,11 @@ const std::string JoinISISPolarizationEfficiencies::summary() const {
          "PolarizationEfficiencyCor.";
 }
 
+const std::vector<std::string> JoinISISPolarizationEfficiencies::seeAlso() const {
+  return {"CreatePolarizationEfficiencies", "LoadISISPolarizationEfficiencies", "PolarizationEfficiencyCor"};
+}
+
+
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
