@@ -98,8 +98,8 @@ void ProjectRecoveryThread::projectSavingThread() {
     const auto basePath = getOutputPath();
     auto projectFile = Poco::Path(basePath).append(getOutputProjectName());
 
-	// Python's OS module cannot handle Poco's parsed paths
-	// so use std::string instead and let OS parse the '/' char on Win
+    // Python's OS module cannot handle Poco's parsed paths
+    // so use std::string instead and let OS parse the '/' char on Win
     saveWsHistories(basePath);
     saveOpenWindows(projectFile.toString());
     g_log.information("Project Recovery: Saving finished");

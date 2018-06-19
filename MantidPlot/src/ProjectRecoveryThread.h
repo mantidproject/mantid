@@ -41,7 +41,7 @@ namespace MantidQt {
 namespace API {
 class ProjectRecoveryThread {
 public:
-	/// Constructor
+  /// Constructor
   explicit ProjectRecoveryThread(ApplicationWindow *windowHandle);
   /// Destructor the ensures background thread stops
   ~ProjectRecoveryThread();
@@ -52,9 +52,9 @@ public:
   void stopProjectSaving();
 
 private:
-	/// Captures the current object in the background thread
+  /// Captures the current object in the background thread
   std::thread createBackgroundThread();
-  
+
   /// Loads a project recovery file back into Mantid
   void loadOpenWindows(const std::string &projectFolder);
   /// Saves a project recovery file in Mantid
@@ -63,7 +63,7 @@ private:
   void saveWsHistories(const std::string &projectDestFile);
   /// Main body of saving thread
   void projectSavingThread();
-	
+
   /// Background thread which runs the saving body
   std::thread m_backgroundSavingThread;
 
@@ -74,7 +74,7 @@ private:
   /// Atomic to detect when the thread should fire or exit
   std::condition_variable m_threadNotifier;
 
-  /// Pointer to main GUI window 
+  /// Pointer to main GUI window
   ApplicationWindow *m_windowPtr;
 };
 
