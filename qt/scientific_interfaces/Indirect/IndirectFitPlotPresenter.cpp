@@ -20,7 +20,7 @@ std::string createPlotString(const std::string &workspaceName,
 
 struct UpdateAvailableSpectra : public boost::static_visitor<> {
 public:
-  UpdateAvailableSpectra(IndirectFitPlotView *view) : m_view(view) {}
+  explicit UpdateAvailableSpectra(IndirectFitPlotView *view) : m_view(view) {}
 
   void operator()(const std::pair<std::size_t, std::size_t> &spectra) {
     m_view->setAvailableSpectra(spectra.first, spectra.second);

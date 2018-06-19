@@ -132,7 +132,7 @@ protected:
   virtual void setPlotResultEnabled(bool enabled) = 0;
   virtual void setSaveResultEnabled(bool enabled) = 0;
 
-  UserInputValidator &validate(UserInputValidator &validator);
+  UserInputValidator &validateTab(UserInputValidator &validator);
 
 signals:
   void functionChanged();

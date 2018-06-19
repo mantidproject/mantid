@@ -303,7 +303,7 @@ size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
 }
 
 UserInputValidator &
-IndirectFitAnalysisTab::validate(UserInputValidator &validator) {
+IndirectFitAnalysisTab::validateTab(UserInputValidator &validator) {
   return m_spectrumPresenter->validate(validator);
 }
 

@@ -202,9 +202,9 @@ IqtFitModel::createDefaultParameters(std::size_t index) const {
   const auto inputWs = getWorkspace(index);
   const auto tau = inputWs ? computeTauApproximation(inputWs) : 0.0;
 
-  parameters["Lifetime"] = tau;
-  parameters["Stretching"] = 1.0;
-  parameters["A0"] = 0.0;
+  parameters["Lifetime"] = ParameterValue(tau);
+  parameters["Stretching"] = ParameterValue(1.0);
+  parameters["A0"] = ParameterValue(0.0);
   return parameters;
 }
 
