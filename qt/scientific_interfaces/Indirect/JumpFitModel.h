@@ -21,6 +21,9 @@ public:
   void removeWorkspace(std::size_t index);
   void setFitType(const std::string &fitType);
 
+  bool zeroWidths(std::size_t dataIndex) const;
+  bool zeroEISF(std::size_t dataIndex) const;
+
   std::string getFitParameterName(std::size_t dataIndex,
                                    std::size_t spectrum) const;
   std::vector<std::string> getWidths(std::size_t dataIndex) const;
