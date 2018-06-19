@@ -510,11 +510,17 @@ class Moderator(object):
         if hasattr(self, 'measured_flux') and self.measured_flux:
             if 'scale_factor' in self.measured_flux:
                 self.measured_flux['flux'] = np.array(self.measured_flux['flux']) * float(self.measured_flux['scale_factor'])
-            self.flux_interp = interp1d(self.measured_flux['wavelength'], self.measured_flux['flux'], kind='cubic')
-            self.fmn, self.fmx = (min(self.measured_flux['wavelength']), max(self.measured_flux['wavelength']))
+            idx = np.argsort(self.measured_flux['wavelength'])
+            wavelength = np.array(self.measured_flux['wavelength'])[idx]
+            flux = np.array(self.measured_flux['flux'])[idx]
+            self.flux_interp = interp1d(wavelength, flux, kind='cubic')
+            self.fmn, self.fmx = (min(wavelength), max(wavelength))
         if hasattr(self, 'measured_width') and self.measured_width:
-            self.width_interp = interp1d(self.measured_width['wavelength'], self.measured_width['width'], kind='slinear')
-            self.wmn, self.wmx = (min(self.measured_width['wavelength']), max(self.measured_width['wavelength']))
+            idx = np.argsort(self.measured_width['wavelength'])
+            wavelength = np.array(self.measured_width['wavelength'])[idx]
+            widths = np.array(self.measured_width['width'])[idx]
+            self.width_interp = interp1d(wavelength, widths, kind='slinear')
+            self.wmn, self.wmx = (min(wavelength), max(wavelength))
             if 'isSigma' not in self.measured_width.keys():
                 self.measured_width['isSigma'] = False
 
