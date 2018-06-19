@@ -56,6 +56,32 @@ void addExtension(const std::string &extension,
     extensions.push_back(extension);
 }
 
+/**
+ * Get the path to the user's home directory (associated with ~) if it is set
+ * as an environment variable, and cache it
+ * @return The user's home path
+ */
+const std::string &getHomePath() {
+  static std::string homePath;
+  static bool initialised(false);
+
+  if (initialised) {
+    return homePath;
+  }
+  initialised = true;
+
+  char *home = std::getenv("HOME"); // Usually set on Windows and UNIX
+  if (home) {
+    homePath = std::string(home);
+    return homePath;
+  }
+
+  char *userProfile = std::getenv("USERPROFILE"); // Not usually set on UNIX
+  // Return even if it's an empty string, as we can do no better
+  homePath = userProfile ? std::string(userProfile) : "";
+  return homePath;
+}
+
 /** Expand user variables in file path.
  *  On Windows and UNIX, ~ is replaced by the user's home directory, if found.
  *  If the path contains no user variables, or expansion fails, the path is
@@ -82,7 +108,7 @@ std::string expandUser(const std::string &filepath) {
   if (std::distance(start, nextSlash) != 1)
     return filepath;
 
-  return FileProperty::getHomePath() + std::string(nextSlash, end);
+  return getHomePath() + std::string(nextSlash, end);
 }
 
 /**
@@ -262,33 +288,6 @@ std::string FileProperty::isValid() const {
     return PropertyWithValue<std::string>::isValid();
   }
 }
-
-/**
-* Get the path to the user's home directory (associated with ~) if it is set
-* as an environment variable, and cache it
-* @return The user's home path
-*/
-std::string FileProperty::getHomePath() {
-	static std::string homePath;
-	static bool initialised(false);
-
-	if (initialised) {
-		return homePath;
-	}
-	initialised = true;
-
-	char *home = std::getenv("HOME"); // Usually set on Windows and UNIX
-	if (home) {
-		homePath = std::string(home);
-		return homePath;
-	}
-
-	char *userProfile = std::getenv("USERPROFILE"); // Not usually set on UNIX
-													// Return even if it's an empty string, as we can do no better
-	homePath = userProfile ? std::string(userProfile) : "";
-	return homePath;
-}
-
 
 /**
  * @returns a string depending on whether an empty value is valid
