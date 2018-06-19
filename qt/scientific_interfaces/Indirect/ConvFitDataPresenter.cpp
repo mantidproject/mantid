@@ -10,9 +10,8 @@ namespace IDA {
 
 ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
                                            IndirectFitDataView *view)
-    : IndirectFitDataPresenter(
-          model, view,
-          new ConvFitDataTablePresenter(model, view->getDataTable())),
+    : IndirectFitDataPresenter(model, view, new ConvFitDataTablePresenter(
+                                                model, view->getDataTable())),
       m_convModel(model) {
   setResolutionHidden(false);
 

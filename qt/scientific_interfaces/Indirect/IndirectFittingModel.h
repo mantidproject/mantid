@@ -20,6 +20,7 @@ class IndirectFittingModel;
 
 struct PrivateFittingData {
   friend class IndirectFittingModel;
+
 public:
   PrivateFittingData();
   PrivateFittingData &operator=(PrivateFittingData &&fittingData);

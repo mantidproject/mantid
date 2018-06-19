@@ -34,8 +34,7 @@ namespace IDA {
 class DLLExport JumpFitDataTablePresenter : public IndirectDataTablePresenter {
   Q_OBJECT
 public:
-  JumpFitDataTablePresenter(JumpFitModel *model,
-                            QTableWidget *dataTable);
+  JumpFitDataTablePresenter(JumpFitModel *model, QTableWidget *dataTable);
 
 protected:
   virtual void addTableEntry(std::size_t dataIndex, std::size_t spectrum,
@@ -48,7 +47,7 @@ private:
   int startXColumn() const override;
   int endXColumn() const override;
   int excludeColumn() const override;
-  
+
   JumpFitModel *m_jumpFitModel;
 };
 

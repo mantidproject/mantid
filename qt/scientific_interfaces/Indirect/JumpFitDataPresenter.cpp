@@ -12,9 +12,8 @@ namespace IDA {
 JumpFitDataPresenter::JumpFitDataPresenter(
     JumpFitModel *model, IndirectFitDataView *view, QComboBox *cbParameterType,
     QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter)
-    : IndirectFitDataPresenter(
-          model, view,
-          new JumpFitDataTablePresenter(model, view->getDataTable())),
+    : IndirectFitDataPresenter(model, view, new JumpFitDataTablePresenter(
+                                                model, view->getDataTable())),
       m_activeParameterType(0), m_dataIndex(0),
       m_cbParameterType(cbParameterType), m_cbParameter(cbParameter),
       m_lbParameterType(lbParameterType), m_lbParameter(lbParameter),
@@ -174,12 +173,10 @@ void JumpFitDataPresenter::setModelSpectrum(int index) {
 std::unique_ptr<IAddWorkspaceDialog>
 JumpFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = Mantid::Kernel::make_unique<JumpFitAddWorkspaceDialog>(parent);
-  connect(dialog.get(),
-          SIGNAL(workspaceChanged(JumpFitAddWorkspaceDialog *,
-                                  const std::string &)),
-          this,
-          SLOT(setDialogParameterNames(JumpFitAddWorkspaceDialog *,
-                                       const std::string &)));
+  connect(dialog.get(), SIGNAL(workspaceChanged(JumpFitAddWorkspaceDialog *,
+                                                const std::string &)),
+          this, SLOT(setDialogParameterNames(JumpFitAddWorkspaceDialog *,
+                                             const std::string &)));
   connect(dialog.get(),
           SIGNAL(parameterTypeChanged(JumpFitAddWorkspaceDialog *, int)), this,
           SLOT(setDialogParameterNames(JumpFitAddWorkspaceDialog *, int)));
