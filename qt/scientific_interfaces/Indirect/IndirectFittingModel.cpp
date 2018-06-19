@@ -118,9 +118,8 @@ excludeRegionsStringToVector(const std::string &excludeRegions) {
 std::ostringstream &addInputString(IndirectFitData *fitData,
                                    std::ostringstream &stream) {
   const auto &name = fitData->workspace()->getName();
-  auto addToStream = [&](std::size_t spectrum) {
-    stream << name << ",i" << spectrum << ";";
-  };
+  auto addToStream =
+      [&](std::size_t spectrum) { stream << name << ",i" << spectrum << ";"; };
   fitData->applySpectra(addToStream);
   return stream;
 }
@@ -599,7 +598,7 @@ IndirectFittingModel::mapDefaultParameterNames() const {
 }
 
 std::unordered_map<std::string, ParameterValue>
-IndirectFittingModel::createDefaultParameters(std::size_t) const {
+    IndirectFittingModel::createDefaultParameters(std::size_t) const {
   return std::unordered_map<std::string, ParameterValue>();
 }
 
@@ -631,7 +630,8 @@ WorkspaceGroup_sptr IndirectFittingModel::getResultGroup() const {
 }
 
 bool IndirectFittingModel::isPreviousModelSelected() const {
-  return m_fitFunction && equivalentFunctions(getFittingFunction(), m_fitFunction);
+  return m_fitFunction &&
+         equivalentFunctions(getFittingFunction(), m_fitFunction);
 }
 
 CompositeFunction_sptr IndirectFittingModel::getMultiDomainFunction() const {

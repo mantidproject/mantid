@@ -92,7 +92,8 @@ struct ApplyEnumeratedSpectra : boost::static_visitor<std::size_t> {
     return i;
   }
 
-  std::size_t operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
+  std::size_t
+  operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
     auto i = m_start;
     for (const auto &spectrum : spectra)
       m_functor(i++, spectrum);

@@ -327,8 +327,8 @@ private:
 };
 
 std::vector<std::string>
-getNames(const std::vector<boost::weak_ptr<Mantid::API::MatrixWorkspace>>
-             &workspaces) {
+getNames(const std::vector<boost::weak_ptr<Mantid::API::MatrixWorkspace>> &
+             workspaces) {
   std::vector<std::string> names;
   names.reserve(workspaces.size());
   std::transform(workspaces.begin(), workspaces.end(),
