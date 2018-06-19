@@ -16,6 +16,9 @@ private:
   std::string m_word;
   std::string m_description;
 };
+
+EXPORT_OPT_MANTIDQT_COMMON bool operator==(Hint const &lhs, Hint const &rhs);
+EXPORT_OPT_MANTIDQT_COMMON bool operator!=(Hint const &lhs, Hint const &rhs);
 }
 }
 #endif // MANTID_MANTIDWIDGETS_HINT_H_

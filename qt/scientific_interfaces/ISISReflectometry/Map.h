@@ -15,8 +15,7 @@ template <typename Container, typename Transform,
 std::vector<Out> map(Container const &in, Transform transform) {
   auto out = std::vector<Out>();
   out.reserve(in.size());
-  std::transform(std::cbegin(in), std::cend(in), std::back_inserter(out),
-                 transform);
+  std::transform(in.cbegin(), in.cend(), std::back_inserter(out), transform);
   return out;
 }
 

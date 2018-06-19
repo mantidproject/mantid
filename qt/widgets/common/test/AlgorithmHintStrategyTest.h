@@ -66,39 +66,31 @@ public:
     m_propAlg = static_cast<IAlgorithm_sptr>(new FakeAlgorithm());
     m_propAlg->initialize();
     // Expected hints for PropertyAlgorithm
-    m_propMap["IntValue"] = "";
-    m_propMap["DoubleValue"] = "";
-    m_propMap["BoolValue"] = "";
-    m_propMap["StringValue"] = "";
-    m_propMap["PositiveIntValue"] = "";
-    m_propMap["PositiveIntValue1"] = "";
-    m_propMap["IntArray"] = "";
-    m_propMap["DoubleArray"] = "";
-    m_propMap["StringArray"] = "";
   }
 
   void testCreateHints() {
-    boost::scoped_ptr<HintStrategy> strategy(
-        new AlgorithmHintStrategy(m_propAlg, std::set<std::string>()));
-    TS_ASSERT_EQUALS(m_propMap, strategy->createHints());
+    auto strategy = AlgorithmHintStrategy(m_propAlg, {});
+    auto expected = std::vector<Hint>(
+        {Hint("IntValue", ""), Hint("DoubleValue", ""), Hint("BoolValue", ""),
+         Hint("StringValue", ""), Hint("PositiveIntValue", ""),
+         Hint("PositiveIntValue1", ""), Hint("IntArray", ""),
+         Hint("DoubleArray", ""), Hint("StringArray", "")});
+    TS_ASSERT_EQUALS(expected, strategy.createHints());
   }
 
   void testBlacklist() {
-    std::set<std::string> blacklist;
-    blacklist.insert("DoubleValue");
-    blacklist.insert("IntArray");
+    auto strategy =
+        AlgorithmHintStrategy(m_propAlg, {"DoubleValue", "IntArray"});
+    auto expected = std::vector<Hint>(
+        {Hint("IntValue", ""), Hint("DoubleValue", ""), Hint("BoolValue", ""),
+         Hint("StringValue", ""), Hint("PositiveIntValue", ""),
+         Hint("PositiveIntValue1", ""), Hint("StringArray", "")});
 
-    boost::scoped_ptr<HintStrategy> strategy(
-        new AlgorithmHintStrategy(m_propAlg, blacklist));
-    auto expected = m_propMap;
-    expected.erase("DoubleValue");
-    expected.erase("IntArray");
-    TS_ASSERT_EQUALS(expected, strategy->createHints());
+    TS_ASSERT_EQUALS(expected, strategy.createHints());
   }
 
 protected:
   IAlgorithm_sptr m_propAlg;
-  std::map<std::string, std::string> m_propMap;
 };
 
 #endif /*MANTID_MANTIDWIDGETS_ALGORITHMHINTSTRATEGYTEST_H */

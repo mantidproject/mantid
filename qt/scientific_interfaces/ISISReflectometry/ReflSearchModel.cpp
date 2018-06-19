@@ -18,9 +18,7 @@ std::vector<SearchResult> const &ReflSearchModel::results() const {
   return m_runDetails;
 }
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
-@param transferMethod : Transfer strategy
+/**
 @param tableWorkspace : The table workspace to copy data from
 @param instrument : instrument name
 */

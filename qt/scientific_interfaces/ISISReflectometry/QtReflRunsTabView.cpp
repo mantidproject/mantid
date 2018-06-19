@@ -22,6 +22,7 @@ using namespace MantidQt::MantidWidgets;
 //----------------------------------------------------------------------------------------------
 /** Constructor
 * @param parent :: The parent of this view
+* @param makeBatchView :: The factory for the BatchViews.
 */
 QtReflRunsTabView::QtReflRunsTabView(QWidget *parent,
                                      BatchViewFactory makeBatchView)
@@ -31,11 +32,6 @@ QtReflRunsTabView::QtReflRunsTabView(QWidget *parent,
   UNUSED_ARG(parent);
   initLayout();
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-QtReflRunsTabView::~QtReflRunsTabView() {}
 
 void QtReflRunsTabView::subscribe(IReflRunsTabPresenter *presenter) {
   m_presenter = presenter;
@@ -222,7 +218,8 @@ void QtReflRunsTabView::setSearchButtonEnabled(bool enabled) {
 Set the list of available instruments to search for and updates the list of
 available instruments in the table view
 @param instruments : The list of instruments available
-@param defaultInstrument : The instrument to have selected by default
+@param defaultInstrumentIndex : The index of the instrument to have selected by
+default
 */
 void QtReflRunsTabView::setInstrumentList(
     const std::vector<std::string> &instruments, int defaultInstrumentIndex) {

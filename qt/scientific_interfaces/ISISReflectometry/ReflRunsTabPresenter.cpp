@@ -54,7 +54,15 @@ QStringList fromStdStringVector(std::vector<std::string> const &inVec) {
 /** Constructor
 * @param mainView :: [input] The view we're managing
 * @param progressableView :: [input] The view reporting progress
-* @param tablePresenters :: [input] The data processor presenters
+* @param makeBatchPresenter :: A generator for the child presenters.
+* @param workspaceNamesFactory :: A generator for the workspace names used in
+* the reduction.
+* @param thetaTolerance The tolerance used to determine if two runs should be
+* summed in a reduction.
+* @param instruments The names of the instruments to show as options for the
+* search.
+* @param defaultInstrumentIndex The index of the instrument to have selected by
+* default.
 * @param searcher :: [input] The search implementation
 */
 ReflRunsTabPresenter::ReflRunsTabPresenter(

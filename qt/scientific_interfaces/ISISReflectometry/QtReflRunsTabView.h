@@ -67,7 +67,6 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflRunsTabView
   Q_OBJECT
 public:
   QtReflRunsTabView(QWidget *parent, BatchViewFactory makeView);
-  ~QtReflRunsTabView() override;
 
   void subscribe(IReflRunsTabPresenter *presenter) override;
   std::vector<IBatchView *> const &tableViews() const override;
