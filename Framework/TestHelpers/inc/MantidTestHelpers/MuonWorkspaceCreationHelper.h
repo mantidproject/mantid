@@ -26,8 +26,8 @@ struct yDataAsymmetry {
 private:
   double m_amp;         // Amplitude of the oscillations
   double m_phi;         // Phase of the sinusoid
-  double m_omega = 5.0; // Frequency of the oscillations
-  double tau = Mantid::PhysicalConstants::MuonLifetime *
+  const double m_omega = 5.0; // Frequency of the oscillations
+  const double tau = Mantid::PhysicalConstants::MuonLifetime *
                1e6; // Muon life time in microseconds
 };
 

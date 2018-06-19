@@ -13,8 +13,10 @@
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
+
 #include "MantidMuon/ApplyMuonDetectorGroupPairing.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
@@ -25,177 +27,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Muon;
 
 namespace {
-
-/**
- * Create a fake muon dataset, each spectrum is offset by 4 degrees in phase
- * and has a different normalization.
- */
-struct yDataAsymmetry {
-  yDataAsymmetry() {
-    m_amp = 1.5;
-    m_phi = 0.1;
-  };
-  yDataAsymmetry(const double amp, const double phi) : m_amp(amp), m_phi(phi){};
-
-  double operator()(const double t, size_t spec) {
-    double e = exp(-t / m_tau);
-    double factor = (static_cast<double>(spec) + 1.0) * 0.5;
-    double phase_offset = 4 * M_PI / 180;
-    return (10. * factor *
-            (1.0 +
-             m_amp * cos(m_omega * t + m_phi +
-                         static_cast<double>(spec) * phase_offset)) *
-            e);
-  }
-
-private:
-  double m_amp;               // Amplitude of the oscillations
-  double m_phi;               // Phase of the sinusoid
-  const double m_omega = 5.0; // Frequency of the oscillations
-  const double m_tau =
-      PhysicalConstants::MuonLifetime * 1e6; // Muon life time in microseconds
-};
-
-// Simple count for use with workspace creator
-struct yDataCounts {
-  yDataCounts() : m_count(-1) {}
-  int m_count;
-  double operator()(const double, size_t) {
-    return static_cast<double>(++m_count);
-  }
-};
-
-// Errors are a fixed value
-struct eData {
-  double operator()(const double, size_t) { return 0.005; }
-};
-
-/**
- * Create a matrix workspace appropriate for Group Asymmetry. One detector per
- * spectra, numbers starting from 1. The detector ID and spectrum number are
- * equal.
- * @param nspec :: The number of spectra
- * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
- * Number of bins = maxt - 1 .
- * @return Pointer to the workspace.
- */
-template <typename Function = yDataAsymmetry>
-MatrixWorkspace_sptr
-createAsymmetryWorkspace(size_t nspec, size_t maxt,
-                         Function dataGenerator = yDataAsymmetry()) {
-
-  MatrixWorkspace_sptr ws =
-      WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-          dataGenerator, static_cast<int>(nspec), 0.0, 1.0,
-          (1.0 / static_cast<double>(maxt)), true, eData());
-
-  ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(
-      static_cast<int>(nspec)));
-
-  for (int g = 0; g < static_cast<int>(nspec); g++) {
-    auto &spec = ws->getSpectrum(g);
-    spec.addDetectorID(g + 1);
-    spec.setSpectrumNo(g + 1);
-  }
-
-  // Add number of good frames (required for Asymmetry calculation)
-  ws->mutableRun().addProperty("goodfrm", 10);
-
-  return ws;
-}
-
-/**
- * Create a matrix workspace appropriate for Group Counts. One detector per
- * spectra, numbers starting from 1. The detector ID and spectrum number are
- * equal. Y values increase from 0 in integer steps.
- * @param nspec :: The number of spectra
- * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
- * Number of bins = maxt - 1 .
- * @param seed :: Number added to all y-values.
- * @return Pointer to the workspace.
- */
-MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
-                                           double seed) {
-
-  MatrixWorkspace_sptr ws =
-      WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-          yDataCounts(), static_cast<int>(nspec), 0.0, 1.0,
-          (1.0 / static_cast<double>(maxt)), true, eData());
-
-  ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(
-      static_cast<int>(nspec)));
-
-  for (int g = 0; g < static_cast<int>(nspec); g++) {
-    auto &spec = ws->getSpectrum(g);
-    spec.addDetectorID(g + 1);
-    spec.setSpectrumNo(g + 1);
-    ws->mutableY(g) += seed;
-  }
-
-  return ws;
-}
-
-/**
- * Create a WorkspaceGroup and add to the ADS, populate with MatrixWorkspaces
- * simulating periods as used in muon analysis. Workspace for period i has a
- * name ending _i.
- * @param nPeriods :: The number of periods (independent workspaces)
- * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
- * Number of bins = maxt - 1 .
- * @param wsGroupName :: Name of the workspace group containing the period
- * workspaces.
- * @return Pointer to the workspace group.
- */
-WorkspaceGroup_sptr
-createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
-                                const std::string &wsGroupName) {
-
-  WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
-  AnalysisDataService::Instance().addOrReplace(wsGroupName, wsGroup);
-
-  std::string wsNameStem = "MuonDataPeriod_";
-  std::string wsName;
-
-  for (int period = 1; period < nPeriods + 1; period++) {
-    // Period 1 yvalues : 1,2,3,4,5,6,7,8,9,10
-    // Period 2 yvalues : 2,3,4,5,6,7,8,9,10,11 etc..
-    MatrixWorkspace_sptr ws = createCountsWorkspace(nspec, maxt, period);
-    wsGroup->addWorkspace(ws);
-    wsName = wsNameStem + std::to_string(period);
-    AnalysisDataService::Instance().addOrReplace(wsName, ws);
-  }
-
-  return wsGroup;
-}
-
-/**
- * Create a simple dead time TableWorkspace with two columns (spectrum number
- * and dead time).
- * @param nspec :: The number of spectra (rows in table).
- * @param deadTimes ::  The dead times for each spectra.
- * @return TableWorkspace with dead times appropriate for pairing algorithm.
- */
-ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
-                                         std::vector<double> &deadTimes) {
-
-  auto deadTimeTable = boost::dynamic_pointer_cast<ITableWorkspace>(
-      WorkspaceFactory::Instance().createTable("TableWorkspace"));
-
-  deadTimeTable->addColumn("int", "Spectrum Number");
-  deadTimeTable->addColumn("double", "Dead Time");
-
-  if (deadTimes.size() != nspec) {
-    return deadTimeTable;
-  }
-
-  for (size_t spec = 0; spec < deadTimes.size(); spec++) {
-    TableRow newRow = deadTimeTable->appendRow();
-    newRow << static_cast<int>(spec) + 1;
-    newRow << deadTimes[spec];
-  }
-
-  return deadTimeTable;
-}
 
 // Set algorithm properties to sensible defaults (assuming data with 10 groups)
 // Use when specifying groups manually
@@ -273,7 +104,8 @@ public:
   }
 
   void test_nonAlphanumericPairNamesNotAllowed() {
-    MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws =
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -290,7 +122,8 @@ public:
   }
 
   void test_zeroOrNegativeAlphaNotAllowed() {
-    MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws =
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -306,7 +139,8 @@ public:
   }
 
   void test_throwsIfTwoGroupsAreIdentical() {
-    MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws =
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -325,7 +159,8 @@ public:
   }
 
   void test_throwsIfTimeMinGreaterThanTimeMax() {
-    MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws =
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -343,7 +178,8 @@ public:
     // periods are set to "1" and "" and so no checks are needed.
     int nPeriods = 2;
     WorkspaceGroup_sptr ws =
-        createMultiPeriodWorkspaceGroup(nPeriods, 10, 10, "MuonAnalysis");
+        MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(
+            nPeriods, 10, 10, "MuonAnalysis");
     ;
     setUpADSWithWorkspace setup(ws);
 
@@ -369,7 +205,8 @@ public:
   }
 
   void test_producesOutputWorkspacesInWorkspaceGroup() {
-    MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 5);
+    MatrixWorkspace_sptr ws =
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 5);
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -384,7 +221,8 @@ public:
   }
 
   void test_outputWorkspacesHaveCorrectName() {
-    MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 5);
+    MatrixWorkspace_sptr ws =
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 5);
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -398,7 +236,8 @@ public:
 
   void test_workspacePairingHasCorrectAsymmetryValues() {
     MatrixWorkspace_sptr ws =
-        createAsymmetryWorkspace(10, 10, yDataAsymmetry());
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
+            10, 10, MuonWorkspaceCreationHelper::yDataAsymmetry());
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -424,7 +263,8 @@ public:
   }
 
   void test_timeOffsetShiftsTimeAxisCorrectly() {
-    MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws =
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -451,7 +291,8 @@ public:
 
   void test_summingPeriodsGivesCorrectAsymmetryValues() {
     WorkspaceGroup_sptr ws =
-        createMultiPeriodWorkspaceGroup(4, 10, 10, "MuonAnalysis");
+        MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(
+            4, 10, 10, "MuonAnalysis");
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -479,7 +320,8 @@ public:
 
   void test_subtractingPeriodsGivesCorrectAsymmetryValues() {
     WorkspaceGroup_sptr ws =
-        createMultiPeriodWorkspaceGroup(4, 10, 10, "MuonAnalysis");
+        MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(
+            4, 10, 10, "MuonAnalysis");
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -510,7 +352,8 @@ public:
   void test_applyingDeadTimeCorrectionGivesCorrectAsymmetryValues() {
 
     MatrixWorkspace_sptr ws =
-        createAsymmetryWorkspace(10, 10, yDataAsymmetry());
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
+            10, 10, MuonWorkspaceCreationHelper::yDataAsymmetry());
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -519,7 +362,8 @@ public:
 
     // Apply same dead time to every spectra
     std::vector<double> deadTimes(10, 0.0025);
-    ITableWorkspace_sptr deadTimeTable = createDeadTimeTable(10, deadTimes);
+    ITableWorkspace_sptr deadTimeTable =
+        MuonWorkspaceCreationHelper::createDeadTimeTable(10, deadTimes);
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyDeadTimeCorrection", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeadTimeTable", deadTimeTable));
@@ -544,16 +388,19 @@ public:
 
   void test_asymmetryValuesCorrectWhenEnteringWorkspacesByHand() {
 
-    MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws =
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
     ApplyMuonDetectorGroupPairing alg;
     alg.initialize();
     setPairAlgorithmPropertiesForInputWorkspace(alg, setup.inputWSName,
                                                 setup.groupWSName);
     MatrixWorkspace_sptr groupWS1 =
-        createAsymmetryWorkspace(1, 10, yDataAsymmetry(0.5, 0.1));
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
+            1, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(0.5, 0.1));
     MatrixWorkspace_sptr groupWS2 =
-        createAsymmetryWorkspace(1, 10, yDataAsymmetry(1.0, 0.2));
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
+            1, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.0, 0.2));
     const std::string groupWS1Name = "EMU000012345; Group; fwd; Counts; #1_Raw";
     const std::string groupWS2Name = "EMU000012345; Group; bwd; Counts; #1_Raw";
     AnalysisDataService::Instance().addOrReplace(groupWS1Name, groupWS1);
@@ -583,16 +430,19 @@ public:
   void test_inputWorkspaceWithMultipleSpectraFails() {
     // We expect the input workspaces to have a single spectra.
 
-    MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws =
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
     ApplyMuonDetectorGroupPairing alg;
     alg.initialize();
     setPairAlgorithmPropertiesForInputWorkspace(alg, setup.inputWSName,
                                                 setup.groupWSName);
     MatrixWorkspace_sptr groupWS1 =
-        createAsymmetryWorkspace(2, 10, yDataAsymmetry(0.5, 0.1));
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
+            2, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(0.5, 0.1));
     MatrixWorkspace_sptr groupWS2 =
-        createAsymmetryWorkspace(1, 10, yDataAsymmetry(1.0, 0.2));
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
+            1, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.0, 0.2));
     const std::string groupWS1Name = "EMU000012345; Group; fwd; Counts; #1_Raw";
     const std::string groupWS2Name = "EMU000012345; Group; bwd; Counts; #1_Raw";
     AnalysisDataService::Instance().addOrReplace(groupWS1Name, groupWS1);
@@ -608,16 +458,19 @@ public:
   void test_inputWorkspaceWithDifferentTimeAxisFails() {
     // e.g. rebin with non-rebin should throw an error from this algorithm.
 
-    MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws =
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
     ApplyMuonDetectorGroupPairing alg;
     alg.initialize();
     setPairAlgorithmPropertiesForInputWorkspace(alg, setup.inputWSName,
                                                 setup.groupWSName);
     MatrixWorkspace_sptr groupWS1 =
-        createAsymmetryWorkspace(1, 10, yDataAsymmetry(0.5, 0.1));
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
+            1, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(0.5, 0.1));
     MatrixWorkspace_sptr groupWS2 =
-        createAsymmetryWorkspace(1, 20, yDataAsymmetry(1.0, 0.2));
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
+            1, 20, MuonWorkspaceCreationHelper::yDataAsymmetry(1.0, 0.2));
     const std::string groupWS1Name = "EMU000012345; Group; fwd; Counts; #1_Raw";
     const std::string groupWS2Name = "EMU000012345; Group; bwd; Counts; #1_Raw";
     AnalysisDataService::Instance().addOrReplace(groupWS1Name, groupWS1);
