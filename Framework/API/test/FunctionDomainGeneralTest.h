@@ -29,6 +29,7 @@ public:
   }
   /// Specialized type check
   bool isBool() const override { return false; }
+  bool isNumber() const override { return false; }
   /// Must return overall memory size taken by the column.
   long int sizeOfData() const override {
     throw std::logic_error("Not implemented");

@@ -40,6 +40,13 @@ PyObject *getCategories(IFunction &self) {
   return registered;
 }
 
+/**
+ * Return fitting error for a parameter given its name.
+ */
+double getError(IFunction &self, std::string const &name) {
+  return self.getError(self.parameterIndex(name));
+}
+
 // -- Set property overloads --
 // setProperty(index,value,explicit)
 using setParameterType1 = void (IFunction::*)(size_t, const double &, bool);
@@ -250,6 +257,10 @@ void export_IFunction() {
       .def("getParamValue",
            (double (IFunction::*)(std::size_t) const) & IFunction::getParameter,
            (arg("self"), arg("i")), "Get the value of the ith parameter")
+      .def("getError", &IFunction::getError, (arg("self"), arg("i")),
+           "Return fitting error of the ith parameter")
+      .def("getError", &getError, (arg("self"), arg("name")),
+           "Return fitting error of the named parameter")
 
       //-- Python special methods --
       .def("__repr__", &IFunction::asString, arg("self"),

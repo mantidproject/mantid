@@ -14,11 +14,6 @@ This algorithm takes a list of component names and an input workspaces and produ
 
 The workspace allows users to select a specific bank for exclusive investigation in subsequent operations. 
 
-Workflow
-########
-
-.. diagram:: AccumulateMD-v1_wkflw.dot
-
 Usage
 -----
 

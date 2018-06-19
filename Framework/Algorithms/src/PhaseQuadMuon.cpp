@@ -28,6 +28,7 @@ int findName(const T1 &patterns, const T2 &names) {
   }
   return -1;
 }
+double ASYMM_ERROR = 999.0;
 }
 
 namespace Mantid {
@@ -229,14 +230,17 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   // Get the maximum asymmetry
   double maxAsym = 0.;
   for (size_t h = 0; h < nspec; h++) {
-    if (phase->Double(h, asymmetryIndex) > maxAsym) {
+    if (phase->Double(h, asymmetryIndex) > maxAsym &&
+        phase->Double(h, asymmetryIndex) != ASYMM_ERROR) {
       maxAsym = phase->Double(h, asymmetryIndex);
     }
   }
+
   if (maxAsym == 0.0) {
     throw std::invalid_argument("Invalid detector asymmetries");
   }
-
+  std::vector<bool> emptySpectrum;
+  emptySpectrum.reserve(nspec);
   std::vector<double> aj, bj;
   {
     // Calculate coefficients aj, bj
@@ -244,15 +248,19 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     double sxx = 0.;
     double syy = 0.;
     double sxy = 0.;
-
     for (size_t h = 0; h < nspec; h++) {
-      const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
-      const double phi = phase->Double(h, phaseIndex);
-      const double X = n0[h] * asym * cos(phi);
-      const double Y = n0[h] * asym * sin(phi);
-      sxx += X * X;
-      syy += Y * Y;
-      sxy += X * Y;
+      emptySpectrum.push_back(
+          std::all_of(ws->y(h).begin(), ws->y(h).end(),
+                      [](double value) { return value == 0.; }));
+      if (!emptySpectrum[h]) {
+        const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
+        const double phi = phase->Double(h, phaseIndex);
+        const double X = n0[h] * asym * cos(phi);
+        const double Y = n0[h] * asym * sin(phi);
+        sxx += X * X;
+        syy += Y * Y;
+        sxy += X * Y;
+      }
     }
 
     const double lam1 = 2 * syy / (sxx * syy - sxy * sxy);
@@ -260,12 +268,17 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     const double lam2 = 2 * sxy / (sxy * sxy - sxx * syy);
     const double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
     for (size_t h = 0; h < nspec; h++) {
-      const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
-      const double phi = phase->Double(h, phaseIndex);
-      const double X = n0[h] * asym * cos(phi);
-      const double Y = n0[h] * asym * sin(phi);
-      aj.push_back((lam1 * X + mu1 * Y) * 0.5);
-      bj.push_back((lam2 * X + mu2 * Y) * 0.5);
+      if (emptySpectrum[h]) {
+        aj.push_back(0.0);
+        bj.push_back(0.0);
+      } else {
+        const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
+        const double phi = phase->Double(h, phaseIndex);
+        const double X = n0[h] * asym * cos(phi);
+        const double Y = n0[h] * asym * sin(phi);
+        aj.push_back((lam1 * X + mu1 * Y) * 0.5);
+        bj.push_back((lam2 * X + mu2 * Y) * 0.5);
+      }
     }
   }
 
@@ -295,18 +308,19 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
 
   for (size_t i = 0; i < npoints; i++) {
     for (size_t h = 0; h < nspec; h++) {
+      if (!emptySpectrum[h]) {
+        // (X,Y,E) with exponential decay removed
+        const double X = ws->x(h)[i];
+        const double exponential = n0[h] * exp(-(X - X0) / muLife);
+        const double Y = ws->y(h)[i] - exponential;
+        const double E =
+            (ws->y(h)[i] > poissonLimit) ? ws->e(h)[i] : sqrt(exponential);
 
-      // (X,Y,E) with exponential decay removed
-      const double X = ws->x(h)[i];
-      const double exponential = n0[h] * exp(-(X - X0) / muLife);
-      const double Y = ws->y(h)[i] - exponential;
-      const double E =
-          (ws->y(h)[i] > poissonLimit) ? ws->e(h)[i] : sqrt(exponential);
-
-      realY[i] += aj[h] * Y;
-      imagY[i] += bj[h] * Y;
-      realE[i] += aj[h] * aj[h] * E * E;
-      imagE[i] += bj[h] * bj[h] * E * E;
+        realY[i] += aj[h] * Y;
+        imagY[i] += bj[h] * Y;
+        realE[i] += aj[h] * aj[h] * E * E;
+        imagE[i] += bj[h] * bj[h] * E * E;
+      }
     }
     realE[i] = sqrt(realE[i]);
     imagE[i] = sqrt(imagE[i]);
