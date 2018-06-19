@@ -4,11 +4,10 @@ import unittest
 import sys
 import mantid
 
-from sans.gui_logic.models.create_state import (create_states, create_gui_state_from_userfile)
+from sans.gui_logic.models.create_state import (create_states)
 from sans.common.enums import (SANSInstrument, ISISReductionMode, SANSFacility)
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
-from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
 
 if sys.version_info.major == 3:
     from unittest import mock
@@ -50,18 +49,19 @@ class GuiCommonTest(unittest.TestCase):
         self.assertEqual(len(states), 1)
 
     @mock.patch('sans.gui_logic.models.create_state.__create_row_state')
-    def test_create_state_from_user_file_if_specified(self, create_row_state_mock):
+    @mock.patch('sans.gui_logic.models.create_state.create_gui_state_from_userfile')
+    def test_create_state_from_user_file_if_specified(self, create_gui_state_mock, create_row_state_mock):
+        create_gui_state_mock.returns = StateGuiModel({})
         table_index_model = TableIndexModel(0, 'LOQ74044', '', '', '', '', '', '', '', '', '', '', '',
                                               user_file='MaskLOQData.txt')
         table_model = TableModel()
         table_model.add_table_entry(0, table_index_model)
-        row_state_model = create_gui_state_from_userfile('MaskLOQData.txt')
-        row_gui_state_director = GuiStateDirector(table_model, row_state_model, SANSFacility.ISIS)
 
         states = create_states(self.state_gui_model, table_model, SANSInstrument.LOQ, SANSFacility.ISIS)
 
         self.assertEqual(len(states), 1)
-        create_row_state_mock.assert_called_once_with(row_gui_state_director, 0, SANSInstrument.LOQ, file_lookup=True)
+        create_gui_state_mock.assert_called_once_with('MaskLOQData.txt')
+
 
 
 if __name__ == '__main__':
