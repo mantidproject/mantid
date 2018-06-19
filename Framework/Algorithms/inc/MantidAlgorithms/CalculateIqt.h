@@ -26,6 +26,9 @@ namespace Algorithms {
   File change history is stored at : <https://github.com/mantidproject/mantid>
     Code Documentation is available at : <http://doxygen.mantidproject.org>
 */
+
+typedef std::function<API::MatrixWorkspace_sptr(API::MatrixWorkspace_sptr)> calculateIqtFunc;
+
 class DLLExport CalculateIqt : public API::Algorithm {
 public:
 
@@ -45,9 +48,6 @@ private:
     API::MatrixWorkspace_sptr resolutionWorkspace, const std::string &rebinParams);
   void CalculateIqt::monteCarloErrorCalculation(API::MatrixWorkspace_sptr sample,
     const calculateIqtFunc &calculateIqtFunction);
-  API::MatrixWorkspace_sptr randomizeYWithinError(API::MatrixWorkspace_sptr workspace, 
-    const int seed, const int errorMin, const int errorMax);
-
 };
 
 } // namespace Algorithms
