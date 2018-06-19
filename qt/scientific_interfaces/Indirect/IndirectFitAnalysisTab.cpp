@@ -238,7 +238,7 @@ bool IndirectFitAnalysisTab::canPlotGuess() const {
 }
 
 UserInputValidator &
-IndirectFitAnalysisTab::validate(UserInputValidator &validator) {
+IndirectFitAnalysisTab::validateTab(UserInputValidator &validator) {
   return m_spectrumPresenter->validate(validator);
 }
 

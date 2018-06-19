@@ -229,7 +229,7 @@ protected:
   virtual void enablePlotPreview() = 0;
   virtual void disablePlotPreview() = 0;
 
-  UserInputValidator &validate(UserInputValidator &validator);
+  UserInputValidator &validateTab(UserInputValidator &validator);
 
 signals:
   void functionChanged();

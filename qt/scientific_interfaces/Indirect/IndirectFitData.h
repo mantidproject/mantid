@@ -43,9 +43,9 @@ public:
     return *this;
   }
 
-  const bool empty() const { return m_vec.empty(); }
-  const std::size_t size() const { return m_vec.size(); }
-  const std::string &getString() const { return m_str; }
+  bool empty() const { return m_vec.empty(); }
+  std::size_t size() const { return m_vec.size(); }
+  std::string &getString() const { return m_str; }
   typename std::vector<T>::iterator begin() { return m_vec.begin(); }
   typename std::vector<T>::iterator end() { return m_vec.end(); }
   typename std::vector<T>::const_iterator begin() const {

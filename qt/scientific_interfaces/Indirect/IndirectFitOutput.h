@@ -16,7 +16,7 @@ namespace IDA {
 
 struct ParameterValue {
   ParameterValue() : value(0) {}
-  explicit ParameterValue(double val) : value(val) {}
+  ParameterValue(double val) : value(val) {}
   ParameterValue(double val, double err) : value(val), error(err) {}
   double value;
   boost::optional<double> error;
