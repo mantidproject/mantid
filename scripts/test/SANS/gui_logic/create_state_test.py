@@ -52,10 +52,10 @@ class GuiCommonTest(unittest.TestCase):
     @mock.patch('sans.gui_logic.models.create_state.__create_row_state')
     def test_create_state_from_user_file_if_specified(self, create_row_state_mock):
         table_index_model = TableIndexModel(0, 'LOQ74044', '', '', '', '', '', '', '', '', '', '', '',
-                                              user_file='MaskFile.txt')
+                                              user_file='MaskLOQData.txt')
         table_model = TableModel()
         table_model.add_table_entry(0, table_index_model)
-        row_state_model = create_gui_state_from_userfile('MaskFile.txt')
+        row_state_model = create_gui_state_from_userfile('MaskLOQData.txt')
         row_gui_state_director = GuiStateDirector(table_model, row_state_model, SANSFacility.ISIS)
 
         states = create_states(self.state_gui_model, table_model, SANSInstrument.LOQ, SANSFacility.ISIS)
