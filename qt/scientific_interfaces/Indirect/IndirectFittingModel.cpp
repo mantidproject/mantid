@@ -118,8 +118,9 @@ excludeRegionsStringToVector(const std::string &excludeRegions) {
 std::ostringstream &addInputString(IndirectFitData *fitData,
                                    std::ostringstream &stream) {
   const auto &name = fitData->workspace()->getName();
-  auto addToStream =
-      [&](std::size_t spectrum) { stream << name << ",i" << spectrum << ";"; };
+  auto addToStream = [&](std::size_t spectrum) {
+    stream << name << ",i" << spectrum << ";";
+  };
   fitData->applySpectra(addToStream);
   return stream;
 }
@@ -136,7 +137,7 @@ void addInputDataToSimultaneousFit(IAlgorithm_sptr fitAlgorithm,
                                    MatrixWorkspace_sptr workspace,
                                    std::size_t spectrum,
                                    const std::pair<double, double> &xRange,
-                                   const std::vector<double> excludeRegions,
+                                   const std::vector<double> &excludeRegions,
                                    const std::string &suffix) {
   fitAlgorithm->setProperty("InputWorkspace" + suffix, workspace);
   fitAlgorithm->setProperty("StartX" + suffix, xRange.first);
@@ -598,7 +599,7 @@ IndirectFittingModel::mapDefaultParameterNames() const {
 }
 
 std::unordered_map<std::string, ParameterValue>
-    IndirectFittingModel::createDefaultParameters(std::size_t) const {
+IndirectFittingModel::createDefaultParameters(std::size_t) const {
   return std::unordered_map<std::string, ParameterValue>();
 }
 

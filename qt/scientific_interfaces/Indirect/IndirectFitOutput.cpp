@@ -8,7 +8,7 @@ namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
 struct TableRowExtractor {
-  TableRowExtractor(ITableWorkspace_sptr table)
+  explicit TableRowExtractor(ITableWorkspace_sptr table)
       : m_table(table), m_columns(m_table->getColumnNames()) {
     m_chiIndex = std::find(m_columns.begin(), m_columns.end(), "Chi_squared") -
                  m_columns.begin();

@@ -71,7 +71,7 @@ struct NumberOfSpectra : boost::static_visitor<std::size_t> {
 };
 
 struct SpectraToString : boost::static_visitor<std::string> {
-  SpectraToString(const std::string &rangeDelimiter = "-")
+  explicit SpectraToString(const std::string &rangeDelimiter = "-")
       : m_rangeDelimiter(rangeDelimiter) {}
 
   std::string
