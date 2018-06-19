@@ -229,8 +229,8 @@ void BatchPresenter::updateRowField(
     std::string const &, std::string const &) {
   auto const groupIndex = groupOf(itemIndex);
   auto const rowIndex = rowOf(itemIndex);
-  auto rowValidationResult =
-      validateRow(m_model, m_workspaceNameFactory, cellTextFromViewAt(itemIndex));
+  auto rowValidationResult = validateRow(m_model, m_workspaceNameFactory,
+                                         cellTextFromViewAt(itemIndex));
   updateRow(m_model, groupIndex, rowIndex,
             rowValidationResult.validRowElseNone());
   if (rowValidationResult.isValid()) {

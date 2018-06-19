@@ -16,7 +16,6 @@ bool isGroupLocation(
 int groupOf(MantidQt::MantidWidgets::Batch::RowLocation const &groupLocation);
 bool isRowLocation(MantidWidgets::Batch::RowLocation const &location);
 int rowOf(MantidQt::MantidWidgets::Batch::RowLocation const &rowLocation);
-
 }
 }
 #endif // MANTID_ISISREFLECTOMETRY_ROWLOCATION_H

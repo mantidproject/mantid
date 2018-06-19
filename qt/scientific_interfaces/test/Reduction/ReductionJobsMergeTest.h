@@ -189,8 +189,8 @@ public:
           auto lhsRowIt = lhsGroup.rows().cbegin();
           auto rhsRowIt = rhsGroup.rows().cbegin();
           for (; lhsRowIt != lhsGroup.rows().cend(); ++lhsRowIt, ++rhsRowIt) {
-            auto const& lhsRow = (*lhsRowIt);
-            auto const& rhsRow = (*rhsRowIt);
+            auto const &lhsRow = (*lhsRowIt);
+            auto const &rhsRow = (*rhsRowIt);
             if (lhsRow.is_initialized() != rhsRow.is_initialized())
               return false;
             else if (lhsRow.is_initialized())
@@ -208,13 +208,11 @@ public:
   }
 
   void testMergingRowsProducesUnionOfRunNumbers() {
-    auto row = mergedRow(
-      rowWithNamesAndAngle({"A", "B"}, 0.0),
-      rowWithNamesAndAngle({"B", "C"}, 0.0),
-      m_nameFactory
-    );
+    auto row = mergedRow(rowWithNamesAndAngle({"A", "B"}, 0.0),
+                         rowWithNamesAndAngle({"B", "C"}, 0.0), m_nameFactory);
 
-    TS_ASSERT_EQUALS(std::vector<std::string>({"A", "B", "C"}), row.runNumbers());
+    TS_ASSERT_EQUALS(std::vector<std::string>({"A", "B", "C"}),
+                     row.runNumbers());
   }
 
   void testMergeIntoSelfResultsInNoChange() {
@@ -234,7 +232,6 @@ public:
     TS_ASSERT(equalRunNumbers(target, addition))
     TS_ASSERT(Mock::VerifyAndClearExpectations(&listener));
   }
-
 
 private:
   double m_thetaTolerance;

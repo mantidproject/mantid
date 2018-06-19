@@ -50,7 +50,8 @@ void trimWhitespaceQuotesAndEmptyValues(QStringList &values);
 /// Convert an options map to a string
 QString EXPORT_OPT_MANTIDQT_COMMON
 convertMapToString(const std::map<QString, QString> &optionsMap);
-std::string EXPORT_OPT_MANTIDQT_COMMON optionsToString(std::map<std::string, std::string> const &options);
+std::string EXPORT_OPT_MANTIDQT_COMMON
+optionsToString(std::map<std::string, std::string> const &options);
 }
 }
 

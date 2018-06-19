@@ -18,7 +18,8 @@ public:
 
   std::string const &name() const;
   void setName(std::string const &name);
-  std::string postprocessedWorkspaceName(WorkspaceNamesFactory const &workspaceNamesFactory) const;
+  std::string postprocessedWorkspaceName(
+      WorkspaceNamesFactory const &workspaceNamesFactory) const;
 
   void appendEmptyRow();
   void appendRow(boost::optional<Row> const &row);
@@ -32,6 +33,7 @@ public:
 
   boost::optional<Row> const &operator[](int rowIndex) const;
   std::vector<boost::optional<Row>> const &rows() const;
+
 private:
   std::string m_name;
   std::vector<boost::optional<Row>> m_rows;
@@ -50,8 +52,10 @@ using UnslicedGroup = Group<UnslicedRow>;
 extern template MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
 operator<<(std::ostream &, UnslicedGroup const &);
 
-UnslicedGroup unslice(SlicedGroup const &slicedGroup, WorkspaceNamesFactory const& workspaceNamesFactory);
-SlicedGroup slice(UnslicedGroup const &unslicedGroup, WorkspaceNamesFactory const& WorkspaceNamesFactory);
+UnslicedGroup unslice(SlicedGroup const &slicedGroup,
+                      WorkspaceNamesFactory const &workspaceNamesFactory);
+SlicedGroup slice(UnslicedGroup const &unslicedGroup,
+                  WorkspaceNamesFactory const &WorkspaceNamesFactory);
 }
 }
 #endif // MANTID_CUSTOMINTERFACES_GROUP_H_

@@ -18,8 +18,10 @@ private:
   double m_max;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(RangeInQ const &lhs, RangeInQ const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(RangeInQ const &lhs, RangeInQ const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(RangeInQ const &lhs,
+                                               RangeInQ const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(RangeInQ const &lhs,
+                                               RangeInQ const &rhs);
 }
 }
 #endif // MANTID_CUSTOMINTERFACES_RANGEINQ_H_

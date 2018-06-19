@@ -54,17 +54,19 @@ public:
   void resetFilter() override;
   bool hasFilter() const override;
 
-  void setHintsForColumn(int column, std::unique_ptr<HintStrategy> hintStrategy) override;
-  void setHintsForColumn(int column, HintStrategy* hintStrategy) override;
+  void setHintsForColumn(int column,
+                         std::unique_ptr<HintStrategy> hintStrategy) override;
+  void setHintsForColumn(int column, HintStrategy *hintStrategy) override;
 
   void subscribe(JobTreeViewSubscriber &subscriber) override;
 
   RowLocation insertChildRowOf(RowLocation const &parent, int beforeRow,
-                        std::vector<Cell> const &rowText) override;
-  RowLocation insertChildRowOf(RowLocation const &parent, int beforeRow) override;
+                               std::vector<Cell> const &rowText) override;
+  RowLocation insertChildRowOf(RowLocation const &parent,
+                               int beforeRow) override;
   RowLocation appendChildRowOf(RowLocation const &parent) override;
   RowLocation appendChildRowOf(RowLocation const &parentLocation,
-                        std::vector<Cell> const &rowText) override;
+                               std::vector<Cell> const &rowText) override;
 
   void removeRowAt(RowLocation const &location) override;
   void removeRows(std::vector<RowLocation> rowsToRemove) override;
@@ -99,7 +101,8 @@ public:
                          Qt::KeyboardModifiers modifiers) override;
   std::vector<RowLocation> selectedRowLocations() const override;
   boost::optional<std::vector<Subtree>> selectedSubtrees() const override;
-  boost::optional<std::vector<RowLocation>> selectedSubtreeRoots() const override;
+  boost::optional<std::vector<RowLocation>>
+  selectedSubtreeRoots() const override;
 
   bool hasNoSelectedDescendants(QModelIndex const &index) const;
   void appendAllUnselectedDescendants(QModelIndexList &selectedRows,

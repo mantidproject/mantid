@@ -36,8 +36,9 @@ public:
   virtual void resetFilter() = 0;
   virtual bool hasFilter() const = 0;
 
-  virtual void setHintsForColumn(int column, std::unique_ptr<HintStrategy> hintStrategy) = 0;
-  virtual void setHintsForColumn(int column, HintStrategy* hintStrategy) = 0;
+  virtual void
+  setHintsForColumn(int column, std::unique_ptr<HintStrategy> hintStrategy) = 0;
+  virtual void setHintsForColumn(int column, HintStrategy *hintStrategy) = 0;
 
   virtual void subscribe(JobTreeViewSubscriber &subscriber) = 0;
 

@@ -41,7 +41,7 @@ private slots:
   void onCopyPressed(bool);
   void onCutPressed(bool);
   void onPastePressed(bool);
-  void onFilterChanged(QString const&);
+  void onFilterChanged(QString const &);
 
 private:
   void addToolbarActions();

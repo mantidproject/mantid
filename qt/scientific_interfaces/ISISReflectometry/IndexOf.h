@@ -8,7 +8,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 template <typename Container, typename Predicate>
-boost::optional<int> indexOf(Container const& container, Predicate pred) {
+boost::optional<int> indexOf(Container const &container, Predicate pred) {
   auto maybeItemIt =
       std::find_if(std::cbegin(container), std::cend(container), pred);
   if (maybeItemIt != std::cend(container))
@@ -16,7 +16,6 @@ boost::optional<int> indexOf(Container const& container, Predicate pred) {
   else
     return boost::none;
 }
-
 }
 }
 #endif // MANTID_ISISREFLECTOMETRY_INDEXOF_H

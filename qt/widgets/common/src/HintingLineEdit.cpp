@@ -103,7 +103,7 @@ void HintingLineEdit::updateMatches() {
 /** Show a tooltip with the current relevant hints */
 void HintingLineEdit::showToolTip() {
   QString hintList;
-  for (auto const& match : m_matches) {
+  for (auto const &match : m_matches) {
     hintList += "<b>" + QString::fromStdString(match.word()) + "</b><br />\n";
     if (!match.description().empty())
       hintList += QString::fromStdString(match.description()) + "<br />\n";
@@ -135,7 +135,8 @@ void HintingLineEdit::insertSuggestion() {
 
   // Insert a suggestion under the cursor, then select it
   line = line.left(curPos) +
-         QString::fromStdString((*m_match).word()).mid(static_cast<int>(m_currentPrefix.size())) +
+         QString::fromStdString((*m_match).word())
+             .mid(static_cast<int>(m_currentPrefix.size())) +
          line.mid(curPos);
 
   setText(line);

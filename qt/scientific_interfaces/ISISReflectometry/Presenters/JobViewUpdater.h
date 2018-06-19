@@ -37,7 +37,6 @@ public:
 private:
   MantidQt::MantidWidgets::Batch::IJobTreeView &m_view;
 };
-
 }
 }
 #endif // MANTID_ISISREFLECTOMETRY_JOBVIEWUPDATER_H

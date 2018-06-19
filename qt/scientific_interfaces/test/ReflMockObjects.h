@@ -38,8 +38,7 @@ GCC_DIAG_OFF_SUGGEST_OVERRIDE
 class MockReflSearchModel : public ReflSearchModel {
 public:
   MockReflSearchModel()
-      : ReflSearchModel(ITableWorkspace_sptr(),
-                        std::string()) {}
+      : ReflSearchModel(ITableWorkspace_sptr(), std::string()) {}
   ~MockReflSearchModel() override {}
   MOCK_CONST_METHOD2(data, QVariant(const QModelIndex &, int role));
 };
@@ -80,15 +79,14 @@ public:
   MOCK_METHOD0(setTableCommandsProxy, void());
   MOCK_METHOD0(setRowCommandsProxy, void());
   MOCK_METHOD0(clearCommands, void());
-  MOCK_METHOD2(setInstrumentList,
-               void(const std::vector<std::string> &, int));
+  MOCK_METHOD2(setInstrumentList, void(const std::vector<std::string> &, int));
   MOCK_METHOD1(updateMenuEnabledState, void(bool));
   MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
   MOCK_METHOD1(setAutoreducePauseButtonEnabled, void(bool));
   MOCK_METHOD1(setTransferButtonEnabled, void(bool));
   MOCK_METHOD1(setInstrumentComboEnabled, void(bool));
-  MOCK_METHOD1(subscribe, void(IReflRunsTabPresenter*));
-  MOCK_CONST_METHOD0(tableViews, std::vector<IBatchView*> const&());
+  MOCK_METHOD1(subscribe, void(IReflRunsTabPresenter *));
+  MOCK_CONST_METHOD0(tableViews, std::vector<IBatchView *> const &());
   MOCK_METHOD1(setSearchTextEntryEnabled, void(bool));
   MOCK_METHOD1(setSearchButtonEnabled, void(bool));
   MOCK_METHOD1(startTimer, void(const int));
@@ -142,8 +140,8 @@ public:
                     std::vector<MissingInstrumentParameterValue> const &));
   MOCK_CONST_METHOD0(detectorCorrectionEnabled, bool());
   // Calls we don't care about
-  void
-  createStitchHints(const std::vector<MantidQt::MantidWidgets::Hint> &hints) override {
+  void createStitchHints(
+      const std::vector<MantidQt::MantidWidgets::Hint> &hints) override {
     UNUSED_ARG(hints);
   };
   IReflSettingsPresenter *getPresenter() const override { return nullptr; }

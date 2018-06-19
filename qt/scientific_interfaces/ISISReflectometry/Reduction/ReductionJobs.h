@@ -147,7 +147,7 @@ bool mergeJobsInto(Jobs &intoHere, Jobs const &fromHere, double thetaTolerance,
       intoHere, fromHere);
 }
 
-Jobs newJobsWithSlicingFrom(Jobs const& jobs);
+Jobs newJobsWithSlicingFrom(Jobs const &jobs);
 
 UnslicedReductionJobs
 unsliced(SlicedReductionJobs const &slicedJobs,

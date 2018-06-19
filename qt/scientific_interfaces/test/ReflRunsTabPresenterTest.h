@@ -422,6 +422,7 @@ public:
 private:
   class ReflRunsTabPresenterFriend : public ReflRunsTabPresenter {
     friend class ReflRunsTabPresenterTest;
+
   public:
     using ReflRunsTabPresenter::ReflRunsTabPresenter;
   };
@@ -463,8 +464,8 @@ private:
       tablePresenters.push_back(tablePresenter.get());
     // Create the presenter
     ReflRunsTabPresenterFriend presenter(
-        m_mockRunsTabView.get(), m_mockProgress.get(), batchPresenterFactory(), 0.01,
-        m_instruments, 0);
+        m_mockRunsTabView.get(), m_mockProgress.get(), batchPresenterFactory(),
+        0.01, m_instruments, 0);
     presenter.acceptMainPresenter(m_mockMainPresenter.get());
     return presenter;
   }

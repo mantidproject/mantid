@@ -165,39 +165,47 @@ public:
 
   void testParsesFirstTransmissionRun() {
     auto const expected = std::pair<std::string, std::string>("1000", "");
-    auto const result = boost::get<TransmissionRunPair>(parseTransmissionRuns("1000", ""));
+    auto const result =
+        boost::get<TransmissionRunPair>(parseTransmissionRuns("1000", ""));
     TS_ASSERT_EQUALS(expected, result);
   }
 
   void testParsesTwoTransmissionRuns() {
     auto const expected = std::pair<std::string, std::string>("1000", "2010");
-    auto const result = boost::get<TransmissionRunPair>(parseTransmissionRuns("1000", "2010"));
+    auto const result =
+        boost::get<TransmissionRunPair>(parseTransmissionRuns("1000", "2010"));
     TS_ASSERT_EQUALS(expected, result);
   }
 
   void testParsesNoTransmissionRuns() {
     auto const expected = TransmissionRunPair("", "");
-    auto const result = boost::get<TransmissionRunPair>(parseTransmissionRuns("", ""));
+    auto const result =
+        boost::get<TransmissionRunPair>(parseTransmissionRuns("", ""));
     TS_ASSERT_EQUALS(expected, result);
   }
 
   void testFailsForOnlySecondTransmissionRun() {
-    TS_ASSERT_EQUALS(std::vector<int>({0}), boost::get<std::vector<int>>(parseTransmissionRuns("", "1000")));
+    TS_ASSERT_EQUALS(
+        std::vector<int>({0}),
+        boost::get<std::vector<int>>(parseTransmissionRuns("", "1000")));
   }
 
   void testFailsForInvalidFirstTransmissionRun() {
-    TS_ASSERT_EQUALS(std::vector<int>({0}),
-                     boost::get<std::vector<int>>(parseTransmissionRuns("HDSK~", "1000")));
+    TS_ASSERT_EQUALS(
+        std::vector<int>({0}),
+        boost::get<std::vector<int>>(parseTransmissionRuns("HDSK~", "1000")));
   }
 
   void testFailsForInvalidSecondTransmissionRun() {
-    TS_ASSERT_EQUALS(std::vector<int>({1}),
-                     boost::get<std::vector<int>>(parseTransmissionRuns("1000", "10ABSC")));
+    TS_ASSERT_EQUALS(
+        std::vector<int>({1}),
+        boost::get<std::vector<int>>(parseTransmissionRuns("1000", "10ABSC")));
   }
 
   void testFailsForInvalidFirstAndSecondTransmissionRun() {
-    TS_ASSERT_EQUALS(std::vector<int>({0, 1}),
-                     boost::get<std::vector<int>>(parseTransmissionRuns("1,000", "10ABSC")));
+    TS_ASSERT_EQUALS(
+        std::vector<int>({0, 1}),
+        boost::get<std::vector<int>>(parseTransmissionRuns("1,000", "10ABSC")));
   }
 };
 #endif // MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_

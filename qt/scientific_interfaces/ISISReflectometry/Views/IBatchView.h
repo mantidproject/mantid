@@ -15,7 +15,7 @@ public:
   virtual void notifyInsertGroupRequested() = 0;
   virtual void notifyDeleteRowRequested() = 0;
   virtual void notifyDeleteGroupRequested() = 0;
-  virtual void notifyFilterChanged(std::string const& filterValue) = 0;
+  virtual void notifyFilterChanged(std::string const &filterValue) = 0;
   virtual void notifyExpandAllRequested() = 0;
   virtual void notifyCollapseAllRequested() = 0;
 

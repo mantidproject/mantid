@@ -23,8 +23,8 @@ using namespace MantidQt::MantidWidgets;
 /** Constructor
 * @param parent :: The parent of this view
 */
-QtReflRunsTabView::QtReflRunsTabView(
-    QWidget *parent, BatchViewFactory makeBatchView)
+QtReflRunsTabView::QtReflRunsTabView(QWidget *parent,
+                                     BatchViewFactory makeBatchView)
     : m_presenter(nullptr), m_calculator(new SlitCalculator(this)),
       m_tableViews(), m_makeBatchView(std::move(makeBatchView)) {
 
@@ -364,7 +364,7 @@ void QtReflRunsTabView::instrumentChanged(int index) {
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->itemText(index).toStdString());
   m_calculator->processInstrumentHasBeenChanged();
-  //m_presenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
+  // m_presenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
 }
 
 /**

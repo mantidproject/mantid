@@ -60,11 +60,11 @@ public:
   void clear();
   bool knownFileType(std::string const &filename) const;
   /// Add details of an error
-  std::vector<SearchResult> const& results() const;
+  std::vector<SearchResult> const &results() const;
 
-  SearchResult const& operator[](int index) const;
+  SearchResult const &operator[](int index) const;
 
-  void setError(int index, std::string const& error);
+  void setError(int index, std::string const &error);
 
 protected:
   // map of run numbers to search result details

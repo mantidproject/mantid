@@ -114,11 +114,14 @@ void JobTreeView::appendAllUnselectedDescendants(
   }
 }
 
-void JobTreeView::setHintsForColumn(int column, std::unique_ptr<HintStrategy> hintStrategy) {
-  setItemDelegateForColumn(column, new HintingLineEditFactory(itemDelegate(), std::move(hintStrategy)));
+void JobTreeView::setHintsForColumn(
+    int column, std::unique_ptr<HintStrategy> hintStrategy) {
+  setItemDelegateForColumn(
+      column,
+      new HintingLineEditFactory(itemDelegate(), std::move(hintStrategy)));
 }
 
-void JobTreeView::setHintsForColumn(int column, HintStrategy* hintStrategy) {
+void JobTreeView::setHintsForColumn(int column, HintStrategy *hintStrategy) {
   setHintsForColumn(column, std::unique_ptr<HintStrategy>(hintStrategy));
 }
 
@@ -366,7 +369,7 @@ RowLocation JobTreeView::appendChildRowOf(RowLocation const &parent) {
 }
 
 RowLocation JobTreeView::appendChildRowOf(RowLocation const &parent,
-                                   std::vector<Cell> const &cells) {
+                                          std::vector<Cell> const &cells) {
   auto parentIndex = rowLocation().indexAt(parent);
   return rowLocation().atIndex(m_adaptedMainModel.appendChildRow(
       parentIndex,

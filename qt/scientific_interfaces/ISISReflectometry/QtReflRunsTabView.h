@@ -69,8 +69,8 @@ public:
   QtReflRunsTabView(QWidget *parent, BatchViewFactory makeView);
   ~QtReflRunsTabView() override;
 
-  void subscribe(IReflRunsTabPresenter* presenter) override;
-  std::vector<IBatchView*> const& tableViews() const override;
+  void subscribe(IReflRunsTabPresenter *presenter) override;
+  std::vector<IBatchView *> const &tableViews() const override;
 
   // Connect the model
   void showSearch(boost::shared_ptr<ReflSearchModel> model) override;
@@ -124,7 +124,7 @@ private:
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
   // the presenter
-  IReflRunsTabPresenter* m_presenter;
+  IReflRunsTabPresenter *m_presenter;
 
   // the search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
@@ -137,7 +137,7 @@ private:
   // Timer for triggering periodic autoreduction
   QBasicTimer m_timer;
 
-  std::vector<IBatchView*> m_tableViews;
+  std::vector<IBatchView *> m_tableViews;
 
   BatchViewFactory m_makeBatchView;
 

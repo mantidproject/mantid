@@ -299,16 +299,16 @@ void prettyPrintModel(Jobs const &jobs) {
 
 class NewJobsWithSlicingFrom : boost::static_visitor<Jobs> {
 public:
-  Jobs operator()(SlicedReductionJobs const&) const {
+  Jobs operator()(SlicedReductionJobs const &) const {
     return SlicedReductionJobs();
   }
 
-  Jobs operator()(UnslicedReductionJobs const&) const {
+  Jobs operator()(UnslicedReductionJobs const &) const {
     return UnslicedReductionJobs();
   }
 };
 
-Jobs newJobsWithSlicingFrom(Jobs const& jobs) {
+Jobs newJobsWithSlicingFrom(Jobs const &jobs) {
   return boost::apply_visitor(NewJobsWithSlicingFrom(), jobs);
 }
 
@@ -327,7 +327,7 @@ unsliced(SlicedReductionJobs const &slicedJobs,
          WorkspaceNamesFactory const &workspaceNamesFactory) {
   auto const &slicedGroups = slicedJobs.groups();
   auto unslicedGroups =
-      map(slicedGroups, [&](SlicedGroup const& sliced) -> UnslicedGroup {
+      map(slicedGroups, [&](SlicedGroup const &sliced) -> UnslicedGroup {
         return unslice(sliced, workspaceNamesFactory);
       });
   return UnslicedReductionJobs(std::move(unslicedGroups));

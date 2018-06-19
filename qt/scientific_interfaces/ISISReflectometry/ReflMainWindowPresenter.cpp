@@ -20,7 +20,8 @@ namespace CustomInterfaces {
 * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
 */
 ReflMainWindowPresenter::ReflMainWindowPresenter(
-    IReflMainWindowView *view, std::unique_ptr<IReflRunsTabPresenter> runsPresenter,
+    IReflMainWindowView *view,
+    std::unique_ptr<IReflRunsTabPresenter> runsPresenter,
     IReflEventTabPresenter *eventPresenter,
     IReflSettingsTabPresenter *settingsPresenter,
     std::unique_ptr<IReflSaveTabPresenter> savePresenter)

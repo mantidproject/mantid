@@ -36,9 +36,11 @@ public:
                         std::vector<std::string> blacklist)
       : m_algorithm(algorithm), m_blacklist(blacklist) {}
 
-  AlgorithmHintStrategy(std::string const& algorithmName,
+  AlgorithmHintStrategy(std::string const &algorithmName,
                         std::vector<std::string> blacklist)
-      : m_algorithm(Mantid::API::AlgorithmManager::Instance().create(algorithmName)), m_blacklist(std::move(blacklist)) {}
+      : m_algorithm(
+            Mantid::API::AlgorithmManager::Instance().create(algorithmName)),
+        m_blacklist(std::move(blacklist)) {}
 
   bool isBlacklisted(std::string const &propertyName) {
     return std::find(m_blacklist.cbegin(), m_blacklist.cend(), propertyName) !=
@@ -54,11 +56,11 @@ public:
                            -> bool { return isBlacklisted(property->name()); }),
         properties.end());
     hints.reserve(properties.size());
-    std::transform(
-        properties.cbegin(), properties.cend(), std::back_inserter(hints),
-        [](Mantid::Kernel::Property *property) -> Hint {
-          return Hint(property->name(), property->documentation());
-        });
+    std::transform(properties.cbegin(), properties.cend(),
+                   std::back_inserter(hints),
+                   [](Mantid::Kernel::Property *property) -> Hint {
+                     return Hint(property->name(), property->documentation());
+                   });
 
     return hints;
   }

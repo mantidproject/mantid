@@ -127,7 +127,7 @@ private:
   /// The progress view
   ProgressableView *m_progressView;
   BatchPresenterFactory m_makeBatchPresenter;
-  WorkspaceNamesFactory const& m_workspaceNamesFactory;
+  WorkspaceNamesFactory const &m_workspaceNamesFactory;
   /// The data processor presenters stored in a vector
   std::vector<std::unique_ptr<BatchPresenter>> m_tablePresenters;
   /// The main presenter

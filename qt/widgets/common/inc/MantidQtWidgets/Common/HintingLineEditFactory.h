@@ -37,8 +37,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class HintingLineEditFactory : public QStyledItemDelegate {
 public:
-  HintingLineEditFactory(QAbstractItemDelegate* cellPainterDelegate, std::unique_ptr<HintStrategy> hintStrategy)
-      : m_strategy(std::move(hintStrategy)), m_cellPainterDelegate(cellPainterDelegate) {};
+  HintingLineEditFactory(QAbstractItemDelegate *cellPainterDelegate,
+                         std::unique_ptr<HintStrategy> hintStrategy)
+      : m_strategy(std::move(hintStrategy)),
+        m_cellPainterDelegate(cellPainterDelegate){};
 
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const override {
@@ -57,7 +59,7 @@ public:
 
 protected:
   std::unique_ptr<HintStrategy> m_strategy;
-  QAbstractItemDelegate* m_cellPainterDelegate;
+  QAbstractItemDelegate *m_cellPainterDelegate;
 };
 }
 }

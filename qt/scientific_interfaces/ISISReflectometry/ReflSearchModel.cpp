@@ -8,14 +8,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 using namespace Mantid::API;
 
-bool ReflSearchModel::knownFileType(std::string const& filename) const {
+bool ReflSearchModel::knownFileType(std::string const &filename) const {
   boost::regex pattern("raw$", boost::regex::icase);
   boost::smatch match; // Unused.
   return boost::regex_search(filename, match, pattern);
 }
 
-
-std::vector<SearchResult> const& ReflSearchModel::results() const {
+std::vector<SearchResult> const &ReflSearchModel::results() const {
   return m_runDetails;
 }
 
@@ -31,13 +30,13 @@ ReflSearchModel::ReflSearchModel(ITableWorkspace_sptr tableWorkspace,
     addDataFromTable(tableWorkspace, instrument);
 }
 
-void ReflSearchModel::setError(int i, std::string const& error) {
+void ReflSearchModel::setError(int i, std::string const &error) {
   m_runDetails[i].issues = error;
   emit dataChanged(index(i, 0), index(i, 2));
 }
 
-void ReflSearchModel::addDataFromTable(
-    ITableWorkspace_sptr tableWorkspace, const std::string &instrument) {
+void ReflSearchModel::addDataFromTable(ITableWorkspace_sptr tableWorkspace,
+                                       const std::string &instrument) {
 
   // Copy the data from the input table workspace
   std::vector<SearchResult> newRunDetails;
@@ -71,10 +70,12 @@ void ReflSearchModel::addDataFromTable(
 
   // To append, insert the new runs after the last element in the model
   const auto first = static_cast<int>(m_runDetails.size());
-  const auto last = static_cast<int>(m_runDetails.size() + newRunDetails.size() - 1);
+  const auto last =
+      static_cast<int>(m_runDetails.size() + newRunDetails.size() - 1);
   beginInsertRows(QModelIndex(), first, last);
 
-  m_runDetails.insert(m_runDetails.end(), newRunDetails.begin(), newRunDetails.end());
+  m_runDetails.insert(m_runDetails.end(), newRunDetails.begin(),
+                      newRunDetails.end());
 
   endInsertRows();
 }
@@ -105,7 +106,7 @@ QVariant ReflSearchModel::data(const QModelIndex &index, int role) const {
   if (rowNumber < 0 || rowNumber >= static_cast<int>(m_runDetails.size()))
     return QVariant();
 
-  auto const& run = m_runDetails[rowNumber];
+  auto const &run = m_runDetails[rowNumber];
 
   /*SETTING TOOL TIP AND BACKGROUND FOR INVALID RUNS*/
   if (role != Qt::DisplayRole) {
@@ -192,7 +193,7 @@ bool ReflSearchModel::runHasError(const SearchResult &run) const {
   return !(run.issues.empty());
 }
 
-SearchResult const& ReflSearchModel::operator[](int index) const {
+SearchResult const &ReflSearchModel::operator[](int index) const {
   return m_runDetails[index];
 }
 

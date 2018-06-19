@@ -72,9 +72,8 @@ Row<ReducedWorkspaceNames> Row<ReducedWorkspaceNames>::withExtraRunNumbers(
   newRunNumbers.reserve(m_runNumbers.size() + extraRunNumbers.size());
   boost::range::set_union(m_runNumbers, extraRunNumbers,
                           std::back_inserter(newRunNumbers));
-  auto wsNames =
-      workspaceNamesFactory.template makeNames<WorkspaceNames>(
-          newRunNumbers, transmissionWorkspaceNames());
+  auto wsNames = workspaceNamesFactory.template makeNames<WorkspaceNames>(
+      newRunNumbers, transmissionWorkspaceNames());
   return Row(newRunNumbers, theta(), transmissionWorkspaceNames(), qRange(),
              scaleFactor(), reductionOptions(), wsNames);
 }
@@ -101,9 +100,12 @@ operator<<(std::ostream &, SlicedRow const &);
 
 using RowVariant = boost::variant<SlicedRow, UnslicedRow>;
 
-boost::optional<UnslicedRow> unslice(boost::optional<SlicedRow> const &row, WorkspaceNamesFactory const& workspaceNamesFactory);
-boost::optional<SlicedRow> slice(boost::optional<UnslicedRow> const &row, WorkspaceNamesFactory const& workspaceNamesFactory);
-
+boost::optional<UnslicedRow>
+unslice(boost::optional<SlicedRow> const &row,
+        WorkspaceNamesFactory const &workspaceNamesFactory);
+boost::optional<SlicedRow>
+slice(boost::optional<UnslicedRow> const &row,
+      WorkspaceNamesFactory const &workspaceNamesFactory);
 }
 }
 #endif // MANTID_CUSTOMINTERFACE_RUN_H_

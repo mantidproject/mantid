@@ -27,7 +27,6 @@ public:
   MOCK_METHOD0(mustNotSelectGroup, void());
   MOCK_METHOD0(mustSelectGroupOrRow, void());
 };
-
 }
 }
 GCC_DIAG_ON_SUGGEST_OVERRIDE

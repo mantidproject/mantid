@@ -29,8 +29,8 @@ private:
 
 std::unique_ptr<RegexFilter>
 filterFromRegexString(std::string const &regex,
-                MantidQt::MantidWidgets::Batch::IJobTreeView const &view,
-                Jobs const &jobs);
+                      MantidQt::MantidWidgets::Batch::IJobTreeView const &view,
+                      Jobs const &jobs);
 }
 }
 

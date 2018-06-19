@@ -50,9 +50,9 @@ MANTIDQT_ISISREFLECTOMETRY_DLL ReductionWorkspaces workspaceNamesForUnsliced(
     std::vector<std::string> const &summedRunNumbers,
     std::pair<std::string, std::string> const &transmissionRuns);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL std::string postprocessedWorkspaceNameForUnsliced(
-    std::vector<std::vector<std::string> const*> const &summedRunNumbers);
-
+MANTIDQT_ISISREFLECTOMETRY_DLL std::string
+postprocessedWorkspaceNameForUnsliced(
+    std::vector<std::vector<std::string> const *> const &summedRunNumbers);
 }
 }
 #endif // MANTID_CUSTOMINTERFACES_REDUCTIONWORKSPACES_H_

@@ -36,7 +36,8 @@ public:
     ON_CALL(view, jobs()).WillByDefault(::testing::ReturnRef(jobsView));
   }
 
-  UnslicedReductionJobs const& unslicedJobsFromPresenter(BatchPresenter &presenter) {
+  UnslicedReductionJobs const &
+  unslicedJobsFromPresenter(BatchPresenter &presenter) {
     return boost::get<UnslicedReductionJobs>(presenter.reductionJobs());
   }
 

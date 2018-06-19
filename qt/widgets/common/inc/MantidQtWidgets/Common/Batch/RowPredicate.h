@@ -41,7 +41,8 @@ protected:
   virtual bool rowMeetsCriteria(RowLocation const &row) const = 0;
 };
 
-template <typename LambdaPredicate> class LambdaRowPredicate : public RowPredicate {
+template <typename LambdaPredicate>
+class LambdaRowPredicate : public RowPredicate {
 public:
   LambdaRowPredicate(LambdaPredicate predicate)
       : m_predicate(std::move(predicate)) {}

@@ -468,7 +468,9 @@ column.
 void QDataProcessorWidget::setOptionsHintStrategy(
     MantidQt::MantidWidgets::HintStrategy *hintStrategy, int column) {
   ui.viewTable->setItemDelegateForColumn(
-      column, new HintingLineEditFactory(ui.viewTable->itemDelegate(), std::unique_ptr<HintStrategy>(hintStrategy)));
+      column,
+      new HintingLineEditFactory(ui.viewTable->itemDelegate(),
+                                 std::unique_ptr<HintStrategy>(hintStrategy)));
 }
 
 /**

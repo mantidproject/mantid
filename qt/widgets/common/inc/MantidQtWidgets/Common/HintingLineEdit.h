@@ -44,8 +44,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class EXPORT_OPT_MANTIDQT_COMMON HintingLineEdit : public QLineEdit {
   Q_OBJECT
 public:
-  HintingLineEdit(QWidget *parent,
-                  std::vector<Hint> hints);
+  HintingLineEdit(QWidget *parent, std::vector<Hint> hints);
   ~HintingLineEdit() override;
 
 protected:

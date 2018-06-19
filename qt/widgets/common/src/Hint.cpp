@@ -8,6 +8,5 @@ Hint::Hint(std::string word, std::string description)
 std::string const &Hint::word() const { return m_word; }
 
 std::string const &Hint::description() const { return m_description; }
-
 }
 }
