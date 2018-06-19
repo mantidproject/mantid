@@ -218,7 +218,7 @@ bool ConvFit::validate() {
            compositeModel->getFunction(0)->name() == "DeltaFunction")
     uiv.addErrorMessage(
         "Fit function is invalid; only a Delta Function has been supplied");
-  uiv = IndirectFitAnalysisTab::validate(uiv);
+  uiv = IndirectFitAnalysisTab::validateTab(uiv);
 
   const auto error = uiv.generateErrorMessage();
   emit showMessageBox(error);
