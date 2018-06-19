@@ -56,7 +56,7 @@ private:
 
 class BatchViewFactory {
 public:
-  BatchViewFactory(std::vector<std::string> const &instruments);
+  explicit BatchViewFactory(std::vector<std::string> const &instruments);
   BatchView *operator()(int defaultInstrumentIndex) const;
   BatchView *operator()() const;
   int defaultInstrumentFromConfig() const;

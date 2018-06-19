@@ -57,8 +57,8 @@ parseOptions(std::string const &options);
 
 template <typename Row> class RowValidationResult {
 public:
-  RowValidationResult(Row row);
-  RowValidationResult(std::vector<int> invalidColumns);
+  explicit RowValidationResult(Row row);
+  explicit RowValidationResult(std::vector<int> invalidColumns);
 
   bool isValid() const;
   std::vector<int> const &invalidColumns() const;

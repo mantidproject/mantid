@@ -329,6 +329,7 @@ makeIfAllInitialized(boost::optional<Params> const &... params) {
 }
 
 template <typename Row>
+// cppcheck-suppress syntaxError
 template <typename WorkspaceNamesFactory>
 RowValidationResult<boost::variant<SlicedRow, UnslicedRow>> RowValidator<Row>::
 operator()(std::vector<std::string> const &cellText,
