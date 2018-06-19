@@ -55,6 +55,8 @@ public:
   void setWorkspaceName(const QString &wsName) override;
   /// Called when the fit is finished
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
+  void finishHandleTF(const Mantid::API::IAlgorithm *alg);
+  void finishHandleNormal(const Mantid::API::IAlgorithm *alg);
   /// Add an extra widget into the browser
   void addExtraWidget(QWidget *widget);
   void addFitBrowserWidget(QWidget *widget, MantidQt::MantidWidgets::FunctionBrowser *functionBrowser);
