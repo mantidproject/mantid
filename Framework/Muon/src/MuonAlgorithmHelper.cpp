@@ -400,8 +400,7 @@ bool checkValidPair(const std::string &WSname1, const std::string &WSname2) {
 
   if (group1.itemType != Muon::ItemType::Group ||
       group2.itemType != Muon::ItemType::Group) {
-    throw std::invalid_argument(
-        "Workspaces must be of group type (not pair)");
+    throw std::invalid_argument("Workspaces must be of group type (not pair)");
   }
 
   if (group1.plotType != Muon::PlotType::Counts ||
