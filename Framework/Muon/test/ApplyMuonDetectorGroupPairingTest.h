@@ -42,8 +42,9 @@ struct yDataAsymmetry {
     double factor = (static_cast<double>(spec) + 1.0) * 0.5;
     double phase_offset = 4 * M_PI / 180;
     return (10. * factor *
-            (1.0 + m_amp * cos(m_omega * t + m_phi +
-                               static_cast<double>(spec) * phase_offset)) *
+            (1.0 +
+             m_amp * cos(m_omega * t + m_phi +
+                         static_cast<double>(spec) * phase_offset)) *
             e);
   }
 
@@ -434,8 +435,8 @@ public:
     auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
-	// Account for the bin edges to point data conversion
-	double shift = 0.2 + 0.05;
+    // Account for the bin edges to point data conversion
+    double shift = 0.2 + 0.05;
     TS_ASSERT_DELTA(wsOut->readX(0)[0], ws->readX(0)[0] + shift, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[4], ws->readX(0)[4] + shift, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], ws->readX(0)[9] + shift, 0.001);
