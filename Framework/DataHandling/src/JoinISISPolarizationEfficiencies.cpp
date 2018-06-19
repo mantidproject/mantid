@@ -39,10 +39,11 @@ const std::string JoinISISPolarizationEfficiencies::summary() const {
          "PolarizationEfficiencyCor.";
 }
 
-const std::vector<std::string> JoinISISPolarizationEfficiencies::seeAlso() const {
-  return {"CreatePolarizationEfficiencies", "LoadISISPolarizationEfficiencies", "PolarizationEfficiencyCor"};
+const std::vector<std::string>
+JoinISISPolarizationEfficiencies::seeAlso() const {
+  return {"CreatePolarizationEfficiencies", "LoadISISPolarizationEfficiencies",
+          "PolarizationEfficiencyCor"};
 }
-
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -51,50 +52,42 @@ void JoinISISPolarizationEfficiencies::init() {
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Pp, "", Kernel::Direction::Input,
-          PropertyMode::Optional),
+          Pp, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the Pp polarization efficiency.");
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Ap, "", Kernel::Direction::Input,
-          PropertyMode::Optional),
+          Ap, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the Ap polarization efficiency.");
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Rho, "", Kernel::Direction::Input,
-          PropertyMode::Optional),
+          Rho, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the Rho polarization efficiency.");
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Alpha, "", Kernel::Direction::Input,
-          PropertyMode::Optional),
+          Alpha, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the Alpha polarization efficiency.");
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          P1, "", Kernel::Direction::Input,
-          PropertyMode::Optional),
+          P1, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the P1 polarization efficiency.");
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          P2, "", Kernel::Direction::Input,
-          PropertyMode::Optional),
+          P2, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the P2 polarization efficiency.");
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          F1, "", Kernel::Direction::Input,
-          PropertyMode::Optional),
+          F1, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the F1 polarization efficiency.");
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          F2, "", Kernel::Direction::Input,
-          PropertyMode::Optional),
+          F2, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the F2 polarization efficiency.");
 
   initOutputWorkspace();
@@ -128,7 +121,8 @@ MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
   auto interpolatedWorkspaces = interpolateWorkspaces(workspaces);
 
   auto const &inWS = interpolatedWorkspaces.front();
-  MatrixWorkspace_sptr outWS = DataObjects::create<Workspace2D>(*inWS, labels.size(), inWS->histogram(0));
+  MatrixWorkspace_sptr outWS = DataObjects::create<Workspace2D>(
+      *inWS, labels.size(), inWS->histogram(0));
   auto axis1 = new TextAxis(labels.size());
   outWS->replaceAxis(1, axis1);
   outWS->getAxis(0)->setUnit("Wavelength");

@@ -49,7 +49,8 @@ const std::string CreatePolarizationEfficiencies::summary() const {
 }
 
 const std::vector<std::string> CreatePolarizationEfficiencies::seeAlso() const {
-  return {"JoinISISPolarizationEfficiencies", "LoadISISPolarizationEfficiencies", "PolarizationEfficiencyCor"};
+  return {"JoinISISPolarizationEfficiencies",
+          "LoadISISPolarizationEfficiencies", "PolarizationEfficiencyCor"};
 }
 
 void CreatePolarizationEfficiencies::init() {

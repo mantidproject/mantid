@@ -40,13 +40,12 @@ void CreatePolarizationEfficienciesBase::initOutputWorkspace() {
 }
 
 void CreatePolarizationEfficienciesBase::exec() {
-  auto const labelsFredrikze =
-      getNonDefaultProperties({Pp, Ap, Rho, Alpha});
-  auto const labelsWildes =
-      getNonDefaultProperties({P1, P2, F1, F2});
+  auto const labelsFredrikze = getNonDefaultProperties({Pp, Ap, Rho, Alpha});
+  auto const labelsWildes = getNonDefaultProperties({P1, P2, F1, F2});
 
   if (labelsFredrikze.empty() && labelsWildes.empty()) {
-    throw std::invalid_argument("At least one of the efficiencies must be set.");
+    throw std::invalid_argument(
+        "At least one of the efficiencies must be set.");
   }
 
   if (!labelsFredrikze.empty() && !labelsWildes.empty()) {

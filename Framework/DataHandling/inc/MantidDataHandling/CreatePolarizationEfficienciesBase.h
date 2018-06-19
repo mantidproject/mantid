@@ -61,7 +61,8 @@ private:
   void exec() override;
   /// Create the output workspace with efficiencies
   /// @param labels :: Names of the efficiencies to create
-  virtual API::MatrixWorkspace_sptr createEfficiencies(std::vector<std::string> const &labels) = 0;
+  virtual API::MatrixWorkspace_sptr
+  createEfficiencies(std::vector<std::string> const &labels) = 0;
 };
 
 } // namespace DataHandling

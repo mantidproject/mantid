@@ -35,8 +35,10 @@ const std::string LoadISISPolarizationEfficiencies::summary() const {
          "one factor per file.";
 }
 
-const std::vector<std::string> LoadISISPolarizationEfficiencies::seeAlso() const {
-  return {"CreatePolarizationEfficiencies", "JoinISISPolarizationEfficiencies", "PolarizationEfficiencyCor"};
+const std::vector<std::string>
+LoadISISPolarizationEfficiencies::seeAlso() const {
+  return {"CreatePolarizationEfficiencies", "JoinISISPolarizationEfficiencies",
+          "PolarizationEfficiencyCor"};
 }
 
 //----------------------------------------------------------------------------------------------

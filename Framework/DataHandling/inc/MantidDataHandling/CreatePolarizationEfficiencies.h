@@ -30,7 +30,8 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport CreatePolarizationEfficiencies : public CreatePolarizationEfficienciesBase {
+class DLLExport CreatePolarizationEfficiencies
+    : public CreatePolarizationEfficienciesBase {
 public:
   const std::string name() const override;
   int version() const override;
