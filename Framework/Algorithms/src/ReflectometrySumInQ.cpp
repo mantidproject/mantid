@@ -309,19 +309,17 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(
   const HistogramData::Histogram modelHistogram(std::move(bins),
                                                 std::move(counts));
   // Create the output workspace
+
   API::MatrixWorkspace_sptr outputWS =
       DataObjects::create<DataObjects::Workspace2D>(detectorWS, 1,
                                                     std::move(modelHistogram));
 
-  // Set the detector ID from the twoThetaR detector.
+  // Set the detector IDs and specturm number from the twoThetaR detector.
+  const auto &thetaSpec = detectorWS.getSpectrum(twoThetaRIdx);
   auto &outSpec = outputWS->getSpectrum(0);
-  // TODO: Handle grouped detectors correctly.
-  const detid_t twoThetaRDetID =
-      detectorWS.spectrumInfo()
-          .detector(static_cast<size_t>(twoThetaRIdx))
-          .getID();
   outSpec.clearDetectorIDs();
-  outSpec.addDetectorID(twoThetaRDetID);
+  outSpec.addDetectorIDs(thetaSpec.getDetectorIDs());
+  outSpec.setSpectrumNo(thetaSpec.getSpectrumNo());
 
   return outputWS;
 }
