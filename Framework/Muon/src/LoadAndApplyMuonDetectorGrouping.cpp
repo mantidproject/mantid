@@ -115,14 +115,14 @@ std::map<std::string, std::string>
 LoadAndApplyMuonDetectorGrouping::validateInputs() {
   std::map<std::string, std::string> errors;
 
-  if (!this->isDefault("InputWorkspaceGroup")) {
+  if (!this->isDefault("WorkspaceGroup")) {
 
-    WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
+    WorkspaceGroup_sptr groupedWS = getProperty("WorkspaceGroup");
     Workspace_sptr inputWS = getProperty("InputWorkspace");
 
     if (groupedWS && groupedWS->getName() == inputWS->getName()) {
-      errors["InputWorkspaceGroup"] = "The InputWorkspaceGroup should not have "
-                                      "the same name as InputWorkspace.";
+      errors["WorkspaceGroup"] = "The WorkspaceGroup should not have "
+                                 "the same name as InputWorkspace.";
     }
   }
 
