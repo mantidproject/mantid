@@ -53,6 +53,7 @@ public:
   // Constructor
   MaxentTransformMultiFourier(MaxentSpace_sptr dataSpace,
                          MaxentSpace_sptr imageSpace,
+                         size_t numSpec,
                          MaxentSpace_sptr linearAdjustments,
                          MaxentSpace_sptr constAdjustments);
   // Transfoms form image space to data space
@@ -63,6 +64,7 @@ public:
 private:
   MaxentSpace_sptr m_dataSpace;
   MaxentSpace_sptr m_imageSpace;
+  size_t m_numSpec;
   MaxentSpace_sptr m_linearAdjustments;
   MaxentSpace_sptr m_constAdjustments;
 };

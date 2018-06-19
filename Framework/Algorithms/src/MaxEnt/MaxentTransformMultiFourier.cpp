@@ -8,6 +8,7 @@ namespace Algorithms {
 /** Constructor */
 MaxentTransformMultiFourier::MaxentTransformMultiFourier(MaxentSpace_sptr dataSpace,
                                                MaxentSpace_sptr imageSpace,
+                                               size_t numSpec,
                                                MaxentSpace_sptr linearAdjustments,
                                                MaxentSpace_sptr constAdjustments)
     : MaxentTransformFourier(dataSpace, imageSpace), m_linearAdjustments(linearAdjustments), m_constAdjustments(constAdjustments) {}
@@ -24,7 +25,22 @@ MaxentTransformMultiFourier::MaxentTransformMultiFourier(MaxentSpace_sptr dataSp
 std::vector<double>
 MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
 
-  return image;
+  std::vector<double> dataOneSpec = imageToData(image);
+
+  // Create concatenated copies of transformed data (one for each spectrum)
+  std::vector<double> data;
+  data.reserve(m_numSpec*size(dataOneSpec));
+  for (size_t s = 0; s < m_numSpec; s++) {
+    for (size_t i = 0; i < size(dataOneSpec); i++) {
+      data.emplace_back(dataOneSpec[i]);
+    }
+  }
+
+  // Apply adjustments  
+  // TO DO 
+
+
+  return data;
 }
 
 /**
@@ -37,11 +53,22 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
 std::vector<double>
 MaxentTransformMultiFourier::dataToImage(const std::vector<double> &data) {
 
-  std::vector<double> complexData = m_dataSpace->toComplex(data);
+  if (size(data) % m_numSpec*2)
+    throw std::invalid_argument(
+      "Size of data vector must be an multiple of twice the number of spectra.");
 
-  /* Performs forward Fourier transform */
+  // Sum the concatenated spectra in data
+  size_t nData = size(data) / (m_numSpec * 2);
+  std::vector<double> dataSum(nData, 0.0);
+  for (size_t s = 0; s < m_numSpec; s++) {
+    for (size_t i = 0; i < nData; i++) {
+      dataSum[i] += data[s*nData + i];
+    }
+  }
+  // Then apply forward fourier transform to sum
+  std::vector<double> image = dataToImage(dataSum);
 
-  return data;
+  return image;
 }
 
 } // namespace Algorithms
