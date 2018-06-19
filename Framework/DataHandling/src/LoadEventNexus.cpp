@@ -49,29 +49,6 @@ using namespace DataObjects;
 using Types::Core::DateAndTime;
 using Types::Event::TofEvent;
 
-namespace {
-
-/**
- * Copy all logData properties from the 'from' workspace to the 'to'
- * workspace. Does not use CopyLogs as a child algorithm (this is a
- * simple copy and the workspace is not yet in the ADS).
- *
- * @param from source of log entries
- * @param to workspace where to add the log entries
- */
-void copyLogs(const Mantid::DataHandling::EventWorkspaceCollection_sptr &from,
-              EventWorkspace_sptr &to) {
-  // from the logs, get all the properties that don't overwrite any
-  // prop. already set in the sink workspace (like 'filename').
-  auto props = from->mutableRun().getLogData();
-  for (auto &prop : props) {
-    if (!to->mutableRun().hasProperty(prop->name())) {
-      to->mutableRun().addLogData(prop->clone());
-    }
-  }
-}
-}
-
 //----------------------------------------------------------------------------------------------
 /** Empty default constructor
 */

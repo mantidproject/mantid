@@ -121,9 +121,6 @@ private:
   API::MatrixWorkspace_sptr m_workspace; ///< The workspace being filled out
   size_t m_monitor_count{0};             ///< Number of monitors
   std::string m_top_entry_name;          ///< name of top level NXentry to use
-  bool m_allMonitorsHaveHistoData{
-      false}; ///< Flag that all monitors have histogram
-              /// data in the entry
 };
 
 } // namespace DataHandling
