@@ -1123,7 +1123,9 @@ public slots:
 
   bool isOfType(const QObject *obj, const char *toCompare) const;
 
-  void saveProjectRecovery(const std::string destination);
+  // Note: The string must be copied from the other thread in saveProjectRecovery
+  /// Saves the current project as part of recovery auto saving
+  void saveProjectRecovery(std::string destination); 
 
 signals:
   void modified();
