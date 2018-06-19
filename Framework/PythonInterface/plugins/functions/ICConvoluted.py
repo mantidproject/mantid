@@ -5,6 +5,7 @@
 # a square wave and a Gaussian.
 #
 #
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 
