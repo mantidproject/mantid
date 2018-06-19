@@ -53,20 +53,20 @@ public:
   // Constructor
   MaxentTransformMultiFourier(MaxentSpace_sptr dataSpace,
                          MaxentSpace_sptr imageSpace,
-                         size_t numSpec,
-                         MaxentSpace_sptr linearAdjustments,
-                         MaxentSpace_sptr constAdjustments);
+                         size_t numSpec);
   // Transfoms form image space to data space
   std::vector<double> imageToData(const std::vector<double> &image) override;
   // Transforms from data space to image space
   std::vector<double> dataToImage(const std::vector<double> &data) override;
+  // Set the adjustments to be applie to data when converted from image
+  void setAdjustments(const std::vector<double> &linAdj, const std::vector<double> &constAdj);
 
 private:
   MaxentSpace_sptr m_dataSpace;
   MaxentSpace_sptr m_imageSpace;
   size_t m_numSpec;
-  MaxentSpace_sptr m_linearAdjustments;
-  MaxentSpace_sptr m_constAdjustments;
+  std::vector<double> m_linearAdjustments;
+  std::vector<double> m_constAdjustments;
 };
 
 } // namespace Algorithms

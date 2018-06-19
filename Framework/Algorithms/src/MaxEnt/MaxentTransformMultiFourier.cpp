@@ -8,10 +8,8 @@ namespace Algorithms {
 /** Constructor */
 MaxentTransformMultiFourier::MaxentTransformMultiFourier(MaxentSpace_sptr dataSpace,
                                                MaxentSpace_sptr imageSpace,
-                                               size_t numSpec,
-                                               MaxentSpace_sptr linearAdjustments,
-                                               MaxentSpace_sptr constAdjustments)
-    : MaxentTransformFourier(dataSpace, imageSpace), m_linearAdjustments(linearAdjustments), m_constAdjustments(constAdjustments) {}
+                                               size_t numSpec)
+    : MaxentTransformFourier(dataSpace, imageSpace), m_linearAdjustments(), m_constAdjustments() {}
 
 /**
 * Transforms a 1D signal from image space to data space, performing an
@@ -36,9 +34,22 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
     }
   }
 
-  // Apply adjustments  
-  // TO DO 
-
+  // Apply adjustments (we assume there are sufficient adjustments supplied)
+  if(!m_linearAdjustments.empty() && !m_constAdjustments.empty()) {
+    for (size_t i = 0; i < size(data); i++) {
+      data[i] = m_linearAdjustments[i] * data[i] + m_constAdjustments[i];
+    }
+  }
+  else if (!m_linearAdjustments.empty() && m_constAdjustments.empty()) {
+    for (size_t i = 0; i < size(data); i++) {
+      data[i] = m_linearAdjustments[i] * data[i];
+    }
+  }
+  else if (m_linearAdjustments.empty() && !m_constAdjustments.empty()) {
+    for (size_t i = 0; i < size(data); i++) {
+      data[i] =  data[i] + m_constAdjustments[i];
+    }
+  }
 
   return data;
 }
@@ -69,6 +80,16 @@ MaxentTransformMultiFourier::dataToImage(const std::vector<double> &data) {
   std::vector<double> image = dataToImage(dataSum);
 
   return image;
+}
+
+/**
+* Sets the adjustments to be applied to the data when converted from image.
+* @param linAdj : [input] Linear adjustments as complex numbers for all spectra concatenated
+* @param constAdj: [input] Constant adjustments as complex numbers for all spectra concatenated
+*/
+void MaxentTransformMultiFourier::setAdjustments(const std::vector<double> &linAdj, const std::vector<double> &constAdj) {
+  m_linearAdjustments = linAdj;
+  m_constAdjustments = constAdj;
 }
 
 } // namespace Algorithms
