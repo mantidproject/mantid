@@ -579,7 +579,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     if (m_convertUnits) {
       g_log.debug("Converting input workspace to wavelength\n");
       result = convertToWavelength(result);
-      findWavelengthMinMax(result);
       outputDebugWorkspace(result, wsName, "_lambda", debug, step);
     }
     // Now the workspace is in wavelength, find the min/max wavelength
