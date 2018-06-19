@@ -49,7 +49,7 @@ Improved
 - XError values (Dx) can now be treated by the following algorithms: :ref:`ConjoinXRuns <algm-ConjoinXRuns>`, :ref:`ConvertToHistogram <algm-ConvertToHistogram>`, :ref:`ConvertToPointData <algm-ConvertToPointData>`, :ref:`CreateWorkspace <algm-CreateWorkspace>`, :ref:`SortXAxis <algm-SortXAxis>`, :ref:`algm-Stitch1D` and :ref:`algm-Stitch1DMany` (both with repect to point data).
 - :ref:`Stitch1D <algm-Stitch1D>` can treat point data.
 - The algorithm :ref:`SortXAxis <algm-SortXAxis>` has a new input option that allows ascending (default) and descending sorting. The documentation needed to be corrected in general.
-- :ref:`LoadNexusMonitors <algm-LoadNexusMonitors2>` has changed its properties for clarification. This has also propogated to :ref:`LoadEventNexus <algm-LoadEventNexus>` and :ref:`LoadEventAndCompress <algm-LoadEventAndCompress>`
+- :ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` has changed its properties for clarification. This has also propogated to :ref:`LoadEventNexus <algm-LoadEventNexus>` and :ref:`LoadEventAndCompress <algm-LoadEventAndCompress>`
 
 Bug fixes
 #########
