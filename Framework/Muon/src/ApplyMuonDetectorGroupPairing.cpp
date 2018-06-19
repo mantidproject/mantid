@@ -268,10 +268,10 @@ ApplyMuonDetectorGroupPairing::validateInputs() {
   } else {
     MatrixWorkspace_sptr ws1 = getProperty("InputWorkspace1");
     MatrixWorkspace_sptr ws2 = getProperty("InputWorkspace2");
-	if (ws1 && ws1->getNumberHistograms() != 1) {
-		errors["InputWorkspace1"] =
-			"The input workspaces should have exactly one spectra";
-	}
+    if (ws1 && ws1->getNumberHistograms() != 1) {
+      errors["InputWorkspace1"] =
+          "The input workspaces should have exactly one spectra";
+    }
     if (ws2 && ws2->getNumberHistograms() != 1) {
       errors["InputWorkspace2"] =
           "The input workspaces should have exactly one spectra";
