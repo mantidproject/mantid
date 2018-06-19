@@ -9,7 +9,7 @@ namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
 struct ContainsOneOrMore {
-  ContainsOneOrMore(std::vector<std::string> &&substrings)
+  explicit ContainsOneOrMore(std::vector<std::string> &&substrings)
       : m_substrings(std::move(substrings)) {}
 
   bool operator()(const std::string &str) const {
