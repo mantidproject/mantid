@@ -4,8 +4,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 SlicedReductionWorkspaces::SlicedReductionWorkspaces(
-    std::string inputWorkspace,
-    std::vector<ReductionWorkspaces> sliceWorkspaces)
+    std::string const &inputWorkspace,
+    std::vector<ReductionWorkspaces> const &sliceWorkspaces)
     : m_inputWorkspace(std::move(inputWorkspace)),
       m_sliceWorkspaces(std::move(sliceWorkspaces)) {}
 

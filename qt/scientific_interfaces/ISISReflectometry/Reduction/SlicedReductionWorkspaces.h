@@ -10,8 +10,9 @@ namespace CustomInterfaces {
 
 class SlicedReductionWorkspaces {
 public:
-  SlicedReductionWorkspaces(std::string inputWorkspace,
-                            std::vector<ReductionWorkspaces> sliceWorkspaces);
+  SlicedReductionWorkspaces(
+      std::string const &inputWorkspace,
+      std::vector<ReductionWorkspaces> const &sliceWorkspaces);
 
   std::string const &inputWorkspace() const;
   std::vector<ReductionWorkspaces> const &sliceWorkspaces() const;

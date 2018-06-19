@@ -64,6 +64,7 @@ std::ostream &operator<<(std::ostream &os,
                          Row<ReducedWorkspaceNames> const &row);
 
 template <typename ReducedWorkspaceNames>
+// cppcheck-suppress syntaxError
 template <typename WorkspaceNamesFactory>
 Row<ReducedWorkspaceNames> Row<ReducedWorkspaceNames>::withExtraRunNumbers(
     std::vector<std::string> const &extraRunNumbers,

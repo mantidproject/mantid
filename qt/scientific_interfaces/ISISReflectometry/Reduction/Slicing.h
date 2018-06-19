@@ -9,7 +9,7 @@ namespace CustomInterfaces {
 
 class UniformSlicingByTime {
 public:
-  UniformSlicingByTime(double secondsPerSlice);
+  explicit UniformSlicingByTime(double secondsPerSlice);
 
 private:
   double m_secondsPerSlice;
@@ -17,7 +17,7 @@ private:
 
 class UniformSlicingByNumberOfSlices {
 public:
-  UniformSlicingByNumberOfSlices(int numberOfSlices);
+  explicit UniformSlicingByNumberOfSlices(int numberOfSlices);
 
 private:
   int m_numberOfSlices;
@@ -25,7 +25,7 @@ private:
 
 class CustomSlicingByList {
 public:
-  CustomSlicingByList(std::vector<double> sliceTimes);
+  explicit CustomSlicingByList(std::vector<double> sliceTimes);
 
 private:
   std::vector<double> m_sliceTimes;

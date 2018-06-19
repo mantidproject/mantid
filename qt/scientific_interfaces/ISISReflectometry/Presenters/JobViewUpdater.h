@@ -6,7 +6,7 @@ namespace CustomInterfaces {
 
 class BatchViewJobsUpdater {
 public:
-  BatchViewJobsUpdater(MantidQt::MantidWidgets::Batch::IJobTreeView &view)
+  explicit BatchViewJobsUpdater(MantidQt::MantidWidgets::Batch::IJobTreeView &view)
       : m_view(view) {}
 
   template <typename Group>

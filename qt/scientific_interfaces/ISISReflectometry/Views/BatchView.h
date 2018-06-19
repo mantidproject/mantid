@@ -14,7 +14,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL BatchView : public QWidget,
                                                  public IBatchView {
   Q_OBJECT
 public:
-  BatchView(std::vector<std::string> const &instruments,
+  explicit BatchView(std::vector<std::string> const &instruments,
             int defaultInstrumentIndex);
   void subscribe(BatchViewSubscriber *notifyee) override;
   void setProgress(int value) override;
