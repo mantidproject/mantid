@@ -20,21 +20,15 @@ public:
   void setupFitTab() override;
 
 protected slots:
-  /// Handle when the sample input is ready
-  void handleSampleInputReady(const QString &filename);
-  /// Slot to handle plotting a different spectrum of the workspace
-  void handleWidthChange(int);
   void updatePlotOptions() override;
   void updateModelFitTypeString();
+  void plotClicked();
 
 protected:
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
 
 private:
-  void setAvailableWidths(const std::vector<std::string> &widths);
-
-  // The UI form
   JumpFitModel *m_jumpFittingModel;
   std::unique_ptr<Ui::JumpFit> m_uiForm;
 };

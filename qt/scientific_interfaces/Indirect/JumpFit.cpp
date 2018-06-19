@@ -1,4 +1,6 @@
 #include "JumpFit.h"
+#include "JumpFitDataPresenter.h"
+
 #include "../General/UserInputValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -26,8 +28,9 @@ JumpFit::JumpFit(QWidget *parent)
   m_uiForm->setupUi(parent);
 
   m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
-  setFitDataPresenter(
-      new IndirectFitDataPresenter(m_jumpFittingModel, m_uiForm->fitDataView));
+  setFitDataPresenter(new JumpFitDataPresenter(
+      m_jumpFittingModel, m_uiForm->fitDataView, m_uiForm->cbParameterType,
+      m_uiForm->cbParameter, m_uiForm->lbParameterType, m_uiForm->lbParameter));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
@@ -37,8 +40,8 @@ void JumpFit::setupFitTab() {
   m_uiForm->svSpectrumView->hideSpectrumSelector();
   m_uiForm->svSpectrumView->hideMaskSpectrumSelector();
 
-  setSampleWSSuffices({ "_Result" });
-  setSampleFBSuffices({ "_Result.nxs" });
+  setSampleWSSuffices({"_Result"});
+  setSampleFBSuffices({"_Result.nxs"});
 
   auto chudleyElliot =
       FunctionFactory::Instance().createFunction("ChudleyElliot");
@@ -47,19 +50,25 @@ void JumpFit::setupFitTab() {
       FunctionFactory::Instance().createFunction("FickDiffusion");
   auto teixeiraWater =
       FunctionFactory::Instance().createFunction("TeixeiraWater");
+  auto eisfDiffCylinder =
+      FunctionFactory::Instance().createFunction("EISFDiffCylinder");
+  auto eisfDiffSphere =
+      FunctionFactory::Instance().createFunction("EISFDiffSphere");
+  auto eisfDiffSphereAklyl =
+      FunctionFactory::Instance().createFunction("EISFDiffSphereAlkyl");
   addComboBoxFunctionGroup("ChudleyElliot", {chudleyElliot});
   addComboBoxFunctionGroup("HallRoss", {hallRoss});
   addComboBoxFunctionGroup("FickDiffusion", {fickDiffusion});
   addComboBoxFunctionGroup("TeixeiraWater", {teixeiraWater});
+  addComboBoxFunctionGroup("EISFDiffCylinder", {eisfDiffCylinder});
+  addComboBoxFunctionGroup("EISFDiffSphere", {eisfDiffSphere});
+  addComboBoxFunctionGroup("EISFDiffSphereAlkyl", {eisfDiffSphereAklyl});
 
-  m_uiForm->cbWidth->setEnabled(false);
-
-  // Connect width selector to handler method
-  connect(m_uiForm->cbWidth, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(handleWidthChange(int)));
+  m_uiForm->cbParameter->setEnabled(false);
 
   // Handle plotting and saving
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
+  connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(this, SIGNAL(functionChanged()), this,
           SLOT(updateModelFitTypeString()));
 }
@@ -68,53 +77,21 @@ void JumpFit::updateModelFitTypeString() {
   m_jumpFittingModel->setFitType(selectedFitType().toStdString());
 }
 
-/**
- * Plots the loaded file to the miniplot and sets the guides
- * and the range
- *
- * @param filename :: The name of the workspace to plot
- */
-void JumpFit::handleSampleInputReady(const QString &filename) {
-  setAvailableWidths(m_jumpFittingModel->getWidths());
-
-  if (m_jumpFittingModel->getWorkspace(0)) {
-    m_uiForm->cbWidth->setEnabled(true);
-    const auto width =
-        static_cast<int>(m_jumpFittingModel->getWidthSpectrum(0));
-    setMinimumSpectrum(width);
-    setMaximumSpectrum(width);
-    setSelectedSpectrum(width);
-  } else {
-    m_uiForm->cbWidth->setEnabled(false);
-    emit showMessageBox("Workspace doesn't appear to contain any width data");
-  }
+void JumpFit::updatePlotOptions() {
+  IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
 }
 
-void JumpFit::setAvailableWidths(const std::vector<std::string> &widths) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm->cbWidth);
-  m_uiForm->cbWidth->clear();
-  for (const auto &width : widths)
-    m_uiForm->cbWidth->addItem(QString::fromStdString(width));
+void JumpFit::setPlotResultEnabled(bool enabled) {
+  m_uiForm->pbPlot->setEnabled(enabled);
+  m_uiForm->cbPlotType->setEnabled(enabled);
 }
-
-/**
- * Plots the loaded file to the miniplot when the selected spectrum changes
- *
- * @param text :: The name spectrum index to plot
- */
-void JumpFit::handleWidthChange(int widthIndex) {
-  auto index = static_cast<std::size_t>(widthIndex);
-  auto spectrum = static_cast<int>(m_jumpFittingModel->getWidthSpectrum(index));
-  m_jumpFittingModel->setActiveWidth(index);
-  setSelectedSpectrum(spectrum);
-}
-
-void JumpFit::updatePlotOptions() {}
-
-void JumpFit::setPlotResultEnabled(bool enabled) {}
 
 void JumpFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
+}
+
+void JumpFit::plotClicked() {
+  IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
 }
 
 } // namespace IDA

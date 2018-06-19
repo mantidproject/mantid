@@ -40,29 +40,9 @@ public:
   bool isRangeCurrentlySelected(std::size_t dataIndex,
                                 std::size_t spectrum) const;
 
-  Mantid::API::IFunction_sptr background() const;
-
-  Mantid::API::IFunction_sptr model() const;
-
-  boost::optional<size_t> backgroundIndex() const;
-
   QString selectedFitType() const;
 
   size_t numberOfCustomFunctions(const std::string &functionName) const;
-
-  double startX() const;
-
-  double endX() const;
-
-  std::vector<double> parameterValue(const std::string &functionName,
-                                     const std::string &parameterName) const;
-  boost::optional<double>
-  lastParameterValue(const std::string &functionName,
-                     const std::string &parameterName) const;
-
-  bool isEmptyModel() const;
-
-  QString backgroundName() const;
 
   void setConvolveMembers(bool convolveMembers);
 
@@ -168,6 +148,7 @@ protected slots:
   void setDataTableExclude(const std::string &exclude);
   void setBrowserStartX(double startX);
   void setBrowserEndX(double endX);
+  void updateBrowserFittingRange();
   void setBrowserWorkspace(std::size_t dataIndex);
   void setBrowserWorkspaceIndex(std::size_t spectrum);
   void tableStartXChanged(double startX, std::size_t dataIndex,
@@ -182,17 +163,15 @@ protected slots:
   void fitAlgorithmComplete(bool error);
 
   void singleFit();
+  void singleFit(std::size_t dataIndex, std::size_t spectrum);
   void executeFit();
 
+  void updateFitBrowserParameterValues();
   void updateParameterValues();
   void updateParameterValues(
       const std::unordered_map<std::string, ParameterValue> &parameters);
 
   virtual void updatePlotOptions() = 0;
-
-  void emitFunctionChanged();
-  void emitParameterChanged(const Mantid::API::IFunction *);
-  void emitCustomBoolChanged(const QString &key, bool value);
 
   void updateResultOptions();
   void saveResult();
