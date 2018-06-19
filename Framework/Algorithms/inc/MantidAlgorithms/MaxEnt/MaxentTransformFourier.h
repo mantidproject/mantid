@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_MAXENTTRANSFORM1DFOURIER_H_
-#define MANTID_ALGORITHMS_MAXENTTRANSFORM1DFOURIER_H_
+#ifndef MANTID_ALGORITHMS_MAXENTTRANSFORMFOURIER_H_
+#define MANTID_ALGORITHMS_MAXENTTRANSFORMFOURIER_H_
 
 #include "MantidAlgorithms/MaxEnt/MaxentTransform.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpace.h"
@@ -10,7 +10,7 @@ namespace Algorithms {
 
 using MaxentSpace_sptr = std::shared_ptr<MaxentSpace>;
 
-/** MaxentTransform1DFourier : Defines a transformation from data space to image
+/** MaxentTransformFourier : Defines a transformation from data space to image
   space (and vice-versa) where spaces are related by a **1D** Fourier Transform.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -54,4 +54,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_MAXENTTRANSFORM1DFOURIER_H_ */
+#endif /* MANTID_ALGORITHMS_MAXENTTRANSFORMFOURIER_H_ */
