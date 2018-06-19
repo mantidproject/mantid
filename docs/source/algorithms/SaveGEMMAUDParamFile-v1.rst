@@ -22,6 +22,7 @@ to produce its output, which lives in
 ``scripts/Diffraction/isis_powder/gem_routines/maud_param_template.maud``.
 
 The parameters of interest in the ``.maud`` file are:
+
 - Bank IDs - essentially just a label for each spectrum in MAUD
 - Diffractometer constants (also called conversion factors, or
   sometimes DIFC values) **DIFC**, **DIFA** and **TZERO**. These are
