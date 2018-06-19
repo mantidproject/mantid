@@ -76,9 +76,7 @@ public:
                           std::size_t index);
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
-  template <typename F> void applySpectra(std::size_t index, const F &functor) {
-    m_fittingData[index]->applySpectra(functor);
-  }
+  template <typename F> void applySpectra(std::size_t index, const F &functor);
 
   FittingMode getFittingMode() const;
   std::unordered_map<std::string, ParameterValue>
@@ -177,6 +175,11 @@ private:
   bool m_previousModelSelected;
   FittingMode m_fittingMode;
 };
+
+template <typename F>
+void IndirectFittingModel::applySpectra(std::size_t index, const F &functor) {
+  m_fittingData[index]->applySpectra(functor);
+}
 
 } // namespace IDA
 } // namespace CustomInterfaces
