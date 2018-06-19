@@ -11,7 +11,7 @@ namespace CustomInterfaces {
 
 template <typename Group> class MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs {
 public:
-  ReductionJobs() = default;
+  ReductionJobs();
   ReductionJobs(std::vector<Group> groups);
   Group &appendGroup(Group group);
   Group &insertGroup(Group group, int beforeIndex);
@@ -147,8 +147,13 @@ bool mergeJobsInto(Jobs &intoHere, Jobs const &fromHere, double thetaTolerance,
       intoHere, fromHere);
 }
 
-UnslicedReductionJobs unsliced(SlicedReductionJobs const &slicedJobs);
-SlicedReductionJobs sliced(UnslicedReductionJobs const &unslicedJobs);
+Jobs newJobsWithSlicingFrom(Jobs const& jobs);
+
+UnslicedReductionJobs
+unsliced(SlicedReductionJobs const &slicedJobs,
+         WorkspaceNamesFactory const &workspaceNamesFactory);
+SlicedReductionJobs sliced(UnslicedReductionJobs const &unslicedJobs,
+                           WorkspaceNamesFactory const &workspaceNamesFactory);
 }
 }
 

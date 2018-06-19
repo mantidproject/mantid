@@ -16,6 +16,12 @@ public:
             Slicing const &) {
     return workspaceNamesForUnsliced(runNumbers, transmissionRuns);
   }
+
+  static std::string makePostprocessedName(
+      std::vector<std::vector<std::string> const *> const &runNumbers,
+      Slicing const &) {
+    return postprocessedWorkspaceNameForUnsliced(runNumbers);
+  }
 };
 
 template <> class WorkspaceNamesFactoryDetail<SlicedReductionWorkspaces> {
@@ -25,6 +31,12 @@ public:
             std::pair<std::string, std::string> const &transmissionRuns,
             Slicing const &slicing) {
     return workspaceNamesForSliced(runNumbers, transmissionRuns, slicing);
+  }
+
+  static std::string makePostprocessedName(
+      std::vector<std::vector<std::string> const *> const &runNumbers,
+      Slicing const &slicing) {
+    return postprocessedWorkspaceNameForSliced(runNumbers, slicing);
   }
 };
 }
@@ -39,6 +51,13 @@ public:
             std::pair<std::string, std::string> const &transmissionRuns) const {
     return internal::WorkspaceNamesFactoryDetail<WorkspaceNames>::makeNames(
         runNumbers, transmissionRuns, m_slicing);
+  }
+
+  template <typename WorkspaceNames>
+  std::string makePostprocessedName(
+      std::vector<std::vector<std::string> const *> const &runNumbers) const {
+    return internal::WorkspaceNamesFactoryDetail<
+        WorkspaceNames>::makePostprocessedName(runNumbers, m_slicing);
   }
 
 private:

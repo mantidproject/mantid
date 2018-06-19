@@ -15,10 +15,12 @@ namespace CustomInterfaces {
 
 BatchPresenter::BatchPresenter(IBatchView *view,
                                std::vector<std::string> const &instruments,
-                               double thetaTolerance, Jobs jobs)
+                               double thetaTolerance,
+                               WorkspaceNamesFactory workspaceNamesFactory,
+                               Jobs jobs)
     : m_view(view), m_instruments(instruments), m_model(std::move(jobs)),
       m_thetaTolerance(thetaTolerance), m_jobViewUpdater(m_view->jobs()),
-      m_workspaceNameFactory(Slicing()) {
+      m_workspaceNameFactory(std::move(workspaceNamesFactory)) {
   m_view->subscribe(this);
 }
 
@@ -107,7 +109,7 @@ void BatchPresenter::notifyFilterChanged(std::string const &filterString) {
   try {
     auto regexFilter =
         filterFromRegexString(filterString, m_view->jobs(), m_model);
-    m_view->jobs().filterRowsBy(regexFilter.get());
+    m_view->jobs().filterRowsBy(std::move(regexFilter));
   } catch (boost::regex_error &) {
   }
 }
@@ -224,12 +226,11 @@ void BatchPresenter::updateGroupName(
 
 void BatchPresenter::updateRowField(
     MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int column,
-    std::string const &, std::string const &newValue) {
+    std::string const &, std::string const &) {
   auto const groupIndex = groupOf(itemIndex);
   auto const rowIndex = rowOf(itemIndex);
-  auto slicing = Slicing(boost::blank());
   auto rowValidationResult =
-      validateRow(m_model, slicing, cellTextFromViewAt(itemIndex));
+      validateRow(m_model, m_workspaceNameFactory, cellTextFromViewAt(itemIndex));
   updateRow(m_model, groupIndex, rowIndex,
             rowValidationResult.validRowElseNone());
   if (rowValidationResult.isValid()) {

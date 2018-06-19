@@ -1,6 +1,7 @@
 #include "Row.h"
 #include <boost/variant.hpp>
 #include <boost/algorithm/string.hpp>
+#include "../Map.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -82,36 +83,28 @@ std::ostream &operator<<(std::ostream &os,
   return os;
 }
 
-SlicedRow slice(UnslicedRow const &row, Slicing const &slicing) {
-  return SlicedRow(
-      row.runNumbers(), row.theta(), row.transmissionWorkspaceNames(),
-      row.qRange(), row.scaleFactor(), row.reductionOptions(),
-      workspaceNamesForSliced(row.runNumbers(),
-                              row.transmissionWorkspaceNames(), slicing));
+boost::optional<UnslicedRow>
+unslice(boost::optional<SlicedRow> const &row,
+        WorkspaceNamesFactory const &workspaceNamesFactory) {
+  return map(row, [&](SlicedRow const &row) -> UnslicedRow {
+    return UnslicedRow(
+        row.runNumbers(), row.theta(), row.transmissionWorkspaceNames(),
+        row.qRange(), row.scaleFactor(), row.reductionOptions(),
+        workspaceNamesFactory.makeNames<typename UnslicedRow::WorkspaceNames>(
+            row.runNumbers(), row.transmissionWorkspaceNames()));
+  });
 }
 
-UnslicedRow unslice(SlicedRow const &row) {
-  return UnslicedRow(row.runNumbers(), row.theta(),
-                     row.transmissionWorkspaceNames(), row.qRange(),
-                     row.scaleFactor(), row.reductionOptions(),
-                     workspaceNamesForUnsliced(
-                         row.runNumbers(), row.transmissionWorkspaceNames()));
-}
-
-boost::optional<UnslicedRow> unslice(boost::optional<SlicedRow> const &row) {
-  if (row.is_initialized()) {
-    return unslice(row.get());
-  } else {
-    return boost::none;
-  }
-}
-
-boost::optional<SlicedRow> slice(boost::optional<UnslicedRow> const &row) {
-  if (row.is_initialized()) {
-    return slice(row.get());
-  } else {
-    return boost::none;
-  }
+boost::optional<SlicedRow>
+slice(boost::optional<UnslicedRow> const &row,
+      WorkspaceNamesFactory const &workspaceNamesFactory) {
+  return map(row, [&](UnslicedRow const &row) -> SlicedRow {
+    return SlicedRow(
+        row.runNumbers(), row.theta(), row.transmissionWorkspaceNames(),
+        row.qRange(), row.scaleFactor(), row.reductionOptions(),
+        workspaceNamesFactory.makeNames<typename SlicedRow::WorkspaceNames>(
+            row.runNumbers(), row.transmissionWorkspaceNames()));
+  });
 }
 
 template class Row<SlicedReductionWorkspaces>;

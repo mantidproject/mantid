@@ -329,10 +329,10 @@ makeIfAllInitialized(boost::optional<Params> const &... params) {
 }
 
 template <typename Row>
-template <typename WorkspaceNameFactory>
+template <typename WorkspaceNamesFactory>
 RowValidationResult<boost::variant<SlicedRow, UnslicedRow>> RowValidator<Row>::
 operator()(std::vector<std::string> const &cellText,
-           WorkspaceNameFactory workspaceNames) {
+           WorkspaceNamesFactory const &workspaceNames) {
   using RowVariant = boost::variant<SlicedRow, UnslicedRow>;
 
   auto maybeRunNumbers = parseRunNumbers(cellText);
@@ -361,8 +361,8 @@ class ValidateRowVisitor
     : boost::static_visitor<RowValidationResult<RowVariant>> {
 public:
   ValidateRowVisitor(std::vector<std::string> const &cells,
-                     Slicing const &slicing)
-      : m_cells(cells), m_slicing(slicing) {}
+                     WorkspaceNamesFactory const &workspaceNamesFactory)
+      : m_cells(cells), m_workspaceNamesFactory(workspaceNamesFactory) {}
 
   RowValidationResult<RowVariant>
   operator()(ReductionJobs<SlicedGroup> const &) const {
@@ -372,7 +372,7 @@ public:
         [this](std::vector<std::string> const &runNumbers,
                std::pair<std::string, std::string> const &transmissionRuns)
             -> boost::optional<SlicedReductionWorkspaces> {
-              return WorkspaceNamesFactory(m_slicing)
+              return m_workspaceNamesFactory
                   .makeNames<SlicedReductionWorkspaces>(runNumbers,
                                                         transmissionRuns);
             });
@@ -386,27 +386,31 @@ public:
         [this](std::vector<std::string> const &runNumbers,
                std::pair<std::string, std::string> const &transmissionRuns)
             -> boost::optional<ReductionWorkspaces> {
-              return WorkspaceNamesFactory(m_slicing)
-                  .makeNames<ReductionWorkspaces>(runNumbers, transmissionRuns);
+              return m_workspaceNamesFactory.makeNames<ReductionWorkspaces>(
+                  runNumbers, transmissionRuns);
             });
   }
 
 private:
   std::vector<std::string> const &m_cells;
-  Slicing const &m_slicing;
+  WorkspaceNamesFactory const &m_workspaceNamesFactory;
 };
 
 RowValidationResult<RowVariant>
-validateRow(Jobs const &jobs, Slicing const &slicing,
+validateRow(Jobs const &jobs,
+            WorkspaceNamesFactory const &workspaceNamesFactory,
             std::vector<std::string> const &cells) {
-  return boost::apply_visitor(ValidateRowVisitor(cells, slicing), jobs);
+  return boost::apply_visitor(ValidateRowVisitor(cells, workspaceNamesFactory),
+                              jobs);
 }
 
 boost::optional<RowVariant>
-validateRowFromRunAndTheta(Jobs const &jobs, Slicing const &slicing,
+validateRowFromRunAndTheta(Jobs const &jobs,
+                           WorkspaceNamesFactory const &workspaceNamesFactory,
                            std::string const &run, std::string const &theta) {
   return boost::apply_visitor(
-             ValidateRowVisitor({run, theta, "", "", "", "", "", "", ""}, slicing),
+             ValidateRowVisitor({run, theta, "", "", "", "", "", "", ""},
+                                workspaceNamesFactory),
              jobs).validRowElseNone();
 }
 

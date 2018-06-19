@@ -28,9 +28,6 @@
 #include <algorithm>
 #include <iterator>
 
-#include <iostream>
-
-#include "Reduction/Slicing.h"
 #include "Reduction/WorkspaceNamesFactory.h"
 #include "ValidateRow.h"
 
@@ -62,12 +59,15 @@ QStringList fromStdStringVector(std::vector<std::string> const &inVec) {
 */
 ReflRunsTabPresenter::ReflRunsTabPresenter(
     IReflRunsTabView *mainView, ProgressableView *progressableView,
-    BatchPresenterFactory makeBatchPresenter, double thetaTolerance,
+    BatchPresenterFactory makeBatchPresenter,
+    WorkspaceNamesFactory workspaceNamesFactory, double thetaTolerance,
     std::vector<std::string> const &instruments, int defaultInstrumentIndex,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
-      m_makeBatchPresenter(makeBatchPresenter), m_mainPresenter(nullptr),
-      m_searcher(searcher), m_instrumentChanged(false), m_thetaTolerance(thetaTolerance) {
+      m_makeBatchPresenter(makeBatchPresenter),
+      m_workspaceNamesFactory(workspaceNamesFactory), m_mainPresenter(nullptr),
+      m_searcher(searcher), m_instrumentChanged(false),
+      m_thetaTolerance(thetaTolerance) {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
@@ -129,8 +129,8 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     break;
   }
   case IReflRunsTabPresenter::TransferFlag:
-//    transfer(m_view->getSelectedSearchRows(), selectedGroup(),
-//             TransferMatch::Any);
+    transfer(m_view->getSelectedSearchRows(), selectedGroup(),
+             TransferMatch::Any);
     break;
   case IReflRunsTabPresenter::InstrumentChangedFlag:
     changeInstrument();
@@ -315,7 +315,7 @@ void ReflRunsTabPresenter::autoreduceNewRuns() {
   auto rowsToTransfer = m_view->getAllSearchRows();
 
   if (rowsToTransfer.size() > 0) {
-    //transfer(rowsToTransfer, autoreductionGroup(), TransferMatch::Strict);
+    // transfer(rowsToTransfer, autoreductionGroup(), TransferMatch::Strict);
     //    auto tablePresenter = getTablePresenter(autoreductionGroup());
     //    tablePresenter->setPromptUser(false);
     //    tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
@@ -457,28 +457,27 @@ RunDescriptionMetadata metadataFromDescription(std::string const &description) {
 */
 void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
                                     int group, const TransferMatch matchType) {
-  if (!validateRowsToTransfer(rowsToTransfer))
-    return;
+  if (validateRowsToTransfer(rowsToTransfer)) {
+    auto progress = setupProgressBar(rowsToTransfer);
+    auto jobs = newJobsWithSlicingFrom(getTablePresenter(0)->reductionJobs());
 
-  auto progress = setupProgressBar(rowsToTransfer);
-
-  auto jobs = Jobs(UnslicedReductionJobs());
-  auto slicing = Slicing();
-
-  for (auto rowIndex : rowsToTransfer) {
-    auto &result = (*m_searchModel)[rowIndex];
-    auto resultMetadata = metadataFromDescription(result.description);
-    auto row = validateRowFromRunAndTheta(jobs, slicing, result.runNumber,
-                                          resultMetadata.theta);
-    if (row.is_initialized()) {
-      mergeRowIntoGroup(jobs, row.get(), 0.001, resultMetadata.groupName,
-                      WorkspaceNamesFactory(slicing));
-    } else {
-      m_searchModel->setError(rowIndex, "Theta was not specified in the description.");
+    for (auto rowIndex : rowsToTransfer) {
+      auto &result = (*m_searchModel)[rowIndex];
+      auto resultMetadata = metadataFromDescription(result.description);
+      auto row =
+          validateRowFromRunAndTheta(jobs, m_workspaceNamesFactory,
+                                     result.runNumber, resultMetadata.theta);
+      if (row.is_initialized()) {
+        mergeRowIntoGroup(jobs, row.get(), 0.001, resultMetadata.groupName,
+                          m_workspaceNamesFactory);
+      } else {
+        m_searchModel->setError(rowIndex,
+                                "Theta was not specified in the description.");
+      }
     }
-  }
 
-  getTablePresenter(0)->mergeAdditionalJobs(jobs);
+    getTablePresenter(0)->mergeAdditionalJobs(jobs);
+  }
 }
 
 /** Used to tell the presenter something has changed in the ADS
@@ -535,14 +534,11 @@ OptionsQMap ReflRunsTabPresenter::getProcessingOptions(int group) const {
 }
 
 /** Requests global post-processing options as a string. Options are supplied
-* by
-* the main
-* presenter
+* by the main presenter
 * @return :: Global post-processing options as a string
 */
 QString
 ReflRunsTabPresenter::getPostprocessingOptionsAsString(int group) const {
-
   return QString::fromStdString(m_mainPresenter->getStitchOptions(group));
 }
 

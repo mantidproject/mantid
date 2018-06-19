@@ -7,6 +7,7 @@
 #include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/optional.hpp>
 #include "RangeInQ.h"
+#include "WorkspaceNamesFactory.h"
 #include "ReductionWorkspaces.h"
 #include "SlicedReductionWorkspaces.h"
 #include "Slicing.h"
@@ -72,7 +73,7 @@ Row<ReducedWorkspaceNames> Row<ReducedWorkspaceNames>::withExtraRunNumbers(
   boost::range::set_union(m_runNumbers, extraRunNumbers,
                           std::back_inserter(newRunNumbers));
   auto wsNames =
-      workspaceNamesFactory.template makeNames<ReducedWorkspaceNames>(
+      workspaceNamesFactory.template makeNames<WorkspaceNames>(
           newRunNumbers, transmissionWorkspaceNames());
   return Row(newRunNumbers, theta(), transmissionWorkspaceNames(), qRange(),
              scaleFactor(), reductionOptions(), wsNames);
@@ -100,10 +101,8 @@ operator<<(std::ostream &, SlicedRow const &);
 
 using RowVariant = boost::variant<SlicedRow, UnslicedRow>;
 
-SlicedRow slice(UnslicedRow const &row, Slicing const &slicing);
-UnslicedRow unslice(SlicedRow const &row);
-boost::optional<UnslicedRow> unslice(boost::optional<SlicedRow> const &row);
-boost::optional<SlicedRow> slice(boost::optional<UnslicedRow> const &row);
+boost::optional<UnslicedRow> unslice(boost::optional<SlicedRow> const &row, WorkspaceNamesFactory const& workspaceNamesFactory);
+boost::optional<SlicedRow> slice(boost::optional<UnslicedRow> const &row, WorkspaceNamesFactory const& workspaceNamesFactory);
 
 }
 }

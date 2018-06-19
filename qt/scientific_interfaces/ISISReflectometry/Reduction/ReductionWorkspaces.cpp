@@ -100,5 +100,15 @@ ReductionWorkspaces workspaceNamesForUnsliced(
       std::move(combinedTransmissionWorkspace), std::move(iVsLambda),
       std::move(iVsQ), std::move(iVsQBinned));
 }
+
+std::string postprocessedWorkspaceNameForUnsliced(
+    std::vector<std::vector<std::string> const *> const &summedRunNumbers) {
+  auto summedRunList =
+      map(summedRunNumbers,
+          [](std::vector<std::string> const *summedRuns) -> std::string {
+            return boost::algorithm::join(*summedRuns, "+");
+          });
+  return boost::algorithm::join(summedRunList, "_");
+}
 }
 }

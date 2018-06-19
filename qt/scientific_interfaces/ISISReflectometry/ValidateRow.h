@@ -9,7 +9,6 @@ namespace CustomInterfaces {
 
 MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double>
 parseDouble(std::string string);
-
 MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double>
 parseNonNegativeDouble(std::string string);
 
@@ -72,10 +71,10 @@ private:
 
 template <typename Row> class MANTIDQT_ISISREFLECTOMETRY_DLL RowValidator {
 public:
-  template <typename WorkspaceNameFactory>
+  template <typename WorkspaceNamesFactory>
   RowValidationResult<boost::variant<SlicedRow, UnslicedRow>>
   operator()(std::vector<std::string> const &cellText,
-             WorkspaceNameFactory workspaceNames);
+             WorkspaceNamesFactory const &workspaceNames);
 
 private:
   boost::optional<std::vector<std::string>>
@@ -93,12 +92,14 @@ private:
   std::vector<int> m_invalidColumns;
 };
 
-RowValidationResult<boost::variant<SlicedRow, UnslicedRow>>
-validateRow(Jobs const &jobs, Slicing const &slicing,
+RowValidationResult<RowVariant>
+validateRow(Jobs const &jobs,
+            WorkspaceNamesFactory const &workspaceNamesFactory,
             std::vector<std::string> const &cellText);
 
-boost::optional<boost::variant<SlicedRow, UnslicedRow>>
-validateRowFromRunAndTheta(Jobs const &jobs, Slicing const &slicing,
+boost::optional<RowVariant>
+validateRowFromRunAndTheta(Jobs const &jobs,
+                           WorkspaceNamesFactory const &workspaceNamesFactory,
                            std::string const &run, std::string const &theta);
 
 extern template class MANTIDQT_ISISREFLECTOMETRY_DLL

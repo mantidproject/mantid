@@ -26,6 +26,13 @@ SlicedReductionWorkspaces workspaceNamesForSliced(
   return SlicedReductionWorkspaces("", {});
 }
 
+std::string postprocessedWorkspaceNameForSliced(
+    std::vector<std::vector<std::string> const *> const &summedRunNumbers,
+    Slicing const &slicing) {
+  // TODO: Implement this correctly.
+  return "";
+}
+
 bool operator==(SlicedReductionWorkspaces const &lhs,
                 SlicedReductionWorkspaces const &rhs) {
   return lhs.inputWorkspace() == rhs.inputWorkspace() &&

@@ -10,6 +10,14 @@ template <typename Group>
 ReductionJobs<Group>::ReductionJobs(std::vector<Group> groups)
     : m_groups(std::move(groups)) {}
 
+template <typename Group> ReductionJobs<Group>::ReductionJobs() {}
+
+// template <typename Group>
+// WorkspaceNamesFactory const *
+// ReductionJobs<Group>::workspaceNamesFactory() const {
+//  return m_workspaceNamesFactory;
+//}
+
 template <typename Group>
 Group &ReductionJobs<Group>::appendGroup(Group group) {
   assertOrThrow(group.name().empty() || !hasGroupWithName(group.name()),
@@ -289,19 +297,39 @@ void prettyPrintModel(Jobs const &jobs) {
   boost::apply_visitor(PrettyPrintVisitor(), jobs);
 }
 
-SlicedReductionJobs sliced(UnslicedReductionJobs const &unslicedJobs) {
+class NewJobsWithSlicingFrom : boost::static_visitor<Jobs> {
+public:
+  Jobs operator()(SlicedReductionJobs const&) const {
+    return SlicedReductionJobs();
+  }
+
+  Jobs operator()(UnslicedReductionJobs const&) const {
+    return UnslicedReductionJobs();
+  }
+};
+
+Jobs newJobsWithSlicingFrom(Jobs const& jobs) {
+  return boost::apply_visitor(NewJobsWithSlicingFrom(), jobs);
+}
+
+SlicedReductionJobs sliced(UnslicedReductionJobs const &unslicedJobs,
+                           WorkspaceNamesFactory const &workspaceNamesFactory) {
   auto const &unslicedGroups = unslicedJobs.groups();
   auto slicedGroups =
-      map(unslicedGroups,
-          static_cast<SlicedGroup (*)(UnslicedGroup const &)>(&slice));
+      map(unslicedGroups, [&](UnslicedGroup const &unsliced) -> SlicedGroup {
+        return slice(unsliced, workspaceNamesFactory);
+      });
   return SlicedReductionJobs(std::move(slicedGroups));
 }
 
-UnslicedReductionJobs unsliced(SlicedReductionJobs const &slicedJobs) {
+UnslicedReductionJobs
+unsliced(SlicedReductionJobs const &slicedJobs,
+         WorkspaceNamesFactory const &workspaceNamesFactory) {
   auto const &slicedGroups = slicedJobs.groups();
   auto unslicedGroups =
-      map(slicedGroups,
-          static_cast<UnslicedGroup (*)(SlicedGroup const &)>(&unslice));
+      map(slicedGroups, [&](SlicedGroup const& sliced) -> UnslicedGroup {
+        return unslice(sliced, workspaceNamesFactory);
+      });
   return UnslicedReductionJobs(std::move(unslicedGroups));
 }
 

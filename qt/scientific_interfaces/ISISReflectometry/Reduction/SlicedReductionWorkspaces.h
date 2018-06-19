@@ -27,6 +27,10 @@ workspaceNamesForSliced(
     std::pair<std::string, std::string> const &transmissionRuns,
     Slicing const &slicing);
 
+MANTIDQT_ISISREFLECTOMETRY_DLL std::string postprocessedWorkspaceNameForSliced(
+    std::vector<std::vector<std::string> const *> const &summedRunNumbers,
+    Slicing const &slicing);
+
 MANTIDQT_ISISREFLECTOMETRY_DLL bool
 operator==(SlicedReductionWorkspaces const &lhs,
            SlicedReductionWorkspaces const &rhs);

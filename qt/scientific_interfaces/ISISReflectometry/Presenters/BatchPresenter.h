@@ -17,7 +17,9 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter
     : public BatchViewSubscriber {
 public:
   BatchPresenter(IBatchView *view, std::vector<std::string> const &instruments,
-                 double thetaTolerance, Jobs reductionJobs);
+                 double thetaTolerance,
+                 WorkspaceNamesFactory workspaceNamesFactory,
+                 Jobs reductionJobs);
 
   void notifyProcessRequested() override;
   void notifyPauseRequested() override;

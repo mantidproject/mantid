@@ -80,9 +80,11 @@ std::unique_ptr<IReflRunsTabPresenter> QtReflMainWindowView::createRunsTab() {
   connect(runsTab, SIGNAL(runAsPythonScript(const QString &, bool)), this,
           SIGNAL(runAsPythonScript(const QString &, bool)));
 
+  auto workspaceNamesFactory = WorkspaceNamesFactory(Slicing());
   auto runsTabPresenter = Mantid::Kernel::make_unique<ReflRunsTabPresenter>(
-      runsTab, runsTab, BatchPresenterFactory(instruments, 0.01), 0.01, instruments,
-      defaultInstrumentIndex);
+      runsTab, runsTab,
+      BatchPresenterFactory(instruments, 0.01, workspaceNamesFactory), workspaceNamesFactory, 0.01,
+      instruments, defaultInstrumentIndex);
 
   return runsTabPresenter;
 }
