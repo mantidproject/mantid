@@ -272,6 +272,7 @@ std::string generateWorkspaceName(const Muon::DatasetParams &params) {
 /**
  * Parse a workspace name into dataset parameters
  * Format: "INST00012345; Pair; long; Asym;[ 1;] #1"
+ * count:     1             2    3      4    (5)  5/6
  * @param wsName :: [input] Name of workspace
  * @returns :: Struct containing dataset parameters
  */

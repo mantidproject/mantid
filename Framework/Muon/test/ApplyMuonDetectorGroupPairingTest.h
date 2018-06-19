@@ -38,21 +38,20 @@ struct yDataAsymmetry {
   yDataAsymmetry(const double amp, const double phi) : m_amp(amp), m_phi(phi){};
 
   double operator()(const double t, size_t spec) {
-    double e = exp(-t / tau);
+    double e = exp(-t / m_tau);
     double factor = (static_cast<double>(spec) + 1.0) * 0.5;
     double phase_offset = 4 * M_PI / 180;
     return (10. * factor *
-            (1.0 +
-             m_amp * cos(m_omega * t + m_phi +
-                         static_cast<double>(spec) * phase_offset)) *
+            (1.0 + m_amp * cos(m_omega * t + m_phi +
+                               static_cast<double>(spec) * phase_offset)) *
             e);
   }
 
 private:
-  double m_amp;         // Amplitude of the oscillations
-  double m_phi;         // Phase of the sinusoid
-  double m_omega = 5.0; // Frequency of the oscillations
-  double tau =
+  double m_amp;               // Amplitude of the oscillations
+  double m_phi;               // Phase of the sinusoid
+  const double m_omega = 5.0; // Frequency of the oscillations
+  const double m_tau =
       PhysicalConstants::MuonLifetime * 1e6; // Muon life time in microseconds
 };
 
@@ -420,7 +419,6 @@ public:
 
     // The error calculation as per Issue #5035
     TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.04212, 0.00001);
-    // TS_ASSERT_DELTA(wsOut->readE(0)[4], -0.00000, 0.00001);
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.06946, 0.00001);
   }
 
@@ -436,9 +434,11 @@ public:
     auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.250, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.650, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 1.150, 0.001);
+	// Account for the bin edges to point data conversion
+	double shift = 0.2 + 0.05;
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], ws->readX(0)[0] + shift, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], ws->readX(0)[4] + shift, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], ws->readX(0)[9] + shift, 0.001);
   }
 
   void test_detectorIDsNotInWorkspaceFails() {
@@ -538,7 +538,6 @@ public:
     TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.6350, 0.0001);
 
     TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0386, 0.0001);
-    // TS_ASSERT_DELTA(wsOut->readE(0)[4], -0.0000000, 0.0001);
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0668, 0.0001);
   }
 
