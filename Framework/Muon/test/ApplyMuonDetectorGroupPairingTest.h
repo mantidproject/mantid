@@ -254,7 +254,7 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.4692, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -1.0517, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 1.0000, 0.0001);
     TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.6119, 0.0001);
 
     // The error calculation as per Issue #5035
@@ -379,7 +379,7 @@ public:
 
     // Dead time applied before asymmetry
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.5181, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -1.0539, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 1.0000, 0.0001);
     TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.6350, 0.0001);
 
     TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0386, 0.0001);

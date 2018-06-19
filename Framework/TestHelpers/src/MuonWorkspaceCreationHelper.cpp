@@ -33,7 +33,8 @@ double yDataCounts2::operator()(const double, size_t) {
 
 /**
  * Create y-values representing muon data, each spectrum is offset by 4 degrees
- * in phase and has a different normalization.
+ * in phase and has a different normalization. Counts are capped at zero to
+ * prevent negative values.
  */
 yDataAsymmetry::yDataAsymmetry(const double amp, const double phi)
     : m_amp(amp), m_phi(phi){};
@@ -45,8 +46,10 @@ double yDataAsymmetry::operator()(const double t, size_t spec) {
   double e = exp(-t / tau);
   double factor = (static_cast<double>(spec) + 1.0) * 0.5;
   double phase_offset = 4 * M_PI / 180;
-  return (10. * factor *
-          (1.0 + m_amp * cos(m_omega * t + m_phi + spec * phase_offset)) * e);
+  return std::max(
+      0.0,
+      (10. * factor *
+       (1.0 + m_amp * cos(m_omega * t + m_phi + spec * phase_offset)) * e));
 }
 
 // Errors are fixed to 0.005
@@ -126,7 +129,7 @@ MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
   ws->mutableRun().addProperty("goodfrm", 10);
   // Add instrument and run number
   boost::shared_ptr<Geometry::Instrument> inst1 =
-	  boost::make_shared<Geometry::Instrument>();
+      boost::make_shared<Geometry::Instrument>();
   inst1->setName("EMU");
   ws->setInstrument(inst1);
   ws->mutableRun().addProperty("run_number", 12345);
@@ -268,8 +271,7 @@ createGroupingXMLSinglePair(const std::string &pairName,
  * @return ScopedFile.
  */
 ScopedFileHelper::ScopedFile
-createXMLwithPairsAndGroups(const int &nGroups,
-                            const int &nDetectorsPerGroup) {
+createXMLwithPairsAndGroups(const int &nGroups, const int &nDetectorsPerGroup) {
 
   API::Grouping grouping;
   std::string groupIDs;

@@ -124,8 +124,14 @@ public:
     TS_ASSERT(wsGroup->contains("EMU00012345; Group; group2; Counts; #1_Raw"));
     TS_ASSERT(wsGroup->contains("EMU00012345; Pair; pair1; Asym; #1"));
     TS_ASSERT(wsGroup->contains("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+    // Group workspace + analysed workspaces as above (11)
+	// "inputData" "inputGroup" from setup (2)
+    // "MuonGroupings" from load algorithm (1)
+	// "MuonAnalysisTFNormalizations" (1)
+	// "tmp_unNorm" (1)
+    auto names = AnalysisDataService::Instance().getObjectNames();
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().getObjectNames().size(),
-                     workspacesBeforeExec + 10 + 4);
+                     workspacesBeforeExec + 16);
   }
 
   void test_produces_workspaces_with_correct_entries() {
@@ -150,7 +156,7 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], 85.43223343, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.70842873, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.87394, 0.0001);
     TS_ASSERT_DELTA(wsOut->readY(0)[9], 25.57248768, 0.0001);
     // Sqrt(2) * 0.005.
     TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.007071, 0.00001);
@@ -173,11 +179,11 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.3928, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.5286, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.44885, 0.0001);
     TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.4804, 0.0001);
 
     TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.09699944, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.6524227, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.6155, 0.00001);
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.18874449, 0.00001);
   }
 
@@ -248,21 +254,23 @@ public:
         boost::dynamic_pointer_cast<ITableWorkspace>(
             AnalysisDataService::Instance().retrieve("MuonGroupings"));
 
-	// Col1 : Names, Col2 : Detector IDs
-	std::string name1 = wsGroupings->String(0, 0);
-	std::string name2 = wsGroupings->String(1, 0);
-	TS_ASSERT_EQUALS(name1, "group1");
-	TS_ASSERT_EQUALS(name2, "group2");
+    // Col1 : Names, Col2 : Detector IDs
+    std::string name1 = wsGroupings->String(0, 0);
+    std::string name2 = wsGroupings->String(1, 0);
+    TS_ASSERT_EQUALS(name1, "group1");
+    TS_ASSERT_EQUALS(name2, "group2");
 
-	std::vector<int> group1 = wsGroupings->cell<std::vector<int>>(0, 1);
-	std::stringstream group1String;
-	std::copy(group1.begin(), group1.end(), std::ostream_iterator<int>(group1String, ","));
-	TS_ASSERT_EQUALS(group1String.str(), "1,2,");
+    std::vector<int> group1 = wsGroupings->cell<std::vector<int>>(0, 1);
+    std::stringstream group1String;
+    std::copy(group1.begin(), group1.end(),
+              std::ostream_iterator<int>(group1String, ","));
+    TS_ASSERT_EQUALS(group1String.str(), "1,2,");
 
-	std::vector<int> group2 = wsGroupings->cell<std::vector<int>>(1, 1);
-	std::stringstream group2String;
-	std::copy(group2.begin(), group2.end(), std::ostream_iterator<int>(group2String, ","));
-	TS_ASSERT_EQUALS(group2String.str(), "3,4,");
+    std::vector<int> group2 = wsGroupings->cell<std::vector<int>>(1, 1);
+    std::stringstream group2String;
+    std::copy(group2.begin(), group2.end(),
+              std::ostream_iterator<int>(group2String, ","));
+    TS_ASSERT_EQUALS(group2String.str(), "3,4,");
   }
 
   void test_throws_if_group_name_not_valid() {
@@ -491,14 +499,14 @@ public:
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], 95.8873, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], 75.7566, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.71041, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.87585, 0.001);
 
     wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.41874, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.39421, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.52868, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.4491, 0.001);
   }
 };
 
