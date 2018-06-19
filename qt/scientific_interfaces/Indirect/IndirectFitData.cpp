@@ -107,7 +107,7 @@ struct CombineSpectra : boost::static_visitor<Spectra> {
 };
 
 struct GetSpectrum : boost::static_visitor<std::size_t> {
-  GetSpectrum(std::size_t index) : m_index(index) {}
+  explicit GetSpectrum(std::size_t index) : m_index(index) {}
 
   std::size_t
   operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
