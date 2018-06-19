@@ -1631,12 +1631,10 @@ private:
   bool m_enableQtiPlotFitting;
 
   /// Set to true when the main window is shutting down
-  bool m_shuttingDown{ false };
+  bool m_shuttingDown{false};
 
   /// Owns a thread which automatically triggers project recovery for the GUI
   MantidQt::API::ProjectRecoveryThread m_projectRecoveryThread;
-
-
 
 #ifdef SHARED_MENUBAR
   QMenuBar *m_sharedMenuBar; ///< Pointer to the shared menubar

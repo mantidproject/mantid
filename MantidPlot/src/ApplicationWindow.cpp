@@ -247,22 +247,21 @@ void file_uncompress(const char *file);
 }
 
 ApplicationWindow::ApplicationWindow(bool factorySettings)
-// Delegate with an empty string list for the arguments
-	: ApplicationWindow(factorySettings, QStringList{}) {}
+    // Delegate with an empty string list for the arguments
+    : ApplicationWindow(factorySettings, QStringList{}) {}
 
 ApplicationWindow::ApplicationWindow(bool factorySettings,
-	const QStringList &args)
-	: QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),
-	blockWindowActivation(false), m_enableQtiPlotFitting(false),
-	m_exitCode(0), 
+                                     const QStringList &args)
+    : QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),
+      blockWindowActivation(false), m_enableQtiPlotFitting(false),
+      m_exitCode(0),
 #ifdef Q_OS_MAC // Mac
       settings(QSettings::IniFormat, QSettings::UserScope, "Mantid",
                "MantidPlot"),
 #else
       settings("Mantid", "MantidPlot"),
 #endif
-	m_projectRecoveryThread(this)
-{
+      m_projectRecoveryThread(this) {
   init(factorySettings, args);
 }
 
@@ -12771,7 +12770,6 @@ void ApplicationWindow::createActions() {
       QIcon(":/waterfall_plot.png"), tr("&Waterfall Plot"), this);
   connect(actionWaterfallPlot, SIGNAL(triggered()), this,
           SLOT(waterfallPlot()));
-
 }
 
 void ApplicationWindow::translateActionsStrings() {
@@ -16723,7 +16721,7 @@ bool ApplicationWindow::isOfType(const QObject *obj,
 }
 
 void ApplicationWindow::saveProjectRecovery(const std::string destination) {
-	const bool isRecovery = true;
-	ProjectSerialiser projectWriter(this, isRecovery);
-	projectWriter.save(QString::fromStdString(destination));
+  const bool isRecovery = true;
+  ProjectSerialiser projectWriter(this, isRecovery);
+  projectWriter.save(QString::fromStdString(destination));
 }
