@@ -2,8 +2,8 @@
 #define MANTID_CUSTOMINTERFACES_REDUCTIONJOBSMERGETEST_H_
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
-#include "../ISISReflectometry/Reduction/ReductionJobs.h"
-#include "../ISISReflectometry/Reduction/WorkspaceNamesFactory.h"
+#include "../../../ISISReflectometry/Reduction/ReductionJobs.h"
+#include "../../../ISISReflectometry/Reduction/WorkspaceNamesFactory.h"
 
 using testing::_;
 using testing::NiceMock;
@@ -114,9 +114,9 @@ public:
   void testMergeJobsIntoExistingWhenNameClashButRowsWithDifferentAngles() {
     MockModificationListener<UnslicedGroup> listener;
     auto target = UnslicedReductionJobs();
-    target.appendGroup(UnslicedGroup("A", {rowWithAngle(0.1)}, ""));
+    target.appendGroup(UnslicedGroup("A", {rowWithAngle(0.1)}));
     auto addition = UnslicedReductionJobs();
-    addition.appendGroup(UnslicedGroup("A", {rowWithAngle(0.2)}, ""));
+    addition.appendGroup(UnslicedGroup("A", {rowWithAngle(0.2)}));
 
     mergeJobsInto(target, addition, m_thetaTolerance, m_nameFactory, listener);
 
@@ -128,9 +128,9 @@ public:
   void testCallsAppendWhenAddingRow() {
     MockModificationListener<UnslicedGroup> listener;
     auto target = UnslicedReductionJobs();
-    target.appendGroup(UnslicedGroup("A", {rowWithAngle(0.1)}, ""));
+    target.appendGroup(UnslicedGroup("A", {rowWithAngle(0.1)}));
     auto addition = UnslicedReductionJobs();
-    addition.appendGroup(UnslicedGroup("A", {rowWithAngle(0.2)}, ""));
+    addition.appendGroup(UnslicedGroup("A", {rowWithAngle(0.2)}));
 
     EXPECT_CALL(listener, rowAppended(0, 1, _)).Times(1);
 
@@ -144,10 +144,9 @@ public:
   void testMergeJobsIntoExistingWhenNameClashAndRowsHaveSameAngles() {
     MockModificationListener<UnslicedGroup> listener;
     auto target = UnslicedReductionJobs();
-    target.appendGroup(UnslicedGroup("A", {rowWithNameAndAngle("C", 0.1)}, ""));
+    target.appendGroup(UnslicedGroup("A", {rowWithNameAndAngle("C", 0.1)}));
     auto addition = UnslicedReductionJobs();
-    addition.appendGroup(
-        UnslicedGroup("A", {rowWithNameAndAngle("D", 0.1)}, ""));
+    addition.appendGroup(UnslicedGroup("A", {rowWithNameAndAngle("D", 0.1)}));
 
     mergeJobsInto(target, addition, m_thetaTolerance, m_nameFactory, listener);
 
@@ -161,10 +160,9 @@ public:
   void testCallsModifiedWhenMergingRow() {
     MockModificationListener<UnslicedGroup> listener;
     auto target = UnslicedReductionJobs();
-    target.appendGroup(UnslicedGroup("A", {rowWithNameAndAngle("C", 0.1)}, ""));
+    target.appendGroup(UnslicedGroup("A", {rowWithNameAndAngle("C", 0.1)}));
     auto addition = UnslicedReductionJobs();
-    addition.appendGroup(
-        UnslicedGroup("A", {rowWithNameAndAngle("D", 0.1)}, ""));
+    addition.appendGroup(UnslicedGroup("A", {rowWithNameAndAngle("D", 0.1)}));
 
     EXPECT_CALL(listener, rowModified(0, 0, _));
     mergeJobsInto(target, addition, m_thetaTolerance, m_nameFactory, listener);
@@ -218,13 +216,12 @@ public:
   void testMergeIntoSelfResultsInNoChange() {
     MockModificationListener<UnslicedGroup> listener;
     auto target = UnslicedReductionJobs();
-    target.appendGroup(UnslicedGroup(
-        "S1 SI/ D20 ",
-        {rowWithNameAndAngle("47450", 0.7), rowWithNameAndAngle("47451", 2.3)},
-        ""));
+    target.appendGroup(
+        UnslicedGroup("S1 SI/ D20 ", {rowWithNameAndAngle("47450", 0.7),
+                                      rowWithNameAndAngle("47451", 2.3)}));
 
     target.appendGroup(UnslicedGroup(
-        "S2 SI/ D20 ", {rowWithNamesAndAngle({"47450", "47453"}, 0.7)}, ""));
+        "S2 SI/ D20 ", {rowWithNamesAndAngle({"47450", "47453"}, 0.7)}));
 
     auto addition = target;
     mergeJobsInto(target, addition, m_thetaTolerance, m_nameFactory, listener);

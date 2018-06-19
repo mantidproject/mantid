@@ -29,7 +29,7 @@
 #include <iterator>
 
 #include "Reduction/WorkspaceNamesFactory.h"
-#include "ValidateRow.h"
+#include "Reduction/ValidateRow.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -468,7 +468,7 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
           validateRowFromRunAndTheta(jobs, m_workspaceNamesFactory,
                                      result.runNumber, resultMetadata.theta);
       if (row.is_initialized()) {
-        mergeRowIntoGroup(jobs, row.get(), 0.001, resultMetadata.groupName,
+        mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance, resultMetadata.groupName,
                           m_workspaceNamesFactory);
       } else {
         m_searchModel->setError(rowIndex,

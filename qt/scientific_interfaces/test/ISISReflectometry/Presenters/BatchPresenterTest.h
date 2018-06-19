@@ -1,7 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLBATCHPRESENTERTEST_H_
 #define MANTID_CUSTOMINTERFACES_REFLBATCHPRESENTERTEST_H_
 
-#include "../ISISReflectometry/Presenters/BatchPresenter.h"
+#include "../../../ISISReflectometry/Presenters/BatchPresenter.h"
+#include "../../../ISISReflectometry/Reduction/Slicing.h"
 #include "MockBatchView.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 
@@ -47,13 +48,25 @@ public:
         MantidQt::MantidWidgets::Batch::RowPath({args...}));
   }
 
+  BatchPresenter makePresenter(IBatchView &view) {
+    static auto slicing = Slicing();
+    return BatchPresenter(&view, {}, 0.01, WorkspaceNamesFactory(slicing),
+                          UnslicedReductionJobs());
+  }
+
+  BatchPresenter makePresenter(IBatchView &view, Jobs jobs) {
+    static auto slicing = Slicing();
+    return BatchPresenter(&view, {}, 0.01, WorkspaceNamesFactory(slicing),
+                          std::move(jobs));
+  }
+
   void testExpandsAllGroupsWhenRequested() {
     MantidQt::MantidWidgets::Batch::MockJobTreeView jobs;
     MockBatchView view;
     jobsViewIs(jobs, view);
     EXPECT_CALL(jobs, expandAll());
 
-    BatchPresenter presenter(&view, {}, 0.01, UnslicedReductionJobs());
+    auto presenter = makePresenter(view);
     presenter.notifyExpandAllRequested();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -66,7 +79,7 @@ public:
     jobsViewIs(jobs, view);
     EXPECT_CALL(jobs, collapseAll());
 
-    BatchPresenter presenter(&view, {}, 0.01, UnslicedReductionJobs());
+    auto presenter = makePresenter(view);
     presenter.notifyCollapseAllRequested();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -90,7 +103,7 @@ public:
     EXPECT_CALL(jobs, insertChildRowOf(location(), 1))
         .WillOnce(Return(location(1)));
 
-    BatchPresenter presenter(&view, {}, 0.01, std::move(reductionJobs));
+    auto presenter = makePresenter(view);
     presenter.notifyInsertGroupRequested();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -108,7 +121,7 @@ public:
     ON_CALL(jobs, insertChildRowOf(location(), 1))
         .WillByDefault(Return(location(1)));
 
-    BatchPresenter presenter(&view, {}, 0.01, std::move(reductionJobs));
+    auto presenter = makePresenter(view, std::move(reductionJobs));
     presenter.notifyInsertGroupRequested();
 
     auto &groups = unslicedJobsFromPresenter(presenter).groups();
@@ -133,7 +146,7 @@ public:
     EXPECT_CALL(jobs, appendChildRowOf(location()))
         .WillOnce(Return(location(2)));
 
-    BatchPresenter presenter(&view, {}, 0.01, std::move(reductionJobs));
+    auto presenter = makePresenter(view, std::move(reductionJobs));
     presenter.notifyInsertGroupRequested();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -151,7 +164,7 @@ public:
     ON_CALL(jobs, insertChildRowOf(location(), 1))
         .WillByDefault(Return(location(1)));
 
-    BatchPresenter presenter(&view, {}, 0.01, std::move(reductionJobs));
+    auto presenter = makePresenter(view, std::move(reductionJobs));
     presenter.notifyInsertGroupRequested();
 
     auto &groups = unslicedJobsFromPresenter(presenter).groups();
@@ -176,7 +189,7 @@ public:
     ON_CALL(jobs, insertChildRowOf(location(), 2))
         .WillByDefault(Return(location(2)));
 
-    BatchPresenter presenter(&view, {}, 0.01, std::move(reductionJobs));
+    auto presenter = makePresenter(view, std::move(reductionJobs));
     presenter.notifyInsertGroupRequested();
 
     auto &groups = unslicedJobsFromPresenter(presenter).groups();

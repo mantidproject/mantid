@@ -5,12 +5,12 @@ set ( SRC_FILES
     Reduction/Row.cpp
     Reduction/SlicedReductionWorkspaces.cpp
     Reduction/ReductionJobs.cpp
+    Reduction/ValidateRow.cpp
+    Presenters/BatchPresenter.cpp
+    Presenters/BatchPresenterFactory.cpp
     Presenters/RegexRowFilter.cpp
     Presenters/RowLocation.cpp
     Views/BatchView.cpp
-    ValidateRow.cpp
-    Presenters/BatchPresenter.cpp
-    Presenters/BatchPresenterFactory.cpp
     MeasurementItem.cpp
     InstrumentOptionDefaults.cpp
     InstrumentParameters.cpp

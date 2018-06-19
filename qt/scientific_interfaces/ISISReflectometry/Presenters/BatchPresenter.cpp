@@ -3,7 +3,7 @@
 #include "MantidQtWidgets/Common/Batch/RowPredicate.h"
 #include "Reduction/Group.h"
 #include "Reduction/Slicing.h"
-#include "ValidateRow.h"
+#include "Reduction/ValidateRow.h"
 #include "Map.h"
 #include "RegexRowFilter.h"
 #include "RowLocation.h"

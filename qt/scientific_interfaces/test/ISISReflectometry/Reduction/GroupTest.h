@@ -1,8 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_GROUPTEST_H_
 #define MANTID_CUSTOMINTERFACES_GROUPTEST_H_
 #include <cxxtest/TestSuite.h>
-#include "../ISISReflectometry/Reduction/Group.h"
-#include "../ISISReflectometry/Reduction/ReductionWorkspaces.h"
+#include "../../../ISISReflectometry/Reduction/Group.h"
+#include "../../../ISISReflectometry/Reduction/ReductionWorkspaces.h"
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -18,12 +18,12 @@ public:
   }
 
   void testConstructorSetsGroupName() {
-    auto slicedGroup = UnslicedGroup("Group1", {}, "Postprocessed Ws Name");
+    auto slicedGroup = UnslicedGroup("Group1", {});
     TS_ASSERT_EQUALS("Group1", slicedGroup.name());
   }
 
   void testCanAddEmptyRowToGroup() {
-    auto slicedGroup = UnslicedGroup("Group1", {}, "Postprocessed Ws Name");
+    auto slicedGroup = UnslicedGroup("Group1", {});
     auto run = UnslicedRow({"000000", "000002"}, 0.02, {"", ""},
                            RangeInQ(0, 1, 10), 1.2, {}, workspaceNames());
     slicedGroup.appendRow(run);

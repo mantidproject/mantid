@@ -55,12 +55,13 @@ set ( TEST_FILES
   test/ReflSaveTabPresenterTest.h
   test/ReflSettingsPresenterTest.h
   test/ReflSettingsTabPresenterTest.h
-  test/ReflBatchPresenterTest.h
   test/RunMapTest.h
   test/UserInputValidatorTest.h
-  test/GroupTest.h
-  test/ValidateRowTest.h
-  test/Reduction/ReductionJobsMergeTest.h
+
+  test/ISISReflectometry/Reduction/GroupTest.h
+  test/ISISReflectometry/Reduction/ValidateRowTest.h
+  test/ISISReflectometry/Reduction/ReductionJobsMergeTest.h
+  test/ISISReflectometry/Presenters/BatchPresenterTest.h
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest

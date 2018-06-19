@@ -40,7 +40,9 @@ public:
         m_defaultInstrument(0) {}
 
   BatchPresenterFactory batchPresenterFactory() const {
-    return BatchPresenterFactory(m_instruments, 0.01);
+    static auto slicing = Slicing();
+    return BatchPresenterFactory(m_instruments, 0.01,
+                                 WorkspaceNamesFactory(slicing));
   }
 
   void test_constructor_sets_possible_transfer_methods() {
@@ -462,10 +464,12 @@ private:
     std::vector<DataProcessorPresenter *> tablePresenters;
     for (auto &tablePresenter : m_tablePresenters)
       tablePresenters.push_back(tablePresenter.get());
+
+    static auto slicing = Slicing();
     // Create the presenter
     ReflRunsTabPresenterFriend presenter(
         m_mockRunsTabView.get(), m_mockProgress.get(), batchPresenterFactory(),
-        0.01, m_instruments, 0);
+        WorkspaceNamesFactory(slicing), 0.01, m_instruments, 0);
     presenter.acceptMainPresenter(m_mockMainPresenter.get());
     return presenter;
   }
