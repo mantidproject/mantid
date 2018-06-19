@@ -302,11 +302,6 @@ size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
   return m_fitPropertyBrowser->numberOfCustomFunctions(functionName);
 }
 
-UserInputValidator &
-IndirectFitAnalysisTab::validateTab(UserInputValidator &validator) {
-  return m_spectrumPresenter->validate(validator);
-}
-
 void IndirectFitAnalysisTab::setModelFitFunction() {
   try {
     m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
@@ -781,7 +776,7 @@ void IndirectFitAnalysisTab::singleFit() {
 
 void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
                                        std::size_t spectrum) {
-  if (validateTab())
+  if (validate())
     runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
 }
 
@@ -790,7 +785,7 @@ void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
  * tab.
  */
 void IndirectFitAnalysisTab::executeFit() {
-  if (validateTab())
+  if (validate())
     runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
 }
 

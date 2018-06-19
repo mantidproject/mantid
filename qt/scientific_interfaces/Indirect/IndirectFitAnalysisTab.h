@@ -132,8 +132,6 @@ protected:
   virtual void setPlotResultEnabled(bool enabled) = 0;
   virtual void setSaveResultEnabled(bool enabled) = 0;
 
-  UserInputValidator &validateTab(UserInputValidator &validator);
-
 signals:
   void functionChanged();
   void parameterChanged(const Mantid::API::IFunction *);
