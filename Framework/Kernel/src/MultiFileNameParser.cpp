@@ -41,7 +41,7 @@ const std::string ADD_RANGE = "(" + SINGLE + MINUS + SINGLE + ")";
 const std::string ADD_STEP_RANGE =
     "(" + SINGLE + MINUS + SINGLE + COLON + SINGLE + ")";
 const std::string SINGLE_OR_STEP_OR_ADD_RANGE =
-    "(" + SINGLE + "|" + ADD_STEP_RANGE + "|" + ADD_RANGE + ")";
+    "(" + ADD_STEP_RANGE + "|" + ADD_RANGE + "|" + SINGLE + ")";
 const std::string ADD_LIST = "(" + SINGLE_OR_STEP_OR_ADD_RANGE + "(" + PLUS +
                              SINGLE_OR_STEP_OR_ADD_RANGE + ")+" + ")";
 
