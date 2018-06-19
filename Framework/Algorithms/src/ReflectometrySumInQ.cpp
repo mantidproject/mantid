@@ -368,7 +368,7 @@ ReflectometrySumInQ::MinMax ReflectometrySumInQ::findWavelengthMinMax(
   auto r = projectedLambdaRange(lambdaRange, twoThetaMinRange, refAngles);
   wavelengthRange.max = r.max;
   const auto twoThetaMaxRange = twoThetaWidth(twoThetaMax.first, spectrumInfo);
-  const auto maxThetaEdges = detectorWS.x(twoThetaMax.first);
+  const auto maxThetaEdges = detectorWS.binEdges(twoThetaMax.first);
   bLambda = (maxThetaEdges[maxThetaEdges.size() - 1] - maxThetaEdges[0]) /
             static_cast<int>(maxThetaEdges.size());
   lambdaRange.min = lambdaMin - bLambda / 2.;
