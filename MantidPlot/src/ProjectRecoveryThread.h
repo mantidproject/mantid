@@ -2,8 +2,10 @@
 #define PROJECT_RECOVERY_THREAD_H_
 
 #include <chrono>
-#include <thread>
+#include <condition_variable>
+#include <mutex>
 #include <string>
+#include <thread>
 
 // Forward declarations
 class ApplicationWindow;
@@ -39,25 +41,40 @@ namespace MantidQt {
 namespace API {
 class ProjectRecoveryThread {
 public:
+	/// Constructor
   explicit ProjectRecoveryThread(ApplicationWindow *windowHandle);
+  /// Destructor the ensures background thread stops
   ~ProjectRecoveryThread();
 
+  /// Starts the background thread
   void startProjectSaving();
+  /// Stops the background thread
   void stopProjectSaving();
 
-
 private:
-	std::thread createBackgroundThread();
-	void projectSavingThread(bool &runThread);
-	void saveOpenWindows(std::string projectFilepath);
-	void saveWsHistories(std::string historyFilePath);
-	void loadOpenWindows(std::string projectFilePath);
-
-  /// Flag to toggle the threads operation.
-  bool m_runProjectSaving; // Does not need to be atomic, as we only read in worker
-
+	/// Captures the current object in the background thread
+  std::thread createBackgroundThread();
+  
+  /// Loads a project recovery file back into Mantid
+  void loadOpenWindows(const std::string &projectFolder);
+  /// Saves a project recovery file in Mantid
+  void saveOpenWindows(const std::string &projectDestFolder);
+  /// Saves the current workspace's histories from Mantid
+  void saveWsHistories(const std::string &projectDestFile);
+  /// Main body of saving thread
+  void projectSavingThread();
+	
+  /// Background thread which runs the saving body
   std::thread m_backgroundSavingThread;
 
+  /// Mutex for conditional variable and background thread flag
+  std::mutex m_notifierMutex;
+  /// Flag to indicate to the thread to exit
+  bool m_stopBackgroundThread;
+  /// Atomic to detect when the thread should fire or exit
+  std::condition_variable m_threadNotifier;
+
+  /// Pointer to main GUI window 
   ApplicationWindow *m_windowPtr;
 };
 

@@ -1,91 +1,132 @@
 #include "ProjectRecoveryThread.h"
 
 #include "ApplicationWindow.h"
-#include "globals.h"
 #include "Folder.h"
 #include "ProjectSerialiser.h"
+#include "globals.h"
 
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/Logger.h"
+
+#include "Poco/Path.h"
+#include "qmetaobject.h"
 
 #include <chrono>
+#include <condition_variable>
+#include <mutex>
 #include <string>
 #include <thread>
 
 namespace {
-	const std::chrono::seconds TIME_BETWEEN_SAVING = std::chrono::seconds(30);
+const std::chrono::seconds TIME_BETWEEN_SAVING = std::chrono::seconds(30);
 
-	std::string getOutputPath() {
-		std::string homePath = Mantid::API::FileProperty::getHomePath();
-		std::string filename = "test";
-		std::string fullBasePath = homePath + '/' + homePath;
-		return fullBasePath;
-	}
+std::string getOutputPath() {
+  static bool isInitalised = false;
+  static std::string recoverFolder;
+
+  if (!isInitalised) {
+    recoverFolder = Mantid::Kernel::ConfigService::Instance().getAppDataDir();
+    recoverFolder.append("/recovery");
+    isInitalised = true;
+  }
+
+  return recoverFolder;
 }
+
+std::string getOutputProjectName() { return "recovery.project"; }
+
+Mantid::Kernel::Logger g_log("Project Recovery Thread");
+} // namespace
 
 namespace MantidQt {
 namespace API {
 
 ProjectRecoveryThread::ProjectRecoveryThread(ApplicationWindow *windowHandle)
-    : m_windowPtr(windowHandle), m_backgroundSavingThread(), m_runProjectSaving(true) {
-	startProjectSaving();
+    : m_windowPtr(windowHandle), m_backgroundSavingThread(),
+      m_stopBackgroundThread(true) {
+  startProjectSaving();
 }
 
-ProjectRecoveryThread::~ProjectRecoveryThread() {
-	stopProjectSaving();
-}
+ProjectRecoveryThread::~ProjectRecoveryThread() { stopProjectSaving(); }
 
 std::thread ProjectRecoveryThread::createBackgroundThread() {
-	return std::thread([this] {projectSavingThread(m_runProjectSaving); });
+  // Using a lambda helps the compiler deduce the this pointer
+  // otherwise the resolution is ambiguous
+  return std::thread([this] { projectSavingThread(); });
 }
 
 void ProjectRecoveryThread::startProjectSaving() {
-	m_runProjectSaving = true;
+  // Close the existing thread first
+  stopProjectSaving();
 
-	// Close the existing thread first
-	if (m_backgroundSavingThread.joinable()) {
-		m_backgroundSavingThread.join();
-	}
+  // Spin up a new thread
+  {
+    std::lock_guard<std::mutex> lock(m_notifierMutex);
+    m_stopBackgroundThread = false;
+  }
 
-	// Attempt to spin up a new thread
-	m_backgroundSavingThread = createBackgroundThread();
+  m_backgroundSavingThread = createBackgroundThread();
 }
 
 void ProjectRecoveryThread::stopProjectSaving() {
-	m_runProjectSaving = false;
+  {
+    std::lock_guard<std::mutex> lock(m_notifierMutex);
+    m_stopBackgroundThread = true;
+    m_threadNotifier.notify_all();
+  }
 
-	if (m_backgroundSavingThread.joinable()) {
-		m_backgroundSavingThread.join();
-	}
+  if (m_backgroundSavingThread.joinable()) {
+    m_backgroundSavingThread.join();
+  }
 }
 
+void ProjectRecoveryThread::projectSavingThread() {
+  while (!m_stopBackgroundThread) {
+    std::unique_lock<std::mutex> lock(m_notifierMutex);
+    // The condition variable releases the lock until the var changes
+    if (m_threadNotifier.wait_for(lock, TIME_BETWEEN_SAVING, [this]() {
+          return m_stopBackgroundThread;
+        })) {
+      // Exit thread
+      g_log.information("Project Recovery: Stopping background saving thread");
+      return;
+    }
 
+    g_log.information("Project Recovery: Saving started");
+    // "Timeout" - Save out again
+    // Generate output paths
+    const auto basePath = getOutputPath();
+    auto projectFile = Poco::Path(basePath).append(getOutputProjectName());
 
-void ProjectRecoveryThread::projectSavingThread(bool &runThread) {
-	while (runThread) {
-		// Generate output paths
-		const auto basePath = getOutputPath();
-		const std::string historyDest = basePath + ".history";
-		const std::string projectDest = basePath + ".project";
-
-		// Trigger main saving routines for the ADS and GUI
-		saveWsHistories(historyDest);
-		//saveOpenWindows(projectDest);
-		std::this_thread::sleep_for(TIME_BETWEEN_SAVING);
-	}
+	// Python's OS module cannot handle Poco's parsed paths
+	// so use std::string instead and let OS parse the '/' char on Win
+    saveWsHistories(basePath);
+    saveOpenWindows(projectFile.toString());
+    g_log.information("Project Recovery: Saving finished");
+  }
 }
 
-void ProjectRecoveryThread::saveOpenWindows(std::string projectFilepath) {
-  const bool isRecovery = true;
-  ProjectSerialiser projectWriter(m_windowPtr, isRecovery);
-  projectWriter.save(QString::fromStdString(projectFilepath));
+void ProjectRecoveryThread::saveOpenWindows(
+    const std::string &projectDestFile) {
+  if (!QMetaObject::invokeMethod(m_windowPtr, "saveProjectRecovery",
+                                 Qt::QueuedConnection,
+                                 Q_ARG(const std::string, projectDestFile))) {
+    g_log.warning(
+        "Project Recovery: Failed to save project windows - Qt binding failed");
+  }
 }
 
-void ProjectRecoveryThread::saveWsHistories(std::string historyFilePath) {
-	// TODO
-	int foo = 2;
+void ProjectRecoveryThread::saveWsHistories(
+    const std::string &historyDestFolder) {
+  QString projectSavingCode =
+      "from mantid.simpleapi import write_all_workspaces_histories\n"
+      "write_all_workspaces_histories(\"" +
+      QString::fromStdString(historyDestFolder) + "\")\n";
+
+  m_windowPtr->runPythonScript(projectSavingCode);
 }
 
-void ProjectRecoveryThread::loadOpenWindows(std::string projectFilePath) {
+void ProjectRecoveryThread::loadOpenWindows(const std::string &projectFolder) {
   const bool isRecovery = true;
   ProjectSerialiser projectWriter(m_windowPtr, isRecovery);
 
@@ -93,7 +134,7 @@ void ProjectRecoveryThread::loadOpenWindows(std::string projectFilePath) {
   // across major versions is not an intended use case
   const int fileVersion = 100 * maj_version + 10 * min_version + patch_version;
 
-  projectWriter.load(projectFilePath, fileVersion);
+  projectWriter.load(projectFolder, fileVersion);
 }
 
 } // namespace API
