@@ -2036,6 +2036,59 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName) {
 }
 
 /**
+* Enable PP tool for the plot of the given WS. Does not update data selector
+* @param wsName Name of the WS which plot PP tool will be attached to.
+* @param filePath :: [input] Optional path to file that is actually used. This
+* is for "load current run" where the data file has a temporary name like
+* MUSRauto_E.tmp
+*/
+void MuonAnalysis::selectMultiPeakNoUpdate(const QString &wsName,
+	const boost::optional<QString> &filePath) {
+	disableAllTools();
+	if (!plotExists(wsName)) {
+		plotSpectrum(wsName);
+		setCurrentDataName(wsName);
+	}
+
+	if (wsName != m_fitDataPresenter->getAssignedFirstRun()) {
+		// Set the available groups/pairs and periods
+		const Grouping groups = m_groupingHelper.parseGroupingTable();
+		QStringList groupsAndPairs;
+		groupsAndPairs.reserve(
+			static_cast<int>(groups.groupNames.size() + groups.pairNames.size()));
+		std::transform(groups.groupNames.begin(), groups.groupNames.end(),
+			std::back_inserter(groupsAndPairs), &QString::fromStdString);
+		std::transform(groups.pairNames.begin(), groups.pairNames.end(),
+			std::back_inserter(groupsAndPairs), &QString::fromStdString);
+		setGroupsAndPairs();
+
+		// Set the selected run, group/pair and period
+		//m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
+		//setChosenGroupAndPeriods(wsName);
+	}
+
+	QString code;
+
+	code += "g = graph('" + wsName + "-1')\n"
+		"if g != None:\n"
+		"  g.show()\n"
+		"  g.setFocus()\n"
+		"  selectMultiPeak(g)\n";
+
+	runPythonCode(code);
+}
+
+/**
+* Pass through to selectMultiPeak(wsName, filePath) where filePath is set
+* to blank. Enables connection as a slot without Qt understanding. No update
+* boost::optional.
+* @param wsName Name of the selected workspace
+*/
+void MuonAnalysis::selectMultiPeakNoUpdate(const QString &wsName) {
+	selectMultiPeakNoUpdate(wsName, boost::optional<QString>());
+}
+
+/**
  * Disable tools for all the graphs within MantidPlot.
  */
 void MuonAnalysis::disableAllTools() { runPythonCode("disableTools()"); }
@@ -2620,6 +2673,9 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     disconnect(m_uiForm.fitBrowser,
                SIGNAL(workspaceNameChanged(const QString &)), this,
                SLOT(selectMultiPeak(const QString &)));
+	disconnect(m_uiForm.fitBrowser,
+		SIGNAL(TFPlot(const QString &)), this,
+		SLOT(selectMultiPeakNoUpdate(const QString &)));
   }
 
   if (newTab == m_uiForm.DataAnalysis) // Entering DA tab
@@ -2657,7 +2713,8 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     // to it
     connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString &)),
             this, SLOT(selectMultiPeak(const QString &)), Qt::QueuedConnection);
-
+	connect(m_uiForm.fitBrowser, SIGNAL(TFPlot(const QString &)),
+		this, SLOT(selectMultiPeakNoUpdate(const QString &)), Qt::QueuedConnection);
     // repeat setting the fitting ranges as the above code can set them to an
     // unwanted default value
     setFittingRanges(xmin, xmax);

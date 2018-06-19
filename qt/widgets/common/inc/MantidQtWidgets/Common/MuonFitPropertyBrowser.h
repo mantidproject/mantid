@@ -155,6 +155,7 @@ signals:
   void reselctGroupClicked(bool enabled);
   /// Emitted when fit is about to be run
   void preFitChecksRequested(bool sequential) override;
+  void TFPlot(QString wsName);
 
 protected:
   void showEvent(QShowEvent *e) override;
@@ -200,7 +201,8 @@ private:
   void addPeriodCheckbox(const QString &name);
   void updatePeriods(const int j);
   bool isPeriodValid(const QString &name);
-
+  std::string TFExtension() const;
+  void updateTFPlot();
   /// Splitter for additional widgets and splitter between this and browser
   QSplitter *m_widgetSplitter, *m_mainSplitter;
   /// Names of workspaces to fit

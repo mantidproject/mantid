@@ -450,7 +450,9 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
         m_boolManager->setValue(iter.value(), selectedGroup == iter.key());
       }
     }
-
+	//update plot for TF Asymm mode
+	updateTFPlot();
+	
   } else {
     FitPropertyBrowser::enumChanged(prop);
   }
@@ -736,6 +738,7 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
       }
       for (int i = 1; i < nWorkspaces; i++) {
         std::string suffix = boost::lexical_cast<std::string>(i);
+		
         alg->setPropertyValue("InputWorkspace_" + suffix, m_workspacesToFit[i]);
         alg->setProperty("WorkspaceIndex_" + suffix, workspaceIndex());
         alg->setProperty("StartX_" + suffix, startX());
@@ -988,10 +991,15 @@ void MuonFitPropertyBrowser::runFit() {
       alg->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(
                                        m_compositeFunction->getFunction(0)));
     }
-    if (rawData())
-      alg->setPropertyValue("InputWorkspace", wsName + "_Raw");
-    else
-      alg->setPropertyValue("InputWorkspace", wsName);
+	std::string tmpWSName = wsName;
+	if (rawData()) {
+		tmpWSName += "_Raw";
+	}
+	if (m_boolManager->value(m_TFAsymmMode) && tmpWSName.find("_unNorm")) {
+		tmpWSName += TFExtension();
+	}
+
+      alg->setPropertyValue("InputWorkspace", tmpWSName);
     alg->setProperty("WorkspaceIndex", workspaceIndex());
     alg->setProperty("StartX", startX());
     alg->setProperty("EndX", endX());
@@ -1001,10 +1009,12 @@ void MuonFitPropertyBrowser::runFit() {
     // If we are doing a simultaneous fit, set this up here
     const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
     if (nWorkspaces > 1) {
-      alg->setPropertyValue("InputWorkspace", m_workspacesToFit[0]);
+	  std::string extension = TFExtension();
+
+      alg->setPropertyValue("InputWorkspace", m_workspacesToFit[0]+extension);
       for (int i = 1; i < nWorkspaces; i++) {
         std::string suffix = boost::lexical_cast<std::string>(i);
-        alg->setPropertyValue("InputWorkspace_" + suffix, m_workspacesToFit[i]);
+        alg->setPropertyValue("InputWorkspace_" + suffix, m_workspacesToFit[i]+extension);
         alg->setProperty("WorkspaceIndex_" + suffix, workspaceIndex());
         alg->setProperty("StartX_" + suffix, startX());
         alg->setProperty("EndX_" + suffix, endX());
@@ -1020,6 +1030,12 @@ void MuonFitPropertyBrowser::runFit() {
     QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
     QMessageBox::critical(this, "Mantid - Error", msg);
   }
+}
+
+std::string MuonFitPropertyBrowser :: TFExtension() const{
+	const std::string UNNORM = "_unNorm";
+	return (m_boolManager->value(m_TFAsymmMode)) ? UNNORM : "";
+
 }
 
 /**
@@ -1120,6 +1136,7 @@ void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
       f0Row << "f0=" + fitAlg->getPropertyValue("InputWorkspace") << 0.0 << 0.0;
       for (int i = 1; i < nWorkspaces; i++) {
         const std::string suffix = boost::lexical_cast<std::string>(i);
+
         const auto wsName =
             fitAlg->getPropertyValue("InputWorkspace_" + suffix);
         Mantid::API::TableRow row = paramTable->appendRow();
@@ -1194,6 +1211,7 @@ std::string MuonFitPropertyBrowser::outputName() const {
     return SIMULTANEOUS_PREFIX + m_simultaneousLabel;
   } else {
     // use parent class behaviour
+
     return FitPropertyBrowser::outputName();
   }
 }
@@ -1334,6 +1352,9 @@ void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
 		  FitPropertyBrowser::addFunction(func->asString());
 	  }
 		  
+	  updateTFPlot();
+	  //m_enumManager->setValue(m_workspace,j);
+
   }
   // Show or hide the TFAsymmetry fit
   if (enabled) {
@@ -1349,6 +1370,21 @@ void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
 
 
 }
+
+/**
+* Makes sure we have the TF plot in TFAsymm mode
+*/
+void MuonFitPropertyBrowser::updateTFPlot(){
+	//update plot
+	int j = m_enumManager->value(m_workspace);
+	std::string option = m_workspaceNames[j].toStdString();
+	if (m_boolManager->value(m_TFAsymmMode) && option.find("unNorm")==std::string::npos) {
+		option += TFExtension();
+	}
+	// update plot
+	emit TFPlot(QString::fromStdString(option));
+}
+
 /**
  * Adds an extra widget in between the fit buttons and the browser
  * @param widget :: [input] Pointer to widget to add
