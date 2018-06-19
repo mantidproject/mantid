@@ -193,7 +193,7 @@ QString convertMapToString(const std::map<QString, QString> &optionsMap) {
 
 std::string optionsToString(std::map<std::string, std::string> const &options) {
   if (!options.empty()) {
-    auto resultStream = std::ostringstream();
+    std::ostringstream resultStream;
     auto optionsKvpIt = options.cbegin();
 
     auto const &firstKvp = (*optionsKvpIt);
