@@ -52,14 +52,6 @@ private:
 };
 
 template <typename ReducedWorkspaceNames>
-bool operator==(Row<ReducedWorkspaceNames> const &lhs,
-                Row<ReducedWorkspaceNames> const &rhs);
-
-template <typename ReducedWorkspaceNames>
-bool operator!=(Row<ReducedWorkspaceNames> const &lhs,
-                Row<ReducedWorkspaceNames> const &rhs);
-
-template <typename ReducedWorkspaceNames>
 std::ostream &operator<<(std::ostream &os,
                          Row<ReducedWorkspaceNames> const &row);
 
@@ -82,17 +74,9 @@ Row<ReducedWorkspaceNames> Row<ReducedWorkspaceNames>::withExtraRunNumbers(
 extern template class MANTIDQT_ISISREFLECTOMETRY_DLL
     Row<SlicedReductionWorkspaces>;
 using SlicedRow = Row<SlicedReductionWorkspaces>;
-extern template MANTIDQT_ISISREFLECTOMETRY_DLL bool
-operator==(SlicedRow const &, SlicedRow const &);
-extern template MANTIDQT_ISISREFLECTOMETRY_DLL bool
-operator!=(SlicedRow const &, SlicedRow const &);
 
 extern template class MANTIDQT_ISISREFLECTOMETRY_DLL Row<ReductionWorkspaces>;
 using UnslicedRow = Row<ReductionWorkspaces>;
-extern template MANTIDQT_ISISREFLECTOMETRY_DLL bool
-operator==(UnslicedRow const &, UnslicedRow const &);
-extern template MANTIDQT_ISISREFLECTOMETRY_DLL bool
-operator!=(UnslicedRow const &, UnslicedRow const &);
 
 extern template MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
 operator<<(std::ostream &, UnslicedRow const &);

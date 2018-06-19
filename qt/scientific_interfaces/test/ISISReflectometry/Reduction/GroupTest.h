@@ -27,7 +27,7 @@ public:
     auto run = UnslicedRow({"000000", "000002"}, 0.02, {"", ""},
                            RangeInQ(0, 1, 10), 1.2, {}, workspaceNames());
     slicedGroup.appendRow(run);
-    TS_ASSERT_EQUALS(run, slicedGroup[0]);
+    TS_ASSERT_EQUALS(run.runNumbers(), slicedGroup[0].get().runNumbers());
   }
 };
 #endif // MANTID_CUSTOMINTERFACES_GROUPTEST_H_

@@ -468,8 +468,8 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
           validateRowFromRunAndTheta(jobs, m_workspaceNamesFactory,
                                      result.runNumber, resultMetadata.theta);
       if (row.is_initialized()) {
-        mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance, resultMetadata.groupName,
-                          m_workspaceNamesFactory);
+        mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance,
+                          resultMetadata.groupName, m_workspaceNamesFactory);
       } else {
         m_searchModel->setError(rowIndex,
                                 "Theta was not specified in the description.");

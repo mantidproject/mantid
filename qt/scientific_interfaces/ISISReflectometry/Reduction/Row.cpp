@@ -60,22 +60,6 @@ Row<ReducedWorkspaceNames>::reducedWorkspaceNames() const {
 }
 
 template <typename ReducedWorkspaceNames>
-bool operator==(Row<ReducedWorkspaceNames> const &lhs,
-                Row<ReducedWorkspaceNames> const &rhs) {
-  return lhs.runNumbers() == rhs.runNumbers() && lhs.theta() == rhs.theta() &&
-         lhs.qRange() == rhs.qRange() &&
-         lhs.scaleFactor() == rhs.scaleFactor() &&
-         lhs.reductionOptions() == rhs.reductionOptions() &&
-         lhs.reducedWorkspaceNames() == rhs.reducedWorkspaceNames();
-}
-
-template <typename ReducedWorkspaceNames>
-bool operator!=(Row<ReducedWorkspaceNames> const &lhs,
-                Row<ReducedWorkspaceNames> const &rhs) {
-  return !(lhs == rhs);
-}
-
-template <typename ReducedWorkspaceNames>
 std::ostream &operator<<(std::ostream &os,
                          Row<ReducedWorkspaceNames> const &row) {
   auto runNumbers = boost::join(row.runNumbers(), "+");
@@ -108,13 +92,9 @@ slice(boost::optional<UnslicedRow> const &row,
 }
 
 template class Row<SlicedReductionWorkspaces>;
-template bool operator==(SlicedRow const &, SlicedRow const &);
-template bool operator!=(SlicedRow const &, SlicedRow const &);
 template std::ostream &operator<<(std::ostream &, SlicedRow const &);
 
 template class Row<ReductionWorkspaces>;
-template bool operator==(UnslicedRow const &, UnslicedRow const &);
-template bool operator!=(UnslicedRow const &, UnslicedRow const &);
 template std::ostream &operator<<(std::ostream &, UnslicedRow const &);
 }
 }
