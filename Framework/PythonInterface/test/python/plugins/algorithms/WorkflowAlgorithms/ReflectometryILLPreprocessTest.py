@@ -294,6 +294,19 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             wsName = outWSName + workspace_name_suffix[i]
             self.assertTrue(mtd.doesExist(wsName), wsName)
 
+    def testTwoInputFiles(self):
+        outWSName = 'outWS'
+        args = {
+            'Run': 'ILL/D17/317369, ILL/D17/317370.nxs',
+            'OutputWorkspace': outWSName,
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        assertRaisesNothing(self, alg.execute)
+        outWS = alg.getProperty('OutputWorkspace').value
+        self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
+
     def create_sample_workspace(self, name, NumMonitors=0):
         args = {
             'OutputWorkspace': name,

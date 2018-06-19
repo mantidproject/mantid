@@ -234,18 +234,18 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             issues[Prop.RUN] = "Provide at least an input file or alternatively an input workspace."
         if self.getProperty(Prop.BKG_METHOD).value != BkgMethod.OFF:
             if self.getProperty(Prop.LOW_BKG_WIDTH).value == 0 and self.getProperty(Prop.HIGH_BKG_WIDTH).value == 0:
-                issues[Prop.BKG_METHOD] = 'Cannot calculate flat background if both upper and lower background widths are zero.'
+                issues[Prop.BKG_METHOD] = "Cannot calculate flat background if both upper and lower background widths are zero."
             if not self.getProperty(Prop.INPUT_WS).isDefault and self.getProperty(Prop.BEAM_POS_WS).isDefault \
                     and self.getProperty(Prop.BEAM_CENTRE).isDefault:
-                issues[Prop.BEAM_POS_WS] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
-                issues[Prop.BEAM_CENTRE] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
+                issues[Prop.BEAM_POS_WS] = "Cannot subtract flat background without knowledge of peak position/foreground centre."
+                issues[Prop.BEAM_CENTRE] = "Cannot subtract flat background without knowledge of peak position/foreground centre."
         wRange = self.getProperty(Prop.WAVELENGTH_RANGE).value
         if len(wRange) == 2 and wRange[1] < wRange[0]:
-            issues[Prop.WAVELENGTH_RANGE] = 'Upper limit is smaller than the lower limit.'
+            issues[Prop.WAVELENGTH_RANGE] = "Upper limit is smaller than the lower limit."
         if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
             beamCentre = self.getProperty(Prop.BEAM_CENTRE).value
             if beamCentre < 0 or beamCentre > 255:
-                issues[Prop.BEAM_CENTRE] = 'Value should be between 0 and 255.'
+                issues[Prop.BEAM_CENTRE] = "Value should be between 0 and 255."
         return issues
 
     def _addForegroundToLogs(self, ws, beamPosWS):
@@ -455,7 +455,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                      XUnit='TimeOfFlight',
                                      EnableLogging=self._subalgLogging)
                 rawWS = mtd[rawWSName]
-                mergedWS = MergeRuns(InputWorkspace=[mergedWS, rawWS],
+                mergedWS = MergeRuns(InputWorkspaces=[mergedWS, rawWS],
                                      OutputWorkspace=mergedWSName,
                                      EnableLogging=self._subalgLogging)
                 if i == 0:
