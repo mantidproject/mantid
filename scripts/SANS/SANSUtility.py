@@ -2059,10 +2059,15 @@ def rename_workspace_correctly(instrument_name, reduced_type, final_name, worksp
             return suffix
         else:
             return ""
+    reduced_workspace = mtd[workspace]
     final_suffix = get_suffix(instrument_name, reduced_type)
-    complete_name = final_name + final_suffix
-    RenameWorkspace(InputWorkspace=workspace, OutputWorkspace=complete_name)
-    return complete_name
+    workspaces_to_rename = [workspace]
+    if isinstance(reduced_workspace, WorkspaceGroup):
+        workspaces_to_rename += reduced_workspace.getNames()
+    for workspace_name in workspaces_to_rename:
+        complete_name = workspace_name.replace(workspace, final_name) + final_suffix
+        RenameWorkspace(InputWorkspace=workspace_name, OutputWorkspace=complete_name)
+    return final_name + final_suffix
 
 
 ###############################################################################
