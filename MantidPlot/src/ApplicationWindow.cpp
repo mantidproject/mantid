@@ -9783,6 +9783,8 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
   // cleaned up meaning we cannot rely on the deleteLater functionality to
   // work correctly as this will happen in the next iteration of the event loop,
   // i.e after the python shutdown code has been run below.
+  m_shuttingDown = true;
+
   MDIWindowList windows = getAllWindows();
   for (auto &win : windows) {
     win->confirmClose(false);
@@ -12782,6 +12784,7 @@ void ApplicationWindow::createActions() {
       QIcon(":/waterfall_plot.png"), tr("&Waterfall Plot"), this);
   connect(actionWaterfallPlot, SIGNAL(triggered()), this,
           SLOT(waterfallPlot()));
+
 }
 
 void ApplicationWindow::translateActionsStrings() {
@@ -15083,7 +15086,7 @@ void ApplicationWindow::onScriptExecuteError(const QString &message,
  */
 bool ApplicationWindow::runPythonScript(const QString &code, bool async,
                                         bool quiet, bool redirect) {
-  if (code.isEmpty())
+  if (code.isEmpty() || m_shuttingDown)
     return false;
   if (!m_iface_script) {
     if (setScriptingLanguage("Python")) {
@@ -16737,4 +16740,10 @@ void ApplicationWindow::dropInTiledWindow(MdiSubWindow *w, QPoint pos) {
 bool ApplicationWindow::isOfType(const QObject *obj,
                                  const char *toCompare) const {
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
+}
+
+void ApplicationWindow::saveProjectRecovery(const std::string destination) {
+	const bool isRecovery = true;
+	ProjectSerialiser projectWriter(this, isRecovery);
+	projectWriter.save(QString::fromStdString(destination));
 }
