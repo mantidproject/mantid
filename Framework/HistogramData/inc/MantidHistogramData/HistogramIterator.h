@@ -15,7 +15,7 @@ class Histogram;
 
 /** HistogramIterator
 
-  HistogramIterator implements an the iterator interface for HistogramData.
+  HistogramIterator implements an iterator interface for HistogramData.
   At each position the iterator will point to an instance of a HistogramItem.
   This item provides direct access to the values at a particular index.
 

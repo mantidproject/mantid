@@ -53,10 +53,9 @@ void ApplyMuonDetectorGroupPairing::init() {
           PropertyMode::Mandatory),
       "The workspace group to which the output will be added.");
 
-  declareProperty("PairName", emptyString,
-                  "The name of the pair. Must "
-                  "contain at least one alphanumeric "
-                  "character.",
+  declareProperty("PairName", emptyString, "The name of the pair. Must "
+                                           "contain at least one alphanumeric "
+                                           "character.",
                   Direction::Input);
 
   declareProperty("Alpha", 1.0,
@@ -111,10 +110,10 @@ void ApplyMuonDetectorGroupPairing::init() {
                       make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_NOT_DEFAULT, ""));
 
-  declareProperty(
-      "TimeMin", 0.1,
-      "Start time for the data in ms. Only used with the asymmetry analysis.",
-      Direction::Input);
+  declareProperty("TimeMin", 0.1,
+                  "Start time for the data in micro seconds. Only used with "
+                  "the asymmetry analysis.",
+                  Direction::Input);
   setPropertySettings("TimeMin",
                       make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_NOT_DEFAULT, ""));
@@ -122,10 +121,10 @@ void ApplyMuonDetectorGroupPairing::init() {
                       make_unique<Kernel::VisibleWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_NOT_DEFAULT, ""));
 
-  declareProperty(
-      "TimeMax", 32.0,
-      "End time for the data in ms. Only used with the asymmetry analysis.",
-      Direction::Input);
+  declareProperty("TimeMax", 32.0,
+                  "End time for the data in micro seconds. Only used with the "
+                  "asymmetry analysis.",
+                  Direction::Input);
   setPropertySettings("TimeMax",
                       make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_NOT_DEFAULT, ""));
@@ -145,7 +144,7 @@ void ApplyMuonDetectorGroupPairing::init() {
 
   declareProperty("TimeOffset", 0.0,
                   "Shift the times of all data by a fixed amount. The value "
-                  "given corresponds to the bin that will become 0.0 seconds.",
+                  "given corresponds to the bin that will become time 0.0.",
                   Direction::Input);
   setPropertySettings("TimeOffset",
                       make_unique<Kernel::EnabledWhenProperty>(
@@ -268,9 +267,13 @@ ApplyMuonDetectorGroupPairing::validateInputs() {
     }
   } else {
     MatrixWorkspace_sptr ws1 = getProperty("InputWorkspace1");
-    MatrixWorkspace_sptr ws2 = getProperty("InputWorkspace1");
-    if (ws1->getNumberHistograms() != 1 || ws2->getNumberHistograms() != 1) {
+    MatrixWorkspace_sptr ws2 = getProperty("InputWorkspace2");
+    if (ws1 && ws1->getNumberHistograms() != 1) {
       errors["InputWorkspace1"] =
+          "The input workspaces should have exactly one spectra";
+    }
+    if (ws2 && ws2->getNumberHistograms() != 1) {
+      errors["InputWorkspace2"] =
           "The input workspaces should have exactly one spectra";
     }
   }

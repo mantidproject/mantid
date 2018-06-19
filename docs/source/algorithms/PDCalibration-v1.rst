@@ -16,13 +16,27 @@ This algorithm calibrates the detector pixels and creates a
 :ref:`algm-CalibrateRectangularDetectors` the peak fitting and
 calibration is done in TOF not d spacing. The peak d values are
 converted to TOF based on either the old calibration or the instrument
-geometry. The SignalFile or SignalWorkspace contains the data from a
-standard sample. The results are then fitted with up to difc, t_zero
-and difa, these values are details in :ref:`algm-AlignDetectors`.
+geometry. The ``InputWorkspace`` contains the data from a standard
+sample. The results are then fitted with up to (in order) difc, t_zero and difa,
+these values are details in :ref:`algm-AlignDetectors`.
 
-The peak fitting properties are explained in
-:ref:`algm-FindPeaks`. This also uses the same criteria on peaks as
-:ref:`algm-GetDetOffsetsMultiPeaks`.
+The peak fitting properties are explained in more detail in
+:ref:`algm-FitPeaks`. This is used to perform a refinement of peaks
+using as much information as is provided as possible. Each input
+spectrum is calibrated separately following the same basic steps:
+
+1. The ``PeakPositions`` are used to determine fit windows in combination with ``PeakWindow``. The windows are half the distance between the provided peak positions, with a maximum size of ``PeakWindow``.
+2. The positions and windows are converted to time-of-flight for the spectrum using either the previous calibration information or the spectrum's geometry.
+3. For each peak, the background is estimated from the first and last ten points in the fit window.
+4. For each peak, the nominal center is selected by locating the highest point near the expected position. The height is used as the initial guess as well.
+5. For each peak, the width is estimated by multiplying the peak center position with ``PeakWidthPercent`` or by calculating the second moment of the data in the window.
+6. For each peak, the peak fit parameters are refined.
+7. All of the fitted peak centers are used to fit the calibration constants, weighted by peak height.
+
+If more than one constant is requested, the result that has the lowest
+`reduced chi-squared value
+<https://en.wikipedia.org/wiki/Reduced_chi-squared_statistic>`_ is
+returned. This favors using less parameters.
 
 A mask workspace is created, named "OutputCalibrationTable" + '_mask',
 with uncalibrated pixels masked.
@@ -30,11 +44,16 @@ with uncalibrated pixels masked.
 The resulting calibration table can be saved with
 :ref:`algm-SaveDiffCal`, loaded with :ref:`algm-LoadDiffCal` and
 applied to a workspace with :ref:`algm-AlignDetectors`. There are also
-three workspaces placed in the ``DiagnosticWorkspace`` group. They
-contain the fitted positions in dspace( ``_dspacing``), peak widths
-(``_width``), peak heights (``_height``), raw peak fit values (``_fitparam``),
-evaluated fit functions (``_fitparam``), and instrument resolution
-(delta-d/d ``_resolution``). Since multiple peak shapes can be used,
+three workspaces placed in the ``DiagnosticWorkspace`` group. They are:
+
+* evaluated fit functions (``_fitted``)
+* raw peak fit values (``_fitparam``)
+* contain the fitted positions in dspace( ``_dspacing``)
+* peak widths (``_width``)
+* peak heights (``_height``)
+* instrument resolution (delta-d/d ``_resolution``)
+
+Since multiple peak shapes can be used,
 see the documentation for the individual `fit functions
 <../fitfunctions/index.html>`_ to see how they relate to the effective
 values displayed in the diagnostic tables. For ``Gaussian`` and
@@ -58,8 +77,9 @@ Usage
    LoadEventNexus(Filename='NOM_72460', OutputWorkspace='NOM_72460')
    PDCalibration(InputWorkspace='NOM_72460',
                  TofBinning=[300,-.001,16666.7],
-                 PreviousCalibrationTable=oldCal,
+                 PreviousCalibrationFile=oldCal,
                  PeakPositions=dvalues,
+                 PeakWidthPercent=.008,
                  OutputCalibrationTable='cal',
                  DiagnosticWorkspaces='diag')
 

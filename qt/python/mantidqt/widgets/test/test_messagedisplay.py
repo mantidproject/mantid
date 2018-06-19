@@ -19,21 +19,13 @@ from __future__ import (absolute_import, division, print_function,
 
 import unittest
 
-from qtpy.QtWidgets import QApplication
-
 from mantidqt.widgets.messagedisplay import MessageDisplay
+from mantidqt.utils.qt.testing import requires_qapp
 
-QAPP = None
 
-
+@requires_qapp
 class MessageDisplayTest(unittest.TestCase):
     """Minimal testing as it is exported from C++"""
-
-    @classmethod
-    def setUpClass(cls):
-        global QAPP
-        if QApplication.instance() is None:
-            QAPP = QApplication([''])
 
     def test_widget_creation(self):
         display = MessageDisplay()

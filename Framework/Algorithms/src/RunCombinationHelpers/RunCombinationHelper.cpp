@@ -110,15 +110,6 @@ RunCombinationHelper::checkCompatibility(MatrixWorkspace_sptr ws,
   return errors;
 }
 
-/// @cond
-// Local function used within validateInputWorkspaces() below in a call to
-// std::list::sort(compare) to order the input workspaces by the start of their
-// frame (i.e. the first X value).
-static bool compare(MatrixWorkspace_sptr &first, MatrixWorkspace_sptr &second) {
-  return (first->x(0).front() < second->x(0).front());
-}
-/// @endcond
-
 /** Checks that the input workspace all exist, that they are the same size, have
  * the same units
  *  and the same instrument name. Will throw if they don't.
@@ -144,7 +135,7 @@ RunCombinationHelper::validateInputWorkspaces(
           "Could not find a MatrixWorkspace with the name " +
           inputWorkspaces[i]);
     }
-    inWS.push_back(ws);
+    inWS.emplace_back(ws);
     // Check that it has common binning
     if (!WorkspaceHelpers::commonBoundaries(*inWS.back())) {
       g_log.error("Input workspaces must have common binning for all spectra");
@@ -163,10 +154,6 @@ RunCombinationHelper::validateInputWorkspaces(
       }
     }
   }
-
-  // Order the workspaces by ascending frame (X) starting point
-  inWS.sort(compare);
-
   return inWS;
 }
 

@@ -38,18 +38,21 @@ struct yDataAsymmetry {
   yDataAsymmetry(const double amp, const double phi) : m_amp(amp), m_phi(phi){};
 
   double operator()(const double t, size_t spec) {
-    double e = exp(-t / tau);
+    double e = exp(-t / m_tau);
     double factor = (static_cast<double>(spec) + 1.0) * 0.5;
     double phase_offset = 4 * M_PI / 180;
     return (10. * factor *
-            (1.0 + m_amp * cos(m_omega * t + m_phi + spec * phase_offset)) * e);
+            (1.0 +
+             m_amp * cos(m_omega * t + m_phi +
+                         static_cast<double>(spec) * phase_offset)) *
+            e);
   }
 
 private:
-  double m_amp;         // Amplitude of the oscillations
-  double m_phi;         // Phase of the sinusoid
-  double m_omega = 5.0; // Frequency of the oscillations
-  double tau =
+  double m_amp;               // Amplitude of the oscillations
+  double m_phi;               // Phase of the sinusoid
+  const double m_omega = 5.0; // Frequency of the oscillations
+  const double m_tau =
       PhysicalConstants::MuonLifetime * 1e6; // Muon life time in microseconds
 };
 
@@ -242,8 +245,8 @@ public:
   ~setUpADSWithWorkspace() { AnalysisDataService::Instance().clear(); };
   WorkspaceGroup_sptr wsGroup;
 
-  static constexpr const char *inputWSName = "inputData";
-  static constexpr const char *groupWSName = "inputGroup";
+  const std::string inputWSName = "inputData";
+  const std::string groupWSName = "inputGroup";
 };
 
 } // namespace
@@ -269,7 +272,7 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
-  void test_checkNonAlphanumericPairNamesNotAllowed() {
+  void test_nonAlphanumericPairNamesNotAllowed() {
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
@@ -286,7 +289,7 @@ public:
     }
   }
 
-  void test_checkZeroOrNegativeAlphaNotAllowed() {
+  void test_zeroOrNegativeAlphaNotAllowed() {
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
@@ -302,7 +305,7 @@ public:
     }
   }
 
-  void test_checkThrowsIfTwoGroupsAreIdentical() {
+  void test_throwsIfTwoGroupsAreIdentical() {
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
@@ -313,7 +316,7 @@ public:
     std::vector<std::string> badGroup1 = {"1-5", "1-5", "1-5", "1-5"};
     std::vector<std::string> badGroup2 = {"1-5", "1,2,3,4,5", "5,4,3,2,1",
                                           "1,2,2,3,4,5,5,5"};
-    for (auto i = 0; i < badGroup1.size(); i++) {
+    for (size_t i = 0; i < badGroup1.size(); i++) {
       alg.setProperty("Group1", badGroup1[i]);
       alg.setProperty("Group2", badGroup2[i]);
       TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
@@ -321,7 +324,7 @@ public:
     }
   }
 
-  void test_checkThrowsIfTimeMinGreaterThanTimeMax() {
+  void test_throwsIfTimeMinGreaterThanTimeMax() {
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
@@ -335,7 +338,7 @@ public:
     TS_ASSERT(!alg.isExecuted());
   }
 
-  void test_checkThrowsIfPeriodOutOfRange() {
+  void test_throwsIfPeriodOutOfRange() {
     // If inputWS is a matrixWorkspace then the summed/subtracted
     // periods are set to "1" and "" and so no checks are needed.
     int nPeriods = 2;
@@ -417,7 +420,6 @@ public:
 
     // The error calculation as per Issue #5035
     TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.04212, 0.00001);
-    //TS_ASSERT_DELTA(wsOut->readE(0)[4], -0.00000, 0.00001);
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.06946, 0.00001);
   }
 
@@ -433,9 +435,11 @@ public:
     auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.250, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.650, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 1.150, 0.001);
+    // Account for the bin edges to point data conversion
+    double shift = 0.2 + 0.05;
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], ws->readX(0)[0] + shift, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], ws->readX(0)[4] + shift, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], ws->readX(0)[9] + shift, 0.001);
   }
 
   void test_detectorIDsNotInWorkspaceFails() {
@@ -493,14 +497,14 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.01528882, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.01297522, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.01075352, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.0153, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.0130, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.0108, 0.0001);
 
     // The error calculation as per Issue #5035
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.06185703, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0584598, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.05491692, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0619, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0585, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0550, 0.0001);
   }
 
   void test_applyingDeadTimeCorrectionGivesCorrectAsymmetryValues() {
@@ -530,16 +534,15 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
 
     // Dead time applied before asymmetry
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.51813228, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -1.05389309, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.63497325, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.5181, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -1.0539, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.6350, 0.0001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.03856093, 0.0001);
-    //TS_ASSERT_DELTA(wsOut->readE(0)[4], -0.0000000, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.06679145, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0386, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0668, 0.0001);
   }
 
-  void test_CheckAsymmetryValuesCorrectWhenEnteringWorkspacesByHand() {
+  void test_asymmetryValuesCorrectWhenEnteringWorkspacesByHand() {
 
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
@@ -568,13 +571,13 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.13876491, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.28995348, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.02261807, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.1388, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.2900, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.02262, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.24211334, 0.001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.47372239, 0.001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.39502973, 0.001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.2421, 0.001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.4737, 0.001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.3950, 0.001);
   }
 
   void test_inputWorkspaceWithMultipleSpectraFails() {

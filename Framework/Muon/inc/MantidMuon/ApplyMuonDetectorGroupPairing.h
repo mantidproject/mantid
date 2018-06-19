@@ -49,9 +49,7 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\Grouping;Transforms\\Grouping";
-  }
+  const std::string category() const override { return "Muon\\DataHandling"; }
   /// Algorithm's summary for identification
   const std::string summary() const override {
     return "Perform an asymmetry analysis on two groupings of muon detectors.";
@@ -75,13 +73,10 @@ public:
 
   /// return a workspace for a pair of detector groups, specified in options.
   API::MatrixWorkspace_sptr
-  createPairWorkspaceManually(API::Workspace_sptr inputWS, bool noRebin);
-
-  /// Allow WorkspaceGroup property to function correctly.
-  bool checkGroups() override;
+  createPairWorkspaceManually(API::Workspace_sptr inputWS, const bool noRebin);
 
   /// Store the input properties in options.
-  Muon::AnalysisOptions ApplyMuonDetectorGroupPairing::getUserInput();
+  Muon::AnalysisOptions getUserInput();
 
   /// Set MuonProcess properties (input workspace and period properties).
   void
@@ -99,13 +94,16 @@ public:
                                          API::MatrixWorkspace_sptr inputWS2,
                                          const double &alpha);
 
-  /// Set grouping properies of MuonProcess
+  /// Set grouping properties of MuonProcess
   void setMuonProcessAlgorithmGroupingProperties(
       IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
 
   /// Set time properties of MuonProcess according to the given options.
   void setMuonProcessAlgorithmTimeProperties(
       IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
+
+  /// Allow WorkspaceGroup property to function correctly.
+  bool checkGroups() override;
 
 private:
   /// Initialisation code

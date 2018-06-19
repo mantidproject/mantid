@@ -369,6 +369,7 @@ bool checkItemsInSet(const std::vector<int> &items, const std::set<int> &set) {
 /**
  * Parse a workspace name into dataset parameters
  * Format: "INST00012345; Pair; long; Asym;[ 1;] #1"
+ * count:     1             2    3      4    (5)  5/6
  * @param wsName :: [input] Name of workspace
  * @returns :: Struct containing dataset parameters
  */
@@ -378,7 +379,8 @@ Muon::DatasetParams parseWorkspaceName(const std::string &wsName) {
   Mantid::Kernel::StringTokenizer tokenizer(
       wsName, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   const size_t numTokens = tokenizer.count();
-  if (numTokens < 5) {
+  // Name contains min of 5 ";" separated values and max 6.
+  if (numTokens < 5 || numTokens > 6) {
     throw std::invalid_argument("Could not parse workspace name: " + wsName);
   }
 
@@ -489,14 +491,20 @@ bool checkValidPair(const std::string &WSname1, const std::string &WSname2) {
         "Group workspaces named with different instruments.");
   }
 
+  if (group1.itemName == group2.itemName) {
+    throw std::invalid_argument(
+        "Groups used for pairing must have differnt names.");
+  }
+
   if (group1.itemType != Muon::ItemType::Group ||
       group2.itemType != Muon::ItemType::Group) {
-    throw std::invalid_argument("Workspaces must be of Group type (not Asym)");
+    throw std::invalid_argument("Workspaces must be of group type (not pair)");
   }
 
   if (group1.plotType != Muon::PlotType::Counts ||
       group2.plotType != Muon::PlotType::Counts) {
-    throw std::invalid_argument("Workspaces must be of Group type (not Asym)");
+    throw std::invalid_argument(
+        "Workspaces must be of counts type (not asymmetry)");
   }
 
   return true;

@@ -16,13 +16,13 @@ The result of the calculation are stored in the provided **WorkspaceGroup** usin
 Analysis
 ########
 
-This algorithm performs the *PairAsymmetry* option of the :ref:`algm-MuonProcess` algorithm, requiring two items of data; spectra corresponding to the groups of detector IDs. This can be given directly to the algorithm via the **InputWorkspace1** and **InputWorkspace2** properties, which accept MatrixWorkspaces with single spectra and identical binning. The pair asymmetry is calculated between the times **TimeMin** and **TimeMax**, and using the **Alpha** parameter (see :ref:`alg-MuonAsymmetry` for details).
+This algorithm performs the *PairAsymmetry* option of the :ref:`algm-MuonProcess` algorithm, requiring two items of data; spectra corresponding to the groups of detector IDs. This can be given directly to the algorithm via the **InputWorkspace1** and **InputWorkspace2** properties, which accept MatrixWorkspaces with single spectra and identical binning. The pair asymmetry is calculated between the times **TimeMin** and **TimeMax**, and using the **Alpha** parameter (see :ref:`algm-CalculateMuonAsymmetry` for details).
 
 Alternatively by checking setting **SpecifyGroupsManually** to true the groupings can be performed as part of the algorithm (requiring the full, ungrouped, data in **InputWorkspace**). 
 
 In this case **Group1** and **Group2** are separator or range based lists (e.g. "1,2,3-6,7") of detector IDs. 
 
-Rebbing is optional and can be achieved through the **Rebin** property (using syntax as in :ref:`alg-Rebin`).
+Rebbing is optional and can be achieved through the **Rebin** property (using syntax as in :ref:`algm-Rebin`).
 
 The way in which multi period data is combined before the analysis is determined by
 **SummedPeriods** and **SubtractedPeriods**.
@@ -112,7 +112,7 @@ Usage
 
 Output:
 
-.. testoutput:: ExCountsOffsetAndRebin
+.. testoutput:: ExMUSRPairAsymmetry
 
    -0.0176193517359
 

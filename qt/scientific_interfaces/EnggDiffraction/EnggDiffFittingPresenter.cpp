@@ -81,13 +81,6 @@ std::string generateXAxisLabel(Mantid::Kernel::Unit_const_sptr unit) {
   }
   return label;
 }
-
-std::string generateMultiRunFileName(const std::vector<RunLabel> &runLabels) {
-  const auto minLabel = std::min_element(runLabels.cbegin(), runLabels.cend());
-  const auto maxLabel = std::max_element(runLabels.cbegin(), runLabels.cend());
-  return std::to_string(minLabel->runNumber) + "_" +
-         std::to_string(maxLabel->runNumber) + ".hdf5";
-}
 }
 
 /**
@@ -198,8 +191,18 @@ EnggDiffFittingPresenter::currentCalibration() const {
 }
 
 Poco::Path
-EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) {
+EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) const {
   return m_mainParam->outFilesUserDir(addToDir);
+}
+
+std::string
+EnggDiffFittingPresenter::userHDFRunFilename(const int runNumber) const {
+  return m_mainParam->userHDFRunFilename(runNumber);
+}
+
+std::string EnggDiffFittingPresenter::userHDFMultiRunFilename(
+    const std::vector<RunLabel> &runLabels) const {
+  return m_mainParam->userHDFMultiRunFilename(runLabels);
 }
 
 void EnggDiffFittingPresenter::startAsyncFittingWorker(
@@ -497,19 +500,15 @@ void EnggDiffFittingPresenter::doFitting(const std::vector<RunLabel> &runLabels,
       return;
     }
 
-    const auto outFilename = std::to_string(runLabel.runNumber) + ".hdf5";
-    auto saveDirectory = outFilesUserDir("Runs");
-    saveDirectory.append(outFilename);
-    m_model->saveFitResultsToHDF5({runLabel}, saveDirectory.toString());
+    const auto outFilename = userHDFRunFilename(runLabel.runNumber);
+    m_model->saveFitResultsToHDF5({runLabel}, outFilename);
 
     m_model->createFittedPeaksWS(runLabel);
   }
 
   if (runLabels.size() > 1) {
-    const auto outFilename = generateMultiRunFileName(runLabels);
-    auto saveDirectory = outFilesUserDir("Runs");
-    saveDirectory.append(outFilename);
-    m_model->saveFitResultsToHDF5(runLabels, saveDirectory.toString());
+    m_model->saveFitResultsToHDF5(runLabels,
+                                  userHDFMultiRunFilename(runLabels));
   }
   m_fittingFinishedOK = true;
 }
