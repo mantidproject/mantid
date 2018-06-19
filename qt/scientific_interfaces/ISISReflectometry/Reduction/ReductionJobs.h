@@ -2,7 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_REDUCTIONJOBS_H_
 #include "../DllConfig.h"
 #include <boost/optional.hpp>
-#include <../multivisitors.hpp>
+#include "../multivisitors.hpp"
 // equivalent to
 //         #include <boost/variant/multivisitors.hpp>
 // available in boost 1.54+ - required for RHEL7.

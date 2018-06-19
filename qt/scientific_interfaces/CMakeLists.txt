@@ -61,7 +61,8 @@ set ( TEST_FILES
   test/ISISReflectometry/Reduction/GroupTest.h
   test/ISISReflectometry/Reduction/ValidateRowTest.h
   test/ISISReflectometry/Reduction/ReductionJobsMergeTest.h
-  test/ISISReflectometry/Presenters/BatchPresenterTest.h
+  test/ISISReflectometry/Presenters/BatchPresenterGroupDeletionTest.h
+  test/ISISReflectometry/Presenters/BatchPresenterGroupInsertionTest.h
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest

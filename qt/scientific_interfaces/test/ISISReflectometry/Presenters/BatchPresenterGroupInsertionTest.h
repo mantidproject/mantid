@@ -13,15 +13,18 @@ using testing::Return;
 using testing::Mock;
 using testing::NiceMock;
 
-class ReflBatchPresenterTest : public CxxTest::TestSuite, BatchPresenterTest {
+class BatchPresenterGroupInsertionTest : public CxxTest::TestSuite,
+                                         BatchPresenterTest {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ReflBatchPresenterTest *createSuite() {
-    return new ReflBatchPresenterTest();
+  static BatchPresenterGroupInsertionTest *createSuite() {
+    return new BatchPresenterGroupInsertionTest();
   }
 
-  static void destroySuite(ReflBatchPresenterTest *suite) { delete suite; }
+  static void destroySuite(BatchPresenterGroupInsertionTest *suite) {
+    delete suite;
+  }
 
   void testExpandsAllGroupsWhenRequested() {
     EXPECT_CALL(m_jobs, expandAll());
@@ -49,11 +52,9 @@ public:
   }
 
   void testUpdatesViewWhenGroupInsertedAfterSelection() {
-    jobsViewIs(m_jobs, m_view);
-
     auto reductionJobs = twoEmptyGroupsModel();
-    selectedRowLocationsAre(m_jobs, {location(0)});
 
+    selectedRowLocationsAre(m_jobs, {location(0)});
     EXPECT_CALL(m_jobs, insertChildRowOf(location(), 1))
         .WillOnce(Return(location(1)));
 

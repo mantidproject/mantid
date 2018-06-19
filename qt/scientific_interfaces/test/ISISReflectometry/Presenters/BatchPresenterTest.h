@@ -24,7 +24,7 @@ public:
     ON_CALL(view, jobs()).WillByDefault(::testing::ReturnRef(jobsView));
   }
 
-  ReflBatchPresenterTest() : m_jobs(), m_view() { jobsViewIs(m_jobs, m_view); }
+  BatchPresenterTest() : m_jobs(), m_view() { jobsViewIs(m_jobs, m_view); }
 
   bool verifyAndClearExpectations() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
