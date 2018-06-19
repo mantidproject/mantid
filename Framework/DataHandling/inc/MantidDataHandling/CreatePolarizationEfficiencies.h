@@ -1,14 +1,11 @@
-#ifndef MANTID_ALGORITHMS_CREATEPOLARIZATIONEFFICIENCIES_H_
-#define MANTID_ALGORITHMS_CREATEPOLARIZATIONEFFICIENCIES_H_
+#ifndef MANTID_DATAHANDLING_CREATEPOLARIZATIONEFFICIENCIES_H_
+#define MANTID_DATAHANDLING_CREATEPOLARIZATIONEFFICIENCIES_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/optional.hpp>
+#include "MantidDataHandling/CreatePolarizationEfficienciesBase.h"
 
 namespace Mantid {
-namespace Algorithms {
+namespace DataHandling {
 
 /** CreatePolarizationEfficiencies
 
@@ -33,23 +30,19 @@ namespace Algorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport CreatePolarizationEfficiencies : public API::Algorithm {
+class DLLExport CreatePolarizationEfficiencies : public CreatePolarizationEfficienciesBase {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::string category() const override;
   const std::string summary() const override;
 
 private:
   void init() override;
-  void exec() override;
   API::MatrixWorkspace_sptr
-  createEfficiencies(std::vector<std::string> const &labels);
-  std::vector<std::string>
-  getNonDefaultProperties(std::vector<std::string> const &labels) const;
+  createEfficiencies(std::vector<std::string> const &labels) override;
 };
 
-} // namespace Algorithms
+} // namespace DataHandling
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_CREATEPOLARIZATIONEFFICIENCIES_H_ */
+#endif /* MANTID_DATAHANDLING_CREATEPOLARIZATIONEFFICIENCIES_H_ */

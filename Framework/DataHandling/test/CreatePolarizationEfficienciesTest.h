@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_CREATEPOLARIZATIONEFFICIENCIES_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/CreatePolarizationEfficiencies.h"
+#include "MantidDataHandling/CreatePolarizationEfficiencies.h"
 #include "MantidAPI/Axis.h"
 #include "MantidKernel/Unit.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -12,7 +12,7 @@
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
-using namespace Mantid::Algorithms;
+using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using namespace WorkspaceCreationHelper;

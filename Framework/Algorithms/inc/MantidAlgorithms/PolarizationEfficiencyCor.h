@@ -8,10 +8,10 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** PolarizationCorrectionWildes : This algorithm corrects for non-ideal
-  component efficiencies in polarized neutron analysis. It is based on
-  [A. R. Wildes (2006) Neutron News, 17:2, 17-25,
-  DOI: 10.1080/10448630600668738]
+/** PolarizationEfficiencyCor: a generalised polarization correction
+  algorithm. Depending on the value of property "CorrectionMethod" it
+  calls either PolarizationCorrectionFredrikze or PolarizationCorrectionWildes
+  inetrnally.
 
   Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

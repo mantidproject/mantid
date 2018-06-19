@@ -11,22 +11,6 @@
 #include "MantidKernel/make_unique.h"
 #include <limits>
 
-namespace Prop {
-
-const std::string PP_WORKSPACE("Pp");
-const std::string AP_WORKSPACE("Ap");
-const std::string RHO_WORKSPACE("Rho");
-const std::string ALPHA_WORKSPACE("Alpha");
-
-const std::string P1_WORKSPACE("P1");
-const std::string P2_WORKSPACE("P2");
-const std::string F1_WORKSPACE("F1");
-const std::string F2_WORKSPACE("F2");
-
-const std::string OUTPUT_WORKSPACE("OutputWorkspace");
-
-} // namespace Prop
-
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
@@ -48,11 +32,6 @@ const std::string JoinISISPolarizationEfficiencies::name() const {
 /// Algorithm's version for identification. @see Algorithm::version
 int JoinISISPolarizationEfficiencies::version() const { return 1; }
 
-/// Algorithm's category for identification. @see Algorithm::category
-const std::string JoinISISPolarizationEfficiencies::category() const {
-  return "DataHandling;ISIS\\Reflectometry";
-}
-
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string JoinISISPolarizationEfficiencies::summary() const {
   return "Joins workspaces containing ISIS reflectometry polarization "
@@ -67,100 +46,53 @@ void JoinISISPolarizationEfficiencies::init() {
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Prop::PP_WORKSPACE, "", Kernel::Direction::Input,
+          Pp, "", Kernel::Direction::Input,
           PropertyMode::Optional),
       "A matrix workspaces containing the Pp polarization efficiency.");
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Prop::AP_WORKSPACE, "", Kernel::Direction::Input,
+          Ap, "", Kernel::Direction::Input,
           PropertyMode::Optional),
       "A matrix workspaces containing the Ap polarization efficiency.");
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Prop::RHO_WORKSPACE, "", Kernel::Direction::Input,
+          Rho, "", Kernel::Direction::Input,
           PropertyMode::Optional),
       "A matrix workspaces containing the Rho polarization efficiency.");
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Prop::ALPHA_WORKSPACE, "", Kernel::Direction::Input,
+          Alpha, "", Kernel::Direction::Input,
           PropertyMode::Optional),
       "A matrix workspaces containing the Alpha polarization efficiency.");
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Prop::P1_WORKSPACE, "", Kernel::Direction::Input,
+          P1, "", Kernel::Direction::Input,
           PropertyMode::Optional),
       "A matrix workspaces containing the P1 polarization efficiency.");
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Prop::P2_WORKSPACE, "", Kernel::Direction::Input,
+          P2, "", Kernel::Direction::Input,
           PropertyMode::Optional),
       "A matrix workspaces containing the P2 polarization efficiency.");
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Prop::F1_WORKSPACE, "", Kernel::Direction::Input,
+          F1, "", Kernel::Direction::Input,
           PropertyMode::Optional),
       "A matrix workspaces containing the F1 polarization efficiency.");
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Prop::F2_WORKSPACE, "", Kernel::Direction::Input,
+          F2, "", Kernel::Direction::Input,
           PropertyMode::Optional),
       "A matrix workspaces containing the F2 polarization efficiency.");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      Prop::OUTPUT_WORKSPACE, "", Direction::Output),
-                  "An output workspace containing the efficiencies.");
-}
-
-//----------------------------------------------------------------------------------------------
-/** Execute the algorithm.
- */
-void JoinISISPolarizationEfficiencies::exec() {
-  auto const propsFredrikze =
-      getNonDefaultProperties({Prop::PP_WORKSPACE, Prop::AP_WORKSPACE,
-                               Prop::RHO_WORKSPACE, Prop::ALPHA_WORKSPACE});
-  auto const propsWildes =
-      getNonDefaultProperties({Prop::P1_WORKSPACE, Prop::P2_WORKSPACE,
-                               Prop::F1_WORKSPACE, Prop::F2_WORKSPACE});
-
-  if (propsFredrikze.empty() && propsWildes.empty()) {
-    throw std::invalid_argument(
-        "At least one of the efficiency file names must be set.");
-  }
-
-  if (!propsFredrikze.empty() && !propsWildes.empty()) {
-    throw std::invalid_argument(
-        "Efficiencies belonging to different methods cannot mix.");
-  }
-
-  MatrixWorkspace_sptr efficiencies;
-  if (!propsFredrikze.empty()) {
-    efficiencies = createEfficiencies(propsFredrikze);
-  } else {
-    efficiencies = createEfficiencies(propsWildes);
-  }
-
-  setProperty("OutputWorkspace", efficiencies);
-}
-
-/// Get names of non-default properties out of a list of names
-/// @param labels :: Names of properties to check.
-std::vector<std::string>
-JoinISISPolarizationEfficiencies::getNonDefaultProperties(
-    std::vector<std::string> const &labels) const {
-  std::vector<std::string> outputLabels;
-  for (auto const &label : labels) {
-    if (!isDefault(label)) {
-      outputLabels.push_back(label);
-    }
-  }
-  return outputLabels;
+  initOutputWorkspace();
 }
 
 /// Load efficientcies from files and put them into a single workspace.
@@ -191,8 +123,7 @@ MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
   auto interpolatedWorkspaces = interpolateWorkspaces(workspaces);
 
   auto const &inWS = interpolatedWorkspaces.front();
-  MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(
-      inWS, labels.size(), inWS->x(0).size(), inWS->blocksize());
+  MatrixWorkspace_sptr outWS = DataObjects::create<Workspace2D>(*inWS, labels.size(), inWS->histogram(0));
   auto axis1 = new TextAxis(labels.size());
   outWS->replaceAxis(1, axis1);
   outWS->getAxis(0)->setUnit("Wavelength");

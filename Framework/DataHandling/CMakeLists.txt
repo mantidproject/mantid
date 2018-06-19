@@ -7,6 +7,8 @@ set ( SRC_FILES
 	src/CreateChopperModel.cpp
 	src/CreateChunkingFromInstrument.cpp
 	src/CreateModeratorModel.cpp
+	src/CreatePolarizationEfficiencies.cpp
+	src/CreatePolarizationEfficienciesBase.cpp
 	src/CreateSampleShape.cpp
 	src/CreateSimulationWorkspace.cpp
 	src/DataBlock.cpp
@@ -190,6 +192,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/CreateChopperModel.h
 	inc/MantidDataHandling/CreateChunkingFromInstrument.h
 	inc/MantidDataHandling/CreateModeratorModel.h
+	inc/MantidDataHandling/CreatePolarizationEfficiencies.h
+	inc/MantidDataHandling/CreatePolarizationEfficienciesBase.h
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/CreateSimulationWorkspace.h
 	inc/MantidDataHandling/DataBlock.h
@@ -372,6 +376,7 @@ set ( TEST_FILES
 	CreateChopperModelTest.h
 	CreateChunkingFromInstrumentTest.h
 	CreateModeratorModelTest.h
+	CreatePolarizationEfficienciesTest.h
 	CreateSampleShapeTest.h
 	CreateSimulationWorkspaceTest.h
 	DataBlockCompositeTest.h

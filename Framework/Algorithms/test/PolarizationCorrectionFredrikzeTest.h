@@ -3,14 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CreatePolarizationEfficiencies.h"
-#include "MantidAlgorithms/PolarizationCorrectionFredrikze.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAlgorithms/PolarizationCorrectionFredrikze.h"
+#include "MantidDataHandling/CreatePolarizationEfficiencies.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/OptionalBool.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -19,6 +19,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace WorkspaceCreationHelper;
 
