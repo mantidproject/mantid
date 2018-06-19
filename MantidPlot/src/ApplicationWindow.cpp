@@ -16720,7 +16720,7 @@ bool ApplicationWindow::isOfType(const QObject *obj,
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
 }
 
-void ApplicationWindow::saveProjectRecovery(const std::string destination) {
+void ApplicationWindow::saveProjectRecovery(std::string destination) {
   const bool isRecovery = true;
   ProjectSerialiser projectWriter(this, isRecovery);
   projectWriter.save(QString::fromStdString(destination));
