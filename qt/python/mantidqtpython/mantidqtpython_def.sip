@@ -1630,7 +1630,7 @@ public:
     void resetFilter();
     bool hasFilter() const;
 
-    void setHintsForColumn(int column, HintStrategy* hintStrategy /Transfer/);
+    void setHintsForColumn(int column, MantidQt::MantidWidgets::HintStrategy* hintStrategy /Transfer/);
 
     bool isOnlyChildOfRoot(const MantidQt::MantidWidgets::Batch::RowLocation& location) const;
     std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsAt(const MantidQt::MantidWidgets::Batch::RowLocation &location) const;
