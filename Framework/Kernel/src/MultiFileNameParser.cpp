@@ -514,12 +514,16 @@ void parseToken(std::vector<std::vector<unsigned int>> &parsedRuns,
                 back_inserter(runsToAdd));
     } else {
       // We should never reach here - the validation done on the token
-      // previously
-      // should prevent any other possible scenario.
+      // previously should prevent any other possible scenario.
       assert(false);
     }
   }
   if (!runsToAdd.empty()) {
+    if (!runs.empty()) {
+      // We have either add ranges or step ranges. Never both.
+      throw std::runtime_error(
+          "Unable to handle a mixture of add ranges and step ranges");
+    }
     runs.emplace_back(runsToAdd);
   }
   // Add the runs on to the end of parsedRuns, and return it.
