@@ -51,14 +51,14 @@ set ( SRC_FILES
 	IndirectTransmissionCalc.cpp
 	Iqt.cpp
 	IqtFit.cpp
-        IqtFitModel.cpp
+	IqtFitModel.cpp
 	JumpFit.cpp
 	JumpFitAddWorkspaceDialog.cpp
 	JumpFitDataPresenter.cpp
 	JumpFitDataTablePresenter.cpp
-        JumpFitModel.cpp
+	JumpFitModel.cpp
 	MSDFit.cpp
-        MSDFitModel.cpp
+	MSDFitModel.cpp
 	Quasi.cpp
 	ResNorm.cpp
 	Stretch.cpp
@@ -76,7 +76,7 @@ set ( INC_FILES
 	ConvFitAddWorkspaceDialog.h
 	ConvFitDataPresenter.h
 	ConvFitDataTablePresenter.h
-        ConvFitModel.h
+	ConvFitModel.h
 	CorrectionsTab.h
 	DensityOfStates.h
         Elwin.h
@@ -103,7 +103,7 @@ set ( INC_FILES
 	IndirectFitPlotModel.h
 	IndirectFitPlotPresenter.h
 	IndirectFitPlotView.h
-  	IndirectFittingModel.h
+	IndirectFittingModel.h
 	IndirectLoadILL.h
 	IndirectMolDyn.h
 	IndirectMoments.h
@@ -121,15 +121,15 @@ set ( INC_FILES
 	IndirectTransmissionCalc.h
 	Iqt.h
 	IqtFit.h
-        IqtFitModel.h
+	IqtFitModel.h
 	JumpFit.h
 	JumpFitAddWorkspaceDialog.h
 	JumpFitDataPresenter.h
 	JumpFitDataTablePresenter.h
-        JumpFitModel.h
 	LazyAsyncRunner.h
+	JumpFitModel.h
 	MSDFit.h
-        MSDFitModel.h
+	MSDFitModel.h
 	Quasi.h
 	ResNorm.h
 	Stretch.h

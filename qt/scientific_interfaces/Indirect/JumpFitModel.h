@@ -25,7 +25,7 @@ public:
   bool zeroEISF(std::size_t dataIndex) const;
 
   std::string getFitParameterName(std::size_t dataIndex,
-                                   std::size_t spectrum) const;
+                                  std::size_t spectrum) const;
   std::vector<std::string> getWidths(std::size_t dataIndex) const;
   std::vector<std::string> getEISF(std::size_t dataIndex) const;
   boost::optional<std::size_t> getWidthSpectrum(std::size_t widthIndex,
