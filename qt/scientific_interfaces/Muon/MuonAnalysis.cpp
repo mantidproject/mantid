@@ -449,24 +449,34 @@ std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
                                   PlotType plotType) {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
 
-  // Create workspace and a raw (unbinned) version of it
-  auto ws = createAnalysisWorkspace(itemType, tableRow, plotType);
-  auto wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
-
   // Find names for new workspaces
   const std::string wsName = getNewAnalysisWSName(itemType, tableRow, plotType);
   const std::string wsRawName = wsName + "_Raw";
+  std::vector<std::string> wsNames = {wsName, wsRawName};
+  // Create workspace and a raw (unbinned) version of it
+  auto ws = createAnalysisWorkspace(itemType, tableRow, plotType, wsName);
+  moveUnNormWS(wsName, wsNames);
 
+  auto wsRaw =
+      createAnalysisWorkspace(itemType, tableRow, plotType, wsRawName, true);
+  moveUnNormWS(wsRawName, wsNames);
   // Make sure they end up in the ADS
   ads.addOrReplace(wsName, ws);
   ads.addOrReplace(wsRawName, wsRaw);
 
-  // Make sure they are grouped
-  std::vector<std::string> wsNames = {wsName, wsRawName};
   MuonAnalysisHelper::groupWorkspaces(m_currentLabel, wsNames);
   return wsName;
 }
 
+void MuonAnalysis::moveUnNormWS(const std::string &name,
+                                std::vector<std::string> &wsNames) {
+  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  const std::string unnorm = "_unNorm";
+  if (ads.doesExist("tmp_unNorm")) {
+    ads.rename("tmp_unNorm", name + unnorm);
+    wsNames.push_back(name + unnorm);
+  }
+}
 /**
  * Creates workspace for specified group/pair and plots it;
  * @param itemType :: Whether it's a group or pair
@@ -563,11 +573,13 @@ MuonAnalysis::parsePlotType(QComboBox *selector) {
  * @param tableRow :: Row in the group/pair table which contains the item
  * @param plotType :: What kind of plot we want to analyse
  * @param isRaw    :: Whether binning should be applied to the workspace
+ * @param wsName   :: The name of the workspace -> for saving the normalisation
  * @return Created workspace
  */
 Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
                                                      int tableRow,
                                                      PlotType plotType,
+                                                     std::string wsName,
                                                      bool isRaw) {
   auto loadedWS =
       AnalysisDataService::Instance().retrieveWS<Workspace>(m_grouped_name);
@@ -580,7 +592,7 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
   options.timeLimits.second = finishTime();
   options.rebinArgs = isRaw ? "" : rebinParams(loadedWS);
   options.plotType = plotType;
-
+  options.wsName = wsName;
   const auto *table =
       itemType == ItemType::Group ? m_uiForm.groupTable : m_uiForm.pairTable;
   options.groupPairName = table->item(tableRow, 0)->text().toStdString();
@@ -1797,7 +1809,6 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
 
   // Plot data in the given window with given options
   s << "def plot_data(ws_name,errors, connect, window_to_use):";
-  bool addToTable = false;
   if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry) {
     // clang-format off
     s << "  w = plotSpectrum(source = ws_name,"
@@ -1808,7 +1819,6 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
          "window = window_to_use)";
     // clang-format on
     // set if TFAsymm is on or off
-    addToTable = getIfTFAsymmStore();
   } else {
     // clang-format off
     s << "  w = plotSpectrum(source = ws_name,"
@@ -1900,7 +1910,6 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   }
 
   runPythonCode(pyS);
-  m_fitDataPresenter->storeNormalization(safeWSName.toStdString(), addToTable);
 }
 
 /**
@@ -3073,8 +3082,6 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
     groupAlg->setProperty("xmin", m_dataSelector->getStartTime());
     groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
     groupAlg->execute();
-    bool addToTable = getIfTFAsymmStore();
-    m_fitDataPresenter->storeNormalization(wsName, addToTable);
 
   } catch (std::exception &e) {
     throw std::runtime_error("Unable to group workspace:\n\n" +

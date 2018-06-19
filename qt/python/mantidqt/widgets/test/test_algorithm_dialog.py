@@ -69,3 +69,7 @@ class TestAlgorithmDialog(unittest.TestCase):
         self.assertTrue(dialog is not None)
         input_widgets = dialog.findChildren(QLineEdit)
         self.assertEqual(len(input_widgets), 3)
+
+
+if __name__ == '__main__':
+    unittest.main()

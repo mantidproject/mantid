@@ -76,8 +76,16 @@ Output:
   import numpy as np
   import random
 
+  def isItDead(phase,amplitude):
+     if phase == 0.0 and amplitude == 999.0:
+         return True 
+     else:
+         return False
+
+
   # create data
-  x=np.linspace(start=0,stop=20,num=2000)
+  x=np.linspace(start=0,stop=20,num=4000)
+
   xData = np.append(x,x)
   xData = np.append(xData,xData)
 
@@ -94,20 +102,22 @@ Output:
   label=ws.getAxis(0).setUnit("Label")
   label.setLabel("Time","microsecond")
 
-  detectorTable, fittingResults =   CalMuonDetectorPhases(InputWorkspace='ws', LastGoodData=20,ForwardSpectra="1,2", BackwardSpectra="3,4",Frequency=5.0)
+  detectorTable, fittingResults =   CalMuonDetectorPhases(InputWorkspace='ws',FirstGoodData=0.1, LastGoodData=20,ForwardSpectra="1,2", BackwardSpectra="3,4",Frequency=5.0)
   # Print the result
   for i in range(0,4):
-     print("Detector {} has phase {:.6f} and amplitude {:.6f}".format(detectorTable.cell(i,0), detectorTable.cell(i,2), detectorTable.cell(i,1)))
+      if isItDead(detectorTable.cell(i,2), detectorTable.cell(i,1)):
+          print("Detector {} is dead".format(detectorTable.cell(i,0)))
+      else:
+          print("Detector {} is working".format(detectorTable.cell(i,0)))
    
 Output:
 
 .. testoutput:: CalMuonDetectorPhasesDeadExample
 
-  Detector 1 has phase 3.953943 and amplitude 0.075950
-  Detector 2 has phase 1.486624 and amplitude 0.595034
-  Detector 3 has phase 0.000000 and amplitude 999.000000
-  Detector 4 has phase 4.669842 and amplitude 0.072808
-
+  Detector 1 is working
+  Detector 2 is working
+  Detector 3 is dead
+  Detector 4 is working
 
 .. categories::
 

@@ -9,6 +9,7 @@
 #include "IEnggDiffractionParam.h"
 #include "IEnggDiffractionPresenter.h"
 #include "IEnggDiffractionView.h"
+#include "IEnggVanadiumCorrectionsModel.h"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -210,29 +211,6 @@ private:
                   size_t bank, const std::string &specNos,
                   const std::string &dgFile);
 
-  void
-  loadOrCalcVanadiumWorkspaces(const std::string &vanNo,
-                               const std::string &inputDirCalib,
-                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-                               Mantid::API::MatrixWorkspace_sptr &vanCurvesWS,
-                               bool forceRecalc, const std::string &specNos);
-
-  void findPrecalcVanadiumCorrFilenames(const std::string &vanNo,
-                                        const std::string &inputDirCalib,
-                                        std::string &preIntegFilename,
-                                        std::string &preCurvesFilename,
-                                        bool &found);
-
-  void loadVanadiumPrecalcWorkspaces(
-      const std::string &preIntegFilename, const std::string &preCurvesFilename,
-      Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-      Mantid::API::MatrixWorkspace_sptr &vanCurvesWS, const std::string &vanNo,
-      const std::string &specNos);
-
-  void calcVanadiumWorkspaces(const std::string &vanNo,
-                              Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-                              Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
-
   /// @name Methods related to pre-processing / re-binning
   //@{
   void inputChecksBeforeRebin(const std::string &runNo);
@@ -265,6 +243,8 @@ private:
                       std::string runNo);
   void saveOpenGenie(std::string inputWorkspace, std::string bank,
                      std::string runNo);
+  void exportSampleLogsToHDF5(const std::string &inputWorkspace,
+                              const std::string &filename) const;
 
   // generates the required file name of the output files
   std::string outFileNameFactory(std::string inputWorkspace, std::string runNo,
@@ -272,9 +252,12 @@ private:
 
   // returns a directory as a path, creating it if not found, and checking
   // errors
-  Poco::Path outFilesUserDir(const std::string &addToDir) override;
+  Poco::Path outFilesUserDir(const std::string &addToDir) const override;
+  std::string userHDFRunFilename(const int runNumber) const override;
+  std::string userHDFMultiRunFilename(
+      const std::vector<RunLabel> &runLabels) const override;
   Poco::Path outFilesGeneralDir(const std::string &addComponent);
-  Poco::Path outFilesRootDir();
+  Poco::Path outFilesRootDir() const;
 
   std::string appendToPath(const std::string &path,
                            const std::string &toAppend) const;
@@ -372,6 +355,10 @@ private:
 
   /// the current selected instrument
   std::string m_currentInst = "";
+
+  /// Model for calculating the vanadium corrections workspaces for focus and
+  /// calib
+  boost::shared_ptr<IEnggVanadiumCorrectionsModel> m_vanadiumCorrectionsModel;
 };
 
 } // namespace CustomInterfaces

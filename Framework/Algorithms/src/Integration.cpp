@@ -173,13 +173,12 @@ void Integration::exec() {
 
     // Copy Axis values from previous workspace
     if (axisIsText) {
-      Mantid::API::TextAxis *newAxis =
-          dynamic_cast<Mantid::API::TextAxis *>(outputWorkspace->getAxis(1));
+      TextAxis *newAxis = dynamic_cast<TextAxis *>(outputWorkspace->getAxis(1));
       if (newAxis)
         newAxis->setLabel(outWI, localworkspace->getAxis(1)->label(i));
     } else if (axisIsNumeric) {
-      Mantid::API::NumericAxis *newAxis =
-          dynamic_cast<Mantid::API::NumericAxis *>(outputWorkspace->getAxis(1));
+      NumericAxis *newAxis =
+          dynamic_cast<NumericAxis *>(outputWorkspace->getAxis(1));
       if (newAxis)
         newAxis->setValue(outWI, (*(localworkspace->getAxis(1)))(i));
     }
@@ -192,10 +191,10 @@ void Integration::exec() {
     // Copy spectrum number, detector IDs
     outSpec.copyInfoFrom(inSpec);
 
-    // Retrieve the spectrum into a vector
-    const MantidVec &X = inSpec.readX();
-    const MantidVec &Y = inSpec.readY();
-    const MantidVec &E = inSpec.readE();
+    // Retrieve the spectrum into a vector (Histogram)
+    const auto &X = inSpec.x();
+    const auto &Y = inSpec.y();
+    const auto &E = inSpec.e();
 
     // Find the range [min,max]
     MantidVec::const_iterator lowit, highit;
@@ -241,8 +240,8 @@ void Integration::exec() {
     --highit; // (note: decrementing 'end()' is safe for vectors, at least
               // according to the C++ standard)
 
-    MantidVec::difference_type distmin = std::distance(X.begin(), lowit);
-    MantidVec::difference_type distmax = std::distance(X.begin(), highit);
+    auto distmin = std::distance(X.begin(), lowit);
+    auto distmax = std::distance(X.begin(), highit);
 
     double sumY = 0.0;
     double sumE = 0.0;
@@ -313,12 +312,12 @@ void Integration::exec() {
         }
       }
     } else {
-      outSpec.dataX()[0] = lowit == X.end() ? *(lowit - 1) : *(lowit);
-      outSpec.dataX()[1] = *highit;
+      outSpec.mutableX()[0] = lowit == X.end() ? *(lowit - 1) : *(lowit);
+      outSpec.mutableX()[1] = *highit;
     }
 
-    outSpec.dataY()[0] = sumY;
-    outSpec.dataE()[0] = sqrt(sumE); // Propagate Gaussian error
+    outSpec.mutableY()[0] = sumY;
+    outSpec.mutableE()[0] = sqrt(sumE); // Propagate Gaussian error
     if (rebinned_output) {
       rebinned_output->dataF(outWI)[0] = sumF;
     }
