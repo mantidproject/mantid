@@ -69,8 +69,9 @@ void LoadAndApplyMuonDetectorGrouping::init() {
       "The workspaces created by the algorithm will be placed inside this "
       "group. If not specified will save to \"MuonAnalysisGroup\" ");
 
-  declareProperty("ApplyAsymmetryToGroups", true,
-                  "Whether to calculate asymmetry and store the workspaces.");
+  declareProperty(
+      "ApplyAsymmetryToGroups", true,
+      "Whether to calculate group asymmetry and store the workspaces.");
 
   // Optional properties
 
@@ -94,7 +95,7 @@ void LoadAndApplyMuonDetectorGrouping::init() {
   declareProperty(
       make_unique<WorkspaceProperty<TableWorkspace>>(
           "DeadTimeTable", "", Direction::Input, PropertyMode::Optional),
-      "Table with dead time information, used to apply dead time corrction.");
+      "Table with dead time information, used to apply dead time correction.");
 
   // Perform Group Associations.
 
@@ -114,16 +115,16 @@ std::map<std::string, std::string>
 LoadAndApplyMuonDetectorGrouping::validateInputs() {
   std::map<std::string, std::string> errors;
 
-  //if (!this->isDefault("InputWorkspaceGroup")) {
+  if (!this->isDefault("InputWorkspaceGroup")) {
 
-  //  WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
-  //  Workspace_sptr inputWS = getProperty("InputWorkspace");
+    WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
+    Workspace_sptr inputWS = getProperty("InputWorkspace");
 
-  //  if (groupedWS && groupedWS->getName() == inputWS->getName()) {
-  //    errors["InputWorkspaceGroup"] = "The InputWorkspaceGroup should not have "
-  //                                    "the same name as InputWorkspace.";
-  //  }
-  //}
+    if (groupedWS && groupedWS->getName() == inputWS->getName()) {
+      errors["InputWorkspaceGroup"] = "The InputWorkspaceGroup should not have "
+                                      "the same name as InputWorkspace.";
+    }
+  }
 
   return errors;
 }
