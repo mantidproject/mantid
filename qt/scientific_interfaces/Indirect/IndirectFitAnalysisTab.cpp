@@ -109,8 +109,9 @@ void IndirectFitAnalysisTab::setup() {
 
 void IndirectFitAnalysisTab::setSpectrumSelectionView(
     IndirectSpectrumSelectionView *view) {
-  m_spectrumPresenter = std::make_unique<IndirectSpectrumSelectionPresenter>(
-      m_fittingModel.get(), view);
+  m_spectrumPresenter =
+      Mantid::Kernel::make_unique<IndirectSpectrumSelectionPresenter>(
+          m_fittingModel.get(), view);
 }
 
 void IndirectFitAnalysisTab::setFitPropertyBrowser(

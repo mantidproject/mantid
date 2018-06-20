@@ -118,8 +118,9 @@ excludeRegionsStringToVector(const std::string &excludeRegions) {
 std::ostringstream &addInputString(IndirectFitData *fitData,
                                    std::ostringstream &stream) {
   const auto &name = fitData->workspace()->getName();
-  auto addToStream =
-      [&](std::size_t spectrum) { stream << name << ",i" << spectrum << ";"; };
+  auto addToStream = [&](std::size_t spectrum) {
+    stream << name << ",i" << spectrum << ";";
+  };
   fitData->applySpectra(addToStream);
   return stream;
 }
@@ -522,7 +523,7 @@ void IndirectFittingModel::addOutput(WorkspaceGroup_sptr resultGroup,
     addOutput(m_fitOutput.get(), resultGroup, parameterTable, resultWorkspace,
               fitDataBegin, fitDataEnd);
   else
-    m_fitOutput = std::make_unique<IndirectFitOutput>(
+    m_fitOutput = Mantid::Kernel::make_unique<IndirectFitOutput>(
         createFitOutput(resultGroup, parameterTable, resultWorkspace,
                         fitDataBegin, fitDataEnd));
   m_previousModelSelected = isPreviousModelSelected();
@@ -537,8 +538,9 @@ void IndirectFittingModel::addOutput(WorkspaceGroup_sptr resultGroup,
     addOutput(m_fitOutput.get(), resultGroup, parameterTable, resultWorkspace,
               fitData, spectrum);
   else
-    m_fitOutput = std::make_unique<IndirectFitOutput>(createFitOutput(
-        resultGroup, parameterTable, resultWorkspace, fitData, spectrum));
+    m_fitOutput =
+        Mantid::Kernel::make_unique<IndirectFitOutput>(createFitOutput(
+            resultGroup, parameterTable, resultWorkspace, fitData, spectrum));
   m_previousModelSelected = isPreviousModelSelected();
 }
 
@@ -619,7 +621,7 @@ IndirectFittingModel::mapDefaultParameterNames() const {
 }
 
 std::unordered_map<std::string, ParameterValue>
-    IndirectFittingModel::createDefaultParameters(std::size_t) const {
+IndirectFittingModel::createDefaultParameters(std::size_t) const {
   return std::unordered_map<std::string, ParameterValue>();
 }
 

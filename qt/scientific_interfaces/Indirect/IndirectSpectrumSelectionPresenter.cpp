@@ -29,7 +29,7 @@ private:
   IndirectSpectrumSelectionView *m_view;
 };
 
-}; // namespace
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
