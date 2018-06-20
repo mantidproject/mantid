@@ -3,12 +3,14 @@
 
 #include "MantidAlgorithms/MaxEnt/MaxentTransformFourier.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpace.h"
+#include "MantidAlgorithms/MaxEnt/MaxentSpaceComplex.h"
 #include <memory>
 
 namespace Mantid {
 namespace Algorithms {
 
 using MaxentSpace_sptr = std::shared_ptr<MaxentSpace>;
+using MaxentSpaceComplex_sptr = std::shared_ptr<MaxentSpaceComplex>;
 
 /** MaxentTransformMultiFourier : Defines a transformation from 
   data space to image space (and vice-versa) 
@@ -51,7 +53,7 @@ public:
   // Deleted default constructor
   MaxentTransformMultiFourier() = delete;
   // Constructor
-  MaxentTransformMultiFourier(MaxentSpace_sptr dataSpace,
+  MaxentTransformMultiFourier(MaxentSpaceComplex_sptr dataSpace,
                          MaxentSpace_sptr imageSpace,
                          size_t numSpec);
   // Transfoms form image space to data space

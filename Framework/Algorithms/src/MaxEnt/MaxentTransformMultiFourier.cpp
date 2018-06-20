@@ -6,7 +6,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** Constructor */
-MaxentTransformMultiFourier::MaxentTransformMultiFourier(MaxentSpace_sptr dataSpace,
+MaxentTransformMultiFourier::MaxentTransformMultiFourier(MaxentSpaceComplex_sptr dataSpace,
                                                MaxentSpace_sptr imageSpace,
                                                size_t numSpec)
     : MaxentTransformFourier(dataSpace, imageSpace), m_numSpec(numSpec), m_linearAdjustments(), m_constAdjustments() {}

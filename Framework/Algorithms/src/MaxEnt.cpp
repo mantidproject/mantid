@@ -226,7 +226,8 @@ void MaxEnt::init() {
       "PerSpectrumImage", true,
       "Reconstruction is done independently on each spectrum. "
       "If false, all the spectra use one image and the reconstructions "
-      "differ only through their adjustments.");
+      "differ only through their adjustments. "
+      "ComplexData must be set true, when this is false.");
 
   declareProperty(
       make_unique<WorkspaceProperty<>>("EvolChi", "", Direction::Output),
