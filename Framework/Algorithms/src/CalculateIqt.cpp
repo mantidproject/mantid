@@ -25,63 +25,63 @@ namespace {
   }
 
   MatrixWorkspace_sptr integration(MatrixWorkspace_sptr workspace) {
-    IAlgorithm_sptr rebinAlgorithm = AlgorithmManager::Instance().create("Integration");
-    rebinAlgorithm->setChild(true);
-    rebinAlgorithm->initialize();
-    rebinAlgorithm->setProperty("InputWorkspace", workspace);
-    rebinAlgorithm->execute();
-    return rebinAlgorithm->getProperty("OutputWorkspace");
+    IAlgorithm_sptr integrationAlgorithm = AlgorithmManager::Instance().create("Integration");
+    integrationAlgorithm->setChild(true);
+    integrationAlgorithm->initialize();
+    integrationAlgorithm->setProperty("InputWorkspace", workspace);
+    integrationAlgorithm->execute();
+    return integrationAlgorithm->getProperty("OutputWorkspace");
   }
 
   MatrixWorkspace_sptr convertToPointData(MatrixWorkspace_sptr workspace) {
-    IAlgorithm_sptr rebinAlgorithm = AlgorithmManager::Instance().create("ConvertToPointData");
-    rebinAlgorithm->setChild(true);
-    rebinAlgorithm->initialize();
-    rebinAlgorithm->setProperty("InputWorkspace", workspace);
-    rebinAlgorithm->execute();
-    return rebinAlgorithm->getProperty("OutputWorkspace");
+    IAlgorithm_sptr pointDataAlgorithm = AlgorithmManager::Instance().create("ConvertToPointData");
+    pointDataAlgorithm->setChild(true);
+    pointDataAlgorithm->initialize();
+    pointDataAlgorithm->setProperty("InputWorkspace", workspace);
+    pointDataAlgorithm->execute();
+    return pointDataAlgorithm->getProperty("OutputWorkspace");
   }
 
   MatrixWorkspace_sptr extractFFTSpectrum(MatrixWorkspace_sptr workspace) {
-    IAlgorithm_sptr rebinAlgorithm = AlgorithmManager::Instance().create("ExtractFFTSpectrum");
-    rebinAlgorithm->setChild(true);
-    rebinAlgorithm->initialize();
-    rebinAlgorithm->setProperty("InputWorkspace", workspace);
-    rebinAlgorithm->setProperty("FFTPart", 2);
-    rebinAlgorithm->execute();
-    return rebinAlgorithm->getProperty("OutputWorkspace");
+    IAlgorithm_sptr FFTAlgorithm = AlgorithmManager::Instance().create("ExtractFFTSpectrum");
+    FFTAlgorithm->setChild(true);
+    FFTAlgorithm->initialize();
+    FFTAlgorithm->setProperty("InputWorkspace", workspace);
+    FFTAlgorithm->setProperty("FFTPart", 2);
+    FFTAlgorithm->execute();
+    return FFTAlgorithm->getProperty("OutputWorkspace");
   }
 
   MatrixWorkspace_sptr divide(MatrixWorkspace_sptr lhsWorkspace, MatrixWorkspace_sptr rhsWorkspace) {
-    IAlgorithm_sptr rebinAlgorithm = AlgorithmManager::Instance().create("ConvertToPointData");
-    rebinAlgorithm->setChild(true);
-    rebinAlgorithm->initialize();
-    rebinAlgorithm->setProperty("LHSWorkspace", lhsWorkspace);
-    rebinAlgorithm->setProperty("RHSWorkspace", rhsWorkspace);
-    rebinAlgorithm->execute();
-    return rebinAlgorithm->getProperty("OutputWorkspace");
+    IAlgorithm_sptr divideAlgorithm = AlgorithmManager::Instance().create("Divide");
+    divideAlgorithm->setChild(true);
+    divideAlgorithm->initialize();
+    divideAlgorithm->setProperty("LHSWorkspace", lhsWorkspace);
+    divideAlgorithm->setProperty("RHSWorkspace", rhsWorkspace);
+    divideAlgorithm->execute();
+    return divideAlgorithm->getProperty("OutputWorkspace");
   }
 
   MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr workspace, double xMax) {
-    IAlgorithm_sptr rebinAlgorithm = AlgorithmManager::Instance().create("CropWorkspace");
-    rebinAlgorithm->setChild(true);
-    rebinAlgorithm->initialize();
-    rebinAlgorithm->setProperty("InputWorkspace", workspace);
-    rebinAlgorithm->setProperty("XMax", xMax);
-    rebinAlgorithm->execute();
-    return rebinAlgorithm->getProperty("OutputWorkspace");
+    IAlgorithm_sptr cropAlgorithm = AlgorithmManager::Instance().create("CropWorkspace");
+    cropAlgorithm->setChild(true);
+    cropAlgorithm->initialize();
+    cropAlgorithm->setProperty("InputWorkspace", workspace);
+    cropAlgorithm->setProperty("XMax", xMax);
+    cropAlgorithm->execute();
+    return cropAlgorithm->getProperty("OutputWorkspace");
   }
 
   MatrixWorkspace_sptr replaceSpecialValues(MatrixWorkspace_sptr workspace) {
-    IAlgorithm_sptr rebinAlgorithm = AlgorithmManager::Instance().create("ReplaceSpecialValues");
-    rebinAlgorithm->setChild(true);
-    rebinAlgorithm->initialize();
-    rebinAlgorithm->setProperty("InputWorkspace", workspace);
-    rebinAlgorithm->setProperty("InfinityValue", 0.0);
-    rebinAlgorithm->setProperty("BigNumberThreshold", 1.0001);
-    rebinAlgorithm->setProperty("NaNValue", 0.0);
-    rebinAlgorithm->execute();
-    return rebinAlgorithm->getProperty("OutputWorkspace");
+    IAlgorithm_sptr specialValuesAlgorithm = AlgorithmManager::Instance().create("ReplaceSpecialValues");
+    specialValuesAlgorithm->setChild(true);
+    specialValuesAlgorithm->initialize();
+    specialValuesAlgorithm->setProperty("InputWorkspace", workspace);
+    specialValuesAlgorithm->setProperty("InfinityValue", 0.0);
+    specialValuesAlgorithm->setProperty("BigNumberThreshold", 1.0001);
+    specialValuesAlgorithm->setProperty("NaNValue", 0.0);
+    specialValuesAlgorithm->execute();
+    return specialValuesAlgorithm->getProperty("OutputWorkspace");
   }
 
   std::string createRebinString(double minimum, double maximum, double width) {
