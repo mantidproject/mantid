@@ -86,7 +86,7 @@ std::unique_ptr<IReflRunsTabPresenter> QtReflMainWindowView::createRunsTab() {
       BatchPresenterFactory(instruments, 0.01, workspaceNamesFactory),
       workspaceNamesFactory, 0.01, instruments, defaultInstrumentIndex);
 
-  return runsTabPresenter;
+  return std::move(runsTabPresenter);
 }
 
 /** Creates the 'Event Handling' tab and returns a pointer to its presenter

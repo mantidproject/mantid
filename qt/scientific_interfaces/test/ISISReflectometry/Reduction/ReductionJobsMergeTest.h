@@ -4,6 +4,7 @@
 #include <gmock/gmock.h>
 #include "../../../ISISReflectometry/Reduction/ReductionJobs.h"
 #include "../../../ISISReflectometry/Reduction/WorkspaceNamesFactory.h"
+#include "../../../ISISReflectometry/ZipRange.h"
 
 using testing::_;
 using testing::NiceMock;
@@ -175,28 +176,19 @@ public:
   }
 
   template <typename T>
-  bool equalRunNumbers(ReductionJobs<T> const &lhs,
-                       ReductionJobs<T> const &rhs) {
+  bool haveEqualRunNumbers(ReductionJobs<T> const &lhs,
+                           ReductionJobs<T> const &rhs) {
     if (lhs.groups().size() == rhs.groups().size()) {
-      auto lhsGroupIt = lhs.groups().cbegin();
-      auto rhsGroupIt = rhs.groups().cbegin();
-      for (; lhsGroupIt != lhs.groups().cend(); ++lhsGroupIt, ++rhsGroupIt) {
-        auto const &lhsGroup = (*lhsGroupIt);
-        auto const &rhsGroup = (*rhsGroupIt);
-        if (lhsGroup.rows().size() == rhsGroup.rows().size()) {
-          auto lhsRowIt = lhsGroup.rows().cbegin();
-          auto rhsRowIt = rhsGroup.rows().cbegin();
-          for (; lhsRowIt != lhsGroup.rows().cend(); ++lhsRowIt, ++rhsRowIt) {
-            auto const &lhsRow = (*lhsRowIt);
-            auto const &rhsRow = (*rhsRowIt);
-            if (lhsRow.is_initialized() != rhsRow.is_initialized())
+      for (auto groupPair : zip_range(lhs.groups(), rhs.groups())) {
+        for (auto rowPair :
+             zip_range(groupPair.get<0>().rows(), groupPair.get<1>().rows())) {
+          auto const &lhsRow = rowPair.get<0>();
+          auto const &rhsRow = rowPair.get<1>();
+          if (lhsRow.is_initialized() != rhsRow.is_initialized())
+            return false;
+          else if (lhsRow.is_initialized())
+            if (lhsRow.get().runNumbers() != rhsRow.get().runNumbers())
               return false;
-            else if (lhsRow.is_initialized())
-              if (lhsRow.get().runNumbers() != rhsRow.get().runNumbers())
-                return false;
-          }
-        } else {
-          return false;
         }
       }
       return true;
@@ -226,7 +218,7 @@ public:
     auto addition = target;
     mergeJobsInto(target, addition, m_thetaTolerance, m_nameFactory, listener);
 
-    TS_ASSERT(equalRunNumbers(target, addition))
+    TS_ASSERT(haveEqualRunNumbers(target, addition))
     TS_ASSERT(Mock::VerifyAndClearExpectations(&listener));
   }
 
