@@ -109,7 +109,7 @@ std::string createRebinString(double minimum, double maximum, double width) {
 
 template <typename Generator>
 void randomizeHistogramWithinError(HistogramY &row, const HistogramE &errors,
-                             Generator &generator) {
+                                   Generator &generator) {
   for (auto i = 0u; i < row.size(); ++i) {
     auto randomValue = generator(errors[i]);
     row[i] += randomValue;
@@ -128,8 +128,9 @@ randomizeWorkspaceWithinError(MatrixWorkspace_sptr workspace, const int seed) {
 }
 
 double standardDeviation(const std::vector<double> &inputValues) {
-  const auto mean = std::accumulate(inputValues.begin(), inputValues.end(), 0.0) /
-                inputValues.size();
+  const auto mean =
+      std::accumulate(inputValues.begin(), inputValues.end(), 0.0) /
+      inputValues.size();
   double sumOfXMinusMeanSquared = 0;
   for (auto &&x : inputValues)
     sumOfXMinusMeanSquared += (x - mean) * (x - mean);
@@ -140,7 +141,8 @@ std::vector<double>
 standardDeviationArray(const std::vector<std::vector<double>> &yValues) {
   std::vector<double> standardDeviations;
   standardDeviations.reserve(yValues.size());
-  std::transform(yValues.begin(), yValues.end(), std::back_inserter(standardDeviations), standardDeviation);
+  std::transform(yValues.begin(), yValues.end(),
+                 std::back_inserter(standardDeviations), standardDeviation);
   return standardDeviations;
 }
 
@@ -169,17 +171,17 @@ MatrixWorkspace_sptr calculateIqt(MatrixWorkspace_sptr workspace,
 }
 
 MatrixWorkspace_sptr doSimulation(MatrixWorkspace_sptr sample,
-                                  MatrixWorkspace_sptr resolution, 
-                                  const std::string &rebinParams, 
+                                  MatrixWorkspace_sptr resolution,
+                                  const std::string &rebinParams,
                                   const int seed) {
   auto simulatedWorkspace = randomizeWorkspaceWithinError(sample, seed);
   return calculateIqt(simulatedWorkspace, resolution, rebinParams);
 }
 
 MatrixWorkspace_sptr setErrorsToStandardDeviation(
-  int nIterations,
-  const std::vector<MatrixWorkspace_sptr> &simulatedWorkspaces,
-  MatrixWorkspace_sptr outputWorkspace) {
+    int nIterations,
+    const std::vector<MatrixWorkspace_sptr> &simulatedWorkspaces,
+    MatrixWorkspace_sptr outputWorkspace) {
   // set errors to standard deviation of y values across simulations
   std::vector<std::vector<double>> allSimY;
   allSimY.reserve(nIterations);
@@ -253,8 +255,8 @@ void CalculateIqt::exec() {
   const int seed = getProperty("SeedValue");
   resolution = normalizedFourierTransform(resolution, rebinParams);
 
-  auto outputWorkspace = monteCarloErrorCalculation(sampleWorkspace, resolution,
-                                                    rebinParams, seed, nIterations);
+  auto outputWorkspace = monteCarloErrorCalculation(
+      sampleWorkspace, resolution, rebinParams, seed, nIterations);
 
   outputWorkspace = removeInvalidData(outputWorkspace);
   setProperty("OutputWorkspace", outputWorkspace);
@@ -267,8 +269,9 @@ std::string CalculateIqt::rebinParamsAsString() {
   return createRebinString(e_min, e_max, e_width);
 }
 
-MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(MatrixWorkspace_sptr sample, MatrixWorkspace_sptr resolution, 
-  const std::string &rebinParams, const int seed, const int nIterations) {
+MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(
+    MatrixWorkspace_sptr sample, MatrixWorkspace_sptr resolution,
+    const std::string &rebinParams, const int seed, const int nIterations) {
   auto outputWorkspace = calculateIqt(sample, resolution, rebinParams);
   std::vector<MatrixWorkspace_sptr> simulatedWorkspaces;
   simulatedWorkspaces.reserve(nIterations);
@@ -277,7 +280,8 @@ MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(MatrixWorkspace_sp
   PARALLEL_FOR_IF(Kernel::threadSafe(*sample, *resolution))
   for (auto i = 0; i < nIterations - 1; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    simulatedWorkspaces.emplace_back(doSimulation(sample->clone(), resolution, rebinParams, seed));
+    simulatedWorkspaces.emplace_back(
+        doSimulation(sample->clone(), resolution, rebinParams, seed));
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
