@@ -9,7 +9,7 @@ namespace Algorithms {
 MaxentTransformMultiFourier::MaxentTransformMultiFourier(MaxentSpace_sptr dataSpace,
                                                MaxentSpace_sptr imageSpace,
                                                size_t numSpec)
-    : MaxentTransformFourier(dataSpace, imageSpace), m_linearAdjustments(), m_constAdjustments() {}
+    : MaxentTransformFourier(dataSpace, imageSpace), m_numSpec(numSpec), m_linearAdjustments(), m_constAdjustments() {}
 
 /**
 * Transforms a 1D signal from image space to data space, performing an
@@ -26,7 +26,7 @@ MaxentTransformMultiFourier::MaxentTransformMultiFourier(MaxentSpace_sptr dataSp
 std::vector<double>
 MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
 
-  std::vector<double> dataOneSpec = imageToData(image);
+  std::vector<double> dataOneSpec = MaxentTransformFourier::imageToData(image);
 
   // Create concatenated copies of transformed data (one for each spectrum)
   std::vector<double> data;
@@ -70,12 +70,12 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
 std::vector<double>
 MaxentTransformMultiFourier::dataToImage(const std::vector<double> &data) {
 
-  if (size(data) % m_numSpec*2)
+  if (size(data) % m_numSpec)
     throw std::invalid_argument(
-      "Size of data vector must be an multiple of twice the number of spectra.");
+      "Size of data vector must be a multiple of number of spectra.");
 
   // Sum the concatenated spectra in data
-  size_t nData = size(data) / (m_numSpec * 2);
+  size_t nData = size(data) / (m_numSpec );
   std::vector<double> dataSum(nData, 0.0);
   for (size_t s = 0; s < m_numSpec; s++) {
     for (size_t i = 0; i < nData; i++) {
@@ -83,7 +83,7 @@ MaxentTransformMultiFourier::dataToImage(const std::vector<double> &data) {
     }
   }
   // Then apply forward fourier transform to sum
-  std::vector<double> image = dataToImage(dataSum);
+  std::vector<double> image = MaxentTransformFourier::dataToImage(dataSum);
 
   return image;
 }

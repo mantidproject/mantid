@@ -29,7 +29,44 @@ public:
   }
   static void destroySuite(MaxentTransformMultiFourierTest *suite) { delete suite; }
 
-  void test_nothing_yet() {
+  void test_real_data_to_real_image_against_fourier() {
+
+    MaxentSpace_sptr dataSpaceMF = std::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr imageSpaceMF = std::make_shared<MaxentSpaceReal>();
+    MaxentTransformMultiFourier transformMF(dataSpaceMF, imageSpaceMF, 3);
+    MaxentSpace_sptr dataSpaceF = std::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr imageSpaceF = std::make_shared<MaxentSpaceReal>();
+    MaxentTransformFourier transformF(dataSpaceF, imageSpaceF);
+
+    // Three square waves that add up to a saw tooth wave
+    std::vector<double> realDataMF = {
+      1, -1, 1, -1, 1, -1, 1, -1, 2, 2, -2, -2, 2, 2, -2, -2, 4, 4, 4, 4, -4, -4, -4, -4 };
+    std::vector<double> realDataF = {
+      7, 5, 3, 1, -1, -3, -5, -7 };
+
+    // Perform the transformation
+    auto result = transformMF.dataToImage(realDataMF);
+    // Perform Fourier transformation for comparison
+    auto resultF = transformF.dataToImage(realDataF);
+
+    // Check both results are equal
+    TS_ASSERT_EQUALS(result.size(), resultF.size());
+    if (result.size() == resultF.size()) {
+      for (size_t i = 0; i < result.size(); i++) {
+          TS_ASSERT_DELTA(result[i], resultF[i], 1e-4);
+        }
+    }
+  }
+
+  void test_real_data_to_complex_image_against_fourier() {
+
+  }
+
+  void test_complex_data_to_real_image_against_fourier() {
+
+  }
+
+  void test_complex_data_to_complex_image_against_fourier() {
 
   }
 
