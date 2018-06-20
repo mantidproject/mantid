@@ -330,8 +330,7 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("outWS"));
 
     MatrixWorkspace_sptr firstLam =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
 
     TS_ASSERT(firstLam);
     TS_ASSERT_EQUALS(firstLam->getAxis(0)->unit()->unitID(), "Wavelength");
@@ -399,9 +398,9 @@ public:
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_4321"));
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
+    TS_ASSERT(
+        !AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("outWS"));
-
   }
 
   void test_two_runs_store_in_ADS_default() {

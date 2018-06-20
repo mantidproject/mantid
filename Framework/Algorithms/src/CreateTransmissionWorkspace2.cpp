@@ -234,7 +234,7 @@ void CreateTransmissionWorkspace2::storeOutputWorkspace(
       name.append("_");
       name.append(m_secondTransmissionRunNumber);
     }
-    setPropertyValue("OutputWorkspace",  name);
+    setPropertyValue("OutputWorkspace", name);
   }
   setProperty("OutputWorkspace", ws);
 }
