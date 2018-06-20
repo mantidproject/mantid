@@ -118,8 +118,7 @@ ONCat::ONCat(const ONCat &other)
     : m_url(other.m_url), m_tokenStore(other.m_tokenStore),
       m_clientId(other.m_clientId), m_clientSecret(other.m_clientSecret),
 
-      m_flow(other.m_flow),
-      m_internetHelper(other.m_internetHelper) {}
+      m_flow(other.m_flow), m_internetHelper(other.m_internetHelper) {}
 
 ONCat::~ONCat() {}
 

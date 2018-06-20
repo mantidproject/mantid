@@ -275,11 +275,10 @@ public:
 
     auto mock_oncat_api = make_mock_oncat_api(
         {{DUMMY_URL + "/api/instruments/HB2C?facility=HFIR",
-          std::make_pair(HTTPResponse::HTTP_OK,
-              "{\"facility\": \"HFIR\","
-              "\"name\": \"HB2C\","
-              "\"id\": \"HB2C\","
-              "\"type\": \"instrument\"}")}});
+          std::make_pair(HTTPResponse::HTTP_OK, "{\"facility\": \"HFIR\","
+                                                "\"name\": \"HB2C\","
+                                                "\"id\": \"HB2C\","
+                                                "\"type\": \"instrument\"}")}});
 
     oncat.setInternetHelper(mock_oncat_api);
 
@@ -363,11 +362,10 @@ public:
               "\"access_token\": \"2KSL5aEnLvIudMHIjc7LcBWBCfxOHZ\", "
               "\"scope\": \"api:read data:read settings:read\"}")},
          {DUMMY_URL + "/api/instruments/HB2C?facility=HFIR",
-          std::make_pair(HTTPResponse::HTTP_OK,
-                         "{\"facility\": \"HFIR\","
-                         "\"name\": \"HB2C\","
-                         "\"id\": \"HB2C\","
-                         "\"type\": \"instrument\"}")}});
+          std::make_pair(HTTPResponse::HTTP_OK, "{\"facility\": \"HFIR\","
+                                                "\"name\": \"HB2C\","
+                                                "\"id\": \"HB2C\","
+                                                "\"type\": \"instrument\"}")}});
 
     oncat.setInternetHelper(mock_oncat_api);
 
@@ -378,11 +376,10 @@ public:
 
     mock_oncat_api = make_mock_oncat_api({{
         DUMMY_URL + "/oauth/token",
-        std::make_pair(
-            HTTPResponse::HTTP_OK,
-            "{\"token_type\": \"Bearer\", \"expires_in\": 3600, "
-            "\"access_token\": \"987JHGFiusdvs72fAkjhsKJH32tkjk\", "
-            "\"scope\": \"api:read data:read settings:read\"}"), }});
+        std::make_pair(HTTPResponse::HTTP_OK,
+                       "{\"token_type\": \"Bearer\", \"expires_in\": 3600, "
+                       "\"access_token\": \"987JHGFiusdvs72fAkjhsKJH32tkjk\", "
+                       "\"scope\": \"api:read data:read settings:read\"}"), }});
 
     oncat.setInternetHelper(mock_oncat_api);
 
