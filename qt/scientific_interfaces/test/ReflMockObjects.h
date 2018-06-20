@@ -47,6 +47,11 @@ public:
 
 class MockRunsTabView : public IReflRunsTabView {
 public:
+  MockRunsTabView() {
+    ON_CALL(*this, tableViews())
+        .WillByDefault(testing::ReturnRef(m_tableViews));
+  }
+
   // Gmock requires parameters and return values of mocked methods to be
   // copyable
   // We can't mock setTableCommands(std::vector<Command_uptr>)
@@ -96,6 +101,9 @@ public:
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
   IReflRunsTabPresenter *getPresenter() const override { return nullptr; };
+
+private:
+  std::vector<IBatchView *> m_tableViews;
 };
 
 class MockSettingsView : public IReflSettingsView {
