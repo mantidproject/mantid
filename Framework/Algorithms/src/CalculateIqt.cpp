@@ -111,7 +111,7 @@ template <typename Generator>
 void randomizeHistogramWithinError(HistogramY &row, const HistogramE &errors,
                              Generator &generator) {
   for (auto i = 0u; i < row.size(); ++i) {
-    auto randomValue = rng(errors[i]);
+    auto randomValue = generator(errors[i]);
     row[i] += randomValue;
   }
 }
@@ -277,7 +277,7 @@ MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(MatrixWorkspace_sp
   PARALLEL_FOR_IF(Kernel::threadSafe(*sample, *resolution))
   for (auto i = 0; i < nIterations - 1; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    simulatedWorkspaces.emplace_back(doSimulation(sample->clone, resolution, rebinParams, seed);
+    simulatedWorkspaces.emplace_back(doSimulation(sample->clone(), resolution, rebinParams, seed));
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
