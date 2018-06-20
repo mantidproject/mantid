@@ -4625,8 +4625,7 @@ bool SANSRunWindow::areSettingsValid(States type) {
     auto is1D = type == OneD;
     auto isCanSAS = m_uiForm.saveCan_check->isChecked();
     QString saveMessage;
-    auto isValidSaveOption =
-        checkSaveOptions(saveMessage, is1D, isCanSAS);
+    auto isValidSaveOption = checkSaveOptions(saveMessage, is1D, isCanSAS);
     if (!isValidSaveOption) {
       isValid = false;
       message += saveMessage;

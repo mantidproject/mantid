@@ -369,7 +369,7 @@ bool SaveWorkspaces::isValid() {
             .retrieveWS<Mantid::API::MatrixWorkspace>(wsName.toStdString());
     if (workspace->getNumberHistograms() != 1) {
       is2D = true;
-    } 
+    }
   }
 
   // Check if CanSAS was selected
@@ -387,7 +387,7 @@ bool SaveWorkspaces::isValid() {
   // Check for errors
   QString message;
   auto isValidOption = true;
-  
+
   if (is2D && isCanSAS) {
     isValidOption = false;
     message += "Save option issue: Cannot save in CanSAS format for 2D data.\n";
