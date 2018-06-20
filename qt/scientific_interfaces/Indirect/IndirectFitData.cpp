@@ -99,12 +99,14 @@ struct CombineSpectra : boost::static_visitor<Spectra> {
     else if (spectra2.second + 1 == spectra1.first)
       return std::make_pair(spectra2.first, spectra1.second);
     else
-      return rangeToString(spectra1) + "," + rangeToString(spectra2);
+      return DiscontinuousSpectra<std::size_t>(rangeToString(spectra1) + "," +
+                                               rangeToString(spectra2));
   }
 
   Spectra operator()(const Spectra &spectra1, const Spectra &spectra2) const {
-    return boost::apply_visitor(SpectraToString(), spectra1) + "," +
-           boost::apply_visitor(SpectraToString(), spectra2);
+    return DiscontinuousSpectra<std::size_t>(
+        boost::apply_visitor(SpectraToString(), spectra1) + "," +
+        boost::apply_visitor(SpectraToString(), spectra2));
   }
 };
 
@@ -231,6 +233,10 @@ std::string IndirectFitData::getExcludeRegion(std::size_t spectrum) const {
 std::vector<double>
 IndirectFitData::excludeRegionsVector(std::size_t spectrum) const {
   return vectorFromString<double>(getExcludeRegion(spectrum));
+}
+
+void IndirectFitData::setSpectra(const std::string &spectra) {
+  setSpectra(DiscontinuousSpectra<std::size_t>(spectra));
 }
 
 void IndirectFitData::setSpectra(Spectra &&spectra) {

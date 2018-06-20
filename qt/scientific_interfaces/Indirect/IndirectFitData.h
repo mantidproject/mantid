@@ -24,7 +24,7 @@ std::vector<T> vectorFromString(const std::string &listString) {
 
 template <typename T> class DiscontinuousSpectra {
 public:
-  DiscontinuousSpectra(const std::string &str)
+  explicit DiscontinuousSpectra(const std::string &str)
       : m_str(str), m_vec(vectorFromString<T>(str)) {}
   DiscontinuousSpectra(const DiscontinuousSpectra &vec)
       : m_str(vec.m_str), m_vec(vec.m_vec) {}
@@ -137,6 +137,7 @@ public:
                                 m_spectra);
   }
 
+  void setSpectra(const std::string &spectra);
   void setSpectra(Spectra &&spectra);
   void setSpectra(const Spectra &spectra);
   void setStartX(double startX, std::size_t index);

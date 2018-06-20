@@ -106,6 +106,7 @@ public:
                                        bool changesFunction);
 
 protected:
+  bool validate() override;
   IndirectFittingModel *fittingModel() const;
 
   void setSampleWSSuffices(const QStringList &suffices);
@@ -138,6 +139,7 @@ signals:
   void customBoolChanged(const QString &key, bool value);
 
 protected slots:
+
   void setModelFitFunction();
   void setModelStartX(double startX);
   void setModelEndX(double startX);

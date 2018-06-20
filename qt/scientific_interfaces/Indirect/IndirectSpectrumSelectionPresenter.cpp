@@ -145,7 +145,7 @@ void IndirectSpectrumSelectionPresenter::setModelSpectra(
 
 void IndirectSpectrumSelectionPresenter::updateSpectraList(
     const std::string &spectraList) {
-  setModelSpectra(spectraList);
+  setModelSpectra(DiscontinuousSpectra<std::size_t>(spectraList));
   emit spectraChanged(m_activeIndex);
 }
 
