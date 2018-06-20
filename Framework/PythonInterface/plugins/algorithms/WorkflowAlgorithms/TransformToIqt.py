@@ -200,7 +200,6 @@ class TransformToIqt(PythonAlgorithm):
         Run TransformToIqt.
         """
         from IndirectCommon import CheckHistZero, CheckHistSame, CheckAnalysers
-        trans_prog = Progress(self, start=0.3, end=0.8, nreports=15)
         try:
             CheckAnalysers(self._sample, self._resolution)
         except ValueError:
@@ -215,91 +214,14 @@ class TransformToIqt(PythonAlgorithm):
         if num_res_hist > 1:
             CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')
 
-        # Float conversion to str differs in precision between python 2 and 3, this gives consistent results
-        rebin_param = '{:.14f},{:.14f},{:.14f}'.format(self._e_min, self._e_width, self._e_max)
-        trans_prog.report('Rebinning Workspace')
-        Rebin(InputWorkspace=self._sample,
-              OutputWorkspace='__sam_data',
-              Params=rebin_param,
-              FullBinsOnly=True)
+        CalculateIqt(InputWorkspace=self._sample, ResolutionWorkspace=self._resolution, EnergyMin=self._e_min,
+                     EnergyMax=self._e_max, EnergyWidth=self._e_width, OutputWorkspace=self._output_workspace)
 
-        # Sample
-        trans_prog.report('Rebinning sample')
-        Rebin(InputWorkspace='__sam_data',
-              OutputWorkspace='__sam_data',
-              Params=rebin_param)
-        trans_prog.report('Integrating Sample')
-        Integration(InputWorkspace='__sam_data',
-                    OutputWorkspace='__sam_int')
-        trans_prog.report('Converting Sample to data points')
-        ConvertToPointData(InputWorkspace='__sam_data',
-                           OutputWorkspace='__sam_data')
-        trans_prog.report('Extracting FFT spectrum for Sample')
-        ExtractFFTSpectrum(InputWorkspace='__sam_data',
-                           OutputWorkspace='__sam_fft',
-                           FFTPart=2)
-        trans_prog.report('Dividing Sample')
-        Divide(LHSWorkspace='__sam_fft',
-               RHSWorkspace='__sam_int',
-               OutputWorkspace='__sam')
-
-        # Resolution
-        trans_prog.report('Rebinnig Resolution')
-        Rebin(InputWorkspace=self._resolution,
-              OutputWorkspace='__res_data',
-              Params=rebin_param)
-        trans_prog.report('Integrating Resolution')
-        Integration(InputWorkspace='__res_data',
-                    OutputWorkspace='__res_int')
-        trans_prog.report('Converting Resolution to data points')
-        ConvertToPointData(InputWorkspace='__res_data',
-                           OutputWorkspace='__res_data')
-        trans_prog.report('Extractig FFT Resolution spectrum')
-        ExtractFFTSpectrum(InputWorkspace='__res_data',
-                           OutputWorkspace='__res_fft',
-                           FFTPart=2)
-        trans_prog.report('Dividing Resolution')
-        Divide(LHSWorkspace='__res_fft',
-               RHSWorkspace='__res_int',
-               OutputWorkspace='__res')
-
-        trans_prog.report('Diving Workspaces')
-        Divide(LHSWorkspace='__sam',
-               RHSWorkspace='__res',
-               OutputWorkspace=self._output_workspace)
-
-        # Cleanup sample workspaces
-        trans_prog.report('Deleting Sample temp')
-        DeleteWorkspace('__sam_data')
-        DeleteWorkspace('__sam_int')
-        DeleteWorkspace('__sam_fft')
-        DeleteWorkspace('__sam')
-
-        # Crop nonsense values off workspace
-        binning = int(math.ceil(mtd[self._output_workspace].blocksize() / 2.0))
-        bin_v = mtd[self._output_workspace].dataX(0)[binning]
-        trans_prog.report('Cropping output')
-        CropWorkspace(InputWorkspace=self._output_workspace,
-                      OutputWorkspace=self._output_workspace,
-                      XMax=bin_v)
-
-        # Replace NaN values in last bin, with zeroes
-        ReplaceSpecialValues(InputWorkspace=self._output_workspace,
-                             OutputWorkspace=self._output_workspace,
-                             InfinityValue=0.0,
-                             BigNumberThreshold=1.0001,
-                             NaNValue=0.0)
 
         # Set Y axis unit and label
         mtd[self._output_workspace].setYUnit('')
         mtd[self._output_workspace].setYUnitLabel('Intensity')
 
-        trans_prog.report('Deleting Resolution temp')
-        # Clean up resolution workspaces
-        DeleteWorkspace('__res_data')
-        DeleteWorkspace('__res_int')
-        DeleteWorkspace('__res_fft')
-        DeleteWorkspace('__res')
 
 
 # Register algorithm with Mantid
