@@ -182,7 +182,7 @@ LoadAndApplyMuonDetectorGrouping::addGroupedWSWithDefaultName(
   WorkspaceGroup_sptr groupedWS;
   if (ads.doesExist(groupedWSName)) {
     if ((groupedWS = boost::dynamic_pointer_cast<WorkspaceGroup>(
-            ads.retrieve(groupedWSName)))) {
+             ads.retrieve(groupedWSName)))) {
       return groupedWS;
     }
   }
