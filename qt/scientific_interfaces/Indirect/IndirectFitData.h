@@ -22,9 +22,9 @@ std::vector<T> vectorFromString(const std::string &listString) {
   }
 }
 
-template <typename T> struct DiscontinuousSpectra {
+template <typename T> class DiscontinuousSpectra {
 public:
-  explicit DiscontinuousSpectra(const std::string &str)
+  DiscontinuousSpectra(const std::string &str)
       : m_str(str), m_vec(vectorFromString<T>(str)) {}
   DiscontinuousSpectra(const DiscontinuousSpectra &vec)
       : m_str(vec.m_str), m_vec(vec.m_vec) {}
