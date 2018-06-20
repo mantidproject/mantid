@@ -29,7 +29,7 @@ yDataCounts2::yDataCounts2() : m_count(-1) {}
 double yDataCounts2::operator()(const double, size_t) {
   m_count++;
   return static_cast<double>(m_count);
-};
+}
 
 /**
  * Create y-values representing muon data, each spectrum is offset by 4 degrees
@@ -37,19 +37,20 @@ double yDataCounts2::operator()(const double, size_t) {
  * prevent negative values.
  */
 yDataAsymmetry::yDataAsymmetry(const double amp, const double phi)
-    : m_amp(amp), m_phi(phi){};
+    : m_amp(amp), m_phi(phi) {}
 yDataAsymmetry::yDataAsymmetry() {
   m_amp = 1.5;
   m_phi = 0.1;
-};
+}
 double yDataAsymmetry::operator()(const double t, size_t spec) {
   double e = exp(-t / tau);
   double factor = (static_cast<double>(spec) + 1.0) * 0.5;
   double phase_offset = 4 * M_PI / 180;
   return std::max(
-      0.0,
-      (10. * factor *
-       (1.0 + m_amp * cos(m_omega * t + m_phi + spec * phase_offset)) * e));
+      0.0, (10. * factor *
+            (1.0 + m_amp * cos(m_omega * t + m_phi +
+                               static_cast<double>(spec) * phase_offset)) *
+            e));
 }
 
 // Errors are fixed to 0.005
