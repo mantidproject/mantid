@@ -359,7 +359,7 @@ operator()(std::vector<std::string> const &cellText,
 }
 
 class ValidateRowVisitor
-    : boost::static_visitor<RowValidationResult<RowVariant>> {
+    : public boost::static_visitor<RowValidationResult<RowVariant>> {
 public:
   ValidateRowVisitor(std::vector<std::string> const &cells,
                      WorkspaceNamesFactory const &workspaceNamesFactory)

@@ -101,7 +101,7 @@ void BatchPresenter::notifyInsertRowRequested() {
     appendRowsToGroupsInModel(groups);
     appendRowsToGroupsInView(groups);
   } else {
-    m_view->mustSelectGroup();
+    m_view->mustSelectGroupOrRow();
   }
 }
 

@@ -16,8 +16,6 @@ using testing::NiceMock;
 class BatchPresenterGroupInsertionTest : public CxxTest::TestSuite,
                                          BatchPresenterTest {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
   static BatchPresenterGroupInsertionTest *createSuite() {
     return new BatchPresenterGroupInsertionTest();
   }
@@ -42,13 +40,6 @@ public:
     presenter.notifyCollapseAllRequested();
 
     verifyAndClearExpectations();
-  }
-
-  UnslicedReductionJobs twoEmptyGroupsModel() {
-    auto reductionJobs = UnslicedReductionJobs();
-    reductionJobs.appendGroup(UnslicedGroup("Group 1"));
-    reductionJobs.appendGroup(UnslicedGroup("Group 2"));
-    return reductionJobs;
   }
 
   void testUpdatesViewWhenGroupInsertedAfterSelection() {

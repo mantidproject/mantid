@@ -113,7 +113,7 @@ void mergeJobsInto(ReductionJobs<Group> &intoHere,
 }
 
 template <typename WorkspaceNamesFactory, typename ModificationListener>
-class MergeJobsMultivisitor : boost::static_visitor<bool> {
+class MergeJobsMultivisitor : public boost::static_visitor<bool> {
 public:
   MergeJobsMultivisitor(double thetaTolerance,
                         WorkspaceNamesFactory const &workspaceNamesFactory,

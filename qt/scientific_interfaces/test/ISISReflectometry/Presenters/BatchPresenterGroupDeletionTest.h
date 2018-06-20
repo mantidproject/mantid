@@ -17,21 +17,12 @@ using testing::NiceMock;
 class BatchPresenterGroupDeletionTest : public CxxTest::TestSuite,
                                         BatchPresenterTest {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
   static BatchPresenterGroupDeletionTest *createSuite() {
     return new BatchPresenterGroupDeletionTest();
   }
 
   static void destroySuite(BatchPresenterGroupDeletionTest *suite) {
     delete suite;
-  }
-
-  UnslicedReductionJobs twoEmptyGroupsModel() {
-    auto reductionJobs = UnslicedReductionJobs();
-    reductionJobs.appendGroup(UnslicedGroup("Group 1"));
-    reductionJobs.appendGroup(UnslicedGroup("Group 2"));
-    return reductionJobs;
   }
 
   void testUpdatesViewWhenGroupDeletedFromDirectSelection() {
@@ -72,7 +63,7 @@ public:
   }
 
   void testUpdatesViewWhenGroupDeletedFromMultiSelection() {
-    auto reductionJobs = groupWithChildModel();
+    auto reductionJobs = twoGroupsWithARowModel();
     selectedRowLocationsAre(m_jobs, {location(0), location(1)});
 
     {
@@ -87,27 +78,8 @@ public:
     verifyAndClearExpectations();
   }
 
-  UnslicedRow basicRow() {
-    return UnslicedRow(std::vector<std::string>({"101", "102"}), 1.2,
-                       {"A", "B"}, boost::none, boost::none, {},
-                       ReductionWorkspaces({}, {"", ""}, "", "", "", ""));
-  }
-
-  UnslicedReductionJobs groupWithChildModel() {
-    auto reductionJobs = UnslicedReductionJobs();
-    auto group1 = UnslicedGroup("Group 1");
-    group1.appendRow(basicRow());
-    reductionJobs.appendGroup(std::move(group1));
-
-    auto group2 = UnslicedGroup("Group 2");
-    group2.appendRow(basicRow());
-    reductionJobs.appendGroup(std::move(group2));
-
-    return reductionJobs;
-  }
-
   void testUpdatesViewWhenGroupDeletedFromChildRowSelection() {
-    auto reductionJobs = groupWithChildModel();
+    auto reductionJobs = twoGroupsWithARowModel();
     selectedRowLocationsAre(m_jobs, {location(0, 0)});
 
     EXPECT_CALL(m_jobs, removeRowAt(location(0)));
@@ -119,7 +91,7 @@ public:
   }
 
   void testUpdatesViewWhenGroupDeletedFromChildRowMultiSelection() {
-    auto reductionJobs = groupWithChildModel();
+    auto reductionJobs = twoGroupsWithARowModel();
     selectedRowLocationsAre(m_jobs, {location(0, 0), location(1, 0)});
 
     {

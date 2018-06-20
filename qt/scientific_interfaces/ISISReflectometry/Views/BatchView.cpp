@@ -62,8 +62,8 @@ void BatchView::mustNotSelectGroup() {
 
 void BatchView::mustSelectGroupOrRow() {
   QMessageBox::critical(
-      this, "No Group Selected",
-      "Select the group or rows of one or more groups you wish to delete.");
+      this, "No Group Or Row Selected",
+      "You must select a group or a row to perform this action.");
 }
 
 void BatchView::onFilterChanged(QString const &filter) {

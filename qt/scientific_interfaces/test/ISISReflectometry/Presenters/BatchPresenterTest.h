@@ -24,6 +24,41 @@ public:
     ON_CALL(view, jobs()).WillByDefault(::testing::ReturnRef(jobsView));
   }
 
+  UnslicedRow basicRow() {
+    return UnslicedRow(std::vector<std::string>({"101", "102"}), 1.2,
+                       {"A", "B"}, boost::none, boost::none, {},
+                       ReductionWorkspaces({}, {"", ""}, "", "", "", ""));
+  }
+
+  UnslicedReductionJobs twoEmptyGroupsModel() {
+    auto reductionJobs = UnslicedReductionJobs();
+    reductionJobs.appendGroup(UnslicedGroup("Group 1"));
+    reductionJobs.appendGroup(UnslicedGroup("Group 2"));
+    return reductionJobs;
+  }
+
+  UnslicedReductionJobs twoGroupsWithARowModel() {
+    auto reductionJobs = UnslicedReductionJobs();
+    auto group1 = UnslicedGroup("Group 1");
+    group1.appendRow(basicRow());
+    reductionJobs.appendGroup(std::move(group1));
+
+    auto group2 = UnslicedGroup("Group 2");
+    group2.appendRow(basicRow());
+    reductionJobs.appendGroup(std::move(group2));
+
+    return reductionJobs;
+  }
+
+  UnslicedReductionJobs oneGroupWithTwoRowsModel() {
+    auto reductionJobs = UnslicedReductionJobs();
+    auto group1 = UnslicedGroup("Group 1");
+    group1.appendRow(basicRow());
+    group1.appendRow(basicRow());
+    reductionJobs.appendGroup(std::move(group1));
+    return reductionJobs;
+  }
+
   BatchPresenterTest() : m_jobs(), m_view() { jobsViewIs(m_jobs, m_view); }
 
   bool verifyAndClearExpectations() {
