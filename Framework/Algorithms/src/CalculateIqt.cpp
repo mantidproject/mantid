@@ -137,10 +137,25 @@ namespace {
 
   MatrixWorkspace_sptr cleanOutput(MatrixWorkspace_sptr workspace) {
     auto binning = static_cast<int>(std::ceil(workspace->blocksize() / 2));
-    auto binV = workspace->dataX(0)[binning];
+    auto binV = workspace->x(0)[binning];
     workspace = cropWorkspace(workspace, binV);
     workspace = replaceSpecialValues(workspace);
     return workspace;
+  }
+
+  MatrixWorkspace_sptr normalizedFourierTransform(MatrixWorkspace_sptr workspace, const std::string &rebinParams) {
+    workspace = rebin(workspace, rebinParams);
+    auto workspace_int = integration(workspace);
+    workspace = convertToPointData(workspace);
+    workspace = extractFFTSpectrum(workspace);
+    workspace = divide(workspace, workspace_int);
+    return workspace;
+  }
+
+  MatrixWorkspace_sptr calculateIqt(MatrixWorkspace_sptr workspace,
+    MatrixWorkspace_sptr resolutionWorkspace, const std::string &rebinParams) {
+    workspace = normalizedFourierTransform(workspace, rebinParams);
+    return divide(workspace, resolutionWorkspace);
   }
 
 } // namespace
@@ -186,14 +201,15 @@ namespace Mantid {
     void CalculateIqt::exec() {
       const auto rebinParams = rebinParamsAsString();
       const MatrixWorkspace_sptr sampleWorkspace = getProperty("InputWorkspace");
-      MatrixWorkspace_sptr resolutionWorkspace = getProperty("ResolutionWorkspace");
-      resolutionWorkspace = normalizedFourierTransform(resolutionWorkspace, rebinParams);
+      MatrixWorkspace_sptr resolution = getProperty("ResolutionWorkspace");
+      resolution = normalizedFourierTransform(resolution, rebinParams);
 
-      //create function which only needs sampleWorkspace as input
-      calculateIqtFunc calculateIqtFunction = [this, resolutionWorkspace, &rebinParams](MatrixWorkspace_sptr workspace) {
-        return this->calculateIqt(workspace, resolutionWorkspace, rebinParams); };
+      //create function which only needs sampleWorkspace as input so it can be easily repeated in simulations
+      auto calculateIqtFunction = [resolution, &rebinParams](MatrixWorkspace_sptr sample) {
+        return calculateIqt(sample, resolution, rebinParams);
+      };
 
-      auto outputWorkspace = monteCarloErrorCalculation(sampleWorkspace, calculateIqtFunction);
+      auto outputWorkspace = monteCarloErrorCalculation(sampleWorkspace, resolution, calculateIqtFunction);
 
       outputWorkspace = cleanOutput(outputWorkspace);
       setProperty("OutputWorkspace", outputWorkspace);
@@ -206,23 +222,8 @@ namespace Mantid {
       return createRebinString(e_min, e_max, e_width);
     }
 
-    MatrixWorkspace_sptr CalculateIqt::calculateIqt(MatrixWorkspace_sptr workspace,
-      MatrixWorkspace_sptr resolutionWorkspace, const std::string &rebinParams) {
-      workspace = normalizedFourierTransform(workspace, rebinParams);
-      return divide(workspace, resolutionWorkspace);
-    }
-
-    MatrixWorkspace_sptr CalculateIqt::normalizedFourierTransform(MatrixWorkspace_sptr workspace, const std::string &rebinParams) {
-      workspace = rebin(workspace, rebinParams);
-      auto workspace_int = integration(workspace);
-      workspace = convertToPointData(workspace);
-      workspace = extractFFTSpectrum(workspace);
-      workspace = divide(workspace, workspace_int);
-      return workspace;
-    }
-
-    MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(MatrixWorkspace_sptr sample,
-      const calculateIqtFunc &calculateIqtFunction) {
+    MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(MatrixWorkspace_sptr sample, MatrixWorkspace_sptr resolution,
+      const std::function<MatrixWorkspace_sptr(MatrixWorkspace_sptr)> &calculateIqtFunction) {
       auto outputWorkspace = calculateIqtFunction(sample);
       const unsigned int nIterations = getProperty("NumberOfIterations");
       const unsigned int seed = getProperty("SeedValue");
@@ -230,27 +231,43 @@ namespace Mantid {
       simulatedWorkspaces.reserve(nIterations);
       simulatedWorkspaces.emplace_back(outputWorkspace);
 
-      for (auto i = 0u; i < nIterations - 1; ++i) {
+      PARALLEL_FOR_IF(Kernel::threadSafe(*sample, *resolution))
+      for (auto i = 0; i < nIterations - 1; ++i) {
+        PARALLEL_START_INTERUPT_REGION
         auto simulatedWorkspace = randomizeWorkspaceWithinError(sample->clone(), seed);
         simulatedWorkspace = calculateIqtFunction(simulatedWorkspace);
         simulatedWorkspaces.emplace_back(simulatedWorkspace);
+        PARALLEL_END_INTERUPT_REGION
       }
+      PARALLEL_CHECK_INTERUPT_REGION
+      return setErrorsToStandardDeviation(nIterations, simulatedWorkspaces, outputWorkspace);
+    }
 
-      //set each y value to its standard deviation across simulations
+    MatrixWorkspace_sptr CalculateIqt::setErrorsToStandardDeviation(int nIterations, 
+      const std::vector<MatrixWorkspace_sptr> simulatedWorkspaces, MatrixWorkspace_sptr outputWorkspace) {
+      //set errors to standard deviation of y values across simulations
       std::vector<std::vector<double>> allSimY;
       allSimY.reserve(nIterations);
+
       for (auto i = 0u; i < outputWorkspace->getNumberHistograms(); ++i) {
-        auto &outputY = outputWorkspace->mutableY(i);
-        for (auto &simWorkspace : simulatedWorkspaces)
-          allSimY.emplace_back(simWorkspace->readY(i));
-        outputY = standardDeviationArray(allSimY);
+        auto &outputError = outputWorkspace->mutableE(i);
+        for (auto &simWorkspace : simulatedWorkspaces)      
+          allSimY.emplace_back(simWorkspace->y(i).rawData());
+        outputError = standardDeviationArray(allSimY);
       }
       return outputWorkspace;
     }
 
     std::map<std::string, std::string> CalculateIqt::validateInputs() {
-      std::map<std::string, std::string> emptyMap;
-      return emptyMap;
+      std::map<std::string, std::string> issues;
+      const double eMin = getProperty("EnergyMin");
+      const double eMax = getProperty("EnergyMax");
+      if (eMin > eMax) {
+        auto energy_swapped = "EnergyMin is greater than EnergyMax";
+        issues["EnergyMin"] = energy_swapped;
+        issues["EnergyMax"] = energy_swapped;
+      }
+      return issues;
     }
 
 } // namespace Algorithms

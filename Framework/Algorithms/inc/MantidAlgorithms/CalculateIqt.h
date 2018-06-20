@@ -27,8 +27,6 @@ namespace Algorithms {
     Code Documentation is available at : <http://doxygen.mantidproject.org>
 */
 
-typedef std::function<API::MatrixWorkspace_sptr(API::MatrixWorkspace_sptr)> calculateIqtFunc;
-
 class DLLExport CalculateIqt : public API::Algorithm {
 public:
 
@@ -43,11 +41,10 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
   std::string rebinParamsAsString();
-  API::MatrixWorkspace_sptr normalizedFourierTransform(API::MatrixWorkspace_sptr workspace, const std::string &rebinParams);
-  API::MatrixWorkspace_sptr calculateIqt(API::MatrixWorkspace_sptr workspace, 
-    API::MatrixWorkspace_sptr resolutionWorkspace, const std::string &rebinParams);
-  API::MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(API::MatrixWorkspace_sptr sample,
-    const calculateIqtFunc &calculateIqtFunction);
+  API::MatrixWorkspace_sptr monteCarloErrorCalculation(API::MatrixWorkspace_sptr sample, API::MatrixWorkspace_sptr resolution,
+    const std::function<API::MatrixWorkspace_sptr(API::MatrixWorkspace_sptr)> &calculateIqtFunction);
+  API::MatrixWorkspace_sptr CalculateIqt::setErrorsToStandardDeviation(int nIterations, const std::vector<API::MatrixWorkspace_sptr> simulatedWorkspaces,
+    API::MatrixWorkspace_sptr outputWorkspace);
 };
 
 } // namespace Algorithms
