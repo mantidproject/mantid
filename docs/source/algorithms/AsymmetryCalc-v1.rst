@@ -21,7 +21,7 @@ group. It then calculates the asymmetry, :math:`A`, as:
 where :math:`F` is the front spectra, :math:`B` is the back spectra
 and :math:`\alpha` is the balance parameter [1]_.
 
-The error in :math:`A`, :math:`\sigma_A` is calculated using standard error propagation. First the errors in :math:`F-\alpha B` and :math:`F+\alpha B` are calculated first
+The error in :math:`A`, :math:`\sigma_A` is calculated using standard error propagation. First the errors in :math:`F-\alpha B` and :math:`F+\alpha B` are calculated
 by adding the errors in :math:`F` and :math:`B` in quadrature (:math:`\alpha` is assumed to have no error);
 
 .. math:: \sigma_{F + \alpha B} = \sigma_{F - \alpha B} = \sqrt{ \sigma_F^2 + \alpha^2 \sigma_B^2  },
