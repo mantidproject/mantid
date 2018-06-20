@@ -108,7 +108,8 @@ SlicedGroup slice(UnslicedGroup const &unslicedGroup,
 }
 
 template <typename Row>
-std::ostream &operator<<(std::ostream &os, Group<Row> const &group) {
+MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
+operator<<(std::ostream &os, Group<Row> const &group) {
   os << "  Group (name: " << group.name() << ")\n";
   for (auto &&row : group.rows()) {
     if (row.is_initialized())

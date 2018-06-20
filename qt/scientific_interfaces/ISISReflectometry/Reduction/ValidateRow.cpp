@@ -418,5 +418,8 @@ validateRowFromRunAndTheta(Jobs const &jobs,
 template class RowValidationResult<UnslicedRow>;
 template class RowValidationResult<SlicedRow>;
 template class RowValidationResult<RowVariant>;
+
+template class RowValidator<UnslicedRow>;
+template class RowValidator<SlicedRow>;
 }
 }

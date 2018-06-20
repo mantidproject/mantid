@@ -32,7 +32,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 namespace MantidQt {
 namespace CustomInterfaces {
 
-template <typename Row> class Group {
+template <typename Row> class MANTIDQT_ISISREFLECTOMETRY_DLL Group {
 public:
   using RowType = Row;
   Group(std::string name);
@@ -89,17 +89,16 @@ void mergeRowsInto(Group<Row> &intoHere, Group<Row> const &fromHere,
 }
 
 template <typename Row>
-std::ostream &operator<<(std::ostream &os, Group<Row> const &group);
+MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
+operator<<(std::ostream &os, Group<Row> const &group);
 
-extern template class MANTIDQT_ISISREFLECTOMETRY_DLL Group<SlicedRow>;
+extern template class Group<SlicedRow>;
 using SlicedGroup = Group<SlicedRow>;
-extern template MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
-operator<<(std::ostream &, SlicedGroup const &);
+extern template std::ostream &operator<<(std::ostream &, SlicedGroup const &);
 
-extern template class MANTIDQT_ISISREFLECTOMETRY_DLL Group<UnslicedRow>;
+extern template class Group<UnslicedRow>;
 using UnslicedGroup = Group<UnslicedRow>;
-extern template MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
-operator<<(std::ostream &, UnslicedGroup const &);
+extern template std::ostream &operator<<(std::ostream &, UnslicedGroup const &);
 
 UnslicedGroup unslice(SlicedGroup const &slicedGroup,
                       WorkspaceNamesFactory const &workspaceNamesFactory);

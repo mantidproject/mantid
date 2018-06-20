@@ -41,7 +41,8 @@ namespace CustomInterfaces {
 using ReductionOptionsMap = std::map<std::string, std::string>;
 
 // Immutability here makes update notification easier.
-template <typename ReducedWorkspaceNames> class Row {
+template <typename ReducedWorkspaceNames>
+class MANTIDQT_ISISREFLECTOMETRY_DLL Row {
 public:
   using WorkspaceNames = ReducedWorkspaceNames;
 
@@ -74,8 +75,8 @@ private:
 };
 
 template <typename ReducedWorkspaceNames>
-std::ostream &operator<<(std::ostream &os,
-                         Row<ReducedWorkspaceNames> const &row);
+MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
+operator<<(std::ostream &os, Row<ReducedWorkspaceNames> const &row);
 
 template <typename ReducedWorkspaceNames>
 // cppcheck-suppress syntaxError
@@ -100,11 +101,10 @@ mergedRow(Row<WorkspaceNames> const &rowA, Row<WorkspaceNames> const &rowB,
   return rowA.withExtraRunNumbers(rowB.runNumbers(), workspaceNamesFactory);
 }
 
-extern template class MANTIDQT_ISISREFLECTOMETRY_DLL
-    Row<SlicedReductionWorkspaces>;
+extern template class Row<SlicedReductionWorkspaces>;
 using SlicedRow = Row<SlicedReductionWorkspaces>;
 
-extern template class MANTIDQT_ISISREFLECTOMETRY_DLL Row<ReductionWorkspaces>;
+extern template class Row<ReductionWorkspaces>;
 using UnslicedRow = Row<ReductionWorkspaces>;
 
 extern template MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &

@@ -77,7 +77,8 @@ MANTIDQT_ISISREFLECTOMETRY_DLL
 boost::optional<std::map<std::string, std::string>>
 parseOptions(std::string const &options);
 
-template <typename Row> class RowValidationResult {
+template <typename Row>
+class MANTIDQT_ISISREFLECTOMETRY_DLL RowValidationResult {
 public:
   explicit RowValidationResult(Row row);
   explicit RowValidationResult(std::vector<int> invalidColumns);
@@ -124,12 +125,12 @@ validateRowFromRunAndTheta(Jobs const &jobs,
                            WorkspaceNamesFactory const &workspaceNamesFactory,
                            std::string const &run, std::string const &theta);
 
-extern template class MANTIDQT_ISISREFLECTOMETRY_DLL
-    RowValidationResult<SlicedRow>;
-extern template class MANTIDQT_ISISREFLECTOMETRY_DLL
-    RowValidationResult<UnslicedRow>;
-extern template class MANTIDQT_ISISREFLECTOMETRY_DLL
-    RowValidationResult<RowVariant>;
+extern template class RowValidationResult<SlicedRow>;
+extern template class RowValidationResult<UnslicedRow>;
+extern template class RowValidationResult<RowVariant>;
+
+extern template class RowValidator<SlicedRow>;
+extern template class RowValidator<UnslicedRow>;
 }
 }
 #endif // MANTID_CUSTOMINTERFACES_VALIDATEROW_H_
