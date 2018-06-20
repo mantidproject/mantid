@@ -11,264 +11,299 @@ using namespace Mantid::Kernel;
 using namespace Mantid::HistogramData;
 
 namespace {
-  constexpr int DEFAULT_ITERATIONS = 10;
-  constexpr int DEFAULT_SEED = 23021997;
+constexpr int DEFAULT_ITERATIONS = 10;
+constexpr int DEFAULT_SEED = 23021997;
 
-  MatrixWorkspace_sptr rebin(MatrixWorkspace_sptr workspace, const std::string &params) {
-    IAlgorithm_sptr rebinAlgorithm = AlgorithmManager::Instance().create("Rebin");
-    rebinAlgorithm->setChild(true);
-    rebinAlgorithm->initialize();
-    rebinAlgorithm->setProperty("InputWorkspace", workspace);
-    rebinAlgorithm->setProperty("Params", params);
-    rebinAlgorithm->execute();
-    return rebinAlgorithm->getProperty("OutputWorkspace");
+MatrixWorkspace_sptr rebin(MatrixWorkspace_sptr workspace,
+                           const std::string &params) {
+  IAlgorithm_sptr rebinAlgorithm = AlgorithmManager::Instance().create("Rebin");
+  rebinAlgorithm->setChild(true);
+  rebinAlgorithm->initialize();
+  rebinAlgorithm->setProperty("InputWorkspace", workspace);
+  rebinAlgorithm->setProperty("Params", params);
+  rebinAlgorithm->execute();
+  return rebinAlgorithm->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr integration(MatrixWorkspace_sptr workspace) {
+  IAlgorithm_sptr integrationAlgorithm =
+      AlgorithmManager::Instance().create("Integration");
+  integrationAlgorithm->setChild(true);
+  integrationAlgorithm->initialize();
+  integrationAlgorithm->setProperty("InputWorkspace", workspace);
+  integrationAlgorithm->execute();
+  return integrationAlgorithm->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr convertToPointData(MatrixWorkspace_sptr workspace) {
+  IAlgorithm_sptr pointDataAlgorithm =
+      AlgorithmManager::Instance().create("ConvertToPointData");
+  pointDataAlgorithm->setChild(true);
+  pointDataAlgorithm->initialize();
+  pointDataAlgorithm->setProperty("InputWorkspace", workspace);
+  pointDataAlgorithm->execute();
+  return pointDataAlgorithm->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr extractFFTSpectrum(MatrixWorkspace_sptr workspace) {
+  IAlgorithm_sptr FFTAlgorithm =
+      AlgorithmManager::Instance().create("ExtractFFTSpectrum");
+  FFTAlgorithm->setChild(true);
+  FFTAlgorithm->initialize();
+  FFTAlgorithm->setProperty("InputWorkspace", workspace);
+  FFTAlgorithm->setProperty("FFTPart", 2);
+  FFTAlgorithm->execute();
+  return FFTAlgorithm->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr divide(MatrixWorkspace_sptr lhsWorkspace,
+                            MatrixWorkspace_sptr rhsWorkspace) {
+  IAlgorithm_sptr divideAlgorithm =
+      AlgorithmManager::Instance().create("Divide");
+  divideAlgorithm->setChild(true);
+  divideAlgorithm->initialize();
+  divideAlgorithm->setProperty("LHSWorkspace", lhsWorkspace);
+  divideAlgorithm->setProperty("RHSWorkspace", rhsWorkspace);
+  divideAlgorithm->execute();
+  return divideAlgorithm->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr workspace,
+                                   double xMax) {
+  IAlgorithm_sptr cropAlgorithm =
+      AlgorithmManager::Instance().create("CropWorkspace");
+  cropAlgorithm->setChild(true);
+  cropAlgorithm->initialize();
+  cropAlgorithm->setProperty("InputWorkspace", workspace);
+  cropAlgorithm->setProperty("XMax", xMax);
+  cropAlgorithm->execute();
+  return cropAlgorithm->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr replaceSpecialValues(MatrixWorkspace_sptr workspace) {
+  IAlgorithm_sptr specialValuesAlgorithm =
+      AlgorithmManager::Instance().create("ReplaceSpecialValues");
+  specialValuesAlgorithm->setChild(true);
+  specialValuesAlgorithm->initialize();
+  specialValuesAlgorithm->setProperty("InputWorkspace", workspace);
+  specialValuesAlgorithm->setProperty("InfinityValue", 0.0);
+  specialValuesAlgorithm->setProperty("BigNumberThreshold", 1.0001);
+  specialValuesAlgorithm->setProperty("NaNValue", 0.0);
+  specialValuesAlgorithm->execute();
+  return specialValuesAlgorithm->getProperty("OutputWorkspace");
+}
+
+std::string createRebinString(double minimum, double maximum, double width) {
+  std::stringstream rebinStream;
+  rebinStream.precision(14);
+  rebinStream << minimum << ", " << width << ", " << maximum;
+  return rebinStream.str();
+}
+
+void randomizeRowWithinError(HistogramY &row, const HistogramE &errors,
+                             std::function<double(double)> rng) {
+  for (auto i = 0u; i < row.size(); ++i) {
+    auto randomValue = rng(errors[i]);
+    row[i] += randomValue;
   }
+}
 
-  MatrixWorkspace_sptr integration(MatrixWorkspace_sptr workspace) {
-    IAlgorithm_sptr integrationAlgorithm = AlgorithmManager::Instance().create("Integration");
-    integrationAlgorithm->setChild(true);
-    integrationAlgorithm->initialize();
-    integrationAlgorithm->setProperty("InputWorkspace", workspace);
-    integrationAlgorithm->execute();
-    return integrationAlgorithm->getProperty("OutputWorkspace");
+MatrixWorkspace_sptr
+randomizeWorkspaceWithinError(MatrixWorkspace_sptr workspace, const int seed) {
+  MersenneTwister mTwister(seed);
+  auto rng = [&mTwister](const double error) {
+    return mTwister.nextValue(-error, error);
+  };
+  for (auto i = 0u; i < workspace->getNumberHistograms(); ++i)
+    randomizeRowWithinError(workspace->mutableY(i), workspace->e(i), rng);
+  return workspace;
+}
+
+double standardDeviation(const std::vector<double> &inputValues) {
+  double mean = std::accumulate(inputValues.begin(), inputValues.end(), 0.0) /
+                inputValues.size();
+  double sumOfXMinusMeanSquared = 0;
+  for (auto &x : inputValues) {
+    sumOfXMinusMeanSquared += pow(x - mean, 2);
   }
+  return sqrt(sumOfXMinusMeanSquared / (inputValues.size() - 1));
+}
 
-  MatrixWorkspace_sptr convertToPointData(MatrixWorkspace_sptr workspace) {
-    IAlgorithm_sptr pointDataAlgorithm = AlgorithmManager::Instance().create("ConvertToPointData");
-    pointDataAlgorithm->setChild(true);
-    pointDataAlgorithm->initialize();
-    pointDataAlgorithm->setProperty("InputWorkspace", workspace);
-    pointDataAlgorithm->execute();
-    return pointDataAlgorithm->getProperty("OutputWorkspace");
+std::vector<double>
+standardDeviationArray(const std::vector<std::vector<double>> &yValues) {
+  std::vector<double> standardDeviations;
+  auto outputSize = yValues[0].size();
+  standardDeviations.reserve(outputSize);
+  std::vector<double> currentRow;
+  currentRow.reserve(yValues.size());
+
+  for (auto i = 0u; i < outputSize; ++i) {
+    currentRow.clear();
+    for (auto &yValueArray : yValues)
+      currentRow.emplace_back(yValueArray[i]);
+    standardDeviations.emplace_back(standardDeviation(currentRow));
   }
+  return standardDeviations;
+}
 
-  MatrixWorkspace_sptr extractFFTSpectrum(MatrixWorkspace_sptr workspace) {
-    IAlgorithm_sptr FFTAlgorithm = AlgorithmManager::Instance().create("ExtractFFTSpectrum");
-    FFTAlgorithm->setChild(true);
-    FFTAlgorithm->initialize();
-    FFTAlgorithm->setProperty("InputWorkspace", workspace);
-    FFTAlgorithm->setProperty("FFTPart", 2);
-    FFTAlgorithm->execute();
-    return FFTAlgorithm->getProperty("OutputWorkspace");
-  }
+MatrixWorkspace_sptr cleanOutput(MatrixWorkspace_sptr workspace) {
+  auto binning = static_cast<int>(std::ceil(workspace->blocksize() / 2));
+  auto binV = workspace->x(0)[binning];
+  workspace = cropWorkspace(workspace, binV);
+  workspace = replaceSpecialValues(workspace);
+  return workspace;
+}
 
-  MatrixWorkspace_sptr divide(MatrixWorkspace_sptr lhsWorkspace, MatrixWorkspace_sptr rhsWorkspace) {
-    IAlgorithm_sptr divideAlgorithm = AlgorithmManager::Instance().create("Divide");
-    divideAlgorithm->setChild(true);
-    divideAlgorithm->initialize();
-    divideAlgorithm->setProperty("LHSWorkspace", lhsWorkspace);
-    divideAlgorithm->setProperty("RHSWorkspace", rhsWorkspace);
-    divideAlgorithm->execute();
-    return divideAlgorithm->getProperty("OutputWorkspace");
-  }
+MatrixWorkspace_sptr
+normalizedFourierTransform(MatrixWorkspace_sptr workspace,
+                           const std::string &rebinParams) {
+  workspace = rebin(workspace, rebinParams);
+  auto workspace_int = integration(workspace);
+  workspace = convertToPointData(workspace);
+  workspace = extractFFTSpectrum(workspace);
+  workspace = divide(workspace, workspace_int);
+  return workspace;
+}
 
-  MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr workspace, double xMax) {
-    IAlgorithm_sptr cropAlgorithm = AlgorithmManager::Instance().create("CropWorkspace");
-    cropAlgorithm->setChild(true);
-    cropAlgorithm->initialize();
-    cropAlgorithm->setProperty("InputWorkspace", workspace);
-    cropAlgorithm->setProperty("XMax", xMax);
-    cropAlgorithm->execute();
-    return cropAlgorithm->getProperty("OutputWorkspace");
-  }
-
-  MatrixWorkspace_sptr replaceSpecialValues(MatrixWorkspace_sptr workspace) {
-    IAlgorithm_sptr specialValuesAlgorithm = AlgorithmManager::Instance().create("ReplaceSpecialValues");
-    specialValuesAlgorithm->setChild(true);
-    specialValuesAlgorithm->initialize();
-    specialValuesAlgorithm->setProperty("InputWorkspace", workspace);
-    specialValuesAlgorithm->setProperty("InfinityValue", 0.0);
-    specialValuesAlgorithm->setProperty("BigNumberThreshold", 1.0001);
-    specialValuesAlgorithm->setProperty("NaNValue", 0.0);
-    specialValuesAlgorithm->execute();
-    return specialValuesAlgorithm->getProperty("OutputWorkspace");
-  }
-
-  std::string createRebinString(double minimum, double maximum, double width) {
-    std::stringstream rebinStream;
-    rebinStream.precision(14);
-    rebinStream << minimum << ", " << width << ", " << maximum;
-    return rebinStream.str();
-  }
-
-  void randomizeRowWithinError(HistogramY &row, const HistogramE &errors, std::function<double(double)> rng) {
-    for (auto i = 0u; i < row.size(); ++i)
-    {
-      auto randomValue = rng(errors[i]);
-      row[i] += randomValue;
-    }
-  }
-
-  MatrixWorkspace_sptr randomizeWorkspaceWithinError(MatrixWorkspace_sptr workspace,
-    const int seed) {
-    MersenneTwister mTwister(seed);
-    auto rng = [&mTwister](const double error) {
-      return mTwister.nextValue(-error, error);
-    };
-    for (auto i = 0u; i < workspace->getNumberHistograms(); ++i)
-      randomizeRowWithinError(workspace->mutableY(i), workspace->e(i), rng);
-    return workspace;
-  }
-
-  double standardDeviation(const std::vector<double> &inputValues) {
-    double mean = std::accumulate(inputValues.begin(), inputValues.end(), 0.0) / inputValues.size();
-    double sumOfXMinusMeanSquared = 0;
-    for (auto &x : inputValues) {
-      sumOfXMinusMeanSquared += pow(x - mean, 2);
-    }
-    return sqrt(sumOfXMinusMeanSquared / (inputValues.size() - 1));
-  }
-
-  std::vector<double> standardDeviationArray(const std::vector<std::vector<double>> &yValues) {
-    std::vector<double> standardDeviations;
-    auto outputSize = yValues[0].size();
-    standardDeviations.reserve(outputSize);
-    std::vector<double> currentRow;
-    currentRow.reserve(yValues.size());
-
-    for (auto i = 0u; i < outputSize; ++i) {
-      currentRow.clear();
-      for (auto &yValueArray : yValues)
-        currentRow.emplace_back(yValueArray[i]);
-      standardDeviations.emplace_back(standardDeviation(currentRow));
-    }
-    return standardDeviations;
-  }
-
-  MatrixWorkspace_sptr cleanOutput(MatrixWorkspace_sptr workspace) {
-    auto binning = static_cast<int>(std::ceil(workspace->blocksize() / 2));
-    auto binV = workspace->x(0)[binning];
-    workspace = cropWorkspace(workspace, binV);
-    workspace = replaceSpecialValues(workspace);
-    return workspace;
-  }
-
-  MatrixWorkspace_sptr normalizedFourierTransform(MatrixWorkspace_sptr workspace, const std::string &rebinParams) {
-    workspace = rebin(workspace, rebinParams);
-    auto workspace_int = integration(workspace);
-    workspace = convertToPointData(workspace);
-    workspace = extractFFTSpectrum(workspace);
-    workspace = divide(workspace, workspace_int);
-    return workspace;
-  }
-
-  MatrixWorkspace_sptr calculateIqt(MatrixWorkspace_sptr workspace,
-    MatrixWorkspace_sptr resolutionWorkspace, const std::string &rebinParams) {
-    workspace = normalizedFourierTransform(workspace, rebinParams);
-    return divide(workspace, resolutionWorkspace);
-  }
+MatrixWorkspace_sptr calculateIqt(MatrixWorkspace_sptr workspace,
+                                  MatrixWorkspace_sptr resolutionWorkspace,
+                                  const std::string &rebinParams) {
+  workspace = normalizedFourierTransform(workspace, rebinParams);
+  return divide(workspace, resolutionWorkspace);
+}
 
 } // namespace
 
 namespace Mantid {
-  namespace Algorithms {
+namespace Algorithms {
 
-    DECLARE_ALGORITHM(CalculateIqt)
+DECLARE_ALGORITHM(CalculateIqt)
 
-    const std::string CalculateIqt::name() const { return "CalculateIqt"; }
+const std::string CalculateIqt::name() const { return "CalculateIqt"; }
 
-    int CalculateIqt::version() const { return 1; }
+int CalculateIqt::version() const { return 1; }
 
-    const std::vector<std::string> CalculateIqt::seeAlso() const { return{ "TransformToIqt" }; }
+const std::vector<std::string> CalculateIqt::seeAlso() const {
+  return {"TransformToIqt"};
+}
 
-    const std::string CalculateIqt::category() const { return "Inelastic\\Indirect"; }
+const std::string CalculateIqt::category() const {
+  return "Inelastic\\Indirect";
+}
 
-    const std::string CalculateIqt::summary() const {
-      return "Calculates I(Q,t) from S(Q,w) and computes the errors using a monte-carlo routine.";
-    }
+const std::string CalculateIqt::summary() const {
+  return "Calculates I(Q,t) from S(Q,w) and computes the errors using a "
+         "monte-carlo routine.";
+}
 
-    void CalculateIqt::init() {
+void CalculateIqt::init() {
 
-      declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-        "The name of the sample workspace.");
-      declareProperty(make_unique<WorkspaceProperty<>>("ResolutionWorkspace", "", Direction::Input),
-        "The name of the resolution workspace.");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      "The name of the sample workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("ResolutionWorkspace", "",
+                                                   Direction::Input),
+                  "The name of the resolution workspace.");
 
-      declareProperty("EnergyMin", -0.5, "Minimum energy for fit. Default = -.0.5.");
-      declareProperty("EnergyMax", 0.5, "Maximum energy for fit. Default = 0.5.");
-      declareProperty("EnergyWidth", 0.1, "Width of energy bins for fit.");
+  declareProperty("EnergyMin", -0.5,
+                  "Minimum energy for fit. Default = -.0.5.");
+  declareProperty("EnergyMax", 0.5, "Maximum energy for fit. Default = 0.5.");
+  declareProperty("EnergyWidth", 0.1, "Width of energy bins for fit.");
 
-      auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
-      positiveInt->setLower(1);
+  auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  positiveInt->setLower(1);
 
-      declareProperty("NumberOfIterations", DEFAULT_ITERATIONS, positiveInt, "Number of randomised simulations within error to run.");
-      declareProperty("SeedValue", DEFAULT_SEED, positiveInt, "Seed the random number generator for monte-carlo error calculation.");
+  declareProperty("NumberOfIterations", DEFAULT_ITERATIONS, positiveInt,
+                  "Number of randomised simulations within error to run.");
+  declareProperty(
+      "SeedValue", DEFAULT_SEED, positiveInt,
+      "Seed the random number generator for monte-carlo error calculation.");
 
-      declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-        Direction::Output), "The name to use for the output workspace.");
-    }
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace.");
+}
 
-    void CalculateIqt::exec() {
-      const auto rebinParams = rebinParamsAsString();
-      const MatrixWorkspace_sptr sampleWorkspace = getProperty("InputWorkspace");
-      MatrixWorkspace_sptr resolution = getProperty("ResolutionWorkspace");
-      resolution = normalizedFourierTransform(resolution, rebinParams);
+void CalculateIqt::exec() {
+  const auto rebinParams = rebinParamsAsString();
+  const MatrixWorkspace_sptr sampleWorkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr resolution = getProperty("ResolutionWorkspace");
+  resolution = normalizedFourierTransform(resolution, rebinParams);
 
-      //create function which only needs sampleWorkspace as input so it can be easily repeated in simulations
-      auto calculateIqtFunction = [resolution, &rebinParams](MatrixWorkspace_sptr sample) {
+  // create function which only needs sampleWorkspace as input so it can be
+  // easily repeated in simulations
+  auto calculateIqtFunction =
+      [resolution, &rebinParams](MatrixWorkspace_sptr sample) {
         return calculateIqt(sample, resolution, rebinParams);
       };
 
-      auto outputWorkspace = monteCarloErrorCalculation(sampleWorkspace, resolution, calculateIqtFunction);
+  auto outputWorkspace = monteCarloErrorCalculation(sampleWorkspace, resolution,
+                                                    calculateIqtFunction);
 
-      outputWorkspace = cleanOutput(outputWorkspace);
-      setProperty("OutputWorkspace", outputWorkspace);
-    }
+  outputWorkspace = cleanOutput(outputWorkspace);
+  setProperty("OutputWorkspace", outputWorkspace);
+}
 
-    std::string CalculateIqt::rebinParamsAsString() {
-      const double e_min = getProperty("EnergyMin");
-      const double e_max = getProperty("EnergyMax");
-      const double e_width = getProperty("EnergyWidth");
-      return createRebinString(e_min, e_max, e_width);
-    }
+std::string CalculateIqt::rebinParamsAsString() {
+  const double e_min = getProperty("EnergyMin");
+  const double e_max = getProperty("EnergyMax");
+  const double e_width = getProperty("EnergyWidth");
+  return createRebinString(e_min, e_max, e_width);
+}
 
-    MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(MatrixWorkspace_sptr sample, MatrixWorkspace_sptr resolution,
-      const std::function<MatrixWorkspace_sptr(MatrixWorkspace_sptr)> &calculateIqtFunction) {
-      auto outputWorkspace = calculateIqtFunction(sample);
-      const unsigned int nIterations = getProperty("NumberOfIterations");
-      const unsigned int seed = getProperty("SeedValue");
-      std::vector<MatrixWorkspace_sptr> simulatedWorkspaces;
-      simulatedWorkspaces.reserve(nIterations);
-      simulatedWorkspaces.emplace_back(outputWorkspace);
+MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(
+    MatrixWorkspace_sptr sample, MatrixWorkspace_sptr resolution,
+    const std::function<MatrixWorkspace_sptr(MatrixWorkspace_sptr)> &
+        calculateIqtFunction) {
+  auto outputWorkspace = calculateIqtFunction(sample);
+  const unsigned int nIterations = getProperty("NumberOfIterations");
+  const unsigned int seed = getProperty("SeedValue");
+  std::vector<MatrixWorkspace_sptr> simulatedWorkspaces;
+  simulatedWorkspaces.reserve(nIterations);
+  simulatedWorkspaces.emplace_back(outputWorkspace);
 
-      PARALLEL_FOR_IF(Kernel::threadSafe(*sample, *resolution))
-      for (auto i = 0; i < nIterations - 1; ++i) {
-        PARALLEL_START_INTERUPT_REGION
-        auto simulatedWorkspace = randomizeWorkspaceWithinError(sample->clone(), seed);
-        simulatedWorkspace = calculateIqtFunction(simulatedWorkspace);
-        simulatedWorkspaces.emplace_back(simulatedWorkspace);
-        PARALLEL_END_INTERUPT_REGION
-      }
-      PARALLEL_CHECK_INTERUPT_REGION
-      return setErrorsToStandardDeviation(nIterations, simulatedWorkspaces, outputWorkspace);
-    }
+  PARALLEL_FOR_IF(Kernel::threadSafe(*sample, *resolution))
+  for (auto i = 0; i < nIterations - 1; ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    auto simulatedWorkspace =
+        randomizeWorkspaceWithinError(sample->clone(), seed);
+    simulatedWorkspace = calculateIqtFunction(simulatedWorkspace);
+    simulatedWorkspaces.emplace_back(simulatedWorkspace);
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
+  return setErrorsToStandardDeviation(nIterations, simulatedWorkspaces,
+                                      outputWorkspace);
+}
 
-    MatrixWorkspace_sptr CalculateIqt::setErrorsToStandardDeviation(int nIterations, 
-      const std::vector<MatrixWorkspace_sptr> simulatedWorkspaces, MatrixWorkspace_sptr outputWorkspace) {
-      //set errors to standard deviation of y values across simulations
-      std::vector<std::vector<double>> allSimY;
-      allSimY.reserve(nIterations);
+MatrixWorkspace_sptr CalculateIqt::setErrorsToStandardDeviation(
+    int nIterations,
+    const std::vector<MatrixWorkspace_sptr> simulatedWorkspaces,
+    MatrixWorkspace_sptr outputWorkspace) {
+  // set errors to standard deviation of y values across simulations
+  std::vector<std::vector<double>> allSimY;
+  allSimY.reserve(nIterations);
 
-      for (auto i = 0u; i < outputWorkspace->getNumberHistograms(); ++i) {
-        auto &outputError = outputWorkspace->mutableE(i);
-        for (auto &simWorkspace : simulatedWorkspaces)      
-          allSimY.emplace_back(simWorkspace->y(i).rawData());
-        outputError = standardDeviationArray(allSimY);
-      }
-      return outputWorkspace;
-    }
+  for (auto i = 0u; i < outputWorkspace->getNumberHistograms(); ++i) {
+    auto &outputError = outputWorkspace->mutableE(i);
+    for (auto &simWorkspace : simulatedWorkspaces)
+      allSimY.emplace_back(simWorkspace->y(i).rawData());
+    outputError = standardDeviationArray(allSimY);
+  }
+  return outputWorkspace;
+}
 
-    std::map<std::string, std::string> CalculateIqt::validateInputs() {
-      std::map<std::string, std::string> issues;
-      const double eMin = getProperty("EnergyMin");
-      const double eMax = getProperty("EnergyMax");
-      if (eMin > eMax) {
-        auto energy_swapped = "EnergyMin is greater than EnergyMax";
-        issues["EnergyMin"] = energy_swapped;
-        issues["EnergyMax"] = energy_swapped;
-      }
-      return issues;
-    }
+std::map<std::string, std::string> CalculateIqt::validateInputs() {
+  std::map<std::string, std::string> issues;
+  const double eMin = getProperty("EnergyMin");
+  const double eMax = getProperty("EnergyMax");
+  if (eMin > eMax) {
+    auto energy_swapped = "EnergyMin is greater than EnergyMax";
+    issues["EnergyMin"] = energy_swapped;
+    issues["EnergyMax"] = energy_swapped;
+  }
+  return issues;
+}
 
 } // namespace Algorithms
 } // namespace Mantid

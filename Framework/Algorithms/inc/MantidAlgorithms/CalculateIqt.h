@@ -29,7 +29,6 @@ namespace Algorithms {
 
 class DLLExport CalculateIqt : public API::Algorithm {
 public:
-
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override;
@@ -41,10 +40,14 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
   std::string rebinParamsAsString();
-  API::MatrixWorkspace_sptr monteCarloErrorCalculation(API::MatrixWorkspace_sptr sample, API::MatrixWorkspace_sptr resolution,
-    const std::function<API::MatrixWorkspace_sptr(API::MatrixWorkspace_sptr)> &calculateIqtFunction);
-  API::MatrixWorkspace_sptr CalculateIqt::setErrorsToStandardDeviation(int nIterations, const std::vector<API::MatrixWorkspace_sptr> simulatedWorkspaces,
-    API::MatrixWorkspace_sptr outputWorkspace);
+  API::MatrixWorkspace_sptr monteCarloErrorCalculation(
+      API::MatrixWorkspace_sptr sample, API::MatrixWorkspace_sptr resolution,
+      const std::function<API::MatrixWorkspace_sptr(
+          API::MatrixWorkspace_sptr)> &calculateIqtFunction);
+  API::MatrixWorkspace_sptr CalculateIqt::setErrorsToStandardDeviation(
+      int nIterations,
+      const std::vector<API::MatrixWorkspace_sptr> simulatedWorkspaces,
+      API::MatrixWorkspace_sptr outputWorkspace);
 };
 
 } // namespace Algorithms
