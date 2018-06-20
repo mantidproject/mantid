@@ -486,7 +486,6 @@ class DarkRunSubtractionTest(unittest.TestCase):
             alg_load_monitors.initialize()
             alg_load_monitors.setChild(True)
             alg_load_monitors.setProperty("Filename", file_path)
-            alg_load_monitors.setProperty("MonitorsAsEvents", False)
             alg_load_monitors.setProperty("OutputWorkspace", monitors_name)
             alg_load_monitors.execute()
             monitor_ws = alg_load_monitors.getProperty("OutputWorkspace").value
@@ -522,7 +521,6 @@ class DarkRunSubtractionTest(unittest.TestCase):
         alg_load2.initialize()
         alg_load2.setChild(True)
         alg_load2.setProperty("Filename", file_path)
-        alg_load2.setProperty("MonitorsAsEvents", False)
         alg_load2.setProperty("OutputWorkspace", monitor_name)
         alg_load2.execute()
         monitor_ws = alg_load2.getProperty("OutputWorkspace").value
@@ -578,7 +576,6 @@ class DarkRunSubtractionTest(unittest.TestCase):
         alg_load_monitors.initialize()
         alg_load_monitors.setChild(True)
         alg_load_monitors.setProperty("Filename", file_path)
-        alg_load_monitors.setProperty("MonitorsAsEvents", False)
         alg_load_monitors.setProperty("OutputWorkspace", trans_name)
         alg_load_monitors.execute()
         monitor = alg_load_monitors.getProperty("OutputWorkspace").value
