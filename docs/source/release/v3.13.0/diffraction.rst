@@ -74,6 +74,8 @@ Single Crystal Diffraction
 
 - New algorithm :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` to integrate peaks using 3D profile fitting in reciprocal space.
 
+- New TOPAZ instrument geometry for 2018 run cycle
+
 Improvements
 ############
 
