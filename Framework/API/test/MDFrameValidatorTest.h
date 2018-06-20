@@ -18,6 +18,13 @@ using namespace Mantid::API;
 
 class MDFrameValidatorTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MDFrameValidatorTest *createSuite() {
+    return new MDFrameValidatorTest();
+  }
+  static void destroySuite(MDFrameValidatorTest *suite) { delete suite; }
+
   void testGetType() {
     MDFrameValidator unitValidator(HKL::HKLName);
     TS_ASSERT_EQUALS(unitValidator.getType(), "mdframe");
