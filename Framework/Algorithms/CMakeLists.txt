@@ -870,6 +870,7 @@ set ( TEST_FILES
 	MaxEnt/MaxentSpaceComplexTest.h
 	MaxEnt/MaxentSpaceRealTest.h
 	MaxEnt/MaxentTransformFourierTest.h
+	MaxEnt/MaxentTransformMultiFourierTest.h
 	MaxEntTest.h
 	MaxMinTest.h
 	MayersSampleCorrectionStrategyTest.h
