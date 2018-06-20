@@ -252,3 +252,6 @@ cluster.submission=Off
 
 # Used to stop a catalog asynchronous algorithm after the timeout period
 catalog.timeout.value=30
+
+# Indicates if project recovery should automatically save in the background
+projectRecovery.enabled=true

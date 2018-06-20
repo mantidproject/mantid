@@ -6,8 +6,10 @@
 #include "globals.h"
 
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 
+#include "Poco/NObserver.h"
 #include "Poco/Path.h"
 #include "qmetaobject.h"
 
@@ -18,7 +20,17 @@
 #include <thread>
 
 namespace {
+Mantid::Kernel::Logger g_log("Project Recovery Thread");
 const std::chrono::seconds TIME_BETWEEN_SAVING = std::chrono::seconds(30);
+const std::string SAVING_ENABLED_CONFIG_KEY = "projectRecovery.enabled";
+
+bool isRecoveryEnabled() {
+  std::string isEnabled;
+  int valueIsGood = Mantid::Kernel::ConfigService::Instance().getValue<std::string>(
+      SAVING_ENABLED_CONFIG_KEY, isEnabled);
+  
+  return (valueIsGood == 1) && isEnabled.find("true") != std::string::npos;
+}
 
 std::string getOutputPath() {
   static bool isInitalised = false;
@@ -35,16 +47,19 @@ std::string getOutputPath() {
 
 std::string getOutputProjectName() { return "recovery.project"; }
 
-Mantid::Kernel::Logger g_log("Project Recovery Thread");
 } // namespace
 
 namespace MantidQt {
 namespace API {
 
 ProjectRecoveryThread::ProjectRecoveryThread(ApplicationWindow *windowHandle)
-    : m_windowPtr(windowHandle), m_backgroundSavingThread(),
-      m_stopBackgroundThread(true) {
-  startProjectSaving();
+    : m_backgroundSavingThread(), m_stopBackgroundThread(true),
+      m_configKeyObserver(*this, &ProjectRecoveryThread::configKeyChanged),
+      m_windowPtr(windowHandle) {
+
+  if (isRecoveryEnabled()) {
+    startProjectSaving();
+  }
 }
 
 ProjectRecoveryThread::~ProjectRecoveryThread() { stopProjectSaving(); }
@@ -52,7 +67,20 @@ ProjectRecoveryThread::~ProjectRecoveryThread() { stopProjectSaving(); }
 std::thread ProjectRecoveryThread::createBackgroundThread() {
   // Using a lambda helps the compiler deduce the this pointer
   // otherwise the resolution is ambiguous
-  return std::thread([this] { projectSavingThread(); });
+  return std::thread([this] { projectSavingThreadWrapper(); });
+}
+
+void ProjectRecoveryThread::configKeyChanged(
+    Mantid::Kernel::ConfigValChangeNotification_ptr notif) {
+  if (notif->key() != (SAVING_ENABLED_CONFIG_KEY)) {
+    return;
+  }
+
+  if (notif->curValue() == "True") {
+    startProjectSaving();
+  } else {
+    stopProjectSaving();
+  }
 }
 
 void ProjectRecoveryThread::startProjectSaving() {
@@ -77,6 +105,19 @@ void ProjectRecoveryThread::stopProjectSaving() {
 
   if (m_backgroundSavingThread.joinable()) {
     m_backgroundSavingThread.join();
+  }
+}
+
+void ProjectRecoveryThread::projectSavingThreadWrapper() {
+  try {
+    projectSavingThread();
+  } catch (std::exception const &e) {
+    std::string preamble("Project recovery has stopped. Please report"
+                         " this to the development team.\nException:\n");
+    g_log.warning(preamble + e.what());
+  } catch (...) {
+    g_log.warning("Project recovery has stopped. Please report"
+                  " this to the development team.");
   }
 }
 
