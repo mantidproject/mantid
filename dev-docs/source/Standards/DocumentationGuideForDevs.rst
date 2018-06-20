@@ -251,4 +251,6 @@ For multi-configuration generators such as Visual Studio or XCode you will need 
 Building the HTML Development Documentation
 ===========================================
 
-The developer documentation is written as .rst files, the html files can be built using visual studio. Open mantid in visual studio, in the solution explorer right click on the dev-docs-html project (inside ``Documentation/``) and select build. This will build all the development documentation into the mantid build folder under ``dev-docs/html/``.
+The developer documentation is written as `.rst` files in the mantid source folder under ``dev-docs/``, the html files can be built using the `dev-docs-html` target. This will build all the development documentation into the mantid build folder under ``dev-docs/html/``.
+
+In Visual Studio, this can be found in the "Documentation" folder in the solution explorer for the Mantid solution. Simply right click `dev-docs-html` and select build.

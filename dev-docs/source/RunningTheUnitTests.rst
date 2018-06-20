@@ -103,18 +103,18 @@ Starting in your build folder (e.g. Mantid/Code/debug):
 
    -  Not possible with ctest.
 
-Running Unit Tests from Within Visual Studio
-############################################
+Running Unit Tests With Visual Studio and ctest
+###############################################
 
-Open the Mantid solution in Visual Studio 2015. To run a subset of tests (for example ``UnitTests/AlgorithmsTest``);
+Open the Mantid solution in Visual Studio. To run a subset of tests (for example ``UnitTests/AlgorithmsTest``);
 
--  In the Solution Explorer, right click the top level directory for the tests (in this case ``UnitTests/AlgorithmsTest``) and select Properties.
+-  In the Solution Explorer, right click the project for the tests (in this case ``UnitTests/AlgorithmsTest``) and select Properties.
 
 -  In the Debugging tab of Properties change the Command Arguments box to the name of the test, for example "AddNoteTest".
 
 -  Right click the directory again and select Debug->Start new instance.
 
-   Once the build has finished, open a file browser and navigate to the mantid build directory, run the command-prompt.bat file to open a command prompt and run 
+-  Once the build has finished, open a file browser and navigate to the mantid build directory, run the command-prompt.bat file to open a command prompt and run 
 
    .. code-block:: sh
 
@@ -128,7 +128,13 @@ Open the Mantid solution in Visual Studio 2015. To run a subset of tests (for ex
 
    Omitting the ``-R AddNoteTest`` option runs all the tests, but note that any tests which were not built according to the above instructions will fail. Adding the ``-V`` increases the output verbosity.
 
--  Alterntively, to use the Visual Studio debugger, add the name of the test to the Target Name field in the General tab of Properties. Then add a breakpoint somewhere in the test header file and select Debug->Start new instance as above.
+
+Running Unit Tests With Visual Studio
+#####################################
+
+The unit tests can be run from within Visual Studio, following steps 1-3 above, with the addition in step 2 of;
+
+-  Add the name of the test to the Target Name field in the General tab of Properties. Then add a breakpoint somewhere in the test header file.
 
 
 Debugging unit tests
