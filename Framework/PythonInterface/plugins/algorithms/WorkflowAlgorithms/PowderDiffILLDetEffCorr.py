@@ -365,8 +365,10 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         inst = mtd[raw_ws].getInstrument()
         self._n_tubes = inst.getComponentByName('detectors').nelements()
         self._n_pixels_per_tube = inst.getComponentByName('detectors/tube_1').nelements()
-        self._n_scans_per_file = mtd[raw_ws].getRun().getLogData('ScanSteps').value
+        #self._n_scans_per_file = mtd[raw_ws].getRun().getLogData('ScanSteps').value
+        self._n_scans_per_file = 25 # TODO: In v2 this should be freely variable
         self._scan_points = self._n_scans_per_file * self._n_scan_files
+        self.log().information('Number of scan steps is: ' + str(self._scan_points))
         if self._excluded_ranges.any():
             n_excluded_ranges = int(len(self._excluded_ranges) / 2)
             self._excluded_ranges = np.split(self._excluded_ranges, n_excluded_ranges)
@@ -603,6 +605,16 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         mtd[constants_ws].getAxis(1).setUnit('Label').setLabel('Cell #', '')
         mtd[constants_ws].setYUnitLabel('Calibration constant')
 
+    def _crop_last_time_index(self, ws, n_scan_points):
+        ws_index_list = ""
+        for pixel in range(self._n_tubes * self._n_pixels_per_tube):
+            start = n_scan_points * pixel
+            end = n_scan_points * (pixel + 1) - 2
+            index_range = str(start)+"-"+str(end)+","
+            ws_index_list += index_range
+        ws_index_list = ws_index_list[:-1]
+        ExtractSpectra(InputWorkspace=ws, OutputWorkspace=ws, WorkspaceIndexList=ws_index_list)
+
     def _process_global(self):
         """
             Performs the global derivation for D2B following the logic:
@@ -618,7 +630,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         self._progress = Progress(self, start=0.0, end=1.0, nreports=self._n_scan_files)
 
         for index, numor in enumerate(self._input_files.split(',')):
-            self._progress.report('Pre-processing detector scan '+numor[-9:-3])
+            self._progress.report('Pre-processing detector scan '+numor[-10:-4])
             ws_name = '__raw_'+str(index)
             numors.append(ws_name)
             LoadILLDiffraction(Filename=numor, OutputWorkspace=ws_name, DataType="Raw")
@@ -633,6 +645,11 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             ConvertSpectrumAxis(InputWorkspace=ws_name, OrderAxis=False, Target="SignedTheta", OutputWorkspace=ws_name)
             if self._calib_file:
                 ApplyDetectorScanEffCorr(InputWorkspace=ws_name, DetectorEfficiencyWorkspace=calib_ws, OutputWorkspace=ws_name)
+                
+            n_scan_steps = mtd[ws_name].getRun().getLogData("ScanSteps").value
+            if n_scan_steps != self._n_scans_per_file:
+                self.log().warning("Run {0} has {1} scan points instead of {2}.".format(numor[-10:-4], n_scan_steps, self._n_scans_per_file))
+                self._crop_last_time_index(ws_name, n_scan_steps)                
 
         if self._calib_file:
             DeleteWorkspace(calib_ws)
@@ -704,7 +721,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             ApplyDetectorScanEffCorr(InputWorkspace=ws_name, DetectorEfficiencyWorkspace=calib_current, OutputWorkspace=ws_name)
             y = mtd[ws_name].extractY()
             e = mtd[ws_name].extractE()
-            x = mtd[ws_name].getAxis(1).extractValues()
+            x = mtd[ws_name].getAxis(1).extractValues()                
             y_3d = np.reshape(y, shape)
             x_3d = np.reshape(x, shape)
             e_3d = np.reshape(e, shape)
