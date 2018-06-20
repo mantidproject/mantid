@@ -5,7 +5,7 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
-    inc/MantidCatalog/DLLConfig.h
+    inc/MantidCatalog/DllConfig.h
     inc/MantidCatalog/Exception.h
     inc/MantidCatalog/ONCat.h
     inc/MantidCatalog/ONCatEntity.h
