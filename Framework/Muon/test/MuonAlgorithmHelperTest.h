@@ -63,7 +63,7 @@ MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
 
   for (int g = 0; g < static_cast<int>(nspec); g++) {
     auto &spec = ws->getSpectrum(g);
-    spec.addDetectorID(g + detectorIDseed);
+    spec.addDetectorID(g + static_cast<int>(detectorIDseed));
     spec.setSpectrumNo(g + 1);
     ws->mutableY(g) += seed;
   }
