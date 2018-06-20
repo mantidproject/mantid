@@ -645,11 +645,12 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             ConvertSpectrumAxis(InputWorkspace=ws_name, OrderAxis=False, Target="SignedTheta", OutputWorkspace=ws_name)
             if self._calib_file:
                 ApplyDetectorScanEffCorr(InputWorkspace=ws_name, DetectorEfficiencyWorkspace=calib_ws, OutputWorkspace=ws_name)
-                
+
             n_scan_steps = mtd[ws_name].getRun().getLogData("ScanSteps").value
             if n_scan_steps != self._n_scans_per_file:
-                self.log().warning("Run {0} has {1} scan points instead of {2}.".format(numor[-10:-4], n_scan_steps, self._n_scans_per_file))
-                self._crop_last_time_index(ws_name, n_scan_steps)                
+                self.log().warning("Run {0} has {1} scan points instead of {2}.".
+                                   format(numor[-10:-4], n_scan_steps, self._n_scans_per_file))
+                self._crop_last_time_index(ws_name, n_scan_steps)
 
         if self._calib_file:
             DeleteWorkspace(calib_ws)
@@ -721,7 +722,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             ApplyDetectorScanEffCorr(InputWorkspace=ws_name, DetectorEfficiencyWorkspace=calib_current, OutputWorkspace=ws_name)
             y = mtd[ws_name].extractY()
             e = mtd[ws_name].extractE()
-            x = mtd[ws_name].getAxis(1).extractValues()                
+            x = mtd[ws_name].getAxis(1).extractValues()
             y_3d = np.reshape(y, shape)
             x_3d = np.reshape(x, shape)
             e_3d = np.reshape(e, shape)
