@@ -41,7 +41,7 @@ static const std::string CONFIG_PATH_BASE = "catalog.oncat.";
 // <externaldownload> tags in the XML.
 static const std::string DEFAULT_ONCAT_URL = "https://oncat.ornl.gov";
 static const std::string DEFAULT_CLIENT_ID =
-  "d16ea847-41ce-4b30-9167-40298588e755";
+    "d16ea847-41ce-4b30-9167-40298588e755";
 }
 
 /**
@@ -83,58 +83,43 @@ static const std::string DEFAULT_CLIENT_ID =
  * @return The constructed ONCat object.
  */
 ONCat ONCat::fromMantidSettings() {
-  auto & config = Mantid::Kernel::ConfigService::Instance();
+  auto &config = Mantid::Kernel::ConfigService::Instance();
   const auto client_id = config.getString(CONFIG_PATH_BASE + "client_id");
   const auto client_secret =
-    config.getString(CONFIG_PATH_BASE + "client_secret");
+      config.getString(CONFIG_PATH_BASE + "client_secret");
   const bool hasClientCredentials = client_id != "" && client_secret != "";
 
   if (hasClientCredentials) {
-    g_log.debug()
-      << "Found client credentials in Mantid.local.properties.  "
-      << "No user login required."
-      << std::endl;
+    g_log.debug() << "Found client credentials in Mantid.local.properties.  "
+                  << "No user login required." << std::endl;
   } else {
     g_log.debug()
-      << "Could not find client credentials in Mantid.local.properties.  "
-      << "Falling back to default -- user login required."
-      << std::endl;
+        << "Could not find client credentials in Mantid.local.properties.  "
+        << "Falling back to default -- user login required." << std::endl;
   }
 
-  return ONCat(
-    DEFAULT_ONCAT_URL,
-    Mantid::Kernel::make_unique<ConfigServiceTokenStore>(),
-    hasClientCredentials
-      ? OAuthFlow::CLIENT_CREDENTIALS
-      : OAuthFlow::RESOURCE_OWNER_CREDENTIALS,
-    hasClientCredentials ? client_id : DEFAULT_CLIENT_ID,
-    boost::make_optional(hasClientCredentials, client_secret)
-  );
+  return ONCat(DEFAULT_ONCAT_URL,
+               Mantid::Kernel::make_unique<ConfigServiceTokenStore>(),
+               hasClientCredentials ? OAuthFlow::CLIENT_CREDENTIALS
+                                    : OAuthFlow::RESOURCE_OWNER_CREDENTIALS,
+               hasClientCredentials ? client_id : DEFAULT_CLIENT_ID,
+               boost::make_optional(hasClientCredentials, client_secret));
 }
 
-ONCat::ONCat(
-  const std::string & url,
-  IOAuthTokenStore_uptr tokenStore,
-  OAuthFlow flow,
-  const std::string & clientId,
-  const boost::optional<std::string> & clientSecret
-) :
-  m_url(url),
-  m_tokenStore(std::move(tokenStore)),
-  m_clientId(clientId),
-  m_clientSecret(clientSecret),
+ONCat::ONCat(const std::string &url, IOAuthTokenStore_uptr tokenStore,
+             OAuthFlow flow, const std::string &clientId,
+             const boost::optional<std::string> &clientSecret)
+    : m_url(url), m_tokenStore(std::move(tokenStore)), m_clientId(clientId),
+      m_clientSecret(clientSecret),
 
-  m_flow(flow),
-  m_internetHelper(new Mantid::Kernel::InternetHelper()) {}
+      m_flow(flow), m_internetHelper(new Mantid::Kernel::InternetHelper()) {}
 
-ONCat::ONCat(const ONCat & other) :
-  m_url(other.m_url),
-  m_tokenStore(other.m_tokenStore),
-  m_clientId(other.m_clientId),
-  m_clientSecret(other.m_clientSecret),
+ONCat::ONCat(const ONCat &other)
+    : m_url(other.m_url), m_tokenStore(other.m_tokenStore),
+      m_clientId(other.m_clientId), m_clientSecret(other.m_clientSecret),
 
-  m_flow(other.m_flow),
-  m_internetHelper(new Mantid::Kernel::InternetHelper()) {}
+      m_flow(other.m_flow),
+      m_internetHelper(new Mantid::Kernel::InternetHelper()) {}
 
 ONCat::~ONCat() {}
 
@@ -195,7 +180,8 @@ void ONCat::logout() {
   // spec).  A "logout", then, is simply throwing away whatever token we
   // previously stored client-side.
   m_tokenStore->setToken(boost::none);
-  g_log.debug() << "Logging out." << std::endl;;
+  g_log.debug() << "Logging out." << std::endl;
+  ;
 }
 
 /**
@@ -208,15 +194,14 @@ void ONCat::logout() {
  * @exception Mantid::Catalog::Exception::InvalidCredentialsError :
  *   Thrown when the given credentials are not valid.
  */
-void ONCat::login(
-  const std::string & username, const std::string & password
-) {
+void ONCat::login(const std::string &username, const std::string &password) {
   if (m_flow != OAuthFlow::RESOURCE_OWNER_CREDENTIALS) {
     g_log.warning()
-      << "Unexpected usage detected!  "
-      << "Logging in with user credentials in not required (and is not "
-      << "supported) when machine-to-machine credentials are being used."
-      << std::endl;;
+        << "Unexpected usage detected!  "
+        << "Logging in with user credentials in not required (and is not "
+        << "supported) when machine-to-machine credentials are being used."
+        << std::endl;
+    ;
     return;
   }
 
@@ -234,20 +219,19 @@ void ONCat::login(
   try {
     std::stringstream ss;
 
-    const int statusCode = m_internetHelper->sendRequest(
-      m_url + "/oauth/token", ss
-    );
+    const int statusCode =
+        m_internetHelper->sendRequest(m_url + "/oauth/token", ss);
 
     if (statusCode == HTTPResponse::HTTP_OK) {
       m_tokenStore->setToken(OAuthToken::fromJSONStream(ss));
     }
 
-    g_log.debug() << "Login was successful!" << std::endl;;
-  } catch (InternetError & ie) {
+    g_log.debug() << "Login was successful!" << std::endl;
+    ;
+  } catch (InternetError &ie) {
     if (ie.errorCode() == HTTPResponse::HTTP_UNAUTHORIZED) {
       throw InvalidCredentialsError(
-        "Invalid UCAMS / XCAMS credentials used for ONCat login."
-      );
+          "Invalid UCAMS / XCAMS credentials used for ONCat login.");
     }
     throw CatalogError(ie.what());
   }
@@ -275,14 +259,12 @@ void ONCat::login(
  *
  * @exception Mantid::Catalog::Exception::CatalogError
  */
-ONCatEntity ONCat::retrieve(
-  const std::string & resourceNamespace,
-  const std::string & resource,
-  const std::string & identifier,
-  const QueryParameters & queryParameters
-) {
+ONCatEntity ONCat::retrieve(const std::string &resourceNamespace,
+                            const std::string &resource,
+                            const std::string &identifier,
+                            const QueryParameters &queryParameters) {
   const auto uri =
-    m_url + "/" + resourceNamespace + "/" + resource + "/" + identifier;
+      m_url + "/" + resourceNamespace + "/" + resource + "/" + identifier;
   std::stringstream ss;
 
   sendAPIRequest(uri, queryParameters, ss);
@@ -296,13 +278,10 @@ ONCatEntity ONCat::retrieve(
  *
  * Please see retrieve documentation for more info.
  */
-std::vector<ONCatEntity> ONCat::list(
-  const std::string & resourceNamespace,
-  const std::string & resource,
-  const QueryParameters & queryParameters
-) {
-  const auto uri =
-    m_url + "/" + resourceNamespace + "/" + resource;
+std::vector<ONCatEntity> ONCat::list(const std::string &resourceNamespace,
+                                     const std::string &resource,
+                                     const QueryParameters &queryParameters) {
+  const auto uri = m_url + "/" + resourceNamespace + "/" + resource;
   std::stringstream ss;
 
   sendAPIRequest(uri, queryParameters, ss);
@@ -331,11 +310,13 @@ void ONCat::refreshTokenIfNeeded() {
  * @exception Mantid::Catalog::Exception::InvalidRefreshTokenError :
  *   Thrown when the provider decides the current token cannot be refreshed.
  */
-void ONCat::refreshTokenIfNeeded(const DateAndTime & currentTime) {
+void ONCat::refreshTokenIfNeeded(const DateAndTime &currentTime) {
   const auto currentToken = m_tokenStore->getToken();
 
   if (m_flow == OAuthFlow::CLIENT_CREDENTIALS) {
-    if (currentToken && !currentToken->isExpired(currentTime)) { return; }
+    if (currentToken && !currentToken->isExpired(currentTime)) {
+      return;
+    }
 
     Poco::Net::HTMLForm form(Poco::Net::HTMLForm::ENCODING_MULTIPART);
     form.set("client_id", m_clientId);
@@ -350,22 +331,27 @@ void ONCat::refreshTokenIfNeeded(const DateAndTime & currentTime) {
     try {
       std::stringstream ss;
 
-      const int statusCode = m_internetHelper->sendRequest(
-        m_url + "/oauth/token", ss
-      );
+      const int statusCode =
+          m_internetHelper->sendRequest(m_url + "/oauth/token", ss);
 
       if (statusCode == HTTPResponse::HTTP_OK) {
         m_tokenStore->setToken(OAuthToken::fromJSONStream(ss));
       }
       g_log.debug() << "Token successfully refreshed." << std::endl;
-    } catch (InternetError & ie) {
+    } catch (InternetError &ie) {
       throw CatalogError(ie.what());
     }
   } else if (m_flow == OAuthFlow::RESOURCE_OWNER_CREDENTIALS) {
-    if (!currentToken) { return; }
-    if (!currentToken->isExpired(currentTime)) { return; }
+    if (!currentToken) {
+      return;
+    }
+    if (!currentToken->isExpired(currentTime)) {
+      return;
+    }
     const auto currentRefreshToken = currentToken->refreshToken();
-    if (!currentRefreshToken) { return; }
+    if (!currentRefreshToken) {
+      return;
+    }
 
     Poco::Net::HTMLForm form(Poco::Net::HTMLForm::ENCODING_MULTIPART);
     form.set("client_id", m_clientId);
@@ -381,22 +367,20 @@ void ONCat::refreshTokenIfNeeded(const DateAndTime & currentTime) {
     try {
       std::stringstream ss;
 
-      const int statusCode = m_internetHelper->sendRequest(
-        m_url + "/oauth/token", ss
-      );
+      const int statusCode =
+          m_internetHelper->sendRequest(m_url + "/oauth/token", ss);
 
       if (statusCode == HTTPResponse::HTTP_OK) {
         m_tokenStore->setToken(OAuthToken::fromJSONStream(ss));
       }
       g_log.debug() << "Token successfully refreshed." << std::endl;
-    } catch (InternetError & ie) {
+    } catch (InternetError &ie) {
       if (ie.errorCode() == HTTPResponse::HTTP_UNAUTHORIZED) {
         // As per OAuth spec, when a refresh token is no longer valid, we
         // can consider ourselves logged out.
         logout();
         throw InvalidRefreshTokenError(
-          "You have been logged out.  Please login again."
-        );
+            "You have been logged out.  Please login again.");
       }
       throw CatalogError(ie.what());
     }
@@ -404,16 +388,13 @@ void ONCat::refreshTokenIfNeeded(const DateAndTime & currentTime) {
 }
 
 void ONCat::setInternetHelper(
-  std::unique_ptr<Mantid::Kernel::InternetHelper> internetHelper
-) {
+    std::unique_ptr<Mantid::Kernel::InternetHelper> internetHelper) {
   m_internetHelper = std::move(internetHelper);
 }
 
-void ONCat::sendAPIRequest(
-  const std::string & uri,
-  const QueryParameters & queryParameters,
-  std::ostream & response
-) {
+void ONCat::sendAPIRequest(const std::string &uri,
+                           const QueryParameters &queryParameters,
+                           std::ostream &response) {
   refreshTokenIfNeeded();
 
   const auto tokenType = m_tokenStore->getToken()->tokenType();
@@ -421,43 +402,36 @@ void ONCat::sendAPIRequest(
 
   m_internetHelper->clearHeaders();
   m_internetHelper->setMethod("GET");
-  m_internetHelper->addHeader(
-    "Authorization", tokenType + " " + accessToken
-  );
+  m_internetHelper->addHeader("Authorization", tokenType + " " + accessToken);
 
   std::vector<std::string> queryStringParts(queryParameters.size());
-  std::transform(
-    queryParameters.begin(), queryParameters.end(),
-    queryStringParts.begin(),
-    [](const QueryParameter & queryParameter) -> std::string {
-      return queryParameter.first + "=" + queryParameter.second;
-    }
-  );
+  std::transform(queryParameters.begin(), queryParameters.end(),
+                 queryStringParts.begin(),
+                 [](const QueryParameter &queryParameter) -> std::string {
+                   return queryParameter.first + "=" + queryParameter.second;
+                 });
   const auto queryString = boost::algorithm::join(queryStringParts, "&");
   const auto url = queryString.size() == 0 ? uri : uri + "?" + queryString;
 
-  g_log.debug()
-    << "About to make a call to the following ONCat URL: " << url;
+  g_log.debug() << "About to make a call to the following ONCat URL: " << url;
 
   try {
     m_internetHelper->sendRequest(url, response);
-  } catch (InternetError & ie) {
-    if (
-      ie.errorCode() == HTTPResponse::HTTP_UNAUTHORIZED
-    ) {
+  } catch (InternetError &ie) {
+    if (ie.errorCode() == HTTPResponse::HTTP_UNAUTHORIZED) {
       std::string errorMessage;
-      switch(m_flow) {
-        case OAuthFlow::RESOURCE_OWNER_CREDENTIALS :
-          errorMessage = "You have been logged out.  Please login again.";
-          break;
-        case OAuthFlow::CLIENT_CREDENTIALS :
-          errorMessage =
+      switch (m_flow) {
+      case OAuthFlow::RESOURCE_OWNER_CREDENTIALS:
+        errorMessage = "You have been logged out.  Please login again.";
+        break;
+      case OAuthFlow::CLIENT_CREDENTIALS:
+        errorMessage =
             "The stored OAuth token appears to be invalid.  "
             "There are a few cases where this might be expected, but in "
             "principle this should rarely happen.  "
             "Please try again and if the problem persists contact the "
             "ONCat administrator at oncat-support@ornl.gov.";
-          break;
+        break;
       }
       // The ONCat API does *not* leak information in the case where a
       // resource exists but a user is not allowed access -- a 404 would

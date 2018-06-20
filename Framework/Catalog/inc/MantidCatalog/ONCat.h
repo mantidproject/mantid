@@ -109,47 +109,38 @@ public:
   static ONCat fromMantidSettings();
 
   ONCat() = delete;
-  ONCat(const ONCat & other);
+  ONCat(const ONCat &other);
   ~ONCat();
 
   bool isUserLoggedIn() const;
 
-  void login(const std::string & username, const std::string & password);
+  void login(const std::string &username, const std::string &password);
   void logout();
 
-  ONCatEntity retrieve(
-    const std::string & resourceNamespace,
-    const std::string & resource,
-    const std::string & identifier,
-    const QueryParameters & queryParameters);
-  std::vector<ONCatEntity> list(
-    const std::string & resourceNamespace,
-    const std::string & resource,
-    const QueryParameters & queryParameters);
+  ONCatEntity retrieve(const std::string &resourceNamespace,
+                       const std::string &resource,
+                       const std::string &identifier,
+                       const QueryParameters &queryParameters);
+  std::vector<ONCatEntity> list(const std::string &resourceNamespace,
+                                const std::string &resource,
+                                const QueryParameters &queryParameters);
 
   //////////////////////////////////////////////////////////////////////
   // Exposed publicly for testing purposes only.
   //////////////////////////////////////////////////////////////////////
-  ONCat(
-    const std::string & url,
-    IOAuthTokenStore_uptr tokenStore,
-    OAuthFlow flow,
-    const std::string & clientId,
-    const boost::optional<std::string> & clientSecret = boost::none
-  );
+  ONCat(const std::string &url, IOAuthTokenStore_uptr tokenStore,
+        OAuthFlow flow, const std::string &clientId,
+        const boost::optional<std::string> &clientSecret = boost::none);
   void refreshTokenIfNeeded();
-  void refreshTokenIfNeeded(const DateAndTime & currentTime);
+  void refreshTokenIfNeeded(const DateAndTime &currentTime);
   void setInternetHelper(
-    std::unique_ptr<Mantid::Kernel::InternetHelper> internetHelper
-  );
+      std::unique_ptr<Mantid::Kernel::InternetHelper> internetHelper);
   //////////////////////////////////////////////////////////////////////
 
 private:
-  void sendAPIRequest(
-    const std::string & uri,
-    const QueryParameters & queryParameters,
-    std::ostream & response
-  );
+  void sendAPIRequest(const std::string &uri,
+                      const QueryParameters &queryParameters,
+                      std::ostream &response);
 
   std::string m_url;
   IOAuthTokenStore_sptr m_tokenStore;

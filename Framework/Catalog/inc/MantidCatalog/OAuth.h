@@ -53,13 +53,9 @@ enum class OAuthFlow : uint8_t {
 class MANTID_CATALOG_DLL OAuthToken {
 public:
   OAuthToken() = delete;
-  OAuthToken(
-    const std::string & tokenType,
-    int expiresIn,
-    const std::string & accessToken,
-    const std::string & scope,
-    const boost::optional<std::string> & refreshToken
-  );
+  OAuthToken(const std::string &tokenType, int expiresIn,
+             const std::string &accessToken, const std::string &scope,
+             const boost::optional<std::string> &refreshToken);
   ~OAuthToken();
 
   std::string tokenType() const;
@@ -69,9 +65,9 @@ public:
   boost::optional<std::string> refreshToken() const;
 
   bool isExpired() const;
-  bool isExpired(const DateAndTime & currentTime) const;
+  bool isExpired(const DateAndTime &currentTime) const;
 
-  static OAuthToken fromJSONStream(std::istream & tokenStringStream);
+  static OAuthToken fromJSONStream(std::istream &tokenStringStream);
 
 private:
   DateAndTime m_expiresAt;
@@ -85,19 +81,18 @@ private:
 
 class MANTID_CATALOG_DLL IOAuthTokenStore {
 public:
-  virtual void setToken(const boost::optional<OAuthToken> & token) = 0;
+  virtual void setToken(const boost::optional<OAuthToken> &token) = 0;
   virtual boost::optional<OAuthToken> getToken() = 0;
 };
 
 class MANTID_CATALOG_DLL ConfigServiceTokenStore : public IOAuthTokenStore {
 public:
   ConfigServiceTokenStore() = default;
-  ConfigServiceTokenStore & operator=(
-    const ConfigServiceTokenStore& other
-  ) = default;
+  ConfigServiceTokenStore &
+  operator=(const ConfigServiceTokenStore &other) = default;
   ~ConfigServiceTokenStore();
 
-  void setToken(const boost::optional<OAuthToken> & token) override;
+  void setToken(const boost::optional<OAuthToken> &token) override;
   boost::optional<OAuthToken> getToken() override;
 };
 

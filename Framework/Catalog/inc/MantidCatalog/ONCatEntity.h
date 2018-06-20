@@ -9,7 +9,7 @@
 #include <boost/optional.hpp>
 
 namespace Json {
-  class Value;
+class Value;
 }
 
 namespace Mantid {
@@ -81,33 +81,29 @@ public:
 
   // So, you can either supply a default value for when the field you
   // want is not there ...
-  std::string asString(
-    const std::string & path, const std::string defaultValue) const;
-  int asInt(const std::string & path, int defaultValue) const;
-  float asFloat(const std::string & path, float defaultValue) const;
-  double asDouble(const std::string & path, double defaultValue) const;
-  bool asBool(const std::string & path, bool defaultValue) const;
+  std::string asString(const std::string &path,
+                       const std::string defaultValue) const;
+  int asInt(const std::string &path, int defaultValue) const;
+  float asFloat(const std::string &path, float defaultValue) const;
+  double asDouble(const std::string &path, double defaultValue) const;
+  bool asBool(const std::string &path, bool defaultValue) const;
 
   // ... or, write conditional logic around boost's optional results.
-  boost::optional<std::string> asString(const std::string & path) const;
-  boost::optional<int> asInt(const std::string & path) const;
-  boost::optional<float> asFloat(const std::string & path) const;
-  boost::optional<double> asDouble(const std::string & path) const;
-  boost::optional<bool> asBool(const std::string & path) const;
+  boost::optional<std::string> asString(const std::string &path) const;
+  boost::optional<int> asInt(const std::string &path) const;
+  boost::optional<float> asFloat(const std::string &path) const;
+  boost::optional<double> asDouble(const std::string &path) const;
+  boost::optional<bool> asBool(const std::string &path) const;
 
   std::string toString() const;
 
-  static ONCatEntity fromJSONStream(
-    std::istream & streamContent);
-  static std::vector<ONCatEntity> vectorFromJSONStream(
-    std::istream & streamContent);
+  static ONCatEntity fromJSONStream(std::istream &streamContent);
+  static std::vector<ONCatEntity>
+  vectorFromJSONStream(std::istream &streamContent);
 
 private:
-  ONCatEntity(
-    const std::string & id,
-    const std::string & type,
-    Content_uptr content
-  );
+  ONCatEntity(const std::string &id, const std::string &type,
+              Content_uptr content);
 
   std::string m_id;
   std::string m_type;

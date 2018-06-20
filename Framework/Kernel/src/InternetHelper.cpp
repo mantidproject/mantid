@@ -136,11 +136,9 @@ void InternetHelper::createRequest(Poco::URI &uri) {
     m_request->setContentType(m_contentType);
   }
 
-  m_request->set(
-    "User-Agent",
-    // Use standard User-Agent format as per MDN documentation.
-    std::string("Mantid/") + MantidVersion::version()
-  );
+  m_request->set("User-Agent",
+                 // Use standard User-Agent format as per MDN documentation.
+                 std::string("Mantid/") + MantidVersion::version());
   if (m_method == "POST") {
     // HTTP states that the 'Content-Length' header should not be included
     // if the 'Transfer-Encoding' header is set. UNKNOWN_CONTENT_LENGTH
