@@ -38,6 +38,7 @@ The parameters of interest in the ``.maud`` file are:
   page 143 of the `GSAS Manual
   <http://www.ccp14.ac.uk/ccp/ccp14/ftp-mirror/gsas/public/gsas/manual/GSASManual.pdf>`_
   [GSASManual]_
+- Sample-detector distance
 - There are also parameters for a second function, GSAS TOF function
   type 2, which are zeroed
 
