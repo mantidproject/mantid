@@ -26,15 +26,6 @@ getFirstInCategory(CompositeFunction_const_sptr composite,
   return boost::none;
 }
 
-IFunction_sptr
-getFirstFunctionInCategory(CompositeFunction_const_sptr composite,
-                           const std::string &category) {
-  const auto index = getFirstInCategory(composite, category);
-  if (index)
-    return composite->getFunction(*index);
-  return nullptr;
-}
-
 IFunction_sptr removeFunction(CompositeFunction_sptr composite,
                               std::size_t index) {
   auto function = composite->getFunction(index);

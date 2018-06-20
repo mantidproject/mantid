@@ -197,7 +197,8 @@ bool IqtFitModel::setConstrainIntensities(bool constrain) {
 std::unordered_map<std::string, ParameterValue>
 IqtFitModel::createDefaultParameters(std::size_t index) const {
   std::unordered_map<std::string, ParameterValue> parameters;
-  parameters["Height"] = computeHeightApproximation(getFittingFunction());
+  parameters["Height"] =
+      ParameterValue(computeHeightApproximation(getFittingFunction()));
 
   const auto inputWs = getWorkspace(index);
   const auto tau = inputWs ? computeTauApproximation(inputWs) : 0.0;
