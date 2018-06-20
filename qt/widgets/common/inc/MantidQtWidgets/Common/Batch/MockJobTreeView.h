@@ -4,6 +4,8 @@
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 #include "MantidKernel/WarningSuppressions.h"
 
+using testing::Return;
+
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
@@ -12,6 +14,10 @@ GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class EXPORT_OPT_MANTIDQT_COMMON MockJobTreeView : public IJobTreeView {
 public:
+  MockJobTreeView() : m_deadCell("", "white", 0, "transparent", 0, false) {
+    ON_CALL(*this, deadCell()).WillByDefault(Return(m_deadCell));
+  }
+
   void filterRowsBy(std::unique_ptr<RowPredicate> predicate) override {
     filterRowsBy(predicate.get());
   }
@@ -68,6 +74,9 @@ public:
   MOCK_CONST_METHOD0(selectedSubtreeRoots,
                      boost::optional<std::vector<RowLocation>>());
   MOCK_CONST_METHOD0(deadCell, Cell());
+
+private:
+  Cell m_deadCell;
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

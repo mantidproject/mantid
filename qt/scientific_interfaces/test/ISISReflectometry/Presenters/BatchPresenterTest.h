@@ -14,6 +14,7 @@ using namespace MantidQt::CustomInterfaces;
 using testing::Return;
 using testing::Mock;
 using testing::NiceMock;
+using testing::_;
 
 class BatchPresenterTest {
 public:
@@ -59,7 +60,12 @@ public:
     return reductionJobs;
   }
 
-  BatchPresenterTest() : m_jobs(), m_view() { jobsViewIs(m_jobs, m_view); }
+  BatchPresenterTest() : m_jobs(), m_view() {
+    jobsViewIs(m_jobs, m_view);
+    ON_CALL(m_jobs, cellsAt(_))
+        .WillByDefault(Return(std::vector<MantidQt::MantidWidgets::Batch::Cell>(
+            8, MantidQt::MantidWidgets::Batch::Cell(""))));
+  }
 
   bool verifyAndClearExpectations() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
