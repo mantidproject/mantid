@@ -181,8 +181,8 @@ LoadAndApplyMuonDetectorGrouping::addGroupedWSWithDefaultName(
 
   WorkspaceGroup_sptr groupedWS;
   if (ads.doesExist(groupedWSName)) {
-    if (groupedWS = boost::dynamic_pointer_cast<WorkspaceGroup>(
-            ads.retrieve(groupedWSName))) {
+    if ((groupedWS = boost::dynamic_pointer_cast<WorkspaceGroup>(
+            ads.retrieve(groupedWSName)))) {
       return groupedWS;
     }
   }
@@ -195,14 +195,14 @@ LoadAndApplyMuonDetectorGrouping::addGroupedWSWithDefaultName(
 // Set the parameters in options to sensible defaults for this algorithm
 AnalysisOptions LoadAndApplyMuonDetectorGrouping::setDefaultOptions() {
   AnalysisOptions options;
-  options.summedPeriods = this->getProperty("SummedPeriods");
-  options.subtractedPeriods = this->getProperty("SubtractedPeriods");
+  options.summedPeriods = this->getPropertyValue("SummedPeriods");
+  options.subtractedPeriods = this->getPropertyValue("SubtractedPeriods");
   options.timeZero = 0.0;
   options.loadedTimeZero = this->getProperty("TimeOffset");
-  options.rebinArgs = this->getProperty("RebinArgs");
+  options.rebinArgs = this->getPropertyValue("RebinArgs");
   options.plotType = Muon::PlotType::Counts;
   return options;
-};
+}
 
 /**
  * Adds the group names and corresponding detector IDs to
@@ -217,7 +217,7 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingInformationToADS(
   groupingTable->addColumn("vector_int", "Detectors");
 
   size_t numGroups = grouping.groups.size();
-  for (auto i = 0; i < numGroups; i++) {
+  for (size_t i = 0; i < numGroups; i++) {
     TableRow newRow = groupingTable->appendRow();
     newRow << grouping.groupNames[i];
     std::vector<int> detectorIDs =
@@ -242,7 +242,7 @@ API::Grouping LoadAndApplyMuonDetectorGrouping::loadGroupsAndPairs() {
   CheckValidGroupsAndPairs(grouping);
 
   return grouping;
-};
+}
 
 /**
  * Check if the group/pair names are valid, and if all the groups which
@@ -292,7 +292,7 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
     Mantid::API::WorkspaceGroup_sptr wsGrouped) {
 
   size_t numGroups = options.grouping.groups.size();
-  for (auto i = 0; i < numGroups; i++) {
+  for (size_t i = 0; i < numGroups; i++) {
     IAlgorithm_sptr alg =
         this->createChildAlgorithm("ApplyMuonDetectorGrouping");
     if (!this->isLogging())
@@ -315,7 +315,7 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
     }
     alg->execute();
   }
-};
+}
 
 /**
  * Add all the supplied pairs to the ADS, inside wsGrouped, by
@@ -327,7 +327,7 @@ void LoadAndApplyMuonDetectorGrouping::addPairingToADS(
     Mantid::API::WorkspaceGroup_sptr wsGrouped) {
 
   size_t numPairs = options.grouping.pairs.size();
-  for (auto i = 0; i < numPairs; i++) {
+  for (size_t i = 0; i < numPairs; i++) {
     IAlgorithm_sptr alg =
         this->createChildAlgorithm("ApplyMuonDetectorGroupPairing");
     if (!this->isLogging())
@@ -357,7 +357,7 @@ void LoadAndApplyMuonDetectorGrouping::addPairingToADS(
     }
     alg->execute();
   };
-};
+}
 
 // Allow WorkspaceGroup property to function correctly.
 bool LoadAndApplyMuonDetectorGrouping::checkGroups() { return false; }

@@ -49,10 +49,6 @@ struct eData {
  * Create a matrix workspace appropriate for Group Asymmetry. One detector per
  * spectra, numbers starting from 1. The detector ID and spectrum number are
  * equal.
- * @param nspec :: The number of spectra
- * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
- * Number of bins = maxt - 1 .
- * @return Pointer to the workspace.
  */
 template <typename Function>
 Mantid::API::MatrixWorkspace_sptr
@@ -65,26 +61,14 @@ Mantid::API::MatrixWorkspace_sptr createAsymmetryWorkspace(size_t nspec,
  * Create a matrix workspace appropriate for Group Counts. One detector per
  * spectra, numbers starting from 1. The detector ID and spectrum number are
  * equal. Y values increase from 0 in integer steps.
- * @param nspec :: The number of spectra
- * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
- * Number of bins = maxt - 1 .
- * @param seed :: Number added to all y-values.
- * @return Pointer to the workspace.
  */
 Mantid::API::MatrixWorkspace_sptr
-createCountsWorkspace(size_t nspec, size_t maxt, double seed,
-                      size_t detectorIDseed = 1);
+createCountsWorkspace(size_t nspec, size_t maxt, double seed);
 
 /**
  * Create a WorkspaceGroup and add to the ADS, populate with MatrixWorkspaces
  * simulating periods as used in muon analysis. Workspace for period i has a
  * name ending _i.
- * @param nPeriods :: The number of periods (independent workspaces)
- * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
- * Number of bins = maxt - 1 .
- * @param wsGroupName :: Name of the workspace group containing the period
- * workspaces.
- * @return Pointer to the workspace group.
  */
 Mantid::API::WorkspaceGroup_sptr
 createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
@@ -93,9 +77,6 @@ createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
 /**
  * Create a simple dead time TableWorkspace with two columns (spectrum number
  * and dead time).
- * @param nspec :: The number of spectra (rows in table).
- * @param deadTimes ::  The dead times for each spectra.
- * @return TableWorkspace with dead times appropriate for pairing algorithm.
  */
 Mantid::API::ITableWorkspace_sptr
 createDeadTimeTable(const size_t &nspec, std::vector<double> &deadTimes);
@@ -104,15 +85,18 @@ createDeadTimeTable(const size_t &nspec, std::vector<double> &deadTimes);
 ScopedFileHelper::ScopedFile
 createGroupingXMLSingleGroup(const std::string &groupName,
                              const std::string &group);
-
-// Create an XML with two simple groups and a pair made from them. groupName
-// applies only to the pairing so that we can test a failure case.
+/**
+ * Create an XML with two simple groups and a pair made from them. groupName
+ * applies only to the pairing so that we can test a failure case.
+ */
 ScopedFileHelper::ScopedFile
 createGroupingXMLSinglePair(const std::string &pairName,
                             const std::string &groupName);
 
-// Create an XML file with grouping/pairing information. With nGroups = 3 and
-// nDetectorPerGroup = 5 the grouping would be {"1-5","6-10","11-15"}.
+/**
+ * Create an XML file with grouping/pairing information. With nGroups = 3 and
+ * nDetectorPerGroup = 5 the grouping would be {"1-5","6-10","11-15"}.
+ */
 ScopedFileHelper::ScopedFile
 createXMLwithPairsAndGroups(const int &nGroups = 1,
                             const int &nDetectorsPerGroup = 1);

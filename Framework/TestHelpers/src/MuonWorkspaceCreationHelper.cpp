@@ -62,8 +62,8 @@ double eData::operator()(const double, size_t) { return 0.005; }
  * @param nspec :: The number of spectra
  * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
  * Number of bins = maxt - 1 .
- * @param dataGenerator :: A function taking double, size_t arguments and
- * returning a double
+ * @param dataGenerator :: A function object which takes a double (t) and
+ * integer (spectrum number) and gives back a double (the y-value for the data).
  * @return Pointer to the workspace.
  */
 template <typename Function>
@@ -108,7 +108,7 @@ Mantid::API::MatrixWorkspace_sptr createAsymmetryWorkspace(size_t nspec,
  * @return Pointer to the workspace.
  */
 MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
-                                           double seed, size_t detectorIDseed) {
+                                           double seed) {
 
   MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceFromFunction(
@@ -141,7 +141,8 @@ MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
  * Create a WorkspaceGroup and add to the ADS, populate with MatrixWorkspaces
  * simulating periods as used in muon analysis. Workspace for period i has a
  * name ending _i.
- * @param nPeriods :: The number of periods (independent workspaces)
+ * @param nPeriods :: The number of periods (independent workspaces).
+ * @param nspec :: The number of spectra in each workspace.
  * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
  * Number of bins = maxt - 1 .
  * @param wsGroupName :: Name of the workspace group containing the period

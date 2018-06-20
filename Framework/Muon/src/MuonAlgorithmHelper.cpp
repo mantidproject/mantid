@@ -322,7 +322,7 @@ getAllDetectorIDsFromGroupWorkspace(Mantid::API::WorkspaceGroup_sptr ws) {
   MatrixWorkspace_sptr matrixWS;
 
   std::vector<Workspace_sptr> workspaces = ws->getAllItems();
-  for (auto i = 0; i < workspaces.size(); i++) {
+  for (size_t i = 0; i < workspaces.size(); i++) {
     matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(workspaces[i]);
     detectorIDsSingleWorkspace = getAllDetectorIDsFromMatrixWorkspace(matrixWS);
     detectorIDs.insert(detectorIDsSingleWorkspace.begin(),
@@ -516,8 +516,7 @@ bool checkValidPair(const std::string &WSname1, const std::string &WSname2) {
  * @param grouping :: Struct with grouping information
  * @param filename :: XML filename where information will be saved
  */
-std::string
-MuonAlgorithmHelper::groupingToXML(const Mantid::API::Grouping &grouping) {
+std::string groupingToXML(const Mantid::API::Grouping &grouping) {
 
   Poco::XML::DOMWriter writer;
   writer.setNewLine("\n");
@@ -575,7 +574,7 @@ MuonAlgorithmHelper::groupingToXML(const Mantid::API::Grouping &grouping) {
 }
 
 /// Check whether a group or pair name is valid
-bool MuonAlgorithmHelper::checkValidGroupPairName(const std::string &name) {
+bool checkValidGroupPairName(const std::string &name) {
   if (name.empty()) {
     return false;
   }
