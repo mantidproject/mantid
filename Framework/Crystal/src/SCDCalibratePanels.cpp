@@ -88,6 +88,7 @@ void SCDCalibratePanels::exec() {
     MyPanels.insert("East");
     MyPanels.insert("West");
     int maxRecurseDepth = 4;
+    // cppcheck-suppress syntaxError
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int num = 1; num < 64; ++num) {
       PARALLEL_START_INTERUPT_REGION
