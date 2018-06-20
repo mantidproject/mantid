@@ -337,5 +337,8 @@ template <typename Group>
 Group const &ReductionJobs<Group>::operator[](int index) const {
   return m_groups[index];
 }
+
+template class ReductionJobs<SlicedGroup>;
+template class ReductionJobs<UnslicedGroup>;
 }
 }

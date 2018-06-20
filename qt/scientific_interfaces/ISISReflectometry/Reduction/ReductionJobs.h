@@ -53,10 +53,11 @@ private:
   std::vector<Group> m_groups;
 };
 
-template class MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs<SlicedGroup>;
+extern template class MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs<SlicedGroup>;
 using SlicedReductionJobs = ReductionJobs<SlicedGroup>;
 
-template class MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs<UnslicedGroup>;
+extern template class MANTIDQT_ISISREFLECTOMETRY_DLL
+    ReductionJobs<UnslicedGroup>;
 using UnslicedReductionJobs = ReductionJobs<UnslicedGroup>;
 
 using Jobs = boost::variant<UnslicedReductionJobs, SlicedReductionJobs>;
