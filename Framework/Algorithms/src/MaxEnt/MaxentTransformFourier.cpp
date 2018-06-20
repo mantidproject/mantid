@@ -13,7 +13,10 @@ MaxentTransformFourier::MaxentTransformFourier(MaxentSpace_sptr dataSpace,
 /**
 * Transforms a 1D signal from image space to data space, performing an
 * inverse Fast Fourier Transform. See also GSL documentation on FFT.
-* Assumes complex input.
+* Input is assumed real or complex according to the type of image space
+* given to the constructor.
+* Return value is real or complex according to the type of data space
+* given to the constructor.
 * @param image : [input] Image as a vector
 * @return : The vector in the data space
 */
@@ -42,8 +45,11 @@ MaxentTransformFourier::imageToData(const std::vector<double> &image) {
 
 /**
 * Transforms a 1D signal from data space to image space, performing a forward
-* Fast Fourier Transform. See also GSL documentation on FFT. Assumes complex
-* input.
+* Fast Fourier Transform. See also GSL documentation on FFT. 
+* Input is assumed real or complex according to the type of data space
+* given to the constructor.
+* Return value is real or complex according to the type of image space
+* given to the constructor.
 * @param data : [input] Data as a vector
 * @return : The vector in the image space
 */
