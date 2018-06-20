@@ -17,6 +17,19 @@ from reduction_gui.reduction.scripter import BaseScriptElement, BaseReductionScr
 
 # -------------------------------------------------------------------------------
 
+class OptionalFloat():
+    """value can be either a float or None. if value is None, str(self) == '' """
+    def __init__(self, value=None):
+        self.value = float(value) if value else None
+
+    def _bind(self, function, default=None):
+        return function(self.value) if self.value is not None else default
+
+    def __str__(self):
+        return self._bind(str, default = '')
+
+    def __format__(self, format_spec):
+        return self._bind(lambda v: v.__format__(format_spec), default = '')
 
 class TOFTOFScriptElement(BaseScriptElement):
 
@@ -72,11 +85,11 @@ class TOFTOFScriptElement(BaseScriptElement):
         # vanadium runs & comment
         self.vanRuns  = ''
         self.vanCmnt  = ''
-        self.vanTemp  = ''
+        self.vanTemp  = OptionalFloat()
 
         # empty can runs, comment, and factor
         self.ecRuns   = ''
-        self.ecTemp   = ''
+        self.ecTemp   = OptionalFloat()
         self.ecFactor = self.DEF_ecFactor
 
         # data runs: [(runs,comment, temperature), ...]
@@ -173,6 +186,9 @@ class TOFTOFScriptElement(BaseScriptElement):
             def get_str(tag, default=''):
                 return BaseScriptElement.getStringElement(dom, tag, default=default)
 
+            def get_optFloat(tag, default=None):
+                return OptionalFloat(BaseScriptElement.getStringElement(dom, tag, default=default))
+
             def get_int(tag, default):
                 return BaseScriptElement.getIntElement(dom, tag, default=default)
 
@@ -182,8 +198,8 @@ class TOFTOFScriptElement(BaseScriptElement):
             def get_strlst(tag):
                 return BaseScriptElement.getStringList(dom, tag)
 
-            def get_float_list(tag):
-                return BaseScriptElement.getFloatList(dom, tag)
+            def get_optFloat_list(tag):
+                return map(OptionalFloat, get_strlst(tag))
 
             def get_bol(tag, default):
                 return BaseScriptElement.getBoolElement(dom, tag, default=default)
@@ -193,15 +209,15 @@ class TOFTOFScriptElement(BaseScriptElement):
 
             self.vanRuns  = get_str('van_runs')
             self.vanCmnt  = get_str('van_comment')
-            self.vanTemp  = get_str('van_temperature')
+            self.vanTemp  = get_optFloat('van_temperature')
 
             self.ecRuns   = get_str('ec_runs')
-            self.ecTemp   = get_str('ec_temp')
+            self.ecTemp   = get_optFloat('ec_temp')
             self.ecFactor = get_flt('ec_factor', self.DEF_ecFactor)
 
             dataRuns = get_strlst('data_runs')
             dataCmts = get_strlst('data_comment')
-            dataTemps = get_float_list('data_temperature')
+            dataTemps = get_optFloat_list('data_temperature')
 
             for dataRun in zip_longest(dataRuns, dataCmts, dataTemps, fillvalue=''):
                 self.dataRuns.append(list(dataRun))

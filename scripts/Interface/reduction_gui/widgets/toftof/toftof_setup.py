@@ -8,7 +8,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui  import *
 
 from reduction_gui.widgets.base_widget import BaseWidget
-from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement
+from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement, OptionalFloat
 from reduction_gui.widgets.data_table_view import DataTableView, DataTableModel
 
 #-------------------------------------------------------------------------------
@@ -29,24 +29,12 @@ class TOFTOFSetupWidget(BaseWidget):
     name = 'TOFTOF Reduction'
 
     class TofTofDataTableModel(DataTableModel):
-
-        def _dataToText(self, row, col, value):
-            """
-            converts the stored data to a displayable text.
-            Override this function if you need data types other than str in your table.
-            """
-            if col == 2:
-                return str(value) if value is not None else ''
-            else:
-                return str(value) # just return the value, it is already str.
-
         def _textToData(self, row, col, text):
             """
             converts a displayable text back to stored data.
-            Override this function if you need data types other than str in your table.
             """
             if col == 2:
-                return float(text) if text else None
+                return OptionalFloat(text)
             else:
                 return text # just return the value, it is already str.
 
@@ -352,9 +340,6 @@ class TOFTOFSetupWidget(BaseWidget):
         def line_text(lineEdit):
             return lineEdit.text().strip()
 
-        def float_or_none(string):
-            return float(string) if string else None
-
         elem.facility_name   = self._settings.facility_name
         elem.instrument_name = self._settings.instrument_name
 
@@ -363,10 +348,10 @@ class TOFTOFSetupWidget(BaseWidget):
 
         elem.vanRuns       = line_text(self.vanRuns)
         elem.vanCmnt       = line_text(self.vanCmnt)
-        elem.vanTemp       = float_or_none(line_text(self.vanTemp))
+        elem.vanTemp       = OptionalFloat(line_text(self.vanTemp))
 
         elem.ecRuns        = line_text(self.ecRuns)
-        elem.ecTemp        = float_or_none(line_text(self.ecTemp))
+        elem.ecTemp        = OptionalFloat(line_text(self.ecTemp))
         elem.ecFactor      = self.ecFactor.value()
 
         elem.dataRuns      = self.runDataModel.tableData
@@ -413,10 +398,10 @@ class TOFTOFSetupWidget(BaseWidget):
 
         self.vanRuns.setText(elem.vanRuns)
         self.vanCmnt.setText(elem.vanCmnt)
-        self.vanTemp.setText(str(elem.vanTemp) if elem.vanTemp is not None else '')
+        self.vanTemp.setText(str(elem.vanTemp))
 
         self.ecRuns.setText(elem.ecRuns)
-        self.ecTemp.setText(str(elem.ecTemp) if elem.ecTemp is not None else '')
+        self.ecTemp.setText(str(elem.ecTemp))
         self.ecFactor.setValue(elem.ecFactor)
 
         self.runDataModel.tableData = elem.dataRuns
