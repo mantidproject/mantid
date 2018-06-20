@@ -3,7 +3,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
-#include <iostream>
+#include <sstream>
 
 using namespace Mantid::API;
 
