@@ -171,7 +171,7 @@ bool ONCat::isUserLoggedIn() const {
     return false;
   }
 
-  return m_tokenStore->getToken();
+  return m_tokenStore->getToken().is_initialized();
 }
 
 void ONCat::logout() {
@@ -342,7 +342,7 @@ void ONCat::refreshTokenIfNeeded(const DateAndTime &currentTime) {
       throw CatalogError(ie.what());
     }
   } else if (m_flow == OAuthFlow::RESOURCE_OWNER_CREDENTIALS) {
-    if (!currentToken) {
+    if (!currentToken.is_initialized()) {
       return;
     }
     if (!currentToken->isExpired(currentTime)) {
