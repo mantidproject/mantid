@@ -32,8 +32,7 @@ private:
     calibrationFinished();
   }
 
-  void startAsyncFocusWorker(const std::string &dir,
-                             const std::vector<std::string> &multi_RunNo,
+  void startAsyncFocusWorker(const std::vector<std::string> &multi_RunNo,
                              const std::vector<bool> &banks,
                              const std::string &specNos,
                              const std::string &dgFile) override {
@@ -41,7 +40,7 @@ private:
 
     std::string runNo = multi_RunNo[0];
 
-    doFocusRun(dir, runNo, banks, specNos, dgFile);
+    doFocusRun(runNo, banks, specNos, dgFile);
 
     focusingFinished();
   }
