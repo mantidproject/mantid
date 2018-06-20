@@ -201,6 +201,9 @@ void ConvFit::updatePlotOptions() {
  * @return If the validation was successful
  */
 bool ConvFit::validate() {
+  if (!IndirectFitAnalysisTab::validate())
+    return false;
+
   UserInputValidator uiv;
 
   uiv.checkDataSelectorIsValid("Sample Input", m_uiForm->dsSampleInput);
@@ -218,7 +221,6 @@ bool ConvFit::validate() {
            compositeModel->getFunction(0)->name() == "DeltaFunction")
     uiv.addErrorMessage(
         "Fit function is invalid; only a Delta Function has been supplied");
-  uiv = IndirectFitAnalysisTab::validateTab(uiv);
 
   const auto error = uiv.generateErrorMessage();
   emit showMessageBox(error);
