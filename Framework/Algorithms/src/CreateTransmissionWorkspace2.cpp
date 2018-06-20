@@ -82,9 +82,10 @@ void CreateTransmissionWorkspace2::init() {
 
   initStitchProperties();
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "Output workspace in wavelength.");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
+      "Output workspace in wavelength.");
 }
 
 /** Validate inputs
@@ -110,17 +111,18 @@ CreateTransmissionWorkspace2::validateInputs() {
 void CreateTransmissionWorkspace2::exec() {
   getRunNumbers();
 
+  MatrixWorkspace_sptr outWS;
+
   MatrixWorkspace_sptr firstTransWS = getProperty("FirstTransmissionRun");
   firstTransWS = normalizeDetectorsByMonitors(firstTransWS);
   firstTransWS = cropWavelength(firstTransWS);
 
-  storeTransitionRun(1, firstTransWS);
-
   MatrixWorkspace_sptr secondTransWS = getProperty("SecondTransmissionRun");
   if (secondTransWS) {
+    storeTransitionRun(1, firstTransWS);
+
     secondTransWS = normalizeDetectorsByMonitors(secondTransWS);
     secondTransWS = cropWavelength(secondTransWS);
-
     storeTransitionRun(2, secondTransWS);
 
     // Stitch the results.
@@ -132,12 +134,11 @@ void CreateTransmissionWorkspace2::exec() {
     stitch->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
     stitch->setPropertyValue("Params", getPropertyValue("Params"));
     stitch->execute();
-    MatrixWorkspace_sptr outWS = stitch->getProperty("OutputWorkspace");
-    setProperty("OutputWorkspace", outWS);
-    storeStitchedTransitionWorkspace(outWS);
+    outWS = stitch->getProperty("OutputWorkspace");
   } else {
-    setProperty("OutputWorkspace", firstTransWS);
+    outWS = firstTransWS;
   }
+  storeOutputWorkspace(outWS);
 }
 
 /** Normalize detectors by monitors
@@ -220,17 +221,22 @@ void CreateTransmissionWorkspace2::storeTransitionRun(int which,
 /** Store the stitched transition workspace run in ADS
  * @param ws A workspace to store.
  */
-void CreateTransmissionWorkspace2::storeStitchedTransitionWorkspace(
+void CreateTransmissionWorkspace2::storeOutputWorkspace(
     API::MatrixWorkspace_sptr ws) {
-  if (m_firstTransmissionRunNumber.empty() ||
-      m_secondTransmissionRunNumber.empty()) {
-    return;
+  if (isDefault("OutputWorkspace")) {
+    std::string name = TRANS_LAM_PREFIX;
+    if (!m_firstTransmissionRunNumber.empty()) {
+      name.append(m_firstTransmissionRunNumber);
+    } else {
+      return;
+    }
+    if (!m_secondTransmissionRunNumber.empty()) {
+      name.append("_");
+      name.append(m_secondTransmissionRunNumber);
+    }
+    setPropertyValue("OutputWorkspace",  name);
   }
-  auto const &runNumbers =
-      m_firstTransmissionRunNumber + "_" + m_secondTransmissionRunNumber;
-
-  AnalysisDataService::Instance().addOrReplace(TRANS_LAM_PREFIX + runNumbers,
-                                               ws);
+  setProperty("OutputWorkspace", ws);
 }
 
 } // namespace Algorithms

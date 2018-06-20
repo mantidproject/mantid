@@ -604,7 +604,7 @@ public:
     alg.execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned"));
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsQ"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam"));
 
     AnalysisDataService::Instance().clear();
@@ -646,7 +646,7 @@ public:
     alg.execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned_13460"));
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsQ_13460"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam_13460"));
 
     AnalysisDataService::Instance().clear();
@@ -690,7 +690,7 @@ public:
     alg.execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned"));
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsQ"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam"));
 
     AnalysisDataService::Instance().clear();

@@ -118,16 +118,14 @@ void ReflectometryReductionOneAuto2::setDefaultOutputWorkspaceNames() {
   if (isDefault("OutputWorkspaceBinned")) {
     setPropertyValue("OutputWorkspaceBinned",
                      OUTPUT_WORKSPACE_BINNED_DEFAULT_PREFIX + runNumber);
-  }
-  if (isDebug) {
     if (isDefault("OutputWorkspace")) {
       setPropertyValue("OutputWorkspace",
                        OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
     }
-    if (isDefault("OutputWorkspaceWavelength")) {
-      setPropertyValue("OutputWorkspaceWavelength",
-                       OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX + runNumber);
-    }
+  }
+  if (isDebug && isDefault("OutputWorkspaceWavelength")) {
+    setPropertyValue("OutputWorkspaceWavelength",
+                     OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX + runNumber);
   }
 }
 
@@ -332,18 +330,18 @@ void ReflectometryReductionOneAuto2::exec() {
   alg->execute();
 
   MatrixWorkspace_sptr IvsQ = alg->getProperty("OutputWorkspace");
-
-  bool const isDebug = getProperty("Debug");
-  if (isDebug || isChild()) {
-    MatrixWorkspace_sptr IvsLam = alg->getProperty("OutputWorkspaceWavelength");
-    setProperty("OutputWorkspaceWavelength", IvsLam);
-    setProperty("OutputWorkspace", IvsQ);
-  }
+  setProperty("OutputWorkspace", IvsQ);
 
   std::vector<double> params;
   MatrixWorkspace_sptr IvsQB = rebinAndScale(IvsQ, theta, params);
 
   setProperty("OutputWorkspaceBinned", IvsQB);
+
+  bool const isDebug = getProperty("Debug");
+  if (isDebug || isChild()) {
+    MatrixWorkspace_sptr IvsLam = alg->getProperty("OutputWorkspaceWavelength");
+    setProperty("OutputWorkspaceWavelength", IvsLam);
+  }
 
   // Set other properties so they can be updated in the Reflectometry interface
   setProperty("ThetaIn", theta);

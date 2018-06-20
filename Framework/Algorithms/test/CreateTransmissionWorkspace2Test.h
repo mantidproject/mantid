@@ -313,11 +313,11 @@ public:
   }
 
   void test_one_run_store_in_ADS() {
+    AnalysisDataService::Instance().clear();
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     inputWS->mutableRun().addProperty<std::string>("run_number", "1234");
 
     CreateTransmissionWorkspace2 alg;
-    alg.setChild(true);
     alg.initialize();
     alg.setProperty("FirstTransmissionRun", inputWS);
     alg.setProperty("WavelengthMin", 3.0);
@@ -325,6 +325,35 @@ public:
     alg.setPropertyValue("ProcessingInstructions", "1");
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
+
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("outWS"));
+
+    MatrixWorkspace_sptr firstLam =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "outWS");
+
+    TS_ASSERT(firstLam);
+    TS_ASSERT_EQUALS(firstLam->getAxis(0)->unit()->unitID(), "Wavelength");
+    TS_ASSERT(firstLam->x(0).front() >= 3.0);
+    TS_ASSERT(firstLam->x(0).back() <= 12.0);
+  }
+
+  void test_one_run_store_in_ADS_default() {
+    AnalysisDataService::Instance().clear();
+    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    inputWS->mutableRun().addProperty<std::string>("run_number", "1234");
+
+    CreateTransmissionWorkspace2 alg;
+    alg.initialize();
+    alg.setProperty("FirstTransmissionRun", inputWS);
+    alg.setProperty("WavelengthMin", 3.0);
+    alg.setProperty("WavelengthMax", 12.0);
+    alg.setPropertyValue("ProcessingInstructions", "1");
+    alg.execute();
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
+
     MatrixWorkspace_sptr firstLam =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "TRANS_LAM_1234");
@@ -336,13 +365,13 @@ public:
   }
 
   void test_two_runs_store_in_ADS() {
+    AnalysisDataService::Instance().clear();
     auto inputWS1 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     inputWS1->mutableRun().addProperty<std::string>("run_number", "1234");
     auto inputWS2 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     inputWS2->mutableRun().addProperty<std::string>("run_number", "4321");
 
     CreateTransmissionWorkspace2 alg;
-    alg.setChild(true);
     alg.initialize();
     alg.setProperty("FirstTransmissionRun", inputWS1);
     alg.setProperty("SecondTransmissionRun", inputWS2);
@@ -368,10 +397,48 @@ public:
     TS_ASSERT(secondLam->x(0).front() >= 3.0);
     TS_ASSERT(secondLam->x(0).back() <= 12.0);
 
-    MatrixWorkspace_sptr stitchedLam =
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_4321"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("outWS"));
+
+  }
+
+  void test_two_runs_store_in_ADS_default() {
+    AnalysisDataService::Instance().clear();
+    auto inputWS1 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    inputWS1->mutableRun().addProperty<std::string>("run_number", "1234");
+    auto inputWS2 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    inputWS2->mutableRun().addProperty<std::string>("run_number", "4321");
+
+    CreateTransmissionWorkspace2 alg;
+    alg.initialize();
+    alg.setProperty("FirstTransmissionRun", inputWS1);
+    alg.setProperty("SecondTransmissionRun", inputWS2);
+    alg.setProperty("WavelengthMin", 3.0);
+    alg.setProperty("WavelengthMax", 12.0);
+    alg.setPropertyValue("ProcessingInstructions", "1");
+    alg.execute();
+    MatrixWorkspace_sptr firstLam =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "TRANS_LAM_1234_4321");
-    TS_ASSERT(stitchedLam);
+            "TRANS_LAM_1234");
+    MatrixWorkspace_sptr secondLam =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "TRANS_LAM_4321");
+
+    TS_ASSERT(firstLam);
+    TS_ASSERT_EQUALS(firstLam->getAxis(0)->unit()->unitID(), "Wavelength");
+    TS_ASSERT(firstLam->x(0).front() >= 3.0);
+    TS_ASSERT(firstLam->x(0).back() <= 12.0);
+
+    TS_ASSERT(secondLam);
+    TS_ASSERT_EQUALS(secondLam->getAxis(0)->unit()->unitID(), "Wavelength");
+    TS_ASSERT(secondLam->x(0).front() >= 3.0);
+    TS_ASSERT(secondLam->x(0).back() <= 12.0);
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_4321"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
   }
 };
 
