@@ -527,12 +527,7 @@ class Moderator(object):
     def __repr__(self):
         return self.name if self.name else 'Undefined neutron moderator'
 
-    def getWidthSquared(self, Ei):
-        """ Returns the squared time gaussian FWHM width due to the sample in s^2 """
-        if hasattr(self, 'width_interp'):
-            wavelength = [min(max(l, self.wmn), self.wmx) for l in np.sqrt(E2L / np.array(Ei if hasattr(Ei, '__len__') else [Ei]))]
-            width = self.width_interp(wavelength)[0]**2 / 1e12
-            return (width * SIGMA2FWHMSQ) if self.measured_width['isSigma'] else width
+    def getAnalyticWidthsSquared(self, Ei):
         if self.imod == 0:
             # CHOP outputs the Gaussian sigma^2 in s^2, we want FWHM^2 in s^2
             tsqmod = Chop.tchi(self.mod_pars / 1000., Ei) * SIGMA2FWHMSQ
@@ -553,17 +548,30 @@ class Moderator(object):
             raise RuntimeError('PyChop: Undefined moderator time profile type %d' % (self.imod))
         return tsqmod
 
+    def getWidthSquared(self, Ei):
+        """ Returns the squared time gaussian FWHM width due to the sample in s^2 """
+        if hasattr(self, 'width_interp'):
+            wavelength = np.sqrt(E2L / (Ei if not hasattr(Ei, '__len__') else Ei[0]))
+            if wavelength >= self.wmn:
+                # Data is obtained from measuring widths of powder Bragg peaks in backscattering
+                # At low wavelengths / high energies, the peaks are too close together to discern
+                # so there is no measurements, but the analytical expressions should still be good.
+                width = self.width_interp(min([wavelength, self.wmx]))**2 / 1e12
+                return (width * SIGMA2FWHMSQ) if self.measured_width['isSigma'] else width
+        return self.getAnalyticWidthsSquared(Ei)
+
     def getWidth(self, Ei):
         """ Calculates the moderator time width in seconds for a given neutron energy (Ei) """
         if hasattr(self, 'width_interp'):
-            wavelength = [min(max(l, self.wmn), self.wmx) for l in np.sqrt(E2L / np.array(Ei if hasattr(Ei, '__len__') else [Ei]))]
-            width = self.width_interp(wavelength)[0] / 1e6  # Table has widths in microseconds
-            return width * SIGMA2FWHM if self.measured_width['isSigma'] else width
+            wavelength = np.sqrt(E2L / (Ei if not hasattr(Ei, '__len__') else Ei[0]))
+            if wavelength >= self.wmn:
+                width = self.width_interp(min([wavelength, self.wmx])) / 1e6  # Table has widths in microseconds
+                return width * SIGMA2FWHM if self.measured_width['isSigma'] else width
         if self.imod == 3:
             # Mode for LET - output of polynomial is FWHM in us
             return np.polyval(self.mod_pars, np.sqrt(E2L / Ei)) / 1e6
         else:
-            return np.sqrt(self.getWidthSquared(Ei))
+            return np.sqrt(self.getAnalyticWidthSquared(Ei))
 
     def getFlux(self, Ei):
         """ Returns the white beam flux estimate from either measured data (prefered) or analytical model (backup) """
