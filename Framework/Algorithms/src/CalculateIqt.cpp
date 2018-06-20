@@ -62,6 +62,28 @@ namespace {
     return rebinAlgorithm->getProperty("OutputWorkspace");
   }
 
+  MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr workspace, double xMax) {
+    IAlgorithm_sptr rebinAlgorithm = AlgorithmManager::Instance().create("CropWorkspace");
+    rebinAlgorithm->setChild(true);
+    rebinAlgorithm->initialize();
+    rebinAlgorithm->setProperty("InputWorkspace", workspace);
+    rebinAlgorithm->setProperty("XMax", xMax);
+    rebinAlgorithm->execute();
+    return rebinAlgorithm->getProperty("OutputWorkspace");
+  }
+
+  MatrixWorkspace_sptr replaceSpecialValues(MatrixWorkspace_sptr workspace) {
+    IAlgorithm_sptr rebinAlgorithm = AlgorithmManager::Instance().create("ReplaceSpecialValues");
+    rebinAlgorithm->setChild(true);
+    rebinAlgorithm->initialize();
+    rebinAlgorithm->setProperty("InputWorkspace", workspace);
+    rebinAlgorithm->setProperty("InfinityValue", 0.0);
+    rebinAlgorithm->setProperty("BigNumberThreshold", 1.0001);
+    rebinAlgorithm->setProperty("NaNValue", 0.0);
+    rebinAlgorithm->execute();
+    return rebinAlgorithm->getProperty("OutputWorkspace");
+  }
+
   std::string createRebinString(double minimum, double maximum, double width) {
     std::stringstream rebinStream;
     rebinStream.precision(14);
@@ -69,14 +91,24 @@ namespace {
     return rebinStream.str();
   }
 
-  MatrixWorkspace_sptr randomizeYWithinError(MatrixWorkspace_sptr workspace,
-  const int seed, const int errorMin, const int errorMax) {
-    MersenneTwister rng(seed, errorMin, errorMax);
-    const double randomValue = rng.nextValue();
-    for (auto i = 0u; i < workspace->getNumberHistograms(); ++i)
-      workspace->mutableY(i) += randomValue;
-    return workspace;
+  void randomizeRowWithinError(HistogramY &row, const HistogramE &errors, std::function<double(double)> rng) {
+    for (auto i = 0u; i < row.size(); ++i)
+    {
+      auto randomValue = rng(errors[i]);
+      row[i] += randomValue;
     }
+  }
+
+  MatrixWorkspace_sptr randomizeWorkspaceWithinError(MatrixWorkspace_sptr workspace,
+    const int seed) {
+    MersenneTwister mTwister(seed);
+    auto rng = [&mTwister](const double error) {
+      return mTwister.nextValue(-error, error);
+    };
+    for (auto i = 0u; i < workspace->getNumberHistograms(); ++i)
+      randomizeRowWithinError(workspace->mutableY(i), workspace->e(i), rng);
+    return workspace;
+  }
 
   double standardDeviation(const std::vector<double> &inputValues) {
     double mean = std::accumulate(inputValues.begin(), inputValues.end(), 0.0) / inputValues.size();
@@ -103,7 +135,15 @@ namespace {
     return standardDeviations;
   }
 
-}
+  MatrixWorkspace_sptr cleanOutput(MatrixWorkspace_sptr workspace) {
+    auto binning = static_cast<int>(std::ceil(workspace->blocksize() / 2));
+    auto binV = workspace->dataX(0)[binning];
+    workspace = cropWorkspace(workspace, binV);
+    workspace = replaceSpecialValues(workspace);
+    return workspace;
+  }
+
+} // namespace
 
 namespace Mantid {
   namespace Algorithms {
@@ -153,7 +193,10 @@ namespace Mantid {
       calculateIqtFunc calculateIqtFunction = [this, resolutionWorkspace, &rebinParams](MatrixWorkspace_sptr workspace) {
         return this->calculateIqt(workspace, resolutionWorkspace, rebinParams); };
 
-      monteCarloErrorCalculation(sampleWorkspace, calculateIqtFunction);
+      auto outputWorkspace = monteCarloErrorCalculation(sampleWorkspace, calculateIqtFunction);
+
+      outputWorkspace = cleanOutput(outputWorkspace);
+      setProperty("OutputWorkspace", outputWorkspace);
     }
 
     std::string CalculateIqt::rebinParamsAsString() {
@@ -178,22 +221,22 @@ namespace Mantid {
       return workspace;
     }
 
-    void CalculateIqt::monteCarloErrorCalculation(MatrixWorkspace_sptr sample,
+    MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(MatrixWorkspace_sptr sample,
       const calculateIqtFunc &calculateIqtFunction) {
       auto outputWorkspace = calculateIqtFunction(sample);
       const unsigned int nIterations = getProperty("NumberOfIterations");
       const unsigned int seed = getProperty("SeedValue");
-      const int energyMax = getProperty("EnergyMax");
-      const int energyMin = getProperty("EnergyMin");
       std::vector<MatrixWorkspace_sptr> simulatedWorkspaces;
       simulatedWorkspaces.reserve(nIterations);
       simulatedWorkspaces.emplace_back(outputWorkspace);
 
       for (auto i = 0u; i < nIterations - 1; ++i) {
-        auto simulatedWorkspace = randomizeYWithinError(sample->clone(), seed, energyMin, energyMax);
+        auto simulatedWorkspace = randomizeWorkspaceWithinError(sample->clone(), seed);
         simulatedWorkspace = calculateIqtFunction(simulatedWorkspace);
         simulatedWorkspaces.emplace_back(simulatedWorkspace);
       }
+
+      //set each y value to its standard deviation across simulations
       std::vector<std::vector<double>> allSimY;
       allSimY.reserve(nIterations);
       for (auto i = 0u; i < outputWorkspace->getNumberHistograms(); ++i) {
@@ -202,13 +245,13 @@ namespace Mantid {
           allSimY.emplace_back(simWorkspace->readY(i));
         outputY = standardDeviationArray(allSimY);
       }
-}
+      return outputWorkspace;
+    }
 
-
-std::map<std::string, std::string> CalculateIqt::validateInputs() {
-  std::map<std::string, std::string> emptyMap;
-  return emptyMap;
-}
+    std::map<std::string, std::string> CalculateIqt::validateInputs() {
+      std::map<std::string, std::string> emptyMap;
+      return emptyMap;
+    }
 
 } // namespace Algorithms
 } // namespace Mantid

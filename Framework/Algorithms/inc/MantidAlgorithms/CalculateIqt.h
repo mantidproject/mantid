@@ -46,7 +46,7 @@ private:
   API::MatrixWorkspace_sptr normalizedFourierTransform(API::MatrixWorkspace_sptr workspace, const std::string &rebinParams);
   API::MatrixWorkspace_sptr calculateIqt(API::MatrixWorkspace_sptr workspace, 
     API::MatrixWorkspace_sptr resolutionWorkspace, const std::string &rebinParams);
-  void CalculateIqt::monteCarloErrorCalculation(API::MatrixWorkspace_sptr sample,
+  API::MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(API::MatrixWorkspace_sptr sample,
     const calculateIqtFunc &calculateIqtFunction);
 };
 
