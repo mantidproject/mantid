@@ -71,6 +71,13 @@ Row<ReducedWorkspaceNames> Row<ReducedWorkspaceNames>::withExtraRunNumbers(
              scaleFactor(), reductionOptions(), wsNames);
 }
 
+template <typename WorkspaceNames, typename WorkspaceNamesFactory>
+Row<WorkspaceNames>
+mergedRow(Row<WorkspaceNames> const &rowA, Row<WorkspaceNames> const &rowB,
+          WorkspaceNamesFactory const &workspaceNamesFactory) {
+  return rowA.withExtraRunNumbers(rowB.runNumbers(), workspaceNamesFactory);
+}
+
 extern template class MANTIDQT_ISISREFLECTOMETRY_DLL
     Row<SlicedReductionWorkspaces>;
 using SlicedRow = Row<SlicedReductionWorkspaces>;

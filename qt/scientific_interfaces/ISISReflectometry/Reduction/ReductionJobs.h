@@ -57,40 +57,6 @@ void mergeRowIntoGroup(Jobs &jobs, RowVariant const &row, double thetaTolerance,
                        std::string const &groupName,
                        WorkspaceNamesFactory const &workspaceNamesFactory);
 
-template <typename WorkspaceNames, typename WorkspaceNamesFactory>
-Row<WorkspaceNames>
-mergedRow(Row<WorkspaceNames> const &rowA, Row<WorkspaceNames> const &rowB,
-          WorkspaceNamesFactory const &workspaceNamesFactory) {
-  return rowA.withExtraRunNumbers(rowB.runNumbers(), workspaceNamesFactory);
-}
-
-template <typename Row, typename WorkspaceNamesFactory,
-          typename ModificationListener>
-void mergeRowsInto(Group<Row> &intoHere, Group<Row> const &fromHere,
-                   int groupIndex, double thetaTolerance,
-                   WorkspaceNamesFactory const &workspaceNamesFactory,
-                   ModificationListener &listener) {
-  for (auto const &maybeRow : fromHere.rows()) {
-    if (maybeRow.is_initialized()) {
-      auto const &fromRow = maybeRow.get();
-      auto index =
-          intoHere.indexOfRowWithTheta(fromRow.theta(), thetaTolerance);
-      if (index.is_initialized()) {
-        auto const updateAtIndex = index.get();
-        auto const &intoRow = intoHere[updateAtIndex].get();
-        auto updatedRow = mergedRow(intoRow, fromRow, workspaceNamesFactory);
-        intoHere.updateRow(updateAtIndex, updatedRow);
-        listener.rowModified(groupIndex, updateAtIndex, updatedRow);
-      } else {
-        intoHere.appendRow(maybeRow.get());
-        listener.rowAppended(groupIndex,
-                             static_cast<int>(intoHere.rows().size() - 1),
-                             maybeRow.get());
-      }
-    }
-  }
-}
-
 template <typename Group, typename WorkspaceNamesFactory,
           typename ModificationListener>
 void mergeJobsInto(ReductionJobs<Group> &intoHere,
@@ -151,11 +117,12 @@ bool mergeJobsInto(Jobs &intoHere, Jobs const &fromHere, double thetaTolerance,
       intoHere, fromHere);
 }
 
-Jobs newJobsWithSlicingFrom(Jobs const &jobs);
+Jobs newJobsWithSlicingFrom(Jobs const &takeSlicingFromHere);
 
 UnslicedReductionJobs
 unsliced(SlicedReductionJobs const &slicedJobs,
          WorkspaceNamesFactory const &workspaceNamesFactory);
+
 SlicedReductionJobs sliced(UnslicedReductionJobs const &unslicedJobs,
                            WorkspaceNamesFactory const &workspaceNamesFactory);
 }

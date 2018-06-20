@@ -180,10 +180,10 @@ public:
                            ReductionJobs<T> const &rhs) {
     if (lhs.groups().size() == rhs.groups().size()) {
       for (auto groupPair : zip_range(lhs.groups(), rhs.groups())) {
-        for (auto rowPair :
-             zip_range(groupPair.get<0>().rows(), groupPair.get<1>().rows())) {
-          auto const &lhsRow = rowPair.get<0>();
-          auto const &rhsRow = rowPair.get<1>();
+        for (auto rowPair : zip_range(boost::get<0>(groupPair).rows(),
+                                      boost::get<1>(groupPair).rows())) {
+          auto const &lhsRow = boost::get<0>(rowPair);
+          auto const &rhsRow = boost::get<1>(rowPair);
           if (lhsRow.is_initialized() != rhsRow.is_initialized())
             return false;
           else if (lhsRow.is_initialized())

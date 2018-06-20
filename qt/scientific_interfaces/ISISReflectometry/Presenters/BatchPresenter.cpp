@@ -7,9 +7,12 @@
 #include "Map.h"
 #include "RegexRowFilter.h"
 #include "RowLocation.h"
-
 #include <boost/regex.hpp>
+#include <boost/range/algorithm/fill.hpp>
+#include <boost/range/iterator_range_core.hpp>
+
 #include <iostream>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -252,9 +255,8 @@ void BatchPresenter::notifyCellTextChanged(
 void BatchPresenter::applyGroupStylingToRow(
     MantidWidgets::Batch::RowLocation const &location) {
   auto cells = m_view->jobs().cellsAt(location);
-  for (auto i = 1u; i < cells.size(); ++i) {
-    cells[i] = m_view->jobs().deadCell();
-  }
+  boost::fill(boost::make_iterator_range(cells.begin() + 1, cells.end()),
+              m_view->jobs().deadCell());
   m_view->jobs().setCellsAt(location, cells);
 }
 

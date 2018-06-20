@@ -48,7 +48,7 @@ bool ReductionJobs<Group>::hasGroupWithName(
 }
 
 template <typename Group> void ReductionJobs<Group>::removeGroup(int index) {
-  m_groups.erase(m_groups.cbegin() + index);
+  m_groups.erase(m_groups.begin() + index);
 }
 
 template <typename Group> std::vector<Group> &ReductionJobs<Group>::groups() {
