@@ -119,7 +119,7 @@ ONCat::ONCat(const ONCat &other)
       m_clientId(other.m_clientId), m_clientSecret(other.m_clientSecret),
 
       m_flow(other.m_flow),
-      m_internetHelper(new Mantid::Kernel::InternetHelper()) {}
+      m_internetHelper(other.m_internetHelper) {}
 
 ONCat::~ONCat() {}
 
@@ -388,7 +388,7 @@ void ONCat::refreshTokenIfNeeded(const DateAndTime &currentTime) {
 }
 
 void ONCat::setInternetHelper(
-    std::unique_ptr<Mantid::Kernel::InternetHelper> internetHelper) {
+    std::shared_ptr<Mantid::Kernel::InternetHelper> internetHelper) {
   m_internetHelper = std::move(internetHelper);
 }
 

@@ -11,6 +11,7 @@
 #include "MantidKernel/make_unique.h"
 
 #include <map>
+#include <memory>
 
 #include <Poco/Net/HTTPResponse.h>
 
@@ -50,7 +51,7 @@ public:
       m_responseCallCounts[mapping.first] = 0;
     }
   }
-  ~MockONCatAPI() { TS_ASSERT(allResponsesCalledOnce()); }
+  ~MockONCatAPI() {}
 
   bool allResponsesCalledOnce() const {
     return std::all_of(m_responseCallCounts.cbegin(),
@@ -91,9 +92,9 @@ private:
   MockResponseCallCounts m_responseCallCounts;
 };
 
-std::unique_ptr<MockONCatAPI>
+std::shared_ptr<MockONCatAPI>
 make_mock_oncat_api(const MockResponseMap &responseMap) {
-  return Mantid::Kernel::make_unique<MockONCatAPI>(responseMap);
+  return std::make_shared<MockONCatAPI>(responseMap);
 }
 
 class MockTokenStore : public IOAuthTokenStore {
@@ -143,16 +144,20 @@ public:
 
     TS_ASSERT(!oncat.isUserLoggedIn());
 
-    oncat.setInternetHelper(make_mock_oncat_api(
+    auto mock_oncat_api = make_mock_oncat_api(
         {{DUMMY_URL + "/oauth/token",
           std::make_pair(
               HTTPResponse::HTTP_UNAUTHORIZED,
               "{\"error\": \"invalid_grant\", "
-              "\"error_description\": \"Invalid credentials given.\"}")}}));
+              "\"error_description\": \"Invalid credentials given.\"}")}});
+
+    oncat.setInternetHelper(mock_oncat_api);
 
     TS_ASSERT_THROWS(oncat.login("user", "does_not_exist"),
                      InvalidCredentialsError);
     TS_ASSERT(!oncat.isUserLoggedIn());
+
+    TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
   }
 
   void test_login_with_valid_credentials_is_successful() {
@@ -161,32 +166,38 @@ public:
 
     TS_ASSERT(!oncat.isUserLoggedIn());
 
-    oncat.setInternetHelper(make_mock_oncat_api(
+    auto mock_oncat_api = make_mock_oncat_api(
         {{DUMMY_URL + "/oauth/token",
           std::make_pair(
               HTTPResponse::HTTP_OK,
               "{\"token_type\": \"Bearer\", \"expires_in\": 3600, "
               "\"access_token\": \"2KSL5aEnLvIudMHIjc7LcBWBCfxOHZ\", "
               "\"scope\": \"api:read data:read settings:read\", "
-              "\"refresh_token\": \"eZEiz7LbgFrkL5ZHv7R4ck9gOzXexb\"}")}}));
+              "\"refresh_token\": \"eZEiz7LbgFrkL5ZHv7R4ck9gOzXexb\"}")}});
+
+    oncat.setInternetHelper(mock_oncat_api);
 
     oncat.login("user", "does_exist");
 
     TS_ASSERT(oncat.isUserLoggedIn());
+
+    TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
   }
 
   void test_refreshing_token_when_needed() {
     ONCat oncat(DUMMY_URL, make_mock_token_store(),
                 OAuthFlow::RESOURCE_OWNER_CREDENTIALS, DUMMY_CLIENT_ID);
 
-    oncat.setInternetHelper(make_mock_oncat_api(
+    auto mock_oncat_api = make_mock_oncat_api(
         {{DUMMY_URL + "/oauth/token",
           std::make_pair(
               HTTPResponse::HTTP_OK,
               "{\"token_type\": \"Bearer\", \"expires_in\": 3600, "
               "\"access_token\": \"2KSL5aEnLvIudMHIjc7LcBWBCfxOHZ\", "
               "\"scope\": \"api:read data:read settings:read\", "
-              "\"refresh_token\": \"eZEiz7LbgFrkL5ZHv7R4ck9gOzXexb\"}")}}));
+              "\"refresh_token\": \"eZEiz7LbgFrkL5ZHv7R4ck9gOzXexb\"}")}});
+
+    oncat.setInternetHelper(mock_oncat_api);
 
     oncat.login("user", "does_exist");
 
@@ -195,31 +206,39 @@ public:
     oncat.refreshTokenIfNeeded();
     TS_ASSERT(oncat.isUserLoggedIn());
 
-    oncat.setInternetHelper(make_mock_oncat_api(
+    TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
+
+    mock_oncat_api = make_mock_oncat_api(
         {{DUMMY_URL + "/oauth/token",
           std::make_pair(
               HTTPResponse::HTTP_OK,
               "{\"token_type\": \"Bearer\", \"expires_in\": 3600, "
               "\"access_token\": \"7dS7flfhsf7ShndHJSFknfskfeu789\", "
               "\"scope\": \"api:read data:read settings:read\", "
-              "\"refresh_token\": \"sdagSDGF87dsgljerg6gdfgddfgfdg\"}")}}));
+              "\"refresh_token\": \"sdagSDGF87dsgljerg6gdfgddfgfdg\"}")}});
+
+    oncat.setInternetHelper(mock_oncat_api);
 
     oncat.refreshTokenIfNeeded(DateAndTime::getCurrentTime() + 3601.0);
     TS_ASSERT(oncat.isUserLoggedIn());
+
+    TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
   }
 
   void test_logged_out_when_refreshing_fails() {
     ONCat oncat(DUMMY_URL, make_mock_token_store(),
                 OAuthFlow::RESOURCE_OWNER_CREDENTIALS, DUMMY_CLIENT_ID);
 
-    oncat.setInternetHelper(make_mock_oncat_api(
+    auto mock_oncat_api = make_mock_oncat_api(
         {{DUMMY_URL + "/oauth/token",
           std::make_pair(
               HTTPResponse::HTTP_OK,
               "{\"token_type\": \"Bearer\", \"expires_in\": 3600, "
               "\"access_token\": \"2KSL5aEnLvIudMHIjc7LcBWBCfxOHZ\", "
               "\"scope\": \"api:read data:read settings:read\", "
-              "\"refresh_token\": \"eZEiz7LbgFrkL5ZHv7R4ck9gOzXexb\"}")}}));
+              "\"refresh_token\": \"eZEiz7LbgFrkL5ZHv7R4ck9gOzXexb\"}")}});
+
+    oncat.setInternetHelper(mock_oncat_api);
 
     oncat.login("user", "does_exist");
 
@@ -228,18 +247,24 @@ public:
     oncat.refreshTokenIfNeeded();
     TS_ASSERT(oncat.isUserLoggedIn());
 
-    oncat.setInternetHelper(make_mock_oncat_api(
+    TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
+
+    mock_oncat_api = make_mock_oncat_api(
         {{DUMMY_URL + "/oauth/token",
           std::make_pair(
               HTTPResponse::HTTP_UNAUTHORIZED,
               "{\"error\": \"invalid_grant\", "
-              "\"error_description\": \"Bearer token not found.\"}")}}));
+              "\"error_description\": \"Bearer token not found.\"}")}});
+
+    oncat.setInternetHelper(mock_oncat_api);
 
     TS_ASSERT_THROWS(
         oncat.refreshTokenIfNeeded(DateAndTime::getCurrentTime() + 3601.0),
         InvalidRefreshTokenError);
 
     TS_ASSERT(!oncat.isUserLoggedIn());
+
+    TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
   }
 
   void test_retrieve_entity() {
@@ -248,19 +273,23 @@ public:
 
     TS_ASSERT(oncat.isUserLoggedIn());
 
-    oncat.setInternetHelper(
-        make_mock_oncat_api({{DUMMY_URL + "/api/instruments/HB2C?facility=HFIR",
-                              std::make_pair(HTTPResponse::HTTP_OK,
-                                             "{\"facility\": \"HFIR\","
-                                             "\"name\": \"HB2C\","
-                                             "\"id\": \"HB2C\","
-                                             "\"type\": \"instrument\"}")}}));
+    auto mock_oncat_api = make_mock_oncat_api(
+        {{DUMMY_URL + "/api/instruments/HB2C?facility=HFIR",
+          std::make_pair(HTTPResponse::HTTP_OK,
+              "{\"facility\": \"HFIR\","
+              "\"name\": \"HB2C\","
+              "\"id\": \"HB2C\","
+              "\"type\": \"instrument\"}")}});
+
+    oncat.setInternetHelper(mock_oncat_api);
 
     const auto entity = oncat.retrieve("api", "instruments", "HB2C",
                                        {QueryParameter("facility", "HFIR")});
 
     TS_ASSERT_EQUALS(entity.id(), std::string("HB2C"));
     TS_ASSERT_EQUALS(entity.asString("name"), std::string("HB2C"));
+
+    TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
   }
 
   void test_list_entities() {
@@ -269,7 +298,7 @@ public:
 
     TS_ASSERT(oncat.isUserLoggedIn());
 
-    oncat.setInternetHelper(make_mock_oncat_api(
+    auto mock_oncat_api = make_mock_oncat_api(
         {{DUMMY_URL + "/api/instruments?facility=HFIR",
           std::make_pair(HTTPResponse::HTTP_OK, "["
                                                 "  {"
@@ -284,7 +313,9 @@ public:
                                                 "    \"id\": \"CG1D\","
                                                 "    \"type\": \"instrument\""
                                                 "  }"
-                                                "]")}}));
+                                                "]")}});
+
+    oncat.setInternetHelper(mock_oncat_api);
 
     const auto entities =
         oncat.list("api", "instruments", {QueryParameter("facility", "HFIR")});
@@ -294,6 +325,8 @@ public:
     TS_ASSERT_EQUALS(entities[0].asString("name"), std::string("HB2C"));
     TS_ASSERT_EQUALS(entities[1].id(), std::string("CG1D"));
     TS_ASSERT_EQUALS(entities[1].asString("name"), std::string("CG1D"));
+
+    TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
   }
 
   void test_send_api_request_logs_out_with_invalid_grant() {
@@ -302,14 +335,18 @@ public:
 
     TS_ASSERT(oncat.isUserLoggedIn());
 
-    oncat.setInternetHelper(make_mock_oncat_api(
+    auto mock_oncat_api = make_mock_oncat_api(
         {{DUMMY_URL + "/api/instruments?facility=HFIR",
-          std::make_pair(HTTPResponse::HTTP_UNAUTHORIZED, "{}")}}));
+          std::make_pair(HTTPResponse::HTTP_UNAUTHORIZED, "{}")}});
+
+    oncat.setInternetHelper(mock_oncat_api);
 
     TS_ASSERT_THROWS(
         oncat.list("api", "instruments", {QueryParameter("facility", "HFIR")}),
         TokenRejectedError);
     TS_ASSERT(!oncat.isUserLoggedIn());
+
+    TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
   }
 
   void test_client_credentials_flow_with_refresh() {
@@ -318,7 +355,7 @@ public:
                 boost::make_optional<std::string>(
                     "9a2ad07a-a139-438b-8116-08c5452f96ad"));
 
-    oncat.setInternetHelper(make_mock_oncat_api(
+    auto mock_oncat_api = make_mock_oncat_api(
         {{DUMMY_URL + "/oauth/token",
           std::make_pair(
               HTTPResponse::HTTP_OK,
@@ -330,20 +367,28 @@ public:
                          "{\"facility\": \"HFIR\","
                          "\"name\": \"HB2C\","
                          "\"id\": \"HB2C\","
-                         "\"type\": \"instrument\"}")}}));
+                         "\"type\": \"instrument\"}")}});
+
+    oncat.setInternetHelper(mock_oncat_api);
 
     oncat.retrieve("api", "instruments", "HB2C",
                    {QueryParameter("facility", "HFIR")});
 
-    oncat.setInternetHelper(make_mock_oncat_api({{
+    TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
+
+    mock_oncat_api = make_mock_oncat_api({{
         DUMMY_URL + "/oauth/token",
         std::make_pair(
             HTTPResponse::HTTP_OK,
             "{\"token_type\": \"Bearer\", \"expires_in\": 3600, "
             "\"access_token\": \"987JHGFiusdvs72fAkjhsKJH32tkjk\", "
-            "\"scope\": \"api:read data:read settings:read\"}"), }}));
+            "\"scope\": \"api:read data:read settings:read\"}"), }});
+
+    oncat.setInternetHelper(mock_oncat_api);
 
     oncat.refreshTokenIfNeeded(DateAndTime::getCurrentTime() + 3601.0);
+
+    TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
   }
 
   void test_config_service_token_store_roundtrip() {

@@ -5,8 +5,8 @@
 #include "MantidCatalog/OAuth.h"
 #include "MantidCatalog/ONCatEntity.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/make_unique.h"
 
+#include <memory>
 #include <vector>
 
 #include <boost/optional.hpp>
@@ -134,7 +134,7 @@ public:
   void refreshTokenIfNeeded();
   void refreshTokenIfNeeded(const DateAndTime &currentTime);
   void setInternetHelper(
-      std::unique_ptr<Mantid::Kernel::InternetHelper> internetHelper);
+      std::shared_ptr<Mantid::Kernel::InternetHelper> internetHelper);
   //////////////////////////////////////////////////////////////////////
 
 private:
@@ -148,7 +148,7 @@ private:
   boost::optional<std::string> m_clientSecret;
 
   OAuthFlow m_flow;
-  std::unique_ptr<Mantid::Kernel::InternetHelper> m_internetHelper;
+  std::shared_ptr<Mantid::Kernel::InternetHelper> m_internetHelper;
 };
 
 } // namespace ONCat

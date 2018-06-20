@@ -76,7 +76,7 @@ T getNestedContentValueElseDefault(const Content &content,
                                    const std::string &path, T defaultValue) {
   try {
     return getNestedContentValueAsType<T>(content, path);
-  } catch (ContentError &ce) {
+  } catch (ContentError &) {
     return defaultValue;
   }
 }
@@ -86,7 +86,7 @@ boost::optional<T> getNestedContentValueIfPresent(const Content &content,
                                                   const std::string &path) {
   try {
     return boost::make_optional(getNestedContentValueAsType<T>(content, path));
-  } catch (ContentError &ce) {
+  } catch (ContentError &) {
     return boost::none;
   }
 }
