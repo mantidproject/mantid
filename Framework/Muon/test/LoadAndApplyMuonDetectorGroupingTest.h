@@ -125,10 +125,10 @@ public:
     TS_ASSERT(wsGroup->contains("EMU00012345; Pair; pair1; Asym; #1"));
     TS_ASSERT(wsGroup->contains("EMU00012345; Pair; pair1; Asym; #1_Raw"));
     // Group workspace + analysed workspaces as above (11)
-	// "inputData" "inputGroup" from setup (2)
+    // "inputData" "inputGroup" from setup (2)
     // "MuonGroupings" from load algorithm (1)
-	// "MuonAnalysisTFNormalizations" (1)
-	// "tmp_unNorm" (1)
+    // "MuonAnalysisTFNormalizations" (1)
+    // "tmp_unNorm" (1)
     auto names = AnalysisDataService::Instance().getObjectNames();
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().getObjectNames().size(),
                      workspacesBeforeExec + 16);

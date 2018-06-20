@@ -290,7 +290,7 @@ public:
 
     ApplyMuonDetectorGroupPairing alg;
     alg.initialize();
-	// Expects 10 IDs
+    // Expects 10 IDs
     setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
 
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);

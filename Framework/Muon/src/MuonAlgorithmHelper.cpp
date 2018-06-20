@@ -583,7 +583,7 @@ bool MuonAlgorithmHelper::checkValidGroupPairName(const std::string &name) {
     return false;
   }
   if (name == "Group" || name == "Pair") {
-	  return false;
+    return false;
   }
   return true;
 }

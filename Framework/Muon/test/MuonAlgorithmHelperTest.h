@@ -50,7 +50,8 @@ struct eData {
  * @return Pointer to the workspace.
  */
 MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
-                                           double seed, size_t detectorIDseed = 1) {
+                                           double seed,
+                                           size_t detectorIDseed = 1) {
 
   MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceFromFunction(
@@ -123,29 +124,31 @@ Workspace_sptr createWs(const std::string &instrName, int runNumber,
 }
 
 /**
-* 
+*
 */
 WorkspaceGroup_sptr
-createWorkspaceGroupConsecutiveDetectorIDs(const int &nWorkspaces, size_t nspec, size_t maxt,
-	const std::string &wsGroupName) {
+createWorkspaceGroupConsecutiveDetectorIDs(const int &nWorkspaces, size_t nspec,
+                                           size_t maxt,
+                                           const std::string &wsGroupName) {
 
-	WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
-	AnalysisDataService::Instance().addOrReplace(wsGroupName, wsGroup);
+  WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
+  AnalysisDataService::Instance().addOrReplace(wsGroupName, wsGroup);
 
-	std::string wsNameStem = "MuonDataPeriod_";
-	std::string wsName;
+  std::string wsNameStem = "MuonDataPeriod_";
+  std::string wsName;
 
-	for (int period = 1; period < nWorkspaces + 1; period++) {
-		// Period 1 yvalues : 1,2,3,4,5,6,7,8,9,10
-		// Period 2 yvalues : 2,3,4,5,6,7,8,9,10,11 etc..
-		size_t detIDstart = (period-1) * nspec + 1;
-		MatrixWorkspace_sptr ws = createCountsWorkspace(nspec, maxt, period, detIDstart);
-		wsGroup->addWorkspace(ws);
-		wsName = wsNameStem + std::to_string(period);
-		AnalysisDataService::Instance().addOrReplace(wsName, ws);
-	}
+  for (int period = 1; period < nWorkspaces + 1; period++) {
+    // Period 1 yvalues : 1,2,3,4,5,6,7,8,9,10
+    // Period 2 yvalues : 2,3,4,5,6,7,8,9,10,11 etc..
+    size_t detIDstart = (period - 1) * nspec + 1;
+    MatrixWorkspace_sptr ws =
+        createCountsWorkspace(nspec, maxt, period, detIDstart);
+    wsGroup->addWorkspace(ws);
+    wsName = wsNameStem + std::to_string(period);
+    AnalysisDataService::Instance().addOrReplace(wsName, ws);
+  }
 
-	return wsGroup;
+  return wsGroup;
 }
 
 } // namespace
@@ -485,16 +488,15 @@ public:
   }
 
   void test_checkGroupDetectorsInWorkspaceFalse() {
-	  API::Grouping grouping;
-	  const std::vector<std::string> groups = { "1", "2", "3,4,5", "6-9", "10" };
-	  grouping.groups = groups;
-	  Workspace_sptr ws =
-		  createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 2, "group");
-	  TS_ASSERT(!checkGroupDetectorsInWorkspace(grouping, ws));
+    API::Grouping grouping;
+    const std::vector<std::string> groups = {"1", "2", "3,4,5", "6-9", "10"};
+    grouping.groups = groups;
+    Workspace_sptr ws =
+        createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 2, "group");
+    TS_ASSERT(!checkGroupDetectorsInWorkspace(grouping, ws));
 
-	  AnalysisDataService::Instance().clear();
+    AnalysisDataService::Instance().clear();
   };
-
 
   void test_parseWorkspaceNameParsesCorrectly() {
     const std::string workspaceName =
@@ -608,22 +610,20 @@ public:
                      std::invalid_argument);
   }
 
-
   void test_checkValidGroupPairName_invalid_names() {
-	  std::vector<std::string> badNames = { "","_name","name_","name;","#name", "Group", "Pair"};
-	  for (auto&& badName : badNames) {
-		  TS_ASSERT(!MuonAlgorithmHelper::checkValidGroupPairName(badName));
-	  }
+    std::vector<std::string> badNames = {"",      "_name", "name_", "name;",
+                                         "#name", "Group", "Pair"};
+    for (auto &&badName : badNames) {
+      TS_ASSERT(!MuonAlgorithmHelper::checkValidGroupPairName(badName));
+    }
   }
 
   void test_checkValidGroupPairName_valid_names() {
-	  std::vector<std::string> goodNames = { "name", "group", "pair", "123" };
-	  for (auto&& goodName : goodNames) {
-		  TS_ASSERT(MuonAlgorithmHelper::checkValidGroupPairName(goodName));
-	  }
+    std::vector<std::string> goodNames = {"name", "group", "pair", "123"};
+    for (auto &&goodName : goodNames) {
+      TS_ASSERT(MuonAlgorithmHelper::checkValidGroupPairName(goodName));
+    }
   }
-  
-
 };
 
 #endif /* MANTID_MUON_MUONALGOIRTHMHELPER_H_ */

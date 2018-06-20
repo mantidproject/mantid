@@ -116,7 +116,7 @@ DLLExport bool checkValidPair(const std::string &name1,
                               const std::string &name2);
 
 /// Check whether a group or pair name is valid
-DLLExport bool checkValidGroupPairName(const std::string& name);
+DLLExport bool checkValidGroupPairName(const std::string &name);
 
 /// Saves grouping to the XML file specified
 DLLExport std::string groupingToXML(const Mantid::API::Grouping &grouping);

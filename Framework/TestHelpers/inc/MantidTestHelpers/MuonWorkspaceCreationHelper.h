@@ -24,11 +24,11 @@ struct yDataAsymmetry {
   double operator()(const double t, size_t spec);
 
 private:
-  double m_amp;         // Amplitude of the oscillations
-  double m_phi;         // Phase of the sinusoid
+  double m_amp;               // Amplitude of the oscillations
+  double m_phi;               // Phase of the sinusoid
   const double m_omega = 5.0; // Frequency of the oscillations
   const double tau = Mantid::PhysicalConstants::MuonLifetime *
-               1e6; // Muon life time in microseconds
+                     1e6; // Muon life time in microseconds
 };
 
 // Generate y-values which increment by 1 each time the function is called
