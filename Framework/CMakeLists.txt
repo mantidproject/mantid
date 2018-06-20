@@ -116,6 +116,7 @@ add_subdirectory (Nexus)
 add_subdirectory (DataHandling)
 add_subdirectory (Algorithms)
 add_subdirectory (WorkflowAlgorithms)
+add_subdirectory (Catalog)
 add_subdirectory (CurveFitting)
 add_subdirectory (Crystal)
 add_subdirectory (ICat)
@@ -145,7 +146,7 @@ add_subdirectory (ScriptRepository)
 
 set ( FRAMEWORK_LIBS Kernel HistogramData Indexing Beamline Geometry API DataObjects
                      PythonInterface DataHandling Nexus Algorithms CurveFitting ICat
-                     Crystal MDAlgorithms WorkflowAlgorithms
+                     Catalog Crystal MDAlgorithms WorkflowAlgorithms
                      LiveData RemoteAlgorithms RemoteJobManagers
                      SINQ
 )
