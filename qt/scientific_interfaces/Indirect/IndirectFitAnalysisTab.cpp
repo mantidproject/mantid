@@ -60,12 +60,11 @@ void IndirectFitAnalysisTab::setup() {
   connect(m_dataPresenter.get(),
           SIGNAL(endXChanged(double, std::size_t, std::size_t)), this,
           SLOT(tableEndXChanged(double, std::size_t, std::size_t)));
-  connect(
-      m_dataPresenter.get(),
-      SIGNAL(
-          excludeRegionChanged(const std::string &, std::size_t, std::size_t)),
-      this,
-      SLOT(tableExcludeChanged(const std::string &, std::size_t, std::size_t)));
+  connect(m_dataPresenter.get(),
+          SIGNAL(excludeRegionChanged(const std::string &, std::size_t,
+                                      std::size_t)),
+          this, SLOT(tableExcludeChanged(const std::string &, std::size_t,
+                                         std::size_t)));
   connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()), this,
           SLOT(setModelFitFunction()));
 
