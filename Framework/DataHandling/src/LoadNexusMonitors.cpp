@@ -25,13 +25,6 @@ void LoadNexusMonitors::init() {
       Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the output workspace in which to load the NeXus monitors.");
-
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
-                      "MonitorsAsEvents", true, Kernel::Direction::Input),
-                  "If enabled (by default), load the monitors as events (into "
-                  "an EventWorkspace), as long as there is event data. If "
-                  "disabled, load monitors as spectra (into a Workspace2D, "
-                  "regardless of whether event data is found.");
 }
 
 /**
