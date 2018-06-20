@@ -1125,18 +1125,17 @@ void LoadEventNexus::runLoadMonitors() {
                                    this->getProperty("NXentryName"));
     loadMonitors->execute();
     Workspace_sptr monsOut = loadMonitors->getProperty("OutputWorkspace");
+    // create the output workspace property on the fly
+    this->declareProperty(
+        Kernel::make_unique<WorkspaceProperty<Workspace>>(
+            "MonitorWorkspace", mon_wsname, Direction::Output),
+        "Monitors from the Event NeXus file");
+    this->setProperty("MonitorWorkspace", monsOut);
 
     // The output will either be a group workspace or a matrix workspace
     MatrixWorkspace_sptr mons =
         boost::dynamic_pointer_cast<MatrixWorkspace>(monsOut);
     if (mons) {
-      // create the output workspace property on the fly
-      this->declareProperty(
-          Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-              "MonitorWorkspace", mon_wsname, Direction::Output),
-          "Monitors from the Event NeXus file");
-      this->setProperty("MonitorWorkspace", mons);
-
       // Set the internal monitor workspace pointer as well
       m_ws->setMonitorWorkspace(mons);
 

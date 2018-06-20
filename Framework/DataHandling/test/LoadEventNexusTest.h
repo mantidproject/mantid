@@ -383,7 +383,7 @@ public:
     ldLMM.setProperty<bool>("LoadLogs", false); // Time-saver
     // Note: this is done here to avoid additional loads
     // This will produce a workspace with suffix _monitors, that is used below
-    // in test_MonitorsAsEvents
+    // in test_CNCSMonitors
     ldLMM.setProperty<bool>("LoadMonitors", true);
 
     TS_ASSERT(ldLMM.execute());
