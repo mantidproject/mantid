@@ -35,19 +35,36 @@ void addPyTimeValue(TimeSeriesProperty<TYPE> &self,
   self.addValue(*dateandtime, value);
 }
 
+// Template
 template <typename TYPE>
-void dtype(TimeSeriesProperty<TYPE> &self) {
-    if (self.m_propSortedFlag == TimeSeriesProperty<std::string>) {
-      self.type = "s";
-    } else if (self.m_propSortedFlag == TimeSeriesProperty<int32_t>) {
-      self.type = "i";
-    } else if (self.m_propSortedFlag == TimeSeriesProperty<int64_t>) {
-      self.type = "i";
-    } else if (self.m_propSortedFlag == TimeSeriesProperty<bool>) {
-      self.type = "b";
-    } else if (self.m_propSortedFlag == TimeSeriesProperty<double>) {
-      self.type = "d";
-    }
+// Default return if no matches occur
+std::string dtype(TimeSeriesProperty<TYPE> &self) {
+  return "obj";
+}
+
+// String return
+std::string dtype(TimeSeriesProperty<std::string> &self) {
+  return "s";
+}
+
+// Integer (32-bit) return
+std::string dtype(TimeSeriesProperty<int32_t> &self) {
+  return "i";
+}
+
+// Integer (64-bit) return
+std::string dtype(TimeSeriesProperty<int64_t> &self) {
+  return "i";
+}
+
+// Boolean return
+std::string dtype(TimeSeriesProperty<bool> &self) {
+  return "b";
+}
+
+// Double return
+std::string dtype(TimeSeriesProperty<double> &self) {
+  return "d";
 }
 
 // Macro to reduce copy-and-paste
