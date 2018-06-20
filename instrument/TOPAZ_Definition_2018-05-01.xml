@@ -4,9 +4,9 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="TOPAZ" valid-from   ="2017-11-03 16:00:00"
-              valid-to     ="2018-04-30 23:59:59"
-                     last-modified="2017-11-03 16:30:00">
+ name="TOPAZ" valid-from   ="2018-05-01 00:00:00"
+              valid-to     ="2100-01-31 23:59:59"
+                     last-modified="2018-06-20 16:30:00">
 
   <!--Created by Vickie Lynch-->
   <!--Modified by Vickie Lynch using the TOPAZ.py script from the Translation Service calibration/geometry/ code. -->
@@ -48,20 +48,6 @@
   </type>
 
 <!-- XML Code automatically generated on 2017-11-03 14:50:15.127696 for the Mantid instrument definition file -->
-<component type="panel" idstart="851968" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.455000" t="105.192621" p="-33.305992" name="bank13" rot="-99.919712" axis-x="0" axis-y="1" axis-z="0">
-  <rot val="53.154399">
-    <rot val="41.466968" axis-x="0" axis-y="1" axis-z="0" />
-  </rot>
-</location>
-</component>
-<component type="panel" idstart="917504" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.455000" t="133.320872" p="-46.751427" name="bank14" rot="-63.920201" axis-x="0" axis-y="1" axis-z="0">
-  <rot val="53.154399">
-    <rot val="41.466968" axis-x="0" axis-y="1" axis-z="0" />
-  </rot>
-</location>
-</component>
 <component type="panel" idstart="1048576" idfillbyfirst="y" idstepbyrow="256">
 <location r="0.455000" t="133.320872" p="-133.248573" name="bank16" rot="8.080272" axis-x="0" axis-y="1" axis-z="0">
   <rot val="53.154399">
@@ -90,29 +76,8 @@
   </rot>
 </location>
 </component>
-<component type="panel" idstart="1310720" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.425000" t="23.905622" p="-42.859145" name="bank20" rot="-177.410228" axis-x="0" axis-y="1" axis-z="0">
-  <rot val="47.178655">
-    <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
-  </rot>
-</location>
-</component>
-<component type="panel" idstart="1376256" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.425000" t="55.596651" p="-19.516218" name="bank21" rot="-141.410201" axis-x="0" axis-y="1" axis-z="0">
-  <rot val="47.178655">
-    <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
-  </rot>
-</location>
-</component>
 <component type="panel" idstart="1441792" idfillbyfirst="y" idstepbyrow="256">
 <location r="0.425000" t="90.000202" p="-16.000018" name="bank22" rot="-105.410002" axis-x="0" axis-y="1" axis-z="0">
-  <rot val="47.178655">
-    <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
-  </rot>
-</location>
-</component>
-<component type="panel" idstart="1507328" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.425000" t="124.403098" p="-19.516157" name="bank23" rot="-69.410491" axis-x="0" axis-y="1" axis-z="0">
   <rot val="47.178655">
     <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
@@ -148,13 +113,6 @@
 </component>
 <component type="panel" idstart="2162688" idfillbyfirst="y" idstepbyrow="256">
 <location r="0.395000" t="108.000253" p="0.000000" name="bank33" rot="-71.999747" axis-x="0" axis-y="1" axis-z="0">
-  <rot val="45.000000">
-    <rot val="0.000000" axis-x="0" axis-y="1" axis-z="0" />
-  </rot>
-</location>
-</component>
-<component type="panel" idstart="2228224" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.395000" t="143.999764" p="0.000000" name="bank34" rot="-36.000236" axis-x="0" axis-y="1" axis-z="0">
   <rot val="45.000000">
     <rot val="0.000000" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
@@ -217,7 +175,7 @@
 </location>
 </component>
 <!-- List of all the bank names:
-     bank13,bank14,bank16,bank17,bank18,bank19,bank20,bank21,bank22,bank23,bank26,bank27,bank28,bank29,bank33,bank34,bank36,bank37,bank38,bank39,bank46,bank47,bank48,bank49
+     bank16,bank17,bank18,bank19,bank22,bank26,bank27,bank28,bank29,bank33,bank36,bank37,bank38,bank39,bank46,bank47,bank48,bank49
 -->
 
 <!-- NOTE: This detector is the same as the SNAP detector -->
