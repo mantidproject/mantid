@@ -4,6 +4,7 @@
 #include "MantidCatalog/DllConfig.h"
 #include "MantidKernel/make_unique.h"
 
+#include <string>
 #include <vector>
 
 #include <boost/optional.hpp>
