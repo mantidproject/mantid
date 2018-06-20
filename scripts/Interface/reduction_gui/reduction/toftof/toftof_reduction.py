@@ -17,6 +17,7 @@ from reduction_gui.reduction.scripter import BaseScriptElement, BaseReductionScr
 
 # -------------------------------------------------------------------------------
 
+
 class OptionalFloat():
     """value can be either a float or None. if value is None, str(self) == '' """
     def __init__(self, value=None):
@@ -30,6 +31,7 @@ class OptionalFloat():
 
     def __format__(self, format_spec):
         return self._bind(lambda v: v.__format__(format_spec), default = '')
+
 
 class TOFTOFScriptElement(BaseScriptElement):
 
