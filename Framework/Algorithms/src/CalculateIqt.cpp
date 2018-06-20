@@ -4,7 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidHistogramData/HistogramY.h"
-#include <math.h>
+#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -107,8 +107,9 @@ std::string createRebinString(double minimum, double maximum, double width) {
   return rebinStream.str();
 }
 
-void randomizeRowWithinError(HistogramY &row, const HistogramE &errors,
-                             std::function<double(double)> rng) {
+template <typename Generator>
+void randomizeHistogramWithinError(HistogramY &row, const HistogramE &errors,
+                             Generator &generator) {
   for (auto i = 0u; i < row.size(); ++i) {
     auto randomValue = rng(errors[i]);
     row[i] += randomValue;
@@ -122,43 +123,32 @@ randomizeWorkspaceWithinError(MatrixWorkspace_sptr workspace, const int seed) {
     return mTwister.nextValue(-error, error);
   };
   for (auto i = 0u; i < workspace->getNumberHistograms(); ++i)
-    randomizeRowWithinError(workspace->mutableY(i), workspace->e(i), rng);
+    randomizeHistogramWithinError(workspace->mutableY(i), workspace->e(i), rng);
   return workspace;
 }
 
 double standardDeviation(const std::vector<double> &inputValues) {
-  double mean = std::accumulate(inputValues.begin(), inputValues.end(), 0.0) /
+  const auto mean = std::accumulate(inputValues.begin(), inputValues.end(), 0.0) /
                 inputValues.size();
   double sumOfXMinusMeanSquared = 0;
-  for (auto &x : inputValues) {
-    sumOfXMinusMeanSquared += pow(x - mean, 2);
-  }
+  for (auto &&x : inputValues)
+    sumOfXMinusMeanSquared += (x - mean) * (x - mean);
   return sqrt(sumOfXMinusMeanSquared / (inputValues.size() - 1));
 }
 
 std::vector<double>
 standardDeviationArray(const std::vector<std::vector<double>> &yValues) {
   std::vector<double> standardDeviations;
-  auto outputSize = yValues[0].size();
-  standardDeviations.reserve(outputSize);
-  std::vector<double> currentRow;
-  currentRow.reserve(yValues.size());
-
-  for (auto i = 0u; i < outputSize; ++i) {
-    currentRow.clear();
-    for (auto &yValueArray : yValues)
-      currentRow.emplace_back(yValueArray[i]);
-    standardDeviations.emplace_back(standardDeviation(currentRow));
-  }
+  standardDeviations.reserve(yValues.size());
+  std::transform(yValues.begin(), yValues.end(), std::back_inserter(standardDeviations), standardDeviation);
   return standardDeviations;
 }
 
-MatrixWorkspace_sptr cleanOutput(MatrixWorkspace_sptr workspace) {
+MatrixWorkspace_sptr removeInvalidData(MatrixWorkspace_sptr workspace) {
   auto binning = static_cast<int>(std::ceil(workspace->blocksize() / 2));
   auto binV = workspace->x(0)[binning];
   workspace = cropWorkspace(workspace, binV);
-  workspace = replaceSpecialValues(workspace);
-  return workspace;
+  return replaceSpecialValues(workspace);
 }
 
 MatrixWorkspace_sptr
@@ -168,8 +158,7 @@ normalizedFourierTransform(MatrixWorkspace_sptr workspace,
   auto workspace_int = integration(workspace);
   workspace = convertToPointData(workspace);
   workspace = extractFFTSpectrum(workspace);
-  workspace = divide(workspace, workspace_int);
-  return workspace;
+  return divide(workspace, workspace_int);
 }
 
 MatrixWorkspace_sptr calculateIqt(MatrixWorkspace_sptr workspace,
@@ -177,6 +166,31 @@ MatrixWorkspace_sptr calculateIqt(MatrixWorkspace_sptr workspace,
                                   const std::string &rebinParams) {
   workspace = normalizedFourierTransform(workspace, rebinParams);
   return divide(workspace, resolutionWorkspace);
+}
+
+MatrixWorkspace_sptr doSimulation(MatrixWorkspace_sptr sample,
+                                  MatrixWorkspace_sptr resolution, 
+                                  const std::string &rebinParams, 
+                                  const int seed) {
+  auto simulatedWorkspace = randomizeWorkspaceWithinError(sample, seed);
+  return calculateIqt(simulatedWorkspace, resolution, rebinParams);
+}
+
+MatrixWorkspace_sptr setErrorsToStandardDeviation(
+  int nIterations,
+  const std::vector<MatrixWorkspace_sptr> &simulatedWorkspaces,
+  MatrixWorkspace_sptr outputWorkspace) {
+  // set errors to standard deviation of y values across simulations
+  std::vector<std::vector<double>> allSimY;
+  allSimY.reserve(nIterations);
+
+  for (auto i = 0u; i < outputWorkspace->getNumberHistograms(); ++i) {
+    auto &outputError = outputWorkspace->mutableE(i);
+    for (auto &simWorkspace : simulatedWorkspaces)
+      allSimY.emplace_back(simWorkspace->y(i).rawData());
+    outputError = standardDeviationArray(allSimY);
+  }
+  return outputWorkspace;
 }
 
 } // namespace
@@ -235,19 +249,14 @@ void CalculateIqt::exec() {
   const auto rebinParams = rebinParamsAsString();
   const MatrixWorkspace_sptr sampleWorkspace = getProperty("InputWorkspace");
   MatrixWorkspace_sptr resolution = getProperty("ResolutionWorkspace");
+  const int nIterations = getProperty("NumberOfIterations");
+  const int seed = getProperty("SeedValue");
   resolution = normalizedFourierTransform(resolution, rebinParams);
 
-  // create function which only needs sampleWorkspace as input so it can be
-  // easily repeated in simulations
-  auto calculateIqtFunction =
-      [resolution, &rebinParams](MatrixWorkspace_sptr sample) {
-        return calculateIqt(sample, resolution, rebinParams);
-      };
-
   auto outputWorkspace = monteCarloErrorCalculation(sampleWorkspace, resolution,
-                                                    calculateIqtFunction);
+                                                    rebinParams, seed, nIterations);
 
-  outputWorkspace = cleanOutput(outputWorkspace);
+  outputWorkspace = removeInvalidData(outputWorkspace);
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
@@ -258,13 +267,9 @@ std::string CalculateIqt::rebinParamsAsString() {
   return createRebinString(e_min, e_max, e_width);
 }
 
-MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(
-    MatrixWorkspace_sptr sample, MatrixWorkspace_sptr resolution,
-    const std::function<MatrixWorkspace_sptr(MatrixWorkspace_sptr)> &
-        calculateIqtFunction) {
-  auto outputWorkspace = calculateIqtFunction(sample);
-  const int nIterations = getProperty("NumberOfIterations");
-  const int seed = getProperty("SeedValue");
+MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(MatrixWorkspace_sptr sample, MatrixWorkspace_sptr resolution, 
+  const std::string &rebinParams, const int seed, const int nIterations) {
+  auto outputWorkspace = calculateIqt(sample, resolution, rebinParams);
   std::vector<MatrixWorkspace_sptr> simulatedWorkspaces;
   simulatedWorkspaces.reserve(nIterations);
   simulatedWorkspaces.emplace_back(outputWorkspace);
@@ -272,32 +277,12 @@ MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(
   PARALLEL_FOR_IF(Kernel::threadSafe(*sample, *resolution))
   for (auto i = 0; i < nIterations - 1; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    auto simulatedWorkspace =
-        randomizeWorkspaceWithinError(sample->clone(), seed);
-    simulatedWorkspace = calculateIqtFunction(simulatedWorkspace);
-    simulatedWorkspaces.emplace_back(simulatedWorkspace);
+    simulatedWorkspaces.emplace_back(doSimulation(sample->clone, resolution, rebinParams, seed);
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
   return setErrorsToStandardDeviation(nIterations, simulatedWorkspaces,
                                       outputWorkspace);
-}
-
-MatrixWorkspace_sptr CalculateIqt::setErrorsToStandardDeviation(
-    int nIterations,
-    const std::vector<MatrixWorkspace_sptr> simulatedWorkspaces,
-    MatrixWorkspace_sptr outputWorkspace) {
-  // set errors to standard deviation of y values across simulations
-  std::vector<std::vector<double>> allSimY;
-  allSimY.reserve(nIterations);
-
-  for (auto i = 0u; i < outputWorkspace->getNumberHistograms(); ++i) {
-    auto &outputError = outputWorkspace->mutableE(i);
-    for (auto &simWorkspace : simulatedWorkspaces)
-      allSimY.emplace_back(simWorkspace->y(i).rawData());
-    outputError = standardDeviationArray(allSimY);
-  }
-  return outputWorkspace;
 }
 
 std::map<std::string, std::string> CalculateIqt::validateInputs() {

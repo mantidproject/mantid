@@ -40,14 +40,8 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
   std::string rebinParamsAsString();
-  API::MatrixWorkspace_sptr monteCarloErrorCalculation(
-      API::MatrixWorkspace_sptr sample, API::MatrixWorkspace_sptr resolution,
-      const std::function<API::MatrixWorkspace_sptr(
-          API::MatrixWorkspace_sptr)> &calculateIqtFunction);
-  API::MatrixWorkspace_sptr setErrorsToStandardDeviation(
-      int nIterations,
-      const std::vector<API::MatrixWorkspace_sptr> simulatedWorkspaces,
-      API::MatrixWorkspace_sptr outputWorkspace);
+  API::MatrixWorkspace_sptr monteCarloErrorCalculation(API::MatrixWorkspace_sptr sample, API::MatrixWorkspace_sptr resolution,
+    const std::string &rebinParams, const int seed, const int nIterations)
 };
 
 } // namespace Algorithms
