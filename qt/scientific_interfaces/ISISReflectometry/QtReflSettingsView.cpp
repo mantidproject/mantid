@@ -138,6 +138,7 @@ void QtReflSettingsView::registerInstrumentSettingsWidgets(
                         alg);
   registerSettingWidget(*m_ui.reductionTypeComboBox, "ReductionType", alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
+  registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
 }
 
 void QtReflSettingsView::registerExperimentSettingsWidgets(
@@ -650,6 +651,10 @@ std::string QtReflSettingsView::getI0MonitorIndex() const {
 
 std::string QtReflSettingsView::getReductionType() const {
   return getText(*m_ui.reductionTypeComboBox);
+}
+
+bool QtReflSettingsView::getDebugOption() const {
+  return m_ui.debugCheckBox->isChecked();
 }
 
 std::string QtReflSettingsView::getSummationType() const {

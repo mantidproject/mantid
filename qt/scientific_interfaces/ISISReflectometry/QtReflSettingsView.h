@@ -95,6 +95,8 @@ public:
   std::string getSummationType() const override;
   /// Return selected reduction type
   std::string getReductionType() const override;
+  /// Return debug option
+  bool getDebugOption() const override;
   /// Set the status of whether polarisation corrections should be enabled
   void setIsPolCorrEnabled(bool enable) const override;
   /// Set default values for experiment and instrument settings

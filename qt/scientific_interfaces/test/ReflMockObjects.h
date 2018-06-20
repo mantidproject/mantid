@@ -105,6 +105,7 @@ public:
   MOCK_CONST_METHOD0(getI0MonitorIndex, std::string());
   MOCK_CONST_METHOD0(getSummationType, std::string());
   MOCK_CONST_METHOD0(getReductionType, std::string());
+  MOCK_CONST_METHOD0(getDebugOption, bool());
   MOCK_CONST_METHOD0(getPerAngleOptions, std::map<std::string, OptionsQMap>());
   MOCK_CONST_METHOD1(setIsPolCorrEnabled, void(bool));
   MOCK_METHOD1(setReductionTypeEnabled, void(bool));
