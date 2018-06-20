@@ -33,8 +33,6 @@ endif(UNITY_BUILD)
 include_directories ( ${OPENSSL_INCLUDE_DIR} )
 add_definitions ( -DWITH_OPENSSL -DWITH_NONAMESPACES )
 
-# Add a precompiled header where they are supported
-enable_precompiled_headers( inc/MantidCatalog/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( Catalog ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
