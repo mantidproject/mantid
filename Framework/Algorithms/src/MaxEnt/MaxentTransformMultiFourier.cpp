@@ -16,7 +16,10 @@ MaxentTransformMultiFourier::MaxentTransformMultiFourier(MaxentSpace_sptr dataSp
 * a backward MaxentTransformFourier on it then creating a concatenated 
 * copy of the resulting data for each spectrum and applying the adjustments 
 * to them.
-* Assumes complex input.
+* Input is assumed real or complex according to the type of image space
+* given to the constructor.
+* Return value is real or complex according to the type of data space
+* given to the constructor.
 * @param image : [input] Image as a vector
 * @return : The vector in the data space of concatenated spectra
 */
@@ -56,8 +59,11 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
 
 /**
 * Transforms a 1D signal from data space to image space, performing a forward
-* Fast MexentTransformFourier on the sum of the spectra. Assumes complex
-* input.
+* Fast MexentTransformFourier on the sum of the spectra. 
+* Input is assumed real or complex according to the type of data space
+* given to the constructor.
+* Return value is real or complex according to the type of image space
+* given to the constructor.
 * @param data : [input] Data as a vector of concatenated spectra
 * @return : The vector in the image space
 */
