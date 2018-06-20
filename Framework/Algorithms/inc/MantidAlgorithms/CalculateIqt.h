@@ -44,7 +44,7 @@ private:
       API::MatrixWorkspace_sptr sample, API::MatrixWorkspace_sptr resolution,
       const std::function<API::MatrixWorkspace_sptr(
           API::MatrixWorkspace_sptr)> &calculateIqtFunction);
-  API::MatrixWorkspace_sptr CalculateIqt::setErrorsToStandardDeviation(
+  API::MatrixWorkspace_sptr setErrorsToStandardDeviation(
       int nIterations,
       const std::vector<API::MatrixWorkspace_sptr> simulatedWorkspaces,
       API::MatrixWorkspace_sptr outputWorkspace);

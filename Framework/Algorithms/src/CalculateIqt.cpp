@@ -3,7 +3,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidHistogramData\HistogramY.h"
+#include "MantidHistogramData/HistogramY.h"
 #include <math.h>
 
 using namespace Mantid::API;
