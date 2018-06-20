@@ -106,7 +106,6 @@ public:
                                        bool changesFunction);
 
 protected:
-  bool validate() override;
   IndirectFittingModel *fittingModel() const;
 
   void setSampleWSSuffices(const QStringList &suffices);

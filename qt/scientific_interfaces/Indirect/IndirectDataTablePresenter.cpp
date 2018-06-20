@@ -11,6 +11,7 @@
 
 namespace {
 using MantidQt::CustomInterfaces::IDA::Spectra;
+using MantidQt::CustomInterfaces::IDA::DiscontinuousSpectra;
 
 namespace Regexes {
 const QString EMPTY = "^$";
@@ -81,7 +82,7 @@ pairsToSpectra(const std::vector<std::pair<std::size_t, std::size_t>> &pairs) {
     return boost::none;
   else if (pairs.size() == 1)
     return pairs[0];
-  return pairsToString(pairs);
+  return DiscontinuousSpectra<std::size_t>(pairsToString(pairs));
 }
 } // namespace
 
