@@ -6,6 +6,7 @@ fitting for integrating peaks.
 
 # This __future__ import is for Python 2/3 compatibility
 from __future__ import (absolute_import, division, print_function)
+import sys
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -15,7 +16,7 @@ import numpy as np
 class IntegratePeaksProfileFitting(PythonAlgorithm):
 
     def summary(self):
-        return 'Fits a series fo peaks using 3D profile fitting as an Ikeda-Carpenter function by a bivariate gaussian.'
+        return 'Fits a series of peaks using 3D profile fitting as an Ikeda-Carpenter function by a bivariate gaussian.'
 
     def category(self):
         # defines the category the algorithm will be put in the algorithm browser
@@ -109,7 +110,10 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         mtd['MDdata'] = MDdata
 
         padeCoefficients = ICCFT.getModeratorCoefficients(padeFile)
-        strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'))
+        if sys.version_info[0] == 3:
+            strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'),encoding='latin1')
+        else:
+            strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'))
         predpplCoefficients = self.getProperty('PredPplCoefficients').value
         nTheta = self.getProperty('NTheta').value
         nPhi = self.getProperty('NPhi').value
@@ -141,6 +145,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
 
         # And we're off!
         peaks_ws_out = peaks_ws.clone()
+        np.warnings.filterwarnings('ignore') # There can be a lot of warnings for bad solutions that get rejected.
         for peakNumber in peaksToFit:#range(peaks_ws.getNumberPeaks()):
             peak = peaks_ws_out.getPeak(peakNumber)
             try:
@@ -178,9 +183,11 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
 
                     sigma = np.sqrt(intensity + bgEvents + varFit)
 
-                    #print('peak %i; original: %4.2f +- %4.2f;  new: %4.2f +- %4.2f'%(peakNumber, peak.getIntensity(),
-                    #                                                                 peak.getSigmaIntensity(),
-                    #                                                                 intensity, sigma))
+                    compStr = 'peak {:d}; original: {:4.2f} +- {:4.2f};  new: {:4.2f} +- {:4.2f}'.format(peakNumber,
+                                                                                                         peak.getIntensity(),
+                                                                                                         peak.getSigmaIntensity(),
+                                                                                                         intensity, sigma)
+                    logger.information(compStr)
 
                     # Save the results
                     params['peakNumber'] = peakNumber
@@ -193,6 +200,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                     numgood += 1
 
             except KeyboardInterrupt:
+                np.warnings.filterwarnings('default') # Re-enable on exit
                 raise
             except:
                 #raise
@@ -204,6 +212,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         for wsName in mtd.getObjectNames():
             if 'fit_' in wsName or 'bvgWS' in wsName or  'tofWS' in wsName or 'scaleWS' in wsName:
                 mtd.remove(wsName)
+        np.warnings.filterwarnings('default') # Re-enable on exit
         # Set the output
         self.setProperty('OutputPeaksWorkspace', peaks_ws_out)
         self.setProperty('OutputParamsWorkspace', params_ws)

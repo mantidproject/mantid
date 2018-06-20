@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import matplotlib.pyplot as plt
 import ICCFitTools as ICCFT
@@ -79,8 +80,10 @@ def get3DPeak(peak, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxT
         tmp = strongPeakParams[:, :2] - phthPeak
         distSq = tmp[:, 0]**2 + tmp[:, 1]**2
         nnIDX = np.argmin(distSq)
-        #print 'Using [ph, th] =', strongPeakParams[nnIDX,
-        #                                           :2], 'for ', phthPeak, '; nnIDX = ', nnIDX
+        logger.information('Using [ph, th] = [{:2.2f},{:2.2f}] for [{:2.2f},{:2.2f}]'.format(strongPeakParams[nnIDX,0],
+                                                                                             strongPeakParams[nnIDX,1],
+                                                                                             phthPeak[0],
+                                                                                             phthPeak[1]))
         params, h, t, p = doBVGFit(box, nTheta=nTheta, nPhi=nPhi, fracBoxToHistogram=fracBoxToHistogram,
                                    goodIDX=goodIDX, forceParams=strongPeakParams[nnIDX])
     else:  # Just do the fit - no nearest neighbor assumptions
@@ -190,7 +193,6 @@ def fitScaling(n_events, box, YTOF, YBVG, goodIDX=None, neigh_length_m=3):
     YRET = A1 * YJOINT + A0
     chiSqRed = fitResultsScaling[1]
 
-    #print chiSqRed, 'is chiSqRed'
     return YRET, chiSqRed, A1
 
 
@@ -255,8 +257,6 @@ def fitTOFCoordinate(box, peak, padeCoefficients, dtSpread=0.03, minFracPixels=0
         plt.clf()
         plt.plot(tofxx, tofyy, label='Interpolated')
         plt.plot(tofWS.readX(0), tofWS.readY(0), 'o', label='Data')
-        #print 'sum:', np.sum(fICC.function1D(tofWS.readX(0)))
-        #print 'bg: ', np.sum(bg[iStart:iStop])
         plt.plot(mtd['fit_Workspace'].readX(1),
                  mtd['fit_Workspace'].readY(1), label='Fit')
         plt.title(fitResults.OutputChi2overDoF)
@@ -468,8 +468,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         m.setAttributeValue('nX', h.shape[0])
         m.setAttributeValue('nY', h.shape[1])
         m.setConstraints(boundsDict)
-        # print 'before: '
-        # print(m)
         # Do the fit
         bvgWS = CreateWorkspace(OutputWorkspace='bvgWS', DataX=pos.ravel(
         ), DataY=H.ravel(), DataE=np.sqrt(H.ravel()))
@@ -477,8 +475,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         fitResults = Fit(Function=m, InputWorkspace='bvgWS', Output='bvgfit',
                          Minimizer='Levenberg-MarquardtMD')
 
-        #print 'after'
-        #print m
     elif forceParams is not None:
         p0 = np.zeros(7)
         p0[0] = np.max(h)
@@ -529,8 +525,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         m.setAttributeValue('nX', h.shape[0])
         m.setAttributeValue('nY', h.shape[1])
         m.setConstraints(boundsDict)
-        #print 'before:'
-        #print m
 
         # Do the fit
         #plt.figure(18); plt.clf(); plt.imshow(m.function2D(pos)); plt.title('BVG Initial guess')
@@ -539,8 +533,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         fitResults = Fit(Function=fitFun, InputWorkspace=bvgWS,
                          Output='bvgfit', Minimizer='Levenberg-MarquardtMD')
 
-        #print 'after:'
-        #print m
     # Recover the result
     m = BivariateGaussian.BivariateGaussian()
     m.init()
@@ -557,7 +549,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
     chiSq = fitResults[1]
     params = [[m['A'], m['MuX'], m['MuY'], m['SigX'],
                m['SigY'], m['SigP'], m['Bg']], chiSq]
-    # print params
     return params, h, thBins, phBins
 
 
@@ -587,5 +578,5 @@ def bvg(A, mu, sigma, x, y, bg):
                              sigmaxy=sigma[1, 0], mux=mu[0], muy=mu[1])
         return A * f + bg
     else:
-        print '   BVGFT:bvg:not PSD Matrix'
+        system.information('   BVGFT:bvg:not PSD Matrix')
         return 0.0 * np.ones_like(x)
