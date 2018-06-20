@@ -45,7 +45,7 @@ public:
 
   bool empty() const { return m_vec.empty(); }
   std::size_t size() const { return m_vec.size(); }
-  std::string &getString() const { return m_str; }
+  const std::string &getString() const { return m_str; }
   typename std::vector<T>::iterator begin() { return m_vec.begin(); }
   typename std::vector<T>::iterator end() { return m_vec.end(); }
   typename std::vector<T>::const_iterator begin() const {
@@ -82,7 +82,7 @@ private:
 template <typename F>
 struct ApplyEnumeratedSpectra : boost::static_visitor<std::size_t> {
   ApplyEnumeratedSpectra(F const &functor, std::size_t start = 0)
-      : m_functor(functor), m_start(start) {}
+      : m_start(start), m_functor(functor) {}
 
   std::size_t
   operator()(const std::pair<std::size_t, std::size_t> &spectra) const {

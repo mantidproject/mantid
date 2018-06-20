@@ -3,6 +3,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
+#include <iostream>
+
 using namespace Mantid::API;
 
 namespace {
@@ -16,7 +18,7 @@ std::string rangeToString(const std::pair<std::size_t, std::size_t> &range,
   return std::to_string(range.first);
 }
 
-template <template <class...> typename Vector, typename T, typename... Ts>
+template <template <typename...> class Vector, typename T, typename... Ts>
 std::vector<T> outOfRange(const Vector<T, Ts...> &values, const T &minimum,
                           const T &maximum) {
   std::vector<T> result;
@@ -50,7 +52,7 @@ private:
 };
 
 struct CheckZeroSpectrum : boost::static_visitor<bool> {
-  bool operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
+  bool operator()(const std::pair<std::size_t, std::size_t> &) const {
     return false;
   }
   bool operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
@@ -131,7 +133,7 @@ std::string join(const std::vector<T> &values, const char *delimiter) {
   std::stringstream stream;
   stream << values.front();
   for (auto i = 1u; i < values.size(); ++i)
-    stream << "," << values[i];
+    stream << delimiter << values[i];
   return stream.str();
 }
 
