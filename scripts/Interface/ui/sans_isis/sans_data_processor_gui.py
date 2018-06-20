@@ -716,8 +716,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             checked_save_types.append(SaveType.NXcanSAS)
         if self.rkh_checkbox.isChecked():
             checked_save_types.append(SaveType.RKH)
-        if self.nist_qxy_checkbox.isChecked():
-            checked_save_types.append(SaveType.NistQxy)
         return checked_save_types
 
     @save_types.setter
@@ -729,8 +727,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
                 self.nx_can_sas_checkbox.setChecked(True)
             elif value is SaveType.RKH:
                 self.rkh_checkbox.setChecked(True)
-            elif value is SaveType.NistQxy:
-                self.nist_qxy_checkbox.setChecked(True)
 
     @property
     def zero_error_free(self):
