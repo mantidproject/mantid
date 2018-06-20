@@ -451,6 +451,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         msg.setWindowTitle(title)
         msg.setDetailedText(details)
         msg.setStandardButtons(QtGui.QMessageBox.Ok)
+        msg.setDefaultButton(QtGui.QMessageBox.Ok)
+        msg.setEscapeButton(QtGui.QMessageBox.Ok)
         msg.exec_()
 
     def get_user_file_path(self):
