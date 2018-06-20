@@ -5,16 +5,14 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-template<class... Conts>
-auto zip_range(Conts&... conts)
-  -> decltype(boost::make_iterator_range(
-  boost::make_zip_iterator(boost::make_tuple(conts.begin()...)),
-  boost::make_zip_iterator(boost::make_tuple(conts.end()...))))
-{
-  return {boost::make_zip_iterator(boost::make_tuple(conts.begin()...)),
-          boost::make_zip_iterator(boost::make_tuple(conts.end()...))};
+template <class... Containers>
+auto zip_range(Containers &... containers)
+    -> decltype(boost::make_iterator_range(
+        boost::make_zip_iterator(boost::make_tuple(containers.begin()...)),
+        boost::make_zip_iterator(boost::make_tuple(containers.end()...)))) {
+  return {boost::make_zip_iterator(boost::make_tuple(containers.begin()...)),
+          boost::make_zip_iterator(boost::make_tuple(containers.end()...))};
 }
-
 }
 }
 #endif // MANTID_ISISREFLECTOMETRY_ZIPRANGE_H
