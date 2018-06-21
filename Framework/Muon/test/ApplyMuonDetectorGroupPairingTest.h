@@ -351,7 +351,7 @@ public:
     alg.initialize();
     setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
 
-    std::vector<std::string> badPeriods = {"3", "1,2,3,4", "-1"};
+    std::vector<std::string> badPeriods = {"3", "1,2,3,4"};
 
     for (auto &&badPeriod : badPeriods) {
       alg.setProperty("SummedPeriods", badPeriod);
@@ -366,6 +366,34 @@ public:
       TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
       TS_ASSERT(!alg.isExecuted());
     }
+  }
+
+  void test_throwsIfPeriodInvalid() {
+	  int nPeriods = 2;
+	  WorkspaceGroup_sptr ws =
+		  createMultiPeriodWorkspaceGroup(nPeriods, 10, 10, "MuonAnalysis");
+	  ;
+	  setUpADSWithWorkspace setup(ws);
+
+	  ApplyMuonDetectorGroupPairing alg;
+	  alg.initialize();
+	  setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
+
+	  std::vector<std::string> badPeriods = {"-1", "1.5", "abc", "." };
+
+	  for (auto &&badPeriod : badPeriods) {
+		  alg.setProperty("SummedPeriods", badPeriod);
+		  // This throw comes from period string generation
+		  TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+		  TS_ASSERT(!alg.isExecuted());
+	  }
+
+	  for (auto &&badPeriod : badPeriods) {
+		  alg.setProperty("SubtractedPeriods", badPeriod);
+		  // This throw comes from period string generation
+		  TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+		  TS_ASSERT(!alg.isExecuted());
+	  }
   }
 
   void test_producesOutputWorkspacesInWorkspaceGroup() {
@@ -459,8 +487,8 @@ public:
     setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
     alg.setProperty("SummedPeriods", "1,2");
     alg.execute();
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
+	auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+		setup.wsGroup->getItem("inputGroup; Pair; test; Asym; 1+2; #1_Raw"));
 
     // Summation of periods occurs before asymmetry calculation
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
@@ -488,8 +516,8 @@ public:
     alg.setProperty("SummedPeriods", "1,2");
     alg.setProperty("SubtractedPeriods", "3");
     alg.execute();
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
+	auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+		setup.wsGroup->getItem("inputGroup; Pair; test; Asym; 1+2-3; #1_Raw"));
 
     // Summation of periods occurs before asymmetry calculation
     // Subtraction of periods occurs AFTER asymmetry calculation
