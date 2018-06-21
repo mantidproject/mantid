@@ -80,7 +80,8 @@ private:
                         Mantid::API::Workspace_sptr ws,
                         Mantid::API::WorkspaceGroup_sptr wsGrouped);
 
-  /// The pairing algorithm is not yet implemented
+  /// Add all the supplied pairs to the ADS, inside wsGrouped, by
+  /// executing the ApplyMuonDetectorGroupPairing algorithm
   void addPairingToADS(const Mantid::Muon::AnalysisOptions &options,
                        Mantid::API::Workspace_sptr ws,
                        Mantid::API::WorkspaceGroup_sptr wsGrouped);

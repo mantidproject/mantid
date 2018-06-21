@@ -36,6 +36,25 @@ std::string plotTypeToString(const Mantid::Muon::PlotType &plotType) {
   return "Counts";
 }
 
+void throwIfGroupNotInPair(const std::string &pairName,
+                           const std::string &pairGroup,
+                           const std::vector<std::string> &groupNames) {
+  bool group1inPair = (std::find(groupNames.begin(), groupNames.end(),
+                                 pairGroup) != groupNames.end());
+  if (!group1inPair) {
+    throw std::invalid_argument("Pairing " + pairName + " : required group " +
+                                pairGroup + " is missing");
+  }
+}
+
+void throwIfGroupsNotInPair(const std::string &pairName,
+                            const std::string &pairGroup1,
+                            const std::string &pairGroup2,
+                            const std::vector<std::string> &groupNames) {
+  throwIfGroupNotInPair(pairName, pairGroup1, groupNames);
+  throwIfGroupNotInPair(pairName, pairGroup2, groupNames);
+}
+
 } // namespace
 
 using namespace Mantid::API;
@@ -73,6 +92,10 @@ void LoadAndApplyMuonDetectorGrouping::init() {
       "ApplyAsymmetryToGroups", true,
       "Whether to calculate group asymmetry and store the workspaces.");
 
+  declareProperty(
+      "AddGroupingTable", false,
+      "Whether to add a TableWorkspace of the groupings to the ADS.");
+
   // Optional properties
 
   declareProperty("RebinArgs", emptyString,
@@ -80,8 +103,9 @@ void LoadAndApplyMuonDetectorGrouping::init() {
                   Direction::Input);
 
   declareProperty("TimeOffset", 0.0,
-                  "Shift the times of all data by a fixed amount. The value "
-                  "given corresponds to the bin that will become 0.0 seconds.",
+                  "Shift the times of all data by a fixed amount (in micro "
+                  "seconds). The value given corresponds to the bin that will "
+                  "become 0.0 seconds.",
                   Direction::Input);
 
   declareProperty("SummedPeriods", std::to_string(1),
@@ -152,7 +176,10 @@ void LoadAndApplyMuonDetectorGrouping::exec() {
     options.plotType = PlotType::Asymmetry;
     addGroupingToADS(options, inputWS, groupedWS);
   }
-  addGroupingInformationToADS(options.grouping);
+
+  if (getProperty("AddGroupingTable")) {
+    addGroupingInformationToADS(options.grouping);
+  }
 }
 
 // Checks that the detector IDs in grouping are in the workspace
@@ -172,6 +199,7 @@ void LoadAndApplyMuonDetectorGrouping::checkDetectorIDsInWorkspace(
 /**
  * Adds an empty WorkspaceGroup to the ADS with a name
  * that it would have if created by the MuonAnalysis GUI.
+ * e.g. MUSR0001234
  */
 WorkspaceGroup_sptr
 LoadAndApplyMuonDetectorGrouping::addGroupedWSWithDefaultName(
@@ -252,33 +280,21 @@ void LoadAndApplyMuonDetectorGrouping::CheckValidGroupsAndPairs(
     const Grouping &grouping) {
   for (auto &&groupName : grouping.groupNames) {
     if (!MuonAlgorithmHelper::checkValidGroupPairName(groupName)) {
-      throw std::invalid_argument("Some group names are invalid");
+      throw std::invalid_argument("Some group names are invalid : " +
+                                  groupName);
     }
   }
 
-  for (size_t p = 0; p < grouping.pairs.size(); p++) {
+  for (auto p = 0u; p < grouping.pairs.size(); ++p) {
     std::string pairName = grouping.pairNames[p];
     if (!MuonAlgorithmHelper::checkValidGroupPairName(pairName)) {
-      throw std::invalid_argument("Some pair names are invalid");
+      throw std::invalid_argument("Some pair names are invalid" + pairName);
     }
     std::string pairGroup1 = grouping.groupNames[grouping.pairs[p].first];
     std::string pairGroup2 = grouping.groupNames[grouping.pairs[p].second];
 
-    bool group1inPair =
-        (std::find(grouping.groupNames.begin(), grouping.groupNames.end(),
-                   pairGroup1) != grouping.groupNames.end());
-    bool group2inPair =
-        (std::find(grouping.groupNames.begin(), grouping.groupNames.end(),
-                   pairGroup1) != grouping.groupNames.end());
-
-    if (!group1inPair) {
-      throw std::invalid_argument("Pairing " + pairName + " : required group " +
-                                  pairGroup1 + " is missing");
-    }
-    if (!group2inPair) {
-      throw std::invalid_argument("Pairing " + pairName + " : required group " +
-                                  pairGroup2 + " is missing");
-    }
+    throwIfGroupsNotInPair(pairName, pairGroup1, pairGroup2,
+                           grouping.groupNames);
   }
 }
 
@@ -292,7 +308,7 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
     Mantid::API::WorkspaceGroup_sptr wsGrouped) {
 
   size_t numGroups = options.grouping.groups.size();
-  for (size_t i = 0; i < numGroups; i++) {
+  for (auto i = 0u; i < numGroups; ++i) {
     IAlgorithm_sptr alg =
         this->createChildAlgorithm("ApplyMuonDetectorGrouping");
     if (!this->isLogging())
@@ -308,10 +324,10 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
     alg->setProperty("TimeOffset", options.loadedTimeZero - options.timeZero);
     alg->setProperty("SummedPeriods", options.summedPeriods);
     alg->setProperty("SubtractedPeriods", options.subtractedPeriods);
-    TableWorkspace_sptr DTC = getProperty("DeadTimeTable");
-    if (DTC) {
+    TableWorkspace_sptr DTT = getProperty("DeadTimeTable");
+    if (DTT) {
       alg->setProperty("ApplyDeadTimeCorrection", true);
-      alg->setProperty("DeadTimeTable", DTC);
+      alg->setProperty("DeadTimeTable", DTT);
     }
     alg->execute();
   }
@@ -350,10 +366,10 @@ void LoadAndApplyMuonDetectorGrouping::addPairingToADS(
     alg->setProperty("TimeOffset", options.loadedTimeZero - options.timeZero);
     alg->setProperty("SummedPeriods", options.summedPeriods);
     alg->setProperty("SubtractedPeriods", options.subtractedPeriods);
-    TableWorkspace_sptr DTC = getProperty("DeadTimeTable");
-    if (DTC) {
+    TableWorkspace_sptr DTT = getProperty("DeadTimeTable");
+    if (DTT) {
       alg->setProperty("ApplyDeadTimeCorrection", true);
-      alg->setProperty("DeadTimeTable", DTC);
+      alg->setProperty("DeadTimeTable", DTT);
     }
     alg->execute();
   };

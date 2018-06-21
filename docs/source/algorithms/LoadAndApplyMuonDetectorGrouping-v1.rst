@@ -21,7 +21,7 @@ All the grouping information (the groupings of detector IDs, and the pairs of gr
 If WorkspaceGroup is not specified then the default format is "<INSTRUMENT><RUN NUMBER>" where for example if the data is from the "EMU" instrument for run number "12345" the name would be "EMU00012345", with the run numbers padded by zero up to 8 digits. If the instrument is not recognized (e.g. "LHC") run numbers below 100 are padded to three digits with zeros, so for run number 10 this would be "LHC010".
 
 
-Rebbing is optional and can be achieved through the **RebinArgs** property (using syntax as in :ref:`algm-Rebin`). Each time a group or pair is analysed, two workspaces are added to WorkspaceGroup; the one ending in "_Raw" has no rebinning applied. If the RebinArgs property is not set then these workspaces will simply be duplicates of each other.
+Rebinning is optional and can be achieved through the **RebinArgs** property (using syntax as in :ref:`algm-Rebin`). Each time a group or pair is analysed, two workspaces are added to WorkspaceGroup; the one ending in "_Raw" has no rebinning applied. If the RebinArgs property is not set then these workspaces will simply be duplicates of each other.
 
 
 The entire time axis can be shifted by a given amount using the **TimeOffset** parameter.
@@ -62,27 +62,13 @@ Usage
 
 .. testcode:: ExMUSRPairAsymmetry
 
-    # Clear the ADS before starting
-    AnalysisDataService.clear()
-
-    # Create the workspace group in which the analysed workspaces will be placed
-    ws = CreateSampleWorkspace()
-    wsGroup = GroupWorkspaces("ws")
-    RenameWorkspace(  
-                      InputWorkspace="wsGroup", 
-                      OutputWorkspace='MUSR00015193', 
-                      OverwriteExisting=True)
-
-    # Load the data
-    LoadMuonNexus(  Filename='MUSR00015193.nxs', 
-                    OutputWorkspace='MuonAnalysis')
+    
 
 
 Output:
 
 .. testoutput:: ExCountsOffsetAndRebin
 
-   -0.0176193517359
 
 .. categories::
 

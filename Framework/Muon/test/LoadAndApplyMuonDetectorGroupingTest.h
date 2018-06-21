@@ -35,6 +35,7 @@ algorithmWithPropertiesSet(const std::string &inputWSName,
   alg->setProperty("InputWorkspace", inputWSName);
   alg->setProperty("Filename", filename);
   alg->setProperty("ApplyAsymmetryToGroups", true);
+  alg->setProperty("AddGroupingTable", false);
   alg->setLogging(false);
   return alg;
 }
@@ -114,6 +115,7 @@ public:
     setUpADSWithWorkspace setup(ws);
     auto file = MuonWorkspaceCreationHelper::createXMLwithPairsAndGroups(2, 5);
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
+	alg->setProperty("AddGroupingTable", true);
     alg->execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("EMU00012345"));
@@ -248,6 +250,7 @@ public:
     auto file = MuonWorkspaceCreationHelper::createXMLwithPairsAndGroups(2, 2);
 
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
+	alg->setProperty("AddGroupingTable", true);
     alg->execute();
 
     ITableWorkspace_sptr wsGroupings =
