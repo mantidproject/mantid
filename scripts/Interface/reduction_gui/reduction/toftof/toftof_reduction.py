@@ -231,7 +231,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             else:
                 # no temperatures in xml file, so generate empty OptionalFloats:
                 dataTemps = (OptionalFloat() for _ in repeat(''))
-                
+
             for dataRun in zip(dataRuns, dataCmts, dataTemps):
                 self.dataRuns.append(list(dataRun))
 
