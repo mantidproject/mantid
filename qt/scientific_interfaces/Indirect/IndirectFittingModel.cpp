@@ -12,6 +12,7 @@
 #include <set>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/optional.hpp>
 
 using namespace Mantid::API;
 

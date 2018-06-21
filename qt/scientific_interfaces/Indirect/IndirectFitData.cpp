@@ -165,7 +165,7 @@ tryPassFormatArgument(boost::basic_format<char> &formatString,
 std::pair<double, double> getBinRange(MatrixWorkspace_sptr workspace) {
   return std::make_pair(workspace->x(0).front(), workspace->x(0).back());
 }
-}; // namespace
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -179,7 +179,8 @@ std::string
 IndirectFitData::displayName(const std::string &formatString,
                              const std::string &rangeDelimiter) const {
   const auto workspaceName = cutLastOf(workspace()->getName(), "_red");
-  const auto spectraString = boost::apply_visitor(SpectraToString(), m_spectra);
+  const auto spectraString =
+      boost::apply_visitor(SpectraToString(rangeDelimiter), m_spectra);
 
   auto formatted = boost::format(formatString);
   formatted = tryPassFormatArgument(formatted, workspaceName);
