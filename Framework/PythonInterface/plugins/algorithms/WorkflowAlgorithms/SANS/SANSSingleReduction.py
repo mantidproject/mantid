@@ -132,6 +132,12 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceUnfittedTransmission', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The unfitted transmission workspace')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceCalculatedTransmissionCan', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                             doc='The calculated transmission workspace for the can')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceUnfittedTransmissionCan', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                             doc='The unfitted transmission workspace for the can')
         self.setPropertyGroup("OutputWorkspaceLABCan", 'Can Output')
         self.setPropertyGroup("OutputWorkspaceLABCanCount", 'Can Output')
         self.setPropertyGroup("OutputWorkspaceLABCanNorm", 'Can Output')
@@ -389,11 +395,18 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
 
     def set_transmission_workspaces_on_output(self, transmission_bundles):
         for transmission_bundle in transmission_bundles:
+
             calculated_transmission_workspace = transmission_bundle.calculated_transmission_workspace
             unfitted_transmission_workspace = transmission_bundle.unfitted_transmission_workspace
-
-            self.setProperty("OutputWorkspaceCalculatedTransmission", calculated_transmission_workspace)
-            self.setProperty("OutputWorkspaceUnfittedTransmission", unfitted_transmission_workspace)
+            if transmission_bundle.data_type is DataType.Can:
+                self.setProperty("OutputWorkspaceCalculatedTransmissionCan", calculated_transmission_workspace)
+                self.setProperty("OutputWorkspaceUnfittedTransmissionCan", unfitted_transmission_workspace)
+            elif transmission_bundle.data_type is DataType.Sample:
+                self.setProperty("OutputWorkspaceCalculatedTransmission", calculated_transmission_workspace)
+                self.setProperty("OutputWorkspaceUnfittedTransmission", unfitted_transmission_workspace)
+            else:
+                raise RuntimeError("SANSSingleReduction: The data type {0} should be"
+                                   " sample or can.".format(transmission_bundle.data_type))
 
     def _get_progress(self, number_of_reductions, overall_reduction_mode):
         number_from_merge = 1 if overall_reduction_mode is ReductionMode.Merged else 0

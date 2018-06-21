@@ -13,7 +13,7 @@ from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, LOQ, LARM
                                    REDUCED_CAN_TAG)
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
 from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode,
-                               SANSInstrument, SANSFacility, DataType)
+                               SANSInstrument, SANSFacility, DataType, TransmissionType)
 # -------------------------------------------
 # Constants
 # -------------------------------------------
@@ -912,6 +912,10 @@ def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
         state_string += "counts"
     elif partial_type is OutputParts.Norm:
         state_string += "norm"
+    elif partial_type is TransmissionType.Calculated:
+        state_string += "calculated_transmission"
+    elif partial_type is TransmissionType.Unfitted:
+        state_string += "unfitted_transmission"
     return str(get_hash_value(state_string))
 
 
@@ -941,6 +945,14 @@ def get_reduced_can_workspace_from_ads(state, output_parts, reduction_mode):
         hashed_state_norm = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.Norm)
         reduced_can_norm = get_workspace_from_ads_based_on_hash(hashed_state_norm)
     return reduced_can, reduced_can_count, reduced_can_norm
+
+
+def get_transmission_workspaces_from_ads(state, reduction_mode):
+    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.Calculated)
+    calculated_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
+    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.Unfitted)
+    unfitted_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
+    return calculated_transmission, unfitted_transmission
 
 
 def write_hash_into_reduced_can_workspace(state, workspace, reduction_mode, partial_type=None):

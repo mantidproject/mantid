@@ -55,7 +55,6 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     # sliced times for example.
     # ------------------------------------------------------------------------------------------------------------------
     reduction_packages = get_reduction_packages(state, workspaces, monitors)
-
     # ------------------------------------------------------------------------------------------------------------------
     # Run reductions (one at a time)
     # ------------------------------------------------------------------------------------------------------------------
@@ -97,6 +96,10 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
                                                                                  "OutputWorkspaceCalculatedTransmission")
         reduction_package.unfitted_transmission = get_workspace_from_algorithm(reduction_alg,
                                                                                "OutputWorkspaceUnfittedTransmission")
+        reduction_package.calculated_transmission_can = get_workspace_from_algorithm(reduction_alg,
+                                                                                 "OutputWorkspaceCalculatedTransmissionCan")
+        reduction_package.unfitted_transmission_can = get_workspace_from_algorithm(reduction_alg,
+                                                                               "OutputWorkspaceUnfittedTransmissionCan")
         if plot_results and mantidplot:
             plot_workspace(reduction_package, output_graph)
         # -----------------------------------
@@ -754,6 +757,13 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
         _set_output_name(reduction_alg, reduction_package, is_group, reduction_mode,
                          "OutputWorkspaceUnfittedTransmission", "unfitted_transmission_name",
                          "unfitted_transmission_base_name",multi_reduction_type, transmission=True, _suffix="_unfitted")
+        _set_output_name(reduction_alg, reduction_package, is_group, reduction_mode,
+                         "OutputWorkspaceCalculatedTransmissionCan", "calculated_transmission_can_name",
+                         "calculated_transmission_can_base_name", multi_reduction_type, transmission=True, _suffix="_can")
+        _set_output_name(reduction_alg, reduction_package, is_group, reduction_mode,
+                         "OutputWorkspaceUnfittedTransmissionCan", "unfitted_transmission_can_name",
+                         "unfitted_transmission_can_base_name", multi_reduction_type, transmission=True,
+                         _suffix="_unfitted_can")
 
 
 def get_workspace_from_algorithm(alg, output_property_name):
