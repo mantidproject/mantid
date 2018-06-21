@@ -630,11 +630,11 @@ public:
       TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
     }
 
-    TS_ASSERT(wsGroup->getItem("inputGroup; Group; test2; Counts; #1"));
-    TS_ASSERT(wsGroup->getItem("inputGroup; Group; test2; Counts; #1_Raw"));
+	TS_ASSERT(wsGroup->getItem("inputGroup; Group; test2; Counts; 1+2; #1"));
+	TS_ASSERT(wsGroup->getItem("inputGroup; Group; test2; Counts; 1+2; #1_Raw"));
 
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("inputGroup; Group; test2; Counts; #1_Raw"));
+	auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+		wsGroup->getItem("inputGroup; Group; test2; Counts; 1+2; #1_Raw"));
 
     // Check values against calculation by hand.
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
@@ -694,11 +694,11 @@ public:
       TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
     }
 
-    TS_ASSERT(wsGroup->getItem("inputGroup; Group; test2; Counts; #1"));
-    TS_ASSERT(wsGroup->getItem("inputGroup; Group; test2; Counts; #1_Raw"));
+	TS_ASSERT(wsGroup->getItem("inputGroup; Group; test2; Counts; 2+3-1; #1"));
+	TS_ASSERT(wsGroup->getItem("inputGroup; Group; test2; Counts; 2+3-1; #1_Raw"));
 
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("inputGroup; Group; test2; Counts; #1_Raw"));
+	auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+		wsGroup->getItem("inputGroup; Group; test2; Counts; 2+3-1; #1_Raw"));
 
     // Check values against calculation by hand.
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);

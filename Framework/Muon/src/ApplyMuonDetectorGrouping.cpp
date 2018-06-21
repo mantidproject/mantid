@@ -77,9 +77,10 @@ void ApplyMuonDetectorGrouping::init() {
           PropertyMode::Mandatory),
       "The workspace group to which the output will be added.");
 
-  declareProperty("GroupName", emptyString, "The name of the group. Must "
-                                            "contain at least one alphanumeric "
-                                            "character.",
+  declareProperty("GroupName", emptyString,
+                  "The name of the group. Must "
+                  "contain at least one alphanumeric "
+                  "character.",
                   Direction::Input);
   declareProperty("Grouping", std::to_string(1),
                   "The grouping of detectors, comma separated list of detector "
@@ -235,6 +236,8 @@ const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName(
   params.itemType = Muon::ItemType::Group;
   params.itemName = options.groupPairName;
   params.plotType = options.plotType;
+  params.periods = generatePeriodAlgebraString(options.summedPeriods,
+                                               options.subtractedPeriods);
   params.version = 1;
   const std::string wsName = generateWorkspaceName(params);
   return wsName;
