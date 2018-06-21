@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_JUMPFITDATATABLEPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_JUMPFITDATATABLEPRESENTER_H_
 
-#include "JumpFitModel.h"
 #include "IndirectDataTablePresenter.h"
+#include "JumpFitModel.h"
 
 #include <QTableWidget>
 
@@ -37,10 +37,10 @@ public:
   JumpFitDataTablePresenter(JumpFitModel *model, QTableWidget *dataTable);
 
 protected:
-  virtual void addTableEntry(std::size_t dataIndex, std::size_t spectrum,
-                             int row);
-  virtual void updateTableEntry(std::size_t dataIndex, std::size_t spectrum,
-                                int row);
+  void addTableEntry(std::size_t dataIndex, std::size_t spectrum,
+                     int row) override;
+  void updateTableEntry(std::size_t dataIndex, std::size_t spectrum,
+                        int row) override;
 
 private:
   int workspaceIndexColumn() const override;

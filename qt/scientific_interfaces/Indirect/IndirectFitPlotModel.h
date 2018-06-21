@@ -54,10 +54,9 @@ public:
 
 private:
   Mantid::API::MatrixWorkspace_sptr
-  IndirectFitPlotModel::createInputAndGuessWorkspace(
-      Mantid::API::MatrixWorkspace_sptr inputWS,
-      Mantid::API::MatrixWorkspace_sptr guessWorkspace, int spectrum,
-      double startX, double endX) const;
+  createInputAndGuessWorkspace(Mantid::API::MatrixWorkspace_sptr inputWS,
+                               Mantid::API::MatrixWorkspace_sptr guessWorkspace,
+                               int spectrum, double startX, double endX) const;
 
   Mantid::API::MatrixWorkspace_sptr
   createGuessWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace,
