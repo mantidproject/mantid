@@ -230,34 +230,11 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             ys = outWS.readY(i)
             numpy.testing.assert_equal(ys, 1.0)
 
-    def testWavelengthRange(self):
-        inWSName = 'ReflectometryILLPreprocess_test_ws'
-        self.create_sample_workspace(inWSName)
-        # Check range begin only.
-        args = {
-            'InputWorkspace': inWSName,
-            'OutputWorkspace': 'unused_for_child',
-            'BeamCentre': 50,
-            'WavelengthRange': [2.0, 4.0],
-            'ForegroundHalfWidth': 1,
-            'FluxNormalisation': 'Normalisation OFF',
-            'FlatBackground': 'Background OFF',
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLPreprocess', **args)
-        assertRaisesNothing(self, alg.execute)
-        outWS = alg.getProperty('OutputWorkspace').value
-        self.assertEquals(outWS.getNumberHistograms(), 100)
-        Xs = outWS.extractX()
-        numpy.testing.assert_array_less(2.0, Xs[:, 0])
-        numpy.testing.assert_array_less(Xs[:, -1], 4.0)
-
     def testCleanupOFF(self):
         # test if intermediate workspaces exist:
         # not tested: position tables
         # normalise_to_slits, normalise_to_monitor, '_normalised_to_time_','transposed_flat_background'
-        workspace_name_suffix = ['_cloned_for_flat_bkg_', '_cropped_', '_detectors_', '_flat_background_',
+        workspace_name_suffix = ['_cloned_for_flat_bkg_', '_detectors_', '_flat_background_',
                                  '_flat_background_subtracted_', '_in_wavelength_',
                                  '_monitors_', '_transposed_clone_', '_water_calibrated_']
         outWSName = 'outWS'
@@ -277,7 +254,6 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             'BeamPositionWorkspace': 'peakTable',
             'OutputWorkspace': outWSName,
             'Cleanup': 'Cleanup OFF',
-            'WavelengthRange': [5., 10.],
             'WaterReference': waterName,
             'ForegroundHalfWidth': [1],
             'LowAngleBkgOffset': 5,

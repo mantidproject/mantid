@@ -3,18 +3,25 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayLengthValidator, FloatArrayProperty,
+from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayProperty,
                            IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, Property, StringListValidator)
-from mantid.simpleapi import (AddSampleLog, ConvertToDistribution, CreateWorkspace, CropWorkspace, Divide, ExtractSingleSpectrum,
+from mantid.simpleapi import (AddSampleLog, CreateWorkspace, CropWorkspace, Divide, ExtractSingleSpectrum,
                               Multiply, RebinToWorkspace, ReflectometrySumInQ)
 import numpy
 import ReflectometryILL_common as common
 from scipy import constants
 
 
+class Sample:
+    AUTO = 'Sample Flatness AUTO'  # To be used in the future.
+    BENT = 'Bent Sample'
+    FLAT = 'Flat Sample'
+
+
 class Prop:
     CLEANUP = 'Cleanup'
     DIRECT_FOREGROUND_WS = 'DirectForegroundWorkspace'
+    FLAT_SAMPLE = 'FlatSample'
     FOREGROUND_INDICES = 'Foreground'
     INPUT_WS = 'InputWorkspace'
     OUTPUT_WS = 'OutputWorkspace'
@@ -88,9 +95,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         threeNonnegativeInts.add(nonnegativeInts)
         nonnegativeFloatArray = FloatArrayBoundedValidator()
         nonnegativeFloatArray.setLower(0.)
-        twoNonnegativeFloats = CompositeValidator()
-        twoNonnegativeFloats.add(FloatArrayLengthValidator(length=2))
-        twoNonnegativeFloats.add(nonnegativeFloatArray)
 
         self.declareProperty(MatrixWorkspaceProperty(Prop.INPUT_WS,
                                                      defaultValue='',
@@ -113,6 +117,10 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                              defaultValue=SumType.IN_LAMBDA,
                              validator=StringListValidator([SumType.IN_LAMBDA, SumType.IN_Q]),
                              doc='Type of summation to perform.')
+        self.declareProperty(Prop.FLAT_SAMPLE,
+                             defaultValue=Sample.FLAT,
+                             validator=StringListValidator([Sample.FLAT, Sample.BENT]),
+                             doc='For SumInQ option, determines if the summation should be done for a flat or bent sample.')
         self.declareProperty(MatrixWorkspaceProperty(Prop.DIRECT_FOREGROUND_WS,
                                                      defaultValue='',
                                                      direction=Direction.Input,
@@ -124,8 +132,8 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                                               validator=threeNonnegativeInts),
                              doc='A three element array of foreground start, centre and end workspace indices.')
         self.declareProperty(FloatArrayProperty(Prop.WAVELENGTH_RANGE,
-                                                values=[0, Property.EMPTY_DBL],
-                                                validator=twoNonnegativeFloats),
+                                                values=[0.],
+                                                validator=nonnegativeFloatArray),
                              doc='The wavelength bounds when summing in Q.')
 
     def validateInputs(self):
@@ -158,9 +166,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         """Cut wavelengths outside the wavelength range from a TOF workspace."""
         if self.getProperty(Prop.WAVELENGTH_RANGE).isDefault:
             return ws
-        if self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
-            self.log().warning('Output is not cropped to given WavelengthRange when summing the direct beam.')
-            return ws
         wRange = self.getProperty(Prop.WAVELENGTH_RANGE).value
         rangeProp = {'XMin': wRange[0]}
         if len(wRange) == 2:
@@ -175,9 +180,9 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
 
     def _checkIfFlatSample(self):
         """Returns true if sample is deemed 'flat' for SumInQ."""
-        # TODO: add real calculations here from COSMOS
-        # Now we always return False because this is what is in a reference dataset.
-        return False
+        flatness = self.getProperty(Prop.FLAT_SAMPLE).value
+        # The 'Sample Flatness AUTO' option should calculate the answer here someday.
+        return flatness == Sample.FLAT
 
     def _correctForChopperOpenings(self, ws, directWS):
         """Correct reflectivity values if chopper openings between RB and DB differ."""

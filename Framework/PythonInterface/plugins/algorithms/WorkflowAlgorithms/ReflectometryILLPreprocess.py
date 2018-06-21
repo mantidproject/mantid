@@ -4,9 +4,9 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, ITableWorkspaceProperty,
                         MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, DeltaEModeType, Direction, FloatArrayBoundedValidator, FloatArrayLengthValidator,
-                           FloatArrayProperty, IntArrayLengthValidator, IntArrayBoundedValidator, IntArrayProperty,
-                           IntBoundedValidator, Property, StringListValidator, UnitConversion)
+from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayLengthValidator,
+                           IntArrayLengthValidator, IntArrayBoundedValidator, IntArrayProperty,
+                           IntBoundedValidator, Property, StringListValidator)
 from mantid.simpleapi import (AddSampleLog, CalculatePolynomialBackground, CloneWorkspace, ConvertUnits,
                               CreateEmptyTableWorkspace, Divide, ExtractMonitors, Fit,
                               Integration, LoadILLReflectometry, MergeRuns, Minus, mtd, NormaliseToMonitor,

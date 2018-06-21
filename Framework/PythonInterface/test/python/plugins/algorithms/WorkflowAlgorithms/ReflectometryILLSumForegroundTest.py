@@ -56,7 +56,6 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)
 
-
     def testReflectedBeamSumInQExecutes(self):
         dirWS = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.add_chopper_configuration_D17(dirWS)
@@ -86,6 +85,30 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)
+
+    def testWavelengthRange(self):
+        ws = illhelpers.create_poor_mans_d17_workspace()
+        illhelpers.refl_rotate_detector(ws, 1.2)
+        beamPosWS = illhelpers.refl_create_beam_position_ws('beamPosWS', ws, 1.2, 128)
+        ws = illhelpers.refl_preprocess('ws', ws, beamPosWS)
+        xMin = 2.3
+        xMax = 4.2
+        args = {
+            'InputWorkspace': ws,
+            'OutputWorkspace': 'foreground',
+            'WavelengthRange': [xMin, xMax],
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLSumForeground', **args)
+        assertRaisesNothing(self, alg.execute)
+        ws = alg.getProperty('OutputWorkspace').value
+        self.assertEquals(ws.getNumberHistograms(), 1)
+        Xs = ws.readX(0)
+        self.assertGreater(len(Xs), 1)
+        self.assertGreater(Xs[0], xMin)
+        self.assertLess(Xs[-1], xMax)
+
 
 if __name__ == "__main__":
     unittest.main()
