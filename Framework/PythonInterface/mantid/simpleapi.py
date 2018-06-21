@@ -936,7 +936,7 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
                     value_str = prop.valueAsStr
                     retvals[name] = _api.AnalysisDataService[value_str]
                 except KeyError:
-                    if not prop.isOptional() and prop.direction == _kernel.Direction.InOut:
+                    if not (hasattr(prop, 'isOptional') and prop.isOptional()) and prop.direction == _kernel.Direction.InOut:
                         raise RuntimeError("Mandatory InOut workspace property '%s' on "
                                            "algorithm '%s' has not been set correctly. " % (name,  algm_obj.name()))
         elif _is_function_property(prop):
