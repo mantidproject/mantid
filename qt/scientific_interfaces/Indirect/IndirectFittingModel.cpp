@@ -12,7 +12,6 @@
 #include <set>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/optional.hpp>
 
 using namespace Mantid::API;
 
@@ -343,12 +342,12 @@ bool IndirectFittingModel::hasZeroSpectra(std::size_t dataIndex) const {
 
 boost::optional<std::string> IndirectFittingModel::isInvalidFunction() const {
   if (!m_activeFunction)
-    return "No fit function has been defined";
+    return std::string("No fit function has been defined");
 
   const auto composite =
       boost::dynamic_pointer_cast<CompositeFunction>(m_activeFunction);
   if (composite && (composite->nFunctions() == 0 || composite->nParams() == 0))
-    return "No fitting functions have been defined.";
+    return std::string("No fitting functions have been defined.");
   return boost::none;
 }
 
