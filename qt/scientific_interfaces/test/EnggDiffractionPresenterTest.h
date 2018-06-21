@@ -1,6 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONPRESENTERTEST_H
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONPRESENTERTEST_H
 
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "../EnggDiffraction/EnggDiffractionPresenter.h"
 
@@ -32,8 +33,7 @@ private:
     calibrationFinished();
   }
 
-  void startAsyncFocusWorker(const std::string &dir,
-                             const std::vector<std::string> &multi_RunNo,
+  void startAsyncFocusWorker(const std::vector<std::string> &multi_RunNo,
                              const std::vector<bool> &banks,
                              const std::string &specNos,
                              const std::string &dgFile) override {
@@ -41,7 +41,7 @@ private:
 
     std::string runNo = multi_RunNo[0];
 
-    doFocusRun(dir, runNo, banks, specNos, dgFile);
+    doFocusRun(runNo, banks, specNos, dgFile);
 
     focusingFinished();
   }
@@ -169,8 +169,8 @@ public:
     // be called and the instrument name will be updated
     const std::string instrumentName = "ENGINX";
     EXPECT_CALL(mockView, currentInstrument())
-        .Times(1)
-        .WillOnce(Return(instrumentName));
+        .Times(2)
+        .WillRepeatedly(Return(instrumentName));
 
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -225,6 +225,32 @@ public:
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
         "satisfied.",
         testing::Mock::VerifyAndClearExpectations(&mockView))
+  }
+
+  void test_calcCalibFailsWhenNoCalibDirectory() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    EnggDiffCalibSettings calibSettings;
+    calibSettings.m_inputDirCalib = "";
+    calibSettings.m_pixelCalibFilename = "/some/file.csv";
+    calibSettings.m_templateGSAS_PRM = "/some/other/file.prm";
+
+    const std::string testFilename("ENGINX00241391.nxs");
+    const auto testFilePath =
+        Mantid::API::FileFinder::Instance().getFullPath(testFilename);
+
+    ON_CALL(mockView, newVanadiumNo())
+        .WillByDefault(Return(std::vector<std::string>({testFilePath})));
+    ON_CALL(mockView, newCeriaNo())
+        .WillByDefault(Return(std::vector<std::string>({testFilePath})));
+    ON_CALL(mockView, currentCalibSettings())
+        .WillByDefault(Return(calibSettings));
+
+    EXPECT_CALL(mockView,
+                userWarning("No calibration directory selected", testing::_));
+
+    pres.notify(IEnggDiffractionPresenter::CalcCalib);
   }
 
   // this can start the calibration thread, so watch out
@@ -1370,7 +1396,7 @@ public:
     // we are calling it twice, once on presenter initialisation
     // and a second time after when using pres.notify!
     EXPECT_CALL(mockView, currentInstrument())
-        .Times(2)
+        .Times(3)
         .WillRepeatedly(Return(instrumentName));
 
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);

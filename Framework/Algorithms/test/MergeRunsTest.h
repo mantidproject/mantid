@@ -3,28 +3,29 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include <stdarg.h>
 
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/MergeRuns.h"
 #include "MantidAlgorithms/Rebin.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
+#include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTypes/SpectrumDefinition.h"
+#include <stdarg.h>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
-#include <MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h>
-#include <MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h>
-#include "MantidTypes/SpectrumDefinition.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::Types::Core::DateAndTime;
@@ -1725,6 +1726,119 @@ public:
     TS_ASSERT_EQUALS(outputWS->histogram(1).y()[0], 1)
     TS_ASSERT_EQUALS(outputWS->histogram(2).y()[0], 1)
     TS_ASSERT_EQUALS(outputWS->histogram(3).y()[0], 1)
+  }
+
+  void test_merging_not_sorted_by_X() {
+    // This test checks that issue #22402 has been and remains fixed.
+    const BinEdges edges1{{0., 1., 2.}};
+    const Counts counts(edges1.size() - 1, 0.);
+    const Histogram h1{edges1, counts};
+    MatrixWorkspace_sptr ws1 = create<Workspace2D>(1, h1);
+    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
+    ws1->mutableRun().addProperty("workspace_number", 1., true);
+    const BinEdges edges2{{1., 2., 3.}};
+    const Histogram h2{edges2, counts};
+    MatrixWorkspace_sptr ws2 = create<Workspace2D>(1, h2);
+    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
+    ws2->mutableRun().addProperty("workspace_number", 2., true);
+    MergeRuns alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspaces", "ws2, ws1"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("OutputWorkspace", "test_merging_not_sorted_by_X"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    MatrixWorkspace_sptr outWS;
+    TS_ASSERT_THROWS_NOTHING(
+        outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "test_merging_not_sorted_by_X"));
+    TS_ASSERT_EQUALS(
+        outWS->run().getPropertyValueAsType<double>("workspace_number"), 2.)
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_output_independent_from_order_of_inputs() {
+    constexpr size_t nWS{5};
+    std::array<MatrixWorkspace_sptr, nWS> workspaces;
+    const BinEdges edges{{0., 1., 2.}};
+    const Counts counts(edges.size() - 1, 1.);
+    workspaces[0] = create<Workspace2D>(1, Histogram{edges, counts});
+    AnalysisDataService::Instance().addOrReplace("ws1", workspaces[0]);
+    workspaces[1] =
+        create<Workspace2D>(1, Histogram{edges - 1e-5, 1.01 * counts});
+    AnalysisDataService::Instance().addOrReplace("ws2", workspaces[1]);
+    workspaces[2] =
+        create<Workspace2D>(1, Histogram{edges + 1e-5, 0.99 * counts});
+    AnalysisDataService::Instance().addOrReplace("ws3", workspaces[2]);
+    workspaces[3] =
+        create<Workspace2D>(1, Histogram{edges + 2e-5, 1.02 * counts});
+    AnalysisDataService::Instance().addOrReplace("ws4", workspaces[3]);
+    workspaces[4] =
+        create<Workspace2D>(1, Histogram{edges - 2e-5, 0.98 * counts});
+    AnalysisDataService::Instance().addOrReplace("ws5", workspaces[4]);
+    std::array<size_t, nWS> indices{{0, 1, 2, 3, 4}};
+    MatrixWorkspace_sptr firstWS;
+    do {
+      std::string inputWS;
+      std::string separator;
+      for (const auto i : indices) {
+        inputWS += separator + workspaces[i]->getName();
+        separator = ',';
+      }
+      MergeRuns alg;
+      alg.setRethrows(true);
+      alg.initialize();
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaces", inputWS))
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+          "OutputWorkspace", "test_output_independent_from_order_of_inputs"))
+      TS_ASSERT_THROWS_NOTHING(alg.execute())
+      MatrixWorkspace_sptr outWS;
+      TS_ASSERT_THROWS_NOTHING(
+          outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              "test_output_independent_from_order_of_inputs"));
+      TS_ASSERT(outWS);
+      if (firstWS) {
+        TS_ASSERT_DELTA(outWS->y(0)[0], firstWS->y(0)[0], 1e-14)
+        TS_ASSERT_DELTA(outWS->y(0)[1], firstWS->y(0)[1], 1e-14)
+      } else {
+        firstWS = outWS;
+      }
+    } while (std::next_permutation(indices.begin(), indices.end()));
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_rebinning_is_done_for_sorted_X() {
+    const BinEdges edges{{0., 1., 2.}};
+    const Counts counts(edges.size() - 1, 1.);
+    MatrixWorkspace_sptr ws1 = create<Workspace2D>(1, Histogram{edges, counts});
+    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
+    MatrixWorkspace_sptr ws2 =
+        create<Workspace2D>(1, Histogram{edges + 10., counts});
+    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
+    MatrixWorkspace_sptr ws3 =
+        create<Workspace2D>(1, Histogram{edges + 5., counts});
+    AnalysisDataService::Instance().addOrReplace("ws3", ws3);
+    MergeRuns alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspaces", "ws1,ws2,ws3"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "OutputWorkspace", "test_rebinning_is_done_for_sorted_X"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    MatrixWorkspace_sptr outWS;
+    TS_ASSERT_THROWS_NOTHING(
+        outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "test_rebinning_is_done_for_sorted_X"));
+    TS_ASSERT(outWS);
+    const auto &X = outWS->x(0);
+    TS_ASSERT_EQUALS(X.size(), 9)
+    const std::array<double, 9> expectedX{{0, 1, 2, 5, 6, 7, 10, 11, 12}};
+    for (size_t i = 0; i < X.size(); ++i) {
+      TS_ASSERT_EQUALS(X[i], expectedX[i])
+    }
+    AnalysisDataService::Instance().clear();
   }
 };
 

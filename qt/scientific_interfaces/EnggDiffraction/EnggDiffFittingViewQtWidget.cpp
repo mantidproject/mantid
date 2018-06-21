@@ -1,10 +1,10 @@
 #include "EnggDiffFittingViewQtWidget.h"
+#include "EnggDiffFittingModel.h"
+#include "EnggDiffFittingPresenter.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "EnggDiffFittingModel.h"
-#include "EnggDiffFittingPresenter.h"
 #include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
 
 #include <array>
@@ -47,8 +47,10 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
     boost::shared_ptr<IEnggDiffractionSettings> mainSettings,
     boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
     boost::shared_ptr<IEnggDiffractionParam> mainParam,
-    boost::shared_ptr<IEnggDiffractionPythonRunner> mainPythonRunner)
-    : IEnggDiffFittingView(), m_fittedDataVector(), m_mainMsgProvider(mainMsg),
+    boost::shared_ptr<IEnggDiffractionPythonRunner> mainPythonRunner,
+    boost::shared_ptr<IEnggDiffractionParam> fileSettings)
+    : IEnggDiffFittingView(), m_fittedDataVector(),
+      m_fileSettings(fileSettings), m_mainMsgProvider(mainMsg),
       m_mainSettings(mainSettings), m_mainPythonRunner(mainPythonRunner),
       m_presenter(boost::make_shared<EnggDiffFittingPresenter>(
           this, Mantid::Kernel::make_unique<EnggDiffFittingModel>(), mainCalib,
@@ -204,10 +206,6 @@ void EnggDiffFittingViewQtWidget::enableCalibrateFocusFitUserActions(
 EnggDiffCalibSettings
 EnggDiffFittingViewQtWidget::currentCalibSettings() const {
   return m_mainSettings->currentCalibSettings();
-}
-
-std::string EnggDiffFittingViewQtWidget::focusingDir() const {
-  return m_mainSettings->focusingDir();
 }
 
 std::string
@@ -421,17 +419,13 @@ EnggDiffFittingViewQtWidget::getSaveFile(const std::string &prevPath) {
 }
 
 void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
-  QString prevPath = QString::fromStdString(focusingDir());
-  if (prevPath.isEmpty()) {
-    prevPath =
-        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  }
+  const auto &focusDir = m_fileSettings->outFilesUserDir("Focus").toString();
   std::string nexusFormat = "Nexus file with calibration table: NXS, NEXUS"
                             "(*.nxs *.nexus);;";
 
-  QStringList paths(
-      QFileDialog::getOpenFileNames(this, tr("Open Focused File "), prevPath,
-                                    QString::fromStdString(nexusFormat)));
+  QStringList paths(QFileDialog::getOpenFileNames(
+      this, tr("Open Focused File "), QString::fromStdString(focusDir),
+      QString::fromStdString(nexusFormat)));
 
   if (paths.isEmpty()) {
     return;

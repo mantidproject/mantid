@@ -40,7 +40,7 @@ class QtReflEventView : public QWidget, public IReflEventView {
   Q_OBJECT
 public:
   /// Constructor
-  explicit QtReflEventView(QWidget *parent = nullptr);
+  explicit QtReflEventView(int group, QWidget *parent = nullptr);
   /// Destructor
   ~QtReflEventView() override;
   /// Returns the presenter managing this view
@@ -68,11 +68,16 @@ public slots:
   void toggleUniformEven(bool isChecked);
   void toggleCustom(bool isChecked);
   void toggleLogValue(bool isChecked);
+  void notifySettingsChanged();
 
 private:
   /// Initialise the interface
   void initLayout();
   std::string textFrom(QLineEdit const *const widget) const;
+  void registerEventWidgets();
+  void connectSettingsChange(QLineEdit &edit);
+  void connectSettingsChange(QGroupBox &edit);
+
   QWidgetGroup<2> m_uniformGroup;
   QWidgetGroup<2> m_uniformEvenGroup;
   QWidgetGroup<4> m_logValueGroup;

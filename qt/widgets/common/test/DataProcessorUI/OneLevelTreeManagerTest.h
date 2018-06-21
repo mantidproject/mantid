@@ -202,6 +202,17 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
   }
 
+  void test_delete_all() {
+    NiceMock<MockDataProcessorPresenter> presenter;
+    OneLevelTreeManager manager(&presenter, reflWhitelist());
+
+    EXPECT_CALL(presenter, selectedParents()).Times(0);
+    EXPECT_CALL(presenter, selectedChildren()).Times(0);
+
+    TS_ASSERT_THROWS_NOTHING(manager.deleteAll());
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
+  }
+
   void test_expand_selection() {
     NiceMock<MockDataProcessorPresenter> presenter;
     OneLevelTreeManager manager(&presenter, reflWhitelist());

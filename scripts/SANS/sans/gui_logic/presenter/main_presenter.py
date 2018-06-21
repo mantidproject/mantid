@@ -78,7 +78,7 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
     # ------------------------------------------------------------------------------------------------------------------
     # Inherited methods
     # ------------------------------------------------------------------------------------------------------------------
-    def getProcessingOptions(self):
+    def getProcessingOptions(self, group = 0):
         """
         Gets the processing options from the run tab presenter
         """
@@ -87,12 +87,12 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
     # ------------------------------------------------------------------------------------------------------------------
     # Unused
     # ------------------------------------------------------------------------------------------------------------------
-    def getPreprocessingOptions(self):
+    def getPreprocessingOptions(self, group = 0):
         empty = {}
         return empty
 
-    def getPostprocessingOptionsAsString(self):
+    def getPostprocessingOptionsAsString(self, group = 0):
         return ""
 
-    def notifyADSChanged(self, workspace_list):
+    def notifyADSChanged(self, workspace_list, group = 0):
         self._view.add_actions_to_menus(workspace_list)

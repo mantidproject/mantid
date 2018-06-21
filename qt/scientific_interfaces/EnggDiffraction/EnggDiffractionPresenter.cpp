@@ -1,4 +1,7 @@
 #include "EnggDiffractionPresenter.h"
+#include "EnggDiffractionPresWorker.h"
+#include "EnggVanadiumCorrectionsModel.h"
+#include "IEnggDiffractionView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -7,8 +10,6 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
-#include "EnggDiffractionPresWorker.h"
-#include "IEnggDiffractionView.h"
 
 #include <algorithm>
 #include <cctype>
@@ -39,11 +40,6 @@ const std::string EnggDiffractionPresenter::g_runNumberErrorStr =
 // discouraged at the moment
 const bool EnggDiffractionPresenter::g_askUserCalibFilename = false;
 
-const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
-    "engggui_vanadium_integration_ws";
-const std::string EnggDiffractionPresenter::g_vanCurvesWSName =
-    "engggui_vanadium_curves_ws";
-
 const std::string EnggDiffractionPresenter::g_calibBanksParms =
     "engggui_calibration_banks_parameters";
 
@@ -57,7 +53,10 @@ std::string EnggDiffractionPresenter::g_sumOfFilesFocus = "";
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(nullptr), m_calibFinishedOK(false),
       m_focusFinishedOK(false), m_rebinningFinishedOK(false), m_view(view),
-      m_viewHasClosed(false) {
+      m_viewHasClosed(false),
+      m_vanadiumCorrectionsModel(
+          boost::make_shared<EnggVanadiumCorrectionsModel>(
+              m_view->currentCalibSettings(), m_view->currentInstrument())) {
   if (!m_view) {
     throw std::runtime_error(
         "Severe inconsistency found. Presenter created "
@@ -522,14 +521,12 @@ void EnggDiffractionPresenter::startFocusing(
   g_log.notice() << "EnggDiffraction GUI: starting new focusing" << optMsg
                  << ". This may take some seconds... \n";
 
-  const std::string focusDir = m_view->focusingDir();
-
   m_view->showStatus("Focusing...");
   m_view->enableCalibrateFocusFitUserActions(false);
   // GUI-blocking alternative:
-  // doFocusRun(focusDir, outFilenames, runNo, banks, specNos, dgFile)
+  // doFocusRun(outFilenames, runNo, banks, specNos, dgFile)
   // focusingFinished()
-  startAsyncFocusWorker(focusDir, multi_RunNo, banks, specNos, dgFile);
+  startAsyncFocusWorker(multi_RunNo, banks, specNos, dgFile);
 }
 
 void EnggDiffractionPresenter::processResetFocus() { m_view->resetFocus(); }
@@ -780,13 +777,13 @@ void EnggDiffractionPresenter::inputChecksBeforeCalibrate(
     throw std::invalid_argument("The Ceria number" + g_runNumberErrorStr);
   }
 
-  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
-  const std::string pixelCalib = cs.m_pixelCalibFilename;
+  const auto &cs = m_view->currentCalibSettings();
+  const auto &pixelCalib = cs.m_pixelCalibFilename;
   if (pixelCalib.empty()) {
     throw std::invalid_argument(
         "You need to set a pixel (full) calibration in settings.");
   }
-  const std::string templGSAS = cs.m_templateGSAS_PRM;
+  const auto &templGSAS = cs.m_templateGSAS_PRM;
   if (templGSAS.empty()) {
     throw std::invalid_argument(
         "You need to set a template calibration file for GSAS in settings.");
@@ -1059,20 +1056,28 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                        const std::string &ceriaNo,
                                        const std::string &outFilename,
                                        const std::string &specNos) {
-  ITableWorkspace_sptr vanIntegWS;
-  MatrixWorkspace_sptr vanCurvesWS;
-  MatrixWorkspace_sptr ceriaWS;
+  if (cs.m_inputDirCalib.empty()) {
+    m_view->userWarning("No calibration directory selected",
+                        "Please select a calibration directory in Settings. "
+                        "This will be used to cache Vanadium calibration data");
+    return;
+  }
 
   // Append current instrument name if numerical only entry
   // to help Load algorithm determine instrument
   std::string vanFileHint, cerFileHint;
   appendCalibInstPrefix(vanNo, ceriaNo, vanFileHint, cerFileHint);
 
-  // save vanIntegWS and vanCurvesWS as open genie
-  // see where spec number comes from
-  loadOrCalcVanadiumWorkspaces(vanFileHint, cs.m_inputDirCalib, vanIntegWS,
-                               vanCurvesWS, cs.m_forceRecalcOverwrite, specNos);
+  // TODO: the settings tab should emit a signal when these are changed, on
+  // which the vanadium corrections model should be updated automatically
+  m_vanadiumCorrectionsModel->setCalibSettings(cs);
+  m_vanadiumCorrectionsModel->setCurrentInstrument(m_view->currentInstrument());
+  const auto vanadiumCorrectionWorkspaces =
+      m_vanadiumCorrectionsModel->fetchCorrectionWorkspaces(vanNo);
+  const auto &vanIntegWS = vanadiumCorrectionWorkspaces.first;
+  const auto &vanCurvesWS = vanadiumCorrectionWorkspaces.second;
 
+  MatrixWorkspace_sptr ceriaWS;
   try {
     auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
     load->initialize();
@@ -1457,21 +1462,19 @@ std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
 * the Qt event loop. For that reason this class needs to be a
 * Q_OBJECT.
 *
-* @param dir directory (full path) for the focused output files
 * @param multi_RunNo input vector of run number
 * @param banks instrument bank to focus
 * @param specNos list of spectra (as usual csv list of spectra in Mantid)
 * @param dgFile detector grouping file name
 */
 void EnggDiffractionPresenter::startAsyncFocusWorker(
-    const std::string &dir, const std::vector<std::string> &multi_RunNo,
-    const std::vector<bool> &banks, const std::string &dgFile,
-    const std::string &specNos) {
+    const std::vector<std::string> &multi_RunNo, const std::vector<bool> &banks,
+    const std::string &dgFile, const std::string &specNos) {
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffWorker *worker =
-      new EnggDiffWorker(this, dir, multi_RunNo, banks, dgFile, specNos);
+      new EnggDiffWorker(this, multi_RunNo, banks, dgFile, specNos);
   worker->moveToThread(m_workerThread);
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(focus()));
   connect(worker, SIGNAL(finished()), this, SLOT(focusingFinished()));
@@ -1487,7 +1490,6 @@ void EnggDiffractionPresenter::startAsyncFocusWorker(
 * should use to run the calculations required to process a 'focus'
 * push or similar from the user.
 *
-* @param dir directory (full path) for the output focused files
 * @param runNo input run number
 *
 * @param specNos list of spectra to use when focusing. Not empty
@@ -1499,8 +1501,7 @@ void EnggDiffractionPresenter::startAsyncFocusWorker(
 * @param banks for every bank, (true/false) to consider it or not for
 * the focusing
 */
-void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
-                                          const std::string &runNo,
+void EnggDiffractionPresenter::doFocusRun(const std::string &runNo,
                                           const std::vector<bool> &banks,
                                           const std::string &specNos,
                                           const std::string &dgFile) {
@@ -1512,8 +1513,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
   // to track last valid run
   g_lastValidRun = runNo;
 
-  g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
-                    "this directory: " << dir << '\n';
+  g_log.notice() << "Generating new focusing workspace(s) and file(s)";
 
   // TODO: this is almost 100% common with doNewCalibrate() - refactor
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
@@ -1568,17 +1568,14 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
 
   // focus all requested banks
   for (size_t idx = 0; idx < bankIDs.size(); idx++) {
-
-    Poco::Path fpath(dir);
-    const std::string fullFilename =
-        fpath.append(effectiveFilenames[idx]).toString();
     g_log.notice() << "Generating new focused file (bank " +
                           boost::lexical_cast<std::string>(bankIDs[idx]) +
                           ") for run " + runNo +
                           " into: " << effectiveFilenames[idx] << '\n';
     try {
       m_focusFinishedOK = false;
-      doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
+      doFocusing(cs, RunLabel(std::stoi(runNo), bankIDs[idx]), specs[idx],
+                 dgFile);
       m_focusFinishedOK = true;
     } catch (std::runtime_error &rexc) {
       g_log.error() << "The focusing calculations failed. One of the algorithms"
@@ -1701,11 +1698,7 @@ void EnggDiffractionPresenter::focusingFinished() {
 * @param cs user settings for calibration (this does not calibrate but
 * uses calibration input files such as vanadium runs
 *
-* @param fullFilename full path for the output (focused) filename
-*
-* @param runNo input run to focus
-*
-* @param bank instrument bank number to focus
+* @param runLabel run number and bank ID of the run to focus
 *
 * @param specNos string specifying a list of spectra (for "cropped"
 * focusing or "texture" focusing), only considered if not empty
@@ -1714,24 +1707,18 @@ void EnggDiffractionPresenter::focusingFinished() {
 * texture focusing
 */
 void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
-                                          const std::string &fullFilename,
-                                          const std::string &runNo, size_t bank,
+                                          const RunLabel &runLabel,
                                           const std::string &specNos,
                                           const std::string &dgFile) {
-  ITableWorkspace_sptr vanIntegWS;
-  MatrixWorkspace_sptr vanCurvesWS;
   MatrixWorkspace_sptr inWS;
 
-  const std::string vanNo = m_view->currentVanadiumNo();
-
-  // Append instrument name if numerical only entry to help load
-  std::string vanFileHint;
-  // We dont need cerium file name so just pass vanadium number twice and
-  // ignore return
-  appendCalibInstPrefix(vanNo, vanFileHint);
-
-  loadOrCalcVanadiumWorkspaces(vanFileHint, cs.m_inputDirCalib, vanIntegWS,
-                               vanCurvesWS, cs.m_forceRecalcOverwrite, "");
+  m_vanadiumCorrectionsModel->setCalibSettings(cs);
+  m_vanadiumCorrectionsModel->setCurrentInstrument(m_view->currentInstrument());
+  const auto vanadiumCorrectionWorkspaces =
+      m_vanadiumCorrectionsModel->fetchCorrectionWorkspaces(
+          m_view->currentVanadiumNo());
+  const auto &vanIntegWS = vanadiumCorrectionWorkspaces.first;
+  const auto &vanCurvesWS = vanadiumCorrectionWorkspaces.second;
 
   const std::string inWSName = "engggui_focusing_input_ws";
   const std::string instStr = m_view->currentInstrument();
@@ -1783,7 +1770,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     try {
       auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
       load->initialize();
-      load->setPropertyValue("Filename", instStr + runNo);
+      load->setPropertyValue("Filename",
+                             instStr + std::to_string(runLabel.runNumber));
       load->setPropertyValue("OutputWorkspace", inWSName);
       load->execute();
 
@@ -1795,22 +1783,21 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
                        "Could not run the algorithm Load succesfully for "
                        "the focusing "
                        "sample (run number: " +
-                           runNo + "). Error description: " + re.what() +
+                           std::to_string(runLabel.runNumber) +
+                           "). Error description: " + re.what() +
                            " Please check also the previous log messages "
                            "for details.";
       throw;
     }
   }
-
+  const auto bankString = std::to_string(runLabel.bank);
   std::string outWSName;
   if (!dgFile.empty()) {
     // doing focus "texture"
-    outWSName = "engggui_focusing_output_ws_texture_bank_" +
-                boost::lexical_cast<std::string>(bank);
+    outWSName = "engggui_focusing_output_ws_texture_bank_" + bankString;
   } else if (specNos.empty()) {
     // doing focus "normal" / by banks
-    outWSName = "engggui_focusing_output_ws_bank_" +
-                boost::lexical_cast<std::string>(bank);
+    outWSName = "engggui_focusing_output_ws_bank_" + bankString;
   } else {
     // doing focus "cropped"
     outWSName = "engggui_focusing_output_ws_cropped";
@@ -1824,7 +1811,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
     // cropped / normal focusing
     if (specNos.empty()) {
-      alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(bank));
+      alg->setPropertyValue("Bank", bankString);
     } else {
       alg->setPropertyValue("SpectrumNumbers", specNos);
     }
@@ -1837,39 +1824,20 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
         "Could not run the algorithm EnggCalibrate successfully for bank " +
-            boost::lexical_cast<std::string>(bank) + ". Error description: " +
-            re.what() + " Please check also the log messages for details.";
+            bankString + ". Error description: " + re.what() +
+            " Please check also the log messages for details.";
     throw;
   }
   g_log.notice() << "Produced focused workspace: " << outWSName << '\n';
 
-  try {
-    g_log.debug() << "Going to save focused output into nexus file: "
-                  << fullFilename << '\n';
-    auto alg =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("SaveNexus");
-    alg->initialize();
-    alg->setPropertyValue("InputWorkspace", outWSName);
-    alg->setPropertyValue("Filename", fullFilename);
-    alg->execute();
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Error in calibration. ",
-        "Could not run the algorithm EnggCalibrate successfully for bank " +
-            boost::lexical_cast<std::string>(bank) + ". Error description: " +
-            re.what() + " Please check also the log messages for details.";
-    throw;
-  }
-  g_log.notice() << "Saved focused workspace as file: " << fullFilename << '\n';
-
-  copyFocusedToUserAndAll(fullFilename);
-
-  bool saveOutputFiles = m_view->saveFocusedOutputFiles();
-
+  const bool saveOutputFiles = m_view->saveFocusedOutputFiles();
   if (saveOutputFiles) {
     try {
-      saveFocusedXYE(outWSName, boost::lexical_cast<std::string>(bank), runNo);
-      saveGSS(outWSName, boost::lexical_cast<std::string>(bank), runNo);
-      saveOpenGenie(outWSName, boost::lexical_cast<std::string>(bank), runNo);
+      saveFocusedXYE(runLabel, outWSName);
+      saveGSS(runLabel, outWSName);
+      saveOpenGenie(runLabel, outWSName);
+      saveNexus(runLabel, outWSName);
+      exportSampleLogsToHDF5(outWSName, userHDFRunFilename(runLabel.runNumber));
     } catch (std::runtime_error &re) {
       g_log.error() << "Error saving focused data. ",
           "There was an error while saving focused data. "
@@ -1879,260 +1847,6 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
       throw;
     }
   }
-}
-
-/**
-* Produce the two workspaces that are required to apply Vanadium
-* corrections. Try to load them if precalculated results are
-* available from files, otherwise load the source Vanadium run
-* workspace and do the calculations.
-*
-* @param vanNo Vanadium run number
-*
-* @param inputDirCalib The 'calibration files' input directory given
-* in settings
-*
-* @param vanIntegWS workspace where to create/load the Vanadium
-* spectra integration
-*
-* @param vanCurvesWS workspace where to create/load the Vanadium
-* aggregated per-bank curve
-*
-* @param forceRecalc whether to calculate Vanadium corrections even
-* if the files of pre-calculated results are found
-*
-*
-* @param specNos string carrying cropped calib info: spectra to use
-* when cropped calibrating.
-*/
-void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
-    const std::string &vanNo, const std::string &inputDirCalib,
-    ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS,
-    bool forceRecalc, const std::string &specNos) {
-  bool foundPrecalc = false;
-
-  std::string preIntegFilename, preCurvesFilename;
-  findPrecalcVanadiumCorrFilenames(vanNo, inputDirCalib, preIntegFilename,
-                                   preCurvesFilename, foundPrecalc);
-
-  // if pre calculated not found ..
-  if (forceRecalc || !foundPrecalc) {
-    g_log.notice() << "Calculating Vanadium corrections. This may take a "
-                      "while...\n";
-    try {
-      calcVanadiumWorkspaces(vanNo, vanIntegWS, vanCurvesWS);
-    } catch (std::invalid_argument &ia) {
-      g_log.error() << "Failed to calculate Vanadium corrections. "
-                       "There was an error in the execution of the algorithms "
-                       "required to calculate Vanadium corrections. Some "
-                       "properties passed to the algorithms were invalid. "
-                       "This is possibly because some of the settings are not "
-                       "consistent. Please check the log messages for "
-                       "details. Details: " +
-                           std::string(ia.what()) << '\n';
-      throw;
-    } catch (std::runtime_error &re) {
-      g_log.error() << "Failed to calculate Vanadium corrections. "
-                       "There was an error while executing one of the "
-                       "algorithms used to perform Vanadium corrections. "
-                       "There was no obvious error in the input properties "
-                       "but the algorithm failed. Please check the log "
-                       "messages for details." +
-                           std::string(re.what()) << '\n';
-      throw;
-    }
-  } else {
-    g_log.notice() << "Found precalculated Vanadium correction features for "
-                      "Vanadium run " << vanNo
-                   << ". Re-using these files: " << preIntegFilename << ", and "
-                   << preCurvesFilename << '\n';
-    try {
-      loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
-                                    vanIntegWS, vanCurvesWS, vanNo, specNos);
-    } catch (std::invalid_argument &ia) {
-      g_log.error() << "Error while loading precalculated Vanadium corrections",
-          "The files with precalculated Vanadium corection features (spectra "
-          "integration and per-bank curves) were found (with names '" +
-              preIntegFilename + "' and '" + preCurvesFilename +
-              "', respectively, but there was a problem with the inputs to "
-              "the "
-              "load algorithms to load them: " +
-              std::string(ia.what());
-      throw;
-    } catch (std::runtime_error &re) {
-      g_log.error() << "Error while loading precalculated Vanadium corrections",
-          "The files with precalculated Vanadium corection features (spectra "
-          "integration and per-bank curves) were found (with names '" +
-              preIntegFilename + "' and '" + preCurvesFilename +
-              "', respectively, but there was a problem while loading them. "
-              "Please check the log messages for details. You might want to "
-              "delete those files or force recalculations (in settings). "
-              "Error "
-              "details: " +
-              std::string(re.what());
-      throw;
-    }
-  }
-}
-
-/**
-* builds the expected names of the precalculated Vanadium correction
-* files and tells if both files are found, similar to:
-* ENGINX_precalculated_vanadium_run000236516_integration.nxs
-* ENGINX_precalculated_vanadium_run00236516_bank_curves.nxs
-*
-* @param vanNo Vanadium run number
-* @param inputDirCalib calibration directory in settings
-* @param preIntegFilename if not found on disk, the string is set as empty
-* @param preCurvesFilename if not found on disk, the string is set as empty
-* @param found true if both files are found and (re-)usable
-*/
-void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
-    const std::string &vanNo, const std::string &inputDirCalib,
-    std::string &preIntegFilename, std::string &preCurvesFilename,
-    bool &found) {
-  found = false;
-
-  const std::string runNo = std::string(2, '0').append(vanNo);
-
-  preIntegFilename = m_currentInst + "_precalculated_vanadium_run" + runNo +
-                     "_integration.nxs";
-
-  preCurvesFilename = m_currentInst + "_precalculated_vanadium_run" + runNo +
-                      "_bank_curves.nxs";
-
-  Poco::Path pathInteg(inputDirCalib);
-  pathInteg.append(preIntegFilename);
-
-  Poco::Path pathCurves(inputDirCalib);
-  pathCurves.append(preCurvesFilename);
-
-  if (Poco::File(pathInteg).exists() && Poco::File(pathCurves).exists()) {
-    preIntegFilename = pathInteg.toString();
-    preCurvesFilename = pathCurves.toString();
-    found = true;
-  }
-}
-
-/**
-* Load precalculated results from Vanadium corrections previously
-* calculated.
-*
-* @param preIntegFilename filename (can be full path) where the
-* vanadium spectra integration table should be loaded from
-*
-* @param preCurvesFilename filename (can be full path) where the
-* vanadium per-bank curves should be loaded from
-*
-* @param vanIntegWS output (matrix) workspace loaded from the
-* precalculated Vanadium correction file, with the integration
-* resutls
-*
-* @param vanCurvesWS output (matrix) workspace loaded from the
-* precalculated Vanadium correction file, with the per-bank curves
-*
-* @param vanNo the Vanadium run number used for the openGenieAscii
-* output label
-*
-* @param specNos string carrying cropped calib info: spectra to use
-* when cropped calibrating.
-*/
-void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
-    const std::string &preIntegFilename, const std::string &preCurvesFilename,
-    ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS,
-    const std::string &vanNo, const std::string &specNos) {
-  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-
-  auto alg =
-      Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadNexus");
-  alg->initialize();
-  alg->setPropertyValue("Filename", preIntegFilename);
-  std::string integWSName = g_vanIntegrationWSName;
-  alg->setPropertyValue("OutputWorkspace", integWSName);
-  alg->execute();
-  // alg->getProperty("OutputWorkspace");
-  vanIntegWS = ADS.retrieveWS<ITableWorkspace>(integWSName);
-
-  auto algCurves =
-      Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadNexus");
-  algCurves->initialize();
-  algCurves->setPropertyValue("Filename", preCurvesFilename);
-  const std::string curvesWSName = g_vanCurvesWSName;
-  algCurves->setPropertyValue("OutputWorkspace", curvesWSName);
-  algCurves->execute();
-  // algCurves->getProperty("OutputWorkspace");
-  vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesWSName);
-
-  const std::string northBank = "North";
-  const std::string southBank = "South";
-
-  if (specNos != "") {
-    if (specNos == northBank) {
-      // when north bank is selected while cropped calib
-      saveOpenGenie(curvesWSName, northBank, vanNo);
-    } else if (specNos == southBank) {
-      // when south bank is selected while cropped calib
-      saveOpenGenie(curvesWSName, southBank, vanNo);
-    } else {
-
-      // when SpectrumNos are provided
-      std::string CustomisedBankName = m_view->currentCalibCustomisedBankName();
-
-      // assign default value if empty string passed
-      if (CustomisedBankName.empty())
-        CustomisedBankName = "cropped";
-
-      saveOpenGenie(curvesWSName, CustomisedBankName, vanNo);
-    }
-  } else {
-    // when full calibration is carried; saves both banks
-    saveOpenGenie(curvesWSName, northBank, vanNo);
-    saveOpenGenie(curvesWSName, southBank, vanNo);
-  }
-}
-
-/**
-* Calculate vanadium corrections (in principle only for when
-* pre-calculated results are not available). This is expensive.
-*
-* @param vanNo Vanadium run number
-*
-* @param vanIntegWS where to keep the Vanadium run spectra
-* integration values
-*
-* @param vanCurvesWS workspace where to keep the per-bank vanadium
-* curves
-*/
-void EnggDiffractionPresenter::calcVanadiumWorkspaces(
-    const std::string &vanNo, ITableWorkspace_sptr &vanIntegWS,
-    MatrixWorkspace_sptr &vanCurvesWS) {
-
-  auto load = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
-  load->initialize();
-  load->setPropertyValue("Filename",
-                         vanNo); // TODO more specific build Vanadium filename
-  std::string vanWSName = "engggui_vanadium_ws";
-  load->setPropertyValue("OutputWorkspace", vanWSName);
-  load->execute();
-  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-  MatrixWorkspace_sptr vanWS = ADS.retrieveWS<MatrixWorkspace>(vanWSName);
-  // TODO?: maybe use setChild() and then
-  // load->getProperty("OutputWorkspace");
-
-  auto alg = Mantid::API::AlgorithmManager::Instance().create(
-      "EnggVanadiumCorrections");
-  alg->initialize();
-  alg->setProperty("VanadiumWorkspace", vanWS);
-  std::string integName = g_vanIntegrationWSName;
-  alg->setPropertyValue("OutIntegrationWorkspace", integName);
-  const std::string curvesName = g_vanCurvesWSName;
-  alg->setPropertyValue("OutCurvesWorkspace", curvesName);
-  alg->execute();
-
-  ADS.remove(vanWSName);
-
-  vanIntegWS = ADS.retrieveWS<ITableWorkspace>(integName);
-  vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesName);
 }
 
 /**
@@ -2443,17 +2157,15 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
 * Convert the generated output files and saves them in
 * FocusedXYE format
 *
+* @param runLabel run number and bank ID of the workspace to save
 * @param inputWorkspace title of the focused workspace
-* @param bank the number of the bank as a string
-* @param runNo the run number as a string
 */
-void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
-                                              std::string bank,
-                                              std::string runNo) {
+void EnggDiffractionPresenter::saveFocusedXYE(
+    const RunLabel &runLabel, const std::string &inputWorkspace) {
 
   // Generates the file name in the appropriate format
   std::string fullFilename =
-      outFileNameFactory(inputWorkspace, runNo, bank, ".dat");
+      outFileNameFactory(inputWorkspace, runLabel, ".dat");
 
   const std::string focusingComp = "Focus";
   // Creates appropriate directory
@@ -2472,7 +2184,7 @@ void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
     const std::string filename(saveDir.toString());
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("SplitFiles", false);
-    alg->setPropertyValue("StartAtBankNumber", bank);
+    alg->setPropertyValue("StartAtBankNumber", std::to_string(runLabel.bank));
     alg->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in saving FocusedXYE format file. ",
@@ -2491,16 +2203,15 @@ void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
 * Convert the generated output files and saves them in
 * GSS format
 *
+* @param runLabel run number and bank ID the workspace to save
 * @param inputWorkspace title of the focused workspace
-* @param bank the number of the bank as a string
-* @param runNo the run number as a string
 */
-void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace,
-                                       std::string bank, std::string runNo) {
+void EnggDiffractionPresenter::saveGSS(const RunLabel &runLabel,
+                                       const std::string &inputWorkspace) {
 
   // Generates the file name in the appropriate format
   std::string fullFilename =
-      outFileNameFactory(inputWorkspace, runNo, bank, ".gss");
+      outFileNameFactory(inputWorkspace, runLabel, ".gss");
 
   const std::string focusingComp = "Focus";
   // Creates appropriate directory
@@ -2519,7 +2230,7 @@ void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace,
     std::string filename(saveDir.toString());
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("SplitFiles", false);
-    alg->setPropertyValue("Bank", bank);
+    alg->setPropertyValue("Bank", std::to_string(runLabel.bank));
     alg->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in saving GSS format file. ",
@@ -2534,21 +2245,47 @@ void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace,
   copyToGeneral(saveDir, focusingComp);
 }
 
+void EnggDiffractionPresenter::saveNexus(const RunLabel &runLabel,
+                                         const std::string &inputWorkspace) {
+  const auto filename = outFileNameFactory(inputWorkspace, runLabel, ".nxs");
+  auto saveDirectory = outFilesUserDir("Focus");
+  saveDirectory.append(filename);
+  const auto fullOutFileName = saveDirectory.toString();
+
+  try {
+    g_log.debug() << "Going to save focused output into OpenGenie file: "
+                  << fullOutFileName << "\n";
+    auto alg =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged("SaveNexus");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inputWorkspace);
+    alg->setProperty("Filename", fullOutFileName);
+    alg->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error in save NXS format file. Could not run the "
+                     "algorithm SaveNexus successfully for workspace "
+                  << inputWorkspace << ". Error description: " << re.what()
+                  << ". Please also check the log message for details.";
+    throw;
+  }
+  g_log.notice() << "Saved focused workspace as file: " << fullOutFileName
+                 << "\n";
+  copyToGeneral(saveDirectory, "Focus");
+}
+
 /**
 * Convert the generated output files and saves them in
 * OpenGenie format
 *
+* @param runLabel run number and bank ID of the workspace to save
 * @param inputWorkspace title of the focused workspace
-* @param bank the number of the bank as a string
-* @param runNo the run number as a string
 */
-void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
-                                             std::string bank,
-                                             std::string runNo) {
+void EnggDiffractionPresenter::saveOpenGenie(
+    const RunLabel &runLabel, const std::string &inputWorkspace) {
 
   // Generates the file name in the appropriate format
   std::string fullFilename =
-      outFileNameFactory(inputWorkspace, runNo, bank, ".his");
+      outFileNameFactory(inputWorkspace, runLabel, ".his");
 
   std::string comp;
   Poco::Path saveDir;
@@ -2590,18 +2327,32 @@ void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
   copyToGeneral(saveDir, comp);
 }
 
+void EnggDiffractionPresenter::exportSampleLogsToHDF5(
+    const std::string &inputWorkspace, const std::string &filename) const {
+  auto saveAlg = Mantid::API::AlgorithmManager::Instance().create(
+      "ExportSampleLogsToHDF5");
+  saveAlg->initialize();
+  saveAlg->setProperty("InputWorkspace", inputWorkspace);
+  saveAlg->setProperty("Filename", filename);
+  saveAlg->setProperty("Blacklist", "bankid");
+  saveAlg->execute();
+}
+
 /**
 * Generates the required file name of the output files
 *
 * @param inputWorkspace title of the focused workspace
-* @param runNo the run number as a string
-* @param bank the number of the bank as a string
+* @param runLabel run number and bank ID of the workspace to save
 * @param format the format of the file to be saved as
 */
-std::string EnggDiffractionPresenter::outFileNameFactory(
-    std::string inputWorkspace, std::string runNo, std::string bank,
-    std::string format) {
+std::string
+EnggDiffractionPresenter::outFileNameFactory(const std::string &inputWorkspace,
+                                             const RunLabel &runLabel,
+                                             const std::string &format) {
   std::string fullFilename;
+
+  const auto runNo = std::to_string(runLabel.runNumber);
+  const auto bank = std::to_string(runLabel.bank);
 
   // calibration output files
   if (inputWorkspace.std::string::find("curves") != std::string::npos) {
@@ -2823,7 +2574,7 @@ std::string EnggDiffractionPresenter::outFitParamsTblNameGenerator(
 * "Focus"
 */
 Poco::Path
-EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) {
+EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) const {
   std::string rbn = m_view->getRBNumber();
   Poco::Path dir = outFilesRootDir();
 
@@ -2845,6 +2596,25 @@ EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) {
                   << dir.toString() << ". Error details: " << re.what() << '\n';
   }
   return dir;
+}
+
+std::string
+EnggDiffractionPresenter::userHDFRunFilename(const int runNumber) const {
+  auto userOutputDir = outFilesUserDir("Runs");
+  userOutputDir.append(std::to_string(runNumber) + ".hdf5");
+  return userOutputDir.toString();
+}
+
+std::string EnggDiffractionPresenter::userHDFMultiRunFilename(
+    const std::vector<RunLabel> &runLabels) const {
+  const auto &begin = runLabels.cbegin();
+  const auto &end = runLabels.cend();
+  const auto minLabel = std::min_element(begin, end);
+  const auto maxLabel = std::max_element(begin, end);
+  auto userOutputDir = outFilesUserDir("Runs");
+  userOutputDir.append(std::to_string(minLabel->runNumber) + "_" +
+                       std::to_string(maxLabel->runNumber) + ".hdf5");
+  return userOutputDir.toString();
 }
 
 /**
@@ -2882,7 +2652,7 @@ EnggDiffractionPresenter::outFilesGeneralDir(const std::string &addComponent) {
 /**
  * Produces the root path where output files are going to be written.
  */
-Poco::Path EnggDiffractionPresenter::outFilesRootDir() {
+Poco::Path EnggDiffractionPresenter::outFilesRootDir() const {
   // TODO decide whether to move into settings or use mantid's default directory
   // after discussion with users
   const std::string rootDir = "EnginX_Mantid";
@@ -2890,11 +2660,11 @@ Poco::Path EnggDiffractionPresenter::outFilesRootDir() {
 
   try {
 // takes to the root of directory according to the platform
-#ifdef __unix__
-    dir = Poco::Path().home();
-#else
+#ifdef _WIN32
     const std::string ROOT_DRIVE = "C:/";
     dir.assign(ROOT_DRIVE);
+#else
+    dir = Poco::Path().home();
 #endif
     dir.append(rootDir);
 
