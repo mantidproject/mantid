@@ -42,13 +42,6 @@ namespace CustomInterfaces {
 // unnamed namespace
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
-
-QStringList fromStdStringVector(std::vector<std::string> const &inVec) {
-  QStringList outVec;
-  std::transform(inVec.begin(), inVec.end(), std::back_inserter(outVec),
-                 &QString::fromStdString);
-  return outVec;
-}
 }
 
 /** Constructor
@@ -355,7 +348,7 @@ int ReflRunsTabPresenter::autoreductionGroup() const {
   return m_autoreduction.group();
 }
 
-bool ReflRunsTabPresenter::isProcessing(int group) const {
+bool ReflRunsTabPresenter::isProcessing(int) const {
   //  return getTablePresenter(group)->isProcessing();
   return false;
 }
@@ -463,8 +456,8 @@ RunDescriptionMetadata metadataFromDescription(std::string const &description) {
  * the transfer criteria
  * @return : The runs to transfer as a vector of maps
 */
-void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
-                                    int group, const TransferMatch matchType) {
+void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer, int,
+                                    const TransferMatch) {
   if (validateRowsToTransfer(rowsToTransfer)) {
     auto progress = setupProgressBar(rowsToTransfer);
     auto jobs = newJobsWithSlicingFrom(getTablePresenter(0)->reductionJobs());

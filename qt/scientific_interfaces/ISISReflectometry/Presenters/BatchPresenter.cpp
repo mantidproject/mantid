@@ -228,7 +228,7 @@ void BatchPresenter::updateGroupName(
 }
 
 void BatchPresenter::updateRowField(
-    MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int column,
+    MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int,
     std::string const &, std::string const &) {
   auto const groupIndex = groupOf(itemIndex);
   auto const rowIndex = rowOf(itemIndex);

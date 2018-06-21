@@ -27,7 +27,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include <boost/optional.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <string>
-#include <unordered_map>
 #include "../DllConfig.h"
 
 namespace MantidQt {

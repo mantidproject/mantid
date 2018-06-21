@@ -18,17 +18,16 @@ SlicedReductionWorkspaces::sliceWorkspaces() const {
   return m_sliceWorkspaces;
 }
 
-SlicedReductionWorkspaces workspaceNamesForSliced(
-    std::vector<std::string> const &summedRunNumbers,
-    std::pair<std::string, std::string> const &transmissionRuns,
-    Slicing const &slicing) {
+SlicedReductionWorkspaces
+workspaceNamesForSliced(std::vector<std::string> const &,
+                        std::pair<std::string, std::string> const &,
+                        Slicing const &) {
   // TODO: Implement this correctly.
   return SlicedReductionWorkspaces("", {});
 }
 
 std::string postprocessedWorkspaceNameForSliced(
-    std::vector<std::vector<std::string> const *> const &summedRunNumbers,
-    Slicing const &slicing) {
+    std::vector<std::vector<std::string> const *> const &, Slicing const &) {
   // TODO: Implement this correctly.
   return "";
 }
