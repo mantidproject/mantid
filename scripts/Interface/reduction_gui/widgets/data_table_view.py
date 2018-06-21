@@ -42,7 +42,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
         :param row: int of the row to get
         :return: data of the row
         """
-        return self.tableData[row] if row < self._numRows() else [""] * self.columnCount()
+        return self.tableData[row] if row < self._numRows() else self._createEmptyRow()
 
     def _isRowEmpty(self, row):
         """
@@ -51,6 +51,9 @@ class DataTableModel(QtCore.QAbstractTableModel):
         :return: true if row is empty
         """
         return all((v is None or not str(v).strip()) for v in self._getRow(row))
+
+    def _createEmptyRow(self):
+        return [self._textToData(self._numRows(), i, '') for i in range(self.columnCount())]
 
     def _removeTrailingEmptyRows(self):
         """
@@ -76,7 +79,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
         :param numRows:  number of rows that should exist
         """
         while self._numRows() < numRows:
-            self.tableData.append([""] * self.columnCount())
+            self.tableData.append(self._createEmptyRow())
 
     def _dataToText(self, row, col, value):
         """

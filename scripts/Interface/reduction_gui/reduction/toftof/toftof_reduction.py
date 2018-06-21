@@ -6,21 +6,18 @@
 TOFTOF reduction workflow gui.
 """
 from __future__ import (absolute_import, division, print_function)
-try:
-    from itertools import zip_longest as zip_longest
-except:
-    from itertools import izip_longest as zip_longest
 
+from itertools import repeat
 import xml.dom.minidom
-
 from reduction_gui.reduction.scripter import BaseScriptElement, BaseReductionScripter
 
 # -------------------------------------------------------------------------------
 
 
-class OptionalFloat():
+class OptionalFloat(object):
     """value can be either a float or None. if value is None, str(self) == '' """
     def __init__(self, value=None):
+        super(OptionalFloat, self).__init__()
         self.value = float(value) if value else None
 
     def _bind(self, function, default=None):
@@ -31,6 +28,12 @@ class OptionalFloat():
 
     def __format__(self, format_spec):
         return self._bind(lambda v: v.__format__(format_spec), default = '')
+
+    def __bool__(self):
+        return self.value is not None
+
+    def __nonzero__(self):
+        return self.__bool__()
 
 
 class TOFTOFScriptElement(BaseScriptElement):
@@ -221,7 +224,15 @@ class TOFTOFScriptElement(BaseScriptElement):
             dataCmts = get_strlst('data_comment')
             dataTemps = get_optFloat_list('data_temperature')
 
-            for dataRun in zip_longest(dataRuns, dataCmts, dataTemps, fillvalue=''):
+            # make sure the lengths of these lists match
+            assert(len(dataRuns) == len(dataCmts))
+            if dataTemps:
+                assert(len(dataRuns) == len(dataTemps))
+            else:
+                # no temperatures in xml file, so generate empty OptionalFloats:
+                dataTemps = (OptionalFloat() for _ in repeat(''))
+                
+            for dataRun in zip(dataRuns, dataCmts, dataTemps):
                 self.dataRuns.append(list(dataRun))
 
             self.binEon    = get_bol('rebin_energy_on',    self.DEF_binEon)
