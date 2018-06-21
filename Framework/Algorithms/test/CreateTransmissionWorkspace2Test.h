@@ -461,7 +461,8 @@ public:
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_4321"));
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
+    TS_ASSERT(
+        !AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
   }
 };
 
