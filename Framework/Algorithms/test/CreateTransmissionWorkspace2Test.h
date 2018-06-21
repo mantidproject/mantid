@@ -439,6 +439,30 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_4321"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
   }
+
+  void test_two_runs_store_in_ADS_default_child() {
+    AnalysisDataService::Instance().clear();
+    auto inputWS1 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    inputWS1->mutableRun().addProperty<std::string>("run_number", "1234");
+    auto inputWS2 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    inputWS2->mutableRun().addProperty<std::string>("run_number", "4321");
+
+    CreateTransmissionWorkspace2 alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("FirstTransmissionRun", inputWS1);
+    alg.setProperty("SecondTransmissionRun", inputWS2);
+    alg.setProperty("WavelengthMin", 3.0);
+    alg.setProperty("WavelengthMax", 12.0);
+    alg.setPropertyValue("ProcessingInstructions", "1");
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS);
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_4321"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
+  }
 };
 
 #endif /* ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACE2TEST_H_ */

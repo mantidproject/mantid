@@ -223,7 +223,7 @@ void CreateTransmissionWorkspace2::storeTransitionRun(int which,
  */
 void CreateTransmissionWorkspace2::storeOutputWorkspace(
     API::MatrixWorkspace_sptr ws) {
-  if (isDefault("OutputWorkspace")) {
+  if (isDefault("OutputWorkspace") && !isChild()) {
     std::string name = TRANS_LAM_PREFIX;
     if (!m_firstTransmissionRunNumber.empty()) {
       name.append(m_firstTransmissionRunNumber);

@@ -745,16 +745,20 @@ bool ReflectometryReductionOneAuto2::processGroups() {
 
     IvsQGroup.push_back(IvsQName);
     IvsQUnbinnedGroup.push_back(IvsQBinnedName);
-    IvsLamGroup.push_back(IvsLamName);
+    if (AnalysisDataService::Instance().doesExist(IvsLamName)) {
+      IvsLamGroup.push_back(IvsLamName);
+    }
   }
 
   // Group the IvsQ and IvsLam workspaces
   Algorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
   groupAlg->setChild(false);
   groupAlg->setRethrows(true);
-  groupAlg->setProperty("InputWorkspaces", IvsLamGroup);
-  groupAlg->setProperty("OutputWorkspace", outputIvsLam);
-  groupAlg->execute();
+  if (!IvsLamGroup.empty()) {
+    groupAlg->setProperty("InputWorkspaces", IvsLamGroup);
+    groupAlg->setProperty("OutputWorkspace", outputIvsLam);
+    groupAlg->execute();
+  }
   groupAlg->setProperty("InputWorkspaces", IvsQGroup);
   groupAlg->setProperty("OutputWorkspace", outputIvsQ);
   groupAlg->execute();

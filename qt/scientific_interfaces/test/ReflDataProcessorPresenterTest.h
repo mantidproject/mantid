@@ -145,7 +145,7 @@ public:
   void assertSliceExists(const std::string &run, const size_t i,
                          const std::vector<std::string> &slices) {
     const auto runName = run + "_slice_" + slices[i] + "_to_" + slices[i + 1];
-    TS_ASSERT(workspaceExists("IvsLam_" + runName));
+    TS_ASSERT(!workspaceExists("IvsLam_" + runName));
     TS_ASSERT(workspaceExists("IvsQ_" + runName));
     TS_ASSERT(workspaceExists("IvsQ_binned_" + runName));
     TS_ASSERT(workspaceExists("TOF_" + runName));
