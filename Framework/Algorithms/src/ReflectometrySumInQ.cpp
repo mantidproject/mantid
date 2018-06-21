@@ -391,7 +391,7 @@ void ReflectometrySumInQ::processValue(
 
   // Check whether there are any counts (if not, nothing to share)
   const double inputCounts = counts[inputIdx];
-  if (inputCounts <= 0.0 || std::isnan(inputCounts) ||
+  if (edges[inputIdx] < 0. || inputCounts <= 0.0 || std::isnan(inputCounts) ||
       std::isinf(inputCounts)) {
     return;
   }
