@@ -26,6 +26,8 @@ DECLARE_FILELOADER_ALGORITHM(LoadAscii2)
 using namespace Kernel;
 using namespace API;
 
+bool g_isTestFile = false;
+
 /// Empty constructor
 LoadAscii2::LoadAscii2()
     : m_columnSep(), m_separatorIndex(), m_comment(), m_baseCols(0),
@@ -89,6 +91,9 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
   setcolumns(file, line, columns);
 
   while (getline(file, line)) {
+    if (g_isTestFile) {
+      g_log.warning() << "line " << line << std::endl;
+    }
     std::string templine = line;
     m_lineNo++;
     boost::trim(templine);
@@ -107,16 +112,24 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
   try {
     localWorkspace = WorkspaceFactory::Instance().create(
         "Workspace2D", numSpectra, m_lastBins, m_lastBins);
-  } catch (std::exception &) {
-    throw std::runtime_error("Failed to create a Workspace2D from the "
-                             "data found in this file");
+  } catch (std::exception &e) {
+    std::ostringstream msg;
+    msg << "Failed to create a Workspace2D from the data found in this file. "
+           "Error: " << e.what() << ' ' << m_lineNo << "\n";
+    file.seekg(0);
+    std::string test_str;
+    file >> test_str;
+    msg << ":::" << test_str << std::endl;
+    throw std::runtime_error(msg.str());
   }
 
   try {
     writeToWorkspace(localWorkspace, numSpectra);
-  } catch (std::exception &) {
-    throw std::runtime_error("Failed to write read data into the "
-                             "output Workspace2D");
+  } catch (std::exception &e) {
+    std::ostringstream msg;
+    msg << "Failed to write read data into the output Workspace2D. Error: "
+        << e.what();
+    throw std::runtime_error(msg.str());
   }
   delete m_curSpectra;
   return localWorkspace;
@@ -237,6 +250,9 @@ void LoadAscii2::setcolumns(std::ifstream &file, std::string &line,
   // but if the user specifies a number of lines to skip that check won't happen
   // in processheader
   processHeader(file);
+  if (g_isTestFile) {
+    g_log.warning() << "m_baseCols " << m_baseCols << std::endl;
+  }
   if (m_baseCols == 0 || m_baseCols > 4 || m_baseCols < 2) {
     // first find the first data set and set that as the template for the number
     // of data columns we expect from this file
@@ -245,6 +261,9 @@ void LoadAscii2::setcolumns(std::ifstream &file, std::string &line,
       // std::string line = line;
       boost::trim(line);
       if (!line.empty()) {
+        if (g_isTestFile) {
+          g_log.warning() << "line not empty " << line << std::endl;
+        }
         if (std::isdigit(line.at(0)) || line.at(0) == '-' ||
             line.at(0) == '+') {
           const int cols = splitIntoColumns(columns, line);
@@ -667,6 +686,11 @@ void LoadAscii2::exec() {
     throw Exception::FileError("Unable to open file: ", filename);
   }
 
+  g_isTestFile = filename.find("Efficiency") != std::string::npos;
+  if (g_isTestFile) {
+    g_log.warning() << "File name " << filename << std::endl;
+  }
+
   std::string sepOption = getProperty("Separator");
   m_columnSep = m_separatorIndex[sepOption];
 
@@ -691,6 +715,10 @@ void LoadAscii2::exec() {
     sep = ",";
   }
   m_columnSep = sep;
+
+  if (g_isTestFile) {
+    g_log.warning() << "Separartor: " << m_columnSep << std::endl;
+  }
 
   // e + and - are included as they're part of the scientific notation
   if (!boost::regex_match(m_columnSep.begin(), m_columnSep.end(),

@@ -6,13 +6,9 @@
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 
 namespace Mantid {
-namespace API {
-class ISpectrum;
-}
-
 namespace Algorithms {
 
-/** PolarizationEfficiencyCor : This algorithm corrects for non-ideal
+/** PolarizationCorrectionWildes : This algorithm corrects for non-ideal
   component efficiencies in polarized neutron analysis. It is based on
   [A. R. Wildes (2006) Neutron News, 17:2, 17-25,
   DOI: 10.1080/10448630600668738]
@@ -49,49 +45,24 @@ public:
   const std::string summary() const override;
 
 private:
-  /// A convenience set of workspaces corresponding flipper configurations.
-  struct WorkspaceMap {
-    API::MatrixWorkspace_sptr mmWS{nullptr};
-    API::MatrixWorkspace_sptr mpWS{nullptr};
-    API::MatrixWorkspace_sptr pmWS{nullptr};
-    API::MatrixWorkspace_sptr ppWS{nullptr};
-    size_t size() const noexcept;
-  };
-
-  /// A convenience set of efficiency factors.
-  struct EfficiencyMap {
-    const API::ISpectrum *P1{nullptr};
-    const API::ISpectrum *P2{nullptr};
-    const API::ISpectrum *F1{nullptr};
-    const API::ISpectrum *F2{nullptr};
-  };
-
   void init() override;
   void exec() override;
-  std::map<std::string, std::string> validateInputs() override;
-  void checkConsistentNumberHistograms(const WorkspaceMap &inputs);
-  void checkConsistentX(const WorkspaceMap &inputs,
-                        const EfficiencyMap &efficiencies);
-  EfficiencyMap efficiencyFactors();
-  WorkspaceMap directBeamCorrections(const WorkspaceMap &inputs,
-                                     const EfficiencyMap &efficiencies);
-  WorkspaceMap analyzerlessCorrections(const WorkspaceMap &inputs,
-                                       const EfficiencyMap &efficiencies);
-  WorkspaceMap twoInputCorrections(const WorkspaceMap &inputs,
-                                   const EfficiencyMap &efficiencies);
-  WorkspaceMap threeInputCorrections(const WorkspaceMap &inputs,
-                                     const EfficiencyMap &efficiencies);
-  WorkspaceMap fullCorrections(const WorkspaceMap &inputs,
-                               const EfficiencyMap &efficiencies);
-  API::WorkspaceGroup_sptr groupOutput(const WorkspaceMap &outputs);
-  WorkspaceMap mapInputsToDirections(const std::vector<std::string> &flippers);
-  void threeInputsSolve01(WorkspaceMap &inputs,
-                          const EfficiencyMap &efficiencies);
-  void threeInputsSolve10(WorkspaceMap &inputs,
-                          const EfficiencyMap &efficiencies);
-  void twoInputsSolve01And10(WorkspaceMap &fullInputs,
-                             const WorkspaceMap &inputs,
-                             const EfficiencyMap &efficiencies);
+  void execWildes();
+  void execFredrikze();
+
+  void checkWorkspaces() const;
+  void checkWildesProperties() const;
+  void checkFredrikzeProperties() const;
+
+  std::vector<std::string> getWorkspaceNameList() const;
+  API::WorkspaceGroup_sptr getWorkspaceGroup() const;
+  API::MatrixWorkspace_sptr getEfficiencies();
+  bool needInterpolation(API::MatrixWorkspace const &efficiencies,
+                         API::MatrixWorkspace const &inWS) const;
+  API::MatrixWorkspace_sptr
+  convertToHistogram(API::MatrixWorkspace_sptr efficiencies);
+  API::MatrixWorkspace_sptr interpolate(API::MatrixWorkspace_sptr efficiencies,
+                                        API::MatrixWorkspace_sptr inWS);
 };
 
 } // namespace Algorithms
