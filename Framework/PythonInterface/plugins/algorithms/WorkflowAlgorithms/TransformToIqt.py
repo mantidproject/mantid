@@ -4,7 +4,6 @@ from mantid.simpleapi import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         ITableWorkspaceProperty, PropertyMode, Progress)
 from mantid.kernel import Direction, logger
-import math
 
 
 class TransformToIqt(PythonAlgorithm):
@@ -217,12 +216,9 @@ class TransformToIqt(PythonAlgorithm):
         CalculateIqt(InputWorkspace=self._sample, ResolutionWorkspace=self._resolution, EnergyMin=self._e_min,
                      EnergyMax=self._e_max, EnergyWidth=self._e_width, OutputWorkspace=self._output_workspace)
 
-
         # Set Y axis unit and label
         mtd[self._output_workspace].setYUnit('')
         mtd[self._output_workspace].setYUnitLabel('Intensity')
-
-
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(TransformToIqt)

@@ -12,7 +12,7 @@ using namespace Mantid::HistogramData;
 
 namespace {
 constexpr int DEFAULT_ITERATIONS = 10;
-constexpr int DEFAULT_SEED = 23021997;
+constexpr int DEFAULT_SEED = 89631139;
 
 MatrixWorkspace_sptr rebin(MatrixWorkspace_sptr workspace,
                            const std::string &params) {
