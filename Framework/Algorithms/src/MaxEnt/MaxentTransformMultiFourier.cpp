@@ -40,12 +40,22 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
   // Apply adjustments (we assume there are sufficient adjustments supplied)
   if(!m_linearAdjustments.empty() && !m_constAdjustments.empty()) {
     for (size_t i = 0; i < size(data); i++) {
-      data[i] = m_linearAdjustments[i] * data[i] + m_constAdjustments[i];
+      if (i % 2 == 0) { // Real part
+        data[i] = m_linearAdjustments[i] * data[i] - m_linearAdjustments[i + 1] * data[i + 1] + m_constAdjustments[i];
+      }
+      else { // Imaginary part
+        data[i] = m_linearAdjustments[i] * data[i-1] + m_linearAdjustments[i - 1] * data[i] + m_constAdjustments[i];
+      }
     }
   }
   else if (!m_linearAdjustments.empty() && m_constAdjustments.empty()) {
     for (size_t i = 0; i < size(data); i++) {
-      data[i] = m_linearAdjustments[i] * data[i];
+      if (i % 2 == 0) { // Real part
+        data[i] = m_linearAdjustments[i] * data[i] - m_linearAdjustments[i + 1] * data[i + 1];
+      }
+      else { // Imaginary part
+        data[i] = m_linearAdjustments[i] * data[i - 1] + m_linearAdjustments[i - 1] * data[i];
+      }
     }
   }
   else if (m_linearAdjustments.empty() && !m_constAdjustments.empty()) {
