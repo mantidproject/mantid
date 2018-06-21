@@ -516,7 +516,7 @@ bool checkValidPair(const std::string &WSname1, const std::string &WSname2) {
 // * @param grouping :: Struct with grouping information
 // * @param filename :: XML filename where information will be saved
 // */
-//std::string groupingToXML(const Mantid::API::Grouping &grouping) {
+// std::string groupingToXML(const Mantid::API::Grouping &grouping) {
 //
 //  Poco::XML::DOMWriter writer;
 //  writer.setNewLine("\n");
@@ -549,15 +549,18 @@ bool checkValidPair(const std::string &WSname1, const std::string &WSname2) {
 //
 //    Poco::AutoPtr<Poco::XML::Element> fwElem =
 //        mDoc->createElement("forward-group");
-//    fwElem->setAttribute("val", grouping.groupNames[grouping.pairs[pi].first]);
+//    fwElem->setAttribute("val",
+//    grouping.groupNames[grouping.pairs[pi].first]);
 //    gElem->appendChild(fwElem);
 //
 //    Poco::AutoPtr<Poco::XML::Element> bwElem =
 //        mDoc->createElement("backward-group");
-//    bwElem->setAttribute("val", grouping.groupNames[grouping.pairs[pi].second]);
+//    bwElem->setAttribute("val",
+//    grouping.groupNames[grouping.pairs[pi].second]);
 //    gElem->appendChild(bwElem);
 //
-//    Poco::AutoPtr<Poco::XML::Element> alphaElem = mDoc->createElement("alpha");
+//    Poco::AutoPtr<Poco::XML::Element> alphaElem =
+//    mDoc->createElement("alpha");
 //    alphaElem->setAttribute(
 //        "val", boost::lexical_cast<std::string>(grouping.pairAlphas[pi]));
 //    gElem->appendChild(alphaElem);

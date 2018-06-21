@@ -78,12 +78,16 @@ public:
   }
 
   void test_getRunLabel_argus() {
-    std::string label = getRunLabel(MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun("ARGUS", 26577));
+    std::string label = getRunLabel(
+        MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
+            "ARGUS", 26577));
     TS_ASSERT_EQUALS(label, "ARGUS0026577");
   }
 
   void test_getRunLabel_singleWs_tooBigRunNumber() {
-    std::string label = getRunLabel(MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun("EMU", 999999999));
+    std::string label = getRunLabel(
+        MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
+            "EMU", 999999999));
     TS_ASSERT_EQUALS(label, "EMU999999999");
   }
 
@@ -91,7 +95,9 @@ public:
     std::vector<Workspace_sptr> list;
 
     for (int i = 15189; i <= 15193; ++i) {
-      list.push_back(MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun("MUSR", i));
+      list.push_back(
+          MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
+              "MUSR", i));
     }
 
     std::string label = getRunLabel(list);
@@ -103,7 +109,9 @@ public:
     std::vector<Workspace_sptr> list;
 
     for (auto it = runNumbers.begin(); it != runNumbers.end(); ++it) {
-      list.push_back(MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun("EMU", *it));
+      list.push_back(
+          MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
+              "EMU", *it));
     }
 
     std::string label = getRunLabel(list);
@@ -114,7 +122,9 @@ public:
     std::vector<int> runNumbers{1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14};
     std::vector<Workspace_sptr> list;
     for (auto it = runNumbers.begin(); it != runNumbers.end(); it++) {
-      list.push_back(MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun("EMU", *it));
+      list.push_back(
+          MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
+              "EMU", *it));
     }
     std::string label = getRunLabel(list);
     TS_ASSERT_EQUALS(label, "EMU00000001-3, 5-6, 8, 10-4");
@@ -124,7 +134,9 @@ public:
     std::vector<int> runNumbers{5, 14, 8, 1, 11, 3, 10, 6, 13, 12, 2};
     std::vector<Workspace_sptr> list;
     for (auto it = runNumbers.begin(); it != runNumbers.end(); it++) {
-      list.push_back(MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun("EMU", *it));
+      list.push_back(
+          MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
+              "EMU", *it));
     }
     std::string label = getRunLabel(list);
     TS_ASSERT_EQUALS(label, "EMU00000001-3, 5-6, 8, 10-4");
@@ -319,7 +331,9 @@ public:
   }
 
   void test_getAllDetectorIDsFromGroupWorkspace() {
-    auto ws = MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 2, "group");
+    auto ws =
+        MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(
+            3, 3, 2, "group");
     std::set<Mantid::detid_t> ids = getAllDetectorIDsFromGroupWorkspace(ws);
     for (auto i = 1; i < 10; i++) {
       TS_ASSERT_DIFFERS(ids.find(i), ids.end());
@@ -329,7 +343,8 @@ public:
 
   void test_getAllDetectorIDsWorkspace_Group() {
     Workspace_sptr ws =
-		MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 2, "group");
+        MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(
+            3, 3, 2, "group");
     std::set<Mantid::detid_t> ids = getAllDetectorIDsFromWorkspace(ws);
     for (auto i = 1; i < 10; i++) {
       TS_ASSERT_DIFFERS(ids.find(i), ids.end());
@@ -354,7 +369,8 @@ public:
     const std::vector<std::string> groups = {"1", "2", "3,4,5", "6-9"};
     grouping.groups = groups;
     Workspace_sptr ws =
-		MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 2, "group");
+        MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(
+            3, 3, 2, "group");
     TS_ASSERT(checkGroupDetectorsInWorkspace(grouping, ws));
 
     AnalysisDataService::Instance().clear();
@@ -365,7 +381,8 @@ public:
     const std::vector<std::string> groups = {"1", "2", "3,4,5", "6-9", "10"};
     grouping.groups = groups;
     Workspace_sptr ws =
-		MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 2, "group");
+        MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(
+            3, 3, 2, "group");
     TS_ASSERT(!checkGroupDetectorsInWorkspace(grouping, ws));
 
     AnalysisDataService::Instance().clear();

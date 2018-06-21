@@ -119,7 +119,7 @@ DLLExport bool checkValidPair(const std::string &name1,
 DLLExport bool checkValidGroupPairName(const std::string &name);
 //
 ///// Saves grouping to the XML file specified
-//DLLExport std::string groupingToXML(const Mantid::API::Grouping &grouping);
+// DLLExport std::string groupingToXML(const Mantid::API::Grouping &grouping);
 
 } // namespace MuonAlgorithmHelper
 } // namespace Mantid

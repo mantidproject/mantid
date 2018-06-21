@@ -40,11 +40,11 @@ double yDataAsymmetry::operator()(const double t, size_t spec) {
   double e = exp(-t / tau);
   double factor = (static_cast<double>(spec) + 1.0) * 0.5;
   double phase_offset = 4 * M_PI / 180;
-  return std::max(
-      0.0, (10. * factor *
-            (1.0 + m_amp * cos(m_omega * t + m_phi +
-                               static_cast<double>(spec) * phase_offset)) *
-            e));
+  return std::max(0.0, (10. * factor * (1.0 +
+                                        m_amp * cos(m_omega * t + m_phi +
+                                                    static_cast<double>(spec) *
+                                                        phase_offset)) *
+                        e));
 }
 
 // Errors are fixed to 0.005
@@ -249,8 +249,8 @@ createWorkspaceGroupConsecutiveDetectorIDs(const int &nWorkspaces, size_t nspec,
         createCountsWorkspace(nspec, maxt, period, detIDstart);
     wsGroup->addWorkspace(ws);
 
-	wsName = wsNameStem + std::to_string(period);
-	AnalysisDataService::Instance().addOrReplace(wsName, ws);
+    wsName = wsNameStem + std::to_string(period);
+    AnalysisDataService::Instance().addOrReplace(wsName, ws);
   }
 
   return wsGroup;
