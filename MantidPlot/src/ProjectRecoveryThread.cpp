@@ -9,43 +9,84 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 
+#include "boost/optional.hpp"
+
+#include "Poco/DirectoryIterator.h"
 #include "Poco/NObserver.h"
 #include "Poco/Path.h"
 #include "qmetaobject.h"
 
 #include <chrono>
 #include <condition_variable>
+#include <ctime>
+#include <iomanip>
+#include <iostream>
 #include <mutex>
 #include <string>
 #include <thread>
 
 namespace {
-Mantid::Kernel::Logger g_log("Project Recovery Thread");
-const std::chrono::seconds TIME_BETWEEN_SAVING = std::chrono::seconds(30);
-const std::string SAVING_ENABLED_CONFIG_KEY = "projectRecovery.enabled";
+// Config helper methods
 
-bool isRecoveryEnabled() {
-  std::string isEnabled;
-  int valueIsGood = Mantid::Kernel::ConfigService::Instance().getValue<std::string>(
-      SAVING_ENABLED_CONFIG_KEY, isEnabled);
-  
-  return (valueIsGood == 1) && isEnabled.find("true") != std::string::npos;
-}
+template <typename T>
+boost::optional<T> getConfigValue(const std::string &key) {
+	T returnedValue;
+	
+	int valueIsGood =
+      Mantid::Kernel::ConfigService::Instance().getValue<T>(
+          SAVING_ENABLED_CONFIG_KEY, returnedValue);
 
-std::string getOutputPath() {
-  static bool isInitalised = false;
-  static std::string recoverFolder;
-
-  if (!isInitalised) {
-    recoverFolder = Mantid::Kernel::ConfigService::Instance().getAppDataDir();
-    recoverFolder.append("/recovery");
-    isInitalised = true;
+  if (valueIsGood != 1) {
+    return boost::optional<T>{};
   }
 
+  return boost::optional<T>{returnedValue};
+}
+
+boost::optional<bool> getConfigBool(const std::string &key) {
+  auto returnedValue = getConfigValue<std::string>(key);
+  if (!returnedValue.is_initialized()) {
+    return boost::optional<bool>{};
+  }
+
+  return returnedValue->find("true") != std::string::npos;
+}
+
+std::string getRecoveryFolder() {
+  static std::string recoverFolder =
+      Mantid::Kernel::ConfigService::Instance().getAppDataDir() + "/recovery/";
   return recoverFolder;
 }
 
-std::string getOutputProjectName() { return "recovery.project"; }
+std::string getOutputPath() {
+  auto time = std::time(nullptr);
+  auto localTime = std::localtime(&time);
+
+  std::ostringstream timestamp;
+  timestamp << std::put_time(localTime, "%Y-%m-%d %H-%M-%S");
+  auto timestampedPath = getRecoveryFolder().append(timestamp.str());
+
+  return timestampedPath;
+}
+
+const std::string OUTPUT_PROJ_NAME = "recovery.mantid" ;
+
+// Config keys
+const std::string SAVING_ENABLED_CONFIG_KEY = "projectRecovery.enabled";
+const std::string SAVING_TIME_KEY = "projectRecovery.secondsBetween";
+const std::string NO_OF_CHECKPOINTS_KEY = "projectRecovery.numberOfCheckpoints";
+
+// Config values
+const bool SAVING_ENABLED =
+getConfigBool(SAVING_ENABLED_CONFIG_KEY).get_value_or(false);
+const int SAVING_TIME =
+getConfigValue<int>(SAVING_TIME_KEY).get_value_or(60); // Seconds
+const int NO_OF_CHECKPOINTS =
+getConfigValue<int>(NO_OF_CHECKPOINTS_KEY).get_value_or(5);
+
+Mantid::Kernel::Logger g_log("Project Recovery Thread");
+const std::chrono::seconds TIME_BETWEEN_SAVING =
+std::chrono::seconds(SAVING_TIME);
 
 } // namespace
 
@@ -55,12 +96,7 @@ namespace API {
 ProjectRecoveryThread::ProjectRecoveryThread(ApplicationWindow *windowHandle)
     : m_backgroundSavingThread(), m_stopBackgroundThread(true),
       m_configKeyObserver(*this, &ProjectRecoveryThread::configKeyChanged),
-      m_windowPtr(windowHandle) {
-
-  if (isRecoveryEnabled()) {
-    startProjectSaving();
-  }
-}
+      m_windowPtr(windowHandle) {}
 
 ProjectRecoveryThread::~ProjectRecoveryThread() { stopProjectSaving(); }
 
@@ -83,9 +119,51 @@ void ProjectRecoveryThread::configKeyChanged(
   }
 }
 
+void ProjectRecoveryThread::deleteExistingCheckpoints(
+    size_t checkpointsToKeep) {
+  static auto workingFolder = getRecoveryFolder();
+  Poco::Path recoveryPath;
+  if (!recoveryPath.tryParse(workingFolder)) {
+    // Folder may not exist
+    g_log.debug("Project Saving: Failed to get working folder whilst deleting "
+                "checkpoints");
+    return;
+  }
+
+  std::vector<Poco::Path> folderPaths;
+
+  Poco::DirectoryIterator dirIterator(recoveryPath);
+  Poco::DirectoryIterator end;
+  while (dirIterator != end) {
+    std::string iterPath = workingFolder + dirIterator.name() + '/';
+    Poco::Path foundPath(iterPath);
+
+    if (foundPath.isDirectory()) {
+      folderPaths.push_back(std::move(foundPath));
+    }
+    ++dirIterator;
+  }
+
+  size_t numberOfDirsPresent = folderPaths.size();
+  if (numberOfDirsPresent <= checkpointsToKeep) {
+    // Nothing to do
+    return;
+  }
+
+  size_t checkpointsToRemove = numberOfDirsPresent - checkpointsToKeep;
+  bool recurse = true;
+  for (size_t i = 0; i < checkpointsToRemove; i++) {
+    Poco::File(folderPaths[i]).remove(recurse);
+  }
+}
+
 void ProjectRecoveryThread::startProjectSaving() {
   // Close the existing thread first
   stopProjectSaving();
+
+  if (!SAVING_ENABLED) {
+    return;
+  }
 
   // Spin up a new thread
   {
@@ -137,12 +215,15 @@ void ProjectRecoveryThread::projectSavingThread() {
     // "Timeout" - Save out again
     // Generate output paths
     const auto basePath = getOutputPath();
-    auto projectFile = Poco::Path(basePath).append(getOutputProjectName());
+    auto projectFile = Poco::Path(basePath).append(OUTPUT_PROJ_NAME);
 
     // Python's OS module cannot handle Poco's parsed paths
     // so use std::string instead and let OS parse the '/' char on Win
-	saveWsHistories(basePath);
+    saveWsHistories(basePath);
     saveOpenWindows(projectFile.toString());
+
+    // Purge any excessive folders
+    deleteExistingCheckpoints(NO_OF_CHECKPOINTS);
     g_log.information("Project Recovery: Saving finished");
   }
 }
@@ -164,10 +245,9 @@ void ProjectRecoveryThread::saveWsHistories(
       "write_all_workspaces_histories(\"" +
       QString::fromStdString(historyDestFolder) + "\")\n";
 
-  if (!m_windowPtr->runPythonScript(projectSavingCode)){
-	  throw std::runtime_error("Project Recovery: Python saving failed");
+  if (!m_windowPtr->runPythonScript(projectSavingCode)) {
+    throw std::runtime_error("Project Recovery: Python saving failed");
   }
-
 }
 
 void ProjectRecoveryThread::loadOpenWindows(const std::string &projectFolder) {

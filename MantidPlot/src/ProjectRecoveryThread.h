@@ -62,6 +62,8 @@ private:
   /// Triggers when the config key is updated to a new value
   void configKeyChanged(Mantid::Kernel::ConfigValChangeNotification_ptr notif);
 
+  void deleteExistingCheckpoints(size_t checkpointsToKeep);
+
   /// Loads a project recovery file back into Mantid
   void loadOpenWindows(const std::string &projectFolder);
   /// Saves a project recovery file in Mantid

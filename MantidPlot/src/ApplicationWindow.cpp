@@ -263,6 +263,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings,
 #endif
       m_projectRecoveryThread(this) {
   init(factorySettings, args);
+  m_projectRecoveryThread.startProjectSaving();
 }
 
 /**
@@ -9776,6 +9777,9 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
       return;
     }
   }
+
+  // Stop background saving thread, so it doesn't try to use a destroyed resource
+  m_projectRecoveryThread.stopProjectSaving();
 
   // Close the remaining MDI windows. The Python API is required to be active
   // when the MDI window destructor is called so that those references can be

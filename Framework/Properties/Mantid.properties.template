@@ -255,3 +255,9 @@ catalog.timeout.value=30
 
 # Indicates if project recovery should automatically save in the background
 projectRecovery.enabled=true
+
+# The delay in seconds between triggering a project recovery save
+projectRecovery.secondsBetween = 60
+
+# The number of checkpoints to retain in the recovery folder
+projectRecovery.numberOfCheckpoints = 5
