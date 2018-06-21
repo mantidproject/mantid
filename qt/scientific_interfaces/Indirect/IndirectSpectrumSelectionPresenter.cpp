@@ -104,8 +104,8 @@ void IndirectSpectrumSelectionPresenter::updateSpectra() {
   MantidQt::API::SignalBlocker<QObject> blocker(m_view.get());
   if (workspace) {
     setSpectraRange(0, workspace->getNumberHistograms() - 1);
-    boost::apply_visitor(SetViewSpectra(m_view.get()),
-                         m_model->getSpectra(m_activeIndex));
+    const auto spectra = m_model->getSpectra(m_activeIndex);
+    boost::apply_visitor(SetViewSpectra(m_view.get()), spectra);
     enableView();
   } else {
     m_view->clear();

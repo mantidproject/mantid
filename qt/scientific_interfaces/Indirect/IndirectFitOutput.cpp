@@ -48,16 +48,6 @@ void applyEnumeratedData(const F &functor, const FitDataIterator &fitDataBegin,
     start = (*it)->applyEnumeratedSpectra(functor(it->get()), start);
 }
 
-void extractParametersFromTable(ITableWorkspace_sptr tableWs,
-                                IndirectFitData const *fitData,
-                                ParameterValues &values) {
-  TableRowExtractor extractRowFromTable(tableWs);
-  auto extractRow = [&](std::size_t index, std::size_t spectrum) {
-    values[spectrum] = extractRowFromTable(index);
-  };
-  fitData->applyEnumeratedSpectra(extractRow);
-}
-
 void extractParametersFromTable(
     ITableWorkspace_sptr tableWs, const FitDataIterator &fitDataBegin,
     const FitDataIterator &fitDataEnd,
