@@ -23,7 +23,7 @@ Kernel::IValidator_sptr MDFrameValidator::clone() const {
 
 /** Checks that the frame of the MDWorkspace matches the expected frame.
  *
- * @param value :: The workspace to test
+ * @param workspace :: The workspace to test
  * @return A user level description of the error or "" for no error
  */
 std::string

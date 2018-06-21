@@ -35,8 +35,8 @@
 #include "MantidKernel/cow_ptr.h"
 
 using namespace Mantid::API;
-using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+using Mantid::Kernel::SpecialCoordinateSystem;
 using Mantid::coord_t;
 using Mantid::detid_t;
 using Mantid::MantidVec;

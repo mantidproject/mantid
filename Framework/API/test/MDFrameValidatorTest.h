@@ -15,6 +15,7 @@
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 class MDFrameValidatorTest : public CxxTest::TestSuite {
 public:
