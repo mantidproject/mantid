@@ -42,14 +42,8 @@ void shareCounts(
     const Mantid::Algorithms::ReflectometrySumInQ::MinMax &lambdaRange,
     Mantid::API::MatrixWorkspace &IvsLam, std::vector<double> &outputE) {
   // Check that we have histogram data
-  const auto &outputX = IvsLam.dataX(0);
-  auto &outputY = IvsLam.dataY(0);
-  if (outputX.size() != outputY.size() + 1) {
-    throw std::runtime_error(
-        "Expected output array to be histogram data (got X len=" +
-        std::to_string(outputX.size()) + ", Y len=" +
-        std::to_string(outputY.size()) + ")");
-  }
+  const auto &outputX = IvsLam.x(0);
+  auto &outputY = IvsLam.mutableY(0);
 
   const double totalWidth = lambdaRange.max - lambdaRange.min;
 
