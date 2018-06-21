@@ -485,7 +485,7 @@ std::vector<double> LoadILLReflectometry::getXValues() {
         if (m_localWorkspace->run().hasProperty(
                 "Distance.edelay_delay")) // Valid from 2018.
           m_tofDelay += doubleFromRun("Distance.edelay_delay");
-        else // Valid 2017.
+        else // Valid before 2018.
           m_tofDelay += doubleFromRun("Theta.edelay_delay");
       }
       g_log.debug() << "TOF delay: " << m_tofDelay << '\n';
@@ -784,7 +784,7 @@ void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
   //try { // Valid from 2018.
   //  m_detectorDistance = inMeter(doubleFromRun("Distance.D1"));
-  //} catch (...) { // Valid 2017.
+  //} catch (...) { // Valid before 2018.
   //  m_detectorDistance = sampleDetectorDistance();
   //}
   m_detectorDistance = sampleDetectorDistance();
@@ -820,7 +820,7 @@ void LoadILLReflectometry::placeSlits() {
     if (m_localWorkspace->run().hasProperty(
             "Distance.inter-slit_distance")) // Valid from 2018.
       slitSeparation = inMeter(doubleFromRun("Distance.inter-slit_distance"));
-    else // Valid 2017.
+    else // Valid before 2018.
       slitSeparation = inMeter(doubleFromRun("Theta.inter-slit_distance"));
     slit2ToSample = 0.368 + offset;
     slit1ToSample = slit2ToSample + slitSeparation;
@@ -839,7 +839,7 @@ void LoadILLReflectometry::placeSource() {
   double dist;
   //if (m_localWorkspace->run().hasProperty("Distance.D0")) // Valid from 2018.
   //  dist = inMeter(doubleFromRun("Distance.D0"));
-  //else // Valid 2017.
+  //else // Valid before 2018.
   //  dist = sourceSampleDistance();
   dist = sourceSampleDistance();
   g_log.debug() << "Source-sample distance " << dist << "m.\n";
@@ -885,7 +885,7 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre,
 }
 
 /** Return the sample to detector distance for the current instrument.
- *  Valid 2017.
+ *  Valid before 2018.
  *  @return the distance in meters
  */
 double LoadILLReflectometry::sampleDetectorDistance() const {
@@ -918,12 +918,12 @@ double LoadILLReflectometry::sampleHorizontalOffset() const {
   if (m_localWorkspace->run().hasProperty(
           "Distance.sampleHorizontalOffset")) // Valid from 2018.
     return inMeter(doubleFromRun("Distance.sampleHorizontalOffset"));
-  else // Valid 2017.
+  else // Valid before 2018.
     return inMeter(doubleFromRun("Theta.sampleHorizontalOffset"));
 }
 
 /** Return the source to sample distance for the current instrument.
- *  Valid 2017.
+ *  Valid before 2018.
  *  @return the source to sample distance in meters
  */
 double LoadILLReflectometry::sourceSampleDistance() const {

@@ -24,10 +24,8 @@ private:
   const std::string m_d17DirectBeamFile{"ILL/D17/317369.nxs"};
   const std::string m_d17File{"ILL/D17/317370.nxs"};
   const std::string m_figaroFile{"ILL/Figaro/598488.nxs"};
-  const std::string m_d17uptodateFile{
-      "/net4/serdon/illdata/181/d17/exp_9-11-1819/rawdata/415859.nxs"};
-  const std::string m_figarouptodateFile{
-      "/net4/serdon/illdata/181/figaro/exp_9-13-731/rawdata/607982.nxs"};
+  const std::string m_d17uptodateFile{"ILL/D17/000001.nxs"};
+  const std::string m_figarouptodateFile{"ILL/Figaro/000002.nxs"};
   // Name of the default output workspace
   const std::string m_outWSName{"LoadILLReflectometryTest_OutputWS"};
 
@@ -603,39 +601,41 @@ public:
             this->m_outWSName);
     TS_ASSERT(output);
     const auto &run = output->run();
-    const auto deflectionAngle =
-        loader.doubleFromRun("CollAngle.actual_coll_angle") * M_PI / 180.;
-    const auto sampleZOffset =
-        loader.doubleFromRun("Distance.sampleHorizontalOffset");
-    const auto d1 = loader.doubleFromRun("Distance.D1");
-    const auto restZ = loader.doubleFromRun("DTR.value");
+    // const auto deflectionAngle =
+    //    loader.doubleFromRun("CollAngle.actual_coll_angle") * M_PI / 180.;
+    // const auto sampleZOffset =
+    //    loader.doubleFromRun("Distance.sampleHorizontalOffset");
+    // const auto d1 = loader.doubleFromRun("Distance.D1");
+    // const auto restZ = loader.doubleFromRun("DTR.value");
     // Motor DH1 vertical coordinate.
-    const auto DH1Y = loader.doubleFromRun("DH1.value");
-    const auto DH2Y = loader.doubleFromRun("DH2.value");
-    const auto detAngle = std::atan2(DH2Y - DH1Y, 2.077 - 1.135);
-    const auto detectorY = std::sin(detAngle) * (restZ - 1.135) + DH1Y - 0.509;
-    const auto detectorZ = std::cos(detAngle) * (restZ - 1.135) + 1.135;
-    const auto instrument = output->getInstrument();
-    const auto detectorPanels =
-        instrument->getAllComponentsWithName("detector");
-    const auto detector = boost::dynamic_pointer_cast<
-        const Mantid::Geometry::RectangularDetector>(detectorPanels.front());
-    const auto pixelWidth = std::abs(detector->ystep());
-    const auto pixelOffset = 0.509 - 0.5 * pixelWidth;
-    const auto beamY = detectorY + pixelOffset * std::cos(detAngle);
-    const auto sht1 = loader.doubleFromRun("SHT1.value");
-    const auto beamZ = detectorZ - pixelOffset * std::sin(detAngle);
-    const auto d1ref = std::hypot(beamY - sht1, beamZ) -
-                       sampleZOffset / std::cos(deflectionAngle);
-    //TS_ASSERT_EQUALS(d1, d1ref);
-    const auto d1refloader = loader.sampleDetectorDistance();
-    //TS_ASSERT_EQUALS(d1, d1refloader * 1000.);
-    const auto d0 = loader.doubleFromRun("Distance.D0");
-    const auto chopperDist = loader.doubleFromRun("Distance.dist_chop_samp");
-    const auto d0ref = chopperDist + sampleZOffset / std::cos(deflectionAngle);
-    //TS_ASSERT_EQUALS(d0, d0ref);
-    const auto d0refloader = loader.sourceSampleDistance();
-    //TS_ASSERT_EQUALS(d0, d0refloader * 1000.);
+    // const auto DH1Y = loader.doubleFromRun("DH1.value");
+    // const auto DH2Y = loader.doubleFromRun("DH2.value");
+    // const auto detAngle = std::atan2(DH2Y - DH1Y, 2.077 - 1.135);
+    // const auto detectorY = std::sin(detAngle) * (restZ - 1.135) + DH1Y -
+    // 0.509;
+    // const auto detectorZ = std::cos(detAngle) * (restZ - 1.135) + 1.135;
+    // const auto instrument = output->getInstrument();
+    // const auto detectorPanels =
+    //    instrument->getAllComponentsWithName("detector");
+    // const auto detector = boost::dynamic_pointer_cast<
+    //    const Mantid::Geometry::RectangularDetector>(detectorPanels.front());
+    // const auto pixelWidth = std::abs(detector->ystep());
+    // const auto pixelOffset = 0.509 - 0.5 * pixelWidth;
+    // const auto beamY = detectorY + pixelOffset * std::cos(detAngle);
+    // const auto sht1 = loader.doubleFromRun("SHT1.value");c
+    // const auto beamZ = detectorZ - pixelOffset * std::sin(detAngle);
+    // const auto d1ref = std::hypot(beamY - sht1, beamZ) -
+    //                   sampleZOffset / std::cos(deflectionAngle);
+    // TS_ASSERT_EQUALS(d1, d1ref);
+    // const auto d1refloader = loader.sampleDetectorDistance();
+    // TS_ASSERT_EQUALS(d1, d1refloader * 1000.);
+    // const auto d0 = loader.doubleFromRun("Distance.D0");
+    // const auto chopperDist = loader.doubleFromRun("Distance.dist_chop_samp");
+    // const auto d0ref = chopperDist + sampleZOffset /
+    // std::cos(deflectionAngle);
+    // TS_ASSERT_EQUALS(d0, d0ref);
+    // const auto d0refloader = loader.sourceSampleDistance();
+    // TS_ASSERT_EQUALS(d0, d0refloader * 1000.);
     TS_ASSERT_EQUALS(run.getProperty("Distance.D1")->units(), "mm");
     TS_ASSERT_EQUALS(run.getProperty("Distance.D0")->units(), "mm");
     TS_ASSERT_EQUALS(run.getProperty("Distance.dist_chop_samp")->units(), "mm");
@@ -659,20 +659,24 @@ public:
             this->m_outWSName);
     const auto &run = output->run();
     TS_ASSERT(output);
-    const auto d1 = loader.doubleFromRun("Distance.D1");
-    const auto d1ref =
-        loader.doubleFromRun("det.value") * 1.e-3; // convert to meter
-    //TS_ASSERT_EQUALS(d1, d1ref);
-    const auto d1refloader = loader.sampleDetectorDistance();
-    //TS_ASSERT_EQUALS(d1, d1refloader);
-    const auto d0 = loader.doubleFromRun("Distance.D0");
-    const auto pairCentre = loader.doubleFromRun("Distance.dist_chop_samp");
-    const auto pairSeparation =
-        loader.doubleFromRun("Distance.ChopperGap") / 100; // still in cm?
-    const auto d0ref = pairCentre - 0.5 * pairSeparation;
-    //TS_ASSERT_EQUALS(d0, d0ref);
-    const auto d0refloader = loader.sourceSampleDistance();
-    //TS_ASSERT_EQUALS(d0, d0refloader);
+    // const auto d1 = loader.doubleFromRun("Distance.D1");
+    // const auto d1ref =
+    //    loader.doubleFromRun("det.value") * 1.e-3; // convert to meter
+    // TS_ASSERT_EQUALS(d1, d1ref);
+    // const auto d1refloader = loader.sampleDetectorDistance();
+    // TS_ASSERT_EQUALS(d1, d1refloader);
+    // const auto d0 = loader.doubleFromRun("Distance.D0");
+    // double pairCentre;
+    // if (run.hasProperty("Distance.dist_chop_samp"))
+    //  pairCentre = loader.doubleFromRun("Distance.dist_chop_samp");
+    // else
+    //  pairCentre = loader.doubleFromRun("VirtualChopper.dist_chop_samp");
+    // const auto pairSeparation =
+    //    loader.doubleFromRun("Distance.ChopperGap") / 100; // still in cm?
+    // const auto d0ref = pairCentre - 0.5 * pairSeparation;
+    // TS_ASSERT_EQUALS(d0, d0ref);
+    // const auto d0refloader = loader.sourceSampleDistance();
+    // TS_ASSERT_EQUALS(d0, d0refloader);
     TS_ASSERT_EQUALS(run.getProperty("Distance.D1")->units(), "");
     TS_ASSERT_EQUALS(run.getProperty("Distance.D0")->units(), "");
     AnalysisDataService::Instance().clear();
@@ -721,13 +725,17 @@ public:
     const auto run = output->run();
     TS_ASSERT(output);
     const auto v7 = loader.doubleFromRun("VirtualChopper.dist_chop_samp");
-    const auto v8 = loader.doubleFromRun("Distance.dist_chop_samp");
+    double v8;
+    if (run.hasProperty("Distance.dist_chop_samp")) {
+      v8 = loader.doubleFromRun("Distance.dist_chop_samp");
+      TS_ASSERT_EQUALS(run.getProperty("Distance.dist_chop_samp")->units(), "");
+    } else {
+      v8 = loader.doubleFromRun("VirtualChopper.dist_chop_samp");
+      TS_ASSERT_EQUALS(
+          run.getProperty("VirtualChopper.dist_chop_samp")->units(), "");
+    }
     TS_ASSERT_EQUALS(v7, v8);
-    TS_ASSERT_EQUALS(run.getProperty("Distance.dist_chop_samp")->units(), "");
     AnalysisDataService::Instance().clear();
-    // D17 Nexus no units declared
-    // D17 Distance.ChopperGap in cm
-    // All distance units can be m
   }
 
   void testSlitConfigurationD17() {
