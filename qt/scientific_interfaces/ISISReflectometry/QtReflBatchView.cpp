@@ -15,8 +15,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-DECLARE_SUBWINDOW(QtReflMainWindowView)
-
 //----------------------------------------------------------------------------------------------
 /** Constructor
 */
@@ -33,7 +31,12 @@ Initialise the Interface
 */
 void QtReflMainWindowView::initLayout() {
   m_ui.setupUi(this);
-  connect(m_ui.helpButton, SIGNAL(clicked()), this, SLOT(helpPressed()));
+
+  // Create the tabs
+  auto runsPresenter = createRunsTab();
+  auto eventPresenter = createEventTab();
+  auto settingsPresenter = createSettingsTab();
+  auto savePresenter = createSaveTab();
 
   // Create the presenter
   m_presenter = Mantid::Kernel::make_unique<ReflMainWindowPresenter>(
@@ -116,54 +119,5 @@ std::unique_ptr<IReflSaveTabPresenter> QtReflMainWindowView::createSaveTab() {
       std::move(saver), std::move(saveTabView));
 }
 
-/**
-Show an critical error dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void QtReflMainWindowView::giveUserCritical(const std::string &prompt,
-                                            const std::string &title) {
-  QMessageBox::critical(this, QString::fromStdString(title),
-                        QString::fromStdString(prompt), QMessageBox::Ok,
-                        QMessageBox::Ok);
-}
-
-/**
-Show an information dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void QtReflMainWindowView::giveUserInfo(const std::string &prompt,
-                                        const std::string &title) {
-  QMessageBox::information(this, QString::fromStdString(title),
-                           QString::fromStdString(prompt), QMessageBox::Ok,
-                           QMessageBox::Ok);
-}
-
-/**
-Runs python code
-* @param pythonCode : [input] The code to run
-* @return : Result of the execution
-*/
-std::string
-QtReflMainWindowView::runPythonAlgorithm(const std::string &pythonCode) {
-
-  QString output = runPythonCode(QString::fromStdString(pythonCode), false);
-  return output.toStdString();
-}
-
-/**
-Handles attempt to close main window
-* @param event : [input] The close event
-*/
-void QtReflMainWindowView::closeEvent(QCloseEvent *event) {
-
-  // Close only if reduction has been paused
-  if (!m_presenter->isProcessing()) {
-    event->accept();
-  } else {
-    event->ignore();
-  }
-}
 }
 }

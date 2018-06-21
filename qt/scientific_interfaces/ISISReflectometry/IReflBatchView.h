@@ -1,14 +1,14 @@
-#ifndef MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWVIEW_H
-#define MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWVIEW_H
+#ifndef MANTID_ISISREFLECTOMETRY_IREFLBATCHVIEW_H
+#define MANTID_ISISREFLECTOMETRY_IREFLBATCHVIEW_H
 
 #include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** @class IReflMainWindowView
+/** @class IReflBatchView
 
-IReflMainWindowView is the interface defining the functions that the main
+IReflBatchView is the interface defining the functions that the main
 window view needs to implement. It is empty and not necessary at the moment, but
 can be used in the future if widgets common to all tabs are added, for instance,
 the help button.
@@ -34,11 +34,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflMainWindowView {
+class IReflBatchView {
 public:
-  virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
-  virtual ~IReflMainWindowView() = default;
+  virtual ~IReflBatchView() = default;
 };
 }
 }
-#endif /* MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWVIEW_H */
+#endif /* MANTID_ISISREFLECTOMETRY_IREFLBATCHVIEW_H */

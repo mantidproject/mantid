@@ -1,5 +1,5 @@
-#ifndef MANTID_ISISREFLECTOMETRY_QTREFLMAINWINDOWVIEW_H
-#define MANTID_ISISREFLECTOMETRY_QTREFLMAINWINDOWVIEW_H
+#ifndef MANTID_ISISREFLECTOMETRY_QTREFLBATCHVIEW_H
+#define MANTID_ISISREFLECTOMETRY_QTREFLBATCHVIEW_H
 
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "IReflMainWindowView.h"
@@ -16,11 +16,7 @@ class IReflRunsTabPresenter;
 class IReflSettingsTabPresenter;
 class IReflSaveTabPresenter;
 
-/** @class ReflMainWindowView
-
-ReflMainWindowView is the concrete main window view implementing the
-functionality defined by the interface IReflMainWindowView
-
+/**
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
@@ -42,34 +38,35 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class QtReflMainWindowView : public MantidQt::API::UserSubWindow,
-                             public IReflMainWindowView {
+class QtReflBatchView : public IReflBatchView {
   Q_OBJECT
 public:
   /// Constructor
-  explicit QtReflMainWindowView(QWidget *parent = nullptr);
+  explicit QtReflBatchView(QWidget *parent = nullptr);
   /// Destructor
-  ~QtReflMainWindowView() override;
-  /// Name of the interface
-  static std::string name() { return "ISIS Reflectometry"; }
-  /// This interface's categories.
-  static QString categoryInfo() { return "Reflectometry"; }
-  /// Run a python algorithm
-  std::string runPythonAlgorithm(const std::string &pythonCode) override;
-  /// Close window handler
-  void closeEvent(QCloseEvent *event) override;
+  ~QtReflBatchView() override;
 
-public slots:
-  void helpPressed();
-
+  QtReflRunsTabView& runsTab() const;
+  QtReflEventTabView& eventTab() const;
+  QtReflSaveTabView& saveTab() const;
+  QtReflSettingsTabView& settingsTab() const;
 private:
   /// Initializes the interface
   void initLayout() override;
+  /// Creates the 'Runs' tab
+  std::unique_ptr<IReflRunsTabPresenter> createRunsTab();
+  /// Creates the 'Event Handling' tab
+  IReflEventTabPresenter *createEventTab();
+  /// Creates the 'Settings' tab
+  IReflSettingsTabPresenter *createSettingsTab();
+  /// Creates the 'Save ASCII' tab
+  std::unique_ptr<IReflSaveTabPresenter> createSaveTab();
+
   /// Interface definition with widgets for the main interface window
-  Ui::ReflMainWindowWidget m_ui;
+  Ui::ReflBatchView m_ui;
   /// The presenter handling this view
-  std::unique_ptr<IReflMainWindowPresenter> m_presenter;
+  std::unique_ptr<IReflBatchPresenter> m_presenter;
 };
 }
 }
-#endif /* MANTID_ISISREFLECTOMETRY_QTREFLMAINWINDOWVIEW_H */
+#endif /* MANTID_ISISREFLECTOMETRY_QTREFLBATCHVIEW_H */
