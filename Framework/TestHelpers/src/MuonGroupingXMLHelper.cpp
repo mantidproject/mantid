@@ -117,10 +117,8 @@ createXMLwithPairsAndGroups(const int &nGroups, const int &nDetectorsPerGroup) {
 }
 
 /**
- * Save grouping to the XML file specified.
- *
+ * Create an XML file (as a string) containing muon grouping information.
  * @param grouping :: Struct with grouping information
- * @param filename :: XML filename where information will be saved
  */
 std::string groupingToXML(const Mantid::API::Grouping &grouping) {
 

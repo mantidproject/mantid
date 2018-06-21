@@ -203,7 +203,7 @@ ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
 
 /**
  * Creates a single-point workspace with instrument and runNumber set.
- * @param intrName :: Instrument name e.g. MUSR
+ * @param instrName :: Instrument name e.g. MUSR
  * @param runNumber ::  e.g. 1000
  * @param nSpectra :: Number of spectra in the workspace, defaults to 1.
  * @return Pointer to the workspace.
