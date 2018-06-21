@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>959</width>
-    <height>346</height>
+    <width>958</width>
+    <height>409</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -342,6 +342,22 @@
        </item>
       </layout>
      </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="buttonMonitor">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Start a background process to monitor live data for this instrument</string>
+     </property>
+     <property name="text">
+      <string>Monitor Live Data</string>
+     </property>
     </widget>
    </item>
   </layout>

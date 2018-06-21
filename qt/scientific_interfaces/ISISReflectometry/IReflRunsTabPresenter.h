@@ -49,7 +49,9 @@ public:
     ICATSearchCompleteFlag,
     TransferFlag,
     InstrumentChangedFlag,
-    GroupChangedFlag
+    GroupChangedFlag,
+    StartMonitorFlag,
+    StartMonitorCompleteFlag
   };
 
   // Tell the presenter something happened

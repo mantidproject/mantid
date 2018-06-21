@@ -87,6 +87,8 @@ public:
   virtual IReflRunsTabPresenter *getPresenter() const = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const = 0;
+  virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  getMonitorAlgorithmRunner() const = 0;
 
   // Timer methods
   virtual void startTimer(const int millisecs) = 0;
@@ -94,6 +96,9 @@ public:
 
   // Start an ICAT search
   virtual void startIcatSearch() = 0;
+
+  // Start live data monitoring
+  virtual void startMonitor() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

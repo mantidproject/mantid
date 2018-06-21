@@ -126,6 +126,9 @@ private:
   static const std::string MeasureTransferMethod;
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
+  /// The name to use for the live data workspace
+  std::string m_liveDataWorkspace;
+  std::string m_liveDataAccWorkspace;
 
   /// searching
   bool search();
@@ -167,6 +170,18 @@ private:
       const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns);
   /// Get the data for a cell in the search results table as a string
   std::string searchModelData(const int row, const int column);
+  /// Start the live data monitor
+  void startMonitor();
+  void startMonitorComplete();
+  std::string setupMonitorPostProcessingScript();
+  Mantid::API::IAlgorithm_sptr
+  setupMonitorAlgorithm(const std::string &postProcessingScript);
+  void runMonitorAlgorithm(Mantid::API::IAlgorithm_sptr alg);
+
+  void handleError(const std::string &message, const std::exception &e);
+  void handleError(const std::string &message);
+
+  void pythonSrcPostProcessingAlgorithm(std::ostringstream &result) const;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

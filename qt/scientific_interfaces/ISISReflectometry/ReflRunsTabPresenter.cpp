@@ -8,6 +8,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/Tolerance.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
@@ -76,6 +77,80 @@ std::string getRunErrorMessage(
 
   return std::string();
 }
+
+/** Utility to set an option in a map of QStrings from std::strings
+ */
+void setOption(OptionsMap &options, const std::string &key,
+               const std::string &value) {
+  options[QString::fromStdString(key)] = QString::fromStdString(value);
+}
+
+void pythonSrcEpicsImport(std::ostringstream &result) {
+  result << "try:\n"
+         << "  from epics import caget\n"
+         << "except:\n"
+         << "  raise RuntimeError('EPICS must be installed for this "
+            "functionality')\n";
+}
+
+void pythonSrcTry(std::ostringstream &result) { result << "try:\n"; }
+
+void pythonSrcCatch(std::ostringstream &result) {
+  result << "except Exception, e:\n"
+         << "  print('Live data error: ' + str(e))\n";
+}
+
+void pythonSrcCloneWorkspace(std::ostringstream &result) {
+  result << "  CloneWorkspace(InputWorkspace=input,OutputWorkspace=output)\n";
+}
+
+void pythonSrcLoadInstrument(std::ostringstream &result,
+                             const std::string &instrument) {
+  result << "  LoadInstrument(Workspace=output,RewriteSpectraMap=True,"
+            "InstrumentName='"
+         << instrument << "')\n";
+}
+
+void pythonSrcLiveDataVariable(std::ostringstream &result,
+                               const std::string &instrument,
+                               const std::string &variable) {
+  result
+      << "  " << variable << " = caget('IN:" << instrument
+      << ":CS:SB:" << variable << "',as_string=True)\n"
+      << "  if " << variable << " == None:\n"
+      << "    raise RuntimeError('Could not find required EPICS variable ' + "
+      << variable << ")\n";
+}
+
+void pythonSrcThetaValidation(std::ostringstream &result) {
+  result << "  if float(Theta) <= " << Tolerance << ":\n"
+         << "    raise RuntimeError('Theta must be greater than zero')\n";
+}
+
+void pythonSrcAddSampleLog(std::ostringstream &result,
+                           const std::vector<std::string> &logNames,
+                           const std::vector<std::string> &logUnits) {
+  result << "  AddSampleLogMultiple(Workspace=output,LogNames=[";
+  for (auto &logName : logNames)
+    result << "'" << logName << "',";
+  result << "],LogValues=[";
+  for (auto &logName : logNames)
+    result << logName << ",";
+  result << "],LogUnits=[";
+  for (auto &logUnit : logUnits)
+    result << "'" << logUnit << "',";
+  result << "])\n";
+}
+
+void pythonSrcInstrumentParameter(std::ostringstream &result,
+                                  const std::string &variable,
+                                  const std::string &component) {
+  result << "  SetInstrumentParameter(Workspace=output"
+         << ",ParameterName='vertical gap'"
+         << ",ParameterType='Number'"
+         << ",ComponentName='" << component << "'"
+         << ",Value=" << variable << ")\n";
+}
 } // namespace
 
 /** Constructor
@@ -90,7 +165,8 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
       m_tablePresenters(tablePresenters), m_mainPresenter(nullptr),
-      m_searcher(searcher), m_instrumentChanged(false) {
+      m_searcher(searcher), m_instrumentChanged(false),
+      m_liveDataWorkspace("live"), m_liveDataAccWorkspace("acc") {
   assert(m_view != nullptr);
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
@@ -188,6 +264,12 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     break;
   case IReflRunsTabPresenter::GroupChangedFlag:
     changeGroup();
+    break;
+  case IReflRunsTabPresenter::StartMonitorFlag:
+    startMonitor();
+    break;
+  case IReflRunsTabPresenter::StartMonitorCompleteFlag:
+    startMonitorComplete();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -790,6 +872,119 @@ void ReflRunsTabPresenter::changeGroup() {
   updateWidgetEnabledState();
   // Update the current menu commands based on the current group
   pushCommands(selectedGroup());
+}
+
+void ReflRunsTabPresenter::handleError(const std::string &message,
+                                       const std::exception &e) {
+  m_mainPresenter->giveUserCritical(message + ": " + std::string(e.what()),
+                                    "Error");
+}
+
+void ReflRunsTabPresenter::handleError(const std::string &message) {
+  m_mainPresenter->giveUserCritical(message, "Error");
+}
+
+void ReflRunsTabPresenter::pythonSrcPostProcessingAlgorithm(
+    std::ostringstream &result) const {
+
+  // Get the options from the settings tab. Not ideal, but just use the first
+  // group.
+  int const group = 0;
+  auto options = convertOptionsFromQMap(getProcessingOptions(group));
+
+  // Set the output workspace names
+  setOption(options, "OutputWorkspaceBinned",
+            "IvsQ_binned_" + m_liveDataWorkspace);
+  setOption(options, "OutputWorkspace", "IvsQ_" + m_liveDataWorkspace);
+  setOption(options, "OutputWorkspaceWavelength",
+            "IvsLam_" + m_liveDataWorkspace);
+
+  // Append the algorithm name and properties string to the result
+  auto const optionsString = convertMapToString(options).toStdString();
+  result
+      << "  ReflectometryReductionOneAuto(InputWorkspace=output,ThetaLogName='"
+         "Theta',"
+      << optionsString << ")\n";
+}
+
+std::string ReflRunsTabPresenter::setupMonitorPostProcessingScript() {
+  std::ostringstream script;
+  auto instrument = m_view->getSearchInstrument();
+
+  pythonSrcEpicsImport(script);
+  pythonSrcTry(script);
+  pythonSrcCloneWorkspace(script);
+  pythonSrcLoadInstrument(script, instrument);
+
+  std::vector<std::string> logNames = {"Theta", "s1vg", "s2vg"};
+  std::vector<std::string> logUnits = {"deg", "m", "m"};
+
+  // for (auto &logName : logNames)
+  //  pythonSrcLiveDataVariable(script, instrument, logName);
+  script << "  Theta = '0.5'\n"; // TODO temp test to always supply valid theta
+  script << "  s1vg='3.25'\n";   // TODO temp test to always supply valid theta
+  script << "  s2vg='0.288'\n";  // TODO temp test to always supply valid theta
+  pythonSrcThetaValidation(script);
+
+  pythonSrcAddSampleLog(script, logNames, logUnits);
+  pythonSrcInstrumentParameter(script, "s1vg", "slit1");
+  pythonSrcInstrumentParameter(script, "s2vg", "slit2");
+
+  pythonSrcPostProcessingAlgorithm(script);
+  pythonSrcCatch(script);
+
+  return script.str();
+}
+
+IAlgorithm_sptr ReflRunsTabPresenter::setupMonitorAlgorithm(
+    const std::string &postProcessingScript) {
+  auto alg = AlgorithmManager::Instance().create("StartLiveData");
+  alg->initialize();
+  alg->setChild(true);
+  alg->setLogging(false);
+  auto instrument = m_view->getSearchInstrument();
+  alg->setProperty("Instrument", instrument);
+  alg->setProperty("OutputWorkspace", m_liveDataWorkspace);
+  alg->setProperty("AccumulationMethod", "Replace");
+  alg->setProperty("AccumulationWorkspace", m_liveDataAccWorkspace);
+  alg->setProperty("UpdateEvery", "10");
+  alg->setProperty("PostProcessingScript", postProcessingScript);
+  alg->setProperty("RunTransitionBehavior", "Restart");
+  auto errorMap = alg->validateInputs();
+  if (!errorMap.empty()) {
+    std::string errorString;
+    for (auto &kvp : errorMap)
+      errorString.append(kvp.first + ":" + kvp.second);
+    handleError(errorString);
+    return nullptr;
+  }
+  return alg;
+}
+
+void ReflRunsTabPresenter::runMonitorAlgorithm(IAlgorithm_sptr alg) {
+  auto algRunner = m_view->getMonitorAlgorithmRunner();
+  algRunner->startAlgorithm(alg);
+}
+
+/** Start live data monitoring
+ */
+void ReflRunsTabPresenter::startMonitor() {
+  try {
+    auto script = setupMonitorPostProcessingScript();
+    auto alg = setupMonitorAlgorithm(script);
+    if (!alg)
+      return;
+    runMonitorAlgorithm(alg);
+  } catch (std::exception &e) {
+    handleError("Error starting live data", e);
+  } catch (...) {
+    handleError("Error starting live data");
+  }
+}
+
+void ReflRunsTabPresenter::startMonitorComplete() {
+  auto algRunner = m_view->getMonitorAlgorithmRunner();
+  auto monitorAlg = algRunner->getAlgorithm()->getProperty("MonitorLiveData");
 }
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";

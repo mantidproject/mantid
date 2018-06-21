@@ -105,6 +105,8 @@ public:
   IReflRunsTabPresenter *getPresenter() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
+  boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  getMonitorAlgorithmRunner() const override;
 
   // Timer methods
   void startTimer(const int millisecs) override;
@@ -112,6 +114,9 @@ public:
 
   // Start an ICAT search
   void startIcatSearch() override;
+
+  // Live data monitor
+  void startMonitor() override;
 
 private:
   /// initialise the interface
@@ -122,6 +127,7 @@ private:
   void timerEvent(QTimerEvent *event) override;
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
+  boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_monitorAlgoRunner;
 
   // the presenter
   std::shared_ptr<IReflRunsTabPresenter> m_presenter;
@@ -143,9 +149,11 @@ private slots:
   void on_actionTransfer_triggered();
   void slitCalculatorTriggered();
   void icatSearchComplete();
+  void startMonitorComplete();
   void instrumentChanged(int index);
   void groupChanged();
   void showSearchContextMenu(const QPoint &pos);
+  void on_buttonMonitor_clicked();
 };
 
 } // namespace CustomInterfaces
