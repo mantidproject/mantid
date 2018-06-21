@@ -157,7 +157,6 @@ signals:
 
 protected:
   void showEvent(QShowEvent *e) override;
-  double normalization() const;
   void setNormalization();
 
 private slots:
@@ -245,7 +244,6 @@ private:
 };
 
 std::map<std::string, double> readMultipleNormalization();
-std::vector<double> readNormalization();
 } // MantidQt
 } // API
 

@@ -4,7 +4,7 @@ from PyQt4 import QtCore, QtGui
 import sys
 import mantid
 from DGSPlanner.ValidateOL import ValidateUB
-from LoadNexusUB import LoadNexusUB
+from DGSPlanner.LoadNexusUB import LoadNexusUB
 try:
     from PyQt4.QtCore import QString
 except ImportError:

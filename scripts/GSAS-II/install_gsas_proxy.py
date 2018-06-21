@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 import os
 import pip
@@ -5,28 +7,23 @@ import shutil
 import site
 import subprocess
 import urllib2
-import zipfile
 
 
+FAILED_DOWNLOAD_MESSAGE = "Could not download the GSAS installation package. " \
+                          "This can occur for many reasons, one of which is " \
+                          "that your computer is not connected to the internet.\n" \
+                          "A common reason is that your version of SSL is out of date " \
+                          "(often seen on OSX). From a Python shell, run " \
+                          "'import ssl; print(ssl.OPENSSL_VERSION)'\n" \
+                          "If you see a version number less than 1.0, you need to either " \
+                          "upgrade SSL (contact the Mantid team or seek help online) " \
+                          "or do a manual installation from the GSAS-II website.\n" \
+                          "If neither of these solutions yield anything useful, please " \
+                          "get in contact with the Mantid team."
 GSAS_SVN_URL = "https://subversion.xray.aps.anl.gov/pyGSAS/install/GSASIIproxy.zip"
 GSAS_BOOTSTRAP_URL = "https://subversion.xray.aps.anl.gov/pyGSAS/install/bootstrap.py"
 GSAS_PROXY_FILE_NAME = "GSASIIProxy.zip"
 GSAS_HOME_DIR_NAME = "g2conda"
-
-
-def download_zip_file(target_location):
-    response = urllib2.urlopen(GSAS_SVN_URL)
-    zip_file = response.read()
-    response.close()
-
-    with open(target_location, "wb") as out:
-        out.write(zip_file)
-
-
-def unzip_file(zip_file_name, target_directory):
-    zip_file = zipfile.ZipFile(zip_file_name, "r")
-    zip_file.extractall(target_directory)
-    zip_file.close()
 
 
 def download_bootstrap(revision_number, target_location):
@@ -55,30 +52,17 @@ def install_package(package_name):
 
 
 def install_gsasii(install_directory, revision_number, force_overwrite):
-    gsas_home_dir = os.path.join(install_directory, GSAS_HOME_DIR_NAME)
+    gsas_home_dir = os.path.join(install_directory, GSAS_HOME_DIR_NAME, "GSASII")
 
     if force_overwrite and os.path.exists(gsas_home_dir):
         print("Removing {}".format(gsas_home_dir))
         shutil.rmtree(gsas_home_dir)
 
     if not os.path.exists(gsas_home_dir):
-        # This is the first time installing GSAS-II, so we have to make a home directory and download the SVN kit
-        print("Downloading GSAS mini-SVN kit")
-
-        if not os.path.exists(install_directory):
-            os.makedirs(install_directory)
-
-        proxy_zip_file = os.path.join(install_directory, GSAS_PROXY_FILE_NAME)
-        download_zip_file(target_location=proxy_zip_file)
-
-        print("Extracting GSAS proxy installation")
-        gsas_home_dir = os.path.join(install_directory, GSAS_HOME_DIR_NAME)
-        unzip_file(zip_file_name=proxy_zip_file, target_directory=gsas_home_dir)
-
-        os.remove(proxy_zip_file)
+        os.makedirs(gsas_home_dir)
 
     print("Downloading correct version of bootstrap.py")
-    bootstrap_file_name = os.path.join(gsas_home_dir, "GSASII", "bootstrap.py")
+    bootstrap_file_name = os.path.join(gsas_home_dir, "bootstrap.py")
     download_bootstrap(revision_number, bootstrap_file_name)
 
     if not package_is_installed("wx"):

@@ -37,14 +37,13 @@ class MANTID_API_DLL MDFrameValidator
 public:
   explicit MDFrameValidator(const std::string &frameName);
   /// Gets the type of the validator
-  inline std::string getType() const { return "mdframe"; }
+  std::string getType() const { return "mdframe"; }
   /// Clone the current state
   Kernel::IValidator_sptr clone() const override;
 
 private:
   /// Check for validity.
-  virtual std::string
-  checkValidity(const IMDWorkspace_sptr &workspace) const override;
+  std::string checkValidity(const IMDWorkspace_sptr &workspace) const override;
 
   /// The name of the required frame
   const std::string m_frameID;

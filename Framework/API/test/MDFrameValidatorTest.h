@@ -15,10 +15,17 @@
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
-using Mantid::Kernel::Units::Symbol;
+using namespace Mantid::Kernel;
 
 class MDFrameValidatorTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MDFrameValidatorTest *createSuite() {
+    return new MDFrameValidatorTest();
+  }
+  static void destroySuite(MDFrameValidatorTest *suite) { delete suite; }
+
   void testGetType() {
     MDFrameValidator unitValidator(HKL::HKLName);
     TS_ASSERT_EQUALS(unitValidator.getType(), "mdframe");
@@ -28,7 +35,8 @@ public:
     MDFrameValidator frameValidator(HKL::HKLName);
 
     HKLFrameFactory factory;
-    auto frame = factory.create(MDFrameArgument{HKL::HKLName, Symbol::RLU});
+    auto frame =
+        factory.create(MDFrameArgument{HKL::HKLName, Units::Symbol::RLU});
     auto dim = boost::make_shared<MDHistoDimension>("x", "x", *frame, 0.0f,
                                                     100.0f, 10);
     auto ws = boost::make_shared<MDHistoWorkspaceTester>(dim, dim, dim);
@@ -38,7 +46,7 @@ public:
   void testHKLMDWorkspaceIsNotValidForValidatorWithQLabFrame() {
     MDFrameValidator frameValidator(QLab::QLabName);
 
-    MDFrameArgument args{HKL::HKLName, Symbol::RLU};
+    MDFrameArgument args{HKL::HKLName, Units::Symbol::RLU};
     auto frame = HKLFrameFactory().create(args);
     auto dim = boost::make_shared<MDHistoDimension>("x", "x", *frame, 0.0f,
                                                     100.0f, 10);
@@ -50,8 +58,8 @@ public:
   void testMixedAxisMDWorkspaceIsNotValidForValidatorWithQLabFrame() {
     MDFrameValidator frameValidator(QLab::QLabName);
 
-    MDFrameArgument axisArgs1{HKL::HKLName, Symbol::RLU};
-    MDFrameArgument axisArgs2{QLab::QLabName, Symbol::InverseAngstrom};
+    MDFrameArgument axisArgs1{HKL::HKLName, Units::Symbol::RLU};
+    MDFrameArgument axisArgs2{QLab::QLabName, Units::Symbol::InverseAngstrom};
 
     auto frame1 = HKLFrameFactory().create(axisArgs1);
     auto frame2 = QLabFrameFactory().create(axisArgs2);
