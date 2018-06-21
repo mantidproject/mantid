@@ -68,8 +68,8 @@ public:
     auto inputWS = testWorkspace();
     inputWS = detectorsOnly(inputWS);
     inputWS = convertToWavelength(inputWS);
-    auto &Ys = inputWS->y(0);
-    const auto totalY = std::accumulate(Ys.cbegin(), Ys.cend(), 0.0);
+    const auto &Ys = inputWS->y(0);
+    const auto totalY = std::accumulate(Ys.cbegin(), Ys.cend(), 0.);
     const std::array<bool, 2> flatSampleOptions{{true, false}};
     for (const auto isFlatSample : flatSampleOptions) {
       for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
@@ -84,8 +84,6 @@ public:
             alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
         TS_ASSERT_THROWS_NOTHING(
             alg.setProperty("BeamCentre", static_cast<int>(i)))
-        TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMin", 0.1))
-        TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMax", 20.))
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", isFlatSample))
         TS_ASSERT_THROWS_NOTHING(alg.execute())
         API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -125,8 +123,6 @@ public:
             alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
         TS_ASSERT_THROWS_NOTHING(
             alg.setProperty("BeamCentre", static_cast<int>(beamCentre)))
-        TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMin", 0.1))
-        TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMax", 20.))
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", isFlatSample))
         TS_ASSERT_THROWS_NOTHING(alg.execute())
         API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -158,8 +154,6 @@ public:
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("BeamCentre", static_cast<int>(detectorIdx)))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMin", 0.1))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMax", 15.))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", true))
     TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
                             e.what(),
@@ -182,8 +176,6 @@ public:
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("BeamCentre", static_cast<int>(monitorIdx)))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMin", 0.1))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMax", 15.))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", true))
     TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
                             e.what(),
@@ -204,8 +196,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BeamCentre", 2))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMin", 0.1))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMax", 15.))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", true))
     TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
                             e.what(),
@@ -216,7 +206,7 @@ private:
   static Mantid::API::MatrixWorkspace_sptr testWorkspace() {
     using namespace Mantid;
     using namespace WorkspaceCreationHelper;
-    constexpr double startX{0.};
+    constexpr double startX{0.1};
     const Kernel::V3D slit1Pos{0., 0., -2.};
     const Kernel::V3D slit2Pos{0., 0., -1.};
     constexpr double vg1{0.5};
@@ -289,8 +279,6 @@ public:
     alg.setProperty("InputWorkspaceIndexSet", m_fullIndexSet);
     alg.setPropertyValue("OutputWorkspace", "_unused_for_child");
     alg.setProperty("BeamCentre", 49);
-    alg.setProperty("WavelengthMin", 0.1);
-    alg.setProperty("WavelengthMax", 20.);
     alg.setProperty("FlatSample", true);
     for (int repetitions = 0; repetitions < 1000; ++repetitions) {
       alg.execute();

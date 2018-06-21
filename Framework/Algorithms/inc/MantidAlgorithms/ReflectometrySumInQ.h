@@ -43,6 +43,12 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL ReflectometrySumInQ : public API::Algorithm {
 public:
+  struct Angles {
+    double horizon{std::nan("")};
+    double twoTheta{std::nan("")};
+    double delta{std::nan("")};
+  };
+
   struct MinMax {
     double min{std::numeric_limits<double>::max()};
     double max{std::numeric_limits<double>::lowest()};
@@ -57,12 +63,6 @@ public:
   const std::string summary() const override;
 
 private:
-  struct Angles {
-    double horizon{std::nan("")};
-    double twoTheta{std::nan("")};
-    double delta{std::nan("")};
-  };
-
   void init() override;
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
