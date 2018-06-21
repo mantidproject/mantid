@@ -107,23 +107,7 @@ SlicedGroup slice(UnslicedGroup const &unslicedGroup,
   return SlicedGroup(unslicedGroup.name(), std::move(slicedRows));
 }
 
-template <typename Row>
-MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
-operator<<(std::ostream &os, Group<Row> const &group) {
-  os << "  Group (name: " << group.name() << ")\n";
-  for (auto &&row : group.rows()) {
-    if (row.is_initialized())
-      os << "    " << row.get() << '\n';
-    else
-      os << "    Row (invalid)\n";
-  }
-  return os;
-}
-
 template class Group<SlicedRow>;
-template std::ostream &operator<<(std::ostream &, SlicedGroup const &);
-
 template class Group<UnslicedRow>;
-template std::ostream &operator<<(std::ostream &, UnslicedGroup const &);
 }
 }

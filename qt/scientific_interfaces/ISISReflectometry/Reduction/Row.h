@@ -75,8 +75,12 @@ private:
 };
 
 template <typename ReducedWorkspaceNames>
-MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
-operator<<(std::ostream &os, Row<ReducedWorkspaceNames> const &row);
+std::ostream &operator<<(std::ostream &os,
+                         Row<ReducedWorkspaceNames> const &row) {
+  auto runNumbers = boost::join(row.runNumbers(), "+");
+  os << "Row (runs: " << runNumbers << ", theta: " << row.theta() << ")";
+  return os;
+}
 
 template <typename ReducedWorkspaceNames>
 // cppcheck-suppress syntaxError

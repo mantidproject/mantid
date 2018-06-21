@@ -59,14 +59,6 @@ Row<ReducedWorkspaceNames>::reducedWorkspaceNames() const {
   return m_reducedWorkspaceNames;
 }
 
-template <typename ReducedWorkspaceNames>
-std::ostream &operator<<(std::ostream &os,
-                         Row<ReducedWorkspaceNames> const &row) {
-  auto runNumbers = boost::join(row.runNumbers(), "+");
-  os << "Row (runs: " << runNumbers << ", theta: " << row.theta() << ")";
-  return os;
-}
-
 boost::optional<UnslicedRow>
 unslice(boost::optional<SlicedRow> const &row,
         WorkspaceNamesFactory const &workspaceNamesFactory) {
@@ -92,9 +84,6 @@ slice(boost::optional<UnslicedRow> const &row,
 }
 
 template class Row<SlicedReductionWorkspaces>;
-template std::ostream &operator<<(std::ostream &, SlicedRow const &);
-
 template class Row<ReductionWorkspaces>;
-template std::ostream &operator<<(std::ostream &, UnslicedRow const &);
 }
 }

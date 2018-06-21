@@ -90,7 +90,16 @@ void mergeRowsInto(Group<Row> &intoHere, Group<Row> const &fromHere,
 
 template <typename Row>
 MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
-operator<<(std::ostream &os, Group<Row> const &group);
+operator<<(std::ostream &os, Group<Row> const &group) {
+  os << "  Group (name: " << group.name() << ")\n";
+  for (auto &&row : group.rows()) {
+    if (row.is_initialized())
+      os << "    " << row.get() << '\n';
+    else
+      os << "    Row (invalid)\n";
+  }
+  return os;
+}
 
 using SlicedGroup = Group<SlicedRow>;
 using UnslicedGroup = Group<UnslicedRow>;
