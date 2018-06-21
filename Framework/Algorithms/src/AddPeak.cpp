@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/AddPeak.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -20,11 +20,13 @@ DECLARE_ALGORITHM(AddPeak)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::DataObjects::PeaksWorkspace;
+using Mantid::DataObjects::PeaksWorkspace_sptr;
 
 /** Initialize the algorithm's properties.
  */
 void AddPeak::init() {
-  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::InOut),
                   "A peaks workspace.");
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -39,7 +41,7 @@ void AddPeak::init() {
 /** Execute the algorithm.
  */
 void AddPeak::exec() {
-  IPeaksWorkspace_sptr peaksWS = getProperty("PeaksWorkspace");
+  PeaksWorkspace_sptr peaksWS = getProperty("PeaksWorkspace");
   MatrixWorkspace_sptr runWS = getProperty("RunWorkspace");
 
   const int detID = getProperty("DetectorID");
