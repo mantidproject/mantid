@@ -123,8 +123,6 @@ public:
 
   void enableCalibrateFocusFitUserActions(bool enable) override;
 
-  std::string focusingDir() const override;
-
   std::vector<std::string> focusingRunNo() const override;
 
   std::vector<std::string> focusingCroppedRunNo() const override;
@@ -192,7 +190,6 @@ private slots:
   void browseInputDirRaw();
   void browsePixelCalibFilename();
   void browseTemplateGSAS_PRM();
-  void browseDirFocusing();
   void forceRecalculateStateChanged();
 
   // slots for the focusing options

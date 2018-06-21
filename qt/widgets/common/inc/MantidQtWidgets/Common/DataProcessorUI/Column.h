@@ -35,10 +35,11 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class EXPORT_OPT_MANTIDQT_COMMON Column {
 public:
   Column(QString const &name, QString const &algorithmProperty, bool isShown,
-         QString const &prefix, QString const &description);
+         QString const &prefix, QString const &description, bool isKey);
   QString const &name() const;
   QString const &algorithmProperty() const;
   bool isShown() const;
+  bool isKey() const;
   QString const &prefix() const;
   QString const &description() const;
 
@@ -48,6 +49,7 @@ private:
   bool m_isShown;
   QString const &m_prefix;
   QString const &m_description;
+  bool m_isKey;
 };
 }
 }

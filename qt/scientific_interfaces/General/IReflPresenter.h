@@ -47,6 +47,7 @@ public:
     PrependRowFlag,
     DeleteRowFlag,
     ProcessFlag,
+    ProcessAllFlag,
     GroupRowsFlag,
     OpenTableFlag,
     NewTableFlag,

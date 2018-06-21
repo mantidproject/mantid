@@ -492,6 +492,11 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             s1_dist = ws.getRun().getProperty("S1Distance").value
             s2_dist = ws.getRun().getProperty("S2Distance").value
             s3_dist = ws.getRun().getProperty("S3Distance").value
+            # Check the units of the distances
+            if ws.getRun().getProperty("S1Distance").units in ['m', 'meter']:
+                s1_dist *= 1000.0
+                s2_dist *= 1000.0
+                s3_dist *= 1000.0
         else:
             s1_dist = -2600.
             s2_dist = -2019.

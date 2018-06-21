@@ -41,9 +41,12 @@ New Algorithms
 - :ref:`ExportSampleLogsToHDF5 <algm-ExportSampleLogsToHDF5>` saves a
   workspace's samples logs to an HDF5 file
 
+- :ref:`SaveGDA <algm-SaveGDA>` saves a focused diffraction workspace to MAUD-readable ``.gda`` format
+
 Improved
 ########
 
+- :ref:`LoadMcStas <algm-LoadMcStas>` new alg property which controls the granularity of event data returned.
 - :ref:`Maxent <algm-Maxent>` when outputting the results of the iterations, it no longer pads with zeroes but
   returns as many items as iterations done for each spectrum, making the iterations easy to count.
 - XError values (Dx) can now be treated by the following algorithms: :ref:`ConjoinXRuns <algm-ConjoinXRuns>`, :ref:`ConvertToHistogram <algm-ConvertToHistogram>`, :ref:`ConvertToPointData <algm-ConvertToPointData>`, :ref:`CreateWorkspace <algm-CreateWorkspace>`, :ref:`SortXAxis <algm-SortXAxis>`, :ref:`algm-Stitch1D` and :ref:`algm-Stitch1DMany` (both with repect to point data).
@@ -53,6 +56,7 @@ Improved
 Bug fixes
 #########
 
+- In :ref:`LoadMcStas <algm-LoadMcStas>` internally reduce number of event workspaces created. If n mcstas event components now create n*(n-1) fewer.
 - The documentation of the algorithm :ref:`algm-CreateSampleWorkspace` did not match its implementation. The axis in beam direction will now be correctly described as Z instead of X.
 - The :ref:`ExtractMask <algm-ExtractMask>` algorithm now returns a non-empty list of detector ID's when given a MaskWorkspace.
 - Fixed a crash when the input workspace for :ref:`GroupDetectors <algm-GroupDetectors>` contained any other units than spectrum numbers.
@@ -60,6 +64,8 @@ Bug fixes
 - Fixed :ref:`SumSpectra <algm-SumSpectra>` to avoid a crash when validation of inputs was called with a WorkspaceGroup.
 - Fixed a bug in TableWorkspaces where vector column data was set to 0 when the table was viewed    
 - The output workspace of :ref:`LineProfile <algm-LineProfile>` now has correct sample logs, instrument and history.
+- TimeSeriesProperty::splitByTimeVector's behavior on a boundary condition is changed.  In the set of splitters toward a same target splitted workspace, if there is a splitter's beginning time is after the last entry of the TimeSeriesProperty to be split, then this last entry shall be included in its output TimeSeriesProperty.
+- Fixed a bug in :ref:`MergeRuns <algm-MergeRuns>` which could cause the runs to be merged in a different sequence than indicated in the *InputWorkspaces* property.
 
 New
 ###

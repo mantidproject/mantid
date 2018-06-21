@@ -56,6 +56,7 @@ Engineering Diffraction
   - After focusing, workspace sample logs are saved to HDF5 using
     :ref:`ExportSampleLogsToHDF5 <algm-ExportSampleLogsToHDF5>`
 
+- The ``.nxs`` file from the Focus tab is now saved in the Focus directory with all the other focus output
 
 :ref:`Release 3.13.0 <v3.13.0>`
 
@@ -72,6 +73,8 @@ Single Crystal Diffraction
 - New algorithms :ref:`LoadWANDSCD <algm-LoadWANDSCD>` and :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` to load single crystal HB2C data and convert it to either Q-sample or HKL space.
 
 - New algorithm :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` to integrate peaks using 3D profile fitting in reciprocal space.
+
+- New TOPAZ instrument geometry for 2018 run cycle
 
 Improvements
 ############
