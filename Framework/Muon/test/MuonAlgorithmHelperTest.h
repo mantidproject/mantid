@@ -497,6 +497,99 @@ public:
     TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName),
                      std::invalid_argument);
   }
+
+  void test_empty_period_string_for_single_period_data() {
+
+    std::vector<int> summedPeriods = {1};
+    std::vector<int> subtractedPeriods = {};
+    TS_ASSERT_EQUALS(
+        generatePeriodAlgebraString(summedPeriods, subtractedPeriods), "");
+    TS_ASSERT_EQUALS(generatePeriodAlgebraString("1", ""), "");
+  }
+
+  void test_empty_period_string_for_no_periods_given() {
+
+    std::vector<int> summedPeriods = {};
+    std::vector<int> subtractedPeriods = {};
+    TS_ASSERT_EQUALS(
+        generatePeriodAlgebraString(summedPeriods, subtractedPeriods), "");
+    TS_ASSERT_EQUALS(generatePeriodAlgebraString("", ""), "");
+  }
+
+  void test_empty_period_string_if_no_summed_periods_given() {
+
+    std::vector<int> summedPeriods = {};
+    std::vector<int> subtractedPeriods = {1, 2, 3, 4};
+    TS_ASSERT_EQUALS(
+        generatePeriodAlgebraString(summedPeriods, subtractedPeriods), "");
+    TS_ASSERT_EQUALS(generatePeriodAlgebraString("", "1,2,3,4"), "");
+  }
+
+  void test_period_string_for_single_period_data_no_trailing_minus() {
+
+    std::vector<int> summedPeriods = {3};
+    std::vector<int> subtractedPeriods = {};
+    TS_ASSERT_EQUALS(
+        generatePeriodAlgebraString(summedPeriods, subtractedPeriods), "3");
+    TS_ASSERT_EQUALS(generatePeriodAlgebraString("4", ""), "4");
+  }
+
+  void test_correct_period_string_for_multi_period_data() {
+
+    std::vector<int> summedPeriods = {1, 2};
+    std::vector<int> subtractedPeriods = {3, 4};
+    TS_ASSERT_EQUALS(
+        generatePeriodAlgebraString(summedPeriods, subtractedPeriods),
+        "1+2-3+4");
+    TS_ASSERT_EQUALS(generatePeriodAlgebraString("1,2", "3,4"), "1+2-3+4");
+  }
+
+  void test_period_string_duplicates_are_allowed() {
+
+    std::vector<int> summedPeriods = {1, 1};
+    std::vector<int> subtractedPeriods = {1, 1};
+    TS_ASSERT_EQUALS(
+        generatePeriodAlgebraString(summedPeriods, subtractedPeriods),
+        "1+1-1+1");
+    TS_ASSERT_EQUALS(generatePeriodAlgebraString("1,1", "1,1"), "1+1-1+1");
+  }
+
+  void test_generatePeriodAlgebraString_throws_if_periods_not_ints() {
+
+    // Doubles
+    TS_ASSERT_THROWS(generatePeriodAlgebraString("1.5", ""),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS(generatePeriodAlgebraString("3.5", ""),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS(generatePeriodAlgebraString("1.2", "2.9"),
+                     std::invalid_argument);
+    // Characters
+    TS_ASSERT_THROWS(generatePeriodAlgebraString("a", "b"),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS(generatePeriodAlgebraString(";", ";,!"),
+                     std::invalid_argument);
+  }
+
+  void test_generatePeriodAlgebraString_throws_if_delimeter_not_comma() {
+
+    TS_ASSERT_THROWS(generatePeriodAlgebraString("1;2;3", "4"),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS(generatePeriodAlgebraString("1:2:3", "4"),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS(generatePeriodAlgebraString("1 2 3", "4"),
+                     std::invalid_argument);
+  }
+
+  void test_period_string_ordered_if_input_not_ordered() {
+
+    std::vector<int> summedPeriods = {3, 2, 1};
+    std::vector<int> subtractedPeriods = {6, 5, 4};
+    TS_ASSERT_EQUALS(
+        generatePeriodAlgebraString(summedPeriods, subtractedPeriods),
+        "1+2+3-4+5+6");
+    TS_ASSERT_EQUALS(generatePeriodAlgebraString("3,1,2", "6,5,4"),
+                     "1+2+3-4+5+6");
+  }
 };
 
 #endif /* MANTID_MUON_MUONALGOIRTHMHELPER_H_ */

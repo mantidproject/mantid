@@ -6,6 +6,10 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/StringTokenizer.h"
 
+#include <algorithm>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -217,6 +221,95 @@ void groupWorkspaces(const std::string &groupName,
     groupingAlg->setPropertyValue("OutputWorkspace", groupName);
     groupingAlg->execute();
   }
+}
+
+/**
+ * Generate a string (to be included in workspace names) to signify the
+ * period algebra.
+ * Format: a sorted sequence of integers separated by only "+,-" in the form
+ * "<summed>-<sub>" with <summed>, <sub> e.g. 1+2+3.
+ * @param summedPeriods :: [input] comma separated string of integers.
+ * @param subtractedPeriods :: [input] comma separated string of integers.
+ * @returns :: string for use in workspace name.
+ */
+std::string generatePeriodAlgebraString(std::string summedPeriods,
+                                        std::string subtractedPeriods) {
+
+  if (summedPeriods.empty()) {
+    return "";
+  }
+  // the default for single period data
+  if (summedPeriods == "1" && subtractedPeriods == "") {
+    return "";
+  }
+
+  std::vector<int> summedPeriodVec, subtractedPeriodVec;
+  const char delimeter(',');
+
+  std::vector<std::string> summedPeriodStrVec;
+  boost::split(summedPeriodStrVec, summedPeriods,
+               [delimeter](char c) { return c == delimeter; });
+  if (!summedPeriodStrVec[0].empty()) {
+    transform(summedPeriodStrVec.begin(), summedPeriodStrVec.end(),
+              back_inserter(summedPeriodVec), [](const std::string &p) {
+                if (std::all_of(p.begin(), p.end(), ::isdigit)) {
+                  return std::stoi(p);
+                } else {
+                  throw std::invalid_argument(
+                      "List contains a non-integer value : " + p);
+                }
+              });
+  }
+
+  std::vector<std::string> subtractedPeriodStrVec;
+  boost::split(subtractedPeriodStrVec, subtractedPeriods,
+               [delimeter](char c) { return c == delimeter; });
+  if (!subtractedPeriodStrVec[0].empty()) {
+    transform(subtractedPeriodStrVec.begin(), subtractedPeriodStrVec.end(),
+              back_inserter(subtractedPeriodVec), [](const std::string &p) {
+                if (std::all_of(p.begin(), p.end(), ::isdigit)) {
+                  return std::stoi(p);
+                } else {
+                  throw std::invalid_argument(
+                      "List contains a non-integer value : " + p);
+                }
+              });
+  }
+
+  return generatePeriodAlgebraString(summedPeriodVec, subtractedPeriodVec);
+}
+
+std::string generatePeriodAlgebraString(std::vector<int> summedPeriods,
+                                        std::vector<int> subtractedPeriods) {
+
+  if (summedPeriods.empty()) {
+    return "";
+  }
+  // the default for single period data
+  if (summedPeriods[0] == 1 && subtractedPeriods.empty()) {
+    return "";
+  }
+
+  std::sort(summedPeriods.begin(), summedPeriods.end());
+  std::sort(subtractedPeriods.begin(), subtractedPeriods.end());
+
+  std::stringstream periodStream;
+
+  std::string sep = "";
+  for (auto &&period : summedPeriods) {
+    periodStream << sep << period;
+    sep = "+";
+  }
+  if (!subtractedPeriods.empty()) {
+    periodStream << "-";
+  }
+  sep = "";
+  for (auto &&period : subtractedPeriods) {
+    periodStream << sep << period;
+    sep = "+";
+  }
+
+  return periodStream.str();
 }
 
 /**

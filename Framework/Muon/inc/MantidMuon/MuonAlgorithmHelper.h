@@ -75,6 +75,14 @@ DLLExport void groupWorkspaces(const std::string &groupName,
 DLLExport std::vector<std::pair<int, int>>
 findConsecutiveRuns(const std::vector<int> &runs);
 
+/// Generate string of the period algebra
+DLLExport std::string
+generatePeriodAlgebraString(std::string summedPeriods,
+                            std::string subtractedPeriods);
+DLLExport std::string
+generatePeriodAlgebraString(std::vector<int> summedPeriods,
+                            std::vector<int> subtractedPeriods);
+
 /// Generate new analysis workspace name
 DLLExport std::string generateWorkspaceName(const Muon::DatasetParams &params);
 
