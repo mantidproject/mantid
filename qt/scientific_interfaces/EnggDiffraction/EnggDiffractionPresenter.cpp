@@ -40,11 +40,6 @@ const std::string EnggDiffractionPresenter::g_runNumberErrorStr =
 // discouraged at the moment
 const bool EnggDiffractionPresenter::g_askUserCalibFilename = false;
 
-const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
-    "engggui_vanadium_integration_ws";
-const std::string EnggDiffractionPresenter::g_vanCurvesWSName =
-    "engggui_vanadium_curves_ws";
-
 const std::string EnggDiffractionPresenter::g_calibBanksParms =
     "engggui_calibration_banks_parameters";
 
@@ -782,13 +777,13 @@ void EnggDiffractionPresenter::inputChecksBeforeCalibrate(
     throw std::invalid_argument("The Ceria number" + g_runNumberErrorStr);
   }
 
-  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
-  const std::string pixelCalib = cs.m_pixelCalibFilename;
+  const auto &cs = m_view->currentCalibSettings();
+  const auto &pixelCalib = cs.m_pixelCalibFilename;
   if (pixelCalib.empty()) {
     throw std::invalid_argument(
         "You need to set a pixel (full) calibration in settings.");
   }
-  const std::string templGSAS = cs.m_templateGSAS_PRM;
+  const auto &templGSAS = cs.m_templateGSAS_PRM;
   if (templGSAS.empty()) {
     throw std::invalid_argument(
         "You need to set a template calibration file for GSAS in settings.");
@@ -1061,7 +1056,12 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                        const std::string &ceriaNo,
                                        const std::string &outFilename,
                                        const std::string &specNos) {
-  MatrixWorkspace_sptr ceriaWS;
+  if (cs.m_inputDirCalib.empty()) {
+    m_view->userWarning("No calibration directory selected",
+                        "Please select a calibration directory in Settings. "
+                        "This will be used to cache Vanadium calibration data");
+    return;
+  }
 
   // Append current instrument name if numerical only entry
   // to help Load algorithm determine instrument
@@ -1077,6 +1077,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   const auto &vanIntegWS = vanadiumCorrectionWorkspaces.first;
   const auto &vanCurvesWS = vanadiumCorrectionWorkspaces.second;
 
+  MatrixWorkspace_sptr ceriaWS;
   try {
     auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
     load->initialize();
