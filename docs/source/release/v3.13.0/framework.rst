@@ -64,6 +64,7 @@ Bug fixes
 - The output workspace of :ref:`LineProfile <algm-LineProfile>` now has correct sample logs, instrument and history.
 - TimeSeriesProperty::splitByTimeVector's behavior on a boundary condition is changed.  In the set of splitters toward a same target splitted workspace, if there is a splitter's beginning time is after the last entry of the TimeSeriesProperty to be split, then this last entry shall be included in its output TimeSeriesProperty.
 - Fixed a bug in :ref:`MergeRuns <algm-MergeRuns>` which could cause the runs to be merged in a different sequence than indicated in the *InputWorkspaces* property.
+- Fixed a bug where the values entered for basis vector properties in :ref:`BinMD <algm-BinMD>` were not being remembered.
 
 New
 ###
