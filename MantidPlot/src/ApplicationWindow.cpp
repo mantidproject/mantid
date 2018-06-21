@@ -4669,7 +4669,13 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
 
   // Open as a top level folder
   ProjectSerialiser serialiser(this);
-  serialiser.load(lines, fileVersion);
+  try {
+    serialiser.load(lines, fileVersion);
+  } catch (std::runtime_error &e) {
+    g_log.error(e.what());
+    // We failed to load - bail out
+    return this;
+  }
 
   if (d_loaded_current)
     curFolder = d_loaded_current;
@@ -11613,7 +11619,8 @@ void ApplicationWindow::patchPaletteForLinux(QPalette &palette) const {
 }
 
 bool ApplicationWindow::isUnityDesktop() const {
-  return QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")) == "Unity";
+  return QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")) == "Unity" ||
+         QString::fromLocal8Bit(qgetenv("XDG_CURRENT_DESKTOP")) == "Unity";
 }
 
 void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
@@ -14147,7 +14154,14 @@ Folder *ApplicationWindow::appendProject(const QString &fn,
 
   // Open folders
   ProjectSerialiser serialiser(this);
-  serialiser.load(lines, fileVersion);
+
+  try {
+    serialiser.load(lines, fileVersion);
+  } catch (std::runtime_error &e) {
+    g_log.error(e.what());
+    // We failed to load - bail out
+    return nullptr;
+  }
 
   // Restore the selected folder
   folders->setCurrentItem(curFolder->folderListItem());

@@ -9,7 +9,7 @@ import platform
 from mantid.simpleapi import CreateWorkspace, EvaluateFunction, Fit, FitDialog 
 from mantid.simpleapi import FunctionWrapper, CompositeFunctionWrapper, ProductFunctionWrapper, ConvolutionWrapper, MultiDomainFunctionWrapper 
 from mantid.simpleapi import Gaussian, LinearBackground, Polynomial, MultiDomainFunction, Convolution, ProductFunction,\
-    CompositeFunction
+    CompositeFunction, IFunction1D, FunctionFactory, Fit
 from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 import numpy as np
 from testhelpers import run_algorithm
@@ -680,6 +680,78 @@ class FitFunctionsTest(unittest.TestCase):
     def test_attributes_passed_to_multidomain_function(self):
         cf = MultiDomainFunction(Gaussian(), Gaussian(), NumDeriv=True)
         self.assertEqual(cf.getAttributeValue('NumDeriv'), True)
+
+    def test_new_function(self):
+        class AFunction(IFunction1D):
+
+            def init(self):
+                self.declareParameter("C", 0.0)
+
+            def function1D(self, xvals):
+                c = self.getParameterValue("C")
+                return c * xvals
+
+        FunctionFactory.subscribe(AFunction)
+        fun = AFunction()
+        self.assertEqual(str(fun), 'name=AFunction,C=0')
+        fun.C = 2
+        self.assertEqual(fun(2), 4)
+        fun = AFunction(C=3)
+        self.assertEqual(fun.C, 3)
+        self.assertEqual(fun(2), 6)
+        self.assertTrue((fun([2, 3, 4]) == np.array([6, 9, 12])).all())
+        self.assertTrue((fun(np.array([2, 3, 4])) == np.array([6, 9, 12])).all())
+
+    def test_new_function_init(self):
+        class BFunction(IFunction1D):
+            def __init__(self):
+                super(BFunction, self).__init__()
+
+            def init(self):
+                self.declareParameter("C", 0.0)
+
+            def function1D(self, xvals):
+                c = self.getParameterValue("C")
+                return c * xvals
+
+        FunctionFactory.subscribe(BFunction)
+        fun = BFunction()
+        self.assertEqual(str(fun), 'name=BFunction,C=0')
+        fun.C = 2
+        self.assertEqual(fun(2), 4)
+        fun = BFunction(C=3)
+        self.assertEqual(fun.C, 3)
+        self.assertEqual(fun(2), 6)
+
+    def test_multi_domain_fit(self):
+        x = np.linspace(-10, 10)
+        y1 = np.exp(-(x-2)**2)
+        y2 = 2*np.exp(-x**2)
+        y3 = 3*np.exp(-(x+2)**2)
+
+        ws1 = CreateWorkspace(x, y1)
+        ws2 = CreateWorkspace(x, y2)
+        ws3 = CreateWorkspace(x, y3)
+
+        mdf = MultiDomainFunction(Gaussian(), Gaussian(), Gaussian(), Global=["Sigma"])
+        res = Fit(mdf, InputWorkspace=ws1, InputWorkspace_1=ws2, InputWorkspace_2=ws3)
+        f = res.Function
+
+        self.assertAlmostEqual(f[0].Sigma, 0.707107, 6)
+        self.assertAlmostEqual(f[1].Sigma, 0.707107, 6)
+        self.assertAlmostEqual(f[2].Sigma, 0.707107, 6)
+
+        self.assertAlmostEqual(f[0].Height, 1, 6)
+        self.assertAlmostEqual(f[1].Height, 2, 6)
+        self.assertAlmostEqual(f[2].Height, 3, 6)
+
+        self.assertAlmostEqual(f[0].PeakCentre, 2, 6)
+        self.assertAlmostEqual(f[1].PeakCentre, 0, 6)
+        self.assertAlmostEqual(f[2].PeakCentre, -2, 6)
+
+    def test_plugins_wrapped(self):
+        from mantid.simpleapi import Lorentz
+        self.assertEqual(str(Lorentz()), 'name=Lorentz,Scale=1,Length=50,Background=0')
 
 
 if __name__ == '__main__':

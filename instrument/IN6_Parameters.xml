@@ -29,6 +29,24 @@
 		<parameter name="scaling_after_monitor_normalisation">
 			<value val="1000" />
 		</parameter>
+		<parameter name="enable_flat_background_subtraction" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="enable_background_diagnostics" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="enable_elastic_peak_diagnostics" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="enable_incident_energy_calibration" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="enable_elastic_peak_fitting" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="enable_elastic_channel_fitting" type="bool">
+			<value val="true" />
+		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
 		<parameter name="sample_logs_sum" type="string">
 			<value val="Detector.detsum, duration, monitor1.monsum" />

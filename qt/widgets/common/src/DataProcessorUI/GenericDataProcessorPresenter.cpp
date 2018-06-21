@@ -38,6 +38,9 @@ using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 
 namespace {
+/// static logger for main window
+Logger g_log("GenericDataProcessorPresenter");
+
 void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
                           std::string const &value) {
   if (!value.empty())
@@ -67,6 +70,23 @@ void removeWorkspace(QString const &workspaceName) {
 template <typename T> void pop_front(std::vector<T> &queue) {
   queue.erase(queue.begin());
 }
+
+/** Validate the algorithm inputs
+ * @return : an error message, or empty string if ok
+ */
+std::string validateAlgorithmInputs(IAlgorithm_sptr alg) {
+  std::string error;
+  // Get input property errors as a map
+  auto errorMap = alg->validateInputs();
+  // Combine into a single string
+  for (auto const &kvp : errorMap) {
+    if (!error.empty()) {
+      error.append("\n");
+    }
+    error.append(kvp.first + ": " + kvp.second);
+  }
+  return error;
+}
 }
 
 namespace MantidQt {
@@ -92,7 +112,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     ProcessingAlgorithm processor, PostprocessingAlgorithm postprocessor,
     int group, std::map<QString, QString> postprocessMap, QString loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
-      m_mainPresenter(), m_loader(std::move(loader)),
+      m_mainPresenter(), m_loader(std::move(loader)), m_reductionPaused(true),
       m_postprocessing(postprocessor.name().isEmpty()
                            ? boost::optional<PostprocessingStep>()
                            : PostprocessingStep(QString(),
@@ -102,8 +122,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_preprocessing(ColumnOptionsMap(), std::move(preprocessMap)),
       m_group(group), m_whitelist(std::move(whitelist)),
       m_processor(std::move(processor)), m_progressReporter(nullptr),
-      m_promptUser(true), m_tableDirty(false), m_pauseReduction(false),
-      m_reductionPaused(true), m_nextActionFlag(ReductionFlag::StopReduceFlag) {
+      m_pauseReduction(false), m_promptUser(true), m_tableDirty(false),
+      m_forceProcessing(false), m_forceProcessingFailed(false) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -301,13 +321,13 @@ QString GenericDataProcessorPresenter::getReducedWorkspaceName(
 void GenericDataProcessorPresenter::settingsChanged() {
   try {
     m_preprocessing.m_options = convertColumnOptionsFromQMap(
-        m_mainPresenter->getPreprocessingOptions());
+        m_mainPresenter->getPreprocessingOptions(m_group));
     m_processingOptions =
-        convertOptionsFromQMap(m_mainPresenter->getProcessingOptions());
+        convertOptionsFromQMap(m_mainPresenter->getProcessingOptions(m_group));
 
     if (hasPostprocessing())
       m_postprocessing->m_options =
-          m_mainPresenter->getPostprocessingOptionsAsString();
+          m_mainPresenter->getPostprocessingOptionsAsString(m_group);
 
     m_manager->invalidateAllProcessed();
   } catch (std::runtime_error &e) {
@@ -315,15 +335,162 @@ void GenericDataProcessorPresenter::settingsChanged() {
   }
 }
 
-bool GenericDataProcessorPresenter::rowOutputExists(RowItem const &row) const {
-  for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
-    auto outputWorkspaceName =
-        row.second->reducedName(m_processor.defaultOutputPrefix());
-    // The name may be empty if the row has not been reduced yet.
-    if (outputWorkspaceName.isEmpty() || !workspaceExists(outputWorkspaceName))
-      return false;
+/** Utilities to set group/row state and errors. Currently groups don't have a
+ * proper model so state needs to be set via the tree manager whereas row state
+ * can be set directly in the row data. This should be cleaned up at some point.
+ */
+void GenericDataProcessorPresenter::setGroupIsProcessed(
+    const int groupIndex, const bool isProcessed) {
+  m_manager->setProcessed(isProcessed, groupIndex);
+}
+
+void GenericDataProcessorPresenter::setGroupError(const int groupIndex,
+                                                  const std::string &error) {
+  m_manager->setError(error, groupIndex);
+}
+
+void GenericDataProcessorPresenter::setRowIsProcessed(RowData_sptr rowData,
+                                                      const bool isProcessed) {
+  if (rowData)
+    rowData->setProcessed(isProcessed);
+}
+
+void GenericDataProcessorPresenter::setRowError(RowData_sptr rowData,
+                                                const std::string &error) {
+  if (rowData)
+    rowData->setError(error);
+}
+
+/** Return true if the given workspace name is the output of a current
+ * reduction that is in progress
+ */
+bool GenericDataProcessorPresenter::workspaceIsBeingReduced(
+    const std::string &workspaceName) const {
+  if (m_reductionPaused)
+    return false;
+
+  return workspaceIsOutputOfGroup(m_currentGroupData, workspaceName) ||
+         workspaceIsOutputOfRow(m_currentRowData, workspaceName);
+}
+
+/** Update any rows/groups whose output workspace matches the given name
+ * after the workspace has been deleted
+ * @param workspaceName : the name of the workspace that has been removed
+ * @param action : a description of the action that removed the workspace
+ */
+void GenericDataProcessorPresenter::handleWorkspaceRemoved(
+    const std::string &workspaceName, const std::string &action) {
+  // If the workspace is currently being processed then don't mark it as
+  // deleted because it will be re-created when processing finishes.
+  if (workspaceIsBeingReduced(workspaceName))
+    return;
+
+  auto tree = m_manager->allData(false);
+  auto error = action + ": " + workspaceName;
+
+  for (auto &groupItem : tree) {
+    const auto groupIndex = groupItem.first;
+    auto groupData = groupItem.second;
+
+    if (workspaceIsOutputOfGroup(groupData, workspaceName))
+      setGroupError(groupIndex, error);
+
+    for (auto &rowItem : groupData) {
+      if (workspaceIsOutputOfRow(rowItem.second, workspaceName))
+        setRowError(rowItem.second, error);
+    }
   }
-  return true;
+}
+
+/** Update all rows/groups after all workspaces have been removed
+ * @param action : a description of the action that removed the workspace
+ */
+void GenericDataProcessorPresenter::handleAllWorkspacesRemoved(
+    const std::string &action) {
+  auto tree = m_manager->allData(false);
+
+  for (auto &groupItem : tree) {
+    const auto groupIndex = groupItem.first;
+    auto groupData = groupItem.second;
+    setGroupError(groupIndex, action);
+
+    for (auto &rowItem : groupData) {
+      auto rowData = rowItem.second;
+      setRowError(rowData, action);
+    }
+  }
+}
+
+bool GenericDataProcessorPresenter::workspaceIsOutputOfGroup(
+    const GroupData &groupData, const std::string &workspaceName) const {
+  if (groupData.size() == 0)
+    return false;
+
+  return hasPostprocessing() &&
+         getPostprocessedWorkspaceName(groupData).toStdString() ==
+             workspaceName;
+}
+
+bool GenericDataProcessorPresenter::workspaceIsOutputOfRow(
+    RowData_sptr rowData, const std::string &workspaceName) const {
+  if (!rowData)
+    return false;
+
+  // Only check the default output workspace (other output workspaces are
+  // optional)
+  return rowData->hasOutputWorkspaceWithNameAndPrefix(
+      QString::fromStdString(workspaceName), m_processor.defaultOutputPrefix());
+}
+
+/** Reset the processed state for a group
+ */
+void GenericDataProcessorPresenter::resetProcessedState(const int groupIndex) {
+  setGroupIsProcessed(groupIndex, false);
+  setGroupError(groupIndex, "");
+}
+
+/** Reset the processed state for a row
+ */
+void GenericDataProcessorPresenter::resetProcessedState(RowData_sptr rowData) {
+  rowData->reset();
+}
+
+/** Reset the processed state for any rows that have the given workspace as an
+ * output
+ */
+void GenericDataProcessorPresenter::resetProcessedState(
+    const std::string &workspaceName) {
+  auto tree = m_manager->allData(false);
+
+  for (auto &groupItem : tree) {
+    const auto groupIndex = groupItem.first;
+    auto groupData = groupItem.second;
+
+    if (workspaceIsOutputOfGroup(groupData, workspaceName))
+      resetProcessedState(groupIndex);
+
+    for (auto &rowItem : groupData) {
+      if (workspaceIsOutputOfRow(rowItem.second, workspaceName))
+        resetProcessedState(rowItem.second);
+    }
+  }
+}
+
+/** Reset the processed state for all rows
+ */
+void GenericDataProcessorPresenter::resetProcessedState() {
+  auto tree = m_manager->allData(false);
+
+  for (auto &groupItem : tree) {
+    const auto groupIndex = groupItem.first;
+    auto groupData = groupItem.second;
+    resetProcessedState(groupIndex);
+
+    for (auto &rowItem : groupData) {
+      auto rowData = rowItem.second;
+      resetProcessedState(rowData);
+    }
+  }
 }
 
 /** Set up the row data so that it contains all of the information needed to
@@ -332,6 +499,9 @@ bool GenericDataProcessorPresenter::rowOutputExists(RowItem const &row) const {
  * @return : true if ok, false if there was a problem
  */
 bool GenericDataProcessorPresenter::initRowForProcessing(RowData_sptr rowData) {
+  // Reset the row to its unprocessed state
+  rowData->reset();
+
   // Work out and cache the reduced workspace name
   rowData->setReducedName(getReducedWorkspaceName(rowData));
 
@@ -340,8 +510,13 @@ bool GenericDataProcessorPresenter::initRowForProcessing(RowData_sptr rowData) {
   try {
     processingOptions = getProcessingOptions(rowData);
   } catch (std::runtime_error &e) {
-    // Warn and quit if user entered invalid options
-    m_view->giveUserCritical(e.what(), "Error");
+    // User entered invalid options
+    // Mark the row as processed and failed
+    setRowIsProcessed(rowData, true);
+    setRowError(rowData, e.what());
+    if (m_promptUser)
+      m_view->giveUserCritical(e.what(), "Error");
+    // Skip setting the options
     return false;
   }
 
@@ -357,62 +532,98 @@ bool GenericDataProcessorPresenter::initRowForProcessing(RowData_sptr rowData) {
 }
 
 /**
-Process selected data
+Process selected items
 */
-void GenericDataProcessorPresenter::process() {
+void GenericDataProcessorPresenter::processSelection() {
+  // If the selection is empty we will process all rows. In this case,
+  // as with process-all, assume they don't want to reprocess failed rows.
+  if (selectedParents().empty() && selectedChildren().empty())
+    m_forceProcessingFailed = false;
+
+  process(m_manager->selectedData(m_promptUser));
+}
+
+/** Process all items
+ */
+void GenericDataProcessorPresenter::processAll() {
+  process(m_manager->allData(m_promptUser));
+}
+
+/** Check whether a group should be processed
+ */
+bool GenericDataProcessorPresenter::groupNeedsProcessing(
+    const int groupIndex) const {
+  if (m_forceProcessing)
+    return true;
+
+  if (!m_manager->isProcessed(groupIndex))
+    return true;
+
+  if (m_manager->reductionFailed(groupIndex) && m_forceProcessingFailed)
+    return true;
+
+  return false;
+}
+
+/** Check whether a row should be processed
+ */
+bool GenericDataProcessorPresenter::rowNeedsProcessing(
+    RowData_sptr rowData) const {
+  if (m_forceProcessing)
+    return true;
+
+  if (!rowData->isProcessed())
+    return true;
+
+  if (rowData->reductionFailed() && m_forceProcessingFailed)
+    return true;
+
+  return false;
+}
+
+/** Process a given set of items
+ */
+void GenericDataProcessorPresenter::process(TreeData itemsToProcess) {
+  m_itemsToProcess = itemsToProcess;
+
   // Emit a signal that the process is starting
   m_view->emitProcessClicked();
   if (GenericDataProcessorPresenter::m_skipProcessing) {
     m_skipProcessing = false;
     return;
   }
-  m_selectedData = m_manager->selectedData(m_promptUser);
 
   // Don't continue if there are no items selected
-  if (m_selectedData.size() == 0) {
-    m_mainPresenter->confirmReductionPaused(m_group);
+  if (m_itemsToProcess.size() == 0) {
+    endReduction(false);
     return;
   }
-
-  // Clear the group queue
-  m_group_queue = GroupQueue();
 
   // Progress: each group and each row within count as a progress step.
   int maxProgress = 0;
 
-  for (const auto &group : m_selectedData) {
-    auto groupOutputNotFound =
-        hasPostprocessing() &&
-        !workspaceExists(getPostprocessedWorkspaceName(group.second));
-
-    if (groupOutputNotFound)
-      m_manager->setProcessed(false, group.first);
+  for (const auto &groupItem : m_itemsToProcess) {
+    const auto groupIndex = groupItem.first;
+    auto groupData = groupItem.second;
+    if (groupNeedsProcessing(groupIndex))
+      resetProcessedState(groupIndex);
 
     // Groups that are already processed or cannot be post-processed (only 1
     // child row selected) do not count in progress
-    if (!isProcessed(group.first) && group.second.size() > 1)
+    if (groupNeedsProcessing(groupIndex) && groupData.size() > 1)
       maxProgress++;
 
-    RowQueue rowQueue;
+    for (const auto &rowItem : groupData) {
+      auto rowData = rowItem.second;
+      if (!rowNeedsProcessing(rowData))
+        continue;
 
-    for (const auto &row : group.second) {
-      // Set up all data required for processing the row
-      if (!initRowForProcessing(row.second))
-        return;
+      // Reset the row ready for (re)processing
+      if (!initRowForProcessing(rowData))
+        continue;
 
-      // Add all row items to queue
-      rowQueue.emplace_back(row);
-
-      // Set group as unprocessed if settings have changed or the expected
-      // output workspaces cannot be found
-      if (!rowOutputExists(row))
-        m_manager->setProcessed(false, row.first, group.first);
-
-      // Rows that are already processed do not count in progress
-      if (!isProcessed(row.first, group.first))
-        maxProgress++;
+      maxProgress++;
     }
-    m_group_queue.emplace_back(group.first, rowQueue);
   }
 
   // Create progress reporter bar
@@ -422,75 +633,58 @@ void GenericDataProcessorPresenter::process() {
                                                maxProgress, m_progressView);
   }
   // Start processing the first group
-  m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
   resume();
 }
 
 /**
-Decide which processing action to take next
+Process the next item in the selection
 */
-void GenericDataProcessorPresenter::doNextAction() {
-
-  switch (m_nextActionFlag) {
-  case ReductionFlag::ReduceRowFlag:
-    nextRow();
-    break;
-  case ReductionFlag::ReduceGroupFlag:
-    nextGroup();
-    break;
-  case ReductionFlag::StopReduceFlag:
-    endReduction();
-    break;
-  }
-  // Not having a 'default' case is deliberate. gcc issues a warning if there's
-  // a flag we aren't handling.
-}
-
-/**
-Process a new row
-*/
-void GenericDataProcessorPresenter::nextRow() {
+void GenericDataProcessorPresenter::processNextItem() {
 
   if (m_pauseReduction) {
-    // Notify presenter that reduction is paused
-    m_mainPresenter->confirmReductionPaused(m_group);
-    m_reductionPaused = true;
+    setReductionPaused();
     return;
   }
 
-  // Add processed row data to the group
-  int rowIndex = m_rowItem.first;
-  m_groupData[rowIndex] = m_rowItem.second;
-  int groupIndex = m_group_queue.front().first;
-  auto &rqueue = m_group_queue.front().second;
+  // We always loop through all groups in the selection and process the
+  // first one that has not yet been processed. We only process one and
+  // then return.
+  for (auto &groupItem : m_itemsToProcess) {
+    m_currentGroupIndex = groupItem.first;
+    m_currentGroupData = groupItem.second;
 
-  if (!rqueue.empty()) {
-    // Set next action flag
-    m_nextActionFlag = ReductionFlag::ReduceRowFlag;
-    // Reduce next row
-    m_rowItem = rqueue.front();
-    pop_front(rqueue);
-    // Skip reducing rows that are already processed
-    if (!isProcessed(m_rowItem.first, groupIndex)) {
-      startAsyncRowReduceThread(&m_rowItem, groupIndex);
+    if (m_manager->isProcessed(m_currentGroupIndex))
+      continue;
+
+    // Process all rows in the group
+    for (auto &rowItem : m_currentGroupData) {
+      const auto rowIndex = rowItem.first;
+      m_currentRowData = rowItem.second;
+
+      if (m_currentRowData->isProcessed())
+        continue;
+
+      // Start a thread to process this item and then return. The next
+      // item will be processed after this thread has finished.
+      startAsyncRowReduceThread(m_currentRowData, rowIndex,
+                                m_currentGroupIndex);
       return;
     }
-  } else {
-    pop_front(m_group_queue);
-    // Set next action flag
-    m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
 
-    // Skip post-processing groups that are already processed or only contain a
-    // single row
-    if (!isProcessed(groupIndex)) {
-      if (m_groupData.size() > 1) {
-        startAsyncGroupReduceThread(m_groupData, groupIndex);
-        return;
-      }
+    // Start a thread to perform any remaining processing required on the group
+    // (i.e. post-processing) and then return. The next item will be processed
+    // after this thread has finished. Note that we skip post-processing of
+    // groups that only contain a single row because there is an assumption
+    // that post-processing only applies to multi-row groups.
+    if (m_currentGroupData.size() > 1) {
+      startAsyncGroupReduceThread(m_currentGroupData, m_currentGroupIndex);
+      return;
     }
   }
-  // Row / group skipped, perform next action
-  doNextAction();
+
+  // If we get here then we did not have anything left to process, so the
+  // reduction is complete.
+  endReduction(true);
 }
 
 void GenericDataProcessorPresenter::completedGroupReductionSuccessfully(
@@ -499,53 +693,14 @@ void GenericDataProcessorPresenter::completedGroupReductionSuccessfully(
 void GenericDataProcessorPresenter::completedRowReductionSuccessfully(
     GroupData const &, std::string const &) {}
 
-/**
-Process a new group
-*/
-void GenericDataProcessorPresenter::nextGroup() {
-
-  if (m_pauseReduction) {
-    // Notify presenter that reduction is paused
-    m_mainPresenter->confirmReductionPaused(m_group);
-    m_reductionPaused = true;
-    return;
-  }
-
-  if (!m_group_queue.empty()) {
-    // Set next action flag
-    m_nextActionFlag = ReductionFlag::ReduceRowFlag;
-    // Reduce first row
-    auto &rqueue = m_group_queue.front().second;
-    m_rowItem = rqueue.front();
-    // Clear group data from any previously processed groups
-    m_groupData.clear();
-    for (auto &&row : rqueue)
-      m_groupData[row.first] = row.second;
-    pop_front(rqueue);
-
-    // Skip reducing rows that are already processed
-    if (!isProcessed(m_rowItem.first, m_group_queue.front().first)) {
-      startAsyncRowReduceThread(&m_rowItem, m_group_queue.front().first);
-    } else {
-      doNextAction();
-    }
-  } else {
-    // If "Output Notebook" checkbox is checked then create an ipython
-    // notebook
-    if (m_view->getEnableNotebook())
-      saveNotebook(m_selectedData);
-    endReduction();
-  }
-}
-
 /*
 Reduce the current row asynchronously
 */
-void GenericDataProcessorPresenter::startAsyncRowReduceThread(RowItem *rowItem,
-                                                              int groupIndex) {
+void GenericDataProcessorPresenter::startAsyncRowReduceThread(
+    RowData_sptr rowData, const int rowIndex, const int groupIndex) {
 
   auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
-      this, rowItem, groupIndex);
+      this, rowData, rowIndex, groupIndex);
 
   connect(worker, SIGNAL(finished(int)), this, SLOT(rowThreadFinished(int)));
   connect(worker, SIGNAL(reductionErrorSignal(QString)), this,
@@ -571,19 +726,38 @@ void GenericDataProcessorPresenter::startAsyncGroupReduceThread(
 
 /**
 End reduction
+*
+* @param reductionSuccessful : true if the reduction completed successfully,
+* false if there were any errors
 */
-void GenericDataProcessorPresenter::endReduction() {
+void GenericDataProcessorPresenter::endReduction(
+    const bool reductionSuccessful) {
 
+  // Create an ipython notebook if "Output Notebook" is checked.
+  if (reductionSuccessful && m_view->getEnableNotebook())
+    saveNotebook(m_itemsToProcess);
+
+  // Stop the reduction
   pause();
-  m_reductionPaused = true;
-  m_mainPresenter->confirmReductionPaused(m_group);
+  setReductionPaused();
 }
 
 /**
 Handle reduction error
 */
-void GenericDataProcessorPresenter::reductionError(QString ex) {
-  m_view->giveUserCritical(ex, "Error");
+void GenericDataProcessorPresenter::reductionError(const QString &ex) {
+  g_log.error(ex.toStdString());
+  if (m_promptUser)
+    m_view->giveUserCritical(ex, "Error");
+}
+
+/**
+Handle reduction error
+*/
+void GenericDataProcessorPresenter::reductionError(const std::string &ex) {
+  g_log.error(ex);
+  if (m_promptUser)
+    m_view->giveUserCritical(QString::fromStdString(ex), "Error");
 }
 
 /**
@@ -598,26 +772,42 @@ void GenericDataProcessorPresenter::threadFinished(const int exitCode) {
 
   if (exitCode == 0) { // Success
     m_progressReporter->report();
-    doNextAction();
+    processNextItem();
   } else { // Error
     m_progressReporter->clear();
-    endReduction();
+    endReduction(false);
   }
 }
 
 void GenericDataProcessorPresenter::groupThreadFinished(const int exitCode) {
 
   auto postprocessedWorkspace =
-      getPostprocessedWorkspaceName(m_groupData).toStdString();
-  completedGroupReductionSuccessfully(m_groupData, postprocessedWorkspace);
+      getPostprocessedWorkspaceName(m_currentGroupData).toStdString();
+
+  try {
+    completedGroupReductionSuccessfully(m_currentGroupData,
+                                        postprocessedWorkspace);
+  } catch (std::exception &e) {
+    setGroupError(m_currentGroupIndex, e.what());
+  } catch (...) {
+    setGroupError(m_currentGroupIndex, "Unknown error");
+  }
+
   threadFinished(exitCode);
 }
 
 void GenericDataProcessorPresenter::rowThreadFinished(const int exitCode) {
-  completedRowReductionSuccessfully(
-      m_groupData,
-      m_rowItem.second->reducedName(m_processor.defaultOutputPrefix())
-          .toStdString());
+  try {
+    completedRowReductionSuccessfully(
+        m_currentGroupData,
+        m_currentRowData->reducedName(m_processor.defaultOutputPrefix())
+            .toStdString());
+  } catch (std::exception &e) {
+    setRowError(m_currentRowData, e.what());
+  } catch (...) {
+    setRowError(m_currentRowData, "Unknown error");
+  }
+
   threadFinished(exitCode);
 }
 
@@ -658,12 +848,14 @@ Post-processes the workspaces created by the given rows together.
 */
 void GenericDataProcessorPresenter::postProcessGroup(
     const GroupData &groupData) {
-  if (hasPostprocessing()) {
-    const auto outputWSName = getPostprocessedWorkspaceName(groupData);
-    m_postprocessing->postProcessGroup(
-        outputWSName, m_processor.postprocessedOutputPropertyName(),
-        m_whitelist, groupData);
-  }
+  // Nothing to do if there is no postprocessing algorithm
+  if (!hasPostprocessing())
+    return;
+
+  const auto outputWSName = getPostprocessedWorkspaceName(groupData);
+  m_postprocessing->postProcessGroup(
+      outputWSName, m_processor.postprocessedOutputPropertyName(), m_whitelist,
+      groupData);
 }
 
 /**
@@ -757,7 +949,7 @@ Returns the name of the reduced workspace for a given group
 @returns : The name of the workspace
 */
 QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
-    const GroupData &groupData, boost::optional<size_t> sliceIndex) {
+    const GroupData &groupData, boost::optional<size_t> sliceIndex) const {
   if (!hasPostprocessing())
     throw std::runtime_error("Attempted to get postprocessing workspace but no "
                              "postprocessing is specified.");
@@ -869,7 +1061,14 @@ IAlgorithm_sptr
 GenericDataProcessorPresenter::createProcessingAlgorithm() const {
   auto alg =
       AlgorithmManager::Instance().create(m_processor.name().toStdString());
+
   alg->initialize();
+
+  if (!alg->isInitialized()) {
+    throw std::runtime_error("Failed to initialize algorithm " +
+                             m_processor.name().toStdString());
+  }
+
   return alg;
 }
 
@@ -954,7 +1153,7 @@ void GenericDataProcessorPresenter::updateModelFromResults(IAlgorithm_sptr alg,
         // First check if there was a default value and if so use that
         const auto optionValue = data->optionValue(column.algorithmProperty());
         if (!optionValue.isEmpty()) {
-          data->setValue(i, optionValue);
+          data->setValue(i, optionValue, true);
           continue;
         }
 
@@ -962,17 +1161,21 @@ void GenericDataProcessorPresenter::updateModelFromResults(IAlgorithm_sptr alg,
         QString propValue = QString::fromStdString(
             alg->getPropertyValue(column.algorithmProperty().toStdString()));
 
+        // Perform any rounding requested
         if (m_options["Round"].toBool()) {
-          QString exp = (propValue.indexOf("e") != -1)
-                            ? propValue.right(propValue.indexOf("e"))
-                            : "";
-          propValue =
-              propValue.mid(0, propValue.indexOf(".") +
-                                   m_options["RoundPrecision"].toInt() + 1) +
-              exp;
+          QString exponential = "";
+          auto const exponentialPosition = propValue.indexOf("e");
+          if (exponentialPosition != -1)
+            exponential =
+                propValue.right(propValue.length() - exponentialPosition);
+
+          auto const decimalPosition = propValue.indexOf(".");
+          auto const precision = m_options["RoundPrecision"].toInt();
+          auto const endPosition = decimalPosition + precision + 1;
+          propValue = propValue.mid(0, endPosition) + exponential;
         }
 
-        data->setValue(i, propValue);
+        data->setValue(i, propValue, true);
       }
     }
   }
@@ -985,14 +1188,23 @@ void GenericDataProcessorPresenter::updateModelFromResults(IAlgorithm_sptr alg,
  */
 IAlgorithm_sptr GenericDataProcessorPresenter::createAndRunAlgorithm(
     const OptionsMap &options) {
-  auto alg = createProcessingAlgorithm();
 
+  // Create and initialize the algorithm
+  auto alg = createProcessingAlgorithm();
+  // Set the properties
   for (auto &kvp : options) {
     setAlgorithmProperty(alg.get(), kvp.first, kvp.second);
   }
-
-  alg->execute();
-
+  // Check for input errors
+  auto error = validateAlgorithmInputs(alg);
+  if (!error.empty()) {
+    throw std::runtime_error(error);
+  }
+  // Run the algorithm
+  if (!alg->execute()) {
+    throw std::runtime_error("Error executing algorithm " +
+                             m_processor.name().toStdString());
+  }
   return alg;
 }
 
@@ -1032,6 +1244,19 @@ void GenericDataProcessorPresenter::deleteRow() { m_manager->deleteRow(); }
 Delete group(s) from the model
 */
 void GenericDataProcessorPresenter::deleteGroup() { m_manager->deleteGroup(); }
+
+/**
+Delete all groups and rows from the model
+*/
+void GenericDataProcessorPresenter::deleteAll() {
+  if (m_tableDirty && m_options["WarnDiscardChanges"].toBool())
+    if (!m_view->askUserYesNo("Your current table has unsaved changes. Are you "
+                              "sure you want to discard them?",
+                              "Delete all rows?"))
+      throw DeleteAllRowsCancelledException();
+
+  m_manager->deleteAll();
+}
 
 /**
 Group rows together
@@ -1077,8 +1302,21 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
   case DataProcessorPresenter::DeleteGroupFlag:
     deleteGroup();
     break;
+  case DataProcessorPresenter::DeleteAllFlag:
+    deleteAll();
+    break;
   case DataProcessorPresenter::ProcessFlag:
-    process();
+    // Process is a user-initiated process so we'll re-process any failed rows
+    // because the user might be deliberately re-trying them
+    m_forceProcessingFailed = true;
+    setPromptUser(true);
+    processSelection();
+    break;
+  case DataProcessorPresenter::ProcessAllFlag:
+    // Process-All is a background process so we don't want to re-process
+    // failed rows
+    m_forceProcessingFailed = true;
+    processAll();
     break;
   case DataProcessorPresenter::GroupRowsFlag:
     groupRows();
@@ -1087,7 +1325,7 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     newTable();
     break;
   case DataProcessorPresenter::TableUpdatedFlag:
-    m_tableDirty = true;
+    tableUpdated();
     break;
   case DataProcessorPresenter::ExpandSelectionFlag:
     expandSelection();
@@ -1273,7 +1511,7 @@ void GenericDataProcessorPresenter::addHandle(
     return;
 
   m_workspaceList.insert(QString::fromStdString(name));
-  m_mainPresenter->notifyADSChanged(m_workspaceList);
+  m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
 }
 
 /**
@@ -1281,7 +1519,8 @@ Handle ADS remove events
 */
 void GenericDataProcessorPresenter::postDeleteHandle(const std::string &name) {
   m_workspaceList.remove(QString::fromStdString(name));
-  m_mainPresenter->notifyADSChanged(m_workspaceList);
+  m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
+  handleWorkspaceRemoved(name, "Workspace deleted");
 }
 
 /**
@@ -1289,7 +1528,8 @@ Handle ADS clear events
 */
 void GenericDataProcessorPresenter::clearADSHandle() {
   m_workspaceList.clear();
-  m_mainPresenter->notifyADSChanged(m_workspaceList);
+  handleAllWorkspacesRemoved("Workspaces cleared");
+  m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
 }
 
 /**
@@ -1298,6 +1538,8 @@ Handle ADS rename events
 void GenericDataProcessorPresenter::renameHandle(const std::string &oldName,
                                                  const std::string &newName) {
 
+  handleWorkspaceRemoved(oldName, "Workspace renamed to " + newName);
+
   // if a workspace with oldName exists then replace it for the same workspace
   // with newName
   auto qOldName = QString::fromStdString(oldName);
@@ -1305,8 +1547,9 @@ void GenericDataProcessorPresenter::renameHandle(const std::string &oldName,
   if (m_workspaceList.contains(qOldName)) {
     m_workspaceList.remove(qOldName);
     m_workspaceList.insert(qNewName);
-    m_mainPresenter->notifyADSChanged(m_workspaceList);
   }
+
+  m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
 }
 
 /**
@@ -1321,6 +1564,14 @@ void GenericDataProcessorPresenter::afterReplaceHandle(
   // If it's a table workspace, bring it back
   if (m_manager->isValidModel(workspace, static_cast<int>(m_whitelist.size())))
     m_workspaceList.insert(qName);
+}
+
+/** Handle when the table has been updated
+ */
+void GenericDataProcessorPresenter::tableUpdated() {
+  // We don't care about changes if the table is empty
+  if (m_manager->rowCount() > 0)
+    m_tableDirty = true;
 }
 
 /** Expands the current selection */
@@ -1561,26 +1812,31 @@ Pauses reduction. If currently reducing runs, this does not take effect until
 the current thread for reducing a row or group has finished
 */
 void GenericDataProcessorPresenter::pause() {
-
-  updateWidgetEnabledState(false);
-
-  m_mainPresenter->pause();
-
   m_pauseReduction = true;
+  m_mainPresenter->pause(m_group);
 }
 
 /** Resumes reduction if currently paused
 */
 void GenericDataProcessorPresenter::resume() {
-
-  updateWidgetEnabledState(true);
-  m_mainPresenter->resume();
-
   m_pauseReduction = false;
   m_reductionPaused = false;
+  updateWidgetEnabledState(true);
+
+  m_mainPresenter->resume(m_group);
   m_mainPresenter->confirmReductionResumed(m_group);
 
-  doNextAction();
+  processNextItem();
+}
+
+void GenericDataProcessorPresenter::setReductionPaused() {
+  m_reductionPaused = true;
+  confirmReductionPaused();
+  m_mainPresenter->confirmReductionPaused(m_group);
+}
+
+void GenericDataProcessorPresenter::confirmReductionPaused() {
+  updateWidgetEnabledState(false);
 }
 
 /**
@@ -1625,9 +1881,9 @@ void GenericDataProcessorPresenter::accept(
   // is registered
   settingsChanged();
 
-  m_mainPresenter->notifyADSChanged(m_workspaceList);
+  m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
   // Presenter should initially be in the paused state
-  m_mainPresenter->pause();
+  m_mainPresenter->pause(m_group);
 }
 
 /** Returs the list of valid workspaces currently in the ADS
@@ -1685,36 +1941,6 @@ void GenericDataProcessorPresenter::giveUserWarning(
 */
 bool GenericDataProcessorPresenter::isProcessing() const {
   return !m_reductionPaused;
-}
-
-/** Checks if a row in the table has been processed.
- * @param position :: the row to check
- * @return :: true if the row has already been processed else false.
- */
-bool GenericDataProcessorPresenter::isProcessed(int position) const {
-  // processing truth table
-  // isProcessed      manager    force
-  //    0               1          1
-  //    0               0          1
-  //    1               1          0
-  //    0               0          0
-  return m_manager->isProcessed(position) && !m_forceProcessing;
-}
-
-/** Checks if a row in the table has been processed.
- * @param position :: the row to check
- * @param parent :: the parent
- * @return :: true if the row has already been processed else false.
- */
-bool GenericDataProcessorPresenter::isProcessed(int position,
-                                                int parent) const {
-  // processing truth table
-  // isProcessed      manager    force
-  //    0               1          1
-  //    0               0          1
-  //    1               1          0
-  //    0               0          0
-  return m_manager->isProcessed(position, parent) && !m_forceProcessing;
 }
 
 /** Set the forced reprocessing flag

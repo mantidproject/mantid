@@ -96,8 +96,8 @@ class TestDirector(object):
         # Build the SANSStateWavelength
         if self.wavelength_state is None:
             wavelength_builder = get_wavelength_builder(self.data_state)
-            wavelength_builder.set_wavelength_low(1.0)
-            wavelength_builder.set_wavelength_high(10.0)
+            wavelength_builder.set_wavelength_low([1.0])
+            wavelength_builder.set_wavelength_high([10.0])
             wavelength_builder.set_wavelength_step(2.0)
             wavelength_builder.set_wavelength_step_type(RangeStepType.Lin)
             wavelength_builder.set_rebin_type(RebinType.Rebin)
@@ -124,8 +124,8 @@ class TestDirector(object):
         if self.adjustment_state is None:
             # NormalizeToMonitor
             normalize_to_monitor_builder = get_normalize_to_monitor_builder(self.data_state)
-            normalize_to_monitor_builder.set_wavelength_low(1.0)
-            normalize_to_monitor_builder.set_wavelength_high(10.0)
+            normalize_to_monitor_builder.set_wavelength_low([1.0])
+            normalize_to_monitor_builder.set_wavelength_high([10.0])
             normalize_to_monitor_builder.set_wavelength_step(2.0)
             normalize_to_monitor_builder.set_wavelength_step_type(RangeStepType.Lin)
             normalize_to_monitor_builder.set_rebin_type(RebinType.Rebin)
@@ -138,8 +138,8 @@ class TestDirector(object):
             calculate_transmission_builder = get_calculate_transmission_builder(self.data_state)
             calculate_transmission_builder.set_transmission_monitor(3)
             calculate_transmission_builder.set_incident_monitor(2)
-            calculate_transmission_builder.set_wavelength_low(1.0)
-            calculate_transmission_builder.set_wavelength_high(10.0)
+            calculate_transmission_builder.set_wavelength_low([1.0])
+            calculate_transmission_builder.set_wavelength_high([10.0])
             calculate_transmission_builder.set_wavelength_step(2.0)
             calculate_transmission_builder.set_wavelength_step_type(RangeStepType.Lin)
             calculate_transmission_builder.set_rebin_type(RebinType.Rebin)
@@ -158,8 +158,8 @@ class TestDirector(object):
 
             # Wavelength and pixel adjustment
             wavelength_and_pixel_builder = get_wavelength_and_pixel_adjustment_builder(self.data_state)
-            wavelength_and_pixel_builder.set_wavelength_low(1.0)
-            wavelength_and_pixel_builder.set_wavelength_high(10.0)
+            wavelength_and_pixel_builder.set_wavelength_low([1.0])
+            wavelength_and_pixel_builder.set_wavelength_high([10.0])
             wavelength_and_pixel_builder.set_wavelength_step(2.0)
             wavelength_and_pixel_builder.set_wavelength_step_type(RangeStepType.Lin)
             wavelength_and_pixel = wavelength_and_pixel_builder.build()

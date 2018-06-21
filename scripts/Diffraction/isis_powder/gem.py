@@ -21,12 +21,14 @@ class Gem(AbstractInst):
     # Public API
 
     def focus(self, **kwargs):
+        self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
         return self._focus(
             run_number_string=self._inst_settings.run_number, do_van_normalisation=self._inst_settings.do_van_norm,
             do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def create_vanadium(self, **kwargs):
+        self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
 
         return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
@@ -54,6 +56,22 @@ class Gem(AbstractInst):
 
     def _generate_output_file_name(self, run_number_string):
         return self._generate_input_file_name(run_number_string)
+
+    def _generate_out_file_paths(self, run_details):
+        out_file_names = super(Gem, self)._generate_out_file_paths(run_details)
+
+        nxs_filename = out_file_names["nxs_filename"]
+        filename_stub = ".".join(nxs_filename.split(".")[:-1])
+
+        if self._inst_settings.save_maud:
+            maud_filename = filename_stub + "_MAUD.gem"
+            out_file_names["maud_filename"] = maud_filename
+
+        if self._inst_settings.save_angles:
+            angles_filename = filename_stub + "_grouping.new"
+            out_file_names["angles_filename"] = angles_filename
+
+        return out_file_names
 
     @staticmethod
     def _generate_input_file_name(run_number):
@@ -88,6 +106,12 @@ class Gem(AbstractInst):
     def _spline_vanadium_ws(self, focused_vanadium_banks):
         return common.spline_vanadium_workspaces(focused_vanadium_spectra=focused_vanadium_banks,
                                                  spline_coefficient=self._inst_settings.spline_coeff)
+
+    def _switch_texture_mode_specific_inst_settings(self, mode):
+        if mode is None and hasattr(self._inst_settings, "texture_mode"):
+            mode = self._inst_settings.texture_mode
+        self._inst_settings.update_attributes(advanced_config=gem_advanced_config.get_mode_specific_variables(mode),
+                                              suppress_warnings=True)
 
 
 def _gem_generate_inst_name(run_number):

@@ -8,57 +8,53 @@ Matrix Workspace
 .. contents::
   :local:
 
-A MatrixWorkspace is a generic name for any workspace that can be access like a table of X, Y and E values.  This is the prime interface for accessing workspace data in Mantid.  This covers several workspace types including:
+A Matrix Workspace is a generic name for a family which contains measured (or derived) data (Y) with associated errors (E) and an axis (X) giving information about where the the measurement was made. The Matrix Workspace forms a 2D structure, more details on this will be provided below. This is the most common structure for storing data in  Mantid. This covers several more detailed workspace types including:
 
--  :ref:`Workspace2D <Workspace2D>` - A workspace for holding two       dimensional data in memory, this is the most commonly used workspace.
--  :ref:`EventWorkspace <EventWorkspace>` - A workspace that retains the       individual neutron event data.            
+-  :ref:`Workspace2D <Workspace2D>` - A workspace for holding 2D, acuumulated data in memory, this is the most commonly used to store histograms.
+-  :ref:`EventWorkspace <EventWorkspace>` - A workspace that retains the individual neutron event data.            
 
-What information is in a MatrixWorkspace
-----------------------------------------
+What information is in a Matrix Workspace
+------------------------------------------
 
-All Matrix Workspaces contain:
-
--  Measured or derived data with associated errors, this is referenced as a 2D array of counts and error data.  The axes are commonly "SpectraNumber" and another unit of measure, but are very flexible.
+All Matrix Workspaces contain one or more rows of data. A single row is formed of a set of arrays (Y, E, X). For example, the output of a single detector in a white-beam measuring wavelength would form a single row. In this scenario The x-axis (or "horizontal axis") has units of length for wavelength, and Y would be the counts at each wavelength. The rows may have no correlation to each other. However, they are usually marked and sorted by some other attribute, such as detector number, or scattering angle. We call this row axis the "vertical axis". Axis have :ref:`Units <Unit Factory>`.  
 
 Also they may contain:
 
--  Axes with
-   :ref:`Units <Unit Factory>`
 -  :ref:`Sample` and sample environment data
 -  :ref:`Run` logs
--  A full :ref:`instrument <instrument>` geometric definition, along with
-   an instrument parameter map
--  A spectra - detector mapping
--  A distribution flag
+-  Usable geometry may be present, for example to determine the position of each detector, see :ref:`here <InstrumentAccessLayers>` for more information
+-  Spectra - detector mapping, and other spectra level information see :ref:`here <InstrumentAccessLayers>`.
+-  :ref:`Histogram <HistogramData>` information
 -  A list of 'masked' bins
 
 Working with Matrix Workspaces in Python
 ----------------------------------------
 
-MatrixWorkspace is an abstract description of an specific workspace implementation. It provides access to a common way of accessing the data for a 2D workspace without needing to know the details of how that data is actually stored.
+As alluded to above, Matrix Workspace is an abstraction. Matrix Workspace provides access to the majority of the common information for all 2D workspaces in its family, without needing to know all the details of how that data is actually stored.
 
-Matrix Workspaces have all the data and operations of the base :ref:`Workspace <Workspace>` class, but add operations to access the data in a useful way.
+Matrix Workspaces have all the data and operations of the base :ref:`Workspace <Workspace>` class, but add operations to access the 2D data itself a useful way.
 
 You can look at the :ref:`Matrix Workspace API reference <mantid.api.MatrixWorkspace>` for a full list of properties and operations, but here are some of the key ones.
 
 Accessing Workspaces
 ####################
 
-The methods for getting a variable to a MatrixWorkspace is the same as shown in the :ref:`Workspace <Workspace-Accessing_Workspaces>` help page.
+The methods for getting a variable to a Matrix Workspace is the same as shown in the :ref:`Workspace <Workspace-Accessing_Workspaces>` help page.
 
 If you want to check if a variable points to something that is a Matrix Workspace you can use this:
 
 .. testcode:: CheckMatrixWorkspace
 
+    from mantid.simpleapi import *
     from mantid.api import MatrixWorkspace
 
     histoWS = CreateSampleWorkspace(WorkspaceType="Histogram")
 
     if isinstance(histoWS, MatrixWorkspace):
         print(histoWS.name() + " is a " + histoWS.id() + \
-                 " and can be treated as a MatrixWorkspace")
+                 " and can be treated as a Matrix Workspace")
 
-    print("\nFor more workspace types")
+    print("\nFor more Matrix Workspace types")
     eventWS = CreateSampleWorkspace(WorkspaceType="Event")
     svWS = CreateSingleValuedWorkspace()
     tableWS = CreateEmptyTableWorkspace()
@@ -68,9 +64,9 @@ If you want to check if a variable points to something that is a Matrix Workspac
                                NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
 
     myWorkspaceList = [histoWS,eventWS,svWS,tableWS,mdWS,mdHistoWS]
-    print("MatrixWorkspace? Type")
+    print("Is Matrix Workspace?\tType")
     for ws in myWorkspaceList:
-        print("   {0}\t      {1}".format(isinstance(ws, MatrixWorkspace), ws.id()))
+        print("{0}\t{1}".format(isinstance(ws, MatrixWorkspace), ws.id()))
 
 
 Output:
@@ -78,22 +74,23 @@ Output:
 .. testoutput:: CheckMatrixWorkspace
     :options: +NORMALIZE_WHITESPACE
 
-    histoWS is a Workspace2D and can be treated as a MatrixWorkspace
+    histoWS is a Workspace2D and can be treated as a Matrix Workspace
 
-    For more workspace types
-    MatrixWorkspace? Type
-       True           Workspace2D
-       True           EventWorkspace
-       True           WorkspaceSingleValue
-       False          TableWorkspace
-       False          MDEventWorkspace<MDLeanEvent,3>
-       False          MDHistoWorkspace
+    For more Matrix Workspace types
+    Is Matrix Workspace? Type
+    True        Workspace2D
+    True        EventWorkspace
+    True        WorkspaceSingleValue
+    False       TableWorkspace
+    False       MDEventWorkspace<MDLeanEvent,3>
+    False       MDHistoWorkspace
 
 Matrix Workspace Properties
 ###########################
 
 .. testsetup:: MatrixWorkspaceProperties
 
+  from mantid.simpleapi import Load
   ws = Load("MAR11015")
 
 .. testcode:: MatrixWorkspaceProperties
@@ -101,7 +98,7 @@ Matrix Workspace Properties
   # find out the number of histograms on a workspace use getNumberHistograms()
   print("number of histograms = {0}".format(ws.getNumberHistograms()))
 
-  # To find out the number of bins use blocksize()
+  # To find out the number of bins along the x-axis use blocksize()
   print("number of bins = {0}".format(ws.blocksize()))
   # To find out the bin containing a value use binIndexOf()
   print("bin index containing 502.2 for a histogram (0 by default) = {0}".format(ws.binIndexOf(502.2)))
@@ -130,6 +127,7 @@ You can get access to the :ref:`Instrument` for a workspace with
 
 .. testsetup:: MatrixWorkspaceInstrument
 
+  from mantid.simpleapi import CreateSampleWorkspace
   ws = CreateSampleWorkspace()
 
 .. testcode:: MatrixWorkspaceInstrument
@@ -145,6 +143,7 @@ You can get access to the :ref:`Run` for a workspace with
 
 .. testsetup:: MatrixWorkspaceRun
 
+  from mantid.simpleapi import CreateSampleWorkspace
   ws = CreateSampleWorkspace()
 
 .. testcode:: MatrixWorkspaceRun
@@ -161,6 +160,7 @@ You can list out the axes of a workspace using the following code.
 
 .. testcode:: MatrixWorkspaceAxes
 
+  from mantid.simpleapi import CreateSampleWorkspace
   ws = CreateSampleWorkspace()
   for i in range(ws.axes()):
       axis = ws.getAxis(i)
@@ -192,6 +192,7 @@ Output:
 
 .. testcode:: MatrixWorkspaceAxesLabel
 
+  from mantid.simpleapi import CreateSampleWorkspace
   ws = CreateSampleWorkspace()
   axis = ws.getAxis(1)
   # Create a new axis
@@ -215,6 +216,7 @@ Output:
 
 .. testsetup:: MatrixWorkspaceAxesReplace
 
+  from mantid.simpleapi import Load
   ws = Load("MAR11015")
 
 .. testcode:: MatrixWorkspaceAxesReplace
@@ -265,6 +267,7 @@ Output:
 
 .. testsetup:: MatrixWorkspaceYUnit
 
+  from mantid.simpleapi import CreateSampleWorkspace
   ws = CreateSampleWorkspace()
 
 .. testcode:: MatrixWorkspaceYUnit
@@ -286,6 +289,7 @@ Matrix Workspace Operations
 
 .. testsetup:: MatrixWorkspaceOperations
 
+  from mantid.simpleapi import *
   ws = CreateSampleWorkspace()
 
 .. testcode:: MatrixWorkspaceOperations
@@ -333,13 +337,14 @@ Matrix Workspace Operations
 Accessing Data
 ##############
 
-A MatrixWorkspace is essentially a 2D list of binned data where a workspace index, starting at 0, gives access to the data fields in each spectra.
+A Matrix Workspace is essentially a 2D list of binned data where a workspace index, starting at 0, gives access to the data fields in each spectra.
 
 
 The data is accessed using the ``readX()``, ``readY()`` and ``readE()`` commands. Each of these commands takes a number that refers to the index on the workspace and returns a list of the data for that workspace index, i.e
 
 .. testsetup:: MatrixWorkspaceData
 
+  from mantid.simpleapi import Load
   ws = Load("MAR11015")
 
 .. testcode:: MatrixWorkspaceData
@@ -369,13 +374,14 @@ There are more examples how to `Extract and manipulate workspace data here <http
 Workspace algebra
 #################
 
-MatrixWorkspaces can have algebraic operations applied to them directly without the need to call a specific algorithm, e.g. :ref:`Plus <algm-Plus>`
+Matrix Workspaces can have algebraic operations applied to them directly without the need to call a specific algorithm, e.g. :ref:`Plus <algm-Plus>`
 
 
 The expected operations of +,-,*,/ are supported with either a single number or another workspace as the second argument, e.g.
 
 .. testsetup:: MatrixWorkspaceAlgebra
 
+  from mantid.simpleapi import *
   workspace1 = Load("MAR11015")
   workspace2 = CloneWorkspace(workspace1)
 
@@ -394,6 +400,7 @@ It is also possible to replace one of the input workspaces using one of +=,-=,*=
 
 .. testsetup:: MatrixWorkspaceAlgebra2
 
+  from mantid.simpleapi import *
   w1= Load("MAR11015")
   w2= CloneWorkspace(w1)
 

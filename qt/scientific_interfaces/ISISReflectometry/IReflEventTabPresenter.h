@@ -42,6 +42,8 @@ public:
   /// Time-slicing type
   virtual std::string getTimeSlicingType(int group) const = 0;
 
+  virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
+  virtual void settingsChanged(int group) = 0;
   virtual void onReductionPaused(int group) = 0;
   virtual void onReductionResumed(int group) = 0;
 };

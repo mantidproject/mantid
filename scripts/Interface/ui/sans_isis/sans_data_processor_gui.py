@@ -233,6 +233,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         self.multi_period_check_box.stateChanged.connect(self._on_multi_period_selection)
 
+        self.wavelength_step_type_combo_box.currentIndexChanged.connect(self._on_wavelength_step_type_changed)
+
         self.instrument_combo_box.currentIndexChanged.connect(self._instrument_changed)
 
         self.process_button.clicked.connect(self._on_python_process)
@@ -294,7 +296,15 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.output_mode_file_radio_button.toggled.connect(self._on_output_mode_changed)
         self.output_mode_both_radio_button.toggled.connect(self._on_output_mode_changed)
 
+        self.wavelength_stacked_widget.setCurrentIndex(0)
+
         return True
+
+    def _on_wavelength_step_type_changed(self):
+        if self.wavelength_step_type == RangeStepType.RangeLin or self.wavelength_step_type == RangeStepType.RangeLog:
+            self.wavelength_stacked_widget.setCurrentIndex(1)
+        else:
+            self.wavelength_stacked_widget.setCurrentIndex(0)
 
     def _on_output_mode_changed(self, state):
         self.data_processor_table.settingsChanged()
@@ -429,6 +439,21 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.batch_button.setEnabled(True)
         self.user_file_button.setEnabled(True)
         self.manage_directories_button.setEnabled(True)
+
+    def display_message_box(self, title, message, details):
+        msg = QtGui.QMessageBox()
+        msg.setIcon(QtGui.QMessageBox.Warning)
+
+        message_length = len(message)
+
+        # This is to ensure that the QMessage box if wide enough to display nicely.
+        msg.setText(10 * ' ' + message + ' ' * (30 - message_length))
+        msg.setWindowTitle(title)
+        msg.setDetailedText(details)
+        msg.setStandardButtons(QtGui.QMessageBox.Ok)
+        msg.setDefaultButton(QtGui.QMessageBox.Ok)
+        msg.setEscapeButton(QtGui.QMessageBox.Ok)
+        msg.exec_()
 
     def get_user_file_path(self):
         return str(self.user_file_line_edit.text())
@@ -989,6 +1014,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     @wavelength_step.setter
     def wavelength_step(self, value):
         self.update_simple_line_edit_field(line_edit="wavelength_step_line_edit", value=value)
+
+    @property
+    def wavelength_range(self):
+        return str(self.wavelength_slices_line_edit.text())
+
+    @wavelength_range.setter
+    def wavelength_range(self, value):
+        self.wavelength_slices.setText(value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Scale Group
@@ -1667,6 +1700,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.wavelength_max_line_edit.setText("")
         self.wavelength_step_line_edit.setText("")
         self.wavelength_step_type_combo_box.setCurrentIndex(0)
+        self.wavelength_slices_line_edit.setText("")
 
         self.absolute_scale_line_edit.setText("")
         self.geometry_combo_box.setCurrentIndex(0)

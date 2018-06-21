@@ -2,14 +2,20 @@
 #define PYSEQUENCETOVECTORCONVERTERTEST_H_
 
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include <boost/python/ssize_t.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/list.hpp>
+#include <boost/python/ssize_t.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::PythonInterface::Converters;
 
 class PySequenceToVectorTest : public CxxTest::TestSuite {
+public:
+  static PySequenceToVectorTest *createSuite() {
+    return new PySequenceToVectorTest();
+  }
+  static void destroySuite(PySequenceToVectorTest *suite) { delete suite; }
+
 private:
   using PySequenceToVectorDouble = PySequenceToVector<double>;
 

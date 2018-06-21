@@ -94,11 +94,12 @@ public:
 
 private:
   // non-async row reduce
-  void startAsyncRowReduceThread(RowItem *rowItem, int groupIndex) override {
+  void startAsyncRowReduceThread(RowData_sptr rowData, const int rowIndex,
+                                 const int groupIndex) override {
     try {
-      reduceRow(rowItem->second);
-      m_manager->update(groupIndex, rowItem->first, rowItem->second->data());
-      m_manager->setProcessed(true, rowItem->first, groupIndex);
+      reduceRow(rowData);
+      m_manager->update(groupIndex, rowIndex, rowData->data());
+      m_manager->setProcessed(true, rowIndex, groupIndex);
     } catch (std::exception &ex) {
       reductionError(QString(ex.what()));
       rowThreadFinished(1);
@@ -121,9 +122,11 @@ private:
   }
 
   // Overriden non-async methods have same implementation as parent class
-  void process() override { GenericDataProcessorPresenter::process(); }
+  void process(TreeData itemsToProcess) override {
+    GenericDataProcessorPresenter::process(itemsToProcess);
+  }
   void plotRow() override { GenericDataProcessorPresenter::plotRow(); }
-  void plotGroup() override { GenericDataProcessorPresenter::process(); }
+  void plotGroup() override { GenericDataProcessorPresenter::plotGroup(); }
 };
 
 class GenericDataProcessorPresenterTest : public CxxTest::TestSuite {
@@ -272,8 +275,7 @@ private:
         << "1.6"
         << "0.04"
         << "1"
-
-        << "";
+        << "ProcessingInstructions='0'";
     row = ws->appendRow();
     row << "1"
         << "24682"
@@ -283,8 +285,8 @@ private:
         << "2.9"
         << "0.04"
         << "1"
+        << "ProcessingInstructions='0'";
 
-        << "";
     return ws;
   }
 
@@ -474,20 +476,23 @@ private:
   void expectGetOptions(MockMainPresenter &mockMainPresenter,
                         Cardinality numTimes,
                         std::string postprocessingOptions = "") {
+    constexpr int GROUP = 0;
     if (numTimes.IsSatisfiedByCallCount(0)) {
       // If 0 calls, don't check return value
-      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions()).Times(numTimes);
-      EXPECT_CALL(mockMainPresenter, getProcessingOptions()).Times(numTimes);
-      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(GROUP))
+          .Times(numTimes);
+      EXPECT_CALL(mockMainPresenter, getProcessingOptions(GROUP))
+          .Times(numTimes);
+      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(GROUP))
           .Times(numTimes);
     } else {
-      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(GROUP))
           .Times(numTimes)
           .WillRepeatedly(Return(ColumnOptionsQMap()));
-      EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+      EXPECT_CALL(mockMainPresenter, getProcessingOptions(GROUP))
           .Times(numTimes)
           .WillRepeatedly(Return(OptionsQMap()));
-      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(GROUP))
           .Times(numTimes)
           .WillRepeatedly(
               Return(QString::fromStdString(postprocessingOptions)));
@@ -569,6 +574,19 @@ private:
   void expectNoWarningsOrErrors(MockDataProcessorView &mockDataProcessorView) {
     EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
     EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(0);
+  }
+
+  void expectInstrumentIsINTER(MockDataProcessorView &mockDataProcessorView,
+                               Cardinality numTimes) {
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
+          .Times(numTimes);
+    } else {
+      EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
+          .Times(numTimes)
+          .WillRepeatedly(Return("INTER"));
+    }
   }
 
   // A list of commonly used input/output workspace names
@@ -1205,6 +1223,36 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
 
+  void testDeleteAll() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+
+    auto presenter = makeDefaultPresenter();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+
+    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+
+    // "delete all" is called with no groups selected
+    expectNoWarningsOrErrors(mockDataProcessorView);
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents()).Times(0);
+    presenter->notify(DataProcessorPresenter::DeleteAllFlag);
+
+    // The user hits "save"
+    presenter->notify(DataProcessorPresenter::SaveFlag);
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+        "TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 0);
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+  }
+
   void expectNotifiedReductionPaused(MockMainPresenter &mockMainPresenter) {
     EXPECT_CALL(mockMainPresenter,
                 confirmReductionPaused(DEFAULT_GROUP_NUMBER));
@@ -1237,15 +1285,65 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(1));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
     expectNotifiedReductionResumed(mockMainPresenter);
+    expectInstrumentIsINTER(mockDataProcessorView, Exactly(2));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
     checkWorkspacesExistInADS(m_defaultWorkspaces);
     removeWorkspacesFromADS(m_defaultWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testProcessAll() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    auto presenter = makeDefaultPresenterNoThread();
+    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
+    expectUpdateViewToPausedState(mockDataProcessorView, AtLeast(1));
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
+
+    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+
+    GroupList grouplist;
+    grouplist.insert(0);
+    grouplist.insert(1);
+
+    createTOFWorkspace("TOF_12345", "12345");
+    createTOFWorkspace("TOF_12346", "12346");
+    createTOFWorkspace("TOF_24681", "24681");
+    createTOFWorkspace("TOF_24682", "24682");
+
+    // The user hits the "process" button with the first group selected
+    expectNoWarningsOrErrors(mockDataProcessorView);
+    expectGetSelection(mockDataProcessorView, Exactly(0));
+    expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(1));
+    expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
+    expectInstrumentIsINTER(mockDataProcessorView, Exactly(4));
+    expectNotifiedReductionResumed(mockMainPresenter);
+
+    presenter->notify(DataProcessorPresenter::ProcessAllFlag);
+
+    // Check output and tidy up
+    auto firstGroupWorkspaces = m_defaultWorkspaces;
+    auto secondGroupWorkspaces = std::vector<std::string>{
+        "TestWorkspace", "TOF_24681", "TOF_24682", "IvsQ_binned_TOF_24681",
+        "IvsQ_TOF_24681", "IvsLam_TOF_24681", "IvsQ_binned_TOF_24682",
+        "IvsQ_TOF_24682", "IvsLam_TOF_24682", "IvsQ_TOF_24681_TOF_24682"};
+
+    checkWorkspacesExistInADS(firstGroupWorkspaces);
+    checkWorkspacesExistInADS(secondGroupWorkspaces);
+    removeWorkspacesFromADS(secondGroupWorkspaces);
+    removeWorkspacesFromADS(firstGroupWorkspaces);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -1272,7 +1370,7 @@ public:
 
     // The user hits the "process" button
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(0));
+    expectGetSelection(mockDataProcessorView, AtLeast(1));
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(0));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(0));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
@@ -1311,7 +1409,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     presenter->notify(DataProcessorPresenter::ProcessFlag);
     presenter->notify(DataProcessorPresenter::SaveFlag);
 
@@ -1360,7 +1458,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     presenter->notify(DataProcessorPresenter::ProcessFlag);
     presenter->notify(DataProcessorPresenter::SaveFlag);
 
@@ -1408,7 +1506,7 @@ public:
     // This means we will process the selected rows but we will not
     // post-process them
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), rowlist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), rowlist);
     expectAskUserYesNo(mockDataProcessorView, Exactly(0));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
@@ -1442,7 +1540,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     expectNotebookIsEnabled(mockDataProcessorView, Exactly(1));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
@@ -1567,7 +1665,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspaces were created as expected
@@ -2364,8 +2462,8 @@ public:
     const auto expected = QString(
         "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
         "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t\n"
-        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\t\n"
-        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\t\t");
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
+        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2436,7 +2534,7 @@ public:
     const auto expected = QString(
         "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
         "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t\n"
-        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\t");
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -3033,7 +3131,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
@@ -3184,7 +3282,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspace was stitched with params = '-0.04'
@@ -3221,6 +3319,8 @@ public:
     NiceMock<MockMainPresenter> mockMainPresenter;
 
     auto presenter = makeDefaultPresenter();
+    constexpr int GROUP_NUMBER = 0;
+
     expectUpdateViewToPausedState(mockDataProcessorView, AtLeast(1));
     // Now accept the views
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
@@ -3228,8 +3328,9 @@ public:
 
     // User hits the 'pause' button
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectUpdateViewToPausedState(mockDataProcessorView, Exactly(1));
-    EXPECT_CALL(mockMainPresenter, pause()).Times(1);
+    // The widget states are not updated immediately (only on confirm)
+    expectUpdateViewToPausedState(mockDataProcessorView, Exactly(0));
+    EXPECT_CALL(mockMainPresenter, pause(GROUP_NUMBER)).Times(1);
     presenter->notify(DataProcessorPresenter::PauseFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
