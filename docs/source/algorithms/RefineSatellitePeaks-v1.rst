@@ -11,27 +11,29 @@ Description
 
 RefineSatellitePeaks can be used to refine the locations of "satellite" peaks
 occurring at fractional HKL locations in reciprocal space. RefineSatellitePeaks
-takes a MDWorkspace of experimental data, a PeaksWorkspace containing the
-locations of peaks with integer HKL, and another PeaksWorkspace containing a
-subset of peaks found at fractional HKL. 
+takes a :ref:`MDWorkspace <MDWorkspace>` of experimental data, a
+:ref:`PeaksWorkspace <PeaksWorkspace>` containing the locations of peaks with
+integer HKL, and another PeaksWorkspace containing a subset of peaks found at
+fractional HKL. 
 
-For each satellite peak the difference between the nearest integer peak and
-satellite are computed. Offsets are then grouped using using the properties
-`NumOfQs` and `ClusterThreshold`. If `NumOfQs` is specified then each offset
-will be grouped into exactly `k` clusters. If `ClusterThreshold` is specified
-then offsets will be grouped into clusters seperated by no more than a
-cophenetic distance below this threshold.  The centroid of each cluster
-calculated for each group and is used as the offset to predict the location of
-fractional peaks everywhere in the MDWorkspace.
+For each satellite peak the euclidean distance between the nearest integer peak
+and satellite are computed in the HKL frame. Peaks are then grouped according
+to euclidean distance using using the properties `NumOfQs` and
+`ClusterThreshold`. If `NumOfQs` is specified then each offset will be grouped
+into exactly `k` clusters. If `ClusterThreshold` is specified then offsets will
+be grouped into clusters seperated by no more than a cophenetic distance below
+this threshold.  The centroid of each cluster calculated for each group and is
+used as the offset to predict the location of fractional peaks everywhere in
+the :ref:`MDWorkspace <MDWorkspace>`.
 
 For each predicted fractional peak, the local centroid (the radius of which is
 defined by `PeakRadius`) in the MD data is found and this is taken as the actual
 position of the satellite peaks.
 
-Finally the found satellite peaks are integerated using the IntegrateMD
-algorithm with the parameters `PeakRadius`, `BackgroundInnerRadius`, and
-`BackgroundOuterRadius`. Satellite peaks are discarded if there I/sigma value is less
-than the parameter `IOverSigma`.
+Finally the found satellite peaks are integerated using the
+:ref:`algm-IntegrateMD` algorithm with the parameters `PeakRadius`,
+`BackgroundInnerRadius`, and `BackgroundOuterRadius`. Satellite peaks are
+discarded if there I/sigma value is less than the parameter `IOverSigma`.
 
 Usage
 -----
