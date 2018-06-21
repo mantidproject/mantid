@@ -36,6 +36,7 @@ Bug fixes
 * Fixed a bug where the beam stop arm was not being masked on LOQ for the new backend.
 * Fixed a bug in the old backend where for LOQ the high angle bank was not being centered correctly in some cases.
 * Fixed a bug where userfiles specified in the batch file were not being loaded into the new GUI.
+* The new sans GUI will now save out all the outputs of a time sliced reduction.
 
 Features Removed
 ################
