@@ -202,7 +202,7 @@ void JumpFit::updatePlotRange() {
 
 void JumpFit::updatePlotOptions() {}
 
-void JumpFit::setPlotResultEnabled(bool enabled) {}
+void JumpFit::setPlotResultEnabled(bool) {}
 
 void JumpFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);

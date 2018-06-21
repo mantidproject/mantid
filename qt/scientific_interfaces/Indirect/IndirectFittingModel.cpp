@@ -104,17 +104,6 @@ bool equivalentFunctions(IFunction_const_sptr func1,
   return false;
 }
 
-std::vector<double>
-excludeRegionsStringToVector(const std::string &excludeRegions) {
-  std::vector<std::string> regionStrings;
-  boost::split(regionStrings, excludeRegions, boost::is_any_of(",-"));
-  std::vector<double> regions;
-  std::transform(
-      regionStrings.begin(), regionStrings.end(), std::back_inserter(regions),
-      [](const std::string &str) { return boost::lexical_cast<double>(str); });
-  return regions;
-}
-
 std::ostringstream &addInputString(IndirectFitData *fitData,
                                    std::ostringstream &stream) {
   const auto &name = fitData->workspace()->getName();

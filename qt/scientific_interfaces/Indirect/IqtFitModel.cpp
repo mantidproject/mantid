@@ -126,7 +126,7 @@ std::string getFitString(MatrixWorkspace_sptr workspace) {
     return "Fit";
   return "_IqtFit";
 }
-}; // namespace
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {

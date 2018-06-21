@@ -34,12 +34,6 @@ void updateParameters(
     }
   }
 }
-
-std::string outputPropertyValue(IAlgorithm_sptr algorithm) {
-  if (algorithm->existsProperty("OutputWorkspace"))
-    return algorithm->getProperty("OutputWorkspace");
-  return algorithm->getProperty("Output");
-}
 } // namespace
 
 namespace MantidQt {
