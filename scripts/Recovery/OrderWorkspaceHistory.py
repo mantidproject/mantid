@@ -64,7 +64,7 @@ def _remove_duplicates(values):
 
 # Get list of all workspace histories
 onlyfiles = [f for f in listdir('.') if isfile(join('.', f))]
-historyfiles = [x for x in onlyfiles if x.endswith('ws.py')]
+historyfiles = [x for x in onlyfiles if x.endswith('.py')]
 
 # Read each history in as a list of tuples
 commands = []
@@ -79,6 +79,8 @@ all_commands = [i for sublist in commands for i in sublist]
 # Remove duplicate commands
 if _has_duplicates(all_commands):
     all_unique_commands = _remove_duplicates(all_commands)
+else:
+    all_unique_commands = all_commands
 
 # Convert the datetime into a sortable integer
 all_unique_commands = [(i[0], _concatenate_iso_datetime(i[1]))
