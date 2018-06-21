@@ -141,7 +141,7 @@ void ProjectRecoveryThread::projectSavingThread() {
 
     // Python's OS module cannot handle Poco's parsed paths
     // so use std::string instead and let OS parse the '/' char on Win
-    saveWsHistories(basePath);
+	saveWsHistories(basePath);
     saveOpenWindows(projectFile.toString());
     g_log.information("Project Recovery: Saving finished");
   }
@@ -164,7 +164,10 @@ void ProjectRecoveryThread::saveWsHistories(
       "write_all_workspaces_histories(\"" +
       QString::fromStdString(historyDestFolder) + "\")\n";
 
-  m_windowPtr->runPythonScript(projectSavingCode);
+  if (!m_windowPtr->runPythonScript(projectSavingCode)){
+	  throw std::runtime_error("Project Recovery: Python saving failed");
+  }
+
 }
 
 void ProjectRecoveryThread::loadOpenWindows(const std::string &projectFolder) {
