@@ -26,6 +26,7 @@ public:
   PrivateFittingData &operator=(PrivateFittingData &&fittingData);
 
 private:
+  PrivateFittingData(PrivateFittingData &&privateData);
   PrivateFittingData(std::vector<std::unique_ptr<IndirectFitData>> &&data);
   std::vector<std::unique_ptr<IndirectFitData>> m_data;
 };

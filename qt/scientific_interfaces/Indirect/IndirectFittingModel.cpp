@@ -107,8 +107,9 @@ bool equivalentFunctions(IFunction_const_sptr func1,
 std::ostringstream &addInputString(IndirectFitData *fitData,
                                    std::ostringstream &stream) {
   const auto &name = fitData->workspace()->getName();
-  auto addToStream =
-      [&](std::size_t spectrum) { stream << name << ",i" << spectrum << ";"; };
+  auto addToStream = [&](std::size_t spectrum) {
+    stream << name << ",i" << spectrum << ";";
+  };
   fitData->applySpectra(addToStream);
   return stream;
 }
@@ -258,6 +259,9 @@ namespace CustomInterfaces {
 namespace IDA {
 
 PrivateFittingData::PrivateFittingData() : m_data() {}
+
+PrivateFittingData::PrivateFittingData(PrivateFittingData &&privateData)
+    : m_data(std::move(privateData.m_data)) {}
 
 PrivateFittingData::PrivateFittingData(
     std::vector<std::unique_ptr<IndirectFitData>> &&data)
@@ -625,7 +629,7 @@ IndirectFittingModel::mapDefaultParameterNames() const {
 }
 
 std::unordered_map<std::string, ParameterValue>
-    IndirectFittingModel::createDefaultParameters(std::size_t) const {
+IndirectFittingModel::createDefaultParameters(std::size_t) const {
   return std::unordered_map<std::string, ParameterValue>();
 }
 
