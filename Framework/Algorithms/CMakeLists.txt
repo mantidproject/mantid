@@ -712,6 +712,7 @@ set ( TEST_FILES
 	CalculateDIFCTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
+	CalculateIqtTest.h
 	CalculateMuonAsymmetryTest.h
 	CalculatePolynomialBackgroundTest.h
 	CalculateSlitsTest.h
