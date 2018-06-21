@@ -67,8 +67,40 @@ Usage
 
 Output:
 
-.. testoutput:: ExCountsOffsetAndRebin
+.. testoutput:: ExLoadAndApplyMUSR
 
+	# Clear the ADS before starting
+	AnalysisDataService.clear()
+
+	# Create the workspace group in which the analysed workspaces will be placed
+	ws = CreateSampleWorkspace()
+	wsGroup = GroupWorkspaces("ws")
+	RenameWorkspace(  
+					  InputWorkspace="wsGroup", 
+					  OutputWorkspace='MUSR00015189', 
+					  OverwriteExisting=True)
+
+	# Load the data
+	LoadMuonNexus(  Filename='MUSR00015189.nxs', 
+					OutputWorkspace='MuonAnalysis')
+
+	LoadAndApplyMuonDetectorGrouping(
+		Filename='MUSRGrouping.xml', 
+		InputWorkspace='MuonAnalysis', 
+		WorkspaceGroup='MUSR00015189', 
+		ApplyAsymmetryToGroups=False)
+		
+	
+	MUSR_asym = mtd["MUSR00015189; Pair; long; Asym; #1"]
+
+	
+	print(map('{0:.2f}'.format, MUSR_asym.readY(0)[1:10]))
+
+Output:
+
+.. testoutput:: ExLoadAndApplyMUSR
+
+   ['0.00', '-1.00', '0.00', '0.33', '0.31', '0.27', '0.37', '0.32', '0.21']
 
 .. categories::
 
