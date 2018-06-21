@@ -147,6 +147,12 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             LogType='String',
             EnableLogging=self._subalgLogging)
 
+    def _checkIfFlatSample(self):
+        """Returns true if sample is deemed 'flat' for SumInQ."""
+        # TODO: add real calculations here from COSMOS
+        # Now we always return False because this is what is in a reference dataset.
+        return False
+
     def _correctForChopperOpenings(self, ws, directWS):
         """Correct reflectivity values if chopper openings between RB and DB differ."""
         def opening(instrumentName, logs, Xs):
@@ -266,6 +272,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             Xs = ws.readX(beamPosIndex)
             wavelengthLimits[0] = Xs[0]
             wavelengthLimits[1] = Xs[-1]
+        isFlatSample = self._checkIfFlatSample()
         sumWSName = self._names.withSuffix('summed_in_Q')
         sumWS = ReflectometrySumInQ(
             InputWorkspace=ws,
@@ -274,6 +281,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             BeamCentre=beamPosIndex,
             WavelengthMin=wavelengthLimits[0],
             WavelengthMax=wavelengthLimits[1],
+            FlatSample=isFlatSample,
             EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
         return sumWS
