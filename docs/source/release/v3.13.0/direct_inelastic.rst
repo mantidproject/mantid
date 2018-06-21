@@ -24,7 +24,9 @@ Improvements
 - :ref:`DirectILLDiagnostics <algm-DirectILLDiagnostics>`:
     - a hard mask is applied over the beamstop region of IN5
     - user masked detectors are not included in the report anymore
-- :ref:`DirectILLReduction <algm-DirectILLReduction>` now converts all its output workspaces to distributions, i.e. divides the histograms by the bin width.
+- :ref:`DirectILLReduction <algm-DirectILLReduction>`:
+    - all output workspaces are now converted to distributions, i.e. the histograms are divided by the bin width.
+    - The default :math:`Q` binning has been revised.
 
 Bug fixes
 #########
