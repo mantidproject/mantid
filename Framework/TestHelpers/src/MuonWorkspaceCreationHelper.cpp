@@ -46,11 +46,11 @@ double yDataAsymmetry::operator()(const double t, size_t spec) {
   double e = exp(-t / tau);
   double factor = (static_cast<double>(spec) + 1.0) * 0.5;
   double phase_offset = 4 * M_PI / 180;
-  return std::max(0.0, (10. * factor * (1.0 +
-                                        m_amp * cos(m_omega * t + m_phi +
-                                                    static_cast<double>(spec) *
-                                                        phase_offset)) *
-                        e));
+  return std::max(
+      0.0, (10. * factor *
+            (1.0 + m_amp * cos(m_omega * t + m_phi +
+                               static_cast<double>(spec) * phase_offset)) *
+            e));
 }
 
 // Errors are fixed to 0.005
@@ -204,105 +204,6 @@ ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
   }
 
   return deadTimeTable;
-}
-
-/**
- * Simplest possible grouping file, with only a single group.
- * @param groupName :: Name of the group.
- * @param group :: Detector grouping string (e.g. "1-4,5,6-10").
- * @return ScopedFile object.
- */
-ScopedFileHelper::ScopedFile
-createGroupingXMLSingleGroup(const std::string &groupName,
-                             const std::string &group) {
-  std::string fileContents("");
-  fileContents += "<detector-grouping description=\"test XML file\"> \n";
-  fileContents += "\t<group name=\"" + groupName + "\"> \n";
-  fileContents += "\t\t<ids val=\"" + group + "\"/>\n";
-  fileContents += "\t</group>\n";
-  fileContents += "\t<default name=\"" + groupName + "\"/>\n";
-  fileContents += "</detector-grouping>";
-
-  ScopedFileHelper::ScopedFile file(fileContents, "testXML_1.xml");
-  return file;
-}
-
-/**
- * Grouping file with two groups (group1 and group2), combined into one pair.
- * @param pairName :: Name of the pair.
- * @param groupName :: Override the name of the second group of the pair, used
- * to test a possible failure case.
- * @return ScopedFile object.
- */
-ScopedFileHelper::ScopedFile
-createGroupingXMLSinglePair(const std::string &pairName,
-                            const std::string &groupName) {
-
-  std::string fileContents("");
-
-  fileContents += "<detector-grouping description=\"test XML file\"> \n";
-  fileContents += "\t<group name=\"group1\"> \n";
-  fileContents += "\t\t<ids val=\"1\"/>\n";
-  fileContents += "\t</group>\n";
-
-  fileContents += "<detector-grouping description=\"test XML file\"> \n";
-  fileContents += "\t<group name=\"group2\"> \n";
-  fileContents += "\t\t<ids val=\"2\"/>\n";
-  fileContents += "\t</group>\n";
-
-  fileContents += "\t<pair name=\"" + pairName + "\"> \n";
-  fileContents += "\t\t<forward-group val=\"group1\"/>\n";
-  fileContents += "\t\t<backward-group val=\"" + groupName + "\"/>\n";
-  fileContents += "\t\t<alpha val=\"1\"/>\n";
-  fileContents += "\t</pair>\n";
-
-  fileContents += "\t<default name=\"" + groupName + "\"/>\n";
-  fileContents += "</detector-grouping>";
-
-  ScopedFileHelper::ScopedFile file(fileContents, "testXML_1.xml");
-
-  return file;
-}
-
-/**
- * Create an XML file with grouping/pairing information. With nGroups = 3 and
- * nDetectorPerGroup = 5 the grouping would be {"1-5","6-10","11-15"}.
- *
- * @param nGroups :: The number of groups to produce
- * @param nDetectorsPerGroup ::  The number of detector IDs per group
- * @return ScopedFile.
- */
-ScopedFileHelper::ScopedFile
-createXMLwithPairsAndGroups(const int &nGroups, const int &nDetectorsPerGroup) {
-
-  API::Grouping grouping;
-  std::string groupIDs;
-  // groups
-  for (auto group = 1; group <= nGroups; group++) {
-    std::string groupName = "group" + std::to_string(group);
-    if (nGroups == 1) {
-      groupIDs = "1";
-    } else {
-      groupIDs = std::to_string((group - 1) * nDetectorsPerGroup + 1) + "-" +
-                 std::to_string(group * nDetectorsPerGroup);
-    }
-    grouping.groupNames.emplace_back(groupName);
-    grouping.groups.emplace_back(groupIDs);
-  }
-  // pairs
-  for (auto pair = 1; pair < nGroups; pair++) {
-    std::string pairName = "pair" + std::to_string(pair);
-    std::pair<size_t, size_t> pairIndices;
-    pairIndices.first = 0;
-    pairIndices.second = pair;
-    grouping.pairNames.emplace_back(pairName);
-    grouping.pairAlphas.emplace_back(1.0);
-    grouping.pairs.emplace_back(pairIndices);
-  }
-
-  auto fileContents = MuonAlgorithmHelper::groupingToXML(grouping);
-  ScopedFileHelper::ScopedFile file(fileContents, "testXML_1.xml");
-  return file;
 }
 
 } // namespace MuonWorkspaceCreationHelper

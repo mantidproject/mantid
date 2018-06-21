@@ -84,7 +84,7 @@ void LoadAndApplyMuonDetectorGrouping::init() {
 
   declareProperty(
       Mantid::Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-          "WorkspaceGroup", "", Direction::Input, PropertyMode::Optional),
+          "WorkspaceGroup", "", Direction::InOut, PropertyMode::Optional),
       "The workspaces created by the algorithm will be placed inside this "
       "group. If not specified will save to \"MuonAnalysisGroup\" ");
 

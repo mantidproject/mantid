@@ -1,8 +1,6 @@
 #ifndef MUONWORKSPACECREATIONHELPER_H_
 #define MUONWORKSPACECREATIONHELPER_H_
 
-#include "MantidKernel/PhysicalConstants.h"
-
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -80,26 +78,6 @@ createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
  */
 Mantid::API::ITableWorkspace_sptr
 createDeadTimeTable(const size_t &nspec, std::vector<double> &deadTimes);
-
-// Simplest possible grouping file, with only a single group
-ScopedFileHelper::ScopedFile
-createGroupingXMLSingleGroup(const std::string &groupName,
-                             const std::string &group);
-/**
- * Create an XML with two simple groups and a pair made from them. groupName
- * applies only to the pairing so that we can test a failure case.
- */
-ScopedFileHelper::ScopedFile
-createGroupingXMLSinglePair(const std::string &pairName,
-                            const std::string &groupName);
-
-/**
- * Create an XML file with grouping/pairing information. With nGroups = 3 and
- * nDetectorPerGroup = 5 the grouping would be {"1-5","6-10","11-15"}.
- */
-ScopedFileHelper::ScopedFile
-createXMLwithPairsAndGroups(const int &nGroups = 1,
-                            const int &nDetectorsPerGroup = 1);
 
 } // namespace MuonWorkspaceCreationHelper
 
