@@ -35,6 +35,7 @@ void addPyTimeValue(TimeSeriesProperty<TYPE> &self,
   self.addValue(*dateandtime, value);
 }
 
+
 // Template
 template <typename TYPE>
 // Default return if no matches occur
@@ -43,25 +44,30 @@ std::string dtype(TimeSeriesProperty<TYPE> &self) {
 }
 
 // String return
+template <> 
 std::string dtype(TimeSeriesProperty<std::string> &self) {
   return "s";
 }
 
+template <>
 // Integer (32-bit) return
 std::string dtype(TimeSeriesProperty<int32_t> &self) {
   return "i";
 }
 
+template <>
 // Integer (64-bit) return
 std::string dtype(TimeSeriesProperty<int64_t> &self) {
   return "i";
 }
 
+template <>
 // Boolean return
 std::string dtype(TimeSeriesProperty<bool> &self) {
   return "b";
 }
 
+template <>
 // Double return
 std::string dtype(TimeSeriesProperty<double> &self) {
   return "d";
@@ -113,7 +119,7 @@ std::string dtype(TimeSeriesProperty<double> &self) {
            "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")      \
       .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue,    \
            arg("self"))                                                        \
-      .def("dtype", &dtype<TYPE>, arg("self"));                                \
+      .def("dtype", &dtype<TYPE>, arg("self"), "returns :`std::string`");      \
 
 }
 
