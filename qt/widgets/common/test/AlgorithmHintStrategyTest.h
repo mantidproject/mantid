@@ -82,11 +82,18 @@ public:
     auto strategy =
         AlgorithmHintStrategy(m_propAlg, {"DoubleValue", "IntArray"});
     auto expected = std::vector<Hint>(
-        {Hint("IntValue", ""), Hint("DoubleValue", ""), Hint("BoolValue", ""),
-         Hint("StringValue", ""), Hint("PositiveIntValue", ""),
-         Hint("PositiveIntValue1", ""), Hint("StringArray", "")});
+        {Hint("IntValue", ""), Hint("BoolValue", ""), Hint("StringValue", ""),
+         Hint("PositiveIntValue", ""), Hint("PositiveIntValue1", ""),
+         Hint("DoubleArray", ""), Hint("StringArray", "")});
 
-    TS_ASSERT_EQUALS(expected, strategy.createHints());
+    auto hints = strategy.createHints();
+
+    auto compare = [](Hint const &lhs, Hint const &rhs)
+                       -> bool { return lhs.word() < rhs.word(); };
+    std::sort(expected.begin(), expected.end(), compare);
+    std::sort(hints.begin(), hints.end(), compare);
+
+    TS_ASSERT_EQUALS(expected, hints);
   }
 
 protected:
