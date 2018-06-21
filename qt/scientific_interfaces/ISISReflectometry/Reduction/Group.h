@@ -92,13 +92,8 @@ template <typename Row>
 MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
 operator<<(std::ostream &os, Group<Row> const &group);
 
-extern template class Group<SlicedRow>;
 using SlicedGroup = Group<SlicedRow>;
-extern template std::ostream &operator<<(std::ostream &, SlicedGroup const &);
-
-extern template class Group<UnslicedRow>;
 using UnslicedGroup = Group<UnslicedRow>;
-extern template std::ostream &operator<<(std::ostream &, UnslicedGroup const &);
 
 UnslicedGroup unslice(SlicedGroup const &slicedGroup,
                       WorkspaceNamesFactory const &workspaceNamesFactory);

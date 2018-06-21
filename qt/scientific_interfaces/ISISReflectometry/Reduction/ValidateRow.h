@@ -124,13 +124,6 @@ boost::optional<RowVariant>
 validateRowFromRunAndTheta(Jobs const &jobs,
                            WorkspaceNamesFactory const &workspaceNamesFactory,
                            std::string const &run, std::string const &theta);
-
-extern template class RowValidationResult<SlicedRow>;
-extern template class RowValidationResult<UnslicedRow>;
-extern template class RowValidationResult<RowVariant>;
-
-extern template class RowValidator<SlicedRow>;
-extern template class RowValidator<UnslicedRow>;
 }
 }
 #endif // MANTID_CUSTOMINTERFACES_VALIDATEROW_H_

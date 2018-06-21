@@ -12,12 +12,6 @@ ReductionJobs<Group>::ReductionJobs(std::vector<Group> groups)
 
 template <typename Group> ReductionJobs<Group>::ReductionJobs() {}
 
-// template <typename Group>
-// WorkspaceNamesFactory const *
-// ReductionJobs<Group>::workspaceNamesFactory() const {
-//  return m_workspaceNamesFactory;
-//}
-
 template <typename Group>
 Group &ReductionJobs<Group>::appendGroup(Group group) {
   assertOrThrow(group.name().empty() || !hasGroupWithName(group.name()),

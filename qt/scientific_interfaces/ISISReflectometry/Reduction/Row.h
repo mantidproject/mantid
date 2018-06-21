@@ -101,17 +101,8 @@ mergedRow(Row<WorkspaceNames> const &rowA, Row<WorkspaceNames> const &rowB,
   return rowA.withExtraRunNumbers(rowB.runNumbers(), workspaceNamesFactory);
 }
 
-extern template class Row<SlicedReductionWorkspaces>;
 using SlicedRow = Row<SlicedReductionWorkspaces>;
-
-extern template class Row<ReductionWorkspaces>;
 using UnslicedRow = Row<ReductionWorkspaces>;
-
-extern template MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
-operator<<(std::ostream &, UnslicedRow const &);
-extern template MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
-operator<<(std::ostream &, SlicedRow const &);
-
 using RowVariant = boost::variant<SlicedRow, UnslicedRow>;
 
 boost::optional<UnslicedRow>
