@@ -1,26 +1,17 @@
 #include "MantidTestHelpers/MuonGroupingXMLHelper.h"
 
-//#include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
-//#include "MantidTestHelpers/ComponentCreationHelper.h"
-//#include "MantidTestHelpers/InstrumentCreationHelper.h"
-//#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-//
-#include "MantidMuon/MuonAlgorithmHelper.h"
-//
-//#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/GroupingLoader.h"
-//#include "MantidAPI/MatrixWorkspace.h"
-//#include "MantidAPI/ScopedWorkspace.h"
-//#include "MantidAPI/TableRow.h"
-//#include "MantidAPI/Workspace.h"
-//#include "MantidAPI/WorkspaceGroup.h"
-//#include "MantidAlgorithms/CompareWorkspaces.h"
-//#include "MantidDataHandling/LoadMuonNexus2.h"
-//#include "MantidDataObjects/TableWorkspace.h"
-//#include "MantidKernel/PhysicalConstants.h"
+#include "MantidMuon/MuonAlgorithmHelper.h"
+
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/XML/XMLWriter.h>
 
 using namespace Mantid;
-//using namespace Mantid::Kernel;
+// using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace ScopedFileHelper;
 
@@ -120,9 +111,72 @@ createXMLwithPairsAndGroups(const int &nGroups, const int &nDetectorsPerGroup) {
     grouping.pairs.emplace_back(pairIndices);
   }
 
-  auto fileContents = MuonAlgorithmHelper::groupingToXML(grouping);
+  auto fileContents = groupingToXML(grouping);
   ScopedFileHelper::ScopedFile file(fileContents, "testXML_1.xml");
   return file;
+}
+
+/**
+ * Save grouping to the XML file specified.
+ *
+ * @param grouping :: Struct with grouping information
+ * @param filename :: XML filename where information will be saved
+ */
+std::string groupingToXML(const Mantid::API::Grouping &grouping) {
+
+  Poco::XML::DOMWriter writer;
+  writer.setNewLine("\n");
+  writer.setOptions(Poco::XML::XMLWriter::PRETTY_PRINT);
+
+  Poco::AutoPtr<Poco::XML::Document> mDoc = new Poco::XML::Document();
+
+  // Create root element with a description
+  Poco::AutoPtr<Poco::XML::Element> rootElem =
+      mDoc->createElement("detector-grouping");
+  rootElem->setAttribute("description", grouping.description);
+  mDoc->appendChild(rootElem);
+
+  // Create group elements
+  for (size_t gi = 0; gi < grouping.groups.size(); gi++) {
+    Poco::AutoPtr<Poco::XML::Element> gElem = mDoc->createElement("group");
+    gElem->setAttribute("name", grouping.groupNames[gi]);
+    rootElem->appendChild(gElem);
+
+    Poco::AutoPtr<Poco::XML::Element> idsElem = mDoc->createElement("ids");
+    idsElem->setAttribute("val", grouping.groups[gi]);
+    gElem->appendChild(idsElem);
+  }
+
+  // Create pair elements
+  for (size_t pi = 0; pi < grouping.pairs.size(); pi++) {
+    Poco::AutoPtr<Poco::XML::Element> gElem = mDoc->createElement("pair");
+    gElem->setAttribute("name", grouping.pairNames[pi]);
+    rootElem->appendChild(gElem);
+
+    Poco::AutoPtr<Poco::XML::Element> fwElem =
+        mDoc->createElement("forward-group");
+    fwElem->setAttribute("val", grouping.groupNames[grouping.pairs[pi].first]);
+    gElem->appendChild(fwElem);
+
+    Poco::AutoPtr<Poco::XML::Element> bwElem =
+        mDoc->createElement("backward-group");
+    bwElem->setAttribute("val", grouping.groupNames[grouping.pairs[pi].second]);
+    gElem->appendChild(bwElem);
+
+    Poco::AutoPtr<Poco::XML::Element> alphaElem = mDoc->createElement("alpha");
+    alphaElem->setAttribute(
+        "val", boost::lexical_cast<std::string>(grouping.pairAlphas[pi]));
+    gElem->appendChild(alphaElem);
+  }
+
+  // Create default group/pair name element
+  Poco::AutoPtr<Poco::XML::Element> gElem = mDoc->createElement("default");
+  gElem->setAttribute("name", grouping.defaultName);
+  rootElem->appendChild(gElem);
+
+  std::stringstream stream;
+  writer.writeNode(stream, mDoc);
+  return stream.str();
 }
 
 } // namespace MuonGroupingXMLHelper

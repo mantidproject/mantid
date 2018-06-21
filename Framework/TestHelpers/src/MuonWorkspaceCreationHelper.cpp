@@ -1,26 +1,20 @@
 #include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
+
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "MantidMuon/MuonAlgorithmHelper.h"
-
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAlgorithms/CompareWorkspaces.h"
-#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace ScopedFileHelper;
 
 namespace MuonWorkspaceCreationHelper {
 
@@ -106,10 +100,11 @@ Mantid::API::MatrixWorkspace_sptr createAsymmetryWorkspace(size_t nspec,
  * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
  * Number of bins = maxt - 1 .
  * @param seed :: Number added to all y-values.
+ * @param detectorIDseed :: detector IDs starting from this number.
  * @return Pointer to the workspace.
  */
 MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
-                                           double seed) {
+                                           double seed, size_t detectorIDseed) {
 
   MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceFromFunction(
@@ -121,7 +116,7 @@ MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
 
   for (int g = 0; g < static_cast<int>(nspec); g++) {
     auto &spec = ws->getSpectrum(g);
-    spec.addDetectorID(g + 1);
+    spec.addDetectorID(g + static_cast<int>(detectorIDseed));
     spec.setSpectrumNo(g + 1);
     ws->mutableY(g) += seed;
   }
@@ -204,6 +199,61 @@ ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
   }
 
   return deadTimeTable;
+}
+
+/**
+ * Creates a single-point workspace with instrument and runNumber set.
+ * @param intrName :: Instrument name e.g. MUSR
+ * @param runNumber ::  e.g. 1000
+ * @param nSpectra :: Number of spectra in the workspace, defaults to 1.
+ * @return Pointer to the workspace.
+ */
+Workspace_sptr createWorkspaceWithInstrumentandRun(const std::string &instrName,
+                                                   int runNumber,
+                                                   size_t nSpectra) {
+
+  Geometry::Instrument_const_sptr instr =
+      boost::make_shared<Geometry::Instrument>(instrName);
+  MatrixWorkspace_sptr ws =
+      WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 1, 1);
+  ws->setInstrument(instr);
+  ws->mutableRun().addProperty("run_number", runNumber);
+  return ws;
+}
+
+/**
+ * Creates a grouped workspace containing multiple workspaces with multiple
+ * spectra, the detector IDs are consequtive across the spectra, starting from 1
+ * @param nWorkspaces :: The number of workspaces.
+ * @param nspec :: The number of spectra per workspace.
+ * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
+ * Number of bins = maxt - 1 .
+ * @param wsGroupName :: Name of the workspace group.
+ */
+WorkspaceGroup_sptr
+createWorkspaceGroupConsecutiveDetectorIDs(const int &nWorkspaces, size_t nspec,
+                                           size_t maxt,
+                                           const std::string &wsGroupName) {
+
+  WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
+  AnalysisDataService::Instance().addOrReplace(wsGroupName, wsGroup);
+
+  std::string wsNameStem = "MuonDataPeriod_";
+  std::string wsName;
+
+  for (int period = 1; period < nWorkspaces + 1; period++) {
+    // Period 1 yvalues : 1,2,3,4,5,6,7,8,9,10
+    // Period 2 yvalues : 2,3,4,5,6,7,8,9,10,11 etc..
+    size_t detIDstart = (period - 1) * nspec + 1;
+    MatrixWorkspace_sptr ws =
+        createCountsWorkspace(nspec, maxt, period, detIDstart);
+    wsGroup->addWorkspace(ws);
+
+	wsName = wsNameStem + std::to_string(period);
+	AnalysisDataService::Instance().addOrReplace(wsName, ws);
+  }
+
+  return wsGroup;
 }
 
 } // namespace MuonWorkspaceCreationHelper

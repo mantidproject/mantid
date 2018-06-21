@@ -7,23 +7,17 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/ScopedWorkspace.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidMuon/LoadAndApplyMuonDetectorGrouping.h"
 
-//#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
-//#include "MantidTestHelpers/ScopedFileHelper.h"
-//#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/MuonGroupingXMLHelper.h"
+#include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::DataHandling;
 
 namespace {
 
@@ -89,8 +83,8 @@ public:
     AnalysisDataService::Instance().addOrReplace("inputData", ws);
     AnalysisDataService::Instance().addOrReplace("inputGroup", wsGroup);
 
-    auto file = MuonGroupingXMLHelper::createGroupingXMLSingleGroup(
-        "test", "1,2,3");
+    auto file =
+        MuonGroupingXMLHelper::createGroupingXMLSingleGroup("test", "1,2,3");
     std::string filename = file.getFileName();
 
     Muon::LoadAndApplyMuonDetectorGrouping alg;
@@ -282,8 +276,8 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
         4, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.5, 0.1));
     setUpADSWithWorkspace setup(ws);
-    auto file = MuonGroupingXMLHelper::createGroupingXMLSingleGroup(
-        "group_", "1-2");
+    auto file =
+        MuonGroupingXMLHelper::createGroupingXMLSingleGroup("group_", "1-2");
 
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
@@ -306,8 +300,8 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createCountsWorkspace(5, 3, 0.0);
     setUpADSWithWorkspace setup(ws);
     std::string group = "1-10";
-    auto file = MuonGroupingXMLHelper::createGroupingXMLSingleGroup(
-        "test", group);
+    auto file =
+        MuonGroupingXMLHelper::createGroupingXMLSingleGroup("test", group);
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
 
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);

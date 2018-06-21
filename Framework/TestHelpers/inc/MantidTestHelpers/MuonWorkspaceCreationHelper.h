@@ -1,17 +1,10 @@
 #ifndef MUONWORKSPACECREATIONHELPER_H_
 #define MUONWORKSPACECREATIONHELPER_H_
 
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
-
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 namespace MuonWorkspaceCreationHelper {
 
@@ -61,7 +54,8 @@ Mantid::API::MatrixWorkspace_sptr createAsymmetryWorkspace(size_t nspec,
  * equal. Y values increase from 0 in integer steps.
  */
 Mantid::API::MatrixWorkspace_sptr
-createCountsWorkspace(size_t nspec, size_t maxt, double seed);
+createCountsWorkspace(size_t nspec, size_t maxt, double seed,
+                      size_t detectorIDseed = 1);
 
 /**
  * Create a WorkspaceGroup and add to the ADS, populate with MatrixWorkspaces
@@ -78,6 +72,18 @@ createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
  */
 Mantid::API::ITableWorkspace_sptr
 createDeadTimeTable(const size_t &nspec, std::vector<double> &deadTimes);
+
+// Creates a single - point workspace with instrument and runNumber set.
+Mantid::API::Workspace_sptr
+createWorkspaceWithInstrumentandRun(const std::string &instrName, int runNumber,
+                                    size_t nSpectra = 1);
+
+// Creates a grouped workspace containing multiple workspaces with multiple
+// spectra, the detector IDs are consequtive across the spectra, starting from 1
+Mantid::API::WorkspaceGroup_sptr
+createWorkspaceGroupConsecutiveDetectorIDs(const int &nWorkspaces, size_t nspec,
+                                           size_t maxt,
+                                           const std::string &wsGroupName);
 
 } // namespace MuonWorkspaceCreationHelper
 

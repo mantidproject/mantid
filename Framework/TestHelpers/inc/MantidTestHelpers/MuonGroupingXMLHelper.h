@@ -1,9 +1,8 @@
 #ifndef MUONGROUPINGXMLHELPER_H_
 #define MUONGROUPINGXMLHELPER_H_
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/GroupingLoader.h"
 
 namespace MuonGroupingXMLHelper {
 
@@ -26,6 +25,9 @@ createGroupingXMLSinglePair(const std::string &pairName,
 ScopedFileHelper::ScopedFile
 createXMLwithPairsAndGroups(const int &nGroups = 1,
                             const int &nDetectorsPerGroup = 1);
+
+// Saves grouping to the XML file specified
+DLLExport std::string groupingToXML(const Mantid::API::Grouping &grouping);
 
 } // namespace MuonGroupingXMLHelper
 
