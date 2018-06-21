@@ -9,7 +9,7 @@
 #include <sstream>
 
 #include <boost/numeric/conversion/cast.hpp>
-#include <boost/variant/static_visitor.hpp>
+#include <boost/variant.hpp>
 
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
