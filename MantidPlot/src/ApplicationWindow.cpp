@@ -212,6 +212,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/make_unique.h"
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -246,19 +247,8 @@ void file_uncompress(const char *file);
 }
 
 ApplicationWindow::ApplicationWindow(bool factorySettings)
-    : QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),
-      blockWindowActivation(false), m_enableQtiPlotFitting(false),
-      m_exitCode(0),
-#ifdef Q_OS_MAC // Mac
-      settings(QSettings::IniFormat, QSettings::UserScope, "Mantid",
-               "MantidPlot")
-#else
-      settings("Mantid", "MantidPlot")
-#endif
-{
-  QStringList empty;
-  init(factorySettings, empty);
-}
+    // Delegate with an empty string list for the arguments
+    : ApplicationWindow(factorySettings, QStringList{}) {}
 
 ApplicationWindow::ApplicationWindow(bool factorySettings,
                                      const QStringList &args)
@@ -267,18 +257,18 @@ ApplicationWindow::ApplicationWindow(bool factorySettings,
       m_exitCode(0),
 #ifdef Q_OS_MAC // Mac
       settings(QSettings::IniFormat, QSettings::UserScope, "Mantid",
-               "MantidPlot")
+               "MantidPlot"),
 #else
-      settings("Mantid", "MantidPlot")
+      settings("Mantid", "MantidPlot"),
 #endif
-{
+      m_projectRecoveryThread(this) {
   init(factorySettings, args);
 }
 
 /**
  * This function is responsible for copying the old configuration
  * information from the ISIS\MantidPlot area to the new Mantid\MantidPlot
- * area. The old area is deleted once the trnasfer is complete. On subsequent
+ * area. The old area is deleted once the transfer is complete. On subsequent
  * runs, if the old configuration area is missing or empty, the copying
  * is ignored.
  */
@@ -4707,6 +4697,7 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
 
   return this;
 }
+
 bool ApplicationWindow::setScriptingLanguage(const QString &lang) {
   if (lang.isEmpty())
     return false;
@@ -6024,7 +6015,6 @@ bool ApplicationWindow::saveProject(bool compress) {
       projectname.endsWith(".ogg", Qt::CaseInsensitive)) {
     saveProjectAs();
     return true;
-    ;
   }
 
   ProjectSerialiser serialiser(this);
@@ -9808,6 +9798,8 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
   // cleaned up meaning we cannot rely on the deleteLater functionality to
   // work correctly as this will happen in the next iteration of the event loop,
   // i.e after the python shutdown code has been run below.
+  m_shuttingDown = true;
+
   MDIWindowList windows = getAllWindows();
   for (auto &win : windows) {
     win->confirmClose(false);
@@ -15108,7 +15100,7 @@ void ApplicationWindow::onScriptExecuteError(const QString &message,
  */
 bool ApplicationWindow::runPythonScript(const QString &code, bool async,
                                         bool quiet, bool redirect) {
-  if (code.isEmpty())
+  if (code.isEmpty() || m_shuttingDown)
     return false;
   if (!m_iface_script) {
     if (setScriptingLanguage("Python")) {
@@ -16762,4 +16754,10 @@ void ApplicationWindow::dropInTiledWindow(MdiSubWindow *w, QPoint pos) {
 bool ApplicationWindow::isOfType(const QObject *obj,
                                  const char *toCompare) const {
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
+}
+
+void ApplicationWindow::saveProjectRecovery(std::string destination) {
+  const bool isRecovery = true;
+  ProjectSerialiser projectWriter(this, isRecovery);
+  projectWriter.save(QString::fromStdString(destination));
 }
