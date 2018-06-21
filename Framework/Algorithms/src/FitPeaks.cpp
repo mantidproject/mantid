@@ -854,7 +854,9 @@ FitPeaks::fitPeaks() {
 namespace {
 /// Supported peak profiles for observation
 std::vector<std::string> supported_peak_profiles{"Gaussian", "Lorentzian",
-                                                 "PseudoVoigt", "Voigt"};
+                                                 "962"
+                                                 "Voigt",
+                                                 "Voigt"};
 
 double numberCounts(const Histogram &histogram) {
   double total = 0.;
@@ -959,7 +961,7 @@ void FitPeaks::fitSpectrumPeaks(
       bool observe_peak_width_flag =
           decideToEstimatePeakWidth(!foundAnyPeak, peakfunction);
 
-      if (observe_peak_width &&
+      if (observe_peak_width_flag &&
           m_peakWidthEstimateApproach == EstimatePeakWidth::NoEstimation) {
         g_log.warning(
             "Peak width can be estimated as ZERO.  The result can be wrong");
