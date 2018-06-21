@@ -446,12 +446,8 @@ void RunRangeList::addRunRange(
 namespace // anonymous
     {
 /**
- * Parses a string containing a run "token".
- *
- * Note that this function takes the form required by the "accumulate"
- *algorithm:
- * it takes in the parsed runs so far and a new token to parse, and then returns
- * the result of appending the newly parsed token to the already parsed runs.
+ * Parses a string containing a run "token" and adds the runs to the parsedRuns
+ * vector.
  *
  * @param parsedRuns :: the vector of vectors of runs parsed so far.
  * @param token      :: the token to parse.
@@ -581,11 +577,11 @@ generateRange(unsigned int const from, unsigned int const to,
     while (currentRun <= to) {
       if (addRuns) {
         if (runs.empty())
-          runs.emplace_back(std::vector<unsigned int>(1, currentRun));
+          runs.emplace_back(1, currentRun);
         else
           runs.front().emplace_back(currentRun);
       } else {
-        runs.emplace_back(std::vector<unsigned int>(1, currentRun));
+        runs.emplace_back(1, currentRun);
       }
 
       currentRun += stepSize;
@@ -596,11 +592,11 @@ generateRange(unsigned int const from, unsigned int const to,
     while (currentRun >= to) {
       if (addRuns) {
         if (runs.empty())
-          runs.emplace_back(std::vector<unsigned int>(1, currentRun));
+          runs.emplace_back(1, currentRun);
         else
           runs.front().emplace_back(currentRun);
       } else {
-        runs.emplace_back(std::vector<unsigned int>(1, currentRun));
+        runs.emplace_back(1, currentRun);
       }
 
       // Guard against case where stepSize would take us into negative
