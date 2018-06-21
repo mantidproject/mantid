@@ -5,8 +5,8 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayLengthValidator, FloatArrayProperty,
                            IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, Property, StringListValidator)
-from mantid.simpleapi import (AddSampleLog, ConvertToDistribution, CreateWorkspace, Divide, ExtractSingleSpectrum, Multiply,
-                              RebinToWorkspace, ReflectometrySumInQ)
+from mantid.simpleapi import (AddSampleLog, ConvertToDistribution, CreateWorkspace, CropWorkspace, Divide, ExtractSingleSpectrum,
+                              Multiply, RebinToWorkspace, ReflectometrySumInQ)
 import numpy
 import ReflectometryILL_common as common
 from scipy import constants
@@ -75,6 +75,8 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             ws = self._sumForegroundInQ(ws)
             self._addSumTypeToLogs(ws, SumType.IN_Q)
 
+        ws = self._applyWavelengthRange(ws)
+
         self._finalize(ws)
 
     def PyInit(self):
@@ -136,6 +138,11 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
             if directWS.getNumberHistograms() != 1:
                 issues[Prop.DIRECT_FOREGROUND_WS] = 'The workspace has histograms != 1. Was foreground summation forgotten?'
+        wRange = self.getProperty(Prop.WAVELENGTH_RANGE).value
+        if len(wRange) == 2 and wRange[0] >= wRange[1]:
+            issues[Prop.WAVELENGTH_RANGE] = 'Upper limit is smaller than the lower limit.'
+        if len(wRange) > 2:
+            issues[Prop.WAVELENGTH_RANGE] = 'The range should be in the form [min] or [min, max].'
         return issues
 
     def _addSumTypeToLogs(self, ws, sumType):
@@ -146,6 +153,25 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             LogText=sumType,
             LogType='String',
             EnableLogging=self._subalgLogging)
+
+    def _applyWavelengthRange(self, ws):
+        """Cut wavelengths outside the wavelength range from a TOF workspace."""
+        if self.getProperty(Prop.WAVELENGTH_RANGE).isDefault:
+            return ws
+        if self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
+            self.log().warning('Output is not cropped to given WavelengthRange when summing the direct beam.')
+            return ws
+        wRange = self.getProperty(Prop.WAVELENGTH_RANGE).value
+        rangeProp = {'XMin': wRange[0]}
+        if len(wRange) == 2:
+            rangeProp['XMax'] = wRange[1]
+        croppedWSName = self._names.withSuffix('cropped')
+        croppedWS = CropWorkspace(InputWorkspace=ws,
+                                  OutputWorkspace=croppedWSName,
+                                  EnableLogging=self._subalgLogging,
+                                  **rangeProp)
+        self._cleanup.cleanup(ws)
+        return croppedWS
 
     def _checkIfFlatSample(self):
         """Returns true if sample is deemed 'flat' for SumInQ."""
@@ -267,11 +293,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         foreground = self._foregroundIndices(ws)
         sumIndices = [i for i in range(foreground[0], foreground[2] + 1)]
         beamPosIndex = foreground[1]
-        wavelengthLimits = self.getProperty(Prop.WAVELENGTH_RANGE).value
-        if self.getProperty(Prop.WAVELENGTH_RANGE).isDefault:
-            Xs = ws.readX(beamPosIndex)
-            wavelengthLimits[0] = Xs[0]
-            wavelengthLimits[1] = Xs[-1]
         isFlatSample = self._checkIfFlatSample()
         sumWSName = self._names.withSuffix('summed_in_Q')
         sumWS = ReflectometrySumInQ(
@@ -279,8 +300,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             OutputWorkspace=sumWSName,
             InputWorkspaceIndexSet=sumIndices,
             BeamCentre=beamPosIndex,
-            WavelengthMin=wavelengthLimits[0],
-            WavelengthMax=wavelengthLimits[1],
             FlatSample=isFlatSample,
             EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
