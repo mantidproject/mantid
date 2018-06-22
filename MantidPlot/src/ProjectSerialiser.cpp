@@ -27,6 +27,8 @@
 
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
+#include <utility>
 #include <vector>
 
 using namespace Mantid::API;
@@ -53,6 +55,7 @@ Logger g_log("ProjectSerialiser");
 
 /// Keys for parsed workspace names
 const std::string ALL_WS = "";
+const std::string ALL_GROUP_NAMES = "__all_groups";
 
 } // namespace
 
@@ -248,22 +251,41 @@ void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv) {
   // There should only be one of these, so we only read the first.
   std::string workspacesText = tsv.sections("mantidworkspaces").front();
 
-  auto parsedNames = parseWsNames(workspacesText);
+  const auto parsedNames = parseWsNames(workspacesText);
 
   if (!m_projectRecovery) {
     loadWorkspacesIntoMantid(parsedNames);
   }
 
+  auto &adsInstance = Mantid::API::AnalysisDataService::Instance();
+
   // Check everything was loaded before continuing, as we might need to open a
   // window
   // for a workspace which did not load in
-  if (!Mantid::API::AnalysisDataService::Instance().doAllWsExist(
-          parsedNames.at(ALL_WS))) {
+  if (!adsInstance.doAllWsExist(parsedNames.at(ALL_WS))) {
     QMessageBox::critical(window, "MantidPlot - Algorithm error",
                           " The workspaces associated with this project "
                           "could not be loaded. Aborting project loading.");
     throw std::runtime_error(
         "Failed to load all required workspaces. Aborting project loading.");
+  }
+
+  // Check there aren't any unexpected workspaces in project recovery mode
+  if (m_projectRecovery) {
+    // Convert to set for fast lookup
+    std::unordered_set<std::string> allWsNames(parsedNames.at(ALL_WS).begin(),
+                                               parsedNames.at(ALL_WS).end());
+
+    allWsNames.insert(parsedNames.at(ALL_GROUP_NAMES).begin(),
+                      parsedNames.at(ALL_GROUP_NAMES).end());
+
+    const auto loadedWs = adsInstance.getObjectNames();
+    for (const std::string &adsWsName : loadedWs) {
+      if (allWsNames.find(adsWsName) == allWsNames.end()) {
+        // Wasn't originally in project recovery, so delete from ADS
+        adsInstance.remove(adsWsName);
+      }
+    }
   }
 }
 
@@ -726,28 +748,20 @@ void ProjectSerialiser::openScriptWindow(const QStringList &files) {
  *
  * @param s :: the string of characters loaded from a Mantid project file
  */
-void ProjectSerialiser::loadWorkspacesIntoMantid(groupNameToWsNamesT &workspaces) {
-  // Holds a reference to a group name and list of ws names belonging to the
-  // group
-  std::unordered_map<std::string, std::vector<std::string>> groupsToPair;
+void ProjectSerialiser::loadWorkspacesIntoMantid(const groupNameToWsNamesT &workspaces) {
+	for (auto &allWsNames : workspaces.at(ALL_WS)) {
+		loadWsToMantidTree(allWsNames);
+	}
 
-  for (auto &groupKeyWsListPair : workspaces) {
-    // Iterate through each group key, then all the ws names belonging to that
-    // key
+  // Next group up the workspaces 
+  for (auto &groupNameAndWorkspaces : workspaces) {
+	  if (groupNameAndWorkspaces.first == ALL_WS || groupNameAndWorkspaces.first == ALL_GROUP_NAMES) {
+		  // Skip this special key holding all workspaces
+		  continue;
+	  }
 
-    for (auto &wsName : groupKeyWsListPair.second) {
-      // Behavior is based on the group key's value
-      loadWsToMantidTree(wsName);
-      if (groupKeyWsListPair.first != ALL_WS) {
-        // Group workspaces - process in seperate loop
-        groupsToPair[groupKeyWsListPair.first].push_back(std::ref(wsName));
-      }
-    }
-  }
-
-  // Next group up the workspaces
-  for (auto &groupNameAndWorkspaces : groupsToPair) {
-    auto &workspaceList = groupNameAndWorkspaces.second;
+	// Force a copy so we can append in the case where there is 1 element
+    auto workspaceList = groupNameAndWorkspaces.second;
     bool smallGroup(workspaceList.size() < 2);
 
 	// name picked because random and won't ever be used.
@@ -770,7 +784,7 @@ void ProjectSerialiser::loadWorkspacesIntoMantid(groupNameToWsNamesT &workspaces
         // execute the algorithm
         alg->execute();
         
-        workspaceList.push_back(std::ref(unusedName));
+        workspaceList.push_back(unusedName);
       }
 
       // Group the workspaces as they were when the project was saved
@@ -932,6 +946,7 @@ MantidQt::API::ProjectSerialiser::parseWsNames(const std::string &wsNames) {
 
 	for (auto end = groupWorkspaceElements.end(); groupMember != end; ++groupMember) {
       allWsNames[*groupName].push_back(*groupMember);
+	  allWsNames[ALL_GROUP_NAMES].push_back(*groupName);
     }
   }
 

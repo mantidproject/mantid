@@ -145,7 +145,7 @@ private:
   /// Open the script window and load scripts from string
   void openScriptWindow(const std::string &files, const int fileVersion);
   /// Load Nexus files and add workspaces to the ADS
-  void loadWorkspacesIntoMantid(groupNameToWsNamesT &workspaces);
+  void loadWorkspacesIntoMantid(const groupNameToWsNamesT &workspaces);
   /// Load a single workspaces to the ADS
   void loadWsToMantidTree(const std::string &wsName);
   /// Load additional windows (e.g. slice viewer)
