@@ -64,8 +64,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         self.declareProperty("FracStop", defaultValue=0.05, validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Fraction of max counts to include in peak selection.")
 
-        self.declareProperty("MinpplFrac", defaultValue=0.7, doc="Min fraction of predicted background level to check")
-        self.declareProperty("MaxpplFrac", defaultValue=1.5, doc="Max fraction of predicted background level to check")
+        self.declareProperty("MinpplFrac", defaultValue=0.9, doc="Min fraction of predicted background level to check")
+        self.declareProperty("MaxpplFrac", defaultValue=1.1, doc="Max fraction of predicted background level to check")
         mindtBinWidthDocString = "Smallest spacing (in microseconds) between data points for TOF profile fitting."
         self.declareProperty("MindtBinWidth", defaultValue=15, doc=mindtBinWidthDocString)
 
