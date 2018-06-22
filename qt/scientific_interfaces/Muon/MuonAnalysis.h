@@ -211,7 +211,7 @@ private slots:
   void selectMultiPeak(const QString &wsName);
   /// Enable PP tool for the plot of the given WS and optional filepath
   void selectMultiPeakNoUpdate(const QString &wsName,
-	  const boost::optional<QString> &filePath);
+                               const boost::optional<QString> &filePath);
 
   /// Enable PP tool for the plot of the given WS overload to take just a ws
   void selectMultiPeakNoUpdate(const QString &wsName);
@@ -266,7 +266,8 @@ private slots:
   void updateNormalization(QString name);
 
 private:
-  void moveUnNormWS(const std::string &name, std::vector<std::string> &wsNames,bool raw);
+  void moveUnNormWS(const std::string &name, std::vector<std::string> &wsNames,
+                    bool raw);
   bool getIfTFAsymmStore() const;
   /// Initialize local Python environment
   void initLocalPython() override;

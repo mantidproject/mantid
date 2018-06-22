@@ -81,8 +81,9 @@ void CalculateMuonAsymmetry::init() {
       "MaxIterations", 500, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found");
   declareProperty("OutputStatus", "", Kernel::Direction::Output);
-  declareProperty(make_unique<API::FunctionProperty>("OutputFunction", Kernel::Direction::Output),
-	  "The fitting function after fit.");
+  declareProperty(make_unique<API::FunctionProperty>("OutputFunction",
+                                                     Kernel::Direction::Output),
+                  "The fitting function after fit.");
 }
 /*
 * Validate the input parameters
@@ -275,14 +276,14 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(
 * @return normalization constant
 */
 double CalculateMuonAsymmetry::getNormValue(API::CompositeFunction_sptr &func) {
-	
+
   // getFunction(0) -> N(1+g)
   auto TFFunc =
       boost::dynamic_pointer_cast<API::CompositeFunction>(func->getFunction(0));
 
   auto fdas = TFFunc->asString();
   // getFunction(0) -> N
-  auto flat =  TFFunc->getFunction(0);
+  auto flat = TFFunc->getFunction(0);
 
   return flat->getParameter("A0");
 }

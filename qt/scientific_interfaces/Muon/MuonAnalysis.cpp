@@ -455,11 +455,11 @@ std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
   std::vector<std::string> wsNames = {wsName, wsRawName};
   // Create workspace and a raw (unbinned) version of it
   auto ws = createAnalysisWorkspace(itemType, tableRow, plotType, wsName);
-  moveUnNormWS(wsName, wsNames,false);
+  moveUnNormWS(wsName, wsNames, false);
 
   auto wsRaw =
       createAnalysisWorkspace(itemType, tableRow, plotType, wsRawName, true);
-  moveUnNormWS(wsName, wsNames,true);//raw
+  moveUnNormWS(wsName, wsNames, true); // raw
   // Make sure they end up in the ADS
   ads.addOrReplace(wsName, ws);
   ads.addOrReplace(wsRawName, wsRaw);
@@ -469,11 +469,11 @@ std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
 }
 
 void MuonAnalysis::moveUnNormWS(const std::string &name,
-                                std::vector<std::string> &wsNames,bool raw) {
+                                std::vector<std::string> &wsNames, bool raw) {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-   std::string unnorm = "_unNorm";
+  std::string unnorm = "_unNorm";
   if (raw) {
-	  unnorm += "_Raw";
+    unnorm += "_Raw";
   }
   if (ads.doesExist("tmp_unNorm")) {
     ads.rename("tmp_unNorm", name + unnorm);
@@ -2045,36 +2045,36 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName) {
 * is for "load current run" where the data file has a temporary name like
 * MUSRauto_E.tmp
 */
-void MuonAnalysis::selectMultiPeakNoUpdate(const QString &wsName,
-	const boost::optional<QString> &filePath) {
-	disableAllTools();
-	if (!plotExists(wsName)) {
-		plotSpectrum(wsName);
-		setCurrentDataName(wsName);
-	}
+void MuonAnalysis::selectMultiPeakNoUpdate(
+    const QString &wsName, const boost::optional<QString> &filePath) {
+  disableAllTools();
+  if (!plotExists(wsName)) {
+    plotSpectrum(wsName);
+    setCurrentDataName(wsName);
+  }
 
-	if (wsName != m_fitDataPresenter->getAssignedFirstRun()) {
-		// Set the available groups/pairs and periods
-		const Grouping groups = m_groupingHelper.parseGroupingTable();
-		QStringList groupsAndPairs;
-		groupsAndPairs.reserve(
-			static_cast<int>(groups.groupNames.size() + groups.pairNames.size()));
-		std::transform(groups.groupNames.begin(), groups.groupNames.end(),
-			std::back_inserter(groupsAndPairs), &QString::fromStdString);
-		std::transform(groups.pairNames.begin(), groups.pairNames.end(),
-			std::back_inserter(groupsAndPairs), &QString::fromStdString);
-		setGroupsAndPairs();
-	}
+  if (wsName != m_fitDataPresenter->getAssignedFirstRun()) {
+    // Set the available groups/pairs and periods
+    const Grouping groups = m_groupingHelper.parseGroupingTable();
+    QStringList groupsAndPairs;
+    groupsAndPairs.reserve(
+        static_cast<int>(groups.groupNames.size() + groups.pairNames.size()));
+    std::transform(groups.groupNames.begin(), groups.groupNames.end(),
+                   std::back_inserter(groupsAndPairs), &QString::fromStdString);
+    std::transform(groups.pairNames.begin(), groups.pairNames.end(),
+                   std::back_inserter(groupsAndPairs), &QString::fromStdString);
+    setGroupsAndPairs();
+  }
 
-	QString code;
+  QString code;
 
-	code += "g = graph('" + wsName + "-1')\n"
-		"if g != None:\n"
-		"  g.show()\n"
-		"  g.setFocus()\n"
-		"  selectMultiPeak(g)\n";
+  code += "g = graph('" + wsName + "-1')\n"
+                                   "if g != None:\n"
+                                   "  g.show()\n"
+                                   "  g.setFocus()\n"
+                                   "  selectMultiPeak(g)\n";
 
-	runPythonCode(code);
+  runPythonCode(code);
 }
 
 /**
@@ -2084,7 +2084,7 @@ void MuonAnalysis::selectMultiPeakNoUpdate(const QString &wsName,
 * @param wsName Name of the selected workspace
 */
 void MuonAnalysis::selectMultiPeakNoUpdate(const QString &wsName) {
-	selectMultiPeakNoUpdate(wsName, boost::optional<QString>());
+  selectMultiPeakNoUpdate(wsName, boost::optional<QString>());
 }
 
 /**
@@ -2318,7 +2318,8 @@ void MuonAnalysis::loadFittings() {
   // Add Function browser widget to the fit tab
   m_functionBrowser = new MuonFunctionBrowser(nullptr, true);
   m_functionBrowser->sizePolicy().setVerticalStretch(10);
-  m_uiForm.fitBrowser->addFitBrowserWidget(m_functionBrowser,m_functionBrowser);
+  m_uiForm.fitBrowser->addFitBrowserWidget(m_functionBrowser,
+                                           m_functionBrowser);
   // Add Data Selector widget to the fit tab
   m_dataSelector = new MuonFitDataSelector(m_uiForm.fitBrowser);
   m_dataSelector->sizePolicy().setVerticalStretch(0);
@@ -2672,9 +2673,8 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     disconnect(m_uiForm.fitBrowser,
                SIGNAL(workspaceNameChanged(const QString &)), this,
                SLOT(selectMultiPeak(const QString &)));
-	disconnect(m_uiForm.fitBrowser,
-		SIGNAL(TFPlot(const QString &)), this,
-		SLOT(selectMultiPeakNoUpdate(const QString &)));
+    disconnect(m_uiForm.fitBrowser, SIGNAL(TFPlot(const QString &)), this,
+               SLOT(selectMultiPeakNoUpdate(const QString &)));
   }
 
   if (newTab == m_uiForm.DataAnalysis) // Entering DA tab
@@ -2712,8 +2712,9 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     // to it
     connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString &)),
             this, SLOT(selectMultiPeak(const QString &)), Qt::QueuedConnection);
-	connect(m_uiForm.fitBrowser, SIGNAL(TFPlot(const QString &)),
-		this, SLOT(selectMultiPeakNoUpdate(const QString &)), Qt::QueuedConnection);
+    connect(m_uiForm.fitBrowser, SIGNAL(TFPlot(const QString &)), this,
+            SLOT(selectMultiPeakNoUpdate(const QString &)),
+            Qt::QueuedConnection);
     // repeat setting the fitting ranges as the above code can set them to an
     // unwanted default value
     setFittingRanges(xmin, xmax);
@@ -2730,8 +2731,8 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       m_uiForm.fitBrowser->updatePeriods();
     }
 
-      m_uiForm.fitBrowser->setTFAsymm(false);
- 
+    m_uiForm.fitBrowser->setTFAsymm(false);
+
     m_uiForm.fitBrowser->checkFitEnabled();
 
   } else if (newTab == m_uiForm.ResultsTable) {

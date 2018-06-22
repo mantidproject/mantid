@@ -238,15 +238,14 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
           if (Mantid::API::AnalysisDataService::Instance().doesExist(
                   "tmp_unNorm")) {
             const std::string unnorm = "_unNorm";
-			std::string wsName = name;
-			auto raw = wsName.find("_Raw");
+            std::string wsName = name;
+            auto raw = wsName.find("_Raw");
 
-			if (raw == std::string::npos) {
-				wsName += unnorm;
-			}
-			else {
-				wsName.insert(raw, unnorm);
-			}
+            if (raw == std::string::npos) {
+              wsName += unnorm;
+            } else {
+              wsName.insert(raw, unnorm);
+            }
 
             Mantid::API::AnalysisDataService::Instance().rename("tmp_unNorm",
                                                                 wsName);

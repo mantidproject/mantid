@@ -59,7 +59,9 @@ public:
   void finishHandleNormal(const Mantid::API::IAlgorithm *alg);
   /// Add an extra widget into the browser
   void addExtraWidget(QWidget *widget);
-  void addFitBrowserWidget(QWidget *widget, MantidQt::MantidWidgets::FunctionBrowser *functionBrowser);
+  void addFitBrowserWidget(
+      QWidget *widget,
+      MantidQt::MantidWidgets::FunctionBrowser *functionBrowser);
   /// Set function externally
   void setFunction(const Mantid::API::IFunction_sptr func) override;
   /// Run a non-sequential fit
@@ -177,7 +179,8 @@ private:
   /// workspaces
   void finishAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,
                                   const int nWorkspaces) const;
-  void finishAfterTFSimultaneousFit(const Mantid::API::IAlgorithm *alg, const std::string baseName) const;
+  void finishAfterTFSimultaneousFit(const Mantid::API::IAlgorithm *alg,
+                                    const std::string baseName) const;
   std::string getUnnormName(const std::string wsName);
   void changeFitFunction(bool enabled);
   void setTFAsymmMode(bool state);
