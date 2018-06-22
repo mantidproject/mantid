@@ -34,7 +34,7 @@ boost::optional<T> getConfigValue(const std::string &key) {
   T returnedValue;
 
   int valueIsGood = Mantid::Kernel::ConfigService::Instance().getValue<T>(
-      SAVING_ENABLED_CONFIG_KEY, returnedValue);
+      key, returnedValue);
 
   if (valueIsGood != 1) {
     return boost::optional<T>{};
