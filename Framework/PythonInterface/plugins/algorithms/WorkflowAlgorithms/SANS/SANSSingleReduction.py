@@ -5,7 +5,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, Property)
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
-
+from mantid.simpleapi import CloneWorkspace
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.enums import (ReductionMode, DataType, ISISReductionMode)
 from sans.common.general_functions import (create_child_algorithm, does_can_workspace_exist_on_ads)
@@ -399,6 +399,10 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
             calculated_transmission_workspace = transmission_bundle.calculated_transmission_workspace
             unfitted_transmission_workspace = transmission_bundle.unfitted_transmission_workspace
             if transmission_bundle.data_type is DataType.Can:
+                if does_can_workspace_exist_on_ads(calculated_transmission_workspace):
+                    calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace, StoreInADS=False)
+                if does_can_workspace_exist_on_ads(unfitted_transmission_workspace):
+                    unfitted_transmission_workspace = CloneWorkspace(unfitted_transmission_workspace, StoreInADS=False)
                 self.setProperty("OutputWorkspaceCalculatedTransmissionCan", calculated_transmission_workspace)
                 self.setProperty("OutputWorkspaceUnfittedTransmissionCan", unfitted_transmission_workspace)
             elif transmission_bundle.data_type is DataType.Sample:
