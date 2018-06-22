@@ -13,6 +13,7 @@
 
 #include "Poco/DirectoryIterator.h"
 #include "Poco/NObserver.h"
+
 #include "Poco/Path.h"
 #include "qmetaobject.h"
 
@@ -30,11 +31,10 @@ namespace {
 
 template <typename T>
 boost::optional<T> getConfigValue(const std::string &key) {
-	T returnedValue;
-	
-	int valueIsGood =
-      Mantid::Kernel::ConfigService::Instance().getValue<T>(
-          SAVING_ENABLED_CONFIG_KEY, returnedValue);
+  T returnedValue;
+
+  int valueIsGood = Mantid::Kernel::ConfigService::Instance().getValue<T>(
+      SAVING_ENABLED_CONFIG_KEY, returnedValue);
 
   if (valueIsGood != 1) {
     return boost::optional<T>{};
@@ -69,7 +69,7 @@ std::string getOutputPath() {
   return timestampedPath;
 }
 
-const std::string OUTPUT_PROJ_NAME = "recovery.mantid" ;
+const std::string OUTPUT_PROJ_NAME = "recovery.mantid";
 
 // Config keys
 const std::string SAVING_ENABLED_CONFIG_KEY = "projectRecovery.enabled";
@@ -78,15 +78,15 @@ const std::string NO_OF_CHECKPOINTS_KEY = "projectRecovery.numberOfCheckpoints";
 
 // Config values
 const bool SAVING_ENABLED =
-getConfigBool(SAVING_ENABLED_CONFIG_KEY).get_value_or(false);
+    getConfigBool(SAVING_ENABLED_CONFIG_KEY).get_value_or(false);
 const int SAVING_TIME =
-getConfigValue<int>(SAVING_TIME_KEY).get_value_or(60); // Seconds
+    getConfigValue<int>(SAVING_TIME_KEY).get_value_or(60); // Seconds
 const int NO_OF_CHECKPOINTS =
-getConfigValue<int>(NO_OF_CHECKPOINTS_KEY).get_value_or(5);
+    getConfigValue<int>(NO_OF_CHECKPOINTS_KEY).get_value_or(5);
 
+// Implementation variables
 Mantid::Kernel::Logger g_log("Project Recovery Thread");
-const std::chrono::seconds TIME_BETWEEN_SAVING =
-std::chrono::seconds(SAVING_TIME);
+const std::chrono::seconds TIME_BETWEEN_SAVING(SAVING_TIME);
 
 } // namespace
 
