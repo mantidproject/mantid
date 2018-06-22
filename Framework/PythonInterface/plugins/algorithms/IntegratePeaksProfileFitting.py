@@ -104,13 +104,14 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         q_frame='lab'
         mtd['MDdata'] = MDdata
 
+        padeCoefficients = ICCFT.getModeratorCoefficients(padeFile)
         if strongPeaksParamsFile != "":
-            padeCoefficients = ICCFT.getModeratorCoefficients(padeFile)
             if sys.version_info[0] == 3:
                 strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'),encoding='latin1')
             else:
                 strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'))
         else:
+            print('NOT USING STRONG PEAKS')
             strongPeakParams = None #This will not force any profiles
 
         nTheta = self.getProperty('NTheta').value
