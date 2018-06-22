@@ -684,7 +684,7 @@ std::string MuonFitPropertyBrowser::getUnnormName(std::string wsName) {
 * Creates an instance of Fit algorithm, sets its properties and launches it.
 */
 void MuonFitPropertyBrowser::doTFAsymmFit() {
-
+	//runFit();
 	std::string wsName = workspaceName();
 	wsName = getUnnormName(wsName);
 	if (wsName.empty()) {
@@ -718,9 +718,9 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
 		alg->initialize();
 		auto fa = m_compositeFunction->asString();
 		if (m_compositeFunction->nFunctions() > 1) {
-		
+			
 			alg->setProperty("InputFunction", boost::dynamic_pointer_cast<IFunction>(
-				m_compositeFunction));
+				m_functionBrowser->getGlobalFunction()));
 		}
 		else {
 			alg->setProperty("InputFunction", boost::dynamic_pointer_cast<IFunction>(
@@ -953,7 +953,6 @@ void MuonFitPropertyBrowser::fit() { emit preFitChecksRequested(false); }
  */
 void MuonFitPropertyBrowser::runFit() {
   std::string wsName = workspaceName();
-
   if (wsName.empty()) {
     QMessageBox::critical(this, "Mantid - Error", "Workspace name is not set");
     return;
@@ -998,7 +997,7 @@ void MuonFitPropertyBrowser::runFit() {
 		tmpWSName += "_Raw";
 	}
 	if (m_boolManager->value(m_TFAsymmMode) && tmpWSName.find(UNNORM)) {
-		tmpWSName += TFExtension();
+		tmpWSName = getUnnormName(tmpWSName);
 	}
 
       alg->setPropertyValue("InputWorkspace", tmpWSName);
