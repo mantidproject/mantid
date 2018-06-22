@@ -696,7 +696,6 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
                            m_compositeFunction->getFunction(0)));
     }
 
-
     auto unnorm = m_workspacesToFit;
     std::string tmp = UNNORM;
     bool raw = rawData();
