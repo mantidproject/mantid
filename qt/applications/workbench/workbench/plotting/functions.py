@@ -40,35 +40,8 @@ SUBPLOT_HSPACE = 0.5
 
 
 # -----------------------------------------------------------------------------
-# Functions
+# 'Public' Functions
 # -----------------------------------------------------------------------------
-def raise_if_not_sequence(seq, seq_name):
-    accepted_types = [list, tuple]
-    if type(seq) not in accepted_types:
-        raise ValueError("{} should be a list or tuple".format(seq_name))
-
-
-def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices):
-    """Raises a ValueError if any arguments have the incorrect types"""
-    if spectrum_nums is not None and wksp_indices is not None:
-        raise ValueError("Both spectrum_nums and wksp_indices supplied. "
-                         "Please supply only 1.")
-
-    if not isinstance(workspaces, MatrixWorkspace):
-        raise_if_not_sequence(workspaces, 'Workspaces')
-
-    if spectrum_nums is not None:
-        raise_if_not_sequence(spectrum_nums, 'spectrum_nums')
-
-    if wksp_indices is not None:
-        raise_if_not_sequence(wksp_indices, 'wksp_indices')
-
-
-def _validate_pcolormesh_inputs(workspaces):
-    """Raises a ValueError if any arguments have the incorrect types"""
-    if not isinstance(workspaces, MatrixWorkspace):
-        raise_if_not_sequence(workspaces, 'Workspaces')
-
 
 def current_figure_or_none():
     """If an active figure exists then return it otherwise return None
@@ -229,3 +202,34 @@ def plotSpectrum(workspaces, indices, distribution=None, error_bars=False,
 
     return plot(workspaces, wksp_indices=indices,
                 errors=error_bars, fmt=fmt)
+
+
+# -----------------------------------------------------------------------------
+# 'Private' Functions
+# -----------------------------------------------------------------------------
+def _raise_if_not_sequence(seq, seq_name):
+    accepted_types = [list, tuple]
+    if type(seq) not in accepted_types:
+        raise ValueError("{} should be a list or tuple".format(seq_name))
+
+
+def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices):
+    """Raises a ValueError if any arguments have the incorrect types"""
+    if spectrum_nums is not None and wksp_indices is not None:
+        raise ValueError("Both spectrum_nums and wksp_indices supplied. "
+                         "Please supply only 1.")
+
+    if not isinstance(workspaces, MatrixWorkspace):
+        _raise_if_not_sequence(workspaces, 'Workspaces')
+
+    if spectrum_nums is not None:
+        _raise_if_not_sequence(spectrum_nums, 'spectrum_nums')
+
+    if wksp_indices is not None:
+        _raise_if_not_sequence(wksp_indices, 'wksp_indices')
+
+
+def _validate_pcolormesh_inputs(workspaces):
+    """Raises a ValueError if any arguments have the incorrect types"""
+    if not isinstance(workspaces, MatrixWorkspace):
+        _raise_if_not_sequence(workspaces, 'Workspaces')
