@@ -111,7 +111,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             else:
                 strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'))
         else:
-            print('NOT USING STRONG PEAKS')
             strongPeakParams = None #This will not force any profiles
 
         nTheta = self.getProperty('NTheta').value
