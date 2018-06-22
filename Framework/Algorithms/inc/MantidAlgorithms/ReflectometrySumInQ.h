@@ -55,6 +55,8 @@ public:
     MinMax() noexcept = default;
     MinMax(const double a, const double b) noexcept;
     void testAndSet(const double a) noexcept;
+    void testAndSetMax(const double a) noexcept;
+    void testAndSetMin(const double a) noexcept;
   };
 
   const std::string name() const override;

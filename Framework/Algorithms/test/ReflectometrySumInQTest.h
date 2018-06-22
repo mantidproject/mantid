@@ -7,6 +7,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidHistogramData/HistogramIterator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ReflectometrySumInQ;
@@ -85,6 +86,7 @@ public:
         TS_ASSERT_THROWS_NOTHING(
             alg.setProperty("BeamCentre", static_cast<int>(i)))
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", isFlatSample))
+        TS_ASSERT_THROWS_NOTHING(alg.setProperty("IncludePartialBins", true))
         TS_ASSERT_THROWS_NOTHING(alg.execute())
         API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
         TS_ASSERT(outputWS);
@@ -124,6 +126,7 @@ public:
         TS_ASSERT_THROWS_NOTHING(
             alg.setProperty("BeamCentre", static_cast<int>(beamCentre)))
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", isFlatSample))
+        TS_ASSERT_THROWS_NOTHING(alg.setProperty("IncludePartialBins", true))
         TS_ASSERT_THROWS_NOTHING(alg.execute())
         API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
         TS_ASSERT(outputWS);
@@ -132,6 +135,42 @@ public:
         const auto totalYSummedInQ =
             std::accumulate(Ys.cbegin(), Ys.cend(), 0.0);
         TS_ASSERT_DELTA(totalYSummedInQ, totalY, 1e-10)
+      }
+    }
+  }
+
+  void test_excludePartialBins() {
+    using namespace Mantid;
+    auto inputWS = testWorkspace();
+    inputWS = detectorsOnly(inputWS);
+    inputWS = convertToWavelength(inputWS);
+    const std::array<bool, 2> flatSampleOptions{{true, false}};
+    for (const auto isFlatSample : flatSampleOptions) {
+      for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
+        ReflectometrySumInQ alg;
+        alg.setChild(true);
+        alg.setRethrows(true);
+        TS_ASSERT_THROWS_NOTHING(alg.initialize())
+        TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+        TS_ASSERT_THROWS_NOTHING(
+            alg.setPropertyValue("InputWorkspaceIndexSet", std::to_string(i)))
+        TS_ASSERT_THROWS_NOTHING(
+            alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+        TS_ASSERT_THROWS_NOTHING(
+            alg.setProperty("BeamCentre", static_cast<int>(i)))
+        TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", isFlatSample))
+        TS_ASSERT_THROWS_NOTHING(alg.setProperty("IncludePartialBins", false))
+        TS_ASSERT_THROWS_NOTHING(alg.execute())
+        API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+        TS_ASSERT(outputWS);
+        TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+        auto hist = outputWS->histogram(0);
+        const auto firstItem = *hist.begin();
+        for (const auto &i : hist) {
+          TS_ASSERT_DELTA(i.binWidth(), firstItem.binWidth(), 1e-12)
+          TS_ASSERT_DELTA(i.counts(), firstItem.counts(), 1e-1)
+          TS_ASSERT_DELTA(i.countStandardDeviation(), firstItem.countStandardDeviation(), 1e-1)
+        }
       }
     }
   }

@@ -22,6 +22,7 @@ const static std::string BEAM_CENTRE{"BeamCentre"};
 const static std::string INPUT_WS{"InputWorkspace"};
 const static std::string IS_FLAT_SAMPLE{"FlatSample"};
 const static std::string OUTPUT_WS{"OutputWorkspace"};
+const static std::string PARTIAL_BINS{"IncludePartialBins"};
 }
 
 /**
@@ -168,6 +169,28 @@ void ReflectometrySumInQ::MinMax::testAndSet(const double a) noexcept {
   }
 }
 
+/**
+* Set the `max` field if `a` is geater than `max`.
+*
+* @param a [in] :: a number
+*/
+void ReflectometrySumInQ::MinMax::testAndSetMax(const double a) noexcept {
+  if (a > max) {
+    max = a;
+  }
+}
+
+/**
+* Set the `min` field if `a` is smaller than `min`.
+*
+* @param a [in] :: a number
+*/
+void ReflectometrySumInQ::MinMax::testAndSetMin(const double a) noexcept {
+  if (a < min) {
+    min = a;
+  }
+}
+
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReflectometrySumInQ)
 
@@ -226,6 +249,8 @@ void ReflectometrySumInQ::init() {
   declareProperty(Prop::IS_FLAT_SAMPLE, true,
                   "If true, the summation is handled as the standard divergent "
                   "beam case, otherwise as the non-flat sample case.");
+  declareProperty(Prop::PARTIAL_BINS, false,
+                  "If true, use the full projected wavelength range possibly including partially filled bins.");
 }
 
 /** Execute the algorithm.
@@ -332,7 +357,7 @@ ReflectometrySumInQ::MinMax ReflectometrySumInQ::findWavelengthMinMax(
     const Indexing::SpectrumIndexSet &indices, const Angles &refAngles) {
   const API::SpectrumInfo &spectrumInfo = detectorWS.spectrumInfo();
   // Get the new max and min X values of the projected (virtual) lambda range
-
+  const bool includePartialBins = getProperty(Prop::PARTIAL_BINS);
   // Find minimum and maximum 2thetas and the corresponding indices.
   // It cannot be assumed that 2theta increases with indices, check for example
   // D17 at ILL
@@ -340,18 +365,22 @@ ReflectometrySumInQ::MinMax ReflectometrySumInQ::findWavelengthMinMax(
   MinMax inputTwoThetaRange;
   for (const auto i : indices) {
     const auto twoThetas = twoThetaWidth(i, spectrumInfo);
-    inputTwoThetaRange.testAndSet(twoThetas.min);
-    inputTwoThetaRange.testAndSet(twoThetas.max);
-    const auto &xs = detectorWS.x(i);
-    for (size_t xIndex = 0; xIndex < xs.size(); ++xIndex) {
+    inputTwoThetaRange.testAndSetMin(includePartialBins ? twoThetas.min : twoThetas.max);
+    inputTwoThetaRange.testAndSetMax(includePartialBins ? twoThetas.max : twoThetas.min);
+    const auto &edges = detectorWS.binEdges(i);
+    for (size_t xIndex = 0; xIndex < edges.size(); ++xIndex) {
       // It is common for the wavelength to have negative values at ILL.
-      const auto x = xs[xIndex];
+      const auto x = edges[xIndex + (includePartialBins ? 0 : 1)];
       if (x > 0.) {
         inputLambdaRange.testAndSet(x);
         break;
       }
     }
-    inputLambdaRange.testAndSet(xs.back());
+    if (includePartialBins) {
+      inputLambdaRange.testAndSet(edges.back());
+    } else {
+      inputLambdaRange.testAndSet(edges[edges.size() - 2]);
+    }
   }
 
   MinMax outputLambdaRange;
