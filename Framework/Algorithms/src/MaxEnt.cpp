@@ -223,7 +223,7 @@ void MaxEnt::init() {
       "The data in this workspace is complex in the same manner as complex "
       "input data.");
   declareProperty(
-      "PerSpectrumImage", true,
+      "PerSpectrumReconstruction", true,
       "Reconstruction is done independently on each spectrum. "
       "If false, all the spectra use one image and the reconstructions "
       "differ only through their adjustments. "
@@ -348,7 +348,7 @@ void MaxEnt::exec() {
   // Constant adjustment of calculated data
   MatrixWorkspace_const_sptr dataConstAdj = getProperty("DataConstAdj");
   // Add spectra in reconstruction if false
-  const bool sumSpectra = !getProperty("PerSpectrumImage");
+  const bool perSpectrumReconstruction = getProperty("PerSpectrumReconstruction");
 
   // For now have the requirement that data must have non-zero
   // (and positive!) errors
@@ -402,7 +402,7 @@ void MaxEnt::exec() {
 
   size_t nSpec = complexData ? nHist / 2 : nHist;
   size_t nSpecSum = 1;
-  if (sumSpectra) {
+  if (!perSpectrumReconstruction) {
     nSpecSum = nSpec;
     nSpec = 1;
   }
@@ -432,11 +432,11 @@ void MaxEnt::exec() {
     std::vector<double> data(dataLength, 0.0);
     std::vector<double> errors(dataLength, 0.0);
     if (complexData) {
-      data = toComplex(inWS, spec, false, sumSpectra); // 3rd arg false -> data
+      data = toComplex(inWS, spec, false, !perSpectrumReconstruction); // 3rd arg false -> data
       errors =
-          toComplex(inWS, spec, true, sumSpectra); // 3rd arg true -> errors
+          toComplex(inWS, spec, true, !perSpectrumReconstruction); // 3rd arg true -> errors
     } else {
-      if (sumSpectra) {
+      if (!perSpectrumReconstruction) {
         const size_t numBins = inWS->y(0).size();
         data.reserve(numBins);
         errors.reserve(numBins);
