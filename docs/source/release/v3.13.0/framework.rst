@@ -93,5 +93,6 @@ Bugfixes
 - Checks on the structure of Python fit function classes have been improved to avoid scenarios, such as writing ``function1d`` rather than ``function1D``, which
   would previously have resulted in a hard crash.
 - Fit functions defined in a python script can be used with the new fit function API right after sibscription.
+- Child algorithms now respect their parent algorithm's ``EnableLogging`` setting when invoked using the function-style calling. Previously, some messages could appear in the log even though ``EnableLogging`` was set to ``False``.
 
 :ref:`Release 3.13.0 <v3.13.0>`
