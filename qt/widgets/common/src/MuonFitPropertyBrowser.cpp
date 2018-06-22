@@ -293,7 +293,7 @@ void MuonFitPropertyBrowser::init() {
 }
 // Set up the execution of the muon fit menu
 void MuonFitPropertyBrowser::executeFitMenu(const QString &item) {
-  if (item == "TFAsymm") {
+  if (item == "Fit" && m_boolManager->value(m_TFAsymmMode)) {
     doTFAsymmFit();
   } else {
     FitPropertyBrowser::executeFitMenu(item);
@@ -305,35 +305,11 @@ void MuonFitPropertyBrowser::groupBtnPressed() { genGroupWindow(); }
 void MuonFitPropertyBrowser::periodBtnPressed() { genPeriodWindow(); }
 // Create combination selection pop up
 void MuonFitPropertyBrowser::generateBtnPressed() { genCombinePeriodWindow(); }
-/**
-pulate the fit button.
-* This initialization includes:
-*   1. SIGNALs/SLOTs when properties change.
-*   2. Actions and associated SIGNALs/SLOTs.
-* @param fitMapper the QMap to the fit mapper
-* @param fitMenu the QMenu for the fit button
-*/
-void MuonFitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper,
-                                                   QMenu *fitMenu) {
 
-  m_fitActionTFAsymm = new QAction("TF Asymmetry Fit", this);
-  fitMapper->setMapping(m_fitActionTFAsymm, "TFAsymm");
-
-  FitPropertyBrowser::populateFitMenuButton(fitMapper, fitMenu);
-  connect(m_fitActionTFAsymm, SIGNAL(triggered()), fitMapper, SLOT(map()));
-  fitMenu->addSeparator();
-  fitMenu->addAction(m_fitActionTFAsymm);
-}
 /// Enable/disable the Fit button;
 void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
   m_fitActionFit->setEnabled(yes);
   m_fitActionSeqFit->setEnabled(yes);
-  // only allow TFAsymm fit if not keeping norm
-  if (!m_boolManager->value(m_keepNorm) && yes) {
-    m_fitActionTFAsymm->setEnabled(yes);
-  } else {
-    m_fitActionTFAsymm->setEnabled(false);
-  }
 }
 
 void MuonFitPropertyBrowser::checkFitEnabled() {
@@ -587,16 +563,11 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
       table->addColumn("int", "spectra");
       TableRow row = table->appendRow();
       row << norm << 0;
-      // remove TFAsymm fit
-      m_fitActionTFAsymm->setEnabled(false);
+
 
     } else { // remove data so it is not used later
       AnalysisDataService::Instance().remove("__keepNorm__");
 
-      // if fit is enabled so should TFAsymm
-      if (m_fitActionSeqFit->isEnabled()) {
-        m_fitActionTFAsymm->setEnabled(true);
-      }
     }
   } else {
     // search map for group/pair change
@@ -1307,7 +1278,6 @@ void MuonFitPropertyBrowser::changeFitFunction(bool enabled) {
 * @param enabled :: [input] Whether to turn this mode on or off
 */
 void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
-  modifyFitMenu(m_fitActionTFAsymm, enabled);
   changeFitFunction(enabled);
  
   // Show or hide the TFAsymmetry fit
