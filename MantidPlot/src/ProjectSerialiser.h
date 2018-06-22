@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include <QFile>
 #include <QFileInfo>
@@ -49,6 +50,8 @@ class Folder;
 
 namespace MantidQt {
 namespace API {
+
+using groupNameToWsNamesT = std::unordered_map<std::string, std::vector<std::string>>;
 
 class ProjectSerialiser : public QObject {
   Q_OBJECT
@@ -142,7 +145,7 @@ private:
   /// Open the script window and load scripts from string
   void openScriptWindow(const std::string &files, const int fileVersion);
   /// Load Nexus files and add workspaces to the ADS
-  void populateMantidTreeWidget(const QString &lines);
+  void loadWorkspacesIntoMantid(groupNameToWsNamesT &workspaces);
   /// Load a single workspaces to the ADS
   void loadWsToMantidTree(const std::string &wsName);
   /// Load additional windows (e.g. slice viewer)
@@ -154,6 +157,8 @@ private:
   QMdiSubWindow *setupQMdiSubWindow() const;
   /// Check if a vector of strings contains a string
   bool contains(const std::vector<std::string> &vec, const std::string &value);
+
+  groupNameToWsNamesT parseWsNames(const std::string &wsNames);
 };
 }
 }

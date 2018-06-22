@@ -4609,78 +4609,75 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &workingDir,
 }
 
 ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
-                                                  const int fileVersion) {
-  newProject();
-  m_mantidmatrixWindows.clear();
+	const int fileVersion) {
+	newProject();
+	m_mantidmatrixWindows.clear();
 
-  cacheWorkingDirectory();
-  projectname = filename;
-  setWindowTitle("MantidPlot - " + filename);
+	cacheWorkingDirectory();
+	projectname = filename;
+	setWindowTitle("MantidPlot - " + filename);
 
-  d_opening_file = true;
+	d_opening_file = true;
 
-  // Open as a top level folder
-  ProjectSerialiser serialiser(this);
-  serialiser.load(filename.toStdString(), fileVersion);
+	folders->blockSignals(true);
+	blockSignals(true);
 
-  setScriptingLanguage("Python");
+	// Open as a top level folder
+	ProjectSerialiser serialiser(this);
+	try {
+		serialiser.load(filename.toStdString(), fileVersion);
+	}
+	catch (std::runtime_error &e) {
+		g_log.error(e.what());
+		// We failed to load - reset and bail out
+		d_opening_file = false;
+		folders->blockSignals(false);
+		blockSignals(false);
+		return this;
+	}
 
-  // These checks have been performed by the load mechanism
-  QFileInfo fileInfo(filename);
-  QString baseName = fileInfo.fileName();
+	Folder *curFolder = projectFolder();
 
-  folders->blockSignals(true);
-  blockSignals(true);
+	// rename project folder item
+	FolderListItem *item = dynamic_cast<FolderListItem *>(folders->firstChild());
+	if (!item)
+		throw std::runtime_error("Couldn't retrieve folder list items.");
 
-  Folder *curFolder = projectFolder();
+	QFile file(filename);
+	QFileInfo fileInfo(filename);
+	QString baseName = fileInfo.fileName();
+	item->setText(0, fileInfo.baseName());
+	item->folder()->setObjectName(fileInfo.baseName());
 
-  // rename project folder item
-  FolderListItem *item = dynamic_cast<FolderListItem *>(folders->firstChild());
-  if (!item)
-    throw std::runtime_error("Couldn't retrieve folder list items.");
+	d_loaded_current = nullptr;
 
-  item->setText(0, fileInfo.baseName());
-  item->folder()->setObjectName(fileInfo.baseName());
+	if (d_loaded_current)
+		curFolder = d_loaded_current;
 
-  // Read the rest of the project file in for parsing
-  std::string lines = fileTS.readAll().toUtf8().constData();
 
-  // Open as a top level folder
-  ProjectSerialiser serialiser(this);
-  try {
-    serialiser.load(lines, fileVersion);
-  } catch (std::runtime_error &e) {
-    g_log.error(e.what());
-    // We failed to load - bail out
-    return this;
-  }
+		QString fileName = fileInfo.absoluteFilePath();
+		recentProjects.removeAll(filename);
+		recentProjects.push_front(filename);
+		updateRecentProjectsList();
 
-  {
-    // WHY use another fileinfo?
-    QFileInfo fi2(filename);
-    QString fileName = fi2.absoluteFilePath();
-    recentProjects.removeAll(filename);
-    recentProjects.push_front(filename);
-    updateRecentProjectsList();
-  }
 
-  folders->setCurrentItem(curFolder->folderListItem());
-  folders->blockSignals(false);
+	folders->setCurrentItem(curFolder->folderListItem());
+	folders->blockSignals(false);
 
-  // change folder to user defined current folder
-  changeFolder(curFolder, true);
+	// change folder to user defined current folder
+	changeFolder(curFolder, true);
 
-  blockSignals(false);
+	blockSignals(false);
 
-  renamedTables.clear();
+	renamedTables.clear();
 
-  restoreApplicationGeometry();
+	restoreApplicationGeometry();
 
-  savedProject();
-  d_opening_file = false;
-  d_workspace->blockSignals(false);
+	savedProject();
+	d_opening_file = false;
+	d_workspace->blockSignals(false);
 
-  return this;
+	return this;
 }
 
 bool ApplicationWindow::setScriptingLanguage(const QString &lang) {

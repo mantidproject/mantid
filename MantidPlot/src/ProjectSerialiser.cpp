@@ -25,14 +25,36 @@
 #include <QTextCodec>
 #include <QTextStream>
 
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 using namespace Mantid::API;
 using namespace MantidQt::API;
 using Mantid::Kernel::Logger;
 
 namespace {
+std::vector<std::string> splitByDelim(const std::string &s, const char delim) {
+  std::vector<std::string> foundWsNames;
+
+  std::stringstream sstream(s);
+  std::string wsName;
+  // Split by \t char
+  while (std::getline(sstream, wsName, delim)) {
+    if (!wsName.empty()) {
+      foundWsNames.push_back(wsName);
+    }
+  }
+  return foundWsNames;
+}
+
 /// static logger
 Logger g_log("ProjectSerialiser");
-}
+
+/// Keys for parsed workspace names
+const std::string ALL_WS = "";
+
+} // namespace
 
 // This C function is defined in the third party C lib minigzip.c
 extern "C" {
@@ -220,10 +242,28 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
  * @param tsv :: the TSVserialiser object for the project file
  */
 void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv) {
-  if (tsv.hasSection("mantidworkspaces")) {
-    // There should only be one of these, so we only read the first.
-    std::string workspaces = tsv.sections("mantidworkspaces").front();
-    populateMantidTreeWidget(QString::fromStdString(workspaces));
+  if (!tsv.hasSection("mantidworkspaces")) {
+    return;
+  }
+  // There should only be one of these, so we only read the first.
+  std::string workspacesText = tsv.sections("mantidworkspaces").front();
+
+  auto parsedNames = parseWsNames(workspacesText);
+
+  if (!m_projectRecovery) {
+    loadWorkspacesIntoMantid(parsedNames);
+  }
+
+  // Check everything was loaded before continuing, as we might need to open a
+  // window
+  // for a workspace which did not load in
+  if (!Mantid::API::AnalysisDataService::Instance().doAllWsExist(
+          parsedNames.at(ALL_WS))) {
+    QMessageBox::critical(window, "MantidPlot - Algorithm error",
+                          " The workspaces associated with this project "
+                          "could not be loaded. Aborting project loading.");
+    throw std::runtime_error(
+        "Failed to load all required workspaces. Aborting project loading.");
   }
 }
 
@@ -323,8 +363,10 @@ bool ProjectSerialiser::canWriteToProject(QFile *fileHandle,
   // check if we can write
   if (!fileHandle->open(QIODevice::WriteOnly)) {
     QMessageBox::about(window, window->tr("MantidPlot - File save error"),
-                       window->tr("The file: <br><b>%1</b> is opened in "
-                                  "read-only mode").arg(projectName)); // Mantid
+                       window
+                           ->tr("The file: <br><b>%1</b> is opened in "
+                                "read-only mode")
+                           .arg(projectName)); // Mantid
     return false;
   }
   return true;
@@ -418,7 +460,8 @@ QString ProjectSerialiser::saveFolderHeader(Folder *folder,
 
 /**
  * Generate the subfolder and subwindow records for the current folder.
- * This method will recursively convert subfolders to their text representation
+ * This method will recursively convert subfolders to their text
+ * representation
  *
  * @param app :: the current application window instance
  * @param folder :: the folder to generate the text for.
@@ -536,7 +579,8 @@ QString ProjectSerialiser::saveWorkspaces() {
 /**
  * Save additional windows that are not MdiSubWindows
  *
- * This includes windows such as the slice viewer, VSI, and the spectrum viewer
+ * This includes windows such as the slice viewer, VSI, and the spectrum
+ * viewer
  *
  * @return a string representing the sections of the
  */
@@ -579,9 +623,10 @@ bool ProjectSerialiser::canBackupProjectFiles(QFile *fileHandle,
         fileHandle->close();
       int choice = QMessageBox::warning(
           window, window->tr("MantidPlot - File backup error"), // Mantid
-          window->tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If "
-                     "you ignore "
-                     "this, you run the risk of <b>data loss</b>.")
+          window
+              ->tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If "
+                   "you ignore "
+                   "this, you run the risk of <b>data loss</b>.")
               .arg(projectName)
               .arg(projectName + "~"),
           QMessageBox::Retry | QMessageBox::Default,
@@ -681,106 +726,94 @@ void ProjectSerialiser::openScriptWindow(const QStringList &files) {
  *
  * @param s :: the string of characters loaded from a Mantid project file
  */
-void ProjectSerialiser::populateMantidTreeWidget(const QString &lines) {
-  QStringList list = lines.split("\t");
-  QStringList::const_iterator line = list.begin();
+void ProjectSerialiser::loadWorkspacesIntoMantid(groupNameToWsNamesT &workspaces) {
+  // Holds a reference to a group name and list of ws names belonging to the
+  // group
+  std::unordered_map<std::string, std::vector<std::string>> groupsToPair;
 
-  std::vector<std::string> expectedWorkspaces;
+  for (auto &groupKeyWsListPair : workspaces) {
+    // Iterate through each group key, then all the ws names belonging to that
+    // key
 
-  for (++line; line != list.end(); ++line) {
-    if ((*line)
-            .contains(',')) // ...it is a group and more work needs to be done
-    {
-      // Format of string is "GroupName, Workspace, Workspace, Workspace, ....
-      // and so on "
-      QStringList groupWorkspaces = (*line).split(',');
-      std::string groupName = groupWorkspaces[0].toStdString();
-      std::vector<std::string> inputWsVec;
-      // Work through workspaces, load into Mantid and then push into
-      // vectorgroup (ignore group name, start at 1)
-      for (int i = 1; i < groupWorkspaces.size(); i++) {
-        std::string wsName = groupWorkspaces[i].toStdString();
-        expectedWorkspaces.push_back(wsName);
-        loadWsToMantidTree(wsName);
-        inputWsVec.push_back(wsName);
-      }
-
-      try {
-        bool smallGroup(inputWsVec.size() < 2);
-        if (smallGroup) // if the group contains less than two items...
-        {
-          // ...create a new workspace and then delete it later on (group
-          // workspace requires two workspaces in order to run the alg)
-          Mantid::API::IAlgorithm_sptr alg =
-              Mantid::API::AlgorithmManager::Instance().create(
-                  "CreateWorkspace", 1);
-          alg->setProperty("OutputWorkspace", "boevsMoreBoevs");
-          alg->setProperty<std::vector<double>>("DataX",
-                                                std::vector<double>(2, 0.0));
-          alg->setProperty<std::vector<double>>("DataY",
-                                                std::vector<double>(2, 0.0));
-          // execute the algorithm
-          alg->execute();
-          // name picked because random and won't ever be used.
-          inputWsVec.emplace_back("boevsMoreBoevs");
-        }
-
-        // Group the workspaces as they were when the project was saved
-        std::string algName("GroupWorkspaces");
-        Mantid::API::IAlgorithm_sptr groupingAlg =
-            Mantid::API::AlgorithmManager::Instance().create(algName, 1);
-        groupingAlg->initialize();
-        groupingAlg->setProperty("InputWorkspaces", inputWsVec);
-        groupingAlg->setPropertyValue("OutputWorkspace", groupName);
-        // execute the algorithm
-        groupingAlg->execute();
-
-        if (smallGroup) {
-          // Delete the temporary workspace used to create a group of 1 or less
-          // (currently can't have group of 0)
-          Mantid::API::AnalysisDataService::Instance().remove("boevsMoreBoevs");
-        }
-      }
-      // Error catching for algorithms
-      catch (std::invalid_argument &) {
-        QMessageBox::critical(window, "MantidPlot - Algorithm error",
-                              " Error in Grouping Workspaces");
-      } catch (Mantid::Kernel::Exception::NotFoundError &) {
-        QMessageBox::critical(window, "MantidPlot - Algorithm error",
-                              " Error in Grouping Workspaces");
-      } catch (std::runtime_error &) {
-        QMessageBox::critical(window, "MantidPlot - Algorithm error",
-                              " Error in Grouping Workspaces");
-      } catch (std::exception &) {
-        QMessageBox::critical(window, "MantidPlot - Algorithm error",
-                              " Error in Grouping Workspaces");
-      }
-    } else // ...not a group so just load the workspace
-    {
-      std::string wsName = line->toStdString();
-      expectedWorkspaces.push_back(wsName);
+    for (auto &wsName : groupKeyWsListPair.second) {
+      // Behavior is based on the group key's value
       loadWsToMantidTree(wsName);
+      if (groupKeyWsListPair.first != ALL_WS) {
+        // Group workspaces - process in seperate loop
+        groupsToPair[groupKeyWsListPair.first].push_back(std::ref(wsName));
+      }
     }
+  }
 
-    // Check everything was loaded before continuing, as we might need to open a
-    // window
-    // for a workspace which did not load in
-    if (!Mantid::API::AnalysisDataService::Instance().doAllWsExist(
-            expectedWorkspaces)) {
+  // Next group up the workspaces
+  for (auto &groupNameAndWorkspaces : groupsToPair) {
+    auto &workspaceList = groupNameAndWorkspaces.second;
+    bool smallGroup(workspaceList.size() < 2);
+
+	// name picked because random and won't ever be used.
+	std::string unusedName = "boevsMoreBoevs";
+
+    try {
+
+      if (smallGroup) // if the group contains less than two items...
+      {
+        // ...create a new workspace and then delete it later on (group
+        // workspace requires two workspaces in order to run the alg)
+        Mantid::API::IAlgorithm_sptr alg =
+            Mantid::API::AlgorithmManager::Instance().create("CreateWorkspace",
+                                                             1);
+        alg->setProperty("OutputWorkspace", "boevsMoreBoevs");
+        alg->setProperty<std::vector<double>>("DataX",
+                                              std::vector<double>(2, 0.0));
+        alg->setProperty<std::vector<double>>("DataY",
+                                              std::vector<double>(2, 0.0));
+        // execute the algorithm
+        alg->execute();
+        
+        workspaceList.push_back(std::ref(unusedName));
+      }
+
+      // Group the workspaces as they were when the project was saved
+      std::string algName("GroupWorkspaces");
+      Mantid::API::IAlgorithm_sptr groupingAlg =
+          Mantid::API::AlgorithmManager::Instance().create(algName, 1);
+      groupingAlg->initialize();
+	  // This is the workspace list, but we cannot pass in a reference
+      groupingAlg->setProperty("InputWorkspaces", workspaceList);
+      groupingAlg->setPropertyValue("OutputWorkspace",
+                                    groupNameAndWorkspaces.first);
+      // execute the algorithm
+      groupingAlg->execute();
+
+      if (smallGroup) {
+        // Delete the temporary workspace used to create a group of 1 or less
+        // (currently can't have group of 0)
+        Mantid::API::AnalysisDataService::Instance().remove(unusedName);
+      }
+
+    }
+    // Error catching for algorithms
+    catch (std::invalid_argument &) {
       QMessageBox::critical(window, "MantidPlot - Algorithm error",
-                            " The workspaces associated with this project "
-                            "could not be loaded. Aborting project loading.");
-      throw std::runtime_error(
-          "Failed to load all required workspaces. Aborting project loading.");
+                            " Error in Grouping Workspaces");
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
+      QMessageBox::critical(window, "MantidPlot - Algorithm error",
+                            " Error in Grouping Workspaces");
+    } catch (std::runtime_error &) {
+      QMessageBox::critical(window, "MantidPlot - Algorithm error",
+                            " Error in Grouping Workspaces");
+    } catch (std::exception &) {
+      QMessageBox::critical(window, "MantidPlot - Algorithm error",
+                            " Error in Grouping Workspaces");
     }
   }
 }
 
 /**
-   * Load a workspace into Mantid from a project directory
-   *
-   * @param wsName :: the name of the workspace to load
-   */
+ * Load a workspace into Mantid from a project directory
+ *
+ * @param wsName :: the name of the workspace to load
+ */
 void ProjectSerialiser::loadWsToMantidTree(const std::string &wsName) {
   if (wsName.empty()) {
     throw std::runtime_error("Workspace Name not found in project file ");
@@ -846,7 +879,8 @@ void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
 }
 
 /**
- * Create a new QMdiSubWindow which will become the parent of the Vates window.
+ * Create a new QMdiSubWindow which will become the parent of the Vates
+ * window.
  *
  * @return  a new handle to a QMdiSubWindow instance
  */
@@ -868,4 +902,38 @@ QMdiSubWindow *ProjectSerialiser::setupQMdiSubWindow() const {
 bool ProjectSerialiser::contains(const std::vector<std::string> &vec,
                                  const std::string &value) {
   return std::find(vec.cbegin(), vec.cend(), value) != vec.cend();
+}
+
+groupNameToWsNamesT
+MantidQt::API::ProjectSerialiser::parseWsNames(const std::string &wsNames) {
+  groupNameToWsNamesT allWsNames;
+  auto unparsedWorkspaces = splitByDelim(wsNames, '\t');
+
+  // The first element is removed since it says "WorkspaceNames"
+  unparsedWorkspaces.erase(unparsedWorkspaces.begin());
+
+
+  for (const auto &workspaceName : unparsedWorkspaces) {
+	const char groupWorkspaceChar = ',';
+    
+	if (workspaceName.find(groupWorkspaceChar) == std::string::npos) {
+      // Normal workspace
+		allWsNames[ALL_WS].push_back(workspaceName);
+      continue;
+    }
+
+    // Group workspace
+    auto groupWorkspaceElements =
+        splitByDelim(workspaceName, groupWorkspaceChar);
+
+	// First element is the group name
+	auto groupName = groupWorkspaceElements.begin();
+	auto groupMember = groupName + 1;
+
+	for (auto end = groupWorkspaceElements.end(); groupMember != end; ++groupMember) {
+      allWsNames[*groupName].push_back(*groupMember);
+    }
+  }
+
+  return allWsNames;
 }
