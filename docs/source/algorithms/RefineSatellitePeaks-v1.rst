@@ -2,8 +2,6 @@
 
 .. summary::
 
-.. alias::
-
 .. properties::
 
 Description
@@ -31,7 +29,7 @@ defined by `PeakRadius`) in the MD data is found and this is taken as the actual
 position of the satellite peaks.
 
 Finally the found satellite peaks are integerated using the
-:ref:`algm-IntegrateMD` algorithm with the parameters `PeakRadius`,
+:ref:`IntegratePeaksMD <algm-IntegratePeaksMD-v2>` algorithm with the parameters `PeakRadius`,
 `BackgroundInnerRadius`, and `BackgroundOuterRadius`. Satellite peaks are
 discarded if there I/sigma value is less than the parameter `IOverSigma`.
 
@@ -58,7 +56,7 @@ Usage
     }
 
 
-    satellites_refined = RefineSatellitePeaks(MainPeaks=main_peaks, SatellitePeaks=satellite_peaks, MDWorkspace=md_workspace, **params)
+    satellites_refined = RefineSatellitePeaks(NuclearPeaks=main_peaks, SatellitePeaks=satellite_peaks, MDWorkspace=md_workspace, **params)
 
     print (len(satellites_refined))
 
