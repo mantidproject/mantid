@@ -2064,10 +2064,6 @@ void MuonAnalysis::selectMultiPeakNoUpdate(const QString &wsName,
 		std::transform(groups.pairNames.begin(), groups.pairNames.end(),
 			std::back_inserter(groupsAndPairs), &QString::fromStdString);
 		setGroupsAndPairs();
-
-		// Set the selected run, group/pair and period
-		//m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
-		//setChosenGroupAndPeriods(wsName);
 	}
 
 	QString code;

@@ -217,6 +217,7 @@ private:
       m_pf; //< if the function is peak holds pointer to it
   boost::shared_ptr<Mantid::API::CompositeFunction>
       m_parent; //< if the function has parent holds pointer to it
+  QtProperty *m_type;
   QtBrowserItem *m_item;              //< the browser item
   QList<QtProperty *> m_attributes;   //< function attribute properties
   QList<QtProperty *> m_parameters;   //< function parameter properties

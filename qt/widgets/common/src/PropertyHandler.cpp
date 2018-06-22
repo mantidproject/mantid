@@ -34,7 +34,7 @@ PropertyHandler::PropertyHandler(Mantid::API::IFunction_sptr fun,
     : FunctionHandler(fun), m_browser(browser),
       m_cf(boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun)),
       m_pf(boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(fun)),
-      m_parent(parent), m_item(item), m_isMultispectral(false),
+      m_parent(parent), m_type(nullptr), m_item(item), m_isMultispectral(false),
       m_workspace(nullptr), m_workspaceIndex(nullptr), m_base(0), m_ci(0),
       m_hasPlot(false) {}
 
@@ -75,6 +75,27 @@ void PropertyHandler::init() {
 
   QtProperty *fnProp = m_item->property();
 
+  // create Type property
+  if (!m_type) {
+	  m_type = m_browser->m_enumManager->addProperty("Type");
+	  
+		  fnProp->addSubProperty(m_type);
+	  if (m_parent) {
+		  m_browser->m_enumManager->setEnumNames(m_type,
+			  m_browser->m_registeredFunctions);
+		  
+	  }
+	  else {
+		  QStringList functionNames;
+		  functionNames << "CompositeFunction"; // << "MultiBG";
+		  m_browser->m_enumManager->setEnumNames(m_type, functionNames);
+		  
+	  }
+	  
+  }
+  int itype = m_browser->m_enumManager->enumNames(m_type)
+	   .indexOf(QString::fromStdString(m_fun->name()));
+  m_browser->m_enumManager->setValue(m_type, itype);
   // create worspace and workspace index properties if parent is a MultiBG
   initWorkspace();
 
@@ -548,6 +569,8 @@ PropertyHandler *PropertyHandler::findHandler(QtProperty *prop) {
     return nullptr;
   if (prop == m_item->property())
     return this;
+  if (prop == m_type)
+	   return this;
   if (prop == m_workspace)
     return this;
   if (prop == m_workspaceIndex)
@@ -894,7 +917,104 @@ void PropertyHandler::clearError(QtProperty *prop) {
 * @param prop :: The "Type" property with new value
 */
 Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
-  if (m_cf) {
+	if (prop == m_type) {
+		    // if (!m_parent) return m_browser->compositeFunction();// dont replace the
+			    // root composite function
+			
+			    // Create new function
+			int i = m_browser->m_enumManager->value(prop);
+		QStringList functionNames = m_browser->m_enumManager->enumNames(prop);
+		const QString &fnName = functionNames[i];
+		Mantid::API::IFunction_sptr f;
+		try {
+			f = Mantid::API::FunctionFactory::Instance().createFunction(
+				fnName.toStdString());
+			
+		}
+		catch (std::exception &e) {
+			QMessageBox::critical(nullptr, "Mantid - Error",
+				"Cannot create function " + fnName + "\n" +
+				e.what());
+			return Mantid::API::IFunction_sptr();
+			
+		}
+		
+			    // turn of the change slots (doubleChanged() etc) to avoid infinite loop
+			m_browser->m_changeSlotsEnabled = false;
+		
+
+			    // Check if it's a peak and set its width
+			Mantid::API::IPeakFunction *pf =
+			dynamic_cast<Mantid::API::IPeakFunction *>(f.get());
+		if (pf) {
+			if (!m_pf) {
+				if (!m_browser->workspaceName().empty() &&
+					m_browser->workspaceIndex() >= 0) {
+					pf->setCentre((m_browser->startX() + m_browser->endX()) / 2);
+					
+				}
+				
+			}
+			else {
+				pf->setCentre(m_pf->centre());
+				pf->setHeight(m_pf->height());
+				pf->setFwhm(m_pf->fwhm());
+				
+			}
+			
+		}
+		
+			if (pf) {
+			m_browser->setDefaultPeakType(fnName.toStdString());
+			
+		}
+			else {
+			m_browser->setDefaultBackgroundType(fnName.toStdString());
+			
+			}
+			
+			QList<QtProperty *> subs = m_item->property()->subProperties();
+			foreach(QtProperty *sub, subs) {
+			m_item->property()->removeSubProperty(sub);
+				
+			}
+			
+				m_browser->m_changeSlotsEnabled = true;
+			
+				emit m_browser->removePlotSignal(this);
+			
+				Mantid::API::IFunction_sptr f_old = function();
+			PropertyHandler *h = new PropertyHandler(f, m_parent, m_browser, m_item);
+			if (this == m_browser->m_autoBackground) {
+				if (dynamic_cast<Mantid::API::IBackgroundFunction *>(f.get())) {
+					m_browser->m_autoBackground = h;
+					h->fit();
+					
+				}
+				else {
+					m_browser->m_autoBackground = nullptr;
+					
+				}
+				
+			}
+			if (m_parent) {
+				m_parent->replaceFunctionPtr(f_old, f);
+				
+			}
+			f->setHandler(h);
+			    // calculate the baseline
+				if (h->pfun()) {
+				h->setCentre(h->centre()); // this sets m_ci
+				h->calcBase();
+				
+			}
+			   // at this point this handler does not exist any more. only return is
+				    // possible
+				return f;
+			
+				
+	}
+	else if (m_cf) {
     for (size_t i = 0; i < m_cf->nFunctions(); i++) {
       Mantid::API::IFunction_sptr f = getHandler(i)->changeType(prop);
       if (f)

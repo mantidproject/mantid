@@ -173,14 +173,6 @@ private:
   QAction *m_fitActionTFAsymm;
   /// override populating fit menu
   void populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu) override;
-  void rescaleWS(const std::map<std::string, double> norm,
-                 const std::string wsName, const double shift);
-  void rescaleWS(const double norm, const std::string wsName,
-                 const double shift);
-  Mantid::API::IFunction_sptr
-  getTFAsymmFitFunction(Mantid::API::IFunction_sptr original,
-                        const std::vector<double> norms);
-  void updateMultipleNormalization(std::map<std::string, double> norms);
   /// Get the registered function names
   void populateFunctionNames() override;
   /// Check if the workspace can be used in the fit
@@ -191,7 +183,7 @@ private:
                                   const int nWorkspaces) const;
   void finishAfterTFSimultaneousFit(const Mantid::API::IAlgorithm *alg, const std::string baseName) const;
   std::string getUnnormName(const std::string wsName);
-
+  void changeFitFunction(bool enabled);
   void setTFAsymmMode(bool state);
   void clearGroupCheckboxes();
   void addGroupCheckbox(const QString &name);

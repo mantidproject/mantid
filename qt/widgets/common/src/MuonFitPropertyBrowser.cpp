@@ -684,7 +684,6 @@ std::string MuonFitPropertyBrowser::getUnnormName(std::string wsName) {
 * Creates an instance of Fit algorithm, sets its properties and launches it.
 */
 void MuonFitPropertyBrowser::doTFAsymmFit() {
-	//runFit();
 	std::string wsName = workspaceName();
 	wsName = getUnnormName(wsName);
 	if (wsName.empty()) {
@@ -759,7 +758,6 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
 		alg->setProperty("StartX", startX());
 		alg->setProperty("EndX", endX());
 		alg->setPropertyValue("Minimizer", minimizer());
-		//alg->setPropertyValue("CostFunction", costFunction());
 
 		// If we are doing a simultaneous fit, set this up here
 		const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
@@ -780,168 +778,25 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
 		QMessageBox::critical(this, "Mantid - Error", msg);
 	}
 }
-/**
-* Updates the normalization in the table WS
-* assumes that the change is due to a calculation
-* @param norms :: map of updated normalization values
-*/
-void MuonFitPropertyBrowser::updateMultipleNormalization(
-    std::map<std::string, double> norms) {
-  auto oldNorm = readMultipleNormalization();
-  ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
-  AnalysisDataService::Instance().addOrReplace("MuonAnalysisTFNormalizations",
-                                               table);
-  table->addColumn("double", "norm");
-  table->addColumn("str", "name");
-  table->addColumn("str", "method");
-
-  for (auto norm : oldNorm) {
-    Mantid::API::TableRow row = table->appendRow();
-    auto it = norms.find(std::get<0>(norm));
-    if (it != norms.end() && it->second != std::get<1>(norm)) {
-      // write new norm
-      row << it->second << std::get<0>(norm) << "Calculated";
-    } else {
-      // write old norm
-      row << std::get<1>(norm) << std::get<0>(norm) << "Estimated";
-    }
-  }
-}
-/** Gets the fitting function for TFAsymmetry fit
-* @param original :: The function defined by the user (in GUI)
-* @param norms :: vector of normalization constants
-* @returns :: The fitting function for the TFAsymmetry fit
-*/
-Mantid::API::IFunction_sptr MuonFitPropertyBrowser::getTFAsymmFitFunction(
-    Mantid::API::IFunction_sptr original, const std::vector<double> norms) {
-
-  auto multi = boost::make_shared<MultiDomainFunction>();
-  auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(original);
-  size_t numDomains = original->getNumberDomains();
-  for (size_t j = 0; j < numDomains; j++) {
-    IFunction_sptr userFunc;
-    auto constant = FunctionFactory::Instance().createInitialized(
-        "name = FlatBackground, A0 = 1.0, ties = (A0 = 1.0)");
-    if (numDomains == 1) {
-      userFunc = original;
-    } else {
-      userFunc = tmp->getFunction(j);
-      multi->setDomainIndex(j, j);
-    }
-    auto inBrace = boost::make_shared<CompositeFunction>();
-    inBrace->addFunction(constant);
-    inBrace->addFunction(userFunc);
-    auto norm = FunctionFactory::Instance().createInitialized(
-        "composite=CompositeFunction,NumDeriv=true;name = FlatBackground, A0 "
-        "=" +
-        std::to_string(norms[j]));
-    auto product = boost::dynamic_pointer_cast<CompositeFunction>(
-        FunctionFactory::Instance().createFunction("ProductFunction"));
-    product->addFunction(norm);
-    product->addFunction(inBrace);
-    multi->addFunction(product);
-  }
-  // add ties
-  for (size_t j = 0; j < original->getParameterNames().size(); j++) {
-    auto originalTie = original->getTie(j);
-    if (originalTie) {
-      auto name = original->getParameterNames()[j];
-      auto stringTie = originalTie->asString();
-      // change name to reflect new postion
-      auto insertPosition = stringTie.find_first_of(".");
-      stringTie.insert(insertPosition + 1, "f1.f1.");
-      // need to change the other side of =
-      insertPosition = stringTie.find_first_of("=");
-      insertPosition = stringTie.find_first_of(".", insertPosition);
-      stringTie.insert(insertPosition + 1, "f1.f1.");
-      multi->addTies(stringTie);
-    }
-  }
-  return boost::dynamic_pointer_cast<IFunction>(multi);
-}
-
 /** Reads the normalization constants and which WS
 * they belong to
 * @returns :: A map of normalization constants and WS names
 */
 std::map<std::string, double> readMultipleNormalization() {
-  std::map<std::string, double> norm;
-  if (AnalysisDataService::Instance().doesExist(
-          "MuonAnalysisTFNormalizations")) {
-    Mantid::API::ITableWorkspace_sptr table =
-        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                "MuonAnalysisTFNormalizations"));
-    auto colNorm = table->getColumn("norm");
-    auto colName = table->getColumn("name");
-    for (size_t j = 0; j < table->rowCount(); j++) {
-      norm[colName->cell<std::string>(j)] = ((*colNorm)[j]); // read norm
-    }
-  }
-  return norm;
-}
-/** The transformation between normalized counts and asymmetry
-* @param norm :: map of normalization constants
-* @param wsName :: the name of the WS to rescale
-* @param shift :: offset to add (+1 = to normalized counts, -1 = to asymmetry)
-*/
-void MuonFitPropertyBrowser::rescaleWS(const std::map<std::string, double> norm,
-                                       const std::string wsName,
-                                       const double shift) {
-  // get norm:
-  std::string tmp = wsName;
-  // stored with ; instead of spaces
-  std::replace(tmp.begin(), tmp.end(), ' ', ';');
-  auto it = norm.find(tmp);
-  if (it == norm.end()) {
-    g_log.error("WS not found: " + wsName);
-    return;
-  }
-  double value = it->second;
-  rescaleWS(value, wsName, shift);
-  if (rawData()) {
-    rescaleWS(value, wsName + "_Raw", shift);
-  }
-}
-/** The transformation between normalized counts and asymmetry
-* @param value :: normalization constants
-* @param wsName :: the name of the WS to rescale
-* @param shift :: offset to add (+1 = to normalized counts, -1 = to asymmetry)
-*/
-void MuonFitPropertyBrowser::rescaleWS(const double value,
-                                       const std::string wsName,
-                                       const double shift) {
-  // go back to normalized counts
-  if (shift == 1.0) {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Scale");
-    alg->initialize();
-    alg->setProperty("InputWorkspace", wsName);
-    alg->setProperty("OutputWorkspace", wsName);
-    alg->setProperty("Factor", 1.0);
-    alg->setProperty("Operation", "Add");
-    alg->execute();
-  }
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Scale");
-  alg->initialize();
-  alg->setProperty("InputWorkspace", wsName);
-  alg->setProperty("OutputWorkspace", wsName);
-  if (shift == 1) {
-    alg->setProperty("Factor", value);
-  } else {
-    alg->setProperty("Factor", 1. / value);
-  }
-  alg->setProperty("Operation", "Multiply");
-  alg->execute();
-  // if to asymmetry
-  if (shift == -1.0) {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Scale");
-    alg->initialize();
-    alg->setProperty("InputWorkspace", wsName);
-    alg->setProperty("OutputWorkspace", wsName);
-    alg->setProperty("Factor", -1.0);
-    alg->setProperty("Operation", "Add");
-    alg->execute();
-  }
+	std::map<std::string, double> norm;
+	if (AnalysisDataService::Instance().doesExist(
+		"MuonAnalysisTFNormalizations")) {
+		Mantid::API::ITableWorkspace_sptr table =
+			boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+				Mantid::API::AnalysisDataService::Instance().retrieve(
+					"MuonAnalysisTFNormalizations"));
+		auto colNorm = table->getColumn("norm");
+		auto colName = table->getColumn("name");
+		for (size_t j = 0; j < table->rowCount(); j++) {
+			norm[colName->cell<std::string>(j)] = ((*colNorm)[j]); // read norm
+		}
+	}
+	return norm;
 }
 /**
  * Requests checks and updates prior to running a fit
@@ -958,7 +813,6 @@ void MuonFitPropertyBrowser::runFit() {
     return;
   }
   try {
-	  auto fa = m_compositeFunction->asString();
     m_initialParameters.resize(compositeFunction()->nParams());
     for (size_t i = 0; i < compositeFunction()->nParams(); i++) {
       m_initialParameters[i] = compositeFunction()->getParameter(i);
@@ -992,15 +846,10 @@ void MuonFitPropertyBrowser::runFit() {
       alg->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(
                                        m_compositeFunction->getFunction(0)));
     }
-	std::string tmpWSName = wsName;
-	if (rawData()) {
-		tmpWSName += "_Raw";
-	}
-	if (m_boolManager->value(m_TFAsymmMode) && tmpWSName.find(UNNORM)) {
-		tmpWSName = getUnnormName(tmpWSName);
-	}
-
-      alg->setPropertyValue("InputWorkspace", tmpWSName);
+	if (rawData())
+		 alg->setPropertyValue("InputWorkspace", wsName + "_Raw");
+	else
+		 alg->setPropertyValue("InputWorkspace", wsName);
     alg->setProperty("WorkspaceIndex", workspaceIndex());
     alg->setProperty("StartX", startX());
     alg->setProperty("EndX", endX());
@@ -1010,12 +859,10 @@ void MuonFitPropertyBrowser::runFit() {
     // If we are doing a simultaneous fit, set this up here
     const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
     if (nWorkspaces > 1) {
-	  std::string extension = TFExtension();
-
-      alg->setPropertyValue("InputWorkspace", m_workspacesToFit[0]+extension);
+      alg->setPropertyValue("InputWorkspace", m_workspacesToFit[0]);
       for (int i = 1; i < nWorkspaces; i++) {
         std::string suffix = boost::lexical_cast<std::string>(i);
-        alg->setPropertyValue("InputWorkspace_" + suffix, m_workspacesToFit[i]+extension);
+        alg->setPropertyValue("InputWorkspace_" + suffix, m_workspacesToFit[i]);
         alg->setProperty("WorkspaceIndex_" + suffix, workspaceIndex());
         alg->setProperty("StartX_" + suffix, startX());
         alg->setProperty("EndX_" + suffix, endX());
@@ -1031,12 +878,6 @@ void MuonFitPropertyBrowser::runFit() {
     QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
     QMessageBox::critical(this, "Mantid - Error", msg);
   }
-}
-
-std::string MuonFitPropertyBrowser :: TFExtension() const{
-
-
-	return (m_boolManager->value(m_TFAsymmMode)) ? UNNORM : "";
 }
 
 /**
@@ -1120,13 +961,10 @@ void MuonFitPropertyBrowser::finishHandleTF(const IAlgorithm *alg) {
 		}
 	}
 
-
-	auto tfsdaf = alg->getPropertyValue("OutputStatus");
 	auto status = QString::fromStdString(alg->getPropertyValue("OutputStatus"));
 	emit fitResultsChanged(status);
 	FitPropertyBrowser::fitResultsChanged(status);
-	//need to add errors and values to browser
-	//m_functionBrowser->setParamError()
+	
 	// If fit was simultaneous, insert extra information into params table
 	// and group the output workspaces
 	const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
@@ -1143,53 +981,7 @@ void MuonFitPropertyBrowser::finishHandleTF(const IAlgorithm *alg) {
 		emit fittingDone(QString::fromStdString(wsList[0]));
 		emit algorithmFinished(QString::fromStdString(wsList[0] + "_workspace"));
 	}
-	//  magic grouping code
-	/*auto &ads = AnalysisDataService::Instance();
-	const QString wsName = QString::fromStdString(workspaceName());
-	std::string groupName;
-	const int index = wsName.indexOf(';');
-	if (index != -1) {
-		groupName = wsName.left(index).toStdString();
-		}
-		else {
-			groupName= wsName.toStdString();
-		}
-	WorkspaceGroup_sptr group;
-	if (ads.doesExist(groupName)) {
-		group = ads.retrieveWS<WorkspaceGroup>(groupName);
-	}
-	std::string wsNormalised =
-		wsName.toStdString() + "_NormalisedCovarianceMatrix";
-	std::string wsParameters = wsName.toStdString() + "_Parameters";
-	std::string wsWorkspace = wsName.toStdString() + "_Workspace";
-	std::vector<std::string> inputWorkspaces;
-
-	if (Mantid::API::AnalysisDataService::Instance().doesExist(wsNormalised)) {
-		inputWorkspaces.push_back(wsNormalised);
-	}
-	if (Mantid::API::AnalysisDataService::Instance().doesExist(wsParameters)) {
-		inputWorkspaces.push_back(wsParameters);
-	}
-	if (Mantid::API::AnalysisDataService::Instance().doesExist(wsWorkspace)) {
-		inputWorkspaces.push_back(wsWorkspace);
-	}
-	if (group) {
-
-		// Exists and is a group -> add missing workspaces to it
-		for (auto it = inputWorkspaces.begin(); it != inputWorkspaces.end(); ++it) {
-			if (!group->contains(*it)) {
-				group->add(*it);
-			}
-		}
-	}
-	else {
-		// Doesn't exist or isn't a group -> create/overwrite
-		IAlgorithm_sptr groupingAlg =
-			AlgorithmManager::Instance().create("GroupWorkspaces");
-		groupingAlg->setProperty("InputWorkspaces", inputWorkspaces);
-		groupingAlg->setPropertyValue("OutputWorkspace", groupName);
-		groupingAlg->execute();
-	}*/
+	
 }
 void MuonFitPropertyBrowser::finishHandleNormal(const IAlgorithm *alg) {
   // Copy experiment info to output workspace
@@ -1278,13 +1070,12 @@ void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
 }
 
 /**
-* After a simultaneous fit, insert extra information into parameters table
+* After a TF simultaneous fit, insert extra information into parameters table
 * (i.e. what runs, groups, periods "f0", "f1" etc were)
 * and group the output workspaces
 * @param fitAlg :: [input] Pointer to fit algorithm that just finished
-* @param nWorkspaces :: [input] Number of workspaces that were fitted
+* @param baseName :: [input] The common name of the workspaces of interest
 */
-// need own version of this
 void MuonFitPropertyBrowser::finishAfterTFSimultaneousFit(
 	const Mantid::API::IAlgorithm *alg, const std::string baseName) const {
 	AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
@@ -1426,6 +1217,87 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
 bool MuonFitPropertyBrowser::isMultiFittingMode() const {
   return m_isMultiFittingMode;
 }
+void MuonFitPropertyBrowser::changeFitFunction(bool enabled) {
+	// set new fit func
+	IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ConvertFitFunctionForMuonTFAsymmetry");
+	// do not preserve the ties
+	if (AnalysisDataService::Instance().doesExist("MuonAnalysisTFNormalizations") && m_compositeFunction->nFunctions()>0) {
+		alg->initialize();
+
+
+		IFunction_sptr old = boost::dynamic_pointer_cast<IFunction>(
+			m_compositeFunction);
+		QStringList globals;
+
+
+		if (enabled && m_isMultiFittingMode) {
+			//manually set the function values
+			old = m_functionBrowser->getGlobalFunction();
+			globals = m_functionBrowser->getGlobalParameters();
+		}
+		else if (!enabled && !m_isMultiFittingMode) {
+			// to extract in single fit we have an extra composite -> so remove it
+			auto tmp = boost::dynamic_pointer_cast<CompositeFunction>(old);
+			old = tmp->getFunction(0);
+		}
+		alg->setProperty("InputFunction", old);
+		alg->setProperty("NormalizationTable", "MuonAnalysisTFNormalizations");
+		alg->setProperty("WorkspaceList", m_workspacesToFit);
+		std::string mode = (enabled) ? "Construct" : "Extract";
+		alg->setProperty("Mode", mode);
+		alg->execute();
+		IFunction_sptr func = alg->getProperty("OutputFunction");
+
+
+		//multiple fit
+		if (m_isMultiFittingMode) {
+			//update values in browser
+			auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(func);
+			old = tmp->getFunction(0);
+			m_functionBrowser->setFunction(old);
+			//preserve global parameters
+			QStringList newGlobals;
+			const std::string INSERT_FUNCTION{ "f0.f1.f1." };
+			if (enabled) {
+				for (auto global : globals) {
+					newGlobals << QString::fromStdString(INSERT_FUNCTION) + global;
+				}
+			}
+			else {
+				for (auto global : globals) {
+					newGlobals << global.remove(0, 9);
+				}
+			}
+			m_functionBrowser->updateMultiDatasetParameters(*func);
+
+			m_functionBrowser->setGlobalParameters(newGlobals);
+			// if multi data set we need to do the fixes manually
+			auto originalNames = func->getParameterNames();
+			for (auto name : originalNames) {
+				auto index = func->parameterIndex(name);
+				if (func->isFixed(index)) {
+					//get domain
+					auto index = name.find_first_of(".");
+					std::string domainStr = name.substr(1, index - 1);
+					int domain = std::stoi(domainStr);
+					//remove domain from name
+					auto newName = name.substr(index + 1);
+					//set fix
+					m_functionBrowser->setLocalParameterFixed(QString::fromStdString(newName), domain, true);
+				}
+			}
+		}//single fit
+		else {
+			FitPropertyBrowser::clear();
+			FitPropertyBrowser::addFunction(func->asString());
+		}
+
+		updateTFPlot();
+		//m_enumManager->setValue(m_workspace,j);
+
+	}
+}
+
 
 /**
 * Set TF asymmetry mode on or off.
@@ -1436,100 +1308,28 @@ bool MuonFitPropertyBrowser::isMultiFittingMode() const {
 */
 void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
   modifyFitMenu(m_fitActionTFAsymm, enabled);
-
-  // set new fit func
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ConvertFitFunctionForMuonTFAsymmetry");
-  // do not preserve the ties
-  if (AnalysisDataService::Instance().doesExist("MuonAnalysisTFNormalizations") && m_compositeFunction->nFunctions()>0) {
-	  alg->initialize();
-
-
-	  IFunction_sptr old = boost::dynamic_pointer_cast<IFunction>(
-		  m_compositeFunction);
-	  QStringList globals; 
-
-
-      if (enabled && m_isMultiFittingMode) {
-		  //manually set the function values
-		 old= m_functionBrowser->getGlobalFunction();
-		 globals= m_functionBrowser->getGlobalParameters();
-	  }
-	  else if (!enabled && !m_isMultiFittingMode) {
-		  // to extract in single fit we have an extra composite -> so remove it
-		  auto tmp = boost::dynamic_pointer_cast<CompositeFunction>(old);
-		  old = tmp->getFunction(0);
-	  }
-	  alg->setProperty("InputFunction", old);
-	  alg->setProperty("NormalizationTable", "MuonAnalysisTFNormalizations");
-	  alg->setProperty("WorkspaceList", m_workspacesToFit);
-	  std::string mode = (enabled) ? "Construct" : "Extract";
-	  alg->setProperty("Mode",mode);
-	  alg->execute();
-	  IFunction_sptr func = alg->getProperty("OutputFunction");
-	 
-
-	  //multiple fit
-	  if (m_isMultiFittingMode) {
-		  //update values in browser
-		  auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(func);
-		  old = tmp->getFunction(0);
-		  m_functionBrowser->setFunction(old);
-		  //preserve global parameters
-		  QStringList newGlobals;
-		  const std::string INSERT_FUNCTION{ "f0.f1.f1." };
-		  if (enabled) {
-			  for (auto global : globals) {
-				  newGlobals << QString::fromStdString(INSERT_FUNCTION) + global;
-			  }
-		  }
-		  else {
-			  for (auto global : globals) {
-				  newGlobals << global.remove(0, 9);
-			  }
-		  }
-		  m_functionBrowser->updateMultiDatasetParameters(*func);
-
-		  m_functionBrowser->setGlobalParameters(newGlobals);
-		  // if multi data set we need to do the fixes manually
-		  auto originalNames = func->getParameterNames();
-		  for (auto name : originalNames) {
-			  auto index = func->parameterIndex(name);
-			  if (func->isFixed(index)) {
-				  //get domain
-				  auto index = name.find_first_of(".");
-				  std::string domainStr = name.substr(1, index - 1);
-				  int domain = std::stoi(domainStr);
-				  //remove domain from name
-				  auto newName = name.substr(index + 1);
-				  //set fix
-				  m_functionBrowser->setLocalParameterFixed(QString::fromStdString(newName), domain, true);
-			  }
-		  }
-	  }//single fit
-	  else {
-		  FitPropertyBrowser::clear();
-		  FitPropertyBrowser::addFunction(func->asString());
-	  }
-		  
-	  updateTFPlot();
-	  //m_enumManager->setValue(m_workspace,j);
-
-  }
+  changeFitFunction(enabled);
+ 
   // Show or hide the TFAsymmetry fit
   if (enabled) {
-    m_settingsGroup->property()->addSubProperty(m_normalization);
-    m_multiFitSettingsGroup->property()->addSubProperty(m_normalization);
+    //m_settingsGroup->property()->addSubProperty(m_normalization);
+    //m_multiFitSettingsGroup->property()->addSubProperty(m_normalization);
     m_settingsGroup->property()->addSubProperty(m_keepNorm);
-    setNormalization();
+    //setNormalization();
   } else {
-    m_settingsGroup->property()->removeSubProperty(m_normalization);
-    m_multiFitSettingsGroup->property()->removeSubProperty(m_normalization);
+   // m_settingsGroup->property()->removeSubProperty(m_normalization);
+    //m_multiFitSettingsGroup->property()->removeSubProperty(m_normalization);
     m_settingsGroup->property()->removeSubProperty(m_keepNorm);
   }
 
 
 }
-
+std::string MuonFitPropertyBrowser::TFExtension() const {
+	
+		
+		return (m_boolManager->value(m_TFAsymmMode)) ? UNNORM : "";
+	
+}
 /**
 * Makes sure we have the TF plot in TFAsymm mode
 */
