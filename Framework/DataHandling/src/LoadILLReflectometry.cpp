@@ -782,11 +782,10 @@ void LoadILLReflectometry::initPixelWidth() {
 /// Update detector position according to data file
 void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
-  //try { // Valid from 2018.
+  // if (m_localWorkspace->run().hasProperty("Distance.D1")) // Valid from 2018.
   //  m_detectorDistance = inMeter(doubleFromRun("Distance.D1"));
-  //} catch (...) { // Valid before 2018.
+  // else // Valid before 2018.
   //  m_detectorDistance = sampleDetectorDistance();
-  //}
   m_detectorDistance = sampleDetectorDistance();
   m_detectorAngle = detectorAngle();
   g_log.debug() << "Sample-detector distance: " << m_detectorDistance << "m.\n";
@@ -837,9 +836,9 @@ void LoadILLReflectometry::placeSlits() {
 /// Update source position.
 void LoadILLReflectometry::placeSource() {
   double dist;
-  //if (m_localWorkspace->run().hasProperty("Distance.D0")) // Valid from 2018.
+  // if (m_localWorkspace->run().hasProperty("Distance.D0")) // Valid from 2018.
   //  dist = inMeter(doubleFromRun("Distance.D0"));
-  //else // Valid before 2018.
+  // else // Valid before 2018.
   //  dist = sourceSampleDistance();
   dist = sourceSampleDistance();
   g_log.debug() << "Source-sample distance " << dist << "m.\n";
@@ -892,6 +891,8 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
   if (m_instrument != Supported::Figaro) {
     return inMeter(doubleFromRun("det.value"));
   }
+  // For Figaro, the DTR field contains the sample-to-detector distance
+  // when the detector is at the horizontal position (angle = 0).
   const double restZ = inMeter(doubleFromRun("DTR.value"));
   // Motor DH1 vertical coordinate.
   const double DH1Y = inMeter(doubleFromRun("DH1.value"));
