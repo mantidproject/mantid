@@ -400,6 +400,8 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
             unfitted_transmission_workspace = transmission_bundle.unfitted_transmission_workspace
             if transmission_bundle.data_type is DataType.Can:
                 if does_can_workspace_exist_on_ads(calculated_transmission_workspace):
+                    # The workspace is cloned here because the transmission runs are diagnostic output so even though
+                    # the values already exist they need to be labelled seperately for each reduction.
                     calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace, StoreInADS=False)
                 if does_can_workspace_exist_on_ads(unfitted_transmission_workspace):
                     unfitted_transmission_workspace = CloneWorkspace(unfitted_transmission_workspace, StoreInADS=False)

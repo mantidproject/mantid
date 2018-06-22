@@ -948,6 +948,13 @@ def get_reduced_can_workspace_from_ads(state, output_parts, reduction_mode):
 
 
 def get_transmission_workspaces_from_ads(state, reduction_mode):
+    """
+        Get the reduced can transmission workspace from the ADS if it exists else nothing
+
+        :param state: a SANSState object.
+        :param reduction_mode: the reduction mode which at this point is either HAB or LAB
+        :return: a reduced transmission can object or None.
+        """
     hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.Calculated)
     calculated_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
     hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.Unfitted)

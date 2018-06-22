@@ -97,9 +97,9 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         reduction_package.unfitted_transmission = get_workspace_from_algorithm(reduction_alg,
                                                                                "OutputWorkspaceUnfittedTransmission")
         reduction_package.calculated_transmission_can = get_workspace_from_algorithm(reduction_alg,
-                                                                                 "OutputWorkspaceCalculatedTransmissionCan")
+                                                                                     "OutputWorkspaceCalculatedTransmissionCan")
         reduction_package.unfitted_transmission_can = get_workspace_from_algorithm(reduction_alg,
-                                                                               "OutputWorkspaceUnfittedTransmissionCan")
+                                                                                   "OutputWorkspaceUnfittedTransmissionCan")
         if plot_results and mantidplot:
             plot_workspace(reduction_package, output_graph)
         # -----------------------------------
