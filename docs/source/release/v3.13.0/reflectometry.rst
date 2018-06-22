@@ -49,6 +49,7 @@ New features
     - :ref:`algm-ReflectometryILLPolarizationCor`
     - :ref:`algm-ReflectometryILLConvertToQ`
 * A new algorithm :ref:`algm-ReflectometryMomentumTransfer` provides conversion to momentum transfer and :math:`Q_{z}` resolution calculation for relfectivity workspaces.
+* A new algorithm :ref:`ReflectometrySumInQ <algm-ReflectometrySumInQ>` is available for coherent summation of the reflected beam.
 
 Improvements
 ############
