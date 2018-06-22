@@ -25,9 +25,8 @@ We have a number of documentation resources.
 
 + The basics guide has sections on:
     * :ref:`getting started`
-    * :ref:`loading and displaying data`
+    * :ref:`loading and displaying`
     * :ref:`algorithms workspaces and history`
-    * :ref:`exercises`, if you like that sort of thing!
 + User documentation, is extensive and has sections on:
     * :ref:`Algorithms List`, with specific details of inputs and parameters for all of our algorithms.
     * :ref:`training`, with links to further learning resources.

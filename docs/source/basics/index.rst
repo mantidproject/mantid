@@ -19,10 +19,15 @@ of resources to get you up and running in no time.
    :glob:
    :maxdepth: 1
 
+   introduction
+   getting_started
+   loading_and_displaying_data
+   algorithms_workspaces_and_history
+
+
 **Sections**
 
 * :ref:`mantid introduction`
 * :ref:`getting started`
-* :ref:`loading and displaying data`
+* :ref:`loading and displaying`
 * :ref:`algorithms workspaces and history`
-* :ref:`exercises`

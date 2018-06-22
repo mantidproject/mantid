@@ -1,12 +1,12 @@
-.. _loading and displaying data:
-
 .. |load_symbol| image:: ../../_images/images/LoadFileToolbar.png
+
+.. _loading and displaying:
                  
 ===========================
-Loading and Displaying Data
+Loading and displaying data
 ===========================
 
-Loading Data
+Loading data
 ============
 
 There are a number of options for loading up data in MantidPlot. The most convenient
@@ -16,7 +16,7 @@ approach is to use the “Load” option in the "Workspaces" window, by default 
 * Click on the the "Load" button and select "File". This will open the Load Dialog window.
 * Browse to the location of the file.
 * If you have added the directory containing this file to your data search directories 
-  (see :ref:`_getting started`) you can simply enter the filename in the File textbox.
+  (see :ref:`getting started`) you can simply enter the filename in the File textbox.
 * Mantid will suggest the OutputWorkspace name, but you can change this if desired.
 * Press "Run". A Workspace will appear in the "Workspaces" window.
 
