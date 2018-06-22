@@ -88,7 +88,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         self.declareProperty("SpecularPixel", 180.0, doc="Pixel position of the specular reflectivity")
         self.declareProperty("QMin", 0.005, doc="Minimum Q-value")
         self.declareProperty("QStep", 0.02, doc="Step size in Q. Enter a negative value to get a log scale")
-        self.declareProperty("AngleOffset", 0.0, doc="angle offset (degrees)")
+        self.declareProperty("AngleOffset", 0.0, doc="angle offset (rad)")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output workspace")
         self.declareProperty("TimeAxisStep", 40.0,
                              doc="Binning step size for the time axis. TOF for detector binning, wavelength for constant Q")
@@ -137,8 +137,9 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             norm_cropped = self.process_data(ws_event_norm,
                                              crop_request, low_res_range,
                                              normPeakRange, bck_request, normBackRange)
-            # Avoid leaving trash behind
-            AnalysisDataService.remove(str(ws_event_norm))
+            # Avoid leaving trash behind (remove only if we loaded the data)
+            if self.getProperty("NormalizationWorkspace").value is None:
+                AnalysisDataService.remove(str(ws_event_norm))
 
             # Sum up the normalization peak
             norm_summed = SumSpectra(InputWorkspace = norm_cropped)
@@ -274,7 +275,11 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         x_pixel_map = x_pixel_map[0,:,:]
 
         pixel_width = float(workspace.getInstrument().getNumberParameter("pixel-width")[0]) / 1000.0
-        det_distance = workspace.getRun()['SampleDetDis'].getStatistics().mean / 1000.0
+        det_distance = workspace.getRun()['SampleDetDis'].getStatistics().mean
+        # Check units
+        if not workspace.getRun()['SampleDetDis'].units in ['m', 'meter']:
+            det_distance /= 1000.0
+
         round_up = self.getProperty("RoundUpPixel").value
         ref_pix = self.getProperty("SpecularPixel").value
         if round_up:
@@ -377,8 +382,13 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
         # Get the distance fromthe moderator to the detector
         run_object = workspace.getRun()
-        sample_detector_distance = run_object['SampleDetDis'].getStatistics().mean / 1000.0
-        source_sample_distance = run_object['ModeratorSamDis'].getStatistics().mean / 1000.0
+        sample_detector_distance = run_object['SampleDetDis'].getStatistics().mean
+        source_sample_distance = run_object['ModeratorSamDis'].getStatistics().mean
+        # Check units
+        if not run_object['SampleDetDis'].units in ['m', 'meter']:
+            sample_detector_distance /= 1000.0
+        if not run_object['ModeratorSamDis'].units in ['m', 'meter']:
+            source_sample_distance /= 1000.0
         source_detector_distance = source_sample_distance + sample_detector_distance
 
         # Convert to Q
@@ -521,31 +531,14 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             Compute the scattering angle
             @param ws_event_data: data workspace
         """
-        run_object = ws_event_data.getRun()
-
         angle_offset = self.getProperty("AngleOffset").value
         use_sangle = self.getProperty("UseSANGLE").value
-        sangle = run_object['SANGLE'].getStatistics().mean
+        ref_pix = self.getProperty("SpecularPixel").value
 
-        if use_sangle:
-            theta = abs(sangle) * math.pi / 180.0
-        else:
-            dangle = run_object['DANGLE'].getStatistics().mean
-            dangle0 = run_object['DANGLE0'].getStatistics().mean
-            det_distance = run_object['SampleDetDis'].getStatistics().mean / 1000.0
-            direct_beam_pix = run_object['DIRPIX'].getStatistics().mean
-            ref_pix = self.getProperty("SpecularPixel").value
+        _theta = MRGetTheta(Workspace=ws_event_data, AngleOffset = angle_offset,
+                            UseSANGLE = use_sangle, SpecularPixel = ref_pix)
 
-            # Get pixel size from instrument properties
-            if ws_event_data.getInstrument().hasParameter("pixel_width"):
-                pixel_width = float(ws_event_data.getInstrument().getNumberParameter("pixel_width")[0]) / 1000.0
-            else:
-                pixel_width = 0.0007
-
-            theta = (dangle - dangle0) * math.pi / 180.0 / 2.0 + ((direct_beam_pix - ref_pix) * pixel_width) / (2.0 * det_distance)
-            theta = abs(theta)
-
-        return theta + angle_offset
+        return _theta
 
     def get_tof_range(self, ws_event_data):
         """

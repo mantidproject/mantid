@@ -44,7 +44,7 @@ void EvaluateMDFunction::init() {
           "InputWorkspace", "", Direction::Input),
       "An input workspace that provides dimensions for the output.");
   declareProperty(
-      Kernel::make_unique<API::FunctionProperty>("Function"),
+      Kernel::make_unique<API::FunctionProperty>("Function", Direction::InOut),
       "Parameters defining the fitting function and its initial values");
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(

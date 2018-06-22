@@ -123,7 +123,7 @@ This specifies how many times the calibration has to be derived (see Step 4 abov
 
   - 0 stands for auto: Iterations will be run automatically until the termination criteria is satisfied. Termination criteria is:
 
-      .. math:: \chi^2/NdoF = \frac{\sum_{i,j}(c_{ij} - 1)ˆ2}{N_{tubes} * N_{pixels_per_tube}} < t
+      .. math:: \frac{\chi^{2}}{NdoF} = \frac{\sum_{i,j}(c_{ij} - 1)^{2}}{N_{\mathrm{tubes}} * N_{\mathrm{pixels\_per\_tube}}} < t
 
       where :math:`c_{ij}` is the residual calibration factor for tube *i* and pixel *j*, :math:`t` is the threshold defined in :ref:`Instrument Parameter File (IPF)<InstrumentParameterFile>` as *chi2_ndof*.
 
@@ -138,6 +138,11 @@ This specifies how many times the calibration has to be derived (see Step 4 abov
       Anyways, the method implemented does not provide enough precision to resolve residual calibration better than in the percent range.
       Hence, care must be taken when using the iterations.
       It is not recommended to use more than 2 iterations.
+
+MaskCriterion
+-------------
+
+Provide a range, out of which the calibration constants will be set to zero. This effectively masks the pixels after applying the calibration multiplicatively.
 
 Limitations
 -----------

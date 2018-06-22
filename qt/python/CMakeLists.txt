@@ -87,10 +87,15 @@ endif ()
   )
 
   # Tests
+  set ( PYUNITTEST_QT_API pyqt )
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
-    mantidqt ${PYTHON_TEST_FILES}
+    mantidqt_qt4 ${PYTHON_TEST_FILES}
   )
-
+  set ( PYUNITTEST_QT_API pyqt5 )
+  pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
+    mantidqt_qt5 ${PYTHON_TEST_FILES}
+  )
+  unset ( PYUNITTEST_QT_API )
   # No package installation yet...
   # Configure utils.qt.plugins file for install
 endif ()

@@ -11,6 +11,8 @@ set ( INSTRUMENT_VIEW_INC ${WIDGETS_DIR}/instrumentview/inc )
 set ( SLICEVIEWER_INC ${WIDGETS_DIR}/sliceviewer/inc )
 set ( REFVIEWER_INC ${WIDGETS_DIR}/refdetectorview/inc )
 set ( HEADER_DEPENDS
+  SIPVector.h
+  vector.sip
   ${FACTORY_INC}/MantidQtWidgets/Factory/WidgetFactory.h
 
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/PythonSystemHeader.h
@@ -26,6 +28,11 @@ set ( HEADER_DEPENDS
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/FitPropertyBrowser.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/SlitCalculator.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/ManageUserDirectories.h
+
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/Batch/Row.h
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/Batch/RowLocation.h
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/Batch/JobTreeView.h
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
 
   ${SLICEVIEWER_INC}/MantidQtWidgets/SliceViewer/SliceViewerWindow.h
   ${SLICEVIEWER_INC}/MantidQtWidgets/SliceViewer/LineViewer.h
@@ -79,6 +86,7 @@ mtd_add_sip_module (
   TARGET_NAME mantidqtpython
   SIP_SRCS mantidqtpython_def.sip
   HEADER_DEPS ${HEADER_DEPENDS}
+  INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}
   PYQT_VERSION 4
   LINK_LIBS ${TCMALLOC_LIBRARIES_LINKTIME}
     MantidQtWidgetsCommonQt4
@@ -97,6 +105,10 @@ mtd_add_sip_module (
     Qwt5
     ${PYTHON_LIBRARIES}
   FOLDER Qt4
+  OSX_INSTALL_RPATH
+    @loader_path/../Contents/MacOS
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../${LIB_DIR}"
 )
 
 if ( MSVC )

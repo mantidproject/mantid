@@ -61,6 +61,22 @@ def save_focused_data(d_spacing_group, tof_group, output_paths, run_number_strin
     _save_xye(ws_group=tof_group, ws_units="TOF", run_number=run_number_string,
               output_folder=dat_file_destination, inst_prefix=inst_prefix, file_ext=file_ext)
 
+    if "maud_filename" in output_paths:
+        _save_maud(d_spacing_group, output_paths["maud_filename"])
+
+    if "angles_filename" in output_paths:
+        _save_angles(d_spacing_group, output_paths["angles_filename"])
+
+
+def _save_angles(d_spacing_group, output_path):
+    mantid.SaveBankScatteringAngles(InputWorkspace=d_spacing_group, Filename=output_path)
+
+
+def _save_maud(d_spacing_group, output_path):
+    for i, ws in enumerate(d_spacing_group):
+        mantid.SaveFocusedXYE(InputWorkspace=ws, Filename=output_path, SplitFiles=False, StartAtBankNumber=i,
+                              Append=i > 0, IncludeHeader=True, Format="MAUD")
+
 
 def _save_xye(ws_group, ws_units, run_number, output_folder, inst_prefix, file_ext):
     """

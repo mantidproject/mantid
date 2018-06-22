@@ -16,7 +16,8 @@ namespace CustomInterfaces {
 
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
     boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
-    boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner)
+    boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner,
+    boost::shared_ptr<IEnggDiffractionParam> mainSettings)
     : m_userMessageProvider(userMessageProvider) {
 
   auto multiRunWidgetModel =
@@ -37,7 +38,7 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
   auto model = Mantid::Kernel::make_unique<EnggDiffGSASFittingModel>();
   auto *model_ptr = model.get();
   m_presenter = boost::make_shared<EnggDiffGSASFittingPresenter>(
-      std::move(model), this, multiRunWidgetPresenter);
+      std::move(model), this, multiRunWidgetPresenter, mainSettings);
   model_ptr->setObserver(m_presenter);
   m_presenter->notify(IEnggDiffGSASFittingPresenter::Start);
 }
