@@ -854,9 +854,7 @@ FitPeaks::fitPeaks() {
 namespace {
 /// Supported peak profiles for observation
 std::vector<std::string> supported_peak_profiles{"Gaussian", "Lorentzian",
-                                                 "962"
-                                                 "Voigt",
-                                                 "Voigt"};
+                                                 "PseudoVoigt", "Voigt"};
 
 double numberCounts(const Histogram &histogram) {
   double total = 0.;
