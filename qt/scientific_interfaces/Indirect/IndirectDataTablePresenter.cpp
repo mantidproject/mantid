@@ -85,6 +85,10 @@ pairsToSpectra(const std::vector<std::pair<std::size_t, std::size_t>> &pairs) {
   return boost::optional<Spectra>(
       DiscontinuousSpectra<std::size_t>(pairsToString(pairs)));
 }
+
+QVariant getVariant(std::size_t i) {
+  return QVariant::fromValue<qulonglong>(i);
+}
 } // namespace
 
 namespace MantidQt {
@@ -490,7 +494,7 @@ void IndirectDataTablePresenter::addTableEntry(std::size_t dataIndex,
                                                std::size_t spectrum) {
   const auto row = m_dataTable->rowCount();
   addTableEntry(dataIndex, spectrum, row);
-  m_dataTable->item(row, 0)->setData(Qt::UserRole, QVariant(dataIndex));
+  m_dataTable->item(row, 0)->setData(Qt::UserRole, getVariant(dataIndex));
 }
 
 void IndirectDataTablePresenter::addTableEntry(std::size_t dataIndex,
@@ -563,7 +567,7 @@ void IndirectDataTablePresenter::updateDataPositionsInCells(std::size_t from,
   for (auto i = from; i < to; ++i) {
     const auto nextPosition = getNextPosition(i);
     for (auto row = m_dataPositions[i]; row < nextPosition; ++row)
-      m_dataTable->item(row, 0)->setData(Qt::UserRole, QVariant(i));
+      m_dataTable->item(row, 0)->setData(Qt::UserRole, getVariant(i));
   }
 }
 
