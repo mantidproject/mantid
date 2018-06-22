@@ -65,9 +65,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                              doc="Fraction of HKL to consider for profile fitting.")
         self.declareProperty("FracStop", defaultValue=0.05, validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Fraction of max counts to include in peak selection.")
-        self.declareProperty(FloatArrayProperty("PredPplCoefficients", values=np.array([6.12,  8.87 , -0.09]),
-                                                direction=Direction.Input),
-                             doc="Coefficients for estimating the background.  This can vary wildly between datasets.")
 
         self.declareProperty("MinpplFrac", defaultValue=0.7, doc="Min fraction of predicted background level to check")
         self.declareProperty("MaxpplFrac", defaultValue=1.5, doc="Max fraction of predicted background level to check")
@@ -80,7 +77,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         self.declareProperty("DQMax", defaultValue=0.15, doc="Largest total side length (in Angstrom) to consider for profile fitting.")
         self.declareProperty("DtSpread", defaultValue=0.03, validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="The fraction of the peak TOF to consider for TOF profile fitting.")
-        self.declareProperty("PeakNumber", defaultValue=-1,  doc="Which Peak to Fit.  Leave negative for all.")
+        self.declareProperty("PeakNumber", defaultValue=-1,  doc="Which Peak to fit.  Leave negative for all.")
 
     def PyExec(self):
         import ICCFitTools as ICCFT
@@ -114,7 +111,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'),encoding='latin1')
         else:
             strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'))
-        predpplCoefficients = self.getProperty('PredPplCoefficients').value
         nTheta = self.getProperty('NTheta').value
         nPhi = self.getProperty('NPhi').value
         zBG = 1.96
@@ -146,8 +142,10 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         # And we're off!
         peaks_ws_out = peaks_ws.clone()
         np.warnings.filterwarnings('ignore') # There can be a lot of warnings for bad solutions that get rejected.
+        progress = Progress(self, 0.0, 1.0, len(peaksToFit))
         for peakNumber in peaksToFit:#range(peaks_ws.getNumberPeaks()):
             peak = peaks_ws_out.getPeak(peakNumber)
+            progress.report(' ')
             try:
                 if peak.getRunNumber() == sampleRun:
                     box = ICCFT.getBoxFracHKL(peak, peaks_ws, MDdata, UBMatrix, peakNumber,
@@ -157,7 +155,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                                                                       nTheta=nTheta, nPhi=nPhi, plotResults=False,
                                                                       zBG=zBG,fracBoxToHistogram=1.0,bgPolyOrder=1,
                                                                       strongPeakParams=strongPeakParams,
-                                                                      predCoefficients=predpplCoefficients,
                                                                       q_frame=q_frame, mindtBinWidth=mindtBinWidth,
                                                                       pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
                                                                       forceCutoff=forceCutoff, edgeCutoff=edgeCutoff)
@@ -202,6 +199,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             except KeyboardInterrupt:
                 np.warnings.filterwarnings('default') # Re-enable on exit
                 raise
+
             except:
                 #raise
                 numerrors += 1
