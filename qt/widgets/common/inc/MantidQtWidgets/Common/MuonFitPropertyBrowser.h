@@ -189,6 +189,8 @@ private:
   /// workspaces
   void finishAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,
                                   const int nWorkspaces) const;
+  void finishAfterTFSimultaneousFit(const Mantid::API::IAlgorithm *alg, const std::string baseName) const;
+  std::string getUnnormName(const std::string wsName);
 
   void setTFAsymmMode(bool state);
   void clearGroupCheckboxes();

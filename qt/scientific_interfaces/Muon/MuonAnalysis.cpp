@@ -455,11 +455,11 @@ std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
   std::vector<std::string> wsNames = {wsName, wsRawName};
   // Create workspace and a raw (unbinned) version of it
   auto ws = createAnalysisWorkspace(itemType, tableRow, plotType, wsName);
-  moveUnNormWS(wsName, wsNames);
+  moveUnNormWS(wsName, wsNames,false);
 
   auto wsRaw =
       createAnalysisWorkspace(itemType, tableRow, plotType, wsRawName, true);
-  moveUnNormWS(wsRawName, wsNames);
+  moveUnNormWS(wsName, wsNames,true);//raw
   // Make sure they end up in the ADS
   ads.addOrReplace(wsName, ws);
   ads.addOrReplace(wsRawName, wsRaw);
@@ -469,9 +469,12 @@ std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
 }
 
 void MuonAnalysis::moveUnNormWS(const std::string &name,
-                                std::vector<std::string> &wsNames) {
+                                std::vector<std::string> &wsNames,bool raw) {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-  const std::string unnorm = "_unNorm";
+   std::string unnorm = "_unNorm";
+  if (raw) {
+	  unnorm += "_Raw";
+  }
   if (ads.doesExist("tmp_unNorm")) {
     ads.rename("tmp_unNorm", name + unnorm);
     wsNames.push_back(name + unnorm);
