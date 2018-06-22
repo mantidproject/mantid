@@ -1,9 +1,10 @@
 #include "MantidAlgorithms/CalculateIqt.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/MersenneTwister.h"
 #include "MantidHistogramData/HistogramY.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MersenneTwister.h"
 #include <cmath>
 
 using namespace Mantid::API;
@@ -11,8 +12,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::HistogramData;
 
 namespace {
-constexpr int DEFAULT_ITERATIONS = 10;
-constexpr int DEFAULT_SEED = 48151623;
+constexpr int DEFAULT_ITERATIONS = 50;
+constexpr int DEFAULT_SEED = 89631139;
 
 MatrixWorkspace_sptr rebin(MatrixWorkspace_sptr workspace,
                            const std::string &params) {
@@ -110,20 +111,19 @@ std::string createRebinString(double minimum, double maximum, double width) {
 template <typename Generator>
 void randomizeHistogramWithinError(HistogramY &row, const HistogramE &errors,
                                    Generator &generator) {
-  for (auto i = 0u; i < row.size(); ++i) {
-    auto randomValue = generator(errors[i]);
-    row[i] += randomValue;
-  }
+  for (auto i = 0u; i < row.size(); ++i)
+    row[i] += generator(errors[i]);
 }
 
 MatrixWorkspace_sptr
 randomizeWorkspaceWithinError(MatrixWorkspace_sptr workspace, const int seed) {
   MersenneTwister mTwister(seed);
-  auto rng = [&mTwister](const double error) {
+  auto randomNumberGenerator = [&mTwister](const double error) {
     return mTwister.nextValue(-error, error);
   };
   for (auto i = 0u; i < workspace->getNumberHistograms(); ++i)
-    randomizeHistogramWithinError(workspace->mutableY(i), workspace->e(i), rng);
+    randomizeHistogramWithinError(workspace->mutableY(i), workspace->e(i),
+                                  randomNumberGenerator);
   return workspace;
 }
 
@@ -140,9 +140,18 @@ double standardDeviation(const std::vector<double> &inputValues) {
 std::vector<double>
 standardDeviationArray(const std::vector<std::vector<double>> &yValues) {
   std::vector<double> standardDeviations;
-  standardDeviations.reserve(yValues.size());
-  std::transform(yValues.begin(), yValues.end(),
-                 std::back_inserter(standardDeviations), standardDeviation);
+
+  auto outputSize = yValues[0].size();
+  standardDeviations.reserve(outputSize);
+  std::vector<double> currentRow;
+  currentRow.reserve(yValues.size());
+
+  for (auto i = 0u; i < outputSize; ++i) {
+    currentRow.clear();
+    for (auto &yValueArray : yValues)
+      currentRow.emplace_back(yValueArray[i]);
+    standardDeviations.emplace_back(standardDeviation(currentRow));
+  }
   return standardDeviations;
 }
 
@@ -178,20 +187,23 @@ MatrixWorkspace_sptr doSimulation(MatrixWorkspace_sptr sample,
   return calculateIqt(simulatedWorkspace, resolution, rebinParams);
 }
 
-MatrixWorkspace_sptr setErrorsToStandardDeviation(
-    int nIterations,
-    const std::vector<MatrixWorkspace_sptr> &simulatedWorkspaces,
-    MatrixWorkspace_sptr outputWorkspace) {
-  // set errors to standard deviation of y values across simulations
-  std::vector<std::vector<double>> allSimY;
-  allSimY.reserve(nIterations);
+std::vector<std::vector<double>>
+allYValuesAtIndex(const std::vector<MatrixWorkspace_sptr> &workspaces,
+                  const int index) {
+  std::vector<std::vector<double>> yValues;
+  yValues.reserve(workspaces.size());
+  for (auto &&workspace : workspaces)
+    yValues.emplace_back(workspace->y(index).rawData());
+  return yValues;
+}
 
-  for (auto i = 0u; i < outputWorkspace->getNumberHistograms(); ++i) {
-    auto &outputError = outputWorkspace->mutableE(i);
-    for (auto &simWorkspace : simulatedWorkspaces)
-      allSimY.emplace_back(simWorkspace->y(i).rawData());
-    outputError = standardDeviationArray(allSimY);
-  }
+MatrixWorkspace_sptr setErrorsToStandardDeviation(
+    const std::vector<MatrixWorkspace_sptr> &simulatedWorkspaces) {
+  // set errors to standard deviation of y values across simulations
+  auto outputWorkspace = simulatedWorkspaces.front();
+  for (auto i = 0u; i < outputWorkspace->getNumberHistograms(); ++i)
+    outputWorkspace->mutableE(i) =
+        standardDeviationArray(allYValuesAtIndex(simulatedWorkspaces, i));
   return outputWorkspace;
 }
 
@@ -228,8 +240,7 @@ void CalculateIqt::init() {
                                                    Direction::Input),
                   "The name of the resolution workspace.");
 
-  declareProperty("EnergyMin", -0.5,
-                  "Minimum energy for fit. Default = -.0.5.");
+  declareProperty("EnergyMin", -0.5, "Minimum energy for fit. Default = -0.5.");
   declareProperty("EnergyMax", 0.5, "Maximum energy for fit. Default = 0.5.");
   declareProperty("EnergyWidth", 0.1, "Width of energy bins for fit.");
 
@@ -285,8 +296,7 @@ MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  return setErrorsToStandardDeviation(nIterations, simulatedWorkspaces,
-                                      outputWorkspace);
+  return setErrorsToStandardDeviation(simulatedWorkspaces);
 }
 
 std::map<std::string, std::string> CalculateIqt::validateInputs() {
