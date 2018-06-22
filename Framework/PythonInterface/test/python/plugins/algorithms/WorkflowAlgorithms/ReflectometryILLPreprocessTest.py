@@ -205,7 +205,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             self.assertTrue(logs.hasProperty(p))
             self.assertEqual(logs.getProperty(p).value, val)
 
-    def testWaterReference(self):
+    def testWaterWorkspace(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
         self.create_sample_workspace(inWSName)
         # Add a peak to the sample workspace.
@@ -216,7 +216,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         args = {
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
-            'WaterReference': inWSName,
+            'WaterWorkspace': inWSName,
             'FluxNormalisation': 'Normalisation OFF',
             'FlatBackground': 'Background OFF',
             'rethrow': True,
@@ -254,7 +254,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             'BeamPositionWorkspace': 'peakTable',
             'OutputWorkspace': outWSName,
             'Cleanup': 'Cleanup OFF',
-            'WaterReference': waterName,
+            'WaterWorkspace': waterName,
             'ForegroundHalfWidth': [1],
             'LowAngleBkgOffset': 5,
             'LowAngleBkgWidth': 10,

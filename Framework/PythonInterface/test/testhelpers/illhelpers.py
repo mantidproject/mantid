@@ -382,6 +382,7 @@ def refl_sum_in_lambda(outputWSName, ws):
         'InputWorkspace': ws,
         'OutputWorkspace': outputWSName,
         'SummationType': 'SumInLambda',
+        'WavelengthRange': [0.1]
     }
     alg = create_algorithm('ReflectometryILLSumForeground', **args)
     alg.execute()
