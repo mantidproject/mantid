@@ -51,7 +51,8 @@ class Folder;
 namespace MantidQt {
 namespace API {
 
-using groupNameToWsNamesT = std::unordered_map<std::string, std::vector<std::string>>;
+using groupNameToWsNamesT =
+    std::unordered_map<std::string, std::vector<std::string>>;
 
 class ProjectSerialiser : public QObject {
   Q_OBJECT

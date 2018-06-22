@@ -385,10 +385,8 @@ bool ProjectSerialiser::canWriteToProject(QFile *fileHandle,
   // check if we can write
   if (!fileHandle->open(QIODevice::WriteOnly)) {
     QMessageBox::about(window, window->tr("MantidPlot - File save error"),
-                       window
-                           ->tr("The file: <br><b>%1</b> is opened in "
-                                "read-only mode")
-                           .arg(projectName)); // Mantid
+                       window->tr("The file: <br><b>%1</b> is opened in "
+                                  "read-only mode").arg(projectName)); // Mantid
     return false;
   }
   return true;
@@ -645,10 +643,9 @@ bool ProjectSerialiser::canBackupProjectFiles(QFile *fileHandle,
         fileHandle->close();
       int choice = QMessageBox::warning(
           window, window->tr("MantidPlot - File backup error"), // Mantid
-          window
-              ->tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If "
-                   "you ignore "
-                   "this, you run the risk of <b>data loss</b>.")
+          window->tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If "
+                     "you ignore "
+                     "this, you run the risk of <b>data loss</b>.")
               .arg(projectName)
               .arg(projectName + "~"),
           QMessageBox::Retry | QMessageBox::Default,
@@ -748,24 +745,26 @@ void ProjectSerialiser::openScriptWindow(const QStringList &files) {
  *
  * @param s :: the string of characters loaded from a Mantid project file
  */
-void ProjectSerialiser::loadWorkspacesIntoMantid(const groupNameToWsNamesT &workspaces) {
-	for (auto &allWsNames : workspaces.at(ALL_WS)) {
-		loadWsToMantidTree(allWsNames);
-	}
+void ProjectSerialiser::loadWorkspacesIntoMantid(
+    const groupNameToWsNamesT &workspaces) {
+  for (auto &allWsNames : workspaces.at(ALL_WS)) {
+    loadWsToMantidTree(allWsNames);
+  }
 
-  // Next group up the workspaces 
+  // Next group up the workspaces
   for (auto &groupNameAndWorkspaces : workspaces) {
-	  if (groupNameAndWorkspaces.first == ALL_WS || groupNameAndWorkspaces.first == ALL_GROUP_NAMES) {
-		  // Skip this special key holding all workspaces
-		  continue;
-	  }
+    if (groupNameAndWorkspaces.first == ALL_WS ||
+        groupNameAndWorkspaces.first == ALL_GROUP_NAMES) {
+      // Skip this special key holding all workspaces
+      continue;
+    }
 
-	// Force a copy so we can append in the case where there is 1 element
+    // Force a copy so we can append in the case where there is 1 element
     auto workspaceList = groupNameAndWorkspaces.second;
     bool smallGroup(workspaceList.size() < 2);
 
-	// name picked because random and won't ever be used.
-	std::string unusedName = "boevsMoreBoevs";
+    // name picked because random and won't ever be used.
+    std::string unusedName = "boevsMoreBoevs";
 
     try {
 
@@ -783,7 +782,7 @@ void ProjectSerialiser::loadWorkspacesIntoMantid(const groupNameToWsNamesT &work
                                               std::vector<double>(2, 0.0));
         // execute the algorithm
         alg->execute();
-        
+
         workspaceList.push_back(unusedName);
       }
 
@@ -792,7 +791,7 @@ void ProjectSerialiser::loadWorkspacesIntoMantid(const groupNameToWsNamesT &work
       Mantid::API::IAlgorithm_sptr groupingAlg =
           Mantid::API::AlgorithmManager::Instance().create(algName, 1);
       groupingAlg->initialize();
-	  // This is the workspace list, but we cannot pass in a reference
+      // This is the workspace list, but we cannot pass in a reference
       groupingAlg->setProperty("InputWorkspaces", workspaceList);
       groupingAlg->setPropertyValue("OutputWorkspace",
                                     groupNameAndWorkspaces.first);
@@ -926,13 +925,12 @@ MantidQt::API::ProjectSerialiser::parseWsNames(const std::string &wsNames) {
   // The first element is removed since it says "WorkspaceNames"
   unparsedWorkspaces.erase(unparsedWorkspaces.begin());
 
-
   for (const auto &workspaceName : unparsedWorkspaces) {
-	const char groupWorkspaceChar = ',';
-    
-	if (workspaceName.find(groupWorkspaceChar) == std::string::npos) {
+    const char groupWorkspaceChar = ',';
+
+    if (workspaceName.find(groupWorkspaceChar) == std::string::npos) {
       // Normal workspace
-		allWsNames[ALL_WS].push_back(workspaceName);
+      allWsNames[ALL_WS].push_back(workspaceName);
       continue;
     }
 
@@ -940,13 +938,14 @@ MantidQt::API::ProjectSerialiser::parseWsNames(const std::string &wsNames) {
     auto groupWorkspaceElements =
         splitByDelim(workspaceName, groupWorkspaceChar);
 
-	// First element is the group name
-	auto groupName = groupWorkspaceElements.begin();
-	auto groupMember = groupName + 1;
+    // First element is the group name
+    auto groupName = groupWorkspaceElements.begin();
+    auto groupMember = groupName + 1;
 
-	for (auto end = groupWorkspaceElements.end(); groupMember != end; ++groupMember) {
+    for (auto end = groupWorkspaceElements.end(); groupMember != end;
+         ++groupMember) {
       allWsNames[*groupName].push_back(*groupMember);
-	  allWsNames[ALL_GROUP_NAMES].push_back(*groupName);
+      allWsNames[ALL_GROUP_NAMES].push_back(*groupName);
     }
   }
 

@@ -4609,75 +4609,72 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &workingDir,
 }
 
 ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
-	const int fileVersion) {
-	newProject();
-	m_mantidmatrixWindows.clear();
+                                                  const int fileVersion) {
+  newProject();
+  m_mantidmatrixWindows.clear();
 
-	cacheWorkingDirectory();
-	projectname = filename;
-	setWindowTitle("MantidPlot - " + filename);
+  cacheWorkingDirectory();
+  projectname = filename;
+  setWindowTitle("MantidPlot - " + filename);
 
-	d_opening_file = true;
+  d_opening_file = true;
 
-	folders->blockSignals(true);
-	blockSignals(true);
+  folders->blockSignals(true);
+  blockSignals(true);
 
-	// Open as a top level folder
-	ProjectSerialiser serialiser(this);
-	try {
-		serialiser.load(filename.toStdString(), fileVersion);
-	}
-	catch (std::runtime_error &e) {
-		g_log.error(e.what());
-		// We failed to load - reset and bail out
-		d_opening_file = false;
-		folders->blockSignals(false);
-		blockSignals(false);
-		return this;
-	}
+  // Open as a top level folder
+  ProjectSerialiser serialiser(this);
+  try {
+    serialiser.load(filename.toStdString(), fileVersion);
+  } catch (std::runtime_error &e) {
+    g_log.error(e.what());
+    // We failed to load - reset and bail out
+    d_opening_file = false;
+    folders->blockSignals(false);
+    blockSignals(false);
+    return this;
+  }
 
-	Folder *curFolder = projectFolder();
+  Folder *curFolder = projectFolder();
 
-	// rename project folder item
-	FolderListItem *item = dynamic_cast<FolderListItem *>(folders->firstChild());
-	if (!item)
-		throw std::runtime_error("Couldn't retrieve folder list items.");
+  // rename project folder item
+  FolderListItem *item = dynamic_cast<FolderListItem *>(folders->firstChild());
+  if (!item)
+    throw std::runtime_error("Couldn't retrieve folder list items.");
 
-	QFile file(filename);
-	QFileInfo fileInfo(filename);
-	QString baseName = fileInfo.fileName();
-	item->setText(0, fileInfo.baseName());
-	item->folder()->setObjectName(fileInfo.baseName());
+  QFile file(filename);
+  QFileInfo fileInfo(filename);
+  QString baseName = fileInfo.fileName();
+  item->setText(0, fileInfo.baseName());
+  item->folder()->setObjectName(fileInfo.baseName());
 
-	d_loaded_current = nullptr;
+  d_loaded_current = nullptr;
 
-	if (d_loaded_current)
-		curFolder = d_loaded_current;
+  if (d_loaded_current)
+    curFolder = d_loaded_current;
 
+  QString fileName = fileInfo.absoluteFilePath();
+  recentProjects.removeAll(filename);
+  recentProjects.push_front(filename);
+  updateRecentProjectsList();
 
-		QString fileName = fileInfo.absoluteFilePath();
-		recentProjects.removeAll(filename);
-		recentProjects.push_front(filename);
-		updateRecentProjectsList();
+  folders->setCurrentItem(curFolder->folderListItem());
+  folders->blockSignals(false);
 
+  // change folder to user defined current folder
+  changeFolder(curFolder, true);
 
-	folders->setCurrentItem(curFolder->folderListItem());
-	folders->blockSignals(false);
+  blockSignals(false);
 
-	// change folder to user defined current folder
-	changeFolder(curFolder, true);
+  renamedTables.clear();
 
-	blockSignals(false);
+  restoreApplicationGeometry();
 
-	renamedTables.clear();
+  savedProject();
+  d_opening_file = false;
+  d_workspace->blockSignals(false);
 
-	restoreApplicationGeometry();
-
-	savedProject();
-	d_opening_file = false;
-	d_workspace->blockSignals(false);
-
-	return this;
+  return this;
 }
 
 bool ApplicationWindow::setScriptingLanguage(const QString &lang) {
@@ -9775,7 +9772,8 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     }
   }
 
-  // Stop background saving thread, so it doesn't try to use a destroyed resource
+  // Stop background saving thread, so it doesn't try to use a destroyed
+  // resource
   m_projectRecoveryThread.stopProjectSaving();
 
   // Close the remaining MDI windows. The Python API is required to be active
