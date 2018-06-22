@@ -23,9 +23,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         return 'Crystal\\Integration'
 
     def PyInit(self):
-
-        # Declare properties
-
         # Declare a property for the output workspace
         self.declareProperty(WorkspaceProperty(name='OutputPeaksWorkspace',
                              defaultValue='',
@@ -57,9 +54,10 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                              extensions=[".dat"]),
                              doc="File containing the Pade coefficients describing moderator emission versus energy.")
         self.declareProperty(FileProperty("StrongPeakParamsFile",defaultValue="",action=FileAction.OptionalLoad,
-                             extensions=[".pkl"]))
+                             extensions=[".pkl"]),
+                             doc="File containing strong peaks profiles.  If left blank, no profiles will be enforced.")
         self.declareProperty("IntensityCutoff", defaultValue=0., doc="Minimum number of counts to force a profile")
-        edgeDocString = 'Pixels within EdgeCutoff from a detector edge will be have a profile forced.  Currently for Anger cameras only.'
+        edgeDocString = 'Pixels within EdgeCutoff from a detector edge will be have a profile forced.  Currently for 256x256 cameras only.'
         self.declareProperty("EdgeCutoff", defaultValue=0., doc=edgeDocString)
         self.declareProperty("FracHKL", defaultValue=0.5, validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Fraction of HKL to consider for profile fitting.")
@@ -106,11 +104,15 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         q_frame='lab'
         mtd['MDdata'] = MDdata
 
-        padeCoefficients = ICCFT.getModeratorCoefficients(padeFile)
-        if sys.version_info[0] == 3:
-            strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'),encoding='latin1')
+        if strongPeaksParamsFile != "":
+            padeCoefficients = ICCFT.getModeratorCoefficients(padeFile)
+            if sys.version_info[0] == 3:
+                strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'),encoding='latin1')
+            else:
+                strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'))
         else:
-            strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'))
+            strongPeakParams = None #This will not force any profiles
+
         nTheta = self.getProperty('NTheta').value
         nPhi = self.getProperty('NPhi').value
         zBG = 1.96
