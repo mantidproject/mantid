@@ -35,7 +35,7 @@ class Prop:
     RUN = 'Run'
     SLIT_NORM = 'SlitNormalisation'
     SUBALG_LOGGING = 'SubalgorithmLogging'
-    WATER_REFERENCE = 'WaterReference'
+    WATER_REFERENCE = 'WaterWorkspace'
 
 
 class BkgMethod:
