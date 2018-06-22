@@ -695,14 +695,7 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
                        boost::dynamic_pointer_cast<IFunction>(
                            m_compositeFunction->getFunction(0)));
     }
-    std::string tmpWSName = wsName;
 
-    if (m_boolManager->value(m_TFAsymmMode) && tmpWSName.find(UNNORM)) {
-      tmpWSName += TFExtension();
-    }
-    if (rawData()) {
-      tmpWSName += "_Raw";
-    }
 
     auto unnorm = m_workspacesToFit;
     std::string tmp = UNNORM;

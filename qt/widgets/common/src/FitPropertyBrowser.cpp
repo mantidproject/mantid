@@ -1265,7 +1265,6 @@ void FitPropertyBrowser::enumChanged(QtProperty *prop) {
     emit functionChanged();
 
   } else if (prop == m_minimizer) {
-  } else if (prop == m_minimizer) {
     minimizerChanged();
   } else if (prop == m_evaluationType) {
     storeSettings = true;
