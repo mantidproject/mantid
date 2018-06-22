@@ -128,9 +128,9 @@ public:
     std::string histoWSname("testLET_hist_mon");
     std::string eventWSname("testLET_event_mon");
 
-    const std::vector<size_t> spec_num{ 40961, 40962, 40963, 40964,
-                                        40965, 40966, 40967, 40968 };
-    const std::vector<int> det_num{ 11, 21, 31, 41, 51, 61, 71, 81 };
+    const std::vector<size_t> spec_num{40961, 40962, 40963, 40964,
+                                       40965, 40966, 40967, 40968};
+    const std::vector<int> det_num{11, 21, 31, 41, 51, 61, 71, 81};
 
     // these tests read from the same file
     LoadNexusMonitors2 load;
@@ -195,7 +195,7 @@ public:
     // Correct number of monitors found
     TS_ASSERT_EQUALS(WS->getNumberHistograms(), 3);
     // Correct spectrum and detector numbers
-    const std::vector<int32_t> NUMS{ 1, 2, 10 };
+    const std::vector<int32_t> NUMS{1, 2, 10};
     for (size_t wi = 0; wi < WS->getNumberHistograms(); ++wi) {
       const auto &spec = WS->getSpectrum(wi);
       TS_ASSERT_EQUALS(spec.getSpectrumNo(), NUMS[wi]);

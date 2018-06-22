@@ -56,7 +56,7 @@ struct MonitorInfo {
   std::string name{""}; ///< name of the group in the nexus file - TODO was
   /// monitorName
   detid_t detNum{0}; ///< detector number for monitor - TODO was monIndex
-  specnum_t specNum{ 0 };
+  specnum_t specNum{0};
   bool hasEvent{false};
   bool hasHisto{false};
 };
