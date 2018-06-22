@@ -335,10 +335,7 @@ void LoadNexusMonitors2::exec() {
 * Fix the detector numbers if the defaults are not correct. Currently checks
 * the isis_vms_compat block and reads them from there if possible.
 *
-* @param det_ids :: An array of prefilled detector IDs
 * @param file :: A reference to the NeXus file opened at the root entry
-* @param spec_ids :: An array of spectrum numbers that the monitors have
-* @param nmonitors :: The size of the det_ids and spec_ids arrays
 */
 void LoadNexusMonitors2::fixUDets(::NeXus::File &file) {
   const size_t nmonitors = m_monitorInfo.size();
@@ -675,14 +672,14 @@ void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file,
   MantidVec seconds;
 
   // read in the data
-  file.openData("event_index");
+  file.openData("event_index"); // pulse index into tof array
   file.getData(event_index);
   file.closeData();
-  file.openData("event_time_offset");
+  file.openData("event_time_offset"); // time of flight
   file.getDataCoerce(time_of_flight);
   file.getAttr("units", tof_units);
   file.closeData();
-  file.openData("event_time_zero");
+  file.openData("event_time_zero"); // pulse time
   file.getDataCoerce(seconds);
   Mantid::Types::Core::DateAndTime pulsetime_offset;
   {
