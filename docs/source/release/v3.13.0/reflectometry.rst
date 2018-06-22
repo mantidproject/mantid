@@ -15,6 +15,8 @@ ISIS Reflectometry Interface
 New features
 ############
 
+- Fully-automatic processing has been added to the interface. Click ``Autoprocess`` to process all of the runs for an investigation and to start polling for new runs. Whenever new runs are found, they will automatically be added to the table and processed.
+
 Improvements
 ############
 
@@ -30,10 +32,17 @@ Algorithms
 ----------
 
 * Removed version 1 of ``ReflectometryReductionOne`` and ``ReflectometryReductionOneAuto``.
+* Renamed algorithms ``PolarizationCorrection`` to ``PolarizationCorrectionFredrikze`` and ``PolarizationEfficiencyCor`` to ``PolarizationCorrectionWildes``.
 
 New features
 ############
 
+* Added algorithm ``PolarizationEfficiencyCor`` which calls ``PolarizationCorrectionFredrikze`` or ``PolarizationCorrectionWildes`` depending on chosen ``Method`` property.
+* Added algorithms that help create a matrix workspace with polarization efficiencies ready to be used with ``PolarizationEfficiencyCor``
+
+  - ``CreatePolarizationEfficiencies`` creates efficiencies from polynomial coefficients
+  - ``JoinISISPolarizationEfficiencies`` joins individual efficiencies into one matrix workspace
+  - ``LoadISISPolarizationEfficiencies`` loads efficiencies form files
 * Algorithms for reflectometry reduction at ILL have been added. These handle the basic reduction in SumInLambda mode. Included algorithms:
     - :ref:`algm-ReflectometryILLPreprocess`
     - :ref:`algm-ReflectometryILLSumForeground`

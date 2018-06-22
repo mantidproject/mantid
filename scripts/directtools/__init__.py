@@ -4,6 +4,7 @@ import collections
 from mantid import mtd
 from mantid.simpleapi import DeleteWorkspace, LineProfile, OneMinusExponentialCor, Transpose
 import matplotlib
+import matplotlib.colors
 from matplotlib import pyplot
 import numpy
 from scipy import constants
@@ -294,7 +295,7 @@ def nanminmax(workspace, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf
     return cMin, cMax
 
 
-def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True):
+def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True, xscale='linear', yscale='linear'):
     """Plot line profiles at constant energy transfer from :math:`S(Q,E)` workspace.
 
     Creates cut workspaces using :ref:`algm-LineProfile`, then plots the cuts. A list of workspaces,
@@ -313,9 +314,14 @@ def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True):
     :type style: str
     :param keepCutWorkspaces: whether or not keep the cut workspaces in the ADS
     :type keepCutWorkspaces: bool
+    :param xscale: horizontal axis scaling: 'linear', 'log', 'symlog', 'logit'
+    :type xscale: str
+    :param yscale: vertical axis scaling: 'linear', 'log', 'symlog', 'logit'
+    :type yscale: str
     :returns: A tuple of (:class:`matplotlib.Figure`, :class:`matplotlib.Axes`, a :class:`list` of names)
     """
-    figure, axes, cutWSList = plotcuts('Horizontal', workspaces, E, dE, '$E$', 'meV', style, keepCutWorkspaces)
+    figure, axes, cutWSList = plotcuts('Horizontal', workspaces, E, dE, '$E$', 'meV', style, keepCutWorkspaces,
+                                       xscale, yscale)
     _profiletitle(workspaces, '$E$', 'meV', E, dE, figure)
     axes.legend()
     axes.set_xlim(xmin=0.)
@@ -326,7 +332,7 @@ def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True):
     return figure, axes, cutWSList
 
 
-def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True):
+def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True, xscale='linear', yscale='linear'):
     """Plot line profiles at constant momentum transfer from :math:`S(Q,E)` workspace.
 
     Creates cut workspaces using :ref:`algm-LineProfile`, then plots the cuts. A list of workspaces,
@@ -345,9 +351,14 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True):
     :type style: str
     :param keepCutWorkspaces: whether or not keep the cut workspaces in the ADS
     :type keepCutWorkspaces: bool
+    :param xscale: horizontal axis scaling: 'linear', 'log', 'symlog', 'logit'
+    :type xscale: str
+    :param yscale: vertical axis scaling: 'linear', 'log', 'symlog', 'logit'
+    :type yscale: str
     :returns: A tuple of (:class:`matplotlib.Figure`, :class:`matplotlib.Axes`, a :class:`list` of names)
     """
-    figure, axes, cutWSList = plotcuts('Vertical', workspaces, Q, dQ, '$Q$', '\\AA$^{-1}$', style, keepCutWorkspaces)
+    figure, axes, cutWSList = plotcuts('Vertical', workspaces, Q, dQ, '$Q$', '\\AA$^{-1}$', style, keepCutWorkspaces,
+                                       xscale, yscale)
     _profiletitle(workspaces, '$Q$', '\\AA$^{-1}$', Q, dQ, figure)
     axes.legend()
     axes.set_xlim(xmin=-10.)
@@ -359,7 +370,7 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True):
     return figure, axes, cutWSList
 
 
-def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', keepCutWorkspaces=True):
+def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', keepCutWorkspaces=True, xscale='linear', yscale='linear'):
     """Cut and plot multiple line profiles.
 
     Creates cut workspaces using :ref:`algm-LineProfile`, then plots the cuts. A list of workspaces,
@@ -384,6 +395,10 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
     :type style: str
     :param keepCutWorkspaces: whether or not keep the cut workspaces in the ADS
     :type keepCutWorkspaces: bool
+    :param xscale: horizontal axis scaling: 'linear', 'log', 'symlog', 'logit'
+    :type xscale: str
+    :param yscale: vertical axis scaling: 'linear', 'log', 'symlog', 'logit'
+    :type yscale: str
     :returns: A tuple of (:class:`matplotlib.Figure`, :class:`matplotlib.Axes`, a :class:`list` of names)
     """
     workspaces = _normwslist(workspaces)
@@ -416,11 +431,13 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
                     markerStyle, markerIndex = _chooseMarker(markers, markerIndex)
                 label = _label(ws, cut, width, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1, quantity, unit)
                 axes.errorbar(line, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
+    axes.set_xscale(xscale)
+    axes.set_yscale(yscale)
     _profileytitle(workspaces[0], axes)
     return figure, axes, cutWSList
 
 
-def plotprofiles(workspaces, labels=None, style='l'):
+def plotprofiles(workspaces, labels=None, style='l', xscale='linear', yscale='linear'):
     """Plot line profile workspaces.
 
     Plots the first histograms from given workspaces.
@@ -431,6 +448,10 @@ def plotprofiles(workspaces, labels=None, style='l'):
     :type labels: str, a :class:`list` of strings or None
     :param style: plot style: 'l' for lines, 'm' for markers, 'lm' for both
     :type style: str
+    :param xscale: horizontal axis scaling: 'linear', 'log', 'symlog', 'logit'
+    :type xscale: str
+    :param yscale: vertical axis scaling: 'linear', 'log', 'symlog', 'logit'
+    :type yscale: str
     :returns: a tuple of (:mod:`matplotlib.Figure`, :mod:`matplotlib.Axes`)
     """
     workspaces = _normwslist(workspaces)
@@ -450,6 +471,8 @@ def plotprofiles(workspaces, labels=None, style='l'):
         if 'm' in style:
             markerStyle, markerIndex = _chooseMarker(markers, markerIndex)
         axes.errorbar(ws, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
+    axes.set_xscale(xscale)
+    axes.set_yscale(yscale)
     _profileytitle(workspaces[0], axes)
     xUnit = workspaces[0].getAxis(0).getUnit().unitID()
     if xUnit == 'DeltaE':
@@ -459,7 +482,7 @@ def plotprofiles(workspaces, labels=None, style='l'):
     return figure, axes
 
 
-def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax=None, colormap='jet'):
+def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax=None, colormap='jet', colorscale='linear'):
     """Plot a 2D :math:`S(Q,E)` workspace.
 
     :param workspace: a workspace to plot
@@ -478,6 +501,8 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
     :type VMax: float or None
     :param colormap: name of the colormap
     :type colormap: str
+    :param colorscale: color map scaling: 'linear', 'log'
+    :type colorscale: str
     :returns: a tuple of (:mod:`matplotlib.Figure`, :mod:`matplotlib.Axes`)
     """
     # Accept both workspace names and actual workspaces.
@@ -496,14 +521,26 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
     if EMax is None:
         EAxis = workspace.getAxis(1).extractValues()
         EMax = numpy.amax(EAxis)
-    if VMin is None:
-        VMin = 0.
     if VMax is None:
         vertMax = EMax if EMax is not None else numpy.inf
         dummy, VMax = nanminmax(workspace, horMin=QMin, horMax=QMax, vertMin=EMin, vertMax=vertMax)
         VMax /= 100.
+    if VMin is None:
+        VMin = 0.
+    colorNormalization = None
+    if colorscale == 'linear':
+        colorNormalization = matplotlib.colors.Normalize()
+    elif colorscale == 'log':
+        if VMin <= 0.:
+            if VMax > 0.:
+                VMin = VMax / 1000.
+            else:
+                raise RuntimeError('Cannot plot negative range in log scale.')
+        colorNormalization = matplotlib.colors.LogNorm()
+    else:
+        raise RuntimeError('Unknown colorscale: ' + colorscale)
     print('Plotting intensity range: {}...{}'.format(VMin, VMax))
-    contours = axes.pcolor(workspace, vmin=VMin, vmax=VMax, distribution=True, cmap=colormap)
+    contours = axes.pcolor(workspace, vmin=VMin, vmax=VMax, distribution=True, cmap=colormap, norm=colorNormalization)
     colorbar = figure.colorbar(contours)
     if isSusceptibility:
         colorbar.set_label("$\\chi''(Q,E)$ (arb. units)")
