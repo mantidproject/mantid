@@ -185,6 +185,11 @@ void LoadNexusMonitors2::exec() {
 
   size_t numPeriods = 0;
   m_monitor_count = getMonitorInfo(file, numPeriods);
+  // Fix the detector numbers if the defaults above are not correct
+  // fixUDets(detector_numbers, file, spectra_numbers, m_monitor_count);
+  // a temporary place to put the spectra/detector numbers
+  // this gets the ids from the "isis_vms_compat" group
+  fixUDets(file);
 
   if (numPeriods > 1) {
     m_multiPeriodCounts.resize(m_monitor_count);
@@ -206,68 +211,37 @@ void LoadNexusMonitors2::exec() {
   std::vector<bool> loadMonitorFlags;
   bool useEventMon = createOutputWorkspace(loadMonitorFlags);
 
-  // a temporary place to put the spectra/detector numbers
-  boost::scoped_array<specnum_t> spectra_numbers(
-      new specnum_t[m_monitor_count]);
-  boost::scoped_array<detid_t> detector_numbers(new detid_t[m_monitor_count]);
-
   API::Progress prog3(this, 0.6, 1.0, m_monitor_count);
 
   // TODO-NEXT: load event monitor if it is required to do so
   //            load histogram monitor if it is required to do so
   // Require a tuple: monitorNames[i], loadAsEvent[i], loadAsHistogram[i]
-  size_t ws_index = 0;
-  for (std::size_t i_mon = 0; i_mon < m_monitor_count; ++i_mon) {
+  for (std::size_t ws_index = 0; ws_index < m_monitor_count; ++ws_index) {
+    // already know spectrum and detector numbers
+    g_log.debug() << "monIndex = " << m_monitorInfo[ws_index].detNum << '\n';
+    g_log.debug() << "spectrumNo = " << m_monitorInfo[ws_index].specNum << '\n';
+    m_workspace->getSpectrum(ws_index)
+        .setSpectrumNo(m_monitorInfo[ws_index].specNum);
+    m_workspace->getSpectrum(ws_index)
+        .setDetectorID(m_monitorInfo[ws_index].detNum);
 
-    // TODO 1: SKIP if this monitor is not to be loaded!
-    g_log.information() << "Loading " << m_monitorInfo[i_mon].name;
-    if (loadMonitorFlags[i_mon]) {
+    // Don't actually read all of the monitors
+    g_log.information() << "Loading " << m_monitorInfo[ws_index].name;
+    if (loadMonitorFlags[ws_index]) {
       g_log.information() << "\n";
+      file.openGroup(m_monitorInfo[ws_index].name, "NXmonitor");
+      if (useEventMon) {
+        // load as an event monitor
+        readEventMonitorEntry(file, ws_index);
+      } else {
+        // load as a histogram monitor
+        readHistoMonitorEntry(file, ws_index, numPeriods);
+      }
+      file.closeGroup(); // NXmonitor
     } else {
       g_log.information() << " is skipped.\n";
-      continue;
     }
 
-    // TODO 2: CHECK
-    if (ws_index == m_workspace->getNumberHistograms())
-      throw std::runtime_error(
-          "Overcedes the number of histograms in output event "
-          "workspace.");
-
-    file.openGroup(m_monitorInfo[i_mon].name, "NXmonitor");
-
-    // Check if the spectra index is there
-    specnum_t spectrumNo(static_cast<specnum_t>(ws_index + 1));
-    try {
-      file.openData("spectrum_index");
-      file.getData(&spectrumNo);
-      file.closeData();
-    } catch (::NeXus::Exception &) {
-      // Use the default as matching the workspace index
-    }
-
-    g_log.debug() << "monIndex = " << m_monitorInfo[i_mon].detNum << '\n';
-    g_log.debug() << "spectrumNo = " << spectrumNo << '\n';
-
-    spectra_numbers[ws_index] = spectrumNo;
-    detector_numbers[ws_index] = m_monitorInfo[i_mon].detNum;
-
-    if (useEventMon) {
-      // load as an event monitor
-      readEventMonitorEntry(file, ws_index);
-    } else {
-      // load as a histogram monitor
-      readHistoMonitorEntry(file, ws_index, numPeriods);
-    }
-
-    file.closeGroup(); // NXmonitor
-
-    // Default values, might change later.
-    m_workspace->getSpectrum(ws_index).setSpectrumNo(spectrumNo);
-    m_workspace->getSpectrum(ws_index)
-        .setDetectorID(m_monitorInfo[i_mon].detNum);
-
-    ++ws_index;
     prog3.report();
   }
 
@@ -281,11 +255,6 @@ void LoadNexusMonitors2::exec() {
     auto axis = HistogramData::BinEdges{xmin - 1, xmax + 1};
     eventWS->setAllX(axis); // Set the binning axis using this.
   }
-
-  // Fix the detector numbers if the defaults above are not correct
-  // fixUDets(detector_numbers, file, spectra_numbers, m_monitor_count);
-  fixUDets(detector_numbers, file, spectra_numbers,
-           m_workspace->getNumberHistograms()); // TODO SHOULDN'T BE NECESSARY
 
   // Check for and ISIS compat block to get the detector IDs for the loaded
   // spectrum numbers
@@ -350,11 +319,6 @@ void LoadNexusMonitors2::exec() {
     g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }
 
-  // Fix the detector IDs/spectrum numbers
-  for (size_t i = 0; i < m_workspace->getNumberHistograms(); i++) {
-    m_workspace->getSpectrum(i).setSpectrumNo(spectra_numbers[i]);
-    m_workspace->getSpectrum(i).setDetectorID(detector_numbers[i]);
-  }
   // add filename
   m_workspace->mutableRun().addProperty("Filename", m_filename);
 
@@ -376,10 +340,16 @@ void LoadNexusMonitors2::exec() {
 * @param spec_ids :: An array of spectrum numbers that the monitors have
 * @param nmonitors :: The size of the det_ids and spec_ids arrays
 */
-void LoadNexusMonitors2::fixUDets(
-    boost::scoped_array<detid_t> &det_ids, ::NeXus::File &file,
-    const boost::scoped_array<specnum_t> &spec_ids,
-    const size_t nmonitors) const {
+void LoadNexusMonitors2::fixUDets(::NeXus::File &file) {
+  const size_t nmonitors = m_monitorInfo.size();
+  boost::scoped_array<detid_t> det_ids(new detid_t[nmonitors]);
+  boost::scoped_array<specnum_t> spec_ids(new specnum_t[nmonitors]);
+  // convert the monitor info into two arrays for resorting
+  for (size_t i = 0; i < nmonitors; ++i) {
+    spec_ids[i] = m_monitorInfo[i].specNum;
+    det_ids[i] = m_monitorInfo[i].detNum;
+  }
+
   try {
     file.openGroup("isis_vms_compat", "IXvms");
   } catch (::NeXus::Exception &) {
@@ -413,6 +383,12 @@ void LoadNexusMonitors2::fixUDets(
     det_ids[mon_index] = udet[udet_index];
   }
   file.closeGroup();
+
+  // copy the information back into the monitorinfo
+  for (size_t i = 0; i < nmonitors; ++i) {
+    m_monitorInfo[i].specNum = spec_ids[i];
+    m_monitorInfo[i].detNum = det_ids[i];
+  }
 }
 
 void LoadNexusMonitors2::runLoadLogs(const std::string filename,
@@ -550,6 +526,7 @@ size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
       info.hasEvent = isEventMonitor(file);
       info.hasHisto = isHistoMonitor(file);
 
+      // get the detector number
       string_map_t inner_entries = file.getEntries(); // get list of entries
       if (inner_entries.find("monitor_number") != inner_entries.end()) {
         // get monitor number from field in file
@@ -571,6 +548,16 @@ size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
 
         info.detNum = -1 * boost::lexical_cast<int>(
                                monitorName.substr(loc + 1)); // SNS default
+      }
+
+      // get the spectrum number
+      if (inner_entries.find("spectrum_index") != inner_entries.end()) {
+        file.openData("spectrum_index");
+        file.getData(&info.specNum);
+        file.closeData();
+      } else {
+        // default is to match the detector number
+        info.specNum = info.detNum;
       }
 
       if (info.hasHisto && (numPeriods == 0) &&
@@ -628,7 +615,7 @@ bool LoadNexusMonitors2::createOutputWorkspace(
           "This file may be corrupted or it may not be supported");
     }
   } else { // only other option is to go with the default
-    if (numEventMon > 0 && numHistoMon > 0) { // TODO message
+    if (numEventMon > 0 && numHistoMon > 0) {
       std::stringstream errmsg;
       errmsg << "There are " << numHistoMon << " histogram monitors and "
              << numEventMon
@@ -658,7 +645,7 @@ bool LoadNexusMonitors2::createOutputWorkspace(
 
     // only used if using event monitors
     EventWorkspace_sptr eventWS = EventWorkspace_sptr(new EventWorkspace());
-    eventWS->initialize(numEventMon, 1, 1);
+    eventWS->initialize(m_monitorInfo.size(), 1, 1);
 
     // Set the units
     eventWS->getAxis(0)->unit() =
@@ -669,8 +656,8 @@ bool LoadNexusMonitors2::createOutputWorkspace(
     // Use histogram monitors and event monitors' histogram data.
     // And thus create a Workspace2D.
 
-    m_workspace = API::WorkspaceFactory::Instance().create("Workspace2D",
-                                                           numHistoMon, 2, 1);
+    m_workspace = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", m_monitorInfo.size(), 2, 1);
   }
 
   return useEventMon;
