@@ -44,12 +44,14 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflMainWindowPresenter
     : public IReflMainWindowPresenter {
 public:
   /// Constructor
-  ReflMainWindowPresenter(IReflMainWindowView *view)
+  ReflMainWindowPresenter(IReflMainWindowView *view);
   /// Run a python algorithm
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
+  bool isProcessing() const override;
 private:
+  void showHelp();
   IReflMainWindowView* m_view;
-  void notify(IReflMainWIndowPresenter::Flag flag) override;
+  void notify(IReflMainWindowPresenter::Flag flag) override;
 };
 }
 }

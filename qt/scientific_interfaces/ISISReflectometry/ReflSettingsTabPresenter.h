@@ -3,13 +3,13 @@
 
 #include "DllConfig.h"
 #include "IReflSettingsTabPresenter.h"
+#include "IReflBatchPresenter.h"
 #include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 // Forward decs
-class IReflMainWindowPresenter;
 class IReflSettingsPresenter;
 
 /** @class ReflSettingsTabPresenter
@@ -47,7 +47,7 @@ public:
   ~ReflSettingsTabPresenter() override;
   /// Set the instrument name
   void setInstrumentName(const std::string &instName) override;
-  void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
+  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
   void settingsChanged(int group) override;
   void onReductionPaused(int group) override;
   void onReductionResumed(int group) override;
@@ -71,7 +71,7 @@ public:
 private:
   /// The presenters for each group as a vector
   std::vector<IReflSettingsPresenter *> m_settingsPresenters;
-  IReflMainWindowPresenter *m_mainPresenter;
+  IReflBatchPresenter *m_mainPresenter;
 };
 }
 }

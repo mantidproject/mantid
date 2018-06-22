@@ -1,11 +1,10 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLSAVETABPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLSAVETABPRESENTER_H
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include "IReflBatchPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
-class IReflMainWindowPresenter;
 
 /** @class IReflSaveTabPresenter
 
@@ -37,7 +36,7 @@ class IReflSaveTabPresenter {
 public:
   virtual ~IReflSaveTabPresenter(){};
   /// Accept a main presenter
-  virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
+  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
 
   enum Flag {
     populateWorkspaceListFlag,

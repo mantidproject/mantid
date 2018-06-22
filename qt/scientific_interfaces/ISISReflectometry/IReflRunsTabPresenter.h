@@ -2,11 +2,10 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSTABPRESENTER_H
 
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
+#include "IReflBatchPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
-class IReflMainWindowPresenter;
 
 /** @class IReflRunsTabPresenter
 
@@ -38,7 +37,7 @@ class IReflRunsTabPresenter {
 public:
   virtual ~IReflRunsTabPresenter(){};
   /// Accept a main presenter
-  virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
+  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
   virtual void settingsChanged(int group) = 0;
 
   enum Flag {

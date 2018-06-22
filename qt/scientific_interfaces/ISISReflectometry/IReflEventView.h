@@ -36,10 +36,9 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport IReflEventView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL IReflEventView {
 public:
-  IReflEventView(){};
-  virtual ~IReflEventView(){};
+  virtual ~IReflEventView() = default;
   virtual IReflEventPresenter *getPresenter() const = 0;
 
   virtual std::string getLogValueTimeSlicingValues() const = 0;

@@ -86,7 +86,7 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
 * @param mainPresenter :: [input] A main presenter
 */
 void ReflRunsTabPresenter::acceptMainPresenter(
-    IReflMainWindowPresenter *mainPresenter) {
+    IReflBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
   // Register this presenter as the workspace receiver
   // When doing so, the inner presenters will notify this
@@ -194,15 +194,14 @@ bool ReflRunsTabPresenter::search() {
   // If we're not logged into a catalog, prompt the user to do so
   if (CatalogManager::Instance().getActiveSessions().empty()) {
     try {
-      std::stringstream pythonSrc;
-      pythonSrc << "try:\n";
-      pythonSrc << "  algm = CatalogLoginDialog()\n";
-      pythonSrc << "except:\n";
-      pythonSrc << "  pass\n";
-      m_mainPresenter->runPythonAlgorithm(pythonSrc.str());
+      //std::stringstream pythonSrc;
+      //pythonSrc << "try:\n";
+      //pythonSrc << "  algm = CatalogLoginDialog()\n";
+      //pythonSrc << "except:\n";
+      //pythonSrc << "  pass\n";
+      //m_mainPresenter->runPythonAlgorithm(pythonSrc.str());
     } catch (std::runtime_error &e) {
-      m_mainPresenter->giveUserCritical(
-          "Error Logging in:\n" + std::string(e.what()), "login failed");
+      m_view->loginFailed(e.what());
       return false;
     }
   }
@@ -214,9 +213,7 @@ bool ReflRunsTabPresenter::search() {
         CatalogManager::Instance().getActiveSessions().front()->getSessionId();
   } else {
     // there are no active sessions, we return here to avoid an exception
-    m_mainPresenter->giveUserInfo(
-        "Error Logging in: Please press 'Search' to try again.",
-        "Login Failed");
+    m_view->noActiveICatSessions();
     return false;
   }
   auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
@@ -399,9 +396,7 @@ bool ReflRunsTabPresenter::validateRowsToTransfer(
     const std::set<int> &rowsToTransfer) {
   // Check that we have something to transfer
   if (rowsToTransfer.size() == 0) {
-    m_mainPresenter->giveUserCritical(
-        "Error: Please select at least one run to transfer.",
-        "No runs selected");
+    m_view->missingRunsToTransfer();
     return false;
   }
   return true;

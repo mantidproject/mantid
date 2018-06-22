@@ -1,5 +1,4 @@
 #include "ReflSettingsTabPresenter.h"
-#include "IReflMainWindowPresenter.h"
 #include "ReflSettingsPresenter.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -30,7 +29,7 @@ void ReflSettingsTabPresenter::passSelfToChildren(
 }
 
 void ReflSettingsTabPresenter::acceptMainPresenter(
-    IReflMainWindowPresenter *mainPresenter) {
+    IReflBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
 

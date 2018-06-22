@@ -70,10 +70,13 @@ public:
 
   virtual void enableFileFormatAndLocationControls() = 0;
   virtual void disableFileFormatAndLocationControls() = 0;
-  virtual void giveUserCritical(const std::string &prompt,
-                                const std::string &title) = 0;
-  virtual void giveUserInfo(const std::string &prompt,
-                            const std::string &title) = 0;
+
+  virtual void invalidRegex() = 0;
+  virtual void errorInvalidSaveDirectory() = 0;
+  virtual void warnInvalidSaveDirectory() = 0;
+  virtual void noWorkspacesSelected() = 0;
+  virtual void cannotSaveWorkspaces() = 0;
+  virtual void cannotSaveWorkspaces(std::string const& fullError) = 0;
 };
 }
 }

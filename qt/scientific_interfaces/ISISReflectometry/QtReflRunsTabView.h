@@ -94,6 +94,7 @@ public:
   void setProgressRange(int min, int max) override;
   void setProgress(int progress) override;
   void clearProgress() override;
+  void loginFailed(std::string const& fullError) override;
 
   // Accessor methods
   std::set<int> getSelectedSearchRows() const override;
@@ -112,6 +113,9 @@ public:
 
   // Start an ICAT search
   void startIcatSearch() override;
+
+   void noActiveICatSessions() override;
+   void missingRunsToTransfer() override;
 
 private:
   /// initialise the interface

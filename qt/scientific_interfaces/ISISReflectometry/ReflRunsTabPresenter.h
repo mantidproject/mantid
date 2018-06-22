@@ -3,6 +3,7 @@
 
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
+#include "IReflBatchPresenter.h"
 #include "Presenters/BatchPresenter.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
@@ -27,7 +28,6 @@ class DataProcessorPresenter;
 namespace CustomInterfaces {
 
 // Forward decs
-class IReflMainWindowPresenter;
 class IReflRunsTabView;
 class IReflSearcher;
 class ReflSearchModel;
@@ -82,7 +82,7 @@ public:
                        boost::shared_ptr<IReflSearcher> searcher =
                            boost::shared_ptr<IReflSearcher>());
 
-  void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
+  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
   void notifyADSChanged(const QSet<QString> &workspaceList, int group) override;
   /// Handle data reduction paused/resumed
@@ -112,6 +112,7 @@ public:
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceNames) override;
 
+
 protected:
   /// Information about the autoreduction process
   ReflAutoreduction m_autoreduction;
@@ -131,7 +132,7 @@ private:
   /// The data processor presenters stored in a vector
   std::vector<std::unique_ptr<BatchPresenter>> m_tablePresenters;
   /// The main presenter
-  IReflMainWindowPresenter *m_mainPresenter;
+  IReflBatchPresenter *m_mainPresenter;
   /// The search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
   /// The current search string used for autoreduction

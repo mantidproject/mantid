@@ -2,6 +2,7 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLEVENTTABPRESENTER_H
 
 #include <string>
+#include "IReflBatchPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -42,7 +43,7 @@ public:
   /// Time-slicing type
   virtual std::string getTimeSlicingType(int group) const = 0;
 
-  virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
+  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
   virtual void settingsChanged(int group) = 0;
   virtual void onReductionPaused(int group) = 0;
   virtual void onReductionResumed(int group) = 0;

@@ -1,5 +1,5 @@
 #include "ReflEventTabPresenter.h"
-#include "IReflMainWindowPresenter.h"
+#include "IReflBatchPresenter.h"
 #include "ReflEventPresenter.h"
 
 namespace MantidQt {
@@ -27,7 +27,7 @@ void ReflEventTabPresenter::passSelfToChildren(
 ReflEventTabPresenter::~ReflEventTabPresenter() {}
 
 void ReflEventTabPresenter::acceptMainPresenter(
-    IReflMainWindowPresenter *mainPresenter) {
+    IReflBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
 

@@ -36,6 +36,11 @@ void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
   // a flag we aren't handling.
 }
 
+bool ReflMainWindowPresenter::isProcessing() const {
+  // TODO Implement this once you have ownership of child presenters.
+  return false;
+}
+
 void ReflMainWindowPresenter::showHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(nullptr,
                                                  QString("ISIS Reflectometry"));

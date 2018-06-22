@@ -1,9 +1,10 @@
 #ifndef MANTID_ISISREFLECTOMETRY_QTREFLBATCHVIEW_H
 #define MANTID_ISISREFLECTOMETRY_QTREFLBATCHVIEW_H
 
-#include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "IReflMainWindowView.h"
-#include "ui_ReflMainWindowWidget.h"
+#include "IReflBatchView.h"
+#include "IReflBatchPresenter.h"
+#include "ui_ReflBatchWidget.h"
+#include <memory>
 
 #include <QCloseEvent>
 
@@ -11,7 +12,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 class IReflEventTabPresenter;
-class IReflMainWindowPresenter;
 class IReflRunsTabPresenter;
 class IReflSettingsTabPresenter;
 class IReflSaveTabPresenter;
@@ -38,21 +38,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class QtReflBatchView : public IReflBatchView {
+class QtReflBatchView : public QWidget, public IReflBatchView {
   Q_OBJECT
 public:
   /// Constructor
   explicit QtReflBatchView(QWidget *parent = nullptr);
-  /// Destructor
-  ~QtReflBatchView() override;
 
-  QtReflRunsTabView& runsTab() const;
-  QtReflEventTabView& eventTab() const;
-  QtReflSaveTabView& saveTab() const;
-  QtReflSettingsTabView& settingsTab() const;
+//  QtReflRunsTabView& runsTab() const;
+//  QtReflEventTabView& eventTab() const;
+//  QtReflSaveTabView& saveTab() const;
+//  QtReflSettingsTabView& settingsTab() const;
 private:
   /// Initializes the interface
-  void initLayout() override;
+  void initLayout();
   /// Creates the 'Runs' tab
   std::unique_ptr<IReflRunsTabPresenter> createRunsTab();
   /// Creates the 'Event Handling' tab
@@ -63,7 +61,7 @@ private:
   std::unique_ptr<IReflSaveTabPresenter> createSaveTab();
 
   /// Interface definition with widgets for the main interface window
-  Ui::ReflBatchView m_ui;
+  Ui::ReflBatchWidget m_ui;
   /// The presenter handling this view
   std::unique_ptr<IReflBatchPresenter> m_presenter;
 };

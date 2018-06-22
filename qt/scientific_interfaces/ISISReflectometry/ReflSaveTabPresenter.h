@@ -52,7 +52,7 @@ public:
   /// Destructor
   ~ReflSaveTabPresenter() override;
   /// Accept a main presenter
-  void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
+  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
   void notify(IReflSaveTabPresenter::Flag flag) override;
   void completedGroupReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
@@ -96,7 +96,7 @@ private:
   std::unique_ptr<IReflSaveTabView> m_view;
   std::unique_ptr<IReflAsciiSaver> m_saver;
   /// The main presenter
-  IReflMainWindowPresenter *m_mainPresenter;
+  IReflBatchPresenter *m_mainPresenter;
   bool m_shouldAutosave;
 };
 }

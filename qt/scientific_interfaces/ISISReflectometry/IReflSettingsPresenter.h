@@ -2,6 +2,7 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLSETTINGSPRESENTER_H
 
 #include "IReflSettingsTabPresenter.h"
+#include "IReflBatchPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include "MantidAPI/Algorithm.h"
 
@@ -10,7 +11,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IReflMainWindowPresenter;
 
 /** @class IReflSettingsPresenter
 
@@ -40,7 +40,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IReflSettingsPresenter {
 public:
-  virtual ~IReflSettingsPresenter(){};
+  virtual ~IReflSettingsPresenter() = default;
   /// Transmission runs for a particular angle
   virtual MantidWidgets::DataProcessor::OptionsQMap
   getOptionsForAngle(const double angle) const = 0;

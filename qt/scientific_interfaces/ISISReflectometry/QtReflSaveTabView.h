@@ -89,10 +89,15 @@ public:
   void enableFileFormatAndLocationControls() override;
   void disableFileFormatAndLocationControls() override;
 
-  void giveUserCritical(const std::string &prompt,
-                        const std::string &title) override;
-  void giveUserInfo(const std::string &prompt,
-                    const std::string &title) override;
+  void error(const std::string &title, const std::string &prompt);
+  void warning(const std::string &title, const std::string &prompt);
+
+  void invalidRegex() override;
+  void errorInvalidSaveDirectory() override;
+  void warnInvalidSaveDirectory() override;
+  void noWorkspacesSelected() override;
+  void cannotSaveWorkspaces() override;
+  void cannotSaveWorkspaces(std::string const &fullError) override;
 
 public slots:
   /// Populate the 'List of workspaces' widget

@@ -48,8 +48,6 @@ class QtReflMainWindowView : public MantidQt::API::UserSubWindow,
 public:
   /// Constructor
   explicit QtReflMainWindowView(QWidget *parent = nullptr);
-  /// Destructor
-  ~QtReflMainWindowView() override;
   /// Name of the interface
   static std::string name() { return "ISIS Reflectometry"; }
   /// This interface's categories.

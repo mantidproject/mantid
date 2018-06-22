@@ -3,13 +3,13 @@
 
 #include "DllConfig.h"
 #include "IReflEventTabPresenter.h"
+#include "IReflBatchPresenter.h"
 #include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 // Forward decs
-class IReflMainWindowPresenter;
 class IReflEventPresenter;
 
 /** @class ReflEventTabPresenter
@@ -51,7 +51,7 @@ public:
   /// Return time-slicing type
   std::string getTimeSlicingType(int group) const override;
 
-  void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
+  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
   void settingsChanged(int group) override;
   void onReductionResumed(int group) override;
   void onReductionPaused(int group) override;
@@ -60,7 +60,7 @@ public:
 private:
   /// The presenters for each group as a vector
   std::vector<IReflEventPresenter *> m_eventPresenters;
-  IReflMainWindowPresenter *m_mainPresenter;
+  IReflBatchPresenter *m_mainPresenter;
 };
 }
 }

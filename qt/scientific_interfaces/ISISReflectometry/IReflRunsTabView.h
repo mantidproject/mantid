@@ -5,6 +5,7 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include "Views/IBatchView.h"
+#include "DllConfig.h"
 
 namespace MantidQt {
 
@@ -50,10 +51,9 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport IReflRunsTabView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL IReflRunsTabView {
 public:
-  IReflRunsTabView(){};
-  virtual ~IReflRunsTabView(){};
+  virtual ~IReflRunsTabView() = default;
 
   virtual void subscribe(IReflRunsTabPresenter *presenter) = 0;
   virtual std::vector<IBatchView *> const &tableViews() const = 0;
@@ -91,6 +91,10 @@ public:
   // Timer methods
   virtual void startTimer(const int millisecs) = 0;
   virtual void stopTimer() = 0;
+  virtual void loginFailed(std::string const &fullError) = 0;
+
+  virtual void noActiveICatSessions() = 0;
+  virtual void missingRunsToTransfer() = 0;
 
   // Start an ICAT search
   virtual void startIcatSearch() = 0;

@@ -1,10 +1,10 @@
-#include "QtReflMainWindowView.h"
+#include "QtReflBatchView.h"
 #include "QtReflEventTabView.h"
 #include "QtReflRunsTabView.h"
 #include "QtReflSaveTabView.h"
 #include "QtReflSettingsTabView.h"
 #include "ReflSaveTabPresenter.h"
-#include "ReflMainWindowPresenter.h"
+#include "ReflBatchPresenter.h"
 #include "ReflAsciiSaver.h"
 #include "MantidKernel/make_unique.h"
 #include "Presenters/BatchPresenter.h"
@@ -18,18 +18,14 @@ namespace CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
 */
-QtReflMainWindowView::QtReflMainWindowView(QWidget *parent)
-    : UserSubWindow(parent) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-QtReflMainWindowView::~QtReflMainWindowView() {}
+QtReflBatchView::QtReflBatchView(QWidget *parent) : QWidget(parent) {
+  initLayout();
+}
 
 /**
 Initialise the Interface
 */
-void QtReflMainWindowView::initLayout() {
+void QtReflBatchView::initLayout() {
   m_ui.setupUi(this);
 
   // Create the tabs
@@ -39,13 +35,9 @@ void QtReflMainWindowView::initLayout() {
   auto savePresenter = createSaveTab();
 
   // Create the presenter
-  m_presenter = Mantid::Kernel::make_unique<ReflMainWindowPresenter>(
+  m_presenter = Mantid::Kernel::make_unique<ReflBatchPresenter>(
       this, std::move(runsPresenter), eventPresenter, settingsPresenter,
       std::move(savePresenter));
-}
-
-void QtReflMainWindowView::helpPressed() {
-  m_presenter->notify(IReflMainWindowPresenter::Flag::HelpPressed);
 }
 
 int indexOfElseFirst(std::string const &instrument,
@@ -66,13 +58,13 @@ int defaultInstrumentFromConfig(std::vector<std::string> const &instruments) {
 /** Creates the 'Runs' tab and returns a pointer to its presenter
 * @return :: A pointer to the presenter managing the 'Runs' tab
 */
-std::unique_ptr<IReflRunsTabPresenter> QtReflMainWindowView::createRunsTab() {
+std::unique_ptr<IReflRunsTabPresenter> QtReflBatchView::createRunsTab() {
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
   auto defaultInstrumentIndex = defaultInstrumentFromConfig(instruments);
 
   auto *runsTab = new QtReflRunsTabView(this, BatchViewFactory(instruments));
-  m_ui.mainTab->addTab(runsTab, QString("Runs"));
+  m_ui.batchTabs->addTab(runsTab, QString("Runs"));
   connect(runsTab, SIGNAL(runAsPythonScript(const QString &, bool)), this,
           SIGNAL(runAsPythonScript(const QString &, bool)));
 
@@ -88,10 +80,10 @@ std::unique_ptr<IReflRunsTabPresenter> QtReflMainWindowView::createRunsTab() {
 /** Creates the 'Event Handling' tab and returns a pointer to its presenter
 * @return :: A pointer to the presenter managing the 'Event Handling' tab
 */
-IReflEventTabPresenter *QtReflMainWindowView::createEventTab() {
+IReflEventTabPresenter *QtReflBatchView::createEventTab() {
 
   QtReflEventTabView *eventTab = new QtReflEventTabView(this);
-  m_ui.mainTab->addTab(eventTab, QString("Event Handling"));
+  m_ui.batchTabs->addTab(eventTab, QString("Event Handling"));
 
   return eventTab->getPresenter();
 }
@@ -99,10 +91,10 @@ IReflEventTabPresenter *QtReflMainWindowView::createEventTab() {
 /** Creates the 'Settings' tab and returns a pointer to its presenter
 * @return :: A pointer to the presenter managing the 'Settings' tab
 */
-IReflSettingsTabPresenter *QtReflMainWindowView::createSettingsTab() {
+IReflSettingsTabPresenter *QtReflBatchView::createSettingsTab() {
 
   QtReflSettingsTabView *settingsTab = new QtReflSettingsTabView(this);
-  m_ui.mainTab->addTab(settingsTab, QString("Settings"));
+  m_ui.batchTabs->addTab(settingsTab, QString("Settings"));
 
   return settingsTab->getPresenter();
 }
@@ -110,9 +102,9 @@ IReflSettingsTabPresenter *QtReflMainWindowView::createSettingsTab() {
 /** Creates the 'Save ASCII' tab and returns a pointer to its presenter
 * @return :: A pointer to the presenter managing the 'Save ASCII' tab
 */
-std::unique_ptr<IReflSaveTabPresenter> QtReflMainWindowView::createSaveTab() {
+std::unique_ptr<IReflSaveTabPresenter> QtReflBatchView::createSaveTab() {
   auto saveTabView = Mantid::Kernel::make_unique<QtReflSaveTabView>(this);
-  m_ui.mainTab->addTab(saveTabView.get(), QString("Save ASCII"));
+  m_ui.batchTabs->addTab(saveTabView.get(), QString("Save ASCII"));
 
   auto saver = Mantid::Kernel::make_unique<ReflAsciiSaver>();
   return Mantid::Kernel::make_unique<ReflSaveTabPresenter>(

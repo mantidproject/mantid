@@ -1,5 +1,5 @@
-#ifndef MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWPRESENTER_H
-#define MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWPRESENTER_H
+#ifndef MANTID_ISISREFLECTOMETRY_IREFLBATCHPRESENTER_H
+#define MANTID_ISISREFLECTOMETRY_IREFLBATCHPRESENTER_H
 
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
@@ -40,9 +40,7 @@ class IReflBatchPresenter {
 public:
   /// Destructor
   virtual ~IReflBatchPresenter(){};
-  enum class Flag { HelpPressed };
 
-  virtual void notify(Flag flag) = 0;
   virtual void notifyReductionPaused(int group) = 0;
   virtual void notifyReductionResumed(int group) = 0;
 
@@ -71,13 +69,6 @@ public:
   virtual std::string getTimeSlicingValues(int group) const = 0;
   /// Time-slicing type
   virtual std::string getTimeSlicingType(int group) const = 0;
-  virtual void giveUserCritical(const std::string &prompt,
-                                const std::string &title) = 0;
-  /// Dialog to print information
-  virtual void giveUserInfo(const std::string &prompt,
-                            const std::string &title) = 0;
-  /// Run a python algorithm
-  virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
   /// Set the instrument name
   virtual void setInstrumentName(const std::string &instName) const = 0;
   /// Data processing check for all groups
@@ -89,4 +80,4 @@ public:
 };
 }
 }
-#endif /* MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWPRESENTER_H */
+#endif /* MANTID_ISISREFLECTOMETRY_IREFLBATCHPRESENTER_H */

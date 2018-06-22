@@ -247,28 +247,44 @@ void QtReflSaveTabView::suggestSaveDir() const {
   m_presenter->notify(IReflSaveTabPresenter::suggestSaveDirFlag);
 }
 
-/**
-Show an critical error dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void QtReflSaveTabView::giveUserCritical(const std::string &prompt,
-                                         const std::string &title) {
+void QtReflSaveTabView::error(const std::string &title,
+                              const std::string &prompt) {
   QMessageBox::critical(this, QString::fromStdString(title),
-                        QString::fromStdString(prompt), QMessageBox::Ok,
-                        QMessageBox::Ok);
+                        QString::fromStdString(prompt));
 }
 
-/**
-Show an information dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void QtReflSaveTabView::giveUserInfo(const std::string &prompt,
-                                     const std::string &title) {
-  QMessageBox::information(this, QString::fromStdString(title),
-                           QString::fromStdString(prompt), QMessageBox::Ok,
-                           QMessageBox::Ok);
+void QtReflSaveTabView::warning(const std::string &title,
+                                const std::string &prompt) {
+  QMessageBox::critical(this, QString::fromStdString(title),
+                        QString::fromStdString(prompt));
+}
+
+void QtReflSaveTabView::invalidRegex() {
+  error("Invalid Regex", "Error, invalid regular expression.");
+}
+
+void QtReflSaveTabView::errorInvalidSaveDirectory() {
+  error("Invalid directory", "The save path specified doesn't exist or is "
+                             "not writable.");
+}
+
+void QtReflSaveTabView::warnInvalidSaveDirectory() {
+  warning("Invalid directory",
+          "You just changed the save path to a directory which "
+          "doesn't exist or is not writable.");
+}
+
+void QtReflSaveTabView::noWorkspacesSelected() {
+  error("No workspaces selected.",
+        "You must select the workspaces in order to save.");
+}
+
+void QtReflSaveTabView::cannotSaveWorkspaces() {
+  error("Error", "Unknown error while saving workspaces");
+}
+
+void QtReflSaveTabView::cannotSaveWorkspaces(std::string const &fullError) {
+  error("Error", fullError);
 }
 } // namespace CustomInterfaces
 } // namespace Mantid

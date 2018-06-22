@@ -65,12 +65,6 @@ void ReflBatchPresenter::notifyReductionResumed(int group) {
   m_eventPresenter->onReductionResumed(group);
 }
 
-
-void ReflBatchPresenter::showHelp() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
-                                                 QString("ISIS Reflectometry"));
-}
-
 void ReflBatchPresenter::settingsChanged(int group) {
   m_runsPresenter->settingsChanged(group);
 }

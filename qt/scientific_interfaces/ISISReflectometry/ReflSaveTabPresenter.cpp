@@ -39,7 +39,7 @@ ReflSaveTabPresenter::~ReflSaveTabPresenter() {}
 * @param mainPresenter :: [input] The main presenter
 */
 void ReflSaveTabPresenter::acceptMainPresenter(
-    IReflMainWindowPresenter *mainPresenter) {
+    IReflBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
 
@@ -155,8 +155,7 @@ void ReflSaveTabPresenter::filterWorkspaceNames() {
           wsNames.begin(), wsNames.end(), validNames.begin(),
           [rgx](std::string s) { return boost::regex_search(s, rgx); });
     } catch (boost::regex_error &) {
-      m_mainPresenter->giveUserCritical("Error, invalid regular expression\n",
-                                        "Invalid regex");
+      m_view->invalidRegex();
     }
   } else {
     // Otherwise simply add names where the filter string is found in
@@ -192,26 +191,12 @@ bool ReflSaveTabPresenter::isValidSaveDirectory(std::string const &directory) {
   return m_saver->isValidSaveDirectory(directory);
 }
 
-void ReflSaveTabPresenter::error(std::string const &message,
-                                 std::string const &title) {
-  m_view->giveUserCritical(message, title);
-}
-
-void ReflSaveTabPresenter::warn(std::string const &message,
-                                std::string const &title) {
-  m_view->giveUserInfo(message, title);
-}
-
 void ReflSaveTabPresenter::warnInvalidSaveDirectory() {
-  warn("You just changed the save path to a directory which "
-       "doesn't exist or is not writable.",
-       "Invalid directory");
+  m_view->warnInvalidSaveDirectory();
 }
 
 void ReflSaveTabPresenter::errorInvalidSaveDirectory() {
-  error("The save path specified doesn't exist or is "
-        "not writable.",
-        "Invalid directory");
+  m_view->errorInvalidSaveDirectory();
 }
 
 NamedFormat ReflSaveTabPresenter::formatFromIndex(int formatIndex) const {
@@ -261,15 +246,14 @@ void ReflSaveTabPresenter::saveSelectedWorkspaces() {
   // Check that at least one workspace has been selected for saving
   auto workspaceNames = m_view->getSelectedWorkspaces();
   if (workspaceNames.empty()) {
-    error("No workspaces selected", "No workspaces selected. "
-                                    "You must select the workspaces to save.");
+    m_view->noWorkspacesSelected();
   } else {
     try {
       saveWorkspaces(workspaceNames);
     } catch (std::exception &e) {
-      error(e.what(), "Error");
+      m_view->cannotSaveWorkspaces(e.what());
     } catch (...) {
-      error("Unknown error while saving workspaces", "Error");
+      m_view->cannotSaveWorkspaces();
     }
   }
 }

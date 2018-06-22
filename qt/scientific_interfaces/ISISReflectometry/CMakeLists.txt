@@ -18,6 +18,7 @@ set ( SRC_FILES
     QtReflEventTabView.cpp
     QtReflEventView.cpp
     QtReflMainWindowView.cpp
+    QtReflBatchView.cpp
     QtReflRunsTabView.cpp
     QtReflSaveTabView.cpp
     QtReflSettingsTabView.cpp
@@ -32,6 +33,7 @@ set ( SRC_FILES
     ReflFromStdStringMap.cpp
     ReflGenericDataProcessorPresenterFactory.cpp
     ReflMainWindowPresenter.cpp
+    ReflBatchPresenter.cpp
     ReflNexusMeasurementItemSource.cpp
     ReflRunsTabPresenter.cpp
     ReflSaveTabPresenter.cpp
@@ -58,7 +60,9 @@ set ( INC_FILES
     IReflEventTabPresenter.h
     IReflEventView.h
     IReflMainWindowPresenter.h
+    IReflBatchPresenter.h
     IReflMainWindowView.h
+    IReflBatchView.h
     IReflRunsTabPresenter.h
     IReflRunsTabView.h
     IReflSaveTabPresenter.h
@@ -72,6 +76,7 @@ set ( INC_FILES
     QtReflEventTabView.h
     QtReflEventView.h
     QtReflMainWindowView.h
+    QtReflBatchView.h
     QtReflRunsTabView.h
     QtReflSaveTabView.h
     QtReflSettingsTabView.h
@@ -88,6 +93,7 @@ set ( INC_FILES
     ReflFromStdStringMap.h
     ReflGenericDataProcessorPresenterFactory.h
     ReflMainWindowPresenter.h
+    ReflBatchPresenter.h
     ReflMeasurementItemSource.h
     ReflNexusMeasurementItemSource.h
     ReflRunsTabPresenter.h
@@ -112,6 +118,7 @@ set ( MOC_FILES
     QtReflSettingsTabView.h
     QtReflSettingsView.h
     QtReflMainWindowView.h
+    QtReflBatchView.h
     Views/BatchView.h
 )
 
@@ -119,6 +126,7 @@ set ( UI_FILES
    ReflEventTabWidget.ui
    ReflEventWidget.ui
    ReflMainWindowWidget.ui
+   ReflBatchWidget.ui
    ReflRunsTabWidget.ui
    ReflSaveTabWidget.ui
    ReflSettingsTabWidget.ui

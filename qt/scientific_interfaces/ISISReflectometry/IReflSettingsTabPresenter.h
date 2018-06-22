@@ -1,6 +1,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLSETTINGSTABPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLSETTINGSTABPRESENTER_H
 
+#include "IReflBatchPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 
 #include <string>
@@ -8,7 +9,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IReflMainWindowPresenter;
 
 /** @class IReflSettingsTabPresenter
 
@@ -54,7 +54,7 @@ public:
   virtual std::string getStitchOptions(int group) const = 0;
   /// Set current instrument name
   virtual void setInstrumentName(const std::string &instName) = 0;
-  virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
+  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
   virtual void settingsChanged(int group) = 0;
   virtual void onReductionPaused(int group) = 0;
   virtual void onReductionResumed(int group) = 0;

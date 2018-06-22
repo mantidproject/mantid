@@ -13,6 +13,7 @@
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
 #include "Views/BatchView.h"
+#include <QMessageBox>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -31,6 +32,10 @@ QtReflRunsTabView::QtReflRunsTabView(QWidget *parent,
 
   UNUSED_ARG(parent);
   initLayout();
+}
+void QtReflRunsTabView::loginFailed(std::string const &fullError) {
+  QMessageBox::critical(this, QString::fromStdString(fullError),
+                        "Login Failed!");
 }
 
 void QtReflRunsTabView::subscribe(IReflRunsTabPresenter *presenter) {
@@ -94,6 +99,17 @@ void QtReflRunsTabView::initLayout() {
   // connect(qDataProcessorWidget_2,
   //        SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
   //        SLOT(instrumentChanged(int)));
+}
+
+void QtReflRunsTabView::noActiveICatSessions() {
+  QMessageBox::information(
+      this, "Login Failed",
+      "Error Logging in: Please press 'Search' to try again.");
+}
+
+void QtReflRunsTabView::missingRunsToTransfer() {
+  QMessageBox::critical(this, "No runs selected",
+                        "Error: Please select at least one run to transfer.");
 }
 
 /**
