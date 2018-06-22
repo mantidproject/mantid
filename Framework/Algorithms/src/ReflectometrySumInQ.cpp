@@ -250,7 +250,8 @@ void ReflectometrySumInQ::init() {
                   "If true, the summation is handled as the standard divergent "
                   "beam case, otherwise as the non-flat sample case.");
   declareProperty(Prop::PARTIAL_BINS, false,
-                  "If true, use the full projected wavelength range possibly including partially filled bins.");
+                  "If true, use the full projected wavelength range possibly "
+                  "including partially filled bins.");
 }
 
 /** Execute the algorithm.
@@ -365,8 +366,10 @@ ReflectometrySumInQ::MinMax ReflectometrySumInQ::findWavelengthMinMax(
   MinMax inputTwoThetaRange;
   for (const auto i : indices) {
     const auto twoThetas = twoThetaWidth(i, spectrumInfo);
-    inputTwoThetaRange.testAndSetMin(includePartialBins ? twoThetas.min : twoThetas.max);
-    inputTwoThetaRange.testAndSetMax(includePartialBins ? twoThetas.max : twoThetas.min);
+    inputTwoThetaRange.testAndSetMin(includePartialBins ? twoThetas.min
+                                                        : twoThetas.max);
+    inputTwoThetaRange.testAndSetMax(includePartialBins ? twoThetas.max
+                                                        : twoThetas.min);
     const auto &edges = detectorWS.binEdges(i);
     for (size_t xIndex = 0; xIndex < edges.size(); ++xIndex) {
       // It is common for the wavelength to have negative values at ILL.

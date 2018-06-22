@@ -43,7 +43,7 @@ New features
   - ``CreatePolarizationEfficiencies`` creates efficiencies from polynomial coefficients
   - ``JoinISISPolarizationEfficiencies`` joins individual efficiencies into one matrix workspace
   - ``LoadISISPolarizationEfficiencies`` loads efficiencies form files
-* Algorithms for reflectometry reduction at ILL have been added. These handle the basic reduction in SumInLambda mode. Included algorithms:
+* Algorithms for reflectometry reduction at ILL have been added. These handle the basic polarized/unpolarized reduction in SumInLambda or SumInQ modes. Included algorithms:
     - :ref:`algm-ReflectometryILLPreprocess`
     - :ref:`algm-ReflectometryILLSumForeground`
     - :ref:`algm-ReflectometryILLPolarizationCor`

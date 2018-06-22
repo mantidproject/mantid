@@ -169,7 +169,8 @@ public:
         for (const auto &i : hist) {
           TS_ASSERT_DELTA(i.binWidth(), firstItem.binWidth(), 1e-12)
           TS_ASSERT_DELTA(i.counts(), firstItem.counts(), 1e-1)
-          TS_ASSERT_DELTA(i.countStandardDeviation(), firstItem.countStandardDeviation(), 1e-1)
+          TS_ASSERT_DELTA(i.countStandardDeviation(),
+                          firstItem.countStandardDeviation(), 1e-1)
         }
       }
     }
