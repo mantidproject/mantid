@@ -69,7 +69,7 @@ protected:
                    Mantid::API::ITableWorkspace_sptr targetTable) const;
 
 private:
-  static const size_t MAX_BANKS = 2;
+  static const size_t MAX_BANKS = 3;
   static const double DEFAULT_DIFC;
   static const double DEFAULT_DIFA;
   static const double DEFAULT_TZERO;
