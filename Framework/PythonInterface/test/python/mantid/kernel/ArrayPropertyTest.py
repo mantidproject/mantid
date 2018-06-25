@@ -129,7 +129,7 @@ class ArrayPropertyTest(unittest.TestCase):
                     FloatArrayProperty("Input", Direction.Input), "Float array")
             def PyExec(self):
                 self._input_values = self.getProperty("Input").value
-    
+
         input_values = range(1, 5)
         self._do_algorithm_test(AlgWithFloatArrayProperty, input_values)
 
@@ -144,7 +144,7 @@ class ArrayPropertyTest(unittest.TestCase):
         # Create float array
         float_input_values = [1.1, 2.5, 5.6, 4.6, 9.0, 6.0]
         float_arr = FloatArrayProperty("floats", float_input_values, validator, direc)
-         
+
         # Create int array
         int_input_values = [1, 2, 5, 4, 9, 6]
         int_arr = IntArrayProperty("integers", int_input_values, validator, direc)
@@ -152,7 +152,7 @@ class ArrayPropertyTest(unittest.TestCase):
         # Create string array
         str_input_values =["a", "b", "c", "d", "e"]
         str_arr = StringArrayProperty("letters", str_input_values, validator, direc)
-       
+
         # Test
         self.assertEquals(float_arr.dtype(), "d")
         self.assertEquals(int_arr.dtype(), "i")

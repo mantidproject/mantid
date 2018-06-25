@@ -47,13 +47,9 @@ namespace dtypeHelper {
 
 // Free function to determine data type being stored in container
 template <template <class> class Container, typename HeldType>
-std::string dtype(Container<HeldType>) {
+std::string dtype(const Container<HeldType>) {
   if (std::is_same<HeldType, bool>::value) {
     return "b";
-  } else if (std::is_same<HeldType, std::int32_t>::value) {
-    return "int32";
-  } else if (std::is_same<HeldType, std::int64_t>::value) {
-    return "int64";
   } else if (std::is_integral<HeldType>::value) {
     return "i";
   } else if (std::is_same<HeldType, std::float_t>::value) {

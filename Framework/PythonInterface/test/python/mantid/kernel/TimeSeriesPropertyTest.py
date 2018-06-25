@@ -69,7 +69,7 @@ class TimeSeriesPropertyTest(unittest.TestCase):
         self.assertEquals(log_series.size(), self._nframes)
         self.assertEquals(log_series.nthValue(1), 1436)
         # Check the dtype return value
-        self.assertEquals(log_series.dtype(), "int64")
+        self.assertEquals(log_series.dtype(), "i")
 
     def test_time_series_string_can_be_extracted(self):
         log_series = self._test_ws.getRun()["icp_event"]
