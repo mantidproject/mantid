@@ -25,12 +25,11 @@ using namespace boost::python;
 
 namespace {
 /// return_value_policy for cloned numpy array
-  using return_cloned_numpy =
+using return_cloned_numpy =
     return_value_policy<Policies::VectorRefToNumpy<Converters::Clone>>;
 
 // Call the dtype helper function
-template <typename type>
-std::string dtype(ArrayProperty<type> &self) {
+template <typename type> std::string dtype(ArrayProperty<type> &self) {
   return dtypeHelper::dtype(self);
 }
 
@@ -107,7 +106,7 @@ ArrayProperty<T> *createArrayPropertyFromNDArray(const std::string &name,
 
 void export_ArrayProperty() {
   // Match the python names to their C types
-  EXPORT_ARRAY_PROP(double, Float); 
+  EXPORT_ARRAY_PROP(double, Float);
   EXPORT_ARRAY_PROP(long, Int);
   EXPORT_ARRAY_PROP(std::string, String);
 

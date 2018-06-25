@@ -61,7 +61,6 @@ struct PropertyWithValueExporter {
         .def("dtype", &dtype<HeldType>, arg("self"), "returns :`std::string`");
   }
 };
-
 }
 }
 
