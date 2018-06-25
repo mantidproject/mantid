@@ -554,7 +554,7 @@ size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
         file.closeData();
       } else {
         // default is to match the detector number
-        info.specNum = info.detNum;
+        info.specNum = std::abs(info.detNum);
       }
 
       if (info.hasHisto && (numPeriods == 0) &&

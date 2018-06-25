@@ -44,6 +44,12 @@ public:
     TS_ASSERT(WS);
     // Correct number of monitors found
     TS_ASSERT_EQUALS(WS->getNumberHistograms(), 3);
+    // check the detector and spectrum numbers
+    for (size_t wi = 0; wi < WS->getNumberHistograms(); ++wi) {
+      const auto &spec = WS->getSpectrum(wi);
+      TS_ASSERT_EQUALS(spec.getSpectrumNo(), wi + 1);
+      TS_ASSERT_EQUALS(*(spec.getDetectorIDs().begin()), -1 * (wi + 1));
+    }
     // Check some histogram data
     // TOF
     TS_ASSERT_EQUALS(WS->x(1).size(), 200002);
