@@ -17,9 +17,9 @@
 from __future__ import absolute_import, print_function
 
 from qtpy.QtCore import Qt, Signal
-from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import (QAbstractItemView, QFileDialog, QHBoxLayout, QLineEdit, QListWidget, QListWidgetItem, QMenu,
-                            QPushButton, QVBoxLayout, QWidget)
+from qtpy.QtGui import QColor, QIcon
+from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QFileDialog, QHBoxLayout, QLineEdit, QListWidget,
+                            QListWidgetItem, QMenu, QPushButton, QVBoxLayout, QWidget)
 
 from mantidqt.utils.flowlayout import FlowLayout
 from workbench.plotting.figuremanager import QAppThreadCall
@@ -56,6 +56,7 @@ class PlotSelectorView(QWidget):
         self.show_button = QPushButton('Show')
         self.select_all_button = QPushButton('Select All')
         self.close_button = QPushButton('Close')
+        self.sort_button = self._make_sort_button()
         self.export_button = self._make_export_button()
         self.filter_box = self._make_filter_box()
         self.list_widget = self._make_list_widget()
@@ -70,6 +71,7 @@ class PlotSelectorView(QWidget):
         buttons_layout.addWidget(self.show_button)
         buttons_layout.addWidget(self.select_all_button)
         buttons_layout.addWidget(self.close_button)
+        buttons_layout.addWidget(self.sort_button)
         buttons_layout.addWidget(self.export_button)
 
         filter_layout = QHBoxLayout()
@@ -123,6 +125,9 @@ class PlotSelectorView(QWidget):
         """
         list_widget = QListWidget(self)
         list_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        list_widget.setSortingEnabled(True)
+
+        list_widget.setStyleSheet("selection-color: transparent;")
         return list_widget
 
     def _make_context_menu(self):
@@ -145,6 +150,8 @@ class PlotSelectorView(QWidget):
     def _add_to_plot_list(self, plot_name):
         real_item = PlotNameWidget(self.presenter, plot_name, self, self.is_run_as_unit_test)
         widget_item = QListWidgetItem()
+        widget_item.setData(Qt.DisplayRole, plot_name)
+        widget_item.setForeground(QColor(Qt.transparent))
         size_hint = real_item.sizeHint()
         widget_item.setSizeHint(size_hint)
         self.list_widget.addItem(widget_item)
@@ -232,6 +239,59 @@ class PlotSelectorView(QWidget):
         plot_name = self.get_currently_selected_plot_name()
         row, widget = self._get_row_and_widget_from_label_text(plot_name)
         widget.toggle_plot_name_editable(True)
+
+    # ----------------------- Plot Sorting --------------------------
+
+    def _make_sort_button(self):
+        sort_button = QPushButton("Sort")
+        sort_menu = QMenu()
+
+        ascending_action = QAction("Ascending", sort_menu, checkable=True)
+        ascending_action.setChecked(True)
+        ascending_action.toggled.connect(self.set_sort_order)
+        descending_action = QAction("Descending", sort_menu, checkable=True)
+
+        order_group = QActionGroup(sort_menu)
+        order_group.addAction(ascending_action)
+        order_group.addAction(descending_action)
+
+        name_action = QAction("Name", sort_menu, checkable=True)
+        name_action.setChecked(True)
+        name_action.toggled.connect(self.set_sort_type)
+        last_shown_action = QAction("Last Shown", sort_menu, checkable=True)
+
+        sort_type_group = QActionGroup(sort_menu)
+        sort_type_group.addAction(name_action)
+        sort_type_group.addAction(last_shown_action)
+
+        sort_menu.addAction(ascending_action)
+        sort_menu.addAction(descending_action)
+        sort_menu.addSeparator()
+        sort_menu.addAction(name_action)
+        sort_menu.addAction(last_shown_action)
+
+        sort_button.setMenu(sort_menu)
+        return sort_button
+
+    def set_sort_order(self, is_ascending):
+        if is_ascending:
+            self.list_widget.sortItems(Qt.AscendingOrder)
+        else:
+            self.list_widget.sortItems(Qt.DescendingOrder)
+
+    def set_sort_type(self, is_by_name):
+        self.list_widget.setSortingEnabled(False)
+        if is_by_name:
+            for row in range(len(self.list_widget)):
+                item = self.list_widget.item(row)
+                widget = self.list_widget.itemWidget(item)
+                item.setData(Qt.DisplayRole, widget.plot_name)
+        else:
+            for row in range(len(self.list_widget)):
+                item = self.list_widget.item(row)
+                widget = self.list_widget.itemWidget(item)
+                item.setData(Qt.DisplayRole, widget.plot_name[-1])
+        self.list_widget.setSortingEnabled(True)
 
     # ---------------------- Plot Exporting -------------------------
 
