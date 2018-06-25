@@ -143,14 +143,14 @@ standardDeviationArray(const std::vector<std::vector<double>> &yValues) {
 
   auto outputSize = yValues[0].size();
   standardDeviations.reserve(outputSize);
-  std::vector<double> currentRow;
-  currentRow.reserve(yValues.size());
+  std::vector<double> valuesAtIndex;
+  valuesAtIndex.reserve(yValues.size());
 
   for (auto i = 0u; i < outputSize; ++i) {
-    currentRow.clear();
-    for (auto &yValueArray : yValues)
-      currentRow.emplace_back(yValueArray[i]);
-    standardDeviations.emplace_back(standardDeviation(currentRow));
+    valuesAtIndex.clear();
+    for (auto &&yValueArray : yValues)
+      valuesAtIndex.emplace_back(yValueArray[i]);
+    standardDeviations.emplace_back(standardDeviation(valuesAtIndex));
   }
   return standardDeviations;
 }
