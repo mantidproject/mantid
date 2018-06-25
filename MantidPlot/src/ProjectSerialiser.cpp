@@ -385,14 +385,14 @@ bool ProjectSerialiser::canWriteToProject(QFile *fileHandle,
                                           const QString &projectName) {
   // check if we can write
   if (!fileHandle->open(QIODevice::WriteOnly)) {
-	  if (m_projectRecovery) {
-		  g_log.error("Failed to open file at the following path:\n" + projectName.toStdString());
-	  }
-	  else {
-		  QMessageBox::about(window, window->tr("MantidPlot - File save error"),
-			  window->tr("The file: <br><b>%1</b> is opened in "
-				  "read-only mode").arg(projectName));
-	  }
+    if (m_projectRecovery) {
+      g_log.error("Failed to open file at the following path:\n" +
+                  projectName.toStdString());
+    } else {
+      QMessageBox::about(window, window->tr("MantidPlot - File save error"),
+                         window->tr("The file: <br><b>%1</b> is opened in "
+                                    "read-only mode").arg(projectName));
+    }
     return false;
   }
   return true;
