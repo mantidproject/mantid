@@ -214,7 +214,7 @@ class TransformToIqt(PythonAlgorithm):
             CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')
 
         iqt = CalculateIqt(InputWorkspace=self._sample, ResolutionWorkspace=self._resolution, EnergyMin=self._e_min,
-                     EnergyMax=self._e_max, EnergyWidth=self._e_width, StoreInADS=False, OutputWorkspace="__calciqt")
+                           EnergyMax=self._e_max, EnergyWidth=self._e_width, StoreInADS=False, OutputWorkspace="__ciqt")
 
         # Set Y axis unit and label
         iqt.setYUnit('')
