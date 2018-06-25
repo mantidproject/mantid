@@ -426,7 +426,7 @@ public:
   void testPropertiesFigaro() {
     MatrixWorkspace_sptr output;
     getWorkspaceFor(output, m_figaroFile, m_outWSName, emptyProperties());
-    commonProperties(output, "Figaro");
+    commonProperties(output, "FIGARO");
     AnalysisDataService::Instance().clear();
   }
 
