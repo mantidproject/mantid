@@ -81,7 +81,7 @@ ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder,
     : window(window), m_currentFolder(folder), m_windowCount(0),
       m_saveAll(true), m_projectRecovery(isRecovery) {}
 
-void ProjectSerialiser::save(const QString &projectName,
+bool ProjectSerialiser::save(const QString &projectName,
                              const std::vector<std::string> &wsNames,
                              const std::vector<std::string> &windowNames,
                              bool compress) {
@@ -90,7 +90,7 @@ void ProjectSerialiser::save(const QString &projectName,
   window->projectname = projectName;
   QFileInfo fileInfo(projectName);
   window->workingDir = fileInfo.absoluteDir().absolutePath();
-  save(projectName, compress, false);
+  return save(projectName, compress, false);
 }
 
 /**
@@ -100,7 +100,7 @@ void ProjectSerialiser::save(const QString &projectName,
  * @param projectName :: the name of the project to write to
  * @param compress :: whether to compress the project (default false)
  */
-void ProjectSerialiser::save(const QString &projectName, bool compress,
+bool ProjectSerialiser::save(const QString &projectName, bool compress,
                              bool saveAll) {
   m_windowCount = 0;
   m_saveAll = saveAll;
@@ -110,7 +110,7 @@ void ProjectSerialiser::save(const QString &projectName, bool compress,
   // attempt to backup project files and check we can write
   if (!canBackupProjectFiles(&fileHandle, projectName) ||
       !canWriteToProject(&fileHandle, projectName)) {
-    return;
+    return false;
   }
 
   if (!m_currentFolder)
@@ -122,6 +122,7 @@ void ProjectSerialiser::save(const QString &projectName, bool compress,
 
   QString text = serialiseProjectState(m_currentFolder);
   saveProjectFile(&fileHandle, projectName, text, compress);
+  return true;
 }
 
 /**
@@ -384,9 +385,14 @@ bool ProjectSerialiser::canWriteToProject(QFile *fileHandle,
                                           const QString &projectName) {
   // check if we can write
   if (!fileHandle->open(QIODevice::WriteOnly)) {
-    QMessageBox::about(window, window->tr("MantidPlot - File save error"),
-                       window->tr("The file: <br><b>%1</b> is opened in "
-                                  "read-only mode").arg(projectName)); // Mantid
+	  if (m_projectRecovery) {
+		  g_log.error("Failed to open file at the following path:\n" + projectName.toStdString());
+	  }
+	  else {
+		  QMessageBox::about(window, window->tr("MantidPlot - File save error"),
+			  window->tr("The file: <br><b>%1</b> is opened in "
+				  "read-only mode").arg(projectName));
+	  }
     return false;
   }
   return true;

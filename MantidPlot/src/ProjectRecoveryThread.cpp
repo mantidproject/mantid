@@ -230,11 +230,16 @@ void ProjectRecoveryThread::projectSavingThread() {
 
 void ProjectRecoveryThread::saveOpenWindows(
     const std::string &projectDestFile) {
+	bool saveCompleted = false;
   if (!QMetaObject::invokeMethod(m_windowPtr, "saveProjectRecovery",
-                                 Qt::QueuedConnection,
+	  Qt::BlockingQueuedConnection, Q_RETURN_ARG(bool, saveCompleted),
                                  Q_ARG(const std::string, projectDestFile))) {
-    g_log.warning(
+    throw std::runtime_error(
         "Project Recovery: Failed to save project windows - Qt binding failed");
+  }
+
+  if (!saveCompleted) {
+	  throw std::runtime_error("Project Recovery: Failed to write out project file");
   }
 }
 

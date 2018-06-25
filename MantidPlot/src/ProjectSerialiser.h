@@ -66,9 +66,9 @@ public:
                              bool isRecovery);
 
   /// Save the current state of the project to disk
-  void save(const QString &projectName, const std::vector<std::string> &wsNames,
+  bool save(const QString &projectName, const std::vector<std::string> &wsNames,
             const std::vector<std::string> &windowNames, bool compress = false);
-  void save(const QString &projectName, bool compress = false,
+  bool save(const QString &projectName, bool compress = false,
             bool saveAll = true);
   /// Load a project file from disk
   void load(std::string filepath, const int fileVersion,
