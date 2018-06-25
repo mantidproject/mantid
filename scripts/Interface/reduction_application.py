@@ -107,6 +107,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.general_settings = GeneralSettings(settings)
 
         self.setupUi(self)
+        self.algorithm_progress_widget.hide()
 
         # Event connections
         if not IS_IN_MANTIDPLOT:
@@ -147,7 +148,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         """
         # Clean up the widgets that have already been created
         self.tabWidget.clear()
-        self.progress_bar.hide()
+        self.algorithm_progress_widget.show()
 
         if self._instrument == '' or self._instrument is None:
             return self._change_instrument()
