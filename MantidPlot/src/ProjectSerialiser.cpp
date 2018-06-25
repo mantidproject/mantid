@@ -767,12 +767,12 @@ void ProjectSerialiser::loadWorkspacesIntoMantid(
 
     // Force a copy so we can append in the case where there is 1 element
     auto workspaceList = groupNameAndWorkspaces.second;
-    bool smallGroup(workspaceList.size() < 2);
 
     // name picked because random and won't ever be used.
     std::string unusedName = "boevsMoreBoevs";
 
     try {
+      bool smallGroup(workspaceList.size() < 2);
 
       if (smallGroup) // if the group contains less than two items...
       {

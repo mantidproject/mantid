@@ -65,8 +65,6 @@ private:
   /// Deletes oldest checkpoints beyond the maximum number to keep
   void deleteExistingCheckpoints(size_t checkpointsToKeep);
 
-  /// Loads a project recovery file back into Mantid
-  void loadOpenWindows(const std::string &projectFolder);
   /// Saves a project recovery file in Mantid
   void saveOpenWindows(const std::string &projectDestFolder);
   /// Saves the current workspace's histories from Mantid

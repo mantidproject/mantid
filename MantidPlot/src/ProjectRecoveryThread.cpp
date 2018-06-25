@@ -302,18 +302,5 @@ void ProjectRecoveryThread::saveWsHistories(
   }
 }
 
-void ProjectRecoveryThread::loadOpenWindows(const std::string &projectFolder) {
-  // TODO
-
-  const bool isRecovery = true;
-  ProjectSerialiser projectWriter(m_windowPtr, isRecovery);
-
-  // Use this version of Mantid as the current version field - as recovery
-  // across major versions is not an intended use case
-  const int fileVersion = 100 * maj_version + 10 * min_version + patch_version;
-
-  projectWriter.load(projectFolder, fileVersion);
-}
-
 } // namespace API
 } // namespace MantidQt
