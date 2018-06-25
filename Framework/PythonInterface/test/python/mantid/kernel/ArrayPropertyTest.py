@@ -154,9 +154,9 @@ class ArrayPropertyTest(unittest.TestCase):
         str_arr = StringArrayProperty("letters", str_input_values, validator, direc)
 
         # Test
-        self.assertEquals(float_arr.dtype(), "d")
-        self.assertEquals(int_arr.dtype(), "i")
-        self.assertEquals(str_arr.dtype(), "s")
+        self.assertEquals(float_arr.dtype(), "double")
+        self.assertEquals(int_arr.dtype(), "long")
+        self.assertEquals(str_arr.dtype(), "string")
 
 
     def test_PythonAlgorithm_setProperty_With_Ranges_String(self):

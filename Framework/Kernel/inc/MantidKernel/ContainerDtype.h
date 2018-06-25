@@ -49,15 +49,27 @@ namespace dtypeHelper {
 template <template <class> class Container, typename HeldType>
 std::string dtype(const Container<HeldType>) {
   if (std::is_same<HeldType, bool>::value) {
-    return "b";
-  } else if (std::is_integral<HeldType>::value) {
-    return "i";
+    return "boolean";
+  } else if (std::is_same<HeldType, short>::value) {
+    return "short";
+  } else if (std::is_same<HeldType, std::int8_t>::value) {
+    return "int8";
+  } else if (std::is_same<HeldType, std::int16_t>::value) {
+    return "int16";
+  } else if (std::is_same<HeldType, std::int32_t>::value) {
+    return "int32";
+  } else if (std::is_same<HeldType, std::int64_t>::value) {
+    return "int64";
+  } else if (std::is_same<HeldType, long>::value) {
+    return "long";
+  } else if (std::is_same<HeldType, long long>::value) {
+    return "longlong";
   } else if (std::is_same<HeldType, std::float_t>::value) {
-    return "f";
+    return "float";
   } else if (std::is_same<HeldType, std::double_t>::value) {
-    return "d";
+    return "double";
   } else if (std::is_same<HeldType, std::string>::value) {
-    return "s";
+    return "string";
   } else {
     return "obj";
   }
