@@ -16,6 +16,8 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, print_function
 
+import re
+
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QColor, QIcon
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QFileDialog, QHBoxLayout, QLineEdit, QListWidget,
@@ -149,7 +151,7 @@ class PlotSelectorView(QWidget):
 
     def _add_to_plot_list(self, plot_name):
         real_item = PlotNameWidget(self.presenter, plot_name, self, self.is_run_as_unit_test)
-        widget_item = QListWidgetItem()
+        widget_item = HumanReadableSortListWidgetItem()
         widget_item.setData(Qt.DisplayRole, plot_name)
         widget_item.setForeground(QColor(Qt.transparent))
         size_hint = real_item.sizeHint()
@@ -184,6 +186,7 @@ class PlotSelectorView(QWidget):
 
     def rename_in_plot_list(self, new_name, old_name):
         row, widget = self._get_row_and_widget_from_label_text(old_name)
+        self.list_widget.item(row).setData(Qt.DisplayRole, new_name)
         widget.set_plot_name(new_name)
 
     # ----------------------- Plot Selection ------------------------
@@ -248,7 +251,7 @@ class PlotSelectorView(QWidget):
 
         ascending_action = QAction("Ascending", sort_menu, checkable=True)
         ascending_action.setChecked(True)
-        ascending_action.toggled.connect(self.set_sort_order)
+        ascending_action.toggled.connect(self.presenter.set_sort_order)
         descending_action = QAction("Descending", sort_menu, checkable=True)
 
         order_group = QActionGroup(sort_menu)
@@ -257,7 +260,7 @@ class PlotSelectorView(QWidget):
 
         name_action = QAction("Name", sort_menu, checkable=True)
         name_action.setChecked(True)
-        name_action.toggled.connect(self.set_sort_type)
+        name_action.toggled.connect(self.presenter.set_sort_type)
         last_shown_action = QAction("Last Shown", sort_menu, checkable=True)
 
         sort_type_group = QActionGroup(sort_menu)
@@ -273,24 +276,32 @@ class PlotSelectorView(QWidget):
         sort_button.setMenu(sort_menu)
         return sort_button
 
-    def set_sort_order(self, is_ascending):
-        if is_ascending:
-            self.list_widget.sortItems(Qt.AscendingOrder)
-        else:
-            self.list_widget.sortItems(Qt.DescendingOrder)
+    def sort_ascending(self):
+        self.list_widget.sortItems(Qt.AscendingOrder)
 
-    def set_sort_type(self, is_by_name):
+    def sort_descending(self):
+        self.list_widget.sortItems(Qt.DescendingOrder)
+
+    def sort_by_name(self):
         self.list_widget.setSortingEnabled(False)
-        if is_by_name:
-            for row in range(len(self.list_widget)):
-                item = self.list_widget.item(row)
-                widget = self.list_widget.itemWidget(item)
-                item.setData(Qt.DisplayRole, widget.plot_name)
-        else:
-            for row in range(len(self.list_widget)):
-                item = self.list_widget.item(row)
-                widget = self.list_widget.itemWidget(item)
-                item.setData(Qt.DisplayRole, widget.plot_name[-1])
+
+        for row in range(len(self.list_widget)):
+            item = self.list_widget.item(row)
+            widget = self.list_widget.itemWidget(item)
+            item.setData(Qt.DisplayRole, widget.plot_name)
+
+        self.list_widget.sortItems()
+        self.list_widget.setSortingEnabled(True)
+
+    def sort_by_last_shown(self):
+        self.list_widget.setSortingEnabled(False)
+
+        for row in range(len(self.list_widget)):
+            item = self.list_widget.item(row)
+            widget = self.list_widget.itemWidget(item)
+            item.setData(Qt.DisplayRole, widget.plot_name[-1])
+
+        self.list_widget.sortItems()
         self.list_widget.setSortingEnabled(True)
 
     # ---------------------- Plot Exporting -------------------------
@@ -396,4 +407,14 @@ class PlotNameWidget(QWidget):
         if not self.is_run_as_unit_test:
             path = QFileDialog.getExistingDirectory(None, 'Select folder for exported plot')
         self.presenter.export_plots(self.plot_name, path, extension)
+
+
+class HumanReadableSortListWidgetItem(QListWidgetItem):
+    def convert(self, text):
+        return int(text) if text.isdigit() else text.lower()
+
+    def __lt__(self, other):
+        self_key = [self.convert(c) for c in re.split('([0-9]+)', self.text())]
+        other_key = [self.convert(c) for c in re.split('([0-9]+)', other.text())]
+        return self_key < other_key
 

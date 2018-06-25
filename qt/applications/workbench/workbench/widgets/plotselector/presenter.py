@@ -201,6 +201,20 @@ class PlotSelectorPresenter(object):
             except ValueError as e:
                 print(e)
 
+    # ----------------------- Plot Sorting --------------------------
+
+    def set_sort_order(self, is_ascending):
+        if is_ascending:
+            self.view.sort_ascending()
+        else:
+            self.view.sort_descending()
+
+    def set_sort_type(self, is_by_name):
+        if is_by_name:
+            self.view.sort_by_name()
+        else:
+            self.view.sort_by_last_shown()
+
     # ---------------------- Plot Exporting -------------------------
 
     def export_plots(self, path, extension):
