@@ -65,10 +65,9 @@ namespace Strings {
 template <typename ITERATOR_TYPE>
 DLLExport std::string
 join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
-     typename std::enable_if<
-         !(std::is_same<
-             typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
-             std::random_access_iterator_tag>::value)>::type * = nullptr) {
+     typename std::enable_if<!(std::is_same<
+         typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
+         std::random_access_iterator_tag>::value)>::type * = nullptr) {
   std::ostringstream output;
   ITERATOR_TYPE it;
   for (it = begin; it != end;) {
@@ -101,10 +100,9 @@ join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
 template <typename ITERATOR_TYPE>
 DLLExport std::string
 join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
-     typename std::enable_if<
-         (std::is_same<
-             typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
-             std::random_access_iterator_tag>::value)>::type * = nullptr) {
+     typename std::enable_if<(std::is_same<
+         typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
+         std::random_access_iterator_tag>::value)>::type * = nullptr) {
 
   // Get the distance between begining and end
   long int dist = std::distance(begin, end);
