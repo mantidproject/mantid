@@ -1,6 +1,10 @@
 #ifndef PROJECT_RECOVERY_THREAD_H_
 #define PROJECT_RECOVERY_THREAD_H_
 
+#include "MantidKernel/ConfigService.h"
+
+#include <Poco/NObserver.h>
+
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
@@ -55,12 +59,19 @@ private:
   /// Captures the current object in the background thread
   std::thread createBackgroundThread();
 
+  /// Triggers when the config key is updated to a new value
+  void configKeyChanged(Mantid::Kernel::ConfigValChangeNotification_ptr notif);
+
+  void deleteExistingCheckpoints(size_t checkpointsToKeep);
+
   /// Loads a project recovery file back into Mantid
   void loadOpenWindows(const std::string &projectFolder);
   /// Saves a project recovery file in Mantid
   void saveOpenWindows(const std::string &projectDestFolder);
   /// Saves the current workspace's histories from Mantid
   void saveWsHistories(const std::string &projectDestFile);
+  /// Wraps the thread in a try catch to log any failures
+  void projectSavingThreadWrapper();
   /// Main body of saving thread
   void projectSavingThread();
 
@@ -73,6 +84,11 @@ private:
   bool m_stopBackgroundThread;
   /// Atomic to detect when the thread should fire or exit
   std::condition_variable m_threadNotifier;
+
+  /// Config observer to monitor the key
+  Poco::NObserver<ProjectRecoveryThread,
+                  Mantid::Kernel::ConfigValChangeNotification>
+      m_configKeyObserver;
 
   /// Pointer to main GUI window
   ApplicationWindow *m_windowPtr;

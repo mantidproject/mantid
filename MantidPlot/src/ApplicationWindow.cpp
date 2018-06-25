@@ -263,6 +263,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings,
 #endif
       m_projectRecoveryThread(this) {
   init(factorySettings, args);
+  m_projectRecoveryThread.startProjectSaving();
 }
 
 /**
@@ -4618,29 +4619,21 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
 
   d_opening_file = true;
 
-  QFile file(filename);
-  QFileInfo fileInfo(filename);
-
-  if (!file.open(QIODevice::ReadOnly))
-    throw std::runtime_error("Couldn't open project file");
-
-  QTextStream fileTS(&file);
-  fileTS.setCodec(QTextCodec::codecForName("UTF-8"));
-
-  QString baseName = fileInfo.fileName();
-
-  // Skip mantid version line
-  fileTS.readLine();
-
-  // Skip the <scripting-lang> line. We only really use python now anyway.
-  fileTS.readLine();
-  setScriptingLanguage("Python");
-
-  // Skip the <windows> line.
-  fileTS.readLine();
-
   folders->blockSignals(true);
   blockSignals(true);
+
+  // Open as a top level folder
+  ProjectSerialiser serialiser(this);
+  try {
+    serialiser.load(filename.toStdString(), fileVersion);
+  } catch (std::runtime_error &e) {
+    g_log.error(e.what());
+    // We failed to load - reset and bail out
+    d_opening_file = false;
+    folders->blockSignals(false);
+    blockSignals(false);
+    return this;
+  }
 
   Folder *curFolder = projectFolder();
 
@@ -4649,35 +4642,21 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
   if (!item)
     throw std::runtime_error("Couldn't retrieve folder list items.");
 
+  QFile file(filename);
+  QFileInfo fileInfo(filename);
+  QString baseName = fileInfo.fileName();
   item->setText(0, fileInfo.baseName());
   item->folder()->setObjectName(fileInfo.baseName());
 
-  // Read the rest of the project file in for parsing
-  std::string lines = fileTS.readAll().toUtf8().constData();
-
   d_loaded_current = nullptr;
-
-  // Open as a top level folder
-  ProjectSerialiser serialiser(this);
-  try {
-    serialiser.load(lines, fileVersion);
-  } catch (std::runtime_error &e) {
-    g_log.error(e.what());
-    // We failed to load - bail out
-    return this;
-  }
 
   if (d_loaded_current)
     curFolder = d_loaded_current;
 
-  {
-    // WHY use another fileinfo?
-    QFileInfo fi2(file);
-    QString fileName = fi2.absoluteFilePath();
-    recentProjects.removeAll(filename);
-    recentProjects.push_front(filename);
-    updateRecentProjectsList();
-  }
+  QString fileName = fileInfo.absoluteFilePath();
+  recentProjects.removeAll(filename);
+  recentProjects.push_front(filename);
+  updateRecentProjectsList();
 
   folders->setCurrentItem(curFolder->folderListItem());
   folders->blockSignals(false);
@@ -9792,6 +9771,10 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
       return;
     }
   }
+
+  // Stop background saving thread, so it doesn't try to use a destroyed
+  // resource
+  m_projectRecoveryThread.stopProjectSaving();
 
   // Close the remaining MDI windows. The Python API is required to be active
   // when the MDI window destructor is called so that those references can be
@@ -16756,8 +16739,8 @@ bool ApplicationWindow::isOfType(const QObject *obj,
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
 }
 
-void ApplicationWindow::saveProjectRecovery(std::string destination) {
+bool ApplicationWindow::saveProjectRecovery(std::string destination) {
   const bool isRecovery = true;
   ProjectSerialiser projectWriter(this, isRecovery);
-  projectWriter.save(QString::fromStdString(destination));
+  return projectWriter.save(QString::fromStdString(destination));
 }
