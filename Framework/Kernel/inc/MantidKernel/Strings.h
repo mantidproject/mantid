@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/System.h"
 
@@ -54,14 +55,20 @@ namespace Strings {
  * For example, join a vector of strings with commas with:
  *  out = join(v.begin(), v.end(), ", ");
  *
+ * This version is used for random access iterators (e.g. map, set).
+ *
  * @param begin :: iterator at the start
  * @param end :: iterator at the end
  * @param separator :: string to append.
  * @return
  */
 template <typename ITERATOR_TYPE>
-DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
-                           const std::string &separator) {
+DLLExport std::string
+join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
+     typename std::enable_if<
+         !(std::is_same<
+             typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
+             std::random_access_iterator_tag>::value)>::type * = nullptr) {
   std::ostringstream output;
   ITERATOR_TYPE it;
   for (it = begin; it != end;) {
@@ -71,6 +78,64 @@ DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
       output << separator;
   }
   return output.str();
+}
+
+//------------------------------------------------------------------------------------------------
+/** Join a set or vector of (something that turns into a string) together
+ * into one string, separated by a string.
+ * Returns an empty string if the range is null.
+ * Does not add the separator after the LAST item.
+ *
+ * For example, join a vector of strings with commas with:
+ *  out = join(v.begin(), v.end(), ", ");
+ *
+ * This is a faster threaded version of the join() function above.
+ * It is used only if the iterators are not random access (e.g. vector), as it
+ * needs to be able to determine the distance between begin and end.
+ *
+ * @param begin :: iterator at the start
+ * @param end :: iterator at the end
+ * @param separator :: string to append.
+ * @return
+ */
+template <typename ITERATOR_TYPE>
+DLLExport std::string
+join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
+     typename std::enable_if<
+         (std::is_same<
+             typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
+             std::random_access_iterator_tag>::value)>::type * = nullptr) {
+
+  // Get the distance between begining and end
+  long int dist = std::distance(begin, end);
+
+  // Get max number of threads and allocate vector speace
+  int nmax_threads = PARALLEL_GET_MAX_THREADS;
+  std::vector<std::ostringstream> output(nmax_threads);
+
+  // Actual number of threads in the current region
+  int nThreads = 1;
+#pragma omp parallel
+  {
+    nThreads = PARALLEL_NUMBER_OF_THREADS;
+    int idThread = PARALLEL_THREAD_NUMBER;
+    ITERATOR_TYPE it;
+
+#pragma omp for
+    for (int i = 0; i < dist; i++) {
+      // Write to stringstream
+      output[idThread] << separator << *(begin + i);
+    }
+  }
+
+  // Flush all buffers into the first one
+  for (int i = 1; i < nThreads; i++) {
+    output[0] << output[i].str();
+  }
+
+  // Return the stringstream converted to a string, minus the separator at
+  // the start of the string.
+  return output[0].str().erase(0, separator.length());
 }
 
 //------------------------------------------------------------------------------------------------
