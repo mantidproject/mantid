@@ -241,12 +241,12 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle):
     # |  True        |        False                        |           False                     |    False    |
 
     is_invalid_partial_workspaces = ((output_parts_bundle.output_workspace_count is None and
-                                     output_parts_bundle.output_workspace_norm is not None) or
+                                      output_parts_bundle.output_workspace_norm is not None) or
                                      (output_parts_bundle.output_workspace_count is not None and
-                                     output_parts_bundle.output_workspace_norm is None))
+                                      output_parts_bundle.output_workspace_norm is None))
     is_invalid_transmission_workspaces = (output_transmission_bundle.calculated_transmission_workspace is None
-                                          or output_transmission_bundle.unfitted_transmission_workspace is None)\
-                                          and state.adjustment.show_transmission
+                                          or output_transmission_bundle.unfitted_transmission_workspace is None) \
+        and state.adjustment.show_transmission
     partial_output_require_reload = output_parts and is_invalid_partial_workspaces
 
     must_reload = output_bundle.output_workspace is None or partial_output_require_reload or is_invalid_transmission_workspaces
@@ -256,8 +256,9 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle):
         must_reload = mpisetup.boost.mpi.broadcast(mpisetup.boost.mpi.world, must_reload, 0)
 
     if must_reload:
-    #if output_bundle.output_workspace is None or partial_output_require_reload:
-        output_bundle, output_parts_bundle, output_transmission_bundle = run_core_reduction(reduction_alg, reduction_setting_bundle)
+        # if output_bundle.output_workspace is None or partial_output_require_reload:
+        output_bundle, output_parts_bundle, output_transmission_bundle = run_core_reduction(reduction_alg,
+                                                                                            reduction_setting_bundle)
 
         # Now we need to tag the workspaces and add it to the ADS
         if output_bundle.output_workspace is not None:
@@ -265,7 +266,7 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle):
                                                   workspace=output_bundle.output_workspace,
                                                   partial_type=None,
                                                   reduction_mode=reduction_mode)
-        if output_transmission_bundle.calculated_transmission_workspace is not None and\
+        if output_transmission_bundle.calculated_transmission_workspace is not None and \
                 output_transmission_bundle.unfitted_transmission_workspace is not None:
             write_hash_into_reduced_can_workspace(state=output_transmission_bundle.state,
                                                   workspace=output_transmission_bundle.calculated_transmission_workspace,
@@ -276,7 +277,7 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle):
                                                   partial_type=TransmissionType.Unfitted,
                                                   reduction_mode=reduction_mode)
         if (output_parts_bundle.output_workspace_count is not None and
-           output_parts_bundle.output_workspace_norm is not None):
+                output_parts_bundle.output_workspace_norm is not None):
             write_hash_into_reduced_can_workspace(state=output_parts_bundle.state,
                                                   workspace=output_parts_bundle.output_workspace_count,
                                                   partial_type=OutputParts.Count,

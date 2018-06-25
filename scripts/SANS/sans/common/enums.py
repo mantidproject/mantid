@@ -218,6 +218,7 @@ class DetectorType(object):
     """
     pass
 
+
 # --------------------------
 #  Transmission Type
 # --------------------------
