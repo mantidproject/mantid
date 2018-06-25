@@ -52,12 +52,14 @@ boost::optional<bool> getConfigBool(const std::string &key) {
   return returnedValue->find("true") != std::string::npos;
 }
 
+/// Returns a string to the current top level recovery folder
 std::string getRecoveryFolder() {
   static std::string recoverFolder =
       Mantid::Kernel::ConfigService::Instance().getAppDataDir() + "/recovery/";
   return recoverFolder;
 }
 
+/// Returns a string to the current timestamped recovery folder
 std::string getOutputPath() {
   auto time = std::time(nullptr);
   auto localTime = std::localtime(&time);
@@ -93,19 +95,29 @@ const std::chrono::seconds TIME_BETWEEN_SAVING(SAVING_TIME);
 namespace MantidQt {
 namespace API {
 
+/**
+ * Constructs a new ProjectRecoveryThread, a class which encapsulates
+ * a background thread to save periodically. This does not start the
+ * background thread though
+ *
+ * @param windowHandle :: Pointer to the main application window
+ */
 ProjectRecoveryThread::ProjectRecoveryThread(ApplicationWindow *windowHandle)
     : m_backgroundSavingThread(), m_stopBackgroundThread(true),
       m_configKeyObserver(*this, &ProjectRecoveryThread::configKeyChanged),
       m_windowPtr(windowHandle) {}
 
+/// Destructor which also stops any background threads currently in progress
 ProjectRecoveryThread::~ProjectRecoveryThread() { stopProjectSaving(); }
 
+/// Returns a background thread with the current object captured inside it
 std::thread ProjectRecoveryThread::createBackgroundThread() {
   // Using a lambda helps the compiler deduce the this pointer
   // otherwise the resolution is ambiguous
   return std::thread([this] { projectSavingThreadWrapper(); });
 }
 
+/// Callback for POCO when a config change had fired for the enabled key
 void ProjectRecoveryThread::configKeyChanged(
     Mantid::Kernel::ConfigValChangeNotification_ptr notif) {
   if (notif->key() != (SAVING_ENABLED_CONFIG_KEY)) {
@@ -119,6 +131,11 @@ void ProjectRecoveryThread::configKeyChanged(
   }
 }
 
+/**
+ * Deletes existing checkpoints, oldest first, in the recovery
+ * folder. This is based on the configuration key which
+ * indicates how many points to keep
+ */
 void ProjectRecoveryThread::deleteExistingCheckpoints(
     size_t checkpointsToKeep) {
   static auto workingFolder = getRecoveryFolder();
@@ -152,7 +169,9 @@ void ProjectRecoveryThread::deleteExistingCheckpoints(
   }
 
   // Ensure the oldest is first in the vector
-  std::sort(folderPaths.begin(), folderPaths.end(), [](Poco::Path &a, Poco::Path &b){ return a.toString() < b.toString(); });
+  std::sort(
+      folderPaths.begin(), folderPaths.end(),
+      [](Poco::Path &a, Poco::Path &b) { return a.toString() < b.toString(); });
 
   size_t checkpointsToRemove = numberOfDirsPresent - checkpointsToKeep;
   bool recurse = true;
@@ -161,6 +180,7 @@ void ProjectRecoveryThread::deleteExistingCheckpoints(
   }
 }
 
+/// Starts a background thread which saves out the project periodically
 void ProjectRecoveryThread::startProjectSaving() {
   // Close the existing thread first
   stopProjectSaving();
@@ -178,6 +198,7 @@ void ProjectRecoveryThread::startProjectSaving() {
   m_backgroundSavingThread = createBackgroundThread();
 }
 
+/// Stops any existing background threads which are running
 void ProjectRecoveryThread::stopProjectSaving() {
   {
     std::lock_guard<std::mutex> lock(m_notifierMutex);
@@ -190,6 +211,8 @@ void ProjectRecoveryThread::stopProjectSaving() {
   }
 }
 
+/// Top level thread wrapper which catches all exceptions to gracefully handle
+/// them
 void ProjectRecoveryThread::projectSavingThreadWrapper() {
   try {
     projectSavingThread();
@@ -203,6 +226,12 @@ void ProjectRecoveryThread::projectSavingThreadWrapper() {
   }
 }
 
+/**
+ * Main thread body which is run to save out projects. A member mutex is
+ * locked and monitored on a timeout to indicate if the thread should
+ * exit early. After the timeout elapses, if the thread has not been
+ * requested to exit, it will save the project out
+ */
 void ProjectRecoveryThread::projectSavingThread() {
   while (!m_stopBackgroundThread) {
     std::unique_lock<std::mutex> lock(m_notifierMutex);
@@ -232,21 +261,35 @@ void ProjectRecoveryThread::projectSavingThread() {
   }
 }
 
+/**
+ * Saves open all open windows using the main GUI thread
+ *
+ * @param projectDestFile :: The full path to write to
+ * @throws If saving fails in the main GUI thread
+ */
 void ProjectRecoveryThread::saveOpenWindows(
     const std::string &projectDestFile) {
-	bool saveCompleted = false;
+  bool saveCompleted = false;
   if (!QMetaObject::invokeMethod(m_windowPtr, "saveProjectRecovery",
-	  Qt::BlockingQueuedConnection, Q_RETURN_ARG(bool, saveCompleted),
+                                 Qt::BlockingQueuedConnection,
+                                 Q_RETURN_ARG(bool, saveCompleted),
                                  Q_ARG(const std::string, projectDestFile))) {
     throw std::runtime_error(
         "Project Recovery: Failed to save project windows - Qt binding failed");
   }
 
   if (!saveCompleted) {
-	  throw std::runtime_error("Project Recovery: Failed to write out project file");
+    throw std::runtime_error(
+        "Project Recovery: Failed to write out project file");
   }
 }
 
+/**
+ * Saves all workspace histories by using an external python script
+ *
+ * @param historyDestFolder:: The folder to write all histories to
+ * @throw If saving fails in the script
+ */
 void ProjectRecoveryThread::saveWsHistories(
     const std::string &historyDestFolder) {
   QString projectSavingCode =
@@ -260,6 +303,8 @@ void ProjectRecoveryThread::saveWsHistories(
 }
 
 void ProjectRecoveryThread::loadOpenWindows(const std::string &projectFolder) {
+  // TODO
+
   const bool isRecovery = true;
   ProjectSerialiser projectWriter(m_windowPtr, isRecovery);
 

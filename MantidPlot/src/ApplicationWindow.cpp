@@ -212,7 +212,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/make_unique.h"
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -16739,6 +16738,13 @@ bool ApplicationWindow::isOfType(const QObject *obj,
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
 }
 
+/**
+ * Triggers saving project recovery on behalf of an external thread
+ * or caller, such as project recovery.
+ *
+ * @param destination:: The full path to write the recovery file to
+ * @return True if saving is successful, false otherwise
+ */
 bool ApplicationWindow::saveProjectRecovery(std::string destination) {
   const bool isRecovery = true;
   ProjectSerialiser projectWriter(this, isRecovery);
