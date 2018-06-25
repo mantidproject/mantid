@@ -82,6 +82,9 @@ public:
                        boost::shared_ptr<IReflSearcher> searcher =
                            boost::shared_ptr<IReflSearcher>());
 
+  ReflRunsTabPresenter(ReflRunsTabPresenter const &) = delete;
+  ReflRunsTabPresenter const &operator=(ReflRunsTabPresenter const &) = delete;
+
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
   void notifyADSChanged(const QSet<QString> &workspaceList, int group) override;
