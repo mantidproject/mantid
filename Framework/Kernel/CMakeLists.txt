@@ -316,7 +316,6 @@ set ( INC_FILES
 	inc/MantidKernel/cow_ptr.h
 	inc/MantidKernel/make_cow.h
 	inc/MantidKernel/make_unique.h
-	inc/MantidKernel/ContainerDType.h
 )
 
 set ( TEST_FILES
