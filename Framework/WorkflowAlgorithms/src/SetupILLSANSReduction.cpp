@@ -484,15 +484,10 @@ void SetupILLSANSReduction::init() {
 
   // Outputs
   const std::string out_grp = "Output";
-  declareProperty("ProcessInfo", "", "Additional process information");
-  declareProperty("OutputDirectory", "",
-                  "Directory to put the output files in");
   declareProperty("OutputMessage", "", Direction::Output);
   declareProperty("ReductionProperties", "__sans_reduction_properties",
                   Direction::Input);
-  setPropertyGroup("ProcessInfo", out_grp);
   setPropertyGroup("OutputMessage", out_grp);
-  setPropertyGroup("OutputDirectory", out_grp);
   setPropertyGroup("ReductionProperties", out_grp);
 }
 
@@ -507,18 +502,6 @@ void SetupILLSANSReduction::exec() {
       boost::make_shared<PropertyManager>();
   PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
                                                       reductionManager);
-
-  // Store additional (and optional) process information
-  const std::string processInfo = getProperty("ProcessInfo");
-  reductionManager->declareProperty(
-      Kernel::make_unique<PropertyWithValue<std::string>>("ProcessInfo",
-                                                          processInfo));
-
-  // Store the output directory
-  const std::string outputDirectory = getProperty("OutputDirectory");
-  reductionManager->declareProperty(
-      Kernel::make_unique<PropertyWithValue<std::string>>("OutputDirectory",
-                                                          outputDirectory));
 
   // Store normalization algorithm
   const std::string normalization = getProperty("Normalisation");
