@@ -70,12 +70,12 @@ Usage
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
        DirectBeamPositionWorkspace='direct_beam_pos',
-       WavelengthRange=[2, 15],
        **settings
    )
    reflectivity = ReflectometryILLSumForeground(
        InputWorkspace=reflected,
-       DirectForegroundWorkspace=directFgd
+       DirectForegroundWorkspace=directFgd,
+       WavelengthRange=[2, 15],
    )
 
    # Reflectivity is a single histogram
@@ -118,7 +118,6 @@ Output:
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
        DirectBeamPositionWorkspace='direct_beam_pos',
-       WavelengthRange=[2, 15],
        **settings
    )
    reflectivity = ReflectometryILLSumForeground(
