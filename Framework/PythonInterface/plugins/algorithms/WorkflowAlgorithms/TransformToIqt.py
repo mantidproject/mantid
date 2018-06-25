@@ -3,8 +3,10 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         ITableWorkspaceProperty, PropertyMode, Progress)
-from mantid.kernel import Direction, logger
+from mantid.kernel import Direction, logger, IntBoundedValidator
 
+DEFAULT_ITERATIONS = 50
+DEFAULT_SEED = 89631139
 
 class TransformToIqt(PythonAlgorithm):
     _sample = None
@@ -16,6 +18,8 @@ class TransformToIqt(PythonAlgorithm):
     _parameter_table = None
     _output_workspace = None
     _dry_run = None
+    _number_of_iterations = None
+    _seed = None
 
     def category(self):
         return "Workflow\\Inelastic;Workflow\\MIDAS"
@@ -41,6 +45,12 @@ class TransformToIqt(PythonAlgorithm):
         self.declareProperty(name='BinReductionFactor', defaultValue=10.0,
                              doc='Decrease total number of spectrum points by this ratio through merging of '
                                  'intensities from neighbouring bins. Default=1')
+
+        self.declareProperty('NumberOfIterations', DEFAULT_ITERATIONS, IntBoundedValidator(lower=1),
+                             doc="Number of randomised simulations for monte-carlo error calculation.")
+
+        self.declareProperty('SeedValue', DEFAULT_SEED, IntBoundedValidator(lower=1),
+                             doc="Seed for pseudo-random number generator in monte-carlo error calculation.")
 
         self.declareProperty(ITableWorkspaceProperty('ParameterWorkspace', '',
                                                      direction=Direction.Output,
@@ -91,6 +101,9 @@ class TransformToIqt(PythonAlgorithm):
         self._parameter_table = self.getPropertyValue('ParameterWorkspace')
         if self._parameter_table == '':
             self._parameter_table = getWSprefix(self._sample) + 'TransformToIqtParameters'
+
+        self._number_of_iterations = self.getProperty("NumberOfIterations").value
+        self._seed = self.getProperty("SeedValue").value
 
         self._output_workspace = self.getPropertyValue('OutputWorkspace')
         if self._output_workspace == '':
@@ -214,7 +227,9 @@ class TransformToIqt(PythonAlgorithm):
             CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')
 
         iqt = CalculateIqt(InputWorkspace=self._sample, ResolutionWorkspace=self._resolution, EnergyMin=self._e_min,
-                           EnergyMax=self._e_max, EnergyWidth=self._e_width, StoreInADS=False, OutputWorkspace="__ciqt")
+                           EnergyMax=self._e_max, EnergyWidth=self._e_width,
+                           NumberOfIterations=self._number_of_iterations, SeedValue=self._seed,
+                           StoreInADS=False, OutputWorkspace="__ciqt")
 
         # Set Y axis unit and label
         iqt.setYUnit('')
