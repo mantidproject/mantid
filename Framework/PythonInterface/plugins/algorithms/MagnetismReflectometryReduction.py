@@ -148,7 +148,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
                 # At this point, the workspace should be considered a distribution of points
                 point_data = ConvertToPointData(InputWorkspace=normalized_data,
-                                                     OutputWorkspace=str(workspace)+'_')
+                                                OutputWorkspace=str(workspace)+'_')
                 # Avoid leaving trash behind
                 AnalysisDataService.remove(str(normalized_data))
 
@@ -159,7 +159,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                 else:
                     q_rebin = self.convert_to_q(point_data)
                 q_rebin = self.cleanup_reflectivity(q_rebin)
-    
+
                 # Avoid leaving trash behind
                 AnalysisDataService.remove(str(point_data))
 
