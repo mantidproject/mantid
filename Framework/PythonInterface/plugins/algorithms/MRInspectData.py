@@ -241,6 +241,10 @@ class DataInfo(object):
         """
             Process the ROI information and determine the peak
             range, the low-resolution range, and the background range.
+
+            Starting in June 2018, with the DAS upgrade, the ROIs are
+            specified with a start/width rather than start/stop.
+
             :param workspace ws: workspace to work with
         """
         roi_peak = [0,0]
@@ -252,8 +256,14 @@ class DataInfo(object):
         if 'ROI1StartX' in ws.getRun():
             roi1_x0 = ws.getRun()['ROI1StartX'].getStatistics().mean
             roi1_y0 = ws.getRun()['ROI1StartY'].getStatistics().mean
-            roi1_x1 = ws.getRun()['ROI1EndX'].getStatistics().mean
-            roi1_y1 = ws.getRun()['ROI1EndY'].getStatistics().mean
+            if 'ROI1SizeX' in ws.getRun():
+                size_x = ws.getRun()['ROI1SizeX'].getStatistics().mean
+                size_y = ws.getRun()['ROI1SizeY'].getStatistics().mean
+                roi1_x1 = roi1_x0 + size_x
+                roi1_y1 = roi1_y0 + size_y
+            else:
+                roi1_x1 = ws.getRun()['ROI1EndX'].getStatistics().mean
+                roi1_y1 = ws.getRun()['ROI1EndY'].getStatistics().mean
             if roi1_x1 > roi1_x0:
                 peak1 = [int(roi1_x0), int(roi1_x1)]
             else:
@@ -266,20 +276,29 @@ class DataInfo(object):
                 roi1_valid = False
 
             # Read ROI 2
-            roi2_valid = True
-            roi2_x0 = ws.getRun()['ROI2StartX'].getStatistics().mean
-            roi2_y0 = ws.getRun()['ROI2StartY'].getStatistics().mean
-            roi2_x1 = ws.getRun()['ROI2EndX'].getStatistics().mean
-            roi2_y1 = ws.getRun()['ROI2EndY'].getStatistics().mean
-            if roi2_x1 > roi2_x0:
-                peak2 = [int(roi2_x0), int(roi2_x1)]
+            if 'ROI2StartX' in ws.getRun():
+                roi2_valid = True
+                roi2_x0 = ws.getRun()['ROI2StartX'].getStatistics().mean
+                roi2_y0 = ws.getRun()['ROI2StartY'].getStatistics().mean
+                if 'ROI2SizeX' in ws.getRun():
+                    size_x = ws.getRun()['ROI2SizeX'].getStatistics().mean
+                    size_y = ws.getRun()['ROI2SizeY'].getStatistics().mean
+                    roi2_x1 = roi2_x0 + size_x
+                    roi2_y1 = roi2_y0 + size_y
+                else:
+                    roi2_x1 = ws.getRun()['ROI2EndX'].getStatistics().mean
+                    roi2_y1 = ws.getRun()['ROI2EndY'].getStatistics().mean
+                if roi2_x1 > roi2_x0:
+                    peak2 = [int(roi2_x0), int(roi2_x1)]
+                else:
+                    peak2 = [int(roi2_x1), int(roi2_x0)]
+                if roi2_y1 > roi2_y0:
+                    low_res2 = [int(roi2_y0), int(roi2_y1)]
+                else:
+                    low_res2 = [int(roi2_y1), int(roi2_y0)]
+                if peak2 == [0,0] and low_res2 == [0,0]:
+                    roi2_valid = False
             else:
-                peak2 = [int(roi2_x1), int(roi2_x0)]
-            if roi2_y1 > roi2_y0:
-                low_res2 = [int(roi2_y0), int(roi2_y1)]
-            else:
-                low_res2 = [int(roi2_y1), int(roi2_y0)]
-            if peak2 == [0,0] and low_res2 == [0,0]:
                 roi2_valid = False
         else:
             roi1_valid = False
@@ -426,7 +445,10 @@ class DataInfo(object):
         bck_range = None
 
         # Process the ROI information
-        self.process_roi(ws)
+        try:
+            self.process_roi(ws)
+        except:
+            logger.notice("Could not process ROI\n%s" % sys.exc_info()[1])
 
         # Keep track of whether we actually used the ROI
         self.use_roi_actual = False
@@ -441,8 +463,10 @@ class DataInfo(object):
             self.use_roi_actual = True
 
         # Determine reflectivity peak position (center)
-        signal_y_crop = signal_y[peak[0]:peak[1]+1]
-        signal_x_crop = signal_x[peak[0]:peak[1]+1]
+        # Crop three sigmas around the peak before fitting
+        _width = int(peak[1]-peak[0])
+        signal_y_crop = signal_y[peak[1]-_width:peak[1]+1+_width]
+        signal_x_crop = signal_x[peak[0]-_width:peak[1]+1+_width]
 
         # Calculate a reasonable peak position
         #peak_mean = np.average(signal_x_crop, weights=signal_y_crop)
@@ -498,8 +522,8 @@ class DataInfo(object):
 
         # Store the information we found
         self.peak_position = peak_position
-        self.peak_range = [int(peak[0]), int(peak[1])]
-        self.low_res_range = [int(low_res[0]), int(low_res[1])]
+        self.peak_range = [int(max(0, peak[0])), int(min(peak[1], self.n_x_pixel))]
+        self.low_res_range = [int(max(0, low_res[0])), int(min(low_res[1], self.n_y_pixel))]
 
         if not self.use_roi_bck or bck_range is None:
             if self.use_tight_bck:
