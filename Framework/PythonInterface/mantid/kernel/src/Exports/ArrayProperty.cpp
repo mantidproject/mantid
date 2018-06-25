@@ -1,5 +1,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/NullValidator.h"
+#include "MantidKernel/ContainerDtype.h"
 
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
@@ -24,31 +25,14 @@ using namespace boost::python;
 
 namespace {
 /// return_value_policy for cloned numpy array
-using return_cloned_numpy =
+  using return_cloned_numpy =
     return_value_policy<Policies::VectorRefToNumpy<Converters::Clone>>;
 
-// Default return if no matches occur
-template <typename type> std::string dtype(ArrayProperty<type> &self) {
-  return "obj";
+// Call the dtype helper function
+template <typename type>
+std::string dtype(ArrayProperty<type> &self) {
+  return dtypeHelper::dtype(self);
 }
-
-// String return
-template <> std::string dtype(ArrayProperty<std::string> &self) { return "s"; }
-
-// Integer (32-bit) return
-template <> std::string dtype(ArrayProperty<int32_t> &self) { return "i"; }
-
-// Integer (64-bit) return
-template <> std::string dtype(ArrayProperty<int64_t> &self) { return "i"; }
-
-// Long return
-template <> std::string dtype(ArrayProperty<long> &self) { return "i"; }
-
-// Boolean return
-template <> std::string dtype(ArrayProperty<bool> &self) { return "b"; }
-
-// Double return
-template <> std::string dtype(ArrayProperty<double> &self) { return "d"; }
 
 #define EXPORT_ARRAY_PROP(type, prefix)                                        \
   class_<ArrayProperty<type>, bases<PropertyWithValue<std::vector<type>>>,     \
@@ -123,7 +107,7 @@ ArrayProperty<T> *createArrayPropertyFromNDArray(const std::string &name,
 
 void export_ArrayProperty() {
   // Match the python names to their C types
-  EXPORT_ARRAY_PROP(double, Float);
+  EXPORT_ARRAY_PROP(double, Float); 
   EXPORT_ARRAY_PROP(long, Int);
   EXPORT_ARRAY_PROP(std::string, String);
 

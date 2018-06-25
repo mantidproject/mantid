@@ -2,8 +2,8 @@
 #define MANTID_KERNEL_CONTAINERDTYPE_H_
 
 #include <string>
-#include <vector>
 #include <type_traits>
+#include <vector>
 
 #include <boost/python/class.hpp>
 #include <boost/python/implicit.hpp>
@@ -15,8 +15,8 @@
 /**
     ContainerDtype Header File
 
-    A helper free function to allow identification of data type being used by providing a
-    numpy friendly string.
+    A helper free function to allow identification of data type being used by
+   providing a numpy friendly string.
 
     @author Lamar Moore STFC, Bhuvan Bezawada STFC
     @date 21/06/2018
@@ -42,27 +42,31 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
 namespace dtypeHelper {
 
-template <template<class> typename Container, typename HeldType>
+// Free function to determine data type being stored in container
+template <template <class> typename Container, typename HeldType>
 std::string dtype(Container<HeldType> &self) {
   if (std::is_same<HeldType, bool>::value) {
     return "b";
-  }
-  else if (std::is_integral<HeldType>::value) {
+  } else if (std::is_same<HeldType, std::int32_t>::value) {
+    return "int32";
+  } else if (std::is_same<HeldType, std::int64_t>::value) {
+    return "int64";
+  } else if (std::is_integral<HeldType>::value) {
     return "i";
-  }
-  else if (std::is_floating_point<HeldType>::value) {
+  } else if (std::is_same<HeldType, std::float_t>::value) {
+    return "f";
+  } else if (std::is_same<HeldType, std::double_t>::value) {
     return "d";
-  }
-  else if (std::is_same<HeldType, std::string>::value) {
+  } else if (std::is_same<HeldType, std::string>::value) {
     return "s";
-  }
-  else {
+  } else {
     return "obj";
   }
 }
 
-}
+} // namespace dtypeHelper
 
 #endif /*MANTID_KERNEL_CONTAINERDTYPE_H_*/

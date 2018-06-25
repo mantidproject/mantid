@@ -2,6 +2,7 @@
 #include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidKernel/ContainerDtype.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/implicit.hpp>
@@ -35,27 +36,11 @@ void addPyTimeValue(TimeSeriesProperty<TYPE> &self,
   self.addValue(*dateandtime, value);
 }
 
-// Default return if no matches occur
-template <typename TYPE> std::string dtype(TimeSeriesProperty<TYPE> &self) {
-  return "obj";
+// Call the dtype helper function
+template <typename TYPE>
+std::string dtype(TimeSeriesProperty<TYPE> &self) {
+  return dtypeHelper::dtype(self);
 }
-
-// String return
-template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
-  return "s";
-}
-
-// Integer (32-bit) return
-template <> std::string dtype(TimeSeriesProperty<int32_t> &self) { return "i"; }
-
-// Integer (64-bit) return
-template <> std::string dtype(TimeSeriesProperty<int64_t> &self) { return "i"; }
-
-// Boolean return
-template <> std::string dtype(TimeSeriesProperty<bool> &self) { return "b"; }
-
-// Double return
-template <> std::string dtype(TimeSeriesProperty<double> &self) { return "d"; }
 
 // Macro to reduce copy-and-paste
 #define EXPORT_TIMESERIES_PROP(TYPE, Prefix)                                   \
@@ -108,6 +93,7 @@ template <> std::string dtype(TimeSeriesProperty<double> &self) { return "d"; }
       .def("dtype", &dtype<TYPE>, arg("self"), "returns :`std::string`");
 
 } // namespace
+
 
 void export_TimeSeriesProperty_Double() {
   EXPORT_TIMESERIES_PROP(double, Float);

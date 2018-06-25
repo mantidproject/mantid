@@ -25,6 +25,7 @@
 */
 
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/ContainerDtype.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/python/class.hpp>
@@ -33,8 +34,15 @@
 #include <boost/python/return_by_value.hpp>
 #endif
 
+// Call the dtype helper function
+template <typename HeldType>
+std::string dtype(Mantid::Kernel::PropertyWithValue<HeldType> &self) {
+  return dtypeHelper::dtype(self);
+}
+
 namespace Mantid {
 namespace PythonInterface {
+
 /**
  * A helper struct to export PropertyWithValue<> types to Python.
  */
@@ -49,9 +57,11 @@ struct PropertyWithValueExporter {
         pythonClassName, no_init)
         .add_property("value",
                       make_function(&PropertyWithValue<HeldType>::operator(),
-                                    return_value_policy<ValueReturnPolicy>()));
+                                    return_value_policy<ValueReturnPolicy>()))
+        .def("dtype", &dtype<HeldType>, arg("self"), "returns :`std::string`");
   }
 };
+
 }
 }
 

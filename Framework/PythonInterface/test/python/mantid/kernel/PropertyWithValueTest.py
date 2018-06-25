@@ -126,6 +126,9 @@ class PropertyWithValueTest(unittest.TestCase):
         result = det_list_prop.valueAsPrettyStr(40,False)
         self.assertEquals(result.startswith("1,2,3,"), True)
         self.assertEquals(result.endswith("98,99"), True)
+        
+        # Check the dtype return value
+        self.assertEquals(det_list_prop.dtype(), "int32")
 
     def _do_vector_double_numpy_test(self, int_type=False):
         create_ws = AlgorithmManager.createUnmanaged('CreateWorkspace')
