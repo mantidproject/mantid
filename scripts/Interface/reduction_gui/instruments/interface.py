@@ -184,7 +184,7 @@ class InstrumentInterface(object):
             self._warning("Runtime error","You cannot send live data to cluster")
 
     #pylint: disable=bare-except
-    def reduce(self):
+    def reduce(self, progress_action):
         """
             Pass the interface data to the scripter and reduce
         """
@@ -206,10 +206,10 @@ class InstrumentInterface(object):
             self.set_running(True)
             if self.live_button_is_checked():
                 # Intercept and redirect if live data requested
-                self.scripter.apply_live()
+                self.scripter.apply_live(progress_action)
             else:
                 # Otherwise take the 'normal' path
-                self.scripter.apply()
+                self.scripter.apply(progress_action)
             self.set_running(False)
         except RuntimeError:
             if self._settings.debug:

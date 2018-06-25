@@ -21,6 +21,8 @@ try:
 except(ImportError, ImportWarning):
     HAS_MANTIDPLOT = False
 
+import reduction_gui.reduction.script_executor as script_executor
+
 import xml.dom.minidom
 import sys
 import time
@@ -514,14 +516,14 @@ class BaseReductionScripter(object):
         """
         return [self.to_script()]
 
-    def apply(self):
+    def apply(self, progress_action):
         """
             Apply the reduction process to a Mantid SANSReducer
         """
         if HAS_MANTID:
             script = self.to_script(None)
             try:
-                self.execute_script(script)
+                self.execute_script(script, progress_action)
                 # Update scripter
                 for item in self._observers:
                     if item.state() is not None:
@@ -539,12 +541,12 @@ class BaseReductionScripter(object):
         else:
             raise RuntimeError("Reduction could not be executed: Mantid could not be imported")
 
-    def apply_live(self):
+    def apply_live(self, progress_action):
         """
             Construct and execute a call to StartLiveData for the current instrument
         """
         script = self.to_live_script()
-        self.execute_script(script)
+        self.execute_script(script, progress_action)
 
     def cluster_submit(self, output_dir, user, pwd, resource=None,
                        nodes=4, cores_per_node=4, job_name=None):
@@ -601,7 +603,7 @@ class BaseReductionScripter(object):
 # Disable warning about the use of exec, which we knowingly use to
 # execute generated code.
 # pylint: disable=W0122
-    def execute_script(self, script):
+    def execute_script(self, script, progress_action):
         """
             Executes the given script code.
 
@@ -611,10 +613,7 @@ class BaseReductionScripter(object):
 
             @param script :: A chunk of code to execute
         """
-        if HAS_MANTIDPLOT:
-            mantidplot.runPythonScript(script, True)
-        else:
-            exec(script)
+        script_executor.execute_script(script, progress_action)
 
     def reset(self):
         """
