@@ -1,8 +1,8 @@
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import Algorithm, PythonAlgorithm, MultipleFileProperty, Progress, MatrixWorkspaceProperty
-from mantid.kernel import *
+from mantid.api import Algorithm, PythonAlgorithm, MultipleFileProperty, FileAction, Progress, MatrixWorkspaceProperty
+from mantid.kernel import StringMandatoryValidator, Direction
 from mantid.simpleapi import *
 import os
 
@@ -23,7 +23,7 @@ class ILLSANSReduction(PythonAlgorithm):
         return 'ILLSANSReduction'
 
     def summary(self):
-        return "Performs ILL SANS reduction workflow"
+        return "Performs ILL SANS reduction"
 
     def validateInputs(self):
         issues = dict()
@@ -33,7 +33,15 @@ class ILLSANSReduction(PythonAlgorithm):
             issues['ReductionProperties'] = 'Property manager does not exist in ADS'
         elif not property_manager.existsProperty('LoadAlgorithm'):
             issues['ReductionProperties'] = 'LoadAlgorithm not specified in the property manager'
+        if property_manager.existsProperty('TransmissionAlgorithm'):
+            trans_alg = property_manager.getPropertyValue("TransmissionAlgorithm")
+            alg = Algorithm.fromString(trans_alg)
+            if alg.name() == "SANSDirectBeamTransmission" and not self.getPropertyValue("TransmissionFilename"):
+                issues['TransmissionFilename'] = 'Sample transmission file is required for direct beam method.'
         return issues
+
+    def _get_numor(self, path):
+        return os.path.basename(path).split('.')[0]
 
     def _setup(self):
         self._filename = self.getPropertyValue("Filename")
@@ -43,14 +51,14 @@ class ILLSANSReduction(PythonAlgorithm):
         self._property_list = [p.name for p in self._property_manager.getProperties()]
 
     def _load(self, filename, output_ws):
-        loader_name = self._property_manager.getPropertyValue('LoadAlgorithm')
-        alg = Algorithm.fromString(loader_name)
+        loader = self._property_manager.getPropertyValue('LoadAlgorithm')
+        alg = Algorithm.fromString(loader)
         alg.setProperty('Filename', filename)
         alg.setProperty('OutputWorkspace', output_ws)
         if alg.existsProperty('ReductionProperties'):
             alg.setProperty('ReductionProperties', self._property_manager_name)
         alg.execute()
-        msg = 'Loaded %s\n' % filename
+        msg = 'Loaded run %s\n' % filename
         if alg.existsProperty('OutputMessage'):
             msg += alg.getPropertyValue('OutputMessage')
         return msg
@@ -58,6 +66,11 @@ class ILLSANSReduction(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(MultipleFileProperty('Filename', extensions=['nxs']),
                              doc='Run number(s) of sample run(s).')
+        self.declareProperty(MultipleFileProperty('TransmissionFilename', extensions=['nxs'], action=FileAction.OptionalLoad),
+                             doc='Run number(s) of sample transmission run; use if TransmissionMethod is DirectBeam')
+        self.declareProperty('TransmissionValue', 1., doc='Sample transmission value; use if TransmissionMethod is Value')
+        self.declareProperty('TransmissionError', 0., doc='Sample transmission value error; use if TransmissionMethod is Value')
+        self.declareProperty('SampleThickness', 0., doc='Sample thickness [cm]; leave default, to use the value from configuration')
         self.declareProperty('ReductionProperties', '__sans_reduction_properties', validator=StringMandatoryValidator(),
                              doc='Property manager name for the reduction configuration')
         self.declareProperty('OutputMessage', '', direction=Direction.Output, doc='Output message report')
@@ -100,8 +113,8 @@ class ILLSANSReduction(PythonAlgorithm):
         if "TransmissionBeamCenterAlgorithm" in self._property_list:
             # Execute the beam finding algorithm and set the beam
             # center for the transmission calculation
-            p=self._property_manager.getProperty("TransmissionBeamCenterAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
+            p=self._property_manager.getPropertyValue("TransmissionBeamCenterAlgorithm")
+            alg=Algorithm.fromString(p)
             if alg.existsProperty("ReductionProperties"):
                 alg.setProperty("ReductionProperties", self._property_manager_name)
             alg.execute()
@@ -109,10 +122,17 @@ class ILLSANSReduction(PythonAlgorithm):
             beam_center_y = alg.getProperty("FoundBeamCenterY").value
 
         if "TransmissionAlgorithm" in self._property_list:
-            p=self._property_manager.getProperty("TransmissionAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
+            # Calculate and apply sample transmission correction
+            trans_alg = self._property_manager.getPropertyValue("TransmissionAlgorithm")
+            alg = Algorithm.fromString(trans_alg)
             alg.setProperty("InputWorkspace", sample_ws)
             alg.setProperty("OutputWorkspace", sample_ws)
+
+            if alg.name() == "ApplyTransmissionCorrection":
+                alg.setProperty("TransmissionValue", self.getProperty("TransmissionValue").value)
+                alg.setProperty("TransmissionError", self.getProperty("TransmissionError").value)
+            elif alg.name() == "SANSDirectBeamTransmission":
+                alg.setPropertyValue("SampleDataFilename", self.getPropertyValue("TransmissionFilename"))
 
             if alg.existsProperty("BeamCenterX") \
                     and alg.existsProperty("BeamCenterY") \
@@ -144,7 +164,7 @@ class ILLSANSReduction(PythonAlgorithm):
         # PROCESS BACKGROUND DATA
         if "BackgroundFiles" in self._property_list:
             background = self._property_manager.getPropertyValue("BackgroundFiles")
-            background_ws = "__bckg_%s" % sample_ws
+            background_ws = "__bckg_%s" % self._output_ws
 
             # Perform steps 2-7 for background file
             # Step 2. Load the background file
@@ -167,7 +187,7 @@ class ILLSANSReduction(PythonAlgorithm):
             trans_beam_center_y = None
             if "BckTransmissionBeamCenterAlgorithm" in self._property_list:
                 # Execute the beam finding algorithm and set the beam
-                # center for the transmission calculation
+                # center for the background transmission calculation
                 p=self._property_manager.getProperty("BckTransmissionBeamCenterAlgorithm")
                 alg=Algorithm.fromString(p.valueAsStr)
                 if alg.existsProperty("ReductionProperties"):
@@ -177,6 +197,7 @@ class ILLSANSReduction(PythonAlgorithm):
                 trans_beam_center_y = alg.getProperty("FoundBeamCenterY").value
 
             if "BckTransmissionAlgorithm" in self._property_list:
+                # Calculate and apply background transmission correction
                 p=self._property_manager.getProperty("BckTransmissionAlgorithm")
                 alg=Algorithm.fromString(p.valueAsStr)
                 alg.setProperty("InputWorkspace", background_ws)
@@ -211,7 +232,7 @@ class ILLSANSReduction(PythonAlgorithm):
                 else:
                     self._message += "Transmission correction applied\n"
 
-            # Step 8: Subtract background
+            # Step 8: Subtract the background from the sample
             RebinToWorkspace(WorkspaceToRebin=background_ws,
                              WorkspaceToMatch=sample_ws,
                              OutputWorkspace=background_ws)
@@ -224,11 +245,11 @@ class ILLSANSReduction(PythonAlgorithm):
         # Step 9: Apply sensitivity correction
         self._message += self._apply_sensitivity(sample_ws)
 
-        # Step 10: Absolute scale correction (flux normalisation method)
-        self._message += self._simple_execution("AbsoluteScaleAlgorithm", sample_ws)
+        # Step 10: Geometry correction (normalise by thickness)
+        self._message += self._normalise_by_thickness(sample_ws)
 
-        # Step 11: Geometry correction (normalise by thickness)
-        self._message += self._simple_execution("GeometryAlgorithm", sample_ws)
+        # Step 11: Absolute scale correction (flux normalisation method)
+        self._message += self._simple_execution("AbsoluteScaleAlgorithm", sample_ws)
 
         # Compute I(q)
         if "IQAlgorithm" in self._property_list:
@@ -258,6 +279,24 @@ class ILLSANSReduction(PythonAlgorithm):
         self.setProperty("OutputMessage", self._message)
         RenameWorkspace(InputWorkspace=sample_ws, OutputWorkspace=self._output_ws)
         self.setProperty("OutputWorkspace", self._output_ws)
+
+    def _normalise_by_thickness(self, workspace):
+
+        output_msg = ""
+        if "GeometryAlgorithm" in self._property_list:
+            norm_alg = self._property_manager.getPropertyValue("GeometryAlgorithm")
+            alg = Algorithm.fromString(norm_alg)
+            alg.setProperty("InputWorkspace", workspace)
+            alg.setProperty("OutputWorkspace", workspace)
+            thickness = self.getProperty("SampleThickness").value
+            if thickness != 0.:
+                # overwrite the setting from the configuration
+                alg.setProperty("SampleThickness", thickness)
+            alg.execute()
+            output_msg = "Normalising by sample thickness\n"
+            if alg.existsProperty("OutputMessage"):
+                output_msg += alg.getPropertyValue("OutputMessage") + "\n"
+        return output_msg
 
     def _apply_sensitivity(self, workspace):
 

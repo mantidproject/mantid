@@ -202,30 +202,11 @@ void SetupILLSANSReduction::init() {
                   boost::make_shared<StringListValidator>(transOptions),
                   "Transmission determination method");
 
-  // - Transmission value entered by hand
-  declareProperty("TransmissionValue", EMPTY_DBL(), positiveDouble,
-                  "Transmission value.");
-  setPropertySettings("TransmissionValue",
-                      make_unique<VisibleWhenProperty>("TransmissionMethod",
-                                                       IS_EQUAL_TO, "Value"));
-  declareProperty("TransmissionError", EMPTY_DBL(), positiveDouble,
-                  "Transmission error.");
-  setPropertySettings("TransmissionError",
-                      make_unique<VisibleWhenProperty>("TransmissionMethod",
-                                                       IS_EQUAL_TO, "Value"));
-
   // - Direct beam method transmission calculation
   declareProperty(
       "TransmissionBeamRadius", 3.0,
       "Radius of the beam area used to compute the transmission [pixels]");
   setPropertySettings("TransmissionBeamRadius",
-                      make_unique<VisibleWhenProperty>(
-                          "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty(
-      make_unique<API::FileProperty>("TransmissionSampleDataFile", "",
-                                     API::FileProperty::OptionalLoad, ".xml"),
-      "Sample data file for transmission calculation");
-  setPropertySettings("TransmissionSampleDataFile",
                       make_unique<VisibleWhenProperty>(
                           "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
   declareProperty(
@@ -287,10 +268,7 @@ void SetupILLSANSReduction::init() {
 
   // -- Define group --
   setPropertyGroup("TransmissionMethod", trans_grp);
-  setPropertyGroup("TransmissionValue", trans_grp);
-  setPropertyGroup("TransmissionError", trans_grp);
   setPropertyGroup("TransmissionBeamRadius", trans_grp);
-  setPropertyGroup("TransmissionSampleDataFile", trans_grp);
   setPropertyGroup("TransmissionEmptyDataFile", trans_grp);
   setPropertyGroup("TransmissionBeamCenterMethod", trans_grp);
   setPropertyGroup("TransmissionBeamCenterX", trans_grp);
@@ -465,11 +443,13 @@ void SetupILLSANSReduction::init() {
                   "Number of wedges to compute the I(Q) for");
   auto wedgeSize = boost::make_shared<BoundedValidator<double>>();
   wedgeSize->setLower(0.);
-  wedgeSize->setUpper(360.);
+  wedgeSize->setUpper(180.);
   declareProperty("WedgeAngle", 0., wedgeSize,
                   "Angular opening of the wedges [degrees]");
   declareProperty("WedgeOffset", 0.,
-                  "Angular offset of the first wedge [degrees]");
+                  "Angular offset of the first wedge; that is, "
+                  "the angle between y axis and the first "
+                  "wedge axis [degrees]");
 
   // -- Define group --
   setPropertyGroup("DoAzimuthalAverage", iq1d_grp);
@@ -600,15 +580,14 @@ void SetupILLSANSReduction::exec() {
   setupBackground(reductionManager);
 
   // Geometry correction
+  IAlgorithm_sptr thickAlg = createChildAlgorithm("NormaliseByThickness");
   const double thickness = getProperty("SampleThickness");
   if (!isEmpty(thickness)) {
-    IAlgorithm_sptr thickAlg = createChildAlgorithm("NormaliseByThickness");
     thickAlg->setProperty("SampleThickness", thickness);
-
-    auto geomalgProp = make_unique<AlgorithmProperty>("GeometryAlgorithm");
-    geomalgProp->setValue(thickAlg->toString());
-    reductionManager->declareProperty(std::move(geomalgProp));
   }
+  auto geomalgProp = make_unique<AlgorithmProperty>("GeometryAlgorithm");
+  geomalgProp->setValue(thickAlg->toString());
+  reductionManager->declareProperty(std::move(geomalgProp));
 
   // Mask
   IAlgorithm_sptr maskAlg = createChildAlgorithm("SANSMask");
@@ -778,29 +757,15 @@ void SetupILLSANSReduction::setupTransmission(
 
   // Transmission is entered by hand
   if (boost::iequals(transMethod, "Value")) {
-    const double transValue = getProperty("TransmissionValue");
-    const double transError = getProperty("TransmissionError");
-    if (!isEmpty(transValue) && !isEmpty(transError)) {
-      IAlgorithm_sptr transAlg =
-          createChildAlgorithm("ApplyTransmissionCorrection");
-      transAlg->setProperty("TransmissionValue", transValue);
-      transAlg->setProperty("TransmissionError", transError);
-      transAlg->setProperty("ThetaDependent", thetaDependentTrans);
-
-      auto transalgProp =
-          make_unique<AlgorithmProperty>("TransmissionAlgorithm");
-      transalgProp->setValue(transAlg->toString());
-      reductionManager->declareProperty(std::move(transalgProp));
-    } else {
-      g_log.information(
-          "SetupILLSANSReduction [TransmissionAlgorithm]:"
-          "expected transmission/error values and got empty values");
-    }
+    IAlgorithm_sptr transAlg =
+        createChildAlgorithm("ApplyTransmissionCorrection");
+    transAlg->setProperty("ThetaDependent", thetaDependentTrans);
+    auto transalgProp = make_unique<AlgorithmProperty>("TransmissionAlgorithm");
+    transalgProp->setValue(transAlg->toString());
+    reductionManager->declareProperty(std::move(transalgProp));
   }
   // Direct beam method for transmission determination
   else if (boost::iequals(transMethod, "DirectBeam")) {
-    const std::string sampleFilename =
-        getPropertyValue("TransmissionSampleDataFile");
     const std::string emptyFilename =
         getPropertyValue("TransmissionEmptyDataFile");
     const double beamRadius = getProperty("TransmissionBeamRadius");
@@ -811,7 +776,6 @@ void SetupILLSANSReduction::setupTransmission(
 
     IAlgorithm_sptr transAlg =
         createChildAlgorithm("SANSDirectBeamTransmission");
-    transAlg->setProperty("SampleDataFilename", sampleFilename);
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
     transAlg->setProperty("BeamRadius", beamRadius);
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);
@@ -831,7 +795,6 @@ void SetupILLSANSReduction::setupTransmission(
         ctrAlg->setProperty("UseDirectBeamMethod", true);
         ctrAlg->setProperty("PersistentCorrection", false);
         ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-
         auto tbcalgProp =
             make_unique<AlgorithmProperty>("TransmissionBeamCenterAlgorithm");
         tbcalgProp->setValue(ctrAlg->toString());

@@ -663,7 +663,7 @@ std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
   std::size_t nHist = m_localWorkspace->getNumberHistograms();
   const auto &spectrumInfo = m_localWorkspace->spectrumInfo();
   for (std::size_t i = 0; i < nHist; ++i) {
-    if (!spectrumInfo.isMonitor(i)) {
+    if (!spectrumInfo.isMonitor(i) && !spectrumInfo.isMasked(i)) {
       const auto &lambdaBinning = m_localWorkspace->x(i);
       Kernel::V3D detPos = spectrumInfo.position(i);
       double r, theta, phi;
