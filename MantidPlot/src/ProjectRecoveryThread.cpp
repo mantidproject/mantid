@@ -124,7 +124,7 @@ void ProjectRecoveryThread::deleteExistingCheckpoints(
   static auto workingFolder = getRecoveryFolder();
   Poco::Path recoveryPath;
   if (!recoveryPath.tryParse(workingFolder)) {
-    // Folder may not exist
+    // Folder may not exist yet
     g_log.debug("Project Saving: Failed to get working folder whilst deleting "
                 "checkpoints");
     return;
@@ -134,6 +134,7 @@ void ProjectRecoveryThread::deleteExistingCheckpoints(
 
   Poco::DirectoryIterator dirIterator(recoveryPath);
   Poco::DirectoryIterator end;
+  // Find all the folders which exist in this folder
   while (dirIterator != end) {
     std::string iterPath = workingFolder + dirIterator.name() + '/';
     Poco::Path foundPath(iterPath);
@@ -149,6 +150,9 @@ void ProjectRecoveryThread::deleteExistingCheckpoints(
     // Nothing to do
     return;
   }
+
+  // Ensure the oldest is first in the vector
+  std::sort(folderPaths.begin(), folderPaths.end(), [](Poco::Path &a, Poco::Path &b){ return a.toString() < b.toString(); });
 
   size_t checkpointsToRemove = numberOfDirsPresent - checkpointsToKeep;
   bool recurse = true;
