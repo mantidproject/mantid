@@ -8,7 +8,9 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/System.h"
 
+#ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
+#endif
 #include <iosfwd>
 #include <map>
 #include <set>
