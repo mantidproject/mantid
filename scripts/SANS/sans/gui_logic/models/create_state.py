@@ -32,7 +32,7 @@ def create_states(state_model, table_model, instrument, facility, row_index=None
         if not __is_empty_row(row, table_model):
             row_user_file = table_model.get_row_user_file(row)
             if row_user_file:
-                row_state_model = create_gui_state_from_userfile(row_user_file)
+                row_state_model = create_gui_state_from_userfile(row_user_file, state_model)
                 row_gui_state_director = GuiStateDirector(table_model, row_state_model, facility)
                 state = __create_row_state(row_gui_state_director, row, instrument, file_lookup=file_lookup)
                 states.update({row: state})
@@ -56,7 +56,7 @@ def __is_empty_row(row, table):
     return True
 
 
-def create_gui_state_from_userfile(row_user_file):
+def create_gui_state_from_userfile(row_user_file, state_model):
     user_file_path = FileFinder.getFullPath(row_user_file)
     if not os.path.exists(user_file_path):
         raise RuntimeError("The user path {} does not exist. Make sure a valid user file path"
@@ -64,5 +64,6 @@ def create_gui_state_from_userfile(row_user_file):
 
     user_file_reader = UserFileReader(user_file_path)
     user_file_items = user_file_reader.read_user_file()
-
-    return StateGuiModel(user_file_items)
+    state_gui_model = StateGuiModel(user_file_items)
+    state_gui_model.save_types = state_model.save_types
+    return state_gui_model
