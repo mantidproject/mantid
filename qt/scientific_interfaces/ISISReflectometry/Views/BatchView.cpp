@@ -1,4 +1,5 @@
 #include "BatchView.h"
+#include "../IndexOf.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
@@ -174,11 +175,9 @@ BatchView *BatchViewFactory::operator()() const {
 }
 
 int BatchViewFactory::indexOfElseFirst(std::string const &instrument) const {
-  auto it = std::find(m_instruments.cbegin(), m_instruments.cend(), instrument);
-  if (it != m_instruments.cend())
-    return static_cast<int>(std::distance(m_instruments.cbegin(), it));
-  else
-    return 0;
+  return indexOf(m_instruments, [&instrument](std::string const &inst) {
+    return instrument == inst;
+  }).get_value_or(0);
 }
 
 int BatchViewFactory::defaultInstrumentFromConfig() const {

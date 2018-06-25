@@ -19,22 +19,30 @@ namespace CustomInterfaces {
 * @param settingsPresenter :: [input] A pointer to the 'Settings' tab presenter
 * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
 */
-ReflMainWindowPresenter::ReflMainWindowPresenter(IReflMainWindowView *view)
-    : m_view(view) {
+ReflMainWindowPresenter::ReflMainWindowPresenter(
+    IReflMainWindowView *view, ReflBatchPresenterFactory batchPresenterFactory)
+    : m_view(view), m_batchPresenterFactory(std::move(batchPresenterFactory)) {
+  view->subscribe(this);
+  for (auto *batchView : m_view->batches())
+    m_batchPresenters.emplace_back(m_batchPresenterFactory.make(batchView));
+}
+
+void ReflMainWindowPresenter::notifyNewBatchRequested() {
+  auto *newBatchView = m_view->newBatch();
+  m_batchPresenters.emplace_back(m_batchPresenterFactory.make(newBatchView));
+}
+
+void ReflMainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
+  if (m_batchPresenters[batchIndex]->requestClose()) {
+    m_batchPresenters.erase(m_batchPresenters.begin() + batchIndex);
+    m_view->removeBatch(batchIndex);
+  }
 }
 
 /**
 Used by the view to tell the presenter something has changed
 */
-void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
-  switch (flag) {
-  case Flag::HelpPressed:
-    showHelp();
-    break;
-  }
-  // Not having a 'default' case is deliberate. gcc issues a warning if there's
-  // a flag we aren't handling.
-}
+void ReflMainWindowPresenter::notifyHelpPressed() { showHelp(); }
 
 bool ReflMainWindowPresenter::isProcessing() const {
   // TODO Implement this once you have ownership of child presenters.
@@ -53,9 +61,7 @@ Tells the view to show the user the dialog for an algorithm
 */
 std::string
 ReflMainWindowPresenter::runPythonAlgorithm(const std::string &pythonCode) {
-
   return m_view->runPythonAlgorithm(pythonCode);
 }
-
 }
 }

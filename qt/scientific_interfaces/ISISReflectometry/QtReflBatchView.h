@@ -5,16 +5,15 @@
 #include "IReflBatchPresenter.h"
 #include "ui_ReflBatchWidget.h"
 #include <memory>
+#include "QtReflSaveTabView.h"
+#include "QtReflEventTabView.h"
+#include "QtReflSettingsTabView.h"
+#include "QtReflRunsTabView.h"
 
 #include <QCloseEvent>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
-class IReflEventTabPresenter;
-class IReflRunsTabPresenter;
-class IReflSettingsTabPresenter;
-class IReflSaveTabPresenter;
 
 /**
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -41,29 +40,27 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class QtReflBatchView : public QWidget, public IReflBatchView {
   Q_OBJECT
 public:
-  /// Constructor
   explicit QtReflBatchView(QWidget *parent = nullptr);
+  void subscribe(IReflBatchPresenter *notifyee);
 
-//  QtReflRunsTabView& runsTab() const;
-//  QtReflEventTabView& eventTab() const;
-//  QtReflSaveTabView& saveTab() const;
-//  QtReflSettingsTabView& settingsTab() const;
+  IReflRunsTabView *runs() const override;
+  IReflEventTabView *eventHandling() const override;
+  IReflSettingsTabView *settings() const override;
+  IReflSaveTabView *save() const override;
+
 private:
-  /// Initializes the interface
   void initLayout();
-  /// Creates the 'Runs' tab
-  std::unique_ptr<IReflRunsTabPresenter> createRunsTab();
-  /// Creates the 'Event Handling' tab
-  IReflEventTabPresenter *createEventTab();
-  /// Creates the 'Settings' tab
-  IReflSettingsTabPresenter *createSettingsTab();
-  /// Creates the 'Save ASCII' tab
-  std::unique_ptr<IReflSaveTabPresenter> createSaveTab();
+  std::unique_ptr<QtReflRunsTabView> createRunsTab();
+  std::unique_ptr<QtReflEventTabView> createEventTab();
+  std::unique_ptr<QtReflSettingsTabView> createSettingsTab();
+  std::unique_ptr<QtReflSaveTabView> createSaveTab();
 
-  /// Interface definition with widgets for the main interface window
   Ui::ReflBatchWidget m_ui;
-  /// The presenter handling this view
-  std::unique_ptr<IReflBatchPresenter> m_presenter;
+  IReflBatchPresenter *m_notifyee;
+  std::unique_ptr<QtReflRunsTabView> m_runs;
+  std::unique_ptr<QtReflEventTabView> m_eventHandling;
+  std::unique_ptr<QtReflSettingsTabView> m_settings;
+  std::unique_ptr<QtReflSaveTabView> m_save;
 };
 }
 }

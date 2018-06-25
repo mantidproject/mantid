@@ -15,6 +15,7 @@ boost::optional<int> indexOf(Container const &container, Predicate pred) {
   else
     return boost::none;
 }
+
 }
 }
 #endif // MANTID_ISISREFLECTOMETRY_INDEXOF_H

@@ -43,7 +43,7 @@ public:
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL WorkspaceNamesFactory {
 public:
-  WorkspaceNamesFactory(Slicing const &slicing) : m_slicing(slicing) {}
+  WorkspaceNamesFactory(Slicing slicing) : m_slicing(slicing) {}
 
   template <typename WorkspaceNames>
   WorkspaceNames
@@ -61,7 +61,7 @@ public:
   }
 
 private:
-  Slicing const &m_slicing;
+  Slicing m_slicing;
 };
 }
 }

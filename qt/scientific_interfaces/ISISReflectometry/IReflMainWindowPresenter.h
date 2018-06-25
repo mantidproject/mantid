@@ -3,7 +3,7 @@
 
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
-
+#include "IReflMainWindowView.h"
 #include <string>
 
 namespace MantidQt {
@@ -36,17 +36,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflMainWindowPresenter {
+class IReflMainWindowPresenter : public ReflMainWindowSubscriber {
 public:
-  /// Destructor
-  virtual ~IReflMainWindowPresenter(){};
-
-  enum class Flag { HelpPressed };
-
-  virtual void notify(Flag flag) = 0;
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
 //  virtual void setInstrumentName(const std::string &instName) const = 0;
   virtual bool isProcessing() const = 0;
+  virtual ~IReflMainWindowPresenter() = default;
 };
 }
 }

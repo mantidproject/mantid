@@ -3,6 +3,7 @@
 
 #include "DllConfig.h"
 #include "IReflSettingsTabPresenter.h"
+#include "IReflSettingsTabView.h"
 #include "IReflBatchPresenter.h"
 #include <vector>
 
@@ -42,18 +43,13 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflSettingsTabPresenter
     : public IReflSettingsTabPresenter {
 public:
   /// Constructor
-  ReflSettingsTabPresenter(std::vector<IReflSettingsPresenter *> presenters);
-  /// Destructor
-  ~ReflSettingsTabPresenter() override;
+  ReflSettingsTabPresenter(IReflSettingsTabView* view);
   /// Set the instrument name
   void setInstrumentName(const std::string &instName) override;
   void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
   void settingsChanged(int group) override;
   void onReductionPaused(int group) override;
   void onReductionResumed(int group) override;
-  void
-  passSelfToChildren(std::vector<IReflSettingsPresenter *> const &children);
-
   /// Returns values passed for 'Transmission run(s)'
   MantidWidgets::DataProcessor::OptionsQMap
   getOptionsForAngle(int group, const double angle) const override;
@@ -70,7 +66,7 @@ public:
 
 private:
   /// The presenters for each group as a vector
-  std::vector<IReflSettingsPresenter *> m_settingsPresenters;
+  IReflSettingsTabView* m_view;
   IReflBatchPresenter *m_mainPresenter;
 };
 }

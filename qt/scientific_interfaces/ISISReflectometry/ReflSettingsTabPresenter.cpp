@@ -16,16 +16,9 @@ namespace CustomInterfaces {
 *
 * @param presenters :: The presenters of each group as a vector
 */
-ReflSettingsTabPresenter::ReflSettingsTabPresenter(
-    std::vector<IReflSettingsPresenter *> presenters)
-    : m_settingsPresenters(presenters) {
-  passSelfToChildren(presenters);
-}
-
-void ReflSettingsTabPresenter::passSelfToChildren(
-    std::vector<IReflSettingsPresenter *> const &children) {
-  for (auto *presenter : children)
-    presenter->acceptTabPresenter(this);
+ReflSettingsTabPresenter::ReflSettingsTabPresenter(IReflSettingsTabView *view)
+    : m_view(view) {
+  // TODO view->subscribe(this);
 }
 
 void ReflSettingsTabPresenter::acceptMainPresenter(
@@ -37,25 +30,22 @@ void ReflSettingsTabPresenter::settingsChanged(int group) {
   m_mainPresenter->settingsChanged(group);
 }
 
-/// Destructor
-ReflSettingsTabPresenter::~ReflSettingsTabPresenter() {}
-
 /** Sets the current instrument name and changes accessibility status of
 * the polarisation corrections option in the view accordingly
 *
 * @param instName :: [input] The name of the instrument to set to
 */
 void ReflSettingsTabPresenter::setInstrumentName(const std::string &instName) {
-  for (auto presenter : m_settingsPresenters)
-    presenter->setInstrumentName(instName);
+  //  for (auto presenter : m_settingsPresenters)
+  //    presenter->setInstrumentName(instName);
 }
 
 void ReflSettingsTabPresenter::onReductionResumed(int group) {
-  m_settingsPresenters[group]->onReductionResumed();
+  //  m_settingsPresenters[group]->onReductionResumed();
 }
 
 void ReflSettingsTabPresenter::onReductionPaused(int group) {
-  m_settingsPresenters[group]->onReductionPaused();
+  // m_settingsPresenters[group]->onReductionPaused();
 }
 
 /** Returns values passed for 'Transmission run(s)'
@@ -67,15 +57,16 @@ void ReflSettingsTabPresenter::onReductionPaused(int group) {
 OptionsQMap
 ReflSettingsTabPresenter::getOptionsForAngle(int group,
                                              const double angle) const {
-
-  return m_settingsPresenters.at(group)->getOptionsForAngle(angle);
+  //  return m_settingsPresenters.at(group)->getOptionsForAngle(angle);
+  return {};
 }
 
 /** Check whether per-angle transmission runs are specified
  * @return :: true if per-angle transmission runs are specified
  */
 bool ReflSettingsTabPresenter::hasPerAngleOptions(int group) const {
-  return m_settingsPresenters.at(group)->hasPerAngleOptions();
+  // return m_settingsPresenters.at(group)->hasPerAngleOptions();
+  return {};
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
@@ -84,8 +75,8 @@ bool ReflSettingsTabPresenter::hasPerAngleOptions(int group) const {
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */
 OptionsQMap ReflSettingsTabPresenter::getTransmissionOptions(int group) const {
-
-  return m_settingsPresenters.at(group)->getTransmissionOptions();
+  //  return m_settingsPresenters.at(group)->getTransmissionOptions();
+  return {};
 }
 
 /** Returns global options for 'ReflectometryReductionOneAuto'
@@ -94,8 +85,8 @@ OptionsQMap ReflSettingsTabPresenter::getTransmissionOptions(int group) const {
 * @return :: Global options for 'ReflectometryReductionOneAuto'
 */
 OptionsQMap ReflSettingsTabPresenter::getReductionOptions(int group) const {
-
-  return m_settingsPresenters.at(group)->getReductionOptions();
+  // return m_settingsPresenters.at(group)->getReductionOptions();
+  return {};
 }
 
 /** Returns global options for 'Stitch1DMany'
@@ -104,8 +95,8 @@ OptionsQMap ReflSettingsTabPresenter::getReductionOptions(int group) const {
 * @return :: Global options for 'Stitch1DMany'
 */
 std::string ReflSettingsTabPresenter::getStitchOptions(int group) const {
-
-  return m_settingsPresenters.at(group)->getStitchOptions();
+  //  return m_settingsPresenters.at(group)->getStitchOptions();
+  return {};
 }
 }
 }

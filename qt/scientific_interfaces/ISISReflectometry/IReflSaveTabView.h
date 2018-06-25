@@ -4,11 +4,11 @@
 #include "DllConfig.h"
 #include <string>
 #include <vector>
+#include "IReflSaveTabPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IReflSaveTabPresenter;
 
 /** @class IReflSaveTabView
 
@@ -40,10 +40,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IReflSaveTabView {
 public:
-  /// Constructor
-  IReflSaveTabView(){};
-  /// Destructor
-  virtual ~IReflSaveTabView(){};
+  virtual ~IReflSaveTabView() = default;
   virtual void subscribe(IReflSaveTabPresenter *presenter) = 0;
 
   virtual std::string getSavePath() const = 0;

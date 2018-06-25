@@ -76,6 +76,8 @@ public:
   /// Data processing check for a specific group
   virtual bool isProcessing(int group) const = 0;
 
+  virtual bool requestClose() const = 0;
+
   virtual void settingsChanged(int group) = 0;
 };
 }

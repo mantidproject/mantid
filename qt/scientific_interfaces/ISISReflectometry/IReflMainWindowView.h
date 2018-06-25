@@ -2,6 +2,8 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWVIEW_H
 
 #include <string>
+#include <vector>
+#include "IReflBatchView.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -34,8 +36,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+class ReflMainWindowSubscriber {
+public:
+  virtual void notifyHelpPressed() = 0;
+  virtual void notifyNewBatchRequested() = 0;
+  virtual void notifyCloseBatchRequested(int batchIndex) = 0;
+  virtual ~ReflMainWindowSubscriber() = default;
+};
+
 class IReflMainWindowView {
 public:
+  virtual void subscribe(ReflMainWindowSubscriber *notifyee) = 0;
+  virtual IReflBatchView *newBatch() = 0;
+  virtual void removeBatch(int index) = 0;
+  virtual std::vector<IReflBatchView *> batches() const = 0;
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
   virtual ~IReflMainWindowView() = default;
 };

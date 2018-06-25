@@ -1,19 +1,17 @@
-#ifndef MANTID_CUSTOMINTERFACES_IREFLSEARCHER_H
-#define MANTID_CUSTOMINTERFACES_IREFLSEARCHER_H
+#ifndef MANTID_ISISREFLECTOMETRY_IREFLEVENTTABVIEW_H
+#define MANTID_ISISREFLECTOMETRY_IREFLEVENTTABVIEW_H
 
-#include <string>
-
-//#include "MantidQtCustomInterfaces/IReflPresenter.h"
-#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class IReflSearcher
 
-IReflSearcher is an interface for search implementations used by IReflPresenter
-implementations.
+/** @class IReflEventTabView
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+IReflSettingsView is the base view class for the Reflectometry settings. It
+contains no QT specific functionality as that should be handled by a subclass.
+
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -34,11 +32,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflSearcher {
+
+class DLLExport IReflEventTabView {
 public:
-  virtual ~IReflSearcher(){};
-  virtual Mantid::API::ITableWorkspace_sptr search(const std::string &text) = 0;
+  virtual ~IReflEventTabView() = default;
 };
 }
 }
-#endif
+#endif /* MANTID_ISISREFLECTOMETRY_IREFLSETTINGSVIEW_H */

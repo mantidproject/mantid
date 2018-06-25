@@ -7,8 +7,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IReflMainWindowPresenter;
-
 /** @class IReflEventTabPresenter
 
 IReflEventTabPresenter is an interface which defines the functions that need
@@ -37,7 +35,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IReflEventTabPresenter {
 public:
-  virtual ~IReflEventTabPresenter(){};
+  virtual ~IReflEventTabPresenter() = default;
   /// Time-slicing values
   virtual std::string getTimeSlicingValues(int group) const = 0;
   /// Time-slicing type

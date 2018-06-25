@@ -23,17 +23,12 @@ using namespace Mantid::API;
 * @param view :: The view we are handling
 */
 ReflSaveTabPresenter::ReflSaveTabPresenter(
-    std::unique_ptr<IReflAsciiSaver> saver,
-    std::unique_ptr<IReflSaveTabView> view)
-    : m_view(std::move(view)), m_saver(std::move(saver)), m_mainPresenter(),
+    IReflSaveTabView *view, std::unique_ptr<IReflAsciiSaver> saver)
+    : m_view(view), m_saver(std::move(saver)), m_mainPresenter(),
       m_shouldAutosave(false) {
 
   m_view->subscribe(this);
 }
-
-/** Destructor
-*/
-ReflSaveTabPresenter::~ReflSaveTabPresenter() {}
 
 /** Accept a main presenter
 * @param mainPresenter :: [input] The main presenter

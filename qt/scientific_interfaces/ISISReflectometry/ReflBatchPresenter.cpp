@@ -20,13 +20,13 @@ namespace CustomInterfaces {
 * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
 */
 ReflBatchPresenter::ReflBatchPresenter(
-    IReflBatchView *view,
-    std::unique_ptr<IReflRunsTabPresenter> runsPresenter,
-    IReflEventTabPresenter *eventPresenter,
-    IReflSettingsTabPresenter *settingsPresenter,
+    IReflBatchView *view, std::unique_ptr<IReflRunsTabPresenter> runsPresenter,
+    std::unique_ptr<IReflEventTabPresenter> eventPresenter,
+    std::unique_ptr<IReflSettingsTabPresenter> settingsPresenter,
     std::unique_ptr<IReflSaveTabPresenter> savePresenter)
     : m_view(view), m_runsPresenter(std::move(runsPresenter)),
-      m_eventPresenter(eventPresenter), m_settingsPresenter(settingsPresenter),
+      m_eventPresenter(std::move(eventPresenter)),
+      m_settingsPresenter(std::move(settingsPresenter)),
       m_savePresenter(std::move(savePresenter)) {
 
   // Tell the tab presenters that this is going to be the main presenter
@@ -39,9 +39,7 @@ ReflBatchPresenter::ReflBatchPresenter(
   m_runsPresenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
 }
 
-/** Destructor
-*/
-ReflBatchPresenter::~ReflBatchPresenter() {}
+bool ReflBatchPresenter::requestClose() const { return true; }
 
 void ReflBatchPresenter::completedGroupReductionSuccessfully(
     GroupData const &group, std::string const &workspaceName) {
@@ -76,9 +74,6 @@ void ReflBatchPresenter::settingsChanged(int group) {
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */
 OptionsQMap ReflBatchPresenter::getTransmissionOptions(int group) const {
-
-  checkSettingsPtrValid(m_settingsPresenter);
-
   return m_settingsPresenter->getTransmissionOptions(group);
 }
 
@@ -89,10 +84,6 @@ OptionsQMap ReflBatchPresenter::getTransmissionOptions(int group) const {
 * @return :: Global processing options
 */
 OptionsQMap ReflBatchPresenter::getReductionOptions(int group) const {
-
-  checkSettingsPtrValid(m_settingsPresenter);
-
-  // Request global processing options to 'Settings' presenter
   return m_settingsPresenter->getReductionOptions(group);
 }
 
@@ -103,10 +94,6 @@ OptionsQMap ReflBatchPresenter::getReductionOptions(int group) const {
 * @return :: Global post-processing options
 */
 std::string ReflBatchPresenter::getStitchOptions(int group) const {
-
-  checkSettingsPtrValid(m_settingsPresenter);
-
-  // Request global post-processing options to 'Settings' presenter
   return m_settingsPresenter->getStitchOptions(group);
 }
 
@@ -117,9 +104,6 @@ std::string ReflBatchPresenter::getStitchOptions(int group) const {
 * @return :: Time-slicing values
 */
 std::string ReflBatchPresenter::getTimeSlicingValues(int group) const {
-
-  checkEventPtrValid(m_eventPresenter);
-
   // Request global time-slicing values to 'Event Handling' presenter
   return m_eventPresenter->getTimeSlicingValues(group);
 }
@@ -131,9 +115,6 @@ std::string ReflBatchPresenter::getTimeSlicingValues(int group) const {
 * @return :: Time-slicing type
 */
 std::string ReflBatchPresenter::getTimeSlicingType(int group) const {
-
-  checkEventPtrValid(m_eventPresenter);
-
   // Request time-slicing type to 'Event Handling' presenter
   return m_eventPresenter->getTimeSlicingType(group);
 }
@@ -146,12 +127,8 @@ std::string ReflBatchPresenter::getTimeSlicingType(int group) const {
 * @param angle :: the run angle to look up transmission runs for
 * @return :: Values passed for 'Transmission run(s)'
 */
-OptionsQMap
-ReflBatchPresenter::getOptionsForAngle(int group,
-                                            const double angle) const {
-
-  checkSettingsPtrValid(m_settingsPresenter);
-
+OptionsQMap ReflBatchPresenter::getOptionsForAngle(int group,
+                                                   const double angle) const {
   return m_settingsPresenter->getOptionsForAngle(group, angle);
 }
 
@@ -159,7 +136,6 @@ ReflBatchPresenter::getOptionsForAngle(int group,
  * @return :: true if there are per-angle transmission runs
  * */
 bool ReflBatchPresenter::hasPerAngleOptions(int group) const {
-  checkSettingsPtrValid(m_settingsPresenter);
   return m_settingsPresenter->hasPerAngleOptions(group);
 }
 
@@ -167,9 +143,7 @@ bool ReflBatchPresenter::hasPerAngleOptions(int group) const {
 Tells the setting tab presenter what to set its current instrument name to
 * @param instName : The name of the instrument to be set
 */
-void ReflBatchPresenter::setInstrumentName(
-    const std::string &instName) const {
-
+void ReflBatchPresenter::setInstrumentName(const std::string &instName) const {
   m_settingsPresenter->setInstrumentName(instName);
 }
 
@@ -188,24 +162,6 @@ for a specific group
 */
 bool ReflBatchPresenter::isProcessing(int group) const {
   return m_runsPresenter->isProcessing(group);
-}
-
-/** Checks for Settings Tab null pointer
-* @param pointer :: The pointer
-*/
-void ReflBatchPresenter::checkSettingsPtrValid(
-    IReflSettingsTabPresenter *pointer) const {
-  if (pointer == nullptr)
-    throw std::invalid_argument("Could not read settings");
-}
-
-/** Checks for Event Handling Tab null pointer
-* @param pointer :: The pointer
-*/
-void ReflBatchPresenter::checkEventPtrValid(
-    IReflEventTabPresenter *pointer) const {
-  if (pointer == nullptr)
-    throw std::invalid_argument("Could not read event handling");
 }
 }
 }

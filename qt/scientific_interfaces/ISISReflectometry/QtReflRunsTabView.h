@@ -5,7 +5,6 @@
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include "DllConfig.h"
 #include "IReflRunsTabView.h"
-#include "MantidQtWidgets/Common/ProgressableView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "Presenters/BatchPresenter.h"
 #include "Views/BatchView.h"
@@ -62,8 +61,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflRunsTabView
     : public MantidQt::API::MantidWidget,
-      public IReflRunsTabView,
-      public MantidQt::MantidWidgets::ProgressableView {
+      public IReflRunsTabView {
   Q_OBJECT
 public:
   QtReflRunsTabView(QWidget *parent, BatchViewFactory makeView);

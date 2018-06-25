@@ -4,6 +4,7 @@
 #include "DllConfig.h"
 #include "IReflEventTabPresenter.h"
 #include "IReflBatchPresenter.h"
+#include "IReflEventTabView.h"
 #include <vector>
 
 namespace MantidQt {
@@ -41,10 +42,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReflEventTabPresenter
     : public IReflEventTabPresenter {
 public:
-  /// Constructor
-  ReflEventTabPresenter(std::vector<IReflEventPresenter *> presenters);
-  /// Destructor
-  ~ReflEventTabPresenter() override;
+  ReflEventTabPresenter(IReflEventTabView* view);
 
   /// Returns time-slicing values
   std::string getTimeSlicingValues(int group) const override;
@@ -55,11 +53,9 @@ public:
   void settingsChanged(int group) override;
   void onReductionResumed(int group) override;
   void onReductionPaused(int group) override;
-  void passSelfToChildren(std::vector<IReflEventPresenter *> const &children);
 
 private:
-  /// The presenters for each group as a vector
-  std::vector<IReflEventPresenter *> m_eventPresenters;
+  IReflEventTabView* m_view;
   IReflBatchPresenter *m_mainPresenter;
 };
 }

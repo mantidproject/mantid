@@ -3,13 +3,12 @@
 
 #include "DllConfig.h"
 #include "ui_ReflEventTabWidget.h"
+#include "IReflEventTabView.h"
+#include "IReflEventTabPresenter.h"
 #include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
-// Forward decs
-class IReflEventTabPresenter;
 
 /** QtReflEventTabView : Provides an interface for the "Event" tab in the
 Reflectometry interface.
@@ -35,24 +34,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflEventTabView : public QWidget {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflEventTabView : public QWidget, public IReflEventTabView {
   Q_OBJECT
 public:
-  /// Constructor
   QtReflEventTabView(QWidget *parent = nullptr);
-  /// Destructor
-  ~QtReflEventTabView() override;
-  /// Returns the presenter managing this view
-  IReflEventTabPresenter *getPresenter() const;
+  void subscribe(IReflEventTabPresenter* notifyee);
 
 private:
-  /// Initialise the interface
   void initLayout();
-
-  /// The widget
   Ui::ReflEventTabWidget m_ui;
-  /// The presenter
-  std::unique_ptr<IReflEventTabPresenter> m_presenter;
+  IReflEventTabPresenter* m_notifyee;
 };
 
 } // namespace Mantid

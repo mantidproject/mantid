@@ -4,17 +4,13 @@
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "IReflMainWindowView.h"
 #include "ui_ReflMainWindowWidget.h"
+#include "IReflMainWindowPresenter.h"
+#include "ReflMainWindowPresenter.h"
 
 #include <QCloseEvent>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
-class IReflEventTabPresenter;
-class IReflMainWindowPresenter;
-class IReflRunsTabPresenter;
-class IReflSettingsTabPresenter;
-class IReflSaveTabPresenter;
 
 /** @class ReflMainWindowView
 
@@ -46,19 +42,23 @@ class QtReflMainWindowView : public MantidQt::API::UserSubWindow,
                              public IReflMainWindowView {
   Q_OBJECT
 public:
-  /// Constructor
   explicit QtReflMainWindowView(QWidget *parent = nullptr);
-  /// Name of the interface
+  void subscribe(ReflMainWindowSubscriber* notifyee) override;
+
   static std::string name() { return "ISIS Reflectometry"; }
-  /// This interface's categories.
   static QString categoryInfo() { return "Reflectometry"; }
-  /// Run a python algorithm
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
-  /// Close window handler
+
+  virtual std::vector<IReflBatchView*> batches() const override;
+
   void closeEvent(QCloseEvent *event) override;
+
+  IReflBatchView* newBatch() override;
+  void removeBatch(int batchIndex) override;
 
 public slots:
   void helpPressed();
+  void onTabCloseRequested(int tabIndex);
 
 private:
   /// Initializes the interface
@@ -66,7 +66,9 @@ private:
   /// Interface definition with widgets for the main interface window
   Ui::ReflMainWindowWidget m_ui;
   /// The presenter handling this view
-  std::unique_ptr<IReflMainWindowPresenter> m_presenter;
+  ReflMainWindowSubscriber* m_notifyee;
+  boost::optional<ReflMainWindowPresenter> m_presenter;
+  std::vector<IReflBatchView*> m_batchViews;
 };
 }
 }

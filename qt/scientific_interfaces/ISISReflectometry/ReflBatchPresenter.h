@@ -46,11 +46,9 @@ public:
   /// Constructor
   ReflBatchPresenter(IReflBatchView *view,
                      std::unique_ptr<IReflRunsTabPresenter> runsPresenter,
-                     IReflEventTabPresenter *eventPresenter,
-                     IReflSettingsTabPresenter *settingsPresenter,
+                     std::unique_ptr<IReflEventTabPresenter> eventPresenter,
+                     std::unique_ptr<IReflSettingsTabPresenter> settingsPresenter,
                      std::unique_ptr<IReflSaveTabPresenter> savePresenter);
-  /// Destructor
-  ~ReflBatchPresenter() override;
 
   /// Returns values passed for 'Transmission run(s)'
   MantidWidgets::DataProcessor::OptionsQMap
@@ -79,6 +77,7 @@ public:
   void settingsChanged(int group) override;
   void notifyReductionPaused(int group) override;
   void notifyReductionResumed(int group) override;
+  bool requestClose() const override;
 
   void completedGroupReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
@@ -88,10 +87,6 @@ public:
       std::string const &workspaceName) override;
 
 private:
-  /// Check for Settings Tab null pointer
-  void checkSettingsPtrValid(IReflSettingsTabPresenter *pointer) const;
-  /// Check for Event Handling Tab null pointer
-  void checkEventPtrValid(IReflEventTabPresenter *pointer) const;
   /// Pauses reduction in the Runs Tab
   void pauseReduction() const;
   /// Resumes reduction in the Runs Tab
@@ -101,9 +96,9 @@ private:
   /// The presenter of tab 'Runs'
   std::unique_ptr<IReflRunsTabPresenter> m_runsPresenter;
   /// The presenter of tab 'Event Handling'
-  IReflEventTabPresenter *m_eventPresenter;
+  std::unique_ptr<IReflEventTabPresenter> m_eventPresenter;
   /// The presenter of tab 'Settings'
-  IReflSettingsTabPresenter *m_settingsPresenter;
+  std::unique_ptr<IReflSettingsTabPresenter> m_settingsPresenter;
   /// The presenter of tab 'Save ASCII'
   std::unique_ptr<IReflSaveTabPresenter> m_savePresenter;
 };

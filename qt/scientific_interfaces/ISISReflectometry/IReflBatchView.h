@@ -2,6 +2,10 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLBATCHVIEW_H
 
 #include <string>
+#include "IReflRunsTabView.h"
+#include "IReflSettingsTabView.h"
+#include "IReflEventTabView.h"
+#include "IReflSaveTabView.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -36,6 +40,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IReflBatchView {
 public:
+  virtual IReflRunsTabView* runs() const = 0;
+  virtual IReflEventTabView* eventHandling() const = 0;
+  virtual IReflSettingsTabView* settings() const = 0;
+  virtual IReflSaveTabView* save() const = 0;
   virtual ~IReflBatchView() = default;
 };
 }

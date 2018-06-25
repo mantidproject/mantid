@@ -9,22 +9,10 @@ namespace CustomInterfaces {
 *
 * @param presenters :: The presenters of each group as a vector
 */
-ReflEventTabPresenter::ReflEventTabPresenter(
-    std::vector<IReflEventPresenter *> presenters)
-    : m_eventPresenters(presenters) {
-  passSelfToChildren(presenters);
+ReflEventTabPresenter::ReflEventTabPresenter(IReflEventTabView *view)
+    : m_view(view) {
+      // TODO: subscribe.
 }
-
-void ReflEventTabPresenter::passSelfToChildren(
-    std::vector<IReflEventPresenter *> const &children) {
-  for (auto *presenter : children)
-    presenter->acceptTabPresenter(this);
-}
-
-/** Destructor
-*
-*/
-ReflEventTabPresenter::~ReflEventTabPresenter() {}
 
 void ReflEventTabPresenter::acceptMainPresenter(
     IReflBatchPresenter *mainPresenter) {
@@ -37,7 +25,7 @@ void ReflEventTabPresenter::acceptMainPresenter(
 * @return :: Time-slicing values for 'ReflectometryReductionOneAuto'
 */
 std::string ReflEventTabPresenter::getTimeSlicingValues(int group) const {
-  return m_eventPresenters.at(group)->getTimeSlicingValues();
+//  return m_eventPresenters.at(group)->getTimeSlicingValues();
 }
 
 /** Returns time-slicing type for 'ReflectometryReductionOneAuto'
@@ -46,19 +34,19 @@ std::string ReflEventTabPresenter::getTimeSlicingValues(int group) const {
 * @return :: Time-slicing type for 'ReflectometryReductionOneAuto'
 */
 std::string ReflEventTabPresenter::getTimeSlicingType(int group) const {
-  return m_eventPresenters.at(group)->getTimeSlicingType();
+ // return m_eventPresenters.at(group)->getTimeSlicingType();
 }
 
 void ReflEventTabPresenter::onReductionPaused(int group) {
-  m_eventPresenters[group]->onReductionPaused();
+//  m_eventPresenters[group]->onReductionPaused();
 }
 
 void ReflEventTabPresenter::onReductionResumed(int group) {
-  m_eventPresenters[group]->onReductionResumed();
+//  m_eventPresenters[group]->onReductionResumed();
 }
 
 void ReflEventTabPresenter::settingsChanged(int group) {
-  m_mainPresenter->settingsChanged(group);
+ // m_mainPresenter->settingsChanged(group);
 }
 }
 }

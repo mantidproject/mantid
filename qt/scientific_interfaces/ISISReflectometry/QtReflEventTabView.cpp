@@ -10,15 +10,13 @@ namespace CustomInterfaces {
 * @param parent :: [input] The parent of this widget
 */
 QtReflEventTabView::QtReflEventTabView(QWidget *parent) {
-
   UNUSED_ARG(parent);
   initLayout();
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-QtReflEventTabView::~QtReflEventTabView() {}
+void QtReflEventTabView::subscribe(IReflEventTabPresenter* notifyee) {
+  m_notifyee = notifyee;
+}
 
 /**
 Initialise the interface
@@ -35,16 +33,6 @@ void QtReflEventTabView::initLayout() {
   std::vector<IReflEventPresenter *> presenters;
   presenters.push_back(event_1->getPresenter());
   presenters.push_back(event_2->getPresenter());
-
-  m_presenter.reset(new ReflEventTabPresenter(presenters));
-}
-
-/** Returns the presenter managing this view
-* @return :: A pointer to the presenter
-*/
-IReflEventTabPresenter *QtReflEventTabView::getPresenter() const {
-
-  return m_presenter.get();
 }
 
 } // namespace CustomInterfaces

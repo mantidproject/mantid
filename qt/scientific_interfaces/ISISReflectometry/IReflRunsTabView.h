@@ -6,6 +6,7 @@
 #include <boost/shared_ptr.hpp>
 #include "Views/IBatchView.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Common/ProgressableView.h"
 
 namespace MantidQt {
 
@@ -51,7 +52,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL IReflRunsTabView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL IReflRunsTabView : public MantidQt::MantidWidgets::ProgressableView {
 public:
   virtual ~IReflRunsTabView() = default;
 

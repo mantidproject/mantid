@@ -13,12 +13,21 @@
   <property name="windowTitle">
    <string>ISIS Reflectometry</string>
   </property>
+  <property name="layoutDirection">
+   <enum>Qt::LeftToRight</enum>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QTabWidget" name="mainTab">
+     <widget class="QTabWidget" name="mainTabs">
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
       <property name="tabPosition">
        <enum>QTabWidget::West</enum>
+      </property>
+      <property name="tabsClosable">
+       <bool>true</bool>
       </property>
      </widget>
     </item>

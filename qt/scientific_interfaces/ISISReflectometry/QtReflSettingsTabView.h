@@ -3,13 +3,13 @@
 
 #include "DllConfig.h"
 #include "ui_ReflSettingsTabWidget.h"
+#include "IReflSettingsTabView.h"
+#include "IReflSettingsTabPresenter.h"
 #include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-// Forward decs
-class IReflSettingsTabPresenter;
 
 /** QtReflSettingsTabView : Provides an interface for the "Settings" tab in the
 ISIS Reflectometry interface.
@@ -35,24 +35,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflSettingsTabView : public QWidget {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflSettingsTabView : public QWidget, public IReflSettingsTabView {
   Q_OBJECT
 public:
-  /// Constructor
   QtReflSettingsTabView(QWidget *parent = nullptr);
-  /// Destructor
-  ~QtReflSettingsTabView() override;
-  /// Returns the presenter managing this view
-  IReflSettingsTabPresenter *getPresenter() const;
-
 private:
   /// Initialise the interface
   void initLayout();
+  void subscribe(IReflSettingsTabPresenter* notifyee) override;
 
-  /// The widget
   Ui::ReflSettingsTabWidget m_ui;
-  /// The presenter
-  std::unique_ptr<IReflSettingsTabPresenter> m_presenter;
+  IReflSettingsTabPresenter* m_notifyee;
 };
 
 } // namespace Mantid

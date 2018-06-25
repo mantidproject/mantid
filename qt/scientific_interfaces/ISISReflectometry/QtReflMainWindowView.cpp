@@ -1,16 +1,10 @@
 #include "QtReflMainWindowView.h"
-#include "QtReflEventTabView.h"
-#include "QtReflRunsTabView.h"
-#include "QtReflSaveTabView.h"
-#include "QtReflSettingsTabView.h"
-#include "ReflSaveTabPresenter.h"
-#include "ReflMainWindowPresenter.h"
-#include "ReflAsciiSaver.h"
 #include "MantidKernel/make_unique.h"
-#include "Presenters/BatchPresenter.h"
-#include "ReflRunsTabPresenter.h"
+#include "QtReflBatchView.h"
+#include "Reduction/Slicing.h"
 
 #include <QMessageBox>
+#include <QToolButton>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -20,20 +14,72 @@ DECLARE_SUBWINDOW(QtReflMainWindowView)
 QtReflMainWindowView::QtReflMainWindowView(QWidget *parent)
     : UserSubWindow(parent) {}
 
+IReflBatchView *QtReflMainWindowView::newBatch() {
+  auto index = m_ui.mainTabs->count();
+  auto *newTab = new QtReflBatchView(this);
+  m_ui.mainTabs->addTab(newTab, QString("Batch ") + QString::number(index));
+  m_batchViews.emplace_back(newTab);
+  return newTab;
+}
+
+void QtReflMainWindowView::removeBatch(int batchIndex) {
+  m_batchViews.erase(m_batchViews.begin() + batchIndex);
+  m_ui.mainTabs->removeTab(batchIndex);
+}
+
+std::vector<IReflBatchView *> QtReflMainWindowView::batches() const {
+  return m_batchViews;
+}
+
 /**
 Initialise the Interface
 */
 void QtReflMainWindowView::initLayout() {
   m_ui.setupUi(this);
   connect(m_ui.helpButton, SIGNAL(clicked()), this, SLOT(helpPressed()));
+  connect(m_ui.mainTabs, SIGNAL(tabCloseRequested(int)), this,
+          SLOT(onTabCloseRequested(int)));
+
+  auto instruments = std::vector<std::string>(
+      {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
+
+  auto defaultSlicing = Slicing();
+  auto thetaTolerance = 0.01;
+  auto makeWorkspaceNames = WorkspaceNamesFactory(defaultSlicing);
+  auto makeBatchPresenter =
+      BatchPresenterFactory(instruments, thetaTolerance, makeWorkspaceNames);
+  auto defaultInstrumentIndex = 0; // TODO: Look this up properly;
+  auto searcher = boost::shared_ptr<IReflSearcher>();
+
+  auto makeRunsPresenter = RunsPresenterFactory(
+      std::move(makeBatchPresenter), std::move(makeWorkspaceNames),
+      thetaTolerance, instruments, defaultInstrumentIndex, searcher);
+
+  auto makeEventPresenter = EventPresenterFactory();
+  auto makeSettingsPresenter = SettingsPresenterFactory();
+  auto makeSaveSettingsPresenter = SavePresenterFactory();
+
+  auto makeReflBatchPresenter = ReflBatchPresenterFactory(
+      std::move(makeRunsPresenter), std::move(makeEventPresenter),
+      std::move(makeSettingsPresenter), std::move(makeSaveSettingsPresenter));
 
   // Create the presenter
-  m_presenter = Mantid::Kernel::make_unique<ReflMainWindowPresenter>(this);
+  m_presenter =
+      ReflMainWindowPresenter(this, std::move(makeReflBatchPresenter));
+
+  m_presenter.get().notifyNewBatchRequested();
+  m_presenter.get().notifyNewBatchRequested();
 }
 
-void QtReflMainWindowView::helpPressed() {
-  m_presenter->notify(IReflMainWindowPresenter::Flag::HelpPressed);
+void QtReflMainWindowView::onTabCloseRequested(int tabIndex) {
+  m_ui.mainTabs->removeTab(tabIndex);
 }
+
+void QtReflMainWindowView::subscribe(ReflMainWindowSubscriber *notifyee) {
+  m_notifyee = notifyee;
+}
+
+void QtReflMainWindowView::helpPressed() { m_notifyee->notifyHelpPressed(); }
 
 /**
 Runs python code
@@ -53,7 +99,7 @@ Handles attempt to close main window
 */
 void QtReflMainWindowView::closeEvent(QCloseEvent *event) {
   // Close only if reduction has been paused
-  if (!m_presenter->isProcessing()) {
+  if (!m_presenter.get().isProcessing()) {
     event->accept();
   } else {
     event->ignore();

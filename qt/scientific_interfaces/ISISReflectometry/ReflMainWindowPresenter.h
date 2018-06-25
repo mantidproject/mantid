@@ -3,6 +3,7 @@
 
 #include "DllConfig.h"
 #include "IReflMainWindowPresenter.h"
+#include "ReflBatchPresenterFactory.h"
 #include <memory>
 
 namespace MantidQt {
@@ -44,14 +45,19 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflMainWindowPresenter
     : public IReflMainWindowPresenter {
 public:
   /// Constructor
-  ReflMainWindowPresenter(IReflMainWindowView *view);
+  ReflMainWindowPresenter(IReflMainWindowView *view,
+                          ReflBatchPresenterFactory batchPresenterFactory);
   /// Run a python algorithm
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
   bool isProcessing() const override;
+  void notifyHelpPressed() override;
+  void notifyNewBatchRequested() override;
+  void notifyCloseBatchRequested(int batchIndex) override;
 private:
   void showHelp();
   IReflMainWindowView* m_view;
-  void notify(IReflMainWindowPresenter::Flag flag) override;
+  ReflBatchPresenterFactory m_batchPresenterFactory;
+  std::vector<std::unique_ptr<IReflBatchPresenter>> m_batchPresenters;
 };
 }
 }
