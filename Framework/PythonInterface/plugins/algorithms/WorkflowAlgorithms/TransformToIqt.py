@@ -61,7 +61,7 @@ class TransformToIqt(PythonAlgorithm):
         self._calculate_parameters()
 
         if not self._dry_run:
-            self._transform()
+            self._output_workspace = self._transform()
 
             self._add_logs()
 
@@ -213,12 +213,13 @@ class TransformToIqt(PythonAlgorithm):
         if num_res_hist > 1:
             CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')
 
-        CalculateIqt(InputWorkspace=self._sample, ResolutionWorkspace=self._resolution, EnergyMin=self._e_min,
+        iqt = CalculateIqt(InputWorkspace=self._sample, ResolutionWorkspace=self._resolution, EnergyMin=self._e_min,
                      EnergyMax=self._e_max, EnergyWidth=self._e_width, StoreInADS=False, OutputWorkspace="__calciqt")
 
         # Set Y axis unit and label
-        mtd[self._output_workspace].setYUnit('')
-        mtd[self._output_workspace].setYUnitLabel('Intensity')
+        iqt.setYUnit('')
+        iqt.setYUnitLabel('Intensity')
+        return iqt
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(TransformToIqt)
