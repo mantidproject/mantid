@@ -2,6 +2,7 @@
 #include "../Map.h"
 #include "../IndexOf.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
+#include <cmath>
 
 namespace MantidQt {
 namespace CustomInterfaces {
