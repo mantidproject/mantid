@@ -1376,7 +1376,12 @@ void LoadEventNexus::loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
 //-----------------------------------------------------------------------------
 /**
 * Load the time of flight data. file must have open the group containing
-* "time_of_flight" data set.
+* "time_of_flight" data set. This will add a offset to all of the
+* time-of-flight values or a random number to each time-of-flight. It
+* should only ever be called on event files that have a "detector_1_events"
+* group inside the "NXentry". It is an old ISIS requirement that is rarely
+* used now.
+*
 * @param file :: The nexus file to read from.
 * @param WS :: The event workspace collection to write to.
 * @param binsName :: bins name
