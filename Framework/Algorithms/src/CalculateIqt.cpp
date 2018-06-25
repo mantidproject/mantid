@@ -5,7 +5,9 @@
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MersenneTwister.h"
+
 #include <cmath>
+#include <functional>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -140,18 +142,9 @@ double standardDeviation(const std::vector<double> &inputValues) {
 std::vector<double>
 standardDeviationArray(const std::vector<std::vector<double>> &yValues) {
   std::vector<double> standardDeviations;
-
-  auto outputSize = yValues[0].size();
-  standardDeviations.reserve(outputSize);
-  std::vector<double> valuesAtIndex;
-  valuesAtIndex.reserve(yValues.size());
-
-  for (auto i = 0u; i < outputSize; ++i) {
-    valuesAtIndex.clear();
-    for (auto &&yValueArray : yValues)
-      valuesAtIndex.emplace_back(yValueArray[i]);
-    standardDeviations.emplace_back(standardDeviation(valuesAtIndex));
-  }
+  standardDeviations.reserve(yValues.size());
+  std::transform(yValues.begin(), yValues.end(),
+                 std::back_inserter(standardDeviations), standardDeviation);
   return standardDeviations;
 }
 
@@ -187,19 +180,25 @@ MatrixWorkspace_sptr doSimulation(MatrixWorkspace_sptr sample,
   return calculateIqt(simulatedWorkspace, resolution, rebinParams);
 }
 
+/**
+Get all histograms at a given index from a set of workspaces. Arranges the
+output such that the first vector contains the first value from each workspace,
+the second vector contains all the second values, etc.
+*/
 std::vector<std::vector<double>>
 allYValuesAtIndex(const std::vector<MatrixWorkspace_sptr> &workspaces,
-                  const int index) {
-  std::vector<std::vector<double>> yValues;
-  yValues.reserve(workspaces.size());
-  for (auto &&workspace : workspaces)
-    yValues.emplace_back(workspace->y(index).rawData());
+                  const std::size_t index) {
+  std::vector<std::vector<double>> yValues(workspaces[0]->getNumberHistograms());
+  for (auto &&workspace : workspaces) {
+    const auto values = workspace->y(index).rawData();
+    for (auto j = 0u; j < values.size(); ++j)
+      yValues[j].emplace_back(values[j]);
+  }
   return yValues;
 }
 
 MatrixWorkspace_sptr setErrorsToStandardDeviation(
     const std::vector<MatrixWorkspace_sptr> &simulatedWorkspaces) {
-  // set errors to standard deviation of y values across simulations
   auto outputWorkspace = simulatedWorkspaces.front();
   for (auto i = 0u; i < outputWorkspace->getNumberHistograms(); ++i)
     outputWorkspace->mutableE(i) =
