@@ -267,6 +267,25 @@ public:
     TS_ASSERT_EQUALS(out, "Help,Me,I'm,Stuck,Inside,A,Test");
   }
 
+  void test_joinSet() {
+    std::set<std::string> v;
+    std::string out;
+
+    out = join(v.begin(), v.end(), ",");
+    TS_ASSERT_EQUALS(out, "");
+
+    v.insert("Help");
+    v.insert("Me");
+    v.insert("I'm");
+    v.insert("Stuck");
+    v.insert("Inside");
+    v.insert("A");
+    v.insert("Test");
+
+    out = join(v.begin(), v.end(), ",");
+    TS_ASSERT_EQUALS(out, "A,Help,I'm,Inside,Me,Stuck,Test");
+  }
+
   void test_joinCompress() {
 
     std::vector<std::vector<int>> inputList{
