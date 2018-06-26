@@ -1,7 +1,7 @@
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import Algorithm, PythonAlgorithm, MultipleFileProperty, FileAction, Progress, MatrixWorkspaceProperty
+from mantid.api import Algorithm, PythonAlgorithm, MultipleFileProperty, FileAction, MatrixWorkspaceProperty
 from mantid.kernel import StringMandatoryValidator, Direction
 from mantid.simpleapi import *
 import os
@@ -77,7 +77,7 @@ class ILLSANSReduction(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Reduced workspace')
 
-    def PyExec(self):
+    def PyExec(self): #noqa C901, we know it's complex
 
         self._setup()
         # PROCESS SAMPLE DATA
