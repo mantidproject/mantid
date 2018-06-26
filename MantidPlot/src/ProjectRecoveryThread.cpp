@@ -59,14 +59,33 @@ std::string getRecoveryFolder() {
   return recoverFolder;
 }
 
-/// Returns a string to the current timestamped recovery folder
-std::string getOutputPath() {
+/// Gets a formatted timestamp
+std::string getTimeStamp() {
+  const char* formatSpecifier = "%Y-%m-%d %H-%M-%S";
   auto time = std::time(nullptr);
   auto localTime = std::localtime(&time);
 
+  #if __GNUG__ < 5
+  // Have to workaround GCC 4 not having std::put_time on RHEL7
+  // this ifdef can be removed when RHEL7 uses a newer compiler
+  char timestamp[20];
+  if (strftime(timestamp, sizeof(timestamp), formatSpecifier, localTime) > 0){
+    return {formatSpecifier};
+  }
+
+  return {};
+  #else
   std::ostringstream timestamp;
-  timestamp << std::put_time(localTime, "%Y-%m-%d %H-%M-%S");
-  auto timestampedPath = getRecoveryFolder().append(timestamp.str());
+  timestamp << std::put_time(localTime, formatSpecifier);
+  return timestamp.str();
+  #endif
+}
+
+/// Returns a string to the current timestamped recovery folder
+std::string getOutputPath() {
+
+  auto timestamp = getTimeStamp();
+  auto timestampedPath = getRecoveryFolder().append(timestamp);
 
   return timestampedPath;
 }
@@ -171,7 +190,7 @@ void ProjectRecoveryThread::deleteExistingCheckpoints(
   // Ensure the oldest is first in the vector
   std::sort(
       folderPaths.begin(), folderPaths.end(),
-      [](Poco::Path &a, Poco::Path &b) { return a.toString() < b.toString(); });
+      [](const Poco::Path &a, const Poco::Path &b) { return a.toString() < b.toString(); });
 
   size_t checkpointsToRemove = numberOfDirsPresent - checkpointsToKeep;
   bool recurse = true;
