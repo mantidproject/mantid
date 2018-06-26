@@ -63,9 +63,10 @@ class AbstractInst(object):
 
     def mask_prompt_pulses_if_necessary(self, ws_list):
         """
-        Mask prompt pulses in a list of input workspaces
+        Mask prompt pulses in a list of input workspaces,
+        disabled for all instrument except HRPD
         """
-        return ws_list
+        pass
 
     def set_beam_parameters(self, height, width):
         """
