@@ -159,12 +159,11 @@ class ArrayPropertyTest(unittest.TestCase):
         
         # Implementation of IntArrayProperty is based on long 
         # (which is itself implementation defined, so a special case is needed here)
-        import os
-        if os.name == 'nt':
-          # Windows should return "long"
+        if sys.platform == 'win32' or sys.platform == 'darwin':
+          # Windows and macOS should return "long"
           self.assertEquals(int_arr.dtype(), "long")
         else:
-          # Unix based systems should return "int64"
+          # Linux based systems should return "int64"
           self.assertEquals(int_arr.dtype(), "int64")
 
 
