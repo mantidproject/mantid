@@ -3,7 +3,9 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Material.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include <numeric>
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -192,7 +194,8 @@ void MeshObject2D::initialize() {
   parameters.p0 = v0;
   m_planeParameters = parameters;
 
-  if (m_vertices.size() > std::numeric_limits<uint16_t>::max()) {
+  if (m_vertices.size() >
+      std::numeric_limits<typename decltype(m_triangles)::value_type>::max()) {
     throw std::invalid_argument(
         "Too many vertices (" + std::to_string(m_vertices.size()) +
         "). MeshObject cannot have more than 65535 vertices.");
@@ -252,8 +255,7 @@ int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
       // Need to know that this corresponds to a finite segment
       if (isOnTriangle(pIntersects, m_vertices[i], m_vertices[i + 1],
                        m_vertices[i + 2])) {
-        IObject *const hack = nullptr;
-        ut.addPoint(-1 /*HACK as exit*/, pIntersects, *hack /*HACK*/);
+        ut.addPoint(-1 /*HACK as exit*/, pIntersects, *this);
         ut.buildLink();
         // All vertices on plane. So only one triangle intersection possible
         break;
@@ -364,6 +366,74 @@ const BoundingBox &MeshObject2D::getBoundingBox() const {
   }
 
   return m_boundingBox;
+}
+
+void MeshObject2D::getBoundingBox(double &xmax, double &ymax, double &zmax,
+                                  double &xmin, double &ymin,
+                                  double &zmin) const {
+  auto bb = this->getBoundingBox();
+  xmax = bb.xMax();
+  xmin = bb.xMin();
+  ymax = bb.yMax();
+  ymin = bb.yMin();
+  zmax = bb.zMax();
+  zmin = bb.zMin();
+}
+
+/**
+Try to find a point that lies within (or on) the object
+@param[out] point :: on exit set to the point value, if found
+@return 1 if point found, 0 otherwise
+*/
+int MeshObject2D::getPointInObject(Kernel::V3D &point) const {
+  return this->isValid(point) ? 1.0 : 0.0;
+}
+
+Kernel::V3D
+MeshObject2D::generatePointInObject(Kernel::PseudoRandomNumberGenerator &,
+                                    const size_t) const {
+  // How this would work for a finite plane is not clear. Points within the
+  // plane can of course be generated, but most implementaitons of this method
+  // use the bounding box
+  throw std::runtime_error("Not implemented.");
+}
+
+Kernel::V3D
+MeshObject2D::generatePointInObject(Kernel::PseudoRandomNumberGenerator &,
+                                    const BoundingBox &, const size_t) const {
+
+  // How this would work for a finite plane is not clear. Points within the
+  // plane can of course be generated, but most implementaitons of this method
+  // use the bounding box
+  throw std::runtime_error("Not implemented");
+}
+
+void MeshObject2D::draw() const { throw std::runtime_error("Not implemented"); }
+
+void MeshObject2D::initDraw() const {
+  throw std::runtime_error("Not implemented");
+}
+
+const Kernel::Material MeshObject2D::material() const {
+
+  throw std::runtime_error("Not implemented");
+}
+
+const std::string &MeshObject2D::id() const {
+
+  throw std::runtime_error("Not implemented");
+}
+
+boost::shared_ptr<GeometryHandler> MeshObject2D::getGeometryHandler() const {
+
+  throw std::runtime_error("Not implemented");
+}
+
+void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,
+                                 std::vector<Kernel::V3D> &, double &,
+                                 double &) const {
+
+  throw std::runtime_error("Not implemented");
 }
 
 } // namespace Geometry

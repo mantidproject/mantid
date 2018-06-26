@@ -2,12 +2,16 @@
 #define MANTID_GEOMETRY_MESHOBJECT2DTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
 
 #include "MantidGeometry/Objects/MeshObject2D.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
+#include "MantidKernel/PseudoRandomNumberGenerator.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <cmath>
 
 using Mantid::Geometry::MeshObject2D;
@@ -31,6 +35,24 @@ MeshObject2D makeTrapezoidMesh(const V3D &a, const V3D &b, const V3D &c,
   triangles.insert(triangles.end(), {2, 3, 0});
   return MeshObject2D(triangles, vertices, Mantid::Kernel::Material());
 }
+// -----------------------------------------------------------------------------
+// Mock Random Number Generator
+// -----------------------------------------------------------------------------
+class MockRNG : public Mantid::Kernel::PseudoRandomNumberGenerator {
+public:
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  MOCK_METHOD0(nextValue, double());
+  MOCK_METHOD2(nextValue, double(double, double));
+  MOCK_METHOD2(nextInt, int(int, int));
+  MOCK_METHOD0(restart, void());
+  MOCK_METHOD0(save, void());
+  MOCK_METHOD0(restore, void());
+  MOCK_METHOD1(setSeed, void(size_t));
+  MOCK_METHOD2(setRange, void(const double, const double));
+  MOCK_CONST_METHOD0(min, double());
+  MOCK_CONST_METHOD0(max, double());
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
+};
 }
 
 class MeshObject2DTest : public CxxTest::TestSuite {
@@ -251,6 +273,69 @@ public:
     TS_ASSERT_EQUALS(boundingBox.xMax(), 1);
     TS_ASSERT_EQUALS(boundingBox.yMin(), 0);
     TS_ASSERT_EQUALS(boundingBox.yMax(), 1);
+  }
+
+  // Characterisation test.
+  void test_generatePointInObject_not_implemented() {
+
+    auto mesh = makeSimpleTriangleMesh();
+    testing::NiceMock<MockRNG> generator;
+    TS_ASSERT_THROWS(mesh.generatePointInObject(generator, 10),
+                     std::runtime_error &);
+  }
+  // Characterisation test.
+  void test_generatePointInObject_with_active_region_not_implemented() {
+
+    auto mesh = makeSimpleTriangleMesh();
+    testing::NiceMock<MockRNG> generator;
+    Mantid::Geometry::BoundingBox boundingBox;
+    TS_ASSERT_THROWS(mesh.generatePointInObject(generator, boundingBox, 10),
+                     std::runtime_error &);
+  }
+
+  // Characterisation test.
+  void test_GetObjGeom_not_implemented() {
+    auto mesh = makeSimpleTriangleMesh();
+    std::vector<V3D> vectors;
+    double radius, height;
+    Mantid::Geometry::detail::ShapeInfo::GeometryShape shape;
+
+    TS_ASSERT_THROWS(mesh.GetObjectGeom(shape, vectors, radius, height),
+                     std::runtime_error &);
+  }
+
+  // Characterisation test.
+  void test_draw_not_implemented() {
+    auto mesh = makeSimpleTriangleMesh();
+
+    TS_ASSERT_THROWS(mesh.draw(), std::runtime_error &);
+  }
+  // Characterisation test.
+  void test_init_draw_not_implemented() {
+    auto mesh = makeSimpleTriangleMesh();
+
+    TS_ASSERT_THROWS(mesh.initDraw(), std::runtime_error &);
+  }
+
+  // Characterisation test.
+  void test_material_not_implemented() {
+    auto mesh = makeSimpleTriangleMesh();
+
+    TS_ASSERT_THROWS(mesh.material(), std::runtime_error &);
+  }
+
+  // Characterisation test.
+  void test_id_not_implemented() {
+    auto mesh = makeSimpleTriangleMesh();
+
+    TS_ASSERT_THROWS(mesh.id(), std::runtime_error &);
+  }
+
+  // Characterisation test.
+  void test_get_geometry_hanlder_not_implemented() {
+    auto mesh = makeSimpleTriangleMesh();
+
+    TS_ASSERT_THROWS(mesh.getGeometryHandler(), std::runtime_error &);
   }
 };
 

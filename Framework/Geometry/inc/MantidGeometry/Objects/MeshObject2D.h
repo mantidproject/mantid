@@ -5,12 +5,15 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 
 namespace Geometry {
 class Track;
+class GeometryHandler;
 
 /** MeshObject2D :
 
@@ -40,7 +43,7 @@ class Track;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_GEOMETRY_DLL MeshObject2D {
+class MANTID_GEOMETRY_DLL MeshObject2D : public IObject {
 public:
   /// Constructor
   MeshObject2D(const std::vector<uint16_t> &faces,
@@ -51,26 +54,45 @@ public:
                std::vector<Mantid::Kernel::V3D> &&vertices,
                const Kernel::Material &&material);
 
-  double volume() const;
+  double volume() const override;
 
   static bool isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &a,
                            const Kernel::V3D &b, const Kernel::V3D &c);
   static bool pointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices);
 
-  bool hasValidShape() const;
+  bool hasValidShape() const override;
   double distanceToPlane(const Kernel::V3D &point) const;
-  bool isValid(const Kernel::V3D &point) const; ///< Check if a point is inside
-  bool isOnSide(const Kernel::V3D &) const;
-  int interceptSurface(Geometry::Track &ut) const;
-  MeshObject2D *clone() const;
-  MeshObject2D *cloneWithMaterial(const Kernel::Material &material) const;
-  int getName() const;
-  double solidAngle(const Kernel::V3D &observer) const;
+  bool isValid(
+      const Kernel::V3D &point) const override; ///< Check if a point is inside
+  bool isOnSide(const Kernel::V3D &) const override;
+  int interceptSurface(Geometry::Track &ut) const override;
+  MeshObject2D *clone() const override;
+  MeshObject2D *
+  cloneWithMaterial(const Kernel::Material &material) const override;
+  int getName() const override;
+  double solidAngle(const Kernel::V3D &observer) const override;
   double solidAngle(const Kernel::V3D &observer,
-                    const Kernel::V3D &scaleFactor) const;
+                    const Kernel::V3D &scaleFactor) const override;
   bool operator==(const MeshObject2D &other) const;
-  const BoundingBox &getBoundingBox() const;
+  const BoundingBox &getBoundingBox() const override;
   const static double MinThickness;
+
+  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
+                      double &ymin, double &zmin) const override;
+  int getPointInObject(Kernel::V3D &point) const override;
+  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                    const size_t) const override;
+  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                    const BoundingBox &activeRegion,
+                                    const size_t) const override;
+  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                     std::vector<Kernel::V3D> &vectors, double &myradius,
+                     double &myheight) const override;
+  void draw() const override;
+  void initDraw() const override;
+  const Kernel::Material material() const override;
+  const std::string &id() const override;
+  boost::shared_ptr<GeometryHandler> getGeometryHandler() const override;
 
 private:
   struct PlaneParameters {
@@ -92,6 +114,8 @@ private:
   Kernel::Material m_material;
   /// Bounding box
   mutable BoundingBox m_boundingBox;
+  /// Geometry Handle for rendering
+  boost::shared_ptr<GeometryHandler> m_handler;
 };
 
 } // namespace Geometry
