@@ -254,6 +254,11 @@ void LoadNexusMonitors2::exec() {
 
     auto axis = HistogramData::BinEdges{xmin - 1, xmax + 1};
     eventWS->setAllX(axis); // Set the binning axis using this.
+
+    // a certain generation of RAL files modify the time-of-flight
+    const std::string currentPath = file.getPath();
+    adjustTimeOfFlightRAL(file, eventWS, m_top_entry_name, "NXmonitor");
+    file.openPath(currentPath); // reset to where it was earlier
   }
 
   // Check for and ISIS compat block to get the detector IDs for the loaded
