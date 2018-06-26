@@ -872,8 +872,8 @@ void MuonFitPropertyBrowser::showEvent(QShowEvent *e) {
   * @param ws :: The workspace
   */
 bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws) const {
-	auto fsad = ws->getName();
-	QString workspaceName(QString::fromStdString(ws->getName()));
+  auto fsad = ws->getName();
+  QString workspaceName(QString::fromStdString(ws->getName()));
 
   if ((workspaceName.contains("_Raw")) ||
       (workspaceName.contains("MuonAnalysis")))

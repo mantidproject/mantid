@@ -2045,8 +2045,7 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName) {
 * is for "load current run" where the data file has a temporary name like
 * MUSRauto_E.tmp
 */
-void MuonAnalysis::selectMultiPeakNoUpdate(
-    const QString &wsName) {
+void MuonAnalysis::selectMultiPeakNoUpdate(const QString &wsName) {
   disableAllTools();
   if (!plotExists(wsName)) {
     plotSpectrum(wsName);
