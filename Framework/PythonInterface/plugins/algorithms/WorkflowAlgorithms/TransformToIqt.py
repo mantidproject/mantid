@@ -8,6 +8,7 @@ from mantid.kernel import Direction, logger, IntBoundedValidator
 DEFAULT_ITERATIONS = 50
 DEFAULT_SEED = 89631139
 
+
 class TransformToIqt(PythonAlgorithm):
     _sample = None
     _resolution = None
