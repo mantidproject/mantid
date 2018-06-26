@@ -90,14 +90,6 @@ public:
 /// --------------------- TofEvent Comparators
 /// ----------------------------------
 //==========================================================================
-/** Compare two events' TOF, return true if e1 should be before e2.
- * @param e1 :: first event
- * @param e2 :: second event
- *  */
-template <typename T> bool compareEventTof(const T &e1, const T &e2) {
-  return (e1.tof() < e2.tof());
-}
-
 /** Compare two events' FRAME id, return true if e1 should be before e2.
  * @param e1 :: first event
  * @param e2 :: second event
