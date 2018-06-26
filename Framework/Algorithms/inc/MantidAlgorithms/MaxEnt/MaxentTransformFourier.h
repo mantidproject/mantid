@@ -3,7 +3,6 @@
 
 #include "MantidAlgorithms/MaxEnt/MaxentTransform.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpace.h"
-//#include <memory>
 
 namespace Mantid {
 namespace Algorithms {

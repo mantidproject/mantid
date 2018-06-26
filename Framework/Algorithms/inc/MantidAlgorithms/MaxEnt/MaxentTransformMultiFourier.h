@@ -4,7 +4,6 @@
 #include "MantidAlgorithms/MaxEnt/MaxentTransformFourier.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpace.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceComplex.h"
-//#include <memory>
 
 namespace Mantid {
 namespace Algorithms {

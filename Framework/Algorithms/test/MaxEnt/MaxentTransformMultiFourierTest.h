@@ -7,9 +7,8 @@
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceReal.h"
 #include "MantidAlgorithms/MaxEnt/MaxentTransformMultiFourier.h"
 #include <boost/shared_ptr.hpp>
-#include <cmath>
-#include <memory>
 #include <boost/make_shared.hpp>
+#include <cmath>
 
 using Mantid::Algorithms::MaxentSpaceComplex;
 using Mantid::Algorithms::MaxentSpaceReal;

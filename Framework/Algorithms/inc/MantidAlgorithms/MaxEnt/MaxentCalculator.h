@@ -5,7 +5,6 @@
 #include "MantidAlgorithms/MaxEnt/MaxentCoefficients.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropy.h"
 #include "MantidAlgorithms/MaxEnt/MaxentTransform.h"
-#include <memory>
 
 namespace Mantid {
 namespace Algorithms {
