@@ -2046,7 +2046,7 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName) {
 * MUSRauto_E.tmp
 */
 void MuonAnalysis::selectMultiPeakNoUpdate(
-    const QString &wsName, const boost::optional<QString> &filePath) {
+    const QString &wsName) {
   disableAllTools();
   if (!plotExists(wsName)) {
     plotSpectrum(wsName);
@@ -2084,7 +2084,7 @@ void MuonAnalysis::selectMultiPeakNoUpdate(
 * @param wsName Name of the selected workspace
 */
 void MuonAnalysis::selectMultiPeakNoUpdate(const QString &wsName) {
-  selectMultiPeakNoUpdate(wsName, boost::optional<QString>());
+  selectMultiPeakNoUpdate(wsName);
 }
 
 /**

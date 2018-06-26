@@ -210,8 +210,7 @@ private slots:
   /// Enable PP tool for the plot of the given WS overload to take just a ws
   void selectMultiPeak(const QString &wsName);
   /// Enable PP tool for the plot of the given WS and optional filepath
-  void selectMultiPeakNoUpdate(const QString &wsName,
-                               const boost::optional<QString> &filePath);
+  void selectMultiPeakNoUpdate(const QString &wsName);
 
   /// Enable PP tool for the plot of the given WS overload to take just a ws
   void selectMultiPeakNoUpdate(const QString &wsName);

@@ -872,7 +872,8 @@ void MuonFitPropertyBrowser::showEvent(QShowEvent *e) {
   * @param ws :: The workspace
   */
 bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws) const {
-  QString workspaceName(QString::fromStdString(ws->getName()));
+	auto fsad = ws->getName();
+	QString workspaceName(QString::fromStdString(ws->getName()));
 
   if ((workspaceName.contains("_Raw")) ||
       (workspaceName.contains("MuonAnalysis")))
@@ -1035,7 +1036,7 @@ void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
 * After a TF simultaneous fit, insert extra information into parameters table
 * (i.e. what runs, groups, periods "f0", "f1" etc were)
 * and group the output workspaces
-* @param fitAlg :: [input] Pointer to fit algorithm that just finished
+* @param alg :: [input] Pointer to fit algorithm that just finished
 * @param baseName :: [input] The common name of the workspaces of interest
 */
 void MuonFitPropertyBrowser::finishAfterTFSimultaneousFit(
@@ -1047,7 +1048,7 @@ void MuonFitPropertyBrowser::finishAfterTFSimultaneousFit(
     std::string paramTableName = baseName + "_Parameters";
     const auto paramTable = ads.retrieveWS<ITableWorkspace>(paramTableName);
     if (paramTable) {
-      for (int i = 0; i < wsList.size(); i++) {
+      for (size_t i = 0; i < wsList.size(); i++) {
         const std::string suffix = boost::lexical_cast<std::string>(i);
 
         const auto wsName = wsList[i];
@@ -1306,6 +1307,7 @@ void MuonFitPropertyBrowser::updateTFPlot() {
 /**
  * Adds an extra widget in between the fit buttons and the browser
  * @param widget :: [input] Pointer to widget to add
+ * @param functionBrowser :: [input] pointer to the function browser
  */
 void MuonFitPropertyBrowser::addFitBrowserWidget(
     QWidget *widget,
