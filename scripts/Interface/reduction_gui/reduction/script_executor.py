@@ -16,6 +16,7 @@ import traceback
 def __get_indent(line):
     return len(line) - len(line.lstrip(' \t'))
 
+
 def splitCodeString(string, return_compiled=True):
     import code
     lines = string.splitlines(False)
@@ -51,6 +52,7 @@ def splitCodeString(string, return_compiled=True):
     except ValueError as e:
         raise e
 
+
 def execute_script(script, progress_action):
     """
         @param script: the script to execute
@@ -59,22 +61,22 @@ def execute_script(script, progress_action):
             - state: a string indicating the current state ('running', 'success' or 'failure')
     """
     if HAS_MANTIDPLOT:
-        execFunc = lambda code: mantidplot.runPythonScript(code, async=True)
+        def execFunc(code):
+            return mantidplot.runPythonScript(code, async=True)
     elif HAS_MANTID_QT:
         codeExecuter = PythonCodeExecution()
-        def __execute(code):
+
+        def execFunc(code):
             codeExecuter.execute_async(code)
             return True
-        execFunc = __execute
     else:
         # exec doesn't keep track of globals and locals, so we have to do it manually:
         globals_dict = dict()
         locals_dict = dict()
-        def __execute(code, globals_dict, locals_dict):
+
+        def execFunc(code):
             exec(code, globals_dict, locals_dict)
             return True
-        execFunc = lambda code: __execute(code, globals_dict, locals_dict)
-
 
     code_blocks = [code for code in splitCodeString(script, return_compiled = not HAS_MANTIDPLOT)]
     code_blocks.insert(0, ('from mantid.simpleapi import *\n', (0,)))

@@ -523,7 +523,7 @@ class BaseReductionScripter(object):
         if not HAS_MANTID:
             raise RuntimeError("Reduction could not be executed: Mantid could not be imported")
 
-        # script has mantid available: 
+        # script has mantid available:
         script = self.to_script(None)
         try:
             self.execute_script(script, progress_action)
