@@ -251,6 +251,9 @@ class ILLSANSReduction(PythonAlgorithm):
         # Step 11: Absolute scale correction (flux normalisation method)
         self._message += self._simple_execution("AbsoluteScaleAlgorithm", sample_ws)
 
+        # Step 12: Calculate the automatic Q range
+        CalculateQMinMax(Workspace = sample_ws)
+
         # Compute I(q)
         if "IQAlgorithm" in self._property_list:
             iq_output = self.getPropertyValue("OutputWorkspace") + '_iq'

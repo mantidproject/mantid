@@ -104,8 +104,6 @@ private:
   bool m_isTOF;          ///< TOF or monochromatic flag
   double m_sourcePos;    ///< Source Z (for D33 TOF)
 
-  double calculateQ(const double lambda, const double twoTheta) const;
-  std::pair<double, double> calculateQMaxQMin();
   void setFinalProperties(const std::string &filename);
   void moveBeamCenter(const std::string &component, double center_x,
                       double center_y);

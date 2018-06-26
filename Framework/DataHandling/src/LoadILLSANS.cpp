@@ -643,64 +643,12 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
 }
 
 /**
- * @param lambda : wavelength in Angstroms
- * @param twoTheta : twoTheta in degreess
- * @return Q : momentum transfer [Aˆ-1]
- */
-double LoadILLSANS::calculateQ(const double lambda,
-                               const double twoTheta) const {
-  return (4 * M_PI * std::sin(twoTheta * (M_PI / 180) / 2)) / (lambda);
-}
-
-/**
- * Calculates the max and min Q
- * @return pair<min, max>
- */
-std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
-  double min = std::numeric_limits<double>::max(),
-         max = std::numeric_limits<double>::min();
-  g_log.debug("Calculating Qmin Qmax...");
-  std::size_t nHist = m_localWorkspace->getNumberHistograms();
-  const auto &spectrumInfo = m_localWorkspace->spectrumInfo();
-  for (std::size_t i = 0; i < nHist; ++i) {
-    if (!spectrumInfo.isMonitor(i) && !spectrumInfo.isMasked(i)) {
-      const auto &lambdaBinning = m_localWorkspace->x(i);
-      Kernel::V3D detPos = spectrumInfo.position(i);
-      double r, theta, phi;
-      detPos.getSpherical(r, theta, phi);
-      double v1 = calculateQ(*(lambdaBinning.begin()), theta);
-      double v2 = calculateQ(*(lambdaBinning.end() - 1), theta);
-      if (i == 0) {
-        min = v1;
-        max = v1;
-      }
-      if (v1 < min) {
-        min = v1;
-      }
-      if (v2 < min) {
-        min = v2;
-      }
-      if (v1 > max) {
-        max = v1;
-      }
-      if (v2 > max) {
-        max = v2;
-      }
-    }
-  }
-  return std::pair<double, double>(min, max);
-}
-
-/**
  * Sets full sample logs
  * @param filename : name of the file
  */
 void LoadILLSANS::setFinalProperties(const std::string &filename) {
   API::Run &runDetails = m_localWorkspace->mutableRun();
   runDetails.addProperty("is_frame_skipping", 0);
-  std::pair<double, double> minmax = LoadILLSANS::calculateQMaxQMin();
-  runDetails.addProperty("qmin", minmax.first);
-  runDetails.addProperty("qmax", minmax.second);
   NXhandle nxHandle;
   NXstatus nxStat = NXopen(filename.c_str(), NXACC_READ, &nxHandle);
   if (nxStat != NX_ERROR) {
@@ -766,6 +714,7 @@ void LoadILLSANS::moveSource() {
   * Moves the component such that the pixel with center_x, center_y coordinates
  * moves to
   * x=0, y=0 (i.e. z axis).
+  * @param component : the name of the instrument component
   * @param center_x : beam center x coord (in pixels)
   * @param center_y : beam center y coord (in pixels)
   */
