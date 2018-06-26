@@ -188,7 +188,8 @@ the second vector contains all the second values, etc.
 std::vector<std::vector<double>>
 allYValuesAtIndex(const std::vector<MatrixWorkspace_sptr> &workspaces,
                   const std::size_t index) {
-  std::vector<std::vector<double>> yValues(workspaces[0]->getDimension(0)->getNBins());
+  std::vector<std::vector<double>> yValues(
+      workspaces[0]->getDimension(0)->getNBins());
   for (auto &&workspace : workspaces) {
     const auto values = workspace->y(index).rawData();
     for (auto j = 0u; j < values.size(); ++j)
