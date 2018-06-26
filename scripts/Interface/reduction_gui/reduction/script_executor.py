@@ -1,20 +1,20 @@
-try: 
-    import mantidplot 
-    HAS_MANTIDPLOT = True 
-except(ImportError, ImportWarning): 
-    HAS_MANTIDPLOT = False 
+try:
+    import mantidplot
+    HAS_MANTIDPLOT = True
+except(ImportError, ImportWarning):
+    HAS_MANTIDPLOT = False
 
-try: 
-    from mantidqt.widgets.codeeditor.execution import PythonCodeExecution 
-    HAS_MANTID_QT = True 
-except(ImportError, ImportWarning): 
-    HAS_MANTID_QT = False 
+try:
+    from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
+    HAS_MANTID_QT = True
+except(ImportError, ImportWarning):
+    HAS_MANTID_QT = False
 
 import traceback
 
 
-def get_indent(line):
-    return len(line) - len(line.lstrip(' \t')) 
+def __get_indent(line):
+    return len(line) - len(line.lstrip(' \t'))
 
 def splitCodeString(string, return_compiled=True):
     import code
@@ -28,7 +28,7 @@ def splitCodeString(string, return_compiled=True):
         for line in lines:
             line_nbr += 1
 
-            if get_indent(line) <= current_indent:
+            if __get_indent(line) <= current_indent:
                 code_object = code.compile_command(current_statement, filename="<input>", symbol="single")
                 if code_object is not None:
                     if current_statement.strip():
@@ -51,7 +51,6 @@ def splitCodeString(string, return_compiled=True):
     except ValueError as e:
         raise e
 
-
 def execute_script(script, progress_action):
     """
         @param script: the script to execute
@@ -59,15 +58,15 @@ def execute_script(script, progress_action):
             - progress: a value between 0 and 1 indicating the current progress
             - state: a string indicating the current state ('running', 'success' or 'failure')
     """
-    if HAS_MANTIDPLOT: 
+    if HAS_MANTIDPLOT:
         execFunc = lambda code: mantidplot.runPythonScript(code, async=True)
     elif HAS_MANTID_QT:
-        codeExecuter = PythonCodeExecution() 
+        codeExecuter = PythonCodeExecution()
         def __execute(code):
             codeExecuter.execute_async(code)
             return True
         execFunc = __execute
-    else: 
+    else:
         # exec doesn't keep track of globals and locals, so we have to do it manually:
         globals_dict = dict()
         locals_dict = dict()
@@ -93,6 +92,3 @@ def execute_script(script, progress_action):
             progress(i, 'failure')
             raise e
     progress_action(1.0, 'success')
-
-
-
