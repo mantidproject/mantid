@@ -326,7 +326,9 @@ void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace,
 *
 * THIS ONLY APPLIES TO ISIS FILES WITH "detector_1_events" IN THE "NXentry."
 *
-* @param WS :: The event workspace collection which events will be modified.
+* @param file :: The nexus file to read from.
+* @param localWorkspace :: The event workspace collection which events will be
+*modified.
 * @param entry_name :: An NXentry tag in the file
 * @param classType :: The type of the events: either detector or monitor
 */
