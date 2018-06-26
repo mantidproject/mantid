@@ -50,8 +50,8 @@ double computeAverageDeltaTByT(const HistogramData::HistogramX &tValues) {
 std::string generateBankHeader(int bank, int minT, size_t numberBins,
                                double deltaTByT) {
   std::stringstream stream;
-  const auto numberLines =
-      (size_t)std::ceil((double)numberBins / POINTS_PER_LINE);
+  const auto numberLines = static_cast<size_t>(
+      std::ceil(static_cast<double>(numberBins) / POINTS_PER_LINE));
 
   stream << std::setprecision(2) << "BANK " << bank << " " << numberBins << "  "
          << numberLines << " RALF  " << minT << "  96  " << minT << " "
@@ -178,8 +178,9 @@ void SaveGDA::exec() {
     const auto numPoints =
         std::min({tofScaled.size(), intensity.size(), error.size()});
 
-    const auto header = generateBankHeader(i + 1, (int)std::round(tofScaled[0]),
-                                           numPoints, averageDeltaTByT);
+    const auto header =
+        generateBankHeader(i + 1, static_cast<int>(std::round(tofScaled[0])),
+                           numPoints, averageDeltaTByT);
 
     outFile << std::left << std::setw(80) << header << '\n' << std::right;
 
