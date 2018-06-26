@@ -9,6 +9,8 @@
 Description
 -----------
 
+This algorithm is deprecated and will be removed in the next release. Please use :ref:`algm-MergeRuns` instead.
+
 Merges workspaces from a given list using :ref:`algm-MergeRuns` algorithm. Sample logs are merged in the following way.
 
 +---------++-------------------------------+
