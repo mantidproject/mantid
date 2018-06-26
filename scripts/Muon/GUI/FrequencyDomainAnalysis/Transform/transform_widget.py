@@ -26,6 +26,9 @@ class TransformWidget(QtGui.QWidget):
     def widget(self):
         return self.view
 
+    def mockWidget(self, mockView):
+        self.view = mockView
+
     def closeEvent(self,event):
         self.selector.closeEvent(event)
         self.fft.closeEvent(event)
