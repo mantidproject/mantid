@@ -154,7 +154,7 @@ class PlotSelectorView(QWidget):
 
     def _add_to_plot_list(self, plot_name):
         real_item = PlotNameWidget(self.presenter, plot_name, self, self.is_run_as_unit_test)
-        widget_item = HumanReadableSortListWidgetItem()
+        widget_item = HumanReadableSortItem()
         if self.sort_type == SortType.Name:
             widget_item.setData(Qt.InitialSortOrderRole, plot_name)
         elif self.sort_type == SortType.LastShown:
@@ -249,6 +249,24 @@ class PlotSelectorView(QWidget):
         widget.toggle_plot_name_editable(True)
 
     # ----------------------- Plot Sorting --------------------------
+    """
+    How the sorting works
+    
+    The QListWidgetItem has a text string set via .setData with the
+    Qt.InitialSortOrderRole as the role for this string (not strictly
+    used as intended in Qt). If the sorting is by name this is just
+    the name of the plot.
+    
+    If sorting by last active this is the number the plot was last 
+    active, or if never active it is the plot name with an 'A' 
+    appended to the front. For example ['1', '2', 'AUnshownPlot'].
+    
+    QListWidgetItem is subclassed by HumanReadableSortItem to
+    override the < operator. This uses the text with the 
+    InitialSortOrderRole to sort, and sorts in a human readable way,
+    for example ['Figure 1', 'Figure 2', 'Figure 10'] as opposed to
+    the ['Figure 1', 'Figure 10', 'Figure 2'].
+    """
 
     def _make_sort_button(self):
         sort_button = QPushButton("Sort")
@@ -300,16 +318,21 @@ class PlotSelectorView(QWidget):
         self.sort_type = SortType.Name
 
     def sort_by_last_shown(self):
-        self.list_widget.setSortingEnabled(False)
+        self.sort_type = SortType.LastShown
+        self.presenter.update_last_shown_order()
 
+    def set_last_shown_order(self, last_shown_order_dict):
         for row in range(len(self.list_widget)):
             item = self.list_widget.item(row)
             widget = self.list_widget.itemWidget(item)
-            item.setData(Qt.InitialSortOrderRole, widget.plot_name[-1])
-
+            if widget.plot_name in last_shown_order_dict:
+                item.setData(Qt.InitialSortOrderRole, str(last_shown_order_dict[widget.plot_name]))
+            else:
+                # Append an 'A' to the plot name - it has never been
+                # shown so goes after the numbers
+                item.setData(Qt.InitialSortOrderRole, 'A' + widget.plot_name)
+                print(item.text())
         self.list_widget.sortItems()
-        self.list_widget.setSortingEnabled(True)
-        self.sort_type = SortType.LastShown
 
     # ---------------------- Plot Exporting -------------------------
 
@@ -416,7 +439,7 @@ class PlotNameWidget(QWidget):
         self.presenter.export_plots(self.plot_name, path, extension)
 
 
-class HumanReadableSortListWidgetItem(QListWidgetItem):
+class HumanReadableSortItem(QListWidgetItem):
     def convert(self, text):
         return int(text) if text.isdigit() else text.lower()
 

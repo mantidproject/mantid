@@ -32,6 +32,7 @@ class FigureAction(Enum):
     New = 1
     Closed = 2
     Renamed = 3
+    OrderChanged = 4
 
 
 class DictionaryObserver(object):
@@ -117,6 +118,7 @@ class GlobalFigureManager(object):
         del cls.figs[num]
         manager.destroy()
         gc.collect(1)
+        cls.notify_observers(FigureAction.OrderChanged, "")
 
     @classmethod
     def destroy_fig(cls, fig):
@@ -185,6 +187,7 @@ class GlobalFigureManager(object):
                 cls._activeQue.append(m)
         cls._activeQue.append(manager)
         cls.figs[manager.num] = manager
+        cls.notify_observers(FigureAction.OrderChanged, "")
 
     @classmethod
     def draw_all(cls, force=False):
@@ -223,6 +226,24 @@ class GlobalFigureManager(object):
             if figure_manager.get_window_title() == figure_title:
                 return figure_manager
         return None
+
+    @classmethod
+    def last_shown_order_dict(cls):
+        """
+        Returns a dictionary where the keys are the plot names (figure
+        titles) and the values are the last shown (active) order, the
+        most recent being 1, the oldest being N, where N is the number
+        of figure managers
+        :return: A dictionary with the values as plot name and keys
+                 as the opening order
+        """
+        last_shown_order_dict = {}
+        num_figure_managers = len(cls._activeQue)
+
+        for index in range(num_figure_managers):
+            last_shown_order_dict[cls._activeQue[index].get_window_title()] = num_figure_managers - index
+
+        return last_shown_order_dict
 
     # ---------------------- Observer methods ---------------------
     # This is currently very simple as the only observer is

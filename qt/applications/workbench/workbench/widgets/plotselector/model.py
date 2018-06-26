@@ -90,6 +90,8 @@ class PlotSelectorModel(object):
         if action == FigureAction.Renamed:
             new_name, old_name = plot_name
             self.presenter.rename_in_plot_list(new_name, old_name)
+        if action == FigureAction.OrderChanged:
+            self.presenter.update_last_shown_order()
         if action == FigureAction.Unknown:
             self.presenter.update_plot_list()
 
@@ -136,6 +138,11 @@ class PlotSelectorModel(object):
         figure_number_to_close = self.GlobalFigureManager.get_figure_number_from_name(plot_name)
         if figure_number_to_close is not None:
             self.GlobalFigureManager.destroy(figure_number_to_close)
+
+    # ----------------------- Plot Sorting --------------------------
+
+    def last_shown_order_dict(self):
+        return self.GlobalFigureManager.last_shown_order_dict()
 
     # ---------------------- Plot Exporting -------------------------
 

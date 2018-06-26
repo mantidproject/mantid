@@ -19,7 +19,7 @@ from __future__ import absolute_import, print_function
 import os
 
 from .model import PlotSelectorModel
-from .view import PlotSelectorView
+from .view import PlotSelectorView, SortType
 
 
 class PlotSelectorPresenter(object):
@@ -214,6 +214,11 @@ class PlotSelectorPresenter(object):
             self.view.sort_by_name()
         else:
             self.view.sort_by_last_shown()
+
+    def update_last_shown_order(self):
+        if self.view.sort_type == SortType.LastShown:
+            last_shown_order_dict = self.model.last_shown_order_dict()
+            self.view.set_last_shown_order(last_shown_order_dict)
 
     # ---------------------- Plot Exporting -------------------------
 
