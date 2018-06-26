@@ -155,8 +155,17 @@ class ArrayPropertyTest(unittest.TestCase):
 
         # Test
         self.assertEquals(float_arr.dtype(), "double")
-        self.assertEquals(int_arr.dtype(), "long")
         self.assertEquals(str_arr.dtype(), "string")
+        
+        # Implementation of IntArrayProperty is based on long 
+        # (which is itself implementation defined, so a special case is needed here)
+        import os
+        if os.name == 'nt':
+          # Windows should return "long"
+          self.assertEquals(int_arr.dtype(), "long")
+        else:
+          # Unix based systems should return "int64"
+          self.assertEquals(int_arr.dtype(), "int64")
 
 
     def test_PythonAlgorithm_setProperty_With_Ranges_String(self):
