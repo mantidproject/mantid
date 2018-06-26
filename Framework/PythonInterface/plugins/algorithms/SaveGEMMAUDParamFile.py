@@ -95,7 +95,7 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
 
         with open(self.getProperty(self.PROP_OUTPUT_FILE).value, "w") as output_file:
             # Note, once we've got rid of Python 2 support this can be simplified to
-            # template.format_map(defaultdict(create_empty_param_list, output_params))
+            # template.format_map(**defaultdict(create_empty_param_list, output_params))
             output_file.write(Formatter().vformat(template, (),
                                                   defaultdict(create_empty_param_list,
                                                               output_params)))
