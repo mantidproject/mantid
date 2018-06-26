@@ -256,7 +256,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings,
       m_projectRecoveryThread(this), m_exitCode(0),
 #ifdef Q_OS_MAC // Mac
       settings(QSettings::IniFormat, QSettings::UserScope, "Mantid",
-               "MantidPlot"),
+               "MantidPlot")
 #else
       settings("Mantid", "MantidPlot")
 #endif
