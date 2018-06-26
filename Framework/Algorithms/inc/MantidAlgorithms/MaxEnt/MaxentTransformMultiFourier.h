@@ -4,13 +4,13 @@
 #include "MantidAlgorithms/MaxEnt/MaxentTransformFourier.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpace.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceComplex.h"
-#include <memory>
+//#include <memory>
 
 namespace Mantid {
 namespace Algorithms {
 
-using MaxentSpace_sptr = std::shared_ptr<MaxentSpace>;
-using MaxentSpaceComplex_sptr = std::shared_ptr<MaxentSpaceComplex>;
+using MaxentSpace_sptr = boost::shared_ptr<MaxentSpace>;
+using MaxentSpaceComplex_sptr = boost::shared_ptr<MaxentSpaceComplex>;
 
 /** MaxentTransformMultiFourier : Defines a transformation from 
   data space to image space (and vice-versa) 

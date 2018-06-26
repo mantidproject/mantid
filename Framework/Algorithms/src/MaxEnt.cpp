@@ -8,6 +8,7 @@
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceComplex.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceReal.h"
 #include "MantidAlgorithms/MaxEnt/MaxentTransformFourier.h"
+#include "MantidAlgorithms/MaxEnt/MaxentTransformMultiFourier.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -367,28 +368,34 @@ void MaxEnt::exec() {
   // Is our data space real or complex?
   MaxentSpace_sptr dataSpace;
   if (complexData) {
-    dataSpace = std::make_shared<MaxentSpaceComplex>();
+    dataSpace = boost::make_shared<MaxentSpaceComplex>();
   } else {
-    dataSpace = std::make_shared<MaxentSpaceReal>();
+    dataSpace = boost::make_shared<MaxentSpaceReal>();
   }
   // Is our image space real or complex?
   MaxentSpace_sptr imageSpace;
   if (complexImage) {
-    imageSpace = std::make_shared<MaxentSpaceComplex>();
+    imageSpace = boost::make_shared<MaxentSpaceComplex>();
   } else {
-    imageSpace = std::make_shared<MaxentSpaceReal>();
+    imageSpace = boost::make_shared<MaxentSpaceReal>();
   }
-  // The type of transform. Currently a 1D Fourier Transform
-  MaxentTransform_sptr transform =
-      std::make_shared<MaxentTransformFourier>(dataSpace, imageSpace);
+  // The type of transform. Currently a 1D Fourier Transform or Multiple ID Fourier transform
+  MaxentTransform_sptr transform;
+  if (perSpectrumReconstruction) {
+    transform = boost::make_shared<MaxentTransformFourier>(dataSpace, imageSpace);
+  }
+  else {
+    auto complexDataSpace = boost::make_shared<MaxentSpaceComplex>();
+    transform = boost::make_shared<MaxentTransformMultiFourier>(complexDataSpace, imageSpace, nHist/2); 
+  }
 
   // The type of entropy we are going to use (depends on the type of image,
   // positive only, or positive and/or negative)
   MaxentEntropy_sptr entropy;
   if (positiveImage) {
-    entropy = std::make_shared<MaxentEntropyPositiveValues>();
+    entropy = boost::make_shared<MaxentEntropyPositiveValues>();
   } else {
-    entropy = std::make_shared<MaxentEntropyNegativeValues>();
+    entropy = boost::make_shared<MaxentEntropyNegativeValues>();
   }
 
   // Entropy and transform is all we need to set up a calculator
@@ -401,9 +408,9 @@ void MaxEnt::exec() {
   MatrixWorkspace_sptr outEvolTest;
 
   size_t nSpec = complexData ? nHist / 2 : nHist;
-  size_t nSpecSum = 1;
+  size_t nSpecConcat = 1;
   if (!perSpectrumReconstruction) {
-    nSpecSum = nSpec;
+    nSpecConcat = nSpec;
     nSpec = 1;
   }
   outImageWS =
@@ -423,6 +430,7 @@ void MaxEnt::exec() {
   outEvolChi->setPoints(0, Points(nIter, LinearGenerator(0.0, 1.0)));
 
   size_t dataLength = complexData ? 2 * inWS->y(0).size() : inWS->y(0).size();
+  dataLength *= nSpecConcat;
 
   for (size_t spec = 0; spec < nSpec; spec++) {
 
@@ -437,15 +445,8 @@ void MaxEnt::exec() {
           toComplex(inWS, spec, true, !perSpectrumReconstruction); // 3rd arg true -> errors
     } else {
       if (!perSpectrumReconstruction) {
-        const size_t numBins = inWS->y(0).size();
-        data.reserve(numBins);
-        errors.reserve(numBins);
-        for (size_t s = 0; s < nSpecSum; s++) {
-          for (size_t i = 0; i < numBins; i++) {
-            data[i] += inWS->y(s).rawData()[i];
-            errors[i] += inWS->e(s).rawData()[i];
-          }
-        }
+        throw std::invalid_argument(
+          "ComplexData must be true, if PerSpectrum is false.");
       } else {
         data = inWS->y(spec).rawData();
         errors = inWS->e(spec).rawData();
@@ -455,10 +456,10 @@ void MaxEnt::exec() {
     std::vector<double> linearAdjustments;
     std::vector<double> constAdjustments;
     if (dataLinearAdj) {
-      linearAdjustments = toComplex(dataLinearAdj, spec, false, false);
+      linearAdjustments = toComplex(dataLinearAdj, spec, false, !perSpectrumReconstruction);
     }
     if (dataConstAdj) {
-      constAdjustments = toComplex(dataConstAdj, spec, false, false);
+      constAdjustments = toComplex(dataConstAdj, spec, false, !perSpectrumReconstruction);
     }
 
     // To record the algorithm's progress
@@ -525,7 +526,7 @@ void MaxEnt::exec() {
     auto solImage = maxentCalculator.getImage();
 
     // Populate the output workspaces
-    populateDataWS(inWS, spec, nSpec, solData, complexData, outDataWS);
+    populateDataWS(inWS, spec, nSpec, solData, complexData, !perSpectrumReconstruction, outDataWS);
     populateImageWS(inWS, spec, nSpec, solImage, complexImage, outImageWS,
                     autoShift);
 
@@ -555,42 +556,43 @@ void MaxEnt::exec() {
 * @param spec :: [input] The spectrum of interest
 * @param errors :: [input] If true, returns the errors, otherwise returns the
 * counts
-* @param sumSpec :: [input] If true, use sum of all spectra (ignoring spec)
+* @param concatSpec :: [input] If true, use concatenation of all spectra (ignoring spec)
 * @return : Spectrum 'spec' as a complex vector
 */
 std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
-                                      size_t spec, bool errors, bool sumSpec) {
+                                      size_t spec, bool errors, bool concatSpec) {
   const size_t numBins = inWS->y(0).size();
-  std::vector<double> result(numBins * 2, 0.0);
+  size_t nSpec = inWS->getNumberHistograms() / 2;
+  size_t dataLength =concatSpec ? numBins*nSpec: nSpec ;
+  std::vector<double> result;
+  result.reserve(numBins);
 
   if (inWS->getNumberHistograms() % 2)
     throw std::invalid_argument(
         "Cannot convert input workspace to complex data");
 
-  size_t nspec = inWS->getNumberHistograms() / 2;
-
   if (!errors) {
     for (size_t i = 0; i < numBins; i++) {
-      if (sumSpec) {
-        for (size_t s = 0; s < nspec; s++) {
-          result[2 * i] += inWS->y(s)[i];
-          result[2 * i + 1] += inWS->y(s + nspec)[i];
+      if (concatSpec) {
+        for (size_t s = 0; s < nSpec; s++) {
+          result.emplace_back( inWS->y(s)[i]);
+          result.emplace_back( inWS->y(s + nSpec)[i]);
         }
       } else {
         result[2 * i] = inWS->y(spec)[i];
-        result[2 * i + 1] = inWS->y(spec + nspec)[i];
+        result[2 * i + 1] = inWS->y(spec + nSpec)[i];
       }
     }
   } else {
     for (size_t i = 0; i < numBins; i++) {
-      if (sumSpec) {
-        for (size_t s = 0; s < nspec; s++) {
-          result[2 * i] += inWS->e(s)[i];
-          result[2 * i + 1] += inWS->e(s + nspec)[i];
+      if (concatSpec) {
+        for (size_t s = 0; s < nSpec; s++) {
+          result.emplace_back(inWS->e(s)[i]);
+          result.emplace_back(inWS->e(s + nSpec)[i]);
         }
       } else {
         result[2 * i] = inWS->e(spec)[i];
-        result[2 * i + 1] = inWS->e(spec + nspec)[i];
+        result[2 * i + 1] = inWS->e(spec + nSpec)[i];
       }
     }
   }
@@ -843,7 +845,7 @@ void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
                              bool autoShift) {
 
   if (complex && result.size() % 2)
-    throw std::invalid_argument("Cannot write results to output workspaces");
+    throw std::invalid_argument("Cannot write image results to output workspaces");
 
   int npoints = complex ? static_cast<int>(result.size() / 2)
                         : static_cast<int>(result.size());
@@ -923,39 +925,57 @@ void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
 * @param result :: [input] The reconstructed data to be written in the output
 * workspace (can be a real or complex vector)
 * @param complex :: [input] True if result is a complex vector, false otherwise
+* @param concatenated :: [input] True if result is concatenated spectra
 * @param outWS :: [input] The output workspace to populate
 */
 void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
                             size_t nspec, const std::vector<double> &result,
+                            bool concatenated,
                             bool complex, MatrixWorkspace_sptr &outWS) {
 
   if (complex && result.size() % 2)
-    throw std::invalid_argument("Cannot write results to output workspaces");
+    throw std::invalid_argument("Cannot write data results to output workspaces");
+  if (concatenated && !complex)
+    throw std::invalid_argument("Concatenated data results must be complex");
+  if (concatenated && result.size() % nspec*2)
+    throw std::invalid_argument("Cannot write concatenated data results to output workspaces");
 
-  int npoints = complex ? static_cast<int>(result.size() / 2)
+  int resultLength = complex ? static_cast<int>(result.size() / 2)
                         : static_cast<int>(result.size());
-  int npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
-  MantidVec X(npointsX);
-  MantidVec YR(npoints);
-  MantidVec YI(npoints);
-  MantidVec E(npoints, 0.);
+  size_t spectrumLength = (concatenated ? resultLength / nspec: resultLength);
+  size_t spectrumLengthX = inWS->isHistogramData() ? spectrumLength + 1 : spectrumLength;
+  MantidVec X(spectrumLengthX);
+  MantidVec YR(spectrumLength);
+  MantidVec YI(spectrumLength);
+  MantidVec E(spectrumLength, 0.);
 
   double x0 = inWS->x(spec)[0];
   double dx = inWS->x(spec)[1] - x0;
 
   // X values
-  for (int i = 0; i < npointsX; i++) {
+  for (size_t i = 0; i < spectrumLengthX; i++) {
     X[i] = x0 + i * dx;
   }
 
   // Y values
   if (complex) {
-    for (int i = 0; i < npoints; i++) {
-      YR[i] = result[2 * i];
-      YI[i] = result[2 * i + 1];
+    if (concatenated) {
+      for (size_t s = 0; s < nspec; s++) {
+        for (size_t i = 0; i < spectrumLength; i++) {
+          // TO DO We need multiple YR & YI here & multiple moves later on
+          YR[i] = result[2 * i];
+          YI[i] = result[2 * i + 1];
+        }
+      }
+    }
+    else {
+      for (size_t i = 0; i < spectrumLength; i++) {
+        YR[i] = result[2 * i];
+        YI[i] = result[2 * i + 1];
+      }
     }
   } else {
-    for (int i = 0; i < npoints; i++) {
+    for (size_t i = 0; i < spectrumLength; i++) {
       YR[i] = result[i];
       YI[i] = 0.;
     }

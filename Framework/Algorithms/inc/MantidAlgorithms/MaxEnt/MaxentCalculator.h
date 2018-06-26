@@ -10,8 +10,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-using MaxentEntropy_sptr = std::shared_ptr<MaxentEntropy>;
-using MaxentTransform_sptr = std::shared_ptr<MaxentTransform>;
+//using MaxentEntropy_sptr = boost::shared_ptr<MaxentEntropy>;
+//using MaxentTransform_sptr = boost::shared_ptr<MaxentTransform>;
 
 /** MaxentCalculator : This class performs one maxent iteration and calculates
   chi-sq, angle between gradient of S and gradient of chi-sq,  search directions

@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_MAXENTTRANSFORM_H_
 
 #include "MantidAlgorithms/DllConfig.h"
+#include <boost/shared_ptr.hpp>
 #include <vector>
 
 namespace Mantid {
@@ -42,6 +43,8 @@ public:
   // Transforms from data space to image space
   virtual std::vector<double> dataToImage(const std::vector<double> &data) = 0;
 };
+
+using MaxentTransform_sptr = boost::shared_ptr<MaxentTransform>;
 
 } // namespace Algorithms
 } // namespace Mantid

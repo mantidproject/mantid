@@ -1,5 +1,4 @@
 #include "MantidAlgorithms/MaxEnt/MaxentTransformMultiFourier.h"
-#include <boost/shared_array.hpp>
 #include <gsl/gsl_fft_complex.h>
 
 namespace Mantid {

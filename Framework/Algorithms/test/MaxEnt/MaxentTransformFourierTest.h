@@ -8,16 +8,12 @@
 #include "MantidAlgorithms/MaxEnt/MaxentTransformFourier.h"
 #include <cmath>
 #include <memory>
+#include <boost/make_shared.hpp>
 
 using Mantid::Algorithms::MaxentSpaceComplex;
 using Mantid::Algorithms::MaxentSpaceReal;
 using Mantid::Algorithms::MaxentTransformFourier;
-
-using MaxentSpace_sptr = std::shared_ptr<Mantid::Algorithms::MaxentSpace>;
-using MaxentSpaceComplex_sptr =
-    std::shared_ptr<Mantid::Algorithms::MaxentSpaceComplex>;
-using MaxentSpaceReal_sptr =
-    std::shared_ptr<Mantid::Algorithms::MaxentSpaceReal>;
+using Mantid::Algorithms::MaxentSpace_sptr;
 
 class MaxentTransformFourierTest : public CxxTest::TestSuite {
 public:
@@ -30,8 +26,8 @@ public:
 
   void test_real_image_to_real_data() {
 
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceReal>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceReal>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // cos (x)
@@ -59,8 +55,8 @@ public:
 
   void test_real_image_to_complex_data() {
 
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceReal>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // cos (x)
@@ -88,8 +84,8 @@ public:
 
   void test_complex_image_to_real_data() {
 
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceReal>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // cos (x) + i sin(x)
@@ -124,8 +120,8 @@ public:
 
   void test_complex_image_to_complex_data() {
 
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // sin (x) + i cos(x)
@@ -160,8 +156,8 @@ public:
 
   void test_real_data_to_real_image() {
 
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceReal>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceReal>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // cos(x)
@@ -189,8 +185,8 @@ public:
 
   void test_real_data_to_complex_image() {
 
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceReal>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // cos (x)
@@ -218,8 +214,8 @@ public:
 
   void test_complex_data_to_real_image() {
 
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceReal>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // cos (x) + i sin(x)
@@ -253,8 +249,8 @@ public:
   }
 
   void test_complex_data_to_complex_image() {
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // sin (x) + i cos(x)
@@ -289,8 +285,8 @@ public:
 
   void test_forward_backward() {
 
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // sin (x) + i cos(x)

@@ -63,7 +63,7 @@ private:
   void exec() override;
   /// Returns spectrum 'spec' as a complex vector
   std::vector<double> toComplex(API::MatrixWorkspace_const_sptr &inWS,
-                                size_t spec, bool errors, bool sumSpec);
+                                size_t spec, bool errors, bool concatSpec);
   // Calculates chi-square by solving the matrix equation A*x = b
   double calculateChi(const QuadraticCoefficients &coeffs, double a,
                       std::vector<double> &beta);
@@ -87,6 +87,7 @@ private:
   /// Populates the output workspace containing the reconstructed data
   void populateDataWS(API::MatrixWorkspace_const_sptr &inWS, size_t spec,
                       size_t nspec, const std::vector<double> &result,
+                      bool concatenatedSpectra,
                       bool complex, API::MatrixWorkspace_sptr &outWS);
   /// Populates the output workspace containing the reconstructed image
   void populateImageWS(API::MatrixWorkspace_const_sptr &inWS, size_t spec,

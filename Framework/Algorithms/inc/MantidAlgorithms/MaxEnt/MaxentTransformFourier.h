@@ -3,12 +3,10 @@
 
 #include "MantidAlgorithms/MaxEnt/MaxentTransform.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpace.h"
-#include <memory>
+//#include <memory>
 
 namespace Mantid {
 namespace Algorithms {
-
-using MaxentSpace_sptr = std::shared_ptr<MaxentSpace>;
 
 /** MaxentTransformFourier : Defines a transformation from data space to image
   space (and vice-versa) where spaces are related by a **1D** Fourier Transform.
