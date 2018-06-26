@@ -2041,7 +2041,6 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName) {
 /**
 * Enable PP tool for the plot of the given WS. Does not update data selector
 * @param wsName Name of the WS which plot PP tool will be attached to.
-* @param filePath :: [input] Optional path to file that is actually used. This
 * is for "load current run" where the data file has a temporary name like
 * MUSRauto_E.tmp
 */
@@ -2076,15 +2075,6 @@ void MuonAnalysis::selectMultiPeakNoUpdate(const QString &wsName) {
   runPythonCode(code);
 }
 
-/**
-* Pass through to selectMultiPeak(wsName, filePath) where filePath is set
-* to blank. Enables connection as a slot without Qt understanding. No update
-* boost::optional.
-* @param wsName Name of the selected workspace
-*/
-void MuonAnalysis::selectMultiPeakNoUpdate(const QString &wsName) {
-  selectMultiPeakNoUpdate(wsName);
-}
 
 /**
  * Disable tools for all the graphs within MantidPlot.
