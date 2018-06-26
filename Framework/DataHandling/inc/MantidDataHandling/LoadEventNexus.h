@@ -204,14 +204,14 @@ private:
   loadISISVMSSpectraMapping(const std::string &entry_name);
 
   /// ISIS specific methods for dealing with wide events
-  void loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
-                        const std::string &entry_name,
-                        const std::string &classType);
+  void adjustTimeOfFlightRAL(EventWorkspaceCollection_sptr WS,
+                             const std::string &entry_name,
+                             const std::string &classType);
 
-  void loadTimeOfFlightData(::NeXus::File &file,
-                            EventWorkspaceCollection_sptr WS,
-                            const std::string &binsName, size_t start_wi = 0,
-                            size_t end_wi = 0);
+  void makeTimeOfFlightDataFuzzy(::NeXus::File &file,
+                                 EventWorkspaceCollection_sptr WS,
+                                 const std::string &binsName,
+                                 size_t start_wi = 0, size_t end_wi = 0);
   template <typename T> void filterDuringPause(T workspace);
 
   /// Set the top entry field name

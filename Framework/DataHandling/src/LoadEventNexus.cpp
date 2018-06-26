@@ -866,7 +866,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_ws->setAllX(HistogramData::BinEdges{0.0, 1.0});
 
   // if there is time_of_flight load it
-  loadTimeOfFlight(m_ws, m_top_entry_name, classType);
+  adjustTimeOfFlightRAL(m_ws, m_top_entry_name, classType);
 }
 
 //-----------------------------------------------------------------------------
@@ -1265,15 +1265,17 @@ void LoadEventNexus::setTimeFilters(const bool monitors) {
 //               ISIS event corrections
 //-----------------------------------------------------------------------------
 /**
-* Check if time_of_flight can be found in the file and load it
+* Check if time_of_flight can be found in the file and load it.
+*
+* THIS ONLY APPLIES TO ISIS FILES WITH "detector_1_events" IN THE "NXentry."
 *
 * @param WS :: The event workspace collection which events will be modified.
 * @param entry_name :: An NXentry tag in the file
 * @param classType :: The type of the events: either detector or monitor
 */
-void LoadEventNexus::loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
-                                      const std::string &entry_name,
-                                      const std::string &classType) {
+void LoadEventNexus::adjustTimeOfFlightRAL(EventWorkspaceCollection_sptr WS,
+                                           const std::string &entry_name,
+                                           const std::string &classType) {
   bool done = false;
   // Go to the root, and then top entry
   m_file->openPath("/");
@@ -1313,7 +1315,7 @@ void LoadEventNexus::loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
                //}
       }
       done = true;
-      loadTimeOfFlightData(*m_file, WS, bins->first, i, i + 1);
+      makeTimeOfFlightDataFuzzy(*m_file, WS, bins->first, i, i + 1);
       m_file->closeGroup();
     }
   }
@@ -1325,7 +1327,7 @@ void LoadEventNexus::loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
     for (string_map_t::const_iterator it = entries.begin(); it != entries.end();
          ++it) {
       if (it->first == "time_of_flight" || it->first == "event_time_bins") {
-        loadTimeOfFlightData(*m_file, WS, it->first);
+        makeTimeOfFlightDataFuzzy(*m_file, WS, it->first);
         done = true;
       }
     }
@@ -1359,7 +1361,7 @@ void LoadEventNexus::loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
         for (string_map_t::const_iterator it = entries.begin();
              it != entries.end(); ++it) {
           if (it->first == "time_of_flight" || it->first == "event_time_bins") {
-            loadTimeOfFlightData(*m_file, WS, it->first);
+            makeTimeOfFlightDataFuzzy(*m_file, WS, it->first);
           }
         }
         m_file->closeGroup();
@@ -1388,19 +1390,17 @@ void LoadEventNexus::loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
 * @param start_wi :: First workspace index to process
 * @param end_wi :: Last workspace index to process
 */
-void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
-                                          EventWorkspaceCollection_sptr WS,
-                                          const std::string &binsName,
-                                          size_t start_wi, size_t end_wi) {
+void LoadEventNexus::makeTimeOfFlightDataFuzzy(::NeXus::File &file,
+                                               EventWorkspaceCollection_sptr WS,
+                                               const std::string &binsName,
+                                               size_t start_wi, size_t end_wi) {
+  const std::string EVENT_TIME_SHIFT_TAG("event_time_offset_shift");
   // first check if the data is already randomized
-  std::map<std::string, std::string> entries;
-  file.getEntries(entries);
-  std::map<std::string, std::string>::const_iterator shift =
-      entries.find("event_time_offset_shift");
-  if (shift != entries.end()) {
-    std::string random;
-    file.readData("event_time_offset_shift", random);
-    if (random == "random") {
+  const auto entries = file.getEntries();
+  if (entries.find(EVENT_TIME_SHIFT_TAG) != entries.end()) {
+    std::string event_shift_type;
+    file.readData(EVENT_TIME_SHIFT_TAG, event_shift_type);
+    if (event_shift_type == "random") {
       return;
     }
   }
@@ -1410,6 +1410,8 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
   // time of flights of events
   std::vector<float> tof;
   file.getData(tof);
+  file.closeData();
+
   // todo: try to find if tof can be reduced to just 3 numbers: start, end and
   // dt
   if (end_wi <= start_wi) {
@@ -1463,7 +1465,6 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
 
     event_list.sortTof();
   } // for wi
-  file.closeData();
 }
 
 /**
