@@ -15,22 +15,8 @@ bool TofEvent::operator==(const TofEvent &rhs) const {
 /** < comparison operator, using the TOF to do the comparison.
  * @param rhs: the other TofEvent to compare.
  * @return true if this->m_tof < rhs.m_tof*/
-bool TofEvent::operator<(const TofEvent &rhs) const {
-  return (this->m_tof < rhs.m_tof);
-}
-
-/** < comparison operator, using the TOF to do the comparison.
- * @param rhs: the other TofEvent to compare.
- * @return true if this->m_tof < rhs.m_tof*/
 bool TofEvent::operator>(const TofEvent &rhs) const {
   return (this->m_tof > rhs.m_tof);
-}
-
-/** < comparison operator, using the TOF to do the comparison.
- * @param rhs_tof: the other time of flight to compare.
- * @return true if this->m_tof < rhs.m_tof*/
-bool TofEvent::operator<(const double rhs_tof) const {
-  return (this->m_tof < rhs_tof);
 }
 
 /**
