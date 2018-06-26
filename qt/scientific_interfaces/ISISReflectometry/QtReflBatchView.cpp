@@ -7,6 +7,7 @@
 #include "ReflBatchPresenter.h"
 #include "ReflAsciiSaver.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "Presenters/BatchPresenter.h"
 #include "ReflRunsTabPresenter.h"
 
@@ -32,7 +33,7 @@ void QtReflBatchView::initLayout() {
   m_ui.batchTabs->addTab(m_settings.get(), "Settings");
 
   m_save = createSaveTab();
-  m_ui.batchTabs->addTab(m_settings.get(), "Save ASCII");
+  m_ui.batchTabs->addTab(m_save.get(), "Save ASCII");
 }
 
 IReflRunsTabView *QtReflBatchView::runs() const { return m_runs.get(); }
@@ -58,8 +59,14 @@ std::unique_ptr<QtReflEventTabView> QtReflBatchView::createEventTab() {
   return Mantid::Kernel::make_unique<QtReflEventTabView>(this);
 }
 
+Mantid::API::IAlgorithm_sptr QtReflBatchView::createReductionAlg() {
+  return Mantid::API::AlgorithmManager::Instance().create(
+      "ReflectometryReductionOneAuto");
+}
+
 std::unique_ptr<QtReflSettingsTabView> QtReflBatchView::createSettingsTab() {
-  return Mantid::Kernel::make_unique<QtReflSettingsTabView>(this);
+  return Mantid::Kernel::make_unique<QtReflSettingsTabView>(
+      createReductionAlg(), this);
 }
 
 std::unique_ptr<QtReflSaveTabView> QtReflBatchView::createSaveTab() {

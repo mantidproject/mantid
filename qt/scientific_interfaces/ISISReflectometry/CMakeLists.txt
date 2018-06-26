@@ -22,7 +22,6 @@ set ( SRC_FILES
     QtReflRunsTabView.cpp
     QtReflSaveTabView.cpp
     QtReflSettingsTabView.cpp
-    QtReflSettingsView.cpp
     ReflCatalogSearcher.cpp
     ReflAsciiSaver.cpp
     IReflAsciiSaver.cpp
@@ -38,7 +37,6 @@ set ( SRC_FILES
     ReflRunsTabPresenter.cpp
     ReflSaveTabPresenter.cpp
     ReflSearchModel.cpp
-    ReflSettingsPresenter.cpp
     ReflSettingsTabPresenter.cpp
     ReflTableSchema.cpp
     TransferResults.cpp
@@ -68,9 +66,7 @@ set ( INC_FILES
     IReflSaveTabPresenter.h
     IReflSaveTabView.h
     IReflSearcher.h
-    IReflSettingsPresenter.h
     IReflSettingsTabPresenter.h
-    IReflSettingsView.h
     MeasurementItem.h
     PrecompiledHeader.h
     QtReflEventTabView.h
@@ -80,7 +76,6 @@ set ( INC_FILES
     QtReflRunsTabView.h
     QtReflSaveTabView.h
     QtReflSettingsTabView.h
-    QtReflSettingsView.h
     QWidgetGroup.h
     ReflAutoreduction.h
     ReflCatalogSearcher.h
@@ -99,7 +94,6 @@ set ( INC_FILES
     ReflRunsTabPresenter.h
     ReflSaveTabPresenter.h
     ReflSearchModel.h
-    ReflSettingsPresenter.h
     ReflSettingsTabPresenter.h
     ReflTableSchema.h
     TransferResults.h
@@ -116,7 +110,6 @@ set ( MOC_FILES
     QtReflRunsTabView.h
     QtReflSaveTabView.h
     QtReflSettingsTabView.h
-    QtReflSettingsView.h
     QtReflMainWindowView.h
     QtReflBatchView.h
     Views/BatchView.h
@@ -130,7 +123,6 @@ set ( UI_FILES
    ReflRunsTabWidget.ui
    ReflSaveTabWidget.ui
    ReflSettingsTabWidget.ui
-   ReflSettingsWidget.ui
    ReflWindow.ui
    Views/BatchView.ui
 )

@@ -40,34 +40,63 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReflSettingsTabPresenter
-    : public IReflSettingsTabPresenter {
+    : public IReflSettingsTabPresenter,
+      public ReflSettingsTabViewSubscriber {
 public:
   /// Constructor
-  ReflSettingsTabPresenter(IReflSettingsTabView* view);
+  ReflSettingsTabPresenter(IReflSettingsTabView *view);
   /// Set the instrument name
   void setInstrumentName(const std::string &instName) override;
   void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
-  void settingsChanged(int group) override;
-  void onReductionPaused(int group) override;
-  void onReductionResumed(int group) override;
+  void settingsChanged() override;
+  void onReductionPaused() override;
+  void onReductionResumed() override;
   /// Returns values passed for 'Transmission run(s)'
   MantidWidgets::DataProcessor::OptionsQMap
-  getOptionsForAngle(int group, const double angle) const override;
+  getOptionsForAngle(const double angle) const override;
   /// Whether per-angle tranmsission runs are set
-  bool hasPerAngleOptions(int group) const override;
+  bool hasPerAngleOptions() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   MantidWidgets::DataProcessor::OptionsQMap
-  getTransmissionOptions(int group) const override;
+  getTransmissionOptions() const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
   MantidWidgets::DataProcessor::OptionsQMap
-  getReductionOptions(int group) const override;
+  getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
-  std::string getStitchOptions(int group) const override;
+  std::string getStitchOptions() const override;
+  MantidWidgets::DataProcessor::OptionsQMap getDefaultOptions() const;
+
+  void setTransmissionOption(MantidWidgets::DataProcessor::OptionsQMap &options,
+                             const QString &key, const QString &value) const;
+  void setTransmissionOption(MantidWidgets::DataProcessor::OptionsQMap &options,
+                             const QString &key,
+                             const std::string &value) const;
+
+  void notifyExperimentDefaultsRequested() override;
+  void notifyInstrumentDefaultsRequested() override;
+  void notifySettingsChanged() override;
+  void notifySummationTypeChanged() override;
+  QString getProcessingInstructions() const;
+  void addIfNotEmpty(MantidWidgets::DataProcessor::OptionsQMap &options,
+                     const QString &key, const QString &value) const;
+  void addIfNotEmpty(MantidWidgets::DataProcessor::OptionsQMap &options,
+                     const QString &key, const std::string &value) const;
 
 private:
-  /// The presenters for each group as a vector
-  IReflSettingsTabView* m_view;
+  Mantid::Geometry::Instrument_const_sptr
+  createEmptyInstrument(const std::string &instName);
+  Mantid::API::IAlgorithm_sptr createReductionAlg();
+  MantidWidgets::DataProcessor::OptionsQMap transmissionOptionsMap() const;
+  void
+  addTransmissionOptions(MantidWidgets::DataProcessor::OptionsQMap &options,
+                         std::initializer_list<QString> keys) const;
+  bool hasReductionTypes(const std::string &reductionType) const;
+  static QString asAlgorithmPropertyBool(bool value);
+  std::string m_currentInstrumentName;
+
+  IReflSettingsTabView *m_view;
   IReflBatchPresenter *m_mainPresenter;
+
 };
 }
 }

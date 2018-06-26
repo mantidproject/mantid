@@ -74,7 +74,7 @@ public:
   /// Returns whether the Runs Tab is currently processing any runs
   bool isProcessing() const override;
   bool isProcessing(int group) const override;
-  void settingsChanged(int group) override;
+  void settingsChanged() override;
   void notifyReductionPaused(int group) override;
   void notifyReductionResumed(int group) override;
   bool requestClose() const override;

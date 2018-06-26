@@ -9,6 +9,7 @@
 #include "QtReflEventTabView.h"
 #include "QtReflSettingsTabView.h"
 #include "QtReflRunsTabView.h"
+#include "MantidAPI/IAlgorithm.h"
 
 #include <QCloseEvent>
 
@@ -50,6 +51,8 @@ public:
 
 private:
   void initLayout();
+  Mantid::API::IAlgorithm_sptr createReductionAlg();
+
   std::unique_ptr<QtReflRunsTabView> createRunsTab();
   std::unique_ptr<QtReflEventTabView> createEventTab();
   std::unique_ptr<QtReflSettingsTabView> createSettingsTab();

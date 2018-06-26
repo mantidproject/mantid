@@ -5,11 +5,11 @@
 #include "ui_ReflSettingsTabWidget.h"
 #include "IReflSettingsTabView.h"
 #include "IReflSettingsTabPresenter.h"
+#include "MantidQtWidgets/Common/HintingLineEdit.h"
 #include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
 
 /** QtReflSettingsTabView : Provides an interface for the "Settings" tab in the
 ISIS Reflectometry interface.
@@ -35,17 +35,148 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflSettingsTabView : public QWidget, public IReflSettingsTabView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflSettingsTabView
+    : public QWidget,
+      public IReflSettingsTabView {
   Q_OBJECT
 public:
-  QtReflSettingsTabView(QWidget *parent = nullptr);
+  QtReflSettingsTabView(Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent = nullptr);
+  void subscribe(ReflSettingsTabViewSubscriber *notifyee) override;
+  /// Returns global options for 'Stitch1DMany'
+  std::string getStitchOptions() const override;
+  /// Return selected analysis mode
+  std::string getAnalysisMode() const override;
+  /// Return the per-angle options
+  std::map<std::string, MantidQt::MantidWidgets::DataProcessor::OptionsQMap>
+  getPerAngleOptions() const override;
+  /// Return start overlap for transmission runs
+  std::string getStartOverlap() const override;
+  /// Return end overlap for transmission runs
+  std::string getEndOverlap() const override;
+  /// Return selected polarisation corrections
+  std::string getPolarisationCorrections() const override;
+  /// Return CRho
+  std::string getCRho() const override;
+  /// Return CAlpha
+  std::string getCAlpha() const override;
+  /// Return CAp
+  std::string getCAp() const override;
+  /// Return Cpp
+  std::string getCPp() const override;
+  /// Return integrated monitors option
+  std::string getIntMonCheck() const override;
+  /// Return monitor integral wavelength min
+  std::string getMonitorIntegralMin() const override;
+  /// Return monitor integral wavelength max
+  std::string getMonitorIntegralMax() const override;
+  /// Return monitor background wavelength min
+  std::string getMonitorBackgroundMin() const override;
+  /// Return monitor background wavelength max
+  std::string getMonitorBackgroundMax() const override;
+  /// Return wavelength min
+  std::string getLambdaMin() const override;
+  /// Return wavelength max
+  std::string getLambdaMax() const override;
+  /// Return I0MonitorIndex
+  std::string getI0MonitorIndex() const override;
+  /// Return selected detector correction type
+  std::string getDetectorCorrectionType() const override;
+  /// Return selected summation type
+  std::string getSummationType() const override;
+  /// Return selected reduction type
+  std::string getReductionType() const override;
+  /// Set the status of whether polarisation corrections should be enabled
+  void setIsPolCorrEnabled(bool enable) const override;
+  /// Set default values for experiment and instrument settings
+  void setExpDefaults(ExperimentOptionDefaults defaults) override;
+  void setInstDefaults(InstrumentOptionDefaults defaults) override;
+  /// Check if experiment settings are enabled
+  bool experimentSettingsEnabled() const override;
+  /// Check if instrument settings are enabled
+  bool instrumentSettingsEnabled() const override;
+  /// Check if detector correction is enabled
+  bool detectorCorrectionEnabled() const override;
+  /// Creates hints for 'Stitch1DMany'
+  void
+  createStitchHints(const std::vector<MantidWidgets::Hint> &hints) override;
+  void disableAll() override;
+  void enableAll() override;
+
+  void showOptionLoadErrors(
+      std::vector<InstrumentParameterTypeMissmatch> const &errors,
+      std::vector<MissingInstrumentParameterValue> const &missingValues)
+      override;
+
+public slots:
+  /// Request presenter to obtain default values for settings
+  void requestExpDefaults() const;
+  void requestInstDefaults() const;
+  void summationTypeChanged(int reductionTypeIndex);
+  /// Sets enabled status for polarisation corrections and parameters
+  void setPolarisationOptionsEnabled(bool enable) override;
+  void setReductionTypeEnabled(bool enable) override;
+  void setDetectorCorrectionEnabled(bool enable) override;
+  void notifySettingsChanged();
+  QString messageFor(
+      std::vector<MissingInstrumentParameterValue> const &missingValues) const;
+  QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
+  /// Adds another row to the per-angle options table
+  void addPerAngleOptionsTableRow();
+
 private:
   /// Initialise the interface
   void initLayout();
-  void subscribe(IReflSettingsTabPresenter* notifyee) override;
+  void initOptionsTable();
+  void registerSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
+  void registerInstrumentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
+  void registerExperimentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
+  void setToolTipAsPropertyDocumentation(QWidget &widget,
+                                         std::string const &propertyName,
+                                         Mantid::API::IAlgorithm_sptr alg);
+
+  template <typename Widget>
+  void registerSettingWidget(Widget &widget, std::string const &propertyName,
+                             Mantid::API::IAlgorithm_sptr alg);
+  void connectSettingsChange(QLineEdit &edit);
+  void connectSettingsChange(QComboBox &edit);
+  void connectSettingsChange(QCheckBox &edit);
+  void connectSettingsChange(QGroupBox &edit);
+  void connectSettingsChange(QTableWidget &edit);
+  QLineEdit &stitchOptionsLineEdit() const;
+  void setSelected(QComboBox &box, std::string const &str);
+  void setText(QLineEdit &lineEdit, int value);
+  void setText(QLineEdit &lineEdit, double value);
+  void setText(QLineEdit &lineEdit, std::string const &value);
+  void setText(QLineEdit &lineEdit, boost::optional<int> value);
+  void setText(QLineEdit &lineEdit, boost::optional<double> value);
+  void setText(QLineEdit &lineEdit, boost::optional<std::string> const &value);
+  void setText(QTableWidget &table, std::string const &propertyName,
+               double value);
+  void setText(QTableWidget &table, std::string const &propertyName,
+               boost::optional<double> value);
+  void setText(QTableWidget &table, std::string const &propertyName,
+               boost::optional<std::string> value);
+  void setText(QTableWidget &table, std::string const &propertyName,
+               std::string const &value);
+  void setText(QTableWidget &table, std::string const &propertyName,
+               const QString &value);
+  void setChecked(QCheckBox &checkBox, bool checked);
+  std::string getText(QLineEdit const &lineEdit) const;
+  std::string getText(QComboBox const &box) const;
+  /// Put the per-angle options for a row into a map
+  MantidQt::MantidWidgets::DataProcessor::OptionsQMap
+  createOptionsMapForRow(const int row) const;
+
+  mutable bool m_isPolCorrEnabled;
+  /// The stitch params entry widget
+  MantidQt::MantidWidgets::HintingLineEdit *m_stitchEdit;
+  /// The algorithm properties relating to the options table
+  /// @todo Could we use the data processor whitelist to get the properties
+  /// instead?
+  QStringList m_columnProperties;
 
   Ui::ReflSettingsTabWidget m_ui;
-  IReflSettingsTabPresenter* m_notifyee;
+  ReflSettingsTabViewSubscriber *m_notifyee;
 };
 
 } // namespace Mantid

@@ -78,7 +78,7 @@ public:
 
   virtual bool requestClose() const = 0;
 
-  virtual void settingsChanged(int group) = 0;
+  virtual void settingsChanged() = 0;
 };
 }
 }

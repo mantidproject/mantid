@@ -41,23 +41,23 @@ public:
   virtual ~IReflSettingsTabPresenter(){};
   /// Transmission runs for a particular run angle
   virtual MantidWidgets::DataProcessor::OptionsQMap
-  getOptionsForAngle(int group, const double angle) const = 0;
+  getOptionsForAngle(const double angle) const = 0;
   /// Whether per-angle transmission runs are specified
-  virtual bool hasPerAngleOptions(int group) const = 0;
+  virtual bool hasPerAngleOptions() const = 0;
   /// Pre-processing
   virtual MantidWidgets::DataProcessor::OptionsQMap
-  getTransmissionOptions(int group) const = 0;
+  getTransmissionOptions() const = 0;
   /// Processing
   virtual MantidWidgets::DataProcessor::OptionsQMap
-  getReductionOptions(int group) const = 0;
+  getReductionOptions() const = 0;
   /// Post-processing
-  virtual std::string getStitchOptions(int group) const = 0;
+  virtual std::string getStitchOptions() const = 0;
   /// Set current instrument name
   virtual void setInstrumentName(const std::string &instName) = 0;
   virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
-  virtual void settingsChanged(int group) = 0;
-  virtual void onReductionPaused(int group) = 0;
-  virtual void onReductionResumed(int group) = 0;
+  virtual void settingsChanged() = 0;
+  virtual void onReductionPaused() = 0;
+  virtual void onReductionResumed() = 0;
 };
 }
 }
