@@ -3,6 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 import math
 import os
 import re
+from collections import defaultdict
+from string import Formatter
 
 from mantid.api import *
 from mantid.kernel import *
@@ -69,46 +71,34 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
                                                 spectrum_numbers=range(num_banks),
                                                 grouping_scheme=grouping_scheme)
 
-        distances, difas, difcs, tzeros, alpha_zeros, alpha_ones, beta_zeros, beta_ones, sigma_zeros, sigma_ones, \
-            sigma_twos = map(expand_to_texture_bank, self._parse_gsas_param_file(gsas_filename))
+        output_params = {}
+
+        gsas_file_params = self._parse_gsas_param_file(gsas_filename)
+        gsas_file_params_to_write = {key: self._format_param_list(expand_to_texture_bank(gsas_file_params[key]))
+                                     for key in gsas_file_params}
+        output_params.update(gsas_file_params_to_write)
 
         two_thetas, phis = zip(*[self._get_two_theta_and_phi(bank) for bank in input_ws])
-
-        with open(self.getProperty(self.PROP_TEMPLATE_FILE).value) as template_file:
-            template = template_file.read()
+        output_params["thetas"] = self._format_param_list(two_thetas)
+        output_params["etas"] = self._format_param_list(phis)
 
         def create_empty_param_list(default_value="0"):
             return "\n".join(default_value for _ in range(num_banks))
 
+        with open(self.getProperty(self.PROP_TEMPLATE_FILE).value) as template_file:
+            template = template_file.read()
+
+        output_params["function_types"] = create_empty_param_list("1")
+        output_params["gsas_prm_file"] = gsas_filename
+        output_params["inst_counter_bank"] = "Bank1"
+        output_params["bank_ids"] = "\n".join("Bank{}".format(i + 1) for i in range(num_banks))
+
         with open(self.getProperty(self.PROP_OUTPUT_FILE).value, "w") as output_file:
-            output_file.write(template.format(gsas_prm_file=gsas_filename,
-                                              inst_counter_bank="Bank1",
-                                              bank_ids="\n".join("Bank{}".format(i + 1) for i in range(num_banks)),
-                                              difcs=self._format_param_list(difcs),
-                                              difas=self._format_param_list(difas),
-                                              tzeros=self._format_param_list(tzeros),
-                                              thetas=self._format_param_list(two_thetas),
-                                              etas=self._format_param_list(phis),
-                                              dists=self._format_param_list(distances),
-                                              func_1_alpha_zeros=self._format_param_list(alpha_zeros),
-                                              func_1_alpha_ones=self._format_param_list(alpha_ones),
-                                              func_1_beta_zeros=self._format_param_list(beta_zeros),
-                                              func_1_beta_ones=self._format_param_list(beta_ones),
-                                              func_1_sigma_zeros=self._format_param_list(sigma_zeros),
-                                              func_1_sigma_ones=self._format_param_list(sigma_ones),
-                                              func_1_sigma_twos=self._format_param_list(sigma_twos),
-                                              func_2_alpha_zeros=create_empty_param_list(),
-                                              func_2_alpha_ones=create_empty_param_list(),
-                                              func_2_betas=create_empty_param_list(),
-                                              func_2_switches=create_empty_param_list(),
-                                              func_2_sigma_zeros=create_empty_param_list(),
-                                              func_2_sigma_ones=create_empty_param_list(),
-                                              func_2_sigma_twos=create_empty_param_list(),
-                                              func_2_gamma_zeros=create_empty_param_list(),
-                                              func_2_gamma_ones=create_empty_param_list(),
-                                              func_2_gamma_twos=create_empty_param_list(),
-                                              function_types=create_empty_param_list("1")
-                                              ))
+            # Note, once we've got rid of Python 2 support this can be simplified to
+            # template.format_map(defaultdict(create_empty_param_list, output_params))
+            output_file.write(Formatter().vformat(template, (),
+                                                  defaultdict(create_empty_param_list,
+                                                              output_params)))
 
     def validateInputs(self):
         issues = {}
@@ -197,8 +187,17 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
                 sigma_ones.append(float(line_items[4]))
                 sigma_twos.append(float(line_items[5]))
 
-        return distances, difas, difcs, tzeros, alpha_zeros, alpha_ones, \
-            beta_zeros, beta_ones, sigma_zeros, sigma_ones, sigma_twos
+        return {"dists": distances,
+                "difas": difas,
+                "difcs": difcs,
+                "tzeros": tzeros,
+                "func_1_alpha_zeros": alpha_zeros,
+                "func_1_alpha_ones": alpha_ones,
+                "func_1_beta_zeros": beta_zeros,
+                "func_1_beta_ones": beta_ones,
+                "func_1_sigma_zeros": sigma_zeros,
+                "func_1_sigma_ones": sigma_ones,
+                "func_1_sigma_twos": sigma_twos}
 
 
 AlgorithmFactory.subscribe(SaveGEMMAUDParamFile)
