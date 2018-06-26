@@ -26,9 +26,6 @@
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <functional>
-#include <random>
-
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 using std::map;

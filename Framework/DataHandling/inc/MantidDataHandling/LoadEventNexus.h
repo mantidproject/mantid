@@ -23,6 +23,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/scoped_array.hpp>
 #include <functional>
+#include <random>
 #include <memory>
 #include <mutex>
 #include <numeric>
