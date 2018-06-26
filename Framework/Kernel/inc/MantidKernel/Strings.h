@@ -105,29 +105,29 @@ join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
          std::random_access_iterator_tag>::value)>::type * = nullptr) {
 
   // Get the distance between begining and end
-  long int dist = std::distance(begin, end);
+  size_t dist = std::distance(begin, end);
 
   // Get max number of threads and allocate vector speace
-  int nmax_threads = PARALLEL_GET_MAX_THREADS;
-  std::vector<std::ostringstream> output(nmax_threads);
+  size_t nmaxThreads = size_t(PARALLEL_GET_MAX_THREADS);
+  std::vector<std::ostringstream> output(nmaxThreads);
 
   // Actual number of threads in the current region
-  int nThreads = 1;
+  size_t nThreads = 1;
 #pragma omp parallel
   {
-    nThreads = PARALLEL_NUMBER_OF_THREADS;
-    int idThread = PARALLEL_THREAD_NUMBER;
+    nThreads = size_t(PARALLEL_NUMBER_OF_THREADS);
+    size_t idThread = size_t(PARALLEL_THREAD_NUMBER);
     ITERATOR_TYPE it;
 
 #pragma omp for
-    for (int i = 0; i < dist; i++) {
+    for (size_t i = 0; i < dist; i++) {
       // Write to stringstream
       output[idThread] << separator << *(begin + i);
     }
   }
 
   // Flush all buffers into the first one
-  for (int i = 1; i < nThreads; i++) {
+  for (size_t i = 1; i < nThreads; i++) {
     output[0] << output[i].str();
   }
 
