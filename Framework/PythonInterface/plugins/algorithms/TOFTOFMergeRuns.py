@@ -5,6 +5,7 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, Wor
 import mantid.simpleapi as api
 import numpy as np
 from dateutil.parser import parse
+import warnings
 
 
 class TOFTOFMergeRuns(PythonAlgorithm):
