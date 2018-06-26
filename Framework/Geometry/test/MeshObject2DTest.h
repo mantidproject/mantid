@@ -1,5 +1,5 @@
-#ifndef MANTID_GEOMETRY_MESH2DOBJECTTEST_H_
-#define MANTID_GEOMETRY_MESH2DOBJECTTEST_H_
+#ifndef MANTID_GEOMETRY_MESHOBJECT2DTEST_H_
+#define MANTID_GEOMETRY_MESHOBJECT2DTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -7,6 +7,7 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include <cmath>
 
 using Mantid::Geometry::MeshObject2D;
@@ -239,6 +240,18 @@ public:
     double solidAngle = mesh.solidAngle(V3D{0, 0, 0});
     TS_ASSERT_DELTA(solidAngle, expected, 1e-3);
   }
+
+  void test_boundingBox() {
+    auto mesh = makeSimpleTriangleMesh(); // Lies in z plane
+    auto boundingBox = mesh.getBoundingBox();
+    TS_ASSERT_EQUALS(boundingBox.zMin(), 0);
+    TS_ASSERT_DELTA(boundingBox.zMax(), boundingBox.zMin(),
+                    MeshObject2D::MinThickness);
+    TS_ASSERT_EQUALS(boundingBox.xMin(), -1);
+    TS_ASSERT_EQUALS(boundingBox.xMax(), 1);
+    TS_ASSERT_EQUALS(boundingBox.yMin(), 0);
+    TS_ASSERT_EQUALS(boundingBox.yMax(), 1);
+  }
 };
 
-#endif /* MANTID_GEOMETRY_MESH2DOBJECTTEST_H_ */
+#endif /* MANTID_GEOMETRY_MESHOBJECT2DTEST_H_ */

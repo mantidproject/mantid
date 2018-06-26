@@ -4,6 +4,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include <vector>
 
 namespace Mantid {
@@ -68,6 +69,8 @@ public:
   double solidAngle(const Kernel::V3D &observer,
                     const Kernel::V3D &scaleFactor) const;
   bool operator==(const MeshObject2D &other) const;
+  const BoundingBox &getBoundingBox() const;
+  const static double MinThickness;
 
 private:
   struct PlaneParameters {
@@ -87,6 +90,8 @@ private:
   std::vector<Kernel::V3D> m_vertices;
   /// Material composition
   Kernel::Material m_material;
+  /// Bounding box
+  mutable BoundingBox m_boundingBox;
 };
 
 } // namespace Geometry

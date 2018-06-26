@@ -3,6 +3,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Material.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include <numeric>
 
 namespace Mantid {
 namespace Geometry {
@@ -320,6 +321,49 @@ bool MeshObject2D::operator==(const MeshObject2D &other) const {
 
 double MeshObject2D::volume() const {
   return 0; // Volume is always 0 for a plane
+}
+
+const double MeshObject2D::MinThickness = 0.001;
+
+/**
+* Returns an axis-aligned bounding box that will fit the shape
+*
+* This is not threadsafe
+*
+* @returns A reference to a bounding box for this shape.
+*/
+const BoundingBox &MeshObject2D::getBoundingBox() const {
+
+  if (m_boundingBox.isNull()) {
+    double minX, maxX, minY, maxY, minZ, maxZ;
+    minX = minY = minZ = std::numeric_limits<double>::max();
+    maxX = maxY = maxZ = std::numeric_limits<double>::min();
+
+    // Loop over all vertices and determine minima and maxima on each axis
+    for (const auto &vertex : m_vertices) {
+      auto vx = vertex.X();
+      auto vy = vertex.Y();
+      auto vz = vertex.Z();
+
+      minX = std::min(minX, vx);
+      maxX = std::max(maxX, vx);
+      minY = std::min(minY, vy);
+      maxY = std::max(maxY, vy);
+      minZ = std::min(minZ, vz);
+      maxZ = std::max(maxZ, vz);
+    }
+    if (minX == maxX)
+      maxX += MinThickness;
+    if (minY == maxY)
+      maxY += MinThickness;
+    if (minZ == maxZ)
+      maxZ += MinThickness;
+
+    // Cache bounding box, so we do not need to repeat calculation
+    m_boundingBox = BoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
+  }
+
+  return m_boundingBox;
 }
 
 } // namespace Geometry
