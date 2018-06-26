@@ -24,6 +24,7 @@ from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QFileDialo
                             QListWidgetItem, QMenu, QPushButton, QVBoxLayout, QWidget)
 
 from mantidqt.utils.flowlayout import FlowLayout
+from mantidqt.py3compat import Enum
 from workbench.plotting.figuremanager import QAppThreadCall
 
 export_types = [
@@ -32,6 +33,11 @@ export_types = [
     ('Export to PNG', '.png'),
     ('Export to SVG', '.svg')
 ]
+
+
+class SortType(Enum):
+    Name = 0
+    LastShown = 1
 
 
 class PlotSelectorView(QWidget):
@@ -54,6 +60,8 @@ class PlotSelectorView(QWidget):
         super(PlotSelectorView, self).__init__(parent)
         self.presenter = presenter
         self.is_run_as_unit_test = is_run_as_unit_test
+
+        self.sort_type = SortType.Name
 
         self.show_button = QPushButton('Show')
         self.select_all_button = QPushButton('Select All')
@@ -103,7 +111,6 @@ class PlotSelectorView(QWidget):
         self.select_all_button.clicked.connect(self.list_widget.selectAll)
         self.close_button.clicked.connect(self.presenter.close_action_called)
         self.deleteKeyPressed.connect(self.presenter.close_action_called)
-        self.enterKeyPressed.connect(self.presenter.show_multiple_selected)
 
     def keyPressEvent(self, event):
         """
@@ -117,8 +124,6 @@ class PlotSelectorView(QWidget):
         super(PlotSelectorView, self).keyPressEvent(event)
         if event.key() == Qt.Key_Delete:
             self.deleteKeyPressed.emit(event.key())
-        elif event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
-            self.enterKeyPressed.emit(event.key())
 
     def _make_list_widget(self):
         """
@@ -128,8 +133,6 @@ class PlotSelectorView(QWidget):
         list_widget = QListWidget(self)
         list_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)
         list_widget.setSortingEnabled(True)
-
-        list_widget.setStyleSheet("selection-color: transparent;")
         return list_widget
 
     def _make_context_menu(self):
@@ -152,8 +155,10 @@ class PlotSelectorView(QWidget):
     def _add_to_plot_list(self, plot_name):
         real_item = PlotNameWidget(self.presenter, plot_name, self, self.is_run_as_unit_test)
         widget_item = HumanReadableSortListWidgetItem()
-        widget_item.setData(Qt.DisplayRole, plot_name)
-        widget_item.setForeground(QColor(Qt.transparent))
+        if self.sort_type == SortType.Name:
+            widget_item.setData(Qt.InitialSortOrderRole, plot_name)
+        elif self.sort_type == SortType.LastShown:
+            widget_item.setData(Qt.InitialSortOrderRole, plot_name[-1])
         size_hint = real_item.sizeHint()
         widget_item.setSizeHint(size_hint)
         self.list_widget.addItem(widget_item)
@@ -186,7 +191,7 @@ class PlotSelectorView(QWidget):
 
     def rename_in_plot_list(self, new_name, old_name):
         row, widget = self._get_row_and_widget_from_label_text(old_name)
-        self.list_widget.item(row).setData(Qt.DisplayRole, new_name)
+        self.list_widget.item(row).setData(Qt.InitialSortOrderRole, new_name)
         widget.set_plot_name(new_name)
 
     # ----------------------- Plot Selection ------------------------
@@ -288,10 +293,11 @@ class PlotSelectorView(QWidget):
         for row in range(len(self.list_widget)):
             item = self.list_widget.item(row)
             widget = self.list_widget.itemWidget(item)
-            item.setData(Qt.DisplayRole, widget.plot_name)
+            item.setData(Qt.InitialSortOrderRole, widget.plot_name)
 
         self.list_widget.sortItems()
         self.list_widget.setSortingEnabled(True)
+        self.sort_type = SortType.Name
 
     def sort_by_last_shown(self):
         self.list_widget.setSortingEnabled(False)
@@ -299,10 +305,11 @@ class PlotSelectorView(QWidget):
         for row in range(len(self.list_widget)):
             item = self.list_widget.item(row)
             widget = self.list_widget.itemWidget(item)
-            item.setData(Qt.DisplayRole, widget.plot_name[-1])
+            item.setData(Qt.InitialSortOrderRole, widget.plot_name[-1])
 
         self.list_widget.sortItems()
         self.list_widget.setSortingEnabled(True)
+        self.sort_type = SortType.LastShown
 
     # ---------------------- Plot Exporting -------------------------
 
@@ -414,7 +421,7 @@ class HumanReadableSortListWidgetItem(QListWidgetItem):
         return int(text) if text.isdigit() else text.lower()
 
     def __lt__(self, other):
-        self_key = [self.convert(c) for c in re.split('([0-9]+)', self.text())]
-        other_key = [self.convert(c) for c in re.split('([0-9]+)', other.text())]
+        self_key = [self.convert(c) for c in re.split('([0-9]+)', self.data(Qt.InitialSortOrderRole))]
+        other_key = [self.convert(c) for c in re.split('([0-9]+)', other.data(Qt.InitialSortOrderRole))]
         return self_key < other_key
 
