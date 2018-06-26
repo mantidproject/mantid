@@ -125,18 +125,20 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
         return (bank_param_list[grouping_scheme[spec_num] - 1] for spec_num in spectrum_numbers)
 
     def _find_isis_powder_dir(self):
-        script_dirs = config["pythonscripts.directories"].split(";")
-        diffraction_dir = None
-        for dir in script_dirs:
-            if "Diffraction" in dir:
-                diffraction_dir = dir
+        script_dirs = [directory for directory in config["pythonscripts.directories"].split(";")
+                       if "Diffraction" in directory]
 
-        if diffraction_dir is None:
-            logger.warning("Could not find default diffraction directory for .maud template file: "
-                           "you'll have to find it yourself")
-            return ""
-        else:
-            return os.path.join(diffraction_dir, "isis_powder", "gem_routines", "maud_param_template.maud")
+        for directory in script_dirs:
+            path_to_test = os.path.join(directory,
+                                        "isis_powder",
+                                        "gem_routines",
+                                        "maud_param_template.maud")
+            if os.path.exists(path_to_test):
+                return path_to_test
+
+        logger.warning("Could not find default diffraction directory for .maud template file: "
+                       "you'll have to find it yourself")
+        return ""
 
     def _format_param_list(self, param_list):
         return "\n".join(str(param) for param in param_list)
