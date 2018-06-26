@@ -137,7 +137,7 @@ public:
                      std::invalid_argument);
   }
 
-  //void test_throws_if_number_of_iterations_is_not_an_integer() {
+  // void test_throws_if_number_of_iterations_is_not_an_integer() {
   //  auto nIterations = 0.2;
   //  TS_ASSERT_THROWS(calculateIqtAlgorithm(m_sampleWorkspace,
   //                                         m_resolutionWorkspace, -0.5, 0.5,

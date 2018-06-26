@@ -36,9 +36,14 @@ Improved
 - :ref:`algm-ConvolutionFitSequential` and :ref:`algm-IqtFitSequential` can now accept multiple datasets as input, in
   the same format as that of :ref:`algm-PlotPeakByLogValue`.
 - :ref:`algm-IndirectILLEnergyTransfer` was fixed to have the correct sign for the energy transfer.
+- :ref:`algm-TransformToIqt` now calculates errors using a monte carlo method, and can take a number of iterations as input.
 
 Data Analysis Interfaces
 ------------------------
+
+Improved
+########
+- A number of iterations for the new monte carlo error calculation can be specified in the I(Q,t) interface.
 
 Bugfixes
 ########
