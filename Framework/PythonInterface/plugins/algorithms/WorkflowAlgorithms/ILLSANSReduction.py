@@ -77,7 +77,7 @@ class ILLSANSReduction(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Reduced workspace')
 
-    def PyExec(self): #noqa C901, we know it's complex
+    def PyExec(self): # noqa C901, we know it's complex
 
         self._setup()
         # PROCESS SAMPLE DATA
