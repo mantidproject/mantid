@@ -80,6 +80,12 @@ class AbstractInst(object):
             self._beam_parameters = {'height': height,
                                      'width': width}
 
+    def should_subtract_empty_inst(self):
+        """
+        :return: Whether the empty run should be subtracted from a run being focused
+        """
+        return True
+
     # Mandatory overrides
 
     def _get_run_details(self, run_number_string):
