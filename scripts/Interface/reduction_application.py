@@ -393,8 +393,24 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # that the state is properly saved on the next close.
         self._clear_and_restart = False
 
-    def progressEvent(self, progress):
+    def _resetProgressBar(self):
+        self.progress_bar.reset()
+        if hasattr(self.progress_bar, 'resetFormat'):
+            self.progress_bar.resetFormat()
+        else:
+            self.progress_bar.setFormat('%p%')
+        self.algorithm_progress_widget.hide()
+
+    def progressEvent(self, progress, state):
+        if state == 'running':
+            self.progress_bar.setFormat('reducing %p%')
+        elif state == 'success':
+            self.progress_bar.setFormat('Reduction successfully finished!')
+        elif state ==  'failure':
+            self.progress_bar.setFormat('An error occured. See the results log.')
+
         self.progress_bar.setValue(int(progress * 100))
+        self.algorithm_progress_widget.show()
 
     def closeEvent(self, event):
         """
@@ -428,6 +444,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             Create an object capable of using the information in the
             interface and turn it into a reduction process.
         """
+        self._resetProgressBar()
         self.reduce_button.setEnabled(False)
         self.export_button.setEnabled(False)
         self.save_button.setEnabled(False)
@@ -435,10 +452,10 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.file_menu.setEnabled(False)
         self.tools_menu.setEnabled(False)
 
-        self.progress_bar.show()
+        #self.progress_bar.show()
         if self._interface is not None:
             self._interface.reduce(self.progressEvent)
-        self.progress_bar.hide()
+        #self.progress_bar.hide()
 
         self.reduce_button.setEnabled(True)
         self.export_button.setEnabled(True)
@@ -451,6 +468,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         """
             Submit for parallel reduction
         """
+        self._resetProgressBar()
         if not self._cluster_details_set:
             self._cluster_details_dialog()
 

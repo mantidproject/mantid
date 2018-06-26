@@ -520,26 +520,18 @@ class BaseReductionScripter(object):
         """
             Apply the reduction process to a Mantid SANSReducer
         """
-        if HAS_MANTID:
-            script = self.to_script(None)
-            try:
-                self.execute_script(script, progress_action)
-                # Update scripter
-                for item in self._observers:
-                    if item.state() is not None:
-                        item.state().update()
-            except:
-                # Update scripter [Duplicated code because we can't use 'finally' on python 2.4]
-                for item in self._observers:
-                    if item.state() is not None:
-                        # Things might be broken, so update what we can
-                        try:
-                            item.state().update()
-                        except (StopIteration, ImportError, NameError, TypeError, ValueError, Warning):
-                            pass
-                raise RuntimeError(str(sys.exc_info()[1]))
-        else:
+        if not HAS_MANTID:
             raise RuntimeError("Reduction could not be executed: Mantid could not be imported")
+
+        # script has mantid available: 
+        script = self.to_script(None)
+        try:
+            self.execute_script(script, progress_action)
+        finally:
+            # Update scripter
+            for item in self._observers:
+                if item.state() is not None:
+                    item.state().update() # why *after* the script has executed?
 
     def apply_live(self, progress_action):
         """

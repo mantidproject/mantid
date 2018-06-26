@@ -10,6 +10,7 @@ try:
 except(ImportError, ImportWarning): 
     HAS_MANTID_QT = False 
 
+import traceback
 
 
 def get_indent(line):
@@ -53,6 +54,12 @@ def __execute(script, globals_dict, locals_dict):
     exec(script, globals_dict, locals_dict)
 
 def execute_script(script, progress_action):
+    """
+        @param script: the script to execute
+        @param progress_action: a callable expresion that takes two arguments:
+            - progress: a value between 0 and 1 indicating the current progress
+            - state: a string indicating the current state ('running', 'success' or 'failure')
+    """
     if HAS_MANTIDPLOT: 
         execFunc = lambda script: mantidplot.runPythonScript(script, async=True)
     elif HAS_MANTID_QT:
@@ -68,9 +75,14 @@ def execute_script(script, progress_action):
     code_blocks = [code for code in splitCodeString(script, return_compiled = not HAS_MANTIDPLOT)]
     execFunc('from mantid.simpleapi import *\n')
     for i, (code, position) in enumerate(code_blocks):
-        progress_action(float(i) / float(len(code_blocks)))
-        execFunc(code)
-    progress_action(1.0)
+        try:
+            progress_action(float(i) / float(len(code_blocks)), 'running')
+            execFunc(code)
+        except Exception as e:
+            traceback.print_exc()
+            progress_action(float(i) / float(len(code_blocks)), 'failure')
+            raise e
+    progress_action(1.0, 'success')
 
 
 
