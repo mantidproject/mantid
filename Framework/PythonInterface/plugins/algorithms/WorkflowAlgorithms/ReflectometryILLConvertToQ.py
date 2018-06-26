@@ -186,7 +186,8 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
             if len(pickedXs) > 0:
                 groupedXs.append(numpy.mean(pickedXs))
                 groupedYs.append(numpy.mean(ys[pick]))
-                groupedEs.append(numpy.mean(es[pick]))
+                pickedEs = es[pick]
+                groupedEs.append(numpy.sqrt(numpy.dot(pickedEs, pickedEs)) / len(pickedEs))
                 groupWidth = pickedXs[-1] - pickedXs[0]
                 groupedDxs.append(numpy.sqrt(dxs[index]**2 + (0.68 * groupWidth)**2))
             start = end
