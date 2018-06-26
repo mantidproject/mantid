@@ -203,15 +203,6 @@ private:
   std::unique_ptr<std::pair<std::vector<int32_t>, std::vector<int32_t>>>
   loadISISVMSSpectraMapping(const std::string &entry_name);
 
-  /// ISIS specific methods for dealing with wide events
-  void adjustTimeOfFlightRAL(EventWorkspaceCollection_sptr WS,
-                             const std::string &entry_name,
-                             const std::string &classType);
-
-  void makeTimeOfFlightDataFuzzy(::NeXus::File &file,
-                                 EventWorkspaceCollection_sptr WS,
-                                 const std::string &binsName,
-                                 size_t start_wi = 0, size_t end_wi = 0);
   template <typename T> void filterDuringPause(T workspace);
 
   /// Set the top entry field name
@@ -231,6 +222,40 @@ private:
   /// True if the event_id is spectrum no not pixel ID
   bool event_id_is_spec;
 };
+
+/**
+* ISIS specific method for dealing with wide events. Check if time_of_flight
+* can be found in the file and load it.
+*
+* THIS ONLY APPLIES TO ISIS FILES WITH "detector_1_events" IN THE "NXentry."
+*
+* @param WS :: The event workspace collection which events will be modified.
+* @param entry_name :: An NXentry tag in the file
+* @param classType :: The type of the events: either detector or monitor
+*/
+void adjustTimeOfFlightRAL(::NeXus::File &file,
+                           EventWorkspaceCollection_sptr WS,
+                           const std::string &entry_name,
+                           const std::string &classType);
+
+/**
+* Load the time of flight data. file must have open the group containing
+* "time_of_flight" data set. This will add a offset to all of the
+* time-of-flight values or a random number to each time-of-flight. It
+* should only ever be called on event files that have a "detector_1_events"
+* group inside the "NXentry". It is an old ISIS requirement that is rarely
+* used now.
+*
+* @param file :: The nexus file to read from.
+* @param WS :: The event workspace collection to write to.
+* @param binsName :: bins name
+* @param start_wi :: First workspace index to process
+* @param end_wi :: Last workspace index to process
+*/
+void makeTimeOfFlightDataFuzzy(::NeXus::File &file,
+                               EventWorkspaceCollection_sptr WS,
+                               const std::string &binsName, size_t start_wi = 0,
+                               size_t end_wi = 0);
 
 //-----------------------------------------------------------------------------
 /** Load the instrument definition file specified by info in the NXS file.
