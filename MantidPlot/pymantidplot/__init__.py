@@ -65,10 +65,11 @@ def runPythonScript(code, async=False, quiet=False, redirect=True):
         @param async :: If the true the code is executed in a separate thread
         @param quiet :: If true no messages reporting status are issued
         @param redirect :: If true then output is redirected to MantidPlot
+        @returns :: True if the code has been executed successfully
     """
     if async and QtCore.QThread.currentThread() != QtGui.qApp.thread():
         async = False
-    threadsafe_call(_qti.app.runPythonScript, code, async, quiet, redirect)
+    return threadsafe_call(_qti.app.runPythonScript, code, async, quiet, redirect)
 
 
 # Overload for consistency with qtiplot table(..) & matrix(..) commands

@@ -31,7 +31,8 @@ def splitCodeString(string, return_compiled=True):
             if get_indent(line) <= current_indent:
                 code_object = code.compile_command(current_statement, filename="<input>", symbol="single")
                 if code_object is not None:
-                    yield (code_object if return_compiled else current_statement, (statement_start, line_nbr))
+                    if current_statement.strip():
+                        yield (code_object if return_compiled else current_statement, (statement_start, line_nbr))
                     statement_start = line_nbr
                     current_statement = '\n' * line_nbr
 
@@ -50,8 +51,6 @@ def splitCodeString(string, return_compiled=True):
     except ValueError as e:
         raise e
 
-def __execute(script, globals_dict, locals_dict):
-    exec(script, globals_dict, locals_dict)
 
 def execute_script(script, progress_action):
     """
@@ -61,26 +60,37 @@ def execute_script(script, progress_action):
             - state: a string indicating the current state ('running', 'success' or 'failure')
     """
     if HAS_MANTIDPLOT: 
-        execFunc = lambda script: mantidplot.runPythonScript(script, async=True)
+        execFunc = lambda code: mantidplot.runPythonScript(code, async=True)
     elif HAS_MANTID_QT:
         codeExecuter = PythonCodeExecution() 
-        execFunc = codeExecuter.execute_async
+        def __execute(code):
+            codeExecuter.execute_async(code)
+            return True
+        execFunc = __execute
     else: 
         # exec doesn't keep track of globals and locals, so we have to do it manually:
         globals_dict = dict()
         locals_dict = dict()
-        execFunc = lambda script: __execute(script, globals_dict, locals_dict)
+        def __execute(code, globals_dict, locals_dict):
+            exec(code, globals_dict, locals_dict)
+            return True
+        execFunc = lambda code: __execute(code, globals_dict, locals_dict)
 
 
     code_blocks = [code for code in splitCodeString(script, return_compiled = not HAS_MANTIDPLOT)]
-    execFunc('from mantid.simpleapi import *\n')
+    code_blocks.insert(0, ('from mantid.simpleapi import *\n', (0,)))
+
+    def progress(i, state):
+        progress_action(float(i) / float(len(code_blocks)), state)
+
     for i, (code, position) in enumerate(code_blocks):
         try:
-            progress_action(float(i) / float(len(code_blocks)), 'running')
-            execFunc(code)
+            progress(i, 'running')
+            if not execFunc(code):
+                return progress(i, 'failure')
         except Exception as e:
             traceback.print_exc()
-            progress_action(float(i) / float(len(code_blocks)), 'failure')
+            progress(i, 'failure')
             raise e
     progress_action(1.0, 'success')
 
