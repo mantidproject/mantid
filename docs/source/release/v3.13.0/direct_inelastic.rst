@@ -41,6 +41,7 @@ Instrument Definitions
 - The source component of ILL's IN5 has been moved from :math:`z = -2` to :math:`z = -2.10945` meters and renamed to ``frame-overlap_chopper``.
 - The source component of ILL's IN6 has been moved from :math:`z = -0.395` to :math:`z = -0.595` meters and renamed to ``suppressor_chopper``.
 - New CNCS geometry and parameters for 2018B cycle
+- ARCS and CNCS are configured for live data
 
 Python
 ------
@@ -48,4 +49,3 @@ Python
 - The plotting methods in the :ref:`directtools <Directtools Python module>` python module now support logarithmic scales.
 
 :ref:`Release 3.13.0 <v3.13.0>`
-
