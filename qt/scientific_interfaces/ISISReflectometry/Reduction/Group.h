@@ -89,8 +89,7 @@ void mergeRowsInto(Group<Row> &intoHere, Group<Row> const &fromHere,
 }
 
 template <typename Row>
-MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
-operator<<(std::ostream &os, Group<Row> const &group) {
+std::ostream &operator<<(std::ostream &os, Group<Row> const &group) {
   os << "  Group (name: " << group.name() << ")\n";
   for (auto &&row : group.rows()) {
     if (row.is_initialized())

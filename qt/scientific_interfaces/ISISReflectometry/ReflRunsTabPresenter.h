@@ -85,6 +85,9 @@ public:
   ReflRunsTabPresenter(ReflRunsTabPresenter const &) = delete;
   ReflRunsTabPresenter const &operator=(ReflRunsTabPresenter const &) = delete;
 
+  ReflRunsTabPresenter(ReflRunsTabPresenter &&) = default;
+  ReflRunsTabPresenter &operator=(ReflRunsTabPresenter &&) = default;
+
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
   void notifyADSChanged(const QSet<QString> &workspaceList, int group) override;
