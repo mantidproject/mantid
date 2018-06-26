@@ -5,6 +5,8 @@
 #include "MantidAPI/Algorithm.h"
 #include <cmath>
 
+#include <cmath>
+
 namespace Mantid {
 namespace API {
 class SpectrumInfo;

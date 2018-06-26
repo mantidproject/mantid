@@ -239,8 +239,8 @@ std::string ICat4Catalog::buildSearchQuery(const CatalogSearchParam &inputs) {
     std::string from, join, where, orderBy, includes;
 
     from = " FROM Investigation inves ";
-    join = Strings::join(joinClause.begin(), joinClause.end(), " ");
-    where = Strings::join(whereClause.begin(), whereClause.end(), " AND ");
+    join = Strings::join(joinClause, " ");
+    where = Strings::join(whereClause, " AND ");
     orderBy = " ORDER BY inves.id DESC";
     includes = " INCLUDE inves.facility, "
                "inves.investigationInstruments.instrument, inves.parameters";

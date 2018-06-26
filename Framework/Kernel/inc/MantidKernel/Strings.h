@@ -12,6 +12,7 @@
 #include <boost/lexical_cast.hpp>
 #endif
 #include <iosfwd>
+#include <list>
 #include <map>
 #include <set>
 #include <sstream>
@@ -54,26 +55,29 @@ namespace Strings {
  * Does not add the separator after the LAST item.
  *
  * For example, join a vector of strings with commas with:
- *  out = join(v.begin(), v.end(), ", ");
+ *  out = join(v, ", ");
  *
  * @param begin :: iterator at the start
  * @param end :: iterator at the end
  * @param separator :: string to append.
  * @return
  */
-template <typename ITERATOR_TYPE>
-DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
+template <typename CONTAINER_TYPE>
+DLLExport std::string join(const CONTAINER_TYPE &c,
                            const std::string &separator) {
   std::ostringstream output;
-  ITERATOR_TYPE it;
-  for (it = begin; it != end;) {
+  for (auto it = c.begin(); it != c.end();) {
     output << *it;
     it++;
-    if (it != end)
+    if (it != c.end())
       output << separator;
   }
   return output.str();
 }
+
+template <>
+DLLExport std::string join(const std::vector<double> &c,
+                           const std::string &separator);
 
 //------------------------------------------------------------------------------------------------
 /** Join a set or vector of (something that turns into a string) together

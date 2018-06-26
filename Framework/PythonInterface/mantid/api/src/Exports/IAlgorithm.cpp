@@ -227,8 +227,7 @@ std::string createDocString(IAlgorithm &self) {
     if (!prop->documentation().empty() || !allowed.empty()) {
       buffer << "      " << prop->documentation();
       if (!allowed.empty()) {
-        buffer << "[" << Mantid::Kernel::Strings::join(allowed.begin(),
-                                                       allowed.end(), ", ");
+        buffer << "[" << Mantid::Kernel::Strings::join(allowed, ", ");
         buffer << "]";
       }
       buffer << EOL;

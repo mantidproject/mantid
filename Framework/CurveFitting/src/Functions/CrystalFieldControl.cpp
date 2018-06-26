@@ -97,7 +97,7 @@ void CrystalFieldControl::parseStringListAttribute(
                                     Kernel::StringTokenizer::TOK_TRIM);
   cache.clear();
   cache.insert(cache.end(), tokenizer.begin(), tokenizer.end());
-  auto attrValue = Kernel::Strings::join(cache.begin(), cache.end(), ",");
+  auto attrValue = Kernel::Strings::join(cache, ",");
   // Store back the trimmed names
   API::IFunction::setAttribute(attName, Attribute(attrValue));
 }

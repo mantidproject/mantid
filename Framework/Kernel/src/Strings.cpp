@@ -6,8 +6,9 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/spirit/include/karma.hpp>
 
 #include <fstream>
 
@@ -16,6 +17,20 @@ using std::size_t;
 namespace Mantid {
 namespace Kernel {
 namespace Strings {
+
+template <>
+DLLExport std::string join(const std::vector<double> &c,
+                           const std::string &separator) {
+  using boost::spirit::karma::double_;
+  using boost::spirit::karma::generate;
+  using boost::spirit::karma::lit;
+  std::string result;
+  generate(std::back_inserter(result),              // the output
+           double_ << *(lit(separator) << double_), // the generator
+           c                                        // the input
+  );
+  return result;
+}
 
 //------------------------------------------------------------------------------------------------
 /** Loads the entire contents of a text file into a string
@@ -1082,8 +1097,7 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
     // it is allowed to have element separator inside a range, e.g. "4 - 5", but
     // not "4,-5"
     Tokenizer ranges(str, rangeSep, Tokenizer::TOK_TRIM);
-    std::string new_str =
-        join(ranges.begin(), ranges.end(), rangeSep.substr(0, 1));
+    std::string new_str = join(ranges.asVector(), rangeSep.substr(0, 1));
     elements = Tokenizer(new_str, elemSep,
                          Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
   } else {

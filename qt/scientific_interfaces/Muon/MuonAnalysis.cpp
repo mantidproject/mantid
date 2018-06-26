@@ -188,7 +188,7 @@ void MuonAnalysis::initLayout() {
   // open it
   if (supportedFacilities.find(userFacility) == supportedFacilities.end()) {
     const std::string supportedFacilitiesStr = Strings::join(
-        supportedFacilities.begin(), supportedFacilities.end(), ", ");
+        supportedFacilities, ", ");
 
     const QString errorTemplate =
         "Your facility (%1) is not supported by MuonAnalysis, so you will not "
