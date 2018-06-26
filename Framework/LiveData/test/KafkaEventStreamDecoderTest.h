@@ -85,7 +85,6 @@ public:
     TSM_ASSERT(
         "Expected an EventWorkspace from extractData(). Found something else",
         eventWksp);
-
     checkWorkspaceMetadata(*eventWksp);
     checkWorkspaceEventData(*eventWksp);
   }
@@ -106,6 +105,7 @@ public:
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     // Need 2 full loops to get both periods
+    // Note: Only 2 iterations required as FakeISISEventSubscriber does not send start/stop messages
     startCapturing(*decoder, 2);
 
     Workspace_sptr workspace;
@@ -130,6 +130,32 @@ public:
       checkWorkspaceMetadata(*eventWksp);
       checkWorkspaceEventData(*eventWksp);
     }
+  }
+
+  void test_Varying_Period_Event_Stream() {
+	  using namespace ::testing;
+	  using namespace KafkaTesting;
+	  using Mantid::API::Workspace_sptr;
+	  using Mantid::DataObjects::EventWorkspace;
+	  using namespace Mantid::LiveData;
+
+	  auto mockBroker = std::make_shared<MockKafkaBroker>();
+	  EXPECT_CALL(*mockBroker, subscribe_(_, _))
+		  .Times(Exactly(3))
+		  .WillOnce(Return(new FakeVariablePeriodSubscriber(4)))
+		  .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
+		  .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+	  auto decoder = createTestDecoder(mockBroker);
+	  TSM_ASSERT("Decoder should not have create data buffers yet",
+		  !decoder->hasData());
+	  startCapturing(*decoder, 5);
+	Workspace_sptr workspace;
+	// Extract data should only get data from the first run
+	TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
+	TS_ASSERT(decoder->hasReachedEndOfRun());
+	TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
+	TS_ASSERT(!decoder->isCapturing());
+
   }
 
   void test_End_Of_Run_Reported_After_Run_Stop_Reached() {
