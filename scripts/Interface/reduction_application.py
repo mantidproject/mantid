@@ -403,7 +403,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
 
     def progressEvent(self, progress, state):
         if state == 'running':
-            self.progress_bar.setFormat('reducing %p%')
+            self.progress_bar.setFormat('Reducing %p%')
         elif state == 'success':
             self.progress_bar.setFormat('Reduction successfully finished!')
         elif state ==  'failure':

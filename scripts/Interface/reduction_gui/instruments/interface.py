@@ -187,6 +187,9 @@ class InstrumentInterface(object):
     def reduce(self, progress_action):
         """
             Pass the interface data to the scripter and reduce
+            @param progress_action :: a callable expresion that takes two arguments:
+                - progress: a value between 0 and 1 indicating the current progress
+                - state: a string indicating the current state ('running', 'success' or 'failure')
         """
         try:
             self.scripter.update()
