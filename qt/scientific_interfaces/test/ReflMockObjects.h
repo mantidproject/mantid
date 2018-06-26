@@ -98,6 +98,8 @@ public:
   MOCK_METHOD0(stopTimer, void());
   MOCK_METHOD0(startIcatSearch, void());
   MOCK_METHOD0(startMonitor, void());
+  MOCK_METHOD0(updateMonitorRunning, void());
+  MOCK_METHOD0(updateMonitorStopped, void());
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};

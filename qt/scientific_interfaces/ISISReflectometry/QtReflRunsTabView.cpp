@@ -514,5 +514,14 @@ void QtReflRunsTabView::startMonitorComplete() {
   m_presenter->notify(IReflRunsTabPresenter::StartMonitorCompleteFlag);
 }
 
+// TODO Add a busy indicator and update it when monitoring starts/stops
+/** Update the view state to indicate the monitor is running
+ */
+void QtReflRunsTabView::updateMonitorRunning() {}
+
+/** Update the view state to indicate the monitor is stopped
+ */
+void QtReflRunsTabView::updateMonitorStopped() {}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

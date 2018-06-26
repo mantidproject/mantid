@@ -3,6 +3,7 @@
 
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
+#include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
@@ -62,7 +63,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReflRunsTabPresenter
     : public IReflRunsTabPresenter,
-      public MantidWidgets::DataProcessor::DataProcessorMainPresenter {
+      public MantidWidgets::DataProcessor::DataProcessorMainPresenter,
+      public Mantid::API::AlgorithmObserver {
 public:
   ReflRunsTabPresenter(IReflRunsTabView *mainView,
                        ProgressableView *progressView,
@@ -129,6 +131,7 @@ private:
   /// The name to use for the live data workspace
   std::string m_liveDataWorkspace;
   std::string m_liveDataAccWorkspace;
+  Mantid::API::IAlgorithm_sptr m_monitorAlg;
 
   /// searching
   bool search();
@@ -176,12 +179,15 @@ private:
   std::string setupMonitorPostProcessingScript();
   Mantid::API::IAlgorithm_sptr
   setupMonitorAlgorithm(const std::string &postProcessingScript);
-  void runMonitorAlgorithm(Mantid::API::IAlgorithm_sptr alg);
 
   void handleError(const std::string &message, const std::exception &e);
   void handleError(const std::string &message);
 
   void pythonSrcPostProcessingAlgorithm(std::ostringstream &result) const;
+
+  void finishHandle(const Mantid::API::IAlgorithm *alg) override;
+  void errorHandle(const Mantid::API::IAlgorithm *alg,
+                   const std::string &what) override;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

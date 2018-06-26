@@ -117,6 +117,8 @@ public:
 
   // Live data monitor
   void startMonitor() override;
+  void updateMonitorRunning() override;
+  void updateMonitorStopped() override;
 
 private:
   /// initialise the interface

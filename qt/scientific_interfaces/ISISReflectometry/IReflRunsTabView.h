@@ -99,6 +99,8 @@ public:
 
   // Start live data monitoring
   virtual void startMonitor() = 0;
+  virtual void updateMonitorRunning() = 0;
+  virtual void updateMonitorStopped() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
