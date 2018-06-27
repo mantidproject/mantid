@@ -4,9 +4,9 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="LARMOR" valid-from   ="2018-06-03 00:00:00"
-                          valid-to     ="2100-01-31 23:59:59"
-		          last-modified="2018-06-04 10:30:00">
+ name="LARMOR" valid-from   ="2015-04-29 12:00:00"
+                          valid-to     ="2018-06-02 23:59:59"
+		          last-modified="2015-06-10 08:30:00">
 
   <defaults>
     <length unit="meter"/>
@@ -231,59 +231,6 @@
     <algebra val="cyl-approx" />
   </type>
 
-  <type name="WLSF-pixel" is="detector">
-    <cuboid id="shape">
-      <left-front-bottom-point x="-0.001046875" y="-0.0955" z="0.0"  />
-      <left-front-top-point  x="-0.001046875" y="0.0955" z="0.0"  />
-      <left-back-bottom-point  x="-0.001046875" y="-0.0955" z="0.01"  />
-      <right-front-bottom-point  x="0.001046875" y="-0.0955" z="0.0"  />
-    </cuboid>
-    <algebra val="shape" />
-  </type>
-
- <type name="WLSF-panel">
-   <component type="WLSF-pixel">
-     <locations x="0.03245" x-end="-0.03245" n-elements="32" />
-   </component>
- </type>
-
-  <component type="DetectorTrolley">
-    <location x="0" y="0" z="25.300" rot="35.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/> 
-  </component>
-
-  <type name="DetectorTrolley">
-   <component type="LARMORWLSFDetector" idlist="LARMORWLSFDetector">
-     <location z="0.0" /> 
-   </component>   
-  </type>
- 
- <type name="LARMORWLSFDetector">
-	<component type="WLSF-panel">
-		<location  x="0.2345" z="1.090062" name="WLSF-Panel1"> <facing x="0" y="0" z="25.3"/> </location>
-	</component>
-	<component type="WLSF-panel">
-		<location  x="0.1675" z="1.102347" name="WLSF-Panel2"> <facing x="0" y="0" z="25.3"/> </location>
-	</component>
-	<component type="WLSF-panel">
-		<location  x="0.1005" z="1.110462" name="WLSF-Panel3"> <facing x="0" y="0" z="25.3"/> </location>
-	</component>
-	<component type="WLSF-panel">
-		<location  x="0.0335" z="1.114497" name="WLSF-Panel4"> <facing x="0" y="0" z="25.3"/> </location>
-	</component>
-	<component type="WLSF-panel">
-		<location  x="-0.0335" z="1.114497" name="WLSF-Panel5"> <facing x="0" y="0" z="25.3"/> </location>
-	</component>
-	<component type="WLSF-panel">
-		<location  x="-0.1005" z="1.110462" name="WLSF-Panel6"> <facing x="0" y="0" z="25.3"/> </location>
-	</component>
-	<component type="WLSF-panel">
-		<location  x="-0.1675" z="1.102347" name="WLSF-Panel7"> <facing x="0" y="0" z="25.3"/> </location>
-	</component>
-	<component type="WLSF-panel">
-		<location  x="-0.2345" z="1.090062" name="WLSF-Panel8"> <facing x="0" y="0" z="25.3"/> </location>
-	</component>
- </type>
-
   <!-- DETECTOR and MONITOR ID LISTS -->
 
   <idlist idname="monitors">
@@ -374,25 +321,5 @@
    <id start="1415000" end="1415511" />
    
   </idlist>
-
-  <idlist idname="LARMORWLSFDetector">
-   <id start="2000016" end="2000031" />
-   <id start="2000032" end="2000047" />
-   <id start="2000048" end="2000063" />
-   <id start="2000000" end="2000015" />
-   <id start="2000080" end="2000095" />
-   <id start="2000096" end="2000111" />
-   <id start="2000112" end="2000127" />
-   <id start="2000064" end="2000079" />
-
-   <id start="2000144" end="2000159" />
-   <id start="2000160" end="2000175" />
-   <id start="2000176" end="2000191" />
-   <id start="2000128" end="2000143" />
-   <id start="2000208" end="2000223" />
-   <id start="2000224" end="2000239" />
-   <id start="2000240" end="2000255" />
-   <id start="2000192" end="2000207" />
-  </idlist>
-  
+ 
 </instrument>

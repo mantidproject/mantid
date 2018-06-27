@@ -13,6 +13,7 @@ Instrument Definition Updates
 -----------------------------
 
 - The ALF IDF has been updated following a detector array alteration.
+- The LARMOR IDF has been updated following the addition of a new detector to the instrument.
 
 Algorithms
 ----------
@@ -43,6 +44,9 @@ New Algorithms
 
 - :ref:`SaveGDA <algm-SaveGDA>` saves a focused diffraction workspace to MAUD-readable ``.gda`` format
 
+- :ref:`SaveGEMMAUDParamFile <algm-SaveGEMMAUDParamFile>`, which acts as a partner to :ref:`SaveGDA <algm-SaveGDA>`,
+  saves a MAUD calibration file to convert the output of **SaveGDA** back to d-spacing
+
 Improved
 ########
 
@@ -68,6 +72,7 @@ Bug fixes
 - TimeSeriesProperty::splitByTimeVector's behavior on a boundary condition is changed.  In the set of splitters toward a same target splitted workspace, if there is a splitter's beginning time is after the last entry of the TimeSeriesProperty to be split, then this last entry shall be included in its output TimeSeriesProperty.
 - Fixed a bug in :ref:`MergeRuns <algm-MergeRuns>` which could cause the runs to be merged in a different sequence than indicated in the *InputWorkspaces* property.
 - Fixed a bug where the values entered for basis vector properties in :ref:`BinMD <algm-BinMD>` were not being remembered.
+- Fixed a bug which prevented :ref:`Load <algm-Load>` and :ref:`LoadAndMerge <algm-Load>` from parsing advanced run ranges such as ``1-3+5-7+10+15-20``.
 
 New
 ###
@@ -95,5 +100,6 @@ Bugfixes
 - Checks on the structure of Python fit function classes have been improved to avoid scenarios, such as writing ``function1d`` rather than ``function1D``, which
   would previously have resulted in a hard crash.
 - Fit functions defined in a python script can be used with the new fit function API right after sibscription.
+- Child algorithms now respect their parent algorithm's ``EnableLogging`` setting when invoked using the function-style calling. Previously, some messages could appear in the log even though ``EnableLogging`` was set to ``False``.
 
 :ref:`Release 3.13.0 <v3.13.0>`

@@ -983,7 +983,10 @@ def _set_logging_option(algm_obj, kwargs):
         :param algm_obj: An initialised algorithm object
         :param **kwargs: A dictionary of the keyword arguments passed to the simple function call
     """
-    algm_obj.setLogging(kwargs.pop(__LOGGING_KEYWORD__, True))
+    import inspect
+    parent = _find_parent_pythonalgorithm(inspect.currentframe())
+    logging_default = parent.isLogging() if parent is not None else True
+    algm_obj.setLogging(kwargs.pop(__LOGGING_KEYWORD__, logging_default))
 
 
 def _set_store_ads(algm_obj, kwargs):
@@ -1119,7 +1122,6 @@ def _create_algorithm_object(name, version=-1, startProgress=None, endProgress=N
             kwargs['startProgress'] = float(startProgress)
             kwargs['endProgress'] = float(endProgress)
         alg = parent.createChildAlgorithm(name, **kwargs)
-        alg.setLogging(parent.isLogging())  # default is to log if parent is logging
     else:
         # managed algorithm so that progress reporting
         # can be more easily wired up automatically

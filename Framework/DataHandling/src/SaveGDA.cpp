@@ -50,8 +50,8 @@ double computeAverageDeltaTByT(const HistogramData::HistogramX &tValues) {
 std::string generateBankHeader(int bank, int minT, size_t numberBins,
                                double deltaTByT) {
   std::stringstream stream;
-  const auto numberLines =
-      (size_t)std::ceil((double)numberBins / POINTS_PER_LINE);
+  const auto numberLines = static_cast<size_t>(
+      std::ceil(static_cast<double>(numberBins) / POINTS_PER_LINE));
 
   stream << std::setprecision(2) << "BANK " << bank << " " << numberBins << "  "
          << numberLines << " RALF  " << minT << "  96  " << minT << " "
@@ -150,11 +150,10 @@ void SaveGDA::exec() {
   outFile << std::fixed << std::setprecision(0) << std::setfill(' ');
 
   const API::WorkspaceGroup_sptr inputWS = getProperty(PROP_INPUT_WS);
-  const auto numBanks = inputWS->getNumberOfEntries();
   const auto calibParams = parseParamsFile();
   const std::vector<int> groupingScheme = getProperty(PROP_GROUPING_SCHEME);
 
-  for (int i = 0; i < numBanks; ++i) {
+  for (int i = 0; i < inputWS->getNumberOfEntries(); ++i) {
     const auto ws = inputWS->getItem(i);
     const auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
 
@@ -180,7 +179,7 @@ void SaveGDA::exec() {
         std::min({tofScaled.size(), intensity.size(), error.size()});
 
     const auto header =
-        generateBankHeader(numBanks - i, (int)std::round(tofScaled[0]),
+        generateBankHeader(i + 1, static_cast<int>(std::round(tofScaled[0])),
                            numPoints, averageDeltaTByT);
 
     outFile << std::left << std::setw(80) << header << '\n' << std::right;

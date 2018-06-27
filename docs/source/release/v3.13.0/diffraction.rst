@@ -17,11 +17,15 @@ Powder Diffraction
   taken as the default, and any changes are reverted back to the
   default once the line they were made on has finished executing
 - Focusing in texture-mode (160 banks) was enabled for GEM. The output
-  is saved to the three-column MAUD format
+  is saved to several formats:
+
+  - The three-column ``.gem`` format
+  - The ``.maud`` calibration file format, for conversion to d-spacing (uses a new algorithm
+    :ref:`SaveGEMMAUDParamFile <algm-SaveGEMMAUDParamFile>`
 - :ref:`PDCalibration <algm-PDCalibration>` has major upgrades including making use of :ref:`FitPeaks <algm-FitPeaks>` for the individual peak fitting
 - New NOMAD instrument geometry for 2018 run cycle
 - New POWGEN instrument geometry for 2018 run cycle
-- New SNAP instrument geometry for 2018 run cycle
+- New SNAP instrument geometry for 2018 run cycle with configuration for live data
 
 New Features
 ------------

@@ -144,6 +144,7 @@ public:
 
     // first line is header
     std::getline(file, line);
+    TS_ASSERT(boost::starts_with(line, "BANK 1"));
     std::vector<std::string> headerItems;
     boost::split(headerItems, line, boost::is_any_of(" "),
                  boost::token_compress_on);
@@ -184,7 +185,7 @@ public:
     TS_ASSERT_DELTA(expectedAverageDeltaTByT, averageDeltaTByT, 1e-3);
 
     // Just make sure there's another header after the one we just checked
-    TS_ASSERT(boost::starts_with(line, "BANK 1"));
+    TS_ASSERT(boost::starts_with(line, "BANK 2"));
   }
 
   void test_dataIsCorrect() {
