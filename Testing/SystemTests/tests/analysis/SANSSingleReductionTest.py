@@ -176,6 +176,8 @@ class SANSSingleReductionTest(unittest.TestCase):
         output_workspace = single_reduction_alg.getProperty("OutputWorkspaceLAB").value
         calculated_transmission = single_reduction_alg.getProperty("OutputWorkspaceCalculatedTransmission").value
         unfitted_transmission = single_reduction_alg.getProperty("OutputWorkspaceUnfittedTransmission").value
+        calculated_transmission_can = single_reduction_alg.getProperty("OutputWorkspaceCalculatedTransmissionCan").value
+        unfitted_transmission_can = single_reduction_alg.getProperty("OutputWorkspaceUnfittedTransmissionCan").value
 
         # Compare the output of the reduction with the reference
         reference_file_name = "SANS2D_ws_D20_reference_LAB_1D.nxs"
@@ -183,8 +185,13 @@ class SANSSingleReductionTest(unittest.TestCase):
 
         calculated_transmission_reference_file = "SANS2D_ws_D20_calculated_transmission_reference_LAB.nxs"
         unfitted_transmission_reference_file = "SANS2D_ws_D20_unfitted_transmission_reference_LAB.nxs"
+        calculated_transmission_reference_file_can = "SANS2D_ws_D20_calculated_transmission_reference_LAB_can.nxs"
+        unfitted_transmission_reference_file_can = "SANS2D_ws_D20_unfitted_transmission_reference_LAB_can.nxs"
         self._compare_workspace(calculated_transmission, calculated_transmission_reference_file, check_spectra_map=False)
         self._compare_workspace(unfitted_transmission, unfitted_transmission_reference_file)
+        self._compare_workspace(calculated_transmission_can, calculated_transmission_reference_file_can,
+                                check_spectra_map=False)
+        self._compare_workspace(unfitted_transmission_can, unfitted_transmission_reference_file_can)
 
     def test_that_single_reduction_evaluates_HAB(self):
         # Arrange
