@@ -68,8 +68,12 @@ public:
 
   /// From the IEnggDiffractionCalibration interface
   //@{
-  Poco::Path outFilesUserDir(const std::string &addToDir) override;
+  Poco::Path outFilesUserDir(const std::string &addToDir) const override;
   //@}
+
+  std::string userHDFRunFilename(const int runNumber) const override;
+  std::string userHDFMultiRunFilename(
+      const std::vector<RunLabel> &runLabels) const override;
 
   /// the fitting hard work that a worker / thread will run
   void doFitting(const std::vector<RunLabel> &runLabels,

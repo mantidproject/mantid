@@ -65,7 +65,7 @@ class GuiStateDirectorTest(unittest.TestCase):
         self.assertTrue(state.wavelength.wavelength_high == [10.3])
 
     def test_that_sample_thickness_set_on_state(self):
-        table_model = self._get_table_model(sample_thickness = '78.0')
+        table_model = self._get_table_model(sample_thickness = 78.0)
         state_model = self._get_state_gui_model()
         director = GuiStateDirector(table_model, state_model, SANSFacility.ISIS)
 
@@ -74,6 +74,18 @@ class GuiStateDirectorTest(unittest.TestCase):
 
         self.assertEqual(state.scale.thickness, 78.0)
 
+    def test_state_created_with_default_sample_thickness_when_file_lookup_disabled(self):
+        table_model = self._get_table_model()
+        state_model = self._get_state_gui_model()
+        director = GuiStateDirector(table_model, state_model, SANSFacility.ISIS)
+
+        state = director.create_state(0, file_lookup=False)
+        self.assertTrue(isinstance(state, State))
+
+        self.assertEqual(state.scale.thickness_from_file, 1.0)
+        self.assertEqual(state.scale.height_from_file, 8.0)
+        self.assertEqual(state.scale.width_from_file, 8.0)
+        self.assertEqual(state.scale.thickness, 8.0)
 
 
 if __name__ == '__main__':

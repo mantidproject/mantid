@@ -37,3 +37,11 @@ if "%MPLBACKEND%"=="" (
 :: The working directory is whatever is set by the caller
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 start "MantidPlot" /B /WAIT %_BIN_DIR%\MantidPlot.exe %*
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Check if Mantidplot exited correctly
+:: If not launch the error reporter
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+if %errorlevel% NEQ 0 (
+python %_INSTALL_DIR%\scripts\ErrorReporter\error_dialog_app.py --exitcode=%1 --directory=%_BIN_DIR%
+)

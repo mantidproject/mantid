@@ -5,9 +5,9 @@
 
 #include <MantidAPI/AlgorithmManager.h>
 #include <MantidAPI/FileProperty.h>
+#include <MantidAPI/ITableWorkspace.h>
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/WorkspaceGroup.h>
-#include <MantidAPI/ITableWorkspace.h>
 
 #include <QMenu>
 #include <QSignalMapper>
@@ -21,13 +21,20 @@ namespace MantidWidgets {
 WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(QWidget *parent)
     : WorkspaceTreeWidget(new MantidTreeModel(), parent),
       m_plotSpectrum(new QAction("spectrum...", this)),
+      m_overplotSpectrum(new QAction("overplot spectrum...", this)),
       m_plotSpectrumWithErrs(new QAction("spectrum with errors...", this)),
+      m_overplotSpectrumWithErrs(
+          new QAction("overplot spectrum with errors...", this)),
       m_plotColorfill(new QAction("colorfill", this)) {
   // connections
   connect(m_plotSpectrum, SIGNAL(triggered()), this,
           SLOT(onPlotSpectrumClicked()));
+  connect(m_overplotSpectrum, SIGNAL(triggered()), this,
+          SLOT(onOverplotSpectrumClicked()));
   connect(m_plotSpectrumWithErrs, SIGNAL(triggered()), this,
           SLOT(onPlotSpectrumWithErrorsClicked()));
+  connect(m_overplotSpectrumWithErrs, SIGNAL(triggered()), this,
+          SLOT(onOverplotSpectrumWithErrorsClicked()));
   connect(m_plotColorfill, SIGNAL(triggered()), this,
           SLOT(onPlotColorfillClicked()));
 }
@@ -54,7 +61,10 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     // plot submenu first
     QMenu *plotSubMenu(new QMenu("Plot", menu));
     plotSubMenu->addAction(m_plotSpectrum);
+    plotSubMenu->addAction(m_overplotSpectrum);
     plotSubMenu->addAction(m_plotSpectrumWithErrs);
+    plotSubMenu->addAction(m_overplotSpectrumWithErrs);
+    plotSubMenu->addSeparator();
     plotSubMenu->addAction(m_plotColorfill);
     menu->addMenu(plotSubMenu);
 
@@ -74,8 +84,16 @@ void WorkspaceTreeWidgetSimple::onPlotSpectrumClicked() {
   emit plotSpectrumClicked(getSelectedWorkspaceNamesAsQList());
 }
 
+void WorkspaceTreeWidgetSimple::onOverplotSpectrumClicked() {
+  emit overplotSpectrumClicked(getSelectedWorkspaceNamesAsQList());
+}
+
 void WorkspaceTreeWidgetSimple::onPlotSpectrumWithErrorsClicked() {
   emit plotSpectrumWithErrorsClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onOverplotSpectrumWithErrorsClicked() {
+  emit overplotSpectrumWithErrorsClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 void WorkspaceTreeWidgetSimple::onPlotColorfillClicked() {

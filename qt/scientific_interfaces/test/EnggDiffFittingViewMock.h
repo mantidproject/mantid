@@ -33,9 +33,6 @@ public:
   MOCK_CONST_METHOD0(currentCalibSettings,
                      MantidQt::CustomInterfaces::EnggDiffCalibSettings());
 
-  // virtual std::string focusingDir() const;
-  MOCK_CONST_METHOD0(focusingDir, std::string());
-
   // virtual std::string enggRunPythonCode(const std::string &pyCode)
   MOCK_METHOD1(enggRunPythonCode, std::string(const std::string &));
 
