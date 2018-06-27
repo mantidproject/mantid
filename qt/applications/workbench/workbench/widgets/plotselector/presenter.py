@@ -140,6 +140,10 @@ class PlotSelectorPresenter(object):
         self.make_plot_active(plot_name)
 
     def show_multiple_selected(self):
+        """
+        Shows multiple selected plots, e.g. from pressing the 'Show'
+        button with multiple selected plots
+        """
         selected_plots = self.view.get_all_selected_plot_names()
         for plot_name in selected_plots:
             self.make_plot_active(plot_name)
@@ -205,12 +209,20 @@ class PlotSelectorPresenter(object):
     # ----------------------- Plot Sorting --------------------------
 
     def set_sort_order(self, is_ascending):
+        """
+        Sets the sort order in the view
+        :param is_ascending: If true ascending order, else descending
+        """
         if is_ascending:
             self.view.sort_ascending()
         else:
             self.view.sort_descending()
 
     def set_sort_type(self, is_by_name):
+        """
+        Sets the sort order in the view
+        :param is_by_name: If true by name, else last shown
+        """
         if is_by_name:
             self.view.sort_by_name()
         else:
@@ -218,10 +230,20 @@ class PlotSelectorPresenter(object):
         self._set_sort_keys()
 
     def update_sort_keys(self):
+        """
+        Update the sort keys in the view. This is only required when
+        changes to the last shown order occur in the model, when
+        renaming the key is set already
+        """
         if self.view.sort_type == SortType.LastShown:
             self._set_sort_keys()
 
     def _set_sort_keys(self):
+        """
+        Set the sort keys in the view. This checks the sorting
+        currently set and then sets the sort keys to the appropriate
+        values
+        """
         sort_keys = {}
 
         if self.view.sort_type == SortType.Name:
@@ -242,20 +264,55 @@ class PlotSelectorPresenter(object):
             self.update_plot_list()
 
     def get_initial_sort_key(self, plot_name):
+        """
+        Gets the initial sort key for a plot just added, in this case
+        it is assumed to not have been shown
+        :param plot_name: The name of the plot to generate the sort
+                          key for
+        """
         if self.view.sort_type == SortType.LastShown:
             return '_' + plot_name
         return plot_name
 
+    def get_renamed_sort_key(self, new_name, old_key):
+        """
+        Gets the initial sort key for a plot just added, in this case
+        it is assumed to not have been shown
+        :param plot_name: The name of the plot to generate the sort
+                          key for
+        """
+        if self.view.sort_type == SortType.LastShown:
+            if isinstance(old_key, int):
+                return old_key
+            else:
+                return '_' + new_name
+        return new_name
+
     # ---------------------- Plot Exporting -------------------------
 
-    def export_plots(self, path, extension):
+    def export_plots(self, dir_name, extension):
+        """
+        Export all selected plots given a directory name and file
+        extension
+        :param dir_name: The of the directory to export to
+        :param extension: The file type extension (must be supported
+                          by matplotlib's savefig)
+        """
         for plot_name in self.view.get_all_selected_plot_names():
-            self.export_plot(plot_name, path, extension)
+            self.export_plot(plot_name, dir_name, extension)
 
-    def export_plot(self, plot_name, path, extension):
+    def export_plot(self, dir_name, path, extension):
+        """
+        Given a directory name, plot name and extension construct
+        the absolute path name and call the model to save the figure
+        :param plot_name: The name of the plot
+        :param dir_name: The directory to export to
+        :param extension: The file type extension (must be supported
+                          by matplotlib's savefig)
+        """
         if path:
-            filename = os.path.join(path, plot_name + extension)
+            filename = os.path.join(path, dir_name + extension)
             try:
-                self.model.export_plot(plot_name, filename)
+                self.model.export_plot(dir_name, filename)
             except ValueError as e:
                 print(e)

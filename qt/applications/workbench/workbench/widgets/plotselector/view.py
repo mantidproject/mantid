@@ -119,6 +119,10 @@ class PlotSelectorView(QWidget):
             self.list_widget.clicked.connect(self.show_debug_info)
 
     def show_debug_info(self):
+        """
+        Special feature to make debugging easier, set self.DEBUG_MODE
+        to true to get information printed when clicking on plots
+        """
         item = self.list_widget.currentItem()
         widget = self.list_widget.itemWidget(item)
         print("Plot name: {}".format(widget.plot_name))
@@ -149,6 +153,11 @@ class PlotSelectorView(QWidget):
         return list_widget
 
     def _make_context_menu(self):
+        """
+        Makes the context menu with options relating to plots
+        :return: The context menu, and export sub-menu with a list of
+                 export types
+        """
         context_menu = QMenu()
         context_menu.addAction("Show", self.presenter.show_multiple_selected)
         context_menu.addAction("Rename", self.rename_selected_in_context_menu)
@@ -161,19 +170,36 @@ class PlotSelectorView(QWidget):
         return context_menu, export_menu
 
     def context_menu_opened(self, position):
+        """
+        Open the context menu in the correct location
+        :param position: The position to open the menu, e.g. where
+                         the mouse button was clicked
+        """
         self.context_menu.exec_(self.mapToGlobal(position))
 
     # ------------------------ Plot Updates ------------------------
 
     def append_to_plot_list(self, plot_name, is_shown_by_filter):
+        """
+        Appends to the plot list, if sorting is enabled this should
+        automatically go to the correct place, and the flag can be
+        set to determine whether it should initially be hidden or not
+        :param plot_name: the name of the plot
+        :param is_shown_by_filter: If true then show this plot name
+                                   in the list, else hide it
+        """
         real_item = PlotNameWidget(self.presenter, plot_name, self, self.is_run_as_unit_test)
         widget_item = HumanReadableSortItem()
+
         sort_key = self.presenter.get_initial_sort_key(plot_name)
         widget_item.setData(Qt.InitialSortOrderRole, sort_key)
+
         size_hint = real_item.sizeHint()
         widget_item.setSizeHint(size_hint)
+
         self.list_widget.addItem(widget_item)
         self.list_widget.setItemWidget(widget_item, real_item)
+
         widget_item.setHidden(not is_shown_by_filter)
 
     def set_plot_list(self, plot_list):
@@ -188,23 +214,26 @@ class PlotSelectorView(QWidget):
         for plot_name in plot_list:
             self.append_to_plot_list(plot_name, True)
 
-    def _get_row_and_widget_from_label_text(self, label_text):
+    def _get_row_and_widget_from_plot_name(self, plot_name):
+        """
+        Get the row in the list, and the PlotNameWidget corresponding
+        to the given the plot name
+        :param plot_name: The plot name
+        """
         for row in range(len(self.list_widget)):
             item = self.list_widget.item(row)
             widget = self.list_widget.itemWidget(item)
-            if widget.plot_name == label_text:
+            if widget.plot_name == plot_name:
                 return row, widget
 
     def remove_from_plot_list(self, plot_name):
-        row, widget = self._get_row_and_widget_from_label_text(plot_name)
+        """
+        Remove the given plot name from the list
+        :param plot_name: The plot name
+        """
+        row, widget = self._get_row_and_widget_from_plot_name(plot_name)
         taken_item = self.list_widget.takeItem(row)
         del taken_item
-        return
-
-    def rename_in_plot_list(self, new_name, old_name):
-        row, widget = self._get_row_and_widget_from_label_text(old_name)
-        self.list_widget.item(row).setData(Qt.InitialSortOrderRole, new_name)
-        widget.set_plot_name(new_name)
 
     # ----------------------- Plot Selection ------------------------
 
@@ -255,11 +284,19 @@ class PlotSelectorView(QWidget):
         return text_box
 
     def unhide_all_plots(self):
+        """
+        Set all plot names to be visible (not hidden)
+        """
         for row in range(len(self.list_widget)):
             item = self.list_widget.item(row)
             item.setHidden(False)
 
     def filter_plot_list(self, plot_list):
+        """
+        Given a list of plots names, show only the ones in the list,
+        hiding the rest
+        :param plot_list: The list of plots to show
+        """
         for row in range(len(self.list_widget)):
             item = self.list_widget.item(row)
             widget = self.list_widget.itemWidget(item)
@@ -270,9 +307,27 @@ class PlotSelectorView(QWidget):
 
     # ------------------------ Plot Renaming ------------------------
 
+    def rename_in_plot_list(self, new_name, old_name):
+        """
+        Rename a plot in the plot list, also setting the sort key
+        :param new_name: The new plot name
+        :param old_name: The plot to be renamed
+        """
+        row, widget = self._get_row_and_widget_from_plot_name(old_name)
+
+        old_key = self.list_widget.item(row).data(Qt.InitialSortOrderRole)
+        new_sort_key = self.presenter.get_renamed_sort_key(new_name, old_key)
+        self.list_widget.item(row).setData(Qt.InitialSortOrderRole, new_sort_key)
+
+        widget.set_plot_name(new_name)
+
     def rename_selected_in_context_menu(self):
+        """
+        Triggered when rename is selected from the context menu,
+        makes the plot name directly editable
+        """
         plot_name = self.get_currently_selected_plot_name()
-        row, widget = self._get_row_and_widget_from_label_text(plot_name)
+        row, widget = self._get_row_and_widget_from_plot_name(plot_name)
         widget.toggle_plot_name_editable(True)
 
     # ----------------------- Plot Sorting --------------------------
@@ -296,6 +351,11 @@ class PlotSelectorView(QWidget):
     """
 
     def _make_sort_button(self):
+        """
+        Make the sort button, with separate groups for ascending and
+        descending, sorting by name or last shown
+        :return: The sort menu button
+        """
         sort_button = QPushButton("Sort")
         sort_menu = QMenu()
 
@@ -327,22 +387,46 @@ class PlotSelectorView(QWidget):
         return sort_button
 
     def sort_ascending(self):
+        """
+        Set the list to sort ascending
+
+        See also HumanReadableSortItem class
+        """
         self.sort_order = Qt.AscendingOrder
         self.list_widget.sortItems(self.sort_order)
 
     def sort_descending(self):
+        """
+        Set the list to sort descending
+
+        See also HumanReadableSortItem class
+        """
         self.sort_order = Qt.DescendingOrder
         self.list_widget.sortItems(self.sort_order)
 
     def sort_by_name(self):
+        """
+        Set sorting to be by name - note this does not update any
+        sort keys, it just sets the required state
+        """
         self.sort_type = SortType.Name
         self.list_widget.sortItems(self.sort_order)
 
     def sort_by_last_shown(self):
+        """
+        Set sorting to be by last shown - note this does not update
+        any sort keys, it just sets the required state
+        """
         self.sort_type = SortType.LastShown
         self.list_widget.sortItems(self.sort_order)
 
     def set_sort_keys(self, sort_names_dict):
+        """
+        Sets the sort keys given a dictionary of plot names and sort
+        keys, e.g. {'Plot1': 1, 'Plot2': '_Plot2'}
+        :param sort_names_dict: A dictionary with keys as plot names
+                                and values as sort keys
+        """
         self.list_widget.setSortingEnabled(False)
         for row in range(len(self.list_widget)):
             item = self.list_widget.item(row)
@@ -354,6 +438,11 @@ class PlotSelectorView(QWidget):
     # ---------------------- Plot Exporting -------------------------
 
     def _make_export_button(self):
+        """
+        Makes the export button menu, containing a list of export
+        types
+        :return: The export button menu
+        """
         export_button = QPushButton("Export")
         export_menu = QMenu()
         for text, extension in export_types:
@@ -362,6 +451,14 @@ class PlotSelectorView(QWidget):
         return export_button
 
     def export_plots(self, extension):
+        """
+        Pops up a directory selection dialogue then calls the
+        presenter to do the export - note that if this is run as a
+        unit test this directory selection must be disabled, else it
+        actually appears!
+        :param extension: The file extension to use which defines the
+                          export type
+        """
         path = ""
         if not self.is_run_as_unit_test:
             path = QFileDialog.getExistingDirectory(None, 'Select folder for exported plots')
@@ -369,6 +466,11 @@ class PlotSelectorView(QWidget):
 
 
 class PlotNameWidget(QWidget):
+    """A widget to display the plot name, and edit and close buttons
+
+    This widget is added to the list widget to support the renaming
+    and close buttons, as well as the direct renaming functionality.
+    """
     def __init__(self, presenter, plot_name="", parent=None, is_run_as_unit_test=False):
         super(PlotNameWidget, self).__init__(parent)
 
@@ -414,20 +516,39 @@ class PlotNameWidget(QWidget):
         self.setLayout(self.layout)
 
     def set_plot_name(self, new_name):
+        """
+        Sets the internally stored and displayed plot name
+        :param new_name: The name to set
+        """
         self.plot_name = new_name
         self.line_edit.setText(new_name)
 
-    def show_pressed(self, plot_name):
-        self.presenter.show_plot(plot_name)
-
     def close_pressed(self, plot_name):
+        """
+        Close the plot with the given name
+        :param plot_name: The name of the plot to close
+        """
         self.presenter.close_single_plot(plot_name)
 
     def rename_button_toggled(self, checked):
+        """
+        If the rename button is pressed from being unchecked then
+        make the line edit item editable
+        :param checked: True if the rename toggle is now pressed
+        """
         if checked:
             self.toggle_plot_name_editable(True, toggle_rename_button=False)
 
     def toggle_plot_name_editable(self, editable, toggle_rename_button=True):
+        """
+        Set the line edit item to be editable or not editable. If
+        editable move the cursor focus to the editable name and
+        highlight it all.
+        :param editable: If true make the plot name editable, else
+                         make it read only
+        :param toggle_rename_button: If true also toggle the rename
+                                     button state
+        """
         self.line_edit.setReadOnly(not editable)
         self.line_edit.setAttribute(Qt.WA_TransparentForMouseEvents, not editable)
 
@@ -446,22 +567,41 @@ class PlotNameWidget(QWidget):
             self.line_edit.setSelection(0, 0)
 
     def rename_plot(self):
+        """
+        Called when the editing is finished, gets the presenter to
+        do the real renaming of the plot
+        """
         self.presenter.rename_figure(self.line_edit.text(), self.plot_name)
         self.toggle_plot_name_editable(False)
 
-    def export_plot(self, extension):
-        path = ""
-        if not self.is_run_as_unit_test:
-            path = QFileDialog.getExistingDirectory(None, 'Select folder for exported plot')
-        self.presenter.export_plots(self.plot_name, path, extension)
-
 
 class HumanReadableSortItem(QListWidgetItem):
+    """Inherits from QListWidgetItem and override __lt__ method
+
+    This overrides the  < operator (or __lt__ method) to make a human
+    readable sort, for example
+      [Figure 1, Figure 2, Figure 3, Figure 20]
+    instead of
+      [Figure 1, Figure 2, Figure 20, Figure 3]
+    """
+
     def convert(self, text):
+        """
+        Convert some text for comparison
+        :param text: A string with the text to convert
+        :return: An int if the string is fully numeric, else the text
+                 in lower case
+        """
         return int(text) if text.isdigit() else text.lower()
 
     def __lt__(self, other):
+        """
+        Override the less than method to do a human readable sort.
+        Essentially break the string up in the following way:
+         'Plot1 Version23' -> ['Plot', 1, 'Version', 23]
+        then uses Python list comparison to get the result we want.
+        :param other: The other HumanReadableSortItem to compare with
+        """
         self_key = [self.convert(c) for c in re.split('([0-9]+)', self.data(Qt.InitialSortOrderRole))]
         other_key = [self.convert(c) for c in re.split('([0-9]+)', other.data(Qt.InitialSortOrderRole))]
         return self_key < other_key
-

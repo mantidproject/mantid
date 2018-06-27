@@ -101,7 +101,7 @@ class PlotSelectorPresenterTest(unittest.TestCase):
 
     def test_no_filtering_displays_all_plots(self):
         self.presenter.filter_text_changed()
-        self.view.unhide_all.assert_called_once_with()
+        self.view.unhide_all_plots.assert_called_once_with()
 
     def test_plots_filtered_on_full_name(self):
         self.view.get_filter_text = mock.Mock(return_value="Plot1")
@@ -259,6 +259,18 @@ class PlotSelectorPresenterTest(unittest.TestCase):
     def test_get_initial_sort_key_for_last_shown_by_name(self):
         self.view.sort_type = SortType.LastShown
         self.assertEqual(self.presenter.get_initial_sort_key("Plot1"), "_Plot1")
+
+    def test_get_renamed_sort_key_for_sort_by_name(self):
+        self.view.sort_type = SortType.Name
+        self.assertEqual(self.presenter.get_renamed_sort_key("Plot1", "Plot1"), "Plot1")
+
+    def test_get_renamed_sort_key_for_sort_by_last_shown_with_int(self):
+        self.view.sort_type = SortType.LastShown
+        self.assertEqual(self.presenter.get_renamed_sort_key("Plot1", 1), 1)
+
+    def test_get_renamed_sort_key_for_sort_by_last_shown_with_string(self):
+        self.view.sort_type = SortType.LastShown
+        self.assertEqual(self.presenter.get_renamed_sort_key("Plot1", "_Plot1"), "_Plot1")
 
     # ---------------------- Plot Exporting -------------------------
 
