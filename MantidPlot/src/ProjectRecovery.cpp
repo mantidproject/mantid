@@ -1,4 +1,4 @@
-#include "ProjectRecoveryThread.h"
+#include "ProjectRecovery.h"
 
 #include "ApplicationWindow.h"
 #include "Folder.h"
@@ -15,7 +15,8 @@
 #include "Poco/NObserver.h"
 
 #include "Poco/Path.h"
-#include "qmetaobject.h"
+
+#include <QMetaObject>
 
 #include <chrono>
 #include <condition_variable>
@@ -112,32 +113,31 @@ const std::chrono::seconds TIME_BETWEEN_SAVING(SAVING_TIME);
 } // namespace
 
 namespace MantidQt {
-namespace API {
 
 /**
- * Constructs a new ProjectRecoveryThread, a class which encapsulates
+ * Constructs a new ProjectRecovery, a class which encapsulates
  * a background thread to save periodically. This does not start the
  * background thread though
  *
  * @param windowHandle :: Pointer to the main application window
  */
-ProjectRecoveryThread::ProjectRecoveryThread(ApplicationWindow *windowHandle)
+ProjectRecovery::ProjectRecovery(ApplicationWindow *windowHandle)
     : m_backgroundSavingThread(), m_stopBackgroundThread(true),
-      m_configKeyObserver(*this, &ProjectRecoveryThread::configKeyChanged),
+      m_configKeyObserver(*this, &ProjectRecovery::configKeyChanged),
       m_windowPtr(windowHandle) {}
 
 /// Destructor which also stops any background threads currently in progress
-ProjectRecoveryThread::~ProjectRecoveryThread() { stopProjectSaving(); }
+ProjectRecovery::~ProjectRecovery() { stopProjectSaving(); }
 
 /// Returns a background thread with the current object captured inside it
-std::thread ProjectRecoveryThread::createBackgroundThread() {
+std::thread ProjectRecovery::createBackgroundThread() {
   // Using a lambda helps the compiler deduce the this pointer
   // otherwise the resolution is ambiguous
   return std::thread([this] { projectSavingThreadWrapper(); });
 }
 
 /// Callback for POCO when a config change had fired for the enabled key
-void ProjectRecoveryThread::configKeyChanged(
+void ProjectRecovery::configKeyChanged(
     Mantid::Kernel::ConfigValChangeNotification_ptr notif) {
   if (notif->key() != (SAVING_ENABLED_CONFIG_KEY)) {
     return;
@@ -155,8 +155,7 @@ void ProjectRecoveryThread::configKeyChanged(
  * folder. This is based on the configuration key which
  * indicates how many points to keep
  */
-void ProjectRecoveryThread::deleteExistingCheckpoints(
-    size_t checkpointsToKeep) {
+void ProjectRecovery::deleteExistingCheckpoints(size_t checkpointsToKeep) {
   static auto workingFolder = getRecoveryFolder();
   Poco::Path recoveryPath;
   if (!recoveryPath.tryParse(workingFolder)) {
@@ -201,7 +200,7 @@ void ProjectRecoveryThread::deleteExistingCheckpoints(
 }
 
 /// Starts a background thread which saves out the project periodically
-void ProjectRecoveryThread::startProjectSaving() {
+void ProjectRecovery::startProjectSaving() {
   // Close the existing thread first
   stopProjectSaving();
 
@@ -219,7 +218,7 @@ void ProjectRecoveryThread::startProjectSaving() {
 }
 
 /// Stops any existing background threads which are running
-void ProjectRecoveryThread::stopProjectSaving() {
+void ProjectRecovery::stopProjectSaving() {
   {
     std::lock_guard<std::mutex> lock(m_notifierMutex);
     m_stopBackgroundThread = true;
@@ -233,7 +232,7 @@ void ProjectRecoveryThread::stopProjectSaving() {
 
 /// Top level thread wrapper which catches all exceptions to gracefully handle
 /// them
-void ProjectRecoveryThread::projectSavingThreadWrapper() {
+void ProjectRecovery::projectSavingThreadWrapper() {
   try {
     projectSavingThread();
   } catch (std::exception const &e) {
@@ -252,7 +251,7 @@ void ProjectRecoveryThread::projectSavingThreadWrapper() {
  * exit early. After the timeout elapses, if the thread has not been
  * requested to exit, it will save the project out
  */
-void ProjectRecoveryThread::projectSavingThread() {
+void ProjectRecovery::projectSavingThread() {
   while (!m_stopBackgroundThread) {
     std::unique_lock<std::mutex> lock(m_notifierMutex);
     // The condition variable releases the lock until the var changes
@@ -287,8 +286,7 @@ void ProjectRecoveryThread::projectSavingThread() {
  * @param projectDestFile :: The full path to write to
  * @throws If saving fails in the main GUI thread
  */
-void ProjectRecoveryThread::saveOpenWindows(
-    const std::string &projectDestFile) {
+void ProjectRecovery::saveOpenWindows(const std::string &projectDestFile) {
   bool saveCompleted = false;
   if (!QMetaObject::invokeMethod(m_windowPtr, "saveProjectRecovery",
                                  Qt::BlockingQueuedConnection,
@@ -310,8 +308,7 @@ void ProjectRecoveryThread::saveOpenWindows(
  * @param historyDestFolder:: The folder to write all histories to
  * @throw If saving fails in the script
  */
-void ProjectRecoveryThread::saveWsHistories(
-    const std::string &historyDestFolder) {
+void ProjectRecovery::saveWsHistories(const std::string &historyDestFolder) {
   QString projectSavingCode =
       "from mantid.simpleapi import write_all_workspaces_histories\n"
       "write_all_workspaces_histories(\"" +
@@ -322,5 +319,4 @@ void ProjectRecoveryThread::saveWsHistories(
   }
 }
 
-} // namespace API
 } // namespace MantidQt

@@ -45,7 +45,7 @@ Description          : QtiPlot's main window
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
-#include "ProjectRecoveryThread.h"
+#include "ProjectRecovery.h"
 #include "ProjectSaveView.h"
 #include "Script.h"
 #include "Scripted.h"
@@ -1637,7 +1637,7 @@ private:
   bool m_shuttingDown{false};
 
   /// Owns a thread which automatically triggers project recovery for the GUI
-  MantidQt::API::ProjectRecoveryThread m_projectRecoveryThread;
+  MantidQt::ProjectRecovery m_ProjectRecovery;
 
 #ifdef SHARED_MENUBAR
   QMenuBar *m_sharedMenuBar; ///< Pointer to the shared menubar

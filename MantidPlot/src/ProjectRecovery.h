@@ -1,5 +1,5 @@
-#ifndef PROJECT_RECOVERY_THREAD_H_
-#define PROJECT_RECOVERY_THREAD_H_
+#ifndef PROJECT_RECOVERY_H_
+#define PROJECT_RECOVERY_H_
 
 #include "MantidKernel/ConfigService.h"
 
@@ -42,13 +42,12 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
 namespace MantidQt {
-namespace API {
-class ProjectRecoveryThread {
+class ProjectRecovery {
 public:
   /// Constructor
-  explicit ProjectRecoveryThread(ApplicationWindow *windowHandle);
+  explicit ProjectRecovery(ApplicationWindow *windowHandle);
   /// Destructor the ensures background thread stops
-  ~ProjectRecoveryThread();
+  ~ProjectRecovery();
 
   /// Starts the background thread
   void startProjectSaving();
@@ -85,15 +84,13 @@ private:
   std::condition_variable m_threadNotifier;
 
   /// Config observer to monitor the key
-  Poco::NObserver<ProjectRecoveryThread,
-                  Mantid::Kernel::ConfigValChangeNotification>
+  Poco::NObserver<ProjectRecovery, Mantid::Kernel::ConfigValChangeNotification>
       m_configKeyObserver;
 
   /// Pointer to main GUI window
   ApplicationWindow *m_windowPtr;
 };
 
-} // namespace API
 } // namespace MantidQt
 
-#endif // PROJECT_RECOVERY_THREAD_H_
+#endif // PROJECT_RECOVERY_H_
