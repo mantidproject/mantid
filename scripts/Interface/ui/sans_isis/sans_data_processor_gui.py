@@ -1742,7 +1742,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.q_xy_step_line_edit.setText("")
         self.q_xy_step_type_combo_box.setCurrentIndex(0)
 
-        self.gravity_group_box.setChecked(True)
+        self.gravity_group_box.setChecked(False)
         self.gravity_extra_length_line_edit.setText("")
 
         self.q_resolution_group_box.setChecked(False)
