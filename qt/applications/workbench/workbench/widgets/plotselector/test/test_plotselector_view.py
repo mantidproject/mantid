@@ -80,7 +80,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
 
-        self.view.append_to_plot_list("Plot4")
+        self.view.append_to_plot_list("Plot4", True)
 
         self.assert_list_of_plots_is_set_in_widget(plot_names + ["Plot4"])
 
@@ -150,6 +150,46 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.view.filter_box.setText('plot1')
         self.assertEquals(self.presenter.filter_text_changed.call_count, 1)
         self.assertEquals(self.view.get_filter_text(), 'plot1')
+
+    def test_filtering_plot_list_hides_plots(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        self.view.filter_plot_list(["Plot1"])
+
+        self.assertFalse(self.view.list_widget.item(0).isHidden())
+        self.assertTrue(self.view.list_widget.item(1).isHidden())
+        self.assertTrue(self.view.list_widget.item(2).isHidden())
+
+    def test_filtering_then_clearing_filter_shows_all_plots(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        self.view.filter_plot_list(["Plot1"])
+        self.view.unhide_all_plots()
+
+        self.assertFalse(self.view.list_widget.item(0).isHidden())
+        self.assertFalse(self.view.list_widget.item(1).isHidden())
+        self.assertFalse(self.view.list_widget.item(2).isHidden())
+
+    def test_filtering_ignores_hidden_when_calling_get_all_selected(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+        self.view.list_widget.selectAll()
+        self.view.filter_plot_list(["Plot1"])
+
+        plot_names = self.view.get_all_selected_plot_names()
+        self.assertEqual(plot_names, ["Plot1"])
+
+    def test_filtering_returns_none_for_hidden_when_calling_get_selected(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        self.click_to_select_by_row_number(1)
+        self.view.filter_plot_list(["Plot1"])
+
+        plot_name = self.view.get_currently_selected_plot_name()
+        self.assertIsNone(plot_name)
 
     # ------------------------ Plot Showing ------------------------
 

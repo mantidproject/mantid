@@ -165,7 +165,7 @@ class PlotSelectorView(QWidget):
 
     # ------------------------ Plot Updates ------------------------
 
-    def _add_to_plot_list(self, plot_name):
+    def append_to_plot_list(self, plot_name, is_shown_by_filter):
         real_item = PlotNameWidget(self.presenter, plot_name, self, self.is_run_as_unit_test)
         widget_item = HumanReadableSortItem()
         sort_key = self.presenter.get_initial_sort_key(plot_name)
@@ -174,18 +174,19 @@ class PlotSelectorView(QWidget):
         widget_item.setSizeHint(size_hint)
         self.list_widget.addItem(widget_item)
         self.list_widget.setItemWidget(widget_item, real_item)
+        widget_item.setHidden(not is_shown_by_filter)
 
     def set_plot_list(self, plot_list):
         """
-        Populate the plot list from the Presenter
+        Populate the plot list from the Presenter. This is reserved
+        for a 'things have gone wrong' scenario, and should only be
+        used when errors are encountered.
         :param plot_list: the list of plot names (list of strings)
         """
         self.list_widget.clear()
+        self.filter_box.clear()
         for plot_name in plot_list:
-            self._add_to_plot_list(plot_name)
-
-    def append_to_plot_list(self, plot_name):
-        self._add_to_plot_list(plot_name)
+            self.append_to_plot_list(plot_name, True)
 
     def _get_row_and_widget_from_label_text(self, label_text):
         for row in range(len(self.list_widget)):
@@ -217,7 +218,8 @@ class PlotSelectorView(QWidget):
         selected_plots = []
         for item in selected:
             widget = self.list_widget.itemWidget(item)
-            selected_plots.append(widget.plot_name)
+            if not item.isHidden():
+                selected_plots.append(widget.plot_name)
         return selected_plots
 
     def get_currently_selected_plot_name(self):
@@ -228,7 +230,7 @@ class PlotSelectorView(QWidget):
         """
         item = self.list_widget.currentItem()
         widget = self.list_widget.itemWidget(item)
-        if widget is None:
+        if widget is None or item.isHidden():
             return None
         return widget.plot_name
 
@@ -251,6 +253,20 @@ class PlotSelectorView(QWidget):
         text_box.setPlaceholderText("Filter Plots")
         text_box.setClearButtonEnabled(True)
         return text_box
+
+    def unhide_all_plots(self):
+        for row in range(len(self.list_widget)):
+            item = self.list_widget.item(row)
+            item.setHidden(False)
+
+    def filter_plot_list(self, plot_list):
+        for row in range(len(self.list_widget)):
+            item = self.list_widget.item(row)
+            widget = self.list_widget.itemWidget(item)
+            if widget.plot_name in plot_list:
+                item.setHidden(False)
+            else:
+                item.setHidden(True)
 
     # ------------------------ Plot Renaming ------------------------
 

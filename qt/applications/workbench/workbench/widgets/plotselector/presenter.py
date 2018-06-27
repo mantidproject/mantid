@@ -61,10 +61,7 @@ class PlotSelectorPresenter(object):
         """
         self.model.update_plot_list()
         filter_text = self.view.get_filter_text()
-        if not filter_text:
-            self.view.set_plot_list(self.model.plot_list)
-        else:
-            self._filter_plot_list_by_string(filter_text)
+        self.view.set_plot_list(self.model.plot_list)
 
     def append_to_plot_list(self, plot_name):
         """
@@ -73,7 +70,8 @@ class PlotSelectorPresenter(object):
         """
         try:
             self.model.append_to_plot_list(plot_name)
-            self.view.append_to_plot_list(plot_name)
+            is_shown = self._is_shown_by_filter(self.view.get_filter_text(), plot_name)
+            self.view.append_to_plot_list(plot_name, is_shown)
         except ValueError as e:
             print(e)
 
@@ -120,13 +118,16 @@ class PlotSelectorPresenter(object):
         :param filter_text: A string containing the filter text
         """
         if not filter_text:
-            self.view.set_plot_list(self.model.plot_list)
+            self.view.unhide_all_plots()
         else:
-            filtered_plot_list = []
+            plot_list = []
             for plot_name in self.model.plot_list:
-                if filter_text.lower() in plot_name.lower():
-                    filtered_plot_list.append(plot_name)
-            self.view.set_plot_list(filtered_plot_list)
+                if self._is_shown_by_filter(filter_text, plot_name):
+                    plot_list.append(plot_name)
+            self.view.filter_plot_list(plot_list)
+
+    def _is_shown_by_filter(self, filter_text, plot_name):
+        return filter_text.lower() in plot_name.lower()
 
     # ------------------------ Plot Showing ------------------------
 

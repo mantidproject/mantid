@@ -59,16 +59,10 @@ class PlotSelectorPresenterTest(unittest.TestCase):
         self.assertEqual(self.model.update_plot_list.call_count, 1)
         self.view.set_plot_list.assert_called_once_with(["Plot1", "Plot2", "Plot3", "Graph99"])
 
-    def test_plot_list_update_with_filter_set(self):
-        self.view.get_filter_text = mock.Mock(return_value="Graph99")
-        self.presenter.update_plot_list()
-        self.assertEqual(self.model.update_plot_list.call_count, 1)
-        self.view.set_plot_list.assert_called_once_with(["Graph99"])
-
     def test_append_to_plot_list_calls_update_in_model_and_view(self):
         self.presenter.append_to_plot_list("Plot4")
         self.model.append_to_plot_list.assert_called_once_with("Plot4")
-        self.view.append_to_plot_list.assert_called_once_with("Plot4")
+        self.view.append_to_plot_list.assert_called_once_with("Plot4", True)
 
     def test_append_to_plot_list_with_error_on_model_does_not_update_view(self):
         self.model.append_to_plot_list.side_effect = ValueError("Some problem")
@@ -107,25 +101,39 @@ class PlotSelectorPresenterTest(unittest.TestCase):
 
     def test_no_filtering_displays_all_plots(self):
         self.presenter.filter_text_changed()
-        self.view.set_plot_list.assert_called_once_with(["Plot1", "Plot2", "Plot3", "Graph99"])
+        self.view.unhide_all.assert_called_once_with()
 
     def test_plots_filtered_on_full_name(self):
         self.view.get_filter_text = mock.Mock(return_value="Plot1")
         self.presenter.filter_text_changed()
 
-        self.view.set_plot_list.assert_called_once_with(["Plot1"])
+        self.view.filter_plot_list.assert_called_once_with(["Plot1"])
 
     def test_plots_filtered_on_substring(self):
         self.view.get_filter_text = mock.Mock(return_value="lot")
         self.presenter.filter_text_changed()
 
-        self.view.set_plot_list.assert_called_once_with(["Plot1", "Plot2", "Plot3"])
+        self.view.filter_plot_list.assert_called_once_with(["Plot1", "Plot2", "Plot3"])
 
     def test_filtering_case_invariant(self):
         self.view.get_filter_text = mock.Mock(return_value="pLOT1")
         self.presenter.filter_text_changed()
 
-        self.view.set_plot_list.assert_called_once_with(["Plot1"])
+        self.view.filter_plot_list.assert_called_once_with(["Plot1"])
+
+    def test_append_to_plot_list_with_filter_set_matching_new_name(self):
+        self.view.get_filter_text = mock.Mock(return_value="lot")
+
+        self.presenter.append_to_plot_list("Plot4")
+        self.model.append_to_plot_list.assert_called_once_with("Plot4")
+        self.view.append_to_plot_list.assert_called_once_with("Plot4", True)
+
+    def test_append_to_plot_list_with_filter_set_not_matching_new_name(self):
+        self.view.get_filter_text = mock.Mock(return_value="Graph99")
+
+        self.presenter.append_to_plot_list("Plot4")
+        self.model.append_to_plot_list.assert_called_once_with("Plot4")
+        self.view.append_to_plot_list.assert_called_once_with("Plot4", False)
 
     # ------------------------ Plot Showing ------------------------
 
