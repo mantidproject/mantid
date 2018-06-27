@@ -4,6 +4,7 @@ import numpy.testing as npt
 import fractional_indexing as indexing
 
 from mantid.kernel import V3D
+from mantid.geometry import UnitCell
 from mantid.simpleapi import CreatePeaksWorkspace, CreateSimulationWorkspace
 
 
@@ -20,10 +21,10 @@ class FractionIndexingTests(unittest.TestCase):
             [0, 0, .13],
         ])
 
-        _, ndim, bases = indexing.find_bases(qs, tolerance=.02)
+        ndim, bases = indexing.find_bases(qs, tolerance=.02)
 
         self.assertEqual(ndim, 1)
-        npt.assert_array_equal(bases[1], qs[0])
+        npt.assert_array_equal(bases[0], qs[0])
 
     def test_find_bases_with_2d_modulation(self):
         qs = np.array([
@@ -31,11 +32,11 @@ class FractionIndexingTests(unittest.TestCase):
             [0, .1, 0],
         ])
 
-        _, ndim, bases = indexing.find_bases(qs, tolerance=.02)
+        ndim, bases = indexing.find_bases(qs, tolerance=.02)
 
         self.assertEqual(ndim, 2)
-        npt.assert_array_equal(bases[1], qs[0])
-        npt.assert_array_equal(bases[2], qs[1])
+        npt.assert_array_equal(bases[0], qs[0])
+        npt.assert_array_equal(bases[1], qs[1])
 
     def test_find_bases_with_3d_modulation(self):
         qs = np.array([
@@ -44,12 +45,12 @@ class FractionIndexingTests(unittest.TestCase):
             [.1, 0, 0],
         ])
 
-        _, ndim, bases = indexing.find_bases(qs, tolerance=.02)
+        ndim, bases = indexing.find_bases(qs, tolerance=.02)
 
         self.assertEqual(ndim, 3)
-        npt.assert_array_equal(bases[1], qs[0])
-        npt.assert_array_equal(bases[2], qs[1])
-        npt.assert_array_equal(bases[3], qs[2])
+        npt.assert_array_equal(bases[0], qs[0])
+        npt.assert_array_equal(bases[1], qs[1])
+        npt.assert_array_equal(bases[2], qs[2])
 
     def test_find_bases_with_4d_modulation(self):
         qs = np.array([
@@ -59,12 +60,12 @@ class FractionIndexingTests(unittest.TestCase):
             [.15, 0, 0],
         ])
 
-        _, ndim, bases = indexing.find_bases(qs, tolerance=.02)
+        ndim, bases = indexing.find_bases(qs, tolerance=.02)
 
         self.assertEqual(ndim, 4)
-        npt.assert_array_equal(bases[1], qs[0])
-        npt.assert_array_equal(bases[2], qs[1])
-        npt.assert_array_equal(bases[3], qs[2])
+        npt.assert_array_equal(bases[0], qs[0])
+        npt.assert_array_equal(bases[1], qs[1])
+        npt.assert_array_equal(bases[2], qs[2])
 
     def test_find_bases_with_2d_modulation_with_linear_combination(self):
         qs = np.array([
@@ -75,12 +76,58 @@ class FractionIndexingTests(unittest.TestCase):
             [0, .1, .2],
         ])
 
-        _, ndim, bases = indexing.find_bases(qs, tolerance=.02)
+        ndim, bases = indexing.find_bases(qs, tolerance=.02)
 
         self.assertEqual(ndim, 3)
+        npt.assert_array_equal(bases[0], np.array([0, 0, .1]))
         npt.assert_array_equal(bases[1], np.array([0, .1, 0]))
-        npt.assert_array_equal(bases[2], np.array([0, 0, .1]))
-        npt.assert_array_equal(bases[3], np.array([0, 0, .15]))
+        npt.assert_array_equal(bases[2], np.array([0, 0, .15]))
+
+    def test_find_bases_with_non_orthogonal_cell(self):
+        cell = UnitCell(1, 1, 1, 90, 95, 103)
+        cart_cell = cell.getB()
+        qs = np.array([
+            [.5, 0, 0],
+            [0, .5, 0],
+            [0, 0, .5],
+            [0, 0, .25],
+        ])
+
+        qs = np.dot(qs, cart_cell)
+
+        ndim, bases = indexing.find_bases(qs, 1e-5)
+        self.assertEqual(ndim, 3, "Number of dimensions must be 3")
+
+        expected_bases = np.array([
+            [0.  , 0.  , 0.25],
+            [0.,  .5, 0.],
+            [0.51521732, 0.11589868, 0.04490415]
+        ])
+
+        npt.assert_almost_equal(bases, expected_bases, err_msg="Basis vectors do not match")
+
+    def test_find_indexing_with_non_orthogonal_cell(self):
+        cell = UnitCell(1, 1, 1, 90, 95, 103)
+        cart_cell = cell.getB()
+        qs = np.array([
+            [.5, 0, 0],
+            [0, .5, 0],
+            [0, 0, .5],
+            [0, 0, .25],
+        ])
+
+        qs = np.dot(qs, cart_cell)
+
+        indices = indexing.index_q_vectors(qs)
+
+        expected_indexing = np.array([
+            [0, 0, 1],
+            [0, 1, 0],
+            [2, 0, 0],
+            [1, 0, 0]
+        ])
+
+        npt.assert_equal(indices, expected_indexing, err_msg="Indexing does not match expected.")
 
     def test_generate_grid(self):
         bases = np.array([
@@ -122,26 +169,26 @@ class FractionIndexingTests(unittest.TestCase):
         result = indexing.generate_grid(bases, 2)
         npt.assert_array_equal(result, expected_result)
 
-    def test_index_with_2d_moduldation_and_noise(self):
+    def test_index_with_modulation(self):
         qs = np.array([
             [0, .1, .1],
             [0, -.1, 0],
-            [0, 0, .11],
-            [0, 0, -.14],
-            [0, 0, .17],
+            [0, 0, .1],
+            [0, 0, -.1],
             [0, .1, .2],
+            [0, 0, .45],
         ])
 
         expected_indexing = np.array([
-            [1, 1, 0],
-            [-1, 0, 0],
-            [0, 1, 0],
-            [0, 0, 1],
-            [0, 0, -1],
-            [1, 2, 0]
+            [-1,  1,  0],
+            [ 1,  0,  0],
+            [ 0,  1,  0],
+            [ 0, -1,  0],
+            [-1,  2,  0],
+            [ 0,  0,  1]
         ])
 
-        actual_indexing = indexing.index_q_vectors(qs, tolerance=.04)
+        actual_indexing = indexing.index_q_vectors(qs, tolerance=.03)
         npt.assert_array_equal(actual_indexing, expected_indexing)
 
     def test_norm_along_axis(self):
