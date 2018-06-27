@@ -138,10 +138,10 @@ public:
     TS_ASSERT(wsGroup->contains("EMU00012345; Pair; pair1; Asym; #1"));
     TS_ASSERT(wsGroup->contains("EMU00012345; Pair; pair1; Asym; #1_Raw"));
     // Analysed workspaces as above : (14)
-	//    unBinned (5)
-	//	  _Raw (5)
-	//	  _unNorm (2)
-	//	  _unNorm_Raw (2)
+    //    unBinned (5)
+    //	  _Raw (5)
+    //	  _unNorm (2)
+    //	  _unNorm_Raw (2)
     // "inputData" "inputGroup" from setup (2)
     // "MuonGroupings" from load algorithm (1)
     // "MuonAnalysisTFNormalizations" (1)
