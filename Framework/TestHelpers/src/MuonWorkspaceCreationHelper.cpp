@@ -40,11 +40,11 @@ double yDataAsymmetry::operator()(const double t, size_t spec) {
   double e = exp(-t / tau);
   double factor = (static_cast<double>(spec) + 1.0) * 0.5;
   double phase_offset = 4 * M_PI / 180;
-  return std::max(
-      0.0, (10. * factor *
-            (1.0 + m_amp * cos(m_omega * t + m_phi +
-                               static_cast<double>(spec) * phase_offset)) *
-            e));
+  return std::max(0.0, (10. * factor * (1.0 +
+                                        m_amp * cos(m_omega * t + m_phi +
+                                                    static_cast<double>(spec) *
+                                                        phase_offset)) *
+                        e));
 }
 
 // Errors are fixed to 0.005
@@ -166,9 +166,9 @@ ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
  * @param nSpectra :: Number of spectra in the workspace, defaults to 1.
  * @return Pointer to the workspace.
  */
-MatrixWorkspace_sptr createWorkspaceWithInstrumentandRun(const std::string &instrName,
-                                                   int runNumber,
-                                                   size_t nSpectra) {
+MatrixWorkspace_sptr
+createWorkspaceWithInstrumentandRun(const std::string &instrName, int runNumber,
+                                    size_t nSpectra) {
 
   Geometry::Instrument_const_sptr instr =
       boost::make_shared<Geometry::Instrument>(instrName);

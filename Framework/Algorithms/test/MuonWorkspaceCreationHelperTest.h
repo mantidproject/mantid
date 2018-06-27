@@ -251,7 +251,8 @@ public:
     MatrixWorkspace_sptr ws =
         createWorkspaceWithInstrumentandRun("MUSR", 12345, 10);
 
-    TS_ASSERT_EQUALS(ws->mutableRun().getPropertyAsIntegerValue("run_number"), 12345);
+    TS_ASSERT_EQUALS(ws->mutableRun().getPropertyAsIntegerValue("run_number"),
+                     12345);
     TS_ASSERT_EQUALS(ws->getInstrument()->getName(), "MUSR");
   }
 
@@ -268,11 +269,11 @@ public:
     TS_ASSERT(ads.doesExist("MuonDataPeriod_2"));
     TS_ASSERT(ads.doesExist("MuonDataPeriod_3"));
 
-    WorkspaceGroup_sptr group =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(ads.retrieve("MuonAnalysis"));
+    WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        ads.retrieve("MuonAnalysis"));
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 3);
-    MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem("MuonDataPeriod_1"));
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        group->getItem("MuonDataPeriod_1"));
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 3);
 
     ads.clear();
@@ -284,10 +285,10 @@ public:
     auto wsGroup =
         createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 10, "MuonAnalysis");
 
-    MatrixWorkspace_sptr wsFirst =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(ads.retrieve("MuonDataPeriod_1"));
-    MatrixWorkspace_sptr wsLast =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(ads.retrieve("MuonDataPeriod_3"));
+    MatrixWorkspace_sptr wsFirst = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        ads.retrieve("MuonDataPeriod_1"));
+    MatrixWorkspace_sptr wsLast = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        ads.retrieve("MuonDataPeriod_3"));
 
     TS_ASSERT(wsFirst->getSpectrum(0).hasDetectorID(1));
     TS_ASSERT(wsFirst->getSpectrum(1).hasDetectorID(2));
