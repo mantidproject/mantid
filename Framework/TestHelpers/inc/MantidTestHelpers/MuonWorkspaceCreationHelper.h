@@ -4,7 +4,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/Geometry.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
