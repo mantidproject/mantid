@@ -22,7 +22,7 @@ from qtpy.QtTest import QTest
 from mantidqt.utils.qt.testing import requires_qapp
 
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
-from workbench.widgets.plotselector.view import export_types, PlotSelectorView
+from workbench.widgets.plotselector.view import export_types, PlotSelectorView, SortType
 
 import unittest
 try:
@@ -36,7 +36,15 @@ class PlotSelectorWidgetTest(unittest.TestCase):
 
     def setUp(self):
         self.presenter = mock.Mock(spec=PlotSelectorPresenter)
+        self.presenter.get_initial_sort_key = mock.Mock(side_effect=self.get_initial_sort_key_se)
+
         self.view = PlotSelectorView(self.presenter, is_run_as_unit_test=True)
+        self.view.list_widget.setSortingEnabled(False)
+
+    def get_initial_sort_key_se(self, plot_name):
+        if self.view.sort_type == SortType.LastShown:
+            return '_' + plot_name
+        return plot_name
 
     def get_NameWidget_by_row_number(self, row_number):
         item = self.view.list_widget.item(row_number)
@@ -164,18 +172,6 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         QTest.mouseClick(self.view.show_button, Qt.LeftButton)
         self.assertEquals(self.presenter.show_multiple_selected.call_count, 2)
 
-    def test_show_plot_by_pressing_enter_key(self):
-        QTest.keyClick(self.view, Qt.Key_Enter)
-        self.assertEquals(self.presenter.show_multiple_selected.call_count, 1)
-        QTest.keyClick(self.view, Qt.Key_Enter)
-        self.assertEquals(self.presenter.show_multiple_selected.call_count, 2)
-
-    def test_show_plot_by_pressing_return_key(self):
-        QTest.keyClick(self.view, Qt.Key_Return)
-        self.assertEquals(self.presenter.show_multiple_selected.call_count, 1)
-        QTest.keyClick(self.view, Qt.Key_Return)
-        self.assertEquals(self.presenter.show_multiple_selected.call_count, 2)
-
     def test_show_context_menu(self):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
@@ -270,6 +266,76 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.view.context_menu.actions()[3].trigger()
 
         self.presenter.close_action_called.assert_called_once_with()
+
+    # ----------------------- Plot Sorting --------------------------
+
+    def test_choosing_sort_ascending(self):
+        self.view.sort_ascending()
+        self.assertEquals(self.view.sort_order, Qt.AscendingOrder)
+
+    def test_choosing_sort_descending(self):
+        self.view.sort_descending()
+        self.assertEquals(self.view.sort_order, Qt.DescendingOrder)
+
+    def test_choosing_sort_by_name(self):
+        self.view.sort_by_name()
+        self.assertEquals(self.view.sort_type, SortType.Name)
+
+    def test_choosing_sort_by_last_active(self):
+        self.view.sort_by_last_shown()
+        self.assertEquals(self.view.sort_type, SortType.LastShown)
+
+    def test_initial_sorting_by_name(self):
+        self.view.list_widget.setSortingEnabled(True)
+        self.view.set_plot_list(["Plot1", "Plot2", "Plot3", "Graph99", "Plot20"])
+        self.assert_list_of_plots_is_set_in_widget(["Graph99", "Plot1", "Plot2", "Plot3", "Plot20"])
+
+    def test_set_sort_descending(self):
+        self.view.list_widget.setSortingEnabled(True)
+        self.view.set_plot_list(["Plot1", "Plot2", "Plot3", "Graph99", "Plot20"])
+        self.view.sort_descending()
+        self.assert_list_of_plots_is_set_in_widget(["Plot20", "Plot3", "Plot2", "Plot1", "Graph99"])
+
+    def test_set_sort_keys_for_last_shown(self):
+        self.view.list_widget.setSortingEnabled(True)
+        self.view.set_plot_list(["Plot1", "Plot2", "Plot3", "Graph99", "Plot20"])
+
+        self.view.set_sort_keys({"Plot1": 2,
+                                 "Plot2": 1,
+                                 "Plot3": "_Plot3",
+                                 "Graph99": "_Graph99",
+                                 "Plot20": "_Plot20"})
+
+        self.assert_list_of_plots_is_set_in_widget(["Plot2", "Plot1", "Graph99", "Plot3", "Plot20"])
+
+    def test_set_sort_keys_with_missing_keys_raises_key_error(self):
+        self.view.list_widget.setSortingEnabled(True)
+        self.view.set_plot_list(["Plot1", "Plot2", "Plot3", "Graph99", "Plot20"])
+
+        self.assertRaises(KeyError, self.view.set_sort_keys, {"Plot1": 2, "Plot2": 1})
+
+    def adding_to_list_with_sorting_by_name(self):
+        self.view.list_widget.setSortingEnabled(True)
+        self.view.set_plot_list(["Plot1", "Plot2", "Plot3", "Graph99", "Plot20"])
+
+        self.view.append_to_plot_list("Plot15")
+
+        self.assert_list_of_plots_is_set_in_widget(["Graph99", "Plot1", "Plot2", "Plot3", "Plot15", "Plot20"])
+
+    def adding_to_list_with_sorting_by_last_active(self):
+        self.view.list_widget.setSortingEnabled(True)
+        self.view.sort_type = SortType.LastShown
+        self.view.set_plot_list(["Plot1", "Plot2", "Plot3", "Graph99", "Plot20"])
+
+        self.view.set_sort_keys({"Plot1": 2,
+                                 "Plot2": 1,
+                                 "Plot3": "_Plot3",
+                                 "Graph99": "_Graph99",
+                                 "Plot20": "_Plot20"})
+
+        self.view.append_to_plot_list("Plot15")
+
+        self.assert_list_of_plots_is_set_in_widget(["Plot2", "Plot1", "Graph99", "Plot3", "Plot15", "Plot20"])
 
     # ---------------------- Plot Exporting -------------------------
 

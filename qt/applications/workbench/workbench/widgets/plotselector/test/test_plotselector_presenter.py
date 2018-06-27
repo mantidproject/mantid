@@ -18,7 +18,7 @@ from __future__ import absolute_import, division, print_function
 
 from workbench.widgets.plotselector.model import PlotSelectorModel
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
-from workbench.widgets.plotselector.view import PlotSelectorView
+from workbench.widgets.plotselector.view import PlotSelectorView, SortType
 
 import os
 
@@ -195,6 +195,62 @@ class PlotSelectorPresenterTest(unittest.TestCase):
     def test_close_single_plot_called(self):
         self.presenter.close_single_plot("Plot2")
         self.model.close_plot.assert_called_once_with("Plot2")
+
+    # ----------------------- Plot Sorting --------------------------
+
+    def test_set_sort_order_to_ascending_calls_view_update(self):
+        self.presenter.set_sort_order(is_ascending=True)
+        self.view.sort_ascending.assert_called_once_with()
+
+    def test_set_sort_order_to_descending_calls_view_update(self):
+        self.presenter.set_sort_order(is_ascending=False)
+        self.view.sort_descending.assert_called_once_with()
+
+    def test_set_sort_type_to_name(self):
+        self.view.sort_type = SortType.Name
+        self.presenter.set_sort_type(is_by_name=True)
+        self.view.sort_by_name.assert_called_once_with()
+        self.view.set_sort_keys.assert_called_once_with({'Plot1': 'Plot1',
+                                                         'Plot2': 'Plot2',
+                                                         'Plot3': 'Plot3',
+                                                         'Graph99': 'Graph99'})
+
+    def test_set_sort_type_to_last_shown(self):
+        self.model.last_shown_order_dict = mock.Mock(return_value={"Plot1": 1, "Plot2": 2})
+        self.view.sort_type = SortType.LastShown
+        self.presenter.set_sort_type(is_by_name=False)
+        self.view.sort_by_last_shown.assert_called_once_with()
+        self.view.set_sort_keys.assert_called_once_with({'Plot1': 1,
+                                                         'Plot2': 2,
+                                                         'Plot3': '_Plot3',
+                                                         'Graph99': '_Graph99'})
+
+    def test_update_last_shown_calls_model_and_view(self):
+        self.model.last_shown_order_dict = mock.Mock(return_value={"Plot1": 1, "Plot2": 2})
+        self.view.sort_type = SortType.LastShown
+        self.presenter.update_sort_keys()
+
+        self.model.last_shown_order_dict.assert_called_once_with()
+        self.view.set_sort_keys.assert_called_once_with({'Plot1': 1,
+                                                         'Plot2': 2,
+                                                         'Plot3': '_Plot3',
+                                                         'Graph99': '_Graph99'})
+
+    def test_update_last_shown_with_sorting_by_name_does_nothing(self):
+        self.model.last_shown_order_dict = mock.Mock(return_value={"Plot1": 1, "Plot2": 2})
+        self.view.sort_type = SortType.Name
+        self.presenter.update_sort_keys()
+
+        self.model.last_shown_order_dict.assert_not_called()
+        self.view.set_sort_keys.assert_not_called()
+
+    def test_get_initial_sort_key_for_sort_by_name(self):
+        self.view.sort_type = SortType.Name
+        self.assertEqual(self.presenter.get_initial_sort_key("Plot1"), "Plot1")
+
+    def test_get_initial_sort_key_for_last_shown_by_name(self):
+        self.view.sort_type = SortType.LastShown
+        self.assertEqual(self.presenter.get_initial_sort_key("Plot1"), "_Plot1")
 
     # ---------------------- Plot Exporting -------------------------
 

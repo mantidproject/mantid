@@ -91,7 +91,7 @@ class PlotSelectorModel(object):
             new_name, old_name = plot_name
             self.presenter.rename_in_plot_list(new_name, old_name)
         if action == FigureAction.OrderChanged:
-            self.presenter.update_last_shown_order()
+            self.presenter.update_sort_keys()
         if action == FigureAction.Unknown:
             self.presenter.update_plot_list()
 

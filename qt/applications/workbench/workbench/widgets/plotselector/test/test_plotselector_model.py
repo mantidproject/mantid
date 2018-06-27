@@ -144,6 +144,12 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.model.close_plot("Plot1")
         self.global_figure_manager.destroy.assert_called_once_with(42)
 
+    # ----------------------- Plot Sorting --------------------------
+
+    def test_last_shown_order_dict_calls_global_figure_manager(self):
+        self.model.last_shown_order_dict()
+        self.global_figure_manager.last_shown_order_dict.assert_called_once_with()
+
     # ---------------------- Plot Exporting -------------------------
 
     def test_export_plot_calls_savefig_on_figure(self):

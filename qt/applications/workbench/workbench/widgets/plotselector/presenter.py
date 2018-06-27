@@ -214,11 +214,36 @@ class PlotSelectorPresenter(object):
             self.view.sort_by_name()
         else:
             self.view.sort_by_last_shown()
+        self._set_sort_keys()
 
-    def update_last_shown_order(self):
+    def update_sort_keys(self):
         if self.view.sort_type == SortType.LastShown:
-            last_shown_order_dict = self.model.last_shown_order_dict()
-            self.view.set_last_shown_order(last_shown_order_dict)
+            self._set_sort_keys()
+
+    def _set_sort_keys(self):
+        sort_keys = {}
+
+        if self.view.sort_type == SortType.Name:
+            sort_keys = dict(zip(self.model.plot_list, self.model.plot_list))
+        elif self.view.sort_type == SortType.LastShown:
+            sort_keys = self.model.last_shown_order_dict()
+            for plot_name in self.model.plot_list:
+                if plot_name not in sort_keys:
+                    # Append an '_' to the plot name - it has never been
+                    # shown so goes after the numbers
+                    sort_keys[plot_name] = '_' + plot_name
+
+        try:
+            self.view.set_sort_keys(sort_keys)
+        except KeyError as e:
+            print('Error, plot list out of sync, reloading. Error was:')
+            print(e)
+            self.update_plot_list()
+
+    def get_initial_sort_key(self, plot_name):
+        if self.view.sort_type == SortType.LastShown:
+            return '_' + plot_name
+        return plot_name
 
     # ---------------------- Plot Exporting -------------------------
 

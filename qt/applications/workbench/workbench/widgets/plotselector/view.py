@@ -45,6 +45,8 @@ class PlotSelectorView(QWidget):
     The view to the plot selector, a PyQt widget.
     """
 
+    DEBUG_MODE = False
+
     # A signal to capture when keys are pressed
     deleteKeyPressed = Signal(int)
     enterKeyPressed = Signal(int)
@@ -61,6 +63,7 @@ class PlotSelectorView(QWidget):
         self.presenter = presenter
         self.is_run_as_unit_test = is_run_as_unit_test
 
+        self.sort_order = Qt.AscendingOrder
         self.sort_type = SortType.Name
 
         self.show_button = QPushButton('Show')
@@ -112,6 +115,16 @@ class PlotSelectorView(QWidget):
         self.close_button.clicked.connect(self.presenter.close_action_called)
         self.deleteKeyPressed.connect(self.presenter.close_action_called)
 
+        if self.DEBUG_MODE:
+            self.list_widget.clicked.connect(self.show_debug_info)
+
+    def show_debug_info(self):
+        item = self.list_widget.currentItem()
+        widget = self.list_widget.itemWidget(item)
+        print("Plot name: {}".format(widget.plot_name))
+        print("Plot text: {}".format(widget.line_edit.text()))
+        print("Sort key: {}".format(item.data(Qt.InitialSortOrderRole)))
+
     def keyPressEvent(self, event):
         """
         This overrides keyPressEvent from QWidget to emit a signal
@@ -155,10 +168,8 @@ class PlotSelectorView(QWidget):
     def _add_to_plot_list(self, plot_name):
         real_item = PlotNameWidget(self.presenter, plot_name, self, self.is_run_as_unit_test)
         widget_item = HumanReadableSortItem()
-        if self.sort_type == SortType.Name:
-            widget_item.setData(Qt.InitialSortOrderRole, plot_name)
-        elif self.sort_type == SortType.LastShown:
-            widget_item.setData(Qt.InitialSortOrderRole, plot_name[-1])
+        sort_key = self.presenter.get_initial_sort_key(plot_name)
+        widget_item.setData(Qt.InitialSortOrderRole, sort_key)
         size_hint = real_item.sizeHint()
         widget_item.setSizeHint(size_hint)
         self.list_widget.addItem(widget_item)
@@ -300,39 +311,29 @@ class PlotSelectorView(QWidget):
         return sort_button
 
     def sort_ascending(self):
-        self.list_widget.sortItems(Qt.AscendingOrder)
+        self.sort_order = Qt.AscendingOrder
+        self.list_widget.sortItems(self.sort_order)
 
     def sort_descending(self):
-        self.list_widget.sortItems(Qt.DescendingOrder)
+        self.sort_order = Qt.DescendingOrder
+        self.list_widget.sortItems(self.sort_order)
 
     def sort_by_name(self):
-        self.list_widget.setSortingEnabled(False)
-
-        for row in range(len(self.list_widget)):
-            item = self.list_widget.item(row)
-            widget = self.list_widget.itemWidget(item)
-            item.setData(Qt.InitialSortOrderRole, widget.plot_name)
-
-        self.list_widget.sortItems()
-        self.list_widget.setSortingEnabled(True)
         self.sort_type = SortType.Name
+        self.list_widget.sortItems(self.sort_order)
 
     def sort_by_last_shown(self):
         self.sort_type = SortType.LastShown
-        self.presenter.update_last_shown_order()
+        self.list_widget.sortItems(self.sort_order)
 
-    def set_last_shown_order(self, last_shown_order_dict):
+    def set_sort_keys(self, sort_names_dict):
+        self.list_widget.setSortingEnabled(False)
         for row in range(len(self.list_widget)):
             item = self.list_widget.item(row)
             widget = self.list_widget.itemWidget(item)
-            if widget.plot_name in last_shown_order_dict:
-                item.setData(Qt.InitialSortOrderRole, str(last_shown_order_dict[widget.plot_name]))
-            else:
-                # Append an 'A' to the plot name - it has never been
-                # shown so goes after the numbers
-                item.setData(Qt.InitialSortOrderRole, 'A' + widget.plot_name)
-                print(item.text())
-        self.list_widget.sortItems()
+            item.setData(Qt.InitialSortOrderRole, str(sort_names_dict[widget.plot_name]))
+        self.list_widget.sortItems(self.sort_order)
+        self.list_widget.setSortingEnabled(True)
 
     # ---------------------- Plot Exporting -------------------------
 
