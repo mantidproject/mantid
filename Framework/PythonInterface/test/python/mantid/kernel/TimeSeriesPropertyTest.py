@@ -61,7 +61,7 @@ class TimeSeriesPropertyTest(unittest.TestCase):
         self.assertEquals(log_series.size(), self._ntemp)
         self.assertAlmostEqual(log_series.nthValue(0), -0.00161)
         # Check the dtype return value
-        self.assertEquals(log_series.dtype(), "double")
+        self.assertEquals(log_series.dtype(), "float64")
 
     def test_time_series_int_can_be_extracted(self):
         log_series = self._test_ws.getRun()["raw_frames"]
@@ -77,14 +77,14 @@ class TimeSeriesPropertyTest(unittest.TestCase):
         self.assertEquals(log_series.size(), 4)
         self.assertEquals(log_series.nthValue(0).strip(), 'CHANGE_PERIOD 1')
         # Check the dtype return value
-        self.assertEquals(log_series.dtype(), "string")
+        self.assertEquals(log_series.dtype(), "string_")
 
     def test_time_series_bool_can_be_extracted(self):
         log_series = self._test_ws.getRun()["period 1"]
         self._check_has_time_series_attributes(log_series)
         self.assertEquals(log_series.size(), 1)
         # Check the dtype return value
-        self.assertEquals(log_series.dtype(), "boolean")
+        self.assertEquals(log_series.dtype(), "bool_")
 
     def _check_has_time_series_attributes(self, log, values_type=np.ndarray):
         self.assertTrue(hasattr(log, "value"))

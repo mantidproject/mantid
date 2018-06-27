@@ -150,22 +150,64 @@ class ArrayPropertyTest(unittest.TestCase):
         int_arr = IntArrayProperty("integers", int_input_values, validator, direc)
 
         # Create string array
-        str_input_values =["a", "b", "c", "d", "e"]
+        str_input_values = ["a", "b", "c", "d", "e"]
         str_arr = StringArrayProperty("letters", str_input_values, validator, direc)
 
         # Test
-        self.assertEquals(float_arr.dtype(), "double")
-        self.assertEquals(str_arr.dtype(), "string")
+        self.assertEquals(float_arr.dtype(), "float64")
+        self.assertEquals(str_arr.dtype(), "string_")
         
         # Implementation of IntArrayProperty is based on long 
         # (which is itself implementation defined, so a special case is needed here)
         if sys.platform == 'win32' or sys.platform == 'darwin':
-          # Windows and macOS should return "long"
-          self.assertEquals(int_arr.dtype(), "long")
+          # Windows and macOS should return "int_"
+          self.assertEquals(int_arr.dtype(), "int_")
         else:
           # Linux based systems should return "int64"
           self.assertEquals(int_arr.dtype(), "int64")
 
+    def test_construct_numpy_array_with_given_dtype_float(self):
+        # Set up
+        direc = Direction.Output
+        validator = NullValidator()
+
+        # Create float array
+        float_input_values = [1.1, 2.5, 5.6, 4.6, 9.0, 6.0]
+        float_arr = FloatArrayProperty("floats", float_input_values, validator, direc)
+        
+        # Use the returned dtype() to check it works with numpy arrays
+        x = np.arange(1, 10, dtype=float_arr.dtype())
+        self.assertIsInstance(x, np.ndarray)
+        self.assertEquals(x.dtype, float_arr.dtype()) 
+
+    def test_construct_numpy_array_with_given_dtype_int(self):
+        # Set up
+        direc = Direction.Output
+        validator = NullValidator()
+
+        # Create int array
+        int_input_values = [1, 2, 5, 4, 9, 6]
+        int_arr = IntArrayProperty("integers", int_input_values, validator, direc)
+        
+        # Use the returned dtype() to check it works with numpy arrays
+        x = np.arange(1, 10, dtype=int_arr.dtype())
+        self.assertIsInstance(x, np.ndarray)
+        self.assertEquals(x.dtype, int_arr.dtype())
+
+    def test_construct_numpy_array_with_given_dtype_string(self):
+        # Set up
+        direc = Direction.Output
+        validator = NullValidator()
+
+        # Create string array
+        str_input_values = ["hello", "testing", "word", "another word", "word"]
+        str_arr = StringArrayProperty("letters", str_input_values, validator, direc)
+        
+        # Use the returned dtype() to check it works with numpy arrays
+        x = np.array(str_input_values, dtype=str_arr.dtype())
+        self.assertIsInstance(x, np.ndarray)
+        # Expect longest string to be returned
+        self.assertEquals(x.dtype, "S12")     
 
     def test_PythonAlgorithm_setProperty_With_Ranges_String(self):
         """
