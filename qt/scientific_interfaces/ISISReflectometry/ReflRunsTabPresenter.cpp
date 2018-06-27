@@ -268,6 +268,9 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   case IReflRunsTabPresenter::StartMonitorFlag:
     startMonitor();
     break;
+  case IReflRunsTabPresenter::StopMonitorFlag:
+    stopMonitor();
+    break;
   case IReflRunsTabPresenter::StartMonitorCompleteFlag:
     startMonitorComplete();
     break;
@@ -961,6 +964,21 @@ IAlgorithm_sptr ReflRunsTabPresenter::setupMonitorAlgorithm(
   return alg;
 }
 
+void ReflRunsTabPresenter::updateViewWhenMonitorStarting() {
+  m_view->setStartMonitorButtonEnabled(false);
+  m_view->setStopMonitorButtonEnabled(false);
+}
+
+void ReflRunsTabPresenter::updateViewWhenMonitorStarted() {
+  m_view->setStartMonitorButtonEnabled(false);
+  m_view->setStopMonitorButtonEnabled(true);
+}
+
+void ReflRunsTabPresenter::updateViewWhenMonitorStopped() {
+  m_view->setStartMonitorButtonEnabled(true);
+  m_view->setStopMonitorButtonEnabled(false);
+}
+
 /** Start live data monitoring
  */
 void ReflRunsTabPresenter::startMonitor() {
@@ -971,7 +989,7 @@ void ReflRunsTabPresenter::startMonitor() {
       return;
     auto algRunner = m_view->getMonitorAlgorithmRunner();
     algRunner->startAlgorithm(alg);
-    m_view->updateMonitorRunning();
+    updateViewWhenMonitorStarting();
   } catch (std::exception &e) {
     handleError("Error starting live data", e);
   } catch (...) {
@@ -984,8 +1002,24 @@ void ReflRunsTabPresenter::startMonitor() {
 void ReflRunsTabPresenter::startMonitorComplete() {
   auto algRunner = m_view->getMonitorAlgorithmRunner();
   m_monitorAlg = algRunner->getAlgorithm()->getProperty("MonitorLiveData");
-  if (m_monitorAlg)
+  if (m_monitorAlg) {
     observeError(m_monitorAlg);
+    updateViewWhenMonitorStarted();
+  } else {
+    updateViewWhenMonitorStopped();
+  }
+}
+
+/** Stop live data monitoring
+ */
+void ReflRunsTabPresenter::stopMonitor() {
+  if (!m_monitorAlg)
+    return;
+
+  stopObserving(m_monitorAlg);
+  m_monitorAlg->cancel();
+  m_monitorAlg.reset();
+  updateViewWhenMonitorStopped();
 }
 
 /** Handler called when the monitor algorithm finishes
@@ -994,7 +1028,7 @@ void ReflRunsTabPresenter::finishHandle(const IAlgorithm *alg) {
   UNUSED_ARG(alg);
   stopObserving(m_monitorAlg);
   m_monitorAlg.reset();
-  m_view->updateMonitorStopped();
+  updateViewWhenMonitorStopped();
 }
 
 /** Handler called when the monitor algorithm errors
@@ -1005,7 +1039,7 @@ void ReflRunsTabPresenter::errorHandle(const IAlgorithm *alg,
   UNUSED_ARG(what);
   stopObserving(m_monitorAlg);
   m_monitorAlg.reset();
-  m_view->updateMonitorStopped();
+  updateViewWhenMonitorStopped();
   // Restart monitoring, unless the user terminated the algorithm
   if (what != "Algorithm terminated")
     startMonitor();

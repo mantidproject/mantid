@@ -75,6 +75,8 @@ public:
   virtual void setTransferMethodComboEnabled(bool enabled) = 0;
   virtual void setSearchTextEntryEnabled(bool enabled) = 0;
   virtual void setSearchButtonEnabled(bool enabled) = 0;
+  virtual void setStartMonitorButtonEnabled(bool enabled) = 0;
+  virtual void setStopMonitorButtonEnabled(bool enabled) = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedSearchRows() const = 0;
@@ -99,8 +101,7 @@ public:
 
   // Start live data monitoring
   virtual void startMonitor() = 0;
-  virtual void updateMonitorRunning() = 0;
-  virtual void updateMonitorStopped() = 0;
+  virtual void stopMonitor() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

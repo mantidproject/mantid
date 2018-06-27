@@ -88,6 +88,8 @@ public:
   void setTransferMethodComboEnabled(bool enabled) override;
   void setSearchTextEntryEnabled(bool enabled) override;
   void setSearchButtonEnabled(bool enabled) override;
+  void setStartMonitorButtonEnabled(bool enabled) override;
+  void setStopMonitorButtonEnabled(bool enabled) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -117,8 +119,7 @@ public:
 
   // Live data monitor
   void startMonitor() override;
-  void updateMonitorRunning() override;
-  void updateMonitorStopped() override;
+  void stopMonitor() override;
 
 private:
   /// initialise the interface
@@ -156,6 +157,7 @@ private slots:
   void groupChanged();
   void showSearchContextMenu(const QPoint &pos);
   void on_buttonMonitor_clicked();
+  void on_buttonStopMonitor_clicked();
 };
 
 } // namespace CustomInterfaces

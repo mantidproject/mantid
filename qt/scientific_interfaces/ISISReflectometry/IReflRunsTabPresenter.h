@@ -51,6 +51,7 @@ public:
     InstrumentChangedFlag,
     GroupChangedFlag,
     StartMonitorFlag,
+    StopMonitorFlag,
     StartMonitorCompleteFlag
   };
 

@@ -244,6 +244,24 @@ void QtReflRunsTabView::setSearchButtonEnabled(bool enabled) {
 }
 
 /**
+ * Sets the start-monitor button enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
+void QtReflRunsTabView::setStartMonitorButtonEnabled(bool enabled) {
+
+  ui.buttonMonitor->setEnabled(enabled);
+}
+
+/**
+* Sets the stop-monitor enabled or disabled
+* @param enabled : Whether to enable or disable the button
+*/
+void QtReflRunsTabView::setStopMonitorButtonEnabled(bool enabled) {
+
+  ui.buttonStopMonitor->setEnabled(enabled);
+}
+
+/**
  * Set all possible tranfer methods
  * @param methods : All possible transfer methods.
  */
@@ -498,6 +516,11 @@ void MantidQt::CustomInterfaces::QtReflRunsTabView::on_buttonMonitor_clicked() {
   startMonitor();
 }
 
+void MantidQt::CustomInterfaces::QtReflRunsTabView::
+    on_buttonStopMonitor_clicked() {
+  stopMonitor();
+}
+
 /** Start live data monitoring
  */
 void QtReflRunsTabView::startMonitor() {
@@ -514,14 +537,11 @@ void QtReflRunsTabView::startMonitorComplete() {
   m_presenter->notify(IReflRunsTabPresenter::StartMonitorCompleteFlag);
 }
 
-// TODO Add a busy indicator and update it when monitoring starts/stops
-/** Update the view state to indicate the monitor is running
+/** Stop live data monitoring
  */
-void QtReflRunsTabView::updateMonitorRunning() {}
-
-/** Update the view state to indicate the monitor is stopped
- */
-void QtReflRunsTabView::updateMonitorStopped() {}
+void QtReflRunsTabView::stopMonitor() {
+  m_presenter->notify(IReflRunsTabPresenter::StopMonitorFlag);
+}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

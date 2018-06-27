@@ -175,6 +175,7 @@ private:
   std::string searchModelData(const int row, const int column);
   /// Start the live data monitor
   void startMonitor();
+  void stopMonitor();
   void startMonitorComplete();
   std::string setupMonitorPostProcessingScript();
   Mantid::API::IAlgorithm_sptr
@@ -188,6 +189,9 @@ private:
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
   void errorHandle(const Mantid::API::IAlgorithm *alg,
                    const std::string &what) override;
+  void updateViewWhenMonitorStarting();
+  void updateViewWhenMonitorStarted();
+  void updateViewWhenMonitorStopped();
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

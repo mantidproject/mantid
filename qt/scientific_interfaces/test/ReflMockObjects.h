@@ -94,10 +94,13 @@ public:
   MOCK_METHOD1(setTransferMethodComboEnabled, void(bool));
   MOCK_METHOD1(setSearchTextEntryEnabled, void(bool));
   MOCK_METHOD1(setSearchButtonEnabled, void(bool));
+  MOCK_METHOD1(setStartMonitorButtonEnabled, void(bool));
+  MOCK_METHOD1(setStopMonitorButtonEnabled, void(bool));
   MOCK_METHOD1(startTimer, void(const int));
   MOCK_METHOD0(stopTimer, void());
   MOCK_METHOD0(startIcatSearch, void());
   MOCK_METHOD0(startMonitor, void());
+  MOCK_METHOD0(stopMonitor, void());
   MOCK_METHOD0(updateMonitorRunning, void());
   MOCK_METHOD0(updateMonitorStopped, void());
 
