@@ -1,21 +1,17 @@
-#ifndef MANTID_ISISREFLECTOMETRY_REFLEVENTTABPRESENTER_H
-#define MANTID_ISISREFLECTOMETRY_REFLEVENTTABPRESENTER_H
+#ifndef MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H
+#define MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H
 
 #include "DllConfig.h"
 #include "IReflEventTabPresenter.h"
 #include "IReflBatchPresenter.h"
 #include "IReflEventTabView.h"
-#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-// Forward decs
-class IReflEventPresenter;
-
 /** @class ReflEventTabPresenter
 
-ReflEventTabPresenter is a presenter class for the tab 'Event' in the
+ReflEventTabPresenter is a presenter class for the widget 'Event' in the
 ISIS Reflectometry Interface.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -40,24 +36,30 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReflEventTabPresenter
-    : public IReflEventTabPresenter {
+    : public IReflEventTabPresenter, public EventTabViewSubscriber {
 public:
-  ReflEventTabPresenter(IReflEventTabView* view);
-
+  /// Constructor
+  ReflEventTabPresenter(IReflEventTabView *view);
   /// Returns time-slicing values
-  std::string getTimeSlicingValues(int group) const override;
-  /// Return time-slicing type
-  std::string getTimeSlicingType(int group) const override;
+  std::string getTimeSlicingValues() const override;
+  /// Returns time-slicing type
+  std::string getTimeSlicingType() const override;
+
+  void onReductionPaused() override;
+  void onReductionResumed() override;
+  void notifySliceTypeChanged(SliceType newSliceType) override;
+  void notifySettingsChanged() override;
 
   void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
-  void settingsChanged(int group) override;
-  void onReductionResumed(int group) override;
-  void onReductionPaused(int group) override;
 
 private:
-  IReflEventTabView* m_view;
+  std::string logFilterAndSliceValues(std::string const &slicingValues,
+                                      std::string const &logFilter) const;
+  /// The view we are managing
+  IReflEventTabView *m_view;
   IReflBatchPresenter *m_mainPresenter;
+  SliceType m_sliceType;
 };
 }
 }
-#endif /* MANTID_ISISREFLECTOMETRY_REFLEVENTTABPRESENTER_H */
+#endif /* MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H */

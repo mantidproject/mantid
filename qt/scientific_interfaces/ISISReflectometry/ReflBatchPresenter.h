@@ -52,21 +52,21 @@ public:
 
   /// Returns values passed for 'Transmission run(s)'
   MantidWidgets::DataProcessor::OptionsQMap
-  getOptionsForAngle(int group, const double angle) const override;
+  getOptionsForAngle(const double angle) const override;
   /// Whether there are per-angle transmission runs specified
-  bool hasPerAngleOptions(int group) const override;
+  bool hasPerAngleOptions() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   MantidWidgets::DataProcessor::OptionsQMap
-  getTransmissionOptions(int group) const override;
+  getTransmissionOptions() const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
   MantidWidgets::DataProcessor::OptionsQMap
-  getReductionOptions(int group) const override;
+  getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
   /// Returns time-slicing values
-  std::string getTimeSlicingValues(int group) const override;
+  std::string getTimeSlicingValues() const override;
   /// Returns time-slicing type
-  std::string getTimeSlicingType(int group) const override;
+  std::string getTimeSlicingType() const override;
 
   /// Set the instrument name
   void setInstrumentName(const std::string &instName) const override;
@@ -74,8 +74,8 @@ public:
   /// Returns whether the Runs Tab is currently processing any runs
   bool isProcessing() const override;
   void settingsChanged() override;
-  void notifyReductionPaused(int group) override;
-  void notifyReductionResumed(int group) override;
+  void notifyReductionPaused() override;
+  void notifyReductionResumed() override;
   bool requestClose() const override;
 
   void completedGroupReductionSuccessfully(

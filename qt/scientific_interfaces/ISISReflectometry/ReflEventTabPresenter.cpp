@@ -1,17 +1,20 @@
 #include "ReflEventTabPresenter.h"
-#include "IReflBatchPresenter.h"
-#include "ReflEventPresenter.h"
+#include "IReflEventTabPresenter.h"
+#include "IReflEventTabView.h"
+
+#include <boost/algorithm/string.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 /** Constructor
-*
-* @param presenters :: The presenters of each group as a vector
+* @param view :: The view we are handling
+* @param group :: The group on the parent tab this belongs to
 */
 ReflEventTabPresenter::ReflEventTabPresenter(IReflEventTabView *view)
-    : m_view(view) {
-      // TODO: subscribe.
+    : m_view(view), m_sliceType(SliceType::UniformEven) {
+  m_view->subscribe(this);
+  m_view->enableSliceType(m_sliceType);
 }
 
 void ReflEventTabPresenter::acceptMainPresenter(
@@ -19,36 +22,69 @@ void ReflEventTabPresenter::acceptMainPresenter(
   m_mainPresenter = mainPresenter;
 }
 
-/** Returns global time-slicing values for 'ReflectometryReductionOneAuto'
-*
-* @param group :: The group from which to get the values
-* @return :: Time-slicing values for 'ReflectometryReductionOneAuto'
+/** Returns the time-slicing values
+* @return :: The time-slicing values
 */
-std::string ReflEventTabPresenter::getTimeSlicingValues(int group) const {
-//  return m_eventPresenters.at(group)->getTimeSlicingValues();
-  return "";
+std::string ReflEventTabPresenter::getTimeSlicingValues() const {
+  switch (m_sliceType) {
+  case SliceType::UniformEven:
+    return m_view->getUniformEvenTimeSlicingValues();
+  case SliceType::Uniform:
+    return m_view->getUniformTimeSlicingValues();
+  case SliceType::Custom:
+    return m_view->getCustomTimeSlicingValues();
+  case SliceType::LogValue: {
+    auto slicingValues = m_view->getLogValueTimeSlicingValues();
+    auto logFilter = m_view->getLogValueTimeSlicingType();
+    return logFilterAndSliceValues(slicingValues, logFilter);
+  }
+  default:
+    throw std::runtime_error("Unrecognized slice type.");
+  }
 }
 
-/** Returns time-slicing type for 'ReflectometryReductionOneAuto'
-*
-* @param group :: The group from which to get the values
-* @return :: Time-slicing type for 'ReflectometryReductionOneAuto'
+std::string ReflEventTabPresenter::logFilterAndSliceValues(
+    std::string const &slicingValues, std::string const &logFilter) const {
+  if (!slicingValues.empty() && !logFilter.empty())
+    return "Slicing=\"" + slicingValues + "\",LogFilter=" + logFilter;
+  else
+    return "";
+}
+
+/** Returns the time-slicing type
+* @return :: The time-slicing type
 */
-std::string ReflEventTabPresenter::getTimeSlicingType(int group) const {
- // return m_eventPresenters.at(group)->getTimeSlicingType();
- return "";
+std::string ReflEventTabPresenter::getTimeSlicingType() const {
+  switch (m_sliceType) {
+  case SliceType::UniformEven:
+    return "UniformEven";
+  case SliceType::Uniform:
+    return "Uniform";
+  case SliceType::Custom:
+    return "Custom";
+  case SliceType::LogValue:
+    return "LogValue";
+  default:
+    throw std::runtime_error("Unrecognized slice type.");
+  }
 }
 
-void ReflEventTabPresenter::onReductionPaused(int group) {
-//  m_eventPresenters[group]->onReductionPaused();
+void ReflEventTabPresenter::onReductionPaused() {
+  m_view->enableSliceType(m_sliceType);
+  m_view->enableSliceTypeSelection();
 }
 
-void ReflEventTabPresenter::onReductionResumed(int group) {
-//  m_eventPresenters[group]->onReductionResumed();
+void ReflEventTabPresenter::onReductionResumed() {
+  m_view->disableSliceType(m_sliceType);
+  m_view->disableSliceTypeSelection();
 }
 
-void ReflEventTabPresenter::settingsChanged(int group) {
- // m_mainPresenter->settingsChanged(group);
+void ReflEventTabPresenter::notifySliceTypeChanged(SliceType newSliceType) {
+  m_view->disableSliceType(m_sliceType);
+  m_view->enableSliceType(newSliceType);
+  m_sliceType = newSliceType;
 }
+
+void ReflEventTabPresenter::notifySettingsChanged() {}
 }
 }

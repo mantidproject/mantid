@@ -51,16 +51,16 @@ void ReflBatchPresenter::completedRowReductionSuccessfully(
   m_savePresenter->completedRowReductionSuccessfully(group, workspaceName);
 }
 
-void ReflBatchPresenter::notifyReductionPaused(int group) {
+void ReflBatchPresenter::notifyReductionPaused() {
   m_savePresenter->onAnyReductionPaused();
   m_settingsPresenter->onReductionPaused();
-  m_eventPresenter->onReductionPaused(group);
+  m_eventPresenter->onReductionPaused();
 }
 
-void ReflBatchPresenter::notifyReductionResumed(int group) {
+void ReflBatchPresenter::notifyReductionResumed() {
   m_savePresenter->onAnyReductionResumed();
   m_settingsPresenter->onReductionResumed();
-  m_eventPresenter->onReductionResumed(group);
+  m_eventPresenter->onReductionResumed();
 }
 
 void ReflBatchPresenter::settingsChanged() {
@@ -73,7 +73,7 @@ void ReflBatchPresenter::settingsChanged() {
 *options
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */
-OptionsQMap ReflBatchPresenter::getTransmissionOptions(int ) const {
+OptionsQMap ReflBatchPresenter::getTransmissionOptions() const {
   return m_settingsPresenter->getTransmissionOptions();
 }
 
@@ -83,7 +83,7 @@ OptionsQMap ReflBatchPresenter::getTransmissionOptions(int ) const {
 *options
 * @return :: Global processing options
 */
-OptionsQMap ReflBatchPresenter::getReductionOptions(int ) const {
+OptionsQMap ReflBatchPresenter::getReductionOptions() const {
   return m_settingsPresenter->getReductionOptions();
 }
 
@@ -103,9 +103,9 @@ std::string ReflBatchPresenter::getStitchOptions() const {
 *the values
 * @return :: Time-slicing values
 */
-std::string ReflBatchPresenter::getTimeSlicingValues(int group) const {
+std::string ReflBatchPresenter::getTimeSlicingValues() const {
   // Request global time-slicing values to 'Event Handling' presenter
-  return m_eventPresenter->getTimeSlicingValues(group);
+  return m_eventPresenter->getTimeSlicingValues();
 }
 
 /** Returns time-slicing type
@@ -114,9 +114,9 @@ std::string ReflBatchPresenter::getTimeSlicingValues(int group) const {
 *the type
 * @return :: Time-slicing type
 */
-std::string ReflBatchPresenter::getTimeSlicingType(int group) const {
+std::string ReflBatchPresenter::getTimeSlicingType() const {
   // Request time-slicing type to 'Event Handling' presenter
-  return m_eventPresenter->getTimeSlicingType(group);
+  return m_eventPresenter->getTimeSlicingType();
 }
 
 /** Returns default values specified for 'Transmission run(s)' for the
@@ -127,15 +127,14 @@ std::string ReflBatchPresenter::getTimeSlicingType(int group) const {
 * @param angle :: the run angle to look up transmission runs for
 * @return :: Values passed for 'Transmission run(s)'
 */
-OptionsQMap ReflBatchPresenter::getOptionsForAngle(int,
-                                                   const double angle) const {
+OptionsQMap ReflBatchPresenter::getOptionsForAngle(const double angle) const {
   return m_settingsPresenter->getOptionsForAngle(angle);
 }
 
 /** Returns whether there are per-angle transmission runs specified
  * @return :: true if there are per-angle transmission runs
  * */
-bool ReflBatchPresenter::hasPerAngleOptions(int) const {
+bool ReflBatchPresenter::hasPerAngleOptions() const {
   return m_settingsPresenter->hasPerAngleOptions();
 }
 
@@ -154,6 +153,5 @@ Checks whether or not data is currently being processed in the Runs Tab
 bool ReflBatchPresenter::isProcessing() const {
   return m_runsPresenter->isProcessing();
 }
-
 }
 }

@@ -39,10 +39,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class IReflBatchPresenter {
 public:
   /// Destructor
-  virtual ~IReflBatchPresenter(){};
+  virtual ~IReflBatchPresenter() = default;
 
-  virtual void notifyReductionPaused(int group) = 0;
-  virtual void notifyReductionResumed(int group) = 0;
+  virtual void notifyReductionPaused() = 0;
+  virtual void notifyReductionResumed() = 0;
 
   virtual void completedRowReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
@@ -54,21 +54,21 @@ public:
 
   /// Transmission runs for a specific run angle
   virtual MantidWidgets::DataProcessor::OptionsQMap
-  getOptionsForAngle(int group, const double angle) const = 0;
+  getOptionsForAngle(const double angle) const = 0;
   /// Whether there are per-angle transmission runs specified
-  virtual bool hasPerAngleOptions(int group) const = 0;
+  virtual bool hasPerAngleOptions() const = 0;
   /// Pre-processing
   virtual MantidWidgets::DataProcessor::OptionsQMap
-  getTransmissionOptions(int group) const = 0;
+  getTransmissionOptions() const = 0;
   /// Processing
   virtual MantidWidgets::DataProcessor::OptionsQMap
-  getReductionOptions(int group) const = 0;
+  getReductionOptions() const = 0;
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
   /// Time-slicing values
-  virtual std::string getTimeSlicingValues(int group) const = 0;
+  virtual std::string getTimeSlicingValues() const = 0;
   /// Time-slicing type
-  virtual std::string getTimeSlicingType(int group) const = 0;
+  virtual std::string getTimeSlicingType() const = 0;
   /// Set the instrument name
   virtual void setInstrumentName(const std::string &instName) const = 0;
   /// Data processing check for all groups

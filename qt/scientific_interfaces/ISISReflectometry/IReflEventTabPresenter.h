@@ -1,5 +1,5 @@
-#ifndef MANTID_ISISREFLECTOMETRY_IREFLEVENTTABPRESENTER_H
-#define MANTID_ISISREFLECTOMETRY_IREFLEVENTTABPRESENTER_H
+#ifndef MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H
+#define MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H
 
 #include <string>
 #include "IReflBatchPresenter.h"
@@ -9,8 +9,8 @@ namespace CustomInterfaces {
 
 /** @class IReflEventTabPresenter
 
-IReflEventTabPresenter is an interface which defines the functions that need
-to be implemented by a concrete 'Event' tab presenter
+IReflEventPresenter is an interface which defines the functions that need
+to be implemented by a concrete 'Event' presenter
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -33,19 +33,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+enum class SliceType { UniformEven, Uniform, Custom, LogValue };
+
 class IReflEventTabPresenter {
 public:
   virtual ~IReflEventTabPresenter() = default;
   /// Time-slicing values
-  virtual std::string getTimeSlicingValues(int group) const = 0;
+  virtual std::string getTimeSlicingValues() const = 0;
   /// Time-slicing type
-  virtual std::string getTimeSlicingType(int group) const = 0;
+  virtual std::string getTimeSlicingType() const = 0;
 
-  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
-  virtual void settingsChanged(int group) = 0;
-  virtual void onReductionPaused(int group) = 0;
-  virtual void onReductionResumed(int group) = 0;
+  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) =0;
+  virtual void onReductionPaused() = 0;
+  virtual void onReductionResumed() = 0;
 };
 }
 }
-#endif /* MANTID_ISISREFLECTOMETRY_IREFLEVENTTABPRESENTER_H */
+#endif /* MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H */

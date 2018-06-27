@@ -1,17 +1,16 @@
-#ifndef MANTID_CUSTOMINTERFACES_QTREFLEVENTTABVIEW_H_
-#define MANTID_CUSTOMINTERFACES_QTREFLEVENTTABVIEW_H_
+#ifndef MANTID_CUSTOMINTERFACES_QTREFLEVENTVIEW_H_
+#define MANTID_CUSTOMINTERFACES_QTREFLEVENTVIEW_H_
 
-#include "DllConfig.h"
-#include "ui_ReflEventTabWidget.h"
 #include "IReflEventTabView.h"
-#include "IReflEventTabPresenter.h"
+#include "ui_ReflEventTabWidget.h"
+#include "QWidgetGroup.h"
 #include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** QtReflEventTabView : Provides an interface for the "Event" tab in the
-Reflectometry interface.
+/** QtReflEventTabView : Provides an interface for the "Event Handling" widget in
+the ISIS Reflectometry interface.
 
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -34,19 +33,58 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflEventTabView : public QWidget, public IReflEventTabView {
+class QtReflEventTabView : public QWidget, public IReflEventTabView {
   Q_OBJECT
 public:
-  QtReflEventTabView(QWidget *parent = nullptr);
-  void subscribe(IReflEventTabPresenter* notifyee);
+  /// Constructor
+  explicit QtReflEventTabView(QWidget *parent = nullptr);
+  /// Returns time-slicing values
+  void initUniformSliceTypeLayout();
+  void initUniformEvenSliceTypeLayout();
+  void initLogValueSliceTypeLayout();
+  void initCustomSliceTypeLayout();
+
+  void enableSliceType(SliceType sliceType) override;
+  void disableSliceType(SliceType sliceType) override;
+
+  void enableSliceTypeSelection() override;
+  void disableSliceTypeSelection() override;
+
+  std::string getLogValueTimeSlicingType() const override;
+  std::string getLogValueTimeSlicingValues() const override;
+  std::string getCustomTimeSlicingValues() const override;
+  std::string getUniformTimeSlicingValues() const override;
+  std::string getUniformEvenTimeSlicingValues() const override;
+
+  void subscribe(EventTabViewSubscriber* notifyee) override;
+
+public slots:
+  void toggleUniform(bool isChecked);
+  void toggleUniformEven(bool isChecked);
+  void toggleCustom(bool isChecked);
+  void toggleLogValue(bool isChecked);
+  void notifySettingsChanged();
 
 private:
+  /// Initialise the interface
   void initLayout();
+  std::string textFrom(QLineEdit const *const widget) const;
+  void registerEventWidgets();
+  void connectSettingsChange(QLineEdit &edit);
+  void connectSettingsChange(QGroupBox &edit);
+
+  QWidgetGroup<2> m_uniformGroup;
+  QWidgetGroup<2> m_uniformEvenGroup;
+  QWidgetGroup<4> m_logValueGroup;
+  QWidgetGroup<2> m_customGroup;
+  QWidgetGroup<4> m_sliceTypeRadioButtons;
+
+  /// The widget
   Ui::ReflEventTabWidget m_ui;
-  IReflEventTabPresenter* m_notifyee;
+  EventTabViewSubscriber* m_notifyee;
 };
 
 } // namespace Mantid
 } // namespace CustomInterfaces
 
-#endif /* MANTID_CUSTOMINTERFACES_QTREFLEVENTTABVIEW_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_QTREFLEVENTVIEW_H_ */

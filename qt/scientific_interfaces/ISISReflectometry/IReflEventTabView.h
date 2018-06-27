@@ -1,15 +1,18 @@
-#ifndef MANTID_ISISREFLECTOMETRY_IREFLEVENTTABVIEW_H
-#define MANTID_ISISREFLECTOMETRY_IREFLEVENTTABVIEW_H
+#ifndef MANTID_ISISREFLECTOMETRY_IREFLEVENTVIEW_H
+#define MANTID_ISISREFLECTOMETRY_IREFLEVENTVIEW_H
 
 #include "DllConfig.h"
+#include <string>
+#include "IReflEventTabPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 /** @class IReflEventTabView
 
-IReflSettingsView is the base view class for the Reflectometry settings. It
-contains no QT specific functionality as that should be handled by a subclass.
+IReflEventTabView is the base view class for the Reflectometry "Event Handling"
+tab. It contains no QT specific functionality as that should be handled by a
+subclass.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -32,11 +35,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
-class DLLExport IReflEventTabView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL EventTabViewSubscriber {
 public:
+  virtual void notifySliceTypeChanged(SliceType newSliceType) = 0;
+  virtual void notifySettingsChanged() = 0;
+};
+
+class MANTIDQT_ISISREFLECTOMETRY_DLL IReflEventTabView {
+public:
+  virtual void subscribe(EventTabViewSubscriber* notifyee) = 0;
   virtual ~IReflEventTabView() = default;
+  virtual std::string getLogValueTimeSlicingValues() const = 0;
+  virtual std::string getCustomTimeSlicingValues() const = 0;
+  virtual std::string getUniformTimeSlicingValues() const = 0;
+  virtual std::string getUniformEvenTimeSlicingValues() const = 0;
+  virtual std::string getLogValueTimeSlicingType() const = 0;
+
+  virtual void enableSliceType(SliceType sliceType) = 0;
+  virtual void disableSliceType(SliceType sliceType) = 0;
+  virtual void enableSliceTypeSelection() = 0;
+  virtual void disableSliceTypeSelection() = 0;
 };
 }
 }
-#endif /* MANTID_ISISREFLECTOMETRY_IREFLSETTINGSVIEW_H */
+#endif /* MANTID_ISISREFLECTOMETRY_IREFLEVENTVIEW_H */

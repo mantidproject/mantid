@@ -16,7 +16,6 @@ set ( SRC_FILES
     InstrumentParameters.cpp
     ExperimentOptionDefaults.cpp
     QtReflEventTabView.cpp
-    QtReflEventView.cpp
     QtReflMainWindowView.cpp
     QtReflBatchView.cpp
     QtReflRunsTabView.cpp
@@ -26,7 +25,6 @@ set ( SRC_FILES
     ReflAsciiSaver.cpp
     IReflAsciiSaver.cpp
     ReflAutoreduction.cpp
-    ReflEventPresenter.cpp
     ReflEventTabPresenter.cpp
     ReflFromStdStringMap.cpp
     ReflMainWindowPresenter.cpp
@@ -52,9 +50,7 @@ set ( INC_FILES
     Presenters/BatchPresenter.h
     Presenters/BatchPresenterFactory.h
     InstrumentParameters.h
-    IReflEventPresenter.h
     IReflEventTabPresenter.h
-    IReflEventView.h
     IReflMainWindowPresenter.h
     IReflBatchPresenter.h
     IReflMainWindowView.h
@@ -68,7 +64,6 @@ set ( INC_FILES
     MeasurementItem.h
     PrecompiledHeader.h
     QtReflEventTabView.h
-    QtReflEventView.h
     QtReflMainWindowView.h
     QtReflBatchView.h
     QtReflRunsTabView.h
@@ -79,7 +74,6 @@ set ( INC_FILES
     ReflCatalogSearcher.h
     ReflAsciiSaver.h
     IReflAsciiSaver.h
-    ReflEventPresenter.h
     ReflEventTabPresenter.h
     ReflFromStdStringMap.h
     ReflMainWindowPresenter.h
@@ -101,7 +95,6 @@ set ( INC_FILES
 set ( MOC_FILES
     ReflSearchModel.h
     QtReflEventTabView.h
-    QtReflEventView.h
     QtReflRunsTabView.h
     QtReflSaveTabView.h
     QtReflSettingsTabView.h
@@ -112,7 +105,6 @@ set ( MOC_FILES
 
 set ( UI_FILES
    ReflEventTabWidget.ui
-   ReflEventWidget.ui
    ReflMainWindowWidget.ui
    ReflBatchWidget.ui
    ReflRunsTabWidget.ui
