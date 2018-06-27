@@ -200,6 +200,14 @@ void ParameterType<Type>::fromString(const std::string &value) {
   istr >> m_value;
 }
 
+/**
+ * Specialization for a string.
+ */
+template <>
+inline void ParameterType<std::string>::fromString(const std::string &value) {
+  m_value = value;
+}
+
 /** Set the value of the parameter via the assignment operator
  * @tparam The parameter type
  * @param value :: The vlue of the parameter
