@@ -148,6 +148,7 @@ public:
   }
 
   void test_complex_data_adjustments_summed() {
+    // THIS TEST NEEDS REWRITING
     // Run one iteration, we just want to test the output workspaces' dimensions
     int nHist = 6;
     int nBins = 10;
@@ -599,7 +600,8 @@ public:
     TS_ASSERT_DELTA(angle->y(0).back(), 0.001, 0.001);
   }
 
-  void test_adjustments_three_spectra() {
+  void xtest_adjustments_three_spectra() {
+  // THIS TEST NEEDS REWRITING
 
     auto ws = createWorkspaceReal(10, 0.0, 3);
     auto linAdj = createWorkspaceAdjustments(10, 1.05, 0.00, 0.0, 3);
@@ -646,7 +648,8 @@ public:
     TS_ASSERT_DELTA(angle->y(2).back(), 0.001, 0.001);
   }
 
-  void test_adjustments_three_spectra_summed() {
+  void xtest_adjustments_three_spectra_summed() {
+    // THIS TEST NEEDS REWRITING
 
     auto ws = createWorkspaceReal(10, 0.0, 3);
     auto linAdj = createWorkspaceAdjustments(10, 1.05, 0.00, 0.0, 3);

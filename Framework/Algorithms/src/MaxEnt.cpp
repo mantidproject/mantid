@@ -407,7 +407,8 @@ void MaxEnt::exec() {
   MatrixWorkspace_sptr outEvolChi;
   MatrixWorkspace_sptr outEvolTest;
 
-  size_t nSpec = complexData ? nHist / 2 : nHist;
+  size_t nSpectra = complexData ? nHist / 2 : nHist;
+  size_t nSpec = nSpectra;
   size_t nSpecConcat = 1;
   if (!perSpectrumReconstruction) {
     nSpecConcat = nSpec;
@@ -526,8 +527,8 @@ void MaxEnt::exec() {
     auto solImage = maxentCalculator.getImage();
 
     // Populate the output workspaces
-    populateDataWS(inWS, spec, nSpec, solData, complexData, !perSpectrumReconstruction, outDataWS);
-    populateImageWS(inWS, spec, nSpec, solImage, complexImage, outImageWS,
+    populateDataWS(inWS, spec, nSpectra, solData, !perSpectrumReconstruction, complexData, outDataWS);
+    populateImageWS(inWS, spec, nSpectra, solImage, complexImage, outImageWS,
                     autoShift);
 
     // Populate workspaces recording the evolution of Chi and Test
@@ -579,8 +580,8 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
           result.emplace_back( inWS->y(s + nSpec)[i]);
         }
       } else {
-        result[2 * i] = inWS->y(spec)[i];
-        result[2 * i + 1] = inWS->y(spec + nSpec)[i];
+        result.emplace_back(inWS->y(spec)[i]);
+        result.emplace_back(inWS->y(spec + nSpec)[i]);
       }
     }
   } else {
@@ -591,8 +592,8 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
           result.emplace_back(inWS->e(s + nSpec)[i]);
         }
       } else {
-        result[2 * i] = inWS->e(spec)[i];
-        result[2 * i + 1] = inWS->e(spec + nSpec)[i];
+        result.emplace_back(inWS->e(spec)[i]);
+        result.emplace_back(inWS->e(spec + nSpec)[i]);
       }
     }
   }
