@@ -2,6 +2,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include <MantidKernel/StringTokenizer.h>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -27,7 +28,13 @@ public:
   bool isProcessed() const { return m_rowData->isProcessed(); }
   void setProcessed(const bool isProcessed) const {
     m_rowData->setProcessed(isProcessed);
+    // Also clear the error if resetting processed state
+    if (!isProcessed)
+      m_rowData->setError("");
   }
+  bool reductionFailed() const { return m_rowData->reductionFailed(); }
+  std::string error() const { return m_rowData->error(); }
+  void setError(const std::string &error) { m_rowData->setError(error); }
   void setAbsoluteIndex(const size_t absoluteIndex) {
     m_absoluteIndex = absoluteIndex;
   }
@@ -50,6 +57,38 @@ public:
   void setName(const std::string &name) { m_name = name; }
   bool isProcessed() const { return m_isProcessed; }
   void setProcessed(const bool isProcessed) { m_isProcessed = isProcessed; }
+  bool allRowsProcessed() const {
+    for (const auto &row : m_rows) {
+      if (!row.isProcessed())
+        return false;
+    }
+    return true;
+  }
+  // Get/set error
+  std::string error() const {
+    // Return the group's error, if set
+    if (!m_error.empty())
+      return m_error;
+    // If the group's error is not set but some row errors are, then
+    // report that some rows failed
+    for (auto const &row : m_rows) {
+      if (!row.error().empty())
+        return "Some rows in the group have errors";
+    }
+    // Return an empty string if there is no error
+    return std::string();
+  }
+  void setError(const std::string &error) { m_error = error; }
+  // Return true if reduction failed for the group or any rows within it
+  bool reductionFailed() const {
+    if (!m_error.empty())
+      return true;
+    for (auto const &row : m_rows) {
+      if (row.reductionFailed())
+        return true;
+    }
+    return false;
+  }
   // Get the row data for the given row index
   RowData_sptr rowData(const size_t rowIndex) const {
     checkRowIndex(rowIndex);
@@ -60,10 +99,24 @@ public:
     checkRowIndex(rowIndex);
     return m_rows[rowIndex].isProcessed();
   }
+  // Check whether a row failed
+  bool rowReductionFailed(const size_t rowIndex) const {
+    checkRowIndex(rowIndex);
+    return m_rows[rowIndex].reductionFailed();
+  }
   // Set the row's processed status for the given row index
   void setRowProcessed(const size_t rowIndex, const bool isProcessed) const {
     checkRowIndex(rowIndex);
     m_rows[rowIndex].setProcessed(isProcessed);
+  }
+  // Get/set an error on a row for the given row index
+  std::string rowError(const size_t rowIndex) const {
+    checkRowIndex(rowIndex);
+    return m_rows[rowIndex].error();
+  }
+  void setRowError(const size_t rowIndex, const std::string &error) {
+    checkRowIndex(rowIndex);
+    m_rows[rowIndex].setError(error);
   }
   // Get the row's absolute index for the given row index in the group
   size_t rowAbsoluteIndex(const size_t rowIndex) const {
@@ -109,6 +162,8 @@ private:
   std::string m_name;
   // Whether the group has been processed
   bool m_isProcessed;
+  // An error message, if reduction failed for this group
+  std::string m_error;
   // The list of rows in this group
   std::vector<RowInfo> m_rows;
 };
@@ -141,6 +196,77 @@ QTwoLevelTreeModel::QTwoLevelTreeModel(ITableWorkspace_sptr tableWorkspace,
 
 QTwoLevelTreeModel::~QTwoLevelTreeModel() {}
 
+/** Return the Edit role data
+ */
+QVariant QTwoLevelTreeModel::getEditRole(const QModelIndex &index) const {
+  return getDisplayRole(index);
+}
+
+/** Returns true if the given index corresponds to a group; false if it
+    corresponds to a row
+ */
+bool QTwoLevelTreeModel::indexIsGroup(const QModelIndex &index) const {
+  return (!parent(index).isValid());
+}
+
+/** Return the Display role data
+ */
+QVariant QTwoLevelTreeModel::getDisplayRole(const QModelIndex &index) const {
+  if (indexIsGroup(index)) {
+    const auto &group = m_groups.at(index.row());
+    // Return the group name only in the first column
+    if (index.column() == 0)
+      return QString::fromStdString(group.name());
+  } else {
+    auto pIndex = parent(index);
+    const auto &group = m_groups[pIndex.row()];
+    return QString::fromStdString(
+        m_tWS->String(group.rowAbsoluteIndex(index.row()), index.column() + 1));
+  }
+
+  return QVariant();
+}
+
+/** Return the Background role data
+ */
+QVariant QTwoLevelTreeModel::getBackgroundRole(const QModelIndex &index) const {
+  if (indexIsGroup(index)) {
+    const auto &group = m_groups.at(index.row());
+    // Highlight if this group is processed
+    if (group.reductionFailed())
+      return QColor(Colour::FAILED);
+    else if (group.isProcessed())
+      return QColor(Colour::SUCCESS);
+    else if (group.allRowsProcessed())
+      return QColor(Colour::COMPLETE);
+  } else {
+    auto pIndex = parent(index);
+    const auto &group = m_groups[pIndex.row()];
+    // Highlight if this row is processed (red if failed, green if success)
+    if (group.rowReductionFailed(index.row()))
+      return QColor(Colour::FAILED);
+    else if (group.isRowProcessed(index.row()))
+      return QColor(Colour::SUCCESS);
+  }
+
+  return QVariant();
+}
+
+/** Return the ToolTip role data
+ */
+QVariant QTwoLevelTreeModel::getToolTipRole(const QModelIndex &index) const {
+  if (indexIsGroup(index)) {
+    const auto &group = m_groups.at(index.row());
+    return QString::fromStdString(group.error());
+  } else {
+    auto pIndex = parent(index);
+    const auto &group = m_groups[pIndex.row()];
+    return QString::fromStdString(group.rowError(index.row()));
+  }
+
+  return QVariant();
+}
+
 /** Returns data for specified index
 * @param index : The index
 * @param role : The role
@@ -151,35 +277,34 @@ QVariant QTwoLevelTreeModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid())
     return QVariant();
 
-  if (!parent(index).isValid()) {
-    // Index corresponds to a group
-    const auto &group = m_groups.at(index.row());
-
-    if ((role == Qt::DisplayRole || role == Qt::EditRole) &&
-        index.column() == 0) {
-      // Return the group name only in the first column
-      return QString::fromStdString(group.name());
-    }
-    if (role == Qt::BackgroundRole && group.isProcessed()) {
-      // Highlight if this group is processed
-      return QColor("#00b300");
-    }
-  } else {
-    // Index corresponds to a row
-    auto pIndex = parent(index);
-    const auto &group = m_groups[pIndex.row()];
-
-    if (role == Qt::DisplayRole || role == Qt::EditRole) {
-      return QString::fromStdString(m_tWS->String(
-          group.rowAbsoluteIndex(index.row()), index.column() + 1));
-    }
-    if (role == Qt::BackgroundRole && group.isRowProcessed(index.row())) {
-      // Highlight if this row is processed
-      return QColor("#00b300");
-    }
+  switch (role) {
+  case Qt::DisplayRole:
+    return getDisplayRole(index);
+  case Qt::EditRole:
+    return getEditRole(index);
+  case Qt::BackgroundRole:
+    return getBackgroundRole(index);
+  case Qt::ToolTipRole:
+    return getToolTipRole(index);
+  default:
+    return QVariant();
   }
+}
 
-  return QVariant();
+/** Utility to get the data for a cell from the group/row/column index
+ */
+std::string QTwoLevelTreeModel::cellValue(int groupIndex, int rowIndex,
+                                          int columnIndex) const {
+  const auto rowQIndex =
+      index(rowIndex, columnIndex, index(groupIndex, columnIndex));
+  auto result = data(rowQIndex).toString().toStdString();
+
+  // Treat auto-generated values as empty cells
+  auto currentRowData = rowData(groupIndex, rowIndex);
+  if (currentRowData->isGenerated(columnIndex))
+    result = "";
+
+  return result;
 }
 
 /** Returns the column name (header data for given section)
@@ -206,14 +331,14 @@ QVariant QTwoLevelTreeModel::headerData(int section,
 * @param index : The index
 * @return : The data associated with the given index as a RowData class
 */
-RowData_sptr QTwoLevelTreeModel::rowData(const QModelIndex &index) {
+RowData_sptr QTwoLevelTreeModel::rowData(const QModelIndex &index) const {
 
   RowData_sptr result;
 
   if (!index.isValid())
     return result;
 
-  if (!parent(index).isValid()) {
+  if (indexIsGroup(index)) {
     return result;
   } else {
     // Index corresponds to a row
@@ -223,6 +348,17 @@ RowData_sptr QTwoLevelTreeModel::rowData(const QModelIndex &index) {
   }
 
   return result;
+}
+
+/** Returns row data struct (which includes metadata about the row)
+ * for specified index
+* @param groupIndex : The group index
+* @param rowIndex : The row index within the group
+* @return : The data associated with the given index as a RowData class
+*/
+RowData_sptr QTwoLevelTreeModel::rowData(int groupIndex, int rowIndex) const {
+  const auto rowQIndex = index(rowIndex, 0, index(groupIndex, 0));
+  return rowData(rowQIndex);
 }
 
 /** Returns the index of an element specified by its row, column and parent
@@ -266,6 +402,37 @@ bool QTwoLevelTreeModel::isProcessed(int position,
                                   "the given group for this model");
 
     return m_groups[parent.row()].isRowProcessed(position);
+  }
+}
+
+/** Check whether the reduction failed for a group/row
+* @param position : The position of the item
+* @param parent : The parent of this item
+* @return : true if the reduction failed
+*/
+bool QTwoLevelTreeModel::reductionFailed(int position,
+                                         const QModelIndex &parent) const {
+
+  if (!parent.isValid()) {
+    // We have a group item (no parent)
+
+    // Invalid position
+    if (position < 0 || position >= rowCount())
+      throw std::invalid_argument("Invalid position. Position index must be "
+                                  "within the range of the number of groups in "
+                                  "this model");
+
+    return m_groups[position].reductionFailed();
+  } else {
+    // We have a row item (parent exists)
+
+    // Invalid position
+    if (position < 0 || position >= rowCount(parent))
+      throw std::invalid_argument("Invalid position. Position index must be "
+                                  "within the range of the number of rows in "
+                                  "the given group for this model");
+
+    return m_groups[parent.row()].rowReductionFailed(position);
   }
 }
 
@@ -522,6 +689,25 @@ bool QTwoLevelTreeModel::removeRows(int position, int count, int parent) {
   return true;
 }
 
+/** Remove all rows and groups
+* @return : Boolean indicating whether or not rows were removed
+*/
+bool QTwoLevelTreeModel::removeAll() {
+  beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
+
+  for (int group = 0; group < rowCount(); ++group) {
+    for (int row = 0; row < rowCount(index(group, 0)); ++row) {
+      m_tWS->removeRow(0);
+    }
+  }
+
+  m_groups.clear();
+
+  endRemoveRows();
+
+  return true;
+}
+
 /** Returns the number of rows of a given parent
 * @param parent : The parent item
 * @return : The number of rows
@@ -557,7 +743,7 @@ bool QTwoLevelTreeModel::setData(const QModelIndex &index,
 
   const std::string newName = value.toString().toStdString();
 
-  if (!parent(index).isValid()) {
+  if (indexIsGroup(index)) {
     // Index corresponds to a group
 
     if (index.column() != 0)
@@ -664,27 +850,89 @@ bool QTwoLevelTreeModel::setProcessed(bool processed, int position,
   return true;
 }
 
+/** Sets the error status of a data item
+* @param error : the error message
+* @param position : The position of the item
+* @param parent : The parent of this item
+* @return : Boolean indicating whether process status was set successfully
+*/
+bool QTwoLevelTreeModel::setError(const std::string &error, int position,
+                                  const QModelIndex &parent) {
+
+  if (!parent.isValid()) {
+    // We have a group item (no parent)
+
+    // Invalid position
+    if (position < 0 || position >= rowCount())
+      return false;
+
+    m_groups[position].setError(error);
+  } else {
+    // We have a row item (parent exists)
+
+    // Invalid position
+    if (position < 0 || position >= rowCount(parent))
+      return false;
+
+    m_groups[parent.row()].setRowError(position, error);
+  }
+
+  return true;
+}
+
+/** Update cached data for all rows in the given group from the table
+ * @param groupIdx : the group index to update
+ * @param start : the first row index in the group to update
+ * @param end : the last row index in the group to update
+ */
+void QTwoLevelTreeModel::updateGroupData(const int groupIdx, const int start,
+                                         const int end) {
+  // Loop through all groups and all rows
+  auto &group = m_groups[groupIdx];
+  for (int row = start; row <= end; ++row) {
+    const auto rowData = group.rowData(row);
+    // Loop through all columns and update the value in the row data
+    for (int col = 0; col < columnCount(); ++col) {
+      auto value = data(index(row, col, index(groupIdx, 0))).toString();
+      if (value != rowData->value(col))
+        rowData->setValue(col, value);
+    }
+  }
+}
+
 void QTwoLevelTreeModel::updateAllGroupData() {
   // Loop through all groups and all rows
   for (int groupIdx = 0; groupIdx < rowCount(); ++groupIdx) {
-    auto &group = m_groups[groupIdx];
-    for (int row = 0; row < rowCount(index(groupIdx, 0)); ++row) {
-      const auto &rowData = group.rowData(row);
-      // Loop through all columns and update the value in the row data
-      for (int col = 0; col < columnCount(); ++col) {
-        auto value = data(index(row, col, index(groupIdx, 0))).toString();
-        rowData->setValue(col, value);
-      }
-    }
+    updateGroupData(groupIdx, 0, rowCount(index(groupIdx, 0)) - 1);
   }
 }
 
 /** Called when the data in the table has changed. Updates the
  * table values in the cached RowData
  */
-void QTwoLevelTreeModel::tableDataUpdated(const QModelIndex &,
-                                          const QModelIndex &) {
-  updateAllGroupData();
+void QTwoLevelTreeModel::tableDataUpdated(const QModelIndex &topLeft,
+                                          const QModelIndex &bottomRight) {
+  if (!topLeft.isValid() || !bottomRight.isValid() ||
+      !topLeft.parent().isValid() || !bottomRight.parent().isValid())
+    return;
+
+  if (topLeft.parent() != bottomRight.parent())
+    return;
+
+  const auto group = topLeft.parent().row();
+  const auto start = topLeft.row();
+  const auto end = bottomRight.row();
+
+  // Reset the processed state for all changed rows and their parent group
+  setProcessed(false, group);
+  setError("", group);
+  for (int i = start; i <= end; ++i) {
+    setProcessed(false, i, index(group, 0));
+    setError("", i, index(group, 0));
+  }
+
+  // Update cached row data from the values in the table
+  updateGroupData(group, start, end);
 }
 
 int QTwoLevelTreeModel::findOrAddGroup(const std::string &groupName) {
@@ -721,6 +969,129 @@ bool QTwoLevelTreeModel::rowIsEmpty(int row, int parent) const {
   return true;
 }
 
+/** This function checks whether two lists of runs match or partially match. If
+ * the original list only contains one of the runs, say '12345', and a
+ * subsequent list contained two, e.g. '12345+22345' then we need to identify
+ * that this is the same row and that it needs updating with the new run
+ * numbers (so it is considered a match but not an exact match).  If the
+ * original list contains both run numbers and the new list contains a run that
+ * already exists in that row then the rows are considered to be an exact match
+ * because no new runs need to be added.
+ */
+bool QTwoLevelTreeModel::runListsMatch(const std::string &newValue,
+                                       const std::string &oldValue,
+                                       const bool exactMatch) const {
+  // Parse the individual runs from each list and check that they all
+  // match, allowing for additional runs in one of the lists.
+  auto newRuns =
+      Mantid::Kernel::StringTokenizer(
+          newValue, ",+", Mantid::Kernel::StringTokenizer::TOK_TRIM).asVector();
+  auto oldRuns =
+      Mantid::Kernel::StringTokenizer(
+          oldValue, ",+", Mantid::Kernel::StringTokenizer::TOK_TRIM).asVector();
+
+  // Loop through all values in the shortest list and check they exist
+  // in the longer list (or they all match if they're the same length).
+  auto longList = newRuns.size() > oldRuns.size() ? newRuns : oldRuns;
+  auto shortList = newRuns.size() > oldRuns.size() ? oldRuns : newRuns;
+  for (auto &run : shortList) {
+    if (!std::count(longList.cbegin(), longList.cend(), run))
+      return false;
+  }
+
+  // Ok, the short list only contains items in the long list. If the new
+  // list contains additional items that are not in the old list then the
+  // row will require updating and this is not an exact match.  However,
+  // if the new list contains fewer items then the row does not updating
+  // because they already all exist in the old list
+  if (exactMatch && newRuns.size() > oldRuns.size())
+    return false;
+
+  return true;
+}
+
+bool QTwoLevelTreeModel::checkColumnInComparisons(const Column &column,
+                                                  const bool exactMatch) const {
+  // If looking for exact matches, check all columns
+  if (exactMatch)
+    return true;
+
+  // If the whitelist does not have any key columns treat them all as key
+  // columns,
+  // i.e. check all columns
+  if (!m_whitelist.hasKeyColumns())
+    return true;
+
+  // Otherwise, only check key columns
+  return column.isKey();
+}
+
+/** Check whether the given row in the model matches the given row values
+ * @param groupIndex : the group to check in the model
+ * @param rowIndex : the row to check in the model
+ * @param rowValues : the cell values to check against
+ * @param exactMatch : whether to match the entire row exactly or just
+ * the key columns
+ * @return : true if the cell matches the given value
+ */
+bool QTwoLevelTreeModel::rowMatches(int groupIndex, int rowIndex,
+                                    const std::map<QString, QString> &rowValues,
+                                    const bool exactMatch) const {
+
+  int columnIndex = 0;
+  for (auto columnIt = m_whitelist.begin(); columnIt != m_whitelist.end();
+       ++columnIt, ++columnIndex) {
+    const auto column = *columnIt;
+
+    // Skip if no value for this column is given
+    if (!rowValues.count(column.name()))
+      continue;
+
+    auto newValue = rowValues.at(column.name()).toStdString();
+    auto oldValue = cellValue(groupIndex, rowIndex, columnIndex);
+
+    // Special case for runs column to allows for new runs to be added into
+    // rows that already contain a partial list of runs for the same angle
+    if (column.name() == "Run(s)") {
+      if (!runListsMatch(newValue, oldValue, exactMatch))
+        return false;
+      continue;
+    }
+
+    if (!checkColumnInComparisons(column, exactMatch))
+      continue;
+
+    // Ok, compare the values
+    if (newValue != oldValue) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/** Find the index of a row in a group based on row data values.
+ * @param groupIndex : the index of the group the row is in
+ * @param rowValues : the row values to look for
+ * @return : an optional value that is set with the row's index if
+ * it was found or is unset if it is not
+  */
+boost::optional<int> QTwoLevelTreeModel::findRowIndex(
+    int groupIndex, const std::map<QString, QString> &rowValues) const {
+  boost::optional<int> result;
+  // Loop through all existing rows
+  for (int rowIndex = 0; rowIndex < rowCount(index(groupIndex, 0));
+       ++rowIndex) {
+    // Return true if we find any match
+    if (rowMatches(groupIndex, rowIndex, rowValues, false)) {
+      result = rowIndex;
+      return result;
+    }
+  }
+
+  return result;
+}
+
 /**
 Inserts a new row with given values to the specified group in the specified
 location
@@ -731,6 +1102,7 @@ location
 void QTwoLevelTreeModel::insertRowWithValues(
     int groupIndex, int rowIndex, const std::map<QString, QString> &rowValues) {
 
+  // Add the row into the table
   insertRow(rowIndex, index(groupIndex, 0));
 
   // Loop through all the cells and update the values
@@ -745,7 +1117,82 @@ void QTwoLevelTreeModel::insertRowWithValues(
     ++colIndex;
   }
 
+  // Update cached data from the table
   updateAllGroupData();
+}
+
+/** Find the position in a group to insert a row with given values. Maintains
+ * sorting within the group by key columns or, if there are no key columns,
+ * inserts
+ * at the end of the group.
+ * @param groupIndex : the group to insert into
+ * @param rowValues : the row values as a map of column name to value
+ */
+int QTwoLevelTreeModel::getPositionToInsertRowInGroup(
+    const int groupIndex, const std::map<QString, QString> &rowValues) {
+
+  auto numberOfRowsInGroup = rowCount(index(groupIndex, 0));
+  auto group = m_groups[groupIndex];
+
+  for (int rowIndex = 0; rowIndex < numberOfRowsInGroup; ++rowIndex) {
+    int columnIndex = 0;
+    for (auto columnIt = m_whitelist.begin(); columnIt != m_whitelist.end();
+         ++columnIt, ++columnIndex) {
+      const auto column = *columnIt;
+
+      // Find the first key column where we have a search value
+      if (!column.isKey() || !rowValues.count(column.name()))
+        continue;
+
+      auto searchValue = rowValues.at(column.name()).toStdString();
+      auto compareValue = cellValue(groupIndex, rowIndex, columnIndex);
+
+      // If the row value is greater than the search value, we'll insert the
+      // new row before it
+      if (compareValue > searchValue) {
+        return rowIndex;
+      }
+
+      // Insert at the end of the group
+      return numberOfRowsInGroup;
+    }
+  }
+
+  // If no values were found to compare, insert at the end of the group
+  return numberOfRowsInGroup;
+}
+
+void QTwoLevelTreeModel::insertRowAndGroupWithValues(
+    const std::map<QString, QString> &rowValues) {
+
+  // Get the group index. Create the groups if it doesn't exist
+  const auto groupName = rowValues.at("Group").toStdString();
+  auto groupIndex = findOrAddGroup(groupName);
+
+  // Find the row index to update. First, check if the row already exists in
+  // the group
+  auto existingRowIndex = findRowIndex(groupIndex, rowValues);
+  int rowIndex = 0;
+  if (existingRowIndex) {
+    // We'll update the existing row
+    rowIndex = existingRowIndex.get();
+
+    // If it is identical to the new values then there is nothing to do
+    if (rowMatches(groupIndex, rowIndex, rowValues, true))
+      return;
+
+    // Otherwise, we want to reset the row to the new values. Just delete the
+    // existing row and then continue below to add the new row.
+    removeRows(rowIndex, 1, groupIndex);
+
+    // The group may have been removed it if was left empty; if so, re-add it
+    groupIndex = findOrAddGroup(groupName);
+  } else {
+    // We'll add a new row to the end of the group
+    rowIndex = getPositionToInsertRowInGroup(groupIndex, rowValues);
+  }
+
+  insertRowWithValues(groupIndex, rowIndex, rowValues);
 }
 
 /** Transfer data to the model
@@ -759,21 +1206,17 @@ void QTwoLevelTreeModel::transfer(
   if (rowCount() == 1 && rowCount(index(0, 0)) == 1 && rowIsEmpty(0, 0))
     removeRows(0, 1);
 
-  for (const auto &row : runs) {
+  for (const auto &rowValues : runs) {
     // The first cell in the row contains the group name. It must be set.
     // (Potentially we could allow it to be empty but it's probably safer to
     // enforce this.)
-    if (!row.count("Group") || row.at("Group").isEmpty()) {
+    if (!rowValues.count("Group") || rowValues.at("Group").isEmpty()) {
       throw std::invalid_argument("Data cannot be transferred to the "
                                   "processing table. Group information is "
                                   "missing.");
     }
-    const auto groupName = row.at("Group").toStdString();
-    // Get the group index. Create the groups if it doesn't exist
-    const auto groupIndex = findOrAddGroup(groupName);
-    // Add a new row with the given values to the end of the group
-    const int rowIndex = rowCount(index(groupIndex, 0));
-    insertRowWithValues(groupIndex, rowIndex, row);
+
+    insertRowAndGroupWithValues(rowValues);
   }
 }
 } // namespace DataProcessor

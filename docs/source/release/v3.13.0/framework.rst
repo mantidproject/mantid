@@ -41,9 +41,12 @@ New Algorithms
 - :ref:`ExportSampleLogsToHDF5 <algm-ExportSampleLogsToHDF5>` saves a
   workspace's samples logs to an HDF5 file
 
+- :ref:`SaveGDA <algm-SaveGDA>` saves a focused diffraction workspace to MAUD-readable ``.gda`` format
+
 Improved
 ########
 
+- :ref:`LoadMcStas <algm-LoadMcStas>` new alg property which controls the granularity of event data returned.
 - :ref:`Maxent <algm-Maxent>` when outputting the results of the iterations, it no longer pads with zeroes but
   returns as many items as iterations done for each spectrum, making the iterations easy to count.
 - XError values (Dx) can now be treated by the following algorithms: :ref:`ConjoinXRuns <algm-ConjoinXRuns>`, :ref:`ConvertToHistogram <algm-ConvertToHistogram>`, :ref:`ConvertToPointData <algm-ConvertToPointData>`, :ref:`CreateWorkspace <algm-CreateWorkspace>`, :ref:`SortXAxis <algm-SortXAxis>`, :ref:`algm-Stitch1D` and :ref:`algm-Stitch1DMany` (both with repect to point data).
@@ -53,6 +56,7 @@ Improved
 Bug fixes
 #########
 
+- In :ref:`LoadMcStas <algm-LoadMcStas>` internally reduce number of event workspaces created. If n mcstas event components now create n*(n-1) fewer.
 - The documentation of the algorithm :ref:`algm-CreateSampleWorkspace` did not match its implementation. The axis in beam direction will now be correctly described as Z instead of X.
 - The :ref:`ExtractMask <algm-ExtractMask>` algorithm now returns a non-empty list of detector ID's when given a MaskWorkspace.
 - Fixed a crash when the input workspace for :ref:`GroupDetectors <algm-GroupDetectors>` contained any other units than spectrum numbers.
@@ -71,6 +75,11 @@ New
 
 Python
 ------
+
+New
+###
+
+- Added a new ``MDFrameValidator`` which can check that a MD workspace passed to a python algorithm has the expected MD frame (e.g. HKL, QLab, QSample etc.).
 
 Improved
 ########

@@ -107,16 +107,20 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
   try {
     localWorkspace = WorkspaceFactory::Instance().create(
         "Workspace2D", numSpectra, m_lastBins, m_lastBins);
-  } catch (std::exception &) {
-    throw std::runtime_error("Failed to create a Workspace2D from the "
-                             "data found in this file");
+  } catch (std::exception &e) {
+    std::ostringstream msg;
+    msg << "Failed to create a Workspace2D from the data found in this file. "
+           "Error: " << e.what();
+    throw std::runtime_error(msg.str());
   }
 
   try {
     writeToWorkspace(localWorkspace, numSpectra);
-  } catch (std::exception &) {
-    throw std::runtime_error("Failed to write read data into the "
-                             "output Workspace2D");
+  } catch (std::exception &e) {
+    std::ostringstream msg;
+    msg << "Failed to write read data into the output Workspace2D. Error: "
+        << e.what();
+    throw std::runtime_error(msg.str());
   }
   delete m_curSpectra;
   return localWorkspace;
