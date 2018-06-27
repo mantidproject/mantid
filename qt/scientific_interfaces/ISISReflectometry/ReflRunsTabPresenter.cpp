@@ -100,8 +100,7 @@ void pythonSrcCloneWorkspace(std::ostringstream &result) {
 void pythonSrcLoadInstrument(std::ostringstream &result,
                              const std::string &instrument) {
   result << "  LoadInstrument(Workspace=output,RewriteSpectraMap=True,"
-            "InstrumentName='"
-         << instrument << "')\n";
+            "InstrumentName='" << instrument << "')\n";
 }
 
 void pythonSrcLiveDataVariable(std::ostringstream &result,
@@ -895,8 +894,7 @@ void ReflRunsTabPresenter::pythonSrcPostProcessingAlgorithm(
   result << "  "
             "ReflectometryReductionOneAuto(InputWorkspace=output,"
             "OutputWorkspaceBinned=output,ThetaLogName='"
-            "Theta',"
-         << optionsString << ")\n";
+            "Theta'," << optionsString << ")\n";
 }
 
 std::string ReflRunsTabPresenter::setupMonitorPostProcessingScript() {
