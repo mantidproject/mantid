@@ -15,6 +15,11 @@
 class ApplicationWindow;
 class Folder;
 
+namespace Poco {
+class Path;
+}
+
+
 /** Adapter class which handles saving or restoring project windows
 
 @author David Fairbrother, ISIS, RAL
@@ -43,12 +48,21 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 
 namespace MantidQt {
 namespace API {
+
 class ProjectRecoveryThread {
 public:
   /// Constructor
   explicit ProjectRecoveryThread(ApplicationWindow *windowHandle);
   /// Destructor the ensures background thread stops
   ~ProjectRecoveryThread();
+
+  /// Attempts recovery of the most recent checkpoint
+  bool attemptRecovery();
+  /// Checks if recovery is required
+  bool checkForRecovery() const;
+
+  /// Clears all checkpoints in the existing folder
+  void clearAllCheckpoints() const { deleteExistingCheckpoints(0); };
 
   /// Starts the background thread
   void startProjectSaving();
@@ -63,7 +77,10 @@ private:
   void configKeyChanged(Mantid::Kernel::ConfigValChangeNotification_ptr notif);
 
   /// Deletes oldest checkpoints beyond the maximum number to keep
-  void deleteExistingCheckpoints(size_t checkpointsToKeep);
+  void deleteExistingCheckpoints(size_t checkpointsToKeep) const;
+
+  /// Loads a recovery checkpoint in the given folder
+  bool loadRecoveryCheckpoint(const Poco::Path &path);
 
   /// Saves a project recovery file in Mantid
   void saveOpenWindows(const std::string &projectDestFolder);

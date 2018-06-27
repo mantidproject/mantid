@@ -13,9 +13,12 @@
 
 #include "Poco/DirectoryIterator.h"
 #include "Poco/NObserver.h"
-
 #include "Poco/Path.h"
+
 #include "qmetaobject.h"
+#include "qmessagebox.h"
+#include "qobject.h"
+#include "qstring.h"
 
 #include <chrono>
 #include <condition_variable>
@@ -27,8 +30,9 @@
 #include <thread>
 
 namespace {
-// Config helper methods
+	Mantid::Kernel::Logger g_log("Project Recovery Thread");
 
+// Config helper methods
 template <typename T>
 boost::optional<T> getConfigValue(const std::string &key) {
   T returnedValue;
@@ -71,6 +75,38 @@ std::string getOutputPath() {
   return timestampedPath;
 }
 
+std::vector<Poco::Path> getRecoveryFolderCheckpoints(const std::string &recoveryFolderPath) {
+	Poco::Path recoveryPath;
+	if (!recoveryPath.tryParse(recoveryFolderPath)) {
+		// Folder may not exist yet
+		g_log.debug("Project Saving: Failed to get working folder whilst deleting "
+			"checkpoints");
+		return{};
+	}
+
+	std::vector<Poco::Path> folderPaths;
+
+	Poco::DirectoryIterator dirIterator(recoveryFolderPath);
+	Poco::DirectoryIterator end;
+	// Find all the folders which exist in this folder
+	while (dirIterator != end) {
+		std::string iterPath = recoveryFolderPath + dirIterator.name() + '/';
+		Poco::Path foundPath(iterPath);
+
+		if (foundPath.isDirectory()) {
+			folderPaths.push_back(std::move(foundPath));
+		}
+		++dirIterator;
+	}
+
+	// Ensure the oldest is first in the vector
+	std::sort(
+		folderPaths.begin(), folderPaths.end(),
+		[](const Poco::Path &a, const Poco::Path &b) { return a.toString() < b.toString(); });
+
+	return folderPaths;
+}
+
 const std::string OUTPUT_PROJ_NAME = "recovery.mantid";
 
 // Config keys
@@ -87,7 +123,6 @@ const int NO_OF_CHECKPOINTS =
     getConfigValue<int>(NO_OF_CHECKPOINTS_KEY).get_value_or(5);
 
 // Implementation variables
-Mantid::Kernel::Logger g_log("Project Recovery Thread");
 const std::chrono::seconds TIME_BETWEEN_SAVING(SAVING_TIME);
 
 } // namespace
@@ -109,6 +144,32 @@ ProjectRecoveryThread::ProjectRecoveryThread(ApplicationWindow *windowHandle)
 
 /// Destructor which also stops any background threads currently in progress
 ProjectRecoveryThread::~ProjectRecoveryThread() { stopProjectSaving(); }
+
+bool ProjectRecoveryThread::attemptRecovery() {
+	const auto checkpointPaths = getRecoveryFolderCheckpoints(getRecoveryFolder());
+	auto &mostRecentCheckpoint = checkpointPaths.back();
+
+	QString recoveryMsg =
+		QObject::tr("Mantid did not close correctly and a recovery"
+			" checkpoint has been found. Would you like to attempt recovery?");
+
+	int userChoice = QMessageBox::information(m_windowPtr, QObject::tr("Project Recovery"),
+		recoveryMsg, QObject::tr("Yes"), QObject::tr("No"), QObject::tr("Open in script editor"), 0, 1);
+
+	switch (userChoice) {
+	case 0: return loadRecoveryCheckpoint(mostRecentCheckpoint);
+	case 1: return true;
+	case 2: return true; // TODO open script editor
+	default: throw std::out_of_range("Unknown selection type whilst trying to load project recovery");
+	}
+
+}
+
+bool ProjectRecoveryThread::checkForRecovery() const
+{
+	const auto checkpointPaths = getRecoveryFolderCheckpoints(getRecoveryFolder());
+	return checkpointPaths.size() != 0; // Non zero indicates recovery is pending
+}
 
 /// Returns a background thread with the current object captured inside it
 std::thread ProjectRecoveryThread::createBackgroundThread() {
@@ -136,42 +197,15 @@ void ProjectRecoveryThread::configKeyChanged(
  * folder. This is based on the configuration key which
  * indicates how many points to keep
  */
-void ProjectRecoveryThread::deleteExistingCheckpoints(
-    size_t checkpointsToKeep) {
-  static auto workingFolder = getRecoveryFolder();
-  Poco::Path recoveryPath;
-  if (!recoveryPath.tryParse(workingFolder)) {
-    // Folder may not exist yet
-    g_log.debug("Project Saving: Failed to get working folder whilst deleting "
-                "checkpoints");
-    return;
-  }
-
-  std::vector<Poco::Path> folderPaths;
-
-  Poco::DirectoryIterator dirIterator(recoveryPath);
-  Poco::DirectoryIterator end;
-  // Find all the folders which exist in this folder
-  while (dirIterator != end) {
-    std::string iterPath = workingFolder + dirIterator.name() + '/';
-    Poco::Path foundPath(iterPath);
-
-    if (foundPath.isDirectory()) {
-      folderPaths.push_back(std::move(foundPath));
-    }
-    ++dirIterator;
-  }
+void ProjectRecoveryThread::deleteExistingCheckpoints (
+    size_t checkpointsToKeep) const {
+  const auto folderPaths = getRecoveryFolderCheckpoints(getRecoveryFolder());
 
   size_t numberOfDirsPresent = folderPaths.size();
   if (numberOfDirsPresent <= checkpointsToKeep) {
     // Nothing to do
     return;
   }
-
-  // Ensure the oldest is first in the vector
-  std::sort(
-      folderPaths.begin(), folderPaths.end(),
-      [](Poco::Path &a, Poco::Path &b) { return a.toString() < b.toString(); });
 
   size_t checkpointsToRemove = numberOfDirsPresent - checkpointsToKeep;
   bool recurse = true;
@@ -259,6 +293,25 @@ void ProjectRecoveryThread::projectSavingThread() {
     deleteExistingCheckpoints(NO_OF_CHECKPOINTS);
     g_log.information("Project Recovery: Saving finished");
   }
+}
+
+bool ProjectRecoveryThread::loadRecoveryCheckpoint(const Poco::Path & path)
+{
+	const QString loadScript =
+		"";
+	m_windowPtr->runPythonScript(loadScript);
+
+	const bool isRecovery = true;
+	ProjectSerialiser serialiser(m_windowPtr, isRecovery);
+
+	// Use this version of Mantid as the current version field - as recovery
+	// across major versions is not an intended use case
+	const int fileVersion = 100 * maj_version + 10 * min_version + patch_version;
+
+	std::string projRecoveryPath = path.toString() + OUTPUT_PROJ_NAME;
+	serialiser.load(projRecoveryPath, fileVersion);
+
+	return false;
 }
 
 /**

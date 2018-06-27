@@ -262,7 +262,6 @@ ApplicationWindow::ApplicationWindow(bool factorySettings,
 #endif
 {
   init(factorySettings, args);
-  m_projectRecoveryThread.startProjectSaving();
 }
 
 /**
@@ -16635,6 +16634,9 @@ void ApplicationWindow::onAboutToStart() {
 
   // Make sure we see all of the startup messages
   resultsLog->scrollToTop();
+
+  // Kick off project recovery
+  checkForProjectRecovery();
 }
 
 /**
@@ -16749,4 +16751,18 @@ bool ApplicationWindow::saveProjectRecovery(std::string destination) {
   const bool isRecovery = true;
   ProjectSerialiser projectWriter(this, isRecovery);
   return projectWriter.save(QString::fromStdString(destination));
+}
+
+void ApplicationWindow::checkForProjectRecovery() {
+	if (!m_projectRecoveryThread.checkForRecovery()) {
+		m_projectRecoveryThread.startProjectSaving();
+		return;
+	}
+
+	// Recovery file present
+	if (m_projectRecoveryThread.attemptRecovery()) {
+		// If it worked correctly reset project recovery and start saving
+		m_projectRecoveryThread.clearAllCheckpoints();
+		m_projectRecoveryThread.startProjectSaving();
+	}
 }
