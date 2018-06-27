@@ -12,7 +12,9 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidLiveData/Exception.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
+#include <xmmintrin.h>
 
 GCC_DIAG_OFF(conversion)
 #include "private/Schema/ba57_run_info_generated.h"
@@ -22,7 +24,15 @@ GCC_DIAG_OFF(conversion)
 #include "private/Schema/f142_logdata_generated.h"
 GCC_DIAG_ON(conversion)
 
+#include <chrono>
+#include <numeric>
+#include <thread>
+#include <tbb/parallel_sort.h>
+
 using namespace Mantid::Types;
+using namespace Mantid::Kernel;
+size_t globEvents = 0;
+size_t lastEvents = 0;
 
 namespace {
 /// Logger
@@ -99,33 +109,32 @@ KafkaEventStreamDecoder::~KafkaEventStreamDecoder() { stopCapture(); }
  * call and will return after the thread has started
  */
 void KafkaEventStreamDecoder::startCapture(bool startNow) {
-
   // If we are not starting now, then we want to start at the start of the run
   if (!startNow) {
     // Get last two messages in run topic to ensure we get a runStart message
     m_runStream =
-        m_broker->subscribe({m_runInfoTopic}, SubscribeAtOption::LASTTWO);
+        m_broker->subscribe({ m_runInfoTopic }, SubscribeAtOption::LASTTWO);
     std::string rawMsgBuffer;
     auto runStartData = getRunStartMessage(rawMsgBuffer);
     auto startTimeMilliseconds =
         runStartData.startTime / 1000000; // nanoseconds to milliseconds
     m_eventStream = m_broker->subscribe(
-        {m_eventTopic, m_runInfoTopic, m_sampleEnvTopic},
+        { m_eventTopic, m_runInfoTopic, m_sampleEnvTopic },
         static_cast<int64_t>(startTimeMilliseconds), SubscribeAtOption::TIME);
     // make sure we listen to the run start topic starting from the run start
     // message we already got the start time from
     m_eventStream->seek(m_runInfoTopic, 0, runStartData.runStartMsgOffset);
   } else {
     m_eventStream =
-        m_broker->subscribe({m_eventTopic, m_runInfoTopic, m_sampleEnvTopic},
+        m_broker->subscribe({ m_eventTopic, m_runInfoTopic, m_sampleEnvTopic },
                             SubscribeAtOption::LATEST);
   }
 
   // Get last two messages in run topic to ensure we get a runStart message
   m_runStream =
-      m_broker->subscribe({m_runInfoTopic}, SubscribeAtOption::LASTTWO);
+      m_broker->subscribe({ m_runInfoTopic }, SubscribeAtOption::LASTTWO);
   m_spDetStream =
-      m_broker->subscribe({m_spDetTopic}, SubscribeAtOption::LASTONE);
+      m_broker->subscribe({ m_spDetTopic }, SubscribeAtOption::LASTONE);
 
   m_thread = std::thread([this]() { this->captureImpl(); });
   m_thread.detach();
@@ -202,6 +211,9 @@ API::Workspace_sptr KafkaEventStreamDecoder::extractData() {
 // -----------------------------------------------------------------------------
 
 API::Workspace_sptr KafkaEventStreamDecoder::extractDataImpl() {
+  g_log.notice() << "Events since last timeout " << globEvents - lastEvents
+                 << std::endl;
+  lastEvents = globEvents;
   std::lock_guard<std::mutex> lock(m_mutex);
   if (m_localEvents.size() == 1) {
     auto temp = createBufferWorkspace(m_localEvents.front());
@@ -230,10 +242,12 @@ void KafkaEventStreamDecoder::captureImpl() noexcept {
   m_capturing = true;
   try {
     captureImplExcept();
-  } catch (std::exception &exc) {
+  }
+  catch (std::exception &exc) {
     m_cbError();
     m_exception = boost::make_shared<std::runtime_error>(exc.what());
-  } catch (...) {
+  }
+  catch (...) {
     m_cbError();
     m_exception = boost::make_shared<std::runtime_error>(
         "KafkaEventStreamDecoder: Unknown exception type caught.");
@@ -256,11 +270,15 @@ void KafkaEventStreamDecoder::captureImplExcept() {
   int64_t offset;
   int32_t partition;
   std::string topicName;
-  std::unordered_map<std::string, std::vector<int64_t>> stopOffsets;
-  std::unordered_map<std::string, std::vector<bool>> reachedEnd;
+  std::unordered_map<std::string, std::vector<int64_t> > stopOffsets;
+  std::unordered_map<std::string, std::vector<bool> > reachedEnd;
   // True when should be checking if run stop offsets have been reached
   bool checkOffsets = false;
-
+  size_t nEvents = 0;
+  size_t nMessages = 0;
+  size_t totalMessages = 0;
+  auto globstart = std::chrono::system_clock::now();
+  auto start = std::chrono::system_clock::now();
   while (!m_interrupt) {
     if (m_endRun)
       waitForRunEndObservation();
@@ -270,8 +288,27 @@ void KafkaEventStreamDecoder::captureImplExcept() {
     m_eventStream->consumeMessage(&buffer, offset, partition, topicName);
     // No events, wait for some to come along...
     if (buffer.empty()) {
+      auto end = std::chrono::system_clock::now();
+      std::chrono::duration<double> dur = end - start;
+      if (dur.count() >= 60) {
+        g_log.notice() << "Consuming " << static_cast<double>(nMessages) /
+                                              dur.count() << "Hz" << std::endl;
+        nMessages = 0;
+        start = std::chrono::system_clock::now();
+      }
       m_cbIterationEnd();
       continue;
+    }
+
+    nMessages++;
+    totalMessages++;
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> dur = end - start;
+    if (dur.count() >= 60) {
+      g_log.notice() << "Consuming " << static_cast<double>(nMessages) /
+                                            dur.count() << "Hz" << std::endl;
+      nMessages = 0;
+      start = std::chrono::system_clock::now();
     }
 
     if (checkOffsets) {
@@ -305,7 +342,8 @@ void KafkaEventStreamDecoder::captureImplExcept() {
     if (flatbuffers::BufferHasIdentifier(
             reinterpret_cast<const uint8_t *>(buffer.c_str()),
             EVENT_MESSAGE_ID.c_str())) {
-      eventDataFromMessage(buffer);
+      eventDataFromMessage(buffer, nEvents);
+      globEvents = nEvents;
     }
     // Check if we have a sample environment log message
     else if (flatbuffers::BufferHasIdentifier(
@@ -337,7 +375,13 @@ void KafkaEventStreamDecoder::captureImplExcept() {
     }
     m_cbIterationEnd();
   }
+  auto globend = std::chrono::system_clock::now();
+  std::chrono::duration<double> dur = globend - globstart;
+  g_log.notice() << "Consumed at a rate of "
+                 << static_cast<double>(totalMessages) / dur.count() << "Hz"
+                 << std::endl;
   g_log.debug("Event capture finished");
+  lastEvents = globEvents = 0;
 }
 
 /**
@@ -347,15 +391,14 @@ void KafkaEventStreamDecoder::captureImplExcept() {
  * offset reached
  */
 void KafkaEventStreamDecoder::checkIfAllStopOffsetsReached(
-    const std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
+    const std::unordered_map<std::string, std::vector<bool> > &reachedEnd,
     bool &checkOffsets) {
 
   if (std::all_of(reachedEnd.cbegin(), reachedEnd.cend(),
-                  [](std::pair<std::string, std::vector<bool>> kv) {
-                    return std::all_of(
-                        kv.second.cbegin(), kv.second.cend(),
-                        [](bool partitionEnd) { return partitionEnd; });
-                  }) ||
+                  [](std::pair<std::string, std::vector<bool> > kv) {
+        return std::all_of(kv.second.cbegin(), kv.second.cend(),
+                           [](bool partitionEnd) { return partitionEnd; });
+      }) ||
       reachedEnd.empty()) {
     m_endRun = true;
     // If we've reached the end of a run then set m_extractWaiting to true
@@ -369,10 +412,10 @@ void KafkaEventStreamDecoder::checkIfAllStopOffsetsReached(
   }
 }
 
-std::unordered_map<std::string, std::vector<int64_t>>
+std::unordered_map<std::string, std::vector<int64_t> >
 KafkaEventStreamDecoder::getStopOffsets(
-    std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
-    std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
+    std::unordered_map<std::string, std::vector<int64_t> > &stopOffsets,
+    std::unordered_map<std::string, std::vector<bool> > &reachedEnd,
     uint64_t stopTime) const {
   reachedEnd.clear();
   stopOffsets.clear();
@@ -396,7 +439,7 @@ KafkaEventStreamDecoder::getStopOffsets(
                     << " PARTITIONS: " << topicOffsets.second.size()
                     << std::endl;
       reachedEnd.insert(
-          {topicName, std::vector<bool>(topicOffsets.second.size(), false)});
+          { topicName, std::vector<bool>(topicOffsets.second.size(), false) });
 
       auto &partitionOffsets = topicOffsets.second;
       for (uint32_t partitionNumber = 0;
@@ -498,7 +541,47 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
   }
 }
 
-void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer) {
+std::vector<size_t>
+KafkaEventStreamDecoder::getSpectrumIndices(const uint32_t *detIds,
+                                            size_t nEvents) {
+  std::vector<size_t> specindices(nEvents);
+  std::transform(detIds, detIds + nEvents, specindices.begin(),
+                 [this](const uint32_t detid)->size_t {
+    return this->m_specToIdx[static_cast<int32_t>(detid)];
+  });
+
+  return specindices;
+}
+
+std::vector<size_t> KafkaEventStreamDecoder::getSortedSpectraPermutation(
+    const std::vector<size_t> &specindices) {
+  std::vector<size_t> perm(specindices.size());
+  std::iota(perm.begin(), perm.end(), 0);
+  tbb::parallel_sort(perm.begin(), perm.end(),
+                     [&specindices](size_t i, size_t j) {
+    return specindices[i] < specindices[j];
+  });
+  return perm;
+}
+
+std::vector<std::pair<size_t, size_t> >
+getRanges(const std::vector<size_t> &perm,
+          const std::vector<size_t> &specindices) {
+  std::vector<std::pair<size_t, size_t> > ranges;
+  size_t first = 0;
+  for (size_t i = 1; i < perm.size(); ++i) {
+    if (specindices[perm[i]] != specindices[perm[first]]) {
+      ranges.emplace_back(first, i);
+      first = i;
+    }
+  }
+
+  ranges.emplace_back(first, perm.size());
+  return ranges;
+}
+
+void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer,
+                                                   size_t &eventCount) {
   auto eventMsg =
       GetEventMessage(reinterpret_cast<const uint8_t *>(buffer.c_str()));
 
@@ -506,6 +589,7 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer) {
   const auto &tofData = *(eventMsg->time_of_flight());
   const auto &detData = *(eventMsg->detector_id());
   auto nEvents = tofData.size();
+  eventCount += nEvents;
 
   DataObjects::EventWorkspace_sptr periodBuffer;
   std::lock_guard<std::mutex> lock(m_mutex);
@@ -519,12 +603,23 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer) {
   } else {
     periodBuffer = m_localEvents[0];
   }
-  for (decltype(nEvents) i = 0; i < nEvents; ++i) {
-    auto &spectrum = periodBuffer->getSpectrum(
-        m_specToIdx[static_cast<int32_t>(detData[i])]);
-    spectrum.addEventQuickly(TofEvent(static_cast<double>(tofData[i]) *
-                                          1e-3, // nanoseconds to microseconds
-                                      pulseTime));
+
+  auto specindices = getSpectrumIndices(detData.data(), nEvents);
+  auto perm = getSortedSpectraPermutation(specindices);
+  auto ranges = getRanges(perm, specindices);
+
+  // PARALLEL_SET_NUM_THREADS(8)
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (size_t r = 0; r < ranges.size(); r++) {
+    auto &range = ranges[r];
+    for (size_t j = range.first; j < range.second; j++) {
+      auto i = perm[j];
+      auto &spectrum = periodBuffer->getSpectrum(specindices[i]);
+      spectrum.addEventQuickly(
+          TofEvent(static_cast<double>(tofData[static_cast<uint32_t>(i)]) *
+                       1e-3, // nanoseconds to microseconds
+                   pulseTime));
+    }
   }
 }
 
@@ -546,9 +641,12 @@ KafkaEventStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
   }
   auto runStartData = static_cast<const RunStart *>(runMsg->info_type());
   KafkaEventStreamDecoder::RunStartStruct runStart = {
-      runStartData->instrument_name()->str(), runStartData->run_number(),
-      runStartData->start_time(),
-      static_cast<size_t>(runStartData->n_periods()), offset};
+    runStartData->instrument_name()->str(),
+    runStartData->run_number(),
+    runStartData->start_time(),
+    static_cast<size_t>(runStartData->n_periods()),
+    offset
+  };
   return runStart;
 }
 
@@ -646,8 +744,8 @@ int64_t KafkaEventStreamDecoder::getRunInfoMessage(std::string &rawMsgBuffer) {
                              "topic. Unable to continue");
   }
   if (!flatbuffers::BufferHasIdentifier(
-          reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
-          RUN_MESSAGE_ID.c_str())) {
+           reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
+           RUN_MESSAGE_ID.c_str())) {
     throw std::runtime_error("KafkaEventStreamDecoder::getRunInfoMessage() - "
                              "Received unexpected message type from run info "
                              "topic. Unable to continue");
@@ -669,7 +767,7 @@ DataObjects::EventWorkspace_sptr KafkaEventStreamDecoder::createBufferWorkspace(
     const size_t nspectra, const int32_t *spec, const int32_t *udet,
     const uint32_t length) {
   // Order is important here
-  std::map<int32_t, std::set<int32_t>> spdetMap;
+  std::map<int32_t, std::set<int32_t> > spdetMap;
   for (uint32_t i = 0; i < length; ++i) {
     auto specNo = spec[i];
     auto detId = udet[i];
@@ -677,7 +775,7 @@ DataObjects::EventWorkspace_sptr KafkaEventStreamDecoder::createBufferWorkspace(
     if (search != spdetMap.end()) {
       search->second.insert(detId);
     } else {
-      spdetMap.insert({specNo, {detId}});
+      spdetMap.insert({ specNo, { detId } });
     }
   }
   assert(nspectra == spdetMap.size());
@@ -740,7 +838,8 @@ void KafkaEventStreamDecoder::loadInstrument(
     alg->setProperty("Workspace", workspace);
     alg->setProperty("RewriteSpectraMap", Kernel::OptionalBool(false));
     alg->execute();
-  } catch (std::exception &exc) {
+  }
+  catch (std::exception &exc) {
     g_log.warning() << "Error loading instrument '" << name
                     << "': " << exc.what() << "\n";
   }

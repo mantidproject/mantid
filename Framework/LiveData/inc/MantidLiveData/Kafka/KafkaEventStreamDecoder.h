@@ -106,8 +106,11 @@ private:
                       DataObjects::EventWorkspace_sptr workspace);
   int64_t getRunInfoMessage(std::string &rawMsgBuffer);
   RunStartStruct getRunStartMessage(std::string &rawMsgBuffer);
-
-  void eventDataFromMessage(const std::string &buffer);
+  std::vector<size_t> getSpectrumIndices(const uint32_t *detIds,
+                                         size_t nEvents);
+  std::vector<size_t>
+  getSortedSpectraPermutation(const std::vector<size_t> &specindices);
+  void eventDataFromMessage(const std::string &buffer, size_t &eventCount);
   void sampleDataFromMessage(const std::string &buffer);
 
   API::Workspace_sptr extractDataImpl();
@@ -164,13 +167,13 @@ private:
   void waitForDataExtraction();
   void waitForRunEndObservation();
 
-  std::unordered_map<std::string, std::vector<int64_t>> getStopOffsets(
-      std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
-      std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
+  std::unordered_map<std::string, std::vector<int64_t> > getStopOffsets(
+      std::unordered_map<std::string, std::vector<int64_t> > &stopOffsets,
+      std::unordered_map<std::string, std::vector<bool> > &reachedEnd,
       uint64_t stopTime) const;
 
   void checkIfAllStopOffsetsReached(
-      const std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
+      const std::unordered_map<std::string, std::vector<bool> > &reachedEnd,
       bool &checkOffsets);
 
   // Callbacks
