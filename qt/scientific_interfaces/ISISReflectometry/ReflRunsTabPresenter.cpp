@@ -165,8 +165,7 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
       m_tablePresenters(tablePresenters), m_mainPresenter(nullptr),
-      m_searcher(searcher), m_instrumentChanged(false),
-      m_liveDataWorkspace("live"), m_liveDataAccWorkspace("acc") {
+      m_searcher(searcher), m_instrumentChanged(false) {
   assert(m_view != nullptr);
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
@@ -207,7 +206,10 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   }
 }
 
-ReflRunsTabPresenter::~ReflRunsTabPresenter() {}
+ReflRunsTabPresenter::~ReflRunsTabPresenter() {
+  if (m_monitorAlg)
+    stopObserving(m_monitorAlg);
+}
 
 /** Accept a main presenter
  * @param mainPresenter :: [input] A main presenter
@@ -895,19 +897,13 @@ void ReflRunsTabPresenter::pythonSrcPostProcessingAlgorithm(
   int const group = 0;
   auto options = convertOptionsFromQMap(getProcessingOptions(group));
 
-  // Set the output workspace names
-  setOption(options, "OutputWorkspaceBinned",
-            "IvsQ_binned_" + m_liveDataWorkspace);
-  setOption(options, "OutputWorkspace", "IvsQ_" + m_liveDataWorkspace);
-  setOption(options, "OutputWorkspaceWavelength",
-            "IvsLam_" + m_liveDataWorkspace);
-
   // Append the algorithm name and properties string to the result
   auto const optionsString = convertMapToString(options).toStdString();
-  result
-      << "  ReflectometryReductionOneAuto(InputWorkspace=output,ThetaLogName='"
-         "Theta',"
-      << optionsString << ")\n";
+  result << "  "
+            "ReflectometryReductionOneAuto(InputWorkspace=output,"
+            "OutputWorkspaceBinned=output,ThetaLogName='"
+            "Theta',"
+         << optionsString << ")\n";
 }
 
 std::string ReflRunsTabPresenter::setupMonitorPostProcessingScript() {
@@ -947,9 +943,9 @@ IAlgorithm_sptr ReflRunsTabPresenter::setupMonitorAlgorithm(
   alg->setLogging(false);
   auto instrument = m_view->getSearchInstrument();
   alg->setProperty("Instrument", instrument);
-  alg->setProperty("OutputWorkspace", m_liveDataWorkspace);
+  alg->setProperty("OutputWorkspace", "IvsQ_binned_live");
   alg->setProperty("AccumulationMethod", "Replace");
-  alg->setProperty("AccumulationWorkspace", m_liveDataAccWorkspace);
+  alg->setProperty("AccumulationWorkspace", "TOF_live");
   alg->setProperty("UpdateEvery", "10");
   alg->setProperty("PostProcessingScript", postProcessingScript);
   alg->setProperty("RunTransitionBehavior", "Restart");

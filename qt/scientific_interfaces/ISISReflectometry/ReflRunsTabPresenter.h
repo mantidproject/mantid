@@ -129,8 +129,6 @@ private:
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
   /// The name to use for the live data workspace
-  std::string m_liveDataWorkspace;
-  std::string m_liveDataAccWorkspace;
   Mantid::API::IAlgorithm_sptr m_monitorAlg;
 
   /// searching
