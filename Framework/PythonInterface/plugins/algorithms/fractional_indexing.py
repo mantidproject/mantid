@@ -1,45 +1,26 @@
+import itertools
 import numpy as np
 import scipy.cluster.hierarchy as hcluster
 from scipy.cluster.vq import kmeans2
 from scipy.spatial import KDTree
 
+_MAX_REFLECTIONS = 10
+
 
 def find_bases(qs, tolerance):
-    """Find a set of bases from the list of qs
+    qs = list(sort_vectors_by_norm(qs))
+    regenerate_grid = False
+    final_qs = [qs.pop(0)]
+    refs, hkls = generate_hkl_grid(np.array(final_qs), _MAX_REFLECTIONS)
 
-    This will estimate the number of additional dimensions needed to index the
-    fractional peaks. One vector for each dimension will then be chosen and
-    used as the basis for the new dimension.
-
-    :param qs: list of q vectors to find bases for.
-    :param tolerance: tolerance how close each vector needs to be to be classes
-        as being the same
-    :return: list of bases for each additional dimension required to index the
-        fractional peaks.
-    """
-    offsets = np.empty((0, 3))
     for q in qs:
-        bases = np.diagflat(q)
-        bases = bases[np.any(bases, axis=0), :]
-        offsets = np.vstack((offsets, bases))
+        regenerate_grid = not is_indexed(q, refs, tolerance)
 
-    pools = {}
-    indicies = []
-    for q in offsets:
-        added_to_pool = False
-        for key, pool in pools.items():
-            result = np.absolute(q - round_nearest(q, pool))
-            if np.all(result <= tolerance):
-                added_to_pool = True
-                indicies.append(key)
-                break
+        if regenerate_grid:
+            final_qs.append(q)
+            refs, hkls = generate_hkl_grid(np.array(final_qs), _MAX_REFLECTIONS)
 
-        if not added_to_pool:
-            key = len(pools.keys()) + 1
-            pools[key] = q
-            indicies.append(key)
-
-    return indicies, len(pools), pools
+    return len(final_qs), np.vstack(final_qs)
 
 
 def generate_grid(vecs, upper_bound):
@@ -56,7 +37,35 @@ def generate_grid(vecs, upper_bound):
     search_range = np.arange(-upper_bound, upper_bound)
     vs = np.array([v*i for v in vecs for i in search_range])
     vs = np.array([v+w for v in vs for w in vs if np.dot(v, w) == 0])
+
     return unique_rows(vs)
+
+
+def generate_hkl_grid(bases, upper_bound):
+    search_range = np.arange(-upper_bound, upper_bound)
+    ndim = len(bases)
+    hkls = np.array(list(itertools.product(*[search_range] * ndim)))
+    reflections = np.array([np.dot(bases.T, hkl) for hkl in hkls])
+    return reflections, hkls
+
+
+def find_nearest_hkl(qs, reflections, hkls, tolerance):
+    kdtree = KDTree(reflections)
+
+    final_indexing = []
+    for i, q in enumerate(qs):
+        result = kdtree.query_ball_point(q, r=tolerance)
+        if len(result) > 0:
+            smallest = sort_vectors_by_norm(hkls[result])
+            final_indexing.append(smallest[0])
+
+    return np.vstack(final_indexing)
+
+
+def is_indexed(q, reflections, tolerance):
+    kdtree = KDTree(reflections)
+    result = kdtree.query_ball_point(q, r=tolerance)
+    return len(result) > 0
 
 
 def unique_rows(a):
@@ -104,35 +113,10 @@ def index_q_vectors(qs, tolerance=.03):
         should be classifed as the same.
     :return: ndarray of indicies for each q vector
     """
-    # choose the bases to represent each new axis
-    idxs, ndim, pools = find_bases(qs, tolerance=tolerance)
-    bases = np.row_stack(pools.values())
 
-    # generate all possible reflections from bases up to a given number
-    MAX_REFLECTIONS = 10
-    reflections = generate_grid(bases, MAX_REFLECTIONS)
-
-    # round all reflections to the nearest reflection
-    qs = round_to_nearest_reflection(qs, reflections, tolerance)
-
-    ndim = 3+ndim
-    basis = np.eye(ndim)
-    basis[3:, :3] = bases
-    basis = np.divide(1., basis, out=np.zeros_like(basis), where=basis != 0)
-
-    qs_s = np.zeros((qs.shape[0], ndim))
-    qs_s[:, :3] = qs
-
-    # Find position of points in higher dimension space
-    indicies = np.dot(qs_s, basis.T) - qs_s
-
-    # We might have multiple translations along parallel directions in 3D
-    # space. These will appear as fractional indicies in this matrix. We
-    # remove them here by setting any no integer values to zero.
-    indicies = remove_noninteger(indicies)
-    indicies = indicies[:, 3:]
-
-    return indicies
+    ndim, bases = find_bases(qs, tolerance)
+    refs, hkls = generate_hkl_grid(bases, _MAX_REFLECTIONS)
+    return find_nearest_hkl(qs, refs, hkls, tolerance)
 
 
 def cluster_qs(qs, k=None, threshold=1.5):
