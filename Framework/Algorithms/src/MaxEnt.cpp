@@ -419,7 +419,7 @@ void MaxEnt::exec() {
   for (size_t i = 0; i < outImageWS->getNumberHistograms(); ++i)
     outImageWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   outDataWS =
-      WorkspaceFactory::Instance().create(inWS, 2 * nSpec, npointsX, npoints);
+      WorkspaceFactory::Instance().create(inWS, 2 * nSpectra, npointsX, npoints);
   for (size_t i = 0; i < outDataWS->getNumberHistograms(); ++i)
     outDataWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   outEvolChi = WorkspaceFactory::Instance().create(inWS, nSpec, nIter, nIter);
@@ -829,7 +829,7 @@ MaxEnt::updateImage(const std::vector<double> &image,
   return newImage;
 }
 
-/** Populates the output workspaces
+/** Populates the image output workspace
 * @param inWS :: [input] The input workspace
 * @param spec :: [input] The current spectrum being analyzed
 * @param nspec :: [input] The total number of histograms in the input workspace
@@ -919,14 +919,15 @@ void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
   outWS->setSharedE(nspec + spec, outWS->sharedE(spec));
 }
 
-/** Populates the output workspaces
+/** Populates the data output workspace
 * @param inWS :: [input] The input workspace
 * @param spec :: [input] The current spectrum being analyzed
 * @param nspec :: [input] The total number of histograms in the input workspace
 * @param result :: [input] The reconstructed data to be written in the output
 * workspace (can be a real or complex vector)
 * @param complex :: [input] True if result is a complex vector, false otherwise
-* @param concatenated :: [input] True if result is concatenated spectra
+* @param concatenated :: [input] True if result is concatenated spectra, 
+* then all spectra are analyzed and spec must be 0.
 * @param outWS :: [input] The output workspace to populate
 */
 void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
@@ -939,31 +940,45 @@ void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
   if (concatenated && !complex)
     throw std::invalid_argument("Concatenated data results must be complex");
   if (concatenated && result.size() % nspec*2)
-    throw std::invalid_argument("Cannot write concatenated data results to output workspaces");
+    throw std::invalid_argument("Cannot write complex concatenated data results to output workspaces");
+  if (concatenated && spec != 0)
+    throw std::invalid_argument("Cannot write concatenated data results to output workspaces from non-first spectrum");
 
   int resultLength = complex ? static_cast<int>(result.size() / 2)
                         : static_cast<int>(result.size());
   size_t spectrumLength = (concatenated ? resultLength / nspec: resultLength);
   size_t spectrumLengthX = inWS->isHistogramData() ? spectrumLength + 1 : spectrumLength;
-  MantidVec X(spectrumLengthX);
-  MantidVec YR(spectrumLength);
-  MantidVec YI(spectrumLength);
-  MantidVec E(spectrumLength, 0.);
+  size_t nSpecAnalyzed = (concatenated ? nspec : 1);
 
+
+  // Here we assume equal constant binning for all spectra analyzed
   double x0 = inWS->x(spec)[0];
   double dx = inWS->x(spec)[1] - x0;
 
-  // X values
-  for (size_t i = 0; i < spectrumLengthX; i++) {
-    X[i] = x0 + i * dx;
-  }
+  // Loop over each spectrum being analyzed - one spectrum unless concatenated
+  for (size_t specA = spec; specA < spec+nSpecAnalyzed; specA++) {
 
-  // Y values
-  if (complex) {
-    if (concatenated) {
-      for (size_t s = 0; s < nspec; s++) {
+    MantidVec X(spectrumLengthX);
+    MantidVec YR(spectrumLength);
+    MantidVec YI(spectrumLength);
+    MantidVec E(spectrumLength, 0.);
+
+    // X values
+    for (size_t i = 0; i < spectrumLengthX; i++) {
+      X[i] = x0 + i * dx;
+    }
+
+    // Y values
+    if (complex) {
+      if (concatenated) {
+        // note the spec=0, so specA starts from 0 in this case.
         for (size_t i = 0; i < spectrumLength; i++) {
-          // TO DO We need multiple YR & YI here & multiple moves later on
+          YR[i] = result[2 * i + specA*spectrumLength];
+          YI[i] = result[2 * i + 1 + specA*spectrumLength];
+        }
+      }
+      else {
+        for (size_t i = 0; i < spectrumLength; i++) {
           YR[i] = result[2 * i];
           YI[i] = result[2 * i + 1];
         }
@@ -971,23 +986,20 @@ void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
     }
     else {
       for (size_t i = 0; i < spectrumLength; i++) {
-        YR[i] = result[2 * i];
-        YI[i] = result[2 * i + 1];
+        YR[i] = result[i];
+        YI[i] = 0.;
       }
     }
-  } else {
-    for (size_t i = 0; i < spectrumLength; i++) {
-      YR[i] = result[i];
-      YI[i] = 0.;
-    }
-  }
 
-  outWS->mutableX(spec) = std::move(X);
-  outWS->mutableY(spec) = std::move(YR);
-  outWS->mutableE(spec) = std::move(E);
-  outWS->setSharedX(nspec + spec, outWS->sharedX(spec));
-  outWS->mutableY(nspec + spec) = std::move(YI);
-  outWS->setSharedE(nspec + spec, outWS->sharedE(spec));
+    outWS->mutableX(specA) = std::move(X);
+    outWS->mutableY(specA) = std::move(YR);
+    outWS->mutableE(specA) = std::move(E);
+    auto nH = outWS->getNumberHistograms();
+    outWS->mutableY(nspec + specA) = std::move(YI);
+    outWS->setSharedX(nspec + specA, outWS->sharedX(spec));
+    outWS->setSharedE(nspec + specA, outWS->sharedE(spec));
+  } // Next spectrum if concatenated
+
 }
 
 } // namespace Algorithms
