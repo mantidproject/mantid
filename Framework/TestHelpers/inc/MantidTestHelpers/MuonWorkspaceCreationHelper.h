@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/Geometry.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -55,7 +56,7 @@ template <typename Function = yDataAsymmetry>
 Mantid::API::MatrixWorkspace_sptr
 createAsymmetryWorkspace(std::size_t nspec, std::size_t maxt,
                          Function dataGenerator = yDataAsymmetry()) {
-  MatrixWorkspace_sptr ws =
+  Mantid::API::MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceFromFunction(
           dataGenerator, static_cast<int>(nspec), 0.0, 1.0,
           (1.0 / static_cast<double>(maxt)), true, eData());
@@ -69,7 +70,7 @@ createAsymmetryWorkspace(std::size_t nspec, std::size_t maxt,
   ws->mutableRun().addProperty("goodfrm", 10);
   // Add instrument and run number
   boost::shared_ptr<Mantid::Geometry::Instrument> inst1 =
-      boost::make_shared<Geometry::Instrument>();
+      boost::make_shared<Mantid::Geometry::Instrument>();
   inst1->setName("EMU");
   ws->setInstrument(inst1);
   ws->mutableRun().addProperty("run_number", 12345);
