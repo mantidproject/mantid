@@ -130,10 +130,10 @@ public:
     // Group Asymmetry, unNormalized
     TS_ASSERT(wsGroup->contains("EMU00012345; Group; group1; Asym; #1_unNorm"));
     TS_ASSERT(
-        wsGroup->contains("EMU00012345; Group; group1; Asym; #1_unNorm_Raw"));
+        wsGroup->contains("EMU00012345; Group; group1; Asym; #1_Raw_unNorm"));
     TS_ASSERT(wsGroup->contains("EMU00012345; Group; group2; Asym; #1_unNorm"));
     TS_ASSERT(
-        wsGroup->contains("EMU00012345; Group; group2; Asym; #1_unNorm_Raw"));
+        wsGroup->contains("EMU00012345; Group; group2; Asym; #1_Raw_unNorm"));
     // Pair Asymmetry
     TS_ASSERT(wsGroup->contains("EMU00012345; Pair; pair1; Asym; #1"));
     TS_ASSERT(wsGroup->contains("EMU00012345; Pair; pair1; Asym; #1_Raw"));
