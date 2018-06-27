@@ -355,7 +355,7 @@ void SetupILLSANSReduction::init() {
   setPropertySettings("BckTransmissionDarkCurrentFile",
                       make_unique<VisibleWhenProperty>("BckTransmissionMethod",
                                                        IS_EQUAL_TO,
-                                                       "BeamSpreader"));
+                                                       "DirectBeam"));
   declareProperty(
       "BckThetaDependentTransmission", true,
       "If true, a theta-dependent transmission correction will be applied.");
