@@ -37,6 +37,8 @@ Bug fixes
 * Fixed a bug in the old backend where for LOQ the high angle bank was not being centered correctly in some cases.
 * Fixed a bug where userfiles specified in the batch file were not being loaded into the new GUI.
 * The new sans GUI will now save out all the outputs of a time sliced reduction.
+* Fixed a bug where save_format was not being specified if a user file was entered for a row.
+* Fixed a bug where use gravity was defaulting to true. 
 
 Features Removed
 ################
