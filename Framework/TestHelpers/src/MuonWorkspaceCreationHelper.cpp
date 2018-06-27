@@ -19,8 +19,8 @@ using namespace Mantid::API;
 namespace MuonWorkspaceCreationHelper {
 
 // Generate y-values which increment by 1 each time the function is called
-yDataCounts2::yDataCounts2() : m_count(-1) {}
-double yDataCounts2::operator()(const double, size_t) {
+yDataCounts::yDataCounts() : m_count(-1) {}
+double yDataCounts::operator()(const double, size_t) {
   m_count++;
   return static_cast<double>(m_count);
 }
@@ -40,57 +40,15 @@ double yDataAsymmetry::operator()(const double t, size_t spec) {
   double e = exp(-t / tau);
   double factor = (static_cast<double>(spec) + 1.0) * 0.5;
   double phase_offset = 4 * M_PI / 180;
-  return std::max(0.0, (10. * factor * (1.0 +
-                                        m_amp * cos(m_omega * t + m_phi +
-                                                    static_cast<double>(spec) *
-                                                        phase_offset)) *
-                        e));
+  return std::max(
+      0.0, (10. * factor *
+            (1.0 + m_amp * cos(m_omega * t + m_phi +
+                               static_cast<double>(spec) * phase_offset)) *
+            e));
 }
 
 // Errors are fixed to 0.005
 double eData::operator()(const double, size_t) { return 0.005; }
-
-/**
- * Create a matrix workspace appropriate for Group Asymmetry. One detector per
- * spectra, numbers starting from 1. The detector ID and spectrum number are
- * equal.
- * @param nspec :: The number of spectra
- * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
- * Number of bins = maxt - 1 .
- * @param dataGenerator :: A function object which takes a double (t) and
- * integer (spectrum number) and gives back a double (the y-value for the data).
- * @return Pointer to the workspace.
- */
-template <typename Function>
-MatrixWorkspace_sptr createAsymmetryWorkspace(std::size_t nspec,
-                                              std::size_t maxt,
-                                              Function dataGenerator) {
-  MatrixWorkspace_sptr ws =
-      WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-          dataGenerator, static_cast<int>(nspec), 0.0, 1.0,
-          (1.0 / static_cast<double>(maxt)), true, eData());
-
-  for (auto g = 0u; g < nspec; ++g) {
-    auto &spec = ws->getSpectrum(g);
-    spec.addDetectorID(g + 1);
-    spec.setSpectrumNo(g + 1);
-  }
-  // Add number of good frames (required for Asymmetry calculation)
-  ws->mutableRun().addProperty("goodfrm", 10);
-  // Add instrument and run number
-  boost::shared_ptr<Geometry::Instrument> inst1 =
-      boost::make_shared<Geometry::Instrument>();
-  inst1->setName("EMU");
-  ws->setInstrument(inst1);
-  ws->mutableRun().addProperty("run_number", 12345);
-
-  return ws;
-}
-
-Mantid::API::MatrixWorkspace_sptr createAsymmetryWorkspace(size_t nspec,
-                                                           size_t maxt) {
-  return createAsymmetryWorkspace(nspec, maxt, yDataAsymmetry());
-}
 
 /**
  * Create a matrix workspace appropriate for Group Counts. One detector per
@@ -108,7 +66,7 @@ MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
 
   MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-          yDataCounts2(), static_cast<int>(nspec), 0.0, 1.0,
+          yDataCounts(), static_cast<int>(nspec), 0.0, 1.0,
           (1.0 / static_cast<double>(maxt)), true, eData());
 
   ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(
@@ -208,7 +166,7 @@ ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
  * @param nSpectra :: Number of spectra in the workspace, defaults to 1.
  * @return Pointer to the workspace.
  */
-Workspace_sptr createWorkspaceWithInstrumentandRun(const std::string &instrName,
+MatrixWorkspace_sptr createWorkspaceWithInstrumentandRun(const std::string &instrName,
                                                    int runNumber,
                                                    size_t nSpectra) {
 
@@ -223,7 +181,7 @@ Workspace_sptr createWorkspaceWithInstrumentandRun(const std::string &instrName,
 
 /**
  * Creates a grouped workspace containing multiple workspaces with multiple
- * spectra, the detector IDs are consequtive across the spectra, starting from 1
+ * spectra, the detector IDs are consecutive across the spectra, starting from 1
  * @param nWorkspaces :: The number of workspaces.
  * @param nspec :: The number of spectra per workspace.
  * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).

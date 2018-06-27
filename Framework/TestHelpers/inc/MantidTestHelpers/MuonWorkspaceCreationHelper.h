@@ -6,6 +6,10 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
 
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 namespace MuonWorkspaceCreationHelper {
 
 // Create y-values for a fake muon dataset.
@@ -23,9 +27,9 @@ private:
 };
 
 // Generate y-values which increment by 1 each time the function is called
-struct yDataCounts2 {
-  yDataCounts2();
-  double operator()(const double, size_t);
+struct yDataCounts {
+  yDataCounts();
+  double operator()(const double t, size_t spec);
 
 private:
   int m_count;
@@ -40,13 +44,38 @@ struct eData {
  * Create a matrix workspace appropriate for Group Asymmetry. One detector per
  * spectra, numbers starting from 1. The detector ID and spectrum number are
  * equal.
+ * @param nspec :: The number of spectra
+ * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
+ * Number of bins = maxt - 1 .
+ * @param dataGenerator :: A function object which takes a double (t) and
+ * integer (spectrum number) and gives back a double (the y-value for the data).
+ * @return Pointer to the workspace.
  */
-template <typename Function>
+template <typename Function = yDataAsymmetry>
 Mantid::API::MatrixWorkspace_sptr
-createAsymmetryWorkspace(size_t nspec, size_t maxt, Function dataGenerator);
+createAsymmetryWorkspace(std::size_t nspec, std::size_t maxt,
+                         Function dataGenerator = yDataAsymmetry()) {
+  MatrixWorkspace_sptr ws =
+      WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+          dataGenerator, static_cast<int>(nspec), 0.0, 1.0,
+          (1.0 / static_cast<double>(maxt)), true, eData());
 
-Mantid::API::MatrixWorkspace_sptr createAsymmetryWorkspace(size_t nspec,
-                                                           size_t maxt);
+  for (auto g = 0u; g < nspec; ++g) {
+    auto &spec = ws->getSpectrum(g);
+    spec.addDetectorID(g + 1);
+    spec.setSpectrumNo(g + 1);
+  }
+  // Add number of good frames (required for Asymmetry calculation)
+  ws->mutableRun().addProperty("goodfrm", 10);
+  // Add instrument and run number
+  boost::shared_ptr<Mantid::Geometry::Instrument> inst1 =
+      boost::make_shared<Geometry::Instrument>();
+  inst1->setName("EMU");
+  ws->setInstrument(inst1);
+  ws->mutableRun().addProperty("run_number", 12345);
+
+  return ws;
+}
 
 /**
  * Create a matrix workspace appropriate for Group Counts. One detector per
@@ -74,7 +103,7 @@ Mantid::API::ITableWorkspace_sptr
 createDeadTimeTable(const size_t &nspec, std::vector<double> &deadTimes);
 
 // Creates a single - point workspace with instrument and runNumber set.
-Mantid::API::Workspace_sptr
+Mantid::API::MatrixWorkspace_sptr
 createWorkspaceWithInstrumentandRun(const std::string &instrName, int runNumber,
                                     size_t nSpectra = 1);
 
