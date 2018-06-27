@@ -93,6 +93,8 @@ public:
   const Kernel::Material material() const override;
   const std::string &id() const override;
   boost::shared_ptr<GeometryHandler> getGeometryHandler() const override;
+  /// Id as static
+  static const std::string Id;
 
 private:
   struct PlaneParameters {

@@ -12,6 +12,7 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/Material.h"
 #include <cmath>
 
 using Mantid::Geometry::MeshObject2D;
@@ -276,16 +277,20 @@ public:
   }
 
   // Characterisation test.
-  void test_generatePointInObject_not_implemented() {
+  void test_generatePointInObject_not_supported() {
 
+    // Generating points in a 3D bounding box volume does not make sense for a
+    // plane
     auto mesh = makeSimpleTriangleMesh();
     testing::NiceMock<MockRNG> generator;
     TS_ASSERT_THROWS(mesh.generatePointInObject(generator, 10),
                      std::runtime_error &);
   }
   // Characterisation test.
-  void test_generatePointInObject_with_active_region_not_implemented() {
+  void test_generatePointInObject_with_active_region_not_supported() {
 
+    // Generating points in a 3D bounding box volume does not make sense for a
+    // plane
     auto mesh = makeSimpleTriangleMesh();
     testing::NiceMock<MockRNG> generator;
     Mantid::Geometry::BoundingBox boundingBox;
@@ -317,18 +322,14 @@ public:
     TS_ASSERT_THROWS(mesh.initDraw(), std::runtime_error &);
   }
 
-  // Characterisation test.
-  void test_material_not_implemented() {
+  void test_get_material() {
     auto mesh = makeSimpleTriangleMesh();
-
-    TS_ASSERT_THROWS(mesh.material(), std::runtime_error &);
+    TS_ASSERT_EQUALS(mesh.material().name(), Mantid::Kernel::Material{}.name())
   }
 
-  // Characterisation test.
-  void test_id_not_implemented() {
+  void test_id() {
     auto mesh = makeSimpleTriangleMesh();
-
-    TS_ASSERT_THROWS(mesh.id(), std::runtime_error &);
+    TS_ASSERT_EQUALS(mesh.id(), MeshObject2D::Id);
   }
 
   // Characterisation test.

@@ -110,6 +110,9 @@ double getTriangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
 }
 }
 
+const double MeshObject2D::MinThickness = 0.001;
+const std::string MeshObject2D::Id = "MeshObject2D";
+
 /**
  * @brief isOnTriangle
  * @param p : point to test
@@ -325,8 +328,6 @@ double MeshObject2D::volume() const {
   return 0; // Volume is always 0 for a plane
 }
 
-const double MeshObject2D::MinThickness = 0.001;
-
 /**
 * Returns an axis-aligned bounding box that will fit the shape
 *
@@ -414,15 +415,9 @@ void MeshObject2D::initDraw() const {
   throw std::runtime_error("Not implemented");
 }
 
-const Kernel::Material MeshObject2D::material() const {
+const Kernel::Material MeshObject2D::material() const { return m_material; }
 
-  throw std::runtime_error("Not implemented");
-}
-
-const std::string &MeshObject2D::id() const {
-
-  throw std::runtime_error("Not implemented");
-}
+const std::string &MeshObject2D::id() const { return MeshObject2D::Id; }
 
 boost::shared_ptr<GeometryHandler> MeshObject2D::getGeometryHandler() const {
 
