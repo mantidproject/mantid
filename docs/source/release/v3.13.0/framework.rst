@@ -13,6 +13,7 @@ Instrument Definition Updates
 -----------------------------
 
 - The ALF IDF has been updated following a detector array alteration.
+- The LARMOR IDF has been updated following the addition of a new detector to the instrument.
 
 Algorithms
 ----------

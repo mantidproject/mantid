@@ -259,28 +259,28 @@
  
  <type name="LARMORWLSFDetector">
 	<component type="WLSF-panel">
-		<location  x=" 0.2345  " z="  1.090062    " name="WLSF-Panel1"> <facing x="0" y="0" z="25.3"/> </location>
+		<location  x="0.2345" z="1.090062" name="WLSF-Panel1"> <facing x="0" y="0" z="25.3"/> </location>
 	</component>
 	<component type="WLSF-panel">
-		<location  x=" 0.1675  " z="  1.102347    " name="WLSF-Panel2"> <facing x="0" y="0" z="25.3"/> </location>
+		<location  x="0.1675" z="1.102347" name="WLSF-Panel2"> <facing x="0" y="0" z="25.3"/> </location>
 	</component>
 	<component type="WLSF-panel">
-		<location  x=" 0.1005  " z="  1.110462    " name="WLSF-Panel3"> <facing x="0" y="0" z="25.3"/> </location>
+		<location  x="0.1005" z="1.110462" name="WLSF-Panel3"> <facing x="0" y="0" z="25.3"/> </location>
 	</component>
 	<component type="WLSF-panel">
-		<location  x=" 0.0335  " z="  1.114497    " name="WLSF-Panel4"> <facing x="0" y="0" z="25.3"/> </location>
+		<location  x="0.0335" z="1.114497" name="WLSF-Panel4"> <facing x="0" y="0" z="25.3"/> </location>
 	</component>
 	<component type="WLSF-panel">
-		<location  x=" -0.0335  " z="  1.114497   " name="WLSF-Panel5"> <facing x="0" y="0" z="25.3"/> </location>
+		<location  x="-0.0335" z="1.114497" name="WLSF-Panel5"> <facing x="0" y="0" z="25.3"/> </location>
 	</component>
 	<component type="WLSF-panel">
-		<location  x=" -0.1005  " z="  1.110462   " name="WLSF-Panel6"> <facing x="0" y="0" z="25.3"/> </location>
+		<location  x="-0.1005" z="1.110462" name="WLSF-Panel6"> <facing x="0" y="0" z="25.3"/> </location>
 	</component>
 	<component type="WLSF-panel">
-		<location  x=" -0.1675  " z="  1.102347    " name="WLSF-Panel7"> <facing x="0" y="0" z="25.3"/> </location>
+		<location  x="-0.1675" z="1.102347" name="WLSF-Panel7"> <facing x="0" y="0" z="25.3"/> </location>
 	</component>
 	<component type="WLSF-panel">
-		<location  x=" -0.2345  " z="  1.090062    " name="WLSF-Panel8"> <facing x="0" y="0" z="25.3"/> </location>
+		<location  x="-0.2345" z="1.090062" name="WLSF-Panel8"> <facing x="0" y="0" z="25.3"/> </location>
 	</component>
  </type>
 
