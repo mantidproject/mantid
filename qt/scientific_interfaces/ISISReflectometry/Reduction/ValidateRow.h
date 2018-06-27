@@ -29,20 +29,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 namespace MantidQt {
 namespace CustomInterfaces {
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double>
-parseDouble(std::string string);
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double>
-parseNonNegativeDouble(std::string string);
-
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double>
-parseNonNegativeNonZeroDouble(std::string string);
-
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<int>
-parseInt(std::string string);
-
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<int>
-parseNonNegativeInt(std::string string);
-
 MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<std::vector<std::string>>
 parseRunNumbers(std::string const &runNumbers);
 

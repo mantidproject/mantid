@@ -35,6 +35,8 @@ set ( SRC_FILES
     ReflSearchModel.cpp
     ReflSettingsTabPresenter.cpp
     ReflTableSchema.cpp
+    Parse.cpp
+    Reduction/Slicing.cpp
     TransferResults.cpp
     GetInstrumentParameter.cpp
 )

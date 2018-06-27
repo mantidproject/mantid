@@ -11,7 +11,6 @@ namespace CustomInterfaces {
 QtReflEventTabView::QtReflEventTabView(QWidget *parent) {
   UNUSED_ARG(parent);
   initLayout();
-  registerEventWidgets();
 }
 
 void QtReflEventTabView::subscribe(EventTabViewSubscriber *notifyee) {
@@ -24,16 +23,52 @@ void QtReflEventTabView::initLayout() {
   initUniformEvenSliceTypeLayout();
   initLogValueSliceTypeLayout();
   initCustomSliceTypeLayout();
-  m_sliceTypeRadioButtons =
-      makeQWidgetGroup(m_ui.uniformEvenButton, m_ui.uniformButton,
-                       m_ui.logValueButton, m_ui.customButton);
+  connect(m_ui.disabledSlicingButton, SIGNAL(toggled(bool)), this,
+          SLOT(toggleDisabledSlicing(bool)));
+
+  m_sliceTypeRadioButtons = makeQWidgetGroup(
+      m_ui.uniformEvenButton, m_ui.uniformButton, m_ui.logValueButton,
+      m_ui.customButton, m_ui.disabledSlicingButton);
 }
 
 void QtReflEventTabView::initUniformSliceTypeLayout() {
   m_uniformGroup = makeQWidgetGroup(m_ui.uniformEdit, m_ui.uniformLabel);
   connect(m_ui.uniformButton, SIGNAL(toggled(bool)), this,
           SLOT(toggleUniform(bool)));
-  connect(m_ui.);
+
+  connect(m_ui.uniformEvenEdit, SIGNAL(valueChanged(int)), this,
+          SLOT(onUniformEvenChanged(int)));
+  connect(m_ui.uniformEdit, SIGNAL(valueChanged(double)), this,
+          SLOT(onUniformSecondsChanged(double)));
+
+  connect(m_ui.customEdit, SIGNAL(textEdited(QString const &)), this,
+          SLOT(onCustomChanged(QString const &)));
+  connect(m_ui.logValueEdit, SIGNAL(textEdited(QString const &)), this,
+          SLOT(onLogValuesChanged(QString const &)));
+  connect(m_ui.logValueTypeEdit, SIGNAL(textEdited(QString const &)), this,
+          SLOT(onLogValueTypeChanged(QString const &)));
+}
+
+void QtReflEventTabView::onUniformEvenChanged(int numberOfSlices) {
+  m_notifyee->notifyUniformSliceCountChanged(numberOfSlices);
+}
+
+void QtReflEventTabView::onUniformSecondsChanged(double numberOfSeconds) {
+  m_notifyee->notifyUniformSecondsChanged(numberOfSeconds);
+}
+
+void QtReflEventTabView::onCustomChanged(QString const &listOfSlices) {
+  m_notifyee->notifyCustomSliceValuesChanged(listOfSlices.toStdString());
+}
+
+void QtReflEventTabView::onLogValuesChanged(
+    QString const &listOfSliceBreakpoints) {
+  m_notifyee->notifyLogSliceBreakpointsChanged(
+      listOfSliceBreakpoints.toStdString());
+}
+
+void QtReflEventTabView::onLogValueTypeChanged(QString const &logBlockName) {
+  m_notifyee->notifyLogBlockNameChanged(logBlockName.toStdString());
 }
 
 void QtReflEventTabView::initUniformEvenSliceTypeLayout() {
@@ -91,24 +126,52 @@ void QtReflEventTabView::disableSliceType(SliceType sliceType) {
   }
 }
 
-std::string QtReflEventTabView::getLogValueTimeSlicingType() const {
+std::string QtReflEventTabView::logBlockName() const {
   return textFrom(m_ui.logValueTypeEdit);
 }
 
-std::string QtReflEventTabView::getLogValueTimeSlicingValues() const {
+std::string QtReflEventTabView::logBreakpoints() const {
   return textFrom(m_ui.logValueEdit);
 }
 
-std::string QtReflEventTabView::getCustomTimeSlicingValues() const {
+std::string QtReflEventTabView::customBreakpoints() const {
   return textFrom(m_ui.customEdit);
 }
 
-std::string QtReflEventTabView::getUniformTimeSlicingValues() const {
-  return textFrom(m_ui.uniformEdit);
+void showAsInvalid(QLineEdit &lineEdit) {
+  auto palette = lineEdit.palette();
+  palette.setColor(QPalette::Base, QColor("#ffb8ad"));
+  lineEdit.setPalette(palette);
 }
 
-std::string QtReflEventTabView::getUniformEvenTimeSlicingValues() const {
-  return textFrom(m_ui.uniformEvenEdit);
+void showAsValid(QLineEdit &lineEdit) {
+  auto palette = lineEdit.palette();
+  palette.setColor(QPalette::Base, Qt::transparent);
+  lineEdit.setPalette(palette);
+}
+
+void QtReflEventTabView::showCustomBreakpointsInvalid() {
+  showAsInvalid(*m_ui.customEdit);
+}
+
+void QtReflEventTabView::showCustomBreakpointsValid() {
+  showAsValid(*m_ui.customEdit);
+}
+
+void QtReflEventTabView::showLogBreakpointsInvalid() {
+  showAsInvalid(*m_ui.logValueEdit);
+}
+
+void QtReflEventTabView::showLogBreakpointsValid() {
+  showAsValid(*m_ui.logValueEdit);
+}
+
+int QtReflEventTabView::uniformSliceCount() const {
+  return m_ui.uniformEvenEdit->value();
+}
+
+double QtReflEventTabView::uniformSliceLength() const {
+  return m_ui.uniformEdit->value();
 }
 
 std::string QtReflEventTabView::textFrom(QLineEdit const *const widget) const {
@@ -143,30 +206,10 @@ void QtReflEventTabView::toggleLogValue(bool isChecked) {
     m_notifyee->notifySliceTypeChanged(SliceType::LogValue);
 }
 
-void QtReflEventTabView::notifySettingsChanged() {
-  m_notifyee->notifySettingsChanged();
+void QtReflEventTabView::toggleDisabledSlicing(bool isChecked) {
+  if (isChecked)
+    m_notifyee->notifySliceTypeChanged(SliceType::None);
 }
 
-void QtReflEventTabView::connectSettingsChange(QLineEdit &edit) {
-  connect(&edit, SIGNAL(textChanged(QString const &)), this,
-          SLOT(notifySettingsChanged()));
-}
-
-void QtReflEventTabView::connectSettingsChange(QGroupBox &edit) {
-  connect(&edit, SIGNAL(toggled(bool)), this, SLOT(notifySettingsChanged()));
-}
-
-void QtReflEventTabView::registerEventWidgets() {
-  connectSettingsChange(*m_ui.uniformGroup);
-  connectSettingsChange(*m_ui.uniformEvenEdit);
-  connectSettingsChange(*m_ui.uniformEdit);
-
-  connectSettingsChange(*m_ui.customGroup);
-  connectSettingsChange(*m_ui.customEdit);
-
-  connectSettingsChange(*m_ui.logValueGroup);
-  connectSettingsChange(*m_ui.logValueEdit);
-  connectSettingsChange(*m_ui.logValueTypeEdit);
-}
 } // namespace CustomInterfaces
 } // namespace Mantid

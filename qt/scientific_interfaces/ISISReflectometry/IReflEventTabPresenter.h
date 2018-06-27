@@ -34,7 +34,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-enum class SliceType { UniformEven, Uniform, Custom, LogValue };
+enum class SliceType { None, UniformEven, Uniform, Custom, LogValue };
 
 class IReflEventTabPresenter {
 public:

@@ -9,7 +9,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** QtReflEventTabView : Provides an interface for the "Event Handling" widget in
+/** QtReflEventTabView : Provides an interface for the "Event Handling" widget
+in
 the ISIS Reflectometry interface.
 
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -50,38 +51,47 @@ public:
   void enableSliceTypeSelection() override;
   void disableSliceTypeSelection() override;
 
-  std::string getLogValueTimeSlicingType() const override;
-  std::string getLogValueTimeSlicingValues() const override;
-  std::string getCustomTimeSlicingValues() const override;
-  std::string getUniformTimeSlicingValues() const override;
-  std::string getUniformEvenTimeSlicingValues() const override;
+  void showCustomBreakpointsInvalid() override;
+  void showCustomBreakpointsValid() override;
 
-  void subscribe(EventTabViewSubscriber* notifyee) override;
+  void showLogBreakpointsInvalid() override;
+  void showLogBreakpointsValid() override;
+
+  std::string logBlockName() const override;
+  std::string logBreakpoints() const override;
+  std::string customBreakpoints() const override;
+  int uniformSliceCount() const override;
+  double uniformSliceLength() const override;
+
+  void subscribe(EventTabViewSubscriber *notifyee) override;
 
 public slots:
   void toggleUniform(bool isChecked);
   void toggleUniformEven(bool isChecked);
   void toggleCustom(bool isChecked);
   void toggleLogValue(bool isChecked);
-  void notifySettingsChanged();
+  void toggleDisabledSlicing(bool isChecked);
+
+  void onUniformEvenChanged(int);
+  void onUniformSecondsChanged(double);
+  void onCustomChanged(QString const &);
+  void onLogValueTypeChanged(QString const &);
+  void onLogValuesChanged(QString const &);
 
 private:
   /// Initialise the interface
   void initLayout();
   std::string textFrom(QLineEdit const *const widget) const;
-  void registerEventWidgets();
-  void connectSettingsChange(QLineEdit &edit);
-  void connectSettingsChange(QGroupBox &edit);
 
   QWidgetGroup<2> m_uniformGroup;
   QWidgetGroup<2> m_uniformEvenGroup;
   QWidgetGroup<4> m_logValueGroup;
   QWidgetGroup<2> m_customGroup;
-  QWidgetGroup<4> m_sliceTypeRadioButtons;
+  QWidgetGroup<5> m_sliceTypeRadioButtons;
 
   /// The widget
   Ui::ReflEventTabWidget m_ui;
-  EventTabViewSubscriber* m_notifyee;
+  EventTabViewSubscriber *m_notifyee;
 };
 
 } // namespace Mantid

@@ -5,6 +5,7 @@
 #include "IReflEventTabPresenter.h"
 #include "IReflBatchPresenter.h"
 #include "IReflEventTabView.h"
+#include "Reduction/Slicing.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -36,7 +37,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReflEventTabPresenter
-    : public IReflEventTabPresenter, public EventTabViewSubscriber {
+    : public IReflEventTabPresenter,
+      public EventTabViewSubscriber {
 public:
   /// Constructor
   ReflEventTabPresenter(IReflEventTabView *view);
@@ -48,11 +50,26 @@ public:
   void onReductionPaused() override;
   void onReductionResumed() override;
   void notifySliceTypeChanged(SliceType newSliceType) override;
-  void notifySettingsChanged() override;
+
+  void notifyUniformSliceCountChanged(int sliceCount) override;
+  void notifyUniformSecondsChanged(double sliceLengthInSeconds) override;
+  void
+  notifyCustomSliceValuesChanged(std::string pythonListOfSliceTimes) override;
+  void
+  notifyLogSliceBreakpointsChanged(std::string logValueBreakpoints) override;
+  void notifyLogBlockNameChanged(std::string blockName) override;
 
   void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
 
+  Slicing const &slicing() const;
+
 private:
+  Slicing m_slicing;
+  void setUniformSlicingByNumberOfSlicesFromView();
+  void setUniformSlicingByTimeFromView();
+  void setCustomSlicingFromView();
+  void setLogValueSlicingFromView();
+  void setSlicingFromView();
   std::string logFilterAndSliceValues(std::string const &slicingValues,
                                       std::string const &logFilter) const;
   /// The view we are managing

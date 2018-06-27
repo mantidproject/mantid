@@ -38,18 +38,30 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTIDQT_ISISREFLECTOMETRY_DLL EventTabViewSubscriber {
 public:
   virtual void notifySliceTypeChanged(SliceType newSliceType) = 0;
-  virtual void notifySettingsChanged() = 0;
+  virtual void notifyUniformSliceCountChanged(int sliceCount) = 0;
+  virtual void notifyUniformSecondsChanged(double sliceLengthInSeconds) = 0;
+  virtual void
+  notifyCustomSliceValuesChanged(std::string pythonListOfSliceTimes) = 0;
+  virtual void
+  notifyLogSliceBreakpointsChanged(std::string logValueBreakpoints) = 0;
+  virtual void notifyLogBlockNameChanged(std::string blockName) = 0;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IReflEventTabView {
 public:
-  virtual void subscribe(EventTabViewSubscriber* notifyee) = 0;
+  virtual void subscribe(EventTabViewSubscriber *notifyee) = 0;
   virtual ~IReflEventTabView() = default;
-  virtual std::string getLogValueTimeSlicingValues() const = 0;
-  virtual std::string getCustomTimeSlicingValues() const = 0;
-  virtual std::string getUniformTimeSlicingValues() const = 0;
-  virtual std::string getUniformEvenTimeSlicingValues() const = 0;
-  virtual std::string getLogValueTimeSlicingType() const = 0;
+
+  virtual std::string logBlockName() const = 0;
+  virtual std::string logBreakpoints() const = 0;
+  virtual std::string customBreakpoints() const = 0;
+  virtual int uniformSliceCount() const = 0;
+  virtual double uniformSliceLength() const = 0;
+
+  virtual void showCustomBreakpointsInvalid() = 0;
+  virtual void showCustomBreakpointsValid() = 0;
+  virtual void showLogBreakpointsInvalid() = 0;
+  virtual void showLogBreakpointsValid() = 0;
 
   virtual void enableSliceType(SliceType sliceType) = 0;
   virtual void disableSliceType(SliceType sliceType) = 0;
