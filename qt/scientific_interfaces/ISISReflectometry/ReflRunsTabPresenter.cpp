@@ -78,13 +78,6 @@ std::string getRunErrorMessage(
   return std::string();
 }
 
-/** Utility to set an option in a map of QStrings from std::strings
- */
-void setOption(OptionsMap &options, const std::string &key,
-               const std::string &value) {
-  options[QString::fromStdString(key)] = QString::fromStdString(value);
-}
-
 void pythonSrcEpicsImport(std::ostringstream &result) {
   result << "try:\n"
          << "  from epics import caget\n"
