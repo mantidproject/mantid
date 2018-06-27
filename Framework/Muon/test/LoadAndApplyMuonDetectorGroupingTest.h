@@ -116,19 +116,39 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("EMU00012345"));
     WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("EMU00012345"));
-    TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 10);
+    TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 14);
+    // Group Counts
+    TS_ASSERT(wsGroup->contains("EMU00012345; Group; group1; Counts; #1"));
+    TS_ASSERT(wsGroup->contains("EMU00012345; Group; group1; Counts; #1_Raw"));
     TS_ASSERT(wsGroup->contains("EMU00012345; Group; group2; Counts; #1"));
     TS_ASSERT(wsGroup->contains("EMU00012345; Group; group2; Counts; #1_Raw"));
+    // Group Asymmetry
+    TS_ASSERT(wsGroup->contains("EMU00012345; Group; group1; Asym; #1"));
+    TS_ASSERT(wsGroup->contains("EMU00012345; Group; group1; Asym; #1_Raw"));
+    TS_ASSERT(wsGroup->contains("EMU00012345; Group; group2; Asym; #1"));
+    TS_ASSERT(wsGroup->contains("EMU00012345; Group; group2; Asym; #1_Raw"));
+    // Group Asymmetry, unNormalized
+    TS_ASSERT(wsGroup->contains("EMU00012345; Group; group1; Asym; #1_unNorm"));
+    TS_ASSERT(
+        wsGroup->contains("EMU00012345; Group; group1; Asym; #1_unNorm_Raw"));
+    TS_ASSERT(wsGroup->contains("EMU00012345; Group; group2; Asym; #1_unNorm"));
+    TS_ASSERT(
+        wsGroup->contains("EMU00012345; Group; group2; Asym; #1_unNorm_Raw"));
+    // Pair Asymmetry
     TS_ASSERT(wsGroup->contains("EMU00012345; Pair; pair1; Asym; #1"));
     TS_ASSERT(wsGroup->contains("EMU00012345; Pair; pair1; Asym; #1_Raw"));
-    // Group workspace + analysed workspaces as above (11)
+    // Analysed workspaces as above : (14)
+	//    unBinned (5)
+	//	  _Raw (5)
+	//	  _unNorm (2)
+	//	  _unNorm_Raw (2)
     // "inputData" "inputGroup" from setup (2)
     // "MuonGroupings" from load algorithm (1)
     // "MuonAnalysisTFNormalizations" (1)
     // "tmp_unNorm" (1)
     auto names = AnalysisDataService::Instance().getObjectNames();
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().getObjectNames().size(),
-                     workspacesBeforeExec + 16);
+                     workspacesBeforeExec + 19);
   }
 
   void test_produces_workspaces_with_correct_entries() {
