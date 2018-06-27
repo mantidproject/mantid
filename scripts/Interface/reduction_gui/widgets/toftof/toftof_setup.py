@@ -8,139 +8,35 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui  import *
 
 from reduction_gui.widgets.base_widget import BaseWidget
-from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement
+from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement, OptionalFloat
+from reduction_gui.widgets.data_table_view import DataTableView, DataTableModel
 
 #-------------------------------------------------------------------------------
+
+
+class SmallQLineEdit(QLineEdit):
+    '''just a smaller QLineEdit'''
+    def sizeHint(self):
+        '''overriding the sizeHint() function to get a smaller lineEdit'''
+        sh = super(SmallQLineEdit, self).sizeHint()
+        sh.setWidth(sh.width() // 2)
+        sh.setHeight(sh.height() // 2)
+        return sh
 
 
 class TOFTOFSetupWidget(BaseWidget):
     ''' The one and only tab page. '''
     name = 'TOFTOF Reduction'
 
-    class DataRunModel(QAbstractTableModel):
-        ''' The list of data runs and corresponding comments. '''
-
-        def __init__(self, parent):
-            QAbstractTableModel.__init__(self, parent)
-            self.dataRuns = [] # [(runs, comment), ...]
-
-        def _numRows(self):
-            return len(self.dataRuns)
-
-        def _getRow(self, row):
-            return self.dataRuns[row] if row < self._numRows() else ('', '')
-
-        def _isRowEmpty(self, row):
-            (runs, comment) = self._getRow(row)
-            return not runs.strip() and not comment.strip()
-
-        def _removeTrailingEmptyRows(self):
-            for row in reversed(range(self._numRows())):
-                if self._isRowEmpty(row):
-                    del self.dataRuns[row]
-                else:
-                    break
-
-        def _removeEmptyRows(self):
-            for row in reversed(range(self._numRows())):
-                if self._isRowEmpty(row):
-                    del self.dataRuns[row]
-
-        def _ensureHasRows(self, numRows):
-            while self._numRows() < numRows:
-                self.dataRuns.append(('', ''))
-
-        def _setCellText(self, row, col, text):
-            self._ensureHasRows(row + 1)
-            (runText, comment) = self.dataRuns[row]
-
-            text = text.strip()
-            if col == 0:
-                runText = text
+    class TofTofDataTableModel(DataTableModel):
+        def _textToData(self, row, col, text):
+            """
+            converts a displayable text back to stored data.
+            """
+            if col == 2:
+                return OptionalFloat(text)
             else:
-                comment = text
-
-            self.dataRuns[row] = (runText, comment)
-
-        def _getCellText(self, row, col):
-            return self._getRow(row)[col].strip()
-
-        # reimplemented QAbstractTableModel methods
-
-        headers    = ('Data runs', 'Comment')
-        selectCell = pyqtSignal(QModelIndex)
-
-        def emptyCells(self, indexes):
-            for index in indexes:
-                row = index.row()
-                col = index.column()
-
-                self._setCellText(row, col, '')
-
-            self._removeEmptyRows()
-            self.reset()
-            # indexes is never empty
-            self.selectCell.emit(indexes[0])
-
-        def rowCount(self, _ = QModelIndex()):
-            # one additional row for new data
-            return self._numRows() + 1
-
-        def columnCount(self, _ = QModelIndex()):
-            return 2
-
-        def headerData(self, section, orientation, role):
-            if Qt.Horizontal == orientation and Qt.DisplayRole == role:
-                return self.headers[section]
-
-            return None
-
-        def data(self, index, role):
-            if Qt.DisplayRole == role or Qt.EditRole == role:
-                return self._getCellText(index.row(), index.column())
-
-            return None
-
-        def setData(self, index, text, _):
-            row = index.row()
-            col = index.column()
-
-            self._setCellText(row, col, text)
-            self._removeTrailingEmptyRows()
-
-            # signal the attached view
-            self.reset()
-
-            # move selection to the next column or row
-            col = col + 1
-
-            if col >= 2:
-                row = row + 1
-                col = 0
-
-            row = min(row, self.rowCount() - 1)
-
-            self.selectCell.emit(self.index(row, col))
-
-            return True
-
-        def flags(self, _):
-            return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
-
-    class DataRunView(QTableView):
-
-        def keyPressEvent(self, QKeyEvent):
-            if self.state() == QAbstractItemView.EditingState:
-                index = self.currentIndex()
-                if QKeyEvent.key() in [Qt.Key_Down, Qt.Key_Up]:
-                    self.setFocus()
-                    self.setCurrentIndex(self.model().index(index.row(), index.column()))
-                else:
-                    QTableView.keyPressEvent(self, QKeyEvent)
-            if QKeyEvent.key() in [Qt.Key_Delete, Qt.Key_Backspace]:
-                self.model().emptyCells(self.selectedIndexes())
-            else:
-                QTableView.keyPressEvent(self, QKeyEvent)
+                return text # just return the value, it is already str.
 
     # tooltips
     TIP_prefix  = ''
@@ -151,8 +47,10 @@ class TOFTOFSetupWidget(BaseWidget):
 
     TIP_vanRuns = ''
     TIP_vanCmnt = ''
+    TIP_vanTemp = 'Temperature (K). Optional.'
 
     TIP_ecRuns = ''
+    TIP_ecTemp = 'Temperature (K). Optional.'
     TIP_ecFactor = ''
 
     TIP_binEon = ''
@@ -211,6 +109,11 @@ class TOFTOFSetupWidget(BaseWidget):
                 widget.setToolTip(text)
             return widget
 
+        def DoubleEdit():
+            edit = SmallQLineEdit()
+            edit.setValidator(QDoubleValidator())
+            return edit
+
         # ui data elements
         self.prefix    = tip(QLineEdit(), self.TIP_prefix)
         self.dataDir   = tip(QLineEdit(), self.TIP_dataDir)
@@ -218,8 +121,10 @@ class TOFTOFSetupWidget(BaseWidget):
 
         self.vanRuns   = tip(QLineEdit(), self.TIP_vanRuns)
         self.vanCmnt   = tip(QLineEdit(), self.TIP_vanCmnt)
+        self.vanTemp   = tip(DoubleEdit(), self.TIP_vanTemp)
 
-        self.ecRuns    = tip(QLineEdit(), self.TIP_ecRuns)
+        self.ecRuns    = tip(SmallQLineEdit(), self.TIP_ecRuns)
+        self.ecTemp    = tip(DoubleEdit(), self.TIP_ecTemp)
         self.ecFactor  = tip(QDoubleSpinBox(), self.TIP_ecFactor)
 
         set_spin(self.ecFactor, 0, 1)
@@ -244,12 +149,11 @@ class TOFTOFSetupWidget(BaseWidget):
 
         self.maskDetectors = tip(QLineEdit(), self.TIP_maskDetectors)
 
-        self.dataRunsView  = tip(self.DataRunView(self), self.TIP_dataRunsView)
+        headers = ('Data runs', 'Comment', 'T (K)')
+        self.dataRunsView = tip(DataTableView(self, headers, TOFTOFSetupWidget.TofTofDataTableModel), self.TIP_dataRunsView)
         self.dataRunsView.horizontalHeader().setStretchLastSection(True)
         self.dataRunsView.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-
-        self.runDataModel = TOFTOFSetupWidget.DataRunModel(self)
-        self.dataRunsView.setModel(self.runDataModel)
+        self.runDataModel = self.dataRunsView.model()
 
         # ui controls
         self.btnDataDir          = tip(QPushButton('Browse'), self.TIP_btnDataDir)
@@ -286,10 +190,10 @@ class TOFTOFSetupWidget(BaseWidget):
                     box.addStretch(wgt)
             return box
 
-        def hbox(widgets):
+        def hbox(*widgets):
             return _box(QHBoxLayout, widgets)
 
-        def vbox(widgets):
+        def vbox(*widgets):
             return _box(QVBoxLayout, widgets)
 
         def label(text, tip):
@@ -309,11 +213,10 @@ class TOFTOFSetupWidget(BaseWidget):
         box = QVBoxLayout()
         self._layout.addLayout(box)
 
-        box.addLayout(hbox((gbDataDir, gbPrefix)))
-        box.addLayout(hbox((vbox((gbInputs, gbBinning, gbOptions, 1)), vbox((gbData, gbSave)))))
+        box.addLayout(hbox(vbox(gbDataDir, gbInputs, gbBinning, gbOptions, 1), vbox(gbPrefix, gbData, gbSave)))
 
-        gbDataDir.setLayout(hbox((self.dataDir, self.btnDataDir)))
-        gbPrefix.setLayout(hbox((self.prefix,)))
+        gbDataDir.setLayout(hbox(self.dataDir, self.btnDataDir))
+        gbPrefix.setLayout(hbox(self.prefix,))
 
         grid = QGridLayout()
         grid.addWidget(self.chkSubtractECVan,   0, 0, 1, 4)
@@ -346,11 +249,12 @@ class TOFTOFSetupWidget(BaseWidget):
         grid.addWidget(QLabel('Vanadium runs'), 0, 0)
         grid.addWidget(self.vanRuns,            0, 1, 1, 3)
         grid.addWidget(QLabel('Van. comment'),  1, 0)
-        grid.addWidget(self.vanCmnt,            1, 1, 1, 3)
+        grid.addWidget(self.vanCmnt,            1, 1, 1, 2)
+        grid.addLayout(hbox(QLabel('T (K)'), self.vanTemp),         1, 3)
         grid.addWidget(QLabel('Empty can runs'),2, 0)
-        grid.addWidget(self.ecRuns,             2, 1)
-        grid.addWidget(QLabel('EC factor'),     2, 2)
-        grid.addWidget(self.ecFactor,           2, 3)
+        grid.addWidget(self.ecRuns,             2, 1, 1, 1)
+        grid.addLayout(hbox(QLabel('EC factor'), self.ecFactor), 2, 2, 1, 1)
+        grid.addLayout(hbox(QLabel('T (K)'), self.ecTemp),         2, 3)
         grid.addWidget(QLabel('Mask detectors'),3, 0)
         grid.addWidget(self.maskDetectors,      3, 1, 1, 3)
 
@@ -379,7 +283,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
         gbBinning.setLayout(grid)
 
-        gbData.setLayout(hbox((self.dataRunsView,)))
+        gbData.setLayout(hbox(self.dataRunsView))
 
         grid = QGridLayout()
         grid.addWidget(QLabel('Workspaces'),  0, 0)
@@ -394,7 +298,7 @@ class TOFTOFSetupWidget(BaseWidget):
         # disable save Ascii, it is not available for the moment
         self.chkAscii.setEnabled(False)
 
-        gbSave.setLayout(vbox((label('Directory',''), hbox((self.saveDir, self.btnSaveDir)), grid)))
+        gbSave.setLayout(vbox(label('Directory',''), hbox(self.saveDir, self.btnSaveDir), grid))
 
         # handle signals
         self.btnDataDir.clicked.connect(self._onDataDir)
@@ -444,11 +348,13 @@ class TOFTOFSetupWidget(BaseWidget):
 
         elem.vanRuns       = line_text(self.vanRuns)
         elem.vanCmnt       = line_text(self.vanCmnt)
+        elem.vanTemp       = OptionalFloat(line_text(self.vanTemp))
 
         elem.ecRuns        = line_text(self.ecRuns)
+        elem.ecTemp        = OptionalFloat(line_text(self.ecTemp))
         elem.ecFactor      = self.ecFactor.value()
 
-        elem.dataRuns      = self.runDataModel.dataRuns
+        elem.dataRuns      = self.runDataModel.tableData
 
         elem.binEon        = self.binEon.isChecked()
         elem.binEstart     = self.binEstart.value()
@@ -492,11 +398,13 @@ class TOFTOFSetupWidget(BaseWidget):
 
         self.vanRuns.setText(elem.vanRuns)
         self.vanCmnt.setText(elem.vanCmnt)
+        self.vanTemp.setText(str(elem.vanTemp))
 
         self.ecRuns.setText(elem.ecRuns)
+        self.ecTemp.setText(str(elem.ecTemp))
         self.ecFactor.setValue(elem.ecFactor)
 
-        self.runDataModel.dataRuns = elem.dataRuns
+        self.runDataModel.tableData = elem.dataRuns
         self.runDataModel.reset()
 
         self.binEon.setChecked(elem.binEon)

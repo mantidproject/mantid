@@ -9,6 +9,15 @@ Direct Inelastic Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Interfaces
+----------
+
+
+New features
+############
+
+- Added the ability to manually specify a temperature for a set of runs in the TOFTOF reduction dialog.
+
 Algorithms
 ----------
 
