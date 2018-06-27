@@ -1110,7 +1110,6 @@ void LoadEventNexus::runLoadMonitors() {
 
   IAlgorithm_sptr loadMonitors =
       this->createChildAlgorithm("LoadNexusMonitors");
-  try {
     g_log.information("Loading monitors from NeXus file...");
     loadMonitors->setPropertyValue("Filename", m_filename);
     g_log.information() << "New workspace name for monitors: " << mon_wsname
@@ -1156,10 +1155,6 @@ void LoadEventNexus::runLoadMonitors() {
         }
       }
     }
-  } catch (...) {
-    g_log.error("Error while loading the monitors from the file. File may "
-                "contain no monitors.");
-  }
 }
 
 //
