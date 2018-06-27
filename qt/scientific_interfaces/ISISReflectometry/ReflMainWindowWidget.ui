@@ -58,6 +58,34 @@
     </item>
    </layout>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>975</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuReflectometry">
+    <property name="title">
+     <string>Batch</string>
+    </property>
+    <addaction name="newBatch"/>
+    <addaction name="loadBatch"/>
+   </widget>
+   <addaction name="menuReflectometry"/>
+  </widget>
+  <action name="newBatch">
+   <property name="text">
+    <string>New</string>
+   </property>
+  </action>
+  <action name="loadBatch">
+   <property name="text">
+    <string>Load</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

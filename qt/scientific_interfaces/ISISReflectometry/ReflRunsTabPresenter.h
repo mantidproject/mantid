@@ -6,7 +6,6 @@
 #include "IReflBatchPresenter.h"
 #include "Presenters/BatchPresenter.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "Presenters/BatchPresenterFactory.h"
 #include "ReflAutoreduction.h"
@@ -20,9 +19,6 @@ namespace MantidQt {
 namespace MantidWidgets {
 // Forward decs
 class ProgressableView;
-namespace DataProcessor {
-class DataProcessorPresenter;
-}
 }
 
 namespace CustomInterfaces {
@@ -31,10 +27,8 @@ namespace CustomInterfaces {
 class IReflRunsTabView;
 class IReflSearcher;
 class ReflSearchModel;
-class ReflTransferStrategy;
 
 using MantidWidgets::ProgressableView;
-using MantidWidgets::DataProcessor::DataProcessorPresenter;
 
 enum class TransferMatch {
   Any,        // any that match the regex
@@ -69,8 +63,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReflRunsTabPresenter
-    : public IReflRunsTabPresenter,
-      public MantidWidgets::DataProcessor::DataProcessorMainPresenter {
+    : public IReflRunsTabPresenter {
 public:
   ReflRunsTabPresenter(IReflRunsTabView *mainView,
                        ProgressableView *progressView,
@@ -84,34 +77,10 @@ public:
 
   void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
-  void notifyADSChanged(const QSet<QString> &workspaceList, int group) override;
-  /// Handle data reduction paused/resumed
-  /// Global options (inherited from DataProcessorMainPresenter)
-  MantidWidgets::DataProcessor::ColumnOptionsQMap
-  getPreprocessingOptions(int group) const override;
-  MantidWidgets::DataProcessor::OptionsQMap
-  getProcessingOptions(int group) const override;
-  QString getPostprocessingOptionsAsString(int group) const override;
-  QString getTimeSlicingValues(int group) const override;
-  QString getTimeSlicingType(int group) const override;
-  MantidWidgets::DataProcessor::OptionsQMap
-  getOptionsForAngle(const double angle, int group) const override;
-  bool hasPerAngleOptions(int group) const override;
-  /// Handle data reduction paused/resumed
-  void pause(int group) override;
-  void resume(int group) const override;
-  /// Reduction finished/paused/resumed confirmation handler
-  void confirmReductionCompleted(int group) override;
-  void confirmReductionPaused(int group) override;
-  void confirmReductionResumed(int group) override;
-  void settingsChanged(int group) override;
-  void completedGroupReductionSuccessfully(
-      MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &) override;
-  void completedRowReductionSuccessfully(
-      MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &workspaceNames) override;
+  void settingsChanged() override;
 
+  bool isAutoreducing() const override;
+  bool isProcessing() const override;
 
 protected:
   /// Information about the autoreduction process
@@ -130,17 +99,13 @@ private:
   BatchPresenterFactory m_makeBatchPresenter;
   WorkspaceNamesFactory const &m_workspaceNamesFactory;
   /// The data processor presenters stored in a vector
-  std::vector<std::unique_ptr<BatchPresenter>> m_tablePresenters;
+  std::unique_ptr<BatchPresenter> m_tablePresenter;
   /// The main presenter
   IReflBatchPresenter *m_mainPresenter;
   /// The search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
   /// The current search string used for autoreduction
   std::string m_autoSearchString;
-  /// Legacy transfer method
-  static const std::string LegacyTransferMethod;
-  /// Measure transfer method
-  static const std::string MeasureTransferMethod;
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
   double m_thetaTolerance;
@@ -151,28 +116,20 @@ private:
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   /// autoreduction
   bool requireNewAutoreduction() const;
-  bool setupNewAutoreduction(int group, const std::string &searchString);
+  bool setupNewAutoreduction(const std::string &searchString);
   void checkForNewRuns();
   void autoreduceNewRuns();
   void pauseAutoreduction();
   void stopAutoreduction();
-  int selectedGroup() const;
-  int autoreductionGroup() const;
   bool shouldUpdateExistingSearchResults() const;
-  bool isAutoreducing(int group) const override;
-  bool isAutoreducing() const override;
-  // processing
-  bool isProcessing(int group) const override;
-  bool isProcessing() const override;
 
   ProgressPresenter setupProgressBar(const std::set<int> &rowsToTransfer);
-  void transfer(const std::set<int> &rowsToTransfer, int group,
+  void transfer(const std::set<int> &rowsToTransfer,
                 const TransferMatch matchType = TransferMatch::Any);
-  void pushCommands(int group);
   void changeInstrument();
   void changeGroup();
   void updateWidgetEnabledState() const;
-  BatchPresenter *getTablePresenter(int group) const;
+  BatchPresenter *tablePresenter() const;
   /// Check that a given set of row indices are valid to transfer
   bool validateRowsToTransfer(const std::set<int> &rowsToTransfer);
   /// Get runs to transfer from row indices

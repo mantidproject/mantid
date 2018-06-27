@@ -59,6 +59,7 @@ public:
 public slots:
   void helpPressed();
   void onTabCloseRequested(int tabIndex);
+  void onNewBatchRequested(bool);
 
 private:
   /// Initializes the interface

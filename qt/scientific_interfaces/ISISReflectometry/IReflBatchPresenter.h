@@ -64,7 +64,7 @@ public:
   virtual MantidWidgets::DataProcessor::OptionsQMap
   getReductionOptions(int group) const = 0;
   /// Post-processing
-  virtual std::string getStitchOptions(int group) const = 0;
+  virtual std::string getStitchOptions() const = 0;
   /// Time-slicing values
   virtual std::string getTimeSlicingValues(int group) const = 0;
   /// Time-slicing type
@@ -73,8 +73,6 @@ public:
   virtual void setInstrumentName(const std::string &instName) const = 0;
   /// Data processing check for all groups
   virtual bool isProcessing() const = 0;
-  /// Data processing check for a specific group
-  virtual bool isProcessing(int group) const = 0;
 
   virtual bool requestClose() const = 0;
 

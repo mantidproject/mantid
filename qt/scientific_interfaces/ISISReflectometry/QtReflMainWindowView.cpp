@@ -12,7 +12,8 @@ namespace CustomInterfaces {
 DECLARE_SUBWINDOW(QtReflMainWindowView)
 
 QtReflMainWindowView::QtReflMainWindowView(QWidget *parent)
-    : UserSubWindow(parent) {}
+    : UserSubWindow(parent) {
+}
 
 IReflBatchView *QtReflMainWindowView::newBatch() {
   auto index = m_ui.mainTabs->count();
@@ -39,6 +40,7 @@ void QtReflMainWindowView::initLayout() {
   connect(m_ui.helpButton, SIGNAL(clicked()), this, SLOT(helpPressed()));
   connect(m_ui.mainTabs, SIGNAL(tabCloseRequested(int)), this,
           SLOT(onTabCloseRequested(int)));
+  connect(m_ui.newBatch, SIGNAL(triggered(bool)), this, SLOT(onNewBatchRequested(bool)));
 
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
@@ -66,6 +68,7 @@ void QtReflMainWindowView::initLayout() {
   // Create the presenter
   m_presenter =
       ReflMainWindowPresenter(this, std::move(makeReflBatchPresenter));
+  subscribe(&m_presenter.get());
 
   m_presenter.get().notifyNewBatchRequested();
   m_presenter.get().notifyNewBatchRequested();
@@ -73,6 +76,10 @@ void QtReflMainWindowView::initLayout() {
 
 void QtReflMainWindowView::onTabCloseRequested(int tabIndex) {
   m_ui.mainTabs->removeTab(tabIndex);
+}
+
+void QtReflMainWindowView::onNewBatchRequested(bool) {
+  m_notifyee->notifyNewBatchRequested();
 }
 
 void QtReflMainWindowView::subscribe(ReflMainWindowSubscriber *notifyee) {

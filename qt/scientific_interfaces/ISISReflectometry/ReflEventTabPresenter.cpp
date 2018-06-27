@@ -26,6 +26,7 @@ void ReflEventTabPresenter::acceptMainPresenter(
 */
 std::string ReflEventTabPresenter::getTimeSlicingValues(int group) const {
 //  return m_eventPresenters.at(group)->getTimeSlicingValues();
+  return "";
 }
 
 /** Returns time-slicing type for 'ReflectometryReductionOneAuto'
@@ -35,6 +36,7 @@ std::string ReflEventTabPresenter::getTimeSlicingValues(int group) const {
 */
 std::string ReflEventTabPresenter::getTimeSlicingType(int group) const {
  // return m_eventPresenters.at(group)->getTimeSlicingType();
+ return "";
 }
 
 void ReflEventTabPresenter::onReductionPaused(int group) {

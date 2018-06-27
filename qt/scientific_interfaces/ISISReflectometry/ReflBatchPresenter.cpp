@@ -64,7 +64,7 @@ void ReflBatchPresenter::notifyReductionResumed(int group) {
 }
 
 void ReflBatchPresenter::settingsChanged() {
-  m_runsPresenter->settingsChanged(0);
+  m_runsPresenter->settingsChanged();
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
@@ -93,7 +93,7 @@ OptionsQMap ReflBatchPresenter::getReductionOptions(int ) const {
 *options
 * @return :: Global post-processing options
 */
-std::string ReflBatchPresenter::getStitchOptions(int group) const {
+std::string ReflBatchPresenter::getStitchOptions() const {
   return m_settingsPresenter->getStitchOptions();
 }
 
@@ -155,13 +155,5 @@ bool ReflBatchPresenter::isProcessing() const {
   return m_runsPresenter->isProcessing();
 }
 
-/**
-Checks whether or not data is currently being processed in the Runs Tab
-for a specific group
-* @return : Bool on whether data is being processed
-*/
-bool ReflBatchPresenter::isProcessing(int group) const {
-  return m_runsPresenter->isProcessing(group);
-}
 }
 }

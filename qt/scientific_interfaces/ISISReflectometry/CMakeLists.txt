@@ -26,11 +26,9 @@ set ( SRC_FILES
     ReflAsciiSaver.cpp
     IReflAsciiSaver.cpp
     ReflAutoreduction.cpp
-    ReflDataProcessorPresenter.cpp
     ReflEventPresenter.cpp
     ReflEventTabPresenter.cpp
     ReflFromStdStringMap.cpp
-    ReflGenericDataProcessorPresenterFactory.cpp
     ReflMainWindowPresenter.cpp
     ReflBatchPresenter.cpp
     ReflNexusMeasurementItemSource.cpp
@@ -81,12 +79,9 @@ set ( INC_FILES
     ReflCatalogSearcher.h
     ReflAsciiSaver.h
     IReflAsciiSaver.h
-    ReflDataProcessorMainPresenter.h
-    ReflDataProcessorPresenter.h
     ReflEventPresenter.h
     ReflEventTabPresenter.h
     ReflFromStdStringMap.h
-    ReflGenericDataProcessorPresenterFactory.h
     ReflMainWindowPresenter.h
     ReflBatchPresenter.h
     ReflMeasurementItemSource.h

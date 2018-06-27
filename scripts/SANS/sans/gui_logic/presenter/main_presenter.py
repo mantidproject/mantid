@@ -72,13 +72,13 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
             self._black_list = get_black_list()
         return self._black_list
 
-    def confirmReductionPaused(self, group):
+    def confirmReductionPaused(self):
         self._presenters[PresenterEnum.RunTabPresenter].on_processing_finished()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Inherited methods
     # ------------------------------------------------------------------------------------------------------------------
-    def getProcessingOptions(self, group = 0):
+    def getProcessingOptions(self):
         """
         Gets the processing options from the run tab presenter
         """
@@ -87,12 +87,12 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
     # ------------------------------------------------------------------------------------------------------------------
     # Unused
     # ------------------------------------------------------------------------------------------------------------------
-    def getPreprocessingOptions(self, group = 0):
+    def getPreprocessingOptions(self):
         empty = {}
         return empty
 
-    def getPostprocessingOptionsAsString(self, group = 0):
+    def getPostprocessingOptionsAsString(self):
         return ""
 
-    def notifyADSChanged(self, workspace_list, group = 0):
+    def notifyADSChanged(self, workspace_list):
         self._view.add_actions_to_menus(workspace_list)

@@ -1823,13 +1823,13 @@ class DataProcessorMainPresenter
 public:
 DataProcessorMainPresenter();
 
-virtual QVariantMap getPreprocessingOptions(int) const;
-virtual QVariantMap getProcessingOptions(int) const;
-virtual QString getPostprocessingOptionsAsString(int) const;
-virtual void confirmReductionPaused(int);
-virtual void confirmReductionResumed(int);
+virtual QVariantMap getPreprocessingOptions() const;
+virtual QVariantMap getProcessingOptions() const;
+virtual QString getPostprocessingOptionsAsString() const;
+virtual void confirmReductionPaused();
+virtual void confirmReductionResumed();
 
-virtual void notifyADSChanged(const QSet<QString> &, int);
+virtual void notifyADSChanged(const QSet<QString> &);
 };
 
 class AppendRowCommand

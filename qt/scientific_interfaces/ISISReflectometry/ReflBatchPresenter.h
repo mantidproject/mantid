@@ -62,7 +62,7 @@ public:
   MantidWidgets::DataProcessor::OptionsQMap
   getReductionOptions(int group) const override;
   /// Returns global options for 'Stitch1DMany'
-  std::string getStitchOptions(int group) const override;
+  std::string getStitchOptions() const override;
   /// Returns time-slicing values
   std::string getTimeSlicingValues(int group) const override;
   /// Returns time-slicing type
@@ -73,7 +73,6 @@ public:
 
   /// Returns whether the Runs Tab is currently processing any runs
   bool isProcessing() const override;
-  bool isProcessing(int group) const override;
   void settingsChanged() override;
   void notifyReductionPaused(int group) override;
   void notifyReductionResumed(int group) override;

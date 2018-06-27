@@ -16,18 +16,16 @@ public:
   ReflAutoreduction();
 
   bool running() const;
-  int group() const;
   bool searchStringChanged(const std::string &newSearchString) const;
   bool searchResultsExist() const;
   void setSearchResultsExist();
 
-  bool setupNewAutoreduction(const int group, const std::string &searchString);
-  bool pause(int group);
+  bool setupNewAutoreduction(const std::string &searchString);
+  bool pause();
   void stop();
 
 private:
   bool m_running;
-  int m_group;
   std::string m_searchString;
   bool m_searchResultsExist;
 };

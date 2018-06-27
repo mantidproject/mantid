@@ -30,25 +30,6 @@
     <number>1</number>
    </property>
    <item>
-    <widget class="QMenuBar" name="menuBar">
-     <property name="nativeMenuBar">
-      <bool>false</bool>
-     </property>
-     <widget class="QMenu" name="menuTable">
-      <property name="title">
-       <string>&amp;Reflectometry</string>
-      </property>
-     </widget>
-     <widget class="QMenu" name="menuRows">
-      <property name="title">
-       <string>&amp;Edit</string>
-      </property>
-     </widget>
-     <addaction name="menuTable"/>
-     <addaction name="menuRows"/>
-    </widget>
-   </item>
-   <item>
     <widget class="QSplitter" name="splitterTables">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -65,7 +46,7 @@
      <property name="childrenCollapsible">
       <bool>true</bool>
      </property>
-     <widget class="QGroupBox" name="groupSearchPane">
+     <widget class="QGroupBox" name="searchPane">
       <property name="title">
        <string>Search Runs</string>
       </property>
@@ -299,7 +280,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QGroupBox" name="groupProcessPane">
+     <widget class="QGroupBox" name="tablePane">
       <property name="title">
        <string>Process Runs</string>
       </property>
@@ -319,17 +300,6 @@
        <property name="bottomMargin">
         <number>1</number>
        </property>
-       <item>
-        <widget class="QToolBox" name="toolbox">
-         <property name="font">
-          <font>
-           <pointsize>11</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
     </widget>

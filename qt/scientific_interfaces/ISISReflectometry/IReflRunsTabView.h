@@ -52,12 +52,13 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL IReflRunsTabView : public MantidQt::MantidWidgets::ProgressableView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL IReflRunsTabView
+    : public MantidQt::MantidWidgets::ProgressableView {
 public:
   virtual ~IReflRunsTabView() = default;
 
   virtual void subscribe(IReflRunsTabPresenter *presenter) = 0;
-  virtual std::vector<IBatchView *> const &tableViews() const = 0;
+  virtual IBatchView *table() const = 0;
 
   // Connect the model
   virtual void showSearch(boost::shared_ptr<ReflSearchModel> model) = 0;
@@ -65,11 +66,6 @@ public:
   // Setter methods
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
                                  int defaultInstrumentIndex) = 0;
-  virtual void setTableCommands(
-      std::vector<std::unique_ptr<DataProcessor::Command>> tableCommands) = 0;
-  virtual void setRowCommands(
-      std::vector<std::unique_ptr<DataProcessor::Command>> rowCommands) = 0;
-  virtual void clearCommands() = 0;
   virtual void updateMenuEnabledState(bool isProcessing) = 0;
   virtual void setAutoreduceButtonEnabled(bool enabled) = 0;
   virtual void setAutoreducePauseButtonEnabled(bool enabled) = 0;
@@ -83,7 +79,6 @@ public:
   virtual std::set<int> getAllSearchRows() const = 0;
   virtual std::string getSearchInstrument() const = 0;
   virtual std::string getSearchString() const = 0;
-  virtual int getSelectedGroup() const = 0;
 
   virtual IReflRunsTabPresenter *getPresenter() const = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>

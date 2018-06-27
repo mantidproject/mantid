@@ -35,10 +35,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IReflRunsTabPresenter {
 public:
-  virtual ~IReflRunsTabPresenter(){};
+  virtual ~IReflRunsTabPresenter() = default;
   /// Accept a main presenter
   virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
-  virtual void settingsChanged(int group) = 0;
+  virtual void settingsChanged() = 0;
 
   enum Flag {
     SearchFlag,
@@ -53,9 +53,7 @@ public:
 
   // Tell the presenter something happened
   virtual void notify(IReflRunsTabPresenter::Flag flag) = 0;
-  virtual bool isAutoreducing(int group) const = 0;
   virtual bool isAutoreducing() const = 0;
-  virtual bool isProcessing(int group) const = 0;
   virtual bool isProcessing() const = 0;
 };
 }
