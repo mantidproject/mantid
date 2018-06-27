@@ -149,7 +149,7 @@ standardDeviationArray(const std::vector<std::vector<double>> &yValues) {
 }
 
 MatrixWorkspace_sptr removeInvalidData(MatrixWorkspace_sptr workspace) {
-  auto binning = static_cast<int>(std::ceil(workspace->blocksize() / 2));
+  auto binning = static_cast<int>(std::ceil(workspace->blocksize() / 2.0));
   auto binV = workspace->x(0)[binning];
   workspace = cropWorkspace(workspace, binV);
   return replaceSpecialValues(workspace);
