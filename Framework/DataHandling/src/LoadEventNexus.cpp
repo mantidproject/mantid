@@ -1110,51 +1110,50 @@ void LoadEventNexus::runLoadMonitors() {
 
   IAlgorithm_sptr loadMonitors =
       this->createChildAlgorithm("LoadNexusMonitors");
-    g_log.information("Loading monitors from NeXus file...");
-    loadMonitors->setPropertyValue("Filename", m_filename);
-    g_log.information() << "New workspace name for monitors: " << mon_wsname
-                        << '\n';
-    loadMonitors->setPropertyValue("OutputWorkspace", mon_wsname);
-    loadMonitors->setPropertyValue("LoadOnly",
-                                   this->getProperty("MonitorsLoadOnly"));
-    loadMonitors->setPropertyValue("NXentryName",
-                                   this->getProperty("NXentryName"));
-    loadMonitors->execute();
-    Workspace_sptr monsOut = loadMonitors->getProperty("OutputWorkspace");
-    // create the output workspace property on the fly
-    this->declareProperty(
-        Kernel::make_unique<WorkspaceProperty<Workspace>>(
-            "MonitorWorkspace", mon_wsname, Direction::Output),
-        "Monitors from the Event NeXus file");
-    this->setProperty("MonitorWorkspace", monsOut);
+  g_log.information("Loading monitors from NeXus file...");
+  loadMonitors->setPropertyValue("Filename", m_filename);
+  g_log.information() << "New workspace name for monitors: " << mon_wsname
+                      << '\n';
+  loadMonitors->setPropertyValue("OutputWorkspace", mon_wsname);
+  loadMonitors->setPropertyValue("LoadOnly",
+                                 this->getProperty("MonitorsLoadOnly"));
+  loadMonitors->setPropertyValue("NXentryName",
+                                 this->getProperty("NXentryName"));
+  loadMonitors->execute();
+  Workspace_sptr monsOut = loadMonitors->getProperty("OutputWorkspace");
+  // create the output workspace property on the fly
+  this->declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+                            "MonitorWorkspace", mon_wsname, Direction::Output),
+                        "Monitors from the Event NeXus file");
+  this->setProperty("MonitorWorkspace", monsOut);
 
-    // The output will either be a group workspace or a matrix workspace
-    MatrixWorkspace_sptr mons =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(monsOut);
-    if (mons) {
-      // Set the internal monitor workspace pointer as well
-      m_ws->setMonitorWorkspace(mons);
+  // The output will either be a group workspace or a matrix workspace
+  MatrixWorkspace_sptr mons =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(monsOut);
+  if (mons) {
+    // Set the internal monitor workspace pointer as well
+    m_ws->setMonitorWorkspace(mons);
 
-      filterDuringPause(mons);
-    } else {
-      WorkspaceGroup_sptr monsGrp =
-          boost::dynamic_pointer_cast<WorkspaceGroup>(monsOut);
-      if (monsGrp) {
-        // declare a property for each member of the group
-        for (int i = 0; i < monsGrp->getNumberOfEntries(); i++) {
-          std::stringstream ssWsName;
-          ssWsName << mon_wsname << "_" << i + 1;
-          std::stringstream ssPropName;
-          ssPropName << "MonitorWorkspace"
-                     << "_" << i + 1;
-          this->declareProperty(
-              Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                  ssPropName.str(), ssWsName.str(), Direction::Output),
-              "Monitors from the Event NeXus file");
-          this->setProperty(ssPropName.str(), monsGrp->getItem(i));
-        }
+    filterDuringPause(mons);
+  } else {
+    WorkspaceGroup_sptr monsGrp =
+        boost::dynamic_pointer_cast<WorkspaceGroup>(monsOut);
+    if (monsGrp) {
+      // declare a property for each member of the group
+      for (int i = 0; i < monsGrp->getNumberOfEntries(); i++) {
+        std::stringstream ssWsName;
+        ssWsName << mon_wsname << "_" << i + 1;
+        std::stringstream ssPropName;
+        ssPropName << "MonitorWorkspace"
+                   << "_" << i + 1;
+        this->declareProperty(
+            Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                ssPropName.str(), ssWsName.str(), Direction::Output),
+            "Monitors from the Event NeXus file");
+        this->setProperty(ssPropName.str(), monsGrp->getItem(i));
       }
     }
+  }
 }
 
 //
