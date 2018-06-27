@@ -804,8 +804,8 @@ bool CompareWorkspaces::checkMasking(API::MatrixWorkspace_const_sptr ws1,
 bool CompareWorkspaces::checkSample(const API::Sample &sample1,
                                     const API::Sample &sample2) {
   if (sample1.getName() != sample2.getName()) {
-    g_log.debug() << "WS1 sample name: " << sample1.getName() << "\n";
-    g_log.debug() << "WS2 sample name: " << sample2.getName() << "\n";
+    g_log.debug() << "WS1 sample name: \"" << sample1.getName() << "\"\n";
+    g_log.debug() << "WS2 sample name: \"" << sample2.getName() << "\"\n";
     recordMismatch("Sample name mismatch");
     return false;
   }
