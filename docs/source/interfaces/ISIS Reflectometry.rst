@@ -466,6 +466,38 @@ then clicking `Autoprocess` will start a new autoprocessing operation, and the
 current contents of the Processing table will be cleared. You will be warned if
 this will cause unsaved changes to be lost.
 
+Live Data Monitoring
+^^^^^^^^^^^^^^^^^^^^
+
+The *Live data* section on the *Runs* tab allows you to start a monitoring
+algorithm that will periodically load live data from the instrument and reduce
+it with :ref:`ReflectometryReductionOneAuto
+<algm-ReflectometryReductionOneAuto>`. It outputs two workspaces, `TOF_live`
+for the original data and `IvsQ_binned_live` for the reduced data.
+
+Live values for `ThetaIn` and the slit gaps are checked and used each time the
+reduction runs. Other algorithm properties are taken from `Group 1` on the
+*Settings* tab. Make any changes you want to the settings and press `Start
+monitor` to begin monitoring. Note that **any changes to the settings will not
+be updated** in the live data reduction unless you stop and re-start
+monitoring.
+
+You can stop monitoring at any time using the `Stop monitor` button or by
+cancelling the algorithm from the *Algorithm progress* dialog. If you close the
+interface, monitoring will continue running in the backgroud. You can cancel
+the `MonitorLiveData` algorithm from the *Algorithm progress* dialog.
+
+If the `MonitorLiveData` algorithm stops for any reason, e.g. due to a change
+in the data size, then it will automatically be re-started.
+
+Live data monitoring has some additional requirements:
+- EPICS support must be installed in Mantid. Tthis is included by default on
+Windows but see the instructions `here
+<http://https://www.mantidproject.org/PyEpics_In_Mantid/>`_ for other
+platforms.
+- The instrument must be on IBEX or have additional processes installed to
+  supply the EPICS values.
+
 Event Handling tab
 ~~~~~~~~~~~~~~~~~~
 
