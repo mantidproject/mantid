@@ -50,9 +50,7 @@ Linux
 
 Red Hat/Cent OS/Fedora
 ~~~~~~~~~~~~~~~~~~~~~~
-* Follow the `Red Hat instructions <http://download.mantidproject.org/redhat.html>`_ to add the
-  stable release yum repository
-* Follow the `instructions here <https://fedoraproject.org/wiki/EPEL>` to enable the EPEL repository
+* Follow the `instructions here <https://fedoraproject.org/wiki/EPEL>`_ to enable the EPEL repository
   for RHEL7
 * Run the following to install the mantid-developer package
 
