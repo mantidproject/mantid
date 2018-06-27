@@ -15,15 +15,15 @@ class MaxEntWidget(QtGui.QWidget):
 
         maxEnt = MaxEntModel()
         model = MaxEntWrapper(maxEnt)
-        self.presenter = MaxEntPresenter(view, model, load)
+        self.pres = MaxEntPresenter(view, model, load)
 
     @property
     def presenter(self):
-        return self.presenter
+        return self.pres
 
     @property
     def widget(self):
-        return self.presenter.widget
+        return self.pres.widget
 
     def closeEvent(self, event):
-        self.presenter.cancel()
+        self.pres.cancel()
