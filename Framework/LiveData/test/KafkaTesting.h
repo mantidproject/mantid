@@ -412,15 +412,15 @@ public:
 
 		switch (m_nextOffset) {
 		case 0:
-			fakeReceiveARunStartMessage(buffer, 1000, m_startTime, m_instName,
+			fakeReceiveARunStartMessage(buffer, 1005, m_startTime, m_instName,
 				m_nperiods);
 			break;
 		case 2:
 			fakeReceiveARunStopMessage(buffer, m_stopTime);
 			break;
 		case 3:
-			fakeReceiveARunStartMessage(buffer, 1000, m_startTime, m_instName,
-				m_nperiods + 1);
+			fakeReceiveARunStartMessage(buffer, 1006, m_startTime, m_instName,
+				2);
 			break;
 		case 5:
 			fakeReceiveAnISISEventMessage(buffer, 1);

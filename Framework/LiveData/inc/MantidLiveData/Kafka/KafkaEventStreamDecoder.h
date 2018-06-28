@@ -95,7 +95,7 @@ private:
   void captureImpl() noexcept;
   void captureImplExcept();
 
-  void initLocalCaches();
+  void initLocalCaches(std::string rawMsgBuffer, const RunStartStruct runStartData);
   DataObjects::EventWorkspace_sptr createBufferWorkspace(const size_t nspectra,
                                                          const int32_t *spec,
                                                          const int32_t *udet,
@@ -135,6 +135,11 @@ private:
   std::unique_ptr<IKafkaStreamSubscriber> m_spDetStream;
   /// Run number
   int m_runNumber;
+
+  /// Cached run start message
+  KafkaEventStreamDecoder::RunStartStruct m_cachedRunStartStruct;
+  /// Flag for start message recived
+  bool m_receivedStartMsg;
 
   /// Associated thread running the capture process
   std::thread m_thread;
