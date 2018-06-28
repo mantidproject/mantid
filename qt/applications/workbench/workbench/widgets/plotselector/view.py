@@ -19,9 +19,10 @@ from __future__ import absolute_import, print_function
 import re
 
 from qtpy.QtCore import Qt, Signal
-from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QFileDialog, QHBoxLayout, QLineEdit, QListWidget,
                             QListWidgetItem, QMenu, QPushButton, QVBoxLayout, QWidget)
+
+import qtawesome as qta
 
 from mantidqt.utils.flowlayout import FlowLayout
 from mantidqt.py3compat import Enum
@@ -487,7 +488,7 @@ class PlotNameWidget(QWidget):
         self.line_edit.setAttribute(Qt.WA_TransparentForMouseEvents, True)
         self.line_edit.editingFinished.connect(self.rename_plot)
 
-        rename_icon = QIcon.fromTheme('insert-text')
+        rename_icon = qta.icon('fa.edit')
         self.rename_button = QPushButton(rename_icon, "")
         self.rename_button.setFlat(True)
         self.rename_button.setMaximumWidth(self.rename_button.iconSize().width() * 2)
@@ -495,7 +496,7 @@ class PlotNameWidget(QWidget):
         self.rename_button.toggled.connect(self.rename_button_toggled)
         self.skip_next_toggle = False
 
-        close_icon = QIcon.fromTheme('window-close')
+        close_icon = qta.icon('fa.close')
         self.close_button = QPushButton(close_icon, "")
         self.close_button.setFlat(True)
         self.close_button.setMaximumWidth(self.close_button.iconSize().width() * 2)
