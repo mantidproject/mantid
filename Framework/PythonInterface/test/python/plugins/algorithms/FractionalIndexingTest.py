@@ -3,7 +3,6 @@ import numpy as np
 import numpy.testing as npt
 import fractional_indexing as indexing
 
-from mantid.kernel import V3D
 from mantid.geometry import UnitCell
 from mantid.simpleapi import CreatePeaksWorkspace, CreateSimulationWorkspace
 
