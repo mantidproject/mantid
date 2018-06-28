@@ -513,6 +513,22 @@ Wavelength
 
 The settings provide the binning for the conversion from
 time-of-flight units to wavelength units. Note that all units are Angstrom.
+Depending on which Step type you have chosen you will be asked to enter either
+a Max and Min wavelength value between which to do the reduction or to specify a
+set of wavelength ranges to reduce between. The syntax for the latter case is the
+same as that used to specify event slices and is 
+
+- *start:step:stop* specifies wavelength slices from a *start* value for the *stop* value
+  in steps of *step*.
+
+- *start-stop* which specifies a wavelength slice from the *start* value to the *stop* value.
+
+- *>start* specifies a slice from the *start* value to the end of the data set.
+
+- *<stop* specifies a slice from the start of the data set to the *stop* value
+
+In addition it is possible to concatenate these specifications using comma-separation.
+An example would be *5-10,12:2:16,20-30*.
 
 +-------+---------------+------------------------------------------+
 | **1** | **Min**       | The lower bound of the wavelength bins.  |
@@ -522,8 +538,21 @@ time-of-flight units to wavelength units. Note that all units are Angstrom.
 | **3** | **Step**      | The step of the wavelength bins.         |
 +-------+---------------+------------------------------------------+
 | **4** | **Step type** | The step type of the wavelength bins,    |
-|       |               | i.e. linear, logarithmic or variable.    |
+|       |               | i.e. linear, logarithmic range linear or |
+|       |               | ranged logarithmic.                      |
 +-------+---------------+------------------------------------------+
+| **5** | **Ranges**    | A set of wavelength ranges. This option  |
+|       |               | only appears if a range step type is     |
+|       |               | selected.                                |
++-------+---------------+------------------------------------------+  
+
+Cuts
+""""
+
+.. _Cuts:
+
+These allow radius and wavelength cuts to be set. These are in mm
+and are passed to :ref:`Q1D <algm-Q1D>` as properties.
 
 Q limits
 """"""""
