@@ -334,7 +334,7 @@ end
 # So we pack the mpl_toolkits and touch an empty file to temporarily work around it
 #TODO: consider installing mpl_toolkits (thus matplotlib) with pip
 system_python_extras = "/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python"
-modules = ["mpl_toolkits"]
+modules = ["mpl_toolkits", "matplotlib"]
 modules.each do |directory|
   addPythonLibrary("#{system_python_extras}/#{directory}","Contents/MacOS/")
 end
