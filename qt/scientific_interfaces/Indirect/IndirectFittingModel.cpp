@@ -104,23 +104,11 @@ bool equivalentFunctions(IFunction_const_sptr func1,
   return false;
 }
 
-std::vector<double>
-excludeRegionsStringToVector(const std::string &excludeRegions) {
-  std::vector<std::string> regionStrings;
-  boost::split(regionStrings, excludeRegions, boost::is_any_of(",-"));
-  std::vector<double> regions;
-  std::transform(
-      regionStrings.begin(), regionStrings.end(), std::back_inserter(regions),
-      [](const std::string &str) { return boost::lexical_cast<double>(str); });
-  return regions;
-}
-
 std::ostringstream &addInputString(IndirectFitData *fitData,
                                    std::ostringstream &stream) {
   const auto &name = fitData->workspace()->getName();
-  auto addToStream = [&](std::size_t spectrum) {
-    stream << name << ",i" << spectrum << ";";
-  };
+  auto addToStream =
+      [&](std::size_t spectrum) { stream << name << ",i" << spectrum << ";"; };
   fitData->applySpectra(addToStream);
   return stream;
 }
@@ -137,7 +125,7 @@ void addInputDataToSimultaneousFit(IAlgorithm_sptr fitAlgorithm,
                                    MatrixWorkspace_sptr workspace,
                                    std::size_t spectrum,
                                    const std::pair<double, double> &xRange,
-                                   const std::vector<double> excludeRegions,
+                                   const std::vector<double> &excludeRegions,
                                    const std::string &suffix) {
   fitAlgorithm->setProperty("InputWorkspace" + suffix, workspace);
   fitAlgorithm->setProperty("StartX" + suffix, xRange.first);
@@ -341,6 +329,17 @@ bool IndirectFittingModel::hasZeroSpectra(std::size_t dataIndex) const {
   return true;
 }
 
+boost::optional<std::string> IndirectFittingModel::isInvalidFunction() const {
+  if (!m_activeFunction)
+    return std::string("No fit function has been defined");
+
+  const auto composite =
+      boost::dynamic_pointer_cast<CompositeFunction>(m_activeFunction);
+  if (composite && (composite->nFunctions() == 0 || composite->nParams() == 0))
+    return std::string("No fitting functions have been defined.");
+  return boost::none;
+}
+
 std::size_t IndirectFittingModel::numberOfWorkspaces() const {
   return m_fittingData.size();
 }
@@ -357,6 +356,11 @@ std::vector<std::string> IndirectFittingModel::getFitParameterNames() const {
 
 Mantid::API::IFunction_sptr IndirectFittingModel::getFittingFunction() const {
   return m_activeFunction;
+}
+
+void IndirectFittingModel::setSpectra(const std::string &spectra,
+                                      std::size_t dataIndex) {
+  setSpectra(DiscontinuousSpectra<std::size_t>(spectra), dataIndex);
 }
 
 void IndirectFittingModel::setSpectra(Spectra &&spectra,
@@ -399,6 +403,11 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName) {
       workspaceName);
   addWorkspace(workspace,
                std::make_pair(0u, workspace->getNumberHistograms() - 1));
+}
+
+void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
+                                        const std::string &spectra) {
+  addWorkspace(workspaceName, DiscontinuousSpectra<std::size_t>(spectra));
 }
 
 void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
@@ -502,7 +511,7 @@ void IndirectFittingModel::addOutput(WorkspaceGroup_sptr resultGroup,
     addOutput(m_fitOutput.get(), resultGroup, parameterTable, resultWorkspace,
               fitDataBegin, fitDataEnd);
   else
-    m_fitOutput = std::make_unique<IndirectFitOutput>(
+    m_fitOutput = Mantid::Kernel::make_unique<IndirectFitOutput>(
         createFitOutput(resultGroup, parameterTable, resultWorkspace,
                         fitDataBegin, fitDataEnd));
   m_previousModelSelected = isPreviousModelSelected();
@@ -517,8 +526,9 @@ void IndirectFittingModel::addOutput(WorkspaceGroup_sptr resultGroup,
     addOutput(m_fitOutput.get(), resultGroup, parameterTable, resultWorkspace,
               fitData, spectrum);
   else
-    m_fitOutput = std::make_unique<IndirectFitOutput>(createFitOutput(
-        resultGroup, parameterTable, resultWorkspace, fitData, spectrum));
+    m_fitOutput =
+        Mantid::Kernel::make_unique<IndirectFitOutput>(createFitOutput(
+            resultGroup, parameterTable, resultWorkspace, fitData, spectrum));
   m_previousModelSelected = isPreviousModelSelected();
 }
 
@@ -599,7 +609,7 @@ IndirectFittingModel::mapDefaultParameterNames() const {
 }
 
 std::unordered_map<std::string, ParameterValue>
-IndirectFittingModel::createDefaultParameters(std::size_t) const {
+    IndirectFittingModel::createDefaultParameters(std::size_t) const {
   return std::unordered_map<std::string, ParameterValue>();
 }
 
@@ -631,7 +641,8 @@ WorkspaceGroup_sptr IndirectFittingModel::getResultGroup() const {
 }
 
 bool IndirectFittingModel::isPreviousModelSelected() const {
-  return m_fitFunction && equivalentFunctions(getFittingFunction(), m_fitFunction);
+  return m_fitFunction &&
+         equivalentFunctions(getFittingFunction(), m_fitFunction);
 }
 
 CompositeFunction_sptr IndirectFittingModel::getMultiDomainFunction() const {

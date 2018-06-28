@@ -54,6 +54,9 @@ class IFunction1DAdapter : public virtual API::ParamFunction,
                            public IFunctionAdapter {
 #endif
 public:
+  // Convenience type def
+  using Base = API::IFunction1D;
+
   /// A constructor that looks like a Python __init__ method
   IFunction1DAdapter(PyObject *self);
 
@@ -76,10 +79,6 @@ public:
   void functionDeriv1D(API::Jacobian *out, const double *xValues,
                        const size_t nData) override;
   ///@}
-
-private:
-  /// Flag if the functionDeriv1D method is overridden (avoids multiple checks)
-  bool m_derivOveridden;
 };
 }
 }

@@ -34,12 +34,6 @@ void updateParameters(
     }
   }
 }
-
-std::string outputPropertyValue(IAlgorithm_sptr algorithm) {
-  if (algorithm->existsProperty("OutputWorkspace"))
-    return algorithm->getProperty("OutputWorkspace");
-  return algorithm->getProperty("Output");
-}
 } // namespace
 
 namespace MantidQt {
@@ -109,8 +103,9 @@ void IndirectFitAnalysisTab::setup() {
 
 void IndirectFitAnalysisTab::setSpectrumSelectionView(
     IndirectSpectrumSelectionView *view) {
-  m_spectrumPresenter = std::make_unique<IndirectSpectrumSelectionPresenter>(
-      m_fittingModel.get(), view);
+  m_spectrumPresenter =
+      Mantid::Kernel::make_unique<IndirectSpectrumSelectionPresenter>(
+          m_fittingModel.get(), view);
 }
 
 void IndirectFitAnalysisTab::setFitPropertyBrowser(
@@ -237,9 +232,17 @@ bool IndirectFitAnalysisTab::canPlotGuess() const {
   return !isEmptyModel() && inputWorkspace();
 }
 
-UserInputValidator &
-IndirectFitAnalysisTab::validate(UserInputValidator &validator) {
-  return m_spectrumPresenter->validate(validator);
+bool IndirectFitAnalysisTab::validate() {
+  UserInputValidator validator;
+  m_spectrumPresenter->validate(validator);
+
+  const auto invalidFunction = m_fittingModel->isInvalidFunction();
+  if (invalidFunction)
+    validator.addErrorMessage(QString::fromStdString(*invalidFunction));
+
+  const auto error = validator.generateErrorMessage();
+  emit showMessageBox(error);
+  return error.isEmpty();
 }
 
 void IndirectFitAnalysisTab::setModelFitFunction() {
@@ -719,7 +722,7 @@ void IndirectFitAnalysisTab::updatePlots(
  * Executes the single fit algorithm defined in this indirect fit analysis tab.
  */
 void IndirectFitAnalysisTab::singleFit() {
-  if (validateTab())
+  if (validate())
     runSingleFit(m_fittingModel->getSingleFit(0, selectedSpectrum()));
 }
 
@@ -728,7 +731,7 @@ void IndirectFitAnalysisTab::singleFit() {
  * tab.
  */
 void IndirectFitAnalysisTab::executeFit() {
-  if (validateTab())
+  if (validate())
     runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
 }
 

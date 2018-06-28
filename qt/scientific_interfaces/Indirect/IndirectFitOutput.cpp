@@ -8,7 +8,7 @@ namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
 struct TableRowExtractor {
-  TableRowExtractor(ITableWorkspace_sptr table)
+  explicit TableRowExtractor(ITableWorkspace_sptr table)
       : m_table(table), m_columns(m_table->getColumnNames()) {
     m_chiIndex = std::find(m_columns.begin(), m_columns.end(), "Chi_squared") -
                  m_columns.begin();
@@ -46,16 +46,6 @@ void applyEnumeratedData(const F &functor, const FitDataIterator &fitDataBegin,
   std::size_t start = 0;
   for (auto it = fitDataBegin; it < fitDataEnd; ++it)
     start = (*it)->applyEnumeratedSpectra(functor(it->get()), start);
-}
-
-void extractParametersFromTable(ITableWorkspace_sptr tableWs,
-                                IndirectFitData const *fitData,
-                                ParameterValues &values) {
-  TableRowExtractor extractRowFromTable(tableWs);
-  auto extractRow = [&](std::size_t index, std::size_t spectrum) {
-    values[spectrum] = extractRowFromTable(index);
-  };
-  fitData->applyEnumeratedSpectra(extractRow);
 }
 
 void extractParametersFromTable(

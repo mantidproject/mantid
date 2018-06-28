@@ -493,7 +493,6 @@ void FilterEvents::groupOutputWorkspace() {
   std::string groupname = m_outputWSNameBase;
   API::IAlgorithm_sptr groupws =
       createChildAlgorithm("GroupWorkspaces", 0.95, 1.00, true);
-  // groupws->initialize();
   groupws->setAlwaysStoreInADS(true);
   groupws->setProperty("InputWorkspaces", m_wsNames);
   groupws->setProperty("OutputWorkspace", groupname);
@@ -615,7 +614,7 @@ void FilterEvents::copyNoneSplitLogs(
 }
 
 //----------------------------------------------------------------------------------------------
-/** Split all the TimeSeriesProperty sample logs to all the output workspace
+/** Split ALL the TimeSeriesProperty sample logs to all the output workspace
  * @brief FilterEvents::splitTimeSeriesLogs
  * @param int_tsp_vector
  * @param dbl_tsp_vector
@@ -688,6 +687,12 @@ void FilterEvents::splitTimeSeriesLogs(
 }
 
 //----------------------------------------------------------------------------------------------
+/** split one single time-series property (template)
+ * @brief FilterEvents::splitTimeSeriesProperty
+ * @param tsp :: a time series property instance
+ * @param split_datetime_vec :: splitter
+ * @param max_target_index :: maximum number of separated time series
+ */
 template <typename TYPE>
 void FilterEvents::splitTimeSeriesProperty(
     Kernel::TimeSeriesProperty<TYPE> *tsp,
@@ -1188,7 +1193,6 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     // workspace name
     std::stringstream wsname;
     if (wsgroup > 0) {
-      //  std::string target_name = m_wsGroupIndexTargetMap[wsgroup];
       int target_name = m_wsGroupdYMap[wsgroup];
       wsname << m_outputWSNameBase << "_" << target_name;
     } else {
@@ -1202,9 +1206,6 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     // Clear Run without copying first.
     optws->setSharedRun(Kernel::make_cow<Run>());
     m_outputWorkspacesMap.emplace(wsgroup, optws);
-
-    // TODO/ISSUE/NOW - How about comment and info similar to
-    // createOutputWorkspaces()?
 
     // add to output workspace property
     std::stringstream propertynamess;

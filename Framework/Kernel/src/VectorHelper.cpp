@@ -133,12 +133,12 @@ void rebin(const std::vector<double> &xold, const std::vector<double> &yold,
   // Make sure y and e vectors are of correct sizes
   const size_t size_xold = xold.size();
   if (size_xold != (yold.size() + 1) || size_xold != (eold.size() + 1))
-    throw std::runtime_error(
-        "rebin: y and error vectors should be of same size & 1 shorter than x");
+    throw std::runtime_error("rebin: old y and error vectors should be of same "
+                             "size & 1 shorter than x");
   const size_t size_xnew = xnew.size();
   if (size_xnew != (ynew.size() + 1) || size_xnew != (enew.size() + 1))
-    throw std::runtime_error(
-        "rebin: y and error vectors should be of same size & 1 shorter than x");
+    throw std::runtime_error("rebin: new y and error vectors should be of same "
+                             "size & 1 shorter than x");
 
   size_t size_yold = yold.size();
   size_t size_ynew = ynew.size();

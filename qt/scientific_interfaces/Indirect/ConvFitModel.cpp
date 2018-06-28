@@ -26,15 +26,6 @@ getFirstInCategory(CompositeFunction_const_sptr composite,
   return boost::none;
 }
 
-IFunction_sptr
-getFirstFunctionInCategory(CompositeFunction_const_sptr composite,
-                           const std::string &category) {
-  const auto index = getFirstInCategory(composite, category);
-  if (index)
-    return composite->getFunction(*index);
-  return nullptr;
-}
-
 IFunction_sptr removeFunction(CompositeFunction_sptr composite,
                               std::size_t index) {
   auto function = composite->getFunction(index);
@@ -232,7 +223,7 @@ void getParameterNameChanges(
     const CompositeFunction &model, const std::string &prefixPrefix,
     const std::string &prefixSuffix, std::size_t from, std::size_t to,
     std::unordered_map<std::string, std::string> &changes) {
-  for (auto i = 0u; i < model.nFunctions(); ++i) {
+  for (auto i = from; i < to; ++i) {
     const auto oldPrefix = "f" + std::to_string(i) + ".";
     const auto functionPrefix = "f" + std::to_string(i) + ".";
     const auto function = model.getFunction(i);
@@ -327,8 +318,8 @@ private:
 };
 
 std::vector<std::string>
-getNames(const std::vector<boost::weak_ptr<Mantid::API::MatrixWorkspace>>
-             &workspaces) {
+getNames(const std::vector<boost::weak_ptr<Mantid::API::MatrixWorkspace>> &
+             workspaces) {
   std::vector<std::string> names;
   names.reserve(workspaces.size());
   std::transform(workspaces.begin(), workspaces.end(),
@@ -547,21 +538,21 @@ void ConvFitModel::setFitTypeString(const std::string &fitType) {
 std::unordered_map<std::string, ParameterValue>
 ConvFitModel::createDefaultParameters(std::size_t index) const {
   std::unordered_map<std::string, ParameterValue> defaultValues;
-  defaultValues["PeakCentre"] = 0.0;
-  defaultValues["Centre"] = 0.0;
+  defaultValues["PeakCentre"] = ParameterValue(0.0);
+  defaultValues["Centre"] = ParameterValue(0.0);
   // Reset all parameters to default of 1
-  defaultValues["Amplitude"] = 1.0;
-  defaultValues["beta"] = 1.0;
-  defaultValues["Decay"] = 1.0;
-  defaultValues["Diffusion"] = 1.0;
-  defaultValues["Height"] = 1.0;
-  defaultValues["Intensity"] = 1.0;
-  defaultValues["Radius"] = 1.0;
-  defaultValues["Tau"] = 1.0;
+  defaultValues["Amplitude"] = ParameterValue(1.0);
+  defaultValues["beta"] = ParameterValue(1.0);
+  defaultValues["Decay"] = ParameterValue(1.0);
+  defaultValues["Diffusion"] = ParameterValue(1.0);
+  defaultValues["Height"] = ParameterValue(1.0);
+  defaultValues["Intensity"] = ParameterValue(1.0);
+  defaultValues["Radius"] = ParameterValue(1.0);
+  defaultValues["Tau"] = ParameterValue(1.0);
 
   auto resolution = getInstrumentResolution(index);
   if (resolution)
-    defaultValues["FWHM"] = *resolution;
+    defaultValues["FWHM"] = ParameterValue(*resolution);
   return defaultValues;
 }
 

@@ -36,6 +36,8 @@ public:
 private:
   /// Initialise the properties
   void init() override;
+  /// Cross-check properties with each other @see IAlgorithm::validateInputs
+  std::map<std::string, std::string> validateInputs() override;
   /// Run the algorithm
   void exec() override;
 };

@@ -14,7 +14,7 @@ namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
 struct SetViewSpectra : boost::static_visitor<> {
-  SetViewSpectra(IndirectSpectrumSelectionView *view) : m_view(view) {}
+  explicit SetViewSpectra(IndirectSpectrumSelectionView *view) : m_view(view) {}
 
   void operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
     m_view->displaySpectra(static_cast<int>(spectra.first),
@@ -29,7 +29,7 @@ private:
   IndirectSpectrumSelectionView *m_view;
 };
 
-}; // namespace
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -107,8 +107,8 @@ void IndirectSpectrumSelectionPresenter::updateSpectra() {
   MantidQt::API::SignalBlocker<QObject> blocker(m_view.get());
   if (workspace) {
     setSpectraRange(0, workspace->getNumberHistograms() - 1);
-    boost::apply_visitor(SetViewSpectra(m_view.get()),
-                         m_model->getSpectra(m_activeIndex));
+    const auto spectra = m_model->getSpectra(m_activeIndex);
+    boost::apply_visitor(SetViewSpectra(m_view.get()), spectra);
     enableView();
   } else {
     m_view->clear();
@@ -148,7 +148,7 @@ void IndirectSpectrumSelectionPresenter::setModelSpectra(
 
 void IndirectSpectrumSelectionPresenter::updateSpectraList(
     const std::string &spectraList) {
-  setModelSpectra(spectraList);
+  setModelSpectra(DiscontinuousSpectra<std::size_t>(spectraList));
   emit spectraChanged(m_activeIndex);
 }
 

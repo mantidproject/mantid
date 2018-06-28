@@ -35,11 +35,13 @@ public:
   bool isMultiFit() const;
   bool isPreviouslyFit(std::size_t dataIndex, std::size_t spectrum) const;
   bool hasZeroSpectra(std::size_t dataIndex) const;
+  virtual boost::optional<std::string> isInvalidFunction() const;
   std::size_t numberOfWorkspaces() const;
   std::size_t getNumberOfSpectra(std::size_t index) const;
   std::vector<std::string> getFitParameterNames() const;
   virtual Mantid::API::IFunction_sptr getFittingFunction() const;
 
+  void setSpectra(const std::string &spectra, std::size_t dataIndex);
   void setSpectra(Spectra &&spectra, std::size_t dataIndex);
   void setSpectra(const Spectra &spectra, std::size_t dataIndex);
   void setStartX(double startX, std::size_t dataIndex, std::size_t spectrum);
@@ -48,6 +50,8 @@ public:
                         std::size_t index);
 
   void addWorkspace(const std::string &workspaceName);
+  void addWorkspace(const std::string &workspaceName,
+                    const std::string &spectra);
   void addWorkspace(const std::string &workspaceName, const Spectra &spectra);
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                             const Spectra &spectra);

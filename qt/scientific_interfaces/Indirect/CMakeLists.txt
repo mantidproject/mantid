@@ -41,11 +41,11 @@ set ( SRC_FILES
 	IndirectTransmissionCalc.cpp
 	Iqt.cpp
 	IqtFit.cpp
-        IqtFitModel.cpp
+	IqtFitModel.cpp
 	JumpFit.cpp
-        JumpFitModel.cpp
+	JumpFitModel.cpp
 	MSDFit.cpp
-        MSDFitModel.cpp
+	MSDFitModel.cpp
 	Quasi.cpp
 	ResNorm.cpp
 	Stretch.cpp
@@ -60,7 +60,7 @@ set ( INC_FILES
 	CalculatePaalmanPings.h
 	ContainerSubtraction.h
 	ConvFit.h
-        ConvFitModel.h
+	ConvFitModel.h
 	CorrectionsTab.h
 	DensityOfStates.h
         Elwin.h
@@ -79,7 +79,7 @@ set ( INC_FILES
 	IndirectFitAnalysisTab.h
 	IndirectFitData.h
 	IndirectFitOutput.h
-  	IndirectFittingModel.h
+	IndirectFittingModel.h
 	IndirectLoadILL.h
 	IndirectMolDyn.h
 	IndirectMoments.h
@@ -97,11 +97,11 @@ set ( INC_FILES
 	IndirectTransmissionCalc.h
 	Iqt.h
 	IqtFit.h
-        IqtFitModel.h
+	IqtFitModel.h
 	JumpFit.h
-        JumpFitModel.h
+	JumpFitModel.h
 	MSDFit.h
-        MSDFitModel.h
+	MSDFitModel.h
 	Quasi.h
 	ResNorm.h
 	Stretch.h

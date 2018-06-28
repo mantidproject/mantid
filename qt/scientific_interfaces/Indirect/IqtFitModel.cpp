@@ -126,7 +126,7 @@ std::string getFitString(MatrixWorkspace_sptr workspace) {
     return "Fit";
   return "_IqtFit";
 }
-}; // namespace
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -197,14 +197,15 @@ bool IqtFitModel::setConstrainIntensities(bool constrain) {
 std::unordered_map<std::string, ParameterValue>
 IqtFitModel::createDefaultParameters(std::size_t index) const {
   std::unordered_map<std::string, ParameterValue> parameters;
-  parameters["Height"] = computeHeightApproximation(getFittingFunction());
+  parameters["Height"] =
+      ParameterValue(computeHeightApproximation(getFittingFunction()));
 
   const auto inputWs = getWorkspace(index);
   const auto tau = inputWs ? computeTauApproximation(inputWs) : 0.0;
 
-  parameters["Lifetime"] = tau;
-  parameters["Stretching"] = 1.0;
-  parameters["A0"] = 0.0;
+  parameters["Lifetime"] = ParameterValue(tau);
+  parameters["Stretching"] = ParameterValue(1.0);
+  parameters["A0"] = ParameterValue(0.0);
   return parameters;
 }
 

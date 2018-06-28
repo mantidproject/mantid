@@ -22,9 +22,9 @@ std::vector<T> vectorFromString(const std::string &listString) {
   }
 }
 
-template <typename T> struct DiscontinuousSpectra {
+template <typename T> class DiscontinuousSpectra {
 public:
-  DiscontinuousSpectra(const std::string &str)
+  explicit DiscontinuousSpectra(const std::string &str)
       : m_str(str), m_vec(vectorFromString<T>(str)) {}
   DiscontinuousSpectra(const DiscontinuousSpectra &vec)
       : m_str(vec.m_str), m_vec(vec.m_vec) {}
@@ -43,8 +43,8 @@ public:
     return *this;
   }
 
-  const bool empty() const { return m_vec.empty(); }
-  const std::size_t size() const { return m_vec.size(); }
+  bool empty() const { return m_vec.empty(); }
+  std::size_t size() const { return m_vec.size(); }
   const std::string &getString() const { return m_str; }
   typename std::vector<T>::iterator begin() { return m_vec.begin(); }
   typename std::vector<T>::iterator end() { return m_vec.end(); }
@@ -63,7 +63,7 @@ using Spectra = boost::variant<DiscontinuousSpectra<std::size_t>,
                                std::pair<std::size_t, std::size_t>>;
 
 template <typename F> struct ApplySpectra : boost::static_visitor<> {
-  ApplySpectra(F &&functor) : m_functor(functor) {}
+  explicit ApplySpectra(F &&functor) : m_functor(functor) {}
 
   void operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
     for (auto spectrum = spectra.first; spectrum <= spectra.second; ++spectrum)
@@ -82,7 +82,7 @@ private:
 template <typename F>
 struct ApplyEnumeratedSpectra : boost::static_visitor<std::size_t> {
   ApplyEnumeratedSpectra(F const &functor, std::size_t start = 0)
-      : m_functor(functor), m_start(start) {}
+      : m_start(start), m_functor(functor) {}
 
   std::size_t
   operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
@@ -92,7 +92,8 @@ struct ApplyEnumeratedSpectra : boost::static_visitor<std::size_t> {
     return i;
   }
 
-  std::size_t operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
+  std::size_t
+  operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
     auto i = m_start;
     for (const auto &spectrum : spectra)
       m_functor(i++, spectrum);
@@ -136,6 +137,7 @@ public:
                                 m_spectra);
   }
 
+  void setSpectra(const std::string &spectra);
   void setSpectra(Spectra &&spectra);
   void setSpectra(const Spectra &spectra);
   void setStartX(double startX, std::size_t index);

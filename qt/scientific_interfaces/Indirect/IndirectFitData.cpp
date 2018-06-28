@@ -3,6 +3,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
+#include <sstream>
+
 using namespace Mantid::API;
 
 namespace {
@@ -16,7 +18,7 @@ std::string rangeToString(const std::pair<std::size_t, std::size_t> &range,
   return std::to_string(range.first);
 }
 
-template <template <class...> typename Vector, typename T, typename... Ts>
+template <template <typename...> class Vector, typename T, typename... Ts>
 std::vector<T> outOfRange(const Vector<T, Ts...> &values, const T &minimum,
                           const T &maximum) {
   std::vector<T> result;
@@ -50,7 +52,7 @@ private:
 };
 
 struct CheckZeroSpectrum : boost::static_visitor<bool> {
-  bool operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
+  bool operator()(const std::pair<std::size_t, std::size_t> &) const {
     return false;
   }
   bool operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
@@ -71,7 +73,7 @@ struct NumberOfSpectra : boost::static_visitor<std::size_t> {
 };
 
 struct SpectraToString : boost::static_visitor<std::string> {
-  SpectraToString(const std::string &rangeDelimiter = "-")
+  explicit SpectraToString(const std::string &rangeDelimiter = "-")
       : m_rangeDelimiter(rangeDelimiter) {}
 
   std::string
@@ -97,17 +99,19 @@ struct CombineSpectra : boost::static_visitor<Spectra> {
     else if (spectra2.second + 1 == spectra1.first)
       return std::make_pair(spectra2.first, spectra1.second);
     else
-      return rangeToString(spectra1) + "," + rangeToString(spectra2);
+      return DiscontinuousSpectra<std::size_t>(rangeToString(spectra1) + "," +
+                                               rangeToString(spectra2));
   }
 
   Spectra operator()(const Spectra &spectra1, const Spectra &spectra2) const {
-    return boost::apply_visitor(SpectraToString(), spectra1) + "," +
-           boost::apply_visitor(SpectraToString(), spectra2);
+    return DiscontinuousSpectra<std::size_t>(
+        boost::apply_visitor(SpectraToString(), spectra1) + "," +
+        boost::apply_visitor(SpectraToString(), spectra2));
   }
 };
 
 struct GetSpectrum : boost::static_visitor<std::size_t> {
-  GetSpectrum(std::size_t index) : m_index(index) {}
+  explicit GetSpectrum(std::size_t index) : m_index(index) {}
 
   std::size_t
   operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
@@ -131,7 +135,7 @@ std::string join(const std::vector<T> &values, const char *delimiter) {
   std::stringstream stream;
   stream << values.front();
   for (auto i = 1u; i < values.size(); ++i)
-    stream << "," << values[i];
+    stream << delimiter << values[i];
   return stream.str();
 }
 
@@ -161,7 +165,7 @@ tryPassFormatArgument(boost::basic_format<char> &formatString,
 std::pair<double, double> getBinRange(MatrixWorkspace_sptr workspace) {
   return std::make_pair(workspace->x(0).front(), workspace->x(0).back());
 }
-}; // namespace
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -175,7 +179,8 @@ std::string
 IndirectFitData::displayName(const std::string &formatString,
                              const std::string &rangeDelimiter) const {
   const auto workspaceName = cutLastOf(workspace()->getName(), "_red");
-  const auto spectraString = boost::apply_visitor(SpectraToString(), m_spectra);
+  const auto spectraString =
+      boost::apply_visitor(SpectraToString(rangeDelimiter), m_spectra);
 
   auto formatted = boost::format(formatString);
   formatted = tryPassFormatArgument(formatted, workspaceName);
@@ -229,6 +234,10 @@ std::string IndirectFitData::getExcludeRegion(std::size_t spectrum) const {
 std::vector<double>
 IndirectFitData::excludeRegionsVector(std::size_t spectrum) const {
   return vectorFromString<double>(getExcludeRegion(spectrum));
+}
+
+void IndirectFitData::setSpectra(const std::string &spectra) {
+  setSpectra(DiscontinuousSpectra<std::size_t>(spectra));
 }
 
 void IndirectFitData::setSpectra(Spectra &&spectra) {

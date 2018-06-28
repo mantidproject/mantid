@@ -1053,7 +1053,7 @@ class Mask_ISIS(ReductionStep):
                     raise RuntimeError("Invalid input for mask file. (%s)" % mask_file)
 
         if len(self.spec_list) > 0:
-            MaskDetectors(Workspace=workspace, SpectraList=self.spec_list)
+            MaskDetectors(Workspace=workspace, SpectraList=self.spec_list, ForceInstrumentMasking=True)
 
         if self._lim_phi_xml != '' and self.mask_phi:
             MaskDetectorsInShape(Workspace=workspace, ShapeXML=self._lim_phi_xml)
@@ -1156,7 +1156,11 @@ class LoadSample(LoadRun):
         # applies on_load_sample for all the workspaces (single or groupworkspace)
         num = 0
         while True:
-            reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), isSample)
+            if reducer.instrument.name() == 'LOQ':
+                reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), isSample,
+                                                  other_centre=reducer.get_beam_center(reducer.instrument.other_detector().name()))
+            else:
+                reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), isSample)
             reducer.update_beam_center()
             num += 1
             if num == self.periods_in_file:
