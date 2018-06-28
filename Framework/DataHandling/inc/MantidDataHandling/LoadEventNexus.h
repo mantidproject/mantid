@@ -349,9 +349,9 @@ void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace,
 * @param classType :: The type of the events: either detector or monitor
 */
 template <typename T>
-void adjustTimeOfFlightRAL(::NeXus::File &file, T localWorkspace,
-                           const std::string &entry_name,
-                           const std::string &classType) {
+void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace,
+                                  const std::string &entry_name,
+                                  const std::string &classType) {
   bool done = false;
   // Go to the root, and then top entry
   file.openPath("/");
