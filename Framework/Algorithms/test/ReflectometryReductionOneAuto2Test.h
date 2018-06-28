@@ -697,7 +697,7 @@ public:
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", name);
-    alg.setProperty("ThetaIn", 0.01);
+    alg.setProperty("ThetaIn", 10.0);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("ProcessingInstructions", "1");
@@ -716,8 +716,8 @@ public:
 
     TS_ASSERT_EQUALS(outLamGroup[0]->blocksize(), 9);
     // X range in outLam
-    TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0872543275, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.3948574363, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
 
     TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.9, 0.0001);
     TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 0.8, 0.0001);
@@ -742,7 +742,6 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", name);
-    alg.setProperty("ThetaIn", 10.0);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 5.0);
     alg.setProperty("ProcessingInstructions", "0");
@@ -764,7 +763,6 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", name);
-    alg.setProperty("ThetaIn", 10.0);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 5.0);
     alg.setProperty("MonitorBackgroundWavelengthMin", 1.0);

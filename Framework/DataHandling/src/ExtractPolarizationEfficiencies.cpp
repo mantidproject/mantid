@@ -41,7 +41,8 @@ std::vector<double> parseVector(std::string const &name,
   }
 
   if (!istr.eof()) {
-    throw std::invalid_argument("Error while parsing vector " + name);
+    throw std::invalid_argument(
+        "Error while parsing instrument vector parameter " + name);
   }
 
   return result;
@@ -116,6 +117,12 @@ void ExtractPolarizationEfficiencies::exec() {
         "Wavelengths are missing from the correction parameters");
   }
   auto const lambda = parseVector(LAMBDA_PARAMETER, lambdaValue);
+  if (lambda.size() < 2) {
+    throw std::runtime_error("Instrument vector parameter \"" +
+                             LAMBDA_PARAMETER +
+                             "\" must have at least 2 elements but it has " +
+                             std::to_string(lambda.size()));
+  }
 
   auto alg = createChildAlgorithm("JoinISISPolarizationEfficiencies");
   auto const &efficiencies = EFFICIENCIES.at(method);
@@ -126,6 +133,12 @@ void ExtractPolarizationEfficiencies::exec() {
                                   " is missing from the correction parameters");
     }
     auto const prop = parseVector(name, propValue);
+    if (lambda.size() != prop.size()) {
+      throw std::runtime_error(
+          "Instrument vector parameter \"" + name +
+          "\" is expeced to be the same size as \"" + LAMBDA_PARAMETER + "\" but " +
+          std::to_string(prop.size()) + " != " + std::to_string(lambda.size()));
+    }
     auto ws = createWorkspace(lambda, prop);
     alg->setProperty(name, ws);
   }

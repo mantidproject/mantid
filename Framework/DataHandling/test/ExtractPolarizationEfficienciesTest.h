@@ -6,6 +6,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidDataHandling/ExtractPolarizationEfficiencies.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -281,10 +282,16 @@ public:
     LoadInstrument loader;
     loader.initialize();
     loader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/REFLECTOMETRY_Definition.xml");
+                            "IDFs_for_UNIT_TESTING/REFL_Definition.xml");
     loader.setProperty("Workspace", workspace);
     loader.setProperty("RewriteSpectraMap", OptionalBool(true));
     loader.execute();
+    LoadParameterFile paramLoader;
+    paramLoader.initialize();
+    paramLoader.setPropertyValue("Filename",
+                            "IDFs_for_UNIT_TESTING/REFL_Parameters_Fredrikze.xml");
+    paramLoader.setProperty("Workspace", workspace);
+    paramLoader.execute();
 
     ExtractPolarizationEfficiencies alg;
     alg.initialize();
@@ -309,39 +316,84 @@ public:
     TS_ASSERT(!outWS->isHistogramData());
 
     TS_ASSERT_DELTA(outWS->x(0)[0], 0.0, 1e-14);
-    TS_ASSERT_DELTA(outWS->x(0)[1], 1.0, 1e-14);
-    TS_ASSERT_DELTA(outWS->x(0)[2], 2.0, 1e-14);
-    TS_ASSERT_DELTA(outWS->x(0)[3], 3.0, 1e-14);
-    TS_ASSERT_DELTA(outWS->x(0)[4], 4.0, 1e-14);
-    TS_ASSERT_DELTA(outWS->x(0)[5], 5.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->x(0)[1], 3.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->x(0)[2], 6.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->x(0)[3], 10.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->x(0)[4], 15.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->x(0)[5], 20.0, 1e-14);
 
-    TS_ASSERT_DELTA(outWS->y(0)[0], 0.991, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(0)[1], 0.992, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(0)[2], 0.993, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(0)[3], 0.994, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(0)[4], 0.995, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(0)[5], 0.996, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 0.9, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(0)[1], 0.9, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(0)[2], 0.9, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(0)[3], 0.9, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(0)[4], 0.9, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(0)[5], 0.9, 1e-14);
 
-    TS_ASSERT_DELTA(outWS->y(1)[0], 0.981, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(1)[1], 0.982, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(1)[2], 0.983, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(1)[3], 0.984, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(1)[4], 0.985, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(1)[5], 0.986, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(1)[0], 0.8, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(1)[1], 0.8, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(1)[2], 0.8, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(1)[3], 0.8, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(1)[4], 0.8, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(1)[5], 0.8, 1e-14);
 
-    TS_ASSERT_DELTA(outWS->y(2)[0], 0.971, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(2)[1], 0.972, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(2)[2], 0.973, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(2)[3], 0.974, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(2)[4], 0.975, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(2)[5], 0.976, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(2)[0], 0.778, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(2)[1], 0.778, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(2)[2], 0.778, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(2)[3], 0.778, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(2)[4], 0.778, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(2)[5], 0.778, 1e-14);
 
-    TS_ASSERT_DELTA(outWS->y(3)[0], 0.961, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(3)[1], 0.962, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(3)[2], 0.963, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(3)[3], 0.964, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(3)[4], 0.965, 1e-14);
-    TS_ASSERT_DELTA(outWS->y(3)[5], 0.966, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(3)[0], 0.75, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(3)[1], 0.75, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(3)[2], 0.75, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(3)[3], 0.75, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(3)[4], 0.75, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(3)[5], 0.75, 1e-14);
+  }
+
+  void test_short_lambda() {
+    auto workspace = createInputWorkspace("Wildes", "0");
+
+    ExtractPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("InputWorkspace", workspace);
+    alg.setProperty("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
+                            std::string(e.what()),
+                            "Instrument vector parameter \"efficiency_lambda\" "
+                            "must have at least 2 elements but it has 1");
+  }
+
+  void test_empty_lambda() {
+    auto workspace = createInputWorkspace("Wildes", " ");
+
+    ExtractPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("InputWorkspace", workspace);
+    alg.setProperty("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
+                            std::string(e.what()),
+                            "Instrument vector parameter \"efficiency_lambda\" "
+                            "must have at least 2 elements but it has 0");
+  }
+
+  void test_wrong_vector_size() {
+    auto workspace = createInputWorkspace("Wildes", "1 2 3");
+
+    ExtractPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("InputWorkspace", workspace);
+    alg.setProperty("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), std::runtime_error & e, std::string(e.what()),
+        "Instrument vector parameter \"P1\" is expeced to be the same size as "
+        "\"efficiency_lambda\" but 4 != 3");
   }
 
 private:
@@ -368,11 +420,13 @@ private:
       pmap->addString(instrument.get(), "efficiency_lambda", lambda);
     }
     if (method == "Fredrikze") {
+      pmap->addString(instrument.get(), "polarization_correction_option", "PA");
       pmap->addString(instrument.get(), "Pp", "0.991 0.992 0.993 0.994");
       pmap->addString(instrument.get(), "Ap", "0.981 0.982 0.983 0.984");
       pmap->addString(instrument.get(), "Rho", "0.971 0.972 0.973 0.974");
       pmap->addString(instrument.get(), "Alpha", "0.961 0.962 0.963 0.964");
     } else {
+      pmap->addString(instrument.get(), "polarization_correction_option", "00,01,10,11");
       if (!skipP1) {
         pmap->addString(instrument.get(), "P1", "0.991 0.992 0.993 0.994");
       }
