@@ -14,7 +14,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::HistogramData;
 
 namespace {
-constexpr int DEFAULT_ITERATIONS = 50;
+constexpr int DEFAULT_ITERATIONS = 100;
 constexpr int DEFAULT_SEED = 89631139;
 
 MatrixWorkspace_sptr rebin(MatrixWorkspace_sptr workspace,
