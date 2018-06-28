@@ -67,12 +67,12 @@ std::string getTimeStamp() {
   auto time = std::time(nullptr);
   auto localTime = std::localtime(&time);
 
-#if __GNUG__ && __GNUG__ < 5
+#if _MSC_VER  || __GNUG__ && __GNUG__ < 5
   // Have to workaround GCC 4 not having std::put_time on RHEL7
   // this ifdef can be removed when RHEL7 uses a newer compiler
   char timestamp[20];
   if (strftime(timestamp, sizeof(timestamp), formatSpecifier, localTime) > 0) {
-    return {formatSpecifier};
+    return { timestamp };
   }
 
   return {};
