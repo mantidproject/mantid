@@ -651,7 +651,8 @@ ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
         getProperty("NormalizeByIntegratedMonitors");
     int index = getProperty("I0MonitorIndex");
     if (!m_spectrumInfo->isMonitor(index)) {
-      throw std::invalid_argument("A monitor is expected at spectrum index " + std::to_string(index));
+      throw std::invalid_argument("A monitor is expected at spectrum index " +
+                                  std::to_string(index));
     }
     const auto monitorWS = makeMonitorWS(m_runWS, integratedMonitors);
     if (!integratedMonitors)

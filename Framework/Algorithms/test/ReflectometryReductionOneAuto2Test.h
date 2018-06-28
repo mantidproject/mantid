@@ -773,11 +773,10 @@ public:
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    TS_ASSERT_THROWS_EQUALS(
-        alg.execute(), std::invalid_argument & e, std::string(e.what()),
-        "A monitor is expected at spectrum index 1");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument & e,
+                            std::string(e.what()),
+                            "A monitor is expected at spectrum index 1");
   }
-
 };
 
 #endif /* MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2TEST_H_ */

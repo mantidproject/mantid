@@ -23,7 +23,8 @@ using namespace Kernel;
 namespace TestHelpers {
 
 MatrixWorkspace_sptr createHistoWS(size_t nBins, double startX, double endX,
-                                   std::vector<double> const & values, std::string const &unitX = "TOF") {
+                                   std::vector<double> const &values,
+                                   std::string const &unitX = "TOF") {
   double const dX = (endX - startX) / double(nBins);
   BinEdges xVals(nBins + 1, LinearGenerator(startX, dX));
   size_t nSpec = values.size();
@@ -72,10 +73,8 @@ MatrixWorkspace_sptr createREFL_WS(size_t nBins, double startX, double endX,
   return workspace;
 }
 
-void prepareInputGroup(std::string const &name,
-                       std::string const &paramsType, size_t size,
-                       double const startX,
-                       double const endX) {
+void prepareInputGroup(std::string const &name, std::string const &paramsType,
+                       size_t size, double const startX, double const endX) {
   double monitorValue = 99.0;
   double detectorValue = 0.9;
   std::string names;
@@ -113,12 +112,11 @@ std::vector<MatrixWorkspace_sptr> groupToVector(WorkspaceGroup_sptr group) {
 }
 
 std::vector<MatrixWorkspace_sptr> retrieveOutWS(std::string const &name) {
-  auto group =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
+  auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
   return groupToVector(group);
 }
 
-void applyPolarizationEfficiencies(WorkspaceGroup_sptr ws) { 
+void applyPolarizationEfficiencies(WorkspaceGroup_sptr ws) {
 
   auto wss = groupToVector(ws);
   auto Rpp = wss[0];

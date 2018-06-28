@@ -87,10 +87,9 @@ void ExtractPolarizationEfficiencies::init() {
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The workspace with extracted eficiencies.");
-  declareProperty<std::string>(
-      "CorrectionMethod", "",
-      "Correction method: Fredrikze or Wildes.",
-      Kernel::Direction::Output);
+  declareProperty<std::string>("CorrectionMethod", "",
+                               "Correction method: Fredrikze or Wildes.",
+                               Kernel::Direction::Output);
   declareProperty<std::string>(
       "CorrectionOption", "",
       "Correction option, eg \"PA\" or \"PNR\" for Fredrikze method.",
@@ -134,10 +133,11 @@ void ExtractPolarizationEfficiencies::exec() {
     }
     auto const prop = parseVector(name, propValue);
     if (lambda.size() != prop.size()) {
-      throw std::runtime_error(
-          "Instrument vector parameter \"" + name +
-          "\" is expeced to be the same size as \"" + LAMBDA_PARAMETER + "\" but " +
-          std::to_string(prop.size()) + " != " + std::to_string(lambda.size()));
+      throw std::runtime_error("Instrument vector parameter \"" + name +
+                               "\" is expeced to be the same size as \"" +
+                               LAMBDA_PARAMETER + "\" but " +
+                               std::to_string(prop.size()) + " != " +
+                               std::to_string(lambda.size()));
     }
     auto ws = createWorkspace(lambda, prop);
     alg->setProperty(name, ws);

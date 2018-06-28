@@ -821,14 +821,15 @@ ReflectometryReductionOneAuto2::getPolarizationEfficiencies() {
  * Apply a polarization correction to workspaces in lambda.
  * @param outputIvsLam :: Name of a workspace group to apply the correction to.
  */
-void ReflectometryReductionOneAuto2::applyPolarizationCorrection(std::string const &outputIvsLam) {
+void ReflectometryReductionOneAuto2::applyPolarizationCorrection(
+    std::string const &outputIvsLam) {
   MatrixWorkspace_sptr efficiencies;
   std::string correctionMethod;
   std::string correctionOption;
-  std::tie(efficiencies, correctionMethod, correctionOption) = getPolarizationEfficiencies();
-  
-  Algorithm_sptr polAlg =
-      createChildAlgorithm("PolarizationEfficiencyCor");
+  std::tie(efficiencies, correctionMethod, correctionOption) =
+      getPolarizationEfficiencies();
+
+  Algorithm_sptr polAlg = createChildAlgorithm("PolarizationEfficiencyCor");
   polAlg->setChild(false);
   polAlg->setRethrows(true);
   polAlg->setProperty("OutputWorkspace", outputIvsLam);
@@ -839,7 +840,8 @@ void ReflectometryReductionOneAuto2::applyPolarizationCorrection(std::string con
     polAlg->setProperty("InputWorkspaceGroup", outputIvsLam);
     polAlg->setProperty("PolarizationAnalysis", correctionOption);
   } else {
-    throw std::invalid_argument("Unsupported polarization correction method: " + correctionMethod);
+    throw std::invalid_argument("Unsupported polarization correction method: " +
+                                correctionMethod);
   }
   polAlg->execute();
 }

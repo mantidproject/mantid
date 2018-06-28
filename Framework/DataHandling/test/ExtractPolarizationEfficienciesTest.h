@@ -288,8 +288,8 @@ public:
     loader.execute();
     LoadParameterFile paramLoader;
     paramLoader.initialize();
-    paramLoader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/REFL_Parameters_Fredrikze.xml");
+    paramLoader.setPropertyValue(
+        "Filename", "IDFs_for_UNIT_TESTING/REFL_Parameters_Fredrikze.xml");
     paramLoader.setProperty("Workspace", workspace);
     paramLoader.execute();
 
@@ -426,7 +426,8 @@ private:
       pmap->addString(instrument.get(), "Rho", "0.971 0.972 0.973 0.974");
       pmap->addString(instrument.get(), "Alpha", "0.961 0.962 0.963 0.964");
     } else {
-      pmap->addString(instrument.get(), "polarization_correction_option", "00,01,10,11");
+      pmap->addString(instrument.get(), "polarization_correction_option",
+                      "00,01,10,11");
       if (!skipP1) {
         pmap->addString(instrument.get(), "P1", "0.991 0.992 0.993 0.994");
       }

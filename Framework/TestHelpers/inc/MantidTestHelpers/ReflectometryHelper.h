@@ -12,19 +12,23 @@ using namespace API;
 
 namespace TestHelpers {
 
-// Create a workspace equipped with fake instrument from IDFs_for_UNIT_TESTING/REFL_Definition.xml IDF.
+// Create a workspace equipped with fake instrument from
+// IDFs_for_UNIT_TESTING/REFL_Definition.xml IDF.
 // @param nBins :: Number of bins in each spectrum.
 // @param startX :: Start value of the x-axis in TOF
 // @param endX :: End value of the x-axis in TOF
-// @param values :: Y-values. The created workspace will have as many spectra as there are values - 
+// @param values :: Y-values. The created workspace will have as many spectra as
+// there are values -
 //     one value per spectrum.
-// @param paramsType :: Defines which instrument parameters file to load. paramsType is appended to
+// @param paramsType :: Defines which instrument parameters file to load.
+// paramsType is appended to
 //     "REFL_Parameters_" to form the name for the file to load.
 MatrixWorkspace_sptr createREFL_WS(size_t nBins, double startX, double endX,
-                                   std::vector<double> const & values,
+                                   std::vector<double> const &values,
                                    std::string const &paramsType = "");
 
-// Create a group of workspaces created with createREFL_WS(...) function and store it in the ADS.
+// Create a group of workspaces created with createREFL_WS(...) function and
+// store it in the ADS.
 // Ys get some hard-coded values.
 // @param name :: Group's name in the ADS.
 // @param size :: Size of the group.
@@ -37,8 +41,10 @@ void prepareInputGroup(std::string const &name,
 // and return a vector of those.
 std::vector<MatrixWorkspace_sptr> retrieveOutWS(std::string const &name);
 
-// Apply some polarization efficiencies (Fredrikze) to a workspace such that when it's run
-// through the polarization correction algorithm it gets restored to the original.
+// Apply some polarization efficiencies (Fredrikze) to a workspace such that
+// when it's run
+// through the polarization correction algorithm it gets restored to the
+// original.
 void applyPolarizationEfficiencies(std::string const &name);
 
 } // namespace TestHelpers

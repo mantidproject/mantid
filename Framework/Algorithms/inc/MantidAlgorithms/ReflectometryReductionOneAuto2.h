@@ -77,7 +77,8 @@ private:
       Mantid::API::IAlgorithm_sptr alg,
       Mantid::Geometry::Instrument_const_sptr instrument);
   /// Get a polarization efficiencies workspace.
-  std::tuple<API::MatrixWorkspace_sptr, std::string, std::string> getPolarizationEfficiencies();
+  std::tuple<API::MatrixWorkspace_sptr, std::string, std::string>
+  getPolarizationEfficiencies();
   void applyPolarizationCorrection(std::string const &outputIvsLam);
 };
 
