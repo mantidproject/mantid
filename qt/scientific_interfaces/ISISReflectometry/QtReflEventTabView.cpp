@@ -106,6 +106,8 @@ void QtReflEventTabView::enableSliceType(SliceType sliceType) {
   case SliceType::LogValue:
     m_logValueGroup.enable();
     break;
+  case SliceType::None:
+    break;
   }
 }
 
@@ -122,6 +124,8 @@ void QtReflEventTabView::disableSliceType(SliceType sliceType) {
     break;
   case SliceType::LogValue:
     m_logValueGroup.disable();
+    break;
+  case SliceType::None:
     break;
   }
 }
