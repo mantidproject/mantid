@@ -1402,6 +1402,25 @@ void LoadEventNexus::setTimeFilters(const bool monitors) {
 //-----------------------------------------------------------------------------
 //               ISIS event corrections
 //-----------------------------------------------------------------------------
+// LoadEventNexus::loadTimeOfFlight and LoadEventNexus::loadTimeOfFlightData
+// concern loading time of flight bins from early ISIS event mode datasets.
+//
+// Due to hardware issues with retro-fitting event mode to old electronics,
+// ISIS event mode is really a very fine histogram with between 1 and 2
+// microseconds bins.
+//
+// If we just took "middle of bin" as the true event time here then WISH
+// observed strange ripples when they added spectra. The solution was to
+// randomise the probability of an event within the bin.
+//
+// This randomisation is now performed in the control program which also writes
+// the "event_time_offset_shift" dataset (with a single value of "random") when
+// it has been performed. If this dataset is present in an event file then no
+// randomisation is performed in LoadEventNexus.
+//
+// This code should remain for loading older ISIS event datasets.
+//-----------------------------------------------------------------------------
+
 /**
 * Check if time_of_flight can be found in the file and load it
 *

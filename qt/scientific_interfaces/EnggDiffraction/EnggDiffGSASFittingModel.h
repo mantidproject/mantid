@@ -81,7 +81,7 @@ protected slots:
   void processRefinementFailed(const std::string &failureMessage);
 
   void processRefinementSuccessful(
-      Mantid::API::IAlgorithm_sptr alg,
+      Mantid::API::IAlgorithm_sptr successfulAlgorithm,
       const GSASIIRefineFitPeaksOutputProperties &refinementResults);
 
   void processRefinementCancelled();
@@ -89,7 +89,7 @@ protected slots:
 private:
   static constexpr double DEFAULT_PAWLEY_DMIN = 1;
   static constexpr double DEFAULT_PAWLEY_NEGATIVE_WEIGHT = 0;
-  static const size_t MAX_BANKS = 2;
+  static const size_t MAX_BANKS = 3;
 
   RunMap<MAX_BANKS, double> m_gammaMap;
   RunMap<MAX_BANKS, Mantid::API::ITableWorkspace_sptr> m_latticeParamsMap;
