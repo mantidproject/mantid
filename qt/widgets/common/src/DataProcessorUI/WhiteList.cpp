@@ -10,11 +10,13 @@ namespace DataProcessor {
 * @param description : a description of this column
 * @param isShown : true if we want to use what's in this column to
 * generate the output ws name.
+* @param isKey : true if we want to use this column as a key value i.e.
+* something that uniquely identifies the row within the group
 * @param prefix : the prefix to be added to the value of this column
 */
 void WhiteList::addElement(const QString &colName, const QString &algProperty,
                            const QString &description, bool isShown,
-                           const QString &prefix) {
+                           const QString &prefix, bool isKey) {
   m_names.emplace_back(colName);
   m_algorithmProperties.emplace_back(algProperty);
   m_isShown.push_back(isShown);
@@ -23,6 +25,7 @@ void WhiteList::addElement(const QString &colName, const QString &algProperty,
    * See: http://en.cppreference.com/w/cpp/container/vector/emplace_back */
   m_prefixes.emplace_back(prefix);
   m_descriptions.emplace_back(description);
+  m_isKey.push_back(isKey);
 }
 
 /** Returns the column index for a column specified via its name
@@ -62,6 +65,22 @@ size_t WhiteList::size() const { return m_names.size(); }
 */
 bool WhiteList::isShown(int index) const { return m_isShown.at(index); }
 
+/** Check whether any of the columns are marked as a key column
+ */
+bool WhiteList::hasKeyColumns() const {
+  for (auto isKey : m_isKey) {
+    if (isKey)
+      return true;
+  }
+  return false;
+}
+
+/** Returns true if the contents of this column should be used to identify the
+ * row uniquely within the group
+ * @param index : The column index
+*/
+bool WhiteList::isKey(int index) const { return m_isKey.at(index); }
+
 /** Returns the column prefix used to generate the name of the output ws (will
 * only be used if showValue is true for this column
 * @param index : The column index
@@ -80,7 +99,7 @@ auto WhiteList::begin() const -> const_iterator { return cbegin(); }
 auto WhiteList::cbegin() const -> const_iterator {
   return const_iterator(m_names.cbegin(), m_descriptions.cbegin(),
                         m_algorithmProperties.cbegin(), m_isShown.cbegin(),
-                        m_prefixes.cbegin());
+                        m_prefixes.cbegin(), m_isKey.cbegin());
 }
 
 /// Returns a ForwardIterator pointing to one past the last entry in the
@@ -88,7 +107,7 @@ auto WhiteList::cbegin() const -> const_iterator {
 auto WhiteList::cend() const -> const_iterator {
   return const_iterator(m_names.cend(), m_descriptions.cend(),
                         m_algorithmProperties.cend(), m_isShown.cend(),
-                        m_prefixes.cend());
+                        m_prefixes.cend(), m_isKey.cend());
 }
 
 ConstColumnIterator operator+(const ConstColumnIterator &lhs,

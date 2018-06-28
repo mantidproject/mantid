@@ -19,13 +19,15 @@ New features
 ############
 * A string of wavelength ranges can now be specified. A reduction is then done for each wavelength range.
 * :ref:`SANSMask <algm-SANSMask>` is extended to have a `MaskedWorkspace` property, to copy the mask from.
+* EQSANS is configured for live data
 
 Improvements
 ############
 * Added thickness column to table in new GUI.
 * The Beam centre finder now takes the default radius limits from the instrument parameter file if specified.
 * Added EventSlice option to options column in new GUI.
-* Updated old backend to mask by detector ID rather than spectrum number, improving reliability. 
+* Updated old backend to mask by detector ID rather than spectrum number, improving reliability.
+* Added thickness column to table in new GUI.
 * Added EventSlice option to options column in new GUI.
 * Added Radius Cutoff and Wavelength Cutoff boxes to the old and new GUI.
 * Improved error messages in the new GUI to be more obvious and clearer.

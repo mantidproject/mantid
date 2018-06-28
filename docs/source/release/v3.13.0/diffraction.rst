@@ -17,11 +17,15 @@ Powder Diffraction
   taken as the default, and any changes are reverted back to the
   default once the line they were made on has finished executing
 - Focusing in texture-mode (160 banks) was enabled for GEM. The output
-  is saved to the three-column MAUD format
+  is saved to several formats:
+
+  - The three-column ``.gem`` format
+  - The ``.maud`` calibration file format, for conversion to d-spacing (uses a new algorithm
+    :ref:`SaveGEMMAUDParamFile <algm-SaveGEMMAUDParamFile>`
 - :ref:`PDCalibration <algm-PDCalibration>` has major upgrades including making use of :ref:`FitPeaks <algm-FitPeaks>` for the individual peak fitting
 - New NOMAD instrument geometry for 2018 run cycle
 - New POWGEN instrument geometry for 2018 run cycle
-- New SNAP instrument geometry for 2018 run cycle
+- New SNAP instrument geometry for 2018 run cycle with configuration for live data
 
 New Features
 ------------
@@ -56,6 +60,7 @@ Engineering Diffraction
   - After focusing, workspace sample logs are saved to HDF5 using
     :ref:`ExportSampleLogsToHDF5 <algm-ExportSampleLogsToHDF5>`
 
+- The ``.nxs`` file from the Focus tab is now saved in the Focus directory with all the other focus output
 
 :ref:`Release 3.13.0 <v3.13.0>`
 
@@ -72,6 +77,8 @@ Single Crystal Diffraction
 - New algorithms :ref:`LoadWANDSCD <algm-LoadWANDSCD>` and :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` to load single crystal HB2C data and convert it to either Q-sample or HKL space.
 
 - New algorithm :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` to integrate peaks using 3D profile fitting in reciprocal space.
+
+- New TOPAZ instrument geometry for 2018 run cycle
 
 Improvements
 ############

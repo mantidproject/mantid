@@ -236,7 +236,7 @@ public:
     TS_ASSERT_EQUALS(model.data(model.index(0, 0), Qt::BackgroundRole)
                          .toString()
                          .toStdString(),
-                     "#00b300");
+                     Colour::SUCCESS);
     TS_ASSERT_EQUALS(model.data(model.index(1, 0), Qt::BackgroundRole)
                          .toString()
                          .toStdString(),
@@ -244,7 +244,7 @@ public:
     TS_ASSERT_EQUALS(model.data(model.index(2, 0), Qt::BackgroundRole)
                          .toString()
                          .toStdString(),
-                     "#00b300");
+                     Colour::SUCCESS);
     TS_ASSERT_EQUALS(model.data(model.index(3, 0), Qt::BackgroundRole)
                          .toString()
                          .toStdString(),

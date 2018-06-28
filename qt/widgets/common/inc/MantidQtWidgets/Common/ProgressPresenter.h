@@ -24,9 +24,14 @@ public:
   }
 
   void doReport(const std::string &) override {
-    m_progressableView->setProgress(static_cast<int>(m_i));
+    if (m_progressableView->isPercentageIndicator())
+      m_progressableView->setProgress(static_cast<int>(m_i));
   }
   void clear() { m_progressableView->clearProgress(); }
+  void setAsPercentageIndicator() {
+    m_progressableView->setAsPercentageIndicator();
+  }
+  void setAsEndlessIndicator() { m_progressableView->setAsEndlessIndicator(); }
   ~ProgressPresenter() {}
 };
 #endif /* MANTIDQTMANTIDWIDGETS_PROGRESSPRESENTER_H */

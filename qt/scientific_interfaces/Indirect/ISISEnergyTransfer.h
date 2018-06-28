@@ -69,12 +69,14 @@ private slots:
 private:
   Ui::ISISEnergyTransfer m_uiForm;
 
-  QPair<QString, QString> createMapFile(
-      const QString &
+  std::pair<std::string, std::string> createMapFile(
+      const std::string &
           groupType); ///< create the mapping file with which to group results
   std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
   std::vector<std::string>
       m_outputWorkspaces; ///< get a vector of workspaces to plot
+  QString validateDetectorGrouping();
+  const std::string createDetectorGroupingString();
 };
 } // namespace CustomInterfaces
 } // namespace Mantid
