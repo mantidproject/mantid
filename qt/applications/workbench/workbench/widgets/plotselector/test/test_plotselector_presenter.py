@@ -275,7 +275,7 @@ class PlotSelectorPresenterTest(unittest.TestCase):
     # ---------------------- Plot Exporting -------------------------
 
     def test_exporting_single_plot_generates_correct_filename(self):
-        self.presenter.export_plots('Plot1', '/home/Documents', '.xyz')
+        self.presenter.export_plot('Plot1', '/home/Documents', '.xyz')
         self.model.export_plot.assert_called_once_with('Plot1', '/home/Documents' + os.sep + 'Plot1.xyz')
 
     def test_exporting_multiple_plots_generates_correct_filename(self):

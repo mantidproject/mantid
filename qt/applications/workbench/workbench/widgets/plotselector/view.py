@@ -175,7 +175,7 @@ class PlotSelectorView(QWidget):
         :param position: The position to open the menu, e.g. where
                          the mouse button was clicked
         """
-        self.context_menu.exec_(self.mapToGlobal(position))
+        self.context_menu.exec_(self.list_widget.mapToGlobal(position))
 
     # ------------------------ Plot Updates ------------------------
 

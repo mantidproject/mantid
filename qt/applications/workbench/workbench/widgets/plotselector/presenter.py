@@ -303,7 +303,7 @@ class PlotSelectorPresenter(object):
         for plot_name in self.view.get_all_selected_plot_names():
             self.export_plot(plot_name, dir_name, extension)
 
-    def export_plot(self, dir_name, path, extension):
+    def export_plot(self, plot_name, dir_name, extension):
         """
         Given a directory name, plot name and extension construct
         the absolute path name and call the model to save the figure
@@ -312,9 +312,9 @@ class PlotSelectorPresenter(object):
         :param extension: The file type extension (must be supported
                           by matplotlib's savefig)
         """
-        if path:
-            filename = os.path.join(path, dir_name + extension)
+        if dir_name:
+            filename = os.path.join(dir_name, plot_name + extension)
             try:
-                self.model.export_plot(dir_name, filename)
+                self.model.export_plot(plot_name, filename)
             except ValueError as e:
                 print(e)
