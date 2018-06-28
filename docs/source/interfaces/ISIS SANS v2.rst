@@ -551,8 +551,13 @@ Cuts
 
 .. _Cuts:
 
-These allow radius and wavelength cuts to be set. These are in mm
-and are passed to :ref:`Q1D <algm-Q1D>` as properties.
+.. image::  ../images/sans_isis_v2_q_tab_cuts.png
+   :align: center
+   :width: 800px
+
+These allow radius and wavelength cuts to be set. They 
+are passed to :ref:`Q1D <algm-Q1D>` as the RadiusCut and
+WaveCut respectively.
 
 Q limits
 """"""""
