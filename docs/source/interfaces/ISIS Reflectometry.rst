@@ -492,10 +492,11 @@ a change in the data size, and will need to be manually re-started from the
 GUI.
 
 Live data monitoring has some additional requirements:
+
 - EPICS support must be installed in Mantid. Tthis is included by default on
-Windows but see the instructions `here
-<http://https://www.mantidproject.org/PyEpics_In_Mantid/>`_ for other
-platforms.
+Windows but see the instructions `here<http://https://www.mantidproject.org/PyEpics_In_Mantid/>`_
+for other platforms.
+
 - The instrument must be on IBEX or have additional processes installed to
   supply the EPICS values.
 
