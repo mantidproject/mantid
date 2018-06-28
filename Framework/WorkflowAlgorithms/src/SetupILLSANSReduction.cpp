@@ -124,80 +124,9 @@ void SetupILLSANSReduction::init() {
   setPropertyGroup("SolidAngleCorrection", load_grp);
   setPropertyGroup("DetectorTubes", load_grp);
 
-  // Sensitivity
-  const std::string eff_grp = "Sensitivity";
-  declareProperty(
-      make_unique<API::FileProperty>("SensitivityFile", "",
-                                     API::FileProperty::OptionalLoad, ".nxs"),
-      "Flood field or sensitivity file.");
-  declareProperty(
-      "MinEfficiency", EMPTY_DBL(), positiveDouble,
-      "Minimum efficiency for a pixel to be considered (default: no minimum).");
-  declareProperty(
-      "MaxEfficiency", EMPTY_DBL(), positiveDouble,
-      "Maximum efficiency for a pixel to be considered (default: no maximum).");
-  declareProperty("UseDefaultDC", true, "If true, the dark current subtracted "
-                                        "from the sample data will also be "
-                                        "subtracted from the flood field.");
-  declareProperty(
-      make_unique<API::FileProperty>("SensitivityDarkCurrentFile", "",
-                                     API::FileProperty::OptionalLoad, ".nxs"),
-      "The name of the input file to load as dark current.");
-  // - sensitivity beam center
-  declareProperty("SensitivityBeamCenterMethod", "None",
-                  boost::make_shared<StringListValidator>(centerOptions),
-                  "Method for determining the sensitivity data beam center");
-
-  //    Option 1: Set beam center by hand
-  declareProperty("SensitivityBeamCenterX", EMPTY_DBL(),
-                  "Sensitivity beam center location in X [pixels]");
-  setPropertySettings("SensitivityBeamCenterX",
-                      make_unique<VisibleWhenProperty>(
-                          "SensitivityBeamCenterMethod", IS_EQUAL_TO, "Value"));
-
-  declareProperty("SensitivityBeamCenterY", EMPTY_DBL(),
-                  "Sensitivity beam center location in Y [pixels]");
-  setPropertySettings("SensitivityBeamCenterY",
-                      make_unique<VisibleWhenProperty>(
-                          "SensitivityBeamCenterMethod", IS_EQUAL_TO, "Value"));
-
-  //    Option 2: Find it (expose properties from FindCenterOfMass)
-  declareProperty(
-      make_unique<API::FileProperty>("SensitivityBeamCenterFile", "",
-                                     API::FileProperty::OptionalLoad, ".xml"),
-      "The name of the input data file to load");
-  setPropertySettings(
-      "SensitivityBeamCenterFile",
-      make_unique<VisibleWhenProperty>("SensitivityBeamCenterMethod",
-                                       IS_NOT_EQUAL_TO, "None"));
-
-  declareProperty(
-      "SensitivityBeamCenterRadius", EMPTY_DBL(),
-      "Radius of the beam area used the exclude the beam when calculating "
-      "the center of mass of the scattering pattern [pixels]. Default=3.0");
-  setPropertySettings("SensitivityBeamCenterRadius",
-                      make_unique<VisibleWhenProperty>(
-                          "BeamCenterMethod", IS_EQUAL_TO, "Scattering"));
-
-  declareProperty("OutputSensitivityWorkspace", "",
-                  "Name to give the sensitivity workspace");
-
-  // -- Define group --
-  setPropertyGroup("SensitivityFile", eff_grp);
-  setPropertyGroup("MinEfficiency", eff_grp);
-  setPropertyGroup("MaxEfficiency", eff_grp);
-  setPropertyGroup("UseDefaultDC", eff_grp);
-  setPropertyGroup("SensitivityDarkCurrentFile", eff_grp);
-  setPropertyGroup("SensitivityBeamCenterMethod", eff_grp);
-  setPropertyGroup("SensitivityBeamCenterX", eff_grp);
-  setPropertyGroup("SensitivityBeamCenterY", eff_grp);
-  setPropertyGroup("SensitivityBeamCenterFile", eff_grp);
-  setPropertyGroup("SensitivityBeamCenterRadius", eff_grp);
-  setPropertyGroup("OutputSensitivityWorkspace", eff_grp);
-
   // Transmission
+  const std::vector<std::string> transOptions{"None", "Value", "DirectBeam"};
   const std::string trans_grp = "Transmission";
-  std::vector<std::string> transOptions{"Value", "DirectBeam"};
   declareProperty("TransmissionMethod", "Value",
                   boost::make_shared<StringListValidator>(transOptions),
                   "Transmission determination method");
@@ -373,6 +302,316 @@ void SetupILLSANSReduction::init() {
   setPropertyGroup("BckTransmissionBeamCenterFile", bck_grp);
   setPropertyGroup("BckTransmissionDarkCurrentFile", bck_grp);
   setPropertyGroup("BckThetaDependentTransmission", bck_grp);
+
+  // Sensitivity
+  const std::string eff_grp = "Sensitivity";
+  declareProperty(
+      make_unique<API::FileProperty>("SensitivityFile", "",
+                                     API::FileProperty::OptionalLoad, ".nxs"),
+      "Flood field or sensitivity file.");
+
+  // Sensitivity Normalisation
+  declareProperty(
+      "SensitivityNormalisation", "None",
+      boost::make_shared<StringListValidator>(incidentBeamNormOptions),
+      "Options for data normalisation");
+
+  declareProperty(
+      "MinEfficiency", EMPTY_DBL(), positiveDouble,
+      "Minimum efficiency for a pixel to be considered (default: no minimum).");
+  declareProperty(
+      "MaxEfficiency", EMPTY_DBL(), positiveDouble,
+      "Maximum efficiency for a pixel to be considered (default: no maximum).");
+  declareProperty("UseDefaultDC", true, "If true, the dark current subtracted "
+                                        "from the sample data will also be "
+                                        "subtracted from the flood field.");
+  declareProperty(
+      make_unique<API::FileProperty>("SensitivityDarkCurrentFile", "",
+                                     API::FileProperty::OptionalLoad, ".nxs"),
+      "The name of the input file to load as dark current.");
+  // - sensitivity beam center
+  declareProperty("SensitivityBeamCenterMethod", "None",
+                  boost::make_shared<StringListValidator>(centerOptions),
+                  "Method for determining the sensitivity data beam center");
+
+  //    Option 1: Set beam center by hand
+  declareProperty("SensitivityBeamCenterX", EMPTY_DBL(),
+                  "Sensitivity beam center location in X [pixels]");
+  setPropertySettings("SensitivityBeamCenterX",
+                      make_unique<VisibleWhenProperty>(
+                          "SensitivityBeamCenterMethod", IS_EQUAL_TO, "Value"));
+
+  declareProperty("SensitivityBeamCenterY", EMPTY_DBL(),
+                  "Sensitivity beam center location in Y [pixels]");
+  setPropertySettings("SensitivityBeamCenterY",
+                      make_unique<VisibleWhenProperty>(
+                          "SensitivityBeamCenterMethod", IS_EQUAL_TO, "Value"));
+
+  //    Option 2: Find it (expose properties from FindCenterOfMass)
+  declareProperty(
+      make_unique<API::FileProperty>("SensitivityBeamCenterFile", "",
+                                     API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input data file to load");
+  setPropertySettings(
+      "SensitivityBeamCenterFile",
+      make_unique<VisibleWhenProperty>("SensitivityBeamCenterMethod",
+                                       IS_NOT_EQUAL_TO, "None"));
+
+  declareProperty(
+      "SensitivityBeamCenterRadius", EMPTY_DBL(),
+      "Radius of the beam area used the exclude the beam when calculating "
+      "the center of mass of the scattering pattern [pixels]. Default=3.0");
+  setPropertySettings("SensitivityBeamCenterRadius",
+                      make_unique<VisibleWhenProperty>(
+                          "BeamCenterMethod", IS_EQUAL_TO, "Scattering"));
+
+  declareProperty("OutputSensitivityWorkspace", "",
+                  "Name to give the sensitivity workspace");
+
+  // Sensitivity Transmission
+  declareProperty("SensitivityTransmissionMethod", "Value",
+                  boost::make_shared<StringListValidator>(transOptions),
+                  "Transmission determination method for sensitivity");
+
+  declareProperty("SensitivityTransmissionValue", EMPTY_DBL(), positiveDouble,
+                  "Transmission value for the flood field material "
+                  "(default: no transmission).");
+  declareProperty("SensitivityTransmissionError", 0.0, positiveDouble,
+                  "Transmission error for the flood field material "
+                  "(default: no transmission).");
+
+  setPropertySettings(
+      "SensitivityTransmissionValue",
+      make_unique<VisibleWhenProperty>("SensitivityTransmissionMethod",
+                                       IS_EQUAL_TO, "Value"));
+
+  setPropertySettings(
+      "SensitivityTransmissionError",
+      make_unique<VisibleWhenProperty>("SensitivityTransmissionMethod",
+                                       IS_EQUAL_TO, "Value"));
+
+  // - Direct beam method transmission calculation
+  declareProperty(
+      "SensitivityTransmissionBeamRadius", 3.0,
+      "Radius of the beam area used to compute the transmission [pixels]");
+  setPropertySettings(
+      "SensitivityTransmissionBeamRadius",
+      make_unique<VisibleWhenProperty>("SensitivityTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(
+      make_unique<API::FileProperty>("SensitivityTransmissionEmptyDataFile", "",
+                                     API::FileProperty::OptionalLoad, ".nxs"),
+      "Empty data file for transmission calculation");
+  setPropertySettings(
+      "SensitivityTransmissionEmptyDataFile",
+      make_unique<VisibleWhenProperty>("SensitivityTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
+
+  declareProperty(make_unique<API::FileProperty>(
+                      "SensitivityTransmissionSampleDataFile", "",
+                      API::FileProperty::OptionalLoad, ".nxs"),
+                  "Sample data file for transmission calculation");
+  setPropertySettings(
+      "SensitivityTransmissionSampleDataFile",
+      make_unique<VisibleWhenProperty>("SensitivityTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
+
+  // Transmission beam center
+  declareProperty("SensitivityTransmissionBeamCenterMethod", "None",
+                  boost::make_shared<StringListValidator>(centerOptions),
+                  "Method for determining the transmission data beam center");
+  setPropertySettings(
+      "SensitivityTransmissionBeamCenterMethod",
+      make_unique<VisibleWhenProperty>("SensitivityTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
+
+  //    Option 1: Set beam center by hand
+  declareProperty("SensitivityTransmissionBeamCenterX", EMPTY_DBL(),
+                  "Transmission beam center location in X [pixels]");
+  setPropertySettings(
+      "SensitivityTransmissionBeamCenterX",
+      make_unique<VisibleWhenProperty>("SensitivityTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
+  declareProperty("SensitivityTransmissionBeamCenterY", EMPTY_DBL(),
+                  "Transmission beam center location in Y [pixels]");
+  setPropertySettings(
+      "SensitivityTransmissionBeamCenterY",
+      make_unique<VisibleWhenProperty>("SensitivityTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
+
+  //    Option 2: Find it (expose properties from FindCenterOfMass)
+  declareProperty(make_unique<API::FileProperty>(
+                      "SensitivityTransmissionBeamCenterFile", "",
+                      API::FileProperty::OptionalLoad, ".nxs"),
+                  "The name of the input data file to load");
+  setPropertySettings(
+      "SensitivityTransmissionBeamCenterFile",
+      make_unique<VisibleWhenProperty>("SensitivityTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
+
+  declareProperty(
+      make_unique<API::FileProperty>("SensitivityTransmissionDarkCurrentFile",
+                                     "", API::FileProperty::OptionalLoad,
+                                     ".nxs"),
+      "The name of the input data file to load as transmission dark current.");
+  setPropertySettings(
+      "SensitivityTransmissionDarkCurrentFile",
+      make_unique<VisibleWhenProperty>("SensitivityTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
+
+  declareProperty(
+      "SensitivityTransmissionUseSampleDC", true,
+      "If true, the sample dark current will be used IF a dark current file is"
+      "not set.");
+  setPropertySettings(
+      "SensitivityTransmissionUseSampleDC",
+      make_unique<VisibleWhenProperty>("SensitivityTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
+
+  declareProperty(
+      "SensitivityThetaDependentTransmission", true,
+      "If true, a theta-dependent transmission correction will be applied.");
+
+  setPropertySettings(
+      "SensitivityThetaDependentTransmission",
+      make_unique<VisibleWhenProperty>("SensitivityTransmissionMethod",
+                                       IS_NOT_EQUAL_TO, "None"));
+
+  // Sensitivity Background
+  declareProperty("SensitivityBackgroundFiles", "", "Background data files");
+  declareProperty("SensitivityBckTransmissionMethod", "None",
+                  boost::make_shared<StringListValidator>(transOptions),
+                  "Transmission determination method");
+
+  // - Transmission value entered by hand
+  declareProperty("SensitivityBckTransmissionValue", EMPTY_DBL(), positiveDouble,
+                  "Transmission value.");
+  setPropertySettings("SensitivityBckTransmissionValue",
+                      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                                       IS_EQUAL_TO, "Value"));
+
+  declareProperty("SensitivityBckTransmissionError", EMPTY_DBL(), positiveDouble,
+                  "Transmission error.");
+  setPropertySettings("SensitivityBckTransmissionError",
+                      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                                       IS_EQUAL_TO, "Value"));
+
+  // - Direct beam method transmission calculation
+  declareProperty(
+      "SensitivityBckTransmissionBeamRadius", 3.0,
+      "Radius of the beam area used to compute the transmission [pixels]");
+  setPropertySettings("SensitivityBckTransmissionBeamRadius",
+                      make_unique<VisibleWhenProperty>(
+                          "SensitivityBckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(
+      make_unique<API::FileProperty>("SensitivityBckTransmissionSampleDataFile", "",
+                                     API::FileProperty::OptionalLoad, ".nxs"),
+      "Sample data file for transmission calculation");
+  setPropertySettings("SensitivityBckTransmissionSampleDataFile",
+                      make_unique<VisibleWhenProperty>(
+                          "SensitivityBckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(
+      make_unique<API::FileProperty>("SensitivityBckTransmissionEmptyDataFile", "",
+                                     API::FileProperty::OptionalLoad, ".nxs"),
+      "Empty data file for transmission calculation");
+  setPropertySettings("SensitivityBckTransmissionEmptyDataFile",
+                      make_unique<VisibleWhenProperty>(
+                          "SensitivityBckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+
+  // - transmission beam center
+  declareProperty("SensitivityBckTransmissionBeamCenterMethod", "None",
+                  boost::make_shared<StringListValidator>(centerOptions),
+                  "Method for determining the transmission data beam center");
+  setPropertySettings("SensitivityBckTransmissionBeamCenterMethod",
+                      make_unique<VisibleWhenProperty>(
+                          "SensitivityBckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  //    Option 1: Set beam center by hand
+  declareProperty("SensitivityBckTransmissionBeamCenterX", EMPTY_DBL(),
+                  "Transmission beam center location in X [pixels]");
+  setPropertySettings("SensitivityBckTransmissionBeamCenterX",
+                      make_unique<VisibleWhenProperty>(
+                          "SensitivityBckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty("SensitivityBckTransmissionBeamCenterY", EMPTY_DBL(),
+                  "Transmission beam center location in Y [pixels]");
+  //    Option 2: Find it (expose properties from FindCenterOfMass)
+  setPropertySettings("SensitivityBckTransmissionBeamCenterY",
+                      make_unique<VisibleWhenProperty>(
+                          "SensitivityBckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(
+      make_unique<API::FileProperty>("SensitivityBckTransmissionBeamCenterFile", "",
+                                     API::FileProperty::OptionalLoad, ".nxs"),
+      "The name of the input data file to load");
+  setPropertySettings("SensitivityBckTransmissionBeamCenterFile",
+                      make_unique<VisibleWhenProperty>(
+                          "SensitivityBckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+
+  declareProperty(
+      make_unique<API::FileProperty>("SensitivityBckTransmissionDarkCurrentFile", "",
+                                     API::FileProperty::OptionalLoad, ".nxs"),
+      "The name of the input data file to load as background "
+      "transmission dark current.");
+  setPropertySettings("SensitivityBckTransmissionDarkCurrentFile",
+                      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                                       IS_EQUAL_TO,
+                                                       "DirectBeam"));
+  setPropertySettings("SensitivityBckTransmissionDarkCurrentFile",
+                      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                                       IS_EQUAL_TO,
+                                                       "DirectBeam"));
+  declareProperty(
+      "SensitivityBckTransmissionUseSampleDC", true,
+      "If true, the sample dark current will be used IF a dark current file is"
+      "not set.");
+  setPropertySettings("SensitivityBckTransmissionUseSampleDC",
+                      make_unique<VisibleWhenProperty>(
+                          "SensitivityBckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(
+      "SensitivityBckThetaDependentTransmission", true,
+      "If true, a theta-dependent transmission correction will be applied.");
+  setPropertySettings("SensitivityBckThetaDependentTransmission",
+                      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                                       IS_NOT_EQUAL_TO,
+                                                       "None"));
+  // -- Define group --
+  setPropertyGroup("SensitivityFile", eff_grp);
+  setPropertyGroup("SensitivityNormalisation", eff_grp);
+  setPropertyGroup("MinEfficiency", eff_grp);
+  setPropertyGroup("MaxEfficiency", eff_grp);
+  setPropertyGroup("UseDefaultDC", eff_grp);
+  setPropertyGroup("SensitivityDarkCurrentFile", eff_grp);
+  setPropertyGroup("SensitivityBeamCenterMethod", eff_grp);
+  setPropertyGroup("SensitivityBeamCenterX", eff_grp);
+  setPropertyGroup("SensitivityBeamCenterY", eff_grp);
+  setPropertyGroup("SensitivityBeamCenterFile", eff_grp);
+  setPropertyGroup("SensitivityBeamCenterRadius", eff_grp);
+  setPropertyGroup("OutputSensitivityWorkspace", eff_grp);
+  setPropertyGroup("SensitivityTransmissionValue", eff_grp);
+  setPropertyGroup("SensitivityTransmissionError", eff_grp);
+  setPropertyGroup("SensitivityTransmissionMethod", eff_grp);
+  setPropertyGroup("SensitivityTransmissionBeamRadius", eff_grp);
+  setPropertyGroup("SensitivityTransmissionEmptyDataFile", eff_grp);
+  setPropertyGroup("SensitivityTransmissionSampleDataFile", eff_grp);
+  setPropertyGroup("SensitivityTransmissionBeamCenterMethod", eff_grp);
+  setPropertyGroup("SensitivityTransmissionBeamCenterX", eff_grp);
+  setPropertyGroup("SensitivityTransmissionBeamCenterY", eff_grp);
+  setPropertyGroup("SensitivityTransmissionBeamCenterFile", eff_grp);
+  setPropertyGroup("SensitivityTransmissionDarkCurrentFile", eff_grp);
+  setPropertyGroup("SensitivityTransmissionUseSampleDC", eff_grp);
+  setPropertyGroup("SensitivityThetaDependentTransmission", eff_grp);
+  setPropertyGroup("SensitivityBackgroundFiles", eff_grp);
+  setPropertyGroup("SensitivityBckTransmissionMethod", eff_grp);
+  setPropertyGroup("SensitivityBckTransmissionValue", eff_grp);
+  setPropertyGroup("SensitivityBckTransmissionError", eff_grp);
+  setPropertyGroup("SensitivityBckTransmissionBeamRadius", eff_grp);
+  setPropertyGroup("SensitivityBckTransmissionSampleDataFile", eff_grp);
+  setPropertyGroup("SensitivityBckTransmissionEmptyDataFile", eff_grp);
+  setPropertyGroup("SensitivityBckTransmissionBeamCenterMethod", eff_grp);
+  setPropertyGroup("SensitivityBckTransmissionBeamCenterX", eff_grp);
+  setPropertyGroup("SensitivityBckTransmissionBeamCenterY", eff_grp);
+  setPropertyGroup("SensitivityBckTransmissionBeamCenterFile", eff_grp);
+  setPropertyGroup("SensitivityBckTransmissionDarkCurrentFile", eff_grp);
+  setPropertyGroup("SensitivityBckTransmissionUseSampleDC", eff_grp);
+  setPropertyGroup("SensitivityBckThetaDependentTransmission", eff_grp);
 
   // Absolute scale
   const std::string abs_scale_grp = "Absolute Scale";
@@ -740,6 +979,79 @@ void SetupILLSANSReduction::setupSensitivity(
     effAlg->setPropertyValue("OutputSensitivityWorkspace", outputSensitivityWS);
     effAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
+    effAlg->setPropertyValue("Normalisation",
+                             getPropertyValue("Normalisation"));
+    effAlg->setPropertyValue("TransmissionMethod",
+                             getPropertyValue("SensitivityTransmissionMethod"));
+    const double sensTransBeamRadius =
+        getProperty("SensitivityTransmissionBeamRadius");
+    effAlg->setProperty("TransmissionBeamRadius", sensTransBeamRadius);
+    effAlg->setPropertyValue(
+        "TransmissionEmptyDataFile",
+        getPropertyValue("SensitivityTransmissionEmptyDataFile"));
+    effAlg->setPropertyValue(
+        "TransmissionSampleDataFile",
+        getPropertyValue("SensitivityTransmissionSampleDataFile"));
+    effAlg->setPropertyValue(
+        "TransmissionBeamCenterMethod",
+        getPropertyValue("SensitivityTransmissionBeamCenterMethod"));
+    const double sensTransBeamCenterX =
+        getProperty("SensitivityTransmissionBeamCenterX");
+    effAlg->setProperty("TransmissionBeamCenterX", sensTransBeamCenterX);
+    const double sensTransBeamCenterY =
+        getProperty("SensitivityTransmissionBeamCenterY");
+    effAlg->setProperty("TransmissionBeamCenterY", sensTransBeamCenterY);
+    effAlg->setPropertyValue(
+        "TransmissionDarkCurrentFile",
+        getPropertyValue("SensitivityTransmissionDarkCurrentFile"));
+    const bool sensTransUseSampleDC =
+        getProperty("SensitivityTransmissionUseSampleDC");
+    effAlg->setProperty("TransmissionUseSampleDC", sensTransUseSampleDC);
+    const bool sensThetaDependentTransmission =
+        getProperty("SensitivityThetaDependentTransmission");
+    effAlg->setProperty("ThetaDependentTransmission",
+                        sensThetaDependentTransmission);
+    effAlg->setPropertyValue("BackgroundFiles",
+                             getPropertyValue("SensitivityBackgroundFiles"));
+    effAlg->setPropertyValue(
+        "BckTransmissionMethod",
+        getPropertyValue("SensitivityBckTransmissionMethod"));
+    const double sensBckTransValue =
+        getProperty("SensitivityBckTransmissionValue");
+    const double sensBckTransError =
+        getProperty("SensitivityBckTransmissionError");
+    effAlg->setProperty("BckTransmissionValue", sensBckTransValue);
+    effAlg->setProperty("BckTransmissionError", sensBckTransError);
+    const double sensBckTransBeamRadius =
+        getProperty("SensitivityBckTransmissionBeamRadius");
+    effAlg->setProperty("BckTransmissionBeamRadius", sensBckTransBeamRadius);
+    effAlg->setPropertyValue(
+        "BckTransmissionSampleDataFile",
+        getPropertyValue("SensitivityBckTransmissionSampleDataFile"));
+    effAlg->setPropertyValue(
+        "BckTransmissionEmptyDataFile",
+        getPropertyValue("SensitivityBckTransmissionEmptyDataFile"));
+    effAlg->setPropertyValue(
+        "BckTransmissionBeamCenterMethod",
+        getPropertyValue("SensitivityBckTransmissionBeamCenterMethod"));
+    const double sensBckTransBeamCenterX =
+        getProperty("SensitivityBckTransmissionBeamCenterX");
+    const double sensBckTransBeamCenterY =
+        getProperty("SensitivityBckTransmissionBeamCenterY");
+    effAlg->setProperty("BckTransmissionBeamCenterX", sensBckTransBeamCenterX);
+    effAlg->setProperty("BckTransmissionBeamCenterY", sensBckTransBeamCenterY);
+    effAlg->setPropertyValue(
+        "BckTransmissionBeamCenterFile",
+        getPropertyValue("SensitivityBckTransmissionBeamCenterFile"));
+    effAlg->setPropertyValue(
+        "BckTransmissionDarkCurrentFile",
+        getPropertyValue("SensitivityBckTransmissionDarkCurrentFile"));
+    const bool sensBckTransUseSampleDC =
+        getProperty("SensitivityBckTransmissionUseSampleDC");
+    effAlg->setProperty("BckTransmissionUseSampleDC", sensBckTransUseSampleDC);
+    const bool sensBckThetaDepTrans =
+        getProperty("SensitivityBckThetaDependentTransmission");
+    effAlg->setProperty("BckThetaDependentTransmission", sensBckThetaDepTrans);
     auto sensalgProp = make_unique<AlgorithmProperty>("SensitivityAlgorithm");
     sensalgProp->setValue(effAlg->toString());
     reductionManager->declareProperty(std::move(sensalgProp));

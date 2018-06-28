@@ -359,7 +359,7 @@ void SANSSensitivityCorrection::process(
         reductionManager->getProperty("DarkCurrentAlgorithm");
     darkAlg->setChild(true);
     darkAlg->setProperty("InputWorkspace", rawFloodWS);
-    darkAlg->setProperty("OutputWorkspace", rawFloodWS);
+    darkAlg->setPropertyValue("OutputWorkspace", "__unused");
 
     // Execute as-is if we use the sample dark current, otherwise check
     // whether a dark current file was provided.
@@ -377,6 +377,7 @@ void SANSSensitivityCorrection::process(
       else
         dark_result = "   Dark current subtracted\n";
     }
+    rawFloodWS = darkAlg->getProperty("OutputWorkspace");
   } else if (!darkCurrentFile.empty()) {
     // We need to subtract the dark current for the flood field but no
     // dark
@@ -387,10 +388,11 @@ void SANSSensitivityCorrection::process(
           reductionManager->getProperty("DefaultDarkCurrentAlgorithm");
       darkAlg->setChild(true);
       darkAlg->setProperty("InputWorkspace", rawFloodWS);
-      darkAlg->setProperty("OutputWorkspace", rawFloodWS);
+      darkAlg->setPropertyValue("OutputWorkspace", "__unused");
       darkAlg->setProperty("Filename", darkCurrentFile);
       darkAlg->setProperty("PersistentCorrection", false);
       darkAlg->execute();
+      rawFloodWS = darkAlg->getProperty("OutputWorkspace");
       if (darkAlg->existsProperty("OutputMessage"))
         dark_result = darkAlg->getPropertyValue("OutputMessage");
     } else {
@@ -415,8 +417,10 @@ void SANSSensitivityCorrection::process(
     }
     normAlg->setProperty("NormalisationType", normalization);
     normAlg->setProperty("InputWorkspace", rawFloodWS);
-    normAlg->setProperty("OutputWorkspace", rawFloodWS);
+    normAlg->setPropertyValue("OutputWorkspace", "__unused");
+    normAlg->setChild(true);
     normAlg->execute();
+    rawFloodWS =normAlg->getProperty("OutputWorkspace");
   }
 
   // Look for solid angle correction algorithm
@@ -425,8 +429,9 @@ void SANSSensitivityCorrection::process(
         reductionManager->getProperty("SANSSolidAngleCorrection");
     solidAlg->setChild(true);
     solidAlg->setProperty("InputWorkspace", rawFloodWS);
-    solidAlg->setProperty("OutputWorkspace", rawFloodWS);
+    solidAlg->setPropertyValue("OutputWorkspace", "__unused");
     solidAlg->execute();
+    rawFloodWS = solidAlg->getProperty("OutputWorkspace");
     std::string msg = "Solid angle correction applied\n";
     if (solidAlg->existsProperty("OutputMessage"))
       msg = solidAlg->getPropertyValue("OutputMessage");
@@ -454,13 +459,14 @@ void SANSSensitivityCorrection::process(
       IAlgorithm_sptr transAlg =
           createChildAlgorithm("ApplyTransmissionCorrection");
       transAlg->setProperty("InputWorkspace", rawFloodWS);
-      transAlg->setProperty("OutputWorkspace", rawFloodWS);
+      transAlg->setPropertyValue("OutputWorkspace", "__unused");
       transAlg->setProperty("TransmissionValue", floodTransmissionValue);
       transAlg->setProperty("TransmissionError", floodTransmissionError);
       const bool thetaDependent =
           getProperty(propertyPrefix + "ThetaDependentTransmission");
       transAlg->setProperty("ThetaDependent", thetaDependent);
       transAlg->execute();
+      rawFloodWS = transAlg->getProperty("OutputWorkspace");
       m_output_message += "   |Applied transmission to flood field\n";
     }
   } else if (transmissionMethod == "DirectBeam") {
@@ -485,7 +491,7 @@ void SANSSensitivityCorrection::process(
     IAlgorithm_sptr transAlg =
         createChildAlgorithm("SANSDirectBeamTransmission");
     transAlg->setProperty("InputWorkspace", rawFloodWS);
-    transAlg->setProperty("OutputWorkspace", rawFloodWS);
+    transAlg->setPropertyValue("OutputWorkspace", "__unused");
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
     transAlg->setProperty("SampleDataFilename", sampleFilename);
     transAlg->setProperty("BeamRadius", beamRadius);
@@ -527,6 +533,7 @@ void SANSSensitivityCorrection::process(
     m_output_message +=
         "   |Calculated and applied direct beam transmission to flood field\n";
     transAlg->execute();
+    rawFloodWS = transAlg->getProperty("OutputWorkspace");
   }
 }
 
@@ -557,7 +564,8 @@ MatrixWorkspace_sptr SANSSensitivityCorrection::load(
     if (!isEmpty(center_y) && loadAlg->existsProperty("BeamCenterY"))
       loadAlg->setProperty("BeamCenterY", center_y);
     loadAlg->setPropertyValue("OutputWorkspace", rawFloodWSName);
-    loadAlg->executeAsChildAlg();
+    loadAlg->setChild(true);
+    loadAlg->execute();
     Workspace_sptr tmpWS = loadAlg->getProperty("OutputWorkspace");
     rawFloodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tmpWS);
     m_output_message += "   | Loaded " + fileName + " (Load algorithm)\n";
@@ -664,7 +672,18 @@ void SANSSensitivityCorrection::exec() {
           MatrixWorkspace_sptr rawBckWS =
               load(reductionManager, bckFileName, Poco::Path(bckFileName));
           process(rawBckWS, reductionManagerName, reductionManager, "Bck");
-          // rebin and subtract
+          Algorithm_sptr rebinAlg = createChildAlgorithm("RebinToWorkspace");
+          rebinAlg->setProperty("WorkspaceToRebin", rawBckWS);
+          rebinAlg->setProperty("WorkspaceToMatch", rawFloodWS);
+          rebinAlg->setProperty("OutputWorkspace", "__unused");
+          rebinAlg->execute();
+          rawBckWS = rebinAlg->getProperty("OutputWorkspace");
+          Algorithm_sptr minusAlg = createChildAlgorithm("Minus");
+          minusAlg->setProperty("LHSWorkspace", rawFloodWS);
+          minusAlg->setProperty("RHSWorkspace", rawBckWS);
+          minusAlg->setProperty("OutputWorkspace", "__unused");
+          minusAlg->execute();
+          rawFloodWS = minusAlg->getProperty("OutputWorkspace");
         }
 
         // Calculate detector sensitivity
