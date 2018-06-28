@@ -145,10 +145,10 @@ void ProjectRecovery::configKeyChanged(
   }
 
   if (notif->curValue() == "True") {
-	SAVING_ENABLED = true;
+    SAVING_ENABLED = true;
     startProjectSaving();
   } else {
-	SAVING_ENABLED = false;
+    SAVING_ENABLED = false;
     stopProjectSaving();
   }
 }
