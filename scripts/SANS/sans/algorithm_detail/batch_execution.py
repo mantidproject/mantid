@@ -958,32 +958,18 @@ def get_all_names_to_save(reduction_packages):
     """
     names_to_save = []
     for reduction_package in reduction_packages:
-        is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
-        is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
-        is_group = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction
-
         reduced_lab = reduction_package.reduced_lab
         reduced_hab = reduction_package.reduced_hab
         reduced_merged = reduction_package.reduced_merged
 
         # If we have merged reduction then store the
         if reduced_merged:
-            if is_group:
-                names_to_save.append(reduction_package.reduced_merged_base_name)
-            else:
-                names_to_save.append(reduced_merged.name())
+            names_to_save.append(reduced_merged.name())
         else:
             if reduced_lab:
-                if is_group:
-                    names_to_save.append(reduction_package.reduced_lab_base_name)
-                else:
-                    names_to_save.append(reduced_lab.name())
-
+                names_to_save.append(reduced_lab.name())
             if reduced_hab:
-                if is_group:
-                    names_to_save.append(reduction_package.reduced_hab_base_name)
-                else:
-                    names_to_save.append(reduced_hab.name())
+                names_to_save.append(reduced_hab.name())
 
     # We might have some workspaces as duplicates (the group workspaces), so make them unique
     return set(names_to_save)

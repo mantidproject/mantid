@@ -28,7 +28,7 @@ public:
 
   void testDefaultGetSlicingValues() {
     MockEventView mockView;
-    ReflEventPresenter presenter(&mockView);
+    ReflEventPresenter presenter(&mockView, 0);
 
     EXPECT_CALL(mockView, getUniformEvenTimeSlicingValues()).Times(Exactly(1));
     presenter.getTimeSlicingValues();
@@ -38,14 +38,14 @@ public:
 
   void testGetSlicingType() {
     MockEventView mockView;
-    ReflEventPresenter presenter(&mockView);
+    ReflEventPresenter presenter(&mockView, 0);
     presenter.notifySliceTypeChanged(SliceType::LogValue);
     TS_ASSERT_EQUALS("LogValue", presenter.getTimeSlicingType());
   }
 
   void testDisablesControlsOnReductionResumed() {
     MockEventView mockView;
-    ReflEventPresenter presenter(&mockView);
+    ReflEventPresenter presenter(&mockView, 0);
     EXPECT_CALL(mockView, disableSliceType(_)).Times(AtLeast(1));
     EXPECT_CALL(mockView, disableSliceTypeSelection()).Times(AtLeast(1));
 
@@ -56,7 +56,7 @@ public:
 
   void testDisablesCorrectControlsOnReductionResumed() {
     MockEventView mockView;
-    ReflEventPresenter presenter(&mockView);
+    ReflEventPresenter presenter(&mockView, 0);
     presenter.notifySliceTypeChanged(SliceType::Custom);
     EXPECT_CALL(mockView, disableSliceType(SliceType::Custom))
         .Times(AtLeast(1));
@@ -67,7 +67,7 @@ public:
 
   void testEnablesControlsOnReductionPaused() {
     MockEventView mockView;
-    ReflEventPresenter presenter(&mockView);
+    ReflEventPresenter presenter(&mockView, 0);
     EXPECT_CALL(mockView, enableSliceType(SliceType::UniformEven))
         .Times(AtLeast(1));
 

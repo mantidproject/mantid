@@ -72,6 +72,19 @@ class TableModelTest(unittest.TestCase):
 
         self.assertEqual(parsed_dict, expected_dict)
 
+    def test_get_number_of_rows_returns_number_of_entries(self):
+        table_model = TableModel()
+        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+        table_index_model = TableIndexModel(1, "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(1, table_index_model)
+
+        number_of_rows = table_model.get_number_of_rows()
+
+        self.assertEqual(number_of_rows, 2)
+
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string
         table_model = TableModel()

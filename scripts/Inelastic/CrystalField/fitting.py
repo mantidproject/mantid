@@ -211,8 +211,11 @@ class CrystalField(object):
         for param in CrystalField.field_parameter_names:
             if param in free_parameters:
                 self.function.setParameter(param, free_parameters[param])
-            elif param not in getSymmAllowedParam(self.Symmetry):
+            symm_allowed_par = getSymmAllowedParam(self.Symmetry)
+            if param not in symm_allowed_par:
                 self.function.fixParameter(param)
+            else:
+                self.function.freeParameter(param)
 
         self._setPeaks()
 
@@ -522,10 +525,12 @@ class CrystalField(object):
         else:
             self._resolutionModel = ResolutionModel(value)
         if self._isMultiSpectrum:
-            if not self._resolutionModel.multi or self._resolutionModel.NumberOfSpectra != self.NumberOfSpectra:
+            NumberOfPhysProp = len(self._physprop) if islistlike(self._physprop) else (0 if self._physprop is None else 1)
+            NSpec = self.NumberOfSpectra - NumberOfPhysProp
+            if not self._resolutionModel.multi or self._resolutionModel.NumberOfSpectra != NSpec:
                 raise RuntimeError('Resolution model is expected to have %s functions, found %s' %
-                                   (self.NumberOfSpectra, self._resolutionModel.NumberOfSpectra))
-            for i in range(self.NumberOfSpectra):
+                                   (NSpec, self._resolutionModel.NumberOfSpectra))
+            for i in range(self._resolutionModel.NumberOfSpectra):
                 model = self._resolutionModel.model[i]
                 self.crystalFieldFunction.setAttributeValue('FWHMX%s' % i, model[0])
                 self.crystalFieldFunction.setAttributeValue('FWHMY%s' % i, model[1])
@@ -1075,7 +1080,7 @@ class CrystalField(object):
         return params
 
     def _getFieldTies(self):
-        ties = re.search('ties=\((.*?)\)', str(self.crystalFieldFunction))
+        ties = re.search(',ties=\((.*?)\)', str(self.crystalFieldFunction))
         return ties.group(1) if ties else ''
 
     def _getFieldConstraints(self):

@@ -19,6 +19,9 @@ class StateGuiModel(object):
         super(StateGuiModel, self).__init__()
         self._user_file_items = user_file_items
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     @property
     def settings(self):
         return self._user_file_items
