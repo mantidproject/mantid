@@ -1,14 +1,14 @@
 try:
     import mantidplot
     HAS_MANTIDPLOT = True
+    HAS_MANTID_QT = False
 except(ImportError, ImportWarning):
     HAS_MANTIDPLOT = False
-
-try:
-    from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
-    HAS_MANTID_QT = True
-except(ImportError, ImportWarning):
-    HAS_MANTID_QT = False
+    try:
+        from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
+        HAS_MANTID_QT = True
+    except(ImportError, ImportWarning):
+        HAS_MANTID_QT = False
 
 import traceback
 
