@@ -4,7 +4,6 @@
 #include "IReflEventTabView.h"
 #include "IReflEventTabPresenter.h"
 #include "ReflEventTabPresenter.h"
-#include "Presenters/BatchPresenterFactory.h"
 #include <memory>
 
 namespace MantidQt {

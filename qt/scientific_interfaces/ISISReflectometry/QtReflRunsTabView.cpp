@@ -11,7 +11,6 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
-#include "Views/BatchView.h"
 #include <QMessageBox>
 
 namespace MantidQt {
@@ -22,12 +21,12 @@ using namespace MantidQt::MantidWidgets;
 //----------------------------------------------------------------------------------------------
 /** Constructor
 * @param parent :: The parent of this view
-* @param makeBatchView :: The factory for the BatchViews.
+* @param makeRunsTableView :: The factory for the RunsTableView.
 */
 QtReflRunsTabView::QtReflRunsTabView(QWidget *parent,
-                                     BatchViewFactory makeBatchView)
+                                     RunsTableViewFactory makeRunsTableView)
     : m_presenter(nullptr), m_calculator(new SlitCalculator(this)),
-      m_tableView(makeBatchView()) {
+      m_tableView(makeRunsTableView()) {
 
   UNUSED_ARG(parent);
   initLayout();
@@ -41,7 +40,7 @@ void QtReflRunsTabView::subscribe(IReflRunsTabPresenter *presenter) {
   m_presenter = presenter;
 }
 
-IBatchView *QtReflRunsTabView::table() const { return m_tableView; }
+IRunsTableView *QtReflRunsTabView::table() const { return m_tableView; }
 
 /**
 Initialise the Interface

@@ -4,10 +4,10 @@
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
 #include "IReflBatchPresenter.h"
-#include "Presenters/BatchPresenter.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
-#include "Presenters/BatchPresenterFactory.h"
+#include "Presenters/RunsTablePresenter.h"
+#include "Presenters/RunsTablePresenterFactory.h"
 #include "ReflAutoreduction.h"
 #include <boost/shared_ptr.hpp>
 #include "SearchResult.h"
@@ -67,7 +67,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflRunsTabPresenter
 public:
   ReflRunsTabPresenter(IReflRunsTabView *mainView,
                        ProgressableView *progressView,
-                       BatchPresenterFactory makeBatchPresenter,
+                       RunsTablePresenterFactory makeRunsTablePresenter,
                        WorkspaceNamesFactory workspaceNamesFactory,
                        double thetaTolerance,
                        std::vector<std::string> const &instruments,
@@ -96,10 +96,10 @@ private:
   IReflRunsTabView *m_view;
   /// The progress view
   ProgressableView *m_progressView;
-  BatchPresenterFactory m_makeBatchPresenter;
+  RunsTablePresenterFactory m_makeRunsTablePresenter;
   WorkspaceNamesFactory const &m_workspaceNamesFactory;
   /// The data processor presenters stored in a vector
-  std::unique_ptr<BatchPresenter> m_tablePresenter;
+  std::unique_ptr<RunsTablePresenter> m_tablePresenter;
   /// The main presenter
   IReflBatchPresenter *m_mainPresenter;
   /// The search implementation
@@ -129,7 +129,7 @@ private:
   void changeInstrument();
   void changeGroup();
   void updateWidgetEnabledState() const;
-  BatchPresenter *tablePresenter() const;
+  RunsTablePresenter *tablePresenter() const;
   /// Check that a given set of row indices are valid to transfer
   bool validateRowsToTransfer(const std::set<int> &rowsToTransfer);
   /// Get runs to transfer from row indices

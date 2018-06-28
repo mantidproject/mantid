@@ -8,7 +8,6 @@
 #include "ReflAsciiSaver.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "Presenters/BatchPresenter.h"
 #include "ReflRunsTabPresenter.h"
 
 #include <QMessageBox>
@@ -52,7 +51,7 @@ std::unique_ptr<QtReflRunsTabView> QtReflBatchView::createRunsTab() {
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
   return Mantid::Kernel::make_unique<QtReflRunsTabView>(
-      this, BatchViewFactory(instruments));
+      this, RunsTableViewFactory(instruments));
 }
 
 std::unique_ptr<QtReflEventTabView> QtReflBatchView::createEventTab() {

@@ -26,17 +26,17 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include <memory>
 #include <vector>
 #include <string>
-#include "BatchPresenter.h"
+#include "RunsTablePresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenterFactory {
+class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenterFactory {
 public:
-  BatchPresenterFactory(std::vector<std::string> const &instruments,
-                        double thetaTolerance,
-                        WorkspaceNamesFactory const &workspaceNamesFactory);
-  std::unique_ptr<BatchPresenter> operator()(IBatchView *view) const;
+  RunsTablePresenterFactory(std::vector<std::string> const &instruments,
+                            double thetaTolerance,
+                            WorkspaceNamesFactory const &workspaceNamesFactory);
+  std::unique_ptr<RunsTablePresenter> operator()(IRunsTableView *view) const;
 
 private:
   std::vector<std::string> m_instruments;

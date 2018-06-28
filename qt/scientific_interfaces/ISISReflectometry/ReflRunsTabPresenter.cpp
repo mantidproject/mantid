@@ -47,7 +47,7 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
 /** Constructor
 * @param mainView :: [input] The view we're managing
 * @param progressableView :: [input] The view reporting progress
-* @param makeBatchPresenter :: A generator for the child presenters.
+* @param makeRunsTablePresenter :: A generator for the child presenters.
 * @param workspaceNamesFactory :: A generator for the workspace names used in
 * the reduction.
 * @param thetaTolerance The tolerance used to determine if two runs should be
@@ -60,19 +60,19 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
 */
 ReflRunsTabPresenter::ReflRunsTabPresenter(
     IReflRunsTabView *mainView, ProgressableView *progressableView,
-    BatchPresenterFactory makeBatchPresenter,
+    RunsTablePresenterFactory makeRunsTablePresenter,
     WorkspaceNamesFactory workspaceNamesFactory, double thetaTolerance,
     std::vector<std::string> const &instruments, int defaultInstrumentIndex,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
-      m_makeBatchPresenter(makeBatchPresenter),
+      m_makeRunsTablePresenter(makeRunsTablePresenter),
       m_workspaceNamesFactory(workspaceNamesFactory), m_mainPresenter(nullptr),
       m_searcher(searcher), m_instrumentChanged(false),
       m_thetaTolerance(thetaTolerance) {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
-  m_tablePresenter = m_makeBatchPresenter(m_view->table());
+  m_tablePresenter = m_makeRunsTablePresenter(m_view->table());
 
   m_view->setInstrumentList(instruments, defaultInstrumentIndex);
 
@@ -313,7 +313,7 @@ void ReflRunsTabPresenter::icatSearchComplete() {
   }
 }
 
-BatchPresenter *ReflRunsTabPresenter::tablePresenter() const {
+RunsTablePresenter *ReflRunsTabPresenter::tablePresenter() const {
   return m_tablePresenter.get();
 }
 

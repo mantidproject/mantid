@@ -6,7 +6,7 @@
 #include "IReflRunsTabView.h"
 #include "ReflRunsTabPresenter.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
-#include "Presenters/BatchPresenterFactory.h"
+#include "Presenters/RunsTablePresenterFactory.h"
 #include "../General/IReflSearcher.h"
 #include <memory>
 
@@ -15,13 +15,13 @@ namespace CustomInterfaces {
 
 class RunsPresenterFactory {
 public:
-  RunsPresenterFactory(BatchPresenterFactory batchPresenterFactory,
+  RunsPresenterFactory(RunsTablePresenterFactory runsTablePresenterFactory,
                        WorkspaceNamesFactory workspaceNamesFactory,
                        double thetaTolerance,
                        std::vector<std::string> instruments,
                        int defaultInstrumentIndex,
                        boost::shared_ptr<IReflSearcher> searcher)
-      : m_batchPresenterFactory(std::move(batchPresenterFactory)),
+      : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)),
         m_workspaceNamesFactory(std::move(workspaceNamesFactory)),
         m_thetaTolerance(std::move(thetaTolerance)),
         m_instruments(std::move(instruments)),
@@ -30,12 +30,12 @@ public:
 
   std::unique_ptr<IReflRunsTabPresenter> make(IReflRunsTabView *view) {
     return std::make_unique<ReflRunsTabPresenter>(
-        view, view, m_batchPresenterFactory, m_workspaceNamesFactory,
+        view, view, m_runsTablePresenterFactory, m_workspaceNamesFactory,
         m_thetaTolerance, m_instruments, m_defaultInstrumentIndex, m_searcher);
   }
 
 private:
-  BatchPresenterFactory m_batchPresenterFactory;
+  RunsTablePresenterFactory m_runsTablePresenterFactory;
   WorkspaceNamesFactory m_workspaceNamesFactory;
   double m_thetaTolerance;
   std::vector<std::string> m_instruments;

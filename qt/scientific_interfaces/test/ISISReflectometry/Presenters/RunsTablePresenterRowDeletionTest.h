@@ -1,9 +1,9 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLBATCHPRESENTERGROUPDELETETEST_H_
-#define MANTID_CUSTOMINTERFACES_REFLBATCHPRESENTERGROUPDELETETEST_H_
+#ifndef MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERGROUPDELETETEST_H_
+#define MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERGROUPDELETETEST_H_
 
-#include "../../../ISISReflectometry/Presenters/BatchPresenter.h"
+#include "../../../ISISReflectometry/Presenters/RunsTablePresenter.h"
 #include "../../../ISISReflectometry/Reduction/ReductionWorkspaces.h"
-#include "BatchPresenterTest.h"
+#include "RunsTablePresenterTest.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -14,14 +14,14 @@ using testing::Return;
 using testing::Mock;
 using testing::NiceMock;
 
-class BatchPresenterRowDeletionTest : public CxxTest::TestSuite,
-                                      BatchPresenterTest {
+class RunsTablePresenterRowDeletionTest : public CxxTest::TestSuite,
+                                          RunsTablePresenterTest {
 public:
-  static BatchPresenterRowDeletionTest *createSuite() {
-    return new BatchPresenterRowDeletionTest();
+  static RunsTablePresenterRowDeletionTest *createSuite() {
+    return new RunsTablePresenterRowDeletionTest();
   }
 
-  static void destroySuite(BatchPresenterRowDeletionTest *suite) {
+  static void destroySuite(RunsTablePresenterRowDeletionTest *suite) {
     delete suite;
   }
 
@@ -93,4 +93,4 @@ public:
   }
 };
 
-#endif // MANTID_CUSTOMINTERFACES_REFLBATCHPRESENTERGROUPDELETETEST_H_
+#endif // MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERGROUPDELETETEST_H_

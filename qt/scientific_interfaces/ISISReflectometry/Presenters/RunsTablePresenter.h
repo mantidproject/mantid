@@ -20,25 +20,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#ifndef MANTID_CUSTOMINTERFACES_BATCHVIEWPRESENTER_H_
-#define MANTID_CUSTOMINTERFACES_BATCHVIEWPRESENTER_H_
+#ifndef MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
+#define MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
 #include "DllConfig.h"
 #include <memory>
-#include "Views/IBatchView.h"
+#include "Views/IRunsTableView.h"
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 #include "Reduction/Group.h"
 #include "Reduction/ReductionJobs.h"
-#include "JobViewUpdater.h"
+#include "JobsViewUpdater.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "Map.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter
-    : public BatchViewSubscriber {
+class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenter
+    : public RunsTableViewSubscriber {
 public:
-  BatchPresenter(IBatchView *view, std::vector<std::string> const &instruments,
+  RunsTablePresenter(IRunsTableView *view, std::vector<std::string> const &instruments,
                  double thetaTolerance,
                  WorkspaceNamesFactory workspaceNamesFactory,
                  Jobs reductionJobs);
@@ -114,13 +114,13 @@ private:
 
   static auto constexpr DEPTH_LIMIT = 2;
 
-  IBatchView *m_view;
+  IRunsTableView *m_view;
   std::vector<std::string> m_instruments;
   boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
       m_clipboard;
   Jobs m_model;
   double m_thetaTolerance;
-  BatchViewJobsUpdater m_jobViewUpdater;
+  JobsViewUpdater m_jobViewUpdater;
   WorkspaceNamesFactory m_workspaceNameFactory;
 };
 
@@ -159,4 +159,4 @@ cellsFromRow(Row<WorkspaceNames> const &row) {
 }
 }
 }
-#endif // MANTID_CUSTOMINTERFACES_BATCHVIEWPRESENTER_H_
+#endif // MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_

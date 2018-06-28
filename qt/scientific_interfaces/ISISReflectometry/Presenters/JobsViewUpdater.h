@@ -26,10 +26,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class BatchViewJobsUpdater {
+class JobsViewUpdater {
 public:
-  explicit BatchViewJobsUpdater(
-      MantidQt::MantidWidgets::Batch::IJobTreeView &view)
+  explicit JobsViewUpdater(MantidQt::MantidWidgets::Batch::IJobTreeView &view)
       : m_view(view) {}
 
   template <typename Group>

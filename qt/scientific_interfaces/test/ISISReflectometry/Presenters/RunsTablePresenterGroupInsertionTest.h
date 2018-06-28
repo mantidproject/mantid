@@ -1,8 +1,8 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLBATCHPRESENTERGROUPINSERTTEST_H_
-#define MANTID_CUSTOMINTERFACES_REFLBATCHPRESENTERGROUPINSERTTEST_H_
+#ifndef MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERGROUPINSERTTEST_H_
+#define MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERGROUPINSERTTEST_H_
 
-#include "../../../ISISReflectometry/Presenters/BatchPresenter.h"
-#include "BatchPresenterTest.h"
+#include "../../../ISISReflectometry/Presenters/RunsTablePresenter.h"
+#include "RunsTablePresenterTest.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -13,14 +13,14 @@ using testing::Return;
 using testing::Mock;
 using testing::NiceMock;
 
-class BatchPresenterGroupInsertionTest : public CxxTest::TestSuite,
-                                         BatchPresenterTest {
+class RunsTablePresenterGroupInsertionTest : public CxxTest::TestSuite,
+                                             RunsTablePresenterTest {
 public:
-  static BatchPresenterGroupInsertionTest *createSuite() {
-    return new BatchPresenterGroupInsertionTest();
+  static RunsTablePresenterGroupInsertionTest *createSuite() {
+    return new RunsTablePresenterGroupInsertionTest();
   }
 
-  static void destroySuite(BatchPresenterGroupInsertionTest *suite) {
+  static void destroySuite(RunsTablePresenterGroupInsertionTest *suite) {
     delete suite;
   }
 
@@ -121,4 +121,4 @@ public:
   }
 };
 
-#endif // MANTID_CUSTOMINTERFACES_REFLBATCHPRESENTERGROUPINSERTTEST_H_
+#endif // MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERGROUPINSERTTEST_H_

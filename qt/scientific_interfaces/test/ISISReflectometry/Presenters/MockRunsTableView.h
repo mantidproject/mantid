@@ -1,7 +1,7 @@
-#ifndef MANTID_CUSTOMINTERFACES_MOCKBATCHVIEW_H_
-#define MANTID_CUSTOMINTERFACES_MOCKBATCHVIEW_H_
+#ifndef MANTID_CUSTOMINTERFACES_MOCKRUNSTABLEVIEW_H_
+#define MANTID_CUSTOMINTERFACES_MOCKRUNSTABLEVIEW_H_
 #include "DllConfig.h"
-#include "Views/IBatchView.h"
+#include "Views/IRunsTableView.h"
 #include <gmock/gmock.h>
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -11,9 +11,9 @@ GCC_DIAG_OFF_SUGGEST_OVERRIDE
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL MockBatchView : public IBatchView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL MockRunsTableView : public IRunsTableView {
 public:
-  MOCK_METHOD1(subscribe, void(BatchViewSubscriber *));
+  MOCK_METHOD1(subscribe, void(RunsTableViewSubscriber *));
   MOCK_METHOD1(setProgress, void(int));
   MOCK_METHOD0(jobs, MantidQt::MantidWidgets::Batch::IJobTreeView &());
   MOCK_METHOD0(resetFilterBox, void());
@@ -30,4 +30,4 @@ public:
 }
 }
 GCC_DIAG_ON_SUGGEST_OVERRIDE
-#endif // MANTID_CUSTOMINTERFACES_MOCKBATCHVIEW_H_
+#endif // MANTID_CUSTOMINTERFACES_MOCKRUNSTABLEVIEW_H_

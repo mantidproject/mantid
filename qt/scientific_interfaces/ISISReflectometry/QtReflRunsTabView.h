@@ -6,8 +6,7 @@
 #include "DllConfig.h"
 #include "IReflRunsTabView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
-#include "Presenters/BatchPresenter.h"
-#include "Views/BatchView.h"
+#include "Views/RunsTableView.h"
 
 #include "ui_ReflRunsTabWidget.h"
 
@@ -64,10 +63,10 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflRunsTabView
       public IReflRunsTabView {
   Q_OBJECT
 public:
-  QtReflRunsTabView(QWidget *parent, BatchViewFactory makeView);
+  QtReflRunsTabView(QWidget *parent, RunsTableViewFactory makeView);
 
   void subscribe(IReflRunsTabPresenter *presenter) override;
-  IBatchView * table() const override;
+  IRunsTableView * table() const override;
 
   // Connect the model
   void showSearch(boost::shared_ptr<ReflSearchModel> model) override;
@@ -130,7 +129,7 @@ private:
   // Timer for triggering periodic autoreduction
   QBasicTimer m_timer;
 
-  BatchView *m_tableView;
+  RunsTableView *m_tableView;
 
 private slots:
   void on_actionSearch_triggered();

@@ -20,25 +20,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#ifndef MANTID_CUSTOMINTERFACES_BATCHVIEW_H_
-#define MANTID_CUSTOMINTERFACES_BATCHVIEW_H_
+#ifndef MANTID_CUSTOMINTERFACES_RUNSTABLEVIEW_H_
+#define MANTID_CUSTOMINTERFACES_RUNSTABLEVIEW_H_
 #include "DllConfig.h"
 #include <memory>
 #include <vector>
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
-#include "IBatchView.h"
-#include "ui_BatchView.h"
+#include "IRunsTableView.h"
+#include "ui_RunsTableView.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL BatchView : public QWidget,
-                                                 public IBatchView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTableView : public QWidget,
+                                                     public IRunsTableView {
   Q_OBJECT
 public:
-  explicit BatchView(std::vector<std::string> const &instruments,
-                     int defaultInstrumentIndex);
-  void subscribe(BatchViewSubscriber *notifyee) override;
+  explicit RunsTableView(std::vector<std::string> const &instruments,
+                         int defaultInstrumentIndex);
+  void subscribe(RunsTableViewSubscriber *notifyee) override;
   void setProgress(int value) override;
   void resetFilterBox() override;
   MantidQt::MantidWidgets::Batch::IJobTreeView &jobs() override;
@@ -70,17 +70,17 @@ private:
   QAction *addToolbarItem(std::string const &iconPath,
                           std::string const &description);
   void showAlgorithmPropertyHintsInOptionsColumn();
-  Ui::BatchView m_ui;
+  Ui::RunsTableView m_ui;
   std::unique_ptr<MantidQt::MantidWidgets::Batch::JobTreeView> m_jobs;
   std::vector<std::string> m_instruments;
-  BatchViewSubscriber *m_notifyee;
+  RunsTableViewSubscriber *m_notifyee;
 };
 
-class BatchViewFactory {
+class RunsTableViewFactory {
 public:
-  explicit BatchViewFactory(std::vector<std::string> const &instruments);
-  BatchView *operator()(int defaultInstrumentIndex) const;
-  BatchView *operator()() const;
+  explicit RunsTableViewFactory(std::vector<std::string> const &instruments);
+  RunsTableView *operator()(int defaultInstrumentIndex) const;
+  RunsTableView *operator()() const;
   int defaultInstrumentFromConfig() const;
   int indexOfElseFirst(std::string const &instrument) const;
 
@@ -89,4 +89,4 @@ private:
 };
 }
 }
-#endif // MANTID_CUSTOMINTERFACES_BATCHVIEW_H_
+#endif // MANTID_CUSTOMINTERFACES_RUNSTABLEVIEW_H_

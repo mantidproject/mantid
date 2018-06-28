@@ -1,4 +1,4 @@
-#include "BatchView.h"
+#include "RunsTableView.h"
 #include "../IndexOf.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/ConfigService.h"
@@ -7,7 +7,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-BatchView::BatchView(std::vector<std::string> const &instruments,
+RunsTableView::RunsTableView(std::vector<std::string> const &instruments,
                      int defaultInstrumentIndex)
     : m_jobs(), m_instruments(instruments) {
   m_ui.setupUi(this);
@@ -30,50 +30,50 @@ BatchView::BatchView(std::vector<std::string> const &instruments,
           SLOT(onFilterChanged(QString const &)));
 }
 
-void BatchView::invalidSelectionForCopy() {
+void RunsTableView::invalidSelectionForCopy() {
   QMessageBox::critical(this, "Bad selection for copy",
                         "All selected rows must share a common group.");
 }
 
-void BatchView::invalidSelectionForPaste() {
+void RunsTableView::invalidSelectionForPaste() {
   QMessageBox::critical(this, "Bad selection for paste",
                         "All selected rows must share a common group.");
 }
 
-void BatchView::invalidSelectionForCut() {
+void RunsTableView::invalidSelectionForCut() {
   QMessageBox::critical(this, "Bad selection for cut",
                         "All selected rows must share a common group.");
 }
 
-void BatchView::mustSelectRow() {
+void RunsTableView::mustSelectRow() {
   QMessageBox::critical(this, "No Row Selected",
                         "To delete a row you must select one or more rows.");
 }
 
-void BatchView::mustSelectGroup() {
+void RunsTableView::mustSelectGroup() {
   QMessageBox::critical(
       this, "No Group Selected",
       "To insert a row you must select a group to add it to.");
 }
 
-void BatchView::mustNotSelectGroup() {
+void RunsTableView::mustNotSelectGroup() {
   QMessageBox::critical(this, "Group Selected",
                         "To delete rows you should not deselect any groups.");
 }
 
-void BatchView::mustSelectGroupOrRow() {
+void RunsTableView::mustSelectGroupOrRow() {
   QMessageBox::critical(
       this, "No Group Or Row Selected",
       "You must select a group or a row to perform this action.");
 }
 
-void BatchView::onFilterChanged(QString const &filter) {
+void RunsTableView::onFilterChanged(QString const &filter) {
   m_notifyee->notifyFilterChanged(filter.toStdString());
 }
 
-void BatchView::resetFilterBox() { m_ui.filterBox->clear(); }
+void RunsTableView::resetFilterBox() { m_ui.filterBox->clear(); }
 
-void BatchView::showAlgorithmPropertyHintsInOptionsColumn() {
+void RunsTableView::showAlgorithmPropertyHintsInOptionsColumn() {
   auto constexpr optionsColumn = 8;
   m_jobs->setHintsForColumn(
       optionsColumn,
@@ -88,13 +88,13 @@ void BatchView::showAlgorithmPropertyHintsInOptionsColumn() {
               "MomentumTransferStep", "ScaleFactor"}));
 }
 
-QAction *BatchView::addToolbarItem(std::string const &iconPath,
+QAction *RunsTableView::addToolbarItem(std::string const &iconPath,
                                    std::string const &description) {
   return m_ui.toolBar->addAction(QIcon(QString::fromStdString(iconPath)),
                                  QString::fromStdString(description));
 }
 
-void BatchView::addToolbarActions() {
+void RunsTableView::addToolbarActions() {
   connect(addToolbarItem("://stat_rows.png", "Process selected runs."),
           SIGNAL(triggered(bool)), this, SLOT(onProcessPressed(bool)));
   connect(addToolbarItem("://pause.png", "Pause processing of runs."),
@@ -121,66 +121,66 @@ void BatchView::addToolbarActions() {
           SLOT(onCollapseAllGroupsPressed(bool)));
 }
 
-MantidQt::MantidWidgets::Batch::IJobTreeView &BatchView::jobs() {
+MantidQt::MantidWidgets::Batch::IJobTreeView &RunsTableView::jobs() {
   return *m_jobs;
 }
 
-void BatchView::subscribe(BatchViewSubscriber *notifyee) {
+void RunsTableView::subscribe(RunsTableViewSubscriber *notifyee) {
   m_notifyee = notifyee;
   m_jobs->subscribe(*notifyee);
   connect(m_ui.processButton, SIGNAL(clicked(bool)), this,
           SLOT(onProcessPressed(bool)));
 }
 
-void BatchView::setProgress(int value) { m_ui.progressBar->setValue(value); }
+void RunsTableView::setProgress(int value) { m_ui.progressBar->setValue(value); }
 
-void BatchView::onExpandAllGroupsPressed(bool) {
+void RunsTableView::onExpandAllGroupsPressed(bool) {
   m_notifyee->notifyExpandAllRequested();
 }
 
-void BatchView::onCollapseAllGroupsPressed(bool) {
+void RunsTableView::onCollapseAllGroupsPressed(bool) {
   m_notifyee->notifyCollapseAllRequested();
 }
 
-void BatchView::onProcessPressed(bool) { m_notifyee->notifyProcessRequested(); }
-void BatchView::onPausePressed(bool) { m_notifyee->notifyPauseRequested(); }
+void RunsTableView::onProcessPressed(bool) { m_notifyee->notifyProcessRequested(); }
+void RunsTableView::onPausePressed(bool) { m_notifyee->notifyPauseRequested(); }
 
-void BatchView::onInsertRowPressed(bool) {
+void RunsTableView::onInsertRowPressed(bool) {
   m_notifyee->notifyInsertRowRequested();
 }
 
-void BatchView::onInsertGroupPressed(bool) {
+void RunsTableView::onInsertGroupPressed(bool) {
   m_notifyee->notifyInsertGroupRequested();
 }
 
-void BatchView::onDeleteRowPressed(bool) {
+void RunsTableView::onDeleteRowPressed(bool) {
   m_notifyee->notifyDeleteRowRequested();
 }
 
-void BatchView::onDeleteGroupPressed(bool) {
+void RunsTableView::onDeleteGroupPressed(bool) {
   m_notifyee->notifyDeleteGroupRequested();
 }
 
-void BatchView::onCopyPressed(bool) { m_notifyee->notifyCopyRowsRequested(); }
+void RunsTableView::onCopyPressed(bool) { m_notifyee->notifyCopyRowsRequested(); }
 
-void BatchView::onCutPressed(bool) { m_notifyee->notifyCutRowsRequested(); }
+void RunsTableView::onCutPressed(bool) { m_notifyee->notifyCutRowsRequested(); }
 
-void BatchView::onPastePressed(bool) { m_notifyee->notifyPasteRowsRequested(); }
+void RunsTableView::onPastePressed(bool) { m_notifyee->notifyPasteRowsRequested(); }
 
-BatchViewFactory::BatchViewFactory(std::vector<std::string> const &instruments)
+RunsTableViewFactory::RunsTableViewFactory(std::vector<std::string> const &instruments)
     : m_instruments(instruments) {}
 
-BatchView *BatchViewFactory::operator()() const {
-  return new BatchView(m_instruments, defaultInstrumentFromConfig());
+RunsTableView *RunsTableViewFactory::operator()() const {
+  return new RunsTableView(m_instruments, defaultInstrumentFromConfig());
 }
 
-int BatchViewFactory::indexOfElseFirst(std::string const &instrument) const {
+int RunsTableViewFactory::indexOfElseFirst(std::string const &instrument) const {
   return indexOf(m_instruments, [&instrument](std::string const &inst) {
     return instrument == inst;
   }).get_value_or(0);
 }
 
-int BatchViewFactory::defaultInstrumentFromConfig() const {
+int RunsTableViewFactory::defaultInstrumentFromConfig() const {
   return indexOfElseFirst(Mantid::Kernel::ConfigService::Instance().getString(
       "default.instrument"));
 }

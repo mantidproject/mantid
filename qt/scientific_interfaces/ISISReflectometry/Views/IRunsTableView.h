@@ -28,7 +28,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class BatchViewSubscriber
+class RunsTableViewSubscriber
     : public MantidQt::MantidWidgets::Batch::JobTreeViewSubscriber {
 public:
   virtual void notifyProcessRequested() = 0;
@@ -41,10 +41,10 @@ public:
   virtual void notifyExpandAllRequested() = 0;
   virtual void notifyCollapseAllRequested() = 0;
 
-  virtual ~BatchViewSubscriber() = default;
+  virtual ~RunsTableViewSubscriber() = default;
 };
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL IBatchView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL IRunsTableView {
 public:
   virtual void invalidSelectionForCopy() = 0;
   virtual void invalidSelectionForPaste() = 0;
@@ -55,7 +55,7 @@ public:
   virtual void mustNotSelectGroup() = 0;
   virtual void mustSelectGroupOrRow() = 0;
 
-  virtual void subscribe(BatchViewSubscriber *notifyee) = 0;
+  virtual void subscribe(RunsTableViewSubscriber *notifyee) = 0;
   virtual void setProgress(int value) = 0;
   virtual void resetFilterBox() = 0;
   virtual MantidQt::MantidWidgets::Batch::IJobTreeView &jobs() = 0;

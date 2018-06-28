@@ -4,7 +4,7 @@
 #include <set>
 #include <string>
 #include <boost/shared_ptr.hpp>
-#include "Views/IBatchView.h"
+#include "Views/IRunsTableView.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
 
@@ -58,7 +58,7 @@ public:
   virtual ~IReflRunsTabView() = default;
 
   virtual void subscribe(IReflRunsTabPresenter *presenter) = 0;
-  virtual IBatchView *table() const = 0;
+  virtual IRunsTableView *table() const = 0;
 
   // Connect the model
   virtual void showSearch(boost::shared_ptr<ReflSearchModel> model) = 0;

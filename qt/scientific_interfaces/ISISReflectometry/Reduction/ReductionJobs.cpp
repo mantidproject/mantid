@@ -29,7 +29,8 @@ ReductionJobs<Group>::indexOfGroupWithName(std::string const &groupName) {
 
 template <typename Group>
 Group &ReductionJobs<Group>::insertGroup(Group group, int beforeIndex) {
-  assert(!hasGroupWithName(group.name()));
+  assertOrThrow(group.name().empty() || !hasGroupWithName(group.name()),
+                "Cannot have multiple groups with a matching non-empty name.");
   return *m_groups.insert(m_groups.begin() + beforeIndex, std::move(group));
 }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>BatchView</class>
- <widget class="QWidget" name="BatchView">
+ <class>RunsTableView</class>
+ <widget class="QWidget" name="RunsTableView">
   <property name="geometry">
    <rect>
     <x>0</x>

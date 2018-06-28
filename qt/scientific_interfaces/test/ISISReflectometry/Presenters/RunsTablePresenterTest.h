@@ -1,9 +1,9 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLBATCHPRESENTERTEST_H_
-#define MANTID_CUSTOMINTERFACES_REFLBATCHPRESENTERTEST_H_
+#ifndef MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERTEST_H_
+#define MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERTEST_H_
 
-#include "../../../ISISReflectometry/Presenters/BatchPresenter.h"
+#include "../../../ISISReflectometry/Presenters/RunsTablePresenter.h"
 #include "../../../ISISReflectometry/Reduction/Slicing.h"
-#include "MockBatchView.h"
+#include "MockRunsTableView.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 
 #include <cxxtest/TestSuite.h>
@@ -16,12 +16,12 @@ using testing::Mock;
 using testing::NiceMock;
 using testing::_;
 
-class BatchPresenterTest {
+class RunsTablePresenterTest {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   void jobsViewIs(MantidQt::MantidWidgets::Batch::IJobTreeView &jobsView,
-                  MockBatchView &view) {
+                  MockRunsTableView &view) {
     ON_CALL(view, jobs()).WillByDefault(::testing::ReturnRef(jobsView));
   }
 
@@ -60,7 +60,7 @@ public:
     return reductionJobs;
   }
 
-  BatchPresenterTest() : m_jobs(), m_view() {
+  RunsTablePresenterTest() : m_jobs(), m_view() {
     jobsViewIs(m_jobs, m_view);
     ON_CALL(m_jobs, cellsAt(_))
         .WillByDefault(Return(std::vector<MantidQt::MantidWidgets::Batch::Cell>(
@@ -81,7 +81,7 @@ public:
   }
 
   UnslicedReductionJobs const &
-  unslicedJobsFromPresenter(BatchPresenter &presenter) {
+  unslicedJobsFromPresenter(RunsTablePresenter &presenter) {
     return boost::get<UnslicedReductionJobs>(presenter.reductionJobs());
   }
 
@@ -91,21 +91,21 @@ public:
         MantidQt::MantidWidgets::Batch::RowPath({args...}));
   }
 
-  BatchPresenter makePresenter(IBatchView &view) {
+  RunsTablePresenter makePresenter(IRunsTableView &view) {
     static auto slicing = Slicing();
-    return BatchPresenter(&view, {}, 0.01, WorkspaceNamesFactory(slicing),
-                          UnslicedReductionJobs());
+    return RunsTablePresenter(&view, {}, 0.01, WorkspaceNamesFactory(slicing),
+                              UnslicedReductionJobs());
   }
 
-  BatchPresenter makePresenter(IBatchView &view, Jobs jobs) {
+  RunsTablePresenter makePresenter(IRunsTableView &view, Jobs jobs) {
     static auto slicing = Slicing();
-    return BatchPresenter(&view, {}, 0.01, WorkspaceNamesFactory(slicing),
-                          std::move(jobs));
+    return RunsTablePresenter(&view, {}, 0.01, WorkspaceNamesFactory(slicing),
+                              std::move(jobs));
   }
 
 protected:
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
-  NiceMock<MockBatchView> m_view;
+  NiceMock<MockRunsTableView> m_view;
 };
 
-#endif // MANTID_CUSTOMINTERFACES_REFLBATCHPRESENTERTEST_H_
+#endif // MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERTEST_H_

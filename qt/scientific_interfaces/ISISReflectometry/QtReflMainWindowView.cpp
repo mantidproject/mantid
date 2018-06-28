@@ -49,7 +49,7 @@ void QtReflMainWindowView::initLayout() {
   auto thetaTolerance = 0.01;
   auto makeWorkspaceNames = WorkspaceNamesFactory(defaultSlicing);
   auto makeBatchPresenter =
-      BatchPresenterFactory(instruments, thetaTolerance, makeWorkspaceNames);
+      RunsTablePresenterFactory(instruments, thetaTolerance, makeWorkspaceNames);
   auto defaultInstrumentIndex = 0; // TODO: Look this up properly;
   auto searcher = boost::shared_ptr<IReflSearcher>();
 
