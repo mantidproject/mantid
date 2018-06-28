@@ -3,7 +3,6 @@
 #include "ApplicationWindow.h"
 #include "Folder.h"
 #include "ProjectSerialiser.h"
-#include "globals.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FrameworkManager.h"
