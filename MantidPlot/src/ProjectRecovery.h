@@ -82,14 +82,18 @@ private:
   /// Loads a recovery checkpoint in the given folder - TODO in future PR
   // bool loadRecoveryCheckpoint(const Poco::Path &path); 
 
+  /// Open a recovery checkpoint in the scripting window
+  bool openInEditor(const Poco::Path &inputFolder);
 
   /// Wraps the thread in a try catch to log any failures
   void projectSavingThreadWrapper();
+
   /// Main body of saving thread
   void projectSavingThread();
 
   /// Saves a project recovery file in Mantid
   void saveOpenWindows(const std::string &projectDestFolder);
+
   /// Saves the current workspace's histories from Mantid
   void saveWsHistories(const Poco::Path &projectDestFile);
 

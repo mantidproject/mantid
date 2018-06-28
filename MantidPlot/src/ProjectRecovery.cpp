@@ -168,7 +168,6 @@ ProjectRecovery::ProjectRecovery(ApplicationWindow *windowHandle)
 ProjectRecovery::~ProjectRecovery() { stopProjectSaving(); }
 
 bool ProjectRecovery::attemptRecovery() {
-
   QString recoveryMsg = QObject::tr(
       "Mantid did not close correctly and a recovery"
       " checkpoint has been found. Would you like to attempt recovery?");
@@ -186,22 +185,13 @@ bool ProjectRecovery::attemptRecovery() {
       getRecoveryFolderCheckpoints(getRecoveryFolder());
   auto &mostRecentCheckpoint = checkpointPaths.back();
 
-  auto destFilename = Poco::Path(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
-  destFilename.append("ordered_recovery.py");
-
-  if (userChoice == 0) {
-	  compileRecoveryScript(mostRecentCheckpoint, destFilename);
-	  // TODO load into scripting window
-	  ScriptingWindow * scriptWindow = m_windowPtr->getScriptWindowHandle();
-	  if (!scriptWindow) {
-		  throw std::runtime_error("Could not get handle to scripting window");
-	  }
-
-	  scriptWindow->open(QString::fromStdString(destFilename.toString()));
-	  const bool forceVisible = true;
-	  m_windowPtr->showScriptWindow(forceVisible);
+  // TODO automated recovery 
+  switch (userChoice){
+  case 0:
+	  return openInEditor(mostRecentCheckpoint);
+  default:
+	  throw std::runtime_error("Unknown choice in ProjectRecovery");
   }
-
 }
 
 bool ProjectRecovery::checkForRecovery() const {
@@ -300,6 +290,25 @@ void ProjectRecovery::stopProjectSaving() {
   }
 }
 
+bool ProjectRecovery::openInEditor(const Poco::Path & inputFolder)
+{
+	auto destFilename = Poco::Path(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
+	destFilename.append("ordered_recovery.py");
+	compileRecoveryScript(inputFolder, destFilename);
+
+	// Force application window to create the script window first
+	const bool forceVisible = true;
+	m_windowPtr->showScriptWindow(forceVisible);
+
+	ScriptingWindow *scriptWindow = m_windowPtr->getScriptWindowHandle();
+	if (!scriptWindow) {
+		throw std::runtime_error("Could not get handle to scripting window");
+	}
+
+	scriptWindow->open(QString::fromStdString(destFilename.toString()));
+	return true;
+}
+
 /// Top level thread wrapper which catches all exceptions to gracefully handle
 /// them
 void ProjectRecovery::projectSavingThreadWrapper() {
@@ -333,11 +342,15 @@ void ProjectRecovery::projectSavingThread() {
       return;
     }
 
-    g_log.debug("Project Recovery: Saving started");
     // "Timeout" - Save out again
-    // Generate output paths
+	const auto &ads = Mantid::API::AnalysisDataService::Instance();
+	if (ads.size() == 0) {
+		g_log.debug("Nothing to save");
+		return;
+	}
+    
+	g_log.debug("Project Recovery: Saving started");
     const auto basePath = getOutputPath();
-
     Poco::File(basePath).createDirectory();
 
     auto projectFile = Poco::Path(basePath).append(OUTPUT_PROJ_NAME);

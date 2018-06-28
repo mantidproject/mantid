@@ -46,6 +46,10 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
         Returns:
             int
         '''
+
+        if not date_time:
+            raise ValueError("No date time stamp was found in the recovery history")
+
         date = date_time.split('T')[0]
         time = date_time.split('T')[1]
         yy = str(date.split('-')[0])
