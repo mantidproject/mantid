@@ -67,7 +67,7 @@ std::string getTimeStamp() {
   auto time = std::time(nullptr);
   auto localTime = std::localtime(&time);
 
-#if _MSC_VER || __GNUG__ && __GNUG__ < 5
+#if __GNUG__ && __GNUG__ < 5
   // Have to workaround GCC 4 not having std::put_time on RHEL7
   // this ifdef can be removed when RHEL7 uses a newer compiler
   char timestamp[20];
@@ -321,8 +321,6 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   if (wsHandles.empty()) {
     return;
   }
-
-  using Mantid::API::WorkspaceHistory;
 
   static auto startTime =
       Mantid::Kernel::UsageService::Instance().getStartTime().toISO8601String();
