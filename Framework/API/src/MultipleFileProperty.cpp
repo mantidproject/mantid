@@ -133,8 +133,7 @@ std::string MultipleFileProperty::isEmptyValueValid() const {
 std::string MultipleFileProperty::setValue(const std::string &propValue) {
   // No empty value is allowed, unless optional.
   // This is yet aditional check that is beyond the underlying
-  // MultiFileValidator,
-  // so isOptional needs to be inspected here as well
+  // MultiFileValidator, so isOptional needs to be inspected here as well
   if (propValue.empty() && !isOptional())
     return "No file(s) specified.";
 
@@ -162,8 +161,8 @@ std::string MultipleFileProperty::setValue(const std::string &propValue) {
       return SUCCESS;
 
     // If we failed return the error message from the multiple file load attempt
-    // as the single file was a guess
-    // and probably not what the user will expect to see
+    // as the single file was a guess and probably not what the user will expect
+    // to see
     return re.what();
   }
 }
@@ -259,7 +258,6 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
                           REGEX_INVALID))
     return "Unable to parse filename due to an empty token.";
 
-  std::stringstream errorMsg;
   std::vector<std::vector<std::string>> fileNames;
 
   // Tokenise on allowed comma operators, and iterate over each token.
@@ -290,28 +288,26 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       } catch (const std::range_error &re) {
         g_log.error(re.what());
         throw;
-      } catch (const std::runtime_error &re) {
-        errorMsg << "Unable to parse run(s): \"" << re.what();
+      } catch (const std::runtime_error &) {
+        // We should be able to safely ignore runtime_errors from parse(),
+        // see below.
       }
 
       std::vector<std::vector<std::string>> f = m_parser.fileNames();
 
       // If there are no files, then we should keep this token as it was passed
-      // to the property,
-      // in its untampered form. This will enable us to deal with the case where
-      // a user is trying to
-      // load a single (and possibly existing) file within a token, but which
-      // has unexpected zero
-      // padding, or some other anomaly.
+      // to the property, in its untampered form. This will enable us to deal
+      // with the case where a user is trying to load a single (and possibly
+      // existing) file within a token, but which has unexpected zero padding,
+      // or some other anomaly.
       if (VectorHelper::flattenVector(f).empty())
         f.push_back(std::vector<std::string>(1, *plusTokenString));
 
       if (plusTokenStrings.size() > 1) {
         // See [3] in header documentation.  Basically, for reasons of
-        // ambiguity, we cant add
-        // together plusTokens if they contain a range of files.  So throw on
-        // any instances of this
-        // when there is more than plusToken.
+        // ambiguity, we cant add together plusTokens if they contain a range
+        // of files.  So throw on any instances of this when there is more than
+        // plusToken.
         if (f.size() > 1)
           return "Adding a range of files to another file(s) is not currently "
                  "supported.";
@@ -351,8 +347,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
 
     } catch (Poco::Exception &) {
       // Safe to ignore?  Need a better understanding of the circumstances under
-      // which
-      // this throws.
+      // which this throws.
     }
   }
 
@@ -360,8 +355,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   // Remember, each vector contains files that are to be added together.
   for (const auto &unresolvedFileNames : allUnresolvedFileNames) {
     // Check for the existance of wild cards. (Instead of iterating over all the
-    // filenames just join them together
-    // and search for "*" in the result.)
+    // filenames just join them together and search for "*" in the result.)
     if (std::string::npos !=
         boost::algorithm::join(unresolvedFileNames, "").find("*"))
       return "Searching for files by wildcards is not currently supported.";
@@ -378,8 +372,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
         useDefaultExt = path.getExtension().empty();
       } catch (Poco::Exception &) {
         // Just shove the problematic filename straight into FileProperty and
-        // see
-        // if we have any luck.
+        // see if we have any luck.
         useDefaultExt = false;
       }
 

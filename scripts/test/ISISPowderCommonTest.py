@@ -573,6 +573,9 @@ class ISISPowderMockInst(object):
     def _normalise_ws_current(ws_to_correct, **_):
         return ws_to_correct
 
+    def mask_prompt_pulses_if_necessary(self, _):
+        pass
+
 
 class ISISPowderMockRunDetails(object):
     def __init__(self, file_ext):

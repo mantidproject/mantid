@@ -8,7 +8,7 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentVali
                         ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, Progress, PropertyMode,
                         WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, IntArrayBoundedValidator,
-                           IntArrayProperty, StringArrayProperty, StringListValidator)
+                           IntArrayProperty, Property, StringArrayProperty, StringListValidator)
 from mantid.simpleapi import (ClearMaskFlag, CloneWorkspace, CreateEmptyTableWorkspace, Divide,
                               ExtractMask, Integration, LoadMask, MaskDetectors, MedianDetectorTest, Plus, SolidAngle)
 import numpy
@@ -260,7 +260,7 @@ def _reportDiagnostics(reportWS, dataWS, diagnosticsWS, dataColumn, diagnosedCol
             reportWS.addColumn('double', dataColumn, _PLOT_TYPE_Y)
         if diagnosedColumn not in existingColumnNames:
             reportWS.addColumn('double', diagnosedColumn, _PLOT_TYPE_Y)
-    maskedSpectra = list()
+    maskedSpectra = set()
     for i in range(dataWS.getNumberHistograms()):
         diagnosed = int(diagnosticsWS.readY(i)[0])
         if reportWS is not None:
@@ -268,7 +268,7 @@ def _reportDiagnostics(reportWS, dataWS, diagnosticsWS, dataColumn, diagnosedCol
             reportWS.setCell(dataColumn, i, y)
             reportWS.setCell(diagnosedColumn, i, diagnosed)
         if diagnosed != 0:
-            maskedSpectra.append(dataWS.getSpectrum(i).getSpectrumNo())
+            maskedSpectra.add(dataWS.getSpectrum(i).getSpectrumNo())
     return maskedSpectra
 
 
@@ -278,24 +278,19 @@ def _reportMasking(reportWS, maskWS, maskedColumn):
         existingColumnNames = reportWS.getColumnNames()
         if maskedColumn not in existingColumnNames:
             reportWS.addColumn('double', maskedColumn, _PLOT_TYPE_Y)
-    maskedSpectra = list()
+    maskedSpectra = set()
     for i in range(maskWS.getNumberHistograms()):
         masked = int(maskWS.readY(i)[0])
         if reportWS is not None:
             reportWS.setCell(maskedColumn, i, masked)
         if masked != 0:
-            maskedSpectra.append(maskWS.getSpectrum(i).getSpectrumNo())
+            maskedSpectra.add(maskWS.getSpectrum(i).getSpectrumNo())
     return maskedSpectra
 
 
 def _reportPeakDiagnostics(reportWS, peakIntensityWS, diagnosticsWS):
     """Return masked spectrum numbers and add elastic peak diagnostics information to a report workspace."""
     return _reportDiagnostics(reportWS, peakIntensityWS, diagnosticsWS, 'ElasticIntensity', 'IntensityDiagnosed')
-
-
-def _reportUserMask(reportWS, maskWS):
-    """Return masked spectrum numbers and add user mask information to a report workspace."""
-    return _reportMasking(reportWS, maskWS, 'UserMask')
 
 
 class DirectILLDiagnostics(DataProcessorAlgorithm):
@@ -348,7 +343,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
 
         progress.report('Loading default mask')
         defaultMaskWS = self._defaultMask(mainWS, wsNames, wsCleanup, report, subalgLogging)
-        defaultMaskedSpectra = list()
+        defaultMaskedSpectra = set()
         if defaultMaskWS is not None:
             defaultMaskedSpectra = _reportDefaultMask(reportWS, defaultMaskWS)
             maskWS = Plus(LHSWorkspace=maskWS,
@@ -358,13 +353,12 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
 
         progress.report('User-defined mask')
         userMaskWS = self._userMask(mainWS, wsNames, wsCleanup, subalgLogging)
-        userMaskedSpectra = _reportUserMask(reportWS, userMaskWS)
         maskWS = Plus(LHSWorkspace=maskWS,
                       RHSWorkspace=userMaskWS,
                       EnableLogging=subalgLogging)
         wsCleanup.cleanup(userMaskWS)
 
-        beamStopMaskedSpectra = list()
+        beamStopMaskedSpectra = set()
         if self._beamStopDiagnosticsEnabled(mainWS, report):
             progress.report('Diagnosing beam stop')
             beamStopMaskWS = self._beamStopDiagnostics(mainWS, maskWS, wsNames, wsCleanup, report, subalgLogging)
@@ -374,10 +368,10 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                           EnableLogging=subalgLogging)
             wsCleanup.cleanup(beamStopMaskWS)
 
-        bkgMaskedSpectra = list()
+        bkgMaskedSpectra = set()
         if self._bkgDiagnosticsEnabled(mainWS, report):
             progress.report('Diagnosing backgrounds')
-            bkgMaskWS, bkgWS = self._bkgDiagnostics(mainWS, maskWS, wsNames, wsCleanup, report, subalgLogging)
+            bkgMaskWS, bkgWS = self._bkgDiagnostics(mainWS, wsNames, wsCleanup, report, subalgLogging)
             bkgMaskedSpectra = _reportBkgDiagnostics(reportWS, bkgWS, bkgMaskWS)
             maskWS = Plus(LHSWorkspace=maskWS,
                           RHSWorkspace=bkgMaskWS,
@@ -385,10 +379,10 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             wsCleanup.cleanup(bkgMaskWS)
             wsCleanup.cleanup(bkgWS)
 
-        peakMaskedSpectra = list()
+        peakMaskedSpectra = set()
         if self._peakDiagnosticsEnabled(mainWS, report):
             progress.report('Diagnosing peaks')
-            peakMaskWS, peakIntensityWS = self._peakDiagnostics(mainWS, maskWS, wsNames, wsCleanup, report, subalgLogging)
+            peakMaskWS, peakIntensityWS = self._peakDiagnostics(mainWS, wsNames, wsCleanup, report, subalgLogging)
             peakMaskedSpectra = _reportPeakDiagnostics(reportWS, peakIntensityWS, peakMaskWS)
             maskWS = Plus(LHSWorkspace=maskWS,
                           RHSWorkspace=peakMaskWS,
@@ -396,7 +390,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             wsCleanup.cleanup(peakMaskWS)
             wsCleanup.cleanup(peakIntensityWS)
 
-        self._outputReports(reportWS, defaultMaskedSpectra, userMaskedSpectra, beamStopMaskedSpectra,
+        self._outputReports(reportWS, defaultMaskedSpectra, beamStopMaskedSpectra,
                             peakMaskedSpectra, bkgMaskedSpectra)
 
         self._finalize(maskWS, wsCleanup, report)
@@ -468,15 +462,15 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         self.setPropertyGroup(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER,
                               PROPGROUP_PEAK_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD,
-                             defaultValue=0.1,
-                             validator=scalingFactor,
+                             defaultValue=Property.EMPTY_DBL,
+                             validator=positiveFloat,
                              direction=Direction.Input,
                              doc='Multiplier for lower acceptance limit ' +
                                  'used in elastic peak diagnostics.')
         self.setPropertyGroup(common.PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD,
                               PROPGROUP_PEAK_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD,
-                             defaultValue=3.0,
+                             defaultValue=Property.EMPTY_DBL,
                              validator=greaterThanUnityFloat,
                              direction=Direction.Input,
                              doc='Multiplier for higher acceptance limit ' +
@@ -484,7 +478,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         self.setPropertyGroup(common.PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD,
                               PROPGROUP_PEAK_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST,
-                             defaultValue=3.3,
+                             defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc='To fail the elastic peak diagnostics, the intensity must also exceed ' +
@@ -509,15 +503,15 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         self.setPropertyGroup(common.PROP_BKG_SIGMA_MULTIPLIER,
                               PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD,
-                             defaultValue=0.1,
-                             validator=scalingFactor,
+                             defaultValue=Property.EMPTY_DBL,
+                             validator=positiveFloat,
                              direction=Direction.Input,
                              doc='Multiplier for lower acceptance limit ' +
                                  'used in noisy background diagnostics.')
         self.setPropertyGroup(common.PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD,
                               PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD,
-                             defaultValue=3.3,
+                             defaultValue=Property.EMPTY_DBL,
                              validator=greaterThanUnityFloat,
                              direction=Direction.Input,
                              doc='Multiplier for higher acceptance limit ' +
@@ -525,7 +519,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         self.setPropertyGroup(common.PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD,
                               PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST,
-                             defaultValue=3.3,
+                             defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc='To fail the background diagnostics, the background level must also exceed ' +
@@ -590,6 +584,11 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                 issues[common.PROP_EPP_WS] = 'An EPP table is needed for elastic peak diagnostics.'
             if self.getProperty(common.PROP_BKG_DIAGNOSTICS).value == common.BKG_DIAGNOSTICS_ON:
                 issues[common.PROP_EPP_WS] = 'An EPP table is needed for background diagnostics.'
+        for propName in [common.PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD, common.PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD]:
+            prop = self.getProperty(propName)
+            if not prop.isDefault:
+                if prop.value >= 1.:
+                    issues[propName] = 'The low threshold cannot equal or exceed 1.'
         return issues
 
     def _beamStopDiagnostics(self, mainWS, maskWS, wsNames, wsCleanup, report, algorithmLogging):
@@ -652,14 +651,17 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             return True
         return False
 
-    def _bkgDiagnostics(self, mainWS, maskWS, wsNames, wsCleanup, report, subalgLogging):
+    def _bkgDiagnostics(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Perform background diagnostics."""
+        if self.getProperty(common.PROP_EPP_WS).isDefault:
+            # With the AUTO option validateInputs might let missing EPPWorkspace pass.
+            raise RuntimeError('Missing ' + common.PROP_EPP_WS + '. Elastic peak positions are needed for background diagnostics.')
         eppWS = self.getProperty(common.PROP_EPP_WS).value
         sigmaMultiplier = self.getProperty(common.PROP_BKG_SIGMA_MULTIPLIER).value
         integratedBkgs = _integrateBkgs(mainWS, eppWS, sigmaMultiplier, wsNames, wsCleanup, subalgLogging)
-        lowThreshold = self.getProperty(common.PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD).value
-        highThreshold = self.getProperty(common.PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD).value
-        significanceTest = self.getProperty(common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
+        lowThreshold = self._bkgDiagnosticsLowThreshold(mainWS)
+        highThreshold = self._bkgDiagnosticsHighThreshold(mainWS)
+        significanceTest = self._bkgDiagnosticsSignificanceTest(mainWS)
         settings = _DiagnosticsSettings(lowThreshold, highThreshold, significanceTest)
         bkgDiagnosticsWS = _bkgDiagnostics(integratedBkgs, settings, wsNames, subalgLogging)
         return (bkgDiagnosticsWS, integratedBkgs)
@@ -677,6 +679,18 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             report.notice('Background diagnostics enabled.')
             return True
         return bkgDiagnostics == common.BKG_DIAGNOSTICS_ON
+
+    def _bkgDiagnosticsHighThreshold(self, ws):
+        """Return a suitable value for the high threshold."""
+        return self._value(ws, common.PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD, 'background_diagnostics_high_threshold', 3.3)
+
+    def _bkgDiagnosticsLowThreshold(self, ws):
+        """Return a suitable value for the low threshold."""
+        return self._value(ws, common.PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD, 'background_diagnostics_low_threshold', 0.1)
+
+    def _bkgDiagnosticsSignificanceTest(self, ws):
+        """Return a suitable value for the significance test."""
+        return self._value(ws, common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST, 'background_diagnostics_significance_test', 3.3)
 
     def _defaultMask(self, mainWS, wsNames, wsCleanup, report, algorithmLogging):
         """Load instrument specific default mask or return None if not available."""
@@ -712,31 +726,33 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         wsCleanup.protect(mainWS)
         return mainWS
 
-    def _outputReports(self, reportWS, defaultMaskedSpectra, userMaskedSpectra, directBeamMaskedSpectra,
+    def _outputReports(self, reportWS, defaultMaskedSpectra, directBeamMaskedSpectra,
                        peakMaskedSpectra, bkgMaskedSpectra):
         """Set the optional output report properties."""
         if reportWS is not None:
             self.setProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS, reportWS)
+        hardMasking = defaultMaskedSpectra | directBeamMaskedSpectra
         report = 'Spectra masked by default mask file:\n'
         report += _maskedListToStr(defaultMaskedSpectra)
-        report += '\nSpectra masked by user:\n'
-        report += _maskedListToStr(userMaskedSpectra)
         report += '\nSpectra masked by beam stop diagnostics:\n'
         report += _maskedListToStr(directBeamMaskedSpectra)
-        report += '\nSpectra marked as bad by elastic peak diagnostics:\n'
-        report += _maskedListToStr(peakMaskedSpectra)
-        report += '\nSpectra marked as bad by flat background diagnostics:\n'
-        report += _maskedListToStr(bkgMaskedSpectra)
+        report += '\nAdditional spectra marked as bad by elastic peak diagnostics:\n'
+        report += _maskedListToStr(peakMaskedSpectra - hardMasking)
+        report += '\nAdditional spectra marked as bad by flat background diagnostics:\n'
+        report += _maskedListToStr(bkgMaskedSpectra - hardMasking)
         self.setProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT, report)
 
-    def _peakDiagnostics(self, mainWS, maskWS, wsNames, wsCleanup, report, subalgLogging):
+    def _peakDiagnostics(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Perform elastic peak diagnostics."""
+        if self.getProperty(common.PROP_EPP_WS).isDefault:
+            # With the AUTO option validateInputs might let missing EPPWorkspace pass.
+            raise RuntimeError('Missing ' + common.PROP_EPP_WS + '. Elastic peak positions are needed for peak diagnostics.')
         eppWS = self.getProperty(common.PROP_EPP_WS).value
         sigmaMultiplier = self.getProperty(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
         integratedPeaksWS = _integrateElasticPeaks(mainWS, eppWS, sigmaMultiplier, wsNames, wsCleanup, subalgLogging)
-        lowThreshold = self.getProperty(common.PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD).value
-        highThreshold = self.getProperty(common.PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD).value
-        significanceTest = self.getProperty(common.PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST).value
+        lowThreshold = self._peakDiagnosticsLowThreshold(mainWS)
+        highThreshold = self._peakDiagnosticsHighThreshold(mainWS)
+        significanceTest = self._peakDiagnosticsSignificanceTest(mainWS)
         settings = _DiagnosticsSettings(lowThreshold, highThreshold, significanceTest)
         peakDiagnosticsWS = _elasticPeakDiagnostics(integratedPeaksWS, settings, wsNames, subalgLogging)
         return (peakDiagnosticsWS, integratedPeaksWS)
@@ -755,6 +771,18 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             return True
         return peakDiagnostics == common.ELASTIC_PEAK_DIAGNOSTICS_ON
 
+    def _peakDiagnosticsHighThreshold(self, ws):
+        """Return a suitable value for the high threshold."""
+        return self._value(ws, common.PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD, 'elastic_peak_diagnostics_high_threshold', 3.)
+
+    def _peakDiagnosticsLowThreshold(self, ws):
+        """Return a suitable value for the low threshold."""
+        return self._value(ws, common.PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD, 'elastic_peak_diagnostics_low_threshold', 0.1)
+
+    def _peakDiagnosticsSignificanceTest(self, ws):
+        """Return a suitable value for the significance test."""
+        return self._value(ws, common.PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST, 'elastic_peak_diagnostics_significance_test', 3.3)
+
     def _userMask(self, mainWS, wsNames, wsCleanup, algorithmLogging):
         """Return combined masked spectra and components."""
         userMask = self.getProperty(common.PROP_USER_MASK).value
@@ -765,10 +793,20 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                       DetectorList=userMask,
                       ComponentList=maskComponents,
                       EnableLogging=algorithmLogging)
-        maskWS, detectorLsit = ExtractMask(InputWorkspace=maskWS,
+        maskWS, detectorList = ExtractMask(InputWorkspace=maskWS,
                                            OutputWorkspace=maskWSName,
                                            EnableLogging=algorithmLogging)
         return maskWS
+
+    def _value(self, ws, propertyName, instrumentParameterName, defaultValue):
+        """Return a suitable value either from a property, the IPF or the supplied defaultValue."""
+        prop = self.getProperty(propertyName)
+        if prop.isDefault:
+            instrument = ws.getInstrument()
+            if instrument.hasParameter(instrumentParameterName):
+                return instrument.getNumberParameter(instrumentParameterName)[0]
+            return defaultValue
+        return prop.value
 
 
 AlgorithmFactory.subscribe(DirectILLDiagnostics)

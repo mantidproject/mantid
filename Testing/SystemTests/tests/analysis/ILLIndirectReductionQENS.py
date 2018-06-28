@@ -152,7 +152,7 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
         self.assertEquals(mtd['out_calib_bg_red'].getItem(0).getNumberHistograms(), 18)
 
-        self.assertDelta(mtd['out_calib_bg_red'].getItem(0).readY(0)[580], 0.0035, 0.0001)
+        self.assertDelta(mtd['out_calib_bg_red'].getItem(0).readY(0)[1024 - 580], 0.0035, 0.0001)
 
     def runTestDifferentZeroMonitorChannels(self):
 

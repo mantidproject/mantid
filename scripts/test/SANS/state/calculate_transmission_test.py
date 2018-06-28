@@ -33,7 +33,7 @@ class StateCalculateTransmissionTest(unittest.TestCase):
                           "transmission_mask_files": ["test.xml"], "default_transmission_monitor": 3,
                           "transmission_monitor": 4, "default_incident_monitor": 1, "incident_monitor": 2,
                           "prompt_peak_correction_min": 123., "prompt_peak_correction_max": 1234.,
-                          "rebin_type": RebinType.Rebin, "wavelength_low": 1., "wavelength_high": 2.7,
+                          "rebin_type": RebinType.Rebin, "wavelength_low": [1.], "wavelength_high": [2.7],
                           "wavelength_step": 0.5,  "wavelength_step_type": RangeStepType.Lin,
                           "use_full_wavelength_range": True, "wavelength_full_range_low": 12.,
                           "wavelength_full_range_high": 434., "background_TOF_general_start": 1.4,
@@ -104,15 +104,15 @@ class StateCalculateTransmissionTest(unittest.TestCase):
                                        good_trans={"prompt_peak_correction_min": 1., "prompt_peak_correction_max": 2.})
 
     def test_that_raises_when_not_all_elements_are_set_for_wavelength(self):
-        self.check_bad_and_good_values(bad_trans={"wavelength_low": 1., "wavelength_high": 2.,
+        self.check_bad_and_good_values(bad_trans={"wavelength_low": [1.], "wavelength_high": [2.],
                                                   "wavelength_step": 0.5, "wavelength_step_type": None},
-                                       good_trans={"wavelength_low": 1., "wavelength_high": 2.,
+                                       good_trans={"wavelength_low": [1.], "wavelength_high": [2.],
                                                    "wavelength_step": 0.5, "wavelength_step_type": RangeStepType.Lin})
 
     def test_that_raises_for_lower_bound_larger_than_upper_bound_for_wavelength(self):
-        self.check_bad_and_good_values(bad_trans={"wavelength_low": 2., "wavelength_high": 1.,
+        self.check_bad_and_good_values(bad_trans={"wavelength_low": [2.], "wavelength_high": [1.],
                                                   "wavelength_step": 0.5, "wavelength_step_type":  RangeStepType.Lin},
-                                       good_trans={"wavelength_low": 1., "wavelength_high": 2.,
+                                       good_trans={"wavelength_low": [1.], "wavelength_high": [2.],
                                                    "wavelength_step": 0.5, "wavelength_step_type": RangeStepType.Lin})
 
     def test_that_raises_for_missing_full_wavelength_entry(self):
@@ -180,12 +180,12 @@ class StateCalculateTransmissionTest(unittest.TestCase):
                                        good_fit={"fit_type": FitType.Polynomial,  "polynomial_order": 4})
 
     def test_that_raises_for_inconsistent_wavelength_in_fit(self):
-        self.check_bad_and_good_values(bad_trans={"wavelength_low": None,  "wavelength_high": 2.},
-                                       good_trans={"wavelength_low": 1.,  "wavelength_high": 2.})
+        self.check_bad_and_good_values(bad_trans={"wavelength_low": None,  "wavelength_high": [2.]},
+                                       good_trans={"wavelength_low": [1.],  "wavelength_high": [2.]})
 
     def test_that_raises_for_lower_bound_larger_than_upper_bound_for_wavelength_in_fit(self):
-        self.check_bad_and_good_values(bad_trans={"wavelength_low": 2.,  "wavelength_high": 1.},
-                                       good_trans={"wavelength_low": 1.,  "wavelength_high": 2.})
+        self.check_bad_and_good_values(bad_trans={"wavelength_low": [2.],  "wavelength_high": [1.]},
+                                       good_trans={"wavelength_low": [1.],  "wavelength_high": [2.]})
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -216,8 +216,8 @@ class StateCalculateTransmissionBuilderTest(unittest.TestCase):
         builder.set_transmission_mask_files(["sdfs", "bbbbbb"])
 
         builder.set_rebin_type(RebinType.Rebin)
-        builder.set_wavelength_low(1.5)
-        builder.set_wavelength_high(2.7)
+        builder.set_wavelength_low([1.5])
+        builder.set_wavelength_high([2.7])
         builder.set_wavelength_step(0.5)
         builder.set_wavelength_step_type(RangeStepType.Lin)
         builder.set_use_full_wavelength_range(True)
@@ -256,8 +256,8 @@ class StateCalculateTransmissionBuilderTest(unittest.TestCase):
         self.assertTrue(state.transmission_mask_files == ["sdfs", "bbbbbb"])
 
         self.assertTrue(state.rebin_type is RebinType.Rebin)
-        self.assertTrue(state.wavelength_low == 1.5)
-        self.assertTrue(state.wavelength_high == 2.7)
+        self.assertTrue(state.wavelength_low == [1.5])
+        self.assertTrue(state.wavelength_high == [2.7])
         self.assertTrue(state.wavelength_step == 0.5)
         self.assertTrue(state.wavelength_step_type is RangeStepType.Lin)
         self.assertTrue(state.use_full_wavelength_range is True)

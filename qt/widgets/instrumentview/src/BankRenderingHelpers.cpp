@@ -97,10 +97,10 @@ void renderRectangularBank(const Mantid::Geometry::ComponentInfo &compInfo,
 
   auto c = findCorners(compInfo, index);
   auto bank = compInfo.quadrilateralComponent(index);
-  auto xstep =
-      (c.bottomRight.X() - c.bottomLeft.X()) / static_cast<double>(bank.nX);
-  auto ystep =
-      (c.topRight.Y() - c.bottomLeft.Y()) / static_cast<double>(bank.nY);
+  const auto &detShape = compInfo.shape(bank.bottomLeft);
+  const auto &shapeInfo = detShape.getGeometryHandler()->shapeInfo();
+  auto xstep = shapeInfo.points()[0].X() - shapeInfo.points()[1].X();
+  auto ystep = shapeInfo.points()[1].Y() - shapeInfo.points()[2].Y();
   auto name = compInfo.name(index);
   // Because texture colours are combined with the geometry colour
   // make sure the current colour is white
@@ -164,10 +164,11 @@ void renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo,
   for (size_t x = 0; x < colWidth; x += 3) {
     auto index = x / 3;
     const auto &column = compInfo.children(columns[index]);
-    for (size_t y = 0; y < column.size() - 1; ++y) {
+    for (size_t y = 0; y < column.size(); ++y) {
       extractHexahedron(compInfo.shape(column[y]), hex);
+      auto rot = compInfo.rotation(column[y]);
+      rotateHexahedron(hex, rot);
       offsetHexahedronPosition(hex, -basePos);
-      rotateHexahedron(hex, compInfo.rotation(column[y]));
       offsetHexahedronPosition(hex, compInfo.position(column[y]));
 
       glColor3ub((GLubyte)color[column[y]].red(),

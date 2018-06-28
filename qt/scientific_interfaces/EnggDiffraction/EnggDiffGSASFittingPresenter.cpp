@@ -22,9 +22,10 @@ namespace CustomInterfaces {
 EnggDiffGSASFittingPresenter::EnggDiffGSASFittingPresenter(
     std::unique_ptr<IEnggDiffGSASFittingModel> model,
     IEnggDiffGSASFittingView *view,
-    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget)
-    : m_model(std::move(model)), m_multiRunWidget(multiRunWidget), m_view(view),
-      m_viewHasClosed(false) {}
+    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget,
+    boost::shared_ptr<IEnggDiffractionParam> mainSettings)
+    : m_model(std::move(model)), m_multiRunWidget(multiRunWidget),
+      m_mainSettings(mainSettings), m_view(view), m_viewHasClosed(false) {}
 
 EnggDiffGSASFittingPresenter::~EnggDiffGSASFittingPresenter() {}
 
@@ -154,8 +155,24 @@ void EnggDiffGSASFittingPresenter::doRefinements(
   m_model->doRefinements(params);
 }
 
-void EnggDiffGSASFittingPresenter::notifyRefinementsComplete() {
+void EnggDiffGSASFittingPresenter::notifyRefinementsComplete(
+    Mantid::API::IAlgorithm_sptr alg,
+    const std::vector<GSASIIRefineFitPeaksOutputProperties> &
+        refinementResultSets) {
   if (!m_viewHasClosed) {
+    const auto numRuns = refinementResultSets.size();
+
+    if (numRuns > 1) {
+      std::vector<RunLabel> runLabels;
+      runLabels.reserve(numRuns);
+      for (const auto &refinementResults : refinementResultSets) {
+        runLabels.emplace_back(refinementResults.runLabel);
+      }
+      m_model->saveRefinementResultsToHDF5(
+          alg, refinementResultSets,
+          m_mainSettings->userHDFMultiRunFilename(runLabels));
+    }
+
     m_view->setEnabled(true);
     m_view->showStatus("Ready");
   }
@@ -178,8 +195,26 @@ void EnggDiffGSASFittingPresenter::notifyRefinementFailed(
 }
 
 void EnggDiffGSASFittingPresenter::notifyRefinementSuccessful(
+    const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
     const GSASIIRefineFitPeaksOutputProperties &refinementResults) {
   if (!m_viewHasClosed) {
+    m_view->showStatus("Saving refinement results");
+    const auto filename = m_mainSettings->userHDFRunFilename(
+        refinementResults.runLabel.runNumber);
+
+    try {
+      m_model->saveRefinementResultsToHDF5(successfulAlgorithm,
+                                           {refinementResults}, filename);
+    } catch (std::exception &e) {
+      m_view->userWarning(
+          "Could not save refinement results",
+          std::string("Refinement was successful but saving results to "
+                      "HDF5 failed for the following reason:\n") +
+              e.what());
+    }
+    m_view->setEnabled(true);
+    m_view->showStatus("Ready");
+
     m_multiRunWidget->addFittedPeaks(refinementResults.runLabel,
                                      refinementResults.fittedPeaksWS);
     displayFitResults(refinementResults.runLabel);

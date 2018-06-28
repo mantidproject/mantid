@@ -30,7 +30,7 @@ using Mantid::HistogramData::CountStandardDeviations;
 
 class FitPeaksTest : public CxxTest::TestSuite {
 private:
-  std::string m_inputWorkspaceName;
+  std::string m_inputWorkspaceName{"FitPeaksTest_workspace"};
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -42,11 +42,6 @@ public:
   static void destroySuite(FitPeaksTest *suite) { delete suite; }
 
   void test_Init() {
-    // Generate input workspace
-    // m_inputWorkspaceName = loadVulcanHighAngleData();
-    m_inputWorkspaceName = "temp_workspace";
-    createTestData(m_inputWorkspaceName);
-
     // Initialize FitPeak
     FitPeaks fitpeaks;
 
@@ -62,7 +57,10 @@ public:
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
-    createTestParameters(peakparnames, peakparvalues);
+    createGuassParameters(peakparnames, peakparvalues);
+
+    // Generate input workspace
+    createTestData(m_inputWorkspaceName);
 
     // initialize algorithm to test
     FitPeaks fitpeaks;
@@ -78,6 +76,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakParameterNames", peakparnames));
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("PeakParameterValues", peakparvalues));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
@@ -115,12 +115,12 @@ public:
 
     // check values: fitted peak positions
     // spectrum 1
-    auto fitted_positions_0 = main_out_ws->histogram(0).y();
+    const auto &fitted_positions_0 = main_out_ws->histogram(0).y();
     TS_ASSERT_EQUALS(fitted_positions_0.size(), 2); // with 2 peaks to fit
     TS_ASSERT_DELTA(fitted_positions_0[0], 5.0, 1.E-6);
     TS_ASSERT_DELTA(fitted_positions_0[1], 10.0, 1.E-6);
     // spectrum 3
-    auto fitted_positions_2 = main_out_ws->histogram(2).y();
+    const auto &fitted_positions_2 = main_out_ws->histogram(2).y();
     TS_ASSERT_EQUALS(fitted_positions_2.size(), 2); // with 2 peaks to fit
     TS_ASSERT_DELTA(fitted_positions_2[0], 5.03, 1.E-6);
     TS_ASSERT_DELTA(fitted_positions_2[1], 10.02, 1.E-6);
@@ -150,6 +150,115 @@ public:
                     data_ws->histogram(0).x().back(), 1E-10);
 
     // clean up
+    AnalysisDataService::Instance().remove(m_inputWorkspaceName);
+    AnalysisDataService::Instance().remove("PeakPositionsWS");
+    AnalysisDataService::Instance().remove("FittedPeaksWS");
+    AnalysisDataService::Instance().remove("PeakParametersWS");
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test output of effective peak parameters
+   * @brief test_effectivePeakParameters
+   */
+  void test_effectivePeakParameters() {
+    // set up parameters with starting value
+    std::vector<string> peakparnames;
+    std::vector<double> peakparvalues;
+    createGuassParameters(peakparnames, peakparvalues);
+
+    // Generate input workspace
+    createTestData(m_inputWorkspaceName);
+
+    // initialize algorithm to test
+    FitPeaks fitpeaks;
+
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 2));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.0, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakParameterNames", peakparnames));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("RawPeakParameters", false));
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS");
+    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS");
+    fitpeaks.setProperty("ConstrainPeakPositions", false);
+
+    fitpeaks.execute();
+
+    // check result
+    TS_ASSERT(fitpeaks.isExecuted());
+    if (!fitpeaks.isExecuted())
+      return;
+
+    // get fitted peak data
+    API::MatrixWorkspace_sptr main_out_ws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("PeakPositionsWS"));
+    TS_ASSERT(main_out_ws);
+    TS_ASSERT_EQUALS(main_out_ws->getNumberHistograms(), 3);
+
+    API::MatrixWorkspace_sptr plot_ws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("FittedPeaksWS"));
+    TS_ASSERT(plot_ws);
+    TS_ASSERT_EQUALS(plot_ws->getNumberHistograms(), 3);
+
+    API::ITableWorkspace_sptr param_ws =
+        boost::dynamic_pointer_cast<API::ITableWorkspace>(
+            AnalysisDataService::Instance().retrieve("PeakParametersWS"));
+    TS_ASSERT(param_ws);
+    TS_ASSERT_EQUALS(param_ws->rowCount(), 6);
+
+    // check values: fitted peak positions
+    // spectrum 1
+    const auto &fitted_positions_0 = main_out_ws->histogram(0).y();
+    TS_ASSERT_EQUALS(fitted_positions_0.size(), 2); // with 2 peaks to fit
+    TS_ASSERT_DELTA(fitted_positions_0[0], 5.0, 1.E-6);
+    TS_ASSERT_DELTA(fitted_positions_0[1], 10.0, 1.E-6);
+    // spectrum 3
+    const auto &fitted_positions_2 = main_out_ws->histogram(2).y();
+    TS_ASSERT_EQUALS(fitted_positions_2.size(), 2); // with 2 peaks to fit
+    TS_ASSERT_DELTA(fitted_positions_2[0], 5.03, 1.E-6);
+    TS_ASSERT_DELTA(fitted_positions_2[1], 10.02, 1.E-6);
+
+    // check other fitted parameters including height and width
+    // spectrum 2: (center, width, height, intensity)
+    double ws1peak0_height = param_ws->cell<double>(2, 4);
+    double ws1peak0_width = param_ws->cell<double>(2, 3);
+    TS_ASSERT_DELTA(ws1peak0_height, 4., 1E-6);
+    TS_ASSERT_DELTA(ws1peak0_width, 0.17 * 2.3548, 1E-4);
+
+    double ws1peak1_height = param_ws->cell<double>(3, 4);
+    double ws1peak1_width = param_ws->cell<double>(3, 3);
+    TS_ASSERT_DELTA(ws1peak1_height, 2., 1E-6);
+    TS_ASSERT_DELTA(ws1peak1_width, 0.12 * 2.3548, 1E-4);
+
+    // check the fitted peak workspace
+    API::MatrixWorkspace_sptr data_ws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            API::AnalysisDataService::Instance().retrieve(
+                m_inputWorkspaceName));
+    TS_ASSERT_EQUALS(plot_ws->histogram(0).x().size(),
+                     data_ws->histogram(0).x().size());
+    TS_ASSERT_DELTA(plot_ws->histogram(0).x().front(),
+                    data_ws->histogram(0).x().front(), 1E-10);
+    TS_ASSERT_DELTA(plot_ws->histogram(0).x().back(),
+                    data_ws->histogram(0).x().back(), 1E-10);
+
+    // clean up
+    AnalysisDataService::Instance().remove(m_inputWorkspaceName);
     AnalysisDataService::Instance().remove("PeakPositionsWS");
     AnalysisDataService::Instance().remove("FittedPeaksWS");
     AnalysisDataService::Instance().remove("PeakParametersWS");
@@ -286,10 +395,6 @@ public:
     loader->execute();
     TS_ASSERT(loader->isExecuted());
 
-    // create an EventNumberWorkspace
-    std::string event_number_ws_name("PG3_733_EventNumbers");
-    createEventNumberWorkspace(event_number_ws_name, 4, 3);
-
     // Initialize FitPeak
     FitPeaks fit_peaks_alg;
 
@@ -311,8 +416,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("HighBackground", true));
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
         "PeakWidthPercent", 0.016)); // typical powgen's
-    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("EventNumberWorkspace",
-                                                       event_number_ws_name));
 
     std::string peak_pos_ws_name("PG3_733_peak_positions");
     std::string peak_param_ws_name("PG3_733_peak_params");
@@ -531,9 +634,8 @@ public:
       size_t iws = 2;
       double peak_intensity_2_0 = peak_param_ws->cell<double>(iws * 4, 2);
       TS_ASSERT_DELTA(peak_intensity_2_0, 0., 1.E-20);
-      // double peak_intensity_2_2 = peak_param_ws->cell<double>(iws * 4 + 2,
-      // 2);
-      // TS_ASSERT_DELTA(peak_intensity_2_2, 213.03, 0.03); // TODO re-enable
+      double peak_intensity_2_2 = peak_param_ws->cell<double>(iws * 4 + 2, 2);
+      TS_ASSERT_DELTA(peak_intensity_2_2, 213.03, 0.03);
       double peak_intensity_2_3 = peak_param_ws->cell<double>(iws * 4 + 3, 2);
       TS_ASSERT_DELTA(peak_intensity_2_3, 1161.78, 4.0);
     }
@@ -581,28 +683,6 @@ public:
     parvalues.push_back(0.000355);
 
     return;
-  }
-
-  //--------------------------------------------------------------------------------------------------------------
-  /** create a multiple spectra workspace containing counts
-   * @brief createEventNumberWorkspace
-   * @param event_number_ws_name
-   * @param num_spec
-   * @param empty_ws_index
-   */
-  void createEventNumberWorkspace(const std::string &event_number_ws_name,
-                                  size_t num_spec, size_t empty_ws_index) {
-    // create a MatrixWorkspace
-    MatrixWorkspace_sptr matrix_ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            static_cast<int>(num_spec), 1);
-
-    // set spectrum without counts
-    matrix_ws->mutableY(empty_ws_index) = 0.;
-
-    // add to ADS
-    AnalysisDataService::Instance().addOrReplace(event_number_ws_name,
-                                                 matrix_ws);
   }
 
   //--------------------------------------------------------------------------------------------------------------
@@ -669,18 +749,18 @@ public:
     return;
   }
 
-  void createTestParameters(vector<string> &parnames,
-                            vector<double> &parvalues) {
+  void createGuassParameters(vector<string> &parnames,
+                             vector<double> &parvalues) {
     parnames.clear();
     parvalues.clear();
 
-    parnames.emplace_back("I");
+    parnames.emplace_back("Height");
     parvalues.push_back(2.5e+06);
 
-    parnames.emplace_back("S");
+    parnames.emplace_back("Sigma");
     parvalues.push_back(0.1);
 
-    parnames.emplace_back("X0");
+    parnames.emplace_back("PeakCentre");
     parvalues.push_back(10.0);
 
     return;
