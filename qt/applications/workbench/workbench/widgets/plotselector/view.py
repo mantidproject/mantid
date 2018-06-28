@@ -46,7 +46,7 @@ class PlotSelectorView(QWidget):
     The view to the plot selector, a PyQt widget.
     """
 
-    DEBUG_MODE = True
+    DEBUG_MODE = False
 
     # A signal to capture when keys are pressed
     deleteKeyPressed = Signal(int)
@@ -107,6 +107,8 @@ class PlotSelectorView(QWidget):
         self.append_to_plot_list = QAppThreadCall(self.append_to_plot_list_orig)
         self.remove_from_plot_list_orig = self.remove_from_plot_list
         self.remove_from_plot_list = QAppThreadCall(self.remove_from_plot_list_orig)
+        self.rename_in_plot_list_orig = self.rename_in_plot_list
+        self.rename_in_plot_list = QAppThreadCall(self.rename_in_plot_list_orig)
 
         # Connect presenter methods to things in the view
         self.list_widget.doubleClicked.connect(self.presenter.show_single_selected)
