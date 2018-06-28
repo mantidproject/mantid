@@ -1,6 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_LAZYASYNCRUNNER_H_
 #define MANTIDQTCUSTOMINTERFACES_LAZYASYNCRUNNER_H_
 
+#include "DllConfig.h"
+
 #include <QtCore>
 
 #include <boost/optional.hpp>
