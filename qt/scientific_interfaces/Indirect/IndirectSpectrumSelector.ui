@@ -99,7 +99,7 @@
    <item>
     <widget class="QLabel" name="lbMaskSpectrum">
      <property name="text">
-      <string>Mask Spectrum</string>
+      <string>Mask Bins of Spectrum</string>
      </property>
     </widget>
    </item>

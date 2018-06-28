@@ -39,20 +39,23 @@ std::string OR(const std::string &lhs, const std::string &rhs) {
   return "(" + lhs + "|" + rhs + ")";
 }
 
+std::string NATURAL_NUMBER(std::size_t digits) {
+  return OR("0", "[1-9][0-9]{," + std::to_string(digits - 1) + "}");
+}
+
 namespace Regexes {
 const std::string EMPTY = "^$";
 const std::string SPACE = "(\\s)*";
 const std::string COMMA = SPACE + "," + SPACE;
 const std::string MINUS = SPACE + "\\-" + SPACE;
 
-const std::string NATURAL_NUMBER = OR("0", "[1-9][0-9]*");
-const std::string NATURAL_RANGE =
-    "(" + NATURAL_NUMBER + MINUS + NATURAL_NUMBER + ")";
-const std::string NATURAL_OR_RANGE = OR(NATURAL_RANGE, NATURAL_NUMBER);
+const std::string NUMBER = NATURAL_NUMBER(4);
+const std::string NATURAL_RANGE = "(" + NUMBER + MINUS + NUMBER + ")";
+const std::string NATURAL_OR_RANGE = OR(NATURAL_RANGE, NUMBER);
 const std::string SPECTRA_LIST =
     "(" + NATURAL_OR_RANGE + "(" + COMMA + NATURAL_OR_RANGE + ")*)";
 
-const std::string REAL_NUMBER = "(-?" + NATURAL_NUMBER + "(\\.[0-9]*)?)";
+const std::string REAL_NUMBER = "(-?" + NUMBER + "(\\.[0-9]*)?)";
 const std::string REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
 const std::string MASK_LIST =
     "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
