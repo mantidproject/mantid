@@ -1639,7 +1639,7 @@ private:
   bool m_shuttingDown{false};
 
   /// Owns a thread which automatically triggers project recovery for the GUI
-  MantidQt::ProjectRecovery m_ProjectRecovery;
+  MantidQt::ProjectRecovery m_projectRecovery;
 
 #ifdef SHARED_MENUBAR
   QMenuBar *m_sharedMenuBar; ///< Pointer to the shared menubar
