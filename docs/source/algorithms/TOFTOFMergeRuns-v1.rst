@@ -6,12 +6,16 @@
 
 .. properties::
 
+.. warning::
+
+   This algorithm is deprecated (June-2018). Please, use :ref:`MergeRuns <algm-MergeRuns>` instead.
+   
 Description
 -----------
 
 This algorithm is deprecated and will be removed in the next release. Please use :ref:`algm-MergeRuns` instead.
 
-Merges workspaces from a given list using :ref:`algm-MergeRuns` algorithm. Sample logs are merged in the following way.
+Merges workspaces from a given list using :ref:`MergeRuns <algm-MergeRuns>` algorithm. Sample logs are merged in the following way.
 
 +---------++-------------------------------+
 | Type of || Parameter                     |
