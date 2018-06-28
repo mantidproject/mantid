@@ -44,13 +44,13 @@ class IndirectFitOutput {
 public:
   IndirectFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                     Mantid::API::ITableWorkspace_sptr parameterTable,
-                    Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                    Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                     const FitDataIterator &fitDataBegin,
                     const FitDataIterator &fitDataEnd);
 
   IndirectFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                     Mantid::API::ITableWorkspace_sptr parameterTable,
-                    Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                    Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                     IndirectFitData const *fitData, std::size_t spectrum);
 
   bool isSpectrumFit(IndirectFitData const *fitData,
@@ -61,7 +61,8 @@ public:
 
   boost::optional<ResultLocation> getResultLocation(IndirectFitData *fitData,
                                                     std::size_t spectrum) const;
-  Mantid::API::MatrixWorkspace_sptr getLastResultWorkspace() const;
+  std::vector<std::string> getResultParameterNames() const;
+  Mantid::API::WorkspaceGroup_sptr getLastResultWorkspace() const;
   Mantid::API::WorkspaceGroup_sptr getLastResultGroup() const;
 
   void mapParameterNames(
@@ -73,12 +74,12 @@ public:
 
   void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
-                 Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                 Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                  const FitDataIterator &fitDataBegin,
                  const FitDataIterator &fitDataEnd);
   void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
-                 Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                 Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                  IndirectFitData const *fitData, std::size_t spectrum);
 
   void removeOutput(IndirectFitData const *fitData);
@@ -92,7 +93,7 @@ private:
                         const FitDataIterator &fitDataEnd);
 
   boost::weak_ptr<Mantid::API::WorkspaceGroup> m_resultGroup;
-  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_resultWorkspace;
+  boost::weak_ptr<Mantid::API::WorkspaceGroup> m_resultWorkspace;
   std::unordered_map<IndirectFitData const *, ParameterValues> m_parameters;
   std::unordered_map<IndirectFitData const *, ResultLocations>
       m_outputResultLocations;

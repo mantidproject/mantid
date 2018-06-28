@@ -114,7 +114,12 @@ protected:
   void setResolutionFBSuffices(const QStringList &suffices);
 
   void plotResult(const QString &plotType);
-  void fillPlotTypeComboBox(QComboBox *comboBox);
+  void plotAll(Mantid::API::WorkspaceGroup_sptr workspaces);
+  void plotParameter(Mantid::API::WorkspaceGroup_sptr workspace,
+                     const std::string &parameter);
+  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace);
+  void plotParameter(Mantid::API::MatrixWorkspace_sptr workspace,
+                     const std::string &parameter);
 
   void setAlgorithmProperties(Mantid::API::IAlgorithm_sptr fitAlgorithm) const;
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
