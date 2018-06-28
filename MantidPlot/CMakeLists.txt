@@ -91,7 +91,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/PluginFit.cpp
                    src/PolynomFitDialog.cpp
                    src/PolynomialFit.cpp
-                   src/ProjectRecoveryThread.cpp
+                   src/ProjectRecovery.cpp
                    src/ProjectSaveView.cpp
                    src/ProjectSerialiser.cpp
                    src/PythonScript.cpp
@@ -291,7 +291,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/PluginFit.h
                    src/PolynomFitDialog.h
                    src/PolynomialFit.h
-                   src/ProjectRecoveryThread.h
+                   src/ProjectRecovery.h
                    src/ProjectSerialiser.h
                    src/ProjectSaveView.h
                    src/PythonScript.h

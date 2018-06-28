@@ -91,6 +91,7 @@
 #include "PlotWizard.h"
 #include "PolynomFitDialog.h"
 #include "PolynomialFit.h"
+#include "ProjectRecovery.h"
 #include "ProjectSerialiser.h"
 #include "QwtErrorPlotCurve.h"
 #include "QwtHistogram.h"
@@ -253,7 +254,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings,
                                      const QStringList &args)
     : QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),
       blockWindowActivation(false), m_enableQtiPlotFitting(false),
-      m_projectRecoveryThread(this), m_exitCode(0),
+      m_ProjectRecovery(this), m_exitCode(0),
 #ifdef Q_OS_MAC // Mac
       settings(QSettings::IniFormat, QSettings::UserScope, "Mantid",
                "MantidPlot")
@@ -9772,7 +9773,7 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
 
   // Stop background saving thread, so it doesn't try to use a destroyed
   // resource
-  m_projectRecoveryThread.stopProjectSaving();
+  m_ProjectRecovery.stopProjectSaving();
 
   // Close the remaining MDI windows. The Python API is required to be active
   // when the MDI window destructor is called so that those references can be

@@ -1,5 +1,5 @@
-#ifndef PROJECT_RECOVERY_THREAD_H_
-#define PROJECT_RECOVERY_THREAD_H_
+#ifndef PROJECT_RECOVERY_H_
+#define PROJECT_RECOVERY_H_
 
 #include "MantidKernel/ConfigService.h"
 
@@ -18,7 +18,6 @@ class Folder;
 namespace Poco {
 class Path;
 }
-
 
 /** Adapter class which handles saving or restoring project windows
 
@@ -47,14 +46,12 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
 namespace MantidQt {
-namespace API {
-
-class ProjectRecoveryThread {
+class ProjectRecovery {
 public:
   /// Constructor
-  explicit ProjectRecoveryThread(ApplicationWindow *windowHandle);
+  explicit ProjectRecovery(ApplicationWindow *windowHandle);
   /// Destructor the ensures background thread stops
-  ~ProjectRecoveryThread();
+  ~ProjectRecovery();
 
   /// Attempts recovery of the most recent checkpoint
   bool attemptRecovery();
@@ -76,20 +73,25 @@ private:
   /// Triggers when the config key is updated to a new value
   void configKeyChanged(Mantid::Kernel::ConfigValChangeNotification_ptr notif);
 
+  /// Creates a recovery script based on all .py scripts in a folder
+  void compileRecoveryScript(const Poco::Path &inputFolder, const Poco::Path &outputFile);
+
   /// Deletes oldest checkpoints beyond the maximum number to keep
   void deleteExistingCheckpoints(size_t checkpointsToKeep) const;
 
-  /// Loads a recovery checkpoint in the given folder
-  bool loadRecoveryCheckpoint(const Poco::Path &path);
+  /// Loads a recovery checkpoint in the given folder - TODO in future PR
+  // bool loadRecoveryCheckpoint(const Poco::Path &path); 
 
-  /// Saves a project recovery file in Mantid
-  void saveOpenWindows(const std::string &projectDestFolder);
-  /// Saves the current workspace's histories from Mantid
-  void saveWsHistories(const std::string &projectDestFile);
+
   /// Wraps the thread in a try catch to log any failures
   void projectSavingThreadWrapper();
   /// Main body of saving thread
   void projectSavingThread();
+
+  /// Saves a project recovery file in Mantid
+  void saveOpenWindows(const std::string &projectDestFolder);
+  /// Saves the current workspace's histories from Mantid
+  void saveWsHistories(const Poco::Path &projectDestFile);
 
   /// Background thread which runs the saving body
   std::thread m_backgroundSavingThread;
@@ -102,15 +104,13 @@ private:
   std::condition_variable m_threadNotifier;
 
   /// Config observer to monitor the key
-  Poco::NObserver<ProjectRecoveryThread,
-                  Mantid::Kernel::ConfigValChangeNotification>
+  Poco::NObserver<ProjectRecovery, Mantid::Kernel::ConfigValChangeNotification>
       m_configKeyObserver;
 
   /// Pointer to main GUI window
   ApplicationWindow *m_windowPtr;
 };
 
-} // namespace API
 } // namespace MantidQt
 
-#endif // PROJECT_RECOVERY_THREAD_H_
+#endif // PROJECT_RECOVERY_H_

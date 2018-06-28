@@ -151,6 +151,7 @@ void ProjectSerialiser::load(std::string filepath, const int fileVersion,
 
   // Skip the <scripting-lang> line. We only really use python now anyway.
   fileTS.readLine();
+  window->setScriptingLanguage("Python");
 
   // Skip the <windows> line.
   fileTS.readLine();
