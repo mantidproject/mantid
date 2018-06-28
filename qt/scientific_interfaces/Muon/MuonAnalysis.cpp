@@ -2075,7 +2075,6 @@ void MuonAnalysis::selectMultiPeakNoUpdate(const QString &wsName) {
   runPythonCode(code);
 }
 
-
 /**
  * Disable tools for all the graphs within MantidPlot.
  */
