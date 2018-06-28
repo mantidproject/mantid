@@ -13,6 +13,7 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentOptionDefaults {
   std::string PolarizationAnalysis;
   std::string SummationType;
   std::string ReductionType;
+  bool IncludePartialBins;
   std::string CRho;
   std::string CAlpha;
   std::string CAp;
