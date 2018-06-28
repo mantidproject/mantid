@@ -17,7 +17,7 @@ public:
   std::string workspaceIndices() const;
 
   void setWSSuffices(const QStringList &suffices) override;
-  void setFBSuffices(const QStringList &suffices);
+  void setFBSuffices(const QStringList &suffices) override;
 
 private slots:
   void selectAllSpectra(int state);
