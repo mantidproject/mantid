@@ -257,6 +257,9 @@ public slots:
   bool runPythonScript(const QString &code, bool async = false,
                        bool quiet = false, bool redirect = true);
 
+  /// Abort a running Python script
+  void abortRunningPythonScript();
+
   QList<MdiSubWindow *> windowsList() const;
   QList<MdiSubWindow *> getAllWindows() const;
   void updateWindowLists(MdiSubWindow *w);

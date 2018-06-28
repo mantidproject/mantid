@@ -5,12 +5,25 @@
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidKernel/UsageService.h"
 
+#include <QCloseEvent>
 #include <QIcon>
 #include <QMessageBox>
 #include <QDir>
 #include <QFileDialog>
 #include <QTemporaryFile>
 #include <QTextStream>
+
+namespace {
+
+struct PythonScriptLockGuard {
+  PythonScriptLockGuard(bool &lock) : m_lock(lock) { m_lock = true; }
+
+  ~PythonScriptLockGuard() { m_lock = false; }
+
+private:
+  bool &m_lock;
+};
+}
 
 using namespace MantidQt::API;
 
@@ -30,6 +43,8 @@ UserSubWindow::UserSubWindow(QWidget *parent)
   connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString &, bool)),
           this, SIGNAL(runAsPythonScript(const QString &, bool)));
 }
+
+UserSubWindow::~UserSubWindow() { emit abortRunningPythonScript(); }
 
 /**
  * Create the layout for this dialog.
@@ -104,6 +119,7 @@ void UserSubWindow::showInformationBox(const QString &message) const {
  * as it should be faster. The default value is false
  */
 QString UserSubWindow::runPythonCode(const QString &code, bool no_output) {
+  PythonScriptLockGuard lockGuard(m_pythonScriptLock);
   return m_pythonRunner.runPythonCode(code, no_output);
 }
 
@@ -153,6 +169,20 @@ QLabel *UserSubWindow::newValidator(QWidget *parent) {
   pal.setColor(QPalette::WindowText, Qt::darkRed);
   validLbl->setPalette(pal);
   return validLbl;
+}
+
+/**
+ * Overrides the closeEvent handler. We want to ensure that we only close the
+ * window if
+ * python script execution has completed.
+ * @param event the event
+ */
+void UserSubWindow::closeEvent(QCloseEvent *event) {
+  if (m_pythonScriptLock) {
+    event->ignore();
+  } else {
+    event->accept();
+  }
 }
 
 //--------------------------------------

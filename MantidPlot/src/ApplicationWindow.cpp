@@ -15164,6 +15164,11 @@ bool ApplicationWindow::runPythonScript(const QString &code, bool async,
   return success;
 }
 
+/**
+ * Aborts a running Python script.
+ */
+void ApplicationWindow::abortRunningPythonScript() { m_iface_script->abort(); }
+
 bool ApplicationWindow::validFor2DPlot(Table *table) {
   if (!table->selectedYColumns().count()) {
     QMessageBox::warning(this, tr("MantidPlot - Error"),
@@ -15729,6 +15734,10 @@ void ApplicationWindow::performCustomAction(QAction *action) {
       connect(user_interface, SIGNAL(runAsPythonScript(const QString &, bool)),
               this, SLOT(runPythonScript(const QString &, bool)),
               Qt::DirectConnection);
+      // Connect the ability to stop a running Python script from the
+      // UserSubWindow
+      connect(user_interface, SIGNAL(abortRunningPythonScript()), this,
+              SLOT(abortRunningPythonScript()));
       // Update the used fit property browser
       connect(user_interface,
               SIGNAL(setFitPropertyBrowser(

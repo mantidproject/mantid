@@ -91,6 +91,9 @@ public:
 public:
   /// DefaultConstructor
   UserSubWindow(QWidget *parent = nullptr);
+  /// Desctructor
+  ~UserSubWindow();
+
   /// Create the layout of the widget. Can only be called once.
   void initializeLayout();
   /// Run local Python init code. Calls overridable function in specialized
@@ -104,6 +107,9 @@ public:
 signals:
   /// Emitted to start a (generally small) script running
   void runAsPythonScript(const QString &code, bool);
+
+  /// Abort a running Python script
+  void abortRunningPythonScript();
 
   /// Thrown when used fit property browser should be changed to given one
   void
@@ -126,6 +132,10 @@ protected:
   QString runPythonCode(const QString &code, bool no_output = false);
   QString openFileDialog(const bool save, const QStringList &exts);
   QLabel *newValidator(QWidget *parent);
+  void closeEvent(QCloseEvent *event) override;
+
+  /// Python script lock
+  bool m_pythonScriptLock = false;
 
 private:
   // This is so that it can set the name
