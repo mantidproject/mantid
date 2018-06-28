@@ -104,7 +104,6 @@ class GlobalFigureManager(object):
         if not cls.has_fignum(num):
             return
         manager = cls.figs[num]
-        window_title = manager.get_window_title()
         manager.canvas.mpl_disconnect(manager._cidgcf)
 
         # There must be a good reason for the following careful

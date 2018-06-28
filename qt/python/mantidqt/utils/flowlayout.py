@@ -40,8 +40,7 @@
 
 
 from PyQt5.QtCore import QPoint, QRect, QSize, Qt
-from PyQt5.QtWidgets import (QApplication, QLayout, QPushButton, QSizePolicy,
-        QWidget)
+from PyQt5.QtWidgets import QLayout, QPushButton, QSizePolicy, QWidget
 
 
 class Window(QWidget):

@@ -278,7 +278,7 @@ class PlotSelectorPresenterTest(unittest.TestCase):
         self.presenter.export_plots('Plot1', '/home/Documents', '.xyz')
         self.model.export_plot.assert_called_once_with('Plot1', '/home/Documents' + os.sep + 'Plot1.xyz')
 
-    def test_exporting_single_plot_generates_correct_filename(self):
+    def test_exporting_multiple_plots_generates_correct_filename(self):
         self.view.get_all_selected_plot_names = mock.Mock(return_value=["Plot0", "Plot1", "Plot2"])
         self.presenter.export_plots('/home/Documents', '.xyz')
         for i in range(len(self.model.export_plot.mock_calls)):
