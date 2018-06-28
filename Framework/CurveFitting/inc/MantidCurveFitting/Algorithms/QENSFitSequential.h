@@ -47,6 +47,7 @@ protected:
   virtual std::map<std::string, std::string> getAdditionalLogNumbers() const;
   virtual API::ITableWorkspace_sptr
   processParameterTable(API::ITableWorkspace_sptr parameterTable);
+  virtual std::vector<std::string> getFitParameterNames() const;
 
 private:
   void init() override;
@@ -54,17 +55,17 @@ private:
   API::ITableWorkspace_sptr performFit(const std::string &input,
                                        const std::string &output);
   void deleteTemporaryWorkspaces(const std::string &outputBaseName);
-  void addAdditionalLogs(API::MatrixWorkspace_sptr result);
+  void addAdditionalLogs(API::Workspace_sptr result);
 
   virtual bool throwIfElasticQConversionFails() const;
   virtual bool isFitParameter(const std::string &parameterName) const;
-  std::vector<std::string> getFitParameterNames() const;
   std::set<std::string> getUniqueParameterNames() const;
   std::string getOutputBaseName() const;
   std::string getInputString(
       const std::vector<API::MatrixWorkspace_sptr> &workspaces) const;
-  API::MatrixWorkspace_sptr
-  processIndirectFitParameters(API::ITableWorkspace_sptr parameterWorkspace);
+  API::WorkspaceGroup_sptr
+  processIndirectFitParameters(API::ITableWorkspace_sptr parameterWorkspace,
+                               const std::vector<std::size_t> &grouping);
 
   std::vector<API::MatrixWorkspace_sptr> convertInputToElasticQ(
       const std::vector<API::MatrixWorkspace_sptr> &workspaces) const;
@@ -74,7 +75,7 @@ private:
   void renameWorkspaces(API::WorkspaceGroup_sptr outputGroup,
                         const std::vector<std::string> &spectra,
                         const std::vector<API::MatrixWorkspace_sptr> &names);
-  void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
+  void copyLogs(API::WorkspaceGroup_sptr resultWorkspace,
                 const std::vector<API::MatrixWorkspace_sptr> &workspaces);
   void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
                 API::WorkspaceGroup_sptr resultGroup);
