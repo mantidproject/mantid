@@ -137,7 +137,16 @@ void pythonSrcAddSampleLog(std::ostringstream &result,
 void pythonSrcInstrumentParameter(std::ostringstream &result,
                                   const std::string &variable,
                                   const std::string &component) {
-  result << "  SetInstrumentParameter(Workspace=output"
+  result << ""
+         << "  try:\n"
+         << "    SetInstrumentParameter(Workspace=output"
+         << ",ParameterName='vertical gap'"
+         << ",ParameterType='Number'"
+         << ",ComponentName='" << component << "'"
+         << ",Value=" << variable << ")\n"
+         << "  except:\n"
+         << "    for ws in mtd[output]:\n"
+         << "      SetInstrumentParameter(Workspace=ws"
          << ",ParameterName='vertical gap'"
          << ",ParameterType='Number'"
          << ",ComponentName='" << component << "'"
