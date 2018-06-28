@@ -15,6 +15,10 @@
 class ApplicationWindow;
 class Folder;
 
+namespace Poco {
+class Path;
+}
+
 /** Adapter class which handles saving or restoring project windows
 
 @author David Fairbrother, ISIS, RAL
@@ -67,7 +71,8 @@ private:
   /// Saves a project recovery file in Mantid
   void saveOpenWindows(const std::string &projectDestFolder);
   /// Saves the current workspace's histories from Mantid
-  void saveWsHistories(const std::string &projectDestFile);
+  void saveWsHistories(const Poco::Path &projectDestFile);
+
   /// Wraps the thread in a try catch to log any failures
   void projectSavingThreadWrapper();
   /// Main body of saving thread

@@ -6,8 +6,10 @@
 #include "globals.h"
 
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/UsageService.h"
 
 #include "boost/optional.hpp"
 
@@ -66,7 +68,7 @@ std::string getTimeStamp() {
   auto time = std::time(nullptr);
   auto localTime = std::localtime(&time);
 
-#if __GNUG__ < 5
+#if __GNUG__ && __GNUG__ < 5
   // Have to workaround GCC 4 not having std::put_time on RHEL7
   // this ifdef can be removed when RHEL7 uses a newer compiler
   char timestamp[20];
@@ -83,12 +85,12 @@ std::string getTimeStamp() {
 }
 
 /// Returns a string to the current timestamped recovery folder
-std::string getOutputPath() {
+Poco::Path getOutputPath() {
 
-  auto timestamp = getTimeStamp();
-  auto timestampedPath = getRecoveryFolder().append(timestamp);
+	auto timestamp = getTimeStamp();
+	auto timestampedPath = getRecoveryFolder().append(timestamp);
 
-  return timestampedPath;
+	return Poco::Path{timestampedPath};
 }
 
 const std::string OUTPUT_PROJ_NAME = "recovery.mantid";
@@ -267,10 +269,11 @@ void ProjectRecovery::projectSavingThread() {
     // "Timeout" - Save out again
     // Generate output paths
     const auto basePath = getOutputPath();
+
+	Poco::File(basePath).createDirectory();
+
     auto projectFile = Poco::Path(basePath).append(OUTPUT_PROJ_NAME);
 
-    // Python's OS module cannot handle Poco's parsed paths
-    // so use std::string instead and let OS parse the '/' char on Win
     saveWsHistories(basePath);
     saveOpenWindows(projectFile.toString());
 
@@ -308,15 +311,45 @@ void ProjectRecovery::saveOpenWindows(const std::string &projectDestFile) {
  * @param historyDestFolder:: The folder to write all histories to
  * @throw If saving fails in the script
  */
-void ProjectRecovery::saveWsHistories(const std::string &historyDestFolder) {
-  QString projectSavingCode =
-      "from mantid.simpleapi import write_all_workspaces_histories\n"
-      "write_all_workspaces_histories(\"" +
-      QString::fromStdString(historyDestFolder) + "\")\n";
+void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
+	const auto &ads = Mantid::API::AnalysisDataService::Instance();
+	using Mantid::Kernel::DataServiceHidden;
+	using Mantid::Kernel::DataServiceSort;
 
-  if (!m_windowPtr->runPythonScript(projectSavingCode)) {
-    throw std::runtime_error("Project Recovery: Python saving failed");
-  }
+	const auto wsHandles = ads.getObjectNames(DataServiceSort::Unsorted, DataServiceHidden::Include);
+	
+	if (wsHandles.empty()) {
+		return;
+	}
+	
+	using Mantid::API::WorkspaceHistory;
+
+	static auto startTime = 
+		Mantid::Kernel::UsageService::Instance().getStartTime().toISO8601String();
+
+	const std::string algName = "GeneratePythonScript";
+	auto *alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(algName, 1);
+	
+	if (!alg) {
+		throw std::runtime_error("Could not get pointer to alg: " + algName);
+	}
+
+	alg->setLogging(false);
+
+	for (const auto &ws : wsHandles) {
+		std::string filename = ws;
+		filename.append(".py");
+		
+		Poco::Path destFilename = historyDestFolder;
+		destFilename.append(filename);
+		
+		alg->initialize();
+		alg->setPropertyValue("InputWorkspace", ws);
+		alg->setPropertyValue("Filename", destFilename.toString());
+		alg->setPropertyValue("StartTimestamp", startTime);
+
+		alg->execute();
+	}
 }
 
 } // namespace MantidQt
