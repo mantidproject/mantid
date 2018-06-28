@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include <string>
 #include <vector>
@@ -30,10 +31,10 @@ MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws) {
 }
 
 /**
-* Get a run label for a single workspace.
-* @param ws :: [input] workspace pointer
-* @return :: run label
-*/
+ * Get a run label for a single workspace.
+ * @param ws :: [input] workspace pointer
+ * @return :: run label
+ */
 std::string getRunLabel(Mantid::API::Workspace_sptr ws) {
   const std::vector<Mantid::API::Workspace_sptr> wsList{ws};
   return getRunLabel(wsList);
@@ -266,6 +267,150 @@ std::string generateWorkspaceName(const Muon::DatasetParams &params) {
   workspaceName << sep << "#" << params.version;
 
   return workspaceName.str();
+}
+
+/**
+ * Parse a workspace name into dataset parameters
+ * Format: "INST00012345; Pair; long; Asym;[ 1;] #1"
+ * count:     1             2    3      4    (5)  5/6
+ * @param wsName :: [input] Name of workspace
+ * @returns :: Struct containing dataset parameters
+ */
+Muon::DatasetParams parseWorkspaceName(const std::string &wsName) {
+  Muon::DatasetParams params;
+
+  Mantid::Kernel::StringTokenizer tokenizer(
+      wsName, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  const size_t numTokens = tokenizer.count();
+  // Name contains min of 5 ";" separated values and max 6.
+  if (numTokens < 5 || numTokens > 6) {
+    throw std::invalid_argument("Could not parse workspace name: " + wsName);
+  }
+
+  params.label = tokenizer[0];
+  parseRunLabel(params.label, params.instrument, params.runs);
+  const std::string itemType = tokenizer[1];
+  params.itemType =
+      (itemType == "Group") ? Muon::ItemType::Group : Muon::ItemType::Pair;
+  params.itemName = tokenizer[2];
+  const std::string plotType = tokenizer[3];
+  if (plotType == "Asym") {
+    params.plotType = Muon::PlotType::Asymmetry;
+  } else if (plotType == "Counts") {
+    params.plotType = Muon::PlotType::Counts;
+  } else {
+    params.plotType = Muon::PlotType::Logarithm;
+  }
+  std::string versionString;
+  if (numTokens > 5) { // periods included
+    params.periods = tokenizer[4];
+    versionString = tokenizer[5];
+  } else {
+    versionString = tokenizer[4];
+  }
+  // Remove the # from the version string
+  versionString.erase(
+      std::remove(versionString.begin(), versionString.end(), '#'),
+      versionString.end());
+
+  try {
+    params.version = boost::lexical_cast<size_t>(versionString);
+  } catch (const boost::bad_lexical_cast &) {
+    params.version = 1; // Set to 1 and ignore the error
+  }
+
+  return params;
+}
+
+/**
+ * Parse a run label e.g. "MUSR00015189-91, 15193" into instrument
+ * ("MUSR") and set of runs (15189, 15190, 15191, 15193).
+ * Assumes instrument name doesn't contain a digit (true for muon instruments).
+ * @param label :: [input] Label to parse
+ * @param instrument :: [output] Name of instrument
+ * @param runNumbers :: [output] Vector to fill with run numbers
+ * @throws std::invalid_argument if input cannot be parsed
+ */
+void parseRunLabel(const std::string &label, std::string &instrument,
+                   std::vector<int> &runNumbers) {
+  const size_t instPos = label.find_first_of("0123456789");
+  instrument = label.substr(0, instPos);
+  const size_t numPos = label.find_first_not_of('0', instPos);
+  if (numPos != std::string::npos) {
+    std::string runString = label.substr(numPos, label.size());
+    // sets of continuous ranges
+    Mantid::Kernel::StringTokenizer rangeTokenizer(
+        runString, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    for (const auto &range : rangeTokenizer.asVector()) {
+      Mantid::Kernel::StringTokenizer pairTokenizer(
+          range, "-", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+      try {
+        if (pairTokenizer.count() == 2) {
+          // Range of run numbers
+          // Deal with common part of string: "151" in "15189-91"
+          const size_t diff =
+              pairTokenizer[0].length() - pairTokenizer[1].length();
+          const std::string endRun =
+              pairTokenizer[0].substr(0, diff) + pairTokenizer[1];
+          const int start = boost::lexical_cast<int>(pairTokenizer[0]);
+          const int end = boost::lexical_cast<int>(endRun);
+          for (int run = start; run < end + 1; run++) {
+            runNumbers.push_back(run);
+          }
+        } else if (pairTokenizer.count() == 1) {
+          // Single run
+          runNumbers.push_back(boost::lexical_cast<int>(pairTokenizer[0]));
+        } else {
+          throw std::invalid_argument("Failed to parse run label: " + label +
+                                      " too many tokens ");
+        }
+      } catch (const boost::bad_lexical_cast &) {
+        throw std::invalid_argument("Failed to parse run label: " + label +
+                                    " not a good run number");
+      } catch (...) {
+        throw std::invalid_argument("Failed to parse run label: " + label);
+      }
+    }
+  } else {
+    // The string was "INST000" or similar...
+    runNumbers = {0};
+  }
+}
+
+// Validate the input group workspaces using their names.
+bool checkValidPair(const std::string &WSname1, const std::string &WSname2) {
+  Muon::DatasetParams group1, group2;
+  try {
+    group1 = parseWorkspaceName(WSname1);
+    group2 = parseWorkspaceName(WSname2);
+  } catch (std::invalid_argument) {
+    throw std::invalid_argument(
+        "Ensure workspaces have the correctly formatted name (see "
+        "documentation).");
+  }
+
+  if (group1.instrument != group2.instrument) {
+    throw std::invalid_argument(
+        "Group workspaces named with different instruments.");
+  }
+
+  if (group1.itemName == group2.itemName) {
+    throw std::invalid_argument(
+        "Groups used for pairing must have differnt names.");
+  }
+
+  if (group1.itemType != Muon::ItemType::Group ||
+      group2.itemType != Muon::ItemType::Group) {
+    throw std::invalid_argument("Workspaces must be of group type (not pair)");
+  }
+
+  if (group1.plotType != Muon::PlotType::Counts ||
+      group2.plotType != Muon::PlotType::Counts) {
+    throw std::invalid_argument(
+        "Workspaces must be of counts type (not asymmetry)");
+  }
+
+  return true;
 }
 
 } // namespace MuonAlgorithmHelper

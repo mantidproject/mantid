@@ -26,10 +26,10 @@ Initialise the interface
 void QtReflEventTabView::initLayout() {
   m_ui.setupUi(this);
 
-  QtReflEventView *event_1 = new QtReflEventView(this);
+  QtReflEventView *event_1 = new QtReflEventView(0, this);
   m_ui.toolbox->addItem(event_1, "Group 1");
 
-  QtReflEventView *event_2 = new QtReflEventView(this);
+  QtReflEventView *event_2 = new QtReflEventView(1, this);
   m_ui.toolbox->addItem(event_2, "Group 2");
 
   std::vector<IReflEventPresenter *> presenters;

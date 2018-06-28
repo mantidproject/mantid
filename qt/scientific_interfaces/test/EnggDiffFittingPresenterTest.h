@@ -8,6 +8,7 @@
 
 #include "EnggDiffFittingModelMock.h"
 #include "EnggDiffFittingViewMock.h"
+#include "EnggDiffractionParamMock.h"
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
@@ -31,6 +32,11 @@ public:
   EnggDiffFittingPresenterNoThread(IEnggDiffFittingView *view,
                                    std::unique_ptr<IEnggDiffFittingModel> model)
       : EnggDiffFittingPresenter(view, std::move(model), nullptr, nullptr) {}
+
+  EnggDiffFittingPresenterNoThread(
+      IEnggDiffFittingView *view, std::unique_ptr<IEnggDiffFittingModel> model,
+      boost::shared_ptr<IEnggDiffractionParam> mainParam)
+      : EnggDiffFittingPresenter(view, std::move(model), nullptr, mainParam) {}
 
 private:
   // not async at all
@@ -297,13 +303,19 @@ public:
 
   void test_browse_peaks_list() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
+    const auto paramMock =
+        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+    EnggDiffFittingPresenterNoThread pres(
+        &mockView, Mantid::Kernel::make_unique<
+                       testing::NiceMock<MockEnggDiffFittingModel>>(),
+        paramMock);
 
-    EXPECT_CALL(mockView, focusingDir()).Times(1);
+    const auto &userDir(Poco::Path::home());
+    EXPECT_CALL(*paramMock, outFilesUserDir(""))
+        .Times(1)
+        .WillOnce(Return(userDir));
 
-    EXPECT_CALL(mockView, getPreviousDir()).Times(1);
-
-    EXPECT_CALL(mockView, getOpenFile(testing::_)).Times(1);
+    EXPECT_CALL(mockView, getOpenFile(userDir)).Times(1);
 
     EXPECT_CALL(mockView, getSaveFile(testing::_)).Times(0);
 
@@ -320,15 +332,21 @@ public:
 
   void test_browse_peaks_list_with_warning() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
+    const auto paramMock =
+        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+    EnggDiffFittingPresenterNoThread pres(
+        &mockView, Mantid::Kernel::make_unique<
+                       testing::NiceMock<MockEnggDiffFittingModel>>(),
+        paramMock);
+
+    const auto &userDir(Poco::Path::home());
+    EXPECT_CALL(*paramMock, outFilesUserDir(""))
+        .Times(1)
+        .WillOnce(Return(userDir));
 
     std::string dummyDir = "I/am/a/dummy/directory";
 
-    EXPECT_CALL(mockView, focusingDir()).Times(1);
-
-    EXPECT_CALL(mockView, getPreviousDir()).Times(1);
-
-    EXPECT_CALL(mockView, getOpenFile(testing::_))
+    EXPECT_CALL(mockView, getOpenFile(userDir))
         .Times(1)
         .WillOnce(Return(dummyDir));
 
@@ -349,13 +367,19 @@ public:
 
   void test_save_peaks_list() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
+    const auto paramMock =
+        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+    EnggDiffFittingPresenterNoThread pres(
+        &mockView, Mantid::Kernel::make_unique<
+                       testing::NiceMock<MockEnggDiffFittingModel>>(),
+        paramMock);
 
-    EXPECT_CALL(mockView, focusingDir()).Times(1);
+    const auto &userDir(Poco::Path::home());
+    EXPECT_CALL(*paramMock, outFilesUserDir(""))
+        .Times(1)
+        .WillOnce(Return(userDir));
 
-    EXPECT_CALL(mockView, getPreviousDir()).Times(1);
-
-    EXPECT_CALL(mockView, getSaveFile(testing::_)).Times(1);
+    EXPECT_CALL(mockView, getSaveFile(userDir)).Times(1);
 
     // No errors/No warnings.
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -370,15 +394,20 @@ public:
 
   void test_save_peaks_list_with_warning() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
+    const auto paramMock =
+        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+    EnggDiffFittingPresenterNoThread pres(
+        &mockView, Mantid::Kernel::make_unique<
+                       testing::NiceMock<MockEnggDiffFittingModel>>(),
+        paramMock);
+
+    const auto &userDir(Poco::Path::home());
+    EXPECT_CALL(*paramMock, outFilesUserDir(""))
+        .Times(1)
+        .WillOnce(Return(userDir));
 
     std::string dummyDir = "/dummy/directory/";
-
-    EXPECT_CALL(mockView, focusingDir()).Times(1);
-
-    EXPECT_CALL(mockView, getPreviousDir()).Times(1);
-
-    EXPECT_CALL(mockView, getSaveFile(testing::_))
+    EXPECT_CALL(mockView, getSaveFile(userDir))
         .Times(1)
         .WillOnce(Return(dummyDir));
 
@@ -546,7 +575,6 @@ public:
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
     EXPECT_CALL(mockView, getFocusedFileNames()).Times(0);
     EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
-    EXPECT_CALL(mockView, focusingDir()).Times(0);
 
     EXPECT_CALL(mockView, getFittingMultiRunMode()).Times(0);
 

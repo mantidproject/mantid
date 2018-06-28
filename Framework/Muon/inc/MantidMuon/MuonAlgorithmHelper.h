@@ -77,6 +77,18 @@ findConsecutiveRuns(const std::vector<int> &runs);
 
 /// Generate new analysis workspace name
 DLLExport std::string generateWorkspaceName(const Muon::DatasetParams &params);
+
+/// Parse analysis workspace name
+DLLExport Muon::DatasetParams parseWorkspaceName(const std::string &wsName);
+
+/// Parse run label into instrument and runs
+DLLExport void parseRunLabel(const std::string &label, std::string &instrument,
+                             std::vector<int> &runNumbers);
+
+/// Checks that the names allow a pairing
+DLLExport bool checkValidPair(const std::string &name1,
+                              const std::string &name2);
+
 } // namespace MuonAlgorithmHelper
 } // namespace Mantid
 

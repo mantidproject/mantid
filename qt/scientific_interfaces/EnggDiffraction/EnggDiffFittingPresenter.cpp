@@ -515,11 +515,8 @@ void EnggDiffFittingPresenter::doFitting(const std::vector<RunLabel> &runLabels,
 
 void EnggDiffFittingPresenter::browsePeaksToFit() {
   try {
-    auto prevPath = m_view->focusingDir();
-    if (prevPath.empty()) {
-      prevPath = m_view->getPreviousDir();
-    }
-    std::string path = m_view->getOpenFile(prevPath);
+    const auto &userDir = outFilesUserDir("");
+    std::string path = m_view->getOpenFile(userDir.toString());
     if (path.empty()) {
       return;
     }
@@ -573,12 +570,8 @@ void EnggDiffFittingPresenter::addPeakToList() {
 
 void EnggDiffFittingPresenter::savePeakList() {
   try {
-    QString prevPath = QString::fromStdString(m_view->focusingDir());
-    if (prevPath.isEmpty()) {
-      prevPath = QString::fromStdString(m_view->getPreviousDir());
-    }
-
-    std::string path = m_view->getSaveFile(prevPath.toStdString());
+    const auto &userDir = outFilesUserDir("");
+    const auto &path = m_view->getSaveFile(userDir.toString());
 
     if (path.empty()) {
       return;

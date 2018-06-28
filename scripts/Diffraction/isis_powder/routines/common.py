@@ -284,25 +284,12 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
         remove_intermediate_workspace(raw_ws_list)
         raw_ws_list = [summed_ws]
 
-    if instrument._inst_prefix == "HRPD":
-        for ws in raw_ws_list:
-            _mask_all_prompt_pulses(ws)
+    instrument.mask_prompt_pulses_if_necessary(raw_ws_list)
 
     normalised_ws_list = _normalise_workspaces(ws_list=raw_ws_list, run_details=run_information,
                                                instrument=instrument)
 
     return normalised_ws_list
-
-
-def _mask_prompt_pulse(workspace, middle, left_crop, right_crop):
-    min_crop = middle - left_crop
-    max_crop = middle + right_crop
-    mantid.MaskBins(InputWorkspace=workspace, OutputWorkspace=workspace, XMin=min_crop, XMax=max_crop)
-
-
-def _mask_all_prompt_pulses(workspace):
-    for i in range(6):
-        _mask_prompt_pulse(workspace=workspace, middle=100000 + 20000 * i, left_crop=30, right_crop=140)
 
 
 def rebin_workspace(workspace, new_bin_width, start_x=None, end_x=None):
