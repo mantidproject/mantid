@@ -63,7 +63,7 @@ std::string getRecoveryFolder() {
 
 /// Gets a formatted timestamp
 std::string getTimeStamp() {
-  const char *formatSpecifier = "%Y-%m-%d %H-%M-%S";
+  const char *formatSpecifier = "%Y-%m-%dT%H-%M-%S";
   auto time = std::time(nullptr);
   auto localTime = std::localtime(&time);
 
@@ -100,7 +100,7 @@ const std::string SAVING_TIME_KEY = "projectRecovery.secondsBetween";
 const std::string NO_OF_CHECKPOINTS_KEY = "projectRecovery.numberOfCheckpoints";
 
 // Config values
-const bool SAVING_ENABLED =
+bool SAVING_ENABLED =
     getConfigBool(SAVING_ENABLED_CONFIG_KEY).get_value_or(false);
 const int SAVING_TIME =
     getConfigValue<int>(SAVING_TIME_KEY).get_value_or(60); // Seconds
@@ -108,7 +108,7 @@ const int NO_OF_CHECKPOINTS =
     getConfigValue<int>(NO_OF_CHECKPOINTS_KEY).get_value_or(5);
 
 // Implementation variables
-Mantid::Kernel::Logger g_log("Project Recovery Thread");
+Mantid::Kernel::Logger g_log("ProjectRecovery");
 const std::chrono::seconds TIME_BETWEEN_SAVING(SAVING_TIME);
 
 } // namespace
@@ -145,8 +145,10 @@ void ProjectRecovery::configKeyChanged(
   }
 
   if (notif->curValue() == "True") {
+	SAVING_ENABLED = true;
     startProjectSaving();
   } else {
+	SAVING_ENABLED = false;
     stopProjectSaving();
   }
 }
@@ -257,7 +259,7 @@ void ProjectRecovery::projectSavingThread() {
     std::unique_lock<std::mutex> lock(m_notifierMutex);
     // The condition variable releases the lock until the var changes
     if (m_threadNotifier.wait_for(lock, TIME_BETWEEN_SAVING, [this]() {
-          return m_stopBackgroundThread;
+          return m_stopBackgroundThread.load();
         })) {
       // Exit thread
       g_log.debug("Project Recovery: Stopping background saving thread");
@@ -269,7 +271,7 @@ void ProjectRecovery::projectSavingThread() {
     // Generate output paths
     const auto basePath = getOutputPath();
 
-    Poco::File(basePath).createDirectory();
+    Poco::File(basePath).createDirectories();
 
     auto projectFile = Poco::Path(basePath).append(OUTPUT_PROJ_NAME);
 

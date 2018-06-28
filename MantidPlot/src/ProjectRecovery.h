@@ -5,6 +5,7 @@
 
 #include <Poco/NObserver.h>
 
+#include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
@@ -84,7 +85,7 @@ private:
   /// Mutex for conditional variable and background thread flag
   std::mutex m_notifierMutex;
   /// Flag to indicate to the thread to exit
-  bool m_stopBackgroundThread;
+  std::atomic<bool> m_stopBackgroundThread;
   /// Atomic to detect when the thread should fire or exit
   std::condition_variable m_threadNotifier;
 
