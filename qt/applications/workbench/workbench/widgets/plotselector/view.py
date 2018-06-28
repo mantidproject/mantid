@@ -19,7 +19,7 @@ from __future__ import absolute_import, print_function
 import re
 
 from qtpy.QtCore import Qt, Signal
-from qtpy.QtGui import QColor, QIcon
+from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QFileDialog, QHBoxLayout, QLineEdit, QListWidget,
                             QListWidgetItem, QMenu, QPushButton, QVBoxLayout, QWidget)
 
@@ -45,7 +45,7 @@ class PlotSelectorView(QWidget):
     The view to the plot selector, a PyQt widget.
     """
 
-    DEBUG_MODE = False
+    DEBUG_MODE = True
 
     # A signal to capture when keys are pressed
     deleteKeyPressed = Signal(int)
@@ -316,7 +316,9 @@ class PlotSelectorView(QWidget):
         row, widget = self._get_row_and_widget_from_plot_name(old_name)
 
         old_key = self.list_widget.item(row).data(Qt.InitialSortOrderRole)
+        print(old_key)
         new_sort_key = self.presenter.get_renamed_sort_key(new_name, old_key)
+        print(new_sort_key)
         self.list_widget.item(row).setData(Qt.InitialSortOrderRole, new_sort_key)
 
         widget.set_plot_name(new_name)
@@ -333,18 +335,18 @@ class PlotSelectorView(QWidget):
     # ----------------------- Plot Sorting --------------------------
     """
     How the sorting works
-    
+
     The QListWidgetItem has a text string set via .setData with the
     Qt.InitialSortOrderRole as the role for this string (not strictly
     used as intended in Qt). If the sorting is by name this is just
     the name of the plot.
-    
-    If sorting by last active this is the number the plot was last 
-    active, or if never active it is the plot name with an 'A' 
+
+    If sorting by last active this is the number the plot was last
+    active, or if never active it is the plot name with an 'A'
     appended to the front. For example ['1', '2', 'AUnshownPlot'].
-    
+
     QListWidgetItem is subclassed by HumanReadableSortItem to
-    override the < operator. This uses the text with the 
+    override the < operator. This uses the text with the
     InitialSortOrderRole to sort, and sorts in a human readable way,
     for example ['Figure 1', 'Figure 2', 'Figure 10'] as opposed to
     the ['Figure 1', 'Figure 10', 'Figure 2'].
@@ -431,7 +433,7 @@ class PlotSelectorView(QWidget):
         for row in range(len(self.list_widget)):
             item = self.list_widget.item(row)
             widget = self.list_widget.itemWidget(item)
-            item.setData(Qt.InitialSortOrderRole, str(sort_names_dict[widget.plot_name]))
+            item.setData(Qt.InitialSortOrderRole, sort_names_dict[widget.plot_name])
         self.list_widget.sortItems(self.sort_order)
         self.list_widget.setSortingEnabled(True)
 
@@ -504,7 +506,6 @@ class PlotNameWidget(QWidget):
         # Get rid of the top and bottom margins - the button provides
         # some natural margin anyway. Get rid of right margin and
         # reduce spacing to get buttons closer together.
-        margins = self.layout.contentsMargins()
         self.layout.setContentsMargins(5, 0, 0, 0)
         self.layout.setSpacing(0)
 
@@ -602,6 +603,6 @@ class HumanReadableSortItem(QListWidgetItem):
         then uses Python list comparison to get the result we want.
         :param other: The other HumanReadableSortItem to compare with
         """
-        self_key = [self.convert(c) for c in re.split('([0-9]+)', self.data(Qt.InitialSortOrderRole))]
-        other_key = [self.convert(c) for c in re.split('([0-9]+)', other.data(Qt.InitialSortOrderRole))]
+        self_key = [self.convert(c) for c in re.split('([0-9]+)', str(self.data(Qt.InitialSortOrderRole)))]
+        other_key = [self.convert(c) for c in re.split('([0-9]+)', str(other.data(Qt.InitialSortOrderRole)))]
         return self_key < other_key

@@ -60,7 +60,6 @@ class PlotSelectorPresenter(object):
         is applied to the updated selection if required.
         """
         self.model.update_plot_list()
-        filter_text = self.view.get_filter_text()
         self.view.set_plot_list(self.model.plot_list)
 
     def append_to_plot_list(self, plot_name):
@@ -278,9 +277,12 @@ class PlotSelectorPresenter(object):
         """
         Gets the initial sort key for a plot just added, in this case
         it is assumed to not have been shown
-        :param plot_name: The name of the plot to generate the sort
-                          key for
+        :param new_name: The name of the plot to generate the sort
+                         key for
+        :param old_key: The old sort key - if this is for sorting by
+                        last shown this is retained as is
         """
+        print(type(old_key))
         if self.view.sort_type == SortType.LastShown:
             if isinstance(old_key, int):
                 return old_key

@@ -191,7 +191,7 @@ class PlotSelectorModel(object):
 
         try:
             figure_manager.canvas.figure.savefig(save_absolute_path)
-        except IOError as e:
+        except IOError:
             raise ValueError("Error, could not save plot with name {} because the filename is invalid. "
                              "Please remove any characters in the plot name that cannot be used in filenames."
                              .format(plot_name))
