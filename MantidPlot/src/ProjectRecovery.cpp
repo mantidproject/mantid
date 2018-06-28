@@ -346,7 +346,7 @@ void ProjectRecovery::projectSavingThread() {
 	const auto &ads = Mantid::API::AnalysisDataService::Instance();
 	if (ads.size() == 0) {
 		g_log.debug("Nothing to save");
-		return;
+		continue;
 	}
     
 	g_log.debug("Project Recovery: Saving started");
@@ -425,6 +425,7 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
     destFilename.append(filename);
 
     alg->initialize();
+	alg->setProperty("AppendTimestamp", true);
     alg->setPropertyValue("InputWorkspace", ws);
     alg->setPropertyValue("Filename", destFilename.toString());
     alg->setPropertyValue("StartTimestamp", startTime);

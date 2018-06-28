@@ -86,22 +86,14 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
         # Add lists of histories together
         all_unique_commands = [command.strip().split('#') for command in commands]
 
-        self.log().debug("1")
-
         # Convert the datetime into a sortable integer
         all_unique_commands = [(i[0], self._concatenate_iso_datetime(i[1]))
                                for i in all_unique_commands]
 
-        self.log().debug("2")
-
         # Sort the new list on datetime integer
         all_unique_commands.sort(key=lambda time: (time[1]))
 
-        self.log().debug("3")
-
         destination = self.getPropertyValue(_destination_file)
-
-        self.log().debug("4")
 
         self.log().debug("Writing commands to file")
         # Write to file

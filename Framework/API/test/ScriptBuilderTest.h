@@ -11,6 +11,15 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+namespace {
+	std::string getAlgTimestamp(Mantid::API::HistoryView &historyView, size_t index) {
+		auto algList = historyView.getAlgorithmsList();
+		TS_ASSERT(algList.size() >= index + 1);
+		auto executionTime = algList[index].getAlgorithmHistory()->executionDate();
+		return executionTime.toISO8601String();
+	}
+}
+
 class ScriptBuilderTest : public CxxTest::TestSuite {
   /// Use a fake algorithm object instead of a dependency on a real one.
   class SubAlgorithm : public Algorithm {
@@ -238,6 +247,48 @@ public:
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
+  }
+
+  void test_Build_Simple_Timestamped() {
+	  boost::shared_ptr<WorkspaceTester> input =
+		  boost::make_shared<WorkspaceTester>();
+	  AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
+
+	  auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
+	  alg->initialize();
+	  alg->setRethrows(true);
+	  alg->setProperty("InputWorkspace", input);
+	  alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
+	  alg->execute();
+
+
+	  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+		  "test_output_workspace");
+
+	  const auto wsHistView = ws->getHistory().createView();
+	  auto executionTime = getAlgTimestamp(*wsHistView, 0);
+
+	  std::string algTimestamp{ " # " + executionTime };
+
+	  std::string result[] = { "TopLevelAlgorithm(InputWorkspace='test_input_"
+		  "workspace', "
+		  "OutputWorkspace='test_output_workspace')" + algTimestamp,
+		  "" };
+
+	  const bool appendTimestamp = true;
+	  ScriptBuilder builder(wsHistView, "old", appendTimestamp);
+	  std::string scriptText = builder.build();
+
+	  std::vector<std::string> scriptLines;
+	  boost::split(scriptLines, scriptText, boost::is_any_of("\n"));
+
+	  int i = 0;
+	  for (auto it = scriptLines.begin(); it != scriptLines.end(); ++it, ++i) {
+		  TS_ASSERT_EQUALS(*it, result[i])
+	  }
+
+	  AnalysisDataService::Instance().remove("test_output_workspace");
+	  AnalysisDataService::Instance().remove("test_input_workspace");
   }
 
   void test_Build_Unrolled() {
