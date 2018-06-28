@@ -133,7 +133,6 @@ struct TableToMatrixWorkspaceConverter {
   }
 
 private:
-  ITableWorkspace const *m_table;
   std::vector<double> const m_x;
   std::vector<Column_const_sptr> const m_yColumns;
   std::vector<Column_const_sptr> const m_eColumns;
