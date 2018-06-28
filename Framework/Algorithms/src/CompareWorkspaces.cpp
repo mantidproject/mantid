@@ -1,6 +1,5 @@
 #include "MantidAlgorithms/CompareWorkspaces.h"
 
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -12,8 +11,10 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Unit.h"
 #include "MantidParallel/Communicator.h"
 
@@ -227,8 +228,8 @@ void CompareWorkspaces::doComparison() {
   // ==============================================================================
 
   // Check that both workspaces are the same type
-  IPeaksWorkspace_sptr pws1 = boost::dynamic_pointer_cast<IPeaksWorkspace>(w1);
-  IPeaksWorkspace_sptr pws2 = boost::dynamic_pointer_cast<IPeaksWorkspace>(w2);
+  PeaksWorkspace_sptr pws1 = boost::dynamic_pointer_cast<PeaksWorkspace>(w1);
+  PeaksWorkspace_sptr pws2 = boost::dynamic_pointer_cast<PeaksWorkspace>(w2);
   if ((pws1 && !pws2) || (!pws1 && pws2)) {
     recordMismatch("One workspace is a PeaksWorkspace and the other is not.");
     return;
@@ -961,8 +962,8 @@ int CompareWorkspaces::compareEventsListInDetails(
 }
 
 //------------------------------------------------------------------------------------------------
-void CompareWorkspaces::doPeaksComparison(API::IPeaksWorkspace_sptr tws1,
-                                          API::IPeaksWorkspace_sptr tws2) {
+void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
+                                          PeaksWorkspace_sptr tws2) {
   // Check some table-based stuff
   if (tws1->getNumberPeaks() != tws2->getNumberPeaks()) {
     recordMismatch("Mismatched number of rows.");

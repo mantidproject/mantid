@@ -236,6 +236,21 @@ private:
 * group inside the "NXentry". It is an old ISIS requirement that is rarely
 * used now.
 *
+* Due to hardware issues with retro-fitting event mode to old electronics,
+* ISIS event mode is really a very fine histogram with between 1 and 2
+* microseconds bins.
+*
+* If we just took "middle of bin" as the true event time here then WISH
+* observed strange ripples when they added spectra. The solution was to
+* randomise the probability of an event within the bin.
+*
+* This randomisation is now performed in the control program which also writes
+* the "event_time_offset_shift" dataset (with a single value of "random") when
+* it has been performed. If this dataset is present in an event file then no
+* randomisation is performed in LoadEventNexus.
+*
+* This code should remain for loading older ISIS event datasets.
+*
 * @param file :: The nexus file to read from.
 * @param localWorkspace :: The event workspace collection to write to.
 * @param binsName :: bins name
