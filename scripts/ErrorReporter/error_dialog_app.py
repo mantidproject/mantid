@@ -4,6 +4,8 @@ import argparse
 parser = argparse.ArgumentParser(description='Pass in exit_code')
 parser.add_argument('--exitcode', dest='exit_code')
 parser.add_argument('--directory', dest='directory')
+parser.add_argument('--qtdir', dest='qtdir')
+
 command_line_args = parser.parse_args()
 
 sys.path.insert(0, command_line_args.directory)
@@ -15,7 +17,11 @@ from ErrorReporter import resources # noqa
 from mantid.kernel import UsageService # noqa
 from ErrorReporter.error_report_presenter import ErrorReporterPresenter # noqa
 from ErrorReporter.errorreport import CrashReportPage # noqa
-
+# Set path to look for package qt libraries
+from PyQt4.QtCore import QCoreApplication
+QCoreApplication.addLibraryPath(
+    command_line_args.qtdir
+)
 
 def main():
     if not UsageService.isEnabled():
