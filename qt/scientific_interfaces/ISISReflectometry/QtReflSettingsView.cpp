@@ -52,6 +52,8 @@ void QtReflSettingsView::initLayout() {
           SLOT(addPerAngleOptionsTableRow()));
   connect(m_ui.correctDetectorsCheckBox, SIGNAL(clicked(bool)), this,
           SLOT(setDetectorCorrectionEnabled(bool)));
+  connect(m_ui.polCorrComboBox, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(setPolCorPageForIndex(int)));
 }
 
 void QtReflSettingsView::initOptionsTable() {
@@ -679,6 +681,19 @@ bool QtReflSettingsView::experimentSettingsEnabled() const {
 */
 bool QtReflSettingsView::instrumentSettingsEnabled() const {
   return m_ui.instSettingsGroup->isChecked();
+}
+
+/**
+  Set the current page index of m_ui.polCorStackedWidget depending on the index
+  of m_ui.polCorrComboBox. They don't match 1-to-1 because PA and PNR options
+  share a page.
+  @param index :: New current index of m_ui.polCorrComboBox.
+ */
+void QtReflSettingsView::setPolCorPageForIndex(int index) {
+  assert(m_ui.polCorrComboBox->count() == 4);
+  assert(m_ui.polCorStackedWidget->count() == 3);
+  static std::array<int, 4> const indexMap = {0, 1, 1, 2};
+  m_ui.polCorStackedWidget->setCurrentIndex(indexMap[index]);
 }
 
 } // namespace CustomInterfaces
