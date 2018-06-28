@@ -174,7 +174,7 @@ public:
     // Retrieve and analyse results table
     MatrixWorkspace_sptr resultWs;
     TS_ASSERT_THROWS_NOTHING(
-        resultWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        resultWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
             "ReductionWs_conv_1LFixF_s0_to_5_Result"));
     TS_ASSERT_EQUALS(resultWs->blocksize(), totalBins);
 
@@ -248,7 +248,7 @@ public:
             "SqwWs_conv_1LFixF_s0_Parameters"));
 
     TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
             "SqwWs_conv_1LFixF_s0_Result"));
 
     TS_ASSERT_THROWS_NOTHING(
