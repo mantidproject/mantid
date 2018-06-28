@@ -6,8 +6,8 @@
 #include "IReflBatchPresenter.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
-#include "Presenters/RunsTablePresenter.h"
-#include "Presenters/RunsTablePresenterFactory.h"
+#include "GUI/RunsTable/RunsTablePresenter.h"
+#include "GUI/RunsTable/RunsTablePresenterFactory.h"
 #include "ReflAutoreduction.h"
 #include <boost/shared_ptr.hpp>
 #include "SearchResult.h"

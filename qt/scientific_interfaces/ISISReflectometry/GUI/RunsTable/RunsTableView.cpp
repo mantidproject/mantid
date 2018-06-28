@@ -1,5 +1,5 @@
 #include "RunsTableView.h"
-#include "../IndexOf.h"
+#include "../../IndexOf.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"

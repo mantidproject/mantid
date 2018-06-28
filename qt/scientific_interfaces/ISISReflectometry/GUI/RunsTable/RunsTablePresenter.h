@@ -24,7 +24,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #define MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
 #include "DllConfig.h"
 #include <memory>
-#include "Views/IRunsTableView.h"
+#include "IRunsTableView.h"
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 #include "Reduction/Group.h"
 #include "Reduction/ReductionJobs.h"

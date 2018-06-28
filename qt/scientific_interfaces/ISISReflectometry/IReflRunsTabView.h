@@ -4,7 +4,7 @@
 #include <set>
 #include <string>
 #include <boost/shared_ptr.hpp>
-#include "Views/IRunsTableView.h"
+#include "GUI/RunsTable/IRunsTableView.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
 

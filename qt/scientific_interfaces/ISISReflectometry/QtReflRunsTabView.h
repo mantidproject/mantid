@@ -6,7 +6,7 @@
 #include "DllConfig.h"
 #include "IReflRunsTabView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
-#include "Views/RunsTableView.h"
+#include "GUI/RunsTable/RunsTableView.h"
 
 #include "ui_ReflRunsTabWidget.h"
 

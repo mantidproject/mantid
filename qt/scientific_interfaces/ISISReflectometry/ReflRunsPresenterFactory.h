@@ -6,7 +6,7 @@
 #include "IReflRunsTabView.h"
 #include "ReflRunsTabPresenter.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
-#include "Presenters/RunsTablePresenterFactory.h"
+#include "GUI/RunsTable/RunsTablePresenterFactory.h"
 #include "../General/IReflSearcher.h"
 #include <memory>
 
