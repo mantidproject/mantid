@@ -216,8 +216,8 @@ void IndirectFitPlotPresenter::updateDataSelection() {
 void IndirectFitPlotPresenter::updateAvailableSpectra() {
   if (m_model->getWorkspace()) {
     m_view->enableSpectrumSelection();
-    const auto spectra = m_model->getSpectra();
-    boost::apply_visitor(UpdateAvailableSpectra(m_view), spectra);
+    auto updateSpectra = UpdateAvailableSpectra(m_view);
+    m_model->getSpectra().apply_visitor(updateSpectra);
     setActiveSpectrum(m_view->getSelectedSpectrum());
   } else
     m_view->disableSpectrumSelection();
