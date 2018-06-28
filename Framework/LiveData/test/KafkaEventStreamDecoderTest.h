@@ -133,9 +133,14 @@ public:
   }
 
   void test_Varying_Period_Event_Stream() {
+	  /**
+	  * Test that period number is correctly updated between runs
+	  * e.g If the first run has 1 period and the next has 2 periods
+	  */
 	  using namespace ::testing;
 	  using namespace KafkaTesting;
 	  using Mantid::API::Workspace_sptr;
+	  using Mantid::API::WorkspaceGroup;
 	  using Mantid::DataObjects::EventWorkspace;
 	  using namespace Mantid::LiveData;
 
@@ -150,12 +155,28 @@ public:
 		  !decoder->hasData());
 	  startCapturing(*decoder, 5);
 	Workspace_sptr workspace;
-	// Extract data should only get data from the first run
 	TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
 	TS_ASSERT(decoder->hasReachedEndOfRun());
 	TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
 	TS_ASSERT(!decoder->isCapturing());
 
+	// --- Workspace checks ---
+	TSM_ASSERT("Expected non-null workspace pointer from extractData()",
+		workspace);
+	auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+	TSM_ASSERT(
+		"Expected a WorkspaceGroup from extractData(). Found something else.",
+		group);
+
+	TS_ASSERT_EQUALS(2, group->size());
+	for (size_t i = 0; i < 2; ++i) {
+		auto eventWksp =
+			boost::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
+		TSM_ASSERT("Expected an EventWorkspace for each member of the group",
+			eventWksp);
+		checkWorkspaceMetadata(*eventWksp);
+		checkWorkspaceEventData(*eventWksp);
+	}
   }
 
   void test_End_Of_Run_Reported_After_Run_Stop_Reached() {
