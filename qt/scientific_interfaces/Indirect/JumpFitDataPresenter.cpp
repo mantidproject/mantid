@@ -127,6 +127,7 @@ void JumpFitDataPresenter::updateParameterOptions(
 void JumpFitDataPresenter::updateParameterTypes(
     JumpFitAddWorkspaceDialog *dialog) {
   dialog->setParameterTypes(getParameterTypes(m_dataIndex));
+  setActiveParameterType(0);
 }
 
 std::vector<std::string>

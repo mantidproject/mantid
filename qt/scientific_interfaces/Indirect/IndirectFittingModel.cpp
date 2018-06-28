@@ -20,7 +20,9 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 bool equivalentWorkspaces(MatrixWorkspace_const_sptr lhs,
                           MatrixWorkspace_const_sptr rhs) {
-  if (lhs->getName() == "" && rhs->getName() == "")
+  if (!lhs || !rhs)
+    return false;
+  else if (lhs->getName() == "" && rhs->getName() == "")
     return lhs == rhs;
   return lhs->getName() == rhs->getName();
 }
