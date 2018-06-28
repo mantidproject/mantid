@@ -792,8 +792,8 @@ ReflectometryReductionOneAuto2::getPolarizationEfficiencies() {
     effAlg->setProperty("InputWorkspace", workspace);
     effAlg->execute();
     efficiencies = effAlg->getProperty("OutputWorkspace");
-    correctionMethod = effAlg->getProperty("CorrectionMethod");
-    correctionOption = effAlg->getProperty("CorrectionOption");
+    correctionMethod = effAlg->getPropertyValue("CorrectionMethod");
+    correctionOption = effAlg->getPropertyValue("CorrectionOption");
   } else {
     auto effAlg = createChildAlgorithm("CreatePolarizationEfficiencies");
     effAlg->setProperty("InputWorkspace", workspace);
