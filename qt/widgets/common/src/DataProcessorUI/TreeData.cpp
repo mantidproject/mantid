@@ -1,3 +1,4 @@
+
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 namespace MantidQt {
@@ -58,12 +59,20 @@ QString RowData::value(const int i) {
 /** Set a data value
  * @param i [in] : the index of the value to set
  * @param value [in] : the new value
+ * @param isGenerated [in] : indicates whether the value is
+ * auto-generated or user-entered
  */
-void RowData::setValue(const int i, const QString &value) {
+void RowData::setValue(const int i, const QString &value,
+                       const bool isGenerated) {
   // Set the row value
   if (m_data.size() > i) {
     m_data[i] = value;
   }
+
+  if (isGenerated)
+    m_generatedColumns.insert(i);
+  else
+    m_generatedColumns.erase(i);
 
   // Also update the value in any child slices
   if (m_slices.size() > 0) {
@@ -105,6 +114,14 @@ void RowData::setPreprocessedOptions(OptionsMap options) {
  * @return : the number of fields
  */
 int RowData::size() const { return m_data.size(); }
+
+/** Check whether a cell value was auto-generated (i.e. has been populated with
+ * a result of the algorithm rather than being entered by the user)
+ * @param i : the column index of the cell to check
+ */
+bool RowData::isGenerated(const int i) const {
+  return (m_generatedColumns.count(i) > 0);
+}
 
 /** Check whether the given property exists in the options
  * @return : true if the property exists
@@ -151,7 +168,7 @@ QString RowData::optionValue(const QString &name,
  * doesn't exist
  */
 QString RowData::preprocessedOptionValue(const QString &name) const {
-  return hasOption(name) ? m_preprocessedOptions.at(name) : "";
+  return hasPreprocessedOption(name) ? m_preprocessedOptions.at(name) : "";
 }
 
 /** Set the value for the given property
@@ -249,19 +266,69 @@ RowData::addSlice(const QString &sliceSuffix,
   return sliceData;
 }
 
+/** Reset the row to how it was before it was processed. This clears the
+ * processed state, errors, generated values etc. It doesn't change the row
+ * data other than clearing generated values i.e. it leaves user-entered inputs
+ * unchanged
+ */
+void RowData::reset() {
+  // Clear processed state and error
+  setProcessed(false);
+  setError("");
+
+  // Clear the cache of algorithm properties used
+  setOptions(OptionsMap());
+  setPreprocessedOptions(OptionsMap());
+
+  // Clear generated values
+  for (auto columnIndex : m_generatedColumns) {
+    setValue(columnIndex, "");
+  }
+  m_generatedColumns.clear();
+}
+
 /** Clear all child slices for this row
  */
 void RowData::clearSlices() { m_slices.clear(); }
+
+/** Check whether reduction failed for this row (or any of its slices)
+ */
+bool RowData::reductionFailed() const {
+  if (!m_error.empty())
+    return true;
+
+  for (const auto slice : m_slices) {
+    if (slice->reductionFailed())
+      return true;
+  }
+
+  return false;
+}
 
 /** Return the canonical reduced workspace name i.e. before any
  * prefixes have been applied for specific output properties.
  * @param prefix [in] : if not empty, apply this prefix to the name
  */
-QString RowData::reducedName(const QString prefix) {
+QString RowData::reducedName(const QString prefix) const {
   if (prefix.isEmpty())
     return m_reducedName;
   else
     return prefix + m_reducedName;
+}
+
+/** Check if this row has an output workspace with the given workspace name
+ * and prefix (including any slices)
+ */
+bool RowData::hasOutputWorkspaceWithNameAndPrefix(const QString &workspaceName,
+                                                  const QString &prefix) const {
+  if (reducedName(prefix) == workspaceName) {
+    return true;
+  }
+  for (auto slice : m_slices) {
+    if (slice->hasOutputWorkspaceWithNameAndPrefix(workspaceName, prefix))
+      return true;
+  }
+  return false;
 }
 }
 }

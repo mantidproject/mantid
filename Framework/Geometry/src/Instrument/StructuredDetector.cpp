@@ -398,15 +398,9 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   auto yrb = m_yvalues[(y * w) + x + 1];
 
   // calculate midpoint of trapeziod
-  auto a = std::fabs(xrf - xlf);
-  auto b = std::fabs(xrb - xlb);
-  auto h = std::fabs(ylb - ylf);
-  auto cx = ((a + b) / 4);
-  auto cy = h / 2;
-
-  // store detector position before translating to origin
-  auto xpos = xlb + cx;
-  auto ypos = ylb + cy;
+  // calculate midpoint of trapeziod
+  auto xpos = (xlb + xlf + xrf + xrb) / 4;
+  auto ypos = (ylb + ylf + yrf + yrb) / 4;
 
   // Translate detector shape to origin
   xlf -= xpos;

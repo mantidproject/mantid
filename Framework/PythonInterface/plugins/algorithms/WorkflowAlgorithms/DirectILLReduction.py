@@ -6,11 +6,11 @@ import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, StringListValidator)
-from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertSpectrumAxis, ConvertUnits, CorrectKiKf, DetectorEfficiencyCorUser,
-                              Divide, GroupDetectors, MaskDetectors, Rebin, Scale, SofQWNormalisedPolygon, Transpose)
+from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertSpectrumAxis, ConvertToDistribution, ConvertUnits, CorrectKiKf,
+                              DetectorEfficiencyCorUser, Divide, GroupDetectors, MaskDetectors, Rebin, Scale, SofQWNormalisedPolygon,
+                              Transpose)
 import math
 import numpy
-import roundinghelper
 from scipy import constants
 
 
@@ -87,7 +87,6 @@ def _energyBinning(ws, algorithmLogging):
     """Create common (but nonequidistant) binning for a DeltaE workspace."""
     xs = ws.extractX()
     minXIndex = numpy.nanargmin(xs[:, 0])
-    # TODO Fix logging.
     dx = BinWidthAtX(InputWorkspace=ws,
                      X=0.0,
                      EnableLogging=algorithmLogging)
@@ -124,8 +123,8 @@ def _medianDeltaTheta(ws):
     if not thetas:
         raise RuntimeError('No usable detectors for median DTheta ' +
                            'calculation.')
-    dThetas = numpy.diff(thetas)
-    return numpy.median(dThetas[dThetas > numpy.radians(0.1)])
+    dThetas = numpy.abs(numpy.diff(thetas))
+    return numpy.median(dThetas[dThetas > numpy.deg2rad(0.1)])
 
 
 def _minMaxQ(ws):
@@ -225,6 +224,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
         mainWS = self._rebinInW(mainWS, wsNames, wsCleanup, report,
                                 subalgLogging)
 
+        # Divide the energy transfer workspace by bin widths.
+        mainWS = self._convertToDistribution(mainWS, wsNames, wsCleanup, subalgLogging)
+
         # Detector efficiency correction.
         progress.report('Correcting detector efficiency')
         mainWS = self._correctByDetectorEfficiency(mainWS, wsNames,
@@ -320,8 +322,18 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def validateInputs(self):
         """Check for issues with user input."""
-        # TODO
-        return dict()
+        issues = dict()
+        qBinProp = self.getProperty(common.PROP_BINNING_PARAMS_Q)
+        if not qBinProp.isDefault:
+            qBinning = qBinProp.value
+            if (len(qBinning) - 1) % 2 != 0:
+                issues[common.PROP_BINNING_PARAMS_Q] = 'Invalid Q binning parameters.'
+        eBinProp = self.getProperty(common.PROP_REBINNING_PARAMS_W)
+        if not eBinProp.isDefault:
+            eBinning = eBinProp.value
+            if (len(eBinning) - 1) % 2 != 0:
+                issues[common.PROP_REBINNING_PARAMS_W] = 'Invalid energy rebinning parameters.'
+        return issues
 
     def _applyDiagnostics(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Mask workspace according to diagnostics."""
@@ -339,6 +351,17 @@ class DirectILLReduction(DataProcessorAlgorithm):
                       EnableLogging=subalgLogging)
         wsCleanup.cleanup(mainWS)
         return maskedWS
+
+    def _convertToDistribution(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        """Convert the workspace into a distribution."""
+        distributionWSName = wsNames.withSuffix('as_distribution')
+        distributionWS = CloneWorkspace(InputWorkspace=mainWS,
+                                        OutputWorkspace=distributionWSName,
+                                        EnableLogging=subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        ConvertToDistribution(Workspace=distributionWS,
+                              EnableLogging=subalgLogging)
+        return distributionWS
 
     def _convertTOFToDeltaE(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Convert the X axis units from time-of-flight to energy transfer."""
@@ -423,18 +446,19 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def _outputWSConvertedToTheta(self, mainWS, wsNames, wsCleanup,
                                   subalgLogging):
-        """If requested, convert the spectrum axis to theta and save the result
+        """
+        If requested, convert the spectrum axis to theta and save the result
         into the proper output property.
         """
-        thetaWSName = self.getProperty(common.PROP_OUTPUT_THETA_W_WS).valueAsStr
-        if thetaWSName:
-            thetaWSName = self.getProperty(common.PROP_OUTPUT_THETA_W_WS).value
+        if not self.getProperty(common.PROP_OUTPUT_THETA_W_WS).isDefault:
+            thetaWSName = wsNames.withSuffix('in_theta_energy_for_output')
             thetaWS = ConvertSpectrumAxis(InputWorkspace=mainWS,
                                           OutputWorkspace=thetaWSName,
                                           Target='Theta',
                                           EMode='Direct',
                                           EnableLogging=subalgLogging)
             self.setProperty(common.PROP_OUTPUT_THETA_W_WS, thetaWS)
+            wsCleanup.cleanup(thetaWS)
 
     def _rebinInW(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Rebin the horizontal axis of a workspace."""
@@ -458,11 +482,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if self.getProperty(common.PROP_BINNING_PARAMS_Q).isDefault:
             qMin, qMax = _minMaxQ(mainWS)
             dq = _deltaQ(mainWS)
-            dq = 10 * roundinghelper.round(dq, roundinghelper.ROUNDING_TEN_TO_INT)
+            e = numpy.ceil(-numpy.log10(dq)) + 1
+            dq = (5. * ((dq*10**e) // 5 + 1.))*10**-e
             params = [qMin, dq, qMax]
-            report.notice('Binned momentum transfer axis to bin width {0}.'.format(dq))
+            report.notice('Binned momentum transfer axis to bin width {0} A-1.'.format(dq))
         else:
             params = self.getProperty(common.PROP_BINNING_PARAMS_Q).value
+            if len(params) == 1:
+                qMin, qMax = _minMaxQ(mainWS)
+                params = [qMin, params[0], qMax]
         Ei = mainWS.run().getLogData('Ei').value
         sOfQWWS = SofQWNormalisedPolygon(InputWorkspace=mainWS,
                                          OutputWorkspace=sOfQWWSName,

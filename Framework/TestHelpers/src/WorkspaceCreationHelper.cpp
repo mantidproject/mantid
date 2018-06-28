@@ -73,14 +73,6 @@ EPPTableRow::EPPTableRow(const int index, const double peakCentre_,
       height(height_), fitStatus(fitStatus_) {}
 
 /**
- * @param name :: The name of the workspace
- * @param ws :: The workspace object
- */
-void storeWS(const std::string &name, Mantid::API::Workspace_sptr ws) {
-  Mantid::API::AnalysisDataService::Instance().add(name, ws);
-}
-
-/**
  * Deletes a workspace
  * @param name :: The name of the workspace
  */
@@ -636,20 +628,20 @@ DataObjects::Workspace2D_sptr reflectometryWorkspace(const double startX,
  * @param startX : X Tof start value for the workspace.
  * @param slit1Pos :: slit 1 position
  * @param slit2Pos :: slit 2 position
- * @param vg1 :: vertical slit 1
- * @param vg2 :: vertical slit 2
+ * @param vg1 :: vertical gap slit 1
+ * @param vg2 :: vertical gap slit 2
  * @param sourcePos :: source position
  * @param monitorPos :: monitor position
  * @param samplePos :: sample position
  * @param detectorPos :: detector position
- * @param nSpectra :: number of spectra
  * @param nBins :: number of bins
  * @param deltaX :: TOF delta x-value
  */
 MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
-    double startX, V3D slit1Pos, V3D slit2Pos, double vg1, double vg2,
-    V3D sourcePos, V3D monitorPos, V3D samplePos, V3D detectorPos,
-    const int nSpectra, const int nBins, const double deltaX) {
+    const double startX, const V3D &slit1Pos, const V3D &slit2Pos,
+    const double vg1, const double vg2, const V3D &sourcePos,
+    const V3D &monitorPos, const V3D &samplePos, const V3D &detectorPos,
+    const int nBins, const double deltaX) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
       PointingAlong::Y, PointingAlong::X, Handedness::Left, "0,0,0"));
@@ -661,7 +653,7 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
   auto slit1 = addComponent(instrument, slit1Pos, "slit1");
   auto slit2 = addComponent(instrument, slit2Pos, "slit2");
 
-  auto workspace = reflectometryWorkspace(startX, nSpectra, nBins, deltaX);
+  auto workspace = reflectometryWorkspace(startX, 2, nBins, deltaX);
   workspace->setInstrument(instrument);
 
   ParameterMap &pmap = workspace->instrumentParameters();
@@ -678,41 +670,53 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
 * Create a very small 2D workspace for a virtual reflectometry instrument with
 * multiple detectors
 * @return workspace with instrument attached.
-* @param startX : X Tof start value for the workspace.
-* @param detSize : optional detector height (default is 0 which puts all
-* detectors at the same position)
-* @param nSpectra :: number of spectra
-* @param nBins :: number of bins
-* @param deltaX :: TOF delta x-value
+* @param startX :: X Tof start value for the workspace.
+* @param detSize :: detector height
+* @param slit1Pos :: position of the first slit (counting from source)
+* @param slit2Pos :: position of the second slit (counting from source)
+* @param vg1 :: slit 1 vertical gap
+* @param vg2 :: slit 2 vertical gap
+* @param sourcePos :: source position
+* @param monitorPos :: monitor position
+* @param samplePos :: sample position
+* @param detectorCenterPos :: position of the detector center
+* @param nSpectra :: number of spectra (detectors + monitor)
+* @param nBins :: number of TOF channels
+* @param deltaX :: TOF channel width
 */
 MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
-    double startX, const double detSize, const int nSpectra, const int nBins,
+    const double startX, const double detSize, const V3D &slit1Pos,
+    const V3D &slit2Pos, const double vg1, const double vg2,
+    const V3D &sourcePos, const V3D &monitorPos, const V3D &samplePos,
+    const V3D &detectorCenterPos, const int nSpectra, const int nBins,
     const double deltaX) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
       PointingAlong::Y /*up*/, PointingAlong::X /*along*/, Handedness::Left,
       "0,0,0"));
 
-  addSource(instrument, V3D(0, 0, 0), "source");
-  addSample(instrument, V3D(15, 0, 0), "some-surface-holder");
-  addMonitor(instrument, V3D(14, 0, 0), 1, "Monitor");
+  addSource(instrument, sourcePos, "source");
+  addSample(instrument, samplePos, "some-surface-holder");
+  addMonitor(instrument, monitorPos, 1, "Monitor");
 
-  // Place the central detector at 45 degrees (i.e. the distance
-  // from the sample in Y is the same as the distance in X).
-  const double posX = 20;
-  const double posY = posX - 15;
-  addDetector(instrument, V3D(posX, posY - detSize, 0), 2,
-              "point-detector"); // offset below centre
-  addDetector(instrument, V3D(posX, posY, 0), 3, "point-detector"); // at centre
-  addDetector(instrument, V3D(posX, posY + detSize, 0), 4,
-              "point-detector"); // offset above centre
+  const int nDet = nSpectra - 1;
+  const double minY = detectorCenterPos.Y() - detSize * (nDet - 1) / 2.;
+  for (int i = 0; i < nDet; ++i) {
+    const double y = minY + i * detSize;
+    const V3D pos{detectorCenterPos.X(), y, detectorCenterPos.Z()};
+    addDetector(instrument, pos, i + 2, "point-detector");
+  }
+  auto slit1 = addComponent(instrument, slit1Pos, "slit1");
+  auto slit2 = addComponent(instrument, slit2Pos, "slit2");
 
   auto workspace = reflectometryWorkspace(startX, nSpectra, nBins, deltaX);
   workspace->setInstrument(instrument);
-  workspace->getSpectrum(0).setDetectorID(1);
-  workspace->getSpectrum(1).setDetectorID(2);
-  workspace->getSpectrum(2).setDetectorID(3);
-  workspace->getSpectrum(3).setDetectorID(4);
+  ParameterMap &pmap = workspace->instrumentParameters();
+  pmap.addDouble(slit1, "vertical gap", vg1);
+  pmap.addDouble(slit2, "vertical gap", vg2);
+  for (int i = 0; i < nSpectra; ++i) {
+    workspace->getSpectrum(i).setDetectorID(i + 1);
+  }
   return workspace;
 }
 

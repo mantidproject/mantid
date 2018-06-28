@@ -429,6 +429,40 @@ def EvaluateFunction(*args, **kwargs):
     return None
 
 
+# Use a python decorator (defined above) to generate the code for this function.
+@fitting_algorithm()
+def QENSFitSimultaneous(*args, **kwargs):
+    """
+    QENSFitSimultaneous is used to fit QENS data
+    The data set is defined in a way similar to Fit algorithm.
+
+    Example:
+      QENSFitSimultaneous(Function='name=LinearBackground,A0=0.3', InputWorkspace=dataWS',
+                          StartX='0.05',EndX='1.0',Output="Z1")
+    """
+    return None
+
+
+# Use a python decorator (defined above) to generate the code for this function.
+@fitting_algorithm()
+def ConvolutionFitSimultaneous(*args, **kwargs):
+    """
+    ConvolutionFitSimultaneous is used to fit QENS convolution data
+    The data set is defined in a way similar to Fit algorithm.
+    """
+    return None
+
+
+# Use a python decorator (defined above) to generate the code for this function.
+@fitting_algorithm()
+def IqtFitSimultaneous(*args, **kwargs):
+    """
+    IqtFitSimultaneous is used to fit I(Q,t) data
+    The data set is defined in a way similar to Fit algorithm.
+    """
+    return None
+
+
 def FitDialog(*args, **kwargs):
     """Popup a dialog for the Load algorithm. More help on the Load function
     is available via help(Load).
@@ -906,7 +940,7 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
                         raise RuntimeError("Mandatory InOut workspace property '%s' on "
                                            "algorithm '%s' has not been set correctly. " % (name,  algm_obj.name()))
         elif _is_function_property(prop):
-            retvals[name] = FunctionWrapper(prop.value)
+            retvals[name] = FunctionWrapper.wrap(prop.value)
         else:
             if hasattr(prop, 'value'):
                 retvals[name] = prop.value
@@ -949,7 +983,10 @@ def _set_logging_option(algm_obj, kwargs):
         :param algm_obj: An initialised algorithm object
         :param **kwargs: A dictionary of the keyword arguments passed to the simple function call
     """
-    algm_obj.setLogging(kwargs.pop(__LOGGING_KEYWORD__, True))
+    import inspect
+    parent = _find_parent_pythonalgorithm(inspect.currentframe())
+    logging_default = parent.isLogging() if parent is not None else True
+    algm_obj.setLogging(kwargs.pop(__LOGGING_KEYWORD__, logging_default))
 
 
 def _set_store_ads(algm_obj, kwargs):
@@ -1085,7 +1122,6 @@ def _create_algorithm_object(name, version=-1, startProgress=None, endProgress=N
             kwargs['startProgress'] = float(startProgress)
             kwargs['endProgress'] = float(endProgress)
         alg = parent.createChildAlgorithm(name, **kwargs)
-        alg.setLogging(parent.isLogging())  # default is to log if parent is logging
     else:
         # managed algorithm so that progress reporting
         # can be more easily wired up automatically

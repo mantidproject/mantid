@@ -7,6 +7,8 @@ set ( SRC_FILES
 	src/CreateChopperModel.cpp
 	src/CreateChunkingFromInstrument.cpp
 	src/CreateModeratorModel.cpp
+	src/CreatePolarizationEfficiencies.cpp
+	src/CreatePolarizationEfficienciesBase.cpp
 	src/CreateSampleShape.cpp
 	src/CreateSimulationWorkspace.cpp
 	src/DataBlock.cpp
@@ -29,6 +31,7 @@ set ( SRC_FILES
 	src/H5Util.cpp
 	src/ISISDataArchive.cpp
 	src/ISISRunLogs.cpp
+	src/JoinISISPolarizationEfficiencies.cpp
 	src/Load.cpp
 	src/LoadANSTOHelper.cpp
 	src/LoadAscii.cpp
@@ -60,6 +63,7 @@ set ( SRC_FILES
 	src/LoadILLSANS.cpp
 	src/LoadILLTOF2.cpp
 	src/LoadISISNexus2.cpp
+	src/LoadISISPolarizationEfficiencies.cpp
 	src/LoadInstrument.cpp
 	src/LoadInstrumentFromNexus.cpp
 	src/LoadInstrumentFromRaw.cpp
@@ -97,6 +101,7 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
+	src/LoadSampleShape.cpp
 	src/LoadSESANS.cpp
 	src/LoadSINQFocus.cpp
 	src/LoadSNSspec.cpp
@@ -131,6 +136,7 @@ set ( SRC_FILES
 	src/SaveANSTOAscii.cpp
 	src/SaveAscii.cpp
 	src/SaveAscii2.cpp
+	src/SaveBankScatteringAngles.cpp
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
 	src/SaveCanSAS1D.cpp
@@ -143,6 +149,7 @@ set ( SRC_FILES
 	src/SaveFITS.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveFullprofResolution.cpp
+	src/SaveGDA.cpp
 	src/SaveGSASInstrumentFile.cpp
 	src/SaveGSS.cpp
 	src/SaveILLCosmosAscii.cpp
@@ -187,6 +194,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/CreateChopperModel.h
 	inc/MantidDataHandling/CreateChunkingFromInstrument.h
 	inc/MantidDataHandling/CreateModeratorModel.h
+	inc/MantidDataHandling/CreatePolarizationEfficiencies.h
+	inc/MantidDataHandling/CreatePolarizationEfficienciesBase.h
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/CreateSimulationWorkspace.h
 	inc/MantidDataHandling/DataBlock.h
@@ -209,6 +218,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/H5Util.h
 	inc/MantidDataHandling/ISISDataArchive.h
 	inc/MantidDataHandling/ISISRunLogs.h
+	inc/MantidDataHandling/JoinISISPolarizationEfficiencies.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadANSTOHelper.h
 	inc/MantidDataHandling/LoadAscii.h
@@ -240,6 +250,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadILLSANS.h
 	inc/MantidDataHandling/LoadILLTOF2.h
 	inc/MantidDataHandling/LoadISISNexus2.h
+	inc/MantidDataHandling/LoadISISPolarizationEfficiencies.h
 	inc/MantidDataHandling/LoadInstrument.h
 	inc/MantidDataHandling/LoadInstrumentFromNexus.h
 	inc/MantidDataHandling/LoadInstrumentFromRaw.h
@@ -272,6 +283,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
+	inc/MantidDataHandling/LoadSampleShape.h
 	inc/MantidDataHandling/LoadSESANS.h
 	inc/MantidDataHandling/LoadSINQFocus.h
 	inc/MantidDataHandling/LoadSNSspec.h
@@ -307,6 +319,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveANSTOAscii.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveAscii2.h
+	inc/MantidDataHandling/SaveBankScatteringAngles.h
 	inc/MantidDataHandling/SaveCSV.h
 	inc/MantidDataHandling/SaveCalFile.h
 	inc/MantidDataHandling/SaveCanSAS1D.h
@@ -319,6 +332,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveFITS.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveFullprofResolution.h
+	inc/MantidDataHandling/SaveGDA.h
 	inc/MantidDataHandling/SaveGSASInstrumentFile.h
 	inc/MantidDataHandling/SaveGSS.h
 	inc/MantidDataHandling/SaveILLCosmosAscii.h
@@ -366,6 +380,7 @@ set ( TEST_FILES
 	CreateChopperModelTest.h
 	CreateChunkingFromInstrumentTest.h
 	CreateModeratorModelTest.h
+	CreatePolarizationEfficienciesTest.h
 	CreateSampleShapeTest.h
 	CreateSimulationWorkspaceTest.h
 	DataBlockCompositeTest.h
@@ -387,6 +402,7 @@ set ( TEST_FILES
 	H5UtilTest.h
 	ISISDataArchiveTest.h
 	InstrumentRayTracerTest.h
+	JoinISISPolarizationEfficienciesTest.h
 	LoadAscii2Test.h
 	LoadAsciiTest.h
 	LoadBBYTest.h
@@ -413,6 +429,7 @@ set ( TEST_FILES
 	LoadILLSANSTest.h
 	LoadILLTOF2Test.h
 	LoadISISNexusTest.h
+	LoadISISPolarizationEfficienciesTest.h
 	LoadInstrumentFromNexusTest.h
 	LoadInstrumentFromRawTest.h
 	LoadInstrumentTest.h
@@ -443,6 +460,7 @@ set ( TEST_FILES
 	LoadRawBin0Test.h
 	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
+	LoadSampleShapeTest.h
 	LoadSESANSTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
@@ -476,6 +494,7 @@ set ( TEST_FILES
 	SaveANSTOAsciiTest.h
 	SaveAscii2Test.h
 	SaveAsciiTest.h
+	SaveBankScatteringAnglesTest.h
 	SaveCSVTest.h
 	SaveCalFileTest.h
 	SaveCanSAS1dTest.h
@@ -487,6 +506,7 @@ set ( TEST_FILES
 	SaveFITSTest.h
 	SaveFocusedXYETest.h
 	SaveFullprofResolutionTest.h
+	SaveGDATest.h
 	SaveGSASInstrumentFileTest.h
 	SaveGSSTest.h
 	SaveILLCosmosAsciiTest.h

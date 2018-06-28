@@ -667,10 +667,10 @@ void ConvertToMD::findMinMax(
     throw(std::runtime_error(
         "Can not create child ChildAlgorithm to found min/max values"));
 
-  childAlg->setPropertyValue("InputWorkspace", inWS->getName());
-  childAlg->setPropertyValue("QDimensions", QMode);
-  childAlg->setPropertyValue("dEAnalysisMode", dEMode);
-  childAlg->setPropertyValue("Q3DFrames", QFrame);
+  childAlg->setProperty("InputWorkspace", inWS);
+  childAlg->setProperty("QDimensions", QMode);
+  childAlg->setProperty("dEAnalysisMode", dEMode);
+  childAlg->setProperty("Q3DFrames", QFrame);
   childAlg->setProperty("OtherDimensions", otherDim);
   childAlg->setProperty("QConversionScales", ConvertTo);
   childAlg->setProperty("PreprocDetectorsWS",

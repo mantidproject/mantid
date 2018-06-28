@@ -87,10 +87,20 @@ endif ()
   )
 
   # Tests
+  set ( PYUNITTEST_QT_API pyqt5 )
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
-    mantidqt ${PYTHON_TEST_FILES}
+    mantidqt_qt5 ${PYTHON_TEST_FILES}
   )
-
+  # The jupyterconsole test segfaults on Python 3 and Qt 4
+  # despite the code functioning in a normal usage.
+  # Leave it out as it's a very basic test and the Qt5
+  # tests should catch any problems anyway
+  list ( REMOVE_ITEM PYTHON_TEST_FILES mantidqt/widgets/test/test_jupyterconsole.py )
+  set ( PYUNITTEST_QT_API pyqt )
+  pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
+    mantidqt_qt4 ${PYTHON_TEST_FILES}
+  )
+  unset ( PYUNITTEST_QT_API )
   # No package installation yet...
   # Configure utils.qt.plugins file for install
 endif ()

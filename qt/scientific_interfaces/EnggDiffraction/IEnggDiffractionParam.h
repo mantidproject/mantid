@@ -1,6 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONPARAM_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONPARAM_H_
 
+#include "RunLabel.h"
+
 #include <Poco/Path.h>
 
 namespace MantidQt {
@@ -40,7 +42,14 @@ class IEnggDiffractionParam {
 public:
   virtual ~IEnggDiffractionParam() = default;
 
-  virtual Poco::Path outFilesUserDir(const std::string &addToDir) = 0;
+  virtual Poco::Path outFilesUserDir(const std::string &addToDir) const = 0;
+
+  /// Get the name of a HDF file for a given run number to save to
+  virtual std::string userHDFRunFilename(const int runNumber) const = 0;
+
+  /// Get the name of a HDF file for a range of runs
+  virtual std::string
+  userHDFMultiRunFilename(const std::vector<RunLabel> &runLabels) const = 0;
 };
 
 } // namespace CustomInterfaces

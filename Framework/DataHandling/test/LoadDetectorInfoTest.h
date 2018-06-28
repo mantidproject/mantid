@@ -309,11 +309,11 @@ public:
       Parameter_sptr par = pmap.getRecursive(&det, "TubePressure");
 
       TS_ASSERT(par);
-      TS_ASSERT_EQUALS(par->asString(), castaround("10.0"));
+      TS_ASSERT_DELTA(par->value<double>(), 10.0, 1.e-6);
       par = pmap.getRecursive(&det, "TubeThickness");
       TS_ASSERT(par);
 
-      TS_ASSERT_EQUALS(par->asString(), castaround("0.0008").substr(0, 6));
+      TS_ASSERT_DELTA(par->value<double>(), 0.0008, 1.e-6);
     }
 
     // Test that a random detector has been moved
@@ -371,42 +371,32 @@ public:
         TS_ASSERT(par);
         if (!par)
           return;
-        if (singleWallPressure) {
-          TS_ASSERT_DELTA(par->value<double>(),
-                          boost::lexical_cast<double>(pressure[j]), 1.e-3);
-        } else {
-          TS_ASSERT_EQUALS(par->asString(), castaround(pressure[j]));
-        }
+        TS_ASSERT_DELTA(par->value<double>(),
+                        boost::lexical_cast<double>(pressure[j]), 1.e-3);
 
         par = pmap.get(baseComp, "TubeThickness");
         TS_ASSERT(par);
         if (!par)
           return;
-        if (singleWallPressure) {
-          if (j < 3)
-            TS_ASSERT_DELTA(par->value<double>(),
-                            boost::lexical_cast<double>(wallThick[j]), 1.e-3);
+        if (!singleWallPressure || j < 3)
+          TS_ASSERT_DELTA(par->value<double>(),
+                          boost::lexical_cast<double>(wallThick[j]), 1.e-3);
+        const V3D pos = detInfo.position(detIndex);
+        V3D expected;
+        if (j == 1) // Monitors are fixed and unaffected
+        {
+          expected = V3D(0, 0, 0);
         } else {
-          TS_ASSERT_EQUALS(
-              par->asString(),
-              castaround(wallThick[j]).substr(0, par->asString().length()));
+          expected.spherical(boost::lexical_cast<double>(det_l2[j]),
+                             boost::lexical_cast<double>(det_theta[j]),
+                             boost::lexical_cast<double>(det_phi[j]));
         }
-      } else
-        TS_ASSERT(!par);
-
-      const V3D pos = detInfo.position(detIndex);
-      V3D expected;
-      if (j == 1) // Monitors are fixed and unaffected
-      {
-        expected = V3D(0, 0, 0);
+        TS_ASSERT_EQUALS(expected.X(), pos.X());
+        TS_ASSERT_EQUALS(expected.Y(), pos.Y());
+        TS_ASSERT_EQUALS(expected.Z(), pos.Z());
       } else {
-        expected.spherical(boost::lexical_cast<double>(det_l2[j]),
-                           boost::lexical_cast<double>(det_theta[j]),
-                           boost::lexical_cast<double>(det_phi[j]));
+        TS_ASSERT(!par);
       }
-      TS_ASSERT_EQUALS(expected.X(), pos.X());
-      TS_ASSERT_EQUALS(expected.Y(), pos.Y());
-      TS_ASSERT_EQUALS(expected.Z(), pos.Z());
     }
 
     AnalysisDataService::Instance().remove(m_InoutWS);
@@ -417,11 +407,6 @@ private:
   std::string m_rawFile;
 
   enum constants { NBINS = 4, DAT_MONTOR_IND = 1 };
-
-  std::string castaround(std::string floatNum) {
-    return boost::lexical_cast<std::string>(
-        boost::lexical_cast<double>(floatNum));
-  }
 };
 
 //-------------------------------------------------------------------------------------------------------------------------

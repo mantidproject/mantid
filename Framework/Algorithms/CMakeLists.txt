@@ -26,12 +26,14 @@ set ( SRC_FILES
 	src/CalculateDIFC.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
+	src/CalculateCarpenterSampleCorrection.cpp
 	src/CalculateMuonAsymmetry.cpp
 	src/CalculatePolynomialBackground.cpp
 	src/CalculateSlits.cpp
 	src/CalculateTransmission.cpp
 	src/CalculateTransmissionBeamSpreader.cpp
 	src/CalculateZscore.cpp
+	src/CarpenterSampleCorrection.cpp
 	src/ChangeBinOffset.cpp
 	src/ChangeLogTime.cpp
 	src/ChangePulsetime.cpp
@@ -198,7 +200,6 @@ set ( SRC_FILES
 	src/MonitorEfficiencyCorUser.cpp
 	src/MonteCarloAbsorption.cpp
 	src/MostLikelyMean.cpp
-	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
 	src/MultiplyRange.cpp
 	src/MuonAsymmetryHelper.cpp
@@ -220,7 +221,8 @@ set ( SRC_FILES
 	src/Plus.cpp
 	src/PointByPointVCorrection.cpp
 	src/PoissonErrors.cpp
-	src/PolarizationCorrection.cpp
+	src/PolarizationCorrectionFredrikze.cpp
+	src/PolarizationCorrectionWildes.cpp
 	src/PolarizationEfficiencyCor.cpp
 	src/PolynomialCorrection.cpp
 	src/Power.cpp
@@ -242,8 +244,10 @@ set ( SRC_FILES
 	src/RebinToWorkspace.cpp
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
+	src/ReflectometryMomentumTransfer.cpp
 	src/ReflectometryReductionOne2.cpp
 	src/ReflectometryReductionOneAuto2.cpp
+	src/ReflectometrySumInQ.cpp
 	src/ReflectometryWorkflowBase.cpp
 	src/ReflectometryWorkflowBase2.cpp
 	src/Regroup.cpp
@@ -358,12 +362,14 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalculateDIFC.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
+	inc/MantidAlgorithms/CalculateCarpenterSampleCorrection.h
 	inc/MantidAlgorithms/CalculateMuonAsymmetry.h
 	inc/MantidAlgorithms/CalculatePolynomialBackground.h
 	inc/MantidAlgorithms/CalculateSlits.h
 	inc/MantidAlgorithms/CalculateTransmission.h
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
 	inc/MantidAlgorithms/CalculateZscore.h
+	inc/MantidAlgorithms/CarpenterSampleCorrection.h
 	inc/MantidAlgorithms/ChangeBinOffset.h
 	inc/MantidAlgorithms/ChangeLogTime.h
 	inc/MantidAlgorithms/ChangePulsetime.h
@@ -534,7 +540,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MonitorEfficiencyCorUser.h
 	inc/MantidAlgorithms/MonteCarloAbsorption.h
 	inc/MantidAlgorithms/MostLikelyMean.h
-	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
 	inc/MantidAlgorithms/MultiplyRange.h
 	inc/MantidAlgorithms/MuonAsymmetryHelper.h
@@ -556,7 +561,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Plus.h
 	inc/MantidAlgorithms/PointByPointVCorrection.h
 	inc/MantidAlgorithms/PoissonErrors.h
-	inc/MantidAlgorithms/PolarizationCorrection.h
+	inc/MantidAlgorithms/PolarizationCorrectionFredrikze.h
+	inc/MantidAlgorithms/PolarizationCorrectionWildes.h
 	inc/MantidAlgorithms/PolarizationEfficiencyCor.h
 	inc/MantidAlgorithms/PolynomialCorrection.h
 	inc/MantidAlgorithms/Power.h
@@ -578,8 +584,10 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RebinToWorkspace.h
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
+	inc/MantidAlgorithms/ReflectometryMomentumTransfer.h
 	inc/MantidAlgorithms/ReflectometryReductionOne2.h
 	inc/MantidAlgorithms/ReflectometryReductionOneAuto2.h
+	inc/MantidAlgorithms/ReflectometrySumInQ.h
 	inc/MantidAlgorithms/ReflectometryWorkflowBase.h
 	inc/MantidAlgorithms/ReflectometryWorkflowBase2.h
 	inc/MantidAlgorithms/Regroup.h
@@ -701,6 +709,7 @@ set ( TEST_FILES
 	BinaryOperationTest.h
 	CalMuonDeadTimeTest.h
 	CalMuonDetectorPhasesTest.h
+	CalculateCarpenterSampleCorrectionTest.h
 	CalculateCountRateTest.h
 	CalculateDIFCTest.h
 	CalculateEfficiencyTest.h
@@ -711,6 +720,7 @@ set ( TEST_FILES
 	CalculateTransmissionBeamSpreaderTest.h
 	CalculateTransmissionTest.h
 	CalculateZscoreTest.h
+	CarpenterSampleCorrectionTest.h
 	ChainedOperatorTest.h
 	ChangeBinOffsetTest.h
 	ChangeLogTimeTest.h
@@ -874,7 +884,6 @@ set ( TEST_FILES
 	MonitorEfficiencyCorUserTest.h
 	MonteCarloAbsorptionTest.h
 	MostLikelyMeanTest.h
-	MultipleScatteringCylinderAbsorptionTest.h
 	MultiplyRangeTest.h
 	MultiplyTest.h
 	MuonGroupDetectorsTest.h
@@ -894,7 +903,8 @@ set ( TEST_FILES
 	PlusTest.h
 	PointByPointVCorrectionTest.h
 	PoissonErrorsTest.h
-	PolarizationCorrectionTest.h
+	PolarizationCorrectionFredrikzeTest.h
+	PolarizationCorrectionWildesTest.h
 	PolarizationEfficiencyCorTest.h
 	PolynomialCorrectionTest.h
 	PowerLawCorrectionTest.h
@@ -914,8 +924,10 @@ set ( TEST_FILES
 	RebinToWorkspaceTest.h
 	RebunchTest.h
 	RectangularBeamProfileTest.h
+	ReflectometryMomentumTransferTest.h
 	ReflectometryReductionOne2Test.h
 	ReflectometryReductionOneAuto2Test.h
+	ReflectometrySumInQTest.h
 	RegroupTest.h
 	RemoveBackgroundTest.h
 	RemoveBinsTest.h

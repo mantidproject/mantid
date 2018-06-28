@@ -52,15 +52,7 @@ protected:
   Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const override;
 
   Mantid::API::IAlgorithm_sptr
-  processParametersAlgorithm(const std::string &parameterWSName,
-                             const std::string &resultWSName);
-
-  Mantid::API::IAlgorithm_sptr
   deleteWorkspaceAlgorithm(const std::string &workspaceName);
-
-  Mantid::API::IAlgorithm_sptr
-  renameWorkspaceAlgorithm(const std::string &workspaceToRename,
-                           const std::string &newName);
 
   Mantid::API::IAlgorithm_sptr
   scaleAlgorithm(const std::string &workspaceToScale,

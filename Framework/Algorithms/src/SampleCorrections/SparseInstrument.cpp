@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidHistogramData/HistogramIterator.h"
 #include "MantidKernel/make_unique.h"
 
 #include <Poco/DOM/AutoPtr.h>
@@ -96,29 +97,12 @@ extremeAngles(const API::MatrixWorkspace &ws) {
 std::tuple<double, double> extremeWavelengths(const API::MatrixWorkspace &ws) {
   double currentMin = std::numeric_limits<double>::max();
   double currentMax = std::numeric_limits<double>::lowest();
-  if (ws.histogram(0).xMode() ==
-      Mantid::HistogramData::Histogram::XMode::BinEdges) {
-    // Deal with point data as in interpolation we need to cover all points,
-    // not bin edges.
-    for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-      const auto &xs = ws.x(i);
-      const auto x0 = (xs[0] + xs[1]) / 2.0;
-      if (x0 < currentMin)
-        currentMin = x0;
-      const auto x1 = (xs[xs.size() - 2] + xs[xs.size() - 1]) / 2.0;
-      if (x1 > currentMax)
-        currentMax = x1;
-    }
-  } else {
-    for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-      const auto &xs = ws.x(i);
-      const auto x0 = xs.front();
-      if (x0 < currentMin)
-        currentMin = x0;
-      const auto x1 = xs.back();
-      if (x1 > currentMax)
-        currentMax = x1;
-    }
+  for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
+    const auto h = ws.histogram(i);
+    const auto first = h.begin();
+    currentMin = std::min(first->center(), currentMin);
+    const auto last = std::prev(h.end());
+    currentMax = std::max(last->center(), currentMax);
   }
   return std::tie(currentMin, currentMax);
 }
@@ -141,9 +125,12 @@ modelHistogram(const API::MatrixWorkspace &modelWS,
   if (wavelengthPoints > 1) {
     const double step = (maxWavelength - minWavelength) /
                         static_cast<double>(wavelengthPoints - 1);
-    for (size_t i = 0; i < xs.size(); ++i) {
+    for (size_t i = 0; i < xs.size() - 1; ++i) {
       xs[i] = minWavelength + step * static_cast<double>(i);
     }
+    // Force last point as otherwise it might be slightly off due to
+    // small rounding errors in the calculation above.
+    xs.back() = maxWavelength;
   } else {
     xs.front() = (minWavelength + maxWavelength) / 2.0;
   }
