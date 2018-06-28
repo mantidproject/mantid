@@ -918,11 +918,8 @@ std::string ReflRunsTabPresenter::setupMonitorPostProcessingScript() {
   std::vector<std::string> logNames = {"Theta", "s1vg", "s2vg"};
   std::vector<std::string> logUnits = {"deg", "m", "m"};
 
-  // for (auto &logName : logNames)
-  //  pythonSrcLiveDataVariable(script, instrument, logName);
-  script << "  Theta = '0.5'\n"; // TODO temp test to always supply valid theta
-  script << "  s1vg='3.25'\n";   // TODO temp test to always supply valid theta
-  script << "  s2vg='0.288'\n";  // TODO temp test to always supply valid theta
+  for (auto &logName : logNames)
+    pythonSrcLiveDataVariable(script, instrument, logName);
   pythonSrcThetaValidation(script);
 
   pythonSrcAddSampleLog(script, logNames, logUnits);
