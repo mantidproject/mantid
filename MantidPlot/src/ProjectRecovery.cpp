@@ -67,12 +67,12 @@ std::string getTimeStamp() {
   auto time = std::time(nullptr);
   auto localTime = std::localtime(&time);
 
-#if _MSC_VER  || __GNUG__ && __GNUG__ < 5
+#if _MSC_VER || __GNUG__ && __GNUG__ < 5
   // Have to workaround GCC 4 not having std::put_time on RHEL7
   // this ifdef can be removed when RHEL7 uses a newer compiler
   char timestamp[20];
   if (strftime(timestamp, sizeof(timestamp), formatSpecifier, localTime) > 0) {
-    return { timestamp };
+    return {timestamp};
   }
 
   return {};
@@ -86,10 +86,10 @@ std::string getTimeStamp() {
 /// Returns a string to the current timestamped recovery folder
 Poco::Path getOutputPath() {
 
-	auto timestamp = getTimeStamp();
-	auto timestampedPath = getRecoveryFolder().append(timestamp);
+  auto timestamp = getTimeStamp();
+  auto timestampedPath = getRecoveryFolder().append(timestamp);
 
-	return Poco::Path{timestampedPath};
+  return Poco::Path{timestampedPath};
 }
 
 const std::string OUTPUT_PROJ_NAME = "recovery.mantid";
@@ -269,7 +269,7 @@ void ProjectRecovery::projectSavingThread() {
     // Generate output paths
     const auto basePath = getOutputPath();
 
-	Poco::File(basePath).createDirectory();
+    Poco::File(basePath).createDirectory();
 
     auto projectFile = Poco::Path(basePath).append(OUTPUT_PROJ_NAME);
 
@@ -311,44 +311,46 @@ void ProjectRecovery::saveOpenWindows(const std::string &projectDestFile) {
  * @throw If saving fails in the script
  */
 void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
-	const auto &ads = Mantid::API::AnalysisDataService::Instance();
-	using Mantid::Kernel::DataServiceHidden;
-	using Mantid::Kernel::DataServiceSort;
+  const auto &ads = Mantid::API::AnalysisDataService::Instance();
+  using Mantid::Kernel::DataServiceHidden;
+  using Mantid::Kernel::DataServiceSort;
 
-	const auto wsHandles = ads.getObjectNames(DataServiceSort::Unsorted, DataServiceHidden::Include);
-	
-	if (wsHandles.empty()) {
-		return;
-	}
-	
-	using Mantid::API::WorkspaceHistory;
+  const auto wsHandles =
+      ads.getObjectNames(DataServiceSort::Unsorted, DataServiceHidden::Include);
 
-	static auto startTime = 
-		Mantid::Kernel::UsageService::Instance().getStartTime().toISO8601String();
+  if (wsHandles.empty()) {
+    return;
+  }
 
-	const std::string algName = "GeneratePythonScript";
-	auto *alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(algName, 1);
-	
-	if (!alg) {
-		throw std::runtime_error("Could not get pointer to alg: " + algName);
-	}
+  using Mantid::API::WorkspaceHistory;
 
-	alg->setLogging(false);
+  static auto startTime =
+      Mantid::Kernel::UsageService::Instance().getStartTime().toISO8601String();
 
-	for (const auto &ws : wsHandles) {
-		std::string filename = ws;
-		filename.append(".py");
-		
-		Poco::Path destFilename = historyDestFolder;
-		destFilename.append(filename);
-		
-		alg->initialize();
-		alg->setPropertyValue("InputWorkspace", ws);
-		alg->setPropertyValue("Filename", destFilename.toString());
-		alg->setPropertyValue("StartTimestamp", startTime);
+  const std::string algName = "GeneratePythonScript";
+  auto *alg =
+      Mantid::API::FrameworkManager::Instance().createAlgorithm(algName, 1);
 
-		alg->execute();
-	}
+  if (!alg) {
+    throw std::runtime_error("Could not get pointer to alg: " + algName);
+  }
+
+  alg->setLogging(false);
+
+  for (const auto &ws : wsHandles) {
+    std::string filename = ws;
+    filename.append(".py");
+
+    Poco::Path destFilename = historyDestFolder;
+    destFilename.append(filename);
+
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace", ws);
+    alg->setPropertyValue("Filename", destFilename.toString());
+    alg->setPropertyValue("StartTimestamp", startTime);
+
+    alg->execute();
+  }
 }
 
 } // namespace MantidQt
