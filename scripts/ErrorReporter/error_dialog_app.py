@@ -18,11 +18,12 @@ from mantid.kernel import UsageService # noqa
 from ErrorReporter.error_report_presenter import ErrorReporterPresenter # noqa
 from ErrorReporter.errorreport import CrashReportPage # noqa
 # Set path to look for package qt libraries
-if command_line_args.qtdir != None:
+if command_line_args.qtdir is not None:
     from PyQt4.QtCore import QCoreApplication
     QCoreApplication.addLibraryPath(
         command_line_args.qtdir
     )
+
 
 def main():
     if not UsageService.isEnabled():
