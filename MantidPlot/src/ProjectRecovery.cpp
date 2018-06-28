@@ -260,11 +260,11 @@ void ProjectRecovery::projectSavingThread() {
           return m_stopBackgroundThread;
         })) {
       // Exit thread
-      g_log.information("Project Recovery: Stopping background saving thread");
+      g_log.debug("Project Recovery: Stopping background saving thread");
       return;
     }
 
-    g_log.information("Project Recovery: Saving started");
+    g_log.debug("Project Recovery: Saving started");
     // "Timeout" - Save out again
     // Generate output paths
     const auto basePath = getOutputPath();
@@ -278,7 +278,7 @@ void ProjectRecovery::projectSavingThread() {
 
     // Purge any excessive folders
     deleteExistingCheckpoints(NO_OF_CHECKPOINTS);
-    g_log.information("Project Recovery: Saving finished");
+    g_log.debug("Project Recovery: Saving finished");
   }
 }
 
