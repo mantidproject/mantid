@@ -49,7 +49,7 @@ void IntegratePeaksUsingClusters::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input md workspace.");
-  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
@@ -74,7 +74,7 @@ void IntegratePeaksUsingClusters::init() {
                   "Normalization to use with Threshold. Defaults to "
                   "VolumeNormalization to account for different binning.");
 
-  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output integrated peaks workspace.");
   declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
@@ -105,8 +105,8 @@ MDNormalization IntegratePeaksUsingClusters::getNormalization() {
  */
 void IntegratePeaksUsingClusters::exec() {
   IMDHistoWorkspace_sptr mdWS = getProperty("InputWorkspace");
-  IPeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
-  IPeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
+  PeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
+  PeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
   if (peakWS != inPeakWS) {
     peakWS = inPeakWS->clone();
   }
