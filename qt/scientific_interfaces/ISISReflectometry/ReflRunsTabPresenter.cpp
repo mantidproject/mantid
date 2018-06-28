@@ -1036,9 +1036,6 @@ void ReflRunsTabPresenter::errorHandle(const IAlgorithm *alg,
   stopObserving(m_monitorAlg);
   m_monitorAlg.reset();
   updateViewWhenMonitorStopped();
-  // Restart monitoring, unless the user terminated the algorithm
-  if (what != "Algorithm terminated")
-    startMonitor();
 }
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";

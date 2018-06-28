@@ -487,8 +487,9 @@ cancelling the algorithm from the *Algorithm progress* dialog. If you close the
 interface, monitoring will continue running in the backgroud. You can cancel
 the `MonitorLiveData` algorithm from the *Algorithm progress* dialog.
 
-If the `MonitorLiveData` algorithm stops for any reason, e.g. due to a change
-in the data size, then it will automatically be re-started.
+Note that the `MonitorLiveData` may stop if it encounters an error, e.g. due to
+a change in the data size, and will need to be manually re-started from the
+GUI.
 
 Live data monitoring has some additional requirements:
 - EPICS support must be installed in Mantid. Tthis is included by default on
