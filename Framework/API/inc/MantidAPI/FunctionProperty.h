@@ -45,7 +45,8 @@ class MANTID_API_DLL FunctionProperty
     : public Kernel::PropertyWithValue<boost::shared_ptr<IFunction>> {
 public:
   /// Constructor.
-  explicit FunctionProperty(const std::string &name);
+  FunctionProperty(const std::string &name,
+                   const unsigned int direction = Kernel::Direction::Input);
 
   /// Copy constructor
   FunctionProperty(const FunctionProperty &right);

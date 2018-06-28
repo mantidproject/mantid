@@ -84,7 +84,6 @@ set ( SRC_FILES
 	src/CreateLogTimeCorrection.cpp
 	src/CreatePSDBleedMask.cpp
 	src/CreatePeaksWorkspace.cpp
-	src/CreatePolarizationEfficiencies.cpp
 	src/CreateSampleWorkspace.cpp
 	src/CreateSingleValuedWorkspace.cpp
 	src/CreateTransmissionWorkspace.cpp
@@ -248,6 +247,7 @@ set ( SRC_FILES
 	src/ReflectometryMomentumTransfer.cpp
 	src/ReflectometryReductionOne2.cpp
 	src/ReflectometryReductionOneAuto2.cpp
+	src/ReflectometrySumInQ.cpp
 	src/ReflectometryWorkflowBase.cpp
 	src/ReflectometryWorkflowBase2.cpp
 	src/Regroup.cpp
@@ -420,7 +420,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateLogTimeCorrection.h
 	inc/MantidAlgorithms/CreatePSDBleedMask.h
 	inc/MantidAlgorithms/CreatePeaksWorkspace.h
-	inc/MantidAlgorithms/CreatePolarizationEfficiencies.h
 	inc/MantidAlgorithms/CreateSampleWorkspace.h
 	inc/MantidAlgorithms/CreateSingleValuedWorkspace.h
 	inc/MantidAlgorithms/CreateTransmissionWorkspace.h
@@ -588,6 +587,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ReflectometryMomentumTransfer.h
 	inc/MantidAlgorithms/ReflectometryReductionOne2.h
 	inc/MantidAlgorithms/ReflectometryReductionOneAuto2.h
+	inc/MantidAlgorithms/ReflectometrySumInQ.h
 	inc/MantidAlgorithms/ReflectometryWorkflowBase.h
 	inc/MantidAlgorithms/ReflectometryWorkflowBase2.h
 	inc/MantidAlgorithms/Regroup.h
@@ -772,7 +772,6 @@ set ( TEST_FILES
 	CreateLogTimeCorrectionTest.h
 	CreatePSDBleedMaskTest.h
 	CreatePeaksWorkspaceTest.h
-	CreatePolarizationEfficienciesTest.h
 	CreateSampleWorkspaceTest.h
 	CreateSingleValuedWorkspaceTest.h
 	CreateTransmissionWorkspace2Test.h
@@ -928,6 +927,7 @@ set ( TEST_FILES
 	ReflectometryMomentumTransferTest.h
 	ReflectometryReductionOne2Test.h
 	ReflectometryReductionOneAuto2Test.h
+	ReflectometrySumInQTest.h
 	RegroupTest.h
 	RemoveBackgroundTest.h
 	RemoveBinsTest.h

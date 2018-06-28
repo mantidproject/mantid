@@ -403,10 +403,6 @@ private:
 
   template <class T>
   static typename std::vector<T>::const_iterator
-  findFirstEvent(const std::vector<T> &events, const double seek_tof);
-
-  template <class T>
-  static typename std::vector<T>::const_iterator
   findFirstPulseEvent(const std::vector<T> &events,
                       const double seek_pulsetime);
 
@@ -415,10 +411,6 @@ private:
   findFirstTimeAtSampleEvent(const std::vector<T> &events,
                              const double seek_time, const double &tofFactor,
                              const double &tofOffset) const;
-
-  template <class T>
-  static typename std::vector<T>::iterator
-  findFirstEvent(std::vector<T> &events, const double seek_tof);
 
   void generateCountsHistogram(const MantidVec &X, MantidVec &Y) const;
 

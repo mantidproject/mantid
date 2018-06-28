@@ -1,8 +1,7 @@
 #ifndef MANTID_DATAHANDLING_LOADISISPOLARIZATIONEFFICIENCIES_H_
 #define MANTID_DATAHANDLING_LOADISISPOLARIZATIONEFFICIENCIES_H_
 
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataHandling/CreatePolarizationEfficienciesBase.h"
 #include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
@@ -33,20 +32,17 @@ namespace DataHandling {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_DATAHANDLING_DLL LoadISISPolarizationEfficiencies
-    : public API::Algorithm {
+    : public CreatePolarizationEfficienciesBase {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::string category() const override;
   const std::string summary() const override;
+  const std::vector<std::string> seeAlso() const override;
 
 private:
   void init() override;
-  void exec() override;
-  std::vector<std::string>
-  getNonDefaultProperties(std::vector<std::string> const &props) const;
   API::MatrixWorkspace_sptr
-  loadEfficiencies(std::vector<std::string> const &props);
+  createEfficiencies(std::vector<std::string> const &props) override;
 };
 
 } // namespace DataHandling

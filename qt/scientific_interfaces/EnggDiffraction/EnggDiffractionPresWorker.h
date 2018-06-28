@@ -47,13 +47,13 @@ public:
         m_banks(), m_bin(.0), m_nperiods(0) {}
 
   /// for focusing
-  EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &outDir,
+  EnggDiffWorker(EnggDiffractionPresenter *pres,
                  const std::vector<std::string> &runNo,
                  const std::vector<bool> &banks, const std::string &SpectrumNos,
                  const std::string &dgFile)
-      : m_pres(pres), m_outCalibFilename(), m_multiRunNo(runNo),
-        m_outDir(outDir), m_banks(banks), m_SpectrumNos(SpectrumNos),
-        m_dgFile(dgFile), m_bin(.0), m_nperiods(0) {}
+      : m_pres(pres), m_outCalibFilename(), m_multiRunNo(runNo), m_banks(banks),
+        m_SpectrumNos(SpectrumNos), m_dgFile(dgFile), m_bin(.0), m_nperiods(0) {
+  }
 
   // for rebinning (ToF)
   EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &runNo,
@@ -88,7 +88,7 @@ private slots:
     for (size_t i = 0; i < m_multiRunNo.size(); ++i) {
 
       auto runNo = m_multiRunNo[i];
-      m_pres->doFocusRun(m_outDir, runNo, m_banks, m_SpectrumNos, m_dgFile);
+      m_pres->doFocusRun(runNo, m_banks, m_SpectrumNos, m_dgFile);
     }
     emit finished();
   }
@@ -119,8 +119,6 @@ private:
   // sample multi-run to process
   const std::vector<std::string> m_multiRunNo;
 
-  /// Output directory
-  const std::string m_outDir;
   /// instrument banks: do focus/don't
   const std::vector<bool> m_banks;
   // parameters for specific types of focusing: "cropped"

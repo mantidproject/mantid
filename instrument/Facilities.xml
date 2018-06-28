@@ -480,10 +480,16 @@
 
    <instrument name="SNAP" beamline="3">
 	<technique>Neutron Diffraction</technique>
+        <livedata>
+          <connection name="event" address="bl3-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
+        </livedata>
    </instrument>
 
    <instrument name="REF_M" beamline="4A">
       <technique>Reflectometry</technique>
+      <livedata>
+      <connection name="event" address="bl4a-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
+      </livedata>
    </instrument>
 
    <instrument name="REF_L" beamline="4B">
@@ -497,10 +503,16 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
+    <livedata>
+      <connection name="event" address="bl5-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
+    </livedata>
    </instrument>
 
    <instrument name="EQ-SANS" shortname="EQSANS" beamline="6">
       <technique>Small Angle Scattering</technique>
+      <livedata>
+        <connection name="event" address="bl6-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
+      </livedata>
    </instrument>
 
    <instrument name="VULCAN" beamline="7">
@@ -573,6 +585,9 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
+    <livedata>
+      <connection name="event" address="bl18-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
+    </livedata>
    </instrument>
 
    <instrument name="VENUS">

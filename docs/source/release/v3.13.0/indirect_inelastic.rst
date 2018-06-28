@@ -15,6 +15,9 @@ Data Reduction Interfaces
 -------------------------
 
 - Added 'Sum Files' checkbox to ISIS Calibration, to sum a specified range of input files on load.
+- Detector grouping in ISISEnergyTransfer:  added custom grouping method to allow specific spectra or ranges, and
+  the 'groups' method now includes all spectra including remainder.
+
 
 Algorithms
 ----------
@@ -35,7 +38,7 @@ Improved
 
 - :ref:`algm-ConvolutionFitSequential` and :ref:`algm-IqtFitSequential` can now accept multiple datasets as input, in
   the same format as that of :ref:`algm-PlotPeakByLogValue`.
-
+- :ref:`algm-IndirectILLEnergyTransfer` was fixed to have the correct sign for the energy transfer.
 
 Data Analysis Interfaces
 ------------------------
@@ -45,3 +48,5 @@ Bugfixes
 
 - The MSDFit algorithm now uses the fully specified model given in the interface; previously MSDFit only used the
   model specified in the 'Fit Type' drop-down menu.
+- Fixed a failure in the wavelength interpolation of :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` which occurred under certain input property combinations.
+

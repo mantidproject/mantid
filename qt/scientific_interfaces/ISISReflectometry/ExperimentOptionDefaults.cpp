@@ -17,6 +17,7 @@ bool operator==(const ExperimentOptionDefaults &lhs,
          lhs.ScaleFactor == rhs.ScaleFactor &&
          lhs.ProcessingInstructions == rhs.ProcessingInstructions &&
          lhs.ReductionType == rhs.ReductionType &&
+         lhs.IncludePartialBins == rhs.IncludePartialBins &&
          lhs.SummationType == rhs.SummationType &&
          lhs.StitchParams == rhs.StitchParams;
 }
@@ -28,7 +29,8 @@ std::ostream &operator<<(std::ostream &os,
      << "',\nRho: '" << defaults.CRho << "',\nAlpha: '" << defaults.CAlpha
      << "',\nAp: '" << defaults.CAp << "', \nPp: '" << defaults.CPp
      << "',\nSummationType: '" << defaults.SummationType
-     << "', \nReductionType: '" << defaults.ReductionType;
+     << "', \nReductionType: '" << defaults.ReductionType
+     << "', \nIncludePartialBins: '" << defaults.IncludePartialBins;
   if (defaults.TransRunStartOverlap)
     os << "',\nTransRunStartOverlap: " << defaults.TransRunStartOverlap.get();
   if (defaults.TransRunEndOverlap)

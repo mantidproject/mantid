@@ -120,16 +120,15 @@ void PolarizationEfficiencyCor::init() {
   declareProperty(
       Prop::FLIPPERS, "",
       boost::make_shared<Kernel::ListValidator<std::string>>(setups),
-      "Flipper configurations of the input workspaces. Applies to Wildes "
-      "method only");
+      "Flipper configurations of the input workspaces  (Wildes method only)");
 
   std::vector<std::string> propOptions{"", "PA", "PNR"};
   declareProperty("PolarizationAnalysis", "",
                   boost::make_shared<StringListValidator>(propOptions),
                   "What Polarization mode will be used?\n"
                   "PNR: Polarized Neutron Reflectivity mode\n"
-                  "PA: Full Polarization Analysis PNR-PA.  Applies to "
-                  "Fredrikze method only");
+                  "PA: Full Polarization Analysis PNR-PA "
+                  "(Fredrikze method only)");
 
   declareProperty(Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       Prop::OUTPUT_WORKSPACES, "", Kernel::Direction::Output),
@@ -213,7 +212,7 @@ void PolarizationEfficiencyCor::checkWildesProperties() const {
 
   if (!isDefault(Prop::POLARIZATION_ANALYSIS)) {
     throw std::invalid_argument(
-        "Property PolarizationAnalysis canot be used with the Wildes method.");
+        "Property PolarizationAnalysis cannot be used with the Wildes method.");
   }
 }
 
@@ -225,7 +224,7 @@ void PolarizationEfficiencyCor::checkFredrikzeProperties() const {
 
   if (!isDefault(Prop::FLIPPERS)) {
     throw std::invalid_argument(
-        "Property Flippers canot be used with the Fredrikze method.");
+        "Property Flippers cannot be used with the Fredrikze method.");
   }
 }
 
@@ -239,7 +238,7 @@ PolarizationEfficiencyCor::getWorkspaceNameList() const {
     names = getProperty(Prop::INPUT_WORKSPACES);
   } else {
     WorkspaceGroup_sptr group = getProperty(Prop::INPUT_WORKSPACE_GROUP);
-    auto n = group->size();
+    auto const n = group->size();
     for (size_t i = 0; i < n; ++i) {
       auto ws = group->getItem(i);
       auto const name = ws->getName();
@@ -280,13 +279,9 @@ bool PolarizationEfficiencyCor::needInterpolation(
     return true;
 
   auto const &x = inWS.x(0);
-  size_t const xSize = x.size();
   for (size_t i = 0; i < efficiencies.getNumberHistograms(); ++i) {
-    auto const &effX = efficiencies.x(i);
-    for (size_t j = 0; j < xSize; ++j) {
-      if (effX[j] != x[j])
-        return true;
-    }
+    if (efficiencies.x(i).rawData() != x.rawData())
+      return true;
   }
   return false;
 }
@@ -330,7 +325,7 @@ PolarizationEfficiencyCor::interpolate(MatrixWorkspace_sptr efficiencies,
 API::MatrixWorkspace_sptr PolarizationEfficiencyCor::getEfficiencies() {
   MatrixWorkspace_sptr inWS;
   if (!isDefault(Prop::INPUT_WORKSPACES)) {
-    std::vector<std::string> names = getProperty(Prop::INPUT_WORKSPACES);
+    std::vector<std::string> const names = getProperty(Prop::INPUT_WORKSPACES);
     inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         names.front());
   } else {
