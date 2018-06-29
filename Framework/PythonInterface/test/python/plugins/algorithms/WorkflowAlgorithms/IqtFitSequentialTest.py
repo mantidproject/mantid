@@ -19,18 +19,18 @@ class IqtFitSequentialTest(unittest.TestCase):
 
     def _validate_output(self, params, result, fit_group):
         self.assertTrue(isinstance(params, ITableWorkspace))
-        self.assertTrue(isinstance(result, MatrixWorkspace))
+        self.assertTrue(isinstance(result, WorkspaceGroup))
         self.assertTrue(isinstance(fit_group, WorkspaceGroup))
 
         self._validate_table_shape(params)
-        self._validate_matrix_shape(result)
+        self._validate_matrix_shape(result.getItem(0))
         self._validate_group_shape(fit_group)
 
         self._validate_table_values(params)
         self._validate_matrix_values(result)
         self._validate_group_values(fit_group)
 
-        self._validate_sample_log_values(result)
+        self._validate_sample_log_values(result.getItem(0))
         self._validate_sample_log_values(fit_group.getItem(0))
 
 
