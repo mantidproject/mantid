@@ -39,6 +39,16 @@ def _configurematplotlib(params):
     matplotlib.rcParams.update(params)
 
 
+def _denormalizeLine(line):
+    """Multiplies line workspace by the line width."""
+    axis = line.getAxis(1)
+    height = axis.getMax() - axis.getMin()
+    Ys = line.dataY(0)
+    Ys *= height
+    Es = line.dataE(0)
+    Es *= height
+
+
 def _finalizeprofileE(axes):
     """Set axes for const E axes."""
     axes.set_xlim(xmin=0.)
@@ -427,10 +437,12 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
                     cutWSList.append(wsName)
                 line = LineProfile(ws, cut, width, Direction=direction,
                                    OutputWorkspace=wsName, StoreInADS=keepCutWorkspaces, EnableLogging=False)
+                if ws.isDistribution() and direction == 'Vertical':
+                    _denormalizeLine(line)
                 if 'm' in style:
                     markerStyle, markerIndex = _chooseMarker(markers, markerIndex)
                 label = _label(ws, cut, width, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1, quantity, unit)
-                axes.errorbar(line, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
+                axes.errorbar(line, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
     _profileytitle(workspaces[0], axes)
@@ -470,7 +482,7 @@ def plotprofiles(workspaces, labels=None, style='l', xscale='linear', yscale='li
     for ws, label in zip(workspaces, labels):
         if 'm' in style:
             markerStyle, markerIndex = _chooseMarker(markers, markerIndex)
-        axes.errorbar(ws, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
+        axes.errorbar(ws, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
     _profileytitle(workspaces[0], axes)
