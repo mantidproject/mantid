@@ -199,14 +199,14 @@ Event Slice
 In case of data which was measured in event-mode, it is possible to perform
 time-of-flight slices of the data and reduce these separately. The input can be:
 
-- *start:step:stop* specifies time slices from a *start* value for the *stop* value
-  in steps of *step*.
+- ``start:step:stop`` specifies time slices from a ``start`` value for the ``stop`` value
+  in steps of ``step``.
 
-- *start-stop* which specifies a time slice from the *start* value to the *stop* value.
+- ``start-stop`` which specifies a time slice from the ``start`` value to the ``stop`` value.
 
-- *>start* specifies a slice form the *start* value to the end of the data set.
+- ``>start`` specifies a slice form the ``start`` value to the end of the data set.
 
-- *<stop* specifies a slice form the start of the data set to the *stop* value
+- ``<stop`` specifies a slice form the start of the data set to the ``stop`` value
 
 In addition it is possible to concatenate these specifications using comma-separation.
 An example would be *5-10,12:2:16,20-30*.
@@ -518,17 +518,17 @@ a Max and Min wavelength value between which to do the reduction or to specify a
 set of wavelength ranges to reduce between. The syntax for the latter case is the
 same as that used to specify event slices and is 
 
-- *start:step:stop* specifies wavelength slices from a *start* value for the *stop* value
-  in steps of *step*.
+- ``start:step:stop`` specifies wavelength slices from a ``start`` value for the ``stop`` value
+  in steps of `step`.
 
-- *start-stop* which specifies a wavelength slice from the *start* value to the *stop* value.
+- ``start-stop`` which specifies a wavelength slice from the ``start`` value to the ``stop`` value.
 
-- *>start* specifies a slice from the *start* value to the end of the data set.
+- ``>start`` specifies a slice from the ``start`` value to the end of the data set.
 
-- *<stop* specifies a slice from the start of the data set to the *stop* value
+- ``<stop`` specifies a slice from the start of the data set to the ``stop`` value
 
 In addition it is possible to concatenate these specifications using comma-separation.
-An example would be *5-10,12:2:16,20-30*.
+An example would be ``5-10,12:2:16,20-30``.
 
 +-------+---------------+------------------------------------------+
 | **1** | **Min**       | The lower bound of the wavelength bins.  |
