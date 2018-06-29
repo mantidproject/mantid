@@ -427,8 +427,8 @@ public:
     WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("EMU00012345"));
 
-	auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-		wsGroup->getItem("EMU00012345; Group; group1; Counts; 1+2; #1_Raw"));
+    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Group; group1; Counts; 1+2; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], 26, 0.1);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], 30, 0.001);
@@ -464,8 +464,8 @@ public:
     WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("EMU00012345"));
 
-	auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-		wsGroup->getItem("EMU00012345; Group; group1; Counts; 1-2; #1_Raw"));
+    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Group; group1; Counts; 1-2; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -2, 0.1);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], -2, 0.001);
