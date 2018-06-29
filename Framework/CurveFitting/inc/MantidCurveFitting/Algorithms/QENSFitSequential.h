@@ -63,6 +63,8 @@ private:
   std::string getOutputBaseName() const;
   std::string getInputString(
       const std::vector<API::MatrixWorkspace_sptr> &workspaces) const;
+  std::vector<std::size_t> getDatasetGrouping(
+      const std::vector<API::MatrixWorkspace_sptr> &workspaces) const;
   API::WorkspaceGroup_sptr
   processIndirectFitParameters(API::ITableWorkspace_sptr parameterWorkspace,
                                const std::vector<std::size_t> &grouping);

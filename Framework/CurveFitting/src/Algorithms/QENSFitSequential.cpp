@@ -253,15 +253,21 @@ void renameWorkspacesInQENSFit(Algorithm *qensFit,
 }
 
 std::vector<std::size_t>
-createDatasetGrouping(const std::vector<MatrixWorkspace_sptr> &workspaces) {
+createDatasetGrouping(const std::vector<MatrixWorkspace_sptr> &workspaces,
+                      std::size_t maximum) {
   std::vector<std::size_t> grouping;
   grouping.emplace_back(0);
   for (auto i = 1u; i < workspaces.size(); ++i) {
     if (workspaces[i] != workspaces[i - 1])
       grouping.emplace_back(i);
   }
-  grouping.emplace_back(workspaces.size());
+  grouping.emplace_back(maximum);
   return grouping;
+}
+
+std::vector<std::size_t>
+createDatasetGrouping(const std::vector<MatrixWorkspace_sptr> &workspaces) {
+  return createDatasetGrouping(workspaces, workspaces.size());
 }
 
 WorkspaceGroup_sptr
@@ -468,8 +474,8 @@ void QENSFitSequential::exec() {
 
   const auto parameterWs =
       processParameterTable(performFit(inputString, outputBaseName));
-  const auto resultWs = processIndirectFitParameters(
-      parameterWs, createDatasetGrouping(workspaces));
+  const auto resultWs =
+      processIndirectFitParameters(parameterWs, getDatasetGrouping(workspaces));
   const auto groupWs =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
           outputBaseName + "_Workspaces");
@@ -585,6 +591,15 @@ void QENSFitSequential::deleteTemporaryWorkspaces(
   deleter->executeAsChildAlg();
 
   deleteTemporaries(deleter, getTemporaryName());
+}
+
+std::vector<std::size_t> QENSFitSequential::getDatasetGrouping(
+    const std::vector<API::MatrixWorkspace_sptr> &workspaces) const {
+  if (getPropertyValue("Input").empty()) {
+    int maximum = getProperty("SpecMax");
+    return createDatasetGrouping(workspaces, static_cast<std::size_t>(maximum));
+  }
+  return createDatasetGrouping(workspaces);
 }
 
 WorkspaceGroup_sptr QENSFitSequential::processIndirectFitParameters(
