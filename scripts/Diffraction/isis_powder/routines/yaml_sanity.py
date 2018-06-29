@@ -49,4 +49,4 @@ def _is_unbound_key_sane(keys):
 
 def _is_run_range_key_unbounded(key):
     split_key = str(key).split('-')
-    return True if split_key[-1] == '' else False
+    return split_key[-1] == ''

@@ -314,11 +314,10 @@ private:
     const Kernel::V3D detectorPos{0., detY, detZ};
     const Kernel::V3D slit1Pos{0., 0., -SLIT1_DIST};
     const Kernel::V3D slit2Pos{0., 0., -SLIT2_DIST};
-    constexpr int nHisto{2};
     constexpr int nBins{100};
     auto ws = create2DWorkspaceWithReflectometryInstrument(
         startX, slit1Pos, slit2Pos, SLIT1_SIZE, SLIT2_SIZE, sourcePos,
-        monitorPos, samplePos, detectorPos, nHisto, nBins, TOF_BIN_WIDTH);
+        monitorPos, samplePos, detectorPos, nBins, TOF_BIN_WIDTH);
     // Add slit sizes to sample logs, too.
     auto &run = ws->mutableRun();
     constexpr bool overwrite{true};
@@ -545,11 +544,10 @@ private:
     const Kernel::V3D detectorPos{0., detY, detZ};
     const Kernel::V3D slit1Pos{0., 0., -SLIT1_DIST};
     const Kernel::V3D slit2Pos{0., 0., -SLIT2_DIST};
-    constexpr int nHisto{2};
     constexpr int nBins{10000};
     auto ws = create2DWorkspaceWithReflectometryInstrument(
         startX, slit1Pos, slit2Pos, SLIT1_SIZE, SLIT2_SIZE, sourcePos,
-        monitorPos, samplePos, detectorPos, nHisto, nBins, TOF_BIN_WIDTH);
+        monitorPos, samplePos, detectorPos, nBins, TOF_BIN_WIDTH);
     // Add slit sizes to sample logs, too.
     auto &run = ws->mutableRun();
     constexpr bool overwrite{true};

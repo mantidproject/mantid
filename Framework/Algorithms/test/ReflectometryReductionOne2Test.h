@@ -583,6 +583,42 @@ public:
     TS_ASSERT_DELTA(outQ->y(0)[7], 2.607359, 1e-6);
   }
 
+  void test_sum_in_q_exclude_partial_bins() {
+    // Sum in Q, single detector
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "1");
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.setProperty("ThetaIn", 25.0);
+    alg.setProperty("IncludePartialBins", "0");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 11);
+
+    TS_ASSERT_DELTA(outLam->x(0)[0], 0.945877, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[3], 5.184485, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 10.835962, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 2.767944, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[3], 2.792424, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 2.787199, 1e-6);
+  }
+
+  void test_sum_in_q_exclude_partial_bins_multiple_detectors() {
+    // Sum in Q, multiple detectors in group
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "1-3");
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.setProperty("ThetaIn", 25.0);
+    alg.setProperty("IncludePartialBins", "0");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 11);
+
+    TS_ASSERT_DELTA(outLam->x(0)[0], 0.957564, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[3], 5.196172, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 10.847649, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 8.458467, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[3], 8.521195, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 8.306563, 1e-6);
+  }
+
   void test_angle_correction() {
 
     ReflectometryReductionOne2 alg;
@@ -696,6 +732,7 @@ private:
     alg.setProperty("WavelengthMin", wavelengthMin);
     alg.setProperty("WavelengthMax", wavelengthMax);
     alg.setPropertyValue("ProcessingInstructions", procInstr);
+    alg.setPropertyValue("IncludePartialBins", "1");
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
   }

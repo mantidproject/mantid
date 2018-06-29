@@ -296,12 +296,6 @@ private:
   /// string to use for invalid run number error message
   const static std::string g_runNumberErrorStr;
 
-  // name of the workspace with the vanadium integration (of spectra)
-  static const std::string g_vanIntegrationWSName;
-
-  // name of the workspace with the vanadium (smoothed) curves
-  static const std::string g_vanCurvesWSName;
-
   // for the GSAS parameters (difc, difa, tzero) of the banks
   static const std::string g_calibBanksParms;
 

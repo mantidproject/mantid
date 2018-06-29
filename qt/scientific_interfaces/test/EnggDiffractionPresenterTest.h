@@ -1,6 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONPRESENTERTEST_H
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONPRESENTERTEST_H
 
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "../EnggDiffraction/EnggDiffractionPresenter.h"
 
@@ -224,6 +225,32 @@ public:
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
         "satisfied.",
         testing::Mock::VerifyAndClearExpectations(&mockView))
+  }
+
+  void test_calcCalibFailsWhenNoCalibDirectory() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    EnggDiffPresenterNoThread pres(&mockView);
+
+    EnggDiffCalibSettings calibSettings;
+    calibSettings.m_inputDirCalib = "";
+    calibSettings.m_pixelCalibFilename = "/some/file.csv";
+    calibSettings.m_templateGSAS_PRM = "/some/other/file.prm";
+
+    const std::string testFilename("ENGINX00241391.nxs");
+    const auto testFilePath =
+        Mantid::API::FileFinder::Instance().getFullPath(testFilename);
+
+    ON_CALL(mockView, newVanadiumNo())
+        .WillByDefault(Return(std::vector<std::string>({testFilePath})));
+    ON_CALL(mockView, newCeriaNo())
+        .WillByDefault(Return(std::vector<std::string>({testFilePath})));
+    ON_CALL(mockView, currentCalibSettings())
+        .WillByDefault(Return(calibSettings));
+
+    EXPECT_CALL(mockView,
+                userWarning("No calibration directory selected", testing::_));
+
+    pres.notify(IEnggDiffractionPresenter::CalcCalib);
   }
 
   // this can start the calibration thread, so watch out
