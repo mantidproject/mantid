@@ -165,7 +165,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 if self._instrument in INSTRUMENT_DICT[facility].keys():
                     self._facility = facility
                     break
-        if self._facility is None:
+        if self._facility is None and IS_IN_MANTIDPLOT:
             self._facility = ConfigService.Instance().getFacility().name()
 
         self.general_settings.facility_name = self._facility
@@ -452,10 +452,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.file_menu.setEnabled(False)
         self.tools_menu.setEnabled(False)
 
-        #self.progress_bar.show()
         if self._interface is not None:
             self._interface.reduce(self.progressEvent)
-        #self.progress_bar.hide()
 
         self.reduce_button.setEnabled(True)
         self.export_button.setEnabled(True)

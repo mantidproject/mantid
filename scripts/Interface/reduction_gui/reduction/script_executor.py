@@ -62,6 +62,12 @@ def splitCodeString(string, return_compiled=True):
         raise e
 
 
+
+def __wrappedExec(code, globals_dict, locals_dict):
+    # wrap exec here, because python doesnt like exec in nested functions
+    exec(code, globals_dict, locals_dict)
+    return True
+
 def execute_script(script, progress_action):
     """
         @param script: the script to execute
@@ -84,8 +90,7 @@ def execute_script(script, progress_action):
         locals_dict = dict()
 
         def execFunc(code):
-            exec(code, globals_dict, locals_dict)
-            return True
+            return __wrappedExec(code, globals_dict, locals_dict)
 
     code_blocks = [code for code in splitCodeString(script, return_compiled = not HAS_MANTIDPLOT)]
     code_blocks.insert(0, ('from mantid.simpleapi import *\n', (0,)))
