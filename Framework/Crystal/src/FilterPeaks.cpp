@@ -54,7 +54,7 @@ void FilterPeaks::init() {
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The filtered workspace");
 
@@ -78,8 +78,9 @@ void FilterPeaks::init() {
  */
 void FilterPeaks::exec() {
   PeaksWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  PeaksWorkspace_sptr filteredWS = boost::dynamic_pointer_cast<PeaksWorkspace>(
+      WorkspaceFactory::Instance().createPeaks());
 
-  IPeaksWorkspace_sptr filteredWS = WorkspaceFactory::Instance().createPeaks();
   // Copy over ExperimentInfo from input workspace
   filteredWS->copyExperimentInfoFrom(inputWS.get());
 
