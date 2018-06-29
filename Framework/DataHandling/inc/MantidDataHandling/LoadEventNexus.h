@@ -23,6 +23,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/scoped_array.hpp>
 #include <functional>
+#include <random>
 #include <memory>
 #include <mutex>
 #include <numeric>
@@ -195,7 +196,6 @@ private:
   void deleteBanks(EventWorkspaceCollection_sptr workspace,
                    std::vector<std::string> bankNames);
   bool hasEventMonitors();
-  void runLoadMonitorsAsEvents(API::Progress *const prog);
   void runLoadMonitors();
   /// Set the filters on TOF.
   void setTimeFilters(const bool monitors);
@@ -204,15 +204,6 @@ private:
   std::unique_ptr<std::pair<std::vector<int32_t>, std::vector<int32_t>>>
   loadISISVMSSpectraMapping(const std::string &entry_name);
 
-  /// ISIS specific methods for dealing with wide events
-  void loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
-                        const std::string &entry_name,
-                        const std::string &classType);
-
-  void loadTimeOfFlightData(::NeXus::File &file,
-                            EventWorkspaceCollection_sptr WS,
-                            const std::string &binsName, size_t start_wi = 0,
-                            size_t end_wi = 0);
   template <typename T> void filterDuringPause(T workspace);
 
   /// Set the top entry field name
@@ -232,6 +223,231 @@ private:
   /// True if the event_id is spectrum no not pixel ID
   bool event_id_is_spec;
 };
+
+//-----------------------------------------------------------------------------
+//               ISIS event corrections
+//-----------------------------------------------------------------------------
+
+/**
+* Load the time of flight data. file must have open the group containing
+* "time_of_flight" data set. This will add a offset to all of the
+* time-of-flight values or a random number to each time-of-flight. It
+* should only ever be called on event files that have a "detector_1_events"
+* group inside the "NXentry". It is an old ISIS requirement that is rarely
+* used now.
+*
+* Due to hardware issues with retro-fitting event mode to old electronics,
+* ISIS event mode is really a very fine histogram with between 1 and 2
+* microseconds bins.
+*
+* If we just took "middle of bin" as the true event time here then WISH
+* observed strange ripples when they added spectra. The solution was to
+* randomise the probability of an event within the bin.
+*
+* This randomisation is now performed in the control program which also writes
+* the "event_time_offset_shift" dataset (with a single value of "random") when
+* it has been performed. If this dataset is present in an event file then no
+* randomisation is performed in LoadEventNexus.
+*
+* This code should remain for loading older ISIS event datasets.
+*
+* @param file :: The nexus file to read from.
+* @param localWorkspace :: The event workspace collection to write to.
+* @param binsName :: bins name
+* @param start_wi :: First workspace index to process
+* @param end_wi :: Last workspace index to process
+*/
+template <typename T>
+void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace,
+                               const std::string &binsName, size_t start_wi = 0,
+                               size_t end_wi = 0) {
+  const std::string EVENT_TIME_SHIFT_TAG("event_time_offset_shift");
+  // first check if the data is already randomized
+  const auto entries = file.getEntries();
+  if (entries.find(EVENT_TIME_SHIFT_TAG) != entries.end()) {
+    std::string event_shift_type;
+    file.readData(EVENT_TIME_SHIFT_TAG, event_shift_type);
+    if (event_shift_type == "random") {
+      return;
+    }
+  }
+
+  // if the data is not randomized randomize it uniformly within each bin
+  file.openData(binsName);
+  // time of flights of events
+  std::vector<float> tofsFile;
+  file.getData(tofsFile);
+  file.closeData();
+
+  // todo: try to find if tof can be reduced to just 3 numbers: start, end and
+  // dt
+  if (end_wi <= start_wi) {
+    end_wi = localWorkspace->getNumberHistograms();
+  }
+
+  // random number generator
+  std::mt19937 rng;
+
+  // loop over spectra
+  for (size_t wi = start_wi; wi < end_wi; ++wi) {
+    DataObjects::EventList &event_list = localWorkspace->getSpectrum(wi);
+    if (event_list.empty())
+      continue;
+    // sort the events
+    event_list.sortTof();
+    auto tofsEventList = event_list.getTofs();
+
+    size_t n = tofsFile.size();
+    // iterate over the events and time bins
+    auto ev = tofsEventList.begin();
+    auto ev_end = tofsEventList.end();
+    for (size_t i = 1; i < n; ++i) {
+      double right = double(tofsFile[i]);
+      // find the right boundary for the current event
+      if ((ev != ev_end) && (right < *ev)) {
+        continue;
+      }
+      // count events which have the same right boundary
+      size_t m = 0;
+      while ((ev != ev_end) && (*ev < right)) {
+        ++ev;
+        ++m; // count events in the i-th bin
+      }
+
+      if (m > 0) { // m events in this bin
+        double left = double(tofsFile[i - 1]);
+        // spread the events uniformly inside the bin
+        std::uniform_real_distribution<double> flat(left, right);
+        std::vector<double> random_numbers(m);
+        for (double &random_number : random_numbers) {
+          random_number = flat(rng);
+        }
+        std::sort(random_numbers.begin(), random_numbers.end());
+        auto it = random_numbers.begin();
+        for (auto ev1 = ev - m; ev1 != ev; ++ev1, ++it) {
+          *ev1 = *it;
+        }
+      }
+
+    } // for i
+    event_list.setTofs(tofsEventList);
+
+    event_list.sortTof();
+  } // for wi
+}
+
+/**
+* ISIS specific method for dealing with wide events. Check if time_of_flight
+* can be found in the file and load it.
+*
+* THIS ONLY APPLIES TO ISIS FILES WITH "detector_1_events" IN THE "NXentry."
+*
+* @param file :: The nexus file to read from.
+* @param localWorkspace :: The event workspace collection which events will be
+*modified.
+* @param entry_name :: An NXentry tag in the file
+* @param classType :: The type of the events: either detector or monitor
+*/
+template <typename T>
+void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace,
+                                  const std::string &entry_name,
+                                  const std::string &classType) {
+  bool done = false;
+  // Go to the root, and then top entry
+  file.openPath("/");
+  file.openGroup(entry_name, "NXentry");
+
+  using string_map_t = std::map<std::string, std::string>;
+  string_map_t entries = file.getEntries();
+
+  if (entries.find("detector_1_events") == entries.end()) { // not an ISIS file
+    return;
+  }
+
+  // try if monitors have their own bins
+  if (classType == "NXmonitor") {
+    std::vector<std::string> bankNames;
+    for (string_map_t::const_iterator it = entries.begin(); it != entries.end();
+         ++it) {
+      std::string entry_name(it->first);
+      std::string entry_class(it->second);
+      if (entry_class == classType) {
+        bankNames.push_back(entry_name);
+      }
+    }
+    for (size_t i = 0; i < bankNames.size(); ++i) {
+      const std::string &mon = bankNames[i];
+      file.openGroup(mon, classType);
+      entries = file.getEntries();
+      if (entries.find("event_time_bins") == entries.end()) {
+        // bins = entries.find("time_of_flight"); // I think time_of_flight
+        // doesn't work here
+        // if (bins == entries.end())
+        //{
+        done = false;
+        file.closeGroup();
+        break; // done == false => use bins from the detectors
+               //}
+      }
+      done = true;
+      makeTimeOfFlightDataFuzzy(file, localWorkspace, "event_time_bins", i,
+                                i + 1);
+      file.closeGroup();
+    }
+  }
+
+  if (!done) {
+    // first check detector_1_events
+    file.openGroup("detector_1_events", "NXevent_data");
+    entries = file.getEntries();
+    for (string_map_t::const_iterator it = entries.begin(); it != entries.end();
+         ++it) {
+      if (it->first == "time_of_flight" || it->first == "event_time_bins") {
+        makeTimeOfFlightDataFuzzy(file, localWorkspace, it->first);
+        done = true;
+      }
+    }
+    file.closeGroup(); // detector_1_events
+
+    if (!done) { // if time_of_flight was not found try
+                 // instrument/dae/time_channels_#
+      file.openGroup("instrument", "NXinstrument");
+      file.openGroup("dae", "IXdae");
+      entries = file.getEntries();
+      size_t time_channels_number = 0;
+      for (string_map_t::const_iterator it = entries.begin();
+           it != entries.end(); ++it) {
+        // check if there are groups with names "time_channels_#" and select the
+        // one with the highest number
+        if (it->first.size() > 14 &&
+            it->first.substr(0, 14) == "time_channels_") {
+          size_t n = boost::lexical_cast<size_t>(it->first.substr(14));
+          if (n > time_channels_number) {
+            time_channels_number = n;
+          }
+        }
+      }
+      if (time_channels_number > 0) // the numbers start with 1
+      {
+        file.openGroup("time_channels_" + std::to_string(time_channels_number),
+                       "IXtime_channels");
+        entries = file.getEntries();
+        for (string_map_t::const_iterator it = entries.begin();
+             it != entries.end(); ++it) {
+          if (it->first == "time_of_flight" || it->first == "event_time_bins") {
+            makeTimeOfFlightDataFuzzy(file, localWorkspace, it->first);
+          }
+        }
+        file.closeGroup();
+      }
+      file.closeGroup(); // dae
+      file.closeGroup(); // instrument
+    }
+  }
+
+  // close top entry (or entry given in entry_name)
+  file.closeGroup();
+}
 
 //-----------------------------------------------------------------------------
 /** Load the instrument definition file specified by info in the NXS file.

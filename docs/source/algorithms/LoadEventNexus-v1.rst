@@ -16,8 +16,19 @@ pixels), and will have their `units <http://www.mantidproject.org/units>`_ set t
 Since it is an :ref:`EventWorkspace <EventWorkspace>`, it can be rebinned
 to finer bins with no loss of data.
 
-Sample logs, such as motor positions or e.g. temperature vs time, are
-also loaded using the :ref:`algm-LoadNexusLogs` child algorithm.
+Child algorithms used
+#####################
+
+**Sample logs**, such as motor positions or e.g. temperature vs time, are
+also loaded using :ref:`LoadNexusLogs <algm-LoadNexusLogs>`.
+
+**Monitors** are loaded using :ref:`LoadNexusMonitors
+<algm-LoadNexusMonitors>`.
+
+**Instrument geometry** is loaded using :ref:`LoadIDFFromNexus
+<algm-LoadIDFFromNexus>`. If the instrument geometry is not in the
+file :ref:`LoadInstrument <algm-LoadInstrument>` is used.
+
 
 Optional properties
 ###################
@@ -27,10 +38,10 @@ specifying minimum and maximum time-of-flight values. This can speed up
 loading and reduce memory requirements if you are only interested in a
 narrow range of the times-of-flight of your data.
 
-You can specify to load only certain spectra within the file, 
-using the SpectraMax, SpectraMin and SpectraList properties.  
-This will load data only matching those restrictions.  
-At facilities that do not group detectors in hardware such as the SNS, 
+You can specify to load only certain spectra within the file,
+using the SpectraMax, SpectraMin and SpectraList properties.
+This will load data only matching those restrictions.
+At facilities that do not group detectors in hardware such as the SNS,
 then this will also equate to the detector IDs.
 
 You may also filter out events by providing the start and stop times, in
@@ -64,7 +75,7 @@ that group be of type ``NXentry``. It also needs a group of type ``NXevent_data`
 
 The data is read from each group of type ``NXevent_data``.
 
-If the file has an ``isis_vms_compat`` then it is taken to be an ISIS file and 
+If the file has an ``isis_vms_compat`` then it is taken to be an ISIS file and
 the data will be modified according to the information obtained from this group.
 
 
@@ -89,7 +100,7 @@ Here are some tables that show it in more detail:
 |                              | else one spectrum per detector assumed    |                                     |
 +------------------------------+-------------------------------------------+-------------------------------------+
 | Run                          | mainly as loaded from                     | Run Object                          |
-|                              | :ref:`algm-LoadNexusLogs`                 |                                     | 
+|                              | :ref:`algm-LoadNexusLogs`                 |                                     |
 +------------------------------+-------------------------------------------+-------------------------------------+
 | Sample                       | If ``isis_vms_compat`` exists,            | Sample Object                       |
 |                              | ``SPB`` and ``RSPB`` within               |                                     |
@@ -101,7 +112,7 @@ Sample Object
 '''''''''''''
 
 If ``isis_vms_compat`` exists,
-then the following sample properties are read from it: 
+then the following sample properties are read from it:
 
 +-------------+-------------------------+
 | Nexus       | Workspace sample object |

@@ -201,15 +201,9 @@ void setTransmissionOnSaveCommand(
   }
 }
 
-bool checkSaveOptions(QString &message, bool is1D, bool isCanSAS,
-                      bool isNistQxy) {
+bool checkSaveOptions(QString &message, bool is1D, bool isCanSAS) {
   // Check we are dealing with 1D or 2D data
   bool isValid = true;
-  if (is1D && isNistQxy) {
-    isValid = false;
-    message +=
-        "Save option issue: Cannot save in NistQxy format for 1D data.\n";
-  }
 
   if (!is1D && isCanSAS) {
     isValid = false;
@@ -493,7 +487,6 @@ void SANSRunWindow::setupSaveBox() {
           SLOT(setUserFname()));
 
   // link the save option tick boxes to their save algorithm
-  m_savFormats.insert(m_uiForm.saveNIST_Qxy_check, "SaveNISTDAT");
   m_savFormats.insert(m_uiForm.saveCan_check, "SaveCanSAS1D");
   m_savFormats.insert(m_uiForm.saveRKH_check, "SaveRKH");
   m_savFormats.insert(m_uiForm.saveNXcanSAS_check, "SaveNXcanSAS");
@@ -756,8 +749,6 @@ void SANSRunWindow::readSaveSettings(QSettings &valueStore) {
   valueStore.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
   m_uiForm.saveCan_check->setChecked(
       valueStore.value("canSAS", false).toBool());
-  m_uiForm.saveNIST_Qxy_check->setChecked(
-      valueStore.value("NIST_Qxy", false).toBool());
   m_uiForm.saveRKH_check->setChecked(valueStore.value("RKH", false).toBool());
   m_uiForm.saveNXcanSAS_check->setChecked(
       valueStore.value("NXcanSAS", false).toBool());
@@ -799,7 +790,6 @@ void SANSRunWindow::saveSettings() {
 void SANSRunWindow::saveSaveSettings(QSettings &valueStore) {
   valueStore.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
   valueStore.setValue("canSAS", m_uiForm.saveCan_check->isChecked());
-  valueStore.setValue("NIST_Qxy", m_uiForm.saveNIST_Qxy_check->isChecked());
   valueStore.setValue("RKH", m_uiForm.saveRKH_check->isChecked());
   valueStore.setValue("NXcanSAS", m_uiForm.saveNXcanSAS_check->isChecked());
 }
@@ -3073,12 +3063,11 @@ bool SANSRunWindow::areSaveSettingsValid(const QString &workspaceName) {
       AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
           workspaceName.toStdString());
   auto is1D = ws->getNumberHistograms() == 1;
-  auto isNistQxy = m_uiForm.saveNIST_Qxy_check->isChecked();
   auto isCanSAS = m_uiForm.saveCan_check->isChecked();
 
   QString message;
 
-  auto isValid = checkSaveOptions(message, is1D, isCanSAS, isNistQxy);
+  auto isValid = checkSaveOptions(message, is1D, isCanSAS);
 
   // Print the error message if there are any
   if (!message.isEmpty()) {
@@ -4630,16 +4619,13 @@ bool SANSRunWindow::areSettingsValid(States type) {
   }
 
   // Check save format consistency for batch mode reduction
-  // 1D --> cannot be Nist Qxy
   // 2D --> cannot be CanSAS
   auto isBatchMode = !m_uiForm.single_mode_btn->isChecked();
   if (isBatchMode) {
     auto is1D = type == OneD;
     auto isCanSAS = m_uiForm.saveCan_check->isChecked();
-    auto isNistQxy = m_uiForm.saveNIST_Qxy_check->isChecked();
     QString saveMessage;
-    auto isValidSaveOption =
-        checkSaveOptions(saveMessage, is1D, isCanSAS, isNistQxy);
+    auto isValidSaveOption = checkSaveOptions(saveMessage, is1D, isCanSAS);
     if (!isValidSaveOption) {
       isValid = false;
       message += saveMessage;

@@ -22,24 +22,24 @@ Basic
 -----
 
 The syntax for multi file loading involves the use of several
-context-sensitive operators.  Here is a run-down of those operators
-with some simple examples:
+context-sensitive operators. Here is a run-down of those operators
+in order of descending precedence with some simple examples:
 
-+---------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
-| Name                | Usage                       | Description                                                                                | Example Input     | Example Result                       |
-+=====================+=============================+============================================================================================+===================+======================================+
-| List                | ``<run>,<run>``             | Used to list runs                                                                          | ``INST1,2,3.ext`` | Load runs 1, 2 and 3                 |
-+---------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
-| Plus                | ``<run>+<run>``             | Used to specify which runs that are to be loaded and then summed together                  | ``INST1+2+3.ext`` | Load and sum runs 1, 2 and 3         |
-+---------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
-| Range               | ``<run>:<run>``             | Used to specify a range of runs to load                                                    | ``INST1:4.ext``   | Load runs 1, 2, 3 and 4              |
-+---------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
-| Stepped Range       | ``<run>:<run>:<step_size>`` | Used to specify a ''stepped'' range of runs to load                                        | ``INST1:5:2.ext`` | Load runs 1, 3 and 5                 |
-+---------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
-| Added Range         | ``<run>-<run>``             | Used to specify a range of runs that are to be loaded and then summed together             | ``INST1-4.ext``   | Load and sum runs 1, 2, 3 and 4      |
-+---------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
-| Stepped Added Range | ``<run>-<run>:<step_size>`` | Used to specify a ''stepped'' range of runs that are to be loaded and then summed together | ``INST1-5:2.ext`` | Load and sum runs 1, 3 and 5         |
-+---------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
++------------+---------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
+| Precedence | Name                | Usage                       | Description                                                                                | Example Input     | Example Result                       |
++============+=====================+=============================+============================================================================================+===================+======================================+
+|            | Added Range         | ``<run>-<run>``             | Used to specify a range of runs that are to be loaded and then summed together             | ``INST1-4.ext``   | Load and sum runs 1, 2, 3 and 4      |
++            +---------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
+|            | Stepped Added Range | ``<run>-<run>:<step_size>`` | Used to specify a ''stepped'' range of runs that are to be loaded and then summed together | ``INST1-5:2.ext`` | Load and sum runs 1, 3 and 5         |
++     1      +---------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
+|            | Range               | ``<run>:<run>``             | Used to specify a range of runs to load. Cannot be summed                                  | ``INST1:4.ext``   | Load runs 1, 2, 3 and 4              |
++            +---------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
+|            | Stepped Range       | ``<run>:<run>:<step_size>`` | Used to specify a ''stepped'' range of runs to load. Cannot be summed                      | ``INST1:5:2.ext`` | Load runs 1, 3 and 5                 |
++------------+---------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
+|     2      | Plus                | ``<run>+<run>``             | Used to specify which runs or added ranges are to be loaded and then summed together       | ``INST1+2+3.ext`` | Load and sum runs 1, 2 and 3         |
++------------+---------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
+|     3      | List                | ``<run>,<run>``             | Used to list runs, ranges or sums                                                          | ``INST1,2,3.ext`` | Load runs 1, 2 and 3                 |
++------------+---------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
 
 Optional Info
 -------------
@@ -61,7 +61,7 @@ algorithm will attempt to fill in the details:
   currently support multiple loaders at the same time (see
   :ref:`MultipleFileProperty_Limitations`) if you specify multiple runs without an extension,
   then Mantid will use the first resolved extension for the remaining
-  files.  If some files have a specified extension but others dont,
+  files.  If some files have a specified extension but others don't,
   then the first extension that has been specified will be used for
   all files without a given extension.
 * **Zero Padding** - There is some leeway regarding the number of
