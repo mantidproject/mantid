@@ -200,7 +200,9 @@ std::size_t IndirectDataTablePresenter::getDataIndex(int row) const {
 
 boost::optional<Spectra>
 IndirectDataTablePresenter::getSpectra(std::size_t dataIndex) const {
-  return getSpectra(m_dataPositions[dataIndex], getNextPosition(dataIndex));
+  if (m_dataPositions.size() > dataIndex)
+    return getSpectra(m_dataPositions[dataIndex], getNextPosition(dataIndex));
+  return boost::none;
 }
 
 boost::optional<Spectra> IndirectDataTablePresenter::getSpectra(int start,
