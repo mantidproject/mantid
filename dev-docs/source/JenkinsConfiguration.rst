@@ -357,7 +357,7 @@ Update Branches For Jobs
     import hudson.plugins.git.BranchSpec
     import static com.google.common.collect.Lists.newArrayList;
 
-    def NEW_BRANCH = "*/release-v3.8"
+    def NEW_BRANCH = "*/release-next"
 
     // Access to the Hudson Singleton
     def jenkins = jenkins.model.Jenkins.instance;
