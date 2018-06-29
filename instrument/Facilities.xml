@@ -789,7 +789,7 @@
 </facility>
 
 <!--  Facility MLZ (FRMII) (Germany) -->
-<facility name="MLZ" FileExtensions=".nxs,.d_dat">
+<facility name="MLZ" FileExtensions=".nxs,.d_dat,.001,.mtxt,.mdat">
   <instrument name="DNS">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
@@ -807,6 +807,10 @@
 
   <instrument name="POWTEX">
 	<technique>Neutron Diffraction</technique>
+  </instrument>
+
+  <instrument name="SANS-1_MLZ" shortname='SANS-1'>
+        <technique>Small Angle Scattering</technique>
   </instrument>
 </facility>
 

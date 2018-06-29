@@ -7,7 +7,7 @@ from sans.common.general_functions import (quaternion_to_angle_and_axis, create_
                                            get_reduced_can_workspace_from_ads, write_hash_into_reduced_can_workspace,
                                            convert_instrument_and_detector_type_to_bank_name,
                                            convert_bank_name_to_detector_type_isis,
-                                           get_facility, parse_diagnostic_settings)
+                                           get_facility, parse_diagnostic_settings, get_transmission_output_name)
 from sans.common.constants import (SANS2D, LOQ, LARMOR)
 from sans.common.enums import (ISISReductionMode, ReductionDimensionality, OutputParts,
                                SANSInstrument, DetectorType, SANSFacility)
@@ -174,6 +174,24 @@ class SANSFunctionsTest(unittest.TestCase):
         output_workspace, _ = get_standard_output_workspace_name(state, ISISReductionMode.LAB, data_type = 'Sample', transmission = True)
         # Assert
         self.assertTrue("12345_trans_Sample_12.0_34.0Phi12.0_56.0_t4.57_T12.37" == output_workspace)
+
+    def test_that_get_transmission_output_name_returns_correct_name_for_user_specified_workspace(self):
+        # Arrange
+        state = SANSFunctionsTest._get_state()
+        state.save.user_specified_output_name = "test_output"
+        # Act
+        output_workspace, _ = get_transmission_output_name(state, ISISReductionMode.LAB)
+        # Assert
+        self.assertEqual(output_workspace, "test_output_trans")
+
+    def test_that_get_transmission_output_name_returns_correct_name(self):
+        # Arrange
+        state = SANSFunctionsTest._get_state()
+        state.save.user_specified_output_name = ''
+        # Act
+        output_workspace, _ = get_transmission_output_name(state, ISISReductionMode.LAB)
+        # Assert
+        self.assertEqual(output_workspace, "12345_trans_Sample_12.0_34.0Phi12.0_56.0_t4.57_T12.37")
 
     def test_that_sanitises_instrument_names(self):
         name1 = sanitise_instrument_name("LOQ_trans")
