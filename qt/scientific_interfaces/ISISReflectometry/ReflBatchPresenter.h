@@ -10,7 +10,7 @@ namespace CustomInterfaces {
 
 class IReflBatchView;
 class IReflRunsTabPresenter;
-class IReflEventTabPresenter;
+class IEventPresenter;
 class IReflSettingsTabPresenter;
 class IReflSaveTabPresenter;
 
@@ -46,7 +46,7 @@ public:
   /// Constructor
   ReflBatchPresenter(IReflBatchView *view,
                      std::unique_ptr<IReflRunsTabPresenter> runsPresenter,
-                     std::unique_ptr<IReflEventTabPresenter> eventPresenter,
+                     std::unique_ptr<IEventPresenter> eventPresenter,
                      std::unique_ptr<IReflSettingsTabPresenter> settingsPresenter,
                      std::unique_ptr<IReflSaveTabPresenter> savePresenter);
 
@@ -63,11 +63,6 @@ public:
   getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
-  /// Returns time-slicing values
-  std::string getTimeSlicingValues() const override;
-  /// Returns time-slicing type
-  std::string getTimeSlicingType() const override;
-
   /// Set the instrument name
   void setInstrumentName(const std::string &instName) const override;
 
@@ -95,7 +90,7 @@ private:
   /// The presenter of tab 'Runs'
   std::unique_ptr<IReflRunsTabPresenter> m_runsPresenter;
   /// The presenter of tab 'Event Handling'
-  std::unique_ptr<IReflEventTabPresenter> m_eventPresenter;
+  std::unique_ptr<IEventPresenter> m_eventPresenter;
   /// The presenter of tab 'Settings'
   std::unique_ptr<IReflSettingsTabPresenter> m_settingsPresenter;
   /// The presenter of tab 'Save ASCII'

@@ -1,7 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERGROUPDELETETEST_H_
 #define MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERGROUPDELETETEST_H_
 
-#include "../../../ISISReflectometry/Presenters/RunsTablePresenter.h"
+#include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
 #include "../../../ISISReflectometry/Reduction/ReductionWorkspaces.h"
 #include "RunsTablePresenterTest.h"
 

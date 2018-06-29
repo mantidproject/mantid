@@ -1,5 +1,5 @@
 #include "QtReflBatchView.h"
-#include "QtReflEventTabView.h"
+#include "GUI/Event/EventView.h"
 #include "QtReflRunsTabView.h"
 #include "QtReflSaveTabView.h"
 #include "QtReflSettingsTabView.h"
@@ -37,7 +37,7 @@ void QtReflBatchView::initLayout() {
 
 IReflRunsTabView *QtReflBatchView::runs() const { return m_runs.get(); }
 
-IReflEventTabView *QtReflBatchView::eventHandling() const {
+IEventView *QtReflBatchView::eventHandling() const {
   return m_eventHandling.get();
 }
 
@@ -54,8 +54,8 @@ std::unique_ptr<QtReflRunsTabView> QtReflBatchView::createRunsTab() {
       this, RunsTableViewFactory(instruments));
 }
 
-std::unique_ptr<QtReflEventTabView> QtReflBatchView::createEventTab() {
-  return Mantid::Kernel::make_unique<QtReflEventTabView>(this);
+std::unique_ptr<EventView> QtReflBatchView::createEventTab() {
+  return Mantid::Kernel::make_unique<EventView>(this);
 }
 
 Mantid::API::IAlgorithm_sptr QtReflBatchView::createReductionAlg() {

@@ -3,11 +3,13 @@ FUNCTION(PREPEND var prefix)
    FOREACH(f ${ARGN})
       LIST(APPEND listVar "${prefix}/${f}")
    ENDFOREACH(f)
-   SET(${var} "${listVar}" PARENT_SCOPE)
+   SET(${var} ${listVar} PARENT_SCOPE)
 ENDFUNCTION(PREPEND)
 
 add_subdirectory(GUI)
 add_subdirectory(Reduction)
+
+message(${GUI_SRC_FILES})
 
 set ( SRC_FILES
     ${GUI_SRC_FILES}
@@ -16,7 +18,6 @@ set ( SRC_FILES
     InstrumentOptionDefaults.cpp
     InstrumentParameters.cpp
     ExperimentOptionDefaults.cpp
-    QtReflEventTabView.cpp
     QtReflMainWindowView.cpp
     QtReflBatchView.cpp
     QtReflRunsTabView.cpp
@@ -26,7 +27,6 @@ set ( SRC_FILES
     ReflAsciiSaver.cpp
     IReflAsciiSaver.cpp
     ReflAutoreduction.cpp
-    ReflEventTabPresenter.cpp
     ReflFromStdStringMap.cpp
     ReflMainWindowPresenter.cpp
     ReflBatchPresenter.cpp
@@ -48,7 +48,6 @@ set ( INC_FILES
     ${REDUCTION_INC_FILES}
     DllConfig.h
     InstrumentParameters.h
-    IReflEventTabPresenter.h
     IReflMainWindowPresenter.h
     IReflBatchPresenter.h
     IReflMainWindowView.h
@@ -61,7 +60,6 @@ set ( INC_FILES
     IReflSettingsTabPresenter.h
     MeasurementItem.h
     PrecompiledHeader.h
-    QtReflEventTabView.h
     QtReflMainWindowView.h
     QtReflBatchView.h
     QtReflRunsTabView.h
@@ -72,7 +70,6 @@ set ( INC_FILES
     ReflCatalogSearcher.h
     ReflAsciiSaver.h
     IReflAsciiSaver.h
-    ReflEventTabPresenter.h
     ReflFromStdStringMap.h
     ReflMainWindowPresenter.h
     ReflBatchPresenter.h
@@ -93,7 +90,6 @@ set ( INC_FILES
 set ( MOC_FILES
     ${GUI_MOC_FILES}
     ReflSearchModel.h
-    QtReflEventTabView.h
     QtReflRunsTabView.h
     QtReflSaveTabView.h
     QtReflSettingsTabView.h
@@ -103,7 +99,6 @@ set ( MOC_FILES
 
 set ( UI_FILES
    ${GUI_UI_FILES}
-   ReflEventTabWidget.ui
    ReflMainWindowWidget.ui
    ReflBatchWidget.ui
    ReflRunsTabWidget.ui

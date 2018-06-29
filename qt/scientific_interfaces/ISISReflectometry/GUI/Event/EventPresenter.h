@@ -1,18 +1,18 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H
 
-#include "DllConfig.h"
-#include "IReflEventTabPresenter.h"
+#include "../../DllConfig.h"
+#include "IEventPresenter.h"
 #include "IReflBatchPresenter.h"
-#include "IReflEventTabView.h"
-#include "Reduction/Slicing.h"
+#include "IEventView.h"
+#include "../../Reduction/Slicing.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** @class ReflEventTabPresenter
+/** @class EventPresenter
 
-ReflEventTabPresenter is a presenter class for the widget 'Event' in the
+EventPresenter is a presenter class for the widget 'Event' in the
 ISIS Reflectometry Interface.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -36,21 +36,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL ReflEventTabPresenter
-    : public IReflEventTabPresenter,
+class MANTIDQT_ISISREFLECTOMETRY_DLL EventPresenter
+    : public IEventPresenter,
       public EventTabViewSubscriber {
 public:
-  /// Constructor
-  ReflEventTabPresenter(IReflEventTabView *view);
-  /// Returns time-slicing values
-  std::string getTimeSlicingValues() const override;
-  /// Returns time-slicing type
-  std::string getTimeSlicingType() const override;
+  EventPresenter(IEventView *view);
 
   void onReductionPaused() override;
   void onReductionResumed() override;
-  void notifySliceTypeChanged(SliceType newSliceType) override;
 
+  void notifySliceTypeChanged(SliceType newSliceType) override;
   void notifyUniformSliceCountChanged(int sliceCount) override;
   void notifyUniformSecondsChanged(double sliceLengthInSeconds) override;
   void
@@ -70,10 +65,8 @@ private:
   void setCustomSlicingFromView();
   void setLogValueSlicingFromView();
   void setSlicingFromView();
-  std::string logFilterAndSliceValues(std::string const &slicingValues,
-                                      std::string const &logFilter) const;
   /// The view we are managing
-  IReflEventTabView *m_view;
+  IEventView *m_view;
   IReflBatchPresenter *m_mainPresenter;
   SliceType m_sliceType;
 };

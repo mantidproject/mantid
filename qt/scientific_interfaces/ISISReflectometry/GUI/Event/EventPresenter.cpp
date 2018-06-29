@@ -1,6 +1,6 @@
-#include "ReflEventTabPresenter.h"
-#include "IReflEventTabPresenter.h"
-#include "IReflEventTabView.h"
+#include "EventPresenter.h"
+#include "IEventPresenter.h"
+#include "IEventView.h"
 #include "Parse.h"
 #include <boost/algorithm/string.hpp>
 
@@ -11,90 +11,57 @@ namespace CustomInterfaces {
 * @param view :: The view we are handling
 * @param group :: The group on the parent tab this belongs to
 */
-ReflEventTabPresenter::ReflEventTabPresenter(IReflEventTabView *view)
+EventPresenter::EventPresenter(IEventView *view)
     : m_view(view), m_sliceType(SliceType::None) {
   m_view->subscribe(this);
 }
 
-void ReflEventTabPresenter::acceptMainPresenter(
+void EventPresenter::acceptMainPresenter(
     IReflBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
 
-Slicing const &ReflEventTabPresenter::slicing() const { return m_slicing; }
+Slicing const &EventPresenter::slicing() const { return m_slicing; }
 
-void ReflEventTabPresenter::notifyUniformSliceCountChanged(int) {
+void EventPresenter::notifyUniformSliceCountChanged(int) {
   setUniformSlicingByNumberOfSlicesFromView();
 }
 
-void ReflEventTabPresenter::notifyUniformSecondsChanged(double) {
+void EventPresenter::notifyUniformSecondsChanged(double) {
   setUniformSlicingByTimeFromView();
 }
 
-void ReflEventTabPresenter::notifyCustomSliceValuesChanged(std::string) {
+void EventPresenter::notifyCustomSliceValuesChanged(std::string) {
   setCustomSlicingFromView();
 }
 
-void ReflEventTabPresenter::notifyLogSliceBreakpointsChanged(std::string) {
+void EventPresenter::notifyLogSliceBreakpointsChanged(std::string) {
   setLogValueSlicingFromView();
 }
 
-void ReflEventTabPresenter::notifyLogBlockNameChanged(std::string) {
+void EventPresenter::notifyLogBlockNameChanged(std::string) {
   setLogValueSlicingFromView();
 }
 
-/** Returns the time-slicing values
-* @return :: The time-slicing values
-*/
-std::string ReflEventTabPresenter::getTimeSlicingValues() const { return {}; }
-
-std::string ReflEventTabPresenter::logFilterAndSliceValues(
-    std::string const &slicingValues, std::string const &logFilter) const {
-  if (!slicingValues.empty() && !logFilter.empty())
-    return "Slicing=\"" + slicingValues + "\",LogFilter=" + logFilter;
-  else
-    return "";
-}
-
-/** Returns the time-slicing type
-* @return :: The time-slicing type
-*/
-std::string ReflEventTabPresenter::getTimeSlicingType() const {
-  switch (m_sliceType) {
-  case SliceType::UniformEven:
-    return "UniformEven";
-  case SliceType::Uniform:
-    return "Uniform";
-  case SliceType::Custom:
-    return "Custom";
-  case SliceType::LogValue:
-    return "LogValue";
-  case SliceType::None:
-    return "None";
-  default:
-    throw std::runtime_error("B Unrecognized slice type.");
-  }
-}
-
-void ReflEventTabPresenter::onReductionPaused() {
+void EventPresenter::onReductionPaused() {
   m_view->enableSliceType(m_sliceType);
   m_view->enableSliceTypeSelection();
 }
 
-void ReflEventTabPresenter::onReductionResumed() {
+void EventPresenter::onReductionResumed() {
   m_view->disableSliceType(m_sliceType);
   m_view->disableSliceTypeSelection();
 }
 
-void ReflEventTabPresenter::setUniformSlicingByTimeFromView() {
+void EventPresenter::setUniformSlicingByTimeFromView() {
   m_slicing = UniformSlicingByTime(m_view->uniformSliceLength());
 }
 
-void ReflEventTabPresenter::setUniformSlicingByNumberOfSlicesFromView() {
+void EventPresenter::setUniformSlicingByNumberOfSlicesFromView() {
   m_slicing = UniformSlicingByNumberOfSlices(m_view->uniformSliceCount());
 }
 
-void ReflEventTabPresenter::setCustomSlicingFromView() {
+void EventPresenter::setCustomSlicingFromView() {
   auto maybeCustomBreakpoints =
       parseList(m_view->customBreakpoints(), parseNonNegativeDouble);
   if (maybeCustomBreakpoints.is_initialized()) {
@@ -102,10 +69,11 @@ void ReflEventTabPresenter::setCustomSlicingFromView() {
     m_slicing = CustomSlicingByList(maybeCustomBreakpoints.get());
   } else {
     m_view->showCustomBreakpointsInvalid();
+    m_slicing = InvalidSlicing();
   }
 }
 
-void ReflEventTabPresenter::setLogValueSlicingFromView() {
+void EventPresenter::setLogValueSlicingFromView() {
   auto maybeBreakpoints =
       parseList(m_view->logBreakpoints(), parseNonNegativeDouble);
   auto blockName = m_view->logBlockName();
@@ -114,10 +82,11 @@ void ReflEventTabPresenter::setLogValueSlicingFromView() {
     m_slicing = SlicingByEventLog(maybeBreakpoints.get(), blockName);
   } else {
     m_view->showLogBreakpointsInvalid();
+    m_slicing = InvalidSlicing();
   }
 }
 
-void ReflEventTabPresenter::setSlicingFromView() {
+void EventPresenter::setSlicingFromView() {
   switch (m_sliceType) {
   case SliceType::UniformEven:
     setUniformSlicingByNumberOfSlicesFromView();
@@ -139,7 +108,7 @@ void ReflEventTabPresenter::setSlicingFromView() {
   }
 }
 
-void ReflEventTabPresenter::notifySliceTypeChanged(SliceType newSliceType) {
+void EventPresenter::notifySliceTypeChanged(SliceType newSliceType) {
   m_view->disableSliceType(m_sliceType);
   m_view->enableSliceType(newSliceType);
   m_sliceType = newSliceType;

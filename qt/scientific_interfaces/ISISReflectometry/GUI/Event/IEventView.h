@@ -1,16 +1,15 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLEVENTVIEW_H
 #define MANTID_ISISREFLECTOMETRY_IREFLEVENTVIEW_H
 
-#include "DllConfig.h"
+#include "../../DllConfig.h"
 #include <string>
-#include "IReflEventTabPresenter.h"
+#include "IEventPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** @class IReflEventTabView
-
-IReflEventTabView is the base view class for the Reflectometry "Event Handling"
+/**
+IEventView is the base view class for the Reflectometry "Event Handling"
 tab. It contains no QT specific functionality as that should be handled by a
 subclass.
 
@@ -47,10 +46,10 @@ public:
   virtual void notifyLogBlockNameChanged(std::string blockName) = 0;
 };
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL IReflEventTabView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL IEventView {
 public:
   virtual void subscribe(EventTabViewSubscriber *notifyee) = 0;
-  virtual ~IReflEventTabView() = default;
+  virtual ~IEventView() = default;
 
   virtual std::string logBlockName() const = 0;
   virtual std::string logBreakpoints() const = 0;
@@ -70,4 +69,4 @@ public:
 };
 }
 }
-#endif /* MANTID_ISISREFLECTOMETRY_IREFLEVENTVIEW_H */
+#endif // MANTID_ISISREFLECTOMETRY_IREFLEVENTVIEW_H

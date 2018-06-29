@@ -11,7 +11,7 @@ namespace CustomInterfaces {
 
 class IReflMainWindowView;
 class IReflRunsTabPresenter;
-class IReflEventTabPresenter;
+class IEventPresenter;
 class IReflSettingsTabPresenter;
 class IReflSaveTabPresenter;
 

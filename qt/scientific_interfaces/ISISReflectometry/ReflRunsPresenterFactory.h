@@ -1,7 +1,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLRUNSPRESENTERFACTORY_H
 #define MANTID_ISISREFLECTOMETRY_REFLRUNSPRESENTERFACTORY_H
 #include "DllConfig.h"
-#include "IReflEventTabPresenter.h"
+#include "GUI/Event/IEventPresenter.h"
 #include "IReflRunsTabPresenter.h"
 #include "IReflRunsTabView.h"
 #include "ReflRunsTabPresenter.h"

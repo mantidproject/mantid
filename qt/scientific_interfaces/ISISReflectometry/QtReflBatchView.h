@@ -6,7 +6,7 @@
 #include "ui_ReflBatchWidget.h"
 #include <memory>
 #include "QtReflSaveTabView.h"
-#include "QtReflEventTabView.h"
+#include "GUI/Event/EventView.h"
 #include "QtReflSettingsTabView.h"
 #include "QtReflRunsTabView.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -45,7 +45,7 @@ public:
   void subscribe(IReflBatchPresenter *notifyee);
 
   IReflRunsTabView *runs() const override;
-  IReflEventTabView *eventHandling() const override;
+  IEventView *eventHandling() const override;
   IReflSettingsTabView *settings() const override;
   IReflSaveTabView *save() const override;
 
@@ -54,14 +54,14 @@ private:
   Mantid::API::IAlgorithm_sptr createReductionAlg();
 
   std::unique_ptr<QtReflRunsTabView> createRunsTab();
-  std::unique_ptr<QtReflEventTabView> createEventTab();
+  std::unique_ptr<EventView> createEventTab();
   std::unique_ptr<QtReflSettingsTabView> createSettingsTab();
   std::unique_ptr<QtReflSaveTabView> createSaveTab();
 
   Ui::ReflBatchWidget m_ui;
   IReflBatchPresenter *m_notifyee;
   std::unique_ptr<QtReflRunsTabView> m_runs;
-  std::unique_ptr<QtReflEventTabView> m_eventHandling;
+  std::unique_ptr<EventView> m_eventHandling;
   std::unique_ptr<QtReflSettingsTabView> m_settings;
   std::unique_ptr<QtReflSaveTabView> m_save;
 };

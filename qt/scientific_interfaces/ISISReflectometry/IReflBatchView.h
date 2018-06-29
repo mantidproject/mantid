@@ -4,7 +4,7 @@
 #include <string>
 #include "IReflRunsTabView.h"
 #include "IReflSettingsTabView.h"
-#include "IReflEventTabView.h"
+#include "GUI/Event/IEventView.h"
 #include "IReflSaveTabView.h"
 
 namespace MantidQt {
@@ -41,7 +41,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class IReflBatchView {
 public:
   virtual IReflRunsTabView* runs() const = 0;
-  virtual IReflEventTabView* eventHandling() const = 0;
+  virtual IEventView* eventHandling() const = 0;
   virtual IReflSettingsTabView* settings() const = 0;
   virtual IReflSaveTabView* save() const = 0;
   virtual ~IReflBatchView() = default;

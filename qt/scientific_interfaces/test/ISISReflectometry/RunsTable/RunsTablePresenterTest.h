@@ -1,7 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERTEST_H_
 #define MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERTEST_H_
 
-#include "../../../ISISReflectometry/Presenters/RunsTablePresenter.h"
+#include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
 #include "../../../ISISReflectometry/Reduction/Slicing.h"
 #include "MockRunsTableView.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"

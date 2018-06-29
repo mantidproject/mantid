@@ -6,7 +6,6 @@ set ( RUNS_TABLE_SRC_FILES
     RunsTableView.cpp
     IRunsTableView.h
     RunsTableView.h
-    PARENT_SCOPE
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -18,15 +17,22 @@ set ( RUNS_TABLE_INC_FILES
     RowLocation.h
     RunsTablePresenter.h
     RunsTablePresenterFactory.h
-    PARENT_SCOPE
 )
 
 set ( RUNS_TABLE_MOC_FILES
     RunsTableView.h
-    PARENT_SCOPE
 )
 
 set ( RUNS_TABLE_UI_FILES
     RunsTableView.ui
-    PARENT_SCOPE
 )
+
+PREPEND( RUNS_TABLE_SRC_FILES GUI/RunsTable ${RUNS_TABLE_SRC_FILES})
+PREPEND( RUNS_TABLE_INC_FILES GUI/RunsTable ${RUNS_TABLE_INC_FILES})
+PREPEND( RUNS_TABLE_MOC_FILES GUI/RunsTable ${RUNS_TABLE_MOC_FILES})
+PREPEND( RUNS_TABLE_UI_FILES GUI/RunsTable ${RUNS_TABLE_UI_FILES})
+
+set(RUNS_TABLE_SRC_FILES ${RUNS_TABLE_SRC_FILES} PARENT_SCOPE)
+set(RUNS_TABLE_INC_FILES ${RUNS_TABLE_INC_FILES} PARENT_SCOPE)
+set(RUNS_TABLE_MOC_FILES ${RUNS_TABLE_MOC_FILES} PARENT_SCOPE)
+set(RUNS_TABLE_UI_FILES ${RUNS_TABLE_UI_FILES} PARENT_SCOPE)

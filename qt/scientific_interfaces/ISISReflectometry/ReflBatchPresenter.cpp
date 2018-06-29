@@ -1,7 +1,7 @@
 #include "ReflBatchPresenter.h"
 #include "IReflBatchView.h"
 #include "IReflRunsTabPresenter.h"
-#include "IReflEventTabPresenter.h"
+#include "GUI/Event/IEventPresenter.h"
 #include "IReflSettingsTabPresenter.h"
 #include "IReflSaveTabPresenter.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
@@ -21,7 +21,7 @@ namespace CustomInterfaces {
 */
 ReflBatchPresenter::ReflBatchPresenter(
     IReflBatchView *view, std::unique_ptr<IReflRunsTabPresenter> runsPresenter,
-    std::unique_ptr<IReflEventTabPresenter> eventPresenter,
+    std::unique_ptr<IEventPresenter> eventPresenter,
     std::unique_ptr<IReflSettingsTabPresenter> settingsPresenter,
     std::unique_ptr<IReflSaveTabPresenter> savePresenter)
     : m_view(view), m_runsPresenter(std::move(runsPresenter)),
@@ -95,28 +95,6 @@ OptionsQMap ReflBatchPresenter::getReductionOptions() const {
 */
 std::string ReflBatchPresenter::getStitchOptions() const {
   return m_settingsPresenter->getStitchOptions();
-}
-
-/** Returns time-slicing values
-*
-* @param group :: Index of the group in 'Event Handling' tab from which to get
-*the values
-* @return :: Time-slicing values
-*/
-std::string ReflBatchPresenter::getTimeSlicingValues() const {
-  // Request global time-slicing values to 'Event Handling' presenter
-  return m_eventPresenter->getTimeSlicingValues();
-}
-
-/** Returns time-slicing type
-*
-* @param group :: Index of the group in 'Event Handling' tab from which to get
-*the type
-* @return :: Time-slicing type
-*/
-std::string ReflBatchPresenter::getTimeSlicingType() const {
-  // Request time-slicing type to 'Event Handling' presenter
-  return m_eventPresenter->getTimeSlicingType();
 }
 
 /** Returns default values specified for 'Transmission run(s)' for the

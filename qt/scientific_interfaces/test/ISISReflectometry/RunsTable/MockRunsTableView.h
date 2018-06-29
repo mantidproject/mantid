@@ -1,7 +1,6 @@
 #ifndef MANTID_CUSTOMINTERFACES_MOCKRUNSTABLEVIEW_H_
 #define MANTID_CUSTOMINTERFACES_MOCKRUNSTABLEVIEW_H_
-#include "DllConfig.h"
-#include "Views/IRunsTableView.h"
+#include "../../../ISISReflectometry/GUI/RunsTable/IRunsTableView.h"
 #include <gmock/gmock.h>
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -11,7 +10,7 @@ GCC_DIAG_OFF_SUGGEST_OVERRIDE
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL MockRunsTableView : public IRunsTableView {
+class MockRunsTableView : public IRunsTableView {
 public:
   MOCK_METHOD1(subscribe, void(RunsTableViewSubscriber *));
   MOCK_METHOD1(setProgress, void(int));

@@ -65,17 +65,12 @@ public:
   getReductionOptions() const = 0;
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
-  /// Time-slicing values
-  virtual std::string getTimeSlicingValues() const = 0;
-  /// Time-slicing type
-  virtual std::string getTimeSlicingType() const = 0;
+
   /// Set the instrument name
   virtual void setInstrumentName(const std::string &instName) const = 0;
   /// Data processing check for all groups
   virtual bool isProcessing() const = 0;
-
   virtual bool requestClose() const = 0;
-
   virtual void settingsChanged() = 0;
 };
 }

@@ -6,7 +6,7 @@
 #include "ReflRunsPresenterFactory.h"
 #include "ReflSavePresenterFactory.h"
 #include "ReflSettingsPresenterFactory.h"
-#include "ReflEventPresenterFactory.h"
+#include "GUI/Event/EventPresenterFactory.h"
 #include "ReflBatchPresenter.h"
 #include <memory>
 

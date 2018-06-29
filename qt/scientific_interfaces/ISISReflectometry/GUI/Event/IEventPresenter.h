@@ -2,12 +2,12 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H
 
 #include <string>
-#include "IReflBatchPresenter.h"
+#include "../../IReflBatchPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** @class IReflEventTabPresenter
+/** @class IEventPresenter
 
 IReflEventPresenter is an interface which defines the functions that need
 to be implemented by a concrete 'Event' presenter
@@ -36,13 +36,13 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 enum class SliceType { None, UniformEven, Uniform, Custom, LogValue };
 
-class IReflEventTabPresenter {
+class IEventPresenter {
 public:
-  virtual ~IReflEventTabPresenter() = default;
+  virtual ~IEventPresenter() = default;
   /// Time-slicing values
-  virtual std::string getTimeSlicingValues() const = 0;
-  /// Time-slicing type
-  virtual std::string getTimeSlicingType() const = 0;
+//  virtual std::string getTimeSlicingValues() const = 0;
+//  /// Time-slicing type
+//  virtual std::string getTimeSlicingType() const = 0;
 
   virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) =0;
   virtual void onReductionPaused() = 0;

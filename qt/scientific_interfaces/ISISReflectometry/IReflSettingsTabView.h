@@ -16,7 +16,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** @class IReflEventTabView
+/** @class IEventView
 
 IReflSettingsView is the base view class for the Reflectometry settings. It
 contains no QT specific functionality as that should be handled by a subclass.

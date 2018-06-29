@@ -3,8 +3,8 @@
 
 #include "../ISISReflectometry/ExperimentOptionDefaults.h"
 #include "../ISISReflectometry/IReflAsciiSaver.h"
-#include "../ISISReflectometry/IReflEventTabPresenter.h"
-#include "../ISISReflectometry/IReflEventTabView.h"
+#include "../ISISReflectometry/IEventPresenter.h"
+#include "../ISISReflectometry/IEventView.h"
 #include "../ISISReflectometry/IReflMainWindowPresenter.h"
 #include "../ISISReflectometry/IReflMainWindowView.h"
 #include "../ISISReflectometry/IReflRunsTabPresenter.h"
@@ -235,7 +235,7 @@ class MockEventPresenter : public IReflEventPresenter {
 public:
   MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
   MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
-  MOCK_METHOD1(acceptTabPresenter, void(IReflEventTabPresenter *));
+  MOCK_METHOD1(acceptTabPresenter, void(IEventPresenter *));
   MOCK_METHOD0(onReductionPaused, void());
   MOCK_METHOD0(onReductionResumed, void());
   MOCK_METHOD1(notifySliceTypeChanged, void(SliceType));
@@ -243,7 +243,7 @@ public:
   ~MockEventPresenter() override{};
 };
 
-class MockEventTabPresenter : public IReflEventTabPresenter {
+class MockEventTabPresenter : public IEventPresenter {
 public:
   std::string getTimeSlicingValues(int) const override { return std::string(); }
   std::string getTimeSlicingType(int) const override { return std::string(); }

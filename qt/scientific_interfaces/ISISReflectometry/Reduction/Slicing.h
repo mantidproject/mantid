@@ -25,46 +25,74 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include <boost/variant.hpp>
 #include <vector>
 #include <string>
+#include "../DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class UniformSlicingByTime {
+class MANTIDQT_ISISREFLECTOMETRY_DLL UniformSlicingByTime {
 public:
   explicit UniformSlicingByTime(double secondsPerSlice);
+  double sliceLengthInSeconds() const;
 
 private:
   double m_secondsPerSlice;
 };
 
-class UniformSlicingByNumberOfSlices {
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(UniformSlicingByTime const &lhs,
+                                               UniformSlicingByTime const &rhs);
+
+class MANTIDQT_ISISREFLECTOMETRY_DLL UniformSlicingByNumberOfSlices {
 public:
   explicit UniformSlicingByNumberOfSlices(int numberOfSlices);
+  int numberOfSlices() const;
 
 private:
   int m_numberOfSlices;
 };
 
-class CustomSlicingByList {
+MANTIDQT_ISISREFLECTOMETRY_DLL bool
+operator==(UniformSlicingByNumberOfSlices const &lhs,
+           UniformSlicingByNumberOfSlices const &rhs);
+
+class MANTIDQT_ISISREFLECTOMETRY_DLL CustomSlicingByList {
 public:
   explicit CustomSlicingByList(std::vector<double> sliceTimes);
+  std::vector<double> const &sliceTimes() const;
 
 private:
   std::vector<double> m_sliceTimes;
 };
 
-class SlicingByEventLog {
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(CustomSlicingByList const &lhs,
+                                               CustomSlicingByList const &rhs);
+
+class MANTIDQT_ISISREFLECTOMETRY_DLL SlicingByEventLog {
 public:
   SlicingByEventLog(std::vector<double> sliceAtValues, std::string blockValue);
+  std::vector<double> const &sliceAtValues() const;
+  std::string const &blockName() const;
 
 private:
   std::vector<double> m_sliceAtValues;
   std::string m_blockName;
 };
 
-using Slicing = boost::variant<boost::blank, UniformSlicingByTime,
-                               UniformSlicingByNumberOfSlices,
-                               CustomSlicingByList, SlicingByEventLog>;
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(SlicingByEventLog const &lhs,
+                                               SlicingByEventLog const &rhs);
+
+class InvalidSlicing {};
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(InvalidSlicing const &lhs,
+                                               InvalidSlicing const &rhs);
+
+using Slicing =
+    boost::variant<boost::blank, InvalidSlicing, UniformSlicingByTime,
+                   UniformSlicingByNumberOfSlices, CustomSlicingByList,
+                   SlicingByEventLog>;
+
+MANTIDQT_ISISREFLECTOMETRY_DLL bool isInvalid(Slicing const &slicing);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool isValid(Slicing const &slicing);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool isNoSlicing(Slicing const &slicing);
 }
 }
 

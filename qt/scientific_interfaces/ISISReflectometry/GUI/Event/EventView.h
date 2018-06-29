@@ -1,7 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_QTREFLEVENTVIEW_H_
 #define MANTID_CUSTOMINTERFACES_QTREFLEVENTVIEW_H_
 
-#include "IReflEventTabView.h"
+#include "IEventView.h"
 #include "ui_ReflEventTabWidget.h"
 #include "QWidgetGroup.h"
 #include <memory>
@@ -9,7 +9,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** QtReflEventTabView : Provides an interface for the "Event Handling" widget
+/** EventView : Provides an interface for the "Event Handling" widget
 in
 the ISIS Reflectometry interface.
 
@@ -34,11 +34,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class QtReflEventTabView : public QWidget, public IReflEventTabView {
+class EventView : public QWidget, public IEventView {
   Q_OBJECT
 public:
   /// Constructor
-  explicit QtReflEventTabView(QWidget *parent = nullptr);
+  explicit EventView(QWidget *parent = nullptr);
   /// Returns time-slicing values
   void initUniformSliceTypeLayout();
   void initUniformEvenSliceTypeLayout();

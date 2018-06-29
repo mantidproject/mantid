@@ -1,9 +1,9 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTERFACTORY_H
 #define MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTERFACTORY_H
 #include "DllConfig.h"
-#include "IReflEventTabView.h"
-#include "IReflEventTabPresenter.h"
-#include "ReflEventTabPresenter.h"
+#include "IEventView.h"
+#include "IEventPresenter.h"
+#include "EventPresenter.h"
 #include <memory>
 
 namespace MantidQt {
@@ -11,8 +11,8 @@ namespace CustomInterfaces {
 
 class EventPresenterFactory {
 public:
-  std::unique_ptr<IReflEventTabPresenter> make(IReflEventTabView *view) {
-    return std::make_unique<ReflEventTabPresenter>(view);
+  std::unique_ptr<IEventPresenter> make(IEventView *view) {
+    return std::make_unique<EventPresenter>(view);
   }
 };
 }

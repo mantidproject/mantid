@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ReflExperimentWidget</class>
- <widget class="QWidget" name="ReflExperimentWidget">
+ <class>ExperimentWidget</class>
+ <widget class="QWidget" name="ExperimentWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
