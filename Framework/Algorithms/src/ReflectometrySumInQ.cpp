@@ -489,7 +489,7 @@ ReflectometrySumInQ::referenceAngles(const API::SpectrumInfo &spectrumInfo) {
   Angles a;
   const int beamCentre = getProperty(Prop::BEAM_CENTRE);
   const double centreTwoTheta =
-      spectrumInfo.signedTwoTheta(static_cast<size_t>(beamCentre));
+      spectrumInfo.twoTheta(static_cast<size_t>(beamCentre));
   const bool isFlat = getProperty(Prop::IS_FLAT_SAMPLE);
   if (isFlat) {
     a.horizon = centreTwoTheta / 2.;
