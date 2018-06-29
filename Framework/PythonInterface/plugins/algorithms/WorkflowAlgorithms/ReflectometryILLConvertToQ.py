@@ -2,9 +2,9 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator)
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator)
 from mantid.kernel import (Direction, FloatBoundedValidator, Property, StringListValidator)
-from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, ReflectometryMomentumTransfer)
+from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, Divide, ReflectometryMomentumTransfer)
 import numpy
 import ReflectometryILL_common as common
 
@@ -12,6 +12,7 @@ import ReflectometryILL_common as common
 class Prop:
     CLEANUP = 'Cleanup'
     DIRECT_WS = 'DirectBeamWorkspace'
+    DIRECT_FOREGROUND_WS = 'DirectForegroundWorkspace'
     GROUPING_FRACTION = 'GroupingQFraction'
     INPUT_WS = 'InputWorkspace'
     OUTPUT_WS = 'OutputWorkspace'
@@ -55,12 +56,18 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
         self._names = common.WSNameSource(wsPrefix, cleanupMode)
 
-        ws = self._inputWS()
+        ws, directWS = self._inputWS()
 
         ws = self._convertToMomentumTransfer(ws)
-
+        if directWS is not None:
+            directWS = self._sameQAndDQ(ws, directWS, 'direct_')
         ws = self._toPointData(ws)
         ws = self._groupPoints(ws)
+
+        if directWS is not None:
+            directWS = self._toPointData(directWS, 'direct_')
+            directWS = self._groupPoints(directWS, 'direct_')
+            ws = self._divideByDirect(ws, directWS)
 
         self._finalize(ws)
 
@@ -94,6 +101,12 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
                                                      direction=Direction.Input,
                                                      validator=WorkspaceUnitValidator('Wavelength')),
                              doc='A non-summed direct beam workspace, needed for Q resolution calculation.')
+        self.declareProperty(MatrixWorkspaceProperty(Prop.DIRECT_FOREGROUND_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional,
+                                                     validator=WorkspaceUnitValidator('Wavelength')),
+                             doc='Summed direct beam workspace if output in reflectivity is required.')
         self.declareProperty(Prop.POLARIZED,
                              defaultValue=False,
                              doc='True if input workspace has been corrected for polarization efficiencies.')
@@ -101,6 +114,24 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
                              doc='If set, group the output by steps of this fraction multiplied by Q resolution')
+
+    def validateInputs(self):
+        """Validate the input properties."""
+        issues = dict()
+        inputWS = self.getProperty(Prop.INPUT_WS).value
+        if inputWS.getNumberHistograms() != 1:
+            issues[Prop.INPUT_WS] = 'The workspace should have only a single histogram. Was foreground summation forgotten?'
+        if not self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
+            directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
+            if directWS.getNumberHistograms() != 1:
+                issues[Prop.DIRECT_FOREGROUND_WS] = 'The workspace should have only a single histogram. Was foreground summation forgotten?'
+            if directWS.blocksize() != inputWS.blocksize():
+                issues[Prop.DIRECT_FOREGROUND_WS] = 'Number of bins does not match with InputWorkspace.'
+            directXs = directWS.readX(0)
+            inputXs = inputWS.readX(0)
+            if directXs[0] != inputXs[0] or directXs[-1] != inputXs[-1]:
+                issues[Prop.DIRECT_FOREGROUND_WS] = 'Binning does not match with InputWorkspace.'
+        return issues
 
     def _convertToMomentumTransfer(self, ws):
         """Convert the X units of ws to momentum transfer."""
@@ -154,13 +185,27 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         self._cleanup.cleanup(ws)
         self._cleanup.finalCleanup()
 
+    def _divideByDirect(self, ws, directWS):
+        """Divide ws by the direct beam."""
+        reflectivityWSName = self._names.withSuffix('reflectivity')
+        reflectivityWS = Divide(LHSWorkspace=ws,
+                                RHSWorkspace=directWS,
+                                OutputWorkspace=reflectivityWSName,
+                                EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(ws)
+        reflectivityWS = common.correctForChopperOpenings(reflectivityWS, directWS, self._names, self._cleanup, self._subalgLogging)
+        self._cleanup.cleanup(directWS)
+        reflectivityWS.setYUnit('Reflectivity')
+        reflectivityWS.setYUnitLabel('Reflectivity')
+        return reflectivityWS
+
     def _foreground(self, sampleLogs):
         """Return a [start, end] list defining the foreground workspace indices."""
         start = sampleLogs.getProperty(common.SampleLogs.FOREGROUND_START).value
         end = sampleLogs.getProperty(common.SampleLogs.FOREGROUND_END).value
         return [start, end]
 
-    def _groupPoints(self, ws):
+    def _groupPoints(self, ws, extraLabel=''):
         """Group bins by Q resolution."""
         if self.getProperty(Prop.GROUPING_FRACTION).isDefault:
             return ws
@@ -194,37 +239,54 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
             if start > xs[-1]:
                 break
             index = numpy.nonzero(xs > start)[0][0]
-        groupedWSName = self._names.withSuffix('grouped')
+        groupedWSName = self._names.withSuffix(extraLabel + 'grouped')
         groupedWS = CreateWorkspace(
             OutputWorkspace=groupedWSName,
             DataX=groupedXs,
             DataY=groupedYs,
             DataE=groupedEs,
+            Dx=groupedDxs,
             UnitX=ws.getAxis(0).getUnit().unitID(),
             ParentWorkspace=ws,
             EnableLogging=self._subalgLogging)
-        groupedWS.setDx(0, groupedDxs)
         self._cleanup.cleanup(ws)
         return groupedWS
 
     def _inputWS(self):
-        "Return the input workspace."
+        """Return the input workspace."""
         ws = self.getProperty(Prop.INPUT_WS).value
         self._cleanup.protect(ws)
-        return ws
+        directWS = None
+        if not self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
+            directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
+            self._cleanup.protect(directWS)
+        return ws, directWS
+
+    def _sameQAndDQ(self, ws, directWS, extraLabel=''):
+        """Create a new workspace with Y and E from directWS and X and DX data from ws."""
+        qWSName = self._names.withSuffix(extraLabel + 'in_momentum_transfer')
+        qWS = CreateWorkspace(
+            OutputWorkspace=qWSName,
+            DataX=ws.readX(0),
+            DataY=directWS.readY(0)[::-1],  # Invert data because wavelength is inversely proportional to Q.
+            DataE=directWS.readE(0)[::-1],
+            Dx=ws.readDx(0),
+            UnitX=ws.getAxis(0).getUnit().unitID(),
+            ParentWorkspace=directWS,
+            EnableLogging=self._subalgLogging)
+        return qWS
 
     def _TOFChannelWidth(self, sampleLogs, instrumentName):
         """Return the time of flight bin width."""
         return sampleLogs.getProperty('PSD.time_of_flight_0').value
 
-    def _toPointData(self, ws):
+    def _toPointData(self, ws, extraLabel=''):
         """Convert ws from binned to point data."""
-        pointWSName = self._names.withSuffix('as_points')
+        pointWSName = self._names.withSuffix(extraLabel + 'as_points')
         pointWS = ConvertToPointData(
             InputWorkspace=ws,
             OutputWorkspace=pointWSName,
             EnableLogging=self._subalgLogging)
-        pointWS.setDx(0, ws.readDx(0))
         self._cleanup.cleanup(ws)
         return pointWS
 

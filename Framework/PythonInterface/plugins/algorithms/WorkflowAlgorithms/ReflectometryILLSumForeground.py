@@ -75,8 +75,8 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         sumType = self._sumType()
         if sumType == SumType.IN_LAMBDA:
             ws = self._sumForegroundInLambda(ws)
-            ws = self._divideByDirect(ws)
             self._addSumTypeToLogs(ws, SumType.IN_LAMBDA)
+            ws = self._rebinToDirect(ws)
         else:
             ws = self._divideByDirect(ws)
             ws = self._sumForegroundInQ(ws)
@@ -145,7 +145,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         if not self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
             directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
             if directWS.getNumberHistograms() != 1:
-                issues[Prop.DIRECT_FOREGROUND_WS] = 'The workspace has histograms != 1. Was foreground summation forgotten?'
+                issues[Prop.DIRECT_FOREGROUND_WS] = 'The workspace should have only a single histogram. Was foreground summation forgotten?'
         wRange = self.getProperty(Prop.WAVELENGTH_RANGE).value
         if len(wRange) == 2 and wRange[0] >= wRange[1]:
             issues[Prop.WAVELENGTH_RANGE] = 'Upper limit is smaller than the lower limit.'
@@ -184,55 +184,19 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         # The 'Sample Flatness AUTO' option should calculate the answer here someday.
         return flatness == Sample.FLAT
 
-    def _correctForChopperOpenings(self, ws, directWS):
-        """Correct reflectivity values if chopper openings between RB and DB differ."""
-        def opening(instrumentName, logs, Xs):
-            chopperGap = common.chopperPairDistance(logs, instrumentName)
-            chopperPeriod = 60. / common.chopperSpeed(logs, instrumentName)
-            openingAngle = common.chopperOpeningAngle(logs, instrumentName)
-            return chopperGap * constants.m_n / constants.h / chopperPeriod * Xs + openingAngle / 360.
-        instrumentName = ws.getInstrument().getName()
-        Xs = ws.readX(0)
-        if ws.isHistogramData():
-            Xs = (Xs[:-1] + Xs[1:]) / 2.
-        reflectedOpening = opening(instrumentName, ws.run(), Xs)
-        directOpening = opening(instrumentName, directWS.run(), Xs)
-        corFactorWSName = self._names.withSuffix('chopper_opening_correction_factors')
-        corFactorWS = CreateWorkspace(
-            OutputWorkspace=corFactorWSName,
-            DataX=ws.readX(0),
-            DataY=reflectedOpening / directOpening,
-            UnitX=ws.getAxis(0).getUnit().unitID(),
-            ParentWorkspace=ws,
-            EnableLogging=self._subalgLogging)
-        correctedWSName = self._names.withSuffix('corrected_by_chopper_opening')
-        correctedWS = Multiply(
-            LHSWorkspace=ws,
-            RHSWorkspace=corFactorWS,
-            OutputWorkspace=correctedWSName,
-            EnableLogging=self._subalgLogging)
-        self._cleanup.cleanup(corFactorWS)
-        self._cleanup.cleanup(ws)
-        return correctedWS
-
     def _divideByDirect(self, ws):
-        "Divide ws by the direct beam."
+        """Divide ws by the direct beam."""
         if self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
             return ws
+        ws = self._rebinToDirect(ws)
         directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
-        rebinnedWSName = self._names.withSuffix('rebinned')
-        rebinnedWS = RebinToWorkspace(WorkspaceToRebin=ws,
-                                      WorkspaceToMatch=directWS,
-                                      OutputWorkspace=rebinnedWSName,
-                                      EnableLogging=self._subalgLogging)
-        self._cleanup.cleanup(ws)
         reflectivityWSName = self._names.withSuffix('reflectivity')
-        reflectivityWS = Divide(LHSWorkspace=rebinnedWS,
+        reflectivityWS = Divide(LHSWorkspace=ws,
                                 RHSWorkspace=directWS,
                                 OutputWorkspace=reflectivityWSName,
                                 EnableLogging=self._subalgLogging)
-        self._cleanup.cleanup(rebinnedWS)
-        reflectivityWS = self._correctForChopperOpenings(reflectivityWS, directWS)
+        self._cleanup.cleanup(ws)
+        reflectivityWS = common.correctForChopperOpenings(reflectivityWS, directWS, self._names, self._cleanup, self._subalgLogging)
         reflectivityWS.setYUnit('Reflectivity')
         reflectivityWS.setYUnitLabel('Reflectivity')
         return reflectivityWS
@@ -261,10 +225,23 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         return [start, centre, end]
 
     def _inputWS(self):
-        "Return the input workspace."
+        """Return the input workspace."""
         ws = self.getProperty(Prop.INPUT_WS).value
         self._cleanup.protect(ws)
         return ws
+
+    def _rebinToDirect(self, ws):
+        """Rebin ws to direct foreground."""
+        if self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
+            return ws
+        directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
+        rebinnedWSName = self._names.withSuffix('rebinned')
+        rebinnedWS = RebinToWorkspace(WorkspaceToRebin=ws,
+                                      WorkspaceToMatch=directWS,
+                                      OutputWorkspace=rebinnedWSName,
+                                      EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(ws)
+        return rebinnedWS
 
     def _sumForegroundInLambda(self, ws):
         """Sum the foreground region into a single histogram."""
@@ -285,12 +262,22 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 continue
             if i < 0 or i > maxIndex:
                 self.log().warning('Foreground partially out of the workspace.')
-            ys = ws.readY(i)
+            addeeWSName = self._names.withSuffix('foreground_addee')
+            addeeWS = ExtractSingleSpectrum(InputWorkspace=ws,
+                                            OutputWorkspace=addeeWSName,
+                                            WorkspaceIndex=i,
+                                            EnableLogging=self._subalgLogging)
+            addeeWS = RebinToWorkspace(WorkspaceToRebin=addeeWS,
+                                       WorkspaceToMatch=foregroundWS,
+                                       OutputWorkspace=addeeWSName,
+                                       EnableLogging=self._subalgLogging)
+            ys = addeeWS.readY(0)
             foregroundYs += ys
-            es = ws.readE(i)
+            es = addeeWS.readE(0)
             foregroundEs += es**2
-        numpy.sqrt(foregroundEs, out=foregroundEs)
+        self._cleanup.cleanup(addeeWS)
         self._cleanup.cleanup(ws)
+        numpy.sqrt(foregroundEs, out=foregroundEs)
         return foregroundWS
 
     def _sumForegroundInQ(self, ws):
