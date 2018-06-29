@@ -427,22 +427,22 @@ public:
     WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("EMU00012345"));
 
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+	auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+		wsGroup->getItem("EMU00012345; Group; group1; Counts; 1+2; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], 26, 0.1);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], 30, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], 42, 0.001);
 
     wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
+        wsGroup->getItem("EMU00012345; Group; group2; Counts; 1+2; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], 106, 0.1);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], 110, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], 122, 0.001);
 
     wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; 1+2; #1_Raw"));
     // Asymmetry on group 1 and 2
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.6061, 0.1);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.5714, 0.001);
@@ -464,22 +464,22 @@ public:
     WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("EMU00012345"));
 
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+	auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+		wsGroup->getItem("EMU00012345; Group; group1; Counts; 1-2; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -2, 0.1);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], -2, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], -2, 0.001);
 
     wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
+        wsGroup->getItem("EMU00012345; Group; group2; Counts; 1-2; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -2, 0.1);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], -2, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], -2, 0.001);
 
     wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; 1-2; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.03676, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.03268, 0.001);
