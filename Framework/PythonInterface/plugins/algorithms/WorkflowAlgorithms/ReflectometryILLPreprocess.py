@@ -490,8 +490,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if self.getProperty(Prop.SLIT_NORM).value == SlitNorm.OFF:
             return ws
         r = ws.run()
-        slit2width = r.get('VirtualSlitAxis.s2w_actual_width')
-        slit3width = r.get('VirtualSlitAxis.s3w_actual_width')
+        instrumentName = r.get('instrument.name').value
+        slit2width = r.get(common.slitSizeLogEntry(instrumentName, 1))
+        slit3width = r.get(common.slitSizeLogEntry(instrumentName, 2))
         if slit2width is None or slit3width is None:
             self.log().warning('Slit information not found in sample logs. Slit normalisation disabled.')
             return ws
