@@ -9,7 +9,7 @@
 
 		<!-- Mapping of nexus fields:
 		- Change the name from val to name in the properties
-		 -->		
+		 -->
 		<parameter name="channel_width" type="string">
 			<value val="monitor1.time_of_flight_0" />
 		</parameter>
@@ -20,12 +20,28 @@
 		<parameter name="detector_centre" type="string">
 			<value val="PSD.ny" />
 		</parameter>
-		
-	<!-- Default monitor spectrum number for monitor normalisation. -->
+		<!-- Default monitor spectrum number for monitor normalisation. -->
 		<parameter name="default-incident-monitor-spectrum" type="int">
 			<value val="257" />
 		</parameter>
-
+		<!-- MergeRuns behavior when merging sample logs. -->
+		<parameter name="sample_logs_sum" type="string">
+			<value val="duration, monitor1.monsum, monitor2.monsum, PSD.detsum, time" />
+		</parameter>
+		<parameter name="sample_logs_time_series" type="string">
+			<value val="sample.temperature" />
+		</parameter>
+		<parameter name="sample_logs_warn" type="string">
+			<value val="sample.temperature" />
+		</parameter>
+		<parameter name="sample_logs_warn_tolerances" type="string">
+			<value val="1.0" />
+		</parameter>
+		<parameter name="sample_logs_fail" type="string">
+			<value val="dan.value, monitor1.time_of_flight_0, monitor1.time_of_flight_1, monitor1.time_of_flight_2, Distance.S2toSample, Distance.S3toSample" />
+		</parameter>
+		<parameter name="sample_logs_fail_tolerances" type="string">
+			<value val="0, 0, 0, 0, 0, 0" />
+		</parameter>
 	</component-link>
-
 </parameter-file>
