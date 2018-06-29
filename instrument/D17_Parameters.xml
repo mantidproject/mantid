@@ -38,10 +38,10 @@
 			<value val="1.0" />
 		</parameter>
 		<parameter name="sample_logs_fail" type="string">
-			<value val="dan.value, monitor1.time_of_flight_0, monitor1.time_of_flight_1, monitor1.time_of_flight_2, Distance.S2toSample, Distance.S3toSample" />
+			<value val="monitor1.time_of_flight_0, monitor1.time_of_flight_1, monitor1.time_of_flight_2" />
 		</parameter>
 		<parameter name="sample_logs_fail_tolerances" type="string">
-			<value val="0, 0, 0, 0, 0, 0" />
+			<value val="0, 0, 0" />
 		</parameter>
 	</component-link>
 </parameter-file>

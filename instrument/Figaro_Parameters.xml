@@ -20,9 +20,9 @@
 			<value val="1.0" />
 		</parameter>
 		<parameter name="sample_logs_fail" type="string">
-			<value val="CollAngle.actual_coll_angle, monitor1.time_of_flight_0, monitor1.time_of_flight_1, monitor1.time_of_flight_2, Theta.actual_theta, Theta.inter-slit_distance, Theta.sampleHorizontalOffset" />
+			<value val="CollAngle.actual_coll_angle, monitor1.time_of_flight_0, monitor1.time_of_flight_1, monitor1.time_of_flight_2" />
 		</parameter>
 		<parameter name="sample_logs_fail_tolerances" type="string">
-			<value val="0, 0, 0, 0, 0, 0, 0" />
+			<value val="0, 0, 0, 0" />
 		</parameter>
 </parameter-file>
