@@ -19,6 +19,8 @@ const std::vector<std::string> g_analysisTypes = {"Counts", "Asymmetry"};
 
 namespace {
 
+const std::string UNNORM = "_unNorm";
+
 // Convert input string plot type to PlotType.
 Mantid::Muon::PlotType getPlotType(const std::string &plotType) {
   if (plotType == "Counts") {
@@ -214,8 +216,8 @@ void ApplyMuonDetectorGrouping::exec() {
   const std::string wsRawName = wsName + "_Raw";
   std::vector<std::string> wsNames = {wsName, wsRawName};
 
-  const std::string wsunNormName = wsName + "_unNorm";
-  const std::string wsunNormRawName = wsRawName + "_unNorm";
+  const std::string wsunNormName = wsName + UNNORM;
+  const std::string wsunNormRawName = wsRawName + UNNORM;
 
   auto ws = createAnalysisWorkspace(inputWS, false, options);
   if (getPropertyValue("AnalysisType") == "Asymmetry") {

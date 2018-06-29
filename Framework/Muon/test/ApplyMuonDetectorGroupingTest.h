@@ -404,10 +404,6 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist(
         "inputGroup; Group; test; Asym; #1_Raw_unNorm"));
   }
-
-  void test_unNorm_workspaces_contain_correct_values() {
-    // TODO : Work out correct values by hand
-  }
 };
 
 #endif /* MANTID_MUON_APPLYMUONDETECTORGROUPINGTEST_H_ */
