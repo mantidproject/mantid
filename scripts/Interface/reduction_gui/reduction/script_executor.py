@@ -31,7 +31,7 @@ def splitCodeString(string, return_compiled=True):
             line_nbr += 1
 
             if __get_indent(line) > base_indent:
-                # if inident of this line is bigger than base indent, 
+                # if inident of this line is bigger than base indent,
                 # previous lines cannot be a full statment, so append this line:
                 current_statement += line + '\n'
                 continue
@@ -43,7 +43,7 @@ def splitCodeString(string, return_compiled=True):
                         yield (code_object if return_compiled else current_statement, (statement_start, line_nbr))
                     statement_start = line_nbr
                     current_statement = '\n' * line_nbr
-                # previousn lines aren't a full statement 
+                # previousn lines aren't a full statement
                 # or they habe been returned and current_statement has been cleared
                 # so append the new line:
                 current_statement += line + '\n'
