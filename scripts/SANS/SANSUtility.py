@@ -2081,7 +2081,6 @@ def rename_workspace_correctly(instrument_name, reduced_type, final_name, worksp
         return final_name + final_suffix
 
 
-
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################
