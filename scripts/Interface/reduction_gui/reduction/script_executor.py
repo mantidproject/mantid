@@ -62,11 +62,11 @@ def splitCodeString(string, return_compiled=True):
         raise e
 
 
-
 def __wrappedExec(code, globals_dict, locals_dict):
     # wrap exec here, because python doesnt like exec in nested functions
     exec(code, globals_dict, locals_dict)
     return True
+
 
 def execute_script(script, progress_action):
     """
