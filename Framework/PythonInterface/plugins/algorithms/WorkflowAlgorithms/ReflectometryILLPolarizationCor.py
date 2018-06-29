@@ -201,7 +201,7 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
         return '00, 01, 10, 11'
 
     def _inputWS(self):
-        "Return the input workspaces."
+        """Return the input workspace."""
         wss = self.getProperty(Prop.INPUT_WS).value
         for ws in wss:
             self._cleanup.protect(ws)
