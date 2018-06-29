@@ -744,7 +744,7 @@ class ISISIndirectInelasticIqtAndIqtFit(with_metaclass(ABCMeta, ISISIndirectInel
 
     def _run(self):
         '''Defines the workflow for the test'''
-        self.tolerance = 1e-7
+        self.tolerance = 1e-5
         self.samples = [sample[:-4] for sample in self.samples]
 
         # Load files into Mantid
@@ -757,7 +757,8 @@ class ISISIndirectInelasticIqtAndIqtFit(with_metaclass(ABCMeta, ISISIndirectInel
                                    EnergyMin=self.e_min,
                                    EnergyMax=self.e_max,
                                    BinReductionFactor=self.num_bins,
-                                   DryRun=False)
+                                   DryRun=False,
+                                   NumberOfIterations=200)
 
         # Test IqtFit Sequential
         iqtfitSeq_ws, params, fit_group = IqtFitSequential(InputWorkspace=iqt_ws, Function=self.func,
@@ -862,7 +863,7 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(with_metaclass(ABCMeta, ISISIndirec
 
     def _run(self):
         '''Defines the workflow for the test'''
-        self.tolerance = 1e-6
+        self.tolerance = 1e-5
         self.samples = [sample[:-4] for sample in self.samples]
 
         #load files into mantid
@@ -875,7 +876,8 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(with_metaclass(ABCMeta, ISISIndirec
                                    EnergyMin=self.e_min,
                                    EnergyMax=self.e_max,
                                    BinReductionFactor=self.num_bins,
-                                   DryRun=False)
+                                   DryRun=False,
+                                   NumberOfIterations=200)
 
         # Test IqtFitMultiple
         iqtfitSeq_ws, params, fit_group = IqtFitMultiple(iqt_ws.name(),
