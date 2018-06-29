@@ -427,8 +427,13 @@ void QENSFitSimultaneous::copyLogs(MatrixWorkspace_sptr resultWorkspace,
                                    WorkspaceGroup_sptr resultGroup) {
   auto logCopier = createChildAlgorithm("CopyLogs", -1.0, -1.0, false);
   logCopier->setProperty("InputWorkspace", resultWorkspace);
-  logCopier->setProperty("OutputWorkspace", resultGroup->getName());
-  logCopier->executeAsChildAlg();
+
+  for (const auto &workspace : *resultGroup) {
+    logCopier->setProperty(
+        "OutputWorkspace",
+        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace));
+    logCopier->executeAsChildAlg();
+  }
 }
 
 void QENSFitSimultaneous::extractMembers(
