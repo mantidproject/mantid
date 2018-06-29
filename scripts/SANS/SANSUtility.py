@@ -2062,7 +2062,6 @@ def rename_workspace_correctly(instrument_name, reduced_type, final_name, worksp
 
     run_number = re.findall(r'\d+', workspace)[0]
     reduced_workspace = mtd[workspace]
-    final_suffix = get_suffix(instrument_name, reduced_type)
     workspaces_to_rename = [workspace]
     if isinstance(reduced_workspace, WorkspaceGroup):
         workspaces_to_rename += reduced_workspace.getNames()
