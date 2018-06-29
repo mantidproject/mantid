@@ -75,13 +75,14 @@ private:
   void configKeyChanged(Mantid::Kernel::ConfigValChangeNotification_ptr notif);
 
   /// Creates a recovery script based on all .py scripts in a folder
-  void compileRecoveryScript(const Poco::Path &inputFolder, const Poco::Path &outputFile);
+  void compileRecoveryScript(const Poco::Path &inputFolder,
+                             const Poco::Path &outputFile);
 
   /// Deletes oldest checkpoints beyond the maximum number to keep
   void deleteExistingCheckpoints(size_t checkpointsToKeep) const;
 
   /// Loads a recovery checkpoint in the given folder - TODO in future PR
-  // bool loadRecoveryCheckpoint(const Poco::Path &path); 
+  // bool loadRecoveryCheckpoint(const Poco::Path &path);
 
   /// Open a recovery checkpoint in the scripting window
   bool openInEditor(const Poco::Path &inputFolder);

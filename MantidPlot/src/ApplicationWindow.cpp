@@ -16755,15 +16755,15 @@ bool ApplicationWindow::saveProjectRecovery(std::string destination) {
 }
 
 void ApplicationWindow::checkForProjectRecovery() {
-	if (!m_projectRecovery.checkForRecovery()) {
-		m_projectRecovery.startProjectSaving();
-		return;
-	}
+  if (!m_projectRecovery.checkForRecovery()) {
+    m_projectRecovery.startProjectSaving();
+    return;
+  }
 
-	// Recovery file present
-	if (m_projectRecovery.attemptRecovery()) {
-		// If it worked correctly reset project recovery and start saving
-		m_projectRecovery.clearAllCheckpoints();
-		m_projectRecovery.startProjectSaving();
-	}
+  // Recovery file present
+  if (m_projectRecovery.attemptRecovery()) {
+    // If it worked correctly reset project recovery and start saving
+    m_projectRecovery.clearAllCheckpoints();
+    m_projectRecovery.startProjectSaving();
+  }
 }

@@ -48,7 +48,7 @@ class MANTID_API_DLL ScriptBuilder {
 public:
   ScriptBuilder(boost::shared_ptr<HistoryView> view,
                 std::string versionSpecificity = "old",
-				bool appendTimestamp = false);
+                bool appendTimestamp = false);
   virtual ~ScriptBuilder() = default;
   /// build a python script from the history view
   const std::string build();

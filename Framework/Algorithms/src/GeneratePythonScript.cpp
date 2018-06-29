@@ -51,9 +51,10 @@ void GeneratePythonScript::init() {
                   "The filter end time in the format YYYY-MM-DD HH:mm:ss",
                   Direction::Input);
 
-  declareProperty("AppendTimestamp", false,
-				  "Appends the time the command was run as a comment afterwards",
-				  Direction::Input);
+  declareProperty(
+      "AppendTimestamp", false,
+      "Appends the time the command was run as a comment afterwards",
+      Direction::Input);
 
   std::vector<std::string> saveVersions{"Specify Old", "Specify All",
                                         "Specify None"};

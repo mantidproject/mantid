@@ -60,8 +60,8 @@ void export_ConfigService() {
       .def("reset", &ConfigServiceImpl::reset, arg("self"),
            "Clears all user settings and removes the user properties file")
 
-	  .def("getAppDataDirectory", &ConfigServiceImpl::getAppDataDir, 
-		  arg("self"), "Returns the path to Mantid's application directory")
+      .def("getAppDataDirectory", &ConfigServiceImpl::getAppDataDir,
+           arg("self"), "Returns the path to Mantid's application directory")
 
       .def("getLocalFilename", &ConfigServiceImpl::getLocalFilename,
            arg("self"), "Returns the path to the system wide properties file.")
