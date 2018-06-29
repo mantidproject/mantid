@@ -10,6 +10,9 @@ import mantid.simpleapi as api
 
 class IndexSatellitePeaks(PythonAlgorithm):
 
+    def category(self):
+        return 'Crystal\\Peaks'
+
     def PyInit(self):
         self.declareProperty(IPeaksWorkspaceProperty(name="MainPeaks",
                                                      defaultValue="",
