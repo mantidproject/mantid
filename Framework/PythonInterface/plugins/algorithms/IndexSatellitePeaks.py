@@ -5,7 +5,7 @@ import fractional_indexing as indexing
 from mantid.kernel import Direction
 from mantid.api import (IPeaksWorkspaceProperty,
                         ITableWorkspaceProperty, PythonAlgorithm, AlgorithmFactory)
-from mantid.simpleapi import CreateEmptyTableWorkspace
+import mantid.simpleapi as api
 
 
 class IndexSatellitePeaks(PythonAlgorithm):
@@ -95,7 +95,7 @@ class IndexSatellitePeaks(PythonAlgorithm):
         types = ['int', 'long64', 'double', 'double', 'double', 'double',  'double', 'double',
                  'double', 'double', 'double', 'float', 'str', 'float', 'float', 'V3D', 'V3D']
         name = self.getPropertyValue("OutputWorkspace")
-        indexed = CreateEmptyTableWorkspace(name)
+        indexed = api.CreateEmptyTableWorkspace(name)
         names = fractional_peaks.getColumnNames()
 
         # Insert the extra columns for the addtional indicies

@@ -183,41 +183,6 @@ class FractionIndexingTests(unittest.TestCase):
         vecs_sorted = indexing.sort_vectors_by_norm(vecs)
         npt.assert_allclose(vecs_sorted, expected_output)
 
-    def test_round_nearest(self):
-        expected = np.array([
-            [0, 0, .2],
-            [0, 0, .1],
-            [0, 0, 0],
-            [0, 0, -.2],
-            [0, 0, -.1],
-            [.1, .1, .2],
-            [-.1, -.1, -.2],
-        ])
-
-        vecs = np.array([
-            [0, 0, .21],
-            [0, 0, .09],
-            [0, 0, 0],
-            [0, 0, -.21],
-            [0, 0, -.09],
-            [.11, .11, .21],
-            [-.11, -.11, -.21],
-        ])
-
-        for test_vec, reference in zip(vecs, expected):
-            result = indexing.round_nearest(test_vec, np.array([.1, .1, .1]))
-            npt.assert_array_equal(result, reference)
-
-    def test_safe_divide(self):
-        reference = np.array([0, 0, 4])
-        result = indexing.safe_divide(np.array([0,0,8]), np.array([0,0,2]))
-        npt.assert_array_equal(result, reference)
-
-    def test_safe_divide_zero_vector(self):
-        reference = np.array([0, 0, 0])
-        result = indexing.safe_divide(np.array([0,0,8]), np.array([0,0,0]))
-        npt.assert_array_equal(result, reference)
-
     def test_trunc_decimals(self):
         reference = np.array([0, 0, 0.1])
         test_input = reference + np.random.random(3) * 0.1

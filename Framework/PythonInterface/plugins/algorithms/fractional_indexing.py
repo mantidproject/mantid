@@ -228,28 +228,6 @@ def trunc_decimals(vec, n_decimals=2):
     return np.trunc(vec*decade)/decade
 
 
-def safe_divide(a, b):
-    """Divide the elements of one vector by another ignoring zero
-
-    Division by zero will simply replace the value by zero.
-
-    :param a: the numerator
-    :param b: the denominator
-    :returns: a / b with infs replaced with zero
-    """
-    return np.divide(a, b, out=np.zeros_like(b), where=b != 0)
-
-
-def round_nearest(vec, reference):
-    """Round the elements of a vector to the nearst multiple of another vector
-
-    :param vec: the vector to round
-    :param reference: the vector to use to find the nearest multiple of
-    :returns: the vector rounded to the nearest multiple of thre reference vector
-    """
-    return np.round(safe_divide(vec, reference)) * reference
-
-
 def sort_vectors_by_norm(vecs):
     """Sort a list of row vectors by the Euclidean norm
     :param vecs: vectors to sort according to their norms
@@ -305,7 +283,6 @@ def kmeans_plus_plus(points, k):
         # choose all points that are not already centroids
         mask = np.array([x for x in indices if x not in centroid_indices])
         pts = points[mask]
-        print centroid_indices
 
         # calculate probability distribution for being picked based on squared
         # distance from each centroid
