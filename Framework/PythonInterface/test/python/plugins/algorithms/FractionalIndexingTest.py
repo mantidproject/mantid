@@ -128,46 +128,6 @@ class FractionIndexingTests(unittest.TestCase):
 
         npt.assert_equal(indices, expected_indexing, err_msg="Indexing does not match expected.")
 
-    def test_generate_grid(self):
-        bases = np.array([
-            [0, .1, 0],
-            [0, 0, .1],
-            [0, 0, .14],
-        ])
-        expected_result = np.array([
-            [-0., -0.2, -0.28],
-            [-0., -0.2, -0.2],
-            [-0., -0.2, -0.14],
-            [-0., -0.2, -0.1],
-            [0., -0.2,  0.],
-            [0., -0.2,  0.1],
-            [0., -0.2,  0.14],
-            [-0., -0.1, -0.28],
-            [-0., -0.1, -0.2],
-            [-0., -0.1, -0.14],
-            [-0., -0.1, -0.1],
-            [0., -0.1,  0.],
-            [0., -0.1,  0.1],
-            [0., -0.1,  0.14],
-            [0.,  0., -0.28],
-            [0.,  0., -0.2],
-            [0.,  0., -0.14],
-            [0.,  0., -0.1],
-            [0.,  0.,  0.],
-            [0.,  0.,  0.1],
-            [0.,  0.,  0.14],
-            [0.,  0.1, -0.28],
-            [0.,  0.1, -0.2],
-            [0.,  0.1, -0.14],
-            [0.,  0.1, -0.1],
-            [0.,  0.1,  0.],
-            [0.,  0.1,  0.1],
-            [0.,  0.1,  0.14]
-        ])
-
-        result = indexing.generate_grid(bases, 2)
-        npt.assert_array_equal(result, expected_result)
-
     def test_index_with_modulation(self):
         qs = np.array([
             [0, .1, .1],
@@ -316,22 +276,6 @@ class FractionIndexingTests(unittest.TestCase):
         clusters, k = indexing.cluster_qs(qs, threshold=0.01)
         self.assertEqual(k, 2)
         npt.assert_array_equal(clusters, np.array([2, 2, 1, 1, 2]))
-
-    def test_round_nearest_reflections(self):
-        reference = np.array([
-            [0, .1, .1],
-            [0, .1, .1],
-            [0, .0, .1],
-            [0, .0, .2],
-            [0, .1, .2],
-        ])
-
-        qs = reference + np.random.random(reference.shape) * 0.01
-
-        reflections = indexing.generate_grid(np.array([[0, 0, .1], [0, .1, 0]]), 3)
-        rounded = indexing.round_to_nearest_reflection(qs, reflections, .03)
-        npt.assert_array_equal(rounded, reference)
-
 
 if __name__ == "__main__":
     unittest.main()
