@@ -182,8 +182,6 @@ private:
   void handleError(const std::string &message, const std::exception &e);
   void handleError(const std::string &message);
 
-  void pythonSrcPostProcessingAlgorithm(std::ostringstream &result) const;
-
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
   void errorHandle(const Mantid::API::IAlgorithm *alg,
                    const std::string &what) override;
