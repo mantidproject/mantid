@@ -102,6 +102,10 @@ public:
   void setMuonProcessAlgorithmTimeProperties(
       IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
 
+  /// Checks that the detector IDs in grouping are in the workspace
+  void checkDetectorIDsInWorkspace(API::Grouping &grouping,
+                                   API::Workspace_sptr workspace);
+
   /// Allow WorkspaceGroup property to function correctly.
   bool checkGroups() override;
 

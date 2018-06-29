@@ -86,6 +86,32 @@ generatePeriodAlgebraString(std::vector<int> summedPeriods,
 /// Generate new analysis workspace name
 DLLExport std::string generateWorkspaceName(const Muon::DatasetParams &params);
 
+/// Find all the detector IDs contained inside a workspace (either matrix or
+/// group) and return as an ordered set.
+DLLExport std::set<Mantid::detid_t>
+getAllDetectorIDsFromWorkspace(Mantid::API::Workspace_sptr ws);
+
+/// Find all the detector IDs contained inside a group workspace
+DLLExport std::set<Mantid::detid_t>
+getAllDetectorIDsFromGroupWorkspace(Mantid::API::WorkspaceGroup_sptr ws);
+
+/// Find all the detector IDs contained inside a matrix workspace
+DLLExport std::set<Mantid::detid_t>
+getAllDetectorIDsFromMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
+
+/// Find all the detector IDs contained inside a grouping object and return as a
+/// vector of ints
+DLLExport std::vector<int>
+getAllDetectorIDsFromGroup(const API::Grouping &grouping);
+
+/// Checks if all the detectors in the groups in a Grouping are in the
+/// workspace. Workspace can be matrix or group type.
+DLLExport bool checkGroupDetectorsInWorkspace(const API::Grouping &grouping,
+                                              API::Workspace_sptr ws);
+
+/// Checks that all of the entries of a vector are contained in a set.
+DLLExport bool checkItemsInSet(const std::vector<int> &items,
+                               const std::set<int> &set);
 /// Parse analysis workspace name
 DLLExport Muon::DatasetParams parseWorkspaceName(const std::string &wsName);
 
@@ -93,9 +119,15 @@ DLLExport Muon::DatasetParams parseWorkspaceName(const std::string &wsName);
 DLLExport void parseRunLabel(const std::string &label, std::string &instrument,
                              std::vector<int> &runNumbers);
 
-/// Checks that the names allow a pairing
+/// Checks that the workspace names allow a pairing
 DLLExport bool checkValidPair(const std::string &name1,
                               const std::string &name2);
+
+/// Check whether a group or pair name is valid
+DLLExport bool checkValidGroupPairName(const std::string &name);
+//
+///// Saves grouping to the XML file specified
+// DLLExport std::string groupingToXML(const Mantid::API::Grouping &grouping);
 
 } // namespace MuonAlgorithmHelper
 } // namespace Mantid

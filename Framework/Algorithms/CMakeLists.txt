@@ -883,6 +883,7 @@ set ( TEST_FILES
 	MultiplyRangeTest.h
 	MultiplyTest.h
 	MuonGroupDetectorsTest.h
+	MuonWorkspaceCreationHelperTest.h
 	NRCalculateSlitResolutionTest.h
 	NormaliseByCurrentTest.h
 	NormaliseByDetectorTest.h

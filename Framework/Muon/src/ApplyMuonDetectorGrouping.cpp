@@ -1,6 +1,7 @@
 #include "MantidMuon/ApplyMuonDetectorGrouping.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
@@ -210,17 +211,37 @@ void ApplyMuonDetectorGrouping::exec() {
   WorkspaceGroup_sptr muonWS = convertInputWStoWSGroup(inputWS);
   clipXRangeToWorkspace(*muonWS, options);
 
-  auto ws = createAnalysisWorkspace(inputWS, false, options);
-  auto wsRaw = createAnalysisWorkspace(inputWS, true, options);
-
   const std::string wsName = getNewWorkspaceName(options, groupedWSName);
   const std::string wsRawName = wsName + "_Raw";
+  std::vector<std::string> wsNames = {wsName, wsRawName};
+
+  const std::string wsunNormName = wsName + "_unNorm";
+  const std::string wsunNormRawName = wsRawName + "_unNorm";
+
+  auto ws = createAnalysisWorkspace(inputWS, false, options);
+  if (getPropertyValue("AnalysisType") == "Asymmetry") {
+    if (renameAndMoveUnNormWorkspace(wsunNormName)) {
+      wsNames.emplace_back(wsunNormName);
+    } else {
+      g_log.notice(
+          "Cannot create unNorm workspace (Cannot find tmp_unNorm in ADS)");
+    }
+  }
+
+  auto wsRaw = createAnalysisWorkspace(inputWS, true, options);
+  if (getPropertyValue("AnalysisType") == "Asymmetry") {
+    if (renameAndMoveUnNormWorkspace(wsunNormRawName)) {
+      wsNames.emplace_back(wsunNormRawName);
+    } else {
+      g_log.notice(
+          "Cannot create unNorm workspace (Cannot find tmp_unNorm in ADS)");
+    }
+  }
 
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   ads.addOrReplace(wsName, ws);
   ads.addOrReplace(wsRawName, wsRaw);
 
-  std::vector<std::string> wsNames = {wsName, wsRawName};
   MuonAlgorithmHelper::groupWorkspaces(groupedWSName, wsNames);
 }
 
@@ -298,21 +319,30 @@ void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
 Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(
     Workspace_sptr inputWS, bool noRebin, Muon::AnalysisOptions options) {
 
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().createUnmanaged("MuonProcess");
+  IAlgorithm_sptr alg = Algorithm::createChildAlgorithm("MuonProcess");
 
   if (noRebin) {
     options.rebinArgs = "";
   }
 
-  alg->initialize();
   setMuonProcessPeriodProperties(*alg, inputWS, options);
   setMuonProcessAlgorithmProperties(*alg, options);
-  alg->setChild(true);
   alg->setPropertyValue("OutputWorkspace", "__NotUsed__");
-
   alg->execute();
   return alg->getProperty("OutputWorkspace");
+}
+
+/**
+ * Give the "tmp_unNorm" workspace which is added to the ADS the correct name
+ */
+bool ApplyMuonDetectorGrouping::renameAndMoveUnNormWorkspace(
+    const std::string &newName) {
+  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  if (ads.doesExist("tmp_unNorm")) {
+    ads.rename("tmp_unNorm", newName);
+    return true;
+  }
+  return false;
 }
 
 /**
