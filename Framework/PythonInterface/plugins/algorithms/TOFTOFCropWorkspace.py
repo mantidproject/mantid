@@ -64,7 +64,6 @@ class TOFTOFCropWorkspace(PythonAlgorithm):
         """ Main execution body
         """
         inputws = self.getProperty("InputWorkspace").value
-        outputws = self.getProperty("OutputWorkspace").value
 
         run = inputws.getRun()
         channel_width = float(run.getLogData('channel_width').value)
