@@ -703,7 +703,7 @@ bool QtReflSettingsView::instrumentSettingsEnabled() const {
 void QtReflSettingsView::setPolCorPageForIndex(int index) {
   assert(m_ui.polCorrComboBox->count() == 4);
   assert(m_ui.polCorStackedWidget->count() == 3);
-  static std::array<int, 4> const indexMap = {0, 1, 1, 2};
+  static std::array<int, 4> const indexMap = {{0, 1, 1, 2}};
   m_ui.polCorStackedWidget->setCurrentIndex(indexMap[index]);
 }
 
