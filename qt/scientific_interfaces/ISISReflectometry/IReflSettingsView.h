@@ -81,6 +81,7 @@ public:
   virtual std::string getDetectorCorrectionType() const = 0;
   virtual std::string getSummationType() const = 0;
   virtual std::string getReductionType() const = 0;
+  virtual bool getIncludePartialBins() const = 0;
 
   /// Check if settings are enabled
   virtual bool experimentSettingsEnabled() const = 0;
@@ -97,6 +98,7 @@ public:
   /// Sets status of whether polarisation corrections should be enabled/disabled
   virtual void setIsPolCorrEnabled(bool enable) const = 0;
   virtual void setReductionTypeEnabled(bool enable) = 0;
+  virtual void setIncludePartialBinsEnabled(bool enable) = 0;
   /// Set polarisation corrections and parameters enabled/disabled
   virtual void setPolarisationOptionsEnabled(bool enable) = 0;
   virtual void setDetectorCorrectionEnabled(bool enable) = 0;

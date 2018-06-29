@@ -74,8 +74,12 @@ std::string ReflAsciiSaver::assembleSavePath(
 
 Mantid::API::MatrixWorkspace_sptr
 ReflAsciiSaver::workspace(std::string const &workspaceName) const {
-  return Mantid::API::AnalysisDataService::Instance()
-      .retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
+  auto const &ads = Mantid::API::AnalysisDataService::Instance();
+
+  if (!ads.doesExist(workspaceName))
+    return nullptr;
+
+  return ads.retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
 }
 
 Mantid::API::IAlgorithm_sptr ReflAsciiSaver::setUpSaveAlgorithm(
@@ -104,12 +108,19 @@ void ReflAsciiSaver::save(std::string const &saveDirectory,
                           std::vector<std::string> const &logParameters,
                           FileFormatOptions const &fileFormat) const {
   // Setup the appropriate save algorithm
-  if (isValidSaveDirectory(saveDirectory))
-    for (auto const &name : workspaceNames)
-      setUpSaveAlgorithm(saveDirectory, workspace(name), logParameters,
-                         fileFormat)->execute();
-  else
+  if (isValidSaveDirectory(saveDirectory)) {
+    for (auto const &name : workspaceNames) {
+      auto ws = workspace(name);
+      if (!ws)
+        throw InvalidWorkspaceName(name);
+
+      auto alg =
+          setUpSaveAlgorithm(saveDirectory, ws, logParameters, fileFormat);
+      alg->execute();
+    }
+  } else {
     throw InvalidSavePath(saveDirectory);
+  }
 }
 }
 }

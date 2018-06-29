@@ -17,18 +17,24 @@ Powder Diffraction
   taken as the default, and any changes are reverted back to the
   default once the line they were made on has finished executing
 - Focusing in texture-mode (160 banks) was enabled for GEM. The output
-  is saved to the three-column MAUD format
+  is saved to several formats:
+
+  - The three-column ``.gem`` format
+  - The ``.maud`` calibration file format, for conversion to d-spacing (uses a new algorithm
+    :ref:`SaveGEMMAUDParamFile <algm-SaveGEMMAUDParamFile>`
 - :ref:`PDCalibration <algm-PDCalibration>` has major upgrades including making use of :ref:`FitPeaks <algm-FitPeaks>` for the individual peak fitting
 - New NOMAD instrument geometry for 2018 run cycle
 - New POWGEN instrument geometry for 2018 run cycle
-- New SNAP instrument geometry for 2018 run cycle
+- New SNAP instrument geometry for 2018 run cycle with configuration for live data
 
 New Features
 ------------
 
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` is extended to apply vertical and horizontal tube alignment for D2B, based on the IPF.
+- :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` is modified to comply with the U-shape convention for tube numbering for D2B.
 - :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` is extended to compute the detector efficiencies also for the 2-dimensional scanning diffractometer D2B at the ILL.
 - :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` is extended to provide automatic masking of the pixels with spurious calibration constants.
+- :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` will now ignore the last scan point data, if some of the input files have 26 points, instead of 25.
 - :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` is extended to provide initial masking of the top and bottom parts of the tubes, and final masking of the 2D outputs.
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` performs powder diffraction data reduction for WAND² with calibration, monitor normalisation and background subtraction.
 
@@ -56,6 +62,7 @@ Engineering Diffraction
   - After focusing, workspace sample logs are saved to HDF5 using
     :ref:`ExportSampleLogsToHDF5 <algm-ExportSampleLogsToHDF5>`
 
+- The ``.nxs`` file from the Focus tab is now saved in the Focus directory with all the other focus output
 
 :ref:`Release 3.13.0 <v3.13.0>`
 
@@ -72,6 +79,8 @@ Single Crystal Diffraction
 - New algorithms :ref:`LoadWANDSCD <algm-LoadWANDSCD>` and :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` to load single crystal HB2C data and convert it to either Q-sample or HKL space.
 
 - New algorithm :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` to integrate peaks using 3D profile fitting in reciprocal space.
+
+- New TOPAZ instrument geometry for 2018 run cycle
 
 Improvements
 ############
