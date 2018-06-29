@@ -31,7 +31,7 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
         self.declareProperty(mantid.api.FileProperty(_destination_file,
                                                      os.path.join(default_folder, "summedHistory.py"),
                                                      action=mantid.api.FileAction.Save),
-                              "File destination to write the combined history to.")
+                             "File destination to write the combined history to.")
 
     def validateInputs(self):
         return dict()
