@@ -92,6 +92,8 @@ New
 
 - New TOPAZ instrument geometry for 2018 run cycle
 
+- New algorithm :ref:`IndexSatellitePeaks <algm-IndexSatellitePeaks>` to index satellite peaks found using the :ref:`RefineSatellitePeaks <algm-RefineSatellitePeaks>` algorithm.
+
 Improvements
 ############
 
