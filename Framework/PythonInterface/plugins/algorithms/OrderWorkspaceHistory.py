@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+import datetime
 import os
 
 import mantid.api
@@ -49,19 +50,11 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
 
         if not date_time:
             raise ValueError("No date time stamp was found in the recovery history")
+        self.log().debug("Found datetime stamp: {0}".format(date_time))
 
-        date = date_time.split('T')[0]
-        time = date_time.split('T')[1]
-        yy = str(date.split('-')[0])
-        mo = str(date.split('-')[1])
-        dd = str(date.split('-')[2])
-        hh = str(time.split(':')[0])
-        mm = str(time.split(':')[1])
-        secs = time.split(':')[2]
-        ss = str(secs.split('.')[0])
-        ms = str(secs.split('.')[1])
-
-        return int(yy + mo + dd + hh + mm + ss + ms)
+        # Remove whitespace and any trailing zeros
+        stipped_time = date_time.strip().rstrip('0')
+        return datetime.datetime.strptime(stipped_time, "%Y-%m-%dT%H:%M:%S.%f")
 
     def write_ordered_workspace_history(self):
         self.log().debug("Started saving workspace histories")
@@ -75,11 +68,18 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
         self.log().debug("Found {0} history files".format(len(historyfiles)))
 
         # Read each history in as a list of tuples
-        commands = set()
+        original_lines = set()
         for infile in historyfiles:
             with open(os.path.join(source_folder, infile), 'r') as f:
                 for line in f:
-                    commands.add(line)
+                    original_lines.add(line)
+
+        commands = []
+        # Remove any comment lines
+        for line in original_lines:
+            stripped_line = line.lstrip()
+            if stripped_line[0] is not '#':
+                commands.append(stripped_line)
 
         self.log().debug("Found {0} unique commands".format(len(commands)))
 
