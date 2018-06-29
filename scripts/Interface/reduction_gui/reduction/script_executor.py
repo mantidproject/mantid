@@ -20,25 +20,34 @@ def __get_indent(line):
 def splitCodeString(string, return_compiled=True):
     import code
     lines = string.splitlines(False)
+    lines.append("\n") # append empty line, so the last staement always gets executed.
 
     statement_start = 0
     line_nbr = 0
     current_statement = ''
-    current_indent = 0
+    base_indent = 0 # indentation of first line
     try:
         for line in lines:
             line_nbr += 1
 
-            if __get_indent(line) <= current_indent:
+            if __get_indent(line) > base_indent:
+                # if inident of this line is bigger than base indent, 
+                # previous lines cannot be a full statment, so append this line:
+                current_statement += line + '\n'
+                continue
+            else:
+                # previous lines might be a full statment...
                 code_object = code.compile_command(current_statement, filename="<input>", symbol="single")
                 if code_object is not None:
                     if current_statement.strip():
                         yield (code_object if return_compiled else current_statement, (statement_start, line_nbr))
                     statement_start = line_nbr
                     current_statement = '\n' * line_nbr
-
-            current_statement += line + '\n'
-            continue
+                # previousn lines aren't a full statement 
+                # or they habe been returned and current_statement has been cleared
+                # so append the new line:
+                current_statement += line + '\n'
+                continue
 
     except SyntaxError as e:
         e.lineno += statement_start
