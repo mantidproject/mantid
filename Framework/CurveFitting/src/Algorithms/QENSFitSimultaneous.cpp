@@ -278,7 +278,7 @@ void QENSFitSimultaneous::initConcrete() {
 
   declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
-                  "The output result workspace");
+                  "The output result workspace(s)");
   declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputParameterWorkspace", "", Direction::Output,
                       PropertyMode::Optional),
