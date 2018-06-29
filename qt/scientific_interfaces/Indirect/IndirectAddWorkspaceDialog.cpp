@@ -41,6 +41,7 @@ namespace IDA {
 AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent)
     : IAddWorkspaceDialog(parent) {
   m_uiForm.setupUi(this);
+  m_uiForm.dsWorkspace->showWorkspaceGroups(false);
 
   connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this,
           SLOT(workspaceChanged(const QString &)));
