@@ -26,7 +26,7 @@ import qtawesome as qta
 
 from mantidqt.utils.flowlayout import FlowLayout
 from mantidqt.py3compat import Enum
-from workbench.plotting.figuremanager import QAppThreadCall
+from workbench.plotting.qappthreadcall import QAppThreadCall
 
 export_types = [
     ('Export to EPS', '.eps'),

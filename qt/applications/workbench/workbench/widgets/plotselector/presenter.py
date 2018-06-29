@@ -282,7 +282,6 @@ class PlotSelectorPresenter(object):
         :param old_key: The old sort key - if this is for sorting by
                         last shown this is retained as is
         """
-        print(type(old_key))
         if self.view.sort_type == SortType.LastShown:
             if isinstance(old_key, int):
                 return old_key

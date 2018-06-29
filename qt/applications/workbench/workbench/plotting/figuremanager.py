@@ -16,76 +16,19 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
 
-# std imports
-import sys
-
 # 3rdparty imports
 import matplotlib
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg, backend_version, draw_if_interactive, show)  # noqa
 from matplotlib._pylab_helpers import Gcf
-from qtpy.QtCore import Qt, QEvent, QMetaObject, QObject, QThread, Signal, Slot
+from qtpy.QtCore import Qt, QEvent, QObject, Signal
 from qtpy.QtWidgets import QApplication, QLabel, QMainWindow
-from six import reraise, text_type
+from six import text_type
 
 # local imports
-from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
-from workbench.plotting.toolbar import WorkbenchNavigationToolbar
-
-
-class QAppThreadCall(QObject):
-    """
-    Wraps a callable object and forces any calls made to it to be executed
-    on the same thread as the qApp object.
-    """
-
-    def __init__(self, callee):
-        self.qApp = QApplication.instance()
-
-        QObject.__init__(self)
-        self.moveToThread(self.qApp.thread())
-        self.callee = callee
-        # Help should then give the correct doc
-        self.__call__.__func__.__doc__ = callee.__doc__
-        self._args = None
-        self._kwargs = None
-        self._result = None
-        self._exc_info = None
-
-    def __call__(self, *args, **kwargs):
-        """
-        If the current thread is the qApp thread then this
-        performs a straight call to the wrapped callable_obj. Otherwise
-        it invokes the do_call method as a slot via a
-        BlockingQueuedConnection.
-        """
-        if QThread.currentThread() == self.qApp.thread():
-            return self.callee(*args, **kwargs)
-        else:
-            self._store_function_args(*args, **kwargs)
-            QMetaObject.invokeMethod(self, "on_call",
-                                     Qt.BlockingQueuedConnection)
-            if self._exc_info is not None:
-                reraise(*self._exc_info)
-            return self._result
-
-    @Slot()
-    def on_call(self):
-        """Perform a call to a GUI function across a
-        thread and return the result
-        """
-        try:
-            self._result = \
-                self.callee(*self._args, **self._kwargs)
-        except Exception: # pylint: disable=broad-except
-            self._exc_info = sys.exc_info()
-
-    def _store_function_args(self, *args, **kwargs):
-        self._args = args
-        self._kwargs = kwargs
-        # Reset return value and exception
-        self._result = None
-        self._exc_info = None
+from .propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
+from .toolbar import WorkbenchNavigationToolbar
+from .qappthreadcall import QAppThreadCall
 
 
 class MainWindow(QMainWindow):
