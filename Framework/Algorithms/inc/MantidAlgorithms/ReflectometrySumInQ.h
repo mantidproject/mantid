@@ -3,6 +3,7 @@
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include <cmath>
 
 namespace Mantid {
 namespace API {

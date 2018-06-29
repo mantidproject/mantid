@@ -67,6 +67,9 @@ class Pearl(AbstractInst):
                                                              cross_correlate_params=cross_correlate_params,
                                                              get_det_offset_params=get_detector_offsets_params)
 
+    def should_subtract_empty_inst(self):
+        return self._inst_settings.subtract_empty_inst
+
     @contextmanager
     def _apply_temporary_inst_settings(self, kwargs):
         self._switch_long_mode_inst_settings(kwargs.get("long_mode"))

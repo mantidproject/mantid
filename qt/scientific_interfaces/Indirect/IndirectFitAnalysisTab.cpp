@@ -714,8 +714,7 @@ void IndirectFitAnalysisTab::updateParameterValues(
 }
 
 /*
- * Saves the result workspace with the specified name, in the default
- * save directory.
+ * Saves the result workspace in the default save directory.
  */
 void IndirectFitAnalysisTab::saveResult() { m_fittingModel->saveResult(); }
 
