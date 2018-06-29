@@ -95,7 +95,7 @@ QGroupBox::title {
       <item>
        <widget class="QStackedWidget" name="main_stacked_widget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="run_page">
          <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -356,16 +356,6 @@ QGroupBox::title {
                        </property>
                        <property name="text">
                         <string>RKH (1D/2D)</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QCheckBox" name="nist_qxy_checkbox">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The save file formats. Note that different formats are suitable for different reduction dimensionalities.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                       <property name="text">
-                        <string>Nist Qxy (2D)</string>
                        </property>
                       </widget>
                      </item>
@@ -2181,7 +2171,6 @@ QGroupBox::title {
   <tabstop>can_sas_checkbox</tabstop>
   <tabstop>nx_can_sas_checkbox</tabstop>
   <tabstop>rkh_checkbox</tabstop>
-  <tabstop>nist_qxy_checkbox</tabstop>
   <tabstop>save_zero_error_free</tabstop>
   <tabstop>use_optimizations_checkbox</tabstop>
   <tabstop>settings_tab_widget</tabstop>

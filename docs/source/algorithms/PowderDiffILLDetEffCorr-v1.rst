@@ -149,6 +149,7 @@ Limitations
 
 For **D2B** it is assumed that the tubes and pixels pass through the exact same positions during the scan.
 That is, the tubes have to be aligned vertically and horizontally and the gap between each pair of neighboring tubes must be integer multiple of the scan step.
+If some of the input files will have 26 scan points instead of 25, the last scan point data will be ignored.
 
 D20 Workflow
 ------------

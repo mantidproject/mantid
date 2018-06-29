@@ -182,6 +182,19 @@ class DirectTest(unittest.TestCase):
         }
         testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
 
+    def test_plotconstE_loglog(self):
+        ws = LoadILLTOF('ILL/IN4/084446.nxs')
+        kwargs = {
+            'workspaces': ws,
+            'E' : 13.,
+            'dE' : 1.5,
+            'xscale': 'log',
+            'yscale': 'log'
+        }
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
+        self.assertEquals(axes.get_xscale(), 'log')
+        self.assertEquals(axes.get_yscale(), 'log')
+
     def test_plotconstQ_nonListArgsExecutes(self):
         ws = LoadILLTOF('ILL/IN4/084446.nxs')
         kwargs = {
@@ -221,6 +234,19 @@ class DirectTest(unittest.TestCase):
         }
         testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
 
+    def test_plotconstQ_loglog(self):
+        ws = LoadILLTOF('ILL/IN4/084446.nxs')
+        kwargs = {
+            'workspaces': ws,
+            'Q' : 523.,
+            'dQ' : 17.,
+            'xscale': 'log',
+            'yscale': 'log'
+        }
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+        self.assertEquals(axes.get_xscale(), 'log')
+        self.assertEquals(axes.get_yscale(), 'log')
+
     def test_plotcuts_keepCutWorkspaces(self):
         ws = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
         kwargs = {
@@ -252,6 +278,23 @@ class DirectTest(unittest.TestCase):
         figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotcuts, **kwargs)
         self.assertEquals(len(cuts), 0)
         self.assertEquals(mtd.size(), 0)
+
+    def test_plotcuts_loglog(self):
+        ws = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
+        kwargs = {
+            'direction' : 'Vertical',
+            'workspaces' : ws,
+            'cuts' : 500.,
+            'widths': 10.,
+            'quantity': 'TOF',
+            'unit': 'microseconds',
+            'xscale': 'log',
+            'yscale': 'log'
+        }
+        self.assertEquals(mtd.size(), 0)
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotcuts, **kwargs)
+        self.assertEquals(axes.get_xscale(), 'log')
+        self.assertEquals(axes.get_yscale(), 'log')
 
     def test_plotprofiles_noXUnitsExecutes(self):
         xs = numpy.linspace(-3., 10., 12)
@@ -285,6 +328,15 @@ class DirectTest(unittest.TestCase):
         self.assertEquals(axes.get_ylabel(), '$S(Q,E)$')
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[0], (xs[1:] + xs[:-1])/2)
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[1], ys)
+
+    def test_plotprofiles_loglog(self):
+        xs = numpy.linspace(-3., 10., 12)
+        ys = numpy.tile(1., len(xs) - 1)
+        ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, UnitX='MomentumTransfer', StoreInADS=False)
+        kwargs = {'workspaces': ws, 'xscale': 'log', 'yscale': 'log'}
+        figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofiles, **kwargs)
+        self.assertEquals(axes.get_xscale(), 'log')
+        self.assertEquals(axes.get_yscale(), 'log')
 
     def test_plotSofQW(self):
         ws = LoadILLTOF('ILL/IN4/084446.nxs')

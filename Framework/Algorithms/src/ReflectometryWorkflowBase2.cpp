@@ -39,6 +39,16 @@ void ReflectometryWorkflowBase2::initReductionProperties() {
   setPropertySettings("ReductionType",
                       make_unique<Kernel::EnabledWhenProperty>(
                           "SummationType", IS_EQUAL_TO, "SumInQ"));
+
+  // Whether to crop out partial bins when projecting to virtual lambda for Q
+  // summation
+  declareProperty(make_unique<PropertyWithValue<bool>>("IncludePartialBins",
+                                                       false, Direction::Input),
+                  "If true then partial bins at the beginning and end of the "
+                  "output range are included");
+  setPropertySettings("IncludePartialBins",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "SummationType", IS_EQUAL_TO, "SumInQ"));
 }
 
 /** Initialize properties related to direct beam normalization

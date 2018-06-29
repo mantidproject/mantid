@@ -77,6 +77,7 @@ class LoadAndMerge(PythonAlgorithm):
         # MergeRuns, which does not work outside ADS (because of WorkspaceGroup input)
         alg = self.createChildAlgorithm(self._loader, self._version)
         alg.setAlwaysStoreInADS(True)
+        alg.setLogging(self.isLogging())
         alg.initialize()
         for key in self._loader_options.keys():
             alg.setPropertyValue(key, self._loader_options.getPropertyValue(key))
