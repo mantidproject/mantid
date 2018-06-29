@@ -69,11 +69,11 @@ class TOFTOFScriptElement(BaseScriptElement):
     DEF_normalise  = NORM_NONE
     DEF_correctTof = CORR_TOF_NONE
 
-    DEF_saveSofQW  = False
-    DEF_saveSofTW  = False
-    DEF_saveNXSPE  = False
-    DEF_saveNexus  = False
-    DEF_saveAscii  = False
+    DEF_saveSofTWNxspe  = False
+    DEF_saveSofTWNexus  = False
+    DEF_saveSofTWAscii  = False
+    DEF_saveSofQWNexus  = False
+    DEF_saveSofQWAscii  = False
 
     XML_TAG = 'TOFTOFReduction'
 
@@ -123,11 +123,17 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         # save data
         self.saveDir      = ''
-        self.saveSofQW    = self.DEF_saveSofQW
-        self.saveSofTW    = self.DEF_saveSofTW
-        self.saveNXSPE    = self.DEF_saveNXSPE
-        self.saveNexus    = self.DEF_saveNexus
-        self.saveAscii    = self.DEF_saveAscii
+        self.saveSofTWNxspe = self.DEF_saveSofTWNxspe
+        self.saveSofTWNexus = self.DEF_saveSofTWNexus
+        self.saveSofTWAscii = self.DEF_saveSofTWAscii
+        self.saveSofQWNexus = self.DEF_saveSofQWNexus
+        self.saveSofQWAscii = self.DEF_saveSofQWAscii
+
+        #self.saveSofQW    = self.DEF_saveSofQW
+        #self.saveSofTW    = self.DEF_saveSofTW
+        #self.saveNXSPE    = self.DEF_saveNXSPE
+        #self.saveNexus    = self.DEF_saveNexus
+        #self.saveAscii    = self.DEF_saveAscii
 
     def to_xml(self):
         res = ['']
@@ -171,11 +177,11 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('keep_steps',     self.keepSteps)
 
         put('save_dir',      self.saveDir)
-        put('save_sofqw',    self.saveSofQW)
-        put('save_softw',    self.saveSofTW)
-        put('save_nxspe',    self.saveNXSPE)
-        put('save_nexus',    self.saveNexus)
-        put('save_ascii',    self.saveAscii)
+        put('saveSofTWNxspe', self.saveSofTWNxspe)
+        put('saveSofTWNexus', self.saveSofTWNexus)
+        put('saveSofTWAscii', self.saveSofTWAscii)
+        put('saveSofQWNexus', self.saveSofQWNexus)
+        put('saveSofQWAscii', self.saveSofQWAscii)
 
         return '<{0}>\n{1}</{0}>\n'.format(self.XML_TAG, res[0])
 
@@ -255,11 +261,20 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.keepSteps     = get_bol('keep_steps',     self.DEF_keepSteps)
 
             self.saveDir     = get_str('save_dir')
-            self.saveSofQW   = get_bol('save_sofqw',   self.DEF_saveSofQW)
-            self.saveSofTW   = get_bol('save_softw',   self.DEF_saveSofTW)
-            self.saveNXSPE   = get_bol('save_nxspe',   self.DEF_saveNXSPE)
-            self.saveNexus   = get_bol('save_nexus',   self.DEF_saveNexus)
-            self.saveAscii   = get_bol('save_ascii',   self.DEF_saveAscii)
+
+            # for backwards compatibility:
+            SofQW   = get_bol('save_sofqw', False)
+            SofTW   = get_bol('save_softw', False)
+            NXSPE   = get_bol('save_nxspe', False)
+            Nexus   = get_bol('save_nexus', False)
+            Ascii   = get_bol('save_ascii', False)
+
+            self.saveSofTWNxspe = get_bol('saveSofTWNxspe', (SofTW and NXSPE) or self.DEF_saveSofTWNxspe)
+            self.saveSofTWNexus = get_bol('saveSofTWNexus', (SofTW and Nexus) or self.DEF_saveSofTWNexus)
+            self.saveSofTWAscii = get_bol('saveSofTWAscii', (SofTW and Ascii) or self.DEF_saveSofTWAscii)
+            self.saveSofQWNexus = get_bol('saveSofQWNexus', (SofQW and Nexus) or self.DEF_saveSofQWNexus)
+            self.saveSofQWAscii = get_bol('saveSofQWAscii', (SofQW and Ascii) or self.DEF_saveSofQWAscii)
+
 
     def validate_inputs(self):
         # must have vanadium for TOF correction

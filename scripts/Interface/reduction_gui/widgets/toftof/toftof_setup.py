@@ -113,7 +113,7 @@ class TOFTOFSetupWidget(BaseWidget):
         def setEnabled(widget, *widgets):
             """enables widget, when value of all widgets evaluates to true""" 
             def setEnabled():
-                widget.setEnabled(any(w.isChecked() for w in widgets))
+                widget.setEnabled(all(w.isChecked() for w in widgets))
             for w in widgets:
                 w.toggled.connect(setEnabled)
             return widget
@@ -394,6 +394,11 @@ class TOFTOFSetupWidget(BaseWidget):
         elem.keepSteps     = self.chkKeepSteps.isChecked()
 
         elem.saveDir       = line_text(self.saveDir)
+        elem.saveSofTWNxspe = self.chkSofTWNxspe.isChecked()
+        elem.saveSofTWNexus = self.chkSofTWNexus.isChecked()
+        elem.saveSofTWAscii = self.chkSofTWAscii.isChecked()
+        elem.saveSofQWNexus = self.chkSofQWNexus.isChecked()
+        elem.saveSofQWAscii = self.chkSofQWAscii.isChecked()
         #elem.saveSofQW     = self.chkSofQW.isChecked()
         #elem.saveSofTW     = self.chkSofTW.isChecked()
         #elem.saveNXSPE     = self.chkNxspe.isChecked()
@@ -449,6 +454,11 @@ class TOFTOFSetupWidget(BaseWidget):
         self.chkKeepSteps.setChecked(elem.keepSteps)
 
         self.saveDir.setText(elem.saveDir)
+        self.chkSofTWNxspe.setChecked(elem.saveSofTWNxspe)
+        self.chkSofTWNexus.setChecked(elem.saveSofTWNexus)
+        self.chkSofTWAscii.setChecked(elem.saveSofTWAscii)
+        self.chkSofQWNexus.setChecked(elem.saveSofQWNexus)
+        self.chkSofQWAscii.setChecked(elem.saveSofQWAscii)
         #self.chkSofQW.setChecked(elem.saveSofQW)
         #self.chkSofTW.setChecked(elem.saveSofTW)
         #self.chkNxspe.setChecked(elem.saveNXSPE)
