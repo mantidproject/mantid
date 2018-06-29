@@ -229,7 +229,7 @@ public:
 
   void test_calcCalibFailsWhenNoCalibDirectory() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
-    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+    EnggDiffPresenterNoThread pres(&mockView);
 
     EnggDiffCalibSettings calibSettings;
     calibSettings.m_inputDirCalib = "";

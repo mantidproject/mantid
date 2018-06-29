@@ -51,7 +51,7 @@ private:
   void init() override;
   void exec() override;
 
-  API::IPeaksWorkspace_sptr getPeaksWorkspace(
+  DataObjects::PeaksWorkspace_sptr getPeaksWorkspace(
       const DataObjects::PeaksWorkspace_sptr &templateWorkspace,
       const PeakStatisticsTools::UniqueReflectionCollection &reflections,
       const Geometry::PointGroup_sptr &pointGroup) const;

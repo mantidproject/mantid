@@ -16,6 +16,7 @@ New features
 ############
 
 - Fully-automatic processing has been added to the interface. Click ``Autoprocess`` to process all of the runs for an investigation and to start polling for new runs. Whenever new runs are found, they will automatically be added to the table and processed.
+- A new option has been added to the Settings tab to control whether partial bins should be included when summing in Q.
 
 Improvements
 ############
@@ -51,6 +52,8 @@ New features
 * A new algorithm :ref:`algm-ReflectometryMomentumTransfer` provides conversion to momentum transfer and :math:`Q_{z}` resolution calculation for relfectivity workspaces.
 * A new algorithm :ref:`ReflectometrySumInQ <algm-ReflectometrySumInQ>` is available for coherent summation of the reflected beam.
 
+- :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometryReductionOneAuto` no longer include partial bins by default when summing in Q. A new property, `IncludePartialBins`, has been added to re-enable partial bins.
+
 Improvements
 ############
 
@@ -66,6 +69,7 @@ Liquids Reflectometer
 Magnetism Reflectometer
 -----------------------
 * Added live data information to Facilities.xml
+* Allow for the use of workspace groups as input to the reduction.
 * Added algorithm to compute scattering angle from a workspace.
 
 :ref:`Release 3.13.0 <v3.13.0>`

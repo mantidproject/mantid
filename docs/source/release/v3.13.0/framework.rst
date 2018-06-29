@@ -13,6 +13,7 @@ Instrument Definition Updates
 -----------------------------
 
 - The ALF IDF has been updated following a detector array alteration.
+- The LARMOR IDF has been updated following the addition of a new detector to the instrument.
 
 Algorithms
 ----------
@@ -42,6 +43,9 @@ New Algorithms
   workspace's samples logs to an HDF5 file
 
 - :ref:`SaveGDA <algm-SaveGDA>` saves a focused diffraction workspace to MAUD-readable ``.gda`` format
+
+- :ref:`SaveGEMMAUDParamFile <algm-SaveGEMMAUDParamFile>`, which acts as a partner to :ref:`SaveGDA <algm-SaveGDA>`,
+  saves a MAUD calibration file to convert the output of **SaveGDA** back to d-spacing
 
 Improved
 ########
@@ -95,5 +99,14 @@ Bugfixes
 - Checks on the structure of Python fit function classes have been improved to avoid scenarios, such as writing ``function1d`` rather than ``function1D``, which
   would previously have resulted in a hard crash.
 - Fit functions defined in a python script can be used with the new fit function API right after sibscription.
+- Child algorithms now respect their parent algorithm's ``EnableLogging`` setting when invoked using the function-style calling. Previously, some messages could appear in the log even though ``EnableLogging`` was set to ``False``.
+
+Python
+------
+
+Bug fixes
+#########
+
+- Fixed a bug in ``detectorSignedTwoTheta`` method in ``MatrixWorkspace`` where the sign of the angle depended on the axis pointing up, not on the actual theta-sing axis defined in the IDF.
 
 :ref:`Release 3.13.0 <v3.13.0>`

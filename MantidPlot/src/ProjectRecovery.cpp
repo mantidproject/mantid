@@ -32,7 +32,7 @@
 #include <thread>
 
 namespace {
-Mantid::Kernel::Logger g_log("Project Recovery Thread");
+Mantid::Kernel::Logger g_log("ProjectRecovery");
 
 // Config helper methods
 template <typename T>
@@ -67,7 +67,7 @@ std::string getRecoveryFolder() {
 
 /// Gets a formatted timestamp
 std::string getTimeStamp() {
-  const char *formatSpecifier = "%Y-%m-%d %H-%M-%S";
+  const char *formatSpecifier = "%Y-%m-%dT%H-%M-%S";
   auto time = std::time(nullptr);
   auto localTime = std::localtime(&time);
 
@@ -138,7 +138,7 @@ const std::string SAVING_TIME_KEY = "projectRecovery.secondsBetween";
 const std::string NO_OF_CHECKPOINTS_KEY = "projectRecovery.numberOfCheckpoints";
 
 // Config values
-const bool SAVING_ENABLED =
+bool SAVING_ENABLED =
     getConfigBool(SAVING_ENABLED_CONFIG_KEY).get_value_or(false);
 const int SAVING_TIME =
     getConfigValue<int>(SAVING_TIME_KEY).get_value_or(60); // Seconds
@@ -174,23 +174,23 @@ bool ProjectRecovery::attemptRecovery() {
 
   int userChoice = QMessageBox::information(
       m_windowPtr, QObject::tr("Project Recovery"), recoveryMsg,
-	  QObject::tr("Open in script editor"), QObject::tr("No"), 0, 1);
+      QObject::tr("Open in script editor"), QObject::tr("No"), 0, 1);
 
   if (userChoice == 1) {
-	  // User selected no
-	  return true;
+    // User selected no
+    return true;
   }
 
   const auto checkpointPaths =
       getRecoveryFolderCheckpoints(getRecoveryFolder());
   auto &mostRecentCheckpoint = checkpointPaths.back();
 
-  // TODO automated recovery 
-  switch (userChoice){
+  // TODO automated recovery
+  switch (userChoice) {
   case 0:
-	  return openInEditor(mostRecentCheckpoint);
+    return openInEditor(mostRecentCheckpoint);
   default:
-	  throw std::runtime_error("Unknown choice in ProjectRecovery");
+    throw std::runtime_error("Unknown choice in ProjectRecovery");
   }
 }
 
@@ -215,26 +215,29 @@ void ProjectRecovery::configKeyChanged(
   }
 
   if (notif->curValue() == "True") {
+    SAVING_ENABLED = true;
     startProjectSaving();
   } else {
+    SAVING_ENABLED = false;
     stopProjectSaving();
   }
 }
 
-void ProjectRecovery::compileRecoveryScript(const Poco::Path & inputFolder, const Poco::Path & outputFile)
-{
-	const std::string algName = "OrderWorkspaceHistory";
-	auto * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(algName, 1);
-	if (!alg) {
-		throw std::runtime_error("Could not get pointer to alg: " + algName);
-	}
+void ProjectRecovery::compileRecoveryScript(const Poco::Path &inputFolder,
+                                            const Poco::Path &outputFile) {
+  const std::string algName = "OrderWorkspaceHistory";
+  auto *alg =
+      Mantid::API::FrameworkManager::Instance().createAlgorithm(algName, 1);
+  if (!alg) {
+    throw std::runtime_error("Could not get pointer to alg: " + algName);
+  }
 
-	alg->initialize();
-	alg->setRethrows(true);
-	alg->setProperty("RecoveryCheckpointFolder", inputFolder.toString());
-	alg->setProperty("OutputFilepath", outputFile.toString());
+  alg->initialize();
+  alg->setRethrows(true);
+  alg->setProperty("RecoveryCheckpointFolder", inputFolder.toString());
+  alg->setProperty("OutputFilepath", outputFile.toString());
 
-	alg->execute();
+  alg->execute();
 }
 
 /**
@@ -290,23 +293,23 @@ void ProjectRecovery::stopProjectSaving() {
   }
 }
 
-bool ProjectRecovery::openInEditor(const Poco::Path & inputFolder)
-{
-	auto destFilename = Poco::Path(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
-	destFilename.append("ordered_recovery.py");
-	compileRecoveryScript(inputFolder, destFilename);
+bool ProjectRecovery::openInEditor(const Poco::Path &inputFolder) {
+  auto destFilename =
+      Poco::Path(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
+  destFilename.append("ordered_recovery.py");
+  compileRecoveryScript(inputFolder, destFilename);
 
-	// Force application window to create the script window first
-	const bool forceVisible = true;
-	m_windowPtr->showScriptWindow(forceVisible);
+  // Force application window to create the script window first
+  const bool forceVisible = true;
+  m_windowPtr->showScriptWindow(forceVisible);
 
-	ScriptingWindow *scriptWindow = m_windowPtr->getScriptWindowHandle();
-	if (!scriptWindow) {
-		throw std::runtime_error("Could not get handle to scripting window");
-	}
+  ScriptingWindow *scriptWindow = m_windowPtr->getScriptWindowHandle();
+  if (!scriptWindow) {
+    throw std::runtime_error("Could not get handle to scripting window");
+  }
 
-	scriptWindow->open(QString::fromStdString(destFilename.toString()));
-	return true;
+  scriptWindow->open(QString::fromStdString(destFilename.toString()));
+  return true;
 }
 
 /// Top level thread wrapper which catches all exceptions to gracefully handle
@@ -335,7 +338,7 @@ void ProjectRecovery::projectSavingThread() {
     std::unique_lock<std::mutex> lock(m_notifierMutex);
     // The condition variable releases the lock until the var changes
     if (m_threadNotifier.wait_for(lock, TIME_BETWEEN_SAVING, [this]() {
-          return m_stopBackgroundThread;
+          return m_stopBackgroundThread.load();
         })) {
       // Exit thread
       g_log.debug("Project Recovery: Stopping background saving thread");
@@ -343,16 +346,16 @@ void ProjectRecovery::projectSavingThread() {
     }
 
     // "Timeout" - Save out again
-	const auto &ads = Mantid::API::AnalysisDataService::Instance();
-	if (ads.size() == 0) {
-		g_log.debug("Nothing to save");
-		continue;
-	}
-    
-	g_log.debug("Project Recovery: Saving started");
-    const auto basePath = getOutputPath();
-    Poco::File(basePath).createDirectory();
+    const auto &ads = Mantid::API::AnalysisDataService::Instance();
+    if (ads.size() == 0) {
+      g_log.debug("Nothing to save");
+      continue;
+    }
 
+    g_log.debug("Project Recovery: Saving started");
+    const auto basePath = getOutputPath();
+
+    Poco::File(basePath).createDirectories();
     auto projectFile = Poco::Path(basePath).append(OUTPUT_PROJ_NAME);
 
     saveWsHistories(basePath);
@@ -425,7 +428,7 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
     destFilename.append(filename);
 
     alg->initialize();
-	alg->setProperty("AppendTimestamp", true);
+    alg->setProperty("AppendTimestamp", true);
     alg->setPropertyValue("InputWorkspace", ws);
     alg->setPropertyValue("Filename", destFilename.toString());
     alg->setPropertyValue("StartTimestamp", startTime);

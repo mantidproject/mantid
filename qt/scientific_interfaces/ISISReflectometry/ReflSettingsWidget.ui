@@ -360,7 +360,27 @@
           </column>
          </widget>
         </item>
-        <item row="1" column="3">
+        <item row="11" column="0">
+         <widget class="QLabel" name="stitchLabel">
+          <property name="text">
+           <string>Stitch1DMany</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="reductionTypeLabel">
+          <property name="minimumSize">
+           <size>
+            <width>117</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>ReductionType</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
          <widget class="QComboBox" name="reductionTypeComboBox">
           <property name="enabled">
            <bool>false</bool>
@@ -388,23 +408,26 @@
           </item>
          </widget>
         </item>
-        <item row="1" column="2">
-         <widget class="QLabel" name="reductionTypeLabel">
-          <property name="minimumSize">
-           <size>
-            <width>117</width>
-            <height>0</height>
-           </size>
+        <item row="2" column="3">
+         <widget class="QCheckBox" name="includePartialBinsCheckBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>If true then partial bins from the beginning and end of the output range are included</string>
+          </property>
+          <property name="whatsThis">
+           <string>When summing in Q, this option controls whether counts from the input range should be included in the output if they would result in partially filled bins, that is, where the intensity in the output bin is not the true intensity because not all of the input for that line of constant Q was available in the input range. By default, this option is off, and any partial bins are excluded.</string>
           </property>
           <property name="text">
-           <string>ReductionType</string>
+           <string/>
           </property>
          </widget>
         </item>
-        <item row="11" column="0">
-         <widget class="QLabel" name="stitchLabel">
+        <item row="2" column="2">
+         <widget class="QLabel" name="includePartialBinsLabel">
           <property name="text">
-           <string>Stitch1DMany</string>
+           <string>IncludePartialBins</string>
           </property>
          </widget>
         </item>
