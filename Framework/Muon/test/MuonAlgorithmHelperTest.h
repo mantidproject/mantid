@@ -591,6 +591,8 @@ public:
         "1+2+3-4+5+6");
     TS_ASSERT_EQUALS(generatePeriodAlgebraString("3,1,2", "6,5,4"),
                      "1+2+3-4+5+6");
+  }
+
   void test_checkValidGroupPairName_invalid_names() {
     std::vector<std::string> badNames = {"",      "_name", "name_", "name;",
                                          "#name", "Group", "Pair"};
