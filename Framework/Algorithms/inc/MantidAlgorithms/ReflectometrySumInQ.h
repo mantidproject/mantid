@@ -44,9 +44,9 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL ReflectometrySumInQ : public API::Algorithm {
 public:
   struct Angles {
-    double horizon{std::nan("")};
-    double twoTheta{std::nan("")};
-    double delta{std::nan("")};
+    double horizon{std::numeric_limits<double>::quiet_NaN()};
+    double twoTheta{std::numeric_limits<double>::quiet_NaN()};
+    double delta{std::numeric_limits<double>::quiet_NaN()};
   };
 
   struct MinMax {

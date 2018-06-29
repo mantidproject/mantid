@@ -175,9 +175,7 @@ void ReflectometrySumInQ::MinMax::testAndSet(const double a) noexcept {
 * @param a [in] :: a number
 */
 void ReflectometrySumInQ::MinMax::testAndSetMax(const double a) noexcept {
-  if (a > max) {
-    max = a;
-  }
+  max = std::max(max, a);
 }
 
 /**
@@ -186,9 +184,7 @@ void ReflectometrySumInQ::MinMax::testAndSetMax(const double a) noexcept {
 * @param a [in] :: a number
 */
 void ReflectometrySumInQ::MinMax::testAndSetMin(const double a) noexcept {
-  if (a < min) {
-    min = a;
-  }
+  min = std::min(min, a);
 }
 
 // Register the algorithm into the AlgorithmFactory
