@@ -17,9 +17,9 @@
 #include "Poco/NObserver.h"
 #include "Poco/Path.h"
 
-#include "qmessagebox.h"
-#include "qobject.h"
-#include "qstring.h"
+#include <QMessageBox>
+#include <QObject>
+#include <QString>
 #include <QMetaObject>
 
 #include <chrono>
@@ -238,6 +238,8 @@ void ProjectRecovery::compileRecoveryScript(const Poco::Path &inputFolder,
   alg->setProperty("OutputFilepath", outputFile.toString());
 
   alg->execute();
+
+  g_log.notice("Saved your recovery script to:\n" + outputFile.toString());
 }
 
 /**
