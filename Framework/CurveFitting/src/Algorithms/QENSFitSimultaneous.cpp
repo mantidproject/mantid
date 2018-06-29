@@ -412,11 +412,14 @@ void QENSFitSimultaneous::copyLogs(
     WorkspaceGroup_sptr resultWorkspace,
     const std::vector<MatrixWorkspace_sptr> &workspaces) {
   auto logCopier = createChildAlgorithm("CopyLogs", -1.0, -1.0, false);
-  logCopier->setProperty("OutputWorkspace", resultWorkspace->getName());
-
-  for (const auto &workspace : workspaces) {
-    logCopier->setProperty("InputWorkspace", workspace);
-    logCopier->executeAsChildAlg();
+  for (auto &&workspace : *resultWorkspace) {
+    logCopier->setProperty(
+        "OutputWorkspace",
+        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace));
+    for (const auto &workspace : workspaces) {
+      logCopier->setProperty("InputWorkspace", workspace);
+      logCopier->executeAsChildAlg();
+    }
   }
 }
 
@@ -445,6 +448,11 @@ void QENSFitSimultaneous::extractMembers(
 
   for (const auto &workspaceName : workspaceNames)
     AnalysisDataService::Instance().remove(workspaceName);
+}
+
+void QENSFitSimultaneous::addAdditionalLogs(API::WorkspaceGroup_sptr group) {
+  for (auto &&workspace : *group)
+    addAdditionalLogs(workspace);
 }
 
 void QENSFitSimultaneous::addAdditionalLogs(Workspace_sptr resultWorkspace) {

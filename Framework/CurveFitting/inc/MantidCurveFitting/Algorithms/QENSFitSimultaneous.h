@@ -67,6 +67,7 @@ private:
   void extractMembers(API::WorkspaceGroup_sptr resultGroupWs,
                       const std::vector<API::MatrixWorkspace_sptr> &workspaces,
                       const std::string &outputWsName);
+  void addAdditionalLogs(API::WorkspaceGroup_sptr group);
   void addAdditionalLogs(API::Workspace_sptr result);
 
   API::IAlgorithm_sptr
