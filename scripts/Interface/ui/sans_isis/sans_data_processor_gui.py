@@ -1726,6 +1726,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.wavelength_adjustment_det_1_line_edit.setText("")
         self.wavelength_adjustment_det_2_line_edit.setText("")
 
+        self.show_transmission_view.setChecked(True)
+
         # --------------------------------
         # Q tab
         # --------------------------------
