@@ -155,7 +155,7 @@ class ArrayPropertyTest(unittest.TestCase):
 
         # Test
         self.assertEquals(float_arr.dtype(), "float64")
-        self.assertEquals(str_arr.dtype(), "string_")
+        self.assertEquals(str_arr.dtype(), "S1")
         
         # Implementation of IntArrayProperty is based on long 
         # (which is itself implementation defined, so a special case is needed here)

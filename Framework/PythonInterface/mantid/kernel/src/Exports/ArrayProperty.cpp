@@ -33,6 +33,31 @@ template <typename type> std::string dtype(ArrayProperty<type> &self) {
   return dtypeHelper::dtype(self);
 }
 
+// Check for the special case of a string
+template <> std::string dtype(ArrayProperty<std::string> &self) {
+  // Get a vector of all the strings
+  std::vector<std::string> values = self();
+
+  // Vector of ints to store the sizes of each of the strings
+  std::vector<int> string_sizes;
+
+  // Loop for the number of strings
+  for (int i = 0; i < values.size(); i++) {
+    //For each string store the number of characters
+    int size = values.at(i).size();
+    string_sizes.push_back(size);
+  }
+
+  // Find the maximum number of characters
+  int max = *std::max_element(std::begin(string_sizes), std::end(string_sizes));
+
+  // Create the string to return
+  std::stringstream ss;
+  ss << "S" << max;
+  std::string ret_val = ss.str();
+  return ret_val;
+}
+
 #define EXPORT_ARRAY_PROP(type, prefix)                                        \
   class_<ArrayProperty<type>, bases<PropertyWithValue<std::vector<type>>>,     \
          boost::noncopyable>(#prefix "ArrayProperty", no_init)                 \
