@@ -288,7 +288,8 @@ std::string generatePeriodAlgebraString(std::vector<int> summedPeriods,
     return "";
   }
   // the default for single period data
-  if (summedPeriods[0] == 1 && subtractedPeriods.empty() && summedPeriods.size()==1) {
+  if (summedPeriods[0] == 1 && subtractedPeriods.empty() &&
+      summedPeriods.size() == 1) {
     return "";
   }
 

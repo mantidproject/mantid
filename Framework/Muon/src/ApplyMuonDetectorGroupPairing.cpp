@@ -53,10 +53,9 @@ void ApplyMuonDetectorGroupPairing::init() {
           PropertyMode::Mandatory),
       "The workspace group to which the output will be added.");
 
-  declareProperty("PairName", emptyString,
-                  "The name of the pair. Must "
-                  "contain at least one alphanumeric "
-                  "character.",
+  declareProperty("PairName", emptyString, "The name of the pair. Must "
+                                           "contain at least one alphanumeric "
+                                           "character.",
                   Direction::Input);
 
   declareProperty("Alpha", 1.0,
@@ -349,8 +348,9 @@ const std::string ApplyMuonDetectorGroupPairing::getGroupWorkspaceNamesManually(
   params.itemType = Muon::ItemType::Group;
   params.itemName = groupName;
   params.plotType = Muon::PlotType::Counts;
-  params.periods = generatePeriodAlgebraString(
-      getPropertyValue("SummedPeriods"), getPropertyValue("subtract edPeriods"));
+  params.periods =
+      generatePeriodAlgebraString(getPropertyValue("SummedPeriods"),
+                                  getPropertyValue("subtract edPeriods"));
   params.version = 1;
   const std::string wsName = generateWorkspaceName(params);
   return wsName;
