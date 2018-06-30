@@ -484,10 +484,10 @@ bool Fit::setWeightingData(WeightingMethod w, const QString &colName) {
       return false;
 
     if (t->numRows() < d_n) {
-      QMessageBox::critical(
-          app, tr("MantidPlot - Error"),
-          tr("The column %1 has less points than the fitted "
-             "data set. Please choose another column!.").arg(colName));
+      QMessageBox::critical(app, tr("MantidPlot - Error"),
+                            tr("The column %1 has less points than the fitted "
+                               "data set. Please choose another column!.")
+                                .arg(colName));
       return false;
     }
 
@@ -618,7 +618,8 @@ void Fit::fit() {
   if (d_p > d_n) {
     QMessageBox::critical(app, tr("MantidPlot - Fit Error"),
                           tr("You need at least %1 data points for this fit "
-                             "operation. Operation aborted!").arg(d_p));
+                             "operation. Operation aborted!")
+                              .arg(d_p));
     return;
   }
   if (d_formula.isEmpty()) {
@@ -634,8 +635,13 @@ void Fit::fit() {
   QString names = d_param_names.join(",");
   const char *parNames = names.toAscii().constData();
 
-  struct FitData d_data = {static_cast<size_t>(d_n), static_cast<size_t>(d_p),
-                           d_x, d_y, d_w, function, parNames};
+  struct FitData d_data = {static_cast<size_t>(d_n),
+                           static_cast<size_t>(d_p),
+                           d_x,
+                           d_y,
+                           d_w,
+                           function,
+                           parNames};
 
   int status, iterations = d_max_iterations;
   if (d_solver == NelderMeadSimplex) {
@@ -733,7 +739,8 @@ bool Fit::save(const QString &fileName) {
     QMessageBox::critical(
         nullptr, tr("MantidPlot") + " - " + tr("File Save Error"),
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-           "you have the right to write to this location!").arg(fileName));
+           "you have the right to write to this location!")
+            .arg(fileName));
     return false;
   }
 

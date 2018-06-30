@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAOBJECTS_MDBOX_SAVEABLE_H
 #define MANTID_DATAOBJECTS_MDBOX_SAVEABLE_H
 
-#include "MantidKernel/ISaveable.h"
 #include "MantidAPI/IMDNode.h"
+#include "MantidKernel/ISaveable.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -67,7 +67,7 @@ public:
 private:
   API::IMDNode *const m_MDNode;
 };
-}
-}
+} // namespace DataObjects
+} // namespace Mantid
 
 #endif

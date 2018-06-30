@@ -1,10 +1,10 @@
 #ifndef ATOMTEST_H_
 #define ATOMTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <stdexcept>
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/NeutronAtom.h"
+#include <cxxtest/TestSuite.h>
+#include <stdexcept>
 
 using namespace Mantid::PhysicalConstants;
 

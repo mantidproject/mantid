@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/HistoryView.h"
-#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/PropertyHistory.h"
 

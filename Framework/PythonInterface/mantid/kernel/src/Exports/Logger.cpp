@@ -1,8 +1,8 @@
 #include "MantidKernel/Logger.h"
 #include <boost/make_shared.hpp>
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/reference_existing_object.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::Logger;
 using namespace boost::python;
@@ -18,7 +18,7 @@ boost::shared_ptr<Logger> getLogger(const std::string &name) {
                                        "Simply use Logger(\"name\") instead");
   return boost::make_shared<Logger>(name);
 }
-}
+} // namespace
 
 void export_Logger() {
   register_ptr_to_python<boost::shared_ptr<Logger>>();

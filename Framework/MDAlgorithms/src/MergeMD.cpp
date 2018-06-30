@@ -1,11 +1,11 @@
 #include "MantidMDAlgorithms/MergeMD.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Strings.h"
-#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -267,5 +267,5 @@ void MergeMD::exec() {
   g_log.debug() << tim << " to merge all workspaces.\n";
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

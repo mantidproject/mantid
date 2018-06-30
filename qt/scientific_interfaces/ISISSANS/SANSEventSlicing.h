@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_SANSEVENTSLICING_H_
 #define MANTIDQTCUSTOMINTERFACES_SANSEVENTSLICING_H_
 
-#include "ui_SANSEventSlicing.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "ui_SANSEventSlicing.h"
 #include <QString>
 
 namespace MantidQt {
@@ -48,7 +48,7 @@ private slots:
 private:
   Ui::SANSEventSlicing ui;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_SANSEVENTSLICING_H_

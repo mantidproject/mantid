@@ -12,16 +12,16 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidNexusCPP/NeXusException.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 
-#include <cmath>
 #include <Poco/File.h>
-#include <string>
-#include <sstream>
-#include <cstring>
-#include <cstdlib>
+#include <cmath>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <sstream>
+#include <string>
 #include <vector>
 
 using std::cout;

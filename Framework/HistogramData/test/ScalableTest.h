@@ -9,11 +9,11 @@
 #include "MantidHistogramData/Scalable.h"
 #include "MantidHistogramData/VectorOf.h"
 
+using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::detail::FixedLengthVector;
 using Mantid::HistogramData::detail::Iterable;
 using Mantid::HistogramData::detail::Scalable;
 using Mantid::HistogramData::detail::VectorOf;
-using Mantid::HistogramData::HistogramX;
 
 class ScalableTester : public VectorOf<ScalableTester, HistogramX>,
                        public Iterable<ScalableTester>,

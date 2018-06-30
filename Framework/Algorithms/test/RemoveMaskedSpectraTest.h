@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/RemoveMaskedSpectra.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/RemoveMaskedSpectra.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 

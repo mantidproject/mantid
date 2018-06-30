@@ -91,6 +91,6 @@ public:
     return quad;
   }
 };
-}
-}
+} // namespace DataObjects
+} // namespace Mantid
 #endif // MANTID_DATAOBJECTS_CALCULATEREFLECTOMETRYP_H_

@@ -41,8 +41,9 @@ void ConvertUnits::init() {
 
   // Extract the current contents of the UnitFactory to be the allowed values of
   // the Target property
-  declareProperty("Target", "", boost::make_shared<StringListValidator>(
-                                    UnitFactory::Instance().getKeys()),
+  declareProperty("Target", "",
+                  boost::make_shared<StringListValidator>(
+                      UnitFactory::Instance().getKeys()),
                   "The name of the units to convert to (must be one of those "
                   "registered in\n"
                   "the Unit Factory)");
@@ -72,15 +73,15 @@ void ConvertUnits::init() {
 }
 
 /** Executes the algorithm
-*  @throw std::runtime_error :: Thrown in the following cases:
-*   - If the input workspace has not had its unit set
-*   - If the input workspace contains Points, but ConvertFromPointData
-*       has not been enabled.
-*   - If ConvertFromPointData has been enabled, but the conversion to Bins
-*       or back to Points fails.
-*  @throw InstrumentDefinitionError If unable to calculate source-sample
-* distance
-*/
+ *  @throw std::runtime_error :: Thrown in the following cases:
+ *   - If the input workspace has not had its unit set
+ *   - If the input workspace contains Points, but ConvertFromPointData
+ *       has not been enabled.
+ *   - If ConvertFromPointData has been enabled, but the conversion to Bins
+ *       or back to Points fails.
+ *  @throw InstrumentDefinitionError If unable to calculate source-sample
+ * distance
+ */
 void ConvertUnits::exec() {
   // Get the workspaces
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
@@ -173,11 +174,11 @@ void ConvertUnits::exec() {
 }
 
 /**Executes the main part of the algorithm that handles the conversion of the
-* units
-* @param inputWS :: the input workspace that will be converted
-* @throw std::runtime_error :: If the workspace has invalid X axis binning
-* @return A pointer to a MatrixWorkspace_sptr that contains the converted units
-*/
+ * units
+ * @param inputWS :: the input workspace that will be converted
+ * @throw std::runtime_error :: If the workspace has invalid X axis binning
+ * @return A pointer to a MatrixWorkspace_sptr that contains the converted units
+ */
 MatrixWorkspace_sptr
 ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr inputWS) {
 
@@ -187,7 +188,8 @@ ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr inputWS) {
     std::stringstream msg;
     msg << "Input workspace has invalid X axis binning parameters. Should "
            "have "
-           "at least 2 values. Found " << inputWS->x(0).size() << ".";
+           "at least 2 values. Found "
+        << inputWS->x(0).size() << ".";
     throw std::runtime_error(msg.str());
   }
   if (inputWS->x(0).front() > inputWS->x(0).back() ||
@@ -240,8 +242,8 @@ ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr inputWS) {
   return outputWS;
 }
 /** Initialise the member variables
-*  @param inputWS The input workspace
-*/
+ *  @param inputWS The input workspace
+ */
 void ConvertUnits::setupMemberVariables(
     const API::MatrixWorkspace_const_sptr inputWS) {
   m_numberOfSpectra = inputWS->getNumberHistograms();
@@ -260,10 +262,10 @@ void ConvertUnits::setupMemberVariables(
 }
 
 /** Create an output workspace of the appropriate (histogram or event) type
-* and
-* copy over the data
-*  @param inputWS The input workspace
-*/
+ * and
+ * copy over the data
+ *  @param inputWS The input workspace
+ */
 API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
     const API::MatrixWorkspace_const_sptr inputWS) {
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
@@ -305,8 +307,8 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
 }
 
 /** Stores the emode in the provided workspace
-*  @param outputWS The workspace
-*/
+ *  @param outputWS The workspace
+ */
 void ConvertUnits::storeEModeOnWorkspace(API::MatrixWorkspace_sptr outputWS) {
   // Store the emode
   const bool overwrite(true);
@@ -315,12 +317,12 @@ void ConvertUnits::storeEModeOnWorkspace(API::MatrixWorkspace_sptr outputWS) {
 }
 
 /** Convert the workspace units according to a simple output = a * (input^b)
-* relationship
-*  @param inputWS :: the input workspace
-*  @param factor :: the conversion factor a to apply
-*  @param power :: the Power b to apply to the conversion
-*  @returns A shared pointer to the output workspace
-*/
+ * relationship
+ *  @param inputWS :: the input workspace
+ *  @param factor :: the conversion factor a to apply
+ *  @param power :: the Power b to apply to the conversion
+ *  @returns A shared pointer to the output workspace
+ */
 MatrixWorkspace_sptr
 ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
                              const double &factor, const double &power) {
@@ -388,17 +390,17 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
 }
 
 /** Get the L2, theta and efixed values for a workspace index
-* @param spectrumInfo :: SpectrumInfo of the workspace
-* @param outputUnit :: The output unit
-* @param emode :: The energy mode
-* @param ws :: The workspace
-* @param signedTheta :: Return twotheta with sign or without
-* @param wsIndex :: The workspace index
-* @param efixed :: the returned fixed energy
-* @param l2 :: The returned sample - detector distance
-* @param twoTheta :: the returned two theta angle
-* @returns true if lookup successful, false on error
-*/
+ * @param spectrumInfo :: SpectrumInfo of the workspace
+ * @param outputUnit :: The output unit
+ * @param emode :: The energy mode
+ * @param ws :: The workspace
+ * @param signedTheta :: Return twotheta with sign or without
+ * @param wsIndex :: The workspace index
+ * @param efixed :: the returned fixed energy
+ * @param l2 :: The returned sample - detector distance
+ * @param twoTheta :: the returned two theta angle
+ * @returns true if lookup successful, false on error
+ */
 bool ConvertUnits::getDetectorValues(const API::SpectrumInfo &spectrumInfo,
                                      const Kernel::Unit &outputUnit, int emode,
                                      const MatrixWorkspace &ws,
@@ -442,11 +444,11 @@ bool ConvertUnits::getDetectorValues(const API::SpectrumInfo &spectrumInfo,
 }
 
 /** Convert the workspace units using TOF as an intermediate step in the
-* conversion
-* @param fromUnit :: The unit of the input workspace
-* @param inputWS :: The input workspace
-* @returns A shared pointer to the output workspace
-*/
+ * conversion
+ * @param fromUnit :: The unit of the input workspace
+ * @param inputWS :: The input workspace
+ * @returns A shared pointer to the output workspace
+ */
 MatrixWorkspace_sptr
 ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
                             API::MatrixWorkspace_const_sptr inputWS) {
@@ -560,8 +562,8 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 
       // EventWorkspace part, modifying the EventLists.
       if (m_inputEvents) {
-        eventWS->getSpectrum(i)
-            .convertUnitsViaTof(localFromUnit.get(), localOutputUnit.get());
+        eventWS->getSpectrum(i).convertUnitsViaTof(localFromUnit.get(),
+                                                   localOutputUnit.get());
       }
     } else {
       // Get to here if exception thrown when calculating distance to detector
@@ -645,8 +647,8 @@ const std::vector<double> ConvertUnits::calculateRebinParams(
 }
 
 /** Reverses the workspace if X values are in descending order
-*  @param WS The workspace to operate on
-*/
+ *  @param WS The workspace to operate on
+ */
 void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
   bool isInputEvents = static_cast<bool>(eventWS);
@@ -681,21 +683,21 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
 }
 
 /** Unwieldy method which removes bins which lie in a physically inaccessible
-* region.
-*  This presently only occurs in conversions to energy transfer, where the
-* initial
-*  unit conversion sets them to +/-DBL_MAX. This method removes those bins,
-* leading
-*  to a workspace which is smaller than the input one.
-*  As presently implemented, it unfortunately requires testing for and
-* knowledge of
-*  aspects of the particular units conversion instead of keeping all that in
-* the
-*  units class. It could be made more general, but that would be less
-* efficient.
-*  @param workspace :: The workspace after initial unit conversion
-*  @return The workspace after bins have been removed
-*/
+ * region.
+ *  This presently only occurs in conversions to energy transfer, where the
+ * initial
+ *  unit conversion sets them to +/-DBL_MAX. This method removes those bins,
+ * leading
+ *  to a workspace which is smaller than the input one.
+ *  As presently implemented, it unfortunately requires testing for and
+ * knowledge of
+ *  aspects of the particular units conversion instead of keeping all that in
+ * the
+ *  units class. It could be made more general, but that would be less
+ * efficient.
+ *  @param workspace :: The workspace after initial unit conversion
+ *  @return The workspace after bins have been removed
+ */
 API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
     const Mantid::API::MatrixWorkspace_const_sptr workspace) {
   MatrixWorkspace_sptr result;
@@ -783,8 +785,8 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
 }
 
 /** Divide by the bin width if workspace is a distribution
-*  @param outputWS The workspace to operate on
-*/
+ *  @param outputWS The workspace to operate on
+ */
 void ConvertUnits::putBackBinWidth(const API::MatrixWorkspace_sptr outputWS) {
   const size_t outSize = outputWS->blocksize();
 
@@ -797,5 +799,5 @@ void ConvertUnits::putBackBinWidth(const API::MatrixWorkspace_sptr outputWS) {
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

@@ -89,7 +89,7 @@ public:
   int intersect(std::list<Kernel::V3D> &, const Sphere &) const;
 };
 
-} // NAMESPACE MonteCarlo
+} // namespace Geometry
 
 } // NAMESPACE Mantid
 

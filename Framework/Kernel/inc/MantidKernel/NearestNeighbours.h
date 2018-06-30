@@ -1,8 +1,8 @@
 #ifndef MANTID_KERNEL_NEARESTNEIGHBOURS_H_
 #define MANTID_KERNEL_NEARESTNEIGHBOURS_H_
 
-#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ANN/ANN.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/make_unique.h"
 
 #include <Eigen/Core>
@@ -190,7 +190,7 @@ private:
   /// handle to the ANN KD-tree used for searching
   std::unique_ptr<ANNkd_tree> m_kdTree;
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif

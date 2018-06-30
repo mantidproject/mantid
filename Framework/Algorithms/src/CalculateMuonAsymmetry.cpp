@@ -36,8 +36,8 @@ using std::size_t;
 DECLARE_ALGORITHM(CalculateMuonAsymmetry)
 
 /** Initialisation method. Declares properties to be used in algorithm.
-*
-*/
+ *
+ */
 void CalculateMuonAsymmetry::init() {
   // norm table to update
   declareProperty(
@@ -82,10 +82,10 @@ void CalculateMuonAsymmetry::init() {
       "Stop after this number of iterations if a good fit is not found");
 }
 /*
-* Validate the input parameters
-* @returns map with keys corresponding to properties with errors and values
-* containing the error messages.
-*/
+ * Validate the input parameters
+ * @returns map with keys corresponding to properties with errors and values
+ * containing the error messages.
+ */
 std::map<std::string, std::string> CalculateMuonAsymmetry::validateInputs() {
   // create the map
   std::map<std::string, std::string> validationOutput;
@@ -161,8 +161,8 @@ std::map<std::string, std::string> CalculateMuonAsymmetry::validateInputs() {
   return validationOutput;
 }
 /** Executes the algorithm
-*
-*/
+ *
+ */
 
 void CalculateMuonAsymmetry::exec() {
   const std::vector<std::string> wsNamesUnNorm =
@@ -196,7 +196,7 @@ void CalculateMuonAsymmetry::exec() {
  * to a linear fitting function
  * @param wsNames ::  names of workspaces to fit to
  * @return normalization constants
-*/
+ */
 
 std::vector<double> CalculateMuonAsymmetry::getNormConstants(
     const std::vector<std::string> wsNames) {
@@ -264,10 +264,10 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(
   return norms;
 }
 /**
-* Gets the normalization from a fitting function
-* @param func ::  fittef function
-* @return normalization constant
-*/
+ * Gets the normalization from a fitting function
+ * @param func ::  fittef function
+ * @return normalization constant
+ */
 double CalculateMuonAsymmetry::getNormValue(API::CompositeFunction_sptr &func) {
 
   // getFunction(0) -> N(1+g)
@@ -279,5 +279,5 @@ double CalculateMuonAsymmetry::getNormValue(API::CompositeFunction_sptr &func) {
       TFFunc->getFunction(0));
   return TFFunc->getParameter("f0.A0");
 }
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

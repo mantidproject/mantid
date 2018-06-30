@@ -98,8 +98,8 @@ void LoadAsciiDialog::initLayout() {
 }
 
 /**
-* A slot for the browse button "clicked" signal
-*/
+ * A slot for the browse button "clicked" signal
+ */
 void LoadAsciiDialog::browseClicked() {
   if (!m_lineFilename->text().isEmpty()) {
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
@@ -120,8 +120,8 @@ void LoadAsciiDialog::browseClicked() {
 }
 
 /**
-* Check for consistency between the file extension and the separator
-*/
+ * Check for consistency between the file extension and the separator
+ */
 void LoadAsciiDialog::checkFileExtension() {
   QString fileName = m_lineFilename->text();
   if (fileName.isEmpty())
@@ -131,5 +131,5 @@ void LoadAsciiDialog::checkFileExtension() {
     m_separatorBox->setCurrentIndex(m_separatorBox->findText("CSV"));
   }
 }
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt

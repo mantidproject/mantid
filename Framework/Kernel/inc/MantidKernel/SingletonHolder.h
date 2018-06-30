@@ -101,7 +101,7 @@ template <typename T> std::once_flag SingletonHolder<T>::flag;
 
 /// variable to allow trapping of attempts to destroy a singleton more than once
 template <typename T> bool SingletonHolder<T>::destroyed = false;
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif // SINGLETON_HOLDER_H

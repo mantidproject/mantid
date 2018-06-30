@@ -16,10 +16,10 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountVariances;
+using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::HistogramData::Points;
 
 class RebunchTest : public CxxTest::TestSuite {
 public:

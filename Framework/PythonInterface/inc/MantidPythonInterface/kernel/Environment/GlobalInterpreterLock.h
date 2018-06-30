@@ -61,8 +61,8 @@ private:
   /// Current GIL state
   PyGILState_STATE m_state;
 };
-}
-}
-}
+} // namespace Environment
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_GLOBALINTERPRETERLOCK_H_ */

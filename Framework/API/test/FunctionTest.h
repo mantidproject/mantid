@@ -2,15 +2,15 @@
 #define IFUNCTIONTEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ParameterTie.h"
-#include "PropertyManagerHelper.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -397,9 +397,9 @@ public:
   }
 
   /**
-  * Test declaring a const IFunction property and retrieving as const or
-  * non-const
-  */
+   * Test declaring a const IFunction property and retrieving as const or
+   * non-const
+   */
   void testGetProperty_const_sptr() {
     const std::string funcName = "InputFunction";
     IFunction_sptr funcInput(new IFT_Funct());

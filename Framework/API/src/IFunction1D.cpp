@@ -2,25 +2,25 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/IFunction1D.tcc"
-#include "MantidAPI/Jacobian.h"
-#include "MantidAPI/IFunctionWithLocation.h"
-#include "MantidAPI/IConstraint.h"
-#include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ConstraintFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Expression.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/IConstraint.h"
+#include "MantidAPI/IFunction1D.tcc"
+#include "MantidAPI/IFunctionWithLocation.h"
+#include "MantidAPI/Jacobian.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Exception.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/muParser_Silent.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/UnitFactory.h"
 #include <boost/lexical_cast.hpp>
 
 #include <sstream>
@@ -86,10 +86,10 @@ void IFunction1D::derivative1D(double *out, const double *xValues, size_t nData,
 
 void IFunction1D::functionDeriv1D(Jacobian *jacobian, const double *xValues,
                                   const size_t nData) {
-  auto evalMethod =
-      [this](double *out, const double *xValues, const size_t nData) {
-        this->function1D(out, xValues, nData);
-      };
+  auto evalMethod = [this](double *out, const double *xValues,
+                           const size_t nData) {
+    this->function1D(out, xValues, nData);
+  };
   this->calcNumericalDerivative1D(jacobian, std::move(evalMethod), xValues,
                                   nData);
 }

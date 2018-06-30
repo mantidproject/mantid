@@ -2,17 +2,17 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidCurveFitting/Functions/PawleyFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCurveFitting/Functions/PawleyFunction.h"
 
 #include "MantidGeometry/Crystal/UnitCell.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitConversion.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -228,9 +228,10 @@ void PawleyFit::init() {
       "Table with peak information. Can be used instead of "
       "supplying a list of indices for better starting parameters.");
 
-  declareProperty("RefineZeroShift", false, "If checked, a zero-shift with the "
-                                            "same unit as the spectrum is "
-                                            "refined.");
+  declareProperty("RefineZeroShift", false,
+                  "If checked, a zero-shift with the "
+                  "same unit as the spectrum is "
+                  "refined.");
 
   auto peakFunctionValidator = boost::make_shared<StringListValidator>(
       FunctionFactory::Instance().getFunctionNames<IPeakFunction>());
@@ -246,9 +247,10 @@ void PawleyFit::init() {
   declareProperty("ChebyshevBackgroundDegree", 0,
                   "Degree of the Chebyshev polynomial, if used as background.");
 
-  declareProperty("CalculationOnly", false, "If enabled, no fit is performed, "
-                                            "the function is only evaluated "
-                                            "and output is generated.");
+  declareProperty("CalculationOnly", false,
+                  "If enabled, no fit is performed, "
+                  "the function is only evaluated "
+                  "and output is generated.");
 
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -265,9 +267,10 @@ void PawleyFit::init() {
           "RefinedPeakParameterTable", "", Direction::Output),
       "TableWorkspace with refined peak parameters, including errors.");
 
-  declareProperty("ReducedChiSquare", 0.0, "Outputs the reduced chi square "
-                                           "value as a measure for the quality "
-                                           "of the fit.",
+  declareProperty("ReducedChiSquare", 0.0,
+                  "Outputs the reduced chi square "
+                  "value as a measure for the quality "
+                  "of the fit.",
                   Direction::Output);
 
   m_dUnit = UnitFactory::Instance().create("dSpacing");

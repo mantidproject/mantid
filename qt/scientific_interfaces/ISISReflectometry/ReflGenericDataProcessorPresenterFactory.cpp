@@ -7,8 +7,8 @@ namespace CustomInterfaces {
 using namespace MantidQt::MantidWidgets;
 
 /**
-* Creates a Reflectometry Data Processor Presenter
-*/
+ * Creates a Reflectometry Data Processor Presenter
+ */
 std::unique_ptr<ReflDataProcessorPresenter>
 ReflGenericDataProcessorPresenterFactory::create(int group) {
 
@@ -115,5 +115,5 @@ ReflGenericDataProcessorPresenterFactory::create(int group) {
       whitelist, preprocessMap, processor, postprocessor, group, postprocessMap,
       "LoadISISNexus");
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

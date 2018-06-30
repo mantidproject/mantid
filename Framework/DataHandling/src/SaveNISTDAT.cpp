@@ -75,5 +75,5 @@ void SaveNISTDAT::exec() {
   progress.report("Save I(Qx,Qy)");
 }
 
-} // namespace Algorithms
+} // namespace DataHandling
 } // namespace Mantid

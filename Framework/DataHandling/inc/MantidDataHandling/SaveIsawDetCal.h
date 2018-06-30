@@ -1,10 +1,14 @@
 #ifndef MANTID_DATAHANDLING_SAVEISAWDETCAL_H_
 #define MANTID_DATAHANDLING_SAVEISAWDETCAL_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Instrument_fwd.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
+namespace Kernel {
+class V3D;
+}
 namespace DataHandling {
 
 /** Saves an instrument with RectangularDetectors to an ISAW .DetCal file.

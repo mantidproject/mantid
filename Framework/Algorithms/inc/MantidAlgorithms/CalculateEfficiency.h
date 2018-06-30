@@ -79,7 +79,7 @@ private:
                  int right, const std::string &componentName);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_CALCULATEEFFICIENCY_H_*/

@@ -42,9 +42,8 @@ struct yDataAsymmetry {
     double factor = (static_cast<double>(spec) + 1.0) * 0.5;
     double phase_offset = 4 * M_PI / 180;
     return (10. * factor *
-            (1.0 +
-             m_amp * cos(m_omega * t + m_phi +
-                         static_cast<double>(spec) * phase_offset)) *
+            (1.0 + m_amp * cos(m_omega * t + m_phi +
+                               static_cast<double>(spec) * phase_offset)) *
             e);
   }
 

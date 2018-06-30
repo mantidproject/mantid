@@ -1,9 +1,9 @@
 #ifndef POLDICONVERSIONSTEST_H
 #define POLDICONVERSIONSTEST_H
 
+#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 #include <cxxtest/TestSuite.h>
 #include <stdexcept>
-#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 
 using namespace Mantid::Poldi;
 

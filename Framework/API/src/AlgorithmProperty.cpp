@@ -12,12 +12,12 @@ namespace API {
 //-----------------------------------------------------------------------------
 
 /** Constructor
-*  @param propName :: The name to assign to the property
-*  @param validator :: The validator to use for this property (this class will
-* take ownership of the validator)
-*  @param direction :: Whether this is a Direction::Input, Direction::Output or
-* Direction::InOut (Input & Output) property
-*/
+ *  @param propName :: The name to assign to the property
+ *  @param validator :: The validator to use for this property (this class will
+ * take ownership of the validator)
+ *  @param direction :: Whether this is a Direction::Input, Direction::Output or
+ * Direction::InOut (Input & Output) property
+ */
 AlgorithmProperty::AlgorithmProperty(const std::string &propName,
                                      Kernel::IValidator_sptr validator,
                                      unsigned int direction)
@@ -26,14 +26,14 @@ AlgorithmProperty::AlgorithmProperty(const std::string &propName,
       m_algStr("") {}
 
 /**
-* Copy constructor
-*/
+ * Copy constructor
+ */
 AlgorithmProperty::AlgorithmProperty(const AlgorithmProperty &rhs)
     : Kernel::PropertyWithValue<HeldType>(rhs) {}
 
 /**
-* Copy-Assignment operator
-*/
+ * Copy-Assignment operator
+ */
 AlgorithmProperty &AlgorithmProperty::operator=(const AlgorithmProperty &rhs) {
   if (&rhs != this) {
     Kernel::PropertyWithValue<HeldType>::operator=(rhs);
@@ -59,7 +59,7 @@ std::string AlgorithmProperty::getDefault() const { return ""; }
  * @param value :: The string format for an algorithm, @see Algorithm::toString
  * @return An empty string if the value is valid, otherwise the string will
  * contain the error
-*/
+ */
 std::string AlgorithmProperty::setValue(const std::string &value) {
   std::string message;
   try {
@@ -79,5 +79,5 @@ std::string AlgorithmProperty::setValue(const std::string &value) {
     return message;
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid

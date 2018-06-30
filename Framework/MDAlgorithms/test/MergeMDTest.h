@@ -1,11 +1,11 @@
 #ifndef MANTID_MDALGORITHMS_MERGEMDTEST_H_
 #define MANTID_MDALGORITHMS_MERGEMDTEST_H_
 
-#include "MantidMDAlgorithms/MergeMD.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidMDAlgorithms/MergeMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidAPI/FrameworkManager.h"
 
 #include <cxxtest/TestSuite.h>
 

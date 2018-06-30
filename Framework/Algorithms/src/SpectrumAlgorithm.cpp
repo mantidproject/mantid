@@ -1,9 +1,9 @@
 #include "MantidAlgorithms/SpectrumAlgorithm.h"
 
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 
 using namespace Mantid;
 using namespace Algorithms;

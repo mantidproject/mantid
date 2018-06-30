@@ -1,6 +1,6 @@
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -47,7 +47,7 @@ Kernel::Logger g_log("FrameworkManager");
 const char *PLUGINS_DIR_KEY = "framework.plugins.directory";
 /// Key to define the location of the plugins to exclude from loading
 const char *PLUGINS_EXCLUDE_KEY = "framework.plugins.exclude";
-}
+} // namespace
 
 /** This is a function called every time NeXuS raises an error.
  * This swallows the errors and outputs nothing.

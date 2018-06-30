@@ -1,20 +1,20 @@
 #ifndef MANTID_ALGORITHMS_BIN2DPOWDERDIFFRACTIONTEST_H_
 #define MANTID_ALGORITHMS_BIN2DPOWDERDIFFRACTIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <iostream>
-#include <fstream>
-#include <cstdio>
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cstdio>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
+#include <iostream>
 
 #include "MantidAlgorithms/Bin2DPowderDiffraction.h"
 
@@ -268,7 +268,7 @@ private:
       }
       events.addDetectorID(Mantid::detid_t(i));
     }
-    std::cout << "Number of events: " << numbins *numSpectra << std::endl;
+    std::cout << "Number of events: " << numbins * numSpectra << std::endl;
 
     return eventWS;
   }

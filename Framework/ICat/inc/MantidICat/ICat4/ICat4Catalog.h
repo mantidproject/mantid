@@ -5,6 +5,7 @@
 #include "MantidAPI/ICatalogInfoService.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidICat/CatalogSearchParam.h"
+#include "MantidICat/ICat4/GSoapGenerated/ICat4ICATPortBindingProxy.h"
 
 namespace Mantid {
 namespace ICat {
@@ -113,7 +114,7 @@ private:
 
   // Is the desired accessType allowed for a specific bean?
   template <class T>
-  bool isAccessAllowed(ICat4::ns1__accessType accessType, T &bean);
+  bool isAccessAllowed(const ICat4::ns1__accessType &accessType, T &bean);
 
   // Stores the session details for a specific catalog.
   API::CatalogSession_sptr m_session;
@@ -132,7 +133,7 @@ private:
     }
   }
 };
-}
-}
+} // namespace ICat
+} // namespace Mantid
 
 #endif

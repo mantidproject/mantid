@@ -123,7 +123,7 @@ private:
   void mergeMergables(Mantid::Kernel::PropertyManager &sum,
                       const Mantid::Kernel::PropertyManager &toAdd);
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif // MANTIDAPI_RUN_H_

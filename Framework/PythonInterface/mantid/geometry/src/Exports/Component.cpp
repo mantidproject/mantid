@@ -1,5 +1,5 @@
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 

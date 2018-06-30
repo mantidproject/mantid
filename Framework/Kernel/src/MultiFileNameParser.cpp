@@ -369,7 +369,7 @@ operator()(const std::vector<unsigned int> &runs) {
 
   std::transform(runs.begin(), runs.end(), std::back_inserter(fileNames),
                  (*this) // Call other overloaded function operator.
-                 );
+  );
 
   return fileNames;
 }
@@ -444,7 +444,7 @@ void RunRangeList::addRunRange(
 /////////////////////////////////////////////////////////////////////////////
 
 namespace // anonymous
-    {
+{
 /**
  * Parses a string containing a run "token" and adds the runs to the parsedRuns
  * vector.

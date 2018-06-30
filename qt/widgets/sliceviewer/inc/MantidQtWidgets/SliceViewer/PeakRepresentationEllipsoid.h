@@ -1,9 +1,9 @@
 #ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_ELLIPSOID_H
 #define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_ELLIPSOID_H
 
-#include "MantidQtWidgets/SliceViewer/PeakRepresentation.h"
-#include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
 #include "MantidKernel/V2D.h"
+#include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentation.h"
 namespace MantidQt {
 namespace SliceViewer {
 
@@ -123,6 +123,6 @@ private:
   std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
       m_calculator;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 #endif

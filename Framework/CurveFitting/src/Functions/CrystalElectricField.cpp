@@ -355,10 +355,10 @@ ComplexType ddrot(int j, int m, int ms, double a, double b, double c) {
     d = 0.0;
     for (int n = std::max(0, -(m + ms)); n <= std::min(j - m, j - ms);
          ++n) { // do n=max(0,-(m+ms)),min(j-m,j-ms)
-      d = d +
-          pow(-1.0, (j - ms - n)) * binom(j - ms, n) *
-              binom(j + ms, j - m - n) * pow(cos(0.5 * b), (2 * n + m + ms)) *
-              pow(sin(0.5 * b), (2 * j - 2 * n - m - ms));
+      d = d + pow(-1.0, (j - ms - n)) * binom(j - ms, n) *
+                  binom(j + ms, j - m - n) *
+                  pow(cos(0.5 * b), (2 * n + m + ms)) *
+                  pow(sin(0.5 * b), (2 * j - 2 * n - m - ms));
     }
     d = d * sqrt(fac(double(j + m)) / fac(double(j + ms)) * fac(double(j - m)) /
                  fac(double(j - ms)));
@@ -790,9 +790,8 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues,
   for (int q = -1; q <= 1; ++q) { // do q=-1,1
     rbex(1, q) = ComplexType(0.0, 0.0);
     for (int qs = -1; qs <= 1; ++qs) { // do qs=-1,1
-      rbex(1, q) =
-          rbex(1, q) +
-          bex(1, qs) * ddrot(1, q, qs, alpha_euler, beta_euler, gamma_euler);
+      rbex(1, q) = rbex(1, q) + bex(1, qs) * ddrot(1, q, qs, alpha_euler,
+                                                   beta_euler, gamma_euler);
     }
   }
   DoubleFortranVector rbext(1, 3);

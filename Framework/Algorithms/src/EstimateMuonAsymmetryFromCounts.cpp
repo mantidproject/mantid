@@ -7,8 +7,8 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -34,9 +34,10 @@ void EstimateMuonAsymmetryFromCounts::init() {
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input 2D workspace.");
-  declareProperty("WorkspaceName", "", "The name used in the normalization "
-                                       "table. If this is blank the "
-                                       "InputWorkspace's name will be used.");
+  declareProperty("WorkspaceName", "",
+                  "The name used in the normalization "
+                  "table. If this is blank the "
+                  "InputWorkspace's name will be used.");
 
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -60,9 +61,10 @@ void EstimateMuonAsymmetryFromCounts::init() {
   declareProperty(
       "EndX", 15.0,
       "The upper limit for calculating the asymmetry  (an X value).");
-  declareProperty("NormalizationIn", 0.0, "If this value is non-zero then this "
-                                          "is used for the normalization, "
-                                          "instead of being estimated.");
+  declareProperty("NormalizationIn", 0.0,
+                  "If this value is non-zero then this "
+                  "is used for the normalization, "
+                  "instead of being estimated.");
 
   declareProperty(
       make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
@@ -71,10 +73,10 @@ void EstimateMuonAsymmetryFromCounts::init() {
 }
 
 /*
-* Validate the input parameters
-* @returns map with keys corresponding to properties with errors and values
-* containing the error messages.
-*/
+ * Validate the input parameters
+ * @returns map with keys corresponding to properties with errors and values
+ * containing the error messages.
+ */
 std::map<std::string, std::string>
 EstimateMuonAsymmetryFromCounts::validateInputs() {
   // create the map
@@ -212,5 +214,5 @@ void EstimateMuonAsymmetryFromCounts::exec() {
 
   setProperty("OutputWorkspace", outputWS);
 }
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

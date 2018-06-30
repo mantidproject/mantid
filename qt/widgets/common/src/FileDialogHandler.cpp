@@ -165,6 +165,6 @@ QString getCaption(const std::string &dialogName,
   }
   return dialogTitle;
 }
-}
-}
-}
+} // namespace FileDialogHandler
+} // namespace API
+} // namespace MantidQt

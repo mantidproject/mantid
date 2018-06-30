@@ -1,19 +1,19 @@
 #ifndef DOWNLOADDATAFILE_H_
 #define DOWNLOADDATAFILE_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidICat/CatalogDownloadDataFiles.h"
-#include "MantidICat/CatalogLogin.h"
-#include "MantidICat/CatalogGetDataFiles.h"
-#include "MantidICat/CatalogSearch.h"
 #include "ICatTestHelper.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include <iomanip>
-#include <fstream>
+#include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidICat/CatalogDownloadDataFiles.h"
+#include "MantidICat/CatalogGetDataFiles.h"
+#include "MantidICat/CatalogLogin.h"
+#include "MantidICat/CatalogSearch.h"
+#include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
+#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::ICat;
@@ -254,8 +254,8 @@ public:
     float diff = float(end - start) / CLOCKS_PER_SEC;
 
     ofs << "Time taken for http download from mantidwebserver over internet "
-           "for a small file of size 1KB is " << std::fixed
-        << std::setprecision(2) << diff << " seconds\n";
+           "for a small file of size 1KB is "
+        << std::fixed << std::setprecision(2) << diff << " seconds\n";
 
     ICatTestHelper::logout();
 

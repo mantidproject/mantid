@@ -1,9 +1,9 @@
-#include <QAbstractTableModel>
 #include "DllOption.h"
-#include <boost/shared_ptr.hpp>
 #include "boost/bind.hpp"
 #include "boost/function.hpp"
 #include "boost/tuple/tuple.hpp"
+#include <QAbstractTableModel>
+#include <boost/shared_ptr.hpp>
 #include <map>
 #include <vector>
 
@@ -16,7 +16,7 @@ class IPeak;
 namespace API {
 class IPeaksWorkspace;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -177,5 +177,5 @@ private:
   /// Map of column indexes to names
   ColumnIndexNameMap m_columnNameMap;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

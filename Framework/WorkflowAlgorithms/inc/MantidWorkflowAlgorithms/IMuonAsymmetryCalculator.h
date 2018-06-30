@@ -1,9 +1,9 @@
 #ifndef MANTID_WORKFLOWALGORITHMS_IMUONASYMMETRYCALCULATOR_H_
 #define MANTID_WORKFLOWALGORITHMS_IMUONASYMMETRYCALCULATOR_H_
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/AlgorithmManager.h"
 
 #include <vector>
 

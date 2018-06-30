@@ -648,8 +648,9 @@ void export_ITableWorkspace() {
            "number then it is interpreted as a row otherwise it "
            "is interpreted as a column name.")
 
-      .def("setCell", &setCell, (arg("self"), arg("row_or_column"),
-                                 arg("column_or_row"), arg("value")),
+      .def("setCell", &setCell,
+           (arg("self"), arg("row_or_column"), arg("column_or_row"),
+            arg("value")),
            "Sets the value of a given cell. If the row_or_column argument is a "
            "number then it is interpreted as a row otherwise it "
            "is interpreted as a column name.")

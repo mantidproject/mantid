@@ -2,15 +2,15 @@
 // Includes
 //----------------------
 #include "MantidQtWidgets/Common/DiagResults.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/Exception.h"
-#include <QLabel>
-#include <QHBoxLayout>
-#include <QGridLayout>
-#include <QPushButton>
 #include <QCloseEvent>
+#include <QGridLayout>
+#include <QHBoxLayout>
 #include <QHashIterator>
+#include <QLabel>
+#include <QPushButton>
 #include <QRegExp>
 
 #include <boost/lexical_cast.hpp>
@@ -36,7 +36,7 @@ int find_test(const std::string &test_name) {
   }
   return found;
 }
-}
+} // namespace
 
 //----------------------
 // Public member functions
@@ -118,9 +118,9 @@ int DiagResults::addRow(QString firstColumn, QString secondColumn) {
 }
 
 /** Displays a summary of the results of tests in to text labels
-*  @param row :: the row where the data will be displayed
-*  @param text :: the text that should be displayed in the first column
-*/
+ *  @param row :: the row where the data will be displayed
+ *  @param text :: the text that should be displayed in the first column
+ */
 void DiagResults::updateRow(int row, QString text) {
   // Get the text label from the grid
   QWidget *widget = m_Grid->itemAtPosition(row, 1)->widget();

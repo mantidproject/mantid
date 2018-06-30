@@ -25,8 +25,9 @@ void FilterChannel::setProperty(const std::string &name,
                                 const std::string &value) {
   if (name.compare(0, 7, "channel") == 0) {
     Mantid::Kernel::StringTokenizer tokenizer(
-        value, ",;", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY |
-                         Mantid::Kernel::StringTokenizer::TOK_TRIM);
+        value, ",;",
+        Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY |
+            Mantid::Kernel::StringTokenizer::TOK_TRIM);
     for (const auto &piece : tokenizer) {
       addChannel(LoggingRegistry::defaultRegistry().channelForName(piece));
     }

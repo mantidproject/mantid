@@ -1,10 +1,10 @@
 #include "MantidDataHandling/CreateSimulationWorkspace.h"
-#include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
 
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -16,8 +16,10 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include "LoadRaw/isisraw2.h"
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <Poco/File.h>
 
@@ -65,7 +67,7 @@ StartAndEndTime getStartAndEndTimesFromNexusFile(
 
   return startAndEndTime;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {

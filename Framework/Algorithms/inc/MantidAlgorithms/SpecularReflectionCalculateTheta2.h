@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_SPECULARREFLECTIONCALCULATETHETA2_H_
 #define MANTID_ALGORITHMS_SPECULARREFLECTIONCALCULATETHETA2_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/SpecularReflectionAlgorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {

@@ -1,14 +1,14 @@
 #ifndef MANTID_DATAOBJECTS_PEAKNOSHAPEFACTORY_H_
 #define MANTID_DATAOBJECTS_PEAKNOSHAPEFACTORY_H_
 
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/PeakShapeFactory.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Geometry {
 // Forward declaration
 class PeakShape;
-}
+} // namespace Geometry
 namespace DataObjects {
 /** PeakNoShapeFactory : Factory method for types of NoShape
 

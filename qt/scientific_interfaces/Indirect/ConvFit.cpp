@@ -729,8 +729,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) const {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != nullptr) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }

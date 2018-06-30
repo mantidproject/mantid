@@ -54,7 +54,7 @@ private:
   void exec() override;
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_COMPUTESENSITIVITY_H_*/

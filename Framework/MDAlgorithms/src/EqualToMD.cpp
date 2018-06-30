@@ -43,5 +43,5 @@ void EqualToMD::execHistoScalar(
   out->equalTo(scalar->y(0)[0], tolerance);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

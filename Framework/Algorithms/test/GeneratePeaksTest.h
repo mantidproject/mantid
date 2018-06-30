@@ -1,23 +1,23 @@
 #ifndef MANTID_ALGORITHMS_GENERATEPEAKSTEST_H_
 #define MANTID_ALGORITHMS_GENERATEPEAKSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/GeneratePeaks.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Column.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/GeneratePeaks.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 #include "MantidAPI/FunctionDomain.h"
-#include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionValues.h"
 #include <MantidHistogramData/LinearGenerator.h>
 
 using namespace Mantid;
@@ -27,14 +27,14 @@ using namespace Mantid::HistogramData;
 namespace {
 //----------------------------------------------------------------------------------------------
 /** Generate a TableWorkspace containing 3 peaks on 2 spectra by using
-* effective parameters
-*  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2
-* = 0
-*  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2
-* = 0
-*  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2
-* = 0
-*/
+ * effective parameters
+ *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2
+ * = 0
+ *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2
+ * = 0
+ *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2
+ * = 0
+ */
 DataObjects::TableWorkspace_sptr createTestEffectiveFuncParameters() {
   // 1. Build a TableWorkspace
   DataObjects::TableWorkspace_sptr peakparms =
@@ -64,14 +64,14 @@ DataObjects::TableWorkspace_sptr createTestEffectiveFuncParameters() {
 
 //----------------------------------------------------------------------------------------------
 /** Generate a TableWorkspace containing 3 peaks on 2 spectra by using raw
-* parameters
-*  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2
-* = 0
-*  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2
-* = 0
-*  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2
-* = 0
-*/
+ * parameters
+ *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2
+ * = 0
+ *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2
+ * = 0
+ *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2
+ * = 0
+ */
 DataObjects::TableWorkspace_sptr createTestPeakParameters2() {
   // 1. Build a TableWorkspace
   DataObjects::TableWorkspace_sptr peakparms =
@@ -101,15 +101,15 @@ DataObjects::TableWorkspace_sptr createTestPeakParameters2() {
 
 //----------------------------------------------------------------------------------------------
 /** Generate a TableWorkspace containing 3 peaks on 2 spectra by using
-* effective parameters
-* of old style f0., f1.
-*  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2
-* = 0
-*  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2
-* = 0
-*  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2
-* = 0
-*/
+ * effective parameters
+ * of old style f0., f1.
+ *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2
+ * = 0
+ *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2
+ * = 0
+ *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2
+ * = 0
+ */
 DataObjects::TableWorkspace_sptr createTestPeakParameters3() {
   // 1. Build a TableWorkspace
   DataObjects::TableWorkspace_sptr peakparms =
@@ -139,8 +139,8 @@ DataObjects::TableWorkspace_sptr createTestPeakParameters3() {
 
 //----------------------------------------------------------------------------------------------
 /** Create a MatrixWorkspace containing 5 spectra
-*  Binning parameter = 1.0, 0.02, 9.0
-*/
+ *  Binning parameter = 1.0, 0.02, 9.0
+ */
 API::MatrixWorkspace_sptr createTestInputWorkspace() {
   // 1. Create empty workspace
   double minx = 1.0;
@@ -160,7 +160,7 @@ API::MatrixWorkspace_sptr createTestInputWorkspace() {
 
   return inpWS;
 }
-}
+} // namespace
 class GeneratePeaksTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -191,8 +191,8 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test to use user-provided binning parameters and effective function
-  * parameters
-  */
+   * parameters
+   */
   void test_UserBinningParameters() {
     // Create input parameter table workspace
     DataObjects::TableWorkspace_sptr peakparmsws =
@@ -265,7 +265,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test algorithm by using an existing input workspace as X-values
-  */
+   */
   void test_FromInputWorkspace() {
     // Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters2();
@@ -341,7 +341,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test to use user-provided binning parameters
-  */
+   */
   void test_Background() {
     // Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters3();
@@ -410,7 +410,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test to input parameter values by vectors user-provided binning parameters
-  */
+   */
   void test_InputValueViaVector() {
     // Create vectors for peak and background parameters
     std::string vecpeakvalue("5.0, 2.0, 0.0849322");
@@ -469,7 +469,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test to input parameter values by vectors user-provided binning parameters
-  */
+   */
   void test_InputValueViaVectorEffective() {
     // Create vectors for peak and background parameters
     std::string vecpeakvalue("2.0, 5.0, 0.2");

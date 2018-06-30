@@ -2,11 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCrystal/IndexSXPeaks.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -19,8 +19,8 @@ using namespace API;
 using namespace Kernel;
 
 /** Initialisation method.
-*
-*/
+ *
+ */
 void IndexSXPeaks::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -127,9 +127,9 @@ void IndexSXPeaks::validateNotColinear(
 }
 
 /** Executes the algorithm
-*
-*  @throw runtime_error Thrown if algorithm cannot execute
-*/
+ *
+ *  @throw runtime_error Thrown if algorithm cannot execute
+ */
 void IndexSXPeaks::exec() {
   using namespace Mantid::DataObjects;
   std::vector<int> peakindices = getProperty("PeakIndices");
@@ -248,5 +248,5 @@ void IndexSXPeaks::exec() {
     }
   }
 }
-} // namespace Algorithms
+} // namespace Crystal
 } // namespace Mantid

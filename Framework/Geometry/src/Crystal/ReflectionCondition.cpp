@@ -105,5 +105,5 @@ getReflectionConditionBySymbol(const std::string &symbol) {
       symbol);
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

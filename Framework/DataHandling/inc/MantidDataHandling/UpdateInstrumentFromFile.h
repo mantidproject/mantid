@@ -9,7 +9,7 @@ namespace Mantid {
 namespace Geometry {
 class DetectorInfo;
 class Instrument;
-}
+} // namespace Geometry
 
 namespace DataHandling {
 /**
