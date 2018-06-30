@@ -2,16 +2,16 @@
 #define MULTIDOMAINFUNCTIONTEST_H_
 
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/JointDomain.h"
-#include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/JointDomain.h"
+#include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/ParamFunction.h"
 
-#include <cxxtest/TestSuite.h>
-#include <boost/make_shared.hpp>
 #include <algorithm>
+#include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -83,7 +83,7 @@ public:
   double get(size_t, size_t) override { return 0.0; }
   void zero() override {}
 };
-}
+} // namespace
 
 class MultiDomainFunctionTest : public CxxTest::TestSuite {
 public:

@@ -1,25 +1,25 @@
 #ifndef PARAMETERMAPTEST_H_
 #define PARAMETERMAPTEST_H_
 
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidBeamline/ComponentInfo.h"
-#include "MantidBeamline/DetectorInfo.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include <boost/function.hpp>
 #include <boost/make_shared.hpp>
 
+using Mantid::Geometry::IComponent;
+using Mantid::Geometry::IComponent_sptr;
+using Mantid::Geometry::Instrument_sptr;
 using Mantid::Geometry::ParameterMap;
 using Mantid::Geometry::ParameterMap_sptr;
 using Mantid::Geometry::Parameter_sptr;
-using Mantid::Geometry::Instrument_sptr;
-using Mantid::Geometry::IComponent;
-using Mantid::Geometry::IComponent_sptr;
 
 class ParameterMapTest : public CxxTest::TestSuite {
 public:
@@ -270,7 +270,8 @@ public:
     // string
     boost::function<void(ParameterMap *, const IComponent *,
                          const std::string &, const std::string &,
-                         const std::string *const)> faddStr;
+                         const std::string *const)>
+        faddStr;
     faddStr = (void (ParameterMap::*)(const IComponent *, const std::string &,
                                       const std::string &,
                                       const std::string *const)) &
@@ -281,7 +282,8 @@ public:
     // V3D
     boost::function<void(ParameterMap *, const IComponent *,
                          const std::string &, const V3D &,
-                         const std::string *const)> faddV3D;
+                         const std::string *const)>
+        faddV3D;
     faddV3D = (void (ParameterMap::*)(const IComponent *, const std::string &,
                                       const V3D &, const std::string *const)) &
               ParameterMap::addV3D;
@@ -291,7 +293,8 @@ public:
     // Quat
     boost::function<void(ParameterMap *, const IComponent *,
                          const std::string &, const Quat &,
-                         const std::string *const)> faddQuat;
+                         const std::string *const)>
+        faddQuat;
     faddQuat =
         (void (ParameterMap::*)(const IComponent *, const std::string &,
                                 const Quat &, const std::string *const)) &
@@ -310,11 +313,10 @@ public:
 
     // double
     AddFuncHelper faddDouble;
-    faddDouble =
-        (void (ParameterMap::*)(const IComponent *, const std::string &,
-                                const std::string &,
-                                const std::string *const)) &
-        ParameterMap::addDouble;
+    faddDouble = (void (ParameterMap::*)(
+                     const IComponent *, const std::string &,
+                     const std::string &, const std::string *const)) &
+                 ParameterMap::addDouble;
     doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, double>(
         faddDouble, "name", 5.0, 4.0);
 

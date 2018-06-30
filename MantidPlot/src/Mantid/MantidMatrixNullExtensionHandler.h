@@ -2,8 +2,8 @@
 #define MANTIDPLOT_MANTIDMATRIXNULLEXTENSIONHANDLER_H
 
 #include "IMantidMatrixExtensionHandler.h"
-#include "MantidMatrixTabExtension.h"
 #include "MantidKernel/Logger.h"
+#include "MantidMatrixTabExtension.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("MantidMatrixNullExtensionHandler");

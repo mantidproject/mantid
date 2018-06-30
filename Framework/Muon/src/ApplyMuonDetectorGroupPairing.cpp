@@ -53,9 +53,10 @@ void ApplyMuonDetectorGroupPairing::init() {
           PropertyMode::Mandatory),
       "The workspace group to which the output will be added.");
 
-  declareProperty("PairName", emptyString, "The name of the pair. Must "
-                                           "contain at least one alphanumeric "
-                                           "character.",
+  declareProperty("PairName", emptyString,
+                  "The name of the pair. Must "
+                  "contain at least one alphanumeric "
+                  "character.",
                   Direction::Input);
 
   declareProperty("Alpha", 1.0,

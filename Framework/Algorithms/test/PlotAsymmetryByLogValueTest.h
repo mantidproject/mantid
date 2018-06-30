@@ -1,18 +1,18 @@
 #ifndef PLOTASYMMETRYBYLOGVALUTEST_H_
 #define PLOTASYMMETRYBYLOGVALUTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/LoadMuonNexus.h"
+#include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/SaveNexus.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include <cxxtest/TestSuite.h>
 
 #include <Poco/File.h>
 #include <Poco/NObserver.h>
@@ -72,8 +72,9 @@ public:
       : m_loadedCount(0), m_foundCount(0),
         m_observer(*this, &ProgressWatcher::handleProgress) {}
   /// Add a notification to the count
-  void handleProgress(const Poco::AutoPtr<
-      Mantid::API::Algorithm::ProgressNotification> &notification) {
+  void handleProgress(
+      const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>
+          &notification) {
     const auto &message = notification->message;
     if (0 == message.compare(0, 5, "Found")) {
       ++m_foundCount;

@@ -47,7 +47,7 @@ private:
   size_t m_recursionDepth = 5;
   bool m_loadInMemory = true;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

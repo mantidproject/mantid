@@ -1,26 +1,26 @@
 #include "MantidMDAlgorithms/ConvertCWSDMDtoHKL.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitLabelTypes.h"
 
-#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidMDAlgorithms/MDWSDescription.h"
-#include "MantidMDAlgorithms/MDWSTransform.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
 
 #include <fstream>
 

@@ -1,14 +1,14 @@
 #ifndef ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACE2TEST_H_
 #define ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACE2TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/CreateTransmissionWorkspace2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/CreateTransmissionWorkspace2.h"
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <algorithm>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

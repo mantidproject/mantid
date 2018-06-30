@@ -63,6 +63,6 @@ private:
   /// Execution code
   void exec() override;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif // DATAHANDING_LOADQKK_H_

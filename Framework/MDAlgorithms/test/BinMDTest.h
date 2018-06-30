@@ -104,10 +104,10 @@ public:
   }
 
   /** Test the algo
-  * @param nameX : name of the axis
-  * @param expected_signal :: how many events in each resulting bin
-  * @param expected_numBins :: how many points/bins in the output
-  */
+   * @param nameX : name of the axis
+   * @param expected_signal :: how many events in each resulting bin
+   * @param expected_numBins :: how many points/bins in the output
+   */
   void do_test_exec(const std::string &functionXML, const std::string &name1,
                     const std::string &name2, const std::string &name3,
                     const std::string &name4, const double expected_signal,
@@ -412,11 +412,11 @@ public:
 
   /** Test the algorithm, with a coordinate transformation.
    *
-  * @param binsX : # of bins in the output
-  * @param expected_signal :: how many events in each resulting bin
-  * @param expected_numBins :: how many points/bins in the output
-  * @param FlipYBasis :: flip the Y basis vector
-  */
+   * @param binsX : # of bins in the output
+   * @param expected_signal :: how many events in each resulting bin
+   * @param expected_numBins :: how many points/bins in the output
+   * @param FlipYBasis :: flip the Y basis vector
+   */
   void do_test_transform(int binsX, int binsY, int binsZ,
                          double expected_signal, size_t expected_numBins,
                          bool IterateEvents, bool ForceOrthogonal,

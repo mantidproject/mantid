@@ -1,10 +1,10 @@
 #ifndef MANTID_GEOMETRY_SPACEGROUPFACTORY_H_
 #define MANTID_GEOMETRY_SPACEGROUPFACTORY_H_
 
-#include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/RegistrationHelper.h"
+#include "MantidKernel/SingletonHolder.h"
 
 #include <map>
 
@@ -14,9 +14,9 @@ namespace Geometry {
 bool MANTID_GEOMETRY_DLL
 isValidGeneratorString(const std::string &generatorString);
 
-std::vector<std::string> MANTID_GEOMETRY_DLL
-operator*(const SymmetryOperation &symOp,
-          const std::vector<std::string> &strings);
+std::vector<std::string>
+    MANTID_GEOMETRY_DLL operator*(const SymmetryOperation &symOp,
+                                  const std::vector<std::string> &strings);
 
 /**
  * @class AbstractSpaceGroupGenerator
@@ -276,7 +276,7 @@ namespace Kernel {
 EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL
     Mantid::Kernel::SingletonHolder<Mantid::Geometry::SpaceGroupFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 /* Macros for compile time space group registration
  *

@@ -1,9 +1,9 @@
 #ifndef MANTID_ISISREFLECTOMETRY_EXPERIMENTOPTIONDEFAULTS_H
 #define MANTID_ISISREFLECTOMETRY_EXPERIMENTOPTIONDEFAULTS_H
-#include <string>
-#include <ostream>
 #include "DllConfig.h"
 #include <boost/optional.hpp>
+#include <ostream>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -34,6 +34,6 @@ operator==(const ExperimentOptionDefaults &lhs,
 
 MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
 operator<<(std::ostream &os, ExperimentOptionDefaults const &defaults);
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_EXPERIMENTOPTIONDEFAULTS_H

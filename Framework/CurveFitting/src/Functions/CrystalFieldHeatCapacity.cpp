@@ -1,12 +1,12 @@
 #include "MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h"
-#include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
-#include "MantidCurveFitting/FortranDefs.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/Jacobian.h"
+#include "MantidCurveFitting/FortranDefs.h"
+#include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <cmath>
@@ -41,7 +41,7 @@ void calculate(double *out, const double *xValues, const size_t nData,
     out[iT] = ((U2 - U * U) / (k_B * xValues[iT] * xValues[iT])) * convfact;
   }
 }
-}
+} // namespace
 
 CrystalFieldHeatCapacityBase::CrystalFieldHeatCapacityBase()
     : API::IFunction1D() {

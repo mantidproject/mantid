@@ -5,8 +5,8 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 #include <memory>
 #include <vector>
 
@@ -20,7 +20,7 @@ class MeshObject;
 namespace detail {
 class Renderer;
 class GeometryTriangulator;
-}
+} // namespace detail
 
 /**
 \class GeometryHandler
@@ -66,7 +66,7 @@ public:
   GeometryHandler(IObjComponent *comp);               ///< Constructor
   GeometryHandler(boost::shared_ptr<CSGObject> obj);  ///< Constructor
   GeometryHandler(CSGObject *obj);                    ///< Constructor
-  GeometryHandler(boost::shared_ptr<MeshObject> obj); ///<Constructor
+  GeometryHandler(boost::shared_ptr<MeshObject> obj); ///< Constructor
   GeometryHandler(MeshObject *obj);
   GeometryHandler(const GeometryHandler &handler);
   boost::shared_ptr<GeometryHandler> clone() const;

@@ -8,14 +8,14 @@
 #include <numpy/arrayobject.h>
 #include <numpy/arrayscalars.h>
 
-using Mantid::Types::Core::DateAndTime;
 using Mantid::PythonInterface::Converters::Impl::func_PyArray_Descr;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 // there is a different EPOCH for DateAndTime vs npy_datetime
 const npy_datetime UNIX_EPOCH_NS =
     DateAndTime("1970-01-01T00:00").totalNanoseconds();
-}
+} // namespace
 
 namespace Mantid {
 namespace PythonInterface {

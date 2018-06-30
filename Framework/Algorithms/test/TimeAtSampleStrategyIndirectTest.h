@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGYINDIRECTTEST_H_
 #define MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGYINDIRECTTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/TimeAtSampleStrategyIndirect.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Algorithms::TimeAtSampleStrategyIndirect;
 

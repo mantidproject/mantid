@@ -28,8 +28,8 @@
 #ifndef COLORMAPEDITOR_H
 #define COLORMAPEDITOR_H
 
-#include <QWidget>
 #include <QLocale>
+#include <QWidget>
 #include <qwt_color_map.h>
 
 class QPushButton;

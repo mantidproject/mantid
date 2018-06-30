@@ -10,8 +10,8 @@
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidTypes/SpectrumDefinition.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -1114,8 +1114,8 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
     auto id = paramComp->getComponentID();
     auto &compParamNames = mapCmptToNameVector[id];
     if (compParamNames.size() > 0) {
-      text += QString::fromStdString("\nParameters from: " +
-                                     paramComp->getName() + "\n");
+      text += QString::fromStdString(
+          "\nParameters from: " + paramComp->getName() + "\n");
       std::sort(compParamNames.begin(), compParamNames.end(),
                 Mantid::Kernel::CaseInsensitiveStringComparator());
       for (auto itParamName = compParamNames.begin();
@@ -1201,9 +1201,9 @@ const Mantid::Geometry::ComponentInfo &InstrumentActor::componentInfo() const {
 }
 
 /** If instrument.geometry.view is set to Default or Physical, then the physical
-* instrument detectorInfo is returned. Othewise this returns the neutronic
-* version.
-*/
+ * instrument detectorInfo is returned. Othewise this returns the neutronic
+ * version.
+ */
 const Mantid::Geometry::DetectorInfo &InstrumentActor::detectorInfo() const {
   if (m_isPhysicalInstrument)
     return *m_physicalDetectorInfo;

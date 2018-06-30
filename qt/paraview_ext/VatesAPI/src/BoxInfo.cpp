@@ -25,5 +25,5 @@ boost::optional<int> findRecursionDepthForTopLevelSplitting(
   }
   return recursionDepth;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

@@ -2,21 +2,21 @@
 #define PROJECT_SERIALISER_H
 
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
+#include <QApplication>
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QStringList>
-#include <QDir>
-#include <QApplication>
 
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 
-#include "qstring.h"
 #include "Graph3D.h"
 #include "Mantid/MantidMatrix.h"
+#include "qstring.h"
 
 // Forward declare Mantid classes.
 class ApplicationWindow;
@@ -161,7 +161,7 @@ private:
 
   groupNameToWsNamesT parseWsNames(const std::string &wsNames);
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif // PROJECT_SERIALISER_H

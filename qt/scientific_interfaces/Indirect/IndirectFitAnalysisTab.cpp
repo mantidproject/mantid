@@ -1040,7 +1040,7 @@ IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
  *                  browser, to the name of a function in the selected model.
  */
 QHash<QString, QString>
-    IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
+IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
   return QHash<QString, QString>();
 }
 

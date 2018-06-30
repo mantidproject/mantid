@@ -4,10 +4,10 @@
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 
 // std headers
+#include <cmath>
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <cmath>
 
 #include <QRgb>
 #include <limits>
@@ -21,7 +21,7 @@ namespace {
 // Log(0) -> inf. Any values less than this cutoff will get set to 1 before the
 // log is taken
 const double LOG_ZERO_CUTOFF = 1e-15;
-}
+} // namespace
 
 //--------------------------------------
 // Public member functions

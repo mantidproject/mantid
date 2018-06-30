@@ -2,12 +2,12 @@
 #define MANTID_MDEVENTS_FAKEMDEVENTDATATEST_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidMDAlgorithms/FakeMDEventData.h"
-#include "MantidMDAlgorithms/BinMD.h"
 #include "MantidAPI/Run.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidMDAlgorithms/BinMD.h"
+#include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

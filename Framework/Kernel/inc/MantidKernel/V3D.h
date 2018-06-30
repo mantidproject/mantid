@@ -1,10 +1,10 @@
 #ifndef MANTID_KERNEL_V3D_H_
 #define MANTID_KERNEL_V3D_H_
 
+#include "MantidKernel/DllConfig.h"
 #include <cmath>
 #include <iosfwd>
 #include <vector>
-#include "MantidKernel/DllConfig.h"
 
 namespace NeXus {
 class File;
@@ -144,7 +144,7 @@ public:
   } ///< Calculate the volume of a cube X*Y*Z
 
   int reBase(const V3D &, const V3D &,
-             const V3D &); ///<rebase to new basis vector
+             const V3D &); ///< rebase to new basis vector
   int masterDir(const double Tol =
                     1e-3) const; ///< Determine if there is a master direction
   bool

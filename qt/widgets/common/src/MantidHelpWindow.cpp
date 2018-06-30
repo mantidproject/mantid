@@ -1,13 +1,11 @@
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/MantidHelpWindow.h"
-#include "MantidQtWidgets/Common/pqHelpWindow.h"
-#include "MantidQtWidgets/Common/InterfaceManager.h"
-#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/RegistrationHelper.h"
-#include <boost/make_shared.hpp>
-#include <boost/lexical_cast.hpp>
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/pqHelpWindow.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <QApplication>
@@ -17,6 +15,8 @@
 #include <QLatin1Char>
 #include <QLatin1String>
 #include <QResource>
+#include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QStandardPaths>
 #endif
@@ -38,7 +38,7 @@ REGISTER_HELPWINDOW(MantidHelpWindow)
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MantidHelpWindow");
-}
+} // namespace
 
 // initialise the help window
 pqHelpWindow *MantidHelpWindow::g_helpWindow = nullptr;

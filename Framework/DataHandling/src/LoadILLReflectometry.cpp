@@ -25,7 +25,7 @@ namespace Figaro {
 constexpr double detectorRestY{0.509};
 constexpr double DH1Z{1.135}; // Motor DH1 horizontal position
 constexpr double DH2Z{2.077}; // Motor DH2 horizontal position
-}
+} // namespace Figaro
 
 /// A struct for information needed for detector angle calibration.
 struct PeakInfo {
@@ -202,12 +202,11 @@ int LoadILLReflectometry::confidence(
   // fields existent only at the ILL
   if ((descriptor.pathExists("/entry0/wavelength") || // ILL D17
        descriptor.pathExists("/entry0/theta"))        // ILL Figaro
-      &&
-      descriptor.pathExists("/entry0/experiment_identifier") &&
+      && descriptor.pathExists("/entry0/experiment_identifier") &&
       descriptor.pathExists("/entry0/mode") &&
       (descriptor.pathExists("/entry0/instrument/VirtualChopper") || // ILL D17
        descriptor.pathExists("/entry0/instrument/Theta")) // ILL Figaro
-      )
+  )
     return 80;
   else
     return 0;
@@ -308,11 +307,11 @@ void LoadILLReflectometry::loadInstrument() {
 }
 
 /**
-  * Init names of sample logs based on instrument specific NeXus file
-  * entries
-  *
-  * @param entry :: the NeXus file entry
-  */
+ * Init names of sample logs based on instrument specific NeXus file
+ * entries
+ *
+ * @param entry :: the NeXus file entry
+ */
 void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   std::string instrumentNamePath = m_loader.findInstrumentNexusPath(entry);
   std::string instrumentName =
@@ -446,7 +445,8 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
          "several tubes, after integration one "
          "tube remains in the Nexus file.\n Number of tubes (banks): 1\n";
   g_log.debug() << "Number of pixels per tube (number of detectors and number "
-                   "of histograms): " << m_numberOfHistograms << '\n';
+                   "of histograms): "
+                << m_numberOfHistograms << '\n';
   g_log.debug() << "Number of time channels: " << m_numberOfChannels << '\n';
   g_log.debug() << "Channel width: " << m_channelWidth << " 1e-6 sec\n";
   g_log.debug() << "TOF delay: " << m_tofDelay << '\n';
@@ -544,10 +544,10 @@ std::vector<double> LoadILLReflectometry::getXValues() {
                       << ". Check you NeXus file.\n";
       }
       const double chopWindow = 45.0;
-      const double t_TOF2 = m_tofDelay -
-                            1.e+6 * 60.0 * (POFF - chopWindow + chop2Phase -
-                                            chop1Phase + openOffset) /
-                                (2.0 * 360 * chop1Speed);
+      const double t_TOF2 = m_tofDelay - 1.e+6 * 60.0 *
+                                             (POFF - chopWindow + chop2Phase -
+                                              chop1Phase + openOffset) /
+                                             (2.0 * 360 * chop1Speed);
       g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
       // compute tof values
       for (int channelIndex = 0;
@@ -625,11 +625,11 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
 }
 
 /**
-  * Gaussian fit to determine peak position if no user position given.
-  *
-  * @return :: detector position of the peak: Gaussian fit and position
-  * of the maximum (serves as start value for the optimization)
-  */
+ * Gaussian fit to determine peak position if no user position given.
+ *
+ * @return :: detector position of the peak: Gaussian fit and position
+ * of the maximum (serves as start value for the optimization)
+ */
 double LoadILLReflectometry::reflectometryPeak() {
   if (!isDefault("BeamCentre")) {
     return getProperty("BeamCentre");

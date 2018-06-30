@@ -5,9 +5,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "../ISISReflectometry/ReflSettingsPresenter.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "../ISISReflectometry/ReflSettingsPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include "ReflMockObjects.h"
 #include <boost/algorithm/string.hpp>
@@ -33,7 +33,7 @@ public:
 std::string variantToString(const QVariant &variant) {
   return variant.value<QString>().toStdString();
 }
-}
+} // namespace
 
 //=====================================================================================
 // Functional tests

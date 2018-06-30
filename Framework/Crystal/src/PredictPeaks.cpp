@@ -1,23 +1,23 @@
 #include "MantidCrystal/PredictPeaks.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
+#include "MantidGeometry/Crystal/EdgePixel.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
 #include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
-#include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Crystal/EdgePixel.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/InstrumentRayTracer.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/make_unique.h"
 
 #include <fstream>
 using Mantid::Kernel::EnabledWhenProperty;
@@ -43,7 +43,7 @@ double get_factor_for_q_convention(const std::string &convention) {
 
   return 1.0;
 }
-}
+} // namespace
 
 /** Constructor
  */
@@ -193,7 +193,8 @@ void PredictPeaks::exec() {
     } catch (std::runtime_error &e) {
       // If there is no goniometer matrix, use identity matrix instead.
       g_log.error() << "Error getting the goniometer rotation matrix from the "
-                       "InputWorkspace.\n" << e.what() << '\n';
+                       "InputWorkspace.\n"
+                    << e.what() << '\n';
       g_log.warning() << "Using identity goniometer rotation matrix instead.\n";
     }
   } else if (peaksWS) {
@@ -236,7 +237,8 @@ void PredictPeaks::exec() {
 
         g_log.error()
             << "Error getting the goniometer rotation matrix from the "
-               "InputWorkspace.\n" << e.what() << '\n';
+               "InputWorkspace.\n"
+            << e.what() << '\n';
         g_log.warning()
             << "Using identity goniometer rotation matrix instead.\n";
       }
@@ -645,5 +647,5 @@ void PredictPeaks::setReferenceFrameAndBeamDirection() {
   m_refBeamDir = m_refFrame->vecPointingAlongBeam();
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

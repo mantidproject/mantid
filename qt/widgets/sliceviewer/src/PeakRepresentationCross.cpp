@@ -1,8 +1,8 @@
-#include "MantidQtWidgets/SliceViewer/PeakPrimitives.h"
-#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
 #include "MantidQtWidgets/SliceViewer/PeakRepresentationCross.h"
-#include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
 #include "MantidKernel/V2D.h"
+#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
+#include "MantidQtWidgets/SliceViewer/PeakPrimitives.h"
+#include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
 #include <QPainter>
 
 namespace MantidQt {
@@ -142,5 +142,5 @@ const Mantid::Kernel::V3D &PeakRepresentationCross::getOrigin() const {
 void PeakRepresentationCross::showBackgroundRadius(const bool) {
   // Do nothing
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

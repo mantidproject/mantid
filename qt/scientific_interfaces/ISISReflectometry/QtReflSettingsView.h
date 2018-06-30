@@ -2,11 +2,11 @@
 #ifndef MANTID_CUSTOMINTERFACES_QTREFLSETTINGSVIEW_H_
 #define MANTID_CUSTOMINTERFACES_QTREFLSETTINGSVIEW_H_
 
+#include "ExperimentOptionDefaults.h"
 #include "IReflSettingsView.h"
+#include "InstrumentOptionDefaults.h"
 #include "ui_ReflSettingsWidget.h"
 #include <memory>
-#include "ExperimentOptionDefaults.h"
-#include "InstrumentOptionDefaults.h"
 
 namespace MantidQt {
 
@@ -193,7 +193,7 @@ private:
   /// instead?
   QStringList m_columnProperties;
 };
-} // namespace Mantid
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_QTREFLSETTINGSVIEW_H_ */

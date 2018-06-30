@@ -3,7 +3,6 @@
 
 #include <math.h>
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -11,6 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -132,7 +132,7 @@ MatrixWorkspace_sptr loadMuonDataset() {
       boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
   return m_loadedData;
 }
-}
+} // namespace
 
 class PhaseQuadMuonTest : public CxxTest::TestSuite {
 public:

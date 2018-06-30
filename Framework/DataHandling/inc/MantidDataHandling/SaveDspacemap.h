@@ -39,7 +39,7 @@ private:
                          std::string DFileName);
 };
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid
 
 #endif /* MANTID_DATAHANDLING_SAVEDSPACEMAP_H_ */

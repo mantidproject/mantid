@@ -1,11 +1,11 @@
 #include "MantidQtWidgets/RefDetectorView/RefImageView.h"
 #include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
 
-#include "ui_RefImageView.h"
 #include "MantidQtWidgets/RefDetectorView/RefIVConnections.h"
 #include "MantidQtWidgets/RefDetectorView/RefImageDisplay.h"
-#include "MantidQtWidgets/RefDetectorView/RefSliderHandler.h"
 #include "MantidQtWidgets/RefDetectorView/RefRangeHandler.h"
+#include "MantidQtWidgets/RefDetectorView/RefSliderHandler.h"
+#include "ui_RefImageView.h"
 
 #include <sstream>
 #include <string>

@@ -6,12 +6,14 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/System.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
+#include <Poco/Exception.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <Poco/Exception.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -202,8 +204,8 @@ void AppendGeometryToSNSNexus::exec() {
                instr_iter != instr_items.end(); ++instr_iter) {
             // Look for NXdetectors
             if (instr_iter->second == "NXdetector") {
-              g_log.debug() << "Detector called '" << instr_iter->first
-                            << "' found.\n";
+              g_log.debug()
+                  << "Detector called '" << instr_iter->first << "' found.\n";
               std::string bankName = instr_iter->first;
               std::vector<Geometry::IDetector_const_sptr> dets;
               ws->getInstrument()->getDetectorsInBank(dets, bankName);
@@ -416,5 +418,5 @@ bool AppendGeometryToSNSNexus::runLoadNexusLogs(
 
   return executionSuccessful;
 }
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

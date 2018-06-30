@@ -81,8 +81,8 @@ void CreateTransmissionWorkspace2::init() {
 }
 
 /** Validate inputs
-* @return :: error message to show
-*/
+ * @return :: error message to show
+ */
 std::map<std::string, std::string>
 CreateTransmissionWorkspace2::validateInputs() {
 
@@ -128,10 +128,10 @@ void CreateTransmissionWorkspace2::exec() {
 }
 
 /** Normalize detectors by monitors
-* @param IvsLam :: a workspace in wavelength that contains spectra for both
-* monitors and detectors
-* @return :: the normalized workspace
-*/
+ * @param IvsLam :: a workspace in wavelength that contains spectra for both
+ * monitors and detectors
+ * @return :: the normalized workspace
+ */
 MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
     const MatrixWorkspace_sptr IvsLam) {
 

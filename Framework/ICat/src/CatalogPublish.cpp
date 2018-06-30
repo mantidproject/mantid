@@ -9,19 +9,19 @@
 #include "MantidKernel/MandatoryValidator.h"
 
 #include <Poco/Net/AcceptCertificateHandler.h>
-#include <Poco/Net/PrivateKeyPassphraseHandler.h>
-#include <Poco/Net/HTTPSClientSession.h>
-#include <Poco/Net/SSLException.h>
-#include <Poco/Net/SSLManager.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/HTTPSClientSession.h>
+#include <Poco/Net/PrivateKeyPassphraseHandler.h>
+#include <Poco/Net/SSLException.h>
+#include <Poco/Net/SSLManager.h>
 #include <Poco/Path.h>
 #include <Poco/SharedPtr.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/URI.h>
 
-#include <fstream>
 #include <boost/regex.hpp>
+#include <fstream>
 
 namespace Mantid {
 namespace ICat {
@@ -199,10 +199,10 @@ void CatalogPublish::publish(std::istream &fileContents,
 }
 
 /**
-* Checks to see if the file to be downloaded is a datafile.
-* @param filePath :: Path of data file to use.
-* @returns True if the file in the path is a data file.
-*/
+ * Checks to see if the file to be downloaded is a datafile.
+ * @param filePath :: Path of data file to use.
+ * @returns True if the file in the path is a data file.
+ */
 bool CatalogPublish::isDataFile(const std::string &filePath) {
   std::string extension = Poco::Path(filePath).getExtension();
   std::transform(extension.begin(), extension.end(), extension.begin(),
@@ -267,5 +267,5 @@ const std::string CatalogPublish::generateWorkspaceHistory(
   wsHistory->execute();
   return wsHistory->getPropertyValue("ScriptText");
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

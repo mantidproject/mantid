@@ -134,6 +134,6 @@ bool pathsSameUntilDepth(int depth, RowLocation const &locationA,
   return boost::algorithm::equal(pathA.cbegin(), pathA.cbegin() + depth,
                                  pathB.cbegin(), pathB.cbegin() + depth);
 }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

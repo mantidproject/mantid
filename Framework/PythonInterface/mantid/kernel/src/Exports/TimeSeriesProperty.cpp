@@ -7,12 +7,12 @@
 #include <boost/python/implicit.hpp>
 #include <boost/python/init.hpp>
 #include <boost/python/make_function.hpp>
-#include <boost/python/return_value_policy.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/return_value_policy.hpp>
 
-using Mantid::Types::Core::DateAndTime;
-using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Kernel::Property;
+using Mantid::Kernel::TimeSeriesProperty;
+using Mantid::Types::Core::DateAndTime;
 using namespace boost::python;
 using boost::python::arg;
 
@@ -43,22 +43,24 @@ void addPyTimeValue(TimeSeriesProperty<TYPE> &self,
       #Prefix "TimeSeriesProperty",                                            \
       init<const std::string &>((arg("self"), arg("value"))))                  \
       .add_property(                                                           \
-           "value",                                                            \
-           make_function(                                                      \
-               &Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector,      \
-               return_value_policy<VectorToNumpy>()))                          \
+          "value",                                                             \
+          make_function(                                                       \
+              &Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector,       \
+              return_value_policy<VectorToNumpy>()))                           \
       .add_property(                                                           \
-           "times",                                                            \
-           make_function(                                                      \
-               &Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector,       \
-               return_value_policy<VectorToNumpy>()))                          \
-      .def("addValue", (void (TimeSeriesProperty<TYPE>::*)(                    \
-                           const DateAndTime &, const TYPE)) &                 \
-                           TimeSeriesProperty<TYPE>::addValue,                 \
+          "times",                                                             \
+          make_function(                                                       \
+              &Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector,        \
+              return_value_policy<VectorToNumpy>()))                           \
+      .def("addValue",                                                         \
+           (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &,            \
+                                               const TYPE)) &                  \
+               TimeSeriesProperty<TYPE>::addValue,                             \
            (arg("self"), arg("time"), arg("value")))                           \
-      .def("addValue", (void (TimeSeriesProperty<TYPE>::*)(                    \
-                           const std::string &, const TYPE)) &                 \
-                           TimeSeriesProperty<TYPE>::addValue,                 \
+      .def("addValue",                                                         \
+           (void (TimeSeriesProperty<TYPE>::*)(const std::string &,            \
+                                               const TYPE)) &                  \
+               TimeSeriesProperty<TYPE>::addValue,                             \
            (arg("self"), arg("time"), arg("value")))                           \
       .def("addValue", &addPyTimeValue<TYPE>,                                  \
            (arg("self"), arg("time"), arg("value")))                           \
@@ -81,7 +83,7 @@ void addPyTimeValue(TimeSeriesProperty<TYPE> &self,
            "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")      \
       .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue,    \
            arg("self"));
-}
+} // namespace
 
 void export_TimeSeriesProperty_Double() {
   EXPORT_TIMESERIES_PROP(double, Float);
@@ -112,8 +114,8 @@ void export_TimeSeriesPropertyStatistics() {
       .add_property("median",
                     &Mantid::Kernel::TimeSeriesPropertyStatistics::median)
       .add_property(
-           "standard_deviation",
-           &Mantid::Kernel::TimeSeriesPropertyStatistics::standard_deviation)
+          "standard_deviation",
+          &Mantid::Kernel::TimeSeriesPropertyStatistics::standard_deviation)
       .add_property("duration",
                     &Mantid::Kernel::TimeSeriesPropertyStatistics::duration);
 }

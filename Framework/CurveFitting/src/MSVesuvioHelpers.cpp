@@ -277,12 +277,12 @@ double finalEnergyAuYap(const double randv) {
 }
 
 /**
-   * Generate the final energy of a neutron for uranium foil analyser at 293K
-   * with number density of 1.456E20 atoms/cm^2 in double-difference mode.
-   * @param randv A random number between 0.0 & 1.0, sample from a flat
+ * Generate the final energy of a neutron for uranium foil analyser at 293K
+ * with number density of 1.456E20 atoms/cm^2 in double-difference mode.
+ * @param randv A random number between 0.0 & 1.0, sample from a flat
  * distribution
-   * @return A value to use for the final energy
-   */
+ * @return A value to use for the final energy
+ */
 double finalEnergyUranium(const double randv) {
   static const double ENERGIES[201] = {
       5959.0, 5967.7, 5976.4, 5985.1, 5993.8, 6002.5, 6011.2, 6019.9, 6028.6,
@@ -389,7 +389,7 @@ SimulationAggregator::SimulationAggregator(const size_t nruns) {
  * @param order The number of requested scatterings
  * @param ntimes The number of times on input workspace
  * @return A reference to a new Simulation object
-*/
+ */
 Simulation &SimulationAggregator::newSimulation(const size_t order,
                                                 const size_t ntimes) {
   results.push_back(Simulation(order, ntimes));
@@ -466,5 +466,5 @@ void SimulationWithErrors::normalise() {
 }
 
 } // namespace MSVesuvioHelper
-}
-}
+} // namespace CurveFitting
+} // namespace Mantid

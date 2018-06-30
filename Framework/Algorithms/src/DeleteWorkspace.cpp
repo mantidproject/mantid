@@ -22,5 +22,5 @@ void DeleteWorkspace::exec() {
   const std::string wsName = getProperty("Workspace");
   dataStore.remove(wsName); // Logs if it doesn't exist
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

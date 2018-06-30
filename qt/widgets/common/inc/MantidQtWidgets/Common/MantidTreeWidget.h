@@ -52,6 +52,6 @@ private:
   MantidItemSortScheme m_sortScheme;
   Qt::SortOrder m_sortOrder;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQT_MANTIDWIDGETS_MANTIDTREEWIDGET_H
