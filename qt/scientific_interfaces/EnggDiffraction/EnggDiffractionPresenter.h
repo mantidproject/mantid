@@ -72,9 +72,8 @@ public:
                         const std::string &specNos);
 
   /// the focusing hard work that a worker / thread will run
-  void doFocusRun(const std::string &dir, const std::string &runNo,
-                  const std::vector<bool> &banks, const std::string &specNos,
-                  const std::string &dgFile);
+  void doFocusRun(const std::string &runNo, const std::vector<bool> &banks,
+                  const std::string &specNos, const std::string &dgFile);
 
   /// checks if its a valid run number returns string
   std::string isValidRunNumber(const std::vector<std::string> &dir);
@@ -174,8 +173,7 @@ private:
                      const std::string &dgFile = "");
 
   virtual void
-  startAsyncFocusWorker(const std::string &dir,
-                        const std::vector<std::string> &multi_RunNo,
+  startAsyncFocusWorker(const std::vector<std::string> &multi_RunNo,
                         const std::vector<bool> &banks,
                         const std::string &specNos, const std::string &dgFile);
 
@@ -206,10 +204,8 @@ private:
                                std::vector<size_t> &bankIDs,
                                std::vector<std::string> &specs);
 
-  void doFocusing(const EnggDiffCalibSettings &cs,
-                  const std::string &fullFilename, const std::string &runNo,
-                  size_t bank, const std::string &specNos,
-                  const std::string &dgFile);
+  void doFocusing(const EnggDiffCalibSettings &cs, const RunLabel &runLabel,
+                  const std::string &specNos, const std::string &dgFile);
 
   /// @name Methods related to pre-processing / re-binning
   //@{
@@ -238,21 +234,28 @@ private:
                           std::string specNos);
 
   // algorithms to save the generated workspace
-  void saveGSS(std::string inputWorkspace, std::string bank, std::string runNo);
-  void saveFocusedXYE(std::string inputWorkspace, std::string bank,
-                      std::string runNo);
-  void saveOpenGenie(std::string inputWorkspace, std::string bank,
-                     std::string runNo);
+  void saveGSS(const RunLabel &runLabel, const std::string &inputWorkspace);
+  void saveFocusedXYE(const RunLabel &runLabel,
+                      const std::string &inputWorkspace);
+  void saveNexus(const RunLabel &runLabel, const std::string &inputWorkspace);
+  void saveOpenGenie(const RunLabel &runLabel,
+                     const std::string &inputWorkspace);
+  void exportSampleLogsToHDF5(const std::string &inputWorkspace,
+                              const std::string &filename) const;
 
   // generates the required file name of the output files
-  std::string outFileNameFactory(std::string inputWorkspace, std::string runNo,
-                                 std::string bank, std::string format);
+  std::string outFileNameFactory(const std::string &inputWorkspace,
+                                 const RunLabel &runLabel,
+                                 const std::string &format);
 
   // returns a directory as a path, creating it if not found, and checking
   // errors
-  Poco::Path outFilesUserDir(const std::string &addToDir) override;
+  Poco::Path outFilesUserDir(const std::string &addToDir) const override;
+  std::string userHDFRunFilename(const int runNumber) const override;
+  std::string userHDFMultiRunFilename(
+      const std::vector<RunLabel> &runLabels) const override;
   Poco::Path outFilesGeneralDir(const std::string &addComponent);
-  Poco::Path outFilesRootDir();
+  Poco::Path outFilesRootDir() const;
 
   std::string appendToPath(const std::string &path,
                            const std::string &toAppend) const;
@@ -292,12 +295,6 @@ private:
 
   /// string to use for invalid run number error message
   const static std::string g_runNumberErrorStr;
-
-  // name of the workspace with the vanadium integration (of spectra)
-  static const std::string g_vanIntegrationWSName;
-
-  // name of the workspace with the vanadium (smoothed) curves
-  static const std::string g_vanCurvesWSName;
 
   // for the GSAS parameters (difc, difa, tzero) of the banks
   static const std::string g_calibBanksParms;

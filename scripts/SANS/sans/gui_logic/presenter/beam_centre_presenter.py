@@ -47,23 +47,28 @@ class BeamCentrePresenter(object):
 
     def on_update_instrument(self, instrument):
         self._beam_centre_model.set_scaling(instrument)
+        self._view.on_update_instrument(instrument)
 
     def on_update_rows(self):
         self._view.set_options(self._beam_centre_model)
+        state = self._parent_presenter.get_state_for_row(0)
+        if state:
+            self._beam_centre_model.reset_to_defaults_for_instrument(state_data=state.data)
 
     def on_processing_finished_centre_finder(self, result):
         # Enable button
         self._view.set_run_button_to_normal()
         # Update Centre Positions in model and GUI
-        self._beam_centre_model.lab_pos_1 = result['pos1']
-        self._beam_centre_model.lab_pos_2 = result['pos2']
-        self._beam_centre_model.hab_pos_1 = result['pos1']
-        self._beam_centre_model.hab_pos_2 = result['pos2']
-
-        self._view.lab_pos_1 = self._beam_centre_model.lab_pos_1 * self._beam_centre_model.scale_1
-        self._view.lab_pos_2 = self._beam_centre_model.lab_pos_2 * self._beam_centre_model.scale_2
-        self._view.hab_pos_1 = self._beam_centre_model.hab_pos_1 * self._beam_centre_model.scale_1
-        self._view.hab_pos_2 = self._beam_centre_model.hab_pos_2 * self._beam_centre_model.scale_2
+        if self._beam_centre_model.update_lab:
+            self._beam_centre_model.lab_pos_1 = result['pos1']
+            self._beam_centre_model.lab_pos_2 = result['pos2']
+            self._view.lab_pos_1 = self._beam_centre_model.lab_pos_1 * self._beam_centre_model.scale_1
+            self._view.lab_pos_2 = self._beam_centre_model.lab_pos_2 * self._beam_centre_model.scale_2
+        if self._beam_centre_model.update_hab:
+            self._beam_centre_model.hab_pos_1 = result['pos1']
+            self._beam_centre_model.hab_pos_2 = result['pos2']
+            self._view.hab_pos_1 = self._beam_centre_model.hab_pos_1 * self._beam_centre_model.scale_1
+            self._view.hab_pos_2 = self._beam_centre_model.hab_pos_2 * self._beam_centre_model.scale_2
 
     def on_processing_error_centre_finder(self, error):
         self._logger.warning("There has been an error. See more: {}".format(error))
@@ -108,6 +113,9 @@ class BeamCentrePresenter(object):
         self._beam_centre_model.hab_pos_2 = self._view.hab_pos_2 / self._beam_centre_model.scale_2
         self._beam_centre_model.q_min = self._view.q_min
         self._beam_centre_model.q_max = self._view.q_max
+        self._beam_centre_model.component = self._view.component
+        self._beam_centre_model.update_hab = self._view.update_hab
+        self._beam_centre_model.update_lab = self._view.update_lab
 
     def set_on_state_model(self, attribute_name, state_model):
         attribute = getattr(self._view, attribute_name)

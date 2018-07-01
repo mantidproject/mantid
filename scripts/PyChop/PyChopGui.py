@@ -471,6 +471,10 @@ class PyChopGui(QtGui.QMainWindow):
         self.minE[newname] = max([new_inst.emin, 0.01])
         self.maxE[newname] = new_inst.emax
         self.updateInstrumentList()
+        combo = self.widgets['InstrumentCombo']['Combo']
+        idx = [i for i in range(combo.count()) if str(combo.itemText(i)) == newname]
+        combo.setCurrentIndex(idx[0])
+        self.setInstrument(newname)
 
     def _ask_overwrite(self):
         msg = QtGui.QDialog()

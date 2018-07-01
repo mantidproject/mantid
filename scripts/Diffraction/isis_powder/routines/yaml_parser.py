@@ -23,7 +23,7 @@ def get_run_dictionary(run_number_string, file_path):
 
 def is_run_range_key_unbounded(key):
     split_key = str(key).split('-')
-    return True if split_key[-1] == '' else False
+    return split_key[-1] == ''
 
 
 def open_yaml_file_as_dictionary(file_path):

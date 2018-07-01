@@ -2,6 +2,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import collections
 from mantid.api import mtd
+import numpy
+import numpy.testing
 from scipy import constants
 from testhelpers import illhelpers, run_algorithm
 import unittest
@@ -74,8 +76,9 @@ class DirectILLReductionTest(unittest.TestCase):
         groupedWSName = outWSName + '_grouped_detectors_'
         self.assertTrue(groupedWSName in mtd)
         groupedWS = mtd[groupedWSName]
-        self.assertEqual(groupedWS.getNumberHistograms(), 1)
-        groupIds = groupedWS.getDetector(0).getDetectorIDs()
+        self.assertEqual(groupedWS.getNumberHistograms(), 2)
+        groupIds = list(groupedWS.getDetector(0).getDetectorIDs())
+        groupIds += groupedWS.getDetector(1).getDetectorIDs()
         self.assertEqual(collections.Counter(detectorIds), collections.Counter(groupIds))
 
     def testOutputIsDistribution(self):
@@ -93,6 +96,62 @@ class DirectILLReductionTest(unittest.TestCase):
         self.assertTrue(mtd.doesExist('SofThetaE'))
         ws = mtd['SofThetaE']
         self.assertTrue(ws.isDistribution())
+
+    def testERebinning(self):
+        outWSName = 'outWS'
+        E0 = -2.
+        dE = 0.13
+        E1 = E0 + 40 * dE
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'EnergyRebinningParams': [E0, dE, E1],
+            'Transposing': 'Transposing OFF',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        ws = mtd[outWSName]
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'DeltaE')
+        xs = ws.readX(0)
+        numpy.testing.assert_almost_equal(xs, numpy.arange(E0, E1 + 0.01, dE))
+
+    def testQRebinning(self):
+        outWSName = 'outWS'
+        Q0 = 2.3
+        dQ = 0.1
+        Q1 = 2.7
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'QBinningParams': [Q0, dQ, Q1],
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        ws = mtd[outWSName]
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
+        xs = ws.readX(0)
+        numpy.testing.assert_almost_equal(xs, numpy.arange(Q0, Q1, dQ))
+
+    def testQRebinningBinWidthOnly(self):
+        outWSName = 'outWS'
+        dQ = 0.1
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'QBinningParams': [dQ],
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        ws = mtd[outWSName]
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
+        xs = ws.readX(0)
+        self.assertGreater(len(xs), 3)
+        dx = xs[1:] - xs[:-1]
+        # Bin widths may differ at the edges.
+        numpy.testing.assert_almost_equal(dx[1:-1], 0.1)
 
     def _checkAlgorithmsInHistory(self, ws, *args):
         """Return true if algorithm names listed in *args are found in the
@@ -119,12 +178,15 @@ def _groupingTestDetectors(ws):
     }
     run_algorithm('MaskDetectors', **kwargs)
     referenceDetector = ws.getDetector(indexBegin)
-    reference2Theta = ws.detectorTwoTheta(referenceDetector)
+    reference2Theta1 = ws.detectorTwoTheta(referenceDetector)
+    referenceDetector = ws.getDetector(indexBegin + 256)
+    reference2Theta2 = ws.detectorTwoTheta(referenceDetector)
     mask = list()
+    tolerance = numpy.deg2rad(0.01)
     for i in range(indexBegin + 1, indexBegin + 10000):
         det = ws.getDetector(i)
         twoTheta = ws.detectorTwoTheta(det)
-        if abs(reference2Theta - twoTheta) >= 0.01 / 180 * constants.pi:
+        if abs(reference2Theta1 - twoTheta) >= tolerance and abs(reference2Theta2 - twoTheta) >= tolerance:
             mask.append(i)
     kwargs = {
         'Workspace': ws,

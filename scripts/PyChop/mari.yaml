@@ -1,5 +1,5 @@
 name: MARI
-# Input file for PyChop2 for the MAPS spectrometer at ISIS.
+# Input file for PyChop2 for the MARI spectrometer at ISIS.
 
 chopper_system:
   name: MARI chopper system

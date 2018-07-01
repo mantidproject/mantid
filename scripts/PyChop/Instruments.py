@@ -9,11 +9,7 @@ import numpy as np
 import yaml
 import warnings
 import copy
-try:
-    from . import Chop, MulpyRep
-except:
-    import Chop
-    import MulpyRep
+from . import Chop, MulpyRep
 from scipy.interpolate import interp1d
 from scipy.special import erf
 from scipy import constants
@@ -254,7 +250,7 @@ class ChopperSystem(object):
         return self.ei
 
     def getAllowedEi(self, Ei_in=None):
-        return self._MulpyRepDriver(Ei_in, calc_res=False)[0]
+        return set(np.round(self._MulpyRepDriver(Ei_in, calc_res=False)[0], decimals=4))
 
     def plotMultiRepFrame(self, h_plt=None, Ei_in=None, frequency=None):
         """
@@ -623,7 +619,7 @@ class Sample(object):
 
 class Detector(object):
     """
-    Class which represents a sample shape
+    Class which represents a neutron detector
     """
 
     __allowed_var_names = ['name', 'idet', 'dd', 'tbin', 'phi', 'tthlims']
@@ -719,9 +715,10 @@ class Instrument(object):
         if frequency:
             oldfreq = self.frequency
             self.frequency = frequency
-        return self.getFlux(self.getAllowedEi(Ei), frequency)
+        fluxes = [self.getFlux(ei, frequency) for ei in self.getAllowedEi(Ei)]
         if frequency:
             self.frequency = oldfreq
+        return fluxes
 
     def getResFlux(self, Etrans=None, Ei_in=None, frequency=None):
         """ Returns the resolution and flux as a tuple. """

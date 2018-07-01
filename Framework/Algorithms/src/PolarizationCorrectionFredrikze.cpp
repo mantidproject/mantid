@@ -1,13 +1,13 @@
-#include "MantidAlgorithms/PolarizationCorrection.h"
+#include "MantidAlgorithms/PolarizationCorrectionFredrikze.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Unit.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ListValidator.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -19,22 +19,24 @@ using namespace Mantid::Geometry;
 
 namespace {
 
-const std::string pNRLabel() { return "PNR"; }
+const std::string pNRLabel("PNR");
 
-const std::string pALabel() { return "PA"; }
+const std::string pALabel("PA");
 
-const std::string crhoLabel() { return "CRho"; }
+const std::string crhoLabel("Rho");
 
-const std::string cppLabel() { return "CPp"; }
+const std::string cppLabel("Pp");
 
-const std::string cAlphaLabel() { return "CAlpha"; }
+const std::string cAlphaLabel("Alpha");
 
-const std::string cApLabel() { return "CAp"; }
+const std::string cApLabel("Ap");
+
+const std::string efficienciesLabel("Efficiencies");
 
 std::vector<std::string> modes() {
   std::vector<std::string> modes;
-  modes.push_back(pALabel());
-  modes.push_back(pNRLabel());
+  modes.push_back(pALabel);
+  modes.push_back(pNRLabel);
   return modes;
 }
 
@@ -103,38 +105,32 @@ void validateInputWorkspace(WorkspaceGroup_sptr &ws) {
 }
 
 using VecDouble = std::vector<double>;
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(PolarizationCorrection)
+DECLARE_ALGORITHM(PolarizationCorrectionFredrikze)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string PolarizationCorrection::name() const {
-  return "PolarizationCorrection";
+const std::string PolarizationCorrectionFredrikze::name() const {
+  return "PolarizationCorrectionFredrikze";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int PolarizationCorrection::version() const { return 1; }
+int PolarizationCorrectionFredrikze::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string PolarizationCorrection::category() const {
+const std::string PolarizationCorrectionFredrikze::category() const {
   return "Reflectometry";
-}
-
-bool PolarizationCorrection::isPropertyDefault(
-    const std::string &propertyName) const {
-  Property *prop = this->getProperty(propertyName);
-  return prop->isDefault();
 }
 
 /**
  * @return Return the algorithm summary.
  */
-const std::string PolarizationCorrection::summary() const {
+const std::string PolarizationCorrectionFredrikze::summary() const {
   return "Makes corrections for polarization efficiencies of the polarizer and "
          "analyzer in a reflectometry neutron spectrometer.";
 }
@@ -146,8 +142,8 @@ const std::string PolarizationCorrection::summary() const {
  * @return Multiplied Workspace.
  */
 MatrixWorkspace_sptr
-PolarizationCorrection::multiply(MatrixWorkspace_sptr &lhsWS,
-                                 const double &rhs) {
+PolarizationCorrectionFredrikze::multiply(MatrixWorkspace_sptr &lhsWS,
+                                          const double &rhs) {
   auto multiply = this->createChildAlgorithm("Multiply");
   auto rhsWS = boost::make_shared<DataObjects::WorkspaceSingleValue>(rhs);
   multiply->initialize();
@@ -164,8 +160,9 @@ PolarizationCorrection::multiply(MatrixWorkspace_sptr &lhsWS,
  * @param rhs Value to add
  * @return Summed workspace
  */
-MatrixWorkspace_sptr PolarizationCorrection::add(MatrixWorkspace_sptr &lhsWS,
-                                                 const double &rhs) {
+MatrixWorkspace_sptr
+PolarizationCorrectionFredrikze::add(MatrixWorkspace_sptr &lhsWS,
+                                     const double &rhs) {
   auto plus = this->createChildAlgorithm("Plus");
   auto rhsWS = boost::make_shared<DataObjects::WorkspaceSingleValue>(rhs);
   plus->initialize();
@@ -179,7 +176,7 @@ MatrixWorkspace_sptr PolarizationCorrection::add(MatrixWorkspace_sptr &lhsWS,
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void PolarizationCorrection::init() {
+void PolarizationCorrectionFredrikze::init() {
   declareProperty(make_unique<WorkspaceProperty<Mantid::API::WorkspaceGroup>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace to process.");
@@ -192,67 +189,18 @@ void PolarizationCorrection::init() {
                   "PA: Full Polarization Analysis PNR-PA");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(cppLabel(), Direction::Input),
-      "Effective polarizing power of the polarizing system. "
-      "Expressed as a ratio 0 < Pp < 1");
-
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(cApLabel(), Direction::Input),
-      "Effective polarizing power of the analyzing system. "
-      "Expressed as a ratio 0 < Ap < 1");
-
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(crhoLabel(), Direction::Input),
-      "Ratio of efficiencies of polarizer spin-down to polarizer "
-      "spin-up. This is characteristic of the polarizer flipper. "
-      "Values are constants for each term in a polynomial "
-      "expression.");
-
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(cAlphaLabel(),
-                                                             Direction::Input),
-                  "Ratio of efficiencies of analyzer spin-down to analyzer "
-                  "spin-up. This is characteristic of the analyzer flipper. "
-                  "Values are factors for each term in a polynomial "
-                  "expression.");
+      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          efficienciesLabel, "", Kernel::Direction::Input),
+      "A workspace containing the efficiency factors Pp, Ap, Rho and Alpha "
+      "as histograms");
 
   declareProperty(make_unique<WorkspaceProperty<Mantid::API::WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
-MatrixWorkspace_sptr PolarizationCorrection::execPolynomialCorrection(
-    MatrixWorkspace_sptr &input, const VecDouble &coefficients) {
-  auto polyCorr = this->createChildAlgorithm("PolynomialCorrection");
-  polyCorr->initialize();
-  polyCorr->setProperty("InputWorkspace", input);
-  polyCorr->setProperty("Coefficients", coefficients);
-  polyCorr->execute();
-  MatrixWorkspace_sptr corrected = polyCorr->getProperty("OutputWorkspace");
-  return corrected;
-}
-
-MatrixWorkspace_sptr
-PolarizationCorrection::copyShapeAndFill(MatrixWorkspace_sptr &base,
-                                         const double &value) {
-  MatrixWorkspace_sptr wsTemplate = WorkspaceFactory::Instance().create(base);
-  // Copy the x-array across to the new workspace.
-  for (size_t i = 0; i < wsTemplate->getNumberHistograms(); ++i) {
-    wsTemplate->setSharedX(i, base->sharedX(i));
-  }
-  auto zeroed = this->multiply(wsTemplate, 0);
-  auto filled = this->add(zeroed, value);
-  return filled;
-}
-
-WorkspaceGroup_sptr PolarizationCorrection::execPA(WorkspaceGroup_sptr inWS) {
-
-  if (isPropertyDefault(cAlphaLabel())) {
-    throw std::invalid_argument("Must provide as input for PA: " +
-                                cAlphaLabel());
-  }
-  if (isPropertyDefault(cApLabel())) {
-    throw std::invalid_argument("Must provide as input for PA: " + cApLabel());
-  }
+WorkspaceGroup_sptr
+PolarizationCorrectionFredrikze::execPA(WorkspaceGroup_sptr inWS) {
 
   size_t itemIndex = 0;
   MatrixWorkspace_sptr Ipp =
@@ -269,30 +217,10 @@ WorkspaceGroup_sptr PolarizationCorrection::execPA(WorkspaceGroup_sptr inWS) {
   Ipa->setTitle("Ipa");
   Iap->setTitle("Iap");
 
-  auto cropAlg = this->createChildAlgorithm("CropWorkspace");
-  cropAlg->initialize();
-  cropAlg->setProperty("InputWorkspace", Ipp);
-  cropAlg->setProperty("EndWorkspaceIndex", 0);
-  cropAlg->execute();
-  MatrixWorkspace_sptr croppedIpp = cropAlg->getProperty("OutputWorkspace");
-
-  MatrixWorkspace_sptr ones = copyShapeAndFill(croppedIpp, 1.0);
-  // The ones workspace is now identical to the input workspaces in x, but has 1
-  // as y values. It can therefore be used to build real polynomial functions.
-
-  const VecDouble c_rho = getProperty(crhoLabel());
-  const VecDouble c_alpha = getProperty(cAlphaLabel());
-  const VecDouble c_pp = getProperty(cppLabel());
-  const VecDouble c_ap = getProperty(cApLabel());
-
-  const auto rho = this->execPolynomialCorrection(
-      ones, c_rho); // Execute polynomial expression
-  const auto pp = this->execPolynomialCorrection(
-      ones, c_pp); // Execute polynomial expression
-  const auto alpha = this->execPolynomialCorrection(
-      ones, c_alpha); // Execute polynomial expression
-  const auto ap = this->execPolynomialCorrection(
-      ones, c_ap); // Execute polynomial expression
+  const auto rho = this->getEfficiencyWorkspace(crhoLabel);
+  const auto pp = this->getEfficiencyWorkspace(cppLabel);
+  const auto alpha = this->getEfficiencyWorkspace(cAlphaLabel);
+  const auto ap = this->getEfficiencyWorkspace(cApLabel);
 
   const auto A0 = (Iaa * pp * ap) + (ap * Ipa * rho * pp) +
                   (ap * Iap * alpha * pp) + (Ipp * ap * alpha * rho * pp);
@@ -341,22 +269,16 @@ WorkspaceGroup_sptr PolarizationCorrection::execPA(WorkspaceGroup_sptr inWS) {
   return dataOut;
 }
 
-WorkspaceGroup_sptr PolarizationCorrection::execPNR(WorkspaceGroup_sptr inWS) {
+WorkspaceGroup_sptr
+PolarizationCorrectionFredrikze::execPNR(WorkspaceGroup_sptr inWS) {
   size_t itemIndex = 0;
   MatrixWorkspace_sptr Ip =
       boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
   MatrixWorkspace_sptr Ia =
       boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
 
-  MatrixWorkspace_sptr ones = copyShapeAndFill(Ip, 1.0);
-
-  const VecDouble c_rho = getProperty(crhoLabel());
-  const VecDouble c_pp = getProperty(cppLabel());
-
-  const auto rho = this->execPolynomialCorrection(
-      ones, c_rho); // Execute polynomial expression
-  const auto pp = this->execPolynomialCorrection(
-      ones, c_pp); // Execute polynomial expression
+  const auto rho = this->getEfficiencyWorkspace(crhoLabel);
+  const auto pp = this->getEfficiencyWorkspace(cppLabel);
 
   const auto D = pp * (rho + 1);
 
@@ -374,55 +296,74 @@ WorkspaceGroup_sptr PolarizationCorrection::execPNR(WorkspaceGroup_sptr inWS) {
   return dataOut;
 }
 
+/** Extract a spectrum from the Efficiencies workspace as a 1D workspace.
+ * @param label :: A label of the spectrum to extract.
+ * @return :: A workspace with a single spectrum.
+ */
+boost::shared_ptr<Mantid::API::MatrixWorkspace>
+PolarizationCorrectionFredrikze::getEfficiencyWorkspace(
+    const std::string &label) {
+  MatrixWorkspace_sptr efficiencies = getProperty(efficienciesLabel);
+  auto const &axis = dynamic_cast<TextAxis &>(*efficiencies->getAxis(1));
+  size_t index = axis.length();
+  for (size_t i = 0; i < axis.length(); ++i) {
+    if (axis.label(i) == label) {
+      index = i;
+      break;
+    }
+  }
+
+  if (index == axis.length()) {
+    // Check if we need to fetch polarization parameters from the instrument's
+    // parameters
+    static std::map<std::string, std::string> loadableProperties{
+        {crhoLabel, "crho"},
+        {cppLabel, "cPp"},
+        {cApLabel, "cAp"},
+        {cAlphaLabel, "calpha"}};
+    WorkspaceGroup_sptr inWS = getProperty("InputWorkspace");
+    Instrument_const_sptr instrument = fetchInstrument(inWS.get());
+    auto vals = instrument->getStringParameter(loadableProperties[label]);
+    if (vals.empty()) {
+      throw std::invalid_argument("Efficiencey property not found: " + label);
+    }
+    auto extract = createChildAlgorithm("CreatePolarizationEfficiencies");
+    extract->initialize();
+    extract->setProperty("InputWorkspace", efficiencies);
+    extract->setProperty(label, vals.front());
+    extract->execute();
+    MatrixWorkspace_sptr outWS = extract->getProperty("OutputWorkspace");
+    return outWS;
+  } else {
+    auto extract = createChildAlgorithm("ExtractSingleSpectrum");
+    extract->initialize();
+    extract->setProperty("InputWorkspace", efficiencies);
+    extract->setProperty("WorkspaceIndex", static_cast<int>(index));
+    extract->execute();
+    MatrixWorkspace_sptr outWS = extract->getProperty("OutputWorkspace");
+    return outWS;
+  }
+}
+
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void PolarizationCorrection::exec() {
+void PolarizationCorrectionFredrikze::exec() {
   WorkspaceGroup_sptr inWS = getProperty("InputWorkspace");
   const std::string analysisMode = getProperty("PolarizationAnalysis");
   const size_t nWorkspaces = inWS->size();
 
   validateInputWorkspace(inWS);
 
-  Instrument_const_sptr instrument = fetchInstrument(inWS.get());
-
-  // Check if we need to fetch polarization parameters from the instrument's
-  // parameters
-  std::map<std::string, std::string> loadableProperties;
-  loadableProperties[crhoLabel()] = "crho";
-  loadableProperties[cppLabel()] = "cPp";
-
-  // In PA mode, we also require cap and calpha
-  if (analysisMode == pALabel()) {
-    loadableProperties[cApLabel()] = "cAp";
-    loadableProperties[cAlphaLabel()] = "calpha";
-  }
-
-  for (auto &loadableProperty : loadableProperties) {
-    Property *prop = getProperty(loadableProperty.first);
-
-    if (!prop)
-      continue;
-
-    if (prop->isDefault()) {
-      auto vals = instrument->getStringParameter(loadableProperty.second);
-      if (vals.empty())
-        throw std::runtime_error(
-            "Cannot find value for " + loadableProperty.first +
-            " in parameter file. Please specify this property manually.");
-      prop->setValue(vals[0]);
-    }
-  }
-
   WorkspaceGroup_sptr outWS;
-  if (analysisMode == pALabel()) {
+  if (analysisMode == pALabel) {
     if (nWorkspaces != 4) {
       throw std::invalid_argument(
           "For PA analysis, input group must have 4 periods.");
     }
     g_log.notice("PA polarization correction");
     outWS = execPA(inWS);
-  } else if (analysisMode == pNRLabel()) {
+  } else if (analysisMode == pNRLabel) {
     if (nWorkspaces != 2) {
       throw std::invalid_argument(
           "For PNR analysis, input group must have 2 periods.");

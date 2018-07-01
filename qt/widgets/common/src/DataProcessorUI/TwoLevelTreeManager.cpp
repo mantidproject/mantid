@@ -112,11 +112,16 @@ std::vector<Command_uptr> TwoLevelTreeManager::publishCommands() {
   return commands;
 }
 
+/** Reset the processed/error state for all rows
+ */
 void TwoLevelTreeManager::invalidateAllProcessed() {
   forEachGroup(*m_model,
                [this](int group) -> void { setProcessed(false, group); });
   forEachRow(*m_model, [this](int group, int row)
                            -> void { setProcessed(false, row, group); });
+  forEachGroup(*m_model, [this](int group) -> void { setError("", group); });
+  forEachRow(*m_model,
+             [this](int group, int row) -> void { setError("", row, group); });
 }
 
 /**
@@ -198,6 +203,11 @@ void TwoLevelTreeManager::deleteGroup() {
     m_model->removeRow(*group);
   }
 }
+
+/**
+Delete all rows and groups from the model
+*/
+void TwoLevelTreeManager::deleteAll() { m_model->removeAll(); }
 
 /**
 Group rows together
@@ -526,6 +536,37 @@ TreeData TwoLevelTreeManager::selectedData(bool prompt) {
   return constructTreeData(rows);
 }
 
+/**
+* Returns all data in a format that the presenter can understand and use
+* @param prompt :: True if warning messages should be displayed. False othewise
+* @return :: data as a map
+*/
+TreeData TwoLevelTreeManager::allData(bool prompt) {
+
+  TreeData allData;
+
+  auto options = m_presenter->options();
+
+  if (m_model->rowCount() == 0 && prompt) {
+    m_presenter->giveUserWarning("Cannot process an empty Table", "Warning");
+    return allData;
+  }
+
+  // Populate all groups with all rows
+  ParentItems groups;
+  ChildItems rows;
+
+  for (int group = 0; group < m_model->rowCount(); group++) {
+    groups.insert(group);
+
+    const auto nrows = numRowsInGroup(group);
+    for (int row = 0; row < nrows; row++)
+      rows[group].insert(row);
+  }
+
+  return constructTreeData(rows);
+}
+
 /** Transfer data to the model
 * @param runs :: [input] Data to transfer as a vector of maps
 */
@@ -596,6 +637,41 @@ void TwoLevelTreeManager::setProcessed(bool processed, int position) {
 void TwoLevelTreeManager::setProcessed(bool processed, int position,
                                        int parent) {
   m_model->setProcessed(processed, position, m_model->index(parent, 0));
+}
+
+/** Check whether reduction failed for a group
+* @param position : The row index
+* @return : true if there was an error
+*/
+bool TwoLevelTreeManager::reductionFailed(int position) const {
+  return m_model->reductionFailed(position);
+}
+
+/** Check whether reduction failed for a row
+* @param position : The row index
+* @param parent : The parent of the row
+* @return : true if there was an error
+*/
+bool TwoLevelTreeManager::reductionFailed(int position, int parent) const {
+  return m_model->reductionFailed(position, m_model->index(parent, 0));
+}
+
+/** Sets the error message of a group
+* @param error : the error message
+* @param position : The index of the group to be set
+*/
+void TwoLevelTreeManager::setError(const std::string &error, int position) {
+  m_model->setError(error, position);
+}
+
+/** Sets the error message of a row
+* @param error : The error message
+* @param position : The index of the row to be set
+* @param parent : The parent of the row
+*/
+void TwoLevelTreeManager::setError(const std::string &error, int position,
+                                   int parent) {
+  m_model->setError(error, position, m_model->index(parent, 0));
 }
 
 /** Return a shared ptr to the model

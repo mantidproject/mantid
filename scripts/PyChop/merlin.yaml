@@ -1,5 +1,5 @@
 name: MERLIN
-# Input file for PyChop2 for the MAPS spectrometer at ISIS.
+# Input file for PyChop2 for the MERLIN spectrometer at ISIS.
 
 chopper_system:
   name: MERLIN chopper system

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="crying_mantid.png">../../images/crying_mantid.png</file>
+    </qresource>
+</RCC>

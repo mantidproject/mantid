@@ -385,6 +385,118 @@ public:
     TS_ASSERT_EQUALS(checkGroup->getNames()[4], names[4]);
     AnalysisDataService::Instance().clear();
   }
+
+  void test_parseWorkspaceNameParsesCorrectly() {
+    const std::string workspaceName =
+        "MUSR00015189-90, 15192; Group; fwd; Counts; 1+3-2+4; #2";
+    const std::vector<int> expectedRuns{15189, 15190, 15192};
+    const auto params = parseWorkspaceName(workspaceName);
+    TS_ASSERT_EQUALS(params.instrument, "MUSR");
+    TS_ASSERT_EQUALS(params.runs, expectedRuns);
+    TS_ASSERT_EQUALS(params.label, "MUSR00015189-90, 15192");
+    TS_ASSERT_EQUALS(params.itemType, Muon::ItemType::Group);
+    TS_ASSERT_EQUALS(params.itemName, "fwd");
+    TS_ASSERT_EQUALS(params.plotType, Muon::PlotType::Counts);
+    TS_ASSERT_EQUALS(params.periods, "1+3-2+4");
+    TS_ASSERT_EQUALS(params.version, 2);
+  }
+
+  void test_parseWorkspaceName_noPeriods() {
+    const std::string workspaceName =
+        "MUSR00015189-90, 15192; Group; fwd; Counts; #2";
+    const std::vector<int> expectedRuns{15189, 15190, 15192};
+    const auto params = parseWorkspaceName(workspaceName);
+    TS_ASSERT_EQUALS(params.instrument, "MUSR");
+    TS_ASSERT_EQUALS(params.runs, expectedRuns);
+    TS_ASSERT_EQUALS(params.label, "MUSR00015189-90, 15192");
+    TS_ASSERT_EQUALS(params.itemType, Muon::ItemType::Group);
+    TS_ASSERT_EQUALS(params.itemName, "fwd");
+    TS_ASSERT_EQUALS(params.plotType, Muon::PlotType::Counts);
+    TS_ASSERT_EQUALS(params.periods, "");
+    TS_ASSERT_EQUALS(params.version, 2);
+  }
+
+  void test_parseRunLabel() {
+    const std::string runLabel = "MUSR00015189-91, 15193-4, 15196";
+    std::string instrument = "";
+    std::vector<int> runs;
+    std::vector<int> expectedRuns{15189, 15190, 15191, 15193, 15194, 15196};
+    TS_ASSERT_THROWS_NOTHING(parseRunLabel(runLabel, instrument, runs));
+    TS_ASSERT_EQUALS(instrument, "MUSR");
+    TS_ASSERT_EQUALS(runs, expectedRuns);
+  }
+
+  void test_parseRunLabel_noZeros() {
+    const std::string runLabel = "EMU12345-8";
+    std::string instrument = "";
+    std::vector<int> runs;
+    std::vector<int> expectedRuns{12345, 12346, 12347, 12348};
+    TS_ASSERT_THROWS_NOTHING(parseRunLabel(runLabel, instrument, runs));
+    TS_ASSERT_EQUALS(instrument, "EMU");
+    TS_ASSERT_EQUALS(runs, expectedRuns);
+  }
+
+  /// This can happen with very old NeXus files where the stored run number is
+  /// zero
+  void test_parseRunLabel_allZeros() {
+    const std::string runLabel = "DEVA000";
+    std::string instrument = "";
+    std::vector<int> runs;
+    std::vector<int> expectedRuns{0};
+    TS_ASSERT_THROWS_NOTHING(parseRunLabel(runLabel, instrument, runs));
+    TS_ASSERT_EQUALS(instrument, "DEVA");
+    TS_ASSERT_EQUALS(runs, expectedRuns);
+  }
+
+  /// No zero padding, but a zero does appear later in the label
+  void test_parseRunLabel_noPadding_zeroInRunNumber() {
+    const std::string runLabel = "MUSR15190";
+    std::string instrument = "";
+    std::vector<int> runs;
+    std::vector<int> expectedRuns{15190};
+    TS_ASSERT_THROWS_NOTHING(parseRunLabel(runLabel, instrument, runs));
+    TS_ASSERT_EQUALS(instrument, "MUSR");
+    TS_ASSERT_EQUALS(runs, expectedRuns);
+  }
+
+  void test_checkValidPair_throws_if_incorrect_name_format() {
+    const std::string validWorkspaceName =
+        "MUSR00015189; Group; fwd; Counts; 1+2; #1";
+    std::vector<std::string> invalidWorkspaceNames = {
+        "MUSR00015189; Soup; fwd; Counts; 1+2; #1",
+        "MUSR00015189; Group; fwd; Couts; 1+2; #1", "MuonGroupWorkspace"};
+
+    for (auto &&invalidName : invalidWorkspaceNames)
+      TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidName),
+                       std::invalid_argument);
+  }
+
+  void test_checkValidPair_throws_if_ItemType_Asym() {
+    const std::string validWorkspaceName =
+        "EMU000015189; Group; fwd; Counts; 1+2; #1";
+    const std::string invalidWorkspaceName =
+        "EMU000015189; Group; fwd; Asym; 1+2; #1";
+    TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName),
+                     std::invalid_argument);
+  }
+
+  void test_checkValidPair_throws_if_different_instruments() {
+    const std::string validWorkspaceName =
+        "EMU000015189; Group; fwd; Counts; 1+2; #1";
+    const std::string invalidWorkspaceName =
+        "MUSR00015189; Group; fwd; Counts; 1+2; #1";
+    TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName),
+                     std::invalid_argument);
+  }
+
+  void test_checkValidPair_does_not_throw_if_same_group() {
+    const std::string validWorkspaceName =
+        "EMU000015189; Group; fwd; Counts; 1+2; #1";
+    const std::string invalidWorkspaceName =
+        "EMU000015189; Group; fwd; Counts; 1+2; #1";
+    TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName),
+                     std::invalid_argument);
+  }
 };
 
 #endif /* MANTID_MUON_MUONALGOIRTHMHELPER_H_ */
