@@ -7,7 +7,7 @@ TOFTOF reduction workflow gui.
 """
 from __future__ import (absolute_import, division, print_function)
 
-from itertools import repeat
+from itertools import repeat, compress
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement, BaseReductionScripter
 
@@ -399,14 +399,18 @@ class TOFTOFScriptElement(BaseScriptElement):
     def get_time(self, workspace):
         return self.get_log(workspace, 'duration')
 
-    def save_wsgroup(self, wsgroup, suffix):
+    allowed_save_formats = ['nxspe', 'nexus', 'ascii']
+    def save_wsgroup(self, wsgroup, suffix, spectrumMetaData, saveFormats):
+        assert(saveFormats <= set(allowed_save_formats))
         self.l("# save {}".format(wsgroup))
         self.l("for ws in {}:".format(wsgroup))
         self.l("    name = ws.getComment() + {}".format(suffix))
-        if self.saveNXSPE and self.binEon:
-            self.l("    SaveNXSPE(ws, join(r'{}', name + '.nxspe'), Efixed=Ei)".format(self.saveDir))
-        if self.saveNexus:
+        if 'nxspe' in saveFormats:
+            self.l("    SaveNXSPE(ws, join(r'{}', name + '.nxspe'), Efixed=Ei)".format(self.saveDir,))
+        if 'nexus' in saveFormats:
             self.l("    SaveNexus(ws, join(r'{}', name + '.nxs'))".format(self.saveDir))
+        if 'ascii' in saveFormats:
+            self.l("    SaveAscii(ws, join(r'{}', name + '.nxs'), SpectrumMetaData='{}')".format(self.saveDir, spectrumMetaData))
         self.l()
 
     def normalize_data(self, gPrefix, gDataRuns, wsEC='', wsVan=''):
@@ -670,9 +674,17 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.l("DeleteWorkspaces('step1,step2,step3')")
             self.l()
 
+            self.saveSofTWNxspe
+            self.saveSofTWNexus
+            self.saveSofTWAscii
+            self.saveSofQWNexus
+            self.saveSofQWAscii
+
         if self.saveSofTW:
             suf = "'_Ei_{}'.format(round(Ei,2))"
-            self.save_wsgroup(gLast, suf)
+            #nxspe only if self.binEon
+            saveFormats = cmpress(allowed_save_formats, [self.saveSofTWNxspe, self.saveSofTWNexus, self.saveSofTWAscii])
+            self.save_wsgroup(gLast, suf, 'Angle', saveFormats)
 
         if self.binQon and self.binEon:
             gDataBinQ = gData + 'SQW'
@@ -685,7 +697,8 @@ class TOFTOFScriptElement(BaseScriptElement):
                 self.l("{} = ReplaceSpecialValues({}, NaNValue=0, NaNError=1)".format(gDataBinQ, gDataBinQ))
             self.l()
             if self.saveSofQW:
-                self.save_wsgroup(gDataBinQ, "'_SQW'")
+                saveFormats = cmpress(allowed_save_formats, [False, self.saveSofTWNexus, self.saveSofTWAscii])
+                self.save_wsgroup(gDataBinQ, "'_SQW'", 'Q', saveFormats)
 
         self.rename_workspaces(gData)
 
