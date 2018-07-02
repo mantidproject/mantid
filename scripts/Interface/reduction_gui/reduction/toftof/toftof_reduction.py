@@ -407,7 +407,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         if 'nexus' in saveFormats:
             self.l("    SaveNexus(ws, join(r'{}', name + '.nxs'))".format(self.saveDir))
         if 'ascii' in saveFormats:
-            self.l("    SaveAscii(ws, join(r'{}', name + '.nxs'), SpectrumMetaData='{}')".format(self.saveDir, spectrumMetaData))
+            self.l("    SaveAscii(ws, join(r'{}', name + '.csv'), SpectrumMetaData='{}')".format(self.saveDir, spectrumMetaData))
         self.l()
 
     def normalize_data(self, gPrefix, gDataRuns, wsEC='', wsVan=''):
