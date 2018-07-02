@@ -3,12 +3,12 @@
 # Resource object code
 #
 # Created by: The Resource Compiler for PyQt4 (Qt v4.8.7)
-#
-# WARNING! All changes made in this file will be lost!
+# and modified to work with Python 3. Strings are prefixed
+# with 'b' to ensure they are byte strings
 
 from PyQt4 import QtCore
 
-qt_resource_data = "\
+qt_resource_data = b"\
 \x00\x00\xdc\x69\
 \x89\
 \x50\x4e\x47\x0d\x0a\x1a\x0a\x00\x00\x00\x0d\x49\x48\x44\x52\x00\
@@ -3540,7 +3540,7 @@ qt_resource_data = "\
 \x49\x45\x4e\x44\xae\x42\x60\x82\
 "
 
-qt_resource_name = "\
+qt_resource_name = b"\
 \x00\x11\
 \x02\xf1\xa7\xe7\
 \x00\x63\
@@ -3548,7 +3548,7 @@ qt_resource_name = "\
 \
 "
 
-qt_resource_struct = "\
+qt_resource_struct = b"\
 \x00\x00\x00\x00\x00\x02\x00\x00\x00\x01\x00\x00\x00\x01\
 \x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\
 "
