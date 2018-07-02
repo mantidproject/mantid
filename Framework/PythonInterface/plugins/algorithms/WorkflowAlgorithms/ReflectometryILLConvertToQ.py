@@ -58,6 +58,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
 
         ws, directWS = self._inputWS()
 
+        ws = self._correctForChopperOpenings(ws, directWS)
         ws = self._convertToMomentumTransfer(ws)
         if directWS is not None:
             directWS = self._sameQAndDQ(ws, directWS, 'direct_')
@@ -179,6 +180,11 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         self._cleanup.cleanup(ws)
         return qWS
 
+    def _correctForChopperOpenings(self, ws, directWS):
+        """Corrects ws for different chopper opening angles."""
+        correctedWS = common.correctForChopperOpenings(ws, directWS, self._names, self._cleanup, self._subalgLogging)
+        return correctedWS
+
     def _finalize(self, ws):
         """Set OutputWorkspace to ws and clean up."""
         self.setProperty(Prop.OUTPUT_WS, ws)
@@ -193,7 +199,6 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
                                 OutputWorkspace=reflectivityWSName,
                                 EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
-        reflectivityWS = common.correctForChopperOpenings(reflectivityWS, directWS, self._names, self._cleanup, self._subalgLogging)
         self._cleanup.cleanup(directWS)
         reflectivityWS.setYUnit('Reflectivity')
         reflectivityWS.setYUnitLabel('Reflectivity')

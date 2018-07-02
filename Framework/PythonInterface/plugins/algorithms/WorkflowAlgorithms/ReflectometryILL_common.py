@@ -50,7 +50,7 @@ def correctForChopperOpenings(ws, directWS, names, cleanup, logging):
         chopperGap = chopperPairDistance(logs, instrumentName)
         chopperPeriod = 60. / chopperSpeed(logs, instrumentName)
         openingAngle = chopperOpeningAngle(logs, instrumentName)
-        return chopperGap * constants.m_n / constants.h / chopperPeriod * Xs + openingAngle / 360.
+        return chopperGap * constants.m_n / constants.h / chopperPeriod * Xs * 1e-10 + openingAngle / 360.
     instrumentName = ws.getInstrument().getName()
     Xs = ws.readX(0)
     if ws.isHistogramData():
@@ -61,7 +61,7 @@ def correctForChopperOpenings(ws, directWS, names, cleanup, logging):
     corFactorWS = CreateWorkspace(
         OutputWorkspace=corFactorWSName,
         DataX=ws.readX(0),
-        DataY=reflectedOpening / directOpening,
+        DataY= directOpening / reflectedOpening,
         UnitX=ws.getAxis(0).getUnit().unitID(),
         ParentWorkspace=ws,
         EnableLogging=logging)
