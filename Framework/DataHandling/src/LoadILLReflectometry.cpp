@@ -899,7 +899,8 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
   const double detectorRestY = 0.509;
   const double detAngle = detectorAngle();
   const double detectorY =
-      std::sin(degToRad(detAngle)) * (restZ - FIGARO::DH1Z) + DH1Y - detectorRestY;
+      std::sin(degToRad(detAngle)) * (restZ - FIGARO::DH1Z) + DH1Y -
+      detectorRestY;
   const double detectorZ =
       std::cos(degToRad(detAngle)) * (restZ - FIGARO::DH1Z) + FIGARO::DH1Z;
   const double pixelOffset = detectorRestY - 0.5 * m_pixelWidth;
