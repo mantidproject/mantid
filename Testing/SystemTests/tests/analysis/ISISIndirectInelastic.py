@@ -758,7 +758,7 @@ class ISISIndirectInelasticIqtAndIqtFit(with_metaclass(ABCMeta, ISISIndirectInel
                                    EnergyMax=self.e_max,
                                    BinReductionFactor=self.num_bins,
                                    DryRun=False,
-                                   NumberOfIterations=200)
+                                   NumberOfIterations=400)
 
         # Test IqtFit Sequential
         iqtfitSeq_ws, params, fit_group = IqtFitSequential(InputWorkspace=iqt_ws, Function=self.func,
