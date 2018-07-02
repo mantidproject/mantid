@@ -229,13 +229,12 @@ void PanelsSurface::setupAxes() {
 
 /**
 * Add a flat bank from an assembly of detectors.
-* @param bankId :: Component ID of the bank.
 * @param normal :: Normal vector to the bank's plane.
 * @param detectors :: List of detectorIndices.
 */
 void PanelsSurface::addFlatBankOfDetectors(const Mantid::Kernel::V3D &normal,
                                            const std::vector<size_t> &detectors,
-                                           size_t bankIndex) {
+                                           size_t) {
   int index = m_flatBanks.size();
   // save bank info
   FlatBankInfo *info = new FlatBankInfo(this);
