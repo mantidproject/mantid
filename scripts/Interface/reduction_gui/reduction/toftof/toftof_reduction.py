@@ -689,7 +689,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.l()
 
             # save S(Q, w)
-            saveFormats = set(compress(self.allowed_save_formats, [False, self.saveSofTWNexus, self.saveSofTWAscii]))
+            saveFormats = set(compress(self.allowed_save_formats, [False, self.saveSofQWNexus, self.saveSofQWAscii]))
             self.save_wsgroup(gDataBinQ, "'_SQW'", 'Q', saveFormats)
 
         self.rename_workspaces(gData)

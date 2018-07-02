@@ -178,8 +178,8 @@ class TOFTOFSetupWidget(BaseWidget):
         self.chkSofTWNexus       = tip(QCheckBox('NeXus'), self.TIP_chkNexus)
         self.chkSofTWAscii       = tip(QCheckBox('Ascii'), self.TIP_chkAscii)
 
-        self.chkSofQWNexus       = setEnabled(tip(QCheckBox('NeXus'), self.TIP_chkNexus), self.binEon)
-        self.chkSofQWAscii       = setEnabled(tip(QCheckBox('Ascii'), self.TIP_chkAscii), self.binEon)
+        self.chkSofQWNexus       = setEnabled(tip(QCheckBox('NeXus'), self.TIP_chkNexus), self.binEon, self.binQon)
+        self.chkSofQWAscii       = setEnabled(tip(QCheckBox('Ascii'), self.TIP_chkAscii), self.binEon, self.binQon)
 
         self.rbtNormaliseNone    = tip(QRadioButton('none'), self.TIP_rbtNormaliseNone)
         self.rbtNormaliseMonitor = tip(QRadioButton('to monitor'), self.TIP_rbtNormaliseMonitor)
@@ -304,7 +304,7 @@ class TOFTOFSetupWidget(BaseWidget):
         grid.addWidget(self.chkSofQWNexus,    1, 2)
         grid.addWidget(self.chkSofQWAscii,    1, 3)
         grid.addItem(QSpacerItem(5, 5, hPolicy=QSizePolicy.Expanding),    1, 4)
-        grid.addWidget(QLabel(u'S(t, ω):'),   2, 0)
+        grid.addWidget(QLabel(u'S(2t, ω):'),   2, 0)
         grid.addWidget(self.chkSofTWNxspe,    2, 1)
         grid.addWidget(self.chkSofTWNexus,    2, 2)
         grid.addWidget(self.chkSofTWAscii,    2, 3)
