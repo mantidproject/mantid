@@ -78,7 +78,8 @@ private:
   void getExpDefaults();
   void getInstDefaults();
   void handleSettingsChanged();
-  bool hasReductionTypes(const std::string &reductionType) const;
+  bool hasReductionTypes(const std::string &summationType) const;
+  bool hasIncludePartialBinsOption(const std::string &summationType) const;
   void handleSummationTypeChange();
   static QString asAlgorithmPropertyBool(bool value);
   Mantid::Geometry::Instrument_const_sptr

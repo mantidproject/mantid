@@ -9,6 +9,7 @@
 Description
 -----------
 
+
 Performs wavelength polarization correction on a TOF reflectometer spectrometer.
 
 Algorithm is based on the the paper Fredrikze, H, et al. "Calibration of a polarized neutron reflectometer" Physica B 297 (2001).

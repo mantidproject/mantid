@@ -71,20 +71,32 @@ The columns can be plotted to get an overview of the diagnostics.
 
 Additionally, a string listing the masked and diagnosed detectors can be accessed via the *OutputReport* property.
 
-ILL's instrument specific defaults
-----------------------------------
+Defaults and ILL's instrument specific values
+---------------------------------------------
 
-The following settings are used when the :literal:`AUTO` keyword is encountered:
+The following settings are used when not explicitly overwritten by the algorithm's properties or the IPFs of non-ILL instruments:
 
-+------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
-| Property               | IN4                       | IN5                      | IN6                       | Ohters                    |
-+========================+===========================+==========================+===========================+===========================+
-| ElasticPeakDiagnostics | Peak Diagnostics ON       | Peak Diagnostics OFF     | Peak Diagnostics ON       | Peak Diagnostics ON       |
-+------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
-| BkgDiagnostics         | Bkg Diagnostics ON        | Bkg Diagnostics OFF      | Bkg Diagnostics ON        | Bkg Diagnostics ON        |
-+------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
-| BeamStopDiagnostics    | Beam Stop Diagnostics OFF | Beam Stop Diagnostics ON | Beam Stop Diagnostics OFF | Beam Stop Diagnostics OFF |
-+------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| Property                  | IN4                       | IN5                      | IN6                       | Default                   |
++===========================+===========================+==========================+===========================+===========================+
+| ElasticPeakDiagnostics    | Peak Diagnostics ON       | Peak Diagnostics OFF     | Peak Diagnostics ON       | Peak Diagnostics ON       |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| ElasticPeakLowThreshold   | 0.1                       | 0.1                      | 0.45                      | 0.1                       |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| ElasticPeakHighThreshold  | 3.0                       | 3.0                      | 3.0                       | 3.0                       |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| ElasticPeakErrorThreshold | 3.3                       | 3.3                      | 3.3                       | 3.3                       |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| BkgDiagnostics            | Bkg Diagnostics ON        | Bkg Diagnostics OFF      | Bkg Diagnostics ON        | Bkg Diagnostics ON        |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| NoisyLowThreshold         | 0.1                       | 0.1                      | 0.1                       | 0.1                       |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| NoisyBkgHighThreshold     | 3.3                       | 3.3                      | 3.3                       | 3.3                       |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| NoisyBkgErrorThreshold    | 3.3                       | 3.3                      | 3.3                       | 3.3                       |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| BeamStopDiagnostics       | Beam Stop Diagnostics OFF | Beam Stop Diagnostics ON | Beam Stop Diagnostics OFF | Beam Stop Diagnostics OFF |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
 
 Usage
 -----
