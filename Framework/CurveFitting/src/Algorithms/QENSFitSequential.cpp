@@ -597,7 +597,8 @@ std::vector<std::size_t> QENSFitSequential::getDatasetGrouping(
     const std::vector<API::MatrixWorkspace_sptr> &workspaces) const {
   if (getPropertyValue("Input").empty()) {
     int maximum = getProperty("SpecMax");
-    return createDatasetGrouping(workspaces, static_cast<std::size_t>(maximum));
+    return createDatasetGrouping(workspaces,
+                                 static_cast<std::size_t>(maximum + 1));
   }
   return createDatasetGrouping(workspaces);
 }
