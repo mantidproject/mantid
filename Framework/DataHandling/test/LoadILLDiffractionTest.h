@@ -250,16 +250,14 @@ public:
     TS_ASSERT(run.hasProperty("PixelHeight"))
     TS_ASSERT(run.hasProperty("MaxHeight"))
     TS_ASSERT_DELTA(run.getLogAsSingleValue("PixelHeight"), 0.00276, 1E-5)
-    TS_ASSERT_DELTA(run.getLogAsSingleValue("MaxHeight"), 0.19358, 1E-5)
+    TS_ASSERT_DELTA(run.getLogAsSingleValue("MaxHeight"), 0.19386, 1E-5)
     const auto &detInfo = outputWS->detectorInfo();
-    const auto tube1CentreTime1 =
-        (detInfo.position({70, 0}) + detInfo.position({71, 0})) / 2.;
+    const auto tube1CentreTime1 = detInfo.position({70, 0});
     TS_ASSERT_DELTA(tube1CentreTime1.Y(), 0., 0.001)
     double r, theta, phi;
     tube1CentreTime1.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(theta, 11.25, 0.001)
-    const auto tube1CentreTime2 =
-        (detInfo.position({70, 1}) + detInfo.position({71, 1})) / 2.;
+    const auto tube1CentreTime2 = detInfo.position({70, 1});
     TS_ASSERT_DELTA(tube1CentreTime2.Y(), 0., 0.001)
     tube1CentreTime2.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(theta, 11.2, 0.001)
@@ -271,15 +269,11 @@ public:
     TS_ASSERT_DELTA(tube23CentreTime2.Y(), 0., 0.001)
     tube23CentreTime2.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(theta, 16.288, 0.001)
-    const auto tube128CentreTime1 = (detInfo.position({128 * 127 + 67, 0}) +
-                                     detInfo.position({128 * 127 + 68, 0})) /
-                                    2.;
+    const auto tube128CentreTime1 = detInfo.position({128 * 127 + 68, 0});
     TS_ASSERT_DELTA(tube128CentreTime1.Y(), 0., 0.001)
     tube128CentreTime1.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(theta, 147.5, 0.001)
-    const auto tube128CentreTime2 = (detInfo.position({128 * 127 + 67, 1}) +
-                                     detInfo.position({128 * 127 + 68, 1})) /
-                                    2.;
+    const auto tube128CentreTime2 = detInfo.position({128 * 127 + 68, 1});
     TS_ASSERT_DELTA(tube128CentreTime2.Y(), 0., 0.001)
     tube128CentreTime2.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(theta, 147.55, 0.001)
