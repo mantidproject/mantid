@@ -24,8 +24,8 @@ private:
   const std::string m_d17DirectBeamFile{"ILL/D17/317369.nxs"};
   const std::string m_d17File{"ILL/D17/317370.nxs"};
   const std::string m_figaroFile{"ILL/Figaro/598488.nxs"};
-  const std::string m_d17uptodateFile{"ILL/D17/000001.nxs"};
-  const std::string m_figarouptodateFile{"ILL/Figaro/000002.nxs"};
+  const std::string m_d17File_2018{"ILL/D17/000001.nxs"};
+  const std::string m_figaroFile_2018{"ILL/Figaro/000002.nxs"};
   // Name of the default output workspace
   const std::string m_outWSName{"LoadILLReflectometryTest_OutputWS"};
 
@@ -562,7 +562,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
     TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", this->m_figarouptodateFile));
+        loader.setPropertyValue("Filename", this->m_figaroFile_2018));
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("OutputWorkspace", this->m_outWSName));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
@@ -591,7 +591,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
     TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", this->m_figarouptodateFile));
+        loader.setPropertyValue("Filename", this->m_figaroFile_2018));
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("OutputWorkspace", this->m_outWSName));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
@@ -649,7 +649,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
     TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", this->m_d17uptodateFile));
+        loader.setPropertyValue("Filename", this->m_d17File_2018));
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("OutputWorkspace", this->m_outWSName));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
@@ -688,7 +688,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
     TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", this->m_figarouptodateFile));
+        loader.setPropertyValue("Filename", this->m_figaroFile_2018));
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("OutputWorkspace", this->m_outWSName));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
@@ -714,7 +714,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
     TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", this->m_d17uptodateFile));
+        loader.setPropertyValue("Filename", this->m_d17File_2018));
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("OutputWorkspace", this->m_outWSName));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););

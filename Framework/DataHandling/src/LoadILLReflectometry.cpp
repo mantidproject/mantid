@@ -38,19 +38,19 @@ struct PeakInfo {
  *  @param x an angle in degrees
  *  @return the angle in radians
  */
-constexpr double inRad(const double x) { return x * M_PI / 180.; }
+constexpr double degToRad(const double x) { return x * M_PI / 180.; }
 
 /** Convert radians to degrees.
  *  @param x an angle in radians
  *  @return the angle in degrees
  */
-constexpr double inDeg(const double x) { return x * 180. / M_PI; }
+constexpr double radToDeg(const double x) { return x * 180. / M_PI; }
 
 /** Convert millimeters to meters.
  *  @param x a distance in millimeters
  *  @return the distance in meters
  */
-constexpr double inMeter(const double x) { return x * 1.e-3; }
+constexpr double mmToMeter(const double x) { return x * 1.e-3; }
 
 /** Create a table with data needed for detector angle calibration.
  * @param info data to be written to the table
@@ -136,7 +136,7 @@ enum class RotationPlane { horizontal, vertical };
 Mantid::Kernel::V3D detectorPosition(const RotationPlane plane,
                                      const double distance,
                                      const double angle) {
-  const double a = inRad(angle);
+  const double a = degToRad(angle);
   double x, y, z;
   switch (plane) {
   case RotationPlane::horizontal:
@@ -760,7 +760,7 @@ void LoadILLReflectometry::initPixelWidth() {
   double widthInLogs;
   if (m_instrument != Supported::FIGARO) {
     m_pixelWidth = std::abs(detector->xstep());
-    widthInLogs = inMeter(
+    widthInLogs = mmToMeter(
         m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppx"));
     if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
       m_log.warning() << "NeXus pixel width (mppx) " << widthInLogs
@@ -769,7 +769,7 @@ void LoadILLReflectometry::initPixelWidth() {
     }
   } else {
     m_pixelWidth = std::abs(detector->ystep());
-    widthInLogs = inMeter(
+    widthInLogs = mmToMeter(
         m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppy"));
     if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
       m_log.warning() << "NeXus pixel width (mppy) " << widthInLogs
@@ -783,7 +783,7 @@ void LoadILLReflectometry::initPixelWidth() {
 void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
   // if (m_localWorkspace->run().hasProperty("Distance.D1")) // Valid from 2018.
-  //  m_detectorDistance = inMeter(doubleFromRun("Distance.D1"));
+  //  m_detectorDistance = mmToMeter(doubleFromRun("Distance.D1"));
   // else // Valid before 2018.
   //  m_detectorDistance = sampleDetectorDistance();
   m_detectorDistance = sampleDetectorDistance();
@@ -811,21 +811,21 @@ void LoadILLReflectometry::placeSlits() {
   double slit2ToSample{0.0};
   if (m_instrument == Supported::FIGARO) {
     const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
-    const double offset = m_sampleZOffset / std::cos(inRad(deflectionAngle));
+    const double offset = m_sampleZOffset / std::cos(degToRad(deflectionAngle));
     // For the moment, the position information for S3 is missing in the
     // NeXus files of FIGARO. Using a hard-coded distance; should be fixed
     // when the NeXus files are
     double slitSeparation;
     if (m_localWorkspace->run().hasProperty(
             "Distance.inter-slit_distance")) // Valid from 2018.
-      slitSeparation = inMeter(doubleFromRun("Distance.inter-slit_distance"));
+      slitSeparation = mmToMeter(doubleFromRun("Distance.inter-slit_distance"));
     else // Valid before 2018.
-      slitSeparation = inMeter(doubleFromRun("Theta.inter-slit_distance"));
+      slitSeparation = mmToMeter(doubleFromRun("Theta.inter-slit_distance"));
     slit2ToSample = 0.368 + offset;
     slit1ToSample = slit2ToSample + slitSeparation;
   } else {
-    slit1ToSample = inMeter(doubleFromRun("Distance.S2toSample"));
-    slit2ToSample = inMeter(doubleFromRun("Distance.S3toSample"));
+    slit1ToSample = mmToMeter(doubleFromRun("Distance.S2toSample"));
+    slit2ToSample = mmToMeter(doubleFromRun("Distance.S3toSample"));
   }
   V3D pos{0.0, 0.0, -slit1ToSample};
   m_loader.moveComponent(m_localWorkspace, "slit2", pos);
@@ -837,7 +837,7 @@ void LoadILLReflectometry::placeSlits() {
 void LoadILLReflectometry::placeSource() {
   double dist;
   // if (m_localWorkspace->run().hasProperty("Distance.D0")) // Valid from 2018.
-  //  dist = inMeter(doubleFromRun("Distance.D0"));
+  //  dist = mmToMeter(doubleFromRun("Distance.D0"));
   // else // Valid before 2018.
   //  dist = sourceSampleDistance();
   dist = sourceSampleDistance();
@@ -862,9 +862,9 @@ double LoadILLReflectometry::detectorAngle() const {
   if (m_instrument != Supported::FIGARO) {
     return doubleFromRun(m_detectorAngleName);
   }
-  const double DH1Y = inMeter(doubleFromRun("DH1.value"));
-  const double DH2Y = inMeter(doubleFromRun("DH2.value"));
-  return inDeg(std::atan2(DH2Y - DH1Y, FIGARO::DH2Z - FIGARO::DH1Z));
+  const double DH1Y = mmToMeter(doubleFromRun("DH1.value"));
+  const double DH2Y = mmToMeter(doubleFromRun("DH2.value"));
+  return radToDeg(std::atan2(DH2Y - DH1Y, FIGARO::DH2Z - FIGARO::DH1Z));
 }
 
 /** Calculate the offset angle between detector center and peak.
@@ -880,7 +880,7 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre,
   // spectrum numbers increase.
   const auto sign = m_instrument == Supported::D17 ? 1. : -1.;
   const double offsetWidth = (detectorCentre - peakCentre) * m_pixelWidth;
-  return sign * inDeg(std::atan2(offsetWidth, detectorDistance));
+  return sign * radToDeg(std::atan2(offsetWidth, detectorDistance));
 }
 
 /** Return the sample to detector distance for the current instrument.
@@ -889,26 +889,26 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre,
  */
 double LoadILLReflectometry::sampleDetectorDistance() const {
   if (m_instrument != Supported::FIGARO) {
-    return inMeter(doubleFromRun("det.value"));
+    return mmToMeter(doubleFromRun("det.value"));
   }
   // For FIGARO, the DTR field contains the sample-to-detector distance
   // when the detector is at the horizontal position (angle = 0).
-  const double restZ = inMeter(doubleFromRun("DTR.value"));
+  const double restZ = mmToMeter(doubleFromRun("DTR.value"));
   // Motor DH1 vertical coordinate.
-  const double DH1Y = inMeter(doubleFromRun("DH1.value"));
+  const double DH1Y = mmToMeter(doubleFromRun("DH1.value"));
   const double detectorRestY = 0.509;
   const double detAngle = detectorAngle();
   const double detectorY =
-      std::sin(inRad(detAngle)) * (restZ - FIGARO::DH1Z) + DH1Y - detectorRestY;
+      std::sin(degToRad(detAngle)) * (restZ - FIGARO::DH1Z) + DH1Y - detectorRestY;
   const double detectorZ =
-      std::cos(inRad(detAngle)) * (restZ - FIGARO::DH1Z) + FIGARO::DH1Z;
+      std::cos(degToRad(detAngle)) * (restZ - FIGARO::DH1Z) + FIGARO::DH1Z;
   const double pixelOffset = detectorRestY - 0.5 * m_pixelWidth;
-  const double beamY = detectorY + pixelOffset * std::cos(inRad(detAngle));
-  const double sht1 = inMeter(doubleFromRun("SHT1.value"));
-  const double beamZ = detectorZ - pixelOffset * std::sin(inRad(detAngle));
+  const double beamY = detectorY + pixelOffset * std::cos(degToRad(detAngle));
+  const double sht1 = mmToMeter(doubleFromRun("SHT1.value"));
+  const double beamZ = detectorZ - pixelOffset * std::sin(degToRad(detAngle));
   const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
   return std::hypot(beamY - sht1, beamZ) -
-         m_sampleZOffset / std::cos(inRad(deflectionAngle));
+         m_sampleZOffset / std::cos(degToRad(deflectionAngle));
 }
 
 /// Return the horizontal offset along the z axis.
@@ -918,9 +918,9 @@ double LoadILLReflectometry::sampleHorizontalOffset() const {
   }
   if (m_localWorkspace->run().hasProperty(
           "Distance.sampleHorizontalOffset")) // Valid from 2018.
-    return inMeter(doubleFromRun("Distance.sampleHorizontalOffset"));
+    return mmToMeter(doubleFromRun("Distance.sampleHorizontalOffset"));
   else // Valid before 2018.
-    return inMeter(doubleFromRun("Theta.sampleHorizontalOffset"));
+    return mmToMeter(doubleFromRun("Theta.sampleHorizontalOffset"));
 }
 
 /** Return the source to sample distance for the current instrument.
@@ -935,9 +935,9 @@ double LoadILLReflectometry::sourceSampleDistance() const {
     return pairCentre - 0.5 * pairSeparation;
   } else {
     const double chopperDist =
-        inMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
+        mmToMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
     const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
-    return chopperDist + m_sampleZOffset / std::cos(inRad(deflectionAngle));
+    return chopperDist + m_sampleZOffset / std::cos(degToRad(deflectionAngle));
   }
 }
 
