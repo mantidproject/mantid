@@ -154,7 +154,6 @@ class PlotSelectorModel(object):
                           (figure title)
         """
         if plot_name not in self.plot_list:
-            print(self.plot_list)
             raise ValueError('Error closing, could not find a plot with the name {}.'.format(plot_name))
 
         figure_number_to_close = self.GlobalFigureManager.get_figure_number_from_name(plot_name)

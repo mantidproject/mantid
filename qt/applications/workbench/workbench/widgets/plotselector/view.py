@@ -319,9 +319,7 @@ class PlotSelectorView(QWidget):
         row, widget = self._get_row_and_widget_from_plot_name(old_name)
 
         old_key = self.list_widget.item(row).data(Qt.InitialSortOrderRole)
-        print(old_key)
         new_sort_key = self.presenter.get_renamed_sort_key(new_name, old_key)
-        print(new_sort_key)
         self.list_widget.item(row).setData(Qt.InitialSortOrderRole, new_sort_key)
 
         widget.set_plot_name(new_name)
