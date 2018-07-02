@@ -4,8 +4,8 @@ import unittest
 import sys
 import mantid
 
-from sans.gui_logic.models.create_state import (create_states)
-from sans.common.enums import (SANSInstrument, ISISReductionMode, SANSFacility)
+from sans.gui_logic.models.create_state import (create_states, create_gui_state_from_userfile)
+from sans.common.enums import (SANSInstrument, ISISReductionMode, SANSFacility, SaveType)
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 
@@ -60,8 +60,15 @@ class GuiCommonTest(unittest.TestCase):
         states = create_states(self.state_gui_model, table_model, SANSInstrument.LOQ, SANSFacility.ISIS)
 
         self.assertEqual(len(states), 1)
-        create_gui_state_mock.assert_called_once_with('MaskLOQData.txt')
+        create_gui_state_mock.assert_called_once_with('MaskLOQData.txt', self.state_gui_model)
 
+    def test_create_gui_state_from_userfile_adds_save_format_from_gui(self):
+        gui_state = StateGuiModel({})
+        gui_state.save_types = [SaveType.NXcanSAS]
+
+        row_state = create_gui_state_from_userfile('MaskLOQData.txt', gui_state)
+
+        self.assertEqual(gui_state.save_types, row_state.save_types)
 
 
 if __name__ == '__main__':

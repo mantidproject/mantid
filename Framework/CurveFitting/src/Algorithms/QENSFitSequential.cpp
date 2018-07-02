@@ -6,6 +6,7 @@
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -395,6 +396,13 @@ void QENSFitSequential::init() {
           new Kernel::ListValidator<std::string>(evaluationTypes)),
       "The way the function is evaluated: CentrePoint or Histogram.",
       Kernel::Direction::Input);
+
+  declareProperty(make_unique<ArrayProperty<double>>("Exclude", ""),
+                  "A list of pairs of real numbers, defining the regions to "
+                  "exclude from the fit.");
+
+  declareProperty("IgnoreInvalidData", false,
+                  "Flag to ignore infinities, NaNs and data with zero errors.");
 }
 
 std::map<std::string, std::string> QENSFitSequential::validateInputs() {
@@ -595,8 +603,10 @@ void QENSFitSequential::renameWorkspaces(
 
 ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
                                                    const std::string &output) {
+  const std::vector<double> exclude = getProperty("Exclude");
   const bool convolveMembers = getProperty("ConvolveMembers");
   const bool passWsIndex = getProperty("PassWSIndexToFunction");
+  const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
 
   // Run PlotPeaksByLogValue
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.05, 0.90, true);
@@ -605,6 +615,8 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   plotPeaks->setPropertyValue("Function", getPropertyValue("Function"));
   plotPeaks->setProperty("StartX", getPropertyValue("StartX"));
   plotPeaks->setProperty("EndX", getPropertyValue("EndX"));
+  plotPeaks->setProperty("Exclude", exclude);
+  plotPeaks->setProperty("IgnoreInvalidData", ignoreInvalidData);
   plotPeaks->setProperty("FitType", "Sequential");
   plotPeaks->setProperty("CreateOutput", true);
   plotPeaks->setProperty("OutputCompositeMembers", true);

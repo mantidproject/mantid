@@ -175,9 +175,7 @@ void ReflectometrySumInQ::MinMax::testAndSet(const double a) noexcept {
 * @param a [in] :: a number
 */
 void ReflectometrySumInQ::MinMax::testAndSetMax(const double a) noexcept {
-  if (a > max) {
-    max = a;
-  }
+  max = std::max(max, a);
 }
 
 /**
@@ -186,9 +184,7 @@ void ReflectometrySumInQ::MinMax::testAndSetMax(const double a) noexcept {
 * @param a [in] :: a number
 */
 void ReflectometrySumInQ::MinMax::testAndSetMin(const double a) noexcept {
-  if (a < min) {
-    min = a;
-  }
+  min = std::min(min, a);
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -493,7 +489,7 @@ ReflectometrySumInQ::referenceAngles(const API::SpectrumInfo &spectrumInfo) {
   Angles a;
   const int beamCentre = getProperty(Prop::BEAM_CENTRE);
   const double centreTwoTheta =
-      spectrumInfo.signedTwoTheta(static_cast<size_t>(beamCentre));
+      spectrumInfo.twoTheta(static_cast<size_t>(beamCentre));
   const bool isFlat = getProperty(Prop::IS_FLAT_SAMPLE);
   if (isFlat) {
     a.horizon = centreTwoTheta / 2.;

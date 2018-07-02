@@ -3,6 +3,7 @@
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include <cmath>
 
 namespace Mantid {
 namespace API {
@@ -44,15 +45,19 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL ReflectometrySumInQ : public API::Algorithm {
 public:
   struct Angles {
-    double horizon{std::nan("")};
-    double twoTheta{std::nan("")};
-    double delta{std::nan("")};
+    double horizon{std::numeric_limits<double>::quiet_NaN()};
+    double twoTheta{std::numeric_limits<double>::quiet_NaN()};
+    double delta{std::numeric_limits<double>::quiet_NaN()};
   };
 
   struct MinMax {
     double min{std::numeric_limits<double>::max()};
     double max{std::numeric_limits<double>::lowest()};
-    MinMax() noexcept = default;
+    // Do not add noexcept to defaulted constructor here as this
+    // causes the constructor to be deleted in clang 6.0.0
+    // For more see:
+    // https://stackoverflow.com/questions/46866686/default-member-initializer-needed-within-definition-of-enclosing-class-outside
+    MinMax() = default;
     MinMax(const double a, const double b) noexcept;
     void testAndSet(const double a) noexcept;
     void testAndSetMax(const double a) noexcept;

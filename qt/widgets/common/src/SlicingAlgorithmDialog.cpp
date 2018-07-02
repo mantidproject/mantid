@@ -266,7 +266,7 @@ void SlicingAlgorithmDialog::buildDimensionInputs(const bool bForceForget) {
   } else {
     makeDimensionInputs("BasisVector",
                         this->ui.non_axis_aligned_layout->layout(),
-                        formatNonAlignedDimensionInput, useHistory);
+                        formatNonAlignedDimensionInput, Remember);
   }
 }
 
