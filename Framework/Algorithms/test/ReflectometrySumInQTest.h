@@ -178,7 +178,7 @@ public:
 
   void test_isTwoThetaSignAgnostic() {
     using namespace Mantid;
-    auto inputWS = testWorkspace(0, 51);  // One spectrum is monitor
+    auto inputWS = testWorkspace(0, 51); // One spectrum is monitor
     inputWS = detectorsOnly(inputWS);
     inputWS = convertToWavelength(inputWS);
     const auto &spectrumInfo = inputWS->spectrumInfo();
@@ -199,8 +199,7 @@ public:
           alg.setPropertyValue("InputWorkspaceIndexSet", indexSetValue.str()))
       TS_ASSERT_THROWS_NOTHING(
           alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setProperty("BeamCentre", spectrum1))
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("BeamCentre", spectrum1))
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", isFlatSample))
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("IncludePartialBins", false))
       TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -274,7 +273,9 @@ public:
   }
 
 private:
-  static Mantid::API::MatrixWorkspace_sptr testWorkspace(const double centreTwoThetaDegrees = 0.87, const int nSpectra = 4) {
+  static Mantid::API::MatrixWorkspace_sptr
+  testWorkspace(const double centreTwoThetaDegrees = 0.87,
+                const int nSpectra = 4) {
     using namespace Mantid;
     using namespace WorkspaceCreationHelper;
     constexpr double startX{0.1};
