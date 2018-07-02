@@ -98,20 +98,26 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
         return ws
 
     def _create_time_series_log(self, log_name, log_value):
+        prop = PropertyWithValueFactory.create(log_name, log_value)
+        
+        """
         if isinstance(log_value[0], int):
             prop = Int32TimeSeriesProperty(log_name)
+            pass
         elif isinstance(log_value[0], float):
             prop = FloatTimeSeriesProperty(log_name)
+            pass
         elif isinstance(log_value[0], str):
             prop = StringTimeSeriesProperty(log_name)
         elif isinstance(log_value[0], bool):
             prop = BoolTimeSeriesProperty(log_name)
         else:
             raise RuntimeError("Unsupported property type {}".format(type(log_value[0])))
+         """
 
         for i, value in enumerate(log_value):
             prop.addValue(i, value)
-
+        
         return prop
 
 if __name__ == "__main__":

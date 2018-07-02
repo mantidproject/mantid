@@ -40,7 +40,8 @@ std::string dtype(Mantid::Kernel::PropertyWithValue<HeldType> &self) {
   // Check for the special case of a string
   if (std::is_same<HeldType, std::string>::value) {
     std::stringstream ss;
-    ss << "S" << self.size();
+    std::string val = self.value();
+    ss << "S" << val.size();
     std::string ret_val = ss.str();
     return ret_val;
   }
