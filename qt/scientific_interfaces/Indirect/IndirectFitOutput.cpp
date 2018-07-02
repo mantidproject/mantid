@@ -75,7 +75,7 @@ Value getValueOr(const MapND &map, const Value &defaultValue, const Key &key,
                  const Keys &... keys) {
   const auto values = map.find(key);
   if (values != map.end())
-    return getValueOr(map, defaultValue, keys...);
+    return getValueOr(values->second, defaultValue, keys...);
   return defaultValue;
 }
 
