@@ -1,22 +1,11 @@
-#ifndef MANTID_KERNEL_CONTAINERDTYPE_H_
-#define MANTID_KERNEL_CONTAINERDTYPE_H_
-
-#include <string>
-#include <type_traits>
-#include <vector>
-
-#include <boost/python/class.hpp>
-#include <boost/python/implicit.hpp>
-#include <boost/python/init.hpp>
-#include <boost/python/make_function.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
-#include <boost/python/return_value_policy.hpp>
+#ifndef MANTID_PYTHONINTERFACE_CONVERTERS_CONTAINERDTYPE_H_
+#define MANTID_PYTHONINTERFACE_CONVERTERS_CONTAINERDTYPE_H_
 
 /**
     ContainerDtype Header File
 
     A helper free function to allow identification of data type being used by
-   providing a numpy friendly string.
+    providing a numpy friendly string.
 
     @author Lamar Moore STFC, Bhuvan Bezawada STFC
     @date 21/06/2018
@@ -43,11 +32,13 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-namespace dtypeHelper {
+namespace Mantid {
+namespace PythonInterface {
+namespace Converters {
 
 // Free function to determine data type being stored in container
 template <template <class> class Container, typename HeldType>
-std::string dtype(const Container<HeldType>) {
+std::string dtype(const Container<HeldType> &) {
   if (std::is_same<HeldType, bool>::value) {
     return "bool_";
   } else if (std::is_same<HeldType, short>::value) {
@@ -75,6 +66,8 @@ std::string dtype(const Container<HeldType>) {
   }
 }
 
-} // namespace dtypeHelper
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
-#endif /*MANTID_KERNEL_CONTAINERDTYPE_H_*/
+#endif /*MANTID_PYTHONINTERFACE_CONVERTERS_CONTAINERDTYPE_H_*/

@@ -25,7 +25,7 @@
 */
 
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/ContainerDtype.h"
+#include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/python/class.hpp>
@@ -37,7 +37,7 @@
 // Call the dtype helper function
 template <typename HeldType>
 std::string dtype(Mantid::Kernel::PropertyWithValue<HeldType> &self) {
-  return dtypeHelper::dtype(self);
+  return Mantid::PythonInterface::Converters::dtype(self);
 }
 
 namespace Mantid {
@@ -58,7 +58,7 @@ struct PropertyWithValueExporter {
         .add_property("value",
                       make_function(&PropertyWithValue<HeldType>::operator(),
                                     return_value_policy<ValueReturnPolicy>()))
-        .def("dtype", &dtype<HeldType>, arg("self"), "returns :`std::string`");
+        .def("dtype", &dtype<HeldType>, arg("self"));
   }
 };
 }
