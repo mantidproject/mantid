@@ -886,34 +886,34 @@ bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws) const {
   return dynamic_cast<MatrixWorkspace *>(ws.get()) != nullptr;
 }
 
-void MuonFitPropertyBrowser::setFitWorkspaces(const std::string input){
-// Copy experiment info to output workspace
-if (AnalysisDataService::Instance().doesExist(outputName() + "_Workspace")) {
-	// Input workspace should be a MatrixWorkspace according to isWorkspaceValid
-	auto inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
-	auto outWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-		outputName() + "_Workspace");
-	if (inWs && outWs) {
-		outWs->copyExperimentInfoFrom(inWs.get());
-	}
-}
-else if (AnalysisDataService::Instance().doesExist(outputName() +
-	"_Workspaces")) {
-	// Output workspace was a group
-	auto outGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-		outputName() + "_Workspaces");
-	if (outGroup->size() == m_workspacesToFit.size()) {
-		for (size_t i = 0; i < outGroup->size(); i++) {
-			auto outWs =
-				boost::dynamic_pointer_cast<MatrixWorkspace>(outGroup->getItem(i));
-			auto inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-				m_workspacesToFit[i]);
-			if (inWs && outWs) {
-				outWs->copyExperimentInfoFrom(inWs.get());
-			}
-		}
-	}
-}
+void MuonFitPropertyBrowser::setFitWorkspaces(const std::string input) {
+  // Copy experiment info to output workspace
+  if (AnalysisDataService::Instance().doesExist(outputName() + "_Workspace")) {
+    // Input workspace should be a MatrixWorkspace according to isWorkspaceValid
+    auto inWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
+    auto outWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        outputName() + "_Workspace");
+    if (inWs && outWs) {
+      outWs->copyExperimentInfoFrom(inWs.get());
+    }
+  } else if (AnalysisDataService::Instance().doesExist(outputName() +
+                                                       "_Workspaces")) {
+    // Output workspace was a group
+    auto outGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        outputName() + "_Workspaces");
+    if (outGroup->size() == m_workspacesToFit.size()) {
+      for (size_t i = 0; i < outGroup->size(); i++) {
+        auto outWs =
+            boost::dynamic_pointer_cast<MatrixWorkspace>(outGroup->getItem(i));
+        auto inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            m_workspacesToFit[i]);
+        if (inWs && outWs) {
+          outWs->copyExperimentInfoFrom(inWs.get());
+        }
+      }
+    }
+  }
 }
 
 void MuonFitPropertyBrowser::finishHandle(const IAlgorithm *alg) {
@@ -925,9 +925,9 @@ void MuonFitPropertyBrowser::finishHandle(const IAlgorithm *alg) {
 }
 void MuonFitPropertyBrowser::finishHandleTF(const IAlgorithm *alg) {
 
-	setFitWorkspaces(static_cast<std::string>(
-            alg->getProperty("UnNormalizedWorkspaceList")));
-  
+  setFitWorkspaces(
+      static_cast<std::string>(alg->getProperty("UnNormalizedWorkspaceList")));
+
   auto status = QString::fromStdString(alg->getPropertyValue("OutputStatus"));
   emit fitResultsChanged(status);
   FitPropertyBrowser::fitResultsChanged(status);
@@ -936,21 +936,22 @@ void MuonFitPropertyBrowser::finishHandleTF(const IAlgorithm *alg) {
   // and group the output workspaces
   const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
   if (nWorkspaces > 1) {
-	  std::string baseName = outputName();
-	  finishAfterTFSimultaneousFit(alg, baseName);
+    std::string baseName = outputName();
+    finishAfterTFSimultaneousFit(alg, baseName);
   }
 
-    getFitResults();
-    std::vector<std::string> wsList =
-        alg->getProperty("UnNormalizedWorkspaceList");
-    emit fittingDone(QString::fromStdString(wsList[0]));
-   if(nWorkspaces==1) {
+  getFitResults();
+  std::vector<std::string> wsList =
+      alg->getProperty("UnNormalizedWorkspaceList");
+  emit fittingDone(QString::fromStdString(wsList[0]));
+  if (nWorkspaces == 1) {
     emit algorithmFinished(QString::fromStdString(wsList[0] + "_workspace"));
   }
 }
 void MuonFitPropertyBrowser::finishHandleNormal(const IAlgorithm *alg) {
   // Copy experiment info to output workspace
-  setFitWorkspaces(static_cast<std::string>(alg->getProperty("InputWorkspace")));
+  setFitWorkspaces(
+      static_cast<std::string>(alg->getProperty("InputWorkspace")));
   // If fit was simultaneous, insert extra information into params table
   // and group the output workspaces
   const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
@@ -1154,7 +1155,8 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
 bool MuonFitPropertyBrowser::isMultiFittingMode() const {
   return m_isMultiFittingMode;
 }
-void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(bool enabled) {
+void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
+    bool enabled) {
   // set new fit func
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create(
       "ConvertFitFunctionForMuonTFAsymmetry");
@@ -1241,7 +1243,7 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(bool enabled) 
 * @param enabled :: [input] Whether to turn this mode on or off
 */
 void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
-	ConvertFitFunctionForMuonTFAsymmetry(enabled);
+  ConvertFitFunctionForMuonTFAsymmetry(enabled);
 
   // Show or hide the TFAsymmetry fit
   if (enabled) {

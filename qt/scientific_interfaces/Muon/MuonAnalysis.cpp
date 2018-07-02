@@ -2012,11 +2012,11 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName, const bool update,
     std::transform(groups.pairNames.begin(), groups.pairNames.end(),
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     setGroupsAndPairs();
-	if (update) {
-		// Set the selected run, group/pair and period
-		m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
-		setChosenGroupAndPeriods(wsName);
-	}
+    if (update) {
+      // Set the selected run, group/pair and period
+      m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
+      setChosenGroupAndPeriods(wsName);
+    }
   }
 
   QString code;
@@ -2031,23 +2031,25 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName, const bool update,
 }
 
 /**
- * Pass through to selectMultiPeak(wsName, update, filePath) where filePath is set
+ * Pass through to selectMultiPeak(wsName, update, filePath) where filePath is
+ * set
  * to blank. Enables connection as a slot without Qt understanding
  * boost::optional.
  * @param wsName Name of the selected workspace
  */
 void MuonAnalysis::selectMultiPeak(const QString &wsName) {
-  selectMultiPeak(wsName, true,boost::optional<QString>());
+  selectMultiPeak(wsName, true, boost::optional<QString>());
 }
 
 /**
-* Pass through to selectMultiPeak(wsName, update, filePath) where filePath is set
+* Pass through to selectMultiPeak(wsName, update, filePath) where filePath is
+* set
 * to blank. Enables connection as a slot without Qt understanding
 * boost::optional. This will not update the data selector
 * @param wsName Name of the selected workspace
 */
 void MuonAnalysis::selectMultiPeakNoUpdate(const QString &wsName) {
-	selectMultiPeak(wsName, false, boost::optional<QString>());
+  selectMultiPeak(wsName, false, boost::optional<QString>());
 }
 
 /**
