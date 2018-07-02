@@ -33,9 +33,9 @@ Authorisation
 Development
 ###########
 
-The patch release will be prepared based off the branch used to
-construct to most recent major point release, e.g. ``release-v3.9``
-would be used for any ``3.9.x`` patches. Changes for the patch should be made using the standard GitHub
+The patch release will be prepared based off the tag used to mark
+the last minor release. A branch called ``release-next`` will be created from this tag.
+Changes for the patch should be made using the standard GitHub
 workflow for merging code with ``master``. The issue and pull request should then have the ``PatchCandidate`` label applied to them. These
 commits will then be cherry picked from ``master`` on to the release branch.
 
@@ -47,8 +47,7 @@ version of the last major/patch release. It is not a requirement but
 advised to unfix the patch number while the patch is being compiled.
 This prevents the nightly builds from generating a collection of packages that have
 exactly the same version. The patch number can be unfixed by commenting the line in
-https://www.github.com/mantidproject/mantid/blob/release-vX.Y/buildconfig/CMake/VersionNumber.cmake#L9, where
-``X.Y`` should be replace with the appropriate numbers.
+https://www.github.com/mantidproject/mantid/blob/release-next/buildconfig/CMake/VersionNumber.cmake#L9.
 
 Release Notes
 -------------
@@ -107,11 +106,9 @@ On the day of release a few steps are required:
 
 * update the patch version:
 * navigate to
-  https://www.github.com/mantidproject/mantid/blob/release-X.Y./buildconfig/CMake/VersionNumber.cmake,
-  where ``X`` & ``Y`` are the major and minor release versions
-  respectively.
+  https://www.github.com/mantidproject/mantid/blob/release-next/buildconfig/CMake/VersionNumber.cmake
 * edit the ``VERSION_PATCH`` to the required number for the patch and
-  commit the result.
+  commit the result
 * run a manual build of all of the OS jobs under {{
   site.mantidreleasebuilds }} and when asked for a suffix use an empty
   string

@@ -137,10 +137,10 @@ Once the unscripted testing has passed:
 * Disable release deploy jobs by executing
   `close-release-testing <http://builds.mantidproject.org/view/All/job/close-release-testing>`__
   job.
-* On the ``release-vX.Y`` branch, update major & minor versions
+* On the ``release-next`` branch, update major & minor versions
   accordingly in ``buildconfig/CMake/VersionNumber.cmake``. Also
   uncomment ``VERSION_PATCH`` and set it to ``0``.
-* Merge ``release`` branch back to ``master``
+* Merge ``release-next`` branch back to ``master``
 * Comment out patch number on ``master`` branch
 * Draft a `new
   release <https://github.com/mantidproject/mantid/releases>`__ on

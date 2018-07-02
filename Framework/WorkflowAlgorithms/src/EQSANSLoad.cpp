@@ -510,7 +510,6 @@ void EQSANSLoad::exec() {
     const bool loadMonitors = getProperty("LoadMonitors");
     IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadEventNexus", 0, 0.2);
     loadAlg->setProperty("LoadMonitors", loadMonitors);
-    loadAlg->setProperty("MonitorsAsEvents", false);
     loadAlg->setProperty("Filename", fileName);
     if (skipTOFCorrection) {
       if (m_low_TOF_cut > 0.0)
