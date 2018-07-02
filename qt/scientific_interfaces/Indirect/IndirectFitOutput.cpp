@@ -62,15 +62,20 @@ void extractParametersFromTable(
   applyEnumeratedData(extract, fitDataBegin, fitDataEnd);
 }
 
-template <typename Map2D, typename T, typename U, typename Value>
-Value findOr(const Map2D &map, const T &firstKey, const U &secondKey,
-             const Value &defaultValue) {
-  const auto values = map.find(firstKey);
-  if (values != map.end()) {
-    const auto value = values->second.find(secondKey);
-    if (value != values->second.end())
-      return value->second;
-  }
+template <typename Map, typename Value, typename Key>
+Value getValueOr(const Map &map, const Value &defaultValue, const Key &key) {
+  const auto value = map.find(key);
+  if (value != map.end())
+    return value->second;
+  return defaultValue;
+}
+
+template <typename MapND, typename Value, typename Key, typename... Keys>
+Value getValueOr(const MapND &map, const Value &defaultValue, const Key &key,
+                 const Keys &... keys) {
+  const auto values = map.find(key);
+  if (values != map.end())
+    return getValueOr(map, defaultValue, keys...);
   return defaultValue;
 }
 
@@ -124,15 +129,17 @@ bool IndirectFitOutput::isSpectrumFit(IndirectFitData const *fitData,
 std::unordered_map<std::string, ParameterValue>
 IndirectFitOutput::getParameters(IndirectFitData const *fitData,
                                  std::size_t spectrum) const {
-  return findOr(m_parameters, fitData, spectrum,
-                std::unordered_map<std::string, ParameterValue>());
+  return getValueOr(m_parameters,
+                    std::unordered_map<std::string, ParameterValue>(), fitData,
+                    spectrum);
 }
 
 boost::optional<ResultLocation>
-IndirectFitOutput::getResultLocation(IndirectFitData *fitData,
+IndirectFitOutput::getResultLocation(IndirectFitData const *fitData,
                                      std::size_t spectrum) const {
-  return findOr(m_outputResultLocations, fitData, spectrum,
-                boost::optional<ResultLocation>(boost::none));
+  return getValueOr(m_outputResultLocations,
+                    boost::optional<ResultLocation>(boost::none), fitData,
+                    spectrum);
 }
 
 MatrixWorkspace_sptr IndirectFitOutput::getLastResultWorkspace() const {
@@ -146,10 +153,17 @@ WorkspaceGroup_sptr IndirectFitOutput::getLastResultGroup() const {
 void IndirectFitOutput::mapParameterNames(
     const std::unordered_map<std::string, std::string> &parameterNameChanges,
     const FitDataIterator &fitDataBegin, const FitDataIterator &fitDataEnd) {
-  for (auto it = fitDataBegin; it < fitDataEnd; ++it) {
-    auto &parameterValues = m_parameters[it->get()];
-    for (const auto &values : parameterValues)
-      parameterValues[values.first] =
+  for (auto it = fitDataBegin; it < fitDataEnd; ++it)
+    mapParameterNames(parameterNameChanges, it->get());
+}
+
+void IndirectFitOutput::mapParameterNames(
+    const std::unordered_map<std::string, std::string> &parameterNameChanges,
+    IndirectFitData const *fitData) {
+  const auto parameterIt = m_parameters.find(fitData);
+  if (parameterIt != m_parameters.end()) {
+    for (const auto &values : parameterIt->second)
+      parameterIt->second[values.first] =
           mapKeys(values.second, parameterNameChanges);
   }
 }
