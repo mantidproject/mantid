@@ -68,6 +68,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.destroy = QAppThreadCall(self._destroy_orig)
         self._show_orig = self.show
         self.show = QAppThreadCall(self._show_orig)
+        self._window_activated_orig = self._window_activated
+        self._window_activated = QAppThreadCall(self._window_activated_orig)
+        self._widgetclosed_orig = self._widgetclosed
+        self._widgetclosed = QAppThreadCall(self._widgetclosed_orig)
 
         self.canvas = canvas
         self.window = MainWindow()
