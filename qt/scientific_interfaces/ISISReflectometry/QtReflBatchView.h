@@ -7,6 +7,7 @@
 #include <memory>
 #include "QtReflSaveTabView.h"
 #include "GUI/Event/EventView.h"
+#include "GUI/Experiment/ExperimentView.h"
 #include "QtReflSettingsTabView.h"
 #include "QtReflRunsTabView.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -48,6 +49,7 @@ public:
   IEventView *eventHandling() const override;
   IReflSettingsTabView *settings() const override;
   IReflSaveTabView *save() const override;
+  IExperimentView* experiment() const override;
 
 private:
   void initLayout();
@@ -64,6 +66,7 @@ private:
   std::unique_ptr<EventView> m_eventHandling;
   std::unique_ptr<QtReflSettingsTabView> m_settings;
   std::unique_ptr<QtReflSaveTabView> m_save;
+  std::unique_ptr<ExperimentView> m_experiment;
 };
 }
 }

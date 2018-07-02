@@ -1,4 +1,6 @@
 #include "Experiment.h"
+#include <cmath>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -7,42 +9,38 @@ Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType,
                        PolarizationCorrections polarizationCorrections,
                        RangeInLambda transmissionRunRange,
                        std::string stitchParameters,
-                       std::vector<RowTemplate> rowTemplate)
+                       std::vector<RowTemplate> rowTemplates)
     : m_analysisMode(analysisMode), m_reductionType(reductionType),
       m_summationType(summationType),
-      m_polarizatioCorrections(polarizationCorrections), m_transmissionRuns(transmissionRunRange),
+      m_polarizationCorrections(std::move(polarizationCorrections)),
+      m_transmissionRunRange(std::move(transmissionRunRange)),
       m_stitchParameters(std::move(stitchParameters)),
       m_rowTemplates(std::move(rowTemplates)) {}
 
-AnalysisMode Experiment::analysisMode() const {
-  return m_analysisMode;
-}
-ReductionType reductionType() const {
-  return m_reductionType;
-}
-SummationType summationType() const {
-  return m_summationType;
-}
-PolarizationCorrections const &polarizationCorrections() const {
+AnalysisMode Experiment::analysisMode() const { return m_analysisMode; }
+ReductionType Experiment::reductionType() const { return m_reductionType; }
+SummationType Experiment::summationType() const { return m_summationType; }
+PolarizationCorrections const &Experiment::polarizationCorrections() const {
   return m_polarizationCorrections;
 }
 
-RangeInLambda const &transissionRunRange() const {
+RangeInLambda const &Experiment::transissionRunRange() const {
   return m_transmissionRunRange;
 }
-std::string stitchParameters() const {
-  return m_stitchParameters;
-}
-std::vector<RowTemplate> const &rowTemplates() const {
+std::string Experiment::stitchParameters() const { return m_stitchParameters; }
+std::vector<RowTemplate> const &Experiment::rowTemplates() const {
   return m_rowTemplates;
 }
 
-RowTemplate const* rowTemplateForTheta(double thetaAngle, double tolerance) const {
-  auto smallestIt = std::min_element(m_rowTemplates, [thetaAngle](RowTemplate const& lhs, RowTemplate const& rhs) -> bool {
-    return std::abs(thetaAngle - lhs.theta());
-  });
+RowTemplate const *Experiment::rowTemplateForTheta(double thetaAngle,
+                                                   double tolerance) const {
+  auto smallestIt = std::min_element(
+      m_rowTemplates.cbegin(),
+      m_rowTemplates.cend(),
+      [thetaAngle](RowTemplate const &lhs, RowTemplate const &rhs)
+          -> bool { return std::abs(thetaAngle - lhs.theta()) < std::abs(thetaAngle - rhs.theta()); });
 
-  auto const* closestCandidate = &(*smallestIt);
+  auto const *closestCandidate = &(*smallestIt);
   if (std::abs(thetaAngle - closestCandidate->theta()) <= tolerance) {
     return closestCandidate;
   } else {

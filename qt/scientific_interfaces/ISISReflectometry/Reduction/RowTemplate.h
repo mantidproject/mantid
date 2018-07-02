@@ -1,16 +1,19 @@
 #ifndef MANTID_CUSTOMINTERFACES_ROWTEMPLATE_H_
 #define MANTID_CUSTOMINTERFACES_ROWTEMPLATE_H_
 #include <boost/optional.hpp>
+#include "ReductionOptionsMap.h"
 #include "RangeInQ.h"
 #include "../DllConfig.h"
+#include <vector>
 namespace MantidQt {
 namespace CustomInterfaces {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL RowTemplate {
 public:
   RowTemplate(double theta, std::pair<std::string, std::string> tranmissionRuns,
-      boost::optional<RangeInQ> qRange, boost::optional<double> scaleFactor,
-      ReductionOptionsMap reductionOptions);
+              boost::optional<RangeInQ> qRange,
+              boost::optional<double> scaleFactor,
+              ReductionOptionsMap reductionOptions);
 
   std::pair<std::string, std::string> const &transmissionWorkspaceNames() const;
   double theta() const;
@@ -25,7 +28,6 @@ private:
   boost::optional<double> m_scaleFactor;
   ReductionOptionsMap m_reductionOptions;
 };
-
 }
 }
 #endif // MANTID_CUSTOMINTERFACES_ROWTEMPLATE_H_

@@ -5,6 +5,7 @@
 #include "IReflRunsTabView.h"
 #include "IReflSettingsTabView.h"
 #include "GUI/Event/IEventView.h"
+#include "GUI/Experiment/IExperimentView.h"
 #include "IReflSaveTabView.h"
 
 namespace MantidQt {
@@ -44,6 +45,7 @@ public:
   virtual IEventView* eventHandling() const = 0;
   virtual IReflSettingsTabView* settings() const = 0;
   virtual IReflSaveTabView* save() const = 0;
+  virtual IExperimentView* experiment() const = 0;
   virtual ~IReflBatchView() = default;
 };
 }

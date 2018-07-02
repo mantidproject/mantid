@@ -21,6 +21,14 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "../DllConfig.h"
+#include "AnalysisMode.h"
+#include "ReductionType.h"
+#include "SummationType.h"
+#include "PolarizationCorrections.h"
+#include "RangeInLambda.h"
+#include "RowTemplate.h"
+#include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -31,7 +39,7 @@ public:
              SummationType summationType,
              PolarizationCorrections polarizationCorrections,
              RangeInLambda transmissionRunRange,
-             std::string const &stitchParameters,
+             std::string stitchParameters,
              std::vector<RowTemplate> rowTemplate);
 
   AnalysisMode analysisMode() const;
@@ -42,7 +50,7 @@ public:
   std::string stitchParameters() const;
   std::vector<RowTemplate> const &rowTemplates() const;
 
-  RowTemplate const *rowTemplateForTheta(double thetaAngle) const;
+  RowTemplate const *rowTemplateForTheta(double thetaAngle, double tolerance) const;
 
 private:
   AnalysisMode m_analysisMode;
@@ -52,7 +60,7 @@ private:
   PolarizationCorrections m_polarizationCorrections;
   RangeInLambda m_transmissionRunRange;
 
-  std::string m_stitchParams;
+  std::string m_stitchParameters;
   std::vector<RowTemplate> m_rowTemplates;
 };
 }

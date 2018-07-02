@@ -8,14 +8,10 @@ RowTemplate::RowTemplate(double theta,
                          boost::optional<RangeInQ> qRange,
                          boost::optional<double> scaleFactor,
                          ReductionOptionsMap reductionOptions)
-    : m_theta(std::move(theta)), m_qRange(std::move(qRange)),
-      m_scaleFactor(std::move(scaleFactor)),
+    : m_theta(std::move(theta)),
       m_transmissionRuns(std::move(transmissionRuns)),
+      m_qRange(std::move(qRange)), m_scaleFactor(std::move(scaleFactor)),
       m_reductionOptions(std::move(reductionOptions)) {}
-
-std::vector<std::string> const &RowTemplate::runNumbers() const {
-  return m_runNumbers;
-}
 
 std::pair<std::string, std::string> const &
 RowTemplate::transmissionWorkspaceNames() const {

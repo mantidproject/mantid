@@ -1,16 +1,20 @@
-#ifndef MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H
-#define MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H
+#ifndef MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTER_H
+#define MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTER_H
 
-#include <string>
-#include "../../IReflBatchPresenter.h"
+#include "../../DllConfig.h"
+#include "IReflBatchPresenter.h"
+#include "IExperimentView.h"
+#include "IExperimentPresenter.h"
+#include "../../Reduction/Experiment.h"
+#include <boost/optional.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** @class IEventPresenter
+/** @class ExperimentPresenter
 
-IReflEventPresenter is an interface which defines the functions that need
-to be implemented by a concrete 'Event' presenter
+ExperimentPresenter is a presenter class for the widget 'Event' in the
+ISIS Reflectometry Interface.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -33,16 +37,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
-enum class SliceType { None, UniformEven, Uniform, Custom, LogValue };
-
-class IEventPresenter {
+class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentPresenter :
+      public ExperimentViewSubscriber, public IExperimentPresenter {
 public:
-  virtual ~IEventPresenter() = default;
-  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) =0;
-  virtual void onReductionPaused() = 0;
-  virtual void onReductionResumed() = 0;
+  ExperimentPresenter(IExperimentView *view);
+  void notifySettingsChanged() override;
+  void notifySummationTypeChanged() override;
+
+  Experiment const& experiment() const;
+
+private:
+  IExperimentView* m_view;
+  boost::optional<Experiment> m_model;
 };
 }
 }
-#endif /* MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H */
+#endif // MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTER_H

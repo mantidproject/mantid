@@ -33,6 +33,13 @@ void QtReflBatchView::initLayout() {
 
   m_save = createSaveTab();
   m_ui.batchTabs->addTab(m_save.get(), "Save ASCII");
+
+  m_experiment = Mantid::Kernel::make_unique<ExperimentView>(createReductionAlg(), this);
+  m_ui.batchTabs->addTab(m_experiment.get(), "Experiment Settings");
+}
+
+IExperimentView* QtReflBatchView::experiment() const {
+  return m_experiment.get();
 }
 
 IReflRunsTabView *QtReflBatchView::runs() const { return m_runs.get(); }

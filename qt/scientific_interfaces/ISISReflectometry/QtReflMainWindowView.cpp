@@ -12,8 +12,7 @@ namespace CustomInterfaces {
 DECLARE_SUBWINDOW(QtReflMainWindowView)
 
 QtReflMainWindowView::QtReflMainWindowView(QWidget *parent)
-    : UserSubWindow(parent) {
-}
+    : UserSubWindow(parent) {}
 
 IReflBatchView *QtReflMainWindowView::newBatch() {
   auto index = m_ui.mainTabs->count();
@@ -40,7 +39,8 @@ void QtReflMainWindowView::initLayout() {
   connect(m_ui.helpButton, SIGNAL(clicked()), this, SLOT(helpPressed()));
   connect(m_ui.mainTabs, SIGNAL(tabCloseRequested(int)), this,
           SLOT(onTabCloseRequested(int)));
-  connect(m_ui.newBatch, SIGNAL(triggered(bool)), this, SLOT(onNewBatchRequested(bool)));
+  connect(m_ui.newBatch, SIGNAL(triggered(bool)), this,
+          SLOT(onNewBatchRequested(bool)));
 
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
@@ -48,8 +48,8 @@ void QtReflMainWindowView::initLayout() {
   auto defaultSlicing = Slicing();
   auto thetaTolerance = 0.01;
   auto makeWorkspaceNames = WorkspaceNamesFactory(defaultSlicing);
-  auto makeBatchPresenter =
-      RunsTablePresenterFactory(instruments, thetaTolerance, makeWorkspaceNames);
+  auto makeBatchPresenter = RunsTablePresenterFactory(
+      instruments, thetaTolerance, makeWorkspaceNames);
   auto defaultInstrumentIndex = 0; // TODO: Look this up properly;
   auto searcher = boost::shared_ptr<IReflSearcher>();
 
@@ -61,9 +61,12 @@ void QtReflMainWindowView::initLayout() {
   auto makeSettingsPresenter = SettingsPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();
 
+  auto makeExperimentPresenter = ExperimentPresenterFactory();
+
   auto makeReflBatchPresenter = ReflBatchPresenterFactory(
       std::move(makeRunsPresenter), std::move(makeEventPresenter),
-      std::move(makeSettingsPresenter), std::move(makeSaveSettingsPresenter));
+      std::move(makeExperimentPresenter), std::move(makeSettingsPresenter),
+      std::move(makeSaveSettingsPresenter));
 
   // Create the presenter
   m_presenter =

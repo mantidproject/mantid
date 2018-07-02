@@ -1,5 +1,5 @@
-#ifndef MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H
-#define MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H
+#ifndef MANTID_ISISREFLECTOMETRY_IEXPERIMENTPRESENTER_H
+#define MANTID_ISISREFLECTOMETRY_IEXPERIMENTPRESENTER_H
 
 #include <string>
 #include "../../IReflBatchPresenter.h"
@@ -33,16 +33,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
-enum class SliceType { None, UniformEven, Uniform, Custom, LogValue };
-
-class IEventPresenter {
+class IExperimentPresenter {
 public:
-  virtual ~IEventPresenter() = default;
-  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) =0;
-  virtual void onReductionPaused() = 0;
-  virtual void onReductionResumed() = 0;
+  virtual ~IExperimentPresenter() = default;
 };
 }
 }
-#endif /* MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H */
+#endif /* MANTID_ISISREFLECTOMETRY_IEXPERIMENTPRESENTER_H */

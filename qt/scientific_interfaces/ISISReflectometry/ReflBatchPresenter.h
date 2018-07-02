@@ -3,6 +3,7 @@
 
 #include "DllConfig.h"
 #include "IReflBatchPresenter.h"
+#include "GUI/Experiment/IExperimentPresenter.h"
 #include <memory>
 
 namespace MantidQt {
@@ -47,6 +48,7 @@ public:
   ReflBatchPresenter(IReflBatchView *view,
                      std::unique_ptr<IReflRunsTabPresenter> runsPresenter,
                      std::unique_ptr<IEventPresenter> eventPresenter,
+                     std::unique_ptr<IExperimentPresenter> experimentPresenter,
                      std::unique_ptr<IReflSettingsTabPresenter> settingsPresenter,
                      std::unique_ptr<IReflSaveTabPresenter> savePresenter);
 
@@ -93,6 +95,7 @@ private:
   std::unique_ptr<IEventPresenter> m_eventPresenter;
   /// The presenter of tab 'Settings'
   std::unique_ptr<IReflSettingsTabPresenter> m_settingsPresenter;
+  std::unique_ptr<IExperimentPresenter> m_experimentPresenter;
   /// The presenter of tab 'Save ASCII'
   std::unique_ptr<IReflSaveTabPresenter> m_savePresenter;
 };

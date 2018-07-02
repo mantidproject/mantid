@@ -24,7 +24,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #define MANTID_CUSTOMINTERFACES_RUN_H_
 #include <string>
 #include <vector>
-#include <map>
 #include <boost/variant.hpp>
 #include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/optional.hpp>
@@ -32,13 +31,13 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "WorkspaceNamesFactory.h"
 #include "ReductionWorkspaces.h"
 #include "SlicedReductionWorkspaces.h"
+#include "ReductionOptionsMap.h"
 #include "Slicing.h"
 #include "../DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-using ReductionOptionsMap = std::map<std::string, std::string>;
 
 // Immutability here makes update notification easier.
 template <typename ReducedWorkspaceNames>

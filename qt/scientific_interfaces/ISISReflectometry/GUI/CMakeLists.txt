@@ -1,5 +1,5 @@
 add_subdirectory( Event )
-#add_subdirectory(Experiment)
+add_subdirectory(Experiment)
 #add_subdirectory(Instrument)
 #add_subdirectory(Runs)
 add_subdirectory( RunsTable )
