@@ -278,6 +278,8 @@ void ReflectometryReductionOneAuto2::exec() {
   // Mandatory properties
   alg->setProperty("SummationType", getPropertyValue("SummationType"));
   alg->setProperty("ReductionType", getPropertyValue("ReductionType"));
+  alg->setProperty("IncludePartialBins",
+                   getPropertyValue("IncludePartialBins"));
   alg->setProperty("Diagnostics", getPropertyValue("Diagnostics"));
   alg->setProperty("Debug", getPropertyValue("Debug"));
   double wavMin = checkForMandatoryInstrumentDefault<double>(

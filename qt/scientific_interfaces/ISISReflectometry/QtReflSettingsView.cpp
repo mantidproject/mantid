@@ -137,6 +137,8 @@ void QtReflSettingsView::registerInstrumentSettingsWidgets(
   registerSettingWidget(*m_ui.correctDetectorsCheckBox, "CorrectDetectors",
                         alg);
   registerSettingWidget(*m_ui.reductionTypeComboBox, "ReductionType", alg);
+  registerSettingWidget(*m_ui.includePartialBinsCheckBox, "IncludePartialBins",
+                        alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
   registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
 }
@@ -167,6 +169,10 @@ void QtReflSettingsView::summationTypeChanged(int reductionTypeIndex) {
 
 void QtReflSettingsView::setReductionTypeEnabled(bool enable) {
   m_ui.reductionTypeComboBox->setEnabled(enable);
+}
+
+void QtReflSettingsView::setIncludePartialBinsEnabled(bool enable) {
+  m_ui.includePartialBinsCheckBox->setEnabled(enable);
 }
 
 template <typename Widget>
@@ -219,6 +225,7 @@ void QtReflSettingsView::setIsPolCorrEnabled(bool enable) const {
 void QtReflSettingsView::setExpDefaults(ExperimentOptionDefaults defaults) {
   setSelected(*m_ui.analysisModeComboBox, defaults.AnalysisMode);
   setSelected(*m_ui.reductionTypeComboBox, defaults.ReductionType);
+  setChecked(*m_ui.includePartialBinsCheckBox, defaults.IncludePartialBins);
   setSelected(*m_ui.summationTypeComboBox, defaults.SummationType);
   setText(*m_ui.startOverlapEdit, defaults.TransRunStartOverlap);
   setText(*m_ui.endOverlapEdit, defaults.TransRunEndOverlap);
@@ -655,6 +662,10 @@ std::string QtReflSettingsView::getReductionType() const {
 
 bool QtReflSettingsView::getDebugOption() const {
   return m_ui.debugCheckBox->isChecked();
+}
+
+bool QtReflSettingsView::getIncludePartialBins() const {
+  return m_ui.includePartialBinsCheckBox->isChecked();
 }
 
 std::string QtReflSettingsView::getSummationType() const {

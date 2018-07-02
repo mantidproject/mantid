@@ -76,9 +76,16 @@ bool ReflSettingsPresenter::hasReductionTypes(
   return summationType == "SumInQ";
 }
 
+bool ReflSettingsPresenter::hasIncludePartialBinsOption(
+    const std::string &summationType) const {
+  return summationType == "SumInQ";
+}
+
 void ReflSettingsPresenter::handleSummationTypeChange() {
   auto summationType = m_view->getSummationType();
   m_view->setReductionTypeEnabled(hasReductionTypes(summationType));
+  m_view->setIncludePartialBinsEnabled(
+      hasIncludePartialBinsOption(summationType));
 }
 
 /** Sets the current instrument name and changes accessibility status of
@@ -230,6 +237,9 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
 
     setTransmissionOption(options, "Debug",
                           asAlgorithmPropertyBool(m_view->getDebugOption()));
+    auto const includePartialBins =
+        asAlgorithmPropertyBool(m_view->getIncludePartialBins());
+    options["IncludePartialBins"] = includePartialBins;
 
     auto defaultOptions = getDefaultOptions();
     for (auto iter = defaultOptions.begin(); iter != defaultOptions.end();
@@ -408,6 +418,10 @@ void ReflSettingsPresenter::getExpDefaults() {
   defaults.ReductionType =
       value_or(parameters.optional<std::string>("ReductionType"),
                alg->getPropertyValue("ReductionType"));
+
+  defaults.IncludePartialBins =
+      value_or(parameters.optional<bool>("IncludePartialBins"),
+               alg->getProperty("IncludePartialBins"));
 
   defaults.CRho = value_or(parameters.optional<std::string>("crho"), "1");
   defaults.CAlpha = value_or(parameters.optional<std::string>("calpha"), "1");

@@ -29,10 +29,10 @@ using namespace Mantid::Geometry;
 
 // Helper typedef
 using MDHistoPeaksWSTuple =
-    boost::tuple<IMDHistoWorkspace_sptr, IPeaksWorkspace_sptr>;
+    boost::tuple<IMDHistoWorkspace_sptr, PeaksWorkspace_sptr>;
 // Helper typedef
 using MDEventPeaksWSTuple =
-    boost::tuple<IMDEventWorkspace_sptr, IPeaksWorkspace_sptr>;
+    boost::tuple<IMDEventWorkspace_sptr, PeaksWorkspace_sptr>;
 
 class ClusterIntegrationBaseTest {
 protected:
@@ -102,7 +102,7 @@ protected:
     coordsAlg->execute();
 
     // --- Make a fake PeaksWorkspace ---
-    IPeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
     peakWS->setInstrument(inst);
 
     // --- Set speical coordinates on fake PeaksWorkspace --

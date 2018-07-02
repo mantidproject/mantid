@@ -219,7 +219,6 @@ set ( INC_FILES
 	inc/MantidKernel/Logger.h
 	inc/MantidKernel/MDAxisValidator.h
 	inc/MantidKernel/MDUnit.h
-	inc/MantidKernel/MDUnitFactory.h
 	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MagneticFormFactorTable.h
 	inc/MantidKernel/MagneticIon.h

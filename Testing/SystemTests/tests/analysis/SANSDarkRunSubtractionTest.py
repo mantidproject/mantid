@@ -410,15 +410,12 @@ class DarkRunSubtractionTest(unittest.TestCase):
         else:
             scatter_workspace, monitor_workspace = self._get_sample_workspace_histo()
 
-        # Execute the dark_run_subtractor
-        try:
-            start_spec = 9
-            end_spec = 20 # Full specturm length
-            scatter_workspace, monitor_workspace = dark_run_subtractor.execute(scatter_workspace, monitor_workspace,
-                                                                               start_spec, end_spec, is_input_event)
-        # pylint: disable=bare-except
-        except:
-            self.assertFalse(True, "The DarkRunSubtraction executed with an error")
+        # Execute the dark_run_subtractor - let exceptions flow to help track down errors
+        start_spec = 9
+        end_spec = 20 # Full specturm length
+        scatter_workspace, monitor_workspace = dark_run_subtractor.execute(scatter_workspace, monitor_workspace,
+                                                                           start_spec, end_spec, is_input_event)
+
         return scatter_workspace, monitor_workspace
 
     def _do_test_valid_transmission(self, settings, trans_ids):
@@ -430,12 +427,9 @@ class DarkRunSubtractionTest(unittest.TestCase):
         # Create an actual scatter workspace
         transmission_workspace = self._get_transmission_workspace(trans_ids)
 
-        # Execute the dark_run_subtractor
-        try:
-            transmission_workspace = dark_run_subtractor.execute_transmission(transmission_workspace, trans_ids)
-        # pylint: disable=bare-except
-        except:
-            self.assertFalse(True, "The DarkRunSubtraction executed with an error")
+        # Execute the dark_run_subtractor - let exceptions flow to help track down errors
+        transmission_workspace = dark_run_subtractor.execute_transmission(transmission_workspace, trans_ids)
+
         return transmission_workspace
 
     def _get_dark_file(self):
@@ -486,7 +480,6 @@ class DarkRunSubtractionTest(unittest.TestCase):
             alg_load_monitors.initialize()
             alg_load_monitors.setChild(True)
             alg_load_monitors.setProperty("Filename", file_path)
-            alg_load_monitors.setProperty("MonitorsAsEvents", False)
             alg_load_monitors.setProperty("OutputWorkspace", monitors_name)
             alg_load_monitors.execute()
             monitor_ws = alg_load_monitors.getProperty("OutputWorkspace").value
@@ -522,7 +515,6 @@ class DarkRunSubtractionTest(unittest.TestCase):
         alg_load2.initialize()
         alg_load2.setChild(True)
         alg_load2.setProperty("Filename", file_path)
-        alg_load2.setProperty("MonitorsAsEvents", False)
         alg_load2.setProperty("OutputWorkspace", monitor_name)
         alg_load2.execute()
         monitor_ws = alg_load2.getProperty("OutputWorkspace").value
@@ -578,7 +570,6 @@ class DarkRunSubtractionTest(unittest.TestCase):
         alg_load_monitors.initialize()
         alg_load_monitors.setChild(True)
         alg_load_monitors.setProperty("Filename", file_path)
-        alg_load_monitors.setProperty("MonitorsAsEvents", False)
         alg_load_monitors.setProperty("OutputWorkspace", trans_name)
         alg_load_monitors.execute()
         monitor = alg_load_monitors.getProperty("OutputWorkspace").value

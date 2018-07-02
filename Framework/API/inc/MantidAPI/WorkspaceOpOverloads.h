@@ -93,7 +93,7 @@ operator/=(const MatrixWorkspace_sptr lhs, const double &rhsValue);
 struct MANTID_API_DLL WorkspaceHelpers {
   // Checks whether a workspace has common X bins/values
   static bool commonBoundaries(const MatrixWorkspace &WS);
-  // Checks whether the binning is the same in two histograms
+  // Checks whether the binning is the same in two workspaces
   static bool matchingBins(const MatrixWorkspace &ws1,
                            const MatrixWorkspace &ws2,
                            const bool firstOnly = false);

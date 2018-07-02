@@ -4,139 +4,69 @@ digraph ReflectometryILLPreprocess {
 
   subgraph params {
     $param_style
-    run               [label="Input File"]
-    workspace         [label="Input workspace (TOF or wavelength units)"]
-    inputBeamPosition [label="BeamPosition (TableWorkspace)"]
+    background        [label="Background options:\nLow/HighAngleBkgOffset\nLow/HighAngleBkgWidth"]
+    beamCentre        [label="BeamCentre"]
     braggAngle        [label="BraggAngle"]
-    beamCentre        [label="BeamCentre (workspace index)"]
-    wavRange          [label="WavelengthRange"]
-    fgCentre          [label="ForegroundCentre"]
+    run               [label="Run"]
+    inputBeamPosition [label="BeamPositionWorkspace\n(from direct)"]
+    inputWorkspace    [label="InputWorkspace"]
     fgHWidth          [label="ForegroundHalfWidth"]
-    laboffset         [label="LowAngleBkgOffset"]
-    labwidth          [label="LowAngleBkgWidth"]
-    haboffset         [label="HighAngleBkgOffset"]
-    habwidth          [label="HighAngleBkgWidth"]
-    outBeamPos        [label="OutputBeamPosition (TableWorkspace)"]
+    outBeamPos        [label="OutputBeamPositionWorkspace"]
     output            [label="OutputWorkspace"]
+    waterReference    [label="WaterWorkspace"]
   }
 
   subgraph algorithms {
     $algorithm_style
-    clone                   [label="CloneWorkspace"]
-    convert_to_distribution [label="ConvertToDistribution"]
-    convert_units           [label="ConvertUnits"]
-    crop                    [label="CropWorkspace"]
-    divide                  [label="Divide"]
-    empty_table             [label="CreateEmptyTableWorkspace"]
-    extract_monitors        [label="ExtractMonitors"]
-    fit                     [label="Fit"]
-    group_detectors         [label="GroupDetectors"]
-    integrate               [label="Integrate"]
-    load                    [label="LoadILLReflectometry"]
-    merge                   [label="MergeRuns"]
-    minus                   [label="Minus"]
-    normalise               [label="NormaliseToMonitor"]
-    poly_background         [label="CalculatePolynomialBackground"]
-    scale                   [label="Scale"]
-    transpose1              [label="Transpose"]
-    transpose2              [label="Transpose"]
-    transpose3              [label="Transpose"]
+    toWavelength [label="Convert from TOF\n to wavelength"]
+    extractMonitors [label="ExtractMonitors"]
+    fluxNorm        [label="Divide by duration/\nmonitor counts"]
+    load  [label="Load and merge runs"]
+    addSampleLogs [label="Add foreground info\nto sample logs"]
+    waterNorm [label="Divide by\nwater reference"]
+    slitNorm [label="Divide by\nslit opening area"]
+    subtractBkg [label="Subtract background"]
   }
 
   subgraph decisions {
     $decision_style
-    table             [label="Input BeamPosition?"]
-    angle             [label="Input BraggAngle?"]
-    peak              [label="Input BeamCentre?"]
-    next_file         [label="Next input file?"]
-    checkBeamPosExists[label="BeamPosition input?"]
-    checkWater        [label="WaterReference input?"]
-    slitNormalisation [label="Slit normalisation"]
-    fluxNormalisation [label="Flux normalisation"]
-    background        [label="Background method"]
-    checkRange        [label="Wavelength range given?"]
-    to_file           [label="Save?"]
-    foreground        [label="Summation method?"]
+    whichInput [label="Use workspace\nor\nread from disk?"]
+    isSlitNorm [label="SlitNormalisation?"]
   }
 
-  beamCentre          -> peak
-  braggAngle          -> angle
-  inputBeamPosition   -> table
-  peak                -> table           [label="No"]
-  peak                -> load            [label="Yes"]
-  angle               -> load            [label="Yes"]
-  table               -> load            [label="Yes"]
-  run                 -> load
-  load                -> next_file
-  load                -> outBeamPos
+  whichInput -> inputWorkspace [label="Use workspace"]
+  whichInput -> load [label="Read from disk"]
 
-  next_file           -> load             [label="Yes"]
-  load                -> merge
-  merge               -> next_file
-  next_file           -> extract_monitors [label="No"]
-  workspace           -> extract_monitors
+  load -> outBeamPos
 
-  extract_monitors    -> convert_units
-  extract_monitors    -> checkBeamPosExists
-  extract_monitors    -> monitorWS
+  run -> load
+  beamCentre -> load [label="Override beam centre\nfrom loader"]
+  braggAngle -> load [label="Override angles in .nxs"]
+  inputBeamPosition -> load
 
-  checkBeamPosExists  -> outBeamPos       [label="Yes"]
-  checkBeamPosExists  -> integrate        [label="No"]
-  integrate           -> transpose3
-  transpose3          -> fit
-  fit                 -> empty_table
-  empty_table         -> to_file          [label="Write data"]
-  empty_table         -> outBeamPos
+  load -> extractMonitors
+  inputWorkspace -> extractMonitors
 
-  convert_units       -> checkWater
+  load -> addSampleLogs [label="Beam centre"]
+  extractMonitors -> addSampleLogs
+  fgHWidth -> addSampleLogs
 
-  checkWater          -> slitNormalisation[label="No"]
-  convert_units       -> divide           [label="Yes"]
-  checkWater          -> divide           [label="Yes"]
-  divide              -> slitNormalisation
+  addSampleLogs -> waterNorm [label="WaterWorkspace available"]
+  waterReference -> waterNorm [label="Rebin"]
 
-  slitNormalisation   -> fluxNormalisation[label="No"]
-  slitNormalisation   -> scale            [label="Yes"]
+  waterNorm -> isSlitNorm
 
-  fluxNormalisation   -> scale            [label="Normalise to time"]
-  monitorWS           -> scale
-  fluxNormalisation   -> normalise        [label="Normalise to monitor"]
+  addSampleLogs -> isSlitNorm
 
-  laboffset           -> background
-  labwidth            -> background
-  haboffset           -> background
-  habwidth            -> background
+  isSlitNorm -> slitNorm [label="Slit Normalisation ON"]
 
-  normalise           -> background
-  scale               -> background
+  isSlitNorm -> fluxNorm [label="Slit Normalisation OFF"]
+  slitNorm -> fluxNorm
 
-  background          -> no_background_subtraction
+  fluxNorm -> subtractBkg
+  background -> subtractBkg
 
-  fgCentre            -> foreground
-  fgHWidth            -> foreground
+  subtractBkg -> toWavelength
 
-  background          -> foreground       [label="No"]
-  background          -> clone            [label="Background subtraction, constant or linear Fit"]
-  clone               -> transpose1
-  transpose1          -> poly_background
-  poly_background     -> transpose2
-  transpose2          -> minus
-  minus               -> foreground
-
-  outBeamPos          -> foreground
-
-  foreground          -> group_detectors  [label="Coherent"]
-  group_detectors     -> convert_to_distribution
-
-  foreground              -> convert_units
-  convert_to_distribution -> convert_units
-
-  wavRange            -> checkRange
-
-  checkRange          -> range            [label="Yes"]
-  checkRange          -> convert_units    [label="No"]
-
-  range               -> crop
-  crop                -> output
-  convert_units       -> output
+  toWavelength -> output
 }

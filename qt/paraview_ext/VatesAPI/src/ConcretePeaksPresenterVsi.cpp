@@ -3,6 +3,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidDataObjects/NoShape.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
@@ -10,6 +11,9 @@
 #include "MantidGeometry/Crystal/PeakShape.h"
 namespace Mantid {
 namespace VATES {
+
+using Mantid::DataObjects::PeaksWorkspace;
+
 /**
  * Constructor
  * @param peaksWorkspace The peaks workspace.
@@ -46,7 +50,8 @@ std::vector<bool> ConcretePeaksPresenterVsi::getViewablePeaks() const {
   if (this->m_peaksWorkspace->getNumberPeaks() >= 1) {
     double effectiveRadius = 1e-2;
     std::string viewable = m_viewableRegion->toExtentsAsString();
-    Mantid::API::IPeaksWorkspace_sptr peaksWS = m_peaksWorkspace;
+    auto peaksWS =
+        boost::dynamic_pointer_cast<PeaksWorkspace>(m_peaksWorkspace);
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("PeaksInRegion");
@@ -158,9 +163,7 @@ double ConcretePeaksPresenterVsi::getMaxRadius(
  */
 void ConcretePeaksPresenterVsi::sortPeaksWorkspace(
     const std::string &byColumnName, const bool ascending) {
-  Mantid::API::IPeaksWorkspace_sptr peaksWS =
-      boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
-          this->m_peaksWorkspace);
+  auto peaksWS = boost::dynamic_pointer_cast<PeaksWorkspace>(m_peaksWorkspace);
 
   // Sort the Peaks in-place.
   Mantid::API::IAlgorithm_sptr alg =

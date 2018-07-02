@@ -484,7 +484,7 @@ void PDCalibration::exec() {
         "The number of rows in OutputPeakParametersWorkspace is not correct!");
 
   // END-OF (FitPeaks)
-  std::string backgroundType = getProperty("BackgroundType");
+  const std::string backgroundType = getPropertyValue("BackgroundType");
 
   API::Progress prog(this, 0.7, 1.0, NUMHIST);
 

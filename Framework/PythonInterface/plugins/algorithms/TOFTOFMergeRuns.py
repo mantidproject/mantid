@@ -5,6 +5,7 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, Wor
 import mantid.simpleapi as api
 import numpy as np
 from dateutil.parser import parse
+import warnings
 
 
 class TOFTOFMergeRuns(PythonAlgorithm):
@@ -36,7 +37,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         return "TOFTOFMergeRuns"
 
     def summary(self):
-        return "Merge runs and the sample logs."
+        return "Merge runs and the sample logs. This algorithm is deprecated (June-2018)."
 
     def PyInit(self):
         """ Declare properties
@@ -116,6 +117,9 @@ class TOFTOFMergeRuns(PythonAlgorithm):
     def PyExec(self):
         """ Main execution body
         """
+
+        warnings.warn("This algorithm is deprecated (June-2018). Please use MergeRuns instead")
+
         # get list of input workspaces
         input_workspace_list = self._expand_groups()
         workspaceCount = len(input_workspace_list)
