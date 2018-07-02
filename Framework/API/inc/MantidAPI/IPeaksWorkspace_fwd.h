@@ -34,13 +34,13 @@ namespace API {
 /// forward declare of Mantid::API::IPeaksWorkspace
 class IPeaksWorkspace;
 /// shared pointer to Mantid::API::IPeaksWorkspace
-typedef boost::shared_ptr<IPeaksWorkspace> IPeaksWorkspace_sptr;
+using IPeaksWorkspace_sptr = boost::shared_ptr<IPeaksWorkspace>;
 /// shared pointer to Mantid::API::IPeaksWorkspace (const version)
-typedef boost::shared_ptr<const IPeaksWorkspace> IPeaksWorkspace_const_sptr;
+using IPeaksWorkspace_const_sptr = boost::shared_ptr<const IPeaksWorkspace>;
 /// unique pointer to Mantid::API::IPeaksWorkspace
-typedef std::unique_ptr<IPeaksWorkspace> IPeaksWorkspace_uptr;
+using IPeaksWorkspace_uptr = std::unique_ptr<IPeaksWorkspace>;
 /// unique pointer to Mantid::API::IPeaksWorkspace (const version)
-typedef std::unique_ptr<const IPeaksWorkspace> IPeaksWorkspace_const_uptr;
+using IPeaksWorkspace_const_uptr = std::unique_ptr<const IPeaksWorkspace>;
 }
 }
 #endif // MANTID_API_IPEAKWORKSPACE_FWD_H_

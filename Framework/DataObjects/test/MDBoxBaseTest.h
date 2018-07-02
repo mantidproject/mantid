@@ -161,7 +161,7 @@ public:
   }
 
   void test_extents_constructor() {
-    typedef MDBoxBaseTester<MDLeanEvent<3>, 3> ibox3;
+    using ibox3 = MDBoxBaseTester<MDLeanEvent<3>, 3>;
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extentsVector;
     TS_ASSERT_THROWS_ANYTHING(ibox3 box(extentsVector));
     extentsVector.resize(3);
@@ -179,7 +179,7 @@ public:
   }
 
   void test_transformDimensions() {
-    typedef MDBoxBaseTester<MDLeanEvent<2>, 2> ibox3;
+    using ibox3 = MDBoxBaseTester<MDLeanEvent<2>, 2>;
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extentsVector;
     TS_ASSERT_THROWS_ANYTHING(ibox3 box(extentsVector));
     extentsVector.resize(2);

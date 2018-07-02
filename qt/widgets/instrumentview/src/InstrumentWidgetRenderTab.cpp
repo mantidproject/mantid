@@ -287,7 +287,7 @@ void InstrumentWidgetRenderTab::enable3DSurface(bool on) {
 */
 void InstrumentWidgetRenderTab::initSurface() {
   setAxis(QString::fromStdString(
-      m_instrWidget->getInstrumentActor().getInstrument()->getDefaultAxis()));
+      m_instrWidget->getInstrumentActor().getDefaultAxis()));
   auto surface = getSurface();
 
   // 3D axes switch needs to be shown for the 3D surface
@@ -474,9 +474,7 @@ void InstrumentWidgetRenderTab::showEvent(QShowEvent *) {
   if (surface) {
     surface->setInteractionMode(ProjectionSurface::MoveMode);
   }
-  auto &actor = m_instrWidget->getInstrumentActor();
-  auto visitor = SetAllVisibleVisitor(actor.areGuidesShown());
-  actor.accept(visitor);
+
   getSurface()->updateView();
   getSurface()->requestRedraw();
 }

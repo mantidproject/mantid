@@ -13,7 +13,7 @@ namespace SimpleGui {
 class VsiApplyBehaviour : public pqApplyBehavior {
 public:
   Q_OBJECT
-  typedef QObject Superclass;
+  using Superclass = QObject;
 
 public:
   VsiApplyBehaviour(Mantid::VATES::ColorScaleLock *lock,

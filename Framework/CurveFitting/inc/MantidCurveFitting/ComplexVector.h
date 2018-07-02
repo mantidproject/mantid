@@ -11,7 +11,7 @@
 namespace Mantid {
 namespace CurveFitting {
 
-typedef std::complex<double> ComplexType;
+using ComplexType = std::complex<double>;
 class ComplexVector;
 
 /// Struct helping converting complex values

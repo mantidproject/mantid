@@ -461,7 +461,7 @@ VesuvioL1ThetaResolution::processDistribution(MatrixWorkspace_sptr ws,
 /** Generates a random number.
  */
 double VesuvioL1ThetaResolution::random() {
-  typedef boost::uniform_real<double> uniform_double;
+  using uniform_double = boost::uniform_real<double>;
   return boost::variate_generator<boost::mt19937 &, uniform_double>(
       m_generator, uniform_double(0.0, 1.0))();
 }

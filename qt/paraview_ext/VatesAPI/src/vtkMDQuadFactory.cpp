@@ -71,8 +71,8 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
 
     // Make iterator, which will use the desired normalization. Ensure
     // destruction in any eventuality.
-    boost::scoped_ptr<IMDIterator> it(
-        createIteratorWithNormalization(m_normalizationOption, imdws.get()));
+    auto it =
+        createIteratorWithNormalization(m_normalizationOption, imdws.get());
 
     // Create 4 points per box.
     vtkNew<vtkPoints> points;

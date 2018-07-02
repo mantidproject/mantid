@@ -740,7 +740,6 @@ copy_files_to_dir ( "${PY_FILES}"
 set( MTDPLOTPY_FILES
   __init__.py
   proxies.py
-  pyplot.py
   qtiplot.py
 )
 copy_files_to_dir ( "${MTDPLOTPY_FILES}"
@@ -893,7 +892,6 @@ set ( MANTIDPLOT_TEST_PY_FILES
     MantidPlotMdiSubWindowTest.py
     MantidPlotTiledWindowTest.py
     MantidPlotInputArgsCheck.py
-    MantidPlotPyplotGeneralTest.py
 )
 
 if ( MAKE_VATES )

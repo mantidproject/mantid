@@ -270,7 +270,7 @@ public:
     alg->execute();
     ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
         "SNAP_empty");
-    ws->sortAll(TOF_SORT, NULL);
+    ws->sortAll(TOF_SORT, nullptr);
 
     // Fill a whole bunch of events
     PARALLEL_FOR_NO_WSP_CHECK()

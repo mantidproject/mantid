@@ -1018,7 +1018,7 @@ public:
   void test_setMDMasking() {
     WorkspaceTester ws;
     TSM_ASSERT_THROWS("Characterisation test. This is not implemented.",
-                      ws.setMDMasking(NULL), std::runtime_error);
+                      ws.setMDMasking(nullptr), std::runtime_error);
   }
 
   void test_clearMDMasking() {
@@ -1569,10 +1569,10 @@ public:
     MatrixWorkspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<MatrixWorkspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(
         wsNonConst = manager.getValue<MatrixWorkspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -1580,9 +1580,9 @@ public:
     MatrixWorkspace_const_sptr wsCastConst;
     MatrixWorkspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (MatrixWorkspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (MatrixWorkspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 

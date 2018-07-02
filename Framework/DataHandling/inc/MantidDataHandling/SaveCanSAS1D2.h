@@ -92,6 +92,9 @@ protected:
   /// this method creates SAStransmission_spectrum element
   void createSASTransElement(std::string &sasTrans, const std::string &name);
 
+  /// this method creates SASProcess element
+  void createSASProcessElement(std::string &sasProcess);
+
   /// Overwrites writeHeader method
   void writeHeader(const std::string &fileName) override;
 

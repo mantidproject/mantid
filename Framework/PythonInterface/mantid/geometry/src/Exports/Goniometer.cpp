@@ -42,8 +42,8 @@ void setR(Goniometer &self, const object &data) {
 void export_Goniometer() {
 
   // return_value_policy for read-only numpy array
-  typedef return_value_policy<Policies::MatrixRefToNumpy<
-      Converters::WrapReadOnly>> return_readonly_numpy;
+  using return_readonly_numpy =
+      return_value_policy<Policies::MatrixRefToNumpy<Converters::WrapReadOnly>>;
 
   class_<Goniometer>("Goniometer", init<>(arg("self")))
       .def(init<Goniometer const &>((arg("self"), arg("other"))))

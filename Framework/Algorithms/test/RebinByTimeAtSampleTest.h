@@ -55,7 +55,7 @@ createSinglePulseEventWorkspace(const V3D &sourcePosition,
 //=====================================================================================
 // Functional Tests
 //=====================================================================================
-typedef RebinByTimeBaseTest<RebinByTimeAtSample> Super;
+using Super = RebinByTimeBaseTest<RebinByTimeAtSample>;
 class RebinByTimeAtSampleTest : public CxxTest::TestSuite, public Super {
 
 public:

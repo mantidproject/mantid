@@ -126,8 +126,7 @@ public:
 
     Mantid::DataObjects::MDHistoWorkspace_sptr ws_sptr(ws);
 
-    MDHistoWorkspaceIterator *histoIt =
-        new MDHistoWorkspaceIterator(ws, function);
+    auto histoIt = Kernel::make_unique<MDHistoWorkspaceIterator>(ws, function);
 
     TSM_ASSERT_EQUALS("The first index hit should be 5 since that is the first "
                       "unmasked and inside function",
@@ -136,8 +135,6 @@ public:
     TSM_ASSERT_EQUALS("The next index hit should be 7 since that is the next "
                       "unmasked and inside function",
                       7, histoIt->getLinearIndex());
-
-    delete histoIt;
   }
 
   void test_getNormalizedSignal_with_mask() {
@@ -167,8 +164,8 @@ public:
 
     Mantid::DataObjects::MDHistoWorkspace_sptr ws_sptr(ws);
 
-    MDHistoWorkspaceIterator *histoIt =
-        dynamic_cast<MDHistoWorkspaceIterator *>(ws->createIterator());
+    auto it = ws->createIterator();
+    auto histoIt = dynamic_cast<MDHistoWorkspaceIterator *>(it.get());
 
     TSM_ASSERT_EQUALS("Should get the signal value here as data at the iterator"
                       " are unmasked",
@@ -180,8 +177,6 @@ public:
     TSM_ASSERT_EQUALS("Should get the signal value here as data at the iterator"
                       " are unmasked",
                       3.0, histoIt->getNormalizedSignal());
-
-    delete histoIt;
   }
 
   void test_iterator_1D() { do_test_iterator(1, 10); }
@@ -202,7 +197,7 @@ public:
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws, function);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws, function);
     TSM_ASSERT("This iterator is valid at the start.", it->valid());
 
     TS_ASSERT_EQUALS(it->getNormalizedSignal(), 0.);
@@ -225,8 +220,6 @@ public:
     it->next();
     TS_ASSERT_EQUALS(it->getNormalizedSignal(), 30.);
     TS_ASSERT(!it->next());
-
-    delete it;
   }
 
   void test_iterator_2D_implicitFunction_thatExcludesTheStart() {
@@ -239,7 +232,7 @@ public:
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws, function);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws, function);
     TSM_ASSERT("This iterator is valid at the start.", it->valid());
 
     TS_ASSERT_EQUALS(it->getNormalizedSignal(), 4.);
@@ -257,8 +250,6 @@ public:
     TS_ASSERT_EQUALS(it->getNormalizedSignal(), 13.);
     it->next();
     // And so forth....
-
-    delete it;
   }
 
   void test_iterator_2D_implicitFunction_thatExcludesEverything() {
@@ -270,11 +261,9 @@ public:
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws, function);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws, function);
 
     TSM_ASSERT("This iterator is not valid at the start.", !it->valid());
-
-    delete it;
   }
 
   /** Create several parallel iterators */
@@ -286,38 +275,35 @@ public:
       ws->setSignalAt(i, double(i));
 
     // Make 3 iterators
-    std::vector<IMDIterator *> iterators = ws->createIterators(3);
+    auto iterators = ws->createIterators(3);
     TS_ASSERT_EQUALS(iterators.size(), 3);
 
     IMDIterator *it;
 
-    it = iterators[0];
+    it = iterators[0].get();
     TS_ASSERT_DELTA(it->getSignal(), 0.0, 1e-5);
     TS_ASSERT_EQUALS(it->getDataSize(), 33);
     TS_ASSERT_DELTA(it->getInnerPosition(0, 0), 0.5, 1e-5);
     TS_ASSERT_DELTA(it->getInnerPosition(0, 1), 0.5, 1e-5);
 
-    it = iterators[1];
+    it = iterators[1].get();
     TS_ASSERT_DELTA(it->getSignal(), 33.0, 1e-5);
     TS_ASSERT_EQUALS(it->getDataSize(), 33);
     TS_ASSERT_DELTA(it->getInnerPosition(0, 0), 3.5, 1e-5);
     TS_ASSERT_DELTA(it->getInnerPosition(0, 1), 3.5, 1e-5);
 
-    it = iterators[2];
+    it = iterators[2].get();
     TS_ASSERT_DELTA(it->getSignal(), 66.0, 1e-5);
     TS_ASSERT_EQUALS(it->getDataSize(), 34);
     TS_ASSERT_DELTA(it->getInnerPosition(0, 0), 6.5, 1e-5);
     TS_ASSERT_DELTA(it->getInnerPosition(0, 1), 6.5, 1e-5);
-
-    for (size_t i = 0; i < 3; ++i)
-      delete iterators[i];
   }
 
   void test_predictable_steps() {
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
-    MDHistoWorkspaceIterator *histoIt =
-        dynamic_cast<MDHistoWorkspaceIterator *>(ws->createIterator());
+    auto it = ws->createIterator();
+    auto histoIt = dynamic_cast<MDHistoWorkspaceIterator *>(it.get());
     size_t expected = 0;
     for (size_t i = 0; i < histoIt->getDataSize(); ++i) {
       size_t current = histoIt->getLinearIndex();
@@ -326,7 +312,6 @@ public:
       expected = current + 1;
       histoIt->next();
     }
-    delete histoIt;
   }
 
   void test_skip_masked_detectors() {
@@ -345,8 +330,8 @@ public:
 
     Mantid::DataObjects::MDHistoWorkspace_sptr ws_sptr(ws);
 
-    MDHistoWorkspaceIterator *histoIt =
-        dynamic_cast<MDHistoWorkspaceIterator *>(ws_sptr->createIterator());
+    auto it = ws_sptr->createIterator();
+    auto histoIt = dynamic_cast<MDHistoWorkspaceIterator *>(it.get());
     histoIt->next();
     TSM_ASSERT_EQUALS(
         "The first index hit should be 2 since that is the first unmasked one",
@@ -355,8 +340,6 @@ public:
     TSM_ASSERT_EQUALS(
         "The next index hit should be 5 since that is the next unmasked one", 5,
         histoIt->getLinearIndex());
-
-    delete histoIt;
   }
 
   // template<typename ContainerType, typename ElementType>
@@ -374,7 +357,7 @@ public:
 
     size_t begin = 1;
     size_t end = 5;
-    MDHistoWorkspaceIterator iterator(ws.get(), NULL, begin, end);
+    MDHistoWorkspaceIterator iterator(ws.get(), nullptr, begin, end);
 
     TS_ASSERT(iterator.isWithinBounds(begin));
     TS_ASSERT(iterator.isWithinBounds(end - 1));
@@ -393,7 +376,7 @@ public:
 
      */
 
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At first position
     /*
@@ -401,7 +384,8 @@ public:
      ^
      |
      */
-    std::vector<size_t> neighbourIndexes = findNeighbourMemberFunction(it);
+    std::vector<size_t> neighbourIndexes =
+        findNeighbourMemberFunction(it.get());
     TS_ASSERT_EQUALS(1, neighbourIndexes.size());
     // should be on edge
     TSM_ASSERT("Neighbour at index 0 is 1",
@@ -414,7 +398,7 @@ public:
          |
          */
     it->next();
-    neighbourIndexes = findNeighbourMemberFunction(it);
+    neighbourIndexes = findNeighbourMemberFunction(it.get());
     TS_ASSERT_EQUALS(2, neighbourIndexes.size());
     // should be on edge
     TSM_ASSERT("Neighbours at index 1 includes 0",
@@ -429,11 +413,9 @@ public:
                                          |
                                          */
     it->jumpTo(9);
-    neighbourIndexes = findNeighbourMemberFunction(it);
+    neighbourIndexes = findNeighbourMemberFunction(it.get());
     TSM_ASSERT("Neighbour at index 9 is 8",
                doesContainIndex(neighbourIndexes, 8));
-
-    delete it;
   }
 
   void test_neighbours_1d_face_touching() {
@@ -462,7 +444,7 @@ public:
      8 - 9 -10 -11
      12-13 -14 -15
      */
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At initial position
     /*
@@ -532,8 +514,6 @@ public:
                doesContainIndex(neighbourIndexes, 11));
     TSM_ASSERT("Neighbour at index 15 is 14",
                doesContainIndex(neighbourIndexes, 14));
-
-    delete it;
   }
 
   void test_neighbours_2d_vertex_touching() {
@@ -548,7 +528,7 @@ public:
      8 - 9 -10 -11
      12-13 -14 -15
      */
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At initial position
     /*
@@ -633,8 +613,6 @@ public:
                doesContainIndex(neighbourIndexes, 11));
     TSM_ASSERT("Neighbour at index 15 is 14",
                doesContainIndex(neighbourIndexes, 14));
-
-    delete it;
   }
 
   void test_neighbours_3d_face_touching() {
@@ -665,7 +643,7 @@ public:
      [60 61 62 63]]]
      */
 
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // Start at Index = 0
     std::vector<size_t> neighbourIndexes =
@@ -710,8 +688,6 @@ public:
          ++i) {
       TS_ASSERT(doesContainIndex(neighbourIndexes, *i));
     }
-
-    delete it;
   }
 
   void test_neighbours_3d_vertex_touching() {
@@ -742,7 +718,7 @@ public:
      [60 61 62 63]]]
      */
 
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // Start at Index = 0
     std::vector<size_t> neighbourIndexes = it->findNeighbourIndexes();
@@ -792,8 +768,6 @@ public:
          ++i) {
       TS_ASSERT(doesContainIndex(neighbourIndexes, *i));
     }
-
-    delete it;
   }
 
   void test_neighbours_1d_with_width() {
@@ -811,7 +785,7 @@ public:
 
      */
 
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At first position
     /*
@@ -859,8 +833,6 @@ public:
                doesContainIndex(neighbourIndexes, 8));
     TSM_ASSERT("Neighbours at index 9 includes 7",
                doesContainIndex(neighbourIndexes, 7));
-
-    delete it;
   }
 
   void test_neighbours_2d_vertex_touching_by_width() {
@@ -876,7 +848,7 @@ public:
      8 - 9 -10 -11
      12-13 -14 -15
      */
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At initial position
     /*
@@ -953,8 +925,6 @@ public:
                doesContainIndex(neighbourIndexes, 13));
     TSM_ASSERT("Neighbour at index is 14",
                doesContainIndex(neighbourIndexes, 14));
-
-    delete it;
   }
 
   void test_neighbours_2d_vertex_touching_by_width_vector() {
@@ -973,7 +943,7 @@ public:
      8 - 9 -10 -11
      12-13 -14 -15
      */
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At initial position
     /*
@@ -1038,8 +1008,6 @@ public:
                doesContainIndex(neighbourIndexes, 13));
     TSM_ASSERT("Neighbour at index is 14",
                doesContainIndex(neighbourIndexes, 14));
-
-    delete it;
   }
 
   void test_neighbours_3d_vertex_touching_width() {
@@ -1071,7 +1039,7 @@ public:
      [60 61 62 63]]]
      */
 
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // Start at Index = 0
     std::vector<size_t> neighbourIndexes =
@@ -1095,8 +1063,6 @@ public:
     TS_ASSERT(doesContainIndex(neighbourIndexes, 24));
     TS_ASSERT(doesContainIndex(neighbourIndexes, 25));
     TS_ASSERT(doesContainIndex(neighbourIndexes, 26));
-
-    delete it;
   }
 
   void test_cache() {
@@ -1110,7 +1076,7 @@ public:
 
      */
 
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
     TSM_ASSERT_EQUALS("Empty cache expected", 0, it->permutationCacheSize());
     it->findNeighbourIndexesByWidth(3);
     TSM_ASSERT_EQUALS("One cache item expected", 1, it->permutationCacheSize());
@@ -1121,15 +1087,13 @@ public:
     it->findNeighbourIndexesByWidth(5);
     TSM_ASSERT_EQUALS("Two cache entries expected", 2,
                       it->permutationCacheSize());
-
-    delete it;
   }
 
   void test_getBoxExtents_1d() {
     const size_t nd = 1;
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(
         1.0 /*signal*/, nd, 3 /*3 bins*/); // Dimension length defaults to 10
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At zeroth position
     VecMDExtents extents = it->getBoxExtents();
@@ -1149,15 +1113,13 @@ public:
     extents = it->getBoxExtents();
     TS_ASSERT_DELTA(extents[0].get<0>(), 10.0 * 2.0 / 3.0, 1e-4);
     TS_ASSERT_DELTA(extents[0].get<1>(), 10.0 * 3.0 / 3.0, 1e-4);
-
-    delete it;
   }
 
   void test_getBoxExtents_3d() {
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(
         1.0 /*signal*/, 3 /*nd*/, 4 /*nbins per dim*/, 6 /*max*/,
         1.0 /*error sq*/);
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At zeroth position
     VecMDExtents extents = it->getBoxExtents();
@@ -1181,8 +1143,6 @@ public:
     TS_ASSERT_DELTA(extents[1].get<1>(), 4.0 / 4 * 6.0, 1e-4);
     TS_ASSERT_DELTA(extents[2].get<0>(), 3.0 / 4 * 6.0, 1e-4);
     TS_ASSERT_DELTA(extents[2].get<1>(), 4.0 / 4 * 6.0, 1e-4);
-
-    delete it;
   }
 
   void test_jump_to_nearest_1d() {
@@ -1210,8 +1170,8 @@ public:
 
     */
 
-    MDHistoWorkspaceIterator *itIn = new MDHistoWorkspaceIterator(wsIn);
-    MDHistoWorkspaceIterator *itOut = new MDHistoWorkspaceIterator(wsOut);
+    auto itIn = Kernel::make_unique<MDHistoWorkspaceIterator>(wsIn);
+    auto itOut = Kernel::make_unique<MDHistoWorkspaceIterator>(wsOut);
 
     // First position
     TS_ASSERT_EQUALS(itIn->getLinearIndex(), 0);
@@ -1239,9 +1199,6 @@ public:
     diff = itOut->jumpToNearest(itIn->getCenter());
     TS_ASSERT_EQUALS(itOut->getLinearIndex(), 3); // 10.5 closer to 12 than 8
     TS_ASSERT_DELTA(1.5, diff, 1e-4);
-
-    delete itIn;
-    delete itOut;
   }
 
   void test_neighbours_1d_with_width_including_out_of_bounds() {
@@ -1259,7 +1216,7 @@ public:
 
      */
 
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At first position
     /*
@@ -1348,8 +1305,6 @@ public:
                doesContainIndex(neighbourIndexes, 10)); // Invalid
     TSM_ASSERT("Neighbours include 3",
                doesContainIndex(neighbourIndexes, 11)); // Invalid
-
-    delete it;
   }
 
   void test_neighbours_2d_vertex_touching_by_width_including_out_of_bounds() {
@@ -1366,7 +1321,7 @@ public:
      8 - 9 -10 -11
      12-13 -14 -15
      */
-    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws);
+    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At initial position
     /*
@@ -1451,8 +1406,6 @@ public:
                doesContainIndex(neighbourIndexes, 19)); // Invalid
     TSM_ASSERT("Neighbour at index is 23",
                doesContainIndex(neighbourIndexes, 23)); // Invalid
-
-    delete it;
   }
 };
 
@@ -1479,21 +1432,20 @@ public:
 
   /** ~Two million iterations */
   void test_iterator_3D_signalAndErrorOnly() {
-    MDHistoWorkspaceIterator *it =
-        new MDHistoWorkspaceIterator(ws, new SkipNothing);
+    auto it =
+        Kernel::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
     do {
       signal_t sig = it->getNormalizedSignal();
       signal_t err = it->getNormalizedError();
       UNUSED_ARG(sig);
       UNUSED_ARG(err);
     } while (it->next());
-    delete it;
   }
 
   /** ~Two million iterations */
   void test_iterator_3D_withGetVertexes() {
-    MDHistoWorkspaceIterator *it =
-        new MDHistoWorkspaceIterator(ws, new SkipNothing);
+    auto it =
+        Kernel::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
     size_t numVertices;
     do {
       signal_t sig = it->getNormalizedSignal();
@@ -1503,13 +1455,12 @@ public:
       UNUSED_ARG(sig);
       UNUSED_ARG(err);
     } while (it->next());
-    delete it;
   }
 
   /** ~Two million iterations */
   void test_iterator_3D_withGetCenter() {
-    MDHistoWorkspaceIterator *it =
-        new MDHistoWorkspaceIterator(ws, new SkipNothing);
+    auto it =
+        Kernel::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
     do {
       signal_t sig = it->getNormalizedSignal();
       signal_t err = it->getNormalizedError();
@@ -1517,13 +1468,12 @@ public:
       UNUSED_ARG(sig);
       UNUSED_ARG(err);
     } while (it->next());
-    delete it;
   }
 
   /** Use jumpTo() */
   void test_iterator_3D_withGetCenter_usingJumpTo() {
-    MDHistoWorkspaceIterator *it =
-        new MDHistoWorkspaceIterator(ws, new SkipNothing);
+    auto it =
+        Kernel::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
     int max = int(it->getDataSize());
     for (int i = 0; i < max; i++) {
       it->jumpTo(size_t(i));
@@ -1533,7 +1483,6 @@ public:
       UNUSED_ARG(sig);
       UNUSED_ARG(err);
     }
-    delete it;
   }
 
   void test_masked_get_vertexes_call_throws() {

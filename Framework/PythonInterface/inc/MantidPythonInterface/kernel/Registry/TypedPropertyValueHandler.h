@@ -47,7 +47,7 @@ namespace Registry {
 template <typename ValueType, typename Enable = void>
 struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
   /// Type required by TypeRegistry framework
-  typedef ValueType HeldType;
+  using HeldType = ValueType;
 
   /**
    * Set function to handle Python -> C++ calls and get the correct type
@@ -101,12 +101,12 @@ struct DLLExport TypedPropertyValueHandler<
     typename std::enable_if<std::is_base_of<API::Workspace, T>::value>::type>
     : public PropertyValueHandler {
   /// Type required by TypeRegistry framework
-  typedef boost::shared_ptr<T> HeldType;
+  using HeldType = boost::shared_ptr<T>;
 
   /// Convenience typedef
-  typedef T PointeeType;
+  using PointeeType = T;
   /// Convenience typedef
-  typedef boost::shared_ptr<T> PropertyValueType;
+  using PropertyValueType = boost::shared_ptr<T>;
 
   /**
    * Set function to handle Python -> C++ calls and get the correct type

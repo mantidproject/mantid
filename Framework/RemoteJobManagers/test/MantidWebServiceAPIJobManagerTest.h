@@ -54,8 +54,7 @@ class MockMantidAPIStatusNotFoundWithErrMsg
     : public MantidWebServiceAPIJobManager {
 public:
   MockMantidAPIStatusNotFoundWithErrMsg() : MantidWebServiceAPIJobManager() {
-    is.str("{\"foo\": \"err_msg\", \"Err_Msg\"=\"fake error\", \"param\": "
-           "\"1\", }");
+    is.str(R"({"foo": "err_msg", "Err_Msg"="fake error", "param": "1", })");
   }
 
 protected:

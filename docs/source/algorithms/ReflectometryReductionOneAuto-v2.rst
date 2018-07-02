@@ -43,7 +43,7 @@ The rest of the input properties are not inferred from the parameter file, and m
 property that allows users to specify a region of direct beam that will be used to normalize
 the detector signal. The region of direct beam is specified by workspace indices. For instance, :literal:`RegionOfDirectBeam='2-3'`
 means that spectra with workspace indices :literal:`2` and :literal:`3` will be summed and the resulting
-workspace will be used as the direct beam workspace. 
+workspace will be used as the direct beam workspace.
 
 Transmission corrections can be optionally applied by providing either one or
 two transmission runs or polynomial corrections. Polynomial correction is enabled by setting the
@@ -198,10 +198,10 @@ Output:
 
     0.00441
     0.00462
-    0.64241
-    0.41453
+    0.64231
+    0.41456
     0.51029
-    0.52240
+    0.52241
 
 .. categories::
 

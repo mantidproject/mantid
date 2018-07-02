@@ -99,7 +99,7 @@ public:
   virtual ~InternetHelper();
 
   // Convenience typedef
-  typedef std::map<std::string, std::string> StringToStringMap;
+  using StringToStringMap = std::map<std::string, std::string>;
 
   // getters and setters
   void setTimeout(int seconds);

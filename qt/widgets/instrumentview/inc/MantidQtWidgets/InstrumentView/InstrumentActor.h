@@ -2,19 +2,14 @@
 #define INSTRUMENTACTOR_H_
 
 #include "DllOption.h"
-#include "GLActor.h"
-#include "GLActorCollection.h"
-#include "GLActorVisitor.h"
+#include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "GLColor.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidGeometry/IObjComponent.h"
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "MaskBinsData.h"
-#include "SampleActor.h"
-
+#include "MantidGeometry/IComponent.h"
 #include <boost/weak_ptr.hpp>
-#include <map>
 #include <vector>
 
 //------------------------------------------------------------------
@@ -29,12 +24,13 @@ namespace Geometry {
 class IObjComponent;
 class Instrument;
 class IDetector;
+class ComponentInfo;
+class DetectorInfo;
 }
 }
 
 namespace MantidQt {
 namespace MantidWidgets {
-class ObjComponentActor;
 
 /**
 \class  InstrumentActor
@@ -48,37 +44,34 @@ interface for picked ObjComponent and other
 operation for selective rendering of the instrument
 
 */
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentActor : public GLActor {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentActor : public QObject {
   Q_OBJECT
 public:
+  /// Invalid workspace index in detector index to workspace index lookup
+  static const size_t INVALID_INDEX;
   /// Constructor
   InstrumentActor(const QString &wsName, bool autoscaling = true,
                   double scaleMin = 0.0, double scaleMax = 0.0);
   ///< Destructor
-  ~InstrumentActor() override;
-  ///< Type of the GL object
-  virtual std::string type() const { return "InstrumentActor"; }
+  ~InstrumentActor();
   /// Draw the instrument in 3D
-  void draw(bool picking = false) const override;
+  void draw(bool picking = false) const;
   /// Return the bounding box in 3D
   void getBoundingBox(Mantid::Kernel::V3D &minBound,
-                      Mantid::Kernel::V3D &maxBound) const override {
-    m_scene.getBoundingBox(minBound, maxBound);
-  }
-  /// Run visitors callback on each component
-  bool accept(GLActorVisitor &visitor,
-              VisitorAcceptRule rule = VisitAll) override;
-  /// Run visitors callback on each component (const version)
-  bool accept(GLActorConstVisitor &visitor,
-              VisitorAcceptRule rule = VisitAll) const override;
+                      Mantid::Kernel::V3D &maxBound) const;
+  /// Set a component (and all its children) visible.
+  void setComponentVisible(size_t componentIndex);
   /// Toggle the visibility of the child actors (if exist).
-  void setChildVisibility(bool) override;
+  void setChildVisibility(bool);
   /// Check if any child is visible
-  bool hasChildVisible() const override;
+  bool hasChildVisible() const;
   /// Get the underlying instrument
+  std::vector<size_t> getMonitors() const;
   boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
   /// Get the associated data workspace
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const;
+  const Mantid::Geometry::ComponentInfo &componentInfo() const;
+  const Mantid::Geometry::DetectorInfo &detectorInfo() const;
   /// Get the mask displayed but not yet applied as a MatrxWorkspace
   boost::shared_ptr<Mantid::API::MatrixWorkspace>
   getMaskMatrixWorkspace() const;
@@ -91,7 +84,7 @@ public:
   /// Apply the mask in the attached mask workspace to the data.
   void applyMaskWorkspace();
   /// Add a range of bins for masking
-  void addMaskBinsData(const QList<int> &detIDs);
+  void addMaskBinsData(const std::vector<size_t> &indices);
   /// Remove the attached mask workspace without applying the mask.
   /// Remove the bin masking data.
   void clearMasks();
@@ -137,32 +130,27 @@ public:
   bool wholeRange() const;
 
   /// Get the number of detectors in the instrument.
-  size_t ndetectors() const { return m_detIDs.size(); }
-  /// Get a reference to a detector by a pick ID converted form a color in
-  /// the pick image.
-  const Mantid::Geometry::IDetector &getDetectorByPickID(size_t pickID) const;
-  /// Get a reference to a detector by a detector ID.
-  const Mantid::Geometry::IDetector &
-  getDetectorByDetID(Mantid::detid_t detID) const;
+  size_t ndetectors() const; // { return m_detIDs.size(); }
+  /// Get a detector index by a detector ID.
+  size_t getDetectorByDetID(Mantid::detid_t detID) const;
   /// Get a detector ID by a pick ID converted form a color in the pick image.
   Mantid::detid_t getDetID(size_t pickID) const;
+  QList<Mantid::detid_t> getDetIDs(const std::vector<size_t> &dets) const;
   /// Get a component ID for a non-detector.
   Mantid::Geometry::ComponentID getComponentID(size_t pickID) const;
-  /// Cache detector positions.
-  void cacheDetPos() const;
   /// Get position of a detector by a pick ID converted form a color in the pick
   /// image.
-  const Mantid::Kernel::V3D &getDetPos(size_t pickID) const;
+  const Mantid::Kernel::V3D getDetPos(size_t pickID) const;
   /// Get a vector of IDs of all detectors in the instrument.
-  const std::vector<Mantid::detid_t> &getAllDetIDs() const { return m_detIDs; }
-  /// Get displayed color of a detector by its detector ID.
-  GLColor getColor(Mantid::detid_t id) const;
-  /// Get the workspace index of a detector by its detector ID.
-  size_t getWorkspaceIndex(Mantid::detid_t id) const;
-  /// Get the integrated counts of a detector by its detector ID.
-  double getIntegratedCounts(Mantid::detid_t id) const;
+  const std::vector<Mantid::detid_t> &getAllDetIDs() const;
+  /// Get displayed color of a detector by its index.
+  GLColor getColor(size_t index) const;
+  /// Get the workspace index of a detector by its detector Index.
+  size_t getWorkspaceIndex(size_t index) const;
+  /// Get the integrated counts of a detector by its detector Index.
+  double getIntegratedCounts(size_t index) const;
   /// Sum the counts in detectors
-  void sumDetectors(QList<int> &dets, std::vector<double> &x,
+  void sumDetectors(const std::vector<size_t> &dets, std::vector<double> &x,
                     std::vector<double> &y, size_t size = 0) const;
   /// Calc indexes for min and max bin values
   void getBinMinMaxIndex(size_t wi, size_t &imin, size_t &imax) const;
@@ -172,7 +160,7 @@ public:
   void updateColors();
   /// Invalidate the OpenGL display lists to force full re-drawing of the
   /// instrument and creation of new lists.
-  void invalidateDisplayLists() const { m_scene.invalidateDisplayList(); }
+  void invalidateDisplayLists() const; //{ m_scene.invalidateDisplayList(); }
   /// Toggle display of the guide and other non-detector instrument components
   void showGuides(bool);
   /// Get the guide visibility status
@@ -190,11 +178,21 @@ public:
                              const Mantid::Kernel::V3D &up,
                              Mantid::Kernel::Quat &R);
 
+  /// Convert a "pick ID" to a colour to put into the pick image.
+  static GLColor makePickColor(size_t pickID);
+  /// Decode a pick colour and return corresponding "pick ID"
+  static size_t decodePickColor(const QRgb &c);
   /* Masking */
 
   void initMaskHelper() const;
   bool hasMaskWorkspace() const;
   bool hasBinMask() const;
+  QString getParameterInfo(size_t index) const;
+  std::string getDefaultAxis() const;
+  std::string getDefaultView() const;
+  std::string getInstrumentName() const;
+  std::vector<std::string> getStringParameter(const std::string &name,
+                                              bool recursive = true) const;
   /// Load the state of the actor from a Mantid project file.
   void loadFromProject(const std::string &lines);
   /// Save the state of the actor to a Mantid project file.
@@ -204,9 +202,11 @@ signals:
   void colorMapChanged();
 
 private:
+  void doDraw(bool picking) const;
   void setUpWorkspace(
       boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace,
       double scaleMin, double scaleMax);
+  void setupPhysicalInstrumentIfExists();
   void resetColors();
   void loadSettings();
   void saveSettings();
@@ -216,15 +216,14 @@ private:
   calculateIntegratedSpectra(const Mantid::API::MatrixWorkspace &workspace);
   /// Sum the counts in detectors if the workspace has equal bins for all
   /// spectra
-  void sumDetectorsUniform(QList<int> &dets, std::vector<double> &x,
+  void sumDetectorsUniform(const std::vector<size_t> &dets,
+                           std::vector<double> &x,
                            std::vector<double> &y) const;
   /// Sum the counts in detectors if the workspace is ragged
-  void sumDetectorsRagged(QList<int> &dets, std::vector<double> &x,
-                          std::vector<double> &y, size_t size) const;
+  void sumDetectorsRagged(const std::vector<size_t> &dets,
+                          std::vector<double> &x, std::vector<double> &y,
+                          size_t size) const;
 
-  size_t pushBackDetid(Mantid::detid_t) const;
-  void pushBackNonDetid(ObjComponentActor *actor,
-                        Mantid::Geometry::ComponentID compID) const;
   void setupPickColors();
 
   boost::shared_ptr<Mantid::API::IMaskWorkspace>
@@ -260,97 +259,29 @@ private:
   bool m_showGuides;
   /// Color map scale type: linear or log
   GraphOptions::ScaleType m_scaleType;
-
-  /// The workspace's detector ID to workspace index map
-  Mantid::detid2index_map m_detid2index_map;
-
-  /// All det ids in the instrument in order of pickIDs, populated by Obj..Actor
-  /// constructors
-  mutable std::vector<Mantid::detid_t> m_detIDs;
-  /// All non-detector component IDs in order of pickIDs. For any index i a
-  /// pickID of the component
-  /// is m_detIDs.size() + i.
-  mutable std::vector<Mantid::Geometry::ComponentID> m_nonDetIDs;
-  /// Temporary stores addresses of actors for non-detector components until
-  /// initialisation completes
-  mutable std::vector<ObjComponentActor *> m_nonDetActorsTemp;
-
-  /// All detector positions, in order of pickIDs, populated by Obj..Actor
-  /// constructors
-  mutable std::vector<Mantid::Kernel::V3D> m_detPos;
   /// Position to refer to when detector not found
   const Mantid::Kernel::V3D m_defaultPos;
 
-  /// Colors in order of workspace indexes
-  mutable std::vector<GLColor> m_colors;
+  /// Colors in order of component info
+  std::vector<GLColor> m_colors;
+  std::vector<size_t> m_monitors;
+  std::vector<size_t> m_components;
   /// Colour of a masked detector
   GLColor m_maskedColor;
   /// Colour of a "failed" detector
   GLColor m_failedColor;
-  /// The collection of actors for the instrument components
-  GLActorCollection m_scene;
 
   static double m_tolerance;
 
-  friend class ObjComponentActor;
-  friend class ObjCompAssemblyActor;
-  friend class RectangularDetectorActor;
-  friend class StructuredDetectorActor;
-};
-
-/**
-* Sets visibility of an actor with a particular ComponentID
-* and makes all other components invisible.
-*/
-class SetVisibleComponentVisitor : public SetVisibilityVisitor {
-public:
-  explicit SetVisibleComponentVisitor(const Mantid::Geometry::ComponentID id)
-      : m_id(id) {}
-  bool visit(GLActor *) override;
-  bool visit(GLActorCollection *) override;
-  bool visit(ComponentActor *actor) override;
-  bool visit(CompAssemblyActor *actor) override;
-  bool visit(ObjCompAssemblyActor *actor) override;
-  bool visit(InstrumentActor *actor) override;
-  bool visit(RectangularDetectorActor *actor) override;
-  bool visit(StructuredDetectorActor *actor) override;
-  Mantid::Geometry::ComponentID getID() const { return m_id; }
-
-private:
-  Mantid::Geometry::ComponentID m_id;
-};
-
-/**
-* Set visibility of all actors of non-detector components.
-* Pass true to constructor to set them visible and false to make them invisible.
-*/
-class SetVisibleNonDetectorVisitor : public SetVisibilityVisitor {
-public:
-  /// Constructor
-  /// @param on :: If true then all non-detectors will be made visible or
-  /// invisible if false.
-  explicit SetVisibleNonDetectorVisitor(bool on) : m_on(on) {}
-  using GLActorVisitor::visit;
-  bool visit(GLActor *) override;
-
-private:
-  bool m_on;
-};
-
-/**
-* Finds an actor with a particular ComponentID
-*/
-class FindComponentVisitor : public GLActorVisitor {
-public:
-  explicit FindComponentVisitor(const Mantid::Geometry::ComponentID id)
-      : m_id(id), m_actor(nullptr) {}
-  using GLActorVisitor::visit;
-  bool visit(GLActor *) override;
-  ComponentActor *getActor() const { return m_actor; }
-
-private:
-  Mantid::Geometry::ComponentID m_id;
-  mutable ComponentActor *m_actor;
+  std::vector<GLColor> m_pickColors;
+  std::vector<bool> m_isCompVisible;
+  std::vector<size_t> m_detIndex2WsIndex;
+  // Two display lists for normal rendering and picking
+  mutable GLuint m_displayListId[2];
+  mutable bool m_useDisplayList[2];
+  bool m_isPhysicalInstrument;
+  std::unique_ptr<Mantid::Geometry::ComponentInfo> m_physicalComponentInfo;
+  std::unique_ptr<Mantid::Geometry::DetectorInfo> m_physicalDetectorInfo;
 };
 
 } // MantidWidgets

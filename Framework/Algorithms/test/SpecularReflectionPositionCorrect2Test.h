@@ -164,7 +164,7 @@ public:
     auto detIn = instrIn->getComponentByName("point-detector")->getPos();
     auto detOut = instrOut->getComponentByName("point-detector")->getPos();
     TS_ASSERT_EQUALS(detIn.X(), detOut.X());
-    TS_ASSERT_DELTA(detOut.Z(), 19.69921, 1e-5);
+    TS_ASSERT_DELTA(detOut.Z(), 2.66221, 1e-5);
     TS_ASSERT_DELTA(detOut.Y(), 0.06506, 1e-5);
   }
 
@@ -205,7 +205,7 @@ public:
     auto detIn = instrIn->getComponentByName("linear-detector")->getPos();
     auto detOut = instrOut->getComponentByName("linear-detector")->getPos();
     TS_ASSERT_EQUALS(detIn.X(), detOut.X());
-    TS_ASSERT_DELTA(detOut.Z(), 20.19906, 1e-5);
+    TS_ASSERT_DELTA(detOut.Z(), 3.162055, 1e-5);
     TS_ASSERT_DELTA(detOut.Y(), 0.07728, 1e-5);
   }
 };

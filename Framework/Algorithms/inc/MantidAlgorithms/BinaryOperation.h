@@ -63,8 +63,8 @@ public:
    * Value at that index: workspace index of the rhs to apply to the WI in the
    * lhs. -1 if not found.
    */
-  typedef std::vector<int64_t> BinaryOperationTable;
-  typedef boost::shared_ptr<BinaryOperationTable> BinaryOperationTable_sptr;
+  using BinaryOperationTable = std::vector<int64_t>;
+  using BinaryOperationTable_sptr = boost::shared_ptr<BinaryOperationTable>;
 
   static BinaryOperationTable_sptr
   buildBinaryOperationTable(const API::MatrixWorkspace_const_sptr &lhs,

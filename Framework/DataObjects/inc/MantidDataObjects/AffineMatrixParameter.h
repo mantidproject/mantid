@@ -9,7 +9,7 @@
 namespace Mantid {
 namespace DataObjects {
 /// Convenience typedef for a specific matrix type.
-typedef Mantid::Kernel::Matrix<coord_t> AffineMatrixType;
+using AffineMatrixType = Mantid::Kernel::Matrix<coord_t>;
 
 /** Type to wrap an affine matrix and allow serialization via xml.
 *

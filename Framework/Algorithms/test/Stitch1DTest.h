@@ -66,7 +66,7 @@ private:
   MatrixWorkspace_sptr a;
   MatrixWorkspace_sptr b;
   std::vector<double> x;
-  typedef boost::tuple<MatrixWorkspace_sptr, double> ResultType;
+  using ResultType = boost::tuple<MatrixWorkspace_sptr, double>;
 
   MatrixWorkspace_sptr make_arbitrary_point_ws() {
     const auto &x = HistogramX(3, LinearGenerator(-1, 0.2));

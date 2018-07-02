@@ -2260,7 +2260,7 @@ p, li { white-space: pre-wrap; }
             <property name="minimumSize">
              <size>
               <width>0</width>
-              <height>100</height>
+              <height>140</height>
              </size>
             </property>
             <property name="title">
@@ -2389,6 +2389,12 @@ p, li { white-space: pre-wrap; }
                       <layout class="QGridLayout" name="gridLayout_29">
                        <item row="0" column="0">
                         <widget class="QLabel" name="optionBinStep_3">
+                         <property name="minimumSize">
+                          <size>
+                           <width>20</width>
+                           <height>30</height>
+                          </size>
+                         </property>
                          <property name="toolTip">
                           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -2407,7 +2413,14 @@ p, li { white-space: pre-wrap; }
                         </widget>
                        </item>
                        <item row="0" column="1">
-                        <widget class="QLineEdit" name="binBoundaries"/>
+                        <widget class="QLineEdit" name="binBoundaries">
+                         <property name="minimumSize">
+                          <size>
+                           <width>10</width>
+                           <height>10</height>
+                          </size>
+                         </property>
+                        </widget>
                        </item>
                        <item row="0" column="2">
                         <spacer name="horizontalSpacer_8">
@@ -2432,6 +2445,12 @@ p, li { white-space: pre-wrap; }
                            <horstretch>0</horstretch>
                            <verstretch>0</verstretch>
                           </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>10</width>
+                           <height>10</height>
+                          </size>
                          </property>
                          <property name="maximumSize">
                           <size>
@@ -2641,8 +2660,8 @@ p, li { white-space: pre-wrap; }
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>131</width>
-                     <height>23</height>
+                     <width>165</width>
+                     <height>26</height>
                     </rect>
                    </property>
                    <layout class="QHBoxLayout" name="horizontalLayout_KeepNPlots">

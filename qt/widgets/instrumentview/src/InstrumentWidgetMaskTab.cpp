@@ -729,9 +729,10 @@ void InstrumentWidgetMaskTab::saveMaskToTable() {
 */
 void InstrumentWidgetMaskTab::extractDetsToWorkspace() {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  QList<int> dets;
+  std::vector<size_t> dets;
   m_instrWidget->getSurface()->getMaskedDetectors(dets);
-  DetXMLFile mapFile(dets);
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  DetXMLFile mapFile(actor.getDetIDs(dets));
   std::string fname = mapFile();
   if (!fname.empty()) {
     std::string workspaceName = m_instrWidget->getWorkspaceName().toStdString();
@@ -751,9 +752,10 @@ void InstrumentWidgetMaskTab::extractDetsToWorkspace() {
 */
 void InstrumentWidgetMaskTab::sumDetsToWorkspace() {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  QList<int> dets;
+  std::vector<size_t> dets;
   m_instrWidget->getSurface()->getMaskedDetectors(dets);
-  DetXMLFile mapFile(dets, DetXMLFile::Sum);
+  DetXMLFile mapFile(m_instrWidget->getInstrumentActor().getDetIDs(dets),
+                     DetXMLFile::Sum);
   std::string fname = mapFile();
 
   if (!fname.empty()) {
@@ -773,9 +775,10 @@ void InstrumentWidgetMaskTab::saveIncludeGroupToFile() {
   QString fname = m_instrWidget->getSaveFileName("Save grouping file",
                                                  "XML files (*.xml);;All (*)");
   if (!fname.isEmpty()) {
-    QList<int> dets;
+    std::vector<size_t> dets;
     m_instrWidget->getSurface()->getMaskedDetectors(dets);
-    DetXMLFile mapFile(dets, DetXMLFile::Sum, fname);
+    DetXMLFile mapFile(m_instrWidget->getInstrumentActor().getDetIDs(dets),
+                       DetXMLFile::Sum, fname);
   }
 }
 
@@ -783,10 +786,10 @@ void InstrumentWidgetMaskTab::saveExcludeGroupToFile() {
   QString fname = m_instrWidget->getSaveFileName("Save grouping file",
                                                  "XML files (*.xml);;All (*)");
   if (!fname.isEmpty()) {
-    QList<int> dets;
+    std::vector<size_t> dets;
     m_instrWidget->getSurface()->getMaskedDetectors(dets);
-    DetXMLFile mapFile(m_instrWidget->getInstrumentActor().getAllDetIDs(), dets,
-                       fname);
+    const auto &actor = m_instrWidget->getInstrumentActor();
+    DetXMLFile mapFile(actor.getAllDetIDs(), actor.getDetIDs(dets), fname);
   }
 }
 
@@ -1109,11 +1112,12 @@ void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
   m_instrWidget->updateInstrumentView(); // to refresh the pick image
   Mantid::API::IMaskWorkspace_sptr wsFresh;
 
-  QList<int> dets;
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  std::vector<size_t> dets;
   // get detectors covered by the shapes
   m_instrWidget->getSurface()->getMaskedDetectors(dets);
-  if (!dets.isEmpty()) {
-    auto wsMask = m_instrWidget->getInstrumentActor().getMaskWorkspace();
+  if (!dets.empty()) {
+    auto wsMask = actor.getMaskWorkspace();
     // have to cast up to the MaskWorkspace to get access to clone()
 
     std::set<Mantid::detid_t> detList;
@@ -1122,21 +1126,22 @@ void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
       // but not if the mask is fresh and empty
       if (wsMask->getNumberMasked() > 0) {
         wsFresh = boost::dynamic_pointer_cast<Mantid::API::IMaskWorkspace>(
-            m_instrWidget->getInstrumentActor().extractCurrentMask());
-        m_instrWidget->getInstrumentActor().invertMaskWorkspace();
+            actor.extractCurrentMask());
+        actor.invertMaskWorkspace();
       }
     }
-    foreach (int id, dets) { detList.insert(id); }
+    for (auto det : dets)
+      detList.insert(actor.getDetID(det));
 
     if (!detList.empty()) {
       // try to mask each detector separately and ignore any failure
-      for (auto det = detList.begin(); det != detList.end(); ++det) {
+      for (auto det : detList) {
         try {
           if (isROI && wsFresh) {
-            if (wsMask->isMasked(*det))
-              wsFresh->setMasked(*det);
+            if (wsMask->isMasked(det))
+              wsFresh->setMasked(det);
           } else {
-            wsMask->setMasked(*det);
+            wsMask->setMasked(det);
           }
         } catch (...) {
         }
@@ -1160,7 +1165,7 @@ void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
 }
 
 void InstrumentWidgetMaskTab::storeBinMask() {
-  QList<int> dets;
+  std::vector<size_t> dets;
   // get detectors covered by the shapes
   m_instrWidget->getSurface()->getMaskedDetectors(dets);
   // mask some bins

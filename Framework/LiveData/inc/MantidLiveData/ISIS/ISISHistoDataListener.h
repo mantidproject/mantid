@@ -12,7 +12,7 @@
 //----------------------------------------------------------------------
 
 struct idc_info;
-typedef struct idc_info *idc_handle_t;
+using idc_handle_t = struct idc_info *;
 
 namespace Mantid {
 //----------------------------------------------------------------------

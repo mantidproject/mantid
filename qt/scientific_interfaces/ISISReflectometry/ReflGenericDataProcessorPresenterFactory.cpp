@@ -88,13 +88,13 @@ ReflGenericDataProcessorPresenterFactory::create(int group) {
   std::map<QString, PreprocessingAlgorithm> preprocessMap = {
       /* 'Plus' will be applied to column 'Run(s)'*/
       {"Run(s)",
-       PreprocessingAlgorithm("Plus", "TOF_",
+       PreprocessingAlgorithm("Plus", "TOF_", "+",
                               std::set<QString>{"LHSWorkspace", "RHSWorkspace",
                                                 "OutputWorkspace"})},
       /* 'CreateTransmissionWorkspaceAuto' will be applied to column
          'Transmission Run(s)'*/
       {"Transmission Run(s)",
-       PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
+       PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_", "_",
                               std::set<QString>{"FirstTransmissionRun",
                                                 "SecondTransmissionRun",
                                                 "OutputWorkspace"})}};

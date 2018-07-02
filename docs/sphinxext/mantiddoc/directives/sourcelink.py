@@ -7,7 +7,7 @@ from six import iteritems
 import mantid
 from .base import AlgorithmBaseDirective #pylint: disable=unused-import
 
-LAST_MODIFIED_UNKNOWN = 'unknown'
+from mantiddoc.tools.git_last_modified import get_file_last_modified_time
 
 
 class SourceLinkError(Exception):
@@ -66,6 +66,8 @@ class SourceLinkDirective(AlgorithmBaseDirective):
     }
     file_lookup = {}
 
+    git_cache = {}
+
     # will be filled in
     __source_root = None
 
@@ -90,7 +92,8 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             if file_paths[extension] is None:
                 try:
                     fname = self.find_source_file(file_name, extension)
-                    file_paths[extension] = (fname, self.get_file_last_modified(fname)) \
+                    file_paths[extension] = (
+                            fname, get_file_last_modified_time(self.git_cache, self.source_root, fname)) \
                             if fname is not None else None
                 except SourceLinkError as err:
                     error_string += str(err) + "\n"
@@ -103,7 +106,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             else:
                 # prepend the base framework directory
                 fname = os.path.join(self.source_root, file_paths[extension])
-                file_paths[extension] = (fname, self.get_file_last_modified(fname))
+                file_paths[extension] = (fname, get_file_last_modified_time(self.git_cache, self.source_root, fname))
                 if not os.path.exists(file_paths[extension][0]):
                     error_string += "Cannot find {} file at {}\n".format(
                         extension, file_paths[extension][0])
@@ -254,19 +257,6 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             url = "/" + url
         url = "https://github.com/mantidproject/mantid/blob/" + mantid.kernel.revision_full() + url
         return url
-
-    def get_file_last_modified(self, filename):
-        """
-        Gets the commit timestamp of the last commit to modify a given file.
-        """
-        if not filename:
-            return LAST_MODIFIED_UNKNOWN
-
-        proc = subprocess.Popen(
-            ['git', 'log', '-n 1', '--pretty=format:%cd', '--date=short', filename],
-            cwd=self.source_root,
-            stdout=subprocess.PIPE)
-        return str(proc.stdout.read().decode('utf-8'))
 
 
 def setup(app):

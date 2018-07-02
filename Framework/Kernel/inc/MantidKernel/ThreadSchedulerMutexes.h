@@ -157,9 +157,9 @@ public:
 
 protected:
   /// Map to tasks, sorted by cost
-  typedef std::multimap<double, Task *> InnerMap;
+  using InnerMap = std::multimap<double, Task *>;
   /// Map to maps, sorted by Mutex*
-  typedef std::map<boost::shared_ptr<std::mutex>, InnerMap> SuperMap;
+  using SuperMap = std::map<boost::shared_ptr<std::mutex>, InnerMap>;
 
   /** A super map; first key = a Mutex *
    * Inside it: second key = the cost. */

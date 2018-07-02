@@ -537,7 +537,7 @@ PlotPeakByLogValue::makeNames() const {
   double start = 0;
   double end = 0;
 
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
   tokenizer names(inputList, ";",
                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
   for (const auto &input : names) {

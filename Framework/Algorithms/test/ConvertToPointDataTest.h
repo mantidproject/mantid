@@ -13,10 +13,16 @@ using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D_sptr;
+using Mantid::HistogramData::HistogramDx;
+using Mantid::Kernel::make_cow;
 
 class ConvertToPointDataTest : public CxxTest::TestSuite {
 
 public:
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().clear();
+  }
+
   void test_That_The_Algorithm_Has_Two_Properties() {
     ConvertToPointData alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -35,7 +41,6 @@ public:
 
     // Check that the algorithm just pointed the output data at the input
     TS_ASSERT_EQUALS(&(*testWS), &(*outputWS));
-    Mantid::API::AnalysisDataService::Instance().remove(outputWS->getName());
   }
 
   void test_A_Uniformly_Binned_Histogram_Is_Transformed_Correctly() {
@@ -94,8 +99,6 @@ public:
     TS_ASSERT_EQUALS((*(outputWS->getAxis(1)))(0), 0);
     TS_ASSERT_EQUALS((*(outputWS->getAxis(1)))(1), 2);
     TS_ASSERT_EQUALS((*(outputWS->getAxis(1)))(2), 4);
-
-    Mantid::API::AnalysisDataService::Instance().remove(outputWS->getName());
   }
 
   void test_A_Non_Uniformly_Binned_Histogram_Is_Transformed_Correctly() {
@@ -135,6 +138,32 @@ public:
         // 1.0 away from the last centre
         const double expectedX = 0.5 * (xBoundaries[j] + xBoundaries[j + 1]);
         TS_ASSERT_EQUALS(xValues[j], expectedX);
+      }
+    }
+  }
+
+  void test_Dx_Data_Is_Handled_Correctly() {
+    constexpr size_t numBins{11};
+    double xBoundaries[numBins] = {0.0,  1.0,  3.0,  5.0,  6.0, 7.0,
+                                   10.0, 13.0, 16.0, 17.0, 17.5};
+    constexpr int numSpectra{2};
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceBinned(
+        numSpectra, numBins, xBoundaries);
+    TS_ASSERT(testWS->isHistogramData())
+    double xErrors[numBins - 1] = {0.1, 0.2, 0.3, 0.4, 0.5,
+                                   0.6, 0.7, 0.8, 0.9, 1.0};
+    auto dxs = make_cow<HistogramDx>(xErrors, xErrors + numBins - 1);
+    testWS->setSharedDx(0, dxs);
+    testWS->setSharedDx(1, dxs);
+    MatrixWorkspace_sptr outputWS = runAlgorithm(testWS);
+    TS_ASSERT(outputWS)
+    TS_ASSERT(!outputWS->isHistogramData())
+    for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
+      TS_ASSERT(outputWS->hasDx(i))
+      const auto &dx = outputWS->dx(i);
+      TS_ASSERT_EQUALS(dx.size(), numBins - 1)
+      for (size_t j = 0; j < dx.size(); ++j) {
+        TS_ASSERT_EQUALS(dx[j], xErrors[j])
       }
     }
   }

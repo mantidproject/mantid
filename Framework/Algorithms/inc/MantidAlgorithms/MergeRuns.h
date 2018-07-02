@@ -96,7 +96,7 @@ private:
   /// An addition table is a list of pairs: First int = workspace index in the
   /// EW being added, Second int = workspace index to which it will be added in
   /// the OUTPUT EW. -1 if it should add a new entry at the end.
-  typedef std::vector<std::pair<int, int>> AdditionTable;
+  using AdditionTable = std::vector<std::pair<int, int>>;
   /// Copy the history from the input workspaces to the output workspaces
   template <typename Container>
   void copyHistoryFromInputWorkspaces(const Container &workspaces) {

@@ -33,7 +33,7 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL MeasurementItem {
 
 public:
-  typedef std::string IDType;
+  using IDType = std::string;
 
   /// Constructor
   MeasurementItem(const IDType &measurementItemId, const IDType &subId,

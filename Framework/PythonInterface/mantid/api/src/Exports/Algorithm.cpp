@@ -34,30 +34,30 @@ GET_POINTER_SPECIALIZATION(ParallelAlgorithm)
 GET_POINTER_SPECIALIZATION(DistributedAlgorithm)
 
 namespace {
-typedef AlgorithmAdapter<Algorithm> PythonAlgorithm;
-typedef AlgorithmAdapter<SerialAlgorithm> PythonSerialAlgorithm;
-typedef AlgorithmAdapter<ParallelAlgorithm> PythonParallelAlgorithm;
-typedef AlgorithmAdapter<DistributedAlgorithm> PythonDistributedAlgorithm;
+using PythonAlgorithm = AlgorithmAdapter<Algorithm>;
+using PythonSerialAlgorithm = AlgorithmAdapter<SerialAlgorithm>;
+using PythonParallelAlgorithm = AlgorithmAdapter<ParallelAlgorithm>;
+using PythonDistributedAlgorithm = AlgorithmAdapter<DistributedAlgorithm>;
 
 // declarePyAlgProperty(property*,doc)
-typedef void (*declarePropertyType1)(boost::python::object &self,
-                                     Mantid::Kernel::Property *,
-                                     const std::string &);
+using declarePropertyType1 = void (*)(boost::python::object &,
+                                      Mantid::Kernel::Property *,
+                                      const std::string &);
 // declarePyAlgProperty(name, defaultValue, validator, doc, direction)
-typedef void (*declarePropertyType2)(boost::python::object &self,
-                                     const std::string &,
-                                     const boost::python::object &,
-                                     const boost::python::object &,
-                                     const std::string &, const int);
+using declarePropertyType2 = void (*)(boost::python::object &,
+                                      const std::string &,
+                                      const boost::python::object &,
+                                      const boost::python::object &,
+                                      const std::string &, const int);
 // declarePyAlgProperty(name, defaultValue, doc, direction)
-typedef void (*declarePropertyType3)(boost::python::object &self,
-                                     const std::string &,
-                                     const boost::python::object &,
-                                     const std::string &, const int);
+using declarePropertyType3 = void (*)(boost::python::object &,
+                                      const std::string &,
+                                      const boost::python::object &,
+                                      const std::string &, const int);
 // declarePyAlgProperty(name, defaultValue, direction)
-typedef void (*declarePropertyType4)(boost::python::object &self,
-                                     const std::string &,
-                                     const boost::python::object &, const int);
+using declarePropertyType4 = void (*)(boost::python::object &,
+                                      const std::string &,
+                                      const boost::python::object &, const int);
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunknown-pragmas"

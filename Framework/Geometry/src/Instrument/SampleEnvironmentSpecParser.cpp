@@ -50,7 +50,7 @@ namespace Geometry {
 SampleEnvironmentSpec_uptr
 SampleEnvironmentSpecParser::parse(const std::string &name,
                                    std::istream &istr) {
-  typedef AutoPtr<Document> DocumentPtr;
+  using DocumentPtr = AutoPtr<Document>;
 
   InputSource src(istr);
   DOMParser parser;

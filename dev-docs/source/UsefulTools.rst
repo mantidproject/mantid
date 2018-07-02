@@ -1,0 +1,158 @@
+Useful Tools for Developers
+===========================
+
+Creating classes: class_maker.py
+--------------------------------
+
+**To make it faster to create a new class**. This is a small python
+script located in /buildconfig/. It generates the .cpp, .h and test
+files for a class along with some code stubs. It can also flesh out more
+methods for new Algorithms, using the "--alg" option.
+
+::
+
+    usage: class_maker.py [-h] [--force] [--test] [--alg] SUBPROJECT CLASSNAME
+    Utility to create Mantid class files: header, source and test.
+    positional arguments:
+     SUBPROJECT  The subproject under Framework/; e.g. Kernel
+     CLASSNAME   Name of the class to create
+    optional arguments:
+     -h, --help  show this help message and exit
+     --force     Force overwriting existing files. Use with caution!
+     --test      Create only the test file.
+     --alg       Create an Algorithm stub. This adds some methods common to
+                 algorithms.
+
+Moving/Renaming classes: move_class.py
+--------------------------------------
+
+This python script is located in in /buidconfig/. It will move a class
+from one subproject to another and/or rename the class. Namespaces and
+cmakelists are adjusted. For details, run:
+
+``buildconfig/move_class.py --help``
+
+Deleting a class: delete_class.py
+---------------------------------
+
+This python script is located in in /buildconfig/. It will delete a
+class from one subproject. CMakeList.txt is adjusted. For details, run:
+
+``buildconfig/delete_class.py --help``
+
+Leak checking etc
+-----------------
+
+Linux
+~~~~~
+
+`Memcheck <http://valgrind.org/docs/manual/mc-manual.html>`__
+
+-  Keeps track of allocs/deallocs and reports anything missing at exit.
+-  Slow but thorough
+-  Useful options to run with
+
+``valgrind --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --track-origins=yes --freelist-vol=500000000 ``\ \ `` [args...]``
+
+Windows
+~~~~~~~
+
+`Visual Leak Detector <https://vld.codeplex.com/releases>`__
+
+#. Setup the additional paths as defined in the readme file
+#. Adjust the configuration file, "C:\Program Files\Visual Leak
+   Detector\vld.ini" to output to both File and debugger by changing the
+   ``ReportTo`` to
+
+``ReportTo = both``
+
+#. Add #include <vld.h> to the system.h file in Kernel
+#. Compile everything in debug
+#. Running unit tests should now create a file memory_leak_report.txt in
+   the test directory.
+#. IMPORTANT remove the #include <vld.ini> before checking in.
+
+Thread checking
+---------------
+
+`Helgrind <http://valgrind.org/docs/manual/hg-manual.html>`__ or  `drd <http://valgrind.org/docs/manual/drd-manual.html>`__
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+-  Identifies race conditions & dead-locks
+-  Slow but accurate
+-  A pain to get working with OpenMP. GCC must be recompiled to use a different call to create OMP threads or helgrind/drd cannot "see" the thread calls. Use this `script <https://github.com/UCSCSlang/Adversarial-Helgrind/raw/master/drd/scripts/download-and-build-gcc>`__ to recompile the same version off gcc that is onyour system. The script will need editing to change the appropriate variables.
+
+Profiling
+---------
+
+.. _linux-1:
+
+Linux
+~~~~~
+
+`Callgrind/KCachegrind <http://kcachegrind.sourceforge.net/cgi-bin/show.cgi/KcacheGrindIndex>`__
+
+-  KCachegrind visualizes callgrind output.
+-  See :ref:`Profiling With Valgrind <ProfilingWithValgrind>` for help on
+   running callgrind
+
+`gperftools <https://github.com/gperftools/gperftools>`__
+
+-  Takes snapshot of run and prints percentage of calls in functions
+
+See here for a list of other tools:
+http://www.pixelbeat.org/programming/profiling/
+
+.. _windows-1:
+
+Windows
+~~~~~~~
+
+`Very Sleepy <http://www.codersnotes.com/sleepy/>`__ (Windows):
+
+-  Start/stop recording of program using a button
+-  Not as detailed or flexible as callgrind
+
+IWYU
+----
+
+`include what you
+use <https://code.google.com/p/include-what-you-use/>`__ (iwyu) is a
+clang-based tool for determining what include statements are needed in
+C/C++ files. Below are instructions for getting it to run with mantid on
+linux which is a filled in version of `this
+bug <https://code.google.com/p/include-what-you-use/issues/detail?id=164>`__.
+
+#. Install the software. The version available from system installs
+   should be fine (e.g. yum or apt-get).
+#. Get a copy of
+   `iwyu_tool.py <https://code.google.com/p/include-what-you-use/source/browse/trunk/iwyu_tool.py>`__
+   which is in the project's repository, but may not be installed if you
+   got it from your operating system locations (e.g. yum).
+#. Run ``cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE``. This will
+   generate an extra file, ``compile_commands.json``, in your build area
+   which has instructions on compiling every file in mantid.
+#. Run :literal:`iwyu_tool.py -p `pwd` 2> iwyu.log` to generate the
+   report of changes redirecting into the file ``iwyu.log``. This will
+   take a long time since it is going through the whole repository. If
+   you want it for a single file, then supply that as an additional
+   argument with full path. Only one file can be supplied at a time.
+#. Run ``fix_includes < iwyu.log`` and compile the results. Depending on
+   how you installed iwyu, the program may be called
+   ``fix_includes.py``. If it doesn't compile, the most likely suspect
+   is that iwyu included a private header. See `iwyu instructions for
+   users <https://code.google.com/p/include-what-you-use/wiki/InstructionsForUsers#How_to_Run>`__
+   for ways to handle this. Generally, they suggest deleting the
+   offending lines.
+#. Check that your build path didn't make it into source files. Since
+   ``compile_commands.json`` has full paths, iwyu will put full paths in
+   the include statements. This will not produce an error on your
+   system, but it will on the build servers. The easiest way to check is
+   to use `the silver
+   searcher <https://github.com/ggreer/the_silver_searcher>`__ to check
+   for your username in your source tree.
+#. Enjoy your success.
+
+**Note:** ``iwyu`` outputs to ``stderr`` and always returns a failure
+status code since it generates no output. The output stream also affects
+``iwyu_tool.py``

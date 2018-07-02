@@ -39,7 +39,7 @@ namespace Geometry {
 */
 class MANTID_GEOMETRY_DLL Container final : public IObject {
 public:
-  typedef std::unordered_map<std::string, double> ShapeArgs;
+  using ShapeArgs = std::unordered_map<std::string, double>;
 
   Container();
   Container(IObject_sptr shape);
@@ -103,8 +103,9 @@ public:
     return m_shape->generatePointInObject(rng, activeRegion, i);
   }
 
-  void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
-                     double &myradius, double &myheight) const override {
+  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                     std::vector<Kernel::V3D> &vectors, double &myradius,
+                     double &myheight) const override {
     m_shape->GetObjectGeom(type, vectors, myradius, myheight);
   }
   boost::shared_ptr<GeometryHandler> getGeometryHandler() const override {
@@ -126,9 +127,9 @@ private:
 };
 
 /// Typdef for a shared pointer
-typedef boost::shared_ptr<Container> Container_sptr;
+using Container_sptr = boost::shared_ptr<Container>;
 /// Typdef for a shared pointer to a const object
-typedef boost::shared_ptr<const Container> Container_const_sptr;
+using Container_const_sptr = boost::shared_ptr<const Container>;
 
 } // namespace Geometry
 } // namespace Mantid

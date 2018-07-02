@@ -48,7 +48,7 @@ this.
 
 The sample is placed at the origin.  The source is seperated from the sample in
 the negative direction by the value you specify in "SourceDistanceFromSample".
-The instrument has "NumBanks" detector banks, each bank is moved down the X axis
+The instrument has "NumBanks" detector banks, each bank is moved down the Z axis
 by "BankDistanceFromSample" from the sample or the previous bank.
 
 Each bank is a square rectangular bank comprising of "BankPixelWidth" pixels in

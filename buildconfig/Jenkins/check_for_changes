@@ -18,29 +18,25 @@ case "$TYPE" in
         exit $(git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.py)
     ;;
     cpp)
-        if $(! git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.h)
-        then
-            exit $FOUND
-        fi
-        if $(! git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cpp)
-        then
-            exit $FOUND
-        fi
-        if $(! git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cxx)
-        then
-            exit $FOUND
-        fi
-        if $(! git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.tcc)
-        then
-            exit $FOUND
-        fi
+        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.h) || exit $FOUND
+        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cpp) || exit $FOUND
+        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cxx) || exit $FOUND
+        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.tcc) || exit $FOUND
+        exit $NOTFOUND
+    ;;
+    dev-docs-only)
+        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- dev-docs || exit $FOUND
+        exit $NOTFOUND
+    ;;
+    user-docs-only)
+        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- docs || exit $FOUND
         exit $NOTFOUND
     ;;
     docs-gui-only)
 	# FOUND=1 iff changes are limited to docs or GUI only
 	# Find all changed files and grep for required type. -v inverts match so grep=0 means
 	# there are other changes besides this
-	if git diff --name-only ${BRANCH_TIP} ${BRANCH_BASE} -- | grep -q -E -v '^docs/|^qt/|^MantidPlot/'; then
+	if git diff --name-only ${BRANCH_TIP} ${BRANCH_BASE} -- | grep -q -E -v '^docs/|^dev-docs/|^qt/|^MantidPlot/'; then
 	    exit $FOUND
 	else
 	    exit $NOTFOUND

@@ -54,7 +54,7 @@ public:
 }; // class ITransformScale
 
 /// typedef for a shared pointer
-typedef boost::shared_ptr<ITransformScale> ITransformScale_sptr;
+using ITransformScale_sptr = boost::shared_ptr<ITransformScale>;
 
 } // namespace API
 } // namespace Mantid

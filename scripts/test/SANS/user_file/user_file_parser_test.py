@@ -888,9 +888,13 @@ class PrintParserTest(unittest.TestCase):
         self.assertTrue(PrintParser.get_type(), "PRINT")
 
     def test_that_print_is_parsed_correctly(self):
-        valid_settings = {"PRINT OdlfP slsk 23lksdl2 34l": {PrintId.print_line: "OdlfP slsk 23lksdl2 34l"}}
+        valid_settings = {"PRINT OdlfP slsk 23lksdl2 34l": {PrintId.print_line: "OdlfP slsk 23lksdl2 34l"},
+                          "PRiNt OdlfP slsk 23lksdl2 34l": {PrintId.print_line: "OdlfP slsk 23lksdl2 34l"},
+                          "  PRINT Loaded: USER_LOQ_174J, 12/03/18, Xuzhi (Lu), 12mm, Sample Changer, Banjo cells":
+                          {PrintId.print_line: "Loaded: USER_LOQ_174J, 12/03/18, Xuzhi (Lu), 12mm, Sample Changer, Banjo cells"}
+                          }
 
-        invalid_settings = {}
+        invalid_settings = {"j PRINT OdlfP slsk 23lksdl2 34l ": RuntimeError,}
 
         print_parser = PrintParser()
         do_test(print_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)

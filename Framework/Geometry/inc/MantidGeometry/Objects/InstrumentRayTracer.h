@@ -19,7 +19,7 @@ class IComponent;
 struct Link;
 class Track;
 /// Typedef for object intersections
-typedef Track::LType Links;
+using Links = Track::LType;
 
 /**
 This class is responsible for tracking rays and accumulating a list of objects

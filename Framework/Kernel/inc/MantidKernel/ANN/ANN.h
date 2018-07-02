@@ -176,8 +176,8 @@ enum ANNbool { ANNfalse = 0, ANNtrue = 1 }; // ANN boolean type (non ANSI C++)
 //		not occur in distance calculation.
 //----------------------------------------------------------------------
 
-typedef double ANNcoord; // coordinate data type
-typedef double ANNdist;  // distance data type
+using ANNcoord = double; // coordinate data type
+using ANNdist = double;  // distance data type
 
 //----------------------------------------------------------------------
 //	ANNidx
@@ -193,7 +193,7 @@ typedef double ANNdist;  // distance data type
 //		It should be distinguishable from any valid array index.
 //----------------------------------------------------------------------
 
-typedef int ANNidx;             // point index
+using ANNidx = int;             // point index
 const ANNidx ANN_NULL_IDX = -1; // a NULL point index
 
 //----------------------------------------------------------------------
@@ -408,10 +408,10 @@ const ANNbool ANN_ALLOW_SELF_MATCH = ANNfalse;
 //		when returning the results of k-nearest neighbor queries.
 //----------------------------------------------------------------------
 
-typedef ANNcoord *ANNpoint;      // a point
-typedef ANNpoint *ANNpointArray; // an array of points
-typedef ANNdist *ANNdistArray;   // an array of distances
-typedef ANNidx *ANNidxArray;     // an array of point indices
+using ANNpoint = ANNcoord *;      // a point
+using ANNpointArray = ANNpoint *; // an array of points
+using ANNdistArray = ANNdist *;   // an array of distances
+using ANNidxArray = ANNidx *;     // an array of point indices
 
 //----------------------------------------------------------------------
 //	Basic point and array utilities:
@@ -766,9 +766,9 @@ const int ANN_N_SHRINK_RULES = 4; // number of shrink rules
 // Some types and objects used by kd-tree functions
 // See src/kd_tree.h and src/kd_tree.cpp for definitions
 //----------------------------------------------------------------------
-class ANNkdStats;              // stats on kd-tree
-class ANNkd_node;              // generic node in a kd-tree
-typedef ANNkd_node *ANNkd_ptr; // pointer to a kd-tree node
+class ANNkdStats;               // stats on kd-tree
+class ANNkd_node;               // generic node in a kd-tree
+using ANNkd_ptr = ANNkd_node *; // pointer to a kd-tree node
 
 class DLL_API ANNkd_tree : public ANNpointSet {
 protected:

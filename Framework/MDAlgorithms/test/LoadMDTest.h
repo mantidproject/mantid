@@ -171,7 +171,7 @@ public:
   template <size_t nd>
   void do_test_exec(bool FileBackEnd, bool deleteWorkspace = true,
                     double memory = 0, bool BoxStructureOnly = false) {
-    typedef MDLeanEvent<nd> MDE;
+    using MDE = MDLeanEvent<nd>;
 
     //------ Start by creating the file
     //----------------------------------------------
@@ -307,7 +307,7 @@ public:
       ev.setCenter(d, 0.5);
     box->addEvent(ev);
     // CHANGE from AB: 20/01/2013: you have to split to identify changes!
-    box->splitAllIfNeeded(NULL);
+    box->splitAllIfNeeded(nullptr);
 
     // Modify a different box by accessing the events
     MDBox<MDLeanEvent<nd>, nd> *box8 =

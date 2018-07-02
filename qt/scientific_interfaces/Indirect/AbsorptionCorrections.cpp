@@ -63,7 +63,7 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
     : CorrectionsTab(parent) {
   m_uiForm.setupUi(parent);
 
-  QRegExp regex("[A-Za-z0-9\\-\\(\\)]*");
+  QRegExp regex(R"([A-Za-z0-9\-\(\)]*)");
   QValidator *formulaValidator = new QRegExpValidator(regex, this);
   m_uiForm.leSampleChemicalFormula->setValidator(formulaValidator);
   m_uiForm.leCanChemicalFormula->setValidator(formulaValidator);

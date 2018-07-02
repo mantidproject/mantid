@@ -290,7 +290,7 @@ void DgsDiagnose::exec() {
     diag->execute();
     maskWS = diag->getProperty("OutputWorkspace");
   } else {
-    typedef Mantid::Kernel::StringTokenizer tokenizer;
+    using tokenizer = Mantid::Kernel::StringTokenizer;
     tokenizer tokens(diag_spectra[0], "(,);",
                      Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     for (auto tok_iter = tokens.begin(); tok_iter != tokens.end();) {

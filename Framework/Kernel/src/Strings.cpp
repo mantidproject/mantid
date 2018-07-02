@@ -850,7 +850,7 @@ int setValues(const std::string &Line, const std::vector<int> &Index,
 
   //  mathFunc::crossSort(sIndex,OPt);
 
-  typedef std::vector<int>::const_iterator iVecIter;
+  using iVecIter = std::vector<int>::const_iterator;
   std::vector<int>::const_iterator sc = sIndex.begin();
   std::vector<int>::const_iterator oc = OPt.begin();
   int cnt(0);
@@ -1072,7 +1072,7 @@ int isMember(const std::vector<std::string> &group,
  */
 std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
                             const std::string &rangeSep) {
-  typedef Mantid::Kernel::StringTokenizer Tokenizer;
+  using Tokenizer = Mantid::Kernel::StringTokenizer;
 
   Tokenizer elements;
 

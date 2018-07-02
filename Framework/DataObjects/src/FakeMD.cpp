@@ -236,8 +236,8 @@ void FakeMD::addFakeRandomData(const std::vector<double> &params,
       genUnit(rng, u2);
 
   // Make a random generator for each dimensions
-  typedef boost::variate_generator<boost::mt19937 &,
-                                   boost::uniform_real<double>> gen_t;
+  using gen_t =
+      boost::variate_generator<boost::mt19937 &, boost::uniform_real<double>>;
 
   // Inserter to help choose the correct event type
   auto eventHelper =
@@ -365,8 +365,8 @@ detid_t FakeMD::pickDetectorID() {
   } else {
     /// A variate generator to combine a random number generator with a
     /// distribution
-    typedef boost::variate_generator<
-        boost::mt19937 &, boost::uniform_int<size_t>> uniform_generator;
+    using uniform_generator =
+        boost::variate_generator<boost::mt19937 &, boost::uniform_int<size_t>>;
     uniform_generator uniformRand(m_randGen, m_uniformDist);
     const size_t randIndex = uniformRand();
     return m_detIDs[randIndex];

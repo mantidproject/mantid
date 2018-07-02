@@ -16,7 +16,7 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
     _q1_workspaces = None
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms"
+        return "Workflow\\MIDAS"
 
     def summary(self):
         return "Create elastic window scans for sample changer"

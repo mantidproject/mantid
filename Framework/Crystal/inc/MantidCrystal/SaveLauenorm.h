@@ -41,7 +41,7 @@ private:
   DataObjects::PeaksWorkspace_sptr ws;
   void sizeBanks(std::string bankName, int &nCols, int &nRows);
   std::vector<int> crystalSystem(Geometry::OrientedLattice lattice,
-                                 std::vector<DataObjects::Peak> peaks);
+                                 const std::vector<DataObjects::Peak> &peaks);
 };
 
 } // namespace Mantid

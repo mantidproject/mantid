@@ -10,8 +10,5 @@ from __future__ import (absolute_import, division,
 import pymantidplot
 from pymantidplot import *
 
-# import pyplot and also bring it into the standard MantidPlot namespace
-import pymantidplot.pyplot
-from pymantidplot.pyplot import *
 # and the old qtiplot stuff
 import pymantidplot.qtiplot

@@ -5,28 +5,6 @@ Indirect Inelastic Changes
 .. contents:: Table of Contents
    :local:
 
-Algorithms
-----------
-
-New
-###
-
-- :ref:`algm-ExtractQENSMembers` can be used to extract the fit members from any QENS fit.
-- New algorithm :ref:`BASISDiffraction <algm-BASISDiffraction-v1>` to determine the orientation of crystal samples for the BASIS beamline.
-
-
-Improved
-########
-
-- :ref:`algm-ApplyPaalmanPingsCorrection` now accepts a corrections group containing only an :math:`A_{s,s}` and an :math:`A_{c,c}` workspace (produced by :ref:`algm-CalculateMonteCarloAbsorption`).
-- :ref:`BASISReduction  <algm-BASISReduction>` now permits the user to exclude a contiguous time segment from the reduction process.
-- :ref:`BASISReduction <algm-BASISReduction>` option *noMonitorNorm* changed to *MonitorNorm*.
-- :ref:`BASISReduction <algm-BASISReduction>` now contains log entry *asString* storing the options passed to to the algorithm.
-- :ref:`IqtFitSequential <algm-IqtFitSequential>` and :ref:`IqtFitMultiple <algm-IqtFitMultiple>` can now both extract members from the fit (when the ExtractMembers property is set to True).
-- Loading the sample log files into a workspace can be disabled when calling the :ref:`LoadVesuvio <algm-LoadVesuvio>` algorithm by supplying *LoadLogFiles=False* to the algorithm call
-- :ref:`OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` no longer has options *DetectDRange* and *DRange*, D-Ranges are now always calculated automatically within the algorithm.
-
-
 Vesuvio
 -------
 
@@ -54,8 +32,8 @@ New
 
 .. figure:: ../../images/Indirect_ConvFit_3_12_release.png
    :class: screenshot
-   :align: center
-   :width: 500 px
+   :align: right
+   :figwidth: 50%
 
    The new design of the Indirect Fitting tabs, shown here within ConvFit (the IndirectFitPropertyBrowser is seen on the left and can be ejected into a separate window).
 
@@ -104,10 +82,10 @@ Improved
 - The Apply Absorption Correction interface no longer requires workspaces to be in units of wavelength (this is done within :ref:`algm-ApplyPaalmanPingsCorrection`).
 - Calculate Monte Carlo Absorption interface has been restructured in a more appropriate format, as outlined in the following image:
 
-.. image::  ../../images/AbsorbtionCorrectionsGui312.png
-   :align: center
+.. figure::  ../../images/AbsorbtionCorrectionsGui312.png
+   :align: right
    :class: screenshot
-   :width: 800px
+   :figwidth: 50%
 
 - Result plotting in the Calculate Monte Carlo Absorption interface is now the same as that in Apply Absorption Correction; ability to select whether to plot result in Wavelength, Angle or Both.
 
@@ -125,5 +103,26 @@ Abins
 Improved
 ########
 - Performance of Abins rebinning routines significantly improved (a factor of 10-20 times for data size of 4000).
+
+Algorithms
+----------
+
+New
+###
+
+- :ref:`algm-ExtractQENSMembers` can be used to extract the fit members from any QENS fit.
+- New algorithm :ref:`BASISDiffraction <algm-BASISDiffraction-v1>` to determine the orientation of crystal samples for the BASIS beamline.
+
+
+Improved
+########
+
+- :ref:`algm-ApplyPaalmanPingsCorrection` now accepts a corrections group containing only an :math:`A_{s,s}` and an :math:`A_{c,c}` workspace (produced by :ref:`algm-CalculateMonteCarloAbsorption`).
+- :ref:`BASISReduction  <algm-BASISReduction>` now permits the user to exclude a contiguous time segment from the reduction process.
+- :ref:`BASISReduction <algm-BASISReduction>` option *noMonitorNorm* changed to *MonitorNorm*.
+- :ref:`BASISReduction <algm-BASISReduction>` now contains log entry *asString* storing the options passed to to the algorithm.
+- :ref:`IqtFitSequential <algm-IqtFitSequential>` and :ref:`IqtFitMultiple <algm-IqtFitMultiple>` can now both extract members from the fit (when the ExtractMembers property is set to True).
+- Loading the sample log files into a workspace can be disabled when calling the :ref:`LoadVesuvio <algm-LoadVesuvio>` algorithm by supplying *LoadLogFiles=False* to the algorithm call
+- :ref:`OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` no longer has options *DetectDRange* and *DRange*, D-Ranges are now always calculated automatically within the algorithm.
 
 :ref:`Release 3.12.0 <v3.12.0>`

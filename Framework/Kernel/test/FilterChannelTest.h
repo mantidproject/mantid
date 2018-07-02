@@ -140,7 +140,7 @@ public:
     a.addChannel(tChannel.get());
 
     // create a priority map
-    typedef std::map<unsigned int, std::string> priorityMap;
+    using priorityMap = std::map<unsigned int, std::string>;
     priorityMap pMap;
     pMap.insert(priorityMap::value_type(1, "FATAL"));
     pMap.insert(priorityMap::value_type(2, "CRITICAL"));

@@ -123,7 +123,7 @@ MANTID_DATAOBJECTS_DLL DetectorAngularCache
 initAngularCaches(const Mantid::API::MatrixWorkspace *const workspace);
 
 // Helper typedef for scoped pointer of this type.
-typedef boost::shared_ptr<ReflectometryTransform> ReflectometryTransform_sptr;
+using ReflectometryTransform_sptr = boost::shared_ptr<ReflectometryTransform>;
 }
 }
 #endif

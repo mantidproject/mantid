@@ -60,10 +60,10 @@ public:
     MatrixWorkspace_sptr fittedWS = alg->getProperty("FittedWorkspace");
     MatrixWorkspace_sptr symmetrisedWS =
         alg->getProperty("SymmetrisedWorkspace");
-    TS_ASSERT(outputWS != 0);
-    TS_ASSERT(yspaceWS != 0);
-    TS_ASSERT(fittedWS != 0);
-    TS_ASSERT(symmetrisedWS != 0);
+    TS_ASSERT(outputWS != nullptr);
+    TS_ASSERT(yspaceWS != nullptr);
+    TS_ASSERT(fittedWS != nullptr);
+    TS_ASSERT(symmetrisedWS != nullptr);
 
     // Dimensions
     TS_ASSERT_EQUALS(testWS->getNumberHistograms(),
@@ -171,10 +171,10 @@ public:
     MatrixWorkspace_sptr fittedWS = alg->getProperty("FittedWorkspace");
     MatrixWorkspace_sptr symmetrisedWS =
         alg->getProperty("SymmetrisedWorkspace");
-    TS_ASSERT(outputWS != 0);
-    TS_ASSERT(yspaceWS != 0);
-    TS_ASSERT(fittedWS != 0);
-    TS_ASSERT(symmetrisedWS != 0);
+    TS_ASSERT(outputWS != nullptr);
+    TS_ASSERT(yspaceWS != nullptr);
+    TS_ASSERT(fittedWS != nullptr);
+    TS_ASSERT(symmetrisedWS != nullptr);
 
     // Dimensions
     TS_ASSERT_EQUALS(testWS->getNumberHistograms(),

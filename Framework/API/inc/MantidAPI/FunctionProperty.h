@@ -56,7 +56,7 @@ public:
 
   /// Bring in the PropertyWithValue assignment operator explicitly (avoids
   /// VSC++ warning)
-  boost::shared_ptr<IFunction> &
+  FunctionProperty &
   operator=(const boost::shared_ptr<IFunction> &value) override;
 
   /// Add the value of another property

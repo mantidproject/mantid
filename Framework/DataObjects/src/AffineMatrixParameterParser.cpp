@@ -17,8 +17,8 @@ AffineMatrixParameter *AffineMatrixParameterParser::createParameter(
         typeName));
   } else {
     // Convenience typedefs
-    typedef std::vector<std::string> VecStrings;
-    typedef std::vector<coord_t> VecDoubles;
+    using VecStrings = std::vector<std::string>;
+    using VecDoubles = std::vector<coord_t>;
 
     std::string sParameterValue =
         parameterElement->getChildElement("Value")->innerText();

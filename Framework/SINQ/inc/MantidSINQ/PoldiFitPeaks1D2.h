@@ -46,7 +46,7 @@ private:
   double m_width;
 };
 
-typedef boost::shared_ptr<RefinedRange> RefinedRange_sptr;
+using RefinedRange_sptr = boost::shared_ptr<RefinedRange>;
 
 bool MANTID_SINQ_DLL
 operator<(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs);

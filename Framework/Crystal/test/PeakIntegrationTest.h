@@ -59,8 +59,8 @@ public:
     rng.seed((unsigned int)(randomSeed));
     size_t nd = 1;
     // Make a random generator for each dimensions
-    typedef boost::variate_generator<boost::mt19937 &,
-                                     boost::uniform_real<double>> gen_t;
+    using gen_t =
+        boost::variate_generator<boost::mt19937 &, boost::uniform_real<double>>;
     gen_t *gens[1];
     for (size_t d = 0; d < nd; ++d) {
       double min = -1.;

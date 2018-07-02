@@ -210,7 +210,7 @@ void IntegratePeaksCWSD::simplePeakIntegration(
     throw std::runtime_error("MDEventWorkspace is not defined.");
 
   // Go through to get value
-  API::IMDIterator *mditer = m_inputWS->createIterator();
+  auto mditer = m_inputWS->createIterator();
   size_t nextindex = 1;
   bool scancell = true;
   // size_t currindex = 0;

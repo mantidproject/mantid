@@ -202,8 +202,6 @@ public:
       it->next();
       ++counter;
     }
-
-    delete it;
   }
 };
 

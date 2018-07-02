@@ -42,7 +42,7 @@ namespace PythonInterface {
  */
 template <typename BaseAlgorithm>
 class AlgorithmAdapter : public BaseAlgorithm {
-  typedef BaseAlgorithm SuperClass;
+  using SuperClass = BaseAlgorithm;
 
 public:
   /// A constructor that looks like a Python __init__ method

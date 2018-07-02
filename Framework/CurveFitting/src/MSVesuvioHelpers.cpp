@@ -358,14 +358,14 @@ RandomNumberGenerator::RandomNumberGenerator(const int seed) : m_generator() {
 }
 /// Returns a flat random number between 0.0 & 1.0
 double RandomNumberGenerator::flat() {
-  typedef boost::variate_generator<boost::mt19937 &, uniform_double>
-      uniform_generator;
+  using uniform_generator =
+      boost::variate_generator<boost::mt19937 &, uniform_double>;
   return uniform_generator(m_generator, uniform_double(0.0, 1.0))();
 }
 /// Returns a random number distributed  by a normal distribution
 double RandomNumberGenerator::gaussian(const double mean, const double sigma) {
-  typedef boost::variate_generator<boost::mt19937 &, gaussian_double>
-      gauss_generator;
+  using gauss_generator =
+      boost::variate_generator<boost::mt19937 &, gaussian_double>;
   return gauss_generator(m_generator, gaussian_double(mean, sigma))();
 }
 

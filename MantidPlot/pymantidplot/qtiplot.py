@@ -19,9 +19,6 @@ from PyQt4 import QtCore
 
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
-#
-# This function has been moved inside qtiplot when pymantidplot.pyplot (which
-# has another plot() function) was imported into the standard MantidPlot namespace
 def plot(source, *args, **kwargs):
     """Create a new plot given a workspace, table or matrix.
 

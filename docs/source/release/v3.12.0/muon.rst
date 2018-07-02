@@ -8,16 +8,14 @@ MuSR Changes
 .. figure:: ../../images/muon_release_3_12.png
    :class: screenshot
    :align: right
-   :width: 500 px
-
-
-Bug Fixes
----------
-- :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` has had the sign of the phase shift changed, this produces data with a positive frequency spike as expected.
-- Log values are no longer filtered by start time when loaded into muon analysis.
+   :figwidth: 50%
 
 Interface
 ---------
+
+Improvements
+############
+
 - Added a cancel button to the MaxEnt widget in Frequency Domain Analysis.
 - Added checkboxes for "add all pairs" and "add all groups" to the settings tab.
 - The data plot style in the settings tab of Muon Analysis, only alters the plot range. It no longer crops the data.
@@ -34,12 +32,31 @@ Interface
 - The period summation/subtraction can now be used in multiple fitting. 
 - Muon analysis now handles the "auto background" gracefully in single and multiple fitting modes.
 - We have disabled some non functional graph right click context menu items or adding functions when in multi data fitting mode, in the Data Analysis tab of the Muon Analysis Interface.
+- Frequency domain analysis will produce a warning if there is no data to load.
 
+Bug fixes
+#########
+
+- Log values are no longer filtered by start time when loaded into muon analysis.
+- Different options under `Settings`>`Data Binning` give different options for input (OSX bug, see Issue ##22167). Fixed in patch.
 
 Algorithms
 ----------
-- :ref:`MuonProcess <algm-MuonProcess>` now has a flag to determine if to crop the input workspace (default is true). In the Muon Analysis interface this flag has been set to false.
+
+New
+###
+
 - :ref:`MuonMaxent <algm-MuonMaxent>` calculates a single frequency spectrum from multiple time domain spectra.
+
+Improvements
+############
+
+- :ref:`MuonProcess <algm-MuonProcess>` now has a flag to determine if to crop the input workspace (default is true). In the Muon Analysis interface this flag has been set to false.
 -  :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts-v1>`: if the number of good frames is zero, then a value of 1 is assumed for the number of good frames.
+
+Bug fixes
+#########
+
+- :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` has had the sign of the phase shift changed, this produces data with a positive frequency spike as expected.
 
 :ref:`Release 3.12.0 <v3.12.0>`

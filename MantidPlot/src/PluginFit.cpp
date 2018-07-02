@@ -161,7 +161,7 @@ bool PluginFit::load(const QString &pluginName) {
   if (!f_eval)
     return false;
 
-  typedef char *(*fitFunc)();
+  using fitFunc = char *(*)();
   ff_union ff;
   ff.ptr = lib.resolve("parameters");
   fitFunc fitFunction = ff.func;

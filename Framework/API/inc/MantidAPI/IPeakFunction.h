@@ -103,8 +103,8 @@ private:
   static constexpr double DEFAULT_SEARCH_LEVEL = 1e-5;
 };
 
-typedef boost::shared_ptr<IPeakFunction> IPeakFunction_sptr;
-typedef boost::shared_ptr<const IPeakFunction> IPeakFunction_const_sptr;
+using IPeakFunction_sptr = boost::shared_ptr<IPeakFunction>;
+using IPeakFunction_const_sptr = boost::shared_ptr<const IPeakFunction>;
 
 } // namespace API
 } // namespace Mantid

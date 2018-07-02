@@ -6,9 +6,9 @@
 
 #include <unordered_map>
 
-typedef std::vector<double> Column;
-typedef std::unordered_map<std::string, Column> ColumnMap;
-typedef std::unordered_map<std::string, std::string> AttributeMap;
+using Column = std::vector<double>;
+using ColumnMap = std::unordered_map<std::string, Column>;
+using AttributeMap = std::unordered_map<std::string, std::string>;
 
 namespace Mantid {
 namespace DataHandling {

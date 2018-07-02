@@ -492,7 +492,8 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
   }
 
   const QString prefix = preprocessor.prefix();
-  const QString outputName = preprocessingListToString(runs, prefix);
+  const QString outputName =
+      preprocessingListToString(runs, prefix, preprocessor.separator());
 
   boost::tuple<QString, QString> loadString;
 

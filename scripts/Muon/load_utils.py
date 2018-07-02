@@ -13,7 +13,7 @@ class LoadUtils(object):
         if exists:
             self.setUp(tmpWS)
         else:
-            mantid.logger.error("Muon Analysis workspace does not exist - no data loaded")
+            raise RuntimeError("No data loaded. \n Please load data using Muon Analysis")
 
     def setUp(self,tmpWS):
         # get everything from the ADS

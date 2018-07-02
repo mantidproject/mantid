@@ -22,7 +22,7 @@ namespace Kernel {
 template <class KEYTYPE, class VALUETYPE> class Cache;
 template <typename TYPE> class TimeSeriesProperty;
 class SplittingInterval;
-typedef std::vector<SplittingInterval> TimeSplitterType;
+using TimeSplitterType = std::vector<SplittingInterval>;
 class PropertyManager;
 }
 
@@ -209,9 +209,9 @@ private:
       m_singleValueCache;
 };
 /// shared pointer to the logManager base class
-typedef boost::shared_ptr<LogManager> LogManager_sptr;
+using LogManager_sptr = boost::shared_ptr<LogManager>;
 /// shared pointer to the logManager base class (const version)
-typedef boost::shared_ptr<const LogManager> LogManager_const_sptr;
+using LogManager_const_sptr = boost::shared_ptr<const LogManager>;
 
 /**
  * Add a property of a specified type (Simply creates a Kernel::Property of that

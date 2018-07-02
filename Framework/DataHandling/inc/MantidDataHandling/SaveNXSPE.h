@@ -47,7 +47,7 @@ public:
   int version() const override { return (1); }
   /// Algorithm's category for identification
   const std::string category() const override {
-    return "DataHandling\\Nexus;DataHandling\\SPE;Inelastic\\DataHandling";
+    return R"(DataHandling\Nexus;DataHandling\SPE;Inelastic\DataHandling)";
   }
 
 private:

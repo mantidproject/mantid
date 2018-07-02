@@ -66,7 +66,7 @@ private:
   /// Returns an allowed values statement to insert into decumentation
   std::string allowedValuesStatement(const std::vector<std::string> &vals);
   // Typedef for det to value map
-  typedef std::unordered_map<detid_t, bool> udet2valuem;
+  using udet2valuem = std::unordered_map<detid_t, bool>;
   /// A map of detector numbers to mask boolean
   udet2valuem umap;
   /// Get the properties

@@ -807,7 +807,7 @@ constexpr double j_Au5[3][9] = {
 }
 
 /// Typedef the map type
-typedef std::unordered_map<std::string, MagneticIon> IonIndex;
+using IonIndex = std::unordered_map<std::string, MagneticIon>;
 
 /// Forward decalre intializer
 void createIonLookup(IonIndex &ion_map);

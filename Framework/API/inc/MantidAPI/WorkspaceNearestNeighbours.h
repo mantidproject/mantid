@@ -82,14 +82,14 @@ private:
   const std::vector<specnum_t> m_spectrumNumbers;
 
   /// typedef for Graph object used to hold the calculated information
-  typedef boost::adjacency_list<
+  using Graph = boost::adjacency_list<
       boost::vecS, boost::vecS, boost::directedS,
       boost::property<boost::vertex_name_t, int64_t>,
-      boost::property<boost::edge_name_t, Mantid::Kernel::V3D>> Graph;
+      boost::property<boost::edge_name_t, Mantid::Kernel::V3D>>;
   /// Vertex descriptor object for Graph
-  typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
+  using Vertex = boost::graph_traits<Graph>::vertex_descriptor;
   /// map object of int to Graph Vertex descriptor
-  typedef std::unordered_map<specnum_t, Vertex> MapIV;
+  using MapIV = std::unordered_map<specnum_t, Vertex>;
 
   /// Construct the graph based on the given number of neighbours and the
   /// current instument and spectra-detector mapping

@@ -35,7 +35,7 @@ namespace LiveData {
 */
 class DLLExport IKafkaBroker {
 public:
-  ~IKafkaBroker() = default;
+  virtual ~IKafkaBroker() = default;
 
   virtual std::unique_ptr<IKafkaStreamSubscriber>
   subscribe(std::vector<std::string> topics,

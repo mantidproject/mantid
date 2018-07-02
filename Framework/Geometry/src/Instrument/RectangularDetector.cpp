@@ -5,15 +5,17 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Rendering/BitmapGeometryHandler.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 #include <algorithm>
 #include <ostream>
 #include <stdexcept>
 #include <boost/regex.hpp>
+#include <boost/make_shared.hpp>
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 namespace {
@@ -45,7 +47,7 @@ RectangularDetector::RectangularDetector()
       m_minDetId(0), m_maxDetId(0) {
 
   init();
-  setGeometryHandler(new BitmapGeometryHandler(this));
+  setGeometryHandler(new GeometryHandler(this));
 }
 
 /** Constructor for a parametrized RectangularDetector
@@ -57,7 +59,7 @@ RectangularDetector::RectangularDetector(const RectangularDetector *base,
     : CompAssembly(base, map), IObjComponent(nullptr), m_rectBase(base),
       m_minDetId(0), m_maxDetId(0) {
   init();
-  setGeometryHandler(new BitmapGeometryHandler(this));
+  setGeometryHandler(new GeometryHandler(this));
 }
 
 /** Valued constructor
@@ -75,7 +77,7 @@ RectangularDetector::RectangularDetector(const std::string &n,
       m_minDetId(0), m_maxDetId(0) {
   init();
   this->setName(n);
-  setGeometryHandler(new BitmapGeometryHandler(this));
+  setGeometryHandler(new GeometryHandler(this));
 }
 
 bool RectangularDetector::compareName(const std::string &proposedMatch) {
@@ -673,7 +675,7 @@ void RectangularDetector::draw() const {
   if (Handle() == nullptr)
     return;
   // Render the ObjComponent and then render the object
-  Handle()->Render();
+  Handle()->render();
 }
 
 /**
@@ -696,7 +698,7 @@ void RectangularDetector::initDraw() const {
     return;
   // Render the ObjComponent and then render the object
   // if(shape!=NULL)    shape->initDraw();
-  Handle()->Initialize();
+  Handle()->initialize();
 }
 
 //-------------------------------------------------------------------------------------------------

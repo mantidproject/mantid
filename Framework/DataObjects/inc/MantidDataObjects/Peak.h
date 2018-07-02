@@ -86,7 +86,7 @@ public:
   Geometry::Instrument_const_sptr getInstrument() const override;
 
   bool findDetector() override;
-  bool findDetector(const Geometry::InstrumentRayTracer &tracer);
+  bool findDetector(const Geometry::InstrumentRayTracer &tracer) override;
 
   int getRunNumber() const override;
   void setRunNumber(int m_runNumber) override;

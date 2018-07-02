@@ -12,7 +12,7 @@
 
 namespace Mantid {
 namespace Algorithms {
-typedef std::map<specnum_t, Mantid::Kernel::V3D> SpectraDistanceMap;
+using SpectraDistanceMap = std::map<specnum_t, Mantid::Kernel::V3D>;
 
 /*
 Filters spectra detector list by radius.
@@ -149,7 +149,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr inWS;
 
   /// Each neighbours is specified as a pair with workspace index, weight.
-  typedef std::pair<size_t, double> weightedNeighbour;
+  using weightedNeighbour = std::pair<size_t, double>;
 
   /// Vector of list of neighbours (with weight) for each workspace index.
   std::vector<std::vector<weightedNeighbour>> m_neighbours;

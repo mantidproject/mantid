@@ -289,7 +289,7 @@ void DetermineChunking::exec() {
 /// set the name of the top level NXentry m_top_entry_name
 std::string DetermineChunking::setTopEntryName(std::string filename) {
   std::string top_entry_name;
-  typedef std::map<std::string, std::string> string_map_t;
+  using string_map_t = std::map<std::string, std::string>;
   try {
     string_map_t::const_iterator it;
     ::NeXus::File file = ::NeXus::File(filename);

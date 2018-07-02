@@ -117,7 +117,7 @@ public:
   void tearDown() override {
     for (size_t i = 0; i < data.size(); i++) {
       delete data[i];
-      data[i] = NULL;
+      data[i] = nullptr;
     }
   }
   void xest_nothing() {

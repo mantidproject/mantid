@@ -94,7 +94,7 @@ void CreatePSDBleedMask::exec() {
   const int numSpectra =
       static_cast<int>(inputWorkspace->getNumberHistograms());
   // Keep track of a map of tubes to lists of indices
-  typedef std::map<Geometry::ComponentID, std::vector<int>> TubeIndex;
+  using TubeIndex = std::map<Geometry::ComponentID, std::vector<int>>;
   TubeIndex tubeMap;
 
   API::Progress progress(this, 0.0, 1.0, numSpectra);

@@ -20,8 +20,8 @@ double finalEnergyUranium(const double randv);
 // Ties together random numbers with various probability distributions
 // @todo: Should move to Kernel
 class RandomNumberGenerator {
-  typedef boost::uniform_real<double> uniform_double;
-  typedef boost::normal_distribution<double> gaussian_double;
+  using uniform_double = boost::uniform_real<double>;
+  using gaussian_double = boost::normal_distribution<double>;
 
 public:
   RandomNumberGenerator(const int seed);

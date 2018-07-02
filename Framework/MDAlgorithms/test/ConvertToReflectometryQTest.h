@@ -153,7 +153,7 @@ public:
     auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
-    TS_ASSERT(ws != NULL);
+    TS_ASSERT(ws != nullptr);
     TS_ASSERT_EQUALS(2, ws->getExperimentInfo(0)->run().getLogData().size());
     // Assert that dimensions should be a general frame
     const auto &frame0 = ws->getDimension(0)->getMDFrame();
@@ -170,7 +170,7 @@ public:
     auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
-    TS_ASSERT(ws != NULL);
+    TS_ASSERT(ws != nullptr);
     // Assert that dimensions should be a general frame
     const auto &frame0 = ws->getDimension(0)->getMDFrame();
     TSM_ASSERT_EQUALS("Should be a general frame", "KiKf", frame0.name());
@@ -185,7 +185,7 @@ public:
     auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
-    TS_ASSERT(ws != NULL);
+    TS_ASSERT(ws != nullptr);
     // Assert that dimensions should be a general frame
     const auto &frame0 = ws->getDimension(0)->getMDFrame();
     TSM_ASSERT_EQUALS("Should be a general frame", "P", frame0.name());
@@ -201,7 +201,7 @@ public:
     auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
-    TS_ASSERT(ws != NULL);
+    TS_ASSERT(ws != nullptr);
     TS_ASSERT_EQUALS(2, ws->run().getLogData().size());
   }
 
@@ -213,7 +213,7 @@ public:
     auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
-    TS_ASSERT(ws != NULL);
+    TS_ASSERT(ws != nullptr);
     TS_ASSERT_EQUALS(2, ws->run().getLogData().size());
   }
 
@@ -225,7 +225,7 @@ public:
     auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
-    TS_ASSERT(ws != NULL);
+    TS_ASSERT(ws != nullptr);
     TS_ASSERT_EQUALS(2, ws->getExperimentInfo(0)->run().getLogData().size());
   }
 
@@ -236,7 +236,7 @@ public:
     auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
-    TS_ASSERT(ws != NULL);
+    TS_ASSERT(ws != nullptr);
   }
 
   void test_execute_pipf_2D() {
@@ -246,7 +246,7 @@ public:
     auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
-    TS_ASSERT(ws != NULL);
+    TS_ASSERT(ws != nullptr);
   }
 
   void test_box_controller_defaults() {
@@ -342,7 +342,7 @@ public:
     IMDWorkspace_sptr out =
         AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(
             "OutputTransformedWorkspace");
-    TS_ASSERT(out != NULL);
+    TS_ASSERT(out != nullptr);
     TS_ASSERT_EQUALS(out->getNumDims(), 2);
   }
 
@@ -363,7 +363,7 @@ public:
     auto out = AnalysisDataService::Instance()
                    .retrieveWS<Mantid::DataObjects::Workspace2D>(
                        "OutputTransformedWorkspace");
-    TS_ASSERT(out != NULL);
+    TS_ASSERT(out != nullptr);
     TS_ASSERT_EQUALS(out->getNumDims(), 2);
   }
 };

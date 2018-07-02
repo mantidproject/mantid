@@ -13,11 +13,11 @@
 namespace Mantid {
 namespace Geometry {
 
-typedef std::complex<double> StructureFactor;
+using StructureFactor = std::complex<double>;
 
 class BraggScatterer;
 
-typedef boost::shared_ptr<BraggScatterer> BraggScatterer_sptr;
+using BraggScatterer_sptr = boost::shared_ptr<BraggScatterer>;
 
 /**
     @class BraggScatterer

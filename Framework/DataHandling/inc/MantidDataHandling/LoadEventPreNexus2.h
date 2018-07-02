@@ -40,10 +40,10 @@ namespace DataHandling {
 #undef LOADEVENTPRENEXUS_ALLOW_PARALLEL
 
 /// Make the code clearer by having this an explicit type
-typedef int PixelType;
+using PixelType = int;
 
 /// Type for the DAS time of flight (data file)
-typedef int DasTofType;
+using DasTofType = int;
 
 /// Structure that matches the form in the binary event list.
 #pragma pack(push, 4) // Make sure the structure is 8 bytes.

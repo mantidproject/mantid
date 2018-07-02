@@ -47,12 +47,12 @@ private:
   enum { m_location = I };
 };
 
-typedef FrustumPlane<LEFTPLANE, double> LeftPlane;
-typedef FrustumPlane<RIGHTPLANE, double> RightPlane;
-typedef FrustumPlane<BOTTOMPLANE, double> BottomPlane;
-typedef FrustumPlane<TOPPLANE, double> TopPlane;
-typedef FrustumPlane<FARPLANE, double> FarPlane;
-typedef FrustumPlane<NEARPLANE, double> NearPlane;
+using LeftPlane = FrustumPlane<LEFTPLANE, double>;
+using RightPlane = FrustumPlane<RIGHTPLANE, double>;
+using BottomPlane = FrustumPlane<BOTTOMPLANE, double>;
+using TopPlane = FrustumPlane<TOPPLANE, double>;
+using FarPlane = FrustumPlane<FARPLANE, double>;
+using NearPlane = FrustumPlane<NEARPLANE, double>;
 
 class DLLExport ViewFrustum {
 public:
@@ -156,9 +156,9 @@ void ViewFrustum::initializeMatrix(Mantid::Kernel::Matrix<T> &matrix,
 }
 
 /// shared pointer to the view frustum
-typedef boost::shared_ptr<Mantid::VATES::ViewFrustum> ViewFrustum_sptr;
-typedef boost::shared_ptr<const Mantid::VATES::ViewFrustum>
-    ViewFrustum_const_sptr;
+using ViewFrustum_sptr = boost::shared_ptr<Mantid::VATES::ViewFrustum>;
+using ViewFrustum_const_sptr =
+    boost::shared_ptr<const Mantid::VATES::ViewFrustum>;
 }
 }
 #endif

@@ -505,10 +505,10 @@ public:
 };
 
 /// Shared ptr to BoxController
-typedef boost::shared_ptr<BoxController> BoxController_sptr;
+using BoxController_sptr = boost::shared_ptr<BoxController>;
 
 /// Shared ptr to a const BoxController
-typedef boost::shared_ptr<const BoxController> BoxController_const_sptr;
+using BoxController_const_sptr = boost::shared_ptr<const BoxController>;
 
 } // namespace API
 

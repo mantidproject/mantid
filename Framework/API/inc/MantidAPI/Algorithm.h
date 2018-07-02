@@ -301,7 +301,7 @@ public:
   /// parent object to fill.
   void trackAlgorithmHistory(boost::shared_ptr<AlgorithmHistory> parentHist);
 
-  typedef std::vector<boost::shared_ptr<Workspace>> WorkspaceVector;
+  using WorkspaceVector = std::vector<boost::shared_ptr<Workspace>>;
 
   void findWorkspaceProperties(WorkspaceVector &inputWorkspaces,
                                WorkspaceVector &outputWorkspaces) const;
@@ -502,7 +502,7 @@ private:
 };
 
 /// Typedef for a shared pointer to an Algorithm
-typedef boost::shared_ptr<Algorithm> Algorithm_sptr;
+using Algorithm_sptr = boost::shared_ptr<Algorithm>;
 
 } // namespace API
 } // namespace Mantid

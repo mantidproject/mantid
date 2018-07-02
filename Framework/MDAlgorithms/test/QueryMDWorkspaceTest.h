@@ -154,7 +154,7 @@ public:
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("QueryWS");
 
-    TSM_ASSERT("Workspace output is not an ITableWorkspace", table != NULL);
+    TSM_ASSERT("Workspace output is not an ITableWorkspace", table != nullptr);
     size_t expectedCount =
         3 + in_ws->getNumDims(); // 3 fixed columns are Signal, Error, nEvents
     TSM_ASSERT_EQUALS("Four columns expected", expectedCount,
@@ -176,7 +176,7 @@ public:
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("QueryWS");
 
-    TSM_ASSERT("Workspace output is not an ITableWorkspace", table != NULL);
+    TSM_ASSERT("Workspace output is not an ITableWorkspace", table != nullptr);
     size_t expectedCount =
         3 + in_ws->getNumDims(); // 3 fixed columns are Signal, Error, nEvents
     TSM_ASSERT_EQUALS("Five columns expected", expectedCount,
@@ -199,7 +199,7 @@ public:
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("QueryWS");
 
-    TSM_ASSERT("Workspace output is not an ITableWorkspace", table != NULL);
+    TSM_ASSERT("Workspace output is not an ITableWorkspace", table != nullptr);
     size_t expectedCount =
         3 + in_ws->getNumDims(); // 3 fixed columns are Signal, Error, nEvents
     TSM_ASSERT_EQUALS("Five columns expected", expectedCount,
@@ -253,7 +253,7 @@ public:
     query.execute();
     ITableWorkspace_sptr table = query.getProperty("OutputWorkspace");
 
-    TSM_ASSERT("Workspace output is not an ITableWorkspace", table != NULL);
+    TSM_ASSERT("Workspace output is not an ITableWorkspace", table != nullptr);
     size_t expectedCount =
         3 + 2; // 3 fixed columns are Signal, Error, nEvents and then data is 2D
     TSM_ASSERT_EQUALS("Six columns expected", expectedCount,
@@ -292,7 +292,7 @@ public:
     query.execute();
     ITableWorkspace_sptr table = query.getProperty("OutputWorkspace");
 
-    TSM_ASSERT("Workspace output is not an ITableWorkspace", table != NULL);
+    TSM_ASSERT("Workspace output is not an ITableWorkspace", table != nullptr);
     size_t expectedCount =
         3 + 2; // 3 fixed columns are Signal, Error, nEvents and then data is 2D
     TSM_ASSERT_EQUALS("Six columns expected", expectedCount,

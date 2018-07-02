@@ -91,8 +91,8 @@ public:
   virtual ~PeakOverlayView() {}
 };
 
-typedef boost::shared_ptr<const PeakOverlayView> PeakOverlayView_const_sptr;
-typedef boost::shared_ptr<PeakOverlayView> PeakOverlayView_sptr;
+using PeakOverlayView_const_sptr = boost::shared_ptr<const PeakOverlayView>;
+using PeakOverlayView_sptr = boost::shared_ptr<PeakOverlayView>;
 }
 }
 

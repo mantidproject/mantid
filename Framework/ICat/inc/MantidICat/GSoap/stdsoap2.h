@@ -1254,7 +1254,7 @@ extern const char soap_base64o[], soap_base64i[];
 
 /* gSOAP status/error codes */
 
-typedef soap_int32 soap_status;
+using soap_status = int32_t;
 
 #define SOAP_EOF EOF
 #define SOAP_ERR EOF
@@ -1364,7 +1364,7 @@ typedef soap_int32 soap_status;
 
 /* gSOAP transport, connection, and content encoding modes */
 
-typedef soap_int32 soap_mode;
+using soap_mode = int32_t;
 
 #define SOAP_IO 0x00000003       /* IO mask */
 #define SOAP_IO_FLUSH 0x00000000 /* flush output immediately, no buffering */
@@ -1621,7 +1621,7 @@ typedef soap_int32 soap_mode;
 
 /* UCS-4 requires 32 bits (0-7FFFFFFF, the sign bit is used by gSOAP to
  * distinguish XML entities) */
-typedef soap_int32 soap_wchar;
+using soap_wchar = int32_t;
 
 /* namespace table row */
 struct Namespace {
@@ -1822,7 +1822,7 @@ struct soap_multipart {
   const char *location;             /* MIME Content-Location (optional) */
   const char *description;          /* MIME Content-Description (optional) */
 #ifdef __cplusplus
-  typedef soap_multipart_iterator iterator;
+  using iterator = soap_multipart_iterator;
 #endif
 };
 #endif
@@ -1868,7 +1868,7 @@ struct soap_dom_attribute {
   wchar_t *wide;
   struct soap *soap;
 #ifdef __cplusplus
-  typedef soap_dom_attribute_iterator iterator;
+  using iterator = soap_dom_attribute_iterator;
   struct soap_dom_attribute &set(const char *nstr,
                                  const char *name); /* set namespace and name */
   struct soap_dom_attribute &set(const char *data); /* set data */
@@ -1920,7 +1920,7 @@ struct soap_dom_element {
   char *tail;        /* leading content before end tag */
   struct soap *soap; /* soap context that manages this node */
 #ifdef __cplusplus
-  typedef soap_dom_element_iterator iterator;
+  using iterator = soap_dom_element_iterator;
   struct soap_dom_element &set(const char *nstr, const char *name);
   struct soap_dom_element &set(const char *data);
   struct soap_dom_element &set(void *node, int type);
@@ -2430,7 +2430,7 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_rand(void);
 #endif
 
 /* soap_traverse() traversal/walker routines take walker function arguments */
-typedef void soap_walker(struct soap *, void *, int, const char *,
+using soap_walker = void(struct soap *, void *, int, const char *,
                          const char *);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap);

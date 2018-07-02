@@ -33,7 +33,7 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
           SLOT(fillCorrectionDetails(const QString &)));
 
-  QRegExp regex("[A-Za-z0-9\\-\\(\\)]*");
+  QRegExp regex(R"([A-Za-z0-9\-\(\)]*)");
   QValidator *formulaValidator = new QRegExpValidator(regex, this);
   m_uiForm.leSampleChemicalFormula->setValidator(formulaValidator);
   m_uiForm.leCanChemicalFormula->setValidator(formulaValidator);

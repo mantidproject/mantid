@@ -67,7 +67,7 @@ class ThreadSafeLogStream;
 class MANTID_KERNEL_DLL Logger {
 public:
   // Our logger's priority types are the same as POCO's Message's types.
-  typedef Poco::Message::Priority Priority;
+  using Priority = Poco::Message::Priority;
 
   static const std::string *PriorityNames;
 

@@ -21,7 +21,7 @@ public:
 };
 
 /// Factory Shared Pointer typedef.
-typedef boost::shared_ptr<PeakTransformFactory> PeakTransformFactory_sptr;
+using PeakTransformFactory_sptr = boost::shared_ptr<PeakTransformFactory>;
 }
 }
 

@@ -94,6 +94,7 @@ const std::string sasProcessName = "name";
 const std::string sasProcessNameValue = "Mantid_generated_NXcanSAS";
 const std::string sasProcessDate = "date";
 const std::string sasProcessTermSvn = "svn";
+const std::string sasProcessTermCan = "can_trans_run";
 const std::string sasProcessTermUserFile = "user_file";
 const std::string sasProcessUserFileInLogs = "UserFile";
 

@@ -142,9 +142,9 @@ public:
    * @param value :: The value of the element.
    */
   template <typename T> double convertToDouble(const T &value) const {
-    typedef
+    using DoubleType =
         typename std::conditional<std::is_convertible<double, T>::value, T,
-                                  InconvertibleToDoubleType>::type DoubleType;
+                                  InconvertibleToDoubleType>::type;
     return boost::numeric_cast<double, DoubleType>(value);
   }
 
@@ -175,9 +175,9 @@ public:
    * @param value: cast this value
    */
   void fromDouble(size_t i, double value) override {
-    typedef typename std::conditional<std::is_convertible<double, Type>::value,
-                                      Type, InconvertibleToDoubleType>::type
-        DoubleType;
+    using DoubleType =
+        typename std::conditional<std::is_convertible<double, Type>::value,
+                                  Type, InconvertibleToDoubleType>::type;
     m_data[i] =
         static_cast<Type>(boost::numeric_cast<DoubleType, double>(value));
   }

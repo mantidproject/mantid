@@ -95,7 +95,7 @@ private:
   using Kernel::DynamicFactory<Workspace>::create;
 };
 
-typedef Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl> WorkspaceFactory;
+using WorkspaceFactory = Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>;
 
 template <class T, class... InitArgs>
 boost::shared_ptr<T> createWorkspace(InitArgs... args) {

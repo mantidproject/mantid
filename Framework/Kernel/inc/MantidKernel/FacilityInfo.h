@@ -131,8 +131,8 @@ private:
   /// this facility
 
   // TODO: remove RemoteJobManager form here (trac ticket #11373)
-  typedef std::map<std::string, boost::shared_ptr<RemoteJobManager>>
-      ComputeResourcesMap;
+  using ComputeResourcesMap =
+      std::map<std::string, boost::shared_ptr<RemoteJobManager>>;
   ComputeResourcesMap m_computeResources; ///< list of compute resources
                                           ///(clusters, etc...) available at
                                           /// this facility

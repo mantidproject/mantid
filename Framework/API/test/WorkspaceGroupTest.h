@@ -368,10 +368,10 @@ public:
     WorkspaceGroup_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<WorkspaceGroup_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsNonConst =
                                  manager.getValue<WorkspaceGroup_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -379,9 +379,9 @@ public:
     WorkspaceGroup_const_sptr wsCastConst;
     WorkspaceGroup_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (WorkspaceGroup_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (WorkspaceGroup_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 
@@ -400,10 +400,10 @@ public:
     Workspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<Workspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsNonConst =
                                  manager.getValue<Workspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -411,9 +411,9 @@ public:
     Workspace_const_sptr wsCastConst;
     Workspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (Workspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (Workspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };

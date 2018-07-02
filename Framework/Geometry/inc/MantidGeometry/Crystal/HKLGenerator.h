@@ -143,7 +143,7 @@ public:
     int m_h, m_k, m_l;
     Kernel::V3D m_hkl;
 
-    int m_hMin, m_hMax;
+    int m_hMax;
     int m_kMin, m_kMax;
     int m_lMin, m_lMax;
   };

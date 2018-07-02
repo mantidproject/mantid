@@ -56,7 +56,7 @@ public:
 
 private:
   /// Typdef for the white-space separated file data type.
-  typedef std::deque<std::string> DataCollectionType;
+  using DataCollectionType = std::deque<std::string>;
   /// All read-in data.
   DataCollectionType m_file_data;
   /// Iterator for the dimensionality start position.

@@ -31,7 +31,7 @@ public:
 };
 
 /// Typedef a factory for type of PeaksTransform.
-typedef ConcretePeakTransformFactory<PeakTransformHKL> PeakTransformHKLFactory;
+using PeakTransformHKLFactory = ConcretePeakTransformFactory<PeakTransformHKL>;
 }
 }
 

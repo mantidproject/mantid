@@ -14,7 +14,7 @@
 namespace MantidQt {
 namespace SliceViewer {
 /// Alias for Vector of Peak Overlay Views
-typedef std::vector<boost::shared_ptr<PeakOverlayView>> VecPeakOverlayView;
+using VecPeakOverlayView = std::vector<boost::shared_ptr<PeakOverlayView>>;
 
 /// Coordinate System Enum to String.
 std::string DLLExport

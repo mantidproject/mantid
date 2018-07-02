@@ -5,7 +5,7 @@
 
 #include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Rendering/CacheGeometryHandler.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Material.h"

@@ -116,7 +116,7 @@ protected:
   CompositeBraggScatterer_sptr m_scatterers;
 };
 
-typedef boost::shared_ptr<CrystalStructure> CrystalStructure_sptr;
+using CrystalStructure_sptr = boost::shared_ptr<CrystalStructure>;
 
 } // namespace Geometry
 } // namespace Mantid

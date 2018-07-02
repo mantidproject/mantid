@@ -205,10 +205,10 @@ public:
 
 public:
   /// Typedef for a shared pointer to a MDGridBox
-  typedef boost::shared_ptr<MDGridBox<MDE, nd>> sptr;
+  using sptr = boost::shared_ptr<MDGridBox<MDE, nd>>;
 
   /// Typedef for a vector of MDBoxBase pointers
-  typedef std::vector<MDBoxBase<MDE, nd> *> boxVector_t;
+  using boxVector_t = std::vector<MDBoxBase<MDE, nd> *>;
 
 private:
   /// Compute the index of the child box for the given event

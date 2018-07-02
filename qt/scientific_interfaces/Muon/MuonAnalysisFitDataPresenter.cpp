@@ -23,8 +23,8 @@ using Mantid::API::ITableWorkspace;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::TableRow;
 using Mantid::API::WorkspaceGroup;
-typedef MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType
-    RebinType;
+using RebinType =
+    MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType;
 
 namespace {
 /// static logger

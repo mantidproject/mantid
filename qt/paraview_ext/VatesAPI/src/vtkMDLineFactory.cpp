@@ -75,8 +75,8 @@ vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
     }
 
     // Ensure destruction in any event.
-    boost::scoped_ptr<IMDIterator> it(
-        createIteratorWithNormalization(m_normalizationOption, imdws.get()));
+    auto it =
+        createIteratorWithNormalization(m_normalizationOption, imdws.get());
 
     // Create 2 points per box.
     vtkNew<vtkPoints> points;

@@ -65,7 +65,7 @@ int LoadNXSPE::identiferConfidence(const std::string &value) {
  */
 int LoadNXSPE::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence(0);
-  typedef std::map<std::string, std::string> string_map_t;
+  using string_map_t = std::map<std::string, std::string>;
   try {
     ::NeXus::File file = ::NeXus::File(descriptor.filename());
     string_map_t entries = file.getEntries();

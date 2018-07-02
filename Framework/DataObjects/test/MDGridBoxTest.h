@@ -445,7 +445,7 @@ public:
     }
 
     // You must refresh the cache after adding individual events.
-    superbox->refreshCache(NULL);
+    superbox->refreshCache(nullptr);
     // superbox->refreshCentroid(NULL);
 
     TS_ASSERT_EQUALS(superbox->getNPoints(), 3);
@@ -473,7 +473,7 @@ public:
     }
     TS_ASSERT_EQUALS(superbox->getNPoints(), 3);
 
-    superbox->refreshCache(NULL);
+    superbox->refreshCache(nullptr);
     TS_ASSERT_EQUALS(superbox->getNPoints(), 6);
 
     // Retrieve the 0th grid box
@@ -801,7 +801,7 @@ public:
           }
         }
       // You must refresh the cache after adding individual events.
-      box->refreshCache(NULL);
+      box->refreshCache(nullptr);
     }
   }
 
@@ -824,7 +824,7 @@ public:
     size_t numbad = 0;
     TS_ASSERT_THROWS_NOTHING(numbad = b->addEvents(events););
     // Get the right totals again
-    b->refreshCache(NULL);
+    b->refreshCache(nullptr);
     TS_ASSERT_EQUALS(numbad, 0);
     TS_ASSERT_EQUALS(b->getNPoints(), 100);
     TS_ASSERT_EQUALS(b->getSignal(), 100 * 2.0);
@@ -851,7 +851,7 @@ public:
         events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
       }
     // Get the right totals again
-    b->refreshCache(NULL);
+    b->refreshCache(nullptr);
     // All 4 points get rejected
     TS_ASSERT_THROWS_NOTHING(numbad = b->addEvents(events););
     TS_ASSERT_EQUALS(numbad, 4);
@@ -886,7 +886,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(numbad = b->addEvents(events));
     TS_ASSERT_EQUALS(numbad, 3);
 
-    b->refreshCache(NULL);
+    b->refreshCache(nullptr);
     TS_ASSERT_EQUALS(b->getNPoints(), 1);
     TS_ASSERT_EQUALS(b->getSignal(), 2.0);
     TS_ASSERT_EQUALS(b->getErrorSquared(), 2.0);
@@ -987,9 +987,9 @@ public:
    * further.
    * */
   void test_splitAllIfNeeded() {
-    typedef MDGridBox<MDLeanEvent<2>, 2> gbox_t;
-    typedef MDBox<MDLeanEvent<2>, 2> box_t;
-    typedef MDBoxBase<MDLeanEvent<2>, 2> ibox_t;
+    using gbox_t = MDGridBox<MDLeanEvent<2>, 2>;
+    using box_t = MDBox<MDLeanEvent<2>, 2>;
+    using ibox_t = MDBoxBase<MDLeanEvent<2>, 2>;
 
     gbox_t *b0 = MDEventsTestHelper::makeMDGridBox<2>();
     b0->getBoxController()->setSplitThreshold(100);
@@ -1006,7 +1006,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(b0->addEvents(events););
 
     // Split into sub-grid boxes
-    TS_ASSERT_THROWS_NOTHING(b0->splitAllIfNeeded(NULL);)
+    TS_ASSERT_THROWS_NOTHING(b0->splitAllIfNeeded(nullptr);)
 
     // Dig recursively into the gridded box hierarchies
     std::vector<ibox_t *> boxes;
@@ -1051,8 +1051,8 @@ public:
    * to use all cores.
    */
   void test_splitAllIfNeeded_usingThreadPool() {
-    typedef MDGridBox<MDLeanEvent<2>, 2> gbox_t;
-    typedef MDBoxBase<MDLeanEvent<2>, 2> ibox_t;
+    using gbox_t = MDGridBox<MDLeanEvent<2>, 2>;
+    using ibox_t = MDBoxBase<MDLeanEvent<2>, 2>;
 
     gbox_t *b = MDEventsTestHelper::makeMDGridBox<2>();
     b->getBoxController()->setSplitThreshold(100);
@@ -1128,14 +1128,14 @@ public:
 
     MDBin<MDLeanEvent<2>, 2> bin;
     bin = makeMDBin2(minX, maxX, minY, maxY);
-    b->centerpointBin(bin, NULL);
+    b->centerpointBin(bin, nullptr);
     TSM_ASSERT_DELTA(message, bin.m_signal, expectedSignal, 1e-5);
   }
 
   //------------------------------------------------------------------------------------------------
   /** Test binning in orthogonal axes */
   void test_centerpointBin() {
-    typedef MDGridBox<MDLeanEvent<2>, 2> gbox_t;
+    using gbox_t = MDGridBox<MDLeanEvent<2>, 2>;
 
     // 10x10 bins, 2 events per bin, each weight of 1.0
     gbox_t *b = MDEventsTestHelper::makeMDGridBox<2>();

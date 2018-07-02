@@ -769,11 +769,11 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
   }
 
   Indexing::IndexInfo indices(specNums.size());
-  indices.setSpectrumNumbers(std::move(specNums));
   // There is no instrument, so the automatic build of a 1:1 mapping would fail.
   // Need to set empty grouping manually.
   indices.setSpectrumDefinitions(
       std::vector<SpectrumDefinition>(specNums.size()));
+  indices.setSpectrumNumbers(std::move(specNums));
   return create<Workspace2D>(indices, BinEdges(std::move(xarray)));
 }
 

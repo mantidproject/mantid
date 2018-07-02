@@ -446,7 +446,7 @@ void SaveWorkspaces::saveFileBrowse() {
                                     ? QFileDialog::DontConfirmOverwrite
                                     : static_cast<QFileDialog::Option>(0);
   QString oFile = QFileDialog::getSaveFileName(this, title, prevPath, filter,
-                                               NULL, userCon);
+                                               nullptr, userCon);
 
   if (!oFile.isEmpty()) {
     m_fNameEdit->setText(oFile);

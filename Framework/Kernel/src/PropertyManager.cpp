@@ -347,7 +347,7 @@ void PropertyManager::setPropertiesWithSimpleString(
     const std::unordered_set<std::string> &ignoreProperties) {
   ::Json::Value propertyJson;
   // Split up comma-separated properties
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
 
   boost::char_separator<char> sep(";");
   tokenizer propPairs(propertiesString, ";",

@@ -227,10 +227,10 @@ private:
 
 public:
   /// Typedef for a shared pointer to a MDBox
-  typedef boost::shared_ptr<MDBox<MDE, nd>> sptr;
+  using sptr = boost::shared_ptr<MDBox<MDE, nd>>;
 
   /// Typedef for a vector of the conatined events
-  typedef std::vector<MDE> vec_t;
+  using vec_t = std::vector<MDE>;
 };
 
 #ifndef __INTEL_COMPILER

@@ -81,8 +81,8 @@ private:
   // jacobian);
 };
 
-typedef boost::shared_ptr<ThermalNeutronDtoTOFFunction>
-    ThermalNeutronDtoTOFFunction_sptr;
+using ThermalNeutronDtoTOFFunction_sptr =
+    boost::shared_ptr<ThermalNeutronDtoTOFFunction>;
 
 /// Calcualte TOF from d-spacing value for thermal neutron
 inline double calThermalNeutronTOF(double dh, double dtt1, double dtt1t,

@@ -291,7 +291,7 @@ Returns the name of the reduced workspace for a given row
 QString GenericDataProcessorPresenter::getReducedWorkspaceName(
     const RowData_sptr data) const {
   return MantidQt::MantidWidgets::DataProcessor::getReducedWorkspaceName(
-      data, m_whitelist);
+      data, m_whitelist, m_preprocessing.m_map);
 }
 
 void GenericDataProcessorPresenter::settingsChanged() {
@@ -651,8 +651,8 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   if (runs.size() == 1)
     return getRun(runs[0], instrument, preprocessor.prefix());
 
-  auto const outputName =
-      preprocessingListToString(runs, preprocessor.prefix());
+  auto const outputName = preprocessingListToString(runs, preprocessor.prefix(),
+                                                    preprocessor.separator());
 
   /* Ideally, this should be executed as a child algorithm to keep the ADS tidy,
   * but that doesn't preserve history nicely, so we'll just take care of tidying

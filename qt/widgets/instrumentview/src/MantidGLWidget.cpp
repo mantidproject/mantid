@@ -283,9 +283,9 @@ void MantidGLWidget::draw() {
   OpenGLError::check("MantidGLWidget::drawUnwrapped()");
 }
 
-void MantidGLWidget::componentSelected(Mantid::Geometry::ComponentID id) {
+void MantidGLWidget::componentSelected(size_t componentIndex) {
   if (m_surface) {
-    m_surface->componentSelected(id);
+    m_surface->componentSelected(componentIndex);
     m_surface->updateView();
     update();
   }

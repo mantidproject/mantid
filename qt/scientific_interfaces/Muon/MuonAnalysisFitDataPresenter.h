@@ -11,9 +11,9 @@
 #include <boost/optional/optional.hpp>
 
 /// Save some typing
-typedef std::pair<
+using RebinOptions = std::pair<
     MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType,
-    std::string> RebinOptions;
+    std::string>;
 
 namespace Mantid {
 namespace API {

@@ -353,7 +353,7 @@ private:
   friend class FloatingWindow;
 };
 
-typedef QList<MdiSubWindow *> MDIWindowList;
+using MDIWindowList = QList<MdiSubWindow *>;
 
 /* Used to register classes into the factory. creates a global object in an
  * anonymous namespace. The object itself does nothing, but the comma operator

@@ -1,13 +1,9 @@
-#include "MantidQtWidgets/InstrumentView/CompAssemblyActor.h"
-#include "MantidQtWidgets/InstrumentView/GLActorVisitor.h"
-#include "MantidQtWidgets/InstrumentView/ObjCompAssemblyActor.h"
 #include "MantidQtWidgets/InstrumentView/PanelsSurface.h"
-#include "MantidQtWidgets/InstrumentView/RectangularDetectorActor.h"
-#include "MantidQtWidgets/InstrumentView/StructuredDetectorActor.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
@@ -18,11 +14,123 @@
 #include <QtDebug>
 
 using namespace Mantid::Geometry;
+using Mantid::Beamline::ComponentType;
 
 namespace {
+
 /// static logger
 Mantid::Kernel::Logger g_log("PanelsSurface");
+
+/**
+ * Given the z axis, define the x and y ones.
+ * @param zaxis :: A given vector in 3d space to become the z axis of a
+ * coordinate system.
+ * @param xaxis :: An output arbitrary vector perpendicular to zaxis.
+ * @param yaxis :: An output arbitrary vector perpendicular to both zaxis and
+ * xaxis.
+ */
+void setupBasisAxes(const Mantid::Kernel::V3D &zaxis,
+                    Mantid::Kernel::V3D &xaxis, Mantid::Kernel::V3D &yaxis) {
+  double R, theta, phi;
+  zaxis.getSpherical(R, theta, phi);
+  if (theta <= 45.0) {
+    xaxis = Mantid::Kernel::V3D(1, 0, 0);
+  } else if (phi <= 45.0) {
+    xaxis = Mantid::Kernel::V3D(0, 1, 0);
+  } else {
+    xaxis = Mantid::Kernel::V3D(0, 0, 1);
+  }
+  yaxis = zaxis.cross_prod(xaxis);
+  yaxis.normalize();
+  xaxis = yaxis.cross_prod(zaxis);
 }
+
+std::vector<Mantid::Kernel::V3D>
+retrievePanelCorners(const Mantid::Geometry::ComponentInfo &componentInfo,
+                     size_t rootIndex) {
+  auto panel = componentInfo.quadrilateralComponent(rootIndex);
+  return {componentInfo.position(panel.bottomLeft),
+          componentInfo.position(panel.bottomRight),
+          componentInfo.position(panel.topRight),
+          componentInfo.position(panel.topLeft)};
+}
+
+Mantid::Kernel::V3D
+calculatePanelNormal(const std::vector<Mantid::Kernel::V3D> &panelCorners) {
+  // find the normal
+  auto xaxis = panelCorners[1] - panelCorners[0];
+  auto yaxis = panelCorners[3] - panelCorners[0];
+  auto normal = xaxis.cross_prod(yaxis);
+  normal.normalize();
+  return normal;
+}
+
+size_t findParentBank(const ComponentInfo &componentInfo, size_t rootIndex) {
+  // Search for parent component which contains tubes
+  auto parent = componentInfo.parent(rootIndex);
+  while (componentInfo.children(parent).size() <= 1)
+    parent = componentInfo.parent(parent);
+
+  return parent;
+}
+
+std::vector<size_t> findBankTubes(const ComponentInfo &componentInfo,
+                                  size_t rootIndex) {
+  auto comps = componentInfo.componentsInSubtree(rootIndex);
+  std::vector<size_t> tubes;
+
+  for (auto comp : comps) {
+    if (componentInfo.componentType(comp) == ComponentType::OutlineComposite)
+      tubes.push_back(comp);
+  }
+
+  return tubes;
+}
+
+bool isBankFlat(const ComponentInfo &componentInfo, size_t bankIndex,
+                const std::vector<size_t> &tubes,
+                const Mantid::Kernel::V3D &normal) {
+  for (auto tube : tubes) {
+    const auto &children = componentInfo.children(tube);
+    auto vector = componentInfo.position(children[0]) -
+                  componentInfo.position(children[1]);
+    vector.normalize();
+    if (fabs(vector.scalar_prod(normal)) > Mantid::Kernel::Tolerance) {
+      g_log.warning() << "Assembly " << componentInfo.name(bankIndex)
+                      << " isn't flat.\n";
+      return false;
+    }
+  }
+  return true;
+}
+
+Mantid::Kernel::V3D calculateBankNormal(const ComponentInfo &componentInfo,
+                                        const std::vector<size_t> &tubes) {
+  // calculate normal from first two tubes in bank as before
+  const auto &tube0 = componentInfo.children(tubes[0]);
+  const auto &tube1 = componentInfo.children(tubes[1]);
+  auto pos = componentInfo.position(tube0[0]);
+  auto x = componentInfo.position(tube0[1]) - pos;
+  x.normalize();
+
+  auto y = componentInfo.position(tube1[0]) - pos;
+  y.normalize();
+  auto normal = x.cross_prod(y);
+
+  if (normal.nullVector()) {
+    y = componentInfo.position(tube1[1]) - componentInfo.position(tube1[0]);
+    y.normalize();
+    normal = x.cross_prod(y);
+  }
+
+  normal.normalize();
+
+  if (normal.nullVector())
+    g_log.warning() << "Colinear Assembly.\n";
+
+  return normal;
+}
+} // namespace
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -31,8 +139,8 @@ namespace MantidWidgets {
 * @param s The surface of the panel
 */
 FlatBankInfo::FlatBankInfo(PanelsSurface *s)
-    : id(nullptr), rotation(), startDetectorIndex(0), endDetectorIndex(0),
-      polygon(), surface(s) {}
+    : rotation(), startDetectorIndex(0), endDetectorIndex(0), polygon(),
+      surface(s) {}
 
 /**
 * Translate the bank by a vector.
@@ -42,7 +150,7 @@ void FlatBankInfo::translate(const QPointF &shift) {
   double du = shift.x();
   double dv = shift.y();
   polygon.translate(shift);
-  for (size_t i = startDetectorIndex; i < endDetectorIndex; ++i) {
+  for (size_t i = startDetectorIndex; i <= endDetectorIndex; ++i) {
     UnwrappedDetector &udet = surface->m_unwrappedDetectors[i];
     udet.u += du;
     udet.v += dv;
@@ -64,17 +172,13 @@ PanelsSurface::~PanelsSurface() { clearBanks(); }
 */
 void PanelsSurface::init() {
   m_unwrappedDetectors.clear();
-  m_assemblies.clear();
 
   size_t ndet = m_instrActor->ndetectors();
+  m_unwrappedDetectors.resize(ndet);
   if (ndet == 0)
     return;
 
-  // Pre-calculate all the detector positions (serial because
-  // I suspect the IComponent->getPos() method to not be properly thread safe)
-  m_instrActor->cacheDetPos();
-
-  findFlatBanks();
+  constructFromComponentInfo();
   spreadBanks();
 
   RectF surfaceRect;
@@ -105,9 +209,10 @@ void PanelsSurface::project(const Mantid::Kernel::V3D &, double &, double &,
 
 void PanelsSurface::rotate(const UnwrappedDetector &udet,
                            Mantid::Kernel::Quat &R) const {
-  int index = m_detector2bankMap[udet.detID];
+  const auto &detectorInfo = m_instrActor->detectorInfo();
+  int index = m_detector2bankMap[udet.detIndex];
   FlatBankInfo &info = *m_flatBanks[index];
-  R = info.rotation * udet.rotation;
+  R = info.rotation * detectorInfo.rotation(udet.detIndex);
 }
 
 /**
@@ -119,316 +224,161 @@ void PanelsSurface::setupAxes() {
   m_origin.ry() = m_yaxis.scalar_prod(m_pos);
 }
 
-/**
-* Given the z axis, define the x and y ones.
-* @param zaxis :: A given vector in 3d space to become the z axis of a
-* coordinate system.
-* @param xaxis :: An output arbitrary vector perpendicular to zaxis.
-* @param yaxis :: An output arbitrary vector perpendicular to both zaxis and
-* xaxis.
-*/
-void PanelsSurface::setupBasisAxes(const Mantid::Kernel::V3D &zaxis,
-                                   Mantid::Kernel::V3D &xaxis,
-                                   Mantid::Kernel::V3D &yaxis) const {
-  double R, theta, phi;
-  zaxis.getSpherical(R, theta, phi);
-  if (theta <= 45.0) {
-    xaxis = Mantid::Kernel::V3D(1, 0, 0);
-  } else if (phi <= 45.0) {
-    xaxis = Mantid::Kernel::V3D(0, 1, 0);
-  } else {
-    xaxis = Mantid::Kernel::V3D(0, 0, 1);
-  }
-  yaxis = zaxis.cross_prod(xaxis);
-  yaxis.normalize();
-  xaxis = yaxis.cross_prod(zaxis);
-}
-
 //-----------------------------------------------------------------------------------------------//
-
-class FlatBankFinder : public GLActorConstVisitor {
-  PanelsSurface &m_surface;
-
-public:
-  explicit FlatBankFinder(PanelsSurface &surface) : m_surface(surface) {}
-
-  bool visit(const GLActor *) override { return false; }
-  bool visit(const GLActorCollection *) override { return false; }
-  bool visit(const ComponentActor *) override { return false; }
-  bool visit(const InstrumentActor *) override { return false; }
-  bool visit(const ObjCompAssemblyActor *) override { return false; }
-
-  bool visit(const CompAssemblyActor *actor) override {
-    m_surface.addObjCompAssemblies(actor->getComponent()->getComponentID());
-    return false;
-  }
-
-  bool visit(const RectangularDetectorActor *actor) override {
-    m_surface.addRectangularDetector(actor->getComponent()->getComponentID());
-    return false;
-  }
-
-  bool visit(const StructuredDetectorActor *actor) override {
-    m_surface.addStructuredDetector(actor->getComponent()->getComponentID());
-    return false;
-  }
-};
-
-/**
-* Traverse the instrument tree and find the banks which detectors lie in the
-* same plane.
-*
-*/
-void PanelsSurface::findFlatBanks() {
-  clearBanks();
-  FlatBankFinder finder(*this);
-  m_instrActor->accept(finder);
-}
-
-//-----------------------------------------------------------------------------------------------//
-
-/**
-* Add a flat bank from an assembly of ObjCompAssemblies.
-* @param bankId :: Component ID of the bank.
-* @param normal :: Normal vector to the bank's plane.
-* @param objCompAssemblies :: List of component IDs. Each component must cast to
-* ObjCompAssembly.
-*/
-void PanelsSurface::addFlatBank(ComponentID bankId,
-                                const Mantid::Kernel::V3D &normal,
-                                QList<ComponentID> objCompAssemblies) {
-  int index = m_flatBanks.size();
-  // save bank info
-  FlatBankInfo *info = new FlatBankInfo(this);
-  m_flatBanks << info;
-  info->id = bankId;
-  // record the first detector index of the bank
-  info->startDetectorIndex = m_unwrappedDetectors.size();
-  bool doneRotation = false;
-  // keep reference position on the bank's plane
-  Mantid::Kernel::V3D pos0;
-  QPointF p0, p1;
-  Mantid::Geometry::Instrument_const_sptr instr = m_instrActor->getInstrument();
-  // loop over the assemblies and process the detectors
-  foreach (ComponentID id, objCompAssemblies) {
-    Mantid::Geometry::ICompAssembly_const_sptr assembly =
-        boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
-            instr->getComponentByID(id));
-    assert(assembly);
-    int nelem = assembly->nelements();
-    m_unwrappedDetectors.reserve(m_unwrappedDetectors.size() + nelem);
-    for (int i = 0; i < nelem; ++i) {
-      // setup detector info
-      auto det = boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(
-          assembly->getChild(i));
-      if (!doneRotation) {
-        pos0 = det->getPos();
-        // find the rotation to put the bank on the plane
-        info->rotation = calcBankRotation(pos0, normal);
-        Mantid::Kernel::V3D pos1 = assembly->getChild(nelem - 1)->getPos();
-        pos1 -= pos0;
-        info->rotation.rotate(pos1);
-        pos1 += pos0;
-        // start forming the outline polygon
-        p0.rx() = m_xaxis.scalar_prod(pos0);
-        p0.ry() = m_yaxis.scalar_prod(pos0);
-        p1.rx() = m_xaxis.scalar_prod(pos1);
-        p1.ry() = m_yaxis.scalar_prod(pos1);
-        QVector<QPointF> vert;
-        vert << p1 << p0;
-        info->polygon = QPolygonF(vert);
-        doneRotation = true;
-      }
-      // add the detector
-      addDetector(*det, pos0, index, info->rotation);
-    }
-    // update the outline polygon
-    UnwrappedDetector &udet0 = *(m_unwrappedDetectors.end() - nelem);
-    UnwrappedDetector &udet1 = m_unwrappedDetectors.back();
-    //      get the tube end points
-    QPointF p3 = QPointF(udet0.u, udet0.v);
-    QPointF p4 = QPointF(udet1.u, udet1.v);
-    QVector<QPointF> vert;
-    //      add a quadrilateral formed by end points of two nearest tubes
-    //      assumption is made here that any two adjacent tubes in an assembly's
-    //      children's list
-    //      are close to each other
-    vert << p0 << p1 << p4 << p3;
-    info->polygon = info->polygon.united(QPolygonF(vert));
-    p0 = p3;
-    p1 = p4;
-  }
-  // record the end detector index of the bank
-  info->endDetectorIndex = m_unwrappedDetectors.size();
-}
 
 /**
 * Add a flat bank from an assembly of detectors.
 * @param bankId :: Component ID of the bank.
 * @param normal :: Normal vector to the bank's plane.
-* @param detectors :: List of component IDs. Each component must cast to
-* Detector.
+* @param detectors :: List of detectorIndices.
 */
-void PanelsSurface::addFlatBankOfDetectors(ComponentID bankId,
-                                           const Mantid::Kernel::V3D &normal,
-                                           QList<ComponentID> detectors) {
+void PanelsSurface::addFlatBankOfDetectors(
+    const Mantid::Kernel::V3D &normal, const std::vector<size_t> &detectors) {
   int index = m_flatBanks.size();
   // save bank info
   FlatBankInfo *info = new FlatBankInfo(this);
   m_flatBanks << info;
-  info->id = bankId;
   // record the first detector index of the bank
-  info->startDetectorIndex = m_unwrappedDetectors.size();
-  int nelem = detectors.size();
-  m_unwrappedDetectors.reserve(m_unwrappedDetectors.size() + nelem);
+  info->startDetectorIndex = detectors.front();
+  info->endDetectorIndex = detectors.back();
 
   // keep reference position on the bank's plane
-  Mantid::Kernel::V3D pos0, pos1;
-  QPointF p0, p1;
-  Mantid::Geometry::Instrument_const_sptr instr = m_instrActor->getInstrument();
-  // loop over the detectors
-  for (int i = 0; i < detectors.size(); ++i) {
-    ComponentID id = detectors[i];
-    auto det = boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(
-        instr->getComponentByID(id));
+  const auto &detectorInfo = m_instrActor->detectorInfo();
+  auto pos0 = detectorInfo.position(detectors[0]);
+  auto pos1 = detectorInfo.position(detectors[1]) - pos0;
 
-    if (i == 0) {
-      pos0 = det->getPos();
-    } else if (i == 1) {
-      // find the rotation to put the bank on the plane
-      info->rotation = calcBankRotation(pos0, normal);
-      pos1 = det->getPos();
-      pos1 -= pos0;
-      info->rotation.rotate(pos1);
-      pos1 += pos0;
-      // start forming the outline polygon
-      p0.rx() = m_xaxis.scalar_prod(pos0);
-      p0.ry() = m_yaxis.scalar_prod(pos0);
-      p1.rx() = m_xaxis.scalar_prod(pos1);
-      p1.ry() = m_yaxis.scalar_prod(pos1);
-      QVector<QPointF> vert;
-      vert << p1 << p0;
-      info->polygon = QPolygonF(vert);
-    }
-    // add the detector
-    addDetector(*det, pos0, index, info->rotation);
+  info->rotation = calcBankRotation(pos0, normal);
+  info->rotation.rotate(pos1);
+  pos1 += pos0;
+  QPointF p0(m_xaxis.scalar_prod(pos0), m_yaxis.scalar_prod(pos0));
+  QPointF p1(m_xaxis.scalar_prod(pos1), m_yaxis.scalar_prod(pos1));
+  QVector<QPointF> vert;
+  vert << p1 << p0;
+  info->polygon = QPolygonF(vert);
+
+  for (auto detector : detectors) {
+    addDetector(detector, pos0, index, info->rotation);
     // update the outline polygon
-    UnwrappedDetector &udet = *(m_unwrappedDetectors.end() - 1);
-    QPointF p2 = QPointF(udet.u, udet.v);
-    QVector<QPointF> vert;
+    UnwrappedDetector &udet = m_unwrappedDetectors[detector];
+    auto p2 = QPointF(udet.u, udet.v);
+    vert.clear();
     vert << p0 << p1 << p2;
     info->polygon = info->polygon.united(QPolygonF(vert));
   }
-
-  // record the end detector index of the bank
-  info->endDetectorIndex = m_unwrappedDetectors.size();
 }
 
-/**
-* Add a component assembly containing a flat array of ObjCompAssemblies.
-* @param bankId :: Component id of an assembly.
-*/
-void PanelsSurface::addObjCompAssemblies(ComponentID bankId) {
-  Mantid::Geometry::Instrument_const_sptr instr = m_instrActor->getInstrument();
-  boost::shared_ptr<const Mantid::Geometry::CompAssembly> assembly =
-      boost::dynamic_pointer_cast<const Mantid::Geometry::CompAssembly>(
-          instr->getComponentByID(bankId));
+void PanelsSurface::processStructured(const std::vector<size_t> &children,
+                                      size_t rootIndex) {
+  int index = m_flatBanks.size();
+  const auto &componentInfo = m_instrActor->componentInfo();
+  auto corners = retrievePanelCorners(componentInfo, rootIndex);
+  auto normal = calculatePanelNormal(corners);
+  // save bank info
+  FlatBankInfo *info = new FlatBankInfo(this);
+  m_flatBanks << info;
+  // find the rotation to put the bank on the plane
+  info->rotation = calcBankRotation(corners[0], normal);
+  // record the first detector index of the bank
+  info->startDetectorIndex = children.front();
+  info->endDetectorIndex = children.back();
+  // set the outline
+  QVector<QPointF> verts;
+  for (auto &corner : corners) {
+    auto pos = corner - corners[0];
+    info->rotation.rotate(pos);
+    pos += corners[0];
+    verts << QPointF(pos.X(), pos.Y());
+  }
 
-  size_t nelem = static_cast<size_t>(assembly->nelements());
-  // assemblies with one element cannot be flat (but its element can be)
-  if (nelem == 1) {
+  info->polygon = QPolygonF(verts);
+
+  for (auto child : children)
+    addDetector(child, corners[0], index, info->rotation);
+}
+
+void PanelsSurface::processTubes(size_t rootIndex, std::vector<bool> &visited) {
+  const auto &componentInfo = m_instrActor->componentInfo();
+  auto bankIndex = findParentBank(componentInfo, rootIndex);
+  auto name = componentInfo.name(bankIndex);
+  auto tubes = findBankTubes(componentInfo, bankIndex);
+  auto normal = calculateBankNormal(componentInfo, tubes);
+
+  if (normal.nullVector() ||
+      !isBankFlat(componentInfo, bankIndex, tubes, normal))
     return;
-  }
 
-  QList<ComponentID> objCompAssemblies;
-  // normal to the plane, undefined at first
-  Mantid::Kernel::V3D normal(0, 0, 0);
-  Mantid::Kernel::V3D x, y, pos;
-  for (size_t i = 0; i < nelem; ++i) {
-    auto elem = assembly->getChild((int)i);
-    ObjCompAssembly *objCompAssembly =
-        dynamic_cast<ObjCompAssembly *>(elem.get());
-    if (!objCompAssembly) {
-      CompAssembly *compAssembly = dynamic_cast<CompAssembly *>(elem.get());
-      if (!compAssembly || compAssembly->nelements() != 1) {
-        // m_surface.g_log.warning() << "Not a CompAssembly\n";
-        addCompAssembly(bankId);
-        return;
-      }
-      elem = compAssembly->getChild(0);
-      objCompAssembly = dynamic_cast<ObjCompAssembly *>(elem.get());
-      if (!objCompAssembly) {
-        // m_surface.g_log.warning() << "Not a ObjCompAssembly\n";
-        return;
-      }
+  // save bank info
+  auto index = m_flatBanks.size();
+  FlatBankInfo *info = new FlatBankInfo(this);
+  m_flatBanks << info;
+  // record the first detector index of the bank
+  info->startDetectorIndex = componentInfo.children(tubes.front()).front();
+  info->endDetectorIndex = componentInfo.children(tubes.back()).back();
+
+  auto pos0 =
+      componentInfo.position(componentInfo.children(tubes.front()).front());
+  auto pos1 =
+      componentInfo.position(componentInfo.children(tubes.front()).back());
+
+  info->rotation = calcBankRotation(pos0, normal);
+  pos1 -= pos0;
+  info->rotation.rotate(pos1);
+  pos1 += pos0;
+
+  QPointF p0(m_xaxis.scalar_prod(pos0), m_yaxis.scalar_prod(pos0));
+  QPointF p1(m_xaxis.scalar_prod(pos1), m_yaxis.scalar_prod(pos1));
+  QVector<QPointF> vert;
+  vert << p0 << p1;
+  info->polygon = QPolygonF(vert);
+
+  for (auto tube : tubes) {
+    const auto &children = componentInfo.children(tube);
+    visited[tube] = true;
+    for (auto child : children) {
+      if (visited[child])
+        continue;
+      visited[child] = true;
+      addDetector(child, pos0, index, info->rotation);
     }
-    if (i == 0) {
-      pos = objCompAssembly->getChild(0)->getPos();
-      x = objCompAssembly->getChild(1)->getPos() - pos;
-      x.normalize();
-    } else if (i == 1) {
-      y = objCompAssembly->getChild(0)->getPos() - pos;
-      y.normalize();
-      normal = x.cross_prod(y);
-      if (normal.nullVector()) {
-        y = objCompAssembly->getChild(1)->getPos() -
-            objCompAssembly->getChild(0)->getPos();
-        y.normalize();
-        normal = x.cross_prod(y);
-      }
-      if (normal.nullVector()) {
-        g_log.warning() << "Colinear ObjCompAssemblies\n";
-        return;
-      }
-      normal.normalize();
-    } else {
-      Mantid::Kernel::V3D vector = objCompAssembly->getChild(0)->getPos() -
-                                   objCompAssembly->getChild(1)->getPos();
-      vector.normalize();
-      if (fabs(vector.scalar_prod(normal)) > Mantid::Kernel::Tolerance) {
-        g_log.warning() << "Assembly " << assembly->getName()
-                        << " isn't flat.\n";
-        return;
-      }
-    }
-    objCompAssemblies << objCompAssembly->getComponentID();
-  }
-  if (!objCompAssemblies.isEmpty()) {
-    addFlatBank(assembly->getComponentID(), normal, objCompAssemblies);
+
+    auto &udet0 = m_unwrappedDetectors[children.front()];
+    auto &udet1 = m_unwrappedDetectors[children.back()];
+    QPointF p2(udet0.u, udet0.v);
+    QPointF p3(udet1.u, udet1.v);
+    //      add a quadrilateral formed by end points of two nearest tubes
+    //      assumption is made here that any two adjacent tubes in an assembly's
+    //      children's list
+    //      are close to each other
+    vert << p0 << p1 << p3 << p2;
+    info->polygon = info->polygon.united(QPolygonF(vert));
+    p0 = p2;
+    p1 = p3;
   }
 }
 
-/**
-* Add an assembly if its detectors are in the same plane.
-* @param bankId :: Component id of an assembly.
-*/
-void PanelsSurface::addCompAssembly(ComponentID bankId) {
-  Mantid::Geometry::Instrument_const_sptr instr = m_instrActor->getInstrument();
-  boost::shared_ptr<const Mantid::Geometry::CompAssembly> assembly =
-      boost::dynamic_pointer_cast<const Mantid::Geometry::CompAssembly>(
-          instr->getComponentByID(bankId));
-
-  size_t nelem = static_cast<size_t>(assembly->nelements());
-  // normal to the plane, undefined at first
-  Mantid::Kernel::V3D normal, x, y;
+std::pair<std::vector<size_t>, Mantid::Kernel::V3D>
+PanelsSurface::processUnstructured(const std::vector<size_t> &children,
+                                   size_t rootIndex,
+                                   std::vector<bool> &visited) {
+  Mantid::Kernel::V3D normal;
+  const auto &detectorInfo = m_instrActor->detectorInfo();
   Mantid::Kernel::V3D pos0;
+  Mantid::Kernel::V3D x, y;
   bool normalFound = false;
-  QList<ComponentID> detectors;
-  const auto &detectorInfo = m_instrActor->getWorkspace()->detectorInfo();
-  for (size_t i = 0; i < nelem; ++i) {
-    auto elem = assembly->getChild((int)i);
-    Mantid::Geometry::IDetector_const_sptr det =
-        boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(elem);
-    if (!det) {
-      return;
-    }
-    size_t detIndex = detectorInfo.indexOf(det->getID());
-    if (detectorInfo.isMonitor(detIndex))
+  const auto &componentInfo = m_instrActor->componentInfo();
+  std::vector<size_t> detectors;
+  detectors.reserve(children.size());
+  for (auto child : children) {
+    if (visited[child])
       continue;
-    Mantid::Kernel::V3D pos = detectorInfo.position(detIndex);
-    if (i == 0) {
+    visited[child] = true;
+
+    if (detectorInfo.isMonitor(child))
+      continue;
+    auto pos = detectorInfo.position(child);
+    if (child == children[0])
       pos0 = pos;
-    } else if (i == 1) {
+    else if (child == children[1]) {
       // at first set the normal to an argbitrary vector orthogonal to
       // the line between the first two detectors
       y = pos - pos0;
@@ -445,157 +395,70 @@ void PanelsSurface::addCompAssembly(ComponentID bankId) {
         x = y.cross_prod(normal);
         normalFound = true;
       } else {
-        g_log.warning() << "Assembly " << assembly->getName()
+        g_log.warning() << "Assembly " << componentInfo.name(rootIndex)
                         << " isn't flat.\n";
-        return;
+        break;
       }
     }
-    detectors << det->getComponentID();
+    detectors.push_back(child);
   }
-
-  // normalFound doesn't have to be true at this point
-  // if it is false then the normal was found by the first guess
-
-  // add the detectors
-  if (!detectors.isEmpty()) {
-    addFlatBankOfDetectors(bankId, normal, detectors);
-  }
+  return std::make_pair(detectors, normal);
 }
 
-/**
-* Add a rectangular detector which is flat.
-* @param bankId :: Component id of a rectangular detector.
-*/
-void PanelsSurface::addRectangularDetector(ComponentID bankId) {
-  Mantid::Geometry::Instrument_const_sptr instr = m_instrActor->getInstrument();
-  Mantid::Geometry::RectangularDetector_const_sptr rectDetector =
-      boost::dynamic_pointer_cast<const Mantid::Geometry::RectangularDetector>(
-          instr->getComponentByID(bankId));
+boost::optional<std::pair<std::vector<size_t>, Mantid::Kernel::V3D>>
+PanelsSurface::findFlatPanels(size_t rootIndex,
+                              const std::vector<size_t> &children,
+                              std::vector<bool> &visited) {
+  const auto &componentInfo = m_instrActor->componentInfo();
+  auto parentIndex = componentInfo.parent(rootIndex);
+  auto componentType = componentInfo.componentType(parentIndex);
+  if (componentType == ComponentType::Rectangular ||
+      componentType == ComponentType::Structured) {
+    /* Do nothing until the root index of the structured bank. */
+    return boost::none;
+  }
 
-  int nx = rectDetector->xpixels();
-  int ny = rectDetector->ypixels();
-  Mantid::Kernel::V3D pos0 = rectDetector->getAtXY(0, 0)->getPos();
-  Mantid::Kernel::V3D pos1 = rectDetector->getAtXY(nx - 1, 0)->getPos();
-  Mantid::Kernel::V3D pos2 = rectDetector->getAtXY(nx - 1, ny - 1)->getPos();
-  Mantid::Kernel::V3D pos3 = rectDetector->getAtXY(0, ny - 1)->getPos();
+  componentType = componentInfo.componentType(rootIndex);
+  if (componentType == ComponentType::Rectangular ||
+      componentType == ComponentType::Structured) {
+    processStructured(children, rootIndex);
+    for (auto child : children)
+      visited[child] = true;
+    return boost::none;
+  }
 
-  // find the normal
-  Mantid::Kernel::V3D xaxis = pos1 - pos0;
-  Mantid::Kernel::V3D yaxis = pos3 - pos0;
-  Mantid::Kernel::V3D normal = xaxis.cross_prod(yaxis);
-  normal.normalize();
+  if (componentType == ComponentType::OutlineComposite) {
+    processTubes(rootIndex, visited);
+    for (auto child : children)
+      visited[child] = true;
+    return boost::none;
+  }
 
-  int index = m_flatBanks.size();
-  // save bank info
-  FlatBankInfo *info = new FlatBankInfo(this);
-  m_flatBanks << info;
-  info->id = bankId;
-  // find the rotation to put the bank on the plane
-  info->rotation = calcBankRotation(pos0, normal);
-  // record the first detector index of the bank
-  info->startDetectorIndex = m_unwrappedDetectors.size();
-  // set the outline
-  QVector<QPointF> verts;
-  Mantid::Kernel::V3D pos = pos0;
-  verts << QPointF(pos.X(), pos.Y());
-
-  pos = pos1 - pos0;
-  info->rotation.rotate(pos);
-  pos += pos0;
-  verts << QPointF(pos.X(), pos.Y());
-
-  pos = pos2 - pos0;
-  info->rotation.rotate(pos);
-  pos += pos0;
-  verts << QPointF(pos.X(), pos.Y());
-
-  pos = pos3 - pos0;
-  info->rotation.rotate(pos);
-  pos += pos0;
-  verts << QPointF(pos.X(), pos.Y());
-
-  info->polygon = QPolygonF(verts);
-
-  int nelem = rectDetector->nelements();
-  m_unwrappedDetectors.reserve(m_unwrappedDetectors.size() + nelem);
-
-  for (int i = 0; i < nx; ++i)
-    for (int j = 0; j < ny; ++j) {
-      Mantid::Geometry::IDetector_const_sptr det = rectDetector->getAtXY(i, j);
-      addDetector(*det, pos0, index, info->rotation);
-    }
-
-  // record the end detector index of the bank
-  info->endDetectorIndex = m_unwrappedDetectors.size();
+  return processUnstructured(children, rootIndex, visited);
 }
 
-/**
-* Add a structured detector which is flat.
-* @param bankId :: Component id of a structured detector.
-*/
-void PanelsSurface::addStructuredDetector(
-    Mantid::Geometry::ComponentID bankId) {
-  Mantid::Geometry::Instrument_const_sptr instr = m_instrActor->getInstrument();
-  Mantid::Geometry::StructuredDetector_const_sptr structDetector =
-      boost::dynamic_pointer_cast<const Mantid::Geometry::StructuredDetector>(
-          instr->getComponentByID(bankId));
+void PanelsSurface::constructFromComponentInfo() {
+  const auto &componentInfo = m_instrActor->componentInfo();
+  std::vector<bool> visited(componentInfo.size(), false);
 
-  auto nx = structDetector->xPixels();
-  auto ny = structDetector->yPixels();
-  Mantid::Kernel::V3D pos0 = structDetector->getAtXY(0, 0)->getPos();
-  Mantid::Kernel::V3D pos1 = structDetector->getAtXY(nx - 1, 0)->getPos();
-  Mantid::Kernel::V3D pos2 = structDetector->getAtXY(nx - 1, ny - 1)->getPos();
-  Mantid::Kernel::V3D pos3 = structDetector->getAtXY(0, ny - 1)->getPos();
+  for (size_t i = 0; i < componentInfo.size() - 1; ++i) {
+    auto children = componentInfo.detectorsInSubtree(i);
 
-  // find the normal
-  Mantid::Kernel::V3D xaxis = pos1 - pos0;
-  Mantid::Kernel::V3D yaxis = pos3 - pos0;
-  Mantid::Kernel::V3D normal = xaxis.cross_prod(yaxis);
-  normal.normalize();
-
-  int index = m_flatBanks.size();
-  // save bank info
-  FlatBankInfo *info = new FlatBankInfo(this);
-  m_flatBanks << info;
-  info->id = bankId;
-  // find the rotation to put the bank on the plane
-  info->rotation = calcBankRotation(pos0, normal);
-  // record the first detector index of the bank
-  info->startDetectorIndex = m_unwrappedDetectors.size();
-  // set the outline
-  QVector<QPointF> verts;
-  Mantid::Kernel::V3D pos = pos0;
-  verts << QPointF(pos.X(), pos.Y());
-
-  pos = pos1 - pos0;
-  info->rotation.rotate(pos);
-  pos += pos0;
-  verts << QPointF(pos.X(), pos.Y());
-
-  pos = pos2 - pos0;
-  info->rotation.rotate(pos);
-  pos += pos0;
-  verts << QPointF(pos.X(), pos.Y());
-
-  pos = pos3 - pos0;
-  info->rotation.rotate(pos);
-  pos += pos0;
-  verts << QPointF(pos.X(), pos.Y());
-
-  info->polygon = QPolygonF(verts);
-
-  int nelem = structDetector->nelements();
-  m_unwrappedDetectors.reserve(m_unwrappedDetectors.size() + nelem);
-
-  for (size_t i = 0; i < nx; ++i)
-    for (size_t j = 0; j < ny; ++j) {
-      Mantid::Geometry::IDetector_const_sptr det =
-          structDetector->getAtXY(i, j);
-      addDetector(*det, pos0, index, info->rotation);
+    if (children.size() > 1 && !visited[i]) {
+      auto res = findFlatPanels(i, children, visited);
+      if (res != boost::none) {
+        std::vector<size_t> detectors;
+        Mantid::Kernel::V3D normal;
+        std::tie(detectors, normal) = res.get();
+        if (!detectors.empty())
+          addFlatBankOfDetectors(normal, detectors);
+      }
+    } else if (children.size() > 0 &&
+               componentInfo.parent(children[0]) == componentInfo.root()) {
+      auto child = children[0];
+      visited[child] = true;
     }
-
-  // record the end detector index of the bank
-  info->endDetectorIndex = m_unwrappedDetectors.size();
+  }
 }
 
 /**
@@ -624,17 +487,15 @@ PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &detPos,
   return Mantid::Kernel::Quat(normal, m_zaxis);
 }
 
-void PanelsSurface::addDetector(const Mantid::Geometry::IDetector &det,
+void PanelsSurface::addDetector(size_t detIndex,
                                 const Mantid::Kernel::V3D &refPos, int index,
                                 Mantid::Kernel::Quat &rotation) {
-  // setup detector info
-  Mantid::Kernel::V3D pos = det.getPos();
-  Mantid::detid_t detid = det.getID();
-  m_detector2bankMap[detid] = index;
+  const auto &detectorInfo = m_instrActor->detectorInfo();
+
+  Mantid::Kernel::V3D pos = detectorInfo.position(detIndex);
+  m_detector2bankMap[detIndex] = index;
   // get the colour
-  unsigned char color[3];
-  m_instrActor->getColor(detid).getUB3(&color[0]);
-  UnwrappedDetector udet(color, det);
+  UnwrappedDetector udet(m_instrActor->getColor(detIndex), detIndex);
   // apply bank's rotation
   pos -= refPos;
   rotation.rotate(pos);
@@ -643,7 +504,7 @@ void PanelsSurface::addDetector(const Mantid::Geometry::IDetector &det,
   udet.v = m_yaxis.scalar_prod(pos);
   udet.uscale = udet.vscale = 1.0;
   this->calcSize(udet);
-  m_unwrappedDetectors.push_back(udet);
+  m_unwrappedDetectors[detIndex] = udet;
 }
 
 /**

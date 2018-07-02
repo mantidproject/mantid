@@ -78,7 +78,8 @@ createTestWorkspace(const bool detShape = true,
     if (groupedDets) {
       // Add another detector in the same position as the first
       auto shape = ShapeFactory().createShape(shapeXML);
-      Mantid::Geometry::Detector *det2 = new Detector("det1", 2, shape, NULL);
+      Mantid::Geometry::Detector *det2 =
+          new Detector("det1", 2, shape, nullptr);
       // Setting detectors should normally go via DetectorInfo, but here we need
       // to set a position as we are adding a new detector. In general getPos
       // should not be called as this tries to set the position of the base

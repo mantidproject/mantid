@@ -457,10 +457,10 @@ void TextFormatButtons::addSymbol(const QString &letter) {
     else if (letter == QString(QChar(4 + s)))
       connectedTextEdit->textCursor().insertText("\\int");
     else if (letter == QString(QChar(5 + s)))
-      connectedTextEdit->textCursor().insertText("\\int \\!\\!\\! \\int");
+      connectedTextEdit->textCursor().insertText(R"(\int \!\!\! \int)");
     else if (letter == QString(QChar(6 + s)))
       connectedTextEdit->textCursor().insertText(
-          "\\int \\!\\!\\! \\int \\!\\!\\! \\int");
+          R"(\int \!\!\! \int \!\!\! \int)");
     else if (letter == QString(QChar(7 + s)))
       connectedTextEdit->textCursor().insertText("\\oint");
 

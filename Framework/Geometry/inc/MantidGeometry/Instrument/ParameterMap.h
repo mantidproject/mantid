@@ -54,23 +54,23 @@ class Instrument;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 /// Parameter map iterator typedef
-typedef tbb::concurrent_unordered_multimap<
-    ComponentID, boost::shared_ptr<Parameter>>::iterator component_map_it;
-typedef tbb::concurrent_unordered_multimap<
-    ComponentID, boost::shared_ptr<Parameter>>::const_iterator
-    component_map_cit;
+using component_map_it =
+    tbb::concurrent_unordered_multimap<ComponentID,
+                                       boost::shared_ptr<Parameter>>::iterator;
+using component_map_cit = tbb::concurrent_unordered_multimap<
+    ComponentID, boost::shared_ptr<Parameter>>::const_iterator;
 
 class MANTID_GEOMETRY_DLL ParameterMap {
 public:
   /// Parameter map typedef
-  typedef tbb::concurrent_unordered_multimap<ComponentID,
-                                             boost::shared_ptr<Parameter>> pmap;
+  using pmap = tbb::concurrent_unordered_multimap<ComponentID,
+                                                  boost::shared_ptr<Parameter>>;
   /// Parameter map iterator typedef
-  typedef tbb::concurrent_unordered_multimap<
-      ComponentID, boost::shared_ptr<Parameter>>::iterator pmap_it;
+  using pmap_it = tbb::concurrent_unordered_multimap<
+      ComponentID, boost::shared_ptr<Parameter>>::iterator;
   /// Parameter map iterator typedef
-  typedef tbb::concurrent_unordered_multimap<
-      ComponentID, boost::shared_ptr<Parameter>>::const_iterator pmap_cit;
+  using pmap_cit = tbb::concurrent_unordered_multimap<
+      ComponentID, boost::shared_ptr<Parameter>>::const_iterator;
   /// Default constructor
   ParameterMap();
   /// Const constructor
@@ -388,9 +388,9 @@ private:
 };
 
 /// ParameterMap shared pointer typedef
-typedef boost::shared_ptr<ParameterMap> ParameterMap_sptr;
+using ParameterMap_sptr = boost::shared_ptr<ParameterMap>;
 /// ParameterMap constant shared pointer typedef
-typedef boost::shared_ptr<const ParameterMap> ParameterMap_const_sptr;
+using ParameterMap_const_sptr = boost::shared_ptr<const ParameterMap>;
 
 } // Namespace Geometry
 

@@ -63,7 +63,7 @@ private:
   Functions::PawleyParameterFunction_sptr m_cellParameters;
 };
 
-typedef boost::shared_ptr<LatticeFunction> LatticeFunction_sptr;
+using LatticeFunction_sptr = boost::shared_ptr<LatticeFunction>;
 
 } // namespace CurveFitting
 } // namespace Mantid

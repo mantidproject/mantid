@@ -31,8 +31,8 @@
 //----------------------------------------------------------------------
 //	Basic types
 //----------------------------------------------------------------------
-typedef ANNdist PQKkey; // key field is distance
-typedef int PQKinfo;    // info field is int
+using PQKkey = ANNdist; // key field is distance
+using PQKinfo = int;    // info field is int
 
 //----------------------------------------------------------------------
 //	Constants

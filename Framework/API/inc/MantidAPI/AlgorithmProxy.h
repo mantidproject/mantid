@@ -26,7 +26,7 @@ class Void;
 namespace Mantid {
 namespace API {
 class Algorithm;
-typedef boost::shared_ptr<Algorithm> Algorithm_sptr;
+using Algorithm_sptr = boost::shared_ptr<Algorithm>;
 
 /**
 

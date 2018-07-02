@@ -21,7 +21,7 @@ namespace API {
  *  we need a way of uniquely identifying managed algorithms. It can be
  * AlgorithmID.
  */
-typedef void *AlgorithmID;
+using AlgorithmID = void *;
 
 /**
  IAlgorithm is the interface implemented by the Algorithm base class.

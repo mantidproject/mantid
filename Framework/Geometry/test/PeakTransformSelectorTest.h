@@ -31,9 +31,9 @@ private:
     GCC_DIAG_ON_SUGGEST_OVERRIDE
   };
 
-  typedef MockPeakTransformFactoryType<0> MockPeakTransformFactory;
-  typedef MockPeakTransformFactoryType<0> MockPeakTransformFactoryA;
-  typedef MockPeakTransformFactoryType<1> MockPeakTransformFactoryB;
+  using MockPeakTransformFactory = MockPeakTransformFactoryType<0>;
+  using MockPeakTransformFactoryA = MockPeakTransformFactoryType<0>;
+  using MockPeakTransformFactoryB = MockPeakTransformFactoryType<1>;
 
 public:
   void test_Constructor() {

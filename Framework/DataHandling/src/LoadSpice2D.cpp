@@ -218,7 +218,7 @@ LoadSpice2D::parseDetectorDimensions(const std::string &dims_str) {
 
   std::pair<int, int> dims = std::make_pair(0, 0);
 
-  boost::regex b_re_sig("INT\\d+\\[(\\d+),(\\d+)\\]");
+  boost::regex b_re_sig(R"(INT\d+\[(\d+),(\d+)\])");
   if (boost::regex_match(dims_str, b_re_sig)) {
     boost::match_results<std::string::const_iterator> match;
     boost::regex_search(dims_str, match, b_re_sig);

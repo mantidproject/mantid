@@ -8,10 +8,10 @@
 namespace Mantid {
 
 /// Typedef for a spectrum Number
-typedef int32_t specnum_t;
+using specnum_t = int32_t;
 
 /// Typedef for a detector ID
-typedef int32_t detid_t;
+using detid_t = int32_t;
 }
 
 #endif // MANTID_GEOMETRY_IDTYPES_H_

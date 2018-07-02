@@ -69,6 +69,9 @@ void XDataConverter::exec() {
     outputWS->setSharedY(i, inputWS->sharedY(i));
     outputWS->setSharedE(i, inputWS->sharedE(i));
     setXData(outputWS, inputWS, i);
+    if (inputWS->hasDx(i)) {
+      outputWS->setSharedDx(i, inputWS->sharedDx(i));
+    }
     prog.report();
 
     PARALLEL_END_INTERUPT_REGION

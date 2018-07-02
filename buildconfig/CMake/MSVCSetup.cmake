@@ -12,7 +12,10 @@ add_definitions ( -D_WINDOWS -DMS_VISUAL_STUDIO )
 add_definitions ( -D_USE_MATH_DEFINES -DNOMINMAX )
 add_definitions ( -DGSL_DLL -DJSON_DLL )
 add_definitions ( -DPOCO_NO_UNWINDOWS )
+add_definitions ( -DBOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE )
 add_definitions ( -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
+  # Prevent deprecation errors from std::tr1 in googletest until it is fixed upstream. In MSVC 2017 and later
+add_definitions ( -D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING )
 
 ##########################################################################
 # Additional compiler flags
@@ -99,7 +102,10 @@ else ()
 endif()
 
 configure_file ( ${WINDOWS_BUILDCONFIG}/command-prompt.bat ${PROJECT_BINARY_DIR}/command-prompt.bat @ONLY )
-configure_file ( ${WINDOWS_BUILDCONFIG}/visual-studio.bat ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY )
+# The IDE may not be installed as we could be just using the build tools
+if ( EXISTS ${MSVC_IDE_LOCATION}/devenv.exe )
+    configure_file ( ${WINDOWS_BUILDCONFIG}/visual-studio.bat ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY )
+endif ()
 configure_file ( ${WINDOWS_BUILDCONFIG}/pycharm.bat ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY )
 
 ###########################################################################

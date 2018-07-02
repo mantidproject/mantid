@@ -31,10 +31,10 @@ FunctionProperty &FunctionProperty::operator=(const FunctionProperty &right) {
   * @param value :: The value to set to
   * @return assigned PropertyWithValue
   */
-boost::shared_ptr<IFunction> &FunctionProperty::
+FunctionProperty &FunctionProperty::
 operator=(const boost::shared_ptr<IFunction> &value) {
-  return Kernel::PropertyWithValue<boost::shared_ptr<IFunction>>::operator=(
-      value);
+  Kernel::PropertyWithValue<boost::shared_ptr<IFunction>>::operator=(value);
+  return *this;
 }
 
 //--------------------------------------------------------------------------------------

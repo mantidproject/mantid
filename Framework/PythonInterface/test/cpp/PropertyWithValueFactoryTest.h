@@ -92,7 +92,7 @@ private:
   template <typename CType> void testCreateArrayProperty(PyObject *pyValue) {
     using namespace boost::python;
     using namespace Mantid::Kernel;
-    typedef std::vector<CType> TypeVec;
+    using TypeVec = std::vector<CType>;
     object pyvalue = object(handle<>(pyValue));
     auto valueProp = createAndCheckPropertyTraits<TypeVec>(
         "TestProperty", pyvalue, Direction::Input);

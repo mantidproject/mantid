@@ -80,7 +80,7 @@ private:
   ILiveListener *createUnwrapped(const std::string &className) const override;
 };
 
-typedef Kernel::SingletonHolder<LiveListenerFactoryImpl> LiveListenerFactory;
+using LiveListenerFactory = Kernel::SingletonHolder<LiveListenerFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid

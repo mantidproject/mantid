@@ -2,13 +2,12 @@
 #include <windows.h>
 #endif
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
-#include "MantidQtWidgets/InstrumentView/GLActor.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSphere.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/InputController.h"
@@ -42,9 +41,6 @@ Projection3D::Projection3D(const InstrumentActor *rootActor, int winWidth,
                            int winHeight)
     : ProjectionSurface(rootActor), m_drawAxes(true), m_wireframe(false),
       m_viewport(0, 0) {
-
-  Instrument_const_sptr instr = rootActor->getInstrument();
-
   m_viewport.resize(winWidth, winHeight);
   V3D minBounds, maxBounds;
   m_instrActor->getBoundingBox(minBounds, maxBounds);
@@ -200,10 +196,10 @@ void Projection3D::setWireframe(bool on) { m_wireframe = on; }
 /** This seems to be called when the user has selected a rectangle
 * using the mouse.
 *
-* @param dets :: returns a list of detector IDs selected.
+* @param detIndices :: returns a list of detector Indices selected.
 */
-void Projection3D::getSelectedDetectors(QList<int> &dets) {
-  dets.clear();
+void Projection3D::getSelectedDetectors(std::vector<size_t> &detIndices) {
+  detIndices.clear();
   if (!hasSelection())
     return;
   double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -218,16 +214,12 @@ void Projection3D::getSelectedDetectors(QList<int> &dets) {
   double yTop = ymin + (ymax - ymin) * (h - rect.top()) / h;
   size_t ndet = m_instrActor->ndetectors();
 
-  // Cache all the detector positions if needed. This is slow, but just once.
-  m_instrActor->cacheDetPos();
-
   for (size_t i = 0; i < ndet; ++i) {
-    detid_t detId = m_instrActor->getDetID(i);
     V3D pos = m_instrActor->getDetPos(i);
     m_viewport.transform(pos);
     if (pos.X() >= xLeft && pos.X() <= xRight && pos.Y() >= yBottom &&
         pos.Y() <= yTop) {
-      dets.push_back(detId);
+      detIndices.push_back(i);
     }
   }
 }
@@ -236,12 +228,9 @@ void Projection3D::getSelectedDetectors(QList<int> &dets) {
 /** Select detectors to mask, using the mouse.
 * From the Instrument Window's mask tab.
 *
-* @param dets :: returns a list of detector IDs to mask.
+* @param dets :: returns a list of detector Indices to mask.
 */
-void Projection3D::getMaskedDetectors(QList<int> &dets) const {
-  // Cache all the detector positions if needed. This is slow, but just once.
-  m_instrActor->cacheDetPos();
-
+void Projection3D::getMaskedDetectors(std::vector<size_t> &detIndices) const {
   // find the layer of visible detectors
   QList<QPoint> pixels = m_maskShapes.getMaskedPixels();
   double zmin = 1.0;
@@ -266,7 +255,7 @@ void Projection3D::getMaskedDetectors(QList<int> &dets) const {
   }
 
   // find masked detector in that layer
-  dets.clear();
+  detIndices.clear();
   if (m_maskShapes.isEmpty())
     return;
   size_t ndet = m_instrActor->ndetectors();
@@ -274,13 +263,12 @@ void Projection3D::getMaskedDetectors(QList<int> &dets) const {
     // Find the cached ID and position. This is much faster than getting the
     // detector.
     V3D pos = m_instrActor->getDetPos(i);
-    detid_t id = m_instrActor->getDetID(i);
     // project pos onto the screen plane
     m_viewport.transform(pos);
     if (pos.Z() < zmin || pos.Z() > zmax)
       continue;
     if (m_maskShapes.isMasked(pos.X(), pos.Y())) {
-      dets.push_back(int(id));
+      detIndices.push_back(i);
     }
   }
 }
@@ -289,19 +277,18 @@ void Projection3D::getMaskedDetectors(QList<int> &dets) const {
 * Orient the viewport to look at a selected component.
 * @param id :: The ID of a selected component.
 */
-void Projection3D::componentSelected(Mantid::Geometry::ComponentID id) {
+void Projection3D::componentSelected(size_t componentIndex) {
 
-  Instrument_const_sptr instr = m_instrActor->getInstrument();
+  const auto &componentInfo = m_instrActor->componentInfo();
 
-  if (id == NULL || id == instr->getComponentID()) {
+  if (componentIndex == componentInfo.root()) {
     m_viewport.reset();
     return;
   }
 
-  IComponent_const_sptr comp = instr->getComponentByID(id);
-  V3D pos = comp->getPos();
+  auto pos = componentInfo.position(componentIndex);
 
-  V3D compDir = comp->getPos() - instr->getSample()->getPos();
+  auto compDir = pos - componentInfo.samplePosition();
   compDir.normalize();
   V3D up(0, 0, 1);
   V3D x = up.cross_prod(compDir);

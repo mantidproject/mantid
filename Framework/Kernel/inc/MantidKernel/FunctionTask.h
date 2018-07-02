@@ -25,7 +25,7 @@ namespace Kernel {
 class DLLExport FunctionTask final : public Task {
 public:
   /// Typedef for a function with no arguments and no return
-  typedef void (*voidFunction)();
+  using voidFunction = void (*)();
   //---------------------------------------------------------------------------------------------
   /** Constructor for a simple void function.
    *

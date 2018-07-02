@@ -491,7 +491,7 @@ void WorkspaceTreeWidget::filterWorkspaces(const std::string &filterText) {
               item->setHidden(false);
             }
 
-            if (item->parent() == NULL) {
+            if (item->parent() == nullptr) {
               // No parent, I am a top level workspace - show me
               item->setHidden(false);
             } else {
