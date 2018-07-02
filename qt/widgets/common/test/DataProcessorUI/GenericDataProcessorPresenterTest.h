@@ -1337,8 +1337,8 @@ public:
     auto firstGroupWorkspaces = m_defaultWorkspaces;
     auto secondGroupWorkspaces = std::vector<std::string>{
         "TestWorkspace", "TOF_24681", "TOF_24682", "IvsQ_binned_TOF_24681",
-        "IvsQ_TOF_24681", "IvsLam_TOF_24681", "IvsQ_binned_TOF_24682",
-        "IvsQ_TOF_24682", "IvsLam_TOF_24682", "IvsQ_TOF_24681_TOF_24682"};
+        "IvsQ_TOF_24681", "IvsQ_binned_TOF_24682",
+        "IvsQ_TOF_24682", "IvsQ_TOF_24681_TOF_24682"};
 
     checkWorkspacesExistInADS(firstGroupWorkspaces);
     checkWorkspacesExistInADS(secondGroupWorkspaces);

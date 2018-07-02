@@ -740,6 +740,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     }
 
     alg->setProperty("InputWorkspace", group->getItem(i)->getName());
+    alg->setProperty("Debug", true);
     alg->setProperty("OutputWorkspace", IvsQName);
     alg->setProperty("OutputWorkspaceBinned", IvsQBinnedName);
     alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
