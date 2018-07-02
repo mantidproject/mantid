@@ -84,8 +84,8 @@ public:
   std::unordered_map<std::string, ParameterValue>
   getParameters(IndirectFitData const *fitData, std::size_t spectrum) const;
 
-  boost::optional<ResultLocation> getResultLocation(IndirectFitData *fitData,
-                                                    std::size_t spectrum) const;
+  boost::optional<ResultLocation>
+  getResultLocation(IndirectFitData const *fitData, std::size_t spectrum) const;
   std::vector<std::string> getResultParameterNames() const;
   Mantid::API::WorkspaceGroup_sptr getLastResultWorkspace() const;
   Mantid::API::WorkspaceGroup_sptr getLastResultGroup() const;
