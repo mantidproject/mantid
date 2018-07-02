@@ -7,6 +7,11 @@ set ( REDUCTION_SRC_FILES
     ReductionJobs.cpp
     ValidateRow.cpp
     Slicing.cpp
+
+    Experiment.cpp
+    PolarizationCorrections.cpp
+    RangeInLambda.cpp
+    RowTemplate.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -21,6 +26,14 @@ set ( REDUCTION_INC_FILES
     Slicing.h
     ValidateRow.h
     WorkspaceNamesFactory.h
+
+    AnalysisMode.h
+    Experiment.h
+    PolarizationCorrections.h
+    RangeInLambda.h
+    ReductionType.h
+    RowTemplate.h
+    SummationType.h
 )
 
 PREPEND( REDUCTION_SRC_FILES Reduction ${REDUCTION_SRC_FILES})
