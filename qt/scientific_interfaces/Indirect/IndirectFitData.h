@@ -120,8 +120,8 @@ private:
   F m_functor;
 };
 
-/* 
-   IndirectFitData - Stores the data to be fit; workspace, spectra, 
+/*
+   IndirectFitData - Stores the data to be fit; workspace, spectra,
    fitting range and exclude regions. Provides methods for accessing
    and applying the fitting data.
 
