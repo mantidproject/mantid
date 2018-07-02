@@ -22,6 +22,12 @@ std::vector<T> vectorFromString(const std::string &listString) {
   }
 }
 
+/*
+ * Representation of a discontinuous spectra range.
+ * Can be used in a vector-like manner.
+ *
+ * Holds a string and vector representation.
+ */
 template <typename T> class DiscontinuousSpectra {
 public:
   explicit DiscontinuousSpectra(const std::string &str)
@@ -59,6 +65,15 @@ private:
   std::vector<T> m_vec;
 };
 
+/*
+ * Spectra can either be specified as:
+ *
+ * Continuous Range - Represented as a pair of the minimum and maximum spectrum.
+ * Discontinuous Range - Represented by a DiscontinuousSpectra object.
+ *
+ * A variant is used, such that faster operations can be employed when using
+ * a continuous range.
+ */
 using Spectra = boost::variant<DiscontinuousSpectra<std::size_t>,
                                std::pair<std::size_t, std::size_t>>;
 
@@ -105,6 +120,32 @@ private:
   F m_functor;
 };
 
+/* 
+   IndirectFitData - Stores the data to be fit; workspace, spectra, 
+   fitting range and exclude regions. Provides methods for accessing
+   and applying the fitting data.
+
+   Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge National Laboratory & European Spallation Source
+
+   This file is part of Mantid.
+
+   Mantid is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   Mantid is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   File change history is stored at: <https://github.com/mantidproject/mantid>.
+   Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 class IndirectFitData {
 public:
   IndirectFitData(Mantid::API::MatrixWorkspace_sptr workspace,
