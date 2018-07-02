@@ -111,13 +111,12 @@ class TOFTOFSetupWidget(BaseWidget):
             return widget
 
         def setEnabled(widget, *widgets):
-            """enables widget, when value of all widgets evaluates to true""" 
+            """enables widget, when value of all widgets evaluates to true"""
             def setEnabled():
                 widget.setEnabled(all(w.isChecked() for w in widgets))
             for w in widgets:
                 w.toggled.connect(setEnabled)
             return widget
-
 
         def DoubleEdit():
             edit = SmallQLineEdit()
@@ -170,7 +169,8 @@ class TOFTOFSetupWidget(BaseWidget):
         self.btnSaveDir          = tip(QPushButton('Browse'), self.TIP_btnSaveDir)
 
         self.chkSubtractECVan    = tip(QCheckBox('Subtract empty can from vanadium'), self.TIP_chkSubtractECVan)
-        self.chkReplaceNaNs      = setEnabled(tip(QCheckBox('Replace special values in S(Q,W) with 0'), self.TIP_chkReplaceNaNs), self.binEon)
+        self.chkReplaceNaNs      = setEnabled(tip(QCheckBox('Replace special values in S(Q,W) with 0'), self.TIP_chkReplaceNaNs)
+            , self.binEon)
         self.chkCreateDiff       = setEnabled(tip(QCheckBox('Create diffractograms'), self.TIP_chkCreateDiff), self.binEon)
         self.chkKeepSteps        = tip(QCheckBox('Keep intermediate steps'), self.TIP_chkKeepSteps)
 
@@ -365,7 +365,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
         elem.facility_name   = self._settings.facility_name
         elem.instrument_name = self._settings.instrument_name
-        
+
         elem.prefix         = line_text(self.prefix)
         elem.dataDir        = line_text(self.dataDir)
 

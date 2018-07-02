@@ -275,7 +275,6 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.saveSofQWNexus = get_bol('saveSofQWNexus', (SofQW and Nexus) or self.DEF_saveSofQWNexus)
             self.saveSofQWAscii = get_bol('saveSofQWAscii', (SofQW and Ascii) or self.DEF_saveSofQWAscii)
 
-
     def validate_inputs(self):
         # must have vanadium for TOF correction
         if self.CORR_TOF_VAN == self.correctTof:
@@ -307,9 +306,8 @@ class TOFTOFScriptElement(BaseScriptElement):
         if self.vanRuns and not self.vanCmnt:
             self.error('missing vanadium comment')
 
-
         # saving settings must be consistent
-        if any([self.saveSofTWNxspe, self.saveSofTWNexus, self.saveSofTWAscii, 
+        if any([self.saveSofTWNxspe, self.saveSofTWNexus, self.saveSofTWAscii,
                 self.saveSofQWNexus, self.saveSofQWAscii]   ) and not self.saveDir:
             self.error('missing directory to save the data')
 
@@ -395,6 +393,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         return self.get_log(workspace, 'duration')
 
     allowed_save_formats = ['nxspe', 'nexus', 'ascii']
+
     def save_wsgroup(self, wsgroup, suffix, spectrumMetaData, saveFormats):
         assert(saveFormats <= set(self.allowed_save_formats))
         if len(saveFormats) == 0:
