@@ -1075,6 +1075,17 @@ def _create_algorithm_function(name, version, algm_object):
         if "CoordinatesToUse" in kwargs and name in __MDCOORD_FUNCTIONS__:
             del kwargs["CoordinatesToUse"]
 
+        # a change in parameters should get a better error message
+        if algm.name() in ['LoadEventNexus', 'LoadNexusMonitors']:
+            for propname in ['MonitorsAsEvents', 'LoadEventMonitors', 'LoadHistoMonitors']:
+                if propname in kwargs:
+                    suggest = 'LoadOnly'
+                    if algm.name() == 'LoadEventNexus':
+                        suggest = 'MonitorsLoadOnly'
+                    msg = 'Deprecated property "{}" in {}. Use "{}" instead'.format(propname,
+                                                                                    algm.name(), suggest)
+                    raise ValueError(msg)
+
         frame = kwargs.pop("__LHS_FRAME_OBJECT__", None)
 
         lhs = _kernel.funcinspect.lhs_info(frame=frame)

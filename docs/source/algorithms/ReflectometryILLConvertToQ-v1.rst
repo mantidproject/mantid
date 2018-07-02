@@ -45,13 +45,13 @@ Usage
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
        DirectBeamPositionWorkspace='direct_beam_pos',
-       WavelengthRange=[2, 15],
        **settings
    )
 
    reflectivityLambda = ReflectometryILLSumForeground(
        InputWorkspace=reflected,
-       DirectForegroundWorkspace=directFgd
+       DirectForegroundWorkspace=directFgd,
+       WavelengthRange=[2, 15],
    )
    reflectivityQ = ReflectometryILLConvertToQ(
        InputWorkspace=reflectivityLambda,
@@ -78,7 +78,7 @@ Output:
    Is reflectivityLambda histogram? True
    Is reflectivityQ histogram? False
    Number of bins in reflectivityLambda: 416
-   Number of points in reflectivityQ: 259
+   Number of points in reflectivityQ: 189
    Has reflectivityQ Dx? True
 
 **Example - polarized reduction**
@@ -108,25 +108,25 @@ Output:
    reflected11 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
        DirectBeamPositionWorkspace='direct_beam_pos',
-       WavelengthRange=[2, 15],
        **settings
    )
 
    reflectivity11 = ReflectometryILLSumForeground(
        InputWorkspace=reflected11,
-       DirectForegroundWorkspace=directFgd
+       DirectForegroundWorkspace=directFgd,
+       WavelengthRange=[2, 15]
    )
    # Reload the reflected be. We will fake the '--' flipper settings
    reflected00 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
        DirectBeamPositionWorkspace='direct_beam_pos',
-       WavelengthRange=[2, 15],
        **settings
    )
 
    reflectivity00 = ReflectometryILLSumForeground(
        InputWorkspace=reflected00,
-       DirectForegroundWorkspace=directFgd
+       DirectForegroundWorkspace=directFgd,
+       WavelengthRange=[2, 15]
    )
    # Overwrite sample logs
    replace = True
