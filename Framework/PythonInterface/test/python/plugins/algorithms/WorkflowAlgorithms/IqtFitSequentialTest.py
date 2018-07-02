@@ -27,7 +27,7 @@ class IqtFitSequentialTest(unittest.TestCase):
         self._validate_group_shape(fit_group)
 
         self._validate_table_values(params)
-        self._validate_matrix_values(result)
+        self._validate_matrix_values(result.getItem(0))
         self._validate_group_values(fit_group)
 
         self._validate_sample_log_values(result.getItem(0))
