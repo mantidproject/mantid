@@ -181,8 +181,9 @@ private:
                                   const int nWorkspaces) const;
   void finishAfterTFSimultaneousFit(const Mantid::API::IAlgorithm *alg,
                                     const std::string baseName) const;
+  void setFitWorkspaces(const std::string input);
   std::string getUnnormName(const std::string wsName);
-  void changeFitFunction(bool enabled);
+  void ConvertFitFunctionForMuonTFAsymmetry(bool enabled);
   void setTFAsymmMode(bool state);
   void clearGroupCheckboxes();
   void addGroupCheckbox(const QString &name);

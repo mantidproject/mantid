@@ -204,7 +204,7 @@ private slots:
   bool plotExists(const QString &wsName);
 
   /// Enable PP tool for the plot of the given WS and optional filepath
-  void selectMultiPeak(const QString &wsName,
+  void selectMultiPeak(const QString &wsName, const bool update,
                        const boost::optional<QString> &filePath);
 
   /// Enable PP tool for the plot of the given WS overload to take just a ws

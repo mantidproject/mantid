@@ -752,7 +752,7 @@ void FunctionBrowser::setGlobalParameters(QStringList &globals) {
        ++propIt) {
     QtProperty *prop = propIt->prop;
     QString tmp = getIndex(prop) + prop->propertyName();
-    for (auto global : globals) {
+    for (auto &global : globals) {
       if (tmp == global) {
         prop->setOption(globalOptionName, true);
       }

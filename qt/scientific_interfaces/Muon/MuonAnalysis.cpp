@@ -1988,11 +1988,12 @@ bool MuonAnalysis::plotExists(const QString &wsName) {
 /**
  * Enable PP tool for the plot of the given WS.
  * @param wsName Name of the WS which plot PP tool will be attached to.
+ * @param update :: [input] If to update the data selector
  * @param filePath :: [input] Optional path to file that is actually used. This
  * is for "load current run" where the data file has a temporary name like
  * MUSRauto_E.tmp
  */
-void MuonAnalysis::selectMultiPeak(const QString &wsName,
+void MuonAnalysis::selectMultiPeak(const QString &wsName, const bool update,
                                    const boost::optional<QString> &filePath) {
   disableAllTools();
   if (!plotExists(wsName)) {
@@ -2011,10 +2012,11 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
     std::transform(groups.pairNames.begin(), groups.pairNames.end(),
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     setGroupsAndPairs();
-
-    // Set the selected run, group/pair and period
-    m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
-    setChosenGroupAndPeriods(wsName);
+	if (update) {
+		// Set the selected run, group/pair and period
+		m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
+		setChosenGroupAndPeriods(wsName);
+	}
   }
 
   QString code;
@@ -2029,50 +2031,23 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
 }
 
 /**
- * Pass through to selectMultiPeak(wsName, filePath) where filePath is set
+ * Pass through to selectMultiPeak(wsName, update, filePath) where filePath is set
  * to blank. Enables connection as a slot without Qt understanding
  * boost::optional.
  * @param wsName Name of the selected workspace
  */
 void MuonAnalysis::selectMultiPeak(const QString &wsName) {
-  selectMultiPeak(wsName, boost::optional<QString>());
+  selectMultiPeak(wsName, true,boost::optional<QString>());
 }
 
 /**
-* Enable PP tool for the plot of the given WS. Does not update data selector
-* @param wsName Name of the WS which plot PP tool will be attached to.
-* is for "load current run" where the data file has a temporary name like
-* MUSRauto_E.tmp
+* Pass through to selectMultiPeak(wsName, update, filePath) where filePath is set
+* to blank. Enables connection as a slot without Qt understanding
+* boost::optional. This will not update the data selector
+* @param wsName Name of the selected workspace
 */
 void MuonAnalysis::selectMultiPeakNoUpdate(const QString &wsName) {
-  disableAllTools();
-  if (!plotExists(wsName)) {
-    plotSpectrum(wsName);
-    setCurrentDataName(wsName);
-  }
-
-  if (wsName != m_fitDataPresenter->getAssignedFirstRun()) {
-    // Set the available groups/pairs and periods
-    const Grouping groups = m_groupingHelper.parseGroupingTable();
-    QStringList groupsAndPairs;
-    groupsAndPairs.reserve(
-        static_cast<int>(groups.groupNames.size() + groups.pairNames.size()));
-    std::transform(groups.groupNames.begin(), groups.groupNames.end(),
-                   std::back_inserter(groupsAndPairs), &QString::fromStdString);
-    std::transform(groups.pairNames.begin(), groups.pairNames.end(),
-                   std::back_inserter(groupsAndPairs), &QString::fromStdString);
-    setGroupsAndPairs();
-  }
-
-  QString code;
-
-  code += "g = graph('" + wsName + "-1')\n"
-                                   "if g != None:\n"
-                                   "  g.show()\n"
-                                   "  g.setFocus()\n"
-                                   "  selectMultiPeak(g)\n";
-
-  runPythonCode(code);
+	selectMultiPeak(wsName, false, boost::optional<QString>());
 }
 
 /**
@@ -2693,7 +2668,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
           m_uiForm.mwRunFiles->getUserInput().toString();
       m_fitDataPresenter->setSelectedWorkspace(m_currentDataName, filePath);
       setChosenGroupAndPeriods(m_currentDataName);
-      selectMultiPeak(m_currentDataName, filePath);
+      selectMultiPeak(m_currentDataName, true, filePath);
     }
 
     // In future, when workspace gets changed, show its plot and attach PP tool

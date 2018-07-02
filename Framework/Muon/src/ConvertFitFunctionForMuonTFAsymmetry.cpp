@@ -248,7 +248,6 @@ IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::extractUserFunction(
     const IFunction_sptr &TFFuncIn) {
   // N(1+g) + exp
   auto TFFunc = boost::dynamic_pointer_cast<CompositeFunction>(TFFuncIn);
-  auto fas = TFFunc->asString();
 
   // getFunction(0) -> N(1+g)
 
