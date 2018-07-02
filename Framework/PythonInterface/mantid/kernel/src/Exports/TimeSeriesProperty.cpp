@@ -1,8 +1,8 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
+#include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
-#include "MantidKernel/ContainerDtype.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/implicit.hpp>
@@ -38,7 +38,7 @@ void addPyTimeValue(TimeSeriesProperty<TYPE> &self,
 
 // Call the dtype helper function
 template <typename TYPE> std::string dtype(TimeSeriesProperty<TYPE> &self) {
-  return dtypeHelper::dtype(self);
+  return Mantid::PythonInterface::Converters::dtype(self);
 }
 
 // Check for the special case of a string
@@ -110,7 +110,7 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
            "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")      \
       .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue,    \
            arg("self"))                                                        \
-      .def("dtype", &dtype<TYPE>, arg("self"), "returns :`std::string`");
+      .def("dtype", &dtype<TYPE>, arg("self"));
 
 } // namespace
 

@@ -1,9 +1,9 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/NullValidator.h"
-#include "MantidKernel/ContainerDtype.h"
 
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
 #include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
@@ -30,7 +30,7 @@ using return_cloned_numpy =
 
 // Call the dtype helper function
 template <typename type> std::string dtype(ArrayProperty<type> &self) {
-  return dtypeHelper::dtype(self);
+  return Mantid::PythonInterface::Converters::dtype(self);
 }
 
 // Check for the special case of a string
@@ -89,7 +89,7 @@ template <> std::string dtype(ArrayProperty<std::string> &self) {
                (arg("name"), arg("values"),                                    \
                 arg("validator") = IValidator_sptr(new NullValidator),         \
                 arg("direction") = Direction::Input)))                         \
-      .def("dtype", &dtype<type>, arg("self"), "returns :`std::string`")       \
+      .def("dtype", &dtype<type>, arg("self"))                                 \
       .add_property("value", make_function(&ArrayProperty<type>::operator(),   \
                                            return_cloned_numpy()));
 
