@@ -58,9 +58,9 @@ std::string dtype(const Container<HeldType> &) {
     return "int_";
   } else if (std::is_same<HeldType, long long>::value) {
     return "int64";
-  } else if (std::is_same<HeldType, std::float_t>::value) {
+  } else if (std::is_same<HeldType, float>::value) {
     return "float32";
-  } else if (std::is_same<HeldType, std::double_t>::value) {
+  } else if (std::is_same<HeldType, double>::value) {
     return "float64";
   } else if (std::is_same<HeldType, std::string>::value) {
     return "string_";
