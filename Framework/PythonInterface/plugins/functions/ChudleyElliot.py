@@ -27,9 +27,13 @@ from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
+from scipy import constants
 
 
 class ChudleyElliot(IFunction1D):
+
+    planck_constant = constants.Planck / constants.e * 1E15  # meV*psec
+    hbar = planck_constant / (2 * np.pi)  # meV * ps  = ueV * ns
 
     def category(self):
         return "QuasiElastic"
@@ -44,7 +48,7 @@ class ChudleyElliot(IFunction1D):
         length = self.getParameterValue("L")
 
         xvals = np.array(xvals)
-        hwhm = (1.0 - np.sin(xvals * length) / (xvals * length)) / tau
+        hwhm = self.hbar*(1.0 - np.sin(xvals * length) / (xvals * length))/tau
 
         return hwhm
 
@@ -54,9 +58,9 @@ class ChudleyElliot(IFunction1D):
         i = 0
         for x in xvals:
             s = math.sin(x*length)/(x*length)
-            h = (1.0-s)/tau
+            h = self.hbar * (1.0-s)/tau
             jacobian.set(i,0,-h/tau)
-            jacobian.set(i,1,(math.cos(x*length)-s)/(length*tau))
+            jacobian.set(i,1, self.hbar * (math.cos(x*length)-s)/(length*tau))
             i += 1
 
 
