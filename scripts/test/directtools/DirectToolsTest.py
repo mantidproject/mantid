@@ -250,7 +250,7 @@ class DirectTest(unittest.TestCase):
 
     def test_plotconstE_and_plotconstQ_plot_equal_value_at_crossing(self):
         DirectILLCollectData(
-            Run='ILL/IN4/084447',
+            Run='ILL/IN4/084447.nxs',
             OutputWorkspace='sample',
             IncidentEnergyCalibration='Energy Calibration OFF',
             FlatBkg='Flat Bkg OFF',
