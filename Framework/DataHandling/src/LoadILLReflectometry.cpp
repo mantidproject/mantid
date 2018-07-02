@@ -21,8 +21,8 @@
 #include "MantidKernel/V3D.h"
 
 namespace {
-/// Component coordinates for Figaro, in meter.
-namespace Figaro {
+/// Component coordinates for FIGARO, in meter.
+namespace FIGARO {
 constexpr double DH1Z{1.135}; // Motor DH1 horizontal position
 constexpr double DH2Z{2.077}; // Motor DH2 horizontal position
 }
@@ -201,12 +201,12 @@ int LoadILLReflectometry::confidence(
 
   // fields existent only at the ILL
   if ((descriptor.pathExists("/entry0/wavelength") || // ILL D17
-       descriptor.pathExists("/entry0/theta"))        // ILL Figaro
+       descriptor.pathExists("/entry0/theta"))        // ILL FIGARO
       &&
       descriptor.pathExists("/entry0/experiment_identifier") &&
       descriptor.pathExists("/entry0/mode") &&
       (descriptor.pathExists("/entry0/instrument/VirtualChopper") || // ILL D17
-       descriptor.pathExists("/entry0/instrument/Theta")) // ILL Figaro
+       descriptor.pathExists("/entry0/instrument/Theta")) // ILL FIGARO
       )
     return 80;
   else
@@ -285,7 +285,7 @@ void LoadILLReflectometry::loadInstrument() {
   try {
     IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
     const std::string instrumentName =
-        m_instrument == Supported::D17 ? "D17" : "Figaro";
+        m_instrument == Supported::D17 ? "D17" : "FIGARO";
     loadInst->setPropertyValue("InstrumentName", instrumentName);
     loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(true));
@@ -315,7 +315,7 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   if (instrumentName == "d17") {
     m_instrument = Supported::D17;
   } else if (instrumentName == "figaro") {
-    m_instrument = Supported::Figaro;
+    m_instrument = Supported::FIGARO;
   } else {
     std::ostringstream str;
     str << "Unsupported instrument: " << instrumentName << '.';
@@ -329,12 +329,12 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_offsetName = "open_offset";
     m_chopper1Name = "Chopper1";
     m_chopper2Name = "Chopper2";
-  } else if (m_instrument == Supported::Figaro) {
+  } else if (m_instrument == Supported::FIGARO) {
     m_detectorAngleName = "VirtualAxis.DAN_actual_angle";
     m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
     m_offsetName = "openOffset";
-    // Figaro: find out which of the four choppers are used
+    // FIGARO: find out which of the four choppers are used
     NXFloat firstChopper =
         entry.openNXFloat("instrument/ChopperSetting/firstChopper");
     firstChopper.load();
@@ -407,7 +407,7 @@ void LoadILLReflectometry::initWorkspace(
  */
 void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   // PSD data D17 256 x 1 x 1000
-  // PSD data Figaro 1 x 256 x 1000
+  // PSD data FIGARO 1 x 256 x 1000
 
   if (m_acqMode) {
     NXFloat timeOfFlight = entry.openNXFloat("instrument/PSD/time_of_flight");
@@ -481,7 +481,7 @@ std::vector<double> LoadILLReflectometry::getXValues() {
   xVals.reserve(m_numberOfChannels + 1); // reserve memory
   try {
     if (m_acqMode) {
-      if (m_instrument == Supported::Figaro) {
+      if (m_instrument == Supported::FIGARO) {
         if (m_localWorkspace->run().hasProperty(
                 "Distance.edelay_delay")) // Valid from 2018.
           m_tofDelay += doubleFromRun("Distance.edelay_delay");
@@ -501,9 +501,9 @@ std::vector<double> LoadILLReflectometry::getXValues() {
           // chopper 1 phase and chopper 2 speed swapped.
           std::swap(chop1Phase, chop2Speed);
         }
-      } else if (m_instrument == Supported::Figaro) {
+      } else if (m_instrument == Supported::FIGARO) {
         chop1Phase = doubleFromRun(m_chopper1Name + ".phase");
-        // Chopper 1 phase on Figaro is set to an arbitrary value (999.9)
+        // Chopper 1 phase on FIGARO is set to an arbitrary value (999.9)
         if (chop1Phase > 360.0)
           chop1Phase = 0.0;
       }
@@ -758,7 +758,7 @@ void LoadILLReflectometry::initPixelWidth() {
       boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(
           detectorPanels.front());
   double widthInLogs;
-  if (m_instrument != Supported::Figaro) {
+  if (m_instrument != Supported::FIGARO) {
     m_pixelWidth = std::abs(detector->xstep());
     widthInLogs = inMeter(
         m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppx"));
@@ -792,7 +792,7 @@ void LoadILLReflectometry::placeDetector() {
   const auto detectorRotationAngle = detectorRotation();
   const std::string componentName = "detector";
   const RotationPlane rotPlane = [this]() {
-    if (m_instrument != Supported::Figaro)
+    if (m_instrument != Supported::FIGARO)
       return RotationPlane::horizontal;
     else
       return RotationPlane::vertical;
@@ -809,11 +809,11 @@ void LoadILLReflectometry::placeDetector() {
 void LoadILLReflectometry::placeSlits() {
   double slit1ToSample{0.0};
   double slit2ToSample{0.0};
-  if (m_instrument == Supported::Figaro) {
+  if (m_instrument == Supported::FIGARO) {
     const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
     const double offset = m_sampleZOffset / std::cos(inRad(deflectionAngle));
     // For the moment, the position information for S3 is missing in the
-    // NeXus files of Figaro. Using a hard-coded distance; should be fixed
+    // NeXus files of FIGARO. Using a hard-coded distance; should be fixed
     // when the NeXus files are
     double slitSeparation;
     if (m_localWorkspace->run().hasProperty(
@@ -849,7 +849,7 @@ void LoadILLReflectometry::placeSource() {
 
 /// Return the incident neutron deflection angle.
 double LoadILLReflectometry::collimationAngle() const {
-  if (m_instrument != Supported::Figaro) {
+  if (m_instrument != Supported::FIGARO) {
     return 0;
   }
   const auto collimationAngle = doubleFromRun("CollAngle.actual_coll_angle");
@@ -859,12 +859,12 @@ double LoadILLReflectometry::collimationAngle() const {
 
 /// Return the detector center angle.
 double LoadILLReflectometry::detectorAngle() const {
-  if (m_instrument != Supported::Figaro) {
+  if (m_instrument != Supported::FIGARO) {
     return doubleFromRun(m_detectorAngleName);
   }
   const double DH1Y = inMeter(doubleFromRun("DH1.value"));
   const double DH2Y = inMeter(doubleFromRun("DH2.value"));
-  return inDeg(std::atan2(DH2Y - DH1Y, Figaro::DH2Z - Figaro::DH1Z));
+  return inDeg(std::atan2(DH2Y - DH1Y, FIGARO::DH2Z - FIGARO::DH1Z));
 }
 
 /** Calculate the offset angle between detector center and peak.
@@ -888,10 +888,10 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre,
  *  @return the distance in meters
  */
 double LoadILLReflectometry::sampleDetectorDistance() const {
-  if (m_instrument != Supported::Figaro) {
+  if (m_instrument != Supported::FIGARO) {
     return inMeter(doubleFromRun("det.value"));
   }
-  // For Figaro, the DTR field contains the sample-to-detector distance
+  // For FIGARO, the DTR field contains the sample-to-detector distance
   // when the detector is at the horizontal position (angle = 0).
   const double restZ = inMeter(doubleFromRun("DTR.value"));
   // Motor DH1 vertical coordinate.
@@ -899,9 +899,9 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
   const double detectorRestY = 0.509;
   const double detAngle = detectorAngle();
   const double detectorY =
-      std::sin(inRad(detAngle)) * (restZ - Figaro::DH1Z) + DH1Y - detectorRestY;
+      std::sin(inRad(detAngle)) * (restZ - FIGARO::DH1Z) + DH1Y - detectorRestY;
   const double detectorZ =
-      std::cos(inRad(detAngle)) * (restZ - Figaro::DH1Z) + Figaro::DH1Z;
+      std::cos(inRad(detAngle)) * (restZ - FIGARO::DH1Z) + FIGARO::DH1Z;
   const double pixelOffset = detectorRestY - 0.5 * m_pixelWidth;
   const double beamY = detectorY + pixelOffset * std::cos(inRad(detAngle));
   const double sht1 = inMeter(doubleFromRun("SHT1.value"));
@@ -913,7 +913,7 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
 
 /// Return the horizontal offset along the z axis.
 double LoadILLReflectometry::sampleHorizontalOffset() const {
-  if (m_instrument != Supported::Figaro) {
+  if (m_instrument != Supported::FIGARO) {
     return 0.;
   }
   if (m_localWorkspace->run().hasProperty(
@@ -928,7 +928,7 @@ double LoadILLReflectometry::sampleHorizontalOffset() const {
  *  @return the source to sample distance in meters
  */
 double LoadILLReflectometry::sourceSampleDistance() const {
-  if (m_instrument != Supported::Figaro) {
+  if (m_instrument != Supported::FIGARO) {
     const double pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp");
     // Chopper pair separation is in cm in sample logs.
     const double pairSeparation = doubleFromRun("Distance.ChopperGap") / 100;

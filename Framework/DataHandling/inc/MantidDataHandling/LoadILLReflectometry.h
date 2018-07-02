@@ -52,7 +52,7 @@ public:
   /// Algorithm's summary. @see Algorithm::summary
   const std::string summary() const override {
     return "Loads an ILL reflectometry Nexus file (instrument D17 or "
-           "Figaro).";
+           "FIGARO).";
   }
   double doubleFromRun(const std::string &entryName) const;
   double sampleDetectorDistance() const;
@@ -61,7 +61,7 @@ public:
 
 private:
   /// ID tags for supported instruments.
-  enum class Supported { D17, Figaro };
+  enum class Supported { D17, FIGARO };
 
   void init() override;
   void exec() override;
