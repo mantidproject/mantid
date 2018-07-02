@@ -360,45 +360,48 @@ class TOFTOFSetupWidget(BaseWidget):
         def line_text(lineEdit):
             return lineEdit.text().strip()
 
+        def is_checked(checkBox):
+            return checkBox.isChecked() and checkBox.isEnabled()
+
         elem.facility_name   = self._settings.facility_name
         elem.instrument_name = self._settings.instrument_name
+        
+        elem.prefix         = line_text(self.prefix)
+        elem.dataDir        = line_text(self.dataDir)
 
-        elem.prefix        = line_text(self.prefix)
-        elem.dataDir       = line_text(self.dataDir)
+        elem.vanRuns        = line_text(self.vanRuns)
+        elem.vanCmnt        = line_text(self.vanCmnt)
+        elem.vanTemp        = OptionalFloat(line_text(self.vanTemp))
 
-        elem.vanRuns       = line_text(self.vanRuns)
-        elem.vanCmnt       = line_text(self.vanCmnt)
-        elem.vanTemp       = OptionalFloat(line_text(self.vanTemp))
+        elem.ecRuns         = line_text(self.ecRuns)
+        elem.ecTemp         = OptionalFloat(line_text(self.ecTemp))
+        elem.ecFactor       = self.ecFactor.value()
 
-        elem.ecRuns        = line_text(self.ecRuns)
-        elem.ecTemp        = OptionalFloat(line_text(self.ecTemp))
-        elem.ecFactor      = self.ecFactor.value()
+        elem.dataRuns       = self.runDataModel.tableData
 
-        elem.dataRuns      = self.runDataModel.tableData
+        elem.binEon         = is_checked(self.binEon)
+        elem.binEstart      = self.binEstart.value()
+        elem.binEstep       = self.binEstep.value()
+        elem.binEend        = self.binEend.value()
 
-        elem.binEon        = self.binEon.isChecked()
-        elem.binEstart     = self.binEstart.value()
-        elem.binEstep      = self.binEstep.value()
-        elem.binEend       = self.binEend.value()
+        elem.binQon         = is_checked(self.binQon)
+        elem.binQstart      = self.binQstart.value()
+        elem.binQstep       = self.binQstep.value()
+        elem.binQend        = self.binQend.value()
 
-        elem.binQon        = self.binQon.isChecked()
-        elem.binQstart     = self.binQstart.value()
-        elem.binQstep      = self.binQstep.value()
-        elem.binQend       = self.binQend.value()
+        elem.maskDetectors  = line_text(self.maskDetectors)
 
-        elem.maskDetectors = line_text(self.maskDetectors)
+        elem.subtractECVan  = is_checked(self.chkSubtractECVan)
+        elem.replaceNaNs    = is_checked(self.chkReplaceNaNs)
+        elem.createDiff     = is_checked(self.chkCreateDiff)
+        elem.keepSteps      = is_checked(self.chkKeepSteps)
 
-        elem.subtractECVan = self.chkSubtractECVan.isChecked()
-        elem.replaceNaNs   = self.chkReplaceNaNs.isChecked()
-        elem.createDiff    = self.chkCreateDiff.isChecked()
-        elem.keepSteps     = self.chkKeepSteps.isChecked()
-
-        elem.saveDir       = line_text(self.saveDir)
-        elem.saveSofTWNxspe = self.chkSofTWNxspe.isChecked()
-        elem.saveSofTWNexus = self.chkSofTWNexus.isChecked()
-        elem.saveSofTWAscii = self.chkSofTWAscii.isChecked()
-        elem.saveSofQWNexus = self.chkSofQWNexus.isChecked()
-        elem.saveSofQWAscii = self.chkSofQWAscii.isChecked()
+        elem.saveDir        = line_text(self.saveDir)
+        elem.saveSofTWNxspe = is_checked(self.chkSofTWNxspe)
+        elem.saveSofTWNexus = is_checked(self.chkSofTWNexus)
+        elem.saveSofTWAscii = is_checked(self.chkSofTWAscii)
+        elem.saveSofQWNexus = is_checked(self.chkSofQWNexus)
+        elem.saveSofQWAscii = is_checked(self.chkSofQWAscii)
         #elem.saveSofQW     = self.chkSofQW.isChecked()
         #elem.saveSofTW     = self.chkSofTW.isChecked()
         #elem.saveNXSPE     = self.chkNxspe.isChecked()
