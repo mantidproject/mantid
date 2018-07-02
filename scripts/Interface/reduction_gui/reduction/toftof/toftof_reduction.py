@@ -674,12 +674,6 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.l("DeleteWorkspaces('step1,step2,step3')")
             self.l()
 
-            self.saveSofTWNxspe
-            self.saveSofTWNexus
-            self.saveSofTWAscii
-            self.saveSofQWNexus
-            self.saveSofQWAscii
-
         if self.saveSofTW:
             suf = "'_Ei_{}'.format(round(Ei,2))"
             #nxspe only if self.binEon
