@@ -176,6 +176,37 @@ public:
     }
   }
 
+  void test_isTwoThetaSignAgnostic() {
+    using namespace Mantid;
+    auto inputWS = testWorkspace(0, 51);  // One spectrum is monitor
+    inputWS = detectorsOnly(inputWS);
+    inputWS = convertToWavelength(inputWS);
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+    constexpr int spectrum1{1};
+    const int spectrum2{static_cast<int>(spectrumInfo.size()) - 2};
+    TS_ASSERT_LESS_THAN(spectrumInfo.signedTwoTheta(spectrum1), 0.)
+    TS_ASSERT_LESS_THAN(0., spectrumInfo.signedTwoTheta(spectrum2))
+    std::ostringstream indexSetValue;
+    indexSetValue << spectrum1 << "," << spectrum2;
+    const std::array<bool, 2> flatSampleOptions{{true, false}};
+    for (const auto isFlatSample : flatSampleOptions) {
+      ReflectometrySumInQ alg;
+      alg.setChild(true);
+      alg.setRethrows(true);
+      TS_ASSERT_THROWS_NOTHING(alg.initialize())
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setPropertyValue("InputWorkspaceIndexSet", indexSetValue.str()))
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setProperty("BeamCentre", spectrum1))
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", isFlatSample))
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("IncludePartialBins", false))
+      TS_ASSERT_THROWS_NOTHING(alg.execute())
+    }
+  }
+
   void test_monitorNextToDetectorsThrows() {
     auto inputWS = testWorkspace();
     inputWS = convertToWavelength(inputWS);
@@ -243,7 +274,7 @@ public:
   }
 
 private:
-  static Mantid::API::MatrixWorkspace_sptr testWorkspace() {
+  static Mantid::API::MatrixWorkspace_sptr testWorkspace(const double centreTwoThetaDegrees = 0.87, const int nSpectra = 4) {
     using namespace Mantid;
     using namespace WorkspaceCreationHelper;
     constexpr double startX{0.1};
@@ -256,13 +287,12 @@ private:
     const Kernel::V3D samplePos{
         0., 0., 0.,
     };
-    constexpr double twoTheta{0.87 / 180. * M_PI};
+    const double twoTheta{centreTwoThetaDegrees / 180. * M_PI};
     constexpr double detectorHeight{0.001};
     constexpr double l2{2.3};
     const auto y = l2 * std::sin(twoTheta);
     const auto z = l2 * std::cos(twoTheta);
     const Kernel::V3D centrePos{0., y, z};
-    constexpr int nSpectra{4}; // One spectrum is monitor
     constexpr int nBins{50};
     return create2DWorkspaceWithReflectometryInstrumentMultiDetector(
         startX, detectorHeight, slit1Pos, slit2Pos, vg1, vg2, sourcePos,
