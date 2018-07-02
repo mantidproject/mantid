@@ -39,6 +39,16 @@ def _configurematplotlib(params):
     matplotlib.rcParams.update(params)
 
 
+def _denormalizeLine(line):
+    """Multiplies line workspace by the line width."""
+    axis = line.getAxis(1)
+    height = axis.getMax() - axis.getMin()
+    Ys = line.dataY(0)
+    Ys *= height
+    Es = line.dataE(0)
+    Es *= height
+
+
 def _finalizeprofileE(axes):
     """Set axes for const E axes."""
     axes.set_xlim(xmin=0.)
@@ -427,6 +437,8 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
                     cutWSList.append(wsName)
                 line = LineProfile(ws, cut, width, Direction=direction,
                                    OutputWorkspace=wsName, StoreInADS=keepCutWorkspaces, EnableLogging=False)
+                if ws.isDistribution() and direction == 'Vertical':
+                    _denormalizeLine(line)
                 if 'm' in style:
                     markerStyle, markerIndex = _chooseMarker(markers, markerIndex)
                 label = _label(ws, cut, width, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1, quantity, unit)
