@@ -15,6 +15,16 @@ Instrument Definition Updates
 - The ALF IDF has been updated following a detector array alteration.
 - The LARMOR IDF has been updated following the addition of a new detector to the instrument.
 
+Stability
+---------
+
+- Mantid now handles poor network stability  better when reading live data from the ISIS DAE.  Mantid will now timeout after a couple of minutes of loss of network connectivity and remains responsive during this time.  You can alter the duration of this timeout by adding a line to the mantid.user.properties file like: 
+
+```
+ISISDAE.Timeout = 100 #seconds
+```
+
+
 Algorithms
 ----------
 
