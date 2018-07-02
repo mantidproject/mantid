@@ -169,7 +169,7 @@ class TOFTOFSetupWidget(BaseWidget):
         self.btnSaveDir          = tip(QPushButton('Browse'), self.TIP_btnSaveDir)
 
         self.chkSubtractECVan    = tip(QCheckBox('Subtract empty can from vanadium'), self.TIP_chkSubtractECVan)
-        self.chkReplaceNaNs      = setEnabled(tip(QCheckBox('Replace special values in S(Q,W) with 0'), self.TIP_chkReplaceNaNs), \
+        self.chkReplaceNaNs      = setEnabled(tip(QCheckBox('Replace special values in S(Q,W) with 0'), self.TIP_chkReplaceNaNs),
                                               self.binEon)
         self.chkCreateDiff       = setEnabled(tip(QCheckBox('Create diffractograms'), self.TIP_chkCreateDiff), self.binEon)
         self.chkKeepSteps        = tip(QCheckBox('Keep intermediate steps'), self.TIP_chkKeepSteps)
