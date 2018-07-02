@@ -307,16 +307,11 @@ class TOFTOFScriptElement(BaseScriptElement):
         if self.vanRuns and not self.vanCmnt:
             self.error('missing vanadium comment')
 
+
         # saving settings must be consistent
-        if self.saveNXSPE or self.saveNexus or self.saveAscii:
-            if not self.saveDir:
-                self.error('missing directory to save the data')
-            elif not (self.saveSofQW or self.saveSofTW):
-                self.error('you must select workspaces to save')
-        elif self.saveSofQW or self.saveSofTW:
-            if not self.saveDir:
-                self.error('missing directory to save the data')
-            self.error('missing data format to save')
+        if any([self.saveSofTWNxspe, self.saveSofTWNexus, self.saveSofTWAscii, 
+                self.saveSofQWNexus, self.saveSofQWAscii]   ) and not self.saveDir:
+            self.error('missing directory to save the data')
 
     @staticmethod
     def error(message):
@@ -401,7 +396,9 @@ class TOFTOFScriptElement(BaseScriptElement):
 
     allowed_save_formats = ['nxspe', 'nexus', 'ascii']
     def save_wsgroup(self, wsgroup, suffix, spectrumMetaData, saveFormats):
-        assert(saveFormats <= set(allowed_save_formats))
+        assert(saveFormats <= set(self.allowed_save_formats))
+        if len(saveFormats) == 0:
+            return
         self.l("# save {}".format(wsgroup))
         self.l("for ws in {}:".format(wsgroup))
         self.l("    name = ws.getComment() + {}".format(suffix))
@@ -674,11 +671,11 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.l("DeleteWorkspaces('step1,step2,step3')")
             self.l()
 
-        if self.saveSofTW:
-            suf = "'_Ei_{}'.format(round(Ei,2))"
-            #nxspe only if self.binEon
-            saveFormats = cmpress(allowed_save_formats, [self.saveSofTWNxspe, self.saveSofTWNexus, self.saveSofTWAscii])
-            self.save_wsgroup(gLast, suf, 'Angle', saveFormats)
+        # save S(2theta, w):
+        suf = "'_Ei_{}'.format(round(Ei,2))"
+        #nxspe only if self.binEon
+        saveFormats = set(compress(self.allowed_save_formats, [self.saveSofTWNxspe, self.saveSofTWNexus, self.saveSofTWAscii]))
+        self.save_wsgroup(gLast, suf, 'Angle', saveFormats)
 
         if self.binQon and self.binEon:
             gDataBinQ = gData + 'SQW'
@@ -690,9 +687,10 @@ class TOFTOFScriptElement(BaseScriptElement):
             if self.replaceNaNs:
                 self.l("{} = ReplaceSpecialValues({}, NaNValue=0, NaNError=1)".format(gDataBinQ, gDataBinQ))
             self.l()
-            if self.saveSofQW:
-                saveFormats = cmpress(allowed_save_formats, [False, self.saveSofTWNexus, self.saveSofTWAscii])
-                self.save_wsgroup(gDataBinQ, "'_SQW'", 'Q', saveFormats)
+
+            # save S(Q, w)
+            saveFormats = set(compress(self.allowed_save_formats, [False, self.saveSofTWNexus, self.saveSofTWAscii]))
+            self.save_wsgroup(gDataBinQ, "'_SQW'", 'Q', saveFormats)
 
         self.rename_workspaces(gData)
 
