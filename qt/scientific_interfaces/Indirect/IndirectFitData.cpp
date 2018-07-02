@@ -266,17 +266,18 @@ void IndirectFitData::setStartX(double startX, std::size_t spectrum) {
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end())
     range->second.first = startX;
-  else
-    m_ranges[spectrum] =
-        std::make_pair(startX, m_workspace.lock()->x(0).back());
+  else if (const auto workspace = m_workspace.lock())
+    m_ranges[spectrum] = std::make_pair(startX, workspace->x(0).back());
+  throw std::runtime_error("Unable to set StartX: Workspace no longer exists.");
 }
 
 void IndirectFitData::setEndX(double endX, std::size_t spectrum) {
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end())
     range->second.second = endX;
-  else
-    m_ranges[spectrum] = std::make_pair(m_workspace.lock()->x(0).front(), endX);
+  else if (const auto workspace = m_workspace.lock())
+    m_ranges[spectrum] = std::make_pair(workspace->x(0).front(), endX);
+  throw std::runtime_error("Unable to set EndX: Workspace no longer exists.");
 }
 
 void IndirectFitData::setExcludeRegionString(const std::string &excludeRegion,
