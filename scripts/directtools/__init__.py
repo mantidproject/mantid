@@ -442,7 +442,7 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
                 if 'm' in style:
                     markerStyle, markerIndex = _chooseMarker(markers, markerIndex)
                 label = _label(ws, cut, width, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1, quantity, unit)
-                axes.errorbar(line, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label)
+                axes.errorbar(line, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
     _profileytitle(workspaces[0], axes)
@@ -482,7 +482,7 @@ def plotprofiles(workspaces, labels=None, style='l', xscale='linear', yscale='li
     for ws, label in zip(workspaces, labels):
         if 'm' in style:
             markerStyle, markerIndex = _chooseMarker(markers, markerIndex)
-        axes.errorbar(ws, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label)
+        axes.errorbar(ws, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
     _profileytitle(workspaces[0], axes)
