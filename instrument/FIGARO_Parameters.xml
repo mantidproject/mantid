@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="Figaro" valid-from="2017-01-31 23:59:59">
+<parameter-file instrument="FIGARO" valid-from="2017-01-31 23:59:59">
 
-	<component-link name="Figaro">
+	<component-link name="FIGARO">
 		<parameter name="deltaE-mode" type="string">
 			<value val="direct" />
 		</parameter>

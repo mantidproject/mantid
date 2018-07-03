@@ -44,6 +44,7 @@ New features
   - ``CreatePolarizationEfficiencies`` creates efficiencies from polynomial coefficients
   - ``JoinISISPolarizationEfficiencies`` joins individual efficiencies into one matrix workspace
   - ``LoadISISPolarizationEfficiencies`` loads efficiencies form files
+* The ILL reflectometry loader ``LoadILLReflectometry`` implements the NeXus file changes of January 2018 and can load again all valid Nexus files for D17 and FIGARO which are available since 2013 and 2017, respectively.
 * Algorithms for reflectometry reduction at ILL have been added. These handle the basic polarized/unpolarized reduction in SumInLambda or SumInQ modes. Included algorithms:
     - :ref:`algm-ReflectometryILLPreprocess`
     - :ref:`algm-ReflectometryILLSumForeground`
