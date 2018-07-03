@@ -26,14 +26,21 @@ Bugfixes
 SliceViewer
 -----------
 
+Improvements
+############
+
+- A peaks workspace can now be overlayed on the slice viewer when the non-orthogonal view is displayed.
+
 .. figure:: ../../images/NonOrthogonalPeaksSV.png
    :class: screenshot
    :align: center
    :figwidth: 70%
 
-- A peaks workspace can now be overlayed on the slice viewer when the non-orthogonal view is displayed.
 
 DGS Planner
 -----------
+
+New
+###
 
 - DGSPlanner has an option to load the UB matrix from the Nexus file metadata

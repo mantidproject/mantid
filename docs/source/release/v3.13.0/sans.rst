@@ -11,8 +11,8 @@ SANS Changes
 ISIS SANS Interface
 ----------------------------
 
-New features
-############
+New
+###
 * A string of wavelength ranges can now be specified. A reduction is then done for each wavelength range.
 * :ref:`SANSMask <algm-SANSMask>` is extended to have a `MaskedWorkspace` property, to copy the mask from.
 
@@ -28,8 +28,8 @@ Improvements
 * Updated the naming of workspace groups in a sliced reduction.
 * Updated old backend to mask by detector ID rather than spectrum number, improving reliability.
 
-Bug fixes
-#########
+Bugfixes
+########
 * The beam stop arm is now masked on LOQ for the new backend.
 * Fixed a bug in the old backend where for LOQ the high angle bank was not being centered correctly in some cases.
 * Userfiles specified in the batch file are now being loaded into the new GUI.

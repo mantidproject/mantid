@@ -12,8 +12,8 @@ Reflectometry Changes
 ISIS Reflectometry Interface
 ----------------------------
 
-New features
-############
+New
+###
 
 - Fully-automatic processing has been added to the interface. Click ``Autoprocess`` to process all of the runs for an investigation and to start polling for new runs. Whenever new runs are found, they will automatically be added to the table and processed.
 - A new option has been added to the Settings tab to control whether partial bins should be included when summing in Q.
@@ -21,8 +21,8 @@ New features
 Improvements
 ############
 
-Bug fixes
-#########
+Bugfixes
+########
 
 Features Removed
 ################
@@ -35,8 +35,8 @@ Algorithms
 * Removed version 1 of ``ReflectometryReductionOne`` and ``ReflectometryReductionOneAuto``.
 * Renamed algorithms ``PolarizationCorrection`` to ``PolarizationCorrectionFredrikze`` and ``PolarizationEfficiencyCor`` to ``PolarizationCorrectionWildes``.
 
-New features
-############
+New
+###
 
 * Added algorithm ``PolarizationEfficiencyCor`` which calls ``PolarizationCorrectionFredrikze`` or ``PolarizationCorrectionWildes`` depending on chosen ``Method`` property.
 * Added algorithms that help create a matrix workspace with polarization efficiencies ready to be used with ``PolarizationEfficiencyCor``
@@ -57,8 +57,8 @@ New features
 Improvements
 ############
 
-Bug fixes
-#########
+Bugfixes
+########
 
 * Correct the angle to the value of ``ThetaIn`` property if summing in lambda in ``ReflectometryReductionOne-v2``.
 

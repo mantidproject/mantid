@@ -12,8 +12,8 @@ Improvements
 ############
 - The updated :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>` is used in Muon Analysis.
 
-Bug fixes
-#########
+Bugfixes
+########
 
 - Results table can now detect sequential fits.
 - Fit options are not disabled after changing tabs.
@@ -32,8 +32,8 @@ Improvements
 ############
 - :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>` now updates a normalization table and produces unnormalized data.
 
-Bug fixes
-#########
+Bugfixes
+########
 - :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>` had a small numerical error in the denominator of the normalisation calculation.
 - :ref:`MuonMaxent <algm-MuonMaxent>` and :ref:`PhaseQuad <algm-PhaseQuad>`  no longer include dead detectors (zero counts) when calculating the frequency spectrum.
 - :ref:`RemoveExpDecay <algm-RemoveExpDecay>` will not alter data from a dead detectors (zero counts).
