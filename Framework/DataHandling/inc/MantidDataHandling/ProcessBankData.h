@@ -9,6 +9,9 @@
 #include <boost/shared_array.hpp>
 
 namespace Mantid {
+namespace API {
+class Progress;
+}
 namespace DataHandling {
 class DefaultEventLoader;
 

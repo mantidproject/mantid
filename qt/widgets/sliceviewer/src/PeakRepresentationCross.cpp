@@ -1,8 +1,10 @@
-#include "MantidQtWidgets/SliceViewer/PeakPrimitives.h"
-#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
 #include "MantidQtWidgets/SliceViewer/PeakRepresentationCross.h"
-#include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
 #include "MantidKernel/V2D.h"
+#include "MantidQtWidgets/Common/NonOrthogonal.h"
+#include "MantidQtWidgets/SliceViewer/NonOrthogonalAxis.h"
+#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
+#include "MantidQtWidgets/SliceViewer/PeakPrimitives.h"
+#include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
 #include <QPainter>
 
 namespace MantidQt {
@@ -40,6 +42,18 @@ void PeakRepresentationCross::movePosition(
   m_origin = peakTransform->transform(m_originalOrigin);
 }
 
+void PeakRepresentationCross::movePositionNonOrthogonal(
+    Mantid::Geometry::PeakTransform_sptr peakTransform,
+    NonOrthogonalAxis &info) {
+
+  m_origin = m_originalOrigin; // reset to original peak point, then transform
+                               // to skewed original peak point, then use
+                               // peakTransform to take into account current
+                               // dimensions
+  API::transformLookpointToWorkspaceCoord(
+      m_origin, info.fromHklToXyz, info.dimX, info.dimY, info.dimMissing);
+  m_origin = peakTransform->transform(m_origin);
+}
 /**
  *
  *@return bounding box for peak in natural coordinates.

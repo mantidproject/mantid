@@ -115,13 +115,13 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         sumType = logs.getProperty(common.SampleLogs.SUM_TYPE).value
         polarized = self.getProperty(Prop.POLARIZED).value
         pixelSize = 0.001195 if instrumentName == 'D17' else 0.0012
-        detResolution = 0.0022
+        detResolution = common.detectorResolution()
         chopperSpeed = common.chopperSpeed(logs, instrumentName)
         chopperOpening = common.chopperOpeningAngle(logs, instrumentName)
         chopperRadius = 0.36 if instrumentName == 'D17' else 0.305
         chopperPairDist = common.chopperPairDistance(logs, instrumentName)
-        slit1SizeLog = 'VirtualSlitAxis.s2w_actual_width' if instrumentName == 'D17' else 'VirtualSlitAxis.S2H_actual_height'
-        slit2SizeLog = 'VirtualSlitAxis.s3w_actual_width' if instrumentName == 'D17' else 'VirtualSlitAxis.S3H_actual_height'
+        slit1SizeLog = common.slitSizeLogEntry(instrumentName, 1)
+        slit2SizeLog = common.slitSizeLogEntry(instrumentName, 2)
         tofBinWidth = self._TOFChannelWidth(logs, instrumentName)
         qWSName = self._names.withSuffix('in_momentum_transfer')
         qWS = ReflectometryMomentumTransfer(
@@ -169,6 +169,8 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         ys = ws.readY(0)
         es = ws.readE(0)
         dxs = ws.readDx(0)
+        if numpy.any(dxs <= 0.):
+            raise RuntimeError('Cannot proceed: the momentum transfer workspace contains nonpositive Q resolutions.')
         index = 0
         start = xs[index]
         groupedXs = list()

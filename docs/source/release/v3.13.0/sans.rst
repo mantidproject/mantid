@@ -18,9 +18,11 @@ New features
 
 Improvements
 ############
-* Added thickness column to table in new GUI.
+* Transmission workspaces are now output by default from the new GUI.
 * The Beam centre finder now takes the default radius limits from the instrument parameter file if specified.
+* Updated old backend to mask by detector ID rather than spectrum number, improving reliability. 
 * Added EventSlice option to options column in new GUI.
+* Added thickness column to table in new GUI.
 * Added Radius Cutoff and Wavelength Cutoff boxes to the old and new GUI.
 * Improved error messages in the new GUI to be more obvious and clearer.
 * Updated the naming of workspace groups in a sliced reduction.
@@ -38,6 +40,7 @@ Bug fixes
 
 Features Removed
 ################
+
 * Removed SaveNist as an option from both GUI's
 
 :ref:`Release 3.13.0 <v3.13.0>`

@@ -15,6 +15,16 @@ Instrument Definition Updates
 - The ALF IDF has been updated following a detector array alteration.
 - The LARMOR IDF has been updated following the addition of a new detector to the instrument.
 
+Stability
+---------
+
+- Mantid now handles poor network stability  better when reading live data from the ISIS DAE.  Mantid will now timeout after a couple of minutes of loss of network connectivity and remains responsive during this time.  You can alter the duration of this timeout by adding a line to the mantid.user.properties file like: 
+
+```
+ISISDAE.Timeout = 100 #seconds
+```
+
+
 Algorithms
 ----------
 
@@ -27,15 +37,15 @@ New Features
 New Algorithms
 ##############
 
-- :ref:`LoadSampleShape <algm-LoadSampleShape>` loads a shape into the sample in a workspace from an 
+- :ref:`LoadSampleShape <algm-LoadSampleShape>` loads a shape into the sample in a workspace from an
   ASCII `STL <https://en.wikipedia.org/wiki/STL_(file_format)>`_  file,
-  which contains a list of triangles or an 
-  ASCII `OFF <https://en.wikipedia.org/wiki/OFF_(file_format)>`_ file, 
-  which has a list of vertices and triangles. 
+  which contains a list of triangles or an
+  ASCII `OFF <https://en.wikipedia.org/wiki/OFF_(file_format)>`_ file,
+  which has a list of vertices and triangles.
 
 - :ref:`CalculateCarpenterSampleCorrection <algm-CalculateCarpenterSampleCorrection>` outputs a group workspace with the separate absorption and multiple scattering corrections for flexibility to the User to apply them to the sample workspace
 
-- :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>` replaces *MultipleScatteringCylinderAbsorption* and uses :ref:`CalculateCarpenterSampleCorrection <algm-CalculateCarpenterSampleCorrection>` for calculating its corrections. 
+- :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>` replaces *MultipleScatteringCylinderAbsorption* and uses :ref:`CalculateCarpenterSampleCorrection <algm-CalculateCarpenterSampleCorrection>` for calculating its corrections.
 
 - :ref:`SaveBankScatteringAngles <algm-SaveBankScatteringAngles>` was added to save theta and phi values for diffraction banks to a MAUD-readable `grouping.new` file format
 
@@ -56,6 +66,7 @@ Improved
 - XError values (Dx) can now be treated by the following algorithms: :ref:`ConjoinXRuns <algm-ConjoinXRuns>`, :ref:`ConvertToHistogram <algm-ConvertToHistogram>`, :ref:`ConvertToPointData <algm-ConvertToPointData>`, :ref:`CreateWorkspace <algm-CreateWorkspace>`, :ref:`SortXAxis <algm-SortXAxis>`, :ref:`algm-Stitch1D` and :ref:`algm-Stitch1DMany` (both with repect to point data).
 - :ref:`Stitch1D <algm-Stitch1D>` can treat point data.
 - The algorithm :ref:`SortXAxis <algm-SortXAxis>` has a new input option that allows ascending (default) and descending sorting. The documentation needed to be corrected in general.
+- :ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` has changed its properties for clarification. This has also propogated to :ref:`LoadEventNexus <algm-LoadEventNexus>` and :ref:`LoadEventAndCompress <algm-LoadEventAndCompress>`
 
 Bug fixes
 #########
@@ -64,9 +75,9 @@ Bug fixes
 - The documentation of the algorithm :ref:`algm-CreateSampleWorkspace` did not match its implementation. The axis in beam direction will now be correctly described as Z instead of X.
 - The :ref:`ExtractMask <algm-ExtractMask>` algorithm now returns a non-empty list of detector ID's when given a MaskWorkspace.
 - Fixed a crash when the input workspace for :ref:`GroupDetectors <algm-GroupDetectors>` contained any other units than spectrum numbers.
-- :ref:`ConvertToMD <algm-ConvertToMD>` can now be used with workspaces that aren't in the ADS. 
+- :ref:`ConvertToMD <algm-ConvertToMD>` can now be used with workspaces that aren't in the ADS.
 - Fixed :ref:`SumSpectra <algm-SumSpectra>` to avoid a crash when validation of inputs was called with a WorkspaceGroup.
-- Fixed a bug in TableWorkspaces where vector column data was set to 0 when the table was viewed    
+- Fixed a bug in TableWorkspaces where vector column data was set to 0 when the table was viewed
 - The output workspace of :ref:`LineProfile <algm-LineProfile>` now has correct sample logs, instrument and history.
 - TimeSeriesProperty::splitByTimeVector's behavior on a boundary condition is changed.  In the set of splitters toward a same target splitted workspace, if there is a splitter's beginning time is after the last entry of the TimeSeriesProperty to be split, then this last entry shall be included in its output TimeSeriesProperty.
 - Fixed a bug in :ref:`MergeRuns <algm-MergeRuns>` which could cause the runs to be merged in a different sequence than indicated in the *InputWorkspaces* property.

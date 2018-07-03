@@ -44,6 +44,18 @@ def chopperSpeed(sampleLogs, instrumentName):
         return sampleLogs.getProperty(speedEntry).value
 
 
+def detectorResolution():
+    return 0.0022
+
+
+def slitSizeLogEntry(instrumentName, slitNumber):
+    """Return the sample log entry which contains the slit size for the given slit"""
+    if slitNumber not in [1, 2]:
+        raise RuntimeError('Slit number out of range.')
+    entry = 'VirtualSlitAxis.s{}w_actual_width' if instrumentName == 'D17' else 'VirtualSlitAxis.S{}H_actual_height'
+    return entry.format(slitNumber + 1)
+
+
 class SampleLogs:
     FOREGROUND_CENTRE = 'foreground.centre_workspace_index'
     FOREGROUND_END = 'foreground.last_workspace_index'
