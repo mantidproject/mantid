@@ -77,7 +77,7 @@ class TOFTOFSetupWidget(BaseWidget):
     TIP_chkSofTW = ''
     TIP_chkNxspe = 'Save for MSlice'
     TIP_chkNexus = 'Save for Mantid'
-    TIP_chkAscii = 'Will be available soon'
+    TIP_chkAscii = 'Save as text'
 
     TIP_rbtNormaliseNone = ''
     TIP_rbtNormaliseMonitor = ''
@@ -213,10 +213,12 @@ class TOFTOFSetupWidget(BaseWidget):
                 label.setToolTip(tip)
             return label
 
+        self.gbSave    = QGroupBox('Save reduced data')
+        self.gbSave.setCheckable(True)
+
         gbDataDir = QGroupBox('Data search directory')
         gbPrefix  = QGroupBox('Workspace prefix')
         gbOptions = QGroupBox('Options')
-        gbSave    = QGroupBox('Save reduced data')
         gbInputs  = QGroupBox('Inputs')
         gbBinning = QGroupBox('Binning')
         gbData    = QGroupBox('Data')
@@ -224,7 +226,7 @@ class TOFTOFSetupWidget(BaseWidget):
         box = QVBoxLayout()
         self._layout.addLayout(box)
 
-        box.addLayout(hbox(vbox(gbDataDir, gbInputs, gbBinning, gbOptions, 1), vbox(gbPrefix, gbData, gbSave)))
+        box.addLayout(hbox(vbox(gbDataDir, gbInputs, gbBinning, gbOptions, 1), vbox(gbPrefix, gbData, self.gbSave)))
 
         gbDataDir.setLayout(hbox(self.dataDir, self.btnDataDir))
         gbPrefix.setLayout(hbox(self.prefix,))
@@ -317,7 +319,7 @@ class TOFTOFSetupWidget(BaseWidget):
         # disable save Ascii, it is not available for the moment
         #self.chkAscii.setEnabled(False)
 
-        gbSave.setLayout(grid)
+        self.gbSave.setLayout(grid)
 
         # handle signals
         self.btnDataDir.clicked.connect(self._onDataDir)
@@ -462,6 +464,10 @@ class TOFTOFSetupWidget(BaseWidget):
         self.chkSofTWAscii.setChecked(elem.saveSofTWAscii)
         self.chkSofQWNexus.setChecked(elem.saveSofQWNexus)
         self.chkSofQWAscii.setChecked(elem.saveSofQWAscii)
+        self.gbSave.setChecked(
+            any((elem.saveSofTWNxspe, elem.saveSofTWNexus,
+                 elem.saveSofTWAscii, elem.saveSofQWNexus,
+                 elem.saveSofQWAscii)))
         #self.chkSofQW.setChecked(elem.saveSofQW)
         #self.chkSofTW.setChecked(elem.saveSofTW)
         #self.chkNxspe.setChecked(elem.saveNXSPE)
