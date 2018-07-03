@@ -396,7 +396,8 @@ protected:
   void setWorkspaceProperties();
   /// Adds the workspace index property to the browser.
   virtual void addWorkspaceIndexToBrowser();
-
+  /// Set the parameters to the fit outcome
+  void getFitResults();
   /// Create a double property and set some settings
   QtProperty *
   addDoubleProperty(const QString &name,
@@ -503,8 +504,7 @@ private:
   virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr) const;
   /// Find QtBrowserItem for a property prop among the chidren of
   QtBrowserItem *findItem(QtBrowserItem *parent, QtProperty *prop) const;
-  /// Set the parameters to the fit outcome
-  void getFitResults();
+
   /// disable undo when the function changes
   void disableUndo();
   /// Enable/disable the Fit button;
