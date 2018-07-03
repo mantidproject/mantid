@@ -29,7 +29,7 @@ SliceViewer
 Improvements
 ############
 
-- A peaks workspace can now be overlayed on the slice viewer when the non-orthogonal view is displayed.
+- A peaks workspace can now be overlaid on the slice viewer when the non-orthogonal view is displayed.
 
 .. figure:: ../../images/NonOrthogonalPeaksSV.png
    :class: screenshot

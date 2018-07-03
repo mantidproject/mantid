@@ -68,10 +68,10 @@ Improvements
 - :ref:`LoadMcStas <algm-LoadMcStas>` new alg property which controls the granularity of event data returned.
 - :ref:`Maxent <algm-Maxent>` when outputting the results of the iterations, it no longer pads with zeroes but
   returns as many items as iterations done for each spectrum, making the iterations easy to count.
-- XError values (Dx) can now be treated by the following algorithms: :ref:`ConjoinXRuns <algm-ConjoinXRuns>`, :ref:`ConvertToHistogram <algm-ConvertToHistogram>`, :ref:`ConvertToPointData <algm-ConvertToPointData>`, :ref:`CreateWorkspace <algm-CreateWorkspace>`, :ref:`SortXAxis <algm-SortXAxis>`, :ref:`algm-Stitch1D` and :ref:`algm-Stitch1DMany` (both with repect to point data).
+- XError values (Dx) can now be treated by the following algorithms: :ref:`ConjoinXRuns <algm-ConjoinXRuns>`, :ref:`ConvertToHistogram <algm-ConvertToHistogram>`, :ref:`ConvertToPointData <algm-ConvertToPointData>`, :ref:`CreateWorkspace <algm-CreateWorkspace>`, :ref:`SortXAxis <algm-SortXAxis>`, :ref:`algm-Stitch1D` and :ref:`algm-Stitch1DMany` (both with respect to point data).
 - :ref:`Stitch1D <algm-Stitch1D>` can treat point data.
 - The algorithm :ref:`SortXAxis <algm-SortXAxis>` has a new input option that allows ascending (default) and descending sorting. The documentation needed to be corrected in general.
-- :ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` has changed its properties for clarification. This has also propogated to :ref:`LoadEventNexus <algm-LoadEventNexus>` and :ref:`LoadEventAndCompress <algm-LoadEventAndCompress>`
+- :ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` has changed its properties for clarification. This has also propagated to :ref:`LoadEventNexus <algm-LoadEventNexus>` and :ref:`LoadEventAndCompress <algm-LoadEventAndCompress>`
 
 Bugfixes
 ########
@@ -84,7 +84,7 @@ Bugfixes
 - Fixed :ref:`SumSpectra <algm-SumSpectra>` to avoid a crash when validation of inputs was called with a WorkspaceGroup.
 - Fixed a bug in TableWorkspaces where vector column data was set to 0 when the table was viewed
 - The output workspace of :ref:`LineProfile <algm-LineProfile>` now has correct sample logs, instrument and history.
-- TimeSeriesProperty::splitByTimeVector's behavior on a boundary condition is changed.  In the set of splitters toward a same target splitted workspace, if there is a splitter's beginning time is after the last entry of the TimeSeriesProperty to be split, then this last entry shall be included in its output TimeSeriesProperty.
+- TimeSeriesProperty::splitByTimeVector's behavior on a boundary condition is changed.  In the set of splitters toward a same target split workspace, if a splitter's beginning time is after the last entry of the TimeSeriesProperty to be split, then this last entry shall be included in its output TimeSeriesProperty.
 - Fixed a bug in :ref:`MergeRuns <algm-MergeRuns>` which could cause the runs to be merged in a different sequence than indicated in the *InputWorkspaces* property.
 - Fixed a bug where the values entered for basis vector properties in :ref:`BinMD <algm-BinMD>` were not being remembered.
 - Fixed a bug which prevented :ref:`Load <algm-Load>` and :ref:`LoadAndMerge <algm-Load>` from parsing advanced run ranges such as ``1-3+5-7+10+15-20``.
@@ -109,7 +109,7 @@ Bugfixes
 
 - Checks on the structure of Python fit function classes have been improved to avoid scenarios, such as writing ``function1d`` rather than ``function1D``, which
   would previously have resulted in a hard crash.
-- Fit functions defined in a python script can be used with the new fit function API right after sibscription.
+- Fit functions defined in a python script can be used with the new fit function API right after subscription.
 - Child algorithms now respect their parent algorithm's ``EnableLogging`` setting when invoked using the function-style calling. Previously, some messages could appear in the log even though ``EnableLogging`` was set to ``False``.
 - Fixed a bug in ``detectorSignedTwoTheta`` method in ``MatrixWorkspace`` where the sign of the angle depended on the axis pointing up, not on the actual theta-sing axis defined in the IDF.
 
