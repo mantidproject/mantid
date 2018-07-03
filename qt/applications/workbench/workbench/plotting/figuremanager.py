@@ -165,8 +165,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.show()
         self.window.activateWindow()
         self.window.raise_()
-        if self.window.windowState() == Qt.WindowMinimized:
-            self.window.setWindowState(Qt.WindowNoState)
+        if self.window.windowState() & Qt.WindowMinimized:
+            if self.window.windowState() & Qt.WindowMaximized:
+                self.window.setWindowState(Qt.WindowMaximized)
+            else:
+                self.window.setWindowState(Qt.WindowNoState)
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
