@@ -399,11 +399,9 @@ void ProjectRecovery::saveOpenWindows(const std::string &projectDestFile) {
  */
 void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   const auto &ads = Mantid::API::AnalysisDataService::Instance();
-  using Mantid::Kernel::DataServiceHidden;
-  using Mantid::Kernel::DataServiceSort;
 
-  const auto wsHandles =
-      ads.getObjectNames(DataServiceSort::Unsorted, DataServiceHidden::Include);
+  // Hold a copy to the shared pointers so they do not get deleted under us
+  const auto wsHandles = ads.getObjects();
 
   if (wsHandles.empty()) {
     return;
@@ -420,18 +418,18 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
     throw std::runtime_error("Could not get pointer to alg: " + algName);
   }
 
-  alg->setLogging(false);
-
+  
   for (const auto &ws : wsHandles) {
-    std::string filename = ws;
+    std::string filename = ws->getName();
     filename.append(".py");
 
     Poco::Path destFilename = historyDestFolder;
     destFilename.append(filename);
 
     alg->initialize();
+	alg->setLogging(false);
     alg->setProperty("AppendTimestamp", true);
-    alg->setPropertyValue("InputWorkspace", ws);
+    alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("Filename", destFilename.toString());
     alg->setPropertyValue("StartTimestamp", startTime);
 
