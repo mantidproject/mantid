@@ -269,7 +269,8 @@ void IndirectFitData::setStartX(double startX, std::size_t spectrum) {
   else if (const auto workspace = m_workspace.lock())
     m_ranges[spectrum] = std::make_pair(startX, workspace->x(0).back());
   else
-    throw std::runtime_error("Unable to set StartX: Workspace no longer exists.");
+    throw std::runtime_error(
+        "Unable to set StartX: Workspace no longer exists.");
 }
 
 void IndirectFitData::setEndX(double endX, std::size_t spectrum) {
