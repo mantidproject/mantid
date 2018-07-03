@@ -16,15 +16,15 @@ class FFTWidget(QtGui.QWidget):
         fft = FFTModel()
         model = FFTWrapper(fft)
 
-        self.pres = FFTPresenter(view=view, alg=model, load=load)
+        self._presenter = FFTPresenter(view=view, alg=model, load=load)
 
     @property
     def presenter(self):
-        return self.pres
+        return self._presenter
 
     @property
     def widget(self):
-        return self.pres.widget
+        return self._presenter.widget
 
     def closeEvent(self, event):
-        self.pres.cancel()
+        self._presenter.cancel()

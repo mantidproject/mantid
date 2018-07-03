@@ -16,7 +16,11 @@ class FFTWrapper(object):
     def __init__(self, FFT):
         self.name = "FFT"
         self.model = FFT
-
+        self.phaseTable = None
+        self.preRe = None
+        self.preIm = None
+        self.FFT = None
+ 
     def cancel(self):
         self.model.cancel()
 

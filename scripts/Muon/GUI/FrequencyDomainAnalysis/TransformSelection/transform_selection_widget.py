@@ -11,7 +11,7 @@ class TransformSelectionWidget(QtGui.QWidget):
     def __init__(self, parent=None):
         super(TransformSelectionWidget, self).__init__(parent)
         view = TransformSelectionView(parent)
-        self.pres = TransformSelectionPresenter(view)
+        self._presenter = TransformSelectionPresenter(view)
 
     def setSelectionConnection(self, slot):
         view = self.widget
@@ -19,8 +19,8 @@ class TransformSelectionWidget(QtGui.QWidget):
 
     @property
     def presenter(self):
-        return self.pres
+        return self._presenter
 
     @property
     def widget(self):
-        return self.pres.widget
+        return self._presenter.widget

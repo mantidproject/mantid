@@ -14,7 +14,7 @@ class DummyWidget(object):
         self.presenter = DummyPresenter(view,model)
 
     @property
-    def presneter(self):
+    def presenter(self):
         return self.presenter
 
     @property

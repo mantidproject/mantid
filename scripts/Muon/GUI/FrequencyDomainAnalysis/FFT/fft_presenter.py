@@ -73,8 +73,7 @@ class FFTPresenter(object):
             return
         # put this on its own thread so not to freeze Mantid
         self.thread = self.createThread()
-        self.thread.started.connect(self.deactivate)
-        self.thread.finished.connect(self.handleFinished)
+        self.thread.threadWrapperSetUp(self.deactivate,self.handleFinished)
 
         # make some inputs
         inputs = {}
@@ -126,6 +125,7 @@ class FFTPresenter(object):
     # kills the thread at end of execution
     def handleFinished(self):
         self.activate()
+        self.thread.threadWrapperTearDown(self.deactivate,self.handleFinished)
         self.thread.deleteLater()
         self.thread = None
 

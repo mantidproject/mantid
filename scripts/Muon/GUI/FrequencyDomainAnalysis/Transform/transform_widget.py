@@ -12,34 +12,34 @@ from PyQt4 import QtGui
 class TransformWidget(QtGui.QWidget):
     def __init__(self, load, parent=None):
         super(TransformWidget,self).__init__(parent)
-        self.fft = FFTWidget(load=load,parent=self)
-        self.maxent = MaxEntWidget(load=load,parent=self)
-        self.selector = TransformSelectionWidget(parent=self)
+        self._fft = FFTWidget(load=load,parent=self)
+        self._maxent = MaxEntWidget(load=load,parent=self)
+        self._selector = TransformSelectionWidget(parent=self)
 
         groupedViews = self.getViews()
 
-        self.view = TransformView(self.selector.widget, groupedViews,parent)
+        self._view = TransformView(self._selector.widget, groupedViews,parent)
 
-        self.selector.setSelectionConnection(self.updateDisplay)
+        self._selector.setSelectionConnection(self.updateDisplay)
 
     @property
     def widget(self):
-        return self.view
+        return self._view
 
     def mockWidget(self, mockView):
-        self.view = mockView
+        self._view = mockView
 
     def closeEvent(self,event):
-        self.selector.closeEvent(event)
-        self.fft.closeEvent(event)
-        self.maxent.closeEvent(event)
+        self._selector.closeEvent(event)
+        self._fft.closeEvent(event)
+        self._maxent.closeEvent(event)
 
     def updateDisplay(self,method):
-        self.view.hideAll()
-        self.view.show(method)
+        self._view.hideAll()
+        self._view.show(method)
 
     def getViews(self):
         groupedViews = {}
-        groupedViews["FFT"] = self.fft.widget
-        groupedViews["MaxEnt"] = self.maxent.widget
+        groupedViews["FFT"] = self._fft.widget
+        groupedViews["MaxEnt"] = self._maxent.widget
         return groupedViews
