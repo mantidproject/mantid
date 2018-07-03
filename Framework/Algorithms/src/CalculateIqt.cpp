@@ -201,7 +201,8 @@ allYValuesAtIndex(const std::vector<MatrixWorkspace_sptr> &workspaces,
 MatrixWorkspace_sptr setErrorsToStandardDeviation(
     const std::vector<MatrixWorkspace_sptr> &simulatedWorkspaces) {
   auto outputWorkspace = simulatedWorkspaces.front();
-  for (auto i = 0u; i < outputWorkspace->getNumberHistograms(); ++i)
+  PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*outputWorkspace))
+  for (int i = 0; i < outputWorkspace->getNumberHistograms(); ++i)
     outputWorkspace->mutableE(i) =
         standardDeviationArray(allYValuesAtIndex(simulatedWorkspaces, i));
   return outputWorkspace;
@@ -291,8 +292,10 @@ MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(
   PARALLEL_FOR_IF(Kernel::threadSafe(*sample, *resolution))
   for (auto i = 0; i < nIterations - 1; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    simulatedWorkspaces.emplace_back(
-        doSimulation(sample->clone(), resolution, rebinParams, seed));
+    auto simulated =
+        doSimulation(sample->clone(), resolution, rebinParams, seed);
+    PARALLEL_CRITICAL(emplace_back)
+      simulatedWorkspaces.emplace_back(simulated);
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
