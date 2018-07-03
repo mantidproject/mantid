@@ -129,12 +129,6 @@ class TOFTOFScriptElement(BaseScriptElement):
         self.saveSofQWNexus = self.DEF_saveSofQWNexus
         self.saveSofQWAscii = self.DEF_saveSofQWAscii
 
-        #self.saveSofQW    = self.DEF_saveSofQW
-        #self.saveSofTW    = self.DEF_saveSofTW
-        #self.saveNXSPE    = self.DEF_saveNXSPE
-        #self.saveNexus    = self.DEF_saveNexus
-        #self.saveAscii    = self.DEF_saveAscii
-
     def to_xml(self):
         res = ['']
 
