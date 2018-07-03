@@ -30,7 +30,6 @@ set SDK_VERSION=8.1
 call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64 %SDK_VERSION%
 set UseEnv=true
 set CM_GENERATOR=Visual Studio 14 2015 Win64
-:: ParaView version
 set PARAVIEW_DIR=%PARAVIEW_DIR%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
