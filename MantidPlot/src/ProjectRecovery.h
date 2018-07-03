@@ -57,10 +57,10 @@ public:
   /// Attempts recovery of the most recent checkpoint
   bool attemptRecovery();
   /// Checks if recovery is required
-  bool checkForRecovery() const;
+  bool checkForRecovery() const noexcept;
 
   /// Clears all checkpoints in the existing folder
-  void clearAllCheckpoints() const { deleteExistingCheckpoints(0); };
+  bool clearAllCheckpoints() const noexcept;
 
   /// Starts the background thread
   void startProjectSaving();
