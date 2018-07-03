@@ -23,8 +23,11 @@ boost::optional<std::size_t> maximumIndex(MatrixWorkspace_sptr workspace) {
 
 QString getIndexString(MatrixWorkspace_sptr workspace) {
   const auto maximum = maximumIndex(workspace);
-  if (maximum)
-    return QString("0-%1").arg(*maximum);
+  if (maximum) {
+    if (*maximum > 0)
+      return QString("0-%1").arg(*maximum);
+    return "0";
+  }
   return "";
 }
 
