@@ -782,10 +782,6 @@ void LoadILLReflectometry::initPixelWidth() {
 /// Update detector position according to data file
 void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
-  // if (m_localWorkspace->run().hasProperty("Distance.D1")) // Valid from 2018.
-  //  m_detectorDistance = mmToMeter(doubleFromRun("Distance.D1"));
-  // else // Valid before 2018.
-  //  m_detectorDistance = sampleDetectorDistance();
   m_detectorDistance = sampleDetectorDistance();
   m_detectorAngle = detectorAngle();
   g_log.debug() << "Sample-detector distance: " << m_detectorDistance << "m.\n";
@@ -836,10 +832,6 @@ void LoadILLReflectometry::placeSlits() {
 /// Update source position.
 void LoadILLReflectometry::placeSource() {
   double dist;
-  // if (m_localWorkspace->run().hasProperty("Distance.D0")) // Valid from 2018.
-  //  dist = mmToMeter(doubleFromRun("Distance.D0"));
-  // else // Valid before 2018.
-  //  dist = sourceSampleDistance();
   dist = sourceSampleDistance();
   g_log.debug() << "Source-sample distance " << dist << "m.\n";
   const std::string source = "chopper1";

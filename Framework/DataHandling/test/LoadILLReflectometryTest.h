@@ -574,11 +574,6 @@ public:
                      "microsec") // a time in the distance field!
     TS_ASSERT_EQUALS(run.getProperty("Distance.inter-slit_distance")->units(),
                      "mm")
-    // moved and tested for figaro: Distance.dist_chop_samp
-    // D17:
-    // "Distance.dist_chop_samp", "VirtualChopper.dist_chop_samp"
-    // Figaro:
-    // "Distance.dist_chop_samp", "ChopperSetting.chopperpair_sample_distance"
   }
 
   void testSourceAndSampleLocationsFigaro() {
@@ -599,43 +594,6 @@ public:
             this->m_outWSName);
     TS_ASSERT(output)
     const auto &run = output->run();
-    // const auto deflectionAngle =
-    //    loader.doubleFromRun("CollAngle.actual_coll_angle") * M_PI / 180.;
-    // const auto sampleZOffset =
-    //    loader.doubleFromRun("Distance.sampleHorizontalOffset");
-    // const auto d1 = loader.doubleFromRun("Distance.D1");
-    // const auto restZ = loader.doubleFromRun("DTR.value");
-    // Motor DH1 vertical coordinate.
-    // const auto DH1Y = loader.doubleFromRun("DH1.value");
-    // const auto DH2Y = loader.doubleFromRun("DH2.value");
-    // const auto detAngle = std::atan2(DH2Y - DH1Y, 2.077 - 1.135);
-    // const auto detectorY = std::sin(detAngle) * (restZ - 1.135) + DH1Y -
-    // 0.509;
-    // const auto detectorZ = std::cos(detAngle) * (restZ - 1.135) + 1.135;
-    // const auto instrument = output->getInstrument();
-    // const auto detectorPanels =
-    //    instrument->getAllComponentsWithName("detector");
-    // const auto detector = boost::dynamic_pointer_cast<
-    //    const
-    //    Mantid::Geometry::RectangularDetector>(detectorPanels.front());
-    // const auto pixelWidth = std::abs(detector->ystep());
-    // const auto pixelOffset = 0.509 - 0.5 * pixelWidth;
-    // const auto beamY = detectorY + pixelOffset * std::cos(detAngle);
-    // const auto sht1 = loader.doubleFromRun("SHT1.value");c
-    // const auto beamZ = detectorZ - pixelOffset * std::sin(detAngle);
-    // const auto d1ref = std::hypot(beamY - sht1, beamZ) -
-    //                   sampleZOffset / std::cos(deflectionAngle);
-    // TS_ASSERT_EQUALS(d1, d1ref)
-    // const auto d1refloader = loader.sampleDetectorDistance();
-    // TS_ASSERT_EQUALS(d1, d1refloader * 1000.)
-    // const auto d0 = loader.doubleFromRun("Distance.D0");
-    // const auto chopperDist =
-    // loader.doubleFromRun("Distance.dist_chop_samp");
-    // const auto d0ref = chopperDist + sampleZOffset /
-    // std::cos(deflectionAngle);
-    // TS_ASSERT_EQUALS(d0, d0ref)
-    // const auto d0refloader = loader.sourceSampleDistance();
-    // TS_ASSERT_EQUALS(d0, d0refloader * 1000.)
     TS_ASSERT_EQUALS(run.getProperty("Distance.D1")->units(), "mm")
     TS_ASSERT_EQUALS(run.getProperty("Distance.D0")->units(), "mm")
     TS_ASSERT_EQUALS(run.getProperty("Distance.dist_chop_samp")->units(), "mm")
@@ -659,24 +617,6 @@ public:
             this->m_outWSName);
     const auto &run = output->run();
     TS_ASSERT(output)
-    // const auto d1 = loader.doubleFromRun("Distance.D1");
-    // const auto d1ref =
-    //    loader.doubleFromRun("det.value") * 1.e-3; // convert to meter
-    // TS_ASSERT_EQUALS(d1, d1ref)
-    // const auto d1refloader = loader.sampleDetectorDistance();
-    // TS_ASSERT_EQUALS(d1, d1refloader)
-    // const auto d0 = loader.doubleFromRun("Distance.D0");
-    // double pairCentre;
-    // if (run.hasProperty("Distance.dist_chop_samp"))
-    //  pairCentre = loader.doubleFromRun("Distance.dist_chop_samp");
-    // else
-    //  pairCentre = loader.doubleFromRun("VirtualChopper.dist_chop_samp");
-    // const auto pairSeparation =
-    //    loader.doubleFromRun("Distance.ChopperGap") / 100; // still in cm?
-    // const auto d0ref = pairCentre - 0.5 * pairSeparation;
-    // TS_ASSERT_EQUALS(d0, d0ref)
-    // const auto d0refloader = loader.sourceSampleDistance();
-    // TS_ASSERT_EQUALS(d0, d0refloader)
     TS_ASSERT_EQUALS(run.getProperty("Distance.D1")->units(), "")
     TS_ASSERT_EQUALS(run.getProperty("Distance.D0")->units(), "")
     AnalysisDataService::Instance().clear();
