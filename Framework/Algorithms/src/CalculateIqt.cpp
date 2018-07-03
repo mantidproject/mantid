@@ -295,7 +295,7 @@ MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(
     auto simulated =
         doSimulation(sample->clone(), resolution, rebinParams, seed);
     PARALLEL_CRITICAL(emplace_back)
-      simulatedWorkspaces.emplace_back(simulated);
+    simulatedWorkspaces.emplace_back(simulated);
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
