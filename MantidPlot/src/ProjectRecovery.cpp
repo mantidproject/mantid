@@ -99,7 +99,9 @@ Poco::Path getOutputPath() {
 std::vector<Poco::Path>
 getRecoveryFolderCheckpoints(const std::string &recoveryFolderPath) {
   Poco::Path recoveryPath;
-  if (!recoveryPath.tryParse(recoveryFolderPath)) {
+
+  if (!recoveryPath.tryParse(recoveryFolderPath) ||
+      !Poco::File(recoveryPath).exists()) {
     // Folder may not exist yet
     g_log.debug("Project Saving: Failed to get working folder whilst deleting "
                 "checkpoints");
@@ -194,10 +196,28 @@ bool ProjectRecovery::attemptRecovery() {
   }
 }
 
-bool ProjectRecovery::checkForRecovery() const {
-  const auto checkpointPaths =
-      getRecoveryFolderCheckpoints(getRecoveryFolder());
-  return checkpointPaths.size() != 0; // Non zero indicates recovery is pending
+bool ProjectRecovery::checkForRecovery() const noexcept {
+  try {
+    const auto checkpointPaths =
+        getRecoveryFolderCheckpoints(getRecoveryFolder());
+    return checkpointPaths.size() !=
+           0; // Non zero indicates recovery is pending
+  } catch (...) {
+    g_log.warning("Project Recovery: Caught exception whilst attempting to "
+                  "check for existing recovery");
+    return false;
+  }
+}
+
+bool ProjectRecovery::clearAllCheckpoints() const noexcept {
+  try {
+    deleteExistingCheckpoints(0);
+    return true;
+  } catch (...) {
+    g_log.warning("Project Recovery: Caught exception whilst attempting to "
+                  "clear existing checkpoints.");
+    return false;
+  }
 }
 
 /// Returns a background thread with the current object captured inside it
