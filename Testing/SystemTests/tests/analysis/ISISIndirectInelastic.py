@@ -994,16 +994,17 @@ class ISISIndirectInelasticConvFit(with_metaclass(ABCMeta, ISISIndirectInelastic
         LoadNexus(self.sample, OutputWorkspace=self.sample)
         LoadNexus(FileFinder.getFullPath(self.resolution), OutputWorkspace=self.resolution)
 
-        ConvolutionFitSequential(
-            InputWorkspace=self.sample,
-            Function=self.func,
-            PassWSIndexToFunction=self.passWSIndexToFunction,
-            StartX=self.startx,
-            EndX=self.endx,
-            SpecMin=self.spectra_min,
-            SpecMax=self.spectra_max,
-            PeakRadius=5,
-            OutputWorkspace=self.result_names[0])
+        convfitSeq_ws, params, fit_group = ConvolutionFitSequential(InputWorkspace=self.sample,
+                                                                    Function=self.func,
+                                                                    PassWSIndexToFunction=self.passWSIndexToFunction,
+                                                                    StartX=self.startx,
+                                                                    EndX=self.endx,
+                                                                    SpecMin=self.spectra_min,
+                                                                    SpecMax=self.spectra_max,
+                                                                    PeakRadius=5)
+
+        self.result_names = [convfitSeq_ws[0].name()]
+
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
