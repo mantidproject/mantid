@@ -169,7 +169,7 @@ class TOFTOFSetupWidget(BaseWidget):
         self.btnSaveDir          = tip(QPushButton('Browse'), self.TIP_btnSaveDir)
 
         self.chkSubtractECVan    = tip(QCheckBox('Subtract empty can from vanadium'), self.TIP_chkSubtractECVan)
-        self.chkReplaceNaNs      = setEnabled(tip(QCheckBox('Replace special values in S(Q,W) with 0'), self.TIP_chkReplaceNaNs),
+        self.chkReplaceNaNs      = setEnabled(tip(QCheckBox(u'Replace special values in S(Q, ω) with 0'), self.TIP_chkReplaceNaNs),
                                               self.binEon)
         self.chkCreateDiff       = setEnabled(tip(QCheckBox('Create diffractograms'), self.TIP_chkCreateDiff), self.binEon)
         self.chkKeepSteps        = tip(QCheckBox('Keep intermediate steps'), self.TIP_chkKeepSteps)
@@ -213,7 +213,7 @@ class TOFTOFSetupWidget(BaseWidget):
                 label.setToolTip(tip)
             return label
 
-        self.gbSave    = QGroupBox('Save reduced data')
+        self.gbSave = QGroupBox('Save reduced data')
         self.gbSave.setCheckable(True)
 
         gbDataDir = QGroupBox('Data search directory')
@@ -306,7 +306,7 @@ class TOFTOFSetupWidget(BaseWidget):
         grid.addWidget(self.chkSofQWNexus,    1, 2)
         grid.addWidget(self.chkSofQWAscii,    1, 3)
         grid.addItem(QSpacerItem(5, 5, hPolicy=QSizePolicy.Expanding),    1, 4)
-        grid.addWidget(QLabel(u'S(2t, ω):'),   2, 0)
+        grid.addWidget(QLabel(u'S(2θ, ω):'),   2, 0)
         grid.addWidget(self.chkSofTWNxspe,    2, 1)
         grid.addWidget(self.chkSofTWNexus,    2, 2)
         grid.addWidget(self.chkSofTWAscii,    2, 3)
