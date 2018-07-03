@@ -12,8 +12,10 @@ set ( Boost_LIBRARIES ) # Empty out the variable after previous use
 
 if ( ${Boost_VERSION} LESS 106700)
     find_package ( Boost REQUIRED python )
-else ()
+elseif (${PYTHON_VERSION_MAJOR} EQUAL 2)
     find_package ( Boost REQUIRED python27 )
+else ()    
+    find_package ( Boost REQUIRED python34 )
 endif ()
 
 set ( Boost_LIBRARIES ${Boost_LIBRARIES} ${old_boost})
