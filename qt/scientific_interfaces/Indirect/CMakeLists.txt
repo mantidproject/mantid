@@ -3,8 +3,9 @@ set ( SRC_FILES
 	ApplyAbsorptionCorrections.cpp
 	CalculatePaalmanPings.cpp
 	ContainerSubtraction.cpp
-	ConvFit.cpp
 	CorrectionsTab.cpp
+	ConvFit.cpp
+	ConvFitModel.cpp
 	DensityOfStates.cpp
         Elwin.cpp
 	ILLEnergyTransfer.cpp
@@ -20,12 +21,17 @@ set ( SRC_FILES
 	IndirectDataReductionTab.cpp
 	IndirectDiffractionReduction.cpp
 	IndirectFitAnalysisTab.cpp
+	IndirectFitData.cpp
+	IndirectFitOutput.cpp
+	IndirectFittingModel.cpp
 	IndirectLoadILL.cpp
 	IndirectMolDyn.cpp
 	IndirectMoments.cpp
 	IndirectSassena.cpp
 	IndirectSimulation.cpp
 	IndirectSimulationTab.cpp
+	IndirectSpectrumSelectionPresenter.cpp
+	IndirectSpectrumSelectionView.cpp
 	IndirectSqw.cpp
 	IndirectSymmetrise.cpp
 	IndirectTab.cpp
@@ -35,8 +41,11 @@ set ( SRC_FILES
 	IndirectTransmissionCalc.cpp
 	Iqt.cpp
 	IqtFit.cpp
+	IqtFitModel.cpp
 	JumpFit.cpp
+	JumpFitModel.cpp
 	MSDFit.cpp
+	MSDFitModel.cpp
 	Quasi.cpp
 	ResNorm.cpp
 	Stretch.cpp
@@ -51,6 +60,7 @@ set ( INC_FILES
 	CalculatePaalmanPings.h
 	ContainerSubtraction.h
 	ConvFit.h
+	ConvFitModel.h
 	CorrectionsTab.h
 	DensityOfStates.h
         Elwin.h
@@ -67,12 +77,17 @@ set ( INC_FILES
 	IndirectDataReductionTab.h
 	IndirectDiffractionReduction.h
 	IndirectFitAnalysisTab.h
+	IndirectFitData.h
+	IndirectFitOutput.h
+	IndirectFittingModel.h
 	IndirectLoadILL.h
 	IndirectMolDyn.h
 	IndirectMoments.h
 	IndirectSassena.h
 	IndirectSimulation.h
 	IndirectSimulationTab.h
+	IndirectSpectrumSelectionPresenter.h
+	IndirectSpectrumSelectionView.h
 	IndirectSqw.h
 	IndirectSymmetrise.h
 	IndirectTab.h
@@ -82,8 +97,11 @@ set ( INC_FILES
 	IndirectTransmissionCalc.h
 	Iqt.h
 	IqtFit.h
+	IqtFitModel.h
 	JumpFit.h
+	JumpFitModel.h
 	MSDFit.h
+	MSDFitModel.h
 	Quasi.h
 	ResNorm.h
 	Stretch.h
@@ -107,13 +125,15 @@ set ( MOC_FILES
     IndirectDataReduction.h
     IndirectDataReductionTab.h
     IndirectDiffractionReduction.h
-	IndirectFitAnalysisTab.h
+    IndirectFitAnalysisTab.h
     IndirectLoadILL.h
     IndirectMolDyn.h
     IndirectMoments.h
     IndirectSassena.h
     IndirectSimulation.h
     IndirectSimulationTab.h
+    IndirectSpectrumSelectionPresenter.h
+    IndirectSpectrumSelectionView.h
     IndirectSqw.h
     IndirectSymmetrise.h
     IndirectTransmission.h
@@ -152,6 +172,7 @@ set ( UI_FILES
    IndirectMoments.ui
    IndirectSassena.ui
    IndirectSimulation.ui
+   IndirectSpectrumSelector.ui
    IndirectSqw.ui
    IndirectSymmetrise.ui
    IndirectTools.ui

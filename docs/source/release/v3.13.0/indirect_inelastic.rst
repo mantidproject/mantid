@@ -43,6 +43,13 @@ Improved
 Data Analysis Interfaces
 ------------------------
 
+New
+###
+
+- The MSDFit, IqtFit and ConvFit interfaces now allow selection of discontinuous spectra ranges and masking energy
+  ranges.
+- The JumpFit interface now allows masking of energy ranges.
+
 Bugfixes
 ########
 
