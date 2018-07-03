@@ -22,11 +22,11 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <Poco/DateTimeFormat.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <Poco/DirectoryIterator.h>
-#include <Poco/DateTimeParser.h>
-#include <Poco/DateTimeFormat.h>
 
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
@@ -40,11 +40,14 @@ using Types::Core::DateAndTime;
 
 /// Constructor
 LoadRawHelper::LoadRawHelper()
-    : isisRaw(new ISISRAW2), m_list(false), m_interval(false), m_spec_list(),
-      m_spec_min(0), m_spec_max(EMPTY_INT()), m_numberOfPeriods(0),
+    : m_list(false), m_interval(false), m_spec_list(), m_spec_min(0),
+      m_spec_max(EMPTY_INT()), m_numberOfPeriods(0), m_isis_raw(),
       m_cache_options(), m_specTimeRegimes(), m_prog(0.0), m_numberOfSpectra(0),
       m_monitordetectorList(), m_bmspeclist(false), m_total_specs(0),
       m_logCreator() {}
+
+/// Destructor
+LoadRawHelper::~LoadRawHelper() {}
 
 /// Initialisation method.
 void LoadRawHelper::init() {
@@ -110,7 +113,7 @@ FILE *LoadRawHelper::openRawFile(const std::string &fileName) {
  */
 void LoadRawHelper::readTitle(FILE *file, std::string &title) {
   ioRaw(file, true);
-  title = std::string(isisRaw->r_title, 80);
+  title = std::string(isisRaw().r_title, 80);
   g_log.information("*** Run title: " + title + " ***");
 }
 /**skips the histogram from raw file
@@ -118,7 +121,7 @@ void LoadRawHelper::readTitle(FILE *file, std::string &title) {
  *@param hist :: postion in the file to skip
  */
 void LoadRawHelper::skipData(FILE *file, int hist) {
-  isisRaw->skipData(file, hist);
+  isisRaw().skipData(file, hist);
 }
 void LoadRawHelper::skipData(FILE *file, int64_t hist) {
   skipData(file, static_cast<int>(hist));
@@ -127,11 +130,25 @@ void LoadRawHelper::skipData(FILE *file, int64_t hist) {
 /// @param file :: the file pointer
 /// @param from_file :: unknown
 void LoadRawHelper::ioRaw(FILE *file, bool from_file) {
-  isisRaw->ioRAW(file, from_file);
+  isisRaw().ioRAW(file, from_file);
 }
-int LoadRawHelper::getNumberofTimeRegimes() { return isisRaw->daep.n_tr_shift; }
+int LoadRawHelper::getNumberofTimeRegimes() {
+  return isisRaw().daep.n_tr_shift;
+}
 
-void LoadRawHelper::reset() { isisRaw.reset(); }
+/**
+ * Lazy-instantiation of the ISISRAW reader
+ * @return A reference to the internal ISISRAW reader instance.
+ */
+ISISRAW2 &LoadRawHelper::isisRaw() const {
+  if (!m_isis_raw) {
+    m_isis_raw.reset(new ISISRAW2);
+  }
+
+  return *m_isis_raw;
+}
+
+void LoadRawHelper::reset() { m_isis_raw.reset(); }
 
 /**reads the histogram from raw file
  * @param file :: pointer to the raw file
@@ -139,14 +156,14 @@ void LoadRawHelper::reset() { isisRaw.reset(); }
  * @return flag is data is read
  */
 bool LoadRawHelper::readData(FILE *file, int hist) {
-  return isisRaw->readData(file, hist);
+  return isisRaw().readData(file, hist);
 }
 bool LoadRawHelper::readData(FILE *file, int64_t hist) {
   return readData(file, static_cast<int>(hist));
 }
 
 float LoadRawHelper::getProtonCharge() const {
-  return isisRaw->rpb.r_gd_prtn_chrg;
+  return isisRaw().rpb.r_gd_prtn_chrg;
 }
 
 /**
@@ -160,7 +177,7 @@ void LoadRawHelper::setProtonCharge(API::Run &run) {
  *  @param run :: the workspace's run object
  */
 void LoadRawHelper::setRunNumber(API::Run &run) {
-  std::string run_num = std::to_string(isisRaw->r_number);
+  std::string run_num = std::to_string(isisRaw().r_number);
   run.addLogData(new PropertyWithValue<std::string>("run_number", run_num));
 }
 /**reads workspace dimensions,number of periods etc from raw data
@@ -174,15 +191,16 @@ void LoadRawHelper::readworkspaceParameters(specnum_t &numberOfSpectra,
                                             int64_t &lengthIn,
                                             int64_t &noTimeRegimes) {
   // Read in the number of spectra in the RAW file
-  m_numberOfSpectra = numberOfSpectra = static_cast<specnum_t>(isisRaw->t_nsp1);
+  m_numberOfSpectra = numberOfSpectra =
+      static_cast<specnum_t>(isisRaw().t_nsp1);
   // Read the number of periods in this file
-  numberOfPeriods = isisRaw->t_nper;
+  numberOfPeriods = isisRaw().t_nper;
   // Read the number of time channels (i.e. bins) from the RAW file
-  const int64_t channelsPerSpectrum = isisRaw->t_ntc1;
+  const int64_t channelsPerSpectrum = isisRaw().t_ntc1;
   // Read in the time bin boundaries
   lengthIn = channelsPerSpectrum + 1;
   // Now check whether there is more than one time regime in use
-  noTimeRegimes = isisRaw->daep.n_tr_shift;
+  noTimeRegimes = isisRaw().daep.n_tr_shift;
 }
 /**This method creates shared pointer to a workspace
  * @param ws_sptr :: shared pointer to the parent workspace
@@ -387,7 +405,7 @@ void LoadRawHelper::setWorkspaceData(
 
   // But note that the last (overflow) bin is kept
   auto &Y = newWorkspace->mutableY(wsIndex);
-  Y.assign(isisRaw->dat1 + binStart, isisRaw->dat1 + lengthIn);
+  Y.assign(isisRaw().dat1 + binStart, isisRaw().dat1 + lengthIn);
   // Fill the vector for the errors, containing sqrt(count)
   newWorkspace->setCountVariances(wsIndex, Y.rawData());
 
@@ -471,17 +489,18 @@ std::vector<boost::shared_ptr<HistogramData::HistogramX>>
 LoadRawHelper::getTimeChannels(const int64_t &regimes,
                                const int64_t &lengthIn) {
   auto const timeChannels = new float[lengthIn];
-  isisRaw->getTimeChannels(timeChannels, static_cast<int>(lengthIn));
+  isisRaw().getTimeChannels(timeChannels, static_cast<int>(lengthIn));
 
   std::vector<boost::shared_ptr<HistogramData::HistogramX>> timeChannelsVec;
   if (regimes >= 2) {
     g_log.debug() << "Raw file contains " << regimes << " time regimes\n";
     // If more than 1 regime, create a timeChannelsVec for each regime
+    auto &isisRawRef = isisRaw();
     for (int64_t i = 0; i < regimes; ++i) {
       // Create a vector with the 'base' time channels
       boost::shared_ptr<HistogramData::HistogramX> channelsVec(
           new HistogramData::HistogramX(timeChannels, timeChannels + lengthIn));
-      const double shift = isisRaw->daep.tr_shift[i];
+      const double shift = isisRawRef.daep.tr_shift[i];
       g_log.debug() << "Time regime " << i + 1 << " shifted by " << shift
                     << " microseconds\n";
       // Add on the shift for this vector
@@ -492,14 +511,14 @@ LoadRawHelper::getTimeChannels(const int64_t &regimes,
     }
     // In this case, also need to populate the map of spectrum-regime
     // correspondence
-    const int64_t ndet = static_cast<int64_t>(isisRaw->i_det);
+    const int64_t ndet = static_cast<int64_t>(isisRawRef.i_det);
     auto hint = m_specTimeRegimes.begin();
     for (int64_t j = 0; j < ndet; ++j) {
       // No checking for consistency here - that all detectors for given
       // spectrum
       // are declared to use same time regime. Will just use first encountered
       hint = m_specTimeRegimes.insert(
-          hint, std::make_pair(isisRaw->spec[j], isisRaw->timr[j]));
+          hint, std::make_pair(isisRawRef.spec[j], isisRawRef.timr[j]));
     }
   } else // Just need one in this case
   {
@@ -524,8 +543,8 @@ void LoadRawHelper::runLoadInstrument(
   m_prog = progStart;
   progress(m_prog, "Loading the instrument geometry...");
 
-  std::string instrumentID = isisRaw->i_inst; // get the instrument name
-  size_t i = instrumentID.find_first_of(' '); // cut trailing spaces
+  std::string instrumentID = isisRaw().i_inst; // get the instrument name
+  size_t i = instrumentID.find_first_of(' ');  // cut trailing spaces
   if (i != std::string::npos)
     instrumentID.erase(i);
 
@@ -760,71 +779,71 @@ void LoadRawHelper::createPeriodLogs(
  */
 void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace,
                                       ISISRAW *const rawFile) const {
-  ISISRAW *localISISRaw(nullptr);
-  if (!rawFile) {
-    localISISRaw = isisRaw.get();
-  } else {
-    localISISRaw = rawFile;
-  }
+  ISISRAW &localISISRaw = [this, rawFile]() -> ISISRAW &{
+    if (rawFile)
+      return *rawFile;
+    else
+      return this->isisRaw();
+  }();
 
   API::Run &runDetails = localWorkspace->mutableRun();
 
-  runDetails.addProperty("run_header", RawFileInfo::runHeader(*localISISRaw));
+  runDetails.addProperty("run_header", RawFileInfo::runHeader(localISISRaw));
   // Run title is stored in a different attribute
-  runDetails.addProperty("run_title", RawFileInfo::runTitle(*localISISRaw),
+  runDetails.addProperty("run_title", RawFileInfo::runTitle(localISISRaw),
                          true);
 
   runDetails.addProperty("user_name",
-                         std::string(localISISRaw->hdr.hd_user, 20));
+                         std::string(localISISRaw.hdr.hd_user, 20));
   runDetails.addProperty("inst_abrv",
-                         std::string(localISISRaw->hdr.inst_abrv, 3));
-  runDetails.addProperty("hd_dur", std::string(localISISRaw->hdr.hd_dur, 8));
+                         std::string(localISISRaw.hdr.inst_abrv, 3));
+  runDetails.addProperty("hd_dur", std::string(localISISRaw.hdr.hd_dur, 8));
 
   // Data details on run not the workspace
-  runDetails.addProperty("nspectra", static_cast<int>(localISISRaw->t_nsp1));
-  runDetails.addProperty("nchannels", static_cast<int>(localISISRaw->t_ntc1));
-  runDetails.addProperty("nperiods", static_cast<int>(localISISRaw->t_nper));
+  runDetails.addProperty("nspectra", static_cast<int>(localISISRaw.t_nsp1));
+  runDetails.addProperty("nchannels", static_cast<int>(localISISRaw.t_ntc1));
+  runDetails.addProperty("nperiods", static_cast<int>(localISISRaw.t_nper));
 
   // RPB struct info
-  runDetails.addProperty("dur", localISISRaw->rpb.r_dur); // actual run duration
+  runDetails.addProperty("dur", localISISRaw.rpb.r_dur); // actual run duration
   runDetails.addProperty(
-      "durunits", localISISRaw->rpb.r_durunits); // scaler for above (1=seconds)
+      "durunits", localISISRaw.rpb.r_durunits); // scaler for above (1=seconds)
   runDetails.addProperty(
       "dur_freq",
-      localISISRaw->rpb.r_dur_freq); // testinterval for above (seconds)
-  runDetails.addProperty("dmp", localISISRaw->rpb.r_dmp); // dump interval
+      localISISRaw.rpb.r_dur_freq); // testinterval for above (seconds)
+  runDetails.addProperty("dmp", localISISRaw.rpb.r_dmp); // dump interval
   runDetails.addProperty("dmp_units",
-                         localISISRaw->rpb.r_dmp_units); // scaler for above
+                         localISISRaw.rpb.r_dmp_units); // scaler for above
   runDetails.addProperty("dmp_freq",
-                         localISISRaw->rpb.r_dmp_freq); // interval for above
+                         localISISRaw.rpb.r_dmp_freq); // interval for above
   runDetails.addProperty(
       "freq",
-      localISISRaw->rpb.r_freq); // 2**k where source frequency = 50 / 2**k
+      localISISRaw.rpb.r_freq); // 2**k where source frequency = 50 / 2**k
   runDetails.addProperty(
       "gd_prtn_chrg",
       static_cast<double>(
-          localISISRaw->rpb.r_gd_prtn_chrg)); // good proton charge (uA.hour)
+          localISISRaw.rpb.r_gd_prtn_chrg)); // good proton charge (uA.hour)
   runDetails.addProperty(
       "tot_prtn_chrg",
       static_cast<double>(
-          localISISRaw->rpb.r_tot_prtn_chrg)); // total proton charge (uA.hour)
-  runDetails.addProperty("goodfrm", localISISRaw->rpb.r_goodfrm); // good frames
-  runDetails.addProperty("rawfrm", localISISRaw->rpb.r_rawfrm);   // raw frames
+          localISISRaw.rpb.r_tot_prtn_chrg)); // total proton charge (uA.hour)
+  runDetails.addProperty("goodfrm", localISISRaw.rpb.r_goodfrm); // good frames
+  runDetails.addProperty("rawfrm", localISISRaw.rpb.r_rawfrm);   // raw frames
   runDetails.addProperty(
-      "dur_wanted", localISISRaw->rpb.r_dur_wanted); // requested run duration
-                                                     // (units as for "duration"
-                                                     // above)
+      "dur_wanted", localISISRaw.rpb.r_dur_wanted); // requested run duration
+                                                    // (units as for "duration"
+                                                    // above)
   runDetails.addProperty(
       "dur_secs",
-      localISISRaw->rpb.r_dur_secs); // actual run duration in seconds
+      localISISRaw.rpb.r_dur_secs); // actual run duration in seconds
   runDetails.addProperty("mon_sum1",
-                         localISISRaw->rpb.r_mon_sum1); // monitor sum 1
+                         localISISRaw.rpb.r_mon_sum1); // monitor sum 1
   runDetails.addProperty("mon_sum2",
-                         localISISRaw->rpb.r_mon_sum2); // monitor sum 2
+                         localISISRaw.rpb.r_mon_sum2); // monitor sum 2
   runDetails.addProperty("mon_sum3",
-                         localISISRaw->rpb.r_mon_sum3); // monitor sum 3
+                         localISISRaw.rpb.r_mon_sum3); // monitor sum 3
   runDetails.addProperty("rb_proposal",
-                         localISISRaw->rpb.r_prop); // RB (proposal) number
+                         localISISRaw.rpb.r_prop); // RB (proposal) number
 
   // Note isis raw date format which is stored in DD-MMM-YYYY. Store dates in
   // ISO 8601
@@ -840,14 +859,14 @@ void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace,
  * @param isisRaw: pointer to the raw file
  * @return the endtime
  */
-Types::Core::DateAndTime LoadRawHelper::extractEndTime(ISISRAW *isisRaw) {
-  std::string isisDate = std::string(isisRaw->rpb.r_enddate, 11);
+Types::Core::DateAndTime LoadRawHelper::extractEndTime(ISISRAW &isisRaw) {
+  std::string isisDate = std::string(isisRaw.rpb.r_enddate, 11);
   if (isisDate[0] == ' ')
     isisDate[0] = '0';
   return DateAndTime(isisDate.substr(7, 4) + "-" +
                      convertMonthLabelToIntStr(isisDate.substr(3, 3)) + "-" +
                      isisDate.substr(0, 2) + "T" +
-                     std::string(isisRaw->rpb.r_endtime, 8));
+                     std::string(isisRaw.rpb.r_endtime, 8));
 }
 
 /**
@@ -855,14 +874,14 @@ Types::Core::DateAndTime LoadRawHelper::extractEndTime(ISISRAW *isisRaw) {
  * @param isisRaw: pointer to the raw file
  * @return the start time
  */
-Types::Core::DateAndTime LoadRawHelper::extractStartTime(ISISRAW *isisRaw) {
-  auto isisDate = std::string(isisRaw->hdr.hd_date, 11);
+Types::Core::DateAndTime LoadRawHelper::extractStartTime(ISISRAW &isisRaw) {
+  auto isisDate = std::string(isisRaw.hdr.hd_date, 11);
   if (isisDate[0] == ' ')
     isisDate[0] = '0';
   return DateAndTime(isisDate.substr(7, 4) + "-" +
                      convertMonthLabelToIntStr(isisDate.substr(3, 3)) + "-" +
                      isisDate.substr(0, 2) + "T" +
-                     std::string(isisRaw->hdr.hd_time, 8));
+                     std::string(isisRaw.hdr.hd_time, 8));
 }
 
 /// To help transforming date stored in ISIS raw file into iso 8601
@@ -1079,10 +1098,11 @@ void LoadRawHelper::loadSpectra(
 
   int64_t histCurrent = -1;
   int64_t wsIndex = 0;
-  int64_t numberOfPeriods = static_cast<int64_t>(isisRaw->t_nper);
+  auto &isisRawRef = isisRaw();
+  int64_t numberOfPeriods = static_cast<int64_t>(isisRawRef.t_nper);
   double histTotal = static_cast<double>(total_specs * numberOfPeriods);
   int64_t noTimeRegimes = getNumberofTimeRegimes();
-  int64_t lengthIn = static_cast<int64_t>(isisRaw->t_ntc1 + 1);
+  int64_t lengthIn = static_cast<int64_t>(isisRawRef.t_ntc1 + 1);
 
   const int64_t periodTimesNSpectraP1 =
       period * (static_cast<int64_t>(m_numberOfSpectra) + 1);
