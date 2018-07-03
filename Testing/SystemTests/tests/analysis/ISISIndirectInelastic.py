@@ -744,7 +744,7 @@ class ISISIndirectInelasticIqtAndIqtFit(with_metaclass(ABCMeta, ISISIndirectInel
 
     def _run(self):
         '''Defines the workflow for the test'''
-        self.tolerance = 1e-5
+        self.tolerance = 1e-3
         self.samples = [sample[:-4] for sample in self.samples]
 
         # Load files into Mantid
@@ -819,7 +819,7 @@ class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.endx = 0.118877
 
     def get_reference_files(self):
-        self.tolerance = 1e-4
+        self.tolerance = 1e-3
         return ['II.OSIRISFury.nxs',
                 'II.OSIRISFuryFitSeq.nxs']
 
@@ -847,7 +847,7 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.endx = 0.169171
 
     def get_reference_files(self):
-        self.tolerance = 1e-4
+        self.tolerance = 1e-3
         return ['II.IRISFury.nxs',
                 'II.IRISFuryFitSeq.nxs']
 
@@ -863,7 +863,7 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(with_metaclass(ABCMeta, ISISIndirec
 
     def _run(self):
         '''Defines the workflow for the test'''
-        self.tolerance = 1e-5
+        self.tolerance = 1e-3
         self.samples = [sample[:-4] for sample in self.samples]
 
         #load files into mantid
@@ -975,7 +975,7 @@ class IRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.endx = 0.156250
 
     def get_reference_files(self):
-        self.tolerance = 1e-4
+        self.tolerance = 1e-3
         return ['II.IRISFury.nxs',
                 'II.IRISFuryFitMulti.nxs']
 
