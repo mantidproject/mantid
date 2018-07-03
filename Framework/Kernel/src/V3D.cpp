@@ -8,7 +8,16 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
+#include <boost/version.hpp>
+
+#if BOOST_VERSION < 106700
+#include <boost/math/common_factor.hpp>
+using boost::math::gcd;
+#else
 #include <boost/integer/common_factor.hpp>
+using boost::integer::gcd;
+#endif
+
 #include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
@@ -705,13 +714,13 @@ void V3D::loadNexus(::NeXus::File *file, const std::string &name) {
 }
 
 /** transform vector into form, used to describe directions in crystallogaphical
-  *coodinate system, assuming that
-  * the vector describes perpendicular to a crystallogaphic plain or is close to
-  *such plain.
-  *
-  *  As crystallographical coordinate sytem is based on 3 integers, eps is used
-  *as accuracy to convert into integers
-*/
+ *coodinate system, assuming that
+ * the vector describes perpendicular to a crystallogaphic plain or is close to
+ *such plain.
+ *
+ *  As crystallographical coordinate sytem is based on 3 integers, eps is used
+ *as accuracy to convert into integers
+ */
 double nearInt(double val, double eps, double mult) {
   if (val > 0) {
     if (val < 1) {
@@ -764,7 +773,7 @@ double V3D::toMillerIndexes(double eps) {
   size_t iay = std::lround(ay * mult / eps);
   size_t iaz = std::lround(az * mult / eps);
 
-  size_t div = boost::integer::gcd(iax, boost::integer::gcd(iay, iaz));
+  size_t div = gcd(iax, gcd(iay, iaz));
   mult /= (static_cast<double>(div) * eps);
   x *= mult;
   y *= mult;
