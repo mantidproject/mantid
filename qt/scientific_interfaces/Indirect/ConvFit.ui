@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>794</width>
-    <height>809</height>
+    <width>803</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,7 @@
      </property>
      <layout class="QGridLayout" name="layoutFiles">
       <item row="0" column="0">
-       <widget class="QLabel" name="label_42">
+       <widget class="QLabel" name="lbSample">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -34,7 +34,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_32">
+       <widget class="QLabel" name="lbResolution">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -116,31 +116,19 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="loPlotArea">
+    <layout class="QHBoxLayout" name="loPlotArea" stretch="1,1">
      <property name="sizeConstraint">
       <enum>QLayout::SetNoConstraint</enum>
      </property>
      <item>
-      <layout class="QVBoxLayout" name="loProperties">
-       <property name="sizeConstraint">
-        <enum>QLayout::SetNoConstraint</enum>
-       </property>
-       <item>
-        <layout class="QVBoxLayout" name="loOptions"/>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="properties">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetNoConstraint</enum>
-         </property>
-        </layout>
-       </item>
-      </layout>
+      <widget class="MantidQt::MantidWidgets::IndirectFitPropertyBrowser" name="fitPropertyBrowser">
+       <widget class="QWidget" name="dockWidgetContents_2"/>
+      </widget>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="loMiniPlot">
+      <layout class="QVBoxLayout" name="loMiniPlot" stretch="0,0">
        <property name="sizeConstraint">
-        <enum>QLayout::SetNoConstraint</enum>
+        <enum>QLayout::SetDefaultConstraint</enum>
        </property>
        <item>
         <layout class="QVBoxLayout" name="loPlots" stretch="5,3">
@@ -213,6 +201,36 @@
           <enum>QLayout::SetNoConstraint</enum>
          </property>
          <item>
+          <widget class="QLabel" name="lbPlotSpectrum">
+           <property name="text">
+            <string>Plot Spectrum:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="spPlotSpectrum">
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
           <widget class="QPushButton" name="pbSingleFit">
            <property name="text">
             <string>Fit Single Spectrum</string>
@@ -261,78 +279,30 @@
          </item>
         </layout>
        </item>
-       <item>
-        <layout class="QHBoxLayout" name="loSpectra">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetNoConstraint</enum>
-         </property>
-         <item>
-          <widget class="QLabel" name="lbPlotSpectrum">
-           <property name="text">
-            <string>Plot Spectrum:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="spPlotSpectrum">
-           <property name="minimum">
-            <number>0</number>
-           </property>
-           <property name="maximum">
-            <number>0</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QLabel" name="lbSpectraRange">
-           <property name="text">
-            <string>Spectra Range:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="spSpectraMin">
-           <property name="minimum">
-            <number>0</number>
-           </property>
-           <property name="maximum">
-            <number>0</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="lbSpectraTo">
-           <property name="text">
-            <string>to</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="spSpectraMax">
-           <property name="minimum">
-            <number>0</number>
-           </property>
-           <property name="maximum">
-            <number>0</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
       </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0">
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView" name="svSpectrumView" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -428,6 +398,18 @@
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView</class>
+   <extends>QWidget</extends>
+   <header>IndirectSpectrumSelectionView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::IndirectFitPropertyBrowser</class>
+   <extends>QDockWidget</extends>
+   <header>MantidQtWidgets/Common/IndirectFitPropertyBrowser.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

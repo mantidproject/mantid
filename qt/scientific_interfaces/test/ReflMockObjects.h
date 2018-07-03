@@ -1,10 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 #define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
-#include "MantidKernel/ICatalogInfo.h"
-#include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "../ISISReflectometry/ExperimentOptionDefaults.h"
+#include "../ISISReflectometry/IReflAsciiSaver.h"
 #include "../ISISReflectometry/IReflEventPresenter.h"
 #include "../ISISReflectometry/IReflEventTabPresenter.h"
 #include "../ISISReflectometry/IReflEventView.h"
@@ -17,10 +15,14 @@
 #include "../ISISReflectometry/IReflSettingsPresenter.h"
 #include "../ISISReflectometry/IReflSettingsTabPresenter.h"
 #include "../ISISReflectometry/IReflSettingsView.h"
-#include "../ISISReflectometry/ReflSearchModel.h"
-#include "../ISISReflectometry/ExperimentOptionDefaults.h"
 #include "../ISISReflectometry/InstrumentOptionDefaults.h"
-#include "../ISISReflectometry/IReflAsciiSaver.h"
+#include "../ISISReflectometry/ReflLegacyTransferStrategy.h"
+#include "../ISISReflectometry/ReflSearchModel.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidKernel/ICatalogInfo.h"
+#include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
@@ -31,6 +33,17 @@ using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets::DataProcessor;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
+
+/**** Models ****/
+
+class MockReflSearchModel : public ReflSearchModel {
+public:
+  MockReflSearchModel()
+      : ReflSearchModel(ReflLegacyTransferStrategy(), ITableWorkspace_sptr(),
+                        std::string()) {}
+  ~MockReflSearchModel() override {}
+  MOCK_CONST_METHOD2(data, QVariant(const QModelIndex &, int role));
+};
 
 /**** Views ****/
 
@@ -57,6 +70,7 @@ public:
 
   // IO
   MOCK_CONST_METHOD0(getSelectedSearchRows, std::set<int>());
+  MOCK_CONST_METHOD0(getAllSearchRows, std::set<int>());
   MOCK_CONST_METHOD0(getSearchString, std::string());
   MOCK_CONST_METHOD0(getSearchInstrument, std::string());
   MOCK_CONST_METHOD0(getTransferMethod, std::string());
@@ -71,12 +85,18 @@ public:
                void(const std::vector<std::string> &, const std::string &));
   MOCK_METHOD1(updateMenuEnabledState, void(bool));
   MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
+  MOCK_METHOD1(setAutoreducePauseButtonEnabled, void(bool));
   MOCK_METHOD1(setTransferButtonEnabled, void(bool));
   MOCK_METHOD1(setInstrumentComboEnabled, void(bool));
+  MOCK_METHOD1(setTransferMethodComboEnabled, void(bool));
+  MOCK_METHOD1(setSearchTextEntryEnabled, void(bool));
+  MOCK_METHOD1(setSearchButtonEnabled, void(bool));
+  MOCK_METHOD1(startTimer, void(const int));
+  MOCK_METHOD0(stopTimer, void());
+  MOCK_METHOD0(startIcatSearch, void());
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
-  void setAllSearchRowsSelected() override{};
   IReflRunsTabPresenter *getPresenter() const override { return nullptr; };
 };
 
@@ -105,9 +125,11 @@ public:
   MOCK_CONST_METHOD0(getI0MonitorIndex, std::string());
   MOCK_CONST_METHOD0(getSummationType, std::string());
   MOCK_CONST_METHOD0(getReductionType, std::string());
+  MOCK_CONST_METHOD0(getIncludePartialBins, bool());
   MOCK_CONST_METHOD0(getPerAngleOptions, std::map<std::string, OptionsQMap>());
   MOCK_CONST_METHOD1(setIsPolCorrEnabled, void(bool));
   MOCK_METHOD1(setReductionTypeEnabled, void(bool));
+  MOCK_METHOD1(setIncludePartialBinsEnabled, void(bool));
   MOCK_METHOD1(setPolarisationOptionsEnabled, void(bool));
   MOCK_METHOD1(setDetectorCorrectionEnabled, void(bool));
   MOCK_METHOD1(setExpDefaults, void(ExperimentOptionDefaults));
@@ -195,12 +217,15 @@ public:
 
 class MockRunsTabPresenter : public IReflRunsTabPresenter {
 public:
-  MOCK_CONST_METHOD0(startNewAutoreduction, bool());
+  MOCK_CONST_METHOD0(isAutoreducing, bool());
+  MOCK_CONST_METHOD1(isAutoreducing, bool(int));
   MOCK_METHOD1(settingsChanged, void(int));
   void notify(IReflRunsTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);
   }
+  bool isProcessing(int) const override { return false; }
+  bool isProcessing() const override { return false; }
   ~MockRunsTabPresenter() override{};
 };
 
@@ -208,23 +233,20 @@ class MockEventPresenter : public IReflEventPresenter {
 public:
   MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
   MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
+  MOCK_METHOD1(acceptTabPresenter, void(IReflEventTabPresenter *));
   MOCK_METHOD0(onReductionPaused, void());
   MOCK_METHOD0(onReductionResumed, void());
   MOCK_METHOD1(notifySliceTypeChanged, void(SliceType));
+  MOCK_METHOD0(notifySettingsChanged, void());
   ~MockEventPresenter() override{};
 };
 
 class MockEventTabPresenter : public IReflEventTabPresenter {
 public:
-  std::string getTimeSlicingValues(int group) const override {
-    UNUSED_ARG(group)
-    return std::string();
-  }
-  std::string getTimeSlicingType(int group) const override {
-    UNUSED_ARG(group)
-    return std::string();
-  }
-
+  std::string getTimeSlicingValues(int) const override { return std::string(); }
+  std::string getTimeSlicingType(int) const override { return std::string(); }
+  MOCK_METHOD1(acceptMainPresenter, void(IReflMainWindowPresenter *));
+  MOCK_METHOD1(settingsChanged, void(int));
   MOCK_METHOD1(onReductionPaused, void(int));
   MOCK_METHOD1(onReductionResumed, void(int));
 
@@ -322,7 +344,8 @@ public:
     UNUSED_ARG(group);
     return std::string();
   }
-  bool checkIfProcessing() const override { return false; }
+  bool isProcessing() const override { return false; }
+  bool isProcessing(int) const override { return false; }
 
   ~MockMainWindowPresenter() override{};
 };

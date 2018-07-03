@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include <QFile>
 #include <QFileInfo>
@@ -14,19 +15,19 @@
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include "qstring.h"
-#include "Folder.h"
 #include "Graph3D.h"
 #include "Mantid/MantidMatrix.h"
 
 // Forward declare Mantid classes.
 class ApplicationWindow;
+class Folder;
 
 /** Manages saving and loading Mantid project files.
 
   @author Samuel Jackson, ISIS, RAL
   @date 21/06/2016
 
-  Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  Copyright &copy; 2007-2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -50,6 +51,9 @@ class ApplicationWindow;
 namespace MantidQt {
 namespace API {
 
+using groupNameToWsNamesT =
+    std::unordered_map<std::string, std::vector<std::string>>;
+
 class ProjectSerialiser : public QObject {
   Q_OBJECT
 public:
@@ -57,13 +61,17 @@ public:
   explicit ProjectSerialiser(ApplicationWindow *window);
   explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder);
 
+  explicit ProjectSerialiser(ApplicationWindow *window, bool isRecovery);
+  explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder,
+                             bool isRecovery);
+
   /// Save the current state of the project to disk
-  void save(const QString &projectName, const std::vector<std::string> &wsNames,
+  bool save(const QString &projectName, const std::vector<std::string> &wsNames,
             const std::vector<std::string> &windowNames, bool compress = false);
-  void save(const QString &projectName, bool compress = false,
+  bool save(const QString &projectName, bool compress = false,
             bool saveAll = true);
   /// Load a project file from disk
-  void load(std::string lines, const int fileVersion,
+  void load(std::string filepath, const int fileVersion,
             const bool isTopLevel = true);
   /// Open the script window and load scripts from string
   void openScriptWindow(const QStringList &files);
@@ -89,8 +97,10 @@ private:
   std::vector<std::string> m_workspaceNames;
   /// Store a count of the number of windows during saving
   int m_windowCount;
-  /// Flag to check if e should save all workspaces
+  /// Flag to check if we should save all workspaces
   bool m_saveAll;
+  /// Flag to check if we are operating for project recovery
+  const bool m_projectRecovery;
 
   // Saving Functions
 
@@ -136,7 +146,7 @@ private:
   /// Open the script window and load scripts from string
   void openScriptWindow(const std::string &files, const int fileVersion);
   /// Load Nexus files and add workspaces to the ADS
-  void populateMantidTreeWidget(const QString &lines);
+  void loadWorkspacesIntoMantid(const groupNameToWsNamesT &workspaces);
   /// Load a single workspaces to the ADS
   void loadWsToMantidTree(const std::string &wsName);
   /// Load additional windows (e.g. slice viewer)
@@ -148,6 +158,8 @@ private:
   QMdiSubWindow *setupQMdiSubWindow() const;
   /// Check if a vector of strings contains a string
   bool contains(const std::vector<std::string> &vec, const std::string &value);
+
+  groupNameToWsNamesT parseWsNames(const std::string &wsNames);
 };
 }
 }

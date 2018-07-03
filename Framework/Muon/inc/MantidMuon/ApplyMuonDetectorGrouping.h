@@ -49,9 +49,7 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\Grouping;Transforms\\Grouping";
-  }
+  const std::string category() const override { return "Muon\\DataHandling"; }
   /// Algorithm's summary for identification
   const std::string summary() const override {
     return "Group several muon detector IDs together and perform an analysis "

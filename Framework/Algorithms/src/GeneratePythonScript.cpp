@@ -1,11 +1,11 @@
 #include "MantidAlgorithms/GeneratePythonScript.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ScriptBuilder.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/System.h"
 
 #include <fstream>
 
@@ -24,7 +24,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(GeneratePythonScript)
 
 /** Initialize the algorithm's properties.
-*/
+ */
 void GeneratePythonScript::init() {
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -51,6 +51,11 @@ void GeneratePythonScript::init() {
                   "The filter end time in the format YYYY-MM-DD HH:mm:ss",
                   Direction::Input);
 
+  declareProperty(
+      "AppendTimestamp", false,
+      "Appends the time the command was run as a comment afterwards",
+      Direction::Input);
+
   std::vector<std::string> saveVersions{"Specify Old", "Specify All",
                                         "Specify None"};
   declareProperty(
@@ -60,13 +65,14 @@ void GeneratePythonScript::init() {
 }
 
 /** Execute the algorithm.
-*/
+ */
 void GeneratePythonScript::exec() {
   const Workspace_const_sptr ws = getProperty("InputWorkspace");
   const bool unrollAll = getProperty("UnrollAll");
   const std::string startTime = getProperty("StartTimestamp");
   const std::string endTime = getProperty("EndTimestamp");
   const std::string saveVersions = getProperty("SpecifyAlgorithmVersions");
+  const bool appendTimestamp = getProperty("AppendTimestamp");
 
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();
@@ -97,7 +103,7 @@ void GeneratePythonScript::exec() {
   else
     versionSpecificity = "all";
 
-  ScriptBuilder builder(view, versionSpecificity);
+  ScriptBuilder builder(view, versionSpecificity, appendTimestamp);
   std::string generatedScript;
   generatedScript += "#########################################################"
                      "#############\n";

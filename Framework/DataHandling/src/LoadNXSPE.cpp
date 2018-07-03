@@ -11,8 +11,10 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include "MantidNexus/NexusClasses.h"
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"

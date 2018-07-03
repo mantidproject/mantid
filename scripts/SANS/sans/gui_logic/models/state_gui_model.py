@@ -19,6 +19,9 @@ class StateGuiModel(object):
         super(StateGuiModel, self).__init__()
         self._user_file_items = user_file_items
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     @property
     def settings(self):
         return self._user_file_items
@@ -760,7 +763,7 @@ class StateGuiModel(object):
 
     @property
     def show_transmission(self):
-        return self.get_simple_element(element_id=OtherId.show_transmission, default_value=False)
+        return self.get_simple_element(element_id=OtherId.show_transmission, default_value=True)
 
     @show_transmission.setter
     def show_transmission(self, value):

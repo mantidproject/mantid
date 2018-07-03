@@ -55,17 +55,26 @@ void CompositePeaksPresenter::updateWithSlicePoint(
 /**
 Handle dimension display changing.
 */
-bool CompositePeaksPresenter::changeShownDim() {
+bool CompositePeaksPresenter::changeShownDim(size_t dimX, size_t dimY) {
   if (useDefault()) {
-    return m_default->changeShownDim();
+    return m_default->changeShownDim(dimX, dimY);
   }
   bool result = true;
   for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
-    result &= (*it)->changeShownDim();
+    result &= (*it)->changeShownDim(dimX, dimY);
   }
   return result;
 }
 
+void CompositePeaksPresenter::setNonOrthogonal(bool nonOrthogonalEnabled) {
+  if (useDefault()) {
+    m_default->setNonOrthogonal(nonOrthogonalEnabled);
+  }
+
+  for (auto &i : m_subjects) {
+    i->setNonOrthogonal(nonOrthogonalEnabled);
+  }
+}
 /**
 Determine wheter a given axis label correponds to the free peak axis.
 @return True only if the label is that of the free peak axis.

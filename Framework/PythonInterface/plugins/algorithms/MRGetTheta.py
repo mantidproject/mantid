@@ -25,7 +25,7 @@ class MRGetTheta(PythonAlgorithm):
         """ Declare properties """
         self.declareProperty(WorkspaceProperty("Workspace", "", Direction.Input), "Workspace containing MR data")
         self.declareProperty("AngleOffset", 0.,FloatBoundedValidator(lower=0.), "Angle offset (rad)")
-        self.declareProperty("UseSANGLE", False, doc="If True, use SANGLE as the scattering angle")
+        self.declareProperty("UseSANGLE", False, doc="If True, use SANGLE as the scattering angle. If False, use DANGLE.")
         self.declareProperty("SpecularPixel", 0., doc="Pixel position of the specular reflectivity [optional]")
         self.declareProperty("Theta", 0., direction=Direction.Output, doc="Scattering angle theta [rad]")
 
