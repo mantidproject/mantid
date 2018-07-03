@@ -5,8 +5,8 @@
 #include "ProjectSerialiser.h"
 #include "ScriptingWindow.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UsageService.h"
@@ -18,9 +18,9 @@
 #include "Poco/Path.h"
 
 #include <QMessageBox>
+#include <QMetaObject>
 #include <QObject>
 #include <QString>
-#include <QMetaObject>
 
 #include <chrono>
 #include <condition_variable>
@@ -246,17 +246,13 @@ void ProjectRecovery::configKeyChanged(
 void ProjectRecovery::compileRecoveryScript(const Poco::Path &inputFolder,
                                             const Poco::Path &outputFile) {
   const std::string algName = "OrderWorkspaceHistory";
-  auto *alg =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm(algName, 1);
-  if (!alg) {
-    throw std::runtime_error("Could not get pointer to alg: " + algName);
-  }
-
+  auto alg =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged(algName, 1);
   alg->initialize();
+  alg->setChild(true);
   alg->setRethrows(true);
   alg->setProperty("RecoveryCheckpointFolder", inputFolder.toString());
   alg->setProperty("OutputFilepath", outputFile.toString());
-
   alg->execute();
 
   g_log.notice("Saved your recovery script to:\n" + outputFile.toString());
@@ -433,13 +429,9 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
       Mantid::Kernel::UsageService::Instance().getStartTime().toISO8601String();
 
   const std::string algName = "GeneratePythonScript";
-  auto *alg =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm(algName, 1);
-
-  if (!alg) {
-    throw std::runtime_error("Could not get pointer to alg: " + algName);
-  }
-
+  auto alg =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged(algName, 1);
+  alg->setChild(true);
   alg->setLogging(false);
 
   for (const auto &ws : wsHandles) {
