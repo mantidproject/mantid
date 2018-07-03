@@ -102,8 +102,8 @@ private:
     auto newGroup = boost::make_shared<Mantid::API::WorkspaceGroup>();
 
     auto &ads = Mantid::API::AnalysisDataService::Instance();
-    for (auto it = inputs.begin(); it != inputs.end(); ++it) {
-      auto ws = addTestMatrixWorkspaceToADS(*it);
+    for (const auto &input : inputs) {
+      auto ws = addTestMatrixWorkspaceToADS(input);
       newGroup->addWorkspace(ws);
     }
     ads.add(name, newGroup);
@@ -120,9 +120,9 @@ private:
   void removeFromADS(const std::vector<std::string> &members) {
     auto &ads = Mantid::API::AnalysisDataService::Instance();
 
-    for (auto it = members.begin(); it != members.end(); ++it) {
-      if (ads.doesExist(*it))
-        ads.remove(*it);
+    for (const auto &member : members) {
+      if (ads.doesExist(member))
+        ads.remove(member);
     }
   }
 };

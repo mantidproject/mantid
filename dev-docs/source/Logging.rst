@@ -50,7 +50,8 @@ For the logging to work you will need to have configured the logging service. Th
 - Get a reference to the :code:`ConfigService` singleton
 
 When the framework is initialised, it attempts to read a file called :code:`Mantid.properties` that it assumes will be available in the current working directory.
-This contains among other things the logging configuration. See :ref:`PropertiesFile <PropertiesFile>` for more information.
+This contains among other things the logging configuration. See the :ref:`properties file <mantid:Properties File>` overview for more information.
+
 Here is an example:
 
 .. code-block:: text

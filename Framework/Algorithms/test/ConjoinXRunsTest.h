@@ -4,19 +4,34 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/AddSampleLog.h"
 #include "MantidAlgorithms/AddTimeSeriesLog.h"
 #include "MantidAlgorithms/ConjoinXRuns.h"
+#include "MantidAlgorithms/GroupWorkspaces.h"
+#include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/HistogramDx.h"
+#include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/HistogramY.h"
+#include "MantidHistogramData/Points.h"
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ConjoinXRuns;
 using Mantid::Algorithms::AddSampleLog;
 using Mantid::Algorithms::AddTimeSeriesLog;
+using Mantid::Algorithms::GroupWorkspaces;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::HistogramDx;
+using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::Points;
 using namespace Mantid::API;
 using namespace WorkspaceCreationHelper;
-using namespace Mantid::HistogramData;
 
 class ConjoinXRunsTest : public CxxTest::TestSuite {
 public:
@@ -26,37 +41,33 @@ public:
   static void destroySuite(ConjoinXRunsTest *suite) { delete suite; }
 
   void setUp() override {
-    MatrixWorkspace_sptr ws1 = create2DWorkspace123(5, 3); // 3 points
-    MatrixWorkspace_sptr ws2 = create2DWorkspace154(5, 2); // 2 points
-    MatrixWorkspace_sptr ws3 = create2DWorkspace123(5, 1); // 1 point
-    MatrixWorkspace_sptr ws4 = create2DWorkspace154(5, 1); // 1 point
-    MatrixWorkspace_sptr ws5 = create2DWorkspace123(5, 3); // 3 points
-    MatrixWorkspace_sptr ws6 = create2DWorkspace123(5, 3); // 3 points
-
-    ws1->getAxis(0)->setUnit("TOF");
-    ws2->getAxis(0)->setUnit("TOF");
-    ws3->getAxis(0)->setUnit("TOF");
-    ws4->getAxis(0)->setUnit("TOF");
-    ws5->getAxis(0)->setUnit("TOF");
-    ws6->getAxis(0)->setUnit("TOF");
-
-    storeWS("ws1", ws1);
-    storeWS("ws2", ws2);
-    storeWS("ws3", ws3);
-    storeWS("ws4", ws4);
-    storeWS("ws5", ws5);
-    storeWS("ws6", ws6);
-
+    std::vector<MatrixWorkspace_sptr> ws(6);
+    // Workspaces have 5 spectra must be point data, don't have masks and have
+    // dx
+    ws[0] = create2DWorkspace123(5, 3, false, std::set<int64_t>(),
+                                 true); // 3 points
+    ws[1] = create2DWorkspace154(5, 2, false, std::set<int64_t>(),
+                                 true); // 2 points
+    ws[2] =
+        create2DWorkspace123(5, 1, false, std::set<int64_t>(), true); // 1 point
+    ws[3] =
+        create2DWorkspace154(5, 1, false, std::set<int64_t>(), true); // 1 point
+    ws[4] = create2DWorkspace123(5, 3, false, std::set<int64_t>(),
+                                 true); // 3 points
+    ws[5] = create2DWorkspace123(5, 3, false, std::set<int64_t>(),
+                                 true); // 3 points
     m_testWS = {"ws1", "ws2", "ws3", "ws4", "ws5", "ws6"};
+
+    for (unsigned int i = 0; i < ws.size(); ++i) {
+      ws[i]->getAxis(0)->setUnit("TOF");
+      storeWS(m_testWS[i], ws[i]);
+    }
   }
 
   void tearDown() override {
-    removeWS("ws1");
-    removeWS("ws2");
-    removeWS("ws3");
-    removeWS("ws4");
-    removeWS("ws5");
-    removeWS("ws6");
+    for (unsigned int i = 0; i < m_testWS.size(); ++i) {
+      removeWS(m_testWS[i]);
+    }
     m_testWS.clear();
   }
 
@@ -80,34 +91,60 @@ public:
     TS_ASSERT_EQUALS(out->blocksize(), 7);
     TS_ASSERT(!out->isHistogramData());
     TS_ASSERT_EQUALS(out->getAxis(0)->unit()->unitID(), "TOF");
+    std::vector<double> x{1., 2., 3., 1., 2., 1., 1.};
+    std::vector<double> y{2., 2., 2., 5., 5., 2., 5.};
+    std::vector<double> e{3., 3., 3., 4., 4., 3., 4.};
+    TS_ASSERT_EQUALS(out->x(0).rawData(), x);
+    TS_ASSERT_EQUALS(out->y(0).rawData(), y);
+    TS_ASSERT_EQUALS(out->e(0).rawData(), e);
+    TSM_ASSERT_EQUALS("Dx and y values are the same", out->dx(0).rawData(), y);
+  }
 
-    std::vector<double> spectrum = out->y(0).rawData();
-    std::vector<double> error = out->e(0).rawData();
-    std::vector<double> xaxis = out->x(0).rawData();
+  void testTableInputWorkspaceInGroup() {
+    auto table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+    storeWS("table", table);
 
-    TS_ASSERT_EQUALS(spectrum[0], 2.);
-    TS_ASSERT_EQUALS(spectrum[1], 2.);
-    TS_ASSERT_EQUALS(spectrum[2], 2.);
-    TS_ASSERT_EQUALS(spectrum[3], 5.);
-    TS_ASSERT_EQUALS(spectrum[4], 5.);
-    TS_ASSERT_EQUALS(spectrum[5], 2.);
-    TS_ASSERT_EQUALS(spectrum[6], 5.);
+    GroupWorkspaces group;
+    group.initialize();
+    group.setProperty("InputWorkspaces",
+                      std::vector<std::string>{"table", "ws1"});
+    group.setProperty("OutputWorkspace", "group");
+    group.execute();
+    m_testee.setProperty("InputWorkspaces", "group");
+    m_testee.setProperty("OutputWorkspace", "out");
+    TS_ASSERT_THROWS_EQUALS(m_testee.execute(), const std::runtime_error &e,
+                            std::string(e.what()),
+                            "Some invalid Properties found");
+  }
 
-    TS_ASSERT_EQUALS(error[0], 3.);
-    TS_ASSERT_EQUALS(error[1], 3.);
-    TS_ASSERT_EQUALS(error[2], 3.);
-    TS_ASSERT_EQUALS(error[3], 4.);
-    TS_ASSERT_EQUALS(error[4], 4.);
-    TS_ASSERT_EQUALS(error[5], 3.);
-    TS_ASSERT_EQUALS(error[6], 4.);
+  void testWSWithoutDxValues() {
+    // Workspaces have 5 spectra must be point data
+    MatrixWorkspace_sptr ws0 = create2DWorkspace123(5, 3); // 3 points
+    MatrixWorkspace_sptr ws1 = create2DWorkspace154(5, 2); // 2 points
+    ws0->getAxis(0)->setUnit("TOF");
+    ws1->getAxis(0)->setUnit("TOF");
+    storeWS("ws_0", ws0);
+    storeWS("ws_1", ws1);
+    m_testee.setProperty("InputWorkspaces",
+                         std::vector<std::string>{"ws_0", "ws_1"});
+    m_testee.setProperty("OutputWorkspace", "out");
+    TS_ASSERT_THROWS_NOTHING(m_testee.execute());
+    TS_ASSERT(m_testee.isExecuted());
 
-    TS_ASSERT_EQUALS(xaxis[0], 1.);
-    TS_ASSERT_EQUALS(xaxis[1], 2.);
-    TS_ASSERT_EQUALS(xaxis[2], 3.);
-    TS_ASSERT_EQUALS(xaxis[3], 1.);
-    TS_ASSERT_EQUALS(xaxis[4], 2.);
-    TS_ASSERT_EQUALS(xaxis[5], 1.);
-    TS_ASSERT_EQUALS(xaxis[6], 1.);
+    MatrixWorkspace_sptr out =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+
+    TS_ASSERT(out);
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 5);
+    TS_ASSERT_EQUALS(out->blocksize(), 5);
+    TS_ASSERT(!out->isHistogramData());
+    TS_ASSERT_EQUALS(out->getAxis(0)->unit()->unitID(), "TOF");
+    std::vector<double> x{1., 2., 3., 1., 2.};
+    std::vector<double> y{2., 2., 2., 5., 5.};
+    std::vector<double> e{3., 3., 3., 4., 4.};
+    TS_ASSERT_EQUALS(out->x(0).rawData(), x);
+    TS_ASSERT_EQUALS(out->y(0).rawData(), y);
+    TS_ASSERT_EQUALS(out->e(0).rawData(), e);
   }
 
   void testFailDifferentNumberBins() {
@@ -127,9 +164,11 @@ public:
     MatrixWorkspace_sptr ws6 =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws6");
 
-    Counts counts{{4, 9, 16}};
-    Points points{{0.4, 0.9, 1.1}};
-    ws6->setHistogram(3, points, counts);
+    for (auto i = 0; i < 5;
+         i++) { // modify all 5 spectra of ws6 in terms of y and x
+      ws6->mutableY(i) = {4., 9., 16.};
+      ws6->mutableX(i) = {0.4, 0.9, 1.1};
+    }
 
     m_testee.setProperty("InputWorkspaces",
                          std::vector<std::string>{"ws1", "ws6"});
@@ -146,55 +185,17 @@ public:
     TS_ASSERT(!out->isHistogramData());
     TS_ASSERT_EQUALS(out->getAxis(0)->unit()->unitID(), "TOF");
 
-    auto spectrum0 = out->y(0).rawData();
-    auto error0 = out->e(0).rawData();
-    auto xaxis0 = out->x(0).rawData();
-
-    TS_ASSERT_EQUALS(spectrum0[0], 2.);
-    TS_ASSERT_EQUALS(spectrum0[1], 2.);
-    TS_ASSERT_EQUALS(spectrum0[2], 2.);
-    TS_ASSERT_EQUALS(spectrum0[3], 2.);
-    TS_ASSERT_EQUALS(spectrum0[4], 2.);
-    TS_ASSERT_EQUALS(spectrum0[5], 2.);
-
-    TS_ASSERT_EQUALS(error0[0], 3.);
-    TS_ASSERT_EQUALS(error0[1], 3.);
-    TS_ASSERT_EQUALS(error0[2], 3.);
-    TS_ASSERT_EQUALS(error0[3], 3.);
-    TS_ASSERT_EQUALS(error0[4], 3.);
-    TS_ASSERT_EQUALS(error0[5], 3.);
-
-    TS_ASSERT_EQUALS(xaxis0[0], 1.);
-    TS_ASSERT_EQUALS(xaxis0[1], 2.);
-    TS_ASSERT_EQUALS(xaxis0[2], 3.);
-    TS_ASSERT_EQUALS(xaxis0[3], 1.);
-    TS_ASSERT_EQUALS(xaxis0[4], 2.);
-    TS_ASSERT_EQUALS(xaxis0[5], 3.);
-
-    auto spectrum3 = out->y(3).rawData();
-    auto error3 = out->e(3).rawData();
-    auto xaxis3 = out->x(3).rawData();
-
-    TS_ASSERT_EQUALS(spectrum3[0], 2.);
-    TS_ASSERT_EQUALS(spectrum3[1], 2.);
-    TS_ASSERT_EQUALS(spectrum3[2], 2.);
-    TS_ASSERT_EQUALS(spectrum3[3], 4.);
-    TS_ASSERT_EQUALS(spectrum3[4], 9.);
-    TS_ASSERT_EQUALS(spectrum3[5], 16.);
-
-    TS_ASSERT_EQUALS(error3[0], 3.);
-    TS_ASSERT_EQUALS(error3[1], 3.);
-    TS_ASSERT_EQUALS(error3[2], 3.);
-    TS_ASSERT_EQUALS(error3[3], 2.);
-    TS_ASSERT_EQUALS(error3[4], 3.);
-    TS_ASSERT_EQUALS(error3[5], 4.);
-
-    TS_ASSERT_EQUALS(xaxis3[0], 1.);
-    TS_ASSERT_EQUALS(xaxis3[1], 2.);
-    TS_ASSERT_EQUALS(xaxis3[2], 3.);
-    TS_ASSERT_EQUALS(xaxis3[3], 0.4);
-    TS_ASSERT_EQUALS(xaxis3[4], 0.9);
-    TS_ASSERT_EQUALS(xaxis3[5], 1.1);
+    std::vector<double> x_vec{1., 2., 3., .4, .9, 1.1};
+    std::vector<double> y_vec{2., 2., 2., 4., 9., 16.};
+    std::vector<double> e_vec{3., 3., 3., 3., 3., 3.};
+    std::vector<double> dx_vec{2., 2., 2., 2., 2., 2.};
+    // Check all 5 spectra
+    for (auto i = 0; i < 5; i++) {
+      TS_ASSERT_EQUALS(out->y(i).rawData(), y_vec);
+      TS_ASSERT_EQUALS(out->e(i).rawData(), e_vec);
+      TS_ASSERT_EQUALS(out->x(i).rawData(), x_vec);
+      TS_ASSERT_EQUALS(out->dx(i).rawData(), dx_vec);
+    }
   }
 
   void testFailWithNumLog() {
@@ -245,16 +246,12 @@ public:
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 5);
     TS_ASSERT_EQUALS(out->getAxis(0)->unit()->unitID(), "Energy");
 
-    std::vector<double> xaxis = out->x(0).rawData();
-    std::vector<double> spectrum = out->y(0).rawData();
-    std::vector<double> error = out->e(0).rawData();
-
-    TS_ASSERT_EQUALS(xaxis[0], 0.7);
-    TS_ASSERT_EQUALS(xaxis[1], 1.1);
-    TS_ASSERT_EQUALS(spectrum[0], 2.);
-    TS_ASSERT_EQUALS(spectrum[1], 5.);
-    TS_ASSERT_EQUALS(error[0], 3.);
-    TS_ASSERT_EQUALS(error[1], 4.);
+    TS_ASSERT_EQUALS(out->x(0)[0], 0.7);
+    TS_ASSERT_EQUALS(out->x(0)[1], 1.1);
+    TS_ASSERT_EQUALS(out->y(0)[0], 2.);
+    TS_ASSERT_EQUALS(out->y(0)[1], 5.);
+    TS_ASSERT_EQUALS(out->e(0)[0], 3.);
+    TS_ASSERT_EQUALS(out->e(0)[1], 4.);
   }
 
   void testFailWithStringLog() {
@@ -315,27 +312,13 @@ public:
     TS_ASSERT_EQUALS(out->blocksize(), 5);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 5);
 
-    std::vector<double> spectrum = out->y(0).rawData();
-    std::vector<double> xaxis = out->x(0).rawData();
-    std::vector<double> error = out->e(0).rawData();
-
-    TS_ASSERT_EQUALS(spectrum[0], 2.);
-    TS_ASSERT_EQUALS(spectrum[1], 2.);
-    TS_ASSERT_EQUALS(spectrum[2], 2.);
-    TS_ASSERT_EQUALS(spectrum[3], 5.);
-    TS_ASSERT_EQUALS(spectrum[4], 5.);
-
-    TS_ASSERT_EQUALS(error[0], 3.);
-    TS_ASSERT_EQUALS(error[1], 3.);
-    TS_ASSERT_EQUALS(error[2], 3.);
-    TS_ASSERT_EQUALS(error[3], 4.);
-    TS_ASSERT_EQUALS(error[4], 4.);
-
-    TS_ASSERT_EQUALS(xaxis[0], 5.7);
-    TS_ASSERT_EQUALS(xaxis[1], 6.1);
-    TS_ASSERT_EQUALS(xaxis[2], 6.7);
-    TS_ASSERT_EQUALS(xaxis[3], 8.3);
-    TS_ASSERT_EQUALS(xaxis[4], 9.5);
+    std::vector<double> y_vec{2., 2., 2., 5., 5.};
+    std::vector<double> x_vec{5.7, 6.1, 6.7, 8.3, 9.5};
+    std::vector<double> e_vec{3., 3., 3., 4., 4.};
+    TS_ASSERT_EQUALS(out->y(0).rawData(), y_vec);
+    TS_ASSERT_EQUALS(out->x(0).rawData(), x_vec);
+    TS_ASSERT_EQUALS(out->e(0).rawData(), e_vec);
+    TS_ASSERT_EQUALS(out->dx(0).rawData(), y_vec)
   }
 
   void testFailWithNumSeriesLog() {
@@ -402,7 +385,8 @@ public:
   void setUp() override {
     m_ws.reserve(100);
     for (size_t i = 0; i < 100; ++i) {
-      MatrixWorkspace_sptr ws = create2DWorkspace123(10000, 100);
+      MatrixWorkspace_sptr ws =
+          create2DWorkspace123(2000, 100, false, std::set<int64_t>(), true);
       std::string name = "ws" + std::to_string(i);
       storeWS(name, ws);
       m_ws.push_back(name);

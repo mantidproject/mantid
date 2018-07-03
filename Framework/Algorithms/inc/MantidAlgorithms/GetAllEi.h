@@ -55,6 +55,7 @@ public:
   }
   /// Algorithm's version for identification. @see Algorithm::version
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override { return {"GetEi"}; }
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string category() const override { return "Inelastic\\Ei"; };
   /// Cross-check properties with each other @see IAlgorithm::validateInputs

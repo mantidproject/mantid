@@ -231,6 +231,19 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
   }
 
+  void test_delete_all() {
+    // This is well tested in GenericDataProcessorPresenterTest, hence just
+    // checking that the presenter is called
+
+    NiceMock<MockDataProcessorPresenter> presenter;
+    TwoLevelTreeManager manager(&presenter, reflWhitelist());
+
+    EXPECT_CALL(presenter, selectedParents()).Times(0);
+    EXPECT_CALL(presenter, selectedChildren()).Times(0);
+    TS_ASSERT_THROWS_NOTHING(manager.deleteAll());
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
+  }
+
   void test_expand_selection() {
     // This is well tested in GenericDataProcessorPresenterTest, hence just
     // checking that the presenter is called

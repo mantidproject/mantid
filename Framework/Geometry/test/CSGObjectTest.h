@@ -12,6 +12,7 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Material.h"
@@ -1270,12 +1271,12 @@ private:
       SurfLine.push_back(SCompT(73, "s 0.6 0 0 0.4"));
 
     // Note that the testObject now manages the "new Plane"
-    for (auto vc = SurfLine.cbegin(); vc != SurfLine.cend(); ++vc) {
-      auto A = Geometry::SurfaceFactory::Instance()->processLine(vc->second);
+    for (const auto &vc : SurfLine) {
+      auto A = Geometry::SurfaceFactory::Instance()->processLine(vc.second);
       TSM_ASSERT("Expected a non-null surface from the factory", A);
-      A->setName(vc->first);
-      SMap.insert(STYPE::value_type(vc->first,
-                                    boost::shared_ptr<Surface>(A.release())));
+      A->setName(vc.first);
+      SMap.insert(
+          STYPE::value_type(vc.first, boost::shared_ptr<Surface>(A.release())));
     }
 
     return;

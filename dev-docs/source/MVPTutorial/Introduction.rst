@@ -23,4 +23,4 @@ open to interpretation if some files are classed as a View or a Model
 (this will be discussed in detail later).
 
 A more thorough explanation of MVP can be found at
-:ref:`dev-docs-mvp-intro`.
+:ref:`GuiDesignGuidelinesMVPIntro`.

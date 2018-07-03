@@ -103,6 +103,9 @@ class BASISDiffraction(DataProcessorAlgorithm):
     def summary(self):
         return "Multiple-file BASIS reduction for diffraction detectors."
 
+    def seeAlso(self):
+        return [ "AlignDetectors","DiffractionFocussing","SNSPowderReduction" ]
+
     def PyInit(self):
         # Input validators
         array_length_three = FloatArrayLengthValidator(3)

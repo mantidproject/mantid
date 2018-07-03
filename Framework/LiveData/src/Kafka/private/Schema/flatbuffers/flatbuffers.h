@@ -757,11 +757,11 @@ FLATBUFFERS_FINAL_CLASS
     auto vt_use = GetSize();
     // See if we already have generated a vtable with this exact same
     // layout before. If so, make it point to the old one, remove this one.
-    for (auto it = vtables_.begin(); it != vtables_.end(); ++it) {
-      auto vt2 = reinterpret_cast<voffset_t *>(buf_.data_at(*it));
+    for (unsigned int & vtable : vtables_) {
+      auto vt2 = reinterpret_cast<voffset_t *>(buf_.data_at(vtable));
       auto vt2_size = *vt2;
       if (vt1_size != vt2_size || memcmp(vt2, vt1, vt1_size)) continue;
-      vt_use = *it;
+      vt_use = vtable;
       buf_.pop(GetSize() - vtableoffsetloc);
       break;
     }

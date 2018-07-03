@@ -507,22 +507,21 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer) {
   const auto &detData = *(eventMsg->detector_id());
   auto nEvents = tofData.size();
 
-  if (eventMsg->facility_specific_data_type() != FacilityData_ISISData) {
-    throw std::runtime_error("KafkaEventStreamDecoder only knows how to "
-                             "deal with ISIS facility specific data");
-  }
-  auto ISISMsg =
-      static_cast<const ISISData *>(eventMsg->facility_specific_data());
-
+  DataObjects::EventWorkspace_sptr periodBuffer;
   std::lock_guard<std::mutex> lock(m_mutex);
-  auto &periodBuffer =
-      *m_localEvents[static_cast<size_t>(ISISMsg->period_number())];
-  auto &mutableRunInfo = periodBuffer.mutableRun();
-  mutableRunInfo.getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)
-      ->addValue(pulseTime, ISISMsg->proton_charge());
+  if (eventMsg->facility_specific_data_type() == FacilityData_ISISData) {
+    auto ISISMsg =
+        static_cast<const ISISData *>(eventMsg->facility_specific_data());
+    periodBuffer = m_localEvents[static_cast<size_t>(ISISMsg->period_number())];
+    auto &mutableRunInfo = periodBuffer->mutableRun();
+    mutableRunInfo.getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)
+        ->addValue(pulseTime, ISISMsg->proton_charge());
+  } else {
+    periodBuffer = m_localEvents[0];
+  }
   for (decltype(nEvents) i = 0; i < nEvents; ++i) {
-    auto &spectrum =
-        periodBuffer.getSpectrum(m_specToIdx[static_cast<int32_t>(detData[i])]);
+    auto &spectrum = periodBuffer->getSpectrum(
+        m_specToIdx[static_cast<int32_t>(detData[i])]);
     spectrum.addEventQuickly(TofEvent(static_cast<double>(tofData[i]) *
                                           1e-3, // nanoseconds to microseconds
                                       pulseTime));

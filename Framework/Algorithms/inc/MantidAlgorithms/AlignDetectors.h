@@ -67,6 +67,9 @@ public:
 
   /// Algorithm's version for identification. @see Algorithm::version
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"DiffractionFocussing", "AlignAndFocusPowder"};
+  }
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string category() const override;
   /// Cross-check properties with each other @see IAlgorithm::validateInputs

@@ -17,7 +17,6 @@ using namespace Mantid::DataObjects;
 using namespace std;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using namespace Mantid::Geometry;
 using namespace Mantid::Crystal;
 
 class SCDCalibratePanelsTest : public CxxTest::TestSuite {

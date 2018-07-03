@@ -5,6 +5,7 @@
 #include <random>
 #include <array>
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/uniform_int_distribution.h"
 
 /**
    \class StringTokenizerTest
@@ -165,9 +166,10 @@ class RandomCharacter {
 public:
   RandomCharacter() {
     const size_t maxIndex = (sizeof(m_characterSet) - 1);
-    m_distribution = std::uniform_int_distribution<unsigned>(0, maxIndex);
-  };
-  char operator()() { return m_characterSet[m_distribution(m_generator)]; };
+    m_distribution =
+        Mantid::Kernel::uniform_int_distribution<unsigned>(0, maxIndex);
+  }
+  char operator()() { return m_characterSet[m_distribution(m_generator)]; }
 
 private:
   std::array<char, 62> m_characterSet{
@@ -177,7 +179,7 @@ private:
        'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
        'u', 'v', 'w', 'x', 'y', 'z'}};
   std::mt19937 m_generator;
-  std::uniform_int_distribution<unsigned> m_distribution;
+  Mantid::Kernel::uniform_int_distribution<unsigned> m_distribution;
 };
 
 std::string randomString(size_t length) {

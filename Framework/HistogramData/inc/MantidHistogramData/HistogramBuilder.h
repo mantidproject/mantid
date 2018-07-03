@@ -50,6 +50,10 @@ public:
   template <typename... T> void setE(T &&... data) {
     m_e = Kernel::make_cow<HistogramE>(std::forward<T>(data)...);
   }
+  /// Sets Dx information. Can be a length or actual Dx data.
+  template <typename... T> void setDx(T &&... data) {
+    d_x = Kernel::make_cow<HistogramDx>(std::forward<T>(data)...);
+  }
   void setDistribution(bool isDistribution);
 
   Histogram build() const;
@@ -59,6 +63,7 @@ private:
   Kernel::cow_ptr<HistogramX> m_x{nullptr};
   Kernel::cow_ptr<HistogramY> m_y{nullptr};
   Kernel::cow_ptr<HistogramE> m_e{nullptr};
+  Kernel::cow_ptr<HistogramDx> d_x{nullptr};
 };
 
 } // namespace HistogramData

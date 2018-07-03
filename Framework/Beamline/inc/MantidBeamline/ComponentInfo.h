@@ -116,6 +116,7 @@ public:
   std::vector<size_t> componentsInSubtree(const size_t componentIndex) const;
   const std::vector<size_t> &children(const size_t componentIndex) const;
   size_t size() const;
+  size_t numberOfDetectorsInSubtree(const size_t componentIndex) const;
   bool isDetector(const size_t componentIndex) const {
     return componentIndex < m_assemblySortedDetectorIndices->size();
   }

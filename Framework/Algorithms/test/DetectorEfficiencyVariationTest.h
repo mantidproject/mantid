@@ -130,8 +130,8 @@ public:
       inputB->setBinEdges(j, x);
       std::vector<double> forInputA, forInputB;
       // the spectravalues will be multiples of the random numbers above
-      for (int l = 0; l < ySize; ++l) {
-        forInputA.push_back(yArray[l]);
+      for (double y : yArray) {
+        forInputA.push_back(y);
         // there is going to be a small difference between the workspaces that
         // will vary with histogram number
         forInputB.push_back(forInputA.back() *

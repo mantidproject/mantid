@@ -54,10 +54,12 @@ public:
 
   signal_t getError() const override;
 
-  coord_t *getVertexesArray(size_t &numVertices, const size_t outDimensions,
-                            const bool *maskDim) const override;
+  std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                   const bool *maskDim) const override;
 
-  coord_t *getVertexesArray(size_t &numVertices) const override;
+  std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices) const override;
 
   Mantid::Kernel::VMD getCenter() const override;
 

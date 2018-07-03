@@ -8,8 +8,10 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -72,119 +74,6 @@ double getLambda(const HistogramX &xValues, const int xIdx) {
 
   // The centre of the bin is the lower bin edge plus half the width
   return xValues[xIdx] + getLambdaRange(xValues, xIdx) / 2.0;
-}
-
-/** @todo The following translation functions are duplicates of code in
-* GroupDetectors2.cpp. Longer term, we should move them to a common location if
-* possible */
-
-/* The following functions are used to translate single operators into
-* groups, just like the ones this algorithm loads from .map files.
-*
-* Each function takes a string, such as "3+4", or "6:10" and then adds
-* the resulting groups of spectra to outGroups.
-*/
-
-// An add operation, i.e. "3+4" -> [3+4]
-void translateAdd(const std::string &instructions,
-                  std::vector<std::vector<size_t>> &outGroups) {
-  auto spectra = Kernel::StringTokenizer(
-      instructions, "+", Kernel::StringTokenizer::TOK_TRIM |
-                             Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-
-  std::vector<size_t> outSpectra;
-  outSpectra.reserve(spectra.count());
-  for (const auto &spectrum : spectra) {
-    // add this spectrum to the group we're about to add
-    outSpectra.push_back(boost::lexical_cast<size_t>(spectrum));
-  }
-  outGroups.push_back(std::move(outSpectra));
-}
-
-// A range summation, i.e. "3-6" -> [3+4+5+6]
-void translateSumRange(const std::string &instructions,
-                       std::vector<std::vector<size_t>> &outGroups) {
-  // add a group with the sum of the spectra in the range
-  auto spectra = Kernel::StringTokenizer(instructions, "-");
-  if (spectra.count() != 2)
-    throw std::runtime_error("Malformed range (-) operation.");
-  // fetch the start and stop spectra
-  size_t first = boost::lexical_cast<size_t>(spectra[0]);
-  size_t last = boost::lexical_cast<size_t>(spectra[1]);
-  // swap if they're back to front
-  if (first > last)
-    std::swap(first, last);
-
-  // add all the spectra in the range to the output group
-  std::vector<size_t> outSpectra;
-  outSpectra.reserve(last - first + 1);
-  for (size_t i = first; i <= last; ++i)
-    outSpectra.push_back(i);
-  if (!outSpectra.empty())
-    outGroups.push_back(std::move(outSpectra));
-}
-
-// A range insertion, i.e. "3:6" -> [3,4,5,6]
-void translateRange(const std::string &instructions,
-                    std::vector<std::vector<size_t>> &outGroups) {
-  // add a group per spectra
-  auto spectra = Kernel::StringTokenizer(
-      instructions, ":", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-  if (spectra.count() != 2)
-    throw std::runtime_error("Malformed range (:) operation.");
-  // fetch the start and stop spectra
-  size_t first = boost::lexical_cast<size_t>(spectra[0]);
-  size_t last = boost::lexical_cast<size_t>(spectra[1]);
-  // swap if they're back to front
-  if (first > last)
-    std::swap(first, last);
-
-  // add all the spectra in the range to separate output groups
-  for (size_t i = first; i <= last; ++i) {
-    // create group of size 1 with the spectrum and add it to output
-    outGroups.emplace_back(1, i);
-  }
-}
-
-/**
-* Translate the processing instructions into a vector of groups of indices
-*
-* @param instructions : Instructions to translate
-* @return : A vector of groups, each group being a vector of its 0-based
-* spectrum indices
-*/
-std::vector<std::vector<size_t>>
-translateInstructions(const std::string &instructions) {
-  std::vector<std::vector<size_t>> outGroups;
-
-  try {
-    // split into comma separated groups, each group potentially containing
-    // an operation (+-:) that produces even more groups.
-    auto groups = Kernel::StringTokenizer(
-        instructions, ",",
-        StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
-    for (const auto &groupStr : groups) {
-      // Look for the various operators in the string. If one is found then
-      // do the necessary translation into groupings.
-      if (groupStr.find('+') != std::string::npos) {
-        // add a group with the given spectra
-        translateAdd(groupStr, outGroups);
-      } else if (groupStr.find('-') != std::string::npos) {
-        translateSumRange(groupStr, outGroups);
-      } else if (groupStr.find(':') != std::string::npos) {
-        translateRange(groupStr, outGroups);
-      } else if (!groupStr.empty()) {
-        // contains no instructions, just add this spectrum as a new group
-        // create group of size 1 with the spectrum in it and add it to output
-        outGroups.emplace_back(1, boost::lexical_cast<size_t>(groupStr));
-      }
-    }
-  } catch (boost::bad_lexical_cast &) {
-    throw std::runtime_error("Invalid processing instructions: " +
-                             instructions);
-  }
-
-  return outGroups;
 }
 
 /**
@@ -443,6 +332,7 @@ void ReflectometryReductionOne2::exec() {
   m_spectrumInfo = &m_runWS->spectrumInfo();
   auto instrument = m_runWS->getInstrument();
   m_refFrame = instrument->getReferenceFrame();
+  m_partialBins = getProperty("IncludePartialBins");
 
   // Find and cache detector groups and theta0
   findDetectorGroups();
@@ -578,7 +468,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     if (m_convertUnits) {
       g_log.debug("Converting input workspace to wavelength\n");
       result = convertToWavelength(result);
-      findWavelengthMinMax(result);
       outputDebugWorkspace(result, wsName, "_lambda", debug, step);
     }
     // Now the workspace is in wavelength, find the min/max wavelength
@@ -789,24 +678,48 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(
   return corrAlg->getProperty("OutputWorkspace");
 }
 
-/**
-* The input workspace (in wavelength) to convert to Q
-* @param inputWS : the input workspace to convert
+/** Convert a workspace to Q
+*
+* @param inputWS : The input workspace (in wavelength) to convert to Q
 * @return : output workspace in Q
 */
 MatrixWorkspace_sptr
 ReflectometryReductionOne2::convertToQ(MatrixWorkspace_sptr inputWS) {
-
-  // Convert to Q
-  auto convertUnits = this->createChildAlgorithm("ConvertUnits");
-  convertUnits->initialize();
-  convertUnits->setProperty("InputWorkspace", inputWS);
-  convertUnits->setProperty("Target", "MomentumTransfer");
-  convertUnits->setProperty("AlignBins", false);
-  convertUnits->execute();
-  MatrixWorkspace_sptr IvsQ = convertUnits->getProperty("OutputWorkspace");
-
-  return IvsQ;
+  bool const moreThanOneDetector = inputWS->getDetector(0)->nDets() > 1;
+  bool const shouldCorrectAngle =
+      !(*getProperty("ThetaIn")).isDefault() && !summingInQ();
+  if (shouldCorrectAngle && moreThanOneDetector) {
+    if (inputWS->getNumberHistograms() > 1) {
+      throw std::invalid_argument(
+          "Expected a single group in "
+          "ProcessingInstructions to be able to "
+          "perform angle correction, found " +
+          std::to_string(inputWS->getNumberHistograms()));
+    }
+    MatrixWorkspace_sptr IvsQ = inputWS->clone();
+    auto &XOut0 = IvsQ->mutableX(0);
+    const auto &XIn0 = inputWS->x(0);
+    double const theta = getProperty("ThetaIn");
+    double const factor = 4.0 * M_PI * sin(theta * M_PI / 180.0);
+    std::transform(XIn0.rbegin(), XIn0.rend(), XOut0.begin(),
+                   [factor](double x) { return factor / x; });
+    auto &Y0 = IvsQ->mutableY(0);
+    auto &E0 = IvsQ->mutableE(0);
+    std::reverse(Y0.begin(), Y0.end());
+    std::reverse(E0.begin(), E0.end());
+    IvsQ->getAxis(0)->unit() =
+        UnitFactory::Instance().create("MomentumTransfer");
+    return IvsQ;
+  } else {
+    auto convertUnits = this->createChildAlgorithm("ConvertUnits");
+    convertUnits->initialize();
+    convertUnits->setProperty("InputWorkspace", inputWS);
+    convertUnits->setProperty("Target", "MomentumTransfer");
+    convertUnits->setProperty("AlignBins", false);
+    convertUnits->execute();
+    MatrixWorkspace_sptr IvsQ = convertUnits->getProperty("OutputWorkspace");
+    return IvsQ;
+  }
 }
 
 /**
@@ -832,7 +745,7 @@ bool ReflectometryReductionOne2::summingInQ() {
 void ReflectometryReductionOne2::findDetectorGroups() {
   std::string instructions = getPropertyValue("ProcessingInstructions");
 
-  m_detectorGroups = translateInstructions(instructions);
+  m_detectorGroups = Kernel::Strings::parseGroups<size_t>(instructions);
 
   // Sort the groups by the first spectrum number in the group (to give the same
   // output order as GroupDetectors)
@@ -968,6 +881,77 @@ void ReflectometryReductionOne2::findWavelengthMinMax(
   }
 }
 
+/** Return the spectrum index of the detector to use in the projection for the
+ * start of the virtual IvsLam range when summing in Q
+ */
+size_t ReflectometryReductionOne2::findIvsLamRangeMinDetector(
+    const std::vector<size_t> &detectors) {
+  // If we're including partial bins, we use the full input range, which means
+  // we project the top left and bottom right corner. For the start of the
+  // range we therefore use the highest theta, i.e. max detector index. If
+  // excluding partial bins we use the bottom left and top right corner so use
+  // the min detector for the start of the range.
+  if (m_partialBins)
+    return detectors.back();
+  else
+    return detectors.front();
+}
+
+/** Return the spectrum index of the detector to use in the projection for the
+ * end of the virtual IvsLam range when summing in Q
+ */
+size_t ReflectometryReductionOne2::findIvsLamRangeMaxDetector(
+    const std::vector<size_t> &detectors) {
+  // If we're including partial bins, we use the full input range, which means
+  // we project the top left and bottom right corner. For the end (max) of the
+  // range we therefore use the lowest theta, i.e. min detector index. If
+  // excluding partial bins we use the bottom left and top right corner so use
+  // the max detector for the end of the range.
+  if (m_partialBins)
+    return detectors.front();
+  else
+    return detectors.back();
+}
+
+double ReflectometryReductionOne2::findIvsLamRangeMin(
+    MatrixWorkspace_sptr detectorWS, const std::vector<size_t> &detectors,
+    const double lambda) {
+  double projectedMin = 0.0;
+
+  const size_t spIdx = findIvsLamRangeMinDetector(detectors);
+  const double twoTheta = getDetectorTwoTheta(m_spectrumInfo, spIdx);
+  const double bTwoTheta = getDetectorTwoThetaRange(spIdx);
+
+  // For bLambda, use the average bin size for this spectrum
+  auto xValues = detectorWS->x(spIdx);
+  double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
+                   static_cast<int>(xValues.size());
+  double dummy = 0.0;
+  getProjectedLambdaRange(lambda, twoTheta, bLambda, bTwoTheta, detectors,
+                          projectedMin, dummy, m_partialBins);
+  return projectedMin;
+}
+
+double ReflectometryReductionOne2::findIvsLamRangeMax(
+    MatrixWorkspace_sptr detectorWS, const std::vector<size_t> &detectors,
+    const double lambda) {
+  double projectedMax = 0.0;
+
+  const size_t spIdx = findIvsLamRangeMaxDetector(detectors);
+  const double twoTheta = getDetectorTwoTheta(m_spectrumInfo, spIdx);
+  const double bTwoTheta = getDetectorTwoThetaRange(spIdx);
+
+  // For bLambda, use the average bin size for this spectrum
+  auto xValues = detectorWS->x(spIdx);
+  double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
+                   static_cast<int>(xValues.size());
+
+  double dummy = 0.0;
+  getProjectedLambdaRange(lambda, twoTheta, bLambda, bTwoTheta, detectors,
+                          dummy, projectedMax, m_partialBins);
+  return projectedMax;
+}
+
 /**
 * Find the range of the projected lambda range when summing in Q
 *
@@ -984,26 +968,8 @@ void ReflectometryReductionOne2::findIvsLamRange(
     double &projectedMax) {
 
   // Get the new max and min X values of the projected (virtual) lambda range
-  double dummy = 0.0;
-
-  const size_t spIdxMin = detectors.front();
-  const double twoThetaMin = getDetectorTwoTheta(m_spectrumInfo, spIdxMin);
-  const double bTwoThetaMin = getDetectorTwoThetaRange(spIdxMin);
-  // For bLambda, use the average bin size for this spectrum
-  auto xValues = detectorWS->x(spIdxMin);
-  double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
-                   static_cast<int>(xValues.size());
-  getProjectedLambdaRange(lambdaMax, twoThetaMin, bLambda, bTwoThetaMin,
-                          detectors, dummy, projectedMax);
-
-  const size_t spIdxMax = detectors.back();
-  const double twoThetaMax = getDetectorTwoTheta(m_spectrumInfo, spIdxMax);
-  const double bTwoThetaMax = getDetectorTwoThetaRange(spIdxMax);
-  xValues = detectorWS->x(spIdxMax);
-  bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
-            static_cast<int>(xValues.size());
-  getProjectedLambdaRange(lambdaMin, twoThetaMax, bLambda, bTwoThetaMax,
-                          detectors, projectedMin, dummy);
+  projectedMin = findIvsLamRangeMin(detectorWS, detectors, lambdaMin);
+  projectedMax = findIvsLamRangeMax(detectorWS, detectors, lambdaMax);
 
   if (projectedMin > projectedMax) {
     throw std::runtime_error(
@@ -1255,11 +1221,13 @@ void ReflectometryReductionOne2::sumInQShareCounts(
 * @param detectors [in] :: spectrum indices of the detectors of interest
 * @param lambdaVMin [out] :: the projected range start
 * @param lambdaVMax [out] :: the projected range end
+* @param outerCorners [in] :: true to project from top-left and bottom-right
+* corners of the pixel; false to use bottom-left and top-right
 */
 void ReflectometryReductionOne2::getProjectedLambdaRange(
     const double lambda, const double twoTheta, const double bLambda,
     const double bTwoTheta, const std::vector<size_t> &detectors,
-    double &lambdaVMin, double &lambdaVMax) {
+    double &lambdaVMin, double &lambdaVMax, const bool outerCorners) {
 
   // We cannot project pixels below the horizon angle
   if (twoTheta <= theta0()) {
@@ -1271,23 +1239,25 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
 
   // Get the angle from twoThetaR to this detector
   const double twoThetaRVal = twoThetaR(detectors);
-  // Get the distance from the pixel to twoThetaR
-  const double gamma = twoTheta - twoThetaRVal;
   // Get the angle from the horizon to the reference angle
-  const double horizonThetaR = twoThetaRVal - theta0();
+  const double delta = twoThetaRVal - theta0();
+  // For outer corners use top left, bottom right; otherwise bottom left, top
+  // right
+  const double lambda1 = lambda - bLambda / 2.0;
+  const double lambda2 = lambda + bLambda / 2.0;
+  double twoTheta1 = twoTheta + bTwoTheta / 2.0;
+  double twoTheta2 = twoTheta - bTwoTheta / 2.0;
+  if (!outerCorners)
+    std::swap(twoTheta1, twoTheta2);
 
   // Calculate the projected wavelength range
   try {
-    const double lambdaTop =
-        (lambda + bLambda / 2.0) *
-        (std::sin(horizonThetaR) /
-         std::sin(horizonThetaR + gamma - bTwoTheta / 2.0));
-    const double lambdaBot =
-        (lambda - bLambda / 2.0) *
-        (std::sin(horizonThetaR) /
-         std::sin(horizonThetaR + gamma + bTwoTheta / 2.0));
-    lambdaVMin = std::min(lambdaTop, lambdaBot);
-    lambdaVMax = std::max(lambdaTop, lambdaBot);
+    const double lambdaV1 =
+        lambda1 * (std::sin(delta) / std::sin(twoTheta1 - theta0()));
+    const double lambdaV2 =
+        lambda2 * (std::sin(delta) / std::sin(twoTheta2 - theta0()));
+    lambdaVMin = std::min(lambdaV1, lambdaV2);
+    lambdaVMax = std::max(lambdaV1, lambdaV2);
   } catch (std::exception &ex) {
     throw std::runtime_error(
         "Failed to project (lambda, twoTheta) = (" + std::to_string(lambda) +
@@ -1334,5 +1304,6 @@ void ReflectometryReductionOne2::verifySpectrumMaps(
     }
   }
 }
+
 } // namespace Algorithms
 } // namespace Mantid

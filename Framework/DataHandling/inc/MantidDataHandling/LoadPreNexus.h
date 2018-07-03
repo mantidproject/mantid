@@ -44,6 +44,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadEventPreNexus", "LoadPreNexusMonitors", "LoadNexus"};
+  }
   const std::string category() const override;
   void parseRuninfo(const std::string &runinfo, std::string &dataDir,
                     std::vector<std::string> &eventFilenames);

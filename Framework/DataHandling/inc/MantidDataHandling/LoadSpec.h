@@ -57,6 +57,9 @@ public:
   }
 
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadSNSspec"};
+  }
   const std::string category() const override { return "DataHandling\\Text"; }
 
 private:

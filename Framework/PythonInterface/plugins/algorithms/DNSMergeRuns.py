@@ -30,6 +30,9 @@ class DNSMergeRuns(PythonAlgorithm):
         """
         return 'Workflow\\MLZ\\DNS'
 
+    def seeAlso(self):
+        return [ "LoadDNSLegacy" ]
+
     def name(self):
         """
         Returns name

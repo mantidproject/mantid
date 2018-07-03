@@ -9,7 +9,6 @@ are configured to find the Vesuvio data
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import numpy as np
-import platform
 
 from mantid.api import *
 import mantid.simpleapi as ms
@@ -43,20 +42,6 @@ def tear_down():
     for name in workspace_names:
         if mtd.doesExist(name):
             mtd.remove(name)
-
-
-def _is_old_boost_version():
-    # It appears that a difference in boost version is causing different
-    # random number generation. As such an OS check is used.
-    # Older boost (earlier than 56): Ubuntu 14.04, RHEL7
-    dist = platform.linux_distribution()
-    if any(dist):
-        if 'Red Hat' in dist[0] and dist[1].startswith('7'):
-            return True
-        if dist[0] == 'Ubuntu' and dist[1] == '14.04':
-            return True
-
-    return False
 
 
 def _create_algorithm(**kwargs):
@@ -178,15 +163,11 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         # Test Corrections Workspaces
         corrections_wsg = self._algorithm.getProperty("CorrectionWorkspaces").value
         _validate_group_structure(self, corrections_wsg, 3)
-        corrections_gb_peak = 0.013565531122
-        corrections_ts_peak = 0.157937557587
-        corrections_ms_peak = 0.000168789876
-        corrections_ts_bin = 724
-        corrections_ms_bin = 721
-        if _is_old_boost_version():
-            corrections_ms_peak = 0.000230715391301
-            corrections_ts_bin = 722
-            corrections_ms_bin = 367
+        corrections_gb_peak = 0.013566
+        corrections_ts_peak = 0.157938
+        corrections_ms_peak = 0.000212
+        corrections_ts_bin = 726
+        corrections_ms_bin = 709
 
         _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak, 458)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, corrections_ts_bin)
@@ -242,10 +223,7 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         corrections_gb_peak = 0.010067042262
         corrections_ts_peak = 0.156099834417
         corrections_ms_peak = 0.000224572965
-        correction_ms_bin = 46
-        if _is_old_boost_version():
-            corrections_ms_peak = 0.000217384521001
-            correction_ms_bin = 717
+        correction_ms_bin = 709
 
         _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak, 457)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, 724)
@@ -298,15 +276,11 @@ class TestMsCorrectWithContainer(stresstesting.MantidStressTest):
         # Test Corrections Workspaces
         corrections_wsg = self._algorithm.getProperty("CorrectionWorkspaces").value
         _validate_group_structure(self, corrections_wsg, 3)
-        corrections_gb_peak = 0.026998140125
-        corrections_ts_peak = 0.138476364257
-        corrections_ms_peak = 0.000147974497
-        corrections_ts_bin = 724
-        corrections_ms_bin = 721
-        if _is_old_boost_version():
-            corrections_ms_peak = 0.000202286454557
-            corrections_ts_bin = 722
-            corrections_ms_bin = 367
+        corrections_gb_peak = 0.026998
+        corrections_ts_peak = 0.138476
+        corrections_ms_peak = 0.000186
+        corrections_ts_bin = 726
+        corrections_ms_bin = 709
 
         _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak, 3)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, corrections_ts_bin)
@@ -360,9 +334,7 @@ class TestGammaAndMsCorrectWithContainer(stresstesting.MantidStressTest):
         corrections_gb_peak = 0.0249370393881
         corrections_ts_peak = 0.0131222459575
         corrections_ms_peak = 0.147875290632
-        corrections_ms_bin = 724
-        if _is_old_boost_version():
-            corrections_ms_bin = 722
+        corrections_ms_bin = 726
 
         _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak, 3)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, 458)
@@ -420,9 +392,7 @@ class TestGammaAndMsCorrectWithContainerFixedScaling(stresstesting.MantidStressT
         corrections_gb_peak = 0.045572099871
         corrections_ts_peak = 0.002216628155
         corrections_ms_peak = 0.132649056625
-        corrections_ms_bin = 724
-        if _is_old_boost_version():
-            corrections_ms_bin = 722
+        corrections_ms_bin = 726
 
         _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak, 3)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, 458)
@@ -483,16 +453,14 @@ class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
         corrections_wsg = self._algorithm.getProperty("CorrectionWorkspaces").value
         _validate_group_structure(self, corrections_wsg, 3)
         corrections_ts_peak = 0.131359579675
-        # corrections_ms_peak = 0.00117365595751
+        corrections_ms_peak = 0.001551
         corrections_ts_bin  = 701
-        # corrections_ms_bin = 690
-        # if _is_old_boost_version():
-        #    corrections_ms_bin = 691
+        corrections_ms_bin = 48
 
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, corrections_ts_bin,
                                      tolerance=0.2, bin_tolerance=5)
-        # _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin,
-        #                              tolerance=0.2, bin_tolerance=5)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin,
+                                     tolerance=0.2, bin_tolerance=5)
 
         # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value

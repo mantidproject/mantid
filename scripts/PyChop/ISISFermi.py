@@ -8,6 +8,7 @@ spectrometers (MAPS, MARI, MERLIN) - using the functions in Chop.py and addition
 """
 
 from __future__ import (absolute_import, division, print_function)
+import warnings
 import numpy as np
 from . import Chop
 from scipy.interpolate import interp1d
@@ -78,14 +79,20 @@ class ISISFermi:
         'MERLIN': {'imod':2, 'ch_mod':'AP', 'mod_pars':[80.0, 0.5226], 'mod_scale_fn':None, 'theta': 26.7}
         }
 
+    # For Merlin, set the disk chopper phase to block neutrons with energy greater than 200meV
+    # For MAPS and MARI, corresponds to the default slit to let the desired rep through
+    __DiskChopperMode = {'MERLIN':1500, 'MAPS':0, 'MARI':2}
+
     def __init__(self, instname=None, choppername='', freq=0):
+        warnings.warn("The ISISFermi class is deprecated and will be removed in the next Mantid version. "
+                      "Please use the Instrument class or the official PyChop CLI interface.", DeprecationWarning)
         if instname:
             self.setInstrument(instname, choppername, freq)
+            self.diskchopper_phase = self.__DiskChopperMode[instname]
         else:
             self.instname = None
+            self.diskchopper_phase = None
         self.Ei = None
-        # For Merlin, set the disk chopper phase to block neutrons with energy greater than 200meV
-        self.diskchopper_phase = 1500
 
     def setInstrument(self, instname, choppername='', freq=0):
         """
@@ -103,7 +110,7 @@ class ISISFermi:
         if choppername:
             self.setChopper(choppername, freq)
 
-    def setChopper(self, choppername, freq=50, diskchopper_phase=None):
+    def setChopper(self, choppername, freq=50, diskchopper_phase=None, diskchopper_freq=None):
         """
         Resets the chopper type of this chopper object
 
@@ -113,14 +120,13 @@ class ISISFermi:
         Chopper frequency must also be given
         """
         choppername = choppername.upper()
-        self.freq = freq
         if choppername not in self.__chopperParameters[self.instname].keys():
             raise ValueError('Chopper %s of %s not recognised' % (choppername, self.instname))
         self.choppername = choppername
-        self.freq = freq[0] if np.shape(freq) else freq
-        if self.freq % 50 != 0:
+        self.freq = freq if np.shape(freq) else [freq]
+        if self.freq[0] % 50 != 0:
             raise ValueError('Chopper frequency must be a multiple of 50Hz')
-        if self.freq <= 0:
+        if self.freq[0] <= 0:
             raise ValueError('Chopper frequency must be greater than 0Hz')
         if diskchopper_phase is not None:
             self.diskchopper_phase = diskchopper_phase
@@ -187,7 +193,7 @@ class ISISFermi:
         pslit = chop_par[0] / 1000.00
         radius = chop_par[2] / 1000.00
         rho = chop_par[3] / 1000.00
-        return Chop.tchop(self.freq, Ei, pslit, radius, rho)
+        return Chop.tchop(self.freq[0], Ei, pslit, radius, rho)
 
     def getModWidth(self, Ei_in=None):
         """
@@ -246,7 +252,7 @@ class ISISFermi:
             self.setFrequency(frequency)
         tsqmod = self.getModWidth(Ei)
         tsqchp = self.getChopWidth(Ei)
-        omega = self.freq * 2*np.pi
+        omega = self.freq[0] * 2*np.pi
         tsqjit = (self.__chopperParameters[self.instname][self.choppername]['par'][5] * 1.0e-6)**2
         # Sample parameters
         sam_dims = np.array(self.__samplesDimensions[self.instname])
@@ -286,7 +292,7 @@ class ISISFermi:
         x2 = self.__Instruments[self.instname][3]
         tbin = self.__Instruments[self.instname][9]
         res_el = np.real(2.35482 * 8.747832e-4 * np.sqrt(Ei**3) * (np.sqrt(v_van[0] + (tbin**2/12.00)) * 1.0e6) / x2)
-        return {"Moderator":tmod*1.e6, "Chopper":tchp*1.e6, "Energy":res_el}
+        return {"Moderator":tmod*2.35482e6, "Chopper":tchp*2.35482e6, "Energy":res_el}
 
     def __van_calc(self, v_mod, v_ch, v_jit, v_x, v_y, v_xy, v_dd, Ei, eps, phi, omega):
         """
@@ -301,8 +307,8 @@ class ISISFermi:
         tanthm = np.tan(thetam)
         am = -(x1+rat*x2) / x0
         ach = (1.00 + (x1+rat*x2)/x0)
-        g1 = (1.00 - (omega*(x0+x1)*tanthm/veli)) # wrong (in original CHOP!) - should be (xa+x1), not (x0+x1)
-        #g1 = (1.00 - (omega*(xa+x1)*tanthm/veli))
+        #g1 = (1.00 - (omega*(x0+x1)*tanthm/veli)) # wrong (in original CHOP!) - should be (xa+x1), not (x0+x1)
+        g1 = (1.00 - (omega*(xa+x1)*tanthm/veli))
         g2 = (1.00 - (omega*(x0-xa)*tanthm/veli))
         f1 = 1.00 + ((x1/x0)*g1)
         f2 = 1.00 + ((x1/x0)*g2)
@@ -391,7 +397,7 @@ class ISISFermi:
         dslat = (chop_par[0] + chop_par[1]) / 1000.00
         radius = chop_par[2] / 1000.00
         rho = chop_par[3] / 1000.00
-        chopper_transmission = Chop.achop(Ei, self.freq, dslat, pslit, radius, rho)
+        chopper_transmission = Chop.achop(Ei, self.freq[0], dslat, pslit, radius, rho)
         x0 = self.__Instruments[self.instname][0]
         x1 = self.__Instruments[self.instname][2]
         flux = 84403.060 * moderator_flux * (chopper_transmission/dslat) / (x0*(x1+x0))

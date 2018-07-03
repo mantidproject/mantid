@@ -16,7 +16,8 @@ namespace CustomInterfaces {
 
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
     boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
-    boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner)
+    boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner,
+    boost::shared_ptr<IEnggDiffractionParam> mainSettings)
     : m_userMessageProvider(userMessageProvider) {
 
   auto multiRunWidgetModel =
@@ -35,8 +36,10 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
   setupUI();
 
   auto model = Mantid::Kernel::make_unique<EnggDiffGSASFittingModel>();
-  m_presenter = Mantid::Kernel::make_unique<EnggDiffGSASFittingPresenter>(
-      std::move(model), this, multiRunWidgetPresenter);
+  auto *model_ptr = model.get();
+  m_presenter = boost::make_shared<EnggDiffGSASFittingPresenter>(
+      std::move(model), this, multiRunWidgetPresenter, mainSettings);
+  model_ptr->setObserver(m_presenter);
   m_presenter->notify(IEnggDiffGSASFittingPresenter::Start);
 }
 
@@ -259,6 +262,10 @@ void EnggDiffGSASFittingViewQtWidget::loadFocusedRun() {
   m_presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
 }
 
+void EnggDiffGSASFittingViewQtWidget::refineAll() {
+  m_presenter->notify(IEnggDiffGSASFittingPresenter::RefineAll);
+}
+
 bool EnggDiffGSASFittingViewQtWidget::runFileLineEditEmpty() const {
   return m_ui.lineEdit_runFile->text().isEmpty();
 }
@@ -288,6 +295,17 @@ void EnggDiffGSASFittingViewQtWidget::setEnabled(const bool enabled) {
 
   m_ui.lineEdit_pawleyDMin->setEnabled(enabled);
   m_ui.lineEdit_pawleyNegativeWeight->setEnabled(enabled);
+
+  m_ui.lineEdit_xMin->setEnabled(enabled);
+  m_ui.lineEdit_xMax->setEnabled(enabled);
+
+  m_ui.checkBox_refineSigma->setEnabled(enabled);
+  m_ui.checkBox_refineGamma->setEnabled(enabled);
+
+  m_ui.pushButton_doRefinement->setEnabled(enabled);
+  m_ui.pushButton_refineAll->setEnabled(enabled);
+
+  m_multiRunWidgetView->setEnabled(enabled);
 }
 
 void EnggDiffGSASFittingViewQtWidget::setFocusedRunFileNames(
@@ -327,6 +345,8 @@ void EnggDiffGSASFittingViewQtWidget::setupUI() {
 
   connect(m_ui.pushButton_doRefinement, SIGNAL(clicked()), this,
           SLOT(doRefinement()));
+  connect(m_ui.pushButton_refineAll, SIGNAL(clicked()), this,
+          SLOT(refineAll()));
 
   connect(m_multiRunWidgetView.get(), SIGNAL(runSelected()), this,
           SLOT(selectRun()));

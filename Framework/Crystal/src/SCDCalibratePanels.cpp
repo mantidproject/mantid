@@ -87,8 +87,21 @@ void SCDCalibratePanels::exec() {
   if (snapPanels) {
     MyPanels.insert("East");
     MyPanels.insert("West");
-    for (int i = 1; i < 19; ++i)
-      MyBankNames.insert("bank" + boost::lexical_cast<std::string>(i));
+    int maxRecurseDepth = 4;
+    // cppcheck-suppress syntaxError
+    PRAGMA_OMP(parallel for schedule(dynamic, 1) )
+    for (int num = 1; num < 64; ++num) {
+      PARALLEL_START_INTERUPT_REGION
+      std::ostringstream mess;
+      mess << "bank" << num;
+      IComponent_const_sptr comp =
+          inst->getComponentByName(mess.str(), maxRecurseDepth);
+      PARALLEL_CRITICAL(MyBankNames)
+      if (comp)
+        MyBankNames.insert(mess.str());
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
   } else {
     for (int i = 0; i < nPeaks; ++i) {
       std::string name = peaksWs->getPeak(i).getBankName();
@@ -102,9 +115,9 @@ void SCDCalibratePanels::exec() {
   std::vector<std::string> parameter_workspaces(
       MyBankNames.size() + MyPanels.size(), "params_");
   int i = 0;
-  for (auto iBank = MyPanels.begin(); iBank != MyPanels.end(); ++iBank) {
-    fit_workspaces[i] += *iBank;
-    parameter_workspaces[i] += *iBank;
+  for (auto &MyPanel : MyPanels) {
+    fit_workspaces[i] += MyPanel;
+    parameter_workspaces[i] += MyPanel;
     i++;
   }
   if (snapPanels) {
@@ -122,9 +135,9 @@ void SCDCalibratePanels::exec() {
                    << " degrees\n";
   }
 
-  for (auto iBank = MyBankNames.begin(); iBank != MyBankNames.end(); ++iBank) {
-    fit_workspaces[i] += *iBank;
-    parameter_workspaces[i] += *iBank;
+  for (auto &MyBankName : MyBankNames) {
+    fit_workspaces[i] += MyBankName;
+    parameter_workspaces[i] += MyBankName;
     i++;
   }
   if (bankPanels) {

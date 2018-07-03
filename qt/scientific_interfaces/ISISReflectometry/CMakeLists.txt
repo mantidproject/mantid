@@ -11,6 +11,9 @@ set ( SRC_FILES
     QtReflSettingsTabView.cpp
     QtReflSettingsView.cpp
     ReflCatalogSearcher.cpp
+    ReflAsciiSaver.cpp
+    IReflAsciiSaver.cpp
+    ReflAutoreduction.cpp
     ReflDataProcessorPresenter.cpp
     ReflEventPresenter.cpp
     ReflEventTabPresenter.cpp
@@ -57,7 +60,11 @@ set ( INC_FILES
     QtReflSaveTabView.h
     QtReflSettingsTabView.h
     QtReflSettingsView.h
+    QWidgetGroup.h
+    ReflAutoreduction.h
     ReflCatalogSearcher.h
+    ReflAsciiSaver.h
+    IReflAsciiSaver.h
     ReflDataProcessorMainPresenter.h
     ReflDataProcessorPresenter.h
     ReflEventPresenter.h

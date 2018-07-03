@@ -39,6 +39,8 @@ public:
    * Notice: the prerequisite is that LoadMask() is correct.
    */
   void test_SaveFile() {
+    const std::string INSTRUMENT{"POWGEN_Definition_2017-05-01.xml"};
+
     // 1. Init SaveDetectorMasking
     SaveMask savealg;
     savealg.initialize();
@@ -47,7 +49,7 @@ public:
     LoadMask loadfile;
     loadfile.initialize();
 
-    loadfile.setProperty("Instrument", "POWGEN");
+    loadfile.setProperty("Instrument", INSTRUMENT);
     loadfile.setProperty("InputFile", "testmasking.xml");
     loadfile.setProperty("OutputWorkspace", "PG3Mask");
 
@@ -70,7 +72,7 @@ public:
     LoadMask loadfile2;
     loadfile2.initialize();
 
-    loadfile2.setProperty("Instrument", "POWGEN");
+    loadfile2.setProperty("Instrument", INSTRUMENT);
     loadfile2.setProperty("InputFile", file1);
     loadfile2.setProperty("OutputWorkspace", "PG3MaskCopy");
 

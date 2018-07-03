@@ -5,7 +5,6 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include <boost/shared_ptr.hpp>
-#include <map>
 #include <unordered_map>
 #include <vector>
 
@@ -70,21 +69,13 @@ private:
 
   /// Private copy constructor. Do not make public.
   ComponentInfo(const ComponentInfo &other);
-  template <typename IteratorT>
-  void growBoundingBoxAsRectuangularBank(
-      size_t index, const Geometry::BoundingBox *reference,
-      Geometry::BoundingBox &mutableBB,
-      std::map<size_t, size_t> &mutableDetExclusions,
-      IteratorT &mutableIterator) const;
-  template <typename IteratorT>
+  void
+  growBoundingBoxAsRectuangularBank(size_t index,
+                                    const Geometry::BoundingBox *reference,
+                                    Geometry::BoundingBox &mutableBB) const;
   void growBoundingBoxAsOutline(size_t index,
                                 const Geometry::BoundingBox *reference,
-                                Geometry::BoundingBox &mutableBB,
-                                std::map<size_t, size_t> &mutableDetExclusions,
-                                IteratorT &mutableIterator) const;
-  void growBoundingBoxByDetectors(
-      size_t index, const BoundingBox *reference, BoundingBox &mutableBB,
-      const std::map<size_t, size_t> &detectorExclusions) const;
+                                Geometry::BoundingBox &mutableBB) const;
 
 public:
   struct QuadrilateralComponent {

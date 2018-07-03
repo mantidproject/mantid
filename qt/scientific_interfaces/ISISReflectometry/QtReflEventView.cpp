@@ -6,141 +6,173 @@ namespace CustomInterfaces {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
+* @param group :: [input] The group on the parent tab this belongs to
 * @param parent :: [input] The parent of this widget
 */
-QtReflEventView::QtReflEventView(QWidget *parent) {
-
+QtReflEventView::QtReflEventView(int group, QWidget *parent) {
   UNUSED_ARG(parent);
   initLayout();
-
-  // Insert slice-type to string pairs
-  m_sliceTypeMap[SliceType::UniformEven] = "UniformEven";
-  m_sliceTypeMap[SliceType::Uniform] = "Uniform";
-  m_sliceTypeMap[SliceType::Custom] = "Custom";
-  m_sliceTypeMap[SliceType::LogValue] = "LogValue";
-
-  // Add slicing option buttons to list
-  m_buttonList.emplace_back(m_ui.uniformEvenButton);
-  m_buttonList.emplace_back(m_ui.uniformButton);
-  m_buttonList.emplace_back(m_ui.customButton);
-  m_buttonList.emplace_back(m_ui.logValueButton);
-
-  // Whenever one of the slicing option buttons is selected, their corresponding
-  // entry is enabled, otherwise they remain disabled.
-  for (auto &button : m_buttonList) {
-    connect(button, SIGNAL(toggled(bool)), this, SLOT(toggleSlicingOptions()));
-  }
-
-  toggleSlicingOptions(); // Run at least once
-
-  m_presenter.reset(new ReflEventPresenter(this));
+  m_presenter.reset(new ReflEventPresenter(this, group));
+  registerEventWidgets();
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
 QtReflEventView::~QtReflEventView() {}
 
-/**
-Initialise the Interface
-*/
-void QtReflEventView::initLayout() { m_ui.setupUi(this); }
+void QtReflEventView::initLayout() {
+  m_ui.setupUi(this);
+  initUniformSliceTypeLayout();
+  initUniformEvenSliceTypeLayout();
+  initLogValueSliceTypeLayout();
+  initCustomSliceTypeLayout();
+  m_sliceTypeRadioButtons =
+      makeQWidgetGroup(m_ui.uniformEvenButton, m_ui.uniformButton,
+                       m_ui.logValueButton, m_ui.customButton);
+}
+
+void QtReflEventView::initUniformSliceTypeLayout() {
+  m_uniformGroup = makeQWidgetGroup(m_ui.uniformEdit, m_ui.uniformLabel);
+  connect(m_ui.uniformButton, SIGNAL(toggled(bool)), this,
+          SLOT(toggleUniform(bool)));
+}
+
+void QtReflEventView::initUniformEvenSliceTypeLayout() {
+  m_uniformEvenGroup =
+      makeQWidgetGroup(m_ui.uniformEvenEdit, m_ui.uniformEvenLabel);
+  connect(m_ui.uniformEvenButton, SIGNAL(toggled(bool)), this,
+          SLOT(toggleUniformEven(bool)));
+}
+
+void QtReflEventView::initCustomSliceTypeLayout() {
+  m_customGroup = makeQWidgetGroup(m_ui.customEdit, m_ui.customLabel);
+  connect(m_ui.customButton, SIGNAL(toggled(bool)), this,
+          SLOT(toggleCustom(bool)));
+}
+
+void QtReflEventView::initLogValueSliceTypeLayout() {
+  m_logValueGroup =
+      makeQWidgetGroup(m_ui.logValueTypeEdit, m_ui.logValueTypeLabel,
+                       m_ui.logValueEdit, m_ui.logValueLabel);
+  connect(m_ui.logValueButton, SIGNAL(toggled(bool)), this,
+          SLOT(toggleLogValue(bool)));
+}
 
 /** Returns the presenter managing this view
 * @return :: A pointer to the presenter
 */
 IReflEventPresenter *QtReflEventView::getPresenter() const {
-
   return m_presenter.get();
 }
 
-void QtReflEventView::enableAll() {
-  m_ui.uniformEvenEdit->setEnabled(true);
-  m_ui.uniformEdit->setEnabled(true);
-  m_ui.logValueEdit->setEnabled(true);
-  m_ui.logValueTypeEdit->setEnabled(true);
-  for (auto *button : m_buttonList)
-    button->setEnabled(true);
-}
-
-void QtReflEventView::disableAll() {
-  m_ui.uniformEvenEdit->setEnabled(false);
-  m_ui.uniformEdit->setEnabled(false);
-  m_ui.logValueEdit->setEnabled(false);
-  m_ui.logValueTypeEdit->setEnabled(false);
-  for (auto *button : m_buttonList)
-    button->setEnabled(false);
-}
-
-/** Returns the time slicing value(s) obtained from the selected widget
-* @return :: Time slicing values
-*/
-std::string QtReflEventView::getTimeSlicingValues() const {
-
-  std::string values;
-
-  switch (m_sliceType) {
-  case SliceType::UniformEven:
-    values = m_ui.uniformEvenEdit->text().toStdString();
-    break;
+void QtReflEventView::enableSliceType(SliceType sliceType) {
+  switch (sliceType) {
   case SliceType::Uniform:
-    values = m_ui.uniformEdit->text().toStdString();
+    m_uniformGroup.enable();
+    break;
+  case SliceType::UniformEven:
+    m_uniformEvenGroup.enable();
     break;
   case SliceType::Custom:
-    values = m_ui.customEdit->text().toStdString();
+    m_customGroup.enable();
     break;
   case SliceType::LogValue:
-    std::string slicingValues = m_ui.logValueEdit->text().toStdString();
-    std::string logFilter = m_ui.logValueTypeEdit->text().toStdString();
-    if (!slicingValues.empty() && !logFilter.empty())
-      values = "Slicing=\"" + slicingValues + "\",LogFilter=" + logFilter;
+    m_logValueGroup.enable();
     break;
   }
-
-  return values;
 }
 
-/** Returns the type of time slicing that was selected as string
-* @return :: Time slicing type
-*/
-std::string QtReflEventView::getTimeSlicingType() const {
-
-  return m_sliceTypeMap.at(m_sliceType);
-}
-
-/** Enable slicing option entries for checked button and disable all others.
-*/
-void QtReflEventView::toggleSlicingOptions() const {
-
-  const auto checkedButton = m_ui.slicingOptionsButtonGroup->checkedButton();
-
-  SliceType slicingTypes[4] = {SliceType::UniformEven, SliceType::Uniform,
-                               SliceType::Custom, SliceType::LogValue};
-
-  std::vector<bool> entriesEnabled(m_buttonList.size(), false);
-  for (size_t i = 0; i < m_buttonList.size(); i++) {
-    if (m_buttonList[i] == checkedButton) {
-      m_sliceType = slicingTypes[i];
-      entriesEnabled[i] = true;
-      break;
-    }
+void QtReflEventView::disableSliceType(SliceType sliceType) {
+  switch (sliceType) {
+  case SliceType::Uniform:
+    m_uniformGroup.disable();
+    break;
+  case SliceType::UniformEven:
+    m_uniformEvenGroup.disable();
+    break;
+  case SliceType::Custom:
+    m_customGroup.disable();
+    break;
+  case SliceType::LogValue:
+    m_logValueGroup.disable();
+    break;
   }
-
-  // UniformEven
-  m_ui.uniformEvenEdit->setEnabled(entriesEnabled[0]);
-  m_ui.uniformEvenLabel->setEnabled(entriesEnabled[0]);
-  // Uniform
-  m_ui.uniformEdit->setEnabled(entriesEnabled[1]);
-  m_ui.uniformLabel->setEnabled(entriesEnabled[1]);
-  // Custom
-  m_ui.customEdit->setEnabled(entriesEnabled[2]);
-  m_ui.customLabel->setEnabled(entriesEnabled[2]);
-  // LogValue
-  m_ui.logValueEdit->setEnabled(entriesEnabled[3]);
-  m_ui.logValueLabel->setEnabled(entriesEnabled[3]);
-  m_ui.logValueTypeEdit->setEnabled(entriesEnabled[3]);
-  m_ui.logValueTypeLabel->setEnabled(entriesEnabled[3]);
 }
 
+std::string QtReflEventView::getLogValueTimeSlicingType() const {
+  return textFrom(m_ui.logValueTypeEdit);
+}
+
+std::string QtReflEventView::getLogValueTimeSlicingValues() const {
+  return textFrom(m_ui.logValueEdit);
+}
+
+std::string QtReflEventView::getCustomTimeSlicingValues() const {
+  return textFrom(m_ui.customEdit);
+}
+
+std::string QtReflEventView::getUniformTimeSlicingValues() const {
+  return textFrom(m_ui.uniformEdit);
+}
+
+std::string QtReflEventView::getUniformEvenTimeSlicingValues() const {
+  return textFrom(m_ui.uniformEvenEdit);
+}
+
+std::string QtReflEventView::textFrom(QLineEdit const *const widget) const {
+  return widget->text().toStdString();
+}
+
+void QtReflEventView::disableSliceTypeSelection() {
+  m_sliceTypeRadioButtons.disable();
+}
+
+void QtReflEventView::enableSliceTypeSelection() {
+  m_sliceTypeRadioButtons.enable();
+}
+
+void QtReflEventView::toggleUniform(bool isChecked) {
+  if (isChecked)
+    m_presenter->notifySliceTypeChanged(SliceType::Uniform);
+}
+
+void QtReflEventView::toggleUniformEven(bool isChecked) {
+  if (isChecked)
+    m_presenter->notifySliceTypeChanged(SliceType::UniformEven);
+}
+
+void QtReflEventView::toggleCustom(bool isChecked) {
+  if (isChecked)
+    m_presenter->notifySliceTypeChanged(SliceType::Custom);
+}
+
+void QtReflEventView::toggleLogValue(bool isChecked) {
+  if (isChecked)
+    m_presenter->notifySliceTypeChanged(SliceType::LogValue);
+}
+
+void QtReflEventView::notifySettingsChanged() {
+  m_presenter->notifySettingsChanged();
+}
+
+void QtReflEventView::connectSettingsChange(QLineEdit &edit) {
+  connect(&edit, SIGNAL(textChanged(QString const &)), this,
+          SLOT(notifySettingsChanged()));
+}
+
+void QtReflEventView::connectSettingsChange(QGroupBox &edit) {
+  connect(&edit, SIGNAL(toggled(bool)), this, SLOT(notifySettingsChanged()));
+}
+
+void QtReflEventView::registerEventWidgets() {
+  connectSettingsChange(*m_ui.uniformGroup);
+  connectSettingsChange(*m_ui.uniformEvenEdit);
+  connectSettingsChange(*m_ui.uniformEdit);
+
+  connectSettingsChange(*m_ui.customGroup);
+  connectSettingsChange(*m_ui.customEdit);
+
+  connectSettingsChange(*m_ui.logValueGroup);
+  connectSettingsChange(*m_ui.logValueEdit);
+  connectSettingsChange(*m_ui.logValueTypeEdit);
+}
 } // namespace CustomInterfaces
 } // namespace Mantid

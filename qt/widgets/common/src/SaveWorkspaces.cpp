@@ -127,13 +127,11 @@ void SaveWorkspaces::setupLine2(
   QPushButton *cancel = new QPushButton("Cancel");
   connect(cancel, SIGNAL(clicked()), this, SLOT(close()));
 
-  QCheckBox *saveNIST = new QCheckBox("NIST Qxy (2D)");
   QCheckBox *saveRKH = new QCheckBox("RKH (1D/2D)");
   QCheckBox *saveNXcanSAS = new QCheckBox("NXcanSAS (1D/2D)");
   QCheckBox *saveCan = new QCheckBox("CanSAS (1D)");
 
   // link the save option tick boxes to their save algorithm
-  m_savFormats.insert(saveNIST, "SaveNISTDAT");
   m_savFormats.insert(saveRKH, "SaveRKH");
   m_savFormats.insert(saveNXcanSAS, "SaveNXcanSAS");
   m_savFormats.insert(saveCan, "SaveCanSAS1D");
@@ -150,7 +148,6 @@ void SaveWorkspaces::setupLine2(
   ly_saveConts->addStretch();
 
   QVBoxLayout *ly_saveFormats = new QVBoxLayout;
-  ly_saveFormats->addWidget(saveNIST);
   ly_saveFormats->addWidget(saveRKH);
   ly_saveFormats->addWidget(saveNXcanSAS);
   ly_saveFormats->addWidget(saveCan);
@@ -168,7 +165,6 @@ void SaveWorkspaces::setupLine2(
   save->setToolTip(formatsTip);
   cancel->setToolTip(formatsTip);
   saveNXcanSAS->setToolTip(formatsTip);
-  saveNIST->setToolTip(formatsTip);
   saveCan->setToolTip(formatsTip);
   saveRKH->setToolTip(formatsTip);
   m_append->setToolTip(formatsTip);
@@ -270,7 +266,7 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
       outFile += exten;
     }
     saveCommands += outFile + "'";
-    if (algorithm != "SaveNISTDAT" && algorithm != "SaveNXcanSAS") {
+    if (algorithm != "SaveNXcanSAS") {
       saveCommands += ", Append=";
       saveCommands += toAppend ? "True" : "False";
     }
@@ -342,7 +338,7 @@ void SaveWorkspaces::saveSel() {
     } // end if save in this format
   }   // end loop over formats
 
-  saveCommands += "print 'success'";
+  saveCommands += "print('success')";
   QString status(runPythonCode(saveCommands).trimmed());
 
   if (m_saveAsZeroErrorFree) {
@@ -364,33 +360,24 @@ void SaveWorkspaces::saveSel() {
  */
 bool SaveWorkspaces::isValid() {
   // Get the dimensionality of the workspaces
-  auto is1D = false;
   auto is2D = false;
-
   auto workspacesList = m_workspaces->selectedItems();
   for (auto it = workspacesList.begin(); it != workspacesList.end(); ++it) {
     auto wsName = (*it)->text();
     auto workspace =
         AnalysisDataService::Instance()
             .retrieveWS<Mantid::API::MatrixWorkspace>(wsName.toStdString());
-    if (workspace->getNumberHistograms() == 1) {
-      is1D = true;
-    } else {
+    if (workspace->getNumberHistograms() != 1) {
       is2D = true;
     }
   }
 
-  // Check if the NistQxy or CanSAS were selected
+  // Check if CanSAS was selected
   auto isCanSAS = false;
-  auto isNistQxy = false;
   for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end();
        ++i) { // the key to a pointer to the check box that the user may have
               // clicked
     if (i.key()->isChecked()) { // we need to save in this format
-      if (i.value() == "SaveNISTDAT") {
-        isNistQxy = true;
-      }
-
       if (i.value() == "SaveCanSAS1D") {
         isCanSAS = true;
       }
@@ -400,11 +387,6 @@ bool SaveWorkspaces::isValid() {
   // Check for errors
   QString message;
   auto isValidOption = true;
-  if (is1D && isNistQxy) {
-    isValidOption = false;
-    message +=
-        "Save option issue: Cannot save in NistQxy format for 1D data.\n";
-  }
 
   if (is2D && isCanSAS) {
     isValidOption = false;

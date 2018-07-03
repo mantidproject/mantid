@@ -45,6 +45,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"ImportMDHistoWorkspace"};
+  }
   const std::string category() const override;
 
   /// Flag used to indicate the dimension block in the file

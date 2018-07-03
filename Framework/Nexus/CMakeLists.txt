@@ -10,10 +10,6 @@ set ( INC_FILES
         inc/MantidNexus/NexusFileIO.h
 )
 
-set ( TEST_FILES
-	test/NexusAPITest.h
-)
-
 if (COVERALLS)
     foreach( loop_var ${SRC_FILES} ${INC_FILES})
       set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
@@ -40,13 +36,6 @@ set_property ( TARGET Nexus PROPERTY FOLDER "MantidFramework" )
 include_directories ( inc )
 
 target_link_libraries ( Nexus LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${NEXUS_C_LIBRARIES} ${NEXUS_LIBRARIES} )
-
-# if ( CXXTEST_FOUND )
-#  cxxtest_add_test ( NexusTest ${TEST_FILES} )
-# target_link_libraries( NexusTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} Nexus  )
-#  add_dependencies ( FrameworkTests NexusTest )
-#  set_property ( TARGET NexusTest PROPERTY FOLDER "UnitTests" )
-# endif ()
 
 ###########################################################################
 # Installation settings

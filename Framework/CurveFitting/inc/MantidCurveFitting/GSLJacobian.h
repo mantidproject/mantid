@@ -127,6 +127,21 @@ public:
   }
   /// overwrite base method
   void set(size_t iY, size_t iP, double value) override {
+    if (iP >= m_index.size()) {
+      // Functions are allowed to change their number of active
+      // fitting parameters during the fit (example: the crystal field
+      // functions). When it happens after an iteration is finished there is a
+      // special exception that signals the minimizer to re-initialize itself.
+      // But it can happen during a numeric derivative calculation: a field
+      // parameter is incremented, a new peak may appear and it may have a free
+      // fitting parameter, so the number of parameters change. You cannot throw
+      // and re-initialize the minimizer at this point because the same will
+      // happen again. If you ignore these "virtual" extra parameters by the
+      // time the derivative calculations finish the number of parameters will
+      // return to the original value. Note that the get(...) method doesn't
+      // skip any extra indices because if there are any it is an error.
+      return;
+    }
     int j = m_index[iP];
     if (j >= 0)
       gsl_matrix_set(m_J, iY, j, value);

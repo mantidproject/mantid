@@ -10,6 +10,9 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
         """
         return "Inelastic\\Ei"
 
+    def seeAlso(self):
+        return [ "GetEi" ]
+
     def name(self):
         """ Return name
         """

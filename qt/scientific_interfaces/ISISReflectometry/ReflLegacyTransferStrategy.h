@@ -33,8 +33,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport ReflLegacyTransferStrategy : public ReflTransferStrategy {
 public:
-  TransferResults transferRuns(SearchResultMap &searchResults,
-                               Mantid::Kernel::ProgressBase &progress) override;
+  TransferResults
+  transferRuns(SearchResultMap &searchResults,
+               Mantid::Kernel::ProgressBase &progress,
+               const TransferMatch matchType = TransferMatch::Any) override;
 
   std::unique_ptr<ReflLegacyTransferStrategy> clone() const;
 

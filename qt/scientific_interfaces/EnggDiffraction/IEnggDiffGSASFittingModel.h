@@ -2,13 +2,15 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGMODEL_H_
 
 #include "GSASIIRefineFitPeaksParameters.h"
+#include "IEnggDiffGSASFittingObserver.h"
 #include "RunLabel.h"
 
+#include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <boost/optional.hpp>
-
+#include <boost/shared_ptr.hpp>
 #include <string>
 #include <utility>
 #include <vector>
@@ -22,22 +24,11 @@ public:
   virtual ~IEnggDiffGSASFittingModel() = default;
 
   /**
-   Perform a Pawley refinement on a run
-   @param params Parameters to be passed to GSASIIRefineFitPeaks
-   @return Fitted peaks workspace resulting from refinement
-   @throws If GSASIIRefineFitPeaks throws
+   Perform refinements on a number of runs
+   @param params Parameters for each run to be passed to GSASIIRefineFitPeaks
    */
-  virtual Mantid::API::MatrixWorkspace_sptr
-  doPawleyRefinement(const GSASIIRefineFitPeaksParameters &params) = 0;
-
-  /**
-   Perform a Rietveld refinement on a run
-   @param params Parameters to be passed to GSASIIRefineFitPeaks
-   @return Fitted peaks workspace resulting from refinement
-   @throws If GSASIIRefineFitPeaks throws
-   */
-  virtual Mantid::API::MatrixWorkspace_sptr
-  doRietveldRefinement(const GSASIIRefineFitPeaksParameters &params) = 0;
+  virtual void
+  doRefinements(const std::vector<GSASIIRefineFitPeaksParameters> &params) = 0;
 
   /**
    Get refined lattice parameters for a run
@@ -76,6 +67,25 @@ public:
    */
   virtual Mantid::API::MatrixWorkspace_sptr
   loadFocusedRun(const std::string &filename) const = 0;
+
+  /**
+   Save results of refinement (and refinement settings used) to HDF5 file
+   @param successfulAlgorithm The completed refinement algorithm (note, even in
+   a multi-run fit, input properties like RefineSigma will be the same for all
+   runs, so it's fine to just use one algorithm)
+   @param refinementResultSets Output properties of all refinements from a
+   multi-run fit
+   @param filename Name of the HDF5 file to save to
+  */
+  virtual void saveRefinementResultsToHDF5(
+      const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
+      const std::vector<GSASIIRefineFitPeaksOutputProperties> &
+          refinementResultSets,
+      const std::string &filename) const = 0;
+
+  /// set the observer for refinement
+  virtual void
+  setObserver(boost::shared_ptr<IEnggDiffGSASFittingObserver> observer) = 0;
 };
 
 } // namespace MantidQt

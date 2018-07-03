@@ -4,10 +4,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 
-#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -55,10 +55,11 @@ void ProcessIndirectFitParameters::init() {
       "ColumnX", "", boost::make_shared<MandatoryValidator<std::string>>(),
       "The column in the table to use for the x values.", Direction::Input);
 
-  declareProperty("ParameterNames", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
-                  "List of the parameter names to add to the workspace.",
-                  Direction::Input);
+  declareProperty(
+      make_unique<ArrayProperty<std::string>>(
+          "ParameterNames",
+          boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+      "List of the parameter names to add to the workspace.");
 
   declareProperty("XAxisUnit", "",
                   boost::make_shared<StringListValidator>(unitOptions),
@@ -76,10 +77,7 @@ void ProcessIndirectFitParameters::exec() {
   // Get Properties
   ITableWorkspace_sptr inputWs = getProperty("InputWorkspace");
   std::string xColumn = getProperty("ColumnX");
-  std::string parameterNamesProp = getProperty("ParameterNames");
-  auto parameterNames =
-      Kernel::VectorHelper::splitStringIntoVector<std::string>(
-          parameterNamesProp);
+  std::vector<std::string> parameterNames = getProperty("ParameterNames");
   std::string xUnit = getProperty("XAxisUnit");
   MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
 

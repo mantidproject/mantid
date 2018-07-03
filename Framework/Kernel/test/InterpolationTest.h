@@ -206,13 +206,13 @@ public:
     Interpolation interpolationOne;
     interpolationOne.addPoint(200, 2.0);
 
-    for (size_t i = 0; i < m_tableXValues.size(); ++i) {
+    for (double m_tableXValue : m_tableXValues) {
       // When there are zero values in the interpolation, it returns 0.0
-      checkValue(interpolationZero, m_tableXValues[i], 0.0,
+      checkValue(interpolationZero, m_tableXValue, 0.0,
                  "zero interpolation values");
 
       // With one value, it returns this one value for any x.
-      checkValue(interpolationOne, m_tableXValues[i], 2.0,
+      checkValue(interpolationOne, m_tableXValue, 2.0,
                  "one interpolation value");
     }
   }

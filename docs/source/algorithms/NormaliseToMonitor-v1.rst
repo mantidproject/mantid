@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 

@@ -38,8 +38,8 @@ public:
     const double start(2.1), end(3.4);
     NDGenerator_sptr ndRand = createTestGenerator(12345, start, end);
     std::vector<double> firstPoint = ndRand->nextPoint();
-    for (size_t i = 0; i < firstPoint.size(); ++i) {
-      TS_ASSERT(firstPoint[i] >= start && firstPoint[i] <= end);
+    for (double i : firstPoint) {
+      TS_ASSERT(i >= start && i <= end);
     }
   }
 

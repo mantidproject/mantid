@@ -371,13 +371,10 @@ public:
 
   void test_fail_CreateOutline_for_wrong_component_type() {
     std::stringstream obj_str;
-    obj_str << "<segmented-cylinder id=\"stick\">";
-    obj_str << "<centre-of-bottom-base ";
-    obj_str << R"(x="0" y="0" z="0" />)";
-    obj_str << R"(<axis x="0" y="1" z="0" /> )";
+    obj_str << "<sphere id=\"A\">";
+    obj_str << "<centre x=\"4.1\"  y=\"2.1\" z=\"8.1\" />";
     obj_str << "<radius val=\"0.1\" />";
-    obj_str << "<height val=\"0.2\" />";
-    obj_str << "</segmented-cylinder>";
+    obj_str << "</sphere>";
     auto s = Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
 
     ObjCompAssembly bank("BankName");

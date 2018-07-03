@@ -29,7 +29,7 @@ execute_integration(const MDHistoPeaksWSTuple &inputWorkspaces,
   alg.setPropertyValue("OutputWorkspaceMD", "out_ws_md");
   alg.execute();
   // ------- Get the integrated results
-  IPeaksWorkspace_sptr outPeaksWS = alg.getProperty("OutputWorkspace");
+  PeaksWorkspace_sptr outPeaksWS = alg.getProperty("OutputWorkspace");
   IMDHistoWorkspace_sptr outClustersWS = alg.getProperty("OutputWorkspaceMD");
   return MDHistoPeaksWSTuple(outClustersWS, outPeaksWS);
 }
@@ -119,7 +119,7 @@ public:
         execute_integration(inputWorkspaces, threshold);
     // ------- Get the integrated results
     IMDHistoWorkspace_sptr outClustersWS = integratedWorkspaces.get<0>();
-    IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
+    PeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
 
     std::unordered_set<Mantid::signal_t> labelIds;
     for (size_t i = 0; i < outClustersWS->getNPoints(); ++i) {
@@ -149,7 +149,7 @@ public:
         execute_integration(inputWorkspaces, threshold);
     // ------- Get the integrated results
     IMDHistoWorkspace_sptr outClustersWS = integratedWorkspaces.get<0>();
-    IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
+    PeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
 
     // ------- Check the results.
     // Basic checks
@@ -190,7 +190,7 @@ public:
         execute_integration(inputWorkspaces, threshold);
     // ------- Get the integrated results
     IMDHistoWorkspace_sptr outClustersWS = integratedWorkspaces.get<0>();
-    IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
+    PeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
 
     // ------- Check the results.
     // Basic checks
@@ -245,7 +245,7 @@ public:
         execute_integration(inputWorkspaces, threshold);
     // ------- Get the integrated results
     IMDHistoWorkspace_sptr outClustersWS = integratedWorkspaces.get<0>();
-    IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
+    PeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
 
     // ------- Check the results.
     // Basic checks

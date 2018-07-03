@@ -37,6 +37,10 @@ class DLLExport ResampleX : public Algorithms::Rebin {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"RebinToWorkspace", "Rebin2D",           "Rebunch",
+            "Regroup",          "RebinByPulseTimes", "RebinByTimeAtSample"};
+  }
   const std::string category() const override;
   const std::string alias() const override;
 

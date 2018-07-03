@@ -345,6 +345,7 @@ void SaveHKL::exec() {
           continue;
         }
         int run = p.getRunNumber();
+        int seqNum = p.getPeakNumber();
         int bank = 0;
         std::string bankName = p.getBankName();
         int nCols, nRows;
@@ -546,7 +547,7 @@ void SaveHKL::exec() {
 
           out << std::setw(6) << run;
 
-          out << std::setw(6) << wi + 1;
+          out << std::setw(6) << seqNum;
 
           out << std::setw(7) << std::fixed << std::setprecision(4)
               << transmission;

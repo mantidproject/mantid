@@ -11,6 +11,9 @@ class FitGaussian(PythonAlgorithm):
     def category(self):
         return "Optimization"
 
+    def seeAlso(self):
+        return [ "Fit" ]
+
     def PyInit(self):
         # input
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.Input),

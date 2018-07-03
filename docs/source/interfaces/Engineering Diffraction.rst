@@ -372,7 +372,6 @@ Peaks:
   peaks. These peaks can be manually written or imported by selecting a
   (*CSV*) file.
 
-
 Output
 ^^^^^^
 
@@ -397,9 +396,14 @@ workspaces window:
 3. The *engggui_fitting_single_peaks* workspace with each workspace
    index representing individual expected peak.
 
-During the Fit process, :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>`
-algorithm will be utilised to save *engggui_fitting_fitpeaks_param*
-TableWorkspace as a `csv` file.
+During the Fit process, :ref:`EnggSaveSinglePeakFitResultsToHDF5
+<algm-EnggSaveSinglePeakFitResultsToHDF5>` algorithm will be utilised
+to save *engggui_fitting_fitpeaks_param* TableWorkspace as a `hdf5`
+file. There will one file per run, indexed by bank ID, and the file
+will be found in the **Runs** directory of the user's output
+directory. If **Fit All** was run on multiple runs, then an additional
+file for all runs will be output, which is indexed first by run number
+and then by bank ID.
 
 In the plots, the x or abscissa axis is in d-spacing units, which are
 more convenient for peak fitting than time-of-flight. However the run
@@ -478,6 +482,9 @@ The following parameters are also required:
 - **New GSAS-II Project** - GSASIIRefineFitPeaks creates a new
   ``.gpx`` project here, which can be opened and inspected from the
   GSAS-II GUI
+
+  - Note, if running **Refine All** on more than one run, the run
+    number and bank ID will be appended to the filename
 - **GSAS-II Installation Directory**
 
   - This is the directory containing the GSAS-II executables and
@@ -514,6 +521,16 @@ To do a refinement, take the following steps:
    (goodness of fit index), Sigma and Gamma (peak broadening
    coefficients) and lattice parameters should be displayed in the
    **Fit Results** section.
+
+   - You can also click **Refine All** to run refinement on all runs
+     loaded into GSAS tab
+
+During the Fit process, :ref:`EnggSaveGSASIIFitResultsToHDF5
+<algm-EnggSaveGSASIIFitResultsToHDF5>` algorithm will be utilised to
+save the fit results, and also the parameters used, as a `hdf5`
+file. There will be one file per run, indexed by bank ID, and the file
+will be found in the **Runs** directory of the user's output
+directory.
 
 You can toggle the fitted peaks on and off with the **Plot Fitted
 Peaks** checkbox, remove runs from the list with the **Remove Run**

@@ -36,6 +36,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         return 'Performs quasi-elastic neutron scattering (QENS) multiple file reduction ' \
                'for ILL indirect geometry data, instrument IN16B.'
 
+    def seeAlso(self):
+        return [ "IndirectILLReductionFWS","IndirectILLEnergyTransfer" ]
+
     def name(self):
         return "IndirectILLReductionQENS"
 

@@ -734,7 +734,7 @@ const Kernel::Material RectangularDetector::material() const {
 
 size_t RectangularDetector::registerContents(
     ComponentVisitor &componentVisitor) const {
-  return componentVisitor.registerStructuredBank(*this);
+  return componentVisitor.registerRectangularBank(*this);
 }
 
 //-------------------------------------------------------------------------------------------------

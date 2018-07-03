@@ -531,9 +531,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
   // 3. Set mask
   auto spec0 = maskedSpecID[0];
   auto prev_masks = spec0;
-  for (size_t i = 0; i < maskedSpecID.size(); i++) {
-
-    auto spec2mask = maskedSpecID[i];
+  for (int spec2mask : maskedSpecID) {
 
     s2iter = s2imap.find(spec2mask);
     if (s2iter == s2imap.end()) {
@@ -703,19 +701,18 @@ void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS,
       sourceWS.getDetectorIDToWorkspaceIndexMap(false);
 
   std::multimap<size_t, Mantid::detid_t> spectr2index_map;
-  for (auto it = sourceDetMap.begin(); it != sourceDetMap.end(); it++) {
+  for (auto &it : sourceDetMap) {
     spectr2index_map.insert(
-        std::pair<size_t, Mantid::detid_t>(it->second, it->first));
+        std::pair<size_t, Mantid::detid_t>(it.second, it.first));
   }
   spec2index_map new_map;
-  for (size_t i = 0; i < maskedSpecID.size(); i++) {
+  for (int i : maskedSpecID) {
     // find spectra number from spectra ID for the source workspace
-    const auto itSpec = s2imap.find(maskedSpecID[i]);
+    const auto itSpec = s2imap.find(i);
     if (itSpec == s2imap.end()) {
-      throw std::runtime_error(
-          "Can not find spectra with ID: " +
-          boost::lexical_cast<std::string>(maskedSpecID[i]) +
-          " in the workspace" + sourceWS.getName());
+      throw std::runtime_error("Can not find spectra with ID: " +
+                               boost::lexical_cast<std::string>(i) +
+                               " in the workspace" + sourceWS.getName());
     }
     size_t specN = itSpec->second;
 

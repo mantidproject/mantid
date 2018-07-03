@@ -40,6 +40,9 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
         """
         return "Diffraction\\Fitting"
 
+    def seeAlso(self):
+        return [ "RefinePowderInstrumentParameters" ]
+
     def name(self):
         """ Algorithm name
         """

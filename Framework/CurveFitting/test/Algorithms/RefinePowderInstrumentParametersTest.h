@@ -308,9 +308,9 @@ public:
         hkl << hkls[ipk][i];
         cout << hkls[ipk][i] << ", ";
       }
-      for (size_t ipm = 0; ipm < peakparams[ipk].size(); ++ipm) {
-        hkl << peakparams[ipk][ipm];
-        cout << peakparams[ipk][ipm];
+      for (double ipm : peakparams[ipk]) {
+        hkl << ipm;
+        cout << ipm;
       }
       cout << '\n';
     }
@@ -416,10 +416,10 @@ public:
 
     // 2. Add peak parameters' name and values
     map<string, vector<double>>::iterator finditer;
-    for (size_t ipn = 0; ipn < paramnames.size(); ++ipn) {
+    for (const auto &paramname : paramnames) {
       API::TableRow newrow = geomws->appendRow();
-      std::string parname = paramnames[ipn];
-      double parvalue = parameters[paramnames[ipn]];
+      std::string parname = paramname;
+      double parvalue = parameters[paramname];
       newrow << parname << parvalue;
       double parmin = -DBL_MAX;
       double parmax = DBL_MAX;

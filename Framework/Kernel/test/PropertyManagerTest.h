@@ -90,12 +90,12 @@ public:
     TS_ASSERT_EQUALS(manager.propertyCount(), 3);
 
     const std::vector<Property *> &props = manager.getProperties();
-    for (auto iter = props.begin(); iter != props.end(); ++iter) {
-      Property *prop = *iter;
+    for (auto iter : props) {
+      Property *prop = iter;
       std::string msg = "Property " + prop->name() +
                         " has not been changed to a FilteredTimeSeries";
       auto filteredProp =
-          dynamic_cast<FilteredTimeSeriesProperty<double> *>(*iter);
+          dynamic_cast<FilteredTimeSeriesProperty<double> *>(iter);
       TSM_ASSERT(msg, filteredProp);
     }
 

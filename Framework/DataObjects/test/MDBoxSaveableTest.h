@@ -840,8 +840,7 @@ public:
     size_t numOnDisk = 0;
     uint64_t eventsOnDisk = 0;
     uint64_t maxFilePos = 0;
-    for (size_t i = 0; i < boxes.size(); i++) {
-      API::IMDNode *box = boxes[i];
+    for (auto box : boxes) {
       TS_ASSERT_EQUALS(box->getNPoints(), num_repeat);
       auto mdbox = dynamic_cast<MDBox<MDE, 2> *>(box);
       TS_ASSERT(mdbox);

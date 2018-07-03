@@ -19,6 +19,9 @@ class StateGuiModel(object):
         super(StateGuiModel, self).__init__()
         self._user_file_items = user_file_items
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     @property
     def settings(self):
         return self._user_file_items
@@ -367,7 +370,7 @@ class StateGuiModel(object):
     # - wavelength_and_pixel_adjustment
     # This is not something that needs to be known at this point, but it is good to know.
     # ------------------------------------------------------------------------------------------------------------------
-    def _update_wavelength(self, min_value=None, max_value=None, step=None, step_type=None):
+    def _update_wavelength(self, min_value=None, max_value=None, step=None, step_type=None, wavelength_range=None):
         if LimitsId.wavelength in self._user_file_items:
             settings = self._user_file_items[LimitsId.wavelength]
         else:
@@ -384,6 +387,18 @@ class StateGuiModel(object):
             new_setting = simple_range(start=new_min, stop=new_max, step=new_step, step_type=new_step_type)
             new_settings.append(new_setting)
         self._user_file_items.update({LimitsId.wavelength: new_settings})
+
+        if wavelength_range:
+            if OtherId.wavelength_range in self._user_file_items:
+                settings = self._user_file_items[OtherId.wavelength_range]
+            else:
+                settings = [""]
+
+            new_settings = []
+            for setting in settings:
+                new_range = wavelength_range if wavelength_range else setting
+                new_settings.append(new_range)
+            self._user_file_items.update({OtherId.wavelength_range: new_settings})
 
     @property
     def wavelength_step_type(self):
@@ -423,6 +438,14 @@ class StateGuiModel(object):
     @wavelength_step.setter
     def wavelength_step(self, value):
         self._update_wavelength(step=value)
+
+    @property
+    def wavelength_range(self):
+        return self.get_simple_element(element_id=OtherId.wavelength_range, default_value="")
+
+    @wavelength_range.setter
+    def wavelength_range(self, value):
+        self._update_wavelength(wavelength_range=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Scale properties
@@ -740,7 +763,7 @@ class StateGuiModel(object):
 
     @property
     def show_transmission(self):
-        return self.get_simple_element(element_id=OtherId.show_transmission, default_value=False)
+        return self.get_simple_element(element_id=OtherId.show_transmission, default_value=True)
 
     @show_transmission.setter
     def show_transmission(self, value):
@@ -892,6 +915,22 @@ class StateGuiModel(object):
     @q_xy_step_type.setter
     def q_xy_step_type(self, value):
         self._set_q_xy_limits(step_type_value=value)
+
+    @property
+    def r_cut(self):
+        return self.get_simple_element(element_id=LimitsId.radius_cut, default_value="")
+
+    @r_cut.setter
+    def r_cut(self, value):
+        self.set_simple_element(element_id=LimitsId.radius_cut, value=value)
+
+    @property
+    def w_cut(self):
+        return self.get_simple_element(element_id=LimitsId.wavelength_cut, default_value="")
+
+    @w_cut.setter
+    def w_cut(self, value):
+        self.set_simple_element(element_id=LimitsId.wavelength_cut, value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Gravity

@@ -22,8 +22,10 @@
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <cxxtest/TestSuite.h>
 #include <boost/regex.hpp>
@@ -526,9 +528,8 @@ public:
     std::pair<std::unordered_multimap<std::string, fromToEntry>::iterator,
               std::unordered_multimap<std::string, fromToEntry>::iterator> ret;
 
-    for (auto setIt = idfIdentifiers.begin(); setIt != idfIdentifiers.end();
-         setIt++) {
-      ret = idfFiles.equal_range(*setIt);
+    for (const auto &idfIdentifier : idfIdentifiers) {
+      ret = idfFiles.equal_range(idfIdentifier);
       for (it1 = ret.first; it1 != ret.second; ++it1) {
         for (it2 = ret.first; it2 != ret.second; ++it2) {
           if (it1 != it2) {
