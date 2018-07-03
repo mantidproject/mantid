@@ -5,11 +5,12 @@
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
+#include <iomanip>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <typeinfo>
 #include <vector>
-#include <stdexcept>
 
 namespace Mantid {
 
@@ -178,16 +179,6 @@ template <class T> void Parameter::set(const T &t) {
 //--------------------------------------------------------------------------
 // Template definitions - ParameterType class
 //--------------------------------------------------------------------------
-
-/** Return the value of the parameter as a string
- * @tparam T The type of the parameter
- * @returns A string representation of the parameter
- */
-template <class Type> std::string ParameterType<Type>::asString() const {
-  std::ostringstream str;
-  str << m_value;
-  return str.str();
-}
 
 /**
  * Set the value of the parameter from a string
