@@ -2,6 +2,12 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+bool isEntirelyWhitespace(std::string const &string) {
+  return std::all_of(string.cbegin(), string.cend(),
+                     [](unsigned char c) { return std::isspace(c); });
+}
+
 boost::optional<double> parseDouble(std::string string) {
   boost::trim(string);
   auto end = std::size_t();
@@ -57,6 +63,5 @@ boost::optional<int> parseNonNegativeInt(std::string string) {
   else
     return boost::none;
 }
-
 }
 }

@@ -55,8 +55,9 @@ public:
   std::string getReductionType() const override;
   void setReductionType(std::string const& reductionType) override;
 
-  std::vector<std::array<std::string, 6>> getPerAngleOptions() const override;
+  std::vector<std::array<std::string, 8>> getPerAngleOptions() const override;
   void showPerAngleOptionsAsInvalid(int row, int column) override;
+  void showPerAngleOptionsAsValid(int row) override;
 
   double getTransmissionStartOverlap() const override;
   void setTransmissionStartOverlap(double start) override;
@@ -97,6 +98,7 @@ public slots:
   void summationTypeChanged(int reductionTypeIndex);
 
 private:
+  void initializeTableItems(QTableWidget& table);
   QString messageFor(
       std::vector<MissingInstrumentParameterValue> const &missingValues) const;
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;

@@ -66,8 +66,9 @@ public:
   virtual void enableReductionType() = 0;
   virtual void disableReductionType() = 0;
 
-  virtual std::vector<std::array<std::string, 6>> getPerAngleOptions() const = 0;
+  virtual std::vector<std::array<std::string, 8>> getPerAngleOptions() const = 0;
   virtual void showPerAngleOptionsAsInvalid(int row, int column) = 0;
+  virtual void showPerAngleOptionsAsValid(int row) = 0;
 
   virtual void enablePolarisationCorrections() = 0;
   virtual void disablePolarisationCorrections() = 0;

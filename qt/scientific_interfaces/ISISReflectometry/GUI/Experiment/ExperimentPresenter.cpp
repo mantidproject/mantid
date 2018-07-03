@@ -1,4 +1,5 @@
 #include "ExperimentPresenter.h"
+#include "../../Reduction/ValidatePerThetaDefaults.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -25,9 +26,25 @@ void ExperimentPresenter::notifySettingsChanged() {
                     m_view->getTransmissionEndOverlap());
   auto stitchParameters = m_view->getStitchOptions();
 
+  auto rowTemplatesContent = m_view->getPerAngleOptions();
+
+  std::vector<PerThetaDefaults> rowTemplates;
+  auto row = 0;
+  for (auto const& rowTemplateContent : rowTemplatesContent) {
+    auto rowValidationResult = validatePerThetaDefaults(rowTemplateContent);
+    if (rowValidationResult.isValid()) {
+      rowTemplates.emplace_back(rowValidationResult.validRowElseNone().get());
+      m_view->showPerAngleOptionsAsValid(row);
+    } else {
+      for (auto const& errorColumn : rowValidationResult.invalidColumns())
+        m_view->showPerAngleOptionsAsInvalid(row, errorColumn);
+    }
+    row++;
+  }
+
   m_model = Experiment(analysisMode, reductionType, summationType,
                        polarizationCorrections, transmissionRunRange,
-                       stitchParameters, {});
+                       stitchParameters, rowTemplates);
 }
 
 void ExperimentPresenter::notifySummationTypeChanged() {

@@ -7,11 +7,13 @@ set ( REDUCTION_SRC_FILES
     ReductionJobs.cpp
     ValidateRow.cpp
     Slicing.cpp
+    ParseReflectometryStrings.cpp
 
     Experiment.cpp
     PolarizationCorrections.cpp
     RangeInLambda.cpp
-    RowTemplate.cpp
+    PerThetaDefaults.cpp
+    ValidatePerThetaDefaults.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -26,13 +28,15 @@ set ( REDUCTION_INC_FILES
     Slicing.h
     ValidateRow.h
     WorkspaceNamesFactory.h
+    ParseReflectometryStrings.h
+    ValidatePerThetaDefaults.h
 
     AnalysisMode.h
     Experiment.h
     PolarizationCorrections.h
     RangeInLambda.h
     ReductionType.h
-    RowTemplate.h
+    PerThetaDefaults.h
     SummationType.h
 )
 

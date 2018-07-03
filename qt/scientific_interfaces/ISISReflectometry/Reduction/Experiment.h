@@ -26,7 +26,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "SummationType.h"
 #include "PolarizationCorrections.h"
 #include "RangeInLambda.h"
-#include "RowTemplate.h"
+#include "PerThetaDefaults.h"
 #include <string>
 #include <vector>
 
@@ -40,7 +40,7 @@ public:
              PolarizationCorrections polarizationCorrections,
              RangeInLambda transmissionRunRange,
              std::string stitchParameters,
-             std::vector<RowTemplate> rowTemplate);
+             std::vector<PerThetaDefaults> perThetaDefaults);
 
   AnalysisMode analysisMode() const;
   ReductionType reductionType() const;
@@ -48,9 +48,9 @@ public:
   PolarizationCorrections const &polarizationCorrections() const;
   RangeInLambda const &transissionRunRange() const;
   std::string stitchParameters() const;
-  std::vector<RowTemplate> const &rowTemplates() const;
+  std::vector<PerThetaDefaults> const &perThetaDefaults() const;
 
-  RowTemplate const *rowTemplateForTheta(double thetaAngle, double tolerance) const;
+  PerThetaDefaults const *defaultsForTheta(double thetaAngle, double tolerance) const;
 
 private:
   AnalysisMode m_analysisMode;
@@ -61,7 +61,7 @@ private:
   RangeInLambda m_transmissionRunRange;
 
   std::string m_stitchParameters;
-  std::vector<RowTemplate> m_rowTemplates;
+  std::vector<PerThetaDefaults> m_perThetaDefaults;
 };
 }
 }

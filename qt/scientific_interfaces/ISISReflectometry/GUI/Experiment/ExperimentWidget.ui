@@ -106,7 +106,7 @@
         <number>3</number>
        </property>
        <property name="columnCount">
-        <number>7</number>
+        <number>8</number>
        </property>
        <attribute name="horizontalHeaderVisible">
         <bool>true</bool>
@@ -145,7 +145,12 @@
        </column>
        <column>
         <property name="text">
-         <string>Transmission Run(s)</string>
+         <string>Second Transmission Run</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>First Transmission Run</string>
         </property>
        </column>
        <column>

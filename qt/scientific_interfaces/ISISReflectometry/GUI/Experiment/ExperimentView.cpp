@@ -26,13 +26,13 @@ Initialise the Interface
 */
 void ExperimentView::initLayout() {
   m_ui.setupUi(this);
+  initOptionsTable();
 
   auto blacklist =
       std::vector<std::string>({"InputWorkspaces", "OutputWorkspace"});
   MantidWidgets::AlgorithmHintStrategy strategy("Stitch1DMany", blacklist);
   createStitchHints(strategy.createHints());
 
-  initOptionsTable();
 
   connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
           SLOT(requestExpDefaults()));
@@ -44,15 +44,23 @@ void ExperimentView::initLayout() {
           SLOT(addPerAngleOptionsTableRow()));
 }
 
+void ExperimentView::initializeTableItems(QTableWidget& table) {
+  for (auto row = 0; row < table.rowCount(); ++row)
+    for (auto column = 0; table.columnCount(); ++column)
+      table.setItem(row, column, new QTableWidgetItem());
+}
+
 void ExperimentView::initOptionsTable() {
   auto table = m_ui.optionsTable;
 
   // Set angle and scale columns to a small width so everything fits
   table->resizeColumnsToContents();
+  table->setColumnCount(8);
+  initializeTableItems(*table);
 
   auto header = table->horizontalHeader();
   int totalRowHeight = 0;
-  for (int i = 0; i < table->rowCount(); ++i) {
+  for (auto i = 0; i < table->rowCount(); ++i) {
     totalRowHeight += table->rowHeight(i);
   }
 
@@ -382,25 +390,32 @@ void ExperimentView::setReductionType(std::string const &reductionType) {
   return setSelected(*m_ui.reductionTypeComboBox, reductionType);
 }
 
-std::vector<std::array<std::string, 6>>
+std::vector<std::array<std::string, 8>>
 ExperimentView::getPerAngleOptions() const {
   auto const &table = *m_ui.optionsTable;
-  auto rows = std::vector<std::array<std::string, 6>>();
+  auto rows = std::vector<std::array<std::string, 8>>();
   rows.reserve(table.rowCount());
   for (auto row = 0; row < table.rowCount(); ++row) {
     rows.emplace_back(
-        std::array<std::string, 6>{table.item(row, 0)->text().toStdString(),
+        std::array<std::string, 8>{table.item(row, 0)->text().toStdString(),
                                    table.item(row, 1)->text().toStdString(),
                                    table.item(row, 2)->text().toStdString(),
                                    table.item(row, 3)->text().toStdString(),
                                    table.item(row, 4)->text().toStdString(),
-                                   table.item(row, 5)->text().toStdString()});
+                                   table.item(row, 5)->text().toStdString(),
+                                   table.item(row, 6)->text().toStdString(),
+                                   table.item(row, 7)->text().toStdString()});
   }
   return rows;
 }
 
 void ExperimentView::showPerAngleOptionsAsInvalid(int row, int column) {
   m_ui.optionsTable->item(row, column)->setBackground(Qt::red);
+}
+
+void ExperimentView::showPerAngleOptionsAsValid(int row) {
+  for (auto column = 0; column < m_ui.optionsTable->columnCount(); ++column)
+    m_ui.optionsTable->item(row, column)->setBackground(Qt::transparent);
 }
 
 double ExperimentView::getTransmissionStartOverlap() const {

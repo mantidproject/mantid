@@ -20,50 +20,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#ifndef MANTID_CUSTOMINTERFACES_VALIDATEROW_H_
-#define MANTID_CUSTOMINTERFACES_VALIDATEROW_H_
-#include "Row.h"
+#ifndef MANTID_CUSTOMINTERFACES_PERTHETADEFAUTSVALIDATOR_H_
+#define MANTID_CUSTOMINTERFACES_PERTHETADEFAUTSVALIDATOR_H_
+#include "PerThetaDefaults.h"
 #include <boost/optional.hpp>
-#include "Reduction/ReductionJobs.h"
 #include "ValidationResult.h"
 #include "ParseReflectometryStrings.h"
 #include "TransmissionRunPair.h"
 #include "DllConfig.h"
 namespace MantidQt {
 namespace CustomInterfaces {
-  
-template <typename Row> class MANTIDQT_ISISREFLECTOMETRY_DLL RowValidator {
+
+class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaultsValidator {
 public:
-  template <typename WorkspaceNamesFactory>
-  ValidationResult<boost::variant<SlicedRow, UnslicedRow>>
-  operator()(std::vector<std::string> const &cellText,
-             WorkspaceNamesFactory const &workspaceNames);
+  static auto constexpr INPUT_FIELD_COUNT = 8;
+
+  ValidationResult<PerThetaDefaults>
+  operator()(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
 
 private:
-  boost::optional<std::vector<std::string>>
-  parseRunNumbers(std::vector<std::string> const &cellText);
-  boost::optional<double> parseTheta(std::vector<std::string> const &cellText);
+  boost::optional<double> parseTheta(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
   boost::optional<TransmissionRunPair>
-  parseTransmissionRuns(std::vector<std::string> const &cellText);
+  parseTransmissionRuns(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
   boost::optional<boost::optional<RangeInQ>>
-  parseQRange(std::vector<std::string> const &cellText);
+  parseQRange(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
   boost::optional<boost::optional<double>>
-  parseScaleFactor(std::vector<std::string> const &cellText);
+  parseScaleFactor(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
   boost::optional<std::map<std::string, std::string>>
-  parseOptions(std::vector<std::string> const &cellText);
+  parseOptions(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
 
   std::vector<int> m_invalidColumns;
 };
 
-ValidationResult<RowVariant>
-validateRow(Jobs const &jobs,
-            WorkspaceNamesFactory const &workspaceNamesFactory,
-            std::vector<std::string> const &cellText);
+ValidationResult<PerThetaDefaults>
+validatePerThetaDefaults(std::array<std::string, PerThetaDefaultsValidator::INPUT_FIELD_COUNT> const &cellText);
 
-boost::optional<RowVariant>
-validateRowFromRunAndTheta(Jobs const &jobs,
-                           WorkspaceNamesFactory const &workspaceNamesFactory,
-                           std::string const &run, std::string const &theta);
 }
 }
-#endif // MANTID_CUSTOMINTERFACES_VALIDATEROW_H_
+#endif // MANTID_CUSTOMINTERFACES_PERTHETADEFAUTSVALIDATOR_H_

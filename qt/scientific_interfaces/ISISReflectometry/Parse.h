@@ -45,6 +45,9 @@ parseInt(std::string string);
 MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<int>
 parseNonNegativeInt(std::string string);
 
+bool MANTIDQT_ISISREFLECTOMETRY_DLL
+isEntirelyWhitespace(std::string const &string);
+
 template <typename ParseItemFunction>
 boost::optional<std::vector<typename std::result_of<
     ParseItemFunction(std::string const &)>::type::value_type>>

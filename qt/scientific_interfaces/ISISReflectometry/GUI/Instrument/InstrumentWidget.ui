@@ -45,7 +45,7 @@
       <string>&amp;Instrument Settings</string>
      </property>
      <property name="checkable">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout" stretch="10,2">
       <item>
