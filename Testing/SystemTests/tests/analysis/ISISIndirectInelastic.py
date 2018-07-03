@@ -1005,7 +1005,6 @@ class ISISIndirectInelasticConvFit(with_metaclass(ABCMeta, ISISIndirectInelastic
 
         self.result_names = [convfitSeq_ws[0].name()]
 
-
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
 
