@@ -3,12 +3,12 @@
 #include <complex>
 #include <vector>
 
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/Quat.h"
-#include <boost/math/common_factor.hpp>
+#include "MantidKernel/Tolerance.h"
+#include "MantidKernel/V3D.h"
+#include <boost/integer/common_factor.hpp>
 #include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
@@ -764,7 +764,7 @@ double V3D::toMillerIndexes(double eps) {
   size_t iay = std::lround(ay * mult / eps);
   size_t iaz = std::lround(az * mult / eps);
 
-  size_t div = boost::math::gcd(iax, boost::math::gcd(iay, iaz));
+  size_t div = boost::integer::gcd(iax, boost::integer::gcd(iay, iaz));
   mult /= (static_cast<double>(div) * eps);
   x *= mult;
   y *= mult;
