@@ -765,7 +765,7 @@ class ISISIndirectInelasticIqtAndIqtFit(with_metaclass(ABCMeta, ISISIndirectInel
                                                            SpecMin=0, SpecMax=self.spec_max)
 
         self.result_names = [iqt_ws.name(),
-                             iqtfitSeq_ws.name()]
+                             iqtfitSeq_ws[0].name()]
 
         # Remove workspaces from Mantid
         for sample in self.samples:
@@ -1045,7 +1045,7 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         self.spectra_max = 41
         self.ties = False
 
-        self.result_names = ['osi97935_graphite002_conv_1LFitL_s0_to_41_Result']
+        self.result_names = ['osi97935_graphite002_conv_1LFitL_s0_to_41_Result_1']
 
     def get_reference_files(self):
         self.tolerance = 0.3
@@ -1072,7 +1072,7 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.spectra_max = 50
         self.ties = False
 
-        self.result_names = ['irs53664_graphite002_conv_1LFitL_s0_to_50_Result']
+        self.result_names = ['irs53664_graphite002_conv_1LFitL_s0_to_50_Result_1']
 
     def get_reference_files(self):
         self.tolerance = 0.2
