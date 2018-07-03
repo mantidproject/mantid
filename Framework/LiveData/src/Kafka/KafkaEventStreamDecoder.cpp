@@ -337,6 +337,10 @@ void KafkaEventStreamDecoder::captureImplExcept() {
         checkIfAllStopOffsetsReached(reachedEnd, checkOffsets);
       } else if (runMsg->info_type_type() == InfoTypes_RunStart) {
 		auto runStartMsg = static_cast<const RunStart *>(runMsg->info_type());
+		m_runNumber = runStartMsg->run_number();
+		auto runStartTime =
+			static_cast<time_t>(runStartMsg->start_time() / 1000000000);
+		m_runStart.set_from_time_t(runStartTime);
 		m_cachedRunStartStruct = {
 			runStartMsg->instrument_name()->str(), runStartMsg->run_number(),
 			runStartMsg->start_time(),

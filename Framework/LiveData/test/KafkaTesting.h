@@ -409,21 +409,25 @@ public:
 		// Run start (with 2 periods)
 		// Event data
 		// Event data
+		// Run stop
 
 		switch (m_nextOffset) {
 		case 0:
-			fakeReceiveARunStartMessage(buffer, 1005, m_startTime, m_instName,
+			fakeReceiveARunStartMessage(buffer, 1000, m_startTime, m_instName,
 				m_nperiods);
 			break;
 		case 2:
-			fakeReceiveARunStopMessage(buffer, m_stopTime);
+			fakeReceiveARunStartMessage(buffer, 1001, m_startTime, m_instName,
+				2);
 			break;
 		case 3:
-			fakeReceiveARunStartMessage(buffer, 1006, m_startTime, m_instName,
-				2);
+			fakeReceiveARunStopMessage(buffer, m_stopTime);
 			break;
 		case 5:
 			fakeReceiveAnISISEventMessage(buffer, 1);
+			break;
+		case 6:
+			fakeReceiveARunStopMessage(buffer, m_stopTime);
 			break;
 		default:
 			fakeReceiveAnISISEventMessage(buffer, 0);
@@ -439,12 +443,12 @@ public:
 		// + 1 because rdkafka::offsetsForTimes returns the first offset _after_ the
 		// given timestamp
 		return{ std::pair<std::string, std::vector<int64_t>>(m_topicName,
-		{ m_stopOffset + 1 }) };
+		{ 2 }) };
 	}
 	std::unordered_map<std::string, std::vector<int64_t>>
 		getCurrentOffsets() override {
 		return{ std::pair<std::string, std::vector<int64_t>>(m_topicName,
-		{ m_nextOffset - 1 }) };
+		{ 2 }) };
 	}
 	void seek(const std::string &topic, uint32_t partition,
 		int64_t offset) override {

@@ -133,28 +133,34 @@ public:
   }
 
   void test_Varying_Period_Event_Stream() {
-	  /**
-	  * Test that period number is correctly updated between runs
-	  * e.g If the first run has 1 period and the next has 2 periods
-	  */
-	  using namespace ::testing;
-	  using namespace KafkaTesting;
-	  using Mantid::API::Workspace_sptr;
-	  using Mantid::API::WorkspaceGroup;
-	  using Mantid::DataObjects::EventWorkspace;
-	  using namespace Mantid::LiveData;
+	/**
+	* Test that period number is correctly updated between runs
+	* e.g If the first run has 1 period and the next has 2 periods
+	*/
+	using namespace ::testing;
+	using namespace KafkaTesting;
+	using Mantid::API::Workspace_sptr;
+	using Mantid::API::WorkspaceGroup;
+	using Mantid::DataObjects::EventWorkspace;
+	using namespace Mantid::LiveData;
 
-	  auto mockBroker = std::make_shared<MockKafkaBroker>();
-	  EXPECT_CALL(*mockBroker, subscribe_(_, _))
-		  .Times(Exactly(3))
-		  .WillOnce(Return(new FakeVariablePeriodSubscriber(4)))
-		  .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
-		  .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
-	  auto decoder = createTestDecoder(mockBroker);
-	  TSM_ASSERT("Decoder should not have create data buffers yet",
-		  !decoder->hasData());
-	  startCapturing(*decoder, 5);
+	auto mockBroker = std::make_shared<MockKafkaBroker>();
+	EXPECT_CALL(*mockBroker, subscribe_(_, _))
+		.Times(Exactly(3))
+		.WillOnce(Return(new FakeVariablePeriodSubscriber(5)))
+		.WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
+		.WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+	auto decoder = createTestDecoder(mockBroker);
+	TSM_ASSERT("Decoder should not have create data buffers yet",
+		!decoder->hasData());
+	// Run start, Event, Run stop, Run start (2 period)
+	startCapturing(*decoder, 4);
 	Workspace_sptr workspace;
+	// Extract the data from single period and inform the decoder
+	TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
+	TS_ASSERT(decoder->hasReachedEndOfRun());
+	// Continue to capture multi period data
+	continueCapturing(*decoder, 6);
 	TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
 	TS_ASSERT(decoder->hasReachedEndOfRun());
 	TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
@@ -414,12 +420,17 @@ private:
     decoder.registerIterationEndCb(callback);
     decoder.registerErrorCb(callback);
     TS_ASSERT_THROWS_NOTHING(decoder.startCapture());
-    {
-      std::unique_lock<std::mutex> lk(m_callbackMutex);
-      this->m_callbackCondition.wait(lk, [this, maxIterations]() {
-        return this->m_niterations == maxIterations;
-      });
-    }
+	continueCapturing(decoder, maxIterations);
+  }
+
+  void continueCapturing(Mantid::LiveData::KafkaEventStreamDecoder &decoder,
+	  uint8_t maxIterations) {
+	{
+	  std::unique_lock<std::mutex> lk(m_callbackMutex);
+	  this->m_callbackCondition.wait(lk, [this, maxIterations]() {
+		return this->m_niterations == maxIterations;
+	  });
+	}
   }
 
   std::unique_ptr<Mantid::LiveData::KafkaEventStreamDecoder>
