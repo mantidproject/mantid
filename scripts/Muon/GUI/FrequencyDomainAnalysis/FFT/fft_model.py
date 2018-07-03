@@ -20,7 +20,7 @@ class FFTWrapper(object):
         self.preRe = None
         self.preIm = None
         self.FFT = None
- 
+
     def cancel(self):
         self.model.cancel()
 
