@@ -334,10 +334,9 @@ bool ProjectRecovery::openInEditor(const Poco::Path &inputFolder) {
 /// them
 void ProjectRecovery::projectSavingThreadWrapper() {
   try {
-	projectSavingThread();
-  }
-	catch (Mantid::API::Algorithm::CancelException) {
-		return;	
+    projectSavingThread();
+  } catch (Mantid::API::Algorithm::CancelException) {
+    return;
   } catch (std::exception const &e) {
     std::string preamble("Project recovery has stopped. Please report"
                          " this to the development team.\nException:\n");
@@ -356,17 +355,17 @@ void ProjectRecovery::projectSavingThreadWrapper() {
  */
 void ProjectRecovery::projectSavingThread() {
   while (!m_stopBackgroundThread) {
-	  {		// Ensure the lock only exists as long as the conditional variable
-		  std::unique_lock<std::mutex> lock(m_notifierMutex);
-		  // The condition variable releases the lock until the var changes
-		  if (m_threadNotifier.wait_for(lock, TIME_BETWEEN_SAVING, [this]() {
-			  return m_stopBackgroundThread.load();
-		  })) {
-			  // Exit thread
-			  g_log.debug("Project Recovery: Stopping background saving thread");
-			  return;
-		  }
-	  }
+    { // Ensure the lock only exists as long as the conditional variable
+      std::unique_lock<std::mutex> lock(m_notifierMutex);
+      // The condition variable releases the lock until the var changes
+      if (m_threadNotifier.wait_for(lock, TIME_BETWEEN_SAVING, [this]() {
+            return m_stopBackgroundThread.load();
+          })) {
+        // Exit thread
+        g_log.debug("Project Recovery: Stopping background saving thread");
+        return;
+      }
+    }
 
     // "Timeout" - Save out again
     const auto &ads = Mantid::API::AnalysisDataService::Instance();
@@ -445,13 +444,13 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
     destFilename.append(filename);
 
     alg->initialize();
-	alg->setLogging(false);
+    alg->setLogging(false);
     alg->setProperty("AppendTimestamp", true);
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("Filename", destFilename.toString());
     alg->setPropertyValue("StartTimestamp", startTime);
 
-	alg->execute();
+    alg->execute();
   }
 }
 
