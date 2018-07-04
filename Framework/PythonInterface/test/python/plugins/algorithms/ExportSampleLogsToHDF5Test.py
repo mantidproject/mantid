@@ -120,5 +120,13 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
         
         return prop
 
+    def test_create_timeSeries(self):
+        #prop = PropertyFactory.testFunction()
+        #self.assertEquals(prop, "Hello!")
+        prop = PropertyFactory.createTimeSeries("hello", [1,2,3,4,5,6,7])
+        self.assertEquals(type(prop), "")
+        
+      
+
 if __name__ == "__main__":
     unittest.main()

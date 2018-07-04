@@ -8,8 +8,38 @@
 #include "MantidKernel/PropertyWithValue.h"
 
 #include <boost/make_shared.hpp>
+#include <boost/python/class.hpp>
+#include <boost/python/extract.hpp> 
 
 #include <cassert>
+
+using namespace Mantid::Kernel;
+using namespace boost::python;
+using Mantid::PythonInterface::Registry::PropertyWithValueFactory;
+
+
+#include "MantidKernel/TimeSeriesProperty.h"
+
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/IValidator.h"
+#include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
+#include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
+#include "MantidKernel/IPropertyManager.h"
+
+#include <boost/python/class.hpp>
+#include <boost/python/list.hpp>
+#include <boost/python/enum.hpp>
+#include <boost/python/make_constructor.hpp>
+
+#include "boost/python/stl_iterator.hpp"
+
+using namespace boost::python;
+using namespace Mantid::Kernel;
+using namespace Mantid::PythonInterface;
+
+using Mantid::Kernel::TimeSeriesProperty;
 
 namespace Mantid {
 namespace PythonInterface {
@@ -136,6 +166,73 @@ PropertyWithValueFactory::create(const std::string &name,
                                  const unsigned int direction) {
   boost::python::object validator; // Default construction gives None object
   return create(name, defaultValue, validator, direction);
+}
+
+/**
+ * Helper function to determine what type a boost::python::list is holding
+ * @param pyList :: The list to be checked
+ * @returns A boolean value - true if all items in the list are of the same type
+ */
+template <typename TYPE>
+bool checkList(const boost::python::list &pyList) {
+
+  // Find the length of the list
+  boost::python::ssize_t n = boost::python::len(pyList);
+
+  // Loop through each element of the list
+  for (boost::python::ssize_t i = 0; i < n - 1; i++) {
+    // Compare current element to next one
+    extract<TYPE> get_val(pyList[i]);
+    extract<TYPE> get_next_val(pyList[i+1]);
+
+                        // Check that the types are the same
+    if (get_val.check() != get_next_val.check()) {
+      return false;
+    }
+  }
+
+  // If we reach here all the elements have the same type
+  return true;
+}
+
+
+/**
+* Creates a TimeSeriesProperty<Type> instance from the given information.
+* The python type is mapped to a C type using the mapping defined by
+* initPythonTypeMap()
+* @param name :: The name of the property
+* @param defaultValue :: A default value for this property.
+* @returns A pointer to a new Property object
+*/
+std::unique_ptr<Mantid::Kernel::Property>
+PropertyWithValueFactory::createTimeSeries(const std::string &name,
+  const boost::python::object &defaultValue) {
+
+  // Take in the object and try to convert it into a list
+  const boost::python::list pyList = extract<boost::python::list> (defaultValue);
+
+  bool check_val_int = checkList<int64_t>(pyList);
+  bool check_val_str = checkList<std::string>(pyList);
+  bool check_val_bool = checkList<bool>(pyList);
+  bool check_val_double = checkList<double>(pyList);
+
+  // Check to see which type of TimeSeriesProperty to return
+  if (check_val_int) {
+    return Mantid::Kernel::make_unique<TimeSeriesProperty<int64_t>>(name);
+  }
+  else if (check_val_str) {
+    return Mantid::Kernel::make_unique<TimeSeriesProperty<std::string>>(name);
+  }
+  else if (check_val_bool) {
+    return Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>(name);
+  }
+  else if (check_val_double) {
+    return Mantid::Kernel::make_unique<TimeSeriesProperty<double>>(name);
+  }
+  else {
+    return Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>(name);
+  }
+
 }
 
 //-------------------------------------------------------------------------
