@@ -136,7 +136,7 @@ getRecoveryFolderCheckpoints(const std::string &recoveryFolderPath) {
 
 std::string removeInvalidFilenameChars(std::string s) {
 	// NTFS is most restrictive, so blacklist on this
-	std::string blacklistChars{ ":*\"?<>|" };
+	std::string blacklistChars{ ":*?<>|/\"\\" };
 	boost::remove_erase_if(s, boost::is_any_of(blacklistChars));
 	return s;
 }
