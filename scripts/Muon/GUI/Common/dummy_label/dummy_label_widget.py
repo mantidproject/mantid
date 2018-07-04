@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.dummy_label.dummy_label_view import DummyLabelView
-from Muon.GUI.dummy_label.dummy_label_presenter import DummyLabelPresenter
+from Muon.GUI.Common.dummy_label.dummy_label_view import DummyLabelView
+from Muon.GUI.Common.dummy_label.dummy_label_presenter import DummyLabelPresenter
 
 
 class DummyLabelWidget(object):

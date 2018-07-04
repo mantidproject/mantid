@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtCore, QtGui
 
-from Muon import table_utils
+from Muon.GUI.Common import table_utils
 
 
 class MaxEntView(QtGui.QWidget):
@@ -19,6 +19,10 @@ class MaxEntView(QtGui.QWidget):
     def __init__(self, parent=None):
         super(MaxEntView, self).__init__(parent)
         self.grid = QtGui.QVBoxLayout(self)
+
+        # add splitter for resizing
+        splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+
         self.run = None
         # make table
         self.table = QtGui.QTableWidget(self)
@@ -126,16 +130,7 @@ class MaxEntView(QtGui.QWidget):
         # this is if complex data is unhidden
         self.table.setMinimumSize(40, 203)
         self.tableA.setMinimumSize(40, 207)
-        self.horizontalSpacer1 = QtGui.QSpacerItem(
-            20,
-            30,
-            QtGui.QSizePolicy.Expanding,
-            QtGui.QSizePolicy.Expanding)
-        self.horizontalSpacer2 = QtGui.QSpacerItem(
-            20,
-            70,
-            QtGui.QSizePolicy.Expanding,
-            QtGui.QSizePolicy.Expanding)
+
         # make buttons
         self.button = QtGui.QPushButton('Calculate MaxEnt', self)
         self.button.setStyleSheet("background-color:lightgrey")
@@ -151,12 +146,14 @@ class MaxEntView(QtGui.QWidget):
         self.buttonLayout.addWidget(self.button)
         self.buttonLayout.addWidget(self.cancel)
         # add to layout
-        self.grid.addWidget(self.table)
-        self.grid.addItem(self.horizontalSpacer1)
-        self.grid.addWidget(self.advancedLabel)
-        self.grid.addWidget(self.tableA)
-        self.grid.addItem(self.horizontalSpacer2)
+        splitter.addWidget(self.table)
+        splitter.addWidget(self.advancedLabel)
+        splitter.addWidget(self.tableA)
+        self.grid.addWidget(splitter)
         self.grid.addLayout(self.buttonLayout)
+
+    def getLayout(self):
+        return self.grid
 
     # add data to view
     def addItems(self, options):

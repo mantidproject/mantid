@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 
 import math
-from Muon import thread_model
+from Muon.GUI.Common import thread_model
 
 
 class MaxEntPresenter(object):
@@ -22,6 +22,10 @@ class MaxEntPresenter(object):
         self.view.maxEntButtonSignal.connect(self.handleMaxEntButton)
         self.view.cancelSignal.connect(self.cancel)
         self.view.phaseSignal.connect(self.handlePhase)
+
+    @property
+    def widget(self):
+        return self.view
 
     # functions
     def getWorkspaceNames(self):
