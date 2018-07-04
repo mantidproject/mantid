@@ -142,7 +142,7 @@ int LoadRawHelper::getNumberofTimeRegimes() {
  */
 ISISRAW2 &LoadRawHelper::isisRaw() const {
   if (!m_isis_raw) {
-    m_isis_raw.reset(new ISISRAW2);
+    m_isis_raw = Kernel::make_unique<ISISRAW2>();
   }
 
   return *m_isis_raw;
