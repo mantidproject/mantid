@@ -26,8 +26,10 @@
 #include <cstdlib>
 #include <exception>
 #include <fstream>
-#include <nexus/NeXusException.hpp>
+// clang-format off
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
+// clang-format on
 #include <ostream>
 #include <string>
 

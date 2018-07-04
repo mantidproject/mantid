@@ -254,7 +254,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings,
                                      const QStringList &args)
     : QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),
       blockWindowActivation(false), m_enableQtiPlotFitting(false),
-      m_ProjectRecovery(this), m_exitCode(0),
+      m_projectRecovery(this), m_exitCode(0),
 #ifdef Q_OS_MAC // Mac
       settings(QSettings::IniFormat, QSettings::UserScope, "Mantid",
                "MantidPlot")
@@ -263,7 +263,6 @@ ApplicationWindow::ApplicationWindow(bool factorySettings,
 #endif
 {
   init(factorySettings, args);
-  m_ProjectRecovery.startProjectSaving();
 }
 
 /**
@@ -9774,7 +9773,8 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
 
   // Stop background saving thread, so it doesn't try to use a destroyed
   // resource
-  m_ProjectRecovery.stopProjectSaving();
+  m_projectRecovery.stopProjectSaving();
+  m_projectRecovery.clearAllCheckpoints();
 
   // Close the remaining MDI windows. The Python API is required to be active
   // when the MDI window destructor is called so that those references can be
@@ -16636,6 +16636,9 @@ void ApplicationWindow::onAboutToStart() {
 
   // Make sure we see all of the startup messages
   resultsLog->scrollToTop();
+
+  // Kick off project recovery
+  checkForProjectRecovery();
 }
 
 /**
@@ -16750,4 +16753,18 @@ bool ApplicationWindow::saveProjectRecovery(std::string destination) {
   const bool isRecovery = true;
   ProjectSerialiser projectWriter(this, isRecovery);
   return projectWriter.save(QString::fromStdString(destination));
+}
+
+void ApplicationWindow::checkForProjectRecovery() {
+  if (!m_projectRecovery.checkForRecovery()) {
+    m_projectRecovery.startProjectSaving();
+    return;
+  }
+
+  // Recovery file present
+  if (m_projectRecovery.attemptRecovery()) {
+    // If it worked correctly reset project recovery and start saving
+    m_projectRecovery.clearAllCheckpoints();
+    m_projectRecovery.startProjectSaving();
+  }
 }

@@ -7,8 +7,10 @@
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 #include "MantidAPI/AlgorithmManager.h"
 #include <vtkUnstructuredGrid.h>
 
