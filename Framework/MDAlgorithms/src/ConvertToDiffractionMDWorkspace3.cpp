@@ -114,6 +114,18 @@ void ConvertToDiffractionMDWorkspace3::calculateExtentsFromData(
   std::replace(maxVal.begin(), maxVal.end(), INF, DEFAULT_BOUND);
   std::replace(minVal.begin(), minVal.end(), MAX_DBL, -DEFAULT_BOUND);
   std::replace(maxVal.begin(), maxVal.end(), -MAX_DBL, DEFAULT_BOUND);
+
+  // Increases bounds by an error margin of 5% and ensures they aren't
+  // too close to zero. This is to prevent events from being incorrectly
+  // discarded as out of bounds by convertEventList() or addEvents().
+  for (size_t i = 0; i < minVal.size(); ++i) {
+    minVal[i] *= (1 - 5.e-2 * boost::math::sign(minVal[i]));
+    if (fabs(minVal[i]) < 1.e-4)
+      minVal[i] = -1.e-4;
+    maxVal[i] *= (1 + 5.e-2 * boost::math::sign(maxVal[i]));
+    if (fabs(maxVal[i]) < 1.e-4)
+      maxVal[i] = 1.e-4;
+  }
 }
 
 } // namespace MDAlgorithms
