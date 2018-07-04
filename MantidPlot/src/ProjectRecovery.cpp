@@ -335,7 +335,7 @@ bool ProjectRecovery::openInEditor(const Poco::Path &inputFolder) {
 void ProjectRecovery::projectSavingThreadWrapper() {
   try {
     projectSavingThread();
-  } catch (Mantid::API::Algorithm::CancelException) {
+  } catch (Mantid::API::Algorithm::CancelException &) {
     return;
   } catch (std::exception const &e) {
     std::string preamble("Project recovery has stopped. Please report"
