@@ -121,7 +121,7 @@ void ReflectometryReductionOneAuto2::setDefaultOutputWorkspaceNames() {
   }
   if (isDefault("OutputWorkspace")) {
     setPropertyValue("OutputWorkspace",
-                      OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
+                     OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
   }
   if (isDebug && isDefault("OutputWorkspaceWavelength")) {
     setPropertyValue("OutputWorkspaceWavelength",
