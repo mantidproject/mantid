@@ -1,8 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-from Muon.GUI.dummy.dummy_view import DummyView
-from Muon.GUI.dummy.dummy_presenter import DummyPresenter
+from Muon.GUI.Common.dummy.dummy_view import DummyView
+from Muon.GUI.Common.dummy.dummy_presenter import DummyPresenter
 
 
 class DummyWidget(object):
@@ -14,7 +14,7 @@ class DummyWidget(object):
         self.presenter = DummyPresenter(view,model)
 
     @property
-    def presneter(self):
+    def presenter(self):
         return self.presenter
 
     @property
