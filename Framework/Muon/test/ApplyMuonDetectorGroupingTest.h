@@ -402,7 +402,7 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist(
         "inputGroup; Group; test; Asym; #1_unNorm"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist(
-        "inputGroup; Group; test; Asym; #1_Raw_unNorm"));
+        "inputGroup; Group; test; Asym; #1_unNorm_Raw"));
   }
 };
 

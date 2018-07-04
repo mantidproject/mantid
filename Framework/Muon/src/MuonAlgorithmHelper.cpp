@@ -7,13 +7,6 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
 
-//#include <Poco/DOM/DOMParser.h>
-//#include <Poco/DOM/DOMWriter.h>
-//#include <Poco/DOM/Document.h>
-//#include <Poco/DOM/NodeList.h>
-//#include <Poco/DOM/Text.h>
-//#include <Poco/XML/XMLWriter.h>
-
 #include <fstream>
 #include <string>
 #include <vector>

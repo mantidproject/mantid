@@ -217,7 +217,7 @@ void ApplyMuonDetectorGrouping::exec() {
   std::vector<std::string> wsNames = {wsName, wsRawName};
 
   const std::string wsunNormName = wsName + UNNORM;
-  const std::string wsunNormRawName = wsRawName + UNNORM;
+  const std::string wsunNormRawName = wsName + UNNORM + "_Raw";
 
   auto ws = createAnalysisWorkspace(inputWS, false, options);
   if (getPropertyValue("AnalysisType") == "Asymmetry") {
