@@ -632,6 +632,18 @@ public:
     TS_ASSERT_EQUALS(oldA->value<bool>(), false);
   }
 
+  void test_asString_for_doubles() {
+    ParameterMap pmap;
+    auto comp = m_testInstrument.get();
+    pmap.addDouble(comp, "d", 0.123456789012345);
+    pmap.addV3D(comp, "v",
+                Mantid::Kernel::V3D(0.123456789012345, 0.123456789012345,
+                                    0.123456789012345));
+    TS_ASSERT_EQUALS(pmap.get(comp, "d")->asString(), "0.123456789012345");
+    TS_ASSERT_EQUALS(pmap.get(comp, "v")->asString(),
+                     "[0.123456789012345,0.123456789012345,0.123456789012345]");
+  }
+
 private:
   template <typename ValueType>
   void doCopyAndUpdateTestUsingGenericAdd(const std::string &type,
