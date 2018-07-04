@@ -118,10 +118,10 @@ void ReflectometryReductionOneAuto2::setDefaultOutputWorkspaceNames() {
   if (isDefault("OutputWorkspaceBinned")) {
     setPropertyValue("OutputWorkspaceBinned",
                      OUTPUT_WORKSPACE_BINNED_DEFAULT_PREFIX + runNumber);
-    if (isDefault("OutputWorkspace")) {
-      setPropertyValue("OutputWorkspace",
-                       OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
-    }
+  }
+  if (isDefault("OutputWorkspace")) {
+    setPropertyValue("OutputWorkspace",
+                      OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
   }
   if (isDebug && isDefault("OutputWorkspaceWavelength")) {
     setPropertyValue("OutputWorkspaceWavelength",

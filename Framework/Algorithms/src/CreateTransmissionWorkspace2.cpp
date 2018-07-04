@@ -82,6 +82,9 @@ void CreateTransmissionWorkspace2::init() {
 
   initStitchProperties();
 
+  declareProperty("Debug", false,
+                  "Whether to enable the output of extra workspaces.");
+
   declareProperty(
       make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
@@ -223,7 +226,8 @@ void CreateTransmissionWorkspace2::storeTransitionRun(int which,
  */
 void CreateTransmissionWorkspace2::storeOutputWorkspace(
     API::MatrixWorkspace_sptr ws) {
-  if (isDefault("OutputWorkspace") && !isChild()) {
+  bool const isDebug = getProperty("Debug");
+  if (isDefault("OutputWorkspace") && (!isChild() || isDebug)) {
     std::string name = TRANS_LAM_PREFIX;
     if (!m_firstTransmissionRunNumber.empty()) {
       name.append(m_firstTransmissionRunNumber);
@@ -234,7 +238,11 @@ void CreateTransmissionWorkspace2::storeOutputWorkspace(
       name.append("_");
       name.append(m_secondTransmissionRunNumber);
     }
-    setPropertyValue("OutputWorkspace", name);
+    if (!isChild()) {
+      setPropertyValue("OutputWorkspace", name);
+    } else {
+      AnalysisDataService::Instance().addOrReplace(name, ws);
+    }
   }
   setProperty("OutputWorkspace", ws);
 }

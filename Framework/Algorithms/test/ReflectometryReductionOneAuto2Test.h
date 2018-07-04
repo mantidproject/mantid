@@ -577,12 +577,33 @@ public:
     alg.setProperty("ThetaIn", theta);
     alg.setProperty("CorrectionAlgorithm", "None");
     alg.setProperty("ProcessingInstructions", "3");
+    alg.execute();
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned_13460"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam_13460"));
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_optional_outputs_binned() {
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    // Use the default correction type, which is a vertical shift
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inter);
+    alg.setProperty("ThetaIn", theta);
+    alg.setProperty("CorrectionAlgorithm", "None");
+    alg.setProperty("ProcessingInstructions", "3");
     alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
     alg.execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned"));
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsQ"));
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsQ_binned_13460"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam_13460"));
 
     AnalysisDataService::Instance().clear();
   }
@@ -699,9 +720,10 @@ public:
   void test_polarization_correction() {
 
     MatrixWorkspace_sptr first = m_TOF->clone();
-    MatrixWorkspace_sptr second = m_TOF->clone();
-    MatrixWorkspace_sptr third = m_TOF->clone();
-    MatrixWorkspace_sptr fourth = m_TOF->clone();
+    first->mutableRun().addProperty<std::string>("run_number", "1234");
+    MatrixWorkspace_sptr second = first->clone();
+    MatrixWorkspace_sptr third = first->clone();
+    MatrixWorkspace_sptr fourth = first->clone();
 
     WorkspaceGroup_sptr inputWSGroup = boost::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(first);
