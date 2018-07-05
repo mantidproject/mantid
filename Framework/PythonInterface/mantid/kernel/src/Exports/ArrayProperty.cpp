@@ -49,7 +49,8 @@ template <> std::string dtype(ArrayProperty<std::string> &self) {
   }
 
   // Find the maximum number of characters
-  size_t max = *std::max_element(std::begin(string_sizes), std::end(string_sizes));
+  size_t max =
+      *std::max_element(std::begin(string_sizes), std::end(string_sizes));
 
   // Create the string to return
   std::stringstream ss;
