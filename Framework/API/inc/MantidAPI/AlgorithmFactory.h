@@ -133,6 +133,9 @@ public:
   /// Get the algorithm categories
   const std::map<std::string, bool> getCategoriesWithState() const;
 
+  /// Returns a single algorithm descriptor
+  AlgorithmDescriptor getDescriptor(const std::string &algName, int version = -1) const;
+
   /// Returns algorithm descriptors.
   std::vector<AlgorithmDescriptor>
   getDescriptors(bool includeHidden = false) const;
