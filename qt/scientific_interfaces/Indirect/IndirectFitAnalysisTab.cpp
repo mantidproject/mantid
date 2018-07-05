@@ -666,13 +666,13 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
 void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
   setSaveResultEnabled(!error);
   setPlotResultEnabled(!error);
+  updateParameterValues();
   m_spectrumPresenter->enableView();
   m_plotPresenter->updatePlots();
-  updateParameterValues();
 
   connect(m_fitPropertyBrowser,
-          SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
-          SLOT(updateGuessPlots()));
+          SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
+          m_plotPresenter.get(), SLOT(updateGuess()));
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(fitAlgorithmComplete(bool)));
 }
@@ -850,8 +850,8 @@ void IndirectFitAnalysisTab::runSingleFit(IAlgorithm_sptr fitAlgorithm) {
 
 void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
   disconnect(m_fitPropertyBrowser,
-             SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
-             SLOT(updateGuessPlots()));
+             SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
+             m_plotPresenter.get(), SLOT(updateGuess()));
 
   setAlgorithmProperties(fitAlgorithm);
 

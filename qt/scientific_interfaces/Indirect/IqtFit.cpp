@@ -65,8 +65,6 @@ void IqtFit::setupFitTab() {
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotResult()));
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
 
-  connect(this, SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
-          SLOT(parameterUpdated(const Mantid::API::IFunction *)));
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
   connect(this, SIGNAL(customBoolChanged(const QString &, bool)), this,
           SLOT(customBoolUpdated(const QString &, bool)));

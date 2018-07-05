@@ -66,6 +66,7 @@ protected slots:
 
 signals:
   void singleSampleLoaded();
+  void singleResolutionLoaded();
   void dataAdded();
   void dataRemoved();
   void dataChanged();

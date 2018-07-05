@@ -59,6 +59,8 @@ void MSDFit::updateModelFitTypeString() {
 
 void MSDFit::updatePlotOptions() {}
 
+void MSDFit::plotClicked() { IndirectFitAnalysisTab::plotResult("All"); }
+
 void MSDFit::setPlotResultEnabled(bool enabled) {
   m_uiForm->pbPlot->setEnabled(enabled);
 }

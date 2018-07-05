@@ -19,8 +19,6 @@ ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
   connect(view, SIGNAL(resolutionLoaded(const QString &)), this,
           SLOT(setModelResolution(const QString &)));
   connect(view, SIGNAL(resolutionLoaded(const QString &)), this,
-          SLOT(updateTableFromSingleData()));
-  connect(view, SIGNAL(resolutionLoaded(const QString &)), this,
           SIGNAL(singleResolutionLoaded()));
 }
 
