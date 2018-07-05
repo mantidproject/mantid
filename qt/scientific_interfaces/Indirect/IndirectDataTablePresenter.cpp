@@ -28,10 +28,11 @@ class ExcludeRegionDelegate : public QItemDelegate {
 public:
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &,
                         const QModelIndex &) const override {
-    QLineEdit *lineEdit = new QLineEdit(parent);
-    lineEdit->setValidator(
-        new QRegExpValidator(QRegExp(Regexes::MASK_LIST), parent));
-    return lineEdit;
+    auto lineEdit = Mantid::Kernel::make_unique<QLineEdit>(parent);
+    auto validator = Mantid::Kernel::make_unique<QRegExpValidator>(
+        QRegExp(Regexes::MASK_LIST), parent);
+    lineEdit->setValidator(validator.release());
+    return lineEdit.release();
   }
 
   void setEditorData(QWidget *editor, const QModelIndex &index) const override {
@@ -66,7 +67,7 @@ QString makeNumber(double d) { return QString::number(d, 'g', 16); }
 std::string
 pairsToString(const std::vector<std::pair<std::size_t, std::size_t>> &pairs) {
   std::vector<std::string> pairStrings;
-  for (auto &&value : pairs) {
+  for (auto const &value : pairs) {
     if (value.first == value.second)
       pairStrings.emplace_back(std::to_string(value.first));
     else
@@ -115,8 +116,9 @@ IndirectDataTablePresenter::IndirectDataTablePresenter(
     const QStringList &headers)
     : m_model(model), m_dataTable(dataTable) {
   setHorizontalHeaders(headers);
-  m_dataTable->setItemDelegateForColumn(headers.size() - 1,
-                                        new ExcludeRegionDelegate);
+  m_dataTable->setItemDelegateForColumn(
+      headers.size() - 1,
+      Mantid::Kernel::make_unique<ExcludeRegionDelegate>().release());
   m_dataTable->verticalHeader()->setVisible(false);
 
   connect(m_dataTable, SIGNAL(cellChanged(int, int)), this,
@@ -254,11 +256,19 @@ void IndirectDataTablePresenter::setExclude(const std::string &exclude,
 }
 
 void IndirectDataTablePresenter::addData(std::size_t index) {
+  if (m_dataPositions.size() > index)
+    updateData(index);
+  else
+    addNewData(index);
+}
+
+void IndirectDataTablePresenter::addNewData(std::size_t index) {
   MantidQt::API::SignalBlocker<QObject> blocker(m_dataTable);
   const auto start = m_dataTable->rowCount();
 
-  const auto addRow =
-      [&](std::size_t spectrum) { addTableEntry(index, spectrum); };
+  const auto addRow = [&](std::size_t spectrum) {
+    addTableEntry(index, spectrum);
+  };
   m_model->applySpectra(index, addRow);
 
   if (m_model->numberOfWorkspaces() > m_dataPositions.size())
@@ -504,32 +514,35 @@ void IndirectDataTablePresenter::addTableEntry(std::size_t dataIndex,
   m_dataTable->insertRow(row);
 
   const auto &name = m_model->getWorkspace(dataIndex)->getName();
-  auto cell = new QTableWidgetItem(QString::fromStdString(name));
-  setCell(cell, row, 0);
+  auto cell = Mantid::Kernel::make_unique<QTableWidgetItem>(
+      QString::fromStdString(name));
   auto flags = cell->flags();
   flags ^= Qt::ItemIsEditable;
   cell->setFlags(flags);
+  setCell(std::move(cell), row, 0);
 
-  cell = new QTableWidgetItem(QString::number(spectrum));
-  setCell(cell, row, workspaceIndexColumn());
+  cell =
+      Mantid::Kernel::make_unique<QTableWidgetItem>(QString::number(spectrum));
   cell->setFlags(flags);
+  setCell(std::move(cell), row, workspaceIndexColumn());
 
   const auto range = m_model->getFittingRange(dataIndex, spectrum);
-  cell = new QTableWidgetItem(makeNumber(range.first));
-  setCell(cell, row, startXColumn());
+  cell = Mantid::Kernel::make_unique<QTableWidgetItem>(makeNumber(range.first));
+  setCell(std::move(cell), row, startXColumn());
 
-  cell = new QTableWidgetItem(makeNumber(range.second));
-  m_dataTable->setItem(row, endXColumn(), cell);
-  setCell(cell, row, endXColumn());
+  cell =
+      Mantid::Kernel::make_unique<QTableWidgetItem>(makeNumber(range.second));
+  setCell(std::move(cell), row, endXColumn());
 
   const auto exclude = m_model->getExcludeRegion(dataIndex, spectrum);
-  cell = new QTableWidgetItem(QString::fromStdString(exclude));
-  setCell(cell, row, excludeColumn());
+  cell = Mantid::Kernel::make_unique<QTableWidgetItem>(
+      QString::fromStdString(exclude));
+  setCell(std::move(cell), row, excludeColumn());
 }
 
-void IndirectDataTablePresenter::setCell(QTableWidgetItem *cell, int row,
-                                         int column) {
-  m_dataTable->setItem(row, column, cell);
+void IndirectDataTablePresenter::setCell(std::unique_ptr<QTableWidgetItem> cell,
+                                         int row, int column) {
+  m_dataTable->setItem(row, column, cell.release());
 }
 
 void IndirectDataTablePresenter::updateTableEntry(std::size_t dataIndex,

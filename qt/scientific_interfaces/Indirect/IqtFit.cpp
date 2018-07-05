@@ -33,8 +33,8 @@ IqtFit::IqtFit(QWidget *parent)
   m_uiForm->setupUi(parent);
   m_iqtFittingModel = dynamic_cast<IqtFitModel *>(fittingModel());
 
-  setFitDataPresenter(
-      new IndirectFitDataPresenter(m_iqtFittingModel, m_uiForm->fitDataView));
+  setFitDataPresenter(Mantid::Kernel::make_unique<IndirectFitDataPresenter>(
+      m_iqtFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
@@ -45,10 +45,10 @@ void IqtFit::setupFitTab() {
   setSampleFBSuffices({"_iqt.nxs"});
 
   // Create custom function groups
-  const auto exponential =
-      FunctionFactory::Instance().createFunction("ExpDecay");
+  auto &functionFactory = FunctionFactory::Instance();
+  const auto exponential = functionFactory.createFunction("ExpDecay");
   const auto stretchedExponential =
-      FunctionFactory::Instance().createFunction("StretchExp");
+      functionFactory.createFunction("StretchExp");
   addSpinnerFunctionGroup("Exponential", {exponential}, 0, 2);
   addCheckBoxFunctionGroup("Stretched Exponential", {stretchedExponential});
 

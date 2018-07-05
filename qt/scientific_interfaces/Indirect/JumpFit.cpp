@@ -28,7 +28,7 @@ JumpFit::JumpFit(QWidget *parent)
   m_uiForm->setupUi(parent);
 
   m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
-  setFitDataPresenter(new JumpFitDataPresenter(
+  setFitDataPresenter(Mantid::Kernel::make_unique<JumpFitDataPresenter>(
       m_jumpFittingModel, m_uiForm->fitDataView, m_uiForm->cbParameterType,
       m_uiForm->cbParameter, m_uiForm->lbParameterType, m_uiForm->lbParameter));
   setPlotView(m_uiForm->pvFitPlotView);
@@ -43,19 +43,15 @@ void JumpFit::setupFitTab() {
   setSampleWSSuffices({"_Result"});
   setSampleFBSuffices({"_Result.nxs"});
 
-  auto chudleyElliot =
-      FunctionFactory::Instance().createFunction("ChudleyElliot");
-  auto hallRoss = FunctionFactory::Instance().createFunction("HallRoss");
-  auto fickDiffusion =
-      FunctionFactory::Instance().createFunction("FickDiffusion");
-  auto teixeiraWater =
-      FunctionFactory::Instance().createFunction("TeixeiraWater");
-  auto eisfDiffCylinder =
-      FunctionFactory::Instance().createFunction("EISFDiffCylinder");
-  auto eisfDiffSphere =
-      FunctionFactory::Instance().createFunction("EISFDiffSphere");
+  auto &functionFactory = FunctionFactory::Instance();
+  auto chudleyElliot = functionFactory.createFunction("ChudleyElliot");
+  auto hallRoss = functionFactory.createFunction("HallRoss");
+  auto fickDiffusion = functionFactory.createFunction("FickDiffusion");
+  auto teixeiraWater = functionFactory.createFunction("TeixeiraWater");
+  auto eisfDiffCylinder = functionFactory.createFunction("EISFDiffCylinder");
+  auto eisfDiffSphere = functionFactory.createFunction("EISFDiffSphere");
   auto eisfDiffSphereAklyl =
-      FunctionFactory::Instance().createFunction("EISFDiffSphereAlkyl");
+      functionFactory.createFunction("EISFDiffSphereAlkyl");
   addComboBoxFunctionGroup("ChudleyElliot", {chudleyElliot});
   addComboBoxFunctionGroup("HallRoss", {hallRoss});
   addComboBoxFunctionGroup("FickDiffusion", {fickDiffusion});

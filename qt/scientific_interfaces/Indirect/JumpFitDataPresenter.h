@@ -55,6 +55,8 @@ private slots:
 private:
   void setAvailableParameters(const std::vector<std::string> &parameters);
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
+  void dialogExecuted(IAddWorkspaceDialog const *dialog,
+                      QDialog::DialogCode result) override;
   std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const override;
   void updateParameterOptions(JumpFitAddWorkspaceDialog *dialog);

@@ -46,11 +46,12 @@ void ConvFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
 
   const auto resolution = m_convFitModel->getResolution(dataIndex);
   const auto name = resolution ? resolution->getName() : "";
-  auto cell = new QTableWidgetItem(QString::fromStdString(name));
-  setCell(cell, row, 1);
+  auto cell = Mantid::Kernel::make_unique<QTableWidgetItem>(
+      QString::fromStdString(name));
   auto flags = cell->flags();
   flags ^= Qt::ItemIsEditable;
   cell->setFlags(flags);
+  setCell(std::move(cell), row, 1);
 }
 
 void ConvFitDataTablePresenter::updateTableEntry(std::size_t dataIndex,
