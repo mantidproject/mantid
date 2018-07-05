@@ -175,6 +175,11 @@ PropertyWithValueFactory::createTimeSeries(
   } else if (PyString_Check(object) == 1) {
     return Mantid::Kernel::make_unique<TimeSeriesProperty<std::string>>(name);
   }
+
+  // If we reach here an error has occurred as there are no type to create
+  // a TimeSeriesProperty from
+  throw std::runtime_error(
+      "Cannot create a TimeSeriesProperty with that data type!");
 }
 
 //-------------------------------------------------------------------------

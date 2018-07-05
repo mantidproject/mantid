@@ -44,7 +44,7 @@ template <> std::string dtype(ArrayProperty<std::string> &self) {
   // Loop for the number of strings
   for (int i = 0; i < values.size(); i++) {
     // For each string store the number of characters
-    int size = values.at(i).size();
+    size_t size = values.at(i).size();
     string_sizes.push_back(size);
   }
 

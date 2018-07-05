@@ -50,7 +50,7 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
   for (int i = 0; i < self.size(); i++) {
     // For each string store the number of characters
     std::string val = self.nthValue(i);
-    int size = val.size();
+    size_t size = val.size();
     string_sizes.push_back(size);
   }
 
