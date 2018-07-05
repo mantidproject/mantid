@@ -192,6 +192,14 @@ public:
     TS_ASSERT_EQUALS(descr, "Short description.");
   }
 
+  void test_add_string_with_spaces() {
+    ParameterMap pmap;
+    auto const comp = m_testInstrument.get();
+    pmap.add("string", comp, "name", std::string("A B C"));
+    auto value = pmap.get(comp, "name");
+    TS_ASSERT_EQUALS(value->value<std::string>(), "A B C");
+  }
+
   void testAdding_A_Parameter_That_Is_Not_Present_Puts_The_Parameter_In() {
     // Add a parameter for the first component of the instrument
     IComponent_sptr comp = m_testInstrument->getChild(0);

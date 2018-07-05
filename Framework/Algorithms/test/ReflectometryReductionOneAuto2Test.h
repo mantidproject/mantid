@@ -3,21 +3,29 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
+
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/ReflectometryHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Algorithms::ReflectometryReductionOneAuto2;
+using namespace Mantid::Algorithms;
 using namespace Mantid::API;
+using namespace Mantid::DataHandling;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
+using namespace Mantid::Kernel;
+using namespace Mantid::TestHelpers;
 
 class ReflectometryReductionOneAuto2Test : public CxxTest::TestSuite {
 private:
   MatrixWorkspace_sptr m_notTOF;
   MatrixWorkspace_sptr m_TOF;
+  AnalysisDataServiceImpl &ADS = AnalysisDataService::Instance();
 
   MatrixWorkspace_sptr loadRun(const std::string &run) {
 
@@ -565,35 +573,68 @@ public:
     TS_ASSERT_DELTA(outQ->x(0)[7], 0.5962, 0.0001);
   }
 
-  void test_polarization_correction() {
-
-    MatrixWorkspace_sptr first = m_TOF->clone();
-    MatrixWorkspace_sptr second = m_TOF->clone();
-    MatrixWorkspace_sptr third = m_TOF->clone();
-    MatrixWorkspace_sptr fourth = m_TOF->clone();
-
-    WorkspaceGroup_sptr inputWSGroup = boost::make_shared<WorkspaceGroup>();
-    inputWSGroup->addWorkspace(first);
-    inputWSGroup->addWorkspace(second);
-    inputWSGroup->addWorkspace(third);
-    inputWSGroup->addWorkspace(fourth);
-    WorkspaceGroup_sptr transWSGroup = boost::make_shared<WorkspaceGroup>();
-    transWSGroup->addWorkspace(first);
-    transWSGroup->addWorkspace(second);
-    transWSGroup->addWorkspace(third);
-    transWSGroup->addWorkspace(fourth);
-    AnalysisDataService::Instance().addOrReplace("input", inputWSGroup);
-    AnalysisDataService::Instance().addOrReplace("trans", transWSGroup);
+  void test_polarization_correction_PA() {
+    std::string const name = "input";
+    prepareInputGroup(name);
+    applyPolarizationEfficiencies(name);
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace", "input");
-    alg.setPropertyValue("FirstTransmissionRun", "trans");
-    alg.setProperty("WavelengthMin", 1.5);
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("ProcessingInstructions", "1");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setProperty("PolarizationAnalysis", "PA");
+    alg.setProperty("Pp", "0.9,0,0");
+    alg.setProperty("Ap", "0.8,0,0");
+    alg.setProperty("Rho", "0.7778,0,0");
+    alg.setProperty("Alpha", "0.75,0");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
+
+    TS_ASSERT_EQUALS(outQGroup.size(), 4);
+    TS_ASSERT_EQUALS(outLamGroup.size(), 4);
+
+    TS_ASSERT_EQUALS(outLamGroup[0]->blocksize(), 9);
+    // X range in outLam
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.9, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 0.8, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[2]->y(0)[0], 0.7, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[3]->y(0)[0], 0.6, 0.0001);
+
+    TS_ASSERT_EQUALS(outQGroup[0]->blocksize(), 9);
+
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.9, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.8, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], 0.7, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], 0.6, 0.0001);
+
+    ADS.clear();
+  }
+
+  void test_polarization_correction_PNR_wrong_input() {
+    std::string const name = "input";
+    prepareInputGroup(name);
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", "PNR");
     alg.setProperty("Pp", "1,1,2");
     alg.setProperty("Ap", "1,1,2");
     alg.setProperty("Rho", "1,1");
@@ -601,50 +642,140 @@ public:
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), std::invalid_argument & e, std::string(e.what()),
+        "For PNR analysis, input group must have 2 periods.");
+  }
+
+  void test_polarization_correction_PNR() {
+    std::string const name = "input";
+    prepareInputGroup(name, "", 2);
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", "PNR");
+    alg.setProperty("Pp", "1,1,2");
+    alg.setProperty("Rho", "1,1");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     alg.execute();
-    auto outQGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
-    auto outLamGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsLam");
 
-    TS_ASSERT(outQGroup);
-    TS_ASSERT(outLamGroup);
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
 
-    if (!outQGroup || !outLamGroup)
-      return;
+    TS_ASSERT_EQUALS(outQGroup.size(), 2);
+    TS_ASSERT_EQUALS(outLamGroup.size(), 2);
 
-    TS_ASSERT_EQUALS(outQGroup->size(), 4);
-    TS_ASSERT_EQUALS(outLamGroup->size(), 4);
+    TS_ASSERT_EQUALS(outLamGroup[0]->blocksize(), 9);
+    // X range in outLam
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
 
-    {
-      auto outQ =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(0));
-      TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
-      TS_ASSERT_EQUALS(outQ->blocksize(), 14);
-      // X range in outQ
-      TS_ASSERT_DELTA(outQ->x(0)[0], 0.3353, 0.0001);
-      TS_ASSERT_DELTA(outQ->x(0)[7], 0.5962, 0.0001);
-      auto outLam =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(0));
-      // X range in outLam
-      TS_ASSERT_DELTA(outLam->x(0)[0], 1.7924, 0.0001);
-      TS_ASSERT_DELTA(outLam->x(0)[7], 8.0658, 0.0001);
-    }
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.8800698581, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 0.8778429658, 0.0001);
 
-    {
-      auto outQ =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(1));
-      TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
-      TS_ASSERT_EQUALS(outQ->blocksize(), 14);
-      // X range in outQ
-      TS_ASSERT_DELTA(outQ->x(0)[0], 0.3353, 0.0001);
-      TS_ASSERT_DELTA(outQ->x(0)[7], 0.5962, 0.0001);
-      auto outLam =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(1));
-      // X range in outLam
-      TS_ASSERT_DELTA(outLam->x(0)[0], 1.7924, 0.0001);
-      TS_ASSERT_DELTA(outLam->x(0)[7], 8.0658, 0.0001);
-    }
+    TS_ASSERT_EQUALS(outQGroup[0]->blocksize(), 9);
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.8936134321, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.8935802109, 0.0001);
+
+    ADS.clear();
+  }
+
+  void test_polarization_correction_default() {
+
+    std::string const name = "input";
+    prepareInputGroup(name, "Fredrikze");
+    applyPolarizationEfficiencies(name);
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", "ParameterFile");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
+
+    TS_ASSERT_EQUALS(outQGroup.size(), 4);
+    TS_ASSERT_EQUALS(outLamGroup.size(), 4);
+
+    TS_ASSERT_EQUALS(outLamGroup[0]->blocksize(), 9);
+    // X range in outLam
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.9, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 0.8, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[2]->y(0)[0], 0.7, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[3]->y(0)[0], 0.6, 0.0001);
+
+    TS_ASSERT_EQUALS(outQGroup[0]->blocksize(), 9);
+
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.9, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.8, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], 0.7, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], 0.6, 0.0001);
+
+    ADS.clear();
+  }
+
+  void test_monitor_index_in_group() {
+    std::string const name = "input";
+    prepareInputGroup(name);
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 5.0);
+    alg.setProperty("ProcessingInstructions", "0");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", "ParameterFile");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), std::invalid_argument & e, std::string(e.what()),
+        "A detector is expected at spectrum 0, found a monitor");
+  }
+
+  void test_I0MonitorIndex_is_detector() {
+    std::string const name = "input";
+    prepareInputGroup(name);
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 5.0);
+    alg.setProperty("MonitorBackgroundWavelengthMin", 1.0);
+    alg.setProperty("MonitorBackgroundWavelengthMax", 5.0);
+    alg.setPropertyValue("I0MonitorIndex", "1");
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument & e,
+                            std::string(e.what()),
+                            "A monitor is expected at spectrum index 1");
   }
 };
 

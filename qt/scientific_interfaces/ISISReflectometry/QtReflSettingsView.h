@@ -136,6 +136,9 @@ public slots:
   /// Adds another row to the per-angle options table
   void addPerAngleOptionsTableRow();
 
+private slots:
+  void setPolCorPageForIndex(int index);
+
 private:
   /// Initialise the interface
   void initLayout();
