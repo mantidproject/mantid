@@ -2,6 +2,7 @@
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidGeometry/Objects/MeshObject2D.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Plane.h"
@@ -77,45 +78,6 @@ createTriangularFaces(const std::vector<uint16_t> &faceIndices,
 
 } // namespace
 
-bool pointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices) {
-  if (vertices.size() < 3)
-    return false; // Not a plane with < 3 points
-
-  auto v0 = vertices[1] - vertices[0];
-
-  Mantid::Kernel::V3D normal;
-  // Look for normal amongst first 3 non coplanar points
-  auto v1 = vertices[2] - vertices[1];
-  for (size_t i = 1; i < vertices.size() - 1; ++i) {
-    v1 = vertices[i + 1] - vertices[i];
-    normal = v0.cross_prod(v1);
-    if (normal.norm2() != 0) {
-      break;
-    }
-  }
-  if (normal.norm2() == 0) {
-    // If all points are colinear. Not a plane.
-    return false;
-  }
-
-  bool in_plane = true;
-  const auto nx = normal[0];
-  const auto ny = normal[1];
-  const auto nz = normal[2];
-  auto denom = normal.norm2();
-  auto k = nx * v0.X() + ny * v0.Y() + nz * v0.Z();
-
-  for (size_t i = 0; i < vertices.size(); ++i) {
-    auto d = (nx * vertices[i].X() + ny * vertices[i].Y() +
-              nz * vertices[i].Z() - k) /
-             denom;
-    if (d != 0) {
-      in_plane = false;
-      break;
-    }
-  }
-  return in_plane;
-}
 std::unique_ptr<const Geometry::IObject>
 createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
   // Calculate cylinder parameters
@@ -211,9 +173,8 @@ std::unique_ptr<const Geometry::IObject>
 createMesh(std::vector<uint16_t> &&triangularFaces,
            std::vector<Mantid::Kernel::V3D> &&vertices) {
 
-  if (NexusShapeFactory::pointsCoplanar(vertices))
-    // TODO. Make Mesh2D
-    return Mantid::Kernel::make_unique<Geometry::MeshObject>(
+  if (Geometry::MeshObject2D::pointsCoplanar(vertices))
+    return Mantid::Kernel::make_unique<Geometry::MeshObject2D>(
         std::move(triangularFaces), std::move(vertices), Kernel::Material{});
   else
     return Mantid::Kernel::make_unique<Geometry::MeshObject>(

@@ -387,7 +387,7 @@ Try to find a point that lies within (or on) the object
 @return 1 if point found, 0 otherwise
 */
 int MeshObject2D::getPointInObject(Kernel::V3D &point) const {
-  return this->isValid(point) ? 1.0 : 0.0;
+  return this->isValid(point) ? 1 : 0;
 }
 
 Kernel::V3D
@@ -406,12 +406,6 @@ MeshObject2D::generatePointInObject(Kernel::PseudoRandomNumberGenerator &,
   // How this would work for a finite plane is not clear. Points within the
   // plane can of course be generated, but most implementations of this method
   // in sibling types use the bounding box
-  throw std::runtime_error("Not implemented");
-}
-
-void MeshObject2D::draw() const { throw std::runtime_error("Not implemented"); }
-
-void MeshObject2D::initDraw() const {
   throw std::runtime_error("Not implemented");
 }
 
@@ -461,6 +455,20 @@ void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,
                                  double &) const {
 
   throw std::runtime_error("Not implemented");
+}
+
+void MeshObject2D::draw() const {
+  if (m_handler == nullptr)
+    return;
+  // Render the Object
+  m_handler->render();
+}
+
+void MeshObject2D::initDraw() const {
+  if (m_handler == nullptr)
+    return;
+  // Render the Object
+  m_handler->initialize();
 }
 
 } // namespace Geometry

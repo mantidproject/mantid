@@ -64,6 +64,40 @@ public:
   static MeshObject2DTest *createSuite() { return new MeshObject2DTest(); }
   static void destroySuite(MeshObject2DTest *suite) { delete suite; }
 
+  void test_not_in_plane_if_insufficient_points() {
+    std::vector<V3D> points;
+    points.push_back(V3D{1, 0, 0});
+    points.push_back(V3D{2, 1, 0});
+    TS_ASSERT(!MeshObject2D::pointsCoplanar(points));
+  }
+
+  void test_points_not_in_plane_if_colinear() {
+    std::vector<V3D> points;
+    points.push_back(V3D{1, 0, 0});
+    points.push_back(V3D{2, 0, 0});
+    points.push_back(V3D{3, 0, 0});
+    TS_ASSERT(!MeshObject2D::pointsCoplanar(points));
+  }
+
+  void test_points_in_plane() {
+    using Mantid::Kernel::V3D;
+    std::vector<V3D> points;
+    points.push_back(V3D{1, 0, 0});
+    points.push_back(V3D{2, 0, 0});
+    points.push_back(V3D{3, 0, 0});
+    points.push_back(V3D{1, 1, 0});
+    TS_ASSERT(MeshObject2D::pointsCoplanar(points));
+  }
+
+  void test_points_not_in_plane() {
+    std::vector<V3D> points;
+    // Make tetrahedron
+    points.push_back(V3D{-1, 0, 0});
+    points.push_back(V3D{1, 0, 0});
+    points.push_back(V3D{0, 0, -1});
+    points.push_back(V3D{0, 1, 0});
+    TS_ASSERT(!MeshObject2D::pointsCoplanar(points));
+  }
   void test_construct_with_insufficient_points_throws() {
     std::vector<V3D> vertices;
     vertices.emplace_back(V3D(0, 0, 0));
@@ -308,19 +342,6 @@ public:
 
     TS_ASSERT_THROWS(mesh.GetObjectGeom(shape, vectors, radius, height),
                      std::runtime_error &);
-  }
-
-  // Characterisation test.
-  void test_draw_not_implemented() {
-    auto mesh = makeSimpleTriangleMesh();
-
-    TS_ASSERT_THROWS(mesh.draw(), std::runtime_error &);
-  }
-  // Characterisation test.
-  void test_init_draw_not_implemented() {
-    auto mesh = makeSimpleTriangleMesh();
-
-    TS_ASSERT_THROWS(mesh.initDraw(), std::runtime_error &);
   }
 
   void test_get_material() {

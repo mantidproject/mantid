@@ -411,9 +411,9 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   yrb -= ypos;
   ylb -= ypos;
 
-  ShapeFactory factory;
   boost::shared_ptr<Mantid::Geometry::IObject> shape =
-      factory.createHexahedralShape(xlb, xlf, xrf, xrb, ylb, ylf, yrf, yrb);
+      ShapeFactory{}.createHexahedralShape(xlb, xlf, xrf, xrb, ylb, ylf, yrf,
+                                           yrb);
 
   // Create detector
   auto detector = new Detector(name, id, shape, parent);
