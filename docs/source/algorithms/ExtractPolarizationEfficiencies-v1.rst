@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm reads polarization correction parameters from the intruments parameters file and creates an efficiency workspace ready to be used with :ref:`algm-PolarizationEfficiencyCor`. It is intended to be used as a child algorithm by the reflectometry
+This algorithm reads polarization correction parameters from the instruments parameters file and creates an efficiency workspace ready to be used with :ref:`algm-PolarizationEfficiencyCor`. It is intended to be used as a child algorithm by the reflectometry
 reduction algorithms and not to be used directly.
 
 To work with this algorithm the parameters file must contain the following parameters (all of type `string` and in the scope of the instrument):

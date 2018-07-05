@@ -86,7 +86,7 @@ void ExtractPolarizationEfficiencies::init() {
       "polarization efficiencies.");
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
-                  "The workspace with extracted eficiencies.");
+                  "The workspace with extracted efficiencies.");
   declareProperty<std::string>("CorrectionMethod", "",
                                "Correction method: Fredrikze or Wildes.",
                                Kernel::Direction::Output);
