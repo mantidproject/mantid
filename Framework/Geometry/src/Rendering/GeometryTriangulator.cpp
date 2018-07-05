@@ -1,4 +1,5 @@
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
+#include "MantidGeometry/Rendering/RenderingMesh.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/Rules.h"
@@ -65,8 +66,8 @@ GeometryTriangulator::GeometryTriangulator(const CSGObject *obj)
 #endif
 }
 
-GeometryTriangulator::GeometryTriangulator(const MeshObject *obj)
-    : m_isTriangulated(false), m_meshObj(obj) {}
+GeometryTriangulator::GeometryTriangulator(std::unique_ptr<RenderingMesh> &&obj)
+    : m_isTriangulated(false), m_meshObj(std::move(obj)) {}
 
 GeometryTriangulator::~GeometryTriangulator() {}
 

@@ -95,6 +95,10 @@ public:
   boost::shared_ptr<GeometryHandler> getGeometryHandler() const override;
   /// Id as static
   static const std::string Id;
+  size_t numberOfVertices() const;
+  size_t numberOfTriangles() const;
+  std::vector<double> getVertices() const;
+  std::vector<uint32_t> getTriangles() const;
 
 private:
   struct PlaneParameters {

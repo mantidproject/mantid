@@ -2,12 +2,17 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidGeometry/Objects/MeshObject2D.h"
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
+#include "MantidGeometry/Rendering/RenderingMesh.h"
 #include "MantidGeometry/Rendering/RenderingHelpers.h"
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Geometry {
+
+namespace {}
+
 GeometryHandler::GeometryHandler(IObjComponent *comp) : m_objComp(comp) {}
 
 GeometryHandler::GeometryHandler(boost::shared_ptr<CSGObject> obj)
@@ -17,12 +22,13 @@ GeometryHandler::GeometryHandler(boost::shared_ptr<CSGObject> obj)
 GeometryHandler::GeometryHandler(CSGObject *obj)
     : m_triangulator(new detail::GeometryTriangulator(obj)), m_csgObj(obj) {}
 
-GeometryHandler::GeometryHandler(boost::shared_ptr<MeshObject> obj)
-    : m_triangulator(new detail::GeometryTriangulator(obj.get())),
-      m_meshObj(obj.get()) {}
+GeometryHandler::GeometryHandler(const MeshObject &obj)
+    : m_triangulator(
+          new detail::GeometryTriangulator(detail::makeRenderingMesh(obj))) {}
 
-GeometryHandler::GeometryHandler(MeshObject *obj)
-    : m_triangulator(new detail::GeometryTriangulator(obj)), m_meshObj(obj) {}
+GeometryHandler::GeometryHandler(const MeshObject2D &obj)
+    : m_triangulator(
+          new detail::GeometryTriangulator(detail::makeRenderingMesh(obj))) {}
 
 GeometryHandler::GeometryHandler(const GeometryHandler &handler) {
   if (handler.m_csgObj) {

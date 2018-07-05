@@ -10,9 +10,10 @@ class TopoDS_Shape;
 namespace Mantid {
 namespace Geometry {
 class CSGObject;
-class MeshObject;
+class RenderingMesh;
 
 namespace detail {
+
 /** GeometryTriangulator : Triangulates object surfaces. May or may not use
   opencascade.
 
@@ -45,12 +46,12 @@ private:
   std::vector<double> m_points;        ///< double array or points
   std::vector<uint32_t> m_faces;       ///< Integer array of faces
   const CSGObject *m_csgObj = nullptr; ///< Input Object
-  const MeshObject *m_meshObj = nullptr;
+  std::unique_ptr<RenderingMesh> m_meshObj;
   void checkTriangulated();
 
 public:
   GeometryTriangulator(const CSGObject *obj = nullptr);
-  GeometryTriangulator(const MeshObject *obj);
+  GeometryTriangulator(std::unique_ptr<RenderingMesh> &&obj);
   GeometryTriangulator(const GeometryTriangulator &) = delete;
   GeometryTriangulator &operator=(const GeometryTriangulator &) = delete;
   ~GeometryTriangulator();

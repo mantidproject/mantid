@@ -5,21 +5,52 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/make_unique.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 #include <memory>
 #include <vector>
+#include "MantidGeometry/Rendering/RenderingMesh.h"
 
 namespace Mantid {
 
 namespace Geometry {
 class IObjComponent;
 class CSGObject;
-
+class MeshObject2D;
 class MeshObject;
 namespace detail {
 class Renderer;
 class GeometryTriangulator;
+
+template <typename Adaptee>
+std::unique_ptr<Geometry::RenderingMesh>
+makeRenderingMesh(const Adaptee &adaptee) {
+
+  // Local class adapter
+  class Adapter : public Geometry::RenderingMesh {
+  private:
+    // Not owned but can be guraranteed not null
+    const Adaptee &m_adaptee;
+
+  public:
+    Adapter(const Adaptee &adaptee) : m_adaptee(adaptee) {}
+    size_t numberOfVertices() const override {
+      return m_adaptee.numberOfVertices();
+    }
+    size_t numberOfTriangles() const override {
+      return m_adaptee.numberOfTriangles();
+    }
+    std::vector<double> getVertices() const override {
+      return m_adaptee.getVertices();
+    }
+    std::vector<uint32_t> getTriangles() const override {
+      return m_adaptee.getTriangles();
+    }
+    virtual ~Adapter() {}
+  };
+  return Kernel::make_unique<Adapter>(adaptee);
+}
 }
 
 /**
@@ -57,17 +88,15 @@ private:
 protected:
   std::shared_ptr<detail::ShapeInfo> m_shapeInfo;
   std::unique_ptr<detail::GeometryTriangulator> m_triangulator;
-  MeshObject *m_meshObj =
-      nullptr; ///< Mesh Object that uses this geometry handler
   IObjComponent *m_objComp =
       nullptr; ///< ObjComponent that uses this geometry handler
   CSGObject *m_csgObj = nullptr; ///< Object that uses this geometry handler
 public:
-  GeometryHandler(IObjComponent *comp);               ///< Constructor
-  GeometryHandler(boost::shared_ptr<CSGObject> obj);  ///< Constructor
-  GeometryHandler(CSGObject *obj);                    ///< Constructor
-  GeometryHandler(boost::shared_ptr<MeshObject> obj); ///<Constructor
-  GeometryHandler(MeshObject *obj);
+  GeometryHandler(IObjComponent *comp);              ///< Constructor
+  GeometryHandler(boost::shared_ptr<CSGObject> obj); ///< Constructor
+  GeometryHandler(CSGObject *obj);                   ///< Constructor
+  GeometryHandler(const MeshObject &obj);
+  GeometryHandler(const MeshObject2D &obj);
   GeometryHandler(const GeometryHandler &handler);
   boost::shared_ptr<GeometryHandler> clone() const;
   ~GeometryHandler();

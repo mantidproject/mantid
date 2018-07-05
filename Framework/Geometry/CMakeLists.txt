@@ -259,8 +259,8 @@ set ( INC_FILES
 	inc/MantidGeometry/Objects/CSGObject.h
 	inc/MantidGeometry/Objects/IObject.h
 	inc/MantidGeometry/Objects/InstrumentRayTracer.h
-        inc/MantidGeometry/Objects/MeshObject2D.h
 	inc/MantidGeometry/Objects/MeshObject.h
+	inc/MantidGeometry/Objects/MeshObject2D.h
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
@@ -268,6 +268,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Rendering/GeometryTriangulator.h
 	inc/MantidGeometry/Rendering/OpenGL_Headers.h
 	inc/MantidGeometry/Rendering/RenderingHelpers.h
+	inc/MantidGeometry/Rendering/RenderingMesh.h
 	inc/MantidGeometry/Rendering/ShapeInfo.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheReader.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheWriter.h

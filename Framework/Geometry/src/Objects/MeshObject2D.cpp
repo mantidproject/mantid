@@ -115,11 +115,11 @@ const std::string MeshObject2D::Id = "MeshObject2D";
 
 /**
  * @brief isOnTriangle
- * @param p : point to test
+ * @param point : point to test
  * @param a : first vertex of triangle
  * @param b : second vertex of triangle
  * @param c : thrid vertex of triangle
- * @return
+ * @return True only point if is on triangle
  */
 bool MeshObject2D::isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &a,
                                 const Kernel::V3D &b, const Kernel::V3D &c) {
@@ -203,7 +203,7 @@ void MeshObject2D::initialize() {
         "Too many vertices (" + std::to_string(m_vertices.size()) +
         "). MeshObject cannot have more than 65535 vertices.");
   }
-  // m_handler = boost::make_shared<GeometryHandler>(this);
+  m_handler = boost::make_shared<GeometryHandler>(*this);
 }
 bool MeshObject2D::hasValidShape() const {
   // 3 or more points define a plane.
@@ -404,8 +404,8 @@ MeshObject2D::generatePointInObject(Kernel::PseudoRandomNumberGenerator &,
                                     const BoundingBox &, const size_t) const {
 
   // How this would work for a finite plane is not clear. Points within the
-  // plane can of course be generated, but most implementaitons of this method
-  // use the bounding box
+  // plane can of course be generated, but most implementations of this method
+  // in sibling types use the bounding box
   throw std::runtime_error("Not implemented");
 }
 
@@ -420,8 +420,40 @@ const Kernel::Material MeshObject2D::material() const { return m_material; }
 const std::string &MeshObject2D::id() const { return MeshObject2D::Id; }
 
 boost::shared_ptr<GeometryHandler> MeshObject2D::getGeometryHandler() const {
+  return m_handler;
+}
 
-  throw std::runtime_error("Not implemented");
+size_t MeshObject2D::numberOfVertices() const { return m_vertices.size(); }
+
+size_t MeshObject2D::numberOfTriangles() const {
+  return m_triangles.size() / 3;
+}
+
+std::vector<double> MeshObject2D::getVertices() const {
+  std::vector<double> points;
+  size_t nPoints = m_vertices.size();
+  if (nPoints > 0) {
+    points.resize(static_cast<std::size_t>(nPoints) * 3);
+    for (size_t i = 0; i < nPoints; ++i) {
+      V3D pnt = m_vertices[i];
+      points[i * 3] = pnt.X();
+      points[i * 3 + 1] = pnt.Y();
+      points[i * 3 + 2] = pnt.Z();
+    }
+  }
+  return points;
+}
+
+std::vector<uint32_t> MeshObject2D::getTriangles() const {
+  std::vector<uint32_t> faces;
+  size_t nFaceCorners = m_triangles.size();
+  if (nFaceCorners > 0) {
+    faces.resize(static_cast<std::size_t>(nFaceCorners));
+    for (size_t i = 0; i < nFaceCorners; ++i) {
+      faces[i] = static_cast<int>(m_triangles[i]);
+    }
+  }
+  return faces;
 }
 
 void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,

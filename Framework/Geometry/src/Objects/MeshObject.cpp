@@ -43,7 +43,7 @@ void MeshObject::initialize() {
         "Too many vertices (" + std::to_string(m_vertices.size()) +
         "). MeshObject cannot have more than 65535 vertices.");
   }
-  m_handler = boost::make_shared<GeometryHandler>(this);
+  m_handler = boost::make_shared<GeometryHandler>(*this);
 }
 
 /**

@@ -10,6 +10,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/Material.h"
@@ -332,11 +333,13 @@ public:
     TS_ASSERT_EQUALS(mesh.id(), MeshObject2D::Id);
   }
 
-  // Characterisation test.
   void test_get_geometry_hanlder_not_implemented() {
     auto mesh = makeSimpleTriangleMesh();
 
-    TS_ASSERT_THROWS(mesh.getGeometryHandler(), std::runtime_error &);
+    auto handler = mesh.getGeometryHandler();
+    // basic sanity checks
+    TS_ASSERT_EQUALS(handler->numberOfTriangles(), 1);
+    TS_ASSERT_EQUALS(handler->numberOfPoints(), 3);
   }
 };
 
