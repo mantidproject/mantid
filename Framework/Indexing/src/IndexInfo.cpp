@@ -229,9 +229,8 @@ SpectrumIndexSet IndexInfo::makeIndexSet(
 /** Map a vector of detector indices to a vector of global spectrum indices.
  *
  * The mapping is based on the held spectrum definitions. Throws if any spectrum
- * maps to more than one detectors. Throws if there is no 1:1 mapping from
- * detectors to spectra, such as when some of the detectors have no matching
- * spectrum. */
+ * maps to more than one detectors. Throws when some of the detectors have no
+ * matching spectrum. */
 std::vector<GlobalSpectrumIndex>
 IndexInfo::globalSpectrumIndicesFromDetectorIndices(
     const std::vector<size_t> &detectorIndices) const {
@@ -290,12 +289,10 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
         const auto detectorIndex = static_cast<size_t>(spectrumDefinition);
         if (detectorMap.size() > detectorIndex &&
             detectorMap[detectorIndex] != 0) {
-          if (detectorMap[detectorIndex] > 1)
-            throw std::runtime_error(
-                "Multiple spectra correspond to the same detector");
-          // Increment flag to catch two spectra mapping to same detector.
-          ++detectorMap[detectorIndex];
           spectrumIndices.push_back(i);
+          if (detectorMap[detectorIndex] == 1) {
+            ++detectorMap[detectorIndex];
+          }
         }
       }
       if (spectrumDefinition == -2)
@@ -309,6 +306,11 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
       auto bytes = static_cast<int>(sizeof(int64_t) * spectrumIndices.size());
       communicator().send(rank, tag, buffer, bytes);
     }
+    if (std::any_of(detectorMap.begin(), detectorMap.end(),
+                    [](char c) { return c == 1; })) {
+      throw std::runtime_error("Some of the requested detectors do not have a "
+                               "corresponding spectrum");
+    }
   } else {
     auto buffer = reinterpret_cast<char *>(thisRankSpectrumDefinitions.data());
     auto bytes = static_cast<int>(sizeof(int64_t) * size());
@@ -320,7 +322,7 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
     spectrumIndices.resize(*status.count<int64_t>());
   }
 
-  if (detectorIndices.size() != spectrumIndices.size())
+  if (detectorIndices.size() > spectrumIndices.size())
     throw std::runtime_error("Some of the requested detectors do not have a "
                              "corresponding spectrum");
   return spectrumIndices;

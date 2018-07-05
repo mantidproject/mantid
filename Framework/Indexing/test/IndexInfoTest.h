@@ -333,19 +333,17 @@ public:
         "Some of the requested detectors do not have a corresponding spectrum");
   }
 
-  void test_globalSpectrumIndicesFromDetectorIndices_fails_conflict() {
+  void test_globalSpectrumIndicesFromDetectorIndices_scanning() {
     IndexInfo info(3);
     std::vector<size_t> detectorIndices{6, 8};
     std::vector<SpectrumDefinition> specDefs(3);
-    // Two indices map to same detector.
+    // Two indices map to same detector; typical for time-indexed workspaces.
     specDefs[0].add(6);
     specDefs[1].add(6);
     specDefs[2].add(8);
     info.setSpectrumDefinitions(specDefs);
-    TS_ASSERT_THROWS_EQUALS(
-        info.globalSpectrumIndicesFromDetectorIndices(detectorIndices),
-        const std::runtime_error &e, std::string(e.what()),
-        "Multiple spectra correspond to the same detector");
+    TS_ASSERT_THROWS_NOTHING(
+        info.globalSpectrumIndicesFromDetectorIndices(detectorIndices));
   }
 
   void test_globalSpectrumIndicesFromDetectorIndices_fails_conflict_miss() {
@@ -359,7 +357,8 @@ public:
     TS_ASSERT_THROWS_EQUALS(
         info.globalSpectrumIndicesFromDetectorIndices(detectorIndices),
         const std::runtime_error &e, std::string(e.what()),
-        "Multiple spectra correspond to the same detector");
+        "Some of the requested detectors do not have a "
+        "corresponding spectrum");
   }
 
   void test_globalSpectrumIndicesFromDetectorIndices() {
