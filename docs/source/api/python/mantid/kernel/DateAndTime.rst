@@ -25,7 +25,7 @@ With :class:`numpy.datetime64`, finding the number of seconds between two times 
 
    diff = (timeArray[-1]-timeArray[0]) / np.timedelta64(1, 's')
 
-For converting :class:`numpy.datetime64` data to a string for the default facilty, use :ref:`numpy.datetime_as_string` explicitly (assuming the times are a variable named ``times``)
+For converting :class:`numpy.datetime64` data to a string for the default facilty, use :func:`numpy.datetime_as_string` explicitly (assuming the times are a variable named ``times``)
 
 .. code-block:: python
 
