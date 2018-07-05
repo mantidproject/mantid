@@ -280,7 +280,6 @@ AlgorithmFactoryImpl::getCategoriesWithState() const {
   return resultCategories;
 }
 
-
 /**
 * Return the categories of the algorithms. This includes those within the
 * Factory itself and
@@ -315,19 +314,20 @@ AlgorithmFactoryImpl::getCategories(bool includeHidden) const {
   * @return AlgorithmDescriptor object
   * @throws std::runtime_error if algorithm does not exist
   */
-AlgorithmDescriptor AlgorithmFactoryImpl::getDescriptor(const std::string & algName, int version) const
-{
-	AlgorithmDescriptor desc;
-	desc.name = algName;
+AlgorithmDescriptor
+AlgorithmFactoryImpl::getDescriptor(const std::string &algName,
+                                    int version) const {
+  AlgorithmDescriptor desc;
+  desc.name = algName;
 
-	boost::shared_ptr<IAlgorithm> alg = create(algName, version);
-	auto categories = alg->categories();
-	desc.version = alg->version();
-	// Set the category if there are any
-	desc.category = categories.empty() ? "" : categories.back();
-	desc.alias = alg->alias();
+  boost::shared_ptr<IAlgorithm> alg = create(algName, version);
+  auto categories = alg->categories();
+  desc.version = alg->version();
+  // Set the category if there are any
+  desc.category = categories.empty() ? "" : categories.back();
+  desc.alias = alg->alias();
 
-	return desc;
+  return desc;
 }
 
 /**

@@ -23,18 +23,16 @@ public:
     Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm> *newTwo =
         new Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>;
 
-	auto &algFactory = AlgorithmFactory::Instance();
+    auto &algFactory = AlgorithmFactory::Instance();
 
     // get the number of algorithms it already has
     std::vector<std::string> keys = algFactory.getKeys();
     size_t noOfAlgs = keys.size();
 
-    TS_ASSERT_THROWS_NOTHING(
-        algFactory.subscribe<ToyAlgorithm>());
+    TS_ASSERT_THROWS_NOTHING(algFactory.subscribe<ToyAlgorithm>());
     TS_ASSERT_THROWS_NOTHING(algFactory.subscribe(newTwo));
 
-    TS_ASSERT_THROWS_ANYTHING(
-        algFactory.subscribe<ToyAlgorithm>());
+    TS_ASSERT_THROWS_ANYTHING(algFactory.subscribe<ToyAlgorithm>());
 
     // get the number of algorithms it has now
     keys = algFactory.getKeys();
@@ -48,8 +46,8 @@ public:
   void testUnsubscribe() {
     Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm> *newTwo =
         new Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>;
-	  
-	auto &algFactory = AlgorithmFactory::Instance();
+
+    auto &algFactory = AlgorithmFactory::Instance();
 
     // get the nubmer of algorithms it already has
     std::vector<std::string> keys = algFactory.getKeys();
@@ -58,10 +56,8 @@ public:
     algFactory.subscribe<ToyAlgorithm>();
     algFactory.subscribe(newTwo);
 
-    TS_ASSERT_THROWS_NOTHING(
-        algFactory.unsubscribe("ToyAlgorithm", 1));
-    TS_ASSERT_THROWS_NOTHING(
-        algFactory.unsubscribe("ToyAlgorithm", 2));
+    TS_ASSERT_THROWS_NOTHING(algFactory.unsubscribe("ToyAlgorithm", 1));
+    TS_ASSERT_THROWS_NOTHING(algFactory.unsubscribe("ToyAlgorithm", 2));
 
     // get the nubmer of algorithms it has now
     keys = algFactory.getKeys();
@@ -70,10 +66,8 @@ public:
     TS_ASSERT_EQUALS(noOfAlgsAfter, noOfAlgs)
 
     // try unsubscribing them again
-    TS_ASSERT_THROWS_NOTHING(
-        algFactory.unsubscribe("ToyAlgorithm", 1));
-    TS_ASSERT_THROWS_NOTHING(
-        algFactory.unsubscribe("ToyAlgorithm", 2));
+    TS_ASSERT_THROWS_NOTHING(algFactory.unsubscribe("ToyAlgorithm", 1));
+    TS_ASSERT_THROWS_NOTHING(algFactory.unsubscribe("ToyAlgorithm", 2));
 
     // make sure the number hasn't changed
     keys = algFactory.getKeys();
@@ -86,7 +80,7 @@ public:
     Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm> *newTwo =
         new Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>;
 
-	auto &algFactory = AlgorithmFactory::Instance();
+    auto &algFactory = AlgorithmFactory::Instance();
 
     algFactory.subscribe<ToyAlgorithm>();
     algFactory.subscribe(newTwo);
@@ -104,7 +98,7 @@ public:
   void testGetKeys() {
     std::vector<std::string> keys;
 
-	auto &algFactory = AlgorithmFactory::Instance();
+    auto &algFactory = AlgorithmFactory::Instance();
 
     TS_ASSERT_EQUALS(0, keys.size());
     algFactory.subscribe<ToyAlgorithm>();
@@ -119,7 +113,7 @@ public:
   }
 
   void test_HighestVersion() {
-	auto &algFactory = AlgorithmFactory::Instance();
+    auto &algFactory = AlgorithmFactory::Instance();
 
     TS_ASSERT_THROWS(algFactory.highestVersion("ToyAlgorithm"),
                      std::invalid_argument);
@@ -140,44 +134,35 @@ public:
     Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm> *newTwo =
         new Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>;
 
-	auto &algFactory = AlgorithmFactory::Instance();
+    auto &algFactory = AlgorithmFactory::Instance();
 
     algFactory.subscribe<ToyAlgorithm>();
     algFactory.subscribe(newTwo);
 
-    TS_ASSERT_THROWS_NOTHING(
-        algFactory.create("ToyAlgorithm", -1));
-    TS_ASSERT_THROWS_ANYTHING(
-        algFactory.create("AlgorithmDoesntExist", -1));
+    TS_ASSERT_THROWS_NOTHING(algFactory.create("ToyAlgorithm", -1));
+    TS_ASSERT_THROWS_ANYTHING(algFactory.create("AlgorithmDoesntExist", -1));
 
-    TS_ASSERT_THROWS_NOTHING(
-        algFactory.create("ToyAlgorithm", 1));
-    TS_ASSERT_THROWS_NOTHING(
-        algFactory.create("ToyAlgorithm", 2));
-    TS_ASSERT_THROWS_ANYTHING(
-        algFactory.create("AlgorithmDoesntExist", 1));
-    TS_ASSERT_THROWS_ANYTHING(
-        algFactory.create("AlgorithmDoesntExist", 2));
+    TS_ASSERT_THROWS_NOTHING(algFactory.create("ToyAlgorithm", 1));
+    TS_ASSERT_THROWS_NOTHING(algFactory.create("ToyAlgorithm", 2));
+    TS_ASSERT_THROWS_ANYTHING(algFactory.create("AlgorithmDoesntExist", 1));
+    TS_ASSERT_THROWS_ANYTHING(algFactory.create("AlgorithmDoesntExist", 2));
 
     TS_ASSERT_THROWS_ANYTHING(algFactory.create("", 1));
     TS_ASSERT_THROWS_ANYTHING(algFactory.create("", -1));
 
-    TS_ASSERT_THROWS_ANYTHING(
-        algFactory.create("ToyAlgorithm", 3));
-    TS_ASSERT_THROWS_ANYTHING(
-        algFactory.create("ToyAlgorithm", 4));
+    TS_ASSERT_THROWS_ANYTHING(algFactory.create("ToyAlgorithm", 3));
+    TS_ASSERT_THROWS_ANYTHING(algFactory.create("ToyAlgorithm", 4));
 
     algFactory.unsubscribe("ToyAlgorithm", 1);
     algFactory.unsubscribe("ToyAlgorithm", 2);
   }
 
   void testGetDescriptors() {
-	auto &algFactory = AlgorithmFactory::Instance();
+    auto &algFactory = AlgorithmFactory::Instance();
 
     algFactory.subscribe<ToyAlgorithm>();
     std::vector<AlgorithmDescriptor> descriptors;
-    TS_ASSERT_THROWS_NOTHING(
-        descriptors = algFactory.getDescriptors(true));
+    TS_ASSERT_THROWS_NOTHING(descriptors = algFactory.getDescriptors(true));
 
     size_t noOfAlgs = descriptors.size();
     std::vector<AlgorithmDescriptor>::const_iterator descItr =
@@ -193,85 +178,74 @@ public:
 
     algFactory.unsubscribe("ToyAlgorithm", 1);
 
-    TS_ASSERT_THROWS_NOTHING(
-        descriptors = algFactory.getDescriptors(true));
+    TS_ASSERT_THROWS_NOTHING(descriptors = algFactory.getDescriptors(true));
 
     TS_ASSERT_EQUALS(noOfAlgs - 1, descriptors.size());
   }
 
   void testGetDescriptor() {
-	  auto &algFactory = AlgorithmFactory::Instance();
+    auto &algFactory = AlgorithmFactory::Instance();
 
-	  const std::string algName = "ToyAlgorithm";
-	  algFactory.subscribe<ToyAlgorithm>();
-	  AlgorithmDescriptor descriptor;
+    const std::string algName = "ToyAlgorithm";
+    algFactory.subscribe<ToyAlgorithm>();
+    AlgorithmDescriptor descriptor;
 
-	  TS_ASSERT_THROWS_NOTHING(
-		  descriptor = algFactory.getDescriptor(algName));
+    TS_ASSERT_THROWS_NOTHING(descriptor = algFactory.getDescriptor(algName));
 
-	  bool AlgCorrect = ("Cat" == descriptor.category) &&
-						(algName == descriptor.name) &&
-						("Dog" == descriptor.alias) &&
-						(1 == descriptor.version);
+    bool AlgCorrect = ("Cat" == descriptor.category) &&
+                      (algName == descriptor.name) &&
+                      ("Dog" == descriptor.alias) && (1 == descriptor.version);
 
-	  TS_ASSERT(AlgCorrect);
+    TS_ASSERT(AlgCorrect);
 
-	  algFactory.unsubscribe("ToyAlgorithm", 1);
+    algFactory.unsubscribe("ToyAlgorithm", 1);
 
-	  TS_ASSERT_THROWS(algFactory.getDescriptor(algName), std::runtime_error);
+    TS_ASSERT_THROWS(algFactory.getDescriptor(algName), std::runtime_error);
   }
 
-
-
   void testGetCategories() {
-	auto &algFactory = AlgorithmFactory::Instance();
+    auto &algFactory = AlgorithmFactory::Instance();
     algFactory.subscribe<CategoryAlgorithm>();
     std::unordered_set<std::string> validCategories;
-    TS_ASSERT_THROWS_NOTHING(
-        validCategories = algFactory.getCategories(true));
+    TS_ASSERT_THROWS_NOTHING(validCategories = algFactory.getCategories(true));
 
     size_t noOfCats = validCategories.size();
     TS_ASSERT_DIFFERS(validCategories.find("Fake"), validCategories.end());
 
     algFactory.unsubscribe("CategoryAlgorithm", 1);
-    TS_ASSERT_THROWS_NOTHING(
-        validCategories = algFactory.getCategories(true));
+    TS_ASSERT_THROWS_NOTHING(validCategories = algFactory.getCategories(true));
     TS_ASSERT_EQUALS(noOfCats - 1, validCategories.size());
   }
 
   void testGetCategoriesWithState() {
-	auto &algFactory = AlgorithmFactory::Instance();
+    auto &algFactory = AlgorithmFactory::Instance();
     algFactory.subscribe<CategoryAlgorithm>();
 
     std::map<std::string, bool> validCategories;
-    TS_ASSERT_THROWS_NOTHING(
-        validCategories =
-            algFactory.getCategoriesWithState());
+    TS_ASSERT_THROWS_NOTHING(validCategories =
+                                 algFactory.getCategoriesWithState());
     size_t noOfCats = validCategories.size();
     TS_ASSERT_DIFFERS(validCategories.find("Fake"), validCategories.end());
 
     algFactory.unsubscribe("CategoryAlgorithm", 1);
-    TS_ASSERT_THROWS_NOTHING(
-        validCategories =
-            algFactory.getCategoriesWithState());
+    TS_ASSERT_THROWS_NOTHING(validCategories =
+                                 algFactory.getCategoriesWithState());
     TS_ASSERT_EQUALS(noOfCats - 1, validCategories.size());
   }
 
   void testDecodeName() {
-	auto &algFactory = AlgorithmFactory::Instance();
+    auto &algFactory = AlgorithmFactory::Instance();
     std::pair<std::string, int> basePair;
     basePair.first = "Cat";
     basePair.second = 1;
     std::string mangledName = "Cat|1";
     std::pair<std::string, int> outPair;
-    TS_ASSERT_THROWS_NOTHING(
-        outPair = algFactory.decodeName(mangledName));
+    TS_ASSERT_THROWS_NOTHING(outPair = algFactory.decodeName(mangledName));
     TS_ASSERT_EQUALS(basePair.first, outPair.first);
     TS_ASSERT_EQUALS(basePair.second, outPair.second);
 
     mangledName = "Cat 1";
-    TS_ASSERT_THROWS_ANYTHING(
-        outPair = algFactory.decodeName(mangledName));
+    TS_ASSERT_THROWS_ANYTHING(outPair = algFactory.decodeName(mangledName));
   }
 };
 

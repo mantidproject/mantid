@@ -197,17 +197,17 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
   } else if (m_versionSpecificity == "old") {
     //...or only specify algorithm versions when they're not the newest version
     bool oldVersion = false;
-	const auto &algName = algHistory->name();
+    const auto &algName = algHistory->name();
 
-	auto descriptor = AlgorithmFactory::Instance().getDescriptor(algName);
+    auto descriptor = AlgorithmFactory::Instance().getDescriptor(algName);
 
     // If a newer version of this algorithm exists, then this must be an old
     // version.
     if (descriptor.name == algHistory->name() &&
         descriptor.version > algHistory->version()) {
-        oldVersion = true;
+      oldVersion = true;
     }
-  
+
     if (oldVersion) {
       properties << "Version=" << algHistory->version() << ", ";
     }

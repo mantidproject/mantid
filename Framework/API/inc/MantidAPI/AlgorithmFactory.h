@@ -134,7 +134,8 @@ public:
   const std::map<std::string, bool> getCategoriesWithState() const;
 
   /// Returns a single algorithm descriptor
-  AlgorithmDescriptor getDescriptor(const std::string &algName, int version = -1) const;
+  AlgorithmDescriptor getDescriptor(const std::string &algName,
+                                    int version = -1) const;
 
   /// Returns algorithm descriptors.
   std::vector<AlgorithmDescriptor>
