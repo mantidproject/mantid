@@ -63,7 +63,7 @@ struct CheckZeroSpectrum : boost::static_visitor<bool> {
 struct NumberOfSpectra : boost::static_visitor<std::size_t> {
   std::size_t
   operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
-    return spectra.second - spectra.first;
+    return 1 + (spectra.second - spectra.first);
   }
 
   std::size_t
