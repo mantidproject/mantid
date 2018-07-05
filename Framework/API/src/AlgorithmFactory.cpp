@@ -308,8 +308,13 @@ AlgorithmFactoryImpl::getCategories(bool includeHidden) const {
 }
 
 /**
-
-*/
+  * Returns a single algorithm descriptor for the given algorithm name
+  *
+  * @param algName The name of the algorithm to get a descriptor for
+  * @param version The version of the algorithm (default = latest)
+  * @return AlgorithmDescriptor object
+  * @throws std::runtime_error if algorithm does not exist
+  */
 AlgorithmDescriptor AlgorithmFactoryImpl::getDescriptor(const std::string & algName, int version) const
 {
 	AlgorithmDescriptor desc;
