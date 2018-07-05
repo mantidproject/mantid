@@ -8,6 +8,7 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
 
+#include <algorithm>
 #include <numeric>
 #include <set>
 
@@ -324,7 +325,9 @@ std::string
 IndirectFittingModel::createOutputName(const std::string &formatString,
                                        const std::string &rangeDelimiter,
                                        std::size_t dataIndex) const {
-  return createDisplayName(formatString, rangeDelimiter, dataIndex) + "_Result";
+  auto name = createDisplayName(formatString, rangeDelimiter, dataIndex) + "_Result";
+  std::replace(name.begin(), name.end(), ',', '+');
+  return name;
 }
 
 bool IndirectFittingModel::isMultiFit() const {
