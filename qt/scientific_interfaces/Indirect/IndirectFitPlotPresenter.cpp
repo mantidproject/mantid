@@ -211,7 +211,7 @@ void IndirectFitPlotPresenter::updateDataSelection() {
     m_view->appendToDataSelection(m_model->getFitDataName(i));
   setActiveIndex(0);
   updateAvailableSpectra();
-  emit selectedFitDataChanged(0);
+  emitSelectedFitDataChanged();
 }
 
 void IndirectFitPlotPresenter::updateAvailableSpectra() {

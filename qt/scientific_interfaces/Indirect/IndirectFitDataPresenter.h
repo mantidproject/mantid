@@ -66,6 +66,7 @@ protected slots:
 
 signals:
   void singleSampleLoaded();
+  void singleResolutionLoaded();
   void dataAdded();
   void dataRemoved();
   void dataChanged();
@@ -78,14 +79,16 @@ signals:
 
 protected:
   IndirectFitDataView const *getView() const;
+  void addData(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
   void setSingleModelData(const std::string &name);
   virtual void addModelData(const std::string &name);
   void setResolutionHidden(bool hide);
   void displayWarning(const std::string &warning);
+  virtual void dialogExecuted(IAddWorkspaceDialog const *dialog,
+                              QDialog::DialogCode result);
 
 private:
-  void addData(IAddWorkspaceDialog const *dialog);
   virtual std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const;
 

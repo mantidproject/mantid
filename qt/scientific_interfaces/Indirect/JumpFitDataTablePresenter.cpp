@@ -42,11 +42,12 @@ void JumpFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
 
   const auto parameter =
       m_jumpFitModel->getFitParameterName(dataIndex, spectrum);
-  auto cell = new QTableWidgetItem(QString::fromStdString(parameter));
-  setCell(cell, row, 1);
+  auto cell = Mantid::Kernel::make_unique<QTableWidgetItem>(
+      QString::fromStdString(parameter));
   auto flags = cell->flags();
   flags ^= Qt::ItemIsEditable;
   cell->setFlags(flags);
+  setCell(std::move(cell), row, 1);
 }
 
 void JumpFitDataTablePresenter::updateTableEntry(std::size_t dataIndex,

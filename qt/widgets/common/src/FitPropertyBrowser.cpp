@@ -919,7 +919,6 @@ void FitPropertyBrowser::popupMenu(const QPoint &) {
     if (isType) {
       isParameter = false;
     }
-
     if (isTie) {
       action = new QAction("Remove", this);
       connect(action, SIGNAL(triggered()), this, SLOT(deleteTie()));
@@ -1264,6 +1263,7 @@ void FitPropertyBrowser::enumChanged(QtProperty *prop) {
     if (f)
       setCurrentFunction(f);
     emit functionChanged();
+
   } else if (prop == m_minimizer) {
     minimizerChanged();
   } else if (prop == m_evaluationType) {

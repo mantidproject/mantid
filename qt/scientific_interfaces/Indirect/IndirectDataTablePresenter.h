@@ -75,7 +75,7 @@ protected:
 
   virtual void addTableEntry(std::size_t dataIndex, std::size_t spectrum,
                              int row);
-  void setCell(QTableWidgetItem *cell, int row, int column);
+  void setCell(std::unique_ptr<QTableWidgetItem> cell, int row, int column);
   virtual void updateTableEntry(std::size_t dataIndex, std::size_t spectrum,
                                 int row);
   void setCellText(const QString &text, int row, int column);
@@ -109,6 +109,7 @@ private:
   void enableGlobalFittingRange();
   void disableGlobalFittingRange();
 
+  void addNewData(std::size_t index);
   void addTableEntry(std::size_t dataIndex, std::size_t spectrum);
   std::size_t removeTableEntry(int row);
   std::pair<std::vector<std::size_t>, std::vector<std::size_t>>

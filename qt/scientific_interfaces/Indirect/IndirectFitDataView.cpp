@@ -23,8 +23,6 @@ IndirectFitDataView::IndirectFitDataView(QWidget *parent)
   connect(this, SIGNAL(currentChanged(int)), this, SLOT(emitViewSelected(int)));
 }
 
-IndirectFitDataView::~IndirectFitDataView() {}
-
 QTableWidget *IndirectFitDataView::getDataTable() const {
   return m_dataForm->tbFitData;
 }

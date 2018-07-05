@@ -63,7 +63,7 @@ struct CheckZeroSpectrum : boost::static_visitor<bool> {
 struct NumberOfSpectra : boost::static_visitor<std::size_t> {
   std::size_t
   operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
-    return spectra.second - spectra.first;
+    return 1 + (spectra.second - spectra.first);
   }
 
   std::size_t
@@ -173,7 +173,9 @@ namespace IDA {
 
 IndirectFitData::IndirectFitData(MatrixWorkspace_sptr workspace,
                                  const Spectra &spectra)
-    : m_workspace(workspace), m_spectra(spectra) {}
+    : m_workspace(workspace), m_spectra(DiscontinuousSpectra<std::size_t>("")) {
+  setSpectra(spectra);
+}
 
 std::string
 IndirectFitData::displayName(const std::string &formatString,
@@ -268,7 +270,9 @@ void IndirectFitData::setStartX(double startX, std::size_t spectrum) {
     range->second.first = startX;
   else if (const auto workspace = m_workspace.lock())
     m_ranges[spectrum] = std::make_pair(startX, workspace->x(0).back());
-  throw std::runtime_error("Unable to set StartX: Workspace no longer exists.");
+  else
+    throw std::runtime_error(
+        "Unable to set StartX: Workspace no longer exists.");
 }
 
 void IndirectFitData::setEndX(double endX, std::size_t spectrum) {
@@ -277,7 +281,8 @@ void IndirectFitData::setEndX(double endX, std::size_t spectrum) {
     range->second.second = endX;
   else if (const auto workspace = m_workspace.lock())
     m_ranges[spectrum] = std::make_pair(workspace->x(0).front(), endX);
-  throw std::runtime_error("Unable to set EndX: Workspace no longer exists.");
+  else
+    throw std::runtime_error("Unable to set EndX: Workspace no longer exists.");
 }
 
 void IndirectFitData::setExcludeRegionString(const std::string &excludeRegion,
@@ -287,8 +292,8 @@ void IndirectFitData::setExcludeRegionString(const std::string &excludeRegion,
 
 IndirectFitData &IndirectFitData::combine(const IndirectFitData &fitData) {
   m_workspace = fitData.m_workspace;
-  m_spectra =
-      boost::apply_visitor(CombineSpectra(), m_spectra, fitData.m_spectra);
+  setSpectra(
+      boost::apply_visitor(CombineSpectra(), m_spectra, fitData.m_spectra));
   m_excludeRegions.insert(std::begin(fitData.m_excludeRegions),
                           std::end(fitData.m_excludeRegions));
   m_ranges.insert(std::begin(fitData.m_ranges), std::end(fitData.m_ranges));

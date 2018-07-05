@@ -16,8 +16,10 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include "LoadRaw/isisraw2.h"
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <Poco/File.h>
 

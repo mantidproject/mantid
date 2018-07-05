@@ -14,8 +14,10 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 namespace Mantid {
 namespace DataHandling {

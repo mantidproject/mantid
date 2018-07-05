@@ -35,8 +35,8 @@ ConvFit::ConvFit(QWidget *parent)
   m_uiForm->setupUi(parent);
   m_convFittingModel = dynamic_cast<ConvFitModel *>(fittingModel());
 
-  setFitDataPresenter(
-      new ConvFitDataPresenter(m_convFittingModel, m_uiForm->fitDataView));
+  setFitDataPresenter(Mantid::Kernel::make_unique<ConvFitDataPresenter>(
+      m_convFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
@@ -62,25 +62,22 @@ void ConvFit::setupFitTab() {
   m_fitStrings["StretchedExpFT"] = "SFT";
   m_fitStrings["TeixeiraWaterSQE"] = "Teixeria1L";
 
-  auto lorentzian = FunctionFactory::Instance().createFunction("Lorentzian");
-  auto teixeiraWater =
-      FunctionFactory::Instance().createFunction("TeixeiraWaterSQE");
+  auto &functionFactory = FunctionFactory::Instance();
+  auto lorentzian = functionFactory.createFunction("Lorentzian");
+  auto teixeiraWater = functionFactory.createFunction("TeixeiraWaterSQE");
 
-  auto elasticDiffSphere =
-      FunctionFactory::Instance().createFunction("ElasticDiffSphere");
+  auto elasticDiffSphere = functionFactory.createFunction("ElasticDiffSphere");
   auto inelasticDiffSphere =
-      FunctionFactory::Instance().createFunction("InelasticDiffSphere");
+      functionFactory.createFunction("InelasticDiffSphere");
 
-  auto elasticDiffRotDiscCircle = FunctionFactory::Instance().createFunction(
-      "ElasticDiffRotDiscreteCircle");
-  auto inelasticDiffRotDiscCircle = FunctionFactory::Instance().createFunction(
-      "InelasticDiffRotDiscreteCircle");
+  auto elasticDiffRotDiscCircle =
+      functionFactory.createFunction("ElasticDiffRotDiscreteCircle");
+  auto inelasticDiffRotDiscCircle =
+      functionFactory.createFunction("InelasticDiffRotDiscreteCircle");
 
-  auto stretchedExpFT =
-      FunctionFactory::Instance().createFunction("StretchedExpFT");
+  auto stretchedExpFT = functionFactory.createFunction("StretchedExpFT");
 
-  auto deltaFunction =
-      FunctionFactory::Instance().createFunction("DeltaFunction");
+  auto deltaFunction = functionFactory.createFunction("DeltaFunction");
 
   addCheckBoxFunctionGroup("Use Delta Function", {deltaFunction});
 

@@ -148,10 +148,11 @@ void JumpFitDataPresenter::addWorkspace(IndirectFittingModel *model,
 }
 
 void JumpFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  const auto jumpDialog =
-      dynamic_cast<JumpFitAddWorkspaceDialog const *>(dialog);
-  setModelSpectrum(jumpDialog->parameterNameIndex());
-  updateActiveDataIndex();
+  if (const auto jumpDialog =
+          dynamic_cast<JumpFitAddWorkspaceDialog const *>(dialog)) {
+    setModelSpectrum(jumpDialog->parameterNameIndex());
+    updateActiveDataIndex();
+  }
 }
 
 void JumpFitDataPresenter::setSingleModelSpectrum(int parameterIndex) {
@@ -169,6 +170,13 @@ void JumpFitDataPresenter::setModelSpectrum(int index) {
     m_jumpModel->setActiveWidth(static_cast<std::size_t>(index), m_dataIndex);
   else
     m_jumpModel->setActiveEISF(static_cast<std::size_t>(index), m_dataIndex);
+}
+
+void JumpFitDataPresenter::dialogExecuted(IAddWorkspaceDialog const *dialog,
+                                          QDialog::DialogCode result) {
+  if (result == QDialog::Rejected)
+    m_jumpModel->removeWorkspace(m_dataIndex);
+  IndirectFitDataPresenter::dialogExecuted(dialog, result);
 }
 
 std::unique_ptr<IAddWorkspaceDialog>

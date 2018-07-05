@@ -53,25 +53,25 @@ Usage
    reflected11 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
        DirectBeamPositionWorkspace='direct_beam_pos',
-       WavelengthRange=[2, 15],
        **settings
    )
    
    reflectivity11 = ReflectometryILLSumForeground(
        InputWorkspace=reflected11,
-       DirectForegroundWorkspace=directFgd
+       DirectForegroundWorkspace=directFgd,
+       WavelengthRange=[2, 15],
    )
    # Reload the reflected be. We will fake the '--' flipper settings
    reflected00 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
        DirectBeamPositionWorkspace='direct_beam_pos',
-       WavelengthRange=[2, 15],
        **settings
    )
    
    reflectivity00 = ReflectometryILLSumForeground(
        InputWorkspace=reflected00,
-       DirectForegroundWorkspace=directFgd
+       DirectForegroundWorkspace=directFgd,
+       WavelengthRange=[2, 15],
    )
    # Overwrite sample logs
    replace = True

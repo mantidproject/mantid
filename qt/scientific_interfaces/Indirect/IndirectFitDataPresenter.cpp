@@ -133,9 +133,14 @@ void IndirectFitDataPresenter::showAddWorkspaceDialog() {
   const auto dialog = getAddWorkspaceDialog(m_view->parentWidget());
   dialog->setWSSuffices(m_view->getSampleWSSuffices());
   dialog->setFBSuffices(m_view->getSampleFBSuffices());
+  dialogExecuted(dialog.get(),
+                 static_cast<QDialog::DialogCode>(dialog->exec()));
+}
 
-  if (dialog->exec() == QDialog::Accepted)
-    addData(dialog.get());
+void IndirectFitDataPresenter::dialogExecuted(IAddWorkspaceDialog const *dialog,
+                                              QDialog::DialogCode result) {
+  if (result == QDialog::Accepted)
+    addData(dialog);
 }
 
 std::unique_ptr<IAddWorkspaceDialog>
@@ -156,9 +161,10 @@ void IndirectFitDataPresenter::addData(IAddWorkspaceDialog const *dialog) {
 
 void IndirectFitDataPresenter::addDataToModel(
     IAddWorkspaceDialog const *dialog) {
-  auto indirectDialog = dynamic_cast<AddWorkspaceDialog const *>(dialog);
-  m_model->addWorkspace(indirectDialog->workspaceName(),
-                        indirectDialog->workspaceIndices());
+  if (const auto indirectDialog =
+          dynamic_cast<AddWorkspaceDialog const *>(dialog))
+    m_model->addWorkspace(indirectDialog->workspaceName(),
+                          indirectDialog->workspaceIndices());
 }
 
 void IndirectFitDataPresenter::setSingleModelData(const std::string &name) {

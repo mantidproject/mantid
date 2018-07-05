@@ -20,6 +20,7 @@ private:
   void setupFitTab() override;
 
 protected slots:
+  void plotClicked();
   void updatePlotOptions() override;
   void updateModelFitTypeString();
 

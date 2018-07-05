@@ -33,9 +33,6 @@ class DLLExport ConvFitDataPresenter : public IndirectFitDataPresenter {
 public:
   ConvFitDataPresenter(ConvFitModel *model, IndirectFitDataView *view);
 
-signals:
-  void singleResolutionLoaded();
-
 private slots:
   void setModelResolution(const QString &name);
 

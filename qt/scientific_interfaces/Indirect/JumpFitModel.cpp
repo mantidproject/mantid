@@ -165,6 +165,9 @@ createHWHMWorkspace(MatrixWorkspace_sptr workspace, const std::string &hwhmName,
                     const std::vector<std::size_t> &widthSpectra) {
   if (widthSpectra.empty())
     return workspace;
+  if (AnalysisDataService::Instance().doesExist(hwhmName))
+    return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        hwhmName);
 
   const auto subworkspaces = subdivideWidthWorkspace(workspace, widthSpectra);
   const auto hwhmWorkspace = appendAll(subworkspaces);

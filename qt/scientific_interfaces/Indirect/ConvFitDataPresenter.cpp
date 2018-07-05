@@ -18,8 +18,6 @@ ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
   connect(view, SIGNAL(resolutionLoaded(const QString &)), this,
           SLOT(setModelResolution(const QString &)));
   connect(view, SIGNAL(resolutionLoaded(const QString &)), this,
-          SLOT(updateTableFromSingleData()));
-  connect(view, SIGNAL(resolutionLoaded(const QString &)), this,
           SIGNAL(singleResolutionLoaded()));
 }
 
@@ -29,10 +27,12 @@ void ConvFitDataPresenter::setModelResolution(const QString &name) {
 }
 
 void ConvFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog);
-  addWorkspace(convDialog, m_convModel);
-  m_convModel->setResolution(convDialog->resolutionName(),
-                             m_convModel->numberOfWorkspaces() - 1);
+  if (const auto convDialog =
+          dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog)) {
+    addWorkspace(convDialog, m_convModel);
+    m_convModel->setResolution(convDialog->resolutionName(),
+                               m_convModel->numberOfWorkspaces() - 1);
+  }
 }
 
 void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const *dialog,

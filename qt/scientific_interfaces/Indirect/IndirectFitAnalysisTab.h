@@ -29,7 +29,7 @@ public:
   IndirectFitAnalysisTab(IndirectFittingModel *model,
                          QWidget *parent = nullptr);
 
-  void setFitDataPresenter(IndirectFitDataPresenter *presenter);
+  void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
   void setPlotView(IndirectFitPlotView *view);
   void setSpectrumSelectionView(IndirectSpectrumSelectionView *view);
   void

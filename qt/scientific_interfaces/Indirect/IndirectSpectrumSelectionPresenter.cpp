@@ -104,7 +104,6 @@ void IndirectSpectrumSelectionPresenter::setActiveIndexToZero() {
 
 void IndirectSpectrumSelectionPresenter::updateSpectra() {
   const auto workspace = m_model->getWorkspace(m_activeIndex);
-  MantidQt::API::SignalBlocker<QObject> blocker(m_view.get());
   if (workspace) {
     setSpectraRange(0, workspace->getNumberHistograms() - 1);
     const auto spectra = m_model->getSpectra(m_activeIndex);
@@ -126,10 +125,7 @@ void IndirectSpectrumSelectionPresenter::setSpectraRange(std::size_t minimum,
                                                          std::size_t maximum) {
   int minimumInt = boost::numeric_cast<int>(minimum);
   int maximumInt = boost::numeric_cast<int>(maximum);
-
-  MantidQt::API::SignalBlocker<QObject> blocker(m_view.get());
   m_view->setSpectraRange(minimumInt, maximumInt);
-  m_view->setMaskSpectraRange(minimumInt, maximumInt);
 }
 
 void IndirectSpectrumSelectionPresenter::setModelSpectra(

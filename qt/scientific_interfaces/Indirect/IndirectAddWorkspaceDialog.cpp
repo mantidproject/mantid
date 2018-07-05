@@ -23,8 +23,11 @@ boost::optional<std::size_t> maximumIndex(MatrixWorkspace_sptr workspace) {
 
 QString getIndexString(MatrixWorkspace_sptr workspace) {
   const auto maximum = maximumIndex(workspace);
-  if (maximum)
-    return QString("0-%1").arg(*maximum);
+  if (maximum) {
+    if (*maximum > 0)
+      return QString("0-%1").arg(*maximum);
+    return "0";
+  }
   return "";
 }
 
@@ -41,7 +44,6 @@ namespace IDA {
 AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent)
     : IAddWorkspaceDialog(parent) {
   m_uiForm.setupUi(this);
-  m_uiForm.dsWorkspace->showWorkspaceGroups(false);
 
   connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this,
           SLOT(workspaceChanged(const QString &)));

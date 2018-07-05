@@ -28,17 +28,18 @@ MSDFit::MSDFit(QWidget *parent)
   m_uiForm->setupUi(parent);
 
   m_msdFittingModel = dynamic_cast<MSDFitModel *>(fittingModel());
-  setFitDataPresenter(
-      new IndirectFitDataPresenter(m_msdFittingModel, m_uiForm->fitDataView));
+  setFitDataPresenter(Mantid::Kernel::make_unique<IndirectFitDataPresenter>(
+      m_msdFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 }
 
 void MSDFit::setupFitTab() {
-  auto gaussian = FunctionFactory::Instance().createFunction("MSDGauss");
-  auto peters = FunctionFactory::Instance().createFunction("MSDPeters");
-  auto yi = FunctionFactory::Instance().createFunction("MSDYi");
+  auto &functionFactory = FunctionFactory::Instance();
+  auto gaussian = functionFactory.createFunction("MSDGauss");
+  auto peters = functionFactory.createFunction("MSDPeters");
+  auto yi = functionFactory.createFunction("MSDYi");
   addComboBoxFunctionGroup("Gaussian", {gaussian});
   addComboBoxFunctionGroup("Peters", {peters});
   addComboBoxFunctionGroup("Yi", {yi});
@@ -57,6 +58,8 @@ void MSDFit::updateModelFitTypeString() {
 }
 
 void MSDFit::updatePlotOptions() {}
+
+void MSDFit::plotClicked() { IndirectFitAnalysisTab::plotResult("All"); }
 
 void MSDFit::setPlotResultEnabled(bool enabled) {
   m_uiForm->pbPlot->setEnabled(enabled);
