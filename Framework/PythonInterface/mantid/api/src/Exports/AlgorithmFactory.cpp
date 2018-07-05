@@ -133,7 +133,7 @@ GCC_DIAG_ON(conversion)
 #endif
 
 ///@endcond
-}
+} // namespace
 // clang-format off
 GCC_DIAG_ON(cast-qual)
 // clang-format on

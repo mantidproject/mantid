@@ -3,16 +3,16 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadLog.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadLog.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <vector>
 

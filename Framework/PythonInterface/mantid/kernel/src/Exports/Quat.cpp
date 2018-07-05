@@ -1,18 +1,18 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include <boost/python/class.hpp>
-#include <boost/python/operators.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/operators.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-#include <boost/python/return_value_policy.hpp>
 #include <boost/python/return_arg.hpp>
+#include <boost/python/return_value_policy.hpp>
 
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
 using boost::python::arg;
-using boost::python::init;
 using boost::python::class_;
 using boost::python::copy_const_reference;
+using boost::python::init;
 using boost::python::return_value_policy;
 
 /**
@@ -23,10 +23,11 @@ void export_Quat() {
 
   // Quat class
   class_<Quat>(
-      "Quat", "Quaternions are the 3D generalization of complex numbers. "
-              "Quaternions are used for roations in 3D spaces and often "
-              "implemented for "
-              "computer graphics applications.",
+      "Quat",
+      "Quaternions are the 3D generalization of complex numbers. "
+      "Quaternions are used for roations in 3D spaces and often "
+      "implemented for "
+      "computer graphics applications.",
       init<>(arg("self"),
              "Construct a default Quat that will perform no transformation."))
       .def(init<double, double, double, double>(
@@ -58,19 +59,19 @@ void export_Quat() {
       .def("getEulerAngles", &Quat::getEulerAngles,
            (arg("self"), arg("convention") = "YZX"),
            "Default convention is \'YZX\'.")
-      .def("__add__", &Quat::operator+, (arg("left"), arg("right")))
+      .def("__add__", &Quat::operator+,(arg("left"), arg("right")))
       .def("__iadd__", &Quat::operator+=, boost::python::return_self<>(),
            (arg("self"), arg("other")))
-      .def("__sub__", &Quat::operator-, (arg("left"), arg("right")))
+      .def("__sub__", &Quat::operator-,(arg("left"), arg("right")))
       .def("__isub__", &Quat::operator-=, boost::python::return_self<>(),
            (arg("self"), arg("other")))
-      .def("__mul__", &Quat::operator*, (arg("left"), arg("right")))
+      .def("__mul__", &Quat::operator*,(arg("left"), arg("right")))
       .def("__imul__", &Quat::operator*=, boost::python::return_self<>(),
            (arg("self"), arg("other")))
-      .def("__eq__", &Quat::operator==, (arg("self"), arg("other")))
-      .def("__ne__", &Quat::operator!=, (arg("self"), arg("other")))
+      .def("__eq__", &Quat::operator==,(arg("self"), arg("other")))
+      .def("__ne__", &Quat::operator!=,(arg("self"), arg("other")))
       .def("__getitem__",
-           (const double &(Quat::*)(int) const) & Quat::operator[],
+           (const double &(Quat::*)(int)const) & Quat::operator[],
            return_value_policy<copy_const_reference>(),
            (arg("self"), arg("index")))
       .def("__str__", &Quat::toString, arg("self"));

@@ -2,9 +2,9 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/RefAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ReadLock.h"
 

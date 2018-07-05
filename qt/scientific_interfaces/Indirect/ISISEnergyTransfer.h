@@ -1,10 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ISISENERGYTRANSFER_H_
 #define MANTIDQTCUSTOMINTERFACES_ISISENERGYTRANSFER_H_
 
-#include "IndirectDataReductionTab.h"
-#include "ui_ISISEnergyTransfer.h"
-#include "MantidKernel/System.h"
 #include "../General/Background.h"
+#include "IndirectDataReductionTab.h"
+#include "MantidKernel/System.h"
+#include "ui_ISISEnergyTransfer.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -70,8 +70,8 @@ private:
   Ui::ISISEnergyTransfer m_uiForm;
 
   std::pair<std::string, std::string> createMapFile(
-      const std::string &
-          groupType); ///< create the mapping file with which to group results
+      const std::string
+          &groupType); ///< create the mapping file with which to group results
   std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
   std::vector<std::string>
       m_outputWorkspaces; ///< get a vector of workspaces to plot
@@ -79,6 +79,6 @@ private:
   const std::string createDetectorGroupingString();
 };
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ISISENERGYTRANSFER_H_

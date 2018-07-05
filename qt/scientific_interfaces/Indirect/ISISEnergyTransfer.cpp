@@ -1,8 +1,8 @@
 #include "ISISEnergyTransfer.h"
 
+#include "../General/UserInputValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "../General/UserInputValidator.h"
 
 #include <QFileInfo>
 
@@ -740,4 +740,4 @@ void ISISEnergyTransfer::saveClicked() {
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

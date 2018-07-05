@@ -81,7 +81,7 @@ std::string generateXAxisLabel(Mantid::Kernel::Unit_const_sptr unit) {
   }
   return label;
 }
-}
+} // namespace
 
 /**
  * Constructs a presenter for a fitting tab/widget view, which has a
@@ -103,9 +103,9 @@ EnggDiffFittingPresenter::EnggDiffFittingPresenter(
 EnggDiffFittingPresenter::~EnggDiffFittingPresenter() { cleanup(); }
 
 /**
-* Close open sessions, kill threads etc., for a graceful window
-* close/destruction
-*/
+ * Close open sessions, kill threads etc., for a graceful window
+ * close/destruction
+ */
 void EnggDiffFittingPresenter::cleanup() {
   // m_model->cleanup();
 
@@ -224,13 +224,13 @@ void EnggDiffFittingPresenter::startAsyncFittingWorker(
 }
 
 /**
-  * Takes a full file path as a string and attempts to get the base name
-  * of the file at that location and return it
-  *
-  * @param filePath The full path to get the basename of
-  *
-  * @return The base name (without ext) of the file
-  */
+ * Takes a full file path as a string and attempts to get the base name
+ * of the file at that location and return it
+ *
+ * @param filePath The full path to get the basename of
+ *
+ * @return The base name (without ext) of the file
+ */
 std::string EnggDiffFittingPresenter::getBaseNameFromStr(
     const std::string &filePath) const {
   Poco::Path pocoPath = filePath;

@@ -1,8 +1,8 @@
 #ifndef MANTIDPLOT_SHAPE2D_H_
 #define MANTIDPLOT_SHAPE2D_H_
 
-#include "RectF.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "RectF.h"
 
 #include <QColor>
 #include <QPointF>
@@ -16,36 +16,35 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /**
-* Base class for an editable 2D shape, which can be drawn on ProjectionSurface.
-*
-* Any shape must implement these pure virtual methods:
-*    clone()     -- to copy itself
-*    drawShape() -- to draw itself
-*    refit()     -- to make sure the shape is entirely within its bounding rect
-*                   ( returned by getBoundingRect() )
-*    addToPath() -- to add itself to a QPainterPath, to allow this shape to be
-*used to
-*                   construct more complex shapes
-*
-* A shape has a border and the area inside this border. A point on the screen
-* which is inside the border is considered to be masked by this shape.
-* To be able to mask anything a shape must implement selectAt(...) and
-*contains(...)
-* methods.
-*
-* A shape can be a part of a Shape2DCollection. Collections allow to apply
-*transformations to
-* their items. A scale transformation is used to implement zooming. By default a
-*shape resizes
-* with the transformation. To override this call setScalable( false ). In this
-*case zooming
-* only changes the visible position but not the size of the shape.
-*
-* Shapes can be edited (ie change their position and sizes) in a generic way
-*either by using coltrol
-* points or setting properties.
-*
-*/
+ * Base class for an editable 2D shape, which can be drawn on ProjectionSurface.
+ *
+ * Any shape must implement these pure virtual methods:
+ *    clone()     -- to copy itself
+ *    drawShape() -- to draw itself
+ *    refit()     -- to make sure the shape is entirely within its bounding rect
+ *                   ( returned by getBoundingRect() )
+ *    addToPath() -- to add itself to a QPainterPath, to allow this shape to be
+ *used to
+ *                   construct more complex shapes
+ *
+ * A shape has a border and the area inside this border. A point on the screen
+ * which is inside the border is considered to be masked by this shape.
+ * To be able to mask anything a shape must implement selectAt(...) and
+ *contains(...)
+ * methods.
+ *
+ * A shape can be a part of a Shape2DCollection. Collections allow to apply
+ *transformations to
+ * their items. A scale transformation is used to implement zooming. By default
+ *a shape resizes with the transformation. To override this call setScalable(
+ *false ). In this case zooming only changes the visible position but not the
+ *size of the shape.
+ *
+ * Shapes can be edited (ie change their position and sizes) in a generic way
+ *either by using coltrol
+ * points or setting properties.
+ *
+ */
 class Shape2D {
 public:
   /// Constructor.
@@ -186,12 +185,12 @@ private:
 };
 
 /**
-* An ellipse with the axes parallel to the x and y axes on the screen.
-*
-* It has a QPointF property "center" defining the centre of the ellipse
-* and double properties "radius1" and "radius2" equal to distances from
-* the centre to the curve along the x and y axes.
-*/
+ * An ellipse with the axes parallel to the x and y axes on the screen.
+ *
+ * It has a QPointF property "center" defining the centre of the ellipse
+ * and double properties "radius1" and "radius2" equal to distances from
+ * the centre to the curve along the x and y axes.
+ */
 class Shape2DEllipse : public Shape2D {
 public:
   Shape2DEllipse(const QPointF &center, double radius1, double radius2 = 0);
@@ -218,10 +217,10 @@ protected:
 };
 
 /**
-* A axis aligned rectangle.
-*
-* No specific properties.
-*/
+ * A axis aligned rectangle.
+ *
+ * No specific properties.
+ */
 class Shape2DRectangle : public Shape2D {
 public:
   Shape2DRectangle();
@@ -244,12 +243,12 @@ protected:
 };
 
 /**
-* A ring: area bounded by two curves of the same shape but different size.
-*
-* The constructor takes a curve shape and the ring widths in the x and y
-* directions.
-* It has QPointF "centre" property and "xwidth" and "ywidth" double properties.
-*/
+ * A ring: area bounded by two curves of the same shape but different size.
+ *
+ * The constructor takes a curve shape and the ring widths in the x and y
+ * directions.
+ * It has QPointF "centre" property and "xwidth" and "ywidth" double properties.
+ */
 class Shape2DRing : public Shape2D {
 public:
   Shape2DRing(Shape2D *shape, double xWidth = 0.000001,
@@ -289,11 +288,11 @@ protected:
 };
 
 /**
-* An arbitrary shape. Implemented as a polygon.
-* It can have disjointed parts and holes.
-*
-* No shape specific properties.
-*/
+ * An arbitrary shape. Implemented as a polygon.
+ * It can have disjointed parts and holes.
+ *
+ * No shape specific properties.
+ */
 class Shape2DFree : public Shape2D {
 public:
   explicit Shape2DFree(const QPointF &p);
@@ -319,7 +318,7 @@ private:
   QPolygonF m_polygon;    ///< Implements the shape.
   QPainterPath m_outline; ///< Object to draw the shape's border.
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*MANTIDPLOT_SHAPE2D_H_*/

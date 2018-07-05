@@ -266,10 +266,10 @@ void MDHistoWorkspace::setTo(signal_t signal, signal_t errorSquared,
 //----------------------------------------------------------------------------------------------
 /** Apply an implicit function to each point; if false, set to the given value.
  *
-* @param function :: the implicit function to apply
-* @param signal :: signal value to set when function evaluates to false
-* @param errorSquared :: error value to set when function evaluates to false
-*/
+ * @param function :: the implicit function to apply
+ * @param signal :: signal value to set when function evaluates to false
+ * @param errorSquared :: error value to set when function evaluates to false
+ */
 void MDHistoWorkspace::applyImplicitFunction(
     Mantid::Geometry::MDImplicitFunction *function, signal_t signal,
     signal_t errorSquared) {
@@ -601,9 +601,8 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
       const auto linearIndex =
           this->getLinearIndexAtCoord(middle.getBareArray());
 
-      if (bin_centres &&
-          !(linearIndex == std::numeric_limits<size_t>::max() ||
-            this->getIsMaskedAt(linearIndex))) {
+      if (bin_centres && !(linearIndex == std::numeric_limits<size_t>::max() ||
+                           this->getIsMaskedAt(linearIndex))) {
         coord_t bin_centrePos =
             static_cast<coord_t>((linePos + lastLinePos) * 0.5);
         line.x.push_back(bin_centrePos);
@@ -1345,7 +1344,7 @@ uint64_t MDHistoWorkspace::sumNContribEvents() const {
 
 /**
  * Get the Q frame system (if any) to use.
-*/
+ */
 // clang-format off
 GCC_DIAG_OFF(strict-aliasing)
 // clang-format on
@@ -1396,5 +1395,5 @@ void MDHistoWorkspace::setDisplayNormalization(
   m_displayNormalization = preferredNormalization;
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

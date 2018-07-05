@@ -7,9 +7,9 @@
 #include <numeric>
 
 #include "MantidKernel/LogParser.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/make_unique.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -499,14 +499,10 @@ public:
         {"2013-10-16T19:13:09", 1}};
 
     const std::vector<std::pair<std::string, bool>> checkRunning{
-        {"2013-10-16T19:04:48", true},
-        {"2013-10-16T19:06:53", false},
-        {"2013-10-16T19:06:53", true},
-        {"2013-10-16T19:08:58", false},
-        {"2013-10-16T19:08:59", true},
-        {"2013-10-16T19:11:03", false},
-        {"2013-10-16T19:11:04", true},
-        {"2013-10-16T19:13:09", false}};
+        {"2013-10-16T19:04:48", true}, {"2013-10-16T19:06:53", false},
+        {"2013-10-16T19:06:53", true}, {"2013-10-16T19:08:58", false},
+        {"2013-10-16T19:08:59", true}, {"2013-10-16T19:11:03", false},
+        {"2013-10-16T19:11:04", true}, {"2013-10-16T19:13:09", false}};
 
     const LogParser logparser(log.get());
 
@@ -629,12 +625,18 @@ public:
         timeZero + 51.0, timeZero + 51.0, timeZero + 57.0,  timeZero + 60.0,
         timeZero + 60.0, timeZero + 60.0, timeZero + 111.0, timeZero + 111.0};
     const std::vector<std::string> values{
-        "CHANGE_PERIOD 1", "CHANGE_PERIOD 1",
-        "START_COLLECTION PERIOD 1 GF 0 RF 0 GUAH 0.000000", "BEGIN",
+        "CHANGE_PERIOD 1",
+        "CHANGE_PERIOD 1",
+        "START_COLLECTION PERIOD 1 GF 0 RF 0 GUAH 0.000000",
+        "BEGIN",
         "STOP_COLLECTION PERIOD 1 GF 1931 RF 1933 GUAH 0.000000 DUR 48",
-        "ABORT", "CHANGE_PERIOD 1", "CHANGE_PERIOD 1",
-        "START_COLLECTION PERIOD 1 GF 0 RF 0 GUAH 0.000000", "BEGIN",
-        "STOP_COLLECTION PERIOD 1 GF 2062 RF 2064 GUAH 0.000000 DUR 51", "END"};
+        "ABORT",
+        "CHANGE_PERIOD 1",
+        "CHANGE_PERIOD 1",
+        "START_COLLECTION PERIOD 1 GF 0 RF 0 GUAH 0.000000",
+        "BEGIN",
+        "STOP_COLLECTION PERIOD 1 GF 2062 RF 2064 GUAH 0.000000 DUR 51",
+        "END"};
     log->addValues(times, values);
 
     const std::multimap<DateAndTime, bool> expectedRunning{

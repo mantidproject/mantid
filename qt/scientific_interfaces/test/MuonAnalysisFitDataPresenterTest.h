@@ -1,39 +1,39 @@
 #ifndef MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTERTEST_H_
 #define MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTERTEST_H_
 
+#include <algorithm>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <algorithm>
 
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidAPI/GroupingLoader.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "../Muon/MuonAnalysisDataLoader.h"
 #include "../Muon/MuonAnalysisFitDataPresenter.h"
 #include "../Muon/MuonAnalysisHelper.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/GroupingLoader.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/IMuonFitDataModel.h"
 #include "MantidQtWidgets/Common/IMuonFitDataSelector.h"
 #include "MantidQtWidgets/Common/IWorkspaceFitControl.h"
 
-using MantidQt::CustomInterfaces::MuonAnalysisDataLoader;
-using MantidQt::CustomInterfaces::MuonAnalysisFitDataPresenter;
-using MantidQt::CustomInterfaces::Muon::DeadTimesType;
-using MantidQt::MantidWidgets::IMuonFitDataModel;
-using MantidQt::MantidWidgets::IMuonFitDataSelector;
-using MantidQt::MantidWidgets::IWorkspaceFitControl;
 using Mantid::API::AnalysisDataService;
 using Mantid::API::ITableWorkspace;
 using Mantid::API::TableRow;
 using Mantid::API::Workspace;
 using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceGroup;
+using MantidQt::CustomInterfaces::Muon::DeadTimesType;
+using MantidQt::CustomInterfaces::MuonAnalysisDataLoader;
+using MantidQt::CustomInterfaces::MuonAnalysisFitDataPresenter;
+using MantidQt::MantidWidgets::IMuonFitDataModel;
+using MantidQt::MantidWidgets::IMuonFitDataSelector;
+using MantidQt::MantidWidgets::IWorkspaceFitControl;
 using namespace testing;
 
 /// This is necessary for using Google Mock with boost::optional
@@ -47,7 +47,7 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
     out << maybe->toStdString();
   return out;
 }
-}
+} // namespace boost
 /// Mock data selector widget
 class MockDataSelector : public IMuonFitDataSelector {
 public:
@@ -196,7 +196,8 @@ public:
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189"), QString("MUSR"),
-                                    Eq(boost::optional<QString>{}))).Times(1);
+                                    Eq(boost::optional<QString>{})))
+        .Times(1);
     m_presenter->setAssignedFirstRun(wsName, boost::none);
   }
 
@@ -205,7 +206,8 @@ public:
     const QString wsName("MUSR00015189-91; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189-91"), QString("MUSR"),
-                                    Eq(boost::optional<QString>{}))).Times(1);
+                                    Eq(boost::optional<QString>{})))
+        .Times(1);
     EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"})))
         .Times(1);
     EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"long"})))
@@ -219,7 +221,8 @@ public:
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189-91, 15193"),
                                     QString("MUSR"),
-                                    Eq(boost::optional<QString>{}))).Times(1);
+                                    Eq(boost::optional<QString>{})))
+        .Times(1);
     EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"long"})))
         .Times(1);
     EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"})))
@@ -249,7 +252,8 @@ public:
     const QString wsName("MUSR00061335; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00061335"), QString("MUSR"),
-                                    Eq(currentRunPath))).Times(1);
+                                    Eq(currentRunPath)))
+        .Times(1);
     // m_presenter->setAssignedFirstRun(wsName, currentRunPath);
     localSetAssignedFirstRun(wsName, currentRunPath);
   }
@@ -693,7 +697,8 @@ public:
     // Expect it will update the UI from workspace details
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189-91"), QString("MUSR"),
-                                    Eq(boost::none))).Times(1);
+                                    Eq(boost::none)))
+        .Times(1);
     EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"fwd"})))
         .Times(1);
     EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"})))
@@ -716,7 +721,8 @@ public:
     // Expect it will update the UI from workspace details
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00061335"), QString("MUSR"),
-                                    Eq(currentRunPath))).Times(1);
+                                    Eq(currentRunPath)))
+        .Times(1);
     EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"fwd"})))
         .Times(1);
     EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"})))

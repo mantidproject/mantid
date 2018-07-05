@@ -1,20 +1,20 @@
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/TextAxis.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/Run.h"
 
 namespace Mantid {
 namespace API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("WorkspaceFactory");
-}
+} // namespace
 
 using std::size_t;
 

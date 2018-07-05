@@ -109,12 +109,14 @@ void export_Projection() {
       .def(init<const Mantid::Kernel::V3D &, const Mantid::Kernel::V3D &,
                 const Mantid::Kernel::V3D &>(
           "Constructs a 3 dimensional projection", args("u", "v", "w")))
-      .def("__init__", make_constructor(&projCtor2, default_call_policies(),
-                                        (arg("u"), arg("v"))),
+      .def("__init__",
+           make_constructor(&projCtor2, default_call_policies(),
+                            (arg("u"), arg("v"))),
            "Constructs a 3 dimensional projection, with w as the cross product "
            "of u and v.")
-      .def("__init__", make_constructor(&projCtor3, default_call_policies(),
-                                        (arg("u"), arg("v"), arg("w"))),
+      .def("__init__",
+           make_constructor(&projCtor3, default_call_policies(),
+                            (arg("u"), arg("v"), arg("w"))),
            "Constructs a 3 dimensional projection")
       .def("getOffset", &Projection::getOffset, (arg("self"), arg("nd")),
            "Returns the offset for the given dimension", args("dimension"))
@@ -134,50 +136,56 @@ void export_Projection() {
       .def("setType", &setUnit, (arg("self"), arg("dimension"), arg("unit")),
            "Sets the unit for the given dimension")
       .add_property(
-           "u", make_function(
-                    &Projection::U, return_internal_reference<>(),
-                    boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
-           make_function(
-               boost::bind(&Projection::setAxis, _1, 0, _2),
-               default_call_policies(),
-               boost::mpl::vector3<void, Projection &, Mantid::Kernel::V3D>()))
+          "u",
+          make_function(
+              &Projection::U, return_internal_reference<>(),
+              boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
+          make_function(
+              boost::bind(&Projection::setAxis, _1, 0, _2),
+              default_call_policies(),
+              boost::mpl::vector3<void, Projection &, Mantid::Kernel::V3D>()))
       .add_property(
-           "v", make_function(
-                    &Projection::V, return_internal_reference<>(),
-                    boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
-           make_function(
-               boost::bind(&Projection::setAxis, _1, 1, _2),
-               default_call_policies(),
-               boost::mpl::vector3<void, Projection &, Mantid::Kernel::V3D>()))
+          "v",
+          make_function(
+              &Projection::V, return_internal_reference<>(),
+              boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
+          make_function(
+              boost::bind(&Projection::setAxis, _1, 1, _2),
+              default_call_policies(),
+              boost::mpl::vector3<void, Projection &, Mantid::Kernel::V3D>()))
       .add_property(
-           "w", make_function(
-                    &Projection::W, return_internal_reference<>(),
-                    boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
-           make_function(
-               boost::bind(&Projection::setAxis, _1, 2, _2),
-               default_call_policies(),
-               boost::mpl::vector3<void, Projection &, Mantid::Kernel::V3D>()))
+          "w",
+          make_function(
+              &Projection::W, return_internal_reference<>(),
+              boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
+          make_function(
+              boost::bind(&Projection::setAxis, _1, 2, _2),
+              default_call_policies(),
+              boost::mpl::vector3<void, Projection &, Mantid::Kernel::V3D>()))
       .add_property(
-           "u", make_function(
-                    &Projection::U, return_internal_reference<>(),
-                    boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
-           make_function(
-               boost::bind(&projSetAxis, _1, 0, _2), default_call_policies(),
-               boost::mpl::vector3<void, Projection &, const object &>()))
+          "u",
+          make_function(
+              &Projection::U, return_internal_reference<>(),
+              boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
+          make_function(
+              boost::bind(&projSetAxis, _1, 0, _2), default_call_policies(),
+              boost::mpl::vector3<void, Projection &, const object &>()))
       .add_property(
-           "v", make_function(
-                    &Projection::V, return_internal_reference<>(),
-                    boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
-           make_function(
-               boost::bind(&projSetAxis, _1, 1, _2), default_call_policies(),
-               boost::mpl::vector3<void, Projection &, const object &>()))
+          "v",
+          make_function(
+              &Projection::V, return_internal_reference<>(),
+              boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
+          make_function(
+              boost::bind(&projSetAxis, _1, 1, _2), default_call_policies(),
+              boost::mpl::vector3<void, Projection &, const object &>()))
       .add_property(
-           "w", make_function(
-                    &Projection::W, return_internal_reference<>(),
-                    boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
-           make_function(
-               boost::bind(&projSetAxis, _1, 2, _2), default_call_policies(),
-               boost::mpl::vector3<void, Projection &, const object &>()))
+          "w",
+          make_function(
+              &Projection::W, return_internal_reference<>(),
+              boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
+          make_function(
+              boost::bind(&projSetAxis, _1, 2, _2), default_call_policies(),
+              boost::mpl::vector3<void, Projection &, const object &>()))
       .def("createWorkspace", createWorkspace(),
            "Create a TableWorkspace representing the projection");
 }

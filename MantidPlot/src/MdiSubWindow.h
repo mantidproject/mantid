@@ -198,7 +198,7 @@ public slots:
   //! Size of the widget as a string
   virtual QString sizeToString();
 
-  //!Notifies that a window was hidden by a direct user action
+  //! Notifies that a window was hidden by a direct user action
   virtual void setHidden();
 
   // event handlers

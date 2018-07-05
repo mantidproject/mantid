@@ -3,9 +3,9 @@
 
 #include <iosfwd>
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {

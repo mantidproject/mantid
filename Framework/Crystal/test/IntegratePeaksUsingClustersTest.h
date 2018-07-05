@@ -1,10 +1,10 @@
 #ifndef MANTID_CRYSTAL_INTEGRATEPEAKSUSINGCLUSTERSTEST_H_
 #define MANTID_CRYSTAL_INTEGRATEPEAKSUSINGCLUSTERSTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "ClusterIntegrationBaseTest.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidCrystal/IntegratePeaksUsingClusters.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Crystal;
 
@@ -33,7 +33,7 @@ execute_integration(const MDHistoPeaksWSTuple &inputWorkspaces,
   IMDHistoWorkspace_sptr outClustersWS = alg.getProperty("OutputWorkspaceMD");
   return MDHistoPeaksWSTuple(outClustersWS, outPeaksWS);
 }
-}
+} // namespace
 
 //=====================================================================================
 // Functional Tests
@@ -288,8 +288,8 @@ public:
 //=====================================================================================
 // clang-format off
 class IntegratePeaksUsingClustersTestPerformance : public CxxTest::TestSuite, public ClusterIntegrationBaseTest
-      // clang-format on
-      {
+// clang-format on
+{
 
 private:
   // Input data

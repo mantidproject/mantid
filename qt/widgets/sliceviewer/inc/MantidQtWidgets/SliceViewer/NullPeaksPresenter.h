@@ -1,8 +1,8 @@
 #ifndef MANTID_SLICEVIEWER_NULLPEAKSPRESENTER_H_
 #define MANTID_SLICEVIEWER_NULLPEAKSPRESENTER_H_
 
-#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
 #include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
+#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -72,7 +72,7 @@ public:
     return false; /*Do nothing. Add nothing.*/
   }
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /* MANTID_SLICEVIEWER_NULLPEAKSPRESENTER_H_ */

@@ -3,16 +3,16 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/Integration.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAlgorithms/Integration.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/IDTypes.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -746,10 +746,10 @@ public:
   }
 
   void testStartWSIndexEqualsEnd() {
-    auto boundsAssert =
-        [](MatrixWorkspace_sptr, MatrixWorkspace_sptr output, int, int) {
-          TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
-        };
+    auto boundsAssert = [](MatrixWorkspace_sptr, MatrixWorkspace_sptr output,
+                           int, int) {
+      TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
+    };
 
     wsBoundsTest("testSpace", 3, 3, boundsAssert);
   }

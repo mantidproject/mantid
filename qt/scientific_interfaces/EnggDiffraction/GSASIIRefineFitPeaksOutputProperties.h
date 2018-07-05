@@ -37,8 +37,8 @@ MANTIDQT_ENGGDIFFRACTION_DLL bool
 operator!=(const GSASIIRefineFitPeaksOutputProperties &lhs,
            const GSASIIRefineFitPeaksOutputProperties &rhs);
 
-} // MantidQt
-} // CustomInterfaces
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 Q_DECLARE_METATYPE(
     MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties)

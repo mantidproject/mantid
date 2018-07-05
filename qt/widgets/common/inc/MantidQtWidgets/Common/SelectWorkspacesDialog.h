@@ -5,10 +5,10 @@
 //   Includes
 //----------------------------
 
+#include "DllOption.h"
 #include <QDialog>
 #include <QListWidget>
 #include <QStringList>
-#include "DllOption.h"
 #include <string>
 
 namespace MantidQt {
@@ -73,7 +73,7 @@ private:
   /// The OK button
   QPushButton *m_customButton;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* SELECTWORKSPACESDIALOG_H */

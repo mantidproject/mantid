@@ -12,9 +12,9 @@
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 #include <cstring>
+#include <iterator>
 #include <map>
 #include <vector>
-#include <iterator>
 
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
@@ -145,10 +145,8 @@ public:
     names.reserve(_map.size());
     std::transform(
         _map.cbegin(), _map.cend(), std::back_inserter(names),
-        [](const std::pair<const std::string,
-                           std::unique_ptr<AbstractFactory>> &mapPair) {
-          return mapPair.first;
-        });
+        [](const std::pair<const std::string, std::unique_ptr<AbstractFactory>>
+               &mapPair) { return mapPair.first; });
     return names;
   }
 
@@ -185,7 +183,7 @@ template class Mantid::Kernel::SingletonHolder<WindowFactoryImpl>;
 #endif /* _WIN32 */
 
 using WindowFactory = Mantid::Kernel::SingletonHolder<WindowFactoryImpl>;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif // WINDOWFACTORY_H

@@ -3,14 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include <vector>
 
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/AutoPtr.h>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;

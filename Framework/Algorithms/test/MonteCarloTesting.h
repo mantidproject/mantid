@@ -118,9 +118,9 @@ inline Mantid::API::Sample createSamplePlusContainer() {
 
 inline Mantid::API::Sample createTestSample(TestSampleType sampleType) {
   using Mantid::API::Sample;
+  using Mantid::Geometry::IObject_sptr;
   using Mantid::Kernel::Material;
   using Mantid::Kernel::V3D;
-  using Mantid::Geometry::IObject_sptr;
   using Mantid::PhysicalConstants::getNeutronAtom;
 
   using namespace Mantid::Geometry;
@@ -148,6 +148,6 @@ inline Mantid::API::Sample createTestSample(TestSampleType sampleType) {
   }
   return testSample;
 }
-}
+} // namespace MonteCarloTesting
 
 #endif // MANTID_ALGORITHMS_MONTECARLOTESTING_H

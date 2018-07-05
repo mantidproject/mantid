@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CorrectTOFAxis.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/CorrectTOFAxis.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
@@ -420,8 +420,9 @@ private:
   }
 
   static double tof(const double Ei, const double flightLength) {
-    return flightLength / std::sqrt(2 * Ei * Mantid::PhysicalConstants::meV /
-                                    Mantid::PhysicalConstants::NeutronMass) /
+    return flightLength /
+           std::sqrt(2 * Ei * Mantid::PhysicalConstants::meV /
+                     Mantid::PhysicalConstants::NeutronMass) /
            1e-6;
   }
 

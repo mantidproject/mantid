@@ -3,14 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadMuonNexus2.h"
-#include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/GroupDetectors.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAlgorithms/AlphaCalc.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAlgorithms/AlphaCalc.h"
+#include "MantidDataHandling/GroupDetectors.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadMuonNexus2.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <stdexcept>
 
 using namespace Mantid::Algorithms;

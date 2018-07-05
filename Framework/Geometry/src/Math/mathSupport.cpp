@@ -1,9 +1,9 @@
-#include <iostream>
+#include <algorithm>
 #include <cmath>
 #include <complex>
-#include <vector>
+#include <iostream>
 #include <iterator>
-#include <algorithm>
+#include <vector>
 
 #include "MantidGeometry/Math/mathSupport.h"
 
@@ -166,4 +166,4 @@ solveCubic(const std::vector<double>::const_iterator, std::complex<double> &,
            std::complex<double> &, std::complex<double> &);
 
 /// \endcond TEMPLATE
-}
+} // namespace Mantid

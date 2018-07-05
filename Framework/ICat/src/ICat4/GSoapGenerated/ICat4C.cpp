@@ -1587,354 +1587,344 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr,
     return ((xsd__anyType *)ptr)->soap_out(soap, tag, id, "xsd:anyType");
   case SOAP_TYPE_ICat4_PointerTons1__getEntityInfoResponse:
     return soap_out_PointerTons1__getEntityInfoResponse(
-        soap, tag, id, (ns1__getEntityInfoResponse * const *)ptr,
+        soap, tag, id, (ns1__getEntityInfoResponse *const *)ptr,
         "ns1:getEntityInfoResponse");
   case SOAP_TYPE_ICat4_PointerTons1__getEntityInfo:
     return soap_out_PointerTons1__getEntityInfo(
-        soap, tag, id, (ns1__getEntityInfo * const *)ptr, "ns1:getEntityInfo");
+        soap, tag, id, (ns1__getEntityInfo *const *)ptr, "ns1:getEntityInfo");
   case SOAP_TYPE_ICat4_PointerTons1__deleteManyResponse:
     return soap_out_PointerTons1__deleteManyResponse(
-        soap, tag, id, (ns1__deleteManyResponse * const *)ptr,
+        soap, tag, id, (ns1__deleteManyResponse *const *)ptr,
         "ns1:deleteManyResponse");
   case SOAP_TYPE_ICat4_PointerTons1__deleteMany:
     return soap_out_PointerTons1__deleteMany(
-        soap, tag, id, (ns1__deleteMany * const *)ptr, "ns1:deleteMany");
+        soap, tag, id, (ns1__deleteMany *const *)ptr, "ns1:deleteMany");
   case SOAP_TYPE_ICat4_PointerTons1__createManyResponse:
     return soap_out_PointerTons1__createManyResponse(
-        soap, tag, id, (ns1__createManyResponse * const *)ptr,
+        soap, tag, id, (ns1__createManyResponse *const *)ptr,
         "ns1:createManyResponse");
   case SOAP_TYPE_ICat4_PointerTons1__createMany:
     return soap_out_PointerTons1__createMany(
-        soap, tag, id, (ns1__createMany * const *)ptr, "ns1:createMany");
+        soap, tag, id, (ns1__createMany *const *)ptr, "ns1:createMany");
   case SOAP_TYPE_ICat4_PointerTons1__luceneGetPopulatingResponse:
     return soap_out_PointerTons1__luceneGetPopulatingResponse(
-        soap, tag, id, (ns1__luceneGetPopulatingResponse * const *)ptr,
+        soap, tag, id, (ns1__luceneGetPopulatingResponse *const *)ptr,
         "ns1:luceneGetPopulatingResponse");
   case SOAP_TYPE_ICat4_PointerTons1__luceneGetPopulating:
     return soap_out_PointerTons1__luceneGetPopulating(
-        soap, tag, id, (ns1__luceneGetPopulating * const *)ptr,
+        soap, tag, id, (ns1__luceneGetPopulating *const *)ptr,
         "ns1:luceneGetPopulating");
   case SOAP_TYPE_ICat4_PointerTons1__luceneSearchResponse:
     return soap_out_PointerTons1__luceneSearchResponse(
-        soap, tag, id, (ns1__luceneSearchResponse * const *)ptr,
+        soap, tag, id, (ns1__luceneSearchResponse *const *)ptr,
         "ns1:luceneSearchResponse");
   case SOAP_TYPE_ICat4_PointerTons1__luceneSearch:
     return soap_out_PointerTons1__luceneSearch(
-        soap, tag, id, (ns1__luceneSearch * const *)ptr, "ns1:luceneSearch");
+        soap, tag, id, (ns1__luceneSearch *const *)ptr, "ns1:luceneSearch");
   case SOAP_TYPE_ICat4_PointerTons1__luceneCommitResponse:
     return soap_out_PointerTons1__luceneCommitResponse(
-        soap, tag, id, (ns1__luceneCommitResponse * const *)ptr,
+        soap, tag, id, (ns1__luceneCommitResponse *const *)ptr,
         "ns1:luceneCommitResponse");
   case SOAP_TYPE_ICat4_PointerTons1__luceneCommit:
     return soap_out_PointerTons1__luceneCommit(
-        soap, tag, id, (ns1__luceneCommit * const *)ptr, "ns1:luceneCommit");
+        soap, tag, id, (ns1__luceneCommit *const *)ptr, "ns1:luceneCommit");
   case SOAP_TYPE_ICat4_PointerTons1__luceneClearResponse:
     return soap_out_PointerTons1__luceneClearResponse(
-        soap, tag, id, (ns1__luceneClearResponse * const *)ptr,
+        soap, tag, id, (ns1__luceneClearResponse *const *)ptr,
         "ns1:luceneClearResponse");
   case SOAP_TYPE_ICat4_PointerTons1__luceneClear:
     return soap_out_PointerTons1__luceneClear(
-        soap, tag, id, (ns1__luceneClear * const *)ptr, "ns1:luceneClear");
+        soap, tag, id, (ns1__luceneClear *const *)ptr, "ns1:luceneClear");
   case SOAP_TYPE_ICat4_PointerTons1__lucenePopulateResponse:
     return soap_out_PointerTons1__lucenePopulateResponse(
-        soap, tag, id, (ns1__lucenePopulateResponse * const *)ptr,
+        soap, tag, id, (ns1__lucenePopulateResponse *const *)ptr,
         "ns1:lucenePopulateResponse");
   case SOAP_TYPE_ICat4_PointerTons1__lucenePopulate:
     return soap_out_PointerTons1__lucenePopulate(
-        soap, tag, id, (ns1__lucenePopulate * const *)ptr,
-        "ns1:lucenePopulate");
+        soap, tag, id, (ns1__lucenePopulate *const *)ptr, "ns1:lucenePopulate");
   case SOAP_TYPE_ICat4_PointerTons1__isAccessAllowedResponse:
     return soap_out_PointerTons1__isAccessAllowedResponse(
-        soap, tag, id, (ns1__isAccessAllowedResponse * const *)ptr,
+        soap, tag, id, (ns1__isAccessAllowedResponse *const *)ptr,
         "ns1:isAccessAllowedResponse");
   case SOAP_TYPE_ICat4_PointerTons1__isAccessAllowed:
     return soap_out_PointerTons1__isAccessAllowed(
-        soap, tag, id, (ns1__isAccessAllowed * const *)ptr,
+        soap, tag, id, (ns1__isAccessAllowed *const *)ptr,
         "ns1:isAccessAllowed");
   case SOAP_TYPE_ICat4_PointerTons1__searchTextResponse:
     return soap_out_PointerTons1__searchTextResponse(
-        soap, tag, id, (ns1__searchTextResponse * const *)ptr,
+        soap, tag, id, (ns1__searchTextResponse *const *)ptr,
         "ns1:searchTextResponse");
   case SOAP_TYPE_ICat4_PointerTons1__searchText:
     return soap_out_PointerTons1__searchText(
-        soap, tag, id, (ns1__searchText * const *)ptr, "ns1:searchText");
+        soap, tag, id, (ns1__searchText *const *)ptr, "ns1:searchText");
   case SOAP_TYPE_ICat4_PointerTons1__getRemainingMinutesResponse:
     return soap_out_PointerTons1__getRemainingMinutesResponse(
-        soap, tag, id, (ns1__getRemainingMinutesResponse * const *)ptr,
+        soap, tag, id, (ns1__getRemainingMinutesResponse *const *)ptr,
         "ns1:getRemainingMinutesResponse");
   case SOAP_TYPE_ICat4_PointerTons1__getRemainingMinutes:
     return soap_out_PointerTons1__getRemainingMinutes(
-        soap, tag, id, (ns1__getRemainingMinutes * const *)ptr,
+        soap, tag, id, (ns1__getRemainingMinutes *const *)ptr,
         "ns1:getRemainingMinutes");
   case SOAP_TYPE_ICat4_PointerTons1__logoutResponse:
     return soap_out_PointerTons1__logoutResponse(
-        soap, tag, id, (ns1__logoutResponse * const *)ptr,
-        "ns1:logoutResponse");
+        soap, tag, id, (ns1__logoutResponse *const *)ptr, "ns1:logoutResponse");
   case SOAP_TYPE_ICat4_PointerTons1__logout:
     return soap_out_PointerTons1__logout(
-        soap, tag, id, (ns1__logout * const *)ptr, "ns1:logout");
+        soap, tag, id, (ns1__logout *const *)ptr, "ns1:logout");
   case SOAP_TYPE_ICat4_PointerTons1__dummyResponse:
     return soap_out_PointerTons1__dummyResponse(
-        soap, tag, id, (ns1__dummyResponse * const *)ptr, "ns1:dummyResponse");
+        soap, tag, id, (ns1__dummyResponse *const *)ptr, "ns1:dummyResponse");
   case SOAP_TYPE_ICat4_PointerTons1__dummy:
-    return soap_out_PointerTons1__dummy(soap, tag, id,
-                                        (ns1__dummy * const *)ptr, "ns1:dummy");
+    return soap_out_PointerTons1__dummy(soap, tag, id, (ns1__dummy *const *)ptr,
+                                        "ns1:dummy");
   case SOAP_TYPE_ICat4_PointerTons1__refreshResponse:
     return soap_out_PointerTons1__refreshResponse(
-        soap, tag, id, (ns1__refreshResponse * const *)ptr,
+        soap, tag, id, (ns1__refreshResponse *const *)ptr,
         "ns1:refreshResponse");
   case SOAP_TYPE_ICat4_PointerTons1__refresh:
     return soap_out_PointerTons1__refresh(
-        soap, tag, id, (ns1__refresh * const *)ptr, "ns1:refresh");
+        soap, tag, id, (ns1__refresh *const *)ptr, "ns1:refresh");
   case SOAP_TYPE_ICat4_PointerTons1__getEntityNamesResponse:
     return soap_out_PointerTons1__getEntityNamesResponse(
-        soap, tag, id, (ns1__getEntityNamesResponse * const *)ptr,
+        soap, tag, id, (ns1__getEntityNamesResponse *const *)ptr,
         "ns1:getEntityNamesResponse");
   case SOAP_TYPE_ICat4_PointerTons1__getEntityNames:
     return soap_out_PointerTons1__getEntityNames(
-        soap, tag, id, (ns1__getEntityNames * const *)ptr,
-        "ns1:getEntityNames");
+        soap, tag, id, (ns1__getEntityNames *const *)ptr, "ns1:getEntityNames");
   case SOAP_TYPE_ICat4_PointerTons1__getApiVersionResponse:
     return soap_out_PointerTons1__getApiVersionResponse(
-        soap, tag, id, (ns1__getApiVersionResponse * const *)ptr,
+        soap, tag, id, (ns1__getApiVersionResponse *const *)ptr,
         "ns1:getApiVersionResponse");
   case SOAP_TYPE_ICat4_PointerTons1__getApiVersion:
     return soap_out_PointerTons1__getApiVersion(
-        soap, tag, id, (ns1__getApiVersion * const *)ptr, "ns1:getApiVersion");
+        soap, tag, id, (ns1__getApiVersion *const *)ptr, "ns1:getApiVersion");
   case SOAP_TYPE_ICat4_PointerTons1__updateResponse:
     return soap_out_PointerTons1__updateResponse(
-        soap, tag, id, (ns1__updateResponse * const *)ptr,
-        "ns1:updateResponse");
+        soap, tag, id, (ns1__updateResponse *const *)ptr, "ns1:updateResponse");
   case SOAP_TYPE_ICat4_PointerTons1__update:
     return soap_out_PointerTons1__update(
-        soap, tag, id, (ns1__update * const *)ptr, "ns1:update");
+        soap, tag, id, (ns1__update *const *)ptr, "ns1:update");
   case SOAP_TYPE_ICat4_PointerTons1__createResponse:
     return soap_out_PointerTons1__createResponse(
-        soap, tag, id, (ns1__createResponse * const *)ptr,
-        "ns1:createResponse");
+        soap, tag, id, (ns1__createResponse *const *)ptr, "ns1:createResponse");
   case SOAP_TYPE_ICat4_PointerTons1__create:
     return soap_out_PointerTons1__create(
-        soap, tag, id, (ns1__create * const *)ptr, "ns1:create");
+        soap, tag, id, (ns1__create *const *)ptr, "ns1:create");
   case SOAP_TYPE_ICat4_PointerTons1__searchResponse:
     return soap_out_PointerTons1__searchResponse(
-        soap, tag, id, (ns1__searchResponse * const *)ptr,
-        "ns1:searchResponse");
+        soap, tag, id, (ns1__searchResponse *const *)ptr, "ns1:searchResponse");
   case SOAP_TYPE_ICat4_PointerTons1__search:
     return soap_out_PointerTons1__search(
-        soap, tag, id, (ns1__search * const *)ptr, "ns1:search");
+        soap, tag, id, (ns1__search *const *)ptr, "ns1:search");
   case SOAP_TYPE_ICat4_PointerTons1__deleteResponse:
     return soap_out_PointerTons1__deleteResponse(
-        soap, tag, id, (ns1__deleteResponse * const *)ptr,
-        "ns1:deleteResponse");
+        soap, tag, id, (ns1__deleteResponse *const *)ptr, "ns1:deleteResponse");
   case SOAP_TYPE_ICat4_PointerTons1__delete:
     return soap_out_PointerTons1__delete(
-        soap, tag, id, (ns1__delete * const *)ptr, "ns1:delete");
+        soap, tag, id, (ns1__delete *const *)ptr, "ns1:delete");
   case SOAP_TYPE_ICat4_PointerTons1__getPropertiesResponse:
     return soap_out_PointerTons1__getPropertiesResponse(
-        soap, tag, id, (ns1__getPropertiesResponse * const *)ptr,
+        soap, tag, id, (ns1__getPropertiesResponse *const *)ptr,
         "ns1:getPropertiesResponse");
   case SOAP_TYPE_ICat4_PointerTons1__getProperties:
     return soap_out_PointerTons1__getProperties(
-        soap, tag, id, (ns1__getProperties * const *)ptr, "ns1:getProperties");
+        soap, tag, id, (ns1__getProperties *const *)ptr, "ns1:getProperties");
   case SOAP_TYPE_ICat4_PointerTons1__getResponse:
     return soap_out_PointerTons1__getResponse(
-        soap, tag, id, (ns1__getResponse * const *)ptr, "ns1:getResponse");
+        soap, tag, id, (ns1__getResponse *const *)ptr, "ns1:getResponse");
   case SOAP_TYPE_ICat4_PointerTons1__get:
-    return soap_out_PointerTons1__get(soap, tag, id, (ns1__get * const *)ptr,
+    return soap_out_PointerTons1__get(soap, tag, id, (ns1__get *const *)ptr,
                                       "ns1:get");
   case SOAP_TYPE_ICat4_PointerTons1__getUserNameResponse:
     return soap_out_PointerTons1__getUserNameResponse(
-        soap, tag, id, (ns1__getUserNameResponse * const *)ptr,
+        soap, tag, id, (ns1__getUserNameResponse *const *)ptr,
         "ns1:getUserNameResponse");
   case SOAP_TYPE_ICat4_PointerTons1__getUserName:
     return soap_out_PointerTons1__getUserName(
-        soap, tag, id, (ns1__getUserName * const *)ptr, "ns1:getUserName");
+        soap, tag, id, (ns1__getUserName *const *)ptr, "ns1:getUserName");
   case SOAP_TYPE_ICat4_PointerTons1__loginResponse:
     return soap_out_PointerTons1__loginResponse(
-        soap, tag, id, (ns1__loginResponse * const *)ptr, "ns1:loginResponse");
+        soap, tag, id, (ns1__loginResponse *const *)ptr, "ns1:loginResponse");
   case SOAP_TYPE_ICat4_PointerTons1__login:
-    return soap_out_PointerTons1__login(soap, tag, id,
-                                        (ns1__login * const *)ptr, "ns1:login");
+    return soap_out_PointerTons1__login(soap, tag, id, (ns1__login *const *)ptr,
+                                        "ns1:login");
   case SOAP_TYPE_ICat4_PointerTons1__IcatException:
     return soap_out_PointerTons1__IcatException(
-        soap, tag, id, (ns1__IcatException * const *)ptr, "ns1:IcatException");
+        soap, tag, id, (ns1__IcatException *const *)ptr, "ns1:IcatException");
   case SOAP_TYPE_ICat4_PointerTons1__parameterValueType:
     return soap_out_PointerTons1__parameterValueType(
-        soap, tag, id, (enum ns1__parameterValueType * const *)ptr,
+        soap, tag, id, (enum ns1__parameterValueType *const *)ptr,
         "ns1:parameterValueType");
   case SOAP_TYPE_ICat4_PointerTons1__permissibleStringValue:
     return soap_out_PointerTons1__permissibleStringValue(
-        soap, tag, id, (ns1__permissibleStringValue * const *)ptr,
+        soap, tag, id, (ns1__permissibleStringValue *const *)ptr,
         "ns1:permissibleStringValue");
   case SOAP_TYPE_ICat4_PointerTodouble:
     return soap_out_PointerTodouble(soap, tag, id, (double *const *)ptr,
                                     "xsd:double");
   case SOAP_TYPE_ICat4_PointerTons1__rule:
-    return soap_out_PointerTons1__rule(soap, tag, id, (ns1__rule * const *)ptr,
+    return soap_out_PointerTons1__rule(soap, tag, id, (ns1__rule *const *)ptr,
                                        "ns1:rule");
   case SOAP_TYPE_ICat4_PointerTons1__sampleType:
     return soap_out_PointerTons1__sampleType(
-        soap, tag, id, (ns1__sampleType * const *)ptr, "ns1:sampleType");
+        soap, tag, id, (ns1__sampleType *const *)ptr, "ns1:sampleType");
   case SOAP_TYPE_ICat4_PointerTons1__investigationParameter:
     return soap_out_PointerTons1__investigationParameter(
-        soap, tag, id, (ns1__investigationParameter * const *)ptr,
+        soap, tag, id, (ns1__investigationParameter *const *)ptr,
         "ns1:investigationParameter");
   case SOAP_TYPE_ICat4_PointerTons1__investigationInstrument:
     return soap_out_PointerTons1__investigationInstrument(
-        soap, tag, id, (ns1__investigationInstrument * const *)ptr,
+        soap, tag, id, (ns1__investigationInstrument *const *)ptr,
         "ns1:investigationInstrument");
   case SOAP_TYPE_ICat4_PointerTons1__accessType:
     return soap_out_PointerTons1__accessType(
-        soap, tag, id, (enum ns1__accessType * const *)ptr, "ns1:accessType");
+        soap, tag, id, (enum ns1__accessType *const *)ptr, "ns1:accessType");
   case SOAP_TYPE_ICat4_PointerToxsd__anyType:
     return soap_out_PointerToxsd__anyType(
-        soap, tag, id, (xsd__anyType * const *)ptr, "xsd:anyType");
+        soap, tag, id, (xsd__anyType *const *)ptr, "xsd:anyType");
   case SOAP_TYPE_ICat4_PointerToint:
     return soap_out_PointerToint(soap, tag, id, (int *const *)ptr, "xsd:int");
   case SOAP_TYPE_ICat4_PointerTons1__relType:
     return soap_out_PointerTons1__relType(
-        soap, tag, id, (enum ns1__relType * const *)ptr, "ns1:relType");
+        soap, tag, id, (enum ns1__relType *const *)ptr, "ns1:relType");
   case SOAP_TYPE_ICat4_PointerTons1__entityField:
     return soap_out_PointerTons1__entityField(
-        soap, tag, id, (ns1__entityField * const *)ptr, "ns1:entityField");
+        soap, tag, id, (ns1__entityField *const *)ptr, "ns1:entityField");
   case SOAP_TYPE_ICat4_PointerTons1__constraint:
     return soap_out_PointerTons1__constraint(
-        soap, tag, id, (ns1__constraint * const *)ptr, "ns1:constraint");
+        soap, tag, id, (ns1__constraint *const *)ptr, "ns1:constraint");
   case SOAP_TYPE_ICat4_PointerTons1__entityInfo:
     return soap_out_PointerTons1__entityInfo(
-        soap, tag, id, (ns1__entityInfo * const *)ptr, "ns1:entityInfo");
+        soap, tag, id, (ns1__entityInfo *const *)ptr, "ns1:entityInfo");
   case SOAP_TYPE_ICat4_PointerTons1__publicStep:
     return soap_out_PointerTons1__publicStep(
-        soap, tag, id, (ns1__publicStep * const *)ptr, "ns1:publicStep");
+        soap, tag, id, (ns1__publicStep *const *)ptr, "ns1:publicStep");
   case SOAP_TYPE_ICat4_PointerTons1__log:
-    return soap_out_PointerTons1__log(soap, tag, id, (ns1__log * const *)ptr,
+    return soap_out_PointerTons1__log(soap, tag, id, (ns1__log *const *)ptr,
                                       "ns1:log");
   case SOAP_TYPE_ICat4_PointerTons1__userGroup:
     return soap_out_PointerTons1__userGroup(
-        soap, tag, id, (ns1__userGroup * const *)ptr, "ns1:userGroup");
+        soap, tag, id, (ns1__userGroup *const *)ptr, "ns1:userGroup");
   case SOAP_TYPE_ICat4_PointerTons1__grouping:
     return soap_out_PointerTons1__grouping(
-        soap, tag, id, (ns1__grouping * const *)ptr, "ns1:grouping");
+        soap, tag, id, (ns1__grouping *const *)ptr, "ns1:grouping");
   case SOAP_TYPE_ICat4_PointerTons1__dataCollectionDatafile:
     return soap_out_PointerTons1__dataCollectionDatafile(
-        soap, tag, id, (ns1__dataCollectionDatafile * const *)ptr,
+        soap, tag, id, (ns1__dataCollectionDatafile *const *)ptr,
         "ns1:dataCollectionDatafile");
   case SOAP_TYPE_ICat4_PointerTons1__dataCollectionDataset:
     return soap_out_PointerTons1__dataCollectionDataset(
-        soap, tag, id, (ns1__dataCollectionDataset * const *)ptr,
+        soap, tag, id, (ns1__dataCollectionDataset *const *)ptr,
         "ns1:dataCollectionDataset");
   case SOAP_TYPE_ICat4_PointerTons1__dataCollectionParameter:
     return soap_out_PointerTons1__dataCollectionParameter(
-        soap, tag, id, (ns1__dataCollectionParameter * const *)ptr,
+        soap, tag, id, (ns1__dataCollectionParameter *const *)ptr,
         "ns1:dataCollectionParameter");
   case SOAP_TYPE_ICat4_PointerTons1__dataCollection:
     return soap_out_PointerTons1__dataCollection(
-        soap, tag, id, (ns1__dataCollection * const *)ptr,
-        "ns1:dataCollection");
+        soap, tag, id, (ns1__dataCollection *const *)ptr, "ns1:dataCollection");
   case SOAP_TYPE_ICat4_PointerTons1__job:
-    return soap_out_PointerTons1__job(soap, tag, id, (ns1__job * const *)ptr,
+    return soap_out_PointerTons1__job(soap, tag, id, (ns1__job *const *)ptr,
                                       "ns1:job");
   case SOAP_TYPE_ICat4_PointerTons1__application:
     return soap_out_PointerTons1__application(
-        soap, tag, id, (ns1__application * const *)ptr, "ns1:application");
+        soap, tag, id, (ns1__application *const *)ptr, "ns1:application");
   case SOAP_TYPE_ICat4_PointerTons1__studyStatus:
     return soap_out_PointerTons1__studyStatus(
-        soap, tag, id, (enum ns1__studyStatus * const *)ptr, "ns1:studyStatus");
+        soap, tag, id, (enum ns1__studyStatus *const *)ptr, "ns1:studyStatus");
   case SOAP_TYPE_ICat4_PointerTons1__studyInvestigation:
     return soap_out_PointerTons1__studyInvestigation(
-        soap, tag, id, (ns1__studyInvestigation * const *)ptr,
+        soap, tag, id, (ns1__studyInvestigation *const *)ptr,
         "ns1:studyInvestigation");
   case SOAP_TYPE_ICat4_PointerTons1__study:
-    return soap_out_PointerTons1__study(soap, tag, id,
-                                        (ns1__study * const *)ptr, "ns1:study");
+    return soap_out_PointerTons1__study(soap, tag, id, (ns1__study *const *)ptr,
+                                        "ns1:study");
   case SOAP_TYPE_ICat4_PointerTons1__shift:
-    return soap_out_PointerTons1__shift(soap, tag, id,
-                                        (ns1__shift * const *)ptr, "ns1:shift");
+    return soap_out_PointerTons1__shift(soap, tag, id, (ns1__shift *const *)ptr,
+                                        "ns1:shift");
   case SOAP_TYPE_ICat4_PointerTons1__sampleParameter:
     return soap_out_PointerTons1__sampleParameter(
-        soap, tag, id, (ns1__sampleParameter * const *)ptr,
+        soap, tag, id, (ns1__sampleParameter *const *)ptr,
         "ns1:sampleParameter");
   case SOAP_TYPE_ICat4_PointerTons1__sample:
     return soap_out_PointerTons1__sample(
-        soap, tag, id, (ns1__sample * const *)ptr, "ns1:sample");
+        soap, tag, id, (ns1__sample *const *)ptr, "ns1:sample");
   case SOAP_TYPE_ICat4_PointerTons1__relatedDatafile:
     return soap_out_PointerTons1__relatedDatafile(
-        soap, tag, id, (ns1__relatedDatafile * const *)ptr,
+        soap, tag, id, (ns1__relatedDatafile *const *)ptr,
         "ns1:relatedDatafile");
   case SOAP_TYPE_ICat4_PointerTons1__publication:
     return soap_out_PointerTons1__publication(
-        soap, tag, id, (ns1__publication * const *)ptr, "ns1:publication");
+        soap, tag, id, (ns1__publication *const *)ptr, "ns1:publication");
   case SOAP_TYPE_ICat4_PointerTons1__parameterType:
     return soap_out_PointerTons1__parameterType(
-        soap, tag, id, (ns1__parameterType * const *)ptr, "ns1:parameterType");
+        soap, tag, id, (ns1__parameterType *const *)ptr, "ns1:parameterType");
   case SOAP_TYPE_ICat4_PointerTons1__keyword:
     return soap_out_PointerTons1__keyword(
-        soap, tag, id, (ns1__keyword * const *)ptr, "ns1:keyword");
+        soap, tag, id, (ns1__keyword *const *)ptr, "ns1:keyword");
   case SOAP_TYPE_ICat4_PointerTons1__investigationUser:
     return soap_out_PointerTons1__investigationUser(
-        soap, tag, id, (ns1__investigationUser * const *)ptr,
+        soap, tag, id, (ns1__investigationUser *const *)ptr,
         "ns1:investigationUser");
   case SOAP_TYPE_ICat4_PointerTons1__investigationType:
     return soap_out_PointerTons1__investigationType(
-        soap, tag, id, (ns1__investigationType * const *)ptr,
+        soap, tag, id, (ns1__investigationType *const *)ptr,
         "ns1:investigationType");
   case SOAP_TYPE_ICat4_PointerTons1__investigation:
     return soap_out_PointerTons1__investigation(
-        soap, tag, id, (ns1__investigation * const *)ptr, "ns1:investigation");
+        soap, tag, id, (ns1__investigation *const *)ptr, "ns1:investigation");
   case SOAP_TYPE_ICat4_PointerTons1__instrument:
     return soap_out_PointerTons1__instrument(
-        soap, tag, id, (ns1__instrument * const *)ptr, "ns1:instrument");
+        soap, tag, id, (ns1__instrument *const *)ptr, "ns1:instrument");
   case SOAP_TYPE_ICat4_PointerTons1__user:
-    return soap_out_PointerTons1__user(soap, tag, id, (ns1__user * const *)ptr,
+    return soap_out_PointerTons1__user(soap, tag, id, (ns1__user *const *)ptr,
                                        "ns1:user");
   case SOAP_TYPE_ICat4_PointerTons1__instrumentScientist:
     return soap_out_PointerTons1__instrumentScientist(
-        soap, tag, id, (ns1__instrumentScientist * const *)ptr,
+        soap, tag, id, (ns1__instrumentScientist *const *)ptr,
         "ns1:instrumentScientist");
   case SOAP_TYPE_ICat4_PointerTons1__facilityCycle:
     return soap_out_PointerTons1__facilityCycle(
-        soap, tag, id, (ns1__facilityCycle * const *)ptr, "ns1:facilityCycle");
+        soap, tag, id, (ns1__facilityCycle *const *)ptr, "ns1:facilityCycle");
   case SOAP_TYPE_ICat4_PointerTons1__facility:
     return soap_out_PointerTons1__facility(
-        soap, tag, id, (ns1__facility * const *)ptr, "ns1:facility");
+        soap, tag, id, (ns1__facility *const *)ptr, "ns1:facility");
   case SOAP_TYPE_ICat4_PointerTons1__datasetType:
     return soap_out_PointerTons1__datasetType(
-        soap, tag, id, (ns1__datasetType * const *)ptr, "ns1:datasetType");
+        soap, tag, id, (ns1__datasetType *const *)ptr, "ns1:datasetType");
   case SOAP_TYPE_ICat4_PointerTons1__datasetParameter:
     return soap_out_PointerTons1__datasetParameter(
-        soap, tag, id, (ns1__datasetParameter * const *)ptr,
+        soap, tag, id, (ns1__datasetParameter *const *)ptr,
         "ns1:datasetParameter");
   case SOAP_TYPE_ICat4_PointerTons1__dataset:
     return soap_out_PointerTons1__dataset(
-        soap, tag, id, (ns1__dataset * const *)ptr, "ns1:dataset");
+        soap, tag, id, (ns1__dataset *const *)ptr, "ns1:dataset");
   case SOAP_TYPE_ICat4_PointerTons1__datafileParameter:
     return soap_out_PointerTons1__datafileParameter(
-        soap, tag, id, (ns1__datafileParameter * const *)ptr,
+        soap, tag, id, (ns1__datafileParameter *const *)ptr,
         "ns1:datafileParameter");
   case SOAP_TYPE_ICat4_PointerTons1__datafileFormat:
     return soap_out_PointerTons1__datafileFormat(
-        soap, tag, id, (ns1__datafileFormat * const *)ptr,
-        "ns1:datafileFormat");
+        soap, tag, id, (ns1__datafileFormat *const *)ptr, "ns1:datafileFormat");
   case SOAP_TYPE_ICat4_PointerTons1__datafile:
     return soap_out_PointerTons1__datafile(
-        soap, tag, id, (ns1__datafile * const *)ptr, "ns1:datafile");
+        soap, tag, id, (ns1__datafile *const *)ptr, "ns1:datafile");
   case SOAP_TYPE_ICat4_PointerToLONG64:
-    return soap_out_PointerToLONG64(soap, tag, id, (LONG64 * const *)ptr,
+    return soap_out_PointerToLONG64(soap, tag, id, (LONG64 *const *)ptr,
                                     "xsd:long");
   case SOAP_TYPE_ICat4_PointerTotime:
-    return soap_out_PointerTotime(soap, tag, id, (time_t * const *)ptr,
+    return soap_out_PointerTotime(soap, tag, id, (time_t *const *)ptr,
                                   "xsd:dateTime");
   case SOAP_TYPE_ICat4_PointerTons1__entityBaseBean:
     return soap_out_PointerTons1__entityBaseBean(
-        soap, tag, id, (ns1__entityBaseBean * const *)ptr,
-        "ns1:entityBaseBean");
+        soap, tag, id, (ns1__entityBaseBean *const *)ptr, "ns1:entityBaseBean");
   case SOAP_TYPE_ICat4_PointerTons1__icatExceptionType:
     return soap_out_PointerTons1__icatExceptionType(
-        soap, tag, id, (enum ns1__icatExceptionType * const *)ptr,
+        soap, tag, id, (enum ns1__icatExceptionType *const *)ptr,
         "ns1:icatExceptionType");
   case SOAP_TYPE_ICat4_PointerTostd__string:
     return soap_out_PointerTostd__string(
-        soap, tag, id, (std::string * const *)ptr, "xsd:string");
+        soap, tag, id, (std::string *const *)ptr, "xsd:string");
   case SOAP_TYPE_ICat4__QName:
     return soap_out_string(soap, tag, id, (char *const *)&ptr, "xsd:QName");
   case SOAP_TYPE_ICat4_string:
@@ -1944,8 +1934,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr,
 }
 
 #ifndef WITH_NOIDREF
-SOAP_FMAC3 void SOAP_FMAC4
-soap_markelement(struct soap *soap, const void *ptr, int type) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr,
+                                            int type) {
   (void)soap;
   (void)ptr;
   (void)type; /* appease -Wall -Werror */
@@ -2396,383 +2386,382 @@ soap_markelement(struct soap *soap, const void *ptr, int type) {
     break;
   case SOAP_TYPE_ICat4_PointerTons1__getEntityInfoResponse:
     soap_serialize_PointerTons1__getEntityInfoResponse(
-        soap, (ns1__getEntityInfoResponse * const *)ptr);
+        soap, (ns1__getEntityInfoResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__getEntityInfo:
     soap_serialize_PointerTons1__getEntityInfo(
-        soap, (ns1__getEntityInfo * const *)ptr);
+        soap, (ns1__getEntityInfo *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__deleteManyResponse:
     soap_serialize_PointerTons1__deleteManyResponse(
-        soap, (ns1__deleteManyResponse * const *)ptr);
+        soap, (ns1__deleteManyResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__deleteMany:
     soap_serialize_PointerTons1__deleteMany(soap,
-                                            (ns1__deleteMany * const *)ptr);
+                                            (ns1__deleteMany *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__createManyResponse:
     soap_serialize_PointerTons1__createManyResponse(
-        soap, (ns1__createManyResponse * const *)ptr);
+        soap, (ns1__createManyResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__createMany:
     soap_serialize_PointerTons1__createMany(soap,
-                                            (ns1__createMany * const *)ptr);
+                                            (ns1__createMany *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__luceneGetPopulatingResponse:
     soap_serialize_PointerTons1__luceneGetPopulatingResponse(
-        soap, (ns1__luceneGetPopulatingResponse * const *)ptr);
+        soap, (ns1__luceneGetPopulatingResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__luceneGetPopulating:
     soap_serialize_PointerTons1__luceneGetPopulating(
-        soap, (ns1__luceneGetPopulating * const *)ptr);
+        soap, (ns1__luceneGetPopulating *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__luceneSearchResponse:
     soap_serialize_PointerTons1__luceneSearchResponse(
-        soap, (ns1__luceneSearchResponse * const *)ptr);
+        soap, (ns1__luceneSearchResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__luceneSearch:
     soap_serialize_PointerTons1__luceneSearch(soap,
-                                              (ns1__luceneSearch * const *)ptr);
+                                              (ns1__luceneSearch *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__luceneCommitResponse:
     soap_serialize_PointerTons1__luceneCommitResponse(
-        soap, (ns1__luceneCommitResponse * const *)ptr);
+        soap, (ns1__luceneCommitResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__luceneCommit:
     soap_serialize_PointerTons1__luceneCommit(soap,
-                                              (ns1__luceneCommit * const *)ptr);
+                                              (ns1__luceneCommit *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__luceneClearResponse:
     soap_serialize_PointerTons1__luceneClearResponse(
-        soap, (ns1__luceneClearResponse * const *)ptr);
+        soap, (ns1__luceneClearResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__luceneClear:
     soap_serialize_PointerTons1__luceneClear(soap,
-                                             (ns1__luceneClear * const *)ptr);
+                                             (ns1__luceneClear *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__lucenePopulateResponse:
     soap_serialize_PointerTons1__lucenePopulateResponse(
-        soap, (ns1__lucenePopulateResponse * const *)ptr);
+        soap, (ns1__lucenePopulateResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__lucenePopulate:
     soap_serialize_PointerTons1__lucenePopulate(
-        soap, (ns1__lucenePopulate * const *)ptr);
+        soap, (ns1__lucenePopulate *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__isAccessAllowedResponse:
     soap_serialize_PointerTons1__isAccessAllowedResponse(
-        soap, (ns1__isAccessAllowedResponse * const *)ptr);
+        soap, (ns1__isAccessAllowedResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__isAccessAllowed:
     soap_serialize_PointerTons1__isAccessAllowed(
-        soap, (ns1__isAccessAllowed * const *)ptr);
+        soap, (ns1__isAccessAllowed *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__searchTextResponse:
     soap_serialize_PointerTons1__searchTextResponse(
-        soap, (ns1__searchTextResponse * const *)ptr);
+        soap, (ns1__searchTextResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__searchText:
     soap_serialize_PointerTons1__searchText(soap,
-                                            (ns1__searchText * const *)ptr);
+                                            (ns1__searchText *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__getRemainingMinutesResponse:
     soap_serialize_PointerTons1__getRemainingMinutesResponse(
-        soap, (ns1__getRemainingMinutesResponse * const *)ptr);
+        soap, (ns1__getRemainingMinutesResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__getRemainingMinutes:
     soap_serialize_PointerTons1__getRemainingMinutes(
-        soap, (ns1__getRemainingMinutes * const *)ptr);
+        soap, (ns1__getRemainingMinutes *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__logoutResponse:
     soap_serialize_PointerTons1__logoutResponse(
-        soap, (ns1__logoutResponse * const *)ptr);
+        soap, (ns1__logoutResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__logout:
-    soap_serialize_PointerTons1__logout(soap, (ns1__logout * const *)ptr);
+    soap_serialize_PointerTons1__logout(soap, (ns1__logout *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__dummyResponse:
     soap_serialize_PointerTons1__dummyResponse(
-        soap, (ns1__dummyResponse * const *)ptr);
+        soap, (ns1__dummyResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__dummy:
-    soap_serialize_PointerTons1__dummy(soap, (ns1__dummy * const *)ptr);
+    soap_serialize_PointerTons1__dummy(soap, (ns1__dummy *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__refreshResponse:
     soap_serialize_PointerTons1__refreshResponse(
-        soap, (ns1__refreshResponse * const *)ptr);
+        soap, (ns1__refreshResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__refresh:
-    soap_serialize_PointerTons1__refresh(soap, (ns1__refresh * const *)ptr);
+    soap_serialize_PointerTons1__refresh(soap, (ns1__refresh *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__getEntityNamesResponse:
     soap_serialize_PointerTons1__getEntityNamesResponse(
-        soap, (ns1__getEntityNamesResponse * const *)ptr);
+        soap, (ns1__getEntityNamesResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__getEntityNames:
     soap_serialize_PointerTons1__getEntityNames(
-        soap, (ns1__getEntityNames * const *)ptr);
+        soap, (ns1__getEntityNames *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__getApiVersionResponse:
     soap_serialize_PointerTons1__getApiVersionResponse(
-        soap, (ns1__getApiVersionResponse * const *)ptr);
+        soap, (ns1__getApiVersionResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__getApiVersion:
     soap_serialize_PointerTons1__getApiVersion(
-        soap, (ns1__getApiVersion * const *)ptr);
+        soap, (ns1__getApiVersion *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__updateResponse:
     soap_serialize_PointerTons1__updateResponse(
-        soap, (ns1__updateResponse * const *)ptr);
+        soap, (ns1__updateResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__update:
-    soap_serialize_PointerTons1__update(soap, (ns1__update * const *)ptr);
+    soap_serialize_PointerTons1__update(soap, (ns1__update *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__createResponse:
     soap_serialize_PointerTons1__createResponse(
-        soap, (ns1__createResponse * const *)ptr);
+        soap, (ns1__createResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__create:
-    soap_serialize_PointerTons1__create(soap, (ns1__create * const *)ptr);
+    soap_serialize_PointerTons1__create(soap, (ns1__create *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__searchResponse:
     soap_serialize_PointerTons1__searchResponse(
-        soap, (ns1__searchResponse * const *)ptr);
+        soap, (ns1__searchResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__search:
-    soap_serialize_PointerTons1__search(soap, (ns1__search * const *)ptr);
+    soap_serialize_PointerTons1__search(soap, (ns1__search *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__deleteResponse:
     soap_serialize_PointerTons1__deleteResponse(
-        soap, (ns1__deleteResponse * const *)ptr);
+        soap, (ns1__deleteResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__delete:
-    soap_serialize_PointerTons1__delete(soap, (ns1__delete * const *)ptr);
+    soap_serialize_PointerTons1__delete(soap, (ns1__delete *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__getPropertiesResponse:
     soap_serialize_PointerTons1__getPropertiesResponse(
-        soap, (ns1__getPropertiesResponse * const *)ptr);
+        soap, (ns1__getPropertiesResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__getProperties:
     soap_serialize_PointerTons1__getProperties(
-        soap, (ns1__getProperties * const *)ptr);
+        soap, (ns1__getProperties *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__getResponse:
     soap_serialize_PointerTons1__getResponse(soap,
-                                             (ns1__getResponse * const *)ptr);
+                                             (ns1__getResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__get:
-    soap_serialize_PointerTons1__get(soap, (ns1__get * const *)ptr);
+    soap_serialize_PointerTons1__get(soap, (ns1__get *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__getUserNameResponse:
     soap_serialize_PointerTons1__getUserNameResponse(
-        soap, (ns1__getUserNameResponse * const *)ptr);
+        soap, (ns1__getUserNameResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__getUserName:
     soap_serialize_PointerTons1__getUserName(soap,
-                                             (ns1__getUserName * const *)ptr);
+                                             (ns1__getUserName *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__loginResponse:
     soap_serialize_PointerTons1__loginResponse(
-        soap, (ns1__loginResponse * const *)ptr);
+        soap, (ns1__loginResponse *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__login:
-    soap_serialize_PointerTons1__login(soap, (ns1__login * const *)ptr);
+    soap_serialize_PointerTons1__login(soap, (ns1__login *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__IcatException:
     soap_serialize_PointerTons1__IcatException(
-        soap, (ns1__IcatException * const *)ptr);
+        soap, (ns1__IcatException *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__parameterValueType:
     soap_serialize_PointerTons1__parameterValueType(
-        soap, (enum ns1__parameterValueType * const *)ptr);
+        soap, (enum ns1__parameterValueType *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__permissibleStringValue:
     soap_serialize_PointerTons1__permissibleStringValue(
-        soap, (ns1__permissibleStringValue * const *)ptr);
+        soap, (ns1__permissibleStringValue *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTodouble:
     soap_serialize_PointerTodouble(soap, (double *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__rule:
-    soap_serialize_PointerTons1__rule(soap, (ns1__rule * const *)ptr);
+    soap_serialize_PointerTons1__rule(soap, (ns1__rule *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__sampleType:
     soap_serialize_PointerTons1__sampleType(soap,
-                                            (ns1__sampleType * const *)ptr);
+                                            (ns1__sampleType *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__investigationParameter:
     soap_serialize_PointerTons1__investigationParameter(
-        soap, (ns1__investigationParameter * const *)ptr);
+        soap, (ns1__investigationParameter *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__investigationInstrument:
     soap_serialize_PointerTons1__investigationInstrument(
-        soap, (ns1__investigationInstrument * const *)ptr);
+        soap, (ns1__investigationInstrument *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__accessType:
-    soap_serialize_PointerTons1__accessType(
-        soap, (enum ns1__accessType * const *)ptr);
+    soap_serialize_PointerTons1__accessType(soap,
+                                            (enum ns1__accessType *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerToxsd__anyType:
-    soap_serialize_PointerToxsd__anyType(soap, (xsd__anyType * const *)ptr);
+    soap_serialize_PointerToxsd__anyType(soap, (xsd__anyType *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerToint:
     soap_serialize_PointerToint(soap, (int *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__relType:
-    soap_serialize_PointerTons1__relType(soap,
-                                         (enum ns1__relType * const *)ptr);
+    soap_serialize_PointerTons1__relType(soap, (enum ns1__relType *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__entityField:
     soap_serialize_PointerTons1__entityField(soap,
-                                             (ns1__entityField * const *)ptr);
+                                             (ns1__entityField *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__constraint:
     soap_serialize_PointerTons1__constraint(soap,
-                                            (ns1__constraint * const *)ptr);
+                                            (ns1__constraint *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__entityInfo:
     soap_serialize_PointerTons1__entityInfo(soap,
-                                            (ns1__entityInfo * const *)ptr);
+                                            (ns1__entityInfo *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__publicStep:
     soap_serialize_PointerTons1__publicStep(soap,
-                                            (ns1__publicStep * const *)ptr);
+                                            (ns1__publicStep *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__log:
-    soap_serialize_PointerTons1__log(soap, (ns1__log * const *)ptr);
+    soap_serialize_PointerTons1__log(soap, (ns1__log *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__userGroup:
-    soap_serialize_PointerTons1__userGroup(soap, (ns1__userGroup * const *)ptr);
+    soap_serialize_PointerTons1__userGroup(soap, (ns1__userGroup *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__grouping:
-    soap_serialize_PointerTons1__grouping(soap, (ns1__grouping * const *)ptr);
+    soap_serialize_PointerTons1__grouping(soap, (ns1__grouping *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__dataCollectionDatafile:
     soap_serialize_PointerTons1__dataCollectionDatafile(
-        soap, (ns1__dataCollectionDatafile * const *)ptr);
+        soap, (ns1__dataCollectionDatafile *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__dataCollectionDataset:
     soap_serialize_PointerTons1__dataCollectionDataset(
-        soap, (ns1__dataCollectionDataset * const *)ptr);
+        soap, (ns1__dataCollectionDataset *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__dataCollectionParameter:
     soap_serialize_PointerTons1__dataCollectionParameter(
-        soap, (ns1__dataCollectionParameter * const *)ptr);
+        soap, (ns1__dataCollectionParameter *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__dataCollection:
     soap_serialize_PointerTons1__dataCollection(
-        soap, (ns1__dataCollection * const *)ptr);
+        soap, (ns1__dataCollection *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__job:
-    soap_serialize_PointerTons1__job(soap, (ns1__job * const *)ptr);
+    soap_serialize_PointerTons1__job(soap, (ns1__job *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__application:
     soap_serialize_PointerTons1__application(soap,
-                                             (ns1__application * const *)ptr);
+                                             (ns1__application *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__studyStatus:
     soap_serialize_PointerTons1__studyStatus(
-        soap, (enum ns1__studyStatus * const *)ptr);
+        soap, (enum ns1__studyStatus *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__studyInvestigation:
     soap_serialize_PointerTons1__studyInvestigation(
-        soap, (ns1__studyInvestigation * const *)ptr);
+        soap, (ns1__studyInvestigation *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__study:
-    soap_serialize_PointerTons1__study(soap, (ns1__study * const *)ptr);
+    soap_serialize_PointerTons1__study(soap, (ns1__study *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__shift:
-    soap_serialize_PointerTons1__shift(soap, (ns1__shift * const *)ptr);
+    soap_serialize_PointerTons1__shift(soap, (ns1__shift *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__sampleParameter:
     soap_serialize_PointerTons1__sampleParameter(
-        soap, (ns1__sampleParameter * const *)ptr);
+        soap, (ns1__sampleParameter *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__sample:
-    soap_serialize_PointerTons1__sample(soap, (ns1__sample * const *)ptr);
+    soap_serialize_PointerTons1__sample(soap, (ns1__sample *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__relatedDatafile:
     soap_serialize_PointerTons1__relatedDatafile(
-        soap, (ns1__relatedDatafile * const *)ptr);
+        soap, (ns1__relatedDatafile *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__publication:
     soap_serialize_PointerTons1__publication(soap,
-                                             (ns1__publication * const *)ptr);
+                                             (ns1__publication *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__parameterType:
     soap_serialize_PointerTons1__parameterType(
-        soap, (ns1__parameterType * const *)ptr);
+        soap, (ns1__parameterType *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__keyword:
-    soap_serialize_PointerTons1__keyword(soap, (ns1__keyword * const *)ptr);
+    soap_serialize_PointerTons1__keyword(soap, (ns1__keyword *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__investigationUser:
     soap_serialize_PointerTons1__investigationUser(
-        soap, (ns1__investigationUser * const *)ptr);
+        soap, (ns1__investigationUser *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__investigationType:
     soap_serialize_PointerTons1__investigationType(
-        soap, (ns1__investigationType * const *)ptr);
+        soap, (ns1__investigationType *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__investigation:
     soap_serialize_PointerTons1__investigation(
-        soap, (ns1__investigation * const *)ptr);
+        soap, (ns1__investigation *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__instrument:
     soap_serialize_PointerTons1__instrument(soap,
-                                            (ns1__instrument * const *)ptr);
+                                            (ns1__instrument *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__user:
-    soap_serialize_PointerTons1__user(soap, (ns1__user * const *)ptr);
+    soap_serialize_PointerTons1__user(soap, (ns1__user *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__instrumentScientist:
     soap_serialize_PointerTons1__instrumentScientist(
-        soap, (ns1__instrumentScientist * const *)ptr);
+        soap, (ns1__instrumentScientist *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__facilityCycle:
     soap_serialize_PointerTons1__facilityCycle(
-        soap, (ns1__facilityCycle * const *)ptr);
+        soap, (ns1__facilityCycle *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__facility:
-    soap_serialize_PointerTons1__facility(soap, (ns1__facility * const *)ptr);
+    soap_serialize_PointerTons1__facility(soap, (ns1__facility *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__datasetType:
     soap_serialize_PointerTons1__datasetType(soap,
-                                             (ns1__datasetType * const *)ptr);
+                                             (ns1__datasetType *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__datasetParameter:
     soap_serialize_PointerTons1__datasetParameter(
-        soap, (ns1__datasetParameter * const *)ptr);
+        soap, (ns1__datasetParameter *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__dataset:
-    soap_serialize_PointerTons1__dataset(soap, (ns1__dataset * const *)ptr);
+    soap_serialize_PointerTons1__dataset(soap, (ns1__dataset *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__datafileParameter:
     soap_serialize_PointerTons1__datafileParameter(
-        soap, (ns1__datafileParameter * const *)ptr);
+        soap, (ns1__datafileParameter *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__datafileFormat:
     soap_serialize_PointerTons1__datafileFormat(
-        soap, (ns1__datafileFormat * const *)ptr);
+        soap, (ns1__datafileFormat *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__datafile:
-    soap_serialize_PointerTons1__datafile(soap, (ns1__datafile * const *)ptr);
+    soap_serialize_PointerTons1__datafile(soap, (ns1__datafile *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerToLONG64:
-    soap_serialize_PointerToLONG64(soap, (LONG64 * const *)ptr);
+    soap_serialize_PointerToLONG64(soap, (LONG64 *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTotime:
-    soap_serialize_PointerTotime(soap, (time_t * const *)ptr);
+    soap_serialize_PointerTotime(soap, (time_t *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__entityBaseBean:
     soap_serialize_PointerTons1__entityBaseBean(
-        soap, (ns1__entityBaseBean * const *)ptr);
+        soap, (ns1__entityBaseBean *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__icatExceptionType:
     soap_serialize_PointerTons1__icatExceptionType(
-        soap, (enum ns1__icatExceptionType * const *)ptr);
+        soap, (enum ns1__icatExceptionType *const *)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTostd__string:
-    soap_serialize_PointerTostd__string(soap, (std::string * const *)ptr);
+    soap_serialize_PointerTostd__string(soap, (std::string *const *)ptr);
     break;
   case SOAP_TYPE_ICat4__QName:
     soap_serialize_string(soap, (char *const *)&ptr);
@@ -2784,9 +2773,10 @@ soap_markelement(struct soap *soap, const void *ptr, int type) {
 }
 #endif
 
-SOAP_FMAC3 void *SOAP_FMAC4
-ICat4_instantiate(struct soap *soap, int t, const char *type,
-                  const char *arrayType, size_t *n) {
+SOAP_FMAC3 void *SOAP_FMAC4 ICat4_instantiate(struct soap *soap, int t,
+                                              const char *type,
+                                              const char *arrayType,
+                                              size_t *n) {
   (void)type;
   switch (t) {
   case SOAP_TYPE_ICat4_xsd__anyType:
@@ -4467,24 +4457,26 @@ SOAP_FMAC3 int SOAP_FMAC4 ICat4_fdelete(struct soap_clist *p) {
   return SOAP_OK;
 }
 
-SOAP_FMAC3 void *SOAP_FMAC4
-soap_class_id_enter(struct soap *soap, const char *id, void *p, int t, size_t n,
-                    const char *type, const char *arrayType) {
+SOAP_FMAC3 void *SOAP_FMAC4 soap_class_id_enter(struct soap *soap,
+                                                const char *id, void *p, int t,
+                                                size_t n, const char *type,
+                                                const char *arrayType) {
   return soap_id_enter(soap, id, p, t, n, 0, type, arrayType,
                        ICat4_instantiate);
 }
 
-SOAP_FMAC3 void *SOAP_FMAC4
-soap_container_id_forward(struct soap *soap, const char *href, void *p,
-                          size_t len, int st, int tt, size_t n,
-                          unsigned int k) {
+SOAP_FMAC3 void *SOAP_FMAC4 soap_container_id_forward(struct soap *soap,
+                                                      const char *href, void *p,
+                                                      size_t len, int st,
+                                                      int tt, size_t n,
+                                                      unsigned int k) {
   return soap_id_forward(soap, href, p, len, st, tt, n, k,
                          ICat4_container_insert);
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-ICat4_container_insert(struct soap *soap, int st, int tt, void *p, size_t len,
-                       const void *q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 ICat4_container_insert(struct soap *soap, int st,
+                                                  int tt, void *p, size_t len,
+                                                  const void *q, size_t n)
 #ifdef WIN32
 #pragma warning(push)
 #pragma warning(disable : 4065)
@@ -4498,292 +4490,292 @@ ICat4_container_insert(struct soap *soap, int st, int tt, void *p, size_t len,
   (void)n; /* appease -Wall -Werror */
   switch (tt) {
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__sampleParameter:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__sampleParameter *> *)p)[len] =
         *(ns1__sampleParameter **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__permissibleStringValue:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__permissibleStringValue *> *)p)[len] =
         *(ns1__permissibleStringValue **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__rule:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__rule *> *)p)[len] = *(ns1__rule **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__userGroup:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__userGroup *> *)p)[len] = *(ns1__userGroup **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__study:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__study *> *)p)[len] = *(ns1__study **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__instrumentScientist:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__instrumentScientist *> *)p)[len] =
         *(ns1__instrumentScientist **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__sampleType:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__sampleType *> *)p)[len] = *(ns1__sampleType **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__parameterType:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__parameterType *> *)p)[len] = *(ns1__parameterType **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigation:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__investigation *> *)p)[len] = *(ns1__investigation **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationType:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__investigationType *> *)p)[len] =
         *(ns1__investigationType **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__instrument:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__instrument *> *)p)[len] = *(ns1__instrument **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__facilityCycle:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__facilityCycle *> *)p)[len] = *(ns1__facilityCycle **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datasetType:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__datasetType *> *)p)[len] = *(ns1__datasetType **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datafileFormat:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__datafileFormat *> *)p)[len] =
         *(ns1__datafileFormat **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__application:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__application *> *)p)[len] = *(ns1__application **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__studyInvestigation:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__studyInvestigation *> *)p)[len] =
         *(ns1__studyInvestigation **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__shift:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__shift *> *)p)[len] = *(ns1__shift **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__sample:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__sample *> *)p)[len] = *(ns1__sample **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__publication:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__publication *> *)p)[len] = *(ns1__publication **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationParameter:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__investigationParameter *> *)p)[len] =
         *(ns1__investigationParameter **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__keyword:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__keyword *> *)p)[len] = *(ns1__keyword **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationUser:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__investigationUser *> *)p)[len] =
         *(ns1__investigationUser **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationInstrument:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__investigationInstrument *> *)p)[len] =
         *(ns1__investigationInstrument **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataset:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__dataset *> *)p)[len] = *(ns1__dataset **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datasetParameter:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__datasetParameter *> *)p)[len] =
         *(ns1__datasetParameter **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datafile:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__datafile *> *)p)[len] = *(ns1__datafile **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataCollectionParameter:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__dataCollectionParameter *> *)p)[len] =
         *(ns1__dataCollectionParameter **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__job:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__job *> *)p)[len] = *(ns1__job **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataCollectionDataset:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__dataCollectionDataset *> *)p)[len] =
         *(ns1__dataCollectionDataset **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datafileParameter:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__datafileParameter *> *)p)[len] =
         *(ns1__datafileParameter **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__relatedDatafile:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__relatedDatafile *> *)p)[len] =
         *(ns1__relatedDatafile **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataCollectionDatafile:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__dataCollectionDatafile *> *)p)[len] =
         *(ns1__dataCollectionDatafile **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerToxsd__anyType:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<xsd__anyType *> *)p)[len] = *(xsd__anyType **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__entityField:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__entityField *> *)p)[len] = *(ns1__entityField **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__constraint:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__constraint *> *)p)[len] = *(ns1__constraint **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOf_ns1__login_credentials_entry:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<_ns1__login_credentials_entry> *)p)[len] =
         *(_ns1__login_credentials_entry *)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfstd__string:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<std::string> *)p)[len] = *(std::string *)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfLONG64:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<LONG64> *)p)[len] = *(LONG64 *)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__entityBaseBean:
-    DBGLOG(TEST,
-           SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in "
-                                "%d location=%p object=%p len=%lu\n",
-                        st, tt, p, q, (unsigned long)len));
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                              "Container ICat4_container_insert type=%d in "
+                              "%d location=%p object=%p len=%lu\n",
+                              st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__entityBaseBean *> *)p)[len] =
         *(ns1__entityBaseBean **)q;
     break;
@@ -4815,8 +4807,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_byte(struct soap *soap, const char *tag,
   return soap_outbyte(soap, tag, id, a, type, SOAP_TYPE_ICat4_byte);
 }
 
-SOAP_FMAC3 char *SOAP_FMAC4
-soap_in_byte(struct soap *soap, const char *tag, char *a, const char *type) {
+SOAP_FMAC3 char *SOAP_FMAC4 soap_in_byte(struct soap *soap, const char *tag,
+                                         char *a, const char *type) {
   char *p;
   p = soap_inbyte(soap, tag, a, type, SOAP_TYPE_ICat4_byte);
   return p;
@@ -4830,8 +4822,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_byte(struct soap *soap, const char *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 char *SOAP_FMAC4
-soap_get_byte(struct soap *soap, char *p, const char *tag, const char *type) {
+SOAP_FMAC3 char *SOAP_FMAC4 soap_get_byte(struct soap *soap, char *p,
+                                          const char *tag, const char *type) {
   if ((p = soap_in_byte(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -4856,8 +4848,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_int(struct soap *soap, const char *tag,
   return soap_outint(soap, tag, id, a, type, SOAP_TYPE_ICat4_int);
 }
 
-SOAP_FMAC3 int *SOAP_FMAC4
-soap_in_int(struct soap *soap, const char *tag, int *a, const char *type) {
+SOAP_FMAC3 int *SOAP_FMAC4 soap_in_int(struct soap *soap, const char *tag,
+                                       int *a, const char *type) {
   int *p;
   p = soap_inint(soap, tag, a, type, SOAP_TYPE_ICat4_int);
   return p;
@@ -4871,8 +4863,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_int(struct soap *soap, const int *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 int *SOAP_FMAC4
-soap_get_int(struct soap *soap, int *p, const char *tag, const char *type) {
+SOAP_FMAC3 int *SOAP_FMAC4 soap_get_int(struct soap *soap, int *p,
+                                        const char *tag, const char *type) {
   if ((p = soap_in_int(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -4984,8 +4976,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_time(struct soap *soap, const char *tag,
   return soap_outdateTime(soap, tag, id, a, type, SOAP_TYPE_ICat4_time);
 }
 
-SOAP_FMAC3 time_t *SOAP_FMAC4
-soap_in_time(struct soap *soap, const char *tag, time_t *a, const char *type) {
+SOAP_FMAC3 time_t *SOAP_FMAC4 soap_in_time(struct soap *soap, const char *tag,
+                                           time_t *a, const char *type) {
   time_t *p;
   p = soap_indateTime(soap, tag, a, type, SOAP_TYPE_ICat4_time);
   return p;
@@ -4999,8 +4991,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_time(struct soap *soap, const time_t *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 time_t *SOAP_FMAC4
-soap_get_time(struct soap *soap, time_t *p, const char *tag, const char *type) {
+SOAP_FMAC3 time_t *SOAP_FMAC4 soap_get_time(struct soap *soap, time_t *p,
+                                            const char *tag, const char *type) {
   if ((p = soap_in_time(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -5106,8 +5098,8 @@ soap_get_ns1__accessType(struct soap *soap, enum ns1__accessType *p,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default_ns1__relType(struct soap *soap, enum ns1__relType *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns1__relType(struct soap *soap,
+                                                     enum ns1__relType *a) {
   (void)soap; /* appease -Wall -Werror */
 #ifdef SOAP_DEFAULT_ns1__relType
   *a = SOAP_DEFAULT_ns1__relType;
@@ -5122,17 +5114,18 @@ static const struct soap_code_map soap_codes_ns1__relType[] = {
     {(long)ns1__relType__ONE, "ONE"},
     {0, NULL}};
 
-SOAP_FMAC3S const char *SOAP_FMAC4S
-soap_ns1__relType2s(struct soap *soap, enum ns1__relType n) {
+SOAP_FMAC3S const char *SOAP_FMAC4S soap_ns1__relType2s(struct soap *soap,
+                                                        enum ns1__relType n) {
   const char *s = soap_code_str(soap_codes_ns1__relType, (long)n);
   if (s)
     return s;
   return soap_long2s(soap, (long)n);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__relType(struct soap *soap, const char *tag, int id,
-                      const enum ns1__relType *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__relType(struct soap *soap,
+                                                const char *tag, int id,
+                                                const enum ns1__relType *a,
+                                                const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__relType), type) ||
@@ -5141,8 +5134,9 @@ soap_out_ns1__relType(struct soap *soap, const char *tag, int id,
   return soap_element_end_out(soap, tag);
 }
 
-SOAP_FMAC3S int SOAP_FMAC4S
-soap_s2ns1__relType(struct soap *soap, const char *s, enum ns1__relType *a) {
+SOAP_FMAC3S int SOAP_FMAC4S soap_s2ns1__relType(struct soap *soap,
+                                                const char *s,
+                                                enum ns1__relType *a) {
   const struct soap_code_map *map;
   if (!s)
     return soap->error;
@@ -5183,9 +5177,10 @@ soap_in_ns1__relType(struct soap *soap, const char *tag, enum ns1__relType *a,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_ns1__relType(struct soap *soap, const enum ns1__relType *a,
-                      const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns1__relType(struct soap *soap,
+                                                const enum ns1__relType *a,
+                                                const char *tag,
+                                                const char *type) {
   int id =
       soap_embed(soap, (void *)a, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__relType);
   if (soap_out_ns1__relType(soap, tag ? tag : "ns1:relType", id, a, type))
@@ -5202,9 +5197,8 @@ soap_get_ns1__relType(struct soap *soap, enum ns1__relType *p, const char *tag,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default_ns1__parameterValueType(struct soap *soap,
-                                     enum ns1__parameterValueType *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns1__parameterValueType(
+    struct soap *soap, enum ns1__parameterValueType *a) {
   (void)soap; /* appease -Wall -Werror */
 #ifdef SOAP_DEFAULT_ns1__parameterValueType
   *a = SOAP_DEFAULT_ns1__parameterValueType;
@@ -5219,31 +5213,29 @@ static const struct soap_code_map soap_codes_ns1__parameterValueType[] = {
     {(long)ns1__parameterValueType__STRING, "STRING"},
     {0, NULL}};
 
-SOAP_FMAC3S const char *SOAP_FMAC4S
-soap_ns1__parameterValueType2s(struct soap *soap,
-                               enum ns1__parameterValueType n) {
+SOAP_FMAC3S const char *SOAP_FMAC4S soap_ns1__parameterValueType2s(
+    struct soap *soap, enum ns1__parameterValueType n) {
   const char *s = soap_code_str(soap_codes_ns1__parameterValueType, (long)n);
   if (s)
     return s;
   return soap_long2s(soap, (long)n);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__parameterValueType(struct soap *soap, const char *tag, int id,
-                                 const enum ns1__parameterValueType *a,
-                                 const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__parameterValueType(
+    struct soap *soap, const char *tag, int id,
+    const enum ns1__parameterValueType *a, const char *type) {
   if (soap_element_begin_out(
-          soap, tag, soap_embedded_id(soap, id, a,
-                                      SOAP_TYPE_ICat4_ns1__parameterValueType),
+          soap, tag,
+          soap_embedded_id(soap, id, a,
+                           SOAP_TYPE_ICat4_ns1__parameterValueType),
           type) ||
       soap_send(soap, soap_ns1__parameterValueType2s(soap, *a)))
     return soap->error;
   return soap_element_end_out(soap, tag);
 }
 
-SOAP_FMAC3S int SOAP_FMAC4S
-soap_s2ns1__parameterValueType(struct soap *soap, const char *s,
-                               enum ns1__parameterValueType *a) {
+SOAP_FMAC3S int SOAP_FMAC4S soap_s2ns1__parameterValueType(
+    struct soap *soap, const char *s, enum ns1__parameterValueType *a) {
   const struct soap_code_map *map;
   if (!s)
     return soap->error;
@@ -5285,10 +5277,9 @@ soap_in_ns1__parameterValueType(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_ns1__parameterValueType(struct soap *soap,
-                                 const enum ns1__parameterValueType *a,
-                                 const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns1__parameterValueType(
+    struct soap *soap, const enum ns1__parameterValueType *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_ns1__parameterValueType);
   if (soap_out_ns1__parameterValueType(
@@ -5407,9 +5398,8 @@ soap_get_ns1__studyStatus(struct soap *soap, enum ns1__studyStatus *p,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default_ns1__icatExceptionType(struct soap *soap,
-                                    enum ns1__icatExceptionType *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns1__icatExceptionType(
+    struct soap *soap, enum ns1__icatExceptionType *a) {
   (void)soap; /* appease -Wall -Werror */
 #ifdef SOAP_DEFAULT_ns1__icatExceptionType
   *a = SOAP_DEFAULT_ns1__icatExceptionType;
@@ -5431,19 +5421,17 @@ static const struct soap_code_map soap_codes_ns1__icatExceptionType[] = {
     {(long)ns1__icatExceptionType__VALIDATION, "VALIDATION"},
     {0, NULL}};
 
-SOAP_FMAC3S const char *SOAP_FMAC4S
-soap_ns1__icatExceptionType2s(struct soap *soap,
-                              enum ns1__icatExceptionType n) {
+SOAP_FMAC3S const char *SOAP_FMAC4S soap_ns1__icatExceptionType2s(
+    struct soap *soap, enum ns1__icatExceptionType n) {
   const char *s = soap_code_str(soap_codes_ns1__icatExceptionType, (long)n);
   if (s)
     return s;
   return soap_long2s(soap, (long)n);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__icatExceptionType(struct soap *soap, const char *tag, int id,
-                                const enum ns1__icatExceptionType *a,
-                                const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__icatExceptionType(
+    struct soap *soap, const char *tag, int id,
+    const enum ns1__icatExceptionType *a, const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__icatExceptionType),
@@ -5453,9 +5441,8 @@ soap_out_ns1__icatExceptionType(struct soap *soap, const char *tag, int id,
   return soap_element_end_out(soap, tag);
 }
 
-SOAP_FMAC3S int SOAP_FMAC4S
-soap_s2ns1__icatExceptionType(struct soap *soap, const char *s,
-                              enum ns1__icatExceptionType *a) {
+SOAP_FMAC3S int SOAP_FMAC4S soap_s2ns1__icatExceptionType(
+    struct soap *soap, const char *s, enum ns1__icatExceptionType *a) {
   const struct soap_code_map *map;
   if (!s)
     return soap->error;
@@ -5497,10 +5484,9 @@ soap_in_ns1__icatExceptionType(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_ns1__icatExceptionType(struct soap *soap,
-                                const enum ns1__icatExceptionType *a,
-                                const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns1__icatExceptionType(
+    struct soap *soap, const enum ns1__icatExceptionType *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_ns1__icatExceptionType);
   if (soap_out_ns1__icatExceptionType(soap, tag ? tag : "ns1:icatExceptionType",
@@ -5547,8 +5533,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_bool(struct soap *soap, const char *tag,
   return soap_element_end_out(soap, tag);
 }
 
-SOAP_FMAC3S int SOAP_FMAC4S
-soap_s2bool(struct soap *soap, const char *s, bool *a) {
+SOAP_FMAC3S int SOAP_FMAC4S soap_s2bool(struct soap *soap, const char *s,
+                                        bool *a) {
   const struct soap_code_map *map;
   if (!s)
     return soap->error;
@@ -5564,8 +5550,8 @@ soap_s2bool(struct soap *soap, const char *s, bool *a) {
   return SOAP_OK;
 }
 
-SOAP_FMAC3 bool *SOAP_FMAC4
-soap_in_bool(struct soap *soap, const char *tag, bool *a, const char *type) {
+SOAP_FMAC3 bool *SOAP_FMAC4 soap_in_bool(struct soap *soap, const char *tag,
+                                         bool *a, const char *type) {
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
   if (*soap->type && soap_match_tag(soap, soap->type, type) &&
@@ -5598,8 +5584,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_bool(struct soap *soap, const bool *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 bool *SOAP_FMAC4
-soap_get_bool(struct soap *soap, bool *p, const char *tag, const char *type) {
+SOAP_FMAC3 bool *SOAP_FMAC4 soap_get_bool(struct soap *soap, bool *p,
+                                          const char *tag, const char *type) {
   if ((p = soap_in_bool(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -5627,11 +5613,9 @@ int _ns1__login_credentials_entry::soap_out(struct soap *soap, const char *tag,
   return soap_out__ns1__login_credentials_entry(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out__ns1__login_credentials_entry(struct soap *soap, const char *tag,
-                                       int id,
-                                       const _ns1__login_credentials_entry *a,
-                                       const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out__ns1__login_credentials_entry(
+    struct soap *soap, const char *tag, int id,
+    const _ns1__login_credentials_entry *a, const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a,
@@ -5771,10 +5755,9 @@ soap_instantiate__ns1__login_credentials_entry(struct soap *soap, int n,
   return (_ns1__login_credentials_entry *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy__ns1__login_credentials_entry(struct soap *soap, int st, int tt,
-                                        void *p, size_t len, const void *q,
-                                        size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy__ns1__login_credentials_entry(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -5804,13 +5787,13 @@ int _ns1__login_credentials::soap_out(struct soap *soap, const char *tag,
   return soap_out__ns1__login_credentials(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out__ns1__login_credentials(struct soap *soap, const char *tag, int id,
-                                 const _ns1__login_credentials *a,
-                                 const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out__ns1__login_credentials(
+    struct soap *soap, const char *tag, int id,
+    const _ns1__login_credentials *a, const char *type) {
   if (soap_element_begin_out(
-          soap, tag, soap_embedded_id(soap, id, a,
-                                      SOAP_TYPE_ICat4__ns1__login_credentials),
+          soap, tag,
+          soap_embedded_id(soap, id, a,
+                           SOAP_TYPE_ICat4__ns1__login_credentials),
           type))
     return soap->error;
   if (soap_out_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(
@@ -5955,9 +5938,10 @@ int ns1__accessType_::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__accessType_(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__accessType_(struct soap *soap, const char *tag, int id,
-                          const ns1__accessType_ *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__accessType_(struct soap *soap,
+                                                    const char *tag, int id,
+                                                    const ns1__accessType_ *a,
+                                                    const char *type) {
   return soap_out_ns1__accessType(soap, tag, id, &(a->ns1__accessType_::__item),
                                   "ns1:accessType");
 }
@@ -5967,9 +5951,8 @@ void *ns1__accessType_::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__accessType_(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__accessType_ *SOAP_FMAC4
-soap_in_ns1__accessType_(struct soap *soap, const char *tag,
-                         ns1__accessType_ *a, const char *type) {
+SOAP_FMAC3 ns1__accessType_ *SOAP_FMAC4 soap_in_ns1__accessType_(
+    struct soap *soap, const char *tag, ns1__accessType_ *a, const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
@@ -6006,9 +5989,8 @@ void *ns1__accessType_::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__accessType_(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__accessType_ *SOAP_FMAC4
-soap_get_ns1__accessType_(struct soap *soap, ns1__accessType_ *p,
-                          const char *tag, const char *type) {
+SOAP_FMAC3 ns1__accessType_ *SOAP_FMAC4 soap_get_ns1__accessType_(
+    struct soap *soap, ns1__accessType_ *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__accessType_(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -6046,9 +6028,10 @@ soap_instantiate_ns1__accessType_(struct soap *soap, int n, const char *type,
   return (ns1__accessType_ *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__accessType_(struct soap *soap, int st, int tt, void *p,
-                           size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__accessType_(struct soap *soap, int st,
+                                                      int tt, void *p,
+                                                      size_t len, const void *q,
+                                                      size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -6079,9 +6062,10 @@ int ns1__relType_::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__relType_(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__relType_(struct soap *soap, const char *tag, int id,
-                       const ns1__relType_ *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__relType_(struct soap *soap,
+                                                 const char *tag, int id,
+                                                 const ns1__relType_ *a,
+                                                 const char *type) {
   return soap_out_ns1__relType(soap, tag, id, &(a->ns1__relType_::__item),
                                "ns1:relType");
 }
@@ -6091,9 +6075,10 @@ void *ns1__relType_::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__relType_(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__relType_ *SOAP_FMAC4
-soap_in_ns1__relType_(struct soap *soap, const char *tag, ns1__relType_ *a,
-                      const char *type) {
+SOAP_FMAC3 ns1__relType_ *SOAP_FMAC4 soap_in_ns1__relType_(struct soap *soap,
+                                                           const char *tag,
+                                                           ns1__relType_ *a,
+                                                           const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
@@ -6130,9 +6115,10 @@ void *ns1__relType_::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__relType_(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__relType_ *SOAP_FMAC4
-soap_get_ns1__relType_(struct soap *soap, ns1__relType_ *p, const char *tag,
-                       const char *type) {
+SOAP_FMAC3 ns1__relType_ *SOAP_FMAC4 soap_get_ns1__relType_(struct soap *soap,
+                                                            ns1__relType_ *p,
+                                                            const char *tag,
+                                                            const char *type) {
   if ((p = soap_in_ns1__relType_(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -6203,10 +6189,9 @@ int ns1__parameterValueType_::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__parameterValueType_(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__parameterValueType_(struct soap *soap, const char *tag, int id,
-                                  const ns1__parameterValueType_ *a,
-                                  const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__parameterValueType_(
+    struct soap *soap, const char *tag, int id,
+    const ns1__parameterValueType_ *a, const char *type) {
   return soap_out_ns1__parameterValueType(
       soap, tag, id, &(a->ns1__parameterValueType_::__item),
       "ns1:parameterValueType");
@@ -6335,9 +6320,10 @@ int ns1__studyStatus_::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__studyStatus_(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__studyStatus_(struct soap *soap, const char *tag, int id,
-                           const ns1__studyStatus_ *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__studyStatus_(struct soap *soap,
+                                                     const char *tag, int id,
+                                                     const ns1__studyStatus_ *a,
+                                                     const char *type) {
   return soap_out_ns1__studyStatus(
       soap, tag, id, &(a->ns1__studyStatus_::__item), "ns1:studyStatus");
 }
@@ -6426,9 +6412,11 @@ soap_instantiate_ns1__studyStatus_(struct soap *soap, int n, const char *type,
   return (ns1__studyStatus_ *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__studyStatus_(struct soap *soap, int st, int tt, void *p,
-                            size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__studyStatus_(struct soap *soap,
+                                                       int st, int tt, void *p,
+                                                       size_t len,
+                                                       const void *q,
+                                                       size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -6460,10 +6448,9 @@ int ns1__icatExceptionType_::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__icatExceptionType_(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__icatExceptionType_(struct soap *soap, const char *tag, int id,
-                                 const ns1__icatExceptionType_ *a,
-                                 const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__icatExceptionType_(
+    struct soap *soap, const char *tag, int id,
+    const ns1__icatExceptionType_ *a, const char *type) {
   return soap_out_ns1__icatExceptionType(soap, tag, id,
                                          &(a->ns1__icatExceptionType_::__item),
                                          "ns1:icatExceptionType");
@@ -6739,10 +6726,9 @@ soap_instantiate_ns1__getRemainingMinutesResponse(struct soap *soap, int n,
   return (ns1__getRemainingMinutesResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__getRemainingMinutesResponse(struct soap *soap, int st, int tt,
-                                           void *p, size_t len, const void *q,
-                                           size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getRemainingMinutesResponse(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -6776,13 +6762,13 @@ int ns1__getRemainingMinutes::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__getRemainingMinutes(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__getRemainingMinutes(struct soap *soap, const char *tag, int id,
-                                  const ns1__getRemainingMinutes *a,
-                                  const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getRemainingMinutes(
+    struct soap *soap, const char *tag, int id,
+    const ns1__getRemainingMinutes *a, const char *type) {
   if (soap_element_begin_out(
-          soap, tag, soap_embedded_id(soap, id, a,
-                                      SOAP_TYPE_ICat4_ns1__getRemainingMinutes),
+          soap, tag,
+          soap_embedded_id(soap, id, a,
+                           SOAP_TYPE_ICat4_ns1__getRemainingMinutes),
           "ns1:getRemainingMinutes"))
     return soap->error;
   /* transient soap skipped */
@@ -7036,9 +7022,11 @@ soap_instantiate_ns1__logoutResponse(struct soap *soap, int n, const char *type,
   return (ns1__logoutResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__logoutResponse(struct soap *soap, int st, int tt, void *p,
-                              size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__logoutResponse(struct soap *soap,
+                                                         int st, int tt,
+                                                         void *p, size_t len,
+                                                         const void *q,
+                                                         size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -7068,9 +7056,10 @@ int ns1__logout::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__logout(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__logout(struct soap *soap, const char *tag, int id,
-                     const ns1__logout *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__logout(struct soap *soap,
+                                               const char *tag, int id,
+                                               const ns1__logout *a,
+                                               const char *type) {
   if (soap_element_begin_out(
           soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__logout),
           "ns1:logout"))
@@ -7087,9 +7076,10 @@ void *ns1__logout::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__logout(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__logout *SOAP_FMAC4
-soap_in_ns1__logout(struct soap *soap, const char *tag, ns1__logout *a,
-                    const char *type) {
+SOAP_FMAC3 ns1__logout *SOAP_FMAC4 soap_in_ns1__logout(struct soap *soap,
+                                                       const char *tag,
+                                                       ns1__logout *a,
+                                                       const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -7159,9 +7149,10 @@ void *ns1__logout::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__logout(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__logout *SOAP_FMAC4
-soap_get_ns1__logout(struct soap *soap, ns1__logout *p, const char *tag,
-                     const char *type) {
+SOAP_FMAC3 ns1__logout *SOAP_FMAC4 soap_get_ns1__logout(struct soap *soap,
+                                                        ns1__logout *p,
+                                                        const char *tag,
+                                                        const char *type) {
   if ((p = soap_in_ns1__logout(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -7360,9 +7351,11 @@ soap_instantiate_ns1__searchResponse(struct soap *soap, int n, const char *type,
   return (ns1__searchResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__searchResponse(struct soap *soap, int st, int tt, void *p,
-                              size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__searchResponse(struct soap *soap,
+                                                         int st, int tt,
+                                                         void *p, size_t len,
+                                                         const void *q,
+                                                         size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -7394,9 +7387,10 @@ int ns1__search::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__search(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__search(struct soap *soap, const char *tag, int id,
-                     const ns1__search *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__search(struct soap *soap,
+                                               const char *tag, int id,
+                                               const ns1__search *a,
+                                               const char *type) {
   if (soap_element_begin_out(
           soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__search),
           "ns1:search"))
@@ -7416,9 +7410,10 @@ void *ns1__search::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__search(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__search *SOAP_FMAC4
-soap_in_ns1__search(struct soap *soap, const char *tag, ns1__search *a,
-                    const char *type) {
+SOAP_FMAC3 ns1__search *SOAP_FMAC4 soap_in_ns1__search(struct soap *soap,
+                                                       const char *tag,
+                                                       ns1__search *a,
+                                                       const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -7496,9 +7491,10 @@ void *ns1__search::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__search(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__search *SOAP_FMAC4
-soap_get_ns1__search(struct soap *soap, ns1__search *p, const char *tag,
-                     const char *type) {
+SOAP_FMAC3 ns1__search *SOAP_FMAC4 soap_get_ns1__search(struct soap *soap,
+                                                        ns1__search *p,
+                                                        const char *tag,
+                                                        const char *type) {
   if ((p = soap_in_ns1__search(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -7566,11 +7562,9 @@ int ns1__isAccessAllowedResponse::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__isAccessAllowedResponse(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__isAccessAllowedResponse(struct soap *soap, const char *tag,
-                                      int id,
-                                      const ns1__isAccessAllowedResponse *a,
-                                      const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__isAccessAllowedResponse(
+    struct soap *soap, const char *tag, int id,
+    const ns1__isAccessAllowedResponse *a, const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a,
@@ -7713,10 +7707,9 @@ soap_instantiate_ns1__isAccessAllowedResponse(struct soap *soap, int n,
   return (ns1__isAccessAllowedResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__isAccessAllowedResponse(struct soap *soap, int st, int tt,
-                                       void *p, size_t len, const void *q,
-                                       size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__isAccessAllowedResponse(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -7910,9 +7903,11 @@ soap_instantiate_ns1__isAccessAllowed(struct soap *soap, int n,
   return (ns1__isAccessAllowed *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__isAccessAllowed(struct soap *soap, int st, int tt, void *p,
-                               size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__isAccessAllowed(struct soap *soap,
+                                                          int st, int tt,
+                                                          void *p, size_t len,
+                                                          const void *q,
+                                                          size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -8030,9 +8025,11 @@ soap_instantiate_ns1__deleteResponse(struct soap *soap, int n, const char *type,
   return (ns1__deleteResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__deleteResponse(struct soap *soap, int st, int tt, void *p,
-                              size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__deleteResponse(struct soap *soap,
+                                                         int st, int tt,
+                                                         void *p, size_t len,
+                                                         const void *q,
+                                                         size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -8064,9 +8061,10 @@ int ns1__delete::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__delete(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__delete(struct soap *soap, const char *tag, int id,
-                     const ns1__delete *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__delete(struct soap *soap,
+                                               const char *tag, int id,
+                                               const ns1__delete *a,
+                                               const char *type) {
   if (soap_element_begin_out(
           soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__delete),
           "ns1:delete"))
@@ -8086,9 +8084,10 @@ void *ns1__delete::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__delete(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__delete *SOAP_FMAC4
-soap_in_ns1__delete(struct soap *soap, const char *tag, ns1__delete *a,
-                    const char *type) {
+SOAP_FMAC3 ns1__delete *SOAP_FMAC4 soap_in_ns1__delete(struct soap *soap,
+                                                       const char *tag,
+                                                       ns1__delete *a,
+                                                       const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -8165,9 +8164,10 @@ void *ns1__delete::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__delete(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__delete *SOAP_FMAC4
-soap_get_ns1__delete(struct soap *soap, ns1__delete *p, const char *tag,
-                     const char *type) {
+SOAP_FMAC3 ns1__delete *SOAP_FMAC4 soap_get_ns1__delete(struct soap *soap,
+                                                        ns1__delete *p,
+                                                        const char *tag,
+                                                        const char *type) {
   if ((p = soap_in_ns1__delete(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -8238,13 +8238,13 @@ int ns1__searchTextResponse::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__searchTextResponse(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__searchTextResponse(struct soap *soap, const char *tag, int id,
-                                 const ns1__searchTextResponse *a,
-                                 const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__searchTextResponse(
+    struct soap *soap, const char *tag, int id,
+    const ns1__searchTextResponse *a, const char *type) {
   if (soap_element_begin_out(
-          soap, tag, soap_embedded_id(soap, id, a,
-                                      SOAP_TYPE_ICat4_ns1__searchTextResponse),
+          soap, tag,
+          soap_embedded_id(soap, id, a,
+                           SOAP_TYPE_ICat4_ns1__searchTextResponse),
           "ns1:searchTextResponse"))
     return soap->error;
   /* transient soap skipped */
@@ -8408,9 +8408,10 @@ int ns1__searchText::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__searchText(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__searchText(struct soap *soap, const char *tag, int id,
-                         const ns1__searchText *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__searchText(struct soap *soap,
+                                                   const char *tag, int id,
+                                                   const ns1__searchText *a,
+                                                   const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__searchText),
@@ -8436,9 +8437,8 @@ void *ns1__searchText::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__searchText(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__searchText *SOAP_FMAC4
-soap_in_ns1__searchText(struct soap *soap, const char *tag, ns1__searchText *a,
-                        const char *type) {
+SOAP_FMAC3 ns1__searchText *SOAP_FMAC4 soap_in_ns1__searchText(
+    struct soap *soap, const char *tag, ns1__searchText *a, const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -8536,9 +8536,8 @@ void *ns1__searchText::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__searchText(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__searchText *SOAP_FMAC4
-soap_get_ns1__searchText(struct soap *soap, ns1__searchText *p, const char *tag,
-                         const char *type) {
+SOAP_FMAC3 ns1__searchText *SOAP_FMAC4 soap_get_ns1__searchText(
+    struct soap *soap, ns1__searchText *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__searchText(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -8576,9 +8575,10 @@ soap_instantiate_ns1__searchText(struct soap *soap, int n, const char *type,
   return (ns1__searchText *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__searchText(struct soap *soap, int st, int tt, void *p,
-                          size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__searchText(struct soap *soap, int st,
+                                                     int tt, void *p,
+                                                     size_t len, const void *q,
+                                                     size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -8606,10 +8606,9 @@ int ns1__luceneCommitResponse::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__luceneCommitResponse(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__luceneCommitResponse(struct soap *soap, const char *tag, int id,
-                                   const ns1__luceneCommitResponse *a,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneCommitResponse(
+    struct soap *soap, const char *tag, int id,
+    const ns1__luceneCommitResponse *a, const char *type) {
   return soap_outliteral(soap, tag, &(a->xsd__anyType::__item),
                          "ns1:luceneCommitResponse");
 }
@@ -8736,9 +8735,10 @@ int ns1__luceneCommit::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__luceneCommit(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__luceneCommit(struct soap *soap, const char *tag, int id,
-                           const ns1__luceneCommit *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneCommit(struct soap *soap,
+                                                     const char *tag, int id,
+                                                     const ns1__luceneCommit *a,
+                                                     const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__luceneCommit),
@@ -8868,9 +8868,11 @@ soap_instantiate_ns1__luceneCommit(struct soap *soap, int n, const char *type,
   return (ns1__luceneCommit *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__luceneCommit(struct soap *soap, int st, int tt, void *p,
-                            size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneCommit(struct soap *soap,
+                                                       int st, int tt, void *p,
+                                                       size_t len,
+                                                       const void *q,
+                                                       size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -8909,9 +8911,10 @@ int ns1__entityField::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__entityField(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__entityField(struct soap *soap, const char *tag, int id,
-                          const ns1__entityField *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__entityField(struct soap *soap,
+                                                    const char *tag, int id,
+                                                    const ns1__entityField *a,
+                                                    const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__entityField),
@@ -8944,9 +8947,8 @@ void *ns1__entityField::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__entityField(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__entityField *SOAP_FMAC4
-soap_in_ns1__entityField(struct soap *soap, const char *tag,
-                         ns1__entityField *a, const char *type) {
+SOAP_FMAC3 ns1__entityField *SOAP_FMAC4 soap_in_ns1__entityField(
+    struct soap *soap, const char *tag, ns1__entityField *a, const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -9059,9 +9061,8 @@ void *ns1__entityField::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__entityField(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__entityField *SOAP_FMAC4
-soap_get_ns1__entityField(struct soap *soap, ns1__entityField *p,
-                          const char *tag, const char *type) {
+SOAP_FMAC3 ns1__entityField *SOAP_FMAC4 soap_get_ns1__entityField(
+    struct soap *soap, ns1__entityField *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__entityField(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -9099,9 +9100,10 @@ soap_instantiate_ns1__entityField(struct soap *soap, int n, const char *type,
   return (ns1__entityField *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__entityField(struct soap *soap, int st, int tt, void *p,
-                           size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__entityField(struct soap *soap, int st,
+                                                      int tt, void *p,
+                                                      size_t len, const void *q,
+                                                      size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -9133,9 +9135,10 @@ int ns1__constraint::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__constraint(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__constraint(struct soap *soap, const char *tag, int id,
-                         const ns1__constraint *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__constraint(struct soap *soap,
+                                                   const char *tag, int id,
+                                                   const ns1__constraint *a,
+                                                   const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__constraint),
@@ -9153,9 +9156,8 @@ void *ns1__constraint::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__constraint(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__constraint *SOAP_FMAC4
-soap_in_ns1__constraint(struct soap *soap, const char *tag, ns1__constraint *a,
-                        const char *type) {
+SOAP_FMAC3 ns1__constraint *SOAP_FMAC4 soap_in_ns1__constraint(
+    struct soap *soap, const char *tag, ns1__constraint *a, const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -9221,9 +9223,8 @@ void *ns1__constraint::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__constraint(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__constraint *SOAP_FMAC4
-soap_get_ns1__constraint(struct soap *soap, ns1__constraint *p, const char *tag,
-                         const char *type) {
+SOAP_FMAC3 ns1__constraint *SOAP_FMAC4 soap_get_ns1__constraint(
+    struct soap *soap, ns1__constraint *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__constraint(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -9261,9 +9262,10 @@ soap_instantiate_ns1__constraint(struct soap *soap, int n, const char *type,
   return (ns1__constraint *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__constraint(struct soap *soap, int st, int tt, void *p,
-                          size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__constraint(struct soap *soap, int st,
+                                                     int tt, void *p,
+                                                     size_t len, const void *q,
+                                                     size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -9302,9 +9304,10 @@ int ns1__entityInfo::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__entityInfo(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__entityInfo(struct soap *soap, const char *tag, int id,
-                         const ns1__entityInfo *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__entityInfo(struct soap *soap,
+                                                   const char *tag, int id,
+                                                   const ns1__entityInfo *a,
+                                                   const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__entityInfo),
@@ -9328,9 +9331,8 @@ void *ns1__entityInfo::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__entityInfo(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__entityInfo *SOAP_FMAC4
-soap_in_ns1__entityInfo(struct soap *soap, const char *tag, ns1__entityInfo *a,
-                        const char *type) {
+SOAP_FMAC3 ns1__entityInfo *SOAP_FMAC4 soap_in_ns1__entityInfo(
+    struct soap *soap, const char *tag, ns1__entityInfo *a, const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -9410,9 +9412,8 @@ void *ns1__entityInfo::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__entityInfo(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__entityInfo *SOAP_FMAC4
-soap_get_ns1__entityInfo(struct soap *soap, ns1__entityInfo *p, const char *tag,
-                         const char *type) {
+SOAP_FMAC3 ns1__entityInfo *SOAP_FMAC4 soap_get_ns1__entityInfo(
+    struct soap *soap, ns1__entityInfo *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__entityInfo(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -9450,9 +9451,10 @@ soap_instantiate_ns1__entityInfo(struct soap *soap, int n, const char *type,
   return (ns1__entityInfo *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__entityInfo(struct soap *soap, int st, int tt, void *p,
-                          size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__entityInfo(struct soap *soap, int st,
+                                                     int tt, void *p,
+                                                     size_t len, const void *q,
+                                                     size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -9483,10 +9485,9 @@ int ns1__getEntityInfoResponse::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__getEntityInfoResponse(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__getEntityInfoResponse(struct soap *soap, const char *tag, int id,
-                                    const ns1__getEntityInfoResponse *a,
-                                    const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getEntityInfoResponse(
+    struct soap *soap, const char *tag, int id,
+    const ns1__getEntityInfoResponse *a, const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a,
@@ -9789,9 +9790,11 @@ soap_instantiate_ns1__getEntityInfo(struct soap *soap, int n, const char *type,
   return (ns1__getEntityInfo *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__getEntityInfo(struct soap *soap, int st, int tt, void *p,
-                             size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getEntityInfo(struct soap *soap,
+                                                        int st, int tt, void *p,
+                                                        size_t len,
+                                                        const void *q,
+                                                        size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -9909,9 +9912,11 @@ soap_instantiate_ns1__dummyResponse(struct soap *soap, int n, const char *type,
   return (ns1__dummyResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__dummyResponse(struct soap *soap, int st, int tt, void *p,
-                             size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__dummyResponse(struct soap *soap,
+                                                        int st, int tt, void *p,
+                                                        size_t len,
+                                                        const void *q,
+                                                        size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -9945,9 +9950,10 @@ int ns1__publicStep::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__publicStep(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__publicStep(struct soap *soap, const char *tag, int id,
-                         const ns1__publicStep *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__publicStep(struct soap *soap,
+                                                   const char *tag, int id,
+                                                   const ns1__publicStep *a,
+                                                   const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__publicStep),
@@ -9983,9 +9989,8 @@ void *ns1__publicStep::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__publicStep(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__publicStep *SOAP_FMAC4
-soap_in_ns1__publicStep(struct soap *soap, const char *tag, ns1__publicStep *a,
-                        const char *type) {
+SOAP_FMAC3 ns1__publicStep *SOAP_FMAC4 soap_in_ns1__publicStep(
+    struct soap *soap, const char *tag, ns1__publicStep *a, const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -10103,9 +10108,8 @@ void *ns1__publicStep::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__publicStep(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__publicStep *SOAP_FMAC4
-soap_get_ns1__publicStep(struct soap *soap, ns1__publicStep *p, const char *tag,
-                         const char *type) {
+SOAP_FMAC3 ns1__publicStep *SOAP_FMAC4 soap_get_ns1__publicStep(
+    struct soap *soap, ns1__publicStep *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__publicStep(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -10143,9 +10147,10 @@ soap_instantiate_ns1__publicStep(struct soap *soap, int n, const char *type,
   return (ns1__publicStep *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__publicStep(struct soap *soap, int st, int tt, void *p,
-                          size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__publicStep(struct soap *soap, int st,
+                                                     int tt, void *p,
+                                                     size_t len, const void *q,
+                                                     size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -10383,9 +10388,11 @@ SOAP_FMAC3 ns1__log *SOAP_FMAC4 soap_get_ns1__log(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC1 ns1__log *SOAP_FMAC2
-soap_instantiate_ns1__log(struct soap *soap, int n, const char *type,
-                          const char *arrayType, size_t *size) {
+SOAP_FMAC1 ns1__log *SOAP_FMAC2 soap_instantiate_ns1__log(struct soap *soap,
+                                                          int n,
+                                                          const char *type,
+                                                          const char *arrayType,
+                                                          size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__log(%d, %s, %s)\n",
@@ -10667,9 +10674,11 @@ soap_instantiate_ns1__relatedDatafile(struct soap *soap, int n,
   return (ns1__relatedDatafile *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__relatedDatafile(struct soap *soap, int st, int tt, void *p,
-                               size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__relatedDatafile(struct soap *soap,
+                                                          int st, int tt,
+                                                          void *p, size_t len,
+                                                          const void *q,
+                                                          size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -10708,9 +10717,10 @@ int ns1__shift::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__shift(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__shift(struct soap *soap, const char *tag, int id,
-                    const ns1__shift *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__shift(struct soap *soap,
+                                              const char *tag, int id,
+                                              const ns1__shift *a,
+                                              const char *type) {
   if (soap_element_begin_out(
           soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__shift),
           "ns1:shift"))
@@ -10751,9 +10761,10 @@ void *ns1__shift::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__shift(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__shift *SOAP_FMAC4
-soap_in_ns1__shift(struct soap *soap, const char *tag, ns1__shift *a,
-                   const char *type) {
+SOAP_FMAC3 ns1__shift *SOAP_FMAC4 soap_in_ns1__shift(struct soap *soap,
+                                                     const char *tag,
+                                                     ns1__shift *a,
+                                                     const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -10886,9 +10897,10 @@ void *ns1__shift::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__shift(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__shift *SOAP_FMAC4
-soap_get_ns1__shift(struct soap *soap, ns1__shift *p, const char *tag,
-                    const char *type) {
+SOAP_FMAC3 ns1__shift *SOAP_FMAC4 soap_get_ns1__shift(struct soap *soap,
+                                                      ns1__shift *p,
+                                                      const char *tag,
+                                                      const char *type) {
   if ((p = soap_in_ns1__shift(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -10972,9 +10984,10 @@ int ns1__publication::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__publication(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__publication(struct soap *soap, const char *tag, int id,
-                          const ns1__publication *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__publication(struct soap *soap,
+                                                    const char *tag, int id,
+                                                    const ns1__publication *a,
+                                                    const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__publication),
@@ -11022,9 +11035,8 @@ void *ns1__publication::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__publication(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__publication *SOAP_FMAC4
-soap_in_ns1__publication(struct soap *soap, const char *tag,
-                         ns1__publication *a, const char *type) {
+SOAP_FMAC3 ns1__publication *SOAP_FMAC4 soap_in_ns1__publication(
+    struct soap *soap, const char *tag, ns1__publication *a, const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -11177,9 +11189,8 @@ void *ns1__publication::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__publication(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__publication *SOAP_FMAC4
-soap_get_ns1__publication(struct soap *soap, ns1__publication *p,
-                          const char *tag, const char *type) {
+SOAP_FMAC3 ns1__publication *SOAP_FMAC4 soap_get_ns1__publication(
+    struct soap *soap, ns1__publication *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__publication(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -11217,9 +11228,10 @@ soap_instantiate_ns1__publication(struct soap *soap, int n, const char *type,
   return (ns1__publication *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__publication(struct soap *soap, int st, int tt, void *p,
-                           size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__publication(struct soap *soap, int st,
+                                                      int tt, void *p,
+                                                      size_t len, const void *q,
+                                                      size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -11254,9 +11266,10 @@ int ns1__keyword::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__keyword(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__keyword(struct soap *soap, const char *tag, int id,
-                      const ns1__keyword *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__keyword(struct soap *soap,
+                                                const char *tag, int id,
+                                                const ns1__keyword *a,
+                                                const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__keyword),
@@ -11292,9 +11305,10 @@ void *ns1__keyword::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__keyword(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__keyword *SOAP_FMAC4
-soap_in_ns1__keyword(struct soap *soap, const char *tag, ns1__keyword *a,
-                     const char *type) {
+SOAP_FMAC3 ns1__keyword *SOAP_FMAC4 soap_in_ns1__keyword(struct soap *soap,
+                                                         const char *tag,
+                                                         ns1__keyword *a,
+                                                         const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -11412,9 +11426,10 @@ void *ns1__keyword::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__keyword(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__keyword *SOAP_FMAC4
-soap_get_ns1__keyword(struct soap *soap, ns1__keyword *p, const char *tag,
-                      const char *type) {
+SOAP_FMAC3 ns1__keyword *SOAP_FMAC4 soap_get_ns1__keyword(struct soap *soap,
+                                                          ns1__keyword *p,
+                                                          const char *tag,
+                                                          const char *type) {
   if ((p = soap_in_ns1__keyword(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -11497,9 +11512,10 @@ int ns1__sampleType::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__sampleType(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__sampleType(struct soap *soap, const char *tag, int id,
-                         const ns1__sampleType *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__sampleType(struct soap *soap,
+                                                   const char *tag, int id,
+                                                   const ns1__sampleType *a,
+                                                   const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__sampleType),
@@ -11546,9 +11562,8 @@ void *ns1__sampleType::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__sampleType(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__sampleType *SOAP_FMAC4
-soap_in_ns1__sampleType(struct soap *soap, const char *tag, ns1__sampleType *a,
-                        const char *type) {
+SOAP_FMAC3 ns1__sampleType *SOAP_FMAC4 soap_in_ns1__sampleType(
+    struct soap *soap, const char *tag, ns1__sampleType *a, const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -11688,9 +11703,8 @@ void *ns1__sampleType::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__sampleType(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__sampleType *SOAP_FMAC4
-soap_get_ns1__sampleType(struct soap *soap, ns1__sampleType *p, const char *tag,
-                         const char *type) {
+SOAP_FMAC3 ns1__sampleType *SOAP_FMAC4 soap_get_ns1__sampleType(
+    struct soap *soap, ns1__sampleType *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__sampleType(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -11728,9 +11742,10 @@ soap_instantiate_ns1__sampleType(struct soap *soap, int n, const char *type,
   return (ns1__sampleType *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__sampleType(struct soap *soap, int st, int tt, void *p,
-                          size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__sampleType(struct soap *soap, int st,
+                                                     int tt, void *p,
+                                                     size_t len, const void *q,
+                                                     size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -11775,9 +11790,10 @@ int ns1__sample::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__sample(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__sample(struct soap *soap, const char *tag, int id,
-                     const ns1__sample *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__sample(struct soap *soap,
+                                               const char *tag, int id,
+                                               const ns1__sample *a,
+                                               const char *type) {
   if (soap_element_begin_out(
           soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__sample),
           "ns1:sample"))
@@ -11821,9 +11837,10 @@ void *ns1__sample::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__sample(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__sample *SOAP_FMAC4
-soap_in_ns1__sample(struct soap *soap, const char *tag, ns1__sample *a,
-                    const char *type) {
+SOAP_FMAC3 ns1__sample *SOAP_FMAC4 soap_in_ns1__sample(struct soap *soap,
+                                                       const char *tag,
+                                                       ns1__sample *a,
+                                                       const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -11957,9 +11974,10 @@ void *ns1__sample::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__sample(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__sample *SOAP_FMAC4
-soap_get_ns1__sample(struct soap *soap, ns1__sample *p, const char *tag,
-                     const char *type) {
+SOAP_FMAC3 ns1__sample *SOAP_FMAC4 soap_get_ns1__sample(struct soap *soap,
+                                                        ns1__sample *p,
+                                                        const char *tag,
+                                                        const char *type) {
   if ((p = soap_in_ns1__sample(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -12299,9 +12317,11 @@ soap_instantiate_ns1__sampleParameter(struct soap *soap, int n,
   return (ns1__sampleParameter *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__sampleParameter(struct soap *soap, int st, int tt, void *p,
-                               size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__sampleParameter(struct soap *soap,
+                                                          int st, int tt,
+                                                          void *p, size_t len,
+                                                          const void *q,
+                                                          size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -12337,10 +12357,9 @@ int ns1__permissibleStringValue::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__permissibleStringValue(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__permissibleStringValue(struct soap *soap, const char *tag, int id,
-                                     const ns1__permissibleStringValue *a,
-                                     const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__permissibleStringValue(
+    struct soap *soap, const char *tag, int id,
+    const ns1__permissibleStringValue *a, const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a,
@@ -12546,10 +12565,9 @@ soap_instantiate_ns1__permissibleStringValue(struct soap *soap, int n,
   return (ns1__permissibleStringValue *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__permissibleStringValue(struct soap *soap, int st, int tt,
-                                      void *p, size_t len, const void *q,
-                                      size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__permissibleStringValue(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -12585,10 +12603,9 @@ int ns1__investigationParameter::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__investigationParameter(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__investigationParameter(struct soap *soap, const char *tag, int id,
-                                     const ns1__investigationParameter *a,
-                                     const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__investigationParameter(
+    struct soap *soap, const char *tag, int id,
+    const ns1__investigationParameter *a, const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a,
@@ -12861,10 +12878,9 @@ soap_instantiate_ns1__investigationParameter(struct soap *soap, int n,
   return (ns1__investigationParameter *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__investigationParameter(struct soap *soap, int st, int tt,
-                                      void *p, size_t len, const void *q,
-                                      size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__investigationParameter(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -12900,10 +12916,9 @@ int ns1__datasetParameter::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__datasetParameter(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__datasetParameter(struct soap *soap, const char *tag, int id,
-                               const ns1__datasetParameter *a,
-                               const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__datasetParameter(
+    struct soap *soap, const char *tag, int id, const ns1__datasetParameter *a,
+    const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__datasetParameter),
@@ -13167,9 +13182,11 @@ soap_instantiate_ns1__datasetParameter(struct soap *soap, int n,
   return (ns1__datasetParameter *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__datasetParameter(struct soap *soap, int st, int tt, void *p,
-                                size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__datasetParameter(struct soap *soap,
+                                                           int st, int tt,
+                                                           void *p, size_t len,
+                                                           const void *q,
+                                                           size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -13204,10 +13221,9 @@ int ns1__datafileParameter::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__datafileParameter(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__datafileParameter(struct soap *soap, const char *tag, int id,
-                                const ns1__datafileParameter *a,
-                                const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__datafileParameter(
+    struct soap *soap, const char *tag, int id, const ns1__datafileParameter *a,
+    const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__datafileParameter),
@@ -13471,9 +13487,11 @@ soap_instantiate_ns1__datafileParameter(struct soap *soap, int n,
   return (ns1__datafileParameter *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__datafileParameter(struct soap *soap, int st, int tt, void *p,
-                                 size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__datafileParameter(struct soap *soap,
+                                                            int st, int tt,
+                                                            void *p, size_t len,
+                                                            const void *q,
+                                                            size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -13517,9 +13535,10 @@ int ns1__parameter::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__parameter(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__parameter(struct soap *soap, const char *tag, int id,
-                        const ns1__parameter *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__parameter(struct soap *soap,
+                                                  const char *tag, int id,
+                                                  const ns1__parameter *a,
+                                                  const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__parameter),
@@ -13570,9 +13589,10 @@ void *ns1__parameter::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__parameter(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__parameter *SOAP_FMAC4
-soap_in_ns1__parameter(struct soap *soap, const char *tag, ns1__parameter *a,
-                       const char *type) {
+SOAP_FMAC3 ns1__parameter *SOAP_FMAC4 soap_in_ns1__parameter(struct soap *soap,
+                                                             const char *tag,
+                                                             ns1__parameter *a,
+                                                             const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -13730,9 +13750,8 @@ void *ns1__parameter::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__parameter(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__parameter *SOAP_FMAC4
-soap_get_ns1__parameter(struct soap *soap, ns1__parameter *p, const char *tag,
-                        const char *type) {
+SOAP_FMAC3 ns1__parameter *SOAP_FMAC4 soap_get_ns1__parameter(
+    struct soap *soap, ns1__parameter *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__parameter(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -13906,11 +13925,9 @@ int ns1__dataCollectionParameter::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__dataCollectionParameter(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__dataCollectionParameter(struct soap *soap, const char *tag,
-                                      int id,
-                                      const ns1__dataCollectionParameter *a,
-                                      const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__dataCollectionParameter(
+    struct soap *soap, const char *tag, int id,
+    const ns1__dataCollectionParameter *a, const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a,
@@ -14184,10 +14201,9 @@ soap_instantiate_ns1__dataCollectionParameter(struct soap *soap, int n,
   return (ns1__dataCollectionParameter *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__dataCollectionParameter(struct soap *soap, int st, int tt,
-                                       void *p, size_t len, const void *q,
-                                       size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__dataCollectionParameter(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -14688,9 +14704,11 @@ soap_instantiate_ns1__parameterType(struct soap *soap, int n, const char *type,
   return (ns1__parameterType *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__parameterType(struct soap *soap, int st, int tt, void *p,
-                             size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__parameterType(struct soap *soap,
+                                                        int st, int tt, void *p,
+                                                        size_t len,
+                                                        const void *q,
+                                                        size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -14733,10 +14751,9 @@ int ns1__investigationType::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__investigationType(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__investigationType(struct soap *soap, const char *tag, int id,
-                                const ns1__investigationType *a,
-                                const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__investigationType(
+    struct soap *soap, const char *tag, int id, const ns1__investigationType *a,
+    const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__investigationType),
@@ -14958,9 +14975,11 @@ soap_instantiate_ns1__investigationType(struct soap *soap, int n,
   return (ns1__investigationType *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__investigationType(struct soap *soap, int st, int tt, void *p,
-                                 size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__investigationType(struct soap *soap,
+                                                            int st, int tt,
+                                                            void *p, size_t len,
+                                                            const void *q,
+                                                            size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -14996,11 +15015,9 @@ int ns1__investigationInstrument::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__investigationInstrument(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__investigationInstrument(struct soap *soap, const char *tag,
-                                      int id,
-                                      const ns1__investigationInstrument *a,
-                                      const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__investigationInstrument(
+    struct soap *soap, const char *tag, int id,
+    const ns1__investigationInstrument *a, const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a,
@@ -15210,10 +15227,9 @@ soap_instantiate_ns1__investigationInstrument(struct soap *soap, int n,
   return (ns1__investigationInstrument *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__investigationInstrument(struct soap *soap, int st, int tt,
-                                       void *p, size_t len, const void *q,
-                                       size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__investigationInstrument(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -15289,9 +15305,10 @@ void *ns1__rule::soap_in(struct soap *soap, const char *tag, const char *type) {
   return soap_in_ns1__rule(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__rule *SOAP_FMAC4
-soap_in_ns1__rule(struct soap *soap, const char *tag, ns1__rule *a,
-                  const char *type) {
+SOAP_FMAC3 ns1__rule *SOAP_FMAC4 soap_in_ns1__rule(struct soap *soap,
+                                                   const char *tag,
+                                                   ns1__rule *a,
+                                                   const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -15416,9 +15433,10 @@ void *ns1__rule::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__rule(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__rule *SOAP_FMAC4
-soap_get_ns1__rule(struct soap *soap, ns1__rule *p, const char *tag,
-                   const char *type) {
+SOAP_FMAC3 ns1__rule *SOAP_FMAC4 soap_get_ns1__rule(struct soap *soap,
+                                                    ns1__rule *p,
+                                                    const char *tag,
+                                                    const char *type) {
   if ((p = soap_in_ns1__rule(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -15496,9 +15514,10 @@ int ns1__grouping::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__grouping(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__grouping(struct soap *soap, const char *tag, int id,
-                       const ns1__grouping *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__grouping(struct soap *soap,
+                                                 const char *tag, int id,
+                                                 const ns1__grouping *a,
+                                                 const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__grouping),
@@ -15537,9 +15556,10 @@ void *ns1__grouping::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__grouping(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__grouping *SOAP_FMAC4
-soap_in_ns1__grouping(struct soap *soap, const char *tag, ns1__grouping *a,
-                      const char *type) {
+SOAP_FMAC3 ns1__grouping *SOAP_FMAC4 soap_in_ns1__grouping(struct soap *soap,
+                                                           const char *tag,
+                                                           ns1__grouping *a,
+                                                           const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -15658,9 +15678,10 @@ void *ns1__grouping::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__grouping(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__grouping *SOAP_FMAC4
-soap_get_ns1__grouping(struct soap *soap, ns1__grouping *p, const char *tag,
-                       const char *type) {
+SOAP_FMAC3 ns1__grouping *SOAP_FMAC4 soap_get_ns1__grouping(struct soap *soap,
+                                                            ns1__grouping *p,
+                                                            const char *tag,
+                                                            const char *type) {
   if ((p = soap_in_ns1__grouping(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -15733,9 +15754,10 @@ int ns1__userGroup::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__userGroup(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__userGroup(struct soap *soap, const char *tag, int id,
-                        const ns1__userGroup *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__userGroup(struct soap *soap,
+                                                  const char *tag, int id,
+                                                  const ns1__userGroup *a,
+                                                  const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__userGroup),
@@ -15771,9 +15793,10 @@ void *ns1__userGroup::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__userGroup(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__userGroup *SOAP_FMAC4
-soap_in_ns1__userGroup(struct soap *soap, const char *tag, ns1__userGroup *a,
-                       const char *type) {
+SOAP_FMAC3 ns1__userGroup *SOAP_FMAC4 soap_in_ns1__userGroup(struct soap *soap,
+                                                             const char *tag,
+                                                             ns1__userGroup *a,
+                                                             const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -15890,9 +15913,8 @@ void *ns1__userGroup::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__userGroup(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__userGroup *SOAP_FMAC4
-soap_get_ns1__userGroup(struct soap *soap, ns1__userGroup *p, const char *tag,
-                        const char *type) {
+SOAP_FMAC3 ns1__userGroup *SOAP_FMAC4 soap_get_ns1__userGroup(
+    struct soap *soap, ns1__userGroup *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__userGroup(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -15967,13 +15989,13 @@ int ns1__studyInvestigation::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__studyInvestigation(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__studyInvestigation(struct soap *soap, const char *tag, int id,
-                                 const ns1__studyInvestigation *a,
-                                 const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__studyInvestigation(
+    struct soap *soap, const char *tag, int id,
+    const ns1__studyInvestigation *a, const char *type) {
   if (soap_element_begin_out(
-          soap, tag, soap_embedded_id(soap, id, a,
-                                      SOAP_TYPE_ICat4_ns1__studyInvestigation),
+          soap, tag,
+          soap_embedded_id(soap, id, a,
+                           SOAP_TYPE_ICat4_ns1__studyInvestigation),
           "ns1:studyInvestigation"))
     return soap->error;
   /* transient soap skipped */
@@ -16217,9 +16239,10 @@ int ns1__study::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__study(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__study(struct soap *soap, const char *tag, int id,
-                    const ns1__study *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__study(struct soap *soap,
+                                              const char *tag, int id,
+                                              const ns1__study *a,
+                                              const char *type) {
   if (soap_element_begin_out(
           soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__study),
           "ns1:study"))
@@ -16266,9 +16289,10 @@ void *ns1__study::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__study(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__study *SOAP_FMAC4
-soap_in_ns1__study(struct soap *soap, const char *tag, ns1__study *a,
-                   const char *type) {
+SOAP_FMAC3 ns1__study *SOAP_FMAC4 soap_in_ns1__study(struct soap *soap,
+                                                     const char *tag,
+                                                     ns1__study *a,
+                                                     const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -16415,9 +16439,10 @@ void *ns1__study::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__study(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__study *SOAP_FMAC4
-soap_get_ns1__study(struct soap *soap, ns1__study *p, const char *tag,
-                    const char *type) {
+SOAP_FMAC3 ns1__study *SOAP_FMAC4 soap_get_ns1__study(struct soap *soap,
+                                                      ns1__study *p,
+                                                      const char *tag,
+                                                      const char *type) {
   if ((p = soap_in_ns1__study(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -16493,10 +16518,9 @@ int ns1__investigationUser::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__investigationUser(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__investigationUser(struct soap *soap, const char *tag, int id,
-                                const ns1__investigationUser *a,
-                                const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__investigationUser(
+    struct soap *soap, const char *tag, int id, const ns1__investigationUser *a,
+    const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__investigationUser),
@@ -16707,9 +16731,11 @@ soap_instantiate_ns1__investigationUser(struct soap *soap, int n,
   return (ns1__investigationUser *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__investigationUser(struct soap *soap, int st, int tt, void *p,
-                                 size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__investigationUser(struct soap *soap,
+                                                            int st, int tt,
+                                                            void *p, size_t len,
+                                                            const void *q,
+                                                            size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -16809,9 +16835,10 @@ void *ns1__user::soap_in(struct soap *soap, const char *tag, const char *type) {
   return soap_in_ns1__user(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__user *SOAP_FMAC4
-soap_in_ns1__user(struct soap *soap, const char *tag, ns1__user *a,
-                  const char *type) {
+SOAP_FMAC3 ns1__user *SOAP_FMAC4 soap_in_ns1__user(struct soap *soap,
+                                                   const char *tag,
+                                                   ns1__user *a,
+                                                   const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -16949,9 +16976,10 @@ void *ns1__user::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__user(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__user *SOAP_FMAC4
-soap_get_ns1__user(struct soap *soap, ns1__user *p, const char *tag,
-                   const char *type) {
+SOAP_FMAC3 ns1__user *SOAP_FMAC4 soap_get_ns1__user(struct soap *soap,
+                                                    ns1__user *p,
+                                                    const char *tag,
+                                                    const char *type) {
   if ((p = soap_in_ns1__user(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -17025,13 +17053,13 @@ int ns1__instrumentScientist::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__instrumentScientist(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__instrumentScientist(struct soap *soap, const char *tag, int id,
-                                  const ns1__instrumentScientist *a,
-                                  const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__instrumentScientist(
+    struct soap *soap, const char *tag, int id,
+    const ns1__instrumentScientist *a, const char *type) {
   if (soap_element_begin_out(
-          soap, tag, soap_embedded_id(soap, id, a,
-                                      SOAP_TYPE_ICat4_ns1__instrumentScientist),
+          soap, tag,
+          soap_embedded_id(soap, id, a,
+                           SOAP_TYPE_ICat4_ns1__instrumentScientist),
           "ns1:instrumentScientist"))
     return soap->error;
   /* transient soap skipped */
@@ -17285,9 +17313,10 @@ int ns1__instrument::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__instrument(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__instrument(struct soap *soap, const char *tag, int id,
-                         const ns1__instrument *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__instrument(struct soap *soap,
+                                                   const char *tag, int id,
+                                                   const ns1__instrument *a,
+                                                   const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__instrument),
@@ -17343,9 +17372,8 @@ void *ns1__instrument::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__instrument(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__instrument *SOAP_FMAC4
-soap_in_ns1__instrument(struct soap *soap, const char *tag, ns1__instrument *a,
-                        const char *type) {
+SOAP_FMAC3 ns1__instrument *SOAP_FMAC4 soap_in_ns1__instrument(
+    struct soap *soap, const char *tag, ns1__instrument *a, const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -17509,9 +17537,8 @@ void *ns1__instrument::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__instrument(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__instrument *SOAP_FMAC4
-soap_get_ns1__instrument(struct soap *soap, ns1__instrument *p, const char *tag,
-                         const char *type) {
+SOAP_FMAC3 ns1__instrument *SOAP_FMAC4 soap_get_ns1__instrument(
+    struct soap *soap, ns1__instrument *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__instrument(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -17549,9 +17576,10 @@ soap_instantiate_ns1__instrument(struct soap *soap, int n, const char *type,
   return (ns1__instrument *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__instrument(struct soap *soap, int st, int tt, void *p,
-                          size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__instrument(struct soap *soap, int st,
+                                                     int tt, void *p,
+                                                     size_t len, const void *q,
+                                                     size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -17825,9 +17853,11 @@ soap_instantiate_ns1__facilityCycle(struct soap *soap, int n, const char *type,
   return (ns1__facilityCycle *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__facilityCycle(struct soap *soap, int st, int tt, void *p,
-                             size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__facilityCycle(struct soap *soap,
+                                                        int st, int tt, void *p,
+                                                        size_t len,
+                                                        const void *q,
+                                                        size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -17869,9 +17899,10 @@ int ns1__datasetType::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__datasetType(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__datasetType(struct soap *soap, const char *tag, int id,
-                          const ns1__datasetType *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__datasetType(struct soap *soap,
+                                                    const char *tag, int id,
+                                                    const ns1__datasetType *a,
+                                                    const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__datasetType),
@@ -17913,9 +17944,8 @@ void *ns1__datasetType::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__datasetType(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__datasetType *SOAP_FMAC4
-soap_in_ns1__datasetType(struct soap *soap, const char *tag,
-                         ns1__datasetType *a, const char *type) {
+SOAP_FMAC3 ns1__datasetType *SOAP_FMAC4 soap_in_ns1__datasetType(
+    struct soap *soap, const char *tag, ns1__datasetType *a, const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -18047,9 +18077,8 @@ void *ns1__datasetType::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__datasetType(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__datasetType *SOAP_FMAC4
-soap_get_ns1__datasetType(struct soap *soap, ns1__datasetType *p,
-                          const char *tag, const char *type) {
+SOAP_FMAC3 ns1__datasetType *SOAP_FMAC4 soap_get_ns1__datasetType(
+    struct soap *soap, ns1__datasetType *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__datasetType(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -18087,9 +18116,10 @@ soap_instantiate_ns1__datasetType(struct soap *soap, int n, const char *type,
   return (ns1__datasetType *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__datasetType(struct soap *soap, int st, int tt, void *p,
-                           size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__datasetType(struct soap *soap, int st,
+                                                      int tt, void *p,
+                                                      size_t len, const void *q,
+                                                      size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -18377,9 +18407,11 @@ soap_instantiate_ns1__datafileFormat(struct soap *soap, int n, const char *type,
   return (ns1__datafileFormat *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__datafileFormat(struct soap *soap, int st, int tt, void *p,
-                              size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__datafileFormat(struct soap *soap,
+                                                         int st, int tt,
+                                                         void *p, size_t len,
+                                                         const void *q,
+                                                         size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -18607,9 +18639,11 @@ SOAP_FMAC3 ns1__job *SOAP_FMAC4 soap_get_ns1__job(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC1 ns1__job *SOAP_FMAC2
-soap_instantiate_ns1__job(struct soap *soap, int n, const char *type,
-                          const char *arrayType, size_t *size) {
+SOAP_FMAC1 ns1__job *SOAP_FMAC2 soap_instantiate_ns1__job(struct soap *soap,
+                                                          int n,
+                                                          const char *type,
+                                                          const char *arrayType,
+                                                          size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__job(%d, %s, %s)\n",
@@ -18679,9 +18713,10 @@ int ns1__application::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__application(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__application(struct soap *soap, const char *tag, int id,
-                          const ns1__application *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__application(struct soap *soap,
+                                                    const char *tag, int id,
+                                                    const ns1__application *a,
+                                                    const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__application),
@@ -18723,9 +18758,8 @@ void *ns1__application::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__application(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__application *SOAP_FMAC4
-soap_in_ns1__application(struct soap *soap, const char *tag,
-                         ns1__application *a, const char *type) {
+SOAP_FMAC3 ns1__application *SOAP_FMAC4 soap_in_ns1__application(
+    struct soap *soap, const char *tag, ns1__application *a, const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -18856,9 +18890,8 @@ void *ns1__application::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__application(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__application *SOAP_FMAC4
-soap_get_ns1__application(struct soap *soap, ns1__application *p,
-                          const char *tag, const char *type) {
+SOAP_FMAC3 ns1__application *SOAP_FMAC4 soap_get_ns1__application(
+    struct soap *soap, ns1__application *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__application(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -18896,9 +18929,10 @@ soap_instantiate_ns1__application(struct soap *soap, int n, const char *type,
   return (ns1__application *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__application(struct soap *soap, int st, int tt, void *p,
-                           size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__application(struct soap *soap, int st,
+                                                      int tt, void *p,
+                                                      size_t len, const void *q,
+                                                      size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -18974,9 +19008,10 @@ int ns1__facility::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__facility(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__facility(struct soap *soap, const char *tag, int id,
-                       const ns1__facility *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__facility(struct soap *soap,
+                                                 const char *tag, int id,
+                                                 const ns1__facility *a,
+                                                 const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__facility),
@@ -19050,9 +19085,10 @@ void *ns1__facility::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__facility(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__facility *SOAP_FMAC4
-soap_in_ns1__facility(struct soap *soap, const char *tag, ns1__facility *a,
-                      const char *type) {
+SOAP_FMAC3 ns1__facility *SOAP_FMAC4 soap_in_ns1__facility(struct soap *soap,
+                                                           const char *tag,
+                                                           ns1__facility *a,
+                                                           const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -19242,9 +19278,10 @@ void *ns1__facility::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__facility(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__facility *SOAP_FMAC4
-soap_get_ns1__facility(struct soap *soap, ns1__facility *p, const char *tag,
-                       const char *type) {
+SOAP_FMAC3 ns1__facility *SOAP_FMAC4 soap_get_ns1__facility(struct soap *soap,
+                                                            ns1__facility *p,
+                                                            const char *tag,
+                                                            const char *type) {
   if ((p = soap_in_ns1__facility(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -19736,9 +19773,11 @@ soap_instantiate_ns1__investigation(struct soap *soap, int n, const char *type,
   return (ns1__investigation *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__investigation(struct soap *soap, int st, int tt, void *p,
-                             size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__investigation(struct soap *soap,
+                                                        int st, int tt, void *p,
+                                                        size_t len,
+                                                        const void *q,
+                                                        size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -19800,9 +19839,10 @@ int ns1__dataset::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__dataset(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__dataset(struct soap *soap, const char *tag, int id,
-                      const ns1__dataset *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__dataset(struct soap *soap,
+                                                const char *tag, int id,
+                                                const ns1__dataset *a,
+                                                const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__dataset),
@@ -19871,9 +19911,10 @@ void *ns1__dataset::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__dataset(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__dataset *SOAP_FMAC4
-soap_in_ns1__dataset(struct soap *soap, const char *tag, ns1__dataset *a,
-                     const char *type) {
+SOAP_FMAC3 ns1__dataset *SOAP_FMAC4 soap_in_ns1__dataset(struct soap *soap,
+                                                         const char *tag,
+                                                         ns1__dataset *a,
+                                                         const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -20072,9 +20113,10 @@ void *ns1__dataset::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__dataset(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__dataset *SOAP_FMAC4
-soap_get_ns1__dataset(struct soap *soap, ns1__dataset *p, const char *tag,
-                      const char *type) {
+SOAP_FMAC3 ns1__dataset *SOAP_FMAC4 soap_get_ns1__dataset(struct soap *soap,
+                                                          ns1__dataset *p,
+                                                          const char *tag,
+                                                          const char *type) {
   if ((p = soap_in_ns1__dataset(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -20149,10 +20191,9 @@ int ns1__dataCollectionDataset::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__dataCollectionDataset(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__dataCollectionDataset(struct soap *soap, const char *tag, int id,
-                                    const ns1__dataCollectionDataset *a,
-                                    const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__dataCollectionDataset(
+    struct soap *soap, const char *tag, int id,
+    const ns1__dataCollectionDataset *a, const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a,
@@ -20632,9 +20673,11 @@ soap_instantiate_ns1__dataCollection(struct soap *soap, int n, const char *type,
   return (ns1__dataCollection *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__dataCollection(struct soap *soap, int st, int tt, void *p,
-                              size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__dataCollection(struct soap *soap,
+                                                         int st, int tt,
+                                                         void *p, size_t len,
+                                                         const void *q,
+                                                         size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -20670,10 +20713,9 @@ int ns1__dataCollectionDatafile::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__dataCollectionDatafile(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__dataCollectionDatafile(struct soap *soap, const char *tag, int id,
-                                     const ns1__dataCollectionDatafile *a,
-                                     const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__dataCollectionDatafile(
+    struct soap *soap, const char *tag, int id,
+    const ns1__dataCollectionDatafile *a, const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a,
@@ -20881,10 +20923,9 @@ soap_instantiate_ns1__dataCollectionDatafile(struct soap *soap, int n,
   return (ns1__dataCollectionDatafile *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__dataCollectionDatafile(struct soap *soap, int st, int tt,
-                                      void *p, size_t len, const void *q,
-                                      size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__dataCollectionDatafile(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -20952,9 +20993,10 @@ int ns1__datafile::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__datafile(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__datafile(struct soap *soap, const char *tag, int id,
-                       const ns1__datafile *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__datafile(struct soap *soap,
+                                                 const char *tag, int id,
+                                                 const ns1__datafile *a,
+                                                 const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__datafile),
@@ -21028,9 +21070,10 @@ void *ns1__datafile::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__datafile(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__datafile *SOAP_FMAC4
-soap_in_ns1__datafile(struct soap *soap, const char *tag, ns1__datafile *a,
-                      const char *type) {
+SOAP_FMAC3 ns1__datafile *SOAP_FMAC4 soap_in_ns1__datafile(struct soap *soap,
+                                                           const char *tag,
+                                                           ns1__datafile *a,
+                                                           const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -21234,9 +21277,10 @@ void *ns1__datafile::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__datafile(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__datafile *SOAP_FMAC4
-soap_get_ns1__datafile(struct soap *soap, ns1__datafile *p, const char *tag,
-                       const char *type) {
+SOAP_FMAC3 ns1__datafile *SOAP_FMAC4 soap_get_ns1__datafile(struct soap *soap,
+                                                            ns1__datafile *p,
+                                                            const char *tag,
+                                                            const char *type) {
   if ((p = soap_in_ns1__datafile(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -21378,9 +21422,10 @@ int ns1__dummy::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__dummy(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__dummy(struct soap *soap, const char *tag, int id,
-                    const ns1__dummy *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__dummy(struct soap *soap,
+                                              const char *tag, int id,
+                                              const ns1__dummy *a,
+                                              const char *type) {
   if (soap_element_begin_out(
           soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__dummy),
           "ns1:dummy"))
@@ -21495,9 +21540,10 @@ void *ns1__dummy::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__dummy(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__dummy *SOAP_FMAC4
-soap_in_ns1__dummy(struct soap *soap, const char *tag, ns1__dummy *a,
-                   const char *type) {
+SOAP_FMAC3 ns1__dummy *SOAP_FMAC4 soap_in_ns1__dummy(struct soap *soap,
+                                                     const char *tag,
+                                                     ns1__dummy *a,
+                                                     const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -21806,9 +21852,10 @@ void *ns1__dummy::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__dummy(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__dummy *SOAP_FMAC4
-soap_get_ns1__dummy(struct soap *soap, ns1__dummy *p, const char *tag,
-                    const char *type) {
+SOAP_FMAC3 ns1__dummy *SOAP_FMAC4 soap_get_ns1__dummy(struct soap *soap,
+                                                      ns1__dummy *p,
+                                                      const char *tag,
+                                                      const char *type) {
   if ((p = soap_in_ns1__dummy(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -22008,9 +22055,11 @@ soap_instantiate_ns1__loginResponse(struct soap *soap, int n, const char *type,
   return (ns1__loginResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__loginResponse(struct soap *soap, int st, int tt, void *p,
-                             size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__loginResponse(struct soap *soap,
+                                                        int st, int tt, void *p,
+                                                        size_t len,
+                                                        const void *q,
+                                                        size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -22042,9 +22091,10 @@ int ns1__login::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__login(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__login(struct soap *soap, const char *tag, int id,
-                    const ns1__login *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__login(struct soap *soap,
+                                              const char *tag, int id,
+                                              const ns1__login *a,
+                                              const char *type) {
   if (soap_element_begin_out(
           soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__login),
           "ns1:login"))
@@ -22063,9 +22113,10 @@ void *ns1__login::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__login(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__login *SOAP_FMAC4
-soap_in_ns1__login(struct soap *soap, const char *tag, ns1__login *a,
-                   const char *type) {
+SOAP_FMAC3 ns1__login *SOAP_FMAC4 soap_in_ns1__login(struct soap *soap,
+                                                     const char *tag,
+                                                     ns1__login *a,
+                                                     const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -22144,9 +22195,10 @@ void *ns1__login::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__login(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__login *SOAP_FMAC4
-soap_get_ns1__login(struct soap *soap, ns1__login *p, const char *tag,
-                    const char *type) {
+SOAP_FMAC3 ns1__login *SOAP_FMAC4 soap_get_ns1__login(struct soap *soap,
+                                                      ns1__login *p,
+                                                      const char *tag,
+                                                      const char *type) {
   if ((p = soap_in_ns1__login(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -22304,9 +22356,11 @@ soap_instantiate_ns1__refreshResponse(struct soap *soap, int n,
   return (ns1__refreshResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__refreshResponse(struct soap *soap, int st, int tt, void *p,
-                               size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__refreshResponse(struct soap *soap,
+                                                          int st, int tt,
+                                                          void *p, size_t len,
+                                                          const void *q,
+                                                          size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -22336,9 +22390,10 @@ int ns1__refresh::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__refresh(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__refresh(struct soap *soap, const char *tag, int id,
-                      const ns1__refresh *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__refresh(struct soap *soap,
+                                                const char *tag, int id,
+                                                const ns1__refresh *a,
+                                                const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__refresh),
@@ -22356,9 +22411,10 @@ void *ns1__refresh::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__refresh(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__refresh *SOAP_FMAC4
-soap_in_ns1__refresh(struct soap *soap, const char *tag, ns1__refresh *a,
-                     const char *type) {
+SOAP_FMAC3 ns1__refresh *SOAP_FMAC4 soap_in_ns1__refresh(struct soap *soap,
+                                                         const char *tag,
+                                                         ns1__refresh *a,
+                                                         const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -22428,9 +22484,10 @@ void *ns1__refresh::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__refresh(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__refresh *SOAP_FMAC4
-soap_get_ns1__refresh(struct soap *soap, ns1__refresh *p, const char *tag,
-                      const char *type) {
+SOAP_FMAC3 ns1__refresh *SOAP_FMAC4 soap_get_ns1__refresh(struct soap *soap,
+                                                          ns1__refresh *p,
+                                                          const char *tag,
+                                                          const char *type) {
   if ((p = soap_in_ns1__refresh(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -22500,13 +22557,13 @@ int ns1__getUserNameResponse::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__getUserNameResponse(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__getUserNameResponse(struct soap *soap, const char *tag, int id,
-                                  const ns1__getUserNameResponse *a,
-                                  const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getUserNameResponse(
+    struct soap *soap, const char *tag, int id,
+    const ns1__getUserNameResponse *a, const char *type) {
   if (soap_element_begin_out(
-          soap, tag, soap_embedded_id(soap, id, a,
-                                      SOAP_TYPE_ICat4_ns1__getUserNameResponse),
+          soap, tag,
+          soap_embedded_id(soap, id, a,
+                           SOAP_TYPE_ICat4_ns1__getUserNameResponse),
           "ns1:getUserNameResponse"))
     return soap->error;
   /* transient soap skipped */
@@ -22672,9 +22729,10 @@ int ns1__getUserName::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__getUserName(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__getUserName(struct soap *soap, const char *tag, int id,
-                          const ns1__getUserName *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getUserName(struct soap *soap,
+                                                    const char *tag, int id,
+                                                    const ns1__getUserName *a,
+                                                    const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__getUserName),
@@ -22692,9 +22750,8 @@ void *ns1__getUserName::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__getUserName(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__getUserName *SOAP_FMAC4
-soap_in_ns1__getUserName(struct soap *soap, const char *tag,
-                         ns1__getUserName *a, const char *type) {
+SOAP_FMAC3 ns1__getUserName *SOAP_FMAC4 soap_in_ns1__getUserName(
+    struct soap *soap, const char *tag, ns1__getUserName *a, const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -22764,9 +22821,8 @@ void *ns1__getUserName::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__getUserName(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__getUserName *SOAP_FMAC4
-soap_get_ns1__getUserName(struct soap *soap, ns1__getUserName *p,
-                          const char *tag, const char *type) {
+SOAP_FMAC3 ns1__getUserName *SOAP_FMAC4 soap_get_ns1__getUserName(
+    struct soap *soap, ns1__getUserName *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__getUserName(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -22804,9 +22860,10 @@ soap_instantiate_ns1__getUserName(struct soap *soap, int n, const char *type,
   return (ns1__getUserName *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__getUserName(struct soap *soap, int st, int tt, void *p,
-                           size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getUserName(struct soap *soap, int st,
+                                                      int tt, void *p,
+                                                      size_t len, const void *q,
+                                                      size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -22834,10 +22891,9 @@ int ns1__deleteManyResponse::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__deleteManyResponse(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__deleteManyResponse(struct soap *soap, const char *tag, int id,
-                                 const ns1__deleteManyResponse *a,
-                                 const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__deleteManyResponse(
+    struct soap *soap, const char *tag, int id,
+    const ns1__deleteManyResponse *a, const char *type) {
   return soap_outliteral(soap, tag, &(a->xsd__anyType::__item),
                          "ns1:deleteManyResponse");
 }
@@ -22963,9 +23019,10 @@ int ns1__deleteMany::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__deleteMany(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__deleteMany(struct soap *soap, const char *tag, int id,
-                         const ns1__deleteMany *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__deleteMany(struct soap *soap,
+                                                   const char *tag, int id,
+                                                   const ns1__deleteMany *a,
+                                                   const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__deleteMany),
@@ -22986,9 +23043,8 @@ void *ns1__deleteMany::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__deleteMany(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__deleteMany *SOAP_FMAC4
-soap_in_ns1__deleteMany(struct soap *soap, const char *tag, ns1__deleteMany *a,
-                        const char *type) {
+SOAP_FMAC3 ns1__deleteMany *SOAP_FMAC4 soap_in_ns1__deleteMany(
+    struct soap *soap, const char *tag, ns1__deleteMany *a, const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -23063,9 +23119,8 @@ void *ns1__deleteMany::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__deleteMany(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__deleteMany *SOAP_FMAC4
-soap_get_ns1__deleteMany(struct soap *soap, ns1__deleteMany *p, const char *tag,
-                         const char *type) {
+SOAP_FMAC3 ns1__deleteMany *SOAP_FMAC4 soap_get_ns1__deleteMany(
+    struct soap *soap, ns1__deleteMany *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__deleteMany(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -23103,9 +23158,10 @@ soap_instantiate_ns1__deleteMany(struct soap *soap, int n, const char *type,
   return (ns1__deleteMany *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__deleteMany(struct soap *soap, int st, int tt, void *p,
-                          size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__deleteMany(struct soap *soap, int st,
+                                                     int tt, void *p,
+                                                     size_t len, const void *q,
+                                                     size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -23223,9 +23279,11 @@ soap_instantiate_ns1__updateResponse(struct soap *soap, int n, const char *type,
   return (ns1__updateResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__updateResponse(struct soap *soap, int st, int tt, void *p,
-                              size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__updateResponse(struct soap *soap,
+                                                         int st, int tt,
+                                                         void *p, size_t len,
+                                                         const void *q,
+                                                         size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -23257,9 +23315,10 @@ int ns1__update::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__update(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__update(struct soap *soap, const char *tag, int id,
-                     const ns1__update *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__update(struct soap *soap,
+                                               const char *tag, int id,
+                                               const ns1__update *a,
+                                               const char *type) {
   if (soap_element_begin_out(
           soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__update),
           "ns1:update"))
@@ -23279,9 +23338,10 @@ void *ns1__update::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__update(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__update *SOAP_FMAC4
-soap_in_ns1__update(struct soap *soap, const char *tag, ns1__update *a,
-                    const char *type) {
+SOAP_FMAC3 ns1__update *SOAP_FMAC4 soap_in_ns1__update(struct soap *soap,
+                                                       const char *tag,
+                                                       ns1__update *a,
+                                                       const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -23358,9 +23418,10 @@ void *ns1__update::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__update(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__update *SOAP_FMAC4
-soap_get_ns1__update(struct soap *soap, ns1__update *p, const char *tag,
-                     const char *type) {
+SOAP_FMAC3 ns1__update *SOAP_FMAC4 soap_get_ns1__update(struct soap *soap,
+                                                        ns1__update *p,
+                                                        const char *tag,
+                                                        const char *type) {
   if ((p = soap_in_ns1__update(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -23575,10 +23636,9 @@ soap_instantiate_ns1__luceneGetPopulatingResponse(struct soap *soap, int n,
   return (ns1__luceneGetPopulatingResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__luceneGetPopulatingResponse(struct soap *soap, int st, int tt,
-                                           void *p, size_t len, const void *q,
-                                           size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneGetPopulatingResponse(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -23612,13 +23672,13 @@ int ns1__luceneGetPopulating::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__luceneGetPopulating(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__luceneGetPopulating(struct soap *soap, const char *tag, int id,
-                                  const ns1__luceneGetPopulating *a,
-                                  const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneGetPopulating(
+    struct soap *soap, const char *tag, int id,
+    const ns1__luceneGetPopulating *a, const char *type) {
   if (soap_element_begin_out(
-          soap, tag, soap_embedded_id(soap, id, a,
-                                      SOAP_TYPE_ICat4_ns1__luceneGetPopulating),
+          soap, tag,
+          soap_embedded_id(soap, id, a,
+                           SOAP_TYPE_ICat4_ns1__luceneGetPopulating),
           "ns1:luceneGetPopulating"))
     return soap->error;
   /* transient soap skipped */
@@ -23785,10 +23845,9 @@ int ns1__getApiVersionResponse::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__getApiVersionResponse(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__getApiVersionResponse(struct soap *soap, const char *tag, int id,
-                                    const ns1__getApiVersionResponse *a,
-                                    const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getApiVersionResponse(
+    struct soap *soap, const char *tag, int id,
+    const ns1__getApiVersionResponse *a, const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a,
@@ -24047,9 +24106,11 @@ soap_instantiate_ns1__getApiVersion(struct soap *soap, int n, const char *type,
   return (ns1__getApiVersion *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__getApiVersion(struct soap *soap, int st, int tt, void *p,
-                             size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getApiVersion(struct soap *soap,
+                                                        int st, int tt, void *p,
+                                                        size_t len,
+                                                        const void *q,
+                                                        size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -24081,10 +24142,9 @@ int ns1__getEntityNamesResponse::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__getEntityNamesResponse(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__getEntityNamesResponse(struct soap *soap, const char *tag, int id,
-                                     const ns1__getEntityNamesResponse *a,
-                                     const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getEntityNamesResponse(
+    struct soap *soap, const char *tag, int id,
+    const ns1__getEntityNamesResponse *a, const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a,
@@ -24219,10 +24279,9 @@ soap_instantiate_ns1__getEntityNamesResponse(struct soap *soap, int n,
   return (ns1__getEntityNamesResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__getEntityNamesResponse(struct soap *soap, int st, int tt,
-                                      void *p, size_t len, const void *q,
-                                      size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getEntityNamesResponse(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -24341,9 +24400,11 @@ soap_instantiate_ns1__getEntityNames(struct soap *soap, int n, const char *type,
   return (ns1__getEntityNames *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__getEntityNames(struct soap *soap, int st, int tt, void *p,
-                              size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getEntityNames(struct soap *soap,
+                                                         int st, int tt,
+                                                         void *p, size_t len,
+                                                         const void *q,
+                                                         size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -24374,9 +24435,10 @@ int ns1__getResponse::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__getResponse(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__getResponse(struct soap *soap, const char *tag, int id,
-                          const ns1__getResponse *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getResponse(struct soap *soap,
+                                                    const char *tag, int id,
+                                                    const ns1__getResponse *a,
+                                                    const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__getResponse),
@@ -24394,9 +24456,8 @@ void *ns1__getResponse::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__getResponse(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__getResponse *SOAP_FMAC4
-soap_in_ns1__getResponse(struct soap *soap, const char *tag,
-                         ns1__getResponse *a, const char *type) {
+SOAP_FMAC3 ns1__getResponse *SOAP_FMAC4 soap_in_ns1__getResponse(
+    struct soap *soap, const char *tag, ns1__getResponse *a, const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -24465,9 +24526,8 @@ void *ns1__getResponse::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__getResponse(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__getResponse *SOAP_FMAC4
-soap_get_ns1__getResponse(struct soap *soap, ns1__getResponse *p,
-                          const char *tag, const char *type) {
+SOAP_FMAC3 ns1__getResponse *SOAP_FMAC4 soap_get_ns1__getResponse(
+    struct soap *soap, ns1__getResponse *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__getResponse(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -24505,9 +24565,10 @@ soap_instantiate_ns1__getResponse(struct soap *soap, int n, const char *type,
   return (ns1__getResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__getResponse(struct soap *soap, int st, int tt, void *p,
-                           size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getResponse(struct soap *soap, int st,
+                                                      int tt, void *p,
+                                                      size_t len, const void *q,
+                                                      size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -24662,9 +24723,11 @@ SOAP_FMAC3 ns1__get *SOAP_FMAC4 soap_get_ns1__get(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC1 ns1__get *SOAP_FMAC2
-soap_instantiate_ns1__get(struct soap *soap, int n, const char *type,
-                          const char *arrayType, size_t *size) {
+SOAP_FMAC1 ns1__get *SOAP_FMAC2 soap_instantiate_ns1__get(struct soap *soap,
+                                                          int n,
+                                                          const char *type,
+                                                          const char *arrayType,
+                                                          size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__get(%d, %s, %s)\n",
@@ -24721,10 +24784,9 @@ int ns1__lucenePopulateResponse::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__lucenePopulateResponse(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__lucenePopulateResponse(struct soap *soap, const char *tag, int id,
-                                     const ns1__lucenePopulateResponse *a,
-                                     const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__lucenePopulateResponse(
+    struct soap *soap, const char *tag, int id,
+    const ns1__lucenePopulateResponse *a, const char *type) {
   return soap_outliteral(soap, tag, &(a->xsd__anyType::__item),
                          "ns1:lucenePopulateResponse");
 }
@@ -24819,10 +24881,9 @@ soap_instantiate_ns1__lucenePopulateResponse(struct soap *soap, int n,
   return (ns1__lucenePopulateResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__lucenePopulateResponse(struct soap *soap, int st, int tt,
-                                      void *p, size_t len, const void *q,
-                                      size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__lucenePopulateResponse(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -25001,9 +25062,11 @@ soap_instantiate_ns1__lucenePopulate(struct soap *soap, int n, const char *type,
   return (ns1__lucenePopulate *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__lucenePopulate(struct soap *soap, int st, int tt, void *p,
-                              size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__lucenePopulate(struct soap *soap,
+                                                         int st, int tt,
+                                                         void *p, size_t len,
+                                                         const void *q,
+                                                         size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -25035,10 +25098,9 @@ int ns1__luceneSearchResponse::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__luceneSearchResponse(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__luceneSearchResponse(struct soap *soap, const char *tag, int id,
-                                   const ns1__luceneSearchResponse *a,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneSearchResponse(
+    struct soap *soap, const char *tag, int id,
+    const ns1__luceneSearchResponse *a, const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a,
@@ -25213,9 +25275,10 @@ int ns1__luceneSearch::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__luceneSearch(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__luceneSearch(struct soap *soap, const char *tag, int id,
-                           const ns1__luceneSearch *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneSearch(struct soap *soap,
+                                                     const char *tag, int id,
+                                                     const ns1__luceneSearch *a,
+                                                     const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__luceneSearch),
@@ -25381,9 +25444,11 @@ soap_instantiate_ns1__luceneSearch(struct soap *soap, int n, const char *type,
   return (ns1__luceneSearch *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__luceneSearch(struct soap *soap, int st, int tt, void *p,
-                            size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneSearch(struct soap *soap,
+                                                       int st, int tt, void *p,
+                                                       size_t len,
+                                                       const void *q,
+                                                       size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -25415,10 +25480,9 @@ int ns1__getPropertiesResponse::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__getPropertiesResponse(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__getPropertiesResponse(struct soap *soap, const char *tag, int id,
-                                    const ns1__getPropertiesResponse *a,
-                                    const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getPropertiesResponse(
+    struct soap *soap, const char *tag, int id,
+    const ns1__getPropertiesResponse *a, const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a,
@@ -25718,9 +25782,11 @@ soap_instantiate_ns1__getProperties(struct soap *soap, int n, const char *type,
   return (ns1__getProperties *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__getProperties(struct soap *soap, int st, int tt, void *p,
-                             size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getProperties(struct soap *soap,
+                                                        int st, int tt, void *p,
+                                                        size_t len,
+                                                        const void *q,
+                                                        size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -25885,9 +25951,11 @@ soap_instantiate_ns1__createResponse(struct soap *soap, int n, const char *type,
   return (ns1__createResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__createResponse(struct soap *soap, int st, int tt, void *p,
-                              size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__createResponse(struct soap *soap,
+                                                         int st, int tt,
+                                                         void *p, size_t len,
+                                                         const void *q,
+                                                         size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -25919,9 +25987,10 @@ int ns1__create::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__create(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__create(struct soap *soap, const char *tag, int id,
-                     const ns1__create *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__create(struct soap *soap,
+                                               const char *tag, int id,
+                                               const ns1__create *a,
+                                               const char *type) {
   if (soap_element_begin_out(
           soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__create),
           "ns1:create"))
@@ -25941,9 +26010,10 @@ void *ns1__create::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__create(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__create *SOAP_FMAC4
-soap_in_ns1__create(struct soap *soap, const char *tag, ns1__create *a,
-                    const char *type) {
+SOAP_FMAC3 ns1__create *SOAP_FMAC4 soap_in_ns1__create(struct soap *soap,
+                                                       const char *tag,
+                                                       ns1__create *a,
+                                                       const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -26020,9 +26090,10 @@ void *ns1__create::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__create(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__create *SOAP_FMAC4
-soap_get_ns1__create(struct soap *soap, ns1__create *p, const char *tag,
-                     const char *type) {
+SOAP_FMAC3 ns1__create *SOAP_FMAC4 soap_get_ns1__create(struct soap *soap,
+                                                        ns1__create *p,
+                                                        const char *tag,
+                                                        const char *type) {
   if ((p = soap_in_ns1__create(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -26093,13 +26164,13 @@ int ns1__createManyResponse::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__createManyResponse(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__createManyResponse(struct soap *soap, const char *tag, int id,
-                                 const ns1__createManyResponse *a,
-                                 const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__createManyResponse(
+    struct soap *soap, const char *tag, int id,
+    const ns1__createManyResponse *a, const char *type) {
   if (soap_element_begin_out(
-          soap, tag, soap_embedded_id(soap, id, a,
-                                      SOAP_TYPE_ICat4_ns1__createManyResponse),
+          soap, tag,
+          soap_embedded_id(soap, id, a,
+                           SOAP_TYPE_ICat4_ns1__createManyResponse),
           "ns1:createManyResponse"))
     return soap->error;
   /* transient soap skipped */
@@ -27222,9 +27293,11 @@ soap_instantiate_ns1__entityBaseBean(struct soap *soap, int n, const char *type,
   return (ns1__entityBaseBean *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__entityBaseBean(struct soap *soap, int st, int tt, void *p,
-                              size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__entityBaseBean(struct soap *soap,
+                                                         int st, int tt,
+                                                         void *p, size_t len,
+                                                         const void *q,
+                                                         size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -27258,9 +27331,10 @@ int ns1__createMany::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__createMany(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__createMany(struct soap *soap, const char *tag, int id,
-                         const ns1__createMany *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__createMany(struct soap *soap,
+                                                   const char *tag, int id,
+                                                   const ns1__createMany *a,
+                                                   const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__createMany),
@@ -27281,9 +27355,8 @@ void *ns1__createMany::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__createMany(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__createMany *SOAP_FMAC4
-soap_in_ns1__createMany(struct soap *soap, const char *tag, ns1__createMany *a,
-                        const char *type) {
+SOAP_FMAC3 ns1__createMany *SOAP_FMAC4 soap_in_ns1__createMany(
+    struct soap *soap, const char *tag, ns1__createMany *a, const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -27358,9 +27431,8 @@ void *ns1__createMany::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__createMany(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__createMany *SOAP_FMAC4
-soap_get_ns1__createMany(struct soap *soap, ns1__createMany *p, const char *tag,
-                         const char *type) {
+SOAP_FMAC3 ns1__createMany *SOAP_FMAC4 soap_get_ns1__createMany(
+    struct soap *soap, ns1__createMany *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__createMany(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -27398,9 +27470,10 @@ soap_instantiate_ns1__createMany(struct soap *soap, int n, const char *type,
   return (ns1__createMany *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__createMany(struct soap *soap, int st, int tt, void *p,
-                          size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__createMany(struct soap *soap, int st,
+                                                     int tt, void *p,
+                                                     size_t len, const void *q,
+                                                     size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -27591,9 +27664,11 @@ soap_instantiate_ns1__IcatException(struct soap *soap, int n, const char *type,
   return (ns1__IcatException *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__IcatException(struct soap *soap, int st, int tt, void *p,
-                             size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__IcatException(struct soap *soap,
+                                                        int st, int tt, void *p,
+                                                        size_t len,
+                                                        const void *q,
+                                                        size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -27621,10 +27696,9 @@ int ns1__luceneClearResponse::soap_out(struct soap *soap, const char *tag,
   return soap_out_ns1__luceneClearResponse(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__luceneClearResponse(struct soap *soap, const char *tag, int id,
-                                  const ns1__luceneClearResponse *a,
-                                  const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneClearResponse(
+    struct soap *soap, const char *tag, int id,
+    const ns1__luceneClearResponse *a, const char *type) {
   return soap_outliteral(soap, tag, &(a->xsd__anyType::__item),
                          "ns1:luceneClearResponse");
 }
@@ -27749,9 +27823,10 @@ int ns1__luceneClear::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_ns1__luceneClear(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_ns1__luceneClear(struct soap *soap, const char *tag, int id,
-                          const ns1__luceneClear *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneClear(struct soap *soap,
+                                                    const char *tag, int id,
+                                                    const ns1__luceneClear *a,
+                                                    const char *type) {
   if (soap_element_begin_out(
           soap, tag,
           soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__luceneClear),
@@ -27769,9 +27844,8 @@ void *ns1__luceneClear::soap_in(struct soap *soap, const char *tag,
   return soap_in_ns1__luceneClear(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__luceneClear *SOAP_FMAC4
-soap_in_ns1__luceneClear(struct soap *soap, const char *tag,
-                         ns1__luceneClear *a, const char *type) {
+SOAP_FMAC3 ns1__luceneClear *SOAP_FMAC4 soap_in_ns1__luceneClear(
+    struct soap *soap, const char *tag, ns1__luceneClear *a, const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
@@ -27841,9 +27915,8 @@ void *ns1__luceneClear::soap_get(struct soap *soap, const char *tag,
   return soap_get_ns1__luceneClear(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__luceneClear *SOAP_FMAC4
-soap_get_ns1__luceneClear(struct soap *soap, ns1__luceneClear *p,
-                          const char *tag, const char *type) {
+SOAP_FMAC3 ns1__luceneClear *SOAP_FMAC4 soap_get_ns1__luceneClear(
+    struct soap *soap, ns1__luceneClear *p, const char *tag, const char *type) {
   if ((p = soap_in_ns1__luceneClear(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -27881,9 +27954,10 @@ soap_instantiate_ns1__luceneClear(struct soap *soap, int n, const char *type,
   return (ns1__luceneClear *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_ns1__luceneClear(struct soap *soap, int st, int tt, void *p,
-                           size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneClear(struct soap *soap, int st,
+                                                      int tt, void *p,
+                                                      size_t len, const void *q,
+                                                      size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -27894,20 +27968,21 @@ soap_copy_ns1__luceneClear(struct soap *soap, int st, int tt, void *p,
   *(ns1__luceneClear *)p = *(ns1__luceneClear *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default_std__string(struct soap *soap, std::string *p) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__string(struct soap *soap,
+                                                    std::string *p) {
   (void)soap; /* appease -Wall -Werror */
   p->erase();
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_std__string(struct soap *soap, const std::string *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__string(struct soap *soap,
+                                                      const std::string *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
 }
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_std__string(struct soap *soap, const char *tag, int id,
-                     const std::string *s, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__string(struct soap *soap,
+                                               const char *tag, int id,
+                                               const std::string *s,
+                                               const char *type) {
   if ((soap->mode & SOAP_C_NILSTRING) && s->empty())
     return soap_element_null(soap, tag, id, type);
   if (soap_element_begin_out(
@@ -27918,9 +27993,10 @@ soap_out_std__string(struct soap *soap, const char *tag, int id,
   return SOAP_OK;
 }
 
-SOAP_FMAC3 std::string *SOAP_FMAC4
-soap_in_std__string(struct soap *soap, const char *tag, std::string *s,
-                    const char *type) {
+SOAP_FMAC3 std::string *SOAP_FMAC4 soap_in_std__string(struct soap *soap,
+                                                       const char *tag,
+                                                       std::string *s,
+                                                       const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
@@ -27951,9 +28027,10 @@ soap_in_std__string(struct soap *soap, const char *tag, std::string *s,
   return s;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_std__string(struct soap *soap, const std::string *a, const char *tag,
-                     const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_std__string(struct soap *soap,
+                                               const std::string *a,
+                                               const char *tag,
+                                               const char *type) {
   int id =
       soap_embed(soap, (void *)a, NULL, 0, tag, SOAP_TYPE_ICat4_std__string);
   if (soap_out_std__string(soap, tag ? tag : "string", id, a, type))
@@ -27961,9 +28038,10 @@ soap_put_std__string(struct soap *soap, const std::string *a, const char *tag,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 std::string *SOAP_FMAC4
-soap_get_std__string(struct soap *soap, std::string *p, const char *tag,
-                     const char *type) {
+SOAP_FMAC3 std::string *SOAP_FMAC4 soap_get_std__string(struct soap *soap,
+                                                        std::string *p,
+                                                        const char *tag,
+                                                        const char *type) {
   if ((p = soap_in_std__string(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -28029,9 +28107,10 @@ int xsd__string::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_xsd__string(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_xsd__string(struct soap *soap, const char *tag, int id,
-                     const xsd__string *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_xsd__string(struct soap *soap,
+                                               const char *tag, int id,
+                                               const xsd__string *a,
+                                               const char *type) {
   return soap_out_std__string(soap, tag, id, &(a->xsd__string::__item),
                               "xsd:string");
 }
@@ -28041,9 +28120,10 @@ void *xsd__string::soap_in(struct soap *soap, const char *tag,
   return soap_in_xsd__string(soap, tag, this, type);
 }
 
-SOAP_FMAC3 xsd__string *SOAP_FMAC4
-soap_in_xsd__string(struct soap *soap, const char *tag, xsd__string *a,
-                    const char *type) {
+SOAP_FMAC3 xsd__string *SOAP_FMAC4 soap_in_xsd__string(struct soap *soap,
+                                                       const char *tag,
+                                                       xsd__string *a,
+                                                       const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
@@ -28079,9 +28159,10 @@ void *xsd__string::soap_get(struct soap *soap, const char *tag,
   return soap_get_xsd__string(soap, this, tag, type);
 }
 
-SOAP_FMAC3 xsd__string *SOAP_FMAC4
-soap_get_xsd__string(struct soap *soap, xsd__string *p, const char *tag,
-                     const char *type) {
+SOAP_FMAC3 xsd__string *SOAP_FMAC4 soap_get_xsd__string(struct soap *soap,
+                                                        xsd__string *p,
+                                                        const char *tag,
+                                                        const char *type) {
   if ((p = soap_in_xsd__string(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -28160,9 +28241,10 @@ void *xsd__long::soap_in(struct soap *soap, const char *tag, const char *type) {
   return soap_in_xsd__long(soap, tag, this, type);
 }
 
-SOAP_FMAC3 xsd__long *SOAP_FMAC4
-soap_in_xsd__long(struct soap *soap, const char *tag, xsd__long *a,
-                  const char *type) {
+SOAP_FMAC3 xsd__long *SOAP_FMAC4 soap_in_xsd__long(struct soap *soap,
+                                                   const char *tag,
+                                                   xsd__long *a,
+                                                   const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
@@ -28198,9 +28280,10 @@ void *xsd__long::soap_get(struct soap *soap, const char *tag,
   return soap_get_xsd__long(soap, this, tag, type);
 }
 
-SOAP_FMAC3 xsd__long *SOAP_FMAC4
-soap_get_xsd__long(struct soap *soap, xsd__long *p, const char *tag,
-                   const char *type) {
+SOAP_FMAC3 xsd__long *SOAP_FMAC4 soap_get_xsd__long(struct soap *soap,
+                                                    xsd__long *p,
+                                                    const char *tag,
+                                                    const char *type) {
   if ((p = soap_in_xsd__long(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -28324,9 +28407,11 @@ SOAP_FMAC3 xsd__int *SOAP_FMAC4 soap_get_xsd__int(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC1 xsd__int *SOAP_FMAC2
-soap_instantiate_xsd__int(struct soap *soap, int n, const char *type,
-                          const char *arrayType, size_t *size) {
+SOAP_FMAC1 xsd__int *SOAP_FMAC2 soap_instantiate_xsd__int(struct soap *soap,
+                                                          int n,
+                                                          const char *type,
+                                                          const char *arrayType,
+                                                          size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_xsd__int(%d, %s, %s)\n",
@@ -28385,9 +28470,10 @@ int xsd__double::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_xsd__double(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_xsd__double(struct soap *soap, const char *tag, int id,
-                     const xsd__double *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_xsd__double(struct soap *soap,
+                                               const char *tag, int id,
+                                               const xsd__double *a,
+                                               const char *type) {
   return soap_out_double(soap, tag, id, &(a->xsd__double::__item),
                          "xsd:double");
 }
@@ -28397,9 +28483,10 @@ void *xsd__double::soap_in(struct soap *soap, const char *tag,
   return soap_in_xsd__double(soap, tag, this, type);
 }
 
-SOAP_FMAC3 xsd__double *SOAP_FMAC4
-soap_in_xsd__double(struct soap *soap, const char *tag, xsd__double *a,
-                    const char *type) {
+SOAP_FMAC3 xsd__double *SOAP_FMAC4 soap_in_xsd__double(struct soap *soap,
+                                                       const char *tag,
+                                                       xsd__double *a,
+                                                       const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
@@ -28435,9 +28522,10 @@ void *xsd__double::soap_get(struct soap *soap, const char *tag,
   return soap_get_xsd__double(soap, this, tag, type);
 }
 
-SOAP_FMAC3 xsd__double *SOAP_FMAC4
-soap_get_xsd__double(struct soap *soap, xsd__double *p, const char *tag,
-                     const char *type) {
+SOAP_FMAC3 xsd__double *SOAP_FMAC4 soap_get_xsd__double(struct soap *soap,
+                                                        xsd__double *p,
+                                                        const char *tag,
+                                                        const char *type) {
   if ((p = soap_in_xsd__double(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -28506,9 +28594,10 @@ int xsd__dateTime::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_xsd__dateTime(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_xsd__dateTime(struct soap *soap, const char *tag, int id,
-                       const xsd__dateTime *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_xsd__dateTime(struct soap *soap,
+                                                 const char *tag, int id,
+                                                 const xsd__dateTime *a,
+                                                 const char *type) {
   return soap_out_time(soap, tag, id, &(a->xsd__dateTime::__item),
                        "xsd:dateTime");
 }
@@ -28518,9 +28607,10 @@ void *xsd__dateTime::soap_in(struct soap *soap, const char *tag,
   return soap_in_xsd__dateTime(soap, tag, this, type);
 }
 
-SOAP_FMAC3 xsd__dateTime *SOAP_FMAC4
-soap_in_xsd__dateTime(struct soap *soap, const char *tag, xsd__dateTime *a,
-                      const char *type) {
+SOAP_FMAC3 xsd__dateTime *SOAP_FMAC4 soap_in_xsd__dateTime(struct soap *soap,
+                                                           const char *tag,
+                                                           xsd__dateTime *a,
+                                                           const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
@@ -28556,9 +28646,10 @@ void *xsd__dateTime::soap_get(struct soap *soap, const char *tag,
   return soap_get_xsd__dateTime(soap, this, tag, type);
 }
 
-SOAP_FMAC3 xsd__dateTime *SOAP_FMAC4
-soap_get_xsd__dateTime(struct soap *soap, xsd__dateTime *p, const char *tag,
-                       const char *type) {
+SOAP_FMAC3 xsd__dateTime *SOAP_FMAC4 soap_get_xsd__dateTime(struct soap *soap,
+                                                            xsd__dateTime *p,
+                                                            const char *tag,
+                                                            const char *type) {
   if ((p = soap_in_xsd__dateTime(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -28626,9 +28717,10 @@ int xsd__boolean::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_xsd__boolean(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_xsd__boolean(struct soap *soap, const char *tag, int id,
-                      const xsd__boolean *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_xsd__boolean(struct soap *soap,
+                                                const char *tag, int id,
+                                                const xsd__boolean *a,
+                                                const char *type) {
   return soap_out_bool(soap, tag, id, &(a->xsd__boolean::__item),
                        "xsd:boolean");
 }
@@ -28638,9 +28730,10 @@ void *xsd__boolean::soap_in(struct soap *soap, const char *tag,
   return soap_in_xsd__boolean(soap, tag, this, type);
 }
 
-SOAP_FMAC3 xsd__boolean *SOAP_FMAC4
-soap_in_xsd__boolean(struct soap *soap, const char *tag, xsd__boolean *a,
-                     const char *type) {
+SOAP_FMAC3 xsd__boolean *SOAP_FMAC4 soap_in_xsd__boolean(struct soap *soap,
+                                                         const char *tag,
+                                                         xsd__boolean *a,
+                                                         const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
@@ -28676,9 +28769,10 @@ void *xsd__boolean::soap_get(struct soap *soap, const char *tag,
   return soap_get_xsd__boolean(soap, this, tag, type);
 }
 
-SOAP_FMAC3 xsd__boolean *SOAP_FMAC4
-soap_get_xsd__boolean(struct soap *soap, xsd__boolean *p, const char *tag,
-                      const char *type) {
+SOAP_FMAC3 xsd__boolean *SOAP_FMAC4 soap_get_xsd__boolean(struct soap *soap,
+                                                          xsd__boolean *p,
+                                                          const char *tag,
+                                                          const char *type) {
   if ((p = soap_in_xsd__boolean(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -28746,9 +28840,10 @@ int xsd__anyType::soap_out(struct soap *soap, const char *tag, int id,
   return soap_out_xsd__anyType(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_xsd__anyType(struct soap *soap, const char *tag, int id,
-                      const xsd__anyType *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_xsd__anyType(struct soap *soap,
+                                                const char *tag, int id,
+                                                const xsd__anyType *a,
+                                                const char *type) {
   return soap_outliteral(soap, tag, &(a->xsd__anyType::__item), NULL);
 }
 
@@ -28757,9 +28852,10 @@ void *xsd__anyType::soap_in(struct soap *soap, const char *tag,
   return soap_in_xsd__anyType(soap, tag, this, type);
 }
 
-SOAP_FMAC3 xsd__anyType *SOAP_FMAC4
-soap_in_xsd__anyType(struct soap *soap, const char *tag, xsd__anyType *a,
-                     const char *type) {
+SOAP_FMAC3 xsd__anyType *SOAP_FMAC4 soap_in_xsd__anyType(struct soap *soap,
+                                                         const char *tag,
+                                                         xsd__anyType *a,
+                                                         const char *type) {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
@@ -28795,9 +28891,10 @@ void *xsd__anyType::soap_get(struct soap *soap, const char *tag,
   return soap_get_xsd__anyType(soap, this, tag, type);
 }
 
-SOAP_FMAC3 xsd__anyType *SOAP_FMAC4
-soap_get_xsd__anyType(struct soap *soap, xsd__anyType *p, const char *tag,
-                      const char *type) {
+SOAP_FMAC3 xsd__anyType *SOAP_FMAC4 soap_get_xsd__anyType(struct soap *soap,
+                                                          xsd__anyType *p,
+                                                          const char *tag,
+                                                          const char *type) {
   if ((p = soap_in_xsd__anyType(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -30924,9 +31021,8 @@ soap_default_SOAP_ENV__Fault(struct soap *soap, struct SOAP_ENV__Fault *a) {
   a->SOAP_ENV__Detail = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_SOAP_ENV__Fault(struct soap *soap,
-                               const struct SOAP_ENV__Fault *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Fault(
+    struct soap *soap, const struct SOAP_ENV__Fault *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -31123,9 +31219,10 @@ soap_instantiate_SOAP_ENV__Fault(struct soap *soap, int n, const char *type,
   return (struct SOAP_ENV__Fault *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_SOAP_ENV__Fault(struct soap *soap, int st, int tt, void *p,
-                          size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Fault(struct soap *soap, int st,
+                                                     int tt, void *p,
+                                                     size_t len, const void *q,
+                                                     size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -31147,9 +31244,8 @@ soap_default_SOAP_ENV__Reason(struct soap *soap, struct SOAP_ENV__Reason *a) {
   soap_default_string(soap, &a->SOAP_ENV__Text);
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_SOAP_ENV__Reason(struct soap *soap,
-                                const struct SOAP_ENV__Reason *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Reason(
+    struct soap *soap, const struct SOAP_ENV__Reason *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -31264,9 +31360,10 @@ soap_instantiate_SOAP_ENV__Reason(struct soap *soap, int n, const char *type,
   return (struct SOAP_ENV__Reason *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_SOAP_ENV__Reason(struct soap *soap, int st, int tt, void *p,
-                           size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Reason(struct soap *soap, int st,
+                                                      int tt, void *p,
+                                                      size_t len, const void *q,
+                                                      size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -31289,9 +31386,8 @@ soap_default_SOAP_ENV__Code(struct soap *soap, struct SOAP_ENV__Code *a) {
   a->SOAP_ENV__Subcode = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_SOAP_ENV__Code(struct soap *soap,
-                              const struct SOAP_ENV__Code *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Code(
+    struct soap *soap, const struct SOAP_ENV__Code *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -31437,9 +31533,8 @@ soap_default_SOAP_ENV__Header(struct soap *soap, struct SOAP_ENV__Header *a) {
   (void)a; /* appease -Wall -Werror */
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_SOAP_ENV__Header(struct soap *soap,
-                                const struct SOAP_ENV__Header *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Header(
+    struct soap *soap, const struct SOAP_ENV__Header *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -31541,9 +31636,10 @@ soap_instantiate_SOAP_ENV__Header(struct soap *soap, int n, const char *type,
   return (struct SOAP_ENV__Header *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_SOAP_ENV__Header(struct soap *soap, int st, int tt, void *p,
-                           size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Header(struct soap *soap, int st,
+                                                      int tt, void *p,
+                                                      size_t len, const void *q,
+                                                      size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -31556,17 +31652,15 @@ soap_copy_SOAP_ENV__Header(struct soap *soap, int st, int tt, void *p,
 
 #endif
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__getEntityInfo(struct soap *soap,
-                                  struct __ns1__getEntityInfo *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getEntityInfo(
+    struct soap *soap, struct __ns1__getEntityInfo *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__getEntityInfo_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__getEntityInfo(struct soap *soap,
-                                    const struct __ns1__getEntityInfo *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getEntityInfo(
+    struct soap *soap, const struct __ns1__getEntityInfo *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -31574,10 +31668,9 @@ soap_serialize___ns1__getEntityInfo(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__getEntityInfo(struct soap *soap, const char *tag, int id,
-                              const struct __ns1__getEntityInfo *a,
-                              const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getEntityInfo(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__getEntityInfo *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -31621,10 +31714,9 @@ soap_in___ns1__getEntityInfo(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__getEntityInfo(struct soap *soap,
-                              const struct __ns1__getEntityInfo *a,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getEntityInfo(
+    struct soap *soap, const struct __ns1__getEntityInfo *a, const char *tag,
+    const char *type) {
   int id = 0;
   if (soap_out___ns1__getEntityInfo(soap, tag ? tag : "-ns1:getEntityInfo", id,
                                     a, type))
@@ -31670,9 +31762,11 @@ soap_instantiate___ns1__getEntityInfo(struct soap *soap, int n,
   return (struct __ns1__getEntityInfo *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__getEntityInfo(struct soap *soap, int st, int tt, void *p,
-                               size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getEntityInfo(struct soap *soap,
+                                                          int st, int tt,
+                                                          void *p, size_t len,
+                                                          const void *q,
+                                                          size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -31691,9 +31785,8 @@ soap_default___ns1__deleteMany(struct soap *soap, struct __ns1__deleteMany *a) {
   a->ns1__deleteMany_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__deleteMany(struct soap *soap,
-                                 const struct __ns1__deleteMany *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__deleteMany(
+    struct soap *soap, const struct __ns1__deleteMany *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -31701,10 +31794,9 @@ soap_serialize___ns1__deleteMany(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__deleteMany(struct soap *soap, const char *tag, int id,
-                           const struct __ns1__deleteMany *a,
-                           const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__deleteMany(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__deleteMany *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -31793,9 +31885,11 @@ soap_instantiate___ns1__deleteMany(struct soap *soap, int n, const char *type,
   return (struct __ns1__deleteMany *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__deleteMany(struct soap *soap, int st, int tt, void *p,
-                            size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__deleteMany(struct soap *soap,
+                                                       int st, int tt, void *p,
+                                                       size_t len,
+                                                       const void *q,
+                                                       size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -31807,9 +31901,8 @@ soap_copy___ns1__deleteMany(struct soap *soap, int st, int tt, void *p,
   *(struct __ns1__deleteMany *)p = *(struct __ns1__deleteMany *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__deleteManyResponse(struct soap *soap,
-                                       struct __ns1__deleteManyResponse *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__deleteManyResponse(
+    struct soap *soap, struct __ns1__deleteManyResponse *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__deleteManyResponse_ = NULL;
@@ -31825,10 +31918,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__deleteManyResponse(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__deleteManyResponse(struct soap *soap, const char *tag, int id,
-                                   const struct __ns1__deleteManyResponse *a,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__deleteManyResponse(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__deleteManyResponse *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -31876,10 +31968,9 @@ soap_in___ns1__deleteManyResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__deleteManyResponse(struct soap *soap,
-                                   const struct __ns1__deleteManyResponse *a,
-                                   const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__deleteManyResponse(
+    struct soap *soap, const struct __ns1__deleteManyResponse *a,
+    const char *tag, const char *type) {
   int id = 0;
   if (soap_out___ns1__deleteManyResponse(
           soap, tag ? tag : "-ns1:deleteManyResponse", id, a, type))
@@ -31950,9 +32041,8 @@ soap_default___ns1__createMany(struct soap *soap, struct __ns1__createMany *a) {
   a->ns1__createMany_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__createMany(struct soap *soap,
-                                 const struct __ns1__createMany *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__createMany(
+    struct soap *soap, const struct __ns1__createMany *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -31960,10 +32050,9 @@ soap_serialize___ns1__createMany(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__createMany(struct soap *soap, const char *tag, int id,
-                           const struct __ns1__createMany *a,
-                           const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__createMany(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__createMany *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -32052,9 +32141,11 @@ soap_instantiate___ns1__createMany(struct soap *soap, int n, const char *type,
   return (struct __ns1__createMany *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__createMany(struct soap *soap, int st, int tt, void *p,
-                            size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__createMany(struct soap *soap,
+                                                       int st, int tt, void *p,
+                                                       size_t len,
+                                                       const void *q,
+                                                       size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -32066,9 +32157,8 @@ soap_copy___ns1__createMany(struct soap *soap, int st, int tt, void *p,
   *(struct __ns1__createMany *)p = *(struct __ns1__createMany *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__luceneGetPopulating(struct soap *soap,
-                                        struct __ns1__luceneGetPopulating *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__luceneGetPopulating(
+    struct soap *soap, struct __ns1__luceneGetPopulating *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__luceneGetPopulating_ = NULL;
@@ -32084,10 +32174,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__luceneGetPopulating(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__luceneGetPopulating(struct soap *soap, const char *tag, int id,
-                                    const struct __ns1__luceneGetPopulating *a,
-                                    const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__luceneGetPopulating(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__luceneGetPopulating *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -32133,10 +32222,9 @@ soap_in___ns1__luceneGetPopulating(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__luceneGetPopulating(struct soap *soap,
-                                    const struct __ns1__luceneGetPopulating *a,
-                                    const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__luceneGetPopulating(
+    struct soap *soap, const struct __ns1__luceneGetPopulating *a,
+    const char *tag, const char *type) {
   int id = 0;
   if (soap_out___ns1__luceneGetPopulating(
           soap, tag ? tag : "-ns1:luceneGetPopulating", id, a, type))
@@ -32200,17 +32288,15 @@ soap_copy___ns1__luceneGetPopulating(struct soap *soap, int st, int tt, void *p,
       *(struct __ns1__luceneGetPopulating *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__luceneSearch(struct soap *soap,
-                                 struct __ns1__luceneSearch *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__luceneSearch(
+    struct soap *soap, struct __ns1__luceneSearch *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__luceneSearch_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__luceneSearch(struct soap *soap,
-                                   const struct __ns1__luceneSearch *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__luceneSearch(
+    struct soap *soap, const struct __ns1__luceneSearch *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -32218,10 +32304,9 @@ soap_serialize___ns1__luceneSearch(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__luceneSearch(struct soap *soap, const char *tag, int id,
-                             const struct __ns1__luceneSearch *a,
-                             const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__luceneSearch(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__luceneSearch *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -32265,10 +32350,9 @@ soap_in___ns1__luceneSearch(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__luceneSearch(struct soap *soap,
-                             const struct __ns1__luceneSearch *a,
-                             const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__luceneSearch(
+    struct soap *soap, const struct __ns1__luceneSearch *a, const char *tag,
+    const char *type) {
   int id = 0;
   if (soap_out___ns1__luceneSearch(soap, tag ? tag : "-ns1:luceneSearch", id, a,
                                    type))
@@ -32312,9 +32396,11 @@ soap_instantiate___ns1__luceneSearch(struct soap *soap, int n, const char *type,
   return (struct __ns1__luceneSearch *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__luceneSearch(struct soap *soap, int st, int tt, void *p,
-                              size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__luceneSearch(struct soap *soap,
+                                                         int st, int tt,
+                                                         void *p, size_t len,
+                                                         const void *q,
+                                                         size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -32326,17 +32412,15 @@ soap_copy___ns1__luceneSearch(struct soap *soap, int st, int tt, void *p,
   *(struct __ns1__luceneSearch *)p = *(struct __ns1__luceneSearch *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__luceneCommit(struct soap *soap,
-                                 struct __ns1__luceneCommit *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__luceneCommit(
+    struct soap *soap, struct __ns1__luceneCommit *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__luceneCommit_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__luceneCommit(struct soap *soap,
-                                   const struct __ns1__luceneCommit *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__luceneCommit(
+    struct soap *soap, const struct __ns1__luceneCommit *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -32344,10 +32428,9 @@ soap_serialize___ns1__luceneCommit(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__luceneCommit(struct soap *soap, const char *tag, int id,
-                             const struct __ns1__luceneCommit *a,
-                             const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__luceneCommit(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__luceneCommit *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -32391,10 +32474,9 @@ soap_in___ns1__luceneCommit(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__luceneCommit(struct soap *soap,
-                             const struct __ns1__luceneCommit *a,
-                             const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__luceneCommit(
+    struct soap *soap, const struct __ns1__luceneCommit *a, const char *tag,
+    const char *type) {
   int id = 0;
   if (soap_out___ns1__luceneCommit(soap, tag ? tag : "-ns1:luceneCommit", id, a,
                                    type))
@@ -32438,9 +32520,11 @@ soap_instantiate___ns1__luceneCommit(struct soap *soap, int n, const char *type,
   return (struct __ns1__luceneCommit *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__luceneCommit(struct soap *soap, int st, int tt, void *p,
-                              size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__luceneCommit(struct soap *soap,
+                                                         int st, int tt,
+                                                         void *p, size_t len,
+                                                         const void *q,
+                                                         size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -32572,10 +32656,9 @@ soap_instantiate___ns1__luceneCommitResponse(struct soap *soap, int n,
   return (struct __ns1__luceneCommitResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__luceneCommitResponse(struct soap *soap, int st, int tt,
-                                      void *p, size_t len, const void *q,
-                                      size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__luceneCommitResponse(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -32589,17 +32672,15 @@ soap_copy___ns1__luceneCommitResponse(struct soap *soap, int st, int tt,
       *(struct __ns1__luceneCommitResponse *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__luceneClear(struct soap *soap,
-                                struct __ns1__luceneClear *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__luceneClear(
+    struct soap *soap, struct __ns1__luceneClear *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__luceneClear_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__luceneClear(struct soap *soap,
-                                  const struct __ns1__luceneClear *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__luceneClear(
+    struct soap *soap, const struct __ns1__luceneClear *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -32607,10 +32688,9 @@ soap_serialize___ns1__luceneClear(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__luceneClear(struct soap *soap, const char *tag, int id,
-                            const struct __ns1__luceneClear *a,
-                            const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__luceneClear(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__luceneClear *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -32654,10 +32734,9 @@ soap_in___ns1__luceneClear(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__luceneClear(struct soap *soap,
-                            const struct __ns1__luceneClear *a, const char *tag,
-                            const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__luceneClear(
+    struct soap *soap, const struct __ns1__luceneClear *a, const char *tag,
+    const char *type) {
   int id = 0;
   if (soap_out___ns1__luceneClear(soap, tag ? tag : "-ns1:luceneClear", id, a,
                                   type))
@@ -32701,9 +32780,11 @@ soap_instantiate___ns1__luceneClear(struct soap *soap, int n, const char *type,
   return (struct __ns1__luceneClear *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__luceneClear(struct soap *soap, int st, int tt, void *p,
-                             size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__luceneClear(struct soap *soap,
+                                                        int st, int tt, void *p,
+                                                        size_t len,
+                                                        const void *q,
+                                                        size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -32715,9 +32796,8 @@ soap_copy___ns1__luceneClear(struct soap *soap, int st, int tt, void *p,
   *(struct __ns1__luceneClear *)p = *(struct __ns1__luceneClear *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__luceneClearResponse(struct soap *soap,
-                                        struct __ns1__luceneClearResponse *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__luceneClearResponse(
+    struct soap *soap, struct __ns1__luceneClearResponse *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__luceneClearResponse_ = NULL;
@@ -32733,10 +32813,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__luceneClearResponse(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__luceneClearResponse(struct soap *soap, const char *tag, int id,
-                                    const struct __ns1__luceneClearResponse *a,
-                                    const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__luceneClearResponse(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__luceneClearResponse *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -32785,10 +32864,9 @@ soap_in___ns1__luceneClearResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__luceneClearResponse(struct soap *soap,
-                                    const struct __ns1__luceneClearResponse *a,
-                                    const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__luceneClearResponse(
+    struct soap *soap, const struct __ns1__luceneClearResponse *a,
+    const char *tag, const char *type) {
   int id = 0;
   if (soap_out___ns1__luceneClearResponse(
           soap, tag ? tag : "-ns1:luceneClearResponse", id, a, type))
@@ -32852,17 +32930,15 @@ soap_copy___ns1__luceneClearResponse(struct soap *soap, int st, int tt, void *p,
       *(struct __ns1__luceneClearResponse *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__lucenePopulate(struct soap *soap,
-                                   struct __ns1__lucenePopulate *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__lucenePopulate(
+    struct soap *soap, struct __ns1__lucenePopulate *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__lucenePopulate_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__lucenePopulate(struct soap *soap,
-                                     const struct __ns1__lucenePopulate *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__lucenePopulate(
+    struct soap *soap, const struct __ns1__lucenePopulate *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -32870,10 +32946,9 @@ soap_serialize___ns1__lucenePopulate(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__lucenePopulate(struct soap *soap, const char *tag, int id,
-                               const struct __ns1__lucenePopulate *a,
-                               const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__lucenePopulate(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__lucenePopulate *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -32918,10 +32993,9 @@ soap_in___ns1__lucenePopulate(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__lucenePopulate(struct soap *soap,
-                               const struct __ns1__lucenePopulate *a,
-                               const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__lucenePopulate(
+    struct soap *soap, const struct __ns1__lucenePopulate *a, const char *tag,
+    const char *type) {
   int id = 0;
   if (soap_out___ns1__lucenePopulate(soap, tag ? tag : "-ns1:lucenePopulate",
                                      id, a, type))
@@ -32968,9 +33042,11 @@ soap_instantiate___ns1__lucenePopulate(struct soap *soap, int n,
   return (struct __ns1__lucenePopulate *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__lucenePopulate(struct soap *soap, int st, int tt, void *p,
-                                size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__lucenePopulate(struct soap *soap,
+                                                           int st, int tt,
+                                                           void *p, size_t len,
+                                                           const void *q,
+                                                           size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -33103,10 +33179,9 @@ soap_instantiate___ns1__lucenePopulateResponse(struct soap *soap, int n,
   return (struct __ns1__lucenePopulateResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__lucenePopulateResponse(struct soap *soap, int st, int tt,
-                                        void *p, size_t len, const void *q,
-                                        size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__lucenePopulateResponse(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -33120,17 +33195,15 @@ soap_copy___ns1__lucenePopulateResponse(struct soap *soap, int st, int tt,
       *(struct __ns1__lucenePopulateResponse *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__isAccessAllowed(struct soap *soap,
-                                    struct __ns1__isAccessAllowed *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__isAccessAllowed(
+    struct soap *soap, struct __ns1__isAccessAllowed *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__isAccessAllowed_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__isAccessAllowed(struct soap *soap,
-                                      const struct __ns1__isAccessAllowed *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__isAccessAllowed(
+    struct soap *soap, const struct __ns1__isAccessAllowed *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -33138,10 +33211,9 @@ soap_serialize___ns1__isAccessAllowed(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__isAccessAllowed(struct soap *soap, const char *tag, int id,
-                                const struct __ns1__isAccessAllowed *a,
-                                const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__isAccessAllowed(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__isAccessAllowed *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -33186,10 +33258,9 @@ soap_in___ns1__isAccessAllowed(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__isAccessAllowed(struct soap *soap,
-                                const struct __ns1__isAccessAllowed *a,
-                                const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__isAccessAllowed(
+    struct soap *soap, const struct __ns1__isAccessAllowed *a, const char *tag,
+    const char *type) {
   int id = 0;
   if (soap_out___ns1__isAccessAllowed(soap, tag ? tag : "-ns1:isAccessAllowed",
                                       id, a, type))
@@ -33236,9 +33307,11 @@ soap_instantiate___ns1__isAccessAllowed(struct soap *soap, int n,
   return (struct __ns1__isAccessAllowed *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__isAccessAllowed(struct soap *soap, int st, int tt, void *p,
-                                 size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__isAccessAllowed(struct soap *soap,
+                                                            int st, int tt,
+                                                            void *p, size_t len,
+                                                            const void *q,
+                                                            size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -33257,9 +33330,8 @@ soap_default___ns1__searchText(struct soap *soap, struct __ns1__searchText *a) {
   a->ns1__searchText_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__searchText(struct soap *soap,
-                                 const struct __ns1__searchText *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__searchText(
+    struct soap *soap, const struct __ns1__searchText *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -33267,10 +33339,9 @@ soap_serialize___ns1__searchText(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__searchText(struct soap *soap, const char *tag, int id,
-                           const struct __ns1__searchText *a,
-                           const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__searchText(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__searchText *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -33359,9 +33430,11 @@ soap_instantiate___ns1__searchText(struct soap *soap, int n, const char *type,
   return (struct __ns1__searchText *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__searchText(struct soap *soap, int st, int tt, void *p,
-                            size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__searchText(struct soap *soap,
+                                                       int st, int tt, void *p,
+                                                       size_t len,
+                                                       const void *q,
+                                                       size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -33373,9 +33446,8 @@ soap_copy___ns1__searchText(struct soap *soap, int st, int tt, void *p,
   *(struct __ns1__searchText *)p = *(struct __ns1__searchText *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__getRemainingMinutes(struct soap *soap,
-                                        struct __ns1__getRemainingMinutes *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getRemainingMinutes(
+    struct soap *soap, struct __ns1__getRemainingMinutes *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__getRemainingMinutes_ = NULL;
@@ -33391,10 +33463,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getRemainingMinutes(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__getRemainingMinutes(struct soap *soap, const char *tag, int id,
-                                    const struct __ns1__getRemainingMinutes *a,
-                                    const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getRemainingMinutes(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__getRemainingMinutes *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -33440,10 +33511,9 @@ soap_in___ns1__getRemainingMinutes(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__getRemainingMinutes(struct soap *soap,
-                                    const struct __ns1__getRemainingMinutes *a,
-                                    const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getRemainingMinutes(
+    struct soap *soap, const struct __ns1__getRemainingMinutes *a,
+    const char *tag, const char *type) {
   int id = 0;
   if (soap_out___ns1__getRemainingMinutes(
           soap, tag ? tag : "-ns1:getRemainingMinutes", id, a, type))
@@ -33507,8 +33577,8 @@ soap_copy___ns1__getRemainingMinutes(struct soap *soap, int st, int tt, void *p,
       *(struct __ns1__getRemainingMinutes *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__logout(struct soap *soap, struct __ns1__logout *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__logout(struct soap *soap,
+                                                      struct __ns1__logout *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__logout_ = NULL;
@@ -33523,9 +33593,10 @@ soap_serialize___ns1__logout(struct soap *soap, const struct __ns1__logout *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__logout(struct soap *soap, const char *tag, int id,
-                       const struct __ns1__logout *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__logout(struct soap *soap,
+                                                 const char *tag, int id,
+                                                 const struct __ns1__logout *a,
+                                                 const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -33568,9 +33639,10 @@ soap_in___ns1__logout(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__logout(struct soap *soap, const struct __ns1__logout *a,
-                       const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__logout(struct soap *soap,
+                                                 const struct __ns1__logout *a,
+                                                 const char *tag,
+                                                 const char *type) {
   int id = 0;
   if (soap_out___ns1__logout(soap, tag ? tag : "-ns1:logout", id, a, type))
     return soap->error;
@@ -33626,17 +33698,15 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__logout(struct soap *soap, int st,
   *(struct __ns1__logout *)p = *(struct __ns1__logout *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__logoutResponse(struct soap *soap,
-                                   struct __ns1__logoutResponse *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__logoutResponse(
+    struct soap *soap, struct __ns1__logoutResponse *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__logoutResponse_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__logoutResponse(struct soap *soap,
-                                     const struct __ns1__logoutResponse *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__logoutResponse(
+    struct soap *soap, const struct __ns1__logoutResponse *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -33644,10 +33714,9 @@ soap_serialize___ns1__logoutResponse(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__logoutResponse(struct soap *soap, const char *tag, int id,
-                               const struct __ns1__logoutResponse *a,
-                               const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__logoutResponse(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__logoutResponse *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -33695,10 +33764,9 @@ soap_in___ns1__logoutResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__logoutResponse(struct soap *soap,
-                               const struct __ns1__logoutResponse *a,
-                               const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__logoutResponse(
+    struct soap *soap, const struct __ns1__logoutResponse *a, const char *tag,
+    const char *type) {
   int id = 0;
   if (soap_out___ns1__logoutResponse(soap, tag ? tag : "-ns1:logoutResponse",
                                      id, a, type))
@@ -33745,9 +33813,11 @@ soap_instantiate___ns1__logoutResponse(struct soap *soap, int n,
   return (struct __ns1__logoutResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__logoutResponse(struct soap *soap, int st, int tt, void *p,
-                                size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__logoutResponse(struct soap *soap,
+                                                           int st, int tt,
+                                                           void *p, size_t len,
+                                                           const void *q,
+                                                           size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -33759,8 +33829,8 @@ soap_copy___ns1__logoutResponse(struct soap *soap, int st, int tt, void *p,
   *(struct __ns1__logoutResponse *)p = *(struct __ns1__logoutResponse *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__dummy(struct soap *soap, struct __ns1__dummy *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__dummy(struct soap *soap,
+                                                     struct __ns1__dummy *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__dummy_ = NULL;
@@ -33775,9 +33845,10 @@ soap_serialize___ns1__dummy(struct soap *soap, const struct __ns1__dummy *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__dummy(struct soap *soap, const char *tag, int id,
-                      const struct __ns1__dummy *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__dummy(struct soap *soap,
+                                                const char *tag, int id,
+                                                const struct __ns1__dummy *a,
+                                                const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -33819,9 +33890,10 @@ soap_in___ns1__dummy(struct soap *soap, const char *tag, struct __ns1__dummy *a,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__dummy(struct soap *soap, const struct __ns1__dummy *a,
-                      const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__dummy(struct soap *soap,
+                                                const struct __ns1__dummy *a,
+                                                const char *tag,
+                                                const char *type) {
   int id = 0;
   if (soap_out___ns1__dummy(soap, tag ? tag : "-ns1:dummy", id, a, type))
     return soap->error;
@@ -33877,17 +33949,15 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__dummy(struct soap *soap, int st,
   *(struct __ns1__dummy *)p = *(struct __ns1__dummy *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__dummyResponse(struct soap *soap,
-                                  struct __ns1__dummyResponse *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__dummyResponse(
+    struct soap *soap, struct __ns1__dummyResponse *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__dummyResponse_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__dummyResponse(struct soap *soap,
-                                    const struct __ns1__dummyResponse *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__dummyResponse(
+    struct soap *soap, const struct __ns1__dummyResponse *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -33895,10 +33965,9 @@ soap_serialize___ns1__dummyResponse(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__dummyResponse(struct soap *soap, const char *tag, int id,
-                              const struct __ns1__dummyResponse *a,
-                              const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__dummyResponse(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__dummyResponse *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -33945,10 +34014,9 @@ soap_in___ns1__dummyResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__dummyResponse(struct soap *soap,
-                              const struct __ns1__dummyResponse *a,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__dummyResponse(
+    struct soap *soap, const struct __ns1__dummyResponse *a, const char *tag,
+    const char *type) {
   int id = 0;
   if (soap_out___ns1__dummyResponse(soap, tag ? tag : "-ns1:dummyResponse", id,
                                     a, type))
@@ -33994,9 +34062,11 @@ soap_instantiate___ns1__dummyResponse(struct soap *soap, int n,
   return (struct __ns1__dummyResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__dummyResponse(struct soap *soap, int st, int tt, void *p,
-                               size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__dummyResponse(struct soap *soap,
+                                                          int st, int tt,
+                                                          void *p, size_t len,
+                                                          const void *q,
+                                                          size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -34015,9 +34085,8 @@ soap_default___ns1__refresh(struct soap *soap, struct __ns1__refresh *a) {
   a->ns1__refresh_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__refresh(struct soap *soap,
-                              const struct __ns1__refresh *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__refresh(
+    struct soap *soap, const struct __ns1__refresh *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -34128,17 +34197,15 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__refresh(struct soap *soap, int st,
   *(struct __ns1__refresh *)p = *(struct __ns1__refresh *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__refreshResponse(struct soap *soap,
-                                    struct __ns1__refreshResponse *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__refreshResponse(
+    struct soap *soap, struct __ns1__refreshResponse *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__refreshResponse_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__refreshResponse(struct soap *soap,
-                                      const struct __ns1__refreshResponse *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__refreshResponse(
+    struct soap *soap, const struct __ns1__refreshResponse *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -34146,10 +34213,9 @@ soap_serialize___ns1__refreshResponse(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__refreshResponse(struct soap *soap, const char *tag, int id,
-                                const struct __ns1__refreshResponse *a,
-                                const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__refreshResponse(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__refreshResponse *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -34197,10 +34263,9 @@ soap_in___ns1__refreshResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__refreshResponse(struct soap *soap,
-                                const struct __ns1__refreshResponse *a,
-                                const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__refreshResponse(
+    struct soap *soap, const struct __ns1__refreshResponse *a, const char *tag,
+    const char *type) {
   int id = 0;
   if (soap_out___ns1__refreshResponse(soap, tag ? tag : "-ns1:refreshResponse",
                                       id, a, type))
@@ -34247,9 +34312,11 @@ soap_instantiate___ns1__refreshResponse(struct soap *soap, int n,
   return (struct __ns1__refreshResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__refreshResponse(struct soap *soap, int st, int tt, void *p,
-                                 size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__refreshResponse(struct soap *soap,
+                                                            int st, int tt,
+                                                            void *p, size_t len,
+                                                            const void *q,
+                                                            size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -34261,17 +34328,15 @@ soap_copy___ns1__refreshResponse(struct soap *soap, int st, int tt, void *p,
   *(struct __ns1__refreshResponse *)p = *(struct __ns1__refreshResponse *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__getEntityNames(struct soap *soap,
-                                   struct __ns1__getEntityNames *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getEntityNames(
+    struct soap *soap, struct __ns1__getEntityNames *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__getEntityNames_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__getEntityNames(struct soap *soap,
-                                     const struct __ns1__getEntityNames *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getEntityNames(
+    struct soap *soap, const struct __ns1__getEntityNames *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -34279,10 +34344,9 @@ soap_serialize___ns1__getEntityNames(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__getEntityNames(struct soap *soap, const char *tag, int id,
-                               const struct __ns1__getEntityNames *a,
-                               const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getEntityNames(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__getEntityNames *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -34327,10 +34391,9 @@ soap_in___ns1__getEntityNames(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__getEntityNames(struct soap *soap,
-                               const struct __ns1__getEntityNames *a,
-                               const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getEntityNames(
+    struct soap *soap, const struct __ns1__getEntityNames *a, const char *tag,
+    const char *type) {
   int id = 0;
   if (soap_out___ns1__getEntityNames(soap, tag ? tag : "-ns1:getEntityNames",
                                      id, a, type))
@@ -34377,9 +34440,11 @@ soap_instantiate___ns1__getEntityNames(struct soap *soap, int n,
   return (struct __ns1__getEntityNames *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__getEntityNames(struct soap *soap, int st, int tt, void *p,
-                                size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getEntityNames(struct soap *soap,
+                                                           int st, int tt,
+                                                           void *p, size_t len,
+                                                           const void *q,
+                                                           size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -34391,17 +34456,15 @@ soap_copy___ns1__getEntityNames(struct soap *soap, int st, int tt, void *p,
   *(struct __ns1__getEntityNames *)p = *(struct __ns1__getEntityNames *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__getApiVersion(struct soap *soap,
-                                  struct __ns1__getApiVersion *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getApiVersion(
+    struct soap *soap, struct __ns1__getApiVersion *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__getApiVersion_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__getApiVersion(struct soap *soap,
-                                    const struct __ns1__getApiVersion *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getApiVersion(
+    struct soap *soap, const struct __ns1__getApiVersion *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -34409,10 +34472,9 @@ soap_serialize___ns1__getApiVersion(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__getApiVersion(struct soap *soap, const char *tag, int id,
-                              const struct __ns1__getApiVersion *a,
-                              const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getApiVersion(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__getApiVersion *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -34456,10 +34518,9 @@ soap_in___ns1__getApiVersion(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__getApiVersion(struct soap *soap,
-                              const struct __ns1__getApiVersion *a,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getApiVersion(
+    struct soap *soap, const struct __ns1__getApiVersion *a, const char *tag,
+    const char *type) {
   int id = 0;
   if (soap_out___ns1__getApiVersion(soap, tag ? tag : "-ns1:getApiVersion", id,
                                     a, type))
@@ -34505,9 +34566,11 @@ soap_instantiate___ns1__getApiVersion(struct soap *soap, int n,
   return (struct __ns1__getApiVersion *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__getApiVersion(struct soap *soap, int st, int tt, void *p,
-                               size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getApiVersion(struct soap *soap,
+                                                          int st, int tt,
+                                                          void *p, size_t len,
+                                                          const void *q,
+                                                          size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -34519,8 +34582,8 @@ soap_copy___ns1__getApiVersion(struct soap *soap, int st, int tt, void *p,
   *(struct __ns1__getApiVersion *)p = *(struct __ns1__getApiVersion *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__update(struct soap *soap, struct __ns1__update *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__update(struct soap *soap,
+                                                      struct __ns1__update *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__update_ = NULL;
@@ -34535,9 +34598,10 @@ soap_serialize___ns1__update(struct soap *soap, const struct __ns1__update *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__update(struct soap *soap, const char *tag, int id,
-                       const struct __ns1__update *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__update(struct soap *soap,
+                                                 const char *tag, int id,
+                                                 const struct __ns1__update *a,
+                                                 const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -34580,9 +34644,10 @@ soap_in___ns1__update(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__update(struct soap *soap, const struct __ns1__update *a,
-                       const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__update(struct soap *soap,
+                                                 const struct __ns1__update *a,
+                                                 const char *tag,
+                                                 const char *type) {
   int id = 0;
   if (soap_out___ns1__update(soap, tag ? tag : "-ns1:update", id, a, type))
     return soap->error;
@@ -34638,17 +34703,15 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__update(struct soap *soap, int st,
   *(struct __ns1__update *)p = *(struct __ns1__update *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__updateResponse(struct soap *soap,
-                                   struct __ns1__updateResponse *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__updateResponse(
+    struct soap *soap, struct __ns1__updateResponse *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__updateResponse_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__updateResponse(struct soap *soap,
-                                     const struct __ns1__updateResponse *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__updateResponse(
+    struct soap *soap, const struct __ns1__updateResponse *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -34656,10 +34719,9 @@ soap_serialize___ns1__updateResponse(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__updateResponse(struct soap *soap, const char *tag, int id,
-                               const struct __ns1__updateResponse *a,
-                               const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__updateResponse(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__updateResponse *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -34707,10 +34769,9 @@ soap_in___ns1__updateResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__updateResponse(struct soap *soap,
-                               const struct __ns1__updateResponse *a,
-                               const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__updateResponse(
+    struct soap *soap, const struct __ns1__updateResponse *a, const char *tag,
+    const char *type) {
   int id = 0;
   if (soap_out___ns1__updateResponse(soap, tag ? tag : "-ns1:updateResponse",
                                      id, a, type))
@@ -34757,9 +34818,11 @@ soap_instantiate___ns1__updateResponse(struct soap *soap, int n,
   return (struct __ns1__updateResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__updateResponse(struct soap *soap, int st, int tt, void *p,
-                                size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__updateResponse(struct soap *soap,
+                                                           int st, int tt,
+                                                           void *p, size_t len,
+                                                           const void *q,
+                                                           size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -34771,8 +34834,8 @@ soap_copy___ns1__updateResponse(struct soap *soap, int st, int tt, void *p,
   *(struct __ns1__updateResponse *)p = *(struct __ns1__updateResponse *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__create(struct soap *soap, struct __ns1__create *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__create(struct soap *soap,
+                                                      struct __ns1__create *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__create_ = NULL;
@@ -34787,9 +34850,10 @@ soap_serialize___ns1__create(struct soap *soap, const struct __ns1__create *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__create(struct soap *soap, const char *tag, int id,
-                       const struct __ns1__create *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__create(struct soap *soap,
+                                                 const char *tag, int id,
+                                                 const struct __ns1__create *a,
+                                                 const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -34832,9 +34896,10 @@ soap_in___ns1__create(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__create(struct soap *soap, const struct __ns1__create *a,
-                       const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__create(struct soap *soap,
+                                                 const struct __ns1__create *a,
+                                                 const char *tag,
+                                                 const char *type) {
   int id = 0;
   if (soap_out___ns1__create(soap, tag ? tag : "-ns1:create", id, a, type))
     return soap->error;
@@ -34890,8 +34955,8 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__create(struct soap *soap, int st,
   *(struct __ns1__create *)p = *(struct __ns1__create *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__search(struct soap *soap, struct __ns1__search *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__search(struct soap *soap,
+                                                      struct __ns1__search *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__search_ = NULL;
@@ -34906,9 +34971,10 @@ soap_serialize___ns1__search(struct soap *soap, const struct __ns1__search *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__search(struct soap *soap, const char *tag, int id,
-                       const struct __ns1__search *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__search(struct soap *soap,
+                                                 const char *tag, int id,
+                                                 const struct __ns1__search *a,
+                                                 const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -34951,9 +35017,10 @@ soap_in___ns1__search(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__search(struct soap *soap, const struct __ns1__search *a,
-                       const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__search(struct soap *soap,
+                                                 const struct __ns1__search *a,
+                                                 const char *tag,
+                                                 const char *type) {
   int id = 0;
   if (soap_out___ns1__search(soap, tag ? tag : "-ns1:search", id, a, type))
     return soap->error;
@@ -35009,8 +35076,8 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__search(struct soap *soap, int st,
   *(struct __ns1__search *)p = *(struct __ns1__search *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__delete(struct soap *soap, struct __ns1__delete *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__delete(struct soap *soap,
+                                                      struct __ns1__delete *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__delete_ = NULL;
@@ -35025,9 +35092,10 @@ soap_serialize___ns1__delete(struct soap *soap, const struct __ns1__delete *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__delete(struct soap *soap, const char *tag, int id,
-                       const struct __ns1__delete *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__delete(struct soap *soap,
+                                                 const char *tag, int id,
+                                                 const struct __ns1__delete *a,
+                                                 const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -35070,9 +35138,10 @@ soap_in___ns1__delete(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__delete(struct soap *soap, const struct __ns1__delete *a,
-                       const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__delete(struct soap *soap,
+                                                 const struct __ns1__delete *a,
+                                                 const char *tag,
+                                                 const char *type) {
   int id = 0;
   if (soap_out___ns1__delete(soap, tag ? tag : "-ns1:delete", id, a, type))
     return soap->error;
@@ -35128,17 +35197,15 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__delete(struct soap *soap, int st,
   *(struct __ns1__delete *)p = *(struct __ns1__delete *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__deleteResponse(struct soap *soap,
-                                   struct __ns1__deleteResponse *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__deleteResponse(
+    struct soap *soap, struct __ns1__deleteResponse *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__deleteResponse_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__deleteResponse(struct soap *soap,
-                                     const struct __ns1__deleteResponse *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__deleteResponse(
+    struct soap *soap, const struct __ns1__deleteResponse *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -35146,10 +35213,9 @@ soap_serialize___ns1__deleteResponse(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__deleteResponse(struct soap *soap, const char *tag, int id,
-                               const struct __ns1__deleteResponse *a,
-                               const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__deleteResponse(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__deleteResponse *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -35197,10 +35263,9 @@ soap_in___ns1__deleteResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__deleteResponse(struct soap *soap,
-                               const struct __ns1__deleteResponse *a,
-                               const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__deleteResponse(
+    struct soap *soap, const struct __ns1__deleteResponse *a, const char *tag,
+    const char *type) {
   int id = 0;
   if (soap_out___ns1__deleteResponse(soap, tag ? tag : "-ns1:deleteResponse",
                                      id, a, type))
@@ -35247,9 +35312,11 @@ soap_instantiate___ns1__deleteResponse(struct soap *soap, int n,
   return (struct __ns1__deleteResponse *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__deleteResponse(struct soap *soap, int st, int tt, void *p,
-                                size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__deleteResponse(struct soap *soap,
+                                                           int st, int tt,
+                                                           void *p, size_t len,
+                                                           const void *q,
+                                                           size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -35261,17 +35328,15 @@ soap_copy___ns1__deleteResponse(struct soap *soap, int st, int tt, void *p,
   *(struct __ns1__deleteResponse *)p = *(struct __ns1__deleteResponse *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__getProperties(struct soap *soap,
-                                  struct __ns1__getProperties *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getProperties(
+    struct soap *soap, struct __ns1__getProperties *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__getProperties_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__getProperties(struct soap *soap,
-                                    const struct __ns1__getProperties *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getProperties(
+    struct soap *soap, const struct __ns1__getProperties *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -35279,10 +35344,9 @@ soap_serialize___ns1__getProperties(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__getProperties(struct soap *soap, const char *tag, int id,
-                              const struct __ns1__getProperties *a,
-                              const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getProperties(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__getProperties *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -35326,10 +35390,9 @@ soap_in___ns1__getProperties(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__getProperties(struct soap *soap,
-                              const struct __ns1__getProperties *a,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getProperties(
+    struct soap *soap, const struct __ns1__getProperties *a, const char *tag,
+    const char *type) {
   int id = 0;
   if (soap_out___ns1__getProperties(soap, tag ? tag : "-ns1:getProperties", id,
                                     a, type))
@@ -35375,9 +35438,11 @@ soap_instantiate___ns1__getProperties(struct soap *soap, int n,
   return (struct __ns1__getProperties *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__getProperties(struct soap *soap, int st, int tt, void *p,
-                               size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getProperties(struct soap *soap,
+                                                          int st, int tt,
+                                                          void *p, size_t len,
+                                                          const void *q,
+                                                          size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -35389,8 +35454,8 @@ soap_copy___ns1__getProperties(struct soap *soap, int st, int tt, void *p,
   *(struct __ns1__getProperties *)p = *(struct __ns1__getProperties *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__get(struct soap *soap, struct __ns1__get *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__get(struct soap *soap,
+                                                   struct __ns1__get *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__get_ = NULL;
@@ -35405,9 +35470,10 @@ soap_serialize___ns1__get(struct soap *soap, const struct __ns1__get *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__get(struct soap *soap, const char *tag, int id,
-                    const struct __ns1__get *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__get(struct soap *soap,
+                                              const char *tag, int id,
+                                              const struct __ns1__get *a,
+                                              const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -35449,9 +35515,10 @@ soap_in___ns1__get(struct soap *soap, const char *tag, struct __ns1__get *a,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__get(struct soap *soap, const struct __ns1__get *a,
-                    const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__get(struct soap *soap,
+                                              const struct __ns1__get *a,
+                                              const char *tag,
+                                              const char *type) {
   int id = 0;
   if (soap_out___ns1__get(soap, tag ? tag : "-ns1:get", id, a, type))
     return soap->error;
@@ -35506,17 +35573,15 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__get(struct soap *soap, int st,
   *(struct __ns1__get *)p = *(struct __ns1__get *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__getUserName(struct soap *soap,
-                                struct __ns1__getUserName *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getUserName(
+    struct soap *soap, struct __ns1__getUserName *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__getUserName_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize___ns1__getUserName(struct soap *soap,
-                                  const struct __ns1__getUserName *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getUserName(
+    struct soap *soap, const struct __ns1__getUserName *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -35524,10 +35589,9 @@ soap_serialize___ns1__getUserName(struct soap *soap,
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__getUserName(struct soap *soap, const char *tag, int id,
-                            const struct __ns1__getUserName *a,
-                            const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getUserName(
+    struct soap *soap, const char *tag, int id,
+    const struct __ns1__getUserName *a, const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -35571,10 +35635,9 @@ soap_in___ns1__getUserName(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__getUserName(struct soap *soap,
-                            const struct __ns1__getUserName *a, const char *tag,
-                            const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getUserName(
+    struct soap *soap, const struct __ns1__getUserName *a, const char *tag,
+    const char *type) {
   int id = 0;
   if (soap_out___ns1__getUserName(soap, tag ? tag : "-ns1:getUserName", id, a,
                                   type))
@@ -35618,9 +35681,11 @@ soap_instantiate___ns1__getUserName(struct soap *soap, int n, const char *type,
   return (struct __ns1__getUserName *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy___ns1__getUserName(struct soap *soap, int st, int tt, void *p,
-                             size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getUserName(struct soap *soap,
+                                                        int st, int tt, void *p,
+                                                        size_t len,
+                                                        const void *q,
+                                                        size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -35632,8 +35697,8 @@ soap_copy___ns1__getUserName(struct soap *soap, int st, int tt, void *p,
   *(struct __ns1__getUserName *)p = *(struct __ns1__getUserName *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default___ns1__login(struct soap *soap, struct __ns1__login *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__login(struct soap *soap,
+                                                     struct __ns1__login *a) {
   (void)soap;
   (void)a; /* appease -Wall -Werror */
   a->ns1__login_ = NULL;
@@ -35648,9 +35713,10 @@ soap_serialize___ns1__login(struct soap *soap, const struct __ns1__login *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out___ns1__login(struct soap *soap, const char *tag, int id,
-                      const struct __ns1__login *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__login(struct soap *soap,
+                                                const char *tag, int id,
+                                                const struct __ns1__login *a,
+                                                const char *type) {
   (void)soap;
   (void)tag;
   (void)id;
@@ -35692,9 +35758,10 @@ soap_in___ns1__login(struct soap *soap, const char *tag, struct __ns1__login *a,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put___ns1__login(struct soap *soap, const struct __ns1__login *a,
-                      const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__login(struct soap *soap,
+                                                const struct __ns1__login *a,
+                                                const char *tag,
+                                                const char *type) {
   int id = 0;
   if (soap_out___ns1__login(soap, tag ? tag : "-ns1:login", id, a, type))
     return soap->error;
@@ -35762,9 +35829,8 @@ soap_default_SOAP_ENV__Detail(struct soap *soap, struct SOAP_ENV__Detail *a) {
   a->fault = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_SOAP_ENV__Detail(struct soap *soap,
-                                const struct SOAP_ENV__Detail *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Detail(
+    struct soap *soap, const struct SOAP_ENV__Detail *a) {
 #ifndef WITH_NOIDREF
   (void)soap;
   (void)a; /* appease -Wall -Werror */
@@ -35899,9 +35965,10 @@ soap_instantiate_SOAP_ENV__Detail(struct soap *soap, int n, const char *type,
   return (struct SOAP_ENV__Detail *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_SOAP_ENV__Detail(struct soap *soap, int st, int tt, void *p,
-                           size_t len, const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Detail(struct soap *soap, int st,
+                                                      int tt, void *p,
+                                                      size_t len, const void *q,
+                                                      size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -35916,19 +35983,17 @@ soap_copy_SOAP_ENV__Detail(struct soap *soap, int st, int tt, void *p,
 
 #ifndef WITH_NOGLOBAL
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerToSOAP_ENV__Reason(struct soap *soap,
-                                         struct SOAP_ENV__Reason *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Reason(
+    struct soap *soap, struct SOAP_ENV__Reason *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_SOAP_ENV__Reason))
     soap_serialize_SOAP_ENV__Reason(soap, *a);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerToSOAP_ENV__Reason(struct soap *soap, const char *tag, int id,
-                                   struct SOAP_ENV__Reason *const *a,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Reason(
+    struct soap *soap, const char *tag, int id,
+    struct SOAP_ENV__Reason *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_SOAP_ENV__Reason);
   if (id < 0)
@@ -35961,10 +36026,9 @@ soap_in_PointerToSOAP_ENV__Reason(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerToSOAP_ENV__Reason(struct soap *soap,
-                                   struct SOAP_ENV__Reason *const *a,
-                                   const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerToSOAP_ENV__Reason(
+    struct soap *soap, struct SOAP_ENV__Reason *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerToSOAP_ENV__Reason);
   if (soap_out_PointerToSOAP_ENV__Reason(soap, tag ? tag : "SOAP-ENV:Reason",
@@ -35987,19 +36051,17 @@ soap_get_PointerToSOAP_ENV__Reason(struct soap *soap,
 
 #ifndef WITH_NOGLOBAL
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerToSOAP_ENV__Detail(struct soap *soap,
-                                         struct SOAP_ENV__Detail *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Detail(
+    struct soap *soap, struct SOAP_ENV__Detail *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_SOAP_ENV__Detail))
     soap_serialize_SOAP_ENV__Detail(soap, *a);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerToSOAP_ENV__Detail(struct soap *soap, const char *tag, int id,
-                                   struct SOAP_ENV__Detail *const *a,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Detail(
+    struct soap *soap, const char *tag, int id,
+    struct SOAP_ENV__Detail *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_SOAP_ENV__Detail);
   if (id < 0)
@@ -36032,10 +36094,9 @@ soap_in_PointerToSOAP_ENV__Detail(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerToSOAP_ENV__Detail(struct soap *soap,
-                                   struct SOAP_ENV__Detail *const *a,
-                                   const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerToSOAP_ENV__Detail(
+    struct soap *soap, struct SOAP_ENV__Detail *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerToSOAP_ENV__Detail);
   if (soap_out_PointerToSOAP_ENV__Detail(soap, tag ? tag : "SOAP-ENV:Detail",
@@ -36058,19 +36119,17 @@ soap_get_PointerToSOAP_ENV__Detail(struct soap *soap,
 
 #ifndef WITH_NOGLOBAL
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerToSOAP_ENV__Code(struct soap *soap,
-                                       struct SOAP_ENV__Code *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Code(
+    struct soap *soap, struct SOAP_ENV__Code *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_SOAP_ENV__Code))
     soap_serialize_SOAP_ENV__Code(soap, *a);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerToSOAP_ENV__Code(struct soap *soap, const char *tag, int id,
-                                 struct SOAP_ENV__Code *const *a,
-                                 const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Code(
+    struct soap *soap, const char *tag, int id, struct SOAP_ENV__Code *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_SOAP_ENV__Code);
   if (id < 0)
@@ -36102,10 +36161,9 @@ soap_in_PointerToSOAP_ENV__Code(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerToSOAP_ENV__Code(struct soap *soap,
-                                 struct SOAP_ENV__Code *const *a,
-                                 const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerToSOAP_ENV__Code(
+    struct soap *soap, struct SOAP_ENV__Code *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerToSOAP_ENV__Code);
   if (soap_out_PointerToSOAP_ENV__Code(soap, tag ? tag : "SOAP-ENV:Code", id, a,
@@ -36198,19 +36256,17 @@ soap_get_PointerTons1__getEntityInfoResponse(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__getEntityInfo(struct soap *soap,
-                                           ns1__getEntityInfo *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getEntityInfo(
+    struct soap *soap, ns1__getEntityInfo *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getEntityInfo))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__getEntityInfo(struct soap *soap, const char *tag, int id,
-                                     ns1__getEntityInfo *const *a,
-                                     const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getEntityInfo(
+    struct soap *soap, const char *tag, int id, ns1__getEntityInfo *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__getEntityInfo);
   if (id < 0)
@@ -36247,10 +36303,9 @@ soap_in_PointerTons1__getEntityInfo(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__getEntityInfo(struct soap *soap,
-                                     ns1__getEntityInfo *const *a,
-                                     const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityInfo(
+    struct soap *soap, ns1__getEntityInfo *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__getEntityInfo);
   if (soap_out_PointerTons1__getEntityInfo(
@@ -36276,11 +36331,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__deleteManyResponse(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__deleteManyResponse(struct soap *soap, const char *tag,
-                                          int id,
-                                          ns1__deleteManyResponse *const *a,
-                                          const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__deleteManyResponse(
+    struct soap *soap, const char *tag, int id,
+    ns1__deleteManyResponse *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__deleteManyResponse);
   if (id < 0)
@@ -36319,10 +36372,9 @@ soap_in_PointerTons1__deleteManyResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__deleteManyResponse(struct soap *soap,
-                                          ns1__deleteManyResponse *const *a,
-                                          const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__deleteManyResponse(
+    struct soap *soap, ns1__deleteManyResponse *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__deleteManyResponse);
   if (soap_out_PointerTons1__deleteManyResponse(
@@ -36341,9 +36393,8 @@ soap_get_PointerTons1__deleteManyResponse(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__deleteMany(struct soap *soap,
-                                        ns1__deleteMany *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__deleteMany(
+    struct soap *soap, ns1__deleteMany *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__deleteMany))
     (*a)->soap_serialize(soap);
@@ -36360,9 +36411,8 @@ soap_out_PointerTons1__deleteMany(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__deleteMany **SOAP_FMAC4
-soap_in_PointerTons1__deleteMany(struct soap *soap, const char *tag,
-                                 ns1__deleteMany **a, const char *type) {
+SOAP_FMAC3 ns1__deleteMany **SOAP_FMAC4 soap_in_PointerTons1__deleteMany(
+    struct soap *soap, const char *tag, ns1__deleteMany **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -36399,9 +36449,8 @@ soap_put_PointerTons1__deleteMany(struct soap *soap, ns1__deleteMany *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__deleteMany **SOAP_FMAC4
-soap_get_PointerTons1__deleteMany(struct soap *soap, ns1__deleteMany **p,
-                                  const char *tag, const char *type) {
+SOAP_FMAC3 ns1__deleteMany **SOAP_FMAC4 soap_get_PointerTons1__deleteMany(
+    struct soap *soap, ns1__deleteMany **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__deleteMany(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -36416,11 +36465,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__createManyResponse(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__createManyResponse(struct soap *soap, const char *tag,
-                                          int id,
-                                          ns1__createManyResponse *const *a,
-                                          const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__createManyResponse(
+    struct soap *soap, const char *tag, int id,
+    ns1__createManyResponse *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__createManyResponse);
   if (id < 0)
@@ -36459,10 +36506,9 @@ soap_in_PointerTons1__createManyResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__createManyResponse(struct soap *soap,
-                                          ns1__createManyResponse *const *a,
-                                          const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__createManyResponse(
+    struct soap *soap, ns1__createManyResponse *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__createManyResponse);
   if (soap_out_PointerTons1__createManyResponse(
@@ -36481,9 +36527,8 @@ soap_get_PointerTons1__createManyResponse(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__createMany(struct soap *soap,
-                                        ns1__createMany *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__createMany(
+    struct soap *soap, ns1__createMany *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__createMany))
     (*a)->soap_serialize(soap);
@@ -36500,9 +36545,8 @@ soap_out_PointerTons1__createMany(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__createMany **SOAP_FMAC4
-soap_in_PointerTons1__createMany(struct soap *soap, const char *tag,
-                                 ns1__createMany **a, const char *type) {
+SOAP_FMAC3 ns1__createMany **SOAP_FMAC4 soap_in_PointerTons1__createMany(
+    struct soap *soap, const char *tag, ns1__createMany **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -36539,9 +36583,8 @@ soap_put_PointerTons1__createMany(struct soap *soap, ns1__createMany *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__createMany **SOAP_FMAC4
-soap_get_PointerTons1__createMany(struct soap *soap, ns1__createMany **p,
-                                  const char *tag, const char *type) {
+SOAP_FMAC3 ns1__createMany **SOAP_FMAC4 soap_get_PointerTons1__createMany(
+    struct soap *soap, ns1__createMany **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__createMany(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -36632,11 +36675,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__luceneGetPopulating(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__luceneGetPopulating(struct soap *soap, const char *tag,
-                                           int id,
-                                           ns1__luceneGetPopulating *const *a,
-                                           const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__luceneGetPopulating(
+    struct soap *soap, const char *tag, int id,
+    ns1__luceneGetPopulating *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__luceneGetPopulating);
   if (id < 0)
@@ -36675,10 +36716,9 @@ soap_in_PointerTons1__luceneGetPopulating(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__luceneGetPopulating(struct soap *soap,
-                                           ns1__luceneGetPopulating *const *a,
-                                           const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__luceneGetPopulating(
+    struct soap *soap, ns1__luceneGetPopulating *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__luceneGetPopulating);
   if (soap_out_PointerTons1__luceneGetPopulating(
@@ -36705,11 +36745,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__luceneSearchResponse(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__luceneSearchResponse(struct soap *soap, const char *tag,
-                                            int id,
-                                            ns1__luceneSearchResponse *const *a,
-                                            const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__luceneSearchResponse(
+    struct soap *soap, const char *tag, int id,
+    ns1__luceneSearchResponse *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__luceneSearchResponse);
   if (id < 0)
@@ -36750,10 +36788,9 @@ soap_in_PointerTons1__luceneSearchResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__luceneSearchResponse(struct soap *soap,
-                                            ns1__luceneSearchResponse *const *a,
-                                            const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__luceneSearchResponse(
+    struct soap *soap, ns1__luceneSearchResponse *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__luceneSearchResponse);
   if (soap_out_PointerTons1__luceneSearchResponse(
@@ -36772,19 +36809,17 @@ soap_get_PointerTons1__luceneSearchResponse(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__luceneSearch(struct soap *soap,
-                                          ns1__luceneSearch *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__luceneSearch(
+    struct soap *soap, ns1__luceneSearch *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__luceneSearch))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__luceneSearch(struct soap *soap, const char *tag, int id,
-                                    ns1__luceneSearch *const *a,
-                                    const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__luceneSearch(
+    struct soap *soap, const char *tag, int id, ns1__luceneSearch *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__luceneSearch);
   if (id < 0)
@@ -36821,10 +36856,9 @@ soap_in_PointerTons1__luceneSearch(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__luceneSearch(struct soap *soap,
-                                    ns1__luceneSearch *const *a,
-                                    const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__luceneSearch(
+    struct soap *soap, ns1__luceneSearch *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__luceneSearch);
   if (soap_out_PointerTons1__luceneSearch(soap, tag ? tag : "ns1:luceneSearch",
@@ -36850,11 +36884,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__luceneCommitResponse(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__luceneCommitResponse(struct soap *soap, const char *tag,
-                                            int id,
-                                            ns1__luceneCommitResponse *const *a,
-                                            const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__luceneCommitResponse(
+    struct soap *soap, const char *tag, int id,
+    ns1__luceneCommitResponse *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__luceneCommitResponse);
   if (id < 0)
@@ -36895,10 +36927,9 @@ soap_in_PointerTons1__luceneCommitResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__luceneCommitResponse(struct soap *soap,
-                                            ns1__luceneCommitResponse *const *a,
-                                            const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__luceneCommitResponse(
+    struct soap *soap, ns1__luceneCommitResponse *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__luceneCommitResponse);
   if (soap_out_PointerTons1__luceneCommitResponse(
@@ -36917,19 +36948,17 @@ soap_get_PointerTons1__luceneCommitResponse(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__luceneCommit(struct soap *soap,
-                                          ns1__luceneCommit *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__luceneCommit(
+    struct soap *soap, ns1__luceneCommit *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__luceneCommit))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__luceneCommit(struct soap *soap, const char *tag, int id,
-                                    ns1__luceneCommit *const *a,
-                                    const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__luceneCommit(
+    struct soap *soap, const char *tag, int id, ns1__luceneCommit *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__luceneCommit);
   if (id < 0)
@@ -36966,10 +36995,9 @@ soap_in_PointerTons1__luceneCommit(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__luceneCommit(struct soap *soap,
-                                    ns1__luceneCommit *const *a,
-                                    const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__luceneCommit(
+    struct soap *soap, ns1__luceneCommit *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__luceneCommit);
   if (soap_out_PointerTons1__luceneCommit(soap, tag ? tag : "ns1:luceneCommit",
@@ -36995,11 +37023,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__luceneClearResponse(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__luceneClearResponse(struct soap *soap, const char *tag,
-                                           int id,
-                                           ns1__luceneClearResponse *const *a,
-                                           const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__luceneClearResponse(
+    struct soap *soap, const char *tag, int id,
+    ns1__luceneClearResponse *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__luceneClearResponse);
   if (id < 0)
@@ -37038,10 +37064,9 @@ soap_in_PointerTons1__luceneClearResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__luceneClearResponse(struct soap *soap,
-                                           ns1__luceneClearResponse *const *a,
-                                           const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__luceneClearResponse(
+    struct soap *soap, ns1__luceneClearResponse *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__luceneClearResponse);
   if (soap_out_PointerTons1__luceneClearResponse(
@@ -37060,19 +37085,17 @@ soap_get_PointerTons1__luceneClearResponse(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__luceneClear(struct soap *soap,
-                                         ns1__luceneClear *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__luceneClear(
+    struct soap *soap, ns1__luceneClear *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__luceneClear))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__luceneClear(struct soap *soap, const char *tag, int id,
-                                   ns1__luceneClear *const *a,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__luceneClear(
+    struct soap *soap, const char *tag, int id, ns1__luceneClear *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__luceneClear);
   if (id < 0)
@@ -37109,10 +37132,9 @@ soap_in_PointerTons1__luceneClear(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__luceneClear(struct soap *soap,
-                                   ns1__luceneClear *const *a, const char *tag,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__luceneClear(
+    struct soap *soap, ns1__luceneClear *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__luceneClear);
   if (soap_out_PointerTons1__luceneClear(soap, tag ? tag : "ns1:luceneClear",
@@ -37203,19 +37225,17 @@ soap_get_PointerTons1__lucenePopulateResponse(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__lucenePopulate(struct soap *soap,
-                                            ns1__lucenePopulate *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__lucenePopulate(
+    struct soap *soap, ns1__lucenePopulate *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__lucenePopulate))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__lucenePopulate(struct soap *soap, const char *tag,
-                                      int id, ns1__lucenePopulate *const *a,
-                                      const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__lucenePopulate(
+    struct soap *soap, const char *tag, int id, ns1__lucenePopulate *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__lucenePopulate);
   if (id < 0)
@@ -37253,10 +37273,9 @@ soap_in_PointerTons1__lucenePopulate(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__lucenePopulate(struct soap *soap,
-                                      ns1__lucenePopulate *const *a,
-                                      const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__lucenePopulate(
+    struct soap *soap, ns1__lucenePopulate *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__lucenePopulate);
   if (soap_out_PointerTons1__lucenePopulate(
@@ -37349,19 +37368,17 @@ soap_get_PointerTons1__isAccessAllowedResponse(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__isAccessAllowed(struct soap *soap,
-                                             ns1__isAccessAllowed *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__isAccessAllowed(
+    struct soap *soap, ns1__isAccessAllowed *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__isAccessAllowed))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__isAccessAllowed(struct soap *soap, const char *tag,
-                                       int id, ns1__isAccessAllowed *const *a,
-                                       const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__isAccessAllowed(
+    struct soap *soap, const char *tag, int id, ns1__isAccessAllowed *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__isAccessAllowed);
   if (id < 0)
@@ -37399,10 +37416,9 @@ soap_in_PointerTons1__isAccessAllowed(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__isAccessAllowed(struct soap *soap,
-                                       ns1__isAccessAllowed *const *a,
-                                       const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__isAccessAllowed(
+    struct soap *soap, ns1__isAccessAllowed *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__isAccessAllowed);
   if (soap_out_PointerTons1__isAccessAllowed(
@@ -37429,11 +37445,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__searchTextResponse(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__searchTextResponse(struct soap *soap, const char *tag,
-                                          int id,
-                                          ns1__searchTextResponse *const *a,
-                                          const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__searchTextResponse(
+    struct soap *soap, const char *tag, int id,
+    ns1__searchTextResponse *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__searchTextResponse);
   if (id < 0)
@@ -37472,10 +37486,9 @@ soap_in_PointerTons1__searchTextResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__searchTextResponse(struct soap *soap,
-                                          ns1__searchTextResponse *const *a,
-                                          const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__searchTextResponse(
+    struct soap *soap, ns1__searchTextResponse *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__searchTextResponse);
   if (soap_out_PointerTons1__searchTextResponse(
@@ -37494,9 +37507,8 @@ soap_get_PointerTons1__searchTextResponse(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__searchText(struct soap *soap,
-                                        ns1__searchText *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__searchText(
+    struct soap *soap, ns1__searchText *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__searchText))
     (*a)->soap_serialize(soap);
@@ -37513,9 +37525,8 @@ soap_out_PointerTons1__searchText(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__searchText **SOAP_FMAC4
-soap_in_PointerTons1__searchText(struct soap *soap, const char *tag,
-                                 ns1__searchText **a, const char *type) {
+SOAP_FMAC3 ns1__searchText **SOAP_FMAC4 soap_in_PointerTons1__searchText(
+    struct soap *soap, const char *tag, ns1__searchText **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -37552,9 +37563,8 @@ soap_put_PointerTons1__searchText(struct soap *soap, ns1__searchText *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__searchText **SOAP_FMAC4
-soap_get_PointerTons1__searchText(struct soap *soap, ns1__searchText **p,
-                                  const char *tag, const char *type) {
+SOAP_FMAC3 ns1__searchText **SOAP_FMAC4 soap_get_PointerTons1__searchText(
+    struct soap *soap, ns1__searchText **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__searchText(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -37645,11 +37655,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getRemainingMinutes(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__getRemainingMinutes(struct soap *soap, const char *tag,
-                                           int id,
-                                           ns1__getRemainingMinutes *const *a,
-                                           const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getRemainingMinutes(
+    struct soap *soap, const char *tag, int id,
+    ns1__getRemainingMinutes *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__getRemainingMinutes);
   if (id < 0)
@@ -37688,10 +37696,9 @@ soap_in_PointerTons1__getRemainingMinutes(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__getRemainingMinutes(struct soap *soap,
-                                           ns1__getRemainingMinutes *const *a,
-                                           const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getRemainingMinutes(
+    struct soap *soap, ns1__getRemainingMinutes *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__getRemainingMinutes);
   if (soap_out_PointerTons1__getRemainingMinutes(
@@ -37710,19 +37717,17 @@ soap_get_PointerTons1__getRemainingMinutes(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__logoutResponse(struct soap *soap,
-                                            ns1__logoutResponse *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__logoutResponse(
+    struct soap *soap, ns1__logoutResponse *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__logoutResponse))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__logoutResponse(struct soap *soap, const char *tag,
-                                      int id, ns1__logoutResponse *const *a,
-                                      const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__logoutResponse(
+    struct soap *soap, const char *tag, int id, ns1__logoutResponse *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__logoutResponse);
   if (id < 0)
@@ -37760,10 +37765,9 @@ soap_in_PointerTons1__logoutResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__logoutResponse(struct soap *soap,
-                                      ns1__logoutResponse *const *a,
-                                      const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__logoutResponse(
+    struct soap *soap, ns1__logoutResponse *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__logoutResponse);
   if (soap_out_PointerTons1__logoutResponse(
@@ -37790,9 +37794,10 @@ soap_serialize_PointerTons1__logout(struct soap *soap, ns1__logout *const *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__logout(struct soap *soap, const char *tag, int id,
-                              ns1__logout *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__logout(struct soap *soap,
+                                                        const char *tag, int id,
+                                                        ns1__logout *const *a,
+                                                        const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__logout);
   if (id < 0)
@@ -37800,9 +37805,8 @@ soap_out_PointerTons1__logout(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__logout **SOAP_FMAC4
-soap_in_PointerTons1__logout(struct soap *soap, const char *tag,
-                             ns1__logout **a, const char *type) {
+SOAP_FMAC3 ns1__logout **SOAP_FMAC4 soap_in_PointerTons1__logout(
+    struct soap *soap, const char *tag, ns1__logout **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -37828,9 +37832,10 @@ soap_in_PointerTons1__logout(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__logout(struct soap *soap, ns1__logout *const *a,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__logout(struct soap *soap,
+                                                        ns1__logout *const *a,
+                                                        const char *tag,
+                                                        const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__logout);
   if (soap_out_PointerTons1__logout(soap, tag ? tag : "ns1:logout", id, a,
@@ -37839,28 +37844,25 @@ soap_put_PointerTons1__logout(struct soap *soap, ns1__logout *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__logout **SOAP_FMAC4
-soap_get_PointerTons1__logout(struct soap *soap, ns1__logout **p,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 ns1__logout **SOAP_FMAC4 soap_get_PointerTons1__logout(
+    struct soap *soap, ns1__logout **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__logout(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__dummyResponse(struct soap *soap,
-                                           ns1__dummyResponse *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__dummyResponse(
+    struct soap *soap, ns1__dummyResponse *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__dummyResponse))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__dummyResponse(struct soap *soap, const char *tag, int id,
-                                     ns1__dummyResponse *const *a,
-                                     const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dummyResponse(
+    struct soap *soap, const char *tag, int id, ns1__dummyResponse *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__dummyResponse);
   if (id < 0)
@@ -37897,10 +37899,9 @@ soap_in_PointerTons1__dummyResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__dummyResponse(struct soap *soap,
-                                     ns1__dummyResponse *const *a,
-                                     const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dummyResponse(
+    struct soap *soap, ns1__dummyResponse *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__dummyResponse);
   if (soap_out_PointerTons1__dummyResponse(
@@ -37926,9 +37927,10 @@ soap_serialize_PointerTons1__dummy(struct soap *soap, ns1__dummy *const *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__dummy(struct soap *soap, const char *tag, int id,
-                             ns1__dummy *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dummy(struct soap *soap,
+                                                       const char *tag, int id,
+                                                       ns1__dummy *const *a,
+                                                       const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__dummy);
   if (id < 0)
@@ -37936,9 +37938,8 @@ soap_out_PointerTons1__dummy(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__dummy **SOAP_FMAC4
-soap_in_PointerTons1__dummy(struct soap *soap, const char *tag, ns1__dummy **a,
-                            const char *type) {
+SOAP_FMAC3 ns1__dummy **SOAP_FMAC4 soap_in_PointerTons1__dummy(
+    struct soap *soap, const char *tag, ns1__dummy **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -37964,9 +37965,10 @@ soap_in_PointerTons1__dummy(struct soap *soap, const char *tag, ns1__dummy **a,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__dummy(struct soap *soap, ns1__dummy *const *a,
-                             const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dummy(struct soap *soap,
+                                                       ns1__dummy *const *a,
+                                                       const char *tag,
+                                                       const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__dummy);
   if (soap_out_PointerTons1__dummy(soap, tag ? tag : "ns1:dummy", id, a, type))
@@ -37974,28 +37976,25 @@ soap_put_PointerTons1__dummy(struct soap *soap, ns1__dummy *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__dummy **SOAP_FMAC4
-soap_get_PointerTons1__dummy(struct soap *soap, ns1__dummy **p, const char *tag,
-                             const char *type) {
+SOAP_FMAC3 ns1__dummy **SOAP_FMAC4 soap_get_PointerTons1__dummy(
+    struct soap *soap, ns1__dummy **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__dummy(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__refreshResponse(struct soap *soap,
-                                             ns1__refreshResponse *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__refreshResponse(
+    struct soap *soap, ns1__refreshResponse *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__refreshResponse))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__refreshResponse(struct soap *soap, const char *tag,
-                                       int id, ns1__refreshResponse *const *a,
-                                       const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__refreshResponse(
+    struct soap *soap, const char *tag, int id, ns1__refreshResponse *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__refreshResponse);
   if (id < 0)
@@ -38033,10 +38032,9 @@ soap_in_PointerTons1__refreshResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__refreshResponse(struct soap *soap,
-                                       ns1__refreshResponse *const *a,
-                                       const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__refreshResponse(
+    struct soap *soap, ns1__refreshResponse *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__refreshResponse);
   if (soap_out_PointerTons1__refreshResponse(
@@ -38055,18 +38053,19 @@ soap_get_PointerTons1__refreshResponse(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__refresh(struct soap *soap,
-                                     ns1__refresh *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__refresh(
+    struct soap *soap, ns1__refresh *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__refresh))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__refresh(struct soap *soap, const char *tag, int id,
-                               ns1__refresh *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__refresh(struct soap *soap,
+                                                         const char *tag,
+                                                         int id,
+                                                         ns1__refresh *const *a,
+                                                         const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__refresh);
   if (id < 0)
@@ -38074,9 +38073,8 @@ soap_out_PointerTons1__refresh(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__refresh **SOAP_FMAC4
-soap_in_PointerTons1__refresh(struct soap *soap, const char *tag,
-                              ns1__refresh **a, const char *type) {
+SOAP_FMAC3 ns1__refresh **SOAP_FMAC4 soap_in_PointerTons1__refresh(
+    struct soap *soap, const char *tag, ns1__refresh **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -38102,9 +38100,10 @@ soap_in_PointerTons1__refresh(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__refresh(struct soap *soap, ns1__refresh *const *a,
-                               const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__refresh(struct soap *soap,
+                                                         ns1__refresh *const *a,
+                                                         const char *tag,
+                                                         const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__refresh);
   if (soap_out_PointerTons1__refresh(soap, tag ? tag : "ns1:refresh", id, a,
@@ -38113,9 +38112,8 @@ soap_put_PointerTons1__refresh(struct soap *soap, ns1__refresh *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__refresh **SOAP_FMAC4
-soap_get_PointerTons1__refresh(struct soap *soap, ns1__refresh **p,
-                               const char *tag, const char *type) {
+SOAP_FMAC3 ns1__refresh **SOAP_FMAC4 soap_get_PointerTons1__refresh(
+    struct soap *soap, ns1__refresh **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__refresh(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -38195,19 +38193,17 @@ soap_get_PointerTons1__getEntityNamesResponse(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__getEntityNames(struct soap *soap,
-                                            ns1__getEntityNames *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getEntityNames(
+    struct soap *soap, ns1__getEntityNames *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getEntityNames))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__getEntityNames(struct soap *soap, const char *tag,
-                                      int id, ns1__getEntityNames *const *a,
-                                      const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getEntityNames(
+    struct soap *soap, const char *tag, int id, ns1__getEntityNames *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__getEntityNames);
   if (id < 0)
@@ -38245,10 +38241,9 @@ soap_in_PointerTons1__getEntityNames(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__getEntityNames(struct soap *soap,
-                                      ns1__getEntityNames *const *a,
-                                      const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityNames(
+    struct soap *soap, ns1__getEntityNames *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__getEntityNames);
   if (soap_out_PointerTons1__getEntityNames(
@@ -38340,19 +38335,17 @@ soap_get_PointerTons1__getApiVersionResponse(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__getApiVersion(struct soap *soap,
-                                           ns1__getApiVersion *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getApiVersion(
+    struct soap *soap, ns1__getApiVersion *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getApiVersion))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__getApiVersion(struct soap *soap, const char *tag, int id,
-                                     ns1__getApiVersion *const *a,
-                                     const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getApiVersion(
+    struct soap *soap, const char *tag, int id, ns1__getApiVersion *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__getApiVersion);
   if (id < 0)
@@ -38389,10 +38382,9 @@ soap_in_PointerTons1__getApiVersion(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__getApiVersion(struct soap *soap,
-                                     ns1__getApiVersion *const *a,
-                                     const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getApiVersion(
+    struct soap *soap, ns1__getApiVersion *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__getApiVersion);
   if (soap_out_PointerTons1__getApiVersion(
@@ -38410,19 +38402,17 @@ soap_get_PointerTons1__getApiVersion(struct soap *soap, ns1__getApiVersion **p,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__updateResponse(struct soap *soap,
-                                            ns1__updateResponse *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__updateResponse(
+    struct soap *soap, ns1__updateResponse *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__updateResponse))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__updateResponse(struct soap *soap, const char *tag,
-                                      int id, ns1__updateResponse *const *a,
-                                      const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__updateResponse(
+    struct soap *soap, const char *tag, int id, ns1__updateResponse *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__updateResponse);
   if (id < 0)
@@ -38460,10 +38450,9 @@ soap_in_PointerTons1__updateResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__updateResponse(struct soap *soap,
-                                      ns1__updateResponse *const *a,
-                                      const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__updateResponse(
+    struct soap *soap, ns1__updateResponse *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__updateResponse);
   if (soap_out_PointerTons1__updateResponse(
@@ -38490,9 +38479,10 @@ soap_serialize_PointerTons1__update(struct soap *soap, ns1__update *const *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__update(struct soap *soap, const char *tag, int id,
-                              ns1__update *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__update(struct soap *soap,
+                                                        const char *tag, int id,
+                                                        ns1__update *const *a,
+                                                        const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__update);
   if (id < 0)
@@ -38500,9 +38490,8 @@ soap_out_PointerTons1__update(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__update **SOAP_FMAC4
-soap_in_PointerTons1__update(struct soap *soap, const char *tag,
-                             ns1__update **a, const char *type) {
+SOAP_FMAC3 ns1__update **SOAP_FMAC4 soap_in_PointerTons1__update(
+    struct soap *soap, const char *tag, ns1__update **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -38528,9 +38517,10 @@ soap_in_PointerTons1__update(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__update(struct soap *soap, ns1__update *const *a,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__update(struct soap *soap,
+                                                        ns1__update *const *a,
+                                                        const char *tag,
+                                                        const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__update);
   if (soap_out_PointerTons1__update(soap, tag ? tag : "ns1:update", id, a,
@@ -38539,28 +38529,25 @@ soap_put_PointerTons1__update(struct soap *soap, ns1__update *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__update **SOAP_FMAC4
-soap_get_PointerTons1__update(struct soap *soap, ns1__update **p,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 ns1__update **SOAP_FMAC4 soap_get_PointerTons1__update(
+    struct soap *soap, ns1__update **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__update(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__createResponse(struct soap *soap,
-                                            ns1__createResponse *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__createResponse(
+    struct soap *soap, ns1__createResponse *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__createResponse))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__createResponse(struct soap *soap, const char *tag,
-                                      int id, ns1__createResponse *const *a,
-                                      const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__createResponse(
+    struct soap *soap, const char *tag, int id, ns1__createResponse *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__createResponse);
   if (id < 0)
@@ -38598,10 +38585,9 @@ soap_in_PointerTons1__createResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__createResponse(struct soap *soap,
-                                      ns1__createResponse *const *a,
-                                      const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__createResponse(
+    struct soap *soap, ns1__createResponse *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__createResponse);
   if (soap_out_PointerTons1__createResponse(
@@ -38628,9 +38614,10 @@ soap_serialize_PointerTons1__create(struct soap *soap, ns1__create *const *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__create(struct soap *soap, const char *tag, int id,
-                              ns1__create *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__create(struct soap *soap,
+                                                        const char *tag, int id,
+                                                        ns1__create *const *a,
+                                                        const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__create);
   if (id < 0)
@@ -38638,9 +38625,8 @@ soap_out_PointerTons1__create(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__create **SOAP_FMAC4
-soap_in_PointerTons1__create(struct soap *soap, const char *tag,
-                             ns1__create **a, const char *type) {
+SOAP_FMAC3 ns1__create **SOAP_FMAC4 soap_in_PointerTons1__create(
+    struct soap *soap, const char *tag, ns1__create **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -38666,9 +38652,10 @@ soap_in_PointerTons1__create(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__create(struct soap *soap, ns1__create *const *a,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__create(struct soap *soap,
+                                                        ns1__create *const *a,
+                                                        const char *tag,
+                                                        const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__create);
   if (soap_out_PointerTons1__create(soap, tag ? tag : "ns1:create", id, a,
@@ -38677,28 +38664,25 @@ soap_put_PointerTons1__create(struct soap *soap, ns1__create *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__create **SOAP_FMAC4
-soap_get_PointerTons1__create(struct soap *soap, ns1__create **p,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 ns1__create **SOAP_FMAC4 soap_get_PointerTons1__create(
+    struct soap *soap, ns1__create **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__create(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__searchResponse(struct soap *soap,
-                                            ns1__searchResponse *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__searchResponse(
+    struct soap *soap, ns1__searchResponse *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__searchResponse))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__searchResponse(struct soap *soap, const char *tag,
-                                      int id, ns1__searchResponse *const *a,
-                                      const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__searchResponse(
+    struct soap *soap, const char *tag, int id, ns1__searchResponse *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__searchResponse);
   if (id < 0)
@@ -38736,10 +38720,9 @@ soap_in_PointerTons1__searchResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__searchResponse(struct soap *soap,
-                                      ns1__searchResponse *const *a,
-                                      const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__searchResponse(
+    struct soap *soap, ns1__searchResponse *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__searchResponse);
   if (soap_out_PointerTons1__searchResponse(
@@ -38766,9 +38749,10 @@ soap_serialize_PointerTons1__search(struct soap *soap, ns1__search *const *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__search(struct soap *soap, const char *tag, int id,
-                              ns1__search *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__search(struct soap *soap,
+                                                        const char *tag, int id,
+                                                        ns1__search *const *a,
+                                                        const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__search);
   if (id < 0)
@@ -38776,9 +38760,8 @@ soap_out_PointerTons1__search(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__search **SOAP_FMAC4
-soap_in_PointerTons1__search(struct soap *soap, const char *tag,
-                             ns1__search **a, const char *type) {
+SOAP_FMAC3 ns1__search **SOAP_FMAC4 soap_in_PointerTons1__search(
+    struct soap *soap, const char *tag, ns1__search **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -38804,9 +38787,10 @@ soap_in_PointerTons1__search(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__search(struct soap *soap, ns1__search *const *a,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__search(struct soap *soap,
+                                                        ns1__search *const *a,
+                                                        const char *tag,
+                                                        const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__search);
   if (soap_out_PointerTons1__search(soap, tag ? tag : "ns1:search", id, a,
@@ -38815,28 +38799,25 @@ soap_put_PointerTons1__search(struct soap *soap, ns1__search *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__search **SOAP_FMAC4
-soap_get_PointerTons1__search(struct soap *soap, ns1__search **p,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 ns1__search **SOAP_FMAC4 soap_get_PointerTons1__search(
+    struct soap *soap, ns1__search **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__search(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__deleteResponse(struct soap *soap,
-                                            ns1__deleteResponse *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__deleteResponse(
+    struct soap *soap, ns1__deleteResponse *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__deleteResponse))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__deleteResponse(struct soap *soap, const char *tag,
-                                      int id, ns1__deleteResponse *const *a,
-                                      const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__deleteResponse(
+    struct soap *soap, const char *tag, int id, ns1__deleteResponse *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__deleteResponse);
   if (id < 0)
@@ -38874,10 +38855,9 @@ soap_in_PointerTons1__deleteResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__deleteResponse(struct soap *soap,
-                                      ns1__deleteResponse *const *a,
-                                      const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__deleteResponse(
+    struct soap *soap, ns1__deleteResponse *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__deleteResponse);
   if (soap_out_PointerTons1__deleteResponse(
@@ -38904,9 +38884,10 @@ soap_serialize_PointerTons1__delete(struct soap *soap, ns1__delete *const *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__delete(struct soap *soap, const char *tag, int id,
-                              ns1__delete *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__delete(struct soap *soap,
+                                                        const char *tag, int id,
+                                                        ns1__delete *const *a,
+                                                        const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__delete);
   if (id < 0)
@@ -38914,9 +38895,8 @@ soap_out_PointerTons1__delete(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__delete **SOAP_FMAC4
-soap_in_PointerTons1__delete(struct soap *soap, const char *tag,
-                             ns1__delete **a, const char *type) {
+SOAP_FMAC3 ns1__delete **SOAP_FMAC4 soap_in_PointerTons1__delete(
+    struct soap *soap, const char *tag, ns1__delete **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -38942,9 +38922,10 @@ soap_in_PointerTons1__delete(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__delete(struct soap *soap, ns1__delete *const *a,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__delete(struct soap *soap,
+                                                        ns1__delete *const *a,
+                                                        const char *tag,
+                                                        const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__delete);
   if (soap_out_PointerTons1__delete(soap, tag ? tag : "ns1:delete", id, a,
@@ -38953,9 +38934,8 @@ soap_put_PointerTons1__delete(struct soap *soap, ns1__delete *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__delete **SOAP_FMAC4
-soap_get_PointerTons1__delete(struct soap *soap, ns1__delete **p,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 ns1__delete **SOAP_FMAC4 soap_get_PointerTons1__delete(
+    struct soap *soap, ns1__delete **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__delete(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -39035,19 +39015,17 @@ soap_get_PointerTons1__getPropertiesResponse(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__getProperties(struct soap *soap,
-                                           ns1__getProperties *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getProperties(
+    struct soap *soap, ns1__getProperties *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getProperties))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__getProperties(struct soap *soap, const char *tag, int id,
-                                     ns1__getProperties *const *a,
-                                     const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getProperties(
+    struct soap *soap, const char *tag, int id, ns1__getProperties *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__getProperties);
   if (id < 0)
@@ -39084,10 +39062,9 @@ soap_in_PointerTons1__getProperties(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__getProperties(struct soap *soap,
-                                     ns1__getProperties *const *a,
-                                     const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getProperties(
+    struct soap *soap, ns1__getProperties *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__getProperties);
   if (soap_out_PointerTons1__getProperties(
@@ -39105,19 +39082,17 @@ soap_get_PointerTons1__getProperties(struct soap *soap, ns1__getProperties **p,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__getResponse(struct soap *soap,
-                                         ns1__getResponse *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getResponse(
+    struct soap *soap, ns1__getResponse *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getResponse))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__getResponse(struct soap *soap, const char *tag, int id,
-                                   ns1__getResponse *const *a,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getResponse(
+    struct soap *soap, const char *tag, int id, ns1__getResponse *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__getResponse);
   if (id < 0)
@@ -39154,10 +39129,9 @@ soap_in_PointerTons1__getResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__getResponse(struct soap *soap,
-                                   ns1__getResponse *const *a, const char *tag,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getResponse(
+    struct soap *soap, ns1__getResponse *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__getResponse);
   if (soap_out_PointerTons1__getResponse(soap, tag ? tag : "ns1:getResponse",
@@ -39183,9 +39157,10 @@ soap_serialize_PointerTons1__get(struct soap *soap, ns1__get *const *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__get(struct soap *soap, const char *tag, int id,
-                           ns1__get *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__get(struct soap *soap,
+                                                     const char *tag, int id,
+                                                     ns1__get *const *a,
+                                                     const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__get);
   if (id < 0)
@@ -39193,9 +39168,10 @@ soap_out_PointerTons1__get(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__get **SOAP_FMAC4
-soap_in_PointerTons1__get(struct soap *soap, const char *tag, ns1__get **a,
-                          const char *type) {
+SOAP_FMAC3 ns1__get **SOAP_FMAC4 soap_in_PointerTons1__get(struct soap *soap,
+                                                           const char *tag,
+                                                           ns1__get **a,
+                                                           const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -39221,9 +39197,10 @@ soap_in_PointerTons1__get(struct soap *soap, const char *tag, ns1__get **a,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__get(struct soap *soap, ns1__get *const *a,
-                           const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__get(struct soap *soap,
+                                                     ns1__get *const *a,
+                                                     const char *tag,
+                                                     const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__get);
   if (soap_out_PointerTons1__get(soap, tag ? tag : "ns1:get", id, a, type))
@@ -39231,9 +39208,10 @@ soap_put_PointerTons1__get(struct soap *soap, ns1__get *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__get **SOAP_FMAC4
-soap_get_PointerTons1__get(struct soap *soap, ns1__get **p, const char *tag,
-                           const char *type) {
+SOAP_FMAC3 ns1__get **SOAP_FMAC4 soap_get_PointerTons1__get(struct soap *soap,
+                                                            ns1__get **p,
+                                                            const char *tag,
+                                                            const char *type) {
   if ((p = soap_in_PointerTons1__get(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -39248,11 +39226,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getUserNameResponse(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__getUserNameResponse(struct soap *soap, const char *tag,
-                                           int id,
-                                           ns1__getUserNameResponse *const *a,
-                                           const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getUserNameResponse(
+    struct soap *soap, const char *tag, int id,
+    ns1__getUserNameResponse *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__getUserNameResponse);
   if (id < 0)
@@ -39291,10 +39267,9 @@ soap_in_PointerTons1__getUserNameResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__getUserNameResponse(struct soap *soap,
-                                           ns1__getUserNameResponse *const *a,
-                                           const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getUserNameResponse(
+    struct soap *soap, ns1__getUserNameResponse *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__getUserNameResponse);
   if (soap_out_PointerTons1__getUserNameResponse(
@@ -39313,19 +39288,17 @@ soap_get_PointerTons1__getUserNameResponse(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__getUserName(struct soap *soap,
-                                         ns1__getUserName *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getUserName(
+    struct soap *soap, ns1__getUserName *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getUserName))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__getUserName(struct soap *soap, const char *tag, int id,
-                                   ns1__getUserName *const *a,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getUserName(
+    struct soap *soap, const char *tag, int id, ns1__getUserName *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__getUserName);
   if (id < 0)
@@ -39362,10 +39335,9 @@ soap_in_PointerTons1__getUserName(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__getUserName(struct soap *soap,
-                                   ns1__getUserName *const *a, const char *tag,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getUserName(
+    struct soap *soap, ns1__getUserName *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__getUserName);
   if (soap_out_PointerTons1__getUserName(soap, tag ? tag : "ns1:getUserName",
@@ -39383,19 +39355,17 @@ soap_get_PointerTons1__getUserName(struct soap *soap, ns1__getUserName **p,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__loginResponse(struct soap *soap,
-                                           ns1__loginResponse *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__loginResponse(
+    struct soap *soap, ns1__loginResponse *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__loginResponse))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__loginResponse(struct soap *soap, const char *tag, int id,
-                                     ns1__loginResponse *const *a,
-                                     const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__loginResponse(
+    struct soap *soap, const char *tag, int id, ns1__loginResponse *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__loginResponse);
   if (id < 0)
@@ -39432,10 +39402,9 @@ soap_in_PointerTons1__loginResponse(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__loginResponse(struct soap *soap,
-                                     ns1__loginResponse *const *a,
-                                     const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__loginResponse(
+    struct soap *soap, ns1__loginResponse *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__loginResponse);
   if (soap_out_PointerTons1__loginResponse(
@@ -39461,9 +39430,10 @@ soap_serialize_PointerTons1__login(struct soap *soap, ns1__login *const *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__login(struct soap *soap, const char *tag, int id,
-                             ns1__login *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__login(struct soap *soap,
+                                                       const char *tag, int id,
+                                                       ns1__login *const *a,
+                                                       const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__login);
   if (id < 0)
@@ -39471,9 +39441,8 @@ soap_out_PointerTons1__login(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__login **SOAP_FMAC4
-soap_in_PointerTons1__login(struct soap *soap, const char *tag, ns1__login **a,
-                            const char *type) {
+SOAP_FMAC3 ns1__login **SOAP_FMAC4 soap_in_PointerTons1__login(
+    struct soap *soap, const char *tag, ns1__login **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -39499,9 +39468,10 @@ soap_in_PointerTons1__login(struct soap *soap, const char *tag, ns1__login **a,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__login(struct soap *soap, ns1__login *const *a,
-                             const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__login(struct soap *soap,
+                                                       ns1__login *const *a,
+                                                       const char *tag,
+                                                       const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__login);
   if (soap_out_PointerTons1__login(soap, tag ? tag : "ns1:login", id, a, type))
@@ -39509,28 +39479,25 @@ soap_put_PointerTons1__login(struct soap *soap, ns1__login *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__login **SOAP_FMAC4
-soap_get_PointerTons1__login(struct soap *soap, ns1__login **p, const char *tag,
-                             const char *type) {
+SOAP_FMAC3 ns1__login **SOAP_FMAC4 soap_get_PointerTons1__login(
+    struct soap *soap, ns1__login **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__login(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__IcatException(struct soap *soap,
-                                           ns1__IcatException *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__IcatException(
+    struct soap *soap, ns1__IcatException *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__IcatException))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__IcatException(struct soap *soap, const char *tag, int id,
-                                     ns1__IcatException *const *a,
-                                     const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__IcatException(
+    struct soap *soap, const char *tag, int id, ns1__IcatException *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__IcatException);
   if (id < 0)
@@ -39567,10 +39534,9 @@ soap_in_PointerTons1__IcatException(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__IcatException(struct soap *soap,
-                                     ns1__IcatException *const *a,
-                                     const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__IcatException(
+    struct soap *soap, ns1__IcatException *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__IcatException);
   if (soap_out_PointerTons1__IcatException(
@@ -39724,16 +39690,17 @@ soap_get_PointerTons1__permissibleStringValue(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTodouble(struct soap *soap, double *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTodouble(struct soap *soap,
+                                                          double *const *a) {
 #ifndef WITH_NOIDREF
   soap_reference(soap, *a, SOAP_TYPE_ICat4_double);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTodouble(struct soap *soap, const char *tag, int id,
-                         double *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTodouble(struct soap *soap,
+                                                   const char *tag, int id,
+                                                   double *const *a,
+                                                   const char *type) {
   id =
       soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_double);
   if (id < 0)
@@ -39741,9 +39708,10 @@ soap_out_PointerTodouble(struct soap *soap, const char *tag, int id,
   return soap_out_double(soap, tag, id, *a, type);
 }
 
-SOAP_FMAC3 double **SOAP_FMAC4
-soap_in_PointerTodouble(struct soap *soap, const char *tag, double **a,
-                        const char *type) {
+SOAP_FMAC3 double **SOAP_FMAC4 soap_in_PointerTodouble(struct soap *soap,
+                                                       const char *tag,
+                                                       double **a,
+                                                       const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -39763,9 +39731,10 @@ soap_in_PointerTodouble(struct soap *soap, const char *tag, double **a,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTodouble(struct soap *soap, double *const *a, const char *tag,
-                         const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTodouble(struct soap *soap,
+                                                   double *const *a,
+                                                   const char *tag,
+                                                   const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTodouble);
   if (soap_out_PointerTodouble(soap, tag ? tag : "double", id, a, type))
@@ -39773,9 +39742,10 @@ soap_put_PointerTodouble(struct soap *soap, double *const *a, const char *tag,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 double **SOAP_FMAC4
-soap_get_PointerTodouble(struct soap *soap, double **p, const char *tag,
-                         const char *type) {
+SOAP_FMAC3 double **SOAP_FMAC4 soap_get_PointerTodouble(struct soap *soap,
+                                                        double **p,
+                                                        const char *tag,
+                                                        const char *type) {
   if ((p = soap_in_PointerTodouble(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -39790,9 +39760,10 @@ soap_serialize_PointerTons1__rule(struct soap *soap, ns1__rule *const *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__rule(struct soap *soap, const char *tag, int id,
-                            ns1__rule *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__rule(struct soap *soap,
+                                                      const char *tag, int id,
+                                                      ns1__rule *const *a,
+                                                      const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__rule);
   if (id < 0)
@@ -39800,9 +39771,10 @@ soap_out_PointerTons1__rule(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__rule **SOAP_FMAC4
-soap_in_PointerTons1__rule(struct soap *soap, const char *tag, ns1__rule **a,
-                           const char *type) {
+SOAP_FMAC3 ns1__rule **SOAP_FMAC4 soap_in_PointerTons1__rule(struct soap *soap,
+                                                             const char *tag,
+                                                             ns1__rule **a,
+                                                             const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -39828,9 +39800,10 @@ soap_in_PointerTons1__rule(struct soap *soap, const char *tag, ns1__rule **a,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__rule(struct soap *soap, ns1__rule *const *a,
-                            const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__rule(struct soap *soap,
+                                                      ns1__rule *const *a,
+                                                      const char *tag,
+                                                      const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__rule);
   if (soap_out_PointerTons1__rule(soap, tag ? tag : "ns1:rule", id, a, type))
@@ -39838,18 +39811,16 @@ soap_put_PointerTons1__rule(struct soap *soap, ns1__rule *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__rule **SOAP_FMAC4
-soap_get_PointerTons1__rule(struct soap *soap, ns1__rule **p, const char *tag,
-                            const char *type) {
+SOAP_FMAC3 ns1__rule **SOAP_FMAC4 soap_get_PointerTons1__rule(
+    struct soap *soap, ns1__rule **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__rule(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__sampleType(struct soap *soap,
-                                        ns1__sampleType *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__sampleType(
+    struct soap *soap, ns1__sampleType *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__sampleType))
     (*a)->soap_serialize(soap);
@@ -39866,9 +39837,8 @@ soap_out_PointerTons1__sampleType(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__sampleType **SOAP_FMAC4
-soap_in_PointerTons1__sampleType(struct soap *soap, const char *tag,
-                                 ns1__sampleType **a, const char *type) {
+SOAP_FMAC3 ns1__sampleType **SOAP_FMAC4 soap_in_PointerTons1__sampleType(
+    struct soap *soap, const char *tag, ns1__sampleType **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -39905,9 +39875,8 @@ soap_put_PointerTons1__sampleType(struct soap *soap, ns1__sampleType *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__sampleType **SOAP_FMAC4
-soap_get_PointerTons1__sampleType(struct soap *soap, ns1__sampleType **p,
-                                  const char *tag, const char *type) {
+SOAP_FMAC3 ns1__sampleType **SOAP_FMAC4 soap_get_PointerTons1__sampleType(
+    struct soap *soap, ns1__sampleType **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__sampleType(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -40061,18 +40030,16 @@ soap_get_PointerTons1__investigationInstrument(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__accessType(struct soap *soap,
-                                        enum ns1__accessType *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__accessType(
+    struct soap *soap, enum ns1__accessType *const *a) {
 #ifndef WITH_NOIDREF
   soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__accessType);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__accessType(struct soap *soap, const char *tag, int id,
-                                  enum ns1__accessType *const *a,
-                                  const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__accessType(
+    struct soap *soap, const char *tag, int id, enum ns1__accessType *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__accessType);
   if (id < 0)
@@ -40104,10 +40071,9 @@ soap_in_PointerTons1__accessType(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__accessType(struct soap *soap,
-                                  enum ns1__accessType *const *a,
-                                  const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__accessType(
+    struct soap *soap, enum ns1__accessType *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__accessType);
   if (soap_out_PointerTons1__accessType(soap, tag ? tag : "ns1:accessType", id,
@@ -40125,18 +40091,19 @@ soap_get_PointerTons1__accessType(struct soap *soap, enum ns1__accessType **p,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerToxsd__anyType(struct soap *soap,
-                                     xsd__anyType *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToxsd__anyType(
+    struct soap *soap, xsd__anyType *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_xsd__anyType))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerToxsd__anyType(struct soap *soap, const char *tag, int id,
-                               xsd__anyType *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToxsd__anyType(struct soap *soap,
+                                                         const char *tag,
+                                                         int id,
+                                                         xsd__anyType *const *a,
+                                                         const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_xsd__anyType);
   if (id < 0)
@@ -40144,9 +40111,8 @@ soap_out_PointerToxsd__anyType(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 xsd__anyType **SOAP_FMAC4
-soap_in_PointerToxsd__anyType(struct soap *soap, const char *tag,
-                              xsd__anyType **a, const char *type) {
+SOAP_FMAC3 xsd__anyType **SOAP_FMAC4 soap_in_PointerToxsd__anyType(
+    struct soap *soap, const char *tag, xsd__anyType **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -40812,9 +40778,10 @@ soap_in_PointerToxsd__anyType(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerToxsd__anyType(struct soap *soap, xsd__anyType *const *a,
-                               const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerToxsd__anyType(struct soap *soap,
+                                                         xsd__anyType *const *a,
+                                                         const char *tag,
+                                                         const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerToxsd__anyType);
   if (soap_out_PointerToxsd__anyType(soap, tag ? tag : "xsd:anyType", id, a,
@@ -40823,25 +40790,25 @@ soap_put_PointerToxsd__anyType(struct soap *soap, xsd__anyType *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 xsd__anyType **SOAP_FMAC4
-soap_get_PointerToxsd__anyType(struct soap *soap, xsd__anyType **p,
-                               const char *tag, const char *type) {
+SOAP_FMAC3 xsd__anyType **SOAP_FMAC4 soap_get_PointerToxsd__anyType(
+    struct soap *soap, xsd__anyType **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerToxsd__anyType(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerToint(struct soap *soap, int *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToint(struct soap *soap,
+                                                       int *const *a) {
 #ifndef WITH_NOIDREF
   soap_reference(soap, *a, SOAP_TYPE_ICat4_int);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerToint(struct soap *soap, const char *tag, int id, int *const *a,
-                      const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToint(struct soap *soap,
+                                                const char *tag, int id,
+                                                int *const *a,
+                                                const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_int);
   if (id < 0)
     return soap->error;
@@ -40889,9 +40856,8 @@ SOAP_FMAC3 int **SOAP_FMAC4 soap_get_PointerToint(struct soap *soap, int **p,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__relType(struct soap *soap,
-                                     enum ns1__relType *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__relType(
+    struct soap *soap, enum ns1__relType *const *a) {
 #ifndef WITH_NOIDREF
   soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__relType);
 #endif
@@ -40951,19 +40917,17 @@ soap_get_PointerTons1__relType(struct soap *soap, enum ns1__relType **p,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__entityField(struct soap *soap,
-                                         ns1__entityField *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__entityField(
+    struct soap *soap, ns1__entityField *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__entityField))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__entityField(struct soap *soap, const char *tag, int id,
-                                   ns1__entityField *const *a,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__entityField(
+    struct soap *soap, const char *tag, int id, ns1__entityField *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__entityField);
   if (id < 0)
@@ -41000,10 +40964,9 @@ soap_in_PointerTons1__entityField(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__entityField(struct soap *soap,
-                                   ns1__entityField *const *a, const char *tag,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__entityField(
+    struct soap *soap, ns1__entityField *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__entityField);
   if (soap_out_PointerTons1__entityField(soap, tag ? tag : "ns1:entityField",
@@ -41021,9 +40984,8 @@ soap_get_PointerTons1__entityField(struct soap *soap, ns1__entityField **p,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__constraint(struct soap *soap,
-                                        ns1__constraint *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__constraint(
+    struct soap *soap, ns1__constraint *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__constraint))
     (*a)->soap_serialize(soap);
@@ -41040,9 +41002,8 @@ soap_out_PointerTons1__constraint(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__constraint **SOAP_FMAC4
-soap_in_PointerTons1__constraint(struct soap *soap, const char *tag,
-                                 ns1__constraint **a, const char *type) {
+SOAP_FMAC3 ns1__constraint **SOAP_FMAC4 soap_in_PointerTons1__constraint(
+    struct soap *soap, const char *tag, ns1__constraint **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -41079,18 +41040,16 @@ soap_put_PointerTons1__constraint(struct soap *soap, ns1__constraint *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__constraint **SOAP_FMAC4
-soap_get_PointerTons1__constraint(struct soap *soap, ns1__constraint **p,
-                                  const char *tag, const char *type) {
+SOAP_FMAC3 ns1__constraint **SOAP_FMAC4 soap_get_PointerTons1__constraint(
+    struct soap *soap, ns1__constraint **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__constraint(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__entityInfo(struct soap *soap,
-                                        ns1__entityInfo *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__entityInfo(
+    struct soap *soap, ns1__entityInfo *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__entityInfo))
     (*a)->soap_serialize(soap);
@@ -41107,9 +41066,8 @@ soap_out_PointerTons1__entityInfo(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__entityInfo **SOAP_FMAC4
-soap_in_PointerTons1__entityInfo(struct soap *soap, const char *tag,
-                                 ns1__entityInfo **a, const char *type) {
+SOAP_FMAC3 ns1__entityInfo **SOAP_FMAC4 soap_in_PointerTons1__entityInfo(
+    struct soap *soap, const char *tag, ns1__entityInfo **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -41146,18 +41104,16 @@ soap_put_PointerTons1__entityInfo(struct soap *soap, ns1__entityInfo *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__entityInfo **SOAP_FMAC4
-soap_get_PointerTons1__entityInfo(struct soap *soap, ns1__entityInfo **p,
-                                  const char *tag, const char *type) {
+SOAP_FMAC3 ns1__entityInfo **SOAP_FMAC4 soap_get_PointerTons1__entityInfo(
+    struct soap *soap, ns1__entityInfo **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__entityInfo(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__publicStep(struct soap *soap,
-                                        ns1__publicStep *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__publicStep(
+    struct soap *soap, ns1__publicStep *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__publicStep))
     (*a)->soap_serialize(soap);
@@ -41174,9 +41130,8 @@ soap_out_PointerTons1__publicStep(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__publicStep **SOAP_FMAC4
-soap_in_PointerTons1__publicStep(struct soap *soap, const char *tag,
-                                 ns1__publicStep **a, const char *type) {
+SOAP_FMAC3 ns1__publicStep **SOAP_FMAC4 soap_in_PointerTons1__publicStep(
+    struct soap *soap, const char *tag, ns1__publicStep **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -41213,9 +41168,8 @@ soap_put_PointerTons1__publicStep(struct soap *soap, ns1__publicStep *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__publicStep **SOAP_FMAC4
-soap_get_PointerTons1__publicStep(struct soap *soap, ns1__publicStep **p,
-                                  const char *tag, const char *type) {
+SOAP_FMAC3 ns1__publicStep **SOAP_FMAC4 soap_get_PointerTons1__publicStep(
+    struct soap *soap, ns1__publicStep **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__publicStep(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -41230,9 +41184,10 @@ soap_serialize_PointerTons1__log(struct soap *soap, ns1__log *const *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__log(struct soap *soap, const char *tag, int id,
-                           ns1__log *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__log(struct soap *soap,
+                                                     const char *tag, int id,
+                                                     ns1__log *const *a,
+                                                     const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__log);
   if (id < 0)
@@ -41240,9 +41195,10 @@ soap_out_PointerTons1__log(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__log **SOAP_FMAC4
-soap_in_PointerTons1__log(struct soap *soap, const char *tag, ns1__log **a,
-                          const char *type) {
+SOAP_FMAC3 ns1__log **SOAP_FMAC4 soap_in_PointerTons1__log(struct soap *soap,
+                                                           const char *tag,
+                                                           ns1__log **a,
+                                                           const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -41268,9 +41224,10 @@ soap_in_PointerTons1__log(struct soap *soap, const char *tag, ns1__log **a,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__log(struct soap *soap, ns1__log *const *a,
-                           const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__log(struct soap *soap,
+                                                     ns1__log *const *a,
+                                                     const char *tag,
+                                                     const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__log);
   if (soap_out_PointerTons1__log(soap, tag ? tag : "ns1:log", id, a, type))
@@ -41278,18 +41235,18 @@ soap_put_PointerTons1__log(struct soap *soap, ns1__log *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__log **SOAP_FMAC4
-soap_get_PointerTons1__log(struct soap *soap, ns1__log **p, const char *tag,
-                           const char *type) {
+SOAP_FMAC3 ns1__log **SOAP_FMAC4 soap_get_PointerTons1__log(struct soap *soap,
+                                                            ns1__log **p,
+                                                            const char *tag,
+                                                            const char *type) {
   if ((p = soap_in_PointerTons1__log(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__userGroup(struct soap *soap,
-                                       ns1__userGroup *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__userGroup(
+    struct soap *soap, ns1__userGroup *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__userGroup))
     (*a)->soap_serialize(soap);
@@ -41306,9 +41263,8 @@ soap_out_PointerTons1__userGroup(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__userGroup **SOAP_FMAC4
-soap_in_PointerTons1__userGroup(struct soap *soap, const char *tag,
-                                ns1__userGroup **a, const char *type) {
+SOAP_FMAC3 ns1__userGroup **SOAP_FMAC4 soap_in_PointerTons1__userGroup(
+    struct soap *soap, const char *tag, ns1__userGroup **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -41345,18 +41301,16 @@ soap_put_PointerTons1__userGroup(struct soap *soap, ns1__userGroup *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__userGroup **SOAP_FMAC4
-soap_get_PointerTons1__userGroup(struct soap *soap, ns1__userGroup **p,
-                                 const char *tag, const char *type) {
+SOAP_FMAC3 ns1__userGroup **SOAP_FMAC4 soap_get_PointerTons1__userGroup(
+    struct soap *soap, ns1__userGroup **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__userGroup(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__grouping(struct soap *soap,
-                                      ns1__grouping *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__grouping(
+    struct soap *soap, ns1__grouping *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__grouping))
     (*a)->soap_serialize(soap);
@@ -41373,9 +41327,8 @@ soap_out_PointerTons1__grouping(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__grouping **SOAP_FMAC4
-soap_in_PointerTons1__grouping(struct soap *soap, const char *tag,
-                               ns1__grouping **a, const char *type) {
+SOAP_FMAC3 ns1__grouping **SOAP_FMAC4 soap_in_PointerTons1__grouping(
+    struct soap *soap, const char *tag, ns1__grouping **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -41412,9 +41365,8 @@ soap_put_PointerTons1__grouping(struct soap *soap, ns1__grouping *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__grouping **SOAP_FMAC4
-soap_get_PointerTons1__grouping(struct soap *soap, ns1__grouping **p,
-                                const char *tag, const char *type) {
+SOAP_FMAC3 ns1__grouping **SOAP_FMAC4 soap_get_PointerTons1__grouping(
+    struct soap *soap, ns1__grouping **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__grouping(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -41641,19 +41593,17 @@ soap_get_PointerTons1__dataCollectionParameter(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__dataCollection(struct soap *soap,
-                                            ns1__dataCollection *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__dataCollection(
+    struct soap *soap, ns1__dataCollection *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__dataCollection))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__dataCollection(struct soap *soap, const char *tag,
-                                      int id, ns1__dataCollection *const *a,
-                                      const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dataCollection(
+    struct soap *soap, const char *tag, int id, ns1__dataCollection *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__dataCollection);
   if (id < 0)
@@ -41691,10 +41641,9 @@ soap_in_PointerTons1__dataCollection(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__dataCollection(struct soap *soap,
-                                      ns1__dataCollection *const *a,
-                                      const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dataCollection(
+    struct soap *soap, ns1__dataCollection *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__dataCollection);
   if (soap_out_PointerTons1__dataCollection(
@@ -41721,9 +41670,10 @@ soap_serialize_PointerTons1__job(struct soap *soap, ns1__job *const *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__job(struct soap *soap, const char *tag, int id,
-                           ns1__job *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__job(struct soap *soap,
+                                                     const char *tag, int id,
+                                                     ns1__job *const *a,
+                                                     const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__job);
   if (id < 0)
@@ -41731,9 +41681,10 @@ soap_out_PointerTons1__job(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__job **SOAP_FMAC4
-soap_in_PointerTons1__job(struct soap *soap, const char *tag, ns1__job **a,
-                          const char *type) {
+SOAP_FMAC3 ns1__job **SOAP_FMAC4 soap_in_PointerTons1__job(struct soap *soap,
+                                                           const char *tag,
+                                                           ns1__job **a,
+                                                           const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -41759,9 +41710,10 @@ soap_in_PointerTons1__job(struct soap *soap, const char *tag, ns1__job **a,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__job(struct soap *soap, ns1__job *const *a,
-                           const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__job(struct soap *soap,
+                                                     ns1__job *const *a,
+                                                     const char *tag,
+                                                     const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__job);
   if (soap_out_PointerTons1__job(soap, tag ? tag : "ns1:job", id, a, type))
@@ -41769,28 +41721,27 @@ soap_put_PointerTons1__job(struct soap *soap, ns1__job *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__job **SOAP_FMAC4
-soap_get_PointerTons1__job(struct soap *soap, ns1__job **p, const char *tag,
-                           const char *type) {
+SOAP_FMAC3 ns1__job **SOAP_FMAC4 soap_get_PointerTons1__job(struct soap *soap,
+                                                            ns1__job **p,
+                                                            const char *tag,
+                                                            const char *type) {
   if ((p = soap_in_PointerTons1__job(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__application(struct soap *soap,
-                                         ns1__application *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__application(
+    struct soap *soap, ns1__application *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__application))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__application(struct soap *soap, const char *tag, int id,
-                                   ns1__application *const *a,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__application(
+    struct soap *soap, const char *tag, int id, ns1__application *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__application);
   if (id < 0)
@@ -41827,10 +41778,9 @@ soap_in_PointerTons1__application(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__application(struct soap *soap,
-                                   ns1__application *const *a, const char *tag,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__application(
+    struct soap *soap, ns1__application *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__application);
   if (soap_out_PointerTons1__application(soap, tag ? tag : "ns1:application",
@@ -41848,18 +41798,16 @@ soap_get_PointerTons1__application(struct soap *soap, ns1__application **p,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__studyStatus(struct soap *soap,
-                                         enum ns1__studyStatus *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__studyStatus(
+    struct soap *soap, enum ns1__studyStatus *const *a) {
 #ifndef WITH_NOIDREF
   soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__studyStatus);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__studyStatus(struct soap *soap, const char *tag, int id,
-                                   enum ns1__studyStatus *const *a,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__studyStatus(
+    struct soap *soap, const char *tag, int id, enum ns1__studyStatus *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__studyStatus);
   if (id < 0)
@@ -41891,10 +41839,9 @@ soap_in_PointerTons1__studyStatus(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__studyStatus(struct soap *soap,
-                                   enum ns1__studyStatus *const *a,
-                                   const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__studyStatus(
+    struct soap *soap, enum ns1__studyStatus *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__studyStatus);
   if (soap_out_PointerTons1__studyStatus(soap, tag ? tag : "ns1:studyStatus",
@@ -41920,11 +41867,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__studyInvestigation(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__studyInvestigation(struct soap *soap, const char *tag,
-                                          int id,
-                                          ns1__studyInvestigation *const *a,
-                                          const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__studyInvestigation(
+    struct soap *soap, const char *tag, int id,
+    ns1__studyInvestigation *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__studyInvestigation);
   if (id < 0)
@@ -41963,10 +41908,9 @@ soap_in_PointerTons1__studyInvestigation(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__studyInvestigation(struct soap *soap,
-                                          ns1__studyInvestigation *const *a,
-                                          const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__studyInvestigation(
+    struct soap *soap, ns1__studyInvestigation *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__studyInvestigation);
   if (soap_out_PointerTons1__studyInvestigation(
@@ -41993,9 +41937,10 @@ soap_serialize_PointerTons1__study(struct soap *soap, ns1__study *const *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__study(struct soap *soap, const char *tag, int id,
-                             ns1__study *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__study(struct soap *soap,
+                                                       const char *tag, int id,
+                                                       ns1__study *const *a,
+                                                       const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__study);
   if (id < 0)
@@ -42003,9 +41948,8 @@ soap_out_PointerTons1__study(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__study **SOAP_FMAC4
-soap_in_PointerTons1__study(struct soap *soap, const char *tag, ns1__study **a,
-                            const char *type) {
+SOAP_FMAC3 ns1__study **SOAP_FMAC4 soap_in_PointerTons1__study(
+    struct soap *soap, const char *tag, ns1__study **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -42031,9 +41975,10 @@ soap_in_PointerTons1__study(struct soap *soap, const char *tag, ns1__study **a,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__study(struct soap *soap, ns1__study *const *a,
-                             const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__study(struct soap *soap,
+                                                       ns1__study *const *a,
+                                                       const char *tag,
+                                                       const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__study);
   if (soap_out_PointerTons1__study(soap, tag ? tag : "ns1:study", id, a, type))
@@ -42041,9 +41986,8 @@ soap_put_PointerTons1__study(struct soap *soap, ns1__study *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__study **SOAP_FMAC4
-soap_get_PointerTons1__study(struct soap *soap, ns1__study **p, const char *tag,
-                             const char *type) {
+SOAP_FMAC3 ns1__study **SOAP_FMAC4 soap_get_PointerTons1__study(
+    struct soap *soap, ns1__study **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__study(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -42058,9 +42002,10 @@ soap_serialize_PointerTons1__shift(struct soap *soap, ns1__shift *const *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__shift(struct soap *soap, const char *tag, int id,
-                             ns1__shift *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__shift(struct soap *soap,
+                                                       const char *tag, int id,
+                                                       ns1__shift *const *a,
+                                                       const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__shift);
   if (id < 0)
@@ -42068,9 +42013,8 @@ soap_out_PointerTons1__shift(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__shift **SOAP_FMAC4
-soap_in_PointerTons1__shift(struct soap *soap, const char *tag, ns1__shift **a,
-                            const char *type) {
+SOAP_FMAC3 ns1__shift **SOAP_FMAC4 soap_in_PointerTons1__shift(
+    struct soap *soap, const char *tag, ns1__shift **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -42096,9 +42040,10 @@ soap_in_PointerTons1__shift(struct soap *soap, const char *tag, ns1__shift **a,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__shift(struct soap *soap, ns1__shift *const *a,
-                             const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__shift(struct soap *soap,
+                                                       ns1__shift *const *a,
+                                                       const char *tag,
+                                                       const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__shift);
   if (soap_out_PointerTons1__shift(soap, tag ? tag : "ns1:shift", id, a, type))
@@ -42106,28 +42051,25 @@ soap_put_PointerTons1__shift(struct soap *soap, ns1__shift *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__shift **SOAP_FMAC4
-soap_get_PointerTons1__shift(struct soap *soap, ns1__shift **p, const char *tag,
-                             const char *type) {
+SOAP_FMAC3 ns1__shift **SOAP_FMAC4 soap_get_PointerTons1__shift(
+    struct soap *soap, ns1__shift **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__shift(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__sampleParameter(struct soap *soap,
-                                             ns1__sampleParameter *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__sampleParameter(
+    struct soap *soap, ns1__sampleParameter *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__sampleParameter))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__sampleParameter(struct soap *soap, const char *tag,
-                                       int id, ns1__sampleParameter *const *a,
-                                       const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__sampleParameter(
+    struct soap *soap, const char *tag, int id, ns1__sampleParameter *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__sampleParameter);
   if (id < 0)
@@ -42165,10 +42107,9 @@ soap_in_PointerTons1__sampleParameter(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__sampleParameter(struct soap *soap,
-                                       ns1__sampleParameter *const *a,
-                                       const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__sampleParameter(
+    struct soap *soap, ns1__sampleParameter *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__sampleParameter);
   if (soap_out_PointerTons1__sampleParameter(
@@ -42195,9 +42136,10 @@ soap_serialize_PointerTons1__sample(struct soap *soap, ns1__sample *const *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__sample(struct soap *soap, const char *tag, int id,
-                              ns1__sample *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__sample(struct soap *soap,
+                                                        const char *tag, int id,
+                                                        ns1__sample *const *a,
+                                                        const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__sample);
   if (id < 0)
@@ -42205,9 +42147,8 @@ soap_out_PointerTons1__sample(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__sample **SOAP_FMAC4
-soap_in_PointerTons1__sample(struct soap *soap, const char *tag,
-                             ns1__sample **a, const char *type) {
+SOAP_FMAC3 ns1__sample **SOAP_FMAC4 soap_in_PointerTons1__sample(
+    struct soap *soap, const char *tag, ns1__sample **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -42233,9 +42174,10 @@ soap_in_PointerTons1__sample(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__sample(struct soap *soap, ns1__sample *const *a,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__sample(struct soap *soap,
+                                                        ns1__sample *const *a,
+                                                        const char *tag,
+                                                        const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__sample);
   if (soap_out_PointerTons1__sample(soap, tag ? tag : "ns1:sample", id, a,
@@ -42244,28 +42186,25 @@ soap_put_PointerTons1__sample(struct soap *soap, ns1__sample *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__sample **SOAP_FMAC4
-soap_get_PointerTons1__sample(struct soap *soap, ns1__sample **p,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 ns1__sample **SOAP_FMAC4 soap_get_PointerTons1__sample(
+    struct soap *soap, ns1__sample **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__sample(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__relatedDatafile(struct soap *soap,
-                                             ns1__relatedDatafile *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__relatedDatafile(
+    struct soap *soap, ns1__relatedDatafile *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__relatedDatafile))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__relatedDatafile(struct soap *soap, const char *tag,
-                                       int id, ns1__relatedDatafile *const *a,
-                                       const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__relatedDatafile(
+    struct soap *soap, const char *tag, int id, ns1__relatedDatafile *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__relatedDatafile);
   if (id < 0)
@@ -42303,10 +42242,9 @@ soap_in_PointerTons1__relatedDatafile(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__relatedDatafile(struct soap *soap,
-                                       ns1__relatedDatafile *const *a,
-                                       const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__relatedDatafile(
+    struct soap *soap, ns1__relatedDatafile *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__relatedDatafile);
   if (soap_out_PointerTons1__relatedDatafile(
@@ -42325,19 +42263,17 @@ soap_get_PointerTons1__relatedDatafile(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__publication(struct soap *soap,
-                                         ns1__publication *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__publication(
+    struct soap *soap, ns1__publication *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__publication))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__publication(struct soap *soap, const char *tag, int id,
-                                   ns1__publication *const *a,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__publication(
+    struct soap *soap, const char *tag, int id, ns1__publication *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__publication);
   if (id < 0)
@@ -42374,10 +42310,9 @@ soap_in_PointerTons1__publication(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__publication(struct soap *soap,
-                                   ns1__publication *const *a, const char *tag,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__publication(
+    struct soap *soap, ns1__publication *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__publication);
   if (soap_out_PointerTons1__publication(soap, tag ? tag : "ns1:publication",
@@ -42395,19 +42330,17 @@ soap_get_PointerTons1__publication(struct soap *soap, ns1__publication **p,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__parameterType(struct soap *soap,
-                                           ns1__parameterType *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__parameterType(
+    struct soap *soap, ns1__parameterType *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__parameterType))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__parameterType(struct soap *soap, const char *tag, int id,
-                                     ns1__parameterType *const *a,
-                                     const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__parameterType(
+    struct soap *soap, const char *tag, int id, ns1__parameterType *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__parameterType);
   if (id < 0)
@@ -42444,10 +42377,9 @@ soap_in_PointerTons1__parameterType(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__parameterType(struct soap *soap,
-                                     ns1__parameterType *const *a,
-                                     const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__parameterType(
+    struct soap *soap, ns1__parameterType *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__parameterType);
   if (soap_out_PointerTons1__parameterType(
@@ -42465,18 +42397,19 @@ soap_get_PointerTons1__parameterType(struct soap *soap, ns1__parameterType **p,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__keyword(struct soap *soap,
-                                     ns1__keyword *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__keyword(
+    struct soap *soap, ns1__keyword *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__keyword))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__keyword(struct soap *soap, const char *tag, int id,
-                               ns1__keyword *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__keyword(struct soap *soap,
+                                                         const char *tag,
+                                                         int id,
+                                                         ns1__keyword *const *a,
+                                                         const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__keyword);
   if (id < 0)
@@ -42484,9 +42417,8 @@ soap_out_PointerTons1__keyword(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__keyword **SOAP_FMAC4
-soap_in_PointerTons1__keyword(struct soap *soap, const char *tag,
-                              ns1__keyword **a, const char *type) {
+SOAP_FMAC3 ns1__keyword **SOAP_FMAC4 soap_in_PointerTons1__keyword(
+    struct soap *soap, const char *tag, ns1__keyword **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -42512,9 +42444,10 @@ soap_in_PointerTons1__keyword(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__keyword(struct soap *soap, ns1__keyword *const *a,
-                               const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__keyword(struct soap *soap,
+                                                         ns1__keyword *const *a,
+                                                         const char *tag,
+                                                         const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__keyword);
   if (soap_out_PointerTons1__keyword(soap, tag ? tag : "ns1:keyword", id, a,
@@ -42523,9 +42456,8 @@ soap_put_PointerTons1__keyword(struct soap *soap, ns1__keyword *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__keyword **SOAP_FMAC4
-soap_get_PointerTons1__keyword(struct soap *soap, ns1__keyword **p,
-                               const char *tag, const char *type) {
+SOAP_FMAC3 ns1__keyword **SOAP_FMAC4 soap_get_PointerTons1__keyword(
+    struct soap *soap, ns1__keyword **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__keyword(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -42540,11 +42472,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__investigationUser(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__investigationUser(struct soap *soap, const char *tag,
-                                         int id,
-                                         ns1__investigationUser *const *a,
-                                         const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__investigationUser(
+    struct soap *soap, const char *tag, int id,
+    ns1__investigationUser *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__investigationUser);
   if (id < 0)
@@ -42583,10 +42513,9 @@ soap_in_PointerTons1__investigationUser(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__investigationUser(struct soap *soap,
-                                         ns1__investigationUser *const *a,
-                                         const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__investigationUser(
+    struct soap *soap, ns1__investigationUser *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__investigationUser);
   if (soap_out_PointerTons1__investigationUser(
@@ -42613,11 +42542,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__investigationType(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__investigationType(struct soap *soap, const char *tag,
-                                         int id,
-                                         ns1__investigationType *const *a,
-                                         const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__investigationType(
+    struct soap *soap, const char *tag, int id,
+    ns1__investigationType *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__investigationType);
   if (id < 0)
@@ -42656,10 +42583,9 @@ soap_in_PointerTons1__investigationType(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__investigationType(struct soap *soap,
-                                         ns1__investigationType *const *a,
-                                         const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__investigationType(
+    struct soap *soap, ns1__investigationType *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__investigationType);
   if (soap_out_PointerTons1__investigationType(
@@ -42678,19 +42604,17 @@ soap_get_PointerTons1__investigationType(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__investigation(struct soap *soap,
-                                           ns1__investigation *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__investigation(
+    struct soap *soap, ns1__investigation *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__investigation))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__investigation(struct soap *soap, const char *tag, int id,
-                                     ns1__investigation *const *a,
-                                     const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__investigation(
+    struct soap *soap, const char *tag, int id, ns1__investigation *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__investigation);
   if (id < 0)
@@ -42727,10 +42651,9 @@ soap_in_PointerTons1__investigation(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__investigation(struct soap *soap,
-                                     ns1__investigation *const *a,
-                                     const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__investigation(
+    struct soap *soap, ns1__investigation *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__investigation);
   if (soap_out_PointerTons1__investigation(
@@ -42748,9 +42671,8 @@ soap_get_PointerTons1__investigation(struct soap *soap, ns1__investigation **p,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__instrument(struct soap *soap,
-                                        ns1__instrument *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__instrument(
+    struct soap *soap, ns1__instrument *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__instrument))
     (*a)->soap_serialize(soap);
@@ -42767,9 +42689,8 @@ soap_out_PointerTons1__instrument(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__instrument **SOAP_FMAC4
-soap_in_PointerTons1__instrument(struct soap *soap, const char *tag,
-                                 ns1__instrument **a, const char *type) {
+SOAP_FMAC3 ns1__instrument **SOAP_FMAC4 soap_in_PointerTons1__instrument(
+    struct soap *soap, const char *tag, ns1__instrument **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -42806,9 +42727,8 @@ soap_put_PointerTons1__instrument(struct soap *soap, ns1__instrument *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__instrument **SOAP_FMAC4
-soap_get_PointerTons1__instrument(struct soap *soap, ns1__instrument **p,
-                                  const char *tag, const char *type) {
+SOAP_FMAC3 ns1__instrument **SOAP_FMAC4 soap_get_PointerTons1__instrument(
+    struct soap *soap, ns1__instrument **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__instrument(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -42823,9 +42743,10 @@ soap_serialize_PointerTons1__user(struct soap *soap, ns1__user *const *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__user(struct soap *soap, const char *tag, int id,
-                            ns1__user *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__user(struct soap *soap,
+                                                      const char *tag, int id,
+                                                      ns1__user *const *a,
+                                                      const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__user);
   if (id < 0)
@@ -42833,9 +42754,10 @@ soap_out_PointerTons1__user(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__user **SOAP_FMAC4
-soap_in_PointerTons1__user(struct soap *soap, const char *tag, ns1__user **a,
-                           const char *type) {
+SOAP_FMAC3 ns1__user **SOAP_FMAC4 soap_in_PointerTons1__user(struct soap *soap,
+                                                             const char *tag,
+                                                             ns1__user **a,
+                                                             const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -42861,9 +42783,10 @@ soap_in_PointerTons1__user(struct soap *soap, const char *tag, ns1__user **a,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__user(struct soap *soap, ns1__user *const *a,
-                            const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__user(struct soap *soap,
+                                                      ns1__user *const *a,
+                                                      const char *tag,
+                                                      const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__user);
   if (soap_out_PointerTons1__user(soap, tag ? tag : "ns1:user", id, a, type))
@@ -42871,9 +42794,8 @@ soap_put_PointerTons1__user(struct soap *soap, ns1__user *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__user **SOAP_FMAC4
-soap_get_PointerTons1__user(struct soap *soap, ns1__user **p, const char *tag,
-                            const char *type) {
+SOAP_FMAC3 ns1__user **SOAP_FMAC4 soap_get_PointerTons1__user(
+    struct soap *soap, ns1__user **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__user(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -42888,11 +42810,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__instrumentScientist(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__instrumentScientist(struct soap *soap, const char *tag,
-                                           int id,
-                                           ns1__instrumentScientist *const *a,
-                                           const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__instrumentScientist(
+    struct soap *soap, const char *tag, int id,
+    ns1__instrumentScientist *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__instrumentScientist);
   if (id < 0)
@@ -42931,10 +42851,9 @@ soap_in_PointerTons1__instrumentScientist(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__instrumentScientist(struct soap *soap,
-                                           ns1__instrumentScientist *const *a,
-                                           const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__instrumentScientist(
+    struct soap *soap, ns1__instrumentScientist *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__instrumentScientist);
   if (soap_out_PointerTons1__instrumentScientist(
@@ -42953,19 +42872,17 @@ soap_get_PointerTons1__instrumentScientist(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__facilityCycle(struct soap *soap,
-                                           ns1__facilityCycle *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__facilityCycle(
+    struct soap *soap, ns1__facilityCycle *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__facilityCycle))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__facilityCycle(struct soap *soap, const char *tag, int id,
-                                     ns1__facilityCycle *const *a,
-                                     const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__facilityCycle(
+    struct soap *soap, const char *tag, int id, ns1__facilityCycle *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__facilityCycle);
   if (id < 0)
@@ -43002,10 +42919,9 @@ soap_in_PointerTons1__facilityCycle(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__facilityCycle(struct soap *soap,
-                                     ns1__facilityCycle *const *a,
-                                     const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__facilityCycle(
+    struct soap *soap, ns1__facilityCycle *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__facilityCycle);
   if (soap_out_PointerTons1__facilityCycle(
@@ -43023,9 +42939,8 @@ soap_get_PointerTons1__facilityCycle(struct soap *soap, ns1__facilityCycle **p,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__facility(struct soap *soap,
-                                      ns1__facility *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__facility(
+    struct soap *soap, ns1__facility *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__facility))
     (*a)->soap_serialize(soap);
@@ -43042,9 +42957,8 @@ soap_out_PointerTons1__facility(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__facility **SOAP_FMAC4
-soap_in_PointerTons1__facility(struct soap *soap, const char *tag,
-                               ns1__facility **a, const char *type) {
+SOAP_FMAC3 ns1__facility **SOAP_FMAC4 soap_in_PointerTons1__facility(
+    struct soap *soap, const char *tag, ns1__facility **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -43081,28 +42995,25 @@ soap_put_PointerTons1__facility(struct soap *soap, ns1__facility *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__facility **SOAP_FMAC4
-soap_get_PointerTons1__facility(struct soap *soap, ns1__facility **p,
-                                const char *tag, const char *type) {
+SOAP_FMAC3 ns1__facility **SOAP_FMAC4 soap_get_PointerTons1__facility(
+    struct soap *soap, ns1__facility **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__facility(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__datasetType(struct soap *soap,
-                                         ns1__datasetType *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__datasetType(
+    struct soap *soap, ns1__datasetType *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__datasetType))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__datasetType(struct soap *soap, const char *tag, int id,
-                                   ns1__datasetType *const *a,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__datasetType(
+    struct soap *soap, const char *tag, int id, ns1__datasetType *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__datasetType);
   if (id < 0)
@@ -43139,10 +43050,9 @@ soap_in_PointerTons1__datasetType(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__datasetType(struct soap *soap,
-                                   ns1__datasetType *const *a, const char *tag,
-                                   const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__datasetType(
+    struct soap *soap, ns1__datasetType *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__datasetType);
   if (soap_out_PointerTons1__datasetType(soap, tag ? tag : "ns1:datasetType",
@@ -43160,19 +43070,17 @@ soap_get_PointerTons1__datasetType(struct soap *soap, ns1__datasetType **p,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__datasetParameter(struct soap *soap,
-                                              ns1__datasetParameter *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__datasetParameter(
+    struct soap *soap, ns1__datasetParameter *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__datasetParameter))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__datasetParameter(struct soap *soap, const char *tag,
-                                        int id, ns1__datasetParameter *const *a,
-                                        const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__datasetParameter(
+    struct soap *soap, const char *tag, int id, ns1__datasetParameter *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__datasetParameter);
   if (id < 0)
@@ -43210,10 +43118,9 @@ soap_in_PointerTons1__datasetParameter(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__datasetParameter(struct soap *soap,
-                                        ns1__datasetParameter *const *a,
-                                        const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__datasetParameter(
+    struct soap *soap, ns1__datasetParameter *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__datasetParameter);
   if (soap_out_PointerTons1__datasetParameter(
@@ -43232,18 +43139,19 @@ soap_get_PointerTons1__datasetParameter(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__dataset(struct soap *soap,
-                                     ns1__dataset *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__dataset(
+    struct soap *soap, ns1__dataset *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__dataset))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__dataset(struct soap *soap, const char *tag, int id,
-                               ns1__dataset *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dataset(struct soap *soap,
+                                                         const char *tag,
+                                                         int id,
+                                                         ns1__dataset *const *a,
+                                                         const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__dataset);
   if (id < 0)
@@ -43251,9 +43159,8 @@ soap_out_PointerTons1__dataset(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__dataset **SOAP_FMAC4
-soap_in_PointerTons1__dataset(struct soap *soap, const char *tag,
-                              ns1__dataset **a, const char *type) {
+SOAP_FMAC3 ns1__dataset **SOAP_FMAC4 soap_in_PointerTons1__dataset(
+    struct soap *soap, const char *tag, ns1__dataset **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -43279,9 +43186,10 @@ soap_in_PointerTons1__dataset(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__dataset(struct soap *soap, ns1__dataset *const *a,
-                               const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dataset(struct soap *soap,
+                                                         ns1__dataset *const *a,
+                                                         const char *tag,
+                                                         const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__dataset);
   if (soap_out_PointerTons1__dataset(soap, tag ? tag : "ns1:dataset", id, a,
@@ -43290,9 +43198,8 @@ soap_put_PointerTons1__dataset(struct soap *soap, ns1__dataset *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__dataset **SOAP_FMAC4
-soap_get_PointerTons1__dataset(struct soap *soap, ns1__dataset **p,
-                               const char *tag, const char *type) {
+SOAP_FMAC3 ns1__dataset **SOAP_FMAC4 soap_get_PointerTons1__dataset(
+    struct soap *soap, ns1__dataset **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__dataset(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -43307,11 +43214,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__datafileParameter(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__datafileParameter(struct soap *soap, const char *tag,
-                                         int id,
-                                         ns1__datafileParameter *const *a,
-                                         const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__datafileParameter(
+    struct soap *soap, const char *tag, int id,
+    ns1__datafileParameter *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__datafileParameter);
   if (id < 0)
@@ -43350,10 +43255,9 @@ soap_in_PointerTons1__datafileParameter(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__datafileParameter(struct soap *soap,
-                                         ns1__datafileParameter *const *a,
-                                         const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__datafileParameter(
+    struct soap *soap, ns1__datafileParameter *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__datafileParameter);
   if (soap_out_PointerTons1__datafileParameter(
@@ -43372,19 +43276,17 @@ soap_get_PointerTons1__datafileParameter(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__datafileFormat(struct soap *soap,
-                                            ns1__datafileFormat *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__datafileFormat(
+    struct soap *soap, ns1__datafileFormat *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__datafileFormat))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__datafileFormat(struct soap *soap, const char *tag,
-                                      int id, ns1__datafileFormat *const *a,
-                                      const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__datafileFormat(
+    struct soap *soap, const char *tag, int id, ns1__datafileFormat *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__datafileFormat);
   if (id < 0)
@@ -43422,10 +43324,9 @@ soap_in_PointerTons1__datafileFormat(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__datafileFormat(struct soap *soap,
-                                      ns1__datafileFormat *const *a,
-                                      const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__datafileFormat(
+    struct soap *soap, ns1__datafileFormat *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__datafileFormat);
   if (soap_out_PointerTons1__datafileFormat(
@@ -43444,9 +43345,8 @@ soap_get_PointerTons1__datafileFormat(struct soap *soap,
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__datafile(struct soap *soap,
-                                      ns1__datafile *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__datafile(
+    struct soap *soap, ns1__datafile *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__datafile))
     (*a)->soap_serialize(soap);
@@ -43463,9 +43363,8 @@ soap_out_PointerTons1__datafile(struct soap *soap, const char *tag, int id,
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__datafile **SOAP_FMAC4
-soap_in_PointerTons1__datafile(struct soap *soap, const char *tag,
-                               ns1__datafile **a, const char *type) {
+SOAP_FMAC3 ns1__datafile **SOAP_FMAC4 soap_in_PointerTons1__datafile(
+    struct soap *soap, const char *tag, ns1__datafile **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -43502,9 +43401,8 @@ soap_put_PointerTons1__datafile(struct soap *soap, ns1__datafile *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__datafile **SOAP_FMAC4
-soap_get_PointerTons1__datafile(struct soap *soap, ns1__datafile **p,
-                                const char *tag, const char *type) {
+SOAP_FMAC3 ns1__datafile **SOAP_FMAC4 soap_get_PointerTons1__datafile(
+    struct soap *soap, ns1__datafile **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTons1__datafile(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
@@ -43575,16 +43473,17 @@ soap_get_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerToLONG64(struct soap *soap, LONG64 *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToLONG64(struct soap *soap,
+                                                          LONG64 *const *a) {
 #ifndef WITH_NOIDREF
   soap_reference(soap, *a, SOAP_TYPE_ICat4_LONG64);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerToLONG64(struct soap *soap, const char *tag, int id,
-                         LONG64 *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToLONG64(struct soap *soap,
+                                                   const char *tag, int id,
+                                                   LONG64 *const *a,
+                                                   const char *type) {
   id =
       soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_LONG64);
   if (id < 0)
@@ -43592,9 +43491,10 @@ soap_out_PointerToLONG64(struct soap *soap, const char *tag, int id,
   return soap_out_LONG64(soap, tag, id, *a, type);
 }
 
-SOAP_FMAC3 LONG64 **SOAP_FMAC4
-soap_in_PointerToLONG64(struct soap *soap, const char *tag, LONG64 **a,
-                        const char *type) {
+SOAP_FMAC3 LONG64 **SOAP_FMAC4 soap_in_PointerToLONG64(struct soap *soap,
+                                                       const char *tag,
+                                                       LONG64 **a,
+                                                       const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -43614,9 +43514,10 @@ soap_in_PointerToLONG64(struct soap *soap, const char *tag, LONG64 **a,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerToLONG64(struct soap *soap, LONG64 *const *a, const char *tag,
-                         const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerToLONG64(struct soap *soap,
+                                                   LONG64 *const *a,
+                                                   const char *tag,
+                                                   const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerToLONG64);
   if (soap_out_PointerToLONG64(soap, tag ? tag : "long", id, a, type))
@@ -43624,34 +43525,37 @@ soap_put_PointerToLONG64(struct soap *soap, LONG64 *const *a, const char *tag,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 LONG64 **SOAP_FMAC4
-soap_get_PointerToLONG64(struct soap *soap, LONG64 **p, const char *tag,
-                         const char *type) {
+SOAP_FMAC3 LONG64 **SOAP_FMAC4 soap_get_PointerToLONG64(struct soap *soap,
+                                                        LONG64 **p,
+                                                        const char *tag,
+                                                        const char *type) {
   if ((p = soap_in_PointerToLONG64(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTotime(struct soap *soap, time_t *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTotime(struct soap *soap,
+                                                        time_t *const *a) {
 #ifndef WITH_NOIDREF
   soap_reference(soap, *a, SOAP_TYPE_ICat4_time);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTotime(struct soap *soap, const char *tag, int id,
-                       time_t *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTotime(struct soap *soap,
+                                                 const char *tag, int id,
+                                                 time_t *const *a,
+                                                 const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_time);
   if (id < 0)
     return soap->error;
   return soap_out_time(soap, tag, id, *a, type);
 }
 
-SOAP_FMAC3 time_t **SOAP_FMAC4
-soap_in_PointerTotime(struct soap *soap, const char *tag, time_t **a,
-                      const char *type) {
+SOAP_FMAC3 time_t **SOAP_FMAC4 soap_in_PointerTotime(struct soap *soap,
+                                                     const char *tag,
+                                                     time_t **a,
+                                                     const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -43671,9 +43575,10 @@ soap_in_PointerTotime(struct soap *soap, const char *tag, time_t **a,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTotime(struct soap *soap, time_t *const *a, const char *tag,
-                       const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTotime(struct soap *soap,
+                                                 time_t *const *a,
+                                                 const char *tag,
+                                                 const char *type) {
   int id =
       soap_embed(soap, (void *)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTotime);
   if (soap_out_PointerTotime(soap, tag ? tag : "dateTime", id, a, type))
@@ -43681,28 +43586,27 @@ soap_put_PointerTotime(struct soap *soap, time_t *const *a, const char *tag,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 time_t **SOAP_FMAC4
-soap_get_PointerTotime(struct soap *soap, time_t **p, const char *tag,
-                       const char *type) {
+SOAP_FMAC3 time_t **SOAP_FMAC4 soap_get_PointerTotime(struct soap *soap,
+                                                      time_t **p,
+                                                      const char *tag,
+                                                      const char *type) {
   if ((p = soap_in_PointerTotime(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_PointerTons1__entityBaseBean(struct soap *soap,
-                                            ns1__entityBaseBean *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__entityBaseBean(
+    struct soap *soap, ns1__entityBaseBean *const *a) {
 #ifndef WITH_NOIDREF
   if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__entityBaseBean))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__entityBaseBean(struct soap *soap, const char *tag,
-                                      int id, ns1__entityBaseBean *const *a,
-                                      const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__entityBaseBean(
+    struct soap *soap, const char *tag, int id, ns1__entityBaseBean *const *a,
+    const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__entityBaseBean);
   if (id < 0)
@@ -43981,10 +43885,9 @@ soap_in_PointerTons1__entityBaseBean(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__entityBaseBean(struct soap *soap,
-                                      ns1__entityBaseBean *const *a,
-                                      const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__entityBaseBean(
+    struct soap *soap, ns1__entityBaseBean *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__entityBaseBean);
   if (soap_out_PointerTons1__entityBaseBean(
@@ -44010,11 +43913,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__icatExceptionType(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTons1__icatExceptionType(struct soap *soap, const char *tag,
-                                         int id,
-                                         enum ns1__icatExceptionType *const *a,
-                                         const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__icatExceptionType(
+    struct soap *soap, const char *tag, int id,
+    enum ns1__icatExceptionType *const *a, const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_ns1__icatExceptionType);
   if (id < 0)
@@ -44047,10 +43948,9 @@ soap_in_PointerTons1__icatExceptionType(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTons1__icatExceptionType(struct soap *soap,
-                                         enum ns1__icatExceptionType *const *a,
-                                         const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__icatExceptionType(
+    struct soap *soap, enum ns1__icatExceptionType *const *a, const char *tag,
+    const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTons1__icatExceptionType);
   if (soap_out_PointerTons1__icatExceptionType(
@@ -44077,9 +43977,10 @@ soap_serialize_PointerTostd__string(struct soap *soap, std::string *const *a) {
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_PointerTostd__string(struct soap *soap, const char *tag, int id,
-                              std::string *const *a, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTostd__string(struct soap *soap,
+                                                        const char *tag, int id,
+                                                        std::string *const *a,
+                                                        const char *type) {
   id = soap_element_id(soap, tag, id, *a, NULL, 0, type,
                        SOAP_TYPE_ICat4_std__string);
   if (id < 0)
@@ -44087,9 +43988,8 @@ soap_out_PointerTostd__string(struct soap *soap, const char *tag, int id,
   return soap_out_std__string(soap, tag, id, *a, type);
 }
 
-SOAP_FMAC3 std::string **SOAP_FMAC4
-soap_in_PointerTostd__string(struct soap *soap, const char *tag,
-                             std::string **a, const char *type) {
+SOAP_FMAC3 std::string **SOAP_FMAC4 soap_in_PointerTostd__string(
+    struct soap *soap, const char *tag, std::string **a, const char *type) {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
@@ -44110,9 +44010,10 @@ soap_in_PointerTostd__string(struct soap *soap, const char *tag,
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_put_PointerTostd__string(struct soap *soap, std::string *const *a,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTostd__string(struct soap *soap,
+                                                        std::string *const *a,
+                                                        const char *tag,
+                                                        const char *type) {
   int id = soap_embed(soap, (void *)a, NULL, 0, tag,
                       SOAP_TYPE_ICat4_PointerTostd__string);
   if (soap_out_PointerTostd__string(soap, tag ? tag : "string", id, a, type))
@@ -44120,17 +44021,16 @@ soap_put_PointerTostd__string(struct soap *soap, std::string *const *a,
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 std::string **SOAP_FMAC4
-soap_get_PointerTostd__string(struct soap *soap, std::string **p,
-                              const char *tag, const char *type) {
+SOAP_FMAC3 std::string **SOAP_FMAC4 soap_get_PointerTostd__string(
+    struct soap *soap, std::string **p, const char *tag, const char *type) {
   if ((p = soap_in_PointerTostd__string(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize__QName(struct soap *soap, char *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize__QName(struct soap *soap,
+                                                 char *const *a) {
 #ifndef WITH_NOIDREF
   soap_reference(soap, *a, SOAP_TYPE_ICat4__QName);
 #endif
@@ -44142,8 +44042,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out__QName(struct soap *soap, const char *tag,
   return soap_outstring(soap, tag, id, a, type, SOAP_TYPE_ICat4__QName);
 }
 
-SOAP_FMAC3 char **SOAP_FMAC4
-soap_in__QName(struct soap *soap, const char *tag, char **a, const char *type) {
+SOAP_FMAC3 char **SOAP_FMAC4 soap_in__QName(struct soap *soap, const char *tag,
+                                            char **a, const char *type) {
   char **p;
   p = soap_instring(soap, tag, a, type, SOAP_TYPE_ICat4__QName, 2, 0, -1);
   return p;
@@ -44175,8 +44075,8 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_string(struct soap *soap, char **a) {
 #endif
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_string(struct soap *soap, char *const *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_string(struct soap *soap,
+                                                 char *const *a) {
 #ifndef WITH_NOIDREF
   soap_reference(soap, *a, SOAP_TYPE_ICat4_string);
 #endif
@@ -44188,8 +44088,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_string(struct soap *soap, const char *tag,
   return soap_outstring(soap, tag, id, a, type, SOAP_TYPE_ICat4_string);
 }
 
-SOAP_FMAC3 char **SOAP_FMAC4
-soap_in_string(struct soap *soap, const char *tag, char **a, const char *type) {
+SOAP_FMAC3 char **SOAP_FMAC4 soap_in_string(struct soap *soap, const char *tag,
+                                            char **a, const char *type) {
   char **p;
   p = soap_instring(soap, tag, a, type, SOAP_TYPE_ICat4_string, 1, 0, -1);
   return p;
@@ -44267,9 +44167,8 @@ soap_in_std__vectorTemplateOfPointerTons1__sampleParameter(
     } else if (!soap_in_PointerTons1__sampleParameter(soap, tag, &n,
                                                       "ns1:sampleParameter"))
       break;
-    if (!a &&
-        !(a = soap_new_std__vectorTemplateOfPointerTons1__sampleParameter(soap,
-                                                                          -1)))
+    if (!a && !(a = soap_new_std__vectorTemplateOfPointerTons1__sampleParameter(
+                    soap, -1)))
       return NULL;
     a->push_back(n);
     if (!tag || *tag == '-')
@@ -44289,9 +44188,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__sampleParameter(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "sampleParameter(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "sampleParameter(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -44410,9 +44310,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__permissibleStringValue(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "permissibleStringValue(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "permissibleStringValue(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -44528,9 +44429,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__rule(struct soap *soap,
                                                          size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__rule(%d, "
-                                    "%s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__rule(%d, "
+                            "%s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__rule, n,
@@ -44552,10 +44454,9 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__rule(struct soap *soap,
   return (std::vector<ns1__rule *> *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_std__vectorTemplateOfPointerTons1__rule(struct soap *soap, int st,
-                                                  int tt, void *p, size_t len,
-                                                  const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__rule(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -44640,9 +44541,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__userGroup(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__userGroup(%"
-                                    "d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__userGroup(%"
+                            "d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__userGroup,
@@ -44757,9 +44659,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__study(struct soap *soap,
                                                           size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__study(%d, "
-                                    "%s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__study(%d, "
+                            "%s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__study, n,
@@ -44781,10 +44684,9 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__study(struct soap *soap,
   return (std::vector<ns1__study *> *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_std__vectorTemplateOfPointerTons1__study(struct soap *soap, int st,
-                                                   int tt, void *p, size_t len,
-                                                   const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__study(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -44873,9 +44775,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__instrumentScientist(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "instrumentScientist(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "instrumentScientist(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -44992,9 +44895,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__sampleType(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__sampleType(%"
-                                    "d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__sampleType(%"
+                            "d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__sampleType,
@@ -45088,9 +44992,8 @@ soap_in_std__vectorTemplateOfPointerTons1__parameterType(
     } else if (!soap_in_PointerTons1__parameterType(soap, tag, &n,
                                                     "ns1:parameterType"))
       break;
-    if (!a &&
-        !(a = soap_new_std__vectorTemplateOfPointerTons1__parameterType(soap,
-                                                                        -1)))
+    if (!a && !(a = soap_new_std__vectorTemplateOfPointerTons1__parameterType(
+                    soap, -1)))
       return NULL;
     a->push_back(n);
     if (!tag || *tag == '-')
@@ -45110,9 +45013,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__parameterType(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "parameterType(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "parameterType(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -45209,9 +45113,8 @@ soap_in_std__vectorTemplateOfPointerTons1__investigation(
     } else if (!soap_in_PointerTons1__investigation(soap, tag, &n,
                                                     "ns1:investigation"))
       break;
-    if (!a &&
-        !(a = soap_new_std__vectorTemplateOfPointerTons1__investigation(soap,
-                                                                        -1)))
+    if (!a && !(a = soap_new_std__vectorTemplateOfPointerTons1__investigation(
+                    soap, -1)))
       return NULL;
     a->push_back(n);
     if (!tag || *tag == '-')
@@ -45231,9 +45134,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__investigation(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "investigation(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "investigation(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -45352,9 +45256,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__investigationType(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "investigationType(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "investigationType(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -45469,9 +45374,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__instrument(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__instrument(%"
-                                    "d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__instrument(%"
+                            "d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__instrument,
@@ -45565,9 +45471,8 @@ soap_in_std__vectorTemplateOfPointerTons1__facilityCycle(
     } else if (!soap_in_PointerTons1__facilityCycle(soap, tag, &n,
                                                     "ns1:facilityCycle"))
       break;
-    if (!a &&
-        !(a = soap_new_std__vectorTemplateOfPointerTons1__facilityCycle(soap,
-                                                                        -1)))
+    if (!a && !(a = soap_new_std__vectorTemplateOfPointerTons1__facilityCycle(
+                    soap, -1)))
       return NULL;
     a->push_back(n);
     if (!tag || *tag == '-')
@@ -45587,9 +45492,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__facilityCycle(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "facilityCycle(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "facilityCycle(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -45686,9 +45592,8 @@ soap_in_std__vectorTemplateOfPointerTons1__datasetType(
     } else if (!soap_in_PointerTons1__datasetType(soap, tag, &n,
                                                   "ns1:datasetType"))
       break;
-    if (!a &&
-        !(a = soap_new_std__vectorTemplateOfPointerTons1__datasetType(soap,
-                                                                      -1)))
+    if (!a && !(a = soap_new_std__vectorTemplateOfPointerTons1__datasetType(
+                    soap, -1)))
       return NULL;
     a->push_back(n);
     if (!tag || *tag == '-')
@@ -45708,9 +45613,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__datasetType(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__datasetType("
-                                    "%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__datasetType("
+                            "%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp =
       soap_link(soap, NULL,
@@ -45806,9 +45712,8 @@ soap_in_std__vectorTemplateOfPointerTons1__datafileFormat(
     } else if (!soap_in_PointerTons1__datafileFormat(soap, tag, &n,
                                                      "ns1:datafileFormat"))
       break;
-    if (!a &&
-        !(a = soap_new_std__vectorTemplateOfPointerTons1__datafileFormat(soap,
-                                                                         -1)))
+    if (!a && !(a = soap_new_std__vectorTemplateOfPointerTons1__datafileFormat(
+                    soap, -1)))
       return NULL;
     a->push_back(n);
     if (!tag || *tag == '-')
@@ -45828,9 +45733,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__datafileFormat(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "datafileFormat(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "datafileFormat(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -45927,9 +45833,8 @@ soap_in_std__vectorTemplateOfPointerTons1__application(
     } else if (!soap_in_PointerTons1__application(soap, tag, &n,
                                                   "ns1:application"))
       break;
-    if (!a &&
-        !(a = soap_new_std__vectorTemplateOfPointerTons1__application(soap,
-                                                                      -1)))
+    if (!a && !(a = soap_new_std__vectorTemplateOfPointerTons1__application(
+                    soap, -1)))
       return NULL;
     a->push_back(n);
     if (!tag || *tag == '-')
@@ -45949,9 +45854,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__application(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__application("
-                                    "%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__application("
+                            "%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp =
       soap_link(soap, NULL,
@@ -46069,9 +45975,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__studyInvestigation(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "studyInvestigation(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "studyInvestigation(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -46187,9 +46094,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__shift(struct soap *soap,
                                                           size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__shift(%d, "
-                                    "%s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__shift(%d, "
+                            "%s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__shift, n,
@@ -46211,10 +46119,9 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__shift(struct soap *soap,
   return (std::vector<ns1__shift *> *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_std__vectorTemplateOfPointerTons1__shift(struct soap *soap, int st,
-                                                   int tt, void *p, size_t len,
-                                                   const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__shift(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -46300,9 +46207,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__sample(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__sample(%d, "
-                                    "%s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__sample(%d, "
+                            "%s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__sample, n,
@@ -46324,10 +46232,9 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__sample(
   return (std::vector<ns1__sample *> *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_std__vectorTemplateOfPointerTons1__sample(struct soap *soap, int st,
-                                                    int tt, void *p, size_t len,
-                                                    const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__sample(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -46394,9 +46301,8 @@ soap_in_std__vectorTemplateOfPointerTons1__publication(
     } else if (!soap_in_PointerTons1__publication(soap, tag, &n,
                                                   "ns1:publication"))
       break;
-    if (!a &&
-        !(a = soap_new_std__vectorTemplateOfPointerTons1__publication(soap,
-                                                                      -1)))
+    if (!a && !(a = soap_new_std__vectorTemplateOfPointerTons1__publication(
+                    soap, -1)))
       return NULL;
     a->push_back(n);
     if (!tag || *tag == '-')
@@ -46416,9 +46322,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__publication(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__publication("
-                                    "%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__publication("
+                            "%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp =
       soap_link(soap, NULL,
@@ -46538,9 +46445,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__investigationParameter(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "investigationParameter(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "investigationParameter(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -46655,9 +46563,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__keyword(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__keyword(%d, "
-                                    "%s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__keyword(%d, "
+                            "%s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__keyword, n,
@@ -46679,11 +46588,9 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__keyword(
   return (std::vector<ns1__keyword *> *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_std__vectorTemplateOfPointerTons1__keyword(struct soap *soap, int st,
-                                                     int tt, void *p,
-                                                     size_t len, const void *q,
-                                                     size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__keyword(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -46772,9 +46679,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__investigationUser(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "investigationUser(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "investigationUser(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -46894,9 +46802,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__investigationInstrument(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "investigationInstrument(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "investigationInstrument(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -47011,9 +46920,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__dataset(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__dataset(%d, "
-                                    "%s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__dataset(%d, "
+                            "%s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataset, n,
@@ -47035,11 +46945,9 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__dataset(
   return (std::vector<ns1__dataset *> *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_std__vectorTemplateOfPointerTons1__dataset(struct soap *soap, int st,
-                                                     int tt, void *p,
-                                                     size_t len, const void *q,
-                                                     size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__dataset(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -47128,9 +47036,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__datasetParameter(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "datasetParameter(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "datasetParameter(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -47243,9 +47152,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__datafile(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__datafile(%d,"
-                                    " %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__datafile(%d,"
+                            " %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datafile,
@@ -47363,9 +47273,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__dataCollectionParameter(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "dataCollectionParameter(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "dataCollectionParameter(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -47480,10 +47391,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__job(struct soap *soap,
                                                         size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST,
-         SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                              "vectorTemplateOfPointerTons1__job(%d, %s, %s)\n",
-                      n, type ? type : "", arrayType ? arrayType : ""));
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__job(%d, %s, %s)\n",
+                            n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__job, n,
       ICat4_fdelete);
@@ -47504,10 +47415,9 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__job(struct soap *soap,
   return (std::vector<ns1__job *> *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_std__vectorTemplateOfPointerTons1__job(struct soap *soap, int st,
-                                                 int tt, void *p, size_t len,
-                                                 const void *q, size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__job(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -47596,9 +47506,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__dataCollectionDataset(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "dataCollectionDataset(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "dataCollectionDataset(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -47717,9 +47628,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__datafileParameter(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "datafileParameter(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "datafileParameter(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -47814,9 +47726,8 @@ soap_in_std__vectorTemplateOfPointerTons1__relatedDatafile(
     } else if (!soap_in_PointerTons1__relatedDatafile(soap, tag, &n,
                                                       "ns1:relatedDatafile"))
       break;
-    if (!a &&
-        !(a = soap_new_std__vectorTemplateOfPointerTons1__relatedDatafile(soap,
-                                                                          -1)))
+    if (!a && !(a = soap_new_std__vectorTemplateOfPointerTons1__relatedDatafile(
+                    soap, -1)))
       return NULL;
     a->push_back(n);
     if (!tag || *tag == '-')
@@ -47836,9 +47747,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__relatedDatafile(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "relatedDatafile(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "relatedDatafile(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -47957,9 +47869,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__dataCollectionDatafile(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "dataCollectionDatafile(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "dataCollectionDatafile(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
@@ -48074,9 +47987,10 @@ soap_instantiate_std__vectorTemplateOfPointerToxsd__anyType(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerToxsd__anyType(%d, "
-                                    "%s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerToxsd__anyType(%d, "
+                            "%s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerToxsd__anyType, n,
@@ -48098,11 +48012,9 @@ soap_instantiate_std__vectorTemplateOfPointerToxsd__anyType(
   return (std::vector<xsd__anyType *> *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_std__vectorTemplateOfPointerToxsd__anyType(struct soap *soap, int st,
-                                                     int tt, void *p,
-                                                     size_t len, const void *q,
-                                                     size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerToxsd__anyType(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -48169,9 +48081,8 @@ soap_in_std__vectorTemplateOfPointerTons1__entityField(
     } else if (!soap_in_PointerTons1__entityField(soap, tag, &n,
                                                   "ns1:entityField"))
       break;
-    if (!a &&
-        !(a = soap_new_std__vectorTemplateOfPointerTons1__entityField(soap,
-                                                                      -1)))
+    if (!a && !(a = soap_new_std__vectorTemplateOfPointerTons1__entityField(
+                    soap, -1)))
       return NULL;
     a->push_back(n);
     if (!tag || *tag == '-')
@@ -48191,9 +48102,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__entityField(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__entityField("
-                                    "%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__entityField("
+                            "%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp =
       soap_link(soap, NULL,
@@ -48309,9 +48221,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__constraint(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__constraint(%"
-                                    "d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__constraint(%"
+                            "d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__constraint,
@@ -48405,9 +48318,8 @@ soap_in_std__vectorTemplateOf_ns1__login_credentials_entry(
         break;
     } else if (!soap_in__ns1__login_credentials_entry(soap, tag, &n, ""))
       break;
-    if (!a &&
-        !(a = soap_new_std__vectorTemplateOf_ns1__login_credentials_entry(soap,
-                                                                          -1)))
+    if (!a && !(a = soap_new_std__vectorTemplateOf_ns1__login_credentials_entry(
+                    soap, -1)))
       return NULL;
     soap_update_pointers(soap, (char *)&n, (char *)&n + sizeof(n),
                          (char *)&(*a->insert(a->end(), n)), (char *)&n);
@@ -48428,10 +48340,10 @@ soap_instantiate_std__vectorTemplateOf_ns1__login_credentials_entry(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST,
-         SOAP_MESSAGE(fdebug, "soap_instantiate_std__vectorTemplateOf_ns1__"
-                              "login_credentials_entry(%d, %s, %s)\n",
-                      n, type ? type : "", arrayType ? arrayType : ""));
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__vectorTemplateOf_ns1__"
+                            "login_credentials_entry(%d, %s, %s)\n",
+                            n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,
       SOAP_TYPE_ICat4_std__vectorTemplateOf_ns1__login_credentials_entry, n,
@@ -48472,9 +48384,8 @@ soap_copy_std__vectorTemplateOf_ns1__login_credentials_entry(
       *(std::vector<_ns1__login_credentials_entry> *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default_std__vectorTemplateOfstd__string(struct soap *soap,
-                                              std::vector<std::string> *p) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfstd__string(
+    struct soap *soap, std::vector<std::string> *p) {
   p->clear();
 }
 
@@ -48487,11 +48398,9 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfstd__string(
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4
-soap_out_std__vectorTemplateOfstd__string(struct soap *soap, const char *tag,
-                                          int id,
-                                          const std::vector<std::string> *a,
-                                          const char *type) {
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfstd__string(
+    struct soap *soap, const char *tag, int id,
+    const std::vector<std::string> *a, const char *type) {
   for (std::vector<std::string>::const_iterator i = a->begin(); i != a->end();
        ++i) {
     if (soap_out_std__string(soap, tag, id, &(*i), ""))
@@ -48572,10 +48481,9 @@ soap_instantiate_std__vectorTemplateOfstd__string(struct soap *soap, int n,
   return (std::vector<std::string> *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_std__vectorTemplateOfstd__string(struct soap *soap, int st, int tt,
-                                           void *p, size_t len, const void *q,
-                                           size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfstd__string(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -48587,23 +48495,21 @@ soap_copy_std__vectorTemplateOfstd__string(struct soap *soap, int st, int tt,
   *(std::vector<std::string> *)p = *(std::vector<std::string> *)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_default_std__vectorTemplateOfLONG64(struct soap *soap,
-                                         std::vector<LONG64> *p) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfLONG64(
+    struct soap *soap, std::vector<LONG64> *p) {
   p->clear();
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_serialize_std__vectorTemplateOfLONG64(struct soap *soap,
-                                           const std::vector<LONG64> *a) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfLONG64(
+    struct soap *soap, const std::vector<LONG64> *a){
 #ifndef WITH_NOIDREF
 #endif
 }
 
 SOAP_FMAC3 int SOAP_FMAC4
-soap_out_std__vectorTemplateOfLONG64(struct soap *soap, const char *tag, int id,
-                                     const std::vector<LONG64> *a,
-                                     const char *type) {
+    soap_out_std__vectorTemplateOfLONG64(struct soap *soap, const char *tag,
+                                         int id, const std::vector<LONG64> *a,
+                                         const char *type) {
   for (std::vector<LONG64>::const_iterator i = a->begin(); i != a->end(); ++i) {
     if (soap_out_LONG64(soap, tag, id, &(*i), ""))
       return soap->error;
@@ -48679,10 +48585,9 @@ soap_instantiate_std__vectorTemplateOfLONG64(struct soap *soap, int n,
   return (std::vector<LONG64> *)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4
-soap_copy_std__vectorTemplateOfLONG64(struct soap *soap, int st, int tt,
-                                      void *p, size_t len, const void *q,
-                                      size_t n) {
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfLONG64(
+    struct soap *soap, int st, int tt, void *p, size_t len, const void *q,
+    size_t n) {
   (void)soap;
   (void)tt;
   (void)st;
@@ -48748,9 +48653,8 @@ soap_in_std__vectorTemplateOfPointerTons1__entityBaseBean(
     } else if (!soap_in_PointerTons1__entityBaseBean(soap, tag, &n,
                                                      "ns1:entityBaseBean"))
       break;
-    if (!a &&
-        !(a = soap_new_std__vectorTemplateOfPointerTons1__entityBaseBean(soap,
-                                                                         -1)))
+    if (!a && !(a = soap_new_std__vectorTemplateOfPointerTons1__entityBaseBean(
+                    soap, -1)))
       return NULL;
     a->push_back(n);
     if (!tag || *tag == '-')
@@ -48770,9 +48674,10 @@ soap_instantiate_std__vectorTemplateOfPointerTons1__entityBaseBean(
     size_t *size) {
   (void)type;
   (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__"
-                                    "vectorTemplateOfPointerTons1__"
-                                    "entityBaseBean(%d, %s, %s)\n",
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug,
+                            "soap_instantiate_std__"
+                            "vectorTemplateOfPointerTons1__"
+                            "entityBaseBean(%d, %s, %s)\n",
                             n, type ? type : "", arrayType ? arrayType : ""));
   struct soap_clist *cp = soap_link(
       soap, NULL,

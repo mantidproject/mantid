@@ -1,9 +1,9 @@
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidKernel/MDUnitFactory.h"
-#include "MantidKernel/MDUnit.h"
-#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidKernel/MDUnit.h"
+#include "MantidKernel/MDUnitFactory.h"
+#include "MantidKernel/UnitLabelTypes.h"
+#include "MantidKernel/make_unique.h"
 #include <boost/regex.hpp>
 namespace Mantid {
 namespace Geometry {

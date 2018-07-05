@@ -1,8 +1,8 @@
 #include "MantidQtWidgets/Common/MantidTreeWidgetItem.h"
 #include "MantidQtWidgets/Common/MantidTreeWidget.h"
 
-#include <MantidAPI/Workspace.h>
 #include "MantidAPI/WorkspaceHistory.h"
+#include <MantidAPI/Workspace.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -11,21 +11,21 @@ using Mantid::Types::Core::DateAndTime;
 namespace MantidQt {
 namespace MantidWidgets {
 /**Constructor.
-* Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
-*/
+ * Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
+ */
 MantidTreeWidgetItem::MantidTreeWidgetItem(MantidTreeWidget *parent)
     : QTreeWidgetItem(parent), m_parent(parent), m_sortPos(0) {}
 
 /**Constructor.
-* Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
-*/
+ * Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
+ */
 MantidTreeWidgetItem::MantidTreeWidgetItem(QStringList list,
                                            MantidTreeWidget *parent)
     : QTreeWidgetItem(list), m_parent(parent), m_sortPos(0) {}
 
 /**Overidden operator.
-* Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
-*/
+ * Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
+ */
 bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other) const {
   // If this and/or other has been set to have a Qt::UserRole, then
   // it has an accompanying sort order that we must maintain, no matter
@@ -86,9 +86,9 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other) const {
 }
 
 /**Finds the date and time of the last modification made to the workspace who's
-* details
-* are found in the given QTreeWidgetItem.
-*/
+ * details
+ * are found in the given QTreeWidgetItem.
+ */
 DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem *item) {
   QVariant userData = item->data(0, Qt::UserRole);
   if (userData.isNull())
@@ -103,5 +103,5 @@ DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem *item) {
   const auto lastAlgHist = wsHist.getAlgorithmHistory(indexOfLast);
   return lastAlgHist->executionDate();
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

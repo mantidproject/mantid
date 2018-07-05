@@ -4,28 +4,28 @@
 #include "MantidGeometry/Objects/MeshObject.h"
 
 #include "MantidGeometry/Math/Algebra.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
-#include <cxxtest/TestSuite.h>
+#include <algorithm>
 #include <cmath>
+#include <ctime>
+#include <cxxtest/TestSuite.h>
 #include <ostream>
 #include <vector>
-#include <algorithm>
-#include <ctime>
 
-#include "boost/shared_ptr.hpp"
 #include "boost/make_shared.hpp"
+#include "boost/shared_ptr.hpp"
 
-#include <gmock/gmock.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
+#include <gmock/gmock.h>
 
 using namespace Mantid;
 using namespace Geometry;
@@ -53,9 +53,9 @@ public:
 
 std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   /**
-  * Create cube of side length size with specified centre,
-  * parellel to axes and non-negative vertex coordinates.
-  */
+   * Create cube of side length size with specified centre,
+   * parellel to axes and non-negative vertex coordinates.
+   */
   double min = 0.0 - 0.5 * size;
   double max = 0.5 * size;
   std::vector<V3D> vertices;
@@ -96,16 +96,16 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
 
 std::unique_ptr<MeshObject> createCube(const double size) {
   /**
-  * Create cube of side length size with vertex at origin,
-  * parellel to axes and non-negative vertex coordinates.
-  */
+   * Create cube of side length size with vertex at origin,
+   * parellel to axes and non-negative vertex coordinates.
+   */
   return createCube(size, V3D(0.5 * size, 0.5 * size, 0.5 * size));
 }
 
 std::unique_ptr<MeshObject> createOctahedron() {
   /**
-  * Create octahedron with vertices on the axes at -1 & +1.
-  */
+   * Create octahedron with vertices on the axes at -1 & +1.
+   */
   // The octahedron is made slightly bigger than this to
   // ensure interior points are not rounded to be outside
   // Opposite vertices have indices differing by 3.
@@ -144,10 +144,10 @@ std::unique_ptr<MeshObject> createOctahedron() {
 
 std::unique_ptr<MeshObject> createLShape() {
   /**
-  * Create an L shape with vertices at
-  * (0,0,Z) (2,0,Z) (2,1,Z) (1,1,Z) (1,2,Z) & (0,2,Z),
-  *  where Z = 0 or 1.
-  */
+   * Create an L shape with vertices at
+   * (0,0,Z) (2,0,Z) (2,1,Z) (1,1,Z) (1,2,Z) & (0,2,Z),
+   *  where Z = 0 or 1.
+   */
   std::vector<V3D> vertices;
   vertices.emplace_back(V3D(0, 0, 0));
   vertices.emplace_back(V3D(2, 0, 0));
@@ -195,7 +195,7 @@ std::unique_ptr<MeshObject> createLShape() {
       std::move(triangles), std::move(vertices), Mantid::Kernel::Material());
   return retVal;
 }
-}
+} // namespace
 
 class MeshObjectTest : public CxxTest::TestSuite {
 

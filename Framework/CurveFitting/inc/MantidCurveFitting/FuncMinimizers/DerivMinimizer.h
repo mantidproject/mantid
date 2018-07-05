@@ -4,11 +4,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/DllConfig.h"
 #include "MantidAPI/IFuncMinimizer.h"
+#include "MantidCurveFitting/DllConfig.h"
 
-#include <gsl/gsl_multimin.h>
 #include <gsl/gsl_multifit_nlin.h>
+#include <gsl/gsl_multimin.h>
 
 namespace Mantid {
 namespace CurveFitting {

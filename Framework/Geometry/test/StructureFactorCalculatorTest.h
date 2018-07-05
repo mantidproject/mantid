@@ -2,8 +2,8 @@
 #define MANTID_GEOMETRY_STRUCTUREFACTORCALCULATORTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/StructureFactorCalculator.h"
@@ -12,8 +12,8 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using ::testing::Mock;
-using ::testing::_;
 using ::testing::Return;
+using ::testing::_;
 
 class StructureFactorCalculatorTest : public CxxTest::TestSuite {
 public:

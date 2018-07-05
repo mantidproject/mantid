@@ -6,8 +6,8 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/AffineMatrixParameterParser.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;
 

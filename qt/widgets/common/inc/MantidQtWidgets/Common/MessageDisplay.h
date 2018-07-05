@@ -127,7 +127,7 @@ private:
   /// Name of the filter channel registered with Poco
   std::string m_filterChannelName;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MESSAGEDISPLAY_H_

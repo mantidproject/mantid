@@ -19,7 +19,7 @@ std::string getAlgTimestamp(Mantid::API::HistoryView &historyView,
   auto executionTime = algList[index].getAlgorithmHistory()->executionDate();
   return executionTime.toISO8601String();
 }
-}
+} // namespace
 
 class ScriptBuilderTest : public CxxTest::TestSuite {
   /// Use a fake algorithm object instead of a dependency on a real one.
@@ -294,16 +294,22 @@ public:
 
   void test_Build_Unrolled() {
     std::string result[] = {
-        "", "# Child algorithms of TopLevelAlgorithm", "",
+        "",
+        "# Child algorithms of TopLevelAlgorithm",
+        "",
         "## Child algorithms of NestedAlgorithm",
         "BasicAlgorithm(PropertyA='FirstOne')",
         "BasicAlgorithm(PropertyA='SecondOne')",
-        "## End of child algorithms of NestedAlgorithm", "",
+        "## End of child algorithms of NestedAlgorithm",
+        "",
         "## Child algorithms of NestedAlgorithm",
         "BasicAlgorithm(PropertyA='FirstOne')",
         "BasicAlgorithm(PropertyA='SecondOne')",
-        "## End of child algorithms of NestedAlgorithm", "",
-        "# End of child algorithms of TopLevelAlgorithm", "", "",
+        "## End of child algorithms of NestedAlgorithm",
+        "",
+        "# End of child algorithms of TopLevelAlgorithm",
+        "",
+        "",
     };
 
     boost::shared_ptr<WorkspaceTester> input =
@@ -340,15 +346,23 @@ public:
 
   void test_Partially_Unrolled() {
     std::string result[] = {
-        "", "# Child algorithms of TopLevelAlgorithm", "",
+        "",
+        "# Child algorithms of TopLevelAlgorithm",
+        "",
         "## Child algorithms of NestedAlgorithm",
         "BasicAlgorithm(PropertyA='FirstOne')",
         "BasicAlgorithm(PropertyA='SecondOne')",
-        "## End of child algorithms of NestedAlgorithm", "",
-        "NestedAlgorithm()", "# End of child algorithms of TopLevelAlgorithm",
-        "", "# Child algorithms of TopLevelAlgorithm", "NestedAlgorithm()",
-        "NestedAlgorithm()", "# End of child algorithms of TopLevelAlgorithm",
-        "", "",
+        "## End of child algorithms of NestedAlgorithm",
+        "",
+        "NestedAlgorithm()",
+        "# End of child algorithms of TopLevelAlgorithm",
+        "",
+        "# Child algorithms of TopLevelAlgorithm",
+        "NestedAlgorithm()",
+        "NestedAlgorithm()",
+        "# End of child algorithms of TopLevelAlgorithm",
+        "",
+        "",
     };
 
     boost::shared_ptr<WorkspaceTester> input =

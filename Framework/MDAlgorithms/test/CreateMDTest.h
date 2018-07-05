@@ -3,13 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/CreateMD.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidMDAlgorithms/CreateMD.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <stdexcept>
 #include <Poco/File.h>
+#include <stdexcept>
 
 using Mantid::MDAlgorithms::CreateMD;
 

@@ -16,7 +16,7 @@ DECLARE_LISTENER(FileEventDataListener)
 namespace {
 /// static logger
 Kernel::Logger g_log("FileEventDataListener");
-}
+} // namespace
 
 /// Constructor
 FileEventDataListener::FileEventDataListener()

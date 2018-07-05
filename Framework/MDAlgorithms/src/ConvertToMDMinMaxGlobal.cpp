@@ -6,14 +6,14 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
 
 using namespace Mantid;
@@ -266,8 +266,9 @@ void ConvertToMDMinMaxGlobal::exec() {
       if (!p) {
         std::string ERR =
             " Can not interpret property, used as dimension.\n Property: " +
-            OtherDimension + " is neither a time series (run) property nor "
-                             "a property with value<double>";
+            OtherDimension +
+            " is neither a time series (run) property nor "
+            "a property with value<double>";
         throw(std::invalid_argument(ERR));
       }
       double val = *p;

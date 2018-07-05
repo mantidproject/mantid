@@ -1,7 +1,7 @@
 
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MultiFileValidator.h"
@@ -22,7 +22,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace // anonymous
-    {
+{
 /// static logger
 Mantid::Kernel::Logger g_log("MultipleFileProperty");
 
@@ -100,9 +100,9 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
     : MultipleFileProperty(name, FileProperty::Load, exts) {}
 
 /**
-* Check if this property is optional
-* @returns True if the property is optinal, false otherwise
-*/
+ * Check if this property is optional
+ * @returns True if the property is optinal, false otherwise
+ */
 bool MultipleFileProperty::isOptional() const {
   return (m_action == FileProperty::OptionalLoad);
 }
@@ -422,5 +422,5 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   return SUCCESS;
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid
