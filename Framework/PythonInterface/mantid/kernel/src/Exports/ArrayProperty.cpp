@@ -39,12 +39,12 @@ template <> std::string dtype(ArrayProperty<std::string> &self) {
   std::vector<std::string> values = self();
 
   // Vector of ints to store the sizes of each of the strings
-  std::vector<int> string_sizes;
+  std::vector<size_t> string_sizes;
 
   // Loop for the number of strings
-  for (int i = 0; i < values.size(); i++) {
-    // For each string store the number of characters
-    size_t size = values.at(i).size();
+  // For each string store the number of characters
+  for (auto val : values) {
+    auto size = val.size();
     string_sizes.push_back(size);
   }
 

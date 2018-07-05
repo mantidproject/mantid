@@ -44,7 +44,7 @@ template <typename TYPE> std::string dtype(TimeSeriesProperty<TYPE> &self) {
 // Check for the special case of a string
 template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
   // Vector of ints to store the sizes of each of the strings
-  std::vector<int> string_sizes;
+  std::vector<size_t> string_sizes;
 
   // Loop for the number of strings in self
   for (int i = 0; i < self.size(); i++) {

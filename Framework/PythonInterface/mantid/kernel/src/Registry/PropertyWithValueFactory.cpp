@@ -12,6 +12,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/python/list.hpp>
+#include <boost/python/object.hpp>
 
 #include <cassert>
 
