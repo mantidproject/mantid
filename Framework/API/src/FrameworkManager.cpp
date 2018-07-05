@@ -161,11 +161,9 @@ void FrameworkManagerImpl::loadPlugins() {
  */
 void FrameworkManagerImpl::setNumOMPThreadsToConfigValue() {
   // Set the number of threads to use for this process
-  int maxCores(0);
-  int retVal = Kernel::ConfigService::Instance().getValue(
-      "MultiThreaded.MaxCores", maxCores);
-  if (retVal > 0 && maxCores > 0) {
-    setNumOMPThreads(maxCores);
+	auto maxCores = Kernel::ConfigService::Instance().getValue<int>("MultiThreaded.MaxCores");
+  if (maxCores.get_value_or(0) > 0) {
+    setNumOMPThreads(maxCores.get());
   }
 }
 
@@ -438,20 +436,18 @@ void FrameworkManagerImpl::disableNexusOutput() {
 
 /// Starts asynchronous tasks that are done as part of Start-up.
 void FrameworkManagerImpl::asynchronousStartupTasks() {
-  int instrumentUpdates(0);
-  int retVal = Kernel::ConfigService::Instance().getValue(
-      "UpdateInstrumentDefinitions.OnStartup", instrumentUpdates);
-  if ((retVal == 1) && (instrumentUpdates == 1)) {
+	auto instrumentUpdates = Kernel::ConfigService::Instance().getValue<bool>(
+		"UpdateInstrumentDefinitions.OnStartup");
+
+  if (instrumentUpdates.get_value_or(false)) {
     updateInstrumentDefinitions();
   } else {
     g_log.information() << "Instrument updates disabled - cannot update "
                            "instrument definitions.\n";
   }
 
-  int newVersionCheck(0);
-  int retValVersionCheck = Kernel::ConfigService::Instance().getValue(
-      "CheckMantidVersion.OnStartup", newVersionCheck);
-  if ((retValVersionCheck == 1) && (newVersionCheck == 1)) {
+  auto newVersionCheck = Kernel::ConfigService::Instance().getValue<bool>("CheckMantidVersion.OnStartup");
+  if (newVersionCheck.get_value_or(false)) {
     checkIfNewerVersionIsAvailable();
   } else {
     g_log.information() << "Version check disabled.\n";
@@ -461,16 +457,14 @@ void FrameworkManagerImpl::asynchronousStartupTasks() {
 }
 
 void FrameworkManagerImpl::setupUsageReporting() {
-  int enabled = 0;
-  int interval = 0;
   auto &configSvc = ConfigService::Instance();
-  int retVal = configSvc.getValue("Usage.BufferCheckInterval", interval);
+  auto interval =  configSvc.getValue<int>("Usage.BufferCheckInterval");
   auto &usageSvc = UsageService::Instance();
-  if ((retVal == 1) && (interval > 0)) {
-    usageSvc.setInterval(interval);
+  if (interval.get_value_or(0) > 0) {
+    usageSvc.setInterval(interval.get());
   }
-  retVal = configSvc.getValue("usagereports.enabled", enabled);
-  usageSvc.setEnabled((retVal == 1) && (enabled > 0));
+  auto enabled = configSvc.getValue<bool>("usagereports.enabled");
+  usageSvc.setEnabled(enabled.get_value_or(false));
   usageSvc.registerStartup();
 }
 

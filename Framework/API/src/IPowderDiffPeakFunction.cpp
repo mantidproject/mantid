@@ -26,13 +26,10 @@ IPowderDiffPeakFunction::IPowderDiffPeakFunction()
       m_unitCell(), m_unitCellSize(0.), m_parameterValid(false), mH(0), mK(0),
       mL(0), mHKLSet(false), LATTICEINDEX(9999), HEIGHTINDEX(9999) {
   // Set peak's radius from configuration
-  int peakRadius;
-  if (Kernel::ConfigService::Instance().getValue("curvefitting.peakRadius",
-                                                 peakRadius)) {
-    if (peakRadius != s_peakRadius) {
-      setPeakRadius(peakRadius);
+	auto peakRadius = Kernel::ConfigService::Instance().getValue<int>("curvefitting.peakRadius");
+    if (peakRadius.is_initialized() && peakRadius.get() != s_peakRadius) {
+      setPeakRadius(peakRadius.get());
     }
-  }
 }
 
 //----------------------------------------------------------------------------------------------

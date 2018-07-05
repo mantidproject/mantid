@@ -549,9 +549,8 @@ generateRange(unsigned int const from, unsigned int const to,
         "Unable to generate a range with a step size of zero.");
 
   size_t limit;
-  std::string limitStr;
-  ConfigService::Instance().getValue("loading.multifilelimit", limitStr);
-  if (!Strings::convert(limitStr, limit)) {
+  auto limitStr = ConfigService::Instance().getValue<std::string>("loading.multifilelimit");
+  if (!limitStr.is_initialized() || !Strings::convert(limitStr.get(), limit)) {
     limit = ConfigService::Instance().getFacility().multiFileLimit();
   }
 

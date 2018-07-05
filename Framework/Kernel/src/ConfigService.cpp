@@ -44,6 +44,7 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/regex.hpp>
+#include <boost/optional/optional.hpp>
 
 #include <algorithm>
 #include <cctype>
@@ -1104,19 +1105,45 @@ void ConfigServiceImpl::setString(const std::string &key,
   m_changed_keys.insert(key);
 }
 
-/** Searches for a string within the currently loaded configuaration values and
+/** Searches for a string within the currently loaded configuration values and
  *  attempts to convert the values to the template type supplied.
  *
  *  @param keyName :: The case sensitive name of the property that you need the
  *value of.
- *  @param out ::     The value if found
- *  @returns A success flag - 0 on failure, 1 on success
+ *  @returns An optional container with the value if found
  */
 template <typename T>
-int ConfigServiceImpl::getValue(const std::string &keyName, T &out) {
+boost::optional<T> ConfigServiceImpl::getValue(const std::string &keyName) {
   std::string strValue = getString(keyName);
-  int result = Mantid::Kernel::Strings::convert(strValue, out);
-  return result;
+  T output;
+  int result = Mantid::Kernel::Strings::convert(strValue, output);
+
+  if (result != 1) {
+	  return boost::none;
+  }
+  
+  return boost::optional<T>(output);
+}
+
+/** Searches for a string within the currently loaded configuration values and
+*  attempts to convert the values to a boolean value
+*
+*  @param keyName :: The case sensitive name of the property that you need the
+*value of.
+*  @returns An optional container with the value if found
+*/
+template <>
+boost::optional<bool> ConfigServiceImpl::getValue(const std::string &keyName) {
+	auto returnedValue = getValue<std::string>(keyName);
+	if (!returnedValue.is_initialized()) {
+		return boost::none;
+	}
+
+	bool trueString = returnedValue->find("true") != std::string::npos;
+	bool valueOne = returnedValue->find("1") != std::string::npos;
+
+	// A string of 1 or true both count
+	return trueString || valueOne;
 }
 
 /**
@@ -1990,12 +2017,14 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
   if (!m_isProxySet) {
     // set the proxy
     // first check if the proxy is defined in the properties file
-    std::string proxyHost;
-    int proxyPort;
-    if ((getValue("proxy.host", proxyHost) == 1) &&
-        (getValue("proxy.port", proxyPort) == 1)) {
+	  auto proxyHost = getValue<std::string>("proxy.host");
+	  auto proxyPort = getValue<int>("proxy.port");
+
+
+
+    if ( proxyHost.is_initialized() && proxyPort.is_initialized()) {
       // set it from the config values
-      m_proxyInfo = ProxyInfo(proxyHost, proxyPort, true);
+      m_proxyInfo = ProxyInfo(proxyHost.get(), proxyPort.get(), true);
     } else {
       // get the system proxy
       Poco::URI uri(url);
@@ -2084,13 +2113,11 @@ int ConfigServiceImpl::FindLowestFilterLevel() const {
 }
 
 /// \cond TEMPLATE
-template DLLExport int ConfigServiceImpl::getValue(const std::string &,
-                                                   double &);
-template DLLExport int ConfigServiceImpl::getValue(const std::string &,
-                                                   std::string &);
-template DLLExport int ConfigServiceImpl::getValue(const std::string &, int &);
-template DLLExport int ConfigServiceImpl::getValue(const std::string &,
-                                                   std::size_t &);
+template DLLExport boost::optional<double> ConfigServiceImpl::getValue(const std::string &);
+template DLLExport boost::optional<std::string> ConfigServiceImpl::getValue(const std::string &);
+template DLLExport boost::optional<int> ConfigServiceImpl::getValue(const std::string &);
+template DLLExport boost::optional<size_t> ConfigServiceImpl::getValue(const std::string &);
+template DLLExport boost::optional<bool> ConfigServiceImpl::getValue(const std::string &);
 /// \endcond TEMPLATE
 
 } // namespace Kernel

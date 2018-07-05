@@ -90,14 +90,10 @@ SNSLiveEventDataListener::SNSLiveEventDataListener()
   // Initialize m_keepPausedEvents from the config file.
   // NOTE: To the best of my knowledge, the existence of this property is not
   // documented anywhere and this lack of documentation is deliberate.
-  int keepPausedEvents;
-  if (ConfigService::Instance().getValue("livelistener.keeppausedevents",
-                                         keepPausedEvents)) {
-    m_keepPausedEvents = (keepPausedEvents != 0);
-  } else {
-    // If the property hasn't been set, assume false
-    m_keepPausedEvents = false;
-  }
+  auto keepPausedEvents = ConfigService::Instance().getValue<bool>("livelistener.keeppausedevents");
+
+  // If the property hasn't been set, assume false
+  m_keepPausedEvents = keepPausedEvents.get_value_or(false);
 }
 
 /// Destructor

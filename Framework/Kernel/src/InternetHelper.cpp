@@ -477,8 +477,8 @@ void InternetHelper::throwNotConnected(const std::string &url,
 **/
 int InternetHelper::getTimeout() {
   if (!m_isTimeoutSet) {
-    if (!ConfigService::Instance().getValue("network.default.timeout",
-                                            m_timeout)) {
+	  auto m_timeout = ConfigService::Instance().getValue<int>("network.default.timeout");
+	  if (!m_timeout.is_initialized()) {
       m_timeout = 30; // the default value if the key is not found
     }
   }

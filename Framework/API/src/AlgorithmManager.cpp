@@ -16,9 +16,9 @@ Kernel::Logger g_log("AlgorithmManager");
 
 /// Private Constructor for singleton class
 AlgorithmManagerImpl::AlgorithmManagerImpl() : m_managed_algs() {
-  if (!Kernel::ConfigService::Instance().getValue("algorithms.retained",
-                                                  m_max_no_algs) ||
-      m_max_no_algs < 1) {
+	auto max_no_algs = Kernel::ConfigService::Instance().getValue<int>("algorithms.retained");
+
+  if (max_no_algs.get_value_or(0) < 1) {
     m_max_no_algs = 100; // Default to keeping 100 algorithms if not specified
   }
 

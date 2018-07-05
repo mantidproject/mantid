@@ -503,14 +503,8 @@ public:
   }
 
   static bool showingHiddenObjects() {
-    int showingHiddenFlag;
-    const int success = ConfigService::Instance().getValue(
-        "MantidOptions.InvisibleWorkspaces", showingHiddenFlag);
-    if (success == 1 && showingHiddenFlag == 1) {
-      return true;
-    } else {
-      return false;
-    }
+    auto showingHiddenFlag = ConfigService::Instance().getValue<bool>("MantidOptions.InvisibleWorkspaces");
+	return showingHiddenFlag.get_value_or(false);
   }
 
   /// Sends notifications to observers. Observers can subscribe to

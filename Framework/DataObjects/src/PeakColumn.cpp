@@ -80,14 +80,15 @@ PeakColumn::PeakColumn(std::vector<Peak> &peaks, const std::string &name)
     : m_peaks(peaks), m_oldRows() {
   this->m_name = name;
   this->m_type = typeFromName(name); // Throws if the name is unknown
-  this->m_hklPrec = 2;
   const std::string key = "PeakColumn.hklPrec";
-  int gotit = ConfigService::Instance().getValue(key, this->m_hklPrec);
-  if (!gotit)
-    g_log.information()
-        << "In PeakColumn constructor, did not find any value for '" << key
-        << "' from the Config Service. Using default: " << this->m_hklPrec
-        << "\n";
+  auto hklPrec = ConfigService::Instance().getValue<int>(key);
+  this->m_hklPrec = hklPrec.get_value_or(2);
+  if (!hklPrec.is_initialized()) {
+	  g_log.information()
+		  << "In PeakColumn constructor, did not find any value for '" << key
+		  << "' from the Config Service. Using default: " << this->m_hklPrec
+		  << "\n";
+  }
 }
 
 /// Returns typeid for the data in the column

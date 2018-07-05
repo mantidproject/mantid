@@ -317,11 +317,8 @@ PawleyFunction::PawleyFunction()
     : IPawleyFunction(), m_compositeFunction(), m_pawleyParameterFunction(),
       m_peakProfileComposite(), m_hkls(), m_dUnit(), m_wsUnit(),
       m_peakRadius(5) {
-  int peakRadius;
-  if (Kernel::ConfigService::Instance().getValue("curvefitting.peakRadius",
-                                                 peakRadius)) {
-    m_peakRadius = peakRadius;
-  }
+	auto peakRadius = Kernel::ConfigService::Instance().getValue<int>("curvefitting.peakRadius");
+	m_peakRadius = peakRadius.get_value_or(5);
 }
 
 void PawleyFunction::setMatrixWorkspace(
