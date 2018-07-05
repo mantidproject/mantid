@@ -71,7 +71,7 @@ Unscripted and Final Testing (technical tasks)
    `merge\_release\_into\_master <http://builds.mantidproject.org/view/All/job/merge_release_into_master/>`__
 *  Check state of all open pull requests for this milestone and update
    the base branch to the new release branch accordingly.
-*  Create a skeleton set of release notes for the next version
+*  Create a skeleton set of release notes for the next version using the `python helper tool <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_
 *  Perform unscripted testing following the instructions described
    `here <https://www.mantidproject.org/Unscripted_Manual_Testing>`__.
 
