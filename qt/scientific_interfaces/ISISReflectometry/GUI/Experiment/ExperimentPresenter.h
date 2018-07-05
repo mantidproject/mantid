@@ -43,6 +43,8 @@ public:
   ExperimentPresenter(IExperimentView *view);
   void notifySettingsChanged() override;
   void notifySummationTypeChanged() override;
+  void notifyNewPerAngleDefaultsRequested() override;
+  void notifyRemovePerAngleDefaultsRequested(int index) override;
 
   Experiment const& experiment() const;
 

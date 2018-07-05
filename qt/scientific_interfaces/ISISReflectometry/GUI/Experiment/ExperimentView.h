@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
 #include <memory>
 #include <QCheckBox>
+#include <QShortcut>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -59,6 +60,7 @@ public:
   void showPerAngleOptionsAsInvalid(int row, int column) override;
   void showPerAngleOptionsAsValid(int row) override;
 
+
   double getTransmissionStartOverlap() const override;
   void setTransmissionStartOverlap(double start) override;
   double getTransmissionEndOverlap() const override;
@@ -82,6 +84,9 @@ public:
       std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
       std::vector<MissingInstrumentParameterValue> const &missingValues) override;
 
+  void showPerAngleThetasNonUnique(double tolerance) override;
+  void showAllPerAngleOptionsAsValid() override;
+
   void disableAll() override;
   void enableAll() override;
 
@@ -91,14 +96,18 @@ public:
   void enablePolarisationCorrections() override;
   void disablePolarisationCorrections() override;
 
+  void addPerThetaDefaultsRow() override;
+  void removePerThetaDefaultsRow(int rowIndex) override;
 public slots:
   void notifySettingsChanged();
   /// Adds another row to the per-angle options table
-  void addPerAngleOptionsTableRow();
   void summationTypeChanged(int reductionTypeIndex);
+  void onNewPerThetaDefaultsRowRequested();
+  void onRemovePerThetaDefaultsRequested();
 
 private:
   void initializeTableItems(QTableWidget& table);
+  void initializeTableRow(QTableWidget& table, int row);
   QString messageFor(
       std::vector<MissingInstrumentParameterValue> const &missingValues) const;
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
@@ -129,6 +138,7 @@ private:
   void setText(QLineEdit &lineEdit, boost::optional<int> value);
   void setText(QLineEdit &lineEdit, boost::optional<double> value);
   void setText(QLineEdit &lineEdit, boost::optional<std::string> const &value);
+  std::string textFromCell(QTableWidgetItem const* maybeNullItem) const;
 //  void setText(QTableWidget &table, std::string const &propertyName,
 //               double value);
 //  void setText(QTableWidget &table, std::string const &propertyName,
@@ -145,6 +155,7 @@ private:
   /// The stitch params entry widget
   MantidQt::MantidWidgets::HintingLineEdit *m_stitchEdit;
 
+  std::unique_ptr<QShortcut> m_deleteShortcut;
   Ui::ExperimentWidget m_ui;
   ExperimentViewSubscriber *m_notifyee;
 };

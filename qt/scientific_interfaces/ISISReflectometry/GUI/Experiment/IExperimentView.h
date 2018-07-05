@@ -47,6 +47,8 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentViewSubscriber {
 public:
   virtual void notifySettingsChanged() = 0;
   virtual void notifySummationTypeChanged() = 0;
+  virtual void notifyNewPerAngleDefaultsRequested() = 0;
+  virtual void notifyRemovePerAngleDefaultsRequested(int index) = 0;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IExperimentView {
@@ -56,19 +58,21 @@ public:
   createStitchHints(const std::vector<MantidWidgets::Hint> &hints) = 0;
 
   virtual std::string getAnalysisMode() const = 0;
-  virtual void setAnalysisMode(std::string const& analysisMode) = 0;
+  virtual void setAnalysisMode(std::string const &analysisMode) = 0;
 
   virtual std::string getSummationType() const = 0;
-  virtual void setSummationType(std::string const& summationType) = 0;
+  virtual void setSummationType(std::string const &summationType) = 0;
 
   virtual std::string getReductionType() const = 0;
-  virtual void setReductionType(std::string const& reductionType) = 0;
+  virtual void setReductionType(std::string const &reductionType) = 0;
   virtual void enableReductionType() = 0;
   virtual void disableReductionType() = 0;
 
-  virtual std::vector<std::array<std::string, 8>> getPerAngleOptions() const = 0;
+  virtual std::vector<std::array<std::string, 8>>
+  getPerAngleOptions() const = 0;
   virtual void showPerAngleOptionsAsInvalid(int row, int column) = 0;
   virtual void showPerAngleOptionsAsValid(int row) = 0;
+  virtual void showAllPerAngleOptionsAsValid() = 0;
 
   virtual void enablePolarisationCorrections() = 0;
   virtual void disablePolarisationCorrections() = 0;
@@ -79,7 +83,7 @@ public:
   virtual void setTransmissionEndOverlap(double end) = 0;
 
   virtual std::string getPolarisationCorrectionType() const = 0;
-  virtual void setPolarisationCorrectionType(std::string const& type) = 0;
+  virtual void setPolarisationCorrectionType(std::string const &type) = 0;
   virtual double getCRho() const = 0;
   virtual void setCRho(double cRho) = 0;
   virtual double getCAlpha() const = 0;
@@ -90,7 +94,7 @@ public:
   virtual void setCPp(double cPp) = 0;
 
   virtual std::string getStitchOptions() const = 0;
-  virtual void setStitchOptions(std::string const& stitchOptions) = 0;
+  virtual void setStitchOptions(std::string const &stitchOptions) = 0;
 
   virtual void showOptionLoadErrors(
       std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
@@ -98,6 +102,12 @@ public:
 
   virtual void disableAll() = 0;
   virtual void enableAll() = 0;
+
+  virtual void addPerThetaDefaultsRow() = 0;
+  virtual void removePerThetaDefaultsRow(int rowIndex) = 0;
+
+  virtual void showPerAngleThetasNonUnique(double tolerance) = 0;
+
   virtual ~IExperimentView() = default;
 };
 }

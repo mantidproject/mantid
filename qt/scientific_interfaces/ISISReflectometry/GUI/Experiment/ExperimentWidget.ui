@@ -145,12 +145,12 @@
        </column>
        <column>
         <property name="text">
-         <string>Second Transmission Run</string>
+         <string>First Transmission Run</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>First Transmission Run</string>
+         <string>Second Transmission Run</string>
         </property>
        </column>
        <column>

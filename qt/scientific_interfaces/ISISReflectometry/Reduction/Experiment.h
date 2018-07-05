@@ -38,8 +38,7 @@ public:
   Experiment(AnalysisMode analysisMode, ReductionType reductionType,
              SummationType summationType,
              PolarizationCorrections polarizationCorrections,
-             RangeInLambda transmissionRunRange,
-             std::string stitchParameters,
+             RangeInLambda transmissionRunRange, std::string stitchParameters,
              std::vector<PerThetaDefaults> perThetaDefaults);
 
   AnalysisMode analysisMode() const;
@@ -50,7 +49,12 @@ public:
   std::string stitchParameters() const;
   std::vector<PerThetaDefaults> const &perThetaDefaults() const;
 
-  PerThetaDefaults const *defaultsForTheta(double thetaAngle, double tolerance) const;
+  PerThetaDefaults const *defaultsForTheta(double thetaAngle,
+                                           double tolerance) const;
+
+  static bool
+  thetaValuesAreUnique(std::vector<PerThetaDefaults> perThetaDefaults,
+                       double tolerance);
 
 private:
   AnalysisMode m_analysisMode;

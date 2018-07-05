@@ -24,6 +24,19 @@ PolarizationCorrections const &Experiment::polarizationCorrections() const {
   return m_polarizationCorrections;
 }
 
+bool Experiment::thetaValuesAreUnique(
+    std::vector<PerThetaDefaults> perThetaDefaults, double tolerance) {
+  auto thetaLt = [](PerThetaDefaults const &lhs, PerThetaDefaults const &rhs)
+                     -> bool { return lhs.theta() < rhs.theta(); };
+  auto thetaWithinRange =
+      [tolerance](PerThetaDefaults const &lhs, PerThetaDefaults const &rhs)
+          -> bool { return std::abs(lhs.theta() - rhs.theta()) < tolerance; };
+
+  std::sort(perThetaDefaults.begin(), perThetaDefaults.end(), thetaLt);
+  return std::adjacent_find(perThetaDefaults.cbegin(), perThetaDefaults.cend(),
+                            thetaWithinRange) == perThetaDefaults.cend();
+}
+
 RangeInLambda const &Experiment::transissionRunRange() const {
   return m_transmissionRunRange;
 }

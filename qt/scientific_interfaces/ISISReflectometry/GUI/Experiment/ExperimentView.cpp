@@ -17,6 +17,31 @@ ExperimentView::ExperimentView(
   registerSettingsWidgets(algorithmForTooltips);
 }
 
+void ExperimentView::onRemovePerThetaDefaultsRequested() {
+  auto index = m_ui.optionsTable->currentIndex();
+  if (index.isValid()) {
+    m_notifyee->notifyRemovePerAngleDefaultsRequested(index.row());
+  }
+}
+
+void ExperimentView::showAllPerAngleOptionsAsValid() {
+  std::cout << "\nClearing validation errors from "
+            << m_ui.optionsTable->rowCount() << " rows.\n" << std::endl;
+
+  for (auto row = 0; row < m_ui.optionsTable->rowCount(); ++row)
+    showPerAngleOptionsAsValid(row);
+}
+
+void ExperimentView::showPerAngleThetasNonUnique(double tolerance) {
+  for (auto row = 0; row < m_ui.optionsTable->rowCount(); ++row)
+    showPerAngleOptionsAsInvalid(row, 0);
+
+  QMessageBox::critical(
+      this, "Invalid theta combination!",
+      "Cannot have multiple defaults with theta values less than " +
+          QString::number(tolerance) + " apart.");
+}
+
 void ExperimentView::subscribe(ExperimentViewSubscriber *notifyee) {
   m_notifyee = notifyee;
 }
@@ -26,28 +51,34 @@ Initialise the Interface
 */
 void ExperimentView::initLayout() {
   m_ui.setupUi(this);
+  m_deleteShortcut = Mantid::Kernel::make_unique<QShortcut>(
+      QKeySequence(tr("Delete")), m_ui.optionsTable);
+  connect(m_deleteShortcut.get(), SIGNAL(activated()), this,
+          SLOT(onRemovePerThetaDefaultsRequested()));
   initOptionsTable();
-
   auto blacklist =
       std::vector<std::string>({"InputWorkspaces", "OutputWorkspace"});
   MantidWidgets::AlgorithmHintStrategy strategy("Stitch1DMany", blacklist);
   createStitchHints(strategy.createHints());
 
-
-  connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
-          SLOT(requestExpDefaults()));
-  connect(m_ui.expSettingsGrid, SIGNAL(clicked(bool)), this,
-          SLOT(setPolarisationOptionsEnabled(bool)));
+  // connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
+  //         SLOT(requestExpDefaults()));
   connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
           SLOT(summationTypeChanged(int)));
   connect(m_ui.addPerAngleOptionsButton, SIGNAL(clicked()), this,
-          SLOT(addPerAngleOptionsTableRow()));
+          SLOT(onNewPerThetaDefaultsRowRequested()));
 }
 
-void ExperimentView::initializeTableItems(QTableWidget& table) {
+void ExperimentView::initializeTableItems(QTableWidget &table) {
   for (auto row = 0; row < table.rowCount(); ++row)
-    for (auto column = 0; table.columnCount(); ++column)
-      table.setItem(row, column, new QTableWidgetItem());
+    initializeTableRow(table, row);
+}
+
+void ExperimentView::initializeTableRow(QTableWidget &table, int row) {
+  m_ui.optionsTable->blockSignals(true);
+  for (auto column = 0; column < table.columnCount(); ++column)
+    table.setItem(row, column, new QTableWidgetItem());
+  m_ui.optionsTable->blockSignals(false);
 }
 
 void ExperimentView::initOptionsTable() {
@@ -56,6 +87,7 @@ void ExperimentView::initOptionsTable() {
   // Set angle and scale columns to a small width so everything fits
   table->resizeColumnsToContents();
   table->setColumnCount(8);
+  table->setRowCount(3);
   initializeTableItems(*table);
 
   auto header = table->horizontalHeader();
@@ -266,13 +298,21 @@ void ExperimentView::disablePolarisationCorrections() {
   m_ui.CPpEdit->clear();
 }
 
-/** Add a new row to the transmission runs table
- * */
-void ExperimentView::addPerAngleOptionsTableRow() {
-  auto numRows = m_ui.optionsTable->rowCount() + 1;
-  m_ui.optionsTable->setRowCount(numRows);
+/** Add a new row to the transmission runs table **/
+void ExperimentView::onNewPerThetaDefaultsRowRequested() {
+  m_notifyee->notifyNewPerAngleDefaultsRequested();
+}
+
+void ExperimentView::addPerThetaDefaultsRow() {
+  auto newRowIndex = m_ui.optionsTable->rowCount();
   // Select the first cell in the new row
-  m_ui.optionsTable->setCurrentCell(numRows - 1, 0);
+  m_ui.optionsTable->insertRow(newRowIndex);
+  initializeTableRow(*m_ui.optionsTable, newRowIndex);
+  m_ui.optionsTable->setCurrentCell(newRowIndex, 0);
+}
+
+void ExperimentView::removePerThetaDefaultsRow(int rowIndex) {
+  m_ui.optionsTable->removeRow(rowIndex);
 }
 
 std::string ExperimentView::getText(QLineEdit const &lineEdit) const {
@@ -390,32 +430,42 @@ void ExperimentView::setReductionType(std::string const &reductionType) {
   return setSelected(*m_ui.reductionTypeComboBox, reductionType);
 }
 
+std::string
+ExperimentView::textFromCell(QTableWidgetItem const *maybeNullItem) const {
+  if (maybeNullItem != nullptr) {
+    return maybeNullItem->text().toStdString();
+  } else {
+    return std::string();
+  }
+}
+
 std::vector<std::array<std::string, 8>>
 ExperimentView::getPerAngleOptions() const {
   auto const &table = *m_ui.optionsTable;
   auto rows = std::vector<std::array<std::string, 8>>();
   rows.reserve(table.rowCount());
   for (auto row = 0; row < table.rowCount(); ++row) {
-    rows.emplace_back(
-        std::array<std::string, 8>{table.item(row, 0)->text().toStdString(),
-                                   table.item(row, 1)->text().toStdString(),
-                                   table.item(row, 2)->text().toStdString(),
-                                   table.item(row, 3)->text().toStdString(),
-                                   table.item(row, 4)->text().toStdString(),
-                                   table.item(row, 5)->text().toStdString(),
-                                   table.item(row, 6)->text().toStdString(),
-                                   table.item(row, 7)->text().toStdString()});
+    rows.emplace_back(std::array<std::string, 8>{
+        textFromCell(table.item(row, 0)), textFromCell(table.item(row, 1)),
+        textFromCell(table.item(row, 2)), textFromCell(table.item(row, 3)),
+        textFromCell(table.item(row, 4)), textFromCell(table.item(row, 5)),
+        textFromCell(table.item(row, 6)), textFromCell(table.item(row, 7))});
   }
   return rows;
 }
 
 void ExperimentView::showPerAngleOptionsAsInvalid(int row, int column) {
-  m_ui.optionsTable->item(row, column)->setBackground(Qt::red);
+  m_ui.optionsTable->blockSignals(true);
+  m_ui.optionsTable->item(row, column)->setBackground(QColor("#ffb8ad"));
+  m_ui.optionsTable->blockSignals(false);
 }
 
 void ExperimentView::showPerAngleOptionsAsValid(int row) {
+  m_ui.optionsTable->blockSignals(true);
   for (auto column = 0; column < m_ui.optionsTable->columnCount(); ++column)
     m_ui.optionsTable->item(row, column)->setBackground(Qt::transparent);
+  m_ui.optionsTable->blockSignals(false);
+  std::cout << "Row " << row << std::endl;
 }
 
 double ExperimentView::getTransmissionStartOverlap() const {

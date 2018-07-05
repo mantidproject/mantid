@@ -31,7 +31,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "DllConfig.h"
 namespace MantidQt {
 namespace CustomInterfaces {
-  
+
 template <typename Row> class MANTIDQT_ISISREFLECTOMETRY_DLL RowValidator {
 public:
   template <typename WorkspaceNamesFactory>
