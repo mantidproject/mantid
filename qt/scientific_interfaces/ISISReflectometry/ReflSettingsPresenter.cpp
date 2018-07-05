@@ -220,12 +220,17 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
 
   if (m_view->experimentSettingsEnabled()) {
     addIfNotEmpty(options, "AnalysisMode", m_view->getAnalysisMode());
-    addIfNotEmpty(options, "Rho", m_view->getCRho());
-    addIfNotEmpty(options, "Alpha", m_view->getCAlpha());
-    addIfNotEmpty(options, "Ap", m_view->getCAp());
-    addIfNotEmpty(options, "Pp", m_view->getCPp());
-    addIfNotEmpty(options, "PolarizationAnalysis",
-                  m_view->getPolarisationCorrections());
+    auto const pa = m_view->getPolarisationCorrections();
+    addIfNotEmpty(options, "PolarizationAnalysis", pa);
+    if (pa == "PA") {
+      addIfNotEmpty(options, "Rho", m_view->getCRho());
+      addIfNotEmpty(options, "Alpha", m_view->getCAlpha());
+      addIfNotEmpty(options, "Ap", m_view->getCAp());
+      addIfNotEmpty(options, "Pp", m_view->getCPp());
+    } else if (pa == "PNR") {
+      addIfNotEmpty(options, "Ap", m_view->getCAp());
+      addIfNotEmpty(options, "Pp", m_view->getCPp());
+    }
     addIfNotEmpty(options, "StartOverlap", m_view->getStartOverlap());
     addIfNotEmpty(options, "EndOverlap", m_view->getEndOverlap());
 
