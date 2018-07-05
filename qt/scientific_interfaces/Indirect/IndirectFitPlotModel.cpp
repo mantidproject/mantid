@@ -11,6 +11,8 @@
 namespace {
 using namespace Mantid::API;
 
+// The name of the conjoined input and guess name -- required for
+// creating an external guess plot.
 const std::string INPUT_AND_GUESS_NAME = "__QENSInputAndGuess";
 
 IFunction_sptr firstFunctionWithParameter(IFunction_sptr function,

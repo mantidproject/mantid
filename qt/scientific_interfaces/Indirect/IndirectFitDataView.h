@@ -32,7 +32,7 @@ class DLLExport IndirectFitDataView : public QTabWidget {
   Q_OBJECT
 public:
   IndirectFitDataView(QWidget *parent);
-  ~IndirectFitDataView() override;
+  ~IndirectFitDataView() override = default;
 
   QTableWidget *getDataTable() const;
   bool isMultipleDataTabSelected() const;

@@ -173,7 +173,9 @@ namespace IDA {
 
 IndirectFitData::IndirectFitData(MatrixWorkspace_sptr workspace,
                                  const Spectra &spectra)
-    : m_workspace(workspace), m_spectra(spectra) {}
+    : m_workspace(workspace), m_spectra(DiscontinuousSpectra<std::size_t>("")) {
+  setSpectra(spectra);
+}
 
 std::string
 IndirectFitData::displayName(const std::string &formatString,
@@ -290,8 +292,8 @@ void IndirectFitData::setExcludeRegionString(const std::string &excludeRegion,
 
 IndirectFitData &IndirectFitData::combine(const IndirectFitData &fitData) {
   m_workspace = fitData.m_workspace;
-  m_spectra =
-      boost::apply_visitor(CombineSpectra(), m_spectra, fitData.m_spectra);
+  setSpectra(
+      boost::apply_visitor(CombineSpectra(), m_spectra, fitData.m_spectra));
   m_excludeRegions.insert(std::begin(fitData.m_excludeRegions),
                           std::end(fitData.m_excludeRegions));
   m_ranges.insert(std::begin(fitData.m_ranges), std::end(fitData.m_ranges));

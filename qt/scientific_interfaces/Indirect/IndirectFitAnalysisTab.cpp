@@ -60,11 +60,12 @@ void IndirectFitAnalysisTab::setup() {
   connect(m_dataPresenter.get(),
           SIGNAL(endXChanged(double, std::size_t, std::size_t)), this,
           SLOT(tableEndXChanged(double, std::size_t, std::size_t)));
-  connect(m_dataPresenter.get(),
-          SIGNAL(excludeRegionChanged(const std::string &, std::size_t,
-                                      std::size_t)),
-          this, SLOT(tableExcludeChanged(const std::string &, std::size_t,
-                                         std::size_t)));
+  connect(
+      m_dataPresenter.get(),
+      SIGNAL(
+          excludeRegionChanged(const std::string &, std::size_t, std::size_t)),
+      this,
+      SLOT(tableExcludeChanged(const std::string &, std::size_t, std::size_t)));
   connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()), this,
           SLOT(setModelFitFunction()));
 
@@ -222,8 +223,8 @@ void IndirectFitAnalysisTab::connectDataAndFitBrowserPresenters() {
 }
 
 void IndirectFitAnalysisTab::setFitDataPresenter(
-    IndirectFitDataPresenter *presenter) {
-  m_dataPresenter = std::unique_ptr<IndirectFitDataPresenter>(presenter);
+    std::unique_ptr<IndirectFitDataPresenter> presenter) {
+  m_dataPresenter = std::move(presenter);
 }
 
 void IndirectFitAnalysisTab::setPlotView(IndirectFitPlotView *view) {

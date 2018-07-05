@@ -637,7 +637,7 @@ std::unordered_map<std::string, ParameterValue>
 boost::optional<ResultLocation>
 IndirectFittingModel::getResultLocation(std::size_t index,
                                         std::size_t spectrum) const {
-  if (m_previousModelSelected && m_fitOutput)
+  if (m_previousModelSelected && m_fitOutput && m_fittingData.size() > index)
     return m_fitOutput->getResultLocation(m_fittingData[index].get(), spectrum);
   return boost::none;
 }

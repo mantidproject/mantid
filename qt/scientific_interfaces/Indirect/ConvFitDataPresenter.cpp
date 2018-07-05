@@ -10,8 +10,9 @@ namespace IDA {
 
 ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
                                            IndirectFitDataView *view)
-    : IndirectFitDataPresenter(model, view, new ConvFitDataTablePresenter(
-                                                model, view->getDataTable())),
+    : IndirectFitDataPresenter(
+          model, view,
+          new ConvFitDataTablePresenter(model, view->getDataTable())),
       m_convModel(model) {
   setResolutionHidden(false);
 
@@ -29,10 +30,12 @@ void ConvFitDataPresenter::setModelResolution(const QString &name) {
 }
 
 void ConvFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog);
-  addWorkspace(convDialog, m_convModel);
-  m_convModel->setResolution(convDialog->resolutionName(),
-                             m_convModel->numberOfWorkspaces() - 1);
+  if (const auto convDialog =
+          dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog)) {
+    addWorkspace(convDialog, m_convModel);
+    m_convModel->setResolution(convDialog->resolutionName(),
+                               m_convModel->numberOfWorkspaces() - 1);
+  }
 }
 
 void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const *dialog,

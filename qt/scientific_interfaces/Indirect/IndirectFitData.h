@@ -78,7 +78,7 @@ using Spectra = boost::variant<DiscontinuousSpectra<std::size_t>,
                                std::pair<std::size_t, std::size_t>>;
 
 template <typename F> struct ApplySpectra : boost::static_visitor<> {
-  explicit ApplySpectra(F &&functor) : m_functor(functor) {}
+  explicit ApplySpectra(F &&functor) : m_functor(std::forward<F>(functor)) {}
 
   void operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
     for (auto spectrum = spectra.first; spectrum <= spectra.second; ++spectrum)
@@ -96,8 +96,8 @@ private:
 
 template <typename F>
 struct ApplyEnumeratedSpectra : boost::static_visitor<std::size_t> {
-  ApplyEnumeratedSpectra(F const &functor, std::size_t start = 0)
-      : m_start(start), m_functor(functor) {}
+  ApplyEnumeratedSpectra(F &&functor, std::size_t start = 0)
+      : m_start(start), m_functor(std::forward<F>(functor)) {}
 
   std::size_t
   operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
@@ -168,14 +168,13 @@ public:
   std::vector<double> excludeRegionsVector(std::size_t spectrum) const;
 
   template <typename F> void applySpectra(F &&functor) const {
-    boost::apply_visitor(ApplySpectra<F>(functor), m_spectra);
+    boost::apply_visitor(ApplySpectra<F>(std::forward<F>(functor)), m_spectra);
   }
 
   template <typename F>
-  std::size_t applyEnumeratedSpectra(F const &functor,
-                                     std::size_t start = 0) const {
-    return boost::apply_visitor(ApplyEnumeratedSpectra<F>(functor, start),
-                                m_spectra);
+  std::size_t applyEnumeratedSpectra(F &&functor, std::size_t start = 0) const {
+    return boost::apply_visitor(
+        ApplyEnumeratedSpectra<F>(std::forward<F>(functor), start), m_spectra);
   }
 
   void setSpectra(const std::string &spectra);

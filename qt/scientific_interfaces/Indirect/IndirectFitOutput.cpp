@@ -2,6 +2,8 @@
 
 #include "MantidAPI/TableRow.h"
 
+#include <boost/functional/hash.hpp>
+
 using namespace Mantid::API;
 
 namespace {
@@ -41,11 +43,18 @@ typename Map::mapped_type &extractOrAddDefault(Map &map, const Key &key) {
 }
 
 template <typename F>
-void applyEnumeratedData(const F &functor, const FitDataIterator &fitDataBegin,
+void applyEnumeratedData(F &&functor, const FitDataIterator &fitDataBegin,
                          const FitDataIterator &fitDataEnd) {
   std::size_t start = 0;
   for (auto it = fitDataBegin; it < fitDataEnd; ++it)
     start = (*it)->applyEnumeratedSpectra(functor(it->get()), start);
+}
+
+template <typename F>
+void applyData(F &&functor, const FitDataIterator &fitDataBegin,
+               const FitDataIterator &fitDataEnd) {
+  for (auto it = fitDataBegin; it < fitDataEnd; ++it)
+    (*it)->applySpectra(functor(it->get()));
 }
 
 void extractParametersFromTable(
@@ -92,6 +101,49 @@ Map mapKeys(const Map &map, const KeyMap &keyMap) {
   }
   return newMap;
 }
+
+template <typename Map, typename Key>
+typename Map::mapped_type &findOrCreateDefaultInMap(Map &map, const Key &key) {
+  auto valueIt = map.find(key);
+  if (valueIt != map.end())
+    return valueIt->second;
+  return map[key] = typename Map::mapped_type();
+}
+
+struct UnstructuredResultAdder {
+public:
+  UnstructuredResultAdder(
+      WorkspaceGroup_sptr resultGroup, ResultLocations &locations,
+      std::unordered_map<std::size_t, std::size_t> &defaultPositions,
+      std::size_t &index)
+      : m_resultGroup(resultGroup), m_locations(locations),
+        m_defaultPositions(defaultPositions), m_index(index) {}
+
+  void operator()(std::size_t spectrum) const {
+    auto defaultIt = m_defaultPositions.find(spectrum);
+    if (defaultIt != m_defaultPositions.end())
+      m_locations[spectrum] = ResultLocation(m_resultGroup, defaultIt->second);
+    else if (m_resultGroup->size() > m_index) {
+      m_locations[spectrum] = ResultLocation(m_resultGroup, m_index);
+      m_defaultPositions[spectrum] = m_index++;
+    }
+  }
+
+private:
+  WorkspaceGroup_sptr m_resultGroup;
+  ResultLocations &m_locations;
+  std::size_t &m_index;
+  std::unordered_map<std::size_t, std::size_t> &m_defaultPositions;
+};
+
+std::size_t numberOfSpectraIn(const FitDataIterator &fitDataBegin,
+                              const FitDataIterator &fitDataEnd) {
+  std::size_t spectra = 0;
+  for (auto it = fitDataBegin; it < fitDataEnd; ++it)
+    spectra += (*it)->numberOfSpectra();
+  return spectra;
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -213,10 +265,36 @@ void IndirectFitOutput::updateParameters(ITableWorkspace_sptr parameterTable,
 void IndirectFitOutput::updateFitResults(
     Mantid::API::WorkspaceGroup_sptr resultGroup,
     const FitDataIterator &fitDataBegin, const FitDataIterator &fitDataEnd) {
+  if (numberOfSpectraIn(fitDataBegin, fitDataEnd) <= resultGroup->size())
+    updateFitResultsFromStructured(resultGroup, fitDataBegin, fitDataEnd);
+  else
+    updateFitResultsFromUnstructured(resultGroup, fitDataBegin, fitDataEnd);
+}
+
+void IndirectFitOutput::updateFitResultsFromUnstructured(
+    Mantid::API::WorkspaceGroup_sptr resultGroup,
+    const FitDataIterator &fitDataBegin, const FitDataIterator &fitDataEnd) {
+  std::unordered_map<MatrixWorkspace *,
+                     std::unordered_map<std::size_t, std::size_t>>
+      resultIndices;
+  std::size_t index = 0;
+
+  auto update = [&](IndirectFitData const *inputData) {
+    auto &fitResults = extractOrAddDefault(m_outputResultLocations, inputData);
+    auto workspace = inputData->workspace().get();
+    auto &indices = findOrCreateDefaultInMap(resultIndices, workspace);
+    return UnstructuredResultAdder(resultGroup, fitResults, indices, index);
+  };
+  applyData(update, fitDataBegin, fitDataEnd);
+}
+
+void IndirectFitOutput::updateFitResultsFromStructured(
+    Mantid::API::WorkspaceGroup_sptr resultGroup,
+    const FitDataIterator &fitDataBegin, const FitDataIterator &fitDataEnd) {
   auto update = [&](IndirectFitData const *inputData) {
     auto &fitResults = extractOrAddDefault(m_outputResultLocations, inputData);
     return [&](std::size_t index, std::size_t spectrum) {
-      fitResults[spectrum] = ResultLocation(resultGroup, index++);
+      fitResults[spectrum] = ResultLocation(resultGroup, index);
     };
   };
   applyEnumeratedData(update, fitDataBegin, fitDataEnd);
