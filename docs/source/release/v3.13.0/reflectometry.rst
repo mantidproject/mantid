@@ -17,6 +17,7 @@ New features
 
 - Fully-automatic processing has been added to the interface. Click ``Autoprocess`` to process all of the runs for an investigation and to start polling for new runs. Whenever new runs are found, they will automatically be added to the table and processed.
 - A new option has been added to the Settings tab to control whether partial bins should be included when summing in Q.
+- ``ReflectometryReductionOneAuto`` takes the polarization correction properties from the instrument parameter file when ``PolarizationAnalysis`` is set to ``ParameterFile``. The instrument parameter file can store the efficiencies as vectors of doubles.
 
 Improvements
 ############
