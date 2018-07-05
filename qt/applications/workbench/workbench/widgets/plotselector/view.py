@@ -18,7 +18,7 @@ from __future__ import absolute_import, print_function
 
 import re
 
-from qtpy.QtCore import Qt, Signal
+from qtpy.QtCore import Qt, Signal, QMutex, QMutexLocker
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QFileDialog, QHBoxLayout, QLineEdit, QListWidget,
                             QListWidgetItem, QMenu, QPushButton, QVBoxLayout, QWidget)
 
@@ -63,6 +63,10 @@ class PlotSelectorView(QWidget):
         super(PlotSelectorView, self).__init__(parent)
         self.presenter = presenter
         self.is_run_as_unit_test = is_run_as_unit_test
+
+        # This mutex prevents multiple operations on the list at the
+        # same time. Wrap code in - with QMutexLocker(self.mutex):
+        self.mutex = QMutex()
 
         self.sort_order = Qt.AscendingOrder
         self.sort_type = SortType.Name
@@ -200,10 +204,11 @@ class PlotSelectorView(QWidget):
         size_hint = real_item.sizeHint()
         widget_item.setSizeHint(size_hint)
 
-        self.list_widget.addItem(widget_item)
-        self.list_widget.setItemWidget(widget_item, real_item)
+        with QMutexLocker(self.mutex):
+            self.list_widget.addItem(widget_item)
+            self.list_widget.setItemWidget(widget_item, real_item)
 
-        widget_item.setHidden(not is_shown_by_filter)
+            widget_item.setHidden(not is_shown_by_filter)
 
     def set_plot_list(self, plot_list):
         """
@@ -212,7 +217,9 @@ class PlotSelectorView(QWidget):
         used when errors are encountered.
         :param plot_list: the list of plot names (list of strings)
         """
-        self.list_widget.clear()
+        with QMutexLocker(self.mutex):
+            self.list_widget.clear()
+
         self.filter_box.clear()
         for plot_name in plot_list:
             self.append_to_plot_list(plot_name, True)
@@ -234,9 +241,10 @@ class PlotSelectorView(QWidget):
         Remove the given plot name from the list
         :param plot_name: The plot name
         """
-        row, widget = self._get_row_and_widget_from_plot_name(plot_name)
-        taken_item = self.list_widget.takeItem(row)
-        del taken_item
+        with QMutexLocker(self.mutex):
+            row, widget = self._get_row_and_widget_from_plot_name(plot_name)
+            taken_item = self.list_widget.takeItem(row)
+            del taken_item
 
     # ----------------------- Plot Selection ------------------------
 
@@ -290,9 +298,10 @@ class PlotSelectorView(QWidget):
         """
         Set all plot names to be visible (not hidden)
         """
-        for row in range(len(self.list_widget)):
-            item = self.list_widget.item(row)
-            item.setHidden(False)
+        with QMutexLocker(self.mutex):
+            for row in range(len(self.list_widget)):
+                item = self.list_widget.item(row)
+                item.setHidden(False)
 
     def filter_plot_list(self, plot_list):
         """
@@ -300,13 +309,14 @@ class PlotSelectorView(QWidget):
         hiding the rest
         :param plot_list: The list of plots to show
         """
-        for row in range(len(self.list_widget)):
-            item = self.list_widget.item(row)
-            widget = self.list_widget.itemWidget(item)
-            if widget.plot_name in plot_list:
-                item.setHidden(False)
-            else:
-                item.setHidden(True)
+        with QMutexLocker(self.mutex):
+            for row in range(len(self.list_widget)):
+                item = self.list_widget.item(row)
+                widget = self.list_widget.itemWidget(item)
+                if widget.plot_name in plot_list:
+                    item.setHidden(False)
+                else:
+                    item.setHidden(True)
 
     # ------------------------ Plot Renaming ------------------------
 
@@ -316,13 +326,14 @@ class PlotSelectorView(QWidget):
         :param new_name: The new plot name
         :param old_name: The plot to be renamed
         """
-        row, widget = self._get_row_and_widget_from_plot_name(old_name)
+        with QMutexLocker(self.mutex):
+            row, widget = self._get_row_and_widget_from_plot_name(old_name)
 
-        old_key = self.list_widget.item(row).data(Qt.InitialSortOrderRole)
-        new_sort_key = self.presenter.get_renamed_sort_key(new_name, old_key)
-        self.list_widget.item(row).setData(Qt.InitialSortOrderRole, new_sort_key)
+            old_key = self.list_widget.item(row).data(Qt.InitialSortOrderRole)
+            new_sort_key = self.presenter.get_renamed_sort_key(new_name, old_key)
+            self.list_widget.item(row).setData(Qt.InitialSortOrderRole, new_sort_key)
 
-        widget.set_plot_name(new_name)
+            widget.set_plot_name(new_name)
 
     def rename_selected_in_context_menu(self):
         """
@@ -395,8 +406,9 @@ class PlotSelectorView(QWidget):
 
         See also HumanReadableSortItem class
         """
-        self.sort_order = Qt.AscendingOrder
-        self.list_widget.sortItems(self.sort_order)
+        with QMutexLocker(self.mutex):
+            self.sort_order = Qt.AscendingOrder
+            self.list_widget.sortItems(self.sort_order)
 
     def sort_descending(self):
         """
@@ -404,24 +416,27 @@ class PlotSelectorView(QWidget):
 
         See also HumanReadableSortItem class
         """
-        self.sort_order = Qt.DescendingOrder
-        self.list_widget.sortItems(self.sort_order)
+        with QMutexLocker(self.mutex):
+            self.sort_order = Qt.DescendingOrder
+            self.list_widget.sortItems(self.sort_order)
 
     def sort_by_name(self):
         """
         Set sorting to be by name - note this does not update any
         sort keys, it just sets the required state
         """
-        self.sort_type = SortType.Name
-        self.list_widget.sortItems(self.sort_order)
+        with QMutexLocker(self.mutex):
+            self.sort_type = SortType.Name
+            self.list_widget.sortItems(self.sort_order)
 
     def sort_by_last_shown(self):
         """
         Set sorting to be by last shown - note this does not update
         any sort keys, it just sets the required state
         """
-        self.sort_type = SortType.LastShown
-        self.list_widget.sortItems(self.sort_order)
+        with QMutexLocker(self.mutex):
+            self.sort_type = SortType.LastShown
+            self.list_widget.sortItems(self.sort_order)
 
     def set_sort_keys(self, sort_names_dict):
         """
@@ -430,13 +445,18 @@ class PlotSelectorView(QWidget):
         :param sort_names_dict: A dictionary with keys as plot names
                                 and values as sort keys
         """
-        self.list_widget.setSortingEnabled(False)
-        for row in range(len(self.list_widget)):
-            item = self.list_widget.item(row)
-            widget = self.list_widget.itemWidget(item)
-            item.setData(Qt.InitialSortOrderRole, sort_names_dict[widget.plot_name])
-        self.list_widget.sortItems(self.sort_order)
-        self.list_widget.setSortingEnabled(True)
+        with QMutexLocker(self.mutex):
+            self.list_widget.setSortingEnabled(False)
+            for row in range(len(self.list_widget)):
+                item = self.list_widget.item(row)
+                widget = self.list_widget.itemWidget(item)
+                try:
+                    item.setData(Qt.InitialSortOrderRole, sort_names_dict[widget.plot_name])
+                except Exception as e:
+                    print(row)
+                    raise
+            self.list_widget.sortItems(self.sort_order)
+            self.list_widget.setSortingEnabled(True)
 
     # ---------------------- Plot Exporting -------------------------
 
