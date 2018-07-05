@@ -45,18 +45,18 @@ template <typename TYPE> std::string dtype(TimeSeriesProperty<TYPE> &self) {
 template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
   // Vector of ints to store the sizes of each of the strings
   std::vector<int> string_sizes;
-  
+
   // Loop for the number of strings in self
   for (int i = 0; i < self.size(); i++) {
-    //For each string store the number of characters
+    // For each string store the number of characters
     std::string val = self.nthValue(i);
     int size = val.size();
     string_sizes.push_back(size);
   }
-  
+
   // Find the maximum number of characters
   int max = *std::max_element(std::begin(string_sizes), std::end(string_sizes));
-   
+
   // Create the string to return
   std::stringstream ss;
   ss << "S" << max;

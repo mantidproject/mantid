@@ -54,7 +54,8 @@ public:
          const unsigned int direction);
 
   static std::unique_ptr<Kernel::Property>
-  createTimeSeries(const std::string &name, const boost::python::object &defaultValue);
+  createTimeSeries(const std::string &name,
+                   const boost::python::object &defaultValue);
 
 private:
   /// Return a handler that maps the python type to a C++ type
