@@ -4,6 +4,8 @@
 #include "IAddWorkspaceDialog.h"
 #include "ui_IndirectAddWorkspaceDialog.h"
 
+class Mantid::API::MatrixWorkspace;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -24,6 +26,9 @@ private slots:
   void workspaceChanged(const QString &workspaceName);
 
 private:
+  void setWorkspace(const std::string &workspace);
+  void setAllSpectraSelectionEnabled(bool doEnable);
+
   Ui::IndirectAddWorkspaceDialog m_uiForm;
 };
 

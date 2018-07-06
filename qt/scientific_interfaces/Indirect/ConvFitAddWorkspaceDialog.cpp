@@ -32,6 +32,31 @@ QString getIndexString(const std::string &workspaceName) {
   return getIndexString(getWorkspace(workspaceName));
 }
 
+std::unique_ptr<QRegExpValidator> createValidator(const QString &regex,
+                                                  QObject *parent) {
+  return Mantid::Kernel::make_unique<QRegExpValidator>(QRegExp(regex), parent);
+}
+
+QString OR(const QString &lhs, const QString &rhs) {
+  return "(" + lhs + "|" + rhs + ")";
+}
+
+QString NATURAL_NUMBER(std::size_t digits) {
+  return OR("0", "[1-9][0-9]{," + QString::number(digits - 1) + "}");
+}
+
+namespace Regexes {
+const QString EMPTY = "^$";
+const QString SPACE = "(\\s)*";
+const QString COMMA = SPACE + "," + SPACE;
+const QString MINUS = SPACE + "\\-" + SPACE;
+
+const QString NUMBER = NATURAL_NUMBER(4);
+const QString NATURAL_RANGE = "(" + NUMBER + MINUS + NUMBER + ")";
+const QString NATURAL_OR_RANGE = OR(NATURAL_RANGE, NUMBER);
+const QString SPECTRA_LIST =
+    "(" + NATURAL_OR_RANGE + "(" + COMMA + NATURAL_OR_RANGE + ")*)";
+} // namespace Regexes
 } // namespace
 
 namespace MantidQt {
@@ -41,6 +66,9 @@ namespace IDA {
 ConvFitAddWorkspaceDialog::ConvFitAddWorkspaceDialog(QWidget *parent)
     : IAddWorkspaceDialog(parent) {
   m_uiForm.setupUi(this);
+  m_uiForm.leWorkspaceIndices->setValidator(
+      createValidator(Regexes::SPECTRA_LIST, this).release());
+  setAllSpectraSelectionEnabled(false);
 
   connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this,
           SLOT(workspaceChanged(const QString &)));
@@ -87,9 +115,22 @@ void ConvFitAddWorkspaceDialog::selectAllSpectra(int state) {
 }
 
 void ConvFitAddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
-  const auto workspace = getWorkspace(workspaceName.toStdString());
-  if (workspace && m_uiForm.ckAllSpectra->isChecked())
+  const auto name = workspaceName.toStdString();
+  const auto workspace = getWorkspace(name);
+  if (workspace)
+    setWorkspace(name);
+  else
+    setAllSpectraSelectionEnabled(false);
+}
+
+void ConvFitAddWorkspaceDialog::setWorkspace(const std::string &workspace) {
+  setAllSpectraSelectionEnabled(true);
+  if (m_uiForm.ckAllSpectra->isChecked())
     m_uiForm.leWorkspaceIndices->setText(getIndexString(workspace));
+}
+
+void ConvFitAddWorkspaceDialog::setAllSpectraSelectionEnabled(bool doEnable) {
+  m_uiForm.ckAllSpectra->setEnabled(doEnable);
 }
 
 } // namespace IDA

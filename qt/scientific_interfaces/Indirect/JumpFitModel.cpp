@@ -274,6 +274,12 @@ bool JumpFitModel::zeroEISF(std::size_t dataIndex) const {
   return true;
 }
 
+bool JumpFitModel::isMultiFit() const {
+  if (numberOfWorkspaces() == 0)
+    return false;
+  return !allWorkspacesEqual(getWorkspace(0));
+}
+
 std::vector<std::string> JumpFitModel::getWidths(std::size_t dataIndex) const {
   const auto parameters = findJumpFitParameters(dataIndex);
   if (parameters != m_jumpParameters.end())
@@ -307,11 +313,9 @@ JumpFitModel::getEISFSpectrum(std::size_t eisfIndex,
 }
 
 std::string JumpFitModel::sequentialFitOutputName() const {
-  auto name = createOutputName("%1%_JumpFit", "", 0);
-  auto position = name.find("_Result");
-  if (position != std::string::npos)
-    return name.substr(0, position) + name.substr(position + 7, name.size());
-  return name;
+  if (isMultiFit())
+    return "MultiFofQFit_" + m_fitType + "_Result";
+  return constructOutputName();
 }
 
 std::string JumpFitModel::simultaneousFitOutputName() const {
@@ -320,6 +324,23 @@ std::string JumpFitModel::simultaneousFitOutputName() const {
 
 std::string JumpFitModel::singleFitOutputName(std::size_t, std::size_t) const {
   return sequentialFitOutputName();
+}
+
+std::string JumpFitModel::constructOutputName() const {
+  auto name = createOutputName("%1%_FofQFit", "", 0);
+  auto position = name.find("_Result");
+  if (position != std::string::npos)
+    return name.substr(0, position) + name.substr(position + 7, name.size());
+  return name;
+}
+
+bool JumpFitModel::allWorkspacesEqual(
+    Mantid::API::MatrixWorkspace_sptr workspace) const {
+  for (auto i = 1u; i < numberOfWorkspaces(); ++i) {
+    if (getWorkspace(i) != workspace)
+      return false;
+  }
+  return true;
 }
 
 } // namespace IDA

@@ -96,17 +96,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-namespace Regexes {
-const QString EMPTY = "^$";
-const QString SPACE = "(\\s)*";
-const QString COMMA = SPACE + "," + SPACE;
-const QString NATURAL_NUMBER = "(0|[1-9][0-9]*)";
-const QString REAL_NUMBER = "(-?" + NATURAL_NUMBER + "(\\.[0-9]*)?)";
-const QString REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
-const QString MASK_LIST =
-    "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
-} // namespace Regexes
-
 IndirectDataTablePresenter::IndirectDataTablePresenter(
     IndirectFittingModel *model, QTableWidget *dataTable)
     : IndirectDataTablePresenter(model, dataTable, defaultHeaders()) {}

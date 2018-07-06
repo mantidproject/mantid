@@ -72,7 +72,7 @@ public:
   std::string createOutputName(const std::string &formatString,
                                const std::string &rangeDelimiter,
                                std::size_t dataIndex) const;
-  bool isMultiFit() const;
+  virtual bool isMultiFit() const;
   bool isPreviouslyFit(std::size_t dataIndex, std::size_t spectrum) const;
   bool hasZeroSpectra(std::size_t dataIndex) const;
   virtual boost::optional<std::string> isInvalidFunction() const;

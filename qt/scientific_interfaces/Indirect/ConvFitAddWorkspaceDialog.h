@@ -27,6 +27,9 @@ private slots:
   void workspaceChanged(const QString &workspaceName);
 
 private:
+  void setWorkspace(const std::string &workspace);
+  void setAllSpectraSelectionEnabled(bool doEnable);
+
   Ui::ConvFitAddWorkspaceDialog m_uiForm;
 };
 

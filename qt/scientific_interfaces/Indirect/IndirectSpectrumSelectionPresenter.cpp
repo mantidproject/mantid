@@ -29,12 +29,6 @@ private:
   IndirectSpectrumSelectionView *m_view;
 };
 
-} // namespace
-
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
-
 std::string OR(const std::string &lhs, const std::string &rhs) {
   return "(" + lhs + "|" + rhs + ")";
 }
@@ -60,6 +54,11 @@ const std::string REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
 const std::string MASK_LIST =
     "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
 } // namespace Regexes
+} // namespace
+
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace IDA {
 
 IndirectSpectrumSelectionPresenter::IndirectSpectrumSelectionPresenter(
     IndirectFittingModel *model, IndirectSpectrumSelectionView *view)
