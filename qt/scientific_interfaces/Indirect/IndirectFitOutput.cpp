@@ -129,33 +129,56 @@ std::vector<std::string> getAxisLabels(MatrixWorkspace_sptr workspace,
   return std::vector<std::string>();
 }
 
+void safeRename(const std::string &oldName, const std::string &newName) {
+  std::string safeNewName = newName;
+  std::size_t counter = 2;
+  while (AnalysisDataService::Instance().doesExist(safeNewName))
+    safeNewName = newName + "(" + std::to_string(counter) + ")";
+  AnalysisDataService::Instance().rename(oldName, safeNewName);
+}
+
+void renameResult(Workspace_sptr resultWorkspace,
+                  const std::string &workspaceName) {
+  safeRename(resultWorkspace->getName(), workspaceName + "_Result");
+}
+
 void renameResult(Workspace_sptr resultWorkspace,
                   IndirectFitData const *fitData) {
   const auto name = resultWorkspace->getName();
   const auto newName = fitData->displayName("%1%_s%2%_Result", "_to_");
-  AnalysisDataService::Instance().rename(name, newName);
+  safeRename(name, newName);
 }
 
-void renameStructuredResult(WorkspaceGroup_sptr resultWorkspace,
-                            const FitDataIterator &fitDataBegin,
-                            const FitDataIterator &fitDataEnd) {
+void renameResultWithoutSpectra(WorkspaceGroup_sptr resultWorkspace,
+                                const FitDataIterator &fitDataBegin,
+                                const FitDataIterator &fitDataEnd) {
+  std::size_t index = 0;
+  MatrixWorkspace const *previous = nullptr;
+
+  for (auto it = fitDataBegin; it < fitDataEnd; ++it) {
+    auto workspace = (*it)->workspace().get();
+    if (workspace != previous) {
+      renameResult(resultWorkspace->getItem(index++), workspace->getName());
+      previous = workspace;
+    }
+  }
+}
+
+void renameResultWithSpectra(WorkspaceGroup_sptr resultWorkspace,
+                             const FitDataIterator &fitDataBegin,
+                             const FitDataIterator &fitDataEnd) {
   std::size_t index = 0;
   for (auto it = fitDataBegin; it < fitDataEnd; ++it)
     renameResult(resultWorkspace->getItem(index++), it->get());
 }
 
-void renameUnstructuredResult(WorkspaceGroup_sptr resultWorkspace,
-                              const FitDataIterator &fitDataBegin,
-                              const FitDataIterator &fitDataEnd) {
-  std::size_t index = 0;
-  std::unordered_set<Workspace *> named;
-  for (auto it = fitDataBegin; it < fitDataEnd; ++it) {
-    const auto workspace = resultWorkspace->getItem(index);
-    if (named.find(workspace.get()) != named.end()) {
-      renameResult(workspace, it->get());
-      ++index;
-    }
-  }
+void renameResult(WorkspaceGroup_sptr resultWorkspace,
+                  const FitDataIterator &fitDataBegin,
+                  const FitDataIterator &fitDataEnd) {
+  if (resultWorkspace->size() >= fitDataEnd - fitDataBegin)
+    renameResultWithSpectra(resultWorkspace, fitDataBegin, fitDataEnd);
+  else
+    renameResultWithoutSpectra(resultWorkspace, fitDataBegin, fitDataEnd);
 }
 
 template <typename Map, typename Key>
@@ -296,7 +319,8 @@ void IndirectFitOutput::addOutput(WorkspaceGroup_sptr resultGroup,
                                   const FitDataIterator &fitDataBegin,
                                   const FitDataIterator &fitDataEnd) {
   updateParameters(parameterTable, fitDataBegin, fitDataEnd);
-  updateResults(resultGroup, resultWorkspace, fitDataBegin, fitDataEnd);
+  updateFitResults(resultGroup, fitDataBegin, fitDataEnd);
+  renameResult(resultWorkspace, fitDataBegin, fitDataEnd);
   m_resultWorkspace = resultWorkspace;
   m_resultGroup = resultGroup;
 }
@@ -319,17 +343,13 @@ void IndirectFitOutput::removeOutput(IndirectFitData const *fitData) {
   m_outputResultLocations.erase(fitData);
 }
 
-void IndirectFitOutput::updateResults(WorkspaceGroup_sptr resultGroup,
-                                      WorkspaceGroup_sptr resultWorkspace,
-                                      const FitDataIterator &fitDataBegin,
-                                      const FitDataIterator &fitDataEnd) {
-  if (numberOfSpectraIn(fitDataBegin, fitDataEnd) <= resultGroup->size()) {
+void IndirectFitOutput::updateFitResults(WorkspaceGroup_sptr resultGroup,
+                                         const FitDataIterator &fitDataBegin,
+                                         const FitDataIterator &fitDataEnd) {
+  if (numberOfSpectraIn(fitDataBegin, fitDataEnd) <= resultGroup->size())
     updateFitResultsFromStructured(resultGroup, fitDataBegin, fitDataEnd);
-    renameStructuredResult(resultWorkspace, fitDataBegin, fitDataEnd);
-  } else {
+  else
     updateFitResultsFromUnstructured(resultGroup, fitDataBegin, fitDataEnd);
-    renameUnstructuredResult(resultWorkspace, fitDataBegin, fitDataEnd);
-  }
 }
 
 void IndirectFitOutput::updateParameters(ITableWorkspace_sptr parameterTable,
