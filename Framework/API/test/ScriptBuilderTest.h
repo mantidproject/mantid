@@ -175,6 +175,10 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
     const std::string summary() const override {
       return "AlgorithmWithDynamicProperty";
     }
+    void afterPropertySet(const std::string &name) override {
+      if (name == "InputWorkspace")
+        declareProperty("DynamicInputProperty", "");
+    }
 
     void init() override {
       declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -435,7 +439,7 @@ public:
     std::string result =
         "AlgorithmWithDynamicProperty(InputWorkspace='test_input_workspace', "
         "OutputWorkspace='test_output_workspace', PropertyA='A', "
-        "PropertyB='B')\n";
+        "PropertyB='B', DynamicInputProperty='C')\n";
     boost::shared_ptr<WorkspaceTester> input =
         boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
@@ -447,6 +451,7 @@ public:
     alg->setProperty("InputWorkspace", input);
     alg->setProperty("PropertyA", "A");
     alg->setProperty("PropertyB", "B");
+    alg->setProperty("DynamicInputProperty", "C");
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
     alg->execute();
 
