@@ -4,7 +4,7 @@
 #include "DllOption.h"
 #include "GLColor.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#include "../../../src/qwt/MantidColorMap.h"
 #include <QString>
 
 namespace MantidQt {
