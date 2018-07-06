@@ -38,7 +38,6 @@ set ( SRC_FILES
 	src/MaskPeaksWorkspace.cpp
 	src/NormaliseVanadium.cpp
 	src/OptimizeCrystalPlacement.cpp
-	src/OptimizeExtinctionParameters.cpp
 	src/OptimizeLatticeForCellType.cpp
 	src/PeakBackground.cpp
 	src/PeakClusterProjection.cpp
@@ -67,7 +66,6 @@ set ( SRC_FILES
 	src/SortHKL.cpp
 	src/SortPeaksWorkspace.cpp
 	src/StatisticsOfPeaksWorkspace.cpp
-	src/TOFExtinction.cpp
 	src/TransformHKL.cpp
 )
 
@@ -114,7 +112,6 @@ set ( INC_FILES
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/NormaliseVanadium.h
 	inc/MantidCrystal/OptimizeCrystalPlacement.h
-	inc/MantidCrystal/OptimizeExtinctionParameters.h
 	inc/MantidCrystal/OptimizeLatticeForCellType.h
 	inc/MantidCrystal/PeakBackground.h
 	inc/MantidCrystal/PeakClusterProjection.h
@@ -143,7 +140,6 @@ set ( INC_FILES
 	inc/MantidCrystal/SortHKL.h
 	inc/MantidCrystal/SortPeaksWorkspace.h
 	inc/MantidCrystal/StatisticsOfPeaksWorkspace.h
-	inc/MantidCrystal/TOFExtinction.h
 	inc/MantidCrystal/TransformHKL.h
 )
 
