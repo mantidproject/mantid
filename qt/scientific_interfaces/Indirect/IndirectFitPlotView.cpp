@@ -169,6 +169,14 @@ void IndirectFitPlotView::enableSpectrumSelection() {
   m_plotForm->spPlotSpectrum->setEnabled(true);
 }
 
+void IndirectFitPlotView::disableFitRangeSelection() {
+  m_plotForm->ppPlotTop->getRangeSelector("FitRange")->setVisible(false);
+}
+
+void IndirectFitPlotView::enableFitRangeSelection() {
+  m_plotForm->ppPlotTop->getRangeSelector("FitRange")->setVisible(true);
+}
+
 void IndirectFitPlotView::clearTopPreview() { m_plotForm->ppPlotTop->clear(); }
 
 void IndirectFitPlotView::clearBottomPreview() {

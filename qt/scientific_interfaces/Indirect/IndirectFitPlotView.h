@@ -52,6 +52,9 @@ public:
   void disableSpectrumSelection();
   void enableSpectrumSelection();
 
+  void disableFitRangeSelection();
+  void enableFitRangeSelection();
+
   void setBackgroundLevel(double value);
 
   void setFitRange(double minimum, double maximum);

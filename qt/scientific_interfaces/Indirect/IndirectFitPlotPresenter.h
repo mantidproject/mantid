@@ -64,6 +64,8 @@ private slots:
   void emitFWHMChanged(double minimum, double maximum);
 
 private:
+  void disableAllDataSelection();
+  void enableAllDataSelection();
   void plotInput(Mantid::API::MatrixWorkspace_sptr workspace,
                  std::size_t spectrum);
   void plotFit(Mantid::API::MatrixWorkspace_sptr workspace,

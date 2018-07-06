@@ -104,6 +104,7 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model,
           this, SIGNAL(runAsPythonScript(const QString &, bool)));
 
   updateRangeSelectors();
+  updateAvailableSpectra();
 }
 
 std::size_t IndirectFitPlotPresenter::getSelectedDataIndex() const {
@@ -141,7 +142,7 @@ void IndirectFitPlotPresenter::setModelEndX(double endX) {
 }
 
 void IndirectFitPlotPresenter::setModelHWHM(double minimum, double maximum) {
-  m_model->setHWHM(maximum - minimum);
+  m_model->setFWHM(maximum - minimum);
 }
 
 void IndirectFitPlotPresenter::setModelBackground(double background) {
@@ -216,12 +217,22 @@ void IndirectFitPlotPresenter::updateDataSelection() {
 
 void IndirectFitPlotPresenter::updateAvailableSpectra() {
   if (m_model->getWorkspace()) {
-    m_view->enableSpectrumSelection();
+    enableAllDataSelection();
     auto updateSpectra = UpdateAvailableSpectra(m_view);
     m_model->getSpectra().apply_visitor(updateSpectra);
     setActiveSpectrum(m_view->getSelectedSpectrum());
   } else
-    m_view->disableSpectrumSelection();
+    disableAllDataSelection();
+}
+
+void IndirectFitPlotPresenter::disableAllDataSelection() {
+  m_view->disableSpectrumSelection();
+  m_view->disableFitRangeSelection();
+}
+
+void IndirectFitPlotPresenter::enableAllDataSelection() {
+  m_view->enableSpectrumSelection();
+  m_view->enableFitRangeSelection();
 }
 
 void IndirectFitPlotPresenter::updatePlots() {

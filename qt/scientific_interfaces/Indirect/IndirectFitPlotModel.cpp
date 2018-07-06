@@ -125,8 +125,7 @@ void IndirectFitPlotModel::setEndX(double endX) {
   m_fittingModel->setEndX(endX, m_activeIndex, m_activeSpectrum);
 }
 
-void IndirectFitPlotModel::setHWHM(double hwhm) {
-  const auto fwhm = std::fabs(hwhm * 2.0);
+void IndirectFitPlotModel::setFWHM(double fwhm) {
   m_fittingModel->setDefaultParameterValue("FWHM", fwhm, m_activeIndex);
   setFunctionParameters(m_fittingModel->getFittingFunction(), "Peak", "FWHM",
                         fwhm);
