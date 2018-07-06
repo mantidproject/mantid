@@ -166,6 +166,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.activateWindow()
         self.window.raise_()
         if self.window.windowState() & Qt.WindowMinimized:
+            # windowState() stores a combination of window state enums
+            # and multiple window states can be valid. On Windows
+            # a window can be both minimized and maximized at the
+            # same time, so we make a check here. For more info see:
+            # http://doc.qt.io/qt-5/qt.html#WindowState-enum
             if self.window.windowState() & Qt.WindowMaximized:
                 self.window.setWindowState(Qt.WindowMaximized)
             else:

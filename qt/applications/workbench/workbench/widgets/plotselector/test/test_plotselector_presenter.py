@@ -224,7 +224,7 @@ class PlotSelectorPresenterTest(unittest.TestCase):
                                                          'Graph99': 'Graph99'})
 
     def test_set_sort_type_to_last_shown(self):
-        self.model.last_shown_order_dict = mock.Mock(return_value={"Plot1": 1, "Plot2": 2})
+        self.model.last_active_order = mock.Mock(return_value={"Plot1": 1, "Plot2": 2})
         self.view.sort_type = SortType.LastShown
         self.presenter.set_sort_type(is_by_name=False)
         self.view.sort_by_last_shown.assert_called_once_with()
@@ -234,22 +234,22 @@ class PlotSelectorPresenterTest(unittest.TestCase):
                                                          'Graph99': '_Graph99'})
 
     def test_update_last_shown_calls_model_and_view(self):
-        self.model.last_shown_order_dict = mock.Mock(return_value={"Plot1": 1, "Plot2": 2})
+        self.model.last_active_order = mock.Mock(return_value={"Plot1": 1, "Plot2": 2})
         self.view.sort_type = SortType.LastShown
         self.presenter.update_sort_keys()
 
-        self.model.last_shown_order_dict.assert_called_once_with()
+        self.model.last_active_order.assert_called_once_with()
         self.view.set_sort_keys.assert_called_once_with({'Plot1': 1,
                                                          'Plot2': 2,
                                                          'Plot3': '_Plot3',
                                                          'Graph99': '_Graph99'})
 
     def test_update_last_shown_with_sorting_by_name_does_nothing(self):
-        self.model.last_shown_order_dict = mock.Mock(return_value={"Plot1": 1, "Plot2": 2})
+        self.model.last_active_order = mock.Mock(return_value={"Plot1": 1, "Plot2": 2})
         self.view.sort_type = SortType.Name
         self.presenter.update_sort_keys()
 
-        self.model.last_shown_order_dict.assert_not_called()
+        self.model.last_active_order.assert_not_called()
         self.view.set_sort_keys.assert_not_called()
 
     def test_get_initial_sort_key_for_sort_by_name(self):

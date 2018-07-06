@@ -248,7 +248,7 @@ class PlotSelectorPresenter(object):
         if self.view.sort_type == SortType.Name:
             sort_keys = dict(zip(self.model.plot_list, self.model.plot_list))
         elif self.view.sort_type == SortType.LastShown:
-            sort_keys = self.model.last_shown_order_dict()
+            sort_keys = self.model.last_active_order()
             for plot_name in self.model.plot_list:
                 if plot_name not in sort_keys:
                     # Append an '_' to the plot name - it has never been

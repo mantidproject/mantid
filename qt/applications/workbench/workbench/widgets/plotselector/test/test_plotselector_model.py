@@ -146,9 +146,9 @@ class PlotSelectorModelTest(unittest.TestCase):
 
     # ----------------------- Plot Sorting --------------------------
 
-    def test_last_shown_order_dict_calls_global_figure_manager(self):
-        self.model.last_shown_order_dict()
-        self.global_figure_manager.last_shown_order_dict.assert_called_once_with()
+    def test_last_active_order_calls_global_figure_manager(self):
+        self.model.last_active_order()
+        self.global_figure_manager.last_active_order.assert_called_once_with()
 
     # ---------------------- Plot Exporting -------------------------
 

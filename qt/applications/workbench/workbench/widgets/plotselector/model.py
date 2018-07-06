@@ -162,7 +162,7 @@ class PlotSelectorModel(object):
 
     # ----------------------- Plot Sorting --------------------------
 
-    def last_shown_order_dict(self):
+    def last_active_order(self):
         """
         Returns a dictionary containing the order of the last shown
         plots. Not all plots are guaranteed to be in returned
@@ -170,7 +170,7 @@ class PlotSelectorModel(object):
         :return: A dictionary containing the plot names as keys, and
                  the order (1...N) as values (e.g. {'Plot1': 1})
         """
-        return self.GlobalFigureManager.last_shown_order_dict()
+        return self.GlobalFigureManager.last_active_order()
 
     # ---------------------- Plot Exporting -------------------------
 

@@ -39,23 +39,8 @@
 #############################################################################
 
 
-from PyQt5.QtCore import QPoint, QRect, QSize, Qt
-from PyQt5.QtWidgets import QLayout, QPushButton, QSizePolicy, QWidget
-
-
-class Window(QWidget):
-    def __init__(self):
-        super(Window, self).__init__()
-
-        flowLayout = FlowLayout()
-        flowLayout.addWidget(QPushButton("Short"))
-        flowLayout.addWidget(QPushButton("Longer"))
-        flowLayout.addWidget(QPushButton("Different text"))
-        flowLayout.addWidget(QPushButton("More text"))
-        flowLayout.addWidget(QPushButton("Even longer button text"))
-        self.setLayout(flowLayout)
-
-        self.setWindowTitle("Flow Layout")
+from qtpy.QtCore import QPoint, QRect, QSize, Qt
+from qtpy.QtWidgets import QLayout, QSizePolicy
 
 
 class FlowLayout(QLayout):

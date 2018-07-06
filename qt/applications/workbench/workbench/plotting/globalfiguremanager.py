@@ -35,7 +35,7 @@ class FigureAction(Enum):
     OrderChanged = 4
 
 
-class DictionaryObserver(object):
+class GlobalFigureManagerObserver(object):
     def notify(self, action, new_value=None, old_value=None):
         """
         This method is called when a dictionary entry is added,
@@ -55,7 +55,7 @@ class DictionaryObserver(object):
         else:
             # Not expecting clear or update to be used, so we are
             # being lazy here and just updating the entire plot list
-            GlobalFigureManager.notify_observers(FigureAction.Unknown, "")
+            gcf.notify_observers(FigureAction.Unknown, "")
 
 
 class GlobalFigureManager(object):
@@ -79,7 +79,7 @@ class GlobalFigureManager(object):
     """
     _activeQue = []
     figs = ObservableDictionary({})
-    figs.add_observer(DictionaryObserver())
+    figs.add_observer(GlobalFigureManagerObserver())
     observers = []
 
     @classmethod
@@ -227,7 +227,7 @@ class GlobalFigureManager(object):
         return None
 
     @classmethod
-    def last_shown_order_dict(cls):
+    def last_active_order(cls):
         """
         Returns a dictionary where the keys are the plot names (figure
         titles) and the values are the last shown (active) order, the
