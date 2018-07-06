@@ -77,6 +77,9 @@ public:
   /// Function to return the separator token for the category string
   virtual const std::string categorySeparator() const = 0;
 
+  /// Function to return all of the seeAlso algorithms related to this algorithm
+  virtual const std::vector<std::string> seeAlso() const = 0;
+
   /// function to return any aliases of the algorithm.
   virtual const std::string alias() const = 0;
 

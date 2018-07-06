@@ -111,11 +111,11 @@ V3D cylBaseCentre(const std::vector<double> &cylCentre, double height,
 std::string axisXML(unsigned axisIdx) {
   switch (axisIdx) {
   case 0:
-    return "<axis x=\"1\" y=\"0\" z=\"0\" />";
+    return R"(<axis x="1" y="0" z="0" />)";
   case 1:
-    return "<axis x=\"0\" y=\"1\" z=\"0\" />";
+    return R"(<axis x="0" y="1" z="0" />)";
   case 2:
-    return "<axis x=\"0\" y=\"0\" z=\"1\" />";
+    return R"(<axis x="0" y="0" z="1" />)";
   default:
     return "";
   }

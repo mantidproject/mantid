@@ -44,6 +44,12 @@ public:
     TS_ASSERT(WS);
     // Correct number of monitors found
     TS_ASSERT_EQUALS(WS->getNumberHistograms(), 3);
+    // check the detector and spectrum numbers
+    for (size_t wi = 0; wi < WS->getNumberHistograms(); ++wi) {
+      const auto &spec = WS->getSpectrum(wi);
+      TS_ASSERT_EQUALS(spec.getSpectrumNo(), wi + 1);
+      TS_ASSERT_EQUALS(*(spec.getDetectorIDs().begin()), -1 * (wi + 1));
+    }
     // Check some histogram data
     // TOF
     TS_ASSERT_EQUALS(WS->x(1).size(), 200002);
@@ -123,6 +129,56 @@ public:
     TS_ASSERT_EQUALS(WS->x(1)[5], 19995.0);
   }
 
+  void testLET() {
+    std::string filename("LET00006278.nxs");
+    std::string histoWSname("testLET_hist_mon");
+    std::string eventWSname("testLET_event_mon");
+
+    const std::vector<size_t> spec_num{40961, 40962, 40963, 40964,
+                                       40965, 40966, 40967, 40968};
+    const std::vector<int> det_num{11, 21, 31, 41, 51, 61, 71, 81};
+
+    // these tests read from the same file
+    LoadNexusMonitors2 load;
+    load.initialize();
+    load.setPropertyValue("Filename", filename);
+
+    // first make sure it fails since the file has both event and histograms
+    // user should specify what to do
+    load.setPropertyValue("OutputWorkspace", "testing");
+    load.execute();
+    TS_ASSERT(!load.isExecuted());
+
+    // force loading histograms
+    load.setPropertyValue("LoadOnly", "Histogram");
+    load.setPropertyValue("OutputWorkspace", histoWSname);
+    load.execute();
+    TS_ASSERT(load.isExecuted());
+    MatrixWorkspace_sptr histo =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            histoWSname);
+    TS_ASSERT_EQUALS(histo->getNumberHistograms(), spec_num.size());
+    for (size_t wi = 0; wi < histo->getNumberHistograms(); ++wi) {
+      const auto &histoSpec = histo->getSpectrum(wi);
+      TS_ASSERT_EQUALS(histoSpec.getSpectrumNo(), spec_num[wi]);
+      TS_ASSERT_EQUALS(*(histoSpec.getDetectorIDs().begin()), det_num[wi]);
+    }
+
+    // force loading events
+    load.setPropertyValue("LoadOnly", "Events");
+    load.setPropertyValue("OutputWorkspace", eventWSname);
+    load.execute();
+    TS_ASSERT(load.isExecuted());
+    EventWorkspace_sptr event =
+        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(eventWSname);
+    TS_ASSERT_EQUALS(event->getNumberHistograms(), spec_num.size());
+    for (size_t wi = 0; wi < histo->getNumberHistograms(); ++wi) {
+      const auto &eventSpec = event->getSpectrum(wi);
+      TS_ASSERT_EQUALS(eventSpec.getSpectrumNo(), spec_num[wi]);
+      TS_ASSERT_EQUALS(*(eventSpec.getDetectorIDs().begin()), det_num[wi]);
+    }
+  }
+
   void test_10_monitors() {
     Poco::Path path(ConfigService::Instance().getTempDir().c_str());
     path.append("LoadNexusMonitorsTestFile.nxs");
@@ -144,6 +200,13 @@ public:
     TS_ASSERT(WS);
     // Correct number of monitors found
     TS_ASSERT_EQUALS(WS->getNumberHistograms(), 3);
+    // Correct spectrum and detector numbers
+    const std::vector<int32_t> NUMS{1, 2, 10};
+    for (size_t wi = 0; wi < WS->getNumberHistograms(); ++wi) {
+      const auto &spec = WS->getSpectrum(wi);
+      TS_ASSERT_EQUALS(spec.getSpectrumNo(), NUMS[wi]);
+      TS_ASSERT_EQUALS(*(spec.getDetectorIDs().begin()), NUMS[wi]);
+    }
     // Monitors are in the right order
     TS_ASSERT_EQUALS(WS->y(0)[0], 1);
     TS_ASSERT_EQUALS(WS->y(1)[0], 2);
@@ -167,8 +230,8 @@ public:
     // Count output workspaces
     int ws_count = 0;
     auto props = ld1.getProperties();
-    for (auto iter = props.begin(); iter != props.end(); ++iter)
-      if ((*iter)->type() == "Workspace")
+    for (auto &prop : props)
+      if (prop->type() == "Workspace")
         ws_count++;
 
     // Version 1 has an issue that produces additional output workspaces for
@@ -191,8 +254,8 @@ public:
     // Count output workspaces
     ws_count = 0;
     props = ld2.getProperties();
-    for (auto iter = props.begin(); iter != props.end(); ++iter)
-      if ((*iter)->type() == "Workspace")
+    for (auto &prop : props)
+      if (prop->type() == "Workspace")
         ws_count++;
 
     // Version 2 always produces one OutputWorkspace, which may be a group

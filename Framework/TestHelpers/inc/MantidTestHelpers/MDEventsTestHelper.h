@@ -423,7 +423,7 @@ static void feedMDBox(MDBoxBase<MDLeanEvent<nd>, nd> *box, size_t repeat = 1,
     allDone = Mantid::Kernel::Utils::NestedForLoop::Increment(nd, counters,
                                                               index_max);
   }
-  box->refreshCache(NULL);
+  box->refreshCache(nullptr);
 }
 
 //-------------------------------------------------------------------------------------

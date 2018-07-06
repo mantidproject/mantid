@@ -37,6 +37,9 @@ class DLLExport LessThanMD : public BooleanBinaryOperationMD {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"GreaterThanMD", "EqualToMD"};
+  }
 
 private:
   bool acceptScalar() const override { return true; }

@@ -1,10 +1,12 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGPRESENTER_H_
 
+#include "IEnggDiffGSASFittingObserver.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IEnggDiffGSASFittingPresenter {
+class IEnggDiffGSASFittingPresenter : public IEnggDiffGSASFittingObserver {
 
 public:
   virtual ~IEnggDiffGSASFittingPresenter() = default;
@@ -14,6 +16,7 @@ public:
   enum Notification {
     DoRefinement, ///< Perform a GSAS refinement on a run
     LoadRun,      ///< Load a focused run
+    RefineAll,    ///< Do refinement on all runs loaded into the tab
     SelectRun,    ///< The user has selected a different run in the multi-run
                   /// widget
     ShutDown,     ///< Shut down the interface
@@ -28,6 +31,20 @@ public:
    * @param notif Type of notification to process.
    */
   virtual void notify(IEnggDiffGSASFittingPresenter::Notification notif) = 0;
+
+  void notifyRefinementsComplete(
+      Mantid::API::IAlgorithm_sptr alg,
+      const std::vector<GSASIIRefineFitPeaksOutputProperties> &
+          refinementResultSets) override = 0;
+
+  void notifyRefinementSuccessful(
+      const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
+      const GSASIIRefineFitPeaksOutputProperties &refinementResults) override =
+      0;
+
+  void notifyRefinementFailed(const std::string &failureMessage) override = 0;
+
+  void notifyRefinementCancelled() override = 0;
 };
 
 } // namespace CustomInterfaces

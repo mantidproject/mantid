@@ -60,6 +60,7 @@ public:
   virtual void setWavelength(double wavelength) = 0;
   virtual double getWavelength() const = 0;
   virtual double getScattering() const = 0;
+  virtual double getAzimuthal() const = 0;
   virtual double getDSpacing() const = 0;
   virtual double getTOF() const = 0;
 
@@ -77,6 +78,9 @@ public:
 
   virtual double getBinCount() const = 0;
   virtual void setBinCount(double m_BinCount) = 0;
+
+  virtual int getPeakNumber() const = 0;
+  virtual void setPeakNumber(int m_PeakNumber) = 0;
 
   virtual Mantid::Kernel::Matrix<double> getGoniometerMatrix() const = 0;
   virtual void setGoniometerMatrix(

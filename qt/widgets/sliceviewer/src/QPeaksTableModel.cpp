@@ -62,6 +62,7 @@ const QString QPeaksTableModel::ROW("Row");
 const QString QPeaksTableModel::COL("Col");
 const QString QPeaksTableModel::QLAB = "QLab";
 const QString QPeaksTableModel::QSAMPLE = "QSample";
+const QString QPeaksTableModel::PEAKNUM = "PeakNumber";
 
 const int QPeaksTableModel::COL_RUNNUMBER(0);
 const int QPeaksTableModel::COL_DETID(1);
@@ -83,6 +84,7 @@ const int QPeaksTableModel::COL_ROW(16);
 const int QPeaksTableModel::COL_COL(17);
 const int QPeaksTableModel::COL_QLAB(18);
 const int QPeaksTableModel::COL_QSAMPLE(19);
+const int QPeaksTableModel::COL_PEAKNUM(20);
 
 /**
  * @param column The column to get the number of characters
@@ -132,6 +134,8 @@ int QPeaksTableModel::numCharacters(const int column) const {
     return 3 * 6;
   else if (column == COL_QSAMPLE)
     return 3 * 6;
+  else if (column == COL_PEAKNUM)
+    return 6;
   else
     return 3;
 }
@@ -162,7 +166,8 @@ QPeaksTableModel::QPeaksTableModel(
                      {16, ROW},
                      {17, COL},
                      {18, QLAB},
-                     {19, QSAMPLE}};
+                     {19, QSAMPLE},
+                     {20, PEAKNUM}};
 
   m_hklPrec = getHKLPrecision();
 
@@ -193,6 +198,7 @@ QPeaksTableModel::QPeaksTableModel(
       [](const IPeak &peak) { return QVariant(peak.getCol()); },
       [](const IPeak &peak) { return QVariant(peak.getQLabFrame().norm()); },
       [](const IPeak &peak) { return QVariant(peak.getQSampleFrame().norm()); },
+      [](const IPeak &peak) { return QVariant(int(peak.getPeakNumber())); },
   };
 
   // Mapping member functions of the Peak object to a column index with
@@ -244,6 +250,7 @@ QPeaksTableModel::QPeaksTableModel(
       [](const IPeak &peak) { return QString::number(peak.getCol()); },
       [](const IPeak &peak) { return v3dAsString(peak.getQLabFrame()); },
       [](const IPeak &peak) { return v3dAsString(peak.getQSampleFrame()); },
+      [](const IPeak &peak) { return QString::number(peak.getPeakNumber()); },
   };
 }
 

@@ -3,6 +3,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -19,6 +20,85 @@ DECLARE_ALGORITHM(SumSpectra)
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+
+namespace {
+/**
+ * @param validationOutput Output map to be populated with any errors
+ * @param ws An input workspace to verify
+ * @param minIndex Minimum index of range to sum
+ * @param maxIndex Mmaximum index of range to sum
+ * @param indices A list of indices to sum
+ */
+bool validateSingleMatrixWorkspace(
+    std::map<std::string, std::string> &validationOutput,
+    const MatrixWorkspace &ws, const int minIndex, const int maxIndex,
+    const std::vector<int> &indices) {
+  bool success(true);
+  const int numSpectra = static_cast<int>(ws.getNumberHistograms());
+  // check StartWorkSpaceIndex,  >=0 done by validator
+  if (minIndex >= numSpectra) {
+    validationOutput["StartWorkspaceIndex"] =
+        "Selected minimum workspace index is greater than available "
+        "spectra.";
+    success = false;
+  }
+  // check EndWorkspaceIndex in range
+  if (maxIndex != EMPTY_INT()) {
+    // check EndWorkspaceIndex in range
+    if (maxIndex >= numSpectra) {
+      validationOutput["EndWorkspaceIndex"] =
+          "Selected maximum workspace index is greater than available "
+          "spectra.";
+      success = false;
+      // check StartWorkspaceIndex < EndWorkspaceIndex
+    }
+  }
+  // check ListOfWorkspaceIndices in range
+  for (const auto index : indices) {
+    if ((index >= numSpectra) || (index < 0)) {
+      validationOutput["ListOfWorkspaceIndices"] =
+          "One or more indices out of range of available spectra.";
+      success = false;
+      break;
+    }
+  }
+  return success;
+}
+
+/**
+* @param validationOutput Output map to be populated with any errors
+* @param name A string identifier for an input workspace to verify
+* @param minIndex Minimum index of range to sum
+* @param maxIndex Mmaximum index of range to sum
+* @param indices A list of indices to sum
+*/
+void validateWorkspaceName(std::map<std::string, std::string> &validationOutput,
+                           const std::string &name, const int minIndex,
+                           const int maxIndex,
+                           const std::vector<int> &indices) {
+  const auto &ads = AnalysisDataService::Instance();
+  if (!ads.doesExist(name))
+    return;
+  auto wsGroup = ads.retrieveWS<WorkspaceGroup>(name);
+  if (!wsGroup)
+    return;
+  size_t index = 0;
+  for (const auto &item : *wsGroup) {
+    auto matrixWs = boost::dynamic_pointer_cast<MatrixWorkspace>(item);
+    if (!matrixWs) {
+      validationOutput["InputWorkspace"] =
+          "Input group contains an invalid workspace type at item " +
+          std::to_string(index) + ". All members must be a  MatrixWorkspace";
+      break;
+    }
+    if (!validateSingleMatrixWorkspace(validationOutput, *matrixWs, minIndex,
+                                       maxIndex, indices)) {
+      break;
+    }
+    ++index;
+  }
+}
+}
 
 /** Initialisation method.
  *
@@ -80,50 +160,27 @@ std::map<std::string, std::string> SumSpectra::validateInputs() {
   // create the map
   std::map<std::string, std::string> validationOutput;
 
-  MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
-  const int numSpectra =
-      static_cast<int>(localworkspace->getNumberHistograms());
+  // Non-workspace checks
   const int minIndex = getProperty("StartWorkspaceIndex");
   const int maxIndex = getProperty("EndWorkspaceIndex");
-
-  // check StartWorkSpaceIndex,  >=0 done by validator
-  if (minIndex >= numSpectra) {
-    validationOutput["StartWorkspaceIndex"] =
-        "Selected minimum workspace index is greater than available spectra.";
-  }
-
-  // check EndWorkspaceIndex in range
-  if (maxIndex != EMPTY_INT()) {
-    // check EndWorkspaceIndex in range
-    if (maxIndex >= numSpectra) {
-      validationOutput["EndWorkspaceIndex"] =
-          "Selected maximum workspace index is greater than available spectra.";
-      // check StartWorkspaceIndex < EndWorkspaceIndex
-    } else if (minIndex > maxIndex) {
-      validationOutput["StartWorkspaceIndex"] =
-          "Selected minimum workspace "
-          "index is greater than selected "
-          "maximum workspace index.";
-      validationOutput["EndWorkspaceIndex"] =
-          "Selected maximum workspace index "
-          "is lower than selected minimum "
-          "workspace index.";
+  if (minIndex > maxIndex) {
+    validationOutput["StartWorkspaceIndex"] = "Selected minimum workspace "
+                                              "index is greater than selected "
+                                              "maximum workspace index.";
+    validationOutput["EndWorkspaceIndex"] = "Selected maximum workspace index "
+                                            "is lower than selected minimum "
+                                            "workspace index.";
+  } else {
+    const std::vector<int> indices = getProperty("ListOfWorkspaceIndices");
+    if (MatrixWorkspace_const_sptr singleWs = getProperty("InputWorkspace")) {
+      validateSingleMatrixWorkspace(validationOutput, *singleWs, minIndex,
+                                    maxIndex, indices);
+    } else {
+      validateWorkspaceName(validationOutput,
+                            getPropertyValue("InputWorkspace"), minIndex,
+                            maxIndex, indices);
     }
   }
-
-  // check ListOfWorkspaceIndices in range
-  const std::vector<int> indices_list = getProperty("ListOfWorkspaceIndices");
-  if (!indices_list.empty()) { // only if specified
-    // indices are assumed to be sorted
-    for (const auto index : indices_list) {
-      if ((index >= numSpectra) || (index < 0)) {
-        validationOutput["ListOfWorkspaceIndices"] =
-            "One or more indices out of range of available spectra.";
-        break;
-      }
-    }
-  }
-
   return validationOutput;
 }
 

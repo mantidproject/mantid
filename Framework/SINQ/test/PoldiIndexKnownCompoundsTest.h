@@ -37,13 +37,13 @@ public:
     /* In this test, peaks from PoldiMockInstrumentHelpers (Silicon)
      * are indexed using theoretical Si-peaks.
      */
-    WorkspaceCreationHelper::storeWS(
-        "measured_SI",
-        PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace());
-    WorkspaceCreationHelper::storeWS(
-        "Si",
+    auto wsMeasuredSi =
+        PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace();
+    WorkspaceCreationHelper::storeWS("measured_SI", wsMeasuredSi);
+    auto wsSi =
         PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon()
-            ->asTableWorkspace());
+            ->asTableWorkspace();
+    WorkspaceCreationHelper::storeWS("Si", wsSi);
 
     std::string outWSName("PoldiIndexKnownCompoundsTest_OutputWS");
 
@@ -669,9 +669,9 @@ private:
   }
 
   void storeRandomWorkspaces(const std::vector<std::string> &wsNames) {
-    for (auto it = wsNames.begin(); it != wsNames.end(); ++it) {
-      WorkspaceCreationHelper::storeWS(
-          *it, WorkspaceCreationHelper::create1DWorkspaceRand(10, true));
+    for (const auto &wsName : wsNames) {
+      auto ws = WorkspaceCreationHelper::create1DWorkspaceRand(10, true);
+      WorkspaceCreationHelper::storeWS(wsName, ws);
     }
   }
 
@@ -684,8 +684,8 @@ private:
   }
 
   void removeRandomWorkspaces(const std::vector<std::string> &wsNames) {
-    for (auto it = wsNames.begin(); it != wsNames.end(); ++it) {
-      WorkspaceCreationHelper::removeWS(*it);
+    for (const auto &wsName : wsNames) {
+      WorkspaceCreationHelper::removeWS(wsName);
     }
   }
 

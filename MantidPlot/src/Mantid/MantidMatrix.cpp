@@ -210,7 +210,7 @@ void MantidMatrix::viewChanged(int index) {
 void MantidMatrix::setup(Mantid::API::MatrixWorkspace_const_sptr ws, int start,
                          int end) {
   if (!ws) {
-    QMessageBox::critical(0, "WorkspaceMatrixModel error",
+    QMessageBox::critical(nullptr, "WorkspaceMatrixModel error",
                           "2D workspace expected.");
     m_rows = 0;
     m_cols = 0;
@@ -417,6 +417,11 @@ void MantidMatrix::copySelection() {
   QString eol = applicationWindow()->endOfLine();
   if (!selModel->hasSelection()) {
     QModelIndex index = selModel->currentIndex();
+    if (!index.isValid()) {
+      // No text boxes were selected. So we cannot copy anything
+      return;
+    }
+
     s = text(index.row(), index.column());
   } else {
     QItemSelection sel = selModel->selection();
@@ -468,8 +473,8 @@ void MantidMatrix::setRange(double min, double max) {
 double **MantidMatrix::allocateMatrixData(int rows, int columns) {
   double **data = (double **)malloc(rows * sizeof(double *));
   if (!data) {
-    QMessageBox::critical(0, tr("MantidPlot") + " - " +
-                                 tr("Memory Allocation Error"),
+    QMessageBox::critical(nullptr, tr("MantidPlot") + " - " +
+                                       tr("Memory Allocation Error"),
                           tr("Not enough memory, operation aborted!"));
     return nullptr;
   }
@@ -481,8 +486,8 @@ double **MantidMatrix::allocateMatrixData(int rows, int columns) {
         free(data[j]);
       free(data);
 
-      QMessageBox::critical(0, tr("MantidPlot") + " - " +
-                                   tr("Memory Allocation Error"),
+      QMessageBox::critical(nullptr, tr("MantidPlot") + " - " +
+                                         tr("Memory Allocation Error"),
                             tr("Not enough memory, operation aborted!"));
       return nullptr;
     }
@@ -736,7 +741,7 @@ void MantidMatrix::attachMultilayer(MultiLayer *ml) {
 */
 MultiLayer *MantidMatrix::plotGraph2D(GraphOptions::CurveType type) {
   if (numRows() == 1) {
-    QMessageBox::critical(0, "MantidPlot - Error",
+    QMessageBox::critical(nullptr, "MantidPlot - Error",
                           "Cannot plot a workspace with only one spectrum.");
     return nullptr;
   }

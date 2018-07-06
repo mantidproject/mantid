@@ -2,9 +2,9 @@
 #define MANTID_ALGORITHMS_COMPAREWORKSPACES_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -76,6 +76,9 @@ public:
 
   /// Algorithm's version for identification. @see Algorithm::version
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"CheckWorkspacesMatch", "CompareSampleLogs", "CloneWorkspace"};
+  }
 
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string category() const override { return "Utility\\Workspaces"; }
@@ -110,8 +113,8 @@ private:
 
   void doComparison();
 
-  void doPeaksComparison(API::IPeaksWorkspace_sptr tws1,
-                         API::IPeaksWorkspace_sptr tws2);
+  void doPeaksComparison(DataObjects::PeaksWorkspace_sptr tws1,
+                         DataObjects::PeaksWorkspace_sptr tws2);
   void doTableComparison(API::ITableWorkspace_const_sptr tws1,
                          API::ITableWorkspace_const_sptr tws2);
   void doMDComparison(API::Workspace_sptr w1, API::Workspace_sptr w2);

@@ -83,7 +83,7 @@ public:
   //--------------------------------------------------------------------------------------
   void test_ctor_with_null_box_fails() {
     using boxit_t = MDBoxIterator<MDLeanEvent<1>, 1>;
-    TS_ASSERT_THROWS_ANYTHING(new boxit_t(NULL, 10, false););
+    TS_ASSERT_THROWS_ANYTHING(new boxit_t(nullptr, 10, false););
   }
 
   //--------------------------------------------------------------------------------------

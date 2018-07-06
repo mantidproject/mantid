@@ -60,6 +60,7 @@ public:
   }
 
   int version() const override { return 1; }
+
   const std::string category() const override {
     return "CorrectionFunctions\\InstrumentCorrections";
   }

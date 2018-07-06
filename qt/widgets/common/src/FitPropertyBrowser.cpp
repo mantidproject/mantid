@@ -21,6 +21,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FilenameDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FormulaDialogEditor.h"
@@ -47,12 +48,15 @@
 #include <QVBoxLayout>
 
 #include <algorithm>
-#include <iostream>
 
 namespace MantidQt {
 using API::MantidDesktopServices;
 
 namespace MantidWidgets {
+
+namespace {
+Mantid::Kernel::Logger g_log("FitPropertyBrowser");
+}
 
 /**
  * Constructor
@@ -915,7 +919,6 @@ void FitPropertyBrowser::popupMenu(const QPoint &) {
     if (isType) {
       isParameter = false;
     }
-
     if (isTie) {
       action = new QAction("Remove", this);
       connect(action, SIGNAL(triggered()), this, SLOT(deleteTie()));
@@ -1209,21 +1212,24 @@ void FitPropertyBrowser::populateFunctionNames() {
   m_registeredBackgrounds.clear();
   m_registeredOther.clear();
 
-  for (size_t i = 0; i < names.size(); i++) {
-    std::string fnName = names[i];
-    QString qfnName = QString::fromStdString(fnName);
-    if (qfnName == "MultiBG")
+  const auto &functionFactory = Mantid::API::FunctionFactory::Instance();
+  for (const auto &fnName : names) {
+    if (fnName == "MultiBG")
       continue;
-
-    auto f = Mantid::API::FunctionFactory::Instance().createFunction(fnName);
+    Mantid::API::IFunction_sptr function;
+    try {
+      function = functionFactory.createFunction(fnName);
+    } catch (std::exception &exc) {
+      g_log.warning() << "Unable to create " << fnName << ": " << exc.what()
+                      << "\n";
+      continue;
+    }
+    QString qfnName = QString::fromStdString(fnName);
     m_registeredFunctions << qfnName;
-    Mantid::API::IPeakFunction *pf =
-        dynamic_cast<Mantid::API::IPeakFunction *>(f.get());
-    // Mantid::API::CompositeFunction* cf =
-    // dynamic_cast<Mantid::API::CompositeFunction*>(f.get());
-    if (pf) {
+    if (dynamic_cast<Mantid::API::IPeakFunction *>(function.get())) {
       m_registeredPeaks << qfnName;
-    } else if (dynamic_cast<Mantid::API::IBackgroundFunction *>(f.get())) {
+    } else if (dynamic_cast<Mantid::API::IBackgroundFunction *>(
+                   function.get())) {
       m_registeredBackgrounds << qfnName;
     } else {
       m_registeredOther << qfnName;
@@ -1257,6 +1263,7 @@ void FitPropertyBrowser::enumChanged(QtProperty *prop) {
     if (f)
       setCurrentFunction(f);
     emit functionChanged();
+
   } else if (prop == m_minimizer) {
     minimizerChanged();
   } else if (prop == m_evaluationType) {
@@ -1432,7 +1439,8 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
       tie->set(str.toStdString());
       h->addTie(parName + "=" + str);
     } catch (...) {
-      std::cerr << "Failed\n";
+      g_log.warning() << "Failed to update tie on "
+                      << parName.toLatin1().constData() << "\n";
     }
     delete tie;
   } else if (getHandler()->setAttribute(
@@ -1784,8 +1792,8 @@ void FitPropertyBrowser::postDeleteHandle(const std::string &wsName) {
  */
 bool FitPropertyBrowser::isWorkspaceValid(
     Mantid::API::Workspace_sptr ws) const {
-  return (dynamic_cast<Mantid::API::MatrixWorkspace *>(ws.get()) != 0 ||
-          dynamic_cast<Mantid::API::ITableWorkspace *>(ws.get()) != 0);
+  return (dynamic_cast<Mantid::API::MatrixWorkspace *>(ws.get()) != nullptr ||
+          dynamic_cast<Mantid::API::ITableWorkspace *>(ws.get()) != nullptr);
 }
 
 bool FitPropertyBrowser::isWorkspaceAGroup() const {

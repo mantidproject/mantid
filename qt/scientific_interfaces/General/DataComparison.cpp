@@ -108,7 +108,7 @@ void DataComparison::addData() {
   m_uiForm.twCurrentData->blockSignals(true);
 
   // If this is a WorkspaceGroup then add all items
-  if (wsGroup != NULL) {
+  if (wsGroup != nullptr) {
     size_t numWs = wsGroup->size();
     for (size_t wsIdx = 0; wsIdx < numWs; wsIdx++) {
       addDataItem(wsGroup->getItem(wsIdx));
@@ -278,7 +278,7 @@ void DataComparison::removeSelectedData() {
 
     // Detach the old curve from the plot if it exists
     if (m_curves.contains(workspaceName))
-      m_curves[workspaceName]->attach(NULL);
+      m_curves[workspaceName]->attach(nullptr);
 
     selectedItems = m_uiForm.twCurrentData->selectedItems();
   }
@@ -304,7 +304,7 @@ void DataComparison::removeAllData() {
 
     // Detach the old curve from the plot if it exists
     if (m_curves.contains(workspaceName))
-      m_curves[workspaceName]->attach(NULL);
+      m_curves[workspaceName]->attach(nullptr);
   }
 
   // Replot the workspaces
@@ -353,7 +353,7 @@ void DataComparison::plotWorkspaces() {
 
       // Detech the curve from the plot
       if (m_curves.contains(workspaceName))
-        m_curves[workspaceName]->attach(NULL);
+        m_curves[workspaceName]->attach(nullptr);
 
       continue;
     }
@@ -369,7 +369,7 @@ void DataComparison::plotWorkspaces() {
 
     // Detach the old curve from the plot if it exists
     if (m_curves.contains(workspaceName))
-      m_curves[workspaceName]->attach(NULL);
+      m_curves[workspaceName]->attach(nullptr);
 
     QComboBox *colourSelector = dynamic_cast<QComboBox *>(
         m_uiForm.twCurrentData->cellWidget(row, COLOUR));
@@ -452,8 +452,8 @@ void DataComparison::workspaceIndexChanged() {
  */
 void DataComparison::plotDiffWorkspace() {
   // Detach old curve
-  if (m_diffCurve != NULL)
-    m_diffCurve->attach(NULL);
+  if (m_diffCurve != nullptr)
+    m_diffCurve->attach(nullptr);
 
   // Do nothing if there are not two workspaces
   if (m_diffWorkspaceNames.first.isEmpty() ||
@@ -682,7 +682,7 @@ void DataComparison::preDeleteHandle(
 
   // Detach the old curve from the plot if it exists
   if (m_curves.contains(oldWsName))
-    m_curves[oldWsName]->attach(NULL);
+    m_curves[oldWsName]->attach(nullptr);
 
   // Update the plot
   plotWorkspaces();
@@ -713,7 +713,7 @@ void DataComparison::renameHandle(const std::string &oldName,
 
   // Detach the old curve from the plot if it exists
   if (m_curves.contains(oldWsName))
-    m_curves[oldWsName]->attach(NULL);
+    m_curves[oldWsName]->attach(nullptr);
 
   // Update the plot
   plotWorkspaces();

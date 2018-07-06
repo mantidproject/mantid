@@ -54,6 +54,7 @@ set ( SRC_FILES
 	src/CatalogSelector.cpp
 	src/CheckboxHeader.cpp
 	src/DataProcessorUI/AbstractTreeModel.cpp
+	src/DataProcessorUI/TreeData.cpp
 	src/DataProcessorUI/GenerateNotebook.cpp
 	src/DataProcessorUI/OneLevelTreeManager.cpp
         src/DataProcessorUI/OptionsMap.cpp
@@ -77,6 +78,22 @@ set ( SRC_FILES
 	src/DataProcessorUI/QDataProcessorWidget.cpp
 	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
 	src/DataProcessorUI/VectorString.cpp
+  src/Batch/RowLocation.cpp
+  src/Batch/RowLocationAdapter.cpp
+  src/Batch/RowPredicate.cpp
+  src/Batch/Row.cpp
+  src/Batch/Cell.cpp
+  src/Batch/CellStandardItem.cpp
+  src/Batch/ExtractSubtrees.cpp
+  src/Batch/FindSubtreeRoots.cpp
+  src/Batch/JobTreeView.cpp
+  src/Batch/JobTreeViewSignalAdapter.cpp
+  src/Batch/QtStandardItemTreeAdapter.cpp
+  src/Batch/FilteredTreeModel.cpp
+  src/Batch/QtBasicNavigation.cpp
+  src/Batch/QtTreeCursorNavigation.cpp
+  src/Batch/CellDelegate.cpp
+  src/Batch/BuildSubtreeItems.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
 	src/DoubleSpinBox.cpp
@@ -107,6 +124,7 @@ set ( SRC_FILES
 	src/MuonFunctionBrowser.cpp
 	src/PeriodicTableWidget.cpp
 	src/ProcessingAlgoWidget.cpp
+        src/ProgressableView.cpp
   src/ProjectSavePresenter.cpp
   src/ProjectSaveModel.cpp
 	src/PropertyHandler.cpp
@@ -176,6 +194,8 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/SelectionNotificationService.h
   inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
   inc/MantidQtWidgets/Common/CheckboxHeader.h
+  inc/MantidQtWidgets/Common/Batch/JobTreeView.h
+  inc/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h
@@ -357,7 +377,6 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/ProgressPresenter.h
   inc/MantidQtWidgets/Common/ProjectSavePresenter.h
   inc/MantidQtWidgets/Common/ProjectSaveModel.h
-  inc/MantidQtWidgets/Common/ProgressableView.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ViewNotifiable.h
@@ -386,6 +405,21 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
   inc/MantidQtWidgets/Common/FindFilesWorker.h
+  inc/MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h
+  inc/MantidQtWidgets/Common/Batch/QtBasicNavigation.h
+  inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h
+  inc/MantidQtWidgets/Common/Batch/StrictQModelIndices.h
+  inc/MantidQtWidgets/Common/Batch/FilteredTreeModel.h
+  inc/MantidQtWidgets/Common/Batch/RowLocation.h
+  inc/MantidQtWidgets/Common/Batch/RowPredicate.h
+  inc/MantidQtWidgets/Common/Batch/RowLocationAdapter.h
+  inc/MantidQtWidgets/Common/Batch/Row.h
+  inc/MantidQtWidgets/Common/Batch/Cell.h
+  inc/MantidQtWidgets/Common/Batch/CellStandardItem.h
+  inc/MantidQtWidgets/Common/Batch/CellDelegate.h
+  inc/MantidQtWidgets/Common/Batch/ExtractSubtrees.h
+  inc/MantidQtWidgets/Common/Batch/FindSubtreeRoots.h
+  inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h
 )
 
 set ( UI_FILES
@@ -531,9 +565,17 @@ set( TEST_FILES
   test/DataProcessorUI/TwoLevelTreeManagerTest.h
   test/DataProcessorUI/WhiteListTest.h
   test/DataProcessorUI/GenericDataProcessorPresenterTest.h
+
+  test/Batch/QtAdaptedModelTest.h
+  test/Batch/RowLocationTest.h
+  test/Batch/FindSubtreeRootsTest.h
+  test/Batch/ExtractSubtreesTest.h
+  test/Batch/BuildSubtreeItemsTest.h
+
   test/ParseKeyValueStringTest.h
   test/DataProcessorUI/QOneLevelTreeModelTest.h
   test/DataProcessorUI/QTwoLevelTreeModelTest.h
+  test/ProgressableViewTest.h
   test/ProjectSaveModelTest.h
   test/ProjectSavePresenterTest.h
   test/WorkspacePresenter/ADSAdapterTest.h

@@ -2,6 +2,7 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWPRESENTER_H
 
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 #include <string>
 
@@ -39,15 +40,19 @@ class IReflMainWindowPresenter {
 public:
   /// Destructor
   virtual ~IReflMainWindowPresenter(){};
-  enum class Flag {
-    ConfirmReductionPausedFlag,
-    ConfirmReductionResumedFlag,
-    HelpPressed
-  };
+  enum class Flag { HelpPressed };
 
   virtual void notify(Flag flag) = 0;
   virtual void notifyReductionPaused(int group) = 0;
   virtual void notifyReductionResumed(int group) = 0;
+
+  virtual void completedRowReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) = 0;
+
+  virtual void completedGroupReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) = 0;
 
   /// Transmission runs for a specific run angle
   virtual MantidWidgets::DataProcessor::OptionsQMap
@@ -75,8 +80,10 @@ public:
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
   /// Set the instrument name
   virtual void setInstrumentName(const std::string &instName) const = 0;
-  /// Data processing check
-  virtual bool checkIfProcessing() const = 0;
+  /// Data processing check for all groups
+  virtual bool isProcessing() const = 0;
+  /// Data processing check for a specific group
+  virtual bool isProcessing(int group) const = 0;
 
   virtual void settingsChanged(int group) = 0;
 };

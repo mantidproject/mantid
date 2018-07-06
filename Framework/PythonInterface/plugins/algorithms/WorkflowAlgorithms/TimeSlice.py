@@ -60,6 +60,9 @@ class TimeSlice(PythonAlgorithm):
     def summary(self):
         return 'Performa an integration on a raw file over a specified time of flight range'
 
+    def seeAlso(self):
+        return [ "Integration" ]
+
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files')

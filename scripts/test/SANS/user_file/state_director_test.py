@@ -6,11 +6,12 @@ import mantid
 
 from sans.user_file.state_director import StateDirectorISIS
 from sans.common.enums import (SANSFacility, ISISReductionMode, RangeStepType, RebinType, DataType, FitType,
-                               DetectorType, SampleShape)
+                               DetectorType, SampleShape, SANSInstrument)
 from sans.common.configurations import Configurations
 from sans.state.data import get_data_builder
 
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
+from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 # -----------------------------------------------------------------
@@ -72,8 +73,8 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
 
     def _assert_wavelength(self, state):
         wavelength = state.wavelength
-        self.assertTrue(wavelength.wavelength_low == 1.5)
-        self.assertTrue(wavelength.wavelength_high == 12.5)
+        self.assertTrue(wavelength.wavelength_low == [1.5])
+        self.assertTrue(wavelength.wavelength_high == [12.5])
         self.assertTrue(wavelength.wavelength_step == 0.125)
         self.assertTrue(wavelength.wavelength_step_type is RangeStepType.Lin)
 
@@ -101,8 +102,8 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertTrue(normalize_to_monitor.prompt_peak_correction_min == 1000)
         self.assertTrue(normalize_to_monitor.prompt_peak_correction_max == 2000)
         self.assertTrue(normalize_to_monitor.rebin_type is RebinType.InterpolatingRebin)
-        self.assertTrue(normalize_to_monitor.wavelength_low == 1.5)
-        self.assertTrue(normalize_to_monitor.wavelength_high == 12.5)
+        self.assertTrue(normalize_to_monitor.wavelength_low == [1.5])
+        self.assertTrue(normalize_to_monitor.wavelength_high == [12.5])
         self.assertTrue(normalize_to_monitor.wavelength_step == 0.125)
         self.assertTrue(normalize_to_monitor.wavelength_step_type is RangeStepType.Lin)
         self.assertTrue(normalize_to_monitor.background_TOF_general_start == 3500)
@@ -125,8 +126,8 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertTrue(calculate_transmission.transmission_mask_files == ["test3.xml", "test4.xml"])
         self.assertTrue(calculate_transmission.transmission_monitor == 4)
         self.assertTrue(calculate_transmission.rebin_type is RebinType.InterpolatingRebin)
-        self.assertTrue(calculate_transmission.wavelength_low == 1.5)
-        self.assertTrue(calculate_transmission.wavelength_high == 12.5)
+        self.assertTrue(calculate_transmission.wavelength_low == [1.5])
+        self.assertTrue(calculate_transmission.wavelength_high == [12.5])
         self.assertTrue(calculate_transmission.wavelength_step == 0.125)
         self.assertTrue(calculate_transmission.wavelength_step_type is RangeStepType.Lin)
         self.assertFalse(calculate_transmission.use_full_wavelength_range)
@@ -150,12 +151,12 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_low == 1.5)
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_high == 12.5)
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].polynomial_order == 0)
-        self.assertTrue(adjustment.show_transmission == False)
+        self.assertTrue(adjustment.show_transmission)
 
         # Wavelength and Pixel Adjustment
         wavelength_and_pixel_adjustment = adjustment.wavelength_and_pixel_adjustment
-        self.assertTrue(wavelength_and_pixel_adjustment.wavelength_low == 1.5)
-        self.assertTrue(wavelength_and_pixel_adjustment.wavelength_high == 12.5)
+        self.assertTrue(wavelength_and_pixel_adjustment.wavelength_low == [1.5])
+        self.assertTrue(wavelength_and_pixel_adjustment.wavelength_high == [12.5])
         self.assertTrue(wavelength_and_pixel_adjustment.wavelength_step == 0.125)
         self.assertTrue(wavelength_and_pixel_adjustment.wavelength_step_type is RangeStepType.Lin)
         self.assertTrue(wavelength_and_pixel_adjustment.adjustment_files[
@@ -170,12 +171,13 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
 
     def test_state_can_be_created_from_valid_user_file_with_data_information(self):
         # Arrange
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024)
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00022024")
         data_builder.set_sample_scatter_period(3)
         data_state = data_builder.build()
 
-        director = StateDirectorISIS(data_state)
+        director = StateDirectorISIS(data_state, file_information)
         user_file_path = create_user_file(sample_user_file)
 
         director.set_user_file(user_file_path)
@@ -197,12 +199,13 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
 
     def test_stat_can_be_crated_from_valid_user_file_and_later_on_reset(self):
         # Arrange
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024)
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00022024")
         data_builder.set_sample_scatter_period(3)
         data_state = data_builder.build()
 
-        director = StateDirectorISIS(data_state)
+        director = StateDirectorISIS(data_state, file_information)
         user_file_path = create_user_file(sample_user_file)
         director.set_user_file(user_file_path)
 

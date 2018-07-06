@@ -50,6 +50,10 @@ const std::string PAUSE_PROPERTY("pause");
 const std::string SCAN_PROPERTY("scan_index");
 const std::string PROTON_CHARGE_PROPERTY("proton_charge");
 
+// These are names for some string properties (not time series)
+const std::string RUN_TITLE_PROPERTY("run_title");
+const std::string EXPERIMENT_ID_PROPERTY("experiment_identifier");
+
 // Helper function to get a DateAndTime value from an ADARA packet header
 Mantid::Types::Core::DateAndTime
 timeFromPacket(const ADARA::PacketHeader &hdr) {
@@ -1011,8 +1015,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
 
   // Find the process_variables element
   // Note: for now, I'm ignoring the 'device_name' & 'enumeration' elements
-  // because I don't
-  // think I need them
+  // because I don't think I need them
 
   const Poco::XML::Node *node = deviceNode->firstChild();
   while (node && node->nodeName() != "process_variables") {
@@ -1193,6 +1196,97 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
   return false;
 }
 
+/// Parse a Run Information packet
+
+/// Overrides the default function defined in ADARA::Parser and processes
+/// data from ADARA::RunInfoPkt packets.  Specifically, it looks for the
+/// proposal id and run title and stores those values in properties in the
+/// workspace.
+/// @param pkt The packet to be parsed
+/// @return Returns false if there were no problems.  Returns true if there
+/// was an error and packet parsing should be interrupted
+bool SNSLiveEventDataListener::rxPacket(const ADARA::RunInfoPkt &pkt) {
+
+  // RunInfoPkts are mostly just blocks of XML.
+  Poco::XML::DOMParser parser;
+  Poco::AutoPtr<Poco::XML::Document> doc = parser.parseString(pkt.info());
+  const Poco::XML::Node *runInfoNode = doc->firstChild();
+
+  // The root of the XML should be "runinfo".
+  while (runInfoNode && runInfoNode->nodeName() != "runinfo") {
+    runInfoNode = runInfoNode->nextSibling();
+  }
+
+  if (!runInfoNode) {
+    g_log.error("Run info packet did not contain a 'runinfo' element!!  "
+                "This should never happen!");
+    return false;
+  }
+
+  // The two elements we're looking for (proposal_id and run_title) should
+  // be children of the runInfoNode.  (Note that run_number is also in there,
+  // but we already get that from the RunStatusPkt.)
+  std::string proposalID;
+  std::string runTitle;
+  const Poco::XML::Node *node = runInfoNode->firstChild();
+  while (node) {
+    // iterate through each individual variable...
+    if (node->nodeName() == "proposal_id") {
+      const Poco::XML::Node *textElement = node->firstChild();
+      if (textElement) {
+        proposalID = textElement->nodeValue();
+      }
+    } else if (node->nodeName() == "run_title") {
+      const Poco::XML::Node *textElement = node->firstChild();
+      if (textElement) {
+        runTitle = textElement->nodeValue();
+      }
+    }
+
+    // If we've got everything we need, we can break out of the while loop
+    if (proposalID.length() && runTitle.length()) {
+      break;
+    }
+
+    node = node->nextSibling();
+  }
+
+  if (proposalID.length()) {
+    Property *prop =
+        m_eventBuffer->mutableRun().getProperty(EXPERIMENT_ID_PROPERTY);
+
+    // Sanity check: We're likely to get multiple RunInfo packets in a
+    // run, but the values shouldn't change mid-run...
+    std::string prevPropVal = prop->value();
+    if (prevPropVal.length() && prevPropVal != proposalID) {
+      g_log.error("Proposal ID in the current run info packet has changed!  "
+                  "This shouldn't happen!  (Keeping new ID value.)");
+    }
+    prop->setValue(proposalID);
+  } else {
+    g_log.warning("Run info packet did not contain a proposal ID.  "
+                  "Property will be empty.");
+  }
+
+  if (runTitle.length()) {
+    Property *prop =
+        m_eventBuffer->mutableRun().getProperty(RUN_TITLE_PROPERTY);
+
+    // Sanity check
+    std::string prevPropVal = prop->value();
+    if (prevPropVal.length() && prevPropVal != runTitle) {
+      g_log.error("The run title in the current run info packet has changed!"
+                  "  This shouldn't happen!  (Keeping new title value.)");
+    }
+    prop->setValue(runTitle);
+  } else {
+    g_log.warning("Run info packet did not contain a run title.  "
+                  "Property will be empty.");
+  }
+
+  return false;
+}
+
 /// First part of the workspace initialization
 
 /// Performs various initialization steps that can (and, in some
@@ -1212,6 +1306,12 @@ void SNSLiveEventDataListener::initWorkspacePart1() {
   m_eventBuffer->mutableRun().addLogData(prop);
   prop = new TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY);
   prop->setUnits("picoCoulomb");
+  m_eventBuffer->mutableRun().addLogData(prop);
+
+  // Same for a couple of other properties (that are not time series)
+  prop = new PropertyWithValue<std::string>(RUN_TITLE_PROPERTY, "");
+  m_eventBuffer->mutableRun().addLogData(prop);
+  prop = new PropertyWithValue<std::string>(EXPERIMENT_ID_PROPERTY, "");
   m_eventBuffer->mutableRun().addLogData(prop);
 }
 

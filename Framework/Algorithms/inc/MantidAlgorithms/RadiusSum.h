@@ -46,6 +46,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"RingProfile", "RadiusSum"};
+  }
   const std::string category() const override;
 
   static bool inputWorkspaceHasInstrumentAssociated(API::MatrixWorkspace_sptr);

@@ -90,15 +90,14 @@ public:
   }
 
   void tearDown() override {
-    for (size_t i = 0; i < data.size(); i++) {
-      delete data[i];
-      data[i] = NULL;
+    for (auto &item : data) {
+      delete item;
     }
 
-    for (size_t i = 0; i < bigData.size(); i++) {
-      delete bigData[i];
-      bigData[i] = NULL;
+    for (auto &bigItem : bigData) {
+      delete bigItem;
     }
+
     ISaveableTester::fakeFile = "";
   }
   void testIsaveable() {
@@ -435,9 +434,9 @@ public:
   void test_smallCache_writeBuffer() {
     CPUTimer tim;
     DiskBuffer dbuf(3);
-    for (size_t i = 0; i < data.size(); i++) {
-      dbuf.toWrite(data[i]);
-      data[i]->setBusy(false);
+    for (auto &i : data) {
+      dbuf.toWrite(i);
+      i->setBusy(false);
     }
     std::cout << " Elapsed : " << tim << " to load " << num << " into MRU.\n";
   }
@@ -445,13 +444,13 @@ public:
   void test_smallCache_no_writeBuffer() {
     CPUTimer tim;
     DiskBuffer dbuf(0);
-    for (size_t i = 0; i < data.size(); i++) {
-      data[i]->setBusy(true); // Items won't do any real saving
+    for (auto &i : data) {
+      i->setBusy(true); // Items won't do any real saving
     }
 
-    for (int i = 0; i < int(data.size()); i++) {
-      dbuf.toWrite(data[i]);
-      data[i]->setBusy(false);
+    for (auto &i : data) {
+      dbuf.toWrite(i);
+      i->setBusy(false);
     }
     std::cout << " Elapsed : " << tim << " to load " << num
               << " into MRU (no write cache).\n";
@@ -460,9 +459,9 @@ public:
   void test_largeCache_writeBuffer() {
     CPUTimer tim;
     DiskBuffer dbuf(1000);
-    for (int i = 0; i < int(data.size()); i++) {
-      dbuf.toWrite(data[i]);
-      data[i]->setBusy(false);
+    for (auto &i : data) {
+      dbuf.toWrite(i);
+      i->setBusy(false);
     }
     std::cout << tim << " to load " << num << " into MRU.\n";
   }
@@ -470,9 +469,9 @@ public:
   void test_largeCache_noWriteBuffer() {
     CPUTimer tim;
     DiskBuffer dbuf(0);
-    for (int i = 0; i < int(data.size()); i++) {
-      dbuf.toWrite(data[i]);
-      data[i]->setBusy(false);
+    for (auto &i : data) {
+      dbuf.toWrite(i);
+      i->setBusy(false);
     }
     std::cout << " Elapsed : " << tim << " to load " << num
               << " into MRU (no write buffer).\n";

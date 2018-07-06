@@ -38,7 +38,7 @@ vtkStandardNewMacro(vtkMDEWSource)
 }
 
 /// Destructor
-vtkMDEWSource::~vtkMDEWSource() {}
+vtkMDEWSource::~vtkMDEWSource() = default;
 
 /*
  Setter for the recursion depth

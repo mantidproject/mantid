@@ -8,6 +8,9 @@ class EnggFitDIFCFromPeaks(PythonAlgorithm):
     def category(self):
         return "Diffraction\\Engineering;Diffraction\\Fitting"
 
+    def seeAlso(self):
+        return [ "EnggFitPeaks","GSASIIRefineFitPeaks","Fit" ]
+
     def name(self):
         return "EnggFitPeaks"
 

@@ -418,8 +418,8 @@ void RingProfile::processInstrumentRingProfile(
 
     const MantidVec &refY = inputWS->getSpectrum(i).dataY();
     // accumulate the values of this spectrum inside this bin
-    for (size_t sp_ind = 0; sp_ind < refY.size(); sp_ind++)
-      output_bins[bin_n] += refY[sp_ind];
+    for (double sp_ind : refY)
+      output_bins[bin_n] += sp_ind;
   }
 }
 

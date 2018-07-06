@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="D2B" valid-from="2018-03-01 23:59:59">
+	<component-link name="D2B">
+
+		<!-- The detector name for the height axis used in SumOverlappingTubes -->
+		<parameter name="detector_for_height_axis" type="string">
+			<value val="tube_1" />
+		</parameter>
+
+		<!-- The flag for mirroring the angles in SumOverlappingTubes -->
+		<parameter name="mirror_scattering_angles" type="bool">
+			<value val="True" />
+	  </parameter>
+
+		<!-- Number of pixels to trim from the top and the bottom of the tubes when
+		calculating the chiˆ2 in the detector efficiencies in case of autoiterations -->
+		<parameter name="pixels_to_trim" type="int">
+			<value val="28" />
+	  </parameter>
+
+		<!-- The chiˆ2/NdoF threshold for termination of autoiterations
+		in detector efficiency calculation -->
+		<parameter name="chi2_ndof" type="float">
+			<value val="0.01" />
+	  </parameter>
+
+		<!-- The central pixel indices of the tubes; these must be rounded!-->
+		<parameter name="tube_centers" type="string">
+			<value val="69,58,65,64,67,61,66,66,63,68,63,67,69,67,65,69,
+									65,66,65,67,63,69,68,63,64,67,66,62,66,63,65,65,
+									65,64,63,64,64,65,64,64,64,66,65,65,65,63,65,61,
+									67,62,65,62,63,63,65,64,62,63,69,60,64,63,62,63,
+									65,63,66,62,64,65,66,67,61,66,66,63,65,65,65,63,
+									63,65,66,62,63,63,63,65,64,64,62,64,66,63,65,64,
+									66,63,63,69,62,64,63,64,68,62,64,67,65,63,65,66,
+									64,65,67,63,60,67,63,65,67,63,69,64,66,65,63,67"/>
+		</parameter>
+
+		<!-- Relative 2theta positions of the tubes wrt the last tube -->
+		<parameter name="tube_angles" type="string">
+			<value val="-158.750,-157.500,-156.250,-155.000,-153.750,-152.500,
+								 -151.250,-150.000,-148.750,-147.500,-146.250,-145.000,
+								 -143.750,-142.500,-141.250,-140.000,-138.750,-137.500,
+								 -136.250,-135.000,-133.750,-132.500,-131.262,-130.027,
+								 -128.764,-127.501,-126.262,-124.986,-123.744,-122.488,
+								 -121.250,-119.996,-118.749,-117.503,-116.240,-115.000,
+								 -113.760,-112.510,-111.225,-110.011,-108.726,-107.537,
+								 -106.240,-104.974,-103.739,-102.491,-101.254,-99.9934,
+								 -98.7551,-97.5007,-96.2569,-94.9937,-93.7413,-92.5081,
+								 -91.2396,-89.9824,-88.7602,-87.5170,-86.2329,-84.9932,
+								 -83.7641,-82.5050,-81.2662,-79.9966,-78.7527,-77.5035,
+								 -76.2564,-74.9872,-73.7477,-72.5086,-71.2457,-70.0003,
+								 -68.7467,-67.4861,-66.2499,-65.0244,-63.7557,-62.5025,
+								 -61.2484,-59.9862,-58.7416,-57.4992,-56.2372,-54.9913,
+								 -53.7547,-52.4989,-51.2399,-50.0088,-48.7492,-47.4948,
+								 -46.2517,-45.0034,-43.7366,-42.4932,-41.2465,-39.9866,
+								 -38.7377,-37.5183,-36.2678,-35.0202,-33.7731,-32.4958,
+								 -31.2734,-30.0018,-28.7291,-27.4887,-26.2319,-24.9728,
+								 -23.7554,-22.4771,-21.2376,-20.0052,-18.7470,-17.5007,
+								 -16.2531,-14.9891,-13.7492,-12.5056,-11.2798,-10.0067,
+								 -8.73692,-7.50000,-6.25000,-5.00000,-3.75000,-2.50000,
+								 -1.25000,0.000000"/>
+		</parameter>
+	</component-link>
+</parameter-file>

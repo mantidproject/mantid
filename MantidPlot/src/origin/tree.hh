@@ -713,7 +713,7 @@ typename tree<T, tree_node_allocator>::fixed_depth_iterator tree<T, tree_node_al
 template <class T, class tree_node_allocator>
 typename tree<T, tree_node_allocator>::sibling_iterator tree<T, tree_node_allocator>::begin(const iterator_base& pos) const
 	{
-	assert(pos.node!=0);
+	assert(pos.node!=nullptr);
 	if(pos.node->first_child==nullptr) {
 		return end(pos);
 		}
@@ -764,7 +764,7 @@ template <class T, class tree_node_allocator>
 template <typename iter>
 iter tree<T, tree_node_allocator>::parent(iter position) 
 	{
-	assert(position.node!=0);
+	assert(position.node!=nullptr);
 	return iter(position.node->parent);
 	}
 
@@ -1667,7 +1667,7 @@ template <class T, class tree_node_allocator>
 int tree<T, tree_node_allocator>::depth(const iterator_base& it) 
 	{
 	tree_node* pos=it.node;
-	assert(pos!=0);
+	assert(pos!=nullptr);
 	int ret=0;
 	while(pos->parent!=nullptr) {
 		pos=pos->parent;
@@ -2119,7 +2119,7 @@ tree<T, tree_node_allocator>::pre_order_iterator::pre_order_iterator(const sibli
 template <class T, class tree_node_allocator>
 typename tree<T, tree_node_allocator>::pre_order_iterator& tree<T, tree_node_allocator>::pre_order_iterator::operator++()
 	{
-	assert(this->node!=0);
+	assert(this->node!=nullptr);
 	if(!this->skip_current_children_ && this->node->first_child != nullptr) {
 		this->node=this->node->first_child;
 		}

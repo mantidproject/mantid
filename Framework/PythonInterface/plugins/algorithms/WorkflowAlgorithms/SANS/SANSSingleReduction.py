@@ -5,7 +5,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, Property)
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
-
+from mantid.simpleapi import CloneWorkspace
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.enums import (ReductionMode, DataType, ISISReductionMode)
 from sans.common.general_functions import (create_child_algorithm, does_can_workspace_exist_on_ads)
@@ -126,6 +126,18 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABCanNorm', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can norm output workspace for the high-angle bank, provided there is one.')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceCalculatedTransmission', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                             doc='The calculated transmission workspace')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceUnfittedTransmission', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                             doc='The unfitted transmission workspace')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceCalculatedTransmissionCan', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                             doc='The calculated transmission workspace for the can')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceUnfittedTransmissionCan', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                             doc='The unfitted transmission workspace for the can')
         self.setPropertyGroup("OutputWorkspaceLABCan", 'Can Output')
         self.setPropertyGroup("OutputWorkspaceLABCanCount", 'Can Output')
         self.setPropertyGroup("OutputWorkspaceLABCanNorm", 'Can Output')
@@ -161,19 +173,21 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         # --------------------------------------------------------------------------------------------------------------
         output_bundles = []
         output_parts_bundles = []
+        output_transmission_bundles = []
 
         for reduction_setting_bundle in reduction_setting_bundles:
             progress.report("Running a single reduction ...")
             # We want to make use of optimizations here. If a can workspace has already been reduced with the same can
             # settings and is stored in the ADS, then we should use it (provided the user has optimizations enabled).
             if use_optimizations and reduction_setting_bundle.data_type is DataType.Can:
-                output_bundle, output_parts_bundle = run_optimized_for_can(reduction_alg,
-                                                                           reduction_setting_bundle)
+                output_bundle, output_parts_bundle, output_transmission_bundle = run_optimized_for_can(reduction_alg,
+                                                                                                       reduction_setting_bundle)
             else:
-                output_bundle, output_parts_bundle = run_core_reduction(reduction_alg,
-                                                                        reduction_setting_bundle)
+                output_bundle, output_parts_bundle, output_transmission_bundle = run_core_reduction(reduction_alg,
+                                                                                                    reduction_setting_bundle)
             output_bundles.append(output_bundle)
             output_parts_bundles.append(output_parts_bundle)
+            output_transmission_bundles.append(output_transmission_bundle)
 
         # --------------------------------------------------------------------------------------------------------------
         # Deal with merging
@@ -209,6 +223,9 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         # --------------------------------------------------------------------------------------------------------------
         if use_optimizations:
             self.set_reduced_can_workspace_on_output(output_bundles, output_parts_bundles)
+
+        if state.adjustment.show_transmission:
+            self.set_transmission_workspaces_on_output(output_transmission_bundles)
 
     def validateInputs(self):
         errors = dict()
@@ -375,6 +392,27 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
                     else:
                         raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
                                            " be set with a partial can.".format(reduction_mode))
+
+    def set_transmission_workspaces_on_output(self, transmission_bundles):
+        for transmission_bundle in transmission_bundles:
+
+            calculated_transmission_workspace = transmission_bundle.calculated_transmission_workspace
+            unfitted_transmission_workspace = transmission_bundle.unfitted_transmission_workspace
+            if transmission_bundle.data_type is DataType.Can:
+                if does_can_workspace_exist_on_ads(calculated_transmission_workspace):
+                    # The workspace is cloned here because the transmission runs are diagnostic output so even though
+                    # the values already exist they need to be labelled seperately for each reduction.
+                    calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace, StoreInADS=False)
+                if does_can_workspace_exist_on_ads(unfitted_transmission_workspace):
+                    unfitted_transmission_workspace = CloneWorkspace(unfitted_transmission_workspace, StoreInADS=False)
+                self.setProperty("OutputWorkspaceCalculatedTransmissionCan", calculated_transmission_workspace)
+                self.setProperty("OutputWorkspaceUnfittedTransmissionCan", unfitted_transmission_workspace)
+            elif transmission_bundle.data_type is DataType.Sample:
+                self.setProperty("OutputWorkspaceCalculatedTransmission", calculated_transmission_workspace)
+                self.setProperty("OutputWorkspaceUnfittedTransmission", unfitted_transmission_workspace)
+            else:
+                raise RuntimeError("SANSSingleReduction: The data type {0} should be"
+                                   " sample or can.".format(transmission_bundle.data_type))
 
     def _get_progress(self, number_of_reductions, overall_reduction_mode):
         number_from_merge = 1 if overall_reduction_mode is ReductionMode.Merged else 0

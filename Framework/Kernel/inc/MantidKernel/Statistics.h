@@ -93,6 +93,9 @@ Statistics getStatistics(const std::vector<TYPE> &data,
 /// Return the Z score values for a dataset
 template <typename TYPE>
 std::vector<double> getZscore(const std::vector<TYPE> &data);
+template <typename TYPE>
+std::vector<double> getWeightedZscore(const std::vector<TYPE> &data,
+                                      const std::vector<TYPE> &weights);
 /// Return the modified Z score values for a dataset
 template <typename TYPE>
 std::vector<double> getModifiedZscore(const std::vector<TYPE> &data,

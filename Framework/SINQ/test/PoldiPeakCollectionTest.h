@@ -390,10 +390,10 @@ private:
 
     BraggScatterer_sptr cs = BraggScattererFactory::Instance().createScatterer(
         "IsotropicAtomBraggScatterer",
-        "{\"Element\":\"Cs\",\"Position\":\"0.5,0.5,0.5\",\"U\":\"0.005\"}");
+        R"({"Element":"Cs","Position":"0.5,0.5,0.5","U":"0.005"})");
     BraggScatterer_sptr cl = BraggScattererFactory::Instance().createScatterer(
         "IsotropicAtomBraggScatterer",
-        "{\"Element\":\"Cl\",\"Position\":\"0,0,0\",\"U\":\"0.005\"}");
+        R"({"Element":"Cl","Position":"0,0,0","U":"0.005"})");
 
     CompositeBraggScatterer_sptr atoms = CompositeBraggScatterer::create();
     atoms->addScatterer(cs);

@@ -254,8 +254,8 @@ public:
     AnalysisDataService::Instance().remove("Splitter02");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    for (const auto &outputwsname : outputwsnames) {
+      AnalysisDataService::Instance().remove(outputwsname);
     }
 
     return;
@@ -350,9 +350,8 @@ public:
     AnalysisDataService::Instance().remove("Splitter02");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      std::cout << "Delete output workspace name: " << outputwsnames[i] << "\n";
-      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    for (const auto &outputwsname : outputwsnames) {
+      AnalysisDataService::Instance().remove(outputwsname);
     }
 
     return;
@@ -435,8 +434,8 @@ public:
 
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    for (const auto &outputwsname : outputwsnames) {
+      AnalysisDataService::Instance().remove(outputwsname);
     }
 
     return;
@@ -493,8 +492,8 @@ public:
     // Delete all the workspaces generated here
     AnalysisDataService::Instance().remove("MockDirectEventWS");
     AnalysisDataService::Instance().remove("SplitterTableX");
-    for (size_t i = 0; i < vecwsname.size(); ++i) {
-      AnalysisDataService::Instance().remove(vecwsname[i]);
+    for (const auto &workspaceName : vecwsname) {
+      AnalysisDataService::Instance().remove(workspaceName);
     }
 
     return;
@@ -544,8 +543,8 @@ public:
     AnalysisDataService::Instance().remove("SplitterTableX");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    for (const auto &outputwsname : outputwsnames) {
+      AnalysisDataService::Instance().remove(outputwsname);
     }
 
     return;
@@ -608,8 +607,8 @@ public:
     AnalysisDataService::Instance().remove("MockIndirectEventWS");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    for (const auto &outputwsname : outputwsnames) {
+      AnalysisDataService::Instance().remove(outputwsname);
     }
 
     return;
@@ -633,8 +632,8 @@ public:
    *      events
    *
    * Splitter-log test:
-        979: 0: 0  -  3.5e+07: 0
-        979: 1: 3.5e+07  -  1.95e+08: 1
+        979: 0: 0         -  3.5e+07:  0
+        979: 1: 3.5e+07   -  1.95e+08: 1
         979: 2: 1.95e+08  -  2.65e+08: 2
         979: 3: 2.65e+08  -  3.65e+08: 2
         979: 4: 3.65e+08  -  4.65e+08: 2
@@ -781,10 +780,10 @@ public:
     //  Test the sample logs
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
+    for (const auto &outputwsname : outputwsnames) {
       EventWorkspace_sptr filtered_ws =
           boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-              AnalysisDataService::Instance().retrieve(outputwsnames[i]));
+              AnalysisDataService::Instance().retrieve(outputwsname));
 
       TS_ASSERT(filtered_ws->run().hasProperty("LogA"));
       TS_ASSERT(filtered_ws->run().hasProperty("LogB"));
@@ -805,8 +804,8 @@ public:
     // clean up all the workspaces generated
     AnalysisDataService::Instance().remove("Test10");
     AnalysisDataService::Instance().remove("Splitter10");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    for (const auto &outputwsname : outputwsnames) {
+      AnalysisDataService::Instance().remove(outputwsname);
     }
 
     return;
@@ -977,8 +976,8 @@ public:
     AnalysisDataService::Instance().remove("TableSplitter1");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    for (const auto &outputwsname : outputwsnames) {
+      AnalysisDataService::Instance().remove(outputwsname);
     }
 
     return;
@@ -1033,10 +1032,10 @@ public:
 
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
+    for (const auto &outputwsname : outputwsnames) {
       EventWorkspace_sptr childworkspace =
           boost::dynamic_pointer_cast<EventWorkspace>(
-              AnalysisDataService::Instance().retrieve(outputwsnames[i]));
+              AnalysisDataService::Instance().retrieve(outputwsname));
       TS_ASSERT(childworkspace);
       // there is 1 sample logs that is excluded from propagating to the child
       // workspaces. LogB is not TSP, so it won't be excluded even if it is
@@ -1051,8 +1050,8 @@ public:
     // clean workspaces
     AnalysisDataService::Instance().remove("Test12");
     AnalysisDataService::Instance().remove("TableSplitter2");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    for (const auto &outputwsname : outputwsnames) {
+      AnalysisDataService::Instance().remove(outputwsname);
     }
 
     return;
@@ -1177,6 +1176,7 @@ public:
         if (i == 0) {
           pchargeLog->addValue(pulsetime, 1.);
           std::cout << "Add proton charge log " << pulsetime.totalNanoseconds()
+                    << " (" << pulsetime.toSimpleString() << ")"
                     << "\n";
         }
 
@@ -1210,6 +1210,9 @@ public:
       Types::Core::DateAndTime log_time(runstart_i64 + 5 * pulsedt * i);
       int log_value = static_cast<int>(i + 1) * 20;
       int_tsp->addValue(log_time, log_value);
+      std::cout << "Add slow int log (" << i
+                << "): " << log_time.toSimpleString() << ", " << log_value
+                << "\n";
     }
     eventWS->mutableRun().addLogData(int_tsp.release());
 
@@ -1379,15 +1382,11 @@ public:
     Kernel::SplittingInterval interval0(t0, t1, 0);
     splitterws->addSplitter(interval0);
 
-    std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 0 << "\n";
-
     // 2. Splitter 1: 3+ ~ 9+ (second pulse)
     t0 = t1;
     t1 = runstart_i64 + pulsedt + tofdt * 9 + tofdt / 2;
     Kernel::SplittingInterval interval1(t0, t1, 1);
     splitterws->addSplitter(interval1);
-
-    std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 1 << "\n";
 
     // 3. Splitter 2: from 3rd pulse, 0 ~ 6+
     for (size_t i = 2; i < 5; i++) {
@@ -1395,8 +1394,6 @@ public:
       t1 = runstart_i64 + i * pulsedt + 6 * tofdt + tofdt / 2;
       Kernel::SplittingInterval interval2(t0, t1, 2);
       splitterws->addSplitter(interval2);
-      // std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 2 <<
-      // "\n";
     }
 
     return splitterws;
@@ -1458,10 +1455,11 @@ public:
       splitterws->mutableY(0)[iy] = static_cast<double>(index_vec[iy]);
 
     // print out splitters
-    for (size_t ix = 0; ix < size_y; ++ix)
-      std::cout << ix << ": " << splitterws->mutableX(0)[ix] << "  -  "
-                << splitterws->mutableX(0)[ix + 1] << ": "
-                << splitterws->mutableY(0)[ix] << "\n";
+    for (size_t ix = 0; ix < size_y; ++ix) {
+      std::cout << ix << ": " << splitterws->mutableX(0)[ix] << " sec  -  "
+                << splitterws->mutableX(0)[ix + 1] << " sec "
+                << ": " << splitterws->mutableY(0)[ix] << "\n";
+    }
 
     return splitterws;
   }
@@ -1587,8 +1585,7 @@ public:
     // 2. Add rows
     const auto &detectorInfo = inpws->detectorInfo();
     const auto detids = detectorInfo.detectorIDs();
-    for (size_t i = 0; i < detids.size(); ++i) {
-      int detid = detids[i];
+    for (int detid : detids) {
       double factor = 0.75;
       TableRow newrow = corrtable->appendRow();
       newrow << detid << factor;

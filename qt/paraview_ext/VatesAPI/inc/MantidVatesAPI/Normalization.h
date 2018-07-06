@@ -4,6 +4,8 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 
+#include <memory>
+
 namespace Mantid {
 
 namespace API {
@@ -50,7 +52,7 @@ NormFuncIMDNodePtr makeMDEventNormalizationFunction(
 Determine which normalization function will be called on an IMDIterator of an
 IMDWorkspace
 */
-DLLExport Mantid::API::IMDIterator *
+DLLExport std::unique_ptr<Mantid::API::IMDIterator>
 createIteratorWithNormalization(const VisualNormalization normalizationOption,
                                 Mantid::API::IMDWorkspace const *const ws);
 }

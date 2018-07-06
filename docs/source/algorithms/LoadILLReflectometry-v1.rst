@@ -2,14 +2,14 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
 Description
 -----------
 
-Loads data of a Nexus file obtained from an ILL reflectometry instrument `D17 <https://www.ill.eu/instruments-support/instruments-groups/instruments/d17/description/instrument-layout/>`_ or `Figaro <https://www.ill.eu/instruments-support/instruments-groups/instruments/figaro/description/instrument-layout/>`_ into a `Workspace2D <http://www.mantidproject.org/Workspace2D>`_. Both time-of-flight and monochromatic instrument configurations are supported. In general, this loader reads detector and monitor counts and adds x-axis and error values. The output workspace contains histogram data. The x-axis can have units in time-of-flight or wavelength with non-varying and varying bins, respectively. The conversion to wavelength uses the algorithm :ref:`algm-ConvertUnits`.
+Loads data of a Nexus file obtained from an ILL reflectometry instrument `D17 <https://www.ill.eu/instruments-support/instruments-groups/instruments/d17/description/instrument-layout/>`_ or `FIGARO <https://www.ill.eu/instruments-support/instruments-groups/instruments/figaro/description/instrument-layout/>`_ into a `Workspace2D <http://www.mantidproject.org/Workspace2D>`_. Both time-of-flight and monochromatic instrument configurations are supported. In general, this loader reads detector and monitor counts and adds x-axis and error values. The output workspace contains histogram data. The x-axis can have units in time-of-flight or wavelength with non-varying and varying bins, respectively. The conversion to wavelength uses the algorithm :ref:`algm-ConvertUnits`.
 The sample logs associated to the output workspace contain an additional entry, :literal:`Facility`, set to :literal:`ILL`.
 
 Time of flight axis
@@ -28,7 +28,7 @@ This loader will update the detector position from what is defined in the instru
 
 The rotation angle can be one of the following:
 
-* The detector angle in the sample logs. For Figaro this will be calculated from the motor positions. This is the default behavior if neither :literal:`BraggAngle` nor :literal:`DirectBeamPosition` is given.
+* The detector angle in the sample logs. For FIGARO this will be calculated from the motor positions. This is the default behavior if neither :literal:`BraggAngle` nor :literal:`DirectBeamPosition` is given.
 
 * The detector angle calibrated by the direct beam measurement. This behavior is triggered when :literal:`DirectBeamPosition` is given.
 
@@ -61,7 +61,7 @@ The :literal:`BraggAngle` option rotates the detector by an angle :math:`\alpha`
 .. math::
    \alpha = 2 \theta_{user} - \Delta_{R}
 
-where :math:`\Delta_{R}` the beam position offset angle (see below). The angle :math:`\theta_{user}` is :literal:`BraggAngle` in the simple case that the sample is in the origin. If a horizontal sample shift is present (Figaro), the :math:`\theta_{user}` angle is calculated so that the angle to the reflected peak on the detector seen from the shifted sample position is the requested `BraggAngle`.
+where :math:`\Delta_{R}` the beam position offset angle (see below). The angle :math:`\theta_{user}` is :literal:`BraggAngle` in the simple case that the sample is in the origin. If a horizontal sample shift is present (FIGARO), the :math:`\theta_{user}` angle is calculated so that the angle to the reflected peak on the detector seen from the shifted sample position is the requested `BraggAngle`.
 
 Beam position offset
 ####################
@@ -71,7 +71,7 @@ To calculate the angle between the detector centre and the beam, the reflectomet
 .. math::
    \Delta = \tan^{-1} \frac{(i_{centre} - i_{fit}) d_{pix}}{l_{2}},
 
-where :math:`i_{centre}` is the workspace index of the detector centre (127.5 for D17 and Figaro), :math:`i_{fit}` the fitted peak position, :math:`d_{pix}` the physical pixel width and :math:`l_{2}` the sample to detector centre distance.
+where :math:`i_{centre}` is the workspace index of the detector centre (127.5 for D17 and FIGARO), :math:`i_{fit}` the fitted peak position, :math:`d_{pix}` the physical pixel width and :math:`l_{2}` the sample to detector centre distance.
 
 The value of :math:`i_{fit}` can be overridden by the :literal:`BeamCentre` property. This effectively disables the fitting procedure.
 

@@ -7,6 +7,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -581,6 +583,144 @@ public:
     TS_ASSERT_DELTA(outQ->y(0)[7], 2.607359, 1e-6);
   }
 
+  void test_sum_in_q_exclude_partial_bins() {
+    // Sum in Q, single detector
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "1");
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.setProperty("ThetaIn", 25.0);
+    alg.setProperty("IncludePartialBins", "0");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 11);
+
+    TS_ASSERT_DELTA(outLam->x(0)[0], 0.945877, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[3], 5.184485, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 10.835962, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 2.767944, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[3], 2.792424, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 2.787199, 1e-6);
+  }
+
+  void test_sum_in_q_exclude_partial_bins_multiple_detectors() {
+    // Sum in Q, multiple detectors in group
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "1-3");
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.setProperty("ThetaIn", 25.0);
+    alg.setProperty("IncludePartialBins", "0");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 11);
+
+    TS_ASSERT_DELTA(outLam->x(0)[0], 0.957564, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[3], 5.196172, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 10.847649, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 8.458467, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[3], 8.521195, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 8.306563, 1e-6);
+  }
+
+  void test_angle_correction() {
+
+    ReflectometryReductionOne2 alg;
+
+    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    setYValuesToWorkspace(*inputWS);
+
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setPropertyValue("ProcessingInstructions", "1+2");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+
+    double const theta = 22.0;
+    alg.setProperty("ThetaIn", theta);
+    alg.execute();
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+
+    auto const &qX = outQ->x(0);
+    auto const &lamX = outLam->x(0);
+
+    std::vector<double> lamXinv(lamX.size() + 3);
+    std::reverse_copy(lamX.begin(), lamX.end(), lamXinv.begin());
+
+    auto factor = 4.0 * M_PI * sin(theta * M_PI / 180.0);
+    for (size_t i = 0; i < qX.size(); ++i) {
+      TS_ASSERT_DELTA(qX[i], factor / lamXinv[i], 1e-14);
+    }
+
+    auto const &lamY = outLam->y(0);
+    TS_ASSERT_DELTA(lamY[0], 19, 1e-2);
+    TS_ASSERT_DELTA(lamY[6], 49, 1e-2);
+    TS_ASSERT_DELTA(lamY[13], 84, 1e-2);
+
+    auto const &qY = outQ->y(0);
+    TS_ASSERT_DELTA(qY[0], 84, 1e-2);
+    TS_ASSERT_DELTA(qY[6], 54, 1e-2);
+    TS_ASSERT_DELTA(qY[13], 19, 1e-2);
+  }
+
+  void test_no_angle_correction() {
+
+    ReflectometryReductionOne2 alg;
+
+    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    setYValuesToWorkspace(*inputWS);
+
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setPropertyValue("ProcessingInstructions", "2");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+
+    alg.setProperty("ThetaIn", 22.0);
+    alg.execute();
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+
+    auto const &qX = outQ->x(0);
+    auto const &lamX = outLam->x(0);
+
+    std::vector<double> lamXinv(lamX.size() + 3);
+    std::reverse_copy(lamX.begin(), lamX.end(), lamXinv.begin());
+
+    auto factor = 4.0 * M_PI * sin(22.5 * M_PI / 180.0);
+    for (size_t i = 0; i < qX.size(); ++i) {
+      TS_ASSERT_DELTA(qX[i], factor / lamXinv[i], 1e-14);
+    }
+
+    auto const &lamY = outLam->y(0);
+    TS_ASSERT_DELTA(lamY[0], 11, 1e-2);
+    TS_ASSERT_DELTA(lamY[6], 29, 1e-2);
+    TS_ASSERT_DELTA(lamY[13], 50, 1e-2);
+
+    auto const &qY = outQ->y(0);
+    TS_ASSERT_DELTA(qY[0], 50, 1e-2);
+    TS_ASSERT_DELTA(qY[6], 32, 1e-2);
+    TS_ASSERT_DELTA(qY[13], 11, 1e-2);
+  }
+
+  void test_angle_correction_multi_group() {
+    ReflectometryReductionOne2 alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_multiDetectorWS);
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setPropertyValue("ProcessingInstructions", "1+2, 3");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.setProperty("ThetaIn", 22.0);
+    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+  }
+
 private:
   // Do standard algorithm setup
   void setupAlgorithm(ReflectometryReductionOne2 &alg,
@@ -592,6 +732,7 @@ private:
     alg.setProperty("WavelengthMin", wavelengthMin);
     alg.setProperty("WavelengthMax", wavelengthMax);
     alg.setPropertyValue("ProcessingInstructions", procInstr);
+    alg.setPropertyValue("IncludePartialBins", "1");
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
   }
@@ -660,6 +801,15 @@ private:
     TS_ASSERT_EQUALS(outQ->blocksize(), blocksize);
 
     return outQ;
+  }
+
+  void setYValuesToWorkspace(MatrixWorkspace &ws) {
+    for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
+      auto &y = ws.mutableY(i);
+      for (size_t j = 0; j < y.size(); ++j) {
+        y[j] += double(j + 1) * double(i + 1);
+      }
+    }
   }
 };
 

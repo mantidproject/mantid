@@ -49,6 +49,10 @@ public:
   const std::string name() const override { return "MonteCarloAbsorption"; }
   /// Algorithm's version
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"MayersSampleCorrection", "CarpenterSampleCorrection",
+            "PearlMCAbsorption", "VesuvioCalculateMS"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "CorrectionFunctions\\AbsorptionCorrections";

@@ -1,34 +1,30 @@
-.. algorithm::
+﻿.. algorithm::
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
 Description
 -----------
 
-Calculate Muon deadtime for each spectra in a workspace.
+Calculate muon deadtime for each spectra in a workspace, by fitting the **DataFitted** to the function detailed below between the times **FirstGoodData** and **LastGoodData**. Using the equation from :ref:`algm-ApplyDeadTimeCorr` and :math:`N(t) = N_0 {\rm exp} (- t / \tau)` results in;
 
-Define:
+.. math:: M(t)\exp \left( \frac{t}{\tau} \right)=N_0 - M(t)*N_0*\left(\frac{t_{\mathrm{dead}}}{t_{\mathrm{bin}}*F}\right)
 
-| `` ``\ :math:`{\displaystyle{N}}`\ `` = true count``
-| `` ``\ :math:`{\displaystyle{N_0}}`\ `` = true count at time zero``
-| `` ``\ :math:`{\displaystyle{M}}`\ `` = measured count``
-| `` ``\ :math:`{\displaystyle{t_{\mathrm{dead}}}}`\ `` = dead-time``
-| `` ``\ :math:`{\displaystyle{t_{\mathrm{bin}}}}`\ `` = time bin width``
-| `` ``\ :math:`{\displaystyle{t_{\mu}}}`\ `` = Muon decay constant``
-| `` ``\ :math:`{\displaystyle{F}}`\ `` = Number of good frames``
+where,
 
-The formula used to calculate the deadtime for each spectra:
+| :math:`{\displaystyle{N}(t)}` = true count (unused) as a function of time :math:`t`
+| :math:`{\displaystyle{N_0}}` = true count at time zero
+| :math:`{\displaystyle{M}(t)}` = measured count
+| :math:`{\displaystyle{t_{\mathrm{dead}}}}` = deadtime (fitted)
+| :math:`{\displaystyle{t_{\mathrm{bin}}}}` = time bin width
+| :math:`{\displaystyle{\tau}}` = Muon lifetime
+| :math:`{\displaystyle{F}}` = Number of good frames
 
-.. math:: M\exp \left( \frac{t}{t_{\mu}} \right)=N_0 - M*N_0*(\frac{t_{\mathrm{dead}}}{t_{\mathrm{bin}}*F})
-
-where :math:`\displaystyle{M\exp ( t/t_{\mu})}` as a function of
-:math:`{\displaystyle{M}}` is a straight line with an intercept of
-:math:`{\displaystyle{N_0}}` and a slope of
-:math:`{\displaystyle{N_0*(\frac{t_{\mathrm{dead}}}{t_{\mathrm{bin}}*F})}}`.
+Then, :math:`t_{\rm dead}` is found by fitting to the straight line :math:`\displaystyle{M\exp ( t/\tau)}` vs
+:math:`{\displaystyle{M}}`, with intercept :math:`{\displaystyle{N_0}}` and slope :math:`{\displaystyle{N_0*\left(\frac{t_{\mathrm{dead}}}{t_{\mathrm{bin}}*F}\right)}}`.
 
 The number of good frames is obtained from the sample log ``goodfrm`` in the input workspace.
 This log must be present for the algorithm to run successfully.

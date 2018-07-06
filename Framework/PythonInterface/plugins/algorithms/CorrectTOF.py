@@ -21,6 +21,9 @@ class CorrectTOF (PythonAlgorithm):
         """
         return "Workflow\\MLZ\\TOFTOF;Transforms\\Axes"
 
+    def seeAlso(self):
+        return [ "TOFTOFMergeRuns","TOFTOFCropWorkspace" ]
+
     def name(self):
         """ Return name
         """

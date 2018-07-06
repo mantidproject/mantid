@@ -107,13 +107,12 @@ public:
 
     TS_ASSERT_EQUALS(pcomp.type(), "ObjCompAssembly");
   }
-
   void testCreateOutlineCylinder() {
     std::stringstream obj_str;
     obj_str << "<cylinder id=\"stick\">";
     obj_str << "<centre-of-bottom-base ";
-    obj_str << "x=\"0\" y=\"0\" z=\"0\" />";
-    obj_str << "<axis x=\"0\" y=\"1\" z=\"0\" /> ";
+    obj_str << R"(x="0" y="0" z="0" />)";
+    obj_str << R"(<axis x="0" y="1" z="0" /> )";
     obj_str << "<radius val=\"0.1\" />";
     obj_str << "<height val=\"0.2\" />";
     obj_str << "</cylinder>";

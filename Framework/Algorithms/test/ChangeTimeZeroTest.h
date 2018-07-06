@@ -487,11 +487,11 @@ private:
 
     auto logs = ws->run().getLogData();
     // Go over each log and check the times
-    for (auto iter = logs.begin(); iter != logs.end(); ++iter) {
-      if (dynamic_cast<Mantid::Kernel::ITimeSeriesProperty *>(*iter)) {
-        do_check_time_series(*iter, timeShift);
-      } else if (dynamic_cast<PropertyWithValue<std::string> *>(*iter)) {
-        do_check_property_with_string_value(*iter, timeShift);
+    for (auto &log : logs) {
+      if (dynamic_cast<Mantid::Kernel::ITimeSeriesProperty *>(log)) {
+        do_check_time_series(log, timeShift);
+      } else if (dynamic_cast<PropertyWithValue<std::string> *>(log)) {
+        do_check_property_with_string_value(log, timeShift);
       }
     }
 
@@ -509,8 +509,8 @@ private:
     // Iterator over all entries of the time series and check if they are
     // altered
     double secondCounter = timeShift;
-    for (auto it = times.begin(); it != times.end(); ++it) {
-      double secs = DateAndTime::secondsFromDuration(*it - m_startTime);
+    for (auto &time : times) {
+      double secs = DateAndTime::secondsFromDuration(time - m_startTime);
       TSM_ASSERT_DELTA("Time series logs should have shifted times.", secs,
                        secondCounter, 1e-5);
       ++secondCounter;

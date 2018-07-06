@@ -79,7 +79,6 @@ set ( SRC_FILES
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusDescriptor.cpp
-	src/NormalDistribution.cpp
 	src/NullValidator.cpp
 	src/OptionalBool.cpp
 	src/ParaViewVersion.cpp
@@ -220,7 +219,6 @@ set ( INC_FILES
 	inc/MantidKernel/Logger.h
 	inc/MantidKernel/MDAxisValidator.h
 	inc/MantidKernel/MDUnit.h
-	inc/MantidKernel/MDUnitFactory.h
 	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MagneticFormFactorTable.h
 	inc/MantidKernel/MagneticIon.h
@@ -248,7 +246,7 @@ set ( INC_FILES
 	inc/MantidKernel/NetworkProxy.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
-	inc/MantidKernel/NormalDistribution.h
+  inc/MantidKernel/normal_distribution.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/OptionalBool.h
 	inc/MantidKernel/ParaViewVersion.h
@@ -406,7 +404,6 @@ set ( TEST_FILES
 	NearestNeighboursTest.h
 	NeutronAtomTest.h
 	NexusDescriptorTest.h
-	NormalDistributionTest.h
 	NullValidatorTest.h
 	OptionalBoolTest.h
 	ProgressBaseTest.h
@@ -673,7 +670,7 @@ install ( TARGETS Kernel ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 # Create the properties file for the installer
 set ( MANTID_ROOT_BUILD ${MANTID_ROOT} )
-if ( APPLE )
+if ( APPLE AND ENABLE_MANTIDPLOT )
   set ( MANTID_ROOT ../.. )
 else ()
   set ( MANTID_ROOT .. )
@@ -737,7 +734,7 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
   set ( QT_PLUGINS_DIR "${MANTID_ROOT}/plugins/qt%V" )
-  set ( PV_PLUGINS_DIR "${MANTID_ROOT}/${PLUGINS_DIR}/${PVPLUGINS_SUBDIR}/qt%V" )
+  set ( PV_PLUGINS_DIR "${MANTID_ROOT}/plugins/${PVPLUGINS_SUBDIR}/qt%V" )
   set ( COLORMAPS_FOLDER ${MANTID_ROOT}/colormaps )
 endif ()
 

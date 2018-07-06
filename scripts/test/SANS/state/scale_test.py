@@ -5,6 +5,8 @@ import mantid
 from sans.state.scale import get_scale_builder
 from sans.state.data import get_data_builder
 from sans.common.enums import (SANSFacility, SANSInstrument, SampleShape)
+from sans.test_helper.file_information_mock import SANSFileInformationMock
+
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -19,12 +21,14 @@ class StateSliceEventBuilderTest(unittest.TestCase):
     def test_that_slice_event_state_can_be_built(self):
         # Arrange
         facility = SANSFacility.ISIS
-        data_builder = get_data_builder(facility)
+        file_information = SANSFileInformationMock(run_number=74044)
+        data_builder = get_data_builder(facility, file_information)
         data_builder.set_sample_scatter("LOQ74044")
         data_info = data_builder.build()
 
+
         # Act
-        builder = get_scale_builder(data_info)
+        builder = get_scale_builder(data_info, file_information)
         self.assertTrue(builder)
 
         builder.set_scale(1.0)

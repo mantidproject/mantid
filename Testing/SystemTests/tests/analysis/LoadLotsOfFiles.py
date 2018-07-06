@@ -132,6 +132,8 @@ BANNED_REGEXP = [r'SANS2D\d+.log$',
                  r'.*_pulseid\.dat',
                  r'.*\.phonon']
 
+BANNED_DIRS = ["DocTest", "reference"]
+
 # This list stores files that will be loaded first.
 # Implemented as simple solution to avoid failures on
 # WinXP where small files have trouble allocating larger
@@ -144,9 +146,8 @@ PRIORITY_FILES = ['HYS_13658_event.nxs',
 
 
 def useDir(direc):
-    """Only allow directories that aren't test output or
-    reference results."""
-    if "reference" in direc:
+    """Only allow directories that aren't test output in the banned list"""
+    if os.path.basename(direc.rstrip("/").rstrip("\\")) in BANNED_DIRS:
         return False
     if config["defaultsave.directory"] == direc:
         return False

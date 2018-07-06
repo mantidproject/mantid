@@ -55,6 +55,7 @@ class vtkGeometryCacheWriter;
  */
 class MANTID_GEOMETRY_DLL IObject {
 public:
+  virtual ~IObject() = default;
   virtual bool isValid(const Kernel::V3D &) const = 0;
   virtual bool isOnSide(const Kernel::V3D &) const = 0;
   virtual int calcValidType(const Kernel::V3D &Pt,
@@ -95,7 +96,6 @@ public:
   virtual void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                              std::vector<Kernel::V3D> &vectors,
                              double &myradius, double &myheight) const = 0;
-
   // Rendering
   virtual void draw() const = 0;
   virtual void initDraw() const = 0;

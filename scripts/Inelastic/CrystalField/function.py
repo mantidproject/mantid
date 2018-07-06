@@ -352,26 +352,38 @@ class ResolutionModel:
                     to tabulate the functions such that linear interpolation between the
                     tabulated points has this accuracy. If not given a default value is used.
         """
+        errmsg = 'Resolution model must be either a tuple of two arrays, a function, PyChop object or list of one of these'
         self.multi = False
         if hasattr(model, '__call__'):
             self.model = self._makeModel(model, xstart, xend, accuracy)
-            return
+        elif hasattr(model, 'getEi') and hasattr(model, 'getResolution'):
+            Ei = model.getEi()
+            self.model = self._makeModel(model.getResolution, -Ei, 0.9 * Ei, 0.01)
+        elif hasattr(model, 'model'):
+            self.model = model
+        elif isinstance(model, tuple):
+            self._checkModel(model)
+            self.model = model
         elif hasattr(model, '__len__'):
             if len(model) == 0:
                 raise RuntimeError('Resolution model cannot be initialised with an empty iterable %s' %
                                    str(model))
             if hasattr(model[0], '__call__'):
                 self.model = [self._makeModel(m, xstart, xend, accuracy) for m in model]
-                self.multi = True
-                return
+            elif hasattr(model[0], 'model'):
+                self.model = [m.model for m in model]
+            elif hasattr(model[0], 'getEi') and hasattr(model[0], 'getResolution'):
+                Ei = model[0].getEi()
+                self.model = [self._makeModel(m.getResolution, -Ei, 0.9 * Ei, 0.01) for m in model]
             elif isinstance(model[0], tuple):
                 for m in model:
                     self._checkModel(m)
                 self.model = model
-                self.multi = True
-                return
-        self._checkModel(model)
-        self.model = model
+            else:
+                raise RuntimeError(errmsg)
+            self.multi = True
+        else:
+            raise RuntimeError(errmsg)
 
     @property
     def NumberOfSpectra(self):

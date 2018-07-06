@@ -216,7 +216,7 @@ void LoadDialog::tieStaticWidgets(const bool readHistory) {
   }
   tie(m_form.workspaceEdit, "OutputWorkspace", m_form.workspaceLayout,
       readHistory);
-  tie(m_form.fileWidget, "Filename", NULL, readHistory);
+  tie(m_form.fileWidget, "Filename", nullptr, readHistory);
 }
 
 /**
@@ -386,7 +386,7 @@ int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop,
   if (addValidator)
     tie(inputWidget, propName, widgetLayout);
   else
-    tie(inputWidget, propName, NULL);
+    tie(inputWidget, propName, nullptr);
 
   return inputWidget->geometry().height();
 }

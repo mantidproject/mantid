@@ -177,9 +177,9 @@ void IndirectDataReduction::instrumentSetupChanged(
   m_instWorkspace = loadInstrumentIfNotExist(instrumentName.toStdString(),
                                              analyser.toStdString(),
                                              reflection.toStdString());
-  instrumentLoadingDone(m_instWorkspace == NULL);
+  instrumentLoadingDone(m_instWorkspace == nullptr);
 
-  if (m_instWorkspace != NULL)
+  if (m_instWorkspace != nullptr)
     emit newInstrumentConfiguration();
 }
 
@@ -270,14 +270,14 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
   if (instrumentName == "IRIS" && analyser == "fmica")
     analyser = "mica";
 
-  if (m_instWorkspace == NULL) {
+  if (m_instWorkspace == nullptr) {
     g_log.warning("Instrument workspace not loaded");
     return instDetails;
   }
 
   // Get the instrument
   auto instrument = m_instWorkspace->getInstrument();
-  if (instrument == NULL) {
+  if (instrument == nullptr) {
     g_log.warning("Instrument workspace has no instrument");
     return instDetails;
   }
@@ -292,7 +292,7 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
 
       QString value = getInstrumentParameterFrom(instrument, key);
 
-      if (value.isEmpty() && component != NULL)
+      if (value.isEmpty() && component != nullptr)
         value = getInstrumentParameterFrom(component, key);
 
       instDetails[QString::fromStdString(key)] = value;

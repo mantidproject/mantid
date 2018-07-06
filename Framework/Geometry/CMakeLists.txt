@@ -258,7 +258,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Objects/CSGObject.h
 	inc/MantidGeometry/Objects/IObject.h
 	inc/MantidGeometry/Objects/InstrumentRayTracer.h
-    inc/MantidGeometry/Objects/MeshObject.h
+        inc/MantidGeometry/Objects/MeshObject.h
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
@@ -391,7 +391,7 @@ set ( TEST_FILES
 	SampleEnvironmentTest.h
 	ScalarUtilsTest.h
 	ShapeFactoryTest.h
-    	ShapeInfoTest.h
+        ShapeInfoTest.h
 	SpaceGroupFactoryTest.h
 	SpaceGroupTest.h
 	SphereTest.h
@@ -459,7 +459,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Geometry LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}  ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${JSONCPP_LIBRARIES} )
+target_link_libraries ( Geometry LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${JSONCPP_LIBRARIES} )
 
 target_link_libraries ( Geometry LINK_PUBLIC ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES} )
 

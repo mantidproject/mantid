@@ -180,8 +180,8 @@ public:
     TS_ASSERT_EQUALS(ws1->getNumberHistograms(), 2);
     double total;
     total = 0;
-    for (auto it = ws1->readY(0).begin(); it != ws1->readY(0).end(); it++)
-      total += *it;
+    for (double yValue : ws1->readY(0))
+      total += yValue;
     TS_ASSERT_DELTA(total, 100.0, 1e-4);
 
     // Next one adds the histograms together
@@ -191,8 +191,8 @@ public:
 
     // The new total signal is 200.0
     total = 0;
-    for (auto it = ws1->readY(0).begin(); it != ws1->readY(0).end(); it++)
-      total += *it;
+    for (double yValue : ws1->readY(0))
+      total += yValue;
     TS_ASSERT_DELTA(total, 200.0, 1e-4);
 
     TSM_ASSERT("Workspace being added stayed the same pointer", ws1 == ws2);

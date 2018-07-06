@@ -6,7 +6,7 @@
 string ( TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_PACKAGE_NAME )
 
 # define the source generators
-set ( CPACK_SOURCE_GENERATOR TGZ )
+set ( CPACK_SOURCE_GENERATOR "TGZ;TXZ" )
 set ( CPACK_SOURCE_IGNORE_FILES "/\\\\.git*")
 if (CMAKE_BINARY_DIR MATCHES "^${CMAKE_SOURCE_DIR}/.+")
   # In-source build add the binary directory to files to ignore for the tarball
@@ -21,6 +21,7 @@ if ( "${UNIX_DIST}" MATCHES "Ubuntu" )
   find_program (DPKG_CMD dpkg)
   if ( DPKG_CMD )
     set ( CPACK_GENERATOR "DEB" )
+    set ( CPACK_DEBIAN_COMPRESSION_TYPE "xz" )
     execute_process( COMMAND ${DPKG_CMD} --print-architecture
       OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
       OUTPUT_STRIP_TRAILING_WHITESPACE )
@@ -38,6 +39,7 @@ if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "Fedora
     set ( CPACK_GENERATOR "RPM" )
     set ( CPACK_RPM_PACKAGE_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}" )
     set ( CPACK_RPM_PACKAGE_URL "http://www.mantidproject.org" )
+    set ( CPACK_RPM_COMPRESSION_TYPE "xz" )
 
     # determine the distribution number
     if(NOT CPACK_RPM_DIST)

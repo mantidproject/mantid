@@ -1,14 +1,12 @@
 #ifndef MANTID_DATAOBJECTS_FAKEMD_H_
 #define MANTID_DATAOBJECTS_FAKEMD_H_
+
 #include <vector>
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/variate_generator.hpp>
+#include "MantidKernel/uniform_int_distribution.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -69,8 +67,8 @@ private:
   const int m_randomSeed;
   const bool m_randomizeSignal;
   mutable std::vector<detid_t> m_detIDs;
-  boost::mt19937 m_randGen;
-  boost::uniform_int<size_t> m_uniformDist;
+  std::mt19937 m_randGen;
+  Kernel::uniform_int_distribution<size_t> m_uniformDist;
 };
 
 } // namespace DataObjects

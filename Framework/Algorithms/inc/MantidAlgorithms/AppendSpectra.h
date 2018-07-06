@@ -46,6 +46,9 @@ class DLLExport AppendSpectra : public WorkspaceJoiners {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConjoinSpectra"};
+  }
 
 private:
   // Overridden Algorithm methods

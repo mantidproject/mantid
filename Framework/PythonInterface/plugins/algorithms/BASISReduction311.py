@@ -45,6 +45,9 @@ class BASISReduction311(PythonAlgorithm):
     def category(self):
         return "Inelastic\\Reduction"
 
+    def seeAlso(self):
+        return [ "BASISReduction" ]
+
     def name(self):
         return "BASISReduction311"
 

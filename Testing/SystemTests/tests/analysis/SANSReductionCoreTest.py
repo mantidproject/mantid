@@ -13,6 +13,7 @@ from sans.common.enums import (DetectorType, DataType, SANSFacility)
 from sans.user_file.state_director import StateDirectorISIS
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
+from sans.common.file_information import SANSFileInformationFactory
 
 
 # -----------------------------------------------
@@ -73,6 +74,9 @@ class SANSReductionCoreTest(unittest.TestCase):
 
         reduction_core_alg.setProperty("OutputWorkspace", EMPTY_NAME)
 
+        reduction_core_alg.setProperty("CalculatedTransmissionWorkspace", EMPTY_NAME)
+        reduction_core_alg.setProperty("UnfittedTransmissionWorkspace", EMPTY_NAME)
+
         # Act
         reduction_core_alg.execute()
         self.assertTrue(reduction_core_alg.isExecuted())
@@ -131,7 +135,9 @@ class SANSReductionCoreTest(unittest.TestCase):
     def test_that_reduction_core_evaluates_LAB(self):
         # Arrange
         # Build the data information
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("SANS2D00034484")
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00034484")
         data_builder.set_sample_transmission("SANS2D00034505")
         data_builder.set_sample_direct("SANS2D00034461")
@@ -139,7 +145,7 @@ class SANSReductionCoreTest(unittest.TestCase):
         data_state = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_state)
+        user_file_director = StateDirectorISIS(data_state, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
 
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -154,6 +160,7 @@ class SANSReductionCoreTest(unittest.TestCase):
 
         # Construct the final state
         state = user_file_director.construct()
+        state.adjustment.show_transmission = True
 
         # Load the sample workspaces
         workspace, workspace_monitor, transmission_workspace, direct_workspace = self._load_workspace(state)
@@ -162,10 +169,17 @@ class SANSReductionCoreTest(unittest.TestCase):
         reduction_core_alg = self._run_reduction_core(state, workspace, workspace_monitor,
                                                       transmission_workspace, direct_workspace)
         output_workspace = reduction_core_alg.getProperty("OutputWorkspace").value
+        calculated_transmission = reduction_core_alg.getProperty("CalculatedTransmissionWorkspace").value
+        unfitted_transmission = reduction_core_alg.getProperty("UnfittedTransmissionWorkspace").value
 
         # Evaluate it up to a defined point
         reference_file_name = "SANS2D_ws_D20_reference.nxs"
         self._compare_workspace(output_workspace, reference_file_name)
+
+        calculated_transmission_reference_file = "SANS2D_ws_D20_calculated_transmission_reference.nxs"
+        unfitted_transmission_reference_file = "SANS2D_ws_D20_unfitted_transmission_reference.nxs"
+        self._compare_workspace(calculated_transmission, calculated_transmission_reference_file)
+        self._compare_workspace(unfitted_transmission, unfitted_transmission_reference_file)
 
 
 class SANSReductionCoreRunnerTest(stresstesting.MantidStressTest):

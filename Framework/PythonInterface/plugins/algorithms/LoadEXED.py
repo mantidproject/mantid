@@ -24,7 +24,7 @@ class LoadEXED(PythonAlgorithm):
     """
 
     def category(self):
-        return "Inelastic;Diffraction;PythonAlgorithms"
+        return "Inelastic;Diffraction"
 
     def name(self):
         return "LoadEXED"

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -13,7 +13,7 @@ Performs a multiple-file QENS (Quasi-Elastic Neutron Scattering) data reduction 
 It uses internally the :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` algorithm.
 
 Multiple File Reduction
-~~~~~~~~~~~~~~~~~~~~~~~
+#######################
 
 The algorithm is capable of running over multiple files.  Run property
 needs to be specified following the syntax in :py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`.
@@ -24,7 +24,7 @@ ignored.  Use **Added Range** and **Added Stepped Range** instead (see
 ``CalibrationRun``, ``CalibrationBackgroundRun`` and ``AlignmentRun`` all the runs will be automatically summed.
 
 Unmirror Options
-~~~~~~~~~~~~~~~~
+################
 
 **IN16B** can record data with mirror sense, where the spectra for the acceleration and
 deceleration phase of the Doppler drive are recorded separately, or without.
@@ -62,7 +62,7 @@ Options 5 and 7 require the ``AlignmentRun`` (vanadium) to determine the peak po
 Note, that both detector calibration and background subtraction are performed wing-by-wing, i.e. unmirroring is the very final step.
 
 Vanadium Calibration
-~~~~~~~~~~~~~~~~~~~~
+####################
 
 Integration range can be specified to integrate over spectra in ``CalibrationRun``. Note, that before integration, the spectra will be
 centered at 0-energy transfer (see Unmirror Option 6 above) for the calibration run.

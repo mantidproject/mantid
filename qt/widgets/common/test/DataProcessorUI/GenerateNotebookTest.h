@@ -152,10 +152,10 @@ public:
 
     auto notebookLines = splitIntoLines(generatedNotebook);
     const QString result[] = {
-        "{", "   \"metadata\" : {", "      \"name\" : \"Mantid Notebook\"",
+        "{", "   \"metadata\" : {", R"(      "name" : "Mantid Notebook")",
         "   },", "   \"nbformat\" : 3,", "   \"nbformat_minor\" : 0,",
         "   \"worksheets\" : [", "      {", "         \"cells\" : [",
-        "            {", "               \"cell_type\" : \"markdown\",",
+        "            {", R"(               "cell_type" : "markdown",)",
     };
 
     // Check that the first 10 lines are output as expected
@@ -841,7 +841,7 @@ public:
         "'IvsLam_TOF_12345', ScaleFactor = '1', ThetaIn = '0.5')\\n\",");
     TS_ASSERT_EQUALS(notebookLines[48].toStdString(), loadAndReduceString);
 
-    auto postProcessString = QString("               \"input\" : \"\",");
+    auto postProcessString = QString(R"(               "input" : "",)");
     TS_ASSERT_EQUALS(notebookLines[56], postProcessString);
 
     auto groupWorkspacesString = std::string(
@@ -876,7 +876,7 @@ public:
         "'IvsLam_TOF_12346', ScaleFactor = '1', ThetaIn = '1.5')\\n\",";
     TS_ASSERT_EQUALS(notebookLines[77].toStdString(), loadAndReduceString);
 
-    postProcessString = "               \"input\" : \"\",";
+    postProcessString = R"(               "input" : "",)";
     TS_ASSERT_EQUALS(notebookLines[85], postProcessString);
 
     groupWorkspacesString =

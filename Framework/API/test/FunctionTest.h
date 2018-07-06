@@ -411,10 +411,10 @@ public:
     IFunction_sptr funcNonConst;
     TS_ASSERT_THROWS_NOTHING(
         funcConst = manager.getValue<IFunction_const_sptr>(funcName));
-    TS_ASSERT(funcConst != NULL);
+    TS_ASSERT(funcConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(funcNonConst =
                                  manager.getValue<IFunction_sptr>(funcName));
-    TS_ASSERT(funcNonConst != NULL);
+    TS_ASSERT(funcNonConst != nullptr);
     TS_ASSERT_EQUALS(funcConst, funcNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -422,9 +422,9 @@ public:
     IFunction_const_sptr funcCastConst;
     IFunction_sptr funcCastNonConst;
     TS_ASSERT_THROWS_NOTHING(funcCastConst = (IFunction_const_sptr)val);
-    TS_ASSERT(funcCastConst != NULL);
+    TS_ASSERT(funcCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(funcCastNonConst = (IFunction_sptr)val);
-    TS_ASSERT(funcCastNonConst != NULL);
+    TS_ASSERT(funcCastNonConst != nullptr);
     TS_ASSERT_EQUALS(funcCastConst, funcCastNonConst);
   }
 

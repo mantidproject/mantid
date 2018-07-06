@@ -66,7 +66,9 @@ public:
   MOCK_CONST_METHOD0(getDetector, Geometry::IDetector_const_sptr());
   MOCK_CONST_METHOD0(getInstrument, Geometry::Instrument_const_sptr());
   MOCK_CONST_METHOD0(getRunNumber, int());
+  MOCK_CONST_METHOD0(getPeakNumber, int());
   MOCK_METHOD1(setRunNumber, void(int m_RunNumber));
+  MOCK_METHOD1(setPeakNumber, void(int m_PeakNumber));
   MOCK_CONST_METHOD0(getMonitorCount, double());
   MOCK_METHOD1(setMonitorCount, void(double m_MonitorCount));
   MOCK_CONST_METHOD0(getH, double());
@@ -90,6 +92,7 @@ public:
   MOCK_METHOD1(setWavelength, void(double wavelength));
   MOCK_CONST_METHOD0(getWavelength, double());
   MOCK_CONST_METHOD0(getScattering, double());
+  MOCK_CONST_METHOD0(getAzimuthal, double());
   MOCK_CONST_METHOD0(getDSpacing, double());
   MOCK_CONST_METHOD0(getTOF, double());
   MOCK_CONST_METHOD0(getInitialEnergy, double());

@@ -15,6 +15,9 @@ class SavePlot1DAsJson(PythonAlgorithm):
         """
         return "DataHandling\\Plots"
 
+    def seeAlso(self):
+        return [ "SavePlot1D","StringToPng" ]
+
     def name(self):
         """
         """

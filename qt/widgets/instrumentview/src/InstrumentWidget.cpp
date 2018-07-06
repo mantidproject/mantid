@@ -8,6 +8,7 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IMaskWorkspace.h"
@@ -1231,29 +1232,22 @@ void InstrumentWidget::handleWorkspaceReplacement(
       // the same name)
       auto matrixWS =
           boost::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
-      if (!matrixWS) {
+      if (!matrixWS || matrixWS->detectorInfo().size() == 0) {
         emit preDeletingHandle();
         close();
         return;
       }
-      bool sameWS = false;
-      try {
-        sameWS = (matrixWS == m_instrumentActor->getWorkspace());
-      } catch (std::runtime_error &) {
-        // Carry on, sameWS should stay false
-      }
-
       // try to detect if the instrument changes (unlikely if the workspace
       // hasn't, but theoretically possible)
-      bool resetGeometry = matrixWS->getInstrument()->getNumberDetectors() !=
-                           m_instrumentActor->ndetectors();
-
-      // if workspace and instrument don't change keep the scaling
-      if (sameWS && !resetGeometry) {
-        m_instrumentActor->updateColors();
-        setupColorMap();
-        updateInstrumentView();
-      } else {
+      bool resetGeometry =
+          matrixWS->detectorInfo().size() != m_instrumentActor->ndetectors();
+      try {
+        if (matrixWS == m_instrumentActor->getWorkspace() && !resetGeometry) {
+          m_instrumentActor->updateColors();
+          setupColorMap();
+          updateInstrumentView();
+        }
+      } catch (std::runtime_error &) {
         resetInstrument(resetGeometry);
       }
     }

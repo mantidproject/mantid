@@ -424,9 +424,8 @@ public:
 
     // turn the mask list into an array like the Y values
     MantidVec weights(outY.size(), 0);
-    for (MatrixWorkspace::MaskList::const_iterator it = mask.begin();
-         it != mask.end(); ++it) {
-      weights[it->first] = it->second;
+    for (auto it : mask) {
+      weights[it.first] = it.second;
     }
 
     // the degree of masking must be the same as the reduction in the y-value,
@@ -484,9 +483,8 @@ public:
 
     // turn the mask list into an array like the Y values
     MantidVec weights(outY.size(), 0);
-    for (MatrixWorkspace::MaskList::const_iterator it = mask.begin();
-         it != mask.end(); ++it) {
-      weights[it->first] = it->second;
+    for (auto it : mask) {
+      weights[it.first] = it.second;
     }
 
     // the degree of masking must be the same as the reduction in the y-value,

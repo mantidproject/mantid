@@ -9,7 +9,8 @@ from mantid.api import Algorithm
 from sans.gui_logic.presenter.property_manager_service import PropertyManagerService
 from sans.state.data import get_data_builder
 from sans.test_helper.test_director import TestDirector
-from sans.common.enums import SANSFacility
+from sans.common.enums import SANSFacility, SANSInstrument
+from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 class FakeAlgorithm(Algorithm):
@@ -22,7 +23,8 @@ class FakeAlgorithm(Algorithm):
 
 def get_example_state():
     ws_name_sample = "SANS2D00022024"
-    data_builder = get_data_builder(SANSFacility.ISIS)
+    file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024)
+    data_builder = get_data_builder(SANSFacility.ISIS, file_information)
     data_builder.set_sample_scatter(ws_name_sample)
     data = data_builder.build()
 

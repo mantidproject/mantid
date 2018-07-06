@@ -30,6 +30,8 @@ public:
   boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFocusedRun(const RunLabel &runLabel) const override;
 
+  std::vector<RunLabel> getAllRunLabels() const override;
+
   boost::optional<RunLabel> getSelectedRunLabel() const override;
 
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>

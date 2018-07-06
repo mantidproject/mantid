@@ -23,15 +23,16 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
     IReflMainWindowView *view, IReflRunsTabPresenter *runsPresenter,
     IReflEventTabPresenter *eventPresenter,
     IReflSettingsTabPresenter *settingsPresenter,
-    IReflSaveTabPresenter *savePresenter)
+    std::unique_ptr<IReflSaveTabPresenter> savePresenter)
     : m_view(view), m_runsPresenter(runsPresenter),
       m_eventPresenter(eventPresenter), m_settingsPresenter(settingsPresenter),
-      m_savePresenter(savePresenter), m_isProcessing(false) {
+      m_savePresenter(std::move(savePresenter)) {
 
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
   m_savePresenter->acceptMainPresenter(this);
   m_settingsPresenter->acceptMainPresenter(this);
+  m_eventPresenter->acceptMainPresenter(this);
 
   // Trigger the setting of the current instrument name in settings tab
   m_runsPresenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
@@ -41,15 +42,23 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
 */
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
 
+void ReflMainWindowPresenter::completedGroupReductionSuccessfully(
+    GroupData const &group, std::string const &workspaceName) {
+  m_savePresenter->completedGroupReductionSuccessfully(group, workspaceName);
+}
+
+void ReflMainWindowPresenter::completedRowReductionSuccessfully(
+    GroupData const &group, std::string const &workspaceName) {
+  m_savePresenter->completedRowReductionSuccessfully(group, workspaceName);
+}
+
 void ReflMainWindowPresenter::notifyReductionPaused(int group) {
-  m_isProcessing = false;
   m_savePresenter->onAnyReductionPaused();
   m_settingsPresenter->onReductionPaused(group);
   m_eventPresenter->onReductionPaused(group);
 }
 
 void ReflMainWindowPresenter::notifyReductionResumed(int group) {
-  m_isProcessing = true;
   m_savePresenter->onAnyReductionResumed();
   m_settingsPresenter->onReductionResumed(group);
   m_eventPresenter->onReductionResumed(group);
@@ -61,12 +70,6 @@ Used by the view to tell the presenter something has changed
 void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
 
   switch (flag) {
-  case Flag::ConfirmReductionPausedFlag:
-    m_isProcessing = false;
-    break;
-  case Flag::ConfirmReductionResumedFlag:
-    m_isProcessing = true;
-    break;
   case Flag::HelpPressed:
     showHelp();
     break;
@@ -225,9 +228,17 @@ void ReflMainWindowPresenter::setInstrumentName(
 Checks whether or not data is currently being processed in the Runs Tab
 * @return : Bool on whether data is being processed
 */
-bool ReflMainWindowPresenter::checkIfProcessing() const {
+bool ReflMainWindowPresenter::isProcessing() const {
+  return m_runsPresenter->isProcessing();
+}
 
-  return m_isProcessing;
+/**
+Checks whether or not data is currently being processed in the Runs Tab
+for a specific group
+* @return : Bool on whether data is being processed
+*/
+bool ReflMainWindowPresenter::isProcessing(int group) const {
+  return m_runsPresenter->isProcessing(group);
 }
 
 /** Checks for Settings Tab null pointer

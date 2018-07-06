@@ -6,6 +6,7 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <cstdlib>
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
 
@@ -176,6 +177,40 @@ void Goniometer::setRotationAngle(size_t axisnumber, double value) {
   (motors.at(axisnumber)).angle = value; // it will throw out of range exception
                                          // if axisnumber is not in range
   recalculateR();
+}
+
+/**Calculate goniometer for rotation around y-asix for constant wavelength from
+ * Q Sample
+ * @param position :: Q Sample position in reciprocal space
+ * @param wavelength :: wavelength
+*/
+void Goniometer::calcFromQSampleAndWavelength(
+    const Mantid::Kernel::V3D &position, double wavelength) {
+  V3D Q(position);
+  if (Kernel::ConfigService::Instance().getString("Q.convention") ==
+      "Crystallography")
+    Q *= -1;
+  double wv = 2.0 * M_PI / wavelength;
+  double norm_q2 = Q.norm2();
+  double theta = acos(1 - norm_q2 / (2 * wv * wv)); // [0, pi]
+  double phi = asin(-Q[1] / wv * sin(theta));       // [-pi/2, pi/2]
+  V3D Q_lab(-wv * sin(theta) * cos(phi), -wv * sin(theta) * sin(phi),
+            wv * (1 - cos(theta)));
+
+  // Solve to find rotation matrix, assuming only rotation around y-axis
+  // A * X = B
+  Matrix<double> A({Q[0], Q[2], Q[2], -Q[0]}, 2, 2);
+  A.Invert();
+  std::vector<double> B{Q_lab[0], Q_lab[2]};
+  std::vector<double> X = A * B;
+  double rot = atan2(X[1], X[0]);
+
+  Matrix<double> goniometer(3, 3, true);
+  goniometer[0][0] = cos(rot);
+  goniometer[0][2] = sin(rot);
+  goniometer[2][0] = -sin(rot);
+  goniometer[2][2] = cos(rot);
+  setR(goniometer);
 }
 
 /// Get GoniometerAxis obfject using motor number

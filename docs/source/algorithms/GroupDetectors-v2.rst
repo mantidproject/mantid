@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -108,13 +108,23 @@ workspace indices. This can be achieved with the following operators:
   keep indices 1, 2 and 4 only.
 - :literal:`:` indicates a continuous range of indices. For example,
   :literal:`1:5` is the same as :literal:`1,2,3,4,5`.
-- :literal:`+` sums two spectra together. :literal:'7+9' will produce a single
+- :literal:`+` sums two spectra together. :literal:`7+9` will produce a single
   spectra listing the sum of 7 and 9, ignoring any others.
 - :literal:`-` sums a range of spectra together. For example, :literal:`3-8` is
   the same as :literal:`3+4+5+6+7+8`.
 
 One could combine these operations, for example :literal:`10+12,13:89` would
 list the sum of 10 and 12 followed by 13 to 89.
+
+Vertical Axis on Output
+#######################
+
+The OutputWorkspace of this algorithm will always have spectrum numbers as the
+vertical axis, independent of the vertical axis units in InputWorkspace. This
+is because after grouping, the vertical axis can have meaningless values and
+generally, there is not enough information available to rebuild the axis. The
+vertical axis can be manually restored afterwards by e.g.
+:ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>`.
 
 Previous Versions
 -----------------

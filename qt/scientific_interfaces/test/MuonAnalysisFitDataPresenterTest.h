@@ -245,7 +245,7 @@ public:
   void test_setAssignedFirstRun_loadCurrentRun() {
     setupGroupPeriodSelections();
     const boost::optional<QString> currentRunPath{
-        "\\\\musr\\data\\MUSRauto_A.tmp"};
+        R"(\\musr\data\MUSRauto_A.tmp)"};
     const QString wsName("MUSR00061335; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00061335"), QString("MUSR"),
@@ -706,7 +706,7 @@ public:
     const QString wsName("MUSR00061335; Group; fwd; Asym; 1; #1");
     const QStringList wsNameList{wsName};
     const boost::optional<QString> currentRunPath{
-        "\\\\musr\\data\\MUSRauto_A.tmp"};
+        R"(\\musr\data\MUSRauto_A.tmp)"};
 
     // Expect it will update the workspace names
     EXPECT_CALL(*m_fitBrowser, setWorkspaceNames(wsNameList)).Times(1);

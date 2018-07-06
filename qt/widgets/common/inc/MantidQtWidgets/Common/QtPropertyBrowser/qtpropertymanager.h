@@ -1138,7 +1138,7 @@ static void setMinimumValue(
     QtProperty *property, const Value &minVal) {
   void (PropertyManagerPrivate::*setSubPropertyRange)(
       QtProperty *, ValueChangeParameter, ValueChangeParameter,
-      ValueChangeParameter) = 0;
+      ValueChangeParameter) = nullptr;
   setBorderValue<ValueChangeParameter, PropertyManagerPrivate, PropertyManager,
                  Value, PrivateData>(
       manager, managerPrivate, propertyChangedSignal, valueChangedSignal,
@@ -1160,7 +1160,7 @@ static void setMaximumValue(
     QtProperty *property, const Value &maxVal) {
   void (PropertyManagerPrivate::*setSubPropertyRange)(
       QtProperty *, ValueChangeParameter, ValueChangeParameter,
-      ValueChangeParameter) = 0;
+      ValueChangeParameter) = nullptr;
   setBorderValue<ValueChangeParameter, PropertyManagerPrivate, PropertyManager,
                  Value, PrivateData>(
       manager, managerPrivate, propertyChangedSignal, valueChangedSignal,

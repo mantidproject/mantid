@@ -44,7 +44,7 @@ PropertyHandler::~PropertyHandler() {}
 /// overrides virtual init() which is called from IFunction::setHandler(...)
 void PropertyHandler::init() {
   m_browser->m_changeSlotsEnabled = false;
-  if (m_parent == NULL) { // the root composite function
+  if (m_parent == nullptr) { // the root composite function
     m_item = m_browser->m_functionsGroup;
   } else if (m_item == nullptr) {
     if (!m_parent->getHandler()) {
@@ -83,6 +83,7 @@ void PropertyHandler::init() {
     if (m_parent) {
       m_browser->m_enumManager->setEnumNames(m_type,
                                              m_browser->m_registeredFunctions);
+
     } else {
       QStringList functionNames;
       functionNames << "CompositeFunction"; // << "MultiBG";
@@ -92,7 +93,6 @@ void PropertyHandler::init() {
   int itype = m_browser->m_enumManager->enumNames(m_type)
                   .indexOf(QString::fromStdString(m_fun->name()));
   m_browser->m_enumManager->setValue(m_type, itype);
-
   // create worspace and workspace index properties if parent is a MultiBG
   initWorkspace();
 
@@ -538,7 +538,7 @@ PropertyHandler::findCompositeFunction(QtBrowserItem *item) const {
   for (size_t i = 0; i < m_cf->nFunctions(); i++) {
     Mantid::API::CompositeFunction_const_sptr res =
         getHandler(i)->findCompositeFunction(item);
-    if (res != NULL)
+    if (res != nullptr)
       return res;
   }
   return Mantid::API::CompositeFunction_sptr();
@@ -555,7 +555,7 @@ PropertyHandler::findFunction(QtBrowserItem *item) const {
     return Mantid::API::IFunction_sptr();
   for (size_t i = 0; i < m_cf->nFunctions(); i++) {
     Mantid::API::IFunction_const_sptr res = getHandler(i)->findFunction(item);
-    if (res != NULL)
+    if (res != nullptr)
       return res;
   }
   return Mantid::API::IFunction_sptr();
@@ -926,10 +926,11 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
     try {
       f = Mantid::API::FunctionFactory::Instance().createFunction(
           fnName.toStdString());
+
     } catch (std::exception &e) {
-      QMessageBox::critical(NULL, "Mantid - Error", "Cannot create function " +
-                                                        fnName + "\n" +
-                                                        e.what());
+      QMessageBox::critical(nullptr, "Mantid - Error",
+                            "Cannot create function " + fnName + "\n" +
+                                e.what());
       return Mantid::API::IFunction_sptr();
     }
 
@@ -945,6 +946,7 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
             m_browser->workspaceIndex() >= 0) {
           pf->setCentre((m_browser->startX() + m_browser->endX()) / 2);
         }
+
       } else {
         pf->setCentre(m_pf->centre());
         pf->setHeight(m_pf->height());
@@ -954,6 +956,7 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
 
     if (pf) {
       m_browser->setDefaultPeakType(fnName.toStdString());
+
     } else {
       m_browser->setDefaultBackgroundType(fnName.toStdString());
     }
@@ -973,6 +976,7 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
       if (dynamic_cast<Mantid::API::IBackgroundFunction *>(f.get())) {
         m_browser->m_autoBackground = h;
         h->fit();
+
       } else {
         m_browser->m_autoBackground = nullptr;
       }

@@ -211,8 +211,11 @@ class CrystalField(object):
         for param in CrystalField.field_parameter_names:
             if param in free_parameters:
                 self.function.setParameter(param, free_parameters[param])
-            elif param not in getSymmAllowedParam(self.Symmetry):
+            symm_allowed_par = getSymmAllowedParam(self.Symmetry)
+            if param not in symm_allowed_par:
                 self.function.fixParameter(param)
+            else:
+                self.function.freeParameter(param)
 
         self._setPeaks()
 
@@ -327,7 +330,10 @@ class CrystalField(object):
         return out
 
     def makeMultiSpectrumFunction(self):
-        return re.sub(r'FWHM[X|Y]\d+=\(\),', '', str(self.function))
+        fun = re.sub(r'FWHM[X|Y]\d+=\(\),', '', str(self.function))
+        fun = re.sub(r'(name=.*?,)(.*?)(Temperatures=\(.*?\),)',r'\1\3\2', fun)
+        fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
+        return fun
 
     @property
     def Ion(self):
@@ -519,10 +525,12 @@ class CrystalField(object):
         else:
             self._resolutionModel = ResolutionModel(value)
         if self._isMultiSpectrum:
-            if not self._resolutionModel.multi or self._resolutionModel.NumberOfSpectra != self.NumberOfSpectra:
+            NumberOfPhysProp = len(self._physprop) if islistlike(self._physprop) else (0 if self._physprop is None else 1)
+            NSpec = self.NumberOfSpectra - NumberOfPhysProp
+            if not self._resolutionModel.multi or self._resolutionModel.NumberOfSpectra != NSpec:
                 raise RuntimeError('Resolution model is expected to have %s functions, found %s' %
-                                   (self.NumberOfSpectra, self._resolutionModel.NumberOfSpectra))
-            for i in range(self.NumberOfSpectra):
+                                   (NSpec, self._resolutionModel.NumberOfSpectra))
+            for i in range(self._resolutionModel.NumberOfSpectra):
                 model = self._resolutionModel.model[i]
                 self.crystalFieldFunction.setAttributeValue('FWHMX%s' % i, model[0])
                 self.crystalFieldFunction.setAttributeValue('FWHMY%s' % i, model[1])
@@ -1072,7 +1080,7 @@ class CrystalField(object):
         return params
 
     def _getFieldTies(self):
-        ties = re.search('ties=\((.*?)\)', str(self.crystalFieldFunction))
+        ties = re.search(',ties=\((.*?)\)', str(self.crystalFieldFunction))
         return ties.group(1) if ties else ''
 
     def _getFieldConstraints(self):
@@ -1319,8 +1327,6 @@ class CrystalFieldFit(object):
         """
         from mantid.api import AlgorithmManager
         fun = self.model.makeMultiSpectrumFunction()
-        if 'CrystalFieldMultiSpectrum' in fun:
-            fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
         alg = AlgorithmManager.createUnmanaged('EstimateFitParameters')
         alg.initialize()
         alg.setProperty('Function', fun)
@@ -1375,8 +1381,6 @@ class CrystalFieldFit(object):
             fun = str(self.model.function)
         else:
             fun = self.model.makeMultiSpectrumFunction()
-        if 'CrystalFieldMultiSpectrum' in fun:
-            fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
         alg = AlgorithmManager.createUnmanaged('Fit')
         alg.initialize()
         alg.setProperty('Function', fun)

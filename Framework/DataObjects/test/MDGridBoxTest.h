@@ -21,17 +21,13 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <Poco/File.h>
-#include <boost/random/linear_congruential.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <map>
 #include <memory>
 #include <nexus/NeXusFile.hpp>
+#include <random>
 #include <vector>
 
 using namespace Mantid;
@@ -261,10 +257,10 @@ public:
         new MDGridBox<MDLeanEvent<1>, 1>(*box, newBoxController);
 
     auto boxes = box1->getBoxes();
-    for (size_t i = 0; i < boxes.size(); ++i) {
+    for (auto &box : boxes) {
       TSM_ASSERT_EQUALS(
           "All child boxes should have the same box controller as the parent.",
-          newBoxController, boxes[i]->getBoxController());
+          newBoxController, box->getBoxController());
     }
     delete newBoxController;
     delete box1;
@@ -295,11 +291,10 @@ public:
       TS_ASSERT_EQUALS(g->getChild(i - 2)->getParent(), g);
     }
     // MDGridBox will delete the children that it pulled in but the rest need to
-    // be
-    // taken care of manually
+    // be taken care of manually
     size_t indices[5] = {0, 1, 12, 13, 14};
-    for (size_t i = 0; i < 5; ++i)
-      delete boxes[indices[i]];
+    for (auto index : indices)
+      delete boxes[index];
     delete g;
     delete bcc;
   }
@@ -329,9 +324,9 @@ public:
     // Check the boxes
     std::vector<MDBoxBase<MDLeanEvent<3>, 3> *> boxes = g->getBoxes();
     TS_ASSERT_EQUALS(boxes.size(), 10 * 5 * 2);
-    for (size_t i = 0; i < boxes.size(); i++) {
+    for (auto &boxBase : boxes) {
       MDBox<MDLeanEvent<3>, 3> *box =
-          dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxes[i]);
+          dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxBase);
       TS_ASSERT(box);
     }
     MDBox<MDLeanEvent<3>, 3> *box;
@@ -445,7 +440,7 @@ public:
     }
 
     // You must refresh the cache after adding individual events.
-    superbox->refreshCache(NULL);
+    superbox->refreshCache(nullptr);
     // superbox->refreshCentroid(NULL);
 
     TS_ASSERT_EQUALS(superbox->getNPoints(), 3);
@@ -473,7 +468,7 @@ public:
     }
     TS_ASSERT_EQUALS(superbox->getNPoints(), 3);
 
-    superbox->refreshCache(NULL);
+    superbox->refreshCache(nullptr);
     TS_ASSERT_EQUALS(superbox->getNPoints(), 6);
 
     // Retrieve the 0th grid box
@@ -602,8 +597,8 @@ public:
     parent->getBoxes(boxes, 3, false, function);
     TS_ASSERT_EQUALS(boxes.size(), 54);
     // The boxes extents make sense
-    for (size_t i = 0; i < boxes.size(); i++) {
-      TS_ASSERT(boxes[i]->getExtents(0).getMax() >= 1.51);
+    for (auto &box : boxes) {
+      TS_ASSERT(box->getExtents(0).getMax() >= 1.51);
     }
 
     // --- Now leaf-only ---
@@ -611,8 +606,8 @@ public:
     parent->getBoxes(boxes, 3, true, function);
     TS_ASSERT_EQUALS(boxes.size(), 40);
     // The boxes extents make sense
-    for (size_t i = 0; i < boxes.size(); i++) {
-      TS_ASSERT(boxes[i]->getExtents(0).getMax() >= 1.51);
+    for (auto &box : boxes) {
+      TS_ASSERT(box->getExtents(0).getMax() >= 1.51);
     }
 
     // Limit by another plane
@@ -622,18 +617,18 @@ public:
     boxes.clear();
     parent->getBoxes(boxes, 3, false, function);
     TS_ASSERT_EQUALS(boxes.size(), 33);
-    for (size_t i = 0; i < boxes.size(); i++) {
-      TS_ASSERT(boxes[i]->getExtents(0).getMax() >= 1.51);
-      TS_ASSERT(boxes[i]->getExtents(0).getMin() <= 2.99);
+    for (auto &box : boxes) {
+      TS_ASSERT(box->getExtents(0).getMax() >= 1.51);
+      TS_ASSERT(box->getExtents(0).getMin() <= 2.99);
     }
 
     // Same, leaf only
     boxes.clear();
     parent->getBoxes(boxes, 3, true, function);
     TS_ASSERT_EQUALS(boxes.size(), 24);
-    for (size_t i = 0; i < boxes.size(); i++) {
-      TS_ASSERT(boxes[i]->getExtents(0).getMax() >= 1.51);
-      TS_ASSERT(boxes[i]->getExtents(0).getMin() <= 2.99);
+    for (auto &box : boxes) {
+      TS_ASSERT(box->getExtents(0).getMax() >= 1.51);
+      TS_ASSERT(box->getExtents(0).getMin() <= 2.99);
     }
 
     // ----- Infinitely thin plane for an implicit function ------------
@@ -675,11 +670,11 @@ public:
     parent->getBoxes(boxes, 3, false, function);
     TS_ASSERT_EQUALS(boxes.size(), 46);
     // The boxes extents make sense
-    for (size_t i = 0; i < boxes.size(); i++) {
-      TS_ASSERT(boxes[i]->getExtents(0).getMax() >= 2.00);
-      TS_ASSERT(boxes[i]->getExtents(0).getMin() <= 3.00);
-      TS_ASSERT(boxes[i]->getExtents(1).getMax() >= 2.00);
-      TS_ASSERT(boxes[i]->getExtents(1).getMin() <= 3.00);
+    for (auto &box : boxes) {
+      TS_ASSERT(box->getExtents(0).getMax() >= 2.00);
+      TS_ASSERT(box->getExtents(0).getMin() <= 3.00);
+      TS_ASSERT(box->getExtents(1).getMax() >= 2.00);
+      TS_ASSERT(box->getExtents(1).getMin() <= 3.00);
     }
 
     // -- Leaf only ---
@@ -690,11 +685,11 @@ public:
         16 + 4 * 4 +
             4); // 16 in the center one + 4x4 at the 4 edges + 4 at the corners
     // The boxes extents make sense
-    for (size_t i = 0; i < boxes.size(); i++) {
-      TS_ASSERT(boxes[i]->getExtents(0).getMax() >= 2.00);
-      TS_ASSERT(boxes[i]->getExtents(0).getMin() <= 3.00);
-      TS_ASSERT(boxes[i]->getExtents(1).getMax() >= 2.00);
-      TS_ASSERT(boxes[i]->getExtents(1).getMin() <= 3.00);
+    for (auto &box : boxes) {
+      TS_ASSERT(box->getExtents(0).getMax() >= 2.00);
+      TS_ASSERT(box->getExtents(0).getMin() <= 3.00);
+      TS_ASSERT(box->getExtents(1).getMax() >= 2.00);
+      TS_ASSERT(box->getExtents(1).getMin() <= 3.00);
     }
 
     // clean up  behind
@@ -801,7 +796,7 @@ public:
           }
         }
       // You must refresh the cache after adding individual events.
-      box->refreshCache(NULL);
+      box->refreshCache(nullptr);
     }
   }
 
@@ -824,7 +819,7 @@ public:
     size_t numbad = 0;
     TS_ASSERT_THROWS_NOTHING(numbad = b->addEvents(events););
     // Get the right totals again
-    b->refreshCache(NULL);
+    b->refreshCache(nullptr);
     TS_ASSERT_EQUALS(numbad, 0);
     TS_ASSERT_EQUALS(b->getNPoints(), 100);
     TS_ASSERT_EQUALS(b->getSignal(), 100 * 2.0);
@@ -835,12 +830,12 @@ public:
     // Get all the boxes contained
     std::vector<MDBoxBase<MDLeanEvent<2>, 2> *> boxes = b->getBoxes();
     TS_ASSERT_EQUALS(boxes.size(), 100);
-    for (size_t i = 0; i < boxes.size(); i++) {
-      TS_ASSERT_EQUALS(boxes[i]->getNPoints(), 1);
-      TS_ASSERT_EQUALS(boxes[i]->getSignal(), 2.0);
-      TS_ASSERT_EQUALS(boxes[i]->getErrorSquared(), 2.0);
-      TS_ASSERT_EQUALS(boxes[i]->getSignalNormalized(), 2.0);
-      TS_ASSERT_EQUALS(boxes[i]->getErrorSquaredNormalized(), 2.0);
+    for (auto &box : boxes) {
+      TS_ASSERT_EQUALS(box->getNPoints(), 1);
+      TS_ASSERT_EQUALS(box->getSignal(), 2.0);
+      TS_ASSERT_EQUALS(box->getErrorSquared(), 2.0);
+      TS_ASSERT_EQUALS(box->getSignalNormalized(), 2.0);
+      TS_ASSERT_EQUALS(box->getErrorSquaredNormalized(), 2.0);
     }
 
     // Now try to add bad events (outside bounds)
@@ -851,7 +846,7 @@ public:
         events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
       }
     // Get the right totals again
-    b->refreshCache(NULL);
+    b->refreshCache(nullptr);
     // All 4 points get rejected
     TS_ASSERT_THROWS_NOTHING(numbad = b->addEvents(events););
     TS_ASSERT_EQUALS(numbad, 4);
@@ -886,7 +881,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(numbad = b->addEvents(events));
     TS_ASSERT_EQUALS(numbad, 3);
 
-    b->refreshCache(NULL);
+    b->refreshCache(nullptr);
     TS_ASSERT_EQUALS(b->getNPoints(), 1);
     TS_ASSERT_EQUALS(b->getSignal(), 2.0);
     TS_ASSERT_EQUALS(b->getErrorSquared(), 2.0);
@@ -1006,7 +1001,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(b0->addEvents(events););
 
     // Split into sub-grid boxes
-    TS_ASSERT_THROWS_NOTHING(b0->splitAllIfNeeded(NULL);)
+    TS_ASSERT_THROWS_NOTHING(b0->splitAllIfNeeded(nullptr);)
 
     // Dig recursively into the gridded box hierarchies
     std::vector<ibox_t *> boxes;
@@ -1083,8 +1078,7 @@ public:
     // many events
     std::vector<ibox_t *> boxes = b->getBoxes();
     TS_ASSERT_EQUALS(boxes.size(), 100);
-    for (size_t i = 0; i < boxes.size(); i++) {
-      ibox_t *box = boxes[i];
+    for (auto box : boxes) {
       TS_ASSERT_EQUALS(box->getNPoints(), num_repeat);
       TS_ASSERT(dynamic_cast<gbox_t *>(box));
 
@@ -1128,7 +1122,7 @@ public:
 
     MDBin<MDLeanEvent<2>, 2> bin;
     bin = makeMDBin2(minX, maxX, minY, maxY);
-    b->centerpointBin(bin, NULL);
+    b->centerpointBin(bin, nullptr);
     TSM_ASSERT_DELTA(message, bin.m_signal, expectedSignal, 1e-5);
   }
 
@@ -1405,8 +1399,8 @@ public:
                        signal);
     // Normalized
     if (signal != 0.0) {
-      for (size_t d = 0; d < 2; d++)
-        centroid[d] /= static_cast<coord_t>(signal);
+      for (float &d : centroid)
+        d /= static_cast<coord_t>(signal);
     }
 
     TSM_ASSERT_DELTA(message, signal, 1.0 * numExpected, 1e-5);
@@ -1624,14 +1618,12 @@ public:
     size_t num = 1000000;
     events.clear();
 
-    boost::mt19937 rng;
-    boost::uniform_real<double> u(0, 5.0); // Range
-    boost::variate_generator<boost::mt19937 &, boost::uniform_real<double>> gen(
-        rng, u);
+    std::mt19937 rng;
+    std::uniform_real_distribution<double> flat(0, 5.0);
     for (size_t i = 0; i < num; ++i) {
       double centers[3];
-      for (size_t d = 0; d < 3; d++)
-        centers[d] = gen();
+      for (double &center : centers)
+        center = flat(rng);
       // Create and add the event.
       events.push_back(MDLeanEvent<3>(1.0, 1.0, centers));
     }
@@ -1730,12 +1722,12 @@ public:
     coord_t centroid[3];
     for (size_t i = 0; i < 100; i++) {
       signal = 0;
-      for (size_t d = 0; d < 3; d++)
-        centroid[d] = 0.0;
+      for (float &d : centroid)
+        d = 0.0;
       box3b->centroidSphere(sphere, radius * radius, centroid, signal);
       if (signal != 0.0) {
-        for (size_t d = 0; d < 3; d++)
-          centroid[d] /= static_cast<coord_t>(signal);
+        for (float &d : centroid)
+          d /= static_cast<coord_t>(signal);
       }
     }
 

@@ -36,6 +36,9 @@ class DLLExport ReflectometryReductionOneAuto2
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"ReflectometryReductionOne"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 
@@ -73,6 +76,10 @@ private:
   void populateAlgorithmicCorrectionProperties(
       Mantid::API::IAlgorithm_sptr alg,
       Mantid::Geometry::Instrument_const_sptr instrument);
+  /// Get a polarization efficiencies workspace.
+  std::tuple<API::MatrixWorkspace_sptr, std::string, std::string>
+  getPolarizationEfficiencies();
+  void applyPolarizationCorrection(std::string const &outputIvsLam);
 };
 
 } // namespace Algorithms

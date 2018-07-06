@@ -7,6 +7,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 class IReflMainWindowPresenter;
+class IReflEventTabPresenter;
 
 /** @class IReflEventPresenter
 
@@ -34,6 +35,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+enum class SliceType { UniformEven, Uniform, Custom, LogValue };
+
 class IReflEventPresenter {
 public:
   virtual ~IReflEventPresenter(){};
@@ -43,8 +47,11 @@ public:
   /// Time-slicing type
   virtual std::string getTimeSlicingType() const = 0;
 
+  virtual void acceptTabPresenter(IReflEventTabPresenter *tabPresenter) = 0;
   virtual void onReductionPaused() = 0;
   virtual void onReductionResumed() = 0;
+  virtual void notifySliceTypeChanged(SliceType newSliceType) = 0;
+  virtual void notifySettingsChanged() = 0;
 };
 }
 }
