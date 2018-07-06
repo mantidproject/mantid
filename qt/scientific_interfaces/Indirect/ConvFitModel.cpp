@@ -318,8 +318,8 @@ private:
 };
 
 std::vector<std::string>
-getNames(const std::vector<boost::weak_ptr<Mantid::API::MatrixWorkspace>> &
-             workspaces) {
+getNames(const std::vector<boost::weak_ptr<Mantid::API::MatrixWorkspace>>
+             &workspaces) {
   std::vector<std::string> names;
   names.reserve(workspaces.size());
   std::transform(workspaces.begin(), workspaces.end(),
@@ -405,7 +405,7 @@ IAlgorithm_sptr ConvFitModel::simultaneousFitAlgorithm() const {
 
 std::string ConvFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
-    return "MultiConvFit_" + m_fitType + m_backgroundString;
+    return "MultiConvFit_" + m_fitType + m_backgroundString + "_Result";
   return createOutputName(
       "%1%_conv_" + m_fitType + m_backgroundString + "_s%2%", "_to_", 0);
 }
