@@ -135,6 +135,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         for key, datatype in zip(keys,datatypes):
             params_ws.addColumn(datatype, key)
 
+        instrumentName = peaks_ws.getInstrument().getFullName()
+
         # Set the peak numbers we're fitting
         if peakNumberToFit < 0:
             peaksToFit = range(peaks_ws.getNumberPeaks())
@@ -159,7 +161,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                                                                       strongPeakParams=strongPeakParams,
                                                                       q_frame=q_frame, mindtBinWidth=mindtBinWidth,
                                                                       pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
-                                                                      forceCutoff=forceCutoff, edgeCutoff=edgeCutoff)
+                                                                      forceCutoff=forceCutoff, edgeCutoff=edgeCutoff,
+                                                                      instrumentName=instrumentName)
 
                     # First we get the peak intensity
                     peakIDX = Y3D/Y3D.max() > fracStop
