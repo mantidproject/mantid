@@ -53,6 +53,9 @@ void SaveIsawPeaks::exec() {
   std::string header = "2   SEQN    H    K    L     COL      ROW     CHAN      "
                        "  L2   2_THETA        AZ         WL         D      IPK "
                        "      INTI    SIGI  RFLG";
+  header = "2   SEQN    H    K    L     ORD1 ORD2 ORD3  COL      ROW     CHAN      "
+                       "  L2   2_THETA        AZ         WL         D      IPK "
+                       "      INTI    SIGI  RFLG";
 
   std::string filename = getPropertyValue("Filename");
   PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
@@ -155,7 +158,7 @@ void SaveIsawPeaks::exec() {
     // saving.
     Types::Core::DateAndTime expDate = inst->getValidFromDate() + 1.0;
     out << expDate.toISO8601String();
-    if (m_ModStru) out << "MOD";
+    if (m_ModStru) out << " MOD";
     out << '\n';
 
     out << "6         L1    T0_SHIFT\n";
@@ -320,14 +323,18 @@ void SaveIsawPeaks::exec() {
 
           // HKL's are flipped by -1 because of the internal Q convention
           // unless Crystallography convention
+          if (m_ModStru) {
+          V3D mod = p.getModStru();
+          out << std::setw(5) << Utils::round(qSign * (p.getH()-mod[0]*0.5)) << std::setw(5)
+              << Utils::round(qSign * (p.getK()-mod[1])) << std::setw(5)
+              << Utils::round(qSign * (p.getL()-mod[2]));
+             out << std::setw(5) <<  Utils::round(qSign * mod[0]) << std::setw(5)
+              << Utils::round(qSign * mod[1]) << std::setw(5) << Utils::round(qSign * mod[2]);
+          }
+          else {
           out << std::setw(5) << Utils::round(qSign * p.getH()) << std::setw(5)
               << Utils::round(qSign * p.getK()) << std::setw(5)
               << Utils::round(qSign * p.getL());
-
-          if (m_ModStru) {
-          V3D mod = p.getModStru();
-             out << std::setw(5) <<  mod[0] << std::setw(5)
-              << mod[1] << std::setw(5) << mod[2];
           }
 
           // Row/column

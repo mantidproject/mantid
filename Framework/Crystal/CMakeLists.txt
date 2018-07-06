@@ -51,6 +51,7 @@ set ( SRC_FILES
 	src/PeaksOnSurface.cpp
 	src/PredictFractionalPeaks.cpp
 	src/PredictPeaks.cpp
+	src/PredictSatellitePeaks.cpp
 	src/SCDCalibratePanels.cpp
 	src/SCDPanelErrors.cpp
 	src/SaveHKL.cpp
@@ -127,6 +128,7 @@ set ( INC_FILES
 	inc/MantidCrystal/PeaksOnSurface.h
 	inc/MantidCrystal/PredictFractionalPeaks.h
 	inc/MantidCrystal/PredictPeaks.h
+	inc/MantidCrystal/PredictSatellitePeaks.h
 	inc/MantidCrystal/SCDCalibratePanels.h
 	inc/MantidCrystal/SCDPanelErrors.h
 	inc/MantidCrystal/SaveHKL.h
@@ -196,6 +198,7 @@ set ( TEST_FILES
 	PeaksOnSurfaceTest.h
 	PredictFractionalPeaksTest.h
 	PredictPeaksTest.h
+	PredictSatellitePeaksTest.h
 	SCDCalibratePanelsTest.h
 	SaveHKLTest.h
 	SaveIsawPeaksTest.h
