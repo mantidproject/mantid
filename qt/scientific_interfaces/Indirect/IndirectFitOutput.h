@@ -112,8 +112,8 @@ public:
   void removeOutput(IndirectFitData const *fitData);
 
 private:
-  void updateResults(WorkspaceGroup_sptr resultGroup,
-                     WorkspaceGroup_sptr resultWorkspace,
+  void updateResults(Mantid::API::WorkspaceGroup_sptr resultGroup,
+                     Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                      const FitDataIterator &fitDataBegin,
                      const FitDataIterator &fitDataEnd);
   void updateParameters(Mantid::API::ITableWorkspace_sptr parameterTable,
