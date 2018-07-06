@@ -11,9 +11,8 @@ namespace IDA {
 ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
                                            IndirectFitDataView *view)
     : IndirectFitDataPresenter(
-          model, view,
-          Mantid::Kernel::make_unique<ConvFitDataTablePresenter>(
-              model, view->getDataTable())),
+          model, view, Mantid::Kernel::make_unique<ConvFitDataTablePresenter>(
+                           model, view->getDataTable())),
       m_convModel(model) {
   setResolutionHidden(false);
 
