@@ -38,9 +38,9 @@ public:
   IndirectFitDataPresenter(IndirectFittingModel *model,
                            IndirectFitDataView *view);
 
-  IndirectFitDataPresenter(IndirectFittingModel *model,
-                           IndirectFitDataView *view,
-                           IndirectDataTablePresenter *tablePresenter);
+  IndirectFitDataPresenter(
+      IndirectFittingModel *model, IndirectFitDataView *view,
+      std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
 
   void setSampleWSSuffices(const QStringList &suffices);
   void setSampleFBSuffices(const QStringList &suffices);
