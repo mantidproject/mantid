@@ -134,12 +134,26 @@ void renameResult(Workspace_sptr resultWorkspace,
   AnalysisDataService::Instance().rename(name, newName);
 }
 
-void renameResult(WorkspaceGroup_sptr resultWorkspace,
-                  const FitDataIterator &fitDataBegin,
-                  const FitDataIterator &fitDataEnd) {
+void renameStructuredResult(WorkspaceGroup_sptr resultWorkspace,
+                            const FitDataIterator &fitDataBegin,
+                            const FitDataIterator &fitDataEnd) {
   std::size_t index = 0;
   for (auto it = fitDataBegin; it < fitDataEnd; ++it)
     renameResult(resultWorkspace->getItem(index++), it->get());
+}
+
+void renameUnstructuredResult(WorkspaceGroup_sptr resultWorkspace,
+                              const FitDataIterator &fitDataBegin,
+                              const FitDataIterator &fitDataEnd) {
+  std::size_t index = 0;
+  std::unordered_set<Workspace *> named;
+  for (auto it = fitDataBegin; it < fitDataEnd; ++it) {
+    const auto workspace = resultWorkspace->getItem(index);
+    if (named.find(workspace.get()) != named.end()) {
+      renameResult(workspace, it->get());
+      ++index;
+    }
+  }
 }
 
 template <typename Map, typename Key>
@@ -304,20 +318,25 @@ void IndirectFitOutput::removeOutput(IndirectFitData const *fitData) {
   m_outputResultLocations.erase(fitData);
 }
 
+void IndirectFitOutput::updateResults(WorkspaceGroup_sptr resultGroup,
+                                      WorkspaceGroup_sptr resultWorkspace,
+                                      const FitDataIterator &fitDataBegin,
+                                      const FitDataIterator &fitDataEnd) {
+  if (numberOfSpectraIn(fitDataBegin, fitDataEnd) <= resultGroup->size()) {
+    updateFitResultsFromStructured(resultGroup, fitDataBegin, fitDataEnd);
+    renameStructuredResult(resultWorkspace, fitDataBegin, fitDataEnd);
+  }
+  else {
+    updateFitResultsFromUnstructured(resultGroup, fitDataBegin, fitDataEnd);
+    renameUnstructuredResult(resultWorkspace, fitDataBegin, fitDataEnd);
+  }
+}
+
 void IndirectFitOutput::updateParameters(ITableWorkspace_sptr parameterTable,
                                          const FitDataIterator &fitDataBegin,
                                          const FitDataIterator &fitDataEnd) {
   extractParametersFromTable(parameterTable, fitDataBegin, fitDataEnd,
                              m_parameters);
-}
-
-void IndirectFitOutput::updateFitResults(
-    Mantid::API::WorkspaceGroup_sptr resultGroup,
-    const FitDataIterator &fitDataBegin, const FitDataIterator &fitDataEnd) {
-  if (numberOfSpectraIn(fitDataBegin, fitDataEnd) <= resultGroup->size())
-    updateFitResultsFromStructured(resultGroup, fitDataBegin, fitDataEnd);
-  else
-    updateFitResultsFromUnstructured(resultGroup, fitDataBegin, fitDataEnd);
 }
 
 void IndirectFitOutput::updateFitResultsFromUnstructured(
