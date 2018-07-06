@@ -47,7 +47,7 @@ public:
   void setActiveSpectrum(std::size_t spectrum);
   void setStartX(double startX);
   void setEndX(double endX);
-  void setHWHM(double hwhm);
+  void setFWHM(double fwhm);
   void setBackground(double background);
 
   void deleteExternalGuessWorkspace();
