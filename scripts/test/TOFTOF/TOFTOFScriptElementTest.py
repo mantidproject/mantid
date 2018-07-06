@@ -3,10 +3,12 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 import mantid
+from mantid import simpleapi
 
 from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement, OptionalFloat
 from reduction_gui.widgets.toftof.toftof_setup import TOFTOFSetupWidget
 
+import os
 import sys
 
 
@@ -136,9 +138,66 @@ class TOFTOFScriptElementTest(unittest.TestCase):
             if not name.startswith('__') and not hasattr(getattr(self.scriptElement, name), '__call__'):
                 self.assertEqual(getattr(self.scriptElement, name), getattr(scriptElement2, name))
         
-    @unittest.skip('wrongTest')
-    def test_that_script_is_generated_correctly(self):
-        pass
+    #@unittest.skip('wrongTest')
+    def test_that_script_is_executable_in_mantid(self):
+        self.scriptElement.reset()
+        #self.scriptElement.facility_name   = 'MLZ'
+        #self.scriptElement.instrument_name = 'TOFTOF'
+
+        # prefix of (some) workspace names
+        self.scriptElement.prefix   = 'ws'
+
+        # data files are here
+        self.scriptElement.dataDir  = ''
+
+        # vanadium runs & comment
+        self.scriptElement.vanRuns  = 'TOFTOFTestdata.nxs'
+        self.scriptElement.vanCmnt  = 'vanadium comment'
+        self.scriptElement.vanTemp  = OptionalFloat(None)
+
+        # empty can runs, comment, and factor
+        self.scriptElement.ecRuns   = 'TOFTOFTestdata.nxs'
+        self.scriptElement.ecTemp   = OptionalFloat(21.0)
+        self.scriptElement.ecFactor = 0.9
+
+        # data runs: [(runs,comment, temperature), ...]
+        self.scriptElement.dataRuns = [
+            [u'TOFTOFTestdata.nxs', u'H2O 21C', OptionalFloat(None)],
+            [u'TOFTOFTestdata.nxs', u'H2O 34C', OptionalFloat(34.0)]
+        ]
+
+        # additional parameters
+        self.scriptElement.binEon        = True
+        self.scriptElement.binEstart     = -1.0
+        self.scriptElement.binEstep      = 0.4
+        self.scriptElement.binEend       = 1.8
+
+        self.scriptElement.binQon        = True
+        self.scriptElement.binQstart     = 0.4
+        self.scriptElement.binQstep      = 0.2
+        self.scriptElement.binQend       = 1.0
+
+        self.scriptElement.maskDetectors = '1,2'
+
+        # options
+        self.scriptElement.subtractECVan = True
+        self.scriptElement.normalise     = TOFTOFScriptElement.NORM_MONITOR
+        self.scriptElement.correctTof    = TOFTOFScriptElement.CORR_TOF_VAN
+        self.scriptElement.replaceNaNs   = True
+        self.scriptElement.createDiff    = True
+        self.scriptElement.keepSteps     = True
+
+        # save data
+        self.scriptElement.saveDir      = ''
+        self.scriptElement.saveSofQW    = False
+        self.scriptElement.saveSofTW    = False
+        self.scriptElement.saveNXSPE    = False
+        self.scriptElement.saveNexus    = False
+        self.scriptElement.saveAscii    = False
+        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        print(self.scriptElement.dataDir)
+        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        exec('from mantid.simpleapi import *\n' + self.scriptElement.to_script(), dict(), dict())
         
     def test_that_script_has_correct_syntax(self):
         self.scriptElement.binEon = False
