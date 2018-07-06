@@ -29,6 +29,8 @@ class FacilityInfoTest(unittest.TestCase):
     def test_timezones(self):
         # verify that all of the timezones can get converted by pytz
         for facility in ConfigService.getFacilities():
+            if len(facility.timezone()) == 0:
+                continue # don't test empty strings
             tz = pytz.timezone(facility.timezone())
             print(facility.name(), tz)
             self.assertEquals(str(tz), facility.timezone())
