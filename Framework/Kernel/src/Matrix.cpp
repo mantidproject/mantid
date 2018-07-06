@@ -1657,15 +1657,11 @@ void fillFromStream(std::istream &is, Kernel::Matrix<T> &in,
 
 ///\cond TEMPLATE
 
-// Symbol definitions for common types
+// Explicit instatiations. Avoid duplicate symbol definitions in
+// client libraries. This must match the explicit declaration list
+// in the header
 template class MANTID_KERNEL_DLL Matrix<double>;
-// The explicit template instantiation for int does not have an export macro
-// since this produces a warning on "gcc: warning: type attributes ignored after
-// type is already define" The reason for this is the use of Matrix<int>
-// in a template specialization above, causing an implicit sepcialization.
-// This, most likely, obtains a visibility setting from the general template
-// definition.
-template class Matrix<int>;
+template class MANTID_KERNEL_DLL Matrix<int>;
 template class MANTID_KERNEL_DLL Matrix<float>;
 
 template MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,

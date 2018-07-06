@@ -40,7 +40,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <typename T> class DLLExport Matrix {
+template <typename T> class Matrix {
 public:
   /// Enable users to retrieve the element type
   using value_type = T;
@@ -190,27 +190,31 @@ private:
                              const char);
 };
 
+// Explicit declarations. Symbols provided by matching explicit
+// instantiations in source file
+extern template class Matrix<double>;
+extern template class Matrix<int>;
+extern template class Matrix<float>;
+
 //-------------------------------------------------------------------------
 // Typedefs
 //-------------------------------------------------------------------------
-/// A matrix of doubles
 using DblMatrix = Mantid::Kernel::Matrix<double>;
-/// A matrix of ints
 using IntMatrix = Mantid::Kernel::Matrix<int>;
+using FloatMatrix = Mantid::Kernel::Matrix<float>;
 
 //-------------------------------------------------------------------------
 // Utility methods
 //-------------------------------------------------------------------------
 template <typename T>
-DLLExport std::ostream &operator<<(std::ostream &, const Kernel::Matrix<T> &);
+std::ostream &operator<<(std::ostream &, const Kernel::Matrix<T> &);
 template <typename T>
-DLLExport void dumpToStream(std::ostream &, const Kernel::Matrix<T> &,
-                            const char);
+void dumpToStream(std::ostream &, const Kernel::Matrix<T> &, const char);
 
 template <typename T>
-DLLExport std::istream &operator>>(std::istream &, Kernel::Matrix<T> &);
+std::istream &operator>>(std::istream &, Kernel::Matrix<T> &);
 template <typename T>
-DLLExport void fillFromStream(std::istream &, Kernel::Matrix<T> &, const char);
+void fillFromStream(std::istream &, Kernel::Matrix<T> &, const char);
 } // namespace Kernel
 } // namespace Mantid
 #endif // MANTID_KERNEL_MATRIX_H_
