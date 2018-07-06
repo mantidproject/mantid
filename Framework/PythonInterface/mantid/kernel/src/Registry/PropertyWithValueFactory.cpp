@@ -8,6 +8,7 @@
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 
+#include <boost/python.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/extract.hpp>
