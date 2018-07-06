@@ -6,6 +6,8 @@
 
 #include <boost/functional/hash.hpp>
 
+#include <unordered_set>
+
 using namespace Mantid::API;
 
 namespace {
