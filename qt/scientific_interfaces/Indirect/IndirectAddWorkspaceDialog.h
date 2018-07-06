@@ -4,8 +4,6 @@
 #include "IAddWorkspaceDialog.h"
 #include "ui_IndirectAddWorkspaceDialog.h"
 
-class Mantid::API::MatrixWorkspace;
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
