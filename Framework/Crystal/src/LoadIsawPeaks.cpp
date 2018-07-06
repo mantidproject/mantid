@@ -154,6 +154,11 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     date = Types::Core::DateAndTime::getCurrentTime().toISO8601String();
   else if (tag == "Date:")
     date = getWord(in, false);
+  tag = getWord(in, false);
+  if (tag == "MOD")
+    m_ModStru = true;
+  else
+    m_ModStru = false;
   readToEndOfLine(in, true);
 
   // Now we load the instrument using the name and date
@@ -298,6 +303,15 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   h = std::stod(getWord(in, false), nullptr);
   k = std::stod(getWord(in, false), nullptr);
   l = std::stod(getWord(in, false), nullptr);
+  int mod1 = 0;
+  int mod2 = 0;
+  int mod3 = 0;
+  if (m_ModStru) {
+      mod1 = std::stoi(getWord(in, false), nullptr);
+      mod2 = std::stoi(getWord(in, false), nullptr);
+      mod3 = std::stoi(getWord(in, false), nullptr);
+  }
+          
 
   col = std::stod(getWord(in, false), nullptr);
   row = std::stod(getWord(in, false), nullptr);
@@ -329,6 +343,9 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   // Create the peak object
   Peak peak(outWS->getInstrument(), pixelID, wl);
   peak.setHKL(qSign * h, qSign * k, qSign * l);
+  if (m_ModStru) {
+  peak.setModStru(V3D(mod1, mod2, mod3));
+  }
   peak.setIntensity(Inti);
   peak.setSigmaIntensity(SigI);
   peak.setBinCount(IPK);

@@ -152,6 +152,8 @@ public:
   void setCol(int m_col);
   void setPeakNumber(int m_peakNumber) override;
   int getPeakNumber() const override;
+  void setModStru(Mantid::Kernel::V3D m_ModStru) override;
+  Mantid::Kernel::V3D getModStru() const override;
 
   virtual Mantid::Kernel::V3D getDetPos() const override;
   double getL1() const override;
@@ -247,6 +249,7 @@ private:
 
   // keep peak number
   int m_peakNumber;
+  Mantid::Kernel::V3D m_ModStru;
 
   /// List of contributing detectors IDs
   std::set<int> m_detIDs;

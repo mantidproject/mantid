@@ -42,6 +42,8 @@ public:
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
+  bool m_ModStru;
+
   /// Initialise the properties
   void init() override;
 

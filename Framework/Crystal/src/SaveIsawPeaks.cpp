@@ -94,6 +94,8 @@ void SaveIsawPeaks::exec() {
   runMap_t runMap;
   for (size_t i = 0; i < peaks.size(); ++i) {
     Peak &p = peaks[i];
+    if (p.getModStru()[0] > 0)
+      m_ModStru = true;
     int run = p.getRunNumber();
     int bank = 0;
     std::string bankName = p.getBankName();
@@ -152,7 +154,9 @@ void SaveIsawPeaks::exec() {
     // For now, this allows the proper instrument to be loaded back after
     // saving.
     Types::Core::DateAndTime expDate = inst->getValidFromDate() + 1.0;
-    out << expDate.toISO8601String() << '\n';
+    out << expDate.toISO8601String();
+    if (m_ModStru) out << "MOD";
+    out << '\n';
 
     out << "6         L1    T0_SHIFT\n";
     out << "7 " << std::setw(10);
@@ -319,6 +323,12 @@ void SaveIsawPeaks::exec() {
           out << std::setw(5) << Utils::round(qSign * p.getH()) << std::setw(5)
               << Utils::round(qSign * p.getK()) << std::setw(5)
               << Utils::round(qSign * p.getL());
+
+          if (m_ModStru) {
+          V3D mod = p.getModStru();
+             out << std::setw(5) <<  mod[0] << std::setw(5)
+              << mod[1] << std::setw(5) << mod[2];
+          }
 
           // Row/column
           out << std::setw(8) << std::fixed << std::setprecision(2)

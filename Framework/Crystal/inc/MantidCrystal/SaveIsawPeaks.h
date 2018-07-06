@@ -39,6 +39,8 @@ public:
   }
 
 private:
+  bool m_ModStru = false;
+
   /// Initialise the properties
   void init() override;
   /// Run the algorithm
