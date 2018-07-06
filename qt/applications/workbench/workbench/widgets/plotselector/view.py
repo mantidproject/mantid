@@ -452,11 +452,7 @@ class PlotSelectorView(QWidget):
             for row in range(len(self.list_widget)):
                 item = self.list_widget.item(row)
                 widget = self.list_widget.itemWidget(item)
-                try:
-                    item.setData(Qt.InitialSortOrderRole, sort_names_dict[widget.plot_name])
-                except Exception as e:
-                    print(row)
-                    raise
+                item.setData(Qt.InitialSortOrderRole, sort_names_dict[widget.plot_name])
             self.list_widget.sortItems(self.sort_order)
             self.list_widget.setSortingEnabled(True)
 
