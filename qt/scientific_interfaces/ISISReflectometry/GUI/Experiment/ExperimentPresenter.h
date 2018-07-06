@@ -5,6 +5,7 @@
 #include "IReflBatchPresenter.h"
 #include "IExperimentView.h"
 #include "IExperimentPresenter.h"
+#include "PerThetaDefaultsValidationResult.h"
 #include "../../Reduction/Experiment.h"
 #include <boost/optional.hpp>
 
@@ -37,19 +38,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentPresenter :
-      public ExperimentViewSubscriber, public IExperimentPresenter {
+class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentPresenter
+    : public ExperimentViewSubscriber,
+      public IExperimentPresenter {
 public:
   ExperimentPresenter(IExperimentView *view);
   void notifySettingsChanged() override;
   void notifySummationTypeChanged() override;
   void notifyNewPerAngleDefaultsRequested() override;
   void notifyRemovePerAngleDefaultsRequested(int index) override;
+  void notifyPerAngleDefaultsChanged(int row, int column) override;
 
-  Experiment const& experiment() const;
+  Experiment const &experiment() const;
 
 private:
-  IExperimentView* m_view;
+  PolarizationCorrections polarizationCorrectionsFromView();
+  RangeInLambda transmissionRunRangeFromView();
+  PerThetaDefaultsValidationResult updateModelFromView();
+  void showPerThetaDefaultsValidationResult(
+      PerThetaDefaultsValidationResult const &result);
+  IExperimentView *m_view;
   boost::optional<Experiment> m_model;
 };
 }

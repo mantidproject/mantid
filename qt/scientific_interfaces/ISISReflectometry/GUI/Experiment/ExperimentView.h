@@ -59,6 +59,7 @@ public:
   std::vector<std::array<std::string, 8>> getPerAngleOptions() const override;
   void showPerAngleOptionsAsInvalid(int row, int column) override;
   void showPerAngleOptionsAsValid(int row) override;
+  void showPerAngleThetasNonUnique(double thetaTolerance) override;
 
 
   double getTransmissionStartOverlap() const override;
@@ -84,7 +85,6 @@ public:
       std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
       std::vector<MissingInstrumentParameterValue> const &missingValues) override;
 
-  void showPerAngleThetasNonUnique(double tolerance) override;
   void showAllPerAngleOptionsAsValid() override;
 
   void disableAll() override;
@@ -99,11 +99,12 @@ public:
   void addPerThetaDefaultsRow() override;
   void removePerThetaDefaultsRow(int rowIndex) override;
 public slots:
-  void notifySettingsChanged();
   /// Adds another row to the per-angle options table
   void summationTypeChanged(int reductionTypeIndex);
   void onNewPerThetaDefaultsRowRequested();
   void onRemovePerThetaDefaultsRequested();
+  void onSettingsChanged();
+  void onPerAngleDefaultsChanged(int row, int column);
 
 private:
   void initializeTableItems(QTableWidget& table);

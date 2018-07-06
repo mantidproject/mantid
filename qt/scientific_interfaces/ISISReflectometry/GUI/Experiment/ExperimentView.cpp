@@ -25,17 +25,11 @@ void ExperimentView::onRemovePerThetaDefaultsRequested() {
 }
 
 void ExperimentView::showAllPerAngleOptionsAsValid() {
-  std::cout << "\nClearing validation errors from "
-            << m_ui.optionsTable->rowCount() << " rows.\n" << std::endl;
-
   for (auto row = 0; row < m_ui.optionsTable->rowCount(); ++row)
     showPerAngleOptionsAsValid(row);
 }
 
 void ExperimentView::showPerAngleThetasNonUnique(double tolerance) {
-  for (auto row = 0; row < m_ui.optionsTable->rowCount(); ++row)
-    showPerAngleOptionsAsInvalid(row, 0);
-
   QMessageBox::critical(
       this, "Invalid theta combination!",
       "Cannot have multiple defaults with theta values less than " +
@@ -102,27 +96,30 @@ void ExperimentView::initOptionsTable() {
 
 void ExperimentView::connectSettingsChange(QLineEdit &edit) {
   connect(&edit, SIGNAL(textChanged(QString const &)), this,
-          SLOT(notifySettingsChanged()));
+          SLOT(onSettingsChanged()));
 }
 
 void ExperimentView::connectSettingsChange(QDoubleSpinBox &edit) {
   connect(&edit, SIGNAL(valueChanged(QString const &)), this,
-          SLOT(notifySettingsChanged()));
+          SLOT(onSettingsChanged()));
 }
 
 void ExperimentView::connectSettingsChange(QComboBox &edit) {
   connect(&edit, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(notifySettingsChanged()));
+          SLOT(onSettingsChanged()));
 }
 
 void ExperimentView::connectSettingsChange(QCheckBox &edit) {
-  connect(&edit, SIGNAL(stateChanged(int)), this,
-          SLOT(notifySettingsChanged()));
+  connect(&edit, SIGNAL(stateChanged(int)), this, SLOT(onSettingsChanged()));
+}
+
+void ExperimentView::onSettingsChanged() {
+  m_notifyee->notifySettingsChanged();
 }
 
 void ExperimentView::connectSettingsChange(QTableWidget &edit) {
   connect(&edit, SIGNAL(cellChanged(int, int)), this,
-          SLOT(notifySettingsChanged()));
+          SLOT(onPerAngleDefaultsChanged(int, int)));
 }
 
 void ExperimentView::disableAll() { m_ui.expSettingsGrid->setEnabled(false); }
@@ -145,10 +142,6 @@ void ExperimentView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.CApEdit, "CAp", alg);
   registerSettingWidget(*m_ui.CPpEdit, "CPp", alg);
   registerSettingWidget(stitchOptionsLineEdit(), "Params", alg);
-}
-
-void ExperimentView::notifySettingsChanged() {
-  m_notifyee->notifySettingsChanged();
 }
 
 void ExperimentView::summationTypeChanged(int reductionTypeIndex) {
@@ -296,6 +289,10 @@ void ExperimentView::disablePolarisationCorrections() {
   m_ui.CAlphaEdit->clear();
   m_ui.CApEdit->clear();
   m_ui.CPpEdit->clear();
+}
+
+void ExperimentView::onPerAngleDefaultsChanged(int row, int column) {
+  m_notifyee->notifyPerAngleDefaultsChanged(row, column);
 }
 
 /** Add a new row to the transmission runs table **/
@@ -465,7 +462,6 @@ void ExperimentView::showPerAngleOptionsAsValid(int row) {
   for (auto column = 0; column < m_ui.optionsTable->columnCount(); ++column)
     m_ui.optionsTable->item(row, column)->setBackground(Qt::transparent);
   m_ui.optionsTable->blockSignals(false);
-  std::cout << "Row " << row << std::endl;
 }
 
 double ExperimentView::getTransmissionStartOverlap() const {

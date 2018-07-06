@@ -45,6 +45,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentViewSubscriber {
 public:
+  virtual void notifyPerAngleDefaultsChanged(int column, int row) = 0;
   virtual void notifySettingsChanged() = 0;
   virtual void notifySummationTypeChanged() = 0;
   virtual void notifyNewPerAngleDefaultsRequested() = 0;
