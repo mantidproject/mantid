@@ -49,7 +49,7 @@ namespace Regexes {
 const QString EMPTY = "^$";
 const QString SPACE = "(\\s)*";
 const QString COMMA = SPACE + "," + SPACE;
-const QString MINUS = SPACE + "\\-" + SPACE;
+const QString MINUS = "\\-";
 
 const QString NUMBER = NATURAL_NUMBER(4);
 const QString NATURAL_RANGE = "(" + NUMBER + MINUS + NUMBER + ")";

@@ -41,7 +41,7 @@ namespace Regexes {
 const std::string EMPTY = "^$";
 const std::string SPACE = "(\\s)*";
 const std::string COMMA = SPACE + "," + SPACE;
-const std::string MINUS = SPACE + "\\-" + SPACE;
+const std::string MINUS = "\\-";
 
 const std::string NUMBER = NATURAL_NUMBER(4);
 const std::string NATURAL_RANGE = "(" + NUMBER + MINUS + NUMBER + ")";
