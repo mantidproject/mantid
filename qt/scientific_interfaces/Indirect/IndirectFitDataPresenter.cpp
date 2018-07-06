@@ -9,13 +9,16 @@ namespace IDA {
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(IndirectFittingModel *model,
                                                    IndirectFitDataView *view)
-    : IndirectFitDataPresenter(model, view, new IndirectDataTablePresenter(
-                                                model, view->getDataTable())) {}
+    : IndirectFitDataPresenter(
+          model, view,
+          Mantid::Kernel::make_unique<IndirectDataTablePresenter>(
+              model, view->getDataTable())) {}
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(
     IndirectFittingModel *model, IndirectFitDataView *view,
-    IndirectDataTablePresenter *tablePresenter)
-    : m_model(model), m_view(view), m_tablePresenter(tablePresenter) {
+    std::unique_ptr<IndirectDataTablePresenter> tablePresenter)
+    : m_model(model), m_view(view),
+      m_tablePresenter(std::move(tablePresenter)) {
   connect(m_view, SIGNAL(singleDataViewSelected()), this,
           SLOT(setModelFromSingleData()));
   connect(m_view, SIGNAL(multipleDataViewSelected()), this,
@@ -51,8 +54,9 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
   connect(m_tablePresenter.get(),
           SIGNAL(excludeRegionChanged(const std::string &, std::size_t,
                                       std::size_t)),
-          this, SIGNAL(excludeRegionChanged(const std::string &, std::size_t,
-                                            std::size_t)));
+          this,
+          SIGNAL(excludeRegionChanged(const std::string &, std::size_t,
+                                      std::size_t)));
 }
 
 IndirectFitDataView const *IndirectFitDataPresenter::getView() const {

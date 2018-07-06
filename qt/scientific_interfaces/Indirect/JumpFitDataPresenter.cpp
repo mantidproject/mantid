@@ -14,7 +14,8 @@ JumpFitDataPresenter::JumpFitDataPresenter(
     QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter)
     : IndirectFitDataPresenter(
           model, view,
-          new JumpFitDataTablePresenter(model, view->getDataTable())),
+          Mantid::Kernel::make_unique<JumpFitDataTablePresenter>(
+              model, view->getDataTable())),
       m_activeParameterType(0), m_dataIndex(0),
       m_cbParameterType(cbParameterType), m_cbParameter(cbParameter),
       m_lbParameterType(lbParameterType), m_lbParameter(lbParameter),
