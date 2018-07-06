@@ -227,7 +227,8 @@ class PlotSelectorView(QWidget):
     def _get_row_and_widget_from_plot_name(self, plot_name):
         """
         Get the row in the list, and the PlotNameWidget corresponding
-        to the given the plot name
+        to the given the plot name. This should always be called with
+        a lock on self.mutex.
         :param plot_name: The plot name
         """
         for row in range(len(self.list_widget)):
@@ -341,7 +342,8 @@ class PlotSelectorView(QWidget):
         makes the plot name directly editable
         """
         plot_name = self.get_currently_selected_plot_name()
-        row, widget = self._get_row_and_widget_from_plot_name(plot_name)
+        with QMutexLocker(self.mutex):
+            row, widget = self._get_row_and_widget_from_plot_name(plot_name)
         widget.toggle_plot_name_editable(True)
 
     # ----------------------- Plot Sorting --------------------------
@@ -406,8 +408,8 @@ class PlotSelectorView(QWidget):
 
         See also HumanReadableSortItem class
         """
+        self.sort_order = Qt.AscendingOrder
         with QMutexLocker(self.mutex):
-            self.sort_order = Qt.AscendingOrder
             self.list_widget.sortItems(self.sort_order)
 
     def sort_descending(self):
@@ -416,8 +418,8 @@ class PlotSelectorView(QWidget):
 
         See also HumanReadableSortItem class
         """
+        self.sort_order = Qt.DescendingOrder
         with QMutexLocker(self.mutex):
-            self.sort_order = Qt.DescendingOrder
             self.list_widget.sortItems(self.sort_order)
 
     def sort_by_name(self):
@@ -425,8 +427,8 @@ class PlotSelectorView(QWidget):
         Set sorting to be by name - note this does not update any
         sort keys, it just sets the required state
         """
+        self.sort_type = SortType.Name
         with QMutexLocker(self.mutex):
-            self.sort_type = SortType.Name
             self.list_widget.sortItems(self.sort_order)
 
     def sort_by_last_shown(self):
@@ -434,8 +436,8 @@ class PlotSelectorView(QWidget):
         Set sorting to be by last shown - note this does not update
         any sort keys, it just sets the required state
         """
+        self.sort_type = SortType.LastShown
         with QMutexLocker(self.mutex):
-            self.sort_type = SortType.LastShown
             self.list_widget.sortItems(self.sort_order)
 
     def set_sort_keys(self, sort_names_dict):
