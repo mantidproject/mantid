@@ -175,7 +175,7 @@ void renameResultWithSpectra(WorkspaceGroup_sptr resultWorkspace,
 void renameResult(WorkspaceGroup_sptr resultWorkspace,
                   const FitDataIterator &fitDataBegin,
                   const FitDataIterator &fitDataEnd) {
-  if (resultWorkspace->size() >= fitDataEnd - fitDataBegin)
+  if (static_cast<int>(resultWorkspace->size()) >= fitDataEnd - fitDataBegin)
     renameResultWithSpectra(resultWorkspace, fitDataBegin, fitDataEnd);
   else
     renameResultWithoutSpectra(resultWorkspace, fitDataBegin, fitDataEnd);
