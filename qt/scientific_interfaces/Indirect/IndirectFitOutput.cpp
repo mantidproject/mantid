@@ -294,8 +294,7 @@ void IndirectFitOutput::addOutput(WorkspaceGroup_sptr resultGroup,
                                   const FitDataIterator &fitDataBegin,
                                   const FitDataIterator &fitDataEnd) {
   updateParameters(parameterTable, fitDataBegin, fitDataEnd);
-  updateFitResults(resultGroup, fitDataBegin, fitDataEnd);
-  renameResult(resultWorkspace, fitDataBegin, fitDataEnd);
+  updateResults(resultGroup, resultWorkspace, fitDataBegin, fitDataEnd);
   m_resultWorkspace = resultWorkspace;
   m_resultGroup = resultGroup;
 }
@@ -325,8 +324,7 @@ void IndirectFitOutput::updateResults(WorkspaceGroup_sptr resultGroup,
   if (numberOfSpectraIn(fitDataBegin, fitDataEnd) <= resultGroup->size()) {
     updateFitResultsFromStructured(resultGroup, fitDataBegin, fitDataEnd);
     renameStructuredResult(resultWorkspace, fitDataBegin, fitDataEnd);
-  }
-  else {
+  } else {
     updateFitResultsFromUnstructured(resultGroup, fitDataBegin, fitDataEnd);
     renameUnstructuredResult(resultWorkspace, fitDataBegin, fitDataEnd);
   }
