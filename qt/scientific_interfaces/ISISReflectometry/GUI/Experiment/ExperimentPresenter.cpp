@@ -2,10 +2,8 @@
 #include "../../Reduction/ValidatePerThetaDefaults.h"
 #include "PerThetaDefaultsValidationResult.h"
 // TODO
-// - Separate table change notifications from other notifications.
-// - Only show theta warning dialog for theta value changes.
 // - Validate the stitch options input.
-// - World domination.
+// - Adjust validation to handle the default angle case.
 
 namespace MantidQt {
 namespace CustomInterfaces {

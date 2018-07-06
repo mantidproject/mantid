@@ -3,6 +3,7 @@
 #include "IEventView.h"
 #include "Parse.h"
 #include <boost/algorithm/string.hpp>
+#include <iostream>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -104,11 +105,12 @@ void EventPresenter::setSlicingFromView() {
     m_slicing = boost::blank();
     break;
   default:
-    throw std::runtime_error("A Unrecognized slice type.");
+    throw std::runtime_error("Unrecognized slice type.");
   }
 }
 
 void EventPresenter::notifySliceTypeChanged(SliceType newSliceType) {
+  std::cout << m_slicing << std::endl;
   m_view->disableSliceType(m_sliceType);
   m_view->enableSliceType(newSliceType);
   m_sliceType = newSliceType;
