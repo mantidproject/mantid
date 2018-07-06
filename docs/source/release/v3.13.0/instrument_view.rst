@@ -12,6 +12,9 @@ Instrument Visualization
 Instrument View
 ---------------
 
+Improvements
+############
+
 The `Instrument View <https://www.mantidproject.org/MantidPlot:_Instrument_View>`__ visualization tool in Mantid has undergone some major changes under-the-hood which has resulted in a smoother, more responsive interface. 
 Instruments generally load faster as well. Below are a few noteworthy improvements to load times:
 

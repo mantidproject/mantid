@@ -36,7 +36,9 @@
 #include <Poco/Message.h>
 
 // NeXus
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #endif

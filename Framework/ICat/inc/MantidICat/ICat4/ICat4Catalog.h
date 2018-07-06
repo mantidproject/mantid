@@ -5,6 +5,7 @@
 #include "MantidAPI/ICatalogInfoService.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidICat/CatalogSearchParam.h"
+#include "MantidICat/ICat4/GSoapGenerated/ICat4ICATPortBindingProxy.h"
 
 namespace Mantid {
 namespace ICat {

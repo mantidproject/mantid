@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/LibraryWrapper.h"
