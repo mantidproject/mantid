@@ -138,11 +138,10 @@ class TOFTOFScriptElementTest(unittest.TestCase):
             if not name.startswith('__') and not hasattr(getattr(self.scriptElement, name), '__call__'):
                 self.assertEqual(getattr(self.scriptElement, name), getattr(scriptElement2, name))
         
-    #@unittest.skip('wrongTest')
     def test_that_script_is_executable_in_mantid(self):
         self.scriptElement.reset()
-        #self.scriptElement.facility_name   = 'MLZ'
-        #self.scriptElement.instrument_name = 'TOFTOF'
+        self.scriptElement.facility_name   = 'MLZ'
+        self.scriptElement.instrument_name = 'TOFTOF'
 
         # prefix of (some) workspace names
         self.scriptElement.prefix   = 'ws'
@@ -194,9 +193,6 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         self.scriptElement.saveNXSPE    = False
         self.scriptElement.saveNexus    = False
         self.scriptElement.saveAscii    = False
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-        print(self.scriptElement.dataDir)
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
         exec('from mantid.simpleapi import *\n' + self.scriptElement.to_script(), dict(), dict())
         
     def test_that_script_has_correct_syntax(self):
