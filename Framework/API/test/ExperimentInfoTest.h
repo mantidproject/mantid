@@ -941,6 +941,19 @@ public:
                      compInfo.parent(compInfo.indexOf(bankId)));
   }
 
+  void test_readParameterMap_semicolons_in_value() {
+    auto inst = ComponentCreationHelper::createMinimalInstrument(
+        V3D{-2, 0, 0} /*source*/, V3D{10, 0, 0} /*sample*/,
+        V3D{12, 0, 0} /*detector*/);
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    expInfo.readParameterMap("detID:1;string;par;11;22;33;44");
+    auto &pmap = expInfo.instrumentParameters();
+    auto det = expInfo.getInstrument()->getDetector(1);
+    auto value = pmap.getString(det.get(), "par");
+    TS_ASSERT_EQUALS(value, "11;22;33;44");
+  }
+
 private:
   void addInstrumentWithParameter(ExperimentInfo &expt, const std::string &name,
                                   const std::string &value) {
