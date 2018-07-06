@@ -7,6 +7,7 @@
 #include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
+#include "stringobject.h"
 
 #include <boost/make_shared.hpp>
 #include <boost/python/class.hpp>
