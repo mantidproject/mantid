@@ -117,7 +117,7 @@ void MuonProcess::init() {
                   "An output workspace.");
 
   declareProperty("CropWorkspace", true,
-                  "Determines if the input workspace should be cropped");
+                  "Determines if the input workspace should be cropped at Xmax, Xmin is still apllied.");
 
   declareProperty("WorkspaceName", "", "The name of the input workspace");
 }
@@ -300,8 +300,6 @@ MatrixWorkspace_sptr MuonProcess::correctWorkspace(MatrixWorkspace_sptr ws,
 
     ws = changeOffset->getProperty("OutputWorkspace");
   }
-  bool toCrop = getProperty("CropWorkspace");
-  if (toCrop) {
     // Crop workspace, if need to
     double Xmin = getProperty("Xmin");
     double Xmax = getProperty("Xmax");
@@ -311,14 +309,14 @@ MatrixWorkspace_sptr MuonProcess::correctWorkspace(MatrixWorkspace_sptr ws,
 
       if (Xmin != EMPTY_DBL())
         crop->setProperty("Xmin", Xmin);
-
-      if (Xmax != EMPTY_DBL())
-        crop->setProperty("Xmax", Xmax);
-
+	  bool toCrop = getProperty("CropWorkspace");
+	  if (toCrop) {
+		  if (Xmax != EMPTY_DBL())
+			  crop->setProperty("Xmax", Xmax);
+	  }
       crop->execute();
 
       ws = crop->getProperty("OutputWorkspace");
-    }
   }
 
   // Rebin workspace if need to
