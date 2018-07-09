@@ -33,6 +33,13 @@ Finally the found satellite peaks are integerated using the
 `BackgroundInnerRadius`, and `BackgroundOuterRadius`. Satellite peaks are
 discarded if there I/sigma value is less than the parameter `IOverSigma`.
 
+Related Algorithms
+------------------
+
+- :ref:`IndexSatellitePeaks <algm-IndexSatellitePeaks-v1>` can be used to
+  obtain a superspace indexing of the peaks workspace output from this
+  algorithm.
+
 Usage
 -----
 
