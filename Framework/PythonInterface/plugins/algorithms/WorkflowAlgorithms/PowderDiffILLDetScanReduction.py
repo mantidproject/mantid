@@ -9,7 +9,6 @@ from mantid.simpleapi import *
 class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
     _progress = None
     _height_range = ''
-    _tolerance = 1000. # set a large number to avoid splitting of counts in SoT
     _mirror = None
     _crop_negative = None
     _out_ws_name = None
@@ -119,8 +118,7 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                                        HeightAxis=self._height_range,
                                        MirrorScatteringAngles=self._mirror,
                                        CropNegativeScatteringAngles=self._crop_negative,
-                                       OutputWorkspace=self._out_ws_name + '_1D',
-                                       ScatteringAngleTolerance=self._tolerance)
+                                       OutputWorkspace=self._out_ws_name + '_1D')
         return output1D
 
     def _reduce_2DTubes(self, input_group):
@@ -130,7 +128,6 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                                             HeightAxis=self._height_range,
                                             MirrorScatteringAngles=self._mirror,
                                             CropNegativeScatteringAngles=self._crop_negative,
-                                            ScatteringAngleTolerance=self._tolerance,
                                             OutputWorkspace=output2DtubesName)
         if self._final_mask != 0:
             nSpec = mtd[output2DtubesName].getNumberHistograms()
@@ -146,7 +143,6 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                                        HeightAxis=self._height_range,
                                        MirrorScatteringAngles=self._mirror,
                                        CropNegativeScatteringAngles=self._crop_negative,
-                                       ScatteringAngleTolerance=self._tolerance,
                                        OutputWorkspace = output2DName)
         if self._final_mask != 0:
             nSpec = mtd[output2DName].getNumberHistograms()

@@ -16,6 +16,7 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -83,6 +84,9 @@ void SumOverlappingTubes::init() {
   declareProperty(make_unique<PropertyWithValue<bool>>("MirrorScatteringAngles",
                                                        false, Direction::Input),
                   "A flag to mirror the signed 2thetas. ");
+  declareProperty(make_unique<PropertyWithValue<bool>>("SplitCounts", false,
+                                                       Direction::Input),
+                  "A flag to split the counts between adjacent bins");
 }
 
 void SumOverlappingTubes::exec() {
@@ -90,10 +94,13 @@ void SumOverlappingTubes::exec() {
 
   m_progress = make_unique<Progress>(this, 0.0, 1.0, m_workspaceList.size());
 
-  HistogramData::Points x(m_numPoints, LinearGenerator(m_startScatteringAngle,
-                                                       m_stepScatteringAngle));
+  // we need histogram data with m_numPoints bins
+  HistogramData::BinEdges x(
+      m_numPoints + 1,
+      LinearGenerator(m_startScatteringAngle, m_stepScatteringAngle));
 
   MatrixWorkspace_sptr outputWS = create<Workspace2D>(m_numHistograms, x);
+  outputWS->setDistribution(false);
 
   const auto newAxis = new NumericAxis(m_heightAxis);
   newAxis->setUnit("Label");
@@ -112,15 +119,18 @@ void SumOverlappingTubes::exec() {
 
   const auto normalisation = performBinning(outputWS);
 
-  if (getProperty("Normalise"))
-    for (size_t i = 0; i < m_numPoints; ++i)
+  if (getProperty("Normalise")) {
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int64_t ii = 0; ii < static_cast<int64_t>(m_numPoints); ++ii)
       for (size_t j = 0; j < m_numHistograms; ++j) {
         // Avoid spurious normalisation for low counting cells
+        const size_t i = static_cast<size_t>(ii);
         if (normalisation[j][i] < 1e-15)
           continue;
         outputWS->mutableY(j)[i] /= normalisation[j][i];
         outputWS->mutableE(j)[i] /= normalisation[j][i];
       }
+  }
 
   setProperty("OutputWorkspace", outputWS);
 }
@@ -148,33 +158,28 @@ void SumOverlappingTubes::getInputParameters() {
 
 void SumOverlappingTubes::getScatteringAngleBinning() {
   m_startScatteringAngle = 180.0;
-  m_endScatteringAngle = 0.0;
+  m_endScatteringAngle = -180.0;
 
   // Loop to check minimum and maximum extents for workspace
   for (auto &ws : m_workspaceList) {
     const auto &specInfo = ws->spectrumInfo();
     for (size_t i = 0; i < specInfo.size(); ++i) {
-      if (specInfo.isMonitor(i))
+      if (specInfo.isMonitor(i) || specInfo.isMasked(i))
         continue;
       const auto &pos = specInfo.position(i);
-      double thetaAngle =
-          m_mirrorDetectors * atan2(pos.X(), pos.Z()) * 180.0 / M_PI;
-      m_startScatteringAngle = std::min(m_startScatteringAngle, thetaAngle);
-      m_endScatteringAngle = std::max(m_endScatteringAngle, thetaAngle);
+      const double theta =
+          atan2(pos.X(), pos.Z()) * m_mirrorDetectors * 180 / M_PI;
+      m_startScatteringAngle = std::min(m_startScatteringAngle, theta);
+      m_endScatteringAngle = std::max(m_endScatteringAngle, theta);
     }
   }
 
-  std::vector<double> scatteringBinning = getProperty("ScatteringAngleBinning");
+  const std::vector<double> scatteringBinning = getProperty("ScatteringAngleBinning");
   if (scatteringBinning.size() == 1) {
     m_stepScatteringAngle = scatteringBinning[0];
-
-    // Round to the nearest m_stepScatteringAngle, normally detectors will be
-    // aiming for this.
-    const auto roundingFactor = 1.0 / m_stepScatteringAngle;
-    m_startScatteringAngle =
-        std::round(m_startScatteringAngle * roundingFactor) / roundingFactor;
-    m_endScatteringAngle =
-        std::round(m_endScatteringAngle * roundingFactor) / roundingFactor;
+    // Extend the boundaries by half of the step size
+    m_startScatteringAngle -= m_stepScatteringAngle / 2.;
+    m_endScatteringAngle += m_stepScatteringAngle / 2.;
   } else if (scatteringBinning.size() == 3) {
     if (scatteringBinning[0] > m_startScatteringAngle ||
         scatteringBinning[2] < m_endScatteringAngle)
@@ -184,17 +189,28 @@ void SumOverlappingTubes::getScatteringAngleBinning() {
     m_endScatteringAngle = scatteringBinning[2];
   }
 
-  if (getProperty("CropNegativeScatteringAngles") && m_startScatteringAngle < 0)
-    m_startScatteringAngle = 0.0;
+  if (getProperty("CropNegativeScatteringAngles")) {
+    if (m_endScatteringAngle < 0) {
+      throw std::runtime_error("No positive scattering angle range");
+    }
+    if (m_startScatteringAngle < 0) {
+      m_startScatteringAngle +=
+          std::floor(-m_startScatteringAngle / m_stepScatteringAngle) *
+          m_stepScatteringAngle;
+    }
+  }
 
-  m_numPoints = int(ceil((m_endScatteringAngle - m_startScatteringAngle) /
-                         m_stepScatteringAngle)) +
-                1;
-  g_log.information() << "Number of bins in output workspace:" << m_numPoints
-                      << std::endl;
+  m_numPoints = size_t(std::floor(
+      (m_endScatteringAngle - m_startScatteringAngle) / m_stepScatteringAngle));
+  g_log.information() << "Number of bins:" << m_numPoints << std::endl;
   g_log.information() << "Scattering angle binning:" << m_startScatteringAngle
                       << ", " << m_stepScatteringAngle << ", "
                       << m_endScatteringAngle << "\n";
+
+  if (m_startScatteringAngle >= m_endScatteringAngle) {
+    throw std::runtime_error(
+        "Wrong scattering angle range, check your binning/data");
+  }
 }
 
 void SumOverlappingTubes::getHeightAxis(const std::string &componentName) {
@@ -258,6 +274,7 @@ std::vector<std::vector<double>>
 SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
   const double scatteringAngleTolerance =
       getProperty("ScatteringAngleTolerance");
+  const bool splitCounts = getProperty("SplitCounts");
 
   std::vector<std::vector<double>> normalisation(
       m_numHistograms, std::vector<double>(m_numPoints, 0.0));
@@ -294,8 +311,8 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
         angle = specInfo.signedTwoTheta(i);
       angle *= m_mirrorDetectors * 180.0 / M_PI;
 
-      int angleIndex = boost::math::iround((angle - m_startScatteringAngle) /
-                                           m_stepScatteringAngle);
+      const int angleIndex = int(
+          std::floor((angle - m_startScatteringAngle) / m_stepScatteringAngle));
 
       // point is out of range, a warning should have been generated already for
       // the theta index
@@ -309,7 +326,8 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
       auto &eData = outputWS->mutableE(heightIndex);
 
       // counts are split between bins if outside this tolerance
-      if (deltaAngle > m_stepScatteringAngle * scatteringAngleTolerance) {
+      if (splitCounts &&
+          deltaAngle > m_stepScatteringAngle * scatteringAngleTolerance) {
         int angleIndexNeighbor;
         if (distanceFromAngle(angleIndex - 1, angle) <
             distanceFromAngle(angleIndex + 1, angle))
