@@ -2,6 +2,7 @@ from mantid.kernel import *
 from mantid.dataobjects import PeaksWorkspaceProperty
 from mantid.api import *
 from mantid.simpleapi import *
+import fractional_indexing as indexing
 
 
 class RefineSatellitePeaks(DataProcessorAlgorithm):
