@@ -185,7 +185,7 @@ void ReflectometryReductionOneAuto2::init() {
   initMomentumTransferProperties();
 
   // Polarization correction
-  std::vector<std::string> propOptions = {"None", "PA", "PNR"};
+  std::vector<std::string> propOptions = {"None", "PA", "PNR", "ParameterFile"};
   declareProperty("PolarizationAnalysis", "None",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Polarization analysis mode.");
@@ -243,10 +243,11 @@ void ReflectometryReductionOneAuto2::exec() {
 
   IAlgorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
   alg->initialize();
-
   // Mandatory properties
   alg->setProperty("SummationType", getPropertyValue("SummationType"));
   alg->setProperty("ReductionType", getPropertyValue("ReductionType"));
+  alg->setProperty("IncludePartialBins",
+                   getPropertyValue("IncludePartialBins"));
   alg->setProperty("Diagnostics", getPropertyValue("Diagnostics"));
   double wavMin = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
@@ -744,35 +745,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     return true;
   }
 
-  auto groupIvsLam =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputIvsLam);
-  auto effAlg = createChildAlgorithm("CreatePolarizationEfficiencies");
-  effAlg->setProperty("InputWorkspace", groupIvsLam->getItem(0));
-  if (!isDefault("Pp")) {
-    effAlg->setProperty("Pp", getPropertyValue("Pp"));
-  }
-  if (!isDefault("Rho")) {
-    effAlg->setProperty("Rho", getPropertyValue("Rho"));
-  }
-  if (!isDefault("Ap")) {
-    effAlg->setProperty("Ap", getPropertyValue("Ap"));
-  }
-  if (!isDefault("Alpha")) {
-    effAlg->setProperty("Alpha", getPropertyValue("Alpha"));
-  }
-  effAlg->execute();
-  MatrixWorkspace_sptr efficiencies = effAlg->getProperty("OutputWorkspace");
-
-  Algorithm_sptr polAlg =
-      createChildAlgorithm("PolarizationCorrectionFredrikze");
-  polAlg->setChild(false);
-  polAlg->setRethrows(true);
-  polAlg->setProperty("InputWorkspace", outputIvsLam);
-  polAlg->setProperty("OutputWorkspace", outputIvsLam);
-  polAlg->setProperty("PolarizationAnalysis",
-                      getPropertyValue("PolarizationAnalysis"));
-  polAlg->setProperty("Efficiencies", efficiencies);
-  polAlg->execute();
+  applyPolarizationCorrection(outputIvsLam);
 
   // Now we've overwritten the IvsLam workspaces, we'll need to recalculate
   // the IvsQ ones
@@ -798,6 +771,79 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
 
   return true;
+}
+
+/** Construct a polarization efficiencies workspace based on values of input
+ * properties.
+ */
+std::tuple<API::MatrixWorkspace_sptr, std::string, std::string>
+ReflectometryReductionOneAuto2::getPolarizationEfficiencies() {
+  auto groupIvsLam = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      getPropertyValue("OutputWorkspaceWavelength"));
+
+  std::string const paMethod = getPropertyValue("PolarizationAnalysis");
+  Workspace_sptr workspace = groupIvsLam->getItem(0);
+  MatrixWorkspace_sptr efficiencies;
+  std::string correctionMethod;
+  std::string correctionOption;
+
+  if (paMethod == "ParameterFile") {
+    auto effAlg = createChildAlgorithm("ExtractPolarizationEfficiencies");
+    effAlg->setProperty("InputWorkspace", workspace);
+    effAlg->execute();
+    efficiencies = effAlg->getProperty("OutputWorkspace");
+    correctionMethod = effAlg->getPropertyValue("CorrectionMethod");
+    correctionOption = effAlg->getPropertyValue("CorrectionOption");
+  } else {
+    auto effAlg = createChildAlgorithm("CreatePolarizationEfficiencies");
+    effAlg->setProperty("InputWorkspace", workspace);
+    if (!isDefault("Pp")) {
+      effAlg->setProperty("Pp", getPropertyValue("Pp"));
+    }
+    if (!isDefault("Rho")) {
+      effAlg->setProperty("Rho", getPropertyValue("Rho"));
+    }
+    if (!isDefault("Ap")) {
+      effAlg->setProperty("Ap", getPropertyValue("Ap"));
+    }
+    if (!isDefault("Alpha")) {
+      effAlg->setProperty("Alpha", getPropertyValue("Alpha"));
+    }
+    effAlg->execute();
+    efficiencies = effAlg->getProperty("OutputWorkspace");
+    correctionMethod = "Fredrikze";
+    correctionOption = paMethod;
+  }
+  return std::make_tuple(efficiencies, correctionMethod, correctionOption);
+}
+
+/**
+ * Apply a polarization correction to workspaces in lambda.
+ * @param outputIvsLam :: Name of a workspace group to apply the correction to.
+ */
+void ReflectometryReductionOneAuto2::applyPolarizationCorrection(
+    std::string const &outputIvsLam) {
+  MatrixWorkspace_sptr efficiencies;
+  std::string correctionMethod;
+  std::string correctionOption;
+  std::tie(efficiencies, correctionMethod, correctionOption) =
+      getPolarizationEfficiencies();
+
+  Algorithm_sptr polAlg = createChildAlgorithm("PolarizationEfficiencyCor");
+  polAlg->setChild(false);
+  polAlg->setRethrows(true);
+  polAlg->setProperty("OutputWorkspace", outputIvsLam);
+  polAlg->setProperty("Efficiencies", efficiencies);
+  polAlg->setProperty("CorrectionMethod", correctionMethod);
+
+  if (correctionMethod == "Fredrikze") {
+    polAlg->setProperty("InputWorkspaceGroup", outputIvsLam);
+    polAlg->setProperty("PolarizationAnalysis", correctionOption);
+  } else {
+    throw std::invalid_argument("Unsupported polarization correction method: " +
+                                correctionMethod);
+  }
+  polAlg->execute();
 }
 
 /**

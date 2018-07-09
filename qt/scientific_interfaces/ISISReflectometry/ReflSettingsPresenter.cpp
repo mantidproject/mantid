@@ -76,9 +76,16 @@ bool ReflSettingsPresenter::hasReductionTypes(
   return summationType == "SumInQ";
 }
 
+bool ReflSettingsPresenter::hasIncludePartialBinsOption(
+    const std::string &summationType) const {
+  return summationType == "SumInQ";
+}
+
 void ReflSettingsPresenter::handleSummationTypeChange() {
   auto summationType = m_view->getSummationType();
   m_view->setReductionTypeEnabled(hasReductionTypes(summationType));
+  m_view->setIncludePartialBinsEnabled(
+      hasIncludePartialBinsOption(summationType));
 }
 
 /** Sets the current instrument name and changes accessibility status of
@@ -213,12 +220,17 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
 
   if (m_view->experimentSettingsEnabled()) {
     addIfNotEmpty(options, "AnalysisMode", m_view->getAnalysisMode());
-    addIfNotEmpty(options, "Rho", m_view->getCRho());
-    addIfNotEmpty(options, "Alpha", m_view->getCAlpha());
-    addIfNotEmpty(options, "Ap", m_view->getCAp());
-    addIfNotEmpty(options, "Pp", m_view->getCPp());
-    addIfNotEmpty(options, "PolarizationAnalysis",
-                  m_view->getPolarisationCorrections());
+    auto const pa = m_view->getPolarisationCorrections();
+    addIfNotEmpty(options, "PolarizationAnalysis", pa);
+    if (pa == "PA") {
+      addIfNotEmpty(options, "Rho", m_view->getCRho());
+      addIfNotEmpty(options, "Alpha", m_view->getCAlpha());
+      addIfNotEmpty(options, "Ap", m_view->getCAp());
+      addIfNotEmpty(options, "Pp", m_view->getCPp());
+    } else if (pa == "PNR") {
+      addIfNotEmpty(options, "Ap", m_view->getCAp());
+      addIfNotEmpty(options, "Pp", m_view->getCPp());
+    }
     addIfNotEmpty(options, "StartOverlap", m_view->getStartOverlap());
     addIfNotEmpty(options, "EndOverlap", m_view->getEndOverlap());
 
@@ -227,6 +239,10 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
 
     if (hasReductionTypes(summationType))
       addIfNotEmpty(options, "ReductionType", m_view->getReductionType());
+
+    auto const includePartialBins =
+        asAlgorithmPropertyBool(m_view->getIncludePartialBins());
+    options["IncludePartialBins"] = includePartialBins;
 
     auto defaultOptions = getDefaultOptions();
     for (auto iter = defaultOptions.begin(); iter != defaultOptions.end();
@@ -405,6 +421,10 @@ void ReflSettingsPresenter::getExpDefaults() {
   defaults.ReductionType =
       value_or(parameters.optional<std::string>("ReductionType"),
                alg->getPropertyValue("ReductionType"));
+
+  defaults.IncludePartialBins =
+      value_or(parameters.optional<bool>("IncludePartialBins"),
+               alg->getProperty("IncludePartialBins"));
 
   defaults.CRho = value_or(parameters.optional<std::string>("crho"), "1");
   defaults.CAlpha = value_or(parameters.optional<std::string>("calpha"), "1");

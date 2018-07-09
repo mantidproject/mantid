@@ -1,4 +1,5 @@
 #include "MantidQtWidgets/SliceViewer/PeakView.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewer.h"
 
 #include <QPainter>
 #include <qwt_plot.h>
@@ -84,6 +85,14 @@ void PeakView::movePosition(
     Mantid::Geometry::PeakTransform_sptr peakTransform) {
   for (auto &peak : m_peaks) {
     peak->movePosition(peakTransform);
+  }
+}
+
+void PeakView::movePositionNonOrthogonal(
+    Mantid::Geometry::PeakTransform_sptr peakTransform,
+    NonOrthogonalAxis &info) {
+  for (auto &peak : m_peaks) {
+    peak->movePositionNonOrthogonal(peakTransform, info);
   }
 }
 

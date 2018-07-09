@@ -55,7 +55,6 @@ def _get_analysis_data_service():
     import mantid
     return mantid.AnalysisDataService.Instance()
 
-
 # -------------------------- Wrapped MantidPlot functions -----------------
 
 def runPythonScript(code, async=False, quiet=False, redirect=True):

@@ -13,11 +13,10 @@ This algorithm is the first step in the ILL reflectometry reduction workflow. It
 
 #. loads data from disk
 #. merges the numors
-#. normalizes to a (water) reference
-#. normalizes to slit sizes
-#. normalizes to experiment time or monitor counts
-#. subtracts time-independent background
-#. crop to given wavelength range (in TOF)
+#. normalizes to a (water) reference (optional)
+#. normalizes to slit sizes (optional)
+#. normalizes to experiment time or monitor counts (optional)
+#. subtracts time-independent background (optional)
 #. converts to wavelength
 
 The algorithm can be thought as an 'advanced loader', and should be used to load both direct beam and reflected beam measurements.

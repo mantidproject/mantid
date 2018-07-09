@@ -127,7 +127,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertTrue(view.radius_limit_min == 12.)
         self.assertTrue(view.radius_limit_max == 15.)
         self.assertFalse(view.compatibility_mode)
-        self.assertFalse(view.show_transmission)
+        self.assertTrue(view.show_transmission)
 
         # Assert that Beam Centre View is updated correctly
         self.assertEqual(view.beam_centre.lab_pos_1, 155.45)

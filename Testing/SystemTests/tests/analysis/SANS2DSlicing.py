@@ -26,7 +26,7 @@ class SANS2DMinimalBatchReductionSliced(stresstesting.MantidStressTest):
         self.tolerance = 0.02
         self.tolerance_is_reller=True
         self.disableChecking.append('Instrument')
-        return str(mtd['trans_test_rear'][0]), 'SANSReductionGUI.nxs'
+        return str(mtd['trans_test_rear_1D_1.5_12.5'][0]), 'SANSReductionGUI.nxs'
 
 
 class SANS2DMinimalSingleReductionSliced(SANS2DMinimalBatchReductionSliced):
@@ -39,7 +39,7 @@ class SANS2DMinimalSingleReductionSliced(SANS2DMinimalBatchReductionSliced):
         i.TransmissionCan('22024', '22024')
         i.SetEventSlices("0.0-450, 5-10")
         reduced = i.WavRangeReduction()
-        RenameWorkspace(reduced, OutputWorkspace='trans_test_rear')
+        RenameWorkspace(reduced, OutputWorkspace='trans_test_rear_1D_1.5_12.5')
 
 
 if __name__ == "__main__":

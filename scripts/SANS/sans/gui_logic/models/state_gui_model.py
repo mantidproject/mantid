@@ -763,7 +763,7 @@ class StateGuiModel(object):
 
     @property
     def show_transmission(self):
-        return self.get_simple_element(element_id=OtherId.show_transmission, default_value=False)
+        return self.get_simple_element(element_id=OtherId.show_transmission, default_value=True)
 
     @show_transmission.setter
     def show_transmission(self, value):

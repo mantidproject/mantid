@@ -13,7 +13,7 @@ from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, LOQ, LARM
                                    REDUCED_CAN_TAG)
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
 from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode,
-                               SANSInstrument, SANSFacility, DataType)
+                               SANSInstrument, SANSFacility, DataType, TransmissionType)
 # -------------------------------------------
 # Constants
 # -------------------------------------------
@@ -632,19 +632,20 @@ def get_standard_output_workspace_name(state, reduction_data_type, transmission 
         period_as_string = ""
 
     # 3. Detector name
-    move = state.move
-    detectors = move.detectors
-    if reduction_data_type is ISISReductionMode.Merged:
-        detector_name_short = "merged"
-    elif reduction_data_type is ISISReductionMode.HAB:
-        det_name = detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short
-        detector_name_short = det_name if det_name is not None else "hab"
-    elif reduction_data_type is ISISReductionMode.LAB:
-        det_name = detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short
-        detector_name_short = det_name if det_name is not None else "lab"
-    else:
-        raise RuntimeError("SANSStateFunctions: Unknown reduction data type {0} cannot be used to "
-                           "create an output name".format(reduction_data_type))
+    if not transmission:
+        move = state.move
+        detectors = move.detectors
+        if reduction_data_type is ISISReductionMode.Merged:
+            detector_name_short = "merged"
+        elif reduction_data_type is ISISReductionMode.HAB:
+            det_name = detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short
+            detector_name_short = det_name if det_name is not None else "hab"
+        elif reduction_data_type is ISISReductionMode.LAB:
+            det_name = detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short
+            detector_name_short = det_name if det_name is not None else "lab"
+        else:
+            raise RuntimeError("SANSStateFunctions: Unknown reduction data type {0} cannot be used to "
+                               "create an output name".format(reduction_data_type))
 
     # 4. Dimensionality
     reduction = state.reduction
@@ -695,6 +696,22 @@ def get_standard_output_workspace_name(state, reduction_data_type, transmission 
         output_workspace_base_name = (short_run_number_as_string + transmission_name +
                                       phi_limits_as_string)
     return output_workspace_name, output_workspace_base_name
+
+
+def get_transmission_output_name(state, reduction_mode):
+    user_specified_output_name = state.save.user_specified_output_name
+    # Get the standard workspace name
+    workspace_name, workspace_base_name = get_standard_output_workspace_name(state, reduction_mode,
+                                                                             transmission=True)
+
+    if user_specified_output_name:
+        output_name = user_specified_output_name + "_trans"
+        output_base_name = output_name
+    else:
+        output_name = workspace_name
+        output_base_name = workspace_base_name
+
+    return output_name, output_base_name
 
 
 def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_type=None):
@@ -895,6 +912,10 @@ def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
         state_string += "counts"
     elif partial_type is OutputParts.Norm:
         state_string += "norm"
+    elif partial_type is TransmissionType.Calculated:
+        state_string += "calculated_transmission"
+    elif partial_type is TransmissionType.Unfitted:
+        state_string += "unfitted_transmission"
     return str(get_hash_value(state_string))
 
 
@@ -924,6 +945,21 @@ def get_reduced_can_workspace_from_ads(state, output_parts, reduction_mode):
         hashed_state_norm = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.Norm)
         reduced_can_norm = get_workspace_from_ads_based_on_hash(hashed_state_norm)
     return reduced_can, reduced_can_count, reduced_can_norm
+
+
+def get_transmission_workspaces_from_ads(state, reduction_mode):
+    """
+        Get the reduced can transmission workspace from the ADS if it exists else nothing
+
+        :param state: a SANSState object.
+        :param reduction_mode: the reduction mode which at this point is either HAB or LAB
+        :return: a reduced transmission can object or None.
+        """
+    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.Calculated)
+    calculated_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
+    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.Unfitted)
+    unfitted_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
+    return calculated_transmission, unfitted_transmission
 
 
 def write_hash_into_reduced_can_workspace(state, workspace, reduction_mode, partial_type=None):

@@ -480,6 +480,9 @@
 
    <instrument name="SNAP" beamline="3">
 	<technique>Neutron Diffraction</technique>
+        <livedata>
+          <connection name="event" address="bl3-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
+        </livedata>
    </instrument>
 
    <instrument name="REF_M" beamline="4A">
@@ -500,10 +503,16 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
+    <livedata>
+      <connection name="event" address="bl5-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
+    </livedata>
    </instrument>
 
    <instrument name="EQ-SANS" shortname="EQSANS" beamline="6">
       <technique>Small Angle Scattering</technique>
+      <livedata>
+        <connection name="event" address="bl6-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
+      </livedata>
    </instrument>
 
    <instrument name="VULCAN" beamline="7">
@@ -576,6 +585,9 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
+    <livedata>
+      <connection name="event" address="bl18-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
+    </livedata>
    </instrument>
 
    <instrument name="VENUS">
@@ -674,7 +686,7 @@
     <technique>Reflectometry</technique>
   </instrument>
 
-  <instrument name="Figaro">
+  <instrument name="FIGARO">
     <technique>Reflectometry</technique>
   </instrument>
 
@@ -777,7 +789,7 @@
 </facility>
 
 <!--  Facility MLZ (FRMII) (Germany) -->
-<facility name="MLZ" FileExtensions=".nxs,.d_dat">
+<facility name="MLZ" FileExtensions=".nxs,.d_dat,.001,.mtxt,.mdat">
   <instrument name="DNS">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
@@ -795,6 +807,10 @@
 
   <instrument name="POWTEX">
 	<technique>Neutron Diffraction</technique>
+  </instrument>
+
+  <instrument name="SANS-1_MLZ" shortname='SANS-1'>
+        <technique>Small Angle Scattering</technique>
   </instrument>
 </facility>
 

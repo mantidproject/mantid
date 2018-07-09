@@ -132,7 +132,10 @@ class SANSCreateAdjustmentWorkspacesTest(unittest.TestCase):
         pixel_adjustment = adjustment_alg.getProperty("OutputWorkspacePixelAdjustment").value
         wavelength_and_pixel_adjustment = adjustment_alg.getProperty(
                                                             "OutputWorkspaceWavelengthAndPixelAdjustment").value
-        return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment
+        calculated_transmission = adjustment_alg.getProperty("CalculatedTransmissionWorkspace").value
+        unfitted_transmission = adjustment_alg.getProperty("UnfittedTransmissionWorkspace").value
+        return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment,\
+               calculated_transmission, unfitted_transmission
 
     def test_that_adjustment_workspaces_are_produced_wavelenth_and_wavlength_plus_pixel(self):
         # Arrange
@@ -143,10 +146,10 @@ class SANSCreateAdjustmentWorkspacesTest(unittest.TestCase):
         sample_monitor_data = SANSCreateAdjustmentWorkspacesTest._get_sample_monitor_data(3.)
         transmission_data = SANSCreateAdjustmentWorkspacesTest._get_trans_type_data(1.)
         direct_data = SANSCreateAdjustmentWorkspacesTest._get_trans_type_data(2.)
-
         # Act
         try:
-            wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment = \
+            wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment,\
+            calculated_transmission, unfitted_transmisison = \
                 SANSCreateAdjustmentWorkspacesTest._run_test(serialized_state, sample_data, sample_monitor_data,
                                                              transmission_data, direct_data)
             raised = False
@@ -157,6 +160,40 @@ class SANSCreateAdjustmentWorkspacesTest(unittest.TestCase):
             # We expect a wavelength and pixel adjustment workspace since we set the flag to true and provided a
             # sample data set
             self.assertTrue(wavelength_and_pixel_adjustment)
+            self.assertFalse(calculated_transmission)
+            self.assertFalse(unfitted_transmisison)
+        except:  # noqa
+            raised = True
+        self.assertFalse(raised)
+
+    def test_that_when_show_transmission_is_true_transmission_runs_are_output(self):
+        # Arrange
+        state = SANSCreateAdjustmentWorkspacesTest._get_state()
+        state.adjustment.wide_angle_correction = True
+        state.adjustment.show_transmission = True
+        serialized_state = state.property_manager
+        sample_data = SANSCreateAdjustmentWorkspacesTest._get_sample_data()
+        sample_monitor_data = SANSCreateAdjustmentWorkspacesTest._get_sample_monitor_data(3.)
+        transmission_data = SANSCreateAdjustmentWorkspacesTest._get_trans_type_data(1.)
+        direct_data = SANSCreateAdjustmentWorkspacesTest._get_trans_type_data(2.)
+
+        # Act
+        try:
+            wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment, \
+            calculated_transmission, unfitted_transmisison = \
+                SANSCreateAdjustmentWorkspacesTest._run_test(serialized_state, sample_data, sample_monitor_data,
+                                                             transmission_data, direct_data)
+            raised = False
+            # We expect a wavelength adjustment workspace
+            self.assertTrue(wavelength_adjustment)
+            # We don't expect a pixel adjustment workspace since no files where specified
+            self.assertFalse(pixel_adjustment)
+            # We expect a wavelength and pixel adjustment workspace since we set the flag to true and provided a
+            # sample data set
+            self.assertTrue(wavelength_and_pixel_adjustment)
+            # We expect transmission workspaces since show_transmission was set to true
+            self.assertTrue(calculated_transmission)
+            self.assertTrue(unfitted_transmisison)
         except:  # noqa
             raised = True
         self.assertFalse(raised)

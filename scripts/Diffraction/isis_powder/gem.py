@@ -1,5 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
+import os
+
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping
 from isis_powder.routines import absorb_corrections, common, instrument_settings
@@ -71,7 +73,44 @@ class Gem(AbstractInst):
             angles_filename = filename_stub + "_grouping.new"
             out_file_names["angles_filename"] = angles_filename
 
+        if self._inst_settings.save_maud_calib:
+            maud_calib_filename = filename_stub + ".maud"
+            out_file_names["maud_calib_filename"] = maud_calib_filename
+
         return out_file_names
+
+    def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
+        """
+        Takes a list of focused workspace banks and saves them out in an instrument appropriate format.
+        :param processed_spectra: The list of workspace banks to save out
+        :param run_details: The run details associated with this run
+        :param output_mode: Optional - Sets additional saving/grouping behaviour depending on the instrument
+        :return: d-spacing and TOF groups of the processed output workspaces
+        """
+        d_spacing_group, tof_group = super(Gem, self)._output_focused_ws(processed_spectra=processed_spectra,
+                                                                         run_details=run_details,
+                                                                         output_mode=output_mode)
+
+        output_paths = self._generate_out_file_paths(run_details=run_details)
+        if "maud_filename" in output_paths:
+            gem_algs.save_maud(d_spacing_group, output_paths["maud_filename"])
+
+        if "angles_filename" in output_paths:
+            gem_algs.save_angles(d_spacing_group, output_paths["angles_filename"])
+
+        if "maud_calib_filename" in output_paths:
+            gsas_calib_file_path = os.path.join(self._inst_settings.calibration_dir,
+                                                self._inst_settings.gsas_calib_filename)
+            if not os.path.exists(gsas_calib_file_path):
+                raise RuntimeWarning("Could not save MAUD calibration file, as GSAS calibration file was not found. "
+                                     "It should be present at " + gsas_calib_file_path)
+            else:
+                gem_algs.save_maud_calib(d_spacing_group=d_spacing_group,
+                                         output_path=output_paths["maud_calib_filename"],
+                                         gsas_calib_filename=gsas_calib_file_path,
+                                         grouping_scheme=self._inst_settings.maud_grouping_scheme)
+
+        return d_spacing_group, tof_group
 
     @staticmethod
     def _generate_input_file_name(run_number):

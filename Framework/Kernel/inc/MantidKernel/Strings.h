@@ -5,10 +5,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/System.h"
 
-#include <map>
+#ifndef Q_MOC_RUN
+#include <boost/lexical_cast.hpp>
+#endif
 #include <iosfwd>
+#include <map>
 #include <set>
 #include <sstream>
 #include <string>
@@ -249,11 +253,94 @@ MANTID_KERNEL_DLL int isMember(const std::vector<std::string> &group,
                                const std::string &candidate);
 
 /// Parses a number range, e.g. "1,4-9,54-111,3,10", to the vector containing
-/// all the elements
-/// within the range
+/// all the elements within the range
 MANTID_KERNEL_DLL std::vector<int>
 parseRange(const std::string &str, const std::string &elemSep = ",",
            const std::string &rangeSep = "-");
+
+/// Parses unsigned integer groups, e.g. "1+2,4-7,9,11" to a nested vector
+/// structure.
+template <typename Integer>
+std::vector<std::vector<Integer>> parseGroups(const std::string &str) {
+  std::vector<std::vector<Integer>> groups;
+
+  // Local helper functions.
+  auto translateAdd = [&groups](const std::string &str) {
+    const auto tokens = Kernel::StringTokenizer(
+        str, "+", Kernel::StringTokenizer::TOK_TRIM |
+                      Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+    std::vector<Integer> group;
+    group.reserve(tokens.count());
+    for (const auto &t : tokens) {
+      // add this number to the group we're about to add
+      group.emplace_back(boost::lexical_cast<Integer>(t));
+    }
+    groups.emplace_back(std::move(group));
+  };
+
+  auto translateSumRange = [&groups](const std::string &str) {
+    // add a group with the numbers in the range
+    const auto tokens = Kernel::StringTokenizer(
+        str, "-", Kernel::StringTokenizer::TOK_TRIM |
+                      Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+    if (tokens.count() != 2)
+      throw std::runtime_error("Malformed range (-) operation.");
+    Integer first = boost::lexical_cast<Integer>(tokens[0]);
+    Integer last = boost::lexical_cast<Integer>(tokens[1]);
+    if (first > last)
+      std::swap(first, last);
+    // add all the numbers in the range to the output group
+    std::vector<Integer> group;
+    group.reserve(last - first + 1);
+    for (Integer i = first; i <= last; ++i)
+      group.emplace_back(i);
+    if (!group.empty())
+      groups.emplace_back(std::move(group));
+  };
+
+  auto translateRange = [&groups](const std::string &str) {
+    // add a group per number
+    const auto tokens = Kernel::StringTokenizer(
+        str, ":", Kernel::StringTokenizer::TOK_TRIM |
+                      Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+    if (tokens.count() != 2)
+      throw std::runtime_error("Malformed range (:) operation.");
+    Integer first = boost::lexical_cast<Integer>(tokens[0]);
+    Integer last = boost::lexical_cast<Integer>(tokens[1]);
+    if (first > last)
+      std::swap(first, last);
+    // add all the numbers in the range to separate output groups
+    for (Integer i = first; i <= last; ++i) {
+      groups.emplace_back(1, i);
+    }
+  };
+
+  try {
+    // split into comma separated groups, each group potentially containing
+    // an operation (+-:) that produces even more groups.
+    const auto tokens =
+        StringTokenizer(str, ",", StringTokenizer::TOK_TRIM |
+                                      StringTokenizer::TOK_IGNORE_EMPTY);
+    for (const auto &token : tokens) {
+      // Look for the various operators in the string. If one is found then
+      // do the necessary translation into groupings.
+      if (token.find('+') != std::string::npos) {
+        translateAdd(token);
+      } else if (token.find('-') != std::string::npos) {
+        translateSumRange(token);
+      } else if (token.find(':') != std::string::npos) {
+        translateRange(token);
+      } else if (!token.empty()) {
+        // contains a single number, just add it as a new group
+        groups.emplace_back(1, boost::lexical_cast<Integer>(token));
+      }
+    }
+  } catch (boost::bad_lexical_cast &) {
+    throw std::runtime_error("Cannot parse numbers from string: '" + str + "'");
+  }
+
+  return groups;
+}
 
 /// Extract a line from input stream, discarding any EOL characters encountered
 MANTID_KERNEL_DLL std::istream &extractToEOL(std::istream &is,

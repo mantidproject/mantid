@@ -1,10 +1,10 @@
 import sys
 
-from Muon import load_utils
-from Muon import fft_presenter
-from Muon import fft_view
-from Muon import fft_model
-from Muon import thread_model
+from Muon.GUI.Common import load_utils
+from Muon.GUI.Common import thread_model
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_view
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
 
 import unittest
 
