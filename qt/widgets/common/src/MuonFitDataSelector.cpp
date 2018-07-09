@@ -356,7 +356,24 @@ QString MuonFitDataSelector::getSimultaneousFitLabel() const {
  * @param label :: [input] Text to set as label
  */
 void MuonFitDataSelector::setSimultaneousFitLabel(const QString &label) {
-  m_ui.txtSimFitLabel->setText(label);
+  //do some checks that it is valid
+  auto safeLabel = label.toStdString();
+  auto index = safeLabel.find(".nxs");
+  if ( index != std::string::npos) {
+	  safeLabel = safeLabel.substr(0, index);
+  }
+  index = safeLabel.find_last_of("\\");
+	  if (index != std::string::npos) {
+		  safeLabel = safeLabel.substr(index+1 ,safeLabel.size());
+		  //need to remove instrument name and leading zeros
+		  index = safeLabel.find_last_of("0");
+		  safeLabel = safeLabel.substr(index, safeLabel.size());
+		  while (safeLabel.front() == '0') {
+			  safeLabel = safeLabel.substr(1, safeLabel.size());
+
+		  }
+	  }
+  m_ui.txtSimFitLabel->setText(QString::fromStdString(safeLabel));
 }
 
 /**
