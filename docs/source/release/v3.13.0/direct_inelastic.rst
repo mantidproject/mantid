@@ -13,17 +13,23 @@ Interfaces
 ----------
 
 
-New features
-############
+New
+###
 
 - Added the ability to manually specify a temperature for a set of runs in the TOFTOF reduction dialog.
+
+
+Improvements
+############
+
+- :ref:`PyChop <PyChop>` has been updated to calculate rep-rate multiplication for MAPS and MARI. In addition, it now supports loading instrument parameters from a YAML file, and also plots the Q-E coverage.
+
 
 Algorithms
 ----------
 
-
-New features
-############
+New
+###
 
 - The *EPPWorkspace* input property has been removed from :ref:`DirectILLCollectData <algm-DirectILLCollectData>`.
 
@@ -39,8 +45,8 @@ Improvements
     - all output workspaces are now converted to distributions, i.e. the histograms are divided by the bin width.
     - The default :math:`Q` binning has been revised.
 
-Bug fixes
-#########
+Bugfixes
+########
 
 - Fixed a crash in :ref:`SofQW <algm-SofQW>`, :ref:`SofQWCentre <algm-SofQWCentre>`, :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` and :ref:`SofQWPolygon <algm-SofQWPolygon>` algorithms when they were supplied with energy or :math:`Q` binning params containing the bin width only.
 - Fixed a failure in the wavelength interpolation of :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` which occurred under certain input property combinations.
@@ -62,6 +68,9 @@ Instrument Definitions
 
 Python
 ------
+
+Improvements
+############
 
 - The plotting methods in the :ref:`directtools <Directtools Python module>` python module now support logarithmic scales.
 

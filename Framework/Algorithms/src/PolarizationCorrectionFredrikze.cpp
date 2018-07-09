@@ -239,9 +239,9 @@ PolarizationCorrectionFredrikze::execPA(WorkspaceGroup_sptr inWS) {
       (A0 - A1 + A2 - A3 + A4 + A5 - A6 + A7 - A8 + Ipp + Iaa - Ipa - Iap) / D;
   const auto nIaa =
       (A0 + A1 - A2 + A3 - A4 - A5 + A6 - A7 + A8 + Ipp + Iaa - Ipa - Iap) / D;
-  const auto nIpa =
-      (A0 - A1 + A2 + A3 - A4 - A5 + A6 + A7 - A8 - Ipp - Iaa + Ipa + Iap) / D;
   const auto nIap =
+      (A0 - A1 + A2 + A3 - A4 - A5 + A6 + A7 - A8 - Ipp - Iaa + Ipa + Iap) / D;
+  const auto nIpa =
       (A0 + A1 - A2 - A3 + A4 + A5 - A6 - A7 + A8 - Ipp - Iaa + Ipa + Iap) / D;
 
   WorkspaceGroup_sptr dataOut = boost::make_shared<WorkspaceGroup>();

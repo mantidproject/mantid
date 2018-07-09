@@ -282,11 +282,10 @@ void IndirectFitPropertyBrowser::getTies(PropertyHandler *handler,
  */
 size_t IndirectFitPropertyBrowser::numberOfCustomFunctions(
     const std::string &functionName) const {
-
-  if (m_customFunctionCount.find(functionName) != m_customFunctionCount.end())
-    return m_customFunctionCount.at(functionName);
-  else
-    return 0;
+  auto count = m_customFunctionCount.find(functionName);
+  if (count != m_customFunctionCount.end())
+    return count->second;
+  return 0;
 }
 
 /**
@@ -389,50 +388,6 @@ void IndirectFitPropertyBrowser::setCustomSettingEnabled(
 }
 
 /**
- * Updates the values of the function parameters in this fit property browser,
- * using the specified map from parameter name to updated value.
- *
- * @param parameterValues A map from the name of a parameter to its updated
- *                        value.
- */
-void IndirectFitPropertyBrowser::updateParameterValues(
-    const QHash<QString, double> &parameterValues) {
-  updateParameterValues(getHandler(), parameterValues);
-}
-
-/**
- * Updates the values of the parameters of the function held by the specified
- * property handler, using the specified map from parameter name to updated
- * value.
- *
- * @param functionHandler The property handler containing the function.
- * @param parameterValues A map from the name of a parameter to its updated
- *                        value.
- */
-void IndirectFitPropertyBrowser::updateParameterValues(
-    PropertyHandler *functionHandler,
-    const QHash<QString, double> &parameterValues) {
-  auto function = functionHandler->function();
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
-
-  if (composite) {
-    if (composite->nFunctions() == 0)
-      return;
-    else if (composite->nFunctions() == 1)
-      function = composite->getFunction(0);
-  }
-
-  for (const auto &parameterName : parameterValues.keys()) {
-    const auto parameter = parameterName.toStdString();
-
-    if (function->hasParameter(parameter))
-      function->setParameter(parameter, parameterValues[parameterName]);
-  }
-
-  updateParameters();
-}
-
-/**
  * Sets the available background options in this indirect fit property browser.
  *
  * @param backgrounds A list of the names of available backgrouns to set.
@@ -451,29 +406,46 @@ void IndirectFitPropertyBrowser::setBackgroundOptions(
   m_enumManager->setEnumNames(m_backgroundSelection, backgrounds);
 }
 
-/**
- * Moves the functions attached to a custom function group, to the end of the
- * model.
- */
-void IndirectFitPropertyBrowser::moveCustomFunctionsToEnd() {
-  if (compositeFunction()->nFunctions() == 0)
-    return;
+void IndirectFitPropertyBrowser::updateErrors() {
+  getHandler()->updateErrors();
+}
 
-  MantidQt::API::SignalBlocker<QObject> blocker(this);
-  for (auto &handlerProperty : m_orderedFunctionGroups) {
-    auto &handlers = m_functionHandlers[handlerProperty];
+void IndirectFitPropertyBrowser::updateTies() {
+  for (auto i = 0u; i < compositeFunction()->nParams(); ++i)
+    updateTie(i);
+}
 
-    for (int i = 0; i < handlers.size(); ++i) {
-      auto &handler = handlers[i];
-      const auto function = handler->function();
+void IndirectFitPropertyBrowser::updateTie(std::size_t index) {
+  const auto function = compositeFunction();
+  const auto tie = function->getTie(index);
+  const auto tieString = tie ? tie->asString() : "";
+  removeTie(QString::fromStdString(function->parameterName(index)));
 
-      if (handler->parentHandler() != nullptr) {
-        handler->removeFunction();
-        handler = addFunction(function->asString());
-      }
-    }
+  if (!tieString.empty())
+    addTie(QString::fromStdString(tieString));
+}
+
+void IndirectFitPropertyBrowser::addTie(const QString &tieString) {
+  const auto index = tieString.split(".").first().right(1).toInt();
+  const auto handler = getHandler()->getHandler(index);
+
+  if (handler)
+    handler->addTie(tieString);
+}
+
+void IndirectFitPropertyBrowser::removeTie(const QString &parameterName) {
+  const auto parts = parameterName.split(".");
+  const auto index = parts.first().right(1).toInt();
+  const auto name = parts.last();
+  const auto handler = getHandler()->getHandler(index);
+
+  if (handler) {
+    const auto tieProperty = handler->getTies()[name];
+    handler->removeTie(tieProperty, parameterName.toStdString());
   }
 }
+
+void IndirectFitPropertyBrowser::clearErrors() { getHandler()->clearErrors(); }
 
 /**
  * @param settingKey  The key of the boolean setting whose value to retrieve.

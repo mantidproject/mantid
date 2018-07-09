@@ -47,7 +47,8 @@ namespace API {
 class MANTID_API_DLL ScriptBuilder {
 public:
   ScriptBuilder(boost::shared_ptr<HistoryView> view,
-                std::string versionSpecificity = "old");
+                std::string versionSpecificity = "old",
+                bool appendTimestamp = false);
   virtual ~ScriptBuilder() = default;
   /// build a python script from the history view
   const std::string build();
@@ -68,6 +69,7 @@ private:
   const std::vector<HistoryItem> m_historyItems;
   std::string m_output;
   std::string m_versionSpecificity;
+  bool m_timestampCommands;
 };
 
 } // namespace API

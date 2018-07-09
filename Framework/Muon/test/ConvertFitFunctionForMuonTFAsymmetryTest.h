@@ -18,7 +18,7 @@ const std::string outputName = "EstimateMuonAsymmetryFromCounts_Output";
 
 namespace {
 
-const std::string NORM_PARAM{"f0.f0.f0.A0"};
+const std::string NORM_PARAM{"f0.f0.A0"};
 const std::string OFFSET_PARAM{"f0.f1.f0.A0"};
 const std::string USER_FUNC{"f0.f1.f1."};
 const std::string EXP_PARAM{"f1.A"};

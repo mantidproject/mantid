@@ -122,8 +122,8 @@ void LoadRaw3::exec() {
 
   // Only run the Child Algorithms once
   loadRunParameters(localWorkspace);
-  const SpectrumDetectorMapping detectorMapping(isisRaw->spec, isisRaw->udet,
-                                                isisRaw->i_det);
+  const SpectrumDetectorMapping detectorMapping(isisRaw().spec, isisRaw().udet,
+                                                isisRaw().i_det);
   localWorkspace->updateSpectraUsing(detectorMapping);
 
   runLoadInstrument(m_filename, localWorkspace, 0.0, 0.4);

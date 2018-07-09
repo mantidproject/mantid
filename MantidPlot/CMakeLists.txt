@@ -910,7 +910,7 @@ else ()
 endif ()
 
 # Add an environment property MANTID_SOURCE so that the script can find the source of xmlrunner
-set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR};PYTHONPATH=${PYTHON_XMLRUNNER_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
+set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR};PYTHONPATH=$ENV{PYTHONPATH}:${PYTHON_XMLRUNNER_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
 # Make a ctest target for each file
 foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
   # Add the test. Name of test = name of the file

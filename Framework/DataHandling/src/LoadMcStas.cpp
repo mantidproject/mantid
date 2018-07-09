@@ -14,8 +14,10 @@
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
 #include <boost/algorithm/string.hpp>
-#include <nexus/NeXusException.hpp>
+// clang-format off
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
+// clang-format on
 
 namespace Mantid {
 namespace DataHandling {
