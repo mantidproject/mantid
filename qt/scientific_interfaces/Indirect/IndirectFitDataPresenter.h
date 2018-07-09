@@ -91,6 +91,7 @@ protected:
 private:
   virtual std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const;
+  void updateDataInTable(std::size_t dataIndex);
 
   IndirectFittingModel *m_model;
   PrivateFittingData m_singleData;

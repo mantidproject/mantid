@@ -201,7 +201,7 @@ std::string IndirectFitData::displayName(const std::string &formatString,
 }
 
 Mantid::API::MatrixWorkspace_sptr IndirectFitData::workspace() const {
-  return m_workspace.lock();
+  return m_workspace;
 }
 
 const Spectra &IndirectFitData::spectra() const { return m_spectra; }
@@ -223,7 +223,7 @@ IndirectFitData::getRange(std::size_t spectrum) const {
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end())
     return range->second;
-  return getBinRange(m_workspace.lock());
+  return getBinRange(m_workspace);
 }
 
 std::string IndirectFitData::getExcludeRegion(std::size_t spectrum) const {
@@ -268,8 +268,8 @@ void IndirectFitData::setStartX(double startX, std::size_t spectrum) {
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end())
     range->second.first = startX;
-  else if (const auto workspace = m_workspace.lock())
-    m_ranges[spectrum] = std::make_pair(startX, workspace->x(0).back());
+  else if (m_workspace)
+    m_ranges[spectrum] = std::make_pair(startX, m_workspace->x(0).back());
   else
     throw std::runtime_error(
         "Unable to set StartX: Workspace no longer exists.");
@@ -279,8 +279,8 @@ void IndirectFitData::setEndX(double endX, std::size_t spectrum) {
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end())
     range->second.second = endX;
-  else if (const auto workspace = m_workspace.lock())
-    m_ranges[spectrum] = std::make_pair(workspace->x(0).front(), endX);
+  else if (m_workspace)
+    m_ranges[spectrum] = std::make_pair(m_workspace->x(0).front(), endX);
   else
     throw std::runtime_error("Unable to set EndX: Workspace no longer exists.");
 }

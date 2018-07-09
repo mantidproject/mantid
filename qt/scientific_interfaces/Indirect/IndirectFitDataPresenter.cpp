@@ -114,6 +114,13 @@ void IndirectFitDataPresenter::updateSpectraInTable(std::size_t dataIndex) {
     m_tablePresenter->updateData(dataIndex);
 }
 
+void IndirectFitDataPresenter::updateDataInTable(std::size_t dataIndex) {
+  if (m_tablePresenter->isTableEmpty())
+    m_tablePresenter->addData(dataIndex);
+  else
+    m_tablePresenter->updateData(dataIndex);
+}
+
 void IndirectFitDataPresenter::setResolutionHidden(bool hide) {
   m_view->setResolutionHidden(hide);
 }

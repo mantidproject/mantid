@@ -264,6 +264,13 @@ void IndirectDataTablePresenter::addNewData(std::size_t index) {
 }
 
 void IndirectDataTablePresenter::updateData(std::size_t index) {
+  if (m_dataPositions.size() > index)
+    updateExistingData(index);
+  else
+    addNewData(index);
+}
+
+void IndirectDataTablePresenter::updateExistingData(std::size_t index) {
   MantidQt::API::SignalBlocker<QObject> blocker(m_dataTable);
   auto position = m_dataPositions[index];
   const auto nextPosition = getNextPosition(index);
