@@ -338,7 +338,7 @@ class TOFTOFSetupWidget(BaseWidget):
         elem = TOFTOFScriptElement()
 
         def line_text(lineEdit):
-            return lineEdit.text().strip()
+            return str(lineEdit.text()).strip()
 
         elem.facility_name   = self._settings.facility_name
         elem.instrument_name = self._settings.instrument_name

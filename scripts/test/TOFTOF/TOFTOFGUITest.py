@@ -6,7 +6,10 @@ import mantid
 from PyQt4 import QtGui
 
 import unittest
-from unittest import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 
 class TOFTOFScriptElementTest(unittest.TestCase):
