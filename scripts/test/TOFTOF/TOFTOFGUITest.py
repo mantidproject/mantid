@@ -1,17 +1,12 @@
 from __future__ import (absolute_import, division, print_function)
 
-import unittest
-
-import mantid
-from mantid import simpleapi
-from PyQt4 import QtGui
-from unittest import mock
-
 from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement, OptionalFloat
 from reduction_gui.widgets.toftof.toftof_setup import TOFTOFSetupWidget
+import mantid
+from PyQt4 import QtGui
 
-import os
-import sys
+import unittest
+from unittest import mock
 
 
 class TOFTOFScriptElementTest(unittest.TestCase):

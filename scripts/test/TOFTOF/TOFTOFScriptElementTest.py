@@ -1,14 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 
+from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement, OptionalFloat
+import mantid
 import unittest
 
-import mantid
-from mantid import simpleapi
-
-from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement, OptionalFloat
-from reduction_gui.widgets.toftof.toftof_setup import TOFTOFSetupWidget
-
-import os
 import sys
 
 
