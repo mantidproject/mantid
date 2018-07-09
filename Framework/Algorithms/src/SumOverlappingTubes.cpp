@@ -174,7 +174,8 @@ void SumOverlappingTubes::getScatteringAngleBinning() {
     }
   }
 
-  const std::vector<double> scatteringBinning = getProperty("ScatteringAngleBinning");
+  const std::vector<double> scatteringBinning =
+      getProperty("ScatteringAngleBinning");
   if (scatteringBinning.size() == 1) {
     m_stepScatteringAngle = scatteringBinning[0];
     // Extend the boundaries by half of the step size
