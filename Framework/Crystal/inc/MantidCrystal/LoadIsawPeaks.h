@@ -43,6 +43,9 @@ public:
 
 private:
   bool m_ModStru;
+  std::vector<double>m_offset1 = {0.0, 0.0, 0.0};
+  std::vector<double>m_offset2 = {0.0, 0.0, 0.0};
+  std::vector<double>m_offset3 = {0.0, 0.0, 0.0};
 
   /// Initialise the properties
   void init() override;

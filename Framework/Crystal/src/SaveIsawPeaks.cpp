@@ -97,7 +97,7 @@ void SaveIsawPeaks::exec() {
   runMap_t runMap;
   for (size_t i = 0; i < peaks.size(); ++i) {
     Peak &p = peaks[i];
-    if (p.getModStru()[0] > 0)
+    if (p.getModStru() != V3D(0,0,0))
       m_ModStru = true;
     int run = p.getRunNumber();
     int bank = 0;
@@ -268,6 +268,22 @@ void SaveIsawPeaks::exec() {
   // =========================================
 
   // Go in order of run numbers
+        auto run = ws->mutableRun();
+        std::vector<double> offset1 = run.getPropertyValueAsType<std::vector<double>>("Offset1");
+        std::vector<double> offset2 = run.getPropertyValueAsType<std::vector<double>>("Offset2");
+        std::vector<double> offset3 = run.getPropertyValueAsType<std::vector<double>>("Offset3");
+    if (m_ModStru) {
+        out << "9  OFFSETS ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << offset1[0] << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << offset1[1] << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << offset1[2] << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << offset2[0] << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << offset2[1] << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << offset2[2] << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << offset3[0] << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << offset3[1] << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << offset3[2] << "\n";
+  }
   int maxPeakNumb = 0;
   int appendPeakNumb = 0;
   runMap_t::iterator runMap_it;
@@ -324,10 +340,14 @@ void SaveIsawPeaks::exec() {
           // HKL's are flipped by -1 because of the internal Q convention
           // unless Crystallography convention
           if (m_ModStru) {
-          V3D mod = p.getModStru();
-          out << std::setw(5) << Utils::round(qSign * (p.getH()-mod[0]*0.5)) << std::setw(5)
-              << Utils::round(qSign * (p.getK()-mod[1])) << std::setw(5)
-              << Utils::round(qSign * (p.getL()-mod[2]));
+              V3D mod = p.getModStru();
+              double deltaH = mod[0]*offset1[0]+mod[1]*offset2[0]+mod[2]*offset3[0];
+              double deltaK = mod[0]*offset1[1]+mod[1]*offset2[1]+mod[2]*offset3[1];
+              double deltaL = mod[0]*offset1[2]+mod[1]*offset2[2]+mod[2]*offset3[2];
+              out << std::setw(5) << Utils::round(qSign * (p.getH()-deltaH)) << std::setw(5)
+                  << Utils::round(qSign * (p.getK()-deltaK)) << std::setw(5)
+                  << Utils::round(qSign * (p.getL()-deltaL));
+
              out << std::setw(5) <<  Utils::round(qSign * mod[0]) << std::setw(5)
               << Utils::round(qSign * mod[1]) << std::setw(5) << Utils::round(qSign * mod[2]);
           }

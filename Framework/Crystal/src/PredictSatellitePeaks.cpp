@@ -13,6 +13,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidAPI/Run.h"
 
 #include <boost/math/special_functions/round.hpp>
 
@@ -120,7 +121,7 @@ void PredictSatellitePeaks::exec() {
     offsets3.push_back(0.0);
     offsets3.push_back(0.0);
     offsets3.push_back(0.0);
-  }
+  } 
 
   bool includePeaksInRange = getProperty("IncludeAllPeaksInRange");
 
@@ -138,6 +139,9 @@ void PredictSatellitePeaks::exec() {
   auto OutPeaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(
       WorkspaceFactory::Instance().createPeaks());
   OutPeaks->setInstrument(Instr);
+  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset1", offsets1, true);
+  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset2", offsets2, true);
+  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset3", offsets3, true);
 
   V3D hkl;
   int peakNum = 0;

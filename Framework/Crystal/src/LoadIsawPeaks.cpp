@@ -198,6 +198,20 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     Strings::convert(getWord(in, false), bank);
     if (s == "5")
       det.push_back(bank);
+    if (s == "9") {
+      m_offset1[0] = std::stod(getWord(in, false), nullptr);
+      m_offset1[1] = std::stod(getWord(in, false), nullptr);
+      m_offset1[2] = std::stod(getWord(in, false), nullptr);
+      m_offset2[0] = std::stod(getWord(in, false), nullptr);
+      m_offset2[1] = std::stod(getWord(in, false), nullptr);
+      m_offset2[2] = std::stod(getWord(in, false), nullptr);
+      m_offset3[0] = std::stod(getWord(in, false), nullptr);
+      m_offset3[1] = std::stod(getWord(in, false), nullptr);
+      m_offset3[2] = std::stod(getWord(in, false), nullptr);
+      outWS->mutableRun().addProperty<std::vector<double>>("Offset1", m_offset1, true);
+      outWS->mutableRun().addProperty<std::vector<double>>("Offset2", m_offset2, true);
+      outWS->mutableRun().addProperty<std::vector<double>>("Offset3", m_offset3, true);
+    }
   }
   // Find bank numbers in instument that are not in header lines
   std::string maskBanks;
@@ -303,13 +317,18 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   h = std::stod(getWord(in, false), nullptr);
   k = std::stod(getWord(in, false), nullptr);
   l = std::stod(getWord(in, false), nullptr);
-  int mod1 = 0;
-  int mod2 = 0;
-  int mod3 = 0;
+  V3D mod = V3D(0,0,0);
   if (m_ModStru) {
-      mod1 = std::stoi(getWord(in, false), nullptr);
-      mod2 = std::stoi(getWord(in, false), nullptr);
-      mod3 = std::stoi(getWord(in, false), nullptr);
+      mod[0] = std::stoi(getWord(in, false), nullptr);
+      mod[1] = std::stoi(getWord(in, false), nullptr);
+      mod[2] = std::stoi(getWord(in, false), nullptr);
+              double deltaH = mod[0]*m_offset1[0]+mod[1]*m_offset2[0]+mod[2]*m_offset3[0];
+              double deltaK = mod[0]*m_offset1[1]+mod[1]*m_offset2[1]+mod[2]*m_offset3[1];
+              double deltaL = mod[0]*m_offset1[2]+mod[1]*m_offset2[2]+mod[2]*m_offset3[2];
+
+      h += deltaH;
+      k += deltaK;
+      l += deltaL;
   }
           
 
@@ -344,7 +363,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   Peak peak(outWS->getInstrument(), pixelID, wl);
   peak.setHKL(qSign * h, qSign * k, qSign * l);
   if (m_ModStru) {
-  peak.setModStru(V3D(mod1, mod2, mod3));
+  peak.setModStru(mod);
   }
   peak.setIntensity(Inti);
   peak.setSigmaIntensity(SigI);

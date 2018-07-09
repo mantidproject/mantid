@@ -8,10 +8,6 @@
 
 namespace Mantid {
 
-namespace Kernel {
-class V3D;
-}
-
 namespace Crystal {
 
 /** Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.
