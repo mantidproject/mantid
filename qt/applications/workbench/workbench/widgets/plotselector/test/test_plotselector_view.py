@@ -39,28 +39,24 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.presenter.get_initial_sort_key = mock.Mock(side_effect=self.get_initial_sort_key_se)
 
         self.view = PlotSelectorView(self.presenter, is_run_as_unit_test=True)
-        self.view.list_widget.setSortingEnabled(False)
+        self.view.table_widget.setSortingEnabled(False)
 
     def get_initial_sort_key_se(self, plot_name):
         if self.view.sort_type == SortType.LastShown:
             return '_' + plot_name
         return plot_name
 
-    def get_NameWidget_by_row_number(self, row_number):
-        item = self.view.list_widget.item(row_number)
-        return self.view.list_widget.itemWidget(item)
-
     def click_to_select_by_row_number(self, row_number):
         # It would be nice to avoid this, but could not find a way to
         # get the list item as a QWidget
-        model_index = self.view.list_widget.model().index(row_number, 0)
-        item_center = self.view.list_widget.visualRect(model_index).center()
-        QTest.mouseClick(self.view.list_widget.viewport(), Qt.LeftButton, pos=item_center)
+        model_index = self.view.table_widget.model().index(row_number, 0)
+        item_center = self.view.table_widget.visualRect(model_index).center()
+        QTest.mouseClick(self.view.table_widget.viewport(), Qt.LeftButton, pos=item_center)
 
     def assert_list_of_plots_is_set_in_widget(self, plot_names):
-        self.assertEqual(len(plot_names), len(self.view.list_widget))
-        for index in range(len(self.view.list_widget)):
-            widget = self.get_NameWidget_by_row_number(index)
+        self.assertEqual(len(plot_names), self.view.table_widget.rowCount())
+        for index in range(self.view.table_widget.rowCount()):
+            widget = self.view.table_widget.cellWidget(index, 1)
             self.assertEqual(widget.plot_name, plot_names[index])
 
     # ------------------------ Plot Updates ------------------------
@@ -74,7 +70,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
     def test_setting_plot_names_to_empty_list(self):
         plot_names = []
         self.view.set_plot_list(plot_names)
-        self.assertEqual(len(self.view.list_widget), 0)
+        self.assertEqual(self.view.table_widget.rowCount(), 0)
 
     def test_appending_to_plot_list(self):
         plot_names = ["Plot1", "Plot2", "Plot3"]
@@ -106,7 +102,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
 
-        self.view.list_widget.selectAll()
+        self.view.table_widget.selectAll()
         selected_plots = self.view.get_all_selected_plot_names()
         self.assertEqual(selected_plots, plot_names)
 
@@ -157,9 +153,9 @@ class PlotSelectorWidgetTest(unittest.TestCase):
 
         self.view.filter_plot_list(["Plot1"])
 
-        self.assertFalse(self.view.list_widget.item(0).isHidden())
-        self.assertTrue(self.view.list_widget.item(1).isHidden())
-        self.assertTrue(self.view.list_widget.item(2).isHidden())
+        self.assertFalse(self.view.table_widget.isRowHidden(0))
+        self.assertTrue(self.view.table_widget.isRowHidden(1))
+        self.assertTrue(self.view.table_widget.isRowHidden(2))
 
     def test_filtering_then_clearing_filter_shows_all_plots(self):
         plot_names = ["Plot1", "Plot2", "Plot3"]
@@ -168,14 +164,14 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.view.filter_plot_list(["Plot1"])
         self.view.unhide_all_plots()
 
-        self.assertFalse(self.view.list_widget.item(0).isHidden())
-        self.assertFalse(self.view.list_widget.item(1).isHidden())
-        self.assertFalse(self.view.list_widget.item(2).isHidden())
+        self.assertFalse(self.view.table_widget.isRowHidden(0))
+        self.assertFalse(self.view.table_widget.isRowHidden(1))
+        self.assertFalse(self.view.table_widget.isRowHidden(2))
 
     def test_filtering_ignores_hidden_when_calling_get_all_selected(self):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
-        self.view.list_widget.selectAll()
+        self.view.table_widget.selectAll()
         self.view.filter_plot_list(["Plot1"])
 
         plot_names = self.view.get_all_selected_plot_names()
@@ -197,11 +193,11 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
 
-        item = self.view.list_widget.item(1)
-        item_center = self.view.list_widget.visualItemRect(item).center()
+        item = self.view.table_widget.item(1, 1)
+        item_center = self.view.table_widget.visualItemRect(item).center()
         # This single click should not be required, but otherwise the double click is not registered
-        QTest.mouseClick(self.view.list_widget.viewport(), Qt.LeftButton, pos=item_center)
-        QTest.mouseDClick(self.view.list_widget.viewport(), Qt.LeftButton, pos=item_center)
+        QTest.mouseClick(self.view.table_widget.viewport(), Qt.LeftButton, pos=item_center)
+        QTest.mouseDClick(self.view.table_widget.viewport(), Qt.LeftButton, pos=item_center)
 
         self.assertEqual(self.presenter.show_single_selected.call_count, 1)
         self.assertEqual(self.view.get_currently_selected_plot_name(), plot_names[1])
@@ -226,7 +222,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
 
-        name_widget = self.get_NameWidget_by_row_number(0)
+        name_widget = self.view.table_widget.cellWidget(0, 1)
         QTest.mouseClick(name_widget.rename_button, Qt.LeftButton)
 
         self.assertFalse(name_widget.line_edit.isReadOnly())
@@ -239,7 +235,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.click_to_select_by_row_number(1)
         self.view.context_menu.actions()[1].trigger()
 
-        name_widget = self.get_NameWidget_by_row_number(1)
+        name_widget = self.view.table_widget.cellWidget(1, 1)
         self.assertFalse(name_widget.line_edit.isReadOnly())
         self.assertTrue(name_widget.rename_button.isChecked())
 
@@ -247,7 +243,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
 
-        name_widget = self.get_NameWidget_by_row_number(1)
+        name_widget = self.view.table_widget.cellWidget(1, 1)
         QTest.mouseClick(name_widget.rename_button, Qt.LeftButton)
         QTest.keyPress(name_widget.line_edit, Qt.Key_Return)
 
@@ -274,7 +270,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
 
-        widget = self.get_NameWidget_by_row_number(1)
+        widget = self.view.table_widget.cellWidget(1, 1)
         QTest.mouseClick(widget.close_button, Qt.LeftButton)
         self.presenter.close_single_plot.assert_called_once_with("Plot2")
 
@@ -284,12 +280,12 @@ class PlotSelectorWidgetTest(unittest.TestCase):
 
         # Set the selected items by clicking with control held
         for row in [0, 2]:
-            widget = self.get_NameWidget_by_row_number(row)
+            widget = self.view.table_widget.cellWidget(row, 1)
             QTest.mouseClick(widget, Qt.LeftButton, Qt.ControlModifier)
         plots_selected_old = self.view.get_all_selected_plot_names()
         self.assertEquals(plots_selected_old, ["Plot1", "Plot3"])
 
-        widget = self.get_NameWidget_by_row_number(1)
+        widget = self.view.table_widget.cellWidget(1, 1)
         QTest.mouseClick(widget.close_button, Qt.LeftButton)
 
         # We need to actually update the plot list, as the presenter would
@@ -325,19 +321,20 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.view.sort_by_last_shown()
         self.assertEquals(self.view.sort_type, SortType.LastShown)
 
-    def test_initial_sorting_by_name(self):
-        self.view.list_widget.setSortingEnabled(True)
+    def test_sorting_by_name(self):
+        self.view.table_widget.setSortingEnabled(True)
+        self.view.sort_by_name()
         self.view.set_plot_list(["Plot1", "Plot2", "Plot3", "Graph99", "Plot20"])
         self.assert_list_of_plots_is_set_in_widget(["Graph99", "Plot1", "Plot2", "Plot3", "Plot20"])
 
     def test_set_sort_descending(self):
-        self.view.list_widget.setSortingEnabled(True)
+        self.view.table_widget.setSortingEnabled(True)
         self.view.set_plot_list(["Plot1", "Plot2", "Plot3", "Graph99", "Plot20"])
         self.view.sort_descending()
         self.assert_list_of_plots_is_set_in_widget(["Plot20", "Plot3", "Plot2", "Plot1", "Graph99"])
 
     def test_set_sort_keys_for_last_shown(self):
-        self.view.list_widget.setSortingEnabled(True)
+        self.view.table_widget.setSortingEnabled(True)
         self.view.set_plot_list(["Plot1", "Plot2", "Plot3", "Graph99", "Plot20"])
 
         self.view.set_sort_keys({"Plot1": 2,
@@ -349,13 +346,13 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.assert_list_of_plots_is_set_in_widget(["Plot2", "Plot1", "Graph99", "Plot3", "Plot20"])
 
     def test_set_sort_keys_with_missing_keys_raises_key_error(self):
-        self.view.list_widget.setSortingEnabled(True)
+        self.view.table_widget.setSortingEnabled(True)
         self.view.set_plot_list(["Plot1", "Plot2", "Plot3", "Graph99", "Plot20"])
 
         self.assertRaises(KeyError, self.view.set_sort_keys, {"Plot1": 2, "Plot2": 1})
 
     def adding_to_list_with_sorting_by_name(self):
-        self.view.list_widget.setSortingEnabled(True)
+        self.view.table_widget.setSortingEnabled(True)
         self.view.set_plot_list(["Plot1", "Plot2", "Plot3", "Graph99", "Plot20"])
 
         self.view.append_to_plot_list("Plot15")
@@ -363,7 +360,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.assert_list_of_plots_is_set_in_widget(["Graph99", "Plot1", "Plot2", "Plot3", "Plot15", "Plot20"])
 
     def adding_to_list_with_sorting_by_last_active(self):
-        self.view.list_widget.setSortingEnabled(True)
+        self.view.table_widget.setSortingEnabled(True)
         self.view.sort_type = SortType.LastShown
         self.view.set_plot_list(["Plot1", "Plot2", "Plot3", "Graph99", "Plot20"])
 

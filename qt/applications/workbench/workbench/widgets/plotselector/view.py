@@ -19,8 +19,8 @@ from __future__ import absolute_import, print_function
 import re
 
 from qtpy.QtCore import Qt, Signal, QMutex, QMutexLocker
-from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QFileDialog, QHBoxLayout, QLineEdit, QListWidget,
-                            QListWidgetItem, QMenu, QPushButton, QVBoxLayout, QWidget)
+from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QFileDialog, QHBoxLayout, QLineEdit, QMenu,
+                            QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
 import qtawesome as qta
 
@@ -64,7 +64,7 @@ class PlotSelectorView(QWidget):
         self.presenter = presenter
         self.is_run_as_unit_test = is_run_as_unit_test
 
-        # This mutex prevents multiple operations on the list at the
+        # This mutex prevents multiple operations on the table at the
         # same time. Wrap code in - with QMutexLocker(self.mutex):
         self.mutex = QMutex()
 
@@ -77,12 +77,12 @@ class PlotSelectorView(QWidget):
         self.sort_button = self._make_sort_button()
         self.export_button = self._make_export_button()
         self.filter_box = self._make_filter_box()
-        self.list_widget = self._make_list_widget()
+        self.table_widget = self._make_table_widget()
 
         # Add the context menu
-        self.list_widget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.table_widget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.context_menu, self.export_menu = self._make_context_menu()
-        self.list_widget.customContextMenuRequested.connect(self.context_menu_opened)
+        self.table_widget.customContextMenuRequested.connect(self.context_menu_opened)
 
         buttons_layout = FlowLayout()
         buttons_layout.setSpacing(1)
@@ -98,7 +98,7 @@ class PlotSelectorView(QWidget):
         layout = QVBoxLayout()
         layout.addLayout(buttons_layout)
         layout.addLayout(filter_layout)
-        layout.addWidget(self.list_widget)
+        layout.addWidget(self.table_widget)
         # todo: Without the sizeHint() call the minimum size is not set correctly
         #       This needs some investigation as to why this is.
         layout.sizeHint()
@@ -115,23 +115,23 @@ class PlotSelectorView(QWidget):
         self.rename_in_plot_list = QAppThreadCall(self.rename_in_plot_list_orig)
 
         # Connect presenter methods to things in the view
-        self.list_widget.doubleClicked.connect(self.presenter.show_single_selected)
+        self.table_widget.doubleClicked.connect(self.presenter.show_single_selected)
         self.filter_box.textChanged.connect(self.presenter.filter_text_changed)
         self.show_button.clicked.connect(self.presenter.show_multiple_selected)
-        self.select_all_button.clicked.connect(self.list_widget.selectAll)
+        self.select_all_button.clicked.connect(self.table_widget.selectAll)
         self.close_button.clicked.connect(self.presenter.close_action_called)
         self.deleteKeyPressed.connect(self.presenter.close_action_called)
 
         if self.DEBUG_MODE:
-            self.list_widget.clicked.connect(self.show_debug_info)
+            self.table_widget.clicked.connect(self.show_debug_info)
 
     def show_debug_info(self):
         """
         Special feature to make debugging easier, set self.DEBUG_MODE
         to true to get information printed when clicking on plots
         """
-        item = self.list_widget.currentItem()
-        widget = self.list_widget.itemWidget(item)
+        item = self.table_widget.currentItem()
+        widget = self.table_widget.itemWidget(item)
         print("Plot name: {}".format(widget.plot_name))
         print("Plot text: {}".format(widget.line_edit.text()))
         print("Sort key: {}".format(item.data(Qt.InitialSortOrderRole)))
@@ -141,23 +141,43 @@ class PlotSelectorView(QWidget):
         This overrides keyPressEvent from QWidget to emit a signal
         whenever the delete key is pressed.
 
-        This might be better to override on list_view, but there is
-        only ever an active selection when focused on the list.
+        This might be better to override on table_widget, but there is
+        only ever an active selection when focused on the table.
         :param event: A QKeyEvent holding the key that was pressed
         """
         super(PlotSelectorView, self).keyPressEvent(event)
         if event.key() == Qt.Key_Delete:
             self.deleteKeyPressed.emit(event.key())
 
-    def _make_list_widget(self):
+    def _make_table_widget(self):
         """
-        Make a list showing the names of the plots, with close buttons
-        :return: A QListWidget object which will contain plot widgets
+        Make a table showing the matplotlib figure number of the
+        plots, the name with close and edit buttons, and a hidden
+        column for sorting with the last shown order
+        :return: A QTableWidget object which will contain plot widgets
         """
-        list_widget = QListWidget(self)
-        list_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        list_widget.setSortingEnabled(True)
-        return list_widget
+        table_widget = QTableWidget(0, 3, self)
+        table_widget.setHorizontalHeaderLabels(['No.', 'Plot Name', 'Last Shown Order (hidden)'])
+        table_widget.setColumnHidden(2, True)
+        table_widget.verticalHeader().setVisible(False)
+
+        # Fix the size of 'No.' and let 'Plot Name' fill the space
+        top_header = table_widget.horizontalHeader()
+        top_header.resizeSection(0, top_header.sectionSizeHint(0))
+        top_header.setStretchLastSection(True)
+
+        table_widget.horizontalHeaderItem(0).setToolTip('This is the matplotlib figure number.\n\nFrom a script use '
+                                                        'plt.figure(N), where N is this figure number, to get a handle'
+                                                        ' to the plot.')
+
+        table_widget.horizontalHeaderItem(1).setToolTip('The plot name, also used  as the file name when saving '
+                                                        'multiple plots.')
+
+        table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        table_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        table_widget.setSortingEnabled(True)
+
+        return table_widget
 
     def _make_context_menu(self):
         """
@@ -182,7 +202,7 @@ class PlotSelectorView(QWidget):
         :param position: The position to open the menu, e.g. where
                          the mouse button was clicked
         """
-        self.context_menu.exec_(self.list_widget.mapToGlobal(position))
+        self.context_menu.exec_(self.table_widget.mapToGlobal(position))
 
     # ------------------------ Plot Updates ------------------------
 
@@ -205,10 +225,16 @@ class PlotSelectorView(QWidget):
         widget_item.setSizeHint(size_hint)
 
         with QMutexLocker(self.mutex):
-            self.list_widget.addItem(widget_item)
-            self.list_widget.setItemWidget(widget_item, real_item)
+            self.table_widget.setSortingEnabled(False)
 
-            widget_item.setHidden(not is_shown_by_filter)
+            row_number = self.table_widget.rowCount()
+            self.table_widget.insertRow(row_number)
+            self.table_widget.setItem(row_number, 1, widget_item)
+            self.table_widget.setCellWidget(row_number, 1, real_item)
+
+            self.table_widget.setRowHidden(row_number, not is_shown_by_filter)
+
+            self.table_widget.setSortingEnabled(True)
 
     def set_plot_list(self, plot_list):
         """
@@ -218,7 +244,7 @@ class PlotSelectorView(QWidget):
         :param plot_list: the list of plot names (list of strings)
         """
         with QMutexLocker(self.mutex):
-            self.list_widget.clear()
+            self.table_widget.clearContents()
 
         self.filter_box.clear()
         for plot_name in plot_list:
@@ -226,14 +252,13 @@ class PlotSelectorView(QWidget):
 
     def _get_row_and_widget_from_plot_name(self, plot_name):
         """
-        Get the row in the list, and the PlotNameWidget corresponding
+        Get the row in the table, and the PlotNameWidget corresponding
         to the given the plot name. This should always be called with
         a lock on self.mutex.
         :param plot_name: The plot name
         """
-        for row in range(len(self.list_widget)):
-            item = self.list_widget.item(row)
-            widget = self.list_widget.itemWidget(item)
+        for row in range(self.table_widget.rowCount()):
+            widget = self.table_widget.cellWidget(row, 1)
             if widget.plot_name == plot_name:
                 return row, widget
 
@@ -244,8 +269,7 @@ class PlotSelectorView(QWidget):
         """
         with QMutexLocker(self.mutex):
             row, widget = self._get_row_and_widget_from_plot_name(plot_name)
-            taken_item = self.list_widget.takeItem(row)
-            del taken_item
+            self.table_widget.removeRow(row)
 
     # ----------------------- Plot Selection ------------------------
 
@@ -255,11 +279,12 @@ class PlotSelectorView(QWidget):
         plots
         :return: A list of strings with the plot names (figure titles)
         """
-        selected = self.list_widget.selectedItems()
+        selected = self.table_widget.selectedItems()
         selected_plots = []
         for item in selected:
-            widget = self.list_widget.itemWidget(item)
-            if not item.isHidden():
+            row = item.row()
+            widget = self.table_widget.cellWidget(row, 1)
+            if not self.table_widget.isRowHidden(row):
                 selected_plots.append(widget.plot_name)
         return selected_plots
 
@@ -269,9 +294,9 @@ class PlotSelectorView(QWidget):
         plot
         :return: A string with the plot name (figure title)
         """
-        item = self.list_widget.currentItem()
-        widget = self.list_widget.itemWidget(item)
-        if widget is None or item.isHidden():
+        row = self.table_widget.currentRow()
+        widget = self.table_widget.cellWidget(row, 1)
+        if widget is None or self.table_widget.isRowHidden(row):
             return None
         return widget.plot_name
 
@@ -300,9 +325,8 @@ class PlotSelectorView(QWidget):
         Set all plot names to be visible (not hidden)
         """
         with QMutexLocker(self.mutex):
-            for row in range(len(self.list_widget)):
-                item = self.list_widget.item(row)
-                item.setHidden(False)
+            for row in range(self.table_widget.rowCount()):
+                self.table_widget.setRowHidden(row, False)
 
     def filter_plot_list(self, plot_list):
         """
@@ -311,13 +335,9 @@ class PlotSelectorView(QWidget):
         :param plot_list: The list of plots to show
         """
         with QMutexLocker(self.mutex):
-            for row in range(len(self.list_widget)):
-                item = self.list_widget.item(row)
-                widget = self.list_widget.itemWidget(item)
-                if widget.plot_name in plot_list:
-                    item.setHidden(False)
-                else:
-                    item.setHidden(True)
+            for row in range(self.table_widget.rowCount()):
+                widget = self.table_widget.cellWidget(row, 1)
+                self.table_widget.setRowHidden(row, widget.plot_name not in plot_list)
 
     # ------------------------ Plot Renaming ------------------------
 
@@ -330,9 +350,9 @@ class PlotSelectorView(QWidget):
         with QMutexLocker(self.mutex):
             row, widget = self._get_row_and_widget_from_plot_name(old_name)
 
-            old_key = self.list_widget.item(row).data(Qt.InitialSortOrderRole)
+            old_key = self.table_widget.item(row, 1).data(Qt.InitialSortOrderRole)
             new_sort_key = self.presenter.get_renamed_sort_key(new_name, old_key)
-            self.list_widget.item(row).setData(Qt.InitialSortOrderRole, new_sort_key)
+            self.table_widget.item(row, 1).setData(Qt.InitialSortOrderRole, new_sort_key)
 
             widget.set_plot_name(new_name)
 
@@ -350,7 +370,7 @@ class PlotSelectorView(QWidget):
     """
     How the sorting works
 
-    The QListWidgetItem has a text string set via .setData with the
+    The QTableWidgetItem has a text string set via .setData with the
     Qt.InitialSortOrderRole as the role for this string (not strictly
     used as intended in Qt). If the sorting is by name this is just
     the name of the plot.
@@ -359,7 +379,7 @@ class PlotSelectorView(QWidget):
     active, or if never active it is the plot name with an 'A'
     appended to the front. For example ['1', '2', 'AUnshownPlot'].
 
-    QListWidgetItem is subclassed by HumanReadableSortItem to
+    QTableWidgetItem is subclassed by HumanReadableSortItem to
     override the < operator. This uses the text with the
     InitialSortOrderRole to sort, and sorts in a human readable way,
     for example ['Figure 1', 'Figure 2', 'Figure 10'] as opposed to
@@ -410,7 +430,7 @@ class PlotSelectorView(QWidget):
         """
         self.sort_order = Qt.AscendingOrder
         with QMutexLocker(self.mutex):
-            self.list_widget.sortItems(self.sort_order)
+            self.table_widget.sortItems(1, self.sort_order)
 
     def sort_descending(self):
         """
@@ -420,7 +440,7 @@ class PlotSelectorView(QWidget):
         """
         self.sort_order = Qt.DescendingOrder
         with QMutexLocker(self.mutex):
-            self.list_widget.sortItems(self.sort_order)
+            self.table_widget.sortItems(1, self.sort_order)
 
     def sort_by_name(self):
         """
@@ -429,7 +449,7 @@ class PlotSelectorView(QWidget):
         """
         self.sort_type = SortType.Name
         with QMutexLocker(self.mutex):
-            self.list_widget.sortItems(self.sort_order)
+            self.table_widget.sortItems(1, self.sort_order)
 
     def sort_by_last_shown(self):
         """
@@ -438,7 +458,7 @@ class PlotSelectorView(QWidget):
         """
         self.sort_type = SortType.LastShown
         with QMutexLocker(self.mutex):
-            self.list_widget.sortItems(self.sort_order)
+            self.table_widget.sortItems(1, self.sort_order)
 
     def set_sort_keys(self, sort_names_dict):
         """
@@ -448,13 +468,18 @@ class PlotSelectorView(QWidget):
                                 and values as sort keys
         """
         with QMutexLocker(self.mutex):
-            self.list_widget.setSortingEnabled(False)
-            for row in range(len(self.list_widget)):
-                item = self.list_widget.item(row)
-                widget = self.list_widget.itemWidget(item)
-                item.setData(Qt.InitialSortOrderRole, sort_names_dict[widget.plot_name])
-            self.list_widget.sortItems(self.sort_order)
-            self.list_widget.setSortingEnabled(True)
+            self.table_widget.setSortingEnabled(False)
+            for row in range(self.table_widget.rowCount()):
+                item = self.table_widget.item(row, 1)
+                widget = self.table_widget.cellWidget(row, 1)
+                try:
+                    item.setData(Qt.InitialSortOrderRole, sort_names_dict[widget.plot_name])
+                except AttributeError as e:
+                    print(row)
+                    print(widget.plot_name)
+                    print(e)
+            self.table_widget.sortItems(1, self.sort_order)
+            self.table_widget.setSortingEnabled(True)
 
     # ---------------------- Plot Exporting -------------------------
 
@@ -489,7 +514,7 @@ class PlotSelectorView(QWidget):
 class PlotNameWidget(QWidget):
     """A widget to display the plot name, and edit and close buttons
 
-    This widget is added to the list widget to support the renaming
+    This widget is added to the table widget to support the renaming
     and close buttons, as well as the direct renaming functionality.
     """
     def __init__(self, presenter, plot_name="", parent=None, is_run_as_unit_test=False):
@@ -595,8 +620,8 @@ class PlotNameWidget(QWidget):
         self.toggle_plot_name_editable(False)
 
 
-class HumanReadableSortItem(QListWidgetItem):
-    """Inherits from QListWidgetItem and override __lt__ method
+class HumanReadableSortItem(QTableWidgetItem):
+    """Inherits from QTableWidgetItem and override __lt__ method
 
     This overrides the  < operator (or __lt__ method) to make a human
     readable sort, for example
