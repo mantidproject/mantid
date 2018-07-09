@@ -3098,7 +3098,7 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
         m_dataTimeZero); // won't be used, but property is mandatory
     groupAlg->setPropertyValue("DetectorGroupingTable", groupingName);
     groupAlg->setPropertyValue("OutputWorkspace", outputEntry.name());
-	// want to remove data before first good data
+    // want to remove data before first good data
     groupAlg->setProperty("xmin", firstGoodBin());
     groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
     groupAlg->execute();
