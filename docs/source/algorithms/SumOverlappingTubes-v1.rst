@@ -59,7 +59,7 @@ ScatteringAngleBinning
 ++++++++++++++++++++++
 
 This can be a comma separated list of start, step, end. Alternatively, if single number is given, it will be taken as the step.
-The start and end will be computed from the input workspaces.
+The start and end will be computed from the input workspaces, such that the first bin center is the minimum, and the last bin center is the maximum scattering angle in the equatorial plane in the list of input workspaces.
 
 OutputWorkspace
 +++++++++++++++
