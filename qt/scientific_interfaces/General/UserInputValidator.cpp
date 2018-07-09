@@ -1,10 +1,10 @@
 #include "UserInputValidator.h"
+#include "MantidKernel/Strings.h"
 
 #include <QValidator>
 #include <QLineEdit>
 #include <QLabel>
 #include <QString>
-
 #include <cmath>
 
 using namespace MantidQt::MantidWidgets;
@@ -38,7 +38,7 @@ UserInputValidator::UserInputValidator() : m_errorMessages() {}
 bool UserInputValidator::checkFieldIsNotEmpty(const QString &name,
                                               QLineEdit *field,
                                               QLabel *errorLabel) {
-  if (field->text() == "") {
+  if (Mantid::Kernel::Strings::isEmpty(field->text().toStdString())) {
     setErrorLabel(errorLabel, false);
     m_errorMessages.append(name + " has been left blank.");
     return false;
