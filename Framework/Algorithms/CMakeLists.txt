@@ -280,6 +280,7 @@ set ( SRC_FILES
 	src/SofQWPolygon.cpp
 	src/SolidAngle.cpp
 	src/SortEvents.cpp
+	src/SortXAxis.cpp
 	src/SpatialGrouping.cpp
 	src/SpectrumAlgorithm.cpp
 	src/SpecularReflectionAlgorithm.cpp
@@ -609,6 +610,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SofQWPolygon.h
 	inc/MantidAlgorithms/SolidAngle.h
 	inc/MantidAlgorithms/SortEvents.h
+	inc/MantidAlgorithms/SortXAxis.h
 	inc/MantidAlgorithms/SpatialGrouping.h
 	inc/MantidAlgorithms/SpectrumAlgorithm.h
 	inc/MantidAlgorithms/SpecularReflectionAlgorithm.h

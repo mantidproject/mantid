@@ -75,4 +75,4 @@ class SortXAxis(PythonAlgorithm):
         self.setProperty('OutputWorkspace', output_ws)
 
 
-AlgorithmFactory.subscribe(SortXAxis)
+#AlgorithmFactory.subscribe(SortXAxis)
