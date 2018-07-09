@@ -3,6 +3,7 @@
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include <QFileInfo.h>
 
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitDataSelector");
@@ -357,22 +358,17 @@ QString MuonFitDataSelector::getSimultaneousFitLabel() const {
  */
 void MuonFitDataSelector::setSimultaneousFitLabel(const QString &label) {
   // do some checks that it is valid
-  auto safeLabel = label.toStdString();
-  auto index = safeLabel.find(".nxs");
-  if (index != std::string::npos) {
-    safeLabel = safeLabel.substr(0, index);
-  }
-  index = safeLabel.find_last_of("\\");
-  if (index != std::string::npos) {
-    safeLabel = safeLabel.substr(index + 1, safeLabel.size());
-    // need to remove instrument name and leading zeros
-    index = safeLabel.find_last_of("0");
-    safeLabel = safeLabel.substr(index, safeLabel.size());
-    while (safeLabel.front() == '0') {
-      safeLabel = safeLabel.substr(1, safeLabel.size());
-    }
-  }
-  m_ui.txtSimFitLabel->setText(QString::fromStdString(safeLabel));
+	auto safeLabel = label;
+	if (label.indexOf(".") >= 0) {
+		QFileInfo file(label);
+		safeLabel = file.baseName();
+		// trim instrument name
+		auto index = safeLabel.indexOf("0");
+		safeLabel= safeLabel.mid(index);
+		// trim leading zeros
+		safeLabel= safeLabel.remove(QRegExp("^[0]*"));
+	}
+  m_ui.txtSimFitLabel->setText(safeLabel);
 }
 
 /**
