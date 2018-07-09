@@ -713,11 +713,11 @@ class MainWindow(QtGui.QMainWindow):
         vectimes = numpy.append(vectimes,tf)
         vecvalue = numpy.append(vecvalue, vecvalue[-1])
 
-        vecreltimes = [(t - t0) / numpy.timedelta64(1, 's') for t in vectimes]
+        vecreltimes = (t - t0) / numpy.timedelta64(1, 's')
 
         # Set to plot
-        xlim = [min(vecreltimes), max(vecreltimes)]
-        ylim = [min(vecvalue), max(vecvalue)]
+        xlim = [vecreltimes.min(), vecreltimes.max()]
+        ylim = [vecvalue.min(), vecvalue.min()]
         self.ui.mainplot.set_xlim(xlim[0], xlim[1])
         self.ui.mainplot.set_ylim(ylim[0], ylim[1])
 
