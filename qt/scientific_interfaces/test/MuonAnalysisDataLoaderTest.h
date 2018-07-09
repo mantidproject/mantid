@@ -258,13 +258,13 @@ public:
         analysed = loader.createAnalysisWorkspace(corrected, options));
     // test the output
     Mantid::MantidVec expectedOutput = {
-        -0.000584754, -0.037308, -0.0183329, 0.0250825, -0.0154756,
-        0.018308,     0.0116216, -0.019053,  0.0100087, -0.0393029};
+        -0.037308, -0.0183329, 0.0250825, -0.0154756,
+        0.018308,     0.0116216, -0.019053,  0.0100087, -0.0393029, -0.001696};
     const auto outputWS =
         boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(analysed);
     TS_ASSERT(outputWS);
     const auto &data = outputWS->y(0);
-    TS_ASSERT_EQUALS(data.size(), 2000);
+    TS_ASSERT_EQUALS(data.size(), 1958);
     auto xData = outputWS->x(0);
     auto offset = std::distance(xData.begin(),
                                 std::lower_bound(xData.begin(), xData.end(),
