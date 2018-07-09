@@ -39,6 +39,8 @@ const size_t LOWER_CONVERGENCE_LIMIT = 350;
 const size_t JUMP_CHECKING_RATE = 200;
 // low jump limit
 const double LOW_JUMP_LIMIT = 1e-25;
+// random number generator
+std::mt19937 rng;
 }
 
 DECLARE_FUNCMINIMIZER(FABADAMinimizer, FABADA)
@@ -352,8 +354,6 @@ void FABADAMinimizer::finalize() {
 * @return :: the step
 */
 double FABADAMinimizer::gaussianStep(const double &jump) {
-  std::mt19937 rng(123 * (int(m_counter) + 45 * int(jump)) +
-                   14 * int(time_t()));
   return Kernel::normal_distribution<double>(0.0, std::abs(jump))(rng);
 }
 
@@ -477,8 +477,6 @@ void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
     double prob = exp((m_chi2 - chi2New) / (2.0 * m_temperature));
 
     // Decide if changing or not
-    std::mt19937 rng(int(time_t()) +
-                     48 * (int(m_counter) + 76 * int(parameterIndex)));
     double p = std::uniform_real_distribution<double>(0.0, 1.0)(rng);
     if (p <= prob) {
       for (size_t j = 0; j < m_nParams; j++) {
