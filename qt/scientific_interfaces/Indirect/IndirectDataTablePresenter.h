@@ -109,6 +109,7 @@ private:
   void enableGlobalFittingRange();
   void disableGlobalFittingRange();
 
+  void updateExistingData(std::size_t index);
   void addNewData(std::size_t index);
   void addTableEntry(std::size_t dataIndex, std::size_t spectrum);
   std::size_t removeTableEntry(int row);

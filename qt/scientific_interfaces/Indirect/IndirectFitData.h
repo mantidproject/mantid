@@ -188,7 +188,7 @@ public:
 private:
   void validateSpectra(const Spectra &spectra);
 
-  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_workspace;
+  Mantid::API::MatrixWorkspace_sptr m_workspace;
   Spectra m_spectra;
   std::unordered_map<std::size_t, std::string> m_excludeRegions;
   std::unordered_map<std::size_t, std::pair<double, double>> m_ranges;
