@@ -9,4 +9,4 @@ MuSR Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
-:ref:`Release 3.13.0 <v3.13.0>`
+:ref:`Release 3.14.0 <v3.14.0>`
