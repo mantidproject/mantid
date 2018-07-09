@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<xs:schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" attributeFormDefault="unqualified" elementFormDefault="qualified" 
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" attributeFormDefault="unqualified" elementFormDefault="qualified"
            xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0">
   <xs:element name="facilities">
     <xs:complexType>
@@ -68,7 +68,8 @@
                   </xs:element>
                   <xs:attribute name="name" type="xs:string"/>
                 </xs:complexType>
-              </xs:element> 
+              </xs:element>
+              <xs:element name="timezone" type="xs:string" minOccurs="0" maxOccurs="1"/>
               <xs:element name="instrument" maxOccurs="unbounded">
                 <xs:complexType>
                   <xs:choice maxOccurs="unbounded">
