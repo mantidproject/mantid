@@ -10,6 +10,7 @@ import ICConvoluted as ICC
 import BivariateGaussian as BivariateGaussian
 plt.ion()
 
+
 def get3DPeak(peak, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxToHistogram=1.0,
               plotResults=False, zBG=1.96, bgPolyOrder=1, fICCParams=None, oldICCFit=None,
               strongPeakParams=None, forceCutoff=250, edgeCutoff=15,
@@ -71,15 +72,19 @@ def get3DPeak(peak, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxT
         goodIDX *= qMask
     X = boxToTOFThetaPhi(box, peak)
     dEdge = edgeCutoff
-    
-    # This section defines detector size to determine if a peak is too 
+
+    # This section defines detector size to determine if a peak is too
     # close to the edge.  Order is [NROWS, NCOLS].
-    if   instrumentName == 'MANDI': nPixels = [255, 255]
-    elif instrumentName == 'TOPAZ': nPixels = [255, 255]
-    elif instrumentName == 'CORELLI': nPixels = [255,16]
-    elif instrumentName == 'WISH': nPixels = [512, 152] #TODO: check with sam or vickie that this makes any sense
+    if   instrumentName == 'MANDI':
+        nPixels = [255, 255]
+    elif instrumentName == 'TOPAZ':
+        nPixels = [255, 255]
+    elif instrumentName == 'CORELLI':
+        nPixels = [255,16]
+    elif instrumentName == 'WISH':
+        nPixels = [512, 152] #TODO: check with sam or vickie that this makes any sense
     else:
-        UserWarning('Instrument name {} not found. Assuming a 255*255 detector!'.format(instrumentName))
+        raise UserWarning('Instrument name {} not found. Assuming a 255*255 detector!'.format(instrumentName))
         nPixels = [255,255]
 
     useForceParams = peak.getIntensity() < forceCutoff or peak.getRow() <= dEdge or peak.getRow(

@@ -68,6 +68,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         self.declareProperty("MaxpplFrac", defaultValue=1.1, doc="Max fraction of predicted background level to check")
         mindtBinWidthDocString = "Smallest spacing (in microseconds) between data points for TOF profile fitting."
         self.declareProperty("MindtBinWidth", defaultValue=15, doc=mindtBinWidthDocString)
+        maxdtBinWidthDocString = "Largest spacing (in microseconds) between data points for TOF profile fitting."
+        self.declareProperty("MaxdtBinWidth", defaultValue=50, doc=maxdtBinWidthDocString)
 
         self.declareProperty("NTheta", defaultValue=50, doc="Number of bins for bivarite Gaussian along the scattering angle.")
         self.declareProperty("NPhi", defaultValue=50,  doc="Number of bins for bivariate Gaussian along the azimuthal angle.")
@@ -117,6 +119,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         nPhi = self.getProperty('NPhi').value
         zBG = 1.96
         mindtBinWidth = self.getProperty('MindtBinWidth').value
+        maxdtBinWidth = self.getProperty('MaxdtBinWidth').value
         pplmin_frac = self.getProperty('MinpplFrac').value
         pplmax_frac = self.getProperty('MaxpplFrac').value
         sampleRun = self.getProperty('RunNumber').value
@@ -160,6 +163,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                                                                       zBG=zBG,fracBoxToHistogram=1.0,bgPolyOrder=1,
                                                                       strongPeakParams=strongPeakParams,
                                                                       q_frame=q_frame, mindtBinWidth=mindtBinWidth,
+                                                                      maxdtBinWidth=maxdtBinWidth,
                                                                       pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
                                                                       forceCutoff=forceCutoff, edgeCutoff=edgeCutoff,
                                                                       instrumentName=instrumentName)

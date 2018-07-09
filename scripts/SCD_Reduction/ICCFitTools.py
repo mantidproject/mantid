@@ -196,7 +196,7 @@ def getPoissionGoodIDX(n_events, zBG=1.96, neigh_length_m=3):
 
 def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, qMask=None,
                         peak=None, box=None, pp_lambda=None, peakNumber=-1, minppl_frac=0.8,
-                        maxppl_frac=1.5, mindtBinWidth=1, maxdtBinWidth=50, 
+                        maxppl_frac=1.5, mindtBinWidth=1, maxdtBinWidth=50,
                         constraintScheme=1, instrumentName=None):
     """
     getOptimizedGoodIDX - returns a numpy arrays which is true if the voxel contains events at
@@ -283,7 +283,7 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
             try:
                 chiSq, h, intens, sigma = getQuickTOFWS(box, peak, padeCoefficients, goodIDX=goodIDX, qMask=qMask, pp_lambda=pp_lambda,
                                                         minppl_frac=minppl_frac, maxppl_frac=maxppl_frac, mindtBinWidth=mindtBinWidth,
-                                                        maxdtBinWidth=maxdtBinWidth, constraintScheme=constraintScheme, 
+                                                        maxdtBinWidth=maxdtBinWidth, constraintScheme=constraintScheme,
                                                         instrumentName=instrumentName)
             except:
                 # raise
