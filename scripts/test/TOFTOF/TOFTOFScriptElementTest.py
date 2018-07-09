@@ -137,7 +137,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         for name in dir(self.scriptElement):
             if not name.startswith('__') and not hasattr(getattr(self.scriptElement, name), '__call__'):
                 self.assertEqual(getattr(self.scriptElement, name), getattr(scriptElement2, name))
-        
+
     def test_that_script_is_executable_in_mantid(self):
         self.scriptElement.reset()
         self.scriptElement.facility_name   = 'MLZ'
@@ -194,7 +194,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         self.scriptElement.saveNexus    = False
         self.scriptElement.saveAscii    = False
         exec('from mantid.simpleapi import *\n' + self.scriptElement.to_script(), dict(), dict())
-        
+
     def test_that_script_has_correct_syntax(self):
         self.scriptElement.binEon = False
         self.scriptElement.binQon = False
@@ -219,7 +219,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         except RuntimeError as e:
             self.fail(e)
 
-        # some handy aliases: 
+        # some handy aliases:
         OptFloat = OptionalFloat
 
         # [(inputDict, causesException=True), ...]
@@ -285,5 +285,3 @@ class TOFTOFScriptElementTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-

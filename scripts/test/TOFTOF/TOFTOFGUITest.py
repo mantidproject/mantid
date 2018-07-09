@@ -35,7 +35,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         #done
 
     #def test_that_init_works_correctly(self):
-        
+
     def test_that_preserves_data(self):
         scriptElement = TOFTOFScriptElement()
         scriptElement.reset()
@@ -94,10 +94,9 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         scriptElement.saveAscii    = True
 
         self.setupWidget.set_state(scriptElement)
-               
-        with mock.patch('reduction_gui.reduction.toftof.toftof_reduction.TOFTOFScriptElement.reset'):
-            scriptElement2 = self.setupWidget.get_state()      
 
+        with mock.patch('reduction_gui.reduction.toftof.toftof_reduction.TOFTOFScriptElement.reset'):
+            scriptElement2 = self.setupWidget.get_state()
 
         scriptElement.facility_name   = self.settingsMock.facility_name
         scriptElement.instrument_name = self.settingsMock.instrument_name
@@ -107,7 +106,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
                 attr2 = getattr(scriptElement2, name)
             except AttributeError as e:
                 self.fail("TOFTOFSetupWidget.get_state() doesn't set the attribute '{}'".format(name))
-            
+
             if not name.startswith('__') and not hasattr(attr1, '__call__'):
                 self.assertEqual(attr1, attr2, "TOFTOFSetupWidget doesn't preserve state of attribute '{}'".format(name))
 
@@ -116,9 +115,9 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         scriptElement.reset()
 
         self.setupWidget.set_state(scriptElement)
-               
+
         with mock.patch('reduction_gui.reduction.toftof.toftof_reduction.TOFTOFScriptElement.reset'):
-            scriptElement2 = self.setupWidget.get_state()      
+            scriptElement2 = self.setupWidget.get_state()
 
         scriptElement.facility_name   = self.settingsMock.facility_name
         scriptElement.instrument_name = self.settingsMock.instrument_name
@@ -128,11 +127,9 @@ class TOFTOFScriptElementTest(unittest.TestCase):
                 attr2 = getattr(scriptElement2, name)
             except AttributeError as e:
                 self.fail("TOFTOFSetupWidget.get_state() doesn't set the attribute '{}'".format(name))
-            
+
             if not name.startswith('__') and not hasattr(attr1, '__call__'):
                 self.assertEqual(attr1, attr2, "TOFTOFSetupWidget doesn't preserve state of attribute '{}'".format(name))
-    
+
 if __name__ == '__main__':
     unittest.main()
-
-
