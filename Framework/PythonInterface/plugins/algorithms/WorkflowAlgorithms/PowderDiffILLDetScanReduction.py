@@ -89,6 +89,12 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         self.declareProperty(name='ComponentsToMask', defaultValue='',
                              doc='Comma separated list of component names to mask, for instance: tube_1, tube_2')
 
+        self.declareProperty(name='ComponentsToReduce', defaultValue='',
+                             doc='Comma separated list of component names to output the reduced data for; for example tube_1')
+
+        self.declareProperty(name='AlignTubes', defaultValue=True,
+                             doc='Align the tubes vertically and horizontally according to IPF.')
+
     def _generate_mask(self, n_pix, instrument):
         """
         Generates the DetectorList input for MaskDetectors
@@ -155,12 +161,13 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         data_type = 'Raw'
         if self.getProperty('UseCalibratedData').value:
             data_type = 'Calibrated'
+        align_tubes = self.getProperty('AlignTubes').value
 
         self._progress = Progress(self, start=0.0, end=1.0, nreports=6)
         self._progress.report('Loading data')
         input_workspace = LoadAndMerge(Filename=self.getPropertyValue('Run'),
                                        LoaderName='LoadILLDiffraction',
-                                       LoaderOptions={'DataType': data_type})
+                                       LoaderOptions={'DataType': data_type, 'AlignTubes': align_tubes})
         # We might already have a group, but group just in case
         input_group = GroupWorkspaces(InputWorkspaces=input_workspace)
 
@@ -178,6 +185,8 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         self._progress.report('Normalising to monitor')
         if self.getPropertyValue('NormaliseTo') == 'Monitor':
             input_group = NormaliseToMonitor(InputWorkspace=input_group, MonitorID=0)
+            if instrument.getName() == 'D2B':
+                input_group = Scale(InputWorkspace=input_group, Factor=1e+6)
 
         calib_file = self.getPropertyValue('CalibrationFile')
         if calib_file:
@@ -214,6 +223,14 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         if instrument.hasParameter("mirror_scattering_angles"):
             self._mirror = instrument.getBoolParameter("mirror_scattering_angles")[0]
         self._final_mask = self.getProperty('FinalMask').value
+
+        components = self.getPropertyValue('ComponentsToReduce')
+        if components:
+            self._mirror = False
+            self.log().information('Mirroring is disabled for tube per tube output.')
+            for ws in input_group:
+                CropToComponent(InputWorkspace=ws.getName(), OutputWorkspace=ws.getName(),
+                                ComponentNames=components)
 
         self._progress.report('Doing Output2DTubes Option')
         if self.getProperty('Output2DTubes').value:

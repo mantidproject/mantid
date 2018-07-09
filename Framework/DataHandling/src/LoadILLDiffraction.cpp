@@ -106,6 +106,10 @@ void LoadILLDiffraction::init() {
                   "Select the type of data, with or without calibration "
                   "already applied. If Auto then the calibrated data is "
                   "loaded if available, otherwise the raw data is loaded.");
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("AlignTubes", true,
+                                           Direction::Input),
+      "Apply vertical and horizontal alignment of tubes as defined in IPF");
 }
 
 std::map<std::string, std::string> LoadILLDiffraction::validateInputs() {
@@ -289,6 +293,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
   referenceComponentPosition.getSpherical(refR, refTheta, refPhi);
 
   if (m_instName == "D2B") {
+    const bool doAlign = getProperty("AlignTubes");
     auto &compInfo = instrumentWorkspace->mutableComponentInfo();
 
     Geometry::IComponent_const_sptr detectors =
@@ -309,7 +314,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
     m_pixelHeight = bb.yMax() - bb.yMin();
 
     const auto tubeAnglesStr = params.getString("D2B", "tube_angles");
-    if (!tubeAnglesStr.empty()) {
+    if (!tubeAnglesStr.empty() && doAlign) {
       std::vector<std::string> tubeAngles;
       boost::split(tubeAngles, tubeAnglesStr[0], boost::is_any_of(","));
       const double ref = -refTheta;
@@ -333,7 +338,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
     }
 
     const auto tubeCentersStr = params.getString("D2B", "tube_centers");
-    if (!tubeCentersStr.empty()) {
+    if (!tubeCentersStr.empty() && doAlign) {
       std::vector<std::string> tubeCenters;
       double maxYOffset = 0.;
       boost::split(tubeCenters, tubeCentersStr[0], boost::is_any_of(","));

@@ -21,6 +21,7 @@ New
 - :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` is extended to provide automatic masking of the pixels with spurious calibration constants.
 - :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` will now ignore the last scan point data, if some of the input files have 26 points, instead of 25.
 - :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` is extended to provide initial masking of the top and bottom parts of the tubes, and final masking of the 2D outputs.
+- :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` is capable now of reducing the data tube by tube, with tube alignment on or off. Also when normalising to monitor, the counts will be scaled up by 1M.
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` performs powder diffraction data reduction for WAND² with calibration, monitor normalisation and background subtraction.
 - New NOMAD instrument geometry for 2018 run cycle
 - New POWGEN instrument geometry for 2018 run cycle
