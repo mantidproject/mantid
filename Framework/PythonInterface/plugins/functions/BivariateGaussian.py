@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 from matplotlib.mlab import bivariate_normal
@@ -41,18 +42,18 @@ class BivariateGaussian(IFunction1D):
     """
     def init(self):
         self.declareParameter("A") #Amplitude
-        self.declareParameter("muX") #Mean along the x direction
-        self.declareParameter("muY") #Mean along the y direction
-        self.declareParameter("sigX") #sigma along the x direction
-        self.declareParameter("sigY") #sigma along the y direction
-        self.declareParameter("sigP") #interaction term rho
-        self.declareParameter("bg") #constant BG terms
+        self.declareParameter("MuX") #Mean along the x direction
+        self.declareParameter("MuY") #Mean along the y direction
+        self.declareParameter("SigX") #sigma along the x direction
+        self.declareParameter("SigY") #sigma along the y direction
+        self.declareParameter("SigP") #interaction term rho
+        self.declareParameter("Bg") #constant BG terms
         self.declareAttribute("nX", 50) #used for reconstructing 2d profile
         self.declareAttribute("nY", 50) #used for reconstruction 2d profile
         self.addConstraints("0 < A") #Require amplitude to be positive
-        self.addConstraints("0 < sigX") #standard deviations must be positive
-        self.addConstraints("0 < sigY") #standard deviations must be positive
-        self.addConstraints("0 < bg") #standard deviations must be positive
+        self.addConstraints("0 < SigX") #standard deviations must be positive
+        self.addConstraints("0 < SigY") #standard deviations must be positive
+        self.addConstraints("0 < Bg") #standard deviations must be positive
 
     def function1D(self, t):
         """
@@ -76,35 +77,35 @@ class BivariateGaussian(IFunction1D):
         Y = pos[...,1]
 
         A = self.getParamValue(0)
-        muX = self.getParamValue(1)
-        muY = self.getParamValue(2)
-        sigX = self.getParamValue(3)
-        sigY = self.getParamValue(4)
-        sigP = self.getParamValue(5)
-        bg = self.getParamValue(6)
+        MuX = self.getParamValue(1)
+        MuY = self.getParamValue(2)
+        SigX = self.getParamValue(3)
+        SigY = self.getParamValue(4)
+        SigP = self.getParamValue(5)
+        Bg = self.getParamValue(6)
 
-        sigXY = sigX*sigY*sigP
-        Z = A*bivariate_normal(X,Y, sigmax=sigX, sigmay=sigY,
-                               mux=muX,muy=muY,sigmaxy=sigXY)
+        SigXY = SigX*SigY*SigP
+        Z = A*bivariate_normal(X,Y, sigmax=SigX, sigmay=SigY,
+                               mux=MuX,muy=MuY,sigmaxy=SigXY)
         if t.ndim == 1:
             zRet = np.empty(Z.shape+(2,))
             zRet[:,:,0] = Z
             zRet[:,:,1] = Z
         elif t.ndim == 3:
             zRet = Z
-        zRet += bg
+        zRet += Bg
         return zRet.ravel()
 
     def getMu(self):
-        muX = self.getParamValue(1)
-        muY = self.getParamValue(2)
-        return np.array([muX, muY])
+        MuX = self.getParamValue(1)
+        MuY = self.getParamValue(2)
+        return np.array([MuX, MuY])
 
     def getSigma(self):
-        sigX = self.getParamValue(3)
-        sigY = self.getParamValue(4)
-        sigP = self.getParamValue(5)
-        return np.array([[sigX**2,sigX*sigY*sigP],[sigX*sigY*sigP, sigY**2]])
+        SigX = self.getParamValue(3)
+        SigY = self.getParamValue(4)
+        SigP = self.getParamValue(5)
+        return np.array([[SigX**2,SigX*SigY*SigP],[SigX*SigY*SigP, SigY**2]])
 
     def getMuSigma(self):
         return self.getMu(), self.getSigma()
@@ -114,7 +115,7 @@ class BivariateGaussian(IFunction1D):
         setConstraints sets fitting constraints for the mbvg function.
         Intput:
             boundsDict: a dictionary object where each key is a parameter as a string
-                        ('A', 'muX', 'muY', 'sigX', 'sigY', 'sigP', 'bg') and the value is
+                        ('A', 'MuX', 'MuY', 'SigX', 'SigY', 'SigP', 'Bg') and the value is
                         an array with the lower bound and upper bound
         """
         for param in boundsDict.keys():
@@ -123,11 +124,11 @@ class BivariateGaussian(IFunction1D):
                     constraintString = "{:4.4e} < {:s} < {:4.4e}".format(boundsDict[param][0], param, boundsDict[param][1])
                     self.addConstraints(constraintString)
                 else:
-                    print 'Setting constraints on mbvg; reversing bounds'
+                    self.log().information('Setting constraints on mbvg; reversing bounds')
                     self.addConstraints("{:4.4e} < A < {:4.4e}".format(boundsDict[param][1], boundsDict[param][0]))
             except ValueError:
-                print 'Cannot set parameter {:s} for mbvg.  Valid choices are', \
-                      '(\'A\', \'muX\', \'muY\', \'sigX\', \'sigY\', \'sigP\', \'bg\')'.format(param)
+                self.log().warning("Cannot set parameter {:s} for mbvg.  Valid choices are " +
+                                   "('A', 'MuX', 'MuY', 'SigX', 'SigY', 'SigP', 'Bg')".format(param))
 
     def function2D(self, t):
         """
@@ -149,17 +150,17 @@ class BivariateGaussian(IFunction1D):
         X = pos[...,0]
         Y = pos[...,1]
         A = self.getParamValue(0)
-        muX = self.getParamValue(1)
-        muY = self.getParamValue(2)
-        sigX = self.getParamValue(3)
-        sigY = self.getParamValue(4)
-        sigP = self.getParamValue(5)
-        bg = self.getParamValue(6)
+        MuX = self.getParamValue(1)
+        MuY = self.getParamValue(2)
+        SigX = self.getParamValue(3)
+        SigY = self.getParamValue(4)
+        SigP = self.getParamValue(5)
+        Bg = self.getParamValue(6)
 
-        sigXY = sigX*sigY*sigP
-        Z = A*bivariate_normal(X,Y, sigmax=sigX, sigmay=sigY,
-                               mux=muX,muy=muY,sigmaxy=sigXY)
-        Z += bg
+        SigXY = SigX*SigY*SigP
+        Z = A*bivariate_normal(X,Y, sigmax=SigX, sigmay=SigY,
+                               mux=MuX,muy=MuY,sigmaxy=SigXY)
+        Z += Bg
         return Z
 
     def function3D(self, t):
@@ -168,17 +169,17 @@ class BivariateGaussian(IFunction1D):
         X = pos[...,0]
         Y = pos[...,1]
         A = self.getParamValue(0)
-        muX = self.getParamValue(1)
-        muY = self.getParamValue(2)
-        sigX = self.getParamValue(3)
-        sigY = self.getParamValue(4)
-        sigP = self.getParamValue(5)
-        bg = self.getParamValue(6)
+        MuX = self.getParamValue(1)
+        MuY = self.getParamValue(2)
+        SigX = self.getParamValue(3)
+        SigY = self.getParamValue(4)
+        SigP = self.getParamValue(5)
+        Bg = self.getParamValue(6)
 
-        sigXY = sigX*sigY*sigP
-        Z = A*bivariate_normal(X,Y, sigmax=sigX, sigmay=sigY,
-                               mux=muX,muy=muY,sigmaxy=sigXY)
-        Z += bg
+        SigXY = SigX*SigY*SigP
+        Z = A*bivariate_normal(X,Y, sigmax=SigX, sigmay=SigY,
+                               mux=MuX,muy=MuY,sigmaxy=SigXY)
+        Z += Bg
         return Z
 
     # Evaluate the function for a differnt set of paremeters (trialc)

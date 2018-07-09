@@ -45,12 +45,10 @@ createAxisFromRebinParams(const std::vector<double> &params,
         }
         return params;
       }();
-  double xs;
   int ibound(2), istep(1), inew(1);
   // highest index in params array containing a bin boundary
   int ibounds = static_cast<int>(fullParams.size());
   int isteps = ibounds - 1; // highest index in params array containing a step
-  xnew.clear();
 
   // This coefficitent represents the maximum difference between the size of the
   // last bin and all
@@ -63,7 +61,10 @@ createAxisFromRebinParams(const std::vector<double> &params,
     lastBinCoef = 1.0;
   }
 
+  double xs = 0;
   double xcurr = fullParams[0];
+
+  xnew.clear();
   if (resize_xnew)
     xnew.push_back(xcurr);
 
@@ -78,6 +79,9 @@ createAxisFromRebinParams(const std::vector<double> &params,
       // Someone gave a 0-sized step! What a dope.
       throw std::runtime_error(
           "Invalid binning step provided! Can't creating binning axis.");
+    } else if (!std::isfinite(xs)) {
+      throw std::runtime_error(
+          "An infinite or NaN value was found in the binning parameters.");
     }
 
     if ((xcurr + xs * (1.0 + lastBinCoef)) <= fullParams[ibound]) {

@@ -1,15 +1,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmHistory.h"
-#include "MantidKernel/PropertyHistory.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/HistoryItem.h"
 #include "MantidAPI/ScriptBuilder.h"
-#include "MantidKernel/Property.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/HistoryItem.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/PropertyHistory.h"
 
 #include <boost/utility.hpp>
 #include <set>
@@ -17,8 +18,8 @@
 namespace Mantid {
 namespace API {
 
-using Mantid::Kernel::PropertyHistory_sptr;
 using Mantid::Kernel::PropertyHistory_const_sptr;
+using Mantid::Kernel::PropertyHistory_sptr;
 
 namespace {
 Mantid::Kernel::Logger g_log("ScriptBuilder");
@@ -27,9 +28,11 @@ Mantid::Kernel::Logger g_log("ScriptBuilder");
 const std::string COMMENT_ALG = "Comment";
 
 ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view,
-                             std::string versionSpecificity)
+                             std::string versionSpecificity,
+                             bool appendTimestamp)
     : m_historyItems(view->getAlgorithmsList()), m_output(),
-      m_versionSpecificity(versionSpecificity) {}
+      m_versionSpecificity(versionSpecificity),
+      m_timestampCommands(appendTimestamp) {}
 
 /**
  * Build a python script for each algorithm included in the history view.
@@ -73,11 +76,21 @@ void ScriptBuilder::writeHistoryToStream(
 
     if (boost::next(iter) == m_historyItems.end() ||
         !boost::next(iter)->isUnrolled()) {
+
+      if (m_timestampCommands) {
+        os << " # " << algHistory->executionDate().toISO8601String();
+      }
+
       os << "\n";
     }
   } else {
     // create the string for this algorithm
-    os << buildAlgorithmString(algHistory) << "\n";
+    os << buildAlgorithmString(algHistory);
+    if (m_timestampCommands) {
+      os << " # " << algHistory->executionDate().toISO8601String();
+    }
+
+    os << "\n";
   }
 }
 
@@ -106,11 +119,11 @@ void ScriptBuilder::buildChildren(
 }
 
 /**
-* Build the script output for a single comment
-*
-* @param algHistory :: pointer to an algorithm history object
-* @returns std::string to run this algorithm
-*/
+ * Build the script output for a single comment
+ *
+ * @param algHistory :: pointer to an algorithm history object
+ * @returns std::string to run this algorithm
+ */
 const std::string
 ScriptBuilder::buildCommentString(AlgorithmHistory_const_sptr algHistory) {
   std::ostringstream comment;
@@ -127,11 +140,11 @@ ScriptBuilder::buildCommentString(AlgorithmHistory_const_sptr algHistory) {
 }
 
 /**
-* Build the script output for a single algorithm
-*
-* @param algHistory :: pointer to an algorithm history object
-* @returns std::string to run this algorithm
-*/
+ * Build the script output for a single algorithm
+ *
+ * @param algHistory :: pointer to an algorithm history object
+ * @returns std::string to run this algorithm
+ */
 const std::string
 ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
   std::ostringstream properties;
@@ -156,10 +169,11 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
       freshPropNames.insert(propFresh->name());
     }
 
-    // remove properties that are not present on a fresh algorithm
+    // remove output properties that are not present on a fresh algorithm
     // i.e. remove dynamically added properties
     for (auto prop_iter = props.begin(); prop_iter != props.end();) {
-      if (freshPropNames.find((*prop_iter)->name()) == freshPropNames.end()) {
+      if (freshPropNames.find((*prop_iter)->name()) == freshPropNames.end() &&
+          (*prop_iter)->direction() == Kernel::Direction::Output) {
         prop_iter = props.erase(prop_iter);
       } else {
         ++prop_iter;

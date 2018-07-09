@@ -222,7 +222,8 @@ set ( SRC_FILES
 	src/Plus.cpp
 	src/PointByPointVCorrection.cpp
 	src/PoissonErrors.cpp
-	src/PolarizationCorrection.cpp
+	src/PolarizationCorrectionFredrikze.cpp
+	src/PolarizationCorrectionWildes.cpp
 	src/PolarizationEfficiencyCor.cpp
 	src/PolynomialCorrection.cpp
 	src/Power.cpp
@@ -247,6 +248,7 @@ set ( SRC_FILES
 	src/ReflectometryMomentumTransfer.cpp
 	src/ReflectometryReductionOne2.cpp
 	src/ReflectometryReductionOneAuto2.cpp
+	src/ReflectometrySumInQ.cpp
 	src/ReflectometryWorkflowBase.cpp
 	src/ReflectometryWorkflowBase2.cpp
 	src/Regroup.cpp
@@ -561,7 +563,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Plus.h
 	inc/MantidAlgorithms/PointByPointVCorrection.h
 	inc/MantidAlgorithms/PoissonErrors.h
-	inc/MantidAlgorithms/PolarizationCorrection.h
+	inc/MantidAlgorithms/PolarizationCorrectionFredrikze.h
+	inc/MantidAlgorithms/PolarizationCorrectionWildes.h
 	inc/MantidAlgorithms/PolarizationEfficiencyCor.h
 	inc/MantidAlgorithms/PolynomialCorrection.h
 	inc/MantidAlgorithms/Power.h
@@ -586,6 +589,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ReflectometryMomentumTransfer.h
 	inc/MantidAlgorithms/ReflectometryReductionOne2.h
 	inc/MantidAlgorithms/ReflectometryReductionOneAuto2.h
+	inc/MantidAlgorithms/ReflectometrySumInQ.h
 	inc/MantidAlgorithms/ReflectometryWorkflowBase.h
 	inc/MantidAlgorithms/ReflectometryWorkflowBase2.h
 	inc/MantidAlgorithms/Regroup.h
@@ -902,7 +906,8 @@ set ( TEST_FILES
 	PlusTest.h
 	PointByPointVCorrectionTest.h
 	PoissonErrorsTest.h
-	PolarizationCorrectionTest.h
+	PolarizationCorrectionFredrikzeTest.h
+	PolarizationCorrectionWildesTest.h
 	PolarizationEfficiencyCorTest.h
 	PolynomialCorrectionTest.h
 	PowerLawCorrectionTest.h
@@ -925,6 +930,7 @@ set ( TEST_FILES
 	ReflectometryMomentumTransferTest.h
 	ReflectometryReductionOne2Test.h
 	ReflectometryReductionOneAuto2Test.h
+	ReflectometrySumInQTest.h
 	RegroupTest.h
 	RemoveBackgroundTest.h
 	RemoveBinsTest.h

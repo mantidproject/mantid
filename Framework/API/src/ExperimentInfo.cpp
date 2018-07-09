@@ -1458,7 +1458,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     std::string paramValue = tokens[3];
     int size = static_cast<int>(tokens.count());
     for (int i = 4; i < size; i++)
-      paramValue += ";" + tokens[4];
+      paramValue += ";" + tokens[i];
 
     const auto &paramType = tokens[1];
     const auto &paramName = tokens[2];

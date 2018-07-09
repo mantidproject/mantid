@@ -2,10 +2,10 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -16,6 +16,8 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+using Mantid::DataObjects::PeaksWorkspace;
+using Mantid::DataObjects::PeaksWorkspace_sptr;
 
 namespace {
 using namespace Mantid::Crystal;
@@ -199,7 +201,7 @@ processing.
 void executeFiltered(IMDIterator *mdIterator, ClusterFaces &localClusterFaces,
                      Progress &progress, IMDHistoWorkspace_sptr &clusterImage,
                      const std::vector<size_t> &imageShape,
-                     IPeaksWorkspace_sptr &filterWorkspace,
+                     PeaksWorkspace_sptr &filterWorkspace,
                      const OptionalLabelPeakIndexMap &optionalAllowedLabels) {
   const int emptyLabelId = 0;
   PeakClusterProjection projection(clusterImage);
@@ -268,7 +270,7 @@ void FindClusterFaces::init() {
                   "An input image workspace consisting of cluster ids.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+      make_unique<WorkspaceProperty<PeaksWorkspace>>(
           "FilterWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional filtering peaks workspace. Used to restrict face finding to "
       "clusters in image which correspond to peaks in the workspace.");
@@ -308,7 +310,7 @@ void FindClusterFaces::exec() {
   }
 
   // Get the peaks workspace
-  IPeaksWorkspace_sptr filterWorkspace = this->getProperty("FilterWorkspace");
+  PeaksWorkspace_sptr filterWorkspace = this->getProperty("FilterWorkspace");
 
   // Use the peaks workspace to filter to labels of interest
   OptionalLabelPeakIndexMap optionalAllowedLabels = createOptionalLabelFilter(

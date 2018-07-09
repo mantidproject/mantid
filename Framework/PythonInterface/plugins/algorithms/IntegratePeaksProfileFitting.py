@@ -6,6 +6,7 @@ fitting for integrating peaks.
 
 # This __future__ import is for Python 2/3 compatibility
 from __future__ import (absolute_import, division, print_function)
+import sys
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -15,16 +16,13 @@ import numpy as np
 class IntegratePeaksProfileFitting(PythonAlgorithm):
 
     def summary(self):
-        return 'Fits a series fo peaks using 3D profile fitting as an Ikeda-Carpenter function by a bivariate gaussian.'
+        return 'Fits a series of peaks using 3D profile fitting as an Ikeda-Carpenter function by a bivariate gaussian.'
 
     def category(self):
         # defines the category the algorithm will be put in the algorithm browser
         return 'Crystal\\Integration'
 
     def PyInit(self):
-
-        # Declare properties
-
         # Declare a property for the output workspace
         self.declareProperty(WorkspaceProperty(name='OutputPeaksWorkspace',
                              defaultValue='',
@@ -56,20 +54,18 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                              extensions=[".dat"]),
                              doc="File containing the Pade coefficients describing moderator emission versus energy.")
         self.declareProperty(FileProperty("StrongPeakParamsFile",defaultValue="",action=FileAction.OptionalLoad,
-                             extensions=[".pkl"]))
+                             extensions=[".pkl"]),
+                             doc="File containing strong peaks profiles.  If left blank, no profiles will be enforced.")
         self.declareProperty("IntensityCutoff", defaultValue=0., doc="Minimum number of counts to force a profile")
-        edgeDocString = 'Pixels within EdgeCutoff from a detector edge will be have a profile forced.  Currently for Anger cameras only.'
+        edgeDocString = 'Pixels within EdgeCutoff from a detector edge will be have a profile forced.  Currently for 256x256 cameras only.'
         self.declareProperty("EdgeCutoff", defaultValue=0., doc=edgeDocString)
         self.declareProperty("FracHKL", defaultValue=0.5, validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Fraction of HKL to consider for profile fitting.")
         self.declareProperty("FracStop", defaultValue=0.05, validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Fraction of max counts to include in peak selection.")
-        self.declareProperty(FloatArrayProperty("PredPplCoefficients", values=np.array([6.12,  8.87 , -0.09]),
-                                                direction=Direction.Input),
-                             doc="Coefficients for estimating the background.  This can vary wildly between datasets.")
 
-        self.declareProperty("MinpplFrac", defaultValue=0.7, doc="Min fraction of predicted background level to check")
-        self.declareProperty("MaxpplFrac", defaultValue=1.5, doc="Max fraction of predicted background level to check")
+        self.declareProperty("MinpplFrac", defaultValue=0.9, doc="Min fraction of predicted background level to check")
+        self.declareProperty("MaxpplFrac", defaultValue=1.1, doc="Max fraction of predicted background level to check")
         mindtBinWidthDocString = "Smallest spacing (in microseconds) between data points for TOF profile fitting."
         self.declareProperty("MindtBinWidth", defaultValue=15, doc=mindtBinWidthDocString)
 
@@ -79,7 +75,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         self.declareProperty("DQMax", defaultValue=0.15, doc="Largest total side length (in Angstrom) to consider for profile fitting.")
         self.declareProperty("DtSpread", defaultValue=0.03, validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="The fraction of the peak TOF to consider for TOF profile fitting.")
-        self.declareProperty("PeakNumber", defaultValue=-1,  doc="Which Peak to Fit.  Leave negative for all.")
+        self.declareProperty("PeakNumber", defaultValue=-1,  doc="Which Peak to fit.  Leave negative for all.")
 
     def PyExec(self):
         import ICCFitTools as ICCFT
@@ -109,8 +105,14 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         mtd['MDdata'] = MDdata
 
         padeCoefficients = ICCFT.getModeratorCoefficients(padeFile)
-        strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'))
-        predpplCoefficients = self.getProperty('PredPplCoefficients').value
+        if strongPeaksParamsFile != "":
+            if sys.version_info[0] == 3:
+                strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'),encoding='latin1')
+            else:
+                strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'))
+        else:
+            strongPeakParams = None #This will not force any profiles
+
         nTheta = self.getProperty('NTheta').value
         nPhi = self.getProperty('NPhi').value
         zBG = 1.96
@@ -125,8 +127,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         numerrors = 0
 
         # Create the parameters workspace
-        keys =  ['peakNumber','Alpha', 'Beta', 'R', 'T0', 'bgBVG', 'chiSq3d', 'dQ', 'k_conv', 'muPH',
-                 'muTH', 'newQ', 'scale', 'scale3d', 'sigP', 'sigX', 'sigY', 'Intens3d', 'SigInt3d']
+        keys =  ['peakNumber','Alpha', 'Beta', 'R', 'T0', 'bgBVG', 'chiSq3d', 'dQ', 'KConv', 'MuPH',
+                 'MuTH', 'newQ', 'Scale', 'scale3d', 'SigP', 'SigX', 'SigY', 'Intens3d', 'SigInt3d']
         datatypes = ['float']*len(keys)
         datatypes[np.where(np.array(keys)=='newQ')[0][0]] = 'V3D'
         params_ws = CreateEmptyTableWorkspace()
@@ -141,8 +143,11 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
 
         # And we're off!
         peaks_ws_out = peaks_ws.clone()
+        np.warnings.filterwarnings('ignore') # There can be a lot of warnings for bad solutions that get rejected.
+        progress = Progress(self, 0.0, 1.0, len(peaksToFit))
         for peakNumber in peaksToFit:#range(peaks_ws.getNumberPeaks()):
             peak = peaks_ws_out.getPeak(peakNumber)
+            progress.report(' ')
             try:
                 if peak.getRunNumber() == sampleRun:
                     box = ICCFT.getBoxFracHKL(peak, peaks_ws, MDdata, UBMatrix, peakNumber,
@@ -152,7 +157,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                                                                       nTheta=nTheta, nPhi=nPhi, plotResults=False,
                                                                       zBG=zBG,fracBoxToHistogram=1.0,bgPolyOrder=1,
                                                                       strongPeakParams=strongPeakParams,
-                                                                      predCoefficients=predpplCoefficients,
                                                                       q_frame=q_frame, mindtBinWidth=mindtBinWidth,
                                                                       pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
                                                                       forceCutoff=forceCutoff, edgeCutoff=edgeCutoff)
@@ -178,9 +182,11 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
 
                     sigma = np.sqrt(intensity + bgEvents + varFit)
 
-                    #print('peak %i; original: %4.2f +- %4.2f;  new: %4.2f +- %4.2f'%(peakNumber, peak.getIntensity(),
-                    #                                                                 peak.getSigmaIntensity(),
-                    #                                                                 intensity, sigma))
+                    compStr = 'peak {:d}; original: {:4.2f} +- {:4.2f};  new: {:4.2f} +- {:4.2f}'.format(peakNumber,
+                                                                                                         peak.getIntensity(),
+                                                                                                         peak.getSigmaIntensity(),
+                                                                                                         intensity, sigma)
+                    logger.information(compStr)
 
                     # Save the results
                     params['peakNumber'] = peakNumber
@@ -193,9 +199,11 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                     numgood += 1
 
             except KeyboardInterrupt:
+                np.warnings.filterwarnings('default') # Re-enable on exit
                 raise
+
             except:
-                # raise
+                #raise
                 numerrors += 1
                 peak.setIntensity(0.0)
                 peak.setSigmaIntensity(1.0)
@@ -204,6 +212,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         for wsName in mtd.getObjectNames():
             if 'fit_' in wsName or 'bvgWS' in wsName or  'tofWS' in wsName or 'scaleWS' in wsName:
                 mtd.remove(wsName)
+        np.warnings.filterwarnings('default') # Re-enable on exit
         # Set the output
         self.setProperty('OutputPeaksWorkspace', peaks_ws_out)
         self.setProperty('OutputParamsWorkspace', params_ws)

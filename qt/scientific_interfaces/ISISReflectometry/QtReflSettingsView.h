@@ -95,6 +95,8 @@ public:
   std::string getSummationType() const override;
   /// Return selected reduction type
   std::string getReductionType() const override;
+  /// Return whether to include partial bins
+  bool getIncludePartialBins() const override;
   /// Set the status of whether polarisation corrections should be enabled
   void setIsPolCorrEnabled(bool enable) const override;
   /// Set default values for experiment and instrument settings
@@ -125,6 +127,7 @@ public slots:
   /// Sets enabled status for polarisation corrections and parameters
   void setPolarisationOptionsEnabled(bool enable) override;
   void setReductionTypeEnabled(bool enable) override;
+  void setIncludePartialBinsEnabled(bool enable) override;
   void setDetectorCorrectionEnabled(bool enable) override;
   void notifySettingsChanged();
   QString messageFor(
@@ -132,6 +135,9 @@ public slots:
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
   /// Adds another row to the per-angle options table
   void addPerAngleOptionsTableRow();
+
+private slots:
+  void setPolCorPageForIndex(int index);
 
 private:
   /// Initialise the interface

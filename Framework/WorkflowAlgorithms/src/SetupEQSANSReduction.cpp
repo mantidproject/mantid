@@ -627,10 +627,11 @@ void SetupEQSANSReduction::exec() {
   } else if (boost::contains(normalization, "Charge")) {
     normAlg->setProperty("NormaliseToBeam", false);
   } else if (boost::contains(normalization, "Monitor")) {
-    loadMonitors = true;
     if (monitorRefFile.empty()) {
       g_log.error() << "ERROR: normalize-to-monitor was turned ON but no "
                        "reference data was selected\n";
+    } else {
+      loadMonitors = true;
     }
     normAlg->setProperty("NormaliseToMonitor", true);
     normAlg->setProperty("BeamSpectrumFile", monitorRefFile);
@@ -661,7 +662,9 @@ void SetupEQSANSReduction::exec() {
 
   const bool preserveEvents = getProperty("PreserveEvents");
   loadAlg->setProperty("PreserveEvents", preserveEvents);
-  loadAlg->setProperty("LoadMonitors", loadMonitors);
+  // load from nexus if they aren't in the reference file
+  loadAlg->setProperty("LoadMonitors",
+                       (loadMonitors && monitorRefFile.empty()));
 
   const double sdd = getProperty("SampleDetectorDistance");
   loadAlg->setProperty("SampleDetectorDistance", sdd);

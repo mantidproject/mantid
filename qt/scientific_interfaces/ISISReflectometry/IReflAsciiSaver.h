@@ -37,6 +37,15 @@ private:
   std::string m_path;
 };
 
+class InvalidWorkspaceName : public std::runtime_error {
+public:
+  explicit InvalidWorkspaceName(std::string const &path);
+  std::string const &name() const;
+
+private:
+  std::string m_name;
+};
+
 class IReflAsciiSaver {
 public:
   virtual bool isValidSaveDirectory(std::string const &filePath) const = 0;
