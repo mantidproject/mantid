@@ -1,7 +1,6 @@
 #ifndef WORKSPACEVALIDATORSTEST_H_
 #define WORKSPACEVALIDATORSTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -9,13 +8,14 @@
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleValidator.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

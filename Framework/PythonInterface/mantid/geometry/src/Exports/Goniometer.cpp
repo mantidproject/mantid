@@ -14,7 +14,7 @@ using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
 namespace //<unnamed>
-    {
+{
 ///@cond
 #ifdef __clang__
 #pragma clang diagnostic push

@@ -4,11 +4,11 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
-#include "MantidAPI/ImplicitFunctionParserFactory.h"
-#include "MantidKernel/ConfigService.h"
+#include "MantidAPI/ImplicitFunctionParameter.h"
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
 #include "MantidAPI/ImplicitFunctionParser.h"
-#include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidAPI/ImplicitFunctionParserFactory.h"
+#include "MantidKernel/ConfigService.h"
 #include <boost/shared_ptr.hpp>
 
 class ImplicitFunctionParserFactoryTest : public CxxTest::TestSuite {

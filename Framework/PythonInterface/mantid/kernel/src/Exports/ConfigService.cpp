@@ -1,15 +1,15 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/StlExportDefinitions.h"
 #include <boost/python/class.hpp>
-#include <boost/python/def.hpp>
-#include <boost/python/reference_existing_object.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/def.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/overloads.hpp>
+#include <boost/python/reference_existing_object.hpp>
 
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
@@ -49,7 +49,7 @@ GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
-}
+} // namespace
 
 void export_ConfigService() {
   using Mantid::PythonInterface::std_vector_exporter;
@@ -89,14 +89,15 @@ void export_ConfigService() {
       .def("getFacilities", &ConfigServiceImpl::getFacilities, arg("self"),
            "Returns the default facility")
 
-      .def("getFacility", (const FacilityInfo &(ConfigServiceImpl::*)() const) &
-                              ConfigServiceImpl::getFacility,
+      .def("getFacility",
+           (const FacilityInfo &(ConfigServiceImpl::*)() const) &
+               ConfigServiceImpl::getFacility,
            arg("self"), return_value_policy<reference_existing_object>(),
            "Returns the default facility")
 
       .def("getFacility",
-           (const FacilityInfo &(ConfigServiceImpl::*)(const std::string &)
-                const) &
+           (const FacilityInfo &(
+               ConfigServiceImpl::*)(const std::string &)const) &
                ConfigServiceImpl::getFacility,
            (arg("self"), arg("facilityName")),
            return_value_policy<reference_existing_object>(),
@@ -163,9 +164,10 @@ void export_ConfigService() {
            "filename")
 
       .def("setFileLogLevel", &ConfigServiceImpl::setFileLogLevel,
-           (arg("self"), arg("logLevel")), "Sets the log level priority for "
-                                           "the File log channel, logLevel 1 = "
-                                           "Fatal, 6 = information, 7 = Debug")
+           (arg("self"), arg("logLevel")),
+           "Sets the log level priority for "
+           "the File log channel, logLevel 1 = "
+           "Fatal, 6 = information, 7 = Debug")
 
       .def("setConsoleLogLevel", &ConfigServiceImpl::setConsoleLogLevel,
            (arg("self"), arg("logLevel")),

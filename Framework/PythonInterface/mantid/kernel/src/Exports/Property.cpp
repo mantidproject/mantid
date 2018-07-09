@@ -1,25 +1,25 @@
-#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/StlExportDefinitions.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
+#include "MantidPythonInterface/kernel/StlExportDefinitions.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
-#include <boost/python/implicit.hpp>
-#include <boost/python/return_value_policy.hpp>
 #include <boost/python/copy_const_reference.hpp>
-#include <boost/python/enum.hpp>
-#include <boost/python/make_function.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/dict.hpp>
+#include <boost/python/enum.hpp>
+#include <boost/python/implicit.hpp>
 #include <boost/python/list.hpp>
+#include <boost/python/make_function.hpp>
 #include <boost/python/overloads.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/return_value_policy.hpp>
 
-using Mantid::Kernel::Property;
 using Mantid::Kernel::Direction;
+using Mantid::Kernel::Property;
 using Mantid::PythonInterface::std_vector_exporter;
 using namespace boost::python;
 

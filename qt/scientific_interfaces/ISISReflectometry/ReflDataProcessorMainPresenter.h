@@ -33,6 +33,6 @@ public:
   /// Return true if event analysis has to be performed
   virtual bool eventAnalysis() const = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTIDQTMANTIDWIDGETS_REFLDATAPROCESSORMAINPRESENTER_H */

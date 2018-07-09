@@ -1,15 +1,15 @@
+#include "MantidCrystal/TOFExtinction.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidCrystal/TOFExtinction.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Utils.h"
-#include "MantidKernel/ListValidator.h"
-#include <fstream>
 #include <cmath>
+#include <fstream>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -40,7 +40,7 @@ const int NUM_WAVELENGTHS =
     static_cast<int>(std::ceil(MAX_WAVELENGTH * STEPS_PER_ANGSTROM));
 
 const double radtodeg_half = 180.0 / M_PI / 2.;
-}
+} // namespace
 
 namespace Mantid {
 namespace Crystal {
@@ -423,5 +423,5 @@ double TOFExtinction::absor_sphere(double &twoth, double &wl) {
   return tbar;
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

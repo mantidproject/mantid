@@ -1,20 +1,20 @@
 #ifndef UNWRAPPEDSURFACE_H
 #define UNWRAPPEDSURFACE_H
 
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Quat.h"
-#include "MantidGeometry/Objects/IObject.h"
 #include "InstrumentActor.h"
+#include "MantidGeometry/Objects/IObject.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 #include "ProjectionSurface.h"
 #include "UnwrappedDetector.h"
 #include <boost/shared_ptr.hpp>
 
 #include <QImage>
 #include <QList>
-#include <QStack>
-#include <QSet>
 #include <QMap>
 #include <QPainter>
+#include <QSet>
+#include <QStack>
 
 namespace Mantid {
 namespace Geometry {
@@ -23,7 +23,7 @@ class IDetector;
 namespace API {
 class IPeaksWorkspace;
 }
-}
+} // namespace Mantid
 
 class GLColor;
 class QGLWidget;
@@ -32,25 +32,25 @@ class GL3DWidget;
 namespace MantidQt {
 namespace MantidWidgets {
 /**
-* @class UnwrappedSurface
-* @brief Performs projection of an instrument onto a 2D surface and unwrapping
-*it into a plane. Draws the resulting image
-*        on the screen.
-* @author Roman Tolchenov, Tessella plc
-* @date 18 Nov 2010
-*
-* Inherited classes must implement methods:
-*
-*   project(...)
-*   rotate(...)
-*   init()
-*
-* In init() the implementation must set values for:
-*
-*   m_u_min, m_u_max, m_v_min, m_v_max, m_height_max, m_width_max, m_viewRect,
-*   m_unwrappedDetectors, m_assemblies
-*
-*/
+ * @class UnwrappedSurface
+ * @brief Performs projection of an instrument onto a 2D surface and unwrapping
+ *it into a plane. Draws the resulting image
+ *        on the screen.
+ * @author Roman Tolchenov, Tessella plc
+ * @date 18 Nov 2010
+ *
+ * Inherited classes must implement methods:
+ *
+ *   project(...)
+ *   rotate(...)
+ *   init()
+ *
+ * In init() the implementation must set values for:
+ *
+ *   m_u_min, m_u_max, m_v_min, m_v_max, m_height_max, m_width_max, m_viewRect,
+ *   m_unwrappedDetectors, m_assemblies
+ *
+ */
 
 class UnwrappedSurface : public ProjectionSurface {
   Q_OBJECT
@@ -70,20 +70,20 @@ public:
   /** @name New public virtual methods */
   //@{
   /**
-  * Project a point in the 3D space onto the surface. The method returns the u-
-  *and v- coordinates of the projection
-  * as well as the scaling factors along the u and v axes. The scaling factors
-  *help to draw an approximate projection
-  * of a 3D object on the surface which is an orthographic projection of the
-  *object onto the tagent plane to the
-  * surface at point (uv) and scaled along u and v by the corresponding factor.
-  *
-  * @param pos :: A position of a 3D point.
-  * @param u (output) :: u-coordinate of the projection.
-  * @param v (output) :: v-coordinate of the projection.
-  * @param uscale (output) :: The scaling factor along the u-coordinate.
-  * @param vscale (output) :: The scaling factor along the v-coordinate.
-  */
+   * Project a point in the 3D space onto the surface. The method returns the u-
+   *and v- coordinates of the projection
+   * as well as the scaling factors along the u and v axes. The scaling factors
+   *help to draw an approximate projection
+   * of a 3D object on the surface which is an orthographic projection of the
+   *object onto the tagent plane to the
+   * surface at point (uv) and scaled along u and v by the corresponding factor.
+   *
+   * @param pos :: A position of a 3D point.
+   * @param u (output) :: u-coordinate of the projection.
+   * @param v (output) :: v-coordinate of the projection.
+   * @param uscale (output) :: The scaling factor along the u-coordinate.
+   * @param vscale (output) :: The scaling factor along the v-coordinate.
+   */
   virtual void project(const Mantid::Kernel::V3D &pos, double &u, double &v,
                        double &uscale, double &vscale) const = 0;
   //@}
@@ -125,14 +125,14 @@ protected:
   /** @name New protected virtual methods */
   //@{
   /**
-  * Calculate a rotation needed to see a detector from the correct angle on the
-  * surface.
-  * The rotation should be such that the detector is seen from the tip of the
-  * normal
-  * to the surface at the detector's position.
-  * @param udet :: A detector.
-  * @param R :: The result rotaion.
-  */
+   * Calculate a rotation needed to see a detector from the correct angle on the
+   * surface.
+   * The rotation should be such that the detector is seen from the tip of the
+   * normal
+   * to the surface at the detector's position.
+   * @param udet :: A detector.
+   * @param R :: The result rotaion.
+   */
   virtual void rotate(const UnwrappedDetector &udet,
                       Mantid::Kernel::Quat &R) const = 0;
   virtual void calcUV(UnwrappedDetector &udet, Mantid::Kernel::V3D &pos);
@@ -170,7 +170,7 @@ protected:
   QStack<RectF> m_zoomStack;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // UNWRAPPEDSURFACE_H

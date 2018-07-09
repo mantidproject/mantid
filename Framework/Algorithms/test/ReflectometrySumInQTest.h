@@ -254,7 +254,9 @@ private:
     const Kernel::V3D sourcePos{0., 0., -50.};
     const Kernel::V3D monitorPos{0., 0., -0.5};
     const Kernel::V3D samplePos{
-        0., 0., 0.,
+        0.,
+        0.,
+        0.,
     };
     constexpr double twoTheta{0.87 / 180. * M_PI};
     constexpr double detectorHeight{0.001};
@@ -290,7 +292,9 @@ public:
     const Kernel::V3D sourcePos{0., 0., -50.};
     const Kernel::V3D monitorPos{0., 0., -0.5};
     const Kernel::V3D samplePos{
-        0., 0., 0.,
+        0.,
+        0.,
+        0.,
     };
     constexpr double twoTheta{5.87 / 180. * M_PI};
     constexpr double detectorHeight{0.001};

@@ -25,8 +25,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTIDQTMANTIDWIDGETS_STRICTQMODELINDICES_H_
 #define MANTIDQTMANTIDWIDGETS_STRICTQMODELINDICES_H_
-#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QModelIndex>
 
 namespace MantidQt {
@@ -112,7 +112,7 @@ inline QModelIndexForMainModel fromMainModel(QModelIndex const &mainModelIndex,
                 "assertFromMainModel: Index model assertion was not true.");
   return QModelIndexForMainModel(mainModelIndex);
 }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_STRICTQMODELINDICES_H_

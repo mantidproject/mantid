@@ -1,17 +1,17 @@
 #include "MantidAlgorithms/RingProfile.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayBoundedValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include <cmath>
-#include <climits>
-#include <MantidAPI/IEventWorkspace.h>
+#include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include <MantidAPI/IEventWorkspace.h>
+#include <climits>
+#include <cmath>
 
 namespace Mantid {
 namespace Algorithms {
@@ -207,7 +207,7 @@ void RingProfile::exec() {
  *  - The minimum ring is smaller than the limits of the image to allow
  *
  * @param inputWS: the input workspace
-*/
+ */
 void RingProfile::checkInputsForSpectraWorkspace(
     const API::MatrixWorkspace_sptr inputWS) {
   try {
@@ -292,7 +292,8 @@ void RingProfile::checkInputsForSpectraWorkspace(
     if (summed >= 2) {
       std::stringstream s;
       s << "The defined minRadius make the inner ring outside the limits of "
-           "the detectors inside this instrument: " << limits_s.str();
+           "the detectors inside this instrument: "
+        << limits_s.str();
       throw std::invalid_argument(s.str());
     }
 
@@ -316,7 +317,7 @@ void RingProfile::checkInputsForSpectraWorkspace(
  *  - the centre of the ring is inside the image it self.
  *  - The minimum ring is smaller than the limits of the image to allow
  * @param inputWS: pointer to the input workspace
-*/
+ */
 void RingProfile::checkInputsForNumericWorkspace(
     const API::MatrixWorkspace_sptr inputWS) {
   g_log.notice() << "CheckingInputs For Numeric Workspace\n";

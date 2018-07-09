@@ -25,7 +25,7 @@ template <typename T> struct IsEmpty {
    */
   static bool check(const T &value) { return checkIsEmpty(value); }
 };
-}
+} // namespace Detail
 
 /** @class MandatoryValidator MandatoryValidator.h Kernel/MandatoryValidator.h
 

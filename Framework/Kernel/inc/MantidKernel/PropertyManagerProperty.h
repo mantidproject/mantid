@@ -1,8 +1,8 @@
 #ifndef MANTID_KERNEL_PROPERTYMANAGERPROPERTY_H_
 #define MANTID_KERNEL_PROPERTYMANAGERPROPERTY_H_
 
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/PropertyManager_fwd.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid {
 namespace Kernel {

@@ -136,8 +136,8 @@ void ExtractPolarizationEfficiencies::exec() {
       throw std::runtime_error("Instrument vector parameter \"" + name +
                                "\" is expeced to be the same size as \"" +
                                LAMBDA_PARAMETER + "\" but " +
-                               std::to_string(prop.size()) + " != " +
-                               std::to_string(lambda.size()));
+                               std::to_string(prop.size()) +
+                               " != " + std::to_string(lambda.size()));
     }
     auto ws = createWorkspace(lambda, prop);
     alg->setProperty(name, ws);

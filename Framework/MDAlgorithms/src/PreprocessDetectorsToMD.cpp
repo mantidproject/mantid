@@ -449,5 +449,5 @@ double PreprocessDetectorsToMD::getEi(
 
   return Efi;
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

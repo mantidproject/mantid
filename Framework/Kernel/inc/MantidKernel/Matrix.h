@@ -7,6 +7,19 @@
 #include <memory>
 #include <vector>
 
+// Our aim with Matrix is to provide the definition for
+// predefined types and avoid multiple copies of the same
+// definition in multiple shared libraries.
+// On MSVC template declarations cannot have
+// both extern and __declspec(dllexport) but gcc
+// requires the __attribute__((visibility("default")))
+// attribute on the class definition.
+#if defined(_MSC_VER)
+#define KERNEL_MATRIX_CLASS_DLL
+#else
+#define KERNEL_MATRIX_CLASS_DLL MANTID_KERNEL_DLL
+#endif
+
 namespace Mantid {
 
 namespace Kernel {
@@ -40,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <typename T> class DLLExport Matrix {
+template <typename T> class KERNEL_MATRIX_CLASS_DLL Matrix {
 public:
   /// Enable users to retrieve the element type
   using value_type = T;
@@ -95,12 +108,12 @@ public:
   Matrix<T> &operator-=(const Matrix<T> &);     ///< Basic subtraction operator
   Matrix<T> operator-(const Matrix<T> &) const; ///< Basic subtraction operator
 
-  Matrix<T> operator*(const Matrix<T> &) const; ///< Basic matrix multiply
-  std::vector<T> operator*(const std::vector<T> &) const; ///< Multiply M*Vec
+  Matrix<T> operator*(const Matrix<T> &)const; ///< Basic matrix multiply
+  std::vector<T> operator*(const std::vector<T> &)const; ///< Multiply M*Vec
   void multiplyPoint(const std::vector<T> &in,
                      std::vector<T> &out) const; ///< Multiply M*Vec
-  V3D operator*(const V3D &) const;              ///< Multiply M*Vec
-  Matrix<T> operator*(const T &) const;          ///< Multiply by constant
+  V3D operator*(const V3D &)const;               ///< Multiply M*Vec
+  Matrix<T> operator*(const T &)const;           ///< Multiply by constant
 
   Matrix<T> &operator*=(const Matrix<T> &); ///< Basic matrix multipy
   Matrix<T> &operator*=(const T &);         ///< Multiply by constant
@@ -190,27 +203,47 @@ private:
                              const char);
 };
 
+template <>
+inline void Matrix<int>::GaussJordan(Kernel::Matrix<int> &)
+/**
+Not valid for Integer
+@throw std::invalid_argument
+*/
+{
+  throw std::invalid_argument(
+      "Gauss-Jordan inversion not valid for integer matrix");
+}
+
+// Explicit declarations required by Visual C++. Symbols provided by matching
+// explicit instantiations in source file
+#if defined(_MSC_VER)
+extern template class Matrix<double>;
+extern template class Matrix<int>;
+extern template class Matrix<float>;
+#endif
+
+// clean up
+#undef KERNEL_MATRIX_CLASS_DLL
+
 //-------------------------------------------------------------------------
 // Typedefs
 //-------------------------------------------------------------------------
-/// A matrix of doubles
 using DblMatrix = Mantid::Kernel::Matrix<double>;
-/// A matrix of ints
 using IntMatrix = Mantid::Kernel::Matrix<int>;
+using FloatMatrix = Mantid::Kernel::Matrix<float>;
 
 //-------------------------------------------------------------------------
 // Utility methods
 //-------------------------------------------------------------------------
 template <typename T>
-DLLExport std::ostream &operator<<(std::ostream &, const Kernel::Matrix<T> &);
+std::ostream &operator<<(std::ostream &, const Kernel::Matrix<T> &);
 template <typename T>
-DLLExport void dumpToStream(std::ostream &, const Kernel::Matrix<T> &,
-                            const char);
+void dumpToStream(std::ostream &, const Kernel::Matrix<T> &, const char);
 
 template <typename T>
-DLLExport std::istream &operator>>(std::istream &, Kernel::Matrix<T> &);
+std::istream &operator>>(std::istream &, Kernel::Matrix<T> &);
 template <typename T>
-DLLExport void fillFromStream(std::istream &, Kernel::Matrix<T> &, const char);
+void fillFromStream(std::istream &, Kernel::Matrix<T> &, const char);
 } // namespace Kernel
 } // namespace Mantid
 #endif // MANTID_KERNEL_MATRIX_H_

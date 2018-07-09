@@ -1,7 +1,9 @@
 #ifndef PYTHONTHREADING_H_
 #define PYTHONTHREADING_H_
 
-#include "MantidQtWidgets/Common/PythonSystemHeader.h" // this needs to go first
+// clang-format off
+#include "MantidQtWidgets/Common/PythonSystemHeader.h"
+// clang-format on
 #include "MantidQtWidgets/Common/DllOption.h"
 
 //------------------------------------------------------------------------------
@@ -43,9 +45,9 @@ private:
 //------------------------------------------------------------------------------
 
 /**
-  * Acquires a lock in the constructor and releases it in the destructor.
-  * @tparam T Templated on the lock type
-  */
+ * Acquires a lock in the constructor and releases it in the destructor.
+ * @tparam T Templated on the lock type
+ */
 template <typename T> class ScopedGIL {
 public:
   ScopedGIL() : m_lock() { m_lock.acquire(); }

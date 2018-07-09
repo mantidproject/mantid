@@ -1,15 +1,15 @@
 #ifndef COMPOSITE_FUNCTION_BUILDER_TEST_H_
 #define COMPOSITE_FUNCTION_BUILDER_TEST_H_
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <cxxtest/TestSuite.h>
-#include <vector>
-#include <boost/scoped_ptr.hpp>
-#include "MantidMDAlgorithms/CompositeFunctionBuilder.h"
-#include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionBuilder.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidMDAlgorithms/CompositeFunctionBuilder.h"
+#include "MantidMDAlgorithms/CompositeImplicitFunction.h"
+#include <boost/scoped_ptr.hpp>
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <vector>
 
 class CompositeBuilderTest : public CxxTest::TestSuite {
 

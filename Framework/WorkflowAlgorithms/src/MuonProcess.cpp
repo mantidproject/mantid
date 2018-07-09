@@ -1,12 +1,12 @@
 #include "MantidWorkflowAlgorithms/MuonProcess.h"
 
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidKernel/CompositeValidator.h"
 #include "MantidWorkflowAlgorithms/MuonGroupAsymmetryCalculator.h"
 #include "MantidWorkflowAlgorithms/MuonGroupCountsCalculator.h"
 #include "MantidWorkflowAlgorithms/MuonPairAsymmetryCalculator.h"
@@ -19,7 +19,7 @@ namespace {
  * @returns True if i == 1, else false.
  */
 bool isOne(int i) { return (i == 1); }
-}
+} // namespace
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -433,10 +433,10 @@ std::map<std::string, std::string> MuonProcess::validateInputs() {
 }
 
 /**
-* Builds an error message from the supplied parameters.
-* @param invalidPeriods :: [input] Vector containing invalid periods
-* @returns An error message
-*/
+ * Builds an error message from the supplied parameters.
+ * @param invalidPeriods :: [input] Vector containing invalid periods
+ * @returns An error message
+ */
 std::string
 MuonProcess::buildErrorString(const std::vector<int> &invalidPeriods) const {
   std::stringstream message;

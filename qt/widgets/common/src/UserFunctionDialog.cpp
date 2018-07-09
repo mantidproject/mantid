@@ -1,15 +1,15 @@
 #include "MantidQtWidgets/Common/UserFunctionDialog.h"
-#include "MantidQtWidgets/Common/RenameParDialog.h"
-#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidAPI/Expression.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/RenameParDialog.h"
 
 #include <QComboBox>
-#include <QStringListModel>
 #include <QDialogButtonBox>
-#include <QMessageBox>
-#include <QKeyEvent>
 #include <QFile>
+#include <QKeyEvent>
+#include <QMessageBox>
+#include <QStringListModel>
 #include <QTextStream>
 #include <QUrl>
 
@@ -302,10 +302,10 @@ QSet<QString> UserFunctionDialog::functionNames(const QString &cat) const {
 }
 
 /**
-  * Get the name of currently selected category. If no category is selected
+ * Get the name of currently selected category. If no category is selected
  * returns
-  * empty string.
-  */
+ * empty string.
+ */
 QString UserFunctionDialog::getCurrentCategory() const {
   QString cur_category;
   QListWidgetItem *currentCategoryItem = m_uiForm.lstCategory->currentItem();
@@ -345,12 +345,13 @@ void UserFunctionDialog::saveFunction() {
       const QSet<QString> functions = functionNames(cat);
       QSet<QString>::const_iterator found = functions.find(fun);
       if (found != functions.end() &&
-          QMessageBox::question(
-              this, "Mantid",
-              "A function with name " + fun + " already exists in category " +
-                  cat + ".\n"
-                        "Would you like to replace it?",
-              QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+          QMessageBox::question(this, "Mantid",
+                                "A function with name " + fun +
+                                    " already exists in category " + cat +
+                                    ".\n"
+                                    "Would you like to replace it?",
+                                QMessageBox::Yes | QMessageBox::No) ==
+              QMessageBox::No) {
         return;
       }
     }

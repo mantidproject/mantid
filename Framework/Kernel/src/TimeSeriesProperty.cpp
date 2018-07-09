@@ -14,7 +14,7 @@ namespace Kernel {
 namespace {
 /// static Logger definition
 Logger g_log("TimeSeriesProperty");
-}
+} // namespace
 
 /**
  * Constructor
@@ -56,13 +56,12 @@ TimeSeriesProperty<TYPE>::cloneWithTimeShift(const double timeShift) const {
 }
 
 /** Return time series property, containing time derivative of current property.
-* The property itself and the returned time derivative become sorted by time and
-* the derivative is calculated in seconds^-1.
-* (e.g. dValue/dT where dT=t2-t1 is time difference in seconds
-* for subsequent time readings and dValue=Val1-Val2 is difference in
-* subsequent values)
-*
-*/
+ * The property itself and the returned time derivative become sorted by time
+ * and the derivative is calculated in seconds^-1. (e.g. dValue/dT where
+ * dT=t2-t1 is time difference in seconds for subsequent time readings and
+ * dValue=Val1-Val2 is difference in subsequent values)
+ *
+ */
 template <typename TYPE>
 std::unique_ptr<TimeSeriesProperty<double>>
 TimeSeriesProperty<TYPE>::getDerivative() const {
@@ -540,7 +539,8 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     errss << "Try to split TSP " << this->m_name
           << ": Input time vector's size " << splitter_time_vec.size()
           << " does not match (one more larger than) taget "
-             "workspace index vector's size " << target_vec.size() << "\n";
+             "workspace index vector's size "
+          << target_vec.size() << "\n";
     throw std::runtime_error(errss.str());
   }
   // return if the output vector TimeSeriesProperties is not defined
@@ -1035,11 +1035,11 @@ std::vector<TYPE> TimeSeriesProperty<TYPE>::valuesAsVector() const {
 }
 
 /**
-  * Return the time series as a C++ multimap<DateAndTime, TYPE>. All values.
-  * This method is used in parsing the ISIS ICPevent log file: different
+ * Return the time series as a C++ multimap<DateAndTime, TYPE>. All values.
+ * This method is used in parsing the ISIS ICPevent log file: different
  * commands
-  * can be recorded against the same time stamp but all must be present.
-  */
+ * can be recorded against the same time stamp but all must be present.
+ */
 template <typename TYPE>
 std::multimap<DateAndTime, TYPE>
 TimeSeriesProperty<TYPE>::valueAsMultiMap() const {
@@ -1173,9 +1173,9 @@ void TimeSeriesProperty<TYPE>::addValues(
 
 /** replace vectors of values to the map. First we clear the vectors
  * and then we run addValues
-*  @param times :: The time as a boost::posix_time::ptime value
-*  @param values :: The associated value
-*/
+ *  @param times :: The time as a boost::posix_time::ptime value
+ *  @param values :: The associated value
+ */
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::replaceValues(
     const std::vector<Types::Core::DateAndTime> &times,
@@ -1254,12 +1254,14 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
 
 template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::minValue() const {
   return std::min_element(m_values.begin(), m_values.end(),
-                          TimeValueUnit<TYPE>::valueCmp)->value();
+                          TimeValueUnit<TYPE>::valueCmp)
+      ->value();
 }
 
 template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::maxValue() const {
   return std::max_element(m_values.begin(), m_values.end(),
-                          TimeValueUnit<TYPE>::valueCmp)->value();
+                          TimeValueUnit<TYPE>::valueCmp)
+      ->value();
 }
 
 /// Returns the number of values at UNIQUE time intervals in the time series
@@ -2352,15 +2354,15 @@ void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
   file->closeGroup();
 }
 /** Calculate constant step histogram of the time series data.
-* @param tMin    -- minimal time to include in histogram
-* @param tMax    -- maximal time to constrain the histogram data
-* @param counts  -- vector of output histogrammed data.
-*   On input, the size of the vector defines the number of points in the
-*   histogram.
-*   On output, adds all property elements belonging to the time interval
-*  [tMin+n*dT;tMin+(n+1)*dT]
-*  to the initial values of each n-th element of the counts vector,
-*  where dT = (tMax-tMin)/counts.size()  */
+ * @param tMin    -- minimal time to include in histogram
+ * @param tMax    -- maximal time to constrain the histogram data
+ * @param counts  -- vector of output histogrammed data.
+ *   On input, the size of the vector defines the number of points in the
+ *   histogram.
+ *   On output, adds all property elements belonging to the time interval
+ *  [tMin+n*dT;tMin+(n+1)*dT]
+ *  to the initial values of each n-th element of the counts vector,
+ *  where dT = (tMax-tMin)/counts.size()  */
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::histogramData(
     const Types::Core::DateAndTime &tMin, const Types::Core::DateAndTime &tMax,
@@ -2573,5 +2575,5 @@ filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
   };
   return singleValue;
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

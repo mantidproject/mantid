@@ -2,8 +2,8 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLEVENTVIEW_H
 
 #include "DllConfig.h"
-#include <string>
 #include "IReflEventPresenter.h"
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -53,6 +53,6 @@ public:
   virtual void enableSliceTypeSelection() = 0;
   virtual void disableSliceTypeSelection() = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLEVENTVIEW_H */

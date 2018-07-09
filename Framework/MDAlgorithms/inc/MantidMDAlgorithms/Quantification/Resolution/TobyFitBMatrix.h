@@ -1,5 +1,5 @@
-#ifndef MANTID_MDALGORITHMS_RESOLUTIONCOEFFICIENTS_H_
-#define MANTID_MDALGORITHMS_RESOLUTIONCOEFFICIENTS_H_
+#ifndef MANTID_MDALGORITHMS_TOBYFITBMATRIX_H_
+#define MANTID_MDALGORITHMS_TOBYFITBMATRIX_H_
 /**
   Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -39,6 +39,10 @@ struct QOmegaPoint;
  * pg 112, equation A.48. It is intimately linked to the
  * TobyFitYVector as their values need to be in sync
  */
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4661)
+#endif
 class DLLExport TobyFitBMatrix : public Kernel::DblMatrix {
 public:
   /// Default constructor sets the size of the matrix
@@ -48,7 +52,12 @@ public:
   void recalculate(const CachedExperimentInfo &observation,
                    const QOmegaPoint &qOmega);
 };
-}
-}
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#pragma warning(disable : 4661)
+#endif
+
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_RESOLUTIONCOEFFICIENTS_H_ */

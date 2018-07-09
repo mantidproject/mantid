@@ -12,10 +12,9 @@
 
 #include "MantidAlgorithms/FilterByTime2.h"
 #include "MantidDataHandling/LoadEventPreNexus2.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
@@ -81,7 +80,7 @@ public:
   }
 
   /** Test Filter by relative time and absolute time
-    */
+   */
   void testExecEventWorkspace_relativeTime_and_absolute_time() {
     std::string outputWS;
     this->setUp_Event();

@@ -224,5 +224,5 @@ time_t CatalogSearchParam::getTimevalue(const std::string &inputDate) {
   // Return the date as time_t value.
   return Types::Core::DateAndTime(isoDate).to_time_t();
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

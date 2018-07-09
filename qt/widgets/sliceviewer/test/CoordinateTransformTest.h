@@ -1,26 +1,24 @@
 #ifndef MANTIDQT_SLICEVIEWER_COORDINATETRANSFORM_TEST_H
 #define MANTIDQT_SLICEVIEWER_COORDINATETRANSFORM_TEST_H
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtWidgets/SliceViewer/CoordinateTransform.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/MDUnitFactory.h"
+#include "MantidAPI/Run.h"
+#include "MantidCrystal/SetUB.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/MDUnit.h"
+#include "MantidKernel/MDUnitFactory.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidQtWidgets/SliceViewer/CoordinateTransform.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidCrystal/SetUB.h"
-#include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/Run.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/MDUnit.h"
+#include <cxxtest/TestSuite.h>
 
 class CoordinateTransformTest : public CxxTest::TestSuite {
 private:

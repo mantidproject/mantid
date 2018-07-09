@@ -75,5 +75,5 @@ void IDomainCreator::initFunction(API::IFunction_sptr function) {
   }
 }
 
-} // namespace Algorithm
+} // namespace API
 } // namespace Mantid

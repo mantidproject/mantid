@@ -8,10 +8,10 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 using std::string;
 using std::stringstream;
 using std::vector;
-using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace Algorithms {
@@ -112,5 +112,5 @@ void ShiftLogTime::exec() {
   outputWS->mutableRun().addProperty(newlog, true);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

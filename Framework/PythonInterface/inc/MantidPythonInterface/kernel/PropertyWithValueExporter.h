@@ -27,10 +27,10 @@
 #include "MantidKernel/PropertyWithValue.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/python/class.hpp>
 #include <boost/python/bases.hpp>
-#include <boost/python/return_value_policy.hpp>
+#include <boost/python/class.hpp>
 #include <boost/python/return_by_value.hpp>
+#include <boost/python/return_value_policy.hpp>
 #endif
 
 namespace Mantid {
@@ -52,7 +52,7 @@ struct PropertyWithValueExporter {
                                     return_value_policy<ValueReturnPolicy>()));
   }
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_PROPERTYWITHVALUEEXPORTER_H_ */

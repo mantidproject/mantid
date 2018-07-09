@@ -1,13 +1,13 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
-#include <boost/python/class.hpp>
-#include <boost/python/return_internal_reference.hpp>
 #include <boost/optional.hpp>
+#include <boost/python/class.hpp>
 #include <boost/python/manage_new_object.hpp>
+#include <boost/python/return_internal_reference.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -39,7 +39,7 @@ IPeak *createPeakQLabWithDistance(IPeaksWorkspace &self, const object &data,
 }
 /// Create a peak via it's QLab value from a list or numpy array
 void addPeak(IPeaksWorkspace &self, const IPeak &peak) { self.addPeak(peak); }
-}
+} // namespace
 
 void export_IPeaksWorkspace() {
   // IPeaksWorkspace class

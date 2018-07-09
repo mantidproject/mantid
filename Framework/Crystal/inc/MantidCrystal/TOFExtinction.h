@@ -1,8 +1,8 @@
 #ifndef MANTID_CRYSTAL_TOFEXTINCTION_H_
 #define MANTID_CRYSTAL_TOFEXTINCTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -62,6 +62,6 @@ private:
   double m_amu = 0.0;    ///< linear absoprtion coefficient in 1/cm
   double m_radius = 0.0; ///< sample radius in cm
 };
-} // namespace Mantid;
-} // namespace Crystal;
+} // namespace Crystal
+} // namespace Mantid
 #endif /* MANTID_CRYSTAL_TOFEXTINCTION_H_ */

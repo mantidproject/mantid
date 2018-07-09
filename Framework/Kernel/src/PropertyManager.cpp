@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
-#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include <json/json.h>
 
@@ -16,7 +16,7 @@ using std::string;
 namespace {
 // static logger reference
 Logger g_log("PropertyManager");
-}
+} // namespace
 
 //-----------------------------------------------------------------------------------------------
 /// Default constructor

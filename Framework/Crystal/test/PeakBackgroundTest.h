@@ -67,7 +67,7 @@ public:
   MOCK_CONST_METHOD0(getLinearIndex, size_t());
   MOCK_CONST_METHOD1(isWithinBounds, bool(size_t));
 };
-}
+} // namespace
 GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 class PeakBackgroundTest : public CxxTest::TestSuite {

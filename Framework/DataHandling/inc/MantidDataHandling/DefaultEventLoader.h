@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAHANDLING_DEFAULTEVENTLOADER_H_
 #define MANTID_DATAHANDLING_DEFAULTEVENTLOADER_H_
 
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
-#include "MantidAPI/Axis.h"
 
 class BankPulseTimes;
 
@@ -106,9 +106,9 @@ private:
 };
 
 /** Generate a look-up table where the index = the pixel ID of an event
-* and the value = a pointer to the EventList in the workspace
-* @param vectors :: the array to create the map on
-*/
+ * and the value = a pointer to the EventList in the workspace
+ * @param vectors :: the array to create the map on
+ */
 template <class T>
 void DefaultEventLoader::makeMapToEventLists(
     std::vector<std::vector<T>> &vectors) {

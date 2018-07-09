@@ -1,5 +1,5 @@
-#include <list>
 #include <MantidKernel/SingletonHolder.h>
+#include <list>
 
 namespace Mantid {
 namespace Kernel {
@@ -34,5 +34,5 @@ MANTID_KERNEL_DLL void AddSingleton(atexit_func_t func) {
   }
   cleanup_list->push_front(func);
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

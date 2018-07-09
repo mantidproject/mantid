@@ -69,6 +69,6 @@ private:
 
   mutable TYPE m_maskedValue; ///< the masked value
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 #endif

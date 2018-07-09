@@ -23,22 +23,22 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using Mantid::Algorithms::Stitch1DMany;
 using Mantid::Algorithms::CreateWorkspace;
 using Mantid::Algorithms::GroupWorkspaces;
+using Mantid::Algorithms::Stitch1DMany;
 
 class Stitch1DManyTest : public CxxTest::TestSuite {
 private:
   /** Create a histogram workspace with two spectra and 10 bins. This can also
-  * be run using the CreateWorkspace algorithm which leaves the output workspace
-  * in the ADS as well.
-  * @param xstart :: the first X value (common to both spectra)
-  * @param deltax :: the bin width
-  * @param value1 :: the Y counts in the first spectrum (constant for all X)
-  * @param value2 :: the Y counts in the second spectrum (constant for all X)
-  * @param runAlg :: set true to run the CreateWorkspace algorithm
-  * @param outWSName :: output workspace name used if running CreateWorkspace
-  */
+   * be run using the CreateWorkspace algorithm which leaves the output
+   * workspace in the ADS as well.
+   * @param xstart :: the first X value (common to both spectra)
+   * @param deltax :: the bin width
+   * @param value1 :: the Y counts in the first spectrum (constant for all X)
+   * @param value2 :: the Y counts in the second spectrum (constant for all X)
+   * @param runAlg :: set true to run the CreateWorkspace algorithm
+   * @param outWSName :: output workspace name used if running CreateWorkspace
+   */
   void createUniformWorkspace(double xstart, double deltax, double value1,
                               double value2, std::string outWSName,
                               bool runAlg = false) {
@@ -99,10 +99,10 @@ private:
   }
 
   /** Groups workspaces using GroupWorkspaces algorithm. The output workpace is
-  * left in the ADS as well.
-  * @param inputWSNames :: input workspaces names
-  * @param outputWSName :: output workspace name
-  */
+   * left in the ADS as well.
+   * @param inputWSNames :: input workspaces names
+   * @param outputWSName :: output workspace name
+   */
   void doGroupWorkspaces(std::string inputWSNames, std::string outWSName) {
     GroupWorkspaces gw;
     gw.initialize();
@@ -115,9 +115,9 @@ private:
   }
 
   /** Obtain all algorithm histories from a workspace
-  * @param inputWS :: the input workspace
-  * @return vector of names of algorithm histories
-  */
+   * @param inputWS :: the input workspace
+   * @return vector of names of algorithm histories
+   */
   std::vector<std::string> getHistory(MatrixWorkspace_sptr inputWS) {
     std::vector<std::string> histNames;
     auto histories = inputWS->history().getAlgorithmHistories();

@@ -26,8 +26,8 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
-#include <string>
 #include <memory>
+#include <string>
 
 namespace Mantid {
 //---------------------------------------------------------------------------
@@ -59,8 +59,8 @@ private:
   /// Return a string based on the python array type
   static const std::string isArray(PyObject *const object);
 };
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif // MANTID_PYTHONINTERFACE_PROEPRTYWITHVALUEFACTORY_H_

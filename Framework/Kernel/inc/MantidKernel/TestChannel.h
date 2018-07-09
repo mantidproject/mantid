@@ -52,6 +52,6 @@ public:
 private:
   MsgList _msgList;
 };
-}
+} // namespace Mantid
 
 #endif // TESTCHANNEL_H_

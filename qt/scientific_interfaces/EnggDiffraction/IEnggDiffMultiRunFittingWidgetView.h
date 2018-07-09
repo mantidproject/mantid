@@ -79,7 +79,7 @@ public:
   virtual void updateRunList(const std::vector<RunLabel> &runLabels) = 0;
 };
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETVIEW_H_

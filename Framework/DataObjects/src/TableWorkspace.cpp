@@ -1,7 +1,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/Logger.h"
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Logger.h"
 
 #include <queue>
 
@@ -19,7 +19,7 @@ struct SortIterationRecord {
   size_t iStart;   // start row to sort
   size_t iEnd;     // end row to sort (one past last)
 };
-}
+} // namespace
 
 DECLARE_WORKSPACE(TableWorkspace)
 
@@ -165,7 +165,7 @@ size_t TableWorkspace::insertRow(size_t index) {
 }
 
 /** @param index :: Row to delete.
-*/
+ */
 void TableWorkspace::removeRow(size_t index) {
   if (index >= rowCount()) {
     g_log.error() << "Attempt to delete a non-existing row (" << index << ")\n";

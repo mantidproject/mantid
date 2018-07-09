@@ -1,7 +1,7 @@
 #include "MantidDataObjects/CoordTransformAligned.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -163,9 +163,9 @@ CoordTransformAligned::makeAffineMatrix() const {
 
 //----------------------------------------------------------------------------------------------
 /** Serialize the coordinate transform
-*
-* @return The coordinate transform in its serialized form.
-*/
+ *
+ * @return The coordinate transform in its serialized form.
+ */
 std::string CoordTransformAligned::toXMLString() const {
   using namespace Poco::XML;
 
@@ -209,5 +209,5 @@ std::string CoordTransformAligned::id() const {
   return "CoordTransformAligned";
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

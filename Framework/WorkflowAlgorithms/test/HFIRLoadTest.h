@@ -1,8 +1,8 @@
 #ifndef HFIRLOADTEST_H_
 #define HFIRLOADTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidWorkflowAlgorithms/HFIRLoad.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

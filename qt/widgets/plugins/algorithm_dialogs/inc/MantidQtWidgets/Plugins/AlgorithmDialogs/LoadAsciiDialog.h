@@ -71,7 +71,7 @@ private:
   QLineEdit *m_lineCustomSeparator;
   QComboBox *m_separatorBox;
 };
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt
 
 #endif /* MANTIDQT_CUSTOM_DIALOGSLOADASCIIDIALOG_H */

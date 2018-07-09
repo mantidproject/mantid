@@ -68,7 +68,7 @@ private:
   bool processGroups() override;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_RENAMEWORKSPACE_H_*/
