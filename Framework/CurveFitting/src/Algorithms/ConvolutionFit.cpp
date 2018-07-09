@@ -255,7 +255,7 @@ ConvolutionFit<QENSFitSequential>::seeAlso() const {
 template <>
 const std::vector<std::string>
 ConvolutionFit<QENSFitSimultaneous>::seeAlso() const {
-  return {"QENSSimultaneousFit"};
+  return {"QENSFitSimultaneous"};
 }
 
 template <typename Base>
