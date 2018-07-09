@@ -255,9 +255,8 @@ void IndirectDataTablePresenter::addNewData(std::size_t index) {
   MantidQt::API::SignalBlocker<QObject> blocker(m_dataTable);
   const auto start = m_dataTable->rowCount();
 
-  const auto addRow = [&](std::size_t spectrum) {
-    addTableEntry(index, spectrum);
-  };
+  const auto addRow =
+      [&](std::size_t spectrum) { addTableEntry(index, spectrum); };
   m_model->applySpectra(index, addRow);
 
   if (m_model->numberOfWorkspaces() > m_dataPositions.size())
@@ -311,7 +310,7 @@ void IndirectDataTablePresenter::removeSelectedData() {
   if (!modifiedIndices.empty()) {
     updateFromRemovedIndices(modifiedIndices);
     updateDataPositionsInCells(
-        std::min(modifiedIndices.back() - 1, std::size_t(0)),
+        modifiedIndices.back() > 0 ? modifiedIndices.back() - 1 : 0,
         m_dataPositions.size());
   }
 }
