@@ -358,16 +358,16 @@ QString MuonFitDataSelector::getSimultaneousFitLabel() const {
  */
 void MuonFitDataSelector::setSimultaneousFitLabel(const QString &label) {
   // do some checks that it is valid
-	auto safeLabel = label;
-	if (label.indexOf(".") >= 0) {
-		QFileInfo file(label);
-		safeLabel = file.baseName();
-		// trim instrument name
-		auto index = safeLabel.indexOf("0");
-		safeLabel= safeLabel.mid(index);
-		// trim leading zeros
-		safeLabel= safeLabel.remove(QRegExp("^[0]*"));
-	}
+  auto safeLabel = label;
+  if (label.indexOf(".") >= 0) {
+    QFileInfo file(label);
+    safeLabel = file.baseName();
+    // trim instrument name
+    auto index = safeLabel.indexOf("0");
+    safeLabel = safeLabel.mid(index);
+    // trim leading zeros
+    safeLabel = safeLabel.remove(QRegExp("^[0]*"));
+  }
   m_ui.txtSimFitLabel->setText(safeLabel);
 }
 
