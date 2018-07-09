@@ -14,7 +14,7 @@ class IndexSatellitePeaks(PythonAlgorithm):
         return 'Crystal\\Peaks'
 
     def PyInit(self):
-        self.declareProperty(IPeaksWorkspaceProperty(name="MainPeaks",
+        self.declareProperty(IPeaksWorkspaceProperty(name="NuclearPeaks",
                                                      defaultValue="",
                                                      direction=Direction.Input),
                              doc="Main integer HKL peaks. Q vectors will be calculated relative to these peaks.")
@@ -45,7 +45,7 @@ class IndexSatellitePeaks(PythonAlgorithm):
     def PyExec(self):
         tolerance = self.getProperty("Tolerance").value
         k = int(self.getProperty("NumOfQs").value)
-        nuclear = self.getProperty("MainPeaks").value
+        nuclear = self.getProperty("NuclearPeaks").value
         satellites = self.getProperty("SatellitePeaks").value
         cluster_threshold = self.getProperty("ClusterThreshold").value
         n_trunc_decimals = int(np.ceil(abs(np.log10(tolerance))))
@@ -55,16 +55,18 @@ class IndexSatellitePeaks(PythonAlgorithm):
 
         qs = indexing.find_q_vectors(nuclear_hkls, sats_hkls)
         self.log().notice("K value is {}".format(k))
+
         k = None if k == -1 else k
         clusters, k = indexing.cluster_qs(qs, k=k, threshold=cluster_threshold)
+
         qs = indexing.average_clusters(qs, clusters)
         qs = indexing.trunc_decimals(qs, n_trunc_decimals)
         qs = indexing.sort_vectors_by_norm(qs)
 
         self.log().notice("Q vectors are: \n{}".format(qs))
 
-        indicies = indexing.index_q_vectors(qs, tolerance)
-        ndim = indicies.shape[1] + 3
+        indices = indexing.index_q_vectors(qs, tolerance)
+        ndim = indices.shape[1] + 3
 
         hkls = indexing.find_nearest_integer_peaks(nuclear_hkls, sats_hkls)
 
@@ -76,7 +78,7 @@ class IndexSatellitePeaks(PythonAlgorithm):
         hkls = []
         for i, q in enumerate(raw_qs):
             distance, index = peak_map.query(q, k=1)
-            hklm[i, 3:] = indicies[index]
+            hklm[i, 3:] = indices[index]
 
         indexed = self.create_indexed_workspace(satellites, ndim, hklm)
         self.setProperty("OutputWorkspace", indexed)
