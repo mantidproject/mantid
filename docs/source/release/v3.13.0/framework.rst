@@ -73,7 +73,7 @@ Improvements
 - The algorithm :ref:`SortXAxis <algm-SortXAxis>` has a new input option that allows ascending (default) and descending sorting. The documentation needed to be corrected in general.
 - :ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` has changed its properties for clarification. This has also propagated to :ref:`LoadEventNexus <algm-LoadEventNexus>` and :ref:`LoadEventAndCompress <algm-LoadEventAndCompress>`
 - :ref:`CropToComponent <algm-CropToComponent>` now supports also scanning workspaces.
-- :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>` will produce histogram data, and will split the counts between bins by default.
+- :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>` will produce histogram data, and will not split the counts between bins by default.
 
 Bugfixes
 ########
