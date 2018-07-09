@@ -710,10 +710,10 @@ class MainWindow(QtGui.QMainWindow):
 
         # append 1 more log if original log only has 1 value
         tf = self._dataWS.getRun().getProperty("proton_charge").times[-1]
-        vectimes.append(tf)
+        vectimes = numpy.append(vectimes,tf)
         vecvalue = numpy.append(vecvalue, vecvalue[-1])
 
-        vecreltimes = [float(t - t0) / numpy.timedelta64(1, 's') for t in vectimes]
+        vecreltimes = [(t - t0) / numpy.timedelta64(1, 's') for t in vectimes]
 
         # Set to plot
         xlim = [min(vecreltimes), max(vecreltimes)]
