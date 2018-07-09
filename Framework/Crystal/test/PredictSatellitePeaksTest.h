@@ -70,32 +70,32 @@ public:
 
     alg.setProperty("Peaks", WSName);
 
-    alg.setProperty("FracPeaks", std::string("FracPeaks"));
-    alg.setProperty("Offset1", "0.5,0,.2,1");
+    alg.setProperty("SatellitePeaks", std::string("SatellitePeaks"));
+    alg.setProperty("OffsetVector1", "0.5,0,.2,1");
     TS_ASSERT(alg.execute());
     TS_ASSERT(alg.isExecuted());
-    alg.setPropertyValue("FracPeaks", "FracPeaks");
-    PeaksWorkspace_sptr FracPeaks = alg.getProperty("FracPeaks");
+    alg.setPropertyValue("SatellitePeaks", "SatellitePeaks");
+    PeaksWorkspace_sptr SatellitePeaks = alg.getProperty("SatellitePeaks");
 
-    TS_ASSERT_EQUALS(FracPeaks->getNumberPeaks(), 117);
+    TS_ASSERT_EQUALS(SatellitePeaks->getNumberPeaks(), 122);
 
-    Peak &peakx = dynamic_cast<Peak &>(FracPeaks->getPeak(0));
+    Peak &peakx = dynamic_cast<Peak &>(SatellitePeaks->getPeak(0));
     Peak peak = peakx;
     TS_ASSERT_DELTA(peak.getH(), -5.5, .0001);
     TS_ASSERT_DELTA(peak.getK(), 7.0, .0001);
-    TS_ASSERT_DELTA(peak.getL(), -3.8, .0001);
+    TS_ASSERT_DELTA(peak.getL(), -4.2, .0001);
 
-    peakx = dynamic_cast<Peak &>(FracPeaks->getPeak(3));
+    peakx = dynamic_cast<Peak &>(SatellitePeaks->getPeak(3));
     peak = peakx;
     TS_ASSERT_DELTA(peak.getH(), -5.5, .0001);
     TS_ASSERT_DELTA(peak.getK(), 3.0, .0001);
-    TS_ASSERT_DELTA(peak.getL(), -2.8, .0001);
+    TS_ASSERT_DELTA(peak.getL(), -3.2, .0001);
 
-    peakx = dynamic_cast<Peak &>(FracPeaks->getPeak(6));
+    peakx = dynamic_cast<Peak &>(SatellitePeaks->getPeak(6));
     peak = peakx;
     TS_ASSERT_DELTA(peak.getH(), -6.5, .0001);
     TS_ASSERT_DELTA(peak.getK(), 4.0, .0001);
-    TS_ASSERT_DELTA(peak.getL(), -3.8, .0001);
+    TS_ASSERT_DELTA(peak.getL(), -4.2, .0001);
   }
 };
 
