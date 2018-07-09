@@ -3,7 +3,7 @@
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
-#include <QFileInfo.h>
+#include <QFileInfo>
 
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitDataSelector");
