@@ -35,6 +35,9 @@ class OptionalFloat(object):
     def __nonzero__(self):
         return self.__bool__()
 
+    def __eq__(self, other):
+        return self.value == (other.value if type(other) is OptionalFloat else other)
+
 
 class TOFTOFScriptElement(BaseScriptElement):
 
@@ -204,7 +207,8 @@ class TOFTOFScriptElement(BaseScriptElement):
                 return BaseScriptElement.getStringList(dom, tag)
 
             def get_optFloat_list(tag):
-                return map(OptionalFloat, get_strlst(tag))
+                # in Python3 map returns an iterator, make it a list here:
+                return list(map(OptionalFloat, get_strlst(tag)))
 
             def get_bol(tag, default):
                 return BaseScriptElement.getBoolElement(dom, tag, default=default)
@@ -289,6 +293,10 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.error('missing data runs')
 
         # must have a comment for runs
+        for i, run in enumerate(self.dataRuns, start=1):
+            if not run[1]:
+                self.error('missing comment for data runs No. {}'.format(i))
+
         if self.vanRuns and not self.vanCmnt:
             self.error('missing vanadium comment')
 
