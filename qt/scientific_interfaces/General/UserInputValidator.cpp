@@ -38,7 +38,7 @@ UserInputValidator::UserInputValidator() : m_errorMessages() {}
 bool UserInputValidator::checkFieldIsNotEmpty(const QString &name,
                                               QLineEdit *field,
                                               QLabel *errorLabel) {
-  if (Mantid::Kernel::Strings::isEmpty(field->text().toStdString())) {
+  if (field->text().trimmed().isEmpty()) {
     setErrorLabel(errorLabel, false);
     m_errorMessages.append(name + " has been left blank.");
     return false;
