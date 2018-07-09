@@ -137,7 +137,8 @@ void LoadNexusMonitors2::init() {
   declareProperty("LoadOnly", "",
                   boost::make_shared<Kernel::StringListValidator>(options),
                   "If multiple repesentations exist, which one to load. "
-                  "Default is to load the one that is present, and Histogram if both are present.");
+                  "Default is to load the one that is present, and Histogram "
+                  "if both are present.");
 }
 
 //------------------------------------------------------------------------------
@@ -620,9 +621,9 @@ bool LoadNexusMonitors2::createOutputWorkspace(
     if (numEventMon > 0 && numHistoMon > 0) {
       std::stringstream errmsg;
       errmsg << "There are " << numHistoMon << " histogram monitors and "
-             << numEventMon
-             << " event monitors. Loading Histogram by default. "
-             << "Use \"LoadOnly\" or \"MonitorLoadOnly\" to specify which to load.";
+             << numEventMon << " event monitors. Loading Histogram by default. "
+             << "Use \"LoadOnly\" or \"MonitorLoadOnly\" to specify which to "
+                "load.";
       m_log.warning(errmsg.str());
       useEventMon = false;
     } else {
