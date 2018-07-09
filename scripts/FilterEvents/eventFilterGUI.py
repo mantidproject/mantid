@@ -717,7 +717,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Set to plot
         xlim = [vecreltimes.min(), vecreltimes.max()]
-        ylim = [vecvalue.min(), vecvalue.min()]
+        ylim = [vecvalue.min(), vecvalue.max()]
         self.ui.mainplot.set_xlim(xlim[0], xlim[1])
         self.ui.mainplot.set_ylim(ylim[0], ylim[1])
 
