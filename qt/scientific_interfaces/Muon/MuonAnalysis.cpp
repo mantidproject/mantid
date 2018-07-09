@@ -55,11 +55,6 @@
 
 #include <fstream>
 
-/*
-Looks like first good data is not causing the ws to update
-*/
-
-
 // Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
 namespace CustomInterfaces {
