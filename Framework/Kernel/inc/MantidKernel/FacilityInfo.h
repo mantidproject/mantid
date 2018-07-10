@@ -67,6 +67,9 @@ public:
   /// Returns the preferred file extension
   const std::string &preferredExtension() const { return m_extensions.front(); }
 
+  /// Returns the time zone designation compatible with pytz
+  const std::string &timezone() const { return m_timezone; }
+
   /// Return the archive search interface names
   const std::vector<std::string> &archiveSearch() const {
     return m_archiveSearch;
@@ -104,6 +107,7 @@ private:
   void fillDelimiter(const Poco::XML::Element *elem);
   void fillExtensions(const Poco::XML::Element *elem);
   void fillArchiveNames(const Poco::XML::Element *elem);
+  void fillTimezone(const Poco::XML::Element *elem);
   void fillInstruments(const Poco::XML::Element *elem);
   void fillHTTPProxy(const Poco::XML::Element *elem);
   void fillComputeResources(const Poco::XML::Element *elem);
@@ -115,6 +119,7 @@ private:
 
   CatalogInfo m_catalogs;   ///< Gain access to the catalogInfo class.
   const std::string m_name; ///< facility name
+  std::string m_timezone;   ///< Timezone designation in pytz
   int m_zeroPadding;        ///< default zero padding for this facility
   std::string
       m_delimiter; ///< default delimiter between instrument name and run number

@@ -5,6 +5,9 @@ set ( SRC_FILES
 	ContainerSubtraction.cpp
 	CorrectionsTab.cpp
 	ConvFit.cpp
+	ConvFitAddWorkspaceDialog.cpp
+	ConvFitDataPresenter.cpp
+	ConvFitDataTablePresenter.cpp
 	ConvFitModel.cpp
 	DensityOfStates.cpp
         Elwin.cpp
@@ -12,6 +15,7 @@ set ( SRC_FILES
 	ISISCalibration.cpp
 	ISISDiagnostics.cpp
 	ISISEnergyTransfer.cpp
+	IndirectAddWorkspaceDialog.cpp
 	IndirectBayes.cpp
 	IndirectBayesTab.cpp
 	IndirectCorrections.cpp
@@ -19,10 +23,16 @@ set ( SRC_FILES
 	IndirectDataAnalysisTab.cpp
 	IndirectDataReduction.cpp
 	IndirectDataReductionTab.cpp
+	IndirectDataTablePresenter.cpp
 	IndirectDiffractionReduction.cpp
 	IndirectFitAnalysisTab.cpp
 	IndirectFitData.cpp
+	IndirectFitDataPresenter.cpp
+	IndirectFitDataView.cpp
 	IndirectFitOutput.cpp
+	IndirectFitPlotModel.cpp
+	IndirectFitPlotPresenter.cpp
+	IndirectFitPlotView.cpp
 	IndirectFittingModel.cpp
 	IndirectLoadILL.cpp
 	IndirectMolDyn.cpp
@@ -43,6 +53,9 @@ set ( SRC_FILES
 	IqtFit.cpp
 	IqtFitModel.cpp
 	JumpFit.cpp
+	JumpFitAddWorkspaceDialog.cpp
+	JumpFitDataPresenter.cpp
+	JumpFitDataTablePresenter.cpp
 	JumpFitModel.cpp
 	MSDFit.cpp
 	MSDFitModel.cpp
@@ -60,14 +73,19 @@ set ( INC_FILES
 	CalculatePaalmanPings.h
 	ContainerSubtraction.h
 	ConvFit.h
+	ConvFitAddWorkspaceDialog.h
+	ConvFitDataPresenter.h
+	ConvFitDataTablePresenter.h
 	ConvFitModel.h
 	CorrectionsTab.h
 	DensityOfStates.h
         Elwin.h
+	IAddWorkspaceDialog.h
 	ILLEnergyTransfer.h
 	ISISCalibration.h
 	ISISDiagnostics.h
 	ISISEnergyTransfer.h
+	IndirectAddWorkspaceDialog.h
 	IndirectBayes.h
 	IndirectBayesTab.h
 	IndirectCorrections.h
@@ -75,10 +93,16 @@ set ( INC_FILES
 	IndirectDataAnalysisTab.h
 	IndirectDataReduction.h
 	IndirectDataReductionTab.h
+	IndirectDataTablePresenter.h
 	IndirectDiffractionReduction.h
 	IndirectFitAnalysisTab.h
 	IndirectFitData.h
+	IndirectFitDataPresenter.h
+	IndirectFitDataView.h
 	IndirectFitOutput.h
+	IndirectFitPlotModel.h
+	IndirectFitPlotPresenter.h
+	IndirectFitPlotView.h
 	IndirectFittingModel.h
 	IndirectLoadILL.h
 	IndirectMolDyn.h
@@ -99,6 +123,10 @@ set ( INC_FILES
 	IqtFit.h
 	IqtFitModel.h
 	JumpFit.h
+	JumpFitAddWorkspaceDialog.h
+	JumpFitDataPresenter.h
+	JumpFitDataTablePresenter.h
+	LazyAsyncRunner.h
 	JumpFitModel.h
 	MSDFit.h
 	MSDFitModel.h
@@ -113,10 +141,15 @@ set ( MOC_FILES
     CalculatePaalmanPings.h
     ContainerSubtraction.h
     ConvFit.h
+    ConvFitAddWorkspaceDialog.h
+    ConvFitDataPresenter.h
+    ConvFitDataTablePresenter.h
     CorrectionsTab.h
     DensityOfStates.h
     Elwin.h
     ILLEnergyTransfer.h
+    IAddWorkspaceDialog.h
+    IndirectAddWorkspaceDialog.h
     IndirectBayes.h
     IndirectBayesTab.h
     IndirectCorrections.h
@@ -124,8 +157,13 @@ set ( MOC_FILES
     IndirectDataAnalysisTab.h
     IndirectDataReduction.h
     IndirectDataReductionTab.h
+    IndirectDataTablePresenter.h
     IndirectDiffractionReduction.h
     IndirectFitAnalysisTab.h
+    IndirectFitDataPresenter.h
+    IndirectFitDataView.h
+    IndirectFitPlotPresenter.h
+    IndirectFitPlotView.h
     IndirectLoadILL.h
     IndirectMolDyn.h
     IndirectMoments.h
@@ -144,6 +182,10 @@ set ( MOC_FILES
     Iqt.h
     IqtFit.h
     JumpFit.h
+    JumpFitAddWorkspaceDialog.h
+    JumpFitDataPresenter.h
+    JumpFitDataTablePresenter.h
+    LazyAsyncRunner.h
     MSDFit.h
     Quasi.h
     ResNorm.h
@@ -159,14 +201,18 @@ set ( UI_FILES
    CalculatePaalmanPings.ui
    ContainerSubtraction.ui
    ConvFit.ui
+   ConvFitAddWorkspaceDialog.ui
    DensityOfStates.ui
    Elwin.ui
    ILLEnergyTransfer.ui
+   IndirectAddWorkspaceDialog.ui
    IndirectBayes.ui
    IndirectCorrections.ui
    IndirectDataAnalysis.ui
    IndirectDataReduction.ui
    IndirectDiffractionReduction.ui
+   IndirectFitDataView.ui
+   IndirectFitPreviewPlot.ui
    IndirectLoadILL.ui
    IndirectMolDyn.ui
    IndirectMoments.ui
@@ -181,6 +227,7 @@ set ( UI_FILES
    Iqt.ui
    IqtFit.ui
    JumpFit.ui
+   JumpFitAddWorkspaceDialog.ui
    MSDFit.ui
    Quasi.ui
    ResNorm.ui
