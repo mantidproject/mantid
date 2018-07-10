@@ -528,7 +528,7 @@ void MaxEnt::exec() {
 
     // Populate the output workspaces
     populateDataWS(inWS, spec, nSpectra, solData, !perSpectrumReconstruction, complexData, outDataWS);
-    populateImageWS(inWS, spec, nSpectra, solImage, complexImage, outImageWS,
+    populateImageWS(inWS, spec, nSpec, solImage, complexImage, outImageWS,
                     autoShift);
 
     // Populate workspaces recording the evolution of Chi and Test
@@ -994,7 +994,6 @@ void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
     outWS->mutableX(specA) = std::move(X);
     outWS->mutableY(specA) = std::move(YR);
     outWS->mutableE(specA) = std::move(E);
-    auto nH = outWS->getNumberHistograms();
     outWS->mutableY(nspec + specA) = std::move(YI);
     outWS->setSharedX(nspec + specA, outWS->sharedX(spec));
     outWS->setSharedE(nspec + specA, outWS->sharedE(spec));
