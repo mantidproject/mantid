@@ -59,8 +59,10 @@ New
 Improvements
 ############
 
-Bugfixes
-########
+- Added a boolean property ``Debug`` to the reflectometry algorithms that controls output of additional and/or intermediate workspaces.
+
+Bug fixes
+#########
 
 * Correct the angle to the value of ``ThetaIn`` property if summing in lambda in ``ReflectometryReductionOne-v2``.
 * Fixed an incorrectly calculated detector angle when loading FIGARO files using :ref:`algm-LoadILLReflectometry`.
