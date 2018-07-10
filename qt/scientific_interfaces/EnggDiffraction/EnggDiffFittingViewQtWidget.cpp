@@ -1,10 +1,10 @@
 #include "EnggDiffFittingViewQtWidget.h"
+#include "EnggDiffFittingModel.h"
+#include "EnggDiffFittingPresenter.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "EnggDiffFittingModel.h"
-#include "EnggDiffFittingPresenter.h"
 #include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
 
 #include <array>
@@ -40,9 +40,6 @@ const std::string EnggDiffFittingViewQtWidget::g_peaksListExt =
     "(*.csv *.txt);;"
     "Other extensions/all files (*)";
 
-bool EnggDiffFittingViewQtWidget::m_fittingMutliRunMode = false;
-bool EnggDiffFittingViewQtWidget::m_fittingSingleRunMode = false;
-
 std::vector<std::string> EnggDiffFittingViewQtWidget::m_fitting_runno_dir_vec;
 
 EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
@@ -50,8 +47,10 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
     boost::shared_ptr<IEnggDiffractionSettings> mainSettings,
     boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
     boost::shared_ptr<IEnggDiffractionParam> mainParam,
-    boost::shared_ptr<IEnggDiffractionPythonRunner> mainPythonRunner)
-    : IEnggDiffFittingView(), m_fittedDataVector(), m_mainMsgProvider(mainMsg),
+    boost::shared_ptr<IEnggDiffractionPythonRunner> mainPythonRunner,
+    boost::shared_ptr<IEnggDiffractionParam> fileSettings)
+    : IEnggDiffFittingView(), m_fittedDataVector(),
+      m_fileSettings(fileSettings), m_mainMsgProvider(mainMsg),
       m_mainSettings(mainSettings), m_mainPythonRunner(mainPythonRunner),
       m_presenter(boost::make_shared<EnggDiffFittingPresenter>(
           this, Mantid::Kernel::make_unique<EnggDiffFittingModel>(), mainCalib,
@@ -85,9 +84,6 @@ void EnggDiffFittingViewQtWidget::initLayout() {
 void EnggDiffFittingViewQtWidget::doSetup() {
   connect(m_ui.pushButton_fitting_browse_run_num, SIGNAL(released()), this,
           SLOT(browseFitFocusedRun()));
-
-  connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(textEdited(const QString &)),
-          this, SLOT(resetFittingMode()));
 
   connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(returnPressed()), this,
           SLOT(loadClicked()));
@@ -212,10 +208,6 @@ EnggDiffFittingViewQtWidget::currentCalibSettings() const {
   return m_mainSettings->currentCalibSettings();
 }
 
-std::string EnggDiffFittingViewQtWidget::focusingDir() const {
-  return m_mainSettings->focusingDir();
-}
-
 std::string
 EnggDiffFittingViewQtWidget::enggRunPythonCode(const std::string &pyCode) {
   return m_mainPythonRunner->enggRunPythonCode(pyCode);
@@ -257,13 +249,6 @@ void EnggDiffFittingViewQtWidget::listWidget_fitting_run_num_clicked(
 
 void EnggDiffFittingViewQtWidget::removeRunClicked() {
   m_presenter->notify(IEnggDiffFittingPresenter::removeRun);
-}
-
-void EnggDiffFittingViewQtWidget::resetFittingMode() {
-  // resets the global variable so the list view widgets
-  // adds the run number to for single runs too
-  m_fittingMutliRunMode = false;
-  m_fittingSingleRunMode = false;
 }
 
 void EnggDiffFittingViewQtWidget::resetCanvas() {
@@ -434,18 +419,13 @@ EnggDiffFittingViewQtWidget::getSaveFile(const std::string &prevPath) {
 }
 
 void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
-  resetFittingMode();
-  QString prevPath = QString::fromStdString(focusingDir());
-  if (prevPath.isEmpty()) {
-    prevPath =
-        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  }
+  const auto &focusDir = m_fileSettings->outFilesUserDir("Focus").toString();
   std::string nexusFormat = "Nexus file with calibration table: NXS, NEXUS"
                             "(*.nxs *.nexus);;";
 
-  QStringList paths(
-      QFileDialog::getOpenFileNames(this, tr("Open Focused File "), prevPath,
-                                    QString::fromStdString(nexusFormat)));
+  QStringList paths(QFileDialog::getOpenFileNames(
+      this, tr("Open Focused File "), QString::fromStdString(focusDir),
+      QString::fromStdString(nexusFormat)));
 
   if (paths.isEmpty()) {
     return;
@@ -570,22 +550,6 @@ void EnggDiffFittingViewQtWidget::setFittingRunNumVec(
   // holds all the directories required
   m_fitting_runno_dir_vec.clear();
   m_fitting_runno_dir_vec = assignVec;
-}
-
-bool EnggDiffFittingViewQtWidget::getFittingSingleRunMode() {
-  return m_fittingSingleRunMode;
-}
-
-void EnggDiffFittingViewQtWidget::setFittingSingleRunMode(bool mode) {
-  m_fittingSingleRunMode = mode;
-}
-
-void EnggDiffFittingViewQtWidget::setFittingMultiRunMode(bool mode) {
-  m_fittingMutliRunMode = mode;
-}
-
-bool EnggDiffFittingViewQtWidget::getFittingMultiRunMode() {
-  return m_fittingMutliRunMode;
 }
 
 void EnggDiffFittingViewQtWidget::setPeakPick() {

@@ -1,5 +1,7 @@
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/MDFrameValidator.h"
 #include "MantidAPI/NumericAxisValidator.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxisValidator.h"
@@ -7,6 +9,7 @@
 #include "MantidPythonInterface/kernel/TypedValidatorExporter.h"
 #include <boost/python/class.hpp>
 
+using Mantid::API::IMDWorkspace_sptr;
 using Mantid::Kernel::TypedValidator;
 using Mantid::PythonInterface::TypedValidatorExporter;
 using namespace boost::python;
@@ -17,9 +20,13 @@ void export_MatrixWorkspaceValidator() {
   using Mantid::API::MatrixWorkspaceValidator;
   TypedValidatorExporter<MatrixWorkspace_sptr>::define(
       "MatrixWorkspaceValidator");
+  TypedValidatorExporter<IMDWorkspace_sptr>::define("IMDWorkspaceValidator");
 
   class_<MatrixWorkspaceValidator, bases<TypedValidator<MatrixWorkspace_sptr>>,
          boost::noncopyable>("MatrixWorkspaceValidator", no_init);
+
+  class_<TypedValidator<IMDWorkspace_sptr>, boost::noncopyable>(
+      "IMDWorkspaceValidator", no_init);
 }
 /// Export a validator derived from a MatrixWorkspaceValidator that has a no-arg
 /// constructor
@@ -62,4 +69,14 @@ void export_WorkspaceValidators() {
   EXPORT_WKSP_VALIDATOR_DEFAULT_ARG(
       NumericAxisValidator, int, "axisNumber", 1,
       "Checks whether the axis specified by axisNumber is a NumericAxis");
+
+  class_<MDFrameValidator, bases<TypedValidator<IMDWorkspace_sptr>>,
+         boost::noncopyable>(
+      "MDFrameValidator",
+      init<std::string>(arg("frameName"),
+                        "Checks the MD workspace has the given frame along all "
+                        "dimensions. Accepted values for the `frameName` are "
+                        "currently: `HKL`, `QLab`, `QSample`, `Time of "
+                        "Flight`, `Distance`, `General frame`, `Unknown "
+                        "frame` "));
 }

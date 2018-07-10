@@ -204,12 +204,13 @@ private slots:
   bool plotExists(const QString &wsName);
 
   /// Enable PP tool for the plot of the given WS and optional filepath
-  void selectMultiPeak(const QString &wsName,
+  void selectMultiPeak(const QString &wsName, const bool update,
                        const boost::optional<QString> &filePath);
 
   /// Enable PP tool for the plot of the given WS overload to take just a ws
   void selectMultiPeak(const QString &wsName);
-
+  /// Enable PP tool for the plot of the given WS overload to take just a ws
+  void selectMultiPeakNoUpdate(const QString &wsName);
   /// Disable tools for all the graphs within MantidPlot
   void disableAllTools();
 
@@ -261,6 +262,8 @@ private slots:
   void updateNormalization(QString name);
 
 private:
+  void moveUnNormWS(const std::string &name, std::vector<std::string> &wsNames,
+                    bool raw);
   bool getIfTFAsymmStore() const;
   /// Initialize local Python environment
   void initLocalPython() override;
@@ -301,6 +304,7 @@ private:
   Mantid::API::Workspace_sptr createAnalysisWorkspace(Muon::ItemType itemType,
                                                       int tableRow,
                                                       Muon::PlotType plotType,
+                                                      std::string wsName,
                                                       bool isRaw = false);
 
   /// Returns PlotType as chosen using given selector

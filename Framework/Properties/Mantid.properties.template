@@ -142,6 +142,9 @@ network.scriptrepo.timeout = 5
 # proxy.port = 8080
 # This is to force https proxy requests to use the http proxy (current necessary)
 proxy.httpsTargetUrl = http://www.mantidproject.org
+# This timeout is the maximum duration in seconds we will wait on a request to the ISIS DAE (live data)
+# it might need to be increased if you are trying to download histogram data from a very large instrument
+ISISDAE.Timeout = 120
 
 # Defines the precision of h, k, and l when output in peak workspace table
 PeakColumn.hklPrec=2
@@ -252,3 +255,12 @@ cluster.submission=Off
 
 # Used to stop a catalog asynchronous algorithm after the timeout period
 catalog.timeout.value=30
+
+# Indicates if project recovery should automatically save in the background
+projectRecovery.enabled=true
+
+# The delay in seconds between triggering a project recovery save
+projectRecovery.secondsBetween = 60
+
+# The number of checkpoints to retain in the recovery folder
+projectRecovery.numberOfCheckpoints = 5

@@ -181,6 +181,8 @@ Component Overviews
    :maxdepth: 1
 
    AlgorithmMPISupport
+   BatchWidget/index
+   EventWorkspaceDev
    HandlingXML
    IndexProperty
    InstrumentViewer
@@ -192,3 +194,4 @@ Component Overviews
    RemoteJobSubmissionAPI
    WritingAnAlgorithm
    WritingCustomConvertToMDTransformation
+

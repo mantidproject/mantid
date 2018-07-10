@@ -52,6 +52,8 @@ void QtReflSettingsView::initLayout() {
           SLOT(addPerAngleOptionsTableRow()));
   connect(m_ui.correctDetectorsCheckBox, SIGNAL(clicked(bool)), this,
           SLOT(setDetectorCorrectionEnabled(bool)));
+  connect(m_ui.polCorrComboBox, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(setPolCorPageForIndex(int)));
 }
 
 void QtReflSettingsView::initOptionsTable() {
@@ -137,7 +139,10 @@ void QtReflSettingsView::registerInstrumentSettingsWidgets(
   registerSettingWidget(*m_ui.correctDetectorsCheckBox, "CorrectDetectors",
                         alg);
   registerSettingWidget(*m_ui.reductionTypeComboBox, "ReductionType", alg);
+  registerSettingWidget(*m_ui.includePartialBinsCheckBox, "IncludePartialBins",
+                        alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
+  registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
 }
 
 void QtReflSettingsView::registerExperimentSettingsWidgets(
@@ -148,10 +153,10 @@ void QtReflSettingsView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.startOverlapEdit, "StartOverlap", alg);
   registerSettingWidget(*m_ui.endOverlapEdit, "EndOverlap", alg);
   registerSettingWidget(*m_ui.polCorrComboBox, "PolarizationAnalysis", alg);
-  registerSettingWidget(*m_ui.CRhoEdit, "CRho", alg);
-  registerSettingWidget(*m_ui.CAlphaEdit, "CAlpha", alg);
-  registerSettingWidget(*m_ui.CApEdit, "CAp", alg);
-  registerSettingWidget(*m_ui.CPpEdit, "CPp", alg);
+  registerSettingWidget(*m_ui.CRhoEdit, "Rho", alg);
+  registerSettingWidget(*m_ui.CAlphaEdit, "Alpha", alg);
+  registerSettingWidget(*m_ui.CApEdit, "Ap", alg);
+  registerSettingWidget(*m_ui.CPpEdit, "Pp", alg);
   registerSettingWidget(stitchOptionsLineEdit(), "Params", alg);
 }
 
@@ -166,6 +171,10 @@ void QtReflSettingsView::summationTypeChanged(int reductionTypeIndex) {
 
 void QtReflSettingsView::setReductionTypeEnabled(bool enable) {
   m_ui.reductionTypeComboBox->setEnabled(enable);
+}
+
+void QtReflSettingsView::setIncludePartialBinsEnabled(bool enable) {
+  m_ui.includePartialBinsCheckBox->setEnabled(enable);
 }
 
 template <typename Widget>
@@ -218,6 +227,7 @@ void QtReflSettingsView::setIsPolCorrEnabled(bool enable) const {
 void QtReflSettingsView::setExpDefaults(ExperimentOptionDefaults defaults) {
   setSelected(*m_ui.analysisModeComboBox, defaults.AnalysisMode);
   setSelected(*m_ui.reductionTypeComboBox, defaults.ReductionType);
+  setChecked(*m_ui.includePartialBinsCheckBox, defaults.IncludePartialBins);
   setSelected(*m_ui.summationTypeComboBox, defaults.SummationType);
   setText(*m_ui.startOverlapEdit, defaults.TransRunStartOverlap);
   setText(*m_ui.endOverlapEdit, defaults.TransRunEndOverlap);
@@ -652,6 +662,14 @@ std::string QtReflSettingsView::getReductionType() const {
   return getText(*m_ui.reductionTypeComboBox);
 }
 
+bool QtReflSettingsView::getDebugOption() const {
+  return m_ui.debugCheckBox->isChecked();
+}
+
+bool QtReflSettingsView::getIncludePartialBins() const {
+  return m_ui.includePartialBinsCheckBox->isChecked();
+}
+
 std::string QtReflSettingsView::getSummationType() const {
   return getText(*m_ui.summationTypeComboBox);
 }
@@ -679,6 +697,19 @@ bool QtReflSettingsView::experimentSettingsEnabled() const {
 */
 bool QtReflSettingsView::instrumentSettingsEnabled() const {
   return m_ui.instSettingsGroup->isChecked();
+}
+
+/**
+  Set the current page index of m_ui.polCorStackedWidget depending on the index
+  of m_ui.polCorrComboBox. They don't match 1-to-1 because PA and PNR options
+  share a page.
+  @param index :: New current index of m_ui.polCorrComboBox.
+ */
+void QtReflSettingsView::setPolCorPageForIndex(int index) {
+  assert(m_ui.polCorrComboBox->count() == 4);
+  assert(m_ui.polCorStackedWidget->count() == 3);
+  static std::array<int, 4> const indexMap = {{0, 1, 1, 2}};
+  m_ui.polCorStackedWidget->setCurrentIndex(indexMap[index]);
 }
 
 } // namespace CustomInterfaces

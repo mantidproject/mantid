@@ -1,10 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEWQTWIDGET_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEWQTWIDGET_H_
 
-#include "MantidAPI/IPeakFunction.h"
 #include "DllConfig.h"
 #include "IEnggDiffFittingPresenter.h"
 #include "IEnggDiffFittingView.h"
+#include "MantidAPI/IPeakFunction.h"
 
 #include "ui_EnggDiffractionQtTabFitting.h"
 
@@ -62,7 +62,8 @@ public:
       boost::shared_ptr<IEnggDiffractionSettings> mainSettings,
       boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
       boost::shared_ptr<IEnggDiffractionParam> mainParam,
-      boost::shared_ptr<IEnggDiffractionPythonRunner> mainPyhonRunner);
+      boost::shared_ptr<IEnggDiffractionPythonRunner> mainPyhonRunner,
+      boost::shared_ptr<IEnggDiffractionParam> fileSettings);
   ~EnggDiffFittingViewQtWidget() override;
 
   /// From the IEnggDiffractionUserMsg interface
@@ -77,8 +78,6 @@ public:
 
   /// From the IEnggDiffractionSettings interface
   EnggDiffCalibSettings currentCalibSettings() const override;
-
-  std::string focusingDir() const override;
 
   /// From the IEnggDiffractionPythonRunner interface
   virtual std::string enggRunPythonCode(const std::string &pyCode) override;
@@ -124,14 +123,6 @@ public:
 
   void setFittingRunNumVec(std::vector<std::string> assignVec) override;
 
-  bool getFittingMultiRunMode() override;
-
-  void setFittingMultiRunMode(bool mode) override;
-
-  bool getFittingSingleRunMode() override;
-
-  void setFittingSingleRunMode(bool mode) override;
-
   double getPeakCentre() const override;
 
   bool peakPickerEnabled() const override;
@@ -173,7 +164,6 @@ signals:
 private slots:
   // slot of the fitting peaks per part of the interface
   void browseFitFocusedRun();
-  void resetFittingMode();
   void setPeakPick();
   void clearPeakList();
   void loadClicked();
@@ -206,12 +196,6 @@ private:
 
   static const std::string g_peaksListExt;
 
-  /// indentifier for fitting multi-run or single run input
-  static bool m_fittingMutliRunMode;
-
-  /// indentifier for fitting multi-run or single run input
-  static bool m_fittingSingleRunMode;
-
   // vector holding directory of focused bank file
   static std::vector<std::string> m_fitting_runno_dir_vec;
 
@@ -231,6 +215,9 @@ private:
 
   /// zoom-in/zoom-out tool for fitting
   QwtPlotZoomer *m_zoomTool = nullptr;
+
+  /// where to go and look for, in particular, focused runs to do fitting on
+  boost::shared_ptr<IEnggDiffractionParam> m_fileSettings;
 
   /// user messages interface provided by a main view/widget
   boost::shared_ptr<IEnggDiffractionUserMsg> m_mainMsgProvider;

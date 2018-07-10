@@ -36,7 +36,8 @@ public:
                                const std::vector<int> summedPeriods,
                                const std::vector<int> subtractedPeriods,
                                const int groupIndex, const double start = 0.0,
-                               const double end = 30.0);
+                               const double end = 30.0,
+                               const std::string wsName = "");
   /// Performs group asymmetry calculation
   API::MatrixWorkspace_sptr calculate() const override;
 

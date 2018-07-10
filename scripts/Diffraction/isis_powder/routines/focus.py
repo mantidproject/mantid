@@ -25,9 +25,7 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
         _test_splined_vanadium_exists(instrument, run_details)
 
     # Subtract empty instrument runs, as long as this run isn't an empty and user hasn't turned empty subtraction off
-    if not common.runs_overlap(run_number, run_details.empty_runs) and \
-            (not hasattr(instrument._inst_settings, "subtract_empty_inst") or
-             instrument._inst_settings.subtract_empty_inst):
+    if not common.runs_overlap(run_number, run_details.empty_runs) and instrument.should_subtract_empty_inst():
         input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, instrument=instrument,
                                                       empty_sample_ws_string=run_details.empty_runs)
 
