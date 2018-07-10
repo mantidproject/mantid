@@ -101,21 +101,19 @@ void SortXAxis::createIndexes(std::vector<std::size_t> &indexes,
 void SortXAxis::orderIndexesAscending(std::vector<std::size_t> &indexes,
                                       MatrixWorkspace_const_sptr inputWorkspace,
                                       unsigned int specNum) {
-  std::sort(indexes.begin(), indexes.end(),
-            [&](std::size_t lhs, std::size_t rhs) -> bool {
-              return inputWorkspace->x(specNum)[lhs] <
-                     inputWorkspace->x(specNum)[rhs];
-            });
+  std::sort(indexes.begin(), indexes.end(), [&](std::size_t lhs,
+                                                std::size_t rhs) -> bool {
+    return inputWorkspace->x(specNum)[lhs] < inputWorkspace->x(specNum)[rhs];
+  });
 }
 
 void SortXAxis::orderIndexesDecending(std::vector<std::size_t> &indexes,
                                       MatrixWorkspace_const_sptr inputWorkspace,
                                       unsigned int specNum) {
-  std::sort(indexes.begin(), indexes.end(),
-            [&](std::size_t lhs, std::size_t rhs) -> bool {
-              return inputWorkspace->x(specNum)[lhs] >
-                     inputWorkspace->x(specNum)[rhs];
-            });
+  std::sort(indexes.begin(), indexes.end(), [&](std::size_t lhs,
+                                                std::size_t rhs) -> bool {
+    return inputWorkspace->x(specNum)[lhs] > inputWorkspace->x(specNum)[rhs];
+  });
 }
 } // namespace Algorithms
 } // namespace Mantid
