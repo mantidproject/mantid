@@ -12,7 +12,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** SortXAxis
- 
+
   Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
@@ -44,14 +44,14 @@ public:
   const std::string category() const override;
   const std::string summary() const override;
 
-private: 
+private:
   void init() override;
   void exec() override;
-  void createIndexes(std::vector<std::size_t>, const size_t);
-  void orderIndexesDecending(std::vector<std::size_t>,
+  void createIndexes(std::vector<std::size_t> &, const size_t);
+  void orderIndexesDecending(std::vector<std::size_t> &,
                              Mantid::API::MatrixWorkspace_const_sptr,
                              unsigned int);
-  void orderIndexesAscending(std::vector<std::size_t>,
+  void orderIndexesAscending(std::vector<std::size_t> &,
                              Mantid::API::MatrixWorkspace_const_sptr,
                              unsigned int);
 };
