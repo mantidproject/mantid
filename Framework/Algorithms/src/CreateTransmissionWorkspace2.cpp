@@ -1,5 +1,7 @@
 #include "MantidAlgorithms/CreateTransmissionWorkspace2.h"
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -11,6 +13,11 @@ namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateTransmissionWorkspace2)
+
+namespace {
+// Prefix for names of intermediate transmission workspaces in lambda
+std::string const TRANS_LAM_PREFIX("TRANS_LAM_");
+}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -75,9 +82,13 @@ void CreateTransmissionWorkspace2::init() {
 
   initStitchProperties();
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "Output workspace in wavelength.");
+  declareProperty("Debug", false,
+                  "Whether to enable the output of extra workspaces.");
+
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
+      "Output workspace in wavelength.");
 }
 
 /** Validate inputs
@@ -101,6 +112,9 @@ CreateTransmissionWorkspace2::validateInputs() {
 /** Execute the algorithm.
  */
 void CreateTransmissionWorkspace2::exec() {
+  getRunNumbers();
+
+  MatrixWorkspace_sptr outWS;
 
   MatrixWorkspace_sptr firstTransWS = getProperty("FirstTransmissionRun");
   firstTransWS = normalizeDetectorsByMonitors(firstTransWS);
@@ -108,8 +122,11 @@ void CreateTransmissionWorkspace2::exec() {
 
   MatrixWorkspace_sptr secondTransWS = getProperty("SecondTransmissionRun");
   if (secondTransWS) {
+    storeTransitionRun(1, firstTransWS);
+
     secondTransWS = normalizeDetectorsByMonitors(secondTransWS);
     secondTransWS = cropWavelength(secondTransWS);
+    storeTransitionRun(2, secondTransWS);
 
     // Stitch the results.
     auto stitch = createChildAlgorithm("Stitch1D");
@@ -120,23 +137,23 @@ void CreateTransmissionWorkspace2::exec() {
     stitch->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
     stitch->setPropertyValue("Params", getPropertyValue("Params"));
     stitch->execute();
-    MatrixWorkspace_sptr outWS = stitch->getProperty("OutputWorkspace");
-    setProperty("OutputWorkspace", outWS);
+    outWS = stitch->getProperty("OutputWorkspace");
   } else {
-    setProperty("OutputWorkspace", firstTransWS);
+    outWS = firstTransWS;
   }
+  storeOutputWorkspace(outWS);
 }
 
 /** Normalize detectors by monitors
-* @param IvsLam :: a workspace in wavelength that contains spectra for both
+* @param IvsTOF :: a workspace in TOF that contains spectra for both
 * monitors and detectors
-* @return :: the normalized workspace
+* @return :: the normalized workspace in Wavelength
 */
 MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
-    const MatrixWorkspace_sptr IvsLam) {
+    const MatrixWorkspace_sptr IvsTOF) {
 
   // Detector workspace
-  MatrixWorkspace_sptr detectorWS = makeDetectorWS(IvsLam);
+  MatrixWorkspace_sptr detectorWS = makeDetectorWS(IvsTOF);
 
   // Monitor workspace
   // Only if I0MonitorIndex, MonitorBackgroundWavelengthMin
@@ -161,11 +178,73 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
   const bool integratedMonitors =
       !(intMinProperty->isDefault() || intMaxProperty->isDefault());
 
-  auto monitorWS = makeMonitorWS(IvsLam, integratedMonitors);
+  auto monitorWS = makeMonitorWS(IvsTOF, integratedMonitors);
   if (!integratedMonitors)
     detectorWS = rebinDetectorsToMonitors(detectorWS, monitorWS);
 
   return divide(detectorWS, monitorWS);
+}
+
+/** Get the run numbers of the input workspaces and store them
+ * in class variables.
+ */
+void CreateTransmissionWorkspace2::getRunNumbers() {
+  MatrixWorkspace_sptr firstTransWS = getProperty("FirstTransmissionRun");
+  auto const &run = firstTransWS->run();
+  if (run.hasProperty("run_number")) {
+    m_firstTransmissionRunNumber =
+        run.getPropertyValueAsType<std::string>("run_number");
+  }
+
+  MatrixWorkspace_sptr secondTransWS = getProperty("SecondTransmissionRun");
+  if (secondTransWS && secondTransWS->run().hasProperty("run_number")) {
+    m_secondTransmissionRunNumber =
+        secondTransWS->run().getPropertyValueAsType<std::string>("run_number");
+  }
+}
+
+/** Store a transition run in ADS
+ * @param which Which of the runs to store: 1 - first, 2 - second.
+ * @param ws A workspace to store.
+ */
+void CreateTransmissionWorkspace2::storeTransitionRun(int which,
+                                                      MatrixWorkspace_sptr ws) {
+  if (which < 1 || which > 2) {
+    throw std::logic_error("There are only two runs: 1 and 2.");
+  }
+  auto const &runNumber =
+      which == 1 ? m_firstTransmissionRunNumber : m_secondTransmissionRunNumber;
+
+  if (!runNumber.empty()) {
+    auto const name = TRANS_LAM_PREFIX + runNumber;
+    AnalysisDataService::Instance().addOrReplace(name, ws);
+  }
+}
+
+/** Store the stitched transition workspace run in ADS
+ * @param ws A workspace to store.
+ */
+void CreateTransmissionWorkspace2::storeOutputWorkspace(
+    API::MatrixWorkspace_sptr ws) {
+  bool const isDebug = getProperty("Debug");
+  if (isDefault("OutputWorkspace") && (!isChild() || isDebug)) {
+    std::string name = TRANS_LAM_PREFIX;
+    if (!m_firstTransmissionRunNumber.empty()) {
+      name.append(m_firstTransmissionRunNumber);
+    } else {
+      return;
+    }
+    if (!m_secondTransmissionRunNumber.empty()) {
+      name.append("_");
+      name.append(m_secondTransmissionRunNumber);
+    }
+    if (!isChild()) {
+      setPropertyValue("OutputWorkspace", name);
+    } else {
+      AnalysisDataService::Instance().addOrReplace(name, ws);
+    }
+  }
+  setProperty("OutputWorkspace", ws);
 }
 
 } // namespace Algorithms

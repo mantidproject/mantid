@@ -4,6 +4,10 @@
 Mantid 3.13.0 Release Notes
 ===========================
 
+.. figure:: ../../images/Release3-13.png
+   :class: screenshot
+   :align: right
+
 .. contents:: Table of Contents
    :local:
 

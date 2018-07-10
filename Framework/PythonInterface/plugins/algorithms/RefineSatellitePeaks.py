@@ -23,7 +23,8 @@ class RefineSatellitePeaks(DataProcessorAlgorithm):
         self.declareProperty(PeaksWorkspaceProperty(name="SatellitePeaks",
                                                     defaultValue="",
                                                     direction=Direction.Input),
-                             doc="Positions of seed satellite peaks. These will be used to define the q vectors for each satellite.")
+                             doc="Positions of seed satellite peaks. These will be used to define the modulation (q) \
+                             vectors for each satellite.")
 
         self.declareProperty(WorkspaceProperty(name="MDWorkspace",
                                                defaultValue="",
@@ -38,17 +39,18 @@ class RefineSatellitePeaks(DataProcessorAlgorithm):
 
         self.declareProperty('NumOfQs', -1, direction=Direction.Input,
                              doc="The number of satellite peaks to look for. If this option is not set to the default then all the \
-                             provided satellites will be grouped into exactly this number of q vectors")
+                             provided satellites will be grouped into exactly this number of modulation (q) vectors")
         self.declareProperty('ClusterThreshold', 1.5, direction=Direction.Input,
-                             doc="Threshold for automaticallty deciding on the number of q vectors to use. If NumOfQs found is set then this \
+                             doc="Threshold for automaticallty deciding on the number of modulation (q) vectors to use. If NumOfQs found is set then this \
                              is property is ignored.")
         self.declareProperty('PeakRadius', 0.1, direction=Direction.Input,
-                             doc="The peak radius used to integrate the satellite peaks. This is passed direclty to IntegratePeaksMD")
+                             doc="The peak radius used to integrate the satellite peaks. This is Euclidean distance in HKL space. \
+                             This is passed directly to IntegratePeaksMD")
         self.declareProperty('BackgroundInnerRadius', 0.1, direction=Direction.Input,
-                             doc="The inner background radius used to integrate the satellite peaks. This is passed direclty to \
+                             doc="The inner background radius used to integrate the satellite peaks. This is Euclidean distance in HKL space. This is passed directly to \
                              IntegratePeaksMD")
         self.declareProperty('BackgroundOuterRadius', 0.2, direction=Direction.Input,
-                             doc="The outer background radius used to integrate satellite peaks. This is passed direclty to \
+                             doc="The outer background radius used to integrate satellite peaks. TThis is Euclidean distance in HKL space. his is passed directly to \
                              IntegratePeaksMD")
         self.declareProperty('IOverSigma', 2, direction=Direction.Input,
                              doc="The I/sigma threshold use to identify if peaks exist. This is passed direclty to FilterPeaks")

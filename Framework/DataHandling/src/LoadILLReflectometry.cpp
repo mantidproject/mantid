@@ -710,7 +710,6 @@ double LoadILLReflectometry::detectorRotation() {
   const double peakCentre = reflectometryPeak();
   g_log.debug() << "Using detector angle (degrees): " << m_detectorAngle
                 << '\n';
-  const double deflection = collimationAngle();
   if (!isDefault("OutputBeamPosition")) {
     PeakInfo p;
     p.detectorAngle = m_detectorAngle;
@@ -730,6 +729,7 @@ double LoadILLReflectometry::detectorRotation() {
     return 2 * userAngle - offset;
   }
   if (!posTable) {
+    const double deflection = collimationAngle();
     if (deflection != 0) {
       g_log.debug() << "Using incident deflection angle (degrees): "
                     << deflection << '\n';
@@ -841,12 +841,9 @@ void LoadILLReflectometry::placeSource() {
 
 /// Return the incident neutron deflection angle.
 double LoadILLReflectometry::collimationAngle() const {
-  if (m_instrument != Supported::FIGARO) {
-    return 0;
-  }
-  const auto collimationAngle = doubleFromRun("CollAngle.actual_coll_angle");
-  const auto sampleAngle = doubleFromRun("Theta.actual_theta");
-  return collimationAngle + sampleAngle;
+  return m_instrument == Supported::FIGARO
+             ? doubleFromRun("CollAngle.actual_coll_angle")
+             : 0.;
 }
 
 /// Return the detector center angle.

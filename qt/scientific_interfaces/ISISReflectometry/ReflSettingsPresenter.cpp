@@ -240,6 +240,8 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
     if (hasReductionTypes(summationType))
       addIfNotEmpty(options, "ReductionType", m_view->getReductionType());
 
+    setTransmissionOption(options, "Debug",
+                          asAlgorithmPropertyBool(m_view->getDebugOption()));
     auto const includePartialBins =
         asAlgorithmPropertyBool(m_view->getIncludePartialBins());
     options["IncludePartialBins"] = includePartialBins;
