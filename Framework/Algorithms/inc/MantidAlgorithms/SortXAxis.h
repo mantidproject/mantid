@@ -48,16 +48,39 @@ private:
   void init() override;
   void exec() override;
   std::vector<std::size_t> createIndexes(const size_t);
-  void sortIndexesByDescendingXValue(std::vector<std::size_t> &workspaceIndecies,
-                             Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
-                             unsigned int specNum);
-  void sortIndexesByAscendingXValue(std::vector<std::size_t> &workspaceIndecies,
-                             Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
-                             unsigned int specNum);
-  void sortIndicesByX(std::vector<std::size_t> &workspaceIndecies, std::string order, Mantid::API::MatrixWorkspace_const_sptr inputWorkspace, unsigned int specNum);
-  void copyYandEToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies, Mantid::API::MatrixWorkspace_const_sptr inputWorkspace, Mantid::API::MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfY, unsigned int SpecNum);                           
-  void copyXandDxToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies, Mantid::API::MatrixWorkspace_const_sptr inputWorkspace, Mantid::API::MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfX, unsigned int specNum);
-  void copyToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies, Mantid::API::MatrixWorkspace_const_sptr inputWorkspace, Mantid::API::MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfX, const size_t sizeOfY, unsigned int specNum);
+  void sortIndexesByDescendingXValue(
+      std::vector<std::size_t> &workspaceIndecies,
+      Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
+      unsigned int specNum);
+      
+  void sortIndexesByAscendingXValue(
+      std::vector<std::size_t> &workspaceIndecies,
+      Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
+      unsigned int specNum);
+
+  void sortIndicesByX(std::vector<std::size_t> &workspaceIndecies,
+                      std::string order,
+                      Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
+                      unsigned int specNum);
+
+  void copyYandEToOutputWorkspace(
+      std::vector<std::size_t> &workspaceIndecies,
+      Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
+      Mantid::API::MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfY,
+      unsigned int SpecNum);
+
+  void copyXandDxToOutputWorkspace(
+      std::vector<std::size_t> &workspaceIndecies,
+      Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
+      Mantid::API::MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfX,
+      unsigned int specNum);
+
+  void
+  copyToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies,
+                        Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
+                        Mantid::API::MatrixWorkspace_sptr outputWorkspace,
+                        const size_t sizeOfX, const size_t sizeOfY,
+                        unsigned int specNum);
 };
 
 } // namespace Algorithms
