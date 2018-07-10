@@ -14,7 +14,9 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidAPI/Run.h"
-
+#include "MantidGeometry/Crystal/BasicHKLFilters.h"
+#include "MantidGeometry/Crystal/HKLFilterWavelength.h"
+#include "MantidGeometry/Crystal/HKLGenerator.h"
 #include <boost/math/special_functions/round.hpp>
 
 namespace Mantid {
@@ -49,48 +51,38 @@ void PredictSatellitePeaks::init() {
                       string("OffsetVector3"), "0.0,0.0,0.0,0"),
                   "Offsets for h, k, l directions and order");
 
+  declareProperty("IncludeIntegerHKL", true,
+                  "If false order 0 peaks are not included in workspace (integer HKL)");
+
   declareProperty("IncludeAllPeaksInRange", false,
-                  "If false only offsets from peaks from Peaks are used");
+                  "If false only offsets from peaks from Peaks workspace in input are used");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("Hmin", -8.0, Direction::Input),
-      "Minimum H value to use");
+      make_unique<PropertyWithValue<double>>("WavelengthMin", 0.1, Direction::Input),
+      "Minimum wavelength limit at which to start looking for single-crystal peaks.");
   declareProperty(
-      make_unique<PropertyWithValue<double>>("Hmax", 8.0, Direction::Input),
-      "Maximum H value to use");
+      make_unique<PropertyWithValue<double>>("WavelengthMax", 100.0, Direction::Input),
+      "Maximum wavelength limit at which to start looking for single-crystal peaks.");
   declareProperty(
-      make_unique<PropertyWithValue<double>>("Kmin", -8.0, Direction::Input),
-      "Minimum K value to use");
+      make_unique<PropertyWithValue<double>>("MinDSpacing", 0.1, Direction::Input),
+      "Minimum d-spacing of peaks to consider. Default = 1.0");
   declareProperty(
-      make_unique<PropertyWithValue<double>>("Kmax", 8.0, Direction::Input),
-      "Maximum K value to use");
-  declareProperty(
-      make_unique<PropertyWithValue<double>>("Lmin", -8.0, Direction::Input),
-      "Minimum L value to use");
-  declareProperty(
-      make_unique<PropertyWithValue<double>>("Lmax", 8.0, Direction::Input),
-      "Maximum L value to use");
+      make_unique<PropertyWithValue<double>>("MaxDSpacing", 100.0, Direction::Input),
+      "Maximum d-spacing of peaks to consider");
 
   setPropertySettings(
-      "Hmin", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+      "WavelengthMin", Kernel::make_unique<Kernel::EnabledWhenProperty>(
                   string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 
   setPropertySettings(
-      "Hmax", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+      "WavelengthMax", Kernel::make_unique<Kernel::EnabledWhenProperty>(
                   string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
   setPropertySettings(
-      "Kmin", Kernel::make_unique<Kernel::EnabledWhenProperty>(
-                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
-
-  setPropertySettings(
-      "Kmax", Kernel::make_unique<Kernel::EnabledWhenProperty>(
-                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
-  setPropertySettings(
-      "Lmin", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+      "MinDSpacing", Kernel::make_unique<Kernel::EnabledWhenProperty>(
                   string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 
   setPropertySettings(
-      "Lmax", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+      "MaxDSpacing", Kernel::make_unique<Kernel::EnabledWhenProperty>(
                   string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 }
 
@@ -124,6 +116,7 @@ void PredictSatellitePeaks::exec() {
   } 
 
   bool includePeaksInRange = getProperty("IncludeAllPeaksInRange");
+  bool includeOrderZero = getProperty("IncludeIntegerHKL");
 
   if (Peaks->getNumberPeaks() <= 0) {
     g_log.error() << "There are No peaks in the input PeaksWorkspace\n";
@@ -149,41 +142,56 @@ void PredictSatellitePeaks::exec() {
   Kernel::Matrix<double> Gon;
   Gon.identityMatrix();
 
-  const double Hmin = getProperty("Hmin");
-  const double Hmax = getProperty("Hmax");
-  const double Kmin = getProperty("Kmin");
-  const double Kmax = getProperty("Kmax");
-  const double Lmin = getProperty("Lmin");
-  const double Lmax = getProperty("Lmax");
-
-  int N = NPeaks;
-  if (includePeaksInRange) {
-    N = boost::math::iround((Hmax - Hmin + 1) * (Kmax - Kmin + 1) *
-                            (Lmax - Lmin + 1));
-    N = max<int>(100, N);
-  }
+  const double lambdaMin = getProperty("WavelengthMin");
+  const double lambdaMax = getProperty("WavelengthMax");
   IPeak &peak0 = Peaks->getPeak(0);
-  auto RunNumber = peak0.getRunNumber();
-  Gon = peak0.getGoniometerMatrix();
-  Progress prog(this, 0.0, 1.0, N);
-  if (includePeaksInRange) {
 
-    hkl[0] = Hmin;
-    hkl[1] = Kmin;
-    hkl[2] = Lmin;
+  std::vector<V3D> possibleHKLs;
+  if (includePeaksInRange) {
+    const double dMin = getProperty("MinDSpacing");
+    const double dMax = getProperty("MaxDSpacing");
+    Geometry::HKLGenerator gen(ol, dMin);
+    auto filter =
+        boost::make_shared<HKLFilterDRange>(ol, dMin, dMax);
+  
+    V3D hkl = *(gen.begin());
+    g_log.information() << "HKL range for d_min of " << dMin << " to d_max of "
+                      << dMax << " is from " << hkl << " to "
+                      << hkl * -1.0 << ", a total of " << gen.size()
+                      << " possible HKL's\n";
+  if (gen.size() > 10000000000)
+    throw std::invalid_argument("More than 10 billion HKLs to search. Is "
+                                "your d_min value too small?");
+
+  possibleHKLs.clear();
+  possibleHKLs.reserve(gen.size());
+  std::remove_copy_if(gen.begin(), gen.end(), std::back_inserter(possibleHKLs),
+                      (~filter)->fn());
   } else {
     hkl[0] = peak0.getH();
     hkl[1] = peak0.getK();
     hkl[2] = peak0.getL();
   }
 
+  size_t N = NPeaks*(1+int(offsets1[3]*2+offsets2[3]*2+offsets3[3]*2));
+  if (includePeaksInRange) {
+    N = possibleHKLs.size();
+    N = max<size_t>(100, N);
+  }
+  auto RunNumber = peak0.getRunNumber();
   const Kernel::DblMatrix &UB = ol.getUB();
+  Gon = peak0.getGoniometerMatrix();
+  Progress prog(this, 0.0, 1.0, N);
   vector<vector<int>> AlreadyDonePeaks;
   bool done = false;
   int ErrPos = 1; // Used to determine position in code of a throw
   Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
+  DblMatrix orientedUB = Gon * UB;
+  HKLFilterWavelength lambdaFilter(orientedUB, lambdaMin, lambdaMax);
+  size_t next = 0;
   while (!done) {
     for (int order = -static_cast<int>(offsets1[3]); order <= static_cast<int>(offsets1[3]); order++) {
+        if (order == 0 && !includeOrderZero) continue; // exclude order 0
           try {
             V3D hkl1(hkl);
             ErrPos = 0;
@@ -191,6 +199,7 @@ void PredictSatellitePeaks::exec() {
             hkl1[0] += order * offsets1[0];
             hkl1[1] += order * offsets1[1];
             hkl1[2] += order * offsets1[2];
+            if(!lambdaFilter.isAllowed(hkl1) && includePeaksInRange) continue;
 
             Kernel::V3D Qs = UB * hkl1;
             Qs *= 2.0;
@@ -330,18 +339,9 @@ void PredictSatellitePeaks::exec() {
     }
     }
     if (includePeaksInRange) {
-      hkl[0]++;
-      if (hkl[0] > Hmax) {
-        hkl[0] = Hmin;
-        hkl[1]++;
-        if (hkl[1] > Kmax) {
-
-          hkl[1] = Kmin;
-          hkl[2]++;
-          if (hkl[2] > Lmax)
-            done = true;
-        }
-      }
+      next++;
+      if (next == possibleHKLs.size()) break;
+      hkl = possibleHKLs[next];
     } else {
       peakNum++;
       if (peakNum >= NPeaks)
