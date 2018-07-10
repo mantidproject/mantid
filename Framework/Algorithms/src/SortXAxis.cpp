@@ -45,25 +45,57 @@ void SortXAxis::exec() {
   for (auto specNum = 0u; specNum < inputWorkspace->getNumberHistograms();
        specNum++) {
 
-    std::vector<std::size_t> indexes;
     const auto sizeOfX = inputWorkspace->x(specNum).size();
     const auto sizeOfY = inputWorkspace->y(specNum).size();
 
-    indexes.reserve(sizeOfX);
-    createIndexes(indexes, sizeOfX);
+    auto workspaceIndicies = createIndexes(sizeOfX);
 
-    // Order the algorithm given the property
-    auto ordering = std::string(getProperty("Ordering"));
-    if (ordering == "Ascending") {
-      orderIndexesAscending(indexes, inputWorkspace, specNum);
-    } else if (ordering == "Descending") {
-      orderIndexesDecending(indexes, inputWorkspace, specNum);
+    sortIndicesByX(workspaceIndicies, getProperty("Ordering"), inputWorkspace, specNum);
+
+    copyToOutputWorkspace(workspaceIndicies, inputWorkspace, outputWorkspace, sizeOfX, sizeOfY, specNum);
+  }
+  setProperty("OutputWorkspace", outputWorkspace);
+}
+
+std::vector<std::size_t> SortXAxis::createIndexes(const size_t sizeOfX) {
+  std::vector<std::size_t> workspaceIndicies;
+  workspaceIndicies.reserve(sizeOfX);                              
+  for (auto workspaceIndex = 0u; workspaceIndex < sizeOfX; workspaceIndex++) {
+    workspaceIndicies.emplace_back(workspaceIndex);
+  }
+  return workspaceIndicies;
+}
+
+void SortXAxis::sortIndexesByAscendingXValue(std::vector<std::size_t> &workspaceIndicies,
+                                      MatrixWorkspace_const_sptr inputWorkspace,
+                                      unsigned int specNum) { 
+  std::sort(workspaceIndicies.begin(), workspaceIndicies.end(), [&](std::size_t lhs,
+                                                std::size_t rhs) -> bool {
+    return inputWorkspace->x(specNum)[lhs] < inputWorkspace->x(specNum)[rhs];
+  });
+}
+
+void SortXAxis::sortIndexesByDescendingXValue(std::vector<std::size_t> &workspaceIndicies,
+                                      MatrixWorkspace_const_sptr inputWorkspace,
+                                      unsigned int specNum) {
+  std::sort(workspaceIndicies.begin(), workspaceIndicies.end(), [&](std::size_t lhs,
+                                                std::size_t rhs) -> bool {
+    return inputWorkspace->x(specNum)[lhs] > inputWorkspace->x(specNum)[rhs];
+  });
+}
+void SortXAxis::sortIndicesByX(std::vector<std::size_t> &workspaceIndicies, std::string order, MatrixWorkspace_const_sptr inputWorkspace, unsigned int specNum){
+    if (order == "Ascending") {
+      sortIndexesByAscendingXValue(workspaceIndicies, inputWorkspace, specNum);
+    } else if (order == "Descending") {
+      sortIndexesByDescendingXValue(workspaceIndicies, inputWorkspace, specNum);
     }
+}
 
-    // Move an ordered X to the output workspace
+void SortXAxis::copyXandDxToOutputWorkspace(std::vector<std::size_t> &workspaceIndicies, MatrixWorkspace_const_sptr inputWorkspace, MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfX, unsigned int specNum){
+      // Move an ordered X to the output workspace
     for (auto workspaceIndex = 0u; workspaceIndex < sizeOfX; workspaceIndex++) {
       outputWorkspace->mutableX(specNum)[workspaceIndex] =
-          inputWorkspace->x(specNum)[indexes[workspaceIndex]];
+          inputWorkspace->x(specNum)[workspaceIndicies[workspaceIndex]];
     }
 
     // If Dx's are present, move Dx's to the output workspace
@@ -71,49 +103,29 @@ void SortXAxis::exec() {
       for (auto workspaceIndex = 0u; workspaceIndex < sizeOfX;
            workspaceIndex++) {
         outputWorkspace->mutableDx(specNum)[workspaceIndex] =
-            inputWorkspace->dx(specNum)[indexes[workspaceIndex]];
+            inputWorkspace->dx(specNum)[workspaceIndicies[workspaceIndex]];
       }
     }
+}
 
-    // If Histogram data find the biggest index value and remove it from indexes
+void SortXAxis::copyYandEToOutputWorkspace(std::vector<std::size_t> &workspaceIndicies, MatrixWorkspace_const_sptr inputWorkspace, MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfY, unsigned int specNum){
+      // If Histogram data find the biggest index value and remove it from workspaceIndicies
     if (inputWorkspace->isHistogramData()) {
-      auto i = std::find(indexes.cbegin(), indexes.cend(), sizeOfY);
-      indexes.erase(i);
+      auto lastIndexIt = std::find(workspaceIndicies.cbegin(), workspaceIndicies.cend(), sizeOfY);
+      workspaceIndicies.erase(lastIndexIt);
     }
 
     for (auto workspaceIndex = 0u; workspaceIndex < sizeOfY; workspaceIndex++) {
       outputWorkspace->mutableY(specNum)[workspaceIndex] =
-          inputWorkspace->y(specNum)[indexes[workspaceIndex]];
+          inputWorkspace->y(specNum)[workspaceIndicies[workspaceIndex]];
       outputWorkspace->mutableE(specNum)[workspaceIndex] =
-          inputWorkspace->e(specNum)[indexes[workspaceIndex]];
+          inputWorkspace->e(specNum)[workspaceIndicies[workspaceIndex]];
     }
-  }
-  setProperty("OutputWorkspace", outputWorkspace);
 }
 
-void SortXAxis::createIndexes(std::vector<std::size_t> &indexes,
-                              const size_t sizeOfX) {
-  for (auto workspaceIndex = 0u; workspaceIndex < sizeOfX; workspaceIndex++) {
-    indexes.emplace_back(workspaceIndex);
-  }
-}
-
-void SortXAxis::orderIndexesAscending(std::vector<std::size_t> &indexes,
-                                      MatrixWorkspace_const_sptr inputWorkspace,
-                                      unsigned int specNum) {
-  std::sort(indexes.begin(), indexes.end(), [&](std::size_t lhs,
-                                                std::size_t rhs) -> bool {
-    return inputWorkspace->x(specNum)[lhs] < inputWorkspace->x(specNum)[rhs];
-  });
-}
-
-void SortXAxis::orderIndexesDecending(std::vector<std::size_t> &indexes,
-                                      MatrixWorkspace_const_sptr inputWorkspace,
-                                      unsigned int specNum) {
-  std::sort(indexes.begin(), indexes.end(), [&](std::size_t lhs,
-                                                std::size_t rhs) -> bool {
-    return inputWorkspace->x(specNum)[lhs] > inputWorkspace->x(specNum)[rhs];
-  });
+void SortXAxis::copyToOutputWorkspace(std::vector<std::size_t> &workspaceIndicies, MatrixWorkspace_const_sptr inputWorkspace, MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfX, const size_t sizeOfY, unsigned int specNum){
+  copyXandDxToOutputWorkspace(workspaceIndicies, inputWorkspace, outputWorkspace, sizeOfX, specNum);
+  copyYandEToOutputWorkspace(workspaceIndicies, inputWorkspace, outputWorkspace, sizeOfY, specNum);
 }
 } // namespace Algorithms
 } // namespace Mantid
