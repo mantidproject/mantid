@@ -25,6 +25,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)
+        self.assertTrue(alg.isExecuted())
 
     def testReflectedBeamSumInLambdaExecutes(self):
         dirWS = illhelpers.create_poor_mans_d17_workspace()
@@ -39,6 +40,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)
+        self.assertTrue(alg.isExecuted())
         dirForeground = alg.getProperty('OutputWorkspace').value
         reflWS = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.refl_rotate_detector(reflWS, 1.2)
@@ -55,6 +57,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)
+        self.assertTrue(alg.isExecuted())
 
     def testReflectedBeamSumInQExecutes(self):
         dirWS = illhelpers.create_poor_mans_d17_workspace()
@@ -69,6 +72,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)
+        self.assertTrue(alg.isExecuted())
         dirForeground = alg.getProperty('OutputWorkspace').value
         reflWS = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.refl_rotate_detector(reflWS, 1.2)
@@ -85,6 +89,42 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)
+        self.assertTrue(alg.isExecuted())
+
+    def testFigaroSumInLambdaExecutes(self):
+        args = {
+            'Run': 'ILL/Figaro/000002.nxs',
+            'OutputWorkspace': 'direct',
+            'ForegroundHalfWidth': [6, 6],
+            'FlatBackground': 'Background OFF',
+        }
+        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        assertRaisesNothing(self, alg.execute)
+        self.assertTrue(alg.isExecuted())
+        args = {
+            'InputWorkspace': 'direct',
+            'OutputWorkspace': 'direct-fgd'
+        }
+        alg = create_algorithm('ReflectometryILLSumForeground', **args)
+        assertRaisesNothing(self, alg.execute)
+        self.assertTrue(alg.isExecuted())
+        args = {
+            'Run': 'ILL/Figaro/000002.nxs',
+            'OutputWorkspace': 'reflected',
+            'ForegroundHalfWidth': [6, 6],
+            'FlatBackground': 'Background OFF',
+        }
+        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        assertRaisesNothing(self, alg.execute)
+        self.assertTrue(alg.isExecuted())
+        args = {
+            'InputWorkspace': 'reflected',
+            'OutputWorkspace': 'reflected-fgd',
+            'DirectForegroundWorkspace': 'direct-fgd'
+        }
+        alg = create_algorithm('ReflectometryILLSumForeground', **args)
+        assertRaisesNothing(self, alg.execute)
+        self.assertTrue(alg.isExecuted())
 
     def testWavelengthRange(self):
         ws = illhelpers.create_poor_mans_d17_workspace()
