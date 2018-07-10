@@ -933,6 +933,10 @@ void IndirectFitPropertyBrowser::customFunctionRemoved(QtProperty *prop) {
   }
 }
 
+void IndirectFitPropertyBrowser::setWorkspaceIndex(int i) {
+  FitPropertyBrowser::setWorkspaceIndex(i);
+}
+
 /**
  * Schedules a fit.
  */

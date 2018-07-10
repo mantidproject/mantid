@@ -8,6 +8,7 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
 
+#include <algorithm>
 #include <numeric>
 #include <set>
 
@@ -20,7 +21,9 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 bool equivalentWorkspaces(MatrixWorkspace_const_sptr lhs,
                           MatrixWorkspace_const_sptr rhs) {
-  if (lhs->getName() == "" && rhs->getName() == "")
+  if (!lhs || !rhs)
+    return false;
+  else if (lhs->getName() == "" && rhs->getName() == "")
     return lhs == rhs;
   return lhs->getName() == rhs->getName();
 }
@@ -257,6 +260,21 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+PrivateFittingData::PrivateFittingData() : m_data() {}
+
+PrivateFittingData::PrivateFittingData(PrivateFittingData &&privateData)
+    : m_data(std::move(privateData.m_data)) {}
+
+PrivateFittingData::PrivateFittingData(
+    std::vector<std::unique_ptr<IndirectFitData>> &&data)
+    : m_data(std::move(data)) {}
+
+PrivateFittingData &PrivateFittingData::
+operator=(PrivateFittingData &&fittingData) {
+  m_data = std::move(fittingData.m_data);
+  return *this;
+}
+
 IndirectFittingModel::IndirectFittingModel()
     : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL) {}
 
@@ -307,7 +325,10 @@ std::string
 IndirectFittingModel::createOutputName(const std::string &formatString,
                                        const std::string &rangeDelimiter,
                                        std::size_t dataIndex) const {
-  return createDisplayName(formatString, rangeDelimiter, dataIndex) + "_Result";
+  auto name =
+      createDisplayName(formatString, rangeDelimiter, dataIndex) + "_Result";
+  std::replace(name.begin(), name.end(), ',', '+');
+  return name;
 }
 
 bool IndirectFittingModel::isMultiFit() const {
@@ -356,6 +377,10 @@ std::vector<std::string> IndirectFittingModel::getFitParameterNames() const {
 
 Mantid::API::IFunction_sptr IndirectFittingModel::getFittingFunction() const {
   return m_activeFunction;
+}
+
+void IndirectFittingModel::setFittingData(PrivateFittingData &&fittingData) {
+  m_fittingData = std::move(fittingData.m_data);
 }
 
 void IndirectFittingModel::setSpectra(const std::string &spectra,
@@ -454,9 +479,9 @@ void IndirectFittingModel::removeFittingData(std::size_t index) {
   m_defaultParameters.erase(m_defaultParameters.begin() + index);
 }
 
-void IndirectFittingModel::clearWorkspaces() {
-  m_fittingData.clear();
+PrivateFittingData IndirectFittingModel::clearWorkspaces() {
   m_fitOutput.reset();
+  return std::move(m_fittingData);
 }
 
 void IndirectFittingModel::setFittingMode(FittingMode mode) {
@@ -616,7 +641,7 @@ std::unordered_map<std::string, ParameterValue>
 boost::optional<ResultLocation>
 IndirectFittingModel::getResultLocation(std::size_t index,
                                         std::size_t spectrum) const {
-  if (m_previousModelSelected && m_fitOutput)
+  if (m_previousModelSelected && m_fitOutput && m_fittingData.size() > index)
     return m_fitOutput->getResultLocation(m_fittingData[index].get(), spectrum);
   return boost::none;
 }

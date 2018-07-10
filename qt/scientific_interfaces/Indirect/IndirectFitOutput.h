@@ -24,8 +24,7 @@ struct ParameterValue {
 
 struct ResultLocation {
   ResultLocation() : result(), index(0) {}
-  ResultLocation(boost::weak_ptr<Mantid::API::WorkspaceGroup> group,
-                 std::size_t i)
+  ResultLocation(Mantid::API::WorkspaceGroup_sptr group, std::size_t i)
       : result(group), index(i) {}
   boost::weak_ptr<Mantid::API::WorkspaceGroup> result;
   std::size_t index;
@@ -118,6 +117,14 @@ private:
   void updateFitResults(Mantid::API::WorkspaceGroup_sptr resultGroup,
                         const FitDataIterator &fitDataBegin,
                         const FitDataIterator &fitDataEnd);
+  void
+  updateFitResultsFromUnstructured(Mantid::API::WorkspaceGroup_sptr resultGroup,
+                                   const FitDataIterator &fitDataBegin,
+                                   const FitDataIterator &fitDataEnd);
+  void
+  updateFitResultsFromStructured(Mantid::API::WorkspaceGroup_sptr resultGroup,
+                                 const FitDataIterator &fitDataBegin,
+                                 const FitDataIterator &fitDataEnd);
 
   boost::weak_ptr<Mantid::API::WorkspaceGroup> m_resultGroup;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_resultWorkspace;
