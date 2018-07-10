@@ -1139,11 +1139,14 @@ boost::optional<bool> ConfigServiceImpl::getValue(const std::string &keyName) {
 		return boost::none;
 	}
 
+  std::transform(returnedValue->begin(), returnedValue->end(), returnedValue->begin(), ::tolower);
+
 	bool trueString = returnedValue->find("true") != std::string::npos;
 	bool valueOne = returnedValue->find("1") != std::string::npos;
+  bool onOffString = returnedValue->find("on") != std::string::npos;
 
 	// A string of 1 or true both count
-	return trueString || valueOne;
+	return trueString || valueOne || onOffString;
 }
 
 /**
