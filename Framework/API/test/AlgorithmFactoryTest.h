@@ -25,9 +25,9 @@ public:
 
     auto &algFactory = AlgorithmFactory::Instance();
 
-	// Ensure the algorithm factory does not already have this
-	algFactory.unsubscribe("ToyAlgorithm", 1);
-	algFactory.unsubscribe("ToyAlgorithm", 2);
+    // Ensure the algorithm factory does not already have this
+    algFactory.unsubscribe("ToyAlgorithm", 1);
+    algFactory.unsubscribe("ToyAlgorithm", 2);
 
     // get the number of algorithms it already has
     std::vector<std::string> keys = algFactory.getKeys();
@@ -192,17 +192,18 @@ public:
 
     const std::string algName = "ToyAlgorithm";
     algFactory.subscribe<ToyAlgorithm>();
-	algFactory.subscribe<ToyAlgorithmTwo>();
+    algFactory.subscribe<ToyAlgorithmTwo>();
 
-	int version = -1;
+    int version = -1;
     TS_ASSERT_THROWS_NOTHING(version = algFactory.getAlgLatestVersion(algName));
 
     TS_ASSERT_EQUALS(version, 2);
 
     algFactory.unsubscribe(algName, 1);
-	algFactory.unsubscribe(algName, 2);
+    algFactory.unsubscribe(algName, 2);
 
-    TS_ASSERT_THROWS(algFactory.getAlgLatestVersion(algName), std::runtime_error);
+    TS_ASSERT_THROWS(algFactory.getAlgLatestVersion(algName),
+                     std::runtime_error);
   }
 
   void testGetCategories() {

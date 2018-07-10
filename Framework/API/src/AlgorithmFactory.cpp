@@ -35,39 +35,37 @@ AlgorithmFactoryImpl::~AlgorithmFactoryImpl() = default;
 */
 boost::shared_ptr<Algorithm>
 AlgorithmFactoryImpl::create(const std::string &name,
-	const int &version) const {
-	int local_version = version;
-	if (version < 0) {
-		if (version == -1) // get latest version since not supplied
-		{
-			auto it = m_vmap.find(name);
-			if (!name.empty()) {
-				if (it == m_vmap.end())
-					throw std::runtime_error("Algorithm not registered " + name);
-				else
-					local_version = it->second;
-			}
-			else
-				throw std::runtime_error(
-					"Algorithm not registered (empty algorithm name)");
-		}
-	}
-	try {
-		return this->createAlgorithm(name, local_version);
-	}
-	catch (Kernel::Exception::NotFoundError &) {
-		auto it = m_vmap.find(name);
-		if (it == m_vmap.end())
-			throw std::runtime_error("algorithm not registered " + name);
-		else {
-			g_log.error() << "algorithm " << name << " version " << version
-				<< " is not registered \n";
-			g_log.error() << "the latest registered version is " << it->second
-				<< '\n';
-			throw std::runtime_error("algorithm not registered " +
-				createName(name, local_version));
-		}
-	}
+                             const int &version) const {
+  int local_version = version;
+  if (version < 0) {
+    if (version == -1) // get latest version since not supplied
+    {
+      auto it = m_vmap.find(name);
+      if (!name.empty()) {
+        if (it == m_vmap.end())
+          throw std::runtime_error("Algorithm not registered " + name);
+        else
+          local_version = it->second;
+      } else
+        throw std::runtime_error(
+            "Algorithm not registered (empty algorithm name)");
+    }
+  }
+  try {
+    return this->createAlgorithm(name, local_version);
+  } catch (Kernel::Exception::NotFoundError &) {
+    auto it = m_vmap.find(name);
+    if (it == m_vmap.end())
+      throw std::runtime_error("algorithm not registered " + name);
+    else {
+      g_log.error() << "algorithm " << name << " version " << version
+                    << " is not registered \n";
+      g_log.error() << "the latest registered version is " << it->second
+                    << '\n';
+      throw std::runtime_error("algorithm not registered " +
+                               createName(name, local_version));
+    }
+  }
 }
 
 /**
@@ -312,18 +310,20 @@ AlgorithmFactoryImpl::getCategories(bool includeHidden) const {
   * Returns a the latest version number of the given algorithm
   *
   * @param algName The name of the algorithm to get a version for
-  * @param throwIfNotRegistered (Default true) Throw if the algorithm is not registered
+  * @param throwIfNotRegistered (Default true) Throw if the algorithm is not
+  *registered
   * @return Integer of the latest algorithm version or -1 if it does not exist
   * @throws std::runtime_error if algorithm does not exist and throw is true
   */
-int AlgorithmFactoryImpl::getAlgLatestVersion(const std::string &algName) const{
-	  auto it = m_vmap.find(algName);
-	  
-	  if (it == m_vmap.end()) {
-		throw std::runtime_error("Algorithm not registered " + algName);
-	  }
-	  
-	  return it->second;
+int AlgorithmFactoryImpl::getAlgLatestVersion(
+    const std::string &algName) const {
+  auto it = m_vmap.find(algName);
+
+  if (it == m_vmap.end()) {
+    throw std::runtime_error("Algorithm not registered " + algName);
+  }
+
+  return it->second;
 }
 
 /**
