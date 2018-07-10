@@ -25,6 +25,10 @@ public:
 
     auto &algFactory = AlgorithmFactory::Instance();
 
+	// Ensure the algorithm factory does not already have this
+	algFactory.unsubscribe("ToyAlgorithm", 1);
+	algFactory.unsubscribe("ToyAlgorithm", 2);
+
     // get the number of algorithms it already has
     std::vector<std::string> keys = algFactory.getKeys();
     size_t noOfAlgs = keys.size();
@@ -183,24 +187,22 @@ public:
     TS_ASSERT_EQUALS(noOfAlgs - 1, descriptors.size());
   }
 
-  void testGetDescriptor() {
+  void testGetLatestVersion() {
     auto &algFactory = AlgorithmFactory::Instance();
 
     const std::string algName = "ToyAlgorithm";
     algFactory.subscribe<ToyAlgorithm>();
-    AlgorithmDescriptor descriptor;
+	algFactory.subscribe<ToyAlgorithmTwo>();
 
-    TS_ASSERT_THROWS_NOTHING(descriptor = algFactory.getDescriptor(algName));
+	int version = -1;
+    TS_ASSERT_THROWS_NOTHING(version = algFactory.getAlgLatestVersion(algName));
 
-    bool AlgCorrect = ("Cat" == descriptor.category) &&
-                      (algName == descriptor.name) &&
-                      ("Dog" == descriptor.alias) && (1 == descriptor.version);
+    TS_ASSERT_EQUALS(version, 2);
 
-    TS_ASSERT(AlgCorrect);
+    algFactory.unsubscribe(algName, 1);
+	algFactory.unsubscribe(algName, 2);
 
-    algFactory.unsubscribe("ToyAlgorithm", 1);
-
-    TS_ASSERT_THROWS(algFactory.getDescriptor(algName), std::runtime_error);
+    TS_ASSERT_THROWS(algFactory.getAlgLatestVersion(algName), std::runtime_error);
   }
 
   void testGetCategories() {

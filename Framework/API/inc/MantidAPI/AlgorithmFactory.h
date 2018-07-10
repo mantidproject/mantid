@@ -16,11 +16,14 @@ namespace API {
 
 /// Structure uniquely describing an algorithm with its name, category and
 /// version.
-struct AlgorithmDescriptor {
-  std::string name;     ///< name
-  std::string alias;    ///< alias
+struct AlgorithmKey {
+	std::string name;     ///< Algorithm Name
+	int version;          ///< version
+};
+
+struct AlgorithmDescriptor : public AlgorithmKey {
   std::string category; ///< category
-  int version;          ///< version
+  std::string alias;    ///< alias
 };
 
 //----------------------------------------------------------------------
@@ -134,8 +137,7 @@ public:
   const std::map<std::string, bool> getCategoriesWithState() const;
 
   /// Returns a single algorithm descriptor
-  AlgorithmDescriptor getDescriptor(const std::string &algName,
-                                    int version = -1) const;
+  int getAlgLatestVersion(const std::string &algName) const;
 
   /// Returns algorithm descriptors.
   std::vector<AlgorithmDescriptor>
