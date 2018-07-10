@@ -193,7 +193,7 @@ def getPoissionGoodIDX(n_events, zBG=1.96, neigh_length_m=3):
 
 def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, qMask=None,
                         peak=None, box=None, pp_lambda=None, peakNumber=-1, minppl_frac=0.8,
-                        maxppl_frac=1.5, predCoefficients=None, mindtBinWidth=1, constraintScheme=1):
+                        maxppl_frac=1.5, mindtBinWidth=1, constraintScheme=1):
     """
     getOptimizedGoodIDX - returns a numpy arrays which is true if the voxel contains events at
             the zBG z level (1.96=95%CI).  Rather than using Poission statistics, this function
@@ -211,8 +211,6 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
         pp_lambda - Currently unused.  Leave as None. TODO: remove this.
         peakNumber - currently unused.  TODO: Remove this.
         minppl_frac, maxppl_frac; range around predicted pp_lambda to check.
-        predCoefficients - an array of floating point coefficients which are used to
-                predict pp_lambda
         mindtBinWidth - the small dt (in us) allowed for constructing the TOF profile.
         constraintScheme - sets the constraints for TOF profile fitting.  Leave as 1 if you're
                 not sure how to modify this.
@@ -236,27 +234,30 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
     pp_lambda_toCheck = pp_lambda_toCheck[1:][np.diff(
         pp_lambda_toCheck) > 0.001]
 
-    if peak is not None:
-        if predCoefficients is not None:
-            pred_ppl = oldScatFun(peak.getScattering(
-            )/peak.getWavelength(), predCoefficients[0], predCoefficients[1], predCoefficients[2])
-            minppl = minppl_frac*pred_ppl
-            maxppl = maxppl_frac*pred_ppl
-            if pred_ppl > 2.0:
-                maxppl = 2.0/1.5*maxppl_frac*pred_ppl
-            pp_lambda_toCheck = pp_lambda_toCheck[pp_lambda_toCheck > minppl]
-            pp_lambda_toCheck = pp_lambda_toCheck[pp_lambda_toCheck < maxppl]
-        else:
-            minppl = np.min(conv_n_events[conv_n_events > 0])
-            maxppl = np.max(pp_lambda_toCheck)
-            for ppl in pp_lambda_toCheck:
-                if np.sum(conv_n_events > ppl) > 10:
-                    maxppl = np.max(pp_lambda_toCheck)
+    # Get the average background level
+    nX, nY, nZ = n_events.shape
+    cX = nX//2
+    cY = nY//2
+    cZ = nZ//2
+    dP = 5
+    peakMask = qMask.copy()
+    peakMask[cX-dP:cX+dP, cY-dP:cY+dP, cZ-dP:cZ+dP] = 0
+    neigh_length_m=3
+    convBox = 1.0 * np.ones([neigh_length_m, neigh_length_m,
+                             neigh_length_m]) / neigh_length_m**3
+    conv_n_events = convolve(n_events, convBox)
+    bgMask = np.logical_and(conv_n_events>0, peakMask>0)
+    meanBG = np.mean(n_events[bgMask])
 
-    else:
-        minppl = 0
-        # add some just to make sure we don't skip any
-        maxppl = pp_lambda_toCheck.max() + 0.5
+    # We set it at slightly lower than 1:1 because we don't
+    # want to fit a peak where most of the counts have been removed.
+    # The factor of 1.96 comes from a historical definition of pp_lambda
+    # where background was considered at the 95% confidence interval.
+    pred_ppl = np.polyval([0.98,0],meanBG)*1.96
+    minppl = minppl_frac*pred_ppl
+    maxppl = maxppl_frac*pred_ppl
+    pp_lambda_toCheck = pp_lambda_toCheck[pp_lambda_toCheck > minppl]
+    pp_lambda_toCheck = pp_lambda_toCheck[pp_lambda_toCheck < maxppl]
 
     chiSqList = 1.0e30*np.ones_like(pp_lambda_toCheck)
     ISIGList = 1.0e-30*np.ones_like(pp_lambda_toCheck)
@@ -302,7 +303,7 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
 
 
 def getBGRemovedIndices(n_events, zBG=1.96, calc_pp_lambda=False, neigh_length_m=3, qMask=None,
-                        peak=None, box=None, pp_lambda=None, peakNumber=-1, padeCoefficients=None, predCoefficients=None,
+                        peak=None, box=None, pp_lambda=None, peakNumber=-1, padeCoefficients=None,
                         pplmin_frac=0.8, pplmax_frac=1.5, mindtBinWidth=1, constraintScheme=1):
     """
     getBGRemovedIndices - A wrapper for getOptimizedGoodIDX
@@ -318,8 +319,6 @@ def getBGRemovedIndices(n_events, zBG=1.96, calc_pp_lambda=False, neigh_length_m
         pp_lambda - Currently unused.  Leave as None. TODO: remove this.
         peakNumber - currently unused.  TODO: Remove this.
         minppl_frac, maxppl_frac; range around predicted pp_lambda to check.
-        predCoefficients - an array of floating point coefficients which are used to
-                predict pp_lambda
         mindtBinWidth - the small dt (in us) allowed for constructing the TOF profile.
         constraintScheme - sets the constraints for TOF profile fitting.  Leave as 1 if you're
                 not sure how to modify this.
@@ -361,7 +360,7 @@ def getBGRemovedIndices(n_events, zBG=1.96, calc_pp_lambda=False, neigh_length_m
             try:
                 return getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=neigh_length_m,
                                            minppl_frac=pplmin_frac, maxppl_frac=pplmax_frac, qMask=qMask, peak=peak,
-                                           box=box, pp_lambda=pp_lambda, peakNumber=peakNumber, predCoefficients=predCoefficients,
+                                           box=box, pp_lambda=pp_lambda, peakNumber=peakNumber,
                                            mindtBinWidth=mindtBinWidth, constraintScheme=constraintScheme)
             except KeyboardInterrupt:
                 sys.exit()
@@ -522,7 +521,7 @@ def get_pp_lambda(n_events, hasEventsIDX):
 
 def getTOFWS(box, flightPath, scatteringHalfAngle, tofPeak, peak, qMask, zBG=-1.0, dtSpread=0.02,
              minFracPixels=0.005, workspaceNumber=None, neigh_length_m=0, pp_lambda=None, calc_pp_lambda=False,
-             padeCoefficients=None, predCoefficients=None, pplmin_frac=0.8, pplmax_frac=1.5,
+             padeCoefficients=None, pplmin_frac=0.8, pplmax_frac=1.5,
              mindtBinWidth=1, constraintScheme=1):
     """
     Builds a TOF profile from the data in box which is nominally centered around a peak.
@@ -545,8 +544,6 @@ def getTOFWS(box, flightPath, scatteringHalfAngle, tofPeak, peak, qMask, zBG=-1.
         calc_pp_lambda - boolean; True if you want to calculate pp_lambda using TOF profile fitting.  If you do not
             want to, you can feed the value in as pp_lambda (calculated elsewhere).
         minppl_frac, maxppl_frac; range around predicted pp_lambda to check.
-        predCoefficients - an array of floating point coefficients which are used to
-                predict pp_lambda
         mindtBinWidth - the small dt (in us) allowed for constructing the TOF profile.
         constraintScheme - sets the constraints for TOF profile fitting.  Leave as 1 if you're
                 not sure how to modify this.
@@ -565,7 +562,7 @@ def getTOFWS(box, flightPath, scatteringHalfAngle, tofPeak, peak, qMask, zBG=-1.
             calc_pp_lambda = True
         goodIDX, pp_lambda = getBGRemovedIndices(n_events, box=box, qMask=qMask, peak=peak, pp_lambda=pp_lambda,
                                                  calc_pp_lambda=calc_pp_lambda, padeCoefficients=padeCoefficients,
-                                                 predCoefficients=predCoefficients, pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
+                                                 pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
                                                  mindtBinWidth=mindtBinWidth, constraintScheme=constraintScheme)
         # TODO bad naming, but a lot of the naming in this function assumes it
         hasEventsIDX = np.logical_and(goodIDX, qMask)
@@ -864,7 +861,7 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
 def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeCoefficients,
                     figsFormat=None, dtSpread=0.02, fracHKL=0.5, minFracPixels=0.0000, fracStop=0.01,
                     dQPixel=0.005, p=None, neigh_length_m=0, zBG=-1.0, bgPolyOrder=1,
-                    doIterativeBackgroundFitting=False, predCoefficients=None, q_frame='sample',
+                    doIterativeBackgroundFitting=False, q_frame='sample',
                     progressFile=None, minpplfrac=0.8, maxpplfrac=1.5, mindtBinWidth=1, keepFitDict=False, constraintScheme=1):
     """
     integrateSample contains the loop that integrates over all of the peaks in a run and saves the results.  Importantly, it also handles
@@ -891,7 +888,6 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
             the background is removed by only keeping signal, so linear is sufficient to take care of
             any small residual bakcground.
         doIterativeBackgroundFitting - do not use; leave as False.  TODO: Remove this
-        predCoefficients - the coefficients for oldScatFun which predict the pp_lambda value for a peak
         q_frame - str; either 'sample' or 'lab'
         progressFile - the name of a file which will write the current peak number every 100 peaks.  Useful
             for monitoring batch jobs.  Set to None to not write file.
@@ -937,7 +933,7 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
                 n_events = Box.getNumEventsArray()
                 goodIDX, pp_lambda = getBGRemovedIndices(n_events, peak=peak, box=Box, qMask=qMask,
                                                          calc_pp_lambda=True, padeCoefficients=padeCoefficients,
-                                                         predCoefficients=predCoefficients, mindtBinWidth=mindtBinWidth,
+                                                         mindtBinWidth=mindtBinWidth,
                                                          pplmin_frac=minpplfrac, pplmax_frac=maxpplfrac,
                                                          constraintScheme=constraintScheme)
                 # --IN PRINCIPLE!!! WE CALCULATE THIS BEFORE GETTING HERE
