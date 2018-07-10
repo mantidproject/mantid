@@ -268,11 +268,12 @@ void SaveIsawPeaks::exec() {
   // =========================================
 
   // Go in order of run numbers
-        auto run = ws->mutableRun();
-        std::vector<double> offset1 = run.getPropertyValueAsType<std::vector<double>>("Offset1");
-        std::vector<double> offset2 = run.getPropertyValueAsType<std::vector<double>>("Offset2");
-        std::vector<double> offset3 = run.getPropertyValueAsType<std::vector<double>>("Offset3");
+    std::vector<double> offset1,offset2,offset3;
     if (m_ModStru) {
+        auto run = ws->mutableRun();
+        offset1 = run.getPropertyValueAsType<std::vector<double>>("Offset1");
+        offset2 = run.getPropertyValueAsType<std::vector<double>>("Offset2");
+        offset3 = run.getPropertyValueAsType<std::vector<double>>("Offset3");
         out << "9  OFFSETS ";
         out << std::setw(8) << std::fixed << std::setprecision(2) << offset1[0] << " ";
         out << std::setw(8) << std::fixed << std::setprecision(2) << offset1[1] << " ";
