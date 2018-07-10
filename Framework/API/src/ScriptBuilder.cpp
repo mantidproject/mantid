@@ -156,14 +156,12 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
 
   auto props = algHistory.getProperties();
 
-
   try {
     // create a fresh version of the algorithm - unmanaged
     auto algFresh = AlgorithmManager::Instance().createUnmanaged(
         name, algHistory.version());
     algFresh->initialize();
 
-  
     const auto &propsFresh = algFresh->getProperties();
     // just get the names out of the fresh alg properties
     std::set<std::string> freshPropNames;
@@ -181,13 +179,10 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
       }
     }
 
+  } catch (std::exception &) {
+    g_log.error() << "Could not create a fresh version of " << name
+                  << " version " << algHistory.version() << "\n";
   }
-  catch (std::exception &) {
-	  g_log.error() << "Could not create a fresh version of " << name
-		  << " version " << algHistory.version() << "\n";
-  }
-
-
 
   for (auto &propIter : props) {
     prop = buildPropertyString(*propIter);
@@ -202,12 +197,12 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
   } else if (m_versionSpecificity == "old") {
     //...or only specify algorithm versions when they're not the newest version
     const auto &algName = algHistory.name();
-	auto &algFactory = API::AlgorithmFactory::Instance();
-	int latestVersion = 0;
+    auto &algFactory = API::AlgorithmFactory::Instance();
+    int latestVersion = 0;
 
-	if (algFactory.exists(algName)) { // Check the alg still exists in Mantid
-		latestVersion = AlgorithmFactory::Instance().highestVersion(algName);
-	}
+    if (algFactory.exists(algName)) { // Check the alg still exists in Mantid
+      latestVersion = AlgorithmFactory::Instance().highestVersion(algName);
+    }
     // If a newer version of this algorithm exists, then this must be an old
     // version.
     if (latestVersion > algHistory.version()) {
@@ -232,8 +227,8 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
  * @param propHistory :: reference to a property history object
  * @returns std::string for this property
  */
-const std::string
-ScriptBuilder::buildPropertyString(const Mantid::Kernel::PropertyHistory &propHistory) {
+const std::string ScriptBuilder::buildPropertyString(
+    const Mantid::Kernel::PropertyHistory &propHistory) {
   using Mantid::Kernel::Direction;
 
   // Create a vector of all non workspace property type names
@@ -246,8 +241,8 @@ ScriptBuilder::buildPropertyString(const Mantid::Kernel::PropertyHistory &propHi
     if (find(nonWorkspaceTypes.begin(), nonWorkspaceTypes.end(),
              propHistory.type()) != nonWorkspaceTypes.end() &&
         propHistory.direction() == Direction::Output) {
-      g_log.debug() << "Ignoring property " << propHistory.name()
-                    << " of type " << propHistory.type() << '\n';
+      g_log.debug() << "Ignoring property " << propHistory.name() << " of type "
+                    << propHistory.type() << '\n';
       // Handle numerical properties
     } else if (propHistory.type() == "number") {
       prop = propHistory.name() + "=" + propHistory.value();
