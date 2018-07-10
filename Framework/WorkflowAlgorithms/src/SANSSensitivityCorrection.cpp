@@ -417,7 +417,7 @@ void SANSSensitivityCorrection::process(
     normAlg->setPropertyValue("OutputWorkspace", "__unused");
     normAlg->setChild(true);
     normAlg->execute();
-    rawFloodWS =normAlg->getProperty("OutputWorkspace");
+    rawFloodWS = normAlg->getProperty("OutputWorkspace");
   }
 
   // Look for solid angle correction algorithm
