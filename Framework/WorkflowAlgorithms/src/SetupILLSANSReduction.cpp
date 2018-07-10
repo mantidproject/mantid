@@ -282,9 +282,8 @@ void SetupILLSANSReduction::init() {
       "The name of the input data file to load as background "
       "transmission dark current.");
   setPropertySettings("BckTransmissionDarkCurrentFile",
-                      make_unique<VisibleWhenProperty>("BckTransmissionMethod",
-                                                       IS_EQUAL_TO,
-                                                       "DirectBeam"));
+                      make_unique<VisibleWhenProperty>(
+                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
   declareProperty(
       "BckThetaDependentTransmission", true,
       "If true, a theta-dependent transmission correction will be applied.");
@@ -484,94 +483,104 @@ void SetupILLSANSReduction::init() {
                   "Transmission determination method");
 
   // - Transmission value entered by hand
-  declareProperty("SensitivityBckTransmissionValue", EMPTY_DBL(), positiveDouble,
-                  "Transmission value.");
-  setPropertySettings("SensitivityBckTransmissionValue",
-                      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
-                                                       IS_EQUAL_TO, "Value"));
+  declareProperty("SensitivityBckTransmissionValue", EMPTY_DBL(),
+                  positiveDouble, "Transmission value.");
+  setPropertySettings(
+      "SensitivityBckTransmissionValue",
+      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                       IS_EQUAL_TO, "Value"));
 
-  declareProperty("SensitivityBckTransmissionError", EMPTY_DBL(), positiveDouble,
-                  "Transmission error.");
-  setPropertySettings("SensitivityBckTransmissionError",
-                      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
-                                                       IS_EQUAL_TO, "Value"));
+  declareProperty("SensitivityBckTransmissionError", EMPTY_DBL(),
+                  positiveDouble, "Transmission error.");
+  setPropertySettings(
+      "SensitivityBckTransmissionError",
+      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                       IS_EQUAL_TO, "Value"));
 
   // - Direct beam method transmission calculation
   declareProperty(
       "SensitivityBckTransmissionBeamRadius", 3.0,
       "Radius of the beam area used to compute the transmission [pixels]");
-  setPropertySettings("SensitivityBckTransmissionBeamRadius",
-                      make_unique<VisibleWhenProperty>(
-                          "SensitivityBckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty(
-      make_unique<API::FileProperty>("SensitivityBckTransmissionSampleDataFile", "",
-                                     API::FileProperty::OptionalLoad, ".nxs"),
-      "Sample data file for transmission calculation");
-  setPropertySettings("SensitivityBckTransmissionSampleDataFile",
-                      make_unique<VisibleWhenProperty>(
-                          "SensitivityBckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty(
-      make_unique<API::FileProperty>("SensitivityBckTransmissionEmptyDataFile", "",
-                                     API::FileProperty::OptionalLoad, ".nxs"),
-      "Empty data file for transmission calculation");
-  setPropertySettings("SensitivityBckTransmissionEmptyDataFile",
-                      make_unique<VisibleWhenProperty>(
-                          "SensitivityBckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  setPropertySettings(
+      "SensitivityBckTransmissionBeamRadius",
+      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(make_unique<API::FileProperty>(
+                      "SensitivityBckTransmissionSampleDataFile", "",
+                      API::FileProperty::OptionalLoad, ".nxs"),
+                  "Sample data file for transmission calculation");
+  setPropertySettings(
+      "SensitivityBckTransmissionSampleDataFile",
+      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(make_unique<API::FileProperty>(
+                      "SensitivityBckTransmissionEmptyDataFile", "",
+                      API::FileProperty::OptionalLoad, ".nxs"),
+                  "Empty data file for transmission calculation");
+  setPropertySettings(
+      "SensitivityBckTransmissionEmptyDataFile",
+      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
 
   // - transmission beam center
   declareProperty("SensitivityBckTransmissionBeamCenterMethod", "None",
                   boost::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the transmission data beam center");
-  setPropertySettings("SensitivityBckTransmissionBeamCenterMethod",
-                      make_unique<VisibleWhenProperty>(
-                          "SensitivityBckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  setPropertySettings(
+      "SensitivityBckTransmissionBeamCenterMethod",
+      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
   //    Option 1: Set beam center by hand
   declareProperty("SensitivityBckTransmissionBeamCenterX", EMPTY_DBL(),
                   "Transmission beam center location in X [pixels]");
-  setPropertySettings("SensitivityBckTransmissionBeamCenterX",
-                      make_unique<VisibleWhenProperty>(
-                          "SensitivityBckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  setPropertySettings(
+      "SensitivityBckTransmissionBeamCenterX",
+      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
   declareProperty("SensitivityBckTransmissionBeamCenterY", EMPTY_DBL(),
                   "Transmission beam center location in Y [pixels]");
   //    Option 2: Find it (expose properties from FindCenterOfMass)
-  setPropertySettings("SensitivityBckTransmissionBeamCenterY",
-                      make_unique<VisibleWhenProperty>(
-                          "SensitivityBckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty(
-      make_unique<API::FileProperty>("SensitivityBckTransmissionBeamCenterFile", "",
-                                     API::FileProperty::OptionalLoad, ".nxs"),
-      "The name of the input data file to load");
-  setPropertySettings("SensitivityBckTransmissionBeamCenterFile",
-                      make_unique<VisibleWhenProperty>(
-                          "SensitivityBckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  setPropertySettings(
+      "SensitivityBckTransmissionBeamCenterY",
+      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(make_unique<API::FileProperty>(
+                      "SensitivityBckTransmissionBeamCenterFile", "",
+                      API::FileProperty::OptionalLoad, ".nxs"),
+                  "The name of the input data file to load");
+  setPropertySettings(
+      "SensitivityBckTransmissionBeamCenterFile",
+      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
 
-  declareProperty(
-      make_unique<API::FileProperty>("SensitivityBckTransmissionDarkCurrentFile", "",
-                                     API::FileProperty::OptionalLoad, ".nxs"),
-      "The name of the input data file to load as background "
-      "transmission dark current.");
-  setPropertySettings("SensitivityBckTransmissionDarkCurrentFile",
-                      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
-                                                       IS_EQUAL_TO,
-                                                       "DirectBeam"));
-  setPropertySettings("SensitivityBckTransmissionDarkCurrentFile",
-                      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
-                                                       IS_EQUAL_TO,
-                                                       "DirectBeam"));
+  declareProperty(make_unique<API::FileProperty>(
+                      "SensitivityBckTransmissionDarkCurrentFile", "",
+                      API::FileProperty::OptionalLoad, ".nxs"),
+                  "The name of the input data file to load as background "
+                  "transmission dark current.");
+  setPropertySettings(
+      "SensitivityBckTransmissionDarkCurrentFile",
+      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
+  setPropertySettings(
+      "SensitivityBckTransmissionDarkCurrentFile",
+      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
   declareProperty(
       "SensitivityBckTransmissionUseSampleDC", true,
       "If true, the sample dark current will be used IF a dark current file is"
       "not set.");
-  setPropertySettings("SensitivityBckTransmissionUseSampleDC",
-                      make_unique<VisibleWhenProperty>(
-                          "SensitivityBckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  setPropertySettings(
+      "SensitivityBckTransmissionUseSampleDC",
+      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                       IS_EQUAL_TO, "DirectBeam"));
   declareProperty(
       "SensitivityBckThetaDependentTransmission", true,
       "If true, a theta-dependent transmission correction will be applied.");
-  setPropertySettings("SensitivityBckThetaDependentTransmission",
-                      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
-                                                       IS_NOT_EQUAL_TO,
-                                                       "None"));
+  setPropertySettings(
+      "SensitivityBckThetaDependentTransmission",
+      make_unique<VisibleWhenProperty>("SensitivityBckTransmissionMethod",
+                                       IS_NOT_EQUAL_TO, "None"));
   // -- Define group --
   setPropertyGroup("SensitivityFile", eff_grp);
   setPropertyGroup("SensitivityNormalisation", eff_grp);

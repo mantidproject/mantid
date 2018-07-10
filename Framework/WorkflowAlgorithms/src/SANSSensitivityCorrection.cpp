@@ -185,12 +185,12 @@ void SANSSensitivityCorrection::init() {
                           "TransmissionMethod", IS_NOT_EQUAL_TO, "None"));
 
   setPropertySettings("FloodTransmissionValue",
-                      make_unique<VisibleWhenProperty>(
-                          "TransmissionMethod", IS_EQUAL_TO, "Value"));
+                      make_unique<VisibleWhenProperty>("TransmissionMethod",
+                                                       IS_EQUAL_TO, "Value"));
 
   setPropertySettings("FloodTransmissionError",
-                      make_unique<VisibleWhenProperty>(
-                          "TransmissionMethod", IS_EQUAL_TO, "Value"));
+                      make_unique<VisibleWhenProperty>("TransmissionMethod",
+                                                       IS_EQUAL_TO, "Value"));
 
   // -- Define group --
   setPropertyGroup("TransmissionMethod", trans_grp);
@@ -280,13 +280,11 @@ void SANSSensitivityCorrection::init() {
       "The name of the input data file to load as background "
       "transmission dark current.");
   setPropertySettings("BckTransmissionDarkCurrentFile",
-                      make_unique<VisibleWhenProperty>("BckTransmissionMethod",
-                                                       IS_EQUAL_TO,
-                                                       "DirectBeam"));
+                      make_unique<VisibleWhenProperty>(
+                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
   setPropertySettings("BckTransmissionDarkCurrentFile",
-                      make_unique<VisibleWhenProperty>("BckTransmissionMethod",
-                                                       IS_EQUAL_TO,
-                                                       "DirectBeam"));
+                      make_unique<VisibleWhenProperty>(
+                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
   declareProperty(
       "BckTransmissionUseSampleDC", true,
       "If true, the sample dark current will be used IF a dark current file is"
@@ -298,9 +296,8 @@ void SANSSensitivityCorrection::init() {
       "BckThetaDependentTransmission", true,
       "If true, a theta-dependent transmission correction will be applied.");
   setPropertySettings("BckThetaDependentTransmission",
-                      make_unique<VisibleWhenProperty>("BckTransmissionMethod",
-                                                       IS_NOT_EQUAL_TO,
-                                                       "None"));
+                      make_unique<VisibleWhenProperty>(
+                          "BckTransmissionMethod", IS_NOT_EQUAL_TO, "None"));
   setPropertyGroup("BackgroundFiles", bck_grp);
   setPropertyGroup("BckTransmissionMethod", bck_grp);
   setPropertyGroup("BckTransmissionValue", bck_grp);
@@ -757,7 +754,7 @@ void SANSSensitivityCorrection::exec() {
               "Sensitivity correction computed\n" + m_output_message);
 
   progress.report("Performed sensitivity correction");
-  }
+}
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
