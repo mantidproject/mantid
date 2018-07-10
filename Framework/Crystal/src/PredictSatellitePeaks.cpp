@@ -188,6 +188,7 @@ void PredictSatellitePeaks::exec() {
   Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
   DblMatrix orientedUB = Gon * UB;
   HKLFilterWavelength lambdaFilter(orientedUB, lambdaMin, lambdaMax);
+  int seqNum = 0;
   size_t next = 0;
   while (!done) {
     for (int order = -static_cast<int>(offsets1[3]); order <= static_cast<int>(offsets1[3]); order++) {
@@ -231,6 +232,8 @@ void PredictSatellitePeaks::exec() {
                 continue;
 
               peak->setHKL(hkl1);
+              peak->setPeakNumber(seqNum);
+              seqNum++;
               peak->setRunNumber(RunNumber);
               peak->setModStru(V3D(order,0,0));
               OutPeaks->addPeak(*peak);
@@ -280,6 +283,8 @@ void PredictSatellitePeaks::exec() {
                 continue;
 
               peak->setHKL(hkl1);
+              peak->setPeakNumber(seqNum);
+              seqNum++;
               peak->setRunNumber(RunNumber);
               peak->setModStru(V3D(0,order,0));
               OutPeaks->addPeak(*peak);
@@ -329,6 +334,8 @@ void PredictSatellitePeaks::exec() {
                 continue;
 
               peak->setHKL(hkl1);
+              peak->setPeakNumber(seqNum);
+              seqNum++;
               peak->setRunNumber(RunNumber);
               peak->setModStru(V3D(0,0,order));
               OutPeaks->addPeak(*peak);
