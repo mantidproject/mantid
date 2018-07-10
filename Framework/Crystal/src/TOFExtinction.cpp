@@ -36,9 +36,6 @@ const double MAX_WAVELENGTH = 50.0; // max in lamda_weight table
 
 const double STEPS_PER_ANGSTROM = 100; // resolution of lamda table
 
-const int NUM_WAVELENGTHS =
-    static_cast<int>(std::ceil(MAX_WAVELENGTH * STEPS_PER_ANGSTROM));
-
 const double radtodeg_half = 180.0 / M_PI / 2.;
 }
 
