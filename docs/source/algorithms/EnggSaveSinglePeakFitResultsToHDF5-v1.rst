@@ -88,3 +88,7 @@ Output:
    Peaks dataset has 3 rows, for our 3 peaks
    First peak is at D spacing 1.0
    Third peak X0 = 0.5
+
+.. categories::
+
+.. sourcelink::
