@@ -310,22 +310,12 @@ class TOFTOFSetupWidget(BaseWidget):
         grid.addWidget(self.chkSofTWNexus,    2, 1)
         grid.addWidget(self.chkSofTWAscii,    2, 2)
         grid.addWidget(self.chkSofTWNxspe,    2, 3)
-        #grid.addWidget(QLabel('Format'),      2, 0)
-        #grid.addWidget(self.chkNxspe,         3, 0)
-        #grid.addWidget(self.chkNexus,         3, 1)
-        #grid.addWidget(self.chkAscii,         3, 2)
-        #grid.setColumnStretch(3, 1)
-
-        # disable save Ascii, it is not available for the moment
-        #self.chkAscii.setEnabled(False)
 
         self.gbSave.setLayout(grid)
 
         # handle signals
         self.btnDataDir.clicked.connect(self._onDataDir)
         self.btnSaveDir.clicked.connect(self._onSaveDir)
-        #self.binEon.clicked.connect(self._onBinEon)
-        #self.binQon.clicked.connect(self._onBinQon)
         self.runDataModel.selectCell.connect(self._onSelectedCell)
 
     def _onDataDir(self):
@@ -337,20 +327,6 @@ class TOFTOFSetupWidget(BaseWidget):
         dirname = self.dir_browse_dialog(self.saveDir.text())
         if dirname:
             self.saveDir.setText(dirname)
-
-    #def _onBinEon(self, onVal):
-    #    pass
-    #    #if not onVal:
-    #    #    self.chkNxspe.setChecked(False)
-    #    #    self.chkReplaceNaNs.setChecked(False)
-    #    #    self.binQon.setChecked(False)
-    #    #for widget in (self.binEstart, self.binEstep, self.binEend, self.chkCreateDiff, self.chkNxspe, self.binQon,
-    #    #               self.binQstart, self.binQstep, self.binQend, self.chkReplaceNaNs, self.chkSofQW):
-    #    #    widget.setEnabled(onVal)
-
-    #def _onBinQon(self, onVal):
-    #    for widget in (self.binQstart, self.binQstep, self.binQend, self.chkReplaceNaNs, self.chkSofQW):
-    #        widget.setEnabled(onVal)
 
     def _onSelectedCell(self, index):
         self.dataRunsView.setCurrentIndex(index)
@@ -404,11 +380,6 @@ class TOFTOFSetupWidget(BaseWidget):
         elem.saveSofTWAscii = is_checked(self.chkSofTWAscii)
         elem.saveSofQWNexus = is_checked(self.chkSofQWNexus)
         elem.saveSofQWAscii = is_checked(self.chkSofQWAscii)
-        #elem.saveSofQW     = self.chkSofQW.isChecked()
-        #elem.saveSofTW     = self.chkSofTW.isChecked()
-        #elem.saveNXSPE     = self.chkNxspe.isChecked()
-        #elem.saveNexus     = self.chkNexus.isChecked()
-        #elem.saveAscii     = self.chkAscii.isChecked()
 
         elem.normalise     = elem.NORM_MONITOR    if self.rbtNormaliseMonitor.isChecked() else \
             elem.NORM_TIME       if self.rbtNormaliseTime.isChecked()    else \
@@ -438,14 +409,12 @@ class TOFTOFSetupWidget(BaseWidget):
         self.runDataModel.reset()
 
         self.binEon.setChecked(elem.binEon)
-        #self._onBinEon(elem.binEon)
 
         self.binEstart.setValue(elem.binEstart)
         self.binEstep.setValue(elem.binEstep)
         self.binEend.setValue(elem.binEend)
 
         self.binQon.setChecked(elem.binQon)
-        #self._onBinQon(elem.binQon)
 
         self.binQstart.setValue(elem.binQstart)
         self.binQstep.setValue(elem.binQstep)
@@ -468,11 +437,6 @@ class TOFTOFSetupWidget(BaseWidget):
             any((elem.saveSofTWNxspe, elem.saveSofTWNexus,
                  elem.saveSofTWAscii, elem.saveSofQWNexus,
                  elem.saveSofQWAscii)))
-        #self.chkSofQW.setChecked(elem.saveSofQW)
-        #self.chkSofTW.setChecked(elem.saveSofTW)
-        #self.chkNxspe.setChecked(elem.saveNXSPE)
-        #self.chkNexus.setChecked(elem.saveNexus)
-        #self.chkAscii.setChecked(elem.saveAscii)
 
         if elem.normalise == elem.NORM_MONITOR:
             self.rbtNormaliseMonitor.setChecked(True)
