@@ -32,6 +32,7 @@
               </xs:element>
               <xs:element name="catalog">
                 <xs:complexType>
+                  <xs:sequence>
                   <xs:element name="soapendpoint">
                     <xs:complexType>
                       <xs:attribute name="url" type="xs:string"/>
@@ -44,28 +45,31 @@
                   </xs:element>
                   <xs:element name="filelocation">
                     <xs:complexType>
-                      <xs:element name="prefix">
-                        <xs:complexType>
-                          <xs:attribute name="regex" type="xs:string"/>
-                        </xs:complexType>
-                      </xs:element>
-                      <xs:element name="windows">
-                        <xs:complexType>
-                          <xs:attribute name="replacement" type="xs:string"/>
-                        </xs:complexType>
-                      </xs:element>
-                      <xs:element name="linux">
-                        <xs:complexType>
-                          <xs:attribute name="replacement" type="xs:string"/>
-                        </xs:complexType>
-                      </xs:element>
-                      <xs:element name="mac">
-                        <xs:complexType>
-                          <xs:attribute name="replacement" type="xs:string"/>
-                        </xs:complexType>
-                      </xs:element>
+                      <xs:sequence>
+                        <xs:element name="prefix">
+                          <xs:complexType>
+                            <xs:attribute name="regex" type="xs:string"/>
+                          </xs:complexType>
+                        </xs:element>
+                        <xs:element name="windows">
+                          <xs:complexType>
+                            <xs:attribute name="replacement" type="xs:string"/>
+                          </xs:complexType>
+                        </xs:element>
+                        <xs:element name="linux">
+                          <xs:complexType>
+                            <xs:attribute name="replacement" type="xs:string"/>
+                          </xs:complexType>
+                        </xs:element>
+                        <xs:element name="mac">
+                          <xs:complexType>
+                            <xs:attribute name="replacement" type="xs:string"/>
+                          </xs:complexType>
+                        </xs:element>
+                      </xs:sequence>
                     </xs:complexType>
                   </xs:element>
+                  </xs:sequence>
                   <xs:attribute name="name" type="xs:string"/>
                 </xs:complexType>
               </xs:element>
@@ -83,14 +87,16 @@
                     <xs:element name="technique" maxOccurs="unbounded" type="xs:string"/>
                     <xs:element name="livedata">
                       <xs:complexType>
+                        <xs:choice>
+                          <xs:element name="connection" minOccurs="1" maxOccurs="unbounded">
+                            <xs:complexType>
+                              <xs:attribute name="name" type="xs:string" use="required"/>
+                              <xs:attribute name="address" type="xs:string" use="required"/>
+                              <xs:attribute name="listener" type="xs:string" use="required"/>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:choice>
                         <xs:attribute name="default" type="xs:string" use="optional"/>
-                        <xs:element name="connection" minOccurs="1" maxOccurs="unbounded">
-                          <xs:complexType>
-                            <xs:attribute name="name" type="xs:string" use="required"/>
-                            <xs:attribute name="address" type="xs:string" use="required"/>
-                            <xs:attribute name="listener" type="xs:string" use="required"/>
-                          </xs:complexType>
-                        </xs:element>
                       </xs:complexType>
                     </xs:element>
                   </xs:choice>
