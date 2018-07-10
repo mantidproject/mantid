@@ -80,6 +80,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.closing.connect(self._widgetclosed)
 
         self.window.setWindowTitle("Figure %d" % num)
+        self.canvas.figure.set_label("Figure %d" % num)
 
         # Give the keyboard focus to the figure instead of the
         # manager; StrongFocus accepts both tab and click to focus and
@@ -211,12 +212,15 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         return text_type(self.window.windowTitle())
 
     def set_window_title(self, title):
-        old_title = self.get_window_title()
         self.window.setWindowTitle(title)
         # We need to add a call to the figure manager here to call
         # notify methods when a figure is renamed, to update our
         # plot list.
-        Gcf.figure_title_changed(old_title, title)
+        Gcf.figure_title_changed(self.num)
+
+        # For the workbench we also keep the label in sync, this is
+        # to allow getting a handle as plt.figure('Figure Name')
+        self.canvas.figure.set_label(title)
 
     # ------------------------ Interaction events --------------------
     def on_button_press(self, event):

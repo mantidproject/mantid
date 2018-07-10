@@ -52,6 +52,9 @@ class PlotSelectorPresenter(object):
         # Make sure the plot list is up to date
         self.update_plot_list()
 
+    def get_plot_name_from_number(self, plot_number):
+        return self.model.get_plot_name_from_number(plot_number)
+
     # ------------------------ Plot Updates ------------------------
 
     def update_plot_list(self):
@@ -59,44 +62,38 @@ class PlotSelectorPresenter(object):
         Updates the plot list in the model and the view. Filter text
         is applied to the updated selection if required.
         """
-        self.model.update_plot_list()
-        self.view.set_plot_list(self.model.plot_list)
+        plot_list = self.model.get_plot_list()
+        self.view.set_plot_list(plot_list)
 
-    def append_to_plot_list(self, plot_name):
+    def append_to_plot_list(self, plot_number):
         """
         Appends the plot name to the end of the plot list
-        :param plot_name: The name of the plot
+        :param plot_number: The unique number in GlobalFigureManager
         """
         try:
-            self.model.append_to_plot_list(plot_name)
-            is_shown = self._is_shown_by_filter(self.view.get_filter_text(), plot_name)
-            self.view.append_to_plot_list(plot_name, is_shown)
+            is_shown = self._is_shown_by_filter(self.view.get_filter_text(), plot_number)
+            self.view.append_to_plot_list(plot_number, is_shown)
         except ValueError as e:
             print(e)
 
-    def remove_from_plot_list(self, plot_name):
+    def remove_from_plot_list(self, plot_number):
         """
         Removes the plot name from the plot list
-        :param plot_name: The name of the plot
+        :param plot_number: The unique number in GlobalFigureManager
         """
         try:
-            self.model.remove_from_plot_list(plot_name)
-            self.view.remove_from_plot_list(plot_name)
+            self.view.remove_from_plot_list(plot_number)
         except ValueError as e:
             print(e)
 
-    def rename_in_plot_list(self, new_name, old_name):
+    def rename_in_plot_list(self, plot_number, new_name):
         """
         Replaces a name in the plot list
-        :param new_name: The new plot name
-        :param old_name: The name of the plot to be replaced
+        :param plot_number: The unique number in GlobalFigureManager
+        :param new_name: The new name for the plot
         """
-        if new_name == old_name:
-            return
-
         try:
-            self.model.rename_in_plot_list(new_name, old_name)
-            self.view.rename_in_plot_list(new_name, old_name)
+            self.view.rename_in_plot_list(plot_number, new_name)
         except ValueError as e:
             print(e)
 
@@ -119,13 +116,21 @@ class PlotSelectorPresenter(object):
         if not filter_text:
             self.view.unhide_all_plots()
         else:
-            plot_list = []
-            for plot_name in self.model.plot_list:
-                if self._is_shown_by_filter(filter_text, plot_name):
-                    plot_list.append(plot_name)
-            self.view.filter_plot_list(plot_list)
+            pass
+            # TODO: add filtering
+            # plot_list = []
+            # for plot_name in self.model.plot_list:
+            #     if self._is_shown_by_filter(filter_text, plot_name):
+            #         plot_list.append(plot_name)
+            # self.view.filter_plot_list(plot_list)
 
-    def _is_shown_by_filter(self, filter_text, plot_name):
+    def _is_shown_by_filter(self, filter_text, plot_number):
+        """
+        :param filter_text: The user set filter text
+        :param plot_number: The unique number in GlobalFigureManager
+        :return: True if shown, or False if filtered out
+        """
+        plot_name = self.get_plot_name_from_number(plot_number)
         return filter_text.lower() in plot_name.lower()
 
     # ------------------------ Plot Showing ------------------------
@@ -135,45 +140,42 @@ class PlotSelectorPresenter(object):
         When a list item is double clicked the view calls this method
         to bring the selected plot to the front
         """
-        plot_name = self.view.get_currently_selected_plot_name()
-        self.make_plot_active(plot_name)
+        plot_number = self.view.get_currently_selected_plot_number()
+        self.make_plot_active(plot_number)
 
     def show_multiple_selected(self):
         """
         Shows multiple selected plots, e.g. from pressing the 'Show'
         button with multiple selected plots
         """
-        selected_plots = self.view.get_all_selected_plot_names()
-        for plot_name in selected_plots:
-            self.make_plot_active(plot_name)
+        selected_plots = self.view.get_all_selected_plot_numbers()
+        for plot_number in selected_plots:
+            self.make_plot_active(plot_number)
 
-    def make_plot_active(self, plot_name):
+    def make_plot_active(self, plot_number):
         """
         Make the plot with the given name active - bring it to the
         front and make it the choice for overplotting
-        :param plot_name: The name of the plot
+        :param plot_number: The unique number in GlobalFigureManager
         """
         try:
-            self.model.show_plot(plot_name)
+            self.model.show_plot(plot_number)
         except ValueError as e:
             print(e)
 
     # ------------------------ Plot Renaming ------------------------
 
-    def rename_figure(self, new_name, old_name):
+    def rename_figure(self, plot_number, new_name):
         """
         Replaces a name in the plot list
+        :param plot_number: The unique number in GlobalFigureManager
         :param new_name: The new plot name
-        :param old_name: The name of the plot to be replaced
-        """
-        if new_name == old_name:
-            return
-
+         """
         try:
-            self.model.rename_figure(new_name, old_name)
+            self.model.rename_figure(plot_number, new_name)
         except ValueError as e:
             # We need to undo the rename in the view
-            self.view.rename_in_plot_list(old_name, old_name)
+            self.view.rename_in_plot_list(plot_number, new_name)
             print(e)
 
     # ------------------------ Plot Closing -------------------------
@@ -183,25 +185,25 @@ class PlotSelectorPresenter(object):
         This is called by the view when closing plots is requested
         (e.g. pressing close or delete).
         """
-        selected_plots = self.view.get_all_selected_plot_names()
+        selected_plots = self.view.get_all_selected_plot_numbers()
         self._close_plots(selected_plots)
 
-    def close_single_plot(self, plot_name):
+    def close_single_plot(self, plot_number):
         """
         This is used to close plots when a close action is called
         that does not refer to the selected plot(s)
-        :param plot_name: Name of the plot to close
+        :param plot_number: The unique number in GlobalFigureManager
         """
-        self._close_plots([plot_name])
+        self._close_plots([plot_number])
 
-    def _close_plots(self, list_of_plots):
+    def _close_plots(self, list_of_plot_numbers):
         """
         Accepts a list of plot names to close
         :param list_of_plots: A list of strings containing plot names
         """
-        for plot_name in list_of_plots:
+        for plot_number in list_of_plot_numbers:
             try:
-                self.model.close_plot(plot_name)
+                self.model.close_plot(plot_number)
             except ValueError as e:
                 print(e)
 
@@ -245,30 +247,33 @@ class PlotSelectorPresenter(object):
         """
         sort_keys = {}
 
-        if self.view.sort_type == SortType.Name:
-            sort_keys = dict(zip(self.model.plot_list, self.model.plot_list))
-        elif self.view.sort_type == SortType.LastShown:
-            sort_keys = self.model.last_active_order()
-            for plot_name in self.model.plot_list:
-                if plot_name not in sort_keys:
-                    # Append an '_' to the plot name - it has never been
-                    # shown so goes after the numbers
-                    sort_keys[plot_name] = '_' + plot_name
+        # if self.view.sort_type == SortType.Name:
+        #     sort_keys = dict(zip(self.model.plot_list, self.model.plot_list))
+        # elif self.view.sort_type == SortType.LastShown:
+        #     sort_keys = self.model.last_active_order()
+        #     for plot_name in self.model.plot_list:
+        #         if plot_name not in sort_keys:
+        #             # Append an '_' to the plot name - it has never been
+        #             # shown so goes after the numbers
+        #             sort_keys[plot_name] = '_' + plot_name
+        #
+        # try:
+        #     self.view.set_sort_keys(sort_keys)
+        # except KeyError as e:
+        #     print('Error, plot list out of sync, reloading. Error was:')
+        #     print(e)
+        #     self.update_plot_list()
 
-        try:
-            self.view.set_sort_keys(sort_keys)
-        except KeyError as e:
-            print('Error, plot list out of sync, reloading. Error was:')
-            print(e)
-            self.update_plot_list()
+        # TODO: get this working again
 
-    def get_initial_sort_key(self, plot_name):
+    def get_initial_sort_key(self, plot_number):
         """
         Gets the initial sort key for a plot just added, in this case
         it is assumed to not have been shown
-        :param plot_name: The name of the plot to generate the sort
-                          key for
+        :param plot_number: The unique number in GlobalFigureManager
         """
+        plot_name = self.model.get_plot_name_from_number(plot_number)
+
         if self.view.sort_type == SortType.LastShown:
             return '_' + plot_name
         return plot_name
@@ -279,8 +284,7 @@ class PlotSelectorPresenter(object):
         it is assumed to not have been shown
         :param new_name: The name of the plot to generate the sort
                          key for
-        :param old_key: The old sort key - if this is for sorting by
-                        last shown this is retained as is
+        :param old_key: The previous sort key
         """
         if self.view.sort_type == SortType.LastShown:
             if isinstance(old_key, int):
@@ -299,18 +303,20 @@ class PlotSelectorPresenter(object):
         :param extension: The file type extension (must be supported
                           by matplotlib's savefig)
         """
-        for plot_name in self.view.get_all_selected_plot_names():
+        for plot_name in self.view.get_all_selected_plot_numbers():
             self.export_plot(plot_name, dir_name, extension)
 
-    def export_plot(self, plot_name, dir_name, extension):
+    def export_plot(self, plot_number, dir_name, extension):
         """
         Given a directory name, plot name and extension construct
         the absolute path name and call the model to save the figure
-        :param plot_name: The name of the plot
+        :param plot_number: The unique number in GlobalFigureManager
         :param dir_name: The directory to export to
         :param extension: The file type extension (must be supported
                           by matplotlib's savefig)
         """
+        plot_name = self.model.get_plot_name_from_number(plot_number)
+
         if dir_name:
             filename = os.path.join(dir_name, plot_name + extension)
             try:

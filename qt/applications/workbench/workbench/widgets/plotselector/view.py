@@ -28,7 +28,13 @@ from mantidqt.utils.flowlayout import FlowLayout
 from mantidqt.py3compat import Enum
 from workbench.plotting.qappthreadcall import QAppThreadCall
 
-export_types = [
+DEBUG_MODE = False
+
+PLOT_NUM_COL = 0
+PLOT_NAME_COL = 1
+LAST_SHOWN_COL = 2
+
+EXPORT_TYPES = [
     ('Export to EPS', '.eps'),
     ('Export to PDF', '.pdf'),
     ('Export to PNG', '.png'),
@@ -46,7 +52,7 @@ class PlotSelectorView(QWidget):
     The view to the plot selector, a PyQt widget.
     """
 
-    DEBUG_MODE = False
+
 
     # A signal to capture when keys are pressed
     deleteKeyPressed = Signal(int)
@@ -122,17 +128,17 @@ class PlotSelectorView(QWidget):
         self.close_button.clicked.connect(self.presenter.close_action_called)
         self.deleteKeyPressed.connect(self.presenter.close_action_called)
 
-        if self.DEBUG_MODE:
+        if DEBUG_MODE:
             self.table_widget.clicked.connect(self.show_debug_info)
 
     def show_debug_info(self):
         """
-        Special feature to make debugging easier, set self.DEBUG_MODE
-        to true to get information printed when clicking on plots
+        Special feature to make debugging easier, set DEBUG_MODE to
+        true to get information printed when clicking on plots
         """
         item = self.table_widget.currentItem()
         widget = self.table_widget.itemWidget(item)
-        print("Plot name: {}".format(widget.plot_name))
+        print("Plot number: {}".format(widget.plot_number))
         print("Plot text: {}".format(widget.line_edit.text()))
         print("Sort key: {}".format(item.data(Qt.InitialSortOrderRole)))
 
@@ -158,23 +164,24 @@ class PlotSelectorView(QWidget):
         """
         table_widget = QTableWidget(0, 3, self)
         table_widget.setHorizontalHeaderLabels(['No.', 'Plot Name', 'Last Shown Order (hidden)'])
-        table_widget.setColumnHidden(2, True)
+        table_widget.setColumnHidden(LAST_SHOWN_COL, True)
         table_widget.verticalHeader().setVisible(False)
 
         # Fix the size of 'No.' and let 'Plot Name' fill the space
         top_header = table_widget.horizontalHeader()
-        top_header.resizeSection(0, top_header.sectionSizeHint(0))
+        top_header.resizeSection(PLOT_NUM_COL, top_header.sectionSizeHint(PLOT_NUM_COL))
         top_header.setStretchLastSection(True)
 
-        table_widget.horizontalHeaderItem(0).setToolTip('This is the matplotlib figure number.\n\nFrom a script use '
+        table_widget.horizontalHeaderItem(PLOT_NUM_COL).setToolTip('This is the matplotlib figure number.\n\nFrom a script use '
                                                         'plt.figure(N), where N is this figure number, to get a handle'
                                                         ' to the plot.')
 
-        table_widget.horizontalHeaderItem(1).setToolTip('The plot name, also used  as the file name when saving '
+        table_widget.horizontalHeaderItem(PLOT_NAME_COL).setToolTip('The plot name, also used  as the file name when saving '
                                                         'multiple plots.')
 
         table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         table_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        table_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         table_widget.setSortingEnabled(True)
 
         return table_widget
@@ -190,7 +197,7 @@ class PlotSelectorView(QWidget):
         context_menu.addAction("Rename", self.rename_selected_in_context_menu)
 
         export_menu = context_menu.addMenu("Export")
-        for text, extension in export_types:
+        for text, extension in EXPORT_TYPES:
             export_menu.addAction(text, lambda ext=extension: self.export_plots(ext))
 
         context_menu.addAction("Close", self.presenter.close_action_called)
@@ -206,16 +213,18 @@ class PlotSelectorView(QWidget):
 
     # ------------------------ Plot Updates ------------------------
 
-    def append_to_plot_list(self, plot_name, is_shown_by_filter):
+    def append_to_plot_list(self, plot_number, is_shown_by_filter):
         """
         Appends to the plot list, if sorting is enabled this should
         automatically go to the correct place, and the flag can be
         set to determine whether it should initially be hidden or not
-        :param plot_name: the name of the plot
+        :param plot_number: The unique number in GlobalFigureManager
         :param is_shown_by_filter: If true then show this plot name
                                    in the list, else hide it
         """
-        real_item = PlotNameWidget(self.presenter, plot_name, self, self.is_run_as_unit_test)
+        plot_name = self.presenter.get_plot_name_from_number(plot_number)
+
+        real_item = PlotNameWidget(self.presenter, plot_number, self, self.is_run_as_unit_test)
         widget_item = HumanReadableSortItem()
 
         sort_key = self.presenter.get_initial_sort_key(plot_name)
@@ -229,8 +238,13 @@ class PlotSelectorView(QWidget):
 
             row_number = self.table_widget.rowCount()
             self.table_widget.insertRow(row_number)
-            self.table_widget.setItem(row_number, 1, widget_item)
-            self.table_widget.setCellWidget(row_number, 1, real_item)
+
+            item = HumanReadableSortItem(str(plot_number))
+            item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            self.table_widget.setItem(row_number, PLOT_NUM_COL, item)
+
+            self.table_widget.setItem(row_number, PLOT_NAME_COL, widget_item)
+            self.table_widget.setCellWidget(row_number, PLOT_NAME_COL, real_item)
 
             self.table_widget.setRowHidden(row_number, not is_shown_by_filter)
 
@@ -241,64 +255,63 @@ class PlotSelectorView(QWidget):
         Populate the plot list from the Presenter. This is reserved
         for a 'things have gone wrong' scenario, and should only be
         used when errors are encountered.
-        :param plot_list: the list of plot names (list of strings)
+        :param plot_list: the list of plot numbers
         """
         with QMutexLocker(self.mutex):
             self.table_widget.clearContents()
 
         self.filter_box.clear()
-        for plot_name in plot_list:
+        for plot_number in plot_list:
+            plot_name = self.presenter.get_plot_name_from_number(plot_number)
             self.append_to_plot_list(plot_name, True)
 
-    def _get_row_and_widget_from_plot_name(self, plot_name):
+    def _get_row_and_widget_from_plot_number(self, plot_number):
         """
         Get the row in the table, and the PlotNameWidget corresponding
         to the given the plot name. This should always be called with
         a lock on self.mutex.
-        :param plot_name: The plot name
+        :param plot_number: The unique number in GlobalFigureManager
         """
         for row in range(self.table_widget.rowCount()):
-            widget = self.table_widget.cellWidget(row, 1)
-            if widget.plot_name == plot_name:
+            widget = self.table_widget.cellWidget(row, PLOT_NAME_COL)
+            if widget.plot_number == plot_number:
                 return row, widget
 
-    def remove_from_plot_list(self, plot_name):
+    def remove_from_plot_list(self, plot_number):
         """
         Remove the given plot name from the list
-        :param plot_name: The plot name
+        :param plot_number: The unique number in GlobalFigureManager
         """
         with QMutexLocker(self.mutex):
-            row, widget = self._get_row_and_widget_from_plot_name(plot_name)
+            row, widget = self._get_row_and_widget_from_plot_number(plot_number)
             self.table_widget.removeRow(row)
 
     # ----------------------- Plot Selection ------------------------
 
-    def get_all_selected_plot_names(self):
+    def get_all_selected_plot_numbers(self):
         """
-        Returns a list with the names of all the currently selected
+        Returns a list with the numbers of all the currently selected
         plots
-        :return: A list of strings with the plot names (figure titles)
+        :return: A list of strings with the plot numbers
         """
         selected = self.table_widget.selectedItems()
         selected_plots = []
         for item in selected:
             row = item.row()
-            widget = self.table_widget.cellWidget(row, 1)
             if not self.table_widget.isRowHidden(row):
-                selected_plots.append(widget.plot_name)
+                selected_plots.append(self.table_widget.cellWidget(row, PLOT_NAME_COL).plot_number)
         return selected_plots
 
-    def get_currently_selected_plot_name(self):
+    def get_currently_selected_plot_number(self):
         """
-        Returns a string with the plot name for the currently active
-        plot
-        :return: A string with the plot name (figure title)
+        Returns a string with the plot number for the currently
+        active plot
+        :return: A string with the plot number
         """
         row = self.table_widget.currentRow()
-        widget = self.table_widget.cellWidget(row, 1)
-        if widget is None or self.table_widget.isRowHidden(row):
+        if self.table_widget.isRowHidden(row):
             return None
-        return widget.plot_name
+        return self.table_widget.cellWidget(row, PLOT_NAME_COL).plot_number
 
     def get_filter_text(self):
         """
@@ -330,29 +343,30 @@ class PlotSelectorView(QWidget):
 
     def filter_plot_list(self, plot_list):
         """
-        Given a list of plots names, show only the ones in the list,
+        Given a list of plots numbers, show only the ones in the list,
         hiding the rest
         :param plot_list: The list of plots to show
         """
+        # TODO: work correctly with numbers
         with QMutexLocker(self.mutex):
             for row in range(self.table_widget.rowCount()):
-                widget = self.table_widget.cellWidget(row, 1)
+                widget = self.table_widget.cellWidget(row, PLOT_NAME_COL)
                 self.table_widget.setRowHidden(row, widget.plot_name not in plot_list)
 
     # ------------------------ Plot Renaming ------------------------
 
-    def rename_in_plot_list(self, new_name, old_name):
+    def rename_in_plot_list(self, plot_number, new_name):
         """
         Rename a plot in the plot list, also setting the sort key
+        :param plot_number: The unique number in GlobalFigureManager
         :param new_name: The new plot name
-        :param old_name: The plot to be renamed
-        """
+          """
         with QMutexLocker(self.mutex):
-            row, widget = self._get_row_and_widget_from_plot_name(old_name)
+            row, widget = self._get_row_and_widget_from_plot_number(plot_number)
 
-            old_key = self.table_widget.item(row, 1).data(Qt.InitialSortOrderRole)
+            old_key = self.table_widget.item(row, PLOT_NAME_COL).data(Qt.InitialSortOrderRole)
             new_sort_key = self.presenter.get_renamed_sort_key(new_name, old_key)
-            self.table_widget.item(row, 1).setData(Qt.InitialSortOrderRole, new_sort_key)
+            self.table_widget.item(row, PLOT_NAME_COL).setData(Qt.InitialSortOrderRole, new_sort_key)
 
             widget.set_plot_name(new_name)
 
@@ -361,13 +375,14 @@ class PlotSelectorView(QWidget):
         Triggered when rename is selected from the context menu,
         makes the plot name directly editable
         """
-        plot_name = self.get_currently_selected_plot_name()
+        plot_number = self.get_currently_selected_plot_number()
         with QMutexLocker(self.mutex):
-            row, widget = self._get_row_and_widget_from_plot_name(plot_name)
+            row, widget = self._get_row_and_widget_from_plot_number(plot_number)
         widget.toggle_plot_name_editable(True)
 
     # ----------------------- Plot Sorting --------------------------
     """
+    TODO: fix this!
     How the sorting works
 
     The QTableWidgetItem has a text string set via .setData with the
@@ -430,7 +445,7 @@ class PlotSelectorView(QWidget):
         """
         self.sort_order = Qt.AscendingOrder
         with QMutexLocker(self.mutex):
-            self.table_widget.sortItems(1, self.sort_order)
+            self.table_widget.sortItems(PLOT_NAME_COL, self.sort_order)
 
     def sort_descending(self):
         """
@@ -440,7 +455,7 @@ class PlotSelectorView(QWidget):
         """
         self.sort_order = Qt.DescendingOrder
         with QMutexLocker(self.mutex):
-            self.table_widget.sortItems(1, self.sort_order)
+            self.table_widget.sortItems(PLOT_NAME_COL, self.sort_order)
 
     def sort_by_name(self):
         """
@@ -449,7 +464,7 @@ class PlotSelectorView(QWidget):
         """
         self.sort_type = SortType.Name
         with QMutexLocker(self.mutex):
-            self.table_widget.sortItems(1, self.sort_order)
+            self.table_widget.sortItems(PLOT_NAME_COL, self.sort_order)
 
     def sort_by_last_shown(self):
         """
@@ -458,7 +473,7 @@ class PlotSelectorView(QWidget):
         """
         self.sort_type = SortType.LastShown
         with QMutexLocker(self.mutex):
-            self.table_widget.sortItems(1, self.sort_order)
+            self.table_widget.sortItems(PLOT_NAME_COL, self.sort_order)
 
     def set_sort_keys(self, sort_names_dict):
         """
@@ -470,15 +485,15 @@ class PlotSelectorView(QWidget):
         with QMutexLocker(self.mutex):
             self.table_widget.setSortingEnabled(False)
             for row in range(self.table_widget.rowCount()):
-                item = self.table_widget.item(row, 1)
-                widget = self.table_widget.cellWidget(row, 1)
+                item = self.table_widget.item(row, PLOT_NAME_COL)
+                widget = self.table_widget.cellWidget(row, PLOT_NAME_COL)
                 try:
                     item.setData(Qt.InitialSortOrderRole, sort_names_dict[widget.plot_name])
                 except AttributeError as e:
                     print(row)
                     print(widget.plot_name)
                     print(e)
-            self.table_widget.sortItems(1, self.sort_order)
+            self.table_widget.sortItems(PLOT_NAME_COL, self.sort_order)
             self.table_widget.setSortingEnabled(True)
 
     # ---------------------- Plot Exporting -------------------------
@@ -491,7 +506,7 @@ class PlotSelectorView(QWidget):
         """
         export_button = QPushButton("Export")
         export_menu = QMenu()
-        for text, extension in export_types:
+        for text, extension in EXPORT_TYPES:
             export_menu.addAction(text, lambda ext=extension: self.export_plots(ext))
         export_button.setMenu(export_menu)
         return export_button
@@ -517,14 +532,14 @@ class PlotNameWidget(QWidget):
     This widget is added to the table widget to support the renaming
     and close buttons, as well as the direct renaming functionality.
     """
-    def __init__(self, presenter, plot_name="", parent=None, is_run_as_unit_test=False):
+    def __init__(self, presenter, plot_number, parent=None, is_run_as_unit_test=False):
         super(PlotNameWidget, self).__init__(parent)
 
         self.presenter = presenter
-        self.plot_name = plot_name
+        self.plot_number = plot_number
         self.is_run_as_unit_test = is_run_as_unit_test
 
-        self.line_edit = QLineEdit(self.plot_name)
+        self.line_edit = QLineEdit(self.presenter.get_plot_name_from_number(plot_number))
         self.line_edit.setReadOnly(True)
         self.line_edit.setFrame(False)
         self.line_edit.setStyleSheet("* { background-color: rgba(0, 0, 0, 0); }")
@@ -543,7 +558,7 @@ class PlotNameWidget(QWidget):
         self.close_button = QPushButton(close_icon, "")
         self.close_button.setFlat(True)
         self.close_button.setMaximumWidth(self.close_button.iconSize().width() * 2)
-        self.close_button.clicked.connect(lambda: self.close_pressed(self.line_edit.text()))
+        self.close_button.clicked.connect(lambda: self.close_pressed(self.plot_number))
 
         self.layout = QHBoxLayout()
 
@@ -565,15 +580,14 @@ class PlotNameWidget(QWidget):
         Sets the internally stored and displayed plot name
         :param new_name: The name to set
         """
-        self.plot_name = new_name
         self.line_edit.setText(new_name)
 
-    def close_pressed(self, plot_name):
+    def close_pressed(self, plot_number):
         """
         Close the plot with the given name
-        :param plot_name: The name of the plot to close
+        :param plot_number: The unique number in GlobalFigureManager
         """
-        self.presenter.close_single_plot(plot_name)
+        self.presenter.close_single_plot(plot_number)
 
     def rename_button_toggled(self, checked):
         """
@@ -616,7 +630,7 @@ class PlotNameWidget(QWidget):
         Called when the editing is finished, gets the presenter to
         do the real renaming of the plot
         """
-        self.presenter.rename_figure(self.line_edit.text(), self.plot_name)
+        self.presenter.rename_figure(self.plot_number, self.line_edit.text())
         self.toggle_plot_name_editable(False)
 
 

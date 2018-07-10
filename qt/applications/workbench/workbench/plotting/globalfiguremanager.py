@@ -36,26 +36,26 @@ class FigureAction(Enum):
 
 
 class GlobalFigureManagerObserver(object):
-    def notify(self, action, new_value=None, old_value=None):
+    def notify(self, action, key):
         """
         This method is called when a dictionary entry is added,
         removed or changed
         :param action: An enum with the type of dictionary action
-        :param new_value: New value(s) added
+        :param key: The key in the dictionary that was changed
         :param old_value: Old value(s) removed
         """
         gcf = GlobalFigureManager
 
         if action == DictionaryAction.Create:
-            gcf.notify_observers(FigureAction.New, new_value.get_window_title())
+            gcf.notify_observers(FigureAction.New, key)
         elif action == DictionaryAction.Set:
-            gcf.notify_observers(FigureAction.Renamed, (new_value.get_window_title(), old_value.get_window_title()))
+            gcf.notify_observers(FigureAction.Renamed, key)
         elif action == DictionaryAction.Removed:
-            gcf.notify_observers(FigureAction.Closed, old_value.get_window_title())
+            gcf.notify_observers(FigureAction.Closed, key)
         else:
             # Not expecting clear or update to be used, so we are
             # being lazy here and just updating the entire plot list
-            gcf.notify_observers(FigureAction.Unknown, "")
+            gcf.notify_observers(FigureAction.Unknown, key)
 
 
 class GlobalFigureManager(object):
@@ -258,16 +258,22 @@ class GlobalFigureManager(object):
         cls.observers.append(observer)
 
     @classmethod
-    def notify_observers(cls, action, plot_name):
+    def notify_observers(cls, action, figure_number):
         """
         Calls notify method on all observers
+        :param action: A FigureAction enum for the action called
+        :param figure_number: The unique fig number (key in the dict)
         """
         for observer in cls.observers:
-            observer.notify(action, plot_name)
+            observer.notify(action, figure_number)
 
     @classmethod
-    def figure_title_changed(cls, old_title, new_title):
-        cls.notify_observers(FigureAction.Renamed, (new_title, old_title))
+    def figure_title_changed(cls, figure_number):
+        """
+        Notify the observers that a figure title was changed
+        :param figure_number: The unique number in GlobalFigureManager
+        """
+        cls.notify_observers(FigureAction.Renamed, figure_number)
 
 
 atexit.register(GlobalFigureManager.destroy_all)

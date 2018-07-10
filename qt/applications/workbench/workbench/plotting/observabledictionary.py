@@ -42,26 +42,22 @@ class ObservableDictionary(dict):
         """
         self.observers.append(observer)
 
-    def _notify_observers(self, action, new_value=None, old_value=None):
+    def _notify_observers(self, action, key=-1):
         for observer in self.observers:
-            observer.notify(action, new_value, old_value)
+            observer.notify(action, key)
 
     def __setitem__(self, key, new_value):
         action = DictionaryAction.Set
 
-        if key in self:
-            old_value = self.__getitem__(key)
-        else:
-            old_value = None
+        if key not in self:
             action = DictionaryAction.Create
         dict.__setitem__(self, key, new_value)
 
-        self._notify_observers(action, new_value, old_value)
+        self._notify_observers(action, key)
 
     def __delitem__(self, key):
-        old_value = dict.__getitem__(self, key)
         dict.__delitem__(self, key)
-        self._notify_observers(DictionaryAction.Removed, old_value=old_value)
+        self._notify_observers(DictionaryAction.Removed, key)
 
     def clear(self):
         dict.clear(self)
@@ -70,7 +66,7 @@ class ObservableDictionary(dict):
     def pop(self, key, default=None):
         if key in self:
             old_value = dict.pop(self, key)
-            self._notify_observers(DictionaryAction.Removed, old_value=old_value)
+            self._notify_observers(DictionaryAction.Removed, key)
             return old_value
         else:
             return dict.pop(self, key, default)
