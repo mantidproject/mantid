@@ -432,6 +432,9 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName) {
 
 void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
                                         const std::string &spectra) {
+  if (spectra.empty())
+    throw std::runtime_error(
+        "Fitting Data must consist of one or more spectra.");
   addWorkspace(workspaceName, DiscontinuousSpectra<std::size_t>(spectra));
 }
 
