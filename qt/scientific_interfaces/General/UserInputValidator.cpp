@@ -1,16 +1,14 @@
 #include "UserInputValidator.h"
-#include "MantidKernel/Strings.h"
-
-#include <QValidator>
-#include <QLineEdit>
 #include <QLabel>
+#include <QLineEdit>
 #include <QString>
+#include <QValidator>
 #include <cmath>
 
 using namespace MantidQt::MantidWidgets;
 
 namespace // anonymous
-    {
+{
 template <typename T> void sortPair(std::pair<T, T> &pair) {
   if (pair.first > pair.second) {
     T temp = pair.first;
@@ -324,5 +322,5 @@ void UserInputValidator::setErrorLabel(QLabel *errorLabel, bool valid) {
   // Only show the label if input is invalid
   errorLabel->setVisible(!valid);
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
