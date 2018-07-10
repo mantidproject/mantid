@@ -19,7 +19,7 @@ last-modified="2018-02-09 09:00:00">
   </defaults>
 
   <component type="source-chopper">
-    <location x="0.0" y="0.0" z="-50.6"/>
+    <location x="0.0" y="0.0" z="-28.9"/>
   </component>
   <type name="source-chopper"/>
 
