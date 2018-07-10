@@ -143,14 +143,7 @@ public:
     load.initialize();
     load.setPropertyValue("Filename", filename);
 
-    // first make sure it fails since the file has both event and histograms
-    // user should specify what to do
-    load.setPropertyValue("OutputWorkspace", "testing");
-    load.execute();
-    TS_ASSERT(!load.isExecuted());
-
-    // force loading histograms
-    load.setPropertyValue("LoadOnly", "Histogram");
+    // do not specify LoadOnly - it should load histograms by default
     load.setPropertyValue("OutputWorkspace", histoWSname);
     load.execute();
     TS_ASSERT(load.isExecuted());

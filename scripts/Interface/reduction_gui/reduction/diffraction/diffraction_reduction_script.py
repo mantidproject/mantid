@@ -251,7 +251,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         runnumbers_str = str(runsetupdict["RunNumber"])
         if runnumbers_str.count(':') > 0:
             runnumbers_str = runnumbers_str.replace(':', '-')
-        runnumbers_str = FileFinder.findRuns('{}_{}'.format(self.instrument_name, runnumbers_str))
+        runnumbers_str = FileFinder.findRuns('{}{}'.format(self.instrument_name, runnumbers_str))
         runnumbers_str = [os.path.split(filename)[-1] for filename in runnumbers_str]
 
         # create an integer version
