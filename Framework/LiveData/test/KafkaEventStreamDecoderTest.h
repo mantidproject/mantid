@@ -105,7 +105,8 @@ public:
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     // Need 2 full loops to get both periods
-    // Note: Only 2 iterations required as FakeISISEventSubscriber does not send start/stop messages
+    // Note: Only 2 iterations required as FakeISISEventSubscriber does not send
+    // start/stop messages
     startCapturing(*decoder, 2);
 
     Workspace_sptr workspace;
@@ -133,56 +134,56 @@ public:
   }
 
   void test_Varying_Period_Event_Stream() {
-	/**
-	* Test that period number is correctly updated between runs
-	* e.g If the first run has 1 period and the next has 2 periods
-	*/
-	using namespace ::testing;
-	using namespace KafkaTesting;
-	using Mantid::API::Workspace_sptr;
-	using Mantid::API::WorkspaceGroup;
-	using Mantid::DataObjects::EventWorkspace;
-	using namespace Mantid::LiveData;
+    /**
+    * Test that period number is correctly updated between runs
+    * e.g If the first run has 1 period and the next has 2 periods
+    */
+    using namespace ::testing;
+    using namespace KafkaTesting;
+    using Mantid::API::Workspace_sptr;
+    using Mantid::API::WorkspaceGroup;
+    using Mantid::DataObjects::EventWorkspace;
+    using namespace Mantid::LiveData;
 
-	auto mockBroker = std::make_shared<MockKafkaBroker>();
-	EXPECT_CALL(*mockBroker, subscribe_(_, _))
-		.Times(Exactly(3))
-		.WillOnce(Return(new FakeVariablePeriodSubscriber(5)))
-		.WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
-		.WillOnce(Return(new FakeISISSpDetStreamSubscriber));
-	auto decoder = createTestDecoder(mockBroker);
-	TSM_ASSERT("Decoder should not have create data buffers yet",
-		!decoder->hasData());
-	// Run start, Event, Run stop, Run start (2 period)
-	startCapturing(*decoder, 4);
-	Workspace_sptr workspace;
-	// Extract the data from single period and inform the decoder
-	TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
-	TS_ASSERT(decoder->hasReachedEndOfRun());
-	// Continue to capture multi period data
-	continueCapturing(*decoder, 6);
-	TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
-	TS_ASSERT(decoder->hasReachedEndOfRun());
-	TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-	TS_ASSERT(!decoder->isCapturing());
+    auto mockBroker = std::make_shared<MockKafkaBroker>();
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
+        .Times(Exactly(3))
+        .WillOnce(Return(new FakeVariablePeriodSubscriber(5)))
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
+        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+    auto decoder = createTestDecoder(mockBroker);
+    TSM_ASSERT("Decoder should not have create data buffers yet",
+               !decoder->hasData());
+    // Run start, Event, Run stop, Run start (2 period)
+    startCapturing(*decoder, 4);
+    Workspace_sptr workspace;
+    // Extract the data from single period and inform the decoder
+    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
+    TS_ASSERT(decoder->hasReachedEndOfRun());
+    // Continue to capture multi period data
+    continueCapturing(*decoder, 6);
+    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
+    TS_ASSERT(decoder->hasReachedEndOfRun());
+    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
+    TS_ASSERT(!decoder->isCapturing());
 
-	// --- Workspace checks ---
-	TSM_ASSERT("Expected non-null workspace pointer from extractData()",
-		workspace);
-	auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
-	TSM_ASSERT(
-		"Expected a WorkspaceGroup from extractData(). Found something else.",
-		group);
+    // --- Workspace checks ---
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
+               workspace);
+    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+    TSM_ASSERT(
+        "Expected a WorkspaceGroup from extractData(). Found something else.",
+        group);
 
-	TS_ASSERT_EQUALS(2, group->size());
-	for (size_t i = 0; i < 2; ++i) {
-		auto eventWksp =
-			boost::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
-		TSM_ASSERT("Expected an EventWorkspace for each member of the group",
-			eventWksp);
-		checkWorkspaceMetadata(*eventWksp);
-		checkWorkspaceEventData(*eventWksp);
-	}
+    TS_ASSERT_EQUALS(2, group->size());
+    for (size_t i = 0; i < 2; ++i) {
+      auto eventWksp =
+          boost::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
+      TSM_ASSERT("Expected an EventWorkspace for each member of the group",
+                 eventWksp);
+      checkWorkspaceMetadata(*eventWksp);
+      checkWorkspaceEventData(*eventWksp);
+    }
   }
 
   void test_End_Of_Run_Reported_After_Run_Stop_Reached() {
@@ -408,29 +409,37 @@ private:
     // Register callback to know when a whole loop as been iterated through
     m_niterations = 0;
     auto callback = [this, maxIterations]() {
-      {
-        std::unique_lock<std::mutex> lock(this->m_callbackMutex);
-        this->m_niterations++;
-        if (this->m_niterations == maxIterations) {
-          lock.unlock();
-          this->m_callbackCondition.notify_one();
-        }
-      }
+      this->iterationCallback(maxIterations);
     };
     decoder.registerIterationEndCb(callback);
     decoder.registerErrorCb(callback);
     TS_ASSERT_THROWS_NOTHING(decoder.startCapture());
-	continueCapturing(decoder, maxIterations);
+    continueCapturing(decoder, maxIterations);
+  }
+
+  void iterationCallback(uint8_t maxIterations) {
+    std::unique_lock<std::mutex> lock(this->m_callbackMutex);
+    this->m_niterations++;
+    if (this->m_niterations == maxIterations) {
+      lock.unlock();
+      this->m_callbackCondition.notify_one();
+    }
   }
 
   void continueCapturing(Mantid::LiveData::KafkaEventStreamDecoder &decoder,
-	  uint8_t maxIterations) {
-	{
-	  std::unique_lock<std::mutex> lk(m_callbackMutex);
-	  this->m_callbackCondition.wait(lk, [this, maxIterations]() {
-		return this->m_niterations == maxIterations;
-	  });
-	}
+                         uint8_t maxIterations) {
+    // Re-register callback with the (potentially) new value of maxIterations
+    auto callback = [this, maxIterations]() {
+      this->iterationCallback(maxIterations);
+    };
+    decoder.registerIterationEndCb(callback);
+    decoder.registerErrorCb(callback);
+    {
+      std::unique_lock<std::mutex> lk(m_callbackMutex);
+      this->m_callbackCondition.wait(lk, [this, maxIterations]() {
+        return this->m_niterations == maxIterations;
+      });
+    }
   }
 
   std::unique_ptr<Mantid::LiveData::KafkaEventStreamDecoder>
