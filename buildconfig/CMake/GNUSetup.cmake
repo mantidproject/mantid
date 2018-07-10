@@ -97,7 +97,7 @@ if(WITH_UBSAN)
 endif()
 
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # XCode isn't picking up the standard set above.
 if(CMAKE_GENERATOR STREQUAL Xcode)
