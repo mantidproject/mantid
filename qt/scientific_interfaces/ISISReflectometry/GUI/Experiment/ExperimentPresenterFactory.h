@@ -11,9 +11,15 @@ namespace CustomInterfaces {
 
 class ExperimentPresenterFactory {
 public:
+  ExperimentPresenterFactory(double thetaTolerance)
+      : m_thetaTolerance(thetaTolerance) {}
+
   std::unique_ptr<IExperimentPresenter> make(IExperimentView *view) {
-    return std::make_unique<ExperimentPresenter>(view);
+    return std::make_unique<ExperimentPresenter>(view, m_thetaTolerance);
   }
+
+private:
+  double m_thetaTolerance;
 };
 }
 }

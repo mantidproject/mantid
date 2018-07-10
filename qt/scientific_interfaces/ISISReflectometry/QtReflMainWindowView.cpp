@@ -48,26 +48,26 @@ void QtReflMainWindowView::initLayout() {
   auto defaultSlicing = Slicing();
   auto thetaTolerance = 0.01;
   auto makeWorkspaceNames = WorkspaceNamesFactory(defaultSlicing);
-  auto makeBatchPresenter = RunsTablePresenterFactory(
+  auto makeRunsTablePresenter = RunsTablePresenterFactory(
       instruments, thetaTolerance, makeWorkspaceNames);
-  auto defaultInstrumentIndex = 0; // TODO: Look this up properly;
+  auto defaultInstrumentIndex = 0;
+  // TODO: Look this up properly by comparing the default instrument to the values in the list;
   auto searcher = boost::shared_ptr<IReflSearcher>();
 
   auto makeRunsPresenter = RunsPresenterFactory(
-      std::move(makeBatchPresenter), std::move(makeWorkspaceNames),
+      std::move(makeRunsTablePresenter), std::move(makeWorkspaceNames),
       thetaTolerance, instruments, defaultInstrumentIndex, searcher);
 
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSettingsPresenter = SettingsPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();
-
-  auto makeExperimentPresenter = ExperimentPresenterFactory();
+  auto makeExperimentPresenter = ExperimentPresenterFactory(thetaTolerance);
 
   auto makeReflBatchPresenter = ReflBatchPresenterFactory(
       std::move(makeRunsPresenter), std::move(makeEventPresenter),
       std::move(makeExperimentPresenter), std::move(makeSettingsPresenter),
       std::move(makeSaveSettingsPresenter));
-
+      
   // Create the presenter
   m_presenter =
       ReflMainWindowPresenter(this, std::move(makeReflBatchPresenter));

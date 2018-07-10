@@ -39,7 +39,7 @@ public:
   operator()(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
 
 private:
-  boost::optional<double> parseTheta(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
+  boost::optional<boost::optional<double>> parseThetaOrWhitespace(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
   boost::optional<TransmissionRunPair>
   parseTransmissionRuns(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
   boost::optional<boost::optional<RangeInQ>>

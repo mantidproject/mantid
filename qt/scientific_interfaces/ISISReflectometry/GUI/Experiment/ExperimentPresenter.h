@@ -12,6 +12,25 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class ExperimentValidationResult {
+public:
+  ExperimentValidationResult(
+      PerThetaDefaultsValidationResult perThetaDefaultsResult,
+      bool stitchParametersResult)
+      : m_perThetaDefaultsResult(perThetaDefaultsResult),
+        m_stitchParametersResult(stitchParametersResult) {}
+
+  PerThetaDefaultsValidationResult const &perThetaDefaults() const {
+    return m_perThetaDefaultsResult;
+  }
+
+  bool stitchParametersAreValid() const { return m_stitchParametersResult; }
+
+private:
+  PerThetaDefaultsValidationResult m_perThetaDefaultsResult;
+  bool m_stitchParametersResult;
+};
+
 /** @class ExperimentPresenter
 
 ExperimentPresenter is a presenter class for the widget 'Event' in the
@@ -42,7 +61,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentPresenter
     : public ExperimentViewSubscriber,
       public IExperimentPresenter {
 public:
-  ExperimentPresenter(IExperimentView *view);
+  ExperimentPresenter(IExperimentView *view, double defaultsThetaTolerance);
   void notifySettingsChanged() override;
   void notifySummationTypeChanged() override;
   void notifyNewPerAngleDefaultsRequested() override;
@@ -54,11 +73,15 @@ public:
 private:
   PolarizationCorrections polarizationCorrectionsFromView();
   RangeInLambda transmissionRunRangeFromView();
-  PerThetaDefaultsValidationResult updateModelFromView();
+  ExperimentValidationResult updateModelFromView();
+
+  void showValidationResult(ExperimentValidationResult const &result);
   void showPerThetaDefaultsValidationResult(
       PerThetaDefaultsValidationResult const &result);
+
   IExperimentView *m_view;
   boost::optional<Experiment> m_model;
+  double m_thetaTolerance;
 };
 }
 }

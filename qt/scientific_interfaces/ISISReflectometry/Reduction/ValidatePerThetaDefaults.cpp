@@ -38,12 +38,17 @@ private:
 using CellText =
     std::array<std::string, PerThetaDefaultsValidator::INPUT_FIELD_COUNT>;
 
-boost::optional<double>
-PerThetaDefaultsValidator::parseTheta(CellText const &cellText) {
+boost::optional<boost::optional<double>>
+PerThetaDefaultsValidator::parseThetaOrWhitespace(CellText const &cellText) {
   auto theta = ::MantidQt::CustomInterfaces::parseTheta(cellText[0]);
-  if (!theta.is_initialized())
+  if (theta.is_initialized()) {
+    return theta;
+  } else if (isEntirelyWhitespace(cellText[0])) {
+    return boost::optional<double>();
+  } else {
     m_invalidColumns.emplace_back(0);
-  return theta;
+    return boost::none;
+  }
 }
 
 boost::optional<TransmissionRunPair>
@@ -85,7 +90,7 @@ PerThetaDefaultsValidator::parseOptions(CellText const &cellText) {
 // cppcheck-suppress syntaxError
 ValidationResult<PerThetaDefaults> PerThetaDefaultsValidator::
 operator()(CellText const &cellText) {
-  auto maybeTheta = parseTheta(cellText);
+  auto maybeTheta = parseThetaOrWhitespace(cellText);
   auto maybeTransmissionRuns = parseTransmissionRuns(cellText);
   auto maybeQRange = parseQRange(cellText);
   auto maybeScaleFactor = parseScaleFactor(cellText);

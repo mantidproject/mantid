@@ -60,7 +60,8 @@ public:
   void showPerAngleOptionsAsInvalid(int row, int column) override;
   void showPerAngleOptionsAsValid(int row) override;
   void showPerAngleThetasNonUnique(double thetaTolerance) override;
-
+  void showStitchParametersValid() override;
+  void showStitchParametersInvalid() override;
 
   double getTransmissionStartOverlap() const override;
   void setTransmissionStartOverlap(double start) override;

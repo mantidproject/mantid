@@ -74,6 +74,8 @@ public:
   virtual void showPerAngleOptionsAsInvalid(int row, int column) = 0;
   virtual void showPerAngleOptionsAsValid(int row) = 0;
   virtual void showAllPerAngleOptionsAsValid() = 0;
+  virtual void showStitchParametersValid() = 0;
+  virtual void showStitchParametersInvalid() = 0;
 
   virtual void enablePolarisationCorrections() = 0;
   virtual void disablePolarisationCorrections() = 0;

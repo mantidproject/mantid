@@ -34,10 +34,10 @@ def cleanFit():
 
 def assertFit(workspace, tg):
     """
-    
+
     :param workspace: data MatrixHistogram
     :param tg: dictionary of target fitting parameters
-    :return: 
+    :return:
     """
     unacceptable_chi_square = 1.0
     msg = ""
@@ -80,7 +80,7 @@ def do_fit(tg, fString, shape):
     Given a target shape and initial fit function guess, carry out the fit
     :param tg: dictionary of target fitting parameters
     :param fString: initial guess of the fit function
-    :param shape: Gaussian or Lorentzian, either integrated or not 
+    :param shape: Gaussian or Lorentzian, either integrated or not
     :return: success or failure of the fit
     """
     if 'Gaussian' in shape:
@@ -105,7 +105,7 @@ def do_fit(tg, fString, shape):
             bb = np.insert(bb, 0, 2 * E[0] - bb[0])  # external lower bin boundary
             bb = np.append(bb, 2 * E[-1] - bb[-1])  # external upper bin boundary
             # return the integral over each energy bin
-            return np.interp(bb[1:], efine, primitive) - np.interp(bb[:-1], efine, primitive)       
+            return np.interp(bb[1:], efine, primitive) - np.interp(bb[:-1], efine, primitive)
         createData(ifunctor)
     else:
         # when testing function StretchedExpFT

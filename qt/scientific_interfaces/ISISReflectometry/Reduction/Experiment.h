@@ -29,16 +29,24 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "PerThetaDefaults.h"
 #include <string>
 #include <vector>
+#include <map>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+enum class ThetaValuesValidationResult {
+  Ok,
+  MultipleWildcards,
+  NonUniqueTheta
+};
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL Experiment {
 public:
   Experiment(AnalysisMode analysisMode, ReductionType reductionType,
              SummationType summationType,
              PolarizationCorrections polarizationCorrections,
-             RangeInLambda transmissionRunRange, std::string stitchParameters,
+             RangeInLambda transmissionRunRange,
+             std::map<std::string, std::string> stitchParameters,
              std::vector<PerThetaDefaults> perThetaDefaults);
 
   AnalysisMode analysisMode() const;
@@ -46,17 +54,22 @@ public:
   SummationType summationType() const;
   PolarizationCorrections const &polarizationCorrections() const;
   RangeInLambda const &transissionRunRange() const;
-  std::string stitchParameters() const;
+  std::map<std::string, std::string> stitchParameters() const;
   std::vector<PerThetaDefaults> const &perThetaDefaults() const;
 
   PerThetaDefaults const *defaultsForTheta(double thetaAngle,
                                            double tolerance) const;
 
   static bool
-  thetaValuesAreUnique(std::vector<PerThetaDefaults> perThetaDefaults,
-                       double tolerance);
+  containsSingleWildcard(std::vector<PerThetaDefaults> const &perThetaDefaults);
+
+  static ThetaValuesValidationResult
+  validateThetaValues(std::vector<PerThetaDefaults> perThetaDefaults,
+                      double tolerance);
 
 private:
+  static int countWildcards(
+      std::vector<PerThetaDefaults> const &perThetaDefaults) ;
   AnalysisMode m_analysisMode;
   ReductionType m_reductionType;
   SummationType m_summationType;
@@ -64,7 +77,7 @@ private:
   PolarizationCorrections m_polarizationCorrections;
   RangeInLambda m_transmissionRunRange;
 
-  std::string m_stitchParameters;
+  std::map<std::string, std::string> m_stitchParameters;
   std::vector<PerThetaDefaults> m_perThetaDefaults;
 };
 }

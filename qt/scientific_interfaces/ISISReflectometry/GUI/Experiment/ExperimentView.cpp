@@ -36,6 +36,18 @@ void ExperimentView::showPerAngleThetasNonUnique(double tolerance) {
           QString::number(tolerance) + " apart.");
 }
 
+void ExperimentView::showStitchParametersValid() {
+  auto palette = stitchOptionsLineEdit().palette();
+  palette.setColor(QPalette::Base, Qt::transparent);
+  stitchOptionsLineEdit().setPalette(palette);
+}
+
+void ExperimentView::showStitchParametersInvalid() {
+  auto palette = stitchOptionsLineEdit().palette();
+  palette.setColor(QPalette::Base, QColor("#ffb8ad"));
+  stitchOptionsLineEdit().setPalette(palette);
+}
+
 void ExperimentView::subscribe(ExperimentViewSubscriber *notifyee) {
   m_notifyee = notifyee;
 }
