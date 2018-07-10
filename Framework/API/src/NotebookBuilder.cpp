@@ -123,8 +123,7 @@ NotebookBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
   } else if (m_versionSpecificity == "old") {
     //...or only specify algorithm versions when they're not the newest version
     const auto &algName = algHistory->name();
-    int latestVersion =
-        AlgorithmFactory::Instance().highestVersion(algName);
+    int latestVersion = AlgorithmFactory::Instance().highestVersion(algName);
     // If a newer version of this algorithm exists, then this must be an old
     // version.
     if (latestVersion > algHistory->version()) {
