@@ -169,10 +169,11 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
       freshPropNames.insert(propFresh->name());
     }
 
-    // remove properties that are not present on a fresh algorithm
+    // remove output properties that are not present on a fresh algorithm
     // i.e. remove dynamically added properties
     for (auto prop_iter = props.begin(); prop_iter != props.end();) {
-      if (freshPropNames.find((*prop_iter)->name()) == freshPropNames.end()) {
+      if (freshPropNames.find((*prop_iter)->name()) == freshPropNames.end() &&
+          (*prop_iter)->direction() == Kernel::Direction::Output) {
         prop_iter = props.erase(prop_iter);
       } else {
         ++prop_iter;

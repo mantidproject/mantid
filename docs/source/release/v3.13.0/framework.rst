@@ -72,7 +72,7 @@ Improvements
 - :ref:`Stitch1D <algm-Stitch1D>` can treat point data.
 - The algorithm :ref:`SortXAxis <algm-SortXAxis>` has a new input option that allows ascending (default) and descending sorting. The documentation needed to be corrected in general.
 - :ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` has changed its properties for clarification. This has also propagated to :ref:`LoadEventNexus <algm-LoadEventNexus>` and :ref:`LoadEventAndCompress <algm-LoadEventAndCompress>`
-- :ref:`CropToComponent <algm-CropToComponent>` now supports also scanning workspaces.
+- :class:`mantid.kernel.FacilityInfo` has an additional field with the timezone for use in converting ``numpy.datetime64`` values to strings
 
 Bugfixes
 ########
