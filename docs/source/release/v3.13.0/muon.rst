@@ -21,6 +21,7 @@ Bugfixes
 - The run number is now updated before the periods, preventing irrelevant warnings from being produced.
 - In single fit the workspace can be changed.
 - In multiple fitting the function can be replaced without causing a crash.
+- Loading current run in Muon Analysis and going to previous runs no longer creates an error in the simultaneous fit label.
 
 Algorithms
 ----------
