@@ -2,6 +2,8 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_IFATAB_H_
 
 #include "IndirectDataAnalysisTab.h"
+#include "IndirectFitDataPresenter.h"
+#include "IndirectFitPlotPresenter.h"
 #include "IndirectFittingModel.h"
 #include "IndirectSpectrumSelectionPresenter.h"
 #include "IndirectSpectrumSelectionView.h"
@@ -19,61 +21,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport QtLazyAsyncRunnerBase : public QObject {
-  Q_OBJECT
-
-signals:
-  void finished();
-  void finishedLazy();
-
-protected slots:
-  void currentFinishedBase() { currentFinished(); }
-
-protected:
-  virtual void currentFinished() = 0;
-};
-
-template <typename Callback>
-class DLLExport QtLazyAsyncRunner : public QtLazyAsyncRunnerBase {
-public:
-  using ReturnType = typename std::result_of<Callback()>::type;
-
-  explicit QtLazyAsyncRunner()
-      : m_current(), m_next(boost::none), m_initialized(false) {
-    connect(&m_current, SIGNAL(finished()), this, SLOT(currentFinishedBase()));
-  }
-
-  void addCallback(Callback &&callback) {
-    if (m_next.is_initialized())
-      m_next = boost::none;
-
-    if (m_current.isFinished() || !m_initialized)
-      m_current.setFuture(QtConcurrent::run(callback));
-    else
-      m_next = std::forward<Callback>(callback);
-    m_initialized = true;
-  }
-
-  bool isFinished() const { return m_current.isFinished(); }
-
-  ReturnType result() const { return m_current.result(); }
-
-protected:
-  void currentFinished() override {
-    if (m_next.is_initialized()) {
-      m_current.setFuture(QtConcurrent::run(*m_next));
-      m_next = boost::none;
-      emit finished();
-    } else
-      emit finishedLazy();
-  }
-
-private:
-  QFutureWatcher<ReturnType> m_current;
-  boost::optional<Callback> m_next;
-  bool m_initialized;
-};
-
 class DLLExport IndirectFitAnalysisTab : public IndirectDataAnalysisTab {
   Q_OBJECT
 
@@ -82,37 +29,20 @@ public:
   IndirectFitAnalysisTab(IndirectFittingModel *model,
                          QWidget *parent = nullptr);
 
+  void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
+  void setPlotView(IndirectFitPlotView *view);
   void setSpectrumSelectionView(IndirectSpectrumSelectionView *view);
   void
   setFitPropertyBrowser(MantidWidgets::IndirectFitPropertyBrowser *browser);
 
-  Mantid::API::IFunction_sptr background() const;
-
-  Mantid::API::IFunction_sptr model() const;
-
-  boost::optional<size_t> backgroundIndex() const;
+  std::size_t getSelectedDataIndex() const;
+  std::size_t getSelectedSpectrum() const;
+  bool isRangeCurrentlySelected(std::size_t dataIndex,
+                                std::size_t spectrum) const;
 
   QString selectedFitType() const;
 
   size_t numberOfCustomFunctions(const std::string &functionName) const;
-
-  double startX() const;
-
-  double endX() const;
-
-  std::vector<double> parameterValue(const std::string &functionName,
-                                     const std::string &parameterName) const;
-  boost::optional<double>
-  lastParameterValue(const std::string &functionName,
-                     const std::string &parameterName) const;
-
-  bool isEmptyModel() const;
-
-  QString backgroundName() const;
-
-  virtual bool canPlotGuess() const;
-
-  virtual bool doPlotGuess() const = 0;
 
   void setConvolveMembers(bool convolveMembers);
 
@@ -176,46 +106,20 @@ public:
                                        bool changesFunction);
 
 protected:
-  bool validate() override;
   IndirectFittingModel *fittingModel() const;
 
+  void setSampleWSSuffices(const QStringList &suffices);
+  void setSampleFBSuffices(const QStringList &suffices);
+  void setResolutionWSSuffices(const QStringList &suffices);
+  void setResolutionFBSuffices(const QStringList &suffices);
+
   void plotResult(const QString &plotType);
-
   void fillPlotTypeComboBox(QComboBox *comboBox);
-
-  void updatePlots(MantidWidgets::PreviewPlot *fitPreviewPlot,
-                   MantidWidgets::PreviewPlot *diffPreviewPlot);
 
   void setAlgorithmProperties(Mantid::API::IAlgorithm_sptr fitAlgorithm) const;
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   virtual void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
-
-  virtual void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) = 0;
-  virtual void removeGuessPlot() = 0;
-  void updateGuessPlots(Mantid::API::IFunction_sptr guessFunction);
-
-  void updatePlotGuess(Mantid::API::MatrixWorkspace_sptr workspace);
-  void updatePlotGuessInWindow(Mantid::API::MatrixWorkspace_sptr workspace);
-
-  Mantid::API::MatrixWorkspace_sptr createInputAndGuessWorkspace(
-      Mantid::API::MatrixWorkspace_sptr guessWorkspace);
-
-  Mantid::API::MatrixWorkspace_sptr
-  createInputAndGuessWorkspace(Mantid::API::MatrixWorkspace_sptr inputWS,
-                               Mantid::API::MatrixWorkspace_sptr guessWorkspace,
-                               const std::string &outputName) const;
-
-  Mantid::API::MatrixWorkspace_sptr createInputAndGuessWorkspace(
-      Mantid::API::MatrixWorkspace_sptr inputWS,
-      Mantid::API::MatrixWorkspace_sptr guessWorkspace) const;
-
-  Mantid::API::MatrixWorkspace_sptr
-  createGuessWorkspace(Mantid::API::IFunction_const_sptr func,
-                       int wsIndex) const;
-
-  std::vector<double> computeOutput(Mantid::API::IFunction_const_sptr func,
-                                    const std::vector<double> &dataX) const;
 
   void updatePlotOptions(QComboBox *cbPlotType);
 
@@ -227,106 +131,68 @@ protected:
 
   virtual void setPlotResultEnabled(bool enabled) = 0;
   virtual void setSaveResultEnabled(bool enabled) = 0;
-  virtual void enablePlotPreview() = 0;
-  virtual void disablePlotPreview() = 0;
 
 signals:
   void functionChanged();
-
   void parameterChanged(const Mantid::API::IFunction *);
-
   void customBoolChanged(const QString &key, bool value);
 
 protected slots:
 
   void setModelFitFunction();
   void setModelStartX(double startX);
-  void setModelEndX(double endX);
+  void setModelEndX(double startX);
+  void setDataTableStartX(double startX);
+  void setDataTableEndX(double endX);
+  void setDataTableExclude(const std::string &exclude);
+  void setBrowserStartX(double startX);
+  void setBrowserEndX(double endX);
+  void updateBrowserFittingRange();
+  void setBrowserWorkspace(std::size_t dataIndex);
+  void setBrowserWorkspaceIndex(std::size_t spectrum);
+  void tableStartXChanged(double startX, std::size_t dataIndex,
+                          std::size_t spectrum);
+  void tableEndXChanged(double endX, std::size_t dataIndex,
+                        std::size_t spectrum);
+  void tableExcludeChanged(const std::string &exclude, std::size_t dataIndex,
+                           std::size_t spectrum);
 
   void updateFitOutput(bool error);
   void updateSingleFitOutput(bool error);
   void fitAlgorithmComplete(bool error);
 
-  void clearGuessWindowPlot();
-
-  void setSelectedSpectrum(int spectrum) override;
-
-  virtual void startXChanged(double startX) = 0;
-
-  virtual void endXChanged(double endX) = 0;
-
-  void xMinSelected(double xMin);
-
-  void xMaxSelected(double xMax);
-
-  virtual void updatePlotRange() = 0;
-
   void singleFit();
-
+  void singleFit(std::size_t dataIndex, std::size_t spectrum);
   void executeFit();
 
-  void newInputDataLoaded(const QString &wsName);
-
+  void updateFitBrowserParameterValues();
   void updateParameterValues();
-
   void updateParameterValues(
       const std::unordered_map<std::string, ParameterValue> &parameters);
 
-  virtual void updatePreviewPlots() = 0;
-
-  void updateGuessPlots();
-
-  void updatePlotGuess();
-
-  void updatePlotGuessInWindow();
-
-  void plotGuessInWindow();
-
   virtual void updatePlotOptions() = 0;
 
-  void emitFunctionChanged();
-
-  void emitParameterChanged(const Mantid::API::IFunction *);
-
-  void emitCustomBoolChanged(const QString &key, bool value);
-
   void updateResultOptions();
-
   void saveResult();
 
 private:
   /// Overidden by child class.
   void setup() override;
+  void loadSettings(const QSettings &settings) override;
   virtual void setupFitTab() = 0;
+  bool validate() override;
   void run() override;
-  void loadSettings(const QSettings &settings) override = 0;
-  virtual void disablePlotGuess() = 0;
-  virtual void enablePlotGuess() = 0;
 
-  void
-  ensureAppendCompatibility(Mantid::API::MatrixWorkspace_sptr inputWS,
-                            Mantid::API::MatrixWorkspace_sptr spectraWS) const;
-
-  Mantid::API::IAlgorithm_sptr
-  createWorkspaceAlgorithm(const std::string &workspaceName, int numSpec,
-                           const std::vector<double> &dataX,
-                           const std::vector<double> &dataY) const;
-  Mantid::API::MatrixWorkspace_sptr
-  extractSpectra(Mantid::API::MatrixWorkspace_sptr inputWS, int startIndex,
-                 int endIndex, double startX, double endX) const;
-  Mantid::API::MatrixWorkspace_sptr
-  appendSpectra(Mantid::API::MatrixWorkspace_sptr inputWS,
-                Mantid::API::MatrixWorkspace_sptr spectraWS) const;
-  Mantid::API::MatrixWorkspace_sptr
-  cropWorkspace(Mantid::API::MatrixWorkspace_sptr inputWS, double startX,
-                double endX, int startIndex, int endIndex) const;
-  void deleteWorkspace(Mantid::API::MatrixWorkspace_sptr workspace) const;
-
-  Mantid::API::MatrixWorkspace_sptr m_inputAndGuessWorkspace;
-  QtLazyAsyncRunner<std::function<void()>> m_plotWindowGuessRunner;
+  void connectDataAndPlotPresenters();
+  void connectSpectrumAndPlotPresenters();
+  void connectFitBrowserAndPlotPresenter();
+  void connectDataAndSpectrumPresenters();
+  void connectDataAndFitBrowserPresenters();
 
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;
+  std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;
+  std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
   std::unique_ptr<IndirectSpectrumSelectionPresenter> m_spectrumPresenter;
 
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;

@@ -57,7 +57,6 @@ public:
   void displaySpectra(int minimum, int maximum);
 
   void setSpectraRange(int minimum, int maximum);
-  void setMaskSpectraRange(int minimum, int maximum);
 
   void setSpectraRegex(const std::string &regex);
   void setMaskBinsRegex(const std::string &regex);
@@ -106,6 +105,8 @@ private slots:
   void enableMaskLineEdit(int doEnable);
 
 private:
+  void setSpectraRangeMinimum(int minimum);
+  void setSpectraRangeMaximum(int maximum);
   QValidator *createValidator(const QString &regex);
 
   std::unique_ptr<Ui::IndirectSpectrumSelector> m_selector;
