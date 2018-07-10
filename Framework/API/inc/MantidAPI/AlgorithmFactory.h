@@ -16,12 +16,9 @@ namespace API {
 
 /// Structure uniquely describing an algorithm with its name, category and
 /// version.
-struct AlgorithmKey {
-	std::string name;     ///< Algorithm Name
-	int version;          ///< version
-};
-
-struct AlgorithmDescriptor : public AlgorithmKey {
+struct AlgorithmDescriptor {
+  std::string name;     ///< Algorithm Name
+  int version;          ///< version
   std::string category; ///< category
   std::string alias;    ///< alias
 };
