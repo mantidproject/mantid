@@ -56,5 +56,5 @@ void export_SpectrumInfo() {
            "Returns the source position.")
 
       .def("samplePosition", &SpectrumInfo::samplePosition, arg("self"),
-           "Returns the sample position.");
+           "Returns the sample position.")
 }
