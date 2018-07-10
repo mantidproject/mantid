@@ -50,6 +50,12 @@ class IndexSatellitePeaks(PythonAlgorithm):
         cluster_threshold = self.getProperty("ClusterThreshold").value
         n_trunc_decimals = int(np.ceil(abs(np.log10(tolerance))))
 
+        if nuclear.getNumberPeaks() == 0:
+            raise RuntimeError("The NuclearPeaks parameter must have at least one peak")
+
+        if satellites.getNumberPeaks() == 0:
+            raise RuntimeError("The SatellitePeaks parameter must have at least one peak")
+
         nuclear_hkls = indexing.get_hkls(nuclear)
         sats_hkls = indexing.get_hkls(satellites)
 
@@ -75,7 +81,6 @@ class IndexSatellitePeaks(PythonAlgorithm):
 
         raw_qs = hkls - sats_hkls
         peak_map = KDTree(qs)
-        hkls = []
         for i, q in enumerate(raw_qs):
             distance, index = peak_map.query(q, k=1)
             hklm[i, 3:] = indices[index]
