@@ -57,8 +57,8 @@ The time-of-flight (TOF), t, of each voxel is determined as:
 
 The events are histogrammed by their `t` values to create a TOF profile.  This profile can then be fit 
 to the Ikeda Carpenter function.  To separate the peak and background, different levels of intensity are
-filtered out.  The predicted background level is determined by **PredPplCoefficients** and values within
-**minppl_frac** and **maxppl_frac** times the predicted value are tried.  The best fit to the expected 
+filtered out.  The predicted background level is determined as the average background not near the peak or off the edge
+and values within **minppl_frac** and **maxppl_frac** times the predicted value are tried.  The best fit to the expected 
 moderator emission (determined by the moderator coefficients defined in **ModeratorCoefficientsFile**) is
 taken and these voxels are considered to be signal.
 
@@ -117,8 +117,7 @@ Usage
             InputWorkspace='MANDI_5921_md', PeaksWorkspace='peaks_ws', RunNumber=5921, DtSpread=0.015,
             UBFile='/SNS/MANDI/shared/ProfileFitting/demo_5921.mat',
             ModeratorCoefficientsFile='/SNS/MANDI/shared/ProfileFitting/franz_coefficients_2017.dat',
-            predpplCoefficients=[3.56405187,  8.34071842,0.14134522],
-            MinpplFrac=0.4, MaxpplFrac=1.5, MindtBinWidth=15,
+            MinpplFrac=0.9, MaxpplFrac=1.1, MindtBinWidth=15,
             StrongPeakParamsFile='/SNS/MANDI/shared/ProfileFitting/strongPeakParams_beta_lac_mut_mbvg.pkl',
             peakNumber=30)
 

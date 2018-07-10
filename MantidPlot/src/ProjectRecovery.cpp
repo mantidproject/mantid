@@ -5,22 +5,24 @@
 #include "ProjectSerialiser.h"
 #include "ScriptingWindow.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UsageService.h"
 
+#include "boost/algorithm/string/classification.hpp"
 #include "boost/optional.hpp"
+#include "boost/range/algorithm_ext/erase.hpp"
 
 #include "Poco/DirectoryIterator.h"
 #include "Poco/NObserver.h"
 #include "Poco/Path.h"
 
 #include <QMessageBox>
+#include <QMetaObject>
 #include <QObject>
 #include <QString>
-#include <QMetaObject>
 
 #include <chrono>
 #include <condition_variable>
@@ -99,7 +101,9 @@ Poco::Path getOutputPath() {
 std::vector<Poco::Path>
 getRecoveryFolderCheckpoints(const std::string &recoveryFolderPath) {
   Poco::Path recoveryPath;
-  if (!recoveryPath.tryParse(recoveryFolderPath)) {
+
+  if (!recoveryPath.tryParse(recoveryFolderPath) ||
+      !Poco::File(recoveryPath).exists()) {
     // Folder may not exist yet
     g_log.debug("Project Saving: Failed to get working folder whilst deleting "
                 "checkpoints");
@@ -128,6 +132,13 @@ getRecoveryFolderCheckpoints(const std::string &recoveryFolderPath) {
             });
 
   return folderPaths;
+}
+
+std::string removeInvalidFilenameChars(std::string s) {
+  // NTFS is most restrictive, so blacklist on this
+  std::string blacklistChars{":*?<>|/\"\\"};
+  boost::remove_erase_if(s, boost::is_any_of(blacklistChars));
+  return s;
 }
 
 const std::string OUTPUT_PROJ_NAME = "recovery.mantid";
@@ -194,10 +205,28 @@ bool ProjectRecovery::attemptRecovery() {
   }
 }
 
-bool ProjectRecovery::checkForRecovery() const {
-  const auto checkpointPaths =
-      getRecoveryFolderCheckpoints(getRecoveryFolder());
-  return checkpointPaths.size() != 0; // Non zero indicates recovery is pending
+bool ProjectRecovery::checkForRecovery() const noexcept {
+  try {
+    const auto checkpointPaths =
+        getRecoveryFolderCheckpoints(getRecoveryFolder());
+    return checkpointPaths.size() !=
+           0; // Non zero indicates recovery is pending
+  } catch (...) {
+    g_log.warning("Project Recovery: Caught exception whilst attempting to "
+                  "check for existing recovery");
+    return false;
+  }
+}
+
+bool ProjectRecovery::clearAllCheckpoints() const noexcept {
+  try {
+    deleteExistingCheckpoints(0);
+    return true;
+  } catch (...) {
+    g_log.warning("Project Recovery: Caught exception whilst attempting to "
+                  "clear existing checkpoints.");
+    return false;
+  }
 }
 
 /// Returns a background thread with the current object captured inside it
@@ -226,17 +255,13 @@ void ProjectRecovery::configKeyChanged(
 void ProjectRecovery::compileRecoveryScript(const Poco::Path &inputFolder,
                                             const Poco::Path &outputFile) {
   const std::string algName = "OrderWorkspaceHistory";
-  auto *alg =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm(algName, 1);
-  if (!alg) {
-    throw std::runtime_error("Could not get pointer to alg: " + algName);
-  }
-
+  auto alg =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged(algName, 1);
   alg->initialize();
+  alg->setChild(true);
   alg->setRethrows(true);
   alg->setProperty("RecoveryCheckpointFolder", inputFolder.toString());
   alg->setProperty("OutputFilepath", outputFile.toString());
-
   alg->execute();
 
   g_log.notice("Saved your recovery script to:\n" + outputFile.toString());
@@ -291,7 +316,7 @@ void ProjectRecovery::stopProjectSaving() {
   }
 
   if (m_backgroundSavingThread.joinable()) {
-    m_backgroundSavingThread.join();
+    m_backgroundSavingThread.detach();
   }
 }
 
@@ -319,6 +344,8 @@ bool ProjectRecovery::openInEditor(const Poco::Path &inputFolder) {
 void ProjectRecovery::projectSavingThreadWrapper() {
   try {
     projectSavingThread();
+  } catch (Mantid::API::Algorithm::CancelException &) {
+    return;
   } catch (std::exception const &e) {
     std::string preamble("Project recovery has stopped. Please report"
                          " this to the development team.\nException:\n");
@@ -337,14 +364,16 @@ void ProjectRecovery::projectSavingThreadWrapper() {
  */
 void ProjectRecovery::projectSavingThread() {
   while (!m_stopBackgroundThread) {
-    std::unique_lock<std::mutex> lock(m_notifierMutex);
-    // The condition variable releases the lock until the var changes
-    if (m_threadNotifier.wait_for(lock, TIME_BETWEEN_SAVING, [this]() {
-          return m_stopBackgroundThread.load();
-        })) {
-      // Exit thread
-      g_log.debug("Project Recovery: Stopping background saving thread");
-      return;
+    { // Ensure the lock only exists as long as the conditional variable
+      std::unique_lock<std::mutex> lock(m_notifierMutex);
+      // The condition variable releases the lock until the var changes
+      if (m_threadNotifier.wait_for(lock, TIME_BETWEEN_SAVING, [this]() {
+            return m_stopBackgroundThread.load();
+          })) {
+        // Exit thread
+        g_log.debug("Project Recovery: Stopping background saving thread");
+        return;
+      }
     }
 
     // "Timeout" - Save out again
@@ -399,11 +428,9 @@ void ProjectRecovery::saveOpenWindows(const std::string &projectDestFile) {
  */
 void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   const auto &ads = Mantid::API::AnalysisDataService::Instance();
-  using Mantid::Kernel::DataServiceHidden;
-  using Mantid::Kernel::DataServiceSort;
 
-  const auto wsHandles =
-      ads.getObjectNames(DataServiceSort::Unsorted, DataServiceHidden::Include);
+  // Hold a copy to the shared pointers so they do not get deleted under us
+  const auto wsHandles = ads.getObjects();
 
   if (wsHandles.empty()) {
     return;
@@ -413,25 +440,22 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
       Mantid::Kernel::UsageService::Instance().getStartTime().toISO8601String();
 
   const std::string algName = "GeneratePythonScript";
-  auto *alg =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm(algName, 1);
-
-  if (!alg) {
-    throw std::runtime_error("Could not get pointer to alg: " + algName);
-  }
-
+  auto alg =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged(algName, 1);
+  alg->setChild(true);
   alg->setLogging(false);
 
   for (const auto &ws : wsHandles) {
-    std::string filename = ws;
+    std::string filename = removeInvalidFilenameChars(ws->getName());
     filename.append(".py");
 
     Poco::Path destFilename = historyDestFolder;
     destFilename.append(filename);
 
     alg->initialize();
+    alg->setLogging(false);
     alg->setProperty("AppendTimestamp", true);
-    alg->setPropertyValue("InputWorkspace", ws);
+    alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("Filename", destFilename.toString());
     alg->setPropertyValue("StartTimestamp", startTime);
 

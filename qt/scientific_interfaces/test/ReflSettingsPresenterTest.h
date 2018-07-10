@@ -189,12 +189,6 @@ public:
     EXPECT_CALL(mockView, getPolarisationCorrections())
         .Times(AtLeast(1))
         .WillOnce(Return("PNR"));
-    EXPECT_CALL(mockView, getCRho())
-        .Times(AtLeast(1))
-        .WillOnce(Return("2.5,0.4,1.1"));
-    EXPECT_CALL(mockView, getCAlpha())
-        .Times(AtLeast(1))
-        .WillOnce(Return("0.6,0.9,1.2"));
     EXPECT_CALL(mockView, getCAp())
         .Times(AtLeast(1))
         .WillOnce(Return("100.0,17.0,44.0"));
@@ -204,8 +198,8 @@ public:
 
     auto options = presenter.getReductionOptions();
     TS_ASSERT_EQUALS(variantToString(options["PolarizationAnalysis"]), "PNR");
-    TS_ASSERT_EQUALS(variantToString(options["Rho"]), "2.5,0.4,1.1");
-    TS_ASSERT_EQUALS(variantToString(options["Alpha"]), "0.6,0.9,1.2");
+    TS_ASSERT_EQUALS(variantToString(options["Rho"]), "");
+    TS_ASSERT_EQUALS(variantToString(options["Alpha"]), "");
     TS_ASSERT_EQUALS(variantToString(options["Ap"]), "100.0,17.0,44.0");
     TS_ASSERT_EQUALS(variantToString(options["Pp"]), "0.54,0.33,1.81");
 
@@ -542,10 +536,10 @@ public:
 
     // Experiment settings should be called
     EXPECT_CALL(mockView, getAnalysisMode()).Times(Exactly(2));
-    EXPECT_CALL(mockView, getCRho()).Times(Exactly(1));
-    EXPECT_CALL(mockView, getCAlpha()).Times(Exactly(1));
-    EXPECT_CALL(mockView, getCAp()).Times(Exactly(1));
-    EXPECT_CALL(mockView, getCPp()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getCRho()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getCAlpha()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getCAp()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getCPp()).Times(Exactly(0));
     EXPECT_CALL(mockView, getPolarisationCorrections()).Times(Exactly(1));
     EXPECT_CALL(mockView, getStartOverlap()).Times(Exactly(2));
     EXPECT_CALL(mockView, getEndOverlap()).Times(Exactly(2));
