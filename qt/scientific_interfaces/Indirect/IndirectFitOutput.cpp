@@ -129,24 +129,17 @@ std::vector<std::string> getAxisLabels(MatrixWorkspace_sptr workspace,
   return std::vector<std::string>();
 }
 
-void safeRename(const std::string &oldName, const std::string &newName) {
-  std::string safeNewName = newName;
-  std::size_t counter = 2;
-  while (AnalysisDataService::Instance().doesExist(safeNewName))
-    safeNewName = newName + "(" + std::to_string(counter) + ")";
-  AnalysisDataService::Instance().rename(oldName, safeNewName);
-}
-
 void renameResult(Workspace_sptr resultWorkspace,
                   const std::string &workspaceName) {
-  safeRename(resultWorkspace->getName(), workspaceName + "_Result");
+  AnalysisDataService::Instance().rename(resultWorkspace->getName(),
+                                         workspaceName + "_Result");
 }
 
 void renameResult(Workspace_sptr resultWorkspace,
                   IndirectFitData const *fitData) {
   const auto name = resultWorkspace->getName();
   const auto newName = fitData->displayName("%1%_s%2%_Result", "_to_");
-  safeRename(name, newName);
+  AnalysisDataService::Instance().rename(name, newName);
 }
 
 void renameResultWithoutSpectra(WorkspaceGroup_sptr resultWorkspace,
