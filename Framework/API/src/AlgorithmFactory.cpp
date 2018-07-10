@@ -307,26 +307,6 @@ AlgorithmFactoryImpl::getCategories(bool includeHidden) const {
 }
 
 /**
-  * Returns a the latest version number of the given algorithm
-  *
-  * @param algName The name of the algorithm to get a version for
-  * @param throwIfNotRegistered (Default true) Throw if the algorithm is not
-  *registered
-  * @return Integer of the latest algorithm version or -1 if it does not exist
-  * @throws std::runtime_error if algorithm does not exist and throw is true
-  */
-int AlgorithmFactoryImpl::getAlgLatestVersion(
-    const std::string &algName) const {
-  auto it = m_vmap.find(algName);
-
-  if (it == m_vmap.end()) {
-    throw std::runtime_error("Algorithm not registered " + algName);
-  }
-
-  return it->second;
-}
-
-/**
 * Get a list of descriptor objects used to order the algorithms in the stored
 * map
 * where an algorithm has multiple categories it will be represented using

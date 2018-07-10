@@ -187,25 +187,6 @@ public:
     TS_ASSERT_EQUALS(noOfAlgs - 1, descriptors.size());
   }
 
-  void testGetLatestVersion() {
-    auto &algFactory = AlgorithmFactory::Instance();
-
-    const std::string algName = "ToyAlgorithm";
-    algFactory.subscribe<ToyAlgorithm>();
-    algFactory.subscribe<ToyAlgorithmTwo>();
-
-    int version = -1;
-    TS_ASSERT_THROWS_NOTHING(version = algFactory.getAlgLatestVersion(algName));
-
-    TS_ASSERT_EQUALS(version, 2);
-
-    algFactory.unsubscribe(algName, 1);
-    algFactory.unsubscribe(algName, 2);
-
-    TS_ASSERT_THROWS(algFactory.getAlgLatestVersion(algName),
-                     std::runtime_error);
-  }
-
   void testGetCategories() {
     auto &algFactory = AlgorithmFactory::Instance();
     algFactory.subscribe<CategoryAlgorithm>();
