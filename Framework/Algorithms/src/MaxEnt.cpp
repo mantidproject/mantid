@@ -407,33 +407,33 @@ void MaxEnt::exec() {
   MatrixWorkspace_sptr outEvolChi;
   MatrixWorkspace_sptr outEvolTest;
 
-  size_t nSpectra = complexData ? nHist / 2 : nHist;
-  size_t nSpec = nSpectra;
+  size_t nDataSpec = complexData ? nHist / 2 : nHist;
+  size_t nImageSpec = nDataSpec;
   size_t nSpecConcat = 1;
   if (!perSpectrumReconstruction) {
-    nSpecConcat = nSpec;
-    nSpec = 1;
+    nSpecConcat = nImageSpec;
+    nImageSpec = 1;
   }
   outImageWS =
-      WorkspaceFactory::Instance().create(inWS, 2 * nSpec, npoints, npoints);
+      WorkspaceFactory::Instance().create(inWS, 2 * nImageSpec, npoints, npoints);
   for (size_t i = 0; i < outImageWS->getNumberHistograms(); ++i)
     outImageWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   outDataWS =
-      WorkspaceFactory::Instance().create(inWS, 2 * nSpectra, npointsX, npoints);
+      WorkspaceFactory::Instance().create(inWS, 2 * nDataSpec, npointsX, npoints);
   for (size_t i = 0; i < outDataWS->getNumberHistograms(); ++i)
     outDataWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
-  outEvolChi = WorkspaceFactory::Instance().create(inWS, nSpec, nIter, nIter);
-  outEvolTest = WorkspaceFactory::Instance().create(inWS, nSpec, nIter, nIter);
+  outEvolChi = WorkspaceFactory::Instance().create(inWS, nImageSpec, nIter, nIter);
+  outEvolTest = WorkspaceFactory::Instance().create(inWS, nImageSpec, nIter, nIter);
 
   npoints = complexImage ? npoints * 2 : npoints;
   std::vector<size_t> iterationCounts;
-  iterationCounts.reserve(nSpec);
+  iterationCounts.reserve(nImageSpec);
   outEvolChi->setPoints(0, Points(nIter, LinearGenerator(0.0, 1.0)));
 
   size_t dataLength = complexData ? 2 * inWS->y(0).size() : inWS->y(0).size();
   dataLength *= nSpecConcat;
 
-  for (size_t spec = 0; spec < nSpec; spec++) {
+  for (size_t spec = 0; spec < nImageSpec; spec++) {
 
     // Start distribution (flat background)
     std::vector<double> image(npoints, background);
@@ -527,8 +527,8 @@ void MaxEnt::exec() {
     auto solImage = maxentCalculator.getImage();
 
     // Populate the output workspaces
-    populateDataWS(inWS, spec, nSpectra, solData, !perSpectrumReconstruction, complexData, outDataWS);
-    populateImageWS(inWS, spec, nSpec, solImage, complexImage, outImageWS,
+    populateDataWS(inWS, spec, nDataSpec, solData, !perSpectrumReconstruction, complexData, outDataWS);
+    populateImageWS(inWS, spec, nImageSpec, solImage, complexImage, outImageWS,
                     autoShift);
 
     // Populate workspaces recording the evolution of Chi and Test
