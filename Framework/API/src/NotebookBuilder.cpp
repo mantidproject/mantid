@@ -119,16 +119,22 @@ NotebookBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
 
   // Three cases, we can either specify the version of every algorithm...
   if (m_versionSpecificity == "all") {
-    properties << "Version=" << algHistory->version() << ", ";
-  } else if (m_versionSpecificity == "old") {
-    //...or only specify algorithm versions when they're not the newest version
-    const auto &algName = algHistory->name();
-    int latestVersion = AlgorithmFactory::Instance().highestVersion(algName);
-    // If a newer version of this algorithm exists, then this must be an old
-    // version.
-    if (latestVersion > algHistory->version()) {
-      properties << "Version=" << algHistory->version() << ", ";
-    }
+	  properties << "Version=" << algHistory->version() << ", ";
+  }
+  else if (m_versionSpecificity == "old") {
+	  //...or only specify algorithm versions when they're not the newest version
+	  const auto &algName = algHistory->name();
+	  auto &algFactory = API::AlgorithmFactory::Instance();
+	  int latestVersion = 0;
+
+	  if (algFactory.exists(algName)) { // Check the alg still exists in Mantid
+		  latestVersion = AlgorithmFactory::Instance().highestVersion(algName);
+	  }
+	  // If a newer version of this algorithm exists, then this must be an old
+	  // version.
+	  if (latestVersion > algHistory->version()) {
+		  properties << "Version=" << algHistory->version() << ", ";
+	  }
   }
   // Third case is we never specify the version, so do nothing.
 
