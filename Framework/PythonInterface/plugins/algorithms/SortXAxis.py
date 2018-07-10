@@ -14,6 +14,9 @@ class SortXAxis(PythonAlgorithm):
     def seeAlso(self):
         return [ "SortDetectors" ]
 
+    def version(self):
+        return 1
+    
     def name(self):
         return "SortXAxis"
 
@@ -75,4 +78,4 @@ class SortXAxis(PythonAlgorithm):
         self.setProperty('OutputWorkspace', output_ws)
 
 
-#AlgorithmFactory.subscribe(SortXAxis)
+AlgorithmFactory.subscribe(SortXAxis)
