@@ -157,7 +157,7 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
 
         return output2D
 
-    def PyExec(self):
+    def PyExec(self): # noqa C901
         data_type = 'Raw'
         if self.getProperty('UseCalibratedData').value:
             data_type = 'Calibrated'
