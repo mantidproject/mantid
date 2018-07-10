@@ -275,15 +275,15 @@ void SaveIsawPeaks::exec() {
         offset2 = run.getPropertyValueAsType<std::vector<double>>("Offset2");
         offset3 = run.getPropertyValueAsType<std::vector<double>>("Offset3");
         out << "9  OFFSETS ";
-        out << std::setw(8) << std::fixed << std::setprecision(2) << offset1[0] << " ";
-        out << std::setw(8) << std::fixed << std::setprecision(2) << offset1[1] << " ";
-        out << std::setw(8) << std::fixed << std::setprecision(2) << offset1[2] << " ";
-        out << std::setw(8) << std::fixed << std::setprecision(2) << offset2[0] << " ";
-        out << std::setw(8) << std::fixed << std::setprecision(2) << offset2[1] << " ";
-        out << std::setw(8) << std::fixed << std::setprecision(2) << offset2[2] << " ";
-        out << std::setw(8) << std::fixed << std::setprecision(2) << offset3[0] << " ";
-        out << std::setw(8) << std::fixed << std::setprecision(2) << offset3[1] << " ";
-        out << std::setw(8) << std::fixed << std::setprecision(2) << offset3[2] << "\n";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << qSign*offset1[0] << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << qSign*offset1[1] << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << qSign*offset1[2] << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << qSign*offset2[0] << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << qSign*offset2[1] << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << qSign*offset2[2] << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << qSign*offset3[0] << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << qSign*offset3[1] << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << qSign*offset3[2] << "\n";
   }
   int maxPeakNumb = 0;
   int appendPeakNumb = 0;

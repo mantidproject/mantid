@@ -121,7 +121,7 @@ void LoadIsawPeaks::exec() {
  * @return the first word on the next line
  */
 std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
-                                      std::ifstream &in, double &T0) {
+                                      std::ifstream &in, double &T0, double &qSign) {
   std::string tag;
   std::string r = getWord(in, false);
 
@@ -199,15 +199,15 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     if (s == "5")
       det.push_back(bank);
     if (s == "9") {
-      m_offset1[0] = std::stod(getWord(in, false), nullptr);
-      m_offset1[1] = std::stod(getWord(in, false), nullptr);
-      m_offset1[2] = std::stod(getWord(in, false), nullptr);
-      m_offset2[0] = std::stod(getWord(in, false), nullptr);
-      m_offset2[1] = std::stod(getWord(in, false), nullptr);
-      m_offset2[2] = std::stod(getWord(in, false), nullptr);
-      m_offset3[0] = std::stod(getWord(in, false), nullptr);
-      m_offset3[1] = std::stod(getWord(in, false), nullptr);
-      m_offset3[2] = std::stod(getWord(in, false), nullptr);
+      m_offset1[0] = qSign*std::stod(getWord(in, false), nullptr);
+      m_offset1[1] = qSign*std::stod(getWord(in, false), nullptr);
+      m_offset1[2] = qSign*std::stod(getWord(in, false), nullptr);
+      m_offset2[0] = qSign*std::stod(getWord(in, false), nullptr);
+      m_offset2[1] = qSign*std::stod(getWord(in, false), nullptr);
+      m_offset2[2] = qSign*std::stod(getWord(in, false), nullptr);
+      m_offset3[0] = qSign*std::stod(getWord(in, false), nullptr);
+      m_offset3[1] = qSign*std::stod(getWord(in, false), nullptr);
+      m_offset3[2] = qSign*std::stod(getWord(in, false), nullptr);
       outWS->mutableRun().addProperty<std::vector<double>>("Offset1", m_offset1, true);
       outWS->mutableRun().addProperty<std::vector<double>>("Offset2", m_offset2, true);
       outWS->mutableRun().addProperty<std::vector<double>>("Offset3", m_offset3, true);
@@ -478,7 +478,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
 
   // Read the header, load the instrument
   double T0;
-  std::string s = readHeader(outWS, in, T0);
+  std::string s = readHeader(outWS, in, T0, qSign);
   // set T0 in the run parameters
   API::Run &m_run = outWS->mutableRun();
   m_run.addProperty<double>("T0", T0, true);
