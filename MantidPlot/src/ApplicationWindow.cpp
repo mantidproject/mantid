@@ -16748,12 +16748,11 @@ bool ApplicationWindow::isOfType(const QObject *obj,
   * @param sourceFile The full path to the .project file
   * @return True is loading was successful, false otherwise
   */
-bool ApplicationWindow::loadProjectRecovery(std::string sourceFile)
-{
-	const bool isRecovery = true;
-	ProjectSerialiser projectWriter(this, isRecovery);
-	// File version is not applicable to project recovery - so set to 0
-	return projectWriter.load(sourceFile, 0);
+bool ApplicationWindow::loadProjectRecovery(std::string sourceFile) {
+  const bool isRecovery = true;
+  ProjectSerialiser projectWriter(this, isRecovery);
+  // File version is not applicable to project recovery - so set to 0
+  return projectWriter.load(sourceFile, 0);
 }
 
 /**

@@ -281,11 +281,11 @@ void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv) {
     std::unordered_set<std::string> allWsNames(parsedNames.at(ALL_WS).begin(),
                                                parsedNames.at(ALL_WS).end());
 
-	if (parsedNames.find(ALL_GROUP_NAMES) != parsedNames.cend()) {
-		// Add group names to the list of accepted names
-		allWsNames.insert(parsedNames.at(ALL_GROUP_NAMES).begin(),
-						  parsedNames.at(ALL_GROUP_NAMES).end());
-	}
+    if (parsedNames.find(ALL_GROUP_NAMES) != parsedNames.cend()) {
+      // Add group names to the list of accepted names
+      allWsNames.insert(parsedNames.at(ALL_GROUP_NAMES).begin(),
+                        parsedNames.at(ALL_GROUP_NAMES).end());
+    }
 
     const auto loadedWs = adsInstance.getObjectNames();
     for (const std::string &adsWsName : loadedWs) {

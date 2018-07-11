@@ -185,11 +185,12 @@ void ProjectRecovery::attemptRecovery() {
 
   int userChoice = QMessageBox::information(
       m_windowPtr, QObject::tr("Project Recovery"), recoveryMsg,
-	  QObject::tr("Yes"), QObject::tr("No"), QObject::tr("Only open script in editor"), 0, 1);
+      QObject::tr("Yes"), QObject::tr("No"),
+      QObject::tr("Only open script in editor"), 0, 1);
 
   if (userChoice == 1) {
     // User selected no
-	  return;
+    return;
   }
 
   const auto checkpointPaths =
@@ -197,24 +198,24 @@ void ProjectRecovery::attemptRecovery() {
   auto &mostRecentCheckpoint = checkpointPaths.back();
 
   auto destFilename =
-	  Poco::Path(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
+      Poco::Path(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
   destFilename.append("ordered_recovery.py");
 
   if (userChoice == 0) {
-	  // We have to spin up a new thread so the GUI can continue painting whilst we exec
-	  openInEditor(mostRecentCheckpoint, destFilename);
-	  std::thread recoveryThread([=] {loadRecoveryCheckpoint(mostRecentCheckpoint, destFilename); });
-	  recoveryThread.detach();
-  }  else if (userChoice == 2) {
-	  openInEditor(mostRecentCheckpoint, destFilename);
-	  // Restart project recovery as we stay synchronous
-	  clearAllCheckpoints();
-	  startProjectSaving();
+    // We have to spin up a new thread so the GUI can continue painting whilst
+    // we exec
+    openInEditor(mostRecentCheckpoint, destFilename);
+    std::thread recoveryThread(
+        [=] { loadRecoveryCheckpoint(mostRecentCheckpoint, destFilename); });
+    recoveryThread.detach();
+  } else if (userChoice == 2) {
+    openInEditor(mostRecentCheckpoint, destFilename);
+    // Restart project recovery as we stay synchronous
+    clearAllCheckpoints();
+    startProjectSaving();
   } else {
     throw std::runtime_error("Unknown choice in ProjectRecovery");
   }
-
-
 }
 
 bool ProjectRecovery::checkForRecovery() const noexcept {
@@ -332,40 +333,41 @@ void ProjectRecovery::stopProjectSaving() {
   }
 }
 
-void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder, const Poco::Path &historyDest) {	
-	ScriptingWindow *scriptWindow = m_windowPtr->getScriptWindowHandle();
-	if (!scriptWindow) {
-		throw std::runtime_error("Could not get handle to scripting window");
-	}
+void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder,
+                                             const Poco::Path &historyDest) {
+  ScriptingWindow *scriptWindow = m_windowPtr->getScriptWindowHandle();
+  if (!scriptWindow) {
+    throw std::runtime_error("Could not get handle to scripting window");
+  }
 
-	// Ensure the window repaints so it doesn't appear frozen before exec
-	scriptWindow->executeCurrentTab(Script::ExecutionMode::Serialised);
-	g_log.notice("Re-opening GUIs");
+  // Ensure the window repaints so it doesn't appear frozen before exec
+  scriptWindow->executeCurrentTab(Script::ExecutionMode::Serialised);
+  g_log.notice("Re-opening GUIs");
 
-	
-	auto projectFile = Poco::Path(recoveryFolder).append(OUTPUT_PROJ_NAME);
+  auto projectFile = Poco::Path(recoveryFolder).append(OUTPUT_PROJ_NAME);
 
-	bool loadCompleted = false;
-	if (!QMetaObject::invokeMethod(m_windowPtr, "loadProjectRecovery",
-		Qt::BlockingQueuedConnection,
-		Q_RETURN_ARG(bool, loadCompleted),
-		Q_ARG(const std::string, projectFile.toString()))) {
-		throw std::runtime_error(
-			"Project Recovery: Failed to load project windows - Qt binding failed");
-	}
+  bool loadCompleted = false;
+  if (!QMetaObject::invokeMethod(
+          m_windowPtr, "loadProjectRecovery", Qt::BlockingQueuedConnection,
+          Q_RETURN_ARG(bool, loadCompleted),
+          Q_ARG(const std::string, projectFile.toString()))) {
+    throw std::runtime_error(
+        "Project Recovery: Failed to load project windows - Qt binding failed");
+  }
 
-	if (!loadCompleted) {
-		g_log.warning("Loading failed to recovery everything completely");
-		return;
-	}
-	g_log.notice("Project Recovery finished");
+  if (!loadCompleted) {
+    g_log.warning("Loading failed to recovery everything completely");
+    return;
+  }
+  g_log.notice("Project Recovery finished");
 
-	// Restart project recovery when the async part finishes 
-	clearAllCheckpoints();
-	startProjectSaving();
+  // Restart project recovery when the async part finishes
+  clearAllCheckpoints();
+  startProjectSaving();
 }
 
-void ProjectRecovery::openInEditor(const Poco::Path &inputFolder, const Poco::Path &historyDest) {
+void ProjectRecovery::openInEditor(const Poco::Path &inputFolder,
+                                   const Poco::Path &historyDest) {
   compileRecoveryScript(inputFolder, historyDest);
 
   // Force application window to create the script window first

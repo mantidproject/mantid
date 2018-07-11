@@ -82,10 +82,12 @@ private:
   void deleteExistingCheckpoints(size_t checkpointsToKeep) const;
 
   /// Loads a recovery checkpoint in the given folder - TODO in future PR
-  void loadRecoveryCheckpoint(const Poco::Path &path, const Poco::Path &historyDest);
+  void loadRecoveryCheckpoint(const Poco::Path &path,
+                              const Poco::Path &historyDest);
 
   /// Open a recovery checkpoint in the scripting window
-  void openInEditor(const Poco::Path &inputFolder, const Poco::Path &historyDest);
+  void openInEditor(const Poco::Path &inputFolder,
+                    const Poco::Path &historyDest);
 
   /// Wraps the thread in a try catch to log any failures
   void projectSavingThreadWrapper();
