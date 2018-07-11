@@ -314,14 +314,14 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
 
   seqNum = std::stoi(getWord(in, false));
 
-  h = std::stod(getWord(in, false), nullptr);
-  k = std::stod(getWord(in, false), nullptr);
-  l = std::stod(getWord(in, false), nullptr);
+  h = qSign * std::stod(getWord(in, false), nullptr);
+  k = qSign * std::stod(getWord(in, false), nullptr);
+  l = qSign * std::stod(getWord(in, false), nullptr);
   V3D mod = V3D(0,0,0);
   if (m_ModStru) {
-      mod[0] = std::stoi(getWord(in, false), nullptr);
-      mod[1] = std::stoi(getWord(in, false), nullptr);
-      mod[2] = std::stoi(getWord(in, false), nullptr);
+      mod[0] = qSign * std::stoi(getWord(in, false), nullptr);
+      mod[1] = qSign * std::stoi(getWord(in, false), nullptr);
+      mod[2] = qSign * std::stoi(getWord(in, false), nullptr);
               double deltaH = mod[0]*m_offset1[0]+mod[1]*m_offset2[0]+mod[2]*m_offset3[0];
               double deltaK = mod[0]*m_offset1[1]+mod[1]*m_offset2[1]+mod[2]*m_offset3[1];
               double deltaL = mod[0]*m_offset1[2]+mod[1]*m_offset2[2]+mod[2]*m_offset3[2];
@@ -361,7 +361,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
 
   // Create the peak object
   Peak peak(outWS->getInstrument(), pixelID, wl);
-  peak.setHKL(qSign * h, qSign * k, qSign * l);
+  peak.setHKL(h, k, l);
   if (m_ModStru) {
   peak.setModStru(mod);
   }
