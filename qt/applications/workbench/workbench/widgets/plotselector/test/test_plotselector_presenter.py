@@ -236,7 +236,7 @@ class PlotSelectorPresenterTest(unittest.TestCase):
     def test_update_last_shown_calls_model_and_view(self):
         self.model.last_active_order = mock.Mock(return_value={"Plot1": 1, "Plot2": 2})
         self.view.sort_type = SortType.LastShown
-        self.presenter.update_sort_keys()
+        self.presenter.update_last_shown_order()
 
         self.model.last_active_order.assert_called_once_with()
         self.view.set_sort_keys.assert_called_once_with({'Plot1': 1,
@@ -247,7 +247,7 @@ class PlotSelectorPresenterTest(unittest.TestCase):
     def test_update_last_shown_with_sorting_by_name_does_nothing(self):
         self.model.last_active_order = mock.Mock(return_value={"Plot1": 1, "Plot2": 2})
         self.view.sort_type = SortType.Name
-        self.presenter.update_sort_keys()
+        self.presenter.update_last_shown_order()
 
         self.model.last_active_order.assert_not_called()
         self.view.set_sort_keys.assert_not_called()

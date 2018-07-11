@@ -201,46 +201,20 @@ class GlobalFigureManager(object):
     # ------------------ Our additional interface -----------------
 
     @classmethod
-    def get_figure_number_from_name(cls, figure_title):
+    def last_active_values(cls):
         """
-        Returns the figure number corresponding to the figure title
-        passed in as a string
-        :param figure_title: A String containing the figure title
-        :return: The figure number (int)
-        """
-        for num, figure_manager in cls.figs.items():
-            if figure_manager.get_window_title() == figure_title:
-                return num
-        return None
-
-    @classmethod
-    def get_figure_manager_from_name(cls, figure_title):
-        """
-        Returns the figure manager corresponding to the figure title
-        passed in as a string
-        :param figure_title: A String containing the figure title
-        :return: The figure manager
-        """
-        for figure_manager in cls.figs.values():
-            if figure_manager.get_window_title() == figure_title:
-                return figure_manager
-        return None
-
-    @classmethod
-    def last_active_order(cls):
-        """
-        Returns a dictionary where the keys are the plot names (figure
-        titles) and the values are the last shown (active) order, the
-        most recent being 1, the oldest being N, where N is the number
-        of figure managers
-        :return: A dictionary with the values as plot name and keys
+        Returns a dictionary where the keys are the plot numbers and
+        the values are the last shown (active) order, the most recent
+        being 1, the oldest being N, where N is the number of figure
+        managers
+        :return: A dictionary with the values as plot number and keys
                  as the opening order
         """
         last_shown_order_dict = {}
         num_figure_managers = len(cls._activeQue)
 
         for index in range(num_figure_managers):
-            last_shown_order_dict[cls._activeQue[index].get_window_title()] = num_figure_managers - index
+            last_shown_order_dict[cls._activeQue[index].num] = num_figure_managers - index
 
         return last_shown_order_dict
 

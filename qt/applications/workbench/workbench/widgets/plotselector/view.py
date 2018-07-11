@@ -30,10 +30,6 @@ from workbench.plotting.qappthreadcall import QAppThreadCall
 
 DEBUG_MODE = False
 
-PLOT_NUM_COL = 0
-PLOT_NAME_COL = 1
-LAST_SHOWN_COL = 2
-
 EXPORT_TYPES = [
     ('Export to EPS', '.eps'),
     ('Export to PDF', '.pdf'),
@@ -42,17 +38,16 @@ EXPORT_TYPES = [
 ]
 
 
-class SortType(Enum):
-    Name = 0
-    LastShown = 1
+class Column(Enum):
+    Number = 0
+    Name = 1
+    LastActive = 2
 
 
 class PlotSelectorView(QWidget):
     """
     The view to the plot selector, a PyQt widget.
     """
-
-
 
     # A signal to capture when keys are pressed
     deleteKeyPressed = Signal(int)
@@ -75,7 +70,7 @@ class PlotSelectorView(QWidget):
         self.mutex = QMutex()
 
         self.sort_order = Qt.AscendingOrder
-        self.sort_type = SortType.Name
+        self.sort_type = Column.Name
 
         self.show_button = QPushButton('Show')
         self.select_all_button = QPushButton('Select All')
@@ -136,11 +131,10 @@ class PlotSelectorView(QWidget):
         Special feature to make debugging easier, set DEBUG_MODE to
         true to get information printed when clicking on plots
         """
-        item = self.table_widget.currentItem()
-        widget = self.table_widget.itemWidget(item)
+        row = self.table_widget.currentRow()
+        widget = self.table_widget.cellWidget(row, Column.Name)
         print("Plot number: {}".format(widget.plot_number))
         print("Plot text: {}".format(widget.line_edit.text()))
-        print("Sort key: {}".format(item.data(Qt.InitialSortOrderRole)))
 
     def keyPressEvent(self, event):
         """
@@ -159,25 +153,25 @@ class PlotSelectorView(QWidget):
         """
         Make a table showing the matplotlib figure number of the
         plots, the name with close and edit buttons, and a hidden
-        column for sorting with the last shown order
+        column for sorting with the last actuve order
         :return: A QTableWidget object which will contain plot widgets
         """
         table_widget = QTableWidget(0, 3, self)
-        table_widget.setHorizontalHeaderLabels(['No.', 'Plot Name', 'Last Shown Order (hidden)'])
-        table_widget.setColumnHidden(LAST_SHOWN_COL, True)
+        table_widget.setHorizontalHeaderLabels(['No.', 'Plot Name', 'Last Active Order (hidden)'])
+        if not DEBUG_MODE:
+            table_widget.setColumnHidden(Column.LastActive, True)
         table_widget.verticalHeader().setVisible(False)
 
         # Fix the size of 'No.' and let 'Plot Name' fill the space
         top_header = table_widget.horizontalHeader()
-        top_header.resizeSection(PLOT_NUM_COL, top_header.sectionSizeHint(PLOT_NUM_COL))
+        top_header.resizeSection(Column.Number, top_header.sectionSizeHint(Column.Number))
         top_header.setStretchLastSection(True)
 
-        table_widget.horizontalHeaderItem(PLOT_NUM_COL).setToolTip('This is the matplotlib figure number.\n\nFrom a script use '
-                                                        'plt.figure(N), where N is this figure number, to get a handle'
-                                                        ' to the plot.')
+        table_widget.horizontalHeaderItem(Column.Number).setToolTip('This is the matplotlib figure number.\n\n'
+                 'From a script use plt.figure(N), where N is this figure number, to get a handle to the plot.')
 
-        table_widget.horizontalHeaderItem(PLOT_NAME_COL).setToolTip('The plot name, also used  as the file name when saving '
-                                                        'multiple plots.')
+        table_widget.horizontalHeaderItem(Column.Name).setToolTip('The plot name, also used  as the file name when '
+                                                                  'saving multiple plots.')
 
         table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         table_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)
@@ -222,32 +216,33 @@ class PlotSelectorView(QWidget):
         :param is_shown_by_filter: If true then show this plot name
                                    in the list, else hide it
         """
-        plot_name = self.presenter.get_plot_name_from_number(plot_number)
+        # TODO: move is_shown_by_filter to presernter logic
 
-        real_item = PlotNameWidget(self.presenter, plot_number, self, self.is_run_as_unit_test)
-        widget_item = HumanReadableSortItem()
+        plot_name_widget = PlotNameWidget(self.presenter, plot_number, self, self.is_run_as_unit_test)
 
-        sort_key = self.presenter.get_initial_sort_key(plot_name)
-        widget_item.setData(Qt.InitialSortOrderRole, sort_key)
+        number_item = HumanReadableSortItem(str(plot_number))
+        number_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
-        size_hint = real_item.sizeHint()
-        widget_item.setSizeHint(size_hint)
+        name_item = HumanReadableSortItem()
+        name_item.setSizeHint(plot_name_widget.sizeHint())
+
+        last_active_item = HumanReadableSortItem()
+        last_active_value = self.presenter.get_initial_last_active_value(plot_number)
+        last_active_item.setData(Qt.DisplayRole, last_active_value)
 
         with QMutexLocker(self.mutex):
             self.table_widget.setSortingEnabled(False)
-
             row_number = self.table_widget.rowCount()
             self.table_widget.insertRow(row_number)
 
-            item = HumanReadableSortItem(str(plot_number))
-            item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            self.table_widget.setItem(row_number, PLOT_NUM_COL, item)
+            self.table_widget.setItem(row_number, Column.Number, number_item)
 
-            self.table_widget.setItem(row_number, PLOT_NAME_COL, widget_item)
-            self.table_widget.setCellWidget(row_number, PLOT_NAME_COL, real_item)
+            self.table_widget.setItem(row_number, Column.Name, name_item)
+            self.table_widget.setCellWidget(row_number, Column.Name, plot_name_widget)
+
+            self.table_widget.setItem(row_number, Column.LastActive, last_active_item)
 
             self.table_widget.setRowHidden(row_number, not is_shown_by_filter)
-
             self.table_widget.setSortingEnabled(True)
 
     def set_plot_list(self, plot_list):
@@ -273,7 +268,7 @@ class PlotSelectorView(QWidget):
         :param plot_number: The unique number in GlobalFigureManager
         """
         for row in range(self.table_widget.rowCount()):
-            widget = self.table_widget.cellWidget(row, PLOT_NAME_COL)
+            widget = self.table_widget.cellWidget(row, Column.Name)
             if widget.plot_number == plot_number:
                 return row, widget
 
@@ -299,7 +294,7 @@ class PlotSelectorView(QWidget):
         for item in selected:
             row = item.row()
             if not self.table_widget.isRowHidden(row):
-                selected_plots.append(self.table_widget.cellWidget(row, PLOT_NAME_COL).plot_number)
+                selected_plots.append(self.table_widget.cellWidget(row, Column.Name).plot_number)
         return selected_plots
 
     def get_currently_selected_plot_number(self):
@@ -311,7 +306,7 @@ class PlotSelectorView(QWidget):
         row = self.table_widget.currentRow()
         if self.table_widget.isRowHidden(row):
             return None
-        return self.table_widget.cellWidget(row, PLOT_NAME_COL).plot_number
+        return self.table_widget.cellWidget(row, Column.Name).plot_number
 
     def get_filter_text(self):
         """
@@ -350,7 +345,7 @@ class PlotSelectorView(QWidget):
         # TODO: work correctly with numbers
         with QMutexLocker(self.mutex):
             for row in range(self.table_widget.rowCount()):
-                widget = self.table_widget.cellWidget(row, PLOT_NAME_COL)
+                widget = self.table_widget.cellWidget(row, Column.Name)
                 self.table_widget.setRowHidden(row, widget.plot_name not in plot_list)
 
     # ------------------------ Plot Renaming ------------------------
@@ -364,9 +359,9 @@ class PlotSelectorView(QWidget):
         with QMutexLocker(self.mutex):
             row, widget = self._get_row_and_widget_from_plot_number(plot_number)
 
-            old_key = self.table_widget.item(row, PLOT_NAME_COL).data(Qt.InitialSortOrderRole)
-            new_sort_key = self.presenter.get_renamed_sort_key(new_name, old_key)
-            self.table_widget.item(row, PLOT_NAME_COL).setData(Qt.InitialSortOrderRole, new_sort_key)
+            old_key = self.table_widget.item(row, Column.LastActive).data(Qt.DisplayRole)
+            new_sort_key = self.presenter.get_renamed_last_active_value(plot_number, old_key)
+            self.table_widget.item(row, Column.LastActive).setData(Qt.InitialSortOrderRole, new_sort_key)
 
             widget.set_plot_name(new_name)
 
@@ -382,17 +377,16 @@ class PlotSelectorView(QWidget):
 
     # ----------------------- Plot Sorting --------------------------
     """
-    TODO: fix this!
-    How the sorting works
-
-    The QTableWidgetItem has a text string set via .setData with the
-    Qt.InitialSortOrderRole as the role for this string (not strictly
-    used as intended in Qt). If the sorting is by name this is just
-    the name of the plot.
+    How the Sorting Works
+    
+    Sorting acts on the three columns for plot number, plot name and
+    last active order. Last active order is a hidden column, not
+    intended for the user to see, but can be set from the sort menu
+    button.
 
     If sorting by last active this is the number the plot was last
-    active, or if never active it is the plot name with an 'A'
-    appended to the front. For example ['1', '2', 'AUnshownPlot'].
+    active, or if never active it is the plot name with an '_'
+    appended to the front. For example ['1', '2', '_UnshownPlot'].
 
     QTableWidgetItem is subclassed by HumanReadableSortItem to
     override the < operator. This uses the text with the
@@ -419,20 +413,25 @@ class PlotSelectorView(QWidget):
         order_group.addAction(ascending_action)
         order_group.addAction(descending_action)
 
+        number_action = QAction("Number", sort_menu, checkable=True)
+        number_action.setChecked(True)
+        number_action.toggled.connect(lambda: self.presenter.set_sort_type(Column.Number))
         name_action = QAction("Name", sort_menu, checkable=True)
-        name_action.setChecked(True)
-        name_action.toggled.connect(self.presenter.set_sort_type)
-        last_shown_action = QAction("Last Shown", sort_menu, checkable=True)
+        name_action.toggled.connect(lambda: self.presenter.set_sort_type(Column.Name))
+        last_active_action = QAction("Last Active", sort_menu, checkable=True)
+        last_active_action.toggled.connect(lambda: self.presenter.set_sort_type(Column.LastActive))
 
         sort_type_group = QActionGroup(sort_menu)
+        sort_type_group.addAction(number_action)
         sort_type_group.addAction(name_action)
-        sort_type_group.addAction(last_shown_action)
+        sort_type_group.addAction(last_active_action)
 
         sort_menu.addAction(ascending_action)
         sort_menu.addAction(descending_action)
         sort_menu.addSeparator()
+        sort_menu.addAction(number_action)
         sort_menu.addAction(name_action)
-        sort_menu.addAction(last_shown_action)
+        sort_menu.addAction(last_active_action)
 
         sort_button.setMenu(sort_menu)
         return sort_button
@@ -445,7 +444,7 @@ class PlotSelectorView(QWidget):
         """
         self.sort_order = Qt.AscendingOrder
         with QMutexLocker(self.mutex):
-            self.table_widget.sortItems(PLOT_NAME_COL, self.sort_order)
+            self.table_widget.sortItems(Column.Name, self.sort_order)
 
     def sort_descending(self):
         """
@@ -455,45 +454,38 @@ class PlotSelectorView(QWidget):
         """
         self.sort_order = Qt.DescendingOrder
         with QMutexLocker(self.mutex):
-            self.table_widget.sortItems(PLOT_NAME_COL, self.sort_order)
+            self.table_widget.sortItems(Column.Name, self.sort_order)
 
-    def sort_by_name(self):
+    def set_sort_type(self, sort_type):
         """
         Set sorting to be by name - note this does not update any
         sort keys, it just sets the required state
+        :param sort_type: A Column enum for the column to sort on
         """
-        self.sort_type = SortType.Name
+        self.sort_type = sort_type
         with QMutexLocker(self.mutex):
-            self.table_widget.sortItems(PLOT_NAME_COL, self.sort_order)
+            self.table_widget.sortItems(sort_type, self.sort_order)
 
-    def sort_by_last_shown(self):
+    def set_last_active_values(self, last_active_values):
         """
-        Set sorting to be by last shown - note this does not update
-        any sort keys, it just sets the required state
-        """
-        self.sort_type = SortType.LastShown
-        with QMutexLocker(self.mutex):
-            self.table_widget.sortItems(PLOT_NAME_COL, self.sort_order)
-
-    def set_sort_keys(self, sort_names_dict):
-        """
-        Sets the sort keys given a dictionary of plot names and sort
-        keys, e.g. {'Plot1': 1, 'Plot2': '_Plot2'}
-        :param sort_names_dict: A dictionary with keys as plot names
-                                and values as sort keys
+        Sets the sort keys given a dictionary of plot numbers and
+        last active values, e.g. {1: 2, 2: 1, 7: 3}
+        :param last_active_values: A dictionary with keys as plot
+                                   number and values as last active
+                                   order
         """
         with QMutexLocker(self.mutex):
             self.table_widget.setSortingEnabled(False)
             for row in range(self.table_widget.rowCount()):
-                item = self.table_widget.item(row, PLOT_NAME_COL)
-                widget = self.table_widget.cellWidget(row, PLOT_NAME_COL)
-                try:
-                    item.setData(Qt.InitialSortOrderRole, sort_names_dict[widget.plot_name])
-                except AttributeError as e:
-                    print(row)
-                    print(widget.plot_name)
-                    print(e)
-            self.table_widget.sortItems(PLOT_NAME_COL, self.sort_order)
+                plot_number = self.table_widget.cellWidget(row, Column.Name).plot_number
+
+                last_active_item = self.table_widget.item(row, Column.LastActive)
+                last_active_value = last_active_values.get(plot_number)
+
+                if last_active_value:
+                    last_active_item.setData(Qt.DisplayRole, str(last_active_value))
+
+            self.table_widget.sortItems(Column.LastActive, self.sort_order)
             self.table_widget.setSortingEnabled(True)
 
     # ---------------------- Plot Exporting -------------------------

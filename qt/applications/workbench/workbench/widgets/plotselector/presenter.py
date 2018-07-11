@@ -19,7 +19,7 @@ from __future__ import absolute_import, print_function
 import os
 
 from .model import PlotSelectorModel
-from .view import PlotSelectorView, SortType
+from .view import PlotSelectorView, Column
 
 
 class PlotSelectorPresenter(object):
@@ -219,79 +219,52 @@ class PlotSelectorPresenter(object):
         else:
             self.view.sort_descending()
 
-    def set_sort_type(self, is_by_name):
+    def set_sort_type(self, sort_type):
         """
         Sets the sort order in the view
-        :param is_by_name: If true by name, else last shown
+        :param sort_type: A Column enum with the column to sort on
         """
-        if is_by_name:
-            self.view.sort_by_name()
-        else:
-            self.view.sort_by_last_shown()
-        self._set_sort_keys()
+        self.view.set_sort_type(sort_type)
+        self.update_last_active_order()
 
-    def update_sort_keys(self):
+    def update_last_active_order(self):
         """
         Update the sort keys in the view. This is only required when
         changes to the last shown order occur in the model, when
         renaming the key is set already
         """
-        if self.view.sort_type == SortType.LastShown:
-            self._set_sort_keys()
+        if self.view.sort_type == Column.LastActive:
+            self._set_last_active_order()
 
-    def _set_sort_keys(self):
+    def _set_last_active_order(self):
         """
-        Set the sort keys in the view. This checks the sorting
+        Set the last shown order in the view. This checks the sorting
         currently set and then sets the sort keys to the appropriate
         values
         """
-        sort_keys = {}
+        last_active_values = self.model.last_active_values()
+        self.view.set_last_active_values(last_active_values)
 
-        # if self.view.sort_type == SortType.Name:
-        #     sort_keys = dict(zip(self.model.plot_list, self.model.plot_list))
-        # elif self.view.sort_type == SortType.LastShown:
-        #     sort_keys = self.model.last_active_order()
-        #     for plot_name in self.model.plot_list:
-        #         if plot_name not in sort_keys:
-        #             # Append an '_' to the plot name - it has never been
-        #             # shown so goes after the numbers
-        #             sort_keys[plot_name] = '_' + plot_name
-        #
-        # try:
-        #     self.view.set_sort_keys(sort_keys)
-        # except KeyError as e:
-        #     print('Error, plot list out of sync, reloading. Error was:')
-        #     print(e)
-        #     self.update_plot_list()
-
-        # TODO: get this working again
-
-    def get_initial_sort_key(self, plot_number):
+    def get_initial_last_active_value(self, plot_number):
         """
-        Gets the initial sort key for a plot just added, in this case
-        it is assumed to not have been shown
+        Gets the initial last active value for a plot just added, in
+        this case it is assumed to not have been shown
         :param plot_number: The unique number in GlobalFigureManager
         """
-        plot_name = self.model.get_plot_name_from_number(plot_number)
+        return '_' + self.model.get_plot_name_from_number(plot_number)
 
-        if self.view.sort_type == SortType.LastShown:
-            return '_' + plot_name
-        return plot_name
-
-    def get_renamed_sort_key(self, new_name, old_key):
+    def get_renamed_last_active_value(self, plot_number, old_last_active_value):
         """
-        Gets the initial sort key for a plot just added, in this case
-        it is assumed to not have been shown
-        :param new_name: The name of the plot to generate the sort
-                         key for
-        :param old_key: The previous sort key
+        Gets the initial last active value for a plot that was
+        renamed. If the plot had a numeric value, i.e. has been shown
+        this is retained, else it is set
+        :param plot_number: The unique number in GlobalFigureManager
+        :param old_last_active_value: The previous last active value
         """
-        if self.view.sort_type == SortType.LastShown:
-            if isinstance(old_key, int):
-                return old_key
-            else:
-                return '_' + new_name
-        return new_name
+        if old_last_active_value.isdigit():
+            return old_last_active_value
+        else:
+            return self.get_initial_last_active_value(plot_number)
 
     # ---------------------- Plot Exporting -------------------------
 

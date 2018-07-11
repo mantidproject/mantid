@@ -82,7 +82,7 @@ class PlotSelectorModel(object):
             if figure_manager is not None:
                 self.presenter.rename_in_plot_list(plot_number, figure_manager.get_window_title())
         if action == FigureAction.OrderChanged:
-            self.presenter.update_sort_keys()
+            self.presenter.update_last_active_order()
         if action == FigureAction.Unknown:
             self.presenter.update_plot_list()
 
@@ -129,15 +129,16 @@ class PlotSelectorModel(object):
 
     # ----------------------- Plot Sorting --------------------------
 
-    def last_active_order(self):
+    def last_active_values(self):
         """
         Returns a dictionary containing the order of the last shown
         plots. Not all plots are guaranteed to be in returned
         dictionary.
-        :return: A dictionary containing the plot names as keys, and
-                 the order (1...N) as values (e.g. {'Plot1': 1})
+        :return: A dictionary containing the plot numbers as keys,
+                 and the order (1...N) as values
+                 (e.g. {1: 2, 2: 1, 7: 3})
         """
-        return self.GlobalFigureManager.last_active_order()
+        return self.GlobalFigureManager.last_active_values()
 
     # ---------------------- Plot Exporting -------------------------
 
