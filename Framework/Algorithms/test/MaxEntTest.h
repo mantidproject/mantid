@@ -649,7 +649,7 @@ public:
 
   void test_adjustments_three_spectra_complex() {
 
-    auto ws = createWorkspaceComplex(10, 0.0, 3);
+    auto ws = createWorkspaceComplex(10, 0.0, 3, 0.0);
     auto linAdj = createWorkspaceAdjustments(10, 1.05, 0.00, 0.0, 3);
     auto constAdj = createWorkspaceAdjustments(10, 0.0, 0.1, 0.2, 3);
 
@@ -681,10 +681,10 @@ public:
     // Test some values
     TS_ASSERT_EQUALS(data->y(0).size(), 10);
     TS_ASSERT_DELTA(data->y(0)[5], 0.251, 0.001);
-    TS_ASSERT_DELTA(data->y(1)[5], 0.675, 0.001);
-    TS_ASSERT_DELTA(data->y(2)[5], 0.920, 0.001);
+    TS_ASSERT_DELTA(data->y(1)[5], 0.249, 0.001);
+    TS_ASSERT_DELTA(data->y(2)[5], 0.247, 0.001);
     TS_ASSERT_EQUALS(data->y(5).size(), 10);
-    TS_ASSERT_DELTA(data->y(5)[5], -0.185, 0.001);
+    TS_ASSERT_DELTA(data->y(5)[5], -0.902, 0.001);
 
     // Test that the algorithm converged
     TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
@@ -697,7 +697,7 @@ public:
 
   void test_three_spectra_together() {
 
-    auto ws = createWorkspaceComplex(10, 0.0, 3);
+    auto ws = createWorkspaceComplex(10, 0.0, 3, 0.0);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -726,10 +726,10 @@ public:
     // Test some values
     TS_ASSERT_EQUALS(data->y(0).size(), 10);
     TS_ASSERT_DELTA(data->y(0)[5], 0.251, 0.001);
-    TS_ASSERT_DELTA(data->y(1)[5], 0.675, 0.001);
-    TS_ASSERT_DELTA(data->y(2)[5], 0.920, 0.001);
+    TS_ASSERT_DELTA(data->y(1)[5], 0.249, 0.001);
+    TS_ASSERT_DELTA(data->y(2)[5], 0.247, 0.001);
     TS_ASSERT_EQUALS(data->y(5).size(), 10);
-    TS_ASSERT_DELTA(data->y(5)[5], -0.185, 0.001);
+    TS_ASSERT_DELTA(data->y(5)[5], -0.902, 0.001);
 
     // Test that the algorithm converged
     TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
@@ -1040,14 +1040,12 @@ public:
   }
 
   MatrixWorkspace_sptr createWorkspaceComplex(size_t maxt, double phase,
-    size_t nSpec) {
+    size_t nSpec, double shift) {
 
     // Create cosine with phase 'phase'
 
     // Frequency of the oscillations
     double w = 1.6;
-    // phase shift between spectra
-    double shift = 0.5;
 
     size_t nPts = maxt * nSpec;
     MantidVec X(2*nPts);
