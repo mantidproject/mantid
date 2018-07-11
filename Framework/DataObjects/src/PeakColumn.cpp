@@ -159,6 +159,13 @@ void PeakColumn::print(size_t index, std::ostream &s) const {
     s << peak.getValueByColName(m_name);
   s.flags(fflags);
 }
+
+//-------------------------------------------------------------------------------------
+/** Remove substring from string
+ *
+ * @param str :: string to modify
+ * @param toErase :: substring to erase
+ */
 void PeakColumn::eraseSubStr(std::string &str, const std::string &toErase) {
   size_t pos = str.find(toErase);
   if (pos != std::string::npos) {
