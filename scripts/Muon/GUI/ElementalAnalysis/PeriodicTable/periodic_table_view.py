@@ -7,8 +7,7 @@ from silx.gui.widgets import PeriodicTable
 
 class PeriodicTableView(QtGui.QWidget):
     sig_table_changed = QtCore.pyqtSignal(object)
-    sig_table_clicked = QtCore.pyqtSignal(
-        PeriodicTable.ColoredPeriodicTableItem)
+    sig_table_clicked = QtCore.pyqtSignal(object)
 
     def __init__(self, parent=None):
         super(PeriodicTableView, self).__init__(parent)
