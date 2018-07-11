@@ -65,7 +65,7 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other) const {
       return true;
     return false;
   }
-  // If both should eb sorted and the scheme is set to ByMemorySize ... 
+  // If both should eb sorted and the scheme is set to ByMemorySize ...
   else if (m_parent->getSortScheme() == MantidItemSortScheme::ByMemorySize) {
     if (this->getMemorySize() < mantidOther->getMemorySize())
       return true;
@@ -109,7 +109,7 @@ DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem *item) {
   const auto lastAlgHist = wsHist.getAlgorithmHistory(indexOfLast);
   return lastAlgHist->executionDate();
 }
-std::size_t MantidTreeWidgetItem::getMemorySize() const{
+std::size_t MantidTreeWidgetItem::getMemorySize() const {
   return this->data(0, Qt::UserRole).value<Workspace_sptr>()->getMemorySize();
 }
 }

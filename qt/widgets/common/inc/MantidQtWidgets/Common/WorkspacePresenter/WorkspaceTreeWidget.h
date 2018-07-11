@@ -180,7 +180,8 @@ private:
   void setupLoadButtonMenu();
   void setupConnections();
 
-  MantidQt::MantidWidgets::MantidItemSortScheme whichCriteria(SortCriteria criteria);
+  MantidQt::MantidWidgets::MantidItemSortScheme
+  whichCriteria(SortCriteria criteria);
 
 public slots:
   void clickedWorkspace(QTreeWidgetItem *, int);

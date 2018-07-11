@@ -335,7 +335,7 @@ void WorkspaceTreeWidget::chooseByLastModified() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
 }
 
-void WorkspaceTreeWidget::chooseByMemorySize(){
+void WorkspaceTreeWidget::chooseByMemorySize() {
   m_sortCriteria = SortCriteria::ByMemorySize;
   m_presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
 }
@@ -368,17 +368,19 @@ void WorkspaceTreeWidget::sortWorkspaces(SortCriteria criteria,
   m_tree->sort();
 }
 
-MantidQt::MantidWidgets::MantidItemSortScheme WorkspaceTreeWidget::whichCriteria(SortCriteria criteria){
-  switch(criteria){
-    case SortCriteria::ByName:
-      return MantidItemSortScheme::ByName;
-    case SortCriteria::ByLastModified:
-      return MantidItemSortScheme::ByLastModified;
-    case SortCriteria::ByMemorySize:
-      return MantidItemSortScheme::ByMemorySize;
-    default:
-      //Handle if someone adds a new Enum and it falls through by defaulting to name
-      return MantidItemSortScheme::ByName;  
+MantidQt::MantidWidgets::MantidItemSortScheme
+WorkspaceTreeWidget::whichCriteria(SortCriteria criteria) {
+  switch (criteria) {
+  case SortCriteria::ByName:
+    return MantidItemSortScheme::ByName;
+  case SortCriteria::ByLastModified:
+    return MantidItemSortScheme::ByLastModified;
+  case SortCriteria::ByMemorySize:
+    return MantidItemSortScheme::ByMemorySize;
+  default:
+    // Handle if someone adds a new Enum and it falls through by defaulting to
+    // name
+    return MantidItemSortScheme::ByName;
   }
 }
 
@@ -729,8 +731,9 @@ void WorkspaceTreeWidget::createSortMenuActions() {
           SLOT(sortDescending()));
   connect(m_byNameChoice, SIGNAL(triggered()), this, SLOT(chooseByName()));
   connect(m_byLastModifiedChoice, SIGNAL(triggered()), this,
-          SLOT(chooseByLastModified()));  
-  connect(m_byMemorySize, SIGNAL(triggered()), this, SLOT(chooseByMemorySize()));              
+          SLOT(chooseByLastModified()));
+  connect(m_byMemorySize, SIGNAL(triggered()), this,
+          SLOT(chooseByMemorySize()));
 
   m_sortMenu->addActions(sortDirectionGroup->actions());
   m_sortMenu->addSeparator();
