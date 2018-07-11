@@ -100,7 +100,6 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_holdDisplayUpdates(false) {
 
   ui.setupUi(this);
-  std::string enableNonOrthogonal;
   auto nonOrthogonalDefaultValue =
       Kernel::ConfigService::Instance().getValue<bool>(
           "sliceviewer.nonorthogonal");
