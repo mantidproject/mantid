@@ -161,7 +161,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
     TS_ASSERT(decoder->hasReachedEndOfRun());
     // Continue to capture multi period data
-    continueCapturing(*decoder, 6);
+	// (one extra iteration to ensure stop signal is acted on before data extraction)
+    continueCapturing(*decoder, 7);
     TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
     TS_ASSERT(decoder->hasReachedEndOfRun());
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
