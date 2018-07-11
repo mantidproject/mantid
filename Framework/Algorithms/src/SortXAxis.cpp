@@ -125,8 +125,8 @@ void SortXAxis::copyYandEToOutputWorkspace(
   // If Histogram data find the biggest index value and remove it from
   // workspaceIndicies
   if (inputWorkspace->isHistogramData()) {
-    auto lastIndexIt = std::find(workspaceIndicies.begin(),
-                                 workspaceIndicies.end(), sizeOfY);
+     auto lastIndexIt =
+         std::find(workspaceIndicies.begin(), workspaceIndicies.end(), sizeOfY);
     workspaceIndicies.erase(lastIndexIt);
   }
 
