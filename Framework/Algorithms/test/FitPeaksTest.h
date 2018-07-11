@@ -56,7 +56,7 @@ public:
    * peak fit windows
    * @brief test_singlePeaksPartialSpectra
    */
-  void test_singlePeaksPartialSpectra() {
+  void New_Test_test_singlePeaksPartialSpectra() {
     // Generate input workspace
     std::string data_ws_name("Test1Data");
     createTestData(data_ws_name);
