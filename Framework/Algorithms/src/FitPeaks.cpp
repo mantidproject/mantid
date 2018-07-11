@@ -159,8 +159,8 @@ enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
 
 //----------------------------------------------------------------------------------------------
 FitPeaks::FitPeaks()
-    : m_fitPeaksFromRight(true), m_numPeaksToFit(0), m_minPeakHeight(20.),
-      m_bkgdSimga(1.), m_peakPosTolCase234(false) {}
+    : m_fitPeaksFromRight(true), m_fitIterations(50), m_numPeaksToFit(0),
+      m_minPeakHeight(20.), m_bkgdSimga(1.), m_peakPosTolCase234(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** initialize the properties
@@ -281,6 +281,11 @@ void FitPeaks::init() {
                   Kernel::IValidator_sptr(
                       new Kernel::ListValidator<std::string>(costFuncOptions)),
                   "Cost functions");
+
+  auto min_max_iter = boost::make_shared<BoundedValidator<int>>();
+  min->setLower(49);
+  declareProperty("MaxFitIterations", 50, min_max_iter,
+                  "Maximum number of function fitting iterations.");
 
   std::string optimizergrp("Optimization Setup");
   setPropertyGroup("Minimizer", optimizergrp);
@@ -456,6 +461,7 @@ void FitPeaks::processInputs() {
   m_costFunction = getPropertyValue("CostFunction");
   m_fitPeaksFromRight = getProperty("FitFromRight");
   m_constrainPeaksPosition = getProperty("ConstrainPeakPositions");
+  m_fitIterations = getProperty("MaxFitIterations");
 
   // Peak centers, tolerance and fitting range
   processInputPeakCenters();
@@ -1565,7 +1571,7 @@ double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit,
   fit->setProperty("Function", fitfunc);
   fit->setProperty("InputWorkspace", dataws);
   fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
-  fit->setProperty("MaxIterations", 50); // magic number
+  fit->setProperty("MaxIterations", m_fitIterations); // magic number
   fit->setProperty("StartX", xmin);
   fit->setProperty("EndX", xmax);
 

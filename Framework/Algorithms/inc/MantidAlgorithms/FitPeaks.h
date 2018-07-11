@@ -261,6 +261,8 @@ private:
   std::string m_costFunction;
   /// Fit from right or left
   bool m_fitPeaksFromRight;
+  /// Fit iterations
+  int m_fitIterations;
 
   //-------- Input param init values --------------------------------
   /// input starting parameters' indexes in peak function
