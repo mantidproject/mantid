@@ -85,7 +85,7 @@ void ScriptBuilder::writeHistoryToStream(
     }
   } else {
     // create the string for this algorithm
-    os << buildAlgorithmString(algHistory);
+    os << buildAlgorithmString(*algHistory);
     if (m_timestampCommands) {
       os << " # " << algHistory->executionDate().toISO8601String();
     }
@@ -125,11 +125,11 @@ void ScriptBuilder::buildChildren(
  * @returns std::string to run this algorithm
  */
 const std::string
-ScriptBuilder::buildCommentString(AlgorithmHistory_const_sptr algHistory) {
+ScriptBuilder::buildCommentString(const AlgorithmHistory &algHistory) {
   std::ostringstream comment;
-  const std::string name = algHistory->name();
+  const std::string name = algHistory.name();
   if (name == COMMENT_ALG) {
-    auto props = algHistory->getProperties();
+    auto props = algHistory.getProperties();
     for (auto &prop : props) {
       if (prop->name() == "Note") {
         comment << "# " << prop->value();
@@ -146,20 +146,20 @@ ScriptBuilder::buildCommentString(AlgorithmHistory_const_sptr algHistory) {
  * @returns std::string to run this algorithm
  */
 const std::string
-ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
+ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
   std::ostringstream properties;
-  const std::string name = algHistory->name();
+  const std::string name = algHistory.name();
   std::string prop;
 
   if (name == COMMENT_ALG)
     return buildCommentString(algHistory);
 
-  auto props = algHistory->getProperties();
+  auto props = algHistory.getProperties();
 
   try {
     // create a fresh version of the algorithm - unmanaged
-    IAlgorithm_sptr algFresh = AlgorithmManager::Instance().createUnmanaged(
-        name, algHistory->version());
+    auto algFresh = AlgorithmManager::Instance().createUnmanaged(
+        name, algHistory.version());
     algFresh->initialize();
 
     const auto &propsFresh = algFresh->getProperties();
@@ -182,11 +182,11 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
 
   } catch (std::exception &) {
     g_log.error() << "Could not create a fresh version of " << name
-                  << " version " << algHistory->version() << "\n";
+                  << " version " << algHistory.version() << "\n";
   }
 
   for (auto &propIter : props) {
-    prop = buildPropertyString(propIter);
+    prop = buildPropertyString(*propIter);
     if (prop.length() > 0) {
       properties << prop << ", ";
     }
@@ -194,25 +194,20 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
 
   // Three cases, we can either specify the version of every algorithm...
   if (m_versionSpecificity == "all") {
-    properties << "Version=" << algHistory->version() << ", ";
+    properties << "Version=" << algHistory.version() << ", ";
   } else if (m_versionSpecificity == "old") {
     //...or only specify algorithm versions when they're not the newest version
-    bool oldVersion = false;
+    const auto &algName = algHistory.name();
+    auto &algFactory = API::AlgorithmFactory::Instance();
+    int latestVersion = 0;
 
-    std::vector<AlgorithmDescriptor> descriptors =
-        AlgorithmFactory::Instance().getDescriptors();
-    for (auto &descriptor : descriptors) {
-      // If a newer version of this algorithm exists, then this must be an old
-      // version.
-      if (descriptor.name == algHistory->name() &&
-          descriptor.version > algHistory->version()) {
-        oldVersion = true;
-        break;
-      }
+    if (algFactory.exists(algName)) { // Check the alg still exists in Mantid
+      latestVersion = AlgorithmFactory::Instance().highestVersion(algName);
     }
-
-    if (oldVersion) {
-      properties << "Version=" << algHistory->version() << ", ";
+    // If a newer version of this algorithm exists, then this must be an old
+    // version.
+    if (latestVersion > algHistory.version()) {
+      properties << "Version=" << algHistory.version() << ", ";
     }
   }
   // Third case is we never specify the version, so do nothing.
@@ -233,8 +228,8 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
  * @param propHistory :: reference to a property history object
  * @returns std::string for this property
  */
-const std::string
-ScriptBuilder::buildPropertyString(PropertyHistory_const_sptr propHistory) {
+const std::string ScriptBuilder::buildPropertyString(
+    const Mantid::Kernel::PropertyHistory &propHistory) {
   using Mantid::Kernel::Direction;
 
   // Create a vector of all non workspace property type names
@@ -242,28 +237,28 @@ ScriptBuilder::buildPropertyString(PropertyHistory_const_sptr propHistory) {
 
   std::string prop;
   // No need to specify value for default properties
-  if (!propHistory->isDefault()) {
+  if (!propHistory.isDefault()) {
     // Do not give values to output properties other than workspace properties
     if (find(nonWorkspaceTypes.begin(), nonWorkspaceTypes.end(),
-             propHistory->type()) != nonWorkspaceTypes.end() &&
-        propHistory->direction() == Direction::Output) {
-      g_log.debug() << "Ignoring property " << propHistory->name()
-                    << " of type " << propHistory->type() << '\n';
+             propHistory.type()) != nonWorkspaceTypes.end() &&
+        propHistory.direction() == Direction::Output) {
+      g_log.debug() << "Ignoring property " << propHistory.name() << " of type "
+                    << propHistory.type() << '\n';
       // Handle numerical properties
-    } else if (propHistory->type() == "number") {
-      prop = propHistory->name() + "=" + propHistory->value();
+    } else if (propHistory.type() == "number") {
+      prop = propHistory.name() + "=" + propHistory.value();
       // Handle boolean properties
-    } else if (propHistory->type() == "boolean") {
-      std::string value = (propHistory->value() == "1" ? "True" : "False");
-      prop = propHistory->name() + "=" + value;
+    } else if (propHistory.type() == "boolean") {
+      std::string value = (propHistory.value() == "1" ? "True" : "False");
+      prop = propHistory.name() + "=" + value;
       // Handle all other property types
     } else {
       std::string opener = "='";
-      if (propHistory->value().find('\\') != std::string::npos) {
+      if (propHistory.value().find('\\') != std::string::npos) {
         opener = "=r'";
       }
 
-      prop = propHistory->name() + opener + propHistory->value() + "'";
+      prop = propHistory.name() + opener + propHistory.value() + "'";
     }
   }
 
