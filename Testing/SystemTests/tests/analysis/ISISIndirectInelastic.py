@@ -848,8 +848,12 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
 
     def get_reference_files(self):
         self.tolerance = 1e-3
-        return ['II.IRISFury.nxs',
-                'II.IRISFuryFitSeq.nxs']
+        ref_files = ['II.IRISFury.nxs']
+		if platform.system() == "Windows":
+			ref_files += ['II.IRISFuryFitSeq_win.nxs']
+		else:
+			ref_files += ['II.IRISFuryFitSeq.nxs']
+		return ref_files
 
 #==============================================================================
 
