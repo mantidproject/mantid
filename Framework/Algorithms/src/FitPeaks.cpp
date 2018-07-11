@@ -283,7 +283,7 @@ void FitPeaks::init() {
                   "Cost functions");
 
   auto min_max_iter = boost::make_shared<BoundedValidator<int>>();
-  min->setLower(49);
+  min_max_iter->setLower(49);
   declareProperty("MaxFitIterations", 50, min_max_iter,
                   "Maximum number of function fitting iterations.");
 
