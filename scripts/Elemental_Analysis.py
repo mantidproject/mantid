@@ -1,7 +1,6 @@
 from __future__ import absolute_import, print_function
 
-import PyQt4.QtGui as QtGui
-import PyQt4.QtCore as QtCore
+from PyQt4 import QtGui
 
 import sys
 
