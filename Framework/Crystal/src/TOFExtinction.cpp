@@ -32,13 +32,6 @@ const double pc[4][19] = {
      -0.0993, -0.1176, -0.1153, -0.1125, -0.1073, -0.1016, -0.0962, -0.0922,
      -0.0898, -0.0892}};
 
-const double MAX_WAVELENGTH = 50.0; // max in lamda_weight table
-
-const double STEPS_PER_ANGSTROM = 100; // resolution of lamda table
-
-const int NUM_WAVELENGTHS =
-    static_cast<int>(std::ceil(MAX_WAVELENGTH * STEPS_PER_ANGSTROM));
-
 const double radtodeg_half = 180.0 / M_PI / 2.;
 }
 
