@@ -167,10 +167,11 @@ void PeakColumn::print(size_t index, std::ostream &s) const {
  * @param toErase :: substring to erase
  */
 void PeakColumn::eraseSubStr(std::string &str, const std::string &toErase) {
-  size_t pos = str.find(toErase);
-  if (pos != std::string::npos) {
-    str.erase(pos, toErase.length());
-  }
+  std::string::size_type n = toErase.length();
+  for (std::string::size_type i = str.find(toErase);
+      i != std::string::npos;
+      i = str.find(toErase))
+      str.erase(i, n);
 }
 
 
