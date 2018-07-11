@@ -534,6 +534,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
 
       peak.setGoniometerMatrix(gonMat);
       peak.setRunNumber(run);
+      std::cout << run<<" RUN\n";
       peak.setMonitorCount(monCount);
 
       double tof = peak.getTOF();

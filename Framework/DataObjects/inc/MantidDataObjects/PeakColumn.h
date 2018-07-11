@@ -39,6 +39,8 @@ public:
   /// Prints
   void print(size_t index, std::ostream &s) const override;
 
+  void eraseSubStr(std::string &str, const std::string &toErase);
+
   void read(size_t index, const std::string &text) override;
 
   /// Sets item from a stream

@@ -53,7 +53,7 @@ void SaveIsawPeaks::exec() {
   std::string header = "2   SEQN    H    K    L     COL      ROW     CHAN      "
                        "  L2   2_THETA        AZ         WL         D      IPK "
                        "      INTI    SIGI  RFLG";
-  header = "2   SEQN    H    K    L     ORD1 ORD2 ORD3  COL      ROW     CHAN      "
+  header = "2   SEQN    H    K    L ORD1 ORD2 ORD3     COL      ROW     CHAN      "
                        "  L2   2_THETA        AZ         WL         D      IPK "
                        "      INTI    SIGI  RFLG";
 

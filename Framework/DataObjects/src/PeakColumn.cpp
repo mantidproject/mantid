@@ -159,6 +159,13 @@ void PeakColumn::print(size_t index, std::ostream &s) const {
     s << peak.getValueByColName(m_name);
   s.flags(fflags);
 }
+void PeakColumn::eraseSubStr(std::string &str, const std::string &toErase) {
+  size_t pos = str.find(toErase);
+  if (pos != std::string::npos) {
+    str.erase(pos, toErase.length());
+  }
+}
+
 
 //-------------------------------------------------------------------------------------
 /** Read in some text and convert to a number in the PeaksWorkspace
@@ -173,7 +180,12 @@ void PeakColumn::read(size_t index, const std::string &text) {
 
   // Convert to a double
   double val = 0;
-  int success = Strings::convert(text, val);
+
+  // Table has put comma in run numbers so remove
+  std::string text2 = text;
+  eraseSubStr(text2, ",");
+
+  int success = Strings::convert(text2, val);
 
   if (success == 0) {
     g_log.error() << "Could not convert string '" << text << "' to a number.\n";
