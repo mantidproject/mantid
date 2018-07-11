@@ -114,7 +114,7 @@ Output:
 
 .. testoutput:: ExMUSRPairAsymmetry
 
-   -0.0176193517359
+   -0.0141980129084
 
 .. categories::
 
