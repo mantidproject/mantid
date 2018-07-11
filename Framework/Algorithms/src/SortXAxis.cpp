@@ -46,7 +46,6 @@ void SortXAxis::exec() {
        specNum++) {
 
     const auto sizeOfX = inputWorkspace->x(specNum).size();
-    const auto sizeOfY = inputWorkspace->y(specNum).size();
 
     auto workspaceIndicies = createIndexes(sizeOfX);
 
@@ -54,7 +53,7 @@ void SortXAxis::exec() {
                    specNum);
 
     copyToOutputWorkspace(workspaceIndicies, inputWorkspace, outputWorkspace,
-                          sizeOfX, sizeOfY, specNum);
+                          sizeOfX, inputWorkspace->y(specNum).size(), specNum);
   }
   setProperty("OutputWorkspace", outputWorkspace);
 }
