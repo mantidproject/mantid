@@ -469,6 +469,8 @@ void KafkaEventStreamDecoder::waitForRunEndObservation() {
   int64_t offset;
   int32_t partition;
   std::string topicName;
+  m_spDetStream =
+    m_broker->subscribe({m_spDetTopic}, SubscribeAtOption::LASTONE);
   m_spDetStream->consumeMessage(&rawMsgBuffer, offset, partition, topicName);
   initLocalCaches(rawMsgBuffer, m_cachedRunStartStruct);
   m_receivedStartMsg = false; // reset flag
