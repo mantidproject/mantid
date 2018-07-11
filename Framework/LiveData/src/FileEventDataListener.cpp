@@ -53,7 +53,8 @@ FileEventDataListener::FileEventDataListener()
     }
   }
 
-  auto numChunks = ConfigService::Instance().getValue<int>("fileeventdatalistener.chunks");
+  auto numChunks =
+      ConfigService::Instance().getValue<int>("fileeventdatalistener.chunks");
   m_numChunks = numChunks.get_value_or(0);
   if (!numChunks.is_initialized()) {
     g_log.error("Configuration property fileeventdatalistener.chunks not "

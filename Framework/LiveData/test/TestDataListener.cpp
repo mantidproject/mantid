@@ -30,23 +30,30 @@ TestDataListener::TestDataListener()
 
   m_dataReset = false;
   m_timesCalled = 0;
-  m_resetAfter = ConfigService::Instance().getValue<int>("testdatalistener.reset_after").get_value_or(0);
-  m_changeStatusAfter = ConfigService::Instance().getValue<int>("testdatalistener.m_changeStatusAfter").get_value_or(0);
-  int temp = ConfigService::Instance().getValue<int>("testdatalistener.m_newStatus").get_value_or(0);
-  
+  m_resetAfter = ConfigService::Instance()
+                     .getValue<int>("testdatalistener.reset_after")
+                     .get_value_or(0);
+  m_changeStatusAfter =
+      ConfigService::Instance()
+          .getValue<int>("testdatalistener.m_changeStatusAfter")
+          .get_value_or(0);
+  int temp = ConfigService::Instance()
+                 .getValue<int>("testdatalistener.m_newStatus")
+                 .get_value_or(0);
+
   switch (temp) {
   case 0:
-	  m_newStatus = ILiveListener::NoRun;
-	  break;
+    m_newStatus = ILiveListener::NoRun;
+    break;
   case 1:
-	  m_newStatus = ILiveListener::BeginRun;
-	  break;
+    m_newStatus = ILiveListener::BeginRun;
+    break;
   case 2:
-	  m_newStatus = ILiveListener::Running;
-	  break;
+    m_newStatus = ILiveListener::Running;
+    break;
   case 4:
-	  m_newStatus = ILiveListener::EndRun;
-	  break;
+    m_newStatus = ILiveListener::EndRun;
+    break;
   }
 }
 

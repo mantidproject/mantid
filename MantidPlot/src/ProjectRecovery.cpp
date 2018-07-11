@@ -43,7 +43,7 @@ boost::optional<T> getConfigValue(const std::string &key) {
 }
 
 boost::optional<bool> getConfigBool(const std::string &key) {
-	return Mantid::Kernel::ConfigService::Instance().getValue<bool>(key);
+  return Mantid::Kernel::ConfigService::Instance().getValue<bool>(key);
 }
 
 /// Returns a string to the current top level recovery folder

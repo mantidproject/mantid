@@ -161,8 +161,11 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
     return INVALID_SOCKET;
   }
 
-  auto timeoutInSecConfigVal = Mantid::Kernel::ConfigService::Instance().getValue<int>("ISISDAE.Timeout");
-  int timeoutinSec = timeoutInSecConfigVal.get_value_or(120); // Default to  120 seconds if not specified
+  auto timeoutInSecConfigVal =
+      Mantid::Kernel::ConfigService::Instance().getValue<int>(
+          "ISISDAE.Timeout");
+  int timeoutinSec = timeoutInSecConfigVal.get_value_or(
+      120); // Default to  120 seconds if not specified
 
 #ifdef WIN32
   // WINDOWS

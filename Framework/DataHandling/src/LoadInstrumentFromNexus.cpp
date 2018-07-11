@@ -75,7 +75,8 @@ void LoadInstrumentFromNexus::exec() {
   instrument->add(source);
   instrument->markAsSource(source);
   // If user has provided an L1, use that
-  auto l1ConfigVal = Kernel::ConfigService::Instance().getValue<double>("instrument.L1");
+  auto l1ConfigVal =
+      Kernel::ConfigService::Instance().getValue<double>("instrument.L1");
   // Otherwise try and get it from the nexus file - but not there at present!
   // l1 = nxload.ivpb.i_l1;
   // Default to 10 if the file doesn't have it set

@@ -386,8 +386,12 @@ public:
 
   void TestCustomPropertyAsValue() {
     // Mantid.legs is defined in the properties script as 6
-    int value = ConfigService::Instance().getValue<int>("algorithms.retained").get_value_or(0);
-    double dblValue = ConfigService::Instance().getValue<double>("algorithms.retained").get_value_or(0);
+    int value = ConfigService::Instance()
+                    .getValue<int>("algorithms.retained")
+                    .get_value_or(0);
+    double dblValue = ConfigService::Instance()
+                          .getValue<double>("algorithms.retained")
+                          .get_value_or(0);
 
     TS_ASSERT_EQUALS(value, 50);
     TS_ASSERT_EQUALS(dblValue, 50.0);

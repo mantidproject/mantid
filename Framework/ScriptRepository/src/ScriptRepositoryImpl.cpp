@@ -1384,7 +1384,8 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file,
   // Configure Poco HTTP Client Session
   try {
     Kernel::InternetHelper inetHelper;
-	auto timeoutConfigVal = ConfigService::Instance().getValue<int>("network.scriptrepo.timeout");
+    auto timeoutConfigVal =
+        ConfigService::Instance().getValue<int>("network.scriptrepo.timeout");
     int timeout = timeoutConfigVal.get_value_or(DEFAULT_TIMEOUT_SEC);
     inetHelper.setTimeout(timeout);
 

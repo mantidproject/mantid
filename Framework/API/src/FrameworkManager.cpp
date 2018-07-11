@@ -161,7 +161,8 @@ void FrameworkManagerImpl::loadPlugins() {
  */
 void FrameworkManagerImpl::setNumOMPThreadsToConfigValue() {
   // Set the number of threads to use for this process
-	auto maxCores = Kernel::ConfigService::Instance().getValue<int>("MultiThreaded.MaxCores");
+  auto maxCores =
+      Kernel::ConfigService::Instance().getValue<int>("MultiThreaded.MaxCores");
   if (maxCores.get_value_or(0) > 0) {
     setNumOMPThreads(maxCores.get());
   }
@@ -436,8 +437,8 @@ void FrameworkManagerImpl::disableNexusOutput() {
 
 /// Starts asynchronous tasks that are done as part of Start-up.
 void FrameworkManagerImpl::asynchronousStartupTasks() {
-	auto instrumentUpdates = Kernel::ConfigService::Instance().getValue<bool>(
-		"UpdateInstrumentDefinitions.OnStartup");
+  auto instrumentUpdates = Kernel::ConfigService::Instance().getValue<bool>(
+      "UpdateInstrumentDefinitions.OnStartup");
 
   if (instrumentUpdates.get_value_or(false)) {
     updateInstrumentDefinitions();
@@ -446,7 +447,8 @@ void FrameworkManagerImpl::asynchronousStartupTasks() {
                            "instrument definitions.\n";
   }
 
-  auto newVersionCheck = Kernel::ConfigService::Instance().getValue<bool>("CheckMantidVersion.OnStartup");
+  auto newVersionCheck = Kernel::ConfigService::Instance().getValue<bool>(
+      "CheckMantidVersion.OnStartup");
   if (newVersionCheck.get_value_or(false)) {
     checkIfNewerVersionIsAvailable();
   } else {
@@ -458,7 +460,7 @@ void FrameworkManagerImpl::asynchronousStartupTasks() {
 
 void FrameworkManagerImpl::setupUsageReporting() {
   auto &configSvc = ConfigService::Instance();
-  auto interval =  configSvc.getValue<int>("Usage.BufferCheckInterval");
+  auto interval = configSvc.getValue<int>("Usage.BufferCheckInterval");
   auto &usageSvc = UsageService::Instance();
   if (interval.get_value_or(0) > 0) {
     usageSvc.setInterval(interval.get());

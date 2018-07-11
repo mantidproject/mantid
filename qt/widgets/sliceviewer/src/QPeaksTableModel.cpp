@@ -35,8 +35,10 @@ static QString v3dAsString(const Mantid::Kernel::V3D &v3d) {
  * @returns :: number of decimals to round displayed HKL values to.
  */
 static int getHKLPrecision() {
-	auto hklPrecConfigVal = Mantid::Kernel::ConfigService::Instance().getValue<int>("PeakColumn.hklPrec");
-    int hklPrec = hklPrecConfigVal.get_value_or(2);
+  auto hklPrecConfigVal =
+      Mantid::Kernel::ConfigService::Instance().getValue<int>(
+          "PeakColumn.hklPrec");
+  int hklPrec = hklPrecConfigVal.get_value_or(2);
   return hklPrec;
 }
 

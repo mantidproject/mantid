@@ -84,10 +84,10 @@ PeakColumn::PeakColumn(std::vector<Peak> &peaks, const std::string &name)
   auto hklPrec = ConfigService::Instance().getValue<int>(key);
   this->m_hklPrec = hklPrec.get_value_or(2);
   if (!hklPrec.is_initialized()) {
-	  g_log.information()
-		  << "In PeakColumn constructor, did not find any value for '" << key
-		  << "' from the Config Service. Using default: " << this->m_hklPrec
-		  << "\n";
+    g_log.information()
+        << "In PeakColumn constructor, did not find any value for '" << key
+        << "' from the Config Service. Using default: " << this->m_hklPrec
+        << "\n";
   }
 }
 

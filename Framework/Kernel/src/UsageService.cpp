@@ -65,11 +65,12 @@ UsageServiceImpl::UsageServiceImpl()
       m_startupActiveMethod(this, &UsageServiceImpl::sendStartupAsyncImpl),
       m_featureActiveMethod(this, &UsageServiceImpl::sendFeatureAsyncImpl) {
   setInterval(60);
-  auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>("usagereports.rooturl");
+  auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>(
+      "usagereports.rooturl");
   if (!url.is_initialized()) {
     g_log.debug() << "Failed to load usage report url\n";
   } else {
-	m_url = url.get();
+    m_url = url.get();
     g_log.debug() << "Root usage reporting url is " << m_url << "\n";
   }
   m_startTime = Types::Core::DateAndTime::getCurrentTime();

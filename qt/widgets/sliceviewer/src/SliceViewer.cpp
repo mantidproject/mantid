@@ -101,7 +101,9 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   ui.setupUi(this);
   std::string enableNonOrthogonal;
-  auto nonOrthogonalDefaultValue = Kernel::ConfigService::Instance().getValue<bool>("sliceviewer.nonorthogonal");
+  auto nonOrthogonalDefaultValue =
+      Kernel::ConfigService::Instance().getValue<bool>(
+          "sliceviewer.nonorthogonal");
   m_nonOrthogonalDefault = nonOrthogonalDefaultValue.get_value_or(false);
 
   m_inf = std::numeric_limits<double>::infinity();

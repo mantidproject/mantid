@@ -1119,9 +1119,9 @@ boost::optional<T> ConfigServiceImpl::getValue(const std::string &keyName) {
   int result = Mantid::Kernel::Strings::convert(strValue, output);
 
   if (result != 1) {
-	  return boost::none;
+    return boost::none;
   }
-  
+
   return boost::optional<T>(output);
 }
 
@@ -1134,19 +1134,20 @@ boost::optional<T> ConfigServiceImpl::getValue(const std::string &keyName) {
 */
 template <>
 boost::optional<bool> ConfigServiceImpl::getValue(const std::string &keyName) {
-	auto returnedValue = getValue<std::string>(keyName);
-	if (!returnedValue.is_initialized()) {
-		return boost::none;
-	}
+  auto returnedValue = getValue<std::string>(keyName);
+  if (!returnedValue.is_initialized()) {
+    return boost::none;
+  }
 
-  std::transform(returnedValue->begin(), returnedValue->end(), returnedValue->begin(), ::tolower);
+  std::transform(returnedValue->begin(), returnedValue->end(),
+                 returnedValue->begin(), ::tolower);
 
-	bool trueString = returnedValue->find("true") != std::string::npos;
-	bool valueOne = returnedValue->find("1") != std::string::npos;
+  bool trueString = returnedValue->find("true") != std::string::npos;
+  bool valueOne = returnedValue->find("1") != std::string::npos;
   bool onOffString = returnedValue->find("on") != std::string::npos;
 
-	// A string of 1 or true both count
-	return trueString || valueOne || onOffString;
+  // A string of 1 or true both count
+  return trueString || valueOne || onOffString;
 }
 
 /**
@@ -2020,12 +2021,10 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
   if (!m_isProxySet) {
     // set the proxy
     // first check if the proxy is defined in the properties file
-	  auto proxyHost = getValue<std::string>("proxy.host");
-	  auto proxyPort = getValue<int>("proxy.port");
+    auto proxyHost = getValue<std::string>("proxy.host");
+    auto proxyPort = getValue<int>("proxy.port");
 
-
-
-    if ( proxyHost.is_initialized() && proxyPort.is_initialized()) {
+    if (proxyHost.is_initialized() && proxyPort.is_initialized()) {
       // set it from the config values
       m_proxyInfo = ProxyInfo(proxyHost.get(), proxyPort.get(), true);
     } else {
@@ -2116,11 +2115,16 @@ int ConfigServiceImpl::FindLowestFilterLevel() const {
 }
 
 /// \cond TEMPLATE
-template DLLExport boost::optional<double> ConfigServiceImpl::getValue(const std::string &);
-template DLLExport boost::optional<std::string> ConfigServiceImpl::getValue(const std::string &);
-template DLLExport boost::optional<int> ConfigServiceImpl::getValue(const std::string &);
-template DLLExport boost::optional<size_t> ConfigServiceImpl::getValue(const std::string &);
-template DLLExport boost::optional<bool> ConfigServiceImpl::getValue(const std::string &);
+template DLLExport boost::optional<double>
+ConfigServiceImpl::getValue(const std::string &);
+template DLLExport boost::optional<std::string>
+ConfigServiceImpl::getValue(const std::string &);
+template DLLExport boost::optional<int>
+ConfigServiceImpl::getValue(const std::string &);
+template DLLExport boost::optional<size_t>
+ConfigServiceImpl::getValue(const std::string &);
+template DLLExport boost::optional<bool>
+ConfigServiceImpl::getValue(const std::string &);
 /// \endcond TEMPLATE
 
 } // namespace Kernel
