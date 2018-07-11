@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
+from mantid.api import SpectrumDefinition
 
 class SpectrumInfoTest(unittest.TestCase):
 
@@ -75,7 +76,7 @@ class SpectrumInfoTest(unittest.TestCase):
         self.assertEquals(info.isMasked(1), False)
 
     """
-    The following test cases test for returned V3D objects. The objects
+    The following are test cases test for returned V3D objects. The objects
     represent a vector in 3 dimensions.
     """
 
@@ -93,6 +94,41 @@ class SpectrumInfoTest(unittest.TestCase):
         """ Test that the sample's position is returned. """
         info = self._ws.spectrumInfo()
         self.assertEquals(type(info.samplePosition()), V3D)
+
+    """
+    The following are test cases are SpectrumDefintion methods.
+    """
+
+    def test_spectrumDefinitionCall(self):
+        """ Get the SpectrumDefintion """
+        info = self._ws.spectrumInfo()
+        self.assertEquals(type(info.spectrumDefinition(1)), SpectrumDefinition)
+
+    def test_spectrumDefintionSize(self):
+        """ Check the size of the SpectrumDefinition
+        (i.e. number of detectors) """
+        info = self._ws.spectrumInfo()
+        spectrumDef = info.spectrumDefinition(1)
+        self.assertEquals(spectrumDef.size(), 1)
+
+    def test_spectrumDefintionAdd(self):
+        """ Add a pair of detector index and time index """
+        info = self._ws.spectrumInfo()
+        spectrumDef = info.spectrumDefinition(1)
+        spectrumDef.add(1, 1)
+        self.assertEquals(spectrumDef.size(), 2)
+
+    def test_spectrumDefintionEquals(self):
+        """ Check the equality of the SpectrumDefintion """
+        info = self._ws.spectrumInfo()
+        spectrumDef = info.spectrumDefinition(1)
+        self.assertTrue(spectrumDef.equals(spectrumDef))
+
+    def test_spectrumDefintionGet(self):
+        """ See if indexing works """
+        info = self._ws.spectrumInfo()
+        spectrumDef = info.spectrumDefinition(1)
+        self.assertEquals(spectrumDef.get(0), (1, 0))
 
 if __name__ == '__main__':
     unittest.main()
