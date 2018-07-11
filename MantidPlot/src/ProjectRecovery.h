@@ -81,9 +81,8 @@ private:
   /// Deletes oldest checkpoints beyond the maximum number to keep
   void deleteExistingCheckpoints(size_t checkpointsToKeep) const;
 
-  /// Loads a recovery checkpoint in the given folder - TODO in future PR
-  void loadRecoveryCheckpoint(const Poco::Path &path,
-                              const Poco::Path &historyDest);
+  /// Loads a recovery checkpoint in the given folder 
+  void loadRecoveryCheckpoint(const Poco::Path &path);
 
   /// Open a recovery checkpoint in the scripting window
   void openInEditor(const Poco::Path &inputFolder,

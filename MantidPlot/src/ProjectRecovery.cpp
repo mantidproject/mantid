@@ -333,6 +333,7 @@ void ProjectRecovery::stopProjectSaving() {
   }
 }
 
+<<<<<<< HEAD
 void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder,
                                              const Poco::Path &historyDest) {
   ScriptingWindow *scriptWindow = m_windowPtr->getScriptWindowHandle();
@@ -368,6 +369,60 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder,
 
 void ProjectRecovery::openInEditor(const Poco::Path &inputFolder,
                                    const Poco::Path &historyDest) {
+=======
+/**
+  * Asynchronously loads a recovery checkpoint by opening
+  * a scripting window to the ordered workspace
+  * history file, then execute it. When this finishes the
+  * project loading mechanism is invoked in the main GUI thread
+  * to recreate all Qt objects / widgets
+  *
+  * @param recoveryFolder : The checkpoint folder
+  * @throws : If Qt binding fails to main GUI thread
+  */
+void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {	
+	ScriptingWindow *scriptWindow = m_windowPtr->getScriptWindowHandle();
+	if (!scriptWindow) {
+		throw std::runtime_error("Could not get handle to scripting window");
+	}
+
+	// Ensure the window repaints so it doesn't appear frozen before exec
+	scriptWindow->executeCurrentTab(Script::ExecutionMode::Serialised);
+	g_log.notice("Re-opening GUIs");
+
+	
+	auto projectFile = Poco::Path(recoveryFolder).append(OUTPUT_PROJ_NAME);
+
+	bool loadCompleted = false;
+	if (!QMetaObject::invokeMethod(m_windowPtr, "loadProjectRecovery",
+		Qt::BlockingQueuedConnection,
+		Q_RETURN_ARG(bool, loadCompleted),
+		Q_ARG(const std::string, projectFile.toString()))) {
+		throw std::runtime_error(
+			"Project Recovery: Failed to load project windows - Qt binding failed");
+	}
+
+	if (!loadCompleted) {
+		g_log.warning("Loading failed to recovery everything completely");
+		return;
+	}
+	g_log.notice("Project Recovery finished");
+
+	// Restart project recovery when the async part finishes 
+	clearAllCheckpoints();
+	startProjectSaving();
+}
+
+/**
+  * Compiles the project recovery script from a given checkpoint
+  * folder and opens this in the script editor
+  *
+  * @param inputFolder : The folder containing the checkpoint to recover
+  * @param historyDest : Where to save the ordered history
+  * @throws If a handle to the scripting window cannot be obtained
+  */
+void ProjectRecovery::openInEditor(const Poco::Path &inputFolder, const Poco::Path &historyDest) {
+>>>>>>> Re #22878 Remove unused param and add doxygen
   compileRecoveryScript(inputFolder, historyDest);
 
   // Force application window to create the script window first
