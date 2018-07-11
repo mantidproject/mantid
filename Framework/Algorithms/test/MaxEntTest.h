@@ -695,6 +695,50 @@ public:
     TS_ASSERT_DELTA(angle->y(2).back(), 0.001, 0.001);
   }
 
+  void test_three_spectra_apart() {
+
+    auto ws = createWorkspaceComplex(10, 0.0, 3, 0.0);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", true);
+    alg->setProperty("A", 0.01);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    MatrixWorkspace_sptr chi = alg->getProperty("EvolChi");
+    MatrixWorkspace_sptr angle = alg->getProperty("EvolAngle");
+
+    TS_ASSERT(data);
+    TS_ASSERT(image);
+    TS_ASSERT(chi);
+    TS_ASSERT(angle);
+
+    // Test some values
+    TS_ASSERT_EQUALS(data->y(0).size(), 10);
+    TS_ASSERT_DELTA(data->y(0)[5], 0.2495, 0.001);
+    TS_ASSERT_DELTA(data->y(1)[5], 0.2495, 0.001);
+    TS_ASSERT_DELTA(data->y(2)[5], 0.2495, 0.001);
+    TS_ASSERT_EQUALS(data->y(5).size(), 10);
+    TS_ASSERT_DELTA(data->y(5)[5], -0.906, 0.001);
+
+    // Test that the algorithm converged
+    TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
+    TS_ASSERT_DELTA(angle->y(0).back(), 0.001, 0.001);
+    TS_ASSERT_DELTA(chi->y(1).back(), 1.000, 0.001);
+    TS_ASSERT_DELTA(angle->y(1).back(), 0.001, 0.001);
+    TS_ASSERT_DELTA(chi->y(2).back(), 1.000, 0.001);
+    TS_ASSERT_DELTA(angle->y(2).back(), 0.001, 0.001);
+  }
+
   void test_three_spectra_together() {
 
     auto ws = createWorkspaceComplex(10, 0.0, 3, 0.0);
@@ -725,11 +769,11 @@ public:
 
     // Test some values
     TS_ASSERT_EQUALS(data->y(0).size(), 10);
-    TS_ASSERT_DELTA(data->y(0)[5], 0.251, 0.001);
-    TS_ASSERT_DELTA(data->y(1)[5], 0.249, 0.001);
-    TS_ASSERT_DELTA(data->y(2)[5], 0.247, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[5], 0.2495, 0.001);
+    TS_ASSERT_DELTA(data->y(1)[5], 0.2495, 0.001);
+    TS_ASSERT_DELTA(data->y(2)[5], 0.2495, 0.001);
     TS_ASSERT_EQUALS(data->y(5).size(), 10);
-    TS_ASSERT_DELTA(data->y(5)[5], -0.902, 0.001);
+    TS_ASSERT_DELTA(data->y(5)[5], -0.906, 0.001);
 
     // Test that the algorithm converged
     TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
