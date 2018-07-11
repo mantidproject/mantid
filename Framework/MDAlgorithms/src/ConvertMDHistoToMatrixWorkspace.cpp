@@ -321,7 +321,7 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   outputWorkspace->getAxis(0)->unit() = labelX;
 
   // set the second axis
-  auto yAxis = new BinEdgeAxis(ny+1);
+  auto yAxis = new BinEdgeAxis(ny + 1);
   for (size_t i = 0; i <= ny; ++i) {
     yAxis->setValue(i, yDim->getX(i));
   }
