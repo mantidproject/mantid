@@ -79,7 +79,6 @@ import platform
 from six import with_metaclass
 
 
-
 class ISISIndirectInelasticBase(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
     '''
     A common base class for the ISISIndirectInelastic* base classes.
