@@ -600,8 +600,7 @@ public:
     TS_ASSERT_DELTA(angle->y(0).back(), 0.001, 0.001);
   }
 
-  void xtest_adjustments_three_spectra() {
-  // THIS TEST NEEDS REWRITING
+  void test_adjustments_three_spectra() {
 
     auto ws = createWorkspaceReal(10, 0.0, 3);
     auto linAdj = createWorkspaceAdjustments(10, 1.05, 0.00, 0.0, 3);
@@ -648,7 +647,7 @@ public:
     TS_ASSERT_DELTA(angle->y(2).back(), 0.001, 0.001);
   }
 
-  void test_three_spectra_together() {
+  void xtest_three_spectra_together() {
 
     auto ws = createWorkspaceReal(10, 0.0, 6);
 
@@ -983,6 +982,45 @@ public:
     createWS->setProperty("DataY", Y);
     createWS->setProperty("DataE", E);
     createWS->setProperty("NSpec", static_cast<int>(nSpec));
+    createWS->setPropertyValue("OutputWorkspace", "ws");
+    createWS->execute();
+    MatrixWorkspace_sptr ws = createWS->getProperty("OutputWorkspace");
+
+    return ws;
+  }
+
+  MatrixWorkspace_sptr createWorkspaceComplex(size_t maxt, double phase,
+    size_t nSpec) {
+
+    // Create cosine with phase 'phase'
+
+    // Frequency of the oscillations
+    double w = 1.6;
+    // phase shift between spectra
+    double shift = 0.5;
+
+    size_t nPts = maxt * nSpec;
+    MantidVec X(2*nPts);
+    MantidVec Y(2*nPts);
+    MantidVec E(2*nPts);
+    for (size_t t = 0; t < maxt; t++) {
+      double x = 2. * M_PI * static_cast<double>(t) / static_cast<double>(maxt);
+      for (size_t s = 0; s < nSpec; s++) {
+        X[t + s * maxt] = x;
+        Y[t + s * maxt] = cos(w * x + phase + static_cast<double>(s) * shift);
+        E[t + s * maxt] = 0.1;
+        X[t + s * maxt + nPts] = x;
+        Y[t + s * maxt + nPts] = sin(w * x + phase + static_cast<double>(s) * shift);
+        E[t + s * maxt + nPts] = 0.1;
+      }
+    }
+    auto createWS = AlgorithmManager::Instance().create("CreateWorkspace");
+    createWS->initialize();
+    createWS->setChild(true);
+    createWS->setProperty("DataX", X);
+    createWS->setProperty("DataY", Y);
+    createWS->setProperty("DataE", E);
+    createWS->setProperty("NSpec", static_cast<int>(2*nSpec));
     createWS->setPropertyValue("OutputWorkspace", "ws");
     createWS->execute();
     MatrixWorkspace_sptr ws = createWS->getProperty("OutputWorkspace");
