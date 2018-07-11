@@ -26,6 +26,7 @@ private:
   MantidTreeWidget *m_parent;
   static Mantid::Types::Core::DateAndTime
   getLastModified(const QTreeWidgetItem *);
+  std::size_t getMemorySize() const;
   int m_sortPos;
 };
 }
