@@ -380,8 +380,9 @@ void LoadBankFromDiskTask::run() {
       this->prepareEventId(file, start_event, stop_event, event_index);
 
       // These are the arguments to getSlab()
-      m_loadStart[0] = static_cast<int>(start_event);
-      m_loadSize[0] = static_cast<int>(stop_event - start_event);
+      m_loadStart[0] = static_cast<int64_t>(start_event);
+      m_loadSize[0] =
+          static_cast<int64_t>(stop_event) - static_cast<int64_t>(start_event);
 
       if ((m_loadSize[0] > 0) && (m_loadStart[0] >= 0)) {
         // Load pixel IDs
@@ -470,8 +471,8 @@ void LoadBankFromDiskTask::run() {
     mid_id = (m_max_id + m_min_id) / 2;
 
   // No error? Launch a new task to process that data.
-  size_t numEvents = m_loadSize[0];
-  size_t startAt = m_loadStart[0];
+  size_t numEvents = static_cast<size_t>(m_loadSize[0]);
+  size_t startAt = static_cast<size_t>(m_loadStart[0]);
 
   // convert things to shared_arrays
   boost::shared_array<uint32_t> event_id_shrd(m_event_id);

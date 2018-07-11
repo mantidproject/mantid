@@ -79,9 +79,9 @@ private:
   /// Old names in the file?
   bool m_oldNexusFileNames;
   /// Index to load start at in the file
-  std::vector<int> m_loadStart;
+  std::vector<int64_t> m_loadStart;
   /// How much to load in the file
-  std::vector<int> m_loadSize;
+  std::vector<int64_t> m_loadSize;
   /// Event pixel ID data
   uint32_t *m_event_id;
   /// Minimum pixel ID in this data
