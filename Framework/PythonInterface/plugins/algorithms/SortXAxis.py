@@ -16,7 +16,7 @@ class SortXAxis(PythonAlgorithm):
 
     def version(self):
         return 1
-    
+
     def name(self):
         return "SortXAxis"
 
