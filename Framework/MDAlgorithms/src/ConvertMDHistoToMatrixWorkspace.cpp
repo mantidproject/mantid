@@ -6,7 +6,6 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidHistogramData/LinearGenerator.h"
