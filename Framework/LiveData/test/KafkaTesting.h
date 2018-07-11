@@ -387,86 +387,81 @@ private:
   int32_t m_nperiods = 1;
 };
 
-
 // -----------------------------------------------------------------------------
 // Varing period data stream with run and event messages
 // -----------------------------------------------------------------------------
 class FakeVariablePeriodSubscriber
-	: public Mantid::LiveData::IKafkaStreamSubscriber {
+    : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
-	explicit FakeVariablePeriodSubscriber(int64_t stopOffset)
-		: m_stopOffset(stopOffset) {}
-	void subscribe() override {}
-	void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
-	void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
-		std::string &topic) override {
-		assert(buffer);
+  explicit FakeVariablePeriodSubscriber(int64_t stopOffset)
+      : m_stopOffset(stopOffset) {}
+  void subscribe() override {}
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
+                      std::string &topic) override {
+    assert(buffer);
 
-		// Return messages in this order:
-		// Run start (with 1 period)
-		// Event data
-		// Run stop
-		// Run start (with 2 periods)
-		// Event data
-		// Event data
-		// Run stop
+    // Return messages in this order:
+    // Run start (with 1 period)
+    // Event data
+    // Run stop
+    // Run start (with 2 periods)
+    // Event data
+    // Event data
+    // Run stop
 
-		switch (m_nextOffset) {
-		case 0:
-			fakeReceiveARunStartMessage(buffer, 1000, m_startTime, m_instName,
-				m_nperiods);
-			break;
-		case 2:
-			fakeReceiveARunStartMessage(buffer, 1001, m_startTime, m_instName,
-				2);
-			break;
-		case 3:
-			fakeReceiveARunStopMessage(buffer, m_stopTime);
-			break;
-		case 5:
-			fakeReceiveAnISISEventMessage(buffer, 1);
-			break;
-		case 6:
-			fakeReceiveARunStopMessage(buffer, m_stopTime);
-			break;
-		default:
-			fakeReceiveAnISISEventMessage(buffer, 0);
-		}
-		topic = "topic_name";
-		offset = m_nextOffset;
-		partition = 0;
-		m_nextOffset++;
-	}
-	std::unordered_map<std::string, std::vector<int64_t>>
-		getOffsetsForTimestamp(int64_t timestamp) override {
-		UNUSED_ARG(timestamp);
-		// + 1 because rdkafka::offsetsForTimes returns the first offset _after_ the
-		// given timestamp
-		return{ std::pair<std::string, std::vector<int64_t>>(m_topicName,
-		{ 2 }) };
-	}
-	std::unordered_map<std::string, std::vector<int64_t>>
-		getCurrentOffsets() override {
-		return{ std::pair<std::string, std::vector<int64_t>>(m_topicName,
-		{ 2 }) };
-	}
-	void seek(const std::string &topic, uint32_t partition,
-		int64_t offset) override {
-		UNUSED_ARG(topic);
-		UNUSED_ARG(partition);
-		UNUSED_ARG(offset);
-	}
+    switch (m_nextOffset) {
+    case 0:
+      fakeReceiveARunStartMessage(buffer, 1000, m_startTime, m_instName,
+                                  m_nperiods);
+      break;
+    case 2:
+      fakeReceiveARunStartMessage(buffer, 1001, m_startTime, m_instName, 2);
+      break;
+    case 3:
+      fakeReceiveARunStopMessage(buffer, m_stopTime);
+      break;
+    case 5:
+      fakeReceiveAnISISEventMessage(buffer, 1);
+      break;
+    case 6:
+      fakeReceiveARunStopMessage(buffer, m_stopTime);
+      break;
+    default:
+      fakeReceiveAnISISEventMessage(buffer, 0);
+    }
+    topic = "topic_name";
+    offset = m_nextOffset;
+    partition = 0;
+    m_nextOffset++;
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp(int64_t timestamp) override {
+    UNUSED_ARG(timestamp);
+    // + 1 because rdkafka::offsetsForTimes returns the first offset _after_ the
+    // given timestamp
+    return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {2})};
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getCurrentOffsets() override {
+    return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {2})};
+  }
+  void seek(const std::string &topic, uint32_t partition,
+            int64_t offset) override {
+    UNUSED_ARG(topic);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(offset);
+  }
 
 private:
-	const std::string m_topicName = "topic_name";
-	uint32_t m_nextOffset = 0;
-	std::string m_startTime = "2016-08-31T12:07:42";
-	std::string m_stopTime = "2016-08-31T12:07:52";
-	const std::string m_instName = "HRPDTEST";
-	int32_t m_nperiods = 1;
-	int64_t m_stopOffset;
+  const std::string m_topicName = "topic_name";
+  uint32_t m_nextOffset = 0;
+  std::string m_startTime = "2016-08-31T12:07:42";
+  std::string m_stopTime = "2016-08-31T12:07:52";
+  const std::string m_instName = "HRPDTEST";
+  int32_t m_nperiods = 1;
+  int64_t m_stopOffset;
 };
-
 
 // -----------------------------------------------------------------------------
 // Fake data stream with run and event messages

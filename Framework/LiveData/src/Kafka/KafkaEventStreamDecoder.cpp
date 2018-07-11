@@ -258,7 +258,6 @@ void KafkaEventStreamDecoder::captureImplExcept() {
   auto runStartData = getRunStartMessage(runBuffer);
   initLocalCaches(buffer, runStartData);
 
-
   m_interrupt = false;
   m_endRun = false;
   m_runStatusSeen = false;
@@ -336,17 +335,17 @@ void KafkaEventStreamDecoder::captureImplExcept() {
         checkOffsets = true;
         checkIfAllStopOffsetsReached(reachedEnd, checkOffsets);
       } else if (runMsg->info_type_type() == InfoTypes_RunStart) {
-		auto runStartMsg = static_cast<const RunStart *>(runMsg->info_type());
-		m_runNumber = runStartMsg->run_number();
-		auto runStartTime =
-			static_cast<time_t>(runStartMsg->start_time() / 1000000000);
-		m_runStart.set_from_time_t(runStartTime);
-		m_cachedRunStartStruct = {
-			runStartMsg->instrument_name()->str(), runStartMsg->run_number(),
-			runStartMsg->start_time(),
-			static_cast<size_t>(runStartMsg->n_periods()), getRunInfoMessage(buffer) };
-		m_receivedStartMsg = true;
-
+        auto runStartMsg = static_cast<const RunStart *>(runMsg->info_type());
+        m_runNumber = runStartMsg->run_number();
+        auto runStartTime =
+            static_cast<time_t>(runStartMsg->start_time() / 1000000000);
+        m_runStart.set_from_time_t(runStartTime);
+        m_cachedRunStartStruct = {runStartMsg->instrument_name()->str(),
+                                  runStartMsg->run_number(),
+                                  runStartMsg->start_time(),
+                                  static_cast<size_t>(runStartMsg->n_periods()),
+                                  getRunInfoMessage(buffer)};
+        m_receivedStartMsg = true;
       }
     }
     m_cbIterationEnd();
@@ -462,9 +461,9 @@ void KafkaEventStreamDecoder::waitForRunEndObservation() {
   // and trigger m_interrupt for next loop iteration if user requested
   // LiveData algorithm to stop at the end of the run
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
-  //ToDo:Check if start message flag is recieved
+  // ToDo:Check if start message flag is recieved
   if (!m_receivedStartMsg) {
-	  //wait for message
+    // wait for message
   }
   std::string rawMsgBuffer;
   int64_t offset;
@@ -584,7 +583,8 @@ KafkaEventStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
  * By the end of this method the local event buffer is ready to accept
  * events
  */
-void KafkaEventStreamDecoder::initLocalCaches(std::string rawMsgBuffer, const RunStartStruct runStartData) {
+void KafkaEventStreamDecoder::initLocalCaches(
+    std::string rawMsgBuffer, const RunStartStruct runStartData) {
 
   if (rawMsgBuffer.empty()) {
     throw std::runtime_error("KafkaEventStreamDecoder::initLocalCaches() - "

@@ -95,7 +95,8 @@ private:
   void captureImpl() noexcept;
   void captureImplExcept();
 
-  void initLocalCaches(std::string rawMsgBuffer, const RunStartStruct runStartData);
+  void initLocalCaches(std::string rawMsgBuffer,
+                       const RunStartStruct runStartData);
   DataObjects::EventWorkspace_sptr createBufferWorkspace(const size_t nspectra,
                                                          const int32_t *spec,
                                                          const int32_t *udet,
