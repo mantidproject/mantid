@@ -46,22 +46,10 @@ class ChudleyElliot(IFunction1D):
     def function1D(self, xvals):
         tau = self.getParameterValue("Tau")
         length = self.getParameterValue("L")
-
         xvals = np.array(xvals)
         hwhm = self.hbar*(1.0 - np.sin(xvals * length) / (xvals * length))/tau
 
         return hwhm
-
-    def functionDeriv1D(self, xvals, jacobian):
-        tau = self.getParameterValue("Tau")
-        length = self.getParameterValue("L")
-        i = 0
-        for x in xvals:
-            s = math.sin(x*length)/(x*length)
-            h = self.hbar * (1.0-s)/tau
-            jacobian.set(i,0,-h/tau)
-            jacobian.set(i,1, self.hbar * (math.cos(x*length)-s)/(length*tau))
-            i += 1
 
 
 # Required to have Mantid recognise the new function

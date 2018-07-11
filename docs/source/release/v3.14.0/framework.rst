@@ -9,4 +9,15 @@ Framework Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Python
+------
+
+Improvements
+############
+
+- :ref:`ChudleyElliot <func-ChudleyElliot>` includes hbar in the definition
+
+
 :ref:`Release 3.14.0 <v3.14.0>`
+
+
