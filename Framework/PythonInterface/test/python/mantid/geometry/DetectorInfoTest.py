@@ -25,5 +25,9 @@ class DetectorInfoTest(unittest.TestCase):
         self.assertEquals(info.isMasked(0), False)
         self.assertEquals(info.isMasked(1), False)
 
+    def test_isEquivalent(self):
+        info = self._ws.detectorInfo()
+        self.assertTrue(info.isEquivalent(info))
+
 if __name__ == '__main__':
     unittest.main()
