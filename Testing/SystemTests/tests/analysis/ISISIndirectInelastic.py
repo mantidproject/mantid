@@ -69,14 +69,15 @@ stresstesting.MantidStressTest
 
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
-import os
 from abc import ABCMeta, abstractmethod
 
 from mantid.simpleapi import *
 
 # For debugging only.
 from mantid.api import FileFinder
+import platform
 from six import with_metaclass
+
 
 
 class ISISIndirectInelasticBase(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
@@ -849,11 +850,11 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
     def get_reference_files(self):
         self.tolerance = 1e-3
         ref_files = ['II.IRISFury.nxs']
-		if platform.system() == "Windows":
-			ref_files += ['II.IRISFuryFitSeq_win.nxs']
-		else:
-			ref_files += ['II.IRISFuryFitSeq.nxs']
-		return ref_files
+        if platform.system() == "Windows":
+            ref_files += ['II.IRISFuryFitSeq_win.nxs']
+        else:
+            ref_files += ['II.IRISFuryFitSeq.nxs']
+        return ref_files
 
 #==============================================================================
 
