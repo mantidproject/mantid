@@ -332,6 +332,7 @@ void ReflectometryReductionOne2::exec() {
   m_spectrumInfo = &m_runWS->spectrumInfo();
   auto instrument = m_runWS->getInstrument();
   m_refFrame = instrument->getReferenceFrame();
+  m_partialBins = getProperty("IncludePartialBins");
 
   // Find and cache detector groups and theta0
   findDetectorGroups();
@@ -467,7 +468,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     if (m_convertUnits) {
       g_log.debug("Converting input workspace to wavelength\n");
       result = convertToWavelength(result);
-      findWavelengthMinMax(result);
       outputDebugWorkspace(result, wsName, "_lambda", debug, step);
     }
     // Now the workspace is in wavelength, find the min/max wavelength
@@ -532,11 +532,16 @@ ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
   Property *backgroundMinProperty =
       getProperty("MonitorBackgroundWavelengthMin");
   Property *backgroundMaxProperty =
-      getProperty("MonitorBackgroundWavelengthMin");
+      getProperty("MonitorBackgroundWavelengthMax");
   if (!monProperty->isDefault() && !backgroundMinProperty->isDefault() &&
       !backgroundMaxProperty->isDefault()) {
     const bool integratedMonitors =
         getProperty("NormalizeByIntegratedMonitors");
+    int index = getProperty("I0MonitorIndex");
+    if (!m_spectrumInfo->isMonitor(index)) {
+      throw std::invalid_argument("A monitor is expected at spectrum index " +
+                                  std::to_string(index));
+    }
     const auto monitorWS = makeMonitorWS(m_runWS, integratedMonitors);
     if (!integratedMonitors)
       detectorWS = rebinDetectorsToMonitors(detectorWS, monitorWS);
@@ -760,6 +765,11 @@ void ReflectometryReductionOne2::findDetectorGroups() {
 
   for (const auto &group : m_detectorGroups) {
     for (const auto &spIdx : group) {
+      if (m_spectrumInfo->isMonitor(spIdx)) {
+        throw std::invalid_argument("A detector is expected at spectrum " +
+                                    std::to_string(spIdx) +
+                                    ", found a monitor");
+      }
       if (spIdx > m_spectrumInfo->size() - 1) {
         throw std::runtime_error(
             "ProcessingInstructions contains an out-of-range index: " +
@@ -881,6 +891,77 @@ void ReflectometryReductionOne2::findWavelengthMinMax(
   }
 }
 
+/** Return the spectrum index of the detector to use in the projection for the
+ * start of the virtual IvsLam range when summing in Q
+ */
+size_t ReflectometryReductionOne2::findIvsLamRangeMinDetector(
+    const std::vector<size_t> &detectors) {
+  // If we're including partial bins, we use the full input range, which means
+  // we project the top left and bottom right corner. For the start of the
+  // range we therefore use the highest theta, i.e. max detector index. If
+  // excluding partial bins we use the bottom left and top right corner so use
+  // the min detector for the start of the range.
+  if (m_partialBins)
+    return detectors.back();
+  else
+    return detectors.front();
+}
+
+/** Return the spectrum index of the detector to use in the projection for the
+ * end of the virtual IvsLam range when summing in Q
+ */
+size_t ReflectometryReductionOne2::findIvsLamRangeMaxDetector(
+    const std::vector<size_t> &detectors) {
+  // If we're including partial bins, we use the full input range, which means
+  // we project the top left and bottom right corner. For the end (max) of the
+  // range we therefore use the lowest theta, i.e. min detector index. If
+  // excluding partial bins we use the bottom left and top right corner so use
+  // the max detector for the end of the range.
+  if (m_partialBins)
+    return detectors.front();
+  else
+    return detectors.back();
+}
+
+double ReflectometryReductionOne2::findIvsLamRangeMin(
+    MatrixWorkspace_sptr detectorWS, const std::vector<size_t> &detectors,
+    const double lambda) {
+  double projectedMin = 0.0;
+
+  const size_t spIdx = findIvsLamRangeMinDetector(detectors);
+  const double twoTheta = getDetectorTwoTheta(m_spectrumInfo, spIdx);
+  const double bTwoTheta = getDetectorTwoThetaRange(spIdx);
+
+  // For bLambda, use the average bin size for this spectrum
+  auto xValues = detectorWS->x(spIdx);
+  double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
+                   static_cast<int>(xValues.size());
+  double dummy = 0.0;
+  getProjectedLambdaRange(lambda, twoTheta, bLambda, bTwoTheta, detectors,
+                          projectedMin, dummy, m_partialBins);
+  return projectedMin;
+}
+
+double ReflectometryReductionOne2::findIvsLamRangeMax(
+    MatrixWorkspace_sptr detectorWS, const std::vector<size_t> &detectors,
+    const double lambda) {
+  double projectedMax = 0.0;
+
+  const size_t spIdx = findIvsLamRangeMaxDetector(detectors);
+  const double twoTheta = getDetectorTwoTheta(m_spectrumInfo, spIdx);
+  const double bTwoTheta = getDetectorTwoThetaRange(spIdx);
+
+  // For bLambda, use the average bin size for this spectrum
+  auto xValues = detectorWS->x(spIdx);
+  double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
+                   static_cast<int>(xValues.size());
+
+  double dummy = 0.0;
+  getProjectedLambdaRange(lambda, twoTheta, bLambda, bTwoTheta, detectors,
+                          dummy, projectedMax, m_partialBins);
+  return projectedMax;
+}
+
 /**
 * Find the range of the projected lambda range when summing in Q
 *
@@ -897,26 +978,8 @@ void ReflectometryReductionOne2::findIvsLamRange(
     double &projectedMax) {
 
   // Get the new max and min X values of the projected (virtual) lambda range
-  double dummy = 0.0;
-
-  const size_t spIdxMin = detectors.front();
-  const double twoThetaMin = getDetectorTwoTheta(m_spectrumInfo, spIdxMin);
-  const double bTwoThetaMin = getDetectorTwoThetaRange(spIdxMin);
-  // For bLambda, use the average bin size for this spectrum
-  auto xValues = detectorWS->x(spIdxMin);
-  double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
-                   static_cast<int>(xValues.size());
-  getProjectedLambdaRange(lambdaMax, twoThetaMin, bLambda, bTwoThetaMin,
-                          detectors, dummy, projectedMax);
-
-  const size_t spIdxMax = detectors.back();
-  const double twoThetaMax = getDetectorTwoTheta(m_spectrumInfo, spIdxMax);
-  const double bTwoThetaMax = getDetectorTwoThetaRange(spIdxMax);
-  xValues = detectorWS->x(spIdxMax);
-  bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
-            static_cast<int>(xValues.size());
-  getProjectedLambdaRange(lambdaMin, twoThetaMax, bLambda, bTwoThetaMax,
-                          detectors, projectedMin, dummy);
+  projectedMin = findIvsLamRangeMin(detectorWS, detectors, lambdaMin);
+  projectedMax = findIvsLamRangeMax(detectorWS, detectors, lambdaMax);
 
   if (projectedMin > projectedMax) {
     throw std::runtime_error(
@@ -1168,11 +1231,13 @@ void ReflectometryReductionOne2::sumInQShareCounts(
 * @param detectors [in] :: spectrum indices of the detectors of interest
 * @param lambdaVMin [out] :: the projected range start
 * @param lambdaVMax [out] :: the projected range end
+* @param outerCorners [in] :: true to project from top-left and bottom-right
+* corners of the pixel; false to use bottom-left and top-right
 */
 void ReflectometryReductionOne2::getProjectedLambdaRange(
     const double lambda, const double twoTheta, const double bLambda,
     const double bTwoTheta, const std::vector<size_t> &detectors,
-    double &lambdaVMin, double &lambdaVMax) {
+    double &lambdaVMin, double &lambdaVMax, const bool outerCorners) {
 
   // We cannot project pixels below the horizon angle
   if (twoTheta <= theta0()) {
@@ -1184,23 +1249,25 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
 
   // Get the angle from twoThetaR to this detector
   const double twoThetaRVal = twoThetaR(detectors);
-  // Get the distance from the pixel to twoThetaR
-  const double gamma = twoTheta - twoThetaRVal;
   // Get the angle from the horizon to the reference angle
-  const double horizonThetaR = twoThetaRVal - theta0();
+  const double delta = twoThetaRVal - theta0();
+  // For outer corners use top left, bottom right; otherwise bottom left, top
+  // right
+  const double lambda1 = lambda - bLambda / 2.0;
+  const double lambda2 = lambda + bLambda / 2.0;
+  double twoTheta1 = twoTheta + bTwoTheta / 2.0;
+  double twoTheta2 = twoTheta - bTwoTheta / 2.0;
+  if (!outerCorners)
+    std::swap(twoTheta1, twoTheta2);
 
   // Calculate the projected wavelength range
   try {
-    const double lambdaTop =
-        (lambda + bLambda / 2.0) *
-        (std::sin(horizonThetaR) /
-         std::sin(horizonThetaR + gamma - bTwoTheta / 2.0));
-    const double lambdaBot =
-        (lambda - bLambda / 2.0) *
-        (std::sin(horizonThetaR) /
-         std::sin(horizonThetaR + gamma + bTwoTheta / 2.0));
-    lambdaVMin = std::min(lambdaTop, lambdaBot);
-    lambdaVMax = std::max(lambdaTop, lambdaBot);
+    const double lambdaV1 =
+        lambda1 * (std::sin(delta) / std::sin(twoTheta1 - theta0()));
+    const double lambdaV2 =
+        lambda2 * (std::sin(delta) / std::sin(twoTheta2 - theta0()));
+    lambdaVMin = std::min(lambdaV1, lambdaV2);
+    lambdaVMax = std::max(lambdaV1, lambdaV2);
   } catch (std::exception &ex) {
     throw std::runtime_error(
         "Failed to project (lambda, twoTheta) = (" + std::to_string(lambda) +

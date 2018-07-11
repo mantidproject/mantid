@@ -20,6 +20,32 @@
 namespace Mantid {
 namespace Geometry {
 
+/** Return the value of the parameter as a string
+ * @tparam T The type of the parameter
+ * @returns A string representation of the parameter
+ */
+template <class Type> std::string ParameterType<Type>::asString() const {
+  std::ostringstream str;
+  str << m_value;
+  return str.str();
+}
+
+/// Specialization for doubles
+template <> std::string ParameterType<double>::asString() const {
+  std::ostringstream str;
+  str << std::setprecision(std::numeric_limits<double>::digits10);
+  str << m_value;
+  return str.str();
+}
+
+/// Specialization for V3D
+template <> std::string ParameterType<Kernel::V3D>::asString() const {
+  std::ostringstream str;
+  str << std::setprecision(std::numeric_limits<double>::digits10);
+  str << m_value;
+  return str.str();
+}
+
 // Initialize the static map
 ParameterFactory::FactoryMap ParameterFactory::s_map;
 

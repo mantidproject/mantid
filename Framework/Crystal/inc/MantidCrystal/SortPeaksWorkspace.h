@@ -49,8 +49,6 @@ public:
 private:
   void init() override;
   void exec() override;
-  Mantid::DataObjects::PeaksWorkspace_sptr tryFetchOutputWorkspace() const;
-  Mantid::DataObjects::PeaksWorkspace_sptr tryFetchInputWorkspace() const;
 };
 
 } // namespace Crystal

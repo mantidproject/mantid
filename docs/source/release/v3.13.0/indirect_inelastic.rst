@@ -14,6 +14,9 @@ Indirect Inelastic Changes
 Data Reduction Interfaces
 -------------------------
 
+Improvements
+############
+
 - Added 'Sum Files' checkbox to ISIS Calibration, to sum a specified range of input files on load.
 - Detector grouping in ISISEnergyTransfer:  added custom grouping method to allow specific spectra or ranges, and
   the 'groups' method now includes all spectra including remainder.
@@ -33,8 +36,8 @@ New
 - :ref:`algm-IqtFitSimultaneous` can be used to perform a QENS simultaneous fit over I(Q,t) data.
 
 
-Improved
-########
+Improvements
+############
 
 - :ref:`algm-ConvolutionFitSequential` and :ref:`algm-IqtFitSequential` can now accept multiple datasets as input, in
   the same format as that of :ref:`algm-PlotPeakByLogValue`.
@@ -42,6 +45,15 @@ Improved
 
 Data Analysis Interfaces
 ------------------------
+
+New
+###
+
+- The MSDFit, IqtFit and ConvFit interfaces now allow selection of discontinuous spectra ranges and masking energy
+  ranges.
+- The JumpFit interface now allows masking of energy ranges.
+- The QENS Fitting interfaces can now be provided multiple data-sets as input -- these data-sets can be viewed
+  individually within the interface (plot, fit result, etc.)
 
 Bugfixes
 ########

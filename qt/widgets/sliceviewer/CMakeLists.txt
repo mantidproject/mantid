@@ -46,6 +46,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/SliceViewer/LinePlotOptions.h
 	inc/MantidQtWidgets/SliceViewer/LineViewer.h
 	inc/MantidQtWidgets/SliceViewer/NullPeaksPresenter.h
+	inc/MantidQtWidgets/SliceViewer/NonOrthogonalAxis.h
 	inc/MantidQtWidgets/SliceViewer/NonOrthogonalOverlay.h
 	inc/MantidQtWidgets/SliceViewer/PeakEditMode.h
     inc/MantidQtWidgets/SliceViewer/PeakBoundingBox.h
