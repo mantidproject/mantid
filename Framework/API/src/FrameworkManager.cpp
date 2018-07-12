@@ -16,6 +16,7 @@
 #include <nexus/NeXusFile.hpp>
 
 #include <Poco/ActiveResult.h>
+#include <tbb/task_scheduler_init.h>
 
 #include <clocale>
 #include <cstdarg>
@@ -175,6 +176,7 @@ void FrameworkManagerImpl::setNumOMPThreadsToConfigValue() {
 void FrameworkManagerImpl::setNumOMPThreads(const int nthreads) {
   g_log.debug() << "Setting maximum number of threads to " << nthreads << "\n";
   PARALLEL_SET_NUM_THREADS(nthreads);
+  static tbb::task_scheduler_init m_init{nthreads};
 }
 
 /**

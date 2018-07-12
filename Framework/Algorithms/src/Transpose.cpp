@@ -103,8 +103,14 @@ API::MatrixWorkspace_sptr Transpose::createOutputWorkspace(
   // The input Y axis may be binned so the new X data should be too
   size_t newNhist(oldYlength), newXsize(oldVerticalAxislength),
       newYsize(oldNhist);
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-      inputWorkspace, newNhist, newXsize, newYsize);
+  MatrixWorkspace_sptr outputWorkspace = inputWorkspace->cloneEmpty();
+  outputWorkspace->initialize(newNhist, newXsize, newYsize);
+  outputWorkspace->setTitle(inputWorkspace->getTitle());
+  outputWorkspace->setComment(inputWorkspace->getComment());
+  outputWorkspace->copyExperimentInfoFrom(inputWorkspace.get());
+  outputWorkspace->setYUnit(inputWorkspace->YUnit());
+  outputWorkspace->setYUnitLabel(inputWorkspace->YUnitLabel());
+  outputWorkspace->setDistribution(inputWorkspace->isDistribution());
 
   // Create a new numeric axis for Y the same length as the old X array
   // Values come from input X

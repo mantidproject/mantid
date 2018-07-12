@@ -512,9 +512,9 @@ On HRPD this is set to the following:
 .. code-block:: python
 
   focused_bin_widths = [
-        -0.0005,  # Bank 1
-        -0.0005,  # Bank 2
-        -0.001    # Bank 3
+        -0.0003,  # Bank 1
+        -0.0007,  # Bank 2
+        -0.0012   # Bank 3
   ]
   
 focused_cropping_values

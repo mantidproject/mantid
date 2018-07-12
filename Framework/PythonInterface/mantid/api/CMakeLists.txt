@@ -9,6 +9,7 @@ set ( MODULE_TEMPLATE src/api.cpp.in )
 #    definitions occur and some depend on their base classes being exported first --
 set ( EXPORT_FILES
   src/Exports/IAlgorithm.cpp
+  src/Exports/AlgorithmObserver.cpp
   src/Exports/AlgorithmProxy.cpp
   src/Exports/AlgorithmHistory.cpp
   src/Exports/CatalogManager.cpp
@@ -85,6 +86,7 @@ create_module ( ${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES} )
 # Helper code
 #############################################################################################
 set ( SRC_FILES
+  src/Algorithms/AlgorithmObserverAdapter.cpp
   src/Algorithms/RunPythonScript.cpp
   src/FitFunctions/IFunctionAdapter.cpp
   src/FitFunctions/IFunction1DAdapter.cpp
@@ -96,6 +98,7 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
+  ${HEADER_DIR}/api/Algorithms/AlgorithmObserverAdapter.h
   ${HEADER_DIR}/api/Algorithms/RunPythonScript.h
   ${HEADER_DIR}/api/FitFunctions/IFunctionAdapter.h
   ${HEADER_DIR}/api/FitFunctions/IFunction1DAdapter.h
@@ -153,7 +156,11 @@ target_link_libraries ( PythonAPIModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTI
             ${Boost_LIBRARIES} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties( PythonAPIModule PROPERTIES INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/")
+  set_target_properties( PythonAPIModule PROPERTIES
+                         INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties( PythonAPIModule PROPERTIES
+                         INSTALL_RPATH "\$ORIGIN/../../../${LIB_DIR};\$ORIGIN/../kernel/;\$ORIGIN/../geometry/")
 endif ()
 ###########################################################################
 # Installation settings

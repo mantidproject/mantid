@@ -62,4 +62,6 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesGeneral
       ${PLUGINS_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../../Contents/MacOS
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../../${LIB_DIR}"
 )

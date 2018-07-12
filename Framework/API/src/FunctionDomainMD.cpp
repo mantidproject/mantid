@@ -34,7 +34,7 @@ FunctionDomainMD::FunctionDomainMD(IMDWorkspace_const_sptr ws, size_t start,
 
 /** Destructor.
  */
-FunctionDomainMD::~FunctionDomainMD() { delete m_iterator; }
+FunctionDomainMD::~FunctionDomainMD() = default;
 
 /// Reset the iterator to point to the start of the domain.
 void FunctionDomainMD::reset() const {
@@ -53,14 +53,14 @@ void FunctionDomainMD::reset() const {
 const IMDIterator *FunctionDomainMD::getNextIterator() const {
   if (m_justReset) {
     m_justReset = false;
-    return m_iterator;
+    return m_iterator.get();
   }
   ++m_currentIndex;
   if (!m_iterator->next() || m_currentIndex >= m_size) {
     m_currentIndex = m_size;
     return nullptr;
   }
-  return m_iterator;
+  return m_iterator.get();
 }
 
 /// Returns the pointer to the original workspace

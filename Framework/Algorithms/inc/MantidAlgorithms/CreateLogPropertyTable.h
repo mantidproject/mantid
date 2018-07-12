@@ -40,6 +40,9 @@ public:
   const std::string name() const override { return "CreateLogPropertyTable"; };
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"CopyLogs"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "Utility\\Workspaces"; }
 

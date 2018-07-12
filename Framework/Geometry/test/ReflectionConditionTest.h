@@ -58,11 +58,11 @@ public:
     centeringSymbols.insert("H");
 
     std::vector<ReflectionCondition_sptr> refs = getAllReflectionConditions();
-    for (auto it = refs.begin(); it != refs.end(); ++it) {
-      TSM_ASSERT_DIFFERS((*it)->getSymbol(),
-                         centeringSymbols.find((*it)->getSymbol()),
+    for (auto &ref : refs) {
+      TSM_ASSERT_DIFFERS(ref->getSymbol(),
+                         centeringSymbols.find(ref->getSymbol()),
                          centeringSymbols.end());
-      centeringSymbols.erase((*it)->getSymbol());
+      centeringSymbols.erase(ref->getSymbol());
     }
 
     // All centering symbols are present if the set is empty.

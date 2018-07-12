@@ -17,7 +17,7 @@
 #include "MantidKernel/System.h"
 #include <Poco/File.h>
 
-typedef std::unique_ptr<::NeXus::File> file_holder_type;
+using file_holder_type = std::unique_ptr<::NeXus::File>;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

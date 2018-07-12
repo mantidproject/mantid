@@ -406,6 +406,16 @@ public:
     }
   }
 
+  void test_multispectrum_malformed_resmod() {
+    std::string fun =
+        "name=CrystalFieldMultiSpectrum,Ion=Ce,FWHMX0=(1,2),FWHMY0=(2,3),"
+        "FWHMX1=(0,1),FWHMY2=(5,6),Temperatures=(44,50),B20=0.37737";
+    auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);
+    alg->initialize();
+    TS_ASSERT_THROWS(alg->setPropertyValue("Function", fun),
+                     std::invalid_argument);
+  }
+
   void test_underdefinded() {
     CrystalFieldMultiSpectrum fun;
     fun.setParameter("B20", 0.37737);

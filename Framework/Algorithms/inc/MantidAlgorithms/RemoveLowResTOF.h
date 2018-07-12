@@ -1,18 +1,16 @@
 #ifndef REMOVELOWRESTOF_H_
 #define REMOVELOWRESTOF_H_
 
-// includes
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 
 namespace Mantid {
 
 namespace Algorithms {
-class DLLExport RemoveLowResTOF : public API::Algorithm {
+class DLLExport RemoveLowResTOF : public API::DistributedAlgorithm {
 public:
   RemoveLowResTOF();
-  ~RemoveLowResTOF() override;
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -31,7 +29,6 @@ private:
   /// Pointer to the input event workspace
   DataObjects::EventWorkspace_const_sptr m_inputEvWS;
   double calcTofMin(const std::size_t, const API::SpectrumInfo &spectrumInfo);
-  void runMaskDetectors();
   void getTminData(const bool);
   /// The reference value for DIFC to filter with
   double m_DIFCref;

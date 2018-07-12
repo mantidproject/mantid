@@ -96,6 +96,7 @@ set ( SRC_FILES
 	src/LogManager.cpp
 	src/LogarithmScale.cpp
 	src/MDGeometry.cpp
+        src/MDFrameValidator.cpp
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
 	src/ModeratorModel.cpp
@@ -292,6 +293,7 @@ set ( INC_FILES
 	inc/MantidAPI/LogManager.h
 	inc/MantidAPI/LogarithmScale.h
 	inc/MantidAPI/MDGeometry.h
+        inc/MantidAPI/MDFrameValidator.h
 	inc/MantidAPI/MatrixWorkspace.h
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MatrixWorkspaceValidator.h
@@ -420,6 +422,7 @@ set ( TEST_FILES
 	LogFilterGeneratorTest.h
 	LogManagerTest.h
 	MDGeometryTest.h
+	MDFrameValidatorTest.h
 	MatrixWorkspaceMDIteratorTest.h
 	ModeratorModelTest.h
 	MuParserUtilsTest.h
@@ -497,7 +500,9 @@ set_target_properties ( API PROPERTIES OUTPUT_NAME MantidAPI
                                        COMPILE_DEFINITIONS IN_MANTID_API )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(API PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 # Add to the 'Framework' group in VS

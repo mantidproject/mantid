@@ -1,11 +1,12 @@
 #include "MantidKernel/V3D.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
-#include <boost/python/operators.hpp>
-#include <boost/python/return_value_policy.hpp>
-#include <boost/python/return_arg.hpp>
-#include <boost/python/list.hpp>
+#include <boost/python/dict.hpp>
 #include <boost/python/errors.hpp>
+#include <boost/python/list.hpp>
+#include <boost/python/operators.hpp>
+#include <boost/python/return_arg.hpp>
+#include <boost/python/return_value_policy.hpp>
 
 using namespace boost::python;
 using Mantid::Kernel::V3D;
@@ -68,9 +69,27 @@ int getV3DLength(V3D &self) {
 }
 }
 
+class V3DPickleSuite : public boost::python::pickle_suite {
+public:
+  static dict getstate(const V3D &vector) {
+    dict data;
+    data['x'] = vector.X();
+    data['y'] = vector.Y();
+    data['z'] = vector.Z();
+    return data;
+  }
+
+  static void setstate(V3D &vector, dict state) {
+    vector.setX(extract<double>(state['x']));
+    vector.setY(extract<double>(state['y']));
+    vector.setZ(extract<double>(state['z']));
+  }
+};
+
 void export_V3D() {
   // V3D class
   class_<V3D>("V3D", init<>("Construct a V3D at the origin"))
+      .def_pickle(V3DPickleSuite())
       .def(init<double, double, double>(
           "Construct a V3D with X,Y,Z coordinates"))
       .def("X", &V3D::X, arg("self"),

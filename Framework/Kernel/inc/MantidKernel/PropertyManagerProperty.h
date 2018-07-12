@@ -35,8 +35,8 @@ class MANTID_KERNEL_DLL PropertyManagerProperty final
     : public PropertyWithValue<PropertyManager_sptr> {
 public:
   // Convenience typedefs
-  typedef PropertyWithValue<PropertyManager_sptr> BaseClass;
-  typedef PropertyManager_sptr ValueType;
+  using BaseClass = PropertyWithValue<PropertyManager_sptr>;
+  using ValueType = PropertyManager_sptr;
 
   PropertyManagerProperty(const std::string &name,
                           unsigned int direction = Direction::Input);

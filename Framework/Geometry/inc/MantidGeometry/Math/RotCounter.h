@@ -1,6 +1,8 @@
 #ifndef RotaryCounter_h
 #define RotaryCounter_h
 
+#include <vector>
+
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
 

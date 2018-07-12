@@ -52,8 +52,16 @@ public:
 
   /// Algorithm's version
   int version() const override { return (2); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"Q1DWeighted", "Qxy"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "SANS"; }
+
+protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
 
 private:
   /// the experimental workspace with counts across the detector

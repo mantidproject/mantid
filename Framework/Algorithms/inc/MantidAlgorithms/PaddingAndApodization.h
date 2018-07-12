@@ -67,7 +67,7 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  typedef double (*fptr)(const double time, const double decayConstant);
+  using fptr = double (*)(const double, const double);
   fptr getApodizationFunction(const std::string method);
   HistogramData::Histogram
   applyApodizationFunction(const HistogramData::Histogram &histogram,

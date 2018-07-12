@@ -19,14 +19,16 @@ def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_d
         raise ValueError("Input batching not passed through. Please contact development team.")
 
 
-def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm, absorb, sample_details):
+def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb, sample_details):
     run_details = instrument._get_run_details(run_number_string=run_number)
     if perform_vanadium_norm:
         _test_splined_vanadium_exists(instrument, run_details)
 
-    # Subtract empty instrument runs
-    input_workspace = common.subtract_summed_runs(ws_to_correct=ws, instrument=instrument,
-                                                  empty_sample_ws_string=run_details.empty_runs)
+    # Subtract empty instrument runs, as long as this run isn't an empty and user hasn't turned empty subtraction off
+    if not common.runs_overlap(run_number, run_details.empty_runs) and instrument.should_subtract_empty_inst():
+        input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, instrument=instrument,
+                                                      empty_sample_ws_string=run_details.empty_runs)
+
     # Subtract a sample empty if specified
     if run_details.sample_empty:
         input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, instrument=instrument,
@@ -99,20 +101,37 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
                                                           instrument=instrument)
     output = None
     for ws in read_ws_list:
-        output = _focus_one_ws(ws=ws, run_number=run_number_string, instrument=instrument,
+        output = _focus_one_ws(input_workspace=ws, run_number=run_number_string, instrument=instrument,
                                perform_vanadium_norm=perform_vanadium_norm, absorb=absorb,
                                sample_details=sample_details)
     return output
 
 
+def _divide_one_spectrum_by_spline(spectrum, spline):
+    rebinned_spline = mantid.RebinToWorkspace(WorkspaceToRebin=spline, WorkspaceToMatch=spectrum, StoreInADS=False)
+    divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline, OutputWorkspace=spectrum)
+    return divided
+
+
 def _divide_by_vanadium_splines(spectra_list, spline_file_path):
-    vanadium_ws_list = mantid.LoadNexus(Filename=spline_file_path)
-    output_list = []
-    for data_ws, van_ws in zip(spectra_list, vanadium_ws_list[1:]):
-        vanadium_ws = mantid.RebinToWorkspace(WorkspaceToRebin=van_ws, WorkspaceToMatch=data_ws)
-        output_ws = mantid.Divide(LHSWorkspace=data_ws, RHSWorkspace=vanadium_ws, OutputWorkspace=data_ws)
-        output_list.append(output_ws)
-        common.remove_intermediate_workspace(vanadium_ws)
+    vanadium_splines = mantid.LoadNexus(Filename=spline_file_path)
+
+    if hasattr(vanadium_splines, "OutputWorkspace"):  # vanadium_splines is a group
+        vanadium_splines = vanadium_splines.OutputWorkspace
+
+        num_splines = len(vanadium_splines)
+        num_spectra = len(spectra_list)
+
+        if num_splines != num_spectra:
+            raise RuntimeError("Mismatch between number of banks in vanadium and number of banks in workspace to focus"
+                               "\nThere are {} banks for vanadium but {} for the run".format(num_splines, num_spectra))
+
+        output_list = [_divide_one_spectrum_by_spline(data_ws, van_ws)
+                       for data_ws, van_ws in zip(spectra_list, vanadium_splines)]
+        return output_list
+
+    output_list = [_divide_one_spectrum_by_spline(spectra_list[0], vanadium_splines)]
+    common.remove_intermediate_workspace(vanadium_splines)
     return output_list
 
 
@@ -122,7 +141,7 @@ def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, abso
     output = None
     for run in run_numbers:
         ws = common.load_current_normalised_ws_list(run_number_string=run, instrument=instrument)
-        output = _focus_one_ws(ws=ws[0], run_number=run, instrument=instrument, absorb=absorb,
+        output = _focus_one_ws(input_workspace=ws[0], run_number=run, instrument=instrument, absorb=absorb,
                                perform_vanadium_norm=perform_vanadium_norm, sample_details=sample_details)
     return output
 

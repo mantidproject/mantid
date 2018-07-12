@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -47,11 +47,12 @@ Usage
 Output:
 
 .. testoutput:: SetUB
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
     UB matrix
-    [[-0.     0.     0.143]
-     [ 0.128 -0.128  0.   ]
-     [ 0.154  0.107 -0.   ]]
+    [[...     ...     0.143]
+     [ 0.128 -0.128  ...   ]
+     [ 0.154  0.107 ...   ]]
 
 
 .. categories::

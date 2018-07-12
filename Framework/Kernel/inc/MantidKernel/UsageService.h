@@ -3,6 +3,7 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <MantidTypes/Core/DateAndTime.h>
 
 #include <json/value.h>
 
@@ -84,6 +85,10 @@ public:
   /// flushes any buffers and sends any outstanding usage reports
   void flush();
   void shutdown();
+  /// gets the uptime of this mantid instance
+  Types::Core::time_duration getUpTime();
+  /// Gets the start time of this mantid instance
+  Types::Core::DateAndTime getStartTime() { return m_startTime; }
 
 protected:
   /// Constructor
@@ -131,16 +136,20 @@ private:
   bool m_isEnabled;
   mutable std::mutex m_mutex;
   std::string m_application;
+  Types::Core::DateAndTime m_startTime;
 
   /// Async method for sending startup notifications
   Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_startupActiveMethod;
   /// Async method for sending feature notifications
   Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_featureActiveMethod;
+
+  /// Stores the base url of the usage system
+  std::string m_url;
 };
 
 EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
     Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
-typedef Mantid::Kernel::SingletonHolder<UsageServiceImpl> UsageService;
+using UsageService = Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
 
 } // namespace Kernel
 } // namespace Mantid

@@ -33,9 +33,9 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
     if splined_name_list:
         # Force Python to make a copy so we don't modify original
         new_splined_list = list(splined_name_list)
-        new_splined_list.append(offset_file_name)
+        new_splined_list.append(os.path.basename(offset_file_name))
     else:
-        new_splined_list = [offset_file_name]
+        new_splined_list = [os.path.basename(offset_file_name)]
 
     # These can either be generic or custom so defer to another method
     results_dict = _get_customisable_attributes(
@@ -67,8 +67,14 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
 
     # Generate the paths
     grouping_file_path = os.path.join(calibration_dir, results_dict["grouping_file_name"])
-    # Offset  and splined vanadium is within the correct label folder
-    offset_file_path = os.path.join(calibration_dir, label, offset_file_name)
+
+    # By default, offset file sits in correct label folder, but it can also be given as an absolute path
+    if os.path.exists(offset_file_name):
+        offset_file_path = offset_file_name
+    else:
+        offset_file_path = os.path.join(calibration_dir, label, offset_file_name)
+
+    # splined vanadium is within the correct label folder
     splined_van_path = os.path.join(calibration_dir, label, results_dict["splined_van_name"])
     unsplined_van_path = os.path.join(calibration_dir, label, results_dict["unsplined_van_name"])
     van_absorb_path = os.path.join(calibration_dir, van_abs_file_name) if van_abs_file_name else None

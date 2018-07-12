@@ -100,18 +100,20 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
 
   auto positions =
       boost::make_shared<std::vector<Eigen::Vector3d>>(1, position);
-  auto rotations =
-      boost::make_shared<std::vector<Eigen::Quaterniond>>(1, rotation);
+  auto rotations = boost::make_shared<std::vector<
+      Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>(
+      1, rotation);
   auto scaleFactors =
       boost::make_shared<std::vector<Eigen::Vector3d>>(1, scaleFactor);
   auto names = boost::make_shared<std::vector<std::string>>(1);
   using Mantid::Beamline::ComponentType;
-  auto isStructuredBank =
+  auto componentType =
       boost::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
+  auto children = boost::make_shared<std::vector<std::vector<size_t>>>(1);
   return Kernel::make_unique<Beamline::ComponentInfo>(
       detectorIndices, detectorRanges, componentIndices, componentRanges,
-      parentIndices, positions, rotations, scaleFactors, isStructuredBank,
-      names, -1, -1);
+      parentIndices, children, positions, rotations, scaleFactors,
+      componentType, names, -1, -1);
 }
 } // namespace
 
@@ -148,16 +150,19 @@ public:
                                        // ok as not being tested here
 
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
-    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(2);
+    auto rotations = boost::make_shared<std::vector<
+        Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>(2);
     auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
     auto names = boost::make_shared<std::vector<std::string>>(2);
     using Mantid::Beamline::ComponentType;
     auto isRectBank = boost::make_shared<std::vector<ComponentType>>(
         2, ComponentType::Generic);
+    auto children = boost::make_shared<std::vector<std::vector<size_t>>>(
+        1, std::vector<size_t>(1));
     auto internalInfo = Kernel::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges,
-        parentIndices, positions, rotations, scaleFactors, isRectBank, names,
-        -1, -1);
+        parentIndices, children, positions, rotations, scaleFactors, isRectBank,
+        names, -1, -1);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 
@@ -203,7 +208,7 @@ public:
     TS_ASSERT(!b->hasDetectorInfo());
   }
 
-  void test_has_shape() {
+  void test_hasValidShape() {
     auto internalInfo = makeSingleBeamlineComponentInfo();
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
@@ -218,10 +223,10 @@ public:
     ComponentInfo compInfo(std::move(internalInfo), componentIds,
                            makeComponentIDMap(componentIds), shapes);
 
-    TS_ASSERT(compInfo.hasShape(0));
+    TS_ASSERT(compInfo.hasValidShape(0));
     // Nullify the shape of the component
     shapes->at(0) = boost::shared_ptr<const Geometry::IObject>(nullptr);
-    TS_ASSERT(!compInfo.hasShape(0));
+    TS_ASSERT(!compInfo.hasValidShape(0));
     TS_ASSERT_THROWS(compInfo.solidAngle(0, V3D{1, 1, 1}),
                      Mantid::Kernel::Exception::NullPointerException &);
   }
@@ -494,7 +499,7 @@ public:
 
     size_t bankOfTubesIndex = componentInfo->root() - 3;
     TS_ASSERT_EQUALS(componentInfo->componentType(bankOfTubesIndex),
-                     Beamline::ComponentType::BankOfTube); // Sanity check
+                     Beamline::ComponentType::Unstructured); // Sanity check
 
     auto boundingBox = componentInfo->boundingBox(bankOfTubesIndex);
     TS_ASSERT_DELTA(boundingBox.minPoint().Y(), minYCenter, 1e-5);
@@ -535,7 +540,7 @@ public:
 
     size_t bankOfTubesIndex = componentInfo->root() - 3;
     TS_ASSERT_EQUALS(componentInfo->componentType(bankOfTubesIndex),
-                     Beamline::ComponentType::BankOfTube); // Sanity check
+                     Beamline::ComponentType::Unstructured); // Sanity check
 
     auto boundingBox = componentInfo->boundingBox(bankOfTubesIndex);
     TS_ASSERT_DELTA(boundingBox.minPoint().Y(), minYCenter + offsets[3],
@@ -573,10 +578,10 @@ public:
 
     size_t tube1Index = componentInfo->root() - 5;
     TS_ASSERT_EQUALS(componentInfo->componentType(tube1Index),
-                     Beamline::ComponentType::Tube); // Sanity check
+                     Beamline::ComponentType::OutlineComposite); // Sanity check
     size_t tube2Index = componentInfo->root() - 4;
     TS_ASSERT_EQUALS(componentInfo->componentType(tube2Index),
-                     Beamline::ComponentType::Tube); // Sanity check
+                     Beamline::ComponentType::OutlineComposite); // Sanity check
 
     auto boundingBox = componentInfo->boundingBox(tube1Index);
     TS_ASSERT_DELTA(boundingBox.minPoint().Y(), minYCenter + offsets[0],
@@ -644,6 +649,47 @@ public:
                      V3D(0, 0, 0));
     TS_ASSERT_EQUALS(infoScan1->position({0 /*detector index*/, 1}),
                      detectorPos);
+  }
+
+  void test_throws_if_ComponentType_is_not_Quadrilateral() {
+    auto instrument =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+
+    // find quadrilateral component
+    size_t structuredIndex = componentInfo->root() - 3;
+    // Does not throw for valid index
+    TS_ASSERT_THROWS_NOTHING(
+        componentInfo->quadrilateralComponent(structuredIndex));
+    // Throws for other non quadrilateral component
+    TS_ASSERT_THROWS(
+        componentInfo->quadrilateralComponent(componentInfo->root() - 1),
+        std::runtime_error &);
+    // Throws for root
+    TS_ASSERT_THROWS(
+        componentInfo->quadrilateralComponent(componentInfo->root()),
+        std::runtime_error &);
+    // Throws for detector
+    TS_ASSERT_THROWS(componentInfo->quadrilateralComponent(0),
+                     std::runtime_error &);
+  }
+
+  void test_QuadrilateralComponent_for_single_rectangular_bank() {
+    auto instrument =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+
+    // find quadrilateral component
+    size_t structuredIndex = componentInfo->root() - 3;
+    auto panel = componentInfo->quadrilateralComponent(structuredIndex);
+    TS_ASSERT_EQUALS(panel.nX, 4);
+    TS_ASSERT_EQUALS(panel.nY, 4);
+    TS_ASSERT_EQUALS(panel.bottomLeft, 0);
+    TS_ASSERT_EQUALS(panel.bottomRight, 12);
+    TS_ASSERT_EQUALS(panel.topLeft, 3);
+    TS_ASSERT_EQUALS(panel.topRight, 15);
   }
 };
 

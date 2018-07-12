@@ -43,7 +43,7 @@ public slots:
   void onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row);
   void onPeaksSorted(const std::string &columnToSortBy,
                      const bool sortAscending,
-                     const Mantid::API::IPeaksWorkspace *ws);
+                     const Mantid::API::IPeaksWorkspace_sptr ws);
   void destroySinglePeakSource();
   void onPeakMarkerDestroyed();
 

@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/VMD.h"
@@ -14,10 +13,18 @@
 namespace Mantid {
 
 namespace API {
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
-class IMDWorkspace;
+
+/** Enum describing different ways to normalize the signal
+ * in a MDWorkspace.
+ */
+enum MDNormalization {
+  /// Don't normalize = return raw counts
+  NoNormalization = 0,
+  /// Divide the signal by the volume of the box/bin
+  VolumeNormalization = 1,
+  /// Divide the signal by the number of events that contributed to it.
+  NumEventsNormalization = 2
+};
 
 /** This is an interface to an iterator of an IMDWorkspace
 
@@ -83,13 +90,14 @@ public:
   virtual signal_t getError() const = 0;
 
   /// Return a list of vertexes defining the volume pointed to
-  virtual coord_t *getVertexesArray(size_t &numVertices) const = 0;
+  virtual std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices) const = 0;
 
   /// Return a list of vertexes defining the volume pointed to, enable masking
   /// of dimensions.
-  virtual coord_t *getVertexesArray(size_t &numVertices,
-                                    const size_t outDimensions,
-                                    const bool *maskDim) const = 0;
+  virtual std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                   const bool *maskDim) const = 0;
 
   /// Returns the position of the center of the box pointed to.
   virtual Mantid::Kernel::VMD getCenter() const = 0;

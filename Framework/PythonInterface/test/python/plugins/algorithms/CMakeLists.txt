@@ -10,10 +10,12 @@ set ( TEST_PY_FILES
   AlignComponentsTest.py
   AngularAutoCorrelationsSingleAxisTest.py
   AngularAutoCorrelationsTwoAxesTest.py
+  ApplyDetectorScanEffCorrTest.py
   BinWidthAtXTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
+  ConvertWANDSCDtoQTest.py
   CompareSampleLogsTest.py
   ComputeCalibrationCoefVanTest.py
   ComputeIncoherentDOSTest.py
@@ -21,6 +23,7 @@ set ( TEST_PY_FILES
   CreateLeBailFitInputTest.py
   CorrectTOFTest.py
   CreateWorkspaceTest.py
+  CropWorkspaceRaggedTest.py
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
   DeltaPDF3DTest.py
@@ -33,13 +36,15 @@ set ( TEST_PY_FILES
   EnggFitDIFCFromPeaksTest.py
   EnggFitPeaksTest.py
   EnggFocusTest.py
+  EnggSaveGSASIIFitResultsToHDF5Test.py
+  EnggSaveSinglePeakFitResultsToHDF5Test.py
   EnggVanadiumCorrectionsTest.py
+  ExportSampleLogsToHDF5Test.py
   ExportSpectraMaskTest.py
   FilterLogByTimeTest.py
   FindEPPTest.py
   FindReflectometryLinesTest.py
   FitGaussianTest.py
-  GSASIIRefineFitPeaksTest.py
   GetEiT0atSNSTest.py
   GetNegMuMuonicXRDTest.py
   IndirectTransmissionTest.py
@@ -54,6 +59,7 @@ set ( TEST_PY_FILES
   LoadNMoldyn3AsciiTest.py
   LoadNMoldyn4Ascii1DTest.py
   LoadNMoldyn4AsciiTest.py
+  LoadWANDSCDTest.py
   LRPeakSelectionTest.py
   MaskAngleTest.py
   MaskBTPTest.py
@@ -63,13 +69,15 @@ set ( TEST_PY_FILES
   MedianBinWidthTest.py
   MergeCalFilesTest.py
   MuscatSofQWTest.py
+  MuonMaxEntTest.py
   NMoldyn4InterpolationTest.py
   NormaliseSpectraTest.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
+  SaveGEMMAUDParamFileTest.py
   SaveNexusPDTest.py
   SavePlot1DAsJsonTest.py
-  SaveVulcanGSSTest.py
+  SaveReflectionsTest.py
   ExtractMonitorsTest.py
   SetDetScaleTest.py
   SortByQVectorsTest.py

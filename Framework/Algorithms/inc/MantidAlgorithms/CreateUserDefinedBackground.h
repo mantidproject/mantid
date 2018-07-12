@@ -44,6 +44,9 @@ public:
   const std::string name() const override;
   /// Version number
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"RemoveBackground", "CalculatePolynomialBackground"};
+  }
   /// Category algorithm belongs to
   const std::string category() const override;
   /// Description of algorithm

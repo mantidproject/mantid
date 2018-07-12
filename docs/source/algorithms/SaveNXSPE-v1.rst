@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -39,6 +39,7 @@ Usage
    out_ws = CreateSimulationWorkspace(Instrument="IRIS", BinParams="0,500,2000")
    out_ws.setY(0, numpy.array([10.0, 50.0, 30.0, 60.0]))
    AddSampleLog(out_ws, 'Ei', LogText='321', LogType='Number')
+   out_ws.setDistribution(True)
    
    file_path = os.path.join(config["defaultsave.directory"], "NXSPEData.nxspe")
    
@@ -72,6 +73,12 @@ Output:
    Initial and loaded workspaces comparison is: True
    Loaded workspace has attached incident energy Ei=321.0 and rotation angle Psi= 32.0deg
    
+Note that :ref:`algm-LoadNXSPE` automatically applies the `distribution` flag to the loaded workspace.
+This is because all examples of workspaces saved to `NXSPE` format by the reduction algorithms
+are distributions (signal is count rate and should be multiplied by bin widths to get counts).
+`SaveNXSPE` does not require its input is a distribution, however, and the `NXSPE` format does
+not have a distribution flag.
+
 
 .. categories::
 

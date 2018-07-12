@@ -23,8 +23,50 @@ except ImportError:
 from . import ui_sans_data_processor_window as ui_sans_data_processor_window
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, SampleShape, ReductionMode, FitType)
+from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection, get_reduction_mode_strings_for_gui,
-                                       get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file)
+                                       get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file,
+                                       get_instrument_from_gui_selection, get_string_for_gui_from_instrument)
+
+from sans.common.general_functions import get_instrument
+
+from sans.gui_logic.models.run_summation import RunSummation
+from sans.gui_logic.models.run_selection import RunSelection
+from sans.gui_logic.models.run_finder import SummableRunFinder
+from sans.gui_logic.models.summation_settings import SummationSettings
+from sans.gui_logic.models.binning_type import BinningType
+
+from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
+from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
+from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
+from ui.sans_isis.work_handler import WorkHandler
+
+DEFAULT_BIN_SETTINGS = \
+    '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
+
+
+class RunSelectorPresenterFactory(object):
+    def __init__(self, title, run_finder):
+        self._title = title
+        self._run_finder = run_finder
+
+    def __call__(self,
+                 run_selector_view,
+                 on_selection_change,
+                 parent_view):
+        return RunSelectorPresenter(self._title,
+                                    RunSelection(on_selection_change),
+                                    self._run_finder,
+                                    run_selector_view,
+                                    parent_view)
+
+
+def _make_run_summation_settings_presenter(summation_settings_view, parent_view):
+    summation_settings = SummationSettings(BinningType.Custom)
+    summation_settings.bin_settings = DEFAULT_BIN_SETTINGS
+    return SummationSettingsPresenter(summation_settings,
+                                      summation_settings_view,
+                                      parent_view)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -71,6 +113,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         def on_manage_directories(self):
             pass
 
+        @abstractmethod
+        def on_instrument_changed(self):
+            pass
+
     def __init__(self, main_presenter):
         """
         Initialise the interface
@@ -110,7 +156,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
                                          SANSInstrument.to_string(SANSInstrument.NoInstrument),
                                          type=str)
         settings.endGroup()
-        self._instrument = SANSInstrument.from_string(instrument_name)
+
+        self.instrument = SANSInstrument.from_string(instrument_name)
 
         # Attach validators
         self._attach_validators()
@@ -129,6 +176,13 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def set_current_page(self, index):
         self.main_stacked_widget.setCurrentIndex(index)
+
+    def _setup_add_runs_page(self):
+        self.add_runs_presenter = AddRunsPagePresenter(RunSummation(WorkHandler()),
+                                                       RunSelectorPresenterFactory('Runs To Sum',
+                                                                                   SummableRunFinder(SANSFileInformationFactory())),
+                                                       _make_run_summation_settings_presenter,
+                                                       self.add_runs_page, self)
 
     def setup_layout(self):
         """
@@ -153,12 +207,22 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         settings_icon = QtGui.QIcon(settings_icon_path)
         _ = QtGui.QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
 
-        settings_icon_path = os.path.join(path, "icons", "settings.png")
-        settings_icon = QtGui.QIcon(settings_icon_path)
-        _ = QtGui.QListWidgetItem(settings_icon, "Beam Centre", self.tab_choice_list)  # noqa
+        centre_icon_path = os.path.join(path, "icons", "centre.png")
+        centre_icon = QtGui.QIcon(centre_icon_path)
+        _ = QtGui.QListWidgetItem(centre_icon, "Beam Centre", self.tab_choice_list)  # noqa
+
+        add_runs_page_icon_path = os.path.join(path, "icons", "sum.png")
+        add_runs_page_icon = QtGui.QIcon(add_runs_page_icon_path)
+        _ = QtGui.QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
+
+        diagnostic_icon_path = os.path.join(path, "icons", "diagnostic.png")
+        diagnostic_icon = QtGui.QIcon(diagnostic_icon_path)
+        _ = QtGui.QListWidgetItem(diagnostic_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
 
         # Set the 0th row enabled
         self.tab_choice_list.setCurrentRow(0)
+
+        self._setup_add_runs_page()
 
         # --------------------------------------------------------------------------------------------------------------
         # Main Tab
@@ -168,6 +232,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self._setup_main_tab()
 
         self.multi_period_check_box.stateChanged.connect(self._on_multi_period_selection)
+
+        self.wavelength_step_type_combo_box.currentIndexChanged.connect(self._on_wavelength_step_type_changed)
+
+        self.instrument_combo_box.currentIndexChanged.connect(self._instrument_changed)
+
+        self.process_button.clicked.connect(self._on_python_process)
+
+        self.help_button.clicked.connect(self._on_help_button_clicked)
 
         # --------------------------------------------------------------------------------------------------------------
         # Settings tabs
@@ -217,7 +289,31 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Q Resolution
         self.q_resolution_moderator_file_push_button.clicked.connect(self._on_load_moderator_file)
 
+        self.plot_results_checkbox.stateChanged.connect(self._on_plot_results_toggled)
+        self.use_optimizations_checkbox.stateChanged.connect(self._on_use_optimisations_changed)
+
+        self.output_mode_memory_radio_button.toggled.connect(self._on_output_mode_changed)
+        self.output_mode_file_radio_button.toggled.connect(self._on_output_mode_changed)
+        self.output_mode_both_radio_button.toggled.connect(self._on_output_mode_changed)
+
+        self.wavelength_stacked_widget.setCurrentIndex(0)
+
         return True
+
+    def _on_wavelength_step_type_changed(self):
+        if self.wavelength_step_type == RangeStepType.RangeLin or self.wavelength_step_type == RangeStepType.RangeLog:
+            self.wavelength_stacked_widget.setCurrentIndex(1)
+        else:
+            self.wavelength_stacked_widget.setCurrentIndex(0)
+
+    def _on_output_mode_changed(self, state):
+        self.data_processor_table.settingsChanged()
+
+    def _on_use_optimisations_changed(self, state):
+        self.data_processor_table.settingsChanged()
+
+    def _on_plot_results_toggled(self, state):
+        self.data_processor_table.settingsChanged()
 
     def create_data_table(self, show_periods):
         # Delete an already existing table
@@ -236,8 +332,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
                                       entry.show_value, entry.prefix)
 
         # Processing algorithm (mandatory)
+        unused_postprocessing_index = 0
         alg = MantidQt.MantidWidgets.DataProcessor.ProcessingAlgorithm(self._gui_algorithm_name,
-                                                                       'unused_', self._black_list)
+                                                                       'unused_', unused_postprocessing_index, self._black_list)
 
         self.data_processor_table = MantidQt.MantidWidgets.DataProcessor.QDataProcessorWidget(white_list, alg, self)
         self.data_processor_table.setForcedReProcessing(True)
@@ -246,11 +343,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.data_processor_table.accept(self._main_presenter)
 
         # Set the list of available instruments in the widget and the default instrument
-        instrument_name = SANSInstrument.to_string(self._instrument)
+        instrument_name = config.getString("default.instrument")
+        instrument_name_enum = get_instrument(instrument_name)
         self.data_processor_table.setInstrumentList(SANSDataProcessorGui.INSTRUMENTS, instrument_name)
 
-        if instrument_name:
-            self._set_mantid_instrument(instrument_name)
+        if instrument_name_enum:
+            self.set_instrument_settings(instrument_name_enum)
+            self._instrument_changed()
+
         # The widget will emit a 'runAsPythonScript' signal to run python code
         self.data_processor_table.runAsPythonScript.connect(self._run_python_code)
         self.data_processor_table.processButtonClicked.connect(self._processed_clicked)
@@ -280,10 +380,13 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self._call_settings_listeners(lambda listener: listener.on_processing_finished())
 
     def _data_changed(self):
-        """
-        Clean up
-        """
         self._call_settings_listeners(lambda listener: listener.on_data_changed())
+
+    def _instrument_changed(self):
+        self._call_settings_listeners(lambda listener: listener.on_instrument_changed())
+
+    def _on_help_button_clicked(self):
+        pymantidplot.proxies.showCustomInterfaceHelp('ISIS SANS v2')
 
     def _on_user_file_load(self):
         """
@@ -316,15 +419,41 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         config.setString("default.instrument", instrument_string)
 
     def _handle_instrument_change(self):
-        # Set instrument as the default instrument
         instrument_string = str(self.data_processor_table.getCurrentInstrument())
-        self._set_mantid_instrument(instrument_string)
+        instrument = get_instrument_from_gui_selection(instrument_string)
+        self.instrument = instrument
 
-        # Set the reduction mode
-        if instrument_string:
-            self._instrument = SANSInstrument.from_string(instrument_string)
-            reduction_mode_list = get_reduction_mode_strings_for_gui(self._instrument)
-            self.set_reduction_modes(reduction_mode_list)
+    def _on_python_process(self):
+        self.data_processor_table.processClicked()
+
+    def disable_buttons(self):
+        self.process_button.setEnabled(False)
+        self.instrument_combo_box.setEnabled(False)
+        self.batch_button.setEnabled(False)
+        self.user_file_button.setEnabled(False)
+        self.manage_directories_button.setEnabled(False)
+
+    def enable_buttons(self):
+        self.process_button.setEnabled(True)
+        self.instrument_combo_box.setEnabled(True)
+        self.batch_button.setEnabled(True)
+        self.user_file_button.setEnabled(True)
+        self.manage_directories_button.setEnabled(True)
+
+    def display_message_box(self, title, message, details):
+        msg = QtGui.QMessageBox()
+        msg.setIcon(QtGui.QMessageBox.Warning)
+
+        message_length = len(message)
+
+        # This is to ensure that the QMessage box if wide enough to display nicely.
+        msg.setText(10 * ' ' + message + ' ' * (30 - message_length))
+        msg.setWindowTitle(title)
+        msg.setDetailedText(details)
+        msg.setStandardButtons(QtGui.QMessageBox.Ok)
+        msg.setDefaultButton(QtGui.QMessageBox.Ok)
+        msg.setEscapeButton(QtGui.QMessageBox.Ok)
+        msg.exec_()
 
     def get_user_file_path(self):
         return str(self.user_file_line_edit.text())
@@ -518,10 +647,13 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     # ------------------------------------------------------------------------------------------------------------------
     def set_instrument_settings(self, instrument):
         if instrument:
-            self._instrument = instrument
+            self.instrument = instrument
             instrument_string = SANSInstrument.to_string(instrument)
-            self.data_processor_table.setInstrumentList(SANSDataProcessorGui.INSTRUMENTS, instrument_string)
             self._set_mantid_instrument(instrument_string)
+            reduction_mode_list = get_reduction_mode_strings_for_gui(instrument)
+            self.set_reduction_modes(reduction_mode_list)
+
+            self.data_processor_table.on_comboProcessInstrument_currentIndexChanged(self.instrument_combo_box.currentIndex())
 
     def update_gui_combo_box(self, value, expected_type, combo_box):
         # There are two types of values that can be passed:
@@ -599,8 +731,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             checked_save_types.append(SaveType.NXcanSAS)
         if self.rkh_checkbox.isChecked():
             checked_save_types.append(SaveType.RKH)
-        if self.nist_qxy_checkbox.isChecked():
-            checked_save_types.append(SaveType.NistQxy)
         return checked_save_types
 
     @save_types.setter
@@ -612,8 +742,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
                 self.nx_can_sas_checkbox.setChecked(True)
             elif value is SaveType.RKH:
                 self.rkh_checkbox.setChecked(True)
-            elif value is SaveType.NistQxy:
-                self.nist_qxy_checkbox.setChecked(True)
 
     @property
     def zero_error_free(self):
@@ -679,6 +807,27 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def show_transmission(self, value):
         self.show_transmission_view.setChecked(value)
 
+    @property
+    def instrument(self):
+        instrument_as_string = self.instrument_combo_box.currentText()
+        return get_instrument_from_gui_selection(instrument_as_string)
+
+    @instrument.setter
+    def instrument(self, value):
+        instrument_as_string = get_string_for_gui_from_instrument(value)
+        if instrument_as_string:
+            index = self.instrument_combo_box.findText(instrument_as_string)
+            if index != -1:
+                self.instrument_combo_box.setCurrentIndex(index)
+
+    def set_instruments(self, instrument_list):
+        current_index = self.instrument_combo_box.currentIndex()
+        self.instrument_combo_box.clear()
+        for element in instrument_list:
+            self.instrument_combo_box.addItem(element)
+        if current_index != -1:
+            self.instrument_combo_box.setCurrentIndex(current_index)
+
     # ==================================================================================================================
     # ==================================================================================================================
     # General TAB
@@ -711,10 +860,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Convert the value to the correct GUI string
 
         # Set the correct selection of reduction modes which are available
-        reduction_mode_list = get_reduction_mode_strings_for_gui(self._instrument)
+        reduction_mode_list = get_reduction_mode_strings_for_gui(self.instrument)
         self.set_reduction_modes(reduction_mode_list)
 
-        reduction_mode_as_string = get_string_for_gui_from_reduction_mode(value, self._instrument)
+        reduction_mode_as_string = get_string_for_gui_from_reduction_mode(value, self.instrument)
         if reduction_mode_as_string:
             index = self.reduction_mode_combo_box.findText(reduction_mode_as_string)
             if index != -1:
@@ -861,6 +1010,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     @wavelength_step.setter
     def wavelength_step(self, value):
         self.update_simple_line_edit_field(line_edit="wavelength_step_line_edit", value=value)
+
+    @property
+    def wavelength_range(self):
+        return str(self.wavelength_slices_line_edit.text())
+
+    @wavelength_range.setter
+    def wavelength_range(self, value):
+        self.wavelength_slices.setText(value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Scale Group
@@ -1375,6 +1532,24 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def q_resolution_moderator_file(self, value):
         self.update_simple_line_edit_field(line_edit="q_resolution_moderator_file_line_edit", value=value)
 
+    @property
+    def r_cut(self):
+        return self.get_simple_line_edit_field(line_edit="r_cut_line_edit",
+                                               expected_type=float)
+
+    @r_cut.setter
+    def r_cut(self, value):
+        self.update_simple_line_edit_field(line_edit="r_cut_line_edit", value=value)
+
+    @property
+    def w_cut(self):
+        return self.get_simple_line_edit_field(line_edit="w_cut_line_edit",
+                                               expected_type=float)
+
+    @w_cut.setter
+    def w_cut(self, value):
+        self.update_simple_line_edit_field(line_edit="w_cut_line_edit", value=value)
+
     # ==================================================================================================================
     # ==================================================================================================================
     # MASK TAB
@@ -1484,6 +1659,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.q_xy_max_line_edit.setValidator(positive_double_validator)  # Yes, this should be positive!
         self.q_xy_step_line_edit.setValidator(positive_double_validator)
 
+        self.r_cut_line_edit.setValidator(positive_double_validator)
+        self.w_cut_line_edit.setValidator(positive_double_validator)
+
         self.gravity_extra_length_line_edit.setValidator(double_validator)
 
         self.q_resolution_source_a_line_edit.setValidator(positive_double_validator)
@@ -1518,6 +1696,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.wavelength_max_line_edit.setText("")
         self.wavelength_step_line_edit.setText("")
         self.wavelength_step_type_combo_box.setCurrentIndex(0)
+        self.wavelength_slices_line_edit.setText("")
 
         self.absolute_scale_line_edit.setText("")
         self.geometry_combo_box.setCurrentIndex(0)
@@ -1547,6 +1726,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.wavelength_adjustment_det_1_line_edit.setText("")
         self.wavelength_adjustment_det_2_line_edit.setText("")
 
+        self.show_transmission_view.setChecked(True)
+
         # --------------------------------
         # Q tab
         # --------------------------------
@@ -1559,7 +1740,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.q_xy_step_line_edit.setText("")
         self.q_xy_step_type_combo_box.setCurrentIndex(0)
 
-        self.gravity_group_box.setChecked(True)
+        self.gravity_group_box.setChecked(False)
         self.gravity_extra_length_line_edit.setText("")
 
         self.q_resolution_group_box.setChecked(False)

@@ -110,7 +110,7 @@ std::vector<std::string> splitPath(const std::string &path) {
 template <typename T> class ConfigServiceImpl::WrappedObject : public T {
 public:
   /// The template type of class that is being wrapped
-  typedef T element_type;
+  using element_type = T;
   /// Simple constructor
   WrappedObject() : T() { m_pPtr = static_cast<T *>(this); }
 
@@ -127,20 +127,6 @@ public:
     m_pPtr = static_cast<T *>(this);
   }
 
-  /// Copy constructor
-  WrappedObject(const WrappedObject<T> &A) : T(A) {
-    m_pPtr = static_cast<T *>(this);
-  }
-
-  /// Overloaded = operator sets the pointer to the wrapped class
-  /// and copies over the contents
-  WrappedObject<T> &operator=(const WrappedObject<T> &rhs) {
-    if (this != &rhs) {
-      m_pPtr = static_cast<T *>(this);
-      *m_pPtr = rhs;
-    }
-    return *this;
-  }
   /// Overloaded * operator returns the wrapped object pointer
   const T &operator*() const { return *m_pPtr; }
   /// Overloaded * operator returns the wrapped object pointer
@@ -1781,15 +1767,16 @@ std::string ConfigServiceImpl::getFacilityFilename(const std::string &fName) {
   // update the iterator, this means we will skip the folder in HOME and
   // look in the instrument folder in mantid install directory or mantid source
   // code directory
-  if (updateInstrStr != "1" || updateInstrStr != "on" ||
-      updateInstrStr != "On") {
+  if (!(updateInstrStr == "1" || updateInstrStr == "on" ||
+        updateInstrStr == "On")) {
     instrDir++;
   }
 
   // look through all the possible files
   for (; instrDir != directoryNames.end(); ++instrDir) {
-    std::string filename = (*instrDir) + "Facilities.xml";
-
+    Poco::Path p(*instrDir);
+    p.append("Facilities.xml");
+    std::string filename = p.toString();
     Poco::File fileObj(filename);
     // stop when you find the first one
     if (fileObj.exists())

@@ -9,6 +9,15 @@
 #include <boost/python/stl_iterator.hpp>
 #include <boost/python/str.hpp>
 
+#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#define NO_IMPORT_ARRAY
+#include <numpy/arrayobject.h>
+
+using boost::python::extract;
+using boost::python::handle;
+using boost::python::object;
+using boost::python::str;
+
 namespace Mantid {
 namespace PythonInterface {
 namespace Converters {
@@ -22,6 +31,14 @@ extern template int NDArrayTypeIndex<unsigned long>::typenum;
 extern template int NDArrayTypeIndex<unsigned long long>::typenum;
 extern template int NDArrayTypeIndex<float>::typenum;
 extern template int NDArrayTypeIndex<double>::typenum;
+extern template char NDArrayTypeIndex<bool>::typecode;
+extern template char NDArrayTypeIndex<int>::typecode;
+extern template char NDArrayTypeIndex<long>::typecode;
+extern template char NDArrayTypeIndex<long long>::typecode;
+extern template char NDArrayTypeIndex<unsigned int>::typecode;
+extern template char NDArrayTypeIndex<unsigned long>::typecode;
+extern template char NDArrayTypeIndex<unsigned long long>::typecode;
+extern template char NDArrayTypeIndex<double>::typecode;
 }
 
 namespace {
@@ -46,12 +63,12 @@ template <typename DestElementType> struct CopyToImpl {
       void *input;
     } npy_union;
     npy_union data;
-    PyObject *iter = Converters::Impl::func_PyArray_IterNew(arr);
+    object iter(handle<>(Converters::Impl::func_PyArray_IterNew(arr)));
     do {
-      data.input = PyArray_ITER_DATA(iter);
+      data.input = PyArray_ITER_DATA(iter.ptr());
       *first++ = *data.output;
-      PyArray_ITER_NEXT(iter);
-    } while (PyArray_ITER_NOTDONE(iter));
+      PyArray_ITER_NEXT(iter.ptr());
+    } while (PyArray_ITER_NOTDONE(iter.ptr()));
   }
 };
 
@@ -62,7 +79,6 @@ template <typename DestElementType> struct CopyToImpl {
 template <> struct CopyToImpl<std::string> {
   void operator()(typename std::vector<std::string>::iterator first,
                   PyArrayObject *arr) {
-    using namespace boost::python;
     object flattened(handle<>(PyArray_Ravel(arr, NPY_CORDER)));
     const Py_ssize_t nelements = PyArray_Size(flattened.ptr());
     for (Py_ssize_t i = 0; i < nelements; ++i) {
@@ -88,7 +104,7 @@ template <typename DestElementType> struct CoerceType {
  * to convert the underlying representation
  */
 template <> struct CoerceType<std::string> {
-  boost::python::object operator()(const NumPy::NdArray &x) { return x; }
+  object operator()(const NumPy::NdArray &x) { return x; }
 };
 }
 
@@ -143,7 +159,6 @@ void NDArrayToVector<DestElementType>::copyTo(TypedVector &dest) const {
 template <typename DestElementType>
 void NDArrayToVector<DestElementType>::throwIfSizeMismatched(
     const TypedVector &dest) const {
-  namespace bp = boost::python;
   if (PyArray_SIZE((PyArrayObject *)m_arr.ptr()) ==
       static_cast<ssize_t>(dest.size())) {
     return;

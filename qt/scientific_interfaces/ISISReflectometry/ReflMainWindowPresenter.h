@@ -3,6 +3,7 @@
 
 #include "DllConfig.h"
 #include "IReflMainWindowPresenter.h"
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -47,19 +48,21 @@ public:
                           IReflRunsTabPresenter *runsPresenter,
                           IReflEventTabPresenter *eventPresenter,
                           IReflSettingsTabPresenter *settingsPresenter,
-                          IReflSaveTabPresenter *savePresenter);
+                          std::unique_ptr<IReflSaveTabPresenter> savePresenter);
   /// Destructor
   ~ReflMainWindowPresenter() override;
 
-  // Tell the presenter something has happened
-  void notify(IReflMainWindowPresenter::Flag flag) override;
-
   /// Returns values passed for 'Transmission run(s)'
-  std::string getTransmissionRuns(int group) const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(int group, const double angle) const override;
+  /// Whether there are per-angle transmission runs specified
+  bool hasPerAngleOptions(int group) const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
-  std::string getTransmissionOptions(int group) const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getTransmissionOptions(int group) const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
-  std::string getReductionOptions(int group) const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getReductionOptions(int group) const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions(int group) const override;
   /// Returns time-slicing values
@@ -79,7 +82,19 @@ public:
   void setInstrumentName(const std::string &instName) const override;
 
   /// Returns whether the Runs Tab is currently processing any runs
-  bool checkIfProcessing() const override;
+  bool isProcessing() const override;
+  bool isProcessing(int group) const override;
+  void settingsChanged(int group) override;
+  void notify(IReflMainWindowPresenter::Flag flag) override;
+  void notifyReductionPaused(int group) override;
+  void notifyReductionResumed(int group) override;
+
+  void completedGroupReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) override;
+  void completedRowReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) override;
 
 private:
   /// Check for Settings Tab null pointer
@@ -90,6 +105,7 @@ private:
   void pauseReduction() const;
   /// Resumes reduction in the Runs Tab
   void resumeReduction() const;
+  void showHelp();
   /// The view we are handling
   IReflMainWindowView *m_view;
   /// The presenter of tab 'Runs'
@@ -99,9 +115,7 @@ private:
   /// The presenter of tab 'Settings'
   IReflSettingsTabPresenter *m_settingsPresenter;
   /// The presenter of tab 'Save ASCII'
-  IReflSaveTabPresenter *m_savePresenter;
-  /// State boolean on whether runs are currently being processed or not
-  mutable bool m_isProcessing;
+  std::unique_ptr<IReflSaveTabPresenter> m_savePresenter;
 };
 }
 }

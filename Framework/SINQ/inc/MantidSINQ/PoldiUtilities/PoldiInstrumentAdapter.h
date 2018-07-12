@@ -45,8 +45,8 @@ public:
                             const std::string &propertyName) const = 0;
 };
 
-typedef boost::shared_ptr<AbstractDoubleValueExtractor>
-    AbstractDoubleValueExtractor_sptr;
+using AbstractDoubleValueExtractor_sptr =
+    boost::shared_ptr<AbstractDoubleValueExtractor>;
 
 class NumberDoubleValueExtractor : public AbstractDoubleValueExtractor {
 public:
@@ -128,7 +128,7 @@ protected:
   static std::map<std::string, AbstractDoubleValueExtractor_sptr> m_extractors;
 };
 
-typedef boost::shared_ptr<PoldiInstrumentAdapter> PoldiInstrumentAdapter_sptr;
+using PoldiInstrumentAdapter_sptr = boost::shared_ptr<PoldiInstrumentAdapter>;
 
 } // namespace Poldi
 } // namespace Mantid

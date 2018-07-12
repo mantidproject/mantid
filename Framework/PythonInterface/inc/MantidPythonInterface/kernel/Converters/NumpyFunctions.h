@@ -26,26 +26,23 @@
 #pragma GCC system_header
 #endif
 
-#include <boost/python/list.hpp>
-#include "MantidKernel/WarningSuppressions.h"
+#include <boost/python/detail/wrap_python.hpp>
 
-// clang-format off
-GCC_DIAG_OFF(cast-qual)
-// clang-format on
+// Forward declare the numpy array types
+struct tagPyArrayObject;
+using PyArrayObject = tagPyArrayObject;
+struct _PyArray_Descr;
+using PyArray_Descr = _PyArray_Descr;
 
-// See
-// http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
-#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
-#define NO_IMPORT_ARRAY
-#include <numpy/arrayobject.h>
-// clang-format off
-GCC_DIAG_ON(cast-qual)
-// clang-format on
-
-/**functions containing numpy macros. We put them in a separate header file to
-  *suppress the warning
-  *ISO C++ forbids casting between pointer-to-function and pointer-to-object
-  */
+/*
+ * The numpy API is a C api where pointers to functions and objects are the
+ * same size.
+ * This is not guaranteed by the C++ standard so macros in the numpy headers,
+ * such as PyArray_IterNew produces warnings when compiled with a C++ compiler.
+ *
+ * The only solution appears to be wrap the calls in our own functions and
+ * suppress the warnings.
+ */
 namespace Mantid {
 namespace PythonInterface {
 namespace Converters {
@@ -55,6 +52,9 @@ PyObject *func_PyArray_IterNew(PyArrayObject *arr);
 /// equivalent to macro PyArray_NewFromDescr
 PyArrayObject *func_PyArray_NewFromDescr(int datatype, const int ndims,
                                          Py_intptr_t *dims);
+PyArrayObject *func_PyArray_NewFromDescr(const char *datadescr, const int ndims,
+                                         Py_intptr_t *dims);
+PyArray_Descr *func_PyArray_Descr(const char *datadescr);
 }
 }
 }

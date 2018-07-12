@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -41,7 +41,7 @@ following absorption correction algorithms:
 :ref:`algm-MonteCarloAbsorption` (correction factors for
 a generic sample using a Monte Carlo instead of a numerical integration
 method),
-:ref:`algm-MultipleScatteringCylinderAbsorption`
+:ref:`algm-CarpenterSampleCorrection`
 & :ref:`algm-AnvredCorrection` (corrections in a spherical
 sample, using a method imported from ISAW). Also, HRPD users can use the
 :ref:`algm-HRPDSlabCanAbsorption` to add rudimentary
@@ -106,8 +106,8 @@ Output:
     The created workspace has one entry for each spectra: 1
     Original y values:  [  5.68751434   5.68751434  15.68751434   5.68751434   5.68751434
        1.56242829]
-    Corrected y values:  [   818.30188422   2375.96165593  14211.52238463   9472.21381511
-      15718.79220638   5747.16759791]
+    Corrected y values:  [   818.24346185   2375.60869191  14208.84555679   9470.18486922
+      15715.10873581   5745.75458361]
 
 .. categories::
 

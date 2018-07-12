@@ -356,10 +356,10 @@ private slots:
 private:
   int indentation(const QModelIndex &index) const;
 
-  typedef QMap<QWidget *, QtProperty *> EditorToPropertyMap;
+  using EditorToPropertyMap = QMap<QWidget *, QtProperty *>;
   mutable EditorToPropertyMap m_editorToProperty;
 
-  typedef QMap<QtProperty *, QWidget *> PropertyToEditorMap;
+  using PropertyToEditorMap = QMap<QtProperty *, QWidget *>;
   mutable PropertyToEditorMap m_propertyToEditor;
   QtTreePropertyBrowserPrivate *m_editorPrivate;
   mutable QTreeWidgetItem *m_editedItem;

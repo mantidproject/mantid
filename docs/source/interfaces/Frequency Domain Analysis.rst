@@ -47,14 +47,18 @@ the interface will generate one and output the result as ``PhaseTable``. It is p
 possible to use a pre-existing ``PhaseTable``. **Note that the PhaseQuad option requires the data archieve to be in the search directory**. 
 
 The Calculate button will execute the :ref:`Padding and Apodization <algm-PaddingAndApodization>`  and then :ref:`FFT <algm-FFT>` algortihms. The output workspace will be added to
-``FFTMuon``. 
+appropriate grouped workspace. 
 
 
 Maximum Entropy Method
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The maximum entropy method can be used to calculate the frequency domain spectrum. The MaxEnt Property table contains 
-the basic quantitites used during the calculation. The 
+The maximum entropy method can be used to calculate the frequency domain spectrum. This interface uses the :ref:`MuonMaxent <algm-MuonMaxent>` algorithm to calculate the frequency spectrum. The MaxEnt Property table contains 
+the basic quantitites used during the calculation. If the ``Use Phase Table`` checkbox is set to true, then an input phase table will be used for the initial phase values (the phase table will be called ``PhaseTable``). To generate
+an estimate phase table the ``Construct Phase Table`` option can be used and when the ``Calculate MaxEnt`` button is pressed :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` is ran first to generate the phase table. If the 
+``Construct Phase Table`` option is not selected then ``PhaseTable`` must already exist. At present ``Construct Phase Table`` does not work with the ``MuonAnalysisGrouped`` workspaces. If the ``Workspace`` is set to the run number then
+their is no pre-defined grouping. 
+The 
 Advanced property table contains variables for users that would
 like more control overt the calculation.
 

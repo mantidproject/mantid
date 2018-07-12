@@ -77,7 +77,7 @@ protected:
 };
 
 /// Shared pointer to a PointGroup
-typedef boost::shared_ptr<PointGroup> PointGroup_sptr;
+using PointGroup_sptr = boost::shared_ptr<PointGroup>;
 
 MANTID_GEOMETRY_DLL std::vector<PointGroup_sptr> getAllPointGroups();
 
@@ -107,8 +107,9 @@ struct MANTID_GEOMETRY_DLL CrystalSystemComparator {
                   const PointGroup::CrystalSystem &rhs) const;
 };
 
-typedef std::multimap<PointGroup::CrystalSystem, PointGroup_sptr,
-                      CrystalSystemComparator> PointGroupCrystalSystemMap;
+using PointGroupCrystalSystemMap =
+    std::multimap<PointGroup::CrystalSystem, PointGroup_sptr,
+                  CrystalSystemComparator>;
 
 MANTID_GEOMETRY_DLL PointGroupCrystalSystemMap getPointGroupsByCrystalSystem();
 

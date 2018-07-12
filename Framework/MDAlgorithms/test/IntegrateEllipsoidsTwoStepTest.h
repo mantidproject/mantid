@@ -350,6 +350,9 @@ public:
     builder.addPeakByHKL(V3D(1, -4, 0), numEventsPerStrongPeak, sigmas);
     builder.addPeakByHKL(V3D(2, -3, -4), numEventsPerStrongPeak, sigmas);
 
+    // weak peak with zero intensity
+    builder.addPeakByHKL(V3D(2, -5, -5), 0, sigmas);
+
     auto data = builder.build();
     auto eventWS = std::get<0>(data);
     auto peaksWS = std::get<1>(data);
@@ -402,6 +405,8 @@ public:
     TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(5),
                      integratedPeaksWS->getPeak(5).getIntensity(),
                      numEventsPerStrongPeak, 800);
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(6),
+                     integratedPeaksWS->getPeak(6).getIntensity(), 100, 10);
   }
 
   void test_exec_events_with_adaptive_q() {
@@ -467,10 +472,10 @@ public:
 
     TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(0),
                      integratedPeaksWS->getPeak(0).getIntensity(),
-                     numEventsPerStrongPeak, 150);
+                     numEventsPerStrongPeak, 5100);
     TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(1),
                      integratedPeaksWS->getPeak(1).getIntensity(),
-                     numEventsPerStrongPeak, 150);
+                     numEventsPerStrongPeak, 5100);
     TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(2),
                      integratedPeaksWS->getPeak(2).getIntensity(),
                      numEventsPerStrongPeak, 900);

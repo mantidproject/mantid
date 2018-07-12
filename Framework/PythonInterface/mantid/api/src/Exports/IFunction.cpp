@@ -40,9 +40,16 @@ PyObject *getCategories(IFunction &self) {
   return registered;
 }
 
+/**
+ * Return fitting error for a parameter given its name.
+ */
+double getError(IFunction &self, std::string const &name) {
+  return self.getError(self.parameterIndex(name));
+}
+
 // -- Set property overloads --
 // setProperty(index,value,explicit)
-typedef void (IFunction::*setParameterType1)(size_t, const double &value, bool);
+using setParameterType1 = void (IFunction::*)(size_t, const double &, bool);
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
@@ -54,8 +61,8 @@ GCC_DIAG_OFF(conversion)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType1_Overloads,
                                        setParameter, 2, 3)
 // setProperty(index,value,explicit)
-typedef void (IFunction::*setParameterType2)(const std::string &,
-                                             const double &value, bool);
+using setParameterType2 = void (IFunction::*)(const std::string &,
+                                              const double &, bool);
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(tie_Overloads, tie, 2, 3)
@@ -65,7 +72,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixParameter_Overloads, fixParameter, 1,
                                        2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fix_Overloads, fix, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixAll_Overloads, fixAll, 0, 1)
-typedef void (IFunction::*removeTieByName)(const std::string &);
+using removeTieByName = void (IFunction::*)(const std::string &);
 
 GCC_DIAG_ON(conversion)
 #ifdef __clang__
@@ -209,6 +216,9 @@ void export_IFunction() {
            (void (IFunction::*)(const std::string &)) & IFunction::removeTie,
            (arg("self"), arg("name")), "Remove the tie of the named parameter")
 
+      .def("getTies", &IFunction::writeTies, arg("self"),
+           "Returns the list of current ties as a string")
+
       .def("addConstraints", &IFunction::addConstraints,
            addConstraints_Overloads(
                (arg("self"), arg("constraints"), arg("isDefault")),
@@ -217,6 +227,9 @@ void export_IFunction() {
       .def("removeConstraint", &IFunction::removeConstraint,
            (arg("self"), arg("name")),
            "Remove the constraint on the named parameter")
+
+      .def("getConstraints", &IFunction::writeConstraints, arg("self"),
+           "Returns the list of current constraints as a string")
 
       .def("getNumberDomains", &IFunction::getNumberDomains, (arg("self")),
            "Get number of domains of a multi-domain function")
@@ -244,6 +257,10 @@ void export_IFunction() {
       .def("getParamValue",
            (double (IFunction::*)(std::size_t) const) & IFunction::getParameter,
            (arg("self"), arg("i")), "Get the value of the ith parameter")
+      .def("getError", &IFunction::getError, (arg("self"), arg("i")),
+           "Return fitting error of the ith parameter")
+      .def("getError", &getError, (arg("self"), arg("name")),
+           "Return fitting error of the named parameter")
 
       //-- Python special methods --
       .def("__repr__", &IFunction::asString, arg("self"),

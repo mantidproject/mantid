@@ -59,10 +59,10 @@ protected:
 };
 
 // Helper typedef for a shared pointer of this type.
-typedef boost::shared_ptr<CoordTransform> CoordTransform_sptr;
+using CoordTransform_sptr = boost::shared_ptr<CoordTransform>;
 
 // Helper typdef for a const shared pointer of this type.
-typedef boost::shared_ptr<const CoordTransform> CoordTransform_const_sptr;
+using CoordTransform_const_sptr = boost::shared_ptr<const CoordTransform>;
 
 } // namespace Mantid
 } // namespace API

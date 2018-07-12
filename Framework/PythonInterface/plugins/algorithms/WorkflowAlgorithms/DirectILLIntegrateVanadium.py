@@ -22,6 +22,9 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
         """Return the algorithm's category."""
         return common.CATEGORIES
 
+    def seeAlso(self):
+        return [ "DirectILLReduction" ]
+
     def name(self):
         """Return the algorithm's name."""
         return 'DirectILLIntegrateVanadium'
@@ -62,11 +65,11 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
             validator=inputWorkspaceValidator,
             optional=PropertyMode.Mandatory,
             direction=Direction.Input),
-            doc='Input workspace.')
+            doc='A workspace to be integrated.')
         self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
                                                defaultValue='',
                                                direction=Direction.Output),
-                             doc='The output of the algorithm.')
+                             doc='The integrated workspace.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
                              defaultValue=common.CLEANUP_ON,
                              validator=StringListValidator([
@@ -99,8 +102,8 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc='Experimental temperature (Vanadium ' +
-                                 'reduction type only) for the Debye-Waller correction, in Kelvins.')
+                             doc='Vanadium temperature in Kelvin for Debye-Waller correction, ' +
+                                 'overrides the default value from the sample logs.')
         self.setPropertySettings(common.PROP_TEMPERATURE, EnabledWhenProperty(common.PROP_DWF_CORRECTION,
                                                                               PropertyCriterion.IsDefault))
 

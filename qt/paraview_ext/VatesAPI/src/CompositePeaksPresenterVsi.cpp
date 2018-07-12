@@ -162,9 +162,9 @@ bool CompositePeaksPresenterVsi::hasPeaks() {
  */
 void CompositePeaksPresenterVsi::sortPeaksWorkspace(
     const std::string &columnToSortBy, const bool sortedAscending,
-    const Mantid::API::IPeaksWorkspace *peaksWS) {
+    const Mantid::API::IPeaksWorkspace_sptr peaksWS) {
   for (const auto &presenter : m_peaksPresenters) {
-    if (presenter->getPeaksWorkspace().get() == peaksWS) {
+    if (presenter->getPeaksWorkspace() == peaksWS) {
       presenter->sortPeaksWorkspace(columnToSortBy, sortedAscending);
     }
   }

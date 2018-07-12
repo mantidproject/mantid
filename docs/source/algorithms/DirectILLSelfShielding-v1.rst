@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -106,10 +106,11 @@ Usage
 Output:
 
 .. testoutput:: FakeIN4Example
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
     Absoprtion corrections factors for detector 1
-    Short final wavelengths: 0.4047
-    Long final wavelengths:  0.2267
+    Short final wavelengths: 0.4...
+    Long final wavelengths:  0.2...
 
 .. categories::
 

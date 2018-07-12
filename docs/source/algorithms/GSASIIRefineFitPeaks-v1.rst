@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -13,7 +13,8 @@ Description
 
    This algorithm requires GSAS-II to be installed on your computer. A
    version of GSAS-II containing the module GSASIIscriptable (added in
-   April 2017) is required.
+   April 2017) is required. See Installing_GSASII_
+   for how to get the correct version of GSAS-II.
 
 Uses `GSAS-II <https://subversion.xray.aps.anl.gov/trac/pyGSAS>`_
 [TobyVonDreele2013]_ as external software to fit peaks to a powder /
@@ -60,7 +61,7 @@ When Pawley refinement is selected as refinement method the flag for
 histogram scale factor refinement is disabled, as recommended in the
 `GSAS-II documentation
 <https://subversion.xray.aps.anl.gov/pyGSAS/trunk/help/gsasII.html>`_,
-as this cannot be refined simultaenously with the Pawley reflection
+as this cannot be refined simultaneously with the Pawley reflection
 intensities.
 
 The GSAS-II Rietveld/Pawley refinement process writes lattice
@@ -68,6 +69,24 @@ parameters and extensive additional information in an output file with
 the same name as the output GSAS-II project file but with extension
 ".lst". This is noted in a log message that specifies where the file
 has been written (next to the output project file).
+
+.. _Installing_GSASII:
+
+Installing GSAS-II
+------------------
+
+On Windows, run either :code:`scripts\GSAS-II\install_gsas_latest.bat`
+or :code:`scripts\GSAS-II\install_gsas_vetted.bat`. Use the former for
+the latest version of GSAS-II and the latter for the most recent
+version to have been manually verified to work with
+GSASIIRefineFitPeaks.  This will install GSAS-II to your current
+working drive (usually C) in a directory called :code:`g2conda`.
+
+On Linux, from :code:`scripts\GSAS-II` run :code:`python install_gsas_proxy.py`.
+Optionally, you can supply a desired revision number (defaults to the
+latest) with the :code:`-v` flag and a directory (defaults to
+:code:`/`) to install GSAS-II to with the :code:`-d` flag.
+
 
 *References*:
 
@@ -99,7 +118,7 @@ Usage
    # You would normally generate the focused file using the Engg GUI or,
    # alternatively, with commands like these:
    #
-   # wks = Load('ENGINX00256663-256675')
+   # ws_to_focus = Load('ENGINX00256663-256675')
    # wks_ceria = Load('ENGINX00255924')
    # wks_vana = Load('ENGINX00254854')
    # # Using default expected peaks for Ceria
@@ -107,49 +126,54 @@ Usage
    # wks_focused = EnggFocus(InputWorkspace=wks, VanadiumWorkspace=wks_vana, Bank='North')
    # SaveNexus(InputWorkspace=wks_focused, Filename='focused_bank1_ENGINX00256663.nxs')
    #
-   wks=Load('focused_bank1_ENGINX00256663.nxs')
-   GoF, Rwp, lattice_tbl = GSASIIRefineFitPeaks(InputWorkspace=wks,
-                                                RefinementMethods="PawleyRefinement",
-                                                InstrumentFile='template_ENGINX_241391_236516_North_bank.prm',
-                                                PhaseInfoFile='FE_ALPHA.cif',
-                                                PathToGSASII='/home/user/gsas',
-                                                SaveGSASIIProjectFile='example_gsas2_project')
-   print "Goodness of fit coefficient: {0:.5f}".format(GoF)
-   print "Weighted profile R-factor (Rwp): {0:.5f}".format(Rwp)
-   print ("Lattice parameters, a: {a}, b: {b}, c: {c}, alpha: {alpha}, beta: {beta}, gamma: {gamma}, "
-          "Volume: {volume:.3f}".format(**lattice_tbl.row(0)))
+   wks = Load('focused_bank1_ENGINX00256663.nxs')
+   peaks, lattice_params, rwp, sigma, gamma = \
+       GSASIIRefineFitPeaks(InputWorkspace=wks,
+                            RefinementMethod="Pawley refinement",
+                            InstrumentFile='template_ENGINX_241391_236516_North_bank.prm',
+                            PhaseInfoFiles='Fe-alpha.cif,Fe-gamma.cif',
+                            PathToGSASII='/home/user/g2conda/GSASII',
+                            RefineSigma=True,
+                            RefineGamma=True,
+                            SaveGSASIIProjectFile='example_gsas2_project.gpx',
+                            OutputWorkspace="FittedPeaks")
+   print("Weighted profile R-factor (Rwp): {0:.5f}".format(rwp))
+   print("Lattice parameters, a: {a}, b: {b}, c: {c}, alpha: {alpha}, beta: {beta}, gamma: {gamma}, "
+         "Volume: {volume:.3f}".format(**lattice_params.row(0)))
+   print("Sigma={}, Gamma={}".format(sigma, gamma))
 
 Output:
 
 .. code-block:: none
 
-    Goodness of fit coefficient: 3.57776
-    Weighted profile R-factor (Rwp): 77.75449
+    Weighted profile R-factor (Rwp): 77.75515
     Lattice parameters, a: 2.8665, b: 2.8665, c: 2.8665, alpha: 90.0, beta: 90.0, gamma: 90.0, Volume: 23.554
+    Sigma=81.0939, Gamma=0.1855
 
 **Example - Rietveld refinement of lattice parameters from a diffraction spectrum**
 
 .. code-block:: python
 
    wks=Load('focused_bank1_ENGINX00256663.nxs')
-   GoF, Rwp, lattice_tbl = GSASIIRefineFitPeaks(InputWorkspace=wks,
-                                                RefinementMethod='Rietveld refinement',
-                                                InstrumentFile='template_ENGINX_241391_236516_North_bank.prm',
-                                                PhaseInfoFile='FE_ALPHA.cif',
-                                                PathToGSASII='/home/user/gsas',
-                                                SaveGSASIIProjectFile='example_gsas2_project',
-   print "Goodness of fit coefficient: {0:.5f}".format(GoF)
-   print "Weighted profile R-factor (Rwp): {0:.5f}".format(Rwp)
-   print ("Lattice parameters, a: {a}, b: {b}, c: {c}, alpha: {alpha}, beta: {beta}, gamma: {gamma}, "
-          "Volume: {volume:.3f}".format(**lattice_tbl.row(0)))
+   peaks, lattice_params, rwp, sigma, gamma = \
+       GSASIIRefineFitPeaks(InputWorkspace=wks,
+                            RefinementMethod='Rietveld refinement',
+                            InstrumentFile='template_ENGINX_241391_236516_North_bank.prm',
+                            PhaseInfoFiles='Fe-alpha.cif,Fe-gamma.cif',
+                            PathToGSASII='/home/user/g2conda/GSASII',
+                            SaveGSASIIProjectFile='example_gsas2_project.gpx',
+   print("Weighted profile R-factor (Rwp): {0:.5f}".format(rwp))
+   print("Lattice parameters, a: {a}, b: {b}, c: {c}, alpha: {alpha}, beta: {beta}, gamma: {gamma}, "
+         "Volume: {volume:.3f}".format(**lattice_params.row(0)))
+   print("Sigma={}, Gamma={}".format(sigma, gamma))
 
 Output:
 
 .. code-block:: none
 
-    Goodness of fit coefficient: 3.57847
-    Weighted profile R-factor (Rwp): 77.75515
+    Weighted profile R-factor (Rwp): 77.75499
     Lattice parameters, a: 2.8665, b: 2.8665, c: 2.8665, alpha: 90.0, beta: 90.0, gamma: 90.0, Volume: 23.554
+    Sigma=81.0939, Gamma=0.1855
 
 .. categories::
 

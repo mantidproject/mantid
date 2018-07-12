@@ -40,8 +40,8 @@ namespace Registry {
  *    - Registers a new PropertyValueHandler for a boost::shared_ptr<T>
  */
 template <typename IType> struct DLLExport RegisterWorkspacePtrToPython {
-  typedef boost::shared_ptr<IType> IType_sptr;
-  typedef boost::weak_ptr<IType> IType_wptr;
+  using IType_sptr = boost::shared_ptr<IType>;
+  using IType_wptr = boost::weak_ptr<IType>;
   /// Constructor
   RegisterWorkspacePtrToPython() {
     using namespace boost::python;

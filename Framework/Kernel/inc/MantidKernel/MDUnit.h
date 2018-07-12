@@ -83,8 +83,8 @@ public:
   LabelUnit *clone() const override;
 };
 
-typedef std::unique_ptr<MDUnit> MDUnit_uptr;
-typedef std::unique_ptr<const MDUnit> MDUnit_const_uptr;
+using MDUnit_uptr = std::unique_ptr<MDUnit>;
+using MDUnit_const_uptr = std::unique_ptr<const MDUnit>;
 
 } // namespace Kernel
 } // namespace Mantid

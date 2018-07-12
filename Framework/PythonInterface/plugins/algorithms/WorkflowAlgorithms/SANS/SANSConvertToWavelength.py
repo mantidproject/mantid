@@ -3,7 +3,7 @@
 """ SANSConvertToWavelength converts to wavelength units """
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
+from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import (create_unmanaged_algorithm, append_to_sans_file_tag,
                                            get_input_workspace_as_copy_if_not_same_as_output_workspace)
@@ -11,7 +11,7 @@ from sans.common.enums import (RangeStepType, RebinType)
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 
-class SANSConvertToWavelength(DataProcessorAlgorithm):
+class SANSConvertToWavelength(DistributedDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Wavelength'
 
@@ -42,8 +42,8 @@ class SANSConvertToWavelength(DataProcessorAlgorithm):
 
         wavelength_name = "SANSConvertToWavelengthAndRebin"
         wavelength_options = {"InputWorkspace": workspace,
-                              "WavelengthLow": wavelength_state.wavelength_low,
-                              "WavelengthHigh": wavelength_state.wavelength_high,
+                              "WavelengthLow": wavelength_state.wavelength_low[0],
+                              "WavelengthHigh": wavelength_state.wavelength_high[0],
                               "WavelengthStep": wavelength_state.wavelength_step,
                               "WavelengthStepType": RangeStepType.to_string(
                                   wavelength_state.wavelength_step_type),

@@ -77,6 +77,10 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
   setupConnections();
 
   m_tree->setDragEnabled(true);
+
+  auto presenter = boost::make_shared<WorkspacePresenter>(this);
+  m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
+  presenter->init();
 }
 
 WorkspaceTreeWidget::~WorkspaceTreeWidget() {}
@@ -172,12 +176,6 @@ void WorkspaceTreeWidget::setTreeUpdating(const bool state) {
 
 void WorkspaceTreeWidget::incrementUpdateCount() { m_updateCount.ref(); }
 
-void WorkspaceTreeWidget::init() {
-  auto presenter = boost::make_shared<WorkspacePresenter>(shared_from_this());
-  m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
-  presenter->init();
-}
-
 WorkspacePresenterWN_wptr WorkspaceTreeWidget::getPresenterWeakPtr() {
   return boost::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
 }
@@ -192,6 +190,16 @@ StringList WorkspaceTreeWidget::getSelectedWorkspaceNames() const {
   for (auto &item : items)
     names.push_back(item->text(0).toStdString());
 
+  return names;
+}
+
+QStringList WorkspaceTreeWidget::getSelectedWorkspaceNamesAsQList() const {
+  auto items = m_tree->selectedItems();
+  QStringList names;
+
+  for (auto &item : items) {
+    names.append(item->text(0));
+  }
   return names;
 }
 
@@ -483,7 +491,7 @@ void WorkspaceTreeWidget::filterWorkspaces(const std::string &filterText) {
               item->setHidden(false);
             }
 
-            if (item->parent() == NULL) {
+            if (item->parent() == nullptr) {
               // No parent, I am a top level workspace - show me
               item->setHidden(false);
             } else {
@@ -626,7 +634,7 @@ void WorkspaceTreeWidget::createWorkspaceMenuActions() {
   m_showHist = new QAction(tr("Show History"), this);
   connect(m_showHist, SIGNAL(triggered()), this, SLOT(onClickShowAlgHistory()));
 
-  m_saveNexus = new QAction(tr("Save Nexus"), this);
+  m_saveNexus = new QAction(tr("Save NeXus"), this);
   connect(m_saveNexus, SIGNAL(triggered()), this,
           SLOT(onClickSaveNexusWorkspace()));
 
@@ -725,9 +733,8 @@ void WorkspaceTreeWidget::populateChildData(QTreeWidgetItem *item) {
   Workspace_sptr workspace = userData.value<Workspace_sptr>();
 
   if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
-    const size_t nmembers = group->getNumberOfEntries();
-    for (size_t i = 0; i < nmembers; ++i) {
-      auto ws = group->getItem(i);
+    auto members = group->getAllItems();
+    for (const auto &ws : members) {
       auto *node = addTreeEntry(std::make_pair(ws->getName(), ws), item);
       excludeItemFromSort(node);
       if (shouldBeSelected(node->text(0)))

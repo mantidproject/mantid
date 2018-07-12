@@ -384,14 +384,16 @@ signal_t MDHistoWorkspaceIterator::getError() const {
 }
 //----------------------------------------------------------------------------------------------
 /// Return a list of vertexes defining the volume pointed to
-coord_t *MDHistoWorkspaceIterator::getVertexesArray(size_t &numVertices) const {
+std::unique_ptr<coord_t[]>
+MDHistoWorkspaceIterator::getVertexesArray(size_t &numVertices) const {
   // The MDHistoWorkspace takes care of this
   return m_ws->getVertexesArray(m_pos, numVertices);
 }
 
-coord_t *MDHistoWorkspaceIterator::getVertexesArray(size_t &numVertices,
-                                                    const size_t outDimensions,
-                                                    const bool *maskDim) const {
+std::unique_ptr<coord_t[]>
+MDHistoWorkspaceIterator::getVertexesArray(size_t &numVertices,
+                                           const size_t outDimensions,
+                                           const bool *maskDim) const {
   // Do the same thing as is done in the MDBoxBase
   UNUSED_ARG(numVertices);
   UNUSED_ARG(outDimensions);

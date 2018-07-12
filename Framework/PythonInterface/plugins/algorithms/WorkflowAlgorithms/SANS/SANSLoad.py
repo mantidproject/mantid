@@ -5,7 +5,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty,
                            EnabledWhenProperty, PropertyCriterion)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
+from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
                         WorkspaceProperty)
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
@@ -14,7 +14,7 @@ from sans.common.general_functions import create_child_algorithm
 from sans.algorithm_detail.load_data import SANSLoadDataFactory
 
 
-class SANSLoad(DataProcessorAlgorithm):
+class SANSLoad(ParallelDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Load'
 

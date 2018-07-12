@@ -4,10 +4,11 @@ import mantid
 
 from sans.common.general_functions import (create_unmanaged_algorithm)
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (SANSFacility, SampleShape, ReductionDimensionality, RangeStepType)
+from sans.common.enums import (SANSFacility, SampleShape, ReductionDimensionality, RangeStepType, SANSInstrument)
 from sans.test_helper.test_director import TestDirector
 from sans.state.convert_to_q import get_convert_to_q_builder
 from sans.state.data import get_data_builder
+from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 class SANSConvertToQTest(unittest.TestCase):
@@ -35,7 +36,8 @@ class SANSConvertToQTest(unittest.TestCase):
                           use_gravity=False, dim=ReductionDimensionality.OneDim):
         # Arrange
         facility = SANSFacility.ISIS
-        data_builder = get_data_builder(facility)
+        file_information = SANSFileInformationMock(instrument=SANSInstrument.LOQ, run_number=74044)
+        data_builder = get_data_builder(facility, file_information)
         data_builder.set_sample_scatter("LOQ74044")
         data_state = data_builder.build()
 

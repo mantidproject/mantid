@@ -3,9 +3,12 @@
 
 #include "DllConfig.h"
 #include "IReflSettingsPresenter.h"
+#include "IReflSettingsTabPresenter.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidGeometry/Instrument_fwd.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include <vector>
+#include <initializer_list>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -43,41 +46,66 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflSettingsPresenter
     : public IReflSettingsPresenter {
 public:
   /// Constructor
-  ReflSettingsPresenter(IReflSettingsView *view);
+  ReflSettingsPresenter(IReflSettingsView *view, int id);
   /// Destructor
   ~ReflSettingsPresenter() override;
   void notify(IReflSettingsPresenter::Flag flag) override;
   void setInstrumentName(const std::string &instName) override;
 
-  /// Returns values passed for 'Transmission run(s)'
-  std::string getTransmissionRuns(bool loadRuns) const override;
+  /// Returns per-angle values passed for 'Transmission run(s)'
+  MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(const double angleToFind) const override;
+  /// Returns default values passed for 'Transmission run(s)'
+  MantidWidgets::DataProcessor::OptionsQMap getDefaultOptions() const;
+  /// Whether per-angle transmission runs are specified
+  bool hasPerAngleOptions() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
-  std::string getTransmissionOptions() const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getTransmissionOptions() const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
-  std::string getReductionOptions() const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
-  // Loads the runs with the names/run numbers specified by the vector.
-  void
-  loadTransmissionRuns(std::vector<std::string> const &transmissionRuns) const;
-  std::string
-  firstTransmissionRunLabelled(std::vector<std::string> const &runNumber) const;
-  std::string secondTransmissionRunLabelled(
-      std::vector<std::string> const &runNumber) const;
+
+  void acceptTabPresenter(IReflSettingsTabPresenter *tabPresenter) override;
+  void onReductionPaused() override;
+  void onReductionResumed() override;
+  Mantid::API::IAlgorithm_sptr createReductionAlg() override;
 
 private:
   void createStitchHints();
   void getExpDefaults();
   void getInstDefaults();
-  void wrapWithQuotes(std::string &str) const;
-  Mantid::API::IAlgorithm_sptr createReductionAlg();
+  void handleSettingsChanged();
+  bool hasReductionTypes(const std::string &summationType) const;
+  bool hasIncludePartialBinsOption(const std::string &summationType) const;
+  void handleSummationTypeChange();
+  static QString asAlgorithmPropertyBool(bool value);
   Mantid::Geometry::Instrument_const_sptr
   createEmptyInstrument(const std::string &instName);
 
+  MantidWidgets::DataProcessor::OptionsQMap transmissionOptionsMap() const;
+  void addIfNotEmpty(MantidWidgets::DataProcessor::OptionsQMap &options,
+                     const QString &key, const QString &value) const;
+  void addIfNotEmpty(MantidWidgets::DataProcessor::OptionsQMap &options,
+                     const QString &key, const std::string &value) const;
+  void setTransmissionOption(MantidWidgets::DataProcessor::OptionsQMap &options,
+                             const QString &key, const QString &value) const;
+  void setTransmissionOption(MantidWidgets::DataProcessor::OptionsQMap &options,
+                             const QString &key,
+                             const std::string &value) const;
+  void
+  addTransmissionOptions(MantidWidgets::DataProcessor::OptionsQMap &options,
+                         std::initializer_list<QString> keys) const;
+  QString getProcessingInstructions() const;
+
   /// The view we are managing
   IReflSettingsView *m_view;
+  IReflSettingsTabPresenter *m_tabPresenter;
   /// Name of the current instrument in use
   std::string m_currentInstrumentName;
+  int m_group;
 };
 }
 }

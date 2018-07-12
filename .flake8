@@ -16,6 +16,7 @@ exclude =
     MantidPlot,
     qt/applications/workbench/workbench/app/resources.py,
     qt/paraview_ext,
+    qt/python/mantidqt/resources.py,
     qt/scientific_interfaces,
     qt/widgets,
     scripts/test,

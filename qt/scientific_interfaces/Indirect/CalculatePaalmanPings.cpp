@@ -33,7 +33,7 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
           SLOT(fillCorrectionDetails(const QString &)));
 
-  QRegExp regex("[A-Za-z0-9\\-\\(\\)]*");
+  QRegExp regex(R"([A-Za-z0-9\-\(\)]*)");
   QValidator *formulaValidator = new QRegExpValidator(regex, this);
   m_uiForm.leSampleChemicalFormula->setValidator(formulaValidator);
   m_uiForm.leCanChemicalFormula->setValidator(formulaValidator);
@@ -149,21 +149,8 @@ void CalculatePaalmanPings::run() {
   if (nameCutIndex == -1)
     nameCutIndex = sampleWsName.length();
 
-  QString correctionType;
-  switch (m_uiForm.cbSampleShape->currentIndex()) {
-  case 0:
-    correctionType = "flt";
-    break;
-  case 1:
-    correctionType = "cyl";
-    break;
-  case 2:
-    correctionType = "ann";
-    break;
-  }
-
   const auto outputWsName =
-      sampleWsName.left(nameCutIndex) + "_" + correctionType + "_abs";
+      sampleWsName.left(nameCutIndex) + "_" + sampleShape + "_PP_Corrections";
 
   absCorAlgo->setProperty("OutputWorkspace", outputWsName.toStdString());
 
@@ -541,7 +528,7 @@ void CalculatePaalmanPings::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
     alg->setProperty("CanFrontThickness", canFrontThickness);
 
     const auto canBackThickness = m_uiForm.spFlatCanBackThickness->value();
-    alg->setProperty("SampleThickness", canBackThickness);
+    alg->setProperty("CanBackThickness", canBackThickness);
   } else if (shape == "Cylinder") {
     const auto canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
     alg->setProperty("CanOuterRadius", canOuterRadius);

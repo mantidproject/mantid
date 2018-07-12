@@ -12,7 +12,6 @@
 using Mantid::API::MultiPeriodGroupWorker;
 using namespace Mantid::API;
 
-namespace {
 class TestAlgorithm : public Algorithm {
 public:
   TestAlgorithm() {}
@@ -32,7 +31,6 @@ public:
   ~TestAlgorithm() override {}
 };
 DECLARE_ALGORITHM(TestAlgorithm)
-}
 
 class MultiPeriodGroupWorkerTest : public CxxTest::TestSuite,
                                    public MultiPeriodGroupTestBase {

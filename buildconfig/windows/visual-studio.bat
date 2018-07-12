@@ -5,6 +5,6 @@
 
 :: Assume the buildenv.bat script exists and is in the same directory
 call %~dp0buildenv.bat
-
+set MSVC_IDE=@MSVC_IDE_LOCATION@
 :: Start IDE
-start "" "%VS140COMNTOOLS%\..\IDE\devenv.exe" Mantid.sln
+start "" "%MSVC_IDE%/devenv.exe" Mantid.sln

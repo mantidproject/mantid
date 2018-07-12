@@ -180,9 +180,9 @@ GCC_DIAG_ON(conversion)
 //============================================
 
 // Function pointer to real implementation of getMoments
-typedef std::vector<double>(*MomentsFunction)(const std::vector<double> &indep,
-                                              const std::vector<double> &depend,
-                                              const int);
+using MomentsFunction = std::vector<double>(*)(const std::vector<double> &,
+                                               const std::vector<double> &,
+                                               const int);
 
 /**
  * The implementation for getMomentsAboutOrigin & getMomentsAboutOriginMean for
@@ -275,7 +275,7 @@ GCC_DIAG_ON(conversion)
 
 void export_Statistics() {
   // typedef std::vector --> numpy array result converter
-  typedef return_value_policy<Policies::VectorToNumpy> ReturnNumpyArray;
+  using ReturnNumpyArray = return_value_policy<Policies::VectorToNumpy>;
 
   // define a new "Statistics" scope so that everything is called as
   // Statistics.getXXX

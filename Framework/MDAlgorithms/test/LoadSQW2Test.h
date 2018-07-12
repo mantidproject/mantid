@@ -145,9 +145,9 @@ private:
   enum class DataType { SQW, Cut3D };
 
   struct DimensionProperties {
-    typedef std::array<std::string, 4> StringList;
-    typedef std::array<double, 8> DoubleList;
-    typedef std::array<size_t, 4> SizeTList;
+    using StringList = std::array<std::string, 4>;
+    using DoubleList = std::array<double, 8>;
+    using SizeTList = std::array<size_t, 4>;
     StringList ids, names, units, frameNames;
     DoubleList ulimits;
     SizeTList nbins;

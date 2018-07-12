@@ -3,7 +3,7 @@
 """ SANSCalculateTransmission algorithm calculates the transmission correction of a SANS workspace."""
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, StringListValidator, PropertyManagerProperty)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
+from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.enums import (RangeStepType, RebinType, FitType, DataType)
@@ -15,7 +15,7 @@ from sans.algorithm_detail.calculate_transmission_helper import (get_detector_id
                                                                  get_region_of_interest)
 
 
-class SANSCalculateTransmission(DataProcessorAlgorithm):
+class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Adjust'
 
@@ -114,8 +114,8 @@ class SANSCalculateTransmission(DataProcessorAlgorithm):
         :return: a fitted workspace and an unfitted workspace
         """
 
-        wavelength_low = calculate_transmission_state.wavelength_low
-        wavelength_high = calculate_transmission_state.wavelength_high
+        wavelength_low = calculate_transmission_state.wavelength_low[0]
+        wavelength_high = calculate_transmission_state.wavelength_high[0]
         wavelength_step = calculate_transmission_state.wavelength_step
         wavelength_step_type = calculate_transmission_state.wavelength_step_type
         prefix = 1.0 if wavelength_step_type is RangeStepType.Lin else -1.0
@@ -281,8 +281,8 @@ class SANSCalculateTransmission(DataProcessorAlgorithm):
             wavelength_low = calculate_transmission_state.wavelength_full_range_low
             wavelength_high = calculate_transmission_state.wavelength_full_range_high
         else:
-            wavelength_low = calculate_transmission_state.wavelength_low
-            wavelength_high = calculate_transmission_state.wavelength_high
+            wavelength_low = calculate_transmission_state.wavelength_low[0]
+            wavelength_high = calculate_transmission_state.wavelength_high[0]
 
         wavelength_step = calculate_transmission_state.wavelength_step
         rebin_type = calculate_transmission_state.rebin_type

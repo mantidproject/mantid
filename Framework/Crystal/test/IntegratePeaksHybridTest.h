@@ -19,8 +19,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
 namespace {
-typedef boost::tuple<WorkspaceGroup_sptr, IPeaksWorkspace_sptr>
-    AlgorithmOutputs;
+using AlgorithmOutputs = boost::tuple<WorkspaceGroup_sptr, PeaksWorkspace_sptr>;
 
 // Execute the clustering integration algorithm
 AlgorithmOutputs execute_integration(const MDEventPeaksWSTuple &inputWorkspaces,
@@ -41,7 +40,7 @@ AlgorithmOutputs execute_integration(const MDEventPeaksWSTuple &inputWorkspaces,
   alg.setPropertyValue("OutputWorkspaces", "out_ws_md");
   alg.execute();
   // ------- Get the integrated results
-  IPeaksWorkspace_sptr outPeaksWS = alg.getProperty("OutputWorkspace");
+  PeaksWorkspace_sptr outPeaksWS = alg.getProperty("OutputWorkspace");
   WorkspaceGroup_sptr outClustersWS = alg.getProperty("OutputWorkspaces");
   return AlgorithmOutputs(outClustersWS, outPeaksWS);
 }
@@ -162,7 +161,7 @@ public:
         execute_integration(inputWorkspaces, backgroundOuterRadius, nBins);
     // ------- Get the integrated results
     WorkspaceGroup_sptr outClustersWorkspaces = integratedWorkspaces.get<0>();
-    IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
+    PeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
 
     TSM_ASSERT_EQUALS("Expect one output image", 1,
                       outClustersWorkspaces->size());
@@ -220,9 +219,9 @@ public:
     AlgorithmOutputs integratedWorkspaces3 =
         execute_integration(inputWorkspaces, peakRadius * 3.5, nBins);
 
-    IPeaksWorkspace_sptr outPeaksWS1 = integratedWorkspaces1.get<1>();
-    IPeaksWorkspace_sptr outPeaksWS2 = integratedWorkspaces2.get<1>();
-    IPeaksWorkspace_sptr outPeaksWS3 = integratedWorkspaces3.get<1>();
+    PeaksWorkspace_sptr outPeaksWS1 = integratedWorkspaces1.get<1>();
+    PeaksWorkspace_sptr outPeaksWS2 = integratedWorkspaces2.get<1>();
+    PeaksWorkspace_sptr outPeaksWS3 = integratedWorkspaces3.get<1>();
 
     TSM_ASSERT(
         "Conservative intensities should lead to lower integrated values.",
@@ -249,7 +248,7 @@ public:
         execute_integration(inputWorkspaces, backgroundOuterRadius, nBins);
     // ------- Get the integrated results
     WorkspaceGroup_sptr outClustersWorkspaces = integratedWorkspaces.get<0>();
-    IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
+    PeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
 
     TSM_ASSERT_EQUALS("Expect two output images", 2,
                       outClustersWorkspaces->size());
@@ -326,7 +325,7 @@ public:
         execute_integration(inputWorkspaces, backgroundOuterRadius, nBins);
     // ------- Get the integrated results
     WorkspaceGroup_sptr outClustersWorkspaces = integratedWorkspaces.get<0>();
-    IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
+    PeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
 
     TSM_ASSERT_EQUALS("Expect two output images", 2,
                       outClustersWorkspaces->size());

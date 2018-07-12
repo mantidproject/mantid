@@ -470,8 +470,7 @@ class VesuvioCorrections(VesuvioBase):
         fit_opts = parse_fit_options(mass_values=self._masses,
                                      profile_strs=self.getProperty("MassProfiles").value,
                                      constraints_str=self.getProperty("IntensityConstraints").value)
-        params_ws_name = self.getPropertyValue("FitParameters")
-        params_dict = TableWorkspaceDictionaryFacade(mtd[params_ws_name])
+        params_dict = TableWorkspaceDictionaryFacade(self.getProperty("FitParameters").value)
         func_str = fit_opts.create_function_str(params_dict)
 
         ms.VesuvioCalculateGammaBackground(InputWorkspace=self._output_ws,
@@ -489,8 +488,7 @@ class VesuvioCorrections(VesuvioBase):
         Calculates the contributions from multiple scattering
         on the input data from the set of given options
         """
-        params_ws_name = self.getPropertyValue("FitParameters")
-        params_dict = TableWorkspaceDictionaryFacade(mtd[params_ws_name])
+        params_dict = TableWorkspaceDictionaryFacade(self.getProperty("FitParameters").value)
 
         atom_props = list()
         intensities = list()

@@ -39,7 +39,7 @@ namespace Poldi {
 
 class PoldiPeak;
 
-typedef boost::shared_ptr<PoldiPeak> PoldiPeak_sptr;
+using PoldiPeak_sptr = boost::shared_ptr<PoldiPeak>;
 
 class MANTID_SINQ_DLL PoldiPeak {
 public:

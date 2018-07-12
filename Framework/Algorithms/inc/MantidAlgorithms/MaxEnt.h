@@ -43,6 +43,10 @@ public:
   const std::string name() const override;
   /// Algorithm's version
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"ExtractFFTSpectrum", "FFT", "FFTDerivative", "RealFFT",
+            "SassenaFFT", "FFTSmooth"};
+  }
   /// Algorithm's category
   const std::string category() const override;
   /// Algorithm's summary

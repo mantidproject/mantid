@@ -14,6 +14,7 @@
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/Text.h>
 #include <MantidKernel/StringTokenizer.h>
 
 using Poco::XML::Element;
@@ -31,9 +32,10 @@ Logger g_log("FacilityInfo");
   * @throw std::runtime_error if name or file extensions are not defined
   */
 FacilityInfo::FacilityInfo(const Poco::XML::Element *elem)
-    : m_catalogs(elem), m_name(elem->getAttribute("name")), m_zeroPadding(0),
-      m_delimiter(), m_extensions(), m_archiveSearch(), m_instruments(),
-      m_noFilePrefix(), m_multiFileLimit(100), m_computeResources() {
+    : m_catalogs(elem), m_name(elem->getAttribute("name")), m_timezone(),
+      m_zeroPadding(0), m_delimiter(), m_extensions(), m_archiveSearch(),
+      m_instruments(), m_noFilePrefix(), m_multiFileLimit(100),
+      m_computeResources() {
   if (m_name.empty()) {
     g_log.error("Facility name is not defined");
     throw std::runtime_error("Facility name is not defined");
@@ -44,6 +46,7 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element *elem)
   fillDelimiter(elem);
   fillExtensions(elem);
   fillArchiveNames(elem);
+  fillTimezone(elem);
   fillComputeResources(elem);
   fillNoFilePrefix(elem);
   fillMultiFileLimit(elem);
@@ -90,7 +93,7 @@ void FacilityInfo::fillExtensions(const Poco::XML::Element *elem) {
     g_log.error("No file extensions defined");
     throw std::runtime_error("No file extensions defined");
   }
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
   tokenizer exts(extsStr, ",",
                  tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
   for (const auto &ext : exts) {
@@ -126,6 +129,25 @@ void FacilityInfo::fillArchiveNames(const Poco::XML::Element *elem) {
         m_archiveSearch.push_back(plugin);
       }
     }
+  }
+}
+
+void FacilityInfo::fillTimezone(const Poco::XML::Element *elem) {
+  Poco::AutoPtr<Poco::XML::NodeList> pNL_timezones =
+      elem->getElementsByTagName("timezone");
+  if (pNL_timezones->length() == 0) {
+    g_log.notice() << "No timezone specified for " << m_name
+                   << " in Facilities.xml\n";
+  } else if (pNL_timezones->length() == 1) {
+    pNL_timezones = pNL_timezones->item(0)->childNodes();
+    if (pNL_timezones->length() > 0) {
+      Poco::XML::Text *txt =
+          dynamic_cast<Poco::XML::Text *>(pNL_timezones->item(0));
+      m_timezone = txt->getData();
+    }
+  } else {
+    throw std::runtime_error("Facility " + m_name +
+                             " has more than one timezone specified");
   }
 }
 

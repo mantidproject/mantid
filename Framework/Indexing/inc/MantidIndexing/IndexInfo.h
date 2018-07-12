@@ -87,15 +87,16 @@ public:
   IndexInfo(std::vector<IndexType> indices, const IndexInfo &parent);
 
   IndexInfo(const IndexInfo &other);
-  IndexInfo(IndexInfo &&other);
+  IndexInfo(IndexInfo &&other) noexcept;
   ~IndexInfo();
   IndexInfo &operator=(const IndexInfo &other);
-  IndexInfo &operator=(IndexInfo &&other);
+  IndexInfo &operator=(IndexInfo &&other) noexcept;
 
   size_t size() const;
   size_t globalSize() const;
 
   SpectrumNumber spectrumNumber(const size_t index) const;
+  const std::vector<SpectrumNumber> &spectrumNumbers() const;
 
   void setSpectrumNumbers(std::vector<SpectrumNumber> &&spectrumNumbers);
   void setSpectrumNumbers(const SpectrumNumber min, const SpectrumNumber max);

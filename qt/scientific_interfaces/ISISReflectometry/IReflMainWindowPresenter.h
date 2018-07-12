@@ -1,7 +1,9 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWPRESENTER_H
 
-#include <map>
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+
 #include <string>
 
 namespace MantidQt {
@@ -38,15 +40,31 @@ class IReflMainWindowPresenter {
 public:
   /// Destructor
   virtual ~IReflMainWindowPresenter(){};
+  enum class Flag { HelpPressed };
 
-  enum class Flag { ConfirmReductionPausedFlag, ConfirmReductionResumedFlag };
   virtual void notify(Flag flag) = 0;
+  virtual void notifyReductionPaused(int group) = 0;
+  virtual void notifyReductionResumed(int group) = 0;
 
+  virtual void completedRowReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) = 0;
+
+  virtual void completedGroupReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) = 0;
+
+  /// Transmission runs for a specific run angle
+  virtual MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(int group, const double angle) const = 0;
+  /// Whether there are per-angle transmission runs specified
+  virtual bool hasPerAngleOptions(int group) const = 0;
   /// Pre-processing
-  virtual std::string getTransmissionRuns(int group) const = 0;
-  virtual std::string getTransmissionOptions(int group) const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsQMap
+  getTransmissionOptions(int group) const = 0;
   /// Processing
-  virtual std::string getReductionOptions(int group) const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsQMap
+  getReductionOptions(int group) const = 0;
   /// Post-processing
   virtual std::string getStitchOptions(int group) const = 0;
   /// Time-slicing values
@@ -62,8 +80,12 @@ public:
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
   /// Set the instrument name
   virtual void setInstrumentName(const std::string &instName) const = 0;
-  /// Data processing check
-  virtual bool checkIfProcessing() const = 0;
+  /// Data processing check for all groups
+  virtual bool isProcessing() const = 0;
+  /// Data processing check for a specific group
+  virtual bool isProcessing(int group) const = 0;
+
+  virtual void settingsChanged(int group) = 0;
 };
 }
 }

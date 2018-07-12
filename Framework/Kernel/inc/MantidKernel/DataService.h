@@ -75,12 +75,12 @@ struct CaseInsensitiveCmp {
 template <typename T> class DLLExport DataService {
 private:
   /// Typedef for the map holding the names of and pointers to the data objects
-  typedef std::map<std::string, boost::shared_ptr<T>, CaseInsensitiveCmp>
-      svcmap;
+  using svcmap =
+      std::map<std::string, boost::shared_ptr<T>, CaseInsensitiveCmp>;
   /// Iterator for the data store map
-  typedef typename svcmap::iterator svc_it;
+  using svc_it = typename svcmap::iterator;
   /// Const iterator for the data store map
-  typedef typename svcmap::const_iterator svc_constit;
+  using svc_constit = typename svcmap::const_iterator;
 
 public:
   /// Class for named object notifications
@@ -394,6 +394,15 @@ public:
               "': data service ",
           name);
     }
+  }
+
+  /// Checks all elements within the specified vector exist in the ADS
+  bool doAllWsExist(const std::vector<std::string> &listOfNames) {
+    for (const auto &wsName : listOfNames) {
+      if (!doesExist(wsName))
+        return false;
+    }
+    return true;
   }
 
   /// Check to see if a data object exists in the store

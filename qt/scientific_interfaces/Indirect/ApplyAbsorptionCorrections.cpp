@@ -48,6 +48,11 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
   m_uiForm.spPreviewSpec->setMaximum(0);
 }
 
+ApplyAbsorptionCorrections::~ApplyAbsorptionCorrections() {
+  if (m_ppContainerWS)
+    AnalysisDataService::Instance().remove(m_containerWorkspaceName);
+}
+
 void ApplyAbsorptionCorrections::setup() {}
 
 /**
@@ -75,6 +80,7 @@ void ApplyAbsorptionCorrections::newSample(const QString &dataName) {
   m_uiForm.spPreviewSpec->setMaximum(
       static_cast<int>(m_ppSampleWS->getNumberHistograms()) - 1);
   m_sampleWorkspaceName = dataName.toStdString();
+  m_pythonExportWsName.clear();
 
   // Set maximum / minimum can shift
   m_uiForm.spCanShift->setMinimum(m_ppSampleWS->getXMin());
@@ -249,7 +255,7 @@ void ApplyAbsorptionCorrections::run() {
                            "Would you like to interpolate this workspace to "
                            "match the sample?";
 
-        result = QMessageBox::question(NULL, tr("Interpolate corrections?"),
+        result = QMessageBox::question(nullptr, tr("Interpolate corrections?"),
                                        tr(text.c_str()), QMessageBox::YesToAll,
                                        QMessageBox::Yes, QMessageBox::No);
       }
@@ -524,12 +530,12 @@ void ApplyAbsorptionCorrections::plotPreview(int wsIndex) {
                                   wsIndex, Qt::black);
 
   // Plot result
-  if (!m_pythonExportWsName.empty())
+  if (AnalysisDataService::Instance().doesExist(m_pythonExportWsName))
     m_uiForm.ppPreview->addSpectrum(
         "Corrected", QString::fromStdString(m_pythonExportWsName), wsIndex,
         Qt::green);
   // Plot container
-  if (useCan) {
+  if (m_ppContainerWS && useCan) {
     m_uiForm.ppPreview->addSpectrum(
         "Container", QString::fromStdString(m_containerWorkspaceName), wsIndex,
         Qt::red);
@@ -577,7 +583,7 @@ void ApplyAbsorptionCorrections::plotCurrentPreview() {
 
   // Check whether a container workspace has been specified
   if (m_ppContainerWS) {
-    workspaces.append(QString::fromStdString(m_ppContainerWS->getName()));
+    workspaces.append(QString::fromStdString(m_containerWorkspaceName));
   }
 
   // Check whether a subtracted workspace has been generated

@@ -38,7 +38,7 @@ private:
   PointGroup_sptr m_prototype;
 };
 
-typedef boost::shared_ptr<PointGroupGenerator> PointGroupGenerator_sptr;
+using PointGroupGenerator_sptr = boost::shared_ptr<PointGroupGenerator>;
 
 /**
   @class PointGroupFactory
@@ -120,8 +120,8 @@ private:
   boost::regex m_originChoiceRegex;
 };
 
-typedef Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>
-    PointGroupFactory;
+using PointGroupFactory =
+    Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>;
 
 } // namespace Geometry
 } // namespace Mantid

@@ -15,6 +15,7 @@ using namespace Mantid::API;
 namespace {
 void run_create(const Parallel::Communicator &comm,
                 const std::string &storageMode) {
+  using namespace Parallel;
   auto alg = ParallelTestHelpers::create<Algorithms::CreateWorkspace>(comm);
   std::vector<double> dataEYX(2000);
   int nspec = 1000;
@@ -22,26 +23,30 @@ void run_create(const Parallel::Communicator &comm,
   alg->setProperty<std::vector<double>>("DataX", dataEYX);
   alg->setProperty<std::vector<double>>("DataY", dataEYX);
   alg->setProperty<std::vector<double>>("DataE", dataEYX);
+  alg->setProperty<std::vector<double>>("Dx", dataEYX);
   alg->setProperty("ParallelStorageMode", storageMode);
   alg->execute();
   MatrixWorkspace_const_sptr ws = alg->getProperty("OutputWorkspace");
-  TS_ASSERT_EQUALS(ws->storageMode(), Parallel::fromString(storageMode));
-  switch (ws->storageMode()) {
-  case Parallel::StorageMode::Cloned: {
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), nspec);
-    break;
-  }
-  case Parallel::StorageMode::Distributed: {
-    int remainder = nspec % comm.size() > comm.rank() ? 1 : 0;
-    size_t expected = nspec / comm.size() + remainder;
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), expected);
-    break;
-  }
-  case Parallel::StorageMode::MasterOnly: {
-    size_t expected = comm.rank() == 0 ? nspec : 0;
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), expected);
-    break;
-  }
+  if (comm.rank() == 0 || fromString(storageMode) != StorageMode::MasterOnly) {
+    TS_ASSERT_EQUALS(ws->storageMode(), fromString(storageMode));
+    switch (ws->storageMode()) {
+    case Parallel::StorageMode::Cloned: {
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), nspec);
+      break;
+    }
+    case Parallel::StorageMode::Distributed: {
+      int remainder = nspec % comm.size() > comm.rank() ? 1 : 0;
+      size_t expected = nspec / comm.size() + remainder;
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), expected);
+      break;
+    }
+    case Parallel::StorageMode::MasterOnly: {
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), nspec);
+      break;
+    }
+    }
+  } else {
+    TS_ASSERT_EQUALS(ws, nullptr);
   }
 }
 }
@@ -69,6 +74,8 @@ public:
         alg.setProperty<std::vector<double>>("DataY", dataEYX));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty<std::vector<double>>("DataE", dataEYX));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty<std::vector<double>>("Dx", dataEYX));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("UnitX", "Wavelength"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("VerticalAxisUnit", "MomentumTransfer"));
@@ -91,17 +98,14 @@ public:
     // No parent workspace -> no instrument -> no detectors -> no mapping.
     TS_ASSERT_EQUALS(ws->getSpectrum(0).getDetectorIDs().size(), 0);
 
-    TS_ASSERT_EQUALS(ws->x(0)[0], 0);
-    TS_ASSERT_EQUALS(ws->x(0)[1], 1.234);
-    TS_ASSERT_EQUALS(ws->x(0)[2], 2.468);
-    TS_ASSERT_EQUALS(ws->y(0)[0], 0);
-    TS_ASSERT_EQUALS(ws->y(0)[1], 1.234);
-    TS_ASSERT_EQUALS(ws->y(0)[2], 2.468);
-    TS_ASSERT_EQUALS(ws->e(0)[0], 0);
-    TS_ASSERT_EQUALS(ws->e(0)[1], 1.234);
-    TS_ASSERT_EQUALS(ws->e(0)[2], 2.468);
+    for (size_t i = 0; i < dataEYX.size(); ++i) {
+      TS_ASSERT_EQUALS(ws->x(0)[i], dataEYX[i]);
+    }
+    for (size_t i = 0; i < dataEYX.size(); ++i) {
+      TS_ASSERT_EQUALS(ws->y(0)[i], dataEYX[i]);
+      TS_ASSERT_EQUALS(ws->e(0)[i], dataEYX[i]);
+    }
     TS_ASSERT_EQUALS(ws->getAxis(0)->unit()->caption(), "Wavelength");
-
     TS_ASSERT_EQUALS(ws->getAxis(1)->unit()->unitID(), "MomentumTransfer");
     TS_ASSERT_EQUALS(ws->getAxis(1)->unit()->caption(), "q");
 
@@ -111,6 +115,54 @@ public:
         axisVal = boost::lexical_cast<double>(ws->getAxis(1)->label(0)));
 
     TS_ASSERT_DELTA(axisVal, 9.876, 0.001);
+
+    // Remove the created workspace
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::AnalysisDataService::Instance().remove(
+            "test_CreateWorkspace"));
+  }
+
+  void testCreateBinEdges() {
+    Mantid::Algorithms::CreateWorkspace createBinEdges;
+    TS_ASSERT_THROWS_NOTHING(createBinEdges.initialize());
+
+    std::vector<double> dataX{5.5, 6.8, 9.1, 12.3};
+    std::vector<double> dataEYDx{0.0, 1.234, 2.468};
+
+    TS_ASSERT_THROWS_NOTHING(createBinEdges.setProperty<int>("NSpec", 1));
+    TS_ASSERT_THROWS_NOTHING(
+        createBinEdges.setProperty<std::vector<double>>("DataX", dataX));
+    TS_ASSERT_THROWS_NOTHING(
+        createBinEdges.setProperty<std::vector<double>>("DataY", dataEYDx));
+    TS_ASSERT_THROWS_NOTHING(
+        createBinEdges.setProperty<std::vector<double>>("DataE", dataEYDx));
+    TS_ASSERT_THROWS_NOTHING(
+        createBinEdges.setProperty<std::vector<double>>("Dx", dataEYDx));
+    TS_ASSERT_THROWS_NOTHING(createBinEdges.setPropertyValue(
+        "OutputWorkspace", "test_CreateWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(createBinEdges.execute());
+
+    TS_ASSERT(createBinEdges.isExecuted());
+    Mantid::API::MatrixWorkspace_const_sptr ws;
+
+    TS_ASSERT_THROWS_NOTHING(
+        ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(
+                "test_CreateWorkspace")));
+
+    TS_ASSERT(ws->isHistogramData());
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
+    // No parent workspace -> no instrument -> no detectors -> no mapping.
+    TS_ASSERT_EQUALS(ws->getSpectrum(0).getDetectorIDs().size(), 0);
+
+    for (size_t i = 0; i < dataX.size(); ++i) {
+      TS_ASSERT_EQUALS(ws->x(0)[i], dataX[i]);
+    }
+    for (size_t i = 0; i < dataEYDx.size(); ++i) {
+      TS_ASSERT_EQUALS(ws->y(0)[i], dataEYDx[i]);
+      TS_ASSERT_EQUALS(ws->e(0)[i], dataEYDx[i]);
+      TS_ASSERT_EQUALS(ws->dx(0)[i], dataEYDx[i]);
+    }
 
     // Remove the created workspace
     TS_ASSERT_THROWS_NOTHING(
@@ -153,11 +205,12 @@ public:
     alg.setProperty<int>("NSpec", 4);
 
     std::vector<double> values{1.0, 2.0, 3.0, 4.0};
+    std::vector<double> xVals{1.1, 2.2};
 
-    alg.setProperty<std::vector<double>>("DataX",
-                                         std::vector<double>{1.1, 2.2});
+    alg.setProperty<std::vector<double>>("DataX", xVals);
     alg.setProperty<std::vector<double>>("DataY", values);
     alg.setProperty<std::vector<double>>("DataE", values);
+    alg.setProperty<std::vector<double>>("Dx", xVals);
 
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
   }
@@ -298,6 +351,7 @@ public:
     creator.setProperty("DataX", *vec);
     creator.setProperty("DataY", *vec);
     creator.setProperty("DataE", *vec);
+    creator.setProperty("Dx", *vec);
     creator.setProperty("NSpec", 10000);
     TS_ASSERT(creator.execute());
   }

@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/LibraryWrapper.h"
@@ -82,7 +83,7 @@ private:
 
 EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
     Mantid::Kernel::SingletonHolder<LibraryManagerImpl>;
-typedef Mantid::Kernel::SingletonHolder<LibraryManagerImpl> LibraryManager;
+using LibraryManager = Mantid::Kernel::SingletonHolder<LibraryManagerImpl>;
 
 } // namespace Kernel
 } // namespace Mantid

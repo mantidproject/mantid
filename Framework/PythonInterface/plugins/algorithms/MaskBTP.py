@@ -12,7 +12,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
     """
 
     # list of supported instruments
-    INSTRUMENT_LIST = ['ARCS','CNCS','CORELLI','HYSPEC','MANDI','NOMAD','POWGEN','REF_M','SEQUOIA','SNAP','SXD','TOPAZ','WISH']
+    INSTRUMENT_LIST = ['ARCS','CNCS','CORELLI','HYSPEC','MANDI','NOMAD','POWGEN','REF_M','SEQUOIA','SNAP','SXD','TOPAZ','WAND','WISH']
 
     instname = None
     instrument = None
@@ -23,6 +23,9 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         """ Mantid required
         """
         return "Transforms\\Masking;Inelastic\\Utility"
+
+    def seeAlso(self):
+        return [ "MaskDetectors","MaskInstrument" ]
 
     def name(self):
         """ Mantid required
@@ -62,11 +65,13 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         # special cases are defined, default value is in front
         self.bankmin=defaultdict(lambda: 1, {"MANDI":1,"SEQUOIA":38,"TOPAZ":10})
         self.bankmax={"ARCS":115,"CNCS":50,"CORELLI":91,"HYSPEC":20,"MANDI":59,"NOMAD":99,"POWGEN":300,"REF_M":1,
-                      "SEQUOIA":150,"SNAP":18,"SXD":11,"TOPAZ":59,"WISH":10}
-        tubemin=defaultdict(int, {"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"NOMAD":1,"SEQUOIA":1,"WISH":1})
-        tubemax=defaultdict(lambda: 8, {"CORELLI":16,"MANDI":255,"POWGEN":153,"REF_M":303,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":152})
-        pixmin=defaultdict(int, {"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"NOMAD":1,"SEQUOIA":1,"WISH":1})
-        pixmax=defaultdict(lambda: 128, {"CORELLI":256,"MANDI":255,"POWGEN":6,"REF_M":255,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":512})
+                      "SEQUOIA":150,"SNAP":64,"SXD":11,"TOPAZ":59,"WAND":8,"WISH":10}
+        tubemin=defaultdict(int, {"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"NOMAD":1,"SEQUOIA":1,"WAND":1,"WISH":1})
+        tubemax=defaultdict(lambda: 8, {"CORELLI":16,"MANDI":255,"POWGEN":153,"REF_M":303,"SNAP":255,"SXD":63,"TOPAZ":255,
+                                        "WAND":480,"WISH":152})
+        pixmin=defaultdict(int, {"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"NOMAD":1,"SEQUOIA":1,"WAND":1,"WISH":1})
+        pixmax=defaultdict(lambda: 128, {"CORELLI":256,"MANDI":255,"POWGEN":6,"REF_M":255,"SNAP":255,"SXD":63,"TOPAZ":255,
+                                         "WAND":512,"WISH":512})
 
         if self.instname not in self.INSTRUMENT_LIST:
             raise ValueError("Instrument '"+self.instname+"' not in the allowed list")
@@ -169,7 +174,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 return self.instrument.getComponentByName("D row")[banknum-114][0]
             else:
                 raise ValueError("Out of range index for SEQUOIA instrument bank numbers")
-        elif self.instname in ["CNCS", "CORELLI","HYSPEC"]:
+        elif self.instname in ["CNCS", "CORELLI","HYSPEC", "WAND"]:
             if self.bankmin[self.instname]<=banknum<= self.bankmax[self.instname]:
                 return self.instrument.getComponentByName("bank"+str(banknum))[0]
             else:

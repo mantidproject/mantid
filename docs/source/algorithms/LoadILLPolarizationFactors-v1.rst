@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -46,7 +46,7 @@ Usage
                              OutputBeamPosition='direct_beam_pos',
                              XUnit='TimeOfFlight')
    rb = LoadILLReflectometry(Filename='ILL/D17/317370.nxs',
-                             BeamPosition='direct_beam_pos',
+                             DirectBeamPosition='direct_beam_pos',
                              XUnit='TimeOfFlight')
    # Sum over the reflected beam.
    rb_grouped = GroupDetectors(rb, GroupingPattern='201-203')

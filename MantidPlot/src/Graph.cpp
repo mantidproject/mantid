@@ -3094,7 +3094,7 @@ void Graph::removePie() {
 
   QList<PieLabel *> labels = pieCurve->labelsList();
   foreach (PieLabel *l, labels)
-    l->setPieCurve(0);
+    l->setPieCurve(nullptr);
 
   d_plot->removeCurve(c_keys[0]);
   d_plot->replot();
@@ -5622,8 +5622,12 @@ void Graph::updateDataCurves() {
 void Graph::checkValuesInAxisRange(MantidMatrixCurve *mc) {
   auto *data = mc->mantidData();
   double xMin(data->x(0)); // Needs to be min of current graph (x-axis)
+  auto const dataSize = data->size();
+  if (dataSize == 0) {
+    throw std::runtime_error("Cannot draw the curve: no plottable values.");
+  }
   double xMax(
-      data->x(data->size() - 1)); // Needs to be max of current graph (x-axis)
+      data->x(dataSize - 1)); // Needs to be max of current graph (x-axis)
   if (xMin > xMax) {
     std::swap(xMin, xMax);
   }

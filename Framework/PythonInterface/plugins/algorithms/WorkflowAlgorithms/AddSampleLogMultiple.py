@@ -14,6 +14,9 @@ class AddSampleLogMultiple(PythonAlgorithm):
     def summary(self):
         return 'Add multiple sample logs to a workspace'
 
+    def seeAlso(self):
+        return ["AddSampleLog"]
+
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('Workspace', '', direction=Direction.InOut),
                              doc='Workspace to add logs to')

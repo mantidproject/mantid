@@ -30,9 +30,14 @@ set ( TEST_FILES
   test/ALCLatestFileFinderTest.h
   test/ALCPeakFittingModelTest.h
   test/ALCPeakFittingPresenterTest.h
+  test/EnggDiffGSASFittingModelTest.h
+  test/EnggDiffGSASFittingPresenterTest.h
+  test/EnggDiffMultiRunFittingWidgetModelTest.h
+  test/EnggDiffMultiRunFittingWidgetPresenterTest.h
   test/EnggDiffFittingModelTest.h
   test/EnggDiffFittingPresenterTest.h
   test/EnggDiffractionPresenterTest.h
+  test/EnggVanadiumCorrectionsModelTest.h
   test/IO_MuonGroupingTest.h
   test/MDFLogValueFinderTest.h
   test/MeasurementItemTest.h
@@ -52,6 +57,7 @@ set ( TEST_FILES
   test/ReflSaveTabPresenterTest.h
   test/ReflSettingsPresenterTest.h
   test/ReflSettingsTabPresenterTest.h
+  test/RunMapTest.h
   test/UserInputValidatorTest.h
 )
 
@@ -64,6 +70,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest
     inc
   TEST_HELPER_SRCS
     ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+    ../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
     ../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
     ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
     ../../Framework/TestHelpers/src/ScopedFileHelper.cpp

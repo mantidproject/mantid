@@ -7,8 +7,9 @@
 #include "MantidQtWidgets/SliceViewer/PeakPalette.h"
 #include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
 
-#include <set>
 #include <QObject>
+#include <array>
+#include <set>
 
 namespace Mantid {
 namespace Kernel {
@@ -35,8 +36,8 @@ class PeakOverlayView;
 class UpdateableOnDemand;
 
 // Alias
-typedef std::set<boost::shared_ptr<const Mantid::API::IPeaksWorkspace>>
-    SetPeaksWorkspaces;
+using SetPeaksWorkspaces =
+    std::set<boost::shared_ptr<const Mantid::API::IPeaksWorkspace>>;
 
 /*---------------------------------------------------------
 Abstract PeaksPresenter.
@@ -51,7 +52,8 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeaksPresenter : public QObject {
 public:
   virtual void update() = 0;
   virtual void updateWithSlicePoint(const PeakBoundingBox &) = 0;
-  virtual bool changeShownDim() = 0;
+  virtual bool changeShownDim(size_t dimX, size_t dimY) = 0;
+  virtual void setNonOrthogonal(bool nonOrthogonalEnabled) = 0;
   virtual bool isLabelOfFreeAxis(const std::string &label) const = 0;
   virtual SetPeaksWorkspaces presentedWorkspaces() const = 0;
   virtual void setForegroundColor(const PeakViewColor) = 0;
@@ -60,8 +62,6 @@ public:
   virtual void showBackgroundRadius(const bool shown) = 0;
   virtual void setShown(const bool shown) = 0;
   virtual PeakBoundingBox getBoundingBox(const int peakIndex) const = 0;
-  virtual void sortPeaksWorkspace(const std::string &byColumnName,
-                                  const bool ascending) = 0;
   virtual void setPeakSizeOnProjection(const double fraction) = 0;
   virtual void setPeakSizeIntoProjection(const double fraction) = 0;
   virtual double getPeakSizeOnProjection() const = 0;
@@ -78,12 +78,11 @@ public:
   virtual void peakEditMode(EditMode mode) = 0;
   virtual bool deletePeaksIn(PeakBoundingBox plotCoordsBox) = 0;
   virtual bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY) = 0;
-  virtual bool hasPeakAddMode() const = 0;
   ~PeaksPresenter() override{};
 };
 
-typedef boost::shared_ptr<PeaksPresenter> PeaksPresenter_sptr;
-typedef boost::shared_ptr<const PeaksPresenter> PeaksPresenter_const_sptr;
+using PeaksPresenter_sptr = boost::shared_ptr<PeaksPresenter>;
+using PeaksPresenter_const_sptr = boost::shared_ptr<const PeaksPresenter>;
 }
 }
 

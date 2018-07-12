@@ -39,7 +39,7 @@ public:
   }
 
   // checks the focus positions for NOMAD
-  void checkNOMAD(PDLoadCharacterizations &alg) {
+  void checkNOMAD(PDLoadCharacterizations &alg, bool checkAziValues = true) {
     TS_ASSERT_EQUALS(alg.getPropertyValue("IParmFilename"),
                      std::string("NOMAD_11_22_11.prm"));
     double l1 = alg.getProperty("PrimaryFlightPath");
@@ -57,8 +57,8 @@ public:
     std::vector<double> l2 = alg.getProperty("L2");
     TS_ASSERT_EQUALS(l2.size(), NUM_SPEC);
     if (!l2.empty()) {
-      for (int i = 0; i < NUM_SPEC; ++i)
-        TS_ASSERT_EQUALS(l2[i], 2.);
+      for (const auto &value : l2)
+        TS_ASSERT_EQUALS(value, 2.);
     }
 
     std::vector<double> polar = alg.getProperty("Polar");
@@ -74,9 +74,9 @@ public:
 
     std::vector<double> azi = alg.getProperty("Azimuthal");
     TS_ASSERT_EQUALS(azi.size(), NUM_SPEC);
-    if (!azi.empty()) {
-      for (int i = 0; i < NUM_SPEC; ++i)
-        TS_ASSERT_EQUALS(azi[0], 0.);
+    if (checkAziValues && !azi.empty()) {
+      for (const auto &value : azi)
+        TS_ASSERT_EQUALS(value, 0.);
     }
   }
 
@@ -249,6 +249,94 @@ public:
 
     // test the other output properties
     checkNOMAD(alg);
+  }
+
+  void test_FocusAndChar2WithAzi() {
+    const std::string CHAR_FILE("Test_characterizations_focus_azi.txt");
+    ITableWorkspace_sptr wksp;
+
+    // initialize and run the algorithm
+    PDLoadCharacterizations alg;
+    runAlg(alg, wksp, CHAR_FILE);
+
+    // test the table workspace
+    TS_ASSERT_EQUALS(wksp->columnCount(), 14);
+    TS_ASSERT_EQUALS(wksp->rowCount(), 1);
+
+    // check all of the contents of row 0
+    TS_ASSERT_EQUALS(wksp->Double(0, 0), 60.);
+    TS_ASSERT_EQUALS(wksp->Double(0, 1), 1.4);
+    TS_ASSERT_EQUALS(wksp->Int(0, 2), 1);
+    TS_ASSERT_EQUALS(wksp->String(0, 3), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 4), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 5), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 6), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 7), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 8), ".31,.25,.13,.13,.13,.42");
+    TS_ASSERT_EQUALS(wksp->String(0, 9), "13.66,5.83,3.93,2.09,1.57,31.42");
+    TS_ASSERT_EQUALS(wksp->Double(0, 10), 300.00);
+    TS_ASSERT_EQUALS(wksp->Double(0, 11), 16666.67);
+    TS_ASSERT_EQUALS(wksp->Double(0, 12), .1);
+    TS_ASSERT_EQUALS(wksp->Double(0, 13), 2.9);
+
+    // test the other output properties
+    checkNOMAD(alg,
+               false); // don't check azimuthal angles because it is done here
+    std::vector<double> azi = alg.getProperty("Azimuthal");
+    TS_ASSERT_EQUALS(azi[0], 0.);
+    TS_ASSERT_EQUALS(azi[1], 15.);
+    TS_ASSERT_EQUALS(azi[2], 25.);
+    TS_ASSERT_EQUALS(azi[3], 0.);
+    TS_ASSERT_EQUALS(azi[4], 0.);
+    TS_ASSERT_EQUALS(azi[5], 65.);
+  }
+
+  void test_BrokenFocusAndChar() {
+    const std::string CHAR_FILE("Test_characterizations_broken_focus.txt");
+    ITableWorkspace_sptr wksp;
+
+    // initialize and run the algorithm
+    PDLoadCharacterizations alg;
+    runAlg(alg, wksp, CHAR_FILE);
+
+    // test the table workspace
+    TS_ASSERT_EQUALS(wksp->columnCount(), 14);
+    TS_ASSERT_EQUALS(wksp->rowCount(), 1);
+
+    // check all of the contents of row 0
+    TS_ASSERT_EQUALS(wksp->Double(0, 0), 60.);
+    TS_ASSERT_EQUALS(wksp->Double(0, 1), 1.4);
+    TS_ASSERT_EQUALS(wksp->Int(0, 2), 1);
+    TS_ASSERT_EQUALS(wksp->String(0, 3), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 4), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 5), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 6), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 7), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 8), ".31,.25,.13,.13,.13,.42");
+    TS_ASSERT_EQUALS(wksp->String(0, 9), "13.66,5.83,3.93,2.09,1.57,31.42");
+    TS_ASSERT_EQUALS(wksp->Double(0, 10), 300.00);
+    TS_ASSERT_EQUALS(wksp->Double(0, 11), 16666.67);
+    TS_ASSERT_EQUALS(wksp->Double(0, 12), .1);
+    TS_ASSERT_EQUALS(wksp->Double(0, 13), 2.9);
+
+    // there shouldn't be an instrument
+    // test the other output properties
+    TS_ASSERT_EQUALS(alg.getPropertyValue("IParmFilename"),
+                     std::string("NOMAD_11_22_11.prm"));
+    double l1 = alg.getProperty("PrimaryFlightPath");
+    TS_ASSERT_EQUALS(l1, Mantid::EMPTY_DBL());
+
+    std::vector<int32_t> specIds = alg.getProperty("SpectrumIDs");
+    TS_ASSERT_EQUALS(specIds.size(), 0);
+
+    std::vector<double> l2 = alg.getProperty("L2");
+    TS_ASSERT_EQUALS(l2.size(), 0);
+
+    std::vector<double> polar = alg.getProperty("Polar");
+    TS_ASSERT_EQUALS(polar.size(), 0);
+
+    std::vector<double> azi = alg.getProperty("Azimuthal");
+    TS_ASSERT_EQUALS(azi.size(), 0);
   }
 
   void test_Focus() {

@@ -2260,7 +2260,7 @@ p, li { white-space: pre-wrap; }
             <property name="minimumSize">
              <size>
               <width>0</width>
-              <height>100</height>
+              <height>140</height>
              </size>
             </property>
             <property name="title">
@@ -2389,6 +2389,12 @@ p, li { white-space: pre-wrap; }
                       <layout class="QGridLayout" name="gridLayout_29">
                        <item row="0" column="0">
                         <widget class="QLabel" name="optionBinStep_3">
+                         <property name="minimumSize">
+                          <size>
+                           <width>20</width>
+                           <height>30</height>
+                          </size>
+                         </property>
                          <property name="toolTip">
                           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -2407,7 +2413,14 @@ p, li { white-space: pre-wrap; }
                         </widget>
                        </item>
                        <item row="0" column="1">
-                        <widget class="QLineEdit" name="binBoundaries"/>
+                        <widget class="QLineEdit" name="binBoundaries">
+                         <property name="minimumSize">
+                          <size>
+                           <width>10</width>
+                           <height>10</height>
+                          </size>
+                         </property>
+                        </widget>
                        </item>
                        <item row="0" column="2">
                         <spacer name="horizontalSpacer_8">
@@ -2432,6 +2445,12 @@ p, li { white-space: pre-wrap; }
                            <horstretch>0</horstretch>
                            <verstretch>0</verstretch>
                           </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>10</width>
+                           <height>10</height>
+                          </size>
                          </property>
                          <property name="maximumSize">
                           <size>
@@ -2490,6 +2509,23 @@ p, li { white-space: pre-wrap; }
             <layout class="QGridLayout" name="gridLayout_20">
              <item row="3" column="0">
               <layout class="QGridLayout" name="gridLayout_21">
+               <item row="4" column="0">
+                <widget class="QLabel" name="label_12">
+                 <property name="text">
+                  <string>Load all groups</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="lblEnableMultiFit">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enables the new UI for the &amp;quot;Data Analysis&amp;quot; tab introduced in Mantid 3.8.&lt;/p&gt;&lt;p&gt;In this mode, simultaneous fits of multiple datasets are possible.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Enable multiple fitting:</string>
+                 </property>
+                </widget>
+               </item>
                <item row="0" column="2">
                 <widget class="QComboBox" name="plotCreation">
                  <property name="sizePolicy">
@@ -2520,20 +2556,6 @@ p, li { white-space: pre-wrap; }
                  </item>
                 </widget>
                </item>
-               <item row="1" column="2">
-                <widget class="QComboBox" name="newPlotPolicy">
-                 <item>
-                  <property name="text">
-                   <string>Create new window</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Use previous window</string>
-                  </property>
-                 </item>
-                </widget>
-               </item>
                <item row="1" column="0">
                 <widget class="QLabel" name="label_14">
                  <property name="toolTip">
@@ -2560,14 +2582,18 @@ p, li { white-space: pre-wrap; }
                  </property>
                 </spacer>
                </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="lblEnableMultiFit">
-                 <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enables the new UI for the &amp;quot;Data Analysis&amp;quot; tab introduced in Mantid 3.8.&lt;/p&gt;&lt;p&gt;In this mode, simultaneous fits of multiple datasets are possible.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                 <property name="text">
-                  <string>Enable multiple fitting:</string>
-                 </property>
+               <item row="1" column="2">
+                <widget class="QComboBox" name="newPlotPolicy">
+                 <item>
+                  <property name="text">
+                   <string>Create new window</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Use previous window</string>
+                  </property>
+                 </item>
                 </widget>
                </item>
                <item row="0" column="0">
@@ -2581,6 +2607,16 @@ p, li { white-space: pre-wrap; }
                  </property>
                  <property name="text">
                   <string>Plot Creation:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_8">
+                 <property name="toolTip">
+                  <string>Hides the MantidPlot toolbars. Useful on small screens.</string>
+                 </property>
+                 <property name="text">
+                  <string>Hide Toolbars:</string>
                  </property>
                 </widget>
                </item>
@@ -2624,8 +2660,8 @@ p, li { white-space: pre-wrap; }
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>131</width>
-                     <height>23</height>
+                     <width>165</width>
+                     <height>26</height>
                     </rect>
                    </property>
                    <layout class="QHBoxLayout" name="horizontalLayout_KeepNPlots">
@@ -2655,13 +2691,13 @@ p, li { white-space: pre-wrap; }
                  </widget>
                 </widget>
                </item>
-               <item row="2" column="0">
-                <widget class="QLabel" name="label_8">
+               <item row="3" column="2">
+                <widget class="QCheckBox" name="chkEnableMultiFit">
                  <property name="toolTip">
-                  <string>Hides the MantidPlot toolbars. Useful on small screens.</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enables the new UI for the &amp;quot;Data Analysis&amp;quot; tab introduced in Mantid 3.8.&lt;/p&gt;&lt;p&gt;In this mode, simultaneous fits of multiple datasets are possible.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="text">
-                  <string>Hide Toolbars:</string>
+                  <string/>
                  </property>
                 </widget>
                </item>
@@ -2672,11 +2708,22 @@ p, li { white-space: pre-wrap; }
                  </property>
                 </widget>
                </item>
-               <item row="3" column="2">
-                <widget class="QCheckBox" name="chkEnableMultiFit">
-                 <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enables the new UI for the &amp;quot;Data Analysis&amp;quot; tab introduced in Mantid 3.8.&lt;/p&gt;&lt;p&gt;In this mode, simultaneous fits of multiple datasets are possible.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <item row="4" column="2">
+                <widget class="QCheckBox" name="loadAllGroupsCheckBox">
+                 <property name="text">
+                  <string/>
                  </property>
+                </widget>
+               </item>
+               <item row="5" column="0">
+                <widget class="QLabel" name="label_13">
+                 <property name="text">
+                  <string>Load all pairs</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="2">
+                <widget class="QCheckBox" name="loadAllPairsCheckBox">
                  <property name="text">
                   <string/>
                  </property>

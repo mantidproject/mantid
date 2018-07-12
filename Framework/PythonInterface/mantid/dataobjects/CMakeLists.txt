@@ -21,6 +21,7 @@ set ( EXPORT_FILES
   src/Exports/MDEventWorkspace.cpp
   src/Exports/MDHistoWorkspace.cpp
   src/Exports/PeaksWorkspace.cpp
+  src/Exports/PeaksWorkspaceProperty.cpp
   src/Exports/TableWorkspace.cpp
   src/Exports/SplittersWorkspace.cpp
   src/Exports/WorkspaceSingleValue.cpp
@@ -75,6 +76,7 @@ target_link_libraries ( PythonDataObjectsModule LINK_PRIVATE ${TCMALLOC_LIBRARIE
             Kernel
             HistogramData
             Geometry
+            Indexing
             ${PYTHON_LIBRARIES}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES} )
@@ -83,6 +85,9 @@ target_link_libraries ( PythonDataObjectsModule LINK_PRIVATE ${TCMALLOC_LIBRARIE
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties( PythonDataObjectsModule PROPERTIES
                          INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/;@loader_path/../api/")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties( PythonDataObjectsModule PROPERTIES
+                         INSTALL_RPATH "\$ORIGIN/../../../${LIB_DIR};\$ORIGIN/../kernel/;\$ORIGIN/../geometry/;\$ORIGIN/../api/")
 endif ()
 ###########################################################################
 # Installation settings

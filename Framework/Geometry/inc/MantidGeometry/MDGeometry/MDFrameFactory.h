@@ -54,7 +54,7 @@ class MANTID_GEOMETRY_DLL MDFrameFactory
                                       MDFrameArgument> {};
 
 /// Helper typedef
-typedef std::unique_ptr<MDFrameFactory> MDFrameFactory_uptr;
+using MDFrameFactory_uptr = std::unique_ptr<MDFrameFactory>;
 
 //-----------------------------------------------------------------------
 // Derived MDFrameFactory declarations

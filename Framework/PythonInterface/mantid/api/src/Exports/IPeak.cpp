@@ -1,11 +1,14 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
+#include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/kernel/Policies/MatrixToNumpy.h"
+#include <boost/optional.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-#include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
-#include <boost/optional.hpp>
 
 using Mantid::Geometry::IPeak;
+using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(IPeak)
@@ -40,9 +43,13 @@ void setQSampleFrame2(IPeak &peak, Mantid::Kernel::V3D qSampleFrame,
 void setGoniometerMatrix(IPeak &self, const object &data) {
   self.setGoniometerMatrix(Converters::PyObjectToMatrix(data)());
 }
-}
+
+} // namespace
 
 void export_IPeak() {
+  // return_value_policy for read-only numpy array
+  using return_copy_to_numpy = return_value_policy<Policies::MatrixToNumpy>;
+
   register_ptr_to_python<IPeak *>();
 
   class_<IPeak, boost::noncopyable>("IPeak", no_init)
@@ -54,9 +61,16 @@ void export_IPeak() {
            "cache values related to it.")
       .def("getRunNumber", &IPeak::getRunNumber, arg("self"),
            "Return the run number this peak was measured at")
+      .def("getPeakNumber", &IPeak::getPeakNumber, arg("self"),
+           "Return the peak number for this peak")
+      .def("getBankName", &IPeak::getBankName, arg("self"),
+           "Return the bank name for this peak")
       .def("setRunNumber", &IPeak::setRunNumber,
            (arg("self"), arg("run_number")),
            "Set the run number that measured this peak")
+      .def("setPeakNumber", &IPeak::setPeakNumber,
+           (arg("self"), arg("peak_number")),
+           "Set the peak number for this peak")
       .def("getMonitorCount", &IPeak::getMonitorCount, arg("self"),
            "Get the monitor count set for this peak")
       .def("setMonitorCount", &IPeak::setMonitorCount,
@@ -82,7 +96,8 @@ void export_IPeak() {
            ":class:`~mantid.geometry.Goniometer` rotation was NOT taken "
            "out.\n"
            "Note: There is no 2*pi factor used, so \\|Q| = 1/wavelength.")
-      .def("findDetector", &IPeak::findDetector, arg("self"),
+      .def("findDetector", (bool (IPeak::*)()) & IPeak::findDetector,
+           arg("self"),
            "Using the :class:`~mantid.geometry.Instrument` set in the peak, "
            "perform ray tracing to find "
            "the exact :class:`~mantid.geometry.Detector`.")
@@ -118,6 +133,8 @@ void export_IPeak() {
            "Return the incident wavelength")
       .def("getScattering", &IPeak::getScattering, arg("self"),
            "Calculate the scattering angle of the peak")
+      .def("getAzimuthal", &IPeak::getAzimuthal, arg("self"),
+           "Calculate the azimuthal angle of the peak")
       .def("getDSpacing", &IPeak::getDSpacing, arg("self"),
            "Calculate the d-spacing of the peak, in 1/Angstroms")
       .def("getTOF", &IPeak::getTOF, arg("self"),
@@ -125,18 +142,26 @@ void export_IPeak() {
            "microseconds) of the neutrons for this "
            "peak")
       .def("getInitialEnergy", &IPeak::getInitialEnergy, arg("self"),
-           "Get the initial (incident) neutron energy")
+           "Get the initial (incident) neutron energy in meV.")
       .def("getFinalEnergy", &IPeak::getFinalEnergy, arg("self"),
-           "Get the final neutron energy")
+           "Get the final neutron energy in meV.")
+      .def("getEnergyTransfer", &IPeak::getEnergyTransfer, arg("self"),
+           "Get the initial neutron energy minus the final neutron energy in "
+           "meV."
+           "\n\n.. versionadded:: 3.12.0")
       .def("setInitialEnergy", &IPeak::setInitialEnergy,
            (arg("self"), arg("initial_energy")),
-           "Set the initial (incident) neutron energy")
+           "Set the initial (incident) neutron energy in meV.")
       .def("setFinalEnergy", &IPeak::setFinalEnergy,
-           (arg("self"), arg("final_energy")), "Set the final neutron energy")
+           (arg("self"), arg("final_energy")),
+           "Set the final neutron energy in meV.")
       .def("getIntensity", &IPeak::getIntensity, arg("self"),
            "Return the integrated peak intensity")
       .def("getSigmaIntensity", &IPeak::getSigmaIntensity, arg("self"),
            "Return the error on the integrated peak intensity")
+      .def("getIntensityOverSigma", &IPeak::getIntensityOverSigma, arg("self"),
+           "Return the error on the integrated peak intensity divided by the "
+           "error in intensity.\n\n.. versionadded:: 3.12.0")
       .def("setIntensity", &IPeak::setIntensity,
            (arg("self"), arg("intensity")), "Set the integrated peak intensity")
       .def("setSigmaIntensity", &IPeak::setSigmaIntensity,
@@ -146,9 +171,15 @@ void export_IPeak() {
            "Return the # of counts in the bin at its peak")
       .def("setBinCount", &IPeak::setBinCount, (arg("self"), arg("bin_count")),
            "Set the # of counts in the bin at its peak")
+      .def("getGoniometerMatrix", &IPeak::getGoniometerMatrix, arg("self"),
+           return_copy_to_numpy(),
+           "Get the :class:`~mantid.geometry.Goniometer` rotation matrix of "
+           "this peak."
+           "\n\n.. versionadded:: 3.12.0")
       .def("setGoniometerMatrix", &setGoniometerMatrix,
            (arg("self"), arg("goniometerMatrix")),
-           "Set the :class:`~mantid.geometry.Goniometer` of the peak")
+           "Set the :class:`~mantid.geometry.Goniometer` rotation matrix of "
+           "this peak.")
       .def("getRow", &IPeak::getRow, arg("self"),
            "For :class:`~mantid.geometry.RectangularDetector` s only, returns "
            "the row (y) of the pixel of the "

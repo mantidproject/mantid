@@ -14,8 +14,6 @@ namespace MantidWidgets {
 class IWorkspaceDockView;
 class WorkspaceProvider;
 
-using DockView_sptr = boost::shared_ptr<IWorkspaceDockView>;
-using DockView_wptr = boost::weak_ptr<IWorkspaceDockView>;
 using ADSAdapter_uptr = std::unique_ptr<WorkspaceProvider>;
 /**
 \class  WorkspacePresenter
@@ -48,8 +46,9 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 class EXPORT_OPT_MANTIDQT_COMMON WorkspacePresenter
     : public WorkspaceProviderNotifiable,
       public ViewNotifiable {
+
 public:
-  explicit WorkspacePresenter(DockView_wptr view);
+  explicit WorkspacePresenter(IWorkspaceDockView *view);
   ~WorkspacePresenter() override;
 
   void init();
@@ -101,11 +100,10 @@ private:
   void workspacesDeleted();
   void workspacesCleared();
 
-  DockView_sptr lockView();
   void updateView();
 
 private:
-  DockView_wptr m_view;
+  IWorkspaceDockView *m_view;
   ADSAdapter_uptr m_adapter;
 };
 } // namespace MantidWidgets

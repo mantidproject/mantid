@@ -225,7 +225,7 @@ def SetMergeQRange(q_min=None, q_max=None):
         @param qMax: When set to None (default) then for merge use the overlapping q region of front and rear detectors
     """
     ReductionSingleton().instrument.getDetector('FRONT').mergeRange = ReductionSingleton().instrument. \
-        getDetector('FRONT')._MergeRange(q_max, q_min)
+        getDetector('FRONT')._MergeRange(q_min, q_max)
     _printMessage('#Set merge range values')
 
 
@@ -460,7 +460,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # do reduce rear bank data
     if reduce_rear_flag:
         ReductionSingleton().instrument.setDetector('rear')
-        retWSname_rear = _WavRangeReduction(name_suffix)
+        retWSname_rear, rear_slices = _WavRangeReduction(name_suffix)
         retWSname = retWSname_rear
 
     # do reduce front bank
@@ -494,107 +494,28 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
         ReductionSingleton().instrument.setDetector('front')
 
-        retWSname_front = _WavRangeReduction(name_suffix)
+        retWSname_front, front_slices = _WavRangeReduction(name_suffix)
         retWSname = retWSname_front
 
     # This section provides a the REAR -- FRONT fitting and a stitched workspace.
     # If merge_flag is selected we use SANSStitch and get the fitting for free
     # If fitRequired is selected, then we explicity call the SANSFitScale algorithm
     if merge_flag:
-        # Prepare the Norm and Count workspaces for the FRONT and the REAR detectors
-        retWSname_merged = retWSname_rear
-        if retWSname_merged.count('rear') == 1:
-            retWSname_merged = retWSname_merged.replace('rear', 'merged')
+        if ReductionSingleton().getNumSlices() > 1:
+            slices = []
+            for index in range(ReductionSingleton().getNumSlices()):
+                merge_workspace = _merge_workspaces(front_slices[index], rear_slices[index], rAnds)
+                slices.append(merge_workspace)
+            ReductionSingleton().setSliceIndex(0)
+            group_name = _common_substring(slices[0], slices[1])
+            if group_name[-2] == "_":
+                group_name = group_name[:-2]
+            _group_workspaces(slices, group_name)
+            retWSname_merged = group_name
         else:
-            retWSname_merged = retWSname_merged + "_merged"
-
-        Nf = mtd[retWSname_front + "_sumOfNormFactors"]
-        Nr = mtd[retWSname_rear + "_sumOfNormFactors"]
-        Cf = mtd[retWSname_front + "_sumOfCounts"]
-        Cr = mtd[retWSname_rear + "_sumOfCounts"]
-        consider_can = True
-        try:
-            Nf_can = mtd[retWSname_front + "_can_tmp_sumOfNormFactors"]
-            Nr_can = mtd[retWSname_rear + "_can_tmp_sumOfNormFactors"]
-            Cf_can = mtd[retWSname_front + "_can_tmp_sumOfCounts"]
-            Cr_can = mtd[retWSname_rear + "_can_tmp_sumOfCounts"]
-            if Cr_can is None:
-                consider_can = False
-        except KeyError:
-            # The CAN was not specified
-            consider_can = False
-        # Get fit paramters
-        scale_factor, shift_factor, fit_mode, fit_min, fit_max = su.extract_fit_parameters(rAnds)
-        merge_range = ReductionSingleton().instrument.getDetector('FRONT').mergeRange
-
-        kwargs_stitch = {"HABCountsSample": Cf,
-                         "HABNormSample": Nf,
-                         "LABCountsSample": Cr,
-                         "LABNormSample": Nr,
-                         "ProcessCan": False,
-                         "Mode": fit_mode,
-                         "ScaleFactor": scale_factor,
-                         "ShiftFactor": shift_factor,
-                         "OutputWorkspace": retWSname_merged,
-                         "MergeMask": merge_range.q_merge_range}
-        if consider_can:
-            kwargs_can = {"HABCountsCan": Cf_can,
-                          "HABNormCan": Nf_can,
-                          "LABCountsCan": Cr_can,
-                          "LABNormCan": Nr_can,
-                          "ProcessCan": True}
-            kwargs_stitch.update(kwargs_can)
-
-        if rAnds.qRangeUserSelected:
-            q_range_stitch = {"FitMin": fit_min,
-                              "FitMax": fit_max}
-            kwargs_stitch.update(q_range_stitch)
-
-        if merge_range.q_merge_range:
-            if merge_range.q_min:
-                q_range_options = {"MergeMin": merge_range.q_min}
-                kwargs_stitch.update(q_range_options)
-            if merge_range.q_max:
-                q_range_options = {"MergeMax": merge_range.q_max}
-                kwargs_stitch.update(q_range_options)
-
-        alg_stitch = su.createUnmanagedAlgorithm("SANSStitch", **kwargs_stitch)
-        alg_stitch.execute()
-
-        # Get the fit values
-        shift_from_alg = alg_stitch.getProperty("OutShiftFactor").value
-        scale_from_alg = alg_stitch.getProperty("OutScaleFactor").value
-        ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift_from_alg
-        ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale_from_alg
-
-        # Get the merged workspace
-        mergedQ = alg_stitch.getProperty("OutputWorkspace").value
-        # Add the ouput to the Analysis Data Service
-        AnalysisDataService.addOrReplace(retWSname_merged, mergedQ)
-
-        # save the properties Transmission and TransmissionCan inside the merged workspace
-        # get these values from the rear_workspace because they are the same value as the front one.
-        # ticket #6929
-        rear_ws = mtd[retWSname_rear]
-        for prop in ['Transmission', 'TransmissionCan']:
-            if rear_ws.getRun().hasProperty(prop):
-                ws_name = rear_ws.getRun().getLogData(prop).value
-                if mtd.doesExist(ws_name):  # ensure the workspace has not been deleted
-                    AddSampleLog(Workspace=retWSname_merged, LogName=prop, LogText=ws_name)
+            retWSname_merged = _merge_workspaces(retWSname_front, retWSname_rear, rAnds)
 
         retWSname = retWSname_merged
-
-        # Remove the partial workspaces, this needs to be done for when we merge and/or fit
-        delete_workspaces(retWSname_rear + "_sumOfCounts")
-        delete_workspaces(retWSname_rear + "_sumOfNormFactors")
-        delete_workspaces(retWSname_front + "_sumOfCounts")
-        delete_workspaces(retWSname_front + "_sumOfNormFactors")
-        if consider_can:
-            delete_workspaces(retWSname_front + "_can_tmp_sumOfNormFactors")
-            delete_workspaces(retWSname_rear + "_can_tmp_sumOfNormFactors")
-            delete_workspaces(retWSname_front + "_can_tmp_sumOfCounts")
-            delete_workspaces(retWSname_rear + "_can_tmp_sumOfCounts")
-
     elif fitRequired:
         # Get fit paramters
         scale_factor, shift_factor, fit_mode = su.extract_fit_parameters(rAnds)
@@ -619,11 +540,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
     # applying scale and shift on the front detector reduced data
     if reduce_front_flag:
-        frontWS = mtd[retWSname_front]
-        buffer = Scale(InputWorkspace=frontWS, Operation="Add", Factor=shift)
-        frontWS = Scale(InputWorkspace=buffer, Operation="Multiply", Factor=scale)
-        RenameWorkspace(InputWorkspace=frontWS, OutputWorkspace=retWSname_front)
-        DeleteWorkspace(buffer)
+        Scale(InputWorkspace=retWSname_front, OutputWorkspace=retWSname_front, Operation="Add", Factor=shift)
+        Scale(InputWorkspace=retWSname_front, OutputWorkspace=retWSname_front, Operation="Multiply", Factor=scale)
 
     # finished calculating cross section so can restore these value
     ReductionSingleton().to_Q.outputParts = toRestoreOutputParts
@@ -653,6 +571,121 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     return retWSname
 
 
+def _merge_workspaces(retWSname_front, retWSname_rear, rAnds):
+    # Prepare the Norm and Count workspaces for the FRONT and the REAR detectors
+    retWSname_merged = retWSname_rear
+    if retWSname_merged.count('rear') == 1:
+        retWSname_merged = retWSname_merged.replace('rear', 'merged')
+    elif retWSname_merged.count('main') == 1:
+        retWSname_merged = retWSname_merged.replace('main', 'merged')
+    else:
+        retWSname_merged = retWSname_merged + "_merged"
+
+    Nf = mtd[retWSname_front + "_sumOfNormFactors"]
+    Nr = mtd[retWSname_rear + "_sumOfNormFactors"]
+    Cf = mtd[retWSname_front + "_sumOfCounts"]
+    Cr = mtd[retWSname_rear + "_sumOfCounts"]
+    consider_can = True
+    try:
+        Nf_can = mtd[retWSname_front + "_can_tmp_sumOfNormFactors"]
+        Nr_can = mtd[retWSname_rear + "_can_tmp_sumOfNormFactors"]
+        Cf_can = mtd[retWSname_front + "_can_tmp_sumOfCounts"]
+        Cr_can = mtd[retWSname_rear + "_can_tmp_sumOfCounts"]
+        if Cr_can is None:
+            consider_can = False
+    except KeyError:
+        # The CAN was not specified
+        consider_can = False
+
+    # Get fit paramters
+    scale_factor, shift_factor, fit_mode, fit_min, fit_max = su.extract_fit_parameters(rAnds)
+    merge_range = ReductionSingleton().instrument.getDetector('FRONT').mergeRange
+
+    kwargs_stitch = {"HABCountsSample": Cf,
+                     "HABNormSample": Nf,
+                     "LABCountsSample": Cr,
+                     "LABNormSample": Nr,
+                     "ProcessCan": False,
+                     "Mode": fit_mode,
+                     "ScaleFactor": scale_factor,
+                     "ShiftFactor": shift_factor,
+                     "OutputWorkspace": retWSname_merged,
+                     "MergeMask": merge_range.q_merge_range}
+    if consider_can:
+        kwargs_can = {"HABCountsCan": Cf_can,
+                      "HABNormCan": Nf_can,
+                      "LABCountsCan": Cr_can,
+                      "LABNormCan": Nr_can,
+                      "ProcessCan": True}
+        kwargs_stitch.update(kwargs_can)
+
+    if rAnds.qRangeUserSelected:
+        q_range_stitch = {"FitMin": fit_min,
+                          "FitMax": fit_max}
+        kwargs_stitch.update(q_range_stitch)
+
+    if merge_range.q_merge_range:
+        if merge_range.q_min:
+            q_range_options = {"MergeMin": merge_range.q_min}
+            kwargs_stitch.update(q_range_options)
+        if merge_range.q_max:
+            q_range_options = {"MergeMax": merge_range.q_max}
+            kwargs_stitch.update(q_range_options)
+
+    alg_stitch = su.createUnmanagedAlgorithm("SANSStitch", **kwargs_stitch)
+    alg_stitch.execute()
+
+    # Get the fit values
+    shift_from_alg = alg_stitch.getProperty("OutShiftFactor").value
+    scale_from_alg = alg_stitch.getProperty("OutScaleFactor").value
+    ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift_from_alg
+    ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale_from_alg
+
+    # Get the merged workspace
+    mergedQ = alg_stitch.getProperty("OutputWorkspace").value
+    # Add the ouput to the Analysis Data Service
+    AnalysisDataService.addOrReplace(retWSname_merged, mergedQ)
+
+    # save the properties Transmission and TransmissionCan inside the merged workspace
+    # get these values from the rear_workspace because they are the same value as the front one.
+    # ticket #6929
+    rear_ws = mtd[retWSname_rear]
+    for prop in ['Transmission', 'TransmissionCan']:
+        if rear_ws.getRun().hasProperty(prop):
+            ws_name = rear_ws.getRun().getLogData(prop).value
+            if mtd.doesExist(ws_name):  # ensure the workspace has not been deleted
+                AddSampleLog(Workspace=retWSname_merged, LogName=prop, LogText=ws_name)
+
+    retWSname = retWSname_merged
+
+    # Remove the partial workspaces, this needs to be done for when we merge and/or fit
+    delete_workspaces(retWSname_rear + "_sumOfCounts")
+    delete_workspaces(retWSname_rear + "_sumOfNormFactors")
+    delete_workspaces(retWSname_front + "_sumOfCounts")
+    delete_workspaces(retWSname_front + "_sumOfNormFactors")
+    if consider_can:
+        delete_workspaces(retWSname_front + "_can_tmp_sumOfNormFactors")
+        delete_workspaces(retWSname_rear + "_can_tmp_sumOfNormFactors")
+        delete_workspaces(retWSname_front + "_can_tmp_sumOfCounts")
+        delete_workspaces(retWSname_rear + "_can_tmp_sumOfCounts")
+
+    return retWSname
+
+
+def _common_substring(val1, val2):
+    l = []
+    for i in range(len(val1)):
+        if val1[i] == val2[i]:
+            l.append(val1[i])
+        else:
+            return ''.join(l)
+
+
+def _group_workspaces(list_of_values, outputname):
+    allnames = ','.join(list_of_values)
+    GroupWorkspaces(InputWorkspaces=allnames, OutputWorkspace=outputname)
+
+
 def _WavRangeReduction(name_suffix=None):
     """
         Run a reduction that has been set up, from loading the raw data to calculating Q
@@ -677,18 +710,6 @@ def _WavRangeReduction(name_suffix=None):
             RenameWorkspace(InputWorkspace=old, OutputWorkspace=result)
         return result
 
-    def _common_substring(val1, val2):
-        l = []
-        for i in range(len(val1)):
-            if val1[i] == val2[i]:
-                l.append(val1[i])
-            else:
-                return ''.join(l)
-
-    def _group_workspaces(list_of_values, outputname):
-        allnames = ','.join(list_of_values)
-        GroupWorkspaces(InputWorkspaces=allnames, OutputWorkspace=outputname)
-
     def _reduceAllSlices():
         if ReductionSingleton().getNumSlices() > 1:
             slices = []
@@ -697,30 +718,32 @@ def _WavRangeReduction(name_suffix=None):
                 slices.append(ReductionSingleton()._reduce())
             ReductionSingleton().setSliceIndex(0)
             group_name = _common_substring(slices[0], slices[1])
+
             if group_name[-2] == "_":
                 group_name = group_name[:-2]
             _group_workspaces(slices, group_name)
-            return group_name
+            return group_name, slices
         else:
-            return ReductionSingleton()._reduce()
-
+            return ReductionSingleton()._reduce(), None
     result = ""
+    slices = []
     if ReductionSingleton().get_sample().loader.periods_in_file == 1:
-        result = _reduceAllSlices()
-        return _applySuffix(result, name_suffix)
+        result, slices = _reduceAllSlices()
+        return _applySuffix(result, name_suffix), slices
 
     calculated = []
     try:
         for period in ReductionSingleton().get_sample().loader.entries:
             _setUpPeriod(period)
-            calculated.append(_reduceAllSlices())
+            result, slices = _reduceAllSlices()
+            calculated.append(result)
 
     finally:
         if len(calculated) > 0:
             result = ReductionSingleton().get_out_ws_name(show_period=False)
             _group_workspaces(calculated, result)
 
-    return _applySuffix(result, name_suffix)
+    return _applySuffix(result, name_suffix), slices
 
 
 def delete_workspaces(workspaces):

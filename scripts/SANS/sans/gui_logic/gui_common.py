@@ -1,4 +1,4 @@
-from sans.common.enums import SANSInstrument, ISISReductionMode
+from sans.common.enums import SANSInstrument, ISISReductionMode, DetectorType
 from PyQt4 import QtGui, QtCore
 import os
 
@@ -22,9 +22,11 @@ def generate_table_index(multi_period):
     table_index.update({'CAN_DIRECT_PERIOD_INDEX': 11 if multi_period else None})
     table_index.update({'OUTPUT_NAME_INDEX': 12 if multi_period else 6})
     table_index.update({'USER_FILE_INDEX': 13 if multi_period else 7})
-    table_index.update({'OPTIONS_INDEX': 14 if multi_period else 8})
-    table_index.update({'HIDDEN_OPTIONS_INDEX': 15 if multi_period else 9})
+    table_index.update({'SAMPLE_THICKNESS_INDEX': 14 if multi_period else 8})
+    table_index.update({'OPTIONS_INDEX': 15 if multi_period else 9})
+    table_index.update({'HIDDEN_OPTIONS_INDEX': 16 if multi_period else 10})
     return table_index
+
 
 OPTIONS_SEPARATOR = ","
 OPTIONS_EQUAL = "="
@@ -52,6 +54,32 @@ GENERIC_SETTINGS = "Mantid/ISISSANS"
 JSON_SUFFIX = ".json"
 
 
+def get_detector_strings_for_gui(instrument=None):
+    if instrument is SANSInstrument.SANS2D:
+        return [SANS2D_LAB, SANS2D_HAB]
+    elif instrument is SANSInstrument.LOQ:
+        return [LOQ_LAB, LOQ_HAB]
+    elif instrument is SANSInstrument.LARMOR:
+        return [LARMOR_LAB]
+    elif instrument is SANSInstrument.ZOOM:
+        return [ZOOM_LAB]
+    else:
+        return [DEFAULT_LAB, DEFAULT_HAB]
+
+
+def get_detector_strings_for_diagnostic_page(instrument=None):
+    if instrument is SANSInstrument.SANS2D:
+        return [SANS2D_LAB, SANS2D_HAB]
+    elif instrument is SANSInstrument.LOQ:
+        return [LOQ_LAB]
+    elif instrument is SANSInstrument.LARMOR:
+        return [LARMOR_LAB]
+    elif instrument is SANSInstrument.ZOOM:
+        return [ZOOM_LAB]
+    else:
+        return [DEFAULT_LAB, DEFAULT_HAB]
+
+
 def get_reduction_mode_strings_for_gui(instrument=None):
     if instrument is SANSInstrument.SANS2D:
         return [SANS2D_LAB, SANS2D_HAB, MERGED, ALL]
@@ -63,6 +91,10 @@ def get_reduction_mode_strings_for_gui(instrument=None):
         return [ZOOM_LAB]
     else:
         return [DEFAULT_LAB, DEFAULT_HAB, MERGED, ALL]
+
+
+def get_instrument_strings_for_gui():
+        return ['SANS2D', 'LOQ', 'LARMOR', 'ZOOM']
 
 
 def get_reduction_selection(instrument):
@@ -92,6 +124,15 @@ def get_string_for_gui_from_reduction_mode(reduction_mode, instrument):
         return None
 
 
+def get_string_for_gui_from_instrument(instrument):
+    instrument_selection = {SANSInstrument.SANS2D: 'SANS2D', SANSInstrument.LOQ: 'LOQ', SANSInstrument.LARMOR: 'LARMOR'
+                            , SANSInstrument.ZOOM: 'ZOOM'}
+    if instrument in list(instrument_selection.keys()):
+        return instrument_selection[instrument]
+    else:
+        return None
+
+
 def get_reduction_mode_from_gui_selection(gui_selection):
     if gui_selection == MERGED:
         return ISISReductionMode.Merged
@@ -103,6 +144,26 @@ def get_reduction_mode_from_gui_selection(gui_selection):
         return ISISReductionMode.HAB
     else:
         raise RuntimeError("Reduction mode selection is not valid.")
+
+
+def get_detector_from_gui_selection(gui_selection):
+    if gui_selection == LOQ_HAB or gui_selection == SANS2D_HAB:
+        return DetectorType.HAB
+    else:
+        return DetectorType.LAB
+
+
+def get_instrument_from_gui_selection(gui_selection):
+    if gui_selection == 'LOQ':
+        return SANSInstrument.LOQ
+    elif gui_selection == 'LARMOR':
+        return SANSInstrument.LARMOR
+    elif gui_selection == 'SANS2D':
+        return SANSInstrument.SANS2D
+    elif gui_selection == 'ZOOM':
+        return SANSInstrument.ZOOM
+    else:
+        raise RuntimeError("Instrument selection is not valid.")
 
 
 def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settings_key, func):

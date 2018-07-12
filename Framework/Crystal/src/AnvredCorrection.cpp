@@ -359,9 +359,9 @@ void AnvredCorrection::retrieveBaseProperties() {
     NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
                         static_cast<uint16_t>(0), 0.0, 0.0, m_smu, 0.0, m_smu,
                         m_amu);
-    auto shape =
-        boost::shared_ptr<IObject>(m_inputWS->sample().getShape().clone());
-    shape->setMaterial(Material("SetInAnvredCorrection", neutron, 1.0));
+    auto shape = boost::shared_ptr<IObject>(
+        m_inputWS->sample().getShape().cloneWithMaterial(
+            Material("SetInAnvredCorrection", neutron, 1.0)));
     m_inputWS->mutableSample().setShape(shape);
   }
   if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL())

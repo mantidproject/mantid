@@ -352,26 +352,38 @@ class ResolutionModel:
                     to tabulate the functions such that linear interpolation between the
                     tabulated points has this accuracy. If not given a default value is used.
         """
+        errmsg = 'Resolution model must be either a tuple of two arrays, a function, PyChop object or list of one of these'
         self.multi = False
         if hasattr(model, '__call__'):
             self.model = self._makeModel(model, xstart, xend, accuracy)
-            return
+        elif hasattr(model, 'getEi') and hasattr(model, 'getResolution'):
+            Ei = model.getEi()
+            self.model = self._makeModel(model.getResolution, -Ei, 0.9 * Ei, 0.01)
+        elif hasattr(model, 'model'):
+            self.model = model
+        elif isinstance(model, tuple):
+            self._checkModel(model)
+            self.model = model
         elif hasattr(model, '__len__'):
             if len(model) == 0:
                 raise RuntimeError('Resolution model cannot be initialised with an empty iterable %s' %
                                    str(model))
             if hasattr(model[0], '__call__'):
                 self.model = [self._makeModel(m, xstart, xend, accuracy) for m in model]
-                self.multi = True
-                return
+            elif hasattr(model[0], 'model'):
+                self.model = [m.model for m in model]
+            elif hasattr(model[0], 'getEi') and hasattr(model[0], 'getResolution'):
+                Ei = model[0].getEi()
+                self.model = [self._makeModel(m.getResolution, -Ei, 0.9 * Ei, 0.01) for m in model]
             elif isinstance(model[0], tuple):
                 for m in model:
                     self._checkModel(m)
                 self.model = model
-                self.multi = True
-                return
-        self._checkModel(model)
-        self.model = model
+            else:
+                raise RuntimeError(errmsg)
+            self.multi = True
+        else:
+            raise RuntimeError(errmsg)
 
     @property
     def NumberOfSpectra(self):
@@ -433,13 +445,18 @@ class ResolutionModel:
             x = self._mergeArrays(x, xx)
             y = self._mergeArrays(y, yy)
             n = len(x)
-        return x, y
+        return list(x), list(y)
 
 
 class PhysicalProperties(object):
     """
     Contains information about measurement conditions of physical properties
     """
+    HEATCAPACITY = 1
+    SUSCEPTIBILITY = 2
+    MAGNETISATION = 3
+    MAGNETICMOMENT = 4
+
     def _str2id(self, typeid):
         mappings = [['cp', 'cv', 'heatcap'], ['chi', 'susc'], ['mag', 'm(h)'], ['mom', 'm(t)']]
         for id in range(4):
@@ -461,19 +478,21 @@ class PhysicalProperties(object):
         :param temperature: the temperature in Kelvin of measurements of M(H)
         :param inverse: a boolean indicating whether susceptibility is chi or 1/chi or M(T) or 1/M(T)
         :param unit: the unit the data was measured in. Either: 'bohr', 'SI' or 'cgs'.
+        :param lambda: (susceptibility only) the value of the exchange constant in inverse susc units
+        :param chi0: (susceptibility only) the value of the residual (background) susceptibility
 
         typeid is required in all cases, and all other parameters may be specified as keyword arguments.
         otherwise the syntax is:
 
         PhysicalProperties('Cp')  # No further parameters required for heat capacity
-        PhysicalProperties('chi', hdir, inverse, unit)
+        PhysicalProperties('chi', hdir, inverse, unit, lambda, chi0)
         PhysicalProperties('chi', unit)
         PhysicalProperties('mag', hdir, temp, unit)
         PhysicalProperties('mag', unit)
         PhysicalProperties('M(T)', hmag, hdir, inverse, unit)
         PhysicalProperties('M(T)', unit)
 
-        Defaults are: hdir=[0, 0, 1]; hmag=1; temp=1; inverse=False; unit='cgs'.
+        Defaults are: hdir=[0, 0, 1]; hmag=1; temp=1; inverse=False; unit='cgs'; lambda=chi0=0.
         """
         self._physpropUnit = 'cgs'
         self._suscInverseFlag = False
@@ -481,6 +500,7 @@ class PhysicalProperties(object):
         self._hmag = 1.
         self._physpropTemperature = 1.
         self._lambda = 0.    # Exchange parameter (for susceptibility only)
+        self._chi0 = 0.      # Residual/background susceptibility (for susceptibility only)
         self._typeid = self._str2id(typeid) if isinstance(typeid, string_types) else int(typeid)
         try:
             initialiser = getattr(self, 'init' + str(self._typeid))
@@ -532,11 +552,11 @@ class PhysicalProperties(object):
 
     @property
     def Inverse(self):
-        return self._suscInverseFlag if (self._typeid == 2 or self._typeid == 4) else None
+        return self._suscInverseFlag if (self._typeid == self.SUSCEPTIBILITY or self._typeid == self.MAGNETICMOMENT) else None
 
     @Inverse.setter
     def Inverse(self, value):
-        if (self._typeid == 2 or self._typeid == 4):
+        if (self._typeid == self.SUSCEPTIBILITY or self._typeid == self.MAGNETICMOMENT):
             if isinstance(value, string_types):
                 self._suscInverseFlag = value.lower() in ['true', 't', '1', 'yes', 'y']
             else:
@@ -546,39 +566,48 @@ class PhysicalProperties(object):
 
     @property
     def Hdir(self):
-        return self._hdir if (self._typeid > 1) else None
+        return self._hdir if (self._typeid != self.HEATCAPACITY) else None
 
     @Hdir.setter
     def Hdir(self, value):
-        if (self._typeid > 1):
+        if (self._typeid != self.HEATCAPACITY):
             self._hdir = self._checkhdir(value)
 
     @property
     def Hmag(self):
-        return self._hmag if (self._typeid == 4) else None
+        return self._hmag if (self._typeid == self.MAGNETICMOMENT) else None
 
     @Hmag.setter
     def Hmag(self, value):
-        if (self._typeid == 4):
+        if (self._typeid == self.MAGNETICMOMENT):
             self._hmag = float(value)
 
     @property
     def Temperature(self):
-        return self._physpropTemperature if (self._typeid == 3) else None
+        return self._physpropTemperature if (self._typeid == self.MAGNETISATION) else None
 
     @Temperature.setter
     def Temperature(self, value):
-        if (self._typeid == 3):
+        if (self._typeid == self.MAGNETISATION):
             self._physpropTemperature = float(value)
 
     @property
     def Lambda(self):
-        return self._lambda if (self._typeid == 2) else None
+        return self._lambda if (self._typeid == self.SUSCEPTIBILITY) else None
 
     @Lambda.setter
     def Lambda(self, value):
-        if (self._typeid == 2):
+        if (self._typeid == self.SUSCEPTIBILITY):
             self._lambda = float(value)
+
+    @property
+    def Chi0(self):
+        return self._chi0 if (self._typeid == self.SUSCEPTIBILITY) else None
+
+    @Chi0.setter
+    def Chi0(self, value):
+        if (self._typeid == self.SUSCEPTIBILITY):
+            self._chi0 = float(value)
 
     def init1(self, *args, **kwargs):
         """ Initialises environment for heat capacity data """
@@ -602,7 +631,7 @@ class PhysicalProperties(object):
 
     def init2(self, *args, **kwargs):
         """ Initialises environment for susceptibility data """
-        mapping = ['Hdir', 'Inverse', 'Unit', 'Lambda']
+        mapping = ['Hdir', 'Inverse', 'Unit', 'Lambda', 'Chi0']
         self._parseargs(mapping, *args, **kwargs)
 
     def init3(self, *args, **kwargs):
@@ -620,35 +649,38 @@ class PhysicalProperties(object):
         types = ['CrystalFieldHeatCapacity', 'CrystalFieldSusceptibility',
                  'CrystalFieldMagnetisation', 'CrystalFieldMoment']
         out = 'name=%s' % (types[self._typeid - 1])
-        if self._typeid > 1:
+        if self._typeid != self.HEATCAPACITY:
             out += ',Unit=%s' % (self._physpropUnit)
             if 'powder' in self._hdir:
                 out += ',powder=1'
             else:
                 out += ',Hdir=(%s)' % (','.join([str(hh) for hh in self._hdir]))
-            if self._typeid == 3:  # magnetisation M(H)
+            if self._typeid == self.MAGNETISATION:
                 out += ',Temperature=%s' % (self._physpropTemperature)
             else:            # either susceptibility or M(T)
                 out += ',inverse=%s' % (1 if self._suscInverseFlag else 0)
-                out += (',Hmag=%s' % (self._hmag)) if self._typeid==3 else ''
-                if self._typeid == 2 and self._lambda != 0:
+                out += (',Hmag=%s' % (self._hmag)) if self._typeid == self.MAGNETISATION else ''
+                if self._typeid == self.SUSCEPTIBILITY and self._lambda != 0:
                     out += ',Lambda=%s' % (self._lambda)
+                if self._typeid == self.SUSCEPTIBILITY and self._chi0 != 0:
+                    out += ',Chi0=%s' % (self._chi0)
         return out
 
     def getAttributes(self, dataset=None):
         """Returns a dictionary of PhysicalProperties attributes for use with IFunction"""
         dataset = '' if dataset is None else str(dataset)
         out = {}
-        if self._typeid > 1:
+        if self._typeid != self.HEATCAPACITY:
             out['Unit%s' % (dataset)] = self._physpropUnit
             if 'powder' in self._hdir:
                 out['powder%s' % (dataset)] = 1
             else:
                 out['Hdir%s' % (dataset)] = [float(hh) for hh in self._hdir] # needs to be list
-            if self._typeid != 3:  # either susceptibility or M(T)
+            if self._typeid != self.MAGNETISATION:  # either susceptibility or M(T)
                 out['inverse%s' % (dataset)] = 1 if self._suscInverseFlag else 0
-                if self._typeid==3:
+                if self._typeid == self.MAGNETICMOMENT:
                     out['Hmag%s' % (dataset)] = self._hmag
-                if self._typeid == 2 and self._lambda != 0:
-                    out['Lambda%s=' % (dataset)] = self._lambda
+                if self._typeid == self.SUSCEPTIBILITY:
+                    out['Lambda%s' % (dataset)] = self._lambda
+                    out['Chi0%s' % (dataset)] = self._chi0
         return out

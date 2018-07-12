@@ -398,9 +398,6 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         self._recordLogMutex = False
 
         # check whether it is time to write all the scans to file
-        print '[DB...BAT] Scans to process: {0} vs \n\tScans processed: {1}' \
-              ''.format(self._scansToProcess, self._scanNumbersProcessed)
-
         if len(self._scansToProcess) == len(self._scanNumbersProcessed):
             self.update_record_file(self._currExpNumber, check_duplicates=False, scan_list=self._scanNumbersProcessed)
             if self._scansToProcess != self._scanNumbersProcessed:
@@ -427,11 +424,12 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         return
 
     def update_record_file(self, exp_number, check_duplicates, scan_list):
-        """
-        update the record file
+        """ update the record file
         it is an option to append file or check and remove duplication.
         duplication can be removed in the record file loading method by checking the time stamp
+        :param exp_number:
         :param check_duplicates:
+        :param scan_list:
         :return:
         """
         # check inputs

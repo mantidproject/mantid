@@ -51,7 +51,7 @@ do_test_doesnt_throw_on_execution(MatrixWorkspace_sptr inputWS,
   TS_ASSERT_THROWS_NOTHING(alg.execute());
   MatrixWorkspace_sptr outWS =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
-  TS_ASSERT(outWS != NULL);
+  TS_ASSERT(outWS != nullptr);
   return outWS;
 }
 
@@ -225,7 +225,7 @@ private:
   create_workspace_with_incomplete_detector_level_only_fit_functions(
       MatrixWorkspace_sptr original = boost::shared_ptr<MatrixWorkspace>()) {
     MatrixWorkspace_sptr ws = original;
-    if (original == NULL) {
+    if (original == nullptr) {
       // Create a default workspace with no-fitting functions.
       ws = create_workspace_with_no_fitting_functions();
     }
@@ -649,7 +649,7 @@ public:
 private:
   /// Helper method to run common sanity checks.
   void do_basic_checks(MatrixWorkspace_sptr normalisedWS) {
-    TS_ASSERT(normalisedWS != NULL);
+    TS_ASSERT(normalisedWS != nullptr);
     TS_ASSERT(ws->getNumberHistograms() == normalisedWS->getNumberHistograms());
     TS_ASSERT(ws->x(0).size() == normalisedWS->x(0).size());
     TS_ASSERT(ws->y(0).size() == normalisedWS->y(0).size());

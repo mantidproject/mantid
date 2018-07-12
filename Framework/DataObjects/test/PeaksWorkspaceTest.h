@@ -1,26 +1,27 @@
 #ifndef MANTID_DATAOBJECTS_PEAKSWORKSPACETEST_H_
 #define MANTID_DATAOBJECTS_PEAKSWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/FileProperty.h"
-#include <fstream>
-#include <stdio.h>
-#include <cmath>
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LogManager.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
+#include <stdio.h>
 
 #include <Poco/File.h>
 
@@ -55,7 +56,7 @@ public:
 
   /** Check that the PeaksWorkspace build by buildPW() is correct */
   void checkPW(const PeaksWorkspace &pw) {
-    TS_ASSERT_EQUALS(pw.columnCount(), 17);
+    TS_ASSERT_EQUALS(pw.columnCount(), 18);
     TS_ASSERT_EQUALS(pw.rowCount(), 1);
     TS_ASSERT_EQUALS(pw.getNumberPeaks(), 1);
     if (pw.getNumberPeaks() != 1)
@@ -357,68 +358,112 @@ public:
   }
 
   void test_createPeakHKL() {
-    // Create simple fictional instrument
-    const V3D source(0, 0, 0);
-    const V3D sample(15, 0, 0);
-    const V3D detectorPos(20, 5, 0);
-    const V3D beam1 = sample - source;
-    const V3D beam2 = detectorPos - sample;
-    auto minimalInstrument = ComponentCreationHelper::createMinimalInstrument(
-        source, sample, detectorPos);
-
-    // Derive distances and angles
-    const double l1 = beam1.norm();
-    const double l2 = beam2.norm();
-    const V3D qLabDir = (beam1 / l1) - (beam2 / l2);
-
-    const double microSecsInSec = 1e6;
-
-    // Derive QLab for diffraction
-    const double wavenumber_in_angstrom_times_tof_in_microsec =
-        (Mantid::PhysicalConstants::NeutronMass * (l1 + l2) * 1e-10 *
-         microSecsInSec) /
-        Mantid::PhysicalConstants::h_bar;
-    V3D qLab = qLabDir * wavenumber_in_angstrom_times_tof_in_microsec;
-
-    Mantid::Geometry::OrientedLattice orientedLattice(
-        1, 1, 1, 90, 90, 90); // U is identity, real and reciprocal lattice
-                              // vectors are identical.
-    Mantid::Geometry::Goniometer goniometer; // identity
-    V3D hkl = qLab / (2 * M_PI); // Given our settings above, this is the
-                                 // simplified relationship between qLab and
-                                 // hkl.
-
-    // Now create a peaks workspace around the simple fictional instrument
-    PeaksWorkspace ws;
-    ws.setInstrument(minimalInstrument);
-    ws.mutableSample().setOrientedLattice(&orientedLattice);
-    ws.mutableRun().setGoniometer(goniometer, false);
-
+    const auto params = makePeakParameters();
+    auto ws = makeWorkspace(params);
     // Create the peak
-    Peak *peak = ws.createPeakHKL(hkl);
+    Peak *peak = ws->createPeakHKL(params.hkl);
 
     /*
      Now we check we have made a self - consistent peak
      */
-    TSM_ASSERT_EQUALS("New peak should have HKL we demanded.", hkl,
+    TSM_ASSERT_EQUALS("New peak should have HKL we demanded.", params.hkl,
                       peak->getHKL());
-    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", qLab,
+    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
                       peak->getQLabFrame());
-    TSM_ASSERT_EQUALS("QSample and QLab should be identical given the identity "
-                      "goniometer settings.",
-                      peak->getQLabFrame(), peak->getQSampleFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
+                      params.qSample, peak->getQSampleFrame());
+
     auto detector = peak->getDetector();
     TSM_ASSERT("No detector", detector);
     TSM_ASSERT_EQUALS("This detector id does not match what we expect from the "
                       "instrument definition",
                       1, detector->getID());
-    TSM_ASSERT_EQUALS("Thie detector position is wrong", detectorPos,
-                      detector->getPos());
-    TSM_ASSERT_EQUALS("Goniometer has not been set properly", goniometer.getR(),
-                      peak->getGoniometerMatrix());
+    TSM_ASSERT_EQUALS("Thie detector position is wrong",
+                      params.detectorPosition, detector->getPos());
+    TSM_ASSERT_EQUALS("Goniometer has not been set properly",
+                      params.goniometer.getR(), peak->getGoniometerMatrix());
 
     // Clean up.
     delete peak;
+  }
+
+  void test_create_peak_with_position_hkl() {
+    const auto params = makePeakParameters();
+    const auto ws = makeWorkspace(params);
+
+    const auto peak = ws->createPeak(params.hkl, Mantid::Kernel::HKL);
+
+    TSM_ASSERT_EQUALS("New peak should have HKL we demanded.", params.hkl,
+                      peak->getHKL());
+    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
+                      peak->getQLabFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
+                      params.qSample, peak->getQSampleFrame());
+  }
+
+  void test_create_peak_with_position_qsample() {
+    const auto params = makePeakParameters();
+    const auto ws = makeWorkspace(params);
+
+    const auto peak = ws->createPeak(params.qSample, Mantid::Kernel::QSample);
+
+    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
+                      peak->getQLabFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
+                      params.qSample, peak->getQSampleFrame());
+  }
+
+  void test_create_peak_with_position_qlab() {
+    const auto params = makePeakParameters();
+    const auto ws = makeWorkspace(params);
+
+    const auto peak = ws->createPeak(params.qLab, Mantid::Kernel::QLab);
+
+    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
+                      peak->getQLabFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
+                      params.qSample, peak->getQSampleFrame());
+  }
+
+  void test_add_peak_with_position_hkl() {
+    const auto params = makePeakParameters();
+    const auto ws = makeWorkspace(params);
+
+    ws->addPeak(params.hkl, Mantid::Kernel::HKL);
+    const auto &peak = ws->getPeak(0);
+
+    TSM_ASSERT_EQUALS("New peak should have HKL we demanded.", params.hkl,
+                      peak.getHKL());
+    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
+                      peak.getQLabFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
+                      params.qSample, peak.getQSampleFrame());
+  }
+
+  void test_add_peak_with_position_qlab() {
+    const auto params = makePeakParameters();
+    const auto ws = makeWorkspace(params);
+
+    ws->addPeak(params.qLab, Mantid::Kernel::QLab);
+    const auto &peak = ws->getPeak(0);
+
+    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
+                      peak.getQLabFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
+                      params.qSample, peak.getQSampleFrame());
+  }
+
+  void test_add_peak_with_position_qsample() {
+    const auto params = makePeakParameters();
+    const auto ws = makeWorkspace(params);
+
+    ws->addPeak(params.qSample, Mantid::Kernel::QSample);
+    const auto &peak = ws->getPeak(0);
+
+    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
+                      peak.getQLabFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
+                      params.qSample, peak.getQSampleFrame());
   }
 
   /**
@@ -436,10 +481,10 @@ public:
     PeaksWorkspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<PeaksWorkspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsNonConst =
                                  manager.getValue<PeaksWorkspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -447,9 +492,9 @@ public:
     PeaksWorkspace_const_sptr wsCastConst;
     PeaksWorkspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (PeaksWorkspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (PeaksWorkspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 
@@ -468,10 +513,10 @@ public:
     IPeaksWorkspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<IPeaksWorkspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(
         wsNonConst = manager.getValue<IPeaksWorkspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -479,9 +524,9 @@ public:
     IPeaksWorkspace_const_sptr wsCastConst;
     IPeaksWorkspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (IPeaksWorkspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IPeaksWorkspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 
@@ -505,6 +550,69 @@ public:
   }
 
 private:
+  struct PeakParameters {
+    Instrument_const_sptr instrument;
+    Goniometer goniometer;
+    OrientedLattice lattice;
+    V3D hkl;
+    V3D qLab;
+    V3D qSample;
+    V3D detectorPosition;
+  };
+
+  PeakParameters makePeakParameters() {
+    // Create simple fictional instrument
+    const V3D source(0, 0, 0);
+    const V3D sample(15, 0, 0);
+    const V3D detectorPos(20, 5, 0);
+    const V3D beam1 = sample - source;
+    const V3D beam2 = detectorPos - sample;
+    auto minimalInstrument = ComponentCreationHelper::createMinimalInstrument(
+        source, sample, detectorPos);
+
+    // Derive distances and angles
+    const double l1 = beam1.norm();
+    const double l2 = beam2.norm();
+    const V3D qLabDir = (beam1 / l1) - (beam2 / l2);
+
+    const double microSecsInSec = 1e6;
+
+    // Derive QLab for diffraction
+    const double wavenumber_in_angstrom_times_tof_in_microsec =
+        (Mantid::PhysicalConstants::NeutronMass * (l1 + l2) * 1e-10 *
+         microSecsInSec) /
+        Mantid::PhysicalConstants::h_bar;
+
+    Mantid::Geometry::Goniometer goniometer;
+    goniometer.pushAxis("axis1", 0, 1, 0);
+    goniometer.setRotationAngle(0, 5);
+    auto Rinv = goniometer.getR();
+    Rinv.Invert();
+
+    V3D qLab = qLabDir * wavenumber_in_angstrom_times_tof_in_microsec;
+
+    Mantid::Geometry::OrientedLattice orientedLattice(
+        1, 1, 1, 90, 90, 90); // U is identity, real and reciprocal lattice
+                              // vectors are identical.
+
+    V3D qSample = Rinv * qLab;
+    V3D hkl = qSample / (2 * M_PI); // Given our settings above, this is the
+                                    // simplified relationship between qLab and
+                                    // hkl.
+
+    return PeakParameters{minimalInstrument, goniometer, orientedLattice, hkl,
+                          qLab, qSample, detectorPos};
+  }
+
+  PeaksWorkspace_sptr makeWorkspace(const PeakParameters &params) {
+    auto lattice = new OrientedLattice(params.lattice);
+    auto ws = boost::make_shared<PeaksWorkspace>();
+    ws->setInstrument(params.instrument);
+    ws->mutableSample().setOrientedLattice(lattice);
+    ws->mutableRun().setGoniometer(params.goniometer, false);
+    return ws;
+  }
+
   PeaksWorkspace_sptr createSaveTestPeaksWorkspace() {
     // Create peak workspace
     auto pw = buildPW();

@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+<!-- For help on the notation used to specify an Instrument Definition File
+     see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="SRF" valid-from   ="2010-01-10 23:59:59"
-                          valid-to     ="2100-01-30 23:59:59"          
-              last-modified="2010-11-04 00:00:00">
+            name="SURF"
+            valid-from="2010-01-10 23:59:59"
+            valid-to="2017-02-13 23:59:59"
+            last-modified="2018-03-15 00:00:00">
+
   <defaults>
     <length unit="meter" />
     <angle unit="degree" />
@@ -13,99 +17,87 @@
       <pointing-up axis="y" />
       <handedness val="right" />
     </reference-frame>
-    <default-view axis-view="z-"/>
+    <default-view axis-view="z+"/>
   </defaults>
 
- <!-- Definition of instrument specific parameters for data reduction (e.g. wavelength cutoffs etc.) , could go into paramter file
-	MonitorBackground= [7.6,8.5]
-	MonitorsToCorrect=[1]
-	PointDetectorStart=[0]   # Note: Since we are removing the monitors in the load raw command they are not counted here.
-	PointDetectorStop=[0]
-	MultiDetectorStart=[1]
-	I0MonitorIndex=1
- -->
+<!-- source and sample-position components START============================= -->
 
-  <!-- BRIEF DESCRIPTION OF CRISP INSTRUMENT: 
-  
-      Here Z=0 is defined by the neutron beam which slopes down at 1.5 deg. 
-      from the horizon. This description is based on data provided by Tim
-      Charlton and Rob Dalgliesh.
-      
-      Note from Tim spreedsheet
-      theta is a rotation about the y axis
-      phi is a rotation about the x axis
-      chi is a rotation about the z axis
-
-      Noticed the face of the monitors/detector shapes that faces the
-      beam/sample path is in this IDF defined to be the y-z plane.
-      
-      Note the status of the instrument during a run is stored in the 
-      logfile RunNo_status.txt
-  -->
-  
-  
-  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
-  
-  <!-- detector components (including monitors) -->
-  
-  <component type="monitor1" idlist="monitor1">
-    <location z="7.2055"/>
+  <component type="source">
+    <location z="-8.869" />
   </component>
-  
+  <type name="source" is="Source">
+    <properties>
+      40mm(H) x 60mm(W)
+    </properties>
+  </type>
+
+  <component type="some-surface-holder">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+  <type name="some-surface-holder" is="SamplePos"/>
+
+<!-- source and sample-position components END=============================== -->
+
+
+<!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+<!-- detector components (including monitors) -->
+
+<!-- ================MONITOR 1 START========================================= -->
+  <component type="monitor1" idlist="monitor1">
+    <location z="-1.663"/>
+  </component>
+
   <type name="monitor1" is="monitor">
     <!-- Shape specified at least big enough to cover the beam which
          is 10mm high and 40mm wide. Note it is described as tube, hence
 	 the choice of a cylinder shape.
-    -->    
+    -->
     <percent-transparency val="95" />
     <cylinder id="shape">
       <centre-of-bottom-base x="-0.02" y="0.0" z="0.0" />
-      <axis x="1.0" y="0.0" z="0.0" /> 
+      <axis x="1.0" y="0.0" z="0.0" />
       <radius val="0.01" />
       <height val="0.04" />
-    </cylinder> 
+    </cylinder>
     <algebra val="shape" />
-  </type>  
-  
+  </type>
+<!-- ================MONITOR 1 END=========================================== -->
+
+<!-- ================MONITOR 2 START========================================= -->
   <component type="monitor2" idlist="monitor2">
-    <location z="8.72" />
-  </component>  
-  
+    <location z="-0.149" />
+  </component>
+
   <type name="monitor2" is="monitor">
     <!-- Original shape included a Sphere attached to the cuboid
-	but that was cosmetic only as it is not in the beam, 
-	and was causing problems with opencascade on windows 8.  
-	Therefore it has been removed. -->    
+	but that was cosmetic only as it is not in the beam,
+	and was causing problems with opencascade on windows 8.
+	Therefore it has been removed. -->
     <percent-transparency val="95" />
     <cuboid id="base">
       <left-front-bottom-point x="0.02" y="-0.005" z="0.0"  />
       <left-front-top-point  x="0.02" y="0.005" z="0.0"  />
       <left-back-bottom-point  x="0.02" y="-0.005" z="-0.01"  />
-      <right-front-bottom-point  x="-0.02" y="-0.005" z="0.0"  />   
+      <right-front-bottom-point  x="-0.02" y="-0.005" z="0.0"  />
     </cuboid>
-    
-  </type>  
-  
+  </type>
+<!-- ================MONITOR 2 END=========================================== -->
+
+<!-- ================POINT DETECTOR START==================================== -->
   <component type="point-detector" idlist="point-detector">
-    <location z="11.43" />
-    
-    <!-- Link to log file that stores the z position. This angle can be used to
-    calculate the y position since the distance along the z-axis between
-    the sample and this detector is known (11.43-8.869=2.561). Also theta in the logfile is
-    assumed to in degrees, hence the reason for the pi/180=0.0174533 transformation
-    to radians factor in the eq attribute. -->
+    <location z="2.561" />
     <parameter name="y">
-      <logfile id="theta" eq="2.561*sin(value*0.0174533)" />
+      <logfile id="THETA" eq="2.561*sin(2*value*0.0174533)" extract-single-value-as="last_value"/>
     </parameter>
-    
+
   </component>
 
   <type name="point-detector" is="detector">
     <!-- Not exactly sure about the dimensions of this one. But pretty sure
     it at least covers the beam. Also, just in front of it is a slit which
-    at the end of day will determine which neutrons get through to this 
+    at the end of day will determine which neutrons get through to this
     detector I believe.
-    -->    
+    -->
     <cuboid id="shape">
       <left-front-bottom-point x="0.02" y="-0.005" z="0.0"  />
       <left-front-top-point  x="0.02" y="0.005" z="0.0"  />
@@ -113,34 +105,20 @@
       <right-front-bottom-point  x="-0.02" y="-0.005" z="0.0"  />
     </cuboid>
     <algebra val="shape" />
-  </type>    
+  </type>
+<!-- ================POINT DETECTOR END====================================== -->
 
+<!-- ================AREA DETECTOR START=================================== -->
   <component type="panel" idstart="10001" idfillbyfirst="y" idstep="1" idstepbyrow="64">
-    <location z="11.93" name="multi-detector"/>
+    <location z="3.061" name="multi-detector"/>
   </component>
- 
- <!-- 
-  <component type="multi-detector" idlist="multi-detector">
-  -->
-    <!-- Link to log file that stores the z position -->
-<!--     <parameter name="z">
-      <logfile id="multi_det_height" eq="0.001*value" extract-single-value-as="position 1" />
-    </parameter>
-  
-    <properties> 
-      square pixels 2.2mm width in z-y direction    
-    </properties>
-    
-    <location x="12.403" />
-  </component>    
--->
 
-  <type name="panel" is="rectangular_detector" type="multi-detector-pixel" 
+  <type name="panel" is="rectangular_detector" type="multi-detector-pixel"
     xpixels="40" xstart="-0.044" xstep="+0.0022"
     ypixels="46" ystart="0.0" ystep="+0.0022" >
     <properties/>
-  </type>  
-  
+  </type>
+
   <type name="multi-detector-pixel" is="detector">
     <cuboid id="shape">
       <left-front-bottom-point x="0.01" y="-0.0011" z="-0.0011"  />
@@ -149,65 +127,43 @@
       <right-front-bottom-point  x="0.01" y="0.0011" z="-0.0011"  />
     </cuboid>
     <algebra val="shape" />
-  </type>    
-
-  
-  <!-- source and sample-position components -->
-
-  <component type="source">
-    <location />
-  </component>
-
-  <type name="source" is="Source">
-    <properties>
-      10mm(H) x 40mm(W)
-    </properties>
-  </type> 
-  
-  
-  <component type="some-surface-holder">
-    <!-- worry about linking relevant logfiles for y,z,theta,phi up later -->
-    <location z="8.869"/>
-  </component>
-
-  <type name="some-surface-holder" is="SamplePos">
   </type>
-  
-  
-  <!-- other components -->  
-  
+
+
+  <!-- other components -->
+
   <component type="slit" name="slit1">
-    <location z="7.032"/>
+    <location z="-1.873"/>
      <!-- This log file stores the vertical opening of slit -->
-    <parameter name="vertical gap"> 
+    <parameter name="vertical gap">
       <logfile id="S1" extract-single-value-as="last_value" />
     </parameter>
   </component>
-  
-  <component type="slit" name="slit2">  
-    <location z="8.532"/> 
+
+  <component type="slit" name="slit2">
+    <location z="-0.254"/>
     <!-- This log file stores the vertical opening of this. Note this
      slit can also be translated in the z. However this info not stored
      in log file since it is not used in the data analysis process. -->
-    <parameter name="vertical gap"> 
+    <parameter name="vertical gap">
       <logfile id="S2" extract-single-value-as="last_value" />
     </parameter>
-  </component>    
-  
-  <component type="slit" name="slit3">   
-    <location z="9.174"/>
-    <!-- This log file stores the vertical opening of slit -->  
+  </component>
+
+  <component type="slit" name="slit3">
+    <location z="0.298"/>
+    <!-- This log file stores the vertical opening of slit -->
     <parameter name="vertical gap">
       <logfile id="S3" extract-single-value-as="last_value" />
     </parameter>
-  </component>    
-  
-  <component type="slit" name="slit4">    
-    <location z="11.300"/> 
+  </component>
+
+  <component type="slit" name="slit4">
+    <location z="2.431"/>
     <!-- This log file stores the vertical opening of slit. Note this slit
      is fixed to the point detector. -->
-    <parameter name="vertical gap"> 
-      <logfile id="S4" extract-single-value-as="last_value" />    
+    <parameter name="vertical gap">
+      <logfile id="S4" extract-single-value-as="last_value" />
     </parameter>
   </component>
 
@@ -220,76 +176,30 @@
       <right-front-bottom-point  z="0.0005" x="0.025" y="-0.03"  />
     </cuboid>
   </type>
-  
 
-  
-  
-  
+
+
+
   <component type="supermirror">
     <!-- Worry about linking relevant logfiles for z,theta up later -->
-    <location z="7.7685"/>  
-  </component>  
+    <location z="-1.103"/>
+  </component>
 
-  <type name="supermirror" /> 
+  <type name="supermirror" />
 
 
-
-  
   <!-- DETECTOR and MONITOR ID LISTS -->
 
   <idlist idname="monitor1">
-    <id val="20001" />  
+    <id val="20001" />
   </idlist>
-  
+
   <idlist idname="monitor2">
-    <id val="20002" />  
+    <id val="20002" />
   </idlist>
 
   <idlist idname="point-detector">
-    <id val="30001" />  
+    <id val="30001" />
   </idlist>
-<!--  
-  <idlist idname="multi-detector">
-    <id start="10001" end="10046" />
-    <id start="10065" end="10110" />
-    <id start="10129" end="10174" />
-    <id start="10193" end="10238" />
-    <id start="10257" end="10302" />
-    <id start="10321" end="10366" />
-    <id start="10385" end="10430" />
-    <id start="10449" end="10494" />
-    <id start="10513" end="10558" />
-    <id start="10577" end="10622" />
-    <id start="10641" end="10686" />
-    <id start="10705" end="10750" />
-    <id start="10769" end="10814" />
-    <id start="10833" end="10878" />
-    <id start="10897" end="10942" />
-    <id start="10961" end="11006" />
-    <id start="11025" end="11070" />
-    <id start="11089" end="11134" />
-    <id start="11153" end="11198" />
-    <id start="11217" end="11262" />
-    <id start="11281" end="11326" />
-    <id start="11345" end="11390" />
-    <id start="11409" end="11454" />
-    <id start="11473" end="11518" />
-    <id start="11537" end="11582" />
-    <id start="11601" end="11646" />
-    <id start="11665" end="11710" />
-    <id start="11729" end="11774" />
-    <id start="11793" end="11838" />
-    <id start="11857" end="11902" />
-    <id start="11921" end="11966" />
-    <id start="11985" end="12030" />
-    <id start="12049" end="12094" />
-    <id start="12113" end="12158" />
-    <id start="12177" end="12222" />
-    <id start="12241" end="12286" />
-    <id start="12305" end="12350" />
-    <id start="12369" end="12414" />
-    <id start="12433" end="12478" />
-    <id start="12497" end="12542" />
-  </idlist>  
-  -->
+
 </instrument>

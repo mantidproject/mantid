@@ -23,7 +23,7 @@ using namespace MantidQt::MantidWidgets;
 InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
                                    ApplicationWindow *parent,
                                    const QString &name)
-    : MdiSubWindow(parent, label, name, 0) {
+    : MdiSubWindow(parent, label, name, nullptr) {
 
   m_instrumentWidget = new InstrumentWidget(wsName, this);
   this->setWidget(m_instrumentWidget);

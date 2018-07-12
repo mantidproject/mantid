@@ -7,7 +7,6 @@
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 
-namespace {
 #define DECLARE_TEST_VALIDATOR(ClassName, HeldType)                            \
   class ClassName : public Mantid::Kernel::TypedValidator<HeldType> {          \
   public:                                                                      \
@@ -33,7 +32,6 @@ private:
 };
 DECLARE_TEST_VALIDATOR(DataItemSptrTypedValidator,
                        boost::shared_ptr<FakeDataItem>)
-}
 
 class TypedValidatorTest : public CxxTest::TestSuite {
 public:

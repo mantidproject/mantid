@@ -231,6 +231,19 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
   }
 
+  void test_delete_all() {
+    // This is well tested in GenericDataProcessorPresenterTest, hence just
+    // checking that the presenter is called
+
+    NiceMock<MockDataProcessorPresenter> presenter;
+    TwoLevelTreeManager manager(&presenter, reflWhitelist());
+
+    EXPECT_CALL(presenter, selectedParents()).Times(0);
+    EXPECT_CALL(presenter, selectedChildren()).Times(0);
+    TS_ASSERT_THROWS_NOTHING(manager.deleteAll());
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
+  }
+
   void test_expand_selection() {
     // This is well tested in GenericDataProcessorPresenterTest, hence just
     // checking that the presenter is called
@@ -312,10 +325,10 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
 
     TS_ASSERT_EQUALS(data.size(), 2);
-    TS_ASSERT_EQUALS(data[0][0], firstRow);
-    TS_ASSERT_EQUALS(data[0][1], secondRow);
-    TS_ASSERT_EQUALS(data[1][0], thirdRow);
-    TS_ASSERT_EQUALS(data[1][1], fourthRow);
+    TS_ASSERT_EQUALS(data[0][0]->data(), firstRow);
+    TS_ASSERT_EQUALS(data[0][1]->data(), secondRow);
+    TS_ASSERT_EQUALS(data[1][0]->data(), thirdRow);
+    TS_ASSERT_EQUALS(data[1][1]->data(), fourthRow);
   }
 
   void test_new_table_clears_model() {
@@ -348,15 +361,7 @@ public:
     TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     Runs runs = {{{"Runs", "12345"}}};
-    TS_ASSERT_THROWS_ANYTHING(manager.transfer(runs, reflWhitelist()));
-  }
-
-  void test_transfer_fails_wrong_whitelist() {
-    NiceMock<MockDataProcessorPresenter> presenter;
-    TwoLevelTreeManager manager(&presenter, reflWhitelist());
-
-    Runs runs = {{{"Group", "0"}, {"Runs", "12345"}}};
-    TS_ASSERT_THROWS_ANYTHING(manager.transfer(runs, WhiteList()));
+    TS_ASSERT_THROWS_ANYTHING(manager.transfer(runs));
   }
 
   void test_transfer_nothing_transferred() {
@@ -364,7 +369,7 @@ public:
     TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     Runs runs = {{{"Group", "0"}, {"Runs", "12345"}}};
-    TS_ASSERT_THROWS_NOTHING(manager.transfer(runs, reflWhitelist()));
+    TS_ASSERT_THROWS_NOTHING(manager.transfer(runs));
   }
 
   void test_transfer_good_data() {
@@ -407,7 +412,7 @@ public:
                   {"dQ/Q", "0.02"},
                   {"Scale", "2"},
                   {"Options", ""}}};
-    TS_ASSERT_THROWS_NOTHING(manager.transfer(runs, reflWhitelist()));
+    TS_ASSERT_THROWS_NOTHING(manager.transfer(runs));
 
     // Check that runs have been transferred correctly
     EXPECT_CALL(presenter, selectedParents())
@@ -431,10 +436,10 @@ public:
     QStringList fourthRow = {"12348", "0.8",  "20004", "0.4",
                              "0.5",   "0.02", "2",     ""};
 
-    TS_ASSERT_EQUALS(data[0][0], firstRow);
-    TS_ASSERT_EQUALS(data[0][1], secondRow);
-    TS_ASSERT_EQUALS(data[1][0], thirdRow);
-    TS_ASSERT_EQUALS(data[1][1], fourthRow);
+    TS_ASSERT_EQUALS(data[0][0]->data(), firstRow);
+    TS_ASSERT_EQUALS(data[0][1]->data(), secondRow);
+    TS_ASSERT_EQUALS(data[1][0]->data(), thirdRow);
+    TS_ASSERT_EQUALS(data[1][1]->data(), fourthRow);
   }
 
   void test_update() {
@@ -458,10 +463,10 @@ public:
     auto data = manager.selectedData(false);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
 
-    TS_ASSERT_EQUALS(data[0][0], newRow);
-    TS_ASSERT_EQUALS(data[0][1], newRow);
-    TS_ASSERT_EQUALS(data[1][0], newRow);
-    TS_ASSERT_EQUALS(data[1][1], newRow);
+    TS_ASSERT_EQUALS(data[0][0]->data(), newRow);
+    TS_ASSERT_EQUALS(data[0][1]->data(), newRow);
+    TS_ASSERT_EQUALS(data[1][0]->data(), newRow);
+    TS_ASSERT_EQUALS(data[1][1]->data(), newRow);
   }
 };
 #endif /* MANTID_MANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGERTEST_H */

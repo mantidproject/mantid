@@ -636,7 +636,7 @@ private:
     // IDFs_for_UNIT_TESTING/HRPD_Parameters_Test4.xml
     Parameter_sptr param = paramMap.getRecursive(&(*comp), par, "fitting");
     TS_ASSERT(param);
-    if (param != 0) {
+    if (param != nullptr) {
       const FitParameter &fitParam4 = param->value<FitParameter>();
       TS_ASSERT(fitParam4.getTie().compare("") == 0);
       TS_ASSERT(fitParam4.getFunction().compare("BackToBackExponential") == 0);

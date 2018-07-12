@@ -34,13 +34,21 @@ namespace Algorithms {
 */
 class DLLExport CalculateDIFC : public API::Algorithm {
 public:
+  /// Algorithms name for identification. @see Algorithm::name
   const std::string name() const override;
+  /// Algorithm's version for identification. @see Algorithm::version
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConvertDiffCal"};
+  }
   const std::string category() const override;
+  /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
   const std::string summary() const override;
 
 private:
   void init() override;
+  /// Cross-check properties with each other @see IAlgorithm::validateInputs
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 };
 

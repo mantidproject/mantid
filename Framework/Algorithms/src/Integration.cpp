@@ -151,7 +151,12 @@ void Integration::exec() {
 
   // Create the 2D workspace (with 1 bin) for the output
   MatrixWorkspace_sptr outputWorkspace =
-      this->getOutputWorkspace(localworkspace, minWsIndex, maxWsIndex);
+      API::WorkspaceFactory::Instance().create(
+          localworkspace, maxWsIndex - minWsIndex + 1, 2, 1);
+  auto rebinned_input =
+      boost::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
+  auto rebinned_output =
+      boost::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
 
   bool is_distrib = outputWorkspace->isDistribution();
   Progress progress(this, progressStart, 1.0, maxWsIndex - minWsIndex + 1);
@@ -168,13 +173,12 @@ void Integration::exec() {
 
     // Copy Axis values from previous workspace
     if (axisIsText) {
-      Mantid::API::TextAxis *newAxis =
-          dynamic_cast<Mantid::API::TextAxis *>(outputWorkspace->getAxis(1));
+      TextAxis *newAxis = dynamic_cast<TextAxis *>(outputWorkspace->getAxis(1));
       if (newAxis)
         newAxis->setLabel(outWI, localworkspace->getAxis(1)->label(i));
     } else if (axisIsNumeric) {
-      Mantid::API::NumericAxis *newAxis =
-          dynamic_cast<Mantid::API::NumericAxis *>(outputWorkspace->getAxis(1));
+      NumericAxis *newAxis =
+          dynamic_cast<NumericAxis *>(outputWorkspace->getAxis(1));
       if (newAxis)
         newAxis->setValue(outWI, (*(localworkspace->getAxis(1)))(i));
     }
@@ -187,10 +191,10 @@ void Integration::exec() {
     // Copy spectrum number, detector IDs
     outSpec.copyInfoFrom(inSpec);
 
-    // Retrieve the spectrum into a vector
-    const MantidVec &X = inSpec.readX();
-    const MantidVec &Y = inSpec.readY();
-    const MantidVec &E = inSpec.readE();
+    // Retrieve the spectrum into a vector (Histogram)
+    const auto &X = inSpec.x();
+    const auto &Y = inSpec.y();
+    const auto &E = inSpec.e();
 
     // Find the range [min,max]
     MantidVec::const_iterator lowit, highit;
@@ -200,8 +204,7 @@ void Integration::exec() {
         maxRanges.empty() ? maxRange : std::min(maxRange, maxRanges[outWI]);
 
     // If doing partial bins, we want to set the bin boundaries to the specified
-    // values
-    // regardless of whether they're 'in range' for this spectrum
+    // values regardless of whether they're 'in range' for this spectrum
     // Have to do this here, ahead of the 'continue' a bit down from here.
     if (incPartBins) {
       outSpec.dataX()[0] = lowerLimit;
@@ -237,15 +240,26 @@ void Integration::exec() {
     --highit; // (note: decrementing 'end()' is safe for vectors, at least
               // according to the C++ standard)
 
-    MantidVec::difference_type distmin = std::distance(X.begin(), lowit);
-    MantidVec::difference_type distmax = std::distance(X.begin(), highit);
+    auto distmin = std::distance(X.begin(), lowit);
+    auto distmax = std::distance(X.begin(), highit);
 
     double sumY = 0.0;
     double sumE = 0.0;
+    double sumF = 0.0;
+    double Fmin = 0.0;
+    double Fmax = 0.0;
     if (distmax <= distmin) {
       sumY = 0.;
       sumE = 0.;
     } else {
+      if (rebinned_input) {
+        // Workspace has fractional area information, need to take into account
+        const MantidVec &F = rebinned_input->readF(i);
+        sumF = std::accumulate(F.begin() + distmin, F.begin() + distmax, 0.0);
+        if (distmin > 0)
+          Fmin = F[distmin - 1];
+        Fmax = F[distmax];
+      }
       if (!is_distrib) {
         // Sum the Y, and sum the E in quadrature
         {
@@ -279,6 +293,9 @@ void Integration::exec() {
         sumY += Y[val_index] * fraction;
         const double eval = E[val_index];
         sumE += eval * eval * fraction * fraction;
+        if (rebinned_input) {
+          sumF += Fmin * fraction;
+        }
       }
       if (highit < X.end() - 1) {
         const double upper_bin = *highit;
@@ -290,19 +307,29 @@ void Integration::exec() {
         sumY += Y[distmax] * fraction;
         const double eval = E[distmax];
         sumE += eval * eval * fraction * fraction;
+        if (rebinned_input) {
+          sumF += Fmax * fraction;
+        }
       }
     } else {
-      outSpec.dataX()[0] = lowit == X.end() ? *(lowit - 1) : *(lowit);
-      outSpec.dataX()[1] = *highit;
+      outSpec.mutableX()[0] = lowit == X.end() ? *(lowit - 1) : *(lowit);
+      outSpec.mutableX()[1] = *highit;
     }
 
-    outSpec.dataY()[0] = sumY;
-    outSpec.dataE()[0] = sqrt(sumE); // Propagate Gaussian error
+    outSpec.mutableY()[0] = sumY;
+    outSpec.mutableE()[0] = sqrt(sumE); // Propagate Gaussian error
+    if (rebinned_output) {
+      rebinned_output->dataF(outWI)[0] = sumF;
+    }
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  if (rebinned_output) {
+    rebinned_output->finalize(false);
+  }
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputWorkspace);
@@ -347,6 +374,8 @@ MatrixWorkspace_sptr Integration::getInputWorkspace() {
     alg->setProperty("InfinityError", 0.0);
     alg->executeAsChildAlg();
     temp = alg->getProperty("OutputWorkspace");
+    // Now if the workspace is "finalized" need to undo this before integrating
+    boost::dynamic_pointer_cast<RebinnedOutput>(temp)->unfinalize();
   }
 
   // To integrate point data it will be converted to histograms
@@ -361,31 +390,6 @@ MatrixWorkspace_sptr Integration::getInputWorkspace() {
   }
 
   return temp;
-}
-
-/**
- * This function creates the output workspace. In the case of a RebinnedOutput
- * workspace, the resulting workspace only needs to be a Workspace2D to handle
- * the integration. Other workspaces are handled normally.
- *
- * @param inWS input workspace to integrate
- * @param minSpec minimum spectrum to integrate
- * @param maxSpec maximum spectrum to integrate
- *
- * @return the output workspace
- */
-MatrixWorkspace_sptr Integration::getOutputWorkspace(MatrixWorkspace_sptr inWS,
-                                                     const int minSpec,
-                                                     const int maxSpec) {
-  if (inWS->id() == "RebinnedOutput") {
-    MatrixWorkspace_sptr outWS = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", maxSpec - minSpec + 1, 2, 1);
-    API::WorkspaceFactory::Instance().initializeFromParent(*inWS, *outWS, true);
-    return outWS;
-  } else {
-    return API::WorkspaceFactory::Instance().create(inWS, maxSpec - minSpec + 1,
-                                                    2, 1);
-  }
 }
 
 std::map<std::string, std::string> Integration::validateInputs() {

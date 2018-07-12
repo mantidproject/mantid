@@ -175,6 +175,8 @@ void FunctionBrowser::createBrowser() {
           SLOT(attributeVectorSizeChanged(QtProperty *)));
   connect(m_tieManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(tieChanged(QtProperty *)));
+  connect(m_constraintManager, SIGNAL(propertyChanged(QtProperty *)), this,
+          SLOT(constraintChanged(QtProperty *)));
   connect(m_parameterManager, SIGNAL(valueChanged(QtProperty *, double)),
           SLOT(parameterChanged(QtProperty *)));
 
@@ -736,14 +738,27 @@ QStringList FunctionBrowser::getGlobalParameters() const {
   for (auto propIt = m_properties.begin(); propIt != m_properties.end();
        ++propIt) {
     QtProperty *prop = propIt->prop;
-    if (prop->hasOption(globalOptionName) &&
-        prop->checkOption(globalOptionName)) {
+    if (isGlobalParameterProperty(prop)) {
       out << getIndex(prop) + prop->propertyName();
     }
   }
   return out;
 }
-
+/**
+* Get a list of names of global parameters
+*/
+void FunctionBrowser::setGlobalParameters(QStringList &globals) {
+  for (auto propIt = m_properties.begin(); propIt != m_properties.end();
+       ++propIt) {
+    QtProperty *prop = propIt->prop;
+    QString tmp = getIndex(prop) + prop->propertyName();
+    for (auto &global : globals) {
+      if (tmp == global) {
+        prop->setOption(globalOptionName, true);
+      }
+    }
+  }
+}
 /**
  * Get a list of names of local parameters
  */
@@ -752,8 +767,7 @@ QStringList FunctionBrowser::getLocalParameters() const {
   for (auto propIt = m_properties.begin(); propIt != m_properties.end();
        ++propIt) {
     QtProperty *prop = propIt->prop;
-    if (prop->hasOption(globalOptionName) &&
-        !prop->checkOption(globalOptionName)) {
+    if (isLocalParameterProperty(prop)) {
       out << getIndex(prop) + prop->propertyName();
     }
   }
@@ -932,45 +946,25 @@ void FunctionBrowser::addTieProperty(QtProperty *prop, QString tie) {
   if (!isParameter(prop))
     return;
 
-  Mantid::API::Expression expr;
-  expr.parse(tie.toStdString());
-  // Do parameter names include composite function index
-  bool isComposite = false;
-  auto vars = expr.getVariables();
-  for (auto var = vars.begin(); var != vars.end(); ++var) {
-    // nesting level of a particular variable
-    int n = static_cast<int>(std::count(var->begin(), var->end(), '.'));
-    if (n != 0) {
-      isComposite = true;
-    }
-  }
-
-  // Find the property of the function that this tie will be set to:
-  // If the tie has variables that contain function indices (f0.f1. ...)
-  // then it will be set to the topmost composite function.
-  // If the tie is a number or has only simple variable names then it belongs
-  // to the local function (the one that has the tied parameter)
-  QtProperty *funProp =
-      isComposite ? getFunctionProperty().prop : m_properties[prop].parent;
+  QtProperty *funProp = getFunctionProperty().prop;
 
   // Create and add a QtProperty for the tie.
   m_tieManager->blockSignals(true);
   QtProperty *tieProp = m_tieManager->addProperty("Tie");
   m_tieManager->setValue(tieProp, tie);
   ap = addProperty(prop, tieProp);
-  tieProp->setEnabled(false);
   m_tieManager->blockSignals(false);
 
+  const auto parName = getParameterName(prop);
   // Store tie information for easier access
   ATie atie;
   atie.paramProp = prop;
+  atie.paramName = parName;
   atie.tieProp = tieProp;
   m_ties.insert(funProp, atie);
 
   // In case of multi-dataset fitting store the tie for a local parameter
-  if (prop->hasOption(globalOptionName) &&
-      !prop->checkOption(globalOptionName)) {
-    auto parName = getParameterName(prop);
+  if (isLocalParameterProperty(prop)) {
     auto &localValues = m_localParameterValues[parName];
     if (m_currentDataset >= localValues.size()) {
       initLocalParameter(parName);
@@ -1082,7 +1076,6 @@ FunctionBrowser::addConstraintProperties(QtProperty *prop, QString constraint) {
   // add properties
   QList<FunctionBrowser::AProperty> plist;
   AConstraint ac;
-  // ac.constraint = constraint;
   ac.paramProp = prop;
   ac.lower = ac.upper = nullptr;
   if (!lowerBoundStr.isEmpty()) {
@@ -1099,6 +1092,15 @@ FunctionBrowser::addConstraintProperties(QtProperty *prop, QString constraint) {
   }
   if (ac.lower || ac.upper) {
     m_constraints.insert(m_properties[prop].parent, ac);
+  }
+
+  // In case of multi-dataset fitting store the tie for a local parameter
+  if (isLocalParameterProperty(prop)) {
+    const auto parName = getParameterName(prop);
+    checkLocalParameter(parName);
+    auto &localValues = m_localParameterValues[parName][m_currentDataset];
+    localValues.lowerBound = lowerBoundStr;
+    localValues.upperBound = upperBoundStr;
   }
 
   return plist;
@@ -1160,6 +1162,21 @@ bool FunctionBrowser::hasUpperBound(QtProperty *prop) const {
   return false;
 }
 
+/// Get a constraint string
+QString FunctionBrowser::getConstraint(const QString &paramName,
+                                       const QString &lowerBound,
+                                       const QString &upperBound) const {
+  QString constraint;
+  if (!lowerBound.isEmpty()) {
+    constraint += lowerBound + "<";
+  }
+  constraint += paramName;
+  if (!upperBound.isEmpty()) {
+    constraint += "<" + upperBound;
+  }
+  return constraint;
+}
+
 /**
  * Show a pop up menu.
  */
@@ -1196,8 +1213,6 @@ void FunctionBrowser::popupMenu(const QPoint &) {
     }
     context.exec(QCursor::pos());
   } else if (isParameter(prop)) { // parameters
-    // if ( prop->hasOption(globalOptionName) &&
-    // !prop->checkOption(globalOptionName) ) return;
     QMenu context(this);
     if (hasTie(prop)) {
       context.addAction(m_actionRemoveTie);
@@ -1256,7 +1271,6 @@ void FunctionBrowser::addFunction() {
   // create new function
   auto f = Mantid::API::FunctionFactory::Instance().createFunction(
       newFunction.toStdString());
-  // newFunction = QString::fromStdString(f->asString());
 
   if (prop) { // there are other functions defined
     Mantid::API::IFunction_sptr fun =
@@ -1373,15 +1387,22 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty *prop,
     QList<QtProperty *> filedTies; // ties can become invalid after some editing
     for (auto it = from; it != to; ++it) {
       try {
-        QString tie = it->paramProp->propertyName() + "=" +
-                      m_tieManager->value(it.value().tieProp);
+        QString tie =
+            it->paramName + "=" + m_tieManager->value(it.value().tieProp);
         fun->addTies(tie.toStdString());
       } catch (...) {
         filedTies << it.value().tieProp;
       }
     }
     // remove failed ties from the browser
-    foreach (QtProperty *p, filedTies) { removeProperty(p); }
+    foreach (QtProperty *p, filedTies) {
+      auto paramProp = getParentParameterProperty(p);
+      if (isLocalParameterProperty(paramProp)) {
+        auto paramName = paramProp->propertyName();
+        setLocalParameterTie(paramName, m_currentDataset, "");
+      }
+      removeProperty(p);
+    }
   }
 
   // add constraints
@@ -1390,17 +1411,11 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty *prop,
     auto to = m_constraints.upperBound(prop);
     for (auto it = from; it != to; ++it) {
       try {
-        QString constraint;
-        auto cp = it.value();
-        if (cp.lower) {
-          constraint += m_constraintManager->value(cp.lower) + "<" +
-                        cp.paramProp->propertyName();
-        } else {
-          constraint += cp.paramProp->propertyName();
-        }
-        if (cp.upper) {
-          constraint += "<" + m_constraintManager->value(cp.upper);
-        }
+        const auto &localParam = it.value();
+        const auto lower = m_constraintManager->value(localParam.lower);
+        const auto upper = m_constraintManager->value(localParam.upper);
+        const auto constraint =
+            getConstraint(localParam.paramProp->propertyName(), lower, upper);
         fun->addConstraints(constraint.toStdString());
       } catch (...) {
       }
@@ -1544,6 +1559,27 @@ FunctionBrowser::getParameterProperty(const QString &funcIndex,
   throw std::runtime_error(message);
 }
 
+/// Get a property for a parameter which is a parent of a given
+/// property (tie or constraint).
+QtProperty *
+FunctionBrowser::getParentParameterProperty(QtProperty *prop) const {
+  for (auto &tie : m_ties) {
+    if (tie.tieProp == prop) {
+      return tie.paramProp;
+    }
+  }
+
+  for (auto &constraint : m_constraints) {
+    if (constraint.lower == prop || constraint.upper == prop) {
+      return constraint.paramProp;
+    }
+  }
+
+  throw std::logic_error(
+      "QtProperty " + prop->propertyName().toStdString() +
+      " is not a child of a property for any function parameter.");
+}
+
 /**
  * Update parameter values in the browser to match those of a function.
  * @param fun :: A function to copy the values from. It must have the same
@@ -1675,33 +1711,12 @@ void FunctionBrowser::removeTie() {
   if (tieProp) {
     removeProperty(tieProp);
   }
-  if (prop->hasOption(globalOptionName) &&
-      !prop->checkOption(globalOptionName)) {
+  if (isLocalParameterProperty(prop)) {
     auto parName = getParameterName(prop);
     auto &localValues = m_localParameterValues[parName];
     if (m_currentDataset < localValues.size()) {
       localValues[m_currentDataset].tie = "";
       localValues[m_currentDataset].fixed = false;
-    }
-  }
-}
-
-/**
- * Remove all tie properties from local parameters
- * (Called when changing datasets)
- * Ties on global parameters are left as they are.
- */
-void FunctionBrowser::removeAllLocalTieProperties() {
-  QList<QtProperty *> tieProperties;
-  for (auto p : m_properties) {
-    if (p.prop->propertyManager() == m_tieManager) {
-      tieProperties << p.prop;
-    }
-  }
-  for (auto prop : tieProperties) {
-    if (prop->hasOption(globalOptionName) &&
-        !prop->checkOption(globalOptionName)) {
-      removeProperty(prop);
     }
   }
 }
@@ -1721,7 +1736,12 @@ void FunctionBrowser::addTie() {
   QString tie = QInputDialog::getText(this, "Add a tie", "Tie:",
                                       QLineEdit::Normal, "", &ok);
   if (ok && !tie.isEmpty()) {
-    addTieProperty(prop, tie);
+    try {
+      addTieProperty(prop, tie);
+    } catch (Mantid::API::Expression::ParsingError &) {
+      QMessageBox::critical(this, "MantidPlot - Error",
+                            "Syntax errors found in tie: " + tie);
+    }
   }
 }
 
@@ -1811,10 +1831,18 @@ void FunctionBrowser::removeConstraints() {
   QtProperty *prop = item->property();
   if (!isParameter(prop))
     return;
+  const bool isLocal = isLocalParameterProperty(prop);
   auto props = prop->subProperties();
   foreach (QtProperty *p, props) {
     if (isConstraint(p)) {
       removeProperty(p);
+      if (isLocal) {
+        auto parName = getParameterName(prop);
+        checkLocalParameter(parName);
+        auto &localValue = m_localParameterValues[parName][m_currentDataset];
+        localValue.lowerBound = "";
+        localValue.upperBound = "";
+      }
     }
   }
 }
@@ -1830,6 +1858,13 @@ void FunctionBrowser::removeConstraint() {
   if (!isConstraint(prop))
     return;
   removeProperty(prop);
+  if (isLocalParameterProperty(getParentParameterProperty(prop))) {
+    auto parName = getParameterName(prop);
+    checkLocalParameter(parName);
+    auto &localValue = m_localParameterValues[parName][m_currentDataset];
+    localValue.lowerBound = "";
+    localValue.upperBound = "";
+  }
 }
 
 void FunctionBrowser::updateCurrentFunctionIndex() {
@@ -1912,47 +1947,72 @@ void FunctionBrowser::attributeVectorDoubleChanged(QtProperty *prop) {
 }
 
 void FunctionBrowser::parameterChanged(QtProperty *prop) {
-  if (m_currentDataset < getNumberOfDatasets() &&
-      !prop->checkOption(globalOptionName)) {
+  bool isGlobal = true;
+  QString newTie;
+  if (isLocalParameterProperty(prop)) {
     setLocalParameterValue(getParameterName(prop), m_currentDataset,
                            m_parameterManager->value(prop));
+    isGlobal = false;
+    newTie = getLocalParameterTie(getParameterName(prop), m_currentDataset);
   }
+
   auto tieProp = getTieProperty(prop);
   if (tieProp && !tieProp->isEnabled()) {
-    // it is a fixed tie
-    auto newTie = QString("%1=%2")
-                      .arg(prop->propertyName())
-                      .arg(m_parameterManager->value(prop));
-    m_tieManager->setValue(tieProp, newTie);
+    if (isGlobal) {
+      // it is a fixed tie
+      newTie = QString("%1=%2")
+                   .arg(prop->propertyName())
+                   .arg(m_parameterManager->value(prop));
+    }
+    if (!newTie.isEmpty()) {
+      m_tieManager->setValue(tieProp, newTie);
+    }
   }
   emit parameterChanged(getIndex(prop), prop->propertyName());
 }
 
 /// Called when a tie property changes
 void FunctionBrowser::tieChanged(QtProperty *prop) {
-  if (m_currentDataset < getNumberOfDatasets() &&
-      !prop->checkOption(globalOptionName)) {
-    QtProperty *parProp = nullptr;
-    for (auto it = m_ties.begin(); it != m_ties.end(); ++it) {
-      if (it.value().tieProp == prop) {
-        parProp = it.value().paramProp;
+  for (const auto &atie : m_ties) {
+    if (atie.tieProp == prop) {
+      const auto parProp = atie.paramProp;
+      if (isLocalParameterProperty(parProp)) {
+        const auto parName = getParameterName(parProp);
+        checkLocalParameter(parName);
+        auto &paramValue = m_localParameterValues[parName][m_currentDataset];
+        if (paramValue.fixed)
+          break;
+        auto tie = QString::fromStdString(getTie(parProp));
+        auto tieExpr = tie.split('=');
+        if (tieExpr.size() == 2) {
+          tie = tieExpr[1];
+        }
+        paramValue.tie = tie;
         break;
       }
     }
-    if (!parProp)
-      return;
+  }
+}
 
-    auto parName = getParameterName(parProp);
-    checkLocalParameter(parName);
-    auto &paramValue = m_localParameterValues[parName][m_currentDataset];
-    if (paramValue.fixed)
-      return;
-    auto tie = QString::fromStdString(getTie(parProp));
-    auto tieExpr = tie.split('=');
-    if (tieExpr.size() == 2) {
-      tie = tieExpr[1];
+/// Called when a constraint property changes
+void FunctionBrowser::constraintChanged(QtProperty *prop) {
+  for (const auto &constraint : m_constraints) {
+    const bool isLower = constraint.lower == prop;
+    const bool isUpper = constraint.upper == prop;
+    if (isLower || isUpper) {
+      auto paramProp = constraint.paramProp;
+      if (isLocalParameterProperty(paramProp)) {
+        const auto parName = getParameterName(paramProp);
+        checkLocalParameter(parName);
+        auto &paramValue = m_localParameterValues[parName][m_currentDataset];
+        if (isLower) {
+          paramValue.lowerBound = m_constraintManager->value(prop);
+        } else {
+          paramValue.upperBound = m_constraintManager->value(prop);
+        }
+        break;
+      }
     }
-    paramValue.tie = tie;
   }
 }
 
@@ -1997,6 +2057,23 @@ void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
   }
 }
 
+void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
+                                             double value, double error) {
+  checkLocalParameter(parName);
+  m_localParameterValues[parName][i].value = value;
+  m_localParameterValues[parName][i].error = error;
+  if (i == m_currentDataset) {
+    setParameter(parName, value);
+    setParamError(parName, error);
+  }
+}
+/// Get error of a local parameter
+double FunctionBrowser::getLocalParameterError(const QString &parName,
+                                               int i) const {
+  checkLocalParameter(parName);
+  return m_localParameterValues[parName][i].error;
+}
+
 /**
  * Init a local parameter. Define initial values for all datasets.
  * @param parName :: Name of parametere to init.
@@ -2030,6 +2107,19 @@ void FunctionBrowser::checkLocalParameter(const QString &parName) const {
   }
 }
 
+/// Check that a property contains a local parameter
+bool FunctionBrowser::isLocalParameterProperty(QtProperty *prop) const {
+  return m_currentDataset < m_numberOfDatasets &&
+         prop->hasOption(globalOptionName) &&
+         !prop->checkOption(globalOptionName);
+}
+
+/// Check that a property contains a global parameter
+bool FunctionBrowser::isGlobalParameterProperty(QtProperty *prop) const {
+  return prop->hasOption(globalOptionName) &&
+         prop->checkOption(globalOptionName);
+}
+
 void FunctionBrowser::resetLocalParameters() { m_localParameterValues.clear(); }
 
 /// Set current dataset.
@@ -2038,11 +2128,12 @@ void FunctionBrowser::setCurrentDataset(int i) {
   if (m_currentDataset >= m_numberOfDatasets) {
     throw std::runtime_error("Dataset index is outside the range");
   }
-  removeAllLocalTieProperties();
   auto localParameters = getLocalParameters();
   foreach (QString par, localParameters) {
     setParameter(par, getLocalParameterValue(par, m_currentDataset));
+    setParamError(par, getLocalParameterError(par, m_currentDataset));
     updateLocalTie(par);
+    updateLocalConstraint(par);
   }
 }
 
@@ -2063,7 +2154,11 @@ void FunctionBrowser::removeDatasets(QList<int> indices) {
             "Index of a dataset in FunctionBrowser cannot be negative.");
       }
       if (index < m_numberOfDatasets) {
-        par.value().remove(index);
+        auto &v = par.value();
+        // value may not have been populated
+        if (index < v.size()) {
+          v.remove(index);
+        }
       } else {
         throw std::runtime_error(
             "Index of a dataset in FunctionBrowser is out of range.");
@@ -2149,7 +2244,8 @@ Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction() {
     multiFun->setDomainIndex(i, i);
     auto fun1 = multiFun->getFunction(i);
     for (size_t j = 0; j < fun1->nParams(); ++j) {
-      QString parName = QString::fromStdString(fun1->parameterName(j));
+      const auto parameterName = fun1->parameterName(j);
+      const auto parName = QString::fromStdString(parameterName);
       if (globalParams.contains(parName))
         continue;
       auto tie = fun1->getTie(j);
@@ -2159,18 +2255,31 @@ Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction() {
         // have this tie, so remove it
         fun1->removeTie(j);
       }
-      if (isLocalParameterFixed(parName, i)) {
+      if (fun1->isFixed(j)) {
+        fun1->unfix(j);
+      }
+      if (fun1->getConstraint(j)) {
+        fun1->removeConstraint(parameterName);
+      }
+      checkLocalParameter(parName);
+      const auto &localParam = m_localParameterValues[parName][i];
+      if (localParam.fixed) {
         // Fix this particular local parameter
-        fun1->tie(parName.toStdString(),
-                  boost::lexical_cast<std::string>(
-                      getLocalParameterValue(parName, i)));
+        fun1->setParameter(j, localParam.value);
+        fun1->fix(j);
       } else {
-        auto tie = getLocalParameterTie(parName, i);
+        const auto &tie = localParam.tie;
         if (!tie.isEmpty()) {
-          fun1->tie(parName.toStdString(), tie.toStdString());
+          fun1->tie(parameterName, tie.toStdString());
         } else {
-          fun1->setParameter(j, getLocalParameterValue(parName, i));
+          fun1->setParameter(j, localParam.value);
         }
+      }
+      if (!localParam.lowerBound.isEmpty() &&
+          !localParam.upperBound.isEmpty()) {
+        auto constraint = getConstraint(parName, localParam.lowerBound,
+                                        localParam.upperBound);
+        fun1->addConstraints(constraint.toStdString());
       }
     }
   }
@@ -2194,6 +2303,26 @@ void FunctionBrowser::updateLocalTie(const QString &parName) {
                   m_localParameterValues[parName][m_currentDataset].value));
   } else if (!localParam.tie.isEmpty()) {
     addTieProperty(prop, localParam.tie);
+  }
+}
+
+/// Make sure that properties are in sync with the cached constraints
+/// @param parName :: A parameter to check.
+void FunctionBrowser::updateLocalConstraint(const QString &parName) {
+  auto prop = getParameterProperty(parName);
+  if (hasConstraint(prop)) {
+    auto props = prop->subProperties();
+    foreach (QtProperty *p, props) {
+      if (isConstraint(p)) {
+        removeProperty(p);
+      }
+    }
+  }
+  auto &localParam = m_localParameterValues[parName][m_currentDataset];
+  if (!localParam.lowerBound.isEmpty() && !localParam.upperBound.isEmpty()) {
+    auto constraint =
+        getConstraint(parName, localParam.lowerBound, localParam.upperBound);
+    addConstraintProperties(prop, constraint);
   }
 }
 
@@ -2247,7 +2376,6 @@ void FunctionBrowser::updateMultiDatasetParameters(
     const Mantid::API::IFunction &fun) {
   auto cfun = dynamic_cast<const Mantid::API::CompositeFunction *>(&fun);
   if (cfun && cfun->nFunctions() > 0) {
-    const auto localParameters = getLocalParameters();
 
     // Multiple datasets
     if (const auto *multiFun =
@@ -2258,16 +2386,31 @@ void FunctionBrowser::updateMultiDatasetParameters(
         throw std::invalid_argument("Function has incorrect number of domains");
       }
       // update function
+      {
+        auto sfun = multiFun->getFunction(0);
+        const auto globalParameters = getGlobalParameters();
+        for (int j = 0; j < globalParameters.size(); ++j) {
+          auto const &paramName = globalParameters[j];
+          auto paramIndex = sfun->parameterIndex(paramName.toStdString());
+          setParameter(paramName, sfun->getParameter(paramIndex));
+          setParamError(paramName, sfun->getError(paramIndex));
+        }
+      }
       size_t currentIndex = static_cast<size_t>(m_currentDataset);
+      const auto localParameters = getLocalParameters();
       for (size_t i = 0; i < multiFun->nFunctions(); ++i) {
         auto sfun = multiFun->getFunction(i);
-        if (i == currentIndex) {
-          updateParameters(*sfun);
-        }
         for (int j = 0; j < localParameters.size(); ++j) {
-          setLocalParameterValue(
-              localParameters[j], static_cast<int>(i),
-              sfun->getParameter(localParameters[j].toStdString()));
+          auto const &paramName = localParameters[j];
+          auto paramIndex = sfun->parameterIndex(paramName.toStdString());
+          auto value = sfun->getParameter(paramIndex);
+          auto error = sfun->getError(paramIndex);
+          setLocalParameterValue(localParameters[j], static_cast<int>(i), value,
+                                 error);
+          if (i == currentIndex) {
+            setParameter(paramName, value);
+            setParamError(paramName, error);
+          }
         }
       }
     } else { // composite function, 1 domain only

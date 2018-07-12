@@ -556,12 +556,52 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(replacementShape));
   }
 
+  void test_get_intensity_over_sigma() {
+    const int detectorId = 19999;
+    const double wavelength = 2;
+    const double intensity{100};
+    const double sigma{10};
+    Peak p(inst, detectorId, wavelength);
+
+    p.setIntensity(intensity);
+    p.setSigmaIntensity(sigma);
+
+    TS_ASSERT_EQUALS(p.getIntensityOverSigma(), intensity / sigma);
+  }
+
+  void test_get_intensity_over_sigma_empty_sigma() {
+    const int detectorId = 19999;
+    const double wavelength = 2;
+    const double intensity{10};
+    const double sigma{0};
+    Peak p(inst, detectorId, wavelength);
+
+    p.setIntensity(intensity);
+    p.setSigmaIntensity(sigma);
+
+    const double expectedResult{0.0};
+    const double tolerance{1e-10};
+    TS_ASSERT_DELTA(p.getIntensityOverSigma(), expectedResult, tolerance);
+  }
+
+  void test_get_energy() {
+    const int detectorId = 19999;
+    const double wavelength = 2;
+    const double initialEnergy{100};
+    const double finalEnergy{110};
+    Peak p(inst, detectorId, wavelength);
+
+    p.setInitialEnergy(initialEnergy);
+    p.setFinalEnergy(finalEnergy);
+
+    TS_ASSERT_EQUALS(p.getEnergyTransfer(), initialEnergy - finalEnergy);
+  }
+
 private:
   void check_Contributing_Detectors(const Peak &peak,
                                     const std::vector<int> &expected) {
     auto peakIDs = peak.getContributingDetIDs();
-    for (auto it = expected.begin(); it != expected.end(); ++it) {
-      const int id = *it;
+    for (int id : expected) {
       TSM_ASSERT_EQUALS("Expected " + boost::lexical_cast<std::string>(id) +
                             " in contribution list",
                         1, peakIDs.count(id))

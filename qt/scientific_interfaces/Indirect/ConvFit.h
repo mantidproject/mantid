@@ -1,7 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_CONVFIT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_CONVFIT_H_
 
+#include "ConvFitModel.h"
 #include "IndirectFitAnalysisTab.h"
+#include "IndirectSpectrumSelectionPresenter.h"
+
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "ui_ConvFit.h"
@@ -15,83 +18,29 @@ class DLLExport ConvFit : public IndirectFitAnalysisTab {
 public:
   ConvFit(QWidget *parent = nullptr);
 
+protected:
+  void setPlotResultEnabled(bool enabled) override;
+  void setSaveResultEnabled(bool enabled) override;
+
 private:
-  void setup() override;
-  void run() override;
-  bool validate() override;
-  void loadSettings(const QSettings &settings) override;
+  void setupFitTab() override;
+  void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
 protected slots:
-  void algorithmComplete(bool error) override;
-  void typeSelection(int index);
-  void bgTypeSelection(int index);
-  void newDataLoaded(const QString &wsName);
-  void extendResolutionWorkspace();
-  void updatePreviewPlots() override;
-  void plotGuess();
-  void singleFit();
-  void specMinChanged(int value);
-  void specMaxChanged(int value);
-  void minChanged(double);
-  void maxChanged(double);
-  void backgLevel(double);
-  void updateRS(QtProperty *, double);
-  void checkBoxUpdate(QtProperty *, bool);
-  void hwhmChanged(double);
-  void hwhmUpdateRS(double);
-  void fitContextMenu(const QPoint &);
-  void showTieCheckbox(QString);
-  void fitFunctionSelected(int fitTypeIndex);
+  void setModelResolution(const QString &resolutionName);
   void saveClicked();
   void plotClicked();
+  void updatePlotOptions() override;
+  void fitFunctionChanged();
 
 private:
-  void disablePlotGuess() override;
-  void enablePlotGuess() override;
+  std::string fitTypeString() const;
 
-  QString addPrefixToParameter(const QString &parameter,
-                               const QString &functionName,
-                               const int &functionNumber) const override;
-
-  QString addPrefixToParameter(const QString &parameter,
-                               const QString &functionName) const override;
-
-  boost::shared_ptr<Mantid::API::CompositeFunction>
-  createFunction(bool tieCentres = false, bool addQValues = false);
-  double
-  getInstrumentResolution(Mantid::API::MatrixWorkspace_sptr workspaceName);
-
-  void createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product);
-  QString fitTypeString() const;
-  QString backgroundString() const;
-  QString minimizerString(QString outputName) const;
-  QVector<QString> indexToFitFunctions(const int &fitTypeIndex,
-                                       const bool &includeDelta = true) const;
-  void addSampleLogsToWorkspace(const std::string &workspaceName,
-                                const std::string &logName,
-                                const std::string &logText,
-                                const std::string &logType);
-  void initFABADAOptions();
-  void showFABADA(bool advanced);
-  void hideFABADA();
-  Mantid::API::IAlgorithm_sptr sequentialFit(const std::string &specMin,
-                                             const std::string &specMax,
-                                             QString &outputWSName);
-  Mantid::API::IFunction_sptr
-  getFunction(const QString &functionName) const override;
-
-  Ui::ConvFit m_uiForm;
-  QtTreePropertyBrowser *m_cfTree;
-  bool m_confitResFileType;
-  QString m_baseName;
+  std::unique_ptr<Ui::ConvFit> m_uiForm;
 
   // ShortHand Naming for fit functions
-  QStringList m_fitStrings;
-
-  // Used in auto generating defaults for parameters
-  void createDefaultParamsMap();
-
-  bool m_usedTemperature;
+  QHash<QString, std::string> m_fitStrings;
+  ConvFitModel *m_convFittingModel;
 };
 
 } // namespace IDA

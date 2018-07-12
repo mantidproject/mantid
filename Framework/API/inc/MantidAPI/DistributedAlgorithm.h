@@ -16,7 +16,9 @@ namespace API {
   from DistributedAlgorithm instead of from Algorithm provides the necessary
   overriden method(s) to allow running an algorithm with MPI. This works under
   the following conditions:
-  1. The algorithm must have a single input and a single output workspace.
+  1. The algorithm must input workspaces with compatible storage modes.
+  StorageMode::Distributed is not compatible with StorageMode::MasterOnly, but
+  all combinations with StorageMode::Cloned are considered compatible.
   2. No output files may be written since filenames would clash.
   Algorithms that do not modify spectra in a workspace may also use this base
   class to support MPI. For example, modifications of the instrument are handled

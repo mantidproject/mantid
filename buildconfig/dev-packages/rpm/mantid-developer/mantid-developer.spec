@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.25
+Version:        1.27
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -19,11 +19,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: clang
 %{?fedora:Requires: cmake-gui}
 %{?rhel:Requires: cmake3-gui}
-%if 0%{?el6}
-Requires: boost157-devel
-%else
 Requires: boost-devel
-%endif
 Requires: doxygen
 Requires: gperftools-devel
 Requires: gperftools-libs
@@ -39,21 +35,17 @@ Requires: muParser-devel
 Requires: mxml-devel
 Requires: nexus >= 4.2
 Requires: nexus-devel >= 4.2
-%if 0%{?el6}
-Requires: ninja
-%else
 Requires: ninja-build
-%endif
 Requires: numpy
 Requires: OCE-devel
 Requires: poco-devel >= 1.4.6
 Requires: PyQt4-devel
 Requires: python-qt5-devel
 Requires: python-QtPy
+Requires: python2-QtAwesome
 Requires: python-devel
 Requires: python-setuptools
 Requires: python-ipython >= 1.1
-%{?el6:Conflicts: python-ipython >= 2.0}
 Requires: python-matplotlib
 %{?fedora:Requires: python2-matplotlib-qt4}
 %{?el7:Requires: python-matplotlib-qt4}
@@ -65,11 +57,7 @@ Requires: PyYAML
 Requires: python2-mock
 Requires: qscintilla-devel
 Requires: qt-devel >= 4.6
-%if 0%{?el6}
-Requires: qwt-devel
-%else
 Requires: qwt5-qt4-devel
-%endif
 Requires: qwtplot3d-qt4-devel
 Requires: redhat-lsb
 Requires: rpmdevtools
@@ -80,19 +68,10 @@ Requires: tbb-devel
 Requires: git
 Requires: openssl-devel
 Requires: texlive-latex
-%if 0%{?el6}
-# do nothing
-%else
 Requires: texlive-latex-bin
 Requires: texlive-was
-%endif
 Requires: tex-preview
 Requires: dvipng
-%if 0%{?el6}
-Requires: mantidlibs34-qt-devel
-Requires: mantidlibs34-qtwebkit-devel
-Requires: scl-utils
-%else
 Requires: qt-devel
 Requires: qtwebkit-devel
 Requires: qt5-qtbase-devel
@@ -102,8 +81,9 @@ Requires: qt5-qtsvg
 Requires: qt5-qttools-devel
 Requires: qt5-qttools-libs-designer
 Requires: qt5-qtwebkit-devel
+Requires: qt5-qtx11extras
+Requires: qt5-qtx11extras-devel
 Requires: qscintilla-qt5-devel
-%endif
 Requires: graphviz
 %if %{with_python3}
 Requires: python3-setuptools
@@ -111,6 +91,7 @@ Requires: python3-sip-devel
 Requires: python3-PyQt4-devel
 Requires: python-qt5-devel
 Requires: python3-QtPy
+%{?fedora:Requires: python3-QtAwesome}
 Requires: python3-numpy
 Requires: python3-scipy
 Requires: python3-sphinx
@@ -124,7 +105,6 @@ Requires: python3-PyYAML
 Requires: python3-mock
 Requires: boost-python3-devel
 %endif
-
 
 BuildArch: noarch
 
@@ -147,6 +127,13 @@ required for Mantid development.
 %files
 
 %changelog
+
+* Wed Apr 25 2018 Steven Hahn <hahnse@ornl.gov>
+- Add qt5-qtx11extras
+- remove RHEL6-specific packages
+
+* Mon Jan 22 2018 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Added qtawesome
 
 * Tue Dec 05 2017 Peter Peterson <petersonpf@ornl.gov>
 - Added cmake3-gui for rhel

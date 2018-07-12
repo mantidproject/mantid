@@ -6,6 +6,7 @@ from optparse import OptionParser
 import os
 import re
 import sys
+from distutils.version import LooseVersion
 
 DOC_EXT = ".rst"
 
@@ -13,13 +14,20 @@ DOC_EXT = ".rst"
 # CMake-populated variables
 ###############################################################################
 BUILDER = "@BUILDER@"
-SRC_DIR = "@SPHINX_SRC_DIR@"
 CONF_DIR = "@SPHINX_CONF_DIR@"
 SPHINX_BUILD_DIR = "@SPHINX_BUILD_DIR@"
 SCREENSHOTS_DIR = "@SCREENSHOTS_DIR@"
 DIAGRAMS_DIR = "@DIAGRAMS_DIR@"
 DOT_EXECUTABLE = "@DOT_EXECUTABLE@"
 BUILD_DIR = "@CMAKE_BINARY_DIR@"
+
+###############################################################################
+# Extract sphinx version
+###############################################################################
+def get_sphinx_version():
+    import sphinx
+    return sphinx.__version__
+
 
 ###############################################################################
 # Main
@@ -43,7 +51,7 @@ def main(sysarg):
     update_path()
 
     # Find test files
-    testpaths = find_test_files(SRC_DIR, opts.testinclude)
+    testpaths = find_test_files(CONF_DIR, opts.testinclude)
 
     # Update environment with screenshots path if necessary
     if SCREENSHOTS_DIR != "":
@@ -58,12 +66,17 @@ def main(sysarg):
     # Arguments for main
     output_dir = pathjoin(SPHINX_BUILD_DIR, BUILDER)
     doctree_dir = pathjoin(SPHINX_BUILD_DIR, "doctrees")
-    argv = [sys.executable,
-            "-N",
+    argv = []
+    if LooseVersion(get_sphinx_version()) < LooseVersion("1.7.0"):
+        # prior to v1.7.0 paths positional argument required       
+        argv = [sys.executable] 
+    argv += ["-N",
             "-b", BUILDER,
-            "-d", doctree_dir,
-            "-c", CONF_DIR,
-            SRC_DIR, output_dir]
+            "-d", doctree_dir]
+    if BUILDER == 'qthelp':
+        # add a tag to differentiate between html/qthelp in conf
+        argv.extend(["-t qthelp"])
+    argv.extend([CONF_DIR, output_dir])
 
     if testpaths is not None:
         if len(testpaths) > 0:

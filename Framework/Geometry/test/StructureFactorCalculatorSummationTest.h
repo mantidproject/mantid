@@ -63,7 +63,7 @@ private:
     CompositeBraggScatterer_sptr scatterers = CompositeBraggScatterer::create();
     scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer(
         "IsotropicAtomBraggScatterer",
-        "{\"Element\":\"Si\",\"Position\":\"0,0,0\",\"U\":\"0.05\"}"));
+        R"({"Element":"Si","Position":"0,0,0","U":"0.05"})"));
 
     CrystalStructure si(
         UnitCell(5.43, 5.43, 5.43),

@@ -1,9 +1,11 @@
 include(UiToPy)
 add_subdirectory(diffraction)
 add_subdirectory(inelastic)
+add_subdirectory(reflectometer)
 add_subdirectory(sans)
 add_subdirectory(sans_isis)
 add_subdirectory(dataprocessorinterface)
+add_subdirectory(batchwidget)
 add_subdirectory(poldi)
 
 SET(UI_FILES
@@ -24,9 +26,11 @@ add_custom_target(CompileUIUI DEPENDS
   CompileUIUIBase
   CompileUIDiffraction
   CompileUIInElastic
+  CompileUIReflectometer
   CompileUISANS
   CompileUISANSDataProcessorInterface
   CompileUIDataProcessorInterface
+  CompileUIBatchWidgetInterface
   CompileUIPoldi
 )
 
@@ -34,6 +38,7 @@ add_custom_target(CompileUIUI DEPENDS
 set_property ( TARGET CompileUIUIBase PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIDiffraction PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIInElastic PROPERTY FOLDER "CompilePyUI" )
+set_property ( TARGET CompileUIReflectometer PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUISANS PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIDataProcessorInterface PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUISANSDataProcessorInterface PROPERTY FOLDER "CompilePyUI" )

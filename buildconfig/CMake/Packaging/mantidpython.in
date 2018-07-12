@@ -13,12 +13,12 @@ LOCAL_PRELOAD=@TCMALLOC_RUNTIME_LIB@
 if [ -n "${LD_PRELOAD}" ]; then
     LOCAL_PRELOAD=${LOCAL_PRELOAD}:${LD_PRELOAD}
 fi
-LOCAL_LDPATH=@EXTRA_LDPATH@:${LD_LIBRARY_PATH}
 if [ -z "${TCMALLOC_RELEASE_RATE}" ]; then
     TCM_RELEASE=10000
 else
     TCM_RELEASE=${TCMALLOC_RELEASE_RATE}
 fi
+LOCAL_LDPATH=@EXTRA_LDPATH@:${LD_LIBRARY_PATH}
 
 # Define when to report large memory allocation
 if [ -z "${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}" ]; then
@@ -38,9 +38,14 @@ fi
 PV_PLUGIN_PATH="${INSTALLDIR}/pvplugins/pvplugins"
 
 # Define extra libraries for python
-LOCAL_PYTHONPATH=$INSTALLDIR@PARAVIEW_PYTHON_PATHS@
+LOCAL_PYTHONPATH=${INSTALLDIR}@PARAVIEW_PYTHON_PATHS@
 if [ -n "${PYTHONPATH}" ]; then
     LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
+fi
+
+# Define QT_API to pyqt if not provided
+if [ -z "${QT_API}" ]; then
+  QT_API=pyqt
 fi
 
 # Define MANTIDPATH
@@ -50,6 +55,11 @@ if [ -n "$1" ] && [ "$1" = "--classic" ]; then
     shift
 
     set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ $*@WRAPPER_POSTFIX@
+
+elif [ -n "$1" ] && [ -n "$2" ] && [ "$1" = "-n" ]; then
+    ranks=$2
+    shift 2
+    set -- mpirun -n $ranks @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ $*@WRAPPER_POSTFIX@
 
 else
     IPYTHON_STARTUP="import IPython;IPython.start_ipython()"
@@ -61,7 +71,7 @@ fi
 
 LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
   TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD=${TCM_REPORT} \
-  LD_LIBRARY_PATH=${LOCAL_LDPATH} QT_API=pyqt \
+  LD_LIBRARY_PATH=${LOCAL_LDPATH} QT_API=${QT_API} \
   PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
   MANTIDPATH=${MANTIDPATH} \
   PYTHONPATH=${LOCAL_PYTHONPATH} \

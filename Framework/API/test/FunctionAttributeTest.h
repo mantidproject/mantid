@@ -11,7 +11,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 
-namespace {
+namespace detail {
 class IFT_Funct : public ParamFunction, public IFunction1D {
 public:
   IFT_Funct() {
@@ -34,13 +34,12 @@ public:
 };
 
 DECLARE_FUNCTION(IFT_Funct)
-
-} // namespace
+} // namespace detail
 
 class FunctionAttributeTest : public CxxTest::TestSuite {
 public:
   void test_double_attribute() {
-    IFT_Funct f;
+    detail::IFT_Funct f;
     IFunction::Attribute att = f.getAttribute("DAttr");
 
     TS_ASSERT_EQUALS(att.asDouble(), 0.0);
@@ -67,7 +66,7 @@ public:
   }
 
   void test_int_attribute() {
-    IFT_Funct f;
+    detail::IFT_Funct f;
     IFunction::Attribute att = f.getAttribute("IAttr");
 
     TS_ASSERT_EQUALS(att.asInt(), 0);
@@ -89,7 +88,7 @@ public:
   }
 
   void test_bool_attribute() {
-    IFT_Funct f;
+    detail::IFT_Funct f;
     IFunction::Attribute att = f.getAttribute("BAttr");
 
     TS_ASSERT_EQUALS(att.asBool(), false);
@@ -117,7 +116,7 @@ public:
   }
 
   void test_string_attribute() {
-    IFT_Funct f;
+    detail::IFT_Funct f;
     IFunction::Attribute att = f.getAttribute("SAttr");
 
     TS_ASSERT_EQUALS(att.asString(), "");
@@ -139,7 +138,7 @@ public:
   }
 
   void test_quoted_string_attribute() {
-    IFT_Funct f;
+    detail::IFT_Funct f;
     IFunction::Attribute att = f.getAttribute("SQAttr");
 
     TS_ASSERT_EQUALS(att.asString(), "\"\"");
@@ -161,7 +160,7 @@ public:
   }
 
   void test_vector_attribute() {
-    IFT_Funct f;
+    detail::IFT_Funct f;
     IFunction::Attribute att = f.getAttribute("VAttr");
 
     TS_ASSERT_EQUALS(att.type(), "std::vector<double>");
@@ -256,7 +255,7 @@ public:
   }
 
   void test_empty_string_attributes_do_not_show_by_asString() {
-    IFT_Funct f;
+    detail::IFT_Funct f;
     TS_ASSERT_EQUALS(
         f.asString(),
         "name=IFT_Funct,BAttr=false,DAttr=0,IAttr=0,VAttr=(),VAttr1=(1,2,3)");

@@ -1,10 +1,22 @@
-from mantid.api import FunctionFactory, Workspace, AlgorithmManager
+from mantid.api import FunctionFactory, Workspace, AlgorithmManager, IFunction1D
 
 
 class FunctionWrapper(object):
     """
     Wrapper class for Fitting Function
     """
+    @staticmethod
+    def wrap(fun, *args, **kwargs):
+        fun_is_str = isinstance(fun, str)
+        name = fun if fun_is_str else fun.name()
+        if name in _name_to_constructor_map:
+            wrapper = _name_to_constructor_map[name]
+            if fun_is_str:
+                return wrapper(*args, **kwargs)
+            else:
+                return wrapper(fun, *args, **kwargs)
+        return FunctionWrapper(fun, **kwargs)
+
     def __init__ (self, name, **kwargs):
         """
         Called when creating an instance
@@ -721,6 +733,18 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
         return self.fun.nDomains()
 
 
+_name_to_constructor_map = {
+    'CompositeFunction': CompositeFunctionWrapper,
+    'ProductFunction': ProductFunctionWrapper,
+    'Convolution': ConvolutionWrapper,
+    'MultiDomainFunction': MultiDomainFunctionWrapper,
+    }
+
+# Some functions need to be excluded from wrapping, eg
+# if there is an algorithm with the same name.
+_do_not_wrap = ['VesuvioResolution']
+
+
 def _create_wrapper_function(name):
     """
     Create fake functions for the given name
@@ -731,21 +755,50 @@ def _create_wrapper_function(name):
     """
     # ------------------------------------------------------------------------------------------------
     def wrapper_function(*args, **kwargs):
-        name_to_constructor = {
-            'CompositeFunction': CompositeFunctionWrapper,
-            'ProductFunction': ProductFunctionWrapper,
-            'Convolution': ConvolutionWrapper,
-            'MultiDomainFunction': MultiDomainFunctionWrapper,
-            }
-        # constructor is FunctionWrapper if the name is not in the registry.
-        if name in name_to_constructor:
-            return name_to_constructor[name](*args, **kwargs)
-        return FunctionWrapper(name, **kwargs)
+        return FunctionWrapper.wrap(name, *args, **kwargs)
 
     # ------------------------------------------------------------------------------------------------
     wrapper_function.__name__ = name
-    globals()[name] = wrapper_function
+    return wrapper_function
 
-fnames = FunctionFactory.getFunctionNames()
-for i, val in enumerate(fnames):
-    _create_wrapper_function(val)
+
+def _attach_wrappers(source_module):
+    for name in FunctionFactory.getFunctionNames():
+        # Wrap all registered functions which are not in the black list
+        if name not in _do_not_wrap:
+            setattr(source_module, name, _create_wrapper_function(name))
+
+
+_ExportedIFunction1D = IFunction1D
+
+
+class _IFunction1DWrapperCreator(_ExportedIFunction1D):
+    """Overriden IFunction1D class that allows creation of
+    FunctionWrappers for newly defined fit functions.
+
+    User defined function inherit from this class.
+    When the user calls the constructor to create an instance
+    of the new function it returns a FunctionWrapper that
+    wraps the actual fit function.
+
+    Class field _used_by_factory is set by FunctionFactory
+    to indicate that an unwrapped instance of the fit function
+    must be returned by the constructor.
+    """
+    _used_by_factory = False
+
+    def __new__(cls, **kwargs):
+        if cls._used_by_factory:
+            return _ExportedIFunction1D.__new__(cls)
+        return FunctionWrapper(cls.__name__, **kwargs)
+
+    @classmethod
+    def _factory_use(cls):
+        cls._used_by_factory = True
+
+    @classmethod
+    def _factory_free(cls):
+        cls._used_by_factory = False
+
+
+IFunction1D = _IFunction1DWrapperCreator

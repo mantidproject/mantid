@@ -43,18 +43,11 @@ void UnaryOperation::exec() {
   MatrixWorkspace_sptr out_work = getProperty(outputPropName());
   // Only create output workspace if different to input one
   if (out_work != in_work) {
-    out_work = WorkspaceFactory::Instance().create(in_work);
-    if (out_work->id() == "RebinnedOutput") {
-      RebinnedOutput_const_sptr intemp =
-          boost::dynamic_pointer_cast<const RebinnedOutput>(in_work);
-      RebinnedOutput_sptr outtemp =
-          boost::dynamic_pointer_cast<RebinnedOutput>(out_work);
-      for (size_t i = 0; i < outtemp->getNumberHistograms(); ++i) {
-        // because setF wants a COW pointer
-        Kernel::cow_ptr<std::vector<double>> F;
-        F.access() = intemp->dataF(i);
-        outtemp->setF(i, F);
-      }
+    if (in_work->id() == "EventWorkspace") {
+      // Handles case of EventList which needs to be converted to Workspace2D
+      out_work = WorkspaceFactory::Instance().create(in_work);
+    } else {
+      out_work = in_work->clone();
     }
     setProperty(outputPropName(), out_work);
   }

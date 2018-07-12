@@ -1,6 +1,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLSETTINGSTABPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLSETTINGSTABPRESENTER_H
 
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
+
 #include <string>
 
 namespace MantidQt {
@@ -37,15 +39,25 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class IReflSettingsTabPresenter {
 public:
   virtual ~IReflSettingsTabPresenter(){};
+  /// Transmission runs for a particular run angle
+  virtual MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(int group, const double angle) const = 0;
+  /// Whether per-angle transmission runs are specified
+  virtual bool hasPerAngleOptions(int group) const = 0;
   /// Pre-processing
-  virtual std::string getTransmissionRuns(int group, bool loadRuns) const = 0;
-  virtual std::string getTransmissionOptions(int group) const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsQMap
+  getTransmissionOptions(int group) const = 0;
   /// Processing
-  virtual std::string getReductionOptions(int group) const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsQMap
+  getReductionOptions(int group) const = 0;
   /// Post-processing
   virtual std::string getStitchOptions(int group) const = 0;
   /// Set current instrument name
   virtual void setInstrumentName(const std::string &instName) = 0;
+  virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
+  virtual void settingsChanged(int group) = 0;
+  virtual void onReductionPaused(int group) = 0;
+  virtual void onReductionResumed(int group) = 0;
 };
 }
 }

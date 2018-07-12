@@ -50,6 +50,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadEventNexus"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Events;Utility\\Sorting";

@@ -1,7 +1,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -39,14 +38,15 @@ GET_POINTER_SPECIALIZATION(MatrixWorkspace)
 
 namespace {
 /// Typedef for data access, i.e. dataX,Y,E members
-typedef Mantid::MantidVec &(MatrixWorkspace::*data_modifier)(const std::size_t);
+using data_modifier =
+    Mantid::MantidVec &(MatrixWorkspace::*)(const std::size_t);
 
 /// return_value_policy for read-only numpy array
-typedef return_value_policy<VectorRefToNumpy<WrapReadOnly>>
-    return_readonly_numpy;
+using return_readonly_numpy =
+    return_value_policy<VectorRefToNumpy<WrapReadOnly>>;
 /// return_value_policy for read-write numpy array
-typedef return_value_policy<VectorRefToNumpy<WrapReadWrite>>
-    return_readwrite_numpy;
+using return_readwrite_numpy =
+    return_value_policy<VectorRefToNumpy<WrapReadWrite>>;
 
 //------------------------------- Overload macros ---------------------------
 #ifdef __clang__
@@ -242,11 +242,6 @@ void export_MatrixWorkspace() {
            "Returns the current Y unit for the data (Y axis) in the workspace")
       .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, arg("self"),
            "Returns the caption for the Y axis")
-
-      .def("spectrumInfo", &MatrixWorkspace::spectrumInfo,
-           return_value_policy<reference_existing_object>(), args("self"),
-           "Return a const reference to the :class:`~mantid.api.SpectrumInfo` "
-           "object.")
 
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),

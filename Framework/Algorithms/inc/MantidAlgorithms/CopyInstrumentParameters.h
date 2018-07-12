@@ -67,6 +67,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ClearInstrumentParameters"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "DataHandling\\Instrument";
@@ -74,6 +77,11 @@ public:
   /// method indicates that base source instrument is the same or different from
   /// base target instrument (mainly used in testing)
   bool isInstrumentDifferent() const { return m_different_instrument_sp; }
+
+protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
 
 private:
   /// Initialisation code

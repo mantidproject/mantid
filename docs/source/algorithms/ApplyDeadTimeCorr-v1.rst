@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -10,8 +10,8 @@ Description
 -----------
 
 Assuming that the *InputWorkspace* contains measured
-counts as a function of TOF, the algorithm returns a workspace
-containing true counts as a function of the same TOF binning
+counts as a function of time, the algorithm returns a workspace
+containing true counts as a function of the same time binning
 according to
 
 .. math:: N = \frac{M}{(1-M*(\frac{t_{\mathrm{dead}}}{t_{\mathrm{bin}}*F}))}

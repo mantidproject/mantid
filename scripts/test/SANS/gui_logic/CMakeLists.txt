@@ -13,8 +13,15 @@ set ( TEST_PY_FILES
   state_gui_model_test.py
   settings_diagnostic_presenter_test.py
   table_model_test.py
+  run_selector_presenter_test.py
+  summation_settings_presenter_test.py
+  summation_settings_model_test.py
+  add_runs_presenter_test.py
   beam_centre_presenter_test.py
   beam_centre_model_test.py
+  diagnostics_page_presenter_test.py
+  diagnostics_page_model_test.py
+  create_state_test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

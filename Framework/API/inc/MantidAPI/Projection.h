@@ -82,7 +82,7 @@ protected:
   ProjectionUnit m_units[3];
 };
 
-typedef boost::shared_ptr<Projection> Projection_sptr;
+using Projection_sptr = boost::shared_ptr<Projection>;
 
 } // namespace API
 } // namespace Mantid

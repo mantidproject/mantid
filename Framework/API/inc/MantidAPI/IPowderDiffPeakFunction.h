@@ -159,7 +159,7 @@ protected:
   size_t HEIGHTINDEX;
 };
 
-typedef boost::shared_ptr<IPowderDiffPeakFunction> IPowderDiffPeakFunction_sptr;
+using IPowderDiffPeakFunction_sptr = boost::shared_ptr<IPowderDiffPeakFunction>;
 
 /// Integral for Gamma
 std::complex<double> MANTID_API_DLL E1(std::complex<double> z);

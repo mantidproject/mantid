@@ -23,8 +23,10 @@
 
 #include <boost/lexical_cast.hpp>
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <Poco/Path.h>
 #include <Poco/DateTimeFormatter.h>
@@ -1090,8 +1092,8 @@ void LoadISISNexus2::parseISODateTime(const std::string &datetime_iso,
     time = Poco::DateTimeFormatter::format(datetime_output, "%H:%M:%S",
                                            timezone_diff);
   } catch (Poco::SyntaxException &) {
-    date = "\?\?-\?\?-\?\?\?\?";
-    time = "\?\?:\?\?:\?\?";
+    date = R"(??-??-????)";
+    time = R"(??:??:??)";
     g_log.warning() << "Cannot parse end time from entry in Nexus file.\n";
   }
 }

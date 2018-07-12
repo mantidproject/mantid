@@ -605,7 +605,7 @@ public:
 };
 
 /// shared pointer to the function base class
-typedef boost::shared_ptr<ScriptRepository> ScriptRepository_sptr;
+using ScriptRepository_sptr = boost::shared_ptr<ScriptRepository>;
 }
 }
 

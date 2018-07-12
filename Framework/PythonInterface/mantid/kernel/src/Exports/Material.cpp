@@ -101,24 +101,37 @@ void export_Material() {
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Real part of Coherent Scattering Length for the given wavelength "
            "in fm")
+      .def("cohScatterLengthImg",
+           (double (Material::*)(double) const)(&Material::cohScatterLengthImg),
+           (arg("self"),
+            arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
+           "Imaginary part of Coherent Scattering Length for the given "
+           "wavelength "
+           "in fm")
       .def("incohScatterLengthReal", (double (Material::*)(double) const)(
                                          &Material::incohScatterLengthReal),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Real part of Incoherent Scattering Length for the given wavelength "
            "in fm")
-
+      .def("incohScatterLengthImg", (double (Material::*)(double) const)(
+                                        &Material::incohScatterLengthImg),
+           (arg("self"),
+            arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
+           "Imaginary part of Incoherent Scattering Length for the given "
+           "wavelength "
+           "in fm")
       .def("cohScatterLengthSqrd", (double (Material::*)(double)
                                         const)(&Material::cohScatterLengthSqrd),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Coherent Scattering Length Squared <b^2> for the given wavelength "
+           "Coherent Scattering Length Squared <b>^2 for the given wavelength "
            "in fm^2")
       .def("incohScatterLengthSqrd", (double (Material::*)(double) const)(
                                          &Material::incohScatterLengthSqrd),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Incoherent Scattering Length Squared <b^2> for the given "
+           "Incoherent Scattering Length Squared <b>^2 for the given "
            "wavelength in fm^2")
       .def("totalScatterLengthSqrd", (double (Material::*)(double) const)(
                                          &Material::totalScatterLengthSqrd),

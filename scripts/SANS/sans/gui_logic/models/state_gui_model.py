@@ -19,6 +19,9 @@ class StateGuiModel(object):
         super(StateGuiModel, self).__init__()
         self._user_file_items = user_file_items
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     @property
     def settings(self):
         return self._user_file_items
@@ -224,6 +227,25 @@ class StateGuiModel(object):
         q_range_stop = max(q_stop) if q_stop else default_value
         return q_range_start, q_range_stop
 
+    def get_merge_overlap(self, default_value):
+        q_start = []
+        q_stop = []
+
+        settings = []
+        if DetectorId.merge_range in self._user_file_items:
+            settings.extend(self._user_file_items[DetectorId.merge_range])
+
+        for setting in settings:
+            if setting.start is not None:
+                q_start.append(setting.start)
+
+            if setting.stop is not None:
+                q_stop.append(setting.stop)
+
+        q_range_start = min(q_start) if q_start else default_value
+        q_range_stop = max(q_stop) if q_stop else default_value
+        return q_range_start, q_range_stop
+
     @property
     def reduction_mode(self):
         return self.get_simple_element_with_attribute(element_id=DetectorId.reduction_mode,
@@ -302,27 +324,31 @@ class StateGuiModel(object):
 
     @property
     def merge_mask(self):
-        return self.get_simple_element(element_id=OtherId.merge_mask, default_value=False)
+        return self.get_simple_element_with_attribute(element_id=DetectorId.merge_range,
+                                                      default_value=False,
+                                                      attribute="use_fit")
 
     @merge_mask.setter
     def merge_mask(self, value):
-        self.set_simple_element(element_id=OtherId.merge_mask, value=value)
+        self._update_merged_fit(element_id=DetectorId.merge_range, use_fit=value)
 
     @property
     def merge_max(self):
-        return self.get_simple_element(element_id=OtherId.merge_max, default_value=None)
+        _, q_range_stop = self.get_merge_overlap(default_value=None)
+        return q_range_stop
 
     @merge_max.setter
     def merge_max(self, value):
-        self.set_simple_element(element_id=OtherId.merge_max, value=value)
+        self._update_merged_fit(element_id=DetectorId.merge_range, q_stop=value)
 
     @property
     def merge_min(self):
-        return self.get_simple_element(element_id=OtherId.merge_min, default_value=None)
+        q_range_start, _ = self.get_merge_overlap(default_value=None)
+        return q_range_start
 
     @merge_min.setter
     def merge_min(self, value):
-        self.set_simple_element(element_id=OtherId.merge_min, value=value)
+        self._update_merged_fit(element_id=DetectorId.merge_range, q_start=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event binning for compatibility mode
@@ -344,7 +370,7 @@ class StateGuiModel(object):
     # - wavelength_and_pixel_adjustment
     # This is not something that needs to be known at this point, but it is good to know.
     # ------------------------------------------------------------------------------------------------------------------
-    def _update_wavelength(self, min_value=None, max_value=None, step=None, step_type=None):
+    def _update_wavelength(self, min_value=None, max_value=None, step=None, step_type=None, wavelength_range=None):
         if LimitsId.wavelength in self._user_file_items:
             settings = self._user_file_items[LimitsId.wavelength]
         else:
@@ -361,6 +387,18 @@ class StateGuiModel(object):
             new_setting = simple_range(start=new_min, stop=new_max, step=new_step, step_type=new_step_type)
             new_settings.append(new_setting)
         self._user_file_items.update({LimitsId.wavelength: new_settings})
+
+        if wavelength_range:
+            if OtherId.wavelength_range in self._user_file_items:
+                settings = self._user_file_items[OtherId.wavelength_range]
+            else:
+                settings = [""]
+
+            new_settings = []
+            for setting in settings:
+                new_range = wavelength_range if wavelength_range else setting
+                new_settings.append(new_range)
+            self._user_file_items.update({OtherId.wavelength_range: new_settings})
 
     @property
     def wavelength_step_type(self):
@@ -400,6 +438,14 @@ class StateGuiModel(object):
     @wavelength_step.setter
     def wavelength_step(self, value):
         self._update_wavelength(step=value)
+
+    @property
+    def wavelength_range(self):
+        return self.get_simple_element(element_id=OtherId.wavelength_range, default_value="")
+
+    @wavelength_range.setter
+    def wavelength_range(self, value):
+        self._update_wavelength(wavelength_range=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Scale properties
@@ -717,7 +763,7 @@ class StateGuiModel(object):
 
     @property
     def show_transmission(self):
-        return self.get_simple_element(element_id=OtherId.show_transmission, default_value=False)
+        return self.get_simple_element(element_id=OtherId.show_transmission, default_value=True)
 
     @show_transmission.setter
     def show_transmission(self, value):
@@ -869,6 +915,22 @@ class StateGuiModel(object):
     @q_xy_step_type.setter
     def q_xy_step_type(self, value):
         self._set_q_xy_limits(step_type_value=value)
+
+    @property
+    def r_cut(self):
+        return self.get_simple_element(element_id=LimitsId.radius_cut, default_value="")
+
+    @r_cut.setter
+    def r_cut(self, value):
+        self.set_simple_element(element_id=LimitsId.radius_cut, value=value)
+
+    @property
+    def w_cut(self):
+        return self.get_simple_element(element_id=LimitsId.wavelength_cut, default_value="")
+
+    @w_cut.setter
+    def w_cut(self, value):
+        self.set_simple_element(element_id=LimitsId.wavelength_cut, value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Gravity

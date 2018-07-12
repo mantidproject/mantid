@@ -53,7 +53,7 @@ det_fit_range = namedtuple('det_fit_range', 'start, stop, use_fit')
 # --- DET
 @serializable_enum("reduction_mode", "rescale", "shift", "rescale_fit", "shift_fit", "correction_x", "correction_y",
                    "correction_z", "correction_rotation", "correction_radius", "correction_translation",
-                   "correction_x_tilt", "correction_y_tilt")
+                   "correction_x_tilt", "correction_y_tilt", "merge_range")
 class DetectorId(object):
     pass
 
@@ -137,6 +137,7 @@ class BackId(object):
 @serializable_enum("reduction_dimensionality", "use_full_wavelength_range", "event_slices",
                    "use_compatibility_mode", "save_types", "save_as_zero_error_free", "user_specified_output_name",
                    "user_specified_output_name_suffix", "use_reduction_mode_as_suffix", "sample_width", "sample_height",
-                   "sample_thickness", "sample_shape", "merge_mask", "merge_min", "merge_max", "show_transmission")
+                   "sample_thickness", "sample_shape", "merge_mask", "merge_min", "merge_max", "show_transmission",
+                   "wavelength_range")
 class OtherId(object):
     pass

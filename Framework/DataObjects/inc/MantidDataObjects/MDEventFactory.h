@@ -65,7 +65,7 @@ public:
   static size_t getMaxNumDim() { return size_t(MAX_MD_DIMENSIONS_NUM); }
 
 private:
-  typedef API::IMDNode *(*fpCreateBox)(
+  using fpCreateBox = API::IMDNode *(*)(
       API::BoxController *,
       const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &,
       const uint32_t, const size_t, const size_t);
@@ -75,10 +75,9 @@ private:
 
   // typedef for the class function pointer to the function, which creates MD
   // Workspaces
-  typedef API::IMDEventWorkspace *(*fpCreateMDWS)(
-      const std::string &eventType,
-      const Mantid::API::MDNormalization &preferredNormalization,
-      const Mantid::API::MDNormalization &preferredNormalizationHisto);
+  using fpCreateMDWS = API::IMDEventWorkspace *(*)(
+      const std::string &, const Mantid::API::MDNormalization &,
+      const Mantid::API::MDNormalization &);
   // vector of function pointers to the funcions
   static std::vector<fpCreateMDWS> wsCreatorFP;
 
@@ -425,197 +424,197 @@ private:
 // ------------- Typedefs for MDBox ------------------
 
 /// Typedef for a MDBox with 1 dimension
-typedef MDBox<MDLeanEvent<1>, 1> MDBox1Lean;
+using MDBox1Lean = MDBox<MDLeanEvent<1>, 1>;
 /// Typedef for a MDBox with 2 dimensions
-typedef MDBox<MDLeanEvent<2>, 2> MDBox2Lean;
+using MDBox2Lean = MDBox<MDLeanEvent<2>, 2>;
 /// Typedef for a MDBox with 3 dimensions
-typedef MDBox<MDLeanEvent<3>, 3> MDBox3Lean;
+using MDBox3Lean = MDBox<MDLeanEvent<3>, 3>;
 /// Typedef for a MDBox with 4 dimensions
-typedef MDBox<MDLeanEvent<4>, 4> MDBox4Lean;
+using MDBox4Lean = MDBox<MDLeanEvent<4>, 4>;
 /// Typedef for a MDBox with 5 dimensions
-typedef MDBox<MDLeanEvent<5>, 5> MDBox5Lean;
+using MDBox5Lean = MDBox<MDLeanEvent<5>, 5>;
 /// Typedef for a MDBox with 6 dimensions
-typedef MDBox<MDLeanEvent<6>, 6> MDBox6Lean;
+using MDBox6Lean = MDBox<MDLeanEvent<6>, 6>;
 /// Typedef for a MDBox with 7 dimensions
-typedef MDBox<MDLeanEvent<7>, 7> MDBox7Lean;
+using MDBox7Lean = MDBox<MDLeanEvent<7>, 7>;
 /// Typedef for a MDBox with 8 dimensions
-typedef MDBox<MDLeanEvent<8>, 8> MDBox8Lean;
+using MDBox8Lean = MDBox<MDLeanEvent<8>, 8>;
 /// Typedef for a MDBox with 9 dimensions
-typedef MDBox<MDLeanEvent<9>, 9> MDBox9Lean;
+using MDBox9Lean = MDBox<MDLeanEvent<9>, 9>;
 /// Typedef for a MDBox with 1 dimension
-typedef MDBox<MDEvent<1>, 1> MDBox1;
+using MDBox1 = MDBox<MDEvent<1>, 1>;
 /// Typedef for a MDBox with 2 dimensions
-typedef MDBox<MDEvent<2>, 2> MDBox2;
+using MDBox2 = MDBox<MDEvent<2>, 2>;
 /// Typedef for a MDBox with 3 dimensions
-typedef MDBox<MDEvent<3>, 3> MDBox3;
+using MDBox3 = MDBox<MDEvent<3>, 3>;
 /// Typedef for a MDBox with 4 dimensions
-typedef MDBox<MDEvent<4>, 4> MDBox4;
+using MDBox4 = MDBox<MDEvent<4>, 4>;
 /// Typedef for a MDBox with 5 dimensions
-typedef MDBox<MDEvent<5>, 5> MDBox5;
+using MDBox5 = MDBox<MDEvent<5>, 5>;
 /// Typedef for a MDBox with 6 dimensions
-typedef MDBox<MDEvent<6>, 6> MDBox6;
+using MDBox6 = MDBox<MDEvent<6>, 6>;
 /// Typedef for a MDBox with 7 dimensions
-typedef MDBox<MDEvent<7>, 7> MDBox7;
+using MDBox7 = MDBox<MDEvent<7>, 7>;
 /// Typedef for a MDBox with 8 dimensions
-typedef MDBox<MDEvent<8>, 8> MDBox8;
+using MDBox8 = MDBox<MDEvent<8>, 8>;
 /// Typedef for a MDBox with 9 dimensions
-typedef MDBox<MDEvent<9>, 9> MDBox9;
+using MDBox9 = MDBox<MDEvent<9>, 9>;
 
 // ------------- Typedefs for MDBoxBase ------------------
 
 /// Typedef for a MDBoxBase with 1 dimension
-typedef MDBoxBase<MDLeanEvent<1>, 1> MDBoxBase1Lean;
+using MDBoxBase1Lean = MDBoxBase<MDLeanEvent<1>, 1>;
 /// Typedef for a MDBoxBase with 2 dimensions
-typedef MDBoxBase<MDLeanEvent<2>, 2> MDBoxBase2Lean;
+using MDBoxBase2Lean = MDBoxBase<MDLeanEvent<2>, 2>;
 /// Typedef for a MDBoxBase with 3 dimensions
-typedef MDBoxBase<MDLeanEvent<3>, 3> MDBoxBase3Lean;
+using MDBoxBase3Lean = MDBoxBase<MDLeanEvent<3>, 3>;
 /// Typedef for a MDBoxBase with 4 dimensions
-typedef MDBoxBase<MDLeanEvent<4>, 4> MDBoxBase4Lean;
+using MDBoxBase4Lean = MDBoxBase<MDLeanEvent<4>, 4>;
 /// Typedef for a MDBoxBase with 5 dimensions
-typedef MDBoxBase<MDLeanEvent<5>, 5> MDBoxBase5Lean;
+using MDBoxBase5Lean = MDBoxBase<MDLeanEvent<5>, 5>;
 /// Typedef for a MDBoxBase with 6 dimensions
-typedef MDBoxBase<MDLeanEvent<6>, 6> MDBoxBase6Lean;
+using MDBoxBase6Lean = MDBoxBase<MDLeanEvent<6>, 6>;
 /// Typedef for a MDBoxBase with 7 dimensions
-typedef MDBoxBase<MDLeanEvent<7>, 7> MDBoxBase7Lean;
+using MDBoxBase7Lean = MDBoxBase<MDLeanEvent<7>, 7>;
 /// Typedef for a MDBoxBase with 8 dimensions
-typedef MDBoxBase<MDLeanEvent<8>, 8> MDBoxBase8Lean;
+using MDBoxBase8Lean = MDBoxBase<MDLeanEvent<8>, 8>;
 /// Typedef for a MDBoxBase with 9 dimensions
-typedef MDBoxBase<MDLeanEvent<9>, 9> MDBoxBase9Lean;
+using MDBoxBase9Lean = MDBoxBase<MDLeanEvent<9>, 9>;
 /// Typedef for a MDBoxBase with 1 dimension
-typedef MDBoxBase<MDEvent<1>, 1> MDBoxBase1;
+using MDBoxBase1 = MDBoxBase<MDEvent<1>, 1>;
 /// Typedef for a MDBoxBase with 2 dimensions
-typedef MDBoxBase<MDEvent<2>, 2> MDBoxBase2;
+using MDBoxBase2 = MDBoxBase<MDEvent<2>, 2>;
 /// Typedef for a MDBoxBase with 3 dimensions
-typedef MDBoxBase<MDEvent<3>, 3> MDBoxBase3;
+using MDBoxBase3 = MDBoxBase<MDEvent<3>, 3>;
 /// Typedef for a MDBoxBase with 4 dimensions
-typedef MDBoxBase<MDEvent<4>, 4> MDBoxBase4;
+using MDBoxBase4 = MDBoxBase<MDEvent<4>, 4>;
 /// Typedef for a MDBoxBase with 5 dimensions
-typedef MDBoxBase<MDEvent<5>, 5> MDBoxBase5;
+using MDBoxBase5 = MDBoxBase<MDEvent<5>, 5>;
 /// Typedef for a MDBoxBase with 6 dimensions
-typedef MDBoxBase<MDEvent<6>, 6> MDBoxBase6;
+using MDBoxBase6 = MDBoxBase<MDEvent<6>, 6>;
 /// Typedef for a MDBoxBase with 7 dimensions
-typedef MDBoxBase<MDEvent<7>, 7> MDBoxBase7;
+using MDBoxBase7 = MDBoxBase<MDEvent<7>, 7>;
 /// Typedef for a MDBoxBase with 8 dimensions
-typedef MDBoxBase<MDEvent<8>, 8> MDBoxBase8;
+using MDBoxBase8 = MDBoxBase<MDEvent<8>, 8>;
 /// Typedef for a MDBoxBase with 9 dimensions
-typedef MDBoxBase<MDEvent<9>, 9> MDBoxBase9;
+using MDBoxBase9 = MDBoxBase<MDEvent<9>, 9>;
 
 // ------------- Typedefs for MDGridBox ------------------
 
 /// Typedef for a MDGridBox with 1 dimension
-typedef MDGridBox<MDLeanEvent<1>, 1> MDGridBox1Lean;
+using MDGridBox1Lean = MDGridBox<MDLeanEvent<1>, 1>;
 /// Typedef for a MDGridBox with 2 dimensions
-typedef MDGridBox<MDLeanEvent<2>, 2> MDGridBox2Lean;
+using MDGridBox2Lean = MDGridBox<MDLeanEvent<2>, 2>;
 /// Typedef for a MDGridBox with 3 dimensions
-typedef MDGridBox<MDLeanEvent<3>, 3> MDGridBox3Lean;
+using MDGridBox3Lean = MDGridBox<MDLeanEvent<3>, 3>;
 /// Typedef for a MDGridBox with 4 dimensions
-typedef MDGridBox<MDLeanEvent<4>, 4> MDGridBox4Lean;
+using MDGridBox4Lean = MDGridBox<MDLeanEvent<4>, 4>;
 /// Typedef for a MDGridBox with 5 dimensions
-typedef MDGridBox<MDLeanEvent<5>, 5> MDGridBox5Lean;
+using MDGridBox5Lean = MDGridBox<MDLeanEvent<5>, 5>;
 /// Typedef for a MDGridBox with 6 dimensions
-typedef MDGridBox<MDLeanEvent<6>, 6> MDGridBox6Lean;
+using MDGridBox6Lean = MDGridBox<MDLeanEvent<6>, 6>;
 /// Typedef for a MDGridBox with 7 dimensions
-typedef MDGridBox<MDLeanEvent<7>, 7> MDGridBox7Lean;
+using MDGridBox7Lean = MDGridBox<MDLeanEvent<7>, 7>;
 /// Typedef for a MDGridBox with 8 dimensions
-typedef MDGridBox<MDLeanEvent<8>, 8> MDGridBox8Lean;
+using MDGridBox8Lean = MDGridBox<MDLeanEvent<8>, 8>;
 /// Typedef for a MDGridBox with 9 dimensions
-typedef MDGridBox<MDLeanEvent<9>, 9> MDGridBox9Lean;
+using MDGridBox9Lean = MDGridBox<MDLeanEvent<9>, 9>;
 /// Typedef for a MDGridBox with 1 dimension
-typedef MDGridBox<MDEvent<1>, 1> MDGridBox1;
+using MDGridBox1 = MDGridBox<MDEvent<1>, 1>;
 /// Typedef for a MDGridBox with 2 dimensions
-typedef MDGridBox<MDEvent<2>, 2> MDGridBox2;
+using MDGridBox2 = MDGridBox<MDEvent<2>, 2>;
 /// Typedef for a MDGridBox with 3 dimensions
-typedef MDGridBox<MDEvent<3>, 3> MDGridBox3;
+using MDGridBox3 = MDGridBox<MDEvent<3>, 3>;
 /// Typedef for a MDGridBox with 4 dimensions
-typedef MDGridBox<MDEvent<4>, 4> MDGridBox4;
+using MDGridBox4 = MDGridBox<MDEvent<4>, 4>;
 /// Typedef for a MDGridBox with 5 dimensions
-typedef MDGridBox<MDEvent<5>, 5> MDGridBox5;
+using MDGridBox5 = MDGridBox<MDEvent<5>, 5>;
 /// Typedef for a MDGridBox with 6 dimensions
-typedef MDGridBox<MDEvent<6>, 6> MDGridBox6;
+using MDGridBox6 = MDGridBox<MDEvent<6>, 6>;
 /// Typedef for a MDGridBox with 7 dimensions
-typedef MDGridBox<MDEvent<7>, 7> MDGridBox7;
+using MDGridBox7 = MDGridBox<MDEvent<7>, 7>;
 /// Typedef for a MDGridBox with 8 dimensions
-typedef MDGridBox<MDEvent<8>, 8> MDGridBox8;
+using MDGridBox8 = MDGridBox<MDEvent<8>, 8>;
 /// Typedef for a MDGridBox with 9 dimensions
-typedef MDGridBox<MDEvent<9>, 9> MDGridBox9;
+using MDGridBox9 = MDGridBox<MDEvent<9>, 9>;
 
 // ------------- Typedefs for MDEventWorkspace ------------------
 
 /// Typedef for a MDEventWorkspace with 1 dimension
-typedef MDEventWorkspace<MDLeanEvent<1>, 1> MDEventWorkspace1Lean;
+using MDEventWorkspace1Lean = MDEventWorkspace<MDLeanEvent<1>, 1>;
 /// Typedef for a MDEventWorkspace with 2 dimensions
-typedef MDEventWorkspace<MDLeanEvent<2>, 2> MDEventWorkspace2Lean;
+using MDEventWorkspace2Lean = MDEventWorkspace<MDLeanEvent<2>, 2>;
 /// Typedef for a MDEventWorkspace with 3 dimensions
-typedef MDEventWorkspace<MDLeanEvent<3>, 3> MDEventWorkspace3Lean;
+using MDEventWorkspace3Lean = MDEventWorkspace<MDLeanEvent<3>, 3>;
 /// Typedef for a MDEventWorkspace with 4 dimensions
-typedef MDEventWorkspace<MDLeanEvent<4>, 4> MDEventWorkspace4Lean;
+using MDEventWorkspace4Lean = MDEventWorkspace<MDLeanEvent<4>, 4>;
 /// Typedef for a MDEventWorkspace with 5 dimensions
-typedef MDEventWorkspace<MDLeanEvent<5>, 5> MDEventWorkspace5Lean;
+using MDEventWorkspace5Lean = MDEventWorkspace<MDLeanEvent<5>, 5>;
 /// Typedef for a MDEventWorkspace with 6 dimensions
-typedef MDEventWorkspace<MDLeanEvent<6>, 6> MDEventWorkspace6Lean;
+using MDEventWorkspace6Lean = MDEventWorkspace<MDLeanEvent<6>, 6>;
 /// Typedef for a MDEventWorkspace with 7 dimensions
-typedef MDEventWorkspace<MDLeanEvent<7>, 7> MDEventWorkspace7Lean;
+using MDEventWorkspace7Lean = MDEventWorkspace<MDLeanEvent<7>, 7>;
 /// Typedef for a MDEventWorkspace with 8 dimensions
-typedef MDEventWorkspace<MDLeanEvent<8>, 8> MDEventWorkspace8Lean;
+using MDEventWorkspace8Lean = MDEventWorkspace<MDLeanEvent<8>, 8>;
 /// Typedef for a MDEventWorkspace with 9 dimensions
-typedef MDEventWorkspace<MDLeanEvent<9>, 9> MDEventWorkspace9Lean;
+using MDEventWorkspace9Lean = MDEventWorkspace<MDLeanEvent<9>, 9>;
 /// Typedef for a MDEventWorkspace with 1 dimension
-typedef MDEventWorkspace<MDEvent<1>, 1> MDEventWorkspace1;
+using MDEventWorkspace1 = MDEventWorkspace<MDEvent<1>, 1>;
 /// Typedef for a MDEventWorkspace with 2 dimensions
-typedef MDEventWorkspace<MDEvent<2>, 2> MDEventWorkspace2;
+using MDEventWorkspace2 = MDEventWorkspace<MDEvent<2>, 2>;
 /// Typedef for a MDEventWorkspace with 3 dimensions
-typedef MDEventWorkspace<MDEvent<3>, 3> MDEventWorkspace3;
+using MDEventWorkspace3 = MDEventWorkspace<MDEvent<3>, 3>;
 /// Typedef for a MDEventWorkspace with 4 dimensions
-typedef MDEventWorkspace<MDEvent<4>, 4> MDEventWorkspace4;
+using MDEventWorkspace4 = MDEventWorkspace<MDEvent<4>, 4>;
 /// Typedef for a MDEventWorkspace with 5 dimensions
-typedef MDEventWorkspace<MDEvent<5>, 5> MDEventWorkspace5;
+using MDEventWorkspace5 = MDEventWorkspace<MDEvent<5>, 5>;
 /// Typedef for a MDEventWorkspace with 6 dimensions
-typedef MDEventWorkspace<MDEvent<6>, 6> MDEventWorkspace6;
+using MDEventWorkspace6 = MDEventWorkspace<MDEvent<6>, 6>;
 /// Typedef for a MDEventWorkspace with 7 dimensions
-typedef MDEventWorkspace<MDEvent<7>, 7> MDEventWorkspace7;
+using MDEventWorkspace7 = MDEventWorkspace<MDEvent<7>, 7>;
 /// Typedef for a MDEventWorkspace with 8 dimensions
-typedef MDEventWorkspace<MDEvent<8>, 8> MDEventWorkspace8;
+using MDEventWorkspace8 = MDEventWorkspace<MDEvent<8>, 8>;
 /// Typedef for a MDEventWorkspace with 9 dimensions
-typedef MDEventWorkspace<MDEvent<9>, 9> MDEventWorkspace9;
+using MDEventWorkspace9 = MDEventWorkspace<MDEvent<9>, 9>;
 
 // ------------- Typedefs for MDBin ------------------
 
 /// Typedef for a MDBin with 1 dimension
-typedef MDBin<MDLeanEvent<1>, 1> MDBin1Lean;
+using MDBin1Lean = MDBin<MDLeanEvent<1>, 1>;
 /// Typedef for a MDBin with 2 dimensions
-typedef MDBin<MDLeanEvent<2>, 2> MDBin2Lean;
+using MDBin2Lean = MDBin<MDLeanEvent<2>, 2>;
 /// Typedef for a MDBin with 3 dimensions
-typedef MDBin<MDLeanEvent<3>, 3> MDBin3Lean;
+using MDBin3Lean = MDBin<MDLeanEvent<3>, 3>;
 /// Typedef for a MDBin with 4 dimensions
-typedef MDBin<MDLeanEvent<4>, 4> MDBin4Lean;
+using MDBin4Lean = MDBin<MDLeanEvent<4>, 4>;
 /// Typedef for a MDBin with 5 dimensions
-typedef MDBin<MDLeanEvent<5>, 5> MDBin5Lean;
+using MDBin5Lean = MDBin<MDLeanEvent<5>, 5>;
 /// Typedef for a MDBin with 6 dimensions
-typedef MDBin<MDLeanEvent<6>, 6> MDBin6Lean;
+using MDBin6Lean = MDBin<MDLeanEvent<6>, 6>;
 /// Typedef for a MDBin with 7 dimensions
-typedef MDBin<MDLeanEvent<7>, 7> MDBin7Lean;
+using MDBin7Lean = MDBin<MDLeanEvent<7>, 7>;
 /// Typedef for a MDBin with 8 dimensions
-typedef MDBin<MDLeanEvent<8>, 8> MDBin8Lean;
+using MDBin8Lean = MDBin<MDLeanEvent<8>, 8>;
 /// Typedef for a MDBin with 9 dimensions
-typedef MDBin<MDLeanEvent<9>, 9> MDBin9Lean;
+using MDBin9Lean = MDBin<MDLeanEvent<9>, 9>;
 /// Typedef for a MDBin with 1 dimension
-typedef MDBin<MDEvent<1>, 1> MDBin1;
+using MDBin1 = MDBin<MDEvent<1>, 1>;
 /// Typedef for a MDBin with 2 dimensions
-typedef MDBin<MDEvent<2>, 2> MDBin2;
+using MDBin2 = MDBin<MDEvent<2>, 2>;
 /// Typedef for a MDBin with 3 dimensions
-typedef MDBin<MDEvent<3>, 3> MDBin3;
+using MDBin3 = MDBin<MDEvent<3>, 3>;
 /// Typedef for a MDBin with 4 dimensions
-typedef MDBin<MDEvent<4>, 4> MDBin4;
+using MDBin4 = MDBin<MDEvent<4>, 4>;
 /// Typedef for a MDBin with 5 dimensions
-typedef MDBin<MDEvent<5>, 5> MDBin5;
+using MDBin5 = MDBin<MDEvent<5>, 5>;
 /// Typedef for a MDBin with 6 dimensions
-typedef MDBin<MDEvent<6>, 6> MDBin6;
+using MDBin6 = MDBin<MDEvent<6>, 6>;
 /// Typedef for a MDBin with 7 dimensions
-typedef MDBin<MDEvent<7>, 7> MDBin7;
+using MDBin7 = MDBin<MDEvent<7>, 7>;
 /// Typedef for a MDBin with 8 dimensions
-typedef MDBin<MDEvent<8>, 8> MDBin8;
+using MDBin8 = MDBin<MDEvent<8>, 8>;
 /// Typedef for a MDBin with 9 dimensions
-typedef MDBin<MDEvent<9>, 9> MDBin9;
+using MDBin9 = MDBin<MDEvent<9>, 9>;
 
 /* CODE ABOWE WAS AUTO-GENERATED BY generate_mdevent_declarations.py - DO NOT
  * EDIT! */

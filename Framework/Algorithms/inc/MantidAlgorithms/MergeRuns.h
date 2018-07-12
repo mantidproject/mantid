@@ -5,7 +5,10 @@
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/System.h"
+
+#include <boost/optional.hpp>
 
 namespace Mantid {
 namespace API {
@@ -73,6 +76,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConjoinWorkspaces"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Merging"; }
   // Overriden MultiPeriodGroupAlgorithm method.
@@ -88,6 +94,7 @@ private:
   void init() override;
   void exec() override;
   void execEvent();
+  void execHistogram(const std::vector<std::string> &inputs);
   void buildAdditionTables();
   // Overriden MultiPeriodGroupAlgorithm method.
   std::string fetchInputPropertyName() const override;
@@ -95,7 +102,7 @@ private:
   /// An addition table is a list of pairs: First int = workspace index in the
   /// EW being added, Second int = workspace index to which it will be added in
   /// the OUTPUT EW. -1 if it should add a new entry at the end.
-  typedef std::vector<std::pair<int, int>> AdditionTable;
+  using AdditionTable = std::vector<std::pair<int, int>>;
   /// Copy the history from the input workspaces to the output workspaces
   template <typename Container>
   void copyHistoryFromInputWorkspaces(const Container &workspaces) {
@@ -124,18 +131,19 @@ private:
   using Mantid::API::Algorithm::validateInputs;
   bool validateInputsForEventWorkspaces(
       const std::vector<std::string> &inputWorkspaces);
-  void calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
-                            const API::MatrixWorkspace_const_sptr &ws2,
-                            std::vector<double> &params) const;
-  void noOverlapParams(const HistogramData::HistogramX &X1,
-                       const HistogramData::HistogramX &X2,
-                       std::vector<double> &params) const;
-  void intersectionParams(const HistogramData::HistogramX &X1, int64_t &i,
-                          const HistogramData::HistogramX &X2,
-                          std::vector<double> &params) const;
-  void inclusionParams(const HistogramData::HistogramX &X1, int64_t &i,
-                       const HistogramData::HistogramX &X2,
-                       std::vector<double> &params) const;
+  boost::optional<std::vector<double>> checkRebinning();
+  static std::vector<double>
+  calculateRebinParams(const std::vector<double> &bins1,
+                       const std::vector<double> &bins2);
+  static void noOverlapParams(const HistogramData::HistogramX &X1,
+                              const HistogramData::HistogramX &X2,
+                              std::vector<double> &params);
+  static void intersectionParams(const HistogramData::HistogramX &X1, size_t &i,
+                                 const HistogramData::HistogramX &X2,
+                                 std::vector<double> &params);
+  static void inclusionParams(const HistogramData::HistogramX &X1, size_t &i,
+                              const HistogramData::HistogramX &X2,
+                              std::vector<double> &params);
   API::MatrixWorkspace_sptr
   rebinInput(const API::MatrixWorkspace_sptr &workspace,
              const std::vector<double> &params);
@@ -153,6 +161,12 @@ private:
   std::vector<AdditionTable> m_tables;
   /// Total number of histograms in the output workspace
   size_t m_outputSize = 0;
+
+  std::vector<SpectrumDefinition>
+  buildScanIntervals(const std::vector<SpectrumDefinition> &addeeSpecDefs,
+                     const Geometry::DetectorInfo &addeeDetInfo,
+                     const Geometry::DetectorInfo &outDetInfo,
+                     const Geometry::DetectorInfo &newOutDetInfo);
 };
 
 } // namespace Algorithm

@@ -47,6 +47,8 @@ public:
   /// Specialized type check
   bool isBool() const override;
 
+  bool isNumber() const override;
+
   /// Must return overall memory size taken by the column.
   long int sizeOfData() const override;
 
@@ -78,7 +80,7 @@ private:
   int m_hklPrec;
 
   /// Type of the row cache value
-  typedef boost::variant<double, int, std::string, Kernel::V3D> CacheValueType;
+  using CacheValueType = boost::variant<double, int, std::string, Kernel::V3D>;
   ///
   mutable std::list<CacheValueType> m_oldRows;
   /// Sets the correct value in the referenced peak.

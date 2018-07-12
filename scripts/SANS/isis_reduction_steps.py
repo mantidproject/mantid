@@ -1053,7 +1053,7 @@ class Mask_ISIS(ReductionStep):
                     raise RuntimeError("Invalid input for mask file. (%s)" % mask_file)
 
         if len(self.spec_list) > 0:
-            MaskDetectors(Workspace=workspace, SpectraList=self.spec_list)
+            MaskDetectors(Workspace=workspace, SpectraList=self.spec_list, ForceInstrumentMasking=True)
 
         if self._lim_phi_xml != '' and self.mask_phi:
             MaskDetectorsInShape(Workspace=workspace, ShapeXML=self._lim_phi_xml)
@@ -1156,7 +1156,11 @@ class LoadSample(LoadRun):
         # applies on_load_sample for all the workspaces (single or groupworkspace)
         num = 0
         while True:
-            reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), isSample)
+            if reducer.instrument.name() == 'LOQ':
+                reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), isSample,
+                                                  other_centre=reducer.get_beam_center(reducer.instrument.other_detector().name()))
+            else:
+                reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), isSample)
             reducer.update_beam_center()
             num += 1
             if num == self.periods_in_file:
@@ -1509,14 +1513,12 @@ class DarkRunSubtraction(object):
                 alg_load_monitors.initialize()
                 alg_load_monitors.setChild(True)
                 alg_load_monitors.setProperty("Filename", dark_run_file_path)
-                alg_load_monitors.setProperty("MonitorsAsEvents", False)
-                alg_load_monitors.setProperty("OutputWorkspace", monitors_name)
+                alg_load_monitors.setProperty('LoadOnly', 'Histogram')
+                alg_load_monitors.setProperty('OutputWorkspace', monitors_name)
                 alg_load_monitors.execute()
                 monitor_ws = alg_load_monitors.getProperty("OutputWorkspace").value
-            except:
-                raise RuntimeError("DarkRunSubtration: The monitor workspace for the specified dark run "
-                                   "file cannot be found or loaded. "
-                                   "Please make sure that that it exists in your search directory.")
+            except RuntimeError as e:
+                raise RuntimeError("DarkRunSubtration: Failed to load monitor for the specified dark run: " + e.message)
         return monitor_ws
 
     def _get_dark_run_name_and_path(self, setting):
@@ -1568,9 +1570,8 @@ class DarkRunSubtraction(object):
                 alg_load.setProperty("OutputWorkspace", dark_run_ws_name)
                 alg_load.execute()
                 dark_run_ws= alg_load.getProperty("OutputWorkspace").value
-            except:
-                raise RuntimeError("DarkRunSubtration: The specified dark run file cannot be found or loaded. "
-                                   "Please make sure that that it exists in your search directory.")
+            except RuntimeError as e:
+                raise RuntimeError("DarkRunSubtration: The specified dark run file failed to load: " + e.message)
 
         # Crop the workspace if this is required
         if dark_run_ws.getNumberHistograms() != (end_spec_index - start_spec_index + 1):
@@ -3351,6 +3352,8 @@ class UserFile(ReductionStep):
                 if det_specif == 'MERGE':
                     det_specif = 'MERGED'
                 reducer.instrument.setDetector(det_specif)
+            elif det_specif.startswith('OVERLAP'):
+                self.readFrontMergeRange(det_specif, reducer)
             else:
                 _issueWarning('Incorrectly formatted DET line, %s, line ignored' % upper_line)
 
@@ -3718,6 +3721,24 @@ class UserFile(ReductionStep):
                     rAnds.shift = float(values[1])
                 else:
                     _issueWarning("Command: \"DET/" + details + "\" not valid. Expected format is /DET/RESCALE r")
+
+    def readFrontMergeRange(self, details, reducer):
+        """
+            Handle user commands of the type DET/OVERLAP [Q1 Q2] which are used to specify the range to merge
+
+            @param details: the contents of the line after DET/
+            @param reducer: the object that contains all the settings
+        """
+        values = details.split()
+        rAnds = reducer.instrument.getDetector('FRONT').mergeRange
+        rAnds.q_merge_range = False
+        if len(values) == 3:
+            rAnds.q_merge_range = True
+            rAnds.q_min = float(values[1])
+            rAnds.q_max = float(values[2])
+        else:
+            _issueWarning(
+                "Command: \"DET/" + details + "\" not valid. Expected format is /DET/OVERLAP q1 q2")
 
     def _read_back_line(self, arguments, reducer):
         """

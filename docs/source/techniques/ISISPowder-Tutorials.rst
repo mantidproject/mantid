@@ -210,6 +210,10 @@ found for each individual instrument in the reference document:
 
 How objects hold state in ISIS Powder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. warning:: This is NOT relevant for PEARL. PEARL scientists should
+	     refer to :ref:`state_for_pearl_isis-powder-diffraction-ref`
+
 Additionally as the objects hold state we can set a parameter
 anywhere. For example on Polaris the ``mode`` parameter indicates
 the chopper state for this/these run(s). This can either be set 
@@ -612,8 +616,9 @@ you must update the calibration directory. Using the cycle mapping from Peal:
 
 The relevant fields from the cycle mapping are the ``label`` and 
 ``offset_file_name``. Within the calibration directory a folder
-with the ``label`` name must exist and contain a cal file with
-the ``offset_file_name``.
+with the ``label`` name must exist. ``offset_file_name`` must either
+be the name of a cal file within that folder, or the full path to a
+cal file elsewhere.
 
 In this example we need a folder within the calibration 
 directory called *1_2* which holds a

@@ -20,7 +20,7 @@ default.instrument =
 Q.convention = Inelastic
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space.  Interfaces are seperated from their respective categories by a "/".
-mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py SANS/ORNL_SANS.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry_Old.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_Powder_Diffraction_Reduction.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py SANS/ISIS_SANS_v2_experimental.py Muon/Frequency_Domain_Analysis.py
+mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py Direct/MSlice.py SANS/ORNL_SANS.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry_Old.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_Powder_Diffraction_Reduction.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py SANS/ISIS_SANS_v2_experimental.py Muon/Frequency_Domain_Analysis.py
 
 # Directory containing the above startup scripts
 mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
@@ -54,6 +54,8 @@ CheckMantidVersion.DownloadURL = http://download.mantidproject.org
 
 # Whether to report usage statistics back to central server
 usagereports.enabled = @ENABLE_USAGE_REPORTS@
+errorreports.rooturl = http://errorreports.mantidproject.org
+usagereports.rooturl = http://reports.mantidproject.org
 
 # Where to load Grouping files (that are shipped with Mantid) from
 groupingFiles.directory = @MANTID_ROOT@/instrument/Grouping
@@ -140,6 +142,9 @@ network.scriptrepo.timeout = 5
 # proxy.port = 8080
 # This is to force https proxy requests to use the http proxy (current necessary)
 proxy.httpsTargetUrl = http://www.mantidproject.org
+# This timeout is the maximum duration in seconds we will wait on a request to the ISIS DAE (live data)
+# it might need to be increased if you are trying to download histogram data from a very large instrument
+ISISDAE.Timeout = 120
 
 # Defines the precision of h, k, and l when output in peak workspace table
 PeakColumn.hklPrec=2
@@ -250,3 +255,12 @@ cluster.submission=Off
 
 # Used to stop a catalog asynchronous algorithm after the timeout period
 catalog.timeout.value=30
+
+# Indicates if project recovery should automatically save in the background
+projectRecovery.enabled=true
+
+# The delay in seconds between triggering a project recovery save
+projectRecovery.secondsBetween = 60
+
+# The number of checkpoints to retain in the recovery folder
+projectRecovery.numberOfCheckpoints = 5

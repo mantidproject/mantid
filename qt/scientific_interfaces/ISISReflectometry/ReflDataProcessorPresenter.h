@@ -11,6 +11,54 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** Utility class to store information about time slicing
+ */
+class TimeSlicingInfo {
+public:
+  TimeSlicingInfo() = delete;
+  TimeSlicingInfo(QString type, QString values);
+
+  size_t numberOfSlices() const;
+  double sliceDuration() const;
+  double startTime(const size_t i) { return m_startTimes[i]; }
+  double stopTime(const size_t i) { return m_stopTimes[i]; }
+  QString values() { return m_values; }
+  QString logFilter() { return m_logFilter; }
+
+  bool hasSlicing() const { return m_enableSlicing && !m_values.isEmpty(); }
+  bool isCustom() const { return m_type == "Custom"; }
+  bool isLogValue() const { return m_type == "LogValue"; }
+  bool isUniform() const { return m_type == "Uniform"; }
+  bool isUniformEven() const { return m_type == "UniformEven"; }
+
+  void addSlice(const double startTime, const double stopTime);
+  void clearSlices();
+  void parseUniform();
+  void parseUniformEven();
+  void parseCustom();
+  void parseLogValue();
+
+private:
+  // the slicing type specified by the user
+  QString m_type;
+  // the slicing values specified by the user
+  QString m_values;
+  // whether time slicing is enabled or not
+  bool m_enableSlicing;
+  // the number of slices (where this is constant for all slices)
+  size_t m_constNumberOfSlices;
+  // the duration of the slices (where this is constant for all slices)
+  double m_constSliceDuration;
+  // The start and stop times for all slices for all rows in all groups. If
+  // using non-even slicing then different runs may have different numbers of
+  // slices. These vectors will contain ALL slices. It is assumed the first n
+  // number of common slices will be the same for all runs and the difference
+  // will be that later slices do not exist for some runs.
+  std::vector<double> m_startTimes;
+  std::vector<double> m_stopTimes;
+  QString m_logFilter;
+};
+
 using namespace MantidQt::MantidWidgets::DataProcessor;
 
 /** @class ReflDataProcessorPresenter
@@ -47,50 +95,52 @@ public:
       const WhiteList &whitelist,
       const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
       const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor,
+      const PostprocessingAlgorithm &postprocessor, int group,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
       const QString &loader = "Load");
   ~ReflDataProcessorPresenter() override;
 
   // The following methods are public for testing purposes only
-  // Add entry for the number of slices for a row in a group
-  void addNumSlicesEntry(int groupID, int rowID, size_t numSlices);
   // Add entry for the number of slices for all rows in a group
   void addNumGroupSlicesEntry(int groupID, size_t numSlices);
+  // end reduction
+  void endReduction(const bool success) override;
+
+  void
+  completedRowReductionSuccessfully(GroupData const &groupData,
+                                    std::string const &workspaceName) override;
+  void completedGroupReductionSuccessfully(
+      GroupData const &groupData, std::string const &workspaceName) override;
+
+protected slots:
+  void threadFinished(const int exitCode) override;
 
 private:
-  // Process selected rows
-  void process() override;
+  // Get the processing options for this row
+  OptionsMap getProcessingOptions(RowData_sptr data) override;
+  // Process given items
+  void process(TreeData itemsToProcess) override;
   // Plotting
   void plotRow() override;
   void plotGroup() override;
   // Loads a run from disk
   QString loadRun(const QString &run, const QString &instrument,
                   const QString &prefix, const QString &loader, bool &runFound);
-  // Get the name of a post-processed workspace
-  QString getPostprocessedWorkspaceName(const GroupData &groupData,
-                                        const QString &prefix, size_t index);
   // Loads a group of runs
   bool loadGroup(const GroupData &group);
+  // Get the property names of workspaces affected by slicing
+  std::vector<QString> getSlicedWorkspacePropertyNames() const;
+  // Reduce a row that is an event workspace
+  bool reduceRowAsEventWS(RowData_sptr rowData, TimeSlicingInfo &slicing);
   // Process a group of runs which are event workspaces
   bool processGroupAsEventWS(int groupID, const GroupData &group,
-                             const QString &timeSlicingType,
-                             const QString &timeSlicingValues);
+                             TimeSlicingInfo &slicingInfo);
   // Process a group of runs which are not event workspaces
   bool processGroupAsNonEventWS(int groupID, GroupData &group);
 
   // Parse uniform / uniform even time slicing from input string
-  void parseUniform(const QString &timeSlicing, const QString &slicingType,
-                    const QString &wsName, std::vector<double> &startTimes,
-                    std::vector<double> &stopTimes);
-  // Parse custom time slicing from input string
-  void parseCustom(const QString &timeSlicing, std::vector<double> &startTimes,
-                   std::vector<double> &stopTimes);
-  // Parse log value slicing and filter from input string
-  void parseLogValue(const QString &inputStr, QString &logFilter,
-                     std::vector<double> &minValues,
-                     std::vector<double> &maxValues);
+  bool parseUniform(TimeSlicingInfo &slicing, const QString &wsName);
   bool workspaceExists(QString const &workspaceName) const;
 
   // Load a run as event workspace
@@ -99,8 +149,12 @@ private:
   void loadNonEventRun(const QString &runNo);
 
   // Take a slice from event workspace
-  QString takeSlice(const QString &runNo, size_t sliceIndex, double startTime,
-                    double stopTime, const QString &logFilter = "");
+  QString takeSlice(const QString &runNo, TimeSlicingInfo &slicing,
+                    size_t sliceIndex);
+
+  void setReductionResumed();
+  void setReductionPaused() override;
+  void setReductionCompleted();
 
   Mantid::API::IEventWorkspace_sptr
   retrieveWorkspaceOrCritical(QString const &name) const;
@@ -112,9 +166,14 @@ private:
   bool proceedIfWSTypeInADS(
       const MantidQt::MantidWidgets::DataProcessor::TreeData &data,
       const bool findEventWS);
+  void handleError(RowData_sptr rowData, const std::string &error);
+  void handleError(const int groupIndex, const std::string &error);
+  bool
+  workspaceIsOutputOfGroup(const GroupData &groupData,
+                           const std::string &workspaceName) const override;
 
-  std::map<int, std::map<int, size_t>> m_numSlicesMap;
   std::map<int, size_t> m_numGroupSlicesMap;
+  bool m_processingAsEventData;
 };
 }
 }

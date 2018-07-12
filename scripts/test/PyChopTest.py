@@ -16,9 +16,6 @@ class PyChop2Tests(unittest.TestCase):
         flux = []
         for inc, instname in enumerate(instnames):
             chopobj = PyChop2(instname)
-            # Checks that initialisations instanciates the correct submodule
-            # which does the actual calculations. PyChop2 is just a wrapper.
-            self.assertTrue('ISISFermi' in chopobj.getObject().__module__)
             # Code should give an error if the chopper settings and Ei have
             # not been set.
             self.assertRaises(ValueError, chopobj.getResolution)
@@ -29,7 +26,8 @@ class PyChop2Tests(unittest.TestCase):
             flux.append(ff)
         # Checks that the flux should be highest for MERLIN, MARI and MAPS in that order
         self.assertTrue(flux[2] > flux[1])
-        self.assertTrue(flux[1] > flux[0])
+        # Note that MAPS has been upgraded so now should have higher flux than MARI.
+        self.assertTrue(flux[0] > flux[1])
         # Checks that the resolution should be best for MARI, MAPS and MERLIN in that order
         self.assertTrue(res[1][0] < res[0][0])
         self.assertTrue(res[0][0] < res[2][0]) 
@@ -46,9 +44,6 @@ class PyChop2Tests(unittest.TestCase):
         flux = []
         for inc, variant in enumerate(variants):
             chopobj = PyChop2('LET', variant)
-            # Checks that initialisations instanciates the correct submodule
-            # which does the actual calculations. PyChop2 is just a wrapper.
-            self.assertTrue('ISISDisk' in chopobj.getObject().__module__)
             # Checks that it instanciates the correct variant
             self.assertTrue(variant in chopobj.getChopper())
             # Code should give an error if the chopper settings and Ei have

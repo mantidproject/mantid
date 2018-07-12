@@ -604,7 +604,7 @@ void PeaksTableControllerVsi::updatePeaksWorkspaces(
  */
 void PeaksTableControllerVsi::onPeaksSorted(
     const std::string &columnToSortBy, const bool sortAscending,
-    const Mantid::API::IPeaksWorkspace *ws) {
+    const Mantid::API::IPeaksWorkspace_sptr ws) {
   // Invoke the ording command on the presenters
   m_presenter->sortPeaksWorkspace(columnToSortBy, sortAscending, ws);
   // Update the tabs

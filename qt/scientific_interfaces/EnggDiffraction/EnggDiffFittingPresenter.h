@@ -68,11 +68,15 @@ public:
 
   /// From the IEnggDiffractionCalibration interface
   //@{
-  Poco::Path outFilesUserDir(const std::string &addToDir) override;
+  Poco::Path outFilesUserDir(const std::string &addToDir) const override;
   //@}
 
+  std::string userHDFRunFilename(const int runNumber) const override;
+  std::string userHDFMultiRunFilename(
+      const std::vector<RunLabel> &runLabels) const override;
+
   /// the fitting hard work that a worker / thread will run
-  void doFitting(const int runNumber, const size_t bank,
+  void doFitting(const std::vector<RunLabel> &runLabels,
                  const std::string &expectedPeaks);
 
   void plotFocusedFile(bool plotSinglePeaks,
@@ -105,9 +109,8 @@ private:
   void warnFileNotFound(const std::exception &ex);
 
   // Methods related single peak fits
-  virtual void startAsyncFittingWorker(
-      const std::vector<std::pair<int, size_t>> &runNumberBankPairs,
-      const std::string &expectedPeaks);
+  virtual void startAsyncFittingWorker(const std::vector<RunLabel> &runLabels,
+                                       const std::string &expectedPeaks);
 
   std::string getBaseNameFromStr(const std::string &filePath) const;
 
@@ -149,9 +152,6 @@ private:
 
   /// Handle the user selecting a different run to plot
   void processSelectRun();
-
-  /// Whether the user is doing fitting on multiple runs
-  bool m_multiRunMode;
 };
 
 } // namespace CustomInterfaces

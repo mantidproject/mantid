@@ -36,5 +36,5 @@ class MuonFFTTest(stresstesting.MantidStressTest):
         self.assertEqual(result, False)
 
     def validate(self):
-        self.tolerance = 1E-1
+        self.tolerance = 1E-8
         return ('MuonFFTResults','MuonFFTMUSR00022725.nxs')

@@ -4,8 +4,6 @@
 #include "MantidBeamline/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
-#include <vector>
-
 namespace Mantid {
 class SpectrumDefinition;
 namespace Beamline {

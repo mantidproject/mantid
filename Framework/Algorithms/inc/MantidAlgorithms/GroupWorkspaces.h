@@ -1,7 +1,7 @@
 #ifndef MANTID_ALGORITHM_GROUP_H_
 #define MANTID_ALGORITHM_GROUP_H_
 
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
@@ -38,7 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport GroupWorkspaces : public API::DistributedAlgorithm {
+class DLLExport GroupWorkspaces : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "GroupWorkspaces"; }
@@ -49,10 +49,18 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"UnGroupWorkspace"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Transforms\\Grouping;Utility\\Workspaces";
   }
+
+protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
 
 private:
   /// Overridden Init method

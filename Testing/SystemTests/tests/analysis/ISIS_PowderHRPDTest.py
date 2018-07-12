@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
+import platform
 import shutil
 import stresstesting
 
@@ -79,7 +80,10 @@ class FocusTest(stresstesting.MantidStressTest):
         self.focus_results = run_focus()
 
     def validate(self):
-        self.tolerance=0.25  # Required for difference in spline data between operating systems
+        if platform.system() == "Darwin":  # OSX requires higher tolerance for splines
+            self.tolerance = 0.4
+        else:
+            self.tolerance = 0.05
         return self.focus_results.getName(), "HRPD66063_focused.nxs"
 
     def cleanup(self):

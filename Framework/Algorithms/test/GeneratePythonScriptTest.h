@@ -159,7 +159,7 @@ public:
     history.addHistory(boost::make_shared<AlgorithmHistory>(
         API::AlgorithmHistory(pAlg.get())));
 
-    pAlg.reset(NULL);
+    pAlg.reset(nullptr);
   }
 };
 

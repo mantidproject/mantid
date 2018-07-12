@@ -52,7 +52,7 @@ struct DLLExport MatrixToNDArray {
     const std::pair<size_t, size_t> matrixDims = cmatrix.size();
     Py_intptr_t dims[2] = {static_cast<Py_intptr_t>(matrixDims.first),
                            static_cast<Py_intptr_t>(matrixDims.second)};
-    typedef typename ConversionPolicy::template apply<ElementType> policy;
+    using policy = typename ConversionPolicy::template apply<ElementType>;
     return policy::createFromArray(&(cmatrix[0][0]), 2, dims);
   }
 };

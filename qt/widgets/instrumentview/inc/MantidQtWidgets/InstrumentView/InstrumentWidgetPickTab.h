@@ -200,12 +200,11 @@ public slots:
   void clear();
 
 private:
-  QString displayDetectorInfo(Mantid::detid_t detid);
+  QString displayDetectorInfo(size_t index);
   QString displayNonDetectorInfo(Mantid::Geometry::ComponentID compID);
   QString displayPeakInfo(Mantid::Geometry::IPeak *peak);
   QString displayPeakAngles(const std::pair<Mantid::Geometry::IPeak *,
                                             Mantid::Geometry::IPeak *> &peaks);
-  QString getParameterInfo(const Mantid::Geometry::IComponent &comp);
   QString getPeakOverlayInfo();
 
   InstrumentWidgetPickTab *m_tab;
@@ -238,7 +237,7 @@ public:
                          InstrumentWidget *instrWidget, OneCurvePlot *plot);
   void setEnabled(bool on) { m_enabled = on; }
   void setPlotData(size_t pickID);
-  void setPlotData(QList<int> detIDs);
+  void setPlotData(const std::vector<size_t> &detIndices);
   void updatePlot();
   void clear();
   void savePlotToWorkspace();
@@ -256,17 +255,17 @@ private slots:
   void addPeak(double x, double y);
 
 private:
-  void plotSingle(int detid);
-  void plotTube(int detid);
-  void plotTubeSums(int detid);
-  void plotTubeIntegrals(int detid);
-  void prepareDataForSinglePlot(int detid, std::vector<double> &x,
+  void plotSingle(size_t detindex);
+  void plotTube(size_t detindex);
+  void plotTubeSums(size_t detindex);
+  void plotTubeIntegrals(size_t detindex);
+  void prepareDataForSinglePlot(size_t detindex, std::vector<double> &x,
                                 std::vector<double> &y,
                                 std::vector<double> *err = nullptr);
-  void prepareDataForSumsPlot(int detid, std::vector<double> &x,
+  void prepareDataForSumsPlot(size_t detindex, std::vector<double> &x,
                               std::vector<double> &y,
                               std::vector<double> *err = nullptr);
-  void prepareDataForIntegralsPlot(int detid, std::vector<double> &x,
+  void prepareDataForIntegralsPlot(size_t detindex, std::vector<double> &x,
                                    std::vector<double> &y,
                                    std::vector<double> *err = nullptr);
   static double getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos,
@@ -281,7 +280,7 @@ private:
   bool m_enabled;
   TubeXUnits
       m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
-  int m_currentDetID;
+  size_t m_currentPickID;
 };
 
 } // MantidWidgets

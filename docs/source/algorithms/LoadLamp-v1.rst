@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -40,3 +40,7 @@ Output:
 .. testcleanup:: ExLoadLamp
 
    mtd.clear()
+
+.. categories::
+
+.. sourcelink::

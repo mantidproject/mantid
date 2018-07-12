@@ -15,6 +15,7 @@
 #include "MantidAPI/ParameterTie.h"
 
 #include "MantidKernel/Exception.h"
+#include <boost/regex.hpp>
 #include <iostream>
 
 namespace Mantid {
@@ -28,6 +29,10 @@ using namespace API;
 DECLARE_FUNCTION(CrystalFieldMultiSpectrum)
 
 namespace {
+
+// Regex for the FWHMX# type strings (single-site mode)
+const boost::regex FWHMX_ATTR_REGEX("FWHMX([0-9]+)");
+const boost::regex FWHMY_ATTR_REGEX("FWHMY([0-9]+)");
 
 /// Define the source function for CrystalFieldMultiSpectrum.
 /// Its function() method is not needed.
@@ -51,11 +56,15 @@ public:
   std::vector<size_t> m_IntensityScalingIdx;
   std::vector<size_t> m_PPLambdaIdxChild;
   std::vector<size_t> m_PPLambdaIdxSelf;
+  std::vector<size_t> m_PPChi0IdxChild;
+  std::vector<size_t> m_PPChi0IdxSelf;
   /// Declare the intensity scaling parameters: one per spectrum.
   void declareIntensityScaling(size_t nSpec) {
     m_IntensityScalingIdx.clear();
     m_PPLambdaIdxChild.resize(nSpec, -1);
     m_PPLambdaIdxSelf.resize(nSpec, -1);
+    m_PPChi0IdxChild.resize(nSpec, -1);
+    m_PPChi0IdxSelf.resize(nSpec, -1);
     for (size_t i = 0; i < nSpec; ++i) {
       auto si = std::to_string(i);
       try { // If parameter has already been declared, don't declare it.
@@ -71,6 +80,8 @@ public:
     if (m_PPLambdaIdxSelf.size() <= iSpec) {
       m_PPLambdaIdxSelf.resize(iSpec + 1, -1);
       m_PPLambdaIdxChild.resize(iSpec + 1, -1);
+      m_PPChi0IdxSelf.resize(iSpec + 1, -1);
+      m_PPChi0IdxChild.resize(iSpec + 1, -1);
     }
     auto si = std::to_string(iSpec);
     try { // If parameter has already been declared, don't declare it.
@@ -78,7 +89,13 @@ public:
                        "Effective exchange coupling of dataset " + si);
     } catch (std::invalid_argument &) {
     }
+    try { // If parameter has already been declared, don't declare it.
+      declareParameter("Chi0" + si, 0.0,
+                       "Effective exchange coupling of dataset " + si);
+    } catch (std::invalid_argument &) {
+    }
     m_PPLambdaIdxSelf[iSpec] = parameterIndex("Lambda" + si);
+    m_PPChi0IdxSelf[iSpec] = parameterIndex("Chi0" + si);
   }
 };
 }
@@ -123,6 +140,7 @@ CrystalFieldMultiSpectrum::createEquivalentFunctions() const {
 /// Perform custom actions on setting certain attributes.
 void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
                                              const Attribute &attr) {
+  boost::smatch match;
   if (name == "Temperatures") {
     // Define (declare) the parameters for intensity scaling.
     const auto nSpec = attr.asVector().size();
@@ -130,13 +148,23 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
     m_nOwnParams = m_source->nParams();
     m_fwhmX.resize(nSpec);
     m_fwhmY.resize(nSpec);
+    std::vector<double> new_fwhm = getAttribute("FWHMs").asVector();
+    const auto nWidths = new_fwhm.size();
+    if (nWidths != nSpec) {
+      new_fwhm.resize(nSpec);
+      if (nWidths > nSpec) {
+        for (size_t iSpec = nWidths; iSpec < nSpec; ++iSpec) {
+          new_fwhm[iSpec] = new_fwhm[0];
+        }
+      }
+    }
+    FunctionGenerator::setAttribute("FWHMs", Attribute(new_fwhm));
     for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
       const auto suffix = std::to_string(iSpec);
       declareAttribute("FWHMX" + suffix, Attribute(m_fwhmX[iSpec]));
       declareAttribute("FWHMY" + suffix, Attribute(m_fwhmY[iSpec]));
     }
-  }
-  if (name == "PhysicalProperties") {
+  } else if (name == "PhysicalProperties") {
     const auto physpropId = attr.asVector();
     const auto nSpec = physpropId.size();
     auto &source = dynamic_cast<Peaks &>(*m_source);
@@ -161,6 +189,22 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
         source.declarePPLambda(iSpec);
         m_nOwnParams = m_source->nParams();
       }
+    }
+  } else if (boost::regex_match(name, match, FWHMX_ATTR_REGEX)) {
+    auto iSpec = std::stoul(match[1]);
+    if (m_fwhmX.size() > iSpec) {
+      m_fwhmX[iSpec].clear();
+    } else {
+      throw std::invalid_argument(
+          "Temperatures must be defined before resolution model");
+    }
+  } else if (boost::regex_match(name, match, FWHMY_ATTR_REGEX)) {
+    auto iSpec = std::stoul(match[1]);
+    if (m_fwhmY.size() > iSpec) {
+      m_fwhmY[iSpec].clear();
+    } else {
+      throw std::invalid_argument(
+          "Temperatures must be defined before resolution model");
     }
   }
   FunctionGenerator::setAttribute(name, attr);
@@ -332,6 +376,8 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
     spectrum.setAttribute("powder", getAttribute("powder" + suffix));
     dynamic_cast<Peaks &>(*m_source).m_PPLambdaIdxChild[iSpec] =
         spectrum.parameterIndex("Lambda");
+    dynamic_cast<Peaks &>(*m_source).m_PPChi0IdxChild[iSpec] =
+        spectrum.parameterIndex("Chi0");
     return retval;
   }
   case Magnetisation: {
@@ -408,6 +454,8 @@ void CrystalFieldMultiSpectrum::updateSpectrum(
     auto &source = dynamic_cast<Peaks &>(*m_source);
     suscept.setParameter(source.m_PPLambdaIdxChild[iSpec],
                          getParameter(source.m_PPLambdaIdxSelf[iSpec]));
+    suscept.setParameter(source.m_PPChi0IdxChild[iSpec],
+                         getParameter(source.m_PPChi0IdxSelf[iSpec]));
     break;
   }
   case Magnetisation: {

@@ -12,6 +12,9 @@ class FilterLogByTime(PythonAlgorithm):
     def category(self):
         return "Events\\EventFiltering"
 
+    def seeAlso(self):
+        return [ "FilterByTime","FilterByLogValue" ]
+
     def name(self):
         return "FilterLogByTime"
 
@@ -55,22 +58,25 @@ class FilterLogByTime(PythonAlgorithm):
 
     def __filter(self, ws, logname, starttime=None, endtime=None):
         run = ws.getRun()
-        runstart = run.startTime().total_nanoseconds()
-        tstart = runstart
-        tend = run.endTime().total_nanoseconds()
-        nanosecond = int(1e9)
-        if starttime:
-            tstart = runstart + (starttime * nanosecond)
-        if  endtime:
-            tend = runstart + (endtime * nanosecond)
+        runstart = run.startTime().to_datetime64()     # start of the run since epoch
+
+        tstart = runstart                              # copy the start of the run
+        tend = run.endTime().to_datetime64()           # end of the run since epoch
+
+        if starttime:                                  # user supplied
+            tstart = runstart + (starttime * numpy.timedelta64(1,'s'))
+        if  endtime:                                   # user supplied
+            tend = runstart + (endtime * numpy.timedelta64(1,'s'))
+
         log = run.getLogData(logname)
         if not hasattr(log, "times"):
             raise ValueError("log called %s is not a FloatTimeSeries log" % logname)
 
-        times = numpy.array([t.total_nanoseconds() for t in log.times])
+        times = log.times # local copy
 
         values = numpy.array(log.value)
-        mask = (tstart <= times) & (times <= tend) # Get times between filter start and end.
+        mask = numpy.logical_and((tstart <= times), (times <= tend)) # Get times between filter start and end.
+
         filteredvalues = values[mask]
         return filteredvalues
 

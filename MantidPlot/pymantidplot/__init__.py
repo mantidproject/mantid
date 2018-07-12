@@ -55,7 +55,6 @@ def _get_analysis_data_service():
     import mantid
     return mantid.AnalysisDataService.Instance()
 
-
 # -------------------------- Wrapped MantidPlot functions -----------------
 
 def runPythonScript(code, async=False, quiet=False, redirect=True):
@@ -726,6 +725,7 @@ InstrumentWidgetRenderTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidg
 InstrumentWidgetPickTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetPickTab
 InstrumentWidgetMaskTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetMaskTab
 InstrumentWidgetTreeTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetTreeTab
+SpectrumView = mantidqtpython.MantidQt.SpectrumView.SpectrumView
 
 
 def getInstrumentView(name, tab=InstrumentWidget.RENDER):

@@ -67,6 +67,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"GenerateEventsFilter", "FilterByTime", "FilterByLogValue"};
+  }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
@@ -158,11 +161,6 @@ private:
   template <typename TYPE>
   void splitTimeSeriesProperty(
       Kernel::TimeSeriesProperty<TYPE> *tsp,
-      std::vector<Types::Core::DateAndTime> &split_datetime_vec,
-      const int max_target_index);
-
-  void splitDoubleTimeSeriesLogs(
-      const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
       std::vector<Types::Core::DateAndTime> &split_datetime_vec,
       const int max_target_index);
 

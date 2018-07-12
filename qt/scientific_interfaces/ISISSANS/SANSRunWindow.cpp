@@ -61,7 +61,7 @@ Logger g_log("SANSRunWindow");
 /// static logger for centre finding
 Logger g_centreFinderLog("CentreFinder");
 
-typedef boost::shared_ptr<Kernel::PropertyManager> ReductionSettings_sptr;
+using ReductionSettings_sptr = boost::shared_ptr<Kernel::PropertyManager>;
 
 /**
  * Returns the PropertyManager object that is used to store the settings
@@ -201,15 +201,9 @@ void setTransmissionOnSaveCommand(
   }
 }
 
-bool checkSaveOptions(QString &message, bool is1D, bool isCanSAS,
-                      bool isNistQxy) {
+bool checkSaveOptions(QString &message, bool is1D, bool isCanSAS) {
   // Check we are dealing with 1D or 2D data
   bool isValid = true;
-  if (is1D && isNistQxy) {
-    isValid = false;
-    message +=
-        "Save option issue: Cannot save in NistQxy format for 1D data.\n";
-  }
 
   if (!is1D && isCanSAS) {
     isValid = false;
@@ -493,7 +487,6 @@ void SANSRunWindow::setupSaveBox() {
           SLOT(setUserFname()));
 
   // link the save option tick boxes to their save algorithm
-  m_savFormats.insert(m_uiForm.saveNIST_Qxy_check, "SaveNISTDAT");
   m_savFormats.insert(m_uiForm.saveCan_check, "SaveCanSAS1D");
   m_savFormats.insert(m_uiForm.saveRKH_check, "SaveRKH");
   m_savFormats.insert(m_uiForm.saveNXcanSAS_check, "SaveNXcanSAS");
@@ -756,8 +749,6 @@ void SANSRunWindow::readSaveSettings(QSettings &valueStore) {
   valueStore.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
   m_uiForm.saveCan_check->setChecked(
       valueStore.value("canSAS", false).toBool());
-  m_uiForm.saveNIST_Qxy_check->setChecked(
-      valueStore.value("NIST_Qxy", false).toBool());
   m_uiForm.saveRKH_check->setChecked(valueStore.value("RKH", false).toBool());
   m_uiForm.saveNXcanSAS_check->setChecked(
       valueStore.value("NXcanSAS", false).toBool());
@@ -799,7 +790,6 @@ void SANSRunWindow::saveSettings() {
 void SANSRunWindow::saveSaveSettings(QSettings &valueStore) {
   valueStore.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
   valueStore.setValue("canSAS", m_uiForm.saveCan_check->isChecked());
-  valueStore.setValue("NIST_Qxy", m_uiForm.saveNIST_Qxy_check->isChecked());
   valueStore.setValue("RKH", m_uiForm.saveRKH_check->isChecked());
   valueStore.setValue("NXcanSAS", m_uiForm.saveNXcanSAS_check->isChecked());
 }
@@ -912,6 +902,15 @@ bool SANSRunWindow::loadUserFile() {
           "print(i.ReductionSingleton().to_wavelen.wav_step)").trimmed();
   setLimitStepParameter("wavelength", wav_step, m_uiForm.wav_dw,
                         m_uiForm.wav_dw_opt);
+  // RCut WCut
+  dbl_param = runReduceScriptFunction(
+                  "print(i.ReductionSingleton().to_Q.r_cut)").toDouble();
+  m_uiForm.r_cut_line_edit->setText(QString::number(dbl_param * unit_conv));
+
+  dbl_param = runReduceScriptFunction(
+                  "print(i.ReductionSingleton().to_Q.w_cut)").toDouble();
+  m_uiForm.w_cut_line_edit->setText(QString::number(dbl_param));
+
   // Q
   QString text =
       runReduceScriptFunction("print(i.ReductionSingleton().to_Q.binning)");
@@ -983,6 +982,23 @@ bool SANSRunWindow::loadUserFile() {
                                 "'FRONT').rescaleAndShift.qMax)").trimmed());
   } else
     m_uiForm.frontDetQrangeOnOff->setChecked(false);
+
+  QString qMergeRangeUserSelected =
+      runReduceScriptFunction("print("
+                              "i.ReductionSingleton().instrument.getDetector('"
+                              "FRONT').mergeRange.q_merge_range)").trimmed();
+  if (qMergeRangeUserSelected == "True") {
+    m_uiForm.mergeQRangeOnOff->setChecked(true);
+    m_uiForm.mergeQMin->setText(
+        runReduceScriptFunction("print("
+                                "i.ReductionSingleton().instrument.getDetector("
+                                "'FRONT').mergeRange.q_min)").trimmed());
+    m_uiForm.mergeQMax->setText(
+        runReduceScriptFunction("print("
+                                "i.ReductionSingleton().instrument.getDetector("
+                                "'FRONT').mergeRange.q_max)").trimmed());
+  } else
+    m_uiForm.mergeQRangeOnOff->setChecked(false);
 
   // Monitor spectra
   m_uiForm.monitor_spec->setText(
@@ -2128,8 +2144,8 @@ bool SANSRunWindow::handleLoadButtonClick() {
       m_uiForm.sample_geomid->setCurrentIndex(geomId - 1);
 
       using namespace boost;
-      typedef tuple<QLineEdit *, function<double(const Sample *)>, std::string>
-          GeomSampleInfo;
+      using GeomSampleInfo =
+          tuple<QLineEdit *, function<double(const Sample *)>, std::string>;
 
       std::vector<GeomSampleInfo> sampleInfoList;
       sampleInfoList.push_back(make_tuple(m_uiForm.sample_thick,
@@ -2232,6 +2248,14 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type) {
       // to give the correct number of characters
       m_uiForm.rad_min->text() + " '+'" + m_uiForm.rad_max->text() +
       " '+'1', i.ReductionSingleton())\n";
+
+  exec_reduce +=
+      "i.ReductionSingleton().user_settings.readLimitValues('L/Q/RCut '+'" +
+      m_uiForm.r_cut_line_edit->text() + "', i.ReductionSingleton())\n";
+
+  exec_reduce +=
+      "i.ReductionSingleton().user_settings.readLimitValues('L/Q/WCut '+'" +
+      m_uiForm.w_cut_line_edit->text() + "', i.ReductionSingleton())\n";
 
   setStringSetting("events.binning", m_uiForm.l_events_binning->text());
 
@@ -3039,12 +3063,11 @@ bool SANSRunWindow::areSaveSettingsValid(const QString &workspaceName) {
       AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
           workspaceName.toStdString());
   auto is1D = ws->getNumberHistograms() == 1;
-  auto isNistQxy = m_uiForm.saveNIST_Qxy_check->isChecked();
   auto isCanSAS = m_uiForm.saveCan_check->isChecked();
 
   QString message;
 
-  auto isValid = checkSaveOptions(message, is1D, isCanSAS, isNistQxy);
+  auto isValid = checkSaveOptions(message, is1D, isCanSAS);
 
   // Print the error message if there are any
   if (!message.isEmpty()) {
@@ -4032,6 +4055,9 @@ void SANSRunWindow::setValidators() {
   m_uiForm.wav_max->setValidator(m_doubleValidatorZeroToMax);
   m_uiForm.wav_dw->setValidator(m_doubleValidatorZeroToMax);
 
+  m_uiForm.r_cut_line_edit->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.w_cut_line_edit->setValidator(m_doubleValidatorZeroToMax);
+
   m_uiForm.q_min->setValidator(m_doubleValidatorZeroToMax);
   m_uiForm.q_max->setValidator(m_doubleValidatorZeroToMax);
   m_uiForm.q_dq->setValidator(m_doubleValidatorZeroToMax);
@@ -4593,16 +4619,13 @@ bool SANSRunWindow::areSettingsValid(States type) {
   }
 
   // Check save format consistency for batch mode reduction
-  // 1D --> cannot be Nist Qxy
   // 2D --> cannot be CanSAS
   auto isBatchMode = !m_uiForm.single_mode_btn->isChecked();
   if (isBatchMode) {
     auto is1D = type == OneD;
     auto isCanSAS = m_uiForm.saveCan_check->isChecked();
-    auto isNistQxy = m_uiForm.saveNIST_Qxy_check->isChecked();
     QString saveMessage;
-    auto isValidSaveOption =
-        checkSaveOptions(saveMessage, is1D, isCanSAS, isNistQxy);
+    auto isValidSaveOption = checkSaveOptions(saveMessage, is1D, isCanSAS);
     if (!isValidSaveOption) {
       isValid = false;
       message += saveMessage;

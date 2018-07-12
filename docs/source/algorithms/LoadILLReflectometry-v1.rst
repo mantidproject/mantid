@@ -2,15 +2,15 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
 Description
 -----------
 
-Loads data of a Nexus file obtained from an ILL reflectometry instrument `D17 <https://www.ill.eu/instruments-support/instruments-groups/instruments/d17/description/instrument-layout/>`_ or `Figaro <https://www.ill.eu/instruments-support/instruments-groups/instruments/figaro/description/instrument-layout/>`_ into a `Workspace2D <http://www.mantidproject.org/Workspace2D>`_. Both time-of-flight and monochromatic instrument configurations are supported. In general, this loader reads detector and monitor counts and adds x-axis and error values. The output workspace contains histogram data. The x-axis can have units in time-of-flight or wavelength with non-varying and varying bins, respectively. The conversion to wavelength uses the algorithm :ref:`algm-ConvertUnits`.
-The sample logs associated to the output workspace contain two additional entries, :literal:`Facility` and :literal:`stheta` (unit radian). While :literal:`Facility` is the ILL, the variable :literal:`stheta` is the computed Bragg angle and can serve directly as input for the algorithm :ref:`algm-ConvertToReflectometryQ` if desired.
+Loads data of a Nexus file obtained from an ILL reflectometry instrument `D17 <https://www.ill.eu/instruments-support/instruments-groups/instruments/d17/description/instrument-layout/>`_ or `FIGARO <https://www.ill.eu/instruments-support/instruments-groups/instruments/figaro/description/instrument-layout/>`_ into a `Workspace2D <http://www.mantidproject.org/Workspace2D>`_. Both time-of-flight and monochromatic instrument configurations are supported. In general, this loader reads detector and monitor counts and adds x-axis and error values. The output workspace contains histogram data. The x-axis can have units in time-of-flight or wavelength with non-varying and varying bins, respectively. The conversion to wavelength uses the algorithm :ref:`algm-ConvertUnits`.
+The sample logs associated to the output workspace contain an additional entry, :literal:`Facility`, set to :literal:`ILL`.
 
 Time of flight axis
 -------------------
@@ -24,26 +24,26 @@ with the following variables: channel width :math:`w_{\mathrm{channel}}`, time-o
 Detector position
 -----------------
 
-This loader will update the detector position from what is defined in the instrument definition files. The detector will be moved to the current sample-detector distance and rotated around the origin either on the horizontal or vertical plane.
+This loader will update the detector position from what is defined in the instrument definition files. The detector will be moved to the current distance from origin and rotated around the it either on the horizontal or vertical plane.
 
 The rotation angle can be one of the following:
 
-* The detector angle in the sample logs. This is the default behavior if neither :literal:`BraggAngle` nor :literal:`BeamPosition` is given.
+* The detector angle in the sample logs. For FIGARO this will be calculated from the motor positions. This is the default behavior if neither :literal:`BraggAngle` nor :literal:`DirectBeamPosition` is given.
 
-* The detector angle calibrated by the direct beam measurement. This behavior is triggered when :literal:`BeamPosition` is given.
+* The detector angle calibrated by the direct beam measurement. This behavior is triggered when :literal:`DirectBeamPosition` is given.
 
 * An angle based on a user-specified angle given by the :literal:`BraggAngle` input property. This overrides all other angles.
 
 Direct beam calibration
 #######################
 
-Calibration using a direct beam measurement is triggered when the :literal:`BeamPosition` property is specified. In this mode, a direct beam file should be loaded separately and the :literal:`OutputBeamPosition` output property used to obtain a special :ref:`TableWorkspace <Table Workspaces>` containing information on the direct beam position. This workspace can be further given as the :literal:`BeamPosition` input to proceeding loads as exemplified in the following:
+Calibration using a direct beam measurement is triggered when the :literal:`DirectBeamPosition` property is specified. In this mode, a direct beam file should be loaded separately and the :literal:`OutputBeamPosition` output property used to obtain a special :ref:`TableWorkspace <Table Workspaces>` containing information on the direct beam position. This workspace can be further given as the :literal:`DirectBeamPosition` input to proceeding loads as exemplified in the following:
 
 .. code-block:: python
 
    LoadILLReflectometry('directbeam.nxs', OutputWorkspace='direct_beam_ws', OutputBeamPosition='beam_position_ws')
-   LoadILLReflectometry('sample1.nxs', OutputWorkspace='sample1_ws', BeamPosition='beam_position_ws')
-   LoadILLReflectometry('sample2.nxs', OutputWorkspace='sample2_ws', BeamPosition='beam_position_ws')
+   LoadILLReflectometry('sample1.nxs', OutputWorkspace='sample1_ws', DirectBeamPosition='beam_position_ws')
+   LoadILLReflectometry('sample2.nxs', OutputWorkspace='sample2_ws', DirectBeamPosition='beam_position_ws')
    # ...
 
 The detector is rotated around angle :math:`\alpha`, given by
@@ -56,12 +56,12 @@ where :math:`\alpha` is the nominal detector angle, :math:`\alpha` the detector 
 User angle
 ##########
 
-The :literal:`BraggAngle` option rotates the detector by an angle :math:`\alpha` such that the angle between the direct beam axis and the reflected peak centre is twice :literal:`BraggAngle`
+The :literal:`BraggAngle` option rotates the detector by an angle :math:`\alpha` such that the angle between the direct beam axis and the reflected peak centre on the detector is twice :literal:`BraggAngle`
 
 .. math::
    \alpha = 2 \theta_{user} - \Delta_{R}
 
-where :math:`\theta_{user}` is :literal:`BraggAngle` and :math:`\Delta_{R}` the beam position offset angle (see below).
+where :math:`\Delta_{R}` the beam position offset angle (see below). The angle :math:`\theta_{user}` is :literal:`BraggAngle` in the simple case that the sample is in the origin. If a horizontal sample shift is present (FIGARO), the :math:`\theta_{user}` angle is calculated so that the angle to the reflected peak on the detector seen from the shifted sample position is the requested `BraggAngle`.
 
 Beam position offset
 ####################
@@ -71,7 +71,9 @@ To calculate the angle between the detector centre and the beam, the reflectomet
 .. math::
    \Delta = \tan^{-1} \frac{(i_{centre} - i_{fit}) d_{pix}}{l_{2}},
 
-where :math:`i_{centre}` is the workspace index of the detector centre (127.5 for D17 and Figaro), :math:`i_{fit}` the fitted peak position, :math:`d_{pix}` the physical pixel width and :math:`l_{2}` the sample to detector centre distance.
+where :math:`i_{centre}` is the workspace index of the detector centre (127.5 for D17 and FIGARO), :math:`i_{fit}` the fitted peak position, :math:`d_{pix}` the physical pixel width and :math:`l_{2}` the sample to detector centre distance.
+
+The value of :math:`i_{fit}` can be overridden by the :literal:`BeamCentre` property. This effectively disables the fitting procedure.
 
 Source position
 ---------------
@@ -82,78 +84,6 @@ In the case of D17, this loader will move the source position ('chopper1' in the
    z_{source} = -d_{ch} + \frac{1}{2} \delta_{ch},
 
 where :math:`d_{ch}` is the :literal:`VirtualChopper.dist_chop_samp` sample log entry and :math:`\delta_{ch}` the :literal:`Distance.ChopperGap` entry.
-
-Description of Nexus file and corresponding workspace SampleLog entries
------------------------------------------------------------------------
-
-The following table summarizes the Nexus file entries partially required by the loader: the choice of the chopper is Chopper or VirtualChopper for D17 and two choppers are selected out of four existing choppers for Figaro.
-
-+-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-| Nexus entry       | D17                                   | Figaro                      | Description                                        | Unit        |
-+===================+=======================================+=============================+====================================================+=============+
-| acquisition_mode  |                                       |                             | If time of flight mode or not                      | \-          |
-+-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-| data              | PSD_data                              | PSD_data                    |                                                    | \-          |
-+-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-| instrument        | Chopper1/phase                        | CH1/phase                   | chopper phase                                      | degree      |
-|                   +                                       +                             +                                                    +             +            
-|                   | Chopper1/rotation_speed               | CH1/rotation_speed          | chopper speed                                      | rpm         |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-|                   | Chopper2/phase                        | CH2/phase                   |                                                    | degree      |
-|                   +                                       +                             +                                                    +             +  
-|                   | Chopper2/rotation_speed               | CH2/rotation_speed          |                                                    | rpm         |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-|                   |                                       | CH3/phase                   |                                                    | degree      |
-|                   +                                       +                             +                                                    +             +  
-|                   |                                       | CH3/rotation_speed          |                                                    | rpm         |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+ 
-|                   |                                       | CH4/phase                   |                                                    | degree      |
-|                   +                                       +                             +                                                    +             +  
-|                   |                                       | CH4/rotation_speed          |                                                    | rpm         |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-|                   |                                       | ChopperSetting/firstChopper | Number of selected first chopper                   | \-          |
-|                   +                                       +                             +                                                    +             +  
-|                   |                                       | ChopperSetting/secondChopper| Number of selected second chopper                  | \-          | 
-|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-|                   | VirtualChopper/chopper1_phase_average |                             |                                                    | degree      |
-|                   +                                       +                             +                                                    +             +
-|                   | VirtualChopper/chopper1_speed_average |                             |                                                    | rpm         |
-|                   +                                       +                             +                                                    +             +  
-|                   | VirtualChopper/chopper2_phase_average |                             |                                                    | degree      |
-|                   +                                       +                             +                                                    +             +  
-|                   | VirtualChopper/chopper2_speed_average |                             |                                                    | rpm         |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-|                   | VirtualChopper/open_offset            | CollAngle/openOffset        |                                                    | degree      |
-|                   +                                       +                             +                                                    +             +  
-|                   | VirtualChopper/poff                   | CollAngle/poff              |                                                    | degree      |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-|                   | det/offset_value                      | DTR/offset_value            | detector distance offset                           | millimeter  |
-|                   +                                       +                             +                                                    +             +  
-|                   | det/value                             | DTR/value                   | detector distance value                            | millimeter  |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-|                   | PSD/detsize                           | PSD/detsize                 | detector size                                      | \-          |
-|                   +                                       +                             +                                                    +             +  
-|                   | PSD/detsum                            | PSD/detsum                  | sum of detector counts                             | \-          |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-|                   | PSD/mmpx                              | PSD/mmpy                    | pixel width                                        | millimeter  |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-|                   | PSD/time_of_flight_0                  | PSD/time_of_flight_0        | channel width                                      | microseconds|
-|                   +                                       +                             +                                                    +             +  
-|                   | PSD/time_of_flight_1                  | PSD/time_of_flight_1        | number of channels                                 | \-          |
-|                   +                                       +                             +                                                    +             +  
-|                   | PSD/time_of_flight_2                  | PSD/time_of_flight_2        | time-of-flight delay                               | microseconds|
-|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-|                   | dan/value                             | VirtualAxis/DAN_actual_angle| detector angle                                     | degree      |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+ 
-|                   | san/value                             | CollAngle/actual_coll_angle | sample angle                                       | degree      |
-+-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-| monitor1          | data                                  | data                        |                                                    | \-          |
-+-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-| monitor2          | data                                  | data                        |                                                    | \-          |
-+-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-| theta (Figaro)    |                                       |                             | sign determines reflection up/down                 | degree      |
-+-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-
 
 Usage
 -----
@@ -169,7 +99,7 @@ Usage
    config['default.instrument'] = 'D17'
 
    # Load ILL D17 data file (TOF mode) into a workspace 2D using default input options:
-   ws1 = Load('ILL/D17/317370.nxs')
+   ws1 = LoadILLReflectometry('ILL/D17/317370.nxs')
 
    print("Workspace {} has {} dimensions and {} histograms.".format(ws1.name(), ws1.getNumDims(), ws1.getNumberHistograms()))
 
@@ -190,7 +120,7 @@ Output:
    import numpy
    
    # Load ILL d17 data file (TOF mode) into a workspace 2D using a user-defined angle of 30 degrees:
-   ws2 = Load('ILL/D17/317370.nxs', BraggAngle = 5.5)
+   ws2 = LoadILLReflectometry('ILL/D17/317370.nxs', BraggAngle=5.5)
    
    # The original detector angle can be found in the sample logs:
    angleOrig = ws2.getRun().getProperty("dan.value").value
@@ -220,20 +150,22 @@ Output:
 
    import numpy
 
-   directBeamWS = Load('ILL/D17/317369.nxs', OutputBeamPosition='beamPositionWS')
+   directBeamWS = LoadILLReflectometry('ILL/D17/317369.nxs', OutputBeamPosition='beamPositionWS')
 
    beamPosWS = mtd['beamPositionWS']
    peakCentre = beamPosWS.cell('PeakCentre', 0)
    print('Fitted direct beam maximum (in workspace indices): {:.5}'.format(peakCentre))
 
-   reflectedBeamWS = Load('ILL/D17/317370.nxs', BeamPosition=beamPosWS)
+   reflectedBeamWS = LoadILLReflectometry('ILL/D17/317370.nxs', DirectBeamPosition=beamPosWS)
 
    # Lets load the data without detector angle calibration just for reference
 
-   refWS = Load('ILL/D17/317370.nxs')
+   refWS = LoadILLReflectometry('ILL/D17/317370.nxs')
 
-   detAngle = numpy.degrees(reflectedBeamWS.getRun().getProperty('stheta').value)
-   refAngle = numpy.degrees(refWS.getRun().getProperty('stheta').value)
+   det = reflectedBeamWS.getDetector(int(peakCentre))
+   detAngle = numpy.degrees(reflectedBeamWS.detectorTwoTheta(det))
+   det = refWS.getDetector(int(peakCentre))
+   refAngle = numpy.degrees(refWS.detectorTwoTheta(det))
 
    print('Uncalibrated detector angle: {:.4} degrees.'.format(refAngle))
    print('Detector angle after calibration using direct beam: {:.4} degrees.'.format(detAngle))
@@ -243,8 +175,8 @@ Output:
 .. testoutput:: LoadDirectBeam
 
    Fitted direct beam maximum (in workspace indices): 202.18
-   Uncalibrated detector angle: 0.7722 degrees.
-   Detector angle after calibration using direct beam: 0.8023 degrees.
+   Uncalibrated detector angle: 1.537 degrees.
+   Detector angle after calibration using direct beam: 1.598 degrees.
 
 .. testcleanup:: LoadDirectBeam
 

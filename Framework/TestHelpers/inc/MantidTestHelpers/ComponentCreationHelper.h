@@ -71,10 +71,20 @@ std::string cappedCylinderXML(double radius, double height,
 /**
  * Create a capped cylinder object
  */
-Mantid::Geometry::IObject_sptr
+boost::shared_ptr<Mantid::Geometry::CSGObject>
 createCappedCylinder(double radius, double height,
                      const Mantid::Kernel::V3D &baseCentre,
                      const Mantid::Kernel::V3D &axis, const std::string &id);
+
+/// Add a spherical sample at samplePos to given instrument.
+void addSampleToInstrument(Mantid::Geometry::Instrument_sptr &instrument,
+                           const Mantid::Kernel::V3D &samplePos);
+
+/// Add a source with given name and sourcePos to given instrument
+void addSourceToInstrument(Mantid::Geometry::Instrument_sptr &instrument,
+                           const Mantid::Kernel::V3D &sourcePos,
+                           const std::string &name = "moderator");
+
 /**
  * Return the XML for a sphere.
  */
@@ -83,14 +93,14 @@ std::string sphereXML(double radius, const Mantid::Kernel::V3D &centre,
 /**
  * Create a sphere object
  */
-Mantid::Geometry::IObject_sptr
+boost::shared_ptr<Mantid::Geometry::CSGObject>
 createSphere(double radius,
              const Mantid::Kernel::V3D &centre = Mantid::Kernel::V3D(),
              const std::string &id = "sp-1");
 /** Create a cuboid shape for your pixels */
-Mantid::Geometry::IObject_sptr createCuboid(double x_side_length,
-                                            double y_side_length = -1.0,
-                                            double z_side_length = -1.0);
+boost::shared_ptr<Mantid::Geometry::CSGObject>
+createCuboid(double x_side_length, double y_side_length = -1.0,
+             double z_side_length = -1.0);
 /**
  * Create a component assembly at the origin made up of 4 cylindrical detectors
  */
@@ -104,7 +114,7 @@ Mantid::Geometry::ObjComponent *createSingleObjectComponent();
  * Create a hollow shell, i.e. the intersection of two spheres or radius r1 and
  * r2
  */
-Mantid::Geometry::IObject_sptr
+boost::shared_ptr<Mantid::Geometry::CSGObject>
 createHollowShell(double innerRadius, double outerRadius,
                   const Mantid::Kernel::V3D &centre = Mantid::Kernel::V3D());
 /**

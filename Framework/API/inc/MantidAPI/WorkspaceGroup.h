@@ -53,7 +53,8 @@ class Algorithm;
 class MANTID_API_DLL WorkspaceGroup : public Workspace {
 public:
   /// Default constructor.
-  WorkspaceGroup();
+  WorkspaceGroup(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
   /// Destructor
   ~WorkspaceGroup() override;
   /// Return a string ID of the class
@@ -75,6 +76,8 @@ public:
   Workspace_sptr getItem(const size_t index) const;
   /// Return the workspace by name
   Workspace_sptr getItem(const std::string wsName) const;
+  /// Return all workspaces in the group as one call for thread safety
+  std::vector<Workspace_sptr> getAllItems() const;
   /// Remove a workspace from the group
   void removeItem(const size_t index);
   /// Remove all names from the group but do not touch the ADS
@@ -105,7 +108,7 @@ public:
   /// @name Wrapped ADS calls
   //@{
 
-  /// Invokes the ADS to sort group members by orkspace name
+  /// Invokes the ADS to sort group members by workspace name
   void sortByName() {
     AnalysisDataService::Instance().sortGroupByName(this->getName());
   }

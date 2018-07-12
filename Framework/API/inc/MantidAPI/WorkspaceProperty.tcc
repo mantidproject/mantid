@@ -107,13 +107,14 @@ operator=(const WorkspaceProperty &right) {
  * @return assigned PropertyWithValue
  */
 template <typename TYPE>
-boost::shared_ptr<TYPE> &WorkspaceProperty<TYPE>::
+WorkspaceProperty<TYPE> &WorkspaceProperty<TYPE>::
 operator=(const boost::shared_ptr<TYPE> &value) {
   std::string wsName = value->getName();
   if (this->direction() == Kernel::Direction::Input && !wsName.empty()) {
     m_workspaceName = wsName;
   }
-  return Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::operator=(value);
+  Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::operator=(value);
+  return *this;
 }
 
 //--------------------------------------------------------------------------------------
@@ -142,7 +143,7 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::value() const {
 /** Returns true if the workspace is in the ADS or there is none.
  * @return true if the string returned by value() is valid
  */
-template<typename TYPE>
+template <typename TYPE>
 bool WorkspaceProperty<TYPE>::isValueSerializable() const {
   return !m_workspaceName.empty() || !this->m_value;
 }
@@ -216,15 +217,28 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
     if (!Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value) {
       Mantid::API::Workspace_sptr wksp;
       // if the workspace name is empty then there is no point asking the ADS
-      if (m_workspaceName.empty())
-        return isOptionalWs();
+      if (m_workspaceName.empty()) {
+        // If workspace is null on a non-master rank this usually indicates that
+        // this is a MasterOnly workspace and algorithm execution. In cases
+        // where the workspace is null for other reasons we can rely on the
+        // master rank failing.
+        if (!m_isMasterRank)
+          return {};
+        else
+          return isOptionalWs();
+      }
 
       try {
         wksp = AnalysisDataService::Instance().retrieve(m_workspaceName);
       } catch (Kernel::Exception::NotFoundError &) {
         // Check to see if the workspace is not logged with the ADS because it
         // is optional.
-        return isOptionalWs();
+        // Similar to above, if the workspace is not in the ADS this indicates
+        // MasterOnly workspace and execution.
+        if (!m_isMasterRank)
+          return {};
+        else
+          return isOptionalWs();
       }
 
       // At this point we have a valid pointer to a Workspace so we need to
@@ -236,12 +250,6 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
         error = "Workspace " + this->value() + " is not of the correct type";
       }
       return error;
-    } else {
-      // Skip validation on non-master ranks if storage mode is MasterOnly.
-      if (!m_isMasterRank &&
-          Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value
-                  ->storageMode() == Parallel::StorageMode::MasterOnly)
-        return {};
     }
   }
   // Call superclass method to access any attached validators (which do their
@@ -334,12 +342,14 @@ template <typename TYPE> bool WorkspaceProperty<TYPE>::store() {
   if (this->direction()) // Output or InOut
   {
     // Check that workspace exists
-    if (!this->operator()())
+    if (this->operator()()) {
+      // Note use of addOrReplace rather than add
+      API::AnalysisDataService::Instance().addOrReplace(m_workspaceName,
+                                                        this->operator()());
+    } else if (m_isMasterRank) {
       throw std::runtime_error(
           "WorkspaceProperty doesn't point to a workspace");
-    // Note use of addOrReplace rather than add
-    API::AnalysisDataService::Instance().addOrReplace(m_workspaceName,
-                                                      this->operator()());
+    }
     result = true;
   }
   // always clear the internal pointer after storing

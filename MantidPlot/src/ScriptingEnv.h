@@ -169,7 +169,7 @@ public:
   static int numLanguages();
 
 private:
-  typedef ScriptingEnv *(*ScriptingEnvConstructor)(ApplicationWindow *);
+  using ScriptingEnvConstructor = ScriptingEnv *(*)(ApplicationWindow *);
   typedef struct {
     const char *name;
     ScriptingEnvConstructor constructor;

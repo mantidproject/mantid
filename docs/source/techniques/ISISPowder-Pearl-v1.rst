@@ -159,6 +159,22 @@ Example
                            calibration_mapping_file=cal_mapping_file)
 
 
+.. _state_for_pearl_isis-powder-diffraction-ref:
+
+How the PEARL object holds state
+--------------------------------
+
+The PEARL object does not behave as described in
+:ref:`how_objects_hold_state_isis-powder-diffraction-ref`. For PEARL,
+any settings given in the constructor for the PEARL object, either
+explicitly or via a config file, are taken as defaults. If these are
+overriden in a call to either
+:ref:`focus_pearl_isis-powder-diffraction-ref`,
+:ref:`create_vanadium_pearl_isis-powder-diffraction-ref` or
+:ref:`create_cal_pearl_isis-powder-diffraction-ref`, then these
+settings only apply to that line, and are reverted to the defaults
+when the line has finished executing.
+
 .. _calibration_mapping_pearl_isis-powder-diffraction-ref:
 
 Calibration Mapping File
@@ -989,6 +1005,22 @@ On PEARL this is set to the following:
 ..  code-block:: python
 
   spline_coefficient: 60
+
+.. _subtract_empty_instrument_pearl_isis-powder-diffraction-ref:
+
+subtract_empty_instrument
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Provides the option to disable subtracting empty instrument runs from
+the run being focused. This is useful for focusing empties, as
+subtracting an empty from itself, or subtracting the previous cycle's
+empty from this cycle's, creates meaningless data. Set to **False** to
+disable empty subtraction.
+
+On PEARL this is set to the following:
+
+.. code-block:: python
+
+  subtract_empty_instrument: True
 
 .. _tt35_grouping_filename_pearl_isis-powder-diffraction-ref:
 

@@ -88,9 +88,14 @@ void EnggDiffractionViewQtGUI::initLayout() {
   // with Qt
   boost::shared_ptr<EnggDiffractionViewQtGUI> sharedView(
       this, [](EnggDiffractionViewQtGUI *) {});
-  m_fittingWidget = new EnggDiffFittingViewQtWidget(
-      m_ui.tabMain, sharedView, sharedView, fullPres, fullPres, sharedView);
+  m_fittingWidget =
+      new EnggDiffFittingViewQtWidget(m_ui.tabMain, sharedView, sharedView,
+                                      fullPres, fullPres, sharedView, fullPres);
   m_ui.tabMain->addTab(m_fittingWidget, QString("Fitting"));
+
+  m_gsasWidget =
+      new EnggDiffGSASFittingViewQtWidget(sharedView, sharedView, fullPres);
+  m_ui.tabMain->addTab(m_gsasWidget, QString("GSAS-II Refinement"));
 
   QWidget *wSettings = new QWidget(m_ui.tabMain);
   m_uiTabSettings.setupUi(wSettings);
@@ -213,9 +218,6 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
   m_uiTabSettings.checkBox_force_recalculate_overwrite->setChecked(
       m_calibSettings.m_forceRecalcOverwrite);
 
-  m_uiTabSettings.lineEdit_dir_focusing->setText(
-      QString::fromStdString(m_focusDir));
-
   // push button signals/slots
   connect(m_uiTabSettings.pushButton_browse_input_dir_calib, SIGNAL(released()),
           this, SLOT(browseInputDirCalib()));
@@ -229,8 +231,9 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
   connect(m_uiTabSettings.pushButton_browse_template_gsas_prm,
           SIGNAL(released()), this, SLOT(browseTemplateGSAS_PRM()));
 
-  connect(m_uiTabSettings.pushButton_browse_dir_focusing, SIGNAL(released()),
-          this, SLOT(browseDirFocusing()));
+  connect(m_uiTabSettings.checkBox_force_recalculate_overwrite,
+          SIGNAL(stateChanged(int)), this,
+          SLOT(forceRecalculateStateChanged()));
 }
 
 void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
@@ -391,9 +394,6 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_calibSettings.m_rebinCalibrate =
       qs.value("rebin-calib", g_defaultRebinWidth).toFloat();
 
-  // 'focusing' block
-  m_focusDir = qs.value("focus-dir").toString().toStdString();
-
   m_ui.tabMain->setCurrentIndex(qs.value("selected-tab-index").toInt());
 
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
@@ -493,9 +493,6 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   qs.setValue("template-gsas-prm",
               QString::fromStdString(m_calibSettings.m_templateGSAS_PRM));
   qs.setValue("rebin-calib", m_calibSettings.m_rebinCalibrate);
-
-  // 'focusing' block
-  qs.setValue("focus-dir", QString::fromStdString(m_focusDir));
 
   qs.setValue("selected-tab-index", m_ui.tabMain->currentIndex());
 
@@ -654,6 +651,7 @@ void EnggDiffractionViewQtGUI::enableCalibrateFocusFitUserActions(bool enable) {
 
   // fitting
   m_fittingWidget->enable(enable);
+  m_gsasWidget->setEnabled(enable);
 }
 
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
@@ -887,23 +885,9 @@ void EnggDiffractionViewQtGUI::browseTemplateGSAS_PRM() {
       QString::fromStdString(m_calibSettings.m_templateGSAS_PRM));
 }
 
-void EnggDiffractionViewQtGUI::browseDirFocusing() {
-  QString prevPath = QString::fromStdString(m_focusDir);
-  if (prevPath.isEmpty()) {
-    prevPath =
-        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  }
-  QString dir = QFileDialog::getExistingDirectory(
-      this, tr("Open Directory"), prevPath,
-      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-
-  if (dir.isEmpty()) {
-    return;
-  }
-
-  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
-  m_focusDir = dir.toStdString();
-  m_uiTabSettings.lineEdit_dir_focusing->setText(dir);
+void EnggDiffractionViewQtGUI::forceRecalculateStateChanged() {
+  m_calibSettings.m_forceRecalcOverwrite =
+      m_uiTabSettings.checkBox_force_recalculate_overwrite->isChecked();
 }
 
 void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
@@ -951,10 +935,6 @@ EnggDiffractionViewQtGUI::qListToVector(QStringList list,
   }
 
   return vec;
-}
-
-std::string EnggDiffractionViewQtGUI::focusingDir() const {
-  return m_uiTabSettings.lineEdit_dir_focusing->text().toStdString();
 }
 
 std::vector<bool> EnggDiffractionViewQtGUI::focusingBanks() const {

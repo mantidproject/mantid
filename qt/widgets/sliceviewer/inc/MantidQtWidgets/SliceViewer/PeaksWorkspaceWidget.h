@@ -1,11 +1,12 @@
 #ifndef PEAKSWORKSPACEWIDGET_H
 #define PEAKSWORKSPACEWIDGET_H
 
-#include <QWidget>
-#include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
 #include "DllOption.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
 #include "ui_PeaksWorkspaceWidget.h"
+#include <QSortFilterProxyModel>
+#include <QWidget>
 
 #include <set>
 
@@ -19,7 +20,7 @@ public:
                        const std::string &coordinateSystem,
                        PeakViewColor defaultForegroundPeakViewColor,
                        PeakViewColor defaultBackgroundPeakViewColor,
-                       const bool canAddPeaks, PeaksViewer *parent);
+                       PeaksViewer *parent);
 
   std::set<QString> getShownColumns();
   void setShownColumns(const std::set<QString> &cols);
@@ -45,8 +46,6 @@ signals:
   void removeWorkspace(Mantid::API::IPeaksWorkspace_const_sptr);
   void hideInPlot(Mantid::API::IPeaksWorkspace_const_sptr, bool);
   void zoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr, int);
-  void peaksSorted(const std::string &, const bool,
-                   Mantid::API::IPeaksWorkspace_const_sptr);
 
 private:
   /// Populate the widget with model data.
@@ -73,6 +72,8 @@ private:
   QString m_nameText;
   /// Parent widget
   PeaksViewer *const m_parent;
+  /// Sort & Filter model to map sorted indicies to unsorted indicies
+  QSortFilterProxyModel *m_tableModel;
 
 private slots:
   void onForegroundColorCrossClicked();
@@ -84,7 +85,6 @@ private slots:
   void onShowBackgroundChanged(bool);
   void onRemoveWorkspaceClicked();
   void onToggleHideInPlot();
-  void onPeaksSorted(const std::string &, const bool);
   void onCurrentChanged(QModelIndex, QModelIndex);
   void onClearPeaksToggled(bool);
   void onAddPeaksToggled(bool);

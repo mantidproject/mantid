@@ -3,10 +3,10 @@
 
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
-#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "InstrumentActor.h"
 #include "ProjectionSurface.h"
+#include "UnwrappedDetector.h"
 #include <boost/shared_ptr.hpp>
 
 #include <QImage>
@@ -31,39 +31,6 @@ class GL3DWidget;
 
 namespace MantidQt {
 namespace MantidWidgets {
-
-/**
-\class UnwrappedDetector
-\brief Class helper for drawing detectors on unwraped surfaces
-\date 15 Nov 2010
-\author Roman Tolchenov, Tessella plc
-
-This class keeps information used to draw a detector on an unwrapped surface.
-
-*/
-class UnwrappedDetector {
-public:
-  UnwrappedDetector();
-  UnwrappedDetector(const unsigned char *c,
-                    const Mantid::Geometry::IDetector &det);
-  UnwrappedDetector(const UnwrappedDetector &other);
-  UnwrappedDetector &operator=(const UnwrappedDetector &other);
-  bool isValid() const;
-  unsigned char color[3]; ///< red, green, blue colour components (0 - 255)
-  double u;               ///< horizontal "unwrapped" coordinate
-  double v;               ///< vertical "unwrapped" coordinate
-  double width;           ///< detector width in units of u
-  double height;          ///< detector height in units of v
-  double uscale;          ///< scaling factor in u direction
-  double vscale;          ///< scaling factor in v direction
-  Mantid::detid_t detID;  ///< Detector ID
-  Mantid::Kernel::V3D position;  ///< Detector position
-  Mantid::Kernel::Quat rotation; ///< Detector orientation
-  boost::shared_ptr<const Mantid::Geometry::IObject>
-      shape;                       ///< Shape of the detector
-  Mantid::Kernel::V3D scaleFactor; ///< Detector's scale factor
-};
-
 /**
 * @class UnwrappedSurface
 * @brief Performs projection of an instrument onto a 2D surface and unwrapping
@@ -92,9 +59,9 @@ public:
 
   /** @name Implemented public virtual methods */
   //@{
-  void componentSelected(Mantid::Geometry::ComponentID = nullptr) override;
-  void getSelectedDetectors(QList<int> &dets) override;
-  void getMaskedDetectors(QList<int> &dets) const override;
+  void componentSelected(size_t componentIndex) override;
+  void getSelectedDetectors(std::vector<size_t> &detIndices) override;
+  void getMaskedDetectors(std::vector<size_t> &detIndices) const override;
   void setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
   QString getInfoText() const override;
   RectF getSurfaceBounds() const override;
@@ -179,10 +146,7 @@ protected:
 
   /** @name Protected methods */
   //@{
-  void setColor(int index, bool picking) const;
-  void calcAssemblies(const Mantid::Geometry::IComponent *comp,
-                      const QRectF &compRect);
-  void cacheAllAssemblies();
+  void setColor(size_t index, bool picking) const;
   void createPeakShapes(const QRect &viewport) const;
   //@}
 
@@ -195,9 +159,6 @@ protected:
 
   /// Info needed to draw detectors onto unwrapped image
   std::vector<UnwrappedDetector> m_unwrappedDetectors;
-
-  /// Bounding rectangles of detector assemblies
-  QMap<Mantid::Geometry::ComponentID, QRectF> m_assemblies;
 
   bool m_flippedView; ///< if false the image is seen from the sample. if true
   /// the view is looking towards the sample.

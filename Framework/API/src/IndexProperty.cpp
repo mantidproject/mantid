@@ -19,6 +19,9 @@ bool IndexProperty::isDefault() const { return m_value.empty(); }
 
 std::string IndexProperty::isValid() const {
   std::string error;
+  // No workspace acts as an empty set and so is considered valid
+  if (!m_workspaceProp.getWorkspace())
+    return error;
 
   try {
     getIndices();
@@ -33,8 +36,9 @@ std::string IndexProperty::isValid() const {
   return error;
 }
 
-std::string IndexProperty::operator=(const std::string &rhs) {
-  return setValue(rhs);
+IndexProperty &IndexProperty::operator=(const std::string &rhs) {
+  setValue(rhs);
+  return *this;
 }
 
 IndexProperty::operator Indexing::SpectrumIndexSet() const {

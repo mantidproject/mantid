@@ -3,6 +3,7 @@
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include <QFileInfo>
 
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitDataSelector");
@@ -17,6 +18,7 @@ namespace MantidWidgets {
  */
 MuonFitDataSelector::MuonFitDataSelector(QWidget *parent)
     : MantidWidget(parent) {
+  m_multiFit = false;
   m_ui.setupUi(this);
   this->setDefaultValues();
   this->setUpConnections();
@@ -39,6 +41,7 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
                                           size_t numPeriods,
                                           const QStringList &groups)*/
     : MuonFitDataSelector(parent) {
+  m_multiFit = false;
   this->setWorkspaceDetails(QString::number(runNumber), instName,
                             boost::optional<QString>{});
   // not used in this case
@@ -88,9 +91,8 @@ void MuonFitDataSelector::userChangedRuns() {
   // check for single run and enable/disable radio buttons
   const auto runs = getRuns();
   if (runs.contains(',') || runs.contains('-')) {
-    // if buttons are disabled, enable them
-    m_ui.rbCoAdd->setEnabled(true);
-    m_ui.rbSimultaneous->setEnabled(true);
+    // record if its multi fit
+    m_multiFit = true;
   } else {
     setFitType(FitType::Single);
   }
@@ -178,6 +180,7 @@ void MuonFitDataSelector::setWorkspaceDetails(
   // Set initial run to be run number of the workspace loaded in Home tab
   // and search for filenames. Use busy cursor until search finished.
   setBusyState();
+
   if (filePath) { // load current run: use special file path
     m_ui.runs->setUserInput(filePath.get());
     m_ui.runs->setText(runs);
@@ -269,7 +272,7 @@ void MuonFitDataSelector::setUserInput(const QVariant &value) {
 IMuonFitDataSelector::FitType MuonFitDataSelector::getFitType() const {
   // If radio buttons disabled, it's a single fit unless multiple groups/periods
   // chosen
-  if (!m_ui.rbCoAdd->isEnabled()) {
+  if (!m_multiFit) {
     return m_chosenGroups.size() <= 1 && m_chosenPeriods.size() <= 1
                ? FitType::Single
                : FitType::Simultaneous;
@@ -291,11 +294,10 @@ IMuonFitDataSelector::FitType MuonFitDataSelector::getFitType() const {
  */
 void MuonFitDataSelector::setFitType(IMuonFitDataSelector::FitType type) {
   if (type == FitType::Single) {
-    m_ui.rbCoAdd->setEnabled(false);
-    m_ui.rbSimultaneous->setEnabled(false);
+    m_multiFit = false;
   } else {
-    m_ui.rbCoAdd->setEnabled(true);
-    m_ui.rbSimultaneous->setEnabled(true);
+    m_multiFit = true;
+
     m_ui.rbCoAdd->setChecked(type == FitType::CoAdd);
     m_ui.rbSimultaneous->setChecked(type == FitType::Simultaneous);
   }
@@ -355,7 +357,18 @@ QString MuonFitDataSelector::getSimultaneousFitLabel() const {
  * @param label :: [input] Text to set as label
  */
 void MuonFitDataSelector::setSimultaneousFitLabel(const QString &label) {
-  m_ui.txtSimFitLabel->setText(label);
+  // do some checks that it is valid
+  auto safeLabel = label;
+  if (label.indexOf(".") >= 0) {
+    QFileInfo file(label);
+    safeLabel = file.baseName();
+    // trim instrument name
+    auto index = safeLabel.indexOf("0");
+    safeLabel = safeLabel.mid(index);
+    // trim leading zeros
+    safeLabel = safeLabel.remove(QRegExp("^[0]*"));
+  }
+  m_ui.txtSimFitLabel->setText(safeLabel);
 }
 
 /**

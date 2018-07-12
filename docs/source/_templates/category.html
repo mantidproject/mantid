@@ -7,20 +7,23 @@
 {# Uses bootstrap col-md-4 for each column along with slice(3) to divide input list #}
 {# It currently assumes the items in the list are mantiddoc.directives.categories.PageRef classes #}
     <div class="row">
-    {%- for column in item_list|slice(3) %}
+    {% for column in item_list|slice(3) %}
       <div class="col-md-4">
-      {%- set first = True %}
-      {%- for item in column %}
-        {%- if (item.name[0] != section or first) %}
-          {%- set section = item.name[0] %}
-          {%- if first != true %}
+      {% set first = [True] %}
+      {% set section = [0] %}
+      {% for item in column %}
+        {% if (item.name[0] != section[0] or first[0]) %}
+          {% set _ = section.pop() %}
+          {% set _ = section.append(item.name[0]) %}
+          {% if first[0] != True %}
             </ul>
-          {%- endif %}
-          <h3 style="font-weight:bold">{{ section }}</h3>
+          {% endif %}
+          <h3 style="font-weight:bold">{{ section[0] }}</h3>
           <ul>
-        {%- endif %}
+        {% endif %}
         <li><a href="{{ item.link(outpath) }}">{{ item.name }}</a></li>
-        {%- set first = False -%}
+        {% set _ = first.pop() %}
+        {% set _ = first.append(False) %}
       {%- endfor -%}
       </ul>
       </div>

@@ -4,7 +4,10 @@
 #include "MantidAlgorithms/DllConfig.h"
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Progress.h"
+
+#include <list>
 
 namespace Mantid {
 namespace Algorithms {
@@ -44,8 +47,10 @@ public:
            "scattering angle. Detector scans with overlapping tubes are "
            "supported.";
   }
-  std::map<std::string, std::string> validateInputs() override;
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SumSpectra"};
+  }
 
 private:
   void init() override;
@@ -67,13 +72,15 @@ private:
 
   void getInputParameters();
   void getScatteringAngleBinning();
-  void getHeightAxis();
+  void getHeightAxis(const std::string &componentName);
   std::vector<std::vector<double>>
   performBinning(API::MatrixWorkspace_sptr &outputWS);
 
   double distanceFromAngle(const int angleIndex, const double angle) const;
 
-  int m_mirrorDetectors;
+  int m_mirrorDetectors; /// holds the sign flipper for 2theta
+
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace Algorithms

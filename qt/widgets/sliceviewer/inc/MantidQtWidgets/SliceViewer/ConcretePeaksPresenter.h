@@ -1,20 +1,21 @@
 #ifndef MANTID_SLICEVIEWER_CONCRETEPEAKSPRESENTER_H_
 #define MANTID_SLICEVIEWER_CONCRETEPEAKSPRESENTER_H_
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidAPI/MDGeometry.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
-#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
-#include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactory.h"
-#include "MantidAPI/MDGeometry.h"
-#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
-#include <vector>
+#include "MantidQtWidgets/SliceViewer/NonOrthogonalAxis.h"
+#include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactory.h"
+#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
 #include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace MantidQt {
 namespace SliceViewer {
 /// Alias for Vector of Peak Overlay Views
-typedef std::vector<boost::shared_ptr<PeakOverlayView>> VecPeakOverlayView;
+using VecPeakOverlayView = std::vector<boost::shared_ptr<PeakOverlayView>>;
 
 /// Coordinate System Enum to String.
 std::string DLLExport
@@ -35,9 +36,10 @@ public:
       Mantid::Geometry::PeakTransformFactory_sptr transformFactory);
   void reInitialize(Mantid::API::IPeaksWorkspace_sptr peaksWS) override;
   ~ConcretePeaksPresenter() override;
+  void setNonOrthogonal(bool nonOrthogonalEnabled) override;
+  bool changeShownDim(size_t dimX, size_t dimY) override;
   void update() override;
   void updateWithSlicePoint(const PeakBoundingBox &slicePoint) override;
-  bool changeShownDim() override;
   bool isLabelOfFreeAxis(const std::string &label) const override;
   SetPeaksWorkspaces presentedWorkspaces() const override;
   void setForegroundColor(const PeakViewColor) override;
@@ -45,8 +47,6 @@ public:
   std::string getTransformName() const override;
   void setShown(const bool shown) override;
   PeakBoundingBox getBoundingBox(const int) const override;
-  void sortPeaksWorkspace(const std::string &byColumnName,
-                          const bool ascending) override;
   void setPeakSizeOnProjection(const double fraction) override;
   void setPeakSizeIntoProjection(const double fraction) override;
   double getPeakSizeOnProjection() const override;
@@ -61,7 +61,6 @@ public:
   void peakEditMode(EditMode mode) override;
   bool deletePeaksIn(PeakBoundingBox plotCoordsBox) override;
   bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY) override;
-  bool hasPeakAddMode() const override;
 
 private:
   /// Peak overlay view.
@@ -84,8 +83,10 @@ private:
   bool m_isHidden;
   /// Flag to indicate the current edit mode.
   EditMode m_editMode;
-  /// Can we add to this peaks workspace
-  bool m_hasAddPeaksMode;
+  /// Flag to indicate slice viewer in in non-orthogonal mode
+  bool m_nonOrthogonalMode;
+  /// Non orthogonal axis information
+  NonOrthogonalAxis m_axisData;
   /// Configure peak transformations
   bool configureMappingTransform();
   /// Hide all views

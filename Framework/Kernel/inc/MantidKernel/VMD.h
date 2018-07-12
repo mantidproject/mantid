@@ -64,7 +64,6 @@ public:
   TYPE &operator[](const size_t index);
   const TYPE *getBareArray() const;
   std::string toString(const std::string &separator = " ") const;
-  template <class T> std::vector<T> toVector() const;
   bool operator==(const VMDBase &v) const;
   bool operator!=(const VMDBase &v) const;
   VMDBase operator+(const VMDBase &v) const;
@@ -99,10 +98,10 @@ protected:
 };
 
 /// Underlying data type for the VMD type
-typedef float VMD_t;
+using VMD_t = float;
 
 /// Define the VMD as using the double or float data type.
-typedef VMDBase<VMD_t> VMD;
+using VMD = VMDBase<VMD_t>;
 
 // Overload operator <<
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,

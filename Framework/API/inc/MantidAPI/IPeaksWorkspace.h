@@ -81,6 +81,14 @@ public:
   virtual void addPeak(const Mantid::Geometry::IPeak &ipeak) = 0;
 
   //---------------------------------------------------------------------------------------------
+  /** Add a peak to the list
+   * @param position :: V3D positon of the peak.
+   * @param frame :: Coordinate system frame of the peak position.
+   */
+  virtual void addPeak(const Kernel::V3D &position,
+                       const Kernel::SpecialCoordinateSystem &frame) = 0;
+
+  //---------------------------------------------------------------------------------------------
   /** Return a reference to the Peak
    * @param peakNum :: index of the peak to get.
    * @return a reference to a Peak object.
@@ -113,7 +121,17 @@ public:
    */
   virtual Mantid::Geometry::IPeak *
   createPeak(const Mantid::Kernel::V3D &QLabFrame,
-             boost::optional<double> detectorDistance) const = 0;
+             boost::optional<double> detectorDistance = boost::none) const = 0;
+
+  //---------------------------------------------------------------------------------------------
+  /** Create an instance of a Peak
+   * @param position :: enter of the peak in the specified frame
+   * @param frame :: the coordinate frame that the position is specified in.
+   * @return a pointer to a new Peak object.
+   */
+  virtual std::unique_ptr<Mantid::Geometry::IPeak>
+  createPeak(const Mantid::Kernel::V3D &position,
+             const Mantid::Kernel::SpecialCoordinateSystem &frame) const = 0;
 
   /**
    * Create an instance of a peak using a V3D

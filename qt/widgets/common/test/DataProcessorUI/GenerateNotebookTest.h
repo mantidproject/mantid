@@ -12,7 +12,10 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/VectorString.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h"
+#include "MantidTestHelpers/DataProcessorTestHelper.h"
 
+using namespace DataProcessorTestHelper;
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace Mantid::API;
@@ -23,17 +26,18 @@ class GenerateNotebookTest : public CxxTest::TestSuite {
 private:
   // Creates a map with pre-processing instruction for reflectometry
   std::map<QString, PreprocessingAlgorithm>
-  reflPreprocessMap(const QString &plusPrefix = "") {
+  reflPreprocessMap(const QString &plusPrefix = "",
+                    const QString &transPrefix = "TRANS_") {
 
     // Reflectometry pre-process map
     return std::map<QString, PreprocessingAlgorithm>{
         {"Run(s)",
-         PreprocessingAlgorithm("Plus", plusPrefix, std::set<QString>())},
+         PreprocessingAlgorithm("Plus", plusPrefix, "+", std::set<QString>())},
         {"Transmission Run(s)",
-         PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
-                                std::set<QString>{"FirstTransmissionRun",
-                                                  "SecondTransmissionRun",
-                                                  "OutputWorkspace"})}};
+         PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", transPrefix,
+                                "_", std::set<QString>{"FirstTransmissionRun",
+                                                       "SecondTransmissionRun",
+                                                       "OutputWorkspace"})}};
   }
 
   // Creates a reflectometry processing algorithm
@@ -41,7 +45,7 @@ private:
 
     return ProcessingAlgorithm(
         "ReflectometryReductionOneAuto",
-        std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
+        std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"}, 1,
         std::set<QString>{"ThetaIn", "ThetaOut", "InputWorkspace",
                           "OutputWorkspace", "OutputWorkspaceWavelength",
                           "FirstTransmissionRun", "SecondTransmissionRun"});
@@ -73,15 +77,22 @@ private:
 
   // Creates reflectometry data
   TreeData reflData() {
+    // Create some rows in 2 groups
     TreeData treeData;
     treeData[0][0] =
-        QStringList({"12345", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""});
+        makeRowData({"12345", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""});
     treeData[0][1] =
-        QStringList({"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
+        makeRowData({"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
     treeData[1][0] =
-        QStringList({"24681", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""});
+        makeRowData({"24681", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""});
     treeData[1][1] =
-        QStringList({"24682", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
+        makeRowData({"24682", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
+
+    for (int i = 0; i < 2; ++i)
+      for (int j = 0; j < 2; ++j)
+        addPropertyValue(treeData[i][j], "AnalysisMode",
+                         "MultiDetectorAnalysis");
+
     return treeData;
   }
 
@@ -105,7 +116,7 @@ public:
     auto lines = splitIntoLines(book);
     auto i = 0u;
     for (auto const &line : lines) {
-      TS_ASSERT_EQUALS(expectedLines[i], line);
+      TS_ASSERT_EQUALS(expectedLines[i].toStdString(), line.toStdString());
       i++;
     }
   }
@@ -116,7 +127,7 @@ public:
     auto lines = splitIntoLines(book);
     auto i = 0u;
     for (auto const &line : lines) {
-      TS_ASSERT_EQUALS(expectedLines[i], line);
+      TS_ASSERT_EQUALS(expectedLines[i].toStdString(), line.toStdString());
       i++;
     }
   }
@@ -134,18 +145,17 @@ public:
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_instrument, reflWhitelist(),
         std::map<QString, PreprocessingAlgorithm>(), reflProcessor(),
-        PostprocessingStep("", reflPostprocessor(),
-                           std::map<QString, QString>()),
-        std::map<QString, QString>(), "");
+        PostprocessingStep("", reflPostprocessor(), OptionsMap()),
+        ColumnOptionsMap());
 
     auto generatedNotebook = notebook->generateNotebook(TreeData());
 
     auto notebookLines = splitIntoLines(generatedNotebook);
     const QString result[] = {
-        "{", "   \"metadata\" : {", "      \"name\" : \"Mantid Notebook\"",
+        "{", "   \"metadata\" : {", R"(      "name" : "Mantid Notebook")",
         "   },", "   \"nbformat\" : 3,", "   \"nbformat_minor\" : 0,",
         "   \"worksheets\" : [", "      {", "         \"cells\" : [",
-        "            {", "               \"cell_type\" : \"markdown\",",
+        "            {", R"(               "cell_type" : "markdown",)",
     };
 
     // Check that the first 10 lines are output as expected
@@ -182,8 +192,8 @@ public:
   void testTableStringOneRow() {
 
     // Create some tree data
-    RowData rowData = {"24682", "1.5", "", "1.4", "2.9",
-                       "0.04",  "1",   "", "" /*Hidden Option*/};
+    auto rowData =
+        makeRowData({"24682", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
     TreeData treeData = {{1, {{0, rowData}}}};
 
     auto output = tableString(treeData, reflWhitelist());
@@ -215,32 +225,34 @@ public:
 
   void testLoadRunString() {
     auto output = loadRunString("12345", m_instrument, "TOF_");
-    auto const result =
-        QString("TOF_12345 = Load(Filename = 'INSTRUMENT12345')\n");
-    TS_ASSERT_EQUALS(boost::get<0>(output), result)
+    auto const result = std::string(
+        "Load(Filename = 'INSTRUMENT12345', OutputWorkspace = 'TOF_12345')\n");
+    TS_ASSERT_EQUALS(boost::get<0>(output).toStdString(), result)
   }
 
-  void testPlusString() {
+  void testPreprocessString() {
 
     auto reflectometryPreprocessMap = reflPreprocessMap();
-    auto output = plusString("INPUT_WS", "OUTPUT_WS",
-                             reflectometryPreprocessMap["Run(s)"], "");
-    auto const result = QString("OUTPUT_WS = Plus(LHSWorkspace = 'OUTPUT_WS', "
-                                "RHSWorkspace = 'INPUT_WS')\n");
-    TS_ASSERT_EQUALS(output, result)
+    auto output = preprocessString("OUTPUT_WS", "INPUT_WS", "OUTPUT_WS",
+                                   reflectometryPreprocessMap["Run(s)"], "");
+    auto const result = std::string(
+        "Plus(LHSWorkspace = 'OUTPUT_WS', "
+        "RHSWorkspace = 'INPUT_WS', OutputWorkspace = 'OUTPUT_WS')\n");
+    TS_ASSERT_EQUALS(output.toStdString(), result)
   }
 
-  void testPlusStringWithOptions() {
+  void testPreprocessStringWithOptions() {
 
     auto preprocessMap = reflPreprocessMap();
     auto transProcessor = preprocessMap["Transmission Run(s)"];
-    auto output = plusString("INPUT_WS", "OUTPUT_WS", transProcessor,
-                             "WavelengthMin = 0.5, WavelengthMax = 5.0");
-    auto result = QString(
-        "OUTPUT_WS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun "
+    auto output =
+        preprocessString("OUTPUT_WS", "INPUT_WS", "OUTPUT_WS", transProcessor,
+                         "WavelengthMin = 0.5, WavelengthMax = 5.0");
+    auto result = std::string(
+        "CreateTransmissionWorkspaceAuto(FirstTransmissionRun "
         "= 'OUTPUT_WS', SecondTransmissionRun = 'INPUT_WS', WavelengthMin = "
-        "0.5, WavelengthMax = 5.0)\n");
-    TS_ASSERT_EQUALS(output, result)
+        "0.5, WavelengthMax = 5.0, OutputWorkspace = 'OUTPUT_WS')\n");
+    TS_ASSERT_EQUALS(output.toStdString(), result)
   }
 
   void testLoadWorkspaceStringOneRun() {
@@ -248,66 +260,74 @@ public:
     auto processor = reflPreprocessMap()["Transmission Run(s)"];
     auto output = loadWorkspaceString("RUN", "INST_", processor, "");
     TS_ASSERT_EQUALS(boost::get<1>(output), "TRANS_RUN");
-    TS_ASSERT_EQUALS(boost::get<0>(output),
-                     "TRANS_RUN = Load(Filename = 'INST_RUN')\n");
+    TS_ASSERT_EQUALS(
+        boost::get<0>(output),
+        "Load(Filename = 'INST_RUN', OutputWorkspace = 'TRANS_RUN')\n");
   }
 
   void testLoadWorkspaceStringThreeRunsWithOptions() {
-    PreprocessingAlgorithm preprocessor("WeightedMean");
+    PreprocessingAlgorithm preprocessor("WeightedMean", "", "+");
     auto output = loadWorkspaceString("RUN1+RUN2,RUN3", "INST_", preprocessor,
                                       "Property1 = 1, Property2 = 2");
     auto outputLines = splitIntoLines(boost::get<0>(output));
 
     // The python code that does the loading
-    const QString result[] = {
-        "RUN1 = Load(Filename = 'INST_RUN1')", "RUN1_RUN2_RUN3 = RUN1",
-        "RUN2 = Load(Filename = 'INST_RUN2')",
-        "RUN1_RUN2_RUN3 = WeightedMean(InputWorkspace1 = 'RUN1_RUN2_RUN3', "
-        "InputWorkspace2 = 'RUN2', Property1 = 1, Property2 = 2)",
-        "RUN3 = Load(Filename = 'INST_RUN3')",
-        "RUN1_RUN2_RUN3 = WeightedMean(InputWorkspace1 = 'RUN1_RUN2_RUN3', "
-        "InputWorkspace2 = 'RUN3', Property1 = 1, Property2 = 2)"};
-    for (int i = 0; i < 6; i++) {
-      TS_ASSERT_EQUALS(outputLines[i], result[i]);
+    const std::string result[] = {
+        "Load(Filename = 'INST_RUN1', OutputWorkspace = 'RUN1+RUN2+RUN3')",
+        "Load(Filename = 'INST_RUN2', OutputWorkspace = 'RUN2')",
+        "WeightedMean(InputWorkspace1 = 'RUN1+RUN2+RUN3', "
+        "InputWorkspace2 = 'RUN2', Property1 = 1, Property2 = 2, "
+        "OutputWorkspace = 'RUN1+RUN2+RUN3')",
+        "Load(Filename = 'INST_RUN3', OutputWorkspace = 'RUN3')",
+        "WeightedMean(InputWorkspace1 = 'RUN1+RUN2+RUN3', "
+        "InputWorkspace2 = 'RUN3', Property1 = 1, Property2 = 2, "
+        "OutputWorkspace = 'RUN1+RUN2+RUN3')"};
+    for (int i = 0; i < 4; i++) {
+      TS_ASSERT_EQUALS(outputLines[i].toStdString(), result[i]);
     }
 
     // The loaded workspace
-    TS_ASSERT_EQUALS(boost::get<1>(output), "RUN1_RUN2_RUN3");
+    TS_ASSERT_EQUALS(boost::get<1>(output).toStdString(), "RUN1+RUN2+RUN3");
   }
 
   void testReduceRowStringWrongData() {
     // Whitelist and data differ in size
 
-    RowData rowData = {"12345", "1.5"};
+    auto rowData = makeRowData({"12345", "1.5"});
 
     TS_ASSERT_THROWS_ANYTHING(reduceRowString(
         rowData, m_instrument, reflWhitelist(), reflPreprocessMap("TOF_"),
-        reflProcessor(), std::map<QString, QString>(), ""));
+        reflProcessor(), ColumnOptionsMap()));
   }
 
   void testReduceRowString() {
     // Reduce a single row, no pre-processing is needed because there's
     // only one run in the 'Run(s)' column and no transmission runs
 
-    std::map<QString, QString> userPreProcessingOptions = {
-        {"Run(s)", ""}, {"Transmission Run(s)", ""}};
+    ColumnOptionsMap userPreProcessingOptions = {
+        {"Run(s)", OptionsMap()}, {"Transmission Run(s)", OptionsMap()}};
 
-    const RowData data = {"12346", "1.5", "", "1.4", "2.9",
-                          "0.04",  "1",   "", ""};
+    // Create a row
+    const auto rowData =
+        makeRowData({"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
+    addPropertyValue(rowData, "AnalysisMode", "MultiDetectorAnalysis");
 
-    auto output = reduceRowString(data, m_instrument, reflWhitelist(),
+    auto output = reduceRowString(rowData, m_instrument, reflWhitelist(),
                                   reflPreprocessMap("TOF_"), reflProcessor(),
-                                  userPreProcessingOptions, "");
+                                  userPreProcessingOptions);
 
     const QString result[] = {
-        "TOF_12346 = Load(Filename = 'INSTRUMENT12346')",
-        "IvsQ_binned_TOF_12346, IvsQ_TOF_12346, IvsLam_TOF_12346 = "
-        "ReflectometryReductionOneAuto(InputWorkspace = 'TOF_12346', ThetaIn = "
-        "1.5, MomentumTransferMin = 1.4, MomentumTransferMax = 2.9, "
-        "MomentumTransferStep = 0.04, ScaleFactor = 1)",
+        "Load(Filename = 'INSTRUMENT12346', OutputWorkspace = 'TOF_12346')",
+        "ReflectometryReductionOneAuto(AnalysisMode = 'MultiDetectorAnalysis', "
+        "InputWorkspace = 'TOF_12346', "
+        "MomentumTransferMax = '2.9', MomentumTransferMin = '1.4', "
+        "MomentumTransferStep = '0.04', OutputWorkspace = 'IvsQ_TOF_12346', "
+        "OutputWorkspaceBinned = 'IvsQ_binned_TOF_12346', "
+        "OutputWorkspaceWavelength = 'IvsLam_TOF_12346', ScaleFactor = '1', "
+        "ThetaIn = '1.5')",
         ""};
 
-    assertContainsMatchingLines(result, boost::get<0>(output));
+    assertContainsMatchingLines(result, output);
   }
 
   void testReduceRowStringWithPreprocessing() {
@@ -326,38 +346,44 @@ public:
 
     // Create a pre-process map
     std::map<QString, PreprocessingAlgorithm> preprocessMap = {
-        {"Run", PreprocessingAlgorithm("Plus", "RUN_", std::set<QString>())}};
+        {"Run",
+         PreprocessingAlgorithm("Plus", "RUN_", "+", std::set<QString>())}};
     // Specify some pre-processing options
-    std::map<QString, QString> userPreProcessingOptions = {
-        {"Run", "Property=prop"}};
+    auto runOptions = OptionsMap{{"Property", "prop"}};
+    auto userPreProcessingOptions = ColumnOptionsMap{{"Run", runOptions}};
 
-    // Create some data
-    const RowData data = {"1000+1001", "0.5", "", "", "", "", "", ""};
+    // Create a row
+    const auto data = makeRowData({"1000+1001", "0.5", "", "", "", "", "", ""});
+    addPropertyValue(data, "AnalysisMode", "MultiDetectorAnalysis");
 
-    auto output =
-        reduceRowString(data, "INST", whitelist, preprocessMap, reflProcessor(),
-                        userPreProcessingOptions, "");
+    // Set the expected output properties (these include the angle as specified
+    // in the whitelist)
+    addPropertyValue(data, "OutputWorkspace", "IvsQ_1000+1001_angle_0.5");
+    addPropertyValue(data, "OutputWorkspaceBinned",
+                     "IvsQ_binned_1000+1001_angle_0.5");
+    addPropertyValue(data, "OutputWorkspaceWavelength",
+                     "IvsLam_1000+1001_angle_0.5");
+
+    auto output = reduceRowString(data, "INST", whitelist, preprocessMap,
+                                  reflProcessor(), userPreProcessingOptions);
 
     const QString result[] = {
-        "RUN_1000 = Load(Filename = 'INST1000')", "RUN_1000_1001 = RUN_1000",
-        "RUN_1001 = Load(Filename = 'INST1001')",
-        "RUN_1000_1001 = Plus(LHSWorkspace = 'RUN_1000_1001', RHSWorkspace = "
-        "'RUN_1001', Property=prop)",
-        "IvsQ_binned_1000_1001_angle_0.5, IvsQ_1000_1001_angle_0.5, "
-        "IvsLam_1000_1001_angle_0.5 = "
-        "ReflectometryReductionOneAuto(InputWorkspace = 'RUN_1000_1001', "
-        "ThetaIn = 0.5)",
+        "Load(Filename = 'INST1000', OutputWorkspace = 'RUN_1000+1001')",
+        "Load(Filename = 'INST1001', OutputWorkspace = 'RUN_1001')",
+        "Plus(LHSWorkspace = 'RUN_1000+1001', RHSWorkspace = "
+        "'RUN_1001', Property='prop', OutputWorkspace = 'RUN_1000+1001')",
+        "ReflectometryReductionOneAuto(AnalysisMode = 'MultiDetectorAnalysis', "
+        "InputWorkspace = 'RUN_1000+1001', "
+        "OutputWorkspace = 'IvsQ_1000+1001_angle_0.5', OutputWorkspaceBinned = "
+        "'IvsQ_binned_1000+1001_angle_0.5', OutputWorkspaceWavelength = "
+        "'IvsLam_1000+1001_angle_0.5', "
+        "ThetaIn = '0.5')",
         ""};
 
-    std::cout << boost::get<1>(output).toStdString() << std::endl;
-
-    // Check the names of the reduced workspaces
-    TS_ASSERT_EQUALS(boost::get<1>(output), "IvsQ_binned_1000_1001_angle_0.5, "
-                                            "IvsQ_1000_1001_angle_0.5, "
-                                            "IvsLam_1000_1001_angle_0.5");
+    std::cout << output.toStdString() << std::endl;
 
     // Check the python code
-    assertContainsMatchingLines(result, boost::get<0>(output));
+    assertContainsMatchingLines(result, output);
   }
 
   void testReduceRowStringNoPreProcessing() {
@@ -365,23 +391,28 @@ public:
     // pre-process map)
 
     std::map<QString, PreprocessingAlgorithm> emptyPreProcessMap;
-    std::map<QString, QString> emptyPreProcessingOptions;
+    ColumnOptionsMap emptyPreProcessingOptions;
 
-    const RowData data = {"12346", "1.5", "", "1.4", "2.9",
-                          "0.04",  "1",   "", ""};
+    // Create a row
+    const auto data =
+        makeRowData({"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
+    addPropertyValue(data, "AnalysisMode", "MultiDetectorAnalysis");
 
     auto output =
         reduceRowString(data, m_instrument, reflWhitelist(), emptyPreProcessMap,
-                        reflProcessor(), emptyPreProcessingOptions, "");
+                        reflProcessor(), emptyPreProcessingOptions);
 
     const QString result[] = {
-        "IvsQ_binned_TOF_12346, IvsQ_TOF_12346, IvsLam_TOF_12346 = "
-        "ReflectometryReductionOneAuto(InputWorkspace = 12346, ThetaIn = 1.5, "
-        "MomentumTransferMin = 1.4, MomentumTransferMax = 2.9, "
-        "MomentumTransferStep = 0.04, ScaleFactor = 1)",
+        "ReflectometryReductionOneAuto(AnalysisMode = 'MultiDetectorAnalysis', "
+        "InputWorkspace = '12346', "
+        "MomentumTransferMax = '2.9', MomentumTransferMin = '1.4', "
+        "MomentumTransferStep = '0.04', OutputWorkspace = 'IvsQ_TOF_12346', "
+        "OutputWorkspaceBinned = 'IvsQ_binned_TOF_12346', "
+        "OutputWorkspaceWavelength = 'IvsLam_TOF_12346', ScaleFactor = '1', "
+        "ThetaIn = '1.5')",
         ""};
 
-    assertContainsMatchingLines(result, boost::get<0>(output));
+    assertContainsMatchingLines(result, output);
   }
 
   void testReducedWorkspaceNameWrong() {
@@ -394,20 +425,20 @@ public:
     whitelist.addElement("Trans", "", "", false, "");
 
     // Create some data
-    const RowData data = {"1000,1001", "0.5", "2000,2001", "1.4", "2.9",
-                          "0.04",      "1",   "",          ""};
-
+    const auto data = makeRowData(
+        {"1000,1001", "0.5", "2000,2001", "1.4", "2.9", "0.04", "1", "", ""});
+    auto reflectometryPreprocessMap = reflPreprocessMap();
     TS_ASSERT_THROWS_ANYTHING(
-        getReducedWorkspaceName(data, whitelist, "IvsQ_"));
+        getReducedWorkspaceName(data, whitelist, reflectometryPreprocessMap));
   }
 
   void testReducedWorkspaceNameOnlyRun() {
 
     // Create a whitelist
     WhiteList whitelist;
-    whitelist.addElement("Run", "", "", true, "run_");
+    whitelist.addElement("Run(s)", "", "", true, "run_");
     whitelist.addElement("Angle", "", "", false, "");
-    whitelist.addElement("Trans", "", "", false, "");
+    whitelist.addElement("Transmission Run(s)", "", "", false, "");
     whitelist.addElement("Q min", "MomentumTransferMinimum", "");
     whitelist.addElement("Q max", "MomentumTransferMaximum", "");
     whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
@@ -416,20 +447,22 @@ public:
     whitelist.addElement("HiddenOptions", "HiddenOptions", "");
 
     // Create some data
-    const RowData data = {"1000,1001", "0.5", "2000,2001", "1.4", "2.9",
-                          "0.04",      "1",   "",          ""};
+    const auto data = makeRowData(
+        {"1000,1001", "0.5", "2000,2001", "1.4", "2.9", "0.04", "1", "", ""});
 
-    auto name = getReducedWorkspaceName(data, whitelist, "IvsQ_");
-    TS_ASSERT_EQUALS(name, "IvsQ_run_1000_1001")
+    auto reflectometryPreprocessMap = reflPreprocessMap("run_", "");
+    auto name =
+        getReducedWorkspaceName(data, whitelist, reflectometryPreprocessMap);
+    TS_ASSERT_EQUALS(name.toStdString(), "run_1000+1001")
   }
 
   void testReducedWorkspaceNameRunAndTrans() {
 
     // Create a whitelist
     WhiteList whitelist;
-    whitelist.addElement("Run", "", "", true, "run_");
+    whitelist.addElement("Run(s)", "", "", true, "run_");
     whitelist.addElement("Angle", "", "", false, "");
-    whitelist.addElement("Trans", "", "", true, "trans_");
+    whitelist.addElement("Transmission Run(s)", "", "", true, "trans_");
     whitelist.addElement("Q min", "MomentumTransferMinimum", "");
     whitelist.addElement("Q max", "MomentumTransferMaximum", "");
     whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
@@ -438,20 +471,22 @@ public:
     whitelist.addElement("HiddenOptions", "HiddenOptions", "");
 
     // Create some data
-    const RowData data = {"1000,1001", "0.5", "2000,2001", "1.4", "2.9",
-                          "0.04",      "1",   "",          ""};
+    const auto data = makeRowData(
+        {"1000,1001", "0.5", "2000,2001", "1.4", "2.9", "0.04", "1", "", ""});
 
-    auto name = getReducedWorkspaceName(data, whitelist, "Prefix_");
-    TS_ASSERT_EQUALS(name, "Prefix_run_1000_1001_trans_2000_2001")
+    auto reflectometryPreprocessMap = reflPreprocessMap("run_", "trans_");
+    auto name =
+        getReducedWorkspaceName(data, whitelist, reflectometryPreprocessMap);
+    TS_ASSERT_EQUALS(name.toStdString(), "run_1000+1001_trans_2000_2001")
   }
 
   void testReducedWorkspaceNameTransNoPrefix() {
 
     // Create a whitelist
     WhiteList whitelist;
-    whitelist.addElement("Run", "", "", false, "");
+    whitelist.addElement("Run(s)", "", "", false, "");
     whitelist.addElement("Angle", "", "", false, "");
-    whitelist.addElement("Trans", "", "", true, "");
+    whitelist.addElement("Transmission Run(s)", "", "", true, "");
     whitelist.addElement("Q min", "MomentumTransferMinimum", "");
     whitelist.addElement("Q max", "MomentumTransferMaximum", "");
     whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
@@ -459,52 +494,50 @@ public:
     whitelist.addElement("Options", "Options", "");
     whitelist.addElement("HiddenOptions", "HiddenOptions", "");
 
-    const RowData data = {"1000,1001", "0.5", "2000+2001", "1.4", "2.9",
-                          "0.04",      "1",   "",          ""};
+    const auto data = makeRowData(
+        {"1000,1001", "0.5", "2000+2001", "1.4", "2.9", "0.04", "1", "", ""});
 
-    auto name = getReducedWorkspaceName(data, whitelist, "Prefix_");
-    TS_ASSERT_EQUALS(name, "Prefix_2000_2001")
+    auto reflectometryPreprocessMap = reflPreprocessMap("", "");
+    auto name =
+        getReducedWorkspaceName(data, whitelist, reflectometryPreprocessMap);
+    TS_ASSERT_EQUALS(name.toStdString(), "2000_2001")
   }
 
   void testPostprocessGroupString() {
     auto userOptions = "Params = '0.1, -0.04, 2.9', StartOverlaps = "
                        "'1.4, 0.1, 1.4', EndOverlaps = '1.6, 2.9, 1.6'";
 
-    RowData rowData0 = {"12345", "", "", "", "", "", "", "", ""};
-    RowData rowData1 = {"12346", "", "", "", "", "", "", "", ""};
+    auto rowData0 = makeRowData({"12345", "", "", "", "", "", "", "", ""});
+    auto rowData1 = makeRowData({"12346", "", "", "", "", "", "", "", ""});
     GroupData groupData = {{0, rowData0}, {1, rowData1}};
 
     auto output = postprocessGroupString(
-        groupData, reflWhitelist(), reflProcessor(),
-        PostprocessingStep(userOptions, reflPostprocessor(),
-                           std::map<QString, QString>()));
+        groupData, reflProcessor(),
+        PostprocessingStep(userOptions, reflPostprocessor(), OptionsMap()));
 
     std::vector<QString> result = {
         "#Post-process workspaces",
-        "IvsQ_TOF_12345_TOF_12346, _ = "
         "Stitch1DMany(InputWorkspaces = "
         "'IvsQ_binned_TOF_12345, IvsQ_binned_TOF_12346', Params = "
         "'0.1, -0.04, 2.9', StartOverlaps = '1.4, 0.1, 1.4', EndOverlaps = "
-        "'1.6, 2.9, 1.6')",
+        "'1.6, 2.9, 1.6', OutputWorkspace = 'IvsQ_TOF_12345_TOF_12346')",
         ""};
 
     assertContainsMatchingLines(result, boost::get<0>(output));
     // All rows in second group
 
-    rowData0 = QStringList({"24681", "", "", "", "", "", "", "", ""});
-    rowData1 = QStringList({"24682", "", "", "", "", "", "", "", ""});
+    rowData0 = makeRowData({"24681", "", "", "", "", "", "", "", ""});
+    rowData1 = makeRowData({"24682", "", "", "", "", "", "", "", ""});
     groupData = {{0, rowData0}, {1, rowData1}};
     output = postprocessGroupString(
-        groupData, reflWhitelist(), reflProcessor(),
-        PostprocessingStep(userOptions, reflPostprocessor(),
-                           std::map<QString, QString>()));
+        groupData, reflProcessor(),
+        PostprocessingStep(userOptions, reflPostprocessor(), OptionsMap()));
 
     result = {"#Post-process workspaces",
-              "IvsQ_TOF_24681_TOF_24682, _ = "
               "Stitch1DMany(InputWorkspaces = "
               "'IvsQ_binned_TOF_24681, IvsQ_binned_TOF_24682', Params = '0.1, "
               "-0.04, 2.9', StartOverlaps = '1.4, 0.1, 1.4', EndOverlaps = "
-              "'1.6, 2.9, 1.6')",
+              "'1.6, 2.9, 1.6', OutputWorkspace = 'IvsQ_TOF_24681_TOF_24682')",
               ""};
 
     assertContainsMatchingLines(result, boost::get<0>(output));
@@ -516,36 +549,45 @@ public:
     ws_names.append("workspace2");
 
     auto output = plot1DString(ws_names);
-    auto const result = QString(
-        "fig = plots([workspace1, workspace2], "
-        "title=['workspace1', 'workspace2'], legendLocation=[1, 1, 4])\n");
+    auto const result = std::string(
+        "fig = plots([mtd['workspace1'], mtd['workspace2']], "
+        "title=['workspace1', 'workspace2'], legendLocation=[1, 1])\n");
 
-    TS_ASSERT_EQUALS(result, output);
+    TS_ASSERT_EQUALS(result, output.toStdString());
   }
 
   void testPlotsString() {
-    QStringList unprocessed_ws;
-    unprocessed_ws.append("IvsQ_binned_1, IvsQ_1, IvsLam_1");
-    unprocessed_ws.append("IvsQ_binned_2, IvsQ_2, IvsLam_2");
+    // Reduced workspaces
+    // Create a group with two rows and some dummy run numbers (with no
+    // prefixes)
+    auto rowData1 = makeRowData({"1"}, {});
+    auto rowData2 = makeRowData({"2"}, {});
+    auto groupData = GroupData();
+    groupData[0] = rowData1;
+    groupData[1] = rowData2;
 
     QStringList postprocessed_ws;
     postprocessed_ws.append("TEST_WS3");
     postprocessed_ws.append("TEST_WS4");
 
-    auto output = plotsString(unprocessed_ws, postprocessed_ws.join("_"),
-                              reflProcessor());
+    auto output =
+        plotsString(groupData, postprocessed_ws.join("_"), reflProcessor());
 
     const QString result[] = {
         "#Group workspaces to be plotted on same axes",
-        "IvsQ_binned_groupWS = GroupWorkspaces(InputWorkspaces = "
-        "'IvsQ_binned_1, IvsQ_binned_2')",
-        "IvsQ_groupWS = GroupWorkspaces(InputWorkspaces = 'IvsQ_1, IvsQ_2')",
-        "IvsLam_groupWS = GroupWorkspaces(InputWorkspaces = 'IvsLam_1, "
-        "IvsLam_2')",
+        "GroupWorkspaces(InputWorkspaces = "
+        "'IvsQ_binned_1, IvsQ_binned_2', OutputWorkspace = "
+        "'IvsQ_binned_groupWS')",
+        "GroupWorkspaces(InputWorkspaces = 'IvsQ_1, "
+        "IvsQ_2', OutputWorkspace = 'IvsQ_groupWS')",
+        "GroupWorkspaces(InputWorkspaces = 'IvsLam_1, "
+        "IvsLam_2', OutputWorkspace = 'IvsLam_groupWS')",
         "#Plot workspaces",
-        "fig = plots([IvsQ_binned_groupWS, IvsQ_groupWS, IvsLam_groupWS, "
-        "TEST_WS3_TEST_WS4], title=['IvsQ_binned_groupWS', 'IvsQ_groupWS', "
-        "'IvsLam_groupWS', 'TEST_WS3_TEST_WS4'], legendLocation=[1, 1, 4])",
+        "fig = plots([mtd['IvsQ_binned_groupWS'], mtd['IvsQ_groupWS'], "
+        "mtd['IvsLam_groupWS'], "
+        "mtd['TEST_WS3_TEST_WS4']], title=['IvsQ_binned_groupWS', "
+        "'IvsQ_groupWS', "
+        "'IvsLam_groupWS', 'TEST_WS3_TEST_WS4'], legendLocation=[1, 1, 4, 1])",
         ""};
 
     assertContainsMatchingLines(result, output);
@@ -553,27 +595,33 @@ public:
 
   void testPlotsStringNoPostprocessing() {
     // Reduced workspaces
-    QStringList unprocessed_ws;
-    unprocessed_ws.append("IvsQ_binned_1, IvsQ_1, IvsLam_1");
-    unprocessed_ws.append("IvsQ_binned_2, IvsQ_2, IvsLam_2");
+    // Create a group with two rows and some dummy run numbers (with no
+    // prefixes)
+    auto rowData1 = makeRowData({"1"}, {});
+    auto rowData2 = makeRowData({"2"}, {});
+    auto groupData = GroupData();
+    groupData[0] = rowData1;
+    groupData[1] = rowData2;
     // Post-processed ws (empty)
     auto postprocessed_ws = "";
 
-    auto output =
-        plotsString(unprocessed_ws, postprocessed_ws, reflProcessor());
+    auto output = plotsString(groupData, postprocessed_ws, reflProcessor());
 
-    const QString result[] = {
-        "#Group workspaces to be plotted on same axes",
-        "IvsQ_binned_groupWS = GroupWorkspaces(InputWorkspaces = "
-        "'IvsQ_binned_1, IvsQ_binned_2')",
-        "IvsQ_groupWS = GroupWorkspaces(InputWorkspaces = 'IvsQ_1, IvsQ_2')",
-        "IvsLam_groupWS = GroupWorkspaces(InputWorkspaces = 'IvsLam_1, "
-        "IvsLam_2')",
-        "#Plot workspaces",
-        "fig = plots([IvsQ_binned_groupWS, IvsQ_groupWS, IvsLam_groupWS, ], "
-        "title=['IvsQ_binned_groupWS', 'IvsQ_groupWS', 'IvsLam_groupWS', ''], "
-        "legendLocation=[1, 1, 4])",
-        ""};
+    const QString result[] = {"#Group workspaces to be plotted on same axes",
+                              "GroupWorkspaces(InputWorkspaces = "
+                              "'IvsQ_binned_1, IvsQ_binned_2', OutputWorkspace "
+                              "= 'IvsQ_binned_groupWS')",
+                              "GroupWorkspaces(InputWorkspaces = 'IvsQ_1, "
+                              "IvsQ_2', OutputWorkspace = 'IvsQ_groupWS')",
+                              "GroupWorkspaces(InputWorkspaces = 'IvsLam_1, "
+                              "IvsLam_2', OutputWorkspace = 'IvsLam_groupWS')",
+                              "#Plot workspaces",
+                              "fig = plots([mtd['IvsQ_binned_groupWS'], "
+                              "mtd['IvsQ_groupWS'], mtd['IvsLam_groupWS']], "
+                              "title=['IvsQ_binned_groupWS', 'IvsQ_groupWS', "
+                              "'IvsLam_groupWS'], "
+                              "legendLocation=[1, 1, 4])",
+                              ""};
 
     assertContainsMatchingLines(result, output);
   }
@@ -602,7 +650,8 @@ public:
     intVector.emplace_back(3);
     auto const intOutput = vectorString(intVector);
 
-    // Test string list output is correct for vector of strings and vector of
+    // Test string list output is correct for vector of strings and vector
+    // of
     // ints
     TS_ASSERT_EQUALS(stringOutput, "A, B, C")
     TS_ASSERT_EQUALS(intOutput, "1, 2, 3")
@@ -615,93 +664,129 @@ public:
     auto preprocessMap = reflPreprocessMap();
     auto processor = reflProcessor();
     auto postProcessor = reflPostprocessor();
-    auto preprocessingOptions =
-        std::map<QString, QString>{{"Run(s)", "PlusProperty=PlusValue"},
-                                   {"Transmission Run(s)", "Property=Value"}};
-    auto processingOptions = "AnalysisMode=MultiDetectorAnalysis";
+    auto runOptions = OptionsMap{{"PlusProperty", "PlusValue"}};
+    auto transmissionOptions = OptionsMap{{"Property", "Value"}};
+    auto preprocessingOptions = ColumnOptionsMap{
+        {"Run(s)", runOptions}, {"Transmission Run(s)", transmissionOptions}};
     auto postprocessingOptions = "Params=0.04";
-    auto postprocessingStep = PostprocessingStep(
-        postprocessingOptions, postProcessor, std::map<QString, QString>());
+    auto postprocessingStep =
+        PostprocessingStep(postprocessingOptions, postProcessor, OptionsMap());
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         "TableName", "INTER", whitelist, preprocessMap, processor,
-        postprocessingStep, preprocessingOptions, processingOptions);
+        postprocessingStep, preprocessingOptions);
 
     auto generatedNotebook = notebook->generateNotebook(reflData());
 
     auto notebookLines = splitIntoLines(generatedNotebook);
-    auto const loadAndReduceStringFirstGroup = QString(
-        "               \"input\" : \"#Load and reduce\\n12345 = Load(Filename "
-        "= \'INTER12345\')\\nIvsQ_binned_TOF_12345, IvsQ_TOF_12345, "
-        "IvsLam_TOF_12345 = ReflectometryReductionOneAuto(InputWorkspace = "
-        "\'12345\', ThetaIn = 0.5, MomentumTransferMin = 0.1, "
-        "MomentumTransferMax = 1.6, MomentumTransferStep = 0.04, ScaleFactor = "
-        "1, AnalysisMode = MultiDetectorAnalysis)\\n#Load and reduce\\n12346 = "
-        "Load(Filename = \'INTER12346\')\\nIvsQ_binned_TOF_12346, "
-        "IvsQ_TOF_12346, IvsLam_TOF_12346 = "
-        "ReflectometryReductionOneAuto(InputWorkspace = \'12346\', ThetaIn = "
-        "1.5, MomentumTransferMin = 1.4, MomentumTransferMax = 2.9, "
-        "MomentumTransferStep = 0.04, ScaleFactor = 1, AnalysisMode = "
-        "MultiDetectorAnalysis)\\n\",");
-    TS_ASSERT_EQUALS(notebookLines[48], loadAndReduceStringFirstGroup);
+    auto const loadAndReduceStringFirstGroup = std::string(
+        "               \"input\" : \"#Load and reduce\\n"
+        "Load(Filename "
+        "= \'INTER12345\', OutputWorkspace = '12345')\\n"
+        "ReflectometryReductionOneAuto(AnalysisMode = 'MultiDetectorAnalysis', "
+        "InputWorkspace = "
+        "\'12345\', "
+        "MomentumTransferMax = '1.6', MomentumTransferMin = '0.1', "
+        "MomentumTransferStep = '0.04', "
+        "OutputWorkspace = 'IvsQ_TOF_12345', OutputWorkspaceBinned = "
+        "'IvsQ_binned_TOF_12345', OutputWorkspaceWavelength = "
+        "'IvsLam_TOF_12345', ScaleFactor = '1', ThetaIn = '0.5')\\n#Load and "
+        "reduce\\n"
+        "Load(Filename = \'INTER12346\', OutputWorkspace = '12346')\\n"
+        "ReflectometryReductionOneAuto(AnalysisMode = 'MultiDetectorAnalysis', "
+        "InputWorkspace = \'12346\', MomentumTransferMax = '2.9', "
+        "MomentumTransferMin = '1.4', "
+        "MomentumTransferStep = '0.04', OutputWorkspace = 'IvsQ_TOF_12346', "
+        "OutputWorkspaceBinned = 'IvsQ_binned_TOF_12346', "
+        "OutputWorkspaceWavelength = 'IvsLam_TOF_12346', ScaleFactor = '1', "
+        "ThetaIn = '1.5')\\n\",");
+    TS_ASSERT_EQUALS(notebookLines[48].toStdString(),
+                     loadAndReduceStringFirstGroup);
 
-    auto const postProcessStringFirstGroup =
-        QString("               \"input\" : \"#Post-process "
-                "workspaces\\nIvsQ_TOF_12345_TOF_12346, _ = "
-                "Stitch1DMany(InputWorkspaces = \'IvsQ_binned_TOF_12345, "
-                "IvsQ_binned_TOF_12346\', "
-                "Params=0.04)\",");
+    auto const postProcessStringFirstGroup = QString(
+        "               \"input\" : \"#Post-process "
+        "workspaces\\n"
+        "Stitch1DMany(InputWorkspaces = \'IvsQ_binned_TOF_12345, "
+        "IvsQ_binned_TOF_12346\', "
+        "Params=0.04, OutputWorkspace = 'IvsQ_TOF_12345_TOF_12346')\",");
     TS_ASSERT_EQUALS(notebookLines[56], postProcessStringFirstGroup);
 
-    auto const groupWorkspacesStringFirstGroup = QString(
-        "               \"input\" : \"#Group workspaces to be plotted on same "
-        "axes\\nIvsQ_binned_groupWS = GroupWorkspaces(InputWorkspaces = "
-        "\'IvsQ_binned_TOF_12345, IvsQ_binned_TOF_12346\')\\nIvsQ_groupWS = "
+    auto const groupWorkspacesStringFirstGroup = std::string(
+        "               \"input\" : \"#Group workspaces to be plotted on "
+        "same "
+        "axes\\nGroupWorkspaces(InputWorkspaces = "
+        "\'IvsQ_binned_TOF_12345, IvsQ_binned_TOF_12346\', OutputWorkspace = "
+        "'IvsQ_binned_groupWS')\\n"
         "GroupWorkspaces(InputWorkspaces = \'IvsQ_TOF_12345, "
-        "IvsQ_TOF_12346\')\\nIvsLam_groupWS = GroupWorkspaces(InputWorkspaces "
-        "= \'IvsLam_TOF_12345, IvsLam_TOF_12346\')\\n#Plot workspaces\\nfig = "
-        "plots([IvsQ_binned_groupWS, IvsQ_groupWS, IvsLam_groupWS, "
-        "IvsQ_TOF_12345_TOF_12346], title=[\'IvsQ_binned_groupWS\', "
-        "\'IvsQ_groupWS\', \'IvsLam_groupWS\', \'IvsQ_TOF_12345_TOF_12346\'], "
-        "legendLocation=[1, 1, 4])\\n\",");
+        "IvsQ_TOF_12346\', OutputWorkspace = 'IvsQ_groupWS')\\n"
+        "GroupWorkspaces(InputWorkspaces "
+        "= \'IvsLam_TOF_12345, IvsLam_TOF_12346\', OutputWorkspace = "
+        "'IvsLam_groupWS')\\n#Plot "
+        "workspaces\\nfig = "
+        "plots([mtd['IvsQ_binned_groupWS'], mtd['IvsQ_groupWS'], "
+        "mtd['IvsLam_groupWS'], "
+        "mtd['IvsQ_TOF_12345_TOF_12346']], title=[\'IvsQ_binned_groupWS\', "
+        "\'IvsQ_groupWS\', \'IvsLam_groupWS\', "
+        "\'IvsQ_TOF_12345_TOF_12346\'], "
+        "legendLocation=[1, 1, 4, 1])\\n\",");
     ;
-    TS_ASSERT_EQUALS(notebookLines[64], groupWorkspacesStringFirstGroup);
+    TS_ASSERT_EQUALS(notebookLines[64].toStdString(),
+                     groupWorkspacesStringFirstGroup);
 
-    auto const loadAndReduceStringSecondGroup = QString(
-        "               \"input\" : \"#Load and reduce\\n24681 = Load(Filename "
-        "= \'INTER24681\')\\nIvsQ_binned_TOF_24681, IvsQ_TOF_24681, "
-        "IvsLam_TOF_24681 = ReflectometryReductionOneAuto(InputWorkspace = "
-        "\'24681\', ThetaIn = 0.5, MomentumTransferMin = 0.1, "
-        "MomentumTransferMax = 1.6, MomentumTransferStep = 0.04, ScaleFactor = "
-        "1, AnalysisMode = MultiDetectorAnalysis)\\n#Load and reduce\\n24682 = "
-        "Load(Filename = \'INTER24682\')\\nIvsQ_binned_TOF_24682, "
-        "IvsQ_TOF_24682, IvsLam_TOF_24682 = "
-        "ReflectometryReductionOneAuto(InputWorkspace = \'24682\', ThetaIn = "
-        "1.5, MomentumTransferMin = 1.4, MomentumTransferMax = 2.9, "
-        "MomentumTransferStep = 0.04, ScaleFactor = 1, AnalysisMode = "
-        "MultiDetectorAnalysis)\\n\",");
-    TS_ASSERT_EQUALS(notebookLines[77], loadAndReduceStringSecondGroup);
+    auto const loadAndReduceStringSecondGroup = std::string(
+        "               \"input\" : \"#Load and reduce\\n"
+        "Load(Filename "
+        "= \'INTER24681\', OutputWorkspace = '24681')\\n"
+        "ReflectometryReductionOneAuto(AnalysisMode = 'MultiDetectorAnalysis', "
+        "InputWorkspace = "
+        "\'24681\', "
+        "MomentumTransferMax = '1.6', MomentumTransferMin = '0.1', "
+        "MomentumTransferStep = '0.04', "
+        "OutputWorkspace = 'IvsQ_TOF_24681', OutputWorkspaceBinned = "
+        "'IvsQ_binned_TOF_24681', OutputWorkspaceWavelength = "
+        "'IvsLam_TOF_24681', ScaleFactor = '1', ThetaIn = '0.5')\\n#Load and "
+        "reduce\\n"
+        "Load(Filename = \'INTER24682\', OutputWorkspace = '24682')\\n"
+        "ReflectometryReductionOneAuto(AnalysisMode = 'MultiDetectorAnalysis', "
+        "InputWorkspace = \'24682\', MomentumTransferMax = '2.9', "
+        "MomentumTransferMin = '1.4', "
+        "MomentumTransferStep = '0.04', OutputWorkspace = 'IvsQ_TOF_24682', "
+        "OutputWorkspaceBinned = 'IvsQ_binned_TOF_24682', "
+        "OutputWorkspaceWavelength = 'IvsLam_TOF_24682', ScaleFactor = '1', "
+        "ThetaIn = '1.5')\\n\",");
+    TS_ASSERT_EQUALS(notebookLines[77].toStdString(),
+                     loadAndReduceStringSecondGroup);
 
     auto const postProcessStringSecondGroup =
-        QString("               \"input\" : \"#Post-process "
-                "workspaces\\nIvsQ_TOF_24681_TOF_24682, _ = "
-                "Stitch1DMany(InputWorkspaces = \'IvsQ_binned_TOF_24681, "
-                "IvsQ_binned_TOF_24682\', Params=0.04)\",");
-    TS_ASSERT_EQUALS(notebookLines[85], postProcessStringSecondGroup);
+        std::string("               \"input\" : \"#Post-process "
+                    "workspaces\\n"
+                    "Stitch1DMany(InputWorkspaces = \'IvsQ_binned_TOF_24681, "
+                    "IvsQ_binned_TOF_24682\', Params=0.04, OutputWorkspace = "
+                    "'IvsQ_TOF_24681_TOF_24682')\",");
+    TS_ASSERT_EQUALS(notebookLines[85].toStdString(),
+                     postProcessStringSecondGroup);
 
-    auto const groupWorkspacesStringSecondGroup = QString(
-        "               \"input\" : \"#Group workspaces to be plotted on same "
-        "axes\\nIvsQ_binned_groupWS = GroupWorkspaces(InputWorkspaces = "
-        "\'IvsQ_binned_TOF_24681, IvsQ_binned_TOF_24682\')\\nIvsQ_groupWS = "
+    auto const groupWorkspacesStringSecondGroup = std::string(
+        "               \"input\" : \"#Group workspaces to be plotted on "
+        "same "
+        "axes\\nGroupWorkspaces(InputWorkspaces = "
+        "\'IvsQ_binned_TOF_24681, IvsQ_binned_TOF_24682\', OutputWorkspace = "
+        "'IvsQ_binned_groupWS')\\n"
         "GroupWorkspaces(InputWorkspaces = \'IvsQ_TOF_24681, "
-        "IvsQ_TOF_24682\')\\nIvsLam_groupWS = GroupWorkspaces(InputWorkspaces "
-        "= \'IvsLam_TOF_24681, IvsLam_TOF_24682\')\\n#Plot workspaces\\nfig = "
-        "plots([IvsQ_binned_groupWS, IvsQ_groupWS, IvsLam_groupWS, "
-        "IvsQ_TOF_24681_TOF_24682], title=[\'IvsQ_binned_groupWS\', "
-        "\'IvsQ_groupWS\', \'IvsLam_groupWS\', \'IvsQ_TOF_24681_TOF_24682\'], "
-        "legendLocation=[1, 1, 4])\\n\",");
+        "IvsQ_TOF_24682\', OutputWorkspace = 'IvsQ_groupWS')\\n"
+        "GroupWorkspaces(InputWorkspaces "
+        "= \'IvsLam_TOF_24681, IvsLam_TOF_24682\', OutputWorkspace = "
+        "'IvsLam_groupWS')\\n#Plot "
+        "workspaces\\nfig = "
+        "plots([mtd['IvsQ_binned_groupWS'], mtd['IvsQ_groupWS'], "
+        "mtd['IvsLam_groupWS'], "
+        "mtd['IvsQ_TOF_24681_TOF_24682']], title=[\'IvsQ_binned_groupWS\', "
+        "\'IvsQ_groupWS\', \'IvsLam_groupWS\', "
+        "\'IvsQ_TOF_24681_TOF_24682\'], "
+        "legendLocation=[1, 1, 4, 1])\\n\",");
 
-    TS_ASSERT_EQUALS(notebookLines[93], groupWorkspacesStringSecondGroup);
+    TS_ASSERT_EQUALS(notebookLines[93].toStdString(),
+                     groupWorkspacesStringSecondGroup);
 
     // Total number of lines
     TS_ASSERT_EQUALS(notebookLines.size(), 104);
@@ -713,20 +798,24 @@ public:
     auto preprocessMap = reflPreprocessMap();
     auto processor = reflProcessor();
     auto postProcessor = reflPostprocessor();
-    auto preprocessingOptions =
-        std::map<QString, QString>{{"Run(s)", "PlusProperty=PlusValue"},
-                                   {"Transmission Run(s)", "Property=Value"}};
-    auto processingOptions = "AnalysisMode=MultiDetectorAnalysis";
+    auto runOptions = OptionsMap{{"PlusProperty", "PlusValue"}};
+    auto transmissionOptions = OptionsMap{{"Property", "Value"}};
+    auto preprocessingOptions = ColumnOptionsMap{
+        {"Run(s)", runOptions}, {"Transmission Run(s)", transmissionOptions}};
     auto postprocessingOptions = "Params=0.04";
-    auto postprocessingStep = PostprocessingStep(
-        postprocessingOptions, postProcessor, std::map<QString, QString>());
+    auto postprocessingStep =
+        PostprocessingStep(postprocessingOptions, postProcessor, OptionsMap());
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         "TableName", "INTER", whitelist, preprocessMap, processor,
-        postprocessingStep, preprocessingOptions, processingOptions);
+        postprocessingStep, preprocessingOptions);
 
-    RowData rowData0 = {"12345", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""};
-    RowData rowData1 = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""};
+    auto rowData0 =
+        makeRowData({"12345", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""});
+    auto rowData1 =
+        makeRowData({"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
+    addPropertyValue(rowData0, "AnalysisMode", "MultiDetectorAnalysis");
+    addPropertyValue(rowData1, "AnalysisMode", "MultiDetectorAnalysis");
     TreeData treeData = {{0, {{0, rowData0}}}, {1, {{0, rowData1}}}};
 
     auto generatedNotebook = notebook->generateNotebook(treeData);
@@ -738,55 +827,73 @@ public:
 
     // First group
 
-    auto loadAndReduceString = QString(
-        "               \"input\" : \"#Load and reduce\\n12345 = Load(Filename "
-        "= \'INTER12345\')\\nIvsQ_binned_TOF_12345, IvsQ_TOF_12345, "
-        "IvsLam_TOF_12345 = ReflectometryReductionOneAuto(InputWorkspace = "
-        "\'12345\', ThetaIn = 0.5, MomentumTransferMin = 0.1, "
-        "MomentumTransferMax = 1.6, MomentumTransferStep = 0.04, ScaleFactor = "
-        "1, AnalysisMode = MultiDetectorAnalysis)\\n\",");
-    TS_ASSERT_EQUALS(notebookLines[48], loadAndReduceString);
+    auto loadAndReduceString = std::string(
+        "               \"input\" : \"#Load and reduce\\n"
+        "Load(Filename "
+        "= \'INTER12345\', OutputWorkspace = '12345')\\n"
+        "ReflectometryReductionOneAuto(AnalysisMode = 'MultiDetectorAnalysis', "
+        "InputWorkspace = "
+        "\'12345\', "
+        "MomentumTransferMax = '1.6', MomentumTransferMin = '0.1', "
+        "MomentumTransferStep = '0.04', "
+        "OutputWorkspace = 'IvsQ_TOF_12345', OutputWorkspaceBinned = "
+        "'IvsQ_binned_TOF_12345', OutputWorkspaceWavelength = "
+        "'IvsLam_TOF_12345', ScaleFactor = '1', ThetaIn = '0.5')\\n\",");
+    TS_ASSERT_EQUALS(notebookLines[48].toStdString(), loadAndReduceString);
 
-    auto postProcessString = QString("               \"input\" : \"\",");
+    auto postProcessString = QString(R"(               "input" : "",)");
     TS_ASSERT_EQUALS(notebookLines[56], postProcessString);
 
-    auto groupWorkspacesString = QString(
-        "               \"input\" : \"#Group workspaces to be plotted on same "
-        "axes\\nIvsQ_binned_groupWS = GroupWorkspaces(InputWorkspaces = "
-        "\'IvsQ_binned_TOF_12345\')\\nIvsQ_groupWS = "
+    auto groupWorkspacesString = std::string(
+        "               \"input\" : \"#Group workspaces to be plotted on "
+        "same "
+        "axes\\nGroupWorkspaces(InputWorkspaces = "
+        "\'IvsQ_binned_TOF_12345\', OutputWorkspace = 'IvsQ_binned_groupWS')\\n"
         "GroupWorkspaces(InputWorkspaces = "
-        "\'IvsQ_TOF_12345\')\\nIvsLam_groupWS = "
-        "GroupWorkspaces(InputWorkspaces = \'IvsLam_TOF_12345\')\\n#Plot "
-        "workspaces\\nfig = plots([IvsQ_binned_groupWS, IvsQ_groupWS, "
-        "IvsLam_groupWS, ], title=[\'IvsQ_binned_groupWS\', \'IvsQ_groupWS\', "
-        "\'IvsLam_groupWS\', \'\'], legendLocation=[1, 1, 4])\\n\",");
-    TS_ASSERT_EQUALS(notebookLines[64], groupWorkspacesString);
+        "\'IvsQ_TOF_12345\', OutputWorkspace = 'IvsQ_groupWS')\\n"
+        "GroupWorkspaces(InputWorkspaces = \'IvsLam_TOF_12345\', "
+        "OutputWorkspace = 'IvsLam_groupWS')\\n#Plot "
+        "workspaces\\nfig = plots([mtd['IvsQ_binned_groupWS'], "
+        "mtd['IvsQ_groupWS'], "
+        "mtd['IvsLam_groupWS']], title=[\'IvsQ_binned_groupWS\', "
+        "\'IvsQ_groupWS\', "
+        "\'IvsLam_groupWS\'], legendLocation=[1, 1, 4])\\n\",");
+    TS_ASSERT_EQUALS(notebookLines[64].toStdString(), groupWorkspacesString);
 
     // Second group
 
     loadAndReduceString =
-        "               \"input\" : \"#Load and reduce\\n12346 = Load(Filename "
-        "= \'INTER12346\')\\nIvsQ_binned_TOF_12346, IvsQ_TOF_12346, "
-        "IvsLam_TOF_12346 = ReflectometryReductionOneAuto(InputWorkspace = "
-        "\'12346\', ThetaIn = 1.5, MomentumTransferMin = 1.4, "
-        "MomentumTransferMax = 2.9, MomentumTransferStep = 0.04, ScaleFactor = "
-        "1, AnalysisMode = MultiDetectorAnalysis)\\n\",";
-    TS_ASSERT_EQUALS(notebookLines[77], loadAndReduceString);
+        "               \"input\" : \"#Load and reduce\\n"
+        "Load(Filename "
+        "= \'INTER12346\', OutputWorkspace = '12346')\\n"
+        "ReflectometryReductionOneAuto(AnalysisMode = 'MultiDetectorAnalysis', "
+        "InputWorkspace = "
+        "\'12346\', "
+        "MomentumTransferMax = '2.9', MomentumTransferMin = '1.4', "
+        "MomentumTransferStep = '0.04', "
+        "OutputWorkspace = 'IvsQ_TOF_12346', OutputWorkspaceBinned = "
+        "'IvsQ_binned_TOF_12346', OutputWorkspaceWavelength = "
+        "'IvsLam_TOF_12346', ScaleFactor = '1', ThetaIn = '1.5')\\n\",";
+    TS_ASSERT_EQUALS(notebookLines[77].toStdString(), loadAndReduceString);
 
-    postProcessString = "               \"input\" : \"\",";
+    postProcessString = R"(               "input" : "",)";
     TS_ASSERT_EQUALS(notebookLines[85], postProcessString);
 
     groupWorkspacesString =
-        "               \"input\" : \"#Group workspaces to be plotted on same "
-        "axes\\nIvsQ_binned_groupWS = GroupWorkspaces(InputWorkspaces = "
-        "\'IvsQ_binned_TOF_12346\')\\nIvsQ_groupWS = "
+        "               \"input\" : \"#Group workspaces to be plotted on "
+        "same "
+        "axes\\nGroupWorkspaces(InputWorkspaces = "
+        "\'IvsQ_binned_TOF_12346\', OutputWorkspace = 'IvsQ_binned_groupWS')\\n"
         "GroupWorkspaces(InputWorkspaces = "
-        "\'IvsQ_TOF_12346\')\\nIvsLam_groupWS = "
-        "GroupWorkspaces(InputWorkspaces = \'IvsLam_TOF_12346\')\\n#Plot "
-        "workspaces\\nfig = plots([IvsQ_binned_groupWS, IvsQ_groupWS, "
-        "IvsLam_groupWS, ], title=[\'IvsQ_binned_groupWS\', \'IvsQ_groupWS\', "
-        "\'IvsLam_groupWS\', \'\'], legendLocation=[1, 1, 4])\\n\",";
-    TS_ASSERT_EQUALS(notebookLines[93], groupWorkspacesString);
+        "\'IvsQ_TOF_12346\', OutputWorkspace = 'IvsQ_groupWS')\\n"
+        "GroupWorkspaces(InputWorkspaces = \'IvsLam_TOF_12346\', "
+        "OutputWorkspace = 'IvsLam_groupWS')\\n#Plot "
+        "workspaces\\nfig = plots([mtd['IvsQ_binned_groupWS'], "
+        "mtd['IvsQ_groupWS'], "
+        "mtd['IvsLam_groupWS']], title=[\'IvsQ_binned_groupWS\', "
+        "\'IvsQ_groupWS\', "
+        "\'IvsLam_groupWS\'], legendLocation=[1, 1, 4])\\n\",";
+    TS_ASSERT_EQUALS(notebookLines[93].toStdString(), groupWorkspacesString);
   }
 };
 

@@ -1,6 +1,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLRUNSTABPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSTABPRESENTER_H
 
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -37,11 +39,13 @@ public:
   virtual ~IReflRunsTabPresenter(){};
   /// Accept a main presenter
   virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
+  virtual void settingsChanged(int group) = 0;
 
   enum Flag {
     SearchFlag,
-    NewAutoreductionFlag,
-    ResumeAutoreductionFlag,
+    StartAutoreductionFlag,
+    PauseAutoreductionFlag,
+    TimerEventFlag,
     ICATSearchCompleteFlag,
     TransferFlag,
     InstrumentChangedFlag,
@@ -50,8 +54,10 @@ public:
 
   // Tell the presenter something happened
   virtual void notify(IReflRunsTabPresenter::Flag flag) = 0;
-  // Determine whether to start a new autoreduction
-  virtual bool startNewAutoreduction() const = 0;
+  virtual bool isAutoreducing(int group) const = 0;
+  virtual bool isAutoreducing() const = 0;
+  virtual bool isProcessing(int group) const = 0;
+  virtual bool isProcessing() const = 0;
 };
 }
 }

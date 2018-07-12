@@ -66,8 +66,8 @@ private:
   ~ImplicitFunctionParserFactoryImpl() override = default;
 };
 
-typedef Mantid::Kernel::SingletonHolder<ImplicitFunctionParserFactoryImpl>
-    ImplicitFunctionParserFactory;
+using ImplicitFunctionParserFactory =
+    Mantid::Kernel::SingletonHolder<ImplicitFunctionParserFactoryImpl>;
 }
 }
 

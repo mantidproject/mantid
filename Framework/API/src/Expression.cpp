@@ -9,7 +9,7 @@
 namespace Mantid {
 namespace API {
 
-typedef Mantid::Kernel::StringTokenizer tokenizer;
+using tokenizer = Mantid::Kernel::StringTokenizer;
 
 const std::string DEFAULT_OPS_STR[] = {";", ",", "=", "== != > < <= >=",
                                        "&& || ^^", "+ -", "* /", "^"};

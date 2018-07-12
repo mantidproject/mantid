@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 from six import iterkeys
+import warnings
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
@@ -41,9 +42,13 @@ def crop_banks_using_crop_list(bank_list, crop_values_list):
         # This error is probably internal as we control the bank lists
         raise RuntimeError("Attempting to use list based cropping on a single workspace not in a list")
 
+    num_banks = len(bank_list)
+    num_crop_vals = len(crop_values_list)
+
     # Finally check the number of elements are equal
-    if len(bank_list) != len(crop_values_list):
-        raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument")
+    if num_banks != num_crop_vals:
+        raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument.\n"
+                           "{} cropping windows were supplied for {} banks".format(num_crop_vals, num_banks))
 
     output_list = []
     for spectra, cropping_values in zip(bank_list, crop_values_list):
@@ -279,6 +284,8 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
         remove_intermediate_workspace(raw_ws_list)
         raw_ws_list = [summed_ws]
 
+    instrument.mask_prompt_pulses_if_necessary(raw_ws_list)
+
     normalised_ws_list = _normalise_workspaces(ws_list=raw_ws_list, run_details=run_information,
                                                instrument=instrument)
 
@@ -360,12 +367,25 @@ def remove_intermediate_workspace(workspaces):
 
 def run_normalise_by_current(ws):
     """
-    Runs the Normalise By Current algorithm on the input workspace
+    Runs the Normalise By Current algorithm on the input workspace. If the workspace has no current, return it unchanged
     :param ws: The workspace to run normalise by current on
     :return: The current normalised workspace
     """
-    ws = mantid.NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
+    if workspace_has_current(ws):
+        ws = mantid.NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
+    else:
+        warnings.warn(
+            "Run {} had no current. NormaliseByCurrent will not be run on it, and empty will not be subtracted".
+            format(ws.getRunNumber()))
     return ws
+
+
+def runs_overlap(run_string1, run_string2):
+    """
+    Get whether two runs, specified using the usual run string format (eg 123-125 referring to 123, 124 and 125)
+    contain any individual runs in common
+    """
+    return len(set(generate_run_numbers(run_string1)).intersection(generate_run_numbers(run_string2))) > 0
 
 
 def spline_vanadium_workspaces(focused_vanadium_spectra, spline_coefficient):
@@ -412,8 +432,9 @@ def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument, scal
     :param scale_factor: The percentage to scale the loaded runs by
     :return: The workspace with the empty runs subtracted
     """
-    # If an empty string was not specified just return to skip this step
-    if empty_sample_ws_string is None:
+    # Skip this step if an empty string was not specified
+    # or if the workspace has no current, as subtracting empty would give us negative counts
+    if empty_sample_ws_string is None or not workspace_has_current(ws_to_correct):
         return ws_to_correct
 
     empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
@@ -578,3 +599,11 @@ def generate_sample_material(sample_details):
         material_json["ScatteringXSection"] = material.scattering_cross_section
 
     return material_json
+
+
+def workspace_has_current(ws):
+    """
+    Gat whether the total charge for this run was greater than 0
+    """
+    charge = ws.run().getProtonCharge()
+    return charge is not None and charge > 0

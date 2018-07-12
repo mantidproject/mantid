@@ -139,6 +139,19 @@ void CrystalFieldSusceptibilityBase::function1D(double *out,
   } else {
     calculate(out, xValues, nData, m_en, m_wf, m_nre, H, convfact);
   }
+  const double lambda = getParameter("Lambda");
+  const double EPS = 1.e-6;
+  if (fabs(lambda) > EPS) {
+    for (size_t i = 0; i < nData; i++) {
+      out[i] /= (1. - lambda * out[i]); // chi = chi_cf/(1 - lambda.chi_cf)
+    }
+  }
+  const double chi0 = getParameter("Chi0");
+  if (fabs(lambda) > 1.e-6) {
+    for (size_t i = 0; i < nData; i++) {
+      out[i] += chi0;
+    }
+  }
   if (getAttribute("inverse").asBool()) {
     for (size_t i = 0; i < nData; i++) {
       out[i] = 1. / out[i];
@@ -150,12 +163,6 @@ void CrystalFieldSusceptibilityBase::function1D(double *out,
       out[i] *= fact;
     }
   }
-  const double lambda = getParameter("Lambda");
-  if (fabs(lambda) > 1.e-6) {
-    for (size_t i = 0; i < nData; i++) {
-      out[i] /= (1. - lambda * out[i]); // chi = chi0/(1 - lambda.chi0)
-    }
-  }
 }
 
 DECLARE_FUNCTION(CrystalFieldSusceptibility)
@@ -164,6 +171,7 @@ CrystalFieldSusceptibility::CrystalFieldSusceptibility()
     : CrystalFieldPeaksBase(), CrystalFieldSusceptibilityBase(),
       m_setDirect(false) {
   declareParameter("Lambda", 0.0, "Effective exchange interaction");
+  declareParameter("Chi0", 0.0, "Background or remnant susceptibility");
 }
 
 // Sets the eigenvectors / values directly
@@ -186,6 +194,7 @@ void CrystalFieldSusceptibility::function1D(double *out, const double *xValues,
 
 CrystalFieldSusceptibilityCalculation::CrystalFieldSusceptibilityCalculation() {
   declareParameter("Lambda", 0.0, "Effective exchange interaction");
+  declareParameter("Chi0", 0.0, "Background or remnant susceptibility");
 }
 
 // Sets the eigenvectors / values directly

@@ -50,7 +50,7 @@ namespace API {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class GenericDialog : public AlgorithmDialog {
+class EXPORT_OPT_MANTIDQT_COMMON GenericDialog : public AlgorithmDialog {
 
   Q_OBJECT
 

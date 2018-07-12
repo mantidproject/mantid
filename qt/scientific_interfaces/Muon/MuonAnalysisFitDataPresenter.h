@@ -11,9 +11,9 @@
 #include <boost/optional/optional.hpp>
 
 /// Save some typing
-typedef std::pair<
+using RebinOptions = std::pair<
     MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType,
-    std::string> RebinOptions;
+    std::string>;
 
 namespace Mantid {
 namespace API {
@@ -121,7 +121,7 @@ public:
   void checkAndUpdateFitLabel(bool sequentialFit);
   /// Generate names of workspaces to be created
   std::vector<std::string> generateWorkspaceNames(bool overwrite) const;
-  void storeNormalization(std::string wsName, bool addToTable) const;
+
 signals:
   void setChosenGroupSignal(const QString &group);
   void setChosenPeriodSignal(const QString &period);

@@ -55,10 +55,31 @@ void CrystalFieldControl::setAttribute(const std::string &name,
       m_temperatures = attr.asVector();
       buildControls();
     } else if (name == "FWHMs") {
+      const size_t nSpec = m_temperatures.size();
       m_FWHMs = attr.asVector();
-      if (m_FWHMs.size() == 1 && m_FWHMs.size() != m_temperatures.size()) {
-        m_FWHMs.assign(m_temperatures.size(), m_FWHMs.front());
+      if (m_FWHMs.size() == 1 && m_FWHMs.size() != nSpec) {
+        m_FWHMs.assign(nSpec, m_FWHMs.front());
       }
+      if (!m_FWHMs.empty()) {
+        m_fwhmX.resize(nSpec);
+        m_fwhmY.resize(nSpec);
+        for (size_t i = 0; i < nSpec; ++i) {
+          m_fwhmX[i].clear();
+          m_fwhmY[i].clear();
+          if (nSpec > 1) {
+            auto &control = *getFunction(i);
+            control.setAttribute("FWHMX", Attribute(std::vector<double>()));
+            control.setAttribute("FWHMY", Attribute(std::vector<double>()));
+          } else {
+            setAttribute("FWHMX", Attribute(std::vector<double>()));
+            setAttribute("FWHMY", Attribute(std::vector<double>()));
+          }
+        }
+      }
+    } else if ((name.compare(0, 5, "FWHMX") == 0 ||
+                name.compare(0, 5, "FWHMY") == 0) &&
+               !attr.asVector().empty()) {
+      m_FWHMs.clear();
     }
     API::IFunction::setAttribute(name, attr);
   }

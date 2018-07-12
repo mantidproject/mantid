@@ -97,7 +97,7 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
   int minTOFN;
 };
 
-typedef boost::shared_ptr<Poldi2DHelper> Poldi2DHelper_sptr;
+using Poldi2DHelper_sptr = boost::shared_ptr<Poldi2DHelper>;
 
 class WrapAroundJacobian : public API::Jacobian {
 public:

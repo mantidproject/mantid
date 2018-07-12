@@ -106,9 +106,9 @@ protected:
   size_t m_totalCols;
 };
 
-typedef boost::shared_ptr<SpectrumDataSource> SpectrumDataSource_sptr;
-typedef boost::shared_ptr<const SpectrumDataSource>
-    SpectrumDataSource_const_sptr;
+using SpectrumDataSource_sptr = boost::shared_ptr<SpectrumDataSource>;
+using SpectrumDataSource_const_sptr =
+    boost::shared_ptr<const SpectrumDataSource>;
 
 } // namespace SpectrumView
 } // namespace MantidQt

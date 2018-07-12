@@ -69,14 +69,12 @@ class PeakProcessRecord(object):
         # Figure print
         self._fingerPrint = '{0:.7f}.{1}'.format(time.time(), random.randint(0, 10000000))
 
-        # print('[DB...BAT] Create PeakProcessRecord for Exp {0} Scan {1} ({2} | {3}).' \
-        #       ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self))))
         return
 
     def calculate_peak_center(self, allow_bad_monitor=True):
         """ Calculate peak's center by averaging the peaks found and stored in PeakWorkspace
         :param allow_bad_monitor: if specified as True, then a bad monitor (zero) is allowed and set the value to 1.
-        :return:
+        :return: str (error message)
         """
         # Go through the peak workspaces to calculate peak center with weight (monitor and counts)
         peak_ws = AnalysisDataService.retrieve(self._myPeakWorkspaceName)
@@ -94,6 +92,7 @@ class PeakProcessRecord(object):
         q_sample_sum = numpy.array([0., 0., 0.])
         weight_sum = 0.
 
+        err_msg = ''
         for i_peak in range(num_found_peaks):
             # get peak
             peak_i = peak_ws.getPeak(i_peak)
@@ -103,7 +102,7 @@ class PeakProcessRecord(object):
             # get row number and then detector counts and monitor counts
             if pt_number not in pt_spice_row_dict:
                 # skip
-                print('[Error] Scan %d Peak %d Pt %d cannot be located.' % (self._myScanNumber, i_peak, pt_number))
+                err_msg += '\nScan %d Peak %d Pt %d cannot be located.' % (self._myScanNumber, i_peak, pt_number)
                 continue
 
             row_index = pt_spice_row_dict[pt_number]
@@ -119,7 +118,6 @@ class PeakProcessRecord(object):
             q_i = peak_i.getQSampleFrame()
             q_array = numpy.array([q_i.X(), q_i.Y(), q_i.Z()])
             # calculate weight
-            print('[DB] Peak {0}: detector counts = {1}, Monitor counts = {2}.'.format(i_peak, det_counts, monitor_counts))
             weight_i = float(det_counts)/float(monitor_counts)
             # contribute to total
             weight_sum += weight_i
@@ -129,21 +127,17 @@ class PeakProcessRecord(object):
         # END-FOR (i_peak)
 
         try:
-            print('[DB] calculate value error: sum(Q-sample) = {0}, sum(weight) = {1}.'.format(q_sample_sum, weight_sum))
             self._avgPeakCenter = q_sample_sum/weight_sum
         except Exception as e:
             raise RuntimeError('Unable to calculate average peak center due to value error as {0}.'.format(e))
 
-        return
+        return err_msg
 
     def generate_integration_report(self):
         """
         generate a dictionary for this PeakInfo
         :return:
         """
-        # print('[DB...BAT] PeakInfo (Scan: {0}, ID: {1}) generate report.  Spice HKL: {2}' \
-        #       ''.format(self._myScanNumber, hex(id(self)), self._spiceHKL))
-
         report = dict()
 
         if self._spiceHKL is not None:
@@ -282,9 +276,7 @@ class PeakProcessRecord(object):
             # if self._spiceHKL is None:
             self.retrieve_hkl_from_spice_table()
             ret_hkl = self._spiceHKL
-
-            # print('[DB...BAT] PeakInfo (Scan: {0}, ID: {1}) SPICE HKL: {2}' \
-            #       ''.format(self._myScanNumber, hex(id(self)), self._spiceHKL))
+        # END-IF-ELSE
 
         return ret_hkl
 
@@ -365,9 +357,6 @@ class PeakProcessRecord(object):
         """
         assert isinstance(factor, float), 'Lorentz correction factor'
         self._lorenzFactor = factor
-
-        # print('[DB...BAT] Exp {0} Scan {1}  ({2} | {3}) has Lorentz factor set up.' \
-        #       ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self))))
 
         return
 
@@ -519,9 +508,6 @@ class PeakProcessRecord(object):
         assert isinstance(peak_integration_dict, dict),\
             'Integrated peak information {0} must be given by a dictionary but not a {1}.' \
             ''.format(peak_integration_dict, type(peak_integration_dict))
-
-        # print('[DB...BAT] Exp {0} Scan {1}  ({2} | {3}) has integrated dictionary set up.' \
-        #       ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self))))
 
         self._integrationDict = peak_integration_dict
 

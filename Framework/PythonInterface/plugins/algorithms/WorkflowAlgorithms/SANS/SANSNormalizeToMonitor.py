@@ -4,14 +4,14 @@
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, FloatBoundedValidator, PropertyManagerProperty)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
+from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.enums import RebinType, RangeStepType
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 
-class SANSNormalizeToMonitor(DataProcessorAlgorithm):
+class SANSNormalizeToMonitor(ParallelDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Adjust'
 
@@ -180,8 +180,8 @@ class SANSNormalizeToMonitor(DataProcessorAlgorithm):
         :param normalize_to_monitor_state: a SANSStateNormalizeToMonitor object.
         :return: a wavelength workspace.
         """
-        wavelength_low = normalize_to_monitor_state.wavelength_low
-        wavelength_high = normalize_to_monitor_state.wavelength_high
+        wavelength_low = normalize_to_monitor_state.wavelength_low[0]
+        wavelength_high = normalize_to_monitor_state.wavelength_high[0]
         wavelength_step = normalize_to_monitor_state.wavelength_step
         wavelength_step_type = normalize_to_monitor_state.wavelength_step_type
         wavelength_rebin_mode = normalize_to_monitor_state.rebin_type

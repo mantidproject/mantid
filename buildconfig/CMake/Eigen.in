@@ -1,12 +1,16 @@
 cmake_minimum_required ( VERSION 3.5 )
 include( ExternalProject )
-ExternalProject_Add(eigen
-  URL               "https://bitbucket.org/eigen/eigen/get/3.2.10.tar.gz"
-  URL_HASH          "MD5=8ad10ac703a78143a4062c9bda9d8fd3"
-  SOURCE_DIR        "${CMAKE_BINARY_DIR}/eigen-src"
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND     ""
-  INSTALL_COMMAND   ""
-  TEST_COMMAND      ""
-)
 
+ExternalProject_Add(eigen
+  URL "https://bitbucket.org/eigen/eigen/get/3.3.4.tar.gz"
+  URL_HASH "MD5=1a47e78efe365a97de0c022d127607c3"
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/extern-eigen/download
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/extern-eigen/source
+  INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/extern-eigen/install
+  CMAKE_ARGS
+    -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION}
+  CMAKE_CACHE_ARGS
+    -DCMAKE_BUILD_TYPE:STRING=Release
+    -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF
+    -DCMAKE_INSTALL_PREFIX:STRING=${CMAKE_CURRENT_BINARY_DIR}/extern-eigen/install
+)

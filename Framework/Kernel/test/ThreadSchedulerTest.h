@@ -87,8 +87,8 @@ public:
 
     // And ThreadScheduler does not delete popped tasks in this way
     TS_ASSERT_EQUALS(ThreadSchedulerTest_numDestructed, 0);
-    for (size_t i = 0; i < 4; i++) {
-      delete tasks[i];
+    for (auto &task : tasks) {
+      delete task;
     }
   }
 

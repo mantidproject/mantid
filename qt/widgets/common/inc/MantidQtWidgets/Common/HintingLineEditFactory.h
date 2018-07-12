@@ -2,6 +2,7 @@
 #define MANTID_MANTIDWIDGETS_HINTINGLINEEDITFACTORY_H
 
 #include <QStyledItemDelegate>
+#include <QPainter>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
@@ -38,6 +39,7 @@ class HintingLineEditFactory : public QStyledItemDelegate {
 public:
   HintingLineEditFactory(HintStrategy *hintStrategy)
       : m_strategy(hintStrategy){};
+
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const override {
     Q_UNUSED(option);
@@ -47,6 +49,16 @@ public:
     editor->setFrame(false);
 
     return editor;
+  }
+
+  void paint(QPainter *painter, const QStyleOptionViewItem &option,
+             const QModelIndex &index) const override {
+    QStyledItemDelegate::paint(painter, option, index);
+
+    painter->save();
+    painter->setPen(QColor(Qt::black));
+    painter->drawRect(option.rect);
+    painter->restore();
   }
 
 protected:

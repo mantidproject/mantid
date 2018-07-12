@@ -67,8 +67,8 @@ private:
   ParameterFactory &operator=(const ParameterFactory &);
 
   /// A typedef for the instantiator
-  typedef Kernel::AbstractInstantiator<Parameter> AbstractFactory;
-  typedef std::map<std::string, std::unique_ptr<AbstractFactory>> FactoryMap;
+  using AbstractFactory = Kernel::AbstractInstantiator<Parameter>;
+  using FactoryMap = std::map<std::string, std::unique_ptr<AbstractFactory>>;
   /// The map holding the registered class names and their instantiators
   static FactoryMap s_map;
 };

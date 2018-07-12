@@ -11,6 +11,9 @@ class StringToPng(mantid.api.PythonAlgorithm):
         """
         return "DataHandling\\Plots"
 
+    def seeAlso(self):
+        return [ "SavePlot1D" ]
+
     def name(self):
         """ Algorithm name
         """
@@ -39,16 +42,16 @@ class StringToPng(mantid.api.PythonAlgorithm):
                 ok2run='Wrong version of matplotlib. Required >= 1.2.0'
         if ok2run!='':
             raise RuntimeError(ok2run)
-        matplotlib.use("agg")
+        if 'backend_mtdqt4agg' not in matplotlib.get_backend():
+            matplotlib.use("agg")
         import matplotlib.pyplot as plt
         fig=plt.figure(figsize=(.1,.1))
         ax1=plt.axes(frameon=False)
         ax1.text(0.,1,bytearray(u(self.getProperty("String").valueAsStr), 'utf-8').decode('unicode_escape'),va="center",fontsize=16)
         ax1.axes.get_xaxis().set_visible(False)
         ax1.axes.get_yaxis().set_visible(False)
-        plt.show()
         filename = self.getProperty("OutputFilename").value
-        plt.savefig(filename,bbox_inches='tight')
+        fig.savefig(filename,bbox_inches='tight')
         plt.close(fig)
 
 

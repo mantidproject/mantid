@@ -123,6 +123,7 @@ add_subdirectory (LiveData)
 add_subdirectory (RemoteAlgorithms)
 add_subdirectory (RemoteJobManagers)
 add_subdirectory (SINQ)
+add_subdirectory (Muon)
 
 # If an MPI-enabled build, add in the MPI-specific algorithms package
 if ( MPI_BUILD )
@@ -144,12 +145,10 @@ add_subdirectory (ScriptRepository)
 ###########################################################################
 
 set ( FRAMEWORK_LIBS Kernel HistogramData Indexing Beamline Geometry API DataObjects
-                     PythonKernelModule PythonGeometryModule PythonAPIModule
-                     PythonDataObjectsModule PythonCurveFittingModule
-                     DataHandling Nexus Algorithms CurveFitting ICat
+                     PythonInterface DataHandling Nexus Algorithms CurveFitting ICat
                      Crystal MDAlgorithms WorkflowAlgorithms
                      LiveData RemoteAlgorithms RemoteJobManagers
-                     SINQ
+                     SINQ Muon
 )
 
 add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} )

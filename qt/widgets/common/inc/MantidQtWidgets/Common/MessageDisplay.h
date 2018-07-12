@@ -54,7 +54,7 @@ public:
   ~MessageDisplay() override;
 
   // Setup logging framework connections
-  void attachLoggingChannel();
+  void attachLoggingChannel(int logLevel = 0);
   /// If set, only Mantid log messages from this source are emitted
   void setSource(const QString &source);
   /// Get the current source are emitted

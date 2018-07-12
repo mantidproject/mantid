@@ -1,14 +1,16 @@
 #include "MantidQtWidgets/SliceViewer/PeakViewFactory.h"
-#include "MantidQtWidgets/SliceViewer/PeakRepresentationCross.h"
-#include "MantidQtWidgets/SliceViewer/PeakRepresentationSphere.h"
-#include "MantidQtWidgets/SliceViewer/PeakRepresentationEllipsoid.h"
-#include "MantidQtWidgets/SliceViewer/PeakView.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidQtWidgets/Common/NonOrthogonal.h"
+#include "MantidQtWidgets/SliceViewer/NonOrthogonalAxis.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentationCross.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentationEllipsoid.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentationSphere.h"
+#include "MantidQtWidgets/SliceViewer/PeakView.h"
 
 namespace {
 struct ZMinAndMax {
@@ -198,6 +200,19 @@ void PeakViewFactory::setForegroundAndBackgroundColors(
       defaultPalette.backgroundIndexToColour(static_cast<int>(colourNumber));
   m_foregroundColor = peakColourEnum;
   m_backgroundColor = backColourEnum;
+}
+
+void PeakViewFactory::getNonOrthogonalInfo(NonOrthogonalAxis &info) {
+  if (API::requiresSkewMatrix(*m_mdWS)) {
+    auto numberOfDimensions = m_mdWS->getNumDims();
+    Mantid::Kernel::DblMatrix skewMatrixDbl(numberOfDimensions,
+                                            numberOfDimensions, true);
+    API::provideSkewMatrix(skewMatrixDbl, *m_mdWS);
+    skewMatrixDbl.Invert();
+    API::transformFromDoubleToCoordT(skewMatrixDbl, info.fromHklToXyz);
+    info.dimMissing =
+        API::getMissingHKLDimensionIndex(m_mdWS, info.dimX, info.dimY);
+  }
 }
 }
 }

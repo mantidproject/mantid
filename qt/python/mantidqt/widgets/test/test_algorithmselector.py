@@ -1,3 +1,19 @@
+#  This file is part of the mantid workbench.
+#
+#  Copyright (C) 2017 mantidproject
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import
 
 from collections import Counter, namedtuple
@@ -128,21 +144,19 @@ class WidgetTest(unittest.TestCase):
         self.assertTrue(widget.get_selected_algorithm() is None)
         self.assertEqual(widget.search_box.currentText(), 'abc')
 
-    def test_execute_signal(self):
-        slot = Mock()
-        widget = AlgorithmSelectorWidget()
-        widget.execute_selected_algorithm.connect(slot)
-        self._select_in_tree(widget, 'DoStuff v.2')
-        widget.execute_button.click()
-        slot.assert_called_once_with('DoStuff', 2)
+    def test_execute_on_click(self):
+        with patch('mantidqt.widgets.interfacemanager.InterfaceManager.createDialogFromName') as createDialog:
+            widget = AlgorithmSelectorWidget()
+            self._select_in_tree(widget, 'DoStuff v.2')
+            widget.execute_button.click()
+            createDialog.assert_called_once_with('DoStuff', 2)
 
-    def test_execute_return_press(self):
-        slot = Mock()
-        widget = AlgorithmSelectorWidget()
-        widget.execute_selected_algorithm.connect(slot)
-        self._select_in_tree(widget, 'DoStuff v.2')
-        QTest.keyClick(widget.search_box, Qt.Key_Return)
-        slot.assert_called_once_with('DoStuff', 2)
+    def test_execute_on_return_press(self):
+        with patch('mantidqt.widgets.interfacemanager.InterfaceManager.createDialogFromName') as createDialog:
+            widget = AlgorithmSelectorWidget()
+            self._select_in_tree(widget, 'DoStuff v.2')
+            QTest.keyClick(widget.search_box, Qt.Key_Return)
+            createDialog.assert_called_once_with('DoStuff', 2)
 
 
 if __name__ == '__main__':

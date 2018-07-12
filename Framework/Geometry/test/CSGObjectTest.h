@@ -1,5 +1,5 @@
-#ifndef MANTID_TESTOBJECT__
-#define MANTID_TESTOBJECT__
+#ifndef MANTID_TESTCSGOBJECT__
+#define MANTID_TESTCSGOBJECT__
 
 #include "MantidGeometry/Objects/CSGObject.h"
 
@@ -10,7 +10,9 @@
 #include "MantidGeometry/Surfaces/SurfaceFactory.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Material.h"
@@ -35,6 +37,7 @@
 using namespace Mantid;
 using namespace Geometry;
 using Mantid::Kernel::V3D;
+using detail::ShapeInfo;
 
 namespace {
 // -----------------------------------------------------------------------------
@@ -83,23 +86,22 @@ public:
     auto original_ptr = ComponentCreationHelper::createSphere(1.0);
     auto &original = dynamic_cast<CSGObject &>(*original_ptr);
     original.setID("sp-1");
-    int objType(-1);
+    ShapeInfo::GeometryShape objType;
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
+    auto handler = original.getGeometryHandler();
+    TS_ASSERT(handler->hasShapeInfo());
     original.GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT_EQUALS(3, objType);
-    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-        original.getGeometryHandler()));
+    TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
 
     CSGObject copy(original);
-    // The copy should be a primitive object with a GluGeometryHandler
-    objType = -1;
+    // The copy should be a primitive object with a GeometryHandler
     copy.GetObjectGeom(objType, pts, radius, height);
 
     TS_ASSERT_EQUALS("sp-1", copy.id());
-    TS_ASSERT_EQUALS(3, objType);
-    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-        copy.getGeometryHandler()));
+    auto handlerCopy = copy.getGeometryHandler();
+    TS_ASSERT(handlerCopy->hasShapeInfo());
+    TS_ASSERT_EQUALS(handler->shapeInfo(), handlerCopy->shapeInfo());
     TS_ASSERT_EQUALS(copy.getName(), original.getName());
     // Check the string representation is the same
     TS_ASSERT_EQUALS(copy.str(), original.str());
@@ -110,24 +112,24 @@ public:
     auto original_ptr = ComponentCreationHelper::createSphere(1.0);
     auto &original = dynamic_cast<CSGObject &>(*original_ptr);
     original.setID("sp-1");
-    int objType(-1);
+    ShapeInfo::GeometryShape objType;
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
+    auto handler = original.getGeometryHandler();
+    TS_ASSERT(handler->hasShapeInfo());
     original.GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT_EQUALS(3, objType);
-    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-        original.getGeometryHandler()));
+    TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
 
     CSGObject lhs;  // initialize
     lhs = original; // assign
     // The copy should be a primitive object with a GluGeometryHandler
-    objType = -1;
     lhs.GetObjectGeom(objType, pts, radius, height);
 
     TS_ASSERT_EQUALS("sp-1", lhs.id());
-    TS_ASSERT_EQUALS(3, objType);
-    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-        lhs.getGeometryHandler()));
+    TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
+    auto handlerCopy = lhs.getGeometryHandler();
+    TS_ASSERT(handlerCopy->hasShapeInfo());
+    TS_ASSERT_EQUALS(handlerCopy->shapeInfo(), handler->shapeInfo());
   }
 
   void testCreateUnitCube() {
@@ -139,8 +141,19 @@ public:
     geom_obj->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
   }
 
+  void testCloneWithMaterial() {
+    using Mantid::Kernel::Material;
+    auto testMaterial =
+        Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
+    auto geom_obj = createUnitCube();
+    TS_ASSERT_THROWS_NOTHING(geom_obj->cloneWithMaterial(testMaterial));
+    auto cloned_obj = geom_obj->cloneWithMaterial(testMaterial);
+    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
+                     cloned_obj->material().numberDensity(), 1e-12);
+  }
+
   void testIsOnSideCappedCylinder() {
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     // inside
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0, 0, 0)), false); // origin
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0, 2.9, 0)), false);
@@ -174,7 +187,7 @@ public:
   }
 
   void testIsValidCappedCylinder() {
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     // inside
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0, 0, 0)), true); // origin
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0, 2.9, 0)), true);
@@ -287,7 +300,7 @@ public:
   }
 
   void testCalcValidTypeCappedCylinder() {
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     // entry on the normal
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(1, 0, 0)), 1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(-1, 0, 0)),
@@ -362,7 +375,7 @@ public:
 
   void testInterceptSurfaceCappedCylinderY() {
     std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     // format = startPoint, endPoint, total distance so far
     expectedResults.push_back(Link(V3D(0, -3, 0), V3D(0, 3, 0), 13, *geom_obj));
 
@@ -372,7 +385,7 @@ public:
 
   void testInterceptSurfaceCappedCylinderX() {
     std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     Track track(V3D(-10, 0, 0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
@@ -384,7 +397,7 @@ public:
   void testInterceptSurfaceCappedCylinderMiss() {
     std::vector<Link>
         expectedResults; // left empty as there are no expected results
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     Track track(V3D(-10, 0, 0), V3D(1, 1, 0));
 
     checkTrackIntercept(geom_obj, track, expectedResults);
@@ -392,19 +405,21 @@ public:
 
   void checkTrackIntercept(Track &track,
                            const std::vector<Link> &expectedResults) {
-    int index = 0;
+    size_t index = 0;
     for (Track::LType::const_iterator it = track.cbegin(); it != track.cend();
          ++it) {
-      TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart,
-                      1e-6);
-      TS_ASSERT_DELTA(it->distInsideObject,
-                      expectedResults[index].distInsideObject, 1e-6);
-      TS_ASSERT_EQUALS(it->componentID, expectedResults[index].componentID);
-      TS_ASSERT_EQUALS(it->entryPoint, expectedResults[index].entryPoint);
-      TS_ASSERT_EQUALS(it->exitPoint, expectedResults[index].exitPoint);
+      if (index < expectedResults.size()) {
+        TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart,
+                        1e-6);
+        TS_ASSERT_DELTA(it->distInsideObject,
+                        expectedResults[index].distInsideObject, 1e-6);
+        TS_ASSERT_EQUALS(it->componentID, expectedResults[index].componentID);
+        TS_ASSERT_EQUALS(it->entryPoint, expectedResults[index].entryPoint);
+        TS_ASSERT_EQUALS(it->exitPoint, expectedResults[index].exitPoint);
+      }
       ++index;
     }
-    TS_ASSERT_EQUALS(index, static_cast<int>(expectedResults.size()));
+    TS_ASSERT_EQUALS(index, expectedResults.size());
   }
 
   void checkTrackIntercept(IObject_sptr obj, Track &track,
@@ -780,10 +795,11 @@ public:
   {
     boost::shared_ptr<CSGObject> geom_obj = createSmallCappedCylinder();
     // Want to test triangulation so setup a geometry handler
-    boost::shared_ptr<GluGeometryHandler> h =
-        boost::shared_ptr<GluGeometryHandler>(
-            new GluGeometryHandler(geom_obj.get()));
-    h->setCylinder(V3D(-0.0015, 0.0, 0.0), V3D(1., 0.0, 0.0), 0.005, 0.003);
+    auto h = boost::make_shared<GeometryHandler>(geom_obj);
+    detail::ShapeInfo shapeInfo;
+    shapeInfo.setCylinder(V3D(-0.0015, 0.0, 0.0), V3D(1., 0.0, 0.0), 0.005,
+                          0.003);
+    h->setShapeInfo(std::move(shapeInfo));
     geom_obj->setGeometryHandler(h);
 
     double satol(1e-8); // tolerance for solid angle
@@ -955,7 +971,7 @@ public:
   Test bounding box for a object capped cylinder
   */
   {
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     double xmax, ymax, zmax, xmin, ymin, zmin;
     xmax = ymax = zmax = 100;
     xmin = ymin = zmin = -100;
@@ -1134,7 +1150,7 @@ public:
 
 private:
   /// Surface type
-  typedef std::map<int, boost::shared_ptr<Surface>> STYPE;
+  using STYPE = std::map<int, boost::shared_ptr<Surface>>;
 
   /// set timeTest true to get time comparisons of soild angle methods
   const static bool timeTest = false;
@@ -1227,7 +1243,7 @@ private:
 
     // PLANE SURFACES:
 
-    typedef std::pair<int, std::string> SCompT;
+    using SCompT = std::pair<int, std::string>;
     std::vector<SCompT> SurfLine;
     if (desired.find("60001") != std::string::npos)
       SurfLine.push_back(SCompT(60001, "px -1"));
@@ -1255,12 +1271,12 @@ private:
       SurfLine.push_back(SCompT(73, "s 0.6 0 0 0.4"));
 
     // Note that the testObject now manages the "new Plane"
-    for (auto vc = SurfLine.cbegin(); vc != SurfLine.cend(); ++vc) {
-      auto A = Geometry::SurfaceFactory::Instance()->processLine(vc->second);
+    for (const auto &vc : SurfLine) {
+      auto A = Geometry::SurfaceFactory::Instance()->processLine(vc.second);
       TSM_ASSERT("Expected a non-null surface from the factory", A);
-      A->setName(vc->first);
-      SMap.insert(STYPE::value_type(vc->first,
-                                    boost::shared_ptr<Surface>(A.release())));
+      A->setName(vc.first);
+      SMap.insert(
+          STYPE::value_type(vc.first, boost::shared_ptr<Surface>(A.release())));
     }
 
     return;
@@ -1428,9 +1444,11 @@ private:
 
     // Explicitly setting the GluGeometryHanler hexahedron allows
     // for the correct bounding box calculation.
-    auto handler = boost::make_shared<GluGeometryHandler>(retVal);
-    handler->setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt, hex.lft,
-                           hex.rft, hex.rbt);
+    auto handler = boost::make_shared<GeometryHandler>(retVal);
+    detail::ShapeInfo shapeInfo;
+    shapeInfo.setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt,
+                            hex.lft, hex.rft, hex.rbt);
+    handler->setShapeInfo(std::move(shapeInfo));
     retVal->setGeometryHandler(handler);
 
     retVal->setObject(68, ObjHex);
@@ -1531,17 +1549,15 @@ public:
 
   void test_generatePointInside_Solid_Primitive() {
     const size_t maxAttempts(500);
-    V3D dummy;
     for (size_t i = 0; i < npoints; ++i) {
-      dummy = solid->generatePointInObject(rng, maxAttempts);
+      solid->generatePointInObject(rng, maxAttempts);
     }
   }
 
   void test_Point_Inside_Solid_Composite_With_Hole() {
     const size_t maxAttempts(500);
-    V3D dummy;
     for (size_t i = 0; i < npoints; ++i) {
-      dummy = shell->generatePointInObject(rng, maxAttempts);
+      shell->generatePointInObject(rng, maxAttempts);
     }
   }
 
@@ -1552,4 +1568,4 @@ private:
   IObject_sptr shell;
 };
 
-#endif // MANTID_TESTOBJECT__
+#endif // MANTID_TESTCSGOBJECT__

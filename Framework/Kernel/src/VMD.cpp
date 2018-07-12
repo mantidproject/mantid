@@ -288,19 +288,6 @@ std::string VMDBase<TYPE>::toString(const std::string &separator) const {
   return mess.str();
 }
 
-/** Get the vector as a vector
- * @tparam T :: type to convert to (double/float)
- * @return the vector as a std::vector
- */
-template <typename TYPE>
-template <class T>
-std::vector<T> VMDBase<TYPE>::toVector() const {
-  typename std::vector<T> out;
-  for (size_t d = 0; d < nd; d++)
-    out.push_back(T(data[d]));
-  return out;
-}
-
 /** Equals operator with tolerance factor
   @param v :: VMDBase for comparison
   @return true if the items are equal

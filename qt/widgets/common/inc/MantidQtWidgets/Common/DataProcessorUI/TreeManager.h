@@ -4,6 +4,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include <map>
 #include <memory>
@@ -15,7 +16,6 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
-class Command;
 class WhiteList;
 
 /** @class TreeManager
@@ -52,7 +52,7 @@ public:
   virtual ~TreeManager(){};
 
   /// Actions/commands
-
+  virtual bool isMultiLevel() const = 0;
   /// Publish actions/commands
   virtual std::vector<std::unique_ptr<Command>> publishCommands() = 0;
   /// Append a row
@@ -63,6 +63,8 @@ public:
   virtual void deleteRow() = 0;
   /// Delete a group
   virtual void deleteGroup() = 0;
+  /// Delete all rows and groups
+  virtual void deleteAll() = 0;
   /// Group rows
   virtual void groupRows() = 0;
   /// Expand selection
@@ -83,9 +85,11 @@ public:
 
   /// Return selected data
   virtual TreeData selectedData(bool prompt = false) = 0;
+  /// Return all data
+  virtual TreeData allData(bool prompt = false) = 0;
   /// Transfer new data to model
-  virtual void transfer(const std::vector<std::map<QString, QString>> &runs,
-                        const WhiteList &whitelist) = 0;
+  virtual void
+  transfer(const std::vector<std::map<QString, QString>> &runs) = 0;
   /// Update row with new data
   virtual void update(int parent, int child, const QStringList &data) = 0;
   /// Get the number of rows of a given parent
@@ -97,11 +101,19 @@ public:
   /// Set the 'processed' status of a data item
   virtual void setProcessed(bool processed, int position) = 0;
   virtual void setProcessed(bool processed, int position, int parent) = 0;
+  /// Check whether reduction failed for a data item
+  virtual bool reductionFailed(int position) const = 0;
+  virtual bool reductionFailed(int position, int parent) const = 0;
+  /// Set the error message for a data item
+  virtual void setError(const std::string &error, int position) = 0;
+  virtual void setError(const std::string &error, int position, int parent) = 0;
+  /// Reset the processed/error state of all items
+  virtual void invalidateAllProcessed() = 0;
   /// Access cells
   virtual void setCell(int row, int column, int parentRow, int parentColumn,
                        const std::string &value) = 0;
   virtual std::string getCell(int row, int column, int parentRow,
-                              int parentColumn) = 0;
+                              int parentColumn) const = 0;
   virtual int getNumberOfRows() = 0;
   /// Validate a table workspace
   virtual bool isValidModel(Mantid::API::Workspace_sptr ws,

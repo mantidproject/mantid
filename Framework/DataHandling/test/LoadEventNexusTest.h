@@ -49,12 +49,12 @@ load_reference_workspace(const std::string &filename) {
 }
 
 void run_MPI_load(const Parallel::Communicator &comm,
-                  boost::shared_ptr<std::mutex> mutex) {
+                  boost::shared_ptr<std::mutex> mutex,
+                  const std::string &filename) {
   boost::shared_ptr<const EventWorkspace> reference;
   boost::shared_ptr<const EventWorkspace> eventWS;
   {
     std::lock_guard<std::mutex> lock(*mutex);
-    const std::string filename("CNCS_7860_event.nxs");
     reference = load_reference_workspace(filename);
     auto alg = ParallelTestHelpers::create<LoadEventNexus>(comm);
     alg->setProperty("Filename", filename);
@@ -76,11 +76,11 @@ void run_MPI_load(const Parallel::Communicator &comm,
   if (comm.rank() == 0) {
     TS_ASSERT_EQUALS(std::accumulate(localSizes.begin(), localSizes.end(),
                                      static_cast<size_t>(0)),
-                     static_cast<size_t>(51200));
+                     reference->getNumberHistograms());
     TS_ASSERT_EQUALS(std::accumulate(localEventCounts.begin(),
                                      localEventCounts.end(),
                                      static_cast<size_t>(0)),
-                     static_cast<size_t>(112266));
+                     reference->getNumberEvents());
   }
 
   const auto &indexInfo = eventWS->indexInfo();
@@ -295,9 +295,9 @@ public:
 
     double max = events.begin()->tof();
     double min = events.begin()->tof();
-    for (size_t j = 0; j < events.size(); ++j) {
-      max = events[j].tof() > max ? events[j].tof() : max;
-      min = events[j].tof() < min ? events[j].tof() : min;
+    for (auto &event : events) {
+      max = event.tof() > max ? event.tof() : max;
+      min = event.tof() < min ? event.tof() : min;
     }
     TSM_ASSERT("The max TOF in the workspace should be equal to or less than "
                "the filtered cut-off",
@@ -383,9 +383,8 @@ public:
     ldLMM.setProperty<bool>("LoadLogs", false); // Time-saver
     // Note: this is done here to avoid additional loads
     // This will produce a workspace with suffix _monitors, that is used below
-    // in test_MonitorsAsEvents
+    // in test_CNCSMonitors
     ldLMM.setProperty<bool>("LoadMonitors", true);
-    ldLMM.setProperty<bool>("MonitorsAsEvents", true);
 
     TS_ASSERT(ldLMM.execute());
 
@@ -463,18 +462,21 @@ public:
     AnalysisDataService::Instance().remove(wsName2);
   }
 
-  void test_MonitorsAsEvents() {
-    // Re-uses the workspace loaded in the last test to save a load execution
+  void test_CNCSMonitors() {
+    // Re-uses the workspace loaded in test_partial_spectra_loading to save a
+    // load execution
     // This is a very simple test for performance issues. There's no real event
     // data, so this just check that the algorithm creates a consistent output
-    // (monitors) event workspace. Real/intensive testing happens in system
+    // (monitors). Real/intensive testing happens in `LoadNexusMonitors` and
+    // system
     // tests.
-    const std::string &mon_outws_name =
+    const std::string mon_outws_name =
         wsSpecFilterAndEventMonitors + "_monitors";
     auto &ads = AnalysisDataService::Instance();
 
     // Valid workspace and it is an event workspace
-    EventWorkspace_sptr monWS = ads.retrieveWS<EventWorkspace>(mon_outws_name);
+    const auto monWS = ads.retrieveWS<MatrixWorkspace>(mon_outws_name);
+
     TS_ASSERT(monWS);
     TS_ASSERT_EQUALS(monWS->getTitle(), "test after manual intervention");
 
@@ -482,21 +484,6 @@ public:
     TS_ASSERT_EQUALS(
         monWS, ads.retrieveWS<MatrixWorkspace>(wsSpecFilterAndEventMonitors)
                    ->monitorWorkspace());
-
-    // Check basic event props / data
-    TS_ASSERT_EQUALS(monWS->getNumberHistograms(), 4);
-    TS_ASSERT_EQUALS(monWS->getNEvents(), 4);
-    TS_ASSERT_EQUALS(monWS->getNumberEvents(), 0);
-    TS_ASSERT_EQUALS(monWS->isHistogramData(), true);
-    TS_ASSERT_EQUALS(monWS->blocksize(), 1);
-
-    TS_ASSERT_EQUALS(monWS->readX(0).size(), 2);
-    TS_ASSERT_DELTA(monWS->readX(0)[0], 0, 1e-6);
-    TS_ASSERT_DELTA(monWS->readX(0)[1], 1, 1e-6);
-    TS_ASSERT_EQUALS(monWS->readY(0).size(), 1);
-    TS_ASSERT_DELTA(monWS->readY(0)[0], 0, 1e-6);
-    TS_ASSERT_EQUALS(monWS->readE(0).size(), 1);
-    TS_ASSERT_DELTA(monWS->readE(0)[0], 0, 1e-6);
   }
 
   void test_Load_And_CompressEvents() {
@@ -836,12 +823,28 @@ public:
   }
 
   void test_MPI_load() {
+    // Note that this and other MPI tests currently work only in non-MPI builds
+    // with the default event loader, i.e., ParallelEventLoader is not
+    // supported. The reason is the locking we need in the test for HDF5 access,
+    // which implies that the communication within ParallelEventLoader will
+    // simply get stuck. Additionally, it will fail for the CNCS file since
+    // empty banks contain a dummy event with an invalid event ID, which
+    // ParallelEventLoader does not support.
     int threads = 3; // Limited number of threads to avoid long running test.
     ParallelTestHelpers::ParallelRunner runner(threads);
     // Test reads from multiple threads, which is not supported by our HDF5
     // libraries, so we need a mutex.
     auto hdf5Mutex = boost::make_shared<std::mutex>();
-    runner.run(run_MPI_load, hdf5Mutex);
+    runner.run(run_MPI_load, hdf5Mutex, "CNCS_7860_event.nxs");
+  }
+
+  void test_MPI_load_ISIS() {
+    int threads = 3; // Limited number of threads to avoid long running test.
+    ParallelTestHelpers::ParallelRunner runner(threads);
+    // Test reads from multiple threads, which is not supported by our HDF5
+    // libraries, so we need a mutex.
+    auto hdf5Mutex = boost::make_shared<std::mutex>();
+    runner.run(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
   }
 
 private:

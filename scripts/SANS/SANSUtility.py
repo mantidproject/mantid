@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry, FileFinder
-from mantid.kernel import time_duration, DateAndTime
+from mantid.kernel import DateAndTime
 import inspect
 import math
 import os
@@ -307,8 +307,7 @@ def getChargeAndTime(ws_event):
     r = ws_event.getRun()
     charges = r.getLogData('proton_charge')
     total_charge = sum(charges.value)
-    time_passed = (charges.times[-1] - charges.times[0]).total_microseconds()
-    time_passed /= 1e6
+    time_passed = (charges.times[-1] - charges.times[0]) / np.timedelta64(1, 's')
     return total_charge, time_passed
 
 
@@ -574,7 +573,7 @@ def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
 
     masked_det_ids = list(_yield_masked_det_ids(masking_ws))
 
-    MaskDetectors(Workspace=ws, DetectorList=masked_det_ids)
+    MaskDetectors(Workspace=ws, DetectorList=masked_det_ids, ForceInstrumentMasking=True)
 
 
 def check_child_ws_for_name_and_type_for_added_eventdata(wsGroup, number_of_entries=None):
@@ -1096,7 +1095,7 @@ class OverlayWorkspaces(object):
         time_1 = self._get_time_from_proton_charge_log(ws1)
         time_2 = self._get_time_from_proton_charge_log(ws2)
 
-        return time_duration.total_nanoseconds(time_1- time_2)/1e9
+        return float((time_1 - time_2) / np.timedelta64(1, 's'))
 
     def _get_time_from_proton_charge_log(self, ws):
         times = ws.getRun().getProperty("proton_charge").times
@@ -1163,9 +1162,8 @@ def transfer_special_sample_logs(from_ws, to_ws):
 
             prop = run_to.getProperty(time_series_name)
             prop.clear()
-            for index in range(0, len(times)):
-                prop.addValue(times[index],
-                              type_map[time_series_name](values[index]))
+            for time, value in zip(times, values):
+                prop.addValue(time, type_map[time_series_name](value))
 
     alg_log = AlgorithmManager.createUnmanaged("AddSampleLog")
     alg_log.initialize()
@@ -1392,6 +1390,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
         return times_lhs_corrected, values_lhs_corrected, times_rhs_corrected, values_rhs_corrected
 
     def _find_start_time_index(self, time_series, start_time):
+        start_time = start_time.to_datetime64()
         index = 0
         for element in time_series:
             if element > start_time or element == start_time:
@@ -1407,9 +1406,8 @@ class CummulativeTimeSeriesPropertyAdder(object):
         @param values: the values array
         @param type_converter: a type converter
         '''
-        for index in range(0, len(times)):
-            prop.addValue(times[index],
-                          type_converter(values[index]))
+        for time, value in zip(times, values):
+            prop.addValue(time, type_converter(value))
 
 
 def load_monitors_for_multiperiod_event_data(workspace, data_file, monitor_appendix):
@@ -2061,10 +2059,26 @@ def rename_workspace_correctly(instrument_name, reduced_type, final_name, worksp
             return suffix
         else:
             return ""
-    final_suffix = get_suffix(instrument_name, reduced_type)
-    complete_name = final_name + final_suffix
-    RenameWorkspace(InputWorkspace=workspace, OutputWorkspace=complete_name)
-    return complete_name
+
+    reduced_workspace = mtd[workspace]
+    workspaces_to_rename = [workspace]
+
+    if isinstance(reduced_workspace, WorkspaceGroup):
+        workspaces_to_rename += reduced_workspace.getNames()
+
+    run_number = re.findall(r'\d+', workspace)[0] if re.findall(r'\d+', workspace) else None
+
+    if run_number and workspace.startswith(run_number):
+        for workspace_name in workspaces_to_rename:
+            complete_name = workspace_name.replace(run_number, final_name + '_')
+            RenameWorkspace(InputWorkspace=workspace_name, OutputWorkspace=complete_name)
+        return workspace.replace(run_number, final_name + '_')
+    else:
+        final_suffix = get_suffix(instrument_name, reduced_type)
+        for workspace_name in workspaces_to_rename:
+            complete_name = workspace_name.replace(workspace, final_name) + final_suffix
+            RenameWorkspace(InputWorkspace=workspace_name, OutputWorkspace=complete_name)
+        return final_name + final_suffix
 
 
 ###############################################################################
@@ -2182,7 +2196,7 @@ def MaskBySpecNumber(workspace, speclist):
     speclist = speclist.rstrip(',')
     if speclist == '':
         return ''
-    MaskDetectors(Workspace=workspace, SpectraList = speclist)
+    MaskDetectors(Workspace=workspace, SpectraList = speclist, ForceInstrumentMasking=True)
 
 
 @deprecated

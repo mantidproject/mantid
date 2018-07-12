@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/FindPeaks.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/EstimatePolynomial.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Statistics.h"
@@ -17,8 +18,6 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace std;
-using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::HistogramY;
 
 namespace Mantid {
 namespace Algorithms {
@@ -136,10 +135,9 @@ int FindPeakBackground::findBackground(
     const HistogramData::Histogram &histogram, const size_t &l0,
     const size_t &n, std::vector<size_t> &peak_min_max_indexes,
     std::vector<double> &bkgd3) {
-  auto &inpX = histogram.x();
-  auto &inpY = histogram.y();
-  size_t sizex = inpX.size(); // inpWS->x(inpwsindex).size();
-  size_t sizey = inpY.size(); // inpWS->y(inpwsindex).size();
+  const size_t sizex = histogram.x().size();
+  const auto &inpY = histogram.y();
+  const size_t sizey = inpY.size();
 
   int goodfit(0);
 
@@ -213,7 +211,6 @@ int FindPeakBackground::findBackground(
       }
     }
     size_t min_peak, max_peak;
-    double a0 = 0., a1 = 0., a2 = 0.;
     if (!peaks.empty()) {
       g_log.debug() << "Peaks' size = " << peaks.size()
                     << " -> esitmate background. \n";
@@ -223,7 +220,7 @@ int FindPeakBackground::findBackground(
 
       // save endpoints
       min_peak = peaks[0].start;
-      // extra point for histogram input
+      // extra point for histogram input - TODO change to use Histogram better
       max_peak = peaks[0].stop + sizex - sizey;
       goodfit = 1;
     } else {
@@ -235,7 +232,8 @@ int FindPeakBackground::findBackground(
       goodfit = 2;
     }
 
-    estimateBackground(inpX, inpY, l0, n, min_peak, max_peak, (!peaks.empty()),
+    double a0 = 0., a1 = 0., a2 = 0.;
+    estimateBackground(histogram, l0, n, min_peak, max_peak, (!peaks.empty()),
                        a0, a1, a2);
 
     // Add a new row
@@ -254,8 +252,7 @@ int FindPeakBackground::findBackground(
 
 //----------------------------------------------------------------------------------------------
 /** Estimate background
-* @param X :: vec for X
-* @param Y :: vec for Y
+* @param histogram :: data to find peak background in
 * @param i_min :: index of minimum in X to estimate background
 * @param i_max :: index of maximum in X to estimate background
 * @param p_min :: index of peak min in X to estimate background
@@ -266,141 +263,18 @@ int FindPeakBackground::findBackground(
 * @param out_bg2 :: a2 = 0
 */
 void FindPeakBackground::estimateBackground(
-    const HistogramX &X, const HistogramY &Y, const size_t i_min,
+    const HistogramData::Histogram &histogram, const size_t i_min,
     const size_t i_max, const size_t p_min, const size_t p_max,
     const bool hasPeak, double &out_bg0, double &out_bg1, double &out_bg2) {
-  // Validate input
-  if (i_min >= i_max)
-    throw std::runtime_error("i_min cannot larger or equal to i_max");
-  if ((hasPeak) && (p_min >= p_max))
-    throw std::runtime_error("p_min cannot larger or equal to p_max");
-
-  // set all parameters to zero
-  out_bg0 = 0.;
-  out_bg1 = 0.;
-  out_bg2 = 0.;
-
-  // accumulate sum
-  double sum = 0.0;
-  double sumX = 0.0;
-  double sumY = 0.0;
-  double sumX2 = 0.0;
-  double sumXY = 0.0;
-  double sumX2Y = 0.0;
-  double sumX3 = 0.0;
-  double sumX4 = 0.0;
-  for (size_t i = i_min; i < i_max; ++i) {
-    if (i >= p_min && i < p_max)
-      continue;
-    sum += 1.0;
-    sumX += X[i];
-    sumX2 += X[i] * X[i];
-    sumY += Y[i];
-    sumXY += X[i] * Y[i];
-    sumX2Y += X[i] * X[i] * Y[i];
-    sumX3 += X[i] * X[i] * X[i];
-    sumX4 += X[i] * X[i] * X[i] * X[i];
-  }
-
-  // Estimate flat background
-  double bg0_flat = 0.;
-  if (sum != 0.)
-    bg0_flat = sumY / sum;
-
-  // Estimate linear - use Cramer's rule for 2 x 2 matrix
-  double bg0_linear = 0.;
-  double bg1_linear = 0.;
-  double determinant = sum * sumX2 - sumX * sumX;
-  if (determinant != 0) {
-    bg0_linear = (sumY * sumX2 - sumX * sumXY) / determinant;
-    bg1_linear = (sum * sumXY - sumY * sumX) / determinant;
-  }
-
-  // Estimate quadratic - use Cramer's rule for 3 x 3 matrix
-
-  // | a b c |
-  // | d e f |
-  // | g h i |
-  // 3 x 3 determinate:  aei+bfg+cdh-ceg-bdi-afh
-
-  double bg0_quadratic = 0.;
-  double bg1_quadratic = 0.;
-  double bg2_quadratic = 0.;
-  determinant = sum * sumX2 * sumX4 + sumX * sumX3 * sumX2 +
-                sumX2 * sumX * sumX3 - sumX2 * sumX2 * sumX2 -
-                sumX * sumX * sumX4 - sum * sumX3 * sumX3;
-  if (determinant != 0) {
-    bg0_quadratic =
-        (sumY * sumX2 * sumX4 + sumX * sumX3 * sumX2Y + sumX2 * sumXY * sumX3 -
-         sumX2 * sumX2 * sumX2Y - sumX * sumXY * sumX4 - sumY * sumX3 * sumX3) /
-        determinant;
-    bg1_quadratic =
-        (sum * sumXY * sumX4 + sumY * sumX3 * sumX2 + sumX2 * sumX * sumX2Y -
-         sumX2 * sumXY * sumX2 - sumY * sumX * sumX4 - sum * sumX3 * sumX2Y) /
-        determinant;
-    bg2_quadratic =
-        (sum * sumX2 * sumX2Y + sumX * sumXY * sumX2 + sumY * sumX * sumX3 -
-         sumY * sumX2 * sumX2 - sumX * sumX * sumX2Y - sum * sumXY * sumX3) /
-        determinant;
-  }
-
-  double chisq_flat = 0.;
-  double chisq_linear = 0.;
-  double chisq_quadratic = 0.;
-  if (sum != 0) {
-    double num_points = 0.;
-    // calculate the chisq - not normalized by the number of points
-    for (size_t i = i_min; i < i_max; ++i) {
-      if (i >= p_min && i < p_max)
-        continue;
-
-      num_points += 1.;
-
-      // accumulate for flat
-      chisq_flat += (bg0_flat - Y[i]) * (bg0_flat - Y[i]);
-
-      // accumulate for linear
-      double temp = bg0_linear + bg1_linear * X[i] - Y[i];
-      chisq_linear += (temp * temp);
-
-      // accumulate for quadratic
-      temp = bg0_quadratic + bg1_quadratic * X[i] +
-             bg2_quadratic * X[i] * X[i] - Y[i];
-      chisq_quadratic += (temp * temp);
-    }
-
-    // convert to <reduced chisq> = chisq / (<number points> - <number
-    // parameters>)
-    chisq_flat = chisq_flat / (num_points - 1.);
-    chisq_linear = chisq_linear / (num_points - 2.);
-    chisq_quadratic = chisq_quadratic / (num_points - 3.);
-  }
-  const double INVALID_CHISQ(1.e10); // big invalid value
-  if (m_backgroundType == "Flat") {
-    chisq_linear = INVALID_CHISQ;
-    chisq_quadratic = INVALID_CHISQ;
-  } else if (m_backgroundType == "Linear") {
-    chisq_quadratic = INVALID_CHISQ;
-  }
-
-  g_log.debug() << "flat: " << bg0_flat << " + " << 0. << "x + " << 0.
-                << "x^2 reduced chisq=" << chisq_flat << "\n";
-  g_log.debug() << "line: " << bg0_linear << " + " << bg1_linear << "x + " << 0.
-                << "x^2  reduced chisq=" << chisq_linear << "\n";
-  g_log.debug() << "quad: " << bg0_quadratic << " + " << bg1_quadratic << "x + "
-                << bg2_quadratic << "x^2  reduced chisq=" << chisq_quadratic
-                << "\n";
-
-  // choose the right background function to apply
-  if ((chisq_quadratic < chisq_flat) && (chisq_quadratic < chisq_linear)) {
-    out_bg0 = bg0_quadratic;
-    out_bg1 = bg1_quadratic;
-    out_bg2 = bg2_quadratic;
-  } else if ((chisq_linear < chisq_flat) && (chisq_linear < chisq_quadratic)) {
-    out_bg0 = bg0_linear;
-    out_bg1 = bg1_linear;
+  double redux_chisq;
+  if (hasPeak) {
+    HistogramData::estimateBackground(m_backgroundOrder, histogram, i_min,
+                                      i_max, p_min, p_max, out_bg0, out_bg1,
+                                      out_bg2, redux_chisq);
   } else {
-    out_bg0 = bg0_flat;
+    HistogramData::estimatePolynomial(m_backgroundOrder, histogram, i_min,
+                                      i_max, out_bg0, out_bg1, out_bg2,
+                                      redux_chisq);
   }
 
   g_log.information() << "Estimated background: A0 = " << out_bg0

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -52,9 +52,10 @@ Output:
 Output:
 
 .. testoutput:: ExFilterWavelengthByMinMax
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
     1900 events before filtering
-    1118 events after filtering
+    11... events after filtering
 
 
 .. categories::

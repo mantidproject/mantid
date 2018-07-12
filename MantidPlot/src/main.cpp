@@ -224,6 +224,9 @@ int main(int argc, char **argv) {
     ApplicationWindow *mw = new ApplicationWindow(factorySettings, args);
     mw->restoreApplicationGeometry();
     mw->parseCommandLineArguments(args);
+    QObject::connect(&app, SIGNAL(runAsPythonScript(const QString &)), mw,
+                     SLOT(runPythonScript(const QString &)),
+                     Qt::DirectConnection);
     app.processEvents();
 
     // register a couple of fonts

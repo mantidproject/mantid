@@ -5,6 +5,8 @@
 /**************************************************************************/
 
 %Include qwttypes.sip
+%Include vector.sip
+%Include string.sip
 
 %ModuleHeaderCode
 #include "MantidQtWidgets/Common/PythonSystemHeader.h"
@@ -18,6 +20,7 @@ qRegisterMetaType<std::string>();
 /***************************************************************************/
 /**************** Exceptions ***********************************************/
 /***************************************************************************/
+
 %Exception std::exception(SIP_Exception) /PyName=StdException/
 {
 %TypeHeaderCode
@@ -581,42 +584,43 @@ private:
     PeaksPresenter();
     PeaksPresenter(const MantidQt::SliceViewer::PeaksPresenter&);
 public:
+    virtual void setForegroundColor(const QColor) = 0;
 %Docstring
 void PeaksPresenter::setForegroundColor(const QColor color)
-------------------------------------------------------
+-----------------------------------------------------------
     Sets the Foreground color of the peaks workspace as displayed in the peaks overlay.
 
     Args:
         color :: color to change foreground to
 %End
-    virtual void setForegroundColor(const QColor) = 0;
+    virtual void setBackgroundColor(const QColor) = 0;
 %Docstring
 void PeaksPresenter::setBackgroundColor(const QColor color)
-------------------------------------------------------
+-----------------------------------------------------------
     Sets the Background color of the peaks workspace as displayed in the peaks overlay.
 
     Args:
         color :: color to change background to
 %End
-    virtual void setBackgroundColor(const QColor) = 0;
+    virtual void showBackgroundRadius(const bool shown) = 0;
 %Docstring
 void PeaksPresenter::showBackgroundRadius(const bool shown)
-------------------------------------------------------
+-----------------------------------------------------------
     Toggle the background radius on and off.
 
     Args:
         shown :: True to show the background radius, otherwise false.
 %End
-    virtual void showBackgroundRadius(const bool shown) = 0;
+    virtual void setShown(const bool shown) = 0;
 %Docstring
 void PeaksPresenter::setShown(const bool shown)
-------------------------------------------------------
+-----------------------------------------------
     Toggle the overplotted state of this PeaksWorkspace in the PeaksOverlay
 
     Args:
         shown :: True to show. False to hide.
 %End
-    virtual void setShown(const bool shown) = 0;
+    virtual void zoomToPeak(const int index) = 0;
 %Docstring
 void PeaksPresenter::zoomToPeak(const int index)
 ------------------------------------------------------
@@ -625,7 +629,6 @@ void PeaksPresenter::zoomToPeak(const int index)
     Args:
         index :: Index into the peaks workspace (0 based) to zoom to.
 %End
-    virtual void zoomToPeak(const int index) = 0;
 };
 
 /***************************************************************************/
@@ -1501,6 +1504,193 @@ namespace MantidQt
 {
 namespace MantidWidgets
 {
+namespace Batch
+{
+
+class RowLocation
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Batch/RowLocation.h"
+%End
+public:
+  RowLocation();
+  RowLocation(std::vector<int> path);
+  const std::vector<int> &path();
+  int rowRelativeToParent();
+  bool isRoot();
+  int depth();
+  bool isChildOf(const MantidQt::MantidWidgets::Batch::RowLocation &other);
+  bool isSiblingOf(const MantidQt::MantidWidgets::Batch::RowLocation &other);
+  bool isChildOrSiblingOf(const MantidQt::MantidWidgets::Batch::RowLocation &other);
+  bool isDescendantOf(const MantidQt::MantidWidgets::Batch::RowLocation &other);
+  MantidQt::MantidWidgets::Batch::RowLocation parent();
+  MantidQt::MantidWidgets::Batch::RowLocation relativeTo(const MantidQt::MantidWidgets::Batch::RowLocation &ancestor);
+  MantidQt::MantidWidgets::Batch::RowLocation child(int n);
+
+  bool operator==(const MantidQt::MantidWidgets::Batch::RowLocation& other);
+  bool operator!=(const MantidQt::MantidWidgets::Batch::RowLocation& other);
+  bool operator<(const MantidQt::MantidWidgets::Batch::RowLocation& other);
+  bool operator<=(const MantidQt::MantidWidgets::Batch::RowLocation& other);
+  bool operator>(const MantidQt::MantidWidgets::Batch::RowLocation& other);
+  bool operator>=(const MantidQt::MantidWidgets::Batch::RowLocation& other);
+};
+
+class RowPredicate {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Batch/FilteredTreeModel.h"
+%End
+protected:
+  RowPredicate();
+  virtual bool rowMeetsCriteria(const MantidQt::MantidWidgets::Batch::RowLocation & row) const = 0;
+};
+
+class JobTreeViewSubscriber {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Batch/JobTreeView.h"
+%End
+public:
+  virtual void notifyCellTextChanged(const MantidQt::MantidWidgets::Batch::RowLocation& itemIndex,
+                                     int column,
+                                     const std::string& oldValue,
+                                     const std::string& newValue) = 0;
+  virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation& itemIndex) = 0;
+  virtual void notifyRemoveRowsRequested(
+    const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToRemove) = 0;
+  virtual void notifyCopyRowsRequested() = 0;
+  virtual void notifyPasteRowsRequested() = 0;
+  virtual void notifyFilterReset() = 0;
+};
+
+class JobTreeView : public QTreeView
+{
+
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Batch/JobTreeView.h"
+%End
+public:
+    JobTreeView(const QStringList &columnHeadings, const MantidQt::MantidWidgets::Batch::Cell& defaultCellStyle, QWidget *parent = nullptr);
+
+    void subscribe(MantidQt::MantidWidgets::Batch::JobTreeViewSubscriber& subscriber);
+    void insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent, int beforeRow,
+                          const std::vector<MantidQt::MantidWidgets::Batch::Cell> &rowText);
+    void insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent, int beforeRow);
+    void appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent);
+    void appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parentLocation,
+                          const std::vector<MantidQt::MantidWidgets::Batch::Cell> &rowText);
+    void removeRowAt(const MantidQt::MantidWidgets::Batch::RowLocation &location);
+    void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
+
+    void replaceRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> replacementPoints,
+                     std::vector<std::vector<MantidQt::MantidWidgets::Batch::Row>> replacementLocations);
+    void appendSubtreesAt(const MantidQt::MantidWidgets::Batch::RowLocation& parent,
+                          std::vector<std::vector<MantidQt::MantidWidgets::Batch::Row>> subtrees);
+    void appendSubtreeAt(const MantidQt::MantidWidgets::Batch::RowLocation& parent,
+                         std::vector<MantidQt::MantidWidgets::Batch::Row> subtree);
+    void replaceSubtreeAt(const MantidQt::MantidWidgets::Batch::RowLocation &rootToRemove,
+                          std::vector<MantidQt::MantidWidgets::Batch::Row> subtree);
+    void insertSubtreeAt(const MantidQt::MantidWidgets::Batch::RowLocation& parent, int index,
+                         std::vector<MantidQt::MantidWidgets::Batch::Row> subtree);
+
+    void filterRowsBy(MantidQt::MantidWidgets::Batch::RowPredicate* predicate /Transfer/);
+    void resetFilter();
+    bool hasFilter() const;
+
+    bool isOnlyChildOfRoot(const MantidQt::MantidWidgets::Batch::RowLocation& location) const;
+    std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsAt(const MantidQt::MantidWidgets::Batch::RowLocation &location) const;
+    void setCellsAt(const MantidQt::MantidWidgets::Batch::RowLocation &location,
+                    const std::vector<MantidQt::MantidWidgets::Batch::Cell> &cells);
+    MantidQt::MantidWidgets::Batch::Cell cellAt(MantidQt::MantidWidgets::Batch::RowLocation location, int column);
+    void setCellAt(MantidQt::MantidWidgets::Batch::RowLocation location, int column, const MantidQt::MantidWidgets::Batch::Cell &cellText);
+    MantidQt::MantidWidgets::Batch::Cell deadCell() const;
+
+    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> selectedRowLocations() const;
+    boost::optional<std::vector<std::vector<MantidQt::MantidWidgets::Batch::Row>>> selectedSubtrees() const;
+    boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>> selectedSubtreeRoots() const;
+};
+
+class Cell {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Batch/Cell.h"
+%End
+public:
+  Cell(const std::string &contentText);
+
+  Cell(const std::string &contentText, const std::string& backgroundColor, int borderThickness,
+       const std::string &color, int borderOpacity, bool isEditable);
+
+  const std::string &contentText() const;
+  void setContentText(const std::string& contentText);
+
+  const std::string & borderColor() const;
+  void setBorderColor(const std::string& borderColor);
+
+  const std::string & backgroundColor() const;
+  void setBackgroundColor(const std::string& backgroundColor);
+
+  int borderOpacity() const;
+  void setBorderOpacity(int alpha);
+
+  int borderThickness() const;
+  void setBorderThickness(int borderThickness);
+
+  bool isEditable() const;
+  void disableEditing();
+  void enableEditing();
+  void setEditable(bool isEditable);
+
+  const std::string &iconFilePath() const;
+  void setIconFilePath(const std::string& iconFilePath);
+
+};
+
+class Row {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Batch/Row.h"
+%End
+public:
+  Row(MantidQt::MantidWidgets::Batch::RowLocation location, std::vector<MantidQt::MantidWidgets::Batch::Cell> cells);
+  const std::vector<MantidQt::MantidWidgets::Batch::Cell>& cells() const;
+  const MantidQt::MantidWidgets::Batch::RowLocation& location() const;
+};
+
+class JobTreeViewSignalAdapter : public QObject, public MantidQt::MantidWidgets::Batch::JobTreeViewSubscriber {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h"
+%End
+public:
+  JobTreeViewSignalAdapter(MantidQt::MantidWidgets::Batch::JobTreeView &view, QObject *parent = nullptr);
+  virtual void notifyCellTextChanged(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex,
+                                     int column,
+                                     const std::string &oldValue,
+                                     const std::string &newValue);
+  virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
+  virtual void notifyRemoveRowsRequested(
+      const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
+  virtual void notifyCopyRowsRequested();
+  virtual void notifyPasteRowsRequested();
+  virtual void notifyFilterReset();
+signals:
+  void cellTextChanged(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex,
+                       int column,
+                       std::string oldValue,
+                       std::string newValue);
+  void rowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
+  void filterReset();
+  void removeRowsRequested(
+      const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
+  void copyRowsRequested();
+
+};
+
+};
+};
+};
+
+
+namespace MantidQt
+{
+namespace MantidWidgets
+{
 namespace DataProcessor
 {
 class WhiteList
@@ -1529,7 +1719,7 @@ class ProcessingAlgorithm
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
 %End
 public:
-ProcessingAlgorithm(const QString &, const QString &, const QString &blacklist = "");
+ProcessingAlgorithm(const QString &, const QString &, int, const QString &blacklist = "");
 };
 
 class PostprocessingAlgorithm
@@ -1549,22 +1739,22 @@ class QDataProcessorWidget : QWidget
 public:
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
-                     QWidget *parent );
+                     QWidget *parent, int group = 0 );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
                      QWidget *parent );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::PreprocessMap &,
                      const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
-                     QWidget *parent );
+                     QWidget *parent, int group = 0 );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
                      const MantidQt::MantidWidgets::DataProcessor::PostprocessingAlgorithm &,
-                     QWidget *parent );
+                     QWidget *parent, int group = 0 );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::PreprocessMap &,
                      const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
                      const MantidQt::MantidWidgets::DataProcessor::PostprocessingAlgorithm &,
-                     QWidget *parent );
+                     QWidget *parent, int group = 0 );
 void accept(MantidQt::MantidWidgets::DataProcessor::DataProcessorMainPresenter *);
 void setInstrumentList(const QString &instruments, const QString &defaultInstrument);
 QString getCurrentInstrument() const;
@@ -1575,6 +1765,7 @@ QString getCell(int, int, int parentRow = 0, int parentColumn = 0);
 int getNumberOfRows();
 void clearTable();
 void skipProcessing();
+void settingsChanged();
 
 signals:
 void runPythonCode(const QString &);
@@ -1594,11 +1785,13 @@ class DataProcessorMainPresenter
 public:
 DataProcessorMainPresenter();
 
-virtual QString getPreprocessingOptionsAsString() const;
-virtual QString getProcessingOptions() const;
-virtual QString getPostprocessingOptions() const;
+virtual QVariantMap getPreprocessingOptions(int) const;
+virtual QVariantMap getProcessingOptions(int) const;
+virtual QString getPostprocessingOptionsAsString(int) const;
+virtual void confirmReductionPaused(int);
+virtual void confirmReductionResumed(int);
 
-virtual void notifyADSChanged(const QSet<QString> &);
+virtual void notifyADSChanged(const QSet<QString> &, int);
 };
 
 class AppendRowCommand
@@ -2459,4 +2652,41 @@ private:
 };
 
 };//end namespace MantidWidgets
+
+
+namespace SpectrumView
+{
+class SpectrumView : QMainWindow
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
+%End
+
+%Docstring
+    This is the QMainWindow for the SpectrumView data viewer.  Data is
+    displayed in an SpectrumView, by constructing the SpectrumView object and
+    specifying a particular data source.
+%End
+public:
+    SpectrumView(QWidget *parent=nullptr);
+    void renderWorkspace(const QString &wsName);
+%Docstring
+    Renders a workspace in the SpectrumViewer
+
+    Args:
+        wsName The name of the workspace to be rendered.
+%End
+
+    void selectData(int spectrumNumber, double dataVal);
+%Docstring
+    Programmatically set horizontal and vertical graph data.
+
+    Args:
+        spectrumNumber SpectrumNumber in the workspace to be displayed.
+        dataVal Data value to be displayed (based on workspace units).
+%End
+private:
+    SpectrumView(const MantidQt::SpectrumView::SpectrumView &);
+};
+};//end namespace SpectrumView
 };//end namespace MantidQt

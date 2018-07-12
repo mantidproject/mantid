@@ -3,6 +3,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GridDelegate.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 
 #include <QClipboard>
@@ -40,24 +41,29 @@ QDataProcessorWidget::QDataProcessorWidget(
 /** Delegating constructor
  * @param whitelist :: [input] The white list
  * @param parent :: [input] The parent of this view
+ * @param group :: [input] The zero based index of this widget within the parent
+ * presenter (reflectometry).
  */
 QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
-                                           QWidget *parent)
+                                           QWidget *parent, int group)
     : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist),
+          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist,
+                                                                     group),
           parent) {}
 
 /** Delegating constructor
 * @param whitelist :: [input] The white list
 * @param algorithm :: [input] The processing algorithm
 * @param parent :: [input] The parent of this view
+* @param group :: [input] The zero based index of this widget within the parent
+* presenter (reflectometry).
 */
 QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            const ProcessingAlgorithm &algorithm,
-                                           QWidget *parent)
+                                           QWidget *parent, int group)
     : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist,
-                                                                     algorithm),
+          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+              whitelist, algorithm, group),
           parent) {}
 
 /** Delegating constructor: pre-processing, no post-processing
@@ -65,14 +71,16 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
 * @param preprocessMap :: [input] Pre-processing instructions as a map
 * @param algorithm :: [input] The processing algorithm
 * @param parent :: [input] The parent of this view
+* @param group :: [input] The zero based index of this widget within the parent
+* presenter (reflectometry).
 */
 QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            const PreprocessMap &preprocessMap,
                                            const ProcessingAlgorithm &algorithm,
-                                           QWidget *parent)
+                                           QWidget *parent, int group)
     : QDataProcessorWidget(
           Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-              whitelist, preprocessMap.asMap(), algorithm),
+              whitelist, preprocessMap.asMap(), algorithm, group),
           parent) {}
 
 /** Delegating constructor: no pre-processing, post-processing
@@ -80,13 +88,15 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
 * @param algorithm :: [input] The processing algorithm
 * @param postprocessor :: [input] The post-processing algorithm
 * @param parent :: [input] The parent of this view
+* @param group :: [input] The zero based index of this widget within the parent
+* presenter (reflectometry).
 */
 QDataProcessorWidget::QDataProcessorWidget(
     const WhiteList &whitelist, const ProcessingAlgorithm &algorithm,
-    const PostprocessingAlgorithm &postprocessor, QWidget *parent)
+    const PostprocessingAlgorithm &postprocessor, QWidget *parent, int group)
     : QDataProcessorWidget(
           Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-              whitelist, algorithm, postprocessor),
+              whitelist, algorithm, postprocessor, group),
           parent) {}
 
 /** Delegating constructor: pre-processing, post-processing
@@ -95,14 +105,17 @@ QDataProcessorWidget::QDataProcessorWidget(
 * @param algorithm :: [input] The processing algorithm
 * @param postprocessor :: [input] The post-processing algorithm
 * @param parent :: [input] The parent of this view
+* @param group :: [input] The zero based index of this widget within the parent
+* presenter (reflectometry).
 */
 QDataProcessorWidget::QDataProcessorWidget(
     const WhiteList &whitelist, const PreprocessMap &preprocessMap,
     const ProcessingAlgorithm &algorithm,
-    const PostprocessingAlgorithm &postprocessor, QWidget *parent)
+    const PostprocessingAlgorithm &postprocessor, QWidget *parent, int group)
     : QDataProcessorWidget(
           Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-              whitelist, preprocessMap.asMap(), algorithm, postprocessor),
+              whitelist, preprocessMap.asMap(), algorithm, postprocessor,
+              group),
           parent) {}
 
 /** Destructor
@@ -118,6 +131,7 @@ void QDataProcessorWidget::createTable() {
   // Allow rows and columns to be reordered
   QHeaderView *header = new QHeaderView(Qt::Horizontal);
   header->setStretchLastSection(true);
+  header->setStyleSheet("QHeaderView {font-size:11pt;}");
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setMovable(true);
   header->setResizeMode(QHeaderView::ResizeToContents);
@@ -168,6 +182,8 @@ void QDataProcessorWidget::processClicked() {
   m_presenter->notify(DataProcessorPresenter::ProcessFlag);
 }
 
+void QDataProcessorWidget::settingsChanged() { m_presenter->settingsChanged(); }
+
 /**
 This slot loads a table workspace model and changes to a LoadedMainView
 presenter
@@ -197,6 +213,9 @@ void QDataProcessorWidget::showTable(
   connect(m_model.get(), SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
           this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   ui.viewTable->setModel(m_model.get());
+  ui.viewTable->setStyleSheet("QTreeView {font-size:11pt;}");
+  ui.viewTable->setAlternatingRowColors(false);
+  ui.viewTable->setItemDelegate(new GridDelegate(ui.viewTable));
 
   // Hide the Hidden Options column
   ui.viewTable->hideColumn(m_model->columnCount() - 1);
@@ -384,6 +403,7 @@ Set the range of the progress bar
 */
 void QDataProcessorWidget::setProgressRange(int min, int max) {
   ui.progressBar->setRange(min, max);
+  ProgressableView::setProgressRange(min, max);
 }
 
 /**
@@ -445,8 +465,8 @@ column.
 @param hintStrategy : The hinting strategy to use
 @param column : The index of the 'Options' column
 */
-void QDataProcessorWidget::setOptionsHintStrategy(HintStrategy *hintStrategy,
-                                                  int column) {
+void QDataProcessorWidget::setOptionsHintStrategy(
+    MantidQt::MantidWidgets::HintStrategy *hintStrategy, int column) {
   ui.viewTable->setItemDelegateForColumn(
       column, new HintingLineEditFactory(hintStrategy));
 }
@@ -692,6 +712,13 @@ QString QDataProcessorWidget::getCurrentInstrument() const {
 }
 
 void QDataProcessorWidget::skipProcessing() { m_presenter->skipProcessing(); }
+
+void QDataProcessorWidget::enableGrouping() {
+  ui.viewTable->setRootIsDecorated(true);
+}
+void QDataProcessorWidget::disableGrouping() {
+  ui.viewTable->setRootIsDecorated(false);
+}
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid

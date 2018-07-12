@@ -41,11 +41,13 @@ ReflMeasureTransferStrategy::~ReflMeasureTransferStrategy() {}
 
 TransferResults
 MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
-    SearchResultMap &searchResults, Mantid::Kernel::ProgressBase &progress) {
+    SearchResultMap &searchResults, Mantid::Kernel::ProgressBase &progress,
+    const TransferMatch matchType) {
+  UNUSED_ARG(matchType);
 
-  typedef std::vector<MeasurementItem> VecSameMeasurement;
-  typedef std::map<MeasurementItem::IDType, VecSameMeasurement>
-      MapGroupedMeasurement;
+  using VecSameMeasurement = std::vector<MeasurementItem>;
+  using MapGroupedMeasurement =
+      std::map<MeasurementItem::IDType, VecSameMeasurement>;
 
   // table-like output for successful runs
   std::vector<std::map<std::string, std::string>> runs;

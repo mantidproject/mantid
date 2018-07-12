@@ -487,6 +487,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         sample_empty_number = "100"
         ws_file_name = "POL" + sample_empty_number
         original_ws = mantid.Load(ws_file_name)
+        mantid.AddSampleLog(Workspace=original_ws, LogName='gd_prtn_chrg', LogText="10.0", LogType='Number')
         no_scale_ws = mantid.CloneWorkspace(InputWorkspace=original_ws, OutputWorkspace="test_subtract_sample_empty_ws")
 
         # Subtracting from self should equal 0
@@ -510,6 +511,7 @@ class ISISPowderCommonTest(unittest.TestCase):
     def test_subtract_summed_runs_throw_on_tof_mismatch(self):
         # Create a sample workspace which will have mismatched TOF range
         sample_ws = mantid.CreateSampleWorkspace()
+        mantid.AddSampleLog(Workspace=sample_ws, LogName='gd_prtn_chrg', LogText="10.0", LogType='Number')
         ws_file_name = "100"  # Load POL100
 
         # This should throw as the TOF ranges do not match
@@ -552,6 +554,7 @@ class ISISPowderCommonTest(unittest.TestCase):
 class ISISPowderMockInst(object):
     def __init__(self, file_ext=None):
         self._file_ext = file_ext
+        self._inst_prefix = "MOCK"
 
     @staticmethod
     def _get_input_batching_mode(**_):
@@ -569,6 +572,9 @@ class ISISPowderMockInst(object):
     @staticmethod
     def _normalise_ws_current(ws_to_correct, **_):
         return ws_to_correct
+
+    def mask_prompt_pulses_if_necessary(self, _):
+        pass
 
 
 class ISISPowderMockRunDetails(object):

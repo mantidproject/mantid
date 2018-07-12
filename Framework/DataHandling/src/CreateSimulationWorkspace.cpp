@@ -16,8 +16,10 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include "LoadRaw/isisraw2.h"
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <Poco/File.h>
 
@@ -41,9 +43,9 @@ StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
 
   StartAndEndTime startAndEndTime;
   startAndEndTime.startTime =
-      Mantid::DataHandling::LoadRawHelper::extractStartTime(&isisRaw);
+      Mantid::DataHandling::LoadRawHelper::extractStartTime(isisRaw);
   startAndEndTime.endTime =
-      Mantid::DataHandling::LoadRawHelper::extractEndTime(&isisRaw);
+      Mantid::DataHandling::LoadRawHelper::extractEndTime(isisRaw);
 
   fclose(rawFile);
   return startAndEndTime;
@@ -288,7 +290,7 @@ void CreateSimulationWorkspace::loadMappingFromISISNXS(
     throw std::runtime_error(
         "Cannot find path to isis_vms_compat. Is the file an ISIS NeXus file?");
   }
-  typedef boost::scoped_ptr<std::vector<int32_t>> NXIntArray;
+  using NXIntArray = std::unique_ptr<std::vector<int32_t>>;
 
   nxsFile.openData("NDET");
   NXIntArray ndets(nxsFile.getData<int32_t>());

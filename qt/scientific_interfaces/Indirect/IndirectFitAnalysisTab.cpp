@@ -1,10 +1,41 @@
 #include "IndirectFitAnalysisTab.h"
+#include "ui_ConvFit.h"
+#include "ui_IqtFit.h"
+#include "ui_JumpFit.h"
+#include "ui_MSDFit.h"
 
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+
+#include "MantidKernel/make_unique.h"
+
+#include "MantidQtWidgets/Common/PropertyHandler.h"
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QString>
+#include <QtCore>
+
+#include <algorithm>
 
 using namespace Mantid::API;
+
+namespace {
+using namespace MantidQt::CustomInterfaces::IDA;
+
+void updateParameters(
+    IFunction_sptr function,
+    const std::unordered_map<std::string, ParameterValue> &parameters) {
+  for (auto i = 0u; i < function->nParams(); ++i) {
+    auto value = parameters.find(function->parameterName(i));
+    if (value != parameters.end()) {
+      function->setParameter(i, value->second.value);
+      if (value->second.error)
+        function->setError(i, *value->second.error);
+    }
+  }
+}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -15,371 +46,676 @@ namespace IDA {
  *
  * @param parent :: the parent widget (an IndirectDataAnalysis object).
  */
-IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
-    : IndirectDataAnalysisTab(parent) {
-  m_stringManager = new QtStringPropertyManager(m_parentWidget);
-  m_propertyTree = new QtTreePropertyBrowser();
+IndirectFitAnalysisTab::IndirectFitAnalysisTab(IndirectFittingModel *model,
+                                               QWidget *parent)
+    : IndirectDataAnalysisTab(parent), m_fittingModel(model) {}
+
+void IndirectFitAnalysisTab::setup() {
+  setupFitTab();
+  updateResultOptions();
+
+  connect(m_dataPresenter.get(),
+          SIGNAL(startXChanged(double, std::size_t, std::size_t)), this,
+          SLOT(tableStartXChanged(double, std::size_t, std::size_t)));
+  connect(m_dataPresenter.get(),
+          SIGNAL(endXChanged(double, std::size_t, std::size_t)), this,
+          SLOT(tableEndXChanged(double, std::size_t, std::size_t)));
+  connect(m_dataPresenter.get(),
+          SIGNAL(excludeRegionChanged(const std::string &, std::size_t,
+                                      std::size_t)),
+          this, SLOT(tableExcludeChanged(const std::string &, std::size_t,
+                                         std::size_t)));
+  connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()), this,
+          SLOT(setModelFitFunction()));
+
+  connect(m_fitPropertyBrowser, SIGNAL(fitScheduled()), this,
+          SLOT(singleFit()));
+  connect(m_fitPropertyBrowser, SIGNAL(sequentialFitScheduled()), this,
+          SLOT(executeFit()));
+
+  connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)), this,
+          SLOT(setModelStartX(double)));
+  connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)), this,
+          SLOT(setModelEndX(double)));
+
+  connect(m_fitPropertyBrowser,
+          SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
+          SIGNAL(parameterChanged(const Mantid::API::IFunction *)));
+
+  connect(m_fitPropertyBrowser,
+          SIGNAL(customBoolChanged(const QString &, bool)), this,
+          SIGNAL(customBoolChanged(const QString &, bool)));
+
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(setModelFitFunction()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SIGNAL(functionChanged()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(updatePlotOptions()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(updateResultOptions()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(updateParameterValues()));
+  connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
+          this, SLOT(updateParameterValues()));
+  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
+          SLOT(updateParameterValues()));
+
+  connect(m_plotPresenter.get(),
+          SIGNAL(fitSingleSpectrum(std::size_t, std::size_t)), this,
+          SLOT(singleFit(std::size_t, std::size_t)));
+  connect(m_plotPresenter.get(),
+          SIGNAL(runAsPythonScript(const QString &, bool)), this,
+          SIGNAL(runAsPythonScript(const QString &, bool)));
+
+  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
+          SLOT(updateResultOptions()));
+
+  connectDataAndSpectrumPresenters();
+  connectDataAndPlotPresenters();
+  connectDataAndFitBrowserPresenters();
+  connectSpectrumAndPlotPresenters();
+  connectFitBrowserAndPlotPresenter();
 }
 
-/*
- * Sets the fit functions used in the most recent fit within this fit
- * analysis tab.
- *
- * @param fitFunctions  The functions used in the most recent fit.
- */
-void IndirectFitAnalysisTab::setFitFunctions(
-    const QVector<QString> &fitFunctions) {
-  m_appendResults = fitFunctions == m_fitFunctions;
+void IndirectFitAnalysisTab::connectDataAndPlotPresenters() {
+  connect(m_dataPresenter.get(), SIGNAL(multipleDataViewSelected()),
+          m_plotPresenter.get(), SLOT(showMultipleDataSelection()));
+  connect(m_dataPresenter.get(), SIGNAL(singleDataViewSelected()),
+          m_plotPresenter.get(), SLOT(hideMultipleDataSelection()));
 
-  if (!m_appendResults)
-    m_fitFunctions = fitFunctions;
+  connect(m_dataPresenter.get(), SIGNAL(dataAdded()), m_plotPresenter.get(),
+          SLOT(appendLastDataToSelection()));
+  connect(m_dataPresenter.get(), SIGNAL(dataRemoved()), m_plotPresenter.get(),
+          SLOT(updateDataSelection()));
+
+  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), m_plotPresenter.get(),
+          SLOT(updateAvailableSpectra()));
+  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), m_plotPresenter.get(),
+          SLOT(updatePlots()));
+  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), m_plotPresenter.get(),
+          SLOT(updateGuess()));
+
+  connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()),
+          m_plotPresenter.get(), SLOT(updatePlots()));
+  connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()),
+          m_plotPresenter.get(), SLOT(updateGuess()));
+
+  connect(m_plotPresenter.get(), SIGNAL(startXChanged(double)), this,
+          SLOT(setDataTableStartX(double)));
+  connect(m_plotPresenter.get(), SIGNAL(endXChanged(double)), this,
+          SLOT(setDataTableEndX(double)));
 }
 
-/*
- * Sets the functions shown in the property table of this fit analysis
- * tab. Also the functions to be used in the next fit.
- *
- * @param fitFunctions  The functions to use in the next fit.
- */
-void IndirectFitAnalysisTab::setPropertyFunctions(
-    const QVector<QString> &functions) {
-  clearFunctionProperties();
-  m_propertyFunctions = functions;
+void IndirectFitAnalysisTab::connectSpectrumAndPlotPresenters() {
+  connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
+          m_spectrumPresenter.get(), SLOT(setActiveModelIndex(std::size_t)));
+  connect(m_plotPresenter.get(), SIGNAL(noFitDataSelected()),
+          m_spectrumPresenter.get(), SLOT(disableView()));
+  connect(m_spectrumPresenter.get(), SIGNAL(spectraChanged(std::size_t)),
+          m_plotPresenter.get(), SLOT(updateSelectedDataName()));
+  connect(m_spectrumPresenter.get(), SIGNAL(spectraChanged(std::size_t)),
+          m_plotPresenter.get(), SLOT(updateAvailableSpectra()));
+}
 
-  for (const auto &propertyFunction : m_propertyFunctions) {
-    updateProperty(propertyFunction, selectedSpectrum());
-    m_propertyTree->addProperty(m_properties[propertyFunction]);
+void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
+  connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
+          this, SLOT(setBrowserWorkspace(std::size_t)));
+  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
+          SLOT(setBrowserWorkspaceIndex(std::size_t)));
+
+  connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)),
+          m_plotPresenter.get(), SLOT(setStartX(double)));
+  connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)),
+          m_plotPresenter.get(), SLOT(setEndX(double)));
+
+  connect(m_plotPresenter.get(), SIGNAL(startXChanged(double)), this,
+          SLOT(setBrowserStartX(double)));
+  connect(m_plotPresenter.get(), SIGNAL(endXChanged(double)), this,
+          SLOT(setBrowserEndX(double)));
+  connect(m_plotPresenter.get(), SIGNAL(fwhmChanged(double)), this,
+          SLOT(updateFitBrowserParameterValues()));
+  connect(m_plotPresenter.get(), SIGNAL(backgroundChanged(double)), this,
+          SLOT(updateFitBrowserParameterValues()));
+
+  connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)),
+          m_plotPresenter.get(), SLOT(updateGuess()));
+  connect(m_plotPresenter.get(), SIGNAL(fwhmChanged(double)),
+          m_plotPresenter.get(), SLOT(updateGuess()));
+  connect(m_plotPresenter.get(), SIGNAL(backgroundChanged(double)),
+          m_plotPresenter.get(), SLOT(updateGuess()));
+
+  connect(m_fitPropertyBrowser,
+          SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
+          m_plotPresenter.get(), SLOT(updateRangeSelectors()));
+  connect(m_fitPropertyBrowser,
+          SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
+          m_plotPresenter.get(), SLOT(updateGuess()));
+
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()),
+          m_plotPresenter.get(), SLOT(updatePlots()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()),
+          m_plotPresenter.get(), SLOT(updateGuess()));
+
+  connect(m_fitPropertyBrowser, SIGNAL(plotGuess()), m_plotPresenter.get(),
+          SLOT(enablePlotGuessInSeparateWindow()));
+}
+
+void IndirectFitAnalysisTab::connectDataAndSpectrumPresenters() {
+  connect(m_dataPresenter.get(), SIGNAL(singleDataViewSelected()),
+          m_spectrumPresenter.get(), SLOT(setActiveIndexToZero()));
+  connect(m_dataPresenter.get(), SIGNAL(dataChanged()),
+          m_spectrumPresenter.get(), SLOT(updateSpectra()));
+  connect(m_spectrumPresenter.get(), SIGNAL(spectraChanged(std::size_t)),
+          m_dataPresenter.get(), SLOT(updateSpectraInTable(std::size_t)));
+  connect(m_spectrumPresenter.get(), SIGNAL(maskChanged(const std::string &)),
+          this, SLOT(setDataTableExclude(const std::string &)));
+}
+
+void IndirectFitAnalysisTab::connectDataAndFitBrowserPresenters() {
+  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
+          SLOT(updateBrowserFittingRange()));
+  connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)), this,
+          SLOT(setDataTableStartX(double)));
+  connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)), this,
+          SLOT(setDataTableEndX(double)));
+}
+
+void IndirectFitAnalysisTab::setFitDataPresenter(
+    std::unique_ptr<IndirectFitDataPresenter> presenter) {
+  m_dataPresenter = std::move(presenter);
+}
+
+void IndirectFitAnalysisTab::setPlotView(IndirectFitPlotView *view) {
+  m_plotPresenter = Mantid::Kernel::make_unique<IndirectFitPlotPresenter>(
+      m_fittingModel.get(), view);
+}
+
+void IndirectFitAnalysisTab::setSpectrumSelectionView(
+    IndirectSpectrumSelectionView *view) {
+  m_spectrumPresenter =
+      Mantid::Kernel::make_unique<IndirectSpectrumSelectionPresenter>(
+          m_fittingModel.get(), view);
+}
+
+void IndirectFitAnalysisTab::setFitPropertyBrowser(
+    MantidWidgets::IndirectFitPropertyBrowser *browser) {
+  browser->init();
+  m_fitPropertyBrowser = browser;
+}
+
+void IndirectFitAnalysisTab::loadSettings(const QSettings &settings) {
+  m_dataPresenter->loadSettings(settings);
+}
+
+void IndirectFitAnalysisTab::setSampleWSSuffices(const QStringList &suffices) {
+  m_dataPresenter->setSampleWSSuffices(suffices);
+}
+
+void IndirectFitAnalysisTab::setSampleFBSuffices(const QStringList &suffices) {
+  m_dataPresenter->setSampleFBSuffices(suffices);
+}
+
+void IndirectFitAnalysisTab::setResolutionWSSuffices(
+    const QStringList &suffices) {
+  m_dataPresenter->setResolutionWSSuffices(suffices);
+}
+
+void IndirectFitAnalysisTab::setResolutionFBSuffices(
+    const QStringList &suffices) {
+  m_dataPresenter->setResolutionFBSuffices(suffices);
+}
+
+std::size_t IndirectFitAnalysisTab::getSelectedDataIndex() const {
+  return m_plotPresenter->getSelectedDataIndex();
+}
+
+std::size_t IndirectFitAnalysisTab::getSelectedSpectrum() const {
+  return m_plotPresenter->getSelectedSpectrum();
+}
+
+bool IndirectFitAnalysisTab::isRangeCurrentlySelected(
+    std::size_t dataIndex, std::size_t spectrum) const {
+  return FittingMode::SEQUENTIAL == m_fittingModel->getFittingMode() ||
+         m_plotPresenter->isCurrentlySelected(dataIndex, spectrum);
+}
+
+IndirectFittingModel *IndirectFitAnalysisTab::fittingModel() const {
+  return m_fittingModel.get();
+}
+
+/**
+ * @return  The fit type selected in the custom functions combo box, in the fit
+ *          property browser.
+ */
+QString IndirectFitAnalysisTab::selectedFitType() const {
+  return m_fitPropertyBrowser->selectedFitType();
+}
+
+/**
+ * @param functionName  The name of the function.
+ * @return              The number of custom functions, with the specified name,
+ *                      included in the selected model.
+ */
+size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
+    const std::string &functionName) const {
+  return m_fitPropertyBrowser->numberOfCustomFunctions(functionName);
+}
+
+void IndirectFitAnalysisTab::setModelFitFunction() {
+  try {
+    m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
+  } catch (const std::out_of_range &) {
+    m_fittingModel->setFitFunction(m_fitPropertyBrowser->compositeFunction());
   }
 }
 
-/*
- * Sets the default value for the property with the specified name,
- * in the property table of this fit analysis tab.
- *
- * @param propertyName  The name of the property whose default to set.
- * @param propertyValue The default value to set.
- */
-void IndirectFitAnalysisTab::setDefaultPropertyValue(
-    const QString &propertyName, const double &propertyValue) {
-  m_defaultPropertyValues[propertyName] = propertyValue;
-
-  if (m_propertyFunctions.contains(propertyName))
-    updateProperty(propertyName, selectedSpectrum());
-}
-
-/*
- * Removes the default value for the property with the specified name,
- * in the property table of this fit analysis tab.
- *
- * @param propertyName  The name of the property whose default to remove.
- */
-void IndirectFitAnalysisTab::removeDefaultPropertyValue(
-    const QString &propertyName) {
-  m_defaultPropertyValues.remove(propertyName);
-}
-
-/*
- * Checks whether the property with the specified name has a default
- * property value.
- *
- * @param propertyName  The name of the property to check for the default of.
- * @return              True if the property with the specified name has a
- *                      default value, false otherwise.
- */
-bool IndirectFitAnalysisTab::hasDefaultPropertyValue(
-    const QString &propertyName) {
-  return m_defaultPropertyValues.contains(propertyName);
-}
-
-/*
- * Check whether a parameter value from a parameters workspace has been
- * found and saved for the current input, for the property with the
- * specified name and for the specified spectrum.
- *
- * @param propertyName    The name of the property associated to the parameter.
- * @param spectrumNumber  The spectrum for which the parameter is defined.
- */
-bool IndirectFitAnalysisTab::hasParameterValue(const QString &propertyName,
-                                               const size_t &spectrumNumber) {
-  return m_parameterValues.contains(propertyName) &&
-         m_parameterValues[propertyName].contains(spectrumNumber);
-}
-
-/*
- * Performs necessary state changes when the fit algorithm was run
- * and completed within this interface.
- *
- * @param paramWSName     The name of the workspace containing the fit
- *                        parameter values.
- */
-void IndirectFitAnalysisTab::fitAlgorithmComplete(
-    const std::string &paramWSName) {
-  fitAlgorithmComplete(paramWSName, QHash<QString, QString>());
-}
-
-/*
- * Performs necessary state changes when the fit algorithm was run
- * and completed within this interface.
- *
- * @param paramWSName          The name of the workspace containing the fit
- *                             parameter values.
- * @param propertyToParameter  Pre-existing property to parameter map to unite.
- */
-void IndirectFitAnalysisTab::fitAlgorithmComplete(
-    const std::string &paramWSName,
-    const QHash<QString, QString> &propertyToParameter) {
-
-  if (AnalysisDataService::Instance().doesExist(paramWSName)) {
-    m_propertyToParameter =
-        createPropertyToParameterMap(m_fitFunctions).unite(propertyToParameter);
-    auto parameterValues = IndirectTab::extractParametersFromTable(
-        paramWSName, m_propertyToParameter.values().toSet(), minimumSpectrum(),
-        maximumSpectrum());
-
-    if (m_appendResults)
-      m_parameterValues =
-          combineParameterValues(parameterValues, m_parameterValues);
-    else
-      m_parameterValues = parameterValues;
-  }
-
-  updateProperties(selectedSpectrum());
-  updatePreviewPlots();
-}
-
-/*
- * Combines the two maps of parameter values, by adding the values from
- * the second into the first, where the parameters (keys) are taken from
- * the first map, and the value doesn't already exist in the first map.
- *
- * @param parameterValues1  The first parameter values map to combine with.
- * @param parameterValues2  The second parameter values map to combine with.
- * @return                  The combined map.
- */
-QHash<QString, QHash<size_t, double>>
-IndirectFitAnalysisTab::combineParameterValues(
-    const QHash<QString, QHash<size_t, double>> &parameterValues1,
-    const QHash<QString, QHash<size_t, double>> &parameterValues2) {
-  auto combinedValues = parameterValues1;
-
-  for (const auto &parameterName : parameterValues1.keys()) {
-
-    if (parameterValues2.contains(parameterName)) {
-      const auto &values1 = parameterValues1[parameterName];
-      const auto &values2 = parameterValues2[parameterName];
-
-      for (const auto &index : values2.keys()) {
-        if (!values1.contains(index))
-          combinedValues[parameterName][index] = values2[index];
-      }
-    }
-  }
-
-  return combinedValues;
-}
-
-/*
- * Updates the values of the properties in the property table of
- * this fit analysis tab, using the parameter values found in the
- * fit, for the specified spectrum.
- *
- * @param specNo  The spectrum number for which the parameter values
- *                will be extracted for.
- */
-void IndirectFitAnalysisTab::updateProperties(int specNo) {
-  disablePlotGuess();
-
-  size_t index = boost::numeric_cast<size_t>(specNo);
-
-  // Iterate through all floating number properties in the property table.
-  for (const auto &propertyName : m_properties.keys())
-    updateProperty(propertyName, index);
-
-  enablePlotGuess();
-}
-
-/*
- * Updates the value of the property, with the specified name, in the
- * property table of this fit analysis tab.
- *
- * @param propertyName  The name of the property to update.
- * @param index         The spectrum number selected in this tab.
- */
-void IndirectFitAnalysisTab::updateProperty(const QString &propertyName,
-                                            const size_t &index) {
-  // Check whether values for this property were found in the
-  // parameters workspace.
-  if (m_propertyToParameter.contains(propertyName)) {
-    const auto &parameterName = m_propertyToParameter[propertyName];
-    const auto &parameters = m_parameterValues[parameterName];
-
-    if (parameters.contains(index)) {
-      m_dblManager->setValue(m_properties[propertyName], parameters[index]);
-      return;
-    }
-  }
-
-  const auto functionAndParameter = propertyName.split(".");
-  // If parameter values were not found in fit for property at
-  // the specified spectrum, update with default.
-  if (functionAndParameter.size() > 1 &&
-      hasDefaultPropertyValue(functionAndParameter[1]))
-    m_dblManager->setValue(m_properties[propertyName],
-                           m_defaultPropertyValues[functionAndParameter[1]]);
-}
-
-/*
- * Clears the property tree of all functions.
- */
-void IndirectFitAnalysisTab::clearFunctionProperties() {
-  for (const auto &propertyFunction : m_propertyFunctions)
-    m_propertyTree->removeProperty(m_properties[propertyFunction]);
-}
-
-/*
- * Fixes the selected item in the property browser tree.
- *
- * @param tree  The tree whose selected item to fix.
- */
-void IndirectFitAnalysisTab::fixSelectedItem() {
-  QtBrowserItem *item = m_propertyTree->currentItem();
-
-  // Determine what the property is.
-  QtProperty *prop = item->property();
-  QtProperty *fixedProp = m_stringManager->addProperty(prop->propertyName());
-  QtProperty *fprlbl = m_stringManager->addProperty("Fixed");
-  fixedProp->addSubProperty(fprlbl);
-  m_stringManager->setValue(fixedProp, prop->valueText());
-
-  item->parent()->property()->addSubProperty(fixedProp);
-  m_fixedProps[fixedProp] = prop;
-  item->parent()->property()->removeSubProperty(prop);
-}
-
-/*
- * Unfixes the selected item in the property browser tree.
- *
- * @param tree  The tree whose selected item to fix.
- */
-void IndirectFitAnalysisTab::unFixSelectedItem() {
-  QtBrowserItem *item = m_propertyTree->currentItem();
-
-  QtProperty *prop = item->property();
-  if (prop->subProperties().empty()) {
-    item = item->parent();
-    prop = item->property();
-  }
-
-  item->parent()->property()->addSubProperty(m_fixedProps[prop]);
-  item->parent()->property()->removeSubProperty(prop);
-  m_fixedProps.remove(prop);
-  QtProperty *proplbl = prop->subProperties()[0];
-  delete proplbl;
-  delete prop;
-}
-
-/*
- * Checks whether the specified property can be fixed.
- *
- * @param prop  The property to check for fixability.
- * @return      True if the property is fixable, False otherwise.
- */
-bool IndirectFitAnalysisTab::isFixable(QtProperty const *prop) const {
-  return prop->propertyManager() == m_dblManager;
-}
-
-/*
- * Checks whether the specified property is fixed.
- *
- * @param prop  The property to check.
- * @return      True if the property is fixed, False otherwise.
- */
-bool IndirectFitAnalysisTab::isFixed(QtProperty const *prop) const {
-  return prop->propertyManager() == m_stringManager;
-}
-
-void IndirectFitAnalysisTab::fitContextMenu(const QString &menuName) {
-  QtBrowserItem *item(nullptr);
-
-  item = m_propertyTree->currentItem();
-
-  if (!item)
-    return;
-
-  QtProperty *prop = item->property();
-  auto fixed = isFixed(prop);
-
-  if (!isFixable(prop) && !isFixed(prop))
-    return;
-
-  // Create the menu
-  QMenu *menu = new QMenu(menuName, m_propertyTree);
-  QAction *action;
-
-  if (!fixed) {
-    action = new QAction("Fix", m_parentWidget);
-    connect(action, SIGNAL(triggered()), this, SLOT(fixSelectedItem()));
+void IndirectFitAnalysisTab::setModelStartX(double startX) {
+  const auto dataIndex = getSelectedDataIndex();
+  if (m_fittingModel->numberOfWorkspaces() > dataIndex) {
+    m_fittingModel->setStartX(startX, dataIndex, getSelectedSpectrum());
   } else {
-    action = new QAction("Remove Fix", m_parentWidget);
-    connect(action, SIGNAL(triggered()), this, SLOT(unFixSelectedItem()));
-  }
-
-  menu->addAction(action);
-
-  // Show the menu
-  menu->popup(QCursor::pos());
-}
-
-/*
- * Performs necessary state changes when new input data is loaded in
- * this fit analysis tab.
- * - Sets preview plot and input workspaces.
- * - Clears stored parameter values.
- * - Updates property table.
- * - Updates preview plot.
- *
- * @param wsName  The name of the loaded input workspace.
- */
-void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
-  auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      wsName.toStdString());
-  setInputWorkspace(inputWs);
-  setPreviewPlotWorkspace(inputWs);
-  m_parameterValues.clear();
-  m_propertyToParameter.clear();
-  m_fitFunctions.clear();
-  updateProperties(selectedSpectrum());
-  updatePreviewPlots();
-}
-
-/*
- * Clears all slots connected to the batch runners signals.
- */
-void IndirectFitAnalysisTab::clearBatchRunnerSlots() {
-  m_batchAlgoRunner->disconnect();
-}
-
-/*
- * Saves the result workspace with the specified name, in the default
- * save directory.
- *
- * @param resultName  The name of the workspace to save.
- */
-void IndirectFitAnalysisTab::saveResult(const std::string &resultName) {
-  // check workspace exists
-  const auto wsFound = checkADSForPlotSaveWorkspace(resultName, false);
-  // process workspace after check
-  if (wsFound) {
-    QString saveDir = QString::fromStdString(
-        Mantid::Kernel::ConfigService::Instance().getString(
-            "defaultsave.directory"));
-    // Check validity of save path
-    QString QresultWsName = QString::fromStdString(resultName);
-    const auto fullPath = saveDir.append(QresultWsName).append(".nxs");
-    addSaveWorkspaceToQueue(QresultWsName, fullPath);
-    m_batchAlgoRunner->executeBatchAsync();
+    setBrowserStartX(0);
+    setBrowserEndX(0);
   }
 }
+
+void IndirectFitAnalysisTab::setModelEndX(double endX) {
+  const auto dataIndex = getSelectedDataIndex();
+  if (m_fittingModel->numberOfWorkspaces() > dataIndex) {
+    m_fittingModel->setEndX(endX, dataIndex, getSelectedSpectrum());
+  } else {
+    setBrowserStartX(0);
+    setBrowserEndX(0);
+  }
+}
+
+void IndirectFitAnalysisTab::setDataTableStartX(double startX) {
+  m_dataPresenter->setStartX(startX, m_plotPresenter->getSelectedDataIndex(),
+                             m_plotPresenter->getSelectedSpectrumIndex());
+}
+
+void IndirectFitAnalysisTab::setDataTableEndX(double endX) {
+  m_dataPresenter->setEndX(endX, m_plotPresenter->getSelectedDataIndex(),
+                           m_plotPresenter->getSelectedSpectrumIndex());
+}
+
+void IndirectFitAnalysisTab::setDataTableExclude(const std::string &exclude) {
+  m_dataPresenter->setExclude(exclude, m_plotPresenter->getSelectedDataIndex(),
+                              m_plotPresenter->getSelectedSpectrumIndex());
+}
+
+void IndirectFitAnalysisTab::setBrowserStartX(double startX) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
+  m_fitPropertyBrowser->setStartX(startX);
+}
+
+void IndirectFitAnalysisTab::setBrowserEndX(double endX) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
+  m_fitPropertyBrowser->setEndX(endX);
+}
+
+void IndirectFitAnalysisTab::updateBrowserFittingRange() {
+  const auto range = m_fittingModel->getFittingRange(getSelectedDataIndex(),
+                                                     getSelectedSpectrum());
+  setBrowserStartX(range.first);
+  setBrowserEndX(range.second);
+}
+
+void IndirectFitAnalysisTab::setBrowserWorkspace(std::size_t dataIndex) {
+  const auto name = m_fittingModel->getWorkspace(dataIndex)->getName();
+  m_fitPropertyBrowser->setWorkspaceName(QString::fromStdString(name));
+}
+
+void IndirectFitAnalysisTab::setBrowserWorkspaceIndex(std::size_t spectrum) {
+  m_fitPropertyBrowser->setWorkspaceIndex(boost::numeric_cast<int>(spectrum));
+}
+
+void IndirectFitAnalysisTab::tableStartXChanged(double startX,
+                                                std::size_t dataIndex,
+                                                std::size_t spectrum) {
+  if (isRangeCurrentlySelected(dataIndex, spectrum)) {
+    m_plotPresenter->setStartX(startX);
+    setBrowserStartX(startX);
+  }
+}
+
+void IndirectFitAnalysisTab::tableEndXChanged(double endX,
+                                              std::size_t dataIndex,
+                                              std::size_t spectrum) {
+  if (isRangeCurrentlySelected(dataIndex, spectrum)) {
+    m_plotPresenter->setEndX(endX);
+    setBrowserEndX(endX);
+  }
+}
+
+void IndirectFitAnalysisTab::tableExcludeChanged(const std::string &,
+                                                 std::size_t dataIndex,
+                                                 std::size_t spectrum) {
+  if (isRangeCurrentlySelected(dataIndex, spectrum))
+    m_spectrumPresenter->displayBinMask();
+}
+
+/**
+ * Sets whether fit members should be convolved with the resolution after a fit.
+ *
+ * @param convolveMembers If true, members are to be convolved.
+ */
+void IndirectFitAnalysisTab::setConvolveMembers(bool convolveMembers) {
+  m_fitPropertyBrowser->setConvolveMembers(convolveMembers);
+}
+
+/**
+ * Updates the ties displayed in the fit property browser, using
+ * the set fitting function.
+ */
+void IndirectFitAnalysisTab::updateTies() {
+  m_fitPropertyBrowser->updateTies();
+}
+
+/**
+ * Sets whether the custom setting with the specified name is enabled.
+ *
+ * @param settingName The name of the custom setting.
+ * @param enabled     True if custom setting should be enabled, false otherwise.
+ */
+void IndirectFitAnalysisTab::setCustomSettingEnabled(const QString &customName,
+                                                     bool enabled) {
+  m_fitPropertyBrowser->setCustomSettingEnabled(customName, enabled);
+}
+
+/**
+ * Sets the value of the parameter with the specified name, in the function with
+ * the specified name.
+ *
+ * @param functionName  The name of the function containing the parameter.
+ * @param parameterName The name of the parameter to set.
+ * @param value         The value to set.
+ */
+void IndirectFitAnalysisTab::setParameterValue(const std::string &functionName,
+                                               const std::string &parameterName,
+                                               double value) {
+  m_fitPropertyBrowser->setParameterValue(functionName, parameterName, value);
+}
+
+/**
+ * Sets the default peak type for the indirect property browser.
+ *
+ * @param function  The name of the default peak function to set.
+ */
+void IndirectFitAnalysisTab::setDefaultPeakType(const std::string &function) {
+  m_fitPropertyBrowser->setDefaultPeakType(function);
+}
+
+/**
+ * Adds a check-box with the specified name, to the fit property browser, which
+ * when checked adds the specified functions to the mode and when unchecked,
+ * removes them.
+ *
+ * @param groupName     The name/label of the check-box to add.
+ * @param functions     The functions to be added when the check-box is checked.
+ * @param defaultValue  The default value of the check-box.
+ */
+void IndirectFitAnalysisTab::addCheckBoxFunctionGroup(
+    const QString &groupName, const std::vector<IFunction_sptr> &functions,
+    bool defaultValue) {
+  m_fitPropertyBrowser->addCheckBoxFunctionGroup(groupName, functions,
+                                                 defaultValue);
+}
+
+/**
+ * Adds a number spinner with the specified name, to the fit property browser,
+ * which specifies how many multiples of the specified functions should be added
+ * to the model.
+ *
+ * @param groupName     The name/label of the spinner to add.
+ * @param functions     The functions to be added.
+ * @param minimum       The minimum value of the spinner.
+ * @param maximum       The maximum value of the spinner.
+ * @param defaultValue  The default value of the spinner.
+ */
+void IndirectFitAnalysisTab::addSpinnerFunctionGroup(
+    const QString &groupName, const std::vector<IFunction_sptr> &functions,
+    int minimum, int maximum, int defaultValue) {
+  m_fitPropertyBrowser->addSpinnerFunctionGroup(groupName, functions, minimum,
+                                                maximum, defaultValue);
+}
+
+/**
+ * Adds an option with the specified name, to the fit type combo-box in the fit
+ * property browser, which adds the specified functions to the model.
+ *
+ * @param groupName The name of the option to be added to the fit type
+ *                  combo-box.
+ * @param functions The functions added by the option.
+ */
+void IndirectFitAnalysisTab::addComboBoxFunctionGroup(
+    const QString &groupName, const std::vector<IFunction_sptr> &functions) {
+  m_fitPropertyBrowser->addComboBoxFunctionGroup(groupName, functions);
+}
+
+/**
+ * Sets the available background options in this fit analysis tab.
+ *
+ * @param backgrounds A list of the available backgrounds.
+ */
+void IndirectFitAnalysisTab::setBackgroundOptions(
+    const QStringList &backgrounds) {
+  m_fitPropertyBrowser->setBackgroundOptions(backgrounds);
+}
+
+/**
+ * @param settingKey  The key of the boolean setting whose value to retrieve.
+ * @return            The value of the boolean setting with the specified key.
+ */
+bool IndirectFitAnalysisTab::boolSettingValue(const QString &settingKey) const {
+  return m_fitPropertyBrowser->boolSettingValue(settingKey);
+}
+
+/**
+ * Sets the value of the custom boolean setting, with the specified key, to the
+ * specified value.
+ *
+ * @param settingKey  The key of the custom boolean setting.
+ * @param value       The value to set the boolean custom setting to.
+ */
+void IndirectFitAnalysisTab::setCustomBoolSetting(const QString &settingKey,
+                                                  bool value) {
+  m_fitPropertyBrowser->setCustomBoolSetting(settingKey, value);
+}
+
+/**
+ * @param settingKey  The key of the integer setting whose value to retrieve.
+ * @return            The value of the integer setting with the specified key.
+ */
+int IndirectFitAnalysisTab::intSettingValue(const QString &settingKey) const {
+  return m_fitPropertyBrowser->intSettingValue(settingKey);
+}
+
+/**
+ * @param settingKey  The key of the double setting whose value to retrieve.
+ * @return            The value of the double setting with the specified key.
+ */
+double
+IndirectFitAnalysisTab::doubleSettingValue(const QString &settingKey) const {
+  return m_fitPropertyBrowser->doubleSettingValue(settingKey);
+}
+
+/**
+ * @param settingKey  The key of the enum setting whose value to retrieve.
+ * @return            The value of the enum setting with the specified key.
+ */
+QString
+IndirectFitAnalysisTab::enumSettingValue(const QString &settingKey) const {
+  return m_fitPropertyBrowser->enumSettingValue(settingKey);
+}
+
+/**
+ * Adds a boolean custom setting, with the specified key and display name.
+ *
+ * @param settingKey    The key of the boolean setting to add.
+ * @param settingName   The display name of the boolean setting to add.
+ * @param defaultValue  The default value of the boolean setting.
+ */
+void IndirectFitAnalysisTab::addBoolCustomSetting(const QString &settingKey,
+                                                  const QString &settingName,
+                                                  bool defaultValue) {
+  m_fitPropertyBrowser->addBoolCustomSetting(settingKey, settingName,
+                                             defaultValue);
+}
+
+/**
+ * Adds a double custom setting, with the specified key and display name.
+ *
+ * @param settingKey    The key of the double setting to add.
+ * @param settingName   The display name of the double setting to add.
+ * @param defaultValue  The default value of the double setting.
+ */
+void IndirectFitAnalysisTab::addDoubleCustomSetting(const QString &settingKey,
+                                                    const QString &settingName,
+                                                    double defaultValue) {
+  m_fitPropertyBrowser->addDoubleCustomSetting(settingKey, settingName,
+                                               defaultValue);
+}
+
+/**
+ * Adds an integer custom setting, with the specified key and display name.
+ *
+ * @param settingKey    The key of the integer setting to add.
+ * @param settingName   The display name of the integer setting to add.
+ * @param defaultValue  The default value of the integer setting.
+ */
+void IndirectFitAnalysisTab::addIntCustomSetting(const QString &settingKey,
+                                                 const QString &settingName,
+                                                 int defaultValue) {
+  m_fitPropertyBrowser->addIntCustomSetting(settingKey, settingName,
+                                            defaultValue);
+}
+
+/**
+ * Adds an enum custom setting, with the specified key and display name.
+ *
+ * @param settingKey    The key of the enum setting to add.
+ * @param settingName   The display name of the enum setting to add.
+ * @param defaultValue  The default value of the enum setting.
+ */
+void IndirectFitAnalysisTab::addEnumCustomSetting(const QString &settingKey,
+                                                  const QString &settingName,
+                                                  const QStringList &options) {
+  m_fitPropertyBrowser->addEnumCustomSetting(settingKey, settingName, options);
+}
+
+/**
+ * Adds an optional double custom setting, with the specified key and display
+ * name.
+ *
+ * @param settingKey    The key of the optional double setting to add.
+ * @param settingName   The display name of the optional double setting to add.
+ * @param optionKey     The key of the setting specifying whether to use this
+ *                      this optional setting.
+ * @param optionName    The display name of the setting specifying whether to
+ *                      use this optional setting.
+ * @param defaultValue  The default value of the optional double setting.
+ */
+void IndirectFitAnalysisTab::addOptionalDoubleSetting(
+    const QString &settingKey, const QString &settingName,
+    const QString &optionKey, const QString &optionName, bool enabled,
+    double defaultValue) {
+  m_fitPropertyBrowser->addOptionalDoubleSetting(
+      settingKey, settingName, optionKey, optionName, enabled, defaultValue);
+}
+
+/**
+ * Sets whether a setting with a specified key affects the fitting function.
+ *
+ * @param settingKey      The key of the setting.
+ * @param changesFunction Boolean specifying whether the setting affects the
+ *                        fitting function.
+ */
+void IndirectFitAnalysisTab::setCustomSettingChangesFunction(
+    const QString &settingKey, bool changesFunction) {
+  m_fitPropertyBrowser->setCustomSettingChangesFunction(settingKey,
+                                                        changesFunction);
+}
+
+void IndirectFitAnalysisTab::updateFitOutput(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(updateFitOutput(bool)));
+
+  if (error)
+    m_fittingModel->cleanFailedRun(m_fittingAlgorithm);
+  else
+    m_fittingModel->addOutput(m_fittingAlgorithm);
+}
+
+void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(updateSingleFitOutput(bool)));
+
+  if (error)
+    m_fittingModel->cleanFailedSingleRun(m_fittingAlgorithm, 0);
+  else
+    m_fittingModel->addSingleFitOutput(m_fittingAlgorithm, 0);
+}
+
+/*
+ * Performs necessary state changes when the fit algorithm was run
+ * and completed within this interface.
+ */
+void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
+  setSaveResultEnabled(!error);
+  setPlotResultEnabled(!error);
+  updateParameterValues();
+  m_spectrumPresenter->enableView();
+  m_plotPresenter->updatePlots();
+
+  connect(m_fitPropertyBrowser,
+          SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
+          m_plotPresenter.get(), SLOT(updateGuess()));
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(fitAlgorithmComplete(bool)));
+}
+
+void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
+  m_fitPropertyBrowser->updateParameters();
+}
+
+/**
+ * Updates the parameter values and errors in the fit property browser.
+ */
+void IndirectFitAnalysisTab::updateParameterValues() {
+  updateParameterValues(m_fittingModel->getParameterValues(
+      getSelectedDataIndex(), getSelectedSpectrum()));
+}
+
+/**
+ * Updates the parameter values and errors in the fit property browser.
+ *
+ * @param parameters  The parameter values to update the browser with.
+ */
+void IndirectFitAnalysisTab::updateParameterValues(
+    const std::unordered_map<std::string, ParameterValue> &parameters) {
+  try {
+    auto fitFunction = m_fitPropertyBrowser->getFittingFunction();
+    updateParameters(fitFunction, parameters);
+
+    MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
+    m_fitPropertyBrowser->updateParameters();
+
+    if (m_fittingModel->isPreviouslyFit(getSelectedDataIndex(),
+                                        getSelectedSpectrum()))
+      m_fitPropertyBrowser->updateErrors();
+    else
+      m_fitPropertyBrowser->clearErrors();
+  } catch (const std::out_of_range &) {
+  }
+}
+
+/*
+ * Saves the result workspace in the default save directory.
+ */
+void IndirectFitAnalysisTab::saveResult() { m_fittingModel->saveResult(); }
 
 /*
  * Plots the result workspace with the specified name, using the specified
@@ -388,36 +724,26 @@ void IndirectFitAnalysisTab::saveResult(const std::string &resultName) {
  * 'All', everything will be plotted. In the case of a parameter name, only
  * the spectra created from that parameter will be plotted.
  *
- * @param resultName  The name of the workspace to plot.
  * @param plotType    The plot type specifying what to plot.
  */
-void IndirectFitAnalysisTab::plotResult(const std::string &resultName,
-                                        const QString &plotType) {
-  const auto wsFound = checkADSForPlotSaveWorkspace(resultName, true);
-  if (wsFound) {
-    MatrixWorkspace_sptr resultWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
-    QString resultWsQName = QString::fromStdString(resultName);
+void IndirectFitAnalysisTab::plotResult(const QString &plotType) {
+  const auto resultWorkspace = m_fittingModel->getResultWorkspace();
+  if (resultWorkspace) {
+    const auto resultName = QString::fromStdString(resultWorkspace->getName());
 
     // Handle plot result
-    if (plotType.compare("None") != 0) {
-      if (plotType.compare("All") == 0) {
-        const auto specEnd = (int)resultWs->getNumberHistograms();
-        for (int i = 0; i < specEnd; ++i)
-          IndirectTab::plotSpectrum(resultWsQName, i);
-      } else {
-        QHash<QString, size_t> labels =
-            IndirectTab::extractAxisLabels(resultWs, 1);
+    if (plotType.compare("All") == 0) {
+      const auto specEnd = resultWorkspace->getNumberHistograms();
+      for (auto i = 0u; i < specEnd; ++i)
+        IndirectTab::plotSpectrum(resultName, static_cast<int>(i));
+    } else {
+      const auto labels = IndirectTab::extractAxisLabels(resultWorkspace, 1);
 
-        for (const auto &propertyName : m_propertyToParameter.keys()) {
-          const auto functionAndParameter = propertyName.split(".");
-          const auto &parameter = functionAndParameter.last();
-
-          if (parameter == plotType) {
-            const auto label = m_propertyToParameter[propertyName];
-            if (labels.contains(label))
-              IndirectTab::plotSpectrum(resultWsQName, (int)labels[label]);
-          }
+      for (const auto &parameter : m_fittingModel->getFitParameterNames()) {
+        if (boost::contains(parameter, plotType)) {
+          auto it = labels.find(parameter);
+          if (it != labels.end())
+            IndirectTab::plotSpectrum(resultName, static_cast<int>(it->second));
         }
       }
     }
@@ -432,39 +758,73 @@ void IndirectFitAnalysisTab::plotResult(const std::string &resultName,
  */
 void IndirectFitAnalysisTab::fillPlotTypeComboBox(QComboBox *comboBox) {
   comboBox->clear();
-
-  if (m_propertyFunctions.isEmpty())
-    return;
-
   comboBox->addItem("All");
-  comboBox->addItem("None");
 
   QSet<QString> parameters;
-  for (const auto &fitFunction : m_propertyFunctions) {
-    for (const auto &parameter : getFunctionParameters(fitFunction))
-      parameters.insert(parameter);
-  }
+  for (const auto &parameter : m_fitPropertyBrowser->getParameterNames())
+    parameters.insert(parameter.right(parameter.lastIndexOf('.')));
   comboBox->addItems(parameters.toList());
 }
 
-/*
- * Updates the preview plots in this fit analysis tab, given the name
- * of the output workspace from a fit.
- *
- * @param workspaceName   The name of the workspace to plot.
- * @param fitPreviewPlot  The preview plot widget in which to plot the fit.
- * @param diffPreviewPlot The preview plot widget in which to plot the
- *                        difference between the fit and sample data.
+/**
+ * Executes the single fit algorithm defined in this indirect fit analysis tab.
  */
-void IndirectFitAnalysisTab::updatePlot(
-    const std::string &workspaceName,
-    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
-  if (m_fitFunctions == m_propertyFunctions)
-    IndirectDataAnalysisTab::updatePlot(workspaceName, fitPreviewPlot,
-                                        diffPreviewPlot);
-  else
-    IndirectDataAnalysisTab::updatePlot("", fitPreviewPlot, diffPreviewPlot);
+void IndirectFitAnalysisTab::singleFit() {
+  singleFit(getSelectedDataIndex(), getSelectedSpectrum());
+}
+
+void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
+                                       std::size_t spectrum) {
+  if (validate())
+    runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
+}
+
+/**
+ * Executes the sequential fit algorithm defined in this indirect fit analysis
+ * tab.
+ */
+void IndirectFitAnalysisTab::executeFit() {
+  if (validate())
+    runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
+}
+
+bool IndirectFitAnalysisTab::validate() {
+  UserInputValidator validator;
+  m_dataPresenter->validate(validator);
+  m_spectrumPresenter->validate(validator);
+
+  const auto invalidFunction = m_fittingModel->isInvalidFunction();
+  if (invalidFunction)
+    validator.addErrorMessage(QString::fromStdString(*invalidFunction));
+
+  const auto error = validator.generateErrorMessage();
+  emit showMessageBox(error);
+  return error.isEmpty();
+}
+
+/**
+ * Called when the 'Run' button is called in the IndirectTab.
+ */
+void IndirectFitAnalysisTab::run() {
+  runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
+}
+
+void IndirectFitAnalysisTab::setAlgorithmProperties(
+    IAlgorithm_sptr fitAlgorithm) const {
+  fitAlgorithm->setProperty("Minimizer", m_fitPropertyBrowser->minimizer(true));
+  fitAlgorithm->setProperty("MaxIterations",
+                            m_fitPropertyBrowser->maxIterations());
+  fitAlgorithm->setProperty("ConvolveMembers",
+                            m_fitPropertyBrowser->convolveMembers());
+  fitAlgorithm->setProperty("PeakRadius",
+                            m_fitPropertyBrowser->getPeakRadius());
+  fitAlgorithm->setProperty("CostFunction",
+                            m_fitPropertyBrowser->costFunction());
+  fitAlgorithm->setProperty("IgnoreInvalidData",
+                            m_fitPropertyBrowser->ignoreInvalidData());
+
+  if (m_fitPropertyBrowser->isHistogramFit())
+    fitAlgorithm->setProperty("EvaluationType", "Histogram");
 }
 
 /*
@@ -473,254 +833,93 @@ void IndirectFitAnalysisTab::updatePlot(
  *
  * @param fitAlgorithm      The fit algorithm to run.
  */
-void IndirectFitAnalysisTab::runFitAlgorithm(
-    Mantid::API::IAlgorithm_sptr fitAlgorithm) {
-  m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
+void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(clearBatchRunnerSlots()));
+          SLOT(updateFitOutput(bool)));
+  setupFit(fitAlgorithm);
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-/*
- * Adds the necessary prefix to the specified parameter, in order to match
- * the name in the parameters table created from a fit with multiple
- * functions.
- *
- * @param parameter      The name of the parameter.
- * @param functionNumber The index of the function which owns this parameter.
- * @return               A string containing the parameter name with the
- *                       appropriate prefix prepended.
- */
-QString
-IndirectFitAnalysisTab::addPrefixToParameter(const QString &parameter,
-                                             const QString &,
-                                             const int &functionNumber) const {
-  return "f" + QString::number(functionNumber) + "." + parameter;
+void IndirectFitAnalysisTab::runSingleFit(IAlgorithm_sptr fitAlgorithm) {
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(updateSingleFitOutput(bool)));
+  setupFit(fitAlgorithm);
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
-/*
- * Adds the necessary prefix to the specified parameter, in order to match
- * the name in the parameters table created from a fit with a single function.
- *
- * @param parameter      The name of the parameter.
- * @return               A string containing the parameter name with the
- *                       appropriate prefix prepended.
- */
-QString IndirectFitAnalysisTab::addPrefixToParameter(const QString &parameter,
-                                                     const QString &) const {
-  return parameter;
+void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
+  disconnect(m_fitPropertyBrowser,
+             SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
+             m_plotPresenter.get(), SLOT(updateGuess()));
+
+  setAlgorithmProperties(fitAlgorithm);
+
+  m_fittingAlgorithm = fitAlgorithm;
+  m_spectrumPresenter->disableView();
+  m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
+
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(fitAlgorithmComplete(bool)));
 }
 
-/*
- * Adds the necessary prefix to the specified vector of parameters, in order
- * to match the names in the parameters table, created from a fit with
- * multiple functions.
+/**
+ * Updates the specified combo box, with the available plot options.
  *
- * @param parameters     A vector containing the vector of parameters for each
- *                       function.
- * @param functionNames  A vector containing the names of the functions used
- *                       in the fit.
- * @return               A vector containing a vector of parameters with the
- *                       appropriate prefixes prepended for each function.
+ * @param cbPlotType  The combo box.
  */
-QVector<QVector<QString>> IndirectFitAnalysisTab::addPrefixToParameters(
-    const QVector<QVector<QString>> &parameters,
-    const QVector<QString> &functionNames) const {
-  QVector<QVector<QString>> parametersWithPrefix(parameters.size());
-
-  for (int i = 0; i < parameters.size(); ++i) {
-    const auto &functionName = functionNames[i];
-    const auto &functionParameters = parameters[i];
-    parametersWithPrefix[i] = QVector<QString>(parameters[i].size());
-
-    for (int j = 0; j < functionParameters.size(); ++j)
-      parametersWithPrefix[i][j] =
-          addPrefixToParameter(functionParameters[j], functionName, i);
-  }
-  return parametersWithPrefix;
+void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
+  setPlotOptions(
+      cbPlotType,
+      m_fitPropertyBrowser->compositeFunction()->getParameterNames());
 }
 
-/*
- * Adds the necessary prefix to the specified vector of parameters, in order
- * to match the names in the parameters table, created from a fit with a
- * single function.
+/**
+ * Fills the specified combo box, with the specified parameters.
  *
- * @param parameters     A vector containing the parameters of the function.
- * @param functionName   The name of the function used in the fit.
- * @return               The vector of parameters with the appropriate
- * prefixes prepended.
+ * @param cbPlotType  The combo box.
+ * @param parameters  The parameters.
  */
-QVector<QString> IndirectFitAnalysisTab::addPrefixToParameters(
-    const QVector<QString> &parameters, const QString &functionName) const {
-  QVector<QString> parametersWithPrefix(parameters.size());
-
-  for (int i = 0; i < parameters.size(); ++i)
-    parametersWithPrefix[i] = addPrefixToParameter(parameters[i], functionName);
-  return parametersWithPrefix;
-}
-
-/*
- * Creates a map from the name of a property in the property table of this
- * fit analysis tab, to the name of the parameter as found in the parameter
- * workspace generated from a fit.
- *
- * @param functionNames          The name of the functions used in the fit.
- * @return                       A map from property name to parameter name.
- */
-QHash<QString, QString> IndirectFitAnalysisTab::createPropertyToParameterMap(
-    const QVector<QString> &functionNames) const {
-
-  if (functionNames.size() == 1) {
-    const auto parameters = getFunctionParameters(functionNames[0]);
-    const auto parametersWithPrefix =
-        addPrefixToParameters(parameters, functionNames[0]);
-
-    return createPropertyToParameterMap(functionNames[0], parameters,
-                                        parametersWithPrefix);
-  } else if (!functionNames.isEmpty()) {
-    const auto parameters = getFunctionParameters(functionNames);
-    const auto parametersWithPrefix =
-        addPrefixToParameters(parameters, functionNames);
-
-    return createPropertyToParameterMap(functionNames, parameters,
-                                        parametersWithPrefix);
-  } else {
-    return QHash<QString, QString>();
-  }
-}
-
-/*
- * Creates a map from the name of a property in the property table of this
- * fit analysis tab, to the name of the parameter as found in the parameter
- * workspace generated from a fit.
- *
- * @param functionNames         The names of the functions used in the fit.
- * @param parameters            A vector containing a vector of parameters,
- * for each function used in the fit.
- * @param parametersWithPrefix  A vector containing a vector of parameters
- * with the appropriate prefixes prepended, for each function used in the fit.
- * @return                      A map from property name to parameter name.
- */
-QHash<QString, QString> IndirectFitAnalysisTab::createPropertyToParameterMap(
-    const QVector<QString> &functionNames,
-    const QVector<QVector<QString>> &parameters,
-    const QVector<QVector<QString>> &parametersWithPrefix) const {
-  QHash<QString, QString> propertyToParameter;
-
-  for (int i = 0; i < parameters.size(); ++i) {
-    const auto &functionName = functionNames[i];
-    const auto &functionParams = parameters[i];
-    const auto &functionParamsWithPrefix = parametersWithPrefix[i];
-
-    for (int j = 0; j < functionParams.size(); ++j)
-      propertyToParameter[functionName + "." + functionParams[j]] =
-          functionParamsWithPrefix[j];
-  }
-  return propertyToParameter;
-}
-
-/*
- * Creates a map from the name of a property in the property table of this
- * fit analysis tab, to the name of the parameter as found in the parameter
- * workspace generated from a fit.
- *
- * @param functionName          The name of the function used in the fit.
- * @param parameters            A vector containing the parameters, for the
- *                              function used in the fit.
- * @param parametersWithPrefix  A vector containing the parameters with the
- *                              appropriate prefixes prepended.
- * @return                      A map from property name to parameter name.
- */
-QHash<QString, QString> IndirectFitAnalysisTab::createPropertyToParameterMap(
-    const QString &functionName, const QVector<QString> &parameters,
-    const QVector<QString> &parametersWithPrefix) const {
-  QHash<QString, QString> propertyToParameter;
-
-  for (int i = 0; i < parameters.size(); ++i)
-    propertyToParameter[functionName + "." + parameters[i]] =
-        parametersWithPrefix[i];
-  return propertyToParameter;
-}
-
-/*
- * Creates a QtProperty containing a property for each parameter in the
- * function with the specified name. Properties have name in the format:
- * FunctionName.ParameterName Adds default values for the parameters of the
- * function, into this fit analysis tab's double manager.
- *
- * @param functionName  The name of the function to create a QtProperty from.
- * @param addParameters Adds parameters from function to QtProperty if True,
- *                      else returns empty QtProperty.
- */
-QtProperty *
-IndirectFitAnalysisTab::createFunctionProperty(const QString &functionName,
-                                               const bool &addParameters) {
-  return createFunctionProperty(m_grpManager->addProperty(functionName),
-                                addParameters);
-}
-
-/*
- * Adds properties to the specified property for each parameter of the
- * function with the same name as the name of the specified property.
- * Properties have names in the format: FunctionName.ParameterName
- * Adds default values for the parameters of the function, into this fit
- * analysis tab's double manager.
- *
- * @param functionGroup The group property to add parameters to.
- * @param addParameters Adds parameters from function to QtProperty if True,
- *                      else returns empty QtProperty.
- */
-QtProperty *
-IndirectFitAnalysisTab::createFunctionProperty(QtProperty *functionGroup,
-                                               const bool &addParameters) {
-  const auto &functionName = functionGroup->propertyName();
-  const auto parameters = getFunctionParameters(functionName);
+void IndirectFitAnalysisTab::setPlotOptions(
+    QComboBox *cbPlotType, const std::vector<std::string> &parameters) const {
+  cbPlotType->clear();
+  QSet<QString> plotOptions;
 
   for (const auto &parameter : parameters) {
-    QString paramName = functionName + "." + parameter;
-    m_properties[paramName] = m_dblManager->addProperty(parameter);
-    m_dblManager->setDecimals(m_properties[paramName], NUM_DECIMALS);
-
-    if (addParameters)
-      functionGroup->addSubProperty(m_properties[paramName]);
+    auto plotOption = QString::fromStdString(parameter);
+    auto index = plotOption.lastIndexOf(".");
+    if (index >= 0)
+      plotOption = plotOption.remove(0, index + 1);
+    plotOptions << plotOption;
   }
-  return functionGroup;
+  setPlotOptions(cbPlotType, plotOptions);
 }
 
-/*
- * Extracts the parameters for the functions with the specified names.
+/**
+ * Fills the specified combo box, with the specified options.
  *
- * @param functionNames The names of the functions to extract the parameters
- *                      for.
- * @return              A vector containing a vector of parameters for each
- *                      specified fucntion.
+ * @param cbPlotType  The combo box.
+ * @param parameters  The options.
  */
-QVector<QVector<QString>> IndirectFitAnalysisTab::getFunctionParameters(
-    const QVector<QString> &functionNames) const {
-  QVector<QVector<QString>> parameters(functionNames.size());
+void IndirectFitAnalysisTab::setPlotOptions(
+    QComboBox *cbPlotType, const QSet<QString> &options) const {
+  cbPlotType->clear();
 
-  for (int i = 0; i < functionNames.size(); ++i)
-    parameters[i] = getFunctionParameters(functionNames[i]);
-  return parameters;
+  QStringList plotList;
+  if (!options.isEmpty())
+    plotList << "All";
+  plotList.append(options.toList());
+  cbPlotType->addItems(plotList);
 }
 
-/*
- * Extracts the parameters for the function with the specified name.
- *
- * @param functionName  The name of the function whose parameters to extract.
- * @return              The vector of parameters for the specified function.
+/**
+ * Updates whether the options for plotting and saving fit results are
+ * enabled/disabled.
  */
-QVector<QString> IndirectFitAnalysisTab::getFunctionParameters(
-    const QString &functionName) const {
-  const auto func = getFunction(functionName);
-  return IndirectTab::convertStdStringVector(func->getParameterNames());
-}
-
-IFunction_sptr
-IndirectFitAnalysisTab::getFunction(const QString &functionName) const {
-  return FunctionFactory::Instance().createFunction(functionName.toStdString());
+void IndirectFitAnalysisTab::updateResultOptions() {
+  const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(),
+                                                     getSelectedSpectrum());
+  setPlotResultEnabled(isFit);
+  setSaveResultEnabled(isFit);
 }
 
 } // namespace IDA

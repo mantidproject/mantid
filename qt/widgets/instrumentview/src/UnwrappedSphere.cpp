@@ -1,5 +1,6 @@
 #include "MantidQtWidgets/InstrumentView/UnwrappedSphere.h"
-#include "MantidGeometry/IDetector.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include <cmath>
 
 namespace MantidQt {
@@ -43,12 +44,13 @@ void UnwrappedSphere::rotate(const UnwrappedDetector &udet,
   Mantid::Kernel::Quat R1;
   // direction in which to look: from sample to detector
   Mantid::Kernel::V3D eye;
-  eye = m_pos - udet.position;
+  const auto &componentInfo = m_instrActor->componentInfo();
+  eye = m_pos - componentInfo.position(udet.detIndex);
   if (!eye.nullVector()) {
     InstrumentActor::rotateToLookAt(eye, m_zaxis, R1);
   }
   // add detector's own rotation
-  R = R1 * udet.rotation;
+  R = R1 * componentInfo.rotation(udet.detIndex);
 }
 
 } // MantidWidgets

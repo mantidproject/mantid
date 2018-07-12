@@ -43,7 +43,7 @@ enum ProxyType {
 };
 
 /// Typedef Collection of proxy information.
-typedef std::vector<ProxyInfo> ProxyInfoVec;
+using ProxyInfoVec = std::vector<ProxyInfo>;
 
 /**
  * Extract proxy information from a CFDistionaryRef

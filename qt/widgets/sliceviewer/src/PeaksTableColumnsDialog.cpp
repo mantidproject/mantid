@@ -34,8 +34,8 @@ void PeaksTableColumnsDialog::setVisibleColumns(const std::set<QString> &cols) {
                    m_origVisible.end());
   ui->cb_wavelength->setChecked(isChecked);
 
-  isChecked =
-      bool(m_origVisible.find(QPeaksTableModel::ENERGY) != m_origVisible.end());
+  isChecked = bool(m_origVisible.find(QPeaksTableModel::ENERGY_TRANSFER) !=
+                   m_origVisible.end());
   ui->cb_deltaE->setChecked(isChecked);
 
   isChecked = bool(m_origVisible.find(QPeaksTableModel::INITIAL_ENERGY) !=
@@ -110,7 +110,8 @@ std::set<QString> PeaksTableColumnsDialog::getVisibleColumns() {
   updateChecked(result, QPeaksTableModel::DETID, ui->cb_detID->isChecked());
   updateChecked(result, QPeaksTableModel::WAVELENGTH,
                 ui->cb_wavelength->isChecked());
-  updateChecked(result, QPeaksTableModel::ENERGY, ui->cb_deltaE->isChecked());
+  updateChecked(result, QPeaksTableModel::ENERGY_TRANSFER,
+                ui->cb_deltaE->isChecked());
   updateChecked(result, QPeaksTableModel::INITIAL_ENERGY,
                 ui->cb_ei->isChecked());
   updateChecked(result, QPeaksTableModel::FINAL_ENERGY, ui->cb_ef->isChecked());

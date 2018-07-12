@@ -17,7 +17,6 @@
 #include <QMap>
 #include <QMetaType>
 #include <QHash>
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 #include <map>
 
@@ -46,10 +45,10 @@ class MantidTreeWidgetItem;
 class MantidTreeWidget;
 
 /**
-\class  QWorkspaceDockView
+\class  WorkspaceTreeWidget
 \author Lamar Moore
 \date   24-08-2016
-\version 1.0
+\version 1.1
 
 
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -74,15 +73,14 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidget
     : public QWidget,
-      public IWorkspaceDockView,
-      public boost::enable_shared_from_this<WorkspaceTreeWidget> {
+      public IWorkspaceDockView {
   Q_OBJECT
 public:
   explicit WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb,
                                QWidget *parent = nullptr);
   ~WorkspaceTreeWidget();
   void dropEvent(QDropEvent *de) override;
-  void init() override;
+
   MantidQt::MantidWidgets::WorkspacePresenterWN_wptr
   getPresenterWeakPtr() override;
 
@@ -92,6 +90,8 @@ public:
 
   MantidQt::MantidWidgets::StringList
   getSelectedWorkspaceNames() const override;
+  // Horrible second function to get a return value as QStringList directly
+  QStringList getSelectedWorkspaceNamesAsQList() const;
   Mantid::API::Workspace_sptr getSelectedWorkspace() const override;
 
   bool askUserYesNo(const std::string &caption,
@@ -232,33 +232,34 @@ private:
 
 protected:
   MantidTreeWidget *m_tree;
+  QPoint m_menuPosition;
+  QString selectedWsName;
+  QMenu *m_loadMenu, *m_saveToProgram;
+  QSignalMapper *m_programMapper;
+  QAction *m_program, *m_saveNexus, *m_rename, *m_delete;
 
 private:
-  QString selectedWsName;
-  QPoint m_menuPosition;
   QString m_programName;
   MantidDisplayBase *const m_mantidDisplayModel;
 
   std::string m_filteredText;
   QPushButton *m_loadButton;
   QPushButton *m_saveButton;
-  QMenu *m_loadMenu, *m_saveToProgram, *m_sortMenu, *m_saveMenu;
   QPushButton *m_deleteButton;
   QPushButton *m_groupButton;
   QPushButton *m_sortButton;
   QLineEdit *m_workspaceFilter;
-  QSignalMapper *m_programMapper;
   QActionGroup *m_sortChoiceGroup;
   QFileDialog *m_saveFolderDialog;
 
+  QMenu *m_sortMenu, *m_saveMenu;
   // Context-menu actions
   QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr,
       *m_plotAdvanced, *m_showDetectors, *m_showBoxData, *m_showVatesGui,
       *m_showSpectrumViewer, *m_showSliceViewer, *m_colorFill, *m_showLogs,
       *m_showSampleMaterial, *m_showHist, *m_showMDPlot, *m_showListData,
-      *m_saveNexus, *m_rename, *m_delete, *m_program, *m_ascendingSortAction,
-      *m_descendingSortAction, *m_byNameChoice, *m_byLastModifiedChoice,
-      *m_showTransposed, *m_convertToMatrixWorkspace,
+      *m_ascendingSortAction, *m_descendingSortAction, *m_byNameChoice,
+      *m_byLastModifiedChoice, *m_showTransposed, *m_convertToMatrixWorkspace,
       *m_convertMDHistoToMatrixWorkspace, *m_clearUB;
 
   QAtomicInt m_updateCount;

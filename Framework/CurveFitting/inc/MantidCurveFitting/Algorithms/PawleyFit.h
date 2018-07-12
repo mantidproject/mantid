@@ -69,6 +69,9 @@ public:
   PawleyFit();
   const std::string name() const override { return "PawleyFit"; }
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"PoldiPeakSearch"};
+  }
   const std::string summary() const override;
   const std::string category() const override { return "Diffraction\\Fitting"; }
 

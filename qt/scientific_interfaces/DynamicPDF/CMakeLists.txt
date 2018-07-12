@@ -21,7 +21,7 @@ set ( INC_FILES
 	SliceSelector.h
 )
 
-set ( MOC_FILES 
+set ( MOC_FILES
     DPDFBackgroundRemover.h
     DPDFDisplayControl.h
     DPDFFitControl.h
@@ -32,7 +32,7 @@ set ( MOC_FILES
 )
 
 
-set ( UI_FILES 
+set ( UI_FILES
     DPDFBackgroundRemover.ui
     DPDFFitControl.ui
     DPDFFourierTransform.ui
@@ -64,4 +64,6 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesDynamicPDF
     ${PLUGINS_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../../Contents/MacOS
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../../${LIB_DIR}"
 )

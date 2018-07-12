@@ -4,6 +4,9 @@
                                 // design
 #endif
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidAPI/SerialAlgorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 #ifdef _MSC_VER
 #pragma warning(default : 4250)
@@ -18,34 +21,43 @@
 #include <boost/python/scope.hpp>
 
 using Mantid::API::Algorithm;
+using Mantid::API::SerialAlgorithm;
+using Mantid::API::ParallelAlgorithm;
+using Mantid::API::DistributedAlgorithm;
 using Mantid::PythonInterface::AlgorithmAdapter;
 using Mantid::Kernel::Direction;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(Algorithm)
+GET_POINTER_SPECIALIZATION(SerialAlgorithm)
+GET_POINTER_SPECIALIZATION(ParallelAlgorithm)
+GET_POINTER_SPECIALIZATION(DistributedAlgorithm)
 
 namespace {
-typedef AlgorithmAdapter<Algorithm> PythonAlgorithm;
+using PythonAlgorithm = AlgorithmAdapter<Algorithm>;
+using PythonSerialAlgorithm = AlgorithmAdapter<SerialAlgorithm>;
+using PythonParallelAlgorithm = AlgorithmAdapter<ParallelAlgorithm>;
+using PythonDistributedAlgorithm = AlgorithmAdapter<DistributedAlgorithm>;
 
 // declarePyAlgProperty(property*,doc)
-typedef void (*declarePropertyType1)(boost::python::object &self,
-                                     Mantid::Kernel::Property *,
-                                     const std::string &);
+using declarePropertyType1 = void (*)(boost::python::object &,
+                                      Mantid::Kernel::Property *,
+                                      const std::string &);
 // declarePyAlgProperty(name, defaultValue, validator, doc, direction)
-typedef void (*declarePropertyType2)(boost::python::object &self,
-                                     const std::string &,
-                                     const boost::python::object &,
-                                     const boost::python::object &,
-                                     const std::string &, const int);
+using declarePropertyType2 = void (*)(boost::python::object &,
+                                      const std::string &,
+                                      const boost::python::object &,
+                                      const boost::python::object &,
+                                      const std::string &, const int);
 // declarePyAlgProperty(name, defaultValue, doc, direction)
-typedef void (*declarePropertyType3)(boost::python::object &self,
-                                     const std::string &,
-                                     const boost::python::object &,
-                                     const std::string &, const int);
+using declarePropertyType3 = void (*)(boost::python::object &,
+                                      const std::string &,
+                                      const boost::python::object &,
+                                      const std::string &, const int);
 // declarePyAlgProperty(name, defaultValue, direction)
-typedef void (*declarePropertyType4)(boost::python::object &self,
-                                     const std::string &,
-                                     const boost::python::object &, const int);
+using declarePropertyType4 = void (*)(boost::python::object &,
+                                      const std::string &,
+                                      const boost::python::object &, const int);
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
@@ -147,4 +159,35 @@ void export_leaf_classes() {
   // client code relies on the "PythonAlgorithm" name in
   // Python so we simply add an alias of the Algorithm name to PythonAlgorithm
   scope().attr("PythonAlgorithm") = scope().attr("Algorithm");
+}
+
+void export_SerialAlgorithm() {
+  register_ptr_to_python<boost::shared_ptr<SerialAlgorithm>>();
+  register_exception_translator<SerialAlgorithm::CancelException>(
+      &translateCancel);
+  class_<SerialAlgorithm, bases<Mantid::API::Algorithm>,
+         boost::shared_ptr<PythonSerialAlgorithm>, boost::noncopyable>(
+      "SerialAlgorithm", "Base class for simple serial algorithms");
+  scope().attr("PythonSerialAlgorithm") = scope().attr("SerialAlgorithm");
+}
+
+void export_ParallelAlgorithm() {
+  register_ptr_to_python<boost::shared_ptr<ParallelAlgorithm>>();
+  register_exception_translator<ParallelAlgorithm::CancelException>(
+      &translateCancel);
+  class_<ParallelAlgorithm, bases<Mantid::API::Algorithm>,
+         boost::shared_ptr<PythonParallelAlgorithm>, boost::noncopyable>(
+      "ParallelAlgorithm", "Base class for simple parallel algorithms");
+  scope().attr("PythonParallelAlgorithm") = scope().attr("ParallelAlgorithm");
+}
+
+void export_DistributedAlgorithm() {
+  register_ptr_to_python<boost::shared_ptr<DistributedAlgorithm>>();
+  register_exception_translator<DistributedAlgorithm::CancelException>(
+      &translateCancel);
+  class_<DistributedAlgorithm, bases<Mantid::API::Algorithm>,
+         boost::shared_ptr<PythonDistributedAlgorithm>, boost::noncopyable>(
+      "DistributedAlgorithm", "Base class for simple distributed algorithms");
+  scope().attr("PythonDistributedAlgorithm") =
+      scope().attr("DistributedAlgorithm");
 }

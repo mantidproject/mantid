@@ -190,7 +190,7 @@ protected:
   /// The type of collection used for the detectors
   ///          - a map of detector pointers with the detector ID as the key
   // May want to change this to a hash_map in due course
-  typedef std::map<int, IDetector_const_sptr> DetCollection;
+  using DetCollection = std::map<int, IDetector_const_sptr>;
   /// The collection of grouped detectors
   DetCollection m_detectors;
   /** the parameter describes the topology of the detector's group namely if
@@ -263,9 +263,9 @@ private:
 };
 
 /// Typedef for shared pointer
-typedef boost::shared_ptr<DetectorGroup> DetectorGroup_sptr;
+using DetectorGroup_sptr = boost::shared_ptr<DetectorGroup>;
 /// Typedef for shared pointer to a const object
-typedef boost::shared_ptr<const DetectorGroup> DetectorGroup_const_sptr;
+using DetectorGroup_const_sptr = boost::shared_ptr<const DetectorGroup>;
 
 } // namespace Geometry
 } // namespace Mantid

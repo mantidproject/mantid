@@ -146,12 +146,12 @@ public:
 
 #ifndef SOAP_TYPE__QName
 #define SOAP_TYPE__QName (5)
-typedef char *_QName;
+using _QName = char *;
 #endif
 
 #ifndef SOAP_TYPE__XML
 #define SOAP_TYPE__XML (6)
-typedef char *_XML;
+using _XML = char *;
 #endif
 
 /******************************************************************************\

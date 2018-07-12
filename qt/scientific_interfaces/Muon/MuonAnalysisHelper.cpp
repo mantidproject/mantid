@@ -168,18 +168,18 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   // output this number to three decimal places
   out << std::setprecision(3);
   out << counts / 1000000 << " MEv";
-  out << std::setprecision(12);
   // Add average temperature.
   out << "\nAverage Temperature: ";
   if (run.hasProperty("Temp_Sample")) {
     // Filter the temperatures by the start and end times for the run.
-    run.getProperty("Temp_Sample")->filterByTime(start, end);
+    Mantid::Kernel::SplittingInterval time_split(start, end);
+    std::vector<Mantid::Kernel::SplittingInterval> splitVector = {time_split};
+    auto tempSample = run.getProperty("Temp_Sample");
+    const auto *tempSampleTimeSeries =
+        dynamic_cast<const TimeSeriesProperty<double> *>(tempSample);
 
-    // Get average of the values
-    double average = run.getPropertyAsSingleValue("Temp_Sample");
-
-    if (average != 0.0) {
-      out << average;
+    if (tempSampleTimeSeries) {
+      out << tempSampleTimeSeries->averageValueInFilter(splitVector);
     } else {
       out << "Not set";
     }
@@ -191,7 +191,14 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   // Could be stored as a double or as a string (range e.g. "1000.0 - 1020.0")
   out << "\nSample Temperature: ";
   if (run.hasProperty("sample_temp")) {
-    out << run.getProperty("sample_temp")->value();
+    // extract as string, then convert to double to allow precision to apply
+    std::string valueAsString = run.getProperty("sample_temp")->value();
+    try {
+      out << std::stod(valueAsString);
+    } catch (const std::invalid_argument &) {
+      // problem converting to double, output as string
+      out << valueAsString;
+    }
   } else {
     out << "Not found";
   }
@@ -200,7 +207,14 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   // Could be stored as a double or as a string (range e.g. "1000.0 - 1020.0")
   out << "\nSample Magnetic Field: ";
   if (run.hasProperty("sample_magn_field")) {
-    out << run.getProperty("sample_magn_field")->value();
+    // extract as string, then convert to double to allow precision to apply
+    std::string valueAsString = run.getProperty("sample_magn_field")->value();
+    try {
+      out << std::stod(valueAsString);
+    } catch (const std::invalid_argument &) {
+      // problem converting to double, output as string
+      out << valueAsString;
+    }
   } else {
     out << "Not found";
   }
@@ -1002,9 +1016,13 @@ void parseRunLabel(const std::string &label, std::string &instrument,
           // Single run
           runNumbers.push_back(boost::lexical_cast<int>(pairTokenizer[0]));
         } else {
-          throw std::invalid_argument("Failed to parse run label: " + label);
+          throw std::invalid_argument("Failed to parse run label: " + label +
+                                      " too many tokens ");
         }
       } catch (const boost::bad_lexical_cast &) {
+        throw std::invalid_argument("Failed to parse run label: " + label +
+                                    " not a good run number");
+      } catch (...) {
         throw std::invalid_argument("Failed to parse run label: " + label);
       }
     }
@@ -1084,7 +1102,7 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
   QMap<int, QColor> colors; // position, color
 
   // Vector of <number of runs in fit, parameters in fit> pairs
-  typedef std::pair<size_t, std::vector<std::string>> FitProp;
+  using FitProp = std::pair<size_t, std::vector<std::string>>;
   std::vector<FitProp> fitProperties;
 
   // Get fit properties for each input workspace

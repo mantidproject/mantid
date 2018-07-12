@@ -656,7 +656,7 @@ will add two new rows populated with values:
 Note that a key "Group" must be specify with a value corresponding to the name of the group where the runs will be added.
 If no post-processing algorithm is specified, it can be omitted. The equivalent in Python is a Qlist<QString> as shown below:
 
-.. code-block:: c
+.. code-block:: python
 
     self.data_processor_table.transfer(['Group:0,Runs:13460,Angle:0.5,Scale:1', 'Group:0,Runs:13462,Angle:1.5,Scale:2'])
 

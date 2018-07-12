@@ -838,12 +838,9 @@ void NexusFileIO::writeEventListData(std::vector<T> events, bool writeTOF,
   auto errorSquareds = new double[num];
   auto pulsetimes = new int64_t[num];
 
-  typename std::vector<T>::const_iterator it;
-  typename std::vector<T>::const_iterator it_end = events.end();
   size_t i = 0;
-
   // Fill the C-arrays with the fields from all the events, as requested.
-  for (it = events.begin(); it != it_end; it++) {
+  for (auto it = events.cbegin(); it != events.cend(); ++it) {
     if (writeTOF)
       tofs[i] = it->tof();
     if (writePulsetime)
@@ -852,7 +849,7 @@ void NexusFileIO::writeEventListData(std::vector<T> events, bool writeTOF,
       weights[i] = it->weight();
     if (writeError)
       errorSquareds[i] = it->errorSquared();
-    i++;
+    ++i;
   }
 
   // Write out all the required arrays.

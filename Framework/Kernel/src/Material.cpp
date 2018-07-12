@@ -10,8 +10,8 @@
 namespace Mantid {
 
 namespace Kernel {
-typedef Mantid::Kernel::StringTokenizer tokenizer;
-typedef std::pair<std::string, std::string> str_pair;
+using tokenizer = Mantid::Kernel::StringTokenizer;
+using str_pair = std::pair<std::string, std::string>;
 
 using PhysicalConstants::Atom;
 using PhysicalConstants::getAtom;
@@ -278,6 +278,26 @@ double Material::cohScatterLengthReal(const double lambda) const {
   }
 }
 
+double Material::cohScatterLengthImg(const double lambda) const {
+  UNUSED_ARG(lambda);
+
+  const double weightedTotal =
+      std::accumulate(std::begin(m_chemicalFormula),
+                      std::end(m_chemicalFormula), 0.,
+                      [](double subtotal, const FormulaUnit &right) {
+                        return subtotal +
+                               right.atom->neutron.coh_scatt_length_img *
+                                   right.multiplicity;
+                      }) /
+      m_atomTotal;
+
+  if (!std::isnormal(weightedTotal)) {
+    return 0.;
+  } else {
+    return weightedTotal;
+  }
+}
+
 double Material::incohScatterLengthReal(const double lambda) const {
   UNUSED_ARG(lambda);
 
@@ -287,6 +307,26 @@ double Material::incohScatterLengthReal(const double lambda) const {
                       [](double subtotal, const FormulaUnit &right) {
                         return subtotal +
                                right.atom->neutron.inc_scatt_length_real *
+                                   right.multiplicity;
+                      }) /
+      m_atomTotal;
+
+  if (!std::isnormal(weightedTotal)) {
+    return 0.;
+  } else {
+    return weightedTotal;
+  }
+}
+
+double Material::incohScatterLengthImg(const double lambda) const {
+  UNUSED_ARG(lambda);
+
+  const double weightedTotal =
+      std::accumulate(std::begin(m_chemicalFormula),
+                      std::end(m_chemicalFormula), 0.,
+                      [](double subtotal, const FormulaUnit &right) {
+                        return subtotal +
+                               right.atom->neutron.inc_scatt_length_img *
                                    right.multiplicity;
                       }) /
       m_atomTotal;
@@ -317,58 +357,28 @@ double Material::totalScatterLength(const double lambda) const {
   }
 }
 
-double Material::cohScatterLengthRealSqrd(const double lambda) const {
-  UNUSED_ARG(lambda);
-
-  const double weightedTotal =
-      std::accumulate(
-          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
-          [](double subtotal, const FormulaUnit &right) {
-            const double value = right.atom->neutron.coh_scatt_length_real;
-            return subtotal + value * value * right.multiplicity;
-          }) /
-      m_atomTotal;
-
-  if (!std::isnormal(weightedTotal)) {
-    return 0.;
-  } else {
-    return weightedTotal;
-  }
-}
-
-double Material::incohScatterLengthRealSqrd(const double lambda) const {
-  UNUSED_ARG(lambda);
-
-  const double weightedTotal =
-      std::accumulate(
-          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
-          [](double subtotal, const FormulaUnit &right) {
-            const double value = right.atom->neutron.inc_scatt_length_real;
-            return subtotal + value * value * right.multiplicity;
-          }) /
-      m_atomTotal;
-
-  if (!std::isnormal(weightedTotal)) {
-    return 0.;
-  } else {
-    return weightedTotal;
-  }
-}
-
 double Material::cohScatterLengthSqrd(const double lambda) const {
-  // cross section has this properly averaged already
-  double crossSection = cohScatterXSection(lambda);
+  const double weightedTotalReal = this->cohScatterLengthReal(lambda);
+  const double weightedTotalImg = this->cohScatterLengthImg();
 
-  // 1 barn = 100 fm^2
-  return 100. * crossSection * INV_FOUR_PI;
+  if (!std::isnormal(weightedTotalReal)) {
+    return 0.;
+  } else {
+    return (weightedTotalReal * weightedTotalReal) +
+           (weightedTotalImg * weightedTotalImg);
+  }
 }
 
 double Material::incohScatterLengthSqrd(const double lambda) const {
-  // cross section has this properly averaged already
-  double crossSection = incohScatterXSection(lambda);
+  const double weightedTotalReal = this->incohScatterLengthReal(lambda);
+  const double weightedTotalImg = this->incohScatterLengthImg(lambda);
 
-  // 1 barn = 100 fm^2
-  return 100. * crossSection * INV_FOUR_PI;
+  if (!std::isnormal(weightedTotalReal)) {
+    return 0.;
+  } else {
+    return (weightedTotalReal * weightedTotalReal) +
+           (weightedTotalImg * weightedTotalImg);
+  }
 }
 
 double Material::totalScatterLengthSqrd(const double lambda) const {

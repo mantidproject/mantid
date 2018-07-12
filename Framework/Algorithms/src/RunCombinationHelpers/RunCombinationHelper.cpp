@@ -21,6 +21,8 @@ using namespace Kernel;
 * @param inputs : input workspaces vector [including] group workspaces (all must
 * be on ADS)
 * @return : the flat vector of the input workspaces
+* @throw : std::runtime_error if the input workspaces are neither groups nor
+* MatrixWorkspaces
 */
 std::vector<std::string>
 RunCombinationHelper::unWrapGroups(const std::vector<std::string> &inputs) {
@@ -33,8 +35,15 @@ RunCombinationHelper::unWrapGroups(const std::vector<std::string> &inputs) {
       std::vector<std::string> group = wsgroup->getNames();
       outputs.insert(outputs.end(), group.begin(), group.end());
     } else {
-      // single workspace
-      outputs.push_back(input);
+      // MatrixWorkspace
+      MatrixWorkspace_sptr matrixws =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
+      if (matrixws)
+        outputs.push_back(matrixws->getName());
+      else
+        throw(std::runtime_error(
+            "The input " + input +
+            " is neither a WorkspaceGroup nor a MatrixWorkspace"));
     }
   }
   return outputs;
@@ -54,6 +63,11 @@ void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
   m_isHistogramData = ref->isHistogramData();
   m_isScanning = ref->detectorInfo().isScanning();
   m_instrumentName = ref->getInstrument()->getName();
+  if (m_numberSpectra) {
+    m_hasDx.reserve(m_numberSpectra);
+    for (unsigned int i = 0; i < m_numberSpectra; ++i)
+      m_hasDx.push_back(ref->hasDx(i));
+  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -65,7 +79,7 @@ void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
 std::string
 RunCombinationHelper::checkCompatibility(MatrixWorkspace_sptr ws,
                                          bool checkNumberHistograms) {
-  std::string errors = "";
+  std::string errors;
   if (ws->getNumberHistograms() != m_numberSpectra && checkNumberHistograms)
     errors += "different number of histograms; ";
   if (ws->getAxis(0)->unit()->unitID() != m_xUnit)
@@ -83,17 +97,18 @@ RunCombinationHelper::checkCompatibility(MatrixWorkspace_sptr ws,
               "detectors; ";
   if (ws->getInstrument()->getName() != m_instrumentName)
     errors += "different instrument names; ";
+  if (ws->getNumberHistograms() == m_numberSpectra) {
+    if (!m_hasDx.empty()) {
+      for (unsigned int i = 0; i < m_numberSpectra; ++i) {
+        if (m_hasDx[i] != ws->hasDx(i)) {
+          errors += "spectra must have either Dx values or not; ";
+          break;
+        }
+      }
+    }
+  }
   return errors;
 }
-
-/// @cond
-// Local function used within validateInputWorkspaces() below in a call to
-// std::list::sort(compare) to order the input workspaces by the start of their
-// frame (i.e. the first X value).
-static bool compare(MatrixWorkspace_sptr &first, MatrixWorkspace_sptr &second) {
-  return (first->x(0).front() < second->x(0).front());
-}
-/// @endcond
 
 /** Checks that the input workspace all exist, that they are the same size, have
  * the same units
@@ -120,7 +135,7 @@ RunCombinationHelper::validateInputWorkspaces(
           "Could not find a MatrixWorkspace with the name " +
           inputWorkspaces[i]);
     }
-    inWS.push_back(ws);
+    inWS.emplace_back(ws);
     // Check that it has common binning
     if (!WorkspaceHelpers::commonBoundaries(*inWS.back())) {
       g_log.error("Input workspaces must have common binning for all spectra");
@@ -139,10 +154,6 @@ RunCombinationHelper::validateInputWorkspaces(
       }
     }
   }
-
-  // Order the workspaces by ascending frame (X) starting point
-  inWS.sort(compare);
-
   return inWS;
 }
 

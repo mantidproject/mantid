@@ -73,7 +73,7 @@ public:
 };
 
 /// define a shared pointer to a cost function
-typedef boost::shared_ptr<ICostFunction> ICostFunction_sptr;
+using ICostFunction_sptr = boost::shared_ptr<ICostFunction>;
 
 /**
  * Macro for declaring a new type of cost functions to be used with the

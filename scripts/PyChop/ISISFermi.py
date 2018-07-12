@@ -8,6 +8,7 @@ spectrometers (MAPS, MARI, MERLIN) - using the functions in Chop.py and addition
 """
 
 from __future__ import (absolute_import, division, print_function)
+import warnings
 import numpy as np
 from . import Chop
 from scipy.interpolate import interp1d
@@ -43,13 +44,13 @@ class ISISFermi:
 
     __Instruments = {
         #         x0       xa      x1      x2      wa       ha       gamma  idet  dd      tbin
-        'MAPS': [10.1000, 8.1100, 1.9000, 6.0000, 0.07013, 0.07013, 0.0000, 2, 0.0250, 0.000e-6],
+        'MAPS': [10.1000, 8.2700, 1.9000, 6.0000, 0.09400, 0.09400, 0.0000, 2, 0.0250, 0.000e-6],
         'MARI': [10.0500, 7.1900, 1.6890, 4.0220, 0.06667, 0.06667, 0.0000, 2, 0.0250, 0.000e-6],
         'MERLIN': [10.0000, 7.1900, 1.8200, 2.5000, 0.06667, 0.06667, 0.0000, 2, 0.0250, 0.000e-6]
         }
     __samplesDimensions = {
         #         sx    sy     sz     isam
-        'MAPS': [2.00, 50.00, 50.00, 0],
+        'MAPS': [2.00, 48.00, 48.00, 0],
         'MARI': [20.00, 19.00, 50.00, 2],
         'MERLIN': [2.00, 40.00, 40.00, 0]
         }
@@ -78,14 +79,20 @@ class ISISFermi:
         'MERLIN': {'imod':2, 'ch_mod':'AP', 'mod_pars':[80.0, 0.5226], 'mod_scale_fn':None, 'theta': 26.7}
         }
 
+    # For Merlin, set the disk chopper phase to block neutrons with energy greater than 200meV
+    # For MAPS and MARI, corresponds to the default slit to let the desired rep through
+    __DiskChopperMode = {'MERLIN':1500, 'MAPS':0, 'MARI':2}
+
     def __init__(self, instname=None, choppername='', freq=0):
+        warnings.warn("The ISISFermi class is deprecated and will be removed in the next Mantid version. "
+                      "Please use the Instrument class or the official PyChop CLI interface.", DeprecationWarning)
         if instname:
             self.setInstrument(instname, choppername, freq)
+            self.diskchopper_phase = self.__DiskChopperMode[instname]
         else:
             self.instname = None
+            self.diskchopper_phase = None
         self.Ei = None
-        # For Merlin, set the disk chopper phase to block neutrons with energy greater than 200meV
-        self.diskchopper_phase = 1500
 
     def setInstrument(self, instname, choppername='', freq=0):
         """
@@ -103,7 +110,7 @@ class ISISFermi:
         if choppername:
             self.setChopper(choppername, freq)
 
-    def setChopper(self, choppername, freq=50, diskchopper_phase=None):
+    def setChopper(self, choppername, freq=50, diskchopper_phase=None, diskchopper_freq=None):
         """
         Resets the chopper type of this chopper object
 
@@ -113,14 +120,13 @@ class ISISFermi:
         Chopper frequency must also be given
         """
         choppername = choppername.upper()
-        self.freq = freq
         if choppername not in self.__chopperParameters[self.instname].keys():
             raise ValueError('Chopper %s of %s not recognised' % (choppername, self.instname))
         self.choppername = choppername
-        self.freq = freq[0] if np.shape(freq) else freq
-        if self.freq % 50 != 0:
+        self.freq = freq if np.shape(freq) else [freq]
+        if self.freq[0] % 50 != 0:
             raise ValueError('Chopper frequency must be a multiple of 50Hz')
-        if self.freq <= 0:
+        if self.freq[0] <= 0:
             raise ValueError('Chopper frequency must be greater than 0Hz')
         if diskchopper_phase is not None:
             self.diskchopper_phase = diskchopper_phase
@@ -187,7 +193,7 @@ class ISISFermi:
         pslit = chop_par[0] / 1000.00
         radius = chop_par[2] / 1000.00
         rho = chop_par[3] / 1000.00
-        return Chop.tchop(self.freq, Ei, pslit, radius, rho)
+        return Chop.tchop(self.freq[0], Ei, pslit, radius, rho)
 
     def getModWidth(self, Ei_in=None):
         """
@@ -246,7 +252,7 @@ class ISISFermi:
             self.setFrequency(frequency)
         tsqmod = self.getModWidth(Ei)
         tsqchp = self.getChopWidth(Ei)
-        omega = self.freq * 2*np.pi
+        omega = self.freq[0] * 2*np.pi
         tsqjit = (self.__chopperParameters[self.instname][self.choppername]['par'][5] * 1.0e-6)**2
         # Sample parameters
         sam_dims = np.array(self.__samplesDimensions[self.instname])
@@ -286,7 +292,7 @@ class ISISFermi:
         x2 = self.__Instruments[self.instname][3]
         tbin = self.__Instruments[self.instname][9]
         res_el = np.real(2.35482 * 8.747832e-4 * np.sqrt(Ei**3) * (np.sqrt(v_van[0] + (tbin**2/12.00)) * 1.0e6) / x2)
-        return {"Moderator":tmod*1.e6, "Chopper":tchp*1.e6, "Energy":res_el}
+        return {"Moderator":tmod*2.35482e6, "Chopper":tchp*2.35482e6, "Energy":res_el}
 
     def __van_calc(self, v_mod, v_ch, v_jit, v_x, v_y, v_xy, v_dd, Ei, eps, phi, omega):
         """
@@ -301,8 +307,8 @@ class ISISFermi:
         tanthm = np.tan(thetam)
         am = -(x1+rat*x2) / x0
         ach = (1.00 + (x1+rat*x2)/x0)
-        g1 = (1.00 - (omega*(x0+x1)*tanthm/veli)) # wrong (in original CHOP!) - should be (xa+x1), not (x0+x1)
-        #g1 = (1.00 - (omega*(xa+x1)*tanthm/veli))
+        #g1 = (1.00 - (omega*(x0+x1)*tanthm/veli)) # wrong (in original CHOP!) - should be (xa+x1), not (x0+x1)
+        g1 = (1.00 - (omega*(xa+x1)*tanthm/veli))
         g2 = (1.00 - (omega*(x0-xa)*tanthm/veli))
         f1 = 1.00 + ((x1/x0)*g1)
         f2 = 1.00 + ((x1/x0)*g2)
@@ -391,7 +397,7 @@ class ISISFermi:
         dslat = (chop_par[0] + chop_par[1]) / 1000.00
         radius = chop_par[2] / 1000.00
         rho = chop_par[3] / 1000.00
-        chopper_transmission = Chop.achop(Ei, self.freq, dslat, pslit, radius, rho)
+        chopper_transmission = Chop.achop(Ei, self.freq[0], dslat, pslit, radius, rho)
         x0 = self.__Instruments[self.instname][0]
         x1 = self.__Instruments[self.instname][2]
         flux = 84403.060 * moderator_flux * (chopper_transmission/dslat) / (x0*(x1+x0))
@@ -438,12 +444,10 @@ class ISISFermi:
             raise ValueError('Incident energy has not be specified')
         # Store the info inside this file, for better portability
         lam, flux_meas = self.flux_store()
-        lam2, flux_ratio = self.ratio_store()
         # Interpolate for wavelength
         f = interp1d(lam, flux_meas, kind='cubic')
-        f2 = interp1d(lam2, flux_ratio, kind='cubic')
         lamb = np.sqrt(81.81/Ei)
-        return f(lamb) * f2(lamb)
+        return f(lamb)
 
     def flux_store(self):
         """
@@ -459,18 +463,46 @@ class ISISFermi:
                7.1500e+00, 7.2500e+00, 7.3500e+00, 7.4500e+00, 7.5500e+00, 7.6500e+00, 7.7500e+00, 7.8500e+00, 7.9500e+00, 8.0500e+00,
                8.1500e+00, 8.2500e+00, 8.3500e+00, 8.4500e+00, 8.5500e+00, 8.6500e+00, 8.7500e+00, 8.8500e+00, 8.9500e+00, 9.0500e+00,
                9.1500e+00, 9.2500e+00, 9.3500e+00, 9.4500e+00, 9.5500e+00, 9.6500e+00, 9.7500e+00, 9.8500e+00, 9.9500e+00, 1.0050e+01]
+        lamb = {'MAPS': [
+                    0.0181, 0.0511, 0.0841, 0.1170, 0.1500, 0.1829, 0.2159, 0.2489, 0.2818, 0.3148, 0.3477, 0.3807, 0.4137, 0.4466, 0.4796,
+                    0.5126, 0.5455, 0.5785, 0.6114, 0.6444, 0.6774, 0.7103, 0.7433, 0.7762, 0.8092, 0.8422, 0.8751, 0.9081, 0.9411, 0.9740,
+                    1.0070, 1.0399, 1.0729, 1.1059, 1.1388, 1.1718, 1.2047, 1.2377, 1.2707, 1.3036, 1.3366, 1.3696, 1.4025, 1.4355, 1.4684,
+                    1.5014, 1.5344, 1.5673, 1.6003, 1.6332, 1.6662, 1.6992, 1.7321, 1.7651, 1.7980, 1.8310, 1.8640, 1.8969, 1.9299, 1.9629,
+                    1.9958, 2.0288, 2.0617, 2.0947, 2.1277, 2.1606, 2.1936, 2.2266, 2.2595, 2.2925, 2.3254, 2.3584, 2.3914, 2.4243, 2.4573,
+                    2.4902, 2.5232, 2.5562, 2.5891, 2.6221, 2.6551, 2.6880, 2.7210, 2.7539, 2.7869, 2.8199, 2.8528, 2.8858, 2.9187, 2.9517,
+                    2.9847, 3.0176, 3.0506, 3.0835, 3.1165, 3.1495, 3.1824, 3.2154, 3.2484, 3.2813, 3.3143, 3.3472, 3.3802, 3.4132, 3.4461,
+                    3.4791, 3.5120, 3.5450, 3.5780, 3.6109, 3.6439, 3.6769, 3.7098, 3.7428, 3.7757, 3.8087, 3.8417, 3.8746, 3.9076, 3.9406,
+                    3.9735, 4.0065, 4.0394, 4.0724, 4.1054, 4.1383, 4.1713, 4.2042, 4.2372, 4.2702, 4.3031, 4.3361, 4.3690, 4.4020, 4.4350,
+                    4.4679, 4.5009, 4.5339, 4.5668, 4.5998, 4.6327, 4.6657, 4.6987, 4.7316, 4.7646, 4.7976, 4.8305, 4.8635, 4.8964, 4.9294,
+                    4.9624, 4.9953, 5.0283, 5.0612, 5.0942, 5.1272, 5.1601, 5.1931, 5.2260, 5.2590, 5.2920, 5.3249, 5.3579, 5.3909, 5.4238,
+                    5.4568, 5.4897, 5.5227, 5.5557, 5.5886, 5.6216, 5.6546, 5.6875, 5.7205, 5.7534, 5.7864, 5.8194, 5.8523, 5.8853, 5.9182,
+                    5.9512, 5.9842, 6.0171, 6.0501, 6.0831, 6.1160, 6.1490, 6.1819, 6.2149, 6.2479, 6.2808, 6.3138, 6.3467, 6.3797, 6.4127,
+                    6.4456, 6.4786, 6.5115, 6.5445, 6.5750], 'MARI': lam, 'MERLIN': lam}
         flux = {
                 'MAPS': [
-                    1.3126e+07, 7.0620e+06, 4.8159e+06, 3.7016e+06, 2.9460e+06, 2.4241e+06, 2.0916e+06, 1.8827e+06, 1.6761e+06, 1.4868e+06,
-                    1.2608e+06, 1.0779e+06, 8.9152e+05, 7.2196e+05, 6.1055e+05, 4.9216e+05, 4.0434e+05, 3.4024e+05, 2.7533e+05, 2.2208e+05,
-                    1.7835e+05, 1.6149e+05, 1.2707e+05, 1.0711e+05, 9.0217e+04, 7.6925e+04, 6.4029e+04, 5.3633e+04, 4.5072e+04, 3.9340e+04,
-                    3.2007e+04, 3.0165e+04, 2.5389e+04, 2.1264e+04, 1.9315e+04, 1.6601e+04, 1.6194e+04, 1.2572e+04, 1.0613e+04, 9.9355e+03,
-                    1.0456e+04, 7.5251e+03, 7.0619e+03, 6.3751e+03, 5.9985e+03, 4.7060e+03, 4.5282e+03, 5.0790e+03, 3.6687e+03, 3.6782e+03,
-                    3.0595e+03, 2.7738e+03, 2.6797e+03, 2.4257e+03, 2.1413e+03, 2.1817e+03, 1.7885e+03, 1.5805e+03, 1.2115e+03, 1.7348e+03,
-                    1.5359e+03, 1.1505e+03, 8.1566e+02, 5.4398e+02, 5.6118e+02, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
-                    0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
-                    0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
-                    0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00],
+                    2.60775e+08, 8.08616e+07, 4.59455e+07, 3.16183e+07, 2.37830e+07, 1.91458e+07, 1.58204e+07, 1.36088e+07, 1.19225e+07,
+                    1.06105e+07, 9.55533e+06, 8.77411e+06, 8.21901e+06, 7.67656e+06, 7.15055e+06, 6.70757e+06, 6.39276e+06, 6.22826e+06,
+                    6.19798e+06, 6.27731e+06, 6.47994e+06, 6.91604e+06, 7.50573e+06, 8.09035e+06, 8.76875e+06, 9.49975e+06, 1.01658e+07,
+                    1.07548e+07, 1.13597e+07, 1.19941e+07, 1.25374e+07, 1.28821e+07, 1.31248e+07, 1.32727e+07, 1.32305e+07, 1.30834e+07,
+                    1.27595e+07, 1.24351e+07, 1.20115e+07, 1.15789e+07, 1.11218e+07, 1.07191e+07, 1.03272e+07, 9.93856e+06, 9.59376e+06,
+                    9.19836e+06, 8.81571e+06, 8.50457e+06, 8.29274e+06, 8.05058e+06, 7.88437e+06, 7.63907e+06, 7.32047e+06, 6.99681e+06,
+                    6.68968e+06, 6.45270e+06, 6.24161e+06, 6.01323e+06, 5.74713e+06, 5.48816e+06, 5.27153e+06, 5.01780e+06, 4.76127e+06,
+                    4.48172e+06, 4.21345e+06, 3.97093e+06, 3.74819e+06, 3.53683e+06, 3.32935e+06, 3.12404e+06, 2.92801e+06, 2.74479e+06,
+                    2.61634e+06, 2.48606e+06, 2.38826e+06, 2.29410e+06, 2.17636e+06, 2.07461e+06, 1.97063e+06, 1.87220e+06, 1.77780e+06,
+                    1.70202e+06, 1.62584e+06, 1.55763e+06, 1.48989e+06, 1.42924e+06, 1.37959e+06, 1.34056e+06, 1.31926e+06, 1.28573e+06,
+                    1.25559e+06, 1.22426e+06, 1.18988e+06, 1.15714e+06, 1.13032e+06, 1.09423e+06, 1.06161e+06, 1.02650e+06, 9.95519e+05,
+                    9.56437e+05, 9.24815e+05, 8.90446e+05, 8.56656e+05, 8.28196e+05, 8.01094e+05, 7.79358e+05, 7.56306e+05, 7.35949e+05,
+                    7.24375e+05, 7.02174e+05, 6.86458e+05, 6.65894e+05, 6.43176e+05, 6.24539e+05, 6.01304e+05, 5.82505e+05, 5.61653e+05,
+                    5.41996e+05, 5.25903e+05, 5.10613e+05, 4.96677e+05, 4.82118e+05, 4.64661e+05, 4.65809e+05, 4.68617e+05, 4.56137e+05,
+                    4.42141e+05, 4.27460e+05, 4.10041e+05, 3.98628e+05, 3.84161e+05, 3.71166e+05, 3.57501e+05, 3.45980e+05, 3.35925e+05,
+                    3.23733e+05, 3.13815e+05, 3.03413e+05, 2.91757e+05, 2.82348e+05, 2.72917e+05, 2.57271e+05, 2.41863e+05, 2.58619e+05,
+                    2.53316e+05, 2.43464e+05, 2.35779e+05, 2.29787e+05, 2.22481e+05, 2.14144e+05, 2.08181e+05, 2.01866e+05, 1.95864e+05,
+                    1.89808e+05, 1.84740e+05, 1.78016e+05, 1.73397e+05, 1.68777e+05, 1.65549e+05, 1.61071e+05, 1.56594e+05, 1.52364e+05,
+                    1.49546e+05, 1.46162e+05, 1.43155e+05, 1.40167e+05, 1.37583e+05, 1.35294e+05, 1.32192e+05, 1.30639e+05, 1.27633e+05,
+                    1.25179e+05, 1.23187e+05, 1.21203e+05, 1.18074e+05, 1.15095e+05, 1.12187e+05, 1.10561e+05, 1.08411e+05, 1.05109e+05,
+                    1.03695e+05, 1.01165e+05, 9.87797e+04, 9.77841e+04, 9.40768e+04, 9.27353e+04, 9.14937e+04, 8.88289e+04, 8.74353e+04,
+                    8.53251e+04, 8.30339e+04, 8.22249e+04, 7.94099e+04, 7.79037e+04, 7.62865e+04, 7.47047e+04, 7.38535e+04, 7.17228e+04,
+                    6.98927e+04, 6.89509e+04],
                 'MARI': [
                     4.2938e+06, 5.7061e+06, 5.7984e+06, 4.9964e+06, 3.8796e+06, 3.1474e+06, 2.4375e+06, 1.9361e+06, 1.6104e+06, 1.4590e+06,
                     1.3767e+06, 1.3706e+06, 1.4005e+06, 1.4263e+06, 1.4117e+06, 1.3879e+06, 1.3323e+06, 1.2699e+06, 1.1757e+06, 1.0680e+06,
@@ -493,23 +525,4 @@ class ISISFermi:
                     0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
                     0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
                     0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00]}
-        return lam, flux[self.instname]
-
-    def ratio_store(self):
-        """
-        # MAPS ratio of new to old moderator, vs lam
-        """
-        lam = [0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95, 1.05, 1.15, 1.25, 1.35, 1.45, 1.55, 1.65, 1.75, 1.85, 1.95, 2.05,
-               2.15, 2.25, 2.35, 2.45, 2.55, 2.65, 2.75, 2.85, 2.95, 3.05, 3.15, 3.25, 3.35, 3.45, 3.55, 3.65, 3.75, 3.85, 3.95, 4.05,
-               4.15, 4.25, 4.35, 4.45, 4.55, 4.65, 4.75, 4.85, 4.95, 5.05, 5.15, 5.25, 5.35, 5.45, 5.55, 5.65, 5.75, 5.85, 5.95, 6.05,
-               6.15, 6.25, 6.35, 6.45, 6.55, 6.65, 6.75, 6.85, 6.95, 7.05, 7.15, 7.25, 7.35, 7.45, 7.55, 7.65, 7.75, 7.85, 7.95, 8.05,
-               8.15, 8.25, 8.35, 8.45, 8.55, 8.65, 8.75, 8.85, 8.95, 9.05, 9.15, 9.25, 9.35, 9.45, 9.55, 9.65, 9.75, 9.85, 9.95, 10.05]
-        ratio = {
-                 'MAPS': [
-                     1.09663, 1.07008, 1.06454, 1.07062, 1.08643, 1.16281, 1.34933, 1.60173, 1.84299, 2.03898, 2.17993, 2.27548, 2.32941,
-                     2.35438, 2.36169, 2.35719, 2.35547, 2.34349, 2.33169, 2.31719, 2.29951, 2.28057, 2.2612, 2.25523, 2.24417, 2.23278,
-                     2.21209, 2.22366, 2.19358, 2.18074, 2.17647, 2.17466, 2.16502, 2.1628, 2.15498, 2.15528, 2.15125, 2.15106, 2.13141,
-                     2.13286, 2.11955, 2.11, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                 'MARI': list(np.array(lam)*0+1), 'MERLIN': list(np.array(lam)*0+1)}
-        return lam, ratio[self.instname]
+        return lamb[self.instname], flux[self.instname]

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -12,25 +12,75 @@ Description
 Converts a 2D workspace from :ref:`units <Unit Factory>` 
 of spectrum number/**energy transfer** 
 to the intensity as a function of **momentum transfer** :math:`Q` 
-and **energy transfer** :math:`\Delta E`. The rebinning is done as a 
-weighted sum of overlapping polygons with
-fractional area tracking. The result is stored in a new workspace type:
-**RebinnedOutput**. The new workspace presents the data as the
-fractional counts divided by the fractional area. The biggest
-consequence of this method is that in places where there are no counts
-and no acceptance (no fractional areas), **nan**\ -s will result.
+and **energy transfer** :math:`\Delta E`. 
+
+.. figure:: /images/RebinnedOutputStep1.png
+   :align: center
+
+As shown in the figure, the input grid (pink-shaded parallelopiped,
+aligned in scattering angle and energy transfer) is not parallel to the
+output grid (square grid, aligned in :math:`Q` and energy). This means
+that the output bins will only ever partially overlap the input data. To
+account for this, the signal :math:`Y` and errors :math:`E` in the new
+bins are calculated as:
+
+.. math:: Y^{\mathrm{new}} = \sum_i Y^{\mathrm{old}}_i F_i
+.. math:: E^{\mathrm{new}} = \sqrt{\sum_i (E^{\mathrm{old}}_i)^2 F_i}
+
+In addition to weighting the signal and error values, the total
+fractional weights:
+
+.. math:: F^{\mathrm{new}} = \sum_i F_i
+
+are also stored in the output of this algorithm which is a new workspace
+type: **RebinnedOutput**. To see why this is needed, consider rebinning
+the output on a larger grid:
+
+.. figure:: /images/RebinnedOutputStep2.png
+   :align: center
+
+If the fractional weights are not chained as shown, then the area
+shaded in a lighter blue under :math:`A_1` (where originally there was
+no data) would be included in the weights, which would be an
+overestimate of the actual weights, leading to an overestimate of the
+signal and error.
+
+Finally, if there is a bin in the output grid which only has a very
+small overlap with the input grid (for example at the edges of the
+detector coverage), the fractional weight :math:`F` of this bin, and
+hence its signal :math:`Y` and error :math:`E` would be very small
+compared to its neighbours. Thus, for display purposes, the actual
+signal and errors stored in a RebinnedOutput are renomalised by the
+weights:
+
+.. math:: Y^{\mathrm{display}} = Y^{\mathrm{new}} / F^{\mathrm{new}}
+.. math:: E^{\mathrm{display}} = E^{\mathrm{new}} / F^{\mathrm{new}}
+
+at the end of the algorithm. The biggest consequence of this method is
+that in places where there are no counts (:math:`Y=0`) and no acceptance
+(no fractional areas, :math:`F=0`), :math:`Y/F=`\ **nan**\ -s will
+result.
 
 The algorithm operates in non-PSD mode by default. This means that all
 azimuthal angles and widths are forced to zero. PSD mode will determine
 the azimuthal angles and widths from the instrument geometry. This mode
-is activated by placing the following named parameter in a Parameter
+is activated by placing the following named parameter in the instrument definition 
 file: *detector-neighbour-offset*. The integer value of this parameter
 should be the number of pixels that separates two pixels at the same
-vertical position in adjacent tubes.
+vertical position in adjacent tubes. Note that in both non-PSD and PSD
+modes, the scattering angle widths are determined from the detector
+geometry and may vary from detector to detector as defined by the
+instrument definition files.
 
-
-See  :ref:`algm-SofQWCentre` for centre-point binning  or :ref:`algm-SofQWPolygon`
-for simpler and less precise but faster binning strategies.
+See :ref:`algm-SofQWCentre` for centre-point binning or :ref:`algm-SofQWPolygon`
+for simpler and less precise but faster binning strategies. The speed-up
+is from ignoring the azimuthal positions of the detectors (as for the non-PSD
+mode in this algorithm) but in addition, :ref:`algm-SofQWPolygon` treats 
+all detectors as being the same, and characterised by a single width in
+scattering angle. Thereafter, it weights the signal and error by the fractional
+overlap, similarly to that shown in the first figure above, but then discards
+the summed weights, producing a **Workspace2D** rather than a
+**RebinnedOutput** workspace.
 
 Usage
 -----

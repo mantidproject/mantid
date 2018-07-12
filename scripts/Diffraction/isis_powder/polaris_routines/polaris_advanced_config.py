@@ -23,11 +23,11 @@ script_params = {
 }
 
 pdf_focused_cropping_values = [
-    (1500, 19900),  # Bank 1
-    (1500, 19900),  # Bank 2
-    (1500, 19900),  # Bank 3
-    (1500, 19900),  # Bank 4
-    (1500, 19900),  # Bank 5
+    (700,  30000),  # Bank 1
+    (1200, 24900),  # Bank 2
+    (1100, 19950),  # Bank 3
+    (1100, 19950),  # Bank 4
+    (1100, 19950),  # Bank 5
     ]
 
 rietveld_focused_cropping_values = [

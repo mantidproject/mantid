@@ -47,6 +47,14 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DataProcessorPresenter {
 public:
+  class DeleteAllRowsCancelledException : public std::exception {
+  public:
+    const char *what() const noexcept override { return m_msg.c_str(); }
+
+  private:
+    std::string m_msg{"User cancelled operation to delete all existing rows"};
+  };
+
   virtual ~DataProcessorPresenter(){};
 
   enum Flag {
@@ -56,7 +64,9 @@ public:
     AppendGroupFlag,
     DeleteRowFlag,
     DeleteGroupFlag,
+    DeleteAllFlag,
     ProcessFlag,
+    ProcessAllFlag,
     GroupRowsFlag,
     OpenTableFlag,
     NewTableFlag,
@@ -79,6 +89,7 @@ public:
 
   // Tell the presenter something happened
   virtual void notify(DataProcessorPresenter::Flag flag) = 0;
+  virtual void settingsChanged() = 0;
   virtual const std::map<QString, QVariant> &options() const = 0;
   virtual void setOptions(const std::map<QString, QVariant> &options) = 0;
   virtual void
@@ -106,6 +117,8 @@ public:
   virtual void clearTable() = 0;
 
   virtual void skipProcessing() = 0;
+  virtual void setPromptUser(bool allowPrompt) = 0;
+  virtual void confirmReductionPaused() {}
 };
 }
 }

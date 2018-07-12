@@ -39,6 +39,9 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         return 'Performs fixed-window scan (FWS) multiple file reduction (both elastic and inelastic) ' \
                'for ILL indirect geometry data, instrument IN16B.'
 
+    def seeAlso(self):
+        return [ "IndirectILLReductionQENS","IndirectILLEnergyTransfer" ]
+
     def name(self):
         return "IndirectILLReductionFWS"
 

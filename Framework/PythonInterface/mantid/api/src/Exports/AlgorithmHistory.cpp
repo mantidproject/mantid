@@ -14,8 +14,6 @@
 using Mantid::API::AlgorithmHistory;
 using namespace boost::python;
 
-namespace Policies = Mantid::PythonInterface::Policies;
-
 /**
  * Return a Python list of child history objects from the history as this is
  * far easier to work with than a set

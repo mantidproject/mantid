@@ -44,6 +44,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class QtReflMainWindowView : public MantidQt::API::UserSubWindow,
                              public IReflMainWindowView {
+  Q_OBJECT
 public:
   /// Constructor
   explicit QtReflMainWindowView(QWidget *parent = nullptr);
@@ -66,6 +67,9 @@ public:
   /// Close window handler
   void closeEvent(QCloseEvent *event) override;
 
+public slots:
+  void helpPressed();
+
 private:
   /// Initializes the interface
   void initLayout() override;
@@ -76,7 +80,7 @@ private:
   /// Creates the 'Settings' tab
   IReflSettingsTabPresenter *createSettingsTab();
   /// Creates the 'Save ASCII' tab
-  IReflSaveTabPresenter *createSaveTab();
+  std::unique_ptr<IReflSaveTabPresenter> createSaveTab();
 
   /// Interface definition with widgets for the main interface window
   Ui::RelMainWindowWidget m_ui;

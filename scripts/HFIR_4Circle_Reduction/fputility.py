@@ -2,7 +2,6 @@
 # Utility methods for Fullprof
 from __future__ import (absolute_import, division, print_function)
 import os
-import sys
 import math
 
 
@@ -70,8 +69,7 @@ def load_scd_fullprof_intensity_file(file_name):
 
         if line_index == 0:
             # line 1 as header
-            header = line
-            print('[INFO] Header:', header)
+            pass
         elif line.startswith('('):
             # line 2 format line, skip
             continue
@@ -136,7 +134,7 @@ def convert_to_peak_dict_list(refection_dict):
 
 
 def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dict_list, fp_file_name,
-                               with_absorption):
+                               with_absorption, high_precision):
     """
     Purpose: Export integrated peaks to single crystal diffraction Fullprof file
     Requirements:
@@ -149,6 +147,7 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
     :param peak_dict_list: a list of peak parameters stored in dictionaries.
     :param fp_file_name:
     :param with_absorption:
+    :param high_precision:
     :return:
     """
     # check input validity
@@ -156,12 +155,13 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
     assert isinstance(wave_length, float), 'Neutron wave length must be a float.'
     assert isinstance(k_vector_dict, dict), 'K-vector list must be a dictionary.'
     assert isinstance(peak_dict_list, list), 'Peak-dictionary list must be a list.'
+    assert isinstance(high_precision, bool), 'blabla'
 
     # determine whether the output is for magnetic peaks or nuclear peaks
     # assuming that either all peaks are magnetic or all peaks are nuclear
     num_k_vectors = len(k_vector_dict)
     peak_0_dict = peak_dict_list[0]
-    assert isinstance(peak_0_dict, dict) and 'kindex' in peak_0_dict
+    assert isinstance(peak_0_dict, dict) and 'kindex' in peak_0_dict, 'blabla'
     peak0_is_magnetic = peak_0_dict['kindex'] > 0 and num_k_vectors > 0
 
     # set up fullprof .ini file buffer
@@ -177,8 +177,14 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
 
     if with_absorption:
         file_format = '(%s,2f8.2,i4,6f8.5)' % first_3_terms_foramt
+    elif high_precision:
+        # precisions: (3i4,2f18.5,i4)
+        file_format = '({0},2f18.5,i4)'.format(first_3_terms_foramt)
     else:
+        # precisions: (3i4,2f8.2,i4)
         file_format = '(%s,2f8.2,i4)' % first_3_terms_foramt
+    # END-IF
+
     # wave length
     lambda_line = '%.4f  0  0' % wave_length
 
@@ -196,6 +202,13 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
 
         fp_buffer += kline + '\n'
     # END-IF
+
+    # again in body,
+    if high_precision:
+        # '%18.5f%18.5f%4d'
+        part3_format = '{0:18.5f}{1:18.5f}{2:4d}'
+    else:
+        part3_format = '%8.2f%8.2f%4d'
 
     # peak intensities
     for i_peak, peak_dict in enumerate(peak_dict_list):
@@ -232,7 +245,10 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
 
         # peak intensity and sigma
         try:
-            part3 = '%8.2f%8.2f%4d' % (peak_dict['intensity'], peak_dict['sigma'], 1)
+            if high_precision:
+                part3 = part3_format.format(peak_dict['intensity'], peak_dict['sigma'], 1)
+            else:
+                part3 = '%8.2f%8.2f%4d' % (peak_dict['intensity'], peak_dict['sigma'], 1)
         except TypeError as type_err:
             raise RuntimeError('In writing Fullprof file, unable to convert intensity {0} and/or sigma {1} to '
                                'floats. FYI: {2}'.format(peak_dict['intensity'], peak_dict['sigma'], type_err))
@@ -270,39 +286,3 @@ def nearest_int(number):
         answer = int(number - 0.5)
 
     return answer
-
-
-def main(argv):
-    """
-    main to calculate difference
-    :param argv:
-    :return:
-    """
-    # get input
-    if len(argv) < 4:
-        print('Calculate the difference of two measurements:\n')
-        print('> %s [intensity file 1]  [intensity file 2]  [output intensity file]' % argv[0])
-        return
-    else:
-        int_file_1 = argv[1]
-        int_file_2 = argv[2]
-        out_file_name = argv[3]
-
-    intensity_dict1, wave_length1, error_message1 = load_scd_fullprof_intensity_file(int_file_1)
-    intensity_dict2, wave_length2, error_message2 = load_scd_fullprof_intensity_file(int_file_2)
-
-    if len(error_message1) == 0:
-        print('[Error] %s: %s' % (int_file_1, error_message1))
-    if len(error_message2) == 0:
-        print('[Error] %s: %s' % (int_file_2, error_message2))
-
-    diff_dict = calculate_intensity_difference(intensity_dict1, intensity_dict2)
-    diff_peak_list = convert_to_peak_dict_list(diff_dict)
-    write_scd_fullprof_kvector('difference', wave_length=wave_length1, k_vector_dict=dict(), peak_dict_list=diff_peak_list,
-                               fp_file_name=out_file_name, with_absorption=False)
-
-    return
-
-
-if __name__ == '__main__':
-    main(sys.argv)

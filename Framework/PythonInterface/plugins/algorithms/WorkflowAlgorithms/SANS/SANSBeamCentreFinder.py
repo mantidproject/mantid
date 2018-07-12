@@ -14,6 +14,15 @@ from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.file_information import get_instrument_paths_for_sans_file
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.algorithm_detail.single_execution import perform_can_subtraction
+from mantid import AnalysisDataService
+from mantid.simpleapi import CloneWorkspace, GroupWorkspaces
+
+try:
+    import mantidplot
+except (Exception, Warning):
+    mantidplot = None
+# this should happen when this is called from outside Mantidplot and only then,
+# the result is that attempting to plot will raise an exception
 
 
 class SANSBeamCentreFinder(DataProcessorAlgorithm):
@@ -85,6 +94,9 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         self.declareProperty('Direction', FindDirectionEnum.to_string(FindDirectionEnum.All), direction=Direction.Input,
                              doc="The search direction is an enumerable which can be either All, LeftRight or UpDown")
 
+        self.declareProperty('Verbose', False, direction=Direction.Input,
+                             doc="Whether to keep workspaces from each iteration in ADS.")
+
         # ----------
         # Output
         # ----------
@@ -103,7 +115,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         progress = self._get_progress()
         self.scale_1 = 1000
         self.scale_2 = 1000
-
+        verbose = self.getProperty('Verbose').value
         x_start = self.getProperty("Position1Start").value
         y_start = self.getProperty("Position2Start").value
 
@@ -130,10 +142,10 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
         instrument_file = get_instrument_paths_for_sans_file(state.data.sample_scatter)
         position_1_step = get_named_elements_from_ipf_file(
-            instrument_file[1], "centre-finder-step-size", float)['centre-finder-step-size']
+            instrument_file[1], ["centre-finder-step-size"], float)['centre-finder-step-size']
         try:
             position_2_step = get_named_elements_from_ipf_file(
-                instrument_file[1], "centre-finder-step-size2", float)['centre-finder-step-size2']
+                instrument_file[1], ["centre-finder-step-size2"], float)['centre-finder-step-size2']
         except:
             position_2_step = position_1_step
 
@@ -144,8 +156,10 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             position_1_step = 0.0
         centre1 = x_start
         centre2 = y_start
-        resLR_old = 0.0
-        resTB_old = 0.0
+        residueLR = []
+        residueTB = []
+        centre_1_hold = x_start
+        centre_2_hold = y_start
         for j in range(0, max_iterations + 1):
             if(j != 0):
                 centre1 += position_1_step
@@ -163,38 +177,71 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 for key in sample_quartiles:
                     sample_quartiles[key] = perform_can_subtraction(sample_quartiles[key], can_quartiles[key], self)
 
-            residueLR = self._calculate_residuals(sample_quartiles[MaskingQuadrant.Left],
-                                                  sample_quartiles[MaskingQuadrant.Right])
-            residueTB = self._calculate_residuals(sample_quartiles[MaskingQuadrant.Top],
-                                                  sample_quartiles[MaskingQuadrant.Bottom])
+            if mantidplot:
+                output_workspaces = self._publish_to_ADS(sample_quartiles)
+                if verbose:
+                    self._rename_and_group_workspaces(j, output_workspaces)
+
+            residueLR.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.Left],
+                                                       sample_quartiles[MaskingQuadrant.Right]))
+            residueTB.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.Top],
+                                                       sample_quartiles[MaskingQuadrant.Bottom]))
             if(j == 0):
                 logger.notice("Itr " + str(j) + ": (" + str(self.scale_1 * centre1) + ", " + str(self.scale_2 * centre2) + ")  SX="
-                              + str(residueLR) + "  SY=" + str(residueTB))
+                              + str(residueLR[j]) + "  SY=" + str(residueTB[j]))
+                if mantidplot:
+                    self._plot_quartiles(output_workspaces, state.data.sample_scatter)
+
             else:
                 # have we stepped across the y-axis that goes through the beam center?
-                if residueLR > resLR_old:
+                if residueLR[j] > residueLR[j-1]:
                     # yes with stepped across the middle, reverse direction and half the step size
                     position_1_step = - position_1_step / 2
-                if residueTB > resTB_old:
+                if residueTB[j] > residueTB[j-1]:
                     position_2_step = - position_2_step / 2
 
                 logger.notice("Itr " + str(j) + ": (" + str(self.scale_1 * centre1) + ", " + str(self.scale_2 * centre2) + ")  SX="
-                              + str(residueLR) + "  SY=" + str(residueTB))
+                              + str(residueLR[j]) + "  SY=" + str(residueTB[j]))
+
+                if (residueLR[j]+residueTB[j]) < (residueLR[j-1]+residueTB[j-1]) or state.compatibility.use_compatibility_mode:
+                    centre_1_hold = centre1
+                    centre_2_hold = centre2
 
                 if abs(position_1_step) < tolerance and abs(position_2_step) < tolerance:
                     # this is the success criteria, we've close enough to the center
                     logger.notice("Converged - check if stuck in local minimum! ")
                     break
+
             if j == max_iterations:
                 logger.notice("Out of iterations, new coordinates may not be the best")
 
-            resLR_old = residueLR
-            resTB_old = residueTB
+        self.setProperty("Centre1", centre_1_hold)
+        self.setProperty("Centre2", centre_2_hold)
 
-        self.setProperty("Centre1", centre1)
-        self.setProperty("Centre2", centre2)
+        logger.notice("Centre coordinates updated: [{}, {}]".format(centre_1_hold*self.scale_1, centre_2_hold*self.scale_2))
 
-        logger.notice("Centre coordinates updated: [{}, {}]".format(centre1*self.scale_1, centre2*self.scale_2))
+    def _rename_and_group_workspaces(self, index, output_workspaces):
+        to_group = []
+        for workspace in output_workspaces:
+            CloneWorkspace(InputWorkspace=workspace, OutputWorkspace='{}_{}'.format(workspace, index))
+            to_group.append('{}_{}'.format(workspace, index))
+        GroupWorkspaces(InputWorkspaces=to_group,OutputWorkspace='Iteration_{}'.format(index))
+
+    def _publish_to_ADS(self, sample_quartiles):
+        output_workspaces = []
+        for key in sample_quartiles:
+            output_workspaces.append(MaskingQuadrant.to_string(key))
+            AnalysisDataService.addOrReplace(MaskingQuadrant.to_string(key), sample_quartiles[key])
+
+        return output_workspaces
+
+    def _plot_quartiles(self, output_workspaces, sample_scatter):
+        title = '{}_beam_centre_finder'.format(sample_scatter)
+        graph_handle = mantidplot.plotSpectrum(output_workspaces, 0)
+        graph_handle.activeLayer().logLogAxes()
+        graph_handle.activeLayer().setTitle(title)
+        graph_handle.setName(title)
+        return graph_handle
 
     def _get_cloned_workspace(self, workspace_name):
         workspace = self.getProperty(workspace_name).value

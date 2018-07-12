@@ -27,8 +27,10 @@ import sys
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
+SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
-STDERR = sys.stderr
+ORIGINAL_STDOUT = sys.stdout
+ORIGINAL_STDERR = sys.stderr
 
 # -----------------------------------------------------------------------------
 # Requirements
@@ -40,17 +42,14 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QByteArray, QCoreApplication, QEventLoop,
-                         QPoint, QSize, Qt)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QTimer, QCoreApplication)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
-from qtpy.QtWidgets import (QApplication, QDockWidget, QMainWindow,
-                            QSplashScreen)  # noqa
+from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
+                            QMainWindow, QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
-if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-    QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
 
 
 # -----------------------------------------------------------------------------
@@ -58,7 +57,6 @@ if hasattr(Qt, 'AA_EnableHighDpiScaling'):
 # titles and hold on to a reference to it. Required to be performed early so
 # that the splash screen can be displayed
 # -----------------------------------------------------------------------------
-
 def qapplication():
     """Either return a reference to an existing application instance
     or create a new one
@@ -66,6 +64,7 @@ def qapplication():
     """
     app = QApplication.instance()
     if app is None:
+        QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
         app = QApplication(['Mantid Workbench'])
     return app
 
@@ -93,6 +92,7 @@ QApplication.processEvents(QEventLoop.AllEvents)
 # -----------------------------------------------------------------------------
 from mantidqt.py3compat import qbytearray_to_str  # noqa
 from mantidqt.utils.qt import add_actions, create_action  # noqa
+from mantidqt.widgets.manageuserdirectories import ManageUserDirectories  # noqa
 from workbench.config.main import CONF  # noqa
 from workbench.external.mantid import prepare_mantid_env  # noqa
 
@@ -103,13 +103,15 @@ from workbench.external.mantid import prepare_mantid_env  # noqa
 
 class MainWindow(QMainWindow):
 
-    DOCKOPTIONS = QMainWindow.AllowTabbedDocks|QMainWindow.AllowNestedDocks
+    DOCKOPTIONS = QMainWindow.AllowTabbedDocks | QMainWindow.AllowNestedDocks
 
     def __init__(self):
         QMainWindow.__init__(self)
 
         qapp = QApplication.instance()
         qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
+        if hasattr(Qt, 'AA_EnableHighDpiScaling'):
+            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, True)
 
         self.setWindowTitle("Mantid Workbench")
 
@@ -120,10 +122,21 @@ class MainWindow(QMainWindow):
         # widgets
         self.messagedisplay = None
         self.ipythonconsole = None
+        self.workspacewidget = None
+        self.editor = None
+        self.algorithm_selector = None
+        self.plot_selector = None
+        self.widgets = []
+
+        # Widget layout map: required for use in Qt.connection
+        self._layout_widget_info = None
 
         # Menus
         self.file_menu = None
         self.file_menu_actions = None
+        self.editor_menu = None
+        self.view_menu = None
+        self.view_menu_actions = None
 
         # Allow splash screen text to be overridden in set_splash
         self.splash = SPLASH
@@ -132,22 +145,51 @@ class MainWindow(QMainWindow):
         self.setDockOptions(self.DOCKOPTIONS)
 
     def setup(self):
+        # menus must be done first so they can be filled by the
+        # plugins in register_plugin
         self.create_menus()
-        self.create_actions()
-        self.populate_menus()
 
         # widgets
+        # Log message display must be imported first
         self.set_splash("Loading message display")
         from workbench.plugins.logmessagedisplay import LogMessageDisplay
         self.messagedisplay = LogMessageDisplay(self)
+        # this takes over stdout/stderr
         self.messagedisplay.register_plugin()
+        self.widgets.append(self.messagedisplay)
+
+        self.set_splash("Loading Algorithm Selector")
+        from workbench.plugins.algorithmselectorwidget import AlgorithmSelector
+        self.algorithm_selector = AlgorithmSelector(self)
+        self.algorithm_selector.register_plugin()
+        self.widgets.append(self.algorithm_selector)
+
+        self.set_splash("Loading Plot Selector")
+        from workbench.plugins.plotselectorwidget import PlotSelector
+        self.plot_selector = PlotSelector(self)
+        self.plot_selector.register_plugin()
+        self.widgets.append(self.plot_selector)
+
+        self.set_splash("Loading code editing widget")
+        from workbench.plugins.editor import MultiFileEditor
+        self.editor = MultiFileEditor(self)
+        self.editor.register_plugin()
+        self.widgets.append(self.editor)
 
         self.set_splash("Loading IPython console")
         from workbench.plugins.jupyterconsole import JupyterConsole
         self.ipythonconsole = JupyterConsole(self)
         self.ipythonconsole.register_plugin()
+        self.widgets.append(self.ipythonconsole)
+
+        from workbench.plugins.workspacewidget import WorkspaceWidget
+        self.workspacewidget = WorkspaceWidget(self)
+        self.workspacewidget.register_plugin()
+        self.widgets.append(self.workspacewidget)
 
         self.setup_layout()
+        self.create_actions()
+        self.populate_menus()
 
     def set_splash(self, msg=None):
         if not self.splash:
@@ -159,127 +201,106 @@ class MainWindow(QMainWindow):
 
     def create_menus(self):
         self.file_menu = self.menuBar().addMenu("&File")
+        self.editor_menu = self.menuBar().addMenu("&Editor")
+        self.view_menu = self.menuBar().addMenu("&View")
 
     def create_actions(self):
+        # --- general application menu options --
+        # file menu
+        action_open = create_action(self, "Open",
+                                    on_triggered=self.open_file,
+                                    shortcut="Ctrl+O",
+                                    shortcut_context=Qt.ApplicationShortcut,
+                                    icon_name="fa.folder-open")
+        action_save = create_action(self, "Save",
+                                    on_triggered=self.save_file,
+                                    shortcut="Ctrl+S",
+                                    shortcut_context=Qt.ApplicationShortcut,
+                                    icon_name="fa.save")
+        action_manage_directories = create_action(self, "Manage User Directories",
+                                                  on_triggered=self.open_manage_directories,
+                                                  icon_name="fa.folder")
+
         action_quit = create_action(self, "&Quit", on_triggered=self.close,
                                     shortcut="Ctrl+Q",
-                                    shortcut_context=Qt.ApplicationShortcut)
-        self.file_menu_actions = [action_quit]
+                                    shortcut_context=Qt.ApplicationShortcut,
+                                    icon_name="fa.power-off")
+        self.file_menu_actions = [action_open, action_save, action_manage_directories, None, action_quit]
+
+        # view menu
+        action_restore_default = create_action(self, "Restore Default Layout",
+                                               on_triggered=self.prep_window_for_reset,
+                                               shortcut="Shift+F10",
+                                               shortcut_context=Qt.ApplicationShortcut)
+        self.view_menu_actions = [action_restore_default, None] + self.create_widget_actions()
+
+    def create_widget_actions(self):
+        """
+        Creates menu actions to show/hide dockable widgets.
+        This uses all widgets that are in self.widgets
+        :return: A list of show/hide actions for all widgets
+        """
+        widget_actions = []
+        for widget in self.widgets:
+            action = widget.dockwidget.toggleViewAction()
+            widget_actions.append(action)
+        return widget_actions
 
     def populate_menus(self):
         # Link to menus
         add_actions(self.file_menu, self.file_menu_actions)
+        add_actions(self.view_menu, self.view_menu_actions)
 
     def add_dockwidget(self, plugin):
         """Create a dockwidget around a plugin and add the dock to window"""
         dockwidget, location = plugin.create_dockwidget()
         self.addDockWidget(location, dockwidget)
 
-    def setup_layout(self):
-        window_settings = self.load_window_settings('window/')
-        hexstate = window_settings[0]
-        if hexstate is None:
-            self.setup_for_first_run(window_settings)
-        else:
-            self.set_window_settings(*window_settings)
+    # ----------------------- Layout ---------------------------------
 
-    def setup_for_first_run(self, window_settings):
+    def setup_layout(self):
+        self.setup_for_first_run()
+
+    def setup_for_first_run(self):
         """Assume this is a first run of the application and set layouts
         accordingly"""
         self.setWindowState(Qt.WindowMaximized)
-        self.setup_default_layouts(window_settings)
+        desktop = QDesktopWidget()
+        self.window_size = desktop.screenGeometry().size()
+        self.setup_default_layouts()
 
-    def load_window_settings(self, prefix, section='main'):
-        """Load window layout settings from userconfig-based configuration
-        with *prefix*, under *section*
-        default: if True, do not restore inner layout"""
-        get_func = CONF.get
-        window_size = get_func(section, prefix + 'size')
-        try:
-            hexstate = get_func(section, prefix + 'state')
-        except KeyError:
-            hexstate = None
-        pos = get_func(section, prefix + 'position')
+    def prep_window_for_reset(self):
+        """Function to reset all dock widgets to a state where they can be
+        ordered by setup_default_layout"""
+        for widget in self.widgets:
+            widget.dockwidget.setFloating(False)  # Bring back any floating windows
+            self.addDockWidget(Qt.LeftDockWidgetArea, widget.dockwidget)  # Un-tabify all widgets
+        self.setup_default_layouts()
 
-        # It's necessary to verify if the window/position value is valid
-        # with the current screen.
-        width = pos[0]
-        height = pos[1]
-        screen_shape = QApplication.desktop().geometry()
-        current_width = screen_shape.width()
-        current_height = screen_shape.height()
-        if current_width < width or current_height < height:
-            pos = CONF.get_default(section, prefix + 'position')
-
-        is_maximized = get_func(section, prefix + 'is_maximized')
-        is_fullscreen = get_func(section, prefix + 'is_fullscreen')
-        return hexstate, window_size, pos, is_maximized, \
-            is_fullscreen
-
-    def get_window_settings(self):
-        """Return current window settings
-        Symetric to the 'set_window_settings' setter"""
-        window_size = (self.window_size.width(), self.window_size.height())
-        is_fullscreen = self.isFullScreen()
-        if is_fullscreen:
-            is_maximized = self.maximized_flag
-        else:
-            is_maximized = self.isMaximized()
-        pos = (self.window_position.x(), self.window_position.y())
-        hexstate = qbytearray_to_str(self.saveState())
-        return (hexstate, window_size, pos, is_maximized,
-                is_fullscreen)
-
-    def set_window_settings(self, hexstate, window_size, pos,
-                            is_maximized, is_fullscreen):
-        """Set window settings
-        Symetric to the 'get_window_settings' accessor"""
-        with widget_updates_disabled(self):
-            self.window_size = QSize(window_size[0], window_size[1])  # width,height
-            self.window_position = QPoint(pos[0], pos[1])  # x,y
-            self.setWindowState(Qt.WindowNoState)
-            self.resize(self.window_size)
-            self.move(self.window_position)
-
-            # Window layout
-            if hexstate:
-                self.restoreState(QByteArray().fromHex(
-                    str(hexstate).encode('utf-8')))
-                # QDockWidget objects are not painted if restored as floating
-                # windows, so we must dock them before showing the mainwindow.
-                for widget in self.children():
-                    if isinstance(widget, QDockWidget) and widget.isFloating():
-                        self.floating_dockwidgets.append(widget)
-                        widget.setFloating(False)
-
-            # Is fullscreen?
-            if is_fullscreen:
-                self.setWindowState(Qt.WindowFullScreen)
-
-            # Is maximized?
-            if is_fullscreen:
-                self.maximized_flag = is_maximized
-            elif is_maximized:
-                self.setWindowState(Qt.WindowMaximized)
-
-    def setup_default_layouts(self, window_settings):
+    def setup_default_layouts(self):
         """Set or reset the layouts of the child widgets"""
-        self.set_window_settings(*window_settings)
-
         # layout definition
         logmessages = self.messagedisplay
         ipython = self.ipythonconsole
+        workspacewidget = self.workspacewidget
+        editor = self.editor
+        algorithm_selector = self.algorithm_selector
+        plot_selector = self.plot_selector
         default_layout = {
             'widgets': [
                 # column 0
-                [[ipython]],
+                [[workspacewidget], [algorithm_selector, plot_selector]],
                 # column 1
+                [[editor, ipython]],
+                # column 2
                 [[logmessages]]
             ],
-            'width-fraction': [0.75,    # column 0 width
-                               0.25],   # column 1 width
-            'height-fraction': [[1.0],  # column 0 row heights
-                                [1.0]]  # column 0 row heights
+            'width-fraction': [0.25,            # column 0 width
+                               0.50,            # column 1 width
+                               0.25],           # column 2 width
+            'height-fraction': [[0.5, 0.5],     # column 0 row heights
+                                [1.0],          # column 1 row heights
+                                [1.0]]          # column 2 row heights
         }
 
         with widget_updates_disabled(self):
@@ -305,25 +326,39 @@ class MainWindow(QMainWindow):
                 for row in column:
                     for i in range(len(row) - 1):
                         first, second = row[i], row[i+1]
-                        self.tabifyDockWidget(first, second)
+                        self.tabifyDockWidget(first.dockwidget, second.dockwidget)
 
                     # Raise front widget per row
                     row[0].dockwidget.show()
                     row[0].dockwidget.raise_()
 
-    def save_current_window_settings(self, prefix, section='main'):
-        """Save current window settings with *prefix* in
-        the userconfig-based configuration, under *section*"""
-        win_size = self.window_size
+    # ----------------------- Events ---------------------------------
+    def closeEvent(self, event):
+        # Close editors
+        self.editor.app_closing()
 
-        CONF.set(section, prefix + 'size', (win_size.width(), win_size.height()))
-        CONF.set(section, prefix + 'is_maximized', self.isMaximized())
-        CONF.set(section, prefix + 'is_fullscreen', self.isFullScreen())
-        pos = self.window_position
-        CONF.set(section, prefix + 'position', (pos.x(), pos.y()))
-        self.maximize_dockwidget(restore=True)  # Restore non-maximized layout
-        qba = self.saveState()
-        CONF.set(section, prefix + 'state', qbytearray_to_str(qba))
+        # Close all open plots
+        # We don't want this at module scope here
+        import matplotlib.pyplot as plt  #noqa
+        plt.close('all')
+
+        event.accept()
+
+    # ----------------------- Slots ---------------------------------
+    def open_file(self):
+        # todo: when more file types are added this should
+        # live in its own type
+        filepath, _ = QFileDialog.getOpenFileName(self, "Open File...", "", "Python (*.py)")
+        if not filepath:
+            return
+        self.editor.open_file_in_new_tab(filepath)
+
+    def save_file(self):
+        # todo: how should this interact with project saving and workspaces when they are implemented?
+        self.editor.save_current_file()
+
+    def open_manage_directories(self):
+        ManageUserDirectories(self).exec_()
 
 
 def initialize():
@@ -348,13 +383,22 @@ def start_workbench(app):
     """Given an application instance create the MainWindow,
     show it and start the main event loop
     """
+    # The ordering here is very delicate. Test thoroughly when
+    # changing anything!
     main_window = MainWindow()
-    main_window.setup()
 
-    preloaded_packages = ('mantid', 'matplotlib')
-    for name in preloaded_packages:
-        main_window.set_splash('Preloading ' + name)
-        importlib.import_module('mantid')
+    # Load matplotlib as early as possible and set our defaults
+    # Setup our custom backend and monkey patch in custom current figure manager
+    main_window.set_splash('Preloading matplotlib')
+    from workbench.plotting.config import initialize_matplotlib  # noqa
+    initialize_matplotlib()
+
+    # Setup widget layouts etc. mantid cannot be imported before this
+    # or the log messages don't get through
+    main_window.setup()
+    # start mantid
+    main_window.set_splash('Preloading mantid')
+    importlib.import_module('mantid')
 
     main_window.show()
     if main_window.splash:
@@ -370,10 +414,13 @@ def main():
     # Prepare for mantid import
     prepare_mantid_env()
 
-    # TODO: parse command arguments
+    # todo: parse command arguments
 
     # general initialization
     app = initialize()
+    # the default sys check interval leads to long lags
+    # when request scripts to be aborted
+    sys.setcheckinterval(SYSCHECK_INTERVAL)
     main_window = None
     try:
         main_window = start_workbench(app)
@@ -383,7 +430,7 @@ def main():
         # This is type of thing we want to capture and have reports
         # about. Prints to stderr as we can't really count on anything
         # else
-        traceback.print_exc(file=STDERR)
+        traceback.print_exc(file=ORIGINAL_STDERR)
 
     if main_window is None:
         # An exception occurred don't exit here

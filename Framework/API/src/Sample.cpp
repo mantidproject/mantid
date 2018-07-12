@@ -6,6 +6,7 @@
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Strings.h"
@@ -298,7 +299,12 @@ void Sample::saveNexus(::NeXus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXsample", true);
   file->putAttr("name", m_name);
   file->putAttr("version", 1);
-  file->putAttr("shape_xml", m_shape->getShapeXML());
+  std::string shapeXML("");
+  if (auto csgObject =
+          boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(m_shape)) {
+    shapeXML = csgObject->getShapeXML();
+  }
+  file->putAttr("shape_xml", shapeXML);
 
   m_shape->material().saveNexus(file, "material");
   // Write out the other (indexes 1+) samples
@@ -363,7 +369,11 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     }
     Kernel::Material material;
     material.loadNexus(file, "material");
-    m_shape->setMaterial(material);
+    // CSGObject expected, if so, set its material
+    if (auto csgObj =
+            boost::dynamic_pointer_cast<Geometry::CSGObject>(m_shape)) {
+      csgObj->setMaterial(material);
+    }
 
     // Load other samples
     int num_other_samples;

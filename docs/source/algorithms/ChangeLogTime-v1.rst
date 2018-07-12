@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -30,8 +30,8 @@ Usage
     #get the log times for a particular variable, after change
     modified=w.getRun()['Speed5'].times
     #print times
-    print("OriginalTimes:  {}".format(original))
-    print("ModifiedTimes:  {}".format(modified))
+    print("OriginalTimes:  {}".format(np.datetime_as_string(original, timezone='UTC')))
+    print("ModifiedTimes:  {}".format(np.datetime_as_string(modified, timezone='UTC')))
 
 
 .. testcleanup:: ChangeLogTime
@@ -43,8 +43,10 @@ Output:
 
 .. testoutput:: ChangeLogTime
 
-    OriginalTimes:  [2010-Mar-25 16:09:27.780000000,2010-Mar-25 16:10:01.560998229,2010-Mar-25 16:10:31.514001159,2010-Mar-25 16:11:25.498002319]
-    ModifiedTimes:  [2010-Mar-25 16:09:37.780000000,2010-Mar-25 16:10:11.560998229,2010-Mar-25 16:10:41.514001159,2010-Mar-25 16:11:35.498002319]
+    OriginalTimes:  ['2010-03-25T16:09:27.780000000Z' '2010-03-25T16:10:01.560998229Z'
+     '2010-03-25T16:10:31.514001159Z' '2010-03-25T16:11:25.498002319Z']
+    ModifiedTimes:  ['2010-03-25T16:09:37.780000000Z' '2010-03-25T16:10:11.560998229Z'
+     '2010-03-25T16:10:41.514001159Z' '2010-03-25T16:11:35.498002319Z']
 
 .. categories::
 

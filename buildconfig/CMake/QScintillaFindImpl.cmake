@@ -40,6 +40,9 @@ function (find_qscintilla qt_version)
       qt5scintilla2
       libqscintilla2_qt5.dylib
     )
+    set ( _qsci_lib_names_debug
+      qscintilla2_qt5d
+    )
     set ( _qsci_include_paths
       ${Qt5Core_INCLUDE_DIRS}
     )
@@ -53,13 +56,13 @@ function (find_qscintilla qt_version)
     endif ()
   endif()
 
-  set ( _include_var QSCINTILLA_QT${qt_version}_INC_DIR )
+  set ( _include_var QSCINTILLA_QT${qt_version}_INCLUDE_DIR )
   find_path ( ${_include_var}
       NAMES Qsci/qsciglobal.h
       PATHS ${_qsci_include_paths}
       NO_DEFAULT_PATH
   )
-  set ( _library_var QSCINTILLA_QT${qt_version}_LIB )
+  set ( _library_var QSCINTILLA_QT${qt_version}_LIBRARY )
   if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
     set ( _default_path_opt NO_DEFAULT_PATH )
   endif()
@@ -68,7 +71,7 @@ function (find_qscintilla qt_version)
     PATHS ${_qsci_lib_paths}
     ${_default_path_opt}
   )
-  set ( _library_var_debug QSCINTILLA_QT${qt_version}_LIB_DEBUG )
+  set ( _library_var_debug QSCINTILLA_QT${qt_version}_LIBRARY_DEBUG )
   find_library ( ${_library_var_debug}
     NAMES ${_qsci_lib_names_debug}
     PATHS ${_qsci_lib_paths}

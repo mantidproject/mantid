@@ -104,7 +104,6 @@ using namespace Mantid::API;
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 using MantidQt::MantidWidgets::MantidWSIndexDialog;
-using MantidQt::MantidWidgets::MantidTreeWidget;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Core::time_duration;
 using MantidQt::SliceViewer::SliceViewerWindow;
@@ -214,9 +213,9 @@ MantidUI::MantidUI(ApplicationWindow *aw)
     : m_finishedLoadDAEObserver(*this,
                                 &MantidUI::handleLoadDAEFinishedNotification),
       m_configServiceObserver(*this, &MantidUI::handleConfigServiceUpdate),
-      m_appWindow(aw), m_lastShownInstrumentWin(NULL),
-      m_lastShownSliceViewWin(NULL), m_lastShownSpectrumViewerWin(NULL),
-      m_lastShownColorFillWin(NULL), m_lastShown1DPlotWin(NULL),
+      m_appWindow(aw), m_lastShownInstrumentWin(nullptr),
+      m_lastShownSliceViewWin(nullptr), m_lastShownSpectrumViewerWin(nullptr),
+      m_lastShownColorFillWin(nullptr), m_lastShown1DPlotWin(nullptr),
       m_vatesSubWindow(nullptr)
 //, m_spectrumViewWindow(NULL)
 {
@@ -232,8 +231,7 @@ MantidUI::MantidUI(ApplicationWindow *aw)
     qRegisterMetaType<std::string>();
   }
 
-  m_exploreMantid = boost::make_shared<WorkspaceTreeWidget>(this);
-  m_exploreMantid->init();
+  m_exploreMantid = new WorkspaceTreeWidget(this);
   m_exploreMantid->enableDeletePrompt(
       appWindow()->isDeleteWorkspacePromptEnabled());
 
@@ -242,7 +240,7 @@ MantidUI::MantidUI(ApplicationWindow *aw)
   m_workspaceDockWidget->setObjectName("exploreMantid");
   m_workspaceDockWidget->setMinimumHeight(150);
   m_workspaceDockWidget->setMinimumWidth(200);
-  m_workspaceDockWidget->setWidget(m_exploreMantid.get());
+  m_workspaceDockWidget->setWidget(m_exploreMantid);
   aw->addDockWidget(Qt::RightDockWidgetArea, m_workspaceDockWidget);
 
   m_exploreAlgorithms = new AlgorithmDockWidget(this, aw);
@@ -927,7 +925,7 @@ void MantidUI::showSpectrumViewer() {
       try {
         viewer = new MantidQt::SpectrumView::SpectrumView(m_appWindow);
       } catch (std::runtime_error &e) {
-        m_lastShownSpectrumViewerWin = NULL;
+        m_lastShownSpectrumViewerWin = nullptr;
         g_log.error() << "Could not create spectrum viewer: " << e.what()
                       << "\n";
         throw std::runtime_error(e);
@@ -983,7 +981,7 @@ void MantidUI::showSliceViewer() {
       w = MantidQt::Factory::WidgetFactory::Instance()->createSliceViewerWindow(
           wsName, "");
     } catch (std::runtime_error &e) {
-      m_lastShownSliceViewWin = NULL;
+      m_lastShownSliceViewWin = nullptr;
       g_log.error() << "Could not create slice viewer: " << e.what() << "\n";
       throw std::runtime_error(e);
     }
@@ -1027,7 +1025,7 @@ Show Algorithm History Details in a window .
 void MantidUI::showAlgorithmHistory() {
   QString wsName = getSelectedWorkspaceName();
   Mantid::API::Workspace_const_sptr wsptr = getWorkspace(wsName);
-  if (NULL != wsptr) {
+  if (nullptr != wsptr) {
     // If the workspace has any AlgorithHistory ...
     if (!wsptr->getHistory().empty()) {
       // ... create and display the window.
@@ -1316,8 +1314,8 @@ Table *MantidUI::createDetectorTable(
   const int nrows = indices.empty()
                         ? static_cast<int>(ws->getNumberHistograms())
                         : static_cast<int>(indices.size());
-  Table *t =
-      new Table(appWindow()->scriptingEnv(), nrows, ncols, "", appWindow(), 0);
+  Table *t = new Table(appWindow()->scriptingEnv(), nrows, ncols, "",
+                       appWindow(), nullptr);
   appWindow()->initTable(
       t, appWindow()->generateUniqueName(wsName + "-Detectors-"));
   // Set the column names
@@ -2142,7 +2140,7 @@ void MantidUI::showMantidInstrument(const QString &wsName) {
   InstrumentWindow *insWin = getInstrumentView(wsName);
 
   if (!insWin) {
-    m_lastShownInstrumentWin = NULL;
+    m_lastShownInstrumentWin = nullptr;
     return;
   }
 
@@ -2222,8 +2220,9 @@ void MantidUI::saveProject(bool saved) {
   if (!saved) {
     QString savemsg =
         tr("Save changes to project: <p><b> %1 </b> ?").arg("untitled");
-    int result = QMessageBox::information(appWindow(), tr("MantidPlot"),
-                                          savemsg, tr("Yes"), tr("No"), 0, 2);
+    int result =
+        QMessageBox::information(appWindow(), tr("MantidPlot"), savemsg,
+                                 tr("Yes"), tr("No"), nullptr, 2);
     if (result == 0)
       appWindow()->saveProject();
   }
@@ -2260,8 +2259,7 @@ void MantidUI::menuMantidMatrixAboutToShow() {
   menuMantidMatrix->addAction(action);
 
   action = new QAction("Plot spectrum...", this);
-  connect(action, SIGNAL(triggered()), m_exploreMantid.get(),
-          SLOT(plotSpectra()));
+  connect(action, SIGNAL(triggered()), m_exploreMantid, SLOT(plotSpectra()));
   menuMantidMatrix->addAction(action);
 
   action = new QAction("Plot as waterfall", this);
@@ -2292,7 +2290,7 @@ void MantidUI::menuMantidMatrixAboutToShow() {
   menuMantidMatrix->addSeparator();
 
   action = new QAction("Delete", this);
-  connect(action, SIGNAL(triggered()), m_exploreMantid.get(),
+  connect(action, SIGNAL(triggered()), m_exploreMantid,
           SLOT(deleteWorkspaces()));
   menuMantidMatrix->addAction(action);
 }
@@ -2408,7 +2406,7 @@ void MantidUI::importString(const QString &logName, const QString &data,
   }
 
   Table *t = new Table(appWindow()->scriptingEnv(), loglines.size(), 1, "",
-                       appWindow(), 0);
+                       appWindow(), nullptr);
   if (!t)
     return;
   // Have to replace "_" since the legend widget uses them to separate things
@@ -2444,8 +2442,8 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data,
   QStringList loglines = data.split("\n", QString::SkipEmptyParts);
 
   int rowcount(loglines.count());
-  Table *t =
-      new Table(appWindow()->scriptingEnv(), rowcount, 2, "", appWindow(), 0);
+  Table *t = new Table(appWindow()->scriptingEnv(), rowcount, 2, "",
+                       appWindow(), nullptr);
   if (!t)
     return;
   QString label;
@@ -2544,7 +2542,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   int colCount = 2;
 
   Table *t = new Table(appWindow()->scriptingEnv(), rowcount, colCount, "",
-                       appWindow(), 0);
+                       appWindow(), nullptr);
   if (!t)
     return;
   // Have to replace "_" since the legend widget uses them to separate things
@@ -2860,7 +2858,7 @@ Table *MantidUI::createTableFromSpectraList(const QString &tableName,
   bool isHistogram = workspace->isHistogramData();
   int no_cols = static_cast<int>(indexList.size());
   Table *t = new Table(appWindow()->scriptingEnv(), numRows, (1 + c) * no_cols,
-                       "", appWindow(), 0);
+                       "", appWindow(), nullptr);
   appWindow()->initTable(t, appWindow()->generateUniqueName(tableName + "-"));
   // t->askOnCloseEvent(false);
 
@@ -3130,7 +3128,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
       return nullptr;
   }
   // Force waterfall option to false if only 1 curve
-  if ((NULL == plotWindow || clearWindow) && toPlot.size() == 1)
+  if ((nullptr == plotWindow || clearWindow) && toPlot.size() == 1)
     waterfallPlot = false;
 
   ScopedOverrideCursor waitCursor;
@@ -3328,7 +3326,7 @@ void MantidUI::drawColorFillPlots(const QStringList &wsNames,
          cit != wsNames.end(); ++cit) {
       const bool hidden = true;
       MultiLayer *plot =
-          this->drawSingleColorFillPlot(*cit, curveType, NULL, hidden);
+          this->drawSingleColorFillPlot(*cit, curveType, nullptr, hidden);
       if (plot)
         plots.append(plot);
     }
@@ -3394,7 +3392,7 @@ MultiLayer *MantidUI::drawSingleColorFillPlot(const QString &wsName,
   ScopedOverrideCursor waitCursor;
 
   bool reusePlots = workspacesDockPlot1To1();
-  if ((!reusePlots && NULL == window) ||
+  if ((!reusePlots && nullptr == window) ||
       (reusePlots && !m_lastShownColorFillWin)) // needs to create a new window
   {
     try {
@@ -3404,7 +3402,7 @@ MultiLayer *MantidUI::drawSingleColorFillPlot(const QString &wsName,
         window->hide();
       }
     } catch (std::runtime_error &e) {
-      m_lastShownColorFillWin = NULL;
+      m_lastShownColorFillWin = nullptr;
       g_log.error() << "Could not create color fill plot: " << e.what() << "\n";
       throw std::runtime_error(e);
     }
@@ -3412,7 +3410,7 @@ MultiLayer *MantidUI::drawSingleColorFillPlot(const QString &wsName,
     m_lastShownColorFillWin = window;
   } else {
     if (nullptr == window) {
-      if (NULL == m_lastShownColorFillWin)
+      if (nullptr == m_lastShownColorFillWin)
         return nullptr;
       window = m_lastShownColorFillWin;
     }
@@ -3739,7 +3737,7 @@ Table *MantidUI::createTableFromBins(
     return nullptr;
 
   Table *t = new Table(appWindow()->scriptingEnv(), numRows,
-                       c * bins.size() + 1, "", appWindow(), 0);
+                       c * bins.size() + 1, "", appWindow(), nullptr);
   appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-"));
 
   for (int i = 0; i < bins.size(); i++) {

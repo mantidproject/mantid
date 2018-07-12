@@ -1,6 +1,5 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
-#include "MantidGeometry/Instrument/ComponentVisitorHelper.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Objects/CSGObject.h"
@@ -358,15 +357,8 @@ void ObjCompAssembly::testIntersectionWithChildren(
 
 size_t ObjCompAssembly::registerContents(
     Mantid::Geometry::ComponentVisitor &visitor) const {
-  // via common helper
-  const auto name = this->getName();
-  if (ComponentVisitorHelper::matchesPackOfTubes(name)) {
-    return visitor.registerBankOfTubes(*this);
-  } else if (ComponentVisitorHelper::matchesPSDTube(name)) {
-    return visitor.registerTubeObj(*this);
-  }
   // Generic Assembly registration call.
-  return visitor.registerComponentAssembly(*this);
+  return visitor.registerObjComponentAssembly(*this);
 }
 
 /** Set the outline of the assembly. Creates an Object and sets m_shape point to
@@ -388,7 +380,7 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
 
   // Get information about the shape and size of a detector
   std::string type;
-  int otype;
+  detail::ShapeInfo::GeometryShape otype;
   std::vector<Kernel::V3D> vectors;
   double radius, height;
   boost::shared_ptr<const IObject> obj = group.front()->shape();
@@ -397,9 +389,9 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
         "Found ObjComponent without shape");
   }
   obj->GetObjectGeom(otype, vectors, radius, height);
-  if (otype == 1) {
+  if (otype == detail::ShapeInfo::GeometryShape::CUBOID) {
     type = "box";
-  } else if (otype == 4) {
+  } else if (otype == detail::ShapeInfo::GeometryShape::CYLINDER) {
     type = "cylinder";
   } else {
     throw std::runtime_error(
@@ -591,7 +583,7 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
       // inverse the vz axis
       vz = vz * (-1);
     }
-    obj_str << "<segmented-cylinder id=\"stick\">";
+    obj_str << "<cylinder id=\"stick\">";
     obj_str << "<centre-of-bottom-base ";
     obj_str << "x=\"" << Cmass.X();
     obj_str << "\" y=\"" << Cmass.Y();
@@ -601,7 +593,7 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
             << vz.Z() << "\" /> ";
     obj_str << "<radius val=\"" << radius << "\" />";
     obj_str << "<height val=\"" << hz << "\" />";
-    obj_str << "</segmented-cylinder>";
+    obj_str << "</cylinder>";
   }
 
   if (!obj_str.str().empty()) {

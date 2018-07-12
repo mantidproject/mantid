@@ -25,6 +25,7 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -144,6 +145,13 @@ void PlotPeakByLogValue::init() {
           new Kernel::ListValidator<std::string>(evaluationTypes)),
       "The way the function is evaluated: CentrePoint or Histogram.",
       Kernel::Direction::Input);
+
+  declareProperty(make_unique<ArrayProperty<double>>("Exclude", ""),
+                  "A list of pairs of real numbers, defining the regions to "
+                  "exclude from the fit.");
+
+  declareProperty("IgnoreInvalidData", false,
+                  "Flag to ignore infinities, NaNs and data with zero errors.");
 }
 
 /**
@@ -154,6 +162,7 @@ void PlotPeakByLogValue::exec() {
   // Create a list of the input workspace
   const std::vector<InputData> wsNames = makeNames();
 
+  const std::vector<double> exclude = getProperty("Exclude");
   std::string fun = getPropertyValue("Function");
   // int wi = getProperty("WorkspaceIndex");
   std::string logName = getProperty("LogValue");
@@ -283,6 +292,7 @@ void PlotPeakByLogValue::exec() {
           wsBaseName = wsNames[i].name + "_" + spectrum_index;
 
         bool histogramFit = getPropertyValue("EvaluationType") == "Histogram";
+        bool ignoreInvalidData = getProperty("IgnoreInvalidData");
 
         // Fit the function
         API::IAlgorithm_sptr fit =
@@ -295,6 +305,7 @@ void PlotPeakByLogValue::exec() {
         fit->setProperty("WorkspaceIndex", j);
         fit->setPropertyValue("StartX", getPropertyValue("StartX"));
         fit->setPropertyValue("EndX", getPropertyValue("EndX"));
+        fit->setProperty("IgnoreInvalidData", ignoreInvalidData);
         fit->setPropertyValue(
             "Minimizer", getMinimizerString(wsNames[i].name, spectrum_index));
         fit->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));
@@ -306,6 +317,7 @@ void PlotPeakByLogValue::exec() {
         if (!histogramFit) {
           fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
           fit->setProperty("ConvolveMembers", outputConvolvedMembers);
+          fit->setProperty("Exclude", exclude);
         }
         fit->setProperty("Output", wsBaseName);
         fit->execute();
@@ -537,7 +549,7 @@ PlotPeakByLogValue::makeNames() const {
   double start = 0;
   double end = 0;
 
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
   tokenizer names(inputList, ";",
                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
   for (const auto &input : names) {

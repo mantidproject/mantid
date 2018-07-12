@@ -10,7 +10,8 @@
 using namespace Mantid;
 using Beamline::DetectorInfo;
 using PosVec = std::vector<Eigen::Vector3d>;
-using RotVec = std::vector<Eigen::Quaterniond>;
+using RotVec = std::vector<Eigen::Quaterniond,
+                           Eigen::aligned_allocator<Eigen::Quaterniond>>;
 
 class DetectorInfoTest : public CxxTest::TestSuite {
 public:

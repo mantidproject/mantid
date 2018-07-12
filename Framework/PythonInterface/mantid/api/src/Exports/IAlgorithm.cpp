@@ -16,6 +16,7 @@
 #include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 
 #include <Poco/Thread.h>
+#include <Poco/ActiveResult.h>
 
 #include <boost/python/arg_from_python.hpp>
 #include <boost/python/bases.hpp>
@@ -99,7 +100,7 @@ struct MandatoryFirst {
 
 //----------------------- Property ordering ------------------------------
 /// Vector of property pointers
-typedef std::vector<Property *> PropertyVector;
+using PropertyVector = std::vector<Property *>;
 
 /**
  * Returns the vector of properties ordered by the criteria defined in
@@ -296,6 +297,15 @@ bool executeProxy(object &self) {
 }
 
 /**
+ * Execute the algorithm asynchronously
+ * @param self :: A reference to the calling object
+ */
+void executeAsync(object &self) {
+  auto &calg = extract<IAlgorithm &>(self)();
+  calg.executeAsync();
+}
+
+/**
  * @param self A reference to the calling object
  * @return An AlgorithmID wrapped in a AlgorithmIDProxy container or None if
  * there is no ID
@@ -362,7 +372,11 @@ void export_ialgorithm() {
       .def("category", &IAlgorithm::category, arg("self"),
            "Returns the category containing the algorithm")
       .def("categories", &IAlgorithm::categories, arg("self"),
+           return_value_policy<VectorToNumpy>(),
            "Returns the list of categories this algorithm belongs to")
+      .def("seeAlso", &IAlgorithm::seeAlso, arg("self"),
+           return_value_policy<VectorToNumpy>(),
+           "Returns the list of similar algorithms")
       .def("summary", &IAlgorithm::summary, arg("self"),
            "Returns a summary message describing the algorithm")
       .def("helpURL", &IAlgorithm::helpURL, arg("self"),
@@ -442,6 +456,8 @@ void export_ialgorithm() {
            "Cross-check all inputs and return any errors as a dictionary")
       .def("execute", &executeProxy, arg("self"),
            "Runs the algorithm and returns whether it has been successful")
+      .def("executeAsync", &executeAsync, arg("self"),
+           "Starts the algorithm in a separate thread and returns immediately")
       // 'Private' static methods
       .def("_algorithmInThread", &_algorithmInThread, arg("thread_id"))
       .staticmethod("_algorithmInThread")

@@ -1,15 +1,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-import numpy
-from numpy import *
-from mantid.kernel import *
-from mantid.api import *
+import numpy as np
 import mantid.kernel as kernel
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 import os
+from distutils.version import LooseVersion
 from six.moves import range
+
 
 class ExportVulcanSampleLogTest(unittest.TestCase):
 
@@ -22,10 +21,10 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 
         # Test algorithm
         alg_test = run_algorithm("ExportSampleLogsToCSVFile",
-            InputWorkspace = "TestMatrixWS",
-            OutputFilename = "furnace20333.txt",
-            SampleLogNames = ["SensorA", "SensorB", "SensorC"],
-            WriteHeaderFile = False)
+                                 InputWorkspace = "TestMatrixWS",
+                                 OutputFilename = "furnace20333.txt",
+                                 SampleLogNames = ["SensorA", "SensorB", "SensorC"],
+                                 WriteHeaderFile = False)
 
         # Validate
         self.assertTrue(alg_test.isExecuted())
@@ -57,7 +56,6 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 
         return
 
-
     def test_exportFile2(self):
         """ Get a partial of real load frame log values, and set them to
         different logs
@@ -68,11 +66,11 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 
         # Test algorithm
         alg_test = run_algorithm("ExportSampleLogsToCSVFile",
-            InputWorkspace = "TestMatrixWS2",
-            OutputFilename = "furnace20334.txt",
-            SampleLogNames = ["SensorA", "SensorB", "SensorC", "SensorD"],
-            WriteHeaderFile = False,
-            TimeTolerance = 1.0)
+                                 InputWorkspace = "TestMatrixWS2",
+                                 OutputFilename = "furnace20334.txt",
+                                 SampleLogNames = ["SensorA", "SensorB", "SensorC", "SensorD"],
+                                 WriteHeaderFile = False,
+                                 TimeTolerance = 1.0)
 
         # Validate
         self.assertTrue(alg_test.isExecuted())
@@ -92,7 +90,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         goodlines = 0
         for line in lines:
             line = line.strip()
-            if len(line) > 0:
+            if len(line) > 0 and len(line.split()) == 6 and line.startswith('76130'):
                 goodlines += 1
         self.assertEquals(goodlines, 64)
 
@@ -101,7 +99,6 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         AnalysisDataService.remove("TestMatrixWS2")
 
         return
-
 
     def test_exportFileAndHeader(self):
         """ Test to export logs without header file
@@ -114,11 +111,11 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 
         # Test algorithm
         alg_test = run_algorithm("ExportSampleLogsToCSVFile",
-            InputWorkspace = "TestMatrixWS",
-            OutputFilename = "furnace20339.txt",
-            SampleLogNames = ["SensorA", "SensorB", "SensorC"],
-            WriteHeaderFile = True,
-            Header = "SensorA[K]\t SensorB[K]\t SensorC[K]")
+                                 InputWorkspace = "TestMatrixWS",
+                                 OutputFilename = "furnace20339.txt",
+                                 SampleLogNames = ["SensorA", "SensorB", "SensorC"],
+                                 WriteHeaderFile = True,
+                                 Header = "SensorA[K]\t SensorB[K]\t SensorC[K]")
 
         # Validate
         self.assertTrue(alg_test.isExecuted())
@@ -152,7 +149,6 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         AnalysisDataService.remove("TestMatrixWS")
 
         return
-
 
     def test_exportUTC(self):
         """ Test to export logs without header file
@@ -165,12 +161,12 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 
         # Test algorithm
         alg_test = run_algorithm("ExportSampleLogsToCSVFile",
-            InputWorkspace = "TestMatrixWS",
-            OutputFilename = "furnace20339utc.txt",
-            SampleLogNames = ["SensorA", "SensorB", "SensorC"],
-            WriteHeaderFile = True,
-            TimeZone = 'UTC', 
-            Header = "SensorA[K]\t SensorB[K]\t SensorC[K]")
+                                 InputWorkspace = "TestMatrixWS",
+                                 OutputFilename = "furnace20339utc.txt",
+                                 SampleLogNames = ["SensorA", "SensorB", "SensorC"],
+                                 WriteHeaderFile = True,
+                                 TimeZone = 'UTC',
+                                 Header = "SensorA[K]\t SensorB[K]\t SensorC[K]")
 
         # Validate
         self.assertTrue(alg_test.isExecuted())
@@ -205,7 +201,6 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 
         return
 
-
     def test_exportFileMissingLog(self):
         """ Test to export logs without header file
         """
@@ -215,10 +210,10 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 
         # Test algorithm
         alg_test = run_algorithm("ExportSampleLogsToCSVFile",
-            InputWorkspace = "TestMatrixWS",
-            OutputFilename = "furnace20335.txt",
-            SampleLogNames = ["SensorA", "SensorB", "SensorX", "SensorC"],
-            WriteHeaderFile = False)
+                                 InputWorkspace = "TestMatrixWS",
+                                 OutputFilename = "furnace20335.txt",
+                                 SampleLogNames = ["SensorA", "SensorB", "SensorX", "SensorC"],
+                                 WriteHeaderFile = False)
 
         # Validate
         self.assertTrue(alg_test.isExecuted())
@@ -261,7 +256,6 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         from mantid.simpleapi import CreateWorkspace
         from mantid.simpleapi import AddSampleLog
         from time import gmtime, strftime,mktime
-        import numpy as np
 
         # Create a matrix workspace
         x = np.array([1.,2.,3.,4.])
@@ -276,7 +270,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         tsp_a=kernel.FloatTimeSeriesProperty("SensorA")
         tsp_b=kernel.FloatTimeSeriesProperty("SensorB")
         tsp_c=kernel.FloatTimeSeriesProperty("SensorC")
-        for i in arange(25):
+        for i in np.arange(25):
             tmptime = strftime("%Y-%m-%d %H:%M:%S", gmtime(mktime(gmtime())+i))
             tsp_a.addValue(tmptime, 1.0*i*i)
             tsp_b.addValue(tmptime, 2.0*i*i)
@@ -288,15 +282,14 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 
         return wksp
 
-
     def createTestWorkspace2(self):
         """ Create a workspace for testing against with more situation
         """
         from mantid.simpleapi import CreateWorkspace
         from mantid.simpleapi import AddSampleLog
-        from time import gmtime, strftime,mktime
-        from datetime import datetime, timedelta
-        import numpy as np
+        import numpy
+        from numpy import datetime64, timedelta64
+        #from time import gmtime, strftime,mktime # in debug prints
 
         # Create a matrix workspace
         x = np.array([1.,2.,3.,4.])
@@ -305,18 +298,14 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         wksp = CreateWorkspace(DataX=x, DataY=y,DataE=e,NSpec=1,UnitX='TOF')
 
         # Add run_start
-        year = 2014
-        month = 2
-        day = 15
-        hour = 13
-        minute = 34
-        second = 3
         dtimesec = 0.0010
-
         timefluc = 0.0001
+        runstart = '2014-02-15T13:34:03'
+        # older numpy assumes local timezone
+        if LooseVersion(numpy.__version__) < LooseVersion('1.9'):
+            runstart = runstart + 'Z'
+        runstart = datetime64(runstart, 'us') # microsecond needed for deltas
 
-        #tmptime = strftime("%Y-%m-%d %H:%M:%S", gmtime(mktime(gmtime())))
-        runstart = datetime(year, month, day, hour, minute, second)
         AddSampleLog(Workspace=wksp,LogName='run_start',LogText=str(runstart))
 
         tsp_a = kernel.FloatTimeSeriesProperty("SensorA")
@@ -327,16 +316,16 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 
         dbbuf = ""
 
-        random.seed(0)
-        for i in arange(25):
+        np.random.seed(0)
+        for i in np.arange(25):
             # Randomly pick up log without records
             # first iteration must have all the record
             skiploglist = []
             if i > 0:
-                numnorecord = random.randint(-1, 4)
+                numnorecord = np.random.randint(-1, 4)
                 if numnorecord > 0:
                     for j in range(numnorecord):
-                        logindex = random.randint(0, 6)
+                        logindex = np.random.randint(0, 6)
                         skiploglist.append(logindex)
                     # ENDFOR (j)
                 # ENDIF (numnorecord)
@@ -351,23 +340,24 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
                     continue
 
                 # get random time shifts
-                timeshift = (random.random()-0.5)*timefluc
+                timeshift = (np.random.random()-0.5)*timefluc
 
                 if i == 0:
                     # first record should have the 'exactly' same time stamps
                     timeshift *= 0.0001
 
-                deltatime = timedelta(i*dtimesec + timeshift)
-                tmptime = str(runstart + deltatime)
+                deltatime = i*dtimesec + timeshift # fraction of a day
+                deltatime = timedelta64(int(deltatime * 24 * 3600 * 1e6), 'us') # timedelta64 requires int
+                tmptime = runstart + deltatime
                 tmpvalue = float(i*i*6)+j
                 logs[j].addValue(tmptime, tmpvalue)
 
-                dbbuf += "%s: %s = %d\n" % (logs[j].name, tmptime, tmpvalue)
+                #dbbuf += "{}: {} = {}\n".format(logs[j].name, tmptime, tmpvalue)
 
             # ENDFOR (j)
         # ENDFOR (i)
 
-        # print dbbuf
+        #print(dbbuf)
 
         wksp.mutableRun()['SensorA']=tsp_a
         wksp.mutableRun()['SensorB']=tsp_b
@@ -384,22 +374,22 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 
         # Generate the matrix workspace with some logs
         Load(Filename="/home/wzz/Projects/MantidProjects/Mantid2/Code/debug/VULCAN_41703_event.nxs",
-                OutputWorkspace="VULCAN_41703",
-                MetaDataOnly = True,
-                LoadLog = True)
+             OutputWorkspace="VULCAN_41703",
+             MetaDataOnly = True,
+             LoadLog = True)
 
         # Test algorithm
         alg_test = run_algorithm("ExportSampleLogsToCSVFile",
-            InputWorkspace = "VULCAN_41703",
-            OutputFilename = "/tmp/furnace41703.txt",
-            SampleLogNames = ["furnace.temp1", "furnace.temp2", "furnace.power"],
-            WriteHeaderFile = False)
+                                 InputWorkspace = "VULCAN_41703",
+                                 OutputFilename = "/tmp/furnace41703.txt",
+                                 SampleLogNames = ["furnace.temp1", "furnace.temp2", "furnace.power"],
+                                 WriteHeaderFile = False)
 
         # Validate
         self.assertTrue(alg_test.isExecuted())
 
         return
 
+
 if __name__ == '__main__':
     unittest.main()
-

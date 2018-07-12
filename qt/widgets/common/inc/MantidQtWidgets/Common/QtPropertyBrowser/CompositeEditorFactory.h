@@ -14,7 +14,7 @@
  */
 template <class ManagerType>
 class CompositeEditorFactory : public QtAbstractEditorFactory<ManagerType> {
-  typedef QtAbstractEditorFactory<ManagerType> FactoryBaseType;
+  using FactoryBaseType = QtAbstractEditorFactory<ManagerType>;
 
 public:
   CompositeEditorFactory(QObject *parent, FactoryBaseType *defaultFactory)

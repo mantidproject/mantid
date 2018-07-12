@@ -66,12 +66,15 @@ set_target_properties ( Indexing PROPERTIES OUTPUT_NAME MantidIndexing
   COMPILE_DEFINITIONS IN_MANTID_INDEXING )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( Indexing PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(Indexing PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(Indexing PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET Indexing PROPERTY FOLDER "MantidFramework" )
 
+target_include_directories ( Indexing PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries ( Indexing LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
   Parallel
   )

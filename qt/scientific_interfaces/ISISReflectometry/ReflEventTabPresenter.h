@@ -51,9 +51,16 @@ public:
   /// Return time-slicing type
   std::string getTimeSlicingType(int group) const override;
 
+  void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
+  void settingsChanged(int group) override;
+  void onReductionResumed(int group) override;
+  void onReductionPaused(int group) override;
+  void passSelfToChildren(std::vector<IReflEventPresenter *> const &children);
+
 private:
   /// The presenters for each group as a vector
   std::vector<IReflEventPresenter *> m_eventPresenters;
+  IReflMainWindowPresenter *m_mainPresenter;
 };
 }
 }

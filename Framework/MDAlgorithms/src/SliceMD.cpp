@@ -268,6 +268,15 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     alg->executeAsChildAlg();
   }
 
+  try {
+    outWS->copyExperimentInfos(*ws);
+  } catch (std::runtime_error &) {
+    g_log.warning()
+        << this->name()
+        << " was not able to copy experiment info to output workspace "
+        << outWS->getName() << '\n';
+  }
+
   // Pass on the display normalization from the input event workspace to the
   // output event workspace
   IMDEventWorkspace_sptr outEvent =

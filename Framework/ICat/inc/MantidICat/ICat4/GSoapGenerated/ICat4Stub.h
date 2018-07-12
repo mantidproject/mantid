@@ -3265,12 +3265,12 @@ public:
 
 #ifndef SOAP_TYPE_ICat4__QName
 #define SOAP_TYPE_ICat4__QName (5)
-typedef char *_QName;
+using _QName = char *;
 #endif
 
 #ifndef SOAP_TYPE_ICat4__XML
 #define SOAP_TYPE_ICat4__XML (6)
-typedef char *_XML;
+using _XML = char *;
 #endif
 
 /******************************************************************************\

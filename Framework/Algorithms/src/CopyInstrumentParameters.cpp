@@ -135,5 +135,16 @@ void CopyInstrumentParameters::checkProperties() {
   }
 }
 
+Parallel::ExecutionMode CopyInstrumentParameters::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  const auto in = storageModes.at("InputWorkspace");
+  const auto out = storageModes.at("InputWorkspace");
+  // Source instrument avaible only on master rank, so copying not possible if
+  // target requires it on non-master ranks.
+  if (in == Parallel::StorageMode::MasterOnly && in != out)
+    return Parallel::ExecutionMode::Invalid;
+  return Parallel::getCorrespondingExecutionMode(out);
+}
+
 } // namespace Algorithms
 } // namespace Mantid

@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from sans.common.general_functions import create_managed_non_child_algorithm
-from sans.common.enums import (SANSDataType, FindDirectionEnum)
+from sans.common.enums import (SANSDataType, FindDirectionEnum, DetectorType)
 from sans.algorithm_detail.batch_execution import (provide_loaded_data, get_reduction_packages)
 from mantid.simpleapi import CreateEmptyTableWorkspace
 
@@ -10,7 +10,7 @@ from mantid.simpleapi import CreateEmptyTableWorkspace
 # Functions for the execution of a single batch iteration
 # ----------------------------------------------------------------------------------------------------------------------
 def centre_finder_new(state, r_min = 0.06, r_max = 0.26, iterations = 10, position_1_start = 0.0, position_2_start = 0.0
-                      , tolerance = 0.0001251, find_direction = FindDirectionEnum.All):
+                      , tolerance = 0.0001251, find_direction = FindDirectionEnum.All, verbose=False, component=DetectorType.LAB):
     """
     Finds the beam centre from a good initial guess.
 
@@ -24,7 +24,7 @@ def centre_finder_new(state, r_min = 0.06, r_max = 0.26, iterations = 10, positi
     :param position_1_start: This is the starting position of the search on the x axis.
     :param position_2_start: This is the starting position of the search on the y axis.
     :param tolerance: This is the tolerance for the search.
-    :param fine_direction: This is an enumerator controlling which axis or both should be searched.
+    :param find_direction: This is an enumerator controlling which axis or both should be searched.
     """
     # ------------------------------------------------------------------------------------------------------------------
     # Load the data
@@ -55,7 +55,8 @@ def centre_finder_new(state, r_min = 0.06, r_max = 0.26, iterations = 10, positi
     beam_centre_finder = "SANSBeamCentreFinder"
     beam_centre_finder_options = {"Iterations": iterations, "RMin": r_min/1000, "RMax": r_max/1000,
                                   "Position1Start": position_1_start, "Position2Start": position_2_start,
-                                  "Tolerance": tolerance, "Direction" : FindDirectionEnum.to_string(find_direction)}
+                                  "Tolerance": tolerance, "Direction" : FindDirectionEnum.to_string(find_direction),
+                                  "Verbose": verbose, "Component": DetectorType.to_string(component)}
     beam_centre_alg = create_managed_non_child_algorithm(beam_centre_finder, **beam_centre_finder_options)
     beam_centre_alg.setChild(False)
     set_properties_for_beam_centre_algorithm(beam_centre_alg, reduction_package,
@@ -70,13 +71,12 @@ def centre_finder_new(state, r_min = 0.06, r_max = 0.26, iterations = 10, positi
     # -----------------------------------
     centre1 = beam_centre_alg.getProperty("Centre1").value
     centre2 = beam_centre_alg.getProperty("Centre2").value
-    create_output_table(centre1, centre2)
 
     return {"pos1": centre1, "pos2": centre2}
 
 
-def centre_finder_mass(state, r_min = 0.06, position_1_start = 0.0, position_2_start = 0.0,
-                       tolerance = 0.0001251):
+def centre_finder_mass(state, r_min = 0.06, max_iter=10, position_1_start = 0.0, position_2_start = 0.0,
+                       tolerance = 0.0001251, component=DetectorType.LAB):
     """
     Finds the beam centre from an initial guess.
 
@@ -110,7 +110,7 @@ def centre_finder_mass(state, r_min = 0.06, position_1_start = 0.0, position_2_s
     # ------------------------------------------------------------------------------------------------------------------
     beam_centre_finder = "SANSBeamCentreFinderMassMethod"
     beam_centre_finder_options = {"RMin": r_min/1000, "Centre1": position_1_start,
-                                  "Centre2": position_2_start, "Tolerance": tolerance}
+                                  "Centre2": position_2_start, "Tolerance": tolerance, "Component": DetectorType.to_string(component)}
     beam_centre_alg = create_managed_non_child_algorithm(beam_centre_finder, **beam_centre_finder_options)
     beam_centre_alg.setChild(False)
 
@@ -130,7 +130,6 @@ def centre_finder_mass(state, r_min = 0.06, position_1_start = 0.0, position_2_s
 
     centre1 = beam_centre_alg.getProperty("Centre1").value
     centre2 = beam_centre_alg.getProperty("Centre2").value
-    create_output_table(centre1, centre2)
 
     return {"pos1": centre1, "pos2": centre2}
 

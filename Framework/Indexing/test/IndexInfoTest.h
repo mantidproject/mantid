@@ -31,12 +31,14 @@ void run_StorageMode_Cloned(const Parallel::Communicator &comm) {
 void run_StorageMode_Distributed(const Parallel::Communicator &comm) {
   IndexInfo i(47, Parallel::StorageMode::Distributed, comm);
   TS_ASSERT_EQUALS(i.globalSize(), 47);
+  TS_ASSERT_EQUALS(i.spectrumNumbers().size(), 47);
   size_t expectedSize = 0;
   for (size_t globalIndex = 0; globalIndex < i.globalSize(); ++globalIndex) {
+    SpectrumNumber specNum = static_cast<int>(globalIndex) + 1;
+    TS_ASSERT_EQUALS(i.spectrumNumbers()[globalIndex], specNum);
     // Current default is RoundRobinPartitioner
     if (static_cast<int>(globalIndex) % comm.size() == comm.rank()) {
-      TS_ASSERT_EQUALS(i.spectrumNumber(expectedSize),
-                       static_cast<int>(globalIndex) + 1);
+      TS_ASSERT_EQUALS(i.spectrumNumber(expectedSize), specNum);
       ++expectedSize;
     }
   }
@@ -163,6 +165,9 @@ public:
     TS_ASSERT_EQUALS(info.spectrumNumber(0), 3);
     TS_ASSERT_EQUALS(info.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(info.spectrumNumber(2), 1);
+    TS_ASSERT_EQUALS(info.spectrumNumbers()[0], 3);
+    TS_ASSERT_EQUALS(info.spectrumNumbers()[1], 2);
+    TS_ASSERT_EQUALS(info.spectrumNumbers()[2], 1);
   }
 
   void test_construct_from_parent_reorder() {

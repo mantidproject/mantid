@@ -1,9 +1,11 @@
 #ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_H
 #define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_H
 
+#include "MantidDataObjects/AffineMatrixParameter.h"
+#include "MantidGeometry/Crystal/PeakTransform.h"
+#include "MantidQtWidgets/SliceViewer/NonOrthogonalAxis.h"
 #include "MantidQtWidgets/SliceViewer/PeakPrimitives.h"
 #include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
-#include "MantidGeometry/Crystal/PeakTransform.h"
 #include <boost/optional.hpp>
 
 class QPainter;
@@ -22,7 +24,7 @@ struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationViewInformation {
 class PeakBoundingBox;
 
 /// Alisas for a boost optional double.
-typedef boost::optional<double> optional_double;
+using optional_double = boost::optional<double>;
 
 /** PeakRepresentation : Allows the draw a general visual peak shape.
 
@@ -60,6 +62,9 @@ public:
   /// Transform the coordinates.
   virtual void
   movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) = 0;
+  virtual void
+  movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform,
+                            NonOrthogonalAxis &info) = 0;
   /// Get the bounding box.
   virtual PeakBoundingBox getBoundingBox() const = 0;
   /// Set the size of the cross peak in the viewing plane
@@ -82,8 +87,8 @@ protected:
                       PeakRepresentationViewInformation viewInformation) = 0;
 };
 
-typedef std::shared_ptr<PeakRepresentation> PeakRepresentation_sptr;
-typedef std::vector<PeakRepresentation_sptr> VecPeakRepresentation;
+using PeakRepresentation_sptr = std::shared_ptr<PeakRepresentation>;
+using VecPeakRepresentation = std::vector<PeakRepresentation_sptr>;
 }
 }
 

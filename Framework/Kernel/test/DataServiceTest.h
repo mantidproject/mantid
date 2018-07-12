@@ -229,6 +229,49 @@ public:
     TS_ASSERT(!svc.doesExist("NOTone"));
   }
 
+  void test_does_all_exist() {
+    auto one = boost::make_shared<int>(1);
+    auto two = boost::make_shared<int>(2);
+
+    const std::string oneName = "one";
+    const std::string twoName = "two";
+
+    svc.add(oneName, one);
+    svc.add(twoName, two);
+
+    std::vector<std::string> expectedNames{oneName, twoName};
+
+    TS_ASSERT(svc.doAllWsExist(expectedNames));
+  }
+
+  void test_does_all_exist_partial() {
+    auto one = boost::make_shared<int>(1);
+
+    const std::string oneName = "one";
+
+    svc.add(oneName, one);
+
+    std::vector<std::string> expectedNames{oneName};
+
+    TS_ASSERT(svc.doAllWsExist(expectedNames));
+  }
+
+  void test_does_all_exist_missing_ws() {
+    auto one = boost::make_shared<int>(1);
+    auto two = boost::make_shared<int>(2);
+
+    const std::string oneName = "one";
+    const std::string twoName = "two";
+    const std::string threeName = "three";
+
+    svc.add(oneName, one);
+    svc.add(twoName, two);
+
+    std::vector<std::string> expectedNames{oneName, twoName, threeName};
+
+    TS_ASSERT(!svc.doAllWsExist(expectedNames));
+  }
+
   void test_size() {
     TS_ASSERT_EQUALS(svc.size(), 0);
     svc.add("something", boost::make_shared<int>(-1));
@@ -295,8 +338,8 @@ public:
     svc.add("Four", four);
     svc.add("Two", two);
 
-    typedef Mantid::Kernel::DataServiceSort sortedEnum;
-    typedef Mantid::Kernel::DataServiceHidden hiddenEnum;
+    using sortedEnum = Mantid::Kernel::DataServiceSort;
+    using hiddenEnum = Mantid::Kernel::DataServiceHidden;
 
     // First assert that sort does not impact size
     TS_ASSERT_EQUALS(svc.getObjectNames(sortedEnum::Sorted).size(),

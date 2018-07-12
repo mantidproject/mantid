@@ -5,6 +5,7 @@
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "DllConfig.h"
 #include "EnggDiffFittingViewQtWidget.h"
+#include "EnggDiffGSASFittingViewQtWidget.h"
 #include "IEnggDiffractionPresenter.h"
 #include "IEnggDiffractionView.h"
 #include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
@@ -122,8 +123,6 @@ public:
 
   void enableCalibrateFocusFitUserActions(bool enable) override;
 
-  std::string focusingDir() const override;
-
   std::vector<std::string> focusingRunNo() const override;
 
   std::vector<std::string> focusingCroppedRunNo() const override;
@@ -191,7 +190,7 @@ private slots:
   void browseInputDirRaw();
   void browsePixelCalibFilename();
   void browseTemplateGSAS_PRM();
-  void browseDirFocusing();
+  void forceRecalculateStateChanged();
 
   // slots for the focusing options
   void browseTextureDetGroupingFile();
@@ -262,6 +261,7 @@ private:
   Ui::EnggDiffractionQtTabPreproc m_uiTabPreproc;
   // Ui::EnggDiffractionQtTabFitting m_uiTabFitting;
   EnggDiffFittingViewQtWidget *m_fittingWidget;
+  EnggDiffGSASFittingViewQtWidget *m_gsasWidget;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
   /// converts QList to a vector

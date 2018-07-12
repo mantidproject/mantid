@@ -66,4 +66,6 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISSANS
   OSX_INSTALL_RPATH
     @loader_path/../../Contents/MacOS
     @loader_path/../../plugins/qt4
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt4/"
 )

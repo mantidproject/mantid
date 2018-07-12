@@ -174,7 +174,7 @@ signals:
   void fileTextChanged(const QString &);
   /// Emitted when the editing has finished
   void fileEditingFinished();
-  // Emitted when files finding starts.
+  /// Emitted when files finding starts.
   void findingFiles();
   /// Emitted when files have been found
   void filesFound();
@@ -196,8 +196,10 @@ public slots:
   void setFileTextWithoutSearch(const QString &text);
   /// Clear the search from the widget
   void clear();
-  /// Find the files within the text edit field and cache their full paths
+  /// Find the files if the text edit field is modified
   void findFiles();
+  /// Find the files within the text edit field and cache their full paths
+  void findFiles(bool isModified);
   boost::shared_ptr<const Mantid::API::IAlgorithm> stopLiveAlgorithm();
 
 public:
@@ -226,6 +228,10 @@ private:
   void refreshValidator();
   /// Turn on/off display of validator red star (default is on)
   void setValidatorDisplay(bool display);
+  /// gets text to use for find files search parameters
+  const QString findFilesGetSearchText(QString &searchText);
+  /// handles findFiles background thread
+  void runFindFiles(const QString &searchText);
   /// Helper method to create a FindFilesSearchParameters object
   FindFilesSearchParameters
   createFindFilesSearchParameters(const std::string &text) const;

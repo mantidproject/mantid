@@ -103,7 +103,7 @@ int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
   bool ffvFound = boost::starts_with(line, "FileFormatVersion");
 
   // Next few lines should be key-value pairs
-  boost::regex kvPair("[\\w_]+\\s+[\\w\\d\\.\\-]+(\\s+[\\w\\d\\.\\-\\$]+)*");
+  boost::regex kvPair(R"([\w_]+\s+[\w\d\.\-]+(\s+[\w\d\.\-\$]+)*)");
   int kvPairsFound = 0;
 
   for (int i = 0; i < 3 && !line.empty(); i++) {
@@ -246,7 +246,7 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
                                  header + "\"",
                        lineNum);
 
-  std::string numberRegex = "(-?\\d+(\\.\\d+)?([Ee][-\\+]?\\d+)?)";
+  std::string numberRegex = R"((-?\d+(\.\d+)?([Ee][-\+]?\d+)?))";
   // static_cast is safe as realistically our file is never going to have enough
   // columns to overflow
   std::string rawRegex = "^\\s*" +

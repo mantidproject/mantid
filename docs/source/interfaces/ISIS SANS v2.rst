@@ -13,7 +13,7 @@ ISIS SANS v2
 Interface Overview
 ------------------
 
-This interface is used to reduce ISIS SANS data for SANS2D, LOQ and LARMOR.
+This interface is used to reduce ISIS SANS data for SANS2D, LOQ,LARMOR and ZOOM.
 The interface can be accessed from the main menu of MantidPlot, in *Interfaces → SANS → ISIS SANS v2 experimental*.
 This interface is intended as a gradual replacement for the old ISIS SANS
 interface. Note that it is not yet feature complete and subject to change.
@@ -94,8 +94,11 @@ Columns
 | **User File**            |   User file to use for this row. If specified it will override any options set in the GUI,      |
 |                          |   otherwise the default file will be used.                                                      |
 +--------------------------+-------------------------------------------------------------------------------------------------+
+| **Sample Thickness**     |   Sets the sample thickness to be used in the reduction.                                        |
+|                          |                                                                                                 |
++--------------------------+-------------------------------------------------------------------------------------------------+
 | **Options**              |   This column allows the user to provide row specific settings. Currently only **WavelengthMin**|
-|                          |   and WavelengthMax can be set here.                                                            |
+|                          |   , **WavelengthMax** and **EventSlices** can be set here.                                      |
 +--------------------------+-------------------------------------------------------------------------------------------------+
 
 Save Options
@@ -120,6 +123,8 @@ Save Options
 |       |                          | loaded into other analysis software.                                                    |
 |       |                          | The **Use optimizations** option will reuse already loaded data. This can speed up the  |
 |       |                          | data reduction considerably. It is recommended to have this option enabled.             |
+|       |                          | The **Plot results** option controls whether the reduced data is automatically plotted  |
+|       |                          | to a graph or not.                                                                      |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 
 Settings
@@ -134,9 +139,9 @@ Settings
 The Settings tab and its sub-tabs allow for manipulating and inspecting the reduction parameters which were
 initially set through loading a user file.  Currently there are five sub-tabs:
 
-- **General, Wavelength, Scale, Event Slice, Sample** This tab contains settings which are not associated
-  with the other tabs. This includes settings regarding the general reduction, the wavelength conversion,
-  the absolute scaling of the data, event slicing and sample volume scaling.
+- **General, Scale, Event Slice, Sample** This tab contains settings which are not associated
+  with the other tabs. This includes settings regarding the general reduction, the absolute scaling of the data, 
+  event slicing and sample volume scaling.
 
 - **Mask** The mask tab contains the masking information. It displays the selected masks in the
   familiar mask table.
@@ -161,7 +166,7 @@ General
 .. _General:
 
 .. image::  ../images/sans_isis_v2_general_tab_general.png
-   :align: right
+   :align: center
    :width: 800px
 
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
@@ -179,7 +184,7 @@ General
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
 | **4** | **Merge fit custom q range** | Describes the q region which should be used to determine the merge parameters.               |
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
-| **5** | **Merge custom q range**     | Describes the q region in which the merged data should be used. Outside of this region the   |                            
+| **5** | **Merge custom q range**     | Describes the q region in which the merged data should be used. Outside of this region the   |
 |       |                              | uncombined **HAB** or **LAB** data is used.                                                  |
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
 
@@ -188,20 +193,20 @@ Event Slice
 .. _Event_Slice:
 
 .. image::  ../images/sans_isis_v2_general_tab_event_slice.png
-   :align: right
+   :align: center
    :width: 800px
 
 In case of data which was measured in event-mode, it is possible to perform
 time-of-flight slices of the data and reduce these separately. The input can be:
 
-- *start:step:stop* specifies time slices from a *start* value for the *stop* value
-  in steps of *step*.
+- ``start:step:stop`` specifies time slices from a ``start`` value for the ``stop`` value
+  in steps of ``step``.
 
-- *start-stop* which specifies a time slice from the *start* value to the *stop* value.
+- ``start-stop`` which specifies a time slice from the ``start`` value to the ``stop`` value.
 
-- *>start* specifies a slice form the *start* value to the end of the data set.
+- ``>start`` specifies a slice form the ``start`` value to the end of the data set.
 
-- *<stop* specifies a slice form the start of the data set to the *stop* value
+- ``<stop`` specifies a slice form the start of the data set to the ``stop`` value
 
 In addition it is possible to concatenate these specifications using comma-separation.
 An example would be *5-10,12:2:16,20-30*.
@@ -212,7 +217,7 @@ Compatibility Mode
 .. _Compatibility_Mode:
 
 .. image::  ../images/sans_isis_v2_general_tab_event_binning.png
-   :align: right
+   :align: center
    :width: 800px
 
 The old SANS GUI allows event-mode data as input but will convert it early on
@@ -229,27 +234,6 @@ If the check-box is enabled, then the time-of-flight binning parameters will be
 taken from the *Event binning* input. If this is not set, then the binning
 parameters will be taken from the monitor workspace.
 
-Wavelength
-""""""""""
-.. _Wavelength:
-
-.. image::  ../images/sans_isis_v2_general_tab_wavelength_conversion.png
-   :align: right
-   :width: 800px
-
-The settings provide the binning for the conversion from
-time-of-flight units to wavelength units. Note that all units are Angstrom.
-
-+-------+---------------+------------------------------------------+
-| **1** | **Min**       | The lower bound of the wavelength bins.  |
-+-------+---------------+------------------------------------------+
-| **2** | **Max**       | The upper bound of the wavelength bins.  |
-+-------+---------------+------------------------------------------+
-| **3** | **Step**      | The step of the wavelength bins.         |
-+-------+---------------+------------------------------------------+
-| **4** | **Step type** | The step type of the wavelength bins,    |
-|       |               | i.e. linear, logarithmic or variable.    |
-+-------+---------------+------------------------------------------+
 
 Scale and Sample
 """"""""""""""""
@@ -286,8 +270,8 @@ Mask
 ^^^^
 .. _Mask:
 
-.. image::  ../images/sans_isis_v2_general_tab_whole.png
-   :align: right
+.. image::  ../images/sans_isis_v2_mask_tab_whole.png
+   :align: center
    :width: 800px
 
 The elements on this tab relate to settings which are used during the masking step.
@@ -303,7 +287,7 @@ Masking information
 
 The masking table shows detailed information about the masks which will be applied.
 These masks include bin masks, cylinder masks, mask files, spectrum masks, angle masks
-and masks for the beam stop. If as mask is applied only to a particular detector
+and line masks for the beam stop arm. If a mask is applied only to a particular detector
 then this will be shown in the masking table. Note that data needs to be specified
 in order to see the masking information. Also note if a manual change to the
 data table or other settings, requires you to update the row selection by
@@ -321,46 +305,12 @@ pressing *Update Rows*.
 |       |                 | These changes are currently not picked up automatically.         |
 +-------+-----------------+------------------------------------------------------------------+
 
-Phi limit
-"""""""""
-.. _Phi_Limit:
-
-.. image::  ../images/sans_isis_v2_masking_tab_phi.png
-   :align: right
-   :width: 400px
-
-This group allows the user to specify an angle (pizza-slice) mask. The angles
-are in degree.
-
-+-------+-----------------+---------------------------------------+
-| **1** | **Start angle** | The starting angle.                   |
-+-------+-----------------+---------------------------------------+
-| **2** | **Stop angle**  | The stop angle.                       |
-+-------+-----------------+---------------------------------------+
-| **3** | **Use mirror**  | If the mirror sector should be used.  |
-+-------+-----------------+---------------------------------------+
-
-
-Radius limit
-""""""""""""
-.. _Radius_Limit:
-
-.. image::  ../images/sans_isis_v2_masking_tab_radius.png
-   :align: right
-   :width: 400px
-
-These settings allow for a hollow cylinder mask. The *Min* entry is the inner
-radius and the *Max* entry is the outer radius of the
-hollow cylinder.
-
-
-
 Adjustment
 ^^^^^^^^^^
 .. _Adjustment:
 
 .. image::  ../images/sans_isis_v2_adjustment_tab_whole.png
-   :align: right
+   :align: center
    :width: 800px
 
 This tab provides settings which are required for the creation of the adjustment
@@ -372,7 +322,7 @@ Monitor normalization
 .. _Monitor_Normalization:
 
 .. image::  ../images/sans_isis_v2_adjustment_tab_monitor_normalization.png
-   :align: right
+   :align: center
    :width: 800px
 
 +-------+------------------------------+--------------------------------------------------------+
@@ -394,7 +344,7 @@ Incident monitor
 ~~~~~~~~~~~~~~~~
 
 .. image::  ../images/sans_isis_v2_adjustment_tab_monitor_normalization.png
-   :align: right
+   :align: center
    :width: 800px
 
 +-------+------------------------------+--------------------------------------------------------+
@@ -408,7 +358,7 @@ Transmission targets
 ~~~~~~~~~~~~~~~~~~~~
 
 .. image::  ../images/sans_isis_v2_adjustment_tab_transmission_monitor.png
-   :align: right
+   :align: center
    :width: 800px
 
 +-------+--------------------------+------------------------------------------------------------------------------------------------+
@@ -451,7 +401,7 @@ for the transmission calculation.
 The following example/image should help to clarify the selection process:
 
 .. image::  ../images/sans_isis_v2_trans_calc_example.png
-   :align: right
+   :align: center
    :width: 400
 
 The radius selection (red) picks pixels 8, 9, 13 and14. The ROI files (red) select pixels 9, 10, 11, 12, 14, 15, 16 and 17.
@@ -464,7 +414,7 @@ Fit settings
 ~~~~~~~~~~~~
 
 .. image::  ../images/sans_isis_v2_adjustment_tab_transmission_fit.png
-   :align: right
+   :align: center
    :width: 800px
 
 +-------+-----------------+---------------------------------------+-----------------------------------------------------------------+
@@ -489,7 +439,7 @@ Adjustment files
 ~~~~~~~~~~~~~~~~
 
 .. image::  ../images/sans_isis_v2_adjustment_tab_files.png
-   :align: right
+   :align: center
    :width: 800px
 
 +-------+---------------------------------+------------------------------------------------------------------------------------------------+
@@ -516,17 +466,105 @@ Q
 .. _Q:
 
 .. image::  ../images/sans_isis_v2_q_tab_whole.png
-   :align: right
+   :align: center
    :width: 800px
 
 The elements on this tab relate to settings which are used during the conversion to momentum transfer step of the reduction.
+
+Phi limit
+"""""""""
+.. _Phi_Limit:
+
+.. image::  ../images/sans_isis_v2_masking_tab_phi.png
+   :align: right
+   :width: 400px
+
+This group allows the user to specify an angle (pizza-slice) mask. The angles
+are in degree.
+
++-------+-----------------+---------------------------------------+
+| **1** | **Start angle** | The starting angle.                   |
++-------+-----------------+---------------------------------------+
+| **2** | **Stop angle**  | The stop angle.                       |
++-------+-----------------+---------------------------------------+
+| **3** | **Use mirror**  | If the mirror sector should be used.  |
++-------+-----------------+---------------------------------------+
+
+
+Radius limit
+""""""""""""
+.. _Radius_Limit:
+
+.. image::  ../images/sans_isis_v2_masking_tab_radius.png
+   :align: right
+   :width: 400px
+
+These settings allow for a hollow cylinder mask. The *Min* entry is the inner
+radius and the *Max* entry is the outer radius of the
+hollow cylinder.
+
+Wavelength
+""""""""""
+.. _Wavelength:
+
+.. image::  ../images/sans_isis_v2_general_tab_wavelength_conversion.png
+   :align: center
+   :width: 800px
+
+The settings provide the binning for the conversion from
+time-of-flight units to wavelength units. Note that all units are Angstrom.
+Depending on which Step type you have chosen you will be asked to enter either
+a Max and Min wavelength value between which to do the reduction or to specify a
+set of wavelength ranges to reduce between. The syntax for the latter case is the
+same as that used to specify event slices and is 
+
+- ``start:step:stop`` specifies wavelength slices from a ``start`` value for the ``stop`` value
+  in steps of `step`.
+
+- ``start-stop`` which specifies a wavelength slice from the ``start`` value to the ``stop`` value.
+
+- ``>start`` specifies a slice from the ``start`` value to the end of the data set.
+
+- ``<stop`` specifies a slice from the start of the data set to the ``stop`` value
+
+In addition it is possible to concatenate these specifications using comma-separation.
+An example would be ``5-10,12:2:16,20-30``.
+
++-------+---------------+------------------------------------------+
+| **1** | **Min**       | The lower bound of the wavelength bins.  |
++-------+---------------+------------------------------------------+
+| **2** | **Max**       | The upper bound of the wavelength bins.  |
++-------+---------------+------------------------------------------+
+| **3** | **Step**      | The step of the wavelength bins.         |
++-------+---------------+------------------------------------------+
+| **4** | **Step type** | The step type of the wavelength bins,    |
+|       |               | i.e. linear, logarithmic range linear or |
+|       |               | ranged logarithmic.                      |
++-------+---------------+------------------------------------------+
+| **5** | **Ranges**    | A set of wavelength ranges. This option  |
+|       |               | only appears if a range step type is     |
+|       |               | selected.                                |
++-------+---------------+------------------------------------------+  
+
+Cuts
+""""
+
+.. _Cuts:
+
+.. image::  ../images/sans_isis_v2_q_tab_cuts.png
+   :align: center
+   :width: 800px
+
+These allow radius and wavelength cuts to be set. They 
+are passed to :ref:`Q1D <algm-Q1D>` as the RadiusCut and
+WaveCut respectively.
 
 Q limits
 """"""""
 .. _Q_Limits:
 
 .. image::  ../images/sans_isis_v2_q_tab_q_limits.png
-   :align: right
+   :align: center
    :width: 800px
 
 The entries here allow for the providing the binning settings during the momentum transfer conversion. In the
@@ -548,7 +586,7 @@ Gravity correction
 .. _Gravity_Correction:
 
 .. image::  ../images/sans_isis_v2_q_tab_gravity_correction.png
-   :align: right
+   :align: center
    :width: 800px
 
 Enabling the check-box will enable the gravity correction. In this case an additional length can be specified.
@@ -559,7 +597,7 @@ Q Resolution
 .. _Q_Resolution:
 
 .. image::  ../images/sans_isis_v2_q_tab_q_resolution.png
-   :align: right
+   :align: center
    :width: 800px
 
 If you want to perform a momentum transfer resolution calculation then enable the check-box of this group.
@@ -656,26 +694,190 @@ finder.
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **2** | **Centre Position HAB**  | The centre position of the high angle bank. The first coordinate is horizontal          |
 |       |                          | and the second vertical. These boxes are populated by the user file and the values here |
-|       |                          | are used by the reduction.                                                              | 
+|       |                          | are used by the reduction.                                                              |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **3** | **Minimum radius limit** | The minimum radius of the region used to ascertain centre position.                     |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **4** | **Maximum radius limit** | The maximum radius of the region used to ascertain centre position.                     |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **5** | **Max iterations**       | The maximum number of iterations the algorithm will perform before concluding its       |
+| **5** | **Minimum Q limit**      | The minimum Q of the region used to ascertain centre position.                          |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **6** | **Maximum Q limit**      | The maximum Q of the region used to ascertain centre position.                          |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **7** | **Max iterations**       | The maximum number of iterations the algorithm will perform before concluding its       |
 |       |                          | search.                                                                                 |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **6** | **Tolerance**            | If the centre position moves by less than this in an iteration the algorithm will       |
+| **8** | **Tolerance**            | If the centre position moves by less than this in an iteration the algorithm will       |
 |       |                          | conclude its search.                                                                    |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **7** | **Left/Right**           | Controls whether the beam centre finder searches for the centre in the                  |
-|       |                          | left/right direction.                                                                   |   
+| **9** | **General Options**      | The **Verbose** option will store the output workspaces from all iterations in memory.  |
+|       |                          | The **Initial COM** option will if checked use a centre of mass estimate as the starting|
+|       |                          | point of the search rather than the user input value.                                   |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **8** | **Up/Down**              | Controls whether the beam centre finder searches for the centre in the                  |
-|       |                          | up/down direction.                                                                      |
+| **10**| **Left/Right**           | Controls whether the beam centre finder searches for the centre in the                  |
+|       |                          | left/right and up/down directions.                                                      |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **9** | **Run**                  | Runs the beam centre finder the boxes **1** and **2** are updated with new              |
+| **11**| **Run**                  | Runs the beam centre finder the boxes **1** and **2** are updated with new              |
 |       |                          | values upon completion.                                                                 |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+
+Run Summation
+-------------
+
+.. image:: ../images/sans_isis_v2_add_runs_tab.png
+   :align: center
+   :width: 800px
+
+.. _Run_Summation:
+
+The Run Summation tab is used to perform addition of two or more run files, saving the output to a
+single file. The user builds a list of multiple histogram or event files (but not mixed) before
+pressing the sum button to produce a single output file in the mantid output directory.
+
+Runs To Sum
+^^^^^^^^^^^^
+
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **1** | **Run Query Box**         | This box is used to add runs to the summation table below. The user can enter one or    |
+|       |                           | more comma separated run numbers and press **Add** or the enter key to search for runs  |
+|       |                           | with a matching number.                                                                 |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **2** | **Run Summation List**    | This list contains the files to be summed.                                              |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **3** | **Browse**                | This button is used to select one or more nexus files to be added to the summation      |
+|       |                           | table.                                                                                  |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **4** | **Manage Directories**    | Opens the 'Manage User Directories' window allowing the user to add/remove directories  |
+|       |                           | from the mantid search path and to set the 'Output Folder' where the summation result   |
+|       |                           | will be saved.                                                                          |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **5** | **Remove**                | Removes an entry from the summation table. Note, this does not delete the file itself,  |
+|       |                           | it just removes it from the list of files to be summed.                                 |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **6** | **Remove All**            | Removes all entries from the summation table. As above, this will only remove the       |
+|       |                           | entries from the table, not the files themselves.                                       |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+
+Histogram Binning
+^^^^^^^^^^^^^^^^^
+
+This panel allows the user to specify the binning parameters to be applied when summing event data.
+There are three different ways to add files containing event data [#no-effect-when-non-event]_.
+
+Custom Binning
+""""""""""""""
+
+If this option is chosen a line edit field becomes available which the user can use to set the
+preferred binning boundaries. The format of this input is identical to the format required by the
+:doc:`Rebin Algorithm <../algorithms/Rebin-v1>`.
+
+    A comma separated list of first bin boundary, width, last bin boundary. Optionally this can be
+    followed by a comma and more widths and last boundary pairs. Optionally this can also be a single
+    number, which is the bin width. In this case, the boundary of binning will be determined by minimum
+    and maximum TOF values among all events, or previous binning boundary, in case of event Workspace,
+    or non-event Workspace, respectively. Negative width values indicate logarithmic binning.
+
+Use Binning From Monitors
+"""""""""""""""""""""""""
+
+If this option is chosen the binning is taken from the monitors.
+
+Save As Event Data
+""""""""""""""""""
+
+If this option is chosen, the output file will contain event data. The output is not an event
+workspace but rather a group workspace, which contains two child event workspaces, one for the
+added event data and one for the added monitor data.
+
+With **'Overlay Event Workspaces' Disabled** the event data from the files is added using the event
+the :doc:`Plus Algorithm <../algorithms/Plus-v1>`. Timestamps of the events and of the logs are not
+changed as indicated in the image below.
+
+.. figure:: ../images/sans_isis_v2_add_tabs_no_overlay.png
+   :align: center
+   :width: 600px
+
+   Simple addition of event data
+
+With **'Overlay Event Workspaces' Enabled** and **no Additional Time Shifts** specified, the event data of
+the different files is shifted on top of each other.
+
+In the case of two workspaces the time difference between them is determined by the difference
+between their first entry in the proton charge log. This time difference is then applied to all
+timestamps of the second workspace. The second workspace is essentially laid on the first. The same
+principle applies if more than two workspaces are involved as this is a pairwise operation. The
+working principle is illustrated below:
+
+.. figure:: ../images/sans_isis_v2_add_tabs_overlay.png
+   :align: center
+   :width: 600px
+
+   Adding two workspaces by overlaying them
+
+Note that the underlying mechanism for time shifting is provided by the
+:doc:`ChangeTimeZero Algorithm <../algorithms/ChangeTimeZero-v1>`. Using this option will result in a
+change to the history of the underlying data.
+
+With **'Overlay Event Workspaces' Enabled** you can specify **Additional Time Shifts**.
+Additional time shifts are specified as a comma separated list of numbers where each shift is the
+time to shift by in seconds. The list should contain exactly *N-1* entries where *N* is the number of
+runs to be summed.
+
+Similar to the case above the workspaces are overlaid. This specified time shift is in addition to
+the actual overlay operation. A positive time shift will shift the second workspace into the future,
+whereas a negative time shift causes a shift into the past. This allows the user to fine tune the
+overlay mechanism. Both situations are illustrated below.
+
+.. figure:: ../images/sans_isis_v2_add_tabs_pos_time_shift.png
+   :align: center
+   :width: 500px
+
+   Overlaid workspaces with a positive time shift (into the future).
+
+.. figure:: ../images/sans_isis_v2_add_tabs_neg_time_shift.png
+   :align: center
+   :width: 500px
+
+   Overlaid workspaces with a negative time shift (into the past).
+
+Just as above, using this option means that the history of the underlying data will be changed.
+
+.. [#no-effect-when-non-event] These options have no effect when adding non-event data files.
+
+
+Diagnostic tab
+---------------
+
+.. image::  ../images/sans_isis_v2_diagnostic.png
+   :align: right
+   :width: 800px
+
+.. _Diagnostic:
+
+The diagnistic tab allows quick integrations to be done on a workspace.
+
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **1** | **User File**            | The currently loaded user file, this is loaded on the runs tab                          |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **2** | **Run**                  | The run number of file name to be considered the instrument is taken from the run tab   |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **3** | **Detector**             | The detector to be considered                                                           |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **4** | **Period**               | The period to be considered if applicable if left blank will do all periods             |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **5** | **Integration buttons**  | These three buttons start an integration on the selected workspace. The horizontal      |
+|       |                          | integral sums up each row, the vertical integral each column and the time integral      |
+|       |                          | sums across time bins.                                                                  |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **6** | **Range**                | The range over which to do the integration. If integrating columns this is a range of   |
+|       |                          | rows, if summing rows a range of columns and if summing bins a range of spectra.        |
+|       |                          | Dashes signify a range so 1-5 for instance will integrate between rows 1 and 5          |
+|       |                          | Commas signify different ranges so for example 1-5, 10-20 will intrgrate over both      |
+|       |                          | ranges and plot two lines                                                               |
+|       |                          | Colons signify a list to integrate individually for example 5:7 is the same as          |
+|       |                          | typing 5,6,7 and will produce three curves.                                             |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **7** | **Mask**                 | If ticked the masks specified in the userfile will be applied before integrating        |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 
 Feedback & Comments

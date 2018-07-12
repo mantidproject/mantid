@@ -60,7 +60,7 @@ protected:
   void runPythonScript(const QString &pyInput);
 
   /// Retrieve input workspace
-  Mantid::API::MatrixWorkspace_sptr inputWorkspace();
+  Mantid::API::MatrixWorkspace_sptr inputWorkspace() const;
 
   /// Set input workspace
   void setInputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
@@ -73,15 +73,22 @@ protected:
       Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace);
 
   /// Retrieve the selected spectrum
-  int selectedSpectrum();
+  int selectedSpectrum() const;
 
   /// Retrieve the selected minimum spectrum
-  int minimumSpectrum();
+  int minimumSpectrum() const;
 
   /// Retrieve the selected maximum spectrum
-  int maximumSpectrum();
+  int maximumSpectrum() const;
 
   void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
+
+  void clearAndPlotInput(MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                         MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
+
+  void updatePlot(const std::string &outputWSName, size_t index,
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
   void updatePlot(Mantid::API::WorkspaceGroup_sptr workspaceGroup, size_t index,
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
@@ -91,10 +98,9 @@ protected:
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  virtual void
-  updatePlot(const std::string &workspaceName,
-             MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-             MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
+  void updatePlot(const std::string &workspaceName,
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
   void updatePlot(Mantid::API::MatrixWorkspace_sptr outputWS,
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
@@ -102,38 +108,8 @@ protected:
 
   void updatePlotRange(const QString &rangeName,
                        MantidQt::MantidWidgets::PreviewPlot *previewPlot,
-                       const QString &startRangePropName = "StartX",
-                       const QString &endRangePropName = "EndX");
-
-  void plotGuess(MantidQt::MantidWidgets::PreviewPlot *previewPlot,
-                 Mantid::API::IFunction_sptr function);
-
-  Mantid::API::MatrixWorkspace_sptr
-  createGuessWorkspace(Mantid::API::IFunction_sptr func, size_t wsIndex);
-
-  std::vector<double> computeOutput(Mantid::API::IFunction_sptr func,
-                                    const std::vector<double> &dataX);
-
-  Mantid::API::IAlgorithm_sptr
-  createWorkspaceAlgorithm(const std::string &workspaceName, int numSpec,
-                           const std::vector<double> &dataX,
-                           const std::vector<double> &dataY);
-
-  Mantid::API::IFunction_sptr
-  createPopulatedFunction(const std::string &funcName,
-                          Mantid::API::IFunction_sptr comp, QtProperty *group,
-                          bool tie = false, const std::string &pref = "");
-
-  Mantid::API::IFunction_sptr
-  createPopulatedFunction(const std::string &funcName, QtProperty *group,
-                          bool tie = false, const std::string &pref = "");
-
-  void populateFunction(Mantid::API::IFunction_sptr func, QtProperty *group,
-                        bool tie = false, const std::string &pref = "");
-
-  void populateFunction(Mantid::API::IFunction_sptr func,
-                        Mantid::API::IFunction_sptr comp, QtProperty *group,
-                        bool tie = false, const std::string &pref = "");
+                       const QString &startRangePropName = "",
+                       const QString &endRangePropName = "");
 
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
@@ -148,7 +124,7 @@ protected slots:
   void plotCurrentPreview();
 
   /// Sets the selected spectrum
-  void setSelectedSpectrum(int spectrum);
+  virtual void setSelectedSpectrum(int spectrum);
 
   /// Sets the maximum spectrum
   void setMaximumSpectrum(int spectrum);
@@ -171,8 +147,6 @@ private:
   IndirectDataAnalysis *m_parent;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_inputWorkspace;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
-  Mantid::API::MatrixWorkspace_sptr m_guessWorkspace;
-  int m_guessSpectrum;
   int m_selectedSpectrum;
   int m_minSpectrum;
   int m_maxSpectrum;

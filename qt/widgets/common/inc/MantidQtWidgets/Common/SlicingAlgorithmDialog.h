@@ -14,7 +14,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-typedef QMap<QString, QString> PropertyDimensionMap;
+using PropertyDimensionMap = QMap<QString, QString>;
 
 /*
 Class SlicingAlgorithmDialog

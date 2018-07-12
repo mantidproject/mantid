@@ -254,7 +254,7 @@ public:
         output = AnalysisDataService::Instance().retrieve(outName));
     Workspace2D_sptr outputWS =
         boost::dynamic_pointer_cast<Workspace2D>(output);
-    TS_ASSERT_EQUALS(outputWS->id(), "Workspace2D");
+    TS_ASSERT_EQUALS(outputWS->id(), "RebinnedOutput");
 
     double tol = 1.e-5;
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), expectedNumHists);
@@ -266,22 +266,22 @@ public:
   }
 
   void testRebinnedOutput_NoLimits() {
-    const double truth[] = {6.0, 2.041241452319315};
+    const double truth[] = {1.1, 0.331662479};
     doTestRebinned("-3.0", "3.0", 0, 3, false, 4, truth);
   }
 
   void testRebinnedOutput_RangeLimits() {
-    const double truth[] = {5.0, 1.9148542155126762};
+    const double truth[] = {1.125, 0.375};
     doTestRebinned("-2.0", "2.0", 0, 3, false, 4, truth);
   }
 
   void testRebinnedOutput_WorkspaceIndexLimits() {
-    const double truth[] = {4.5, 1.8027756377319946};
+    const double truth[] = {1.1666666667, 0.4409585512};
     doTestRebinned("-3.0", "3.0", 1, 2, false, 2, truth);
   }
 
   void testRebinnedOutput_RangeLimitsWithPartialBins() {
-    const double truth[] = {4.0, 1.4288690166235205};
+    const double truth[] = {1.1034482756, 0.3745786376};
     doTestRebinned("-1.5", "1.75", 0, 3, true, 4, truth);
   }
 

@@ -1,6 +1,5 @@
 #include "MantidAlgorithms/CompareWorkspaces.h"
 
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -12,9 +11,12 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Unit.h"
+#include "MantidParallel/Communicator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -226,8 +228,8 @@ void CompareWorkspaces::doComparison() {
   // ==============================================================================
 
   // Check that both workspaces are the same type
-  IPeaksWorkspace_sptr pws1 = boost::dynamic_pointer_cast<IPeaksWorkspace>(w1);
-  IPeaksWorkspace_sptr pws2 = boost::dynamic_pointer_cast<IPeaksWorkspace>(w2);
+  PeaksWorkspace_sptr pws1 = boost::dynamic_pointer_cast<PeaksWorkspace>(w1);
+  PeaksWorkspace_sptr pws2 = boost::dynamic_pointer_cast<PeaksWorkspace>(w2);
   if ((pws1 && !pws2) || (!pws1 && pws2)) {
     recordMismatch("One workspace is a PeaksWorkspace and the other is not.");
     return;
@@ -382,7 +384,7 @@ bool CompareWorkspaces::compareEventWorkspaces(
   ews2.sortAll(PULSETIMETOF_SORT, m_progress.get());
 
   if (!m_progress) {
-    throw new std::runtime_error("The progress pointer was found to be null!");
+    throw std::runtime_error("The progress pointer was found to be null!");
   }
 
   // Determine the tolerance for "tof" attribute and "weight" of events
@@ -803,8 +805,8 @@ bool CompareWorkspaces::checkMasking(API::MatrixWorkspace_const_sptr ws1,
 bool CompareWorkspaces::checkSample(const API::Sample &sample1,
                                     const API::Sample &sample2) {
   if (sample1.getName() != sample2.getName()) {
-    g_log.debug() << "WS1 sample name: " << sample1.getName() << "\n";
-    g_log.debug() << "WS2 sample name: " << sample2.getName() << "\n";
+    g_log.debug() << "WS1 sample name: \"" << sample1.getName() << "\"\n";
+    g_log.debug() << "WS2 sample name: \"" << sample2.getName() << "\"\n";
     recordMismatch("Sample name mismatch");
     return false;
   }
@@ -960,8 +962,8 @@ int CompareWorkspaces::compareEventsListInDetails(
 }
 
 //------------------------------------------------------------------------------------------------
-void CompareWorkspaces::doPeaksComparison(API::IPeaksWorkspace_sptr tws1,
-                                          API::IPeaksWorkspace_sptr tws2) {
+void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
+                                          PeaksWorkspace_sptr tws2) {
   // Check some table-based stuff
   if (tws1->getNumberPeaks() != tws2->getNumberPeaks()) {
     recordMismatch("Mismatched number of rows.");
@@ -1194,6 +1196,13 @@ Parallel::ExecutionMode CompareWorkspaces::getParallelExecutionMode(
       return getCorrespondingExecutionMode(StorageMode::MasterOnly);
   }
   return ExecutionMode::Invalid;
+}
+
+void CompareWorkspaces::execMasterOnly() {
+  if (communicator().rank() == 0)
+    exec();
+  else
+    setProperty("Result", true);
 }
 
 } // namespace Algorithms

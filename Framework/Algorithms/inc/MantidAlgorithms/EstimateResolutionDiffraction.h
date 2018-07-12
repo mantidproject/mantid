@@ -43,6 +43,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"EstimateDivergence"};
+  }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override;

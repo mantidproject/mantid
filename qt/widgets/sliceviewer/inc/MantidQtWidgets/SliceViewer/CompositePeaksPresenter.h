@@ -38,7 +38,8 @@ public:
   // Overrriden methods from Peaks Presenter
   void update() override;
   void updateWithSlicePoint(const PeakBoundingBox &) override;
-  bool changeShownDim() override;
+  bool changeShownDim(size_t dimX, size_t dimY) override;
+  void setNonOrthogonal(bool nonOrthogonalEnabled) override;
   bool isLabelOfFreeAxis(const std::string &label) const override;
   SetPeaksWorkspaces presentedWorkspaces() const override;
   virtual void setForegroundColor(const PeakViewColor) override {
@@ -65,9 +66,6 @@ public:
   }
   PeakBoundingBox getBoundingBox(const int peakIndex) const override {
     return m_default->getBoundingBox(peakIndex);
-  }
-  void sortPeaksWorkspace(const std::string &,
-                          const bool) override { /*Do Nothing*/
   }
   bool getShowBackground() const override {
     return m_default->getShowBackground();
@@ -134,10 +132,6 @@ public:
   /// zoom in on a peak.
   void zoomToPeak(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS,
                   const int peakIndex);
-  /// Sort the peaks workspace.
-  void sortPeaksWorkspace(
-      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS,
-      const std::string &columnToSortBy, const bool sortedAscending);
   /// Get the named peaks presenter.
   PeaksPresenter *getPeaksPresenter(const QString &name);
   /// Register any owning presenter
@@ -165,11 +159,6 @@ public:
   /// Enter the requested edit mode for the peaks workspace.
   void editCommand(EditMode editMode,
                    boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
-  /// Can we add peaks to this peaks workspace.
-  bool
-  hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
-  /// Can we add peaks
-  bool hasPeakAddMode() const override;
 
 private:
   /// Updateable on demand method.
@@ -178,7 +167,7 @@ private:
                        boost::shared_ptr<const Mantid::API::IPeaksWorkspace>
                            toWorkspace) override;
   /// Alias for container of subjects type.
-  typedef std::vector<PeaksPresenter_sptr> SubjectContainer;
+  using SubjectContainer = std::vector<PeaksPresenter_sptr>;
   /// Subject presenters.
   SubjectContainer m_subjects;
   /// Use default

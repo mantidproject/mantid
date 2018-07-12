@@ -48,7 +48,6 @@ set ( SRC_FILES
 	src/Instrument/Component.cpp
 	src/Instrument/ComponentHelper.cpp
 	src/Instrument/ComponentInfo.cpp
-	src/Instrument/ComponentVisitorHelper.cpp
 	src/Instrument/Container.cpp
 	src/Instrument/Detector.cpp
 	src/Instrument/DetectorGroup.cpp
@@ -105,20 +104,17 @@ set ( SRC_FILES
 	src/Objects/BoundingBox.cpp
 	src/Objects/CSGObject.cpp
 	src/Objects/InstrumentRayTracer.cpp
+	src/Objects/MeshObject.cpp
 	src/Objects/RuleItems.cpp
 	src/Objects/Rules.cpp
 	src/Objects/ShapeFactory.cpp
 	src/Objects/Track.cpp
-	src/Rendering/BitmapGeometryHandler.cpp
-	src/Rendering/CacheGeometryGenerator.cpp
-	src/Rendering/CacheGeometryHandler.cpp
-	src/Rendering/CacheGeometryRenderer.cpp
 	src/Rendering/GeometryHandler.cpp
-	src/Rendering/GluGeometryHandler.cpp
-	src/Rendering/GluGeometryRenderer.cpp
-	src/Rendering/StructuredGeometryHandler.cpp
+        src/Rendering/RenderingHelpers.cpp
+        src/Rendering/ShapeInfo.cpp
 	src/Rendering/vtkGeometryCacheReader.cpp
 	src/Rendering/vtkGeometryCacheWriter.cpp
+	src/Rendering/GeometryTriangulator.cpp
 	src/Surfaces/Cone.cpp
 	src/Surfaces/Cylinder.cpp
 	src/Surfaces/General.cpp
@@ -132,16 +128,8 @@ set ( SRC_FILES
 	src/Surfaces/Torus.cpp
 )
 
-set ( OPENCASCADE_SRC
-  src/Rendering/OCGeometryGenerator.cpp
-  src/Rendering/OCGeometryHandler.cpp
-  src/Rendering/OCGeometryRenderer.cpp
-)
-
 set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
   src/Instrument/ObjCompAssembly.cpp
-  src/Rendering/OCGeometryHandler.cpp
-  src/Rendering/OCGeometryRenderer.cpp
 )
 
 set ( INC_FILES
@@ -206,7 +194,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/ComponentHelper.h
 	inc/MantidGeometry/Instrument/ComponentInfo.h
 	inc/MantidGeometry/Instrument/ComponentVisitor.h
-	inc/MantidGeometry/Instrument/ComponentVisitorHelper.h
 	inc/MantidGeometry/Instrument/Container.h
 	inc/MantidGeometry/Instrument/Detector.h
 	inc/MantidGeometry/Instrument/DetectorGroup.h
@@ -271,23 +258,17 @@ set ( INC_FILES
 	inc/MantidGeometry/Objects/CSGObject.h
 	inc/MantidGeometry/Objects/IObject.h
 	inc/MantidGeometry/Objects/InstrumentRayTracer.h
+        inc/MantidGeometry/Objects/MeshObject.h
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
-	inc/MantidGeometry/Rendering/BitmapGeometryHandler.h
-	inc/MantidGeometry/Rendering/CacheGeometryGenerator.h
-	inc/MantidGeometry/Rendering/CacheGeometryHandler.h
-	inc/MantidGeometry/Rendering/CacheGeometryRenderer.h
 	inc/MantidGeometry/Rendering/GeometryHandler.h
-	inc/MantidGeometry/Rendering/GluGeometryHandler.h
-	inc/MantidGeometry/Rendering/GluGeometryRenderer.h
-	inc/MantidGeometry/Rendering/OCGeometryGenerator.h
-	inc/MantidGeometry/Rendering/OCGeometryHandler.h
-	inc/MantidGeometry/Rendering/OCGeometryRenderer.h
+    	inc/MantidGeometry/Rendering/RenderingHelpers.h
+    	inc/MantidGeometry/Rendering/ShapeInfo.h
 	inc/MantidGeometry/Rendering/OpenGL_Headers.h
-	inc/MantidGeometry/Rendering/StructuredGeometryHandler.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheReader.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheWriter.h
+	inc/MantidGeometry/Rendering/GeometryTriangulator.h
 	inc/MantidGeometry/Surfaces/BaseVisit.h
 	inc/MantidGeometry/Surfaces/Cone.h
 	inc/MantidGeometry/Surfaces/Cylinder.h
@@ -317,7 +298,6 @@ set ( TEST_FILES
 	ComponentInfoTest.h
 	ComponentParserTest.h
 	ComponentTest.h
-	ComponentVisitorHelperTest.h
 	CompositeBraggScattererTest.h
 	CompositeImplicitFunctionTest.h
 	ConeTest.h
@@ -363,6 +343,7 @@ set ( TEST_FILES
 	MathSupportTest.h
 	MatrixVectorPairParserTest.h
 	MatrixVectorPairTest.h
+	MeshObjectTest.h
 	NiggliCellTest.h
 	NullImplicitFunctionTest.h
 	ObjCompAssemblyTest.h
@@ -410,6 +391,7 @@ set ( TEST_FILES
 	SampleEnvironmentTest.h
 	ScalarUtilsTest.h
 	ShapeFactoryTest.h
+        ShapeInfoTest.h
 	SpaceGroupFactoryTest.h
 	SpaceGroupTest.h
 	SphereTest.h
@@ -446,11 +428,6 @@ if(UNITY_BUILD)
   enable_unity_build(Geometry SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-# ===================== Open Cascade ===================
-if (ENABLE_OPENCASCADE)
-  LIST (APPEND SRC_FILES ${OPENCASCADE_SRC} )
-endif ()
-
 # A few defines needed for OpenCascade on the Mac
 if ( APPLE )
   add_definitions ( -DHAVE_IOSTREAM -DHAVE_LIMITS -DHAVE_IOMANIP )
@@ -469,7 +446,9 @@ set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry
                                             COMPILE_DEFINITIONS IN_MANTID_GEOMETRY )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( Geometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(Geometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(Geometry PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 if (ENABLE_OPENCASCADE)
@@ -480,7 +459,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Geometry LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}  ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${JSONCPP_LIBRARIES} )
+target_link_libraries ( Geometry LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${JSONCPP_LIBRARIES} )
 
 target_link_libraries ( Geometry LINK_PUBLIC ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES} )
 

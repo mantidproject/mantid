@@ -333,7 +333,7 @@ private:
 };
 
 /// Typedef for a shared pointer to a MantidMatrix
-typedef QSharedPointer<MantidMatrix> MantidMatrix_sptr;
+using MantidMatrix_sptr = QSharedPointer<MantidMatrix>;
 
 class ProjectData {
 public:

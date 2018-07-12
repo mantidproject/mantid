@@ -97,7 +97,7 @@ class MANTID_CURVEFITTING_DLL AugmentedLagrangianOptimizer {
 
 public:
   /// Function type
-  typedef boost::function<double(const size_t, const double *)> ObjFunction;
+  using ObjFunction = boost::function<double(const size_t, const double *)>;
 
 public:
   /**

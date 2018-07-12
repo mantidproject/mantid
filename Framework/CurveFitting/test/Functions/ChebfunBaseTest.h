@@ -115,8 +115,7 @@ private:
     ChebfunBase base(n, start, end);
     auto p = base.fit(fun);
     auto x = base.linspace(2 * n);
-    for (size_t i = 0; i < x.size(); ++i) {
-      double xi = x[i];
+    for (double xi : x) {
       TS_ASSERT_DELTA(base.eval(xi, p), fun(xi), 1e-4);
     }
   }
@@ -148,8 +147,7 @@ private:
     std::vector<double> p, a;
     auto base = ChebfunBase::bestFit(start, end, fun, p, a);
     auto x = base->linspace(2 * base->size());
-    for (size_t i = 0; i < x.size(); ++i) {
-      double xi = x[i];
+    for (double xi : x) {
       TS_ASSERT_DELTA(base->eval(xi, p), fun(xi), 1e-14);
     }
     TS_ASSERT_EQUALS(base->size(), expected_n);
@@ -169,8 +167,7 @@ private:
     base->derivative(a, da);
     dp = base->calcP(da);
     auto x = base->linspace(2 * base->size());
-    for (size_t i = 0; i < x.size(); ++i) {
-      double xi = x[i];
+    for (double xi : x) {
       // std::cerr << xi << ' ' << base->eval(xi,dp) - Cos(xi) << '\n';
       TS_ASSERT_DELTA(base->eval(xi, dp), deriv(xi), 1e-13);
     }
@@ -182,8 +179,8 @@ private:
     auto base = ChebfunBase::bestFit(start, end, fun, p, a);
     auto roots = base->roots(a);
     TS_ASSERT_EQUALS(n_roots, roots.size());
-    for (size_t i = 0; i < roots.size(); ++i) {
-      TS_ASSERT_DELTA(base->eval(roots[i], p), 0.0, tol);
+    for (double root : roots) {
+      TS_ASSERT_DELTA(base->eval(root, p), 0.0, tol);
     }
   }
 };

@@ -58,7 +58,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
   // This is currenly the case for algorithms that take an array of strings as
   // an input where each entry is the name of a workspace.
   if (this->useCustomWorkspaceProperty()) {
-    typedef std::vector<std::string> WorkspaceNameType;
+    using WorkspaceNameType = std::vector<std::string>;
 
     // Perform a check that the input property is the correct type.
     Property *inputProperty =
@@ -85,7 +85,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
                                         vecWorkspaceGroups);
     }
   } else {
-    typedef std::vector<boost::shared_ptr<Workspace>> WorkspaceVector;
+    using WorkspaceVector = std::vector<boost::shared_ptr<Workspace>>;
     WorkspaceVector inWorkspaces;
     WorkspaceVector outWorkspaces;
     sourceAlg->findWorkspaceProperties(inWorkspaces, outWorkspaces);
@@ -112,21 +112,20 @@ bool MultiPeriodGroupWorker::useCustomWorkspaceProperty() const {
 
 /**
  * Creates a list of input workspaces as a string for a given period using all
- nested workspaces at that period
- * within all group workspaces.
-
+ * nested workspaces at that period within all group workspaces.
+ *
  * This requires a little explanation, because this is the reason that this
- algorithm needs a customised overriden checkGroups and processGroups
+ * algorithm needs a customised overriden checkGroups and processGroups
  * method:
-
+ *
  * Say you have two multiperiod group workspaces A and B and an output workspace
- C. A contains matrix workspaces A_1 and A_2, and B contains matrix workspaces
- B_1 and B2. Because this
- * is multiperiod data. A_1 and B_1 share the same period, as do A_2 and B_2. So
- merging must be with respect to workspaces of equivalent periods. Therefore,
- * merging must be A_1 + B_1 = C_1 and A_2 + B_2 = C_2. This method constructs
- the inputs for a nested call to MultiPeriodGroupAlgorithm in this manner.
-
+ * C. A contains matrix workspaces A_1 and A_2, and B contains matrix workspaces
+ * B_1 and B2. Because this is multiperiod data. A_1 and B_1 share the same
+ * period, as do A_2 and B_2. So merging must be with respect to workspaces of
+ * equivalent periods. Therefore, merging must be A_1 + B_1 = C_1 and
+ * A_2 + B_2 = C_2. This method constructs the inputs for a nested call to
+ * MultiPeriodGroupAlgorithm in this manner.
+ *
  * @param periodIndex : zero based index denoting the period.
  * @param vecWorkspaceGroups : Vector of workspace groups
  * @return comma separated string of input workspaces.
@@ -205,7 +204,7 @@ bool MultiPeriodGroupWorker::processGroups(
   Property *outputWorkspaceProperty = sourceAlg->getProperty("OutputWorkspace");
   const std::string outName = outputWorkspaceProperty->value();
 
-  size_t nPeriods = vecMultiPeriodGroups[0]->size();
+  const size_t nPeriods = vecMultiPeriodGroups[0]->size();
   WorkspaceGroup_sptr outputWS = boost::make_shared<WorkspaceGroup>();
   AnalysisDataService::Instance().addOrReplace(outName, outputWS);
 
@@ -215,21 +214,20 @@ bool MultiPeriodGroupWorker::processGroups(
   for (size_t i = 0; i < nPeriods; ++i) {
     const int periodNumber = static_cast<int>(i + 1);
     // use create Child Algorithm that look like this one
-    Algorithm_sptr alg_sptr = sourceAlg->createChildAlgorithm(
+    Algorithm_sptr alg = sourceAlg->createChildAlgorithm(
         sourceAlg->name(), progress_proportion * periodNumber,
         progress_proportion * (1 + periodNumber), sourceAlg->isLogging(),
         sourceAlg->version());
-    // Don't make the new algorithm a child so that it's workspaces are stored
-    // correctly
-    alg_sptr->setChild(false);
-    alg_sptr->setRethrows(true);
-    IAlgorithm *alg = alg_sptr.get();
     if (!alg) {
       throw std::runtime_error("Algorithm creation failed.");
     }
+    // Don't make the new algorithm a child so that it's workspaces are stored
+    // correctly
+    alg->setChild(false);
+    alg->setRethrows(true);
     alg->initialize();
     // Copy properties that aren't workspaces properties.
-    sourceAlg->copyNonWorkspaceProperties(alg, periodNumber);
+    sourceAlg->copyNonWorkspaceProperties(alg.get(), periodNumber);
 
     if (this->useCustomWorkspaceProperty()) {
       const std::string inputWorkspaces =
@@ -238,7 +236,7 @@ bool MultiPeriodGroupWorker::processGroups(
       alg->setPropertyValue(this->m_workspacePropertyName, inputWorkspaces);
     } else {
       // Configure input properties that are group workspaces.
-      copyInputWorkspaceProperties(alg, sourceAlg, periodNumber);
+      copyInputWorkspaceProperties(alg.get(), sourceAlg, periodNumber);
     }
     const std::string outName_i = outName + "_" + Strings::toString(i + 1);
     alg->setPropertyValue("OutputWorkspace", outName_i);

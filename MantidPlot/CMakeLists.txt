@@ -91,6 +91,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/PluginFit.cpp
                    src/PolynomFitDialog.cpp
                    src/PolynomialFit.cpp
+                   src/ProjectRecovery.cpp
                    src/ProjectSaveView.cpp
                    src/ProjectSerialiser.cpp
                    src/PythonScript.cpp
@@ -290,6 +291,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/PluginFit.h
                    src/PolynomFitDialog.h
                    src/PolynomialFit.h
+                   src/ProjectRecovery.h
                    src/ProjectSerialiser.h
                    src/ProjectSaveView.h
                    src/PythonScript.h
@@ -740,7 +742,6 @@ copy_files_to_dir ( "${PY_FILES}"
 set( MTDPLOTPY_FILES
   __init__.py
   proxies.py
-  pyplot.py
   qtiplot.py
 )
 copy_files_to_dir ( "${MTDPLOTPY_FILES}"
@@ -808,7 +809,8 @@ target_link_libraries ( MantidPlot LINK_PRIVATE
   Qt4::Qscintilla
   ${PYTHON_LIBRARIES}
   ${ZLIB_LIBRARIES}
-  ${OPENGL_LIBRARIES}
+  ${OPENGL_glu_LIBRARY}
+  ${OPENGL_gl_LIBRARY}
 )
 
 if(MAKE_VATES)
@@ -825,6 +827,13 @@ add_dependencies( MantidPlot mantidqtpython CompilePyUI )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "@executable_path;@executable_path/../Libraries")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  if(MAKE_VATES)
+    set_target_properties(MantidPlot PROPERTIES
+                          INSTALL_RPATH "\$ORIGIN/../${LIB_DIR};\$ORIGIN/../${LIB_DIR}/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}")
+  else()
+    set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  endif()
 endif ()
 
 set_target_properties ( MantidPlot PROPERTIES FOLDER "Qt4" )
@@ -886,7 +895,6 @@ set ( MANTIDPLOT_TEST_PY_FILES
     MantidPlotMdiSubWindowTest.py
     MantidPlotTiledWindowTest.py
     MantidPlotInputArgsCheck.py
-    MantidPlotPyplotGeneralTest.py
 )
 
 if ( MAKE_VATES )
@@ -902,7 +910,16 @@ else ()
 endif ()
 
 # Add an environment property MANTID_SOURCE so that the script can find the source of xmlrunner
-set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR};PYTHONPATH=${PYTHON_XMLRUNNER_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
+if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+  set ( _python_path $ENV{PYTHONPATH};${PYTHON_XMLRUNNER_DIR} )
+  # cmake list separator and Windows environment seprator are the same so escape the cmake one
+  string ( REPLACE ";" "\\;" _python_path "${_python_path}" )
+else()
+  set ( _python_path $ENV{PYTHONPATH}:${PYTHON_XMLRUNNER_DIR} )
+endif ()
+list ( APPEND _test_environment "PYTHONPATH=${_python_path}" )
+list ( APPEND _test_environment "MANTID_SOURCE=${CMAKE_SOURCE_DIR}" )
+list ( APPEND _test_environment "MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
 # Make a ctest target for each file
 foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
   # Add the test. Name of test = name of the file
@@ -910,7 +927,7 @@ foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
   # Set the previously-built environment
   set_tests_properties ( ${PYFILE} PROPERTIES
     RUN_SERIAL 1
-    ENVIRONMENT "${TEST_ENVIRONMENT}"
+    ENVIRONMENT "${_test_environment}"
     TIMEOUT ${TESTING_TIMEOUT} )
 endforeach ()
 

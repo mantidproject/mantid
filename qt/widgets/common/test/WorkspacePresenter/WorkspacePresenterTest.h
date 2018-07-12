@@ -31,8 +31,6 @@ public:
   void setUp() override {
     mockView.reset();
     mockView = boost::make_shared<NiceMock<MockWorkspaceDockView>>();
-    mockView->init();
-
     presenter = mockView->getPresenterSharedPtr();
   }
 

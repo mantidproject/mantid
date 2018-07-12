@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -28,14 +29,14 @@ DECLARE_ALGORITHM(PredictFractionalPeaks)
 /// Initialise the properties
 void PredictFractionalPeaks::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<IPeaksWorkspace>>("Peaks", "",
-                                                      Direction::Input),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("Peaks", "",
+                                                     Direction::Input),
       "Workspace of Peaks with orientation matrix that indexed the peaks and "
       "instrument loaded");
 
   declareProperty(
-      make_unique<WorkspaceProperty<IPeaksWorkspace>>("FracPeaks", "",
-                                                      Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("FracPeaks", "",
+                                                     Direction::Output),
       "Workspace of Peaks with peaks with fractional h,k, and/or l values");
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
                       string("HOffset"), "-0.5,0.0,0.5"),
@@ -94,11 +95,10 @@ void PredictFractionalPeaks::init() {
 
 /// Run the algorithm
 void PredictFractionalPeaks::exec() {
-  IPeaksWorkspace_sptr ipeaks = getProperty("Peaks");
-  auto Peaks = boost::dynamic_pointer_cast<PeaksWorkspace>(ipeaks);
+  PeaksWorkspace_sptr Peaks = getProperty("Peaks");
   if (!Peaks)
     throw std::invalid_argument(
-        "Input workspace is not a PeaksWorkspace. Type=" + ipeaks->id());
+        "Input workspace is not a PeaksWorkspace. Type=" + Peaks->id());
 
   vector<double> hOffsets = getProperty("HOffset");
   vector<double> kOffsets = getProperty("KOffset");
@@ -123,22 +123,22 @@ void PredictFractionalPeaks::exec() {
 
   Geometry::Instrument_const_sptr Instr = Peaks->getInstrument();
 
-  boost::shared_ptr<IPeaksWorkspace> OutPeaks =
-      WorkspaceFactory::Instance().createPeaks();
+  auto OutPeaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+      WorkspaceFactory::Instance().createPeaks());
   OutPeaks->setInstrument(Instr);
 
   V3D hkl;
   int peakNum = 0;
-  int NPeaks = Peaks->getNumberPeaks();
+  const auto NPeaks = Peaks->getNumberPeaks();
   Kernel::Matrix<double> Gon;
   Gon.identityMatrix();
 
-  double Hmin = getProperty("Hmin");
-  double Hmax = getProperty("Hmax");
-  double Kmin = getProperty("Kmin");
-  double Kmax = getProperty("Kmax");
-  double Lmin = getProperty("Lmin");
-  double Lmax = getProperty("Lmax");
+  const double Hmin = getProperty("Hmin");
+  const double Hmax = getProperty("Hmax");
+  const double Kmin = getProperty("Kmin");
+  const double Kmax = getProperty("Kmax");
+  const double Lmin = getProperty("Lmin");
+  const double Lmax = getProperty("Lmax");
 
   int N = NPeaks;
   if (includePeaksInRange) {
@@ -147,7 +147,7 @@ void PredictFractionalPeaks::exec() {
     N = max<int>(100, N);
   }
   IPeak &peak0 = Peaks->getPeak(0);
-  int RunNumber = peak0.getRunNumber();
+  auto RunNumber = peak0.getRunNumber();
   Gon = peak0.getGoniometerMatrix();
   Progress prog(this, 0.0, 1.0, N);
   if (includePeaksInRange) {
@@ -165,6 +165,7 @@ void PredictFractionalPeaks::exec() {
   vector<vector<int>> AlreadyDonePeaks;
   bool done = false;
   int ErrPos = 1; // Used to determine position in code of a throw
+  Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
   while (!done) {
     for (double hOffset : hOffsets) {
       for (double kOffset : kOffsets) {
@@ -190,7 +191,7 @@ void PredictFractionalPeaks::exec() {
 
             peak->setGoniometerMatrix(Gon);
 
-            if (Qs[2] > 0 && peak->findDetector()) {
+            if (Qs[2] > 0 && peak->findDetector(tracer)) {
               ErrPos = 2;
               vector<int> SavPk{RunNumber,
                                 boost::math::iround(1000.0 * hkl1[0]),

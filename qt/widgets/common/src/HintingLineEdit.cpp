@@ -21,7 +21,6 @@ HintingLineEdit::HintingLineEdit(
   m_hintLabel->setWordWrap(true);
   m_hintLabel->setIndent(1);
   m_hintLabel->setAutoFillBackground(true);
-  m_hintLabel->setPalette(createFixedPalette());
   m_hintLabel->setForegroundRole(QPalette::ToolTipText);
   m_hintLabel->setBackgroundRole(QPalette::ToolTipBase);
   m_hintLabel->ensurePolished();
@@ -29,29 +28,6 @@ HintingLineEdit::HintingLineEdit(
   connect(this, SIGNAL(textEdited(const QString &)), this,
           SLOT(updateHints(const QString &)));
   connect(this, SIGNAL(editingFinished()), this, SLOT(hideHints()));
-}
-
-/** Fixes the colour pallete so that the hints are readable.
-
-    Tooltips use the inactive text colours since they are never 'in focus'.
-    This causes problems on some linux distributions (specifically Fedora 26
-    and Ubuntu 16.04) where the inactive text colours are particularly light
-    and lack contrast with the colour used for the background.
-
-    This method creates a modified tooltip pallete which uses the active
-    window text colour instead.
-
-    @returns A tooltip pallete with contrasting tooltip text and background
-    colours.
-*/
-QPalette HintingLineEdit::createFixedPalette() {
-  auto toolTipPalette = QToolTip::palette();
-
-  auto const activeTextColour =
-      toolTipPalette.color(QPalette::ColorGroup::Active, QPalette::WindowText);
-  toolTipPalette.setColor(QPalette::ColorGroup::Inactive, QPalette::ToolTipText,
-                          activeTextColour);
-  return toolTipPalette;
 }
 
 HintingLineEdit::~HintingLineEdit() {}

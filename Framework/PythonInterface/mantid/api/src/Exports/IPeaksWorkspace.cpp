@@ -37,6 +37,8 @@ IPeak *createPeakQLabWithDistance(IPeaksWorkspace &self, const object &data,
       Mantid::PythonInterface::Converters::PyObjectToV3D(data)(),
       detectorDistance);
 }
+/// Create a peak via it's QLab value from a list or numpy array
+void addPeak(IPeaksWorkspace &self, const IPeak &peak) { self.addPeak(peak); }
 }
 
 void export_IPeaksWorkspace() {
@@ -45,7 +47,7 @@ void export_IPeaksWorkspace() {
          boost::noncopyable>("IPeaksWorkspace", no_init)
       .def("getNumberPeaks", &IPeaksWorkspace::getNumberPeaks, arg("self"),
            "Returns the number of peaks within the workspace")
-      .def("addPeak", &IPeaksWorkspace::addPeak, (arg("self"), arg("peak")),
+      .def("addPeak", addPeak, (arg("self"), arg("peak")),
            "Add a peak to the workspace")
       .def("removePeak", &IPeaksWorkspace::removePeak,
            (arg("self"), arg("peak_num")), "Remove a peak from the workspace")

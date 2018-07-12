@@ -172,11 +172,9 @@ protected:
   }
 };
 
-class FakeAlgNTo1StorageModeFailure : public Algorithm {
+class FakeAlgNTo1 : public Algorithm {
 public:
-  const std::string name() const override {
-    return "FakeAlgNTo1StorageModeFailure";
-  }
+  const std::string name() const override { return "FakeAlgNTo1"; }
   int version() const override { return 1; }
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
@@ -204,19 +202,6 @@ protected:
   }
 };
 
-class FakeAlgNTo1 : public FakeAlgNTo1StorageModeFailure {
-public:
-  const std::string name() const override { return "FakeAlgNTo1"; }
-
-protected:
-  void execNonMaster() override {
-    // Default implementation only works for 1:1 input->output, so we have to
-    // provide an alternative implementation here.
-    boost::shared_ptr<MatrixWorkspace> ws1 = getProperty("InputWorkspace1");
-    setProperty("OutputWorkspace", ws1->cloneEmpty());
-  }
-};
-
 template <Parallel::StorageMode storageMode>
 class FakeAlg0To1 : public Algorithm {
 public:
@@ -237,12 +222,6 @@ public:
   }
 
 protected:
-  void execNonMaster() override {
-    // This method should never create anything that is not
-    // StorageMode::MasterOnly.
-    setProperty("OutputWorkspace", Kernel::make_unique<FakeWorkspaceA>(
-                                       Parallel::StorageMode::MasterOnly));
-  }
   Parallel::ExecutionMode getParallelExecutionMode(
       const std::map<std::string, Parallel::StorageMode> &storageModes)
       const override {
@@ -274,12 +253,6 @@ public:
   }
 
 protected:
-  void execNonMaster() override {
-    // This method should never create anything that is not
-    // StorageMode::MasterOnly.
-    setProperty("OutputWorkspace", Kernel::make_unique<FakeWorkspaceA>(
-                                       Parallel::StorageMode::MasterOnly));
-  }
   Parallel::ExecutionMode getParallelExecutionMode(
       const std::map<std::string, Parallel::StorageMode> &storageModes)
       const override {
@@ -340,13 +313,15 @@ void run1To1(const Parallel::Communicator &comm) {
     auto alg = create<FakeAlg1To1>(comm);
     if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
       alg->setProperty("InputWorkspace", in);
-    } else {
-      alg->setProperty("InputWorkspace", in->cloneEmpty());
     }
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(out->storageMode(), storageMode);
-    TS_ASSERT_EQUALS(out->id(), "FakeWorkspaceA");
+    if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
+      TS_ASSERT_EQUALS(out->storageMode(), storageMode);
+      TS_ASSERT_EQUALS(out->id(), "FakeWorkspaceA");
+    } else {
+      TS_ASSERT_EQUALS(out, nullptr);
+    }
   }
 }
 
@@ -362,44 +337,8 @@ void runNTo0(const Parallel::Communicator &comm) {
     if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
       alg->setProperty("InputWorkspace1", in1);
       alg->setProperty("InputWorkspace2", in2);
-    } else {
-      alg->setProperty("InputWorkspace1", in1->cloneEmpty());
-      alg->setProperty("InputWorkspace2", in2->cloneEmpty());
     }
     TS_ASSERT_THROWS_NOTHING(alg->execute());
-  }
-}
-
-void runNTo1StorageModeFailure(const Parallel::Communicator &comm) {
-  for (auto storageMode :
-       {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
-        Parallel::StorageMode::MasterOnly}) {
-    auto in1 = boost::make_shared<FakeWorkspaceA>(storageMode);
-    auto in2 = boost::make_shared<FakeWorkspaceB>(storageMode);
-    in1->initialize(1, 2, 1);
-    in2->initialize(1, 2, 1);
-    auto alg = create<FakeAlgNTo1StorageModeFailure>(comm);
-    if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
-      alg->setProperty("InputWorkspace1", in1);
-      alg->setProperty("InputWorkspace2", in2);
-    } else {
-      alg->setProperty("InputWorkspace1", in1->cloneEmpty());
-      alg->setProperty("InputWorkspace2", in2->cloneEmpty());
-    }
-    if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
-      TS_ASSERT_THROWS_NOTHING(alg->execute());
-      TS_ASSERT(alg->isExecuted());
-      Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
-      // Preserving storage mode is actually not guaranteed, but this
-      // implementation does of FakeAlgNTo1StorageModeFailure does.
-      TS_ASSERT_EQUALS(out->storageMode(), storageMode);
-      TS_ASSERT_EQUALS(out->id(), "FakeWorkspaceA");
-    } else {
-      TS_ASSERT_THROWS_EQUALS(
-          alg->execute(), const std::runtime_error &e, std::string(e.what()),
-          "Attempt to run algorithm with Parallel::ExecutionMode::MasterOnly: "
-          "Execution in this mode not implemented.");
-    }
   }
 }
 
@@ -415,15 +354,18 @@ void runNTo1(const Parallel::Communicator &comm) {
     if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
       alg->setProperty("InputWorkspace1", in1);
       alg->setProperty("InputWorkspace2", in2);
-    } else {
-      alg->setProperty("InputWorkspace1", in1->cloneEmpty());
-      alg->setProperty("InputWorkspace2", in2->cloneEmpty());
     }
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
     Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(out->storageMode(), storageMode);
-    TS_ASSERT_EQUALS(out->id(), "FakeWorkspaceA");
+    if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
+      // Preserving storage mode is actually not guaranteed, but this
+      // implementation does of FakeAlgNTo1 does.
+      TS_ASSERT_EQUALS(out->storageMode(), storageMode);
+      TS_ASSERT_EQUALS(out->id(), "FakeWorkspaceA");
+    } else {
+      TS_ASSERT_EQUALS(out, nullptr);
+    }
   }
 }
 
@@ -433,8 +375,12 @@ void run0To1(const Parallel::Communicator &comm) {
   TS_ASSERT_THROWS_NOTHING(alg->execute());
   TS_ASSERT(alg->isExecuted());
   Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
-  TS_ASSERT_EQUALS(out->storageMode(), storageMode);
-  TS_ASSERT_EQUALS(out->id(), "FakeWorkspaceA");
+  if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
+    TS_ASSERT_EQUALS(out->storageMode(), storageMode);
+    TS_ASSERT_EQUALS(out->id(), "FakeWorkspaceA");
+  } else {
+    TS_ASSERT_EQUALS(out, nullptr);
+  }
 }
 
 template <Parallel::StorageMode modeIn, Parallel::StorageMode modeOut>
@@ -444,14 +390,16 @@ void run1To1StorageModeTransition(const Parallel::Communicator &comm) {
   auto alg = create<FakeAlg1To1StorageModeTransition<modeOut>>(comm);
   if (modeIn != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
     alg->setProperty("InputWorkspace", in);
-  } else {
-    alg->setProperty("InputWorkspace", in->cloneEmpty());
   }
   TS_ASSERT_THROWS_NOTHING(alg->execute());
   TS_ASSERT(alg->isExecuted());
   Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
-  TS_ASSERT_EQUALS(out->storageMode(), modeOut);
-  TS_ASSERT_EQUALS(out->id(), "FakeWorkspaceA");
+  if (modeOut != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
+    TS_ASSERT_EQUALS(out->storageMode(), modeOut);
+    TS_ASSERT_EQUALS(out->id(), "FakeWorkspaceA");
+  } else {
+    TS_ASSERT_EQUALS(out, nullptr);
+  }
 }
 
 void runChained(const Parallel::Communicator &comm) {
@@ -460,7 +408,11 @@ void runChained(const Parallel::Communicator &comm) {
   TS_ASSERT_THROWS_NOTHING(alg1->execute());
   TS_ASSERT(alg1->isExecuted());
   Workspace_sptr ws1 = alg1->getProperty("OutputWorkspace");
-  TS_ASSERT_EQUALS(ws1->storageMode(), StorageMode::MasterOnly);
+  if (comm.rank() == 0) {
+    TS_ASSERT_EQUALS(ws1->storageMode(), StorageMode::MasterOnly);
+  } else {
+    TS_ASSERT_EQUALS(ws1, nullptr);
+  }
 
   auto alg2 =
       create<FakeAlg1To1StorageModeTransition<StorageMode::Distributed>>(comm);
@@ -492,8 +444,6 @@ public:
   void test1To1() { runParallel(run1To1); }
 
   void testNTo0() { runParallel(runNTo0); }
-
-  void testNTo1StorageModeFailure() { runParallel(runNTo1StorageModeFailure); }
 
   void testNTo1() { runParallel(runNTo1); }
 

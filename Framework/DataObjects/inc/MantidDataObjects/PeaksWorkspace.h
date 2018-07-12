@@ -102,12 +102,19 @@ public:
   void addPeak(const Geometry::IPeak &peak) override;
   /// Move a peak object into this peaks workspace
   void addPeak(Peak &&peak);
+  void addPeak(const Kernel::V3D &position,
+               const Kernel::SpecialCoordinateSystem &frame) override;
   Peak &getPeak(int peakNum) override;
   const Peak &getPeak(int peakNum) const override;
 
   Geometry::IPeak *createPeak(
       const Kernel::V3D &QLabFrame,
       boost::optional<double> detectorDistance = boost::none) const override;
+
+  std::unique_ptr<Geometry::IPeak>
+  createPeak(const Kernel::V3D &Position,
+             const Kernel::SpecialCoordinateSystem &frame) const override;
+
   std::vector<std::pair<std::string, std::string>>
   peakInfo(const Kernel::V3D &qFrame, bool labCoords) const override;
 
@@ -192,6 +199,8 @@ private:
   void initColumns();
   /// Adds a new PeakColumn of the given type
   void addPeakColumn(const std::string &name);
+  /// Create a peak from a QSample position
+  Peak *createPeakQSample(const Kernel::V3D &position) const;
 
   // ====================================== ITableWorkspace Methods
   // ==================================
@@ -286,10 +295,10 @@ private:
 };
 
 /// Typedef for a shared pointer to a peaks workspace.
-typedef boost::shared_ptr<PeaksWorkspace> PeaksWorkspace_sptr;
+using PeaksWorkspace_sptr = boost::shared_ptr<PeaksWorkspace>;
 
 /// Typedef for a shared pointer to a const peaks workspace.
-typedef boost::shared_ptr<const PeaksWorkspace> PeaksWorkspace_const_sptr;
+using PeaksWorkspace_const_sptr = boost::shared_ptr<const PeaksWorkspace>;
 }
 }
 #endif

@@ -11,12 +11,25 @@ namespace CustomInterfaces {
 */
 ReflEventTabPresenter::ReflEventTabPresenter(
     std::vector<IReflEventPresenter *> presenters)
-    : m_eventPresenters(presenters) {}
+    : m_eventPresenters(presenters) {
+  passSelfToChildren(presenters);
+}
+
+void ReflEventTabPresenter::passSelfToChildren(
+    std::vector<IReflEventPresenter *> const &children) {
+  for (auto *presenter : children)
+    presenter->acceptTabPresenter(this);
+}
 
 /** Destructor
 *
 */
 ReflEventTabPresenter::~ReflEventTabPresenter() {}
+
+void ReflEventTabPresenter::acceptMainPresenter(
+    IReflMainWindowPresenter *mainPresenter) {
+  m_mainPresenter = mainPresenter;
+}
 
 /** Returns global time-slicing values for 'ReflectometryReductionOneAuto'
 *
@@ -24,7 +37,6 @@ ReflEventTabPresenter::~ReflEventTabPresenter() {}
 * @return :: Time-slicing values for 'ReflectometryReductionOneAuto'
 */
 std::string ReflEventTabPresenter::getTimeSlicingValues(int group) const {
-
   return m_eventPresenters.at(group)->getTimeSlicingValues();
 }
 
@@ -34,8 +46,19 @@ std::string ReflEventTabPresenter::getTimeSlicingValues(int group) const {
 * @return :: Time-slicing type for 'ReflectometryReductionOneAuto'
 */
 std::string ReflEventTabPresenter::getTimeSlicingType(int group) const {
-
   return m_eventPresenters.at(group)->getTimeSlicingType();
+}
+
+void ReflEventTabPresenter::onReductionPaused(int group) {
+  m_eventPresenters[group]->onReductionPaused();
+}
+
+void ReflEventTabPresenter::onReductionResumed(int group) {
+  m_eventPresenters[group]->onReductionResumed();
+}
+
+void ReflEventTabPresenter::settingsChanged(int group) {
+  m_mainPresenter->settingsChanged(group);
 }
 }
 }

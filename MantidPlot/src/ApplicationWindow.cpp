@@ -30,150 +30,152 @@
  *                                                                         *
  ***************************************************************************/
 #include "ApplicationWindow.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
-#include "CurvesDialog.h"
-#include "PlotDialog.h"
-#include "AxesDialog.h"
-#include "LineDialog.h"
-#include "TextDialog.h"
-#include "ExportDialog.h"
-#include "TableDialog.h"
-#include "SetColValuesDialog.h"
-#include "ErrDialog.h"
-#include "LegendWidget.h"
 #include "ArrowMarker.h"
-#include "ImageMarker.h"
-#include "Graph.h"
-#include "Plot.h"
-#include "Grid.h"
-#include "PlotWizard.h"
-#include "PolynomFitDialog.h"
-#include "ExpDecayDialog.h"
-#include "FunctionDialog.h"
-#include "FitDialog.h"
-#include "SurfaceDialog.h"
-#include "Graph3D.h"
-#include "Plot3DDialog.h"
-#include "ImageDialog.h"
-#include "MultiLayer.h"
-#include "LayerDialog.h"
-#include "DataSetDialog.h"
-#include "IntDialog.h"
-#include "ConfigDialog.h"
-#include "MatrixDialog.h"
-#include "MatrixSizeDialog.h"
-#include "MatrixValuesDialog.h"
-#include "MatrixModel.h"
-#include "MatrixCommand.h"
-#include "importOPJ.h"
 #include "AssociationsDialog.h"
-#include "RenameWindowDialog.h"
-#include "QwtErrorPlotCurve.h"
-#include "InterpolationDialog.h"
-#include "ImportASCIIDialog.h"
-#include "ImageExportDialog.h"
-#include "SmoothCurveDialog.h"
-#include "FilterDialog.h"
-#include "FFTDialog.h"
-#include "Note.h"
-#include "Folder.h"
-#include "FindDialog.h"
-#include "ScaleDraw.h"
-#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
-#include "ScriptingLangDialog.h"
-#include "ScriptingWindow.h"
-#include "ScriptFileInterpreter.h"
-#include "TableStatistics.h"
-#include "Fit.h"
-#include "MultiPeakFit.h"
-#include "PolynomialFit.h"
-#include "SigmoidalFit.h"
-#include "LogisticFit.h"
-#include "NonLinearFit.h"
-#include "FunctionCurve.h"
-#include "QwtPieCurve.h"
-#include "Spectrogram.h"
-#include "Integration.h"
-#include "Differentiation.h"
-#include "SmoothFilter.h"
-#include "FFTFilter.h"
+#include "AxesDialog.h"
+#include "ColorBox.h"
+#include "ColorMapDialog.h"
+#include "ConfigDialog.h"
 #include "Convolution.h"
 #include "Correlation.h"
 #include "CurveRangeDialog.h"
-#include "ColorBox.h"
-#include "QwtHistogram.h"
-#include "OpenProjectDialog.h"
-#include "ColorMapDialog.h"
-#include "TextEditor.h"
-#include "SymbolDialog.h"
+#include "CurvesDialog.h"
 #include "CustomActionDialog.h"
-#include "MdiSubWindow.h"
-#include "FloatingWindow.h"
 #include "DataPickerTool.h"
-#include "TiledWindow.h"
+#include "DataSetDialog.h"
+#include "Differentiation.h"
 #include "DockedWindow.h"
+#include "ErrDialog.h"
+#include "ExpDecayDialog.h"
+#include "ExportDialog.h"
+#include "FFTDialog.h"
+#include "FFTFilter.h"
+#include "FilterDialog.h"
+#include "FindDialog.h"
+#include "Fit.h"
+#include "FitDialog.h"
+#include "FloatingWindow.h"
+#include "Folder.h"
+#include "FunctionCurve.h"
+#include "FunctionDialog.h"
+#include "Graph.h"
+#include "Graph3D.h"
+#include "Grid.h"
+#include "ImageDialog.h"
+#include "ImageExportDialog.h"
+#include "ImageMarker.h"
+#include "ImportASCIIDialog.h"
+#include "IntDialog.h"
+#include "Integration.h"
+#include "InterpolationDialog.h"
+#include "LayerDialog.h"
+#include "LegendWidget.h"
+#include "LineDialog.h"
+#include "LogisticFit.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
+#include "MatrixCommand.h"
+#include "MatrixDialog.h"
+#include "MatrixModel.h"
+#include "MatrixSizeDialog.h"
+#include "MatrixValuesDialog.h"
+#include "MdiSubWindow.h"
+#include "MultiLayer.h"
+#include "MultiPeakFit.h"
+#include "NonLinearFit.h"
+#include "Note.h"
+#include "OpenProjectDialog.h"
+#include "Plot.h"
+#include "Plot3DDialog.h"
+#include "PlotDialog.h"
+#include "PlotWizard.h"
+#include "PolynomFitDialog.h"
+#include "PolynomialFit.h"
+#include "ProjectRecovery.h"
 #include "ProjectSerialiser.h"
+#include "QwtErrorPlotCurve.h"
+#include "QwtHistogram.h"
+#include "QwtPieCurve.h"
+#include "RenameWindowDialog.h"
+#include "ScaleDraw.h"
+#include "ScriptFileInterpreter.h"
+#include "ScriptingLangDialog.h"
+#include "ScriptingWindow.h"
+#include "SetColValuesDialog.h"
+#include "SigmoidalFit.h"
+#include "SmoothCurveDialog.h"
+#include "SmoothFilter.h"
+#include "Spectrogram.h"
+#include "SurfaceDialog.h"
+#include "SymbolDialog.h"
+#include "TableDialog.h"
+#include "TableStatistics.h"
+#include "TextDialog.h"
+#include "TextEditor.h"
+#include "TiledWindow.h"
+#include "importOPJ.h"
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 // TODO: move tool-specific code to an extension manager
-#include "ScreenPickerTool.h"
-#include "LabelTool.h"
-#include "TranslateCurveTool.h"
-#include "MultiPeakFitTool.h"
-#include "LineProfileTool.h"
-#include "RangeSelectorTool.h"
-#include "PlotToolInterface.h"
-#include "Mantid/MantidMatrix.h"
-#include "Mantid/MantidTable.h"
-#include "Mantid/MantidMatrixCurve.h"
 #include "ContourLinesEditor.h"
+#include "LabelTool.h"
+#include "LineProfileTool.h"
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
+#include "Mantid/MantidMatrix.h"
+#include "Mantid/MantidMatrixCurve.h"
+#include "Mantid/MantidTable.h"
 #include "Mantid/RemoveErrorsDialog.h"
+#include "MultiPeakFitTool.h"
+#include "PlotToolInterface.h"
+#include "RangeSelectorTool.h"
+#include "ScreenPickerTool.h"
+#include "TranslateCurveTool.h"
 
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
 
-#include <qwt_scale_engine.h>
-#include <QColorGroup>
-#include <QFileDialog>
-#include <QInputDialog>
-#include <QProgressDialog>
-#include <QPrintDialog>
-#include <QPixmapCache>
-#include <QMenuBar>
-#include <QClipboard>
-#include <QTranslator>
-#include <QSplitter>
-#include <QSettings>
-#include <QApplication>
-#include <QMessageBox>
-#include <QPrinter>
-#include <QPrinterInfo>
-#include <QActionGroup>
 #include <QAction>
-#include <QToolBar>
-#include <QKeySequence>
+#include <QActionGroup>
+#include <QApplication>
+#include <QClipboard>
+#include <QColorGroup>
+#include <QDateTime>
+#include <QDesktopWidget>
+#include <QDockWidget>
+#include <QFileDialog>
+#include <QFontComboBox>
 #include <QImageReader>
 #include <QImageWriter>
-#include <QDateTime>
+#include <QInputDialog>
+#include <QKeySequence>
+#include <QList>
+#include <QMdiArea>
+#include <QMdiSubWindow>
+#include <QMenuBar>
+#include <QMenuItem>
+#include <QMessageBox>
+#include <QPair>
+#include <QPixmapCache>
+#include <QPrintDialog>
+#include <QPrinter>
+#include <QPrinterInfo>
+#include <QProgressDialog>
+#include <QSettings>
 #include <QShortcut>
-#include <QDockWidget>
+#include <QSignalMapper>
+#include <QSpinBox>
+#include <QSplitter>
 #include <QTextCodec>
 #include <QTextStream>
-#include <QVarLengthArray>
-#include <QList>
+#include <QToolBar>
+#include <QTranslator>
 #include <QUrl>
-#include <QFontComboBox>
-#include <QSpinBox>
-#include <QMdiArea>
-#include <QMenuItem>
-#include <QMdiSubWindow>
-#include <QSignalMapper>
-#include <QDesktopWidget>
-#include <QPair>
+#include <QVarLengthArray>
 #include <QtAlgorithms>
+#include <QtGlobal>
+#include <qwt_scale_engine.h>
 #include <zlib.h>
 
 #include <gsl/gsl_sort.h>
@@ -182,24 +184,24 @@
 #include <boost/scoped_ptr.hpp>
 
 // Mantid
-#include "Mantid/MantidUI.h"
-#include "Mantid/MantidAbout.h"
-#include "Mantid/PeakPickerTool.h"
+#include "Mantid/FirstTimeSetup.h"
 #include "Mantid/ManageCustomMenus.h"
 #include "Mantid/ManageInterfaceCategories.h"
-#include "Mantid/FirstTimeSetup.h"
+#include "Mantid/MantidAbout.h"
+#include "Mantid/MantidUI.h"
+#include "Mantid/PeakPickerTool.h"
 
-#include "MantidQtWidgets/Common/InterfaceManager.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/Message.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 
 #include "MantidQtWidgets/Common/CatalogHelper.h"
 #include "MantidQtWidgets/Common/CatalogSearch.h"
-#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/MessageDisplay.h"
 #include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/TrackedAction.h"
@@ -237,7 +239,7 @@ using Mantid::Kernel::Logger;
 namespace {
 /// static logger
 Logger g_log("ApplicationWindow");
-}
+} // namespace
 
 extern "C" {
 void file_compress(const char *file, const char *mode);
@@ -245,25 +247,14 @@ void file_uncompress(const char *file);
 }
 
 ApplicationWindow::ApplicationWindow(bool factorySettings)
-    : QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),
-      blockWindowActivation(false), m_enableQtiPlotFitting(false),
-      m_exitCode(0),
-#ifdef Q_OS_MAC // Mac
-      settings(QSettings::IniFormat, QSettings::UserScope, "Mantid",
-               "MantidPlot")
-#else
-      settings("Mantid", "MantidPlot")
-#endif
-{
-  QStringList empty;
-  init(factorySettings, empty);
-}
+    // Delegate with an empty string list for the arguments
+    : ApplicationWindow(factorySettings, QStringList{}) {}
 
 ApplicationWindow::ApplicationWindow(bool factorySettings,
                                      const QStringList &args)
     : QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),
       blockWindowActivation(false), m_enableQtiPlotFitting(false),
-      m_exitCode(0),
+      m_projectRecovery(this), m_exitCode(0),
 #ifdef Q_OS_MAC // Mac
       settings(QSettings::IniFormat, QSettings::UserScope, "Mantid",
                "MantidPlot")
@@ -277,7 +268,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings,
 /**
  * This function is responsible for copying the old configuration
  * information from the ISIS\MantidPlot area to the new Mantid\MantidPlot
- * area. The old area is deleted once the trnasfer is complete. On subsequent
+ * area. The old area is deleted once the transfer is complete. On subsequent
  * runs, if the old configuration area is missing or empty, the copying
  * is ignored.
  */
@@ -363,8 +354,8 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   logWindow->setWindowTitle(tr("Results Log"));
   addDockWidget(Qt::TopDockWidgetArea, logWindow);
 
-  using MantidQt::MantidWidgets::MessageDisplay;
   using MantidQt::MantidWidgets::Message;
+  using MantidQt::MantidWidgets::MessageDisplay;
   qRegisterMetaType<Message>("Message"); // Required to use it in signals-slots
   resultsLog = new MessageDisplay(logWindow);
   logWindow->setWidget(resultsLog);
@@ -609,9 +600,9 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
 }
 
 /** Determines if the first time dialog should be shown
-* @param commandArguments : all command line arguments.
-* @returns true if the dialog should be shown
-*/
+ * @param commandArguments : all command line arguments.
+ * @returns true if the dialog should be shown
+ */
 bool ApplicationWindow::shouldWeShowFirstTimeSetup(
     const QStringList &commandArguments) {
   // Early check of execute and quit command arguments used by system tests.
@@ -2445,7 +2436,7 @@ Graph3D *ApplicationWindow::dataPlot3D(const QString &caption,
   posX = formula.indexOf("(", pos);
   QString yCol = formula.mid(pos + 1, posX - pos - 1);
 
-  Graph3D *plot = new Graph3D("", this, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr);
   plot->addData(w, xCol, yCol, xl, xr, yl, yr, zl, zr);
   plot->update();
 
@@ -2465,7 +2456,7 @@ Graph3D *ApplicationWindow::newPlot3D() {
 
   QString label = generateUniqueName(tr("Graph"));
 
-  Graph3D *plot = new Graph3D("", this, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr);
   plot->setWindowTitle(label);
   plot->setName(label);
 
@@ -2485,7 +2476,7 @@ Graph3D *ApplicationWindow::plotXYZ(Table *table, const QString &zColName,
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-  Graph3D *plot = new Graph3D("", this, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr);
   QString label = generateUniqueName(tr("Graph"));
   plot->setWindowTitle(label);
   plot->setName(label);
@@ -2530,7 +2521,7 @@ Graph3D *ApplicationWindow::openPlotXYZ(const QString &caption,
   int yCol = w->colIndex(yColName);
   int zCol = w->colIndex(zColName);
 
-  Graph3D *plot = new Graph3D("", this, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr);
   plot->loadData(w, xCol, yCol, zCol, xl, xr, yl, yr, zl, zr);
 
   QString label = caption;
@@ -2583,7 +2574,7 @@ void ApplicationWindow::exportMatrix() {
     return;
 
   ImageExportDialog *ied =
-      new ImageExportDialog(this, m != NULL, d_extended_export_dialog);
+      new ImageExportDialog(this, m != nullptr, d_extended_export_dialog);
   ied->setDirectory(workingDir);
   ied->selectFilter(d_image_export_filter);
   if (ied->exec() != QDialog::Accepted)
@@ -3050,7 +3041,7 @@ void ApplicationWindow::setPreferences(Graph *g) {
  *creates a new empty table
  */
 Table *ApplicationWindow::newTable() {
-  Table *w = new Table(scriptingEnv(), 30, 2, "", this, 0);
+  Table *w = new Table(scriptingEnv(), 30, 2, "", this, nullptr);
   initTable(w, generateUniqueName(tr("Table")));
   w->showNormal();
   return w;
@@ -3060,7 +3051,7 @@ Table *ApplicationWindow::newTable() {
  *used when opening a project file
  */
 Table *ApplicationWindow::newTable(const QString &caption, int r, int c) {
-  Table *w = new Table(scriptingEnv(), r, c, "", this, 0);
+  Table *w = new Table(scriptingEnv(), r, c, "", this, nullptr);
   initTable(w, caption);
   if (w->objectName() != caption) { // the table was renamed
     renamedTables << caption << w->objectName();
@@ -3082,7 +3073,7 @@ bool ApplicationWindow::isDeleteWorkspacePromptEnabled() {
 
 Table *ApplicationWindow::newTable(int r, int c, const QString &name,
                                    const QString &legend) {
-  Table *w = new Table(scriptingEnv(), r, c, legend, this, 0);
+  Table *w = new Table(scriptingEnv(), r, c, legend, this, nullptr);
   initTable(w, name);
   return w;
 }
@@ -3094,7 +3085,7 @@ Table *ApplicationWindow::newTable(const QString &caption, int r, int c,
   if (lst.count() == 2)
     legend = lst[1];
 
-  Table *w = new Table(scriptingEnv(), r, c, legend, this, 0);
+  Table *w = new Table(scriptingEnv(), r, c, legend, this, nullptr);
 
   QStringList rows = text.split("\n", QString::SkipEmptyParts);
   QString rlist = rows[0];
@@ -3116,7 +3107,7 @@ Table *ApplicationWindow::newTable(const QString &caption, int r, int c,
 Table *ApplicationWindow::newHiddenTable(const QString &name,
                                          const QString &label, int r, int c,
                                          const QString &text) {
-  Table *w = new Table(scriptingEnv(), r, c, label, this, 0);
+  Table *w = new Table(scriptingEnv(), r, c, label, this, nullptr);
 
   if (!text.isEmpty()) {
     QStringList rows = text.split("\n", QString::SkipEmptyParts);
@@ -3193,14 +3184,14 @@ Note *ApplicationWindow::newNote(const QString &caption) {
 }
 
 Matrix *ApplicationWindow::newMatrix(int rows, int columns) {
-  Matrix *m = new Matrix(scriptingEnv(), rows, columns, "", this, 0);
+  Matrix *m = new Matrix(scriptingEnv(), rows, columns, "", this, nullptr);
   initMatrix(m, generateUniqueName(tr("Matrix")));
   m->showNormal();
   return m;
 }
 
 Matrix *ApplicationWindow::newMatrix(const QString &caption, int r, int c) {
-  Matrix *w = new Matrix(scriptingEnv(), r, c, "", this, 0);
+  Matrix *w = new Matrix(scriptingEnv(), r, c, "", this, nullptr);
   initMatrix(w, caption);
   if (w->objectName() != caption) // the matrix was renamed
     renamedTables << caption << w->objectName();
@@ -3396,14 +3387,14 @@ ApplicationWindow::matrixToTable(Matrix *m,
 
   Table *w = nullptr;
   if (conversionType == Direct) {
-    w = new Table(scriptingEnv(), rows, cols, "", this, 0);
+    w = new Table(scriptingEnv(), rows, cols, "", this, nullptr);
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < cols; j++)
         w->setCell(i, j, m->cell(i, j));
     }
   } else if (conversionType == XYZ) {
     int tableRows = rows * cols;
-    w = new Table(scriptingEnv(), tableRows, 3, "", this, 0);
+    w = new Table(scriptingEnv(), tableRows, 3, "", this, nullptr);
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < cols; j++) {
         int cell = i * cols + j;
@@ -3414,7 +3405,7 @@ ApplicationWindow::matrixToTable(Matrix *m,
     }
   } else if (conversionType == YXZ) {
     int tableRows = rows * cols;
-    w = new Table(scriptingEnv(), tableRows, 3, "", this, 0);
+    w = new Table(scriptingEnv(), tableRows, 3, "", this, nullptr);
     for (int i = 0; i < cols; i++) {
       for (int j = 0; j < rows; j++) {
         int cell = i * rows + j;
@@ -3599,7 +3590,7 @@ Matrix *ApplicationWindow::tableToMatrix(Table *t) {
   int cols = t->numCols();
 
   QString caption = generateUniqueName(tr("Matrix"));
-  Matrix *m = new Matrix(scriptingEnv(), rows, cols, "", this, 0);
+  Matrix *m = new Matrix(scriptingEnv(), rows, cols, "", this, nullptr);
   initMatrix(m, caption);
 
   for (int i = 0; i < rows; i++) {
@@ -4627,29 +4618,21 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
 
   d_opening_file = true;
 
-  QFile file(filename);
-  QFileInfo fileInfo(filename);
-
-  if (!file.open(QIODevice::ReadOnly))
-    throw std::runtime_error("Couldn't open project file");
-
-  QTextStream fileTS(&file);
-  fileTS.setCodec(QTextCodec::codecForName("UTF-8"));
-
-  QString baseName = fileInfo.fileName();
-
-  // Skip mantid version line
-  fileTS.readLine();
-
-  // Skip the <scripting-lang> line. We only really use python now anyway.
-  fileTS.readLine();
-  setScriptingLanguage("Python");
-
-  // Skip the <windows> line.
-  fileTS.readLine();
-
   folders->blockSignals(true);
   blockSignals(true);
+
+  // Open as a top level folder
+  ProjectSerialiser serialiser(this);
+  try {
+    serialiser.load(filename.toStdString(), fileVersion);
+  } catch (std::runtime_error &e) {
+    g_log.error(e.what());
+    // We failed to load - reset and bail out
+    d_opening_file = false;
+    folders->blockSignals(false);
+    blockSignals(false);
+    return this;
+  }
 
   Folder *curFolder = projectFolder();
 
@@ -4658,29 +4641,21 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
   if (!item)
     throw std::runtime_error("Couldn't retrieve folder list items.");
 
+  QFile file(filename);
+  QFileInfo fileInfo(filename);
+  QString baseName = fileInfo.fileName();
   item->setText(0, fileInfo.baseName());
   item->folder()->setObjectName(fileInfo.baseName());
 
-  // Read the rest of the project file in for parsing
-  std::string lines = fileTS.readAll().toUtf8().constData();
-
   d_loaded_current = nullptr;
-
-  // Open as a top level folder
-  ProjectSerialiser serialiser(this);
-  serialiser.load(lines, fileVersion);
 
   if (d_loaded_current)
     curFolder = d_loaded_current;
 
-  {
-    // WHY use another fileinfo?
-    QFileInfo fi2(file);
-    QString fileName = fi2.absoluteFilePath();
-    recentProjects.removeAll(filename);
-    recentProjects.push_front(filename);
-    updateRecentProjectsList();
-  }
+  QString fileName = fileInfo.absoluteFilePath();
+  recentProjects.removeAll(filename);
+  recentProjects.push_front(filename);
+  updateRecentProjectsList();
 
   folders->setCurrentItem(curFolder->folderListItem());
   folders->blockSignals(false);
@@ -4700,6 +4675,7 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
 
   return this;
 }
+
 bool ApplicationWindow::setScriptingLanguage(const QString &lang) {
   if (lang.isEmpty())
     return false;
@@ -5700,7 +5676,7 @@ void ApplicationWindow::exportGraph() {
     return;
 
   ImageExportDialog *ied =
-      new ImageExportDialog(this, plot2D != NULL, d_extended_export_dialog);
+      new ImageExportDialog(this, plot2D != nullptr, d_extended_export_dialog);
   ied->setDirectory(workingDir);
   ied->selectFilter(d_image_export_filter);
   if (ied->exec() != QDialog::Accepted)
@@ -5763,7 +5739,7 @@ void ApplicationWindow::exportLayer() {
     return;
 
   ImageExportDialog *ied =
-      new ImageExportDialog(this, g != NULL, d_extended_export_dialog);
+      new ImageExportDialog(this, g != nullptr, d_extended_export_dialog);
   ied->setDirectory(workingDir);
   ied->selectFilter(d_image_export_filter);
   if (ied->exec() != QDialog::Accepted)
@@ -5836,7 +5812,7 @@ void ApplicationWindow::exportAllGraphs() {
   foreach (MdiSubWindow *w, windows) {
     const std::string windowClassName = w->metaObject()->className();
     if (windowClassName == "MultiLayer") {
-      plot3D = 0;
+      plot3D = nullptr;
       plot2D = dynamic_cast<MultiLayer *>(w);
       if (!plot2D)
         continue;
@@ -5850,7 +5826,7 @@ void ApplicationWindow::exportAllGraphs() {
         continue;
       }
     } else if (windowClassName == "Graph3D") {
-      plot2D = 0;
+      plot2D = nullptr;
       plot3D = dynamic_cast<Graph3D *>(w);
       if (!plot3D)
         continue;
@@ -6017,7 +5993,6 @@ bool ApplicationWindow::saveProject(bool compress) {
       projectname.endsWith(".ogg", Qt::CaseInsensitive)) {
     saveProjectAs();
     return true;
-    ;
   }
 
   ProjectSerialiser serialiser(this);
@@ -6136,7 +6111,7 @@ void ApplicationWindow::savetoNexusFile() {
 void ApplicationWindow::loadDataFile() {
   // Ask user for file
   QString fn = QFileDialog::getOpenFileName(
-      0, tr("Mantidplot - Open file to load"),
+      nullptr, tr("Mantidplot - Open file to load"),
       AlgorithmInputHistory::Instance().getPreviousDirectory());
   if (fn != "") {
     loadDataFileByName(fn);
@@ -6437,7 +6412,7 @@ void ApplicationWindow::showTitleDialog() {
 
     Graph *g = ml->activeGraph();
     if (g) {
-      TextDialog *td = new TextDialog(TextDialog::LayerTitle, this, 0);
+      TextDialog *td = new TextDialog(TextDialog::LayerTitle, this, nullptr);
       td->setGraph(g);
       td->exec();
     }
@@ -6461,7 +6436,7 @@ void ApplicationWindow::showAxisTitleDialog() {
   if (!g)
     return;
 
-  TextDialog *td = new TextDialog(TextDialog::AxisTitle, this, 0);
+  TextDialog *td = new TextDialog(TextDialog::AxisTitle, this, nullptr);
   td->setGraph(g);
   td->exec();
 }
@@ -7605,7 +7580,7 @@ void ApplicationWindow::removePoints() {
         this, tr("MantidPlot"), // Mantid
         tr("This will modify the data in the worksheets!\nAre you sure you "
            "want to continue?"),
-        tr("Continue"), tr("Cancel"), 0, 1)) {
+        tr("Continue"), tr("Cancel"), nullptr, 1)) {
     case 0:
       g->setActiveTool(new DataPickerTool(g, this, DataPickerTool::Remove, info,
                                           SLOT(setText(const QString &))));
@@ -7650,7 +7625,7 @@ void ApplicationWindow::movePoints() {
         this, tr("MantidPlot"), // Mantid
         tr("This will modify the data in the worksheets!\nAre you sure you "
            "want to continue?"),
-        tr("Continue"), tr("Cancel"), 0, 1)) {
+        tr("Continue"), tr("Cancel"), nullptr, 1)) {
     case 0:
       if (g) {
         g->setActiveTool(new DataPickerTool(g, this, DataPickerTool::Move, info,
@@ -8344,7 +8319,7 @@ void ApplicationWindow::showTextDialog() {
     if (!l)
       return;
 
-    TextDialog *td = new TextDialog(TextDialog::TextMarker, this, 0);
+    TextDialog *td = new TextDialog(TextDialog::TextMarker, this, nullptr);
     td->setLegendWidget(l);
     td->exec();
   }
@@ -8877,8 +8852,8 @@ void ApplicationWindow::setWindowGeometry(int x, int y, int w, int h) {
 }
 
 /**
-  * Checks if a mdi sub-window exists.
-  */
+ * Checks if a mdi sub-window exists.
+ */
 bool ApplicationWindow::existsWindow(MdiSubWindow *w) const {
   if (!w)
     return false;
@@ -8891,8 +8866,8 @@ bool ApplicationWindow::existsWindow(MdiSubWindow *w) const {
 }
 
 /**
-  * Returns the active sub-window
-  */
+ * Returns the active sub-window
+ */
 MdiSubWindow *ApplicationWindow::getActiveWindow() const {
   if (!existsWindow(d_active_window)) {
     d_active_window = nullptr;
@@ -8901,8 +8876,8 @@ MdiSubWindow *ApplicationWindow::getActiveWindow() const {
 }
 
 /**
-  * Sets internal pointer to a new active sub-window.
-  */
+ * Sets internal pointer to a new active sub-window.
+ */
 void ApplicationWindow::setActiveWindow(MdiSubWindow *w) {
   d_active_window = w;
   if (!existsWindow(d_active_window)) {
@@ -9796,11 +9771,18 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     }
   }
 
+  // Stop background saving thread, so it doesn't try to use a destroyed
+  // resource
+  m_projectRecovery.stopProjectSaving();
+  m_projectRecovery.clearAllCheckpoints();
+
   // Close the remaining MDI windows. The Python API is required to be active
   // when the MDI window destructor is called so that those references can be
   // cleaned up meaning we cannot rely on the deleteLater functionality to
   // work correctly as this will happen in the next iteration of the event loop,
   // i.e after the python shutdown code has been run below.
+  m_shuttingDown = true;
+
   MDIWindowList windows = getAllWindows();
   for (auto &win : windows) {
     win->confirmClose(false);
@@ -9824,9 +9806,10 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     delete scriptingWindow;
     scriptingWindow = nullptr;
   }
-  /// Ensure interface python references are cleaned up before the interpreter
-  /// shuts down
+  // Ensure all python references are cleaned up before the interpreter shuts
+  // down
   delete m_iface_script;
+  delete m_interpreterDock;
 
   // Emit a shutting_down() signal that can be caught by
   // independent QMainWindow objects to know when MantidPlot
@@ -10466,7 +10449,7 @@ void ApplicationWindow::chooseHelpFolder() {
   QFileInfo hfi(helpFilePath);
   QString dir = QFileDialog::getExistingDirectory(
       this, tr("Choose the location of the MantidPlot help folder!"),
-      hfi.dir().absolutePath(), 0 /**QFileDialog::ShowDirsOnly*/);
+      hfi.dir().absolutePath(), nullptr /**QFileDialog::ShowDirsOnly*/);
 
   if (!dir.isEmpty()) {
     helpFilePath = dir + "index.html";
@@ -10521,7 +10504,7 @@ void ApplicationWindow::showHelp() {
 void ApplicationWindow::showPlotWizard() {
   QStringList lst = tableNames();
   if (lst.count() > 0) {
-    PlotWizard *pw = new PlotWizard(this, 0);
+    PlotWizard *pw = new PlotWizard(this, nullptr);
     pw->setAttribute(Qt::WA_DeleteOnClose);
     connect(pw, SIGNAL(plot(const QStringList &)), this,
             SLOT(multilayerPlot(const QStringList &)));
@@ -11558,6 +11541,63 @@ void ApplicationWindow::setUpdateCurvesFromTable(Table *table, bool on) {
   }
 }
 
+/** Fixes the colour pallete so that the hints are readable.
+
+  On Linux Fedora 26+ and Ubuntu 14.4+ the palette colour for
+  ToolTipBase has no effect on the colour of tooltips, but does change
+  the colour of 'What's This' boxes and and Line Edit hints. The palette
+  colour for ToolTipText on the other hand affects all three of
+  these.
+
+  The default pallete shows light text on a pale background which, although not
+  affecting tooltips, makes LineEdit hints and 'What's This' boxes difficuilt
+  if not impossible to read.
+
+  Changing the tooltip text to a darker colour fixes the problem for 'LineEdit'
+  hints and 'What's This' boxes but creates one for ordinary tooltips.
+
+  Setting the tooltip background colour to a darker colour works fine on
+  Fedora 26-7+ and Ubuntu 14.04 but not for RHEL7 where the tooltip text
+  colour is also dark.
+
+  One option is to simply hardcode the values to a dark-on-light colour
+  scheme which works consistently on Fedora, Ubuntu and RHEL7.
+  However, RHEL7 users were not happy with this solution.
+
+  Further investigation revealed that the issue may be related to
+  https://bugs.launchpad.net/ubuntu/+source/qt4-x11/+bug/877236 and the
+  fact that in the qt source gui/styles/qgtkstyle.cpp ~line 299 only loads
+  the ToolTipText colour, leaving ToolTibBase to the default from
+  CleanLooksStyle.
+
+  This problem can be worked around on fedora by switching to the
+  Adwaita theme in Mantid Preferences. However, the adwaita-qt
+  theme is not available on certain versions of Ubuntu.
+
+  Any easy solution for now is to detect unity clients and apply the
+  fix only to them.
+*/
+void ApplicationWindow::patchPaletteForLinux(QPalette &palette) const {
+  if (isUnityDesktop()) {
+    auto tooltipBaseColor = QColor("black");
+    auto tooltipTextColor = QColor("white");
+
+    palette.setColor(QPalette::ColorGroup::Inactive, QPalette::ToolTipBase,
+                     tooltipBaseColor);
+    palette.setColor(QPalette::ColorGroup::Active, QPalette::ToolTipBase,
+                     tooltipBaseColor);
+    palette.setColor(QPalette::ColorGroup::Inactive, QPalette::ToolTipText,
+                     tooltipTextColor);
+    palette.setColor(QPalette::ColorGroup::Active, QPalette::ToolTipText,
+                     tooltipTextColor);
+  }
+}
+
+bool ApplicationWindow::isUnityDesktop() const {
+  return QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")) == "Unity" ||
+         QString::fromLocal8Bit(qgetenv("XDG_CURRENT_DESKTOP")) == "Unity";
+}
+
 void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
                                      const QColor &tpc, bool force) {
   if (force || workspaceColor != wc) {
@@ -11572,6 +11612,11 @@ void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
   panelsTextColor = tpc;
 
   QPalette palette;
+
+#ifdef Q_OS_LINUX
+  patchPaletteForLinux(palette);
+#endif
+
   palette.setColor(QPalette::Base, QColor(panelsColor));
   qApp->setPalette(palette);
 
@@ -13304,7 +13349,7 @@ Graph3D *ApplicationWindow::openMatrixPlot3D(const QString &caption,
   if (!m)
     return nullptr;
 
-  Graph3D *plot = new Graph3D("", this, 0, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr, nullptr);
   plot->setWindowTitle(caption);
   plot->setName(caption);
   plot->addMatrixData(m, xl, xr, yl, yr, zl, zr);
@@ -13328,7 +13373,7 @@ Graph3D *ApplicationWindow::plot3DMatrix(Matrix *m, int style) {
   QApplication::setOverrideCursor(Qt::WaitCursor);
   QString label = generateUniqueName(tr("Graph"));
 
-  Graph3D *plot = new Graph3D("", this, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr);
   plot->addMatrixData(m);
   plot->customPlotStyle(style);
   customPlot3D(plot);
@@ -13504,14 +13549,12 @@ ApplicationWindow *ApplicationWindow::importOPJ(const QString &filename,
     app->recentProjects.push_front(filename);
     app->updateRecentProjectsList();
 
-    // cppcheck-suppress unusedScopedObject
     ImportOPJ(app, filename);
 
     QApplication::restoreOverrideCursor();
     return app;
   } else if (filename.endsWith(".ogm", Qt::CaseInsensitive) ||
              filename.endsWith(".ogw", Qt::CaseInsensitive)) {
-    // cppcheck-suppress unusedScopedObject
     ImportOPJ(this, filename);
     recentProjects.removeAll(filename);
     recentProjects.push_front(filename);
@@ -13575,8 +13618,8 @@ QList<MdiSubWindow *> ApplicationWindow::windowsList() const {
 }
 
 /**
-  * Return all windows in all folders.
-  */
+ * Return all windows in all folders.
+ */
 QList<MdiSubWindow *> ApplicationWindow::getAllWindows() const {
   QList<MdiSubWindow *> out;
   // get the docked windows first
@@ -14086,7 +14129,14 @@ Folder *ApplicationWindow::appendProject(const QString &fn,
 
   // Open folders
   ProjectSerialiser serialiser(this);
-  serialiser.load(lines, fileVersion);
+
+  try {
+    serialiser.load(lines, fileVersion);
+  } catch (std::runtime_error &e) {
+    g_log.error(e.what());
+    // We failed to load - bail out
+    return nullptr;
+  }
 
   // Restore the selected folder
   folders->setCurrentItem(curFolder->folderListItem());
@@ -14349,7 +14399,7 @@ bool ApplicationWindow::deleteFolder(Folder *f) {
           this, tr("MantidPlot - Delete folder?"), // Mantid
           tr("Delete folder '%1' and all the windows it contains?")
               .arg(f->objectName()),
-          tr("Yes"), tr("No"), 0, 0))
+          tr("Yes"), tr("No"), nullptr, 0))
     return false;
   else {
     Folder *parent = projectFolder();
@@ -14798,7 +14848,8 @@ void ApplicationWindow::showScriptWindow(bool forceVisible, bool quitting) {
     // it doesn't respect the always on top
     // flag, it is treated as a sub window of its parent
     const bool capturePrint = !quitting;
-    scriptingWindow = new ScriptingWindow(scriptingEnv(), capturePrint, NULL);
+    scriptingWindow =
+        new ScriptingWindow(scriptingEnv(), capturePrint, nullptr);
     scriptingWindow->setObjectName("ScriptingWindow");
     scriptingWindow->setAttribute(Qt::WA_DeleteOnClose, false);
     connect(scriptingWindow, SIGNAL(closeMe()), this,
@@ -14928,12 +14979,12 @@ void ApplicationWindow::cascade() {
 }
 
 /**
-*  Load a script file into a new or existing project
-*
-* @param fn :: is read as a Python script file and loaded in the command script
-* window.
-* @param existingProject :: True if loading into an already existing project
-*/
+ *  Load a script file into a new or existing project
+ *
+ * @param fn :: is read as a Python script file and loaded in the command script
+ * window.
+ * @param existingProject :: True if loading into an already existing project
+ */
 ApplicationWindow *ApplicationWindow::loadScript(const QString &fn,
                                                  bool existingProject) {
 #ifdef SCRIPTING_PYTHON
@@ -15022,17 +15073,17 @@ void ApplicationWindow::onScriptExecuteError(const QString &message,
 }
 
 /**
-* Run Python code
-* @param code :: An arbitrary string of python code
-* @param async :: If true the code will be run asynchronously but only if it is
-* called from the GUI thread
-* @param quiet :: If true then no output is produced concerning script
-* start/finished
-* @param redirect :: If true redirect stdout/stderr to results log
-*/
+ * Run Python code
+ * @param code :: An arbitrary string of python code
+ * @param async :: If true the code will be run asynchronously but only if it is
+ * called from the GUI thread
+ * @param quiet :: If true then no output is produced concerning script
+ * start/finished
+ * @param redirect :: If true redirect stdout/stderr to results log
+ */
 bool ApplicationWindow::runPythonScript(const QString &code, bool async,
                                         bool quiet, bool redirect) {
-  if (code.isEmpty())
+  if (code.isEmpty() || m_shuttingDown)
     return false;
   if (!m_iface_script) {
     if (setScriptingLanguage("Python")) {
@@ -15241,7 +15292,6 @@ void ApplicationWindow::scriptsDirPathChanged(const QString &path) {
 }
 
 void ApplicationWindow::makeToolbarsMenu() {
-  // cppcheck-suppress publicAllocationError
   actionFileTools = new QAction(standardTools->windowTitle(), toolbarsMenu);
   actionFileTools->setCheckable(true);
   toolbarsMenu->addAction(actionFileTools);
@@ -15550,7 +15600,6 @@ void ApplicationWindow::showUserDirectoryDialog() {
   ad->setAttribute(Qt::WA_DeleteOnClose);
   ad->show();
   ad->setFocus();
-  // cppcheck-suppress memleak
 }
 
 void ApplicationWindow::addCustomAction(QAction *action,
@@ -16179,11 +16228,11 @@ FloatingWindow *ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow *w,
 }
 
 /**
-  * Returns the top-left corner of the ADI area available for sub-windows
+ * Returns the top-left corner of the ADI area available for sub-windows
  * relative
-  * to the top-left corner of the monitor screen.
-  *
-  */
+ * to the top-left corner of the monitor screen.
+ *
+ */
 QPoint ApplicationWindow::mdiAreaTopLeft() const {
   QPoint p = this->pos() + d_workspace->pos();
 
@@ -16200,9 +16249,9 @@ QPoint ApplicationWindow::mdiAreaTopLeft() const {
 }
 
 /**
-  * Find the best position for a new floating window.
-  * @param sz :: Size of the new window.
-  */
+ * Find the best position for a new floating window.
+ * @param sz :: Size of the new window.
+ */
 QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const {
   const QPoint noPoint(-1, -1);
 
@@ -16587,6 +16636,9 @@ void ApplicationWindow::onAboutToStart() {
 
   // Make sure we see all of the startup messages
   resultsLog->scrollToTop();
+
+  // Kick off project recovery
+  checkForProjectRecovery();
 }
 
 /**
@@ -16636,8 +16688,8 @@ TiledWindow *ApplicationWindow::getTiledWindowAtPos(QPoint pos) {
   foreach (QMdiSubWindow *w, wl) {
     TiledWindow *tw = dynamic_cast<TiledWindow *>(w->widget());
     if (tw) {
-      QPoint mdiOrigin = mapFromGlobal(pos);
-      auto r = w->visibleRegion();
+      QPoint mdiOrigin = mapToGlobal(w->pos());
+      auto r = w->visibleRegion().boundingRect();
       r.translate(mdiOrigin);
       if (r.contains(pos)) {
         return tw;
@@ -16648,8 +16700,8 @@ TiledWindow *ApplicationWindow::getTiledWindowAtPos(QPoint pos) {
   foreach (FloatingWindow *w, m_floatingWindows) {
     TiledWindow *tw = dynamic_cast<TiledWindow *>(w->mdiSubWindow());
     if (tw) {
-      QPoint mdiOrigin = mapFromGlobal(pos);
-      auto r = w->visibleRegion();
+      QPoint mdiOrigin = mapToGlobal(w->pos());
+      auto r = w->visibleRegion().boundingRect();
       r.translate(mdiOrigin);
       if (r.contains(pos)) {
         return tw;
@@ -16688,4 +16740,31 @@ void ApplicationWindow::dropInTiledWindow(MdiSubWindow *w, QPoint pos) {
 bool ApplicationWindow::isOfType(const QObject *obj,
                                  const char *toCompare) const {
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
+}
+
+/**
+ * Triggers saving project recovery on behalf of an external thread
+ * or caller, such as project recovery.
+ *
+ * @param destination:: The full path to write the recovery file to
+ * @return True if saving is successful, false otherwise
+ */
+bool ApplicationWindow::saveProjectRecovery(std::string destination) {
+  const bool isRecovery = true;
+  ProjectSerialiser projectWriter(this, isRecovery);
+  return projectWriter.save(QString::fromStdString(destination));
+}
+
+void ApplicationWindow::checkForProjectRecovery() {
+  if (!m_projectRecovery.checkForRecovery()) {
+    m_projectRecovery.startProjectSaving();
+    return;
+  }
+
+  // Recovery file present
+  if (m_projectRecovery.attemptRecovery()) {
+    // If it worked correctly reset project recovery and start saving
+    m_projectRecovery.clearAllCheckpoints();
+    m_projectRecovery.startProjectSaving();
+  }
 }

@@ -1,5 +1,8 @@
 set ( SRC_FILES
     MeasurementItem.cpp
+    InstrumentOptionDefaults.cpp
+    InstrumentParameters.cpp
+    ExperimentOptionDefaults.cpp
     QtReflEventTabView.cpp
     QtReflEventView.cpp
     QtReflMainWindowView.cpp
@@ -8,6 +11,9 @@ set ( SRC_FILES
     QtReflSettingsTabView.cpp
     QtReflSettingsView.cpp
     ReflCatalogSearcher.cpp
+    ReflAsciiSaver.cpp
+    IReflAsciiSaver.cpp
+    ReflAutoreduction.cpp
     ReflDataProcessorPresenter.cpp
     ReflEventPresenter.cpp
     ReflEventTabPresenter.cpp
@@ -24,12 +30,14 @@ set ( SRC_FILES
     ReflSettingsTabPresenter.cpp
     ReflTableSchema.cpp
     TransferResults.cpp
+    GetInstrumentParameter.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
     DllConfig.h
+    InstrumentParameters.h
     IReflEventPresenter.h
     IReflEventTabPresenter.h
     IReflEventView.h
@@ -52,7 +60,11 @@ set ( INC_FILES
     QtReflSaveTabView.h
     QtReflSettingsTabView.h
     QtReflSettingsView.h
+    QWidgetGroup.h
+    ReflAutoreduction.h
     ReflCatalogSearcher.h
+    ReflAsciiSaver.h
+    IReflAsciiSaver.h
     ReflDataProcessorMainPresenter.h
     ReflDataProcessorPresenter.h
     ReflEventPresenter.h
@@ -72,6 +84,10 @@ set ( INC_FILES
     ReflTableSchema.h
     ReflTransferStrategy.h
     TransferResults.h
+    GetInstrumentParameter.h
+    ExperimentOptionDefaults.h
+    InstrumentOptionDefaults.h
+    First.h
 )
 
 set ( MOC_FILES
@@ -82,6 +98,7 @@ set ( MOC_FILES
     QtReflSaveTabView.h
     QtReflSettingsTabView.h
     QtReflSettingsView.h
+    QtReflMainWindowView.h
 )
 
 set ( UI_FILES
@@ -119,4 +136,6 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISReflectometry
       ${PLUGINS_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../../Contents/MacOS
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../../${LIB_DIR}"
 )

@@ -10,6 +10,13 @@ namespace PythonInterface {
  * Construct the "wrapper" and stores the reference to the PyObject
  * @param self A reference to the calling Python object
  */
-DataProcessorAdapter::DataProcessorAdapter(PyObject *self) : SuperClass(self) {}
+template <class Base>
+DataProcessorAdapter<Base>::DataProcessorAdapter(PyObject *self)
+    : AlgorithmAdapter<API::GenericDataProcessorAlgorithm<Base>>(self) {}
+
+template class DataProcessorAdapter<API::Algorithm>;
+template class DataProcessorAdapter<API::SerialAlgorithm>;
+template class DataProcessorAdapter<API::ParallelAlgorithm>;
+template class DataProcessorAdapter<API::DistributedAlgorithm>;
 }
 }

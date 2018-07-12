@@ -9,10 +9,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ReflTableSchema {
 
-typedef std::string ColumnNameType;
-typedef std::string ColumnValueType;
-typedef std::map<int, ColumnNameType> ColumnIndexNameMap;
-typedef std::map<ColumnNameType, int> ColumnNameIndexMap;
+using ColumnNameType = std::string;
+using ColumnValueType = std::string;
+using ColumnIndexNameMap = std::map<int, ColumnNameType>;
+using ColumnNameIndexMap = std::map<ColumnNameType, int>;
 
 /// Label for run number column
 static const std::string RUNS("Run(s)");

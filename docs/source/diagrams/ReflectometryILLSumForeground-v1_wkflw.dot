@@ -1,0 +1,66 @@
+digraph ReflectometryILLSumForeground {
+  label = "ReflectometryILLSumForeground workflow diagram"
+  $global_style
+
+  subgraph params {
+    $param_style
+    input               [label="InputWorkspace"]
+    output              [label="OutputWorkspace"]
+    l_direct_foreground [label="DirectForegroundWorkspace"]
+    q_direct_foreground [label="DirectForegroundWorkspace"]
+    l_foreground_centre [label="Foreground\ncentre"]
+    q_foreground_centre [label="Foreground\ncentre"]
+    l_foreground_widths [label="Foreground\nwidths"]
+    q_foreground_widths [label="Foreground\nwidths"]
+    flat_sample         [label="FlatSample"]
+    wavelength_range    [label="WavelengthRange"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    crop                      [label="CropWorkspace"]
+    extract_spectrum          [label="ExtractSingleSpectrum"]
+    sum_foreground_q          [label="Sum foreground spectra\nin Q"]
+    sum_foreground_wavelength [label="Sum foreground spectra\nin wavelength"] 
+    l_rebin                   [label="Rebin reflected to direct"]
+    q_rebin                   [label="Rebin reflected to direct"]
+    divide_after              [label="Divide"]
+    divide_before             [label="Divide"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    if_direct_foreground [label="Is DirectForeground\navailable?"]
+    which_sum_type       [label="SummationType?"]
+  }
+
+
+  input                     -> which_sum_type
+
+  which_sum_type            -> q_rebin [label="SumInQ"]
+  q_direct_foreground       -> q_rebin
+  q_rebin                   -> divide_before [label="LHS"]
+  q_direct_foreground       -> divide_before [label="RHS"]
+  divide_before             -> sum_foreground_q
+  q_foreground_centre       -> sum_foreground_q
+  q_foreground_widths       -> sum_foreground_q
+  flat_sample               -> sum_foreground_q
+  sum_foreground_q          -> crop
+
+  which_sum_type            -> extract_spectrum [label="SumInLambda"]
+  l_foreground_centre       -> extract_spectrum
+  extract_spectrum          -> sum_foreground_wavelength
+  l_foreground_widths       -> sum_foreground_wavelength
+  sum_foreground_wavelength -> if_direct_foreground
+
+  if_direct_foreground      -> crop [label="No"]
+
+  if_direct_foreground      -> l_rebin [label="Yes"]
+  l_direct_foreground       -> l_rebin
+  l_rebin                   -> divide_after [label="LHS"]
+  l_direct_foreground       -> divide_after [label="RHS"]
+  divide_after              -> crop
+
+  wavelength_range          -> crop
+  crop                      -> output
+}

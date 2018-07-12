@@ -6,7 +6,7 @@ import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator, MatrixWorkspaceProperty,
                         Progress, PropertyMode,  WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, StringListValidator)
-from mantid.simpleapi import (CreateSingleValuedWorkspace, Divide, Minus, Multiply)
+from mantid.simpleapi import (CloneWorkspace, CreateSingleValuedWorkspace, Divide, Minus, Multiply)
 
 
 def _subtractEC(ws, ecWS, ecScaling, wsNames, wsCleanup, algorithmLogging):
@@ -42,6 +42,9 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
         """Return the algorithm's category."""
         return common.CATEGORIES
 
+    def seeAlso(self):
+        return [ "DirectILLReduction" ]
+
     def name(self):
         """Return the algorithm's name."""
         return 'DirectILLApplySelfShielding'
@@ -69,10 +72,13 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
         mainWS = self._inputWS(wsCleanup)
 
         progress.report('Applying self shielding corrections')
-        mainWS = self._applyCorrections(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS, applied = self._applyCorrections(mainWS, wsNames, wsCleanup, subalgLogging)
 
         progress.report('Subtracting EC')
-        mainWS = self._subtractEC(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS, subtracted = self._subtractEC(mainWS, wsNames, wsCleanup, subalgLogging)
+
+        if not applied and not subtracted:
+            mainWS = self._cloneOnly(mainWS, wsNames, wsCleanup, subalgLogging)
 
         self._finalize(mainWS, wsCleanup)
         progress.report('Done')
@@ -90,11 +96,11 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
             defaultValue='',
             validator=inputWorkspaceValidator,
             direction=Direction.Input),
-            doc='Input workspace.')
+            doc='A workspace to which to apply the corrections.')
         self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
                                                defaultValue='',
                                                direction=Direction.Output),
-                             doc='The output of the algorithm.')
+                             doc='The corrected workspace.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
                              defaultValue=common.CLEANUP_ON,
                              validator=StringListValidator([
@@ -116,24 +122,30 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
             validator=inputWorkspaceValidator,
             direction=Direction.Input,
             optional=PropertyMode.Optional),
-            doc='Reduced empty container workspace.')
+            doc='An empty container workspace for subtraction from the input workspace.')
         self.declareProperty(name=common.PROP_EC_SCALING,
                              defaultValue=1.0,
                              validator=scalingFactor,
                              direction=Direction.Input,
-                             doc='Scaling factor (transmission, if no self ' +
-                                 'shielding is applied) for empty container.')
+                             doc='A multiplier (transmission, if no self ' +
+                                 'shielding is applied) for the empty container.')
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_SELF_SHIELDING_CORRECTION_WS,
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
-            doc='A workspace containing self shielding correction factors.')
+            doc='A workspace containing the self shielding correction factors.')
+
+    def _cloneOnly(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        cloneWSName = wsNames.withSuffix('cloned_only')
+        cloneWS = CloneWorkspace(InputWorkspace=mainWS,
+                                 OutputWorkspace=cloneWSName)
+        return cloneWS
 
     def _applyCorrections(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Applies self shielding corrections to a workspace, if corrections exist."""
         if self.getProperty(common.PROP_SELF_SHIELDING_CORRECTION_WS).isDefault:
-            return mainWS
+            return mainWS, False
         correctionWS = self.getProperty(common.PROP_SELF_SHIELDING_CORRECTION_WS).value
         correctedWSName = wsNames.withSuffix('self_shielding_corrected')
         correctedWS = Divide(LHSWorkspace=mainWS,
@@ -141,7 +153,7 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
                              OutputWorkspace=correctedWSName,
                              EnableLogging=subalgLogging)
         wsCleanup.cleanup(mainWS)
-        return correctedWS
+        return correctedWS, True
 
     def _finalize(self, outWS, wsCleanup):
         """Do final cleanup and set the output property."""
@@ -158,12 +170,12 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
     def _subtractEC(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Subtract the empty container workspace without self-shielding corrections."""
         if self.getProperty(common.PROP_EC_WS).isDefault:
-            return mainWS
+            return mainWS, False
         ecWS = self.getProperty(common.PROP_EC_WS).value
         ecScaling = self.getProperty(common.PROP_EC_SCALING).value
         subtractedWS = _subtractEC(mainWS, ecWS, ecScaling, wsNames, wsCleanup, subalgLogging)
         wsCleanup.cleanup(mainWS)
-        return subtractedWS
+        return subtractedWS, True
 
 
 AlgorithmFactory.subscribe(DirectILLApplySelfShielding)

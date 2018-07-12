@@ -242,7 +242,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
 
   std::string x_label = "";
   Unit_sptr &old_unit = m_matWs->getAxis(0)->unit();
-  if (old_unit != 0) {
+  if (old_unit) {
     x_label = old_unit->caption();
     SVUtils::PushNameValue(x_label, 8, 3, x, list);
   }
@@ -262,7 +262,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
 
   try {
 
-    if (old_unit == 0) {
+    if (!old_unit) {
       g_log.debug("No UNITS on MatrixWorkspace X-axis");
       return list;
     }

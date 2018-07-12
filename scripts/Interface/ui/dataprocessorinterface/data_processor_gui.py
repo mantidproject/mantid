@@ -16,9 +16,9 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
     """
     A DataProcessorMainPresenter. The base class provides default implementations
     but we should re-implement the following methods:
-    - getPreprocessingOptionsAsString() -- to supply global pre-processing options to the table widget
+    - getPreprocessingOptions() -- to supply global pre-processing options to the table widget
     - getProcessingOptions() -- to supply global processing options
-    - getPostprocessingOptions() -- to supply global post-processing options
+    - getPostprocessingOptionsAsString() -- to supply global post-processing options
     - notifyADSChanged() -- to act when the ADS changed, typically we want to update
       table actions with the list of table workspaces that can be loaded into the interface
 
@@ -31,28 +31,28 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
         super(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresenter, self).__init__()
         self.gui = gui
 
-    def getPreprocessingOptionsAsString(self):
+    def getPreprocessingOptions(self, group = 0):
         """
-        Return global pre-processing options as a string.
-        The string must be a sequence of key=value separated by ','.
+        Return global pre-processing options as a dict of key:value pairs
         """
-        return "AnalysisMode=PointDetectorAnalysis"
+        result = {"AnalysisMode":"PointDetectorAnalysis"}
+        return result
 
-    def getProcessingOptions(self):
+    def getProcessingOptions(self, group = 0):
         """
-        Return global processing options as a string.
-        The string must be a sequence of key=value separated by ','.
+        Return global processing options as a dict of key:value pairs.
         """
-        return "AnalysisMode=PointDetectorAnalysis, WavelengthMin=1.5"
+        result = {"AnalysisMode":"PointDetectorAnalysis", "WavelengthMin":"1.5"}
+        return result
 
-    def getPostprocessingOptions(self):
+    def getPostprocessingOptionsAsString(self, group = 0):
         """
         Return global post-processing options as a string.
         The string must be a sequence of key=value separated by ','.
         """
         return "Params='0.03, -0.04, 0.6'"
 
-    def notifyADSChanged(self, workspace_list):
+    def notifyADSChanged(self, workspace_list, group = 0):
         """
         The widget will call this method when something changes in the ADS.
         The argument is the list of table workspaces that can be loaded into

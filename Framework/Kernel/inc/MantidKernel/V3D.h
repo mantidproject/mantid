@@ -117,7 +117,7 @@ public:
   double toMillerIndexes(double eps = 1.e-3);
   /// Scalar product
   double scalar_prod(const V3D &) const;
-  /// Cross product
+  /// Cross product (this * argument)
   V3D cross_prod(const V3D &) const;
   /// Distance (R) between two points defined as vectors
   double distance(const V3D &) const;

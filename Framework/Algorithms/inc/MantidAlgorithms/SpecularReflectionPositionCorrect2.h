@@ -38,6 +38,9 @@ public:
   const std::string summary() const override;
   /// Version
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"SpecularReflectionCalculateTheta"};
+  }
   /// Category
   const std::string category() const override;
 

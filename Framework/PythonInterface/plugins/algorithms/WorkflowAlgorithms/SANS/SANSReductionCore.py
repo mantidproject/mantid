@@ -4,7 +4,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
+from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         IEventWorkspace, Progress)
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
@@ -13,7 +13,7 @@ from sans.common.general_functions import (create_child_algorithm, append_to_san
 from sans.common.enums import (DetectorType, DataType)
 
 
-class SANSReductionCore(DataProcessorAlgorithm):
+class SANSReductionCore(DistributedDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Reduction'
 
@@ -78,6 +78,14 @@ class SANSReductionCore(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('SumOfNormFactors', '', optional=PropertyMode.Optional,
                                                      direction=Direction.Output),
                              doc='The sum of the counts of the output workspace.')
+
+        self.declareProperty(MatrixWorkspaceProperty('CalculatedTransmissionWorkspace', '', optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc='The calculated transmission workspace')
+
+        self.declareProperty(MatrixWorkspaceProperty('UnfittedTransmissionWorkspace', '', optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc='The unfitted transmission workspace')
 
     def PyExec(self):
         # Get the input
@@ -184,7 +192,8 @@ class SANSReductionCore(DataProcessorAlgorithm):
         # settings. On the other hand it is not clear that this would be an advantage with the GIL.
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Creating adjustment workspaces ...")
-        wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace =\
+        wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace, \
+            calculated_transmission_workspace, unfitted_transmission_workspace = \
             self._adjustment(state_serialized, workspace, monitor_workspace, component_as_string, data_type_as_string)
 
         # ------------------------------------------------------------
@@ -217,8 +226,9 @@ class SANSReductionCore(DataProcessorAlgorithm):
         if sum_of_norms:
             self.setProperty("SumOfNormFactors", sum_of_norms)
 
-        # TODO: Publish temporary workspaces if required
-        # This includes partial workspaces of Q1D and unfitted transmission data
+        if state.adjustment.show_transmission:
+            self.setProperty("CalculatedTransmissionWorkspace", calculated_transmission_workspace)
+            self.setProperty("UnfittedTransmissionWorkspace", unfitted_transmission_workspace)
 
     def _get_cropped_workspace(self, component):
         scatter_workspace = self.getProperty("ScatterWorkspace").value
@@ -323,7 +333,10 @@ class SANSReductionCore(DataProcessorAlgorithm):
         pixel_adjustment = adjustment_alg.getProperty("OutputWorkspacePixelAdjustment").value
         wavelength_and_pixel_adjustment = adjustment_alg.getProperty(
                                            "OutputWorkspaceWavelengthAndPixelAdjustment").value
-        return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment
+        calculated_transmission_workspace = adjustment_alg.getProperty("CalculatedTransmissionWorkspace").value
+        unfitted_transmission_workspace = adjustment_alg.getProperty("UnfittedTransmissionWorkspace").value
+        return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment, \
+            calculated_transmission_workspace, unfitted_transmission_workspace
 
     def _convert_to_histogram(self, workspace):
         if isinstance(workspace, IEventWorkspace):

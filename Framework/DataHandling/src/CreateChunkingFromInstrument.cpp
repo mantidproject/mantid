@@ -11,8 +11,10 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 namespace Mantid {
 namespace DataHandling {
@@ -23,7 +25,7 @@ using namespace Mantid::Kernel;
 using Types::Core::DateAndTime;
 using namespace std;
 
-typedef Mantid::Kernel::StringTokenizer tokenizer;
+using tokenizer = Mantid::Kernel::StringTokenizer;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateChunkingFromInstrument)

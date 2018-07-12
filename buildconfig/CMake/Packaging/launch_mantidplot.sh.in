@@ -5,15 +5,14 @@
 # Script is configured by CMake
 
 # Find out where we are
-SCRIPTFILE=$(readlink -f "$0")
-INSTALLDIR=$(echo $SCRIPTFILE | sed -r -e 's|^(.*)/(.*)$|\1|g') #.* is greedy and eats up until the final slash
+THISFILE=$(readlink -f "$0")
+INSTALLDIR=$(echo $THISFILE | sed -r -e 's|^(.*)/(.*)$|\1|g') #.* is greedy and eats up until the final slash
 
 # Define extra libraries and load paths
 LOCAL_PRELOAD=@TCMALLOC_RUNTIME_LIB@
 if [ -n "${LD_PRELOAD}" ]; then
     LOCAL_PRELOAD=${LOCAL_PRELOAD}:${LD_PRELOAD}
 fi
-LOCAL_LDPATH=@EXTRA_LDPATH@:${LD_LIBRARY_PATH}
 if [ -z "${TCMALLOC_RELEASE_RATE}" ]; then
     TCM_RELEASE=10000
 else
@@ -22,10 +21,10 @@ fi
 
 if [ -n "${NXSESSIONID}" ]; then
   command -v vglrun >/dev/null 2>&1 || { echo >&2 "MantidPlot requires VirtualGL but it's not installed.  Aborting."; exit 1; }
-  VGLRUN="vglrun "
+  VGLRUN="vglrun"
 elif [ -n "${TLSESSIONDATA}" ]; then
   command -v vglrun >/dev/null 2>&1 || { echo >&2 "MantidPlot requires VirtualGL but it's not installed.  Aborting."; exit 1; }
-  VGLRUN="vglrun "
+  VGLRUN="vglrun"
 fi
 
 # Define when to report large memory allocation
@@ -42,8 +41,14 @@ else
     TCM_REPORT=${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}
 fi
 
+# run with gdb THIS OPTION MUST BE SUPPLIED FIRST
+if [ -n "$1" ] && [ "$1" = "--debug" ]; then
+    shift
+    GDB="gdb --args"
+fi
+
+
 # Launch
 LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
-    TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD=${TCM_REPORT} \
-    LD_LIBRARY_PATH=${LOCAL_LDPATH} QT_API=pyqt \
-    @WRAPPER_PREFIX@$VGLRUN$INSTALLDIR/@MANTIDPLOT_EXEC@ $*@WRAPPER_POSTFIX@
+    TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD=${TCM_REPORT} QT_API=pyqt \
+    @WRAPPER_PREFIX@$VGLRUN $GDB $INSTALLDIR/@MANTIDPLOT_EXEC@ $*@WRAPPER_POSTFIX@ || @PYTHON_EXECUTABLE@ @SCRIPTSDIR@/ErrorReporter/error_dialog_app.py --exitcode=$? --directory=$INSTALLDIR

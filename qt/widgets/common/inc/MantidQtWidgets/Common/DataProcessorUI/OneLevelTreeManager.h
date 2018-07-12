@@ -51,6 +51,7 @@ public:
   /// Destructor
   ~OneLevelTreeManager() override;
 
+  bool isMultiLevel() const override;
   /// Publish commands
   std::vector<std::unique_ptr<Command>> publishCommands() override;
   /// Append a row
@@ -61,6 +62,8 @@ public:
   void deleteRow() override;
   /// Delete a group
   void deleteGroup() override;
+  /// Delete all rows and groups
+  void deleteAll() override;
   /// Group rows
   void groupRows() override;
   /// Expand selection
@@ -79,9 +82,10 @@ public:
 
   /// Return selected data
   TreeData selectedData(bool prompt) override;
+  /// Return all data
+  TreeData allData(bool prompt) override;
   /// Transfer new data to model
-  void transfer(const std::vector<std::map<QString, QString>> &runs,
-                const WhiteList &whitelist) override;
+  void transfer(const std::vector<std::map<QString, QString>> &runs) override;
   /// Update row with new data
   void update(int parent, int child, const QStringList &data) override;
   /// Get the number of rows of a given parent
@@ -91,13 +95,21 @@ public:
                const std::string &value) override;
   int getNumberOfRows() override;
   std::string getCell(int row, int column, int parentRow,
-                      int parentColumn) override;
+                      int parentColumn) const override;
   /// Get the 'processed' status of a data item
   bool isProcessed(int position) const override;
   bool isProcessed(int position, int parent) const override;
   /// Set the 'processed' status of a data item
   void setProcessed(bool processed, int position) override;
   void setProcessed(bool processed, int position, int parent) override;
+  /// Check whether reduction failed for an item
+  bool reductionFailed(int position) const override;
+  bool reductionFailed(int position, int parent) const override;
+  /// Set the error message for a data item
+  void setError(const std::string &error, int position) override;
+  void setError(const std::string &error, int position, int parent) override;
+  /// Invalidate the processed/error state for all items
+  void invalidateAllProcessed() override;
 
   /// Validate a table workspace
   bool isValidModel(Mantid::API::Workspace_sptr ws,
@@ -121,7 +133,7 @@ private:
   /// The model
   boost::shared_ptr<QOneLevelTreeModel> m_model;
 
-  /// Insert a row in the model
+  /// Insert an empty row in the model
   void insertRow(int rowIndex);
   /// Create a default table workspace
   Mantid::API::ITableWorkspace_sptr
@@ -129,6 +141,7 @@ private:
   /// Validate a table workspace
   void validateModel(Mantid::API::ITableWorkspace_sptr ws,
                      size_t whitelistColumns) const;
+  TreeData constructTreeData(std::set<int> rows);
 };
 }
 }

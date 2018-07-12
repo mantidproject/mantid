@@ -158,9 +158,11 @@ public:
   // -------------------------------------------
 
   std::vector<Mantid::Kernel::VMD> getVertexes() const override;
-  coord_t *getVertexesArray(size_t &numVertices) const override;
-  coord_t *getVertexesArray(size_t &numVertices, const size_t outDimensions,
-                            const bool *maskDim) const override;
+  std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices) const override;
+  std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                   const bool *maskDim) const override;
   void transformDimensions(std::vector<double> &scaling,
                            std::vector<double> &offset) override;
 
@@ -372,7 +374,7 @@ private:
 
 public:
   /// Convenience typedef for a shared pointer to a this type of class
-  typedef boost::shared_ptr<MDBoxBase<MDE, nd>> sptr;
+  using sptr = boost::shared_ptr<MDBoxBase<MDE, nd>>;
 
 }; //(end class MDBoxBase)
 

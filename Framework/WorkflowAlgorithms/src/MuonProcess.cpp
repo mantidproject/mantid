@@ -116,8 +116,11 @@ void MuonProcess::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
-  declareProperty("CropWorkspace", true,
-                  "Determines if the input workspace should be cropped");
+  declareProperty("CropWorkspace", true, "Determines if the input workspace "
+                                         "should be cropped at Xmax, Xmin is "
+                                         "still aplied.");
+
+  declareProperty("WorkspaceName", "", "The name of the input workspace");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -185,7 +188,8 @@ void MuonProcess::exec() {
     } else if (outputType == "GroupAsymmetry") {
       asymCalc = Mantid::Kernel::make_unique<MuonGroupAsymmetryCalculator>(
           allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex,
-          getProperty("Xmin"), getProperty("Xmax"));
+          getProperty("Xmin"), getProperty("Xmax"),
+          getProperty("WorkspaceName"));
     } else if (outputType == "PairAsymmetry") {
       int first = getProperty("PairFirstIndex");
       int second = getProperty("PairSecondIndex");
@@ -297,25 +301,23 @@ MatrixWorkspace_sptr MuonProcess::correctWorkspace(MatrixWorkspace_sptr ws,
 
     ws = changeOffset->getProperty("OutputWorkspace");
   }
-  bool toCrop = getProperty("CropWorkspace");
-  if (toCrop) {
-    // Crop workspace, if need to
-    double Xmin = getProperty("Xmin");
-    double Xmax = getProperty("Xmax");
-    if (Xmin != EMPTY_DBL() || Xmax != EMPTY_DBL()) {
-      IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
-      crop->setProperty("InputWorkspace", ws);
+  // Crop workspace, if need to
+  double Xmin = getProperty("Xmin");
+  double Xmax = getProperty("Xmax");
+  if (Xmin != EMPTY_DBL() || Xmax != EMPTY_DBL()) {
+    IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
+    crop->setProperty("InputWorkspace", ws);
 
-      if (Xmin != EMPTY_DBL())
-        crop->setProperty("Xmin", Xmin);
-
+    if (Xmin != EMPTY_DBL())
+      crop->setProperty("Xmin", Xmin);
+    bool toCrop = getProperty("CropWorkspace");
+    if (toCrop) {
       if (Xmax != EMPTY_DBL())
         crop->setProperty("Xmax", Xmax);
-
-      crop->execute();
-
-      ws = crop->getProperty("OutputWorkspace");
     }
+    crop->execute();
+
+    ws = crop->getProperty("OutputWorkspace");
   }
 
   // Rebin workspace if need to

@@ -118,11 +118,11 @@ def mask_with_mask_files(mask_info, workspace):
         load_options = {"Instrument": idf_path,
                         "OutputWorkspace": EMPTY_NAME}
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
+        dummy_params = {"OutputWorkspace": EMPTY_NAME}
+        mask_alg = create_unmanaged_algorithm("MaskInstrument", **dummy_params)
+        clear_alg = create_unmanaged_algorithm("ClearMaskedSpectra", **dummy_params)
 
         # Masker
-        mask_name = "MaskDetectors"
-        mask_options = {"ForceInstrumentMasking": True}
-        mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
         for mask_file in mask_files:
             mask_file = find_full_file_path(mask_file)
 
@@ -130,11 +130,21 @@ def mask_with_mask_files(mask_info, workspace):
             load_alg.setProperty("InputFile", mask_file)
             load_alg.execute()
             masking_workspace = load_alg.getProperty("OutputWorkspace").value
-            # Mask the detector ids on the original workspace
-            mask_alg.setProperty("Workspace", workspace)
-            mask_alg.setProperty("MaskedWorkspace", masking_workspace)
+            # Could use MaskDetectors directly with masking_workspace but it does not
+            # support MPI. Use a three step approach via a, b, and c instead.
+            # a) Extract detectors to mask from MaskWorkspace
+            det_ids = masking_workspace.getMaskedDetectors()
+            # b) Mask the detector ids on the instrument
+            mask_alg.setProperty("InputWorkspace", workspace)
+            mask_alg.setProperty("OutputWorkspace", workspace)
+            mask_alg.setProperty("DetectorIDs", det_ids)
             mask_alg.execute()
-            workspace = mask_alg.getProperty("Workspace").value
+            workspace = mask_alg.getProperty("OutputWorkspace").value
+        # c) Clear data in all spectra associated with masked detectors
+        clear_alg.setProperty("InputWorkspace", workspace)
+        clear_alg.setProperty("OutputWorkspace", workspace)
+        clear_alg.execute()
+        workspace = clear_alg.getProperty("OutputWorkspace").value
     return workspace
 
 
@@ -243,12 +253,15 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
 
     # Perform the masking
     if total_spectra:
-        mask_name = "MaskDetectors"
-        mask_options = {"Workspace": workspace,
-                        "SpectraList": total_spectra}
+        mask_name = "MaskSpectra"
+        mask_options = {"InputWorkspace": workspace,
+                        "InputWorkspaceIndexType": "SpectrumNumber",
+                        "OutputWorkspace": "__dummy"}
         mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
+        mask_alg.setProperty("InputWorkspaceIndexSet", list(set(total_spectra)))
+        mask_alg.setProperty("OutputWorkspace", workspace)
         mask_alg.execute()
-        workspace = mask_alg.getProperty("Workspace").value
+        workspace = mask_alg.getProperty("OutputWorkspace").value
     return workspace
 
 
@@ -286,9 +299,9 @@ def mask_angle(mask_info, workspace):
     return workspace
 
 
-def mask_beam_stop(mask_info, workspace, instrument):
+def mask_beam_stop(mask_info, workspace, instrument, detector_names):
     """
-    The beam stop is being masked here. Note that this is only implemented for SANS2D
+    The beam stop is being masked here.
 
     :param mask_info: a SANSStateMask object.
     :param workspace: the workspace which is to be masked.
@@ -300,18 +313,17 @@ def mask_beam_stop(mask_info, workspace, instrument):
     beam_stop_arm_pos1 = mask_info.beam_stop_arm_pos1
     beam_stop_arm_pos2 = mask_info.beam_stop_arm_pos2
     if beam_stop_arm_width is not None and beam_stop_arm_angle is not None:
-        if instrument is SANSInstrument.SANS2D:
-            detector = workspace.getInstrument().getComponentByName('rear-detector')
-            z_position = detector.getPos().getZ()
-            start_point = [beam_stop_arm_pos1, beam_stop_arm_pos2, z_position]
-            line_mask = create_line_mask(start_point, 100., beam_stop_arm_width, beam_stop_arm_angle)
+        detector = workspace.getInstrument().getComponentByName(detector_names['LAB'])
+        z_position = detector.getPos().getZ()
+        start_point = [beam_stop_arm_pos1, beam_stop_arm_pos2, z_position]
+        line_mask = create_line_mask(start_point, 100., beam_stop_arm_width, beam_stop_arm_angle)
 
-            mask_name = "MaskDetectorsInShape"
-            mask_options = {"Workspace": workspace,
-                            "ShapeXML": line_mask}
-            mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
-            mask_alg.execute()
-            workspace = mask_alg.getProperty("Workspace").value
+        mask_name = "MaskDetectorsInShape"
+        mask_options = {"Workspace": workspace,
+                        "ShapeXML": line_mask}
+        mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
+        mask_alg.execute()
+        workspace = mask_alg.getProperty("Workspace").value
     return workspace
 
 
@@ -338,10 +350,11 @@ class NullMasker(Masker):
 
 
 class MaskerISIS(Masker):
-    def __init__(self, spectra_block, instrument):
+    def __init__(self, spectra_block, instrument, detector_names):
         super(MaskerISIS, self).__init__()
         self._spectra_block = spectra_block
         self._instrument = instrument
+        self._detector_names = detector_names
 
     def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress):
         """
@@ -375,7 +388,7 @@ class MaskerISIS(Masker):
 
         # Mask beam stop
         progress.report("Masking beam stop.")
-        return mask_beam_stop(mask_info, workspace_to_mask, self._instrument)
+        return mask_beam_stop(mask_info, workspace_to_mask, self._instrument, self._detector_names)
 
 
 class MaskFactory(object):
@@ -393,13 +406,14 @@ class MaskFactory(object):
         """
         data_info = state.data
         instrument = data_info.instrument
+        detector_names = state.reduction.detector_names
         if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or\
                         instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM:  # noqa
             run_number = data_info.sample_scatter_run_number
             file_name = data_info.sample_scatter
             _, ipf_path = get_instrument_paths_for_sans_file(file_name)
             spectra_block = SpectraBlock(ipf_path, run_number, instrument, detector_type)
-            masker = MaskerISIS(spectra_block, instrument)
+            masker = MaskerISIS(spectra_block, instrument, detector_names)
         else:
             masker = NullMasker()
             NotImplementedError("MaskFactory: Other instruments are not implemented yet.")

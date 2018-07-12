@@ -2,6 +2,20 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_IFATAB_H_
 
 #include "IndirectDataAnalysisTab.h"
+#include "IndirectFitDataPresenter.h"
+#include "IndirectFitPlotPresenter.h"
+#include "IndirectFittingModel.h"
+#include "IndirectSpectrumSelectionPresenter.h"
+#include "IndirectSpectrumSelectionView.h"
+
+#include "MantidQtWidgets/Common/IndirectFitPropertyBrowser.h"
+
+#include <boost/optional.hpp>
+
+#include <QtCore>
+
+#include <memory>
+#include <type_traits>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -12,129 +26,176 @@ class DLLExport IndirectFitAnalysisTab : public IndirectDataAnalysisTab {
 
 public:
   /// Constructor
-  IndirectFitAnalysisTab(QWidget *parent = nullptr);
+  IndirectFitAnalysisTab(IndirectFittingModel *model,
+                         QWidget *parent = nullptr);
+
+  void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
+  void setPlotView(IndirectFitPlotView *view);
+  void setSpectrumSelectionView(IndirectSpectrumSelectionView *view);
+  void
+  setFitPropertyBrowser(MantidWidgets::IndirectFitPropertyBrowser *browser);
+
+  std::size_t getSelectedDataIndex() const;
+  std::size_t getSelectedSpectrum() const;
+  bool isRangeCurrentlySelected(std::size_t dataIndex,
+                                std::size_t spectrum) const;
+
+  QString selectedFitType() const;
+
+  size_t numberOfCustomFunctions(const std::string &functionName) const;
+
+  void setConvolveMembers(bool convolveMembers);
+
+  void updateTies();
+
+  void setCustomSettingEnabled(const QString &customName, bool enabled);
+
+  void setParameterValue(const std::string &functionName,
+                         const std::string &parameterName, double value);
+
+  void setDefaultPeakType(const std::string &function);
+
+  void addCheckBoxFunctionGroup(
+      const QString &groupName,
+      const std::vector<Mantid::API::IFunction_sptr> &functions,
+      bool defaultValue = false);
+
+  void addSpinnerFunctionGroup(
+      const QString &groupName,
+      const std::vector<Mantid::API::IFunction_sptr> &functions,
+      int minimum = 0, int maximum = 10, int defaultValue = 0);
+
+  void addComboBoxFunctionGroup(
+      const QString &groupName,
+      const std::vector<Mantid::API::IFunction_sptr> &functions);
+
+  void setBackgroundOptions(const QStringList &backgrounds);
+
+  bool boolSettingValue(const QString &settingKey) const;
+
+  void setCustomBoolSetting(const QString &settingKey, bool value);
+
+  int intSettingValue(const QString &settingKey) const;
+
+  double doubleSettingValue(const QString &settingKey) const;
+
+  QString enumSettingValue(const QString &settingKey) const;
+
+  void addBoolCustomSetting(const QString &settingKey,
+                            const QString &settingName,
+                            bool defaultValue = false);
+
+  void addDoubleCustomSetting(const QString &settingKey,
+                              const QString &settingName,
+                              double defaultValue = 0);
+
+  void addIntCustomSetting(const QString &settingKey,
+                           const QString &settingName, int defaultValue = 0);
+
+  void addEnumCustomSetting(const QString &settingKey,
+                            const QString &settingName,
+                            const QStringList &options);
+
+  void addOptionalDoubleSetting(const QString &settingKey,
+                                const QString &settingName,
+                                const QString &optionKey,
+                                const QString &optionName, bool enabled = false,
+                                double defaultValue = 0);
+
+  void setCustomSettingChangesFunction(const QString &settingKey,
+                                       bool changesFunction);
 
 protected:
-  void setFitFunctions(const QVector<QString> &fitFunctions);
+  IndirectFittingModel *fittingModel() const;
 
-  void setPropertyFunctions(const QVector<QString> &functions);
+  void setSampleWSSuffices(const QStringList &suffices);
+  void setSampleFBSuffices(const QStringList &suffices);
+  void setResolutionWSSuffices(const QStringList &suffices);
+  void setResolutionFBSuffices(const QStringList &suffices);
 
-  void setDefaultPropertyValue(const QString &propertyName,
-                               const double &propertyValue);
-
-  void removeDefaultPropertyValue(const QString &propertyName);
-
-  bool hasDefaultPropertyValue(const QString &propertyName);
-
-  bool hasParameterValue(const QString &propertyName,
-                         const size_t &spectrumNumber);
-
-  void fitAlgorithmComplete(const std::string &paramWSName);
-
-  void fitAlgorithmComplete(const std::string &paramWSName,
-                            const QHash<QString, QString> &propertyToParameter);
-
-  QtProperty *createFunctionProperty(const QString &functionName,
-                                     const bool &addParameters = true);
-
-  QtProperty *createFunctionProperty(QtProperty *functionGroup,
-                                     const bool &addParameters = true);
-
-  QVector<QVector<QString>>
-  getFunctionParameters(const QVector<QString> &functionNames) const;
-
-  QVector<QString> getFunctionParameters(const QString &functionName) const;
-
-  virtual Mantid::API::IFunction_sptr
-  getFunction(const QString &functionName) const;
-
-  void fixSelectedItem();
-
-  void unFixSelectedItem();
-
-  bool isFixable(QtProperty const *prop) const;
-
-  bool isFixed(QtProperty const *prop) const;
-
-  void fitContextMenu(const QString &menuName);
-
-  void saveResult(const std::string &resultName);
-
-  void plotResult(const std::string &resultName, const QString &plotType);
-
+  void plotResult(const QString &plotType);
   void fillPlotTypeComboBox(QComboBox *comboBox);
 
-  void
-  updatePlot(const std::string &workspaceName,
-             MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-             MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) override;
-
+  void setAlgorithmProperties(Mantid::API::IAlgorithm_sptr fitAlgorithm) const;
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
+  void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
+  virtual void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
-  QtTreePropertyBrowser *m_propertyTree;
+  void updatePlotOptions(QComboBox *cbPlotType);
+
+  void setPlotOptions(QComboBox *cbPlotType,
+                      const std::vector<std::string> &parameters) const;
+
+  void setPlotOptions(QComboBox *cbPlotType,
+                      const QSet<QString> &options) const;
+
+  virtual void setPlotResultEnabled(bool enabled) = 0;
+  virtual void setSaveResultEnabled(bool enabled) = 0;
+
+signals:
+  void functionChanged();
+  void parameterChanged(const Mantid::API::IFunction *);
+  void customBoolChanged(const QString &key, bool value);
 
 protected slots:
-  virtual void algorithmComplete(bool error) = 0;
 
-  void updateProperties(int specNo);
+  void setModelFitFunction();
+  void setModelStartX(double startX);
+  void setModelEndX(double startX);
+  void setDataTableStartX(double startX);
+  void setDataTableEndX(double endX);
+  void setDataTableExclude(const std::string &exclude);
+  void setBrowserStartX(double startX);
+  void setBrowserEndX(double endX);
+  void updateBrowserFittingRange();
+  void setBrowserWorkspace(std::size_t dataIndex);
+  void setBrowserWorkspaceIndex(std::size_t spectrum);
+  void tableStartXChanged(double startX, std::size_t dataIndex,
+                          std::size_t spectrum);
+  void tableEndXChanged(double endX, std::size_t dataIndex,
+                        std::size_t spectrum);
+  void tableExcludeChanged(const std::string &exclude, std::size_t dataIndex,
+                           std::size_t spectrum);
 
-  void newInputDataLoaded(const QString &wsName);
+  void updateFitOutput(bool error);
+  void updateSingleFitOutput(bool error);
+  void fitAlgorithmComplete(bool error);
 
-  void clearBatchRunnerSlots();
+  void singleFit();
+  void singleFit(std::size_t dataIndex, std::size_t spectrum);
+  void executeFit();
 
-  virtual void updatePreviewPlots() = 0;
+  void updateFitBrowserParameterValues();
+  void updateParameterValues();
+  void updateParameterValues(
+      const std::unordered_map<std::string, ParameterValue> &parameters);
+
+  virtual void updatePlotOptions() = 0;
+
+  void updateResultOptions();
+  void saveResult();
 
 private:
   /// Overidden by child class.
-  void setup() override = 0;
-  void run() override = 0;
-  bool validate() override = 0;
-  void loadSettings(const QSettings &settings) override = 0;
-  virtual void disablePlotGuess() = 0;
-  virtual void enablePlotGuess() = 0;
+  void setup() override;
+  void loadSettings(const QSettings &settings) override;
+  virtual void setupFitTab() = 0;
+  bool validate() override;
+  void run() override;
 
-  /// Can be overidden by child class.
-  virtual QString addPrefixToParameter(const QString &parameter,
-                                       const QString &functionName,
-                                       const int &functionNumber) const;
-  virtual QString addPrefixToParameter(const QString &parameter,
-                                       const QString &functionName) const;
+  void connectDataAndPlotPresenters();
+  void connectSpectrumAndPlotPresenters();
+  void connectFitBrowserAndPlotPresenter();
+  void connectDataAndSpectrumPresenters();
+  void connectDataAndFitBrowserPresenters();
 
-  QVector<QVector<QString>>
-  addPrefixToParameters(const QVector<QVector<QString>> &parameters,
-                        const QVector<QString> &functionNames) const;
+  std::unique_ptr<IndirectFittingModel> m_fittingModel;
+  MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;
+  std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;
+  std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
+  std::unique_ptr<IndirectSpectrumSelectionPresenter> m_spectrumPresenter;
 
-  QVector<QString> addPrefixToParameters(const QVector<QString> &parameters,
-                                         const QString &functionName) const;
-
-  QHash<QString, QString>
-  createPropertyToParameterMap(const QVector<QString> &functionNames) const;
-
-  QHash<QString, QString> createPropertyToParameterMap(
-      const QVector<QString> &functionNames,
-      const QVector<QVector<QString>> &parameters,
-      const QVector<QVector<QString>> &parametersWithPrefix) const;
-
-  QHash<QString, QString> createPropertyToParameterMap(
-      const QString &functionName, const QVector<QString> &parameters,
-      const QVector<QString> &parametersWithPrefix) const;
-
-  QHash<QString, QHash<size_t, double>> combineParameterValues(
-      const QHash<QString, QHash<size_t, double>> &parameterValues1,
-      const QHash<QString, QHash<size_t, double>> &parameterValues2);
-
-  void updateProperty(const QString &propertyName, const size_t &index);
-
-  void clearFunctionProperties();
-
-  QtStringPropertyManager *m_stringManager;
-  QMap<QtProperty *, QtProperty *> m_fixedProps;
-  QVector<QString> m_fitFunctions;
-  QVector<QString> m_propertyFunctions;
-  QHash<QString, QHash<size_t, double>> m_parameterValues;
-  QHash<QString, QString> m_propertyToParameter;
-  QMap<QString, double> m_defaultPropertyValues;
-  bool m_appendResults;
+  Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
 };
 
 } // namespace IDA

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>704</width>
-    <height>591</height>
+    <width>752</width>
+    <height>744</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -76,13 +76,12 @@
         </property>
         <property name="workspaceSuffixes" stdset="0">
          <stringlist>
-          <string>_flt_abs</string>
           <string>_Corrections</string>
          </stringlist>
         </property>
         <property name="fileBrowserSuffixes" stdset="0">
          <stringlist>
-          <string>_flt_abs.nxs</string>
+          <string>_Corrections.nxs</string>
          </stringlist>
         </property>
         <property name="showLoad" stdset="0">
@@ -264,9 +263,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPreview" native="true">
-        <zorder>gbOptions</zorder>
-       </widget>
+       <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPreview" native="true"/>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">

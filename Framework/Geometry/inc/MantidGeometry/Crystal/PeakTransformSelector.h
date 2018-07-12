@@ -34,7 +34,7 @@ private:
   /// Disabled assigment operator
   PeakTransformSelector &operator=(const PeakTransformSelector &);
   /// Collection of candidate factories.
-  typedef std::set<PeakTransformFactory_sptr> Factories;
+  using Factories = std::set<PeakTransformFactory_sptr>;
   Factories m_candidateFactories;
 };
 }

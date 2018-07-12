@@ -66,7 +66,7 @@ protected:
   PoldiAbstractDetector() = default;
 };
 
-typedef boost::shared_ptr<PoldiAbstractDetector> PoldiAbstractDetector_sptr;
+using PoldiAbstractDetector_sptr = boost::shared_ptr<PoldiAbstractDetector>;
 }
 }
 #endif // POLDIABSTRACTDETECTOR_H

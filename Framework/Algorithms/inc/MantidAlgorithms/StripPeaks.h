@@ -1,10 +1,7 @@
 #ifndef MANTID_ALGORITHMS_STRIPPEAKS_H_
 #define MANTID_ALGORITHMS_STRIPPEAKS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace Mantid {
@@ -53,10 +50,8 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport StripPeaks : public API::Algorithm {
+class DLLExport StripPeaks : public API::ParallelAlgorithm {
 public:
-  /// (Empty) Constructor
-  StripPeaks();
   /// Algorithm's name
   const std::string name() const override { return "StripPeaks"; }
   /// Summary of algorithms purpose
@@ -68,6 +63,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"FindPeaks", "StripVanadiumPeaks"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "CorrectionFunctions\\PeakCorrections;Optimization\\PeakFinding";
@@ -82,7 +80,7 @@ private:
   API::ITableWorkspace_sptr findPeaks(API::MatrixWorkspace_sptr WS);
   API::MatrixWorkspace_sptr removePeaks(API::MatrixWorkspace_const_sptr input,
                                         API::ITableWorkspace_sptr peakslist);
-  double m_maxChiSq;
+  double m_maxChiSq{0.0};
 };
 
 } // namespace Algorithms

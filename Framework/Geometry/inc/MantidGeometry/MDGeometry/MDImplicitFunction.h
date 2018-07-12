@@ -294,7 +294,7 @@ protected:
   size_t m_numPlanes;
 };
 
-typedef boost::shared_ptr<MDImplicitFunction> MDImplicitFunction_sptr;
+using MDImplicitFunction_sptr = boost::shared_ptr<MDImplicitFunction>;
 
 } // namespace Geometry
 } // namespace Mantid

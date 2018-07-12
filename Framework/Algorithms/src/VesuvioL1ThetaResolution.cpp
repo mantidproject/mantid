@@ -12,13 +12,12 @@
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/Unit.h"
 
-#include <fstream>
-
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/uniform_real.hpp>
+
+#include <fstream>
+#include <random>
 
 namespace Mantid {
 namespace Algorithms {
@@ -29,11 +28,6 @@ using namespace Mantid::Geometry;
 
 namespace {
 Mantid::Kernel::Logger g_log("VesuvioL1ThetaResolution");
-
-class SquareRoot {
-public:
-  double operator()(double x) { return sqrt(x); }
-};
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -108,10 +102,6 @@ void VesuvioL1ThetaResolution::init() {
 /** Execute the algorithm.
  */
 void VesuvioL1ThetaResolution::exec() {
-  // Set up random number generator
-  m_generator.seed(static_cast<boost::mt19937::result_type>(
-      static_cast<int>(getProperty("Seed"))));
-
   // Load the instrument workspace
   loadInstrument();
 
@@ -173,9 +163,13 @@ void VesuvioL1ThetaResolution::exec() {
 
   // Set up progress reporting
   Progress prog(this, 0.0, 1.0, numHist);
+  const int seed(getProperty("Seed"));
+  std::mt19937 randEngine(static_cast<std::mt19937::result_type>(seed));
+  std::uniform_real_distribution<> flatDistrib(0.0, 1.0);
+  std::function<double()> flatVariateGen(
+      [&randEngine, &flatDistrib]() { return flatDistrib(randEngine); });
 
   const auto &spectrumInfo = m_instWorkspace->spectrumInfo();
-
   // Loop for all detectors
   for (size_t i = 0; i < numHist; i++) {
     std::vector<double> l1;
@@ -189,7 +183,7 @@ void VesuvioL1ThetaResolution::exec() {
     g_log.information() << "Detector ID " << det.getID() << '\n';
 
     // Do simulation
-    calculateDetector(det, l1, theta);
+    calculateDetector(det, flatVariateGen, l1, theta);
 
     // Calculate statistics for L1 and theta
     Statistics l1Stats = getStatistics(l1);
@@ -350,8 +344,8 @@ void VesuvioL1ThetaResolution::loadInstrument() {
 /** Loads the instrument into a workspace.
  */
 void VesuvioL1ThetaResolution::calculateDetector(
-    const IDetector &detector, std::vector<double> &l1Values,
-    std::vector<double> &thetaValues) {
+    const IDetector &detector, std::function<double()> &flatRandomVariateGen,
+    std::vector<double> &l1Values, std::vector<double> &thetaValues) {
   const int numEvents = getProperty("NumEvents");
   l1Values.reserve(numEvents);
   thetaValues.reserve(numEvents);
@@ -389,16 +383,16 @@ void VesuvioL1ThetaResolution::calculateDetector(
   // This loop is not iteration limited but highly unlikely to ever become
   // infinate
   while (l1Values.size() < static_cast<size_t>(numEvents)) {
-    const double xs = -sampleWidth / 2 + sampleWidth * random();
+    const double xs = -sampleWidth / 2 + sampleWidth * flatRandomVariateGen();
     const double ys = 0.0;
-    const double zs = -sampleWidth / 2 + sampleWidth * random();
+    const double zs = -sampleWidth / 2 + sampleWidth * flatRandomVariateGen();
     const double rs = sqrt(pow(xs, 2) + pow(zs, 2));
 
     if (rs <= sampleWidth / 2) {
-      const double a = -detWidth / 2 + detWidth * random();
+      const double a = -detWidth / 2 + detWidth * flatRandomVariateGen();
       const double xd = x0 - a * cos(theta);
       const double yd = y0 + a * sin(theta);
-      const double zd = -detHeight / 2 + detHeight * random();
+      const double zd = -detHeight / 2 + detHeight * flatRandomVariateGen();
 
       const double l1 =
           sqrt(pow(xd - xs, 2) + pow(yd - ys, 2) + pow(zd - zs, 2));
@@ -450,20 +444,11 @@ VesuvioL1ThetaResolution::processDistribution(MatrixWorkspace_sptr ws,
   for (size_t i = 0; i < numHist; i++) {
     auto &y = ws->y(i);
     auto &e = ws->mutableE(i);
-
-    std::transform(y.begin(), y.end(), e.begin(), SquareRoot());
+    std::transform(y.begin(), y.end(), e.begin(),
+                   [](double x) { return sqrt(x); });
   }
 
   return ws;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Generates a random number.
- */
-double VesuvioL1ThetaResolution::random() {
-  typedef boost::uniform_real<double> uniform_double;
-  return boost::variate_generator<boost::mt19937 &, uniform_double>(
-      m_generator, uniform_double(0.0, 1.0))();
 }
 
 } // namespace Algorithms

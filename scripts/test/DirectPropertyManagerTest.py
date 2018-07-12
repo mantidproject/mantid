@@ -176,7 +176,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_set_non_default_complex_value_synonims(self):
         propman = PropertyManager("MAP")
         propman.test_ei2_mon_spectra = 10000
-        self.assertEqual(propman.ei_mon_spectra,(41474,10000))
+        self.assertEqual(propman.ei_mon_spectra,(41475,10000))
 
         prop_changed = propman.getChangedProperties()
         self.assertEqual(len(prop_changed),1)

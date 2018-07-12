@@ -42,9 +42,11 @@ public:
   ProcessingAlgorithm();
   // Constructor
   ProcessingAlgorithm(QString name, std::vector<QString> prefix,
+                      std::size_t postprocessedOutputPrefixIndex,
                       std::set<QString> blacklist = std::set<QString>());
   // Delegating constructor
   ProcessingAlgorithm(QString name, QString const &prefix,
+                      std::size_t postprocessedOutputPrefixIndex,
                       QString const &blacklist = "");
   // Destructor
   virtual ~ProcessingAlgorithm();
@@ -56,8 +58,27 @@ public:
   QString inputPropertyName(size_t index) const;
   // The name of this output property
   QString outputPropertyName(size_t index) const;
+  // The prefix for the default output ws property
+  QString defaultOutputPrefix() const;
+  // The default output ws property
+  QString defaultOutputPropertyName() const;
+  // The default input ws property
+  QString defaultInputPropertyName() const;
+  // The prefix for the postprocessed output ws property
+  QString postprocessedOutputPrefix() const;
+  // The postprocessed output ws property
+  QString postprocessedOutputPropertyName() const;
+  // The input properties
+  std::vector<QString> inputProperties() const;
+  // The output properties
+  std::vector<QString> outputProperties() const;
+  // The prefixes for the output properties
+  std::vector<QString> prefixes() const;
 
 private:
+  bool isValidOutputPrefixIndex(std::size_t outputPrefixIndex) const;
+  void ensureValidPostprocessedOutput() const;
+  std::size_t m_postprocessedOutputPrefixIndex;
   // The prefix of the output workspace(s)
   std::vector<QString> m_prefix;
   // The names of the input workspace properties

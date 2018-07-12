@@ -62,6 +62,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveISISNexus", "SaveNexus", "LoadNexusProcessed"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
@@ -84,12 +87,12 @@ private:
                        Mantid::API::MatrixWorkspace_const_sptr matrixWorkspace);
 
   template <class T>
-  static void appendEventListData(std::vector<T> events, size_t offset,
+  static void appendEventListData(const std::vector<T> &events, size_t offset,
                                   double *tofs, float *weights,
                                   float *errorSquareds, int64_t *pulsetimes);
 
   void execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
-                 const bool uniformSpectra, const std::vector<int> spec);
+                 const bool uniformSpectra, const std::vector<int> &spec);
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
                           const std::string &propertyValue,

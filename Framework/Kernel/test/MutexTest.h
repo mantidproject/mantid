@@ -24,8 +24,7 @@ void reader() {
   Poco::ScopedReadRWLock lock(_access);
   //  std::cout << "Read launching\n";
   // do work here, without anyone having exclusive access
-  for (size_t i = 0; i < shared_data.size(); i++) {
-    double val = shared_data[i];
+  for (double val : shared_data) {
     UNUSED_ARG(val)
   }
   //  std::cout << "Read finished\n";
@@ -38,8 +37,8 @@ void unconditional_writer() {
   // do work here, with exclusive access
   shared_data.resize(shared_data.size() + 1, 2.345);
   // Dumb thing to slow down the writer
-  for (size_t i = 0; i < shared_data.size(); i++)
-    shared_data[i] = 4.567;
+  for (double &i : shared_data)
+    i = 4.567;
   //  std::cout << "Write finished\n";
 }
 

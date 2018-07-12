@@ -207,7 +207,7 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
           boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
               Mantid::API::AnalysisDataService::Instance().retrieve(
                   m_wsNames[i].toStdString()));
-      if (NULL == ws)
+      if (nullptr == ws)
         continue;
 
       const Mantid::spec2index_map spec2index =
@@ -690,7 +690,7 @@ void MantidWSIndexWidget::checkForSpectraAxes() {
         boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 (*it).toStdString()));
-    if (NULL == ws)
+    if (nullptr == ws)
       continue;
     bool hasSpectra = false;
     for (int i = 0; i < ws->axes(); i++) {
@@ -718,7 +718,7 @@ void MantidWSIndexWidget::generateWsIndexIntervals() {
         boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 (*it).toStdString()));
-    if (NULL == ws)
+    if (nullptr == ws)
       continue;
 
     const int endWs = static_cast<int>(ws->getNumberHistograms() -

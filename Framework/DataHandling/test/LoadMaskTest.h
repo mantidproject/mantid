@@ -532,8 +532,8 @@ public:
       ss << "</detids>\n";
     }
 
-    for (size_t i = 0; i < banks.size(); i++) {
-      ss << "<component>bank" << banks[i] << "</component>\n";
+    for (int bank : banks) {
+      ss << "<component>bank" << bank << "</component>\n";
     }
 
     // 4. End of file
@@ -552,8 +552,8 @@ public:
     std::stringstream ss;
 
     // 1. Single spectra
-    for (size_t i = 0; i < singlespectra.size(); i++) {
-      ss << singlespectra[i] << " ";
+    for (int i : singlespectra) {
+      ss << i << " ";
     }
     ss << '\n';
 

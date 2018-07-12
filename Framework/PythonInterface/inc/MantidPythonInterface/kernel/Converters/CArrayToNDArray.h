@@ -45,7 +45,7 @@ struct CArrayToNDArray {
     // Round about way of calling the wrapNDArray template function that is
     // defined
     // in the cpp file
-    typedef typename ConversionPolicy::template apply<ElementType> policy;
+    using policy = typename ConversionPolicy::template apply<ElementType>;
     return policy::createFromArray(carray, ndims, dims);
   }
 };

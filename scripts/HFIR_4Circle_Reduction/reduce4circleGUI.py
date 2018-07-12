@@ -14,11 +14,12 @@ import time
 import datetime
 import random
 import numpy
+from HFIR_4Circle_Reduction import reduce4circleControl as r4c
 import HFIR_4Circle_Reduction.guiutility as gutil
 import HFIR_4Circle_Reduction.peakprocesshelper as peak_util
 import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
 from HFIR_4Circle_Reduction import plot3dwindow
-from HFIR_4Circle_Reduction.multi_threads_helpers import *
+import HFIR_4Circle_Reduction.multi_threads_helpers as thread_pool
 import HFIR_4Circle_Reduction.optimizelatticewindow as ol_window
 from HFIR_4Circle_Reduction import viewspicedialog
 from HFIR_4Circle_Reduction import peak_integration_utility
@@ -26,6 +27,9 @@ from HFIR_4Circle_Reduction import FindUBUtility
 from HFIR_4Circle_Reduction import message_dialog
 from HFIR_4Circle_Reduction import PreprocessWindow
 from HFIR_4Circle_Reduction.downloaddialog import DataDownloadDialog
+import HFIR_4Circle_Reduction.refineubfftsetup as refineubfftsetup
+import HFIR_4Circle_Reduction.PeaksIntegrationReport as PeaksIntegrationReport
+
 
 # import line for the UI python class
 from HFIR_4Circle_Reduction.ui_MainWindow import Ui_MainWindow
@@ -161,9 +165,9 @@ class MainWindow(QtGui.QMainWindow):
                      self.show_scan_pt_list)
         self.connect(self.ui.pushButton_showSPICEinRaw, QtCore.SIGNAL('clicked()'),
                      self.do_show_spice_file_raw)
-        self.connect(self.ui.pushButton_addROI, QtCore.SIGNAL('clicked()'),
-                     self.do_add_roi)
-        self.connect(self.ui.pushButton_cancelROI, QtCore.SIGNAL('clicked()'),
+        self.connect(self.ui.pushButton_switchROIMode, QtCore.SIGNAL('clicked()'),
+                     self.do_switch_roi_mode)
+        self.connect(self.ui.pushButton_removeROICanvas, QtCore.SIGNAL('clicked()'),
                      self.do_del_roi)
         self.connect(self.ui.pushButton_nextScanNumber, QtCore.SIGNAL('clicked()'),
                      self.do_plot_next_scan)
@@ -171,10 +175,10 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_plot_prev_scan)
         self.connect(self.ui.pushButton_maskScanPt, QtCore.SIGNAL('clicked()'),
                      self.do_mask_pt_2d)
-        self.connect(self.ui.pushButton_saveMask, QtCore.SIGNAL('clicked()'),
-                     self.do_save_roi)
         self.connect(self.ui.pushButton_integrateROI, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_roi)
+        self.connect(self.ui.pushButton_exportMaskToFile, QtCore.SIGNAL('clicked()'),
+                     self.do_export_mask)
 
         # Tab 'calculate ub matrix'
         self.connect(self.ui.pushButton_addUBScans, QtCore.SIGNAL('clicked()'),
@@ -287,6 +291,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_clearPeakIntFigure, QtCore.SIGNAL('clicked()'),
                      self.do_clear_peak_integration_canvas)
 
+        self.ui.comboBox_viewRawDataMasks.currentIndexChanged.connect(self.evt_change_roi)
+        self.ui.comboBox_mergePeakNormType.currentIndexChanged.connect(self.evt_change_norm_type)
+
         # Tab k-shift vector
         self.connect(self.ui.pushButton_addKShift, QtCore.SIGNAL('clicked()'),
                      self.do_add_k_shift_vector)
@@ -299,6 +306,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.save_current_session)
         self.connect(self.ui.actionLoad_Session, QtCore.SIGNAL('triggered()'),
                      self.load_session)
+        self.connect(self.ui.actionLoad_Mask, QtCore.SIGNAL('triggered()'),
+                     self.menu_load_mask)
 
         self.connect(self.ui.actionSave_Project, QtCore.SIGNAL('triggered()'),
                      self.action_save_project)
@@ -333,6 +342,7 @@ class MainWindow(QtGui.QMainWindow):
         self._dataAccessMode = 'Download'
         self._surveyTableFlag = True
         self._ubPeakTableFlag = True
+        self._isROIApplied = False
 
         # set the detector geometry
         self.do_set_detector_size()
@@ -346,6 +356,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # QSettings
         self.load_settings()
+
+        # mutex interlock
+        self._roiComboBoxMutex = False
 
         return
 
@@ -409,6 +422,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.comboBox_ptCountType.addItem('Monitor')
         self.ui.comboBox_ptCountType.addItem('Absolute')
 
+        self.ui.comboBox_viewRawDataMasks.addItem('')
+
         # tab
         self.ui.tabWidget.setCurrentIndex(0)
 
@@ -430,12 +445,18 @@ class MainWindow(QtGui.QMainWindow):
 
         # check boxes
         self.ui.graphicsView_detector2dPlot.set_parent_window(self)
+        self.ui.checkBox_fpHighPrecision.setChecked(True)
 
         # background points
         self.ui.lineEdit_backgroundPts.setText('1, 1')
+        self.ui.lineEdit_scaleFactor.setText('1.')
 
         # about pre-processed data
         self.ui.checkBox_searchPreprocessedFirst.setChecked(True)
+
+        # hide and disable some push buttons for future implemetation
+        self.ui.pushButton_viewScan3D.hide()
+        self.ui.pushButton_plotSelectedData.hide()
 
         return
 
@@ -450,7 +471,7 @@ class MainWindow(QtGui.QMainWindow):
             err_msg = 'At least 3 peaks must be selected to refine UB matrix.' \
                       'Now it is only %d selected.' % len(row_index_list)
             self.pop_one_button_dialog(err_msg)
-            return
+            return None
 
         # loop over all peaks for peak information
         peak_info_list = list()
@@ -471,7 +492,12 @@ class MainWindow(QtGui.QMainWindow):
                 spice_hkl = self.ui.tableWidget_peaksCalUB.get_hkl(i_row, True)
                 peak_info.set_hkl_np_array(numpy.array(spice_hkl))
             else:
-                calculated_hkl = self.ui.tableWidget_peaksCalUB.get_hkl(i_row, False)
+                try:
+                    calculated_hkl = self.ui.tableWidget_peaksCalUB.get_hkl(i_row, False)
+                except RuntimeError as run_err:
+                    errmsg = '[ERROR] Failed to get calculated HKL from UB calcualtion table due to {0}'.format(run_err)
+                    self.pop_one_button_dialog(errmsg)
+                    return None
                 peak_info.set_hkl_np_array(numpy.array(calculated_hkl))
             # END-IF-ELSE
 
@@ -511,6 +537,17 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def _show_message(self, message):
+        """
+        show message in the message bar while clearing previous information
+        :param message:
+        :return:
+        """
+        if message is not None:
+            self.ui.lineEdit_message.setText(message)
+
+        return
+
     def action_save_project(self):
         """
         Save project
@@ -523,11 +560,12 @@ class MainWindow(QtGui.QMainWindow):
             yes = gutil.show_message(self, 'Project file %s does exist. This is supposed to be '
                                            'an incremental save.' % project_file_name)
             if yes:
-                print('[INFO] Save project in incremental way.')
+                message = 'Save project to {0} in incremental way.'.format(project_file_name)
             else:
-                print('[INFO] Saving activity is cancelled.')
+                message = 'Saving activity is cancelled.'
         else:
-            print('[INFO] Saving current project to %s.' % project_file_name)
+            message = 'Saving current project to {0}'.format(project_file_name)
+        self._show_message(message)
 
         # gather some useful information
         ui_dict = dict()
@@ -560,13 +598,14 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.label_last1Path.setText(project_file_name)
         # END-IF
 
-        self._myControl.save_project(project_file_name, ui_dict)
+        err_msg = self._myControl.save_project(project_file_name, ui_dict)
+        if err_msg is not None:
+            self.pop_one_button_dialog(err_msg)
 
         # show user the message that the saving process is over
-        information = 'Project has been saved to {0}\n'.format(project_file_name),
+        information = 'Project has been saved to {0}\n'.format(project_file_name)
         information += 'Including dictionary keys: {0}'.format(ui_dict)
         self.pop_one_button_dialog(information)
-        print('[INFO]\n{0}'.format(information))
 
         return
 
@@ -600,21 +639,9 @@ class MainWindow(QtGui.QMainWindow):
         project_file_name = str(self.ui.label_last1Path.text())
         if os.path.exists(project_file_name) is False:
             self.pop_one_button_dialog('Last saved project %s cannot be located.' % project_file_name)
+            return
         else:
-            ui_dict = self._myControl.load_project(project_file_name)
-
-            # set the UI parameters to GUI
-            try:
-                self.ui.lineEdit_localSpiceDir.setText(ui_dict['local spice dir'])
-                self.ui.lineEdit_workDir.setText(ui_dict['work dir'])
-                self.ui.lineEdit_surveyStartPt.setText(ui_dict['survey start'])
-                self.ui.lineEdit_surveyEndPt.setText(ui_dict['survey stop'])
-
-                # now try to call some actions
-                self.do_apply_setup()
-                self.do_set_experiment()
-            except KeyError:
-                print('[Error] Some field cannot be found.')
+            self.load_project(project_file_name)
 
         return
 
@@ -668,7 +695,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # prototype for a new thread
         self.ui.progressBar_add_ub_peaks.setRange(0, len(scan_number_list))
-        self._addUBPeaksThread = AddPeaksThread(self, exp_number, scan_number_list)
+        self._addUBPeaksThread = thread_pool.AddPeaksThread(self, exp_number, scan_number_list)
         self._addUBPeaksThread.start()
 
         # set the flag/notification where the indexing (HKL) from
@@ -677,8 +704,7 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def add_scans_ub_table(self, scan_list):
-        """
-
+        """ add scans to UB matrix construction table
         :param scan_list:
         :return:
         """
@@ -694,7 +720,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # prototype for a new thread
         self.ui.progressBar_add_ub_peaks.setRange(0, len(scan_list))
-        self._addUBPeaksThread = AddPeaksThread(self, exp_number, scan_list)
+        self._addUBPeaksThread = thread_pool.AddPeaksThread(self, exp_number, scan_list)
         self._addUBPeaksThread.start()
 
         # set the flag/notification where the indexing (HKL) from
@@ -702,21 +728,21 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_add_roi(self):
+    def do_switch_roi_mode(self):
         """ Add region of interest to 2D image
         :return:
         """
         # set the button to next mode
-        if str(self.ui.pushButton_addROI.text()) == 'Edit ROI':
+        if str(self.ui.pushButton_switchROIMode.text()) == 'Enter ROI-Edit Mode':
             # enter adding ROI mode
             self.ui.graphicsView_detector2dPlot.enter_roi_mode(state=True)
             # rename the button
-            self.ui.pushButton_addROI.setText('Quit ROI')
+            self.ui.pushButton_switchROIMode.setText('Quit ROI-Edit Mode')
         else:
             # quit editing ROI mode
             self.ui.graphicsView_detector2dPlot.enter_roi_mode(state=False)
             # rename the button
-            self.ui.pushButton_addROI.setText('Edit ROI')
+            self.ui.pushButton_switchROIMode.setText('Enter ROI-Edit Mode')
         # END-IF-ELSE
 
         return
@@ -847,27 +873,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_apply_roi(self):
-        """ Save current selection of region of interest
-        :return:
-        """
-        lower_left_c, upper_right_c = self.ui.graphicsView_detector2dPlot.get_roi()
-        # at the very beginning, the lower left and upper right are same
-        if lower_left_c[0] == upper_right_c[0] or lower_left_c[1] == upper_right_c[1]:
-            return
-
-        status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
-        assert status, str(par_val_list)
-        exp_number = par_val_list[0]
-        scan_number = par_val_list[1]
-
-        try:
-            self._myControl.set_roi(exp_number, scan_number, lower_left_c, upper_right_c)
-        except AssertionError as ass_err:
-            print('[ERROR] Unable to set ROI due to {0}.'.format(ass_err))
-
-        return
-
     def do_apply_setup(self):
         """
         Purpose:
@@ -925,7 +930,8 @@ class MainWindow(QtGui.QMainWindow):
         # preprocess directory
         if len(pre_process_dir) == 0:
             # user does not specify
-            self._myControl.pre_processed_dir = None
+            pass
+        # It is not allowed to set pre-processed dir to None: self._myControl.pre_processed_dir = None
         elif os.path.exists(pre_process_dir):
             # user specifies a valid directory
             self._myControl.pre_processed_dir = pre_process_dir
@@ -1126,10 +1132,25 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_del_roi(self):
-        """ Delete ROI
+        """ Remove the current ROI
         :return:
         """
-        self.ui.graphicsView_detector2dPlot.remove_roi()
+        # check whether there is mask on detector view
+        if self.ui.graphicsView_detector2dPlot.is_roi_selection_drawn:
+            self.ui.graphicsView_detector2dPlot.remove_roi()
+
+        # need to draw again?
+        if self._isROIApplied:
+            re_plot = True
+        else:
+            re_plot = False
+
+        # need to reset combo box index
+        curr_index = self.ui.comboBox_viewRawDataMasks.currentIndex()
+        if curr_index != 0:
+            self.ui.comboBox_viewRawDataMasks.setCurrentIndex(0)
+        elif re_plot:
+            self.do_plot_pt_raw()
 
         return
 
@@ -1192,6 +1213,29 @@ class MainWindow(QtGui.QMainWindow):
 
         return hkl, vec_q
 
+    def do_export_mask(self):
+        """
+        export selected mask to file
+        :return:
+        """
+        # get selected mask name
+        mask_name = str(self.ui.comboBox_viewRawDataMasks.currentText())
+        if mask_name == 'No Mask':
+            self.pop_one_button_dialog('No mask is selected.  Saving is aborted.')
+            return
+
+        # get the output file name
+        roi_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Output mask/ROI file name',
+                                                              self._myControl._workDir,
+                                                              'XML Files (*.xml);;All Files (*.*)'))
+        if len(roi_file_name) == 0:
+            return
+
+        # save file
+        self._myControl.save_roi_to_file(None, None, mask_name, roi_file_name)
+
+        return
+
     def do_export_selected_peaks_to_integrate(self):
         """
         export (to file or just print out) the scans that are selected for integration
@@ -1205,10 +1249,8 @@ class MainWindow(QtGui.QMainWindow):
             scan_number_list.append(tup[0])
         scan_number_list.sort()
 
-        info_str = '# Selected scans: \n'
-        info_str += '{0}'.format(scan_number_list)
-
-        print('[TEMP] Selected scans:\n{0}'.format(info_str))
+        info_str = '{0}'.format(scan_number_list)
+        self._show_message('Selected scans: {0}'.format(info_str))
 
         return
 
@@ -1241,7 +1283,8 @@ class MainWindow(QtGui.QMainWindow):
             export_absorption = self.ui.checkBox_exportAbsorptionToFP.isChecked()
 
             status, file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list,
-                                                                      user_header, export_absorption, fp_name)
+                                                                      user_header, export_absorption, fp_name,
+                                                                      self.ui.checkBox_fpHighPrecision.isChecked())
             self.ui.plainTextEdit_fpContent.setPlainText(file_content)
             if status is False:
                 error_msg = file_content
@@ -1384,7 +1427,6 @@ class MainWindow(QtGui.QMainWindow):
         # plot calculated motor position (or Pt.) - integrated intensity per Pts.
         motor_pos_vec = int_peak_dict['motor positions']
         pt_intensity_vec = int_peak_dict['pt intensities']
-        # print('[DB...BAT] motor position vector: {0} of type {1}'.format(motor_pos_vec, type(motor_pos_vec)))
         motor_std = motor_pos_vec.std()
         if motor_std > 0.005:
             self.ui.graphicsView_integratedPeakView.plot_raw_data(motor_pos_vec, pt_intensity_vec)
@@ -1429,7 +1471,7 @@ class MainWindow(QtGui.QMainWindow):
             raise RuntimeError('Peak integration result dictionary has keys {0}. Error is caused by {1}.'
                                ''.format(int_peak_dict.keys(), key_err))
         except ValueError as value_err:
-            print('[ERROR] Unable to fit by Gaussian due to {0}.'.format(value_err))
+            self._show_message('[ERROR] Unable to fit by Gaussian due to {0}.'.format(value_err))
         else:
             self.plot_model_data(motor_pos_vec, fit_gauss_dict)
 
@@ -1570,9 +1612,15 @@ class MainWindow(QtGui.QMainWindow):
         num_pt_bg_left = ret_obj[0]
         num_pt_bg_right = ret_obj[1]
 
-        self._myIntegratePeaksThread = IntegratePeaksThread(self, exp_number, scan_number_list,
-                                                            mask_det, selected_mask, norm_type,
-                                                            num_pt_bg_left, num_pt_bg_right)
+        # scale factor:
+        scale_factor = float(self.ui.lineEdit_scaleFactor.text())
+
+        # initialize a thread and start
+        self._myIntegratePeaksThread = \
+            thread_pool.IntegratePeaksThread(self, exp_number, scan_number_list,
+                                             mask_det, selected_mask, norm_type,
+                                             num_pt_bg_left, num_pt_bg_right,
+                                             scale_factor=scale_factor)
         self._myIntegratePeaksThread.start()
 
         return
@@ -1583,7 +1631,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Get UB matrix
         ub_matrix = self.ui.tableWidget_ubMatrix.get_matrix()
-        print('[Info] Get UB matrix from table ', ub_matrix)
+        self._show_message('[Info] Get UB matrix from table: {0}'.format(ub_matrix))
 
         # Index all peaks
         num_peaks = self.ui.tableWidget_peaksCalUB.rowCount()
@@ -1674,20 +1722,17 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(ret_obj)
             return
 
-        # Call to plot 2D
-        self._plot_raw_xml_2d(exp_no, scan_no, pt_no)
+        if self.ui.checkBox_autoMask.isChecked():
+            roi_index = self.ui.comboBox_viewRawDataMasks.currentIndex()
+            if roi_index == 0:
+                roi_name = None
+            else:
+                roi_name = str(self.ui.comboBox_viewRawDataMasks.currentText())
+        else:
+            # if auto-mask flag is off, then no need to mask data
+            roi_name = None
 
-        return
-
-    def evt_change_normalization(self):
-        """
-        Integrate Pt. vs integrated intensity of detectors of that Pt. if it is not calculated before
-        and then plot pt vs. integrated intensity on
-        :return:
-        """
-        # integrate any how
-        # self.do_integrate_per_pt()
-        self.do_integrate_single_scan()
+        self.load_plot_raw_data(exp_no, scan_no, pt_no, roi_name=roi_name)
 
         return
 
@@ -1699,8 +1744,6 @@ class MainWindow(QtGui.QMainWindow):
                                                         self.ui.lineEdit_run,
                                                         self.ui.lineEdit_rawDataPtNo])
         if status is True:
-            exp_no = ret_obj[0]
-            scan_no = ret_obj[1]
             pt_no = ret_obj[2]
         else:
             self.pop_one_button_dialog(ret_obj)
@@ -1715,7 +1758,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_rawDataPtNo.setText('%d' % pt_no)
 
         # Plot
-        self._plot_raw_xml_2d(exp_no, scan_no, pt_no)
+        self.do_plot_pt_raw()
 
         return
 
@@ -1724,15 +1767,13 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # get current exp number, scan number and pt number
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_run,
-                                                        self.ui.lineEdit_rawDataPtNo])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_run])
         if status is False:
             error_msg = ret_obj
             self.pop_one_button_dialog(error_msg)
             return
 
-        exp_number, scan_number, pt_number = ret_obj
+        scan_number = ret_obj[0]
 
         # get next scan
         scan_number -= 1
@@ -1740,16 +1781,11 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog('Scan number cannot be negative!')
             return
 
-        # plot
-        try:
-            self._plot_raw_xml_2d(exp_number, scan_number, pt_number)
-        except RuntimeError as err:
-            error_msg = 'Unable to plot next scan %d due to %s.' % (scan_number, str(err))
-            self.pop_one_button_dialog(error_msg)
-            return
-
         # update line edits
         self.ui.lineEdit_run.setText(str(scan_number))
+
+        #
+        self.do_plot_pt_raw()
 
         return
 
@@ -1760,7 +1796,7 @@ class MainWindow(QtGui.QMainWindow):
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
                                                         self.ui.lineEdit_run,
                                                         self.ui.lineEdit_rawDataPtNo])
-        if status is True:
+        if status:
             exp_no = ret_obj[0]
             scan_no = ret_obj[1]
             pt_no = ret_obj[2]
@@ -1783,7 +1819,9 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_rawDataPtNo.setText('%d' % pt_no)
 
         # Plot
-        self._plot_raw_xml_2d(exp_no, scan_no, pt_no)
+        self.do_plot_pt_raw()
+
+        # self.load_plot_raw_data(exp_no, scan_no, pt_no)
 
         return
 
@@ -1792,26 +1830,26 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # get current exp number, scan number and pt number
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_run,
-                                                        self.ui.lineEdit_rawDataPtNo])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_run])
         if status is False:
             error_msg = ret_obj
             self.pop_one_button_dialog(error_msg)
             return
 
-        exp_number, scan_number, pt_number = ret_obj
+        scan_number = ret_obj[0]
 
         # get next scan
         scan_number += 1
 
+        self.do_plot_pt_raw()
+
         # plot
-        try:
-            self._plot_raw_xml_2d(exp_number, scan_number, pt_number)
-        except RuntimeError as err:
-            error_msg = 'Unable to plot next scan %d due to %s.' % (scan_number, str(err))
-            self.pop_one_button_dialog(error_msg)
-            return
+        # try:
+        #     self.load_plot_raw_data(exp_number, scan_number, pt_number)
+        # except RuntimeError as err:
+        #     error_msg = 'Unable to plot next scan %d due to %s.' % (scan_number, str(err))
+        #     self.pop_one_button_dialog(error_msg)
+        #     return
 
         # update line edits
         self.ui.lineEdit_run.setText(str(scan_number))
@@ -1839,9 +1877,42 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_mask_pt_2d(self):
-        """ Mask a Pt and re-plot
+        """ Save current in-edit ROI Mask a Pt and re-plot with current selected ROI or others
         :return:
         """
+        # # get the experiment and scan value
+        # status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
+        # if not status:
+        #     raise RuntimeError('Experiment number and Scan number must be given!')
+        # exp_number = par_val_list[0]
+        # scan_number = par_val_list[1]
+
+        # get the user specified name from ...
+        roi_name, ok = QtGui.QInputDialog.getText(self, 'Input Mask Name', 'Enter mask name:')
+
+        # return if cancelled
+        if not ok:
+            return
+        roi_name = str(roi_name)
+
+        # TODO : It is better to warn user if the given ROI is used already
+        pass
+
+        # get current ROI
+        ll_corner, ur_corner = self.ui.graphicsView_detector2dPlot.get_roi()
+
+        # set ROI
+        self._myControl.set_roi(roi_name, ll_corner, ur_corner)
+
+        # set it to combo-box
+        self._roiComboBoxMutex = True
+        self.ui.comboBox_maskNames1.addItem(roi_name)
+        self.ui.comboBox_maskNames2.addItem(roi_name)
+        self.ui.comboBox_maskNamesSurvey.addItem(roi_name)
+        self.ui.comboBox_viewRawDataMasks.addItem(roi_name)
+        self.ui.comboBox_viewRawDataMasks.setCurrentIndex(self.ui.comboBox_viewRawDataMasks.count()-1)
+        self._roiComboBoxMutex = False
+
         # get experiment, scan
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run,
                                                         self.ui.lineEdit_rawDataPtNo],
@@ -1852,27 +1923,21 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(ret_obj)
             return
 
-        # get the mask
-        status, ret_obj = self._myControl.get_region_of_interest(exp, scan)
-        if status is False:
-            # unable to get region of interest
-            self.pop_one_button_dialog(ret_obj)
-            return
-        else:
-            corner1, corner2 = ret_obj
-
-        # create mask workspace
-        status, error = self._myControl.generate_mask_workspace(exp, scan, corner1, corner2)
-        if status is False:
-            self.pop_one_button_dialog(error)
-            return
-
-        # re-load data file and mask
-        self._myControl.load_spice_xml_file(exp, scan, pt)
-        self._myControl.apply_mask(exp, scan, pt)
+        # previously saved ROI
+        if self._myControl.has_roi_generated(roi_name) is False:
+            roi_start, roi_end = self._myControl.get_region_of_interest(roi_name)
+            status, mask_ws_name = self._myControl.generate_mask_workspace(exp, scan,
+                                                                           roi_start=roi_start, roi_end=roi_end,
+                                                                           mask_tag=roi_name)
+            if status:
+                self._myControl.set_roi_workspace(roi_name, mask_ws_name)
+        # END-IF
 
         # plot
-        self._plot_raw_xml_2d(exp, scan, pt)
+        self.load_plot_raw_data(exp, scan, pt, roi_name=roi_name)
+
+        # switch ROI edit mode
+        self.do_switch_roi_mode()
 
         return
 
@@ -2011,6 +2076,8 @@ class MainWindow(QtGui.QMainWindow):
         """
         # refine UB matrix by indexed peak
         peak_info_list = self._build_peak_info_list(zero_hkl=False)
+        if peak_info_list is None:
+            return
 
         # Refine UB matrix
         try:
@@ -2031,6 +2098,8 @@ class MainWindow(QtGui.QMainWindow):
         """
         # refine UB matrix by indexed peak
         peak_info_list = self._build_peak_info_list(zero_hkl=False, is_spice=False)
+        if peak_info_list is None:
+            return
 
         # Refine UB matrix
         try:
@@ -2069,7 +2138,7 @@ class MainWindow(QtGui.QMainWindow):
         assert os.path.exists(project_file_name), 'Project file "%s" cannot be found.' % project_file_name
 
         # load project
-        ui_dict = self._myControl.load_project(project_file_name)
+        ui_dict, err_msg = self._myControl.load_project(project_file_name)
 
         # get experiment number and IPTS number
         exp_number = int(ui_dict['exp number'])
@@ -2089,7 +2158,7 @@ class MainWindow(QtGui.QMainWindow):
             self.do_set_experiment()
 
         except KeyError:
-            print('[Error] Some field cannot be found.')
+            self._show_message('[Error] Some field cannot be found from project file {0}'.format(project_file_name))
 
         # set experiment configurations
         # set sample distance
@@ -2113,9 +2182,11 @@ class MainWindow(QtGui.QMainWindow):
             self._myControl.set_detector_center(exp_number, center_row, center_col)
 
         # pop out a dialog to notify the completion
+        if err_msg is not None:
+            self.pop_one_button_dialog('Encountered these errors from loading:\n{0}'.format(err_msg))
+
         message = 'Project from file {0} is loaded.'.format(project_file_name)
         self.pop_one_button_dialog(message)
-        print('[INFO] {0}'.format(message))
 
         return
 
@@ -2139,14 +2210,16 @@ class MainWindow(QtGui.QMainWindow):
 
         # get peak information list
         peak_info_list = self._build_peak_info_list(zero_hkl=False)
+        if peak_info_list is None:
+            return
 
         # get the UB matrix value
         ub_src_tab = self._refineConfigWindow.get_ub_source()
         if ub_src_tab == 3:
-            print('[INFO] UB matrix comes from tab "Calculate UB".')
+            self._show_message('UB matrix comes from tab "Calculate UB".')
             ub_matrix = self.ui.tableWidget_ubMatrix.get_matrix_str()
         elif ub_src_tab == 4:
-            print('[INFO] UB matrix comes from tab "UB Matrix".')
+            self._show_message('UB matrix comes from tab "UB Matrix".')
             ub_matrix = self.ui.tableWidget_ubInUse.get_matrix_str()
         else:
             self.pop_one_button_dialog('UB source tab %s is not supported.' % str(ub_src_tab))
@@ -2167,8 +2240,6 @@ class MainWindow(QtGui.QMainWindow):
         Refine UB matrix by calling FFT method
         :return:
         """
-        import refineubfftsetup
-
         dlg = refineubfftsetup.RefineUBFFTSetupDialog(self)
         if dlg.exec_():
             # Do stuff with values
@@ -2185,6 +2256,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # get PeakInfo list and check
         peak_info_list = self._build_peak_info_list(zero_hkl=True)
+        if peak_info_list is None:
+            return
         assert isinstance(peak_info_list, list), \
             'PeakInfo list must be a list but not %s.' % str(type(peak_info_list))
         assert len(peak_info_list) >= 3, \
@@ -2259,37 +2332,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # set the flag right
         self.ui.lineEdit_peaksIndexedBy.setText(IndexFromSpice)
-
-        return
-
-    def do_save_roi(self):
-        """
-        Save region of interest to a specific name and reflects in combo boxes for future use,
-        especially used as a general ROI for multiple scans
-        :return:
-        """
-        # get the experiment and scan value
-        status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
-        assert status
-        exp_number = par_val_list[0]
-        scan_number = par_val_list[1]
-
-        # get the user specified name from ...
-        roi_name, ok = QtGui.QInputDialog.getText(self, 'Input Mask Name', 'Enter mask name:')
-
-        # return if cancelled
-        if not ok:
-            return
-
-        # get current ROI
-        status, roi = self._myControl.get_region_of_interest(exp_number=exp_number, scan_number=scan_number)
-        assert status, str(roi)
-        roi_name = str(roi_name)
-        self._myControl.save_roi(roi_name, roi)
-
-        # set it to combo-box
-        self.ui.comboBox_maskNames1.addItem(roi_name)
-        self.ui.comboBox_maskNames2.addItem(roi_name)
 
         return
 
@@ -2591,6 +2633,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             integrate_type = 'simple'
 
+        err_msg = ''
         for i_row in range(self.ui.tableWidget_mergeScans.rowCount()):
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(i_row)
             peak_info_obj = self._myControl.get_peak_info(exp_number, scan_number)
@@ -2599,9 +2642,11 @@ class MainWindow(QtGui.QMainWindow):
                 intensity2, error2 = peak_info_obj.get_intensity(integrate_type, True)
                 self.ui.tableWidget_mergeScans.set_peak_intensity(i_row, intensity1, intensity2, error2, integrate_type)
             except RuntimeError as run_err:
-                print('[ERROR] Unable to get peak intensity of scan'
-                      ' {0} due to {1}.'.format(self.ui.tableWidget_mergeScans.get_scan_number(i_row), run_err))
+                err_msg += '{0} due to {1};'.format(self.ui.tableWidget_mergeScans.get_scan_number(i_row), run_err)
         # END-FOR
+
+        if len(err_msg) > 0:
+            self._show_message('Unable to get peak intensity of scan: {0}'.format(err_msg))
 
         return
 
@@ -2654,8 +2699,8 @@ class MainWindow(QtGui.QMainWindow):
                 try:
                     ub_matrix = self._myControl.get_ub_matrix(exp_number)
                 except KeyError as key_err:
-                    print('[Error] unable to get UB matrix: %s' % str(key_err))
-                    self.pop_one_button_dialog('Unable to get UB matrix.\nCheck whether UB matrix is set.')
+                    self.pop_one_button_dialog('Unable to get UB matrix due to {0}.\nCheck whether UB matrix is set.'
+                                               ''.format(key_err))
                     return
                 index_status, ret_tup = self._myControl.index_peak(ub_matrix, scan_i, allow_magnetic=True)
                 if index_status:
@@ -2821,8 +2866,6 @@ class MainWindow(QtGui.QMainWindow):
         show the details (in table) about the integration of scans
         :return:
         """
-        import PeaksIntegrationReport
-
         # check whether the integration information table
         if self._peakIntegrationInfoWindow is None:
             self._peakIntegrationInfoWindow = PeaksIntegrationReport.PeaksIntegrationReportDialog(self)
@@ -3074,15 +3117,19 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # get experiment and scan number
-        scan_number = self.ui.tableWidget_peaksCalUB.get_selected_scans()
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_scanNumber])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
         if status:
             exp_number = ret_obj[0]
-            scan_number = ret_obj[1]
         else:
             self.pop_one_button_dialog(ret_obj)
             return
+        scan_number_list = self.ui.tableWidget_peaksCalUB.get_selected_scans()
+        if len(scan_number_list) != 1:
+            self.pop_one_button_dialog('To view scan data in 3D, one and only one scan can be selected.'
+                                       'Now there are {0} scans that are selected.'.format(len(scan_number_list)))
+            return
+        else:
+            scan_number = scan_number_list[0]
 
         # Check
         if self._myControl.has_merged_data(exp_number, scan_number) is False:
@@ -3098,7 +3145,7 @@ class MainWindow(QtGui.QMainWindow):
         if self._my3DWindow is None:
             self._my3DWindow = plot3dwindow.Plot3DWindow(self)
 
-        print('[INFO] Write file to %s' % md_file_name)
+        # print('[INFO] Write file to %s' % md_file_name)
         self._my3DWindow.add_plot_by_file(md_file_name)
         self._my3DWindow.add_plot_by_array(weight_peak_centers, weight_peak_intensities)
         self._my3DWindow.add_plot_by_array(avg_peak_centre, avg_peak_intensity)
@@ -3199,6 +3246,88 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def evt_change_norm_type(self):
+        """
+        handling the event that the detector counts normalization method is changed
+        :return:
+        """
+        # read the current normalization type
+        new_norm_type = str(self.ui.comboBox_mergePeakNormType.currentText()).lower()
+        print ('[DB...BAT] Change Norm Type is Triggered.  Type: {0}'.format(new_norm_type))
+
+        # set the scale factor according to new norm type
+        if new_norm_type.count('time') > 0:
+            scale_factor = 1.
+        elif new_norm_type.count('monitor') > 0:
+            scale_factor = 1000.
+        else:
+            scale_factor = 1.
+
+        self.ui.lineEdit_scaleFactor.setText('{0}'.format(scale_factor))
+
+        return
+
+    def evt_change_normalization(self):
+        """
+        Integrate Pt. vs integrated intensity of detectors of that Pt. if it is not calculated before
+        and then plot pt vs. integrated intensity on
+        :return:
+        """
+        # integrate any how
+        # self.do_integrate_per_pt()
+        self.do_integrate_single_scan()
+
+        return
+
+    def evt_change_roi(self):
+        """ handing event of ROI selected in combobox is changed
+        :return:
+        """
+        if self._roiComboBoxMutex:
+            return
+
+        # get target ROI name
+        curr_roi_name = str(self.ui.comboBox_viewRawDataMasks.currentText()).strip()
+
+        # set to 'no ROI', i.e., removing ROI and plot data without mask
+        self.ui.graphicsView_detector2dPlot.remove_roi()
+
+        if len(curr_roi_name) == 0:
+            # re-plot
+            self.do_plot_pt_raw()
+
+        else:
+            # set to another ROI
+            self.do_plot_pt_raw()
+
+            if self.ui.graphicsView_detector2dPlot.is_roi_selection_drawn is False:
+                # shall apply ROI/rectangular to 2D plot
+                lower_left, upper_right = self._myControl.get_region_of_interest(curr_roi_name)
+                self.ui.graphicsView_detector2dPlot.set_roi(lower_left, upper_right)
+                self.ui.graphicsView_detector2dPlot.plot_roi()
+            # END-IF
+
+        # END-IF-ELSE
+
+        return
+
+    def evt_new_roi(self, lower_left_x, lower_left_y, upper_right_x, upper_right_y):
+        """
+        handling event that a new ROI is defined
+        :param lower_left_x:
+        :param lower_left_y:
+        :param upper_right_x:
+        :param upper_right_y:
+        :return:
+        """
+        # a new ROI is defined so combo box is set to item 0
+        self.ui.comboBox_viewRawDataMasks.setCurrentIndex(0)
+
+        self.ui.lineEdit_message.setText('New selected ROI: ({0}, {1}), ({2}, {3})'
+                                         ''.format(lower_left_x, lower_left_y, upper_right_x, upper_right_y))
+
+        return
+
     def evt_show_survey(self):
         """
         Show survey result
@@ -3233,13 +3362,11 @@ class MainWindow(QtGui.QMainWindow):
 
         # collection all the information
         report_dict = dict()
-        print('[DB] Selected rows: {0}'.format(row_number_list))
         for row_number in row_number_list:
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
             peak_info = self._myControl.get_peak_info(exp_number, scan_number)
             peak_integrate_dict = peak_info.generate_integration_report()
             report_dict[scan_number] = peak_integrate_dict
-            print('[DB] Report Scan {0}. Keys: {1}'.format(scan_number, peak_integrate_dict.keys()))
         # END-FOR
 
         return report_dict
@@ -3312,9 +3439,8 @@ class MainWindow(QtGui.QMainWindow):
         # set the experiment
         self._myControl.set_local_data_dir(str(self.ui.lineEdit_localSpiceDir.text()))
         self._myControl.set_working_directory(str(self.ui.lineEdit_workDir.text()))
-        self._myControl.set_server_url(str(self.ui.lineEdit_url.text()))
 
-        print('[INFO] Session {0} has been loaded.'.format(filename))
+        self._show_message('Session {0} has been loaded.'.format(filename))
 
         return
 
@@ -3350,7 +3476,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # Setup
         save_dict['lineEdit_localSpiceDir'] = str(self.ui.lineEdit_localSpiceDir.text())
-        save_dict['lineEdit_url'] = str(self.ui.lineEdit_url.text())
         save_dict['lineEdit_workDir'] = str(self.ui.lineEdit_workDir.text())
 
         # Experiment
@@ -3398,6 +3523,37 @@ class MainWindow(QtGui.QMainWindow):
 
         # show the dialog
         self._dataDownloadDialog.show()
+
+        return
+
+    def menu_load_mask(self):
+        """ Load Mask and apply to both workspaces and GUI
+        hb3a_clean_ui_21210
+        """
+        # get the XML file to load
+        file_filter = 'XML Files (*.xml);;All Files (*)'
+        mask_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Open Masking File',
+                                                               self._myControl.get_working_directory(),
+                                                               file_filter))
+
+        # generate a mask name and load by calling controller to load mask XML
+        roi_name = os.path.basename(mask_file_name).split('.')[0]
+        lower_left_corner, upper_right_corner = self._myControl.load_mask_file(mask_file_name, roi_name)
+
+        # set UI
+        self.ui.comboBox_maskNames1.addItem(roi_name)
+        self.ui.comboBox_maskNames2.addItem(roi_name)
+        self.ui.comboBox_maskNamesSurvey.addItem(roi_name)
+        self.ui.comboBox_maskNamesSurvey.setCurrentIndex(self.ui.comboBox_maskNames1.count() - 1)
+        self.ui.comboBox_viewRawDataMasks.addItem(roi_name)
+        self.ui.comboBox_viewRawDataMasks.setCurrentIndex(self.ui.comboBox_viewRawDataMasks.count() - 1)
+
+        # set ROI to controller
+        self._myControl.set_roi(roi_name, lower_left_corner, upper_right_corner)
+
+        # plot ROI on 2D plot
+        self.ui.graphicsView_detector2dPlot.remove_roi()
+        self.ui.graphicsView_detector2dPlot.set_roi(lower_left_corner, upper_right_corner)
 
         return
 
@@ -3571,6 +3727,12 @@ class MainWindow(QtGui.QMainWindow):
         last_1_project_path = str(self.ui.label_last1Path.text())
         settings.setValue('last1path', last_1_project_path)
 
+        # survey
+        survey_start = str(self.ui.lineEdit_surveyStartPt.text())
+        survey_stop = str(self.ui.lineEdit_surveyEndPt.text())
+        settings.setValue('survey_start_scan', survey_start)
+        settings.setValue('survey_stop_scan', survey_stop)
+
         return
 
     def load_settings(self):
@@ -3622,6 +3784,12 @@ class MainWindow(QtGui.QMainWindow):
             last_1_project_path = str(settings.value('last1path'))
             self.ui.label_last1Path.setText(last_1_project_path)
 
+            # survey
+            survey_start = str(settings.value('survey_start_scan'))
+            self.ui.lineEdit_surveyStartPt.setText(survey_start)
+            survey_stop = str(settings.value('survey_stop_scan'))
+            self.ui.lineEdit_surveyEndPt.setText(survey_stop)
+
         except TypeError as err:
             self.pop_one_button_dialog(str(err))
             return
@@ -3649,16 +3817,31 @@ class MainWindow(QtGui.QMainWindow):
 
         return True, (a, b, c, alpha, beta, gamma)
 
-    def _plot_raw_xml_2d(self, exp_no, scan_no, pt_no):
-        """ Plot raw workspace from XML file for a measurement/pt.
+    def load_spice_file(self, exp_number, scan_number, overwrite):
         """
+        load spice file
+        :param exp_number:
+        :param scan_number:
+        :param overwrite:
+        :return:
+        """
+        # check inputs
+        assert isinstance(exp_number, int), 'Exp number {0} must be an integer but not of type {1}' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not of type {1}' \
+                                             ''.format(scan_number, type(scan_number))
+
         # Check and load SPICE table file
-        does_exist = self._myControl.does_spice_loaded(exp_no, scan_no)
-        if does_exist is False:
+        load_spice = False
+        if not overwrite:
+            load_spice = not self._myControl.does_spice_loaded(exp_number, scan_number)
+
+        # load if necessary
+        if load_spice:
             # Download data
-            status, error_message = self._myControl.download_spice_file(exp_no, scan_no, over_write=False)
-            if status is True:
-                status, error_message = self._myControl.load_spice_scan_file(exp_no, scan_no)
+            status, error_message = self._myControl.download_spice_file(exp_number, scan_number, over_write=False)
+            if status:
+                status, error_message = self._myControl.load_spice_scan_file(exp_number, scan_number)
                 if status is False and self._allowDownload is False:
                     self.pop_one_button_dialog(error_message)
                     return
@@ -3667,44 +3850,40 @@ class MainWindow(QtGui.QMainWindow):
                 return
         # END-IF(does_exist)
 
-        # Load Data for Pt's xml file
-        does_exist = self._myControl.does_raw_loaded(exp_no, scan_no, pt_no)
+        return
 
-        if does_exist is False:
-            # Check whether needs to download
-            status, error_message = self._myControl.download_spice_xml_file(scan_no, pt_no, exp_no=exp_no)
-            if status is False:
-                self.pop_one_button_dialog(error_message)
-                return
-            # Load SPICE xml file
-            status, error_message = self._myControl.load_spice_xml_file(exp_no, scan_no, pt_no)
-            if status is False:
-                self.pop_one_button_dialog(error_message)
-                return
+    def load_plot_raw_data(self, exp_no, scan_no, pt_no, roi_name=None):
+        """
+        Plot raw workspace from XML file for a measurement/pt.
+        :param exp_no:
+        :param scan_no:
+        :param pt_no:
+        :param roi_name: string (mask loaded data) or None (do nothing)
+        :return:
+        """
+        # check inputs
+        assert isinstance(exp_no, int), 'Exp number {0} must be an integer but not of type {1}' \
+                                        ''.format(exp_no, type(exp_no))
+        assert isinstance(scan_no, int), 'Scan number {0} must be an integer but not of type {1}' \
+                                         ''.format(scan_no, type(scan_no))
+        assert isinstance(pt_no, int), 'Pt number {0} must be an integer but not of type {1}' \
+                                       ''.format(pt_no, type(pt_no))
 
-        # Convert a list of vector to 2D numpy array for imshow()
+        # check data loaded with mask information
+        does_loaded = self._myControl.does_raw_loaded(exp_no, scan_no, pt_no, roi_name)
+        if not does_loaded:
+            # check and load SPICE file if necessary
+            self.load_spice_file(exp_no, scan_no, overwrite=False)
+            # load Pt xml
+            self._myControl.load_spice_xml_file(exp_no, scan_no, pt_no)
+            # mask detector if required
+            if roi_name is not None:
+                self._myControl.apply_mask(exp_no, scan_no, pt_no, roi_name=roi_name)
+        # END-IF
+
         # Get data and plot
         raw_det_data = self._myControl.get_raw_detector_counts(exp_no, scan_no, pt_no)
-        # raw_det_data = numpy.rot90(raw_det_data, 1)
-        self.ui.graphicsView_detector2dPlot.clear_canvas()
-        # get the configuration of detector from GUI
-        #  FIXME/TODO/ISSUE/NOW/TODAY - use the detector size wrong!
-        if 0:
-            ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()), expected_size=2)
-            x_max, y_max = ret_obj
-        else:
-            x_max, y_max = 256, 256
-
-        self.ui.graphicsView_detector2dPlot.add_plot_2d(raw_det_data, x_min=0, x_max=x_max, y_min=0, y_max=y_max,
-                                                        hold_prev_image=False)
-        status, roi = self._myControl.get_region_of_interest(exp_no, scan_number=None)
-        if status:
-            self.ui.graphicsView_detector2dPlot.add_roi(roi[0], roi[1])
-        else:
-            error_msg = roi
-            # self.pop_one_button_dialog(error_msg)
-            print('[Error] %s' % error_msg)
-        # END-IF
+        self.ui.graphicsView_detector2dPlot.plot_detector_counts(raw_det_data)
 
         # Information
         info = '%-10s: %d\n%-10s: %d\n%-10s: %d\n' % ('Exp', exp_no,

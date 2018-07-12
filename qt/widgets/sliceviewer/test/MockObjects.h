@@ -46,7 +46,7 @@ class MockPeaksPresenter : public PeaksPresenter {
 public:
   MOCK_METHOD0(update, void());
   MOCK_METHOD1(updateWithSlicePoint, void(const PeakBoundingBox &));
-  MOCK_METHOD0(changeShownDim, bool());
+  MOCK_METHOD2(changeShownDim, bool(size_t, size_t));
   MOCK_CONST_METHOD1(isLabelOfFreeAxis, bool(const std::string &));
   MOCK_CONST_METHOD0(presentedWorkspaces, SetPeaksWorkspaces());
   MOCK_METHOD1(setForegroundColor, void(const PeakViewColor));
@@ -60,6 +60,7 @@ public:
   MOCK_METHOD2(sortPeaksWorkspace, void(const std::string &, const bool));
   MOCK_METHOD1(setPeakSizeOnProjection, void(const double));
   MOCK_METHOD1(setPeakSizeIntoProjection, void(const double));
+  MOCK_METHOD1(setNonOrthogonal, void(bool));
   MOCK_CONST_METHOD0(getPeakSizeOnProjection, double());
   MOCK_CONST_METHOD0(getPeakSizeIntoProjection, double());
   MOCK_METHOD1(registerOwningPresenter, void(UpdateableOnDemand *));
@@ -125,6 +126,8 @@ public:
   MOCK_METHOD0(hideView, void());
   MOCK_METHOD0(showView, void());
   MOCK_METHOD1(movePosition, void(PeakTransform_sptr));
+  MOCK_METHOD2(movePositionNonOrthogonal,
+               void(PeakTransform_sptr, NonOrthogonalAxis &));
   MOCK_METHOD1(showBackgroundRadius, void(const bool));
   MOCK_CONST_METHOD1(getBoundingBox, PeakBoundingBox(const int));
   MOCK_METHOD1(changeOccupancyInView, void(const double));
@@ -158,66 +161,7 @@ public:
   MOCK_METHOD0(updateView, void());
   MOCK_METHOD1(swapPeaksWorkspace,
                void(boost::shared_ptr<Mantid::API::IPeaksWorkspace> &));
-};
-
-/*------------------------------------------------------------
-Mock IPeak
-------------------------------------------------------------*/
-class MockIPeak : public Mantid::Geometry::IPeak {
-public:
-  MOCK_METHOD1(setInstrument,
-               void(const Geometry::Instrument_const_sptr &inst));
-  MOCK_CONST_METHOD0(getDetectorID, int());
-  MOCK_METHOD1(setDetectorID, void(int m_DetectorID));
-  MOCK_CONST_METHOD0(getDetector, Geometry::IDetector_const_sptr());
-  MOCK_CONST_METHOD0(getInstrument, Geometry::Instrument_const_sptr());
-  MOCK_CONST_METHOD0(getRunNumber, int());
-  MOCK_METHOD1(setRunNumber, void(int m_RunNumber));
-  MOCK_CONST_METHOD0(getMonitorCount, double());
-  MOCK_METHOD1(setMonitorCount, void(double m_MonitorCount));
-  MOCK_CONST_METHOD0(getH, double());
-  MOCK_CONST_METHOD0(getK, double());
-  MOCK_CONST_METHOD0(getL, double());
-  MOCK_CONST_METHOD0(getHKL, Mantid::Kernel::V3D());
-  MOCK_METHOD1(setH, void(double m_H));
-  MOCK_METHOD1(setK, void(double m_K));
-  MOCK_METHOD1(setL, void(double m_L));
-  MOCK_METHOD3(setHKL, void(double H, double K, double L));
-  MOCK_METHOD1(setHKL, void(const Mantid::Kernel::V3D &HKL));
-  MOCK_CONST_METHOD0(getQLabFrame, Mantid::Kernel::V3D());
-  MOCK_CONST_METHOD0(getQSampleFrame, Mantid::Kernel::V3D());
-  MOCK_METHOD0(findDetector, bool());
-  MOCK_METHOD2(setQSampleFrame, void(const Mantid::Kernel::V3D &QSampleFrame,
-                                     boost::optional<double> detectorDistance));
-  MOCK_METHOD2(setQLabFrame, void(const Mantid::Kernel::V3D &QLabFrame,
-                                  boost::optional<double> detectorDistance));
-  MOCK_METHOD1(setWavelength, void(double wavelength));
-  MOCK_CONST_METHOD0(getWavelength, double());
-  MOCK_CONST_METHOD0(getScattering, double());
-  MOCK_CONST_METHOD0(getDSpacing, double());
-  MOCK_CONST_METHOD0(getTOF, double());
-  MOCK_CONST_METHOD0(getInitialEnergy, double());
-  MOCK_CONST_METHOD0(getFinalEnergy, double());
-  MOCK_METHOD1(setInitialEnergy, void(double m_InitialEnergy));
-  MOCK_METHOD1(setFinalEnergy, void(double m_FinalEnergy));
-  MOCK_CONST_METHOD0(getIntensity, double());
-  MOCK_CONST_METHOD0(getSigmaIntensity, double());
-  MOCK_METHOD1(setIntensity, void(double m_Intensity));
-  MOCK_METHOD1(setSigmaIntensity, void(double m_SigmaIntensity));
-  MOCK_CONST_METHOD0(getBinCount, double());
-  MOCK_METHOD1(setBinCount, void(double m_BinCount));
-  MOCK_CONST_METHOD0(getGoniometerMatrix, Mantid::Kernel::Matrix<double>());
-  MOCK_METHOD1(setGoniometerMatrix,
-               void(const Mantid::Kernel::Matrix<double> &m_GoniometerMatrix));
-  MOCK_CONST_METHOD0(getBankName, std::string());
-  MOCK_CONST_METHOD0(getRow, int());
-  MOCK_CONST_METHOD0(getCol, int());
-  MOCK_CONST_METHOD0(getDetPos, Mantid::Kernel::V3D());
-  MOCK_CONST_METHOD0(getL1, double());
-  MOCK_CONST_METHOD0(getL2, double());
-  MOCK_CONST_METHOD0(getDetectorPosition, Mantid::Kernel::V3D());
-  MOCK_CONST_METHOD0(getDetectorPositionNoCheck, Mantid::Kernel::V3D());
-  MOCK_CONST_METHOD0(getPeakShape, const Mantid::Geometry::PeakShape &());
+  MOCK_METHOD1(getNonOrthogonalInfo, void(NonOrthogonalAxis &));
 };
 
 /*------------------------------------------------------------

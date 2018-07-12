@@ -41,11 +41,11 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.37666067, signal.front(), delta);
-    TS_ASSERT_DELTA(0.37553044, signal.back(), delta);
+    TS_ASSERT_DELTA(0.374435, signal.front(), delta);
+    TS_ASSERT_DELTA(0.377909, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.26633931, error.front(), delta);
-    TS_ASSERT_DELTA(0.26554012, error.back(), delta);
+    TS_ASSERT_DELTA(0.264766, error.front(), delta);
+    TS_ASSERT_DELTA(0.267222, error.back(), delta);
   }
 
   void test_Success_With_Just_Absorption_Correction() {
@@ -130,7 +130,7 @@ private:
       spectrum.addDetectorID(i + 1);
     }
 
-    // Sample properties - cylinder of vanadium
+    // Sample properties
     const double radius(0.0025), height(0.04);
     auto cylinder =
         createCappedCylinder(radius, height, V3D(), V3D(0., 1., 0.), "sample");

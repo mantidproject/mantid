@@ -65,6 +65,7 @@ public:
   /// Tie structure
   struct ATie {
     QtProperty *paramProp; ///< Parameter property
+    QString paramName;     ///< Parameter name
     QtProperty *tieProp;   ///< Tie property
   };
   /// Constraint structure
@@ -119,6 +120,7 @@ public:
 
   /// Get a list of names of global parameters
   QStringList getGlobalParameters() const;
+  void setGlobalParameters(QStringList &globals);
   /// Get a list of names of local parameters
   QStringList getLocalParameters() const;
   /// Get the number of datasets
@@ -128,6 +130,11 @@ public:
   /// Set value of a local parameter
   void setLocalParameterValue(const QString &parName, int i,
                               double value) override;
+  /// Set value and error of a local parameter
+  void setLocalParameterValue(const QString &parName, int i, double value,
+                              double error);
+  /// Get error of a local parameter
+  double getLocalParameterError(const QString &parName, int i) const;
   /// Check if a local parameter is fixed
   bool isLocalParameterFixed(const QString &parName, int i) const override;
   /// Fix/unfix local parameter
@@ -241,6 +248,9 @@ protected:
   /// Get a property for a parameter
   QtProperty *getParameterProperty(const QString &funcIndex,
                                    const QString &paramName) const;
+  /// Get a property for a parameter which is a parent of a given
+  /// property (tie or constraint).
+  QtProperty *getParentParameterProperty(QtProperty *prop) const;
   /// Get a tie property attached to a parameter property
   QtProperty *getTieProperty(QtProperty *prop) const;
 
@@ -252,8 +262,6 @@ protected:
   bool isTie(QtProperty *prop) const;
   /// Get a tie for a paramater
   std::string getTie(QtProperty *prop) const;
-  /// Remove all local tie properties
-  void removeAllLocalTieProperties();
 
   /// Add a constraint property
   QList<AProperty> addConstraintProperties(QtProperty *prop,
@@ -266,13 +274,22 @@ protected:
   bool hasLowerBound(QtProperty *prop) const;
   /// Check if a parameter property has a upper bound
   bool hasUpperBound(QtProperty *prop) const;
+  /// Get a constraint string
+  QString getConstraint(const QString &paramName, const QString &lowerBound,
+                        const QString &upperBound) const;
 
   /// Initialize storage and values for local parameters
   void initLocalParameter(const QString &parName) const;
   /// Make sure that the parameter is initialized
   void checkLocalParameter(const QString &parName) const;
+  /// Check that a property contains a local parameter
+  bool isLocalParameterProperty(QtProperty *prop) const;
+  /// Check that a property contains a global parameter
+  bool isGlobalParameterProperty(QtProperty *prop) const;
   /// Make sure that properties are in sync with the cached ties
   void updateLocalTie(const QString &parName);
+  /// Make sure that properties are in sync with the cached constraints
+  void updateLocalConstraint(const QString &parName);
 
   /// Ask user for function type
   virtual QString getUserFunctionFromDialog();
@@ -321,6 +338,8 @@ protected slots:
   void parameterButtonClicked(QtProperty *);
   /// Called when a tie property changes
   void tieChanged(QtProperty *);
+  /// Called when a constraint property changes
+  void constraintChanged(QtProperty *);
   /// Called when "Global" check-box was clicked
   void globalChanged(QtProperty *, const QString &, bool);
   /// Set value of an attribute (as a property) to a function
@@ -399,10 +418,14 @@ protected:
   boost::optional<QString> m_currentFunctionIndex;
 
   struct LocalParameterData {
-    explicit LocalParameterData(double v = 0.0) : value(v), fixed(false) {}
+    explicit LocalParameterData(double v = 0.0, double e = 0.0)
+        : value(v), error(e), fixed(false) {}
     double value;
+    double error;
     bool fixed;
     QString tie;
+    QString lowerBound;
+    QString upperBound;
   };
 
   /// Set true if the constructed function is intended to be used in a

@@ -100,20 +100,19 @@ namespace flatbuffers {
 // Our default offset / size type, 32bit on purpose on 64bit systems.
 // Also, using a consistent offset type maintains compatibility of serialized
 // offset values between 32bit and 64bit systems.
-typedef uint32_t uoffset_t;
+using uoffset_t = uint32_t;
 
 // Signed offsets for references that can go in both directions.
-typedef int32_t soffset_t;
+using soffset_t = int32_t;
 
 // Offset/index used in v-tables, can be changed to uint8_t in
 // format forks to save a bit of space if desired.
-typedef uint16_t voffset_t;
+using voffset_t = uint16_t;
 
-typedef uintmax_t largest_scalar_t;
+using largest_scalar_t = uintmax_t;
 
 // Pointer to relinquished memory.
-typedef std::unique_ptr<uint8_t, std::function<void(uint8_t * /* unused */)>>
-          unique_ptr_t;
+using unique_ptr_t = std::unique_ptr<uint8_t, std::function<void (uint8_t *)> >;
 
 // Wrapper for uoffset_t to allow safe template specialization.
 template<typename T> struct Offset {
@@ -195,14 +194,14 @@ template<typename T> size_t AlignOf() {
 // The typedef is for the convenience of callers of this function
 // (avoiding the need for a trailing return decltype)
 template<typename T> struct IndirectHelper {
-  typedef T return_type;
+  using return_type = T;
   static const size_t element_stride = sizeof(T);
   static return_type Read(const uint8_t *p, uoffset_t i) {
     return EndianScalar((reinterpret_cast<const T *>(p))[i]);
   }
 };
 template<typename T> struct IndirectHelper<Offset<T>> {
-  typedef const T *return_type;
+  using return_type = const T *;
   static const size_t element_stride = sizeof(uoffset_t);
   static return_type Read(const uint8_t *p, uoffset_t i) {
     p += i * sizeof(uoffset_t);
@@ -210,7 +209,7 @@ template<typename T> struct IndirectHelper<Offset<T>> {
   }
 };
 template<typename T> struct IndirectHelper<const T *> {
-  typedef const T *return_type;
+  using return_type = const T *;
   static const size_t element_stride = sizeof(T);
   static return_type Read(const uint8_t *p, uoffset_t i) {
     return reinterpret_cast<const T *>(p + i * sizeof(T));
@@ -226,10 +225,7 @@ struct VectorIterator : public
   const typename IndirectHelper<T>::return_type,
   typename IndirectHelper<T>::return_type > ::type, uoffset_t > {
 
-  typedef std::iterator<std::input_iterator_tag,
-    typename std::conditional<bConst,
-    const typename IndirectHelper<T>::return_type,
-    typename IndirectHelper<T>::return_type>::type, uoffset_t> super_type;
+  using super_type = std::iterator<std::input_iterator_tag, typename std::conditional<bConst, const typename IndirectHelper<T>::return_type, typename IndirectHelper<T>::return_type>::type, uoffset_t>;
 
 public:
   VectorIterator(const uint8_t *data, uoffset_t i) :
@@ -286,15 +282,15 @@ private:
 // Vector::data() assumes the vector elements start after the length field.
 template<typename T> class Vector {
 public:
-  typedef VectorIterator<T, false> iterator;
-  typedef VectorIterator<T, true> const_iterator;
+  using iterator = VectorIterator<T, false>;
+  using const_iterator = VectorIterator<T, true>;
 
   uoffset_t size() const { return EndianScalar(length_); }
 
   // Deprecated: use size(). Here for backwards compatibility.
   uoffset_t Length() const { return size(); }
 
-  typedef typename IndirectHelper<T>::return_type return_type;
+  using return_type = typename IndirectHelper<T>::return_type;
 
   return_type Get(uoffset_t i) const {
     assert(i < size());
@@ -761,11 +757,11 @@ FLATBUFFERS_FINAL_CLASS
     auto vt_use = GetSize();
     // See if we already have generated a vtable with this exact same
     // layout before. If so, make it point to the old one, remove this one.
-    for (auto it = vtables_.begin(); it != vtables_.end(); ++it) {
-      auto vt2 = reinterpret_cast<voffset_t *>(buf_.data_at(*it));
+    for (unsigned int & vtable : vtables_) {
+      auto vt2 = reinterpret_cast<voffset_t *>(buf_.data_at(vtable));
       auto vt2_size = *vt2;
       if (vt1_size != vt2_size || memcmp(vt2, vt1, vt1_size)) continue;
-      vt_use = *it;
+      vt_use = vtable;
       buf_.pop(GetSize() - vtableoffsetloc);
       break;
     }

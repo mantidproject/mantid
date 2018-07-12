@@ -89,12 +89,16 @@ target_link_libraries ( PythonGeometryModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_L
             ${PYTHON_LIBRARIES}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
-			${TBB_LIBRARIES} 
+			${TBB_LIBRARIES}
 			${TBB_MALLOC_LIBRARIES}
             )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( PythonGeometryModule PROPERTIES INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/")
+  set_target_properties ( PythonGeometryModule PROPERTIES
+                          INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties ( PythonGeometryModule PROPERTIES
+                         INSTALL_RPATH "\$ORIGIN/../../../${LIB_DIR};\$ORIGIN/../kernel/")
 endif ()
 
 ###########################################################################

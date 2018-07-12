@@ -32,7 +32,7 @@ class IqtFitMultiple(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                              doc='The _iqt.nxs InputWorkspace used by the algorithm')
 
-        self.declareProperty(name='Function', defaultValue='',
+        self.declareProperty(FunctionProperty(name='Function',direction=Direction.InOut),
                              doc='The function to use in fitting')
 
         self.declareProperty(name='FitType', defaultValue='',
@@ -63,6 +63,11 @@ class IqtFitMultiple(PythonAlgorithm):
 
         self.declareProperty(name='ConstrainIntensities', defaultValue=False,
                              doc="If the Intensities should be constrained during the fit")
+
+        self.declareProperty(name='ExtractMembers', defaultValue=False,
+                             doc="If true, then each member of the fit will be extracted, into their "
+                                 "own workspace. These workspaces will have a histogram for each spectrum "
+                                 "(Q-value) and will be grouped.")
 
         self.declareProperty(MatrixWorkspaceProperty('OutputResultWorkspace', '', direction=Direction.Output),
                              doc='The output workspace containing the results of the fit data')
@@ -108,6 +113,7 @@ class IqtFitMultiple(PythonAlgorithm):
         self._spec_min = self.getProperty('SpecMin').value
         self._spec_max = self.getProperty('SpecMax').value
         self._intensities_constrained = self.getProperty('ConstrainIntensities').value
+        self._do_extract_members = self.getProperty('ExtractMembers').value
         self._minimizer = self.getProperty('Minimizer').value
         self._max_iterations = self.getProperty('MaxIterations').value
         self._result_name = self.getPropertyValue('OutputResultWorkspace')
@@ -128,7 +134,7 @@ class IqtFitMultiple(PythonAlgorithm):
 
         option = self._fit_type[:-2]
         logger.information('Option: ' + option)
-        logger.information('Function: ' + self._function)
+        logger.information('Function: ' + str(self._function))
 
         setup_prog.report('Cropping workspace')
         # prepare input workspace for fitting
@@ -162,7 +168,7 @@ class IqtFitMultiple(PythonAlgorithm):
 
         # fit multi-domain function to workspace
         fit_prog = Progress(self, start=0.1, end=0.8, nreports=2)
-        multi_domain_func, kwargs = self._create_mutli_domain_func(self._function, tmp_fit_workspace)
+        multi_domain_func, kwargs = _create_multi_domain_func(self._function, tmp_fit_workspace)
         fit_prog.report('Fitting...')
         ms.Fit(Function=multi_domain_func,
                InputWorkspace=tmp_fit_workspace,
@@ -171,6 +177,7 @@ class IqtFitMultiple(PythonAlgorithm):
                CreateOutput=True,
                Minimizer=self._minimizer,
                MaxIterations=self._max_iterations,
+               OutputCompositeMembers=self._do_extract_members,
                **kwargs)
         fit_prog.report('Fitting complete')
 
@@ -240,33 +247,53 @@ class IqtFitMultiple(PythonAlgorithm):
         delete_alg.setProperty("Workspace", tmp_fit_workspace)
         delete_alg.execute()
 
+        if self._do_extract_members:
+            ms.ExtractQENSMembers(InputWorkspace=self._input_ws,
+                                  ResultWorkspace=self._fit_group_name,
+                                  OutputWorkspace=self._fit_group_name.rsplit('_', 1)[0] + "_Members")
+
         self.setProperty('OutputResultWorkspace', result_workspace)
         self.setProperty('OutputParameterWorkspace', self._parameter_name)
         self.setProperty('OutputWorkspaceGroup', self._fit_group_name)
         conclusion_prog.report('Algorithm complete')
 
-    def _create_mutli_domain_func(self, function, input_ws):
-        multi = 'composite=MultiDomainFunction,NumDeriv=true;'
-        comp = '(composite=CompositeFunction,NumDeriv=true,$domains=i;' + function + ');'
 
-        ties = []
-        kwargs = {}
-        num_spectra = mtd[input_ws].getNumberHistograms()
-        for i in range(0, num_spectra):
-            multi += comp
-            kwargs['WorkspaceIndex_' + str(i)] = i
+def _create_multi_domain_func(function, input_ws):
+    multi = 'composite=MultiDomainFunction,NumDeriv=true;'
+    comp = '(composite=CompositeFunction,NumDeriv=true,$domains=i;' + str(function) + ');'
+    stretched_indices = _find_indices_of_stretched_exponentials(function)
 
-            if i > 0:
-                kwargs['InputWorkspace_' + str(i)] = input_ws
+    if not stretched_indices:
+        logger.warning("Stretched Exponential not found in function, tie-creation skipped.")
+        return function
 
-                # tie beta for every spectrum
-                tie = 'f%d.f1.Stretching=f0.f1.Stretching' % i
-                ties.append(tie)
+    ties = []
+    kwargs = {}
+    num_spectra = mtd[input_ws].getNumberHistograms()
+    for i in range(0, num_spectra):
+        multi += comp
+        kwargs['WorkspaceIndex_' + str(i)] = i
 
-        ties = ','.join(ties)
-        multi += 'ties=(' + ties + ')'
+        if i > 0:
+            kwargs['InputWorkspace_' + str(i)] = input_ws
 
-        return multi, kwargs
+            # tie beta for every spectrum
+            for stretched_index in stretched_indices:
+                ties.append('f{0}.f{1}.Stretching=f0.f{1}.Stretching'.format(i, stretched_index))
+
+    ties = ','.join(ties)
+    multi += 'ties=(' + ties + ')'
+
+    return multi, kwargs
+
+
+def _find_indices_of_stretched_exponentials(composite):
+    indices = []
+
+    for index in range(0, len(composite)):
+        if composite.getFunction(index).name() == "StretchExp":
+            indices.append(index)
+    return indices
 
 
 AlgorithmFactory.subscribe(IqtFitMultiple)

@@ -6,21 +6,49 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include <QString>
 #include <boost/lexical_cast.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace boost;
 
+using Mantid::Geometry::IPeak;
+
 namespace MantidQt {
 namespace SliceViewer {
+
+/** Convert a V3D to a comma seperated QString
+ *
+ * @param v3d :: the vector to convert to a QString
+ * @returns :: a string representing the V3D
+ */
+static QString v3dAsString(const Mantid::Kernel::V3D &v3d) {
+  const QString COMMA(",");
+  return QString::number(v3d.X(), 'f', 4) + COMMA +
+         QString::number(v3d.Y(), 'f', 4) + COMMA +
+         QString::number(v3d.Z(), 'f', 4);
+}
+
+/** Get the precision to display HKL values as
+ *
+ * @returns :: number of decimals to round displayed HKL values to.
+ */
+static int getHKLPrecision() {
+  int hklPrec = 0;
+  if (!Mantid::Kernel::ConfigService::Instance().getValue("PeakColumn.hklPrec",
+                                                          hklPrec))
+    hklPrec = 2;
+  return hklPrec;
+}
+
 const QString QPeaksTableModel::RUNNUMBER = "Run";
 const QString QPeaksTableModel::DETID = "DetID";
 const QString QPeaksTableModel::H = "h";
 const QString QPeaksTableModel::K = "k";
 const QString QPeaksTableModel::L = "l";
 const QString QPeaksTableModel::WAVELENGTH("Wavelength");
-const QString QPeaksTableModel::ENERGY("delta E");
+const QString QPeaksTableModel::ENERGY_TRANSFER("delta E");
 const QString QPeaksTableModel::INITIAL_ENERGY("E_i");
 const QString QPeaksTableModel::FINAL_ENERGY("E_f");
 const QString QPeaksTableModel::TOF("TOF");
@@ -34,6 +62,7 @@ const QString QPeaksTableModel::ROW("Row");
 const QString QPeaksTableModel::COL("Col");
 const QString QPeaksTableModel::QLAB = "QLab";
 const QString QPeaksTableModel::QSAMPLE = "QSample";
+const QString QPeaksTableModel::PEAKNUM = "PeakNumber";
 
 const int QPeaksTableModel::COL_RUNNUMBER(0);
 const int QPeaksTableModel::COL_DETID(1);
@@ -43,7 +72,7 @@ const int QPeaksTableModel::COL_L(4);
 const int QPeaksTableModel::COL_WAVELENGTH(5);
 const int QPeaksTableModel::COL_INITIAL_ENERGY(6);
 const int QPeaksTableModel::COL_FINAL_ENERGY(7);
-const int QPeaksTableModel::COL_ENERGY(8);
+const int QPeaksTableModel::COL_ENERGY_TRANSFER(8);
 const int QPeaksTableModel::COL_TOF(9);
 const int QPeaksTableModel::COL_DSPACING(10);
 const int QPeaksTableModel::COL_INT(11);
@@ -55,50 +84,7 @@ const int QPeaksTableModel::COL_ROW(16);
 const int QPeaksTableModel::COL_COL(17);
 const int QPeaksTableModel::COL_QLAB(18);
 const int QPeaksTableModel::COL_QSAMPLE(19);
-
-void QPeaksTableModel::updateDataCache(const Mantid::Geometry::IPeak &peak,
-                                       const int row) const {
-  // if the index is what is already cached just return
-  if (row == m_dataCachePeakIndex)
-    return;
-
-  // generate the cache
-  m_dataCache.clear();
-  m_dataCache.push_back(QString::number(peak.getRunNumber()));
-  m_dataCache.push_back(QString::number(peak.getDetectorID()));
-  m_dataCache.push_back(QString::number(peak.getH(), 'f', m_hklPrec));
-  m_dataCache.push_back(QString::number(peak.getK(), 'f', m_hklPrec));
-  m_dataCache.push_back(QString::number(peak.getL(), 'f', m_hklPrec));
-  m_dataCache.push_back(QString::number(peak.getWavelength(), 'f', 4));
-  double eI = peak.getInitialEnergy();
-  double eF = peak.getFinalEnergy();
-  m_dataCache.push_back(QString::number(eI, 'f', 4));
-  m_dataCache.push_back(QString::number(eF, 'f', 4));
-  m_dataCache.push_back(QString::number(eI - eF, 'f', 4));
-  m_dataCache.push_back(QString::number(peak.getTOF(), 'f', 1));
-  m_dataCache.push_back(QString::number(peak.getDSpacing(), 'f', 4));
-  double intensity = peak.getIntensity();
-  double sigma = peak.getSigmaIntensity();
-  m_dataCache.push_back(QString::number(intensity, 'f', 1));
-  m_dataCache.push_back(QString::number(sigma, 'f', 1));
-  m_dataCache.push_back(QString::number(intensity / sigma, 'f', 2));
-  m_dataCache.push_back(QString::number(peak.getBinCount(), 'g', 2));
-  m_dataCache.push_back(QString(peak.getBankName().c_str()));
-  m_dataCache.push_back(QString::number(peak.getRow()));
-  m_dataCache.push_back(QString::number(peak.getCol()));
-
-  const QString COMMA(",");
-
-  const Mantid::Kernel::V3D qlab = peak.getQLabFrame();
-  m_dataCache.push_back(QString::number(qlab.X(), 'f', 4) + COMMA +
-                        QString::number(qlab.Y(), 'f', 4) + COMMA +
-                        QString::number(qlab.Z(), 'f', 4));
-
-  const Mantid::Kernel::V3D qsample = peak.getQSampleFrame();
-  m_dataCache.push_back(QString::number(qsample.X(), 'f', 4) + COMMA +
-                        QString::number(qsample.Y(), 'f', 4) + COMMA +
-                        QString::number(qsample.Z(), 'f', 4));
-}
+const int QPeaksTableModel::COL_PEAKNUM(20);
 
 /**
  * @param column The column to get the number of characters
@@ -120,7 +106,7 @@ int QPeaksTableModel::numCharacters(const int column) const {
     return 3 + m_hklPrec;
   else if (column == COL_WAVELENGTH)
     return 6;
-  else if (column == COL_ENERGY)
+  else if (column == COL_ENERGY_TRANSFER)
     return 6;
   else if (column == COL_INITIAL_ENERGY)
     return 6;
@@ -148,6 +134,8 @@ int QPeaksTableModel::numCharacters(const int column) const {
     return 3 * 6;
   else if (column == COL_QSAMPLE)
     return 3 * 6;
+  else if (column == COL_PEAKNUM)
+    return 6;
   else
     return 3;
 }
@@ -158,8 +146,7 @@ Constructor
 */
 QPeaksTableModel::QPeaksTableModel(
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS)
-    : QAbstractTableModel(nullptr), m_dataCachePeakIndex(-1),
-      m_peaksWS(peaksWS) {
+    : QAbstractTableModel(nullptr), m_peaksWS(peaksWS) {
   m_columnNameMap = {{0, RUNNUMBER},
                      {1, DETID},
                      {2, H},
@@ -168,7 +155,7 @@ QPeaksTableModel::QPeaksTableModel(
                      {5, WAVELENGTH},
                      {6, INITIAL_ENERGY},
                      {7, FINAL_ENERGY},
-                     {8, ENERGY},
+                     {8, ENERGY_TRANSFER},
                      {9, TOF},
                      {10, DSPACING},
                      {11, INT},
@@ -179,45 +166,102 @@ QPeaksTableModel::QPeaksTableModel(
                      {16, ROW},
                      {17, COL},
                      {18, QLAB},
-                     {19, QSAMPLE}};
+                     {19, QSAMPLE},
+                     {20, PEAKNUM}};
 
-  m_sortableColumns = {{RUNNUMBER, true},
-                       {DETID, true},
-                       {H, true},
-                       {K, true},
-                       {L, true},
-                       {WAVELENGTH, true},
-                       {ENERGY, false},
-                       {INITIAL_ENERGY, true},
-                       {FINAL_ENERGY, true},
-                       {TOF, true},
-                       {DSPACING, true},
-                       {INT, true},
-                       {SIGMINT, true},
-                       {INT_SIGINT, false},
-                       {BINCOUNT, true},
-                       {BANKNAME, true},
-                       {ROW, true},
-                       {COL, true},
-                       {QLAB, false},
-                       {QSAMPLE, false}};
+  m_hklPrec = getHKLPrecision();
 
-  if (!Mantid::Kernel::ConfigService::Instance().getValue("PeakColumn.hklPrec",
-                                                          m_hklPrec))
-    m_hklPrec = 2;
+  // Utility function to convert a V3D type to a QString by combining the
+  // elements with a comma
+
+  // Mapping member functions of the Peak object to a column index
+  m_dataLookup = {
+      [](const IPeak &peak) { return QVariant(peak.getRunNumber()); },
+      [](const IPeak &peak) { return QVariant(peak.getDetectorID()); },
+      [](const IPeak &peak) { return QVariant(peak.getH()); },
+      [](const IPeak &peak) { return QVariant(peak.getK()); },
+      [](const IPeak &peak) { return QVariant(peak.getL()); },
+      [](const IPeak &peak) { return QVariant(peak.getWavelength()); },
+      [](const IPeak &peak) { return QVariant(peak.getInitialEnergy()); },
+      [](const IPeak &peak) { return QVariant(peak.getFinalEnergy()); },
+      [](const IPeak &peak) { return QVariant(peak.getEnergyTransfer()); },
+      [](const IPeak &peak) { return QVariant(peak.getTOF()); },
+      [](const IPeak &peak) { return QVariant(peak.getDSpacing()); },
+      [](const IPeak &peak) { return QVariant(peak.getIntensity()); },
+      [](const IPeak &peak) { return QVariant(peak.getSigmaIntensity()); },
+      [](const IPeak &peak) { return QVariant(peak.getIntensityOverSigma()); },
+      [](const IPeak &peak) { return QVariant(peak.getBinCount()); },
+      [](const IPeak &peak) {
+        return QVariant(QString::fromStdString(peak.getBankName()));
+      },
+      [](const IPeak &peak) { return QVariant(peak.getRow()); },
+      [](const IPeak &peak) { return QVariant(peak.getCol()); },
+      [](const IPeak &peak) { return QVariant(peak.getQLabFrame().norm()); },
+      [](const IPeak &peak) { return QVariant(peak.getQSampleFrame().norm()); },
+      [](const IPeak &peak) { return QVariant(int(peak.getPeakNumber())); },
+  };
+
+  // Mapping member functions of the Peak object to a column index with
+  // formatting for displaying data to the user
+  m_formattedValueLookup = {
+      [](const IPeak &peak) { return QString::number(peak.getRunNumber()); },
+      [](const IPeak &peak) { return QString::number(peak.getDetectorID()); },
+      [](const IPeak &peak) {
+        return QString::number(peak.getH(), 'f', getHKLPrecision());
+      },
+      [](const IPeak &peak) {
+        return QString::number(peak.getK(), 'f', getHKLPrecision());
+      },
+      [](const IPeak &peak) {
+        return QString::number(peak.getL(), 'f', getHKLPrecision());
+      },
+      [](const IPeak &peak) {
+        return QString::number(peak.getWavelength(), 'f', 4);
+      },
+      [](const IPeak &peak) {
+        return QString::number(peak.getInitialEnergy(), 'f', 4);
+      },
+      [](const IPeak &peak) {
+        return QString::number(peak.getFinalEnergy(), 'f', 4);
+      },
+      [](const IPeak &peak) {
+        return QString::number(peak.getEnergyTransfer(), 'f', 4);
+      },
+      [](const IPeak &peak) { return QString::number(peak.getTOF(), 'f', 1); },
+      [](const IPeak &peak) {
+        return QString::number(peak.getDSpacing(), 'f', 4);
+      },
+      [](const IPeak &peak) {
+        return QString::number(peak.getIntensity(), 'f', 1);
+      },
+      [](const IPeak &peak) {
+        return QString::number(peak.getSigmaIntensity(), 'f', 1);
+      },
+      [](const IPeak &peak) {
+        return QString::number(peak.getIntensityOverSigma(), 'f', 2);
+      },
+      [](const IPeak &peak) {
+        return QString::number(peak.getBinCount(), 'g', 2);
+      },
+      [](const IPeak &peak) {
+        return QString::fromStdString(peak.getBankName());
+      },
+      [](const IPeak &peak) { return QString::number(peak.getRow()); },
+      [](const IPeak &peak) { return QString::number(peak.getCol()); },
+      [](const IPeak &peak) { return v3dAsString(peak.getQLabFrame()); },
+      [](const IPeak &peak) { return v3dAsString(peak.getQSampleFrame()); },
+      [](const IPeak &peak) { return QString::number(peak.getPeakNumber()); },
+  };
 }
 
 void QPeaksTableModel::setPeaksWorkspace(
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) {
+  beginResetModel();
+  emit layoutAboutToBeChanged();
   m_peaksWS = peaksWS;
-  this->update();
-}
-
-/**
-Update the model.
-*/
-void QPeaksTableModel::update() {
-  emit layoutChanged(); // This should tell the view that the data has changed.
+  emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+  emit layoutChanged();
+  endResetModel();
 }
 
 /**
@@ -231,7 +275,7 @@ int QPeaksTableModel::rowCount(const QModelIndex &) const {
 @return the number of columns in the model.
 */
 int QPeaksTableModel::columnCount(const QModelIndex &) const {
-  return static_cast<int>(m_columnNameMap.size());
+  return static_cast<int>(m_dataLookup.size());
 }
 
 /**
@@ -258,15 +302,20 @@ QVariant QPeaksTableModel::data(const QModelIndex &index, int role) const {
   if (role == Qt::TextAlignmentRole)
     return Qt::AlignRight;
 
-  if (role != Qt::DisplayRole)
-    return QVariant();
+  const auto colNumber = index.column();
+  const auto rowNumber = index.row();
 
-  const int colNumber = index.column();
-  const int rowNumber = index.row();
+  const auto &peak = m_peaksWS->getPeak(rowNumber);
 
-  const IPeak &peak = m_peaksWS->getPeak(rowNumber);
-  this->updateDataCache(peak, rowNumber);
-  return m_dataCache[colNumber];
+  if (role == Qt::DisplayRole) {
+    // For displaying values to the user
+    return m_formattedValueLookup[colNumber](peak);
+  } else if (role == Qt::UserRole) {
+    // For using values for searching
+    return m_dataLookup[colNumber](peak);
+  }
+
+  return QVariant();
 }
 
 /**
@@ -278,7 +327,7 @@ Get the heading for a given section, orientation and role.
 */
 QVariant QPeaksTableModel::headerData(int section, Qt::Orientation orientation,
                                       int role) const {
-  if (role != Qt::DisplayRole)
+  if (role != Qt::DisplayRole || section < 0)
     return QVariant();
 
   if (orientation == Qt::Horizontal) {
@@ -329,7 +378,7 @@ std::vector<int> QPeaksTableModel::defaultHideCols() {
       else
         showEnergy = true;
       if (!showEnergy)
-        result.push_back(COL_ENERGY);
+        result.push_back(COL_ENERGY_TRANSFER);
     }
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     // Unable to fetch instrument info, so continue without it.
@@ -340,28 +389,5 @@ std::vector<int> QPeaksTableModel::defaultHideCols() {
 
 /// Destructor
 QPeaksTableModel::~QPeaksTableModel() {}
-
-/**
- * Overriden sort.
- * @param column
- * @param order
- */
-void QPeaksTableModel::sort(int column, Qt::SortOrder order) {
-  using namespace Mantid::API;
-  const QString columnName = findColumnName(column);
-  const bool isSortable = m_sortableColumns[columnName];
-  if (isSortable) {
-    std::string rationalName(columnName.toStdString());
-    if (columnName == QPeaksTableModel::INT)
-      rationalName = "Intens";
-    else if (columnName == QPeaksTableModel::RUNNUMBER)
-      rationalName = "RunNumber";
-    // TODO raise event and propagate through to Proper presenter.
-    peaksSorted(rationalName, order == Qt::AscendingOrder);
-
-    emit layoutChanged(); // This should tell the view that the data has
-                          // changed.
-  }
-}
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

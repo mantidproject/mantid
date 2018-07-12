@@ -3,6 +3,7 @@
 //-----------------------------------------------
 #include "MantidQtWidgets/Common/ScriptEditor.h"
 #include "MantidQtWidgets/Common/FindReplaceDialog.h"
+#include "MantidQtWidgets/Common/AlternateCSPythonLexer.h"
 
 // Qt
 #include <QApplication>
@@ -24,95 +25,32 @@
 #include <QMimeData>
 
 // Qscintilla
-#include <Qsci/qscilexer.h>
 #include <Qsci/qsciapis.h>
-#include <Qsci/qscilexerpython.h>
 
 // std
 #include <cmath>
 #include <stdexcept>
 
-//***************************************************************************
-//
-// CommandHistory struct
-//
-//***************************************************************************
+namespace {
+
 /**
- * Add a block of lines to the store
- * @param block
+ * Return a new instance of a lexer based on the given language
+ * @param lexerName A string defining the language. Currently hardcoded to
+ * Python.
+ * @return A new QsciLexer instance
  */
-void CommandHistory::addCode(QString block) {
-  QStringList lines = block.split("\n");
-  QStringListIterator iter(lines);
-  while (iter.hasNext()) {
-    this->add(iter.next());
+QsciLexer *createLexerFromName(const QString &lexerName) {
+  if (lexerName == "Python") {
+    return new QsciLexerPython;
+  } else if (lexerName == "AlternateCSPythonLexer") {
+    return new AlternateCSPythonLexer;
+  } else {
+    throw std::invalid_argument("createLexerFromLanguage: Unsupported "
+                                "name. Supported names=Python, ");
   }
 }
-
-/**
- * Add a command to the store.
- */
-void CommandHistory::add(QString cmd) {
-  // Ignore duplicates that are the same as the last command entered and just
-  // reset the pointer
-  int ncmds = m_commands.count();
-  if (ncmds > 1 && m_commands.lastIndexOf(cmd) == ncmds - 2) {
-    // Reset the index pointer
-    m_current = ncmds - 1;
-    return;
-  }
-
-  // If the stack is full, then remove the oldest
-  if (ncmds == m_hist_maxsize + 1) {
-    m_commands.removeFirst();
-  }
-  if (!m_commands.isEmpty()) {
-    // Remove blankline
-    m_commands.removeLast();
-  }
-  // Add the command and an extra blank line
-  m_commands.append(cmd);
-  m_commands.append("");
-
-  // Reset the index pointer
-  m_current = m_commands.count() - 1;
 }
 
-/**
- * Is there a previous command
- * @returns A boolean indicating whether there is command on the left of the
- * current index
- */
-bool CommandHistory::hasPrevious() const {
-  return !m_commands.isEmpty() && m_current > 0;
-}
-
-/**
- * Get the item pointed to by the current index and move it back one
- */
-QString CommandHistory::getPrevious() const {
-  return m_commands.value(--m_current);
-}
-
-/**
- * Is there a command next on the stack
- */
-bool CommandHistory::hasNext() const {
-  return !m_commands.isEmpty() && m_current < m_commands.count() - 1;
-}
-
-/**
- * Get the item pointed to by the current index and move it down one
- */
-QString CommandHistory::getNext() const {
-  return m_commands.value(++m_current);
-}
-
-//***************************************************************************
-//
-// ScriptEditor class
-//
-//***************************************************************************
 // The colour for a success marker
 QColor ScriptEditor::g_success_colour = QColor("lightgreen");
 // The colour for an error marker
@@ -122,10 +60,19 @@ QColor ScriptEditor::g_error_colour = QColor("red");
 // Public member functions
 //------------------------------------------------
 /**
+ * Construction based on a string defining the langauge used
+ * for syntax highlighting
+ * @param lexerName A string choosing the name of a lexer
+ * @param parent Parent widget
+ */
+ScriptEditor::ScriptEditor(const QString &lexerName, QWidget *parent)
+    : ScriptEditor(parent, createLexerFromName(lexerName)) {}
+
+/**
  * Constructor
- * @param parent :: The parent widget (can be NULL)
- * @param codelexer :: define the syntax highlighting and code completion.
- * @param settingsGroup :: Used when saving settings to persistent store
+ * @param parent The parent widget (can be NULL)
+ * @param codelexer define the syntax highlighting and code completion.
+ * @param settingsGroup Used when saving settings to persistent store
  */
 ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer,
                            const QString &settingsGroup)
@@ -230,10 +177,10 @@ void ScriptEditor::setAutoMarginResize() {
 /**
  * Enable the auto complete
  */
-void ScriptEditor::enableAutoCompletion() {
-  setAutoCompletionSource(QsciScintilla::AcsAPIs);
-  setCallTipsVisible(QsciScintilla::CallTipsNoAutoCompletionContext);
+void ScriptEditor::enableAutoCompletion(AutoCompletionSource source) {
+  setAutoCompletionSource(source);
   setAutoCompletionThreshold(2);
+  setCallTipsStyle(QsciScintilla::CallTipsNoAutoCompletionContext);
   setCallTipsVisible(0); // This actually makes all of them visible
 }
 
@@ -242,7 +189,6 @@ void ScriptEditor::enableAutoCompletion() {
  * */
 void ScriptEditor::disableAutoCompletion() {
   setAutoCompletionSource(QsciScintilla::AcsNone);
-  setCallTipsVisible(QsciScintilla::CallTipsNone);
   setAutoCompletionThreshold(-1);
   setCallTipsVisible(-1);
 }
@@ -258,8 +204,8 @@ QSize ScriptEditor::sizeHint() const { return QSize(600, 500); }
 void ScriptEditor::saveAs() {
   QString selectedFilter;
   QString filter = "Scripts (*.py *.PY);;All Files (*)";
-  QString filename = QFileDialog::getSaveFileName(nullptr, "MantidPlot - Save",
-                                                  "", filter, &selectedFilter);
+  QString filename = QFileDialog::getSaveFileName(nullptr, "Save file...", "",
+                                                  filter, &selectedFilter);
 
   if (filename.isEmpty()) {
     throw SaveCancelledException();
@@ -330,6 +276,14 @@ void ScriptEditor::setText(int lineno, const QString &txt, int index) {
 void ScriptEditor::keyPressEvent(QKeyEvent *event) {
   // Avoids a bug in QScintilla
   forwardKeyPressToBase(event);
+}
+
+/*
+ * @param filename The new filename
+ */
+void ScriptEditor::setFileName(const QString &filename) {
+  m_filename = filename;
+  emit fileNameChanged(filename);
 }
 
 /** Ctrl + Rotating the mouse wheel will increase/decrease the font size

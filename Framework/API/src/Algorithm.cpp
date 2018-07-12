@@ -437,6 +437,7 @@ void Algorithm::unlockWorkspaces() {
  *  @return true if executed successfully.
  */
 bool Algorithm::execute() {
+  Timer timer;
   AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
   {
     DeprecatedAlgorithm *depo = dynamic_cast<DeprecatedAlgorithm *>(this);
@@ -460,6 +461,8 @@ bool Algorithm::execute() {
     logAlgorithmInfo();
 
   // Check all properties for validity
+  constexpr bool resetTimer{true};
+  float timingInit = timer.elapsed(resetTimer);
   if (!validateProperties()) {
     // Reset name on input workspaces to trigger attempt at collection from ADS
     const std::vector<Property *> &props = getProperties();
@@ -477,6 +480,7 @@ bool Algorithm::execute() {
       throw std::runtime_error("Some invalid Properties found");
     }
   }
+  const float timingPropertyValidation = timer.elapsed(resetTimer);
 
   // ----- Check for processing groups -------------
   // default true so that it has the right value at the check below the catch
@@ -498,9 +502,15 @@ bool Algorithm::execute() {
     return false;
   }
 
+  const auto executionMode = getExecutionMode();
+
+  timingInit += timer.elapsed(resetTimer);
   // ----- Perform validation of the whole set of properties -------------
-  if (!callProcessGroups) // for groups this is called on each workspace
-                          // separately
+  if ((!callProcessGroups) &&
+      (executionMode != Parallel::ExecutionMode::MasterOnly ||
+       communicator().rank() ==
+           0)) // for groups this is called on each workspace
+               // separately
   {
     std::map<std::string, std::string> errors = this->validateInputs();
     if (!errors.empty()) {
@@ -526,6 +536,7 @@ bool Algorithm::execute() {
       }
     }
   }
+  const float timingInputValidation = timer.elapsed(resetTimer);
 
   if (trackingHistory()) {
     // count used for defining the algorithm execution order
@@ -549,6 +560,7 @@ bool Algorithm::execute() {
 
   // Read or write locks every input/output workspace
   this->lockWorkspaces();
+  timingInit += timer.elapsed(resetTimer);
 
   // Invoke exec() method of derived class and catch all uncaught exceptions
   try {
@@ -558,15 +570,15 @@ bool Algorithm::execute() {
       }
 
       startTime = Mantid::Types::Core::DateAndTime::getCurrentTime();
-      // Start a timer
-      Timer timer;
       // Call the concrete algorithm's exec method
-      this->exec(getExecutionMode());
+      this->exec(executionMode);
       registerFeatureUsage();
       // Check for a cancellation request in case the concrete algorithm doesn't
       interruption_point();
-      // Get how long this algorithm took to run
-      const float duration = timer.elapsed();
+      const float timingExec = timer.elapsed(resetTimer);
+      // The total runtime including all init steps is used for general logging.
+      const float duration = timingInit + timingPropertyValidation +
+                             timingInputValidation + timingExec;
       // need it to throw before trying to run fillhistory() on an algorithm
       // which has failed
       if (trackingHistory() && m_history) {
@@ -584,6 +596,14 @@ bool Algorithm::execute() {
       setExecuted(true);
 
       // Log that execution has completed.
+      getLogger().debug("Time to validate properties: " +
+                        std::to_string(timingPropertyValidation) +
+                        " seconds\n" + "Time for other input validation: " +
+                        std::to_string(timingInputValidation) + " seconds\n" +
+                        "Time for other initialization: " +
+                        std::to_string(timingInit) + " seconds\n" +
+                        "Time to run exec: " + std::to_string(timingExec) +
+                        " seconds\n");
       reportCompleted(duration);
     } catch (std::runtime_error &ex) {
       this->unlockWorkspaces();
@@ -1723,55 +1743,14 @@ void Algorithm::execDistributed() { exec(); }
 /** Runs the algorithm in `master-only` execution mode.
  *
  * The default implementation runs the normal exec() method on rank 0 and
- * execNonMaster() on all other ranks. Classes inheriting from Algorithm can
- * re-implement this if they support execution with multiple MPI ranks and
- * require a special implementation for master-only execution. */
+ * nothing on all other ranks. As a consequence all output properties will have
+ * their default values, such as a nullptr for output workspaces. Classes
+ * inheriting from Algorithm can re-implement this if they support execution
+ * with multiple MPI ranks and require a special implementation for master-only
+ * execution. */
 void Algorithm::execMasterOnly() {
   if (communicator().rank() == 0)
     exec();
-  else
-    execNonMaster();
-}
-
-/** By default execMasterOnly() runs this in `master-only` execution mode on all
- * but rank 0.
- *
- * The default implementation creates dummy workspaces for all pure output
- * workspaces. Classes inheriting from Algorithm can re-implement this if they
- * support execution with multiple MPI ranks and require a special behavior on
- * non-master ranks in master-only execution. */
-void Algorithm::execNonMaster() {
-  // If there is no output we can simply do nothing.
-  if (m_pureOutputWorkspaceProps.empty())
-    return;
-  // Does Algorithm have exactly one input and one output workspace property?
-  if (m_inputWorkspaceProps.size() == 1 &&
-      m_pureOutputWorkspaceProps.size() == 1) {
-    // Does the input workspace property point to an actual workspace?
-    if (const auto &ws = m_inputWorkspaceProps.front()->getWorkspace()) {
-      if (ws->storageMode() == Parallel::StorageMode::MasterOnly) {
-        const auto &wsProp = m_pureOutputWorkspaceProps.front();
-        // This is the reverse cast of what is done in
-        // cacheWorkspaceProperties(), so it should never fail.
-        const Property &prop = dynamic_cast<Property &>(*wsProp);
-        auto clone = ws->cloneEmpty();
-        // Currently we have not implemented a proper cloneEmpty() for all
-        // workspace types, in particular the abundance of Workspace2D subtypes,
-        // so we do a safety check here.
-        if (ws->storageMode() != clone->storageMode())
-          throw std::runtime_error(clone->id() +
-                                   "::cloneEmpty() did not return a workspace "
-                                   "with the correct storage mode. Make sure "
-                                   "cloneEmpty() sets the storage mode.");
-        setProperty(prop.name(), std::move(clone));
-        return;
-      }
-    }
-  }
-  throw std::runtime_error(
-      "Attempt to run algorithm with " +
-      Parallel::toString(Parallel::ExecutionMode::MasterOnly) +
-      ": Execution in this mode not implemented.");
 }
 
 /** Get a (valid) execution mode for this algorithm.
@@ -1799,6 +1778,9 @@ Parallel::ExecutionMode Algorithm::getExecutionMode() const {
     getLogger().error() << error << "\n";
     throw(std::runtime_error(error));
   }
+  getLogger().information() << "MPI Rank " << communicator().rank()
+                            << " running with "
+                            << Parallel::toString(executionMode) << '\n';
   return executionMode;
 }
 
@@ -1815,7 +1797,14 @@ Algorithm::getInputWorkspaceStorageModes() const {
     // Check if we actually have that input workspace
     if (wsProp->getWorkspace())
       map.emplace(prop.name(), wsProp->getWorkspace()->storageMode());
+    else if (!wsProp->isOptional())
+      map.emplace(prop.name(), Parallel::StorageMode::MasterOnly);
   }
+  getLogger().information()
+      << "Input workspaces for determining execution mode:\n";
+  for (const auto &item : map)
+    getLogger().information() << "  " << item.first << " --- "
+                              << Parallel::toString(item.second) << '\n';
   return map;
 }
 

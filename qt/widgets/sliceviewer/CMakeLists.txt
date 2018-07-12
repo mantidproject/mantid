@@ -46,6 +46,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/SliceViewer/LinePlotOptions.h
 	inc/MantidQtWidgets/SliceViewer/LineViewer.h
 	inc/MantidQtWidgets/SliceViewer/NullPeaksPresenter.h
+	inc/MantidQtWidgets/SliceViewer/NonOrthogonalAxis.h
 	inc/MantidQtWidgets/SliceViewer/NonOrthogonalOverlay.h
 	inc/MantidQtWidgets/SliceViewer/PeakEditMode.h
     inc/MantidQtWidgets/SliceViewer/PeakBoundingBox.h
@@ -139,6 +140,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSliceViewer
     MantidQtWidgetsLegacyQwt
   OSX_INSTALL_RPATH
     loader_path/../MacOS
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../../${LIB_DIR}"
 )
 
 ###########################################################################

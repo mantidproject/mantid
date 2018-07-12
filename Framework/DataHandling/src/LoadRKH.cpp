@@ -13,8 +13,10 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
+// clang-format off
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/date_parsing.hpp>
+// clang-format on
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <MantidKernel/StringTokenizer.h>
@@ -34,7 +36,7 @@ bool isUnit(const Mantid::Kernel::StringTokenizer &codes) {
   //  5. Close bracket
   std::string input =
       std::accumulate(codes.begin(), codes.end(), std::string(""));
-  std::string reg("^[06][\\w]+\\([/ \\w\\^-]+\\)$");
+  std::string reg(R"(^[06][\w]+\([/ \w\^-]+\)$)");
   boost::regex baseRegex(reg);
   return boost::regex_match(input, baseRegex);
 }

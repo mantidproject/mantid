@@ -204,12 +204,13 @@ private slots:
   bool plotExists(const QString &wsName);
 
   /// Enable PP tool for the plot of the given WS and optional filepath
-  void selectMultiPeak(const QString &wsName,
+  void selectMultiPeak(const QString &wsName, const bool update,
                        const boost::optional<QString> &filePath);
 
   /// Enable PP tool for the plot of the given WS overload to take just a ws
   void selectMultiPeak(const QString &wsName);
-
+  /// Enable PP tool for the plot of the given WS overload to take just a ws
+  void selectMultiPeakNoUpdate(const QString &wsName);
   /// Disable tools for all the graphs within MantidPlot
   void disableAllTools();
 
@@ -251,6 +252,9 @@ private slots:
 
   /// Called when "enable multi fit" checkbox is turned on/off
   void multiFitCheckboxChanged(int state);
+  bool safeToLoadAllGroupsOrPairs();
+  void loadAllGroups(int state = 0);
+  void loadAllPairs(int state = 0);
 
   /// Called when "overwrite" is changed
   void updateDataPresenterOverwrite(int state);
@@ -258,6 +262,8 @@ private slots:
   void updateNormalization(QString name);
 
 private:
+  void moveUnNormWS(const std::string &name, std::vector<std::string> &wsNames,
+                    bool raw);
   bool getIfTFAsymmStore() const;
   /// Initialize local Python environment
   void initLocalPython() override;
@@ -292,11 +298,13 @@ private:
 
   /// Creates workspace for specified group/pair and plots it
   void plotItem(Muon::ItemType itemType, int tableRow, Muon::PlotType plotType);
-
+  std::string addItem(Muon::ItemType itemType, int tableRow,
+                      Muon::PlotType plotType);
   /// Creates workspace ready for analysis and plotting
   Mantid::API::Workspace_sptr createAnalysisWorkspace(Muon::ItemType itemType,
                                                       int tableRow,
-                                                      Muon::PlotType type,
+                                                      Muon::PlotType plotType,
+                                                      std::string wsName,
                                                       bool isRaw = false);
 
   /// Returns PlotType as chosen using given selector
@@ -576,6 +584,8 @@ private:
 
   /// set the group/pair name
   std::string m_groupPairName;
+  int m_deadTimeIndex;
+  bool m_useDeadTime;
 };
 }
 }

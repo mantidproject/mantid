@@ -8,6 +8,8 @@
 
 #include <Poco/Net/HTTPResponse.h>
 
+#include "MantidKernel/DllConfig.h"
+
 // Forward declarations
 namespace Poco {
 namespace XML {
@@ -32,7 +34,7 @@ public:
   // Name/Value pairs for POST data.  Note that the second string might be
   // binary, and might be
   // fairly large.  (If it were a JPG image for example...)
-  typedef std::map<std::string, std::string> PostDataMap;
+  using PostDataMap = std::map<std::string, std::string>;
 
   // Low level HTTP functions - GET, POST, etc...
   // It's up to the various algorithms to know what to do with these functions

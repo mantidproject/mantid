@@ -264,13 +264,13 @@ public:
         AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
     alg->initialize();
     alg->setRethrows(true);
-    alg->setPropertyValue("Filename", "SNAP_Definition.xml");
+    alg->setPropertyValue("Filename", "SNAP_Definition_2011-09-07.xml");
     alg->setPropertyValue("OutputWorkspace", "SNAP_empty");
     alg->setPropertyValue("MakeEventWorkspace", "1");
     alg->execute();
     ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
         "SNAP_empty");
-    ws->sortAll(TOF_SORT, NULL);
+    ws->sortAll(TOF_SORT, nullptr);
 
     // Fill a whole bunch of events
     PARALLEL_FOR_NO_WSP_CHECK()

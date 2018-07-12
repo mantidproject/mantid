@@ -2,10 +2,11 @@ from __future__ import (absolute_import)
 
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
+from ui.sans_isis.diagnostics_page import DiagnosticsPage
 from ui.sans_isis.masking_table import MaskingTable
 from ui.sans_isis.beam_centre import BeamCentre
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from sans.common.enums import (RangeStepType, OutputMode)
+from sans.common.enums import (RangeStepType, OutputMode, SANSFacility, SANSInstrument)
 from sans.test_helper.test_director import TestDirector
 from functools import (partial)
 
@@ -30,6 +31,11 @@ def create_mock_masking_table():
 
 def create_mock_beam_centre_tab():
     view = mock.create_autospec(BeamCentre, spec_set=False)
+    return view
+
+
+def create_mock_diagnostics_tab():
+    view = mock.create_autospec(DiagnosticsPage, spec_set=False)
     return view
 
 
@@ -98,6 +104,10 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path = 
     # Add the beam centre view
     beam_centre = create_mock_beam_centre_tab()
     view.beam_centre = beam_centre
+
+    # Add the data diagnostic tab
+    diagnostic_page = create_mock_diagnostics_tab()
+    view.diagnostic_page = diagnostic_page
 
     view.halt_process_flag = mock.MagicMock()
 
@@ -185,6 +195,12 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path = 
     _output_mode = mock.PropertyMock(return_value=OutputMode.PublishToADS)
     type(view).output_mode = _output_mode
 
+    _wavelength_range = mock.PropertyMock(return_value='')
+    type(view).wavelength_range = _wavelength_range
+
+    _instrument = mock.PropertyMock(return_value=SANSInstrument.SANS2D)
+    type(view).instrument = _instrument
+
     return view, settings_diagnostic_tab, masking_table
 
 
@@ -214,11 +230,11 @@ class FakeState(object):
         return self.dummy_state
 
 
-def get_state_for_row_mock(row_index):
+def get_state_for_row_mock(row_index, file_lookup=True):
     return FakeState() if row_index == 3 else ""
 
 
-def get_state_for_row_mock_with_real_state(row_index):
+def get_state_for_row_mock_with_real_state(row_index, file_lookup=True):
     _ = row_index  # noqa
     test_director = TestDirector()
     return test_director.construct()
@@ -227,6 +243,7 @@ def get_state_for_row_mock_with_real_state(row_index):
 def create_run_tab_presenter_mock(use_fake_state=True):
     presenter = mock.create_autospec(RunTabPresenter, spec_set=False)
     presenter.get_row_indices = mock.MagicMock(return_value=[0, 1, 3])
+    presenter._facility = SANSFacility.ISIS
     if use_fake_state:
         presenter.get_state_for_row = mock.MagicMock(side_effect=get_state_for_row_mock)
     else:

@@ -11,6 +11,7 @@
 
 namespace Mantid {
 namespace Geometry {
+class InstrumentRayTracer;
 
 /** Structure describing a single-crystal peak
  *
@@ -49,6 +50,7 @@ public:
   virtual Mantid::Kernel::V3D getQLabFrame() const = 0;
   virtual Mantid::Kernel::V3D getQSampleFrame() const = 0;
   virtual bool findDetector() = 0;
+  virtual bool findDetector(const InstrumentRayTracer &tracer) = 0;
 
   virtual void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
                                boost::optional<double> detectorDistance) = 0;
@@ -58,22 +60,27 @@ public:
   virtual void setWavelength(double wavelength) = 0;
   virtual double getWavelength() const = 0;
   virtual double getScattering() const = 0;
+  virtual double getAzimuthal() const = 0;
   virtual double getDSpacing() const = 0;
   virtual double getTOF() const = 0;
 
   virtual double getInitialEnergy() const = 0;
   virtual double getFinalEnergy() const = 0;
+  virtual double getEnergyTransfer() const = 0;
   virtual void setInitialEnergy(double m_InitialEnergy) = 0;
   virtual void setFinalEnergy(double m_FinalEnergy) = 0;
 
   virtual double getIntensity() const = 0;
   virtual double getSigmaIntensity() const = 0;
-
+  virtual double getIntensityOverSigma() const = 0;
   virtual void setIntensity(double m_Intensity) = 0;
   virtual void setSigmaIntensity(double m_SigmaIntensity) = 0;
 
   virtual double getBinCount() const = 0;
   virtual void setBinCount(double m_BinCount) = 0;
+
+  virtual int getPeakNumber() const = 0;
+  virtual void setPeakNumber(int m_PeakNumber) = 0;
 
   virtual Mantid::Kernel::Matrix<double> getGoniometerMatrix() const = 0;
   virtual void setGoniometerMatrix(

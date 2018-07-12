@@ -1,9 +1,10 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidPythonInterface/kernel/Converters/PyObjectToString.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
+#include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -17,32 +18,12 @@
 
 using namespace Mantid::Kernel;
 namespace Registry = Mantid::PythonInterface::Registry;
+namespace Converters = Mantid::PythonInterface::Converters;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(IPropertyManager)
 
 namespace {
-
-/**
- * Convert a python object to a string or throw an exception. This will convert
- * unicode strings in python2 via utf8.
- */
-std::string pyObjToStr(const boost::python::object &value) {
-  extract<std::string> extractor(value);
-
-  std::string valuestr;
-  if (extractor.check()) {
-    valuestr = extractor();
-#if PY_VERSION_HEX < 0x03000000
-  } else if (PyUnicode_Check(value.ptr())) {
-    valuestr = extract<std::string>(str(value).encode("utf-8"))();
-#endif
-  } else {
-    throw std::invalid_argument("Failed to convert python object a string");
-  }
-  return valuestr;
-}
-
 /**
  * Set the value of a property from the value within the
  * boost::python object
@@ -55,7 +36,7 @@ void setProperty(IPropertyManager &self, const boost::python::object &name,
                  const boost::python::object &value) {
   std::string namestr;
   try {
-    namestr = pyObjToStr(name);
+    namestr = Converters::pyObjToStr(name);
   } catch (std::invalid_argument &) {
     throw std::invalid_argument("Failed to convert property name to a string");
   }
@@ -103,7 +84,7 @@ void setProperties(IPropertyManager &self, const boost::python::dict &kwargs) {
  */
 void declareProperty(IPropertyManager &self, const boost::python::object &name,
                      boost::python::object value) {
-  std::string nameStr = pyObjToStr(name);
+  std::string nameStr = Converters::pyObjToStr(name);
   auto p = std::unique_ptr<Property>(
       Registry::PropertyWithValueFactory::create(nameStr, value, 0));
   self.declareProperty(std::move(p));
@@ -120,7 +101,7 @@ void declareProperty(IPropertyManager &self, const boost::python::object &name,
 void declareOrSetProperty(IPropertyManager &self,
                           const boost::python::object &name,
                           boost::python::object value) {
-  std::string nameStr = pyObjToStr(name);
+  std::string nameStr = Converters::pyObjToStr(name);
   bool propExists = self.existsProperty(nameStr);
   if (propExists) {
     setProperty(self, name, value);

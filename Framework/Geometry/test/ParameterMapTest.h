@@ -192,6 +192,14 @@ public:
     TS_ASSERT_EQUALS(descr, "Short description.");
   }
 
+  void test_add_string_with_spaces() {
+    ParameterMap pmap;
+    auto const comp = m_testInstrument.get();
+    pmap.add("string", comp, "name", std::string("A B C"));
+    auto value = pmap.get(comp, "name");
+    TS_ASSERT_EQUALS(value->value<std::string>(), "A B C");
+  }
+
   void testAdding_A_Parameter_That_Is_Not_Present_Puts_The_Parameter_In() {
     // Add a parameter for the first component of the instrument
     IComponent_sptr comp = m_testInstrument->getChild(0);
@@ -304,9 +312,9 @@ public:
   test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_AddHelpers_As_Strings() {
     // -- Specialized Helper Functions --
 
-    typedef boost::function<void(ParameterMap *, const IComponent *,
-                                 const std::string &, const std::string &,
-                                 const std::string *const)> AddFuncHelper;
+    using AddFuncHelper = boost::function<void(
+        ParameterMap *, const IComponent *, const std::string &,
+        const std::string &, const std::string *const)>;
 
     // double
     AddFuncHelper faddDouble;
@@ -513,7 +521,7 @@ public:
     Parameter_sptr fetchedValue =
         pmap.getByType(comp.get(), ParameterMap::pDouble());
     TSM_ASSERT("Should not be able to find a double type parameter",
-               fetchedValue == NULL);
+               fetchedValue == nullptr);
   }
 
   void test_lookup_via_type() {
@@ -551,7 +559,7 @@ public:
     // Find it via the component
     Parameter_sptr fetchedValue =
         pmap.getRecursiveByType(component.get(), ParameterMap::pBool());
-    TS_ASSERT(fetchedValue != NULL);
+    TS_ASSERT(fetchedValue != nullptr);
     TS_ASSERT_EQUALS("A", fetchedValue->name());
     TS_ASSERT_EQUALS(ParameterMap::pBool(), fetchedValue->type());
     TS_ASSERT_EQUALS(true, fetchedValue->value<bool>());
@@ -568,7 +576,7 @@ public:
     // Find it via the child
     Parameter_sptr fetchedValue =
         pmap.getRecursiveByType(childComponent.get(), ParameterMap::pBool());
-    TS_ASSERT(fetchedValue != NULL);
+    TS_ASSERT(fetchedValue != nullptr);
     TS_ASSERT_EQUALS("A", fetchedValue->name());
     TS_ASSERT_EQUALS(ParameterMap::pBool(), fetchedValue->type());
     TS_ASSERT_EQUALS(true, fetchedValue->value<bool>());
@@ -589,7 +597,7 @@ public:
     // Find it via the child
     Parameter_sptr fetchedValue =
         pmap.getRecursiveByType(childComponent.get(), ParameterMap::pBool());
-    TS_ASSERT(fetchedValue != NULL);
+    TS_ASSERT(fetchedValue != nullptr);
     TSM_ASSERT_EQUALS(
         "Has not searched through parameters with the correct priority", "A",
         fetchedValue->name());
@@ -632,6 +640,18 @@ public:
     TS_ASSERT_EQUALS(oldA->value<bool>(), false);
   }
 
+  void test_asString_for_doubles() {
+    ParameterMap pmap;
+    auto comp = m_testInstrument.get();
+    pmap.addDouble(comp, "d", 0.123456789012345);
+    pmap.addV3D(comp, "v",
+                Mantid::Kernel::V3D(0.123456789012345, 0.123456789012345,
+                                    0.123456789012345));
+    TS_ASSERT_EQUALS(pmap.get(comp, "d")->asString(), "0.123456789012345");
+    TS_ASSERT_EQUALS(pmap.get(comp, "v")->asString(),
+                     "[0.123456789012345,0.123456789012345,0.123456789012345]");
+  }
+
 private:
   template <typename ValueType>
   void doCopyAndUpdateTestUsingGenericAdd(const std::string &type,
@@ -639,7 +659,7 @@ private:
                                           const ValueType &newValue) {
     ParameterMap pmap;
     const std::string name = "Parameter";
-    pmap.add<ValueType>(type, m_testInstrument.get(), name, origValue, NULL);
+    pmap.add<ValueType>(type, m_testInstrument.get(), name, origValue, nullptr);
 
     ParameterMap copy(pmap); // invoke copy constructor
 

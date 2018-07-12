@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_MSDFIT_H_
 
 #include "IndirectFitAnalysisTab.h"
+#include "MSDFitModel.h"
 #include "ui_MSDFit.h"
 
 #include "MantidAPI/IFunction.h"
@@ -16,38 +17,20 @@ public:
   MSDFit(QWidget *parent = nullptr);
 
 private:
-  void setup() override;
-  void run() override;
-  bool validate() override;
-  void loadSettings(const QSettings &settings) override;
+  void setupFitTab() override;
 
 protected slots:
-  void singleFit();
-  void newDataLoaded(const QString wsName);
-  void specMinChanged(int value);
-  void specMaxChanged(int value);
-  void minChanged(double val);
-  void maxChanged(double val);
-  void updateRS(QtProperty *prop, double val);
-  void saveClicked();
   void plotClicked();
-  void algorithmComplete(bool error) override;
-  void modelSelection(int selected);
-  void updatePreviewPlots() override;
-  void plotGuess();
+  void updatePlotOptions() override;
+  void updateModelFitTypeString();
+
+protected:
+  void setPlotResultEnabled(bool enabled) override;
+  void setSaveResultEnabled(bool enabled) override;
 
 private:
-  void disablePlotGuess() override;
-  void enablePlotGuess() override;
-  Mantid::API::IAlgorithm_sptr msdFitAlgorithm(const std::string &model,
-                                               int specMin, int specMax);
-  std::string modelToAlgorithmProperty(const QString &model);
-  Mantid::API::IFunction_sptr createFunction(const QString &modelName);
-  Mantid::API::IFunction_sptr
-  getFunction(const QString &functionName) const override;
-
-  Ui::MSDFit m_uiForm;
-  QtTreePropertyBrowser *m_msdTree;
+  MSDFitModel *m_msdFittingModel;
+  std::unique_ptr<Ui::MSDFit> m_uiForm;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

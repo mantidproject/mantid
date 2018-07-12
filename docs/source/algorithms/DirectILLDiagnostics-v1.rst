@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -52,6 +52,9 @@ Defaul mask
 
 The default mask file is defined by the 'Workflow.MaskFile' instrument parameter.
 
+Currently, there is a default mask available for ILL's IN5 instrument which masks 8 pixels at both ends of every detector tube.
+
+
 Diagnostics reporting
 #####################
 
@@ -67,6 +70,33 @@ The optional *OutputReportWorkspace* property returns a table workspace summariz
 The columns can be plotted to get an overview of the diagnostics.
 
 Additionally, a string listing the masked and diagnosed detectors can be accessed via the *OutputReport* property.
+
+Defaults and ILL's instrument specific values
+---------------------------------------------
+
+The following settings are used when not explicitly overwritten by the algorithm's properties or the IPFs of non-ILL instruments:
+
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| Property                  | IN4                       | IN5                      | IN6                       | Default                   |
++===========================+===========================+==========================+===========================+===========================+
+| ElasticPeakDiagnostics    | Peak Diagnostics ON       | Peak Diagnostics OFF     | Peak Diagnostics ON       | Peak Diagnostics ON       |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| ElasticPeakLowThreshold   | 0.1                       | 0.1                      | 0.45                      | 0.1                       |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| ElasticPeakHighThreshold  | 3.0                       | 3.0                      | 3.0                       | 3.0                       |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| ElasticPeakErrorThreshold | 3.3                       | 3.3                      | 3.3                       | 3.3                       |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| BkgDiagnostics            | Bkg Diagnostics ON        | Bkg Diagnostics OFF      | Bkg Diagnostics ON        | Bkg Diagnostics ON        |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| NoisyLowThreshold         | 0.1                       | 0.1                      | 0.1                       | 0.1                       |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| NoisyBkgHighThreshold     | 3.3                       | 3.3                      | 3.3                       | 3.3                       |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| NoisyBkgErrorThreshold    | 3.3                       | 3.3                      | 3.3                       | 3.3                       |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| BeamStopDiagnostics       | Beam Stop Diagnostics OFF | Beam Stop Diagnostics ON | Beam Stop Diagnostics OFF | Beam Stop Diagnostics OFF |
++---------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
 
 Usage
 -----
@@ -153,13 +183,11 @@ Output:
 
     Spectra masked by default mask file:
     None
-    Spectra masked by user:
-    None
     Spectra masked by beam stop diagnostics:
     None
-    Spectra marked as bad by elastic peak diagnostics:
+    Additional spectra marked as bad by elastic peak diagnostics:
     14, 102, 302-305, 314-317, 326-329, 338-341, 350-353, 362-365, 374-377, 386-389
-    Spectra marked as bad by flat background diagnostics:
+    Additional spectra marked as bad by flat background diagnostics:
     14, 102
     Some small-angle detectors got diagnosed as bad due to detector solid angle corrections.
     Solid-angle corrected elastic intensity of spectrum 1: 555524.7

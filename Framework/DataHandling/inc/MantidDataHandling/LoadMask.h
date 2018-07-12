@@ -2,7 +2,7 @@
 #define MANTID_DATAHANDLING_LOADMASK_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
@@ -47,7 +47,7 @@ namespace DataHandling {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LoadMask : public API::Algorithm {
+class DLLExport LoadMask : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadMask"; };
@@ -59,6 +59,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"ExportSpectraMask", "LoadMask"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "DataHandling\\Masking;Transforms\\Masking";

@@ -18,44 +18,37 @@ GCC_DIAG_OFF_SUGGEST_OVERRIDE
 class MockEnggDiffFittingModel : public IEnggDiffFittingModel {
 
 public:
-  MOCK_CONST_METHOD2(getFocusedWorkspace,
-                     Mantid::API::MatrixWorkspace_sptr(const int runNumber,
-                                                       const size_t bank));
+  MOCK_CONST_METHOD1(getFocusedWorkspace, Mantid::API::MatrixWorkspace_sptr(
+                                              const RunLabel &runLabel));
 
-  MOCK_CONST_METHOD2(getAlignedWorkspace,
-                     Mantid::API::MatrixWorkspace_sptr(const int runNumber,
-                                                       const size_t bank));
+  MOCK_CONST_METHOD1(getAlignedWorkspace, Mantid::API::MatrixWorkspace_sptr(
+                                              const RunLabel &runLabel));
 
-  MOCK_CONST_METHOD2(getFittedPeaksWS,
-                     Mantid::API::MatrixWorkspace_sptr(const int runNumber,
-                                                       const size_t bank));
+  MOCK_CONST_METHOD1(getFittedPeaksWS, Mantid::API::MatrixWorkspace_sptr(
+                                           const RunLabel &runLabel));
 
-  MOCK_CONST_METHOD2(getFitResults,
-                     Mantid::API::ITableWorkspace_sptr(const int runNumber,
-                                                       const size_t bank));
+  MOCK_CONST_METHOD1(getFitResults, Mantid::API::ITableWorkspace_sptr(
+                                        const RunLabel &runLabel));
 
-  MOCK_CONST_METHOD2(getWorkspaceFilename,
-                     const std::string &(const int runNumber,
-                                         const size_t bank));
+  MOCK_CONST_METHOD1(getWorkspaceFilename,
+                     const std::string &(const RunLabel &runLabel));
 
   MOCK_METHOD1(loadWorkspaces, void(const std::string &filenames));
 
-  MOCK_CONST_METHOD0(getRunNumbersAndBankIDs,
-                     std::vector<std::pair<int, size_t>>());
+  MOCK_CONST_METHOD0(getRunLabels, std::vector<RunLabel>());
 
-  MOCK_METHOD3(setDifcTzero,
-               void(const int runNumber, const size_t bank,
+  MOCK_METHOD2(setDifcTzero,
+               void(const RunLabel &runLabel,
                     const std::vector<GSASCalibrationParms> &calibParams));
 
-  MOCK_METHOD3(enggFitPeaks, void(const int runNumber, const size_t bank,
+  MOCK_METHOD2(enggFitPeaks, void(const RunLabel &runLabel,
                                   const std::string &expectedPeaks));
 
-  MOCK_CONST_METHOD3(saveDiffFittingAscii,
-                     void(const int runNumber, const size_t bank,
+  MOCK_CONST_METHOD2(saveFitResultsToHDF5,
+                     void(const std::vector<RunLabel> &runLabels,
                           const std::string &filename));
 
-  MOCK_METHOD2(createFittedPeaksWS,
-               void(const int runNumber, const size_t bank));
+  MOCK_METHOD1(createFittedPeaksWS, void(const RunLabel &runLabel));
 
   MOCK_CONST_METHOD0(getNumFocusedWorkspaces, size_t());
 
@@ -63,10 +56,9 @@ public:
 
   MOCK_CONST_METHOD0(addAllFittedPeaksToADS, void());
 
-  MOCK_CONST_METHOD2(hasFittedPeaksForRun,
-                     bool(const int runNumber, const size_t bank));
+  MOCK_CONST_METHOD1(hasFittedPeaksForRun, bool(const RunLabel &runLabel));
 
-  MOCK_METHOD2(removeRun, void(const int runNumber, const size_t bank));
+  MOCK_METHOD1(removeRun, void(const RunLabel &runLabel));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

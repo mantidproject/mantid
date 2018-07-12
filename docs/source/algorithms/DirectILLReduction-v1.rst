@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -32,11 +32,11 @@ The optional :math:`S(2\theta,\omega)` output can be enabled by the *OutputSofTh
 Normalisation to absolute units
 ###############################
 
-Normalisation to absolute units can be enabled by setting *AbsoluteUnitsNormalisation* to 'Absolute Units ON'. In this case the data is scaled by a factor
+Normalisation to absolute units can be enabled by setting *AbsoluteUnitsNormalisation* to :literal:`'Absolute Units ON'`. In this case the data is multiplied by a factor
 
     :math:`f = \frac{N_V \sigma_V}{N_S}`
 
-after normalisation to vanadium. In the above, :math:`N_V` stands for the vanadium number density, :math:`\sigma_V` for vanadium total scattering cross section and :math:`N_S` sample number density. 
+after normalisation to vanadium giving units of barn to the data. In the above, :math:`N_V` stands for the vanadium number density, :math:`\sigma_V` for vanadium total scattering cross section and :math:`N_S` sample number density. 
 
 The material properties should be set for *InputWorkspace* and *IntegratedVanadiumWorkspace* by :ref:`SetSample <algm-SetSample>` before running this algorithm .
 
@@ -47,7 +47,12 @@ After conversion from time-of-flight to energy transfer, the binning may differ 
 - Find the spectrum with smallest bin border. Copy binning from this spectrum for negative energy transfers.
 - For positive energy transfers, use the median bin width at zero energy transfer.
 
-*QBinningParams* are passed to :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` and have the same format as *EnergyRebinningParamas*. If the property is not specified, :math:`q` is binned to ten times the median :math:`2\theta` steps between the spectra.
+*QBinningParams* are passed to :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` and have the same format as *EnergyRebinningParamas*. If the property is not specified, :math:`q` is binned to a value that depends on the :math:`2\theta` separation of the detectors and the wavelength.
+
+Transposing output
+##################
+
+After conversion to momentum transfer, the vertical axis of the data is in units of momentum transfer while the horizontal axis is in energy transfer. By default, the data is transposed such that momentum transfer is on the horizontal axis and energy transfer in the vertical. This can be turned off by setting *Transposing* to :literal:`'Transposing OFF'`.
 
 Usage
 -----
@@ -171,7 +176,7 @@ Output:
 
 .. testoutput:: FakeIN4Example
 
-    Size of the final S(q,w) workspace: 177 histograms, 234 bins
+    Size of the final S(q,w) workspace: 177 histograms, 260 bins
 
 .. categories::
 

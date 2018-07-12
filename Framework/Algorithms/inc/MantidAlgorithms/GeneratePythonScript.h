@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_GENERATEPYTHONSCRIPT_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/SerialAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -42,7 +42,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport GeneratePythonScript : public API::Algorithm {
+class DLLExport GeneratePythonScript : public API::SerialAlgorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "GeneratePythonScript"; };
@@ -54,6 +54,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"RecordPythonScript", "GenerateIPythonNotebook"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "Utility\\Python"; }
 

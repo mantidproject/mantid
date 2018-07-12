@@ -11,6 +11,18 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
+namespace Colour {
+constexpr const char *FAILED =
+    "#accbff"; // processing completed with error (blue)
+constexpr const char *SUCCESS =
+    "#d0f4d0"; // processing completed successfully (green)
+constexpr const char *COMPLETE =
+    "#f2fcf2"; // complete but no processing was required (pale green)
+}
+
+class RowData;
+using RowData_sptr = std::shared_ptr<RowData>;
+
 /** AbstractTreeModel is a base class for several tree model
 implementations for processing table data. Full function implementation is
 provided for functions common to all data processing tree models, while
@@ -57,6 +69,18 @@ public:
   // Set the 'processed' status of a data item
   virtual bool setProcessed(bool processed, int position,
                             const QModelIndex &parent = QModelIndex()) = 0;
+  // Check whether reduction failed for a data item
+  virtual bool
+  reductionFailed(int position,
+                  const QModelIndex &parent = QModelIndex()) const = 0;
+  // Set the error message for a data item
+  virtual bool setError(const std::string &error, int position,
+                        const QModelIndex &parent = QModelIndex()) = 0;
+  // Get the row metadata
+  virtual RowData_sptr rowData(const QModelIndex &index) const = 0;
+  // Transfer rows into the table
+  virtual void
+  transfer(const std::vector<std::map<QString, QString>> &runs) = 0;
 
 protected:
   /// Collection of data for viewing.

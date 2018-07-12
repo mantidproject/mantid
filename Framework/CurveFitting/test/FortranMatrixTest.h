@@ -12,8 +12,8 @@ using Mantid::CurveFitting::GSLMatrix;
 using Mantid::CurveFitting::ComplexMatrix;
 using Mantid::CurveFitting::ComplexType;
 
-typedef FortranMatrix<GSLMatrix> DoubleFortranMatrix;
-typedef FortranMatrix<ComplexMatrix> ComplexFortranMatrix;
+using DoubleFortranMatrix = FortranMatrix<GSLMatrix>;
+using ComplexFortranMatrix = FortranMatrix<ComplexMatrix>;
 
 class FortranMatrixTest : public CxxTest::TestSuite {
 public:

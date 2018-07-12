@@ -69,6 +69,7 @@ TwoLevelTreeManager::TwoLevelTreeManager(DataProcessorPresenter *presenter,
 */
 TwoLevelTreeManager::~TwoLevelTreeManager() {}
 
+bool TwoLevelTreeManager::isMultiLevel() const { return true; }
 /**
 * Publishes a list of available commands
 * @return : The list of available commands
@@ -109,6 +110,18 @@ std::vector<Command_uptr> TwoLevelTreeManager::publishCommands() {
   addCommand(commands, make_unique<DeleteRowCommand>(m_presenter));
   addCommand(commands, make_unique<DeleteGroupCommand>(m_presenter));
   return commands;
+}
+
+/** Reset the processed/error state for all rows
+ */
+void TwoLevelTreeManager::invalidateAllProcessed() {
+  forEachGroup(*m_model,
+               [this](int group) -> void { setProcessed(false, group); });
+  forEachRow(*m_model, [this](int group, int row)
+                           -> void { setProcessed(false, row, group); });
+  forEachGroup(*m_model, [this](int group) -> void { setError("", group); });
+  forEachRow(*m_model,
+             [this](int group, int row) -> void { setError("", row, group); });
 }
 
 /**
@@ -190,6 +203,11 @@ void TwoLevelTreeManager::deleteGroup() {
     m_model->removeRow(*group);
   }
 }
+
+/**
+Delete all rows and groups from the model
+*/
+void TwoLevelTreeManager::deleteAll() { m_model->removeAll(); }
 
 /**
 Group rows together
@@ -324,12 +342,17 @@ void TwoLevelTreeManager::pasteSelected(const QString &text) {
     // Add as many new rows as required
     for (auto i = 0; i < lines.size(); ++i) {
       auto values = lines[i].split("\t");
+      auto const valuesSizeLessOne = static_cast<int>(values.size()) - 1;
+
+      if (valuesSizeLessOne < 1)
+        continue;
 
       auto groupId = parseDenaryInteger(values.front());
       int rowId = numRowsInGroup(groupId);
       if (!m_model->insertRow(rowId, m_model->index(groupId, 0)))
         return;
-      for (int col = 0; col < m_model->columnCount(); col++) {
+      for (int col = 0; col < m_model->columnCount() && col < valuesSizeLessOne;
+           col++) {
         m_model->setData(m_model->index(rowId, col, m_model->index(groupId, 0)),
                          values[col + 1]);
       }
@@ -382,7 +405,7 @@ void TwoLevelTreeManager::newTable(ITableWorkspace_sptr table,
 }
 
 /**
-Inserts a new row to the specified group in the specified location
+Inserts a new empty row to the specified group in the specified location
 @param groupIndex :: The index to insert the new row after
 @param rowIndex :: The index to insert the new row after
 */
@@ -407,6 +430,28 @@ void TwoLevelTreeManager::insertGroup(int groupIndex) {
 int TwoLevelTreeManager::numRowsInGroup(int group) const {
 
   return m_model->rowCount(m_model->index(group, 0));
+}
+
+/**
+* Returns given row data in a format that the presenter can understand and use
+* @return :: All data as a map where keys are units of post-processing (i.e.
+* group indices) and values are a map of row index in the group to row data
+*/
+TreeData TwoLevelTreeManager::constructTreeData(ChildItems rows) {
+  TreeData tree;
+  const int columnNotUsed = 0; // dummy value required to create index
+  // Return row data in the format: map<int, set<vector<string>>>, where:
+  // int -> group index
+  // set<vector<string>> -> set of vectors storing the data. Each set is a row
+  // and each element in the vector is a column
+  for (const auto &item : rows) {
+    int group = item.first;
+    for (const auto &row : item.second) {
+      tree[group][row] = m_model->rowData(
+          m_model->index(row, columnNotUsed, m_model->index(group, 0)));
+    }
+  }
+  return tree;
 }
 
 /**
@@ -488,71 +533,46 @@ TreeData TwoLevelTreeManager::selectedData(bool prompt) {
     }
   }
 
-  // Return selected data in the format: map<int, set<vector<string>>>, where:
-  // int -> group index
-  // set<vector<string>> -> set of vectors storing the data. Each set is a row
-  // and each element in the vector is a column
-  for (const auto &item : rows) {
+  return constructTreeData(rows);
+}
 
-    int group = item.first;
+/**
+* Returns all data in a format that the presenter can understand and use
+* @param prompt :: True if warning messages should be displayed. False othewise
+* @return :: data as a map
+*/
+TreeData TwoLevelTreeManager::allData(bool prompt) {
 
-    for (const auto &row : item.second) {
-      QStringList data;
-      for (int i = 0; i < m_model->columnCount(); i++)
-        data.append(
-            m_model->data(m_model->index(row, i, m_model->index(group, 0)))
-                .toString());
-      selectedData[group][row] = data;
-    }
+  TreeData allData;
+
+  auto options = m_presenter->options();
+
+  if (m_model->rowCount() == 0 && prompt) {
+    m_presenter->giveUserWarning("Cannot process an empty Table", "Warning");
+    return allData;
   }
-  return selectedData;
+
+  // Populate all groups with all rows
+  ParentItems groups;
+  ChildItems rows;
+
+  for (int group = 0; group < m_model->rowCount(); group++) {
+    groups.insert(group);
+
+    const auto nrows = numRowsInGroup(group);
+    for (int row = 0; row < nrows; row++)
+      rows[group].insert(row);
+  }
+
+  return constructTreeData(rows);
 }
 
 /** Transfer data to the model
 * @param runs :: [input] Data to transfer as a vector of maps
-* @param whitelist :: [input] Whitelist containing number of columns
 */
 void TwoLevelTreeManager::transfer(
-    const std::vector<std::map<QString, QString>> &runs,
-    const WhiteList &whitelist) {
-
-  ITableWorkspace_sptr ws = m_model->getTableWorkspace();
-
-  if (ws->rowCount() == 1) {
-    // If the table only has one row, check if it is empty and if so, remove it.
-    // This is to make things nicer when transferring, as the default table has
-    // one empty row
-    auto cols = ws->columnCount();
-    bool emptyTable = true;
-    for (auto i = 0u; i < cols; i++) {
-      if (!ws->String(0, i).empty())
-        emptyTable = false;
-    }
-    if (emptyTable)
-      ws->removeRow(0);
-  }
-
-  for (const auto &row : runs) {
-    TableRow newRow = ws->appendRow();
-
-    try {
-      newRow << (row.at("Group")).toStdString();
-    } catch (std::out_of_range &) {
-      throw std::invalid_argument("Data cannot be transferred to the "
-                                  "processing table. Group information is "
-                                  "missing.");
-    }
-
-    try {
-      for (auto const &columnName : whitelist.names())
-        newRow << (row.at(columnName)).toStdString();
-    } catch (std::out_of_range &) {
-      // OK, this column will not be populated
-      continue;
-    }
-  }
-
-  m_model.reset(new QTwoLevelTreeModel(ws, whitelist));
+    const std::vector<std::map<QString, QString>> &runs) {
+  m_model->transfer(runs);
 }
 
 /** Updates a row with new data
@@ -617,6 +637,41 @@ void TwoLevelTreeManager::setProcessed(bool processed, int position) {
 void TwoLevelTreeManager::setProcessed(bool processed, int position,
                                        int parent) {
   m_model->setProcessed(processed, position, m_model->index(parent, 0));
+}
+
+/** Check whether reduction failed for a group
+* @param position : The row index
+* @return : true if there was an error
+*/
+bool TwoLevelTreeManager::reductionFailed(int position) const {
+  return m_model->reductionFailed(position);
+}
+
+/** Check whether reduction failed for a row
+* @param position : The row index
+* @param parent : The parent of the row
+* @return : true if there was an error
+*/
+bool TwoLevelTreeManager::reductionFailed(int position, int parent) const {
+  return m_model->reductionFailed(position, m_model->index(parent, 0));
+}
+
+/** Sets the error message of a group
+* @param error : the error message
+* @param position : The index of the group to be set
+*/
+void TwoLevelTreeManager::setError(const std::string &error, int position) {
+  m_model->setError(error, position);
+}
+
+/** Sets the error message of a row
+* @param error : The error message
+* @param position : The index of the row to be set
+* @param parent : The parent of the row
+*/
+void TwoLevelTreeManager::setError(const std::string &error, int position,
+                                   int parent) {
+  m_model->setError(error, position, m_model->index(parent, 0));
 }
 
 /** Return a shared ptr to the model
@@ -725,7 +780,7 @@ void TwoLevelTreeManager::setCell(int row, int column, int parentRow,
  * @return : the value in the cell as a string
 */
 std::string TwoLevelTreeManager::getCell(int row, int column, int parentRow,
-                                         int parentColumn) {
+                                         int parentColumn) const {
 
   return m_model->data(m_model->index(row, column,
                                       m_model->index(parentRow, parentColumn)))

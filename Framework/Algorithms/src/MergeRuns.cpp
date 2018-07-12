@@ -15,6 +15,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -32,42 +33,6 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 using namespace RunCombinationOptions;
-
-namespace {
-/*
- * Here we build up the correct time indexes for the workspace being added. If
- *the scan times for the addee workspace and output workspace are the same this
- *builds the same indexing as the workspace had before. Otherwise, the correct
- *time indexes are set here.
- */
-std::vector<SpectrumDefinition>
-buildScanIntervals(const std::vector<SpectrumDefinition> &addeeSpecDefs,
-                   const DetectorInfo &addeeDetInfo,
-                   const DetectorInfo &outDetInfo,
-                   const DetectorInfo &newOutDetInfo) {
-  std::vector<SpectrumDefinition> newAddeeSpecDefs;
-
-  for (auto &specDef : addeeSpecDefs) {
-    for (auto &index : specDef) {
-      SpectrumDefinition newSpecDef;
-      if (addeeDetInfo.scanInterval(index) == outDetInfo.scanInterval(index)) {
-        newSpecDef.add(index.first, index.second);
-      } else {
-        // Find the correct time index for this entry
-        for (size_t i = 0; i < newOutDetInfo.scanCount(index.first); i++) {
-          if (addeeDetInfo.scanInterval(index) ==
-              newOutDetInfo.scanInterval({index.first, i})) {
-            newSpecDef.add(index.first, i);
-          }
-        }
-      }
-      newAddeeSpecDefs.push_back(newSpecDef);
-    }
-  }
-
-  return newAddeeSpecDefs;
-}
-}
 
 /// Initialisation method
 void MergeRuns::init() {
@@ -127,27 +92,9 @@ void MergeRuns::exec() {
   // Check that all input workspaces exist and match in certain important ways
   const std::vector<std::string> inputs_orig = getProperty("InputWorkspaces");
 
-  const std::string sampleLogsSum = getProperty(SampleLogsBehaviour::SUM_PROP);
-  const std::string sampleLogsTimeSeries =
-      getProperty(SampleLogsBehaviour::TIME_SERIES_PROP);
-  const std::string sampleLogsList =
-      getProperty(SampleLogsBehaviour::LIST_PROP);
-  const std::string sampleLogsWarn =
-      getProperty(SampleLogsBehaviour::WARN_PROP);
-  const std::string sampleLogsWarnTolerances =
-      getProperty(SampleLogsBehaviour::WARN_TOL_PROP);
-  const std::string sampleLogsFail =
-      getProperty(SampleLogsBehaviour::FAIL_PROP);
-  const std::string sampleLogsFailTolerances =
-      getProperty(SampleLogsBehaviour::FAIL_TOL_PROP);
-
-  const std::string rebinBehaviour = getProperty("RebinBehaviour");
-  const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
-
   // This will hold the inputs, with the groups separated off
   std::vector<std::string> inputs =
       RunCombinationHelper::unWrapGroups(inputs_orig);
-
   if (inputs.size() == 1) {
     g_log.warning("Only one input workspace specified");
   }
@@ -158,82 +105,7 @@ void MergeRuns::exec() {
     this->execEvent();
   } else {
     // At least one is not event workspace ----------------
-
-    // This gets the list of workspaces
-    RunCombinationHelper combHelper;
-    m_inMatrixWS = combHelper.validateInputWorkspaces(inputs, g_log);
-
-    // Iterate over the collection of input workspaces
-    auto it = m_inMatrixWS.begin();
-
-    size_t numberOfWSs = m_inMatrixWS.size();
-
-    // Take the first input workspace as the first argument to the addition
-    MatrixWorkspace_sptr outWS(m_inMatrixWS.front()->clone());
-    Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
-        *outWS, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
-        sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
-        sampleLogsFailTolerances);
-
-    auto isScanning = outWS->detectorInfo().isScanning();
-
-    m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numberOfWSs - 1);
-    // Note that the iterator is incremented before first pass so that 1st
-    // workspace isn't added to itself
-    for (++it; it != m_inMatrixWS.end(); ++it) {
-      MatrixWorkspace_sptr addee;
-      // Only do a rebinning if the bins don't already match - otherwise can
-      // just add (see the 'else')
-      if (!WorkspaceHelpers::matchingBins(*outWS, **it, true)) {
-        if (rebinBehaviour == REBIN_BEHAVIOUR) {
-          std::vector<double> rebinParams;
-          this->calculateRebinParams(outWS, *it, rebinParams);
-
-          // Rebin the two workspaces in turn to the same set of bins
-          outWS = this->rebinInput(outWS, rebinParams);
-          addee = this->rebinInput(*it, rebinParams);
-        } else if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
-          g_log.error() << "Could not merge run: " << it->get()->getName()
-                        << ". Binning is different from first workspace. "
-                           "MergeRuns will continue but this run will be "
-                           "skipped.\n";
-          continue;
-        } else {
-          throw std::invalid_argument(
-              "Could not merge run: " + it->get()->getName() +
-              ". Binning is different from first workspace.");
-        }
-      } else {
-        addee = *it;
-      }
-
-      // Add the current workspace to the total
-      // Update the sample logs
-      try {
-        sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
-        sampleLogsBehaviour.removeSampleLogsFromWorkspace(*addee);
-        if (isScanning)
-          outWS = buildScanningOutputWorkspace(outWS, addee);
-        else
-          outWS = outWS + addee;
-        sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
-        sampleLogsBehaviour.readdSampleLogToWorkspace(*addee);
-      } catch (std::invalid_argument &e) {
-        if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
-          g_log.error()
-              << "Could not merge run: " << it->get()->getName()
-              << ". Reason: \"" << e.what()
-              << "\". MergeRuns will continue but this run will be skipped.\n";
-          sampleLogsBehaviour.resetSampleLogs(*outWS);
-        } else {
-          throw std::invalid_argument(e);
-        }
-      }
-      m_progress->report();
-    }
-
-    // Set the final workspace to the output property
-    setProperty("OutputWorkspace", outWS);
+    this->execHistogram(inputs);
   }
 }
 
@@ -361,9 +233,8 @@ void MergeRuns::buildAdditionTables() {
         detid2index_map::const_iterator map_it =
             lhs_det_to_wi.find(rhs_detector_ID);
         if (map_it != lhs_det_to_wi.cend()) {
-          outWI = static_cast<int>(map_it->second); // This is the workspace
-                                                    // index in the LHS that
-                                                    // matched rhs_detector_ID
+          // This is the workspace index in the LHS that matched rhs_detector_ID
+          outWI = static_cast<int>(map_it->second);
         } else {
           // Did not find it!
           outWI = -1; // Marker to mean its not in the LHS.
@@ -375,8 +246,7 @@ void MergeRuns::buildAdditionTables() {
 
       if (!done) {
         // Didn't find it? Now we need to iterate through the output workspace
-        // to
-        //  match the detector ID.
+        // to match the detector ID.
         // NOTE: This can be SUPER SLOW!
         for (outWI = 0; outWI < lhs_nhist; outWI++) {
           const auto &outDets2 = lhs->getSpectrum(outWI).getDetectorIDs();
@@ -464,6 +334,82 @@ void MergeRuns::execEvent() {
   setProperty("OutputWorkspace", std::move(outWS));
 }
 
+void MergeRuns::execHistogram(const std::vector<std::string> &inputs) {
+  const std::string sampleLogsSum = getProperty(SampleLogsBehaviour::SUM_PROP);
+  const std::string sampleLogsTimeSeries =
+      getProperty(SampleLogsBehaviour::TIME_SERIES_PROP);
+  const std::string sampleLogsList =
+      getProperty(SampleLogsBehaviour::LIST_PROP);
+  const std::string sampleLogsWarn =
+      getProperty(SampleLogsBehaviour::WARN_PROP);
+  const std::string sampleLogsWarnTolerances =
+      getProperty(SampleLogsBehaviour::WARN_TOL_PROP);
+  const std::string sampleLogsFail =
+      getProperty(SampleLogsBehaviour::FAIL_PROP);
+  const std::string sampleLogsFailTolerances =
+      getProperty(SampleLogsBehaviour::FAIL_TOL_PROP);
+
+  const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
+
+  // This gets the list of workspaces
+  RunCombinationHelper combHelper;
+  m_inMatrixWS = combHelper.validateInputWorkspaces(inputs, g_log);
+  const auto rebinParams = checkRebinning();
+
+  // Take the first input workspace as the first argument to the addition
+  MatrixWorkspace_sptr outWS(m_inMatrixWS.front()->clone());
+  if (rebinParams) {
+    outWS = this->rebinInput(outWS, *rebinParams);
+  }
+  Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
+      *outWS, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
+      sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
+      sampleLogsFailTolerances);
+
+  auto isScanning = outWS->detectorInfo().isScanning();
+
+  const size_t numberOfWSs = m_inMatrixWS.size();
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numberOfWSs - 1);
+  // Note that the iterator is incremented before first pass so that 1st
+  // workspace isn't added to itself
+  auto it = m_inMatrixWS.begin();
+  for (++it; it != m_inMatrixWS.end(); ++it) {
+    MatrixWorkspace_sptr addee;
+    if (rebinParams) {
+      addee = this->rebinInput(*it, *rebinParams);
+    } else {
+      addee = *it;
+    }
+
+    // Add the current workspace to the total
+    // Update the sample logs
+    try {
+      sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
+      sampleLogsBehaviour.removeSampleLogsFromWorkspace(*addee);
+      if (isScanning)
+        outWS = buildScanningOutputWorkspace(outWS, addee);
+      else
+        outWS = outWS + addee;
+      sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
+      sampleLogsBehaviour.readdSampleLogToWorkspace(*addee);
+    } catch (std::invalid_argument &e) {
+      if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
+        g_log.error()
+            << "Could not merge run: " << it->get()->getName() << ". Reason: \""
+            << e.what()
+            << "\". MergeRuns will continue but this run will be skipped.\n";
+        sampleLogsBehaviour.resetSampleLogs(*outWS);
+      } else {
+        throw std::invalid_argument(e);
+      }
+    }
+    m_progress->report();
+  }
+
+  // Set the final workspace to the output property
+  setProperty("OutputWorkspace", outWS);
+}
+
 //------------------------------------------------------------------------------------------------
 /** Validate the input event workspaces
  *
@@ -512,47 +458,95 @@ bool MergeRuns::validateInputsForEventWorkspaces(
   return true;
 }
 
+/** Checks if the workspaces need to be rebinned and if so, returns the
+ *  rebinning parameters for the Rebin algorithm.
+ *  @return :: An optional object containing the rebinning params or none
+ *  if rebinning is not needed.
+ */
+boost::optional<std::vector<double>> MergeRuns::checkRebinning() {
+  const std::string rebinBehaviour = getProperty("RebinBehaviour");
+  const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
+  // To properly cover all X spans of the input workspaces, one needs to
+  // sort the workspaces in ascending X before figuring out the rebinning.
+  std::vector<MatrixWorkspace_sptr> inputsSortedByX(m_inMatrixWS.cbegin(),
+                                                    m_inMatrixWS.cend());
+  std::sort(
+      inputsSortedByX.begin(), inputsSortedByX.end(),
+      [](const MatrixWorkspace_sptr &ws1, const MatrixWorkspace_sptr &ws2) {
+        return ws1->x(0).front() < ws2->x(0).front();
+      });
+  auto it = inputsSortedByX.cbegin();
+  g_log.notice() << "Using run '" << (*it)->getName()
+                 << "' as a reference to determine possible rebinning.\n";
+  boost::optional<std::vector<double>> rebinParams{boost::none};
+  std::vector<double> bins{(*it)->x(0).rawData()};
+  for (++it; it != inputsSortedByX.cend(); ++it) {
+    if (!WorkspaceHelpers::matchingBins(*inputsSortedByX.front(), **it, true)) {
+      if (rebinBehaviour != REBIN_BEHAVIOUR) {
+        if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
+          g_log.error() << "Could not merge run: " << (*it)->getName()
+                        << ". Binning is different from the reference run. "
+                           "MergeRuns will continue but this run will be "
+                           "skipped.\n";
+          m_inMatrixWS.remove(*it);
+          continue;
+        } else {
+          throw std::invalid_argument(
+              "Could not merge run: " + (*it)->getName() +
+              ". Binning is different from the reference run.");
+        }
+      }
+      rebinParams = this->calculateRebinParams(bins, (*it)->x(0).rawData());
+      VectorHelper::createAxisFromRebinParams(*rebinParams, bins);
+    }
+  }
+  return rebinParams;
+}
+
 //------------------------------------------------------------------------------------------------
 /** Calculates the parameters to hand to the Rebin algorithm. Specifies the new
- * binning, bin-by-bin,
- *  to cover the full range covered by the two input workspaces. In regions of
- * overlap, the bins from
- *  the workspace having the wider bins are taken. Note that because the list of
- * input workspaces
- *  is sorted, ws1 will always start before (or at the same point as) ws2.
- *  @param ws1 ::    The first input workspace. Will start before ws2.
- *  @param ws2 ::    The second input workspace.
- *  @param params :: A reference to the vector of rebinning parameters
+ *  binning, bin-by-bin, to cover the full range covered by the two old
+ *  binnings. In regions of overlap, the wider bins are taken.
+ *  @param bins1 ::    The first bin edges
+ *  @param bins2 ::    The second bin edges
+ *  @return :: The rebinning parameters
  */
-void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
-                                     const API::MatrixWorkspace_const_sptr &ws2,
-                                     std::vector<double> &params) const {
-  auto &X1 = ws1->x(0);
-  auto &X2 = ws2->x(0);
-  const double end1 = X1.back();
-  const double start2 = X2.front();
-  const double end2 = X2.back();
+std::vector<double>
+MergeRuns::calculateRebinParams(const std::vector<double> &bins1,
+                                const std::vector<double> &bins2) {
+  std::vector<double> newParams;
+  // Try to reserve memory for the worst-case scenario: two non-overlapping
+  // ranges.
+  newParams.reserve(1 + 2 * (bins1.size() - 1) + 2 + 2 * (bins2.size() - 1));
+  // Sort by X axis which starts smaller
+  bool const oldIsFirst = bins1.front() < bins2.front();
+  auto const &smallerX = oldIsFirst ? bins1 : bins2;
+  auto const &greaterX = oldIsFirst ? bins2 : bins1;
+  double const end1 = smallerX.back();
+  double const start2 = greaterX.front();
+  double const end2 = greaterX.back();
 
   if (end1 <= start2) {
     // First case is if there's no overlap between the workspaces
-    this->noOverlapParams(X1, X2, params);
+    noOverlapParams(smallerX, greaterX, newParams);
   } else {
-    // Add the bins from the first workspace up to the start of the overlap
-    params.push_back(X1[0]);
-    int64_t i;
-    for (i = 1; X1[i] <= start2; ++i) {
-      params.push_back(X1[i] - X1[i - 1]);
-      params.push_back(X1[i]);
+    // Add the bins up to the start of the overlap
+    newParams.emplace_back(smallerX.front());
+    size_t i;
+    for (i = 1; smallerX[i] <= start2; ++i) {
+      newParams.emplace_back(smallerX[i] - smallerX[i - 1]);
+      newParams.emplace_back(smallerX[i]);
     }
-    // If the range of workspace2 is completely within that of workspace1, then
-    // call the
-    // 'inclusion' routine. Otherwise call the standard 'intersection' one.
+    // If the range of one of the workspaces is completely within that
+    // of the other, call the 'inclusion' routine.
+    // Otherwise call the standard 'intersection' one.
     if (end1 < end2) {
-      this->intersectionParams(X1, i, X2, params);
+      intersectionParams(smallerX, i, greaterX, newParams);
     } else {
-      this->inclusionParams(X1, i, X2, params);
+      inclusionParams(smallerX, i, greaterX, newParams);
     }
   }
+  return newParams;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -563,23 +557,23 @@ void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
  *  @param params :: A reference to the vector of rebinning parameters
  */
 void MergeRuns::noOverlapParams(const HistogramX &X1, const HistogramX &X2,
-                                std::vector<double> &params) const {
+                                std::vector<double> &params) {
   // Add all the bins from the first workspace
   for (size_t i = 1; i < X1.size(); ++i) {
-    params.push_back(X1[i - 1]);
-    params.push_back(X1[i] - X1[i - 1]);
+    params.emplace_back(X1[i - 1]);
+    params.emplace_back(X1[i] - X1[i - 1]);
   }
   // Put a single bin in the 'gap' (but check first the 'gap' isn't zero)
   if (X1.back() < X2.front()) {
-    params.push_back(X1.back());
-    params.push_back(X2.front() - X1.back());
+    params.emplace_back(X1.back());
+    params.emplace_back(X2.front() - X1.back());
   }
   // Now add all the bins from the second workspace
   for (size_t j = 1; j < X2.size(); ++j) {
-    params.push_back(X2[j - 1]);
-    params.push_back(X2[j] - X2[j - 1]);
+    params.emplace_back(X2[j - 1]);
+    params.emplace_back(X2[j] - X2[j - 1]);
   }
-  params.push_back(X2.back());
+  params.emplace_back(X2.back());
 }
 
 //------------------------------------------------------------------------------------------------
@@ -592,36 +586,38 @@ void MergeRuns::noOverlapParams(const HistogramX &X1, const HistogramX &X2,
  *  @param X2 ::     The bin boundaries from the second workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
-void MergeRuns::intersectionParams(const HistogramX &X1, int64_t &i,
+void MergeRuns::intersectionParams(const HistogramX &X1, size_t &i,
                                    const HistogramX &X2,
-                                   std::vector<double> &params) const {
+                                   std::vector<double> &params) {
   // First calculate the number of bins in each workspace that are in the
   // overlap region
-  int64_t overlapbins1, overlapbins2;
-  overlapbins1 = X1.size() - i;
-  for (overlapbins2 = 0; X2[overlapbins2] < X1.back(); ++overlapbins2) {
+  auto const overlapbins1 = X1.size() - i;
+  auto const iterX2 = std::lower_bound(X2.cbegin(), X2.cend(), X1.back());
+  if (iterX2 == X2.end()) {
+    throw std::runtime_error("MergerRuns::intersectionParams: no intersection "
+                             "between the histograms.");
   }
-
+  auto const overlapbins2 = std::distance(X2.cbegin(), iterX2);
   // We want to use whichever one has the larger bins (on average)
-  if (overlapbins1 < overlapbins2) {
+  if (static_cast<decltype(overlapbins2)>(overlapbins1) < overlapbins2) {
     // In this case we want the rest of the bins from the first workspace.....
-    for (; i < static_cast<int64_t>(X1.size()); ++i) {
-      params.push_back(X1[i] - X1[i - 1]);
-      params.push_back(X1[i]);
+    for (; i < X1.size(); ++i) {
+      params.emplace_back(X1[i] - X1[i - 1]);
+      params.emplace_back(X1[i]);
     }
     // Now remove the last bin & boundary
     params.pop_back();
     params.pop_back();
     // ....and then the non-overlap ones from the second workspace
     for (size_t j = overlapbins2; j < X2.size(); ++j) {
-      params.push_back(X2[j] - params.back());
-      params.push_back(X2[j]);
+      params.emplace_back(X2[j] - params.back());
+      params.emplace_back(X2[j]);
     }
   } else {
     // In this case we just have to add all the bins from the second workspace
     for (size_t j = 1; j < X2.size(); ++j) {
-      params.push_back(X2[j] - params.back());
-      params.push_back(X2[j]);
+      params.emplace_back(X2[j] - params.back());
+      params.emplace_back(X2[j]);
     }
   }
 }
@@ -637,38 +633,40 @@ void MergeRuns::intersectionParams(const HistogramX &X1, int64_t &i,
  *  @param X2 ::     The bin boundaries from the second workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
-void MergeRuns::inclusionParams(const HistogramX &X1, int64_t &i,
+void MergeRuns::inclusionParams(const HistogramX &X1, size_t &i,
                                 const HistogramX &X2,
-                                std::vector<double> &params) const {
+                                std::vector<double> &params) {
   // First calculate the number of bins in each workspace that are in the
   // overlap region
-  int64_t overlapbins1, overlapbins2;
-  for (overlapbins1 = 1; X1[i + overlapbins1] < X2.back(); ++overlapbins1) {
+  const auto iterX1 = std::lower_bound(X1.cbegin() + i, X1.cend(), X2.back());
+  if (iterX1 == X1.cend()) {
+    throw std::runtime_error(
+        "MergeRuns::inclusionParams: no overlap between the histograms");
   }
-  //++overlapbins1;
-  overlapbins2 = X2.size() - 1;
+  auto const overlapbins1 = std::distance(X1.cbegin(), iterX1) - i;
+  auto const overlapbins2 = X2.size() - 1;
 
   // In the overlap region, we want to use whichever one has the larger bins (on
   // average)
   if (overlapbins1 + 1 <= overlapbins2) {
     // In the case where the first workspace has larger bins it's easy
     // - just add the rest of X1's bins
-    for (; i < static_cast<int64_t>(X1.size()); ++i) {
-      params.push_back(X1[i] - X1[i - 1]);
-      params.push_back(X1[i]);
+    for (; i < X1.size(); ++i) {
+      params.emplace_back(X1[i] - X1[i - 1]);
+      params.emplace_back(X1[i]);
     }
   } else {
     // In this case we want all of X2's bins first (without the first and last
     // boundaries)
     for (size_t j = 1; j < X2.size() - 1; ++j) {
-      params.push_back(X2[j] - params.back());
-      params.push_back(X2[j]);
+      params.emplace_back(X2[j] - params.back());
+      params.emplace_back(X2[j]);
     }
     // And now those from X1 that lie above the overlap region
     i += overlapbins1;
-    for (; i < static_cast<int64_t>(X1.size()); ++i) {
-      params.push_back(X1[i] - params.back());
-      params.push_back(X1[i]);
+    for (; i < X1.size(); ++i) {
+      params.emplace_back(X1[i] - params.back());
+      params.emplace_back(X1[i]);
     }
   }
 }
@@ -703,6 +701,41 @@ void MergeRuns::fillHistory() {
     copyHistoryFromInputWorkspaces<std::list<MatrixWorkspace_sptr>>(
         m_inMatrixWS);
   }
+}
+
+/*
+ * Here we build up the correct time indexes for the workspace being added. If
+ *the scan times for the addee workspace and output workspace are the same this
+ *builds the same indexing as the workspace had before. Otherwise, the correct
+ *time indexes are set here.
+ */
+std::vector<SpectrumDefinition> MergeRuns::buildScanIntervals(
+    const std::vector<SpectrumDefinition> &addeeSpecDefs,
+    const DetectorInfo &addeeDetInfo, const DetectorInfo &outDetInfo,
+    const DetectorInfo &newOutDetInfo) {
+  std::vector<SpectrumDefinition> newAddeeSpecDefs(addeeSpecDefs.size());
+
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int64_t i = 0; i < int64_t(addeeSpecDefs.size()); ++i) {
+    for (auto &index : addeeSpecDefs[i]) {
+      SpectrumDefinition newSpecDef;
+      const auto &addeeScanInterval = addeeDetInfo.scanInterval(index);
+      if (addeeScanInterval == outDetInfo.scanInterval(index)) {
+        newSpecDef.add(index.first, index.second);
+      } else {
+        // Find the correct time index for this entry
+        for (size_t i = 0; i < newOutDetInfo.scanCount(index.first); i++) {
+          if (addeeScanInterval ==
+              newOutDetInfo.scanInterval({index.first, i})) {
+            newSpecDef.add(index.first, i);
+          }
+        }
+      }
+      newAddeeSpecDefs[i] = newSpecDef;
+    }
+  }
+
+  return newAddeeSpecDefs;
 }
 
 } // namespace Algorithm

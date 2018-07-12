@@ -1,11 +1,10 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init, invalid-name, bare-except
 """
     Magnetism reflectometry reduction
 """
 from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np
-import functools
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
@@ -37,13 +36,19 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         """ Friendly description """
         return "Magnetism Reflectometer (REFM) reduction"
 
+    def checkGroups(self):
+        """Allow us to deal with a workspace group"""
+        return False
+
     def PyInit(self):
         """ Initialization """
-        self.declareProperty(StringArrayProperty("RunNumbers"), "List of run numbers to process")
         self.declareProperty(WorkspaceProperty("InputWorkspace", "",
                                                Direction.Input, PropertyMode.Optional),
-                             "Optionally, we can provide a workspace directly")
+                             "Optionally, we can provide a scattering workspace directly")
         self.declareProperty("NormalizationRunNumber", 0, "Run number of the normalization run to use")
+        self.declareProperty(WorkspaceProperty("NormalizationWorkspace", "",
+                                               Direction.Input, PropertyMode.Optional),
+                             "Optionally, we can provide a normalization workspace directly")
         self.declareProperty(IntArrayProperty("SignalPeakPixelRange", [123, 137],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range defining the data peak")
@@ -85,131 +90,133 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         self.declareProperty("SpecularPixel", 180.0, doc="Pixel position of the specular reflectivity")
         self.declareProperty("QMin", 0.005, doc="Minimum Q-value")
         self.declareProperty("QStep", 0.02, doc="Step size in Q. Enter a negative value to get a log scale")
-        self.declareProperty("AngleOffset", 0.0, doc="angle offset (degrees)")
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output workspace")
+        self.declareProperty("AngleOffset", 0.0, doc="angle offset (rad)")
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output workspace")
         self.declareProperty("TimeAxisStep", 40.0,
                              doc="Binning step size for the time axis. TOF for detector binning, wavelength for constant Q")
-        self.declareProperty("EntryName", "entry-Off_Off", doc="Name of the entry to load")
         self.declareProperty("CropFirstAndLastPoints", True, doc="If true, we crop the first and last points")
         self.declareProperty("ConstQTrim", 0.5,
                              doc="With const-Q binning, cut Q bins with contributions fewer than ConstQTrim of WL bins")
+        self.declareProperty("SampleLength", 10.0, doc="Length of the sample in mm")
         self.declareProperty("ConstantQBinning", False, doc="If true, we convert to Q before summing")
 
     #pylint: disable=too-many-locals
     def PyExec(self):
         """ Main execution """
-        # DATA
+        # Reduction parameters
         dataPeakRange = self.getProperty("SignalPeakPixelRange").value
         dataBackRange = self.getProperty("SignalBackgroundPixelRange").value
-
-        # NORMALIZATION
-        normalizationRunNumber = self.getProperty("NormalizationRunNumber").value
-        normBackRange = self.getProperty("NormBackgroundPixelRange").value
-        normPeakRange = self.getProperty("NormPeakPixelRange").value
-
-        # Load the data
-        ws_event_data = self.load_data()
-
-        # Number of pixels in each direction
-        self.number_of_pixels_x = int(ws_event_data.getInstrument().getNumberParameter("number-of-x-pixels")[0])
-        self.number_of_pixels_y = int(ws_event_data.getInstrument().getNumberParameter("number-of-y-pixels")[0])
 
         # ----- Process Sample Data -------------------------------------------
         crop_request = self.getProperty("CutLowResDataAxis").value
         low_res_range = self.getProperty("LowResDataAxisPixelRange").value
         bck_request = self.getProperty("SubtractSignalBackground").value
-        data_cropped = self.process_data(ws_event_data,
-                                         crop_request, low_res_range,
-                                         dataPeakRange, bck_request, dataBackRange)
-
-        # ----- Normalization -------------------------------------------------
         perform_normalization = self.getProperty("ApplyNormalization").value
-        if perform_normalization:
-            # Load normalization
-            ws_event_norm = self.load_direct_beam(normalizationRunNumber)
-            crop_request = self.getProperty("CutLowResNormAxis").value
-            low_res_range = self.getProperty("LowResNormAxisPixelRange").value
-            bck_request = self.getProperty("SubtractNormBackground").value
-            norm_cropped = self.process_data(ws_event_norm,
-                                             crop_request, low_res_range,
-                                             normPeakRange, bck_request, normBackRange)
-            # Avoid leaving trash behind
-            AnalysisDataService.remove(str(ws_event_norm))
 
-            # Sum up the normalization peak
-            norm_summed = SumSpectra(InputWorkspace = norm_cropped)
-            norm_summed = RebinToWorkspace(WorkspaceToRebin=norm_summed,
-                                           WorkspaceToMatch=data_cropped,
-                                           OutputWorkspace=str(norm_summed))
+        # Processed normalization workspace
+        norm_summed = None
+        output_list = []
 
-            # Normalize the data
-            normalized_data = data_cropped / norm_summed
+        for workspace in self.load_data():
+            try:
+                logger.notice("Processing %s" % str(workspace))
+                data_cropped = self.process_data(workspace,
+                                                 crop_request, low_res_range,
+                                                 dataPeakRange, bck_request, dataBackRange)
 
-            AddSampleLog(Workspace=normalized_data, LogName='normalization_run', LogText=str(normalizationRunNumber))
-            AddSampleLog(Workspace=normalized_data, LogName='normalization_file_path',
-                         LogText=norm_summed.getRun().getProperty("Filename").value)
-            norm_dirpix = norm_summed.getRun().getProperty('DIRPIX').getStatistics().mean
-            AddSampleLog(Workspace=normalized_data, LogName='normalization_dirpix',
-                         LogText=str(norm_dirpix), LogType='Number', LogUnit='pixel')
+                # Normalization
+                if perform_normalization:
+                    if norm_summed is None:
+                        norm_summed = self.process_direct_beam(data_cropped)
 
-            # Avoid leaving trash behind
-            AnalysisDataService.remove(str(data_cropped))
-            AnalysisDataService.remove(str(norm_cropped))
+                    # Normalize the data
+                    normalized_data = Divide(LHSWorkspace=data_cropped, RHSWorkspace=norm_summed,
+                                             OutputWorkspace=str(data_cropped)+'_normalized')
+
+                    AddSampleLog(Workspace=normalized_data, LogName='normalization_run', LogText=str(norm_summed.getRunNumber()))
+                    AddSampleLog(Workspace=normalized_data, LogName='normalization_file_path',
+                                 LogText=norm_summed.getRun().getProperty("Filename").value)
+                    norm_dirpix = norm_summed.getRun().getProperty('DIRPIX').getStatistics().mean
+                    AddSampleLog(Workspace=normalized_data, LogName='normalization_dirpix',
+                                 LogText=str(norm_dirpix), LogType='Number', LogUnit='pixel')
+
+                    # Avoid leaving trash behind
+                    AnalysisDataService.remove(str(data_cropped))
+                else:
+                    normalized_data = data_cropped
+                    AddSampleLog(Workspace=normalized_data, LogName='normalization_run', LogText="None")
+
+                # At this point, the workspace should be considered a distribution of points
+                point_data = ConvertToPointData(InputWorkspace=normalized_data,
+                                                OutputWorkspace=str(workspace)+'_')
+                # Avoid leaving trash behind
+                AnalysisDataService.remove(str(normalized_data))
+
+                # Convert to Q and clean up the distribution
+                constant_q_binning = self.getProperty("ConstantQBinning").value
+                if constant_q_binning:
+                    q_rebin = self.constant_q(point_data, dataPeakRange)
+                else:
+                    q_rebin = self.convert_to_q(point_data)
+                q_rebin = self.cleanup_reflectivity(q_rebin)
+
+                # Avoid leaving trash behind
+                AnalysisDataService.remove(str(point_data))
+
+                # Add dQ to each Q point
+                q_rebin = self.compute_resolution(q_rebin)
+                output_list.append(q_rebin)
+            except:
+                logger.error("Could not process %s" % str(workspace))
+
+        # Prepare output workspace group
+        if len(output_list)>1:
+            output_wsg = self.getPropertyValue("OutputWorkspace")
+            GroupWorkspaces(InputWorkspaces=output_list,
+                            OutputWorkspace=output_wsg)
+            self.setProperty("OutputWorkspace", output_wsg)
+        else:
+            self.setProperty("OutputWorkspace", output_list[0])
+
+        # Clean up leftover workspace
+        if norm_summed is not None:
             AnalysisDataService.remove(str(norm_summed))
-        else:
-            normalized_data = data_cropped
-            AddSampleLog(Workspace=normalized_data, LogName='normalization_run', LogText="None")
-
-        # At this point, the workspace should be considered a distribution of points
-        normalized_data = ConvertToPointData(InputWorkspace=normalized_data,
-                                             OutputWorkspace=str(normalized_data))
-
-        # Convert to Q and clean up the distribution
-        constant_q_binning = self.getProperty("ConstantQBinning").value
-        if constant_q_binning:
-            q_rebin = self.constant_q(normalized_data, dataPeakRange)
-        else:
-            q_rebin = self.convert_to_q(normalized_data)
-        q_rebin = self.cleanup_reflectivity(q_rebin)
-
-        # Avoid leaving trash behind
-        AnalysisDataService.remove(str(normalized_data))
-
-        self.setProperty('OutputWorkspace', q_rebin)
 
     def load_data(self):
         """
             Load the data. We can either load it from the specified
-            run numbers, or use the input workspace if no runs are specified.
-        """
-        dataRunNumbers = self.getProperty("RunNumbers").value
-        ws_event_data = self.getProperty("InputWorkspace").value
+            run numbers, or use the input workspace.
 
-        if len(dataRunNumbers) > 0:
-            # If we have multiple files, add them
-            file_list = []
-            for item in dataRunNumbers:
-                # The standard mode of operation is to give a run number as input
-                try:
-                    data_file = FileFinder.findRuns("%s%s" % (INSTRUMENT_NAME, item))[0]
-                except RuntimeError:
-                    # Allow for a file name or file path as input
-                    data_file = FileFinder.findRuns(item)[0]
-                file_list.append(data_file)
-            runs = functools.reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
-            entry_name = self.getProperty("EntryName").value
-            ws_event_data = LoadEventNexus(Filename=runs, NXentryName=entry_name,
-                                           OutputWorkspace="%s_%s" % (INSTRUMENT_NAME, dataRunNumbers[0]))
-        elif ws_event_data is None:
+            Supplying a workspace takes precedence over supplying a list of runs
+        """
+        input_workspaces = self.getProperty("InputWorkspace").value
+
+        if isinstance(input_workspaces, WorkspaceGroup):
+            ws_list = input_workspaces
+        else:
+            ws_list = [input_workspaces]
+
+        # Sanity check, and retrieve some info while we're at it.
+        if ws_list:
+            self.number_of_pixels_x = int(ws_list[0].getInstrument().getNumberParameter("number-of-x-pixels")[0])
+            self.number_of_pixels_y = int(ws_list[0].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+        else:
             raise RuntimeError("No input data was specified")
-        return ws_event_data
+        return ws_list
 
-    def load_direct_beam(self, normalizationRunNumber):
+    def load_direct_beam(self):
         """
-            Load a direct beam file. This method will disappear once we move to the new DAS.
-            It is necessary at the moment only because the direct beam data is occasionally
-            stored in another entry than entry_Off-Off.
+            Load a direct beam file. We can either load it from the specified
+            run number, or use the input workspace.
+
+            Supplying a workspace takes precedence over supplying a run number.
         """
+        normalizationRunNumber = self.getProperty("NormalizationRunNumber").value
+        ws_event_norm = self.getProperty("NormalizationWorkspace").value
+
+        if ws_event_norm is not None:
+            return ws_event_norm
+
         for entry in ['entry', 'entry-Off_Off', 'entry-On_Off', 'entry-Off_On', 'entry-On_On']:
             try:
                 ws_event_norm = LoadEventNexus("%s_%s" % (INSTRUMENT_NAME, normalizationRunNumber),
@@ -227,6 +234,32 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
         # If we are here, we haven't found the data we need and we need to stop execution.
         raise RuntimeError("Could not find direct beam data for run %s" % normalizationRunNumber)
+
+    def process_direct_beam(self, data_cropped):
+        """
+            Process the direct beam and rebin it to match our
+            scattering data.
+            :param Workspace data_cropped: scattering data workspace
+        """
+        # Load normalization
+        ws_event_norm = self.load_direct_beam()
+
+        # Retrieve reduction parameters
+        normBackRange = self.getProperty("NormBackgroundPixelRange").value
+        normPeakRange = self.getProperty("NormPeakPixelRange").value
+        crop_request = self.getProperty("CutLowResNormAxis").value
+        low_res_range = self.getProperty("LowResNormAxisPixelRange").value
+        bck_request = self.getProperty("SubtractNormBackground").value
+
+        norm_cropped = self.process_data(ws_event_norm,
+                                         crop_request, low_res_range,
+                                         normPeakRange, bck_request, normBackRange,
+                                         rebin_to_ws=data_cropped)
+        # Avoid leaving trash behind (remove only if we loaded the data)
+        if self.getProperty("NormalizationWorkspace").value is None:
+            AnalysisDataService.remove(str(ws_event_norm))
+
+        return norm_cropped
 
     def constant_q(self, workspace, peak):
         """
@@ -255,7 +288,11 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         x_pixel_map = x_pixel_map[0,:,:]
 
         pixel_width = float(workspace.getInstrument().getNumberParameter("pixel-width")[0]) / 1000.0
-        det_distance = workspace.getRun()['SampleDetDis'].getStatistics().mean / 1000.0
+        det_distance = workspace.getRun()['SampleDetDis'].getStatistics().mean
+        # Check units
+        if not workspace.getRun()['SampleDetDis'].units in ['m', 'meter']:
+            det_distance /= 1000.0
+
         round_up = self.getProperty("RoundUpPixel").value
         ref_pix = self.getProperty("SpecularPixel").value
         if round_up:
@@ -326,7 +363,10 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                 refl[i] = 0.0
                 refl_err[i] = 0.0
 
-        q_rebin = CreateWorkspace(DataX=axis_z, DataY=refl, DataE=refl_err, ParentWorkspace=workspace)
+        name_output_ws = str(workspace)+'_reflectivity' #self.getPropertyValue("OutputWorkspace")
+        q_rebin = CreateWorkspace(DataX=axis_z, DataY=refl, DataE=refl_err,
+                                  ParentWorkspace=workspace, OutputWorkspace=name_output_ws)
+
         # At this point we still have a histogram, and we need to convert to point data
         q_rebin = ConvertToPointData(InputWorkspace=q_rebin)
         return q_rebin
@@ -358,8 +398,13 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
         # Get the distance fromthe moderator to the detector
         run_object = workspace.getRun()
-        sample_detector_distance = run_object['SampleDetDis'].getStatistics().mean / 1000.0
-        source_sample_distance = run_object['ModeratorSamDis'].getStatistics().mean / 1000.0
+        sample_detector_distance = run_object['SampleDetDis'].getStatistics().mean
+        source_sample_distance = run_object['ModeratorSamDis'].getStatistics().mean
+        # Check units
+        if not run_object['SampleDetDis'].units in ['m', 'meter']:
+            sample_detector_distance /= 1000.0
+        if not run_object['ModeratorSamDis'].units in ['m', 'meter']:
+            source_sample_distance /= 1000.0
         source_detector_distance = source_sample_distance + sample_detector_distance
 
         # Convert to Q
@@ -389,7 +434,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             data_x[i] = constant / data_x[i]
         q_workspace = SortXAxis(InputWorkspace=q_workspace, OutputWorkspace=str(q_workspace))
 
-        name_output_ws = self.getPropertyValue("OutputWorkspace")
+        name_output_ws = str(workspace)+'_reflectivity'
         try:
             q_rebin = Rebin(InputWorkspace=q_workspace, Params=q_range,
                             OutputWorkspace=name_output_ws)
@@ -451,36 +496,70 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         self.write_meta_data(q_rebin)
         return q_rebin
 
+    def compute_resolution(self, ws):
+        """
+            Calculate dQ/Q using the slit information.
+            :param workspace ws: reflectivity workspace
+        """
+        sample_length = self.getProperty("SampleLength").value
+
+        # In newer data files, the slit distances are part of the logs
+        if ws.getRun().hasProperty("S1Distance"):
+            s1_dist = ws.getRun().getProperty("S1Distance").value
+            s2_dist = ws.getRun().getProperty("S2Distance").value
+            s3_dist = ws.getRun().getProperty("S3Distance").value
+            # Check the units of the distances
+            if ws.getRun().getProperty("S1Distance").units in ['m', 'meter']:
+                s1_dist *= 1000.0
+                s2_dist *= 1000.0
+                s3_dist *= 1000.0
+        else:
+            s1_dist = -2600.
+            s2_dist = -2019.
+            s3_dist = -714.
+        slits =[[ws.getRun().getProperty("S1HWidth").getStatistics().mean, s1_dist],
+                [ws.getRun().getProperty("S2HWidth").getStatistics().mean, s2_dist],
+                [ws.getRun().getProperty("S3HWidth").getStatistics().mean, s3_dist]]
+        theta = ws.getRun().getProperty("two_theta").value/2.0 * np.pi / 180.0
+        res=[]
+        s_width=sample_length*np.sin(theta)
+        for width, dist in slits:
+            # Calculate the maximum opening angle dTheta
+            if s_width > 0.:
+                d_theta = np.arctan((s_width/2.*(1.+width/s_width))/dist)*2.
+            else:
+                d_theta = np.arctan(width/2./dist)*2.
+            # The standard deviation for a uniform angle distribution is delta/sqrt(12)
+            res.append(d_theta*0.28867513)
+
+        # Wavelength uncertainty
+        lambda_min = ws.getRun().getProperty("lambda_min").value
+        lambda_max = ws.getRun().getProperty("lambda_max").value
+        dq_over_q = min(res) / np.tan(theta)
+
+        data_x = ws.dataX(0)
+        data_dx = ws.dataDx(0)
+        dwl = (lambda_max - lambda_min) / len(data_x) / np.sqrt(12.0)
+        for i in range(len(data_x)):
+            dq_theta = data_x[i] * dq_over_q
+            dq_wl = data_x[i]**2 * dwl / (4.0*np.pi*np.sin(theta))
+            data_dx[i] = np.sqrt(dq_theta**2 + dq_wl**2)
+
+        return ws
+
     def calculate_scattering_angle(self, ws_event_data):
         """
             Compute the scattering angle
             @param ws_event_data: data workspace
         """
-        run_object = ws_event_data.getRun()
-
         angle_offset = self.getProperty("AngleOffset").value
         use_sangle = self.getProperty("UseSANGLE").value
-        sangle = run_object['SANGLE'].getStatistics().mean
+        ref_pix = self.getProperty("SpecularPixel").value
 
-        if use_sangle:
-            theta = abs(sangle) * math.pi / 180.0
-        else:
-            dangle = run_object['DANGLE'].getStatistics().mean
-            dangle0 = run_object['DANGLE0'].getStatistics().mean
-            det_distance = run_object['SampleDetDis'].getStatistics().mean / 1000.0
-            direct_beam_pix = run_object['DIRPIX'].getStatistics().mean
-            ref_pix = self.getProperty("SpecularPixel").value
+        _theta = MRGetTheta(Workspace=ws_event_data, AngleOffset = angle_offset,
+                            UseSANGLE = use_sangle, SpecularPixel = ref_pix)
 
-            # Get pixel size from instrument properties
-            if ws_event_data.getInstrument().hasParameter("pixel_width"):
-                pixel_width = float(ws_event_data.getInstrument().getNumberParameter("pixel_width")[0]) / 1000.0
-            else:
-                pixel_width = 0.0007
-
-            theta = (dangle - dangle0) * math.pi / 180.0 / 2.0 + ((direct_beam_pix - ref_pix) * pixel_width) / (2.0 * det_distance)
-            theta = abs(theta)
-
-        return theta + angle_offset
+        return _theta
 
     def get_tof_range(self, ws_event_data):
         """
@@ -561,9 +640,16 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
     #pylint: disable=too-many-arguments
     def process_data(self, workspace, crop_low_res, low_res_range,
-                     peak_range, subtract_background, background_range):
+                     peak_range, subtract_background, background_range, rebin_to_ws=None):
         """
             Common processing for both sample data and normalization.
+            :param workspace: event workspace to process
+            :param crop_low_res: if True, the low-resolution direction will be cropped
+            :param low_res_range: low-resolution direction pixel range
+            :param peak_range: pixel range of the specular reflection peak
+            :param subtract_background: if True, the background will be subtracted
+            :param background__range: pixel range of the background region
+            :param rebin_to_ws: Workspace to rebin to instead of doing independent rebinning
         """
         use_wl_cut = self.getProperty("UseWLTimeAxis").value
         constant_q_binning = self.getProperty("ConstantQBinning").value
@@ -585,10 +671,15 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                                                       tof_min, tof_max)
             raise RuntimeError(error_msg)
 
-        tof_step = self.getProperty("TimeAxisStep").value
-        logger.notice("Time axis range: %s %s %s [%s %s]" % (tof_range[0], tof_step, tof_range[1], tof_min, tof_max))
-        workspace = Rebin(InputWorkspace=workspace, Params=[tof_range[0], tof_step, tof_range[1]],
-                          OutputWorkspace="%s_histo" % str(workspace))
+        if rebin_to_ws is not None:
+            workspace = RebinToWorkspace(WorkspaceToRebin=workspace,
+                                         WorkspaceToMatch=rebin_to_ws,
+                                         OutputWorkspace="%s_histo" % str(workspace))
+        else:
+            tof_step = self.getProperty("TimeAxisStep").value
+            logger.notice("Time axis range: %s %s %s [%s %s]" % (tof_range[0], tof_step, tof_range[1], tof_min, tof_max))
+            workspace = Rebin(InputWorkspace=workspace, Params=[tof_range[0], tof_step, tof_range[1]],
+                              OutputWorkspace="%s_histo" % str(workspace))
 
         if constant_q_binning and not use_wl_cut:
             # Convert to wavelength
@@ -601,7 +692,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         low_res_max = self.number_of_pixels_y
         if crop_low_res:
             low_res_min = int(low_res_range[0])
-            low_res_max = int(low_res_range[1])
+            low_res_max = min(int(low_res_range[1]), self.number_of_pixels_y-1)
 
         # Subtract background
         if subtract_background:
@@ -643,9 +734,12 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
         # Crop to only the selected peak region
         cropped = CropWorkspace(InputWorkspace=subtracted,
-                                StartWorkspaceIndex=int(peak_range[0]),
-                                EndWorkspaceIndex=int(peak_range[1]),
+                                StartWorkspaceIndex=max(0, int(peak_range[0])),
+                                EndWorkspaceIndex=min(int(peak_range[1]), self.number_of_pixels_x-1),
                                 OutputWorkspace="%s_cropped" % str(subtracted))
+
+        if rebin_to_ws is not None:
+            cropped = SumSpectra(InputWorkspace = cropped)
 
         # Avoid leaving trash behind
         AnalysisDataService.remove(str(workspace))

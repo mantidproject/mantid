@@ -8,6 +8,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "../ISISReflectometry/ReflSettingsPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include "ReflMockObjects.h"
 #include <boost/algorithm/string.hpp>
 
@@ -27,197 +28,341 @@ public:
     return !in_q && c == ',';
   }
 };
+
+// Get a std::string from a QVariant which represents a QString
+std::string variantToString(const QVariant &variant) {
+  return variant.value<QString>().toStdString();
+}
 }
 
 //=====================================================================================
 // Functional tests
 //=====================================================================================
 class ReflSettingsPresenterTest : public CxxTest::TestSuite {
-
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static ReflSettingsPresenterTest *createSuite() {
     return new ReflSettingsPresenterTest();
   }
+
   static void destroySuite(ReflSettingsPresenterTest *suite) { delete suite; }
 
   ReflSettingsPresenterTest() { FrameworkManager::Instance(); }
 
-  void testGetTransmissionOptions() {
-    MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView);
+  void onCallReturnDefaultSettings(MockSettingsView &mockView) {
+    ON_CALL(mockView, instrumentSettingsEnabled()).WillByDefault(Return(true));
+    onCallReturnDefaultInstrumentSettings(mockView);
+    onCallReturnDefaultExperimentSettings(mockView);
+  }
 
-    EXPECT_CALL(mockView, experimentSettingsEnabled())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(mockView, instrumentSettingsEnabled())
-        .Times(1)
-        .WillOnce(Return(true));
+  void onCallReturnDefaultExperimentSettings(MockSettingsView &mockView) {
+    ON_CALL(mockView, experimentSettingsEnabled()).WillByDefault(Return(true));
+    onCallReturnDefaultOptions(mockView);
+    onCallReturnDefaultAnalysisMode(mockView);
+    onCallReturnDefaultOverlap(mockView);
+    onCallReturnDefaultPolarisationCorrections(mockView);
+    onCallReturnDefaultSummationSettings(mockView);
+  }
+
+  void onCallReturnDefaultAnalysisMode(MockSettingsView &mockView) {
+    ON_CALL(mockView, getAnalysisMode())
+        .WillByDefault(Return("PointDetectorAnalysis"));
+  }
+
+  void onCallReturnDefaultOptions(MockSettingsView &mockView) {
+    ON_CALL(mockView, getPerAngleOptions())
+        .WillByDefault(Return(std::map<std::string, OptionsQMap>()));
+  }
+
+  void onCallReturnDefaultOverlap(MockSettingsView &mockView) {
+    ON_CALL(mockView, getStartOverlap()).WillByDefault(Return(""));
+    ON_CALL(mockView, getEndOverlap()).WillByDefault(Return(""));
+  }
+
+  void onCallReturnDefaultSummationSettings(MockSettingsView &mockView) {
+    ON_CALL(mockView, getSummationType()).WillByDefault(Return("SumInLambda"));
+    ON_CALL(mockView, getReductionType()).WillByDefault(Return("Normal"));
+  }
+
+  void onCallReturnDefaultPolarisationCorrections(MockSettingsView &mockView) {
+    ON_CALL(mockView, getPolarisationCorrections())
+        .WillByDefault(Return("None"));
+    ON_CALL(mockView, getCRho()).WillByDefault(Return(""));
+    ON_CALL(mockView, getCAlpha()).WillByDefault(Return(""));
+    ON_CALL(mockView, getCAp()).WillByDefault(Return(""));
+    ON_CALL(mockView, getCPp()).WillByDefault(Return(""));
+  }
+
+  void onCallReturnDefaultInstrumentSettings(MockSettingsView &mockView) {
+    ON_CALL(mockView, getIntMonCheck()).WillByDefault(Return("False"));
+    onCallReturnDefaultMonitorIntegralRange(mockView);
+    onCallReturnDefaultMonitorBackgroundRange(mockView);
+    onCallReturnDefaultLambdaRange(mockView);
+    ON_CALL(mockView, getI0MonitorIndex()).WillByDefault(Return(""));
+    ON_CALL(mockView, getDetectorCorrectionType())
+        .WillByDefault(Return("VerticalShift"));
+  }
+
+  void onCallReturnDefaultLambdaRange(MockSettingsView &mockView) {
+    ON_CALL(mockView, getLambdaMin()).WillByDefault(Return(""));
+    ON_CALL(mockView, getLambdaMax()).WillByDefault(Return(""));
+  }
+
+  void onCallReturnDefaultMonitorIntegralRange(MockSettingsView &mockView) {
+    ON_CALL(mockView, getMonitorIntegralMin()).WillByDefault(Return(""));
+    ON_CALL(mockView, getMonitorIntegralMax()).WillByDefault(Return(""));
+  }
+
+  void onCallReturnDefaultMonitorBackgroundRange(MockSettingsView &mockView) {
+    ON_CALL(mockView, getMonitorBackgroundMin()).WillByDefault(Return(""));
+    ON_CALL(mockView, getMonitorBackgroundMax()).WillByDefault(Return(""));
+  }
+
+  bool keyNotSet(
+      QString const &key,
+      MantidQt::MantidWidgets::DataProcessor::OptionsQMap const &options) {
+    return !options.contains(key);
+  }
+
+  ReflSettingsPresenter makeReflSettingsPresenter(IReflSettingsView *view) {
+    return ReflSettingsPresenter(view, 1);
+  }
+
+  void testGetQSummationOptionsWhenSummingInLambda() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
+    EXPECT_CALL(mockView, getSummationType())
+        .Times(AtLeast(1))
+        .WillOnce(Return("SumInLambda"));
+    EXPECT_CALL(mockView, getReductionType())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return("NonFlatSample"));
+
+    auto options = presenter.getReductionOptions();
+    TS_ASSERT_EQUALS(variantToString(options["SummationType"]), "SumInLambda");
+    TS_ASSERT(keyNotSet("ReductionType", options));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetQSummationOptionsWhenSummingInQ() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
+    EXPECT_CALL(mockView, getSummationType())
+        .Times(AtLeast(1))
+        .WillOnce(Return("SumInQ"));
+    EXPECT_CALL(mockView, getReductionType())
+        .Times(AtLeast(1))
+        .WillOnce(Return("DivergentBeam"));
+
+    auto options = presenter.getReductionOptions();
+    TS_ASSERT_EQUALS(variantToString(options["SummationType"]), "SumInQ");
+    TS_ASSERT_EQUALS(variantToString(options["ReductionType"]),
+                     "DivergentBeam");
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetAnalysisMode() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
     EXPECT_CALL(mockView, getAnalysisMode())
-        .Times(Exactly(1))
+        .Times(AtLeast(1))
         .WillOnce(Return("MultiDetectorAnalysis"));
-    EXPECT_CALL(mockView, getMonitorIntegralMin())
-        .Times(Exactly(1))
-        .WillOnce(Return("4"));
-    EXPECT_CALL(mockView, getMonitorIntegralMax())
-        .Times(Exactly(1))
-        .WillOnce(Return("10"));
-    EXPECT_CALL(mockView, getMonitorBackgroundMin())
-        .Times(Exactly(1))
-        .WillOnce(Return("12"));
-    EXPECT_CALL(mockView, getMonitorBackgroundMax())
-        .Times(Exactly(1))
-        .WillOnce(Return("17"));
-    EXPECT_CALL(mockView, getLambdaMin())
-        .Times(Exactly(1))
-        .WillOnce(Return("1"));
-    EXPECT_CALL(mockView, getLambdaMax())
-        .Times(Exactly(1))
-        .WillOnce(Return("15"));
-    EXPECT_CALL(mockView, getI0MonitorIndex())
-        .Times(Exactly(1))
-        .WillOnce(Return("2"));
-    EXPECT_CALL(mockView, getProcessingInstructions())
-        .Times(Exactly(1))
-        .WillOnce(Return("3,4"));
-    EXPECT_CALL(mockView, getStartOverlap())
-        .Times(Exactly(1))
-        .WillOnce(Return("10"));
-    EXPECT_CALL(mockView, getEndOverlap())
-        .Times(Exactly(1))
-        .WillOnce(Return("12"));
-    auto options = presenter.getTransmissionOptions();
 
-    std::vector<std::string> optionsVec;
-    boost::split(optionsVec, options, split_q());
-    TS_ASSERT_EQUALS(optionsVec.size(), 11);
-    TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
-    TS_ASSERT_EQUALS(optionsVec[1], "StartOverlap=10");
-    TS_ASSERT_EQUALS(optionsVec[2], "EndOverlap=12");
-    TS_ASSERT_EQUALS(optionsVec[3], "MonitorIntegrationWavelengthMin=4");
-    TS_ASSERT_EQUALS(optionsVec[4], "MonitorIntegrationWavelengthMax=10");
-    TS_ASSERT_EQUALS(optionsVec[5], "MonitorBackgroundWavelengthMin=12");
-    TS_ASSERT_EQUALS(optionsVec[6], "MonitorBackgroundWavelengthMax=17");
-    TS_ASSERT_EQUALS(optionsVec[7], "WavelengthMin=1");
-    TS_ASSERT_EQUALS(optionsVec[8], "WavelengthMax=15");
-    TS_ASSERT_EQUALS(optionsVec[9], "I0MonitorIndex=2");
-    TS_ASSERT_EQUALS(optionsVec[10], "ProcessingInstructions=\"3,4\"");
+    auto options = presenter.getReductionOptions();
+    TS_ASSERT_EQUALS(variantToString(options["AnalysisMode"]),
+                     "MultiDetectorAnalysis");
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetPolarisationCorrectionOptions() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
+    EXPECT_CALL(mockView, getPolarisationCorrections())
+        .Times(AtLeast(1))
+        .WillOnce(Return("PNR"));
+    EXPECT_CALL(mockView, getCAp())
+        .Times(AtLeast(1))
+        .WillOnce(Return("100.0,17.0,44.0"));
+    EXPECT_CALL(mockView, getCPp())
+        .Times(AtLeast(1))
+        .WillOnce(Return("0.54,0.33,1.81"));
+
+    auto options = presenter.getReductionOptions();
+    TS_ASSERT_EQUALS(variantToString(options["PolarizationAnalysis"]), "PNR");
+    TS_ASSERT_EQUALS(variantToString(options["Rho"]), "");
+    TS_ASSERT_EQUALS(variantToString(options["Alpha"]), "");
+    TS_ASSERT_EQUALS(variantToString(options["Ap"]), "100.0,17.0,44.0");
+    TS_ASSERT_EQUALS(variantToString(options["Pp"]), "0.54,0.33,1.81");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
-  void testGetReductionOptions() {
-    MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView);
+  void testGetIntMonCheck() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
-    EXPECT_CALL(mockView, experimentSettingsEnabled())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(mockView, instrumentSettingsEnabled())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(mockView, getAnalysisMode())
-        .Times(Exactly(1))
-        .WillOnce(Return("MultiDetectorAnalysis"));
-    EXPECT_CALL(mockView, getCRho())
-        .Times(Exactly(1))
-        .WillOnce(Return("2.5,0.4,1.1"));
-    EXPECT_CALL(mockView, getCAlpha())
-        .Times(Exactly(1))
-        .WillOnce(Return("0.6,0.9,1.2"));
-    EXPECT_CALL(mockView, getCAp())
-        .Times(Exactly(1))
-        .WillOnce(Return("100.0,17.0,44.0"));
-    EXPECT_CALL(mockView, getCPp())
-        .Times(Exactly(1))
-        .WillOnce(Return("0.54,0.33,1.81"));
-    EXPECT_CALL(mockView, getPolarisationCorrections())
-        .Times(Exactly(1))
-        .WillOnce(Return("PNR"));
     EXPECT_CALL(mockView, getIntMonCheck())
-        .Times(Exactly(1))
+        .Times(AtLeast(1))
         .WillOnce(Return("True"));
+
+    auto options = presenter.getReductionOptions();
+    TS_ASSERT_EQUALS(variantToString(options["NormalizeByIntegratedMonitors"]),
+                     "True");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetMonitorIntegralRangeOptions() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
     EXPECT_CALL(mockView, getMonitorIntegralMin())
-        .Times(Exactly(1))
+        .Times(AtLeast(1))
         .WillOnce(Return("4"));
     EXPECT_CALL(mockView, getMonitorIntegralMax())
-        .Times(Exactly(1))
+        .Times(AtLeast(1))
         .WillOnce(Return("10"));
+
+    auto options = presenter.getReductionOptions();
+    TS_ASSERT_EQUALS(
+        variantToString(options["MonitorIntegrationWavelengthMin"]), "4");
+    TS_ASSERT_EQUALS(
+        variantToString(options["MonitorIntegrationWavelengthMax"]), "10");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetMonitorBackgroundRangeOptions() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
     EXPECT_CALL(mockView, getMonitorBackgroundMin())
-        .Times(Exactly(1))
+        .Times(AtLeast(1))
         .WillOnce(Return("12"));
     EXPECT_CALL(mockView, getMonitorBackgroundMax())
-        .Times(Exactly(1))
+        .Times(AtLeast(1))
         .WillOnce(Return("17"));
+
+    auto options = presenter.getReductionOptions();
+    TS_ASSERT_EQUALS(variantToString(options["MonitorBackgroundWavelengthMin"]),
+                     "12");
+    TS_ASSERT_EQUALS(variantToString(options["MonitorBackgroundWavelengthMax"]),
+                     "17");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetLambdaRangeOptions() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
     EXPECT_CALL(mockView, getLambdaMin())
-        .Times(Exactly(1))
+        .Times(AtLeast(1))
         .WillOnce(Return("1"));
     EXPECT_CALL(mockView, getLambdaMax())
-        .Times(Exactly(1))
+        .Times(AtLeast(1))
         .WillOnce(Return("15"));
+
+    auto options = presenter.getReductionOptions();
+    TS_ASSERT_EQUALS(variantToString(options["WavelengthMin"]), "1");
+    TS_ASSERT_EQUALS(variantToString(options["WavelengthMax"]), "15");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetI0MonitorIndexOption() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
     EXPECT_CALL(mockView, getI0MonitorIndex())
-        .Times(Exactly(1))
+        .Times(AtLeast(1))
         .WillOnce(Return("2"));
-    EXPECT_CALL(mockView, getScaleFactor())
+
+    auto options = presenter.getReductionOptions();
+    TS_ASSERT_EQUALS(variantToString(options["I0MonitorIndex"]), "2");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetDetectorCorrectionTypeOptions() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
+    EXPECT_CALL(mockView, detectorCorrectionEnabled())
         .Times(Exactly(1))
-        .WillOnce(Return("2"));
-    EXPECT_CALL(mockView, getMomentumTransferStep())
-        .Times(Exactly(1))
-        .WillOnce(Return("-0.02"));
-    EXPECT_CALL(mockView, getProcessingInstructions())
-        .Times(Exactly(1))
-        .WillOnce(Return("3,4"));
+        .WillOnce(Return(true));
     EXPECT_CALL(mockView, getDetectorCorrectionType())
-        .Times(Exactly(1))
+        .Times(AtLeast(1))
         .WillOnce(Return("VerticalShift"));
-    EXPECT_CALL(mockView, getTransmissionRuns())
-        .Times(Exactly(1))
-        .WillOnce(Return("INTER00013463,INTER00013464"));
-    EXPECT_CALL(mockView, getStartOverlap())
-        .Times(Exactly(1))
-        .WillOnce(Return("10"));
-    EXPECT_CALL(mockView, getEndOverlap())
-        .Times(Exactly(1))
-        .WillOnce(Return("12"));
+
     auto options = presenter.getReductionOptions();
 
-    std::vector<std::string> optionsVec;
-    boost::split(optionsVec, options, split_q());
-    TS_ASSERT_EQUALS(optionsVec.size(), 22);
-    TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
-    TS_ASSERT_EQUALS(optionsVec[1], "CRho=\"2.5,0.4,1.1\"");
-    TS_ASSERT_EQUALS(optionsVec[2], "CAlpha=\"0.6,0.9,1.2\"");
-    TS_ASSERT_EQUALS(optionsVec[3], "CAp=\"100.0,17.0,44.0\"");
-    TS_ASSERT_EQUALS(optionsVec[4], "CPp=\"0.54,0.33,1.81\"");
-    TS_ASSERT_EQUALS(optionsVec[5], "PolarizationAnalysis=PNR");
-    TS_ASSERT_EQUALS(optionsVec[6], "ScaleFactor=2");
-    TS_ASSERT_EQUALS(optionsVec[7], "MomentumTransferStep=-0.02");
-    TS_ASSERT_EQUALS(optionsVec[8], "StartOverlap=10");
-    TS_ASSERT_EQUALS(optionsVec[9], "EndOverlap=12");
-    TS_ASSERT_EQUALS(optionsVec[10], "FirstTransmissionRun=INTER00013463");
-    TS_ASSERT_EQUALS(optionsVec[11], "SecondTransmissionRun=INTER00013464");
-    TS_ASSERT_EQUALS(optionsVec[12], "NormalizeByIntegratedMonitors=True");
-    TS_ASSERT_EQUALS(optionsVec[13], "MonitorIntegrationWavelengthMin=4");
-    TS_ASSERT_EQUALS(optionsVec[14], "MonitorIntegrationWavelengthMax=10");
-    TS_ASSERT_EQUALS(optionsVec[15], "MonitorBackgroundWavelengthMin=12");
-    TS_ASSERT_EQUALS(optionsVec[16], "MonitorBackgroundWavelengthMax=17");
-    TS_ASSERT_EQUALS(optionsVec[17], "WavelengthMin=1");
-    TS_ASSERT_EQUALS(optionsVec[18], "WavelengthMax=15");
-    TS_ASSERT_EQUALS(optionsVec[19], "I0MonitorIndex=2");
-    TS_ASSERT_EQUALS(optionsVec[20], "ProcessingInstructions=\"3,4\"");
-    TS_ASSERT_EQUALS(optionsVec[21], "DetectorCorrectionType=VerticalShift");
+    TS_ASSERT_EQUALS(variantToString(options["CorrectDetectors"]), "1");
+    TS_ASSERT_EQUALS(variantToString(options["DetectorCorrectionType"]),
+                     "VerticalShift");
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
 
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013463"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013464"));
-    AnalysisDataService::Instance().clear();
+  void testReductionOptionsIncludePerAngleDefaults() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
+    // The reduction options should include any defaults specified in the
+    // per-angle options table. These are specified via a single row in the
+    // table which has an empty angle as the key
+    OptionsQMap options;
+    options["FirstTransmissionRun"] = "INTER00013463,INTER00013464";
+    std::map<std::string, OptionsQMap> perAngleOptions = {{"", options}};
+
+    EXPECT_CALL(mockView, getPerAngleOptions())
+        .Times(AtLeast(1))
+        .WillOnce(Return(perAngleOptions));
+
+    auto result = presenter.getReductionOptions();
+    TS_ASSERT_EQUALS(result["FirstTransmissionRun"],
+                     perAngleOptions[""]["FirstTransmissionRun"]);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetOverlapRangeOptions() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
+    EXPECT_CALL(mockView, getStartOverlap())
+        .Times(AtLeast(1))
+        .WillOnce(Return("10"));
+    EXPECT_CALL(mockView, getEndOverlap())
+        .Times(AtLeast(1))
+        .WillOnce(Return("12"));
+
+    auto options = presenter.getReductionOptions();
+
+    TS_ASSERT_EQUALS(variantToString(options["StartOverlap"]), "10");
+    TS_ASSERT_EQUALS(variantToString(options["EndOverlap"]), "12");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
   void testStitchOptions() {
-    MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView);
+    NiceMock<MockSettingsView> mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
         .Times(1)
@@ -229,8 +374,8 @@ public:
   }
 
   void testPolarisationOptionsEnabled() {
-    MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView);
+    NiceMock<MockSettingsView> mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, setIsPolCorrEnabled(false)).Times(Exactly(1));
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(false))
@@ -240,11 +385,33 @@ public:
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(true))
         .Times(Exactly(1));
     presenter.setInstrumentName("POLREF");
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testDisablesControlsWhenReductionResumed() {
+    NiceMock<MockSettingsView> mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
+    EXPECT_CALL(mockView, disableAll());
+    presenter.onReductionResumed();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testEnablesControlsWhenReductionPaused() {
+    NiceMock<MockSettingsView> mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
+    EXPECT_CALL(mockView, enableAll());
+    presenter.onReductionPaused();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
   void testExperimentDefaults() {
-    MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView);
+    NiceMock<MockSettingsView> mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
+    expectNoOptionLoadErrors(mockView);
     MockMainWindowPresenter mainPresenter;
 
     // Set instrument to 'POLREF'
@@ -253,43 +420,64 @@ public:
         .Times(Exactly(1));
     presenter.setInstrumentName("POLREF");
 
-    std::vector<std::string> defaults = {
-        "PointDetectorAnalysis", "None",
-        "1.006831,-0.011467,0.002244,-0.000095",
-        "1.017526,-0.017183,0.003136,-0.000140",
-        "0.917940,0.038265,-0.006645,0.000282",
-        "0.972762,0.001828,-0.000261,0.0", "10", "12"};
+    auto fromIDFOrReductionAlg = ExperimentOptionDefaults();
+    fromIDFOrReductionAlg.AnalysisMode = "PointDetectorAnalysis";
+    fromIDFOrReductionAlg.PolarizationAnalysis = "None";
+    fromIDFOrReductionAlg.CRho = "1.006831,-0.011467,0.002244,-0.000095";
+    fromIDFOrReductionAlg.CAlpha = "1.017526,-0.017183,0.003136,-0.000140";
+    fromIDFOrReductionAlg.CAp = "0.917940,0.038265,-0.006645,0.000282";
+    fromIDFOrReductionAlg.CPp = "0.972762,0.001828,-0.000261,0.0";
+    fromIDFOrReductionAlg.TransRunStartOverlap = 10.0;
+    fromIDFOrReductionAlg.TransRunEndOverlap = 12.0;
+    fromIDFOrReductionAlg.SummationType = "SumInLambda";
+    fromIDFOrReductionAlg.ReductionType = "Normal";
 
-    EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
+    EXPECT_CALL(mockView, setExpDefaults(fromIDFOrReductionAlg)).Times(1);
     presenter.notify(IReflSettingsPresenter::ExpDefaultsFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
+  void expectNoOptionLoadErrors(MockSettingsView &mockView) {
+    EXPECT_CALL(mockView, showOptionLoadErrors(_, _)).Times(0);
+  }
+
+  void expectOptionLoadErrors(MockSettingsView &mockView) {
+    EXPECT_CALL(mockView, showOptionLoadErrors(_, _)).Times(AtLeast(1));
+  }
+
   void testInstrumentDefaults() {
-    MockSettingsView mockView;
+    NiceMock<MockSettingsView> mockView;
     MockMainWindowPresenter mainPresenter;
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     // Set instrument to 'INTER'
     EXPECT_CALL(mockView, setIsPolCorrEnabled(false)).Times(Exactly(1));
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(false))
         .Times(Exactly(1));
+    expectNoOptionLoadErrors(mockView);
+
     presenter.setInstrumentName("INTER");
+    auto fromIDFOrReductionAlg = InstrumentOptionDefaults();
 
-    std::vector<double> defaults_double = {1.,  4.0, 10., 17.,
-                                           18., 1.5, 17., 2.0};
-    std::vector<std::string> defaults_str = {"VerticalShift"};
+    fromIDFOrReductionAlg.NormalizeByIntegratedMonitors = true;
+    fromIDFOrReductionAlg.MonitorIntegralMin = 4.0;
+    fromIDFOrReductionAlg.MonitorIntegralMax = 10.0;
+    fromIDFOrReductionAlg.MonitorBackgroundMin = 17.0;
+    fromIDFOrReductionAlg.MonitorBackgroundMax = 18.0;
+    fromIDFOrReductionAlg.LambdaMin = 1.5;
+    fromIDFOrReductionAlg.LambdaMax = 17.0;
+    fromIDFOrReductionAlg.I0MonitorIndex = 2.0;
+    fromIDFOrReductionAlg.DetectorCorrectionType = "VerticalShift";
+    fromIDFOrReductionAlg.CorrectDetectors = true;
 
-    EXPECT_CALL(mockView, setInstDefaults(defaults_double, defaults_str))
-        .Times(1);
+    EXPECT_CALL(mockView, setInstDefaults(fromIDFOrReductionAlg)).Times(1);
     presenter.notify(IReflSettingsPresenter::InstDefaultsFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
   void testExperimentSettingsDisabled() {
-
-    MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView);
+    NiceMock<MockSettingsView> mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
         .Times(3)
@@ -313,7 +501,6 @@ public:
     EXPECT_CALL(mockView, getLambdaMin()).Times(Exactly(2));
     EXPECT_CALL(mockView, getLambdaMax()).Times(Exactly(2));
     EXPECT_CALL(mockView, getI0MonitorIndex()).Times(Exactly(2));
-    EXPECT_CALL(mockView, getProcessingInstructions()).Times(Exactly(2));
     EXPECT_CALL(mockView, getDetectorCorrectionType()).Times(Exactly(1));
 
     auto transmissionOptions = presenter.getTransmissionOptions();
@@ -324,12 +511,12 @@ public:
   }
 
   void testInstrumentSettingsDisabled() {
-
-    MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView);
+    NiceMock<MockSettingsView> mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
+    onCallReturnDefaultOptions(mockView);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
-        .Times(3)
+        .Times(5)
         .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, instrumentSettingsEnabled())
         .Times(2)
@@ -343,27 +530,78 @@ public:
     EXPECT_CALL(mockView, getLambdaMin()).Times(Exactly(0));
     EXPECT_CALL(mockView, getLambdaMax()).Times(Exactly(0));
     EXPECT_CALL(mockView, getI0MonitorIndex()).Times(Exactly(0));
-    EXPECT_CALL(mockView, getProcessingInstructions()).Times(Exactly(0));
     EXPECT_CALL(mockView, getIntMonCheck()).Times(Exactly(0));
     EXPECT_CALL(mockView, getDetectorCorrectionType()).Times(Exactly(0));
+    EXPECT_CALL(mockView, detectorCorrectionEnabled()).Times(Exactly(0));
 
     // Experiment settings should be called
     EXPECT_CALL(mockView, getAnalysisMode()).Times(Exactly(2));
-    EXPECT_CALL(mockView, getCRho()).Times(Exactly(1));
-    EXPECT_CALL(mockView, getCAlpha()).Times(Exactly(1));
-    EXPECT_CALL(mockView, getCAp()).Times(Exactly(1));
-    EXPECT_CALL(mockView, getCPp()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getCRho()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getCAlpha()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getCAp()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getCPp()).Times(Exactly(0));
     EXPECT_CALL(mockView, getPolarisationCorrections()).Times(Exactly(1));
-    EXPECT_CALL(mockView, getScaleFactor()).Times(Exactly(1));
-    EXPECT_CALL(mockView, getMomentumTransferStep()).Times(Exactly(1));
     EXPECT_CALL(mockView, getStartOverlap()).Times(Exactly(2));
     EXPECT_CALL(mockView, getEndOverlap()).Times(Exactly(2));
-    EXPECT_CALL(mockView, getTransmissionRuns()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getPerAngleOptions()).Times(Exactly(2));
     EXPECT_CALL(mockView, getStitchOptions()).Times(Exactly(1));
 
     auto transmissionOptions = presenter.getTransmissionOptions();
     auto reductionOptions = presenter.getReductionOptions();
     auto stitchOptions = presenter.getStitchOptions();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetDefaultOptions() {
+    MockSettingsView mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
+    // Default options are specified with a single entry with an empty angle as
+    // the key
+    OptionsQMap options;
+    options["FirstTransmissionRun"] = "INTER00013463,INTER00013464";
+    std::map<std::string, OptionsQMap> perAngleOptions = {{"", options}};
+
+    EXPECT_CALL(mockView, experimentSettingsEnabled())
+        .Times(1)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, getPerAngleOptions())
+        .Times(1)
+        .WillOnce(Return(perAngleOptions));
+
+    auto result = presenter.getDefaultOptions();
+    TS_ASSERT_EQUALS(result, perAngleOptions[""]);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetOptionsForAngle() {
+    MockSettingsView mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
+    // Set up a table with transmission runs for 2 different angles
+    OptionsQMap options1;
+    options1["FirstTransmissionRun"] = "INTER00013463,INTER00013464";
+    OptionsQMap options2;
+    options2["FirstTransmissionRun"] = "INTER00013463R00013464";
+    std::map<std::string, OptionsQMap> perAngleOptions = {{"0.7", options1},
+                                                          {"2.33", options2}};
+
+    // Test looking up transmission runs based on the angle. It has
+    // quite a generous tolerance so the angle does not have to be
+    // exact
+    EXPECT_CALL(mockView, experimentSettingsEnabled())
+        .Times(4)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, getPerAngleOptions())
+        .Times(6)
+        .WillRepeatedly(Return(perAngleOptions));
+
+    auto result = presenter.getOptionsForAngle(0.69);
+    TS_ASSERT_EQUALS(result, perAngleOptions["0.7"]);
+    result = presenter.getOptionsForAngle(2.34);
+    TS_ASSERT_EQUALS(result, perAngleOptions["2.33"]);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

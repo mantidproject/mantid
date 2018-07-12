@@ -1454,9 +1454,8 @@ std::vector<T> Matrix<T>::toRotation()
   }
   // step 2: get scales and rescsale the matrix
   std::vector<T> scale(this->m_numRows);
-  T currentScale;
   for (size_t i = 0; i < this->m_numColumns; ++i) {
-    currentScale = T(0.);
+    T currentScale{0};
     for (size_t j = 0; j < this->m_numRows; ++j)
       currentScale += (m_rawData[j][i] * m_rawData[j][i]);
     currentScale = static_cast<T>(sqrt(static_cast<double>(currentScale)));

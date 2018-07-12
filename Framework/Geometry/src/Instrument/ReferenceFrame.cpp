@@ -6,65 +6,15 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace Geometry {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
-@param up : pointing up axis
-@param alongBeam : axis pointing along the beam
-@param handedness : Handedness
-@param origin : origin
-*/
-ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
-                               Handedness handedness, std::string origin)
-    : m_up(up), m_alongBeam(alongBeam), m_thetaSign(up),
-      m_handedness(handedness), m_origin(origin) {
-  if (up == alongBeam) {
-    throw std::invalid_argument(
-        "Cannot have up direction the same as the beam direction");
-  }
-  init();
-}
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
-@param up : pointing up axis
-@param alongBeam : axis pointing along the beam
-@param thetaSign : axis defining the sign of 2theta
-@param handedness : Handedness
-@param origin : origin
-*/
-ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
-                               PointingAlong thetaSign, Handedness handedness,
-                               std::string origin)
-    : m_up(up), m_alongBeam(alongBeam), m_thetaSign(thetaSign),
-      m_handedness(handedness), m_origin(origin) {
-  if (up == alongBeam) {
-    throw std::invalid_argument(
-        "Cannot have up direction the same as the beam direction");
-  }
-  if (thetaSign == alongBeam) {
-    throw std::invalid_argument(
-        "Scattering angle sign axis cannot be the same as the beam direction");
-  }
-  init();
-}
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
-Default constructor
-*/
-ReferenceFrame::ReferenceFrame()
-    : m_up(Y), m_alongBeam(Z), m_handedness(Right), m_origin("source") {
-  init();
-}
-
+namespace {
 /**
-Non-member helper method to convert x y z enumeration directions into proper
-3D vectors.
-@param direction : direction marker
-@return 3D vector
+ * Non-member helper method to convert x y z enumeration directions into proper
+ * 3D vectors.
+ * @param direction : direction marker
+ * @return 3D vector
 */
 V3D directionToVector(const PointingAlong &direction) {
-  Mantid::Kernel::V3D result;
+  V3D result;
   if (direction == X) {
     result = V3D(1, 0, 0);
   } else if (direction == Y) {
@@ -91,9 +41,44 @@ std::string directionToString(const PointingAlong &direction) {
   }
   return result;
 }
+}
 
-/// Perform common initalisation steps.
-void ReferenceFrame::init() {
+/**
+ * Default constructor. up=Y, beam=Z, thetaSign=Y
+ */
+ReferenceFrame::ReferenceFrame() : ReferenceFrame(Y, Z, Y, Right, "source") {}
+
+/** Constructor specifying thetaSign=up
+ * @param up :pointing up axis
+ * @param alongBeam : axis pointing along the beam
+ * @param handedness : Handedness
+ * @param origin : origin
+*/
+ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
+                               Handedness handedness, std::string origin)
+    : ReferenceFrame(up, alongBeam, up, handedness, std::move(origin)) {}
+
+/**
+ * Constructor specifying all attributes
+ * @param up : pointing up axis
+ * @param alongBeam : axis pointing along the beam
+ * @param thetaSign : axis defining the sign of 2theta
+ * @param handedness : Handedness
+ * @param origin : origin
+*/
+ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
+                               PointingAlong thetaSign, Handedness handedness,
+                               std::string origin)
+    : m_up(up), m_alongBeam(alongBeam), m_thetaSign(thetaSign),
+      m_handedness(handedness), m_origin(std::move(origin)) {
+  if (up == alongBeam) {
+    throw std::invalid_argument(
+        "Cannot have up direction the same as the beam direction");
+  }
+  if (thetaSign == alongBeam) {
+    throw std::invalid_argument(
+        "Scattering angle sign axis cannot be the same as the beam direction");
+  }
   m_vecPointingUp = directionToVector(m_up);
   m_vecPointingAlongBeam = directionToVector(m_alongBeam);
   m_vecThetaSign = directionToVector(m_thetaSign);

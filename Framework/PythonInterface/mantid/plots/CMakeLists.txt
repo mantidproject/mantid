@@ -1,6 +1,8 @@
 set ( PY_FILES
   __init__.py
-  _functions.py
+  helperfunctions.py
+  plotfunctions.py
+  plotfunctions3D.py
 )
 
 

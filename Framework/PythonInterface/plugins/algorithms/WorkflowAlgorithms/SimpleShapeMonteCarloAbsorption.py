@@ -39,6 +39,9 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
     def category(self):
         return 'Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS'
 
+    def seeAlso(self):
+        return [ "CalculateMonteCarloAbsorption","MonteCarloAbsorption" ]
+
     def summary(self):
         return 'Calculates absorption corrections for a given sample shape.'
 

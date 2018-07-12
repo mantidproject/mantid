@@ -92,7 +92,7 @@ public:
   const boost::shared_ptr<const IObject> shape() const override;
   /// Set a new shape on the component
   /// void setShape(boost::shared_ptr<const IObject> newShape);
-  void setShape(IObject_const_sptr newShape);
+  void setShape(boost::shared_ptr<const IObject> newShape);
   /// Return the material this component is made from
   const Kernel::Material material() const override;
 

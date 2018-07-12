@@ -40,8 +40,8 @@ private:
 template class Mantid::Kernel::SingletonHolder<LiveDataAlgInputHistoryImpl>;
 #endif /* _WIN32 */
 /// The specific instantiation of the templated type
-typedef Mantid::Kernel::SingletonHolder<LiveDataAlgInputHistoryImpl>
-    LiveDataAlgInputHistory;
+using LiveDataAlgInputHistory =
+    Mantid::Kernel::SingletonHolder<LiveDataAlgInputHistoryImpl>;
 
 class LiveDataPostProcessingAlgInputHistoryImpl
     : public AbstractAlgorithmInputHistory {
@@ -61,9 +61,8 @@ template class Mantid::Kernel::SingletonHolder<
     LiveDataPostProcessingAlgInputHistoryImpl>;
 #endif /* _WIN32 */
 /// The specific instantiation of the templated type
-typedef Mantid::Kernel::SingletonHolder<
-    LiveDataPostProcessingAlgInputHistoryImpl>
-    LiveDataPostProcessingAlgInputHistory;
+using LiveDataPostProcessingAlgInputHistory =
+    Mantid::Kernel::SingletonHolder<LiveDataPostProcessingAlgInputHistoryImpl>;
 }
 
 // Add this class to the list of specialised dialogs in this namespace

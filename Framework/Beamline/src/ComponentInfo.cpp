@@ -7,7 +7,6 @@
 #include <numeric>
 #include <sstream>
 #include <utility>
-#include <vector>
 
 namespace Mantid {
 namespace Beamline {
@@ -39,8 +38,11 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
         componentRanges,
     boost::shared_ptr<const std::vector<size_t>> parentIndices,
+    boost::shared_ptr<std::vector<std::vector<size_t>>> children,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
-    boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
+    boost::shared_ptr<std::vector<Eigen::Quaterniond,
+                                  Eigen::aligned_allocator<Eigen::Quaterniond>>>
+        rotations,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
     boost::shared_ptr<std::vector<ComponentType>> componentType,
     boost::shared_ptr<const std::vector<std::string>> names,
@@ -51,7 +53,8 @@ ComponentInfo::ComponentInfo(
       m_detectorRanges(std::move(detectorRanges)),
       m_componentRanges(std::move(componentRanges)),
       m_parentIndices(std::move(parentIndices)),
-      m_positions(std::move(positions)), m_rotations(std::move(rotations)),
+      m_children(std::move(children)), m_positions(std::move(positions)),
+      m_rotations(std::move(rotations)),
       m_scaleFactors(std::move(scaleFactors)),
       m_componentType(std::move(componentType)), m_names(std::move(names)),
       m_size(m_assemblySortedDetectorIndices->size() +
@@ -90,6 +93,19 @@ ComponentInfo::ComponentInfo(
   if (m_names->size() != m_size) {
     throw std::invalid_argument("ComponentInfo should be provided same number "
                                 "of names as number of components");
+  }
+
+  // Calculate total size of all assemblies
+  auto assemTotalSize = std::accumulate(
+      m_children->begin(), m_children->end(), static_cast<size_t>(1),
+      [](size_t size, const std::vector<size_t> &assem) {
+        return size += assem.size();
+      });
+
+  if (assemTotalSize != m_size) {
+    throw std::invalid_argument("ComponentInfo should be provided an "
+                                "instrument tree which contains same number "
+                                "components");
   }
 }
 
@@ -139,7 +155,23 @@ ComponentInfo::componentsInSubtree(const size_t componentIndex) const {
   return indices;
 }
 
+const std::vector<size_t> &
+ComponentInfo::children(const size_t componentIndex) const {
+  static const std::vector<size_t> emptyVec;
+
+  if (!isDetector(componentIndex))
+    return (*m_children)[compOffsetIndex(componentIndex)];
+
+  return emptyVec;
+}
+
 size_t ComponentInfo::size() const { return m_size; }
+
+size_t
+ComponentInfo::numberOfDetectorsInSubtree(const size_t componentIndex) const {
+  auto range = detectorRangeInSubtree(componentIndex);
+  return std::distance(range.begin(), range.end());
+}
 
 Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
   checkNoTimeDependence();
@@ -264,18 +296,16 @@ void ComponentInfo::doSetRotation(const std::pair<size_t, size_t> &index,
   auto transform = Eigen::Matrix3d(rotDelta);
 
   for (const auto &subDetIndex : detectorRange) {
-    auto newPos =
-        transform *
-            (m_detectorInfo->position({subDetIndex, timeIndex}) - compPos) +
-        compPos;
+    auto oldPos = m_detectorInfo->position({subDetIndex, timeIndex});
+    auto newPos = transform * (oldPos - compPos) + compPos;
     auto newRot = rotDelta * m_detectorInfo->rotation({subDetIndex, timeIndex});
     m_detectorInfo->setPosition({subDetIndex, timeIndex}, newPos);
     m_detectorInfo->setRotation({subDetIndex, timeIndex}, newRot);
   }
 
   for (const auto &subCompIndex : componentRangeInSubtree(componentIndex)) {
-    auto newPos =
-        transform * (position({subCompIndex, timeIndex}) - compPos) + compPos;
+    auto oldPos = position({subCompIndex, timeIndex});
+    auto newPos = transform * (oldPos - compPos) + compPos;
     auto newRot = rotDelta * rotation({subCompIndex, timeIndex});
     const size_t childCompIndexOffset = compOffsetIndex(subCompIndex);
     m_positions.access()[linearIndex({childCompIndexOffset, timeIndex})] =
@@ -302,7 +332,8 @@ void ComponentInfo::setPosition(const size_t componentIndex,
   if (isDetector(componentIndex))
     return m_detectorInfo->setPosition(componentIndex, newPosition);
 
-  // Optimization: Not using detectorsInSubtree and componentsInSubtree to avoid
+  // Optimization: Not using detectorsInSubtree and componentsInSubtree to
+  // avoid
   // memory allocations.
   // Optimization: Split loop over detectors and other components.
   const auto detectorRange = detectorRangeInSubtree(componentIndex);
@@ -506,7 +537,7 @@ const std::string &ComponentInfo::name(const size_t componentIndex) const {
   return (*m_names)[componentIndex];
 }
 
-size_t ComponentInfo::indexOf(const std::string &name) const {
+size_t ComponentInfo::indexOfAny(const std::string &name) const {
   // Reverse iterate to hit top level components sooner
   auto it = std::find(m_names->rbegin(), m_names->rend(), name);
   if (it == m_names->rend()) {

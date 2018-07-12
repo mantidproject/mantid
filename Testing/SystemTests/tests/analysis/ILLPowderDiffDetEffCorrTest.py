@@ -23,6 +23,7 @@ class ILLPowderDiffDetEffCorrTest(stresstesting.MantidStressTest):
         mtd.clear()
 
     def runTest(self):
+
         PowderDiffILLDetEffCorr(CalibrationRun='967076.nxs',
                                 OutputWorkspace='calib',
                                 OutputResponseWorkspace='response')

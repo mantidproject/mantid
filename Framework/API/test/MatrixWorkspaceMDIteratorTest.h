@@ -52,8 +52,8 @@ public:
 
   void test_iterating() {
     boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
-    IMDIterator *it = nullptr;
-    TS_ASSERT_THROWS_NOTHING(it = ws->createIterator(NULL));
+    std::unique_ptr<IMDIterator> it;
+    TS_ASSERT_THROWS_NOTHING(it = ws->createIterator(nullptr));
     TS_ASSERT_EQUALS(it->getDataSize(), 20);
     TS_ASSERT_DELTA(it->getSignal(), 0.0, 1e-5);
     it->next();
@@ -83,24 +83,21 @@ public:
     TS_ASSERT_DELTA(it->getError(), 22.0, 1e-5);
     TS_ASSERT_DELTA(it->getCenter()[0], 3.0, 1e-5);
     TS_ASSERT_DELTA(it->getCenter()[1], 2.0, 1e-5);
-    delete it;
   }
 
   /** Create a set of iterators that can be applied in parallel */
   void test_parallel_iterators() {
     boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
     // The number of output cannot be larger than the number of histograms
-    std::vector<IMDIterator *> it = ws->createIterators(10, NULL);
+    auto it = ws->createIterators(10, nullptr);
     TS_ASSERT_EQUALS(it.size(), 4);
-    for (size_t i = 0; i < it.size(); ++i)
-      delete it[i];
 
     // Split in 4 iterators
-    std::vector<IMDIterator *> iterators = ws->createIterators(4, NULL);
+    auto iterators = ws->createIterators(4, nullptr);
     TS_ASSERT_EQUALS(iterators.size(), 4);
 
     for (size_t i = 0; i < iterators.size(); i++) {
-      IMDIterator *it = iterators[i];
+      IMDIterator *it = iterators[i].get();
       const double i_d = static_cast<double>(i);
       // Only 5 elements per each iterator
       TS_ASSERT_EQUALS(it->getDataSize(), 5);
@@ -116,19 +113,17 @@ public:
       TS_ASSERT(it->next());
       TS_ASSERT(it->next());
       TS_ASSERT(!it->next());
-      delete it;
     }
   }
 
   void test_get_is_masked() {
     boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
-    IMDIterator *it = ws->createIterator(NULL);
+    auto it = ws->createIterator(nullptr);
     const auto &spectrumInfo = ws->spectrumInfo();
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), it->getIsMasked());
       it->next();
     }
-    delete it;
   }
 
   void testUnequalBins() {
@@ -141,11 +136,11 @@ public:
     TS_ASSERT_THROWS(ws->blocksize(), std::logic_error);
     TS_ASSERT_EQUALS(ws->size(), 17);
     // Split in 4 iterators
-    std::vector<IMDIterator *> iterators = ws->createIterators(4, nullptr);
+    auto iterators = ws->createIterators(4, nullptr);
     TS_ASSERT_EQUALS(iterators.size(), 4);
 
     for (size_t i = 0; i < iterators.size(); i++) {
-      IMDIterator *it = iterators[i];
+      auto it = iterators[i].get();
       const double i_d = static_cast<double>(i);
       if (i == 0) {
         // Only 5 elements per each iterator
@@ -174,7 +169,6 @@ public:
         TS_ASSERT(it->next());
       }
       TS_ASSERT(!it->next());
-      delete it;
     }
   }
 };

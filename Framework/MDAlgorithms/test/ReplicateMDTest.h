@@ -77,8 +77,8 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
     // Generate the axis order 0, 1, 2 ... in reverse
     std::vector<int> axes(outWs->getNumDims());
     Decreasing op(outWs->getNumDims());
-    for (auto it = axes.begin(); it != axes.end(); ++it) {
-      *it = static_cast<int>(op());
+    for (int &axis : axes) {
+      axis = static_cast<int>(op());
     }
 
     IAlgorithm *transpose =

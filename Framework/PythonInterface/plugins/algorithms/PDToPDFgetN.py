@@ -19,6 +19,9 @@ class PDToPDFgetN(DataProcessorAlgorithm):
     def category(self):
         return "Workflow\\Diffraction"
 
+    def seeAlso(self):
+        return [ "PDToGUDRUN" ]
+
     def name(self):
         return "PDToPDFgetN"
 

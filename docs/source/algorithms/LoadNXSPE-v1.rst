@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -18,6 +18,13 @@ For indirect data, we recommend to save the data in NXS format instead.
 
 **NOTE:** In the current implementation, the rendering of the NXSPE
 instrument is VERY memory intensive.
+
+**NOTE:** This algorithm also sets to true the `distribution` flag on the output 
+workspace. This is because all examples of workspaces saved to `NXSPE` format
+by the reduction algorithms are distributions (signal is count rate and should
+be multiplied by bin widths to get counts). :ref:`algm-SaveNXSPE` does not
+require its input is a distribution, however, and the `NXSPE` format does not
+have a distribution flag.
 
 Usage
 -----

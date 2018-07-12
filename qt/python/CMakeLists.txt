@@ -23,6 +23,18 @@ if ( ENABLE_WORKBENCH )
   # Create egg link to binary output directory for mantidqt
   add_python_package ( mantidqt )
 
+  # Configure resources data in place for ease of development. The output
+  # file is added to the toplevel gitignore
+  set ( _qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc )
+  set ( _output_res_py ${CMAKE_CURRENT_LIST_DIR}/mantidqt/resources.py )
+  configure_file ( create_resources.cmake.in create_resources.cmake @ONLY)
+  add_custom_command ( OUTPUT ${_output_res_py}
+    COMMAND ${CMAKE_COMMAND} -P create_resources.cmake
+    COMMENT "Generating mantidqt resources module"
+    DEPENDS ${_qrc_file}
+  )
+  add_custom_target ( mantidqt_resources ALL DEPENDS ${_output_res_py} )
+
   # Now add any compiled sip targets
   add_subdirectory ( mantidqt/widgets )
 
@@ -30,7 +42,20 @@ if ( ENABLE_WORKBENCH )
   add_dependencies ( mantidqt
     mantidqt_widgetscoreqt5
     mantidqt_widgetscoreqt4
+    mantidqt_resources
   )
+
+  if ( MSVC )
+    # Debug builds need libraries that are linked with MSVC debug runtime
+    add_custom_command (
+      TARGET mantidqt
+      POST_BUILD
+      COMMAND if 1==$<CONFIG:Debug> ${CMAKE_COMMAND}
+        -E copy_directory ${PYTHON_DIR}/msvc-site-packages/debug/PyQt5 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/PyQt5
+      COMMENT "Copying debug PyQt5 to bin/Debug"
+    )
+endif ()
+
 
   ##########################################################################
   # Testing
@@ -38,18 +63,44 @@ if ( ENABLE_WORKBENCH )
 
   # ctest targets
   set ( PYTHON_TEST_FILES
+    mantidqt/test/test_algorithm_observer.py
     mantidqt/test/test_import.py
+
+    mantidqt/utils/test/test_async.py
+    mantidqt/utils/test/test_modal_tester.py
     mantidqt/utils/test/test_qt_utils.py
+    mantidqt/utils/test/test_writetosignal.py
+
+    mantidqt/widgets/test/test_algorithm_dialog.py
+
+    mantidqt/widgets/codeeditor/test/test_codeeditor.py
+    mantidqt/widgets/codeeditor/test/test_errorformatter.py
+    mantidqt/widgets/codeeditor/test/test_execution.py
+    mantidqt/widgets/codeeditor/test/test_interpreter.py
+    mantidqt/widgets/codeeditor/test/test_multifileinterpreter.py
+
+    mantidqt/widgets/workspacewidget/test/test_plotselectiondialog.py
+
     mantidqt/widgets/test/test_algorithmselector.py
     mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/test/test_messagedisplay.py
   )
 
   # Tests
+  set ( PYUNITTEST_QT_API pyqt5 )
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
-    mantidqt ${PYTHON_TEST_FILES}
+    mantidqt_qt5 ${PYTHON_TEST_FILES}
   )
-
+  # The jupyterconsole test segfaults on Python 3 and Qt 4
+  # despite the code functioning in a normal usage.
+  # Leave it out as it's a very basic test and the Qt5
+  # tests should catch any problems anyway
+  list ( REMOVE_ITEM PYTHON_TEST_FILES mantidqt/widgets/test/test_jupyterconsole.py )
+  set ( PYUNITTEST_QT_API pyqt )
+  pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
+    mantidqt_qt4 ${PYTHON_TEST_FILES}
+  )
+  unset ( PYUNITTEST_QT_API )
   # No package installation yet...
   # Configure utils.qt.plugins file for install
 endif ()

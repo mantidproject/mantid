@@ -83,6 +83,11 @@ SpectrumNumberTranslator::SpectrumNumberTranslator(
   }
 }
 
+const std::vector<SpectrumNumber> &
+SpectrumNumberTranslator::globalSpectrumNumbers() const {
+  return m_globalSpectrumNumbers;
+}
+
 SpectrumNumberTranslator::SpectrumNumberTranslator(
     const std::vector<GlobalSpectrumIndex> &globalIndices,
     const SpectrumNumberTranslator &parent)

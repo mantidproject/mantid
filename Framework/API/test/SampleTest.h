@@ -7,6 +7,7 @@
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -260,7 +261,7 @@ public:
     Material vanBlock("vanBlock",
                       Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
     Sample sample;
-    IObject_sptr shape = Mantid::Geometry::ShapeFactory().createShape("");
+    auto shape = Mantid::Geometry::ShapeFactory().createShape("");
     shape->setMaterial(vanBlock);
     sample.setShape(shape);
 
@@ -321,7 +322,8 @@ public:
     auto sample2 = boost::make_shared<Sample>();
     sample2->setName("test name for test_Multiple_Sample - 2");
     sample.addSample(sample2);
-    TS_ASSERT(sample.getShape().getShapeXML() != "");
+    TS_ASSERT(
+        dynamic_cast<const CSGObject &>(sample.getShape()).getShapeXML() != "");
 
     sample.saveNexus(th.file, "sample");
     th.reopenFile();
@@ -339,8 +341,9 @@ public:
     TS_ASSERT_DELTA(loaded.getOrientedLattice().c(), 6.0, 1e-6);
     TS_ASSERT_EQUALS(loaded.getShape().getBoundingBox().xMax(),
                      sample.getShape().getBoundingBox().xMax());
-    TS_ASSERT_EQUALS(loaded.getShape().getShapeXML(),
-                     sample.getShape().getShapeXML());
+    TS_ASSERT_EQUALS(
+        dynamic_cast<const CSGObject &>(loaded.getShape()).getShapeXML(),
+        dynamic_cast<const CSGObject &>(sample.getShape()).getShapeXML());
     // Geometry values
     TS_ASSERT_DELTA(loaded.getWidth(), sample.getWidth(), 1e-6);
   }

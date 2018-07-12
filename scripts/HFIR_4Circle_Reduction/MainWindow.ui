@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1568</width>
-    <height>1116</height>
+    <height>1147</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -911,7 +911,7 @@ p, li { white-space: pre-wrap; }
                    <widget class="QPushButton" name="pushButton_viewRawSpice">
                     <property name="font">
                      <font>
-                      <pointsize>12</pointsize>
+                      <pointsize>11</pointsize>
                      </font>
                     </property>
                     <property name="text">
@@ -923,7 +923,7 @@ p, li { white-space: pre-wrap; }
                    <widget class="QPushButton" name="pushButton_viewSurveyPeak">
                     <property name="font">
                      <font>
-                      <pointsize>12</pointsize>
+                      <pointsize>11</pointsize>
                      </font>
                     </property>
                     <property name="toolTip">
@@ -1737,57 +1737,22 @@ p, li { white-space: pre-wrap; }
                   </property>
                   <layout class="QGridLayout" name="gridLayout_18">
                    <item row="5" column="0">
-                    <widget class="QPushButton" name="pushButton_cancelROI">
-                     <property name="font">
-                      <font>
-                       <pointsize>10</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>Reset ROI</string>
-                     </property>
-                    </widget>
+                    <layout class="QHBoxLayout" name="horizontalLayout_24">
+                     <item>
+                      <widget class="QCheckBox" name="checkBox_autoMask">
+                       <property name="font">
+                        <font>
+                         <pointsize>9</pointsize>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string>Auto Mask</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </item>
-                   <item row="0" column="0">
-                    <widget class="QPushButton" name="pushButton_addROI">
-                     <property name="font">
-                      <font>
-                       <pointsize>10</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>Edit ROI</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
-                    <widget class="QPushButton" name="pushButton_maskScanPt">
-                     <property name="font">
-                      <font>
-                       <pointsize>10</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>Mask</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="0">
-                    <widget class="QPushButton" name="pushButton_saveMask">
-                     <property name="font">
-                      <font>
-                       <pointsize>10</pointsize>
-                      </font>
-                     </property>
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pop up a window to allow user to specify the name of the mask;&lt;/p&gt;&lt;p&gt;And it will be added to the combo box for available mask names in tab 'merge scan' and 'peak integration'&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                     <property name="text">
-                      <string>Save</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="3" column="0">
+                   <item row="6" column="0">
                     <widget class="QPushButton" name="pushButton_integrateROI">
                      <property name="font">
                       <font>
@@ -1800,9 +1765,66 @@ p, li { white-space: pre-wrap; }
                     </widget>
                    </item>
                    <item row="4" column="0">
+                    <widget class="QComboBox" name="comboBox_viewRawDataMasks"/>
+                   </item>
+                   <item row="0" column="0">
+                    <widget class="QPushButton" name="pushButton_switchROIMode">
+                     <property name="font">
+                      <font>
+                       <pointsize>10</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>Enter ROI-Edit Mode</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="0">
+                    <widget class="QPushButton" name="pushButton_removeROICanvas">
+                     <property name="font">
+                      <font>
+                       <pointsize>10</pointsize>
+                      </font>
+                     </property>
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Remove ROI from 2D detector and restore original image.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                     <property name="text">
+                      <string>Remove In-Edit ROI</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="0">
+                    <widget class="QPushButton" name="pushButton_maskScanPt">
+                     <property name="font">
+                      <font>
+                       <pointsize>10</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>Apply In-Edit ROI</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="7" column="0">
+                    <widget class="QPushButton" name="pushButton_exportMaskToFile">
+                     <property name="font">
+                      <font>
+                       <pointsize>10</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>Export ROI</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="0">
                     <spacer name="verticalSpacer_31">
                      <property name="orientation">
                       <enum>Qt::Vertical</enum>
+                     </property>
+                     <property name="sizeType">
+                      <enum>QSizePolicy::Preferred</enum>
                      </property>
                      <property name="sizeHint" stdset="0">
                       <size>
@@ -2129,18 +2151,6 @@ p, li { white-space: pre-wrap; }
                  <widget class="Line" name="line_7">
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton_2">
-                  <property name="font">
-                   <font>
-                    <pointsize>10</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Plot Scan 2D</string>
                   </property>
                  </widget>
                 </item>
@@ -4341,6 +4351,21 @@ p, li { white-space: pre-wrap; }
                 </property>
                </widget>
               </item>
+              <item row="2" column="10">
+               <widget class="QCheckBox" name="checkBox_fpHighPrecision">
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                 </font>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;If selected, the output peak intensity will have higher precision, i.e., (3i4,2f18.5,i4).&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Otherwise, it peak intensities will be written as (3i4,2f8.2,i4).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>High Precision</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
            </layout>
@@ -5555,6 +5580,9 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEdit_message"/>
       </item>
      </layout>
     </item>

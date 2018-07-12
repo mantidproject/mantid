@@ -28,7 +28,7 @@ std::vector<std::string> parseDimensionNames(const std::string &names_string) {
   // unless they contain square brackets (so that it only matches inner pairs)
   // The second part matches anything that doesn't contain a comma
   // NB, the order of the two parts matters
-  regex expression("\\[([^\\[]*)\\]|[^,]+");
+  regex expression(R"(\[([^\[]*)\]|[^,]+)");
 
   boost::sregex_token_iterator iter(names_string.begin(), names_string.end(),
                                     expression, 0);

@@ -10,7 +10,7 @@ using namespace MantidQt::MantidWidgets;
 * Creates a Reflectometry Data Processor Presenter
 */
 std::unique_ptr<ReflDataProcessorPresenter>
-ReflGenericDataProcessorPresenterFactory::create() {
+ReflGenericDataProcessorPresenterFactory::create(int group) {
 
   // The whitelist, elements will appear in order in the table
   // 'Run(s)' column will be linked to 'InputWorkspace' property
@@ -35,7 +35,8 @@ ReflGenericDataProcessorPresenterFactory::create() {
       "degrees<br />If left blank, this is set to the last value for 'THETA' "
       "in the run's sample log. If multiple runs were given in the Run(s) "
       "column, the first listed run's sample log will be used. <br /><br "
-      "/><b>Example:</b> <samp>0.7</samp>");
+      "/><b>Example:</b> <samp>0.7</samp>",
+      false, "", true);
   whitelist.addElement(
       "Transmission Run(s)", "FirstTransmissionRun",
       "<b>Transmission run(s) to use to normalise the sample runs.</b><br "
@@ -73,7 +74,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
       /*The name of the algorithm */
       "ReflectometryReductionOneAuto",
       /*Prefixes to the output workspaces*/
-      std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
+      std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"}, 1,
       /*The blacklist*/
       std::set<QString>{"ThetaIn", "ThetaOut", "InputWorkspace",
                         "OutputWorkspace", "OutputWorkspaceBinned",
@@ -88,13 +89,13 @@ ReflGenericDataProcessorPresenterFactory::create() {
   std::map<QString, PreprocessingAlgorithm> preprocessMap = {
       /* 'Plus' will be applied to column 'Run(s)'*/
       {"Run(s)",
-       PreprocessingAlgorithm("Plus", "TOF_",
+       PreprocessingAlgorithm("Plus", "TOF_", "+",
                               std::set<QString>{"LHSWorkspace", "RHSWorkspace",
                                                 "OutputWorkspace"})},
       /* 'CreateTransmissionWorkspaceAuto' will be applied to column
          'Transmission Run(s)'*/
       {"Transmission Run(s)",
-       PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
+       PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_", "_",
                               std::set<QString>{"FirstTransmissionRun",
                                                 "SecondTransmissionRun",
                                                 "OutputWorkspace"})}};
@@ -111,8 +112,8 @@ ReflGenericDataProcessorPresenterFactory::create() {
   std::map<QString, QString> postprocessMap = {{"dQ/Q", "Params"}};
 
   return Mantid::Kernel::make_unique<ReflDataProcessorPresenter>(
-      whitelist, preprocessMap, processor, postprocessor, postprocessMap,
-      "LoadISISNexus");
+      whitelist, preprocessMap, processor, postprocessor, group, postprocessMap,
+      "LoadNexus");
 }
 }
 }

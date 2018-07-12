@@ -38,7 +38,6 @@ set ( SRC_FILES
 	src/MaskPeaksWorkspace.cpp
 	src/NormaliseVanadium.cpp
 	src/OptimizeCrystalPlacement.cpp
-	src/OptimizeExtinctionParameters.cpp
 	src/OptimizeLatticeForCellType.cpp
 	src/PeakBackground.cpp
 	src/PeakClusterProjection.cpp
@@ -67,7 +66,6 @@ set ( SRC_FILES
 	src/SortHKL.cpp
 	src/SortPeaksWorkspace.cpp
 	src/StatisticsOfPeaksWorkspace.cpp
-	src/TOFExtinction.cpp
 	src/TransformHKL.cpp
 )
 
@@ -114,7 +112,6 @@ set ( INC_FILES
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/NormaliseVanadium.h
 	inc/MantidCrystal/OptimizeCrystalPlacement.h
-	inc/MantidCrystal/OptimizeExtinctionParameters.h
 	inc/MantidCrystal/OptimizeLatticeForCellType.h
 	inc/MantidCrystal/PeakBackground.h
 	inc/MantidCrystal/PeakClusterProjection.h
@@ -143,7 +140,6 @@ set ( INC_FILES
 	inc/MantidCrystal/SortHKL.h
 	inc/MantidCrystal/SortPeaksWorkspace.h
 	inc/MantidCrystal/StatisticsOfPeaksWorkspace.h
-	inc/MantidCrystal/TOFExtinction.h
 	inc/MantidCrystal/TransformHKL.h
 )
 
@@ -228,9 +224,13 @@ endif()
 # Add the target for this directory
 add_library ( Crystal ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( Crystal PROPERTIES OUTPUT_NAME MantidCrystal
-  INSTALL_RPATH "@loader_path/../Contents/MacOS/"
-)
+set_target_properties ( Crystal PROPERTIES OUTPUT_NAME MantidCrystal )
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties(Crystal PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS/" )
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(Crystal PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+endif()
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET Crystal PROPERTY FOLDER "MantidFramework" )
 

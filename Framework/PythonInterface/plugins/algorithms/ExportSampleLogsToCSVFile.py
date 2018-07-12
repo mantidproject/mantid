@@ -2,6 +2,8 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
+from distutils.version import LooseVersion
+import numpy as np
 import os
 from six.moves import range # pylint: disable=redefined-builtin
 
@@ -38,6 +40,9 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         """ Category
         """
         return "DataHandling\\Logs"
+
+    def seeAlso(self):
+        return [ "ExportExperimentLog" ]
 
     def name(self):
         """ Algorithm name
@@ -114,10 +119,9 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         logtimesdict, logvaluedict, loglength = self._readSampleLogs()
 
         # Local time difference
-        localtimediff = self._calLocalTimeDiff(logtimesdict, loglength)
+        localtimediff = self._calTimeOffset(logtimesdict, loglength)
 
         # Write log file
-        # self._writeLogFile(logtimesdict, logvaluedict, loglength, localtimediff)
         logtimeslist = []
         logvaluelist = []
         for logname in self._sampleloglist:
@@ -152,6 +156,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         self._timeTolerance = self.getProperty("TimeTolerance").value
         if (self._timeTolerance) <= 0.:
             raise NotImplementedError("TimeTolerance must be larger than zero.")
+        self._timeTolerance = np.timedelta64(int(self._timeTolerance*1e9), 'ns')
 
         # Set the flag to write header to separate file
         if self._writeheader is True:
@@ -161,8 +166,8 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         return
 
-    def _calLocalTimeDiff(self, logtimesdict, loglength):
-        """ Calcualte the time difference between local time and UTC in seconds
+    def _calTimeOffset(self, logtimesdict, loglength):
+        """ Calcualte the time epoch in local time
         """
         # Find out local time
         if loglength > 0:
@@ -175,58 +180,13 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             # Local time difference
             localtimediff = getLocalTimeShiftInSecond(time0, self._timezone, self.log())
         else:
-            localtimediff = 0
+            localtimediff = np.timedelta64(0, 's')
 
-        return localtimediff
-
-    def _writeLogFile(self, logtimesdict, logvaluedict, loglength, localtimediff):
-        """ Write the logs to file
-        """
-        write_buffer = ''
-
-        # Init time
-        if loglength > 0:
-            # If there are more than 0 log to output
-            vec_time = None
-            init_abs_time = 0
-            # Try to get the time vector
-            for log in logtimesdict.keys():
-                if logtimesdict[log] is not None:
-                    time0 = logtimesdict[log][0]
-                    init_abs_time = time0.totalNanoseconds() * 1.E-9 - localtimediff
-                    vec_time = logtimesdict[log]
-                    break
-                # END-IF
-            # END-FOR
-
-            assert vec_time is not None, 'All logs are empty!'
-
-            # Loop over all logs
-            for i in range(loglength):
-                # get absolute time and relative time
-                abstime = vec_time[i].totalNanoseconds() * 1.E-9 - localtimediff
-                reltime = abstime - init_abs_time
-                # write absolute time and relative time as column 0 and 1
-                write_buffer += "%.6f\t%.6f\t" % (abstime, reltime)
-                # Write each log value
-                for samplelog in self._sampleloglist:
-                    if logvaluedict[samplelog] is not None:
-                        logvalue = logvaluedict[samplelog][i]
-                    else:
-                        logvalue = 0.
-                    write_buffer += "%.6f\t" % (logvalue)
-                write_buffer += "\n"
-            # END-FOR(i)
-        # END-IF
-
-        try:
-            ofile = open(self._outputfilename, "w")
-            ofile.write(write_buffer)
-            ofile.close()
-        except IOError:
-            raise NotImplementedError("Unable to write file %s. Check permission." % (self._outputfilename))
-
-        return
+        epoch = '1990-01-01T00:00'
+        # older numpy assumes local timezone
+        if LooseVersion(np.__version__) < LooseVersion('1.9'):
+            epoch = epoch+'Z'
+        return np.datetime64(epoch) + localtimediff
 
     def _getLogsInfo(self, logtimeslist):
         """ Get maximum number of lines, staring time and ending time in the output log file
@@ -351,12 +311,12 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             self.log().debug("tmptime type = %s " % ( type(tmptime)))
 
             # difftime = calTimeDiff(tmptime, nexttime)
-            difftime = (tmptime.totalNanoseconds() - nexttime.totalNanoseconds())*1.0E-9
+            difftime = (tmptime - nexttime)
 
             if abs(difftime) < timetol:
                 # same ...
                 nexttimelogindexes.append(i)
-            elif difftime < 0:
+            elif difftime/np.timedelta64(1, 's') < 0:
                 # new smaller time
                 nexttime = tmptime
                 nexttimelogindexes[:] = []
@@ -379,8 +339,8 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         logindex = nexttimelogindexes[0]
         logtimes = logtimeslist[logindex]
         thislogtime = logtimes[currtimeindexes[logindex]]
-        abstime = thislogtime.totalNanoseconds() * 1.E-9 - self._localtimediff
-        reltime = thislogtime.totalNanoseconds() * 1.E-9 - self._starttime.totalNanoseconds() * 1.0E-9
+        abstime = (thislogtime - self._localtimediff) / np.timedelta64(1, 's') # time from epoch in seconds
+        reltime = (thislogtime - self._starttime) / np.timedelta64(1, 's') # time from start of run in seconds
         wbuf = "%.6f\t%.6f\t" % (abstime, reltime)
 
         # Log valuess
@@ -545,9 +505,7 @@ def getLocalTimeShiftInSecond(utctime, localtimezone, currentlogger = None):
     newutc = utc.replace(tzinfo=None)
 
     shift = newutc-newsns
-    shift_in_sec = shift.seconds
-
-    return shift_in_sec
+    return np.timedelta64(shift.seconds, 's')
 
 
 # Register algorithm with Mantid

@@ -3,6 +3,7 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -10,6 +11,10 @@
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/HistogramDx.h"
+#include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
@@ -109,17 +114,32 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
       getProperty(INPUT_WORKSPACE_PROPERTY);
   m_logEntry = getPropertyValue(SAMPLE_LOG_X_AXIS_PROPERTY);
 
-  // find if there are workspaces that are not Matrix or not a point-data
-  for (const auto &input : RunCombinationHelper::unWrapGroups(inputs_given)) {
+  std::vector<std::string> workspaces;
+  try { // input workspace must be a group or a MatrixWorkspace
+    workspaces = RunCombinationHelper::unWrapGroups(inputs_given);
+  } catch (const std::exception &e) {
+    issues[INPUT_WORKSPACE_PROPERTY] = std::string(e.what());
+  }
+
+  // find if there are grouped workspaces that are not Matrix or not a
+  // point-data
+  for (const auto &input : workspaces) {
     MatrixWorkspace_sptr ws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
     if (!ws) {
       issues[INPUT_WORKSPACE_PROPERTY] +=
-          "Workspace " + ws->getName() + " is not a MatrixWorkspace\n";
+          "Workspace " + input + " is not a MatrixWorkspace\n";
     } else if (ws->isHistogramData()) {
       issues[INPUT_WORKSPACE_PROPERTY] +=
           "Workspace " + ws->getName() + " is not a point-data\n";
     } else {
+      try {
+        ws->blocksize();
+      } catch (std::length_error &) {
+        issues[INPUT_WORKSPACE_PROPERTY] +=
+            "Workspace " + ws->getName() +
+            " has different number of points per histogram\n";
+      }
       m_inputWS.push_back(ws);
     }
   }
@@ -171,7 +191,8 @@ std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
       try {
         run.getLogAsSingleValue(m_logEntry);
 
-        // try if numeric time series, then the size must match to the blocksize
+        // try if numeric time series, then the size must match to the
+        // blocksize
         const int blocksize = static_cast<int>(ws->blocksize());
 
         TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
@@ -214,33 +235,28 @@ std::vector<double> ConjoinXRuns::getXAxis(MatrixWorkspace_sptr ws) const {
 
   std::vector<double> axis;
   axis.reserve(ws->blocksize());
-
-  if (m_logEntry.empty()) {
-    // return the actual x-axis of the first spectrum
-    axis = ws->x(0).rawData();
+  auto &run = ws->run();
+  // try time series first
+  TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
+  timeSeriesDouble =
+      dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData(m_logEntry));
+  if (timeSeriesDouble) {
+    // try double series
+    axis = timeSeriesDouble->filteredValuesAsVector();
   } else {
-    auto &run = ws->run();
-    // try time series first
-    TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
-    timeSeriesDouble =
-        dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData(m_logEntry));
-    if (timeSeriesDouble) {
-      // try double series
-      axis = timeSeriesDouble->filteredValuesAsVector();
+    // try int series next
+    TimeSeriesProperty<int> *timeSeriesInt(nullptr);
+    timeSeriesInt =
+        dynamic_cast<TimeSeriesProperty<int> *>(run.getLogData(m_logEntry));
+    if (timeSeriesInt) {
+      std::vector<int> intAxis = timeSeriesInt->filteredValuesAsVector();
+      axis = std::vector<double>(intAxis.begin(), intAxis.end());
     } else {
-      // try int series next
-      TimeSeriesProperty<int> *timeSeriesInt(nullptr);
-      timeSeriesInt =
-          dynamic_cast<TimeSeriesProperty<int> *>(run.getLogData(m_logEntry));
-      if (timeSeriesInt) {
-        std::vector<int> intAxis = timeSeriesInt->filteredValuesAsVector();
-        axis = std::vector<double>(intAxis.begin(), intAxis.end());
-      } else {
-        // then scalar
-        axis.push_back(run.getPropertyAsSingleValue(m_logEntry));
-      }
+      // then scalar
+      axis.push_back(run.getPropertyAsSingleValue(m_logEntry));
     }
   }
+
   return axis;
 }
 
@@ -252,8 +268,8 @@ void ConjoinXRuns::fillHistory() {
   if (!isChild()) {
     // Loop over the input workspaces, making the call that copies their
     // history to the output one
-    for (auto inWS = m_inputWS.begin(); inWS != m_inputWS.end(); ++inWS) {
-      m_outWS->history().addHistory((*inWS)->getHistory());
+    for (auto &inWS : m_inputWS) {
+      m_outWS->history().addHistory(inWS->getHistory());
     }
     // Add the history for the current algorithm to the output
     m_outWS->history().addHistory(m_history);
@@ -271,19 +287,35 @@ void ConjoinXRuns::fillHistory() {
 void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
   std::vector<double> spectrum;
   std::vector<double> errors;
+  std::vector<double> axis;
+  std::vector<double> x;
+  std::vector<double> xerrors;
   spectrum.reserve(m_outWS->blocksize());
   errors.reserve(m_outWS->blocksize());
+  axis.reserve(m_outWS->blocksize());
   size_t index = static_cast<size_t>(wsIndex);
-
   for (const auto &input : m_inputWS) {
-    auto y = input->y(index).rawData();
-    auto e = input->e(index).rawData();
+    const auto &y = input->y(index);
     spectrum.insert(spectrum.end(), y.begin(), y.end());
+    const auto &e = input->e(index);
     errors.insert(errors.end(), e.begin(), e.end());
+    if (m_logEntry.empty()) {
+      const auto &x = input->x(index);
+      axis.insert(axis.end(), x.begin(), x.end());
+    } else {
+      x = m_axisCache[input->getName()];
+      axis.insert(axis.end(), x.begin(), x.end());
+    }
+    if (input->hasDx(index)) {
+      const auto &dx = input->dx(index);
+      xerrors.insert(xerrors.end(), dx.begin(), dx.end());
+    }
   }
-
+  if (!xerrors.empty())
+    m_outWS->setPointStandardDeviations(index, xerrors);
   m_outWS->mutableY(index) = spectrum;
   m_outWS->mutableE(index) = errors;
+  m_outWS->mutableX(index) = axis;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -319,10 +351,6 @@ void ConjoinXRuns::exec() {
   }
 
   auto first = m_inputWS.front();
-  std::vector<double> axisFirst = getXAxis(first);
-  std::vector<double> xAxis;
-  xAxis.insert(xAxis.end(), axisFirst.begin(), axisFirst.end());
-
   SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
       *first, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
       sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
@@ -337,14 +365,14 @@ void ConjoinXRuns::exec() {
   // to be skipped, to compute the size of the output respectively.
   MatrixWorkspace_uptr temp = first->clone();
 
-  // First sequentially merge the sample logs and build the x-axis
+  size_t outBlockSize = (*it)->blocksize();
+  // First sequentially merge the sample logs
   for (++it; it != m_inputWS.end(); ++it) {
     // attempt to merge the sample logs
     try {
       sampleLogsBehaviour.mergeSampleLogs(**it, *temp);
       sampleLogsBehaviour.setUpdatedSampleLogs(*temp);
-      std::vector<double> axisIt = getXAxis(*it);
-      xAxis.insert(xAxis.end(), axisIt.begin(), axisIt.end());
+      outBlockSize += (*it)->blocksize();
     } catch (std::invalid_argument &e) {
       if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
         g_log.error() << "Could not join workspace: " << (*it)->getName()
@@ -366,8 +394,13 @@ void ConjoinXRuns::exec() {
     // the x-axis might need to be changed
   }
 
+  if (!m_logEntry.empty()) {
+    for (const auto &ws : m_inputWS) {
+      m_axisCache[ws->getName()] = getXAxis(ws);
+    }
+  }
+
   // now get the size of the output
-  size_t outBlockSize = xAxis.size();
   size_t numSpec = first->getNumberHistograms();
 
   m_outWS = WorkspaceFactory::Instance().create(first, numSpec, outBlockSize,
@@ -382,7 +415,6 @@ void ConjoinXRuns::exec() {
   PARALLEL_FOR_IF(threadSafe(*m_outWS))
   for (int64_t index = 0; index < static_cast<int64_t>(numSpec); ++index) {
     PARALLEL_START_INTERUPT_REGION
-    m_outWS->mutableX(static_cast<size_t>(index)) = xAxis;
     joinSpectrum(index);
     m_progress->report();
     PARALLEL_END_INTERUPT_REGION
@@ -399,6 +431,8 @@ void ConjoinXRuns::exec() {
   }
 
   setProperty("OutputWorkspace", m_outWS);
+  m_inputWS.clear();
+  m_axisCache.clear();
 }
 } // namespace Algorithms
 } // namespace Mantid

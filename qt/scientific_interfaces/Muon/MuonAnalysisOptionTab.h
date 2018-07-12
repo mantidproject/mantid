@@ -95,6 +95,8 @@ signals:
 
   /// Emitted when multi fitting mode is turned on/off
   void multiFitStateChanged(int state);
+  void loadAllGroupChanged(int state);
+  void loadAllPairsChanged(int state);
 
 private:
   /// Default widget values

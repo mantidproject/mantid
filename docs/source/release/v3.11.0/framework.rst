@@ -75,7 +75,7 @@ Performance
 Core functionality
 ------------------
 
-- The :ref:`IndexProperty` has been added to the list of property types.
+- The ``IndexProperty`` has been added to the list of property types.
 - The ``blocksize()`` of a workspace now throws an exception if the number of bins is not constant. ``size()`` has been modified to the sum of the number of bins in each ``Histogram``.
 
 

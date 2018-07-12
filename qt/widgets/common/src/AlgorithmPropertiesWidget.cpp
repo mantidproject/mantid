@@ -295,7 +295,7 @@ bool isCalledInputWorkspace(PropertyWidget *const candidate) {
  */
 void AlgorithmPropertiesWidget::replaceWSClicked(const QString &propName) {
   if (m_propWidgets.contains(propName)) {
-    typedef std::vector<PropertyWidget *> CollectionOfPropertyWidget;
+    using CollectionOfPropertyWidget = std::vector<PropertyWidget *>;
     CollectionOfPropertyWidget candidateReplacementSources;
     PropertyWidget *propWidget = m_propWidgets[propName];
     if (propWidget) {

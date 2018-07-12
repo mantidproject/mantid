@@ -18,5 +18,8 @@ void export_SpectrumInfo() {
            "masked.")
       .def("hasDetectors", &SpectrumInfo::hasDetectors, (arg("self")),
            "Returns true if the spectrum is associated with detectors in the "
-           "instrument.");
+           "instrument.")
+      .def("twoTheta", &SpectrumInfo::twoTheta, (arg("self"), arg("index")),
+           "Returns the scattering angle 2 theta in radians w.r.t. beam "
+           "direction.");
 }

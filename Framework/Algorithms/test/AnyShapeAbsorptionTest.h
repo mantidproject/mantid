@@ -152,13 +152,13 @@ public:
     // Check a few actual numbers as well
     TS_ASSERT_DELTA(y0.front(), 0.7300, 0.0001);
     TS_ASSERT_DELTA(y0.back(), 0.2238, 0.0001);
-    TS_ASSERT_DELTA(y0[5], 0.3748, 0.0001);
+    TS_ASSERT_DELTA(y0[5], 0.3749, 0.0001);
 
     // Now test with a gauge volume used.
     // Create a small cylinder to be the gauge volume
     std::string cylinder = "<cylinder id=\"shape\"> ";
-    cylinder += "<centre-of-bottom-base x=\"0.0\" y=\"-0.01\" z=\"0.0\" /> ";
-    cylinder += "<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> ";
+    cylinder += R"(<centre-of-bottom-base x="0.0" y="-0.01" z="0.0" /> )";
+    cylinder += R"(<axis x="0.0" y="0.0" z="1" /> )";
     cylinder += "<radius val=\"0.1\" /> ";
     cylinder += "<height val=\"0.02\" /> ";
     cylinder += "</cylinder>";
