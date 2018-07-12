@@ -191,7 +191,7 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         l2 = run.getLogData('L2').value
         dx = run.getLogData('pixel_width').value
         dy = run.getLogData('pixel_height').value
-        factor = att_coeff * (dx * dy / l2) ** 2
+        factor = ((dx * dy / l2) ** 2) * att_coeff
         Scale(InputWorkspace=integral, Factor=factor, OutputWorkspace=integral)
         self.setProperty('BeamFluxValue', mtd[integral].readY(0)[0])
         self.setProperty('BeamFluxError', mtd[integral].readE(0)[0])
@@ -257,6 +257,7 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                                 flux_ws = ws + '_flux'
                                 CreateSingleValuedWorkspace(DataValue=flux, ErrorValue=ferr, OutputWorkspace=flux_ws)
                                 Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws)
+                                DeleteWorkspace(flux_ws)
 
         CalculateQMinMax(Workspace=ws)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
