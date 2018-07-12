@@ -235,11 +235,11 @@ void RunsTablePresenter::updateRowField(
   auto rowValidationResult = validateRow(m_model, m_workspaceNameFactory,
                                          cellTextFromViewAt(itemIndex));
   updateRow(m_model, groupIndex, rowIndex,
-            rowValidationResult.validRowElseNone());
+            rowValidationResult.validElseNone());
   if (rowValidationResult.isValid()) {
     showAllCellsOnRowAsValid(itemIndex);
   } else {
-    showCellsAsInvalidInView(itemIndex, rowValidationResult.invalidColumns());
+    showCellsAsInvalidInView(itemIndex, rowValidationResult.assertError());
   }
 }
 

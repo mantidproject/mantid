@@ -5,31 +5,35 @@
 #include "IReflBatchPresenter.h"
 #include "IExperimentView.h"
 #include "IExperimentPresenter.h"
-#include "PerThetaDefaultsValidationResult.h"
+#include "PerThetaDefaultsTableValidationError.h"
 #include "../../Reduction/Experiment.h"
+#include "../../ValidationResult.h"
 #include <boost/optional.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class ExperimentValidationResult {
+class ExperimentValidationErrors {
 public:
-  ExperimentValidationResult(
-      PerThetaDefaultsValidationResult perThetaDefaultsResult,
+  ExperimentValidationErrors(
+      PerThetaDefaultsTableValidationError perThetaDefaultsErrors,
       bool stitchParametersResult)
-      : m_perThetaDefaultsResult(perThetaDefaultsResult),
+      : m_perThetaDefaultsErrors(std::move(perThetaDefaultsErrors)),
         m_stitchParametersResult(stitchParametersResult) {}
-
-  PerThetaDefaultsValidationResult const &perThetaDefaults() const {
-    return m_perThetaDefaultsResult;
-  }
 
   bool stitchParametersAreValid() const { return m_stitchParametersResult; }
 
+  PerThetaDefaultsTableValidationError const &perThetaValidationErrors() const {
+    return m_perThetaDefaultsErrors;
+  }
+
 private:
-  PerThetaDefaultsValidationResult m_perThetaDefaultsResult;
+  PerThetaDefaultsTableValidationError m_perThetaDefaultsErrors;
   bool m_stitchParametersResult;
 };
+
+using ExperimentValidationResult =
+    ValidationResult<Experiment, ExperimentValidationErrors>;
 
 /** @class ExperimentPresenter
 
@@ -71,13 +75,14 @@ public:
   Experiment const &experiment() const;
 
 private:
+  ExperimentValidationResult validateExperimentFromView();
   PolarizationCorrections polarizationCorrectionsFromView();
   RangeInLambda transmissionRunRangeFromView();
   ExperimentValidationResult updateModelFromView();
 
   void showValidationResult(ExperimentValidationResult const &result);
-  void showPerThetaDefaultsValidationResult(
-      PerThetaDefaultsValidationResult const &result);
+  void showPerThetaTableErrors(
+      PerThetaDefaultsTableValidationError const &errors);
 
   IExperimentView *m_view;
   boost::optional<Experiment> m_model;

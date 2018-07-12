@@ -28,6 +28,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "ParseReflectometryStrings.h"
 #include "TransmissionRunPair.h"
 #include "DllConfig.h"
+#include "../ValidationResult.h"
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -35,7 +36,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaultsValidator {
 public:
   static auto constexpr INPUT_FIELD_COUNT = 8;
 
-  ValidationResult<PerThetaDefaults>
+  ValidationResult<PerThetaDefaults, std::vector<int>>
   operator()(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
 
 private:
@@ -52,7 +53,7 @@ private:
   std::vector<int> m_invalidColumns;
 };
 
-ValidationResult<PerThetaDefaults>
+ValidationResult<PerThetaDefaults, std::vector<int>>
 validatePerThetaDefaults(std::array<std::string, PerThetaDefaultsValidator::INPUT_FIELD_COUNT> const &cellText);
 
 }

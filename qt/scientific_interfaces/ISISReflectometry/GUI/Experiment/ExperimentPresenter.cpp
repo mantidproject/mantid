@@ -1,8 +1,7 @@
 #include "ExperimentPresenter.h"
 #include "../../Reduction/ValidatePerThetaDefaults.h"
-#include "PerThetaDefaultsValidationResult.h"
-// TODO
-// - Adjust validation to handle the default angle case.
+#include "../../Reduction/ParseReflectometryStrings.h"
+#include "PerThetaDefaultsTableValidator.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -24,42 +23,6 @@ void ExperimentPresenter::notifyRemovePerAngleDefaultsRequested(int index) {
   notifySettingsChanged();
 }
 
-PerThetaDefaultsValidationResult validatePerThetaDefaultsFromView(
-    std::vector<std::array<std::string, 8>> const &perThetaDefaultsContent,
-    double thetaTolerance) {
-  auto defaults = std::vector<PerThetaDefaults>();
-  auto validationErrors = std::vector<InvalidDefaultsError>();
-
-  auto row = 0;
-  for (auto const &rowTemplateContent : perThetaDefaultsContent) {
-    auto rowValidationResult = validatePerThetaDefaults(rowTemplateContent);
-    if (rowValidationResult.isValid())
-      defaults.emplace_back(rowValidationResult.validRowElseNone().get());
-    else
-      validationErrors.emplace_back(row, rowValidationResult.invalidColumns());
-    row++;
-  }
-
-  auto defaultValidationResult =
-      Experiment::validateThetaValues(defaults, thetaTolerance);
-  if (defaultValidationResult == ThetaValuesValidationResult::Ok) {
-    return PerThetaDefaultsValidationResult(std::move(defaults),
-                                            std::move(validationErrors), true);
-  } else if (defaultValidationResult ==
-             ThetaValuesValidationResult::MultipleWildcards) {
-    for (auto row = 0u; row < perThetaDefaultsContent.size(); ++row)
-      validationErrors.emplace_back(row, std::vector<int>({0}));
-    return PerThetaDefaultsValidationResult(std::move(defaults),
-                                            std::move(validationErrors), true);
-  } else /* if (defaultValidationResult ==
-             ThetaValuesValidationResult::NonUniqueTheta) */ {
-    for (auto row = 0u; row < perThetaDefaultsContent.size(); ++row)
-      validationErrors.emplace_back(row, std::vector<int>({0}));
-    return PerThetaDefaultsValidationResult(std::move(defaults),
-                                            std::move(validationErrors), false);
-  }
-}
-
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   auto const cRho = m_view->getCRho();
   auto const cAlpha = m_view->getCAlpha();
@@ -78,11 +41,11 @@ void ExperimentPresenter::notifySettingsChanged() {
   showValidationResult(validationResult);
 }
 
-ExperimentValidationResult ExperimentPresenter::updateModelFromView() {
-  auto perThetaValidationResult = validatePerThetaDefaultsFromView(
-      m_view->getPerAngleOptions(), m_thetaTolerance);
+ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
+  auto validate = PerThetaDefaultsTableValidator();
+  auto perThetaValidationResult =
+      validate(m_view->getPerAngleOptions(), m_thetaTolerance);
   auto maybeStitchParameters = parseOptions(m_view->getStitchOptions());
-
   if (perThetaValidationResult.isValid() &&
       maybeStitchParameters.is_initialized()) {
     auto const analysisMode = analysisModeFromString(m_view->getAnalysisMode());
@@ -92,45 +55,55 @@ ExperimentValidationResult ExperimentPresenter::updateModelFromView() {
         summationTypeFromString(m_view->getSummationType());
     auto transmissionRunRange = transmissionRunRangeFromView();
     auto polarizationCorrections = polarizationCorrectionsFromView();
-
-    m_model = Experiment(analysisMode, reductionType, summationType,
-                         polarizationCorrections, transmissionRunRange,
-                         maybeStitchParameters.get(),
-                         perThetaValidationResult.defaults());
+    return ExperimentValidationResult(Experiment(
+        analysisMode, reductionType, summationType, polarizationCorrections,
+        transmissionRunRange, maybeStitchParameters.get(),
+        perThetaValidationResult.assertValid()));
   } else {
-    m_model = boost::none;
+    return ExperimentValidationResult(
+        ExperimentValidationErrors(perThetaValidationResult.assertError(),
+                                   maybeStitchParameters.is_initialized()));
   }
-  return ExperimentValidationResult(perThetaValidationResult,
-                                    maybeStitchParameters.is_initialized());
+}
+
+ExperimentValidationResult ExperimentPresenter::updateModelFromView() {
+  auto validationResult = validateExperimentFromView();
+  m_model = validationResult.validElseNone();
+  return validationResult;
 }
 
 void ExperimentPresenter::notifyPerAngleDefaultsChanged(int, int column) {
   auto validationResult = updateModelFromView();
-  showPerThetaDefaultsValidationResult(validationResult.perThetaDefaults());
-  if (column == 0 && !validationResult.perThetaDefaults().hasUniqueThetas())
+  showValidationResult(validationResult);
+  if (column == 0 && !validationResult.isValid() &&
+      !validationResult.assertError()
+           .perThetaValidationErrors()
+           .hasUniqueThetas())
     m_view->showPerAngleThetasNonUnique(m_thetaTolerance);
 }
 
-void ExperimentPresenter::showPerThetaDefaultsValidationResult(
-    PerThetaDefaultsValidationResult const &result) {
-  if (result.isValid()) {
-    m_view->showAllPerAngleOptionsAsValid();
-  } else {
-    m_view->showAllPerAngleOptionsAsValid();
-    for (auto const &validationError : result.errors()) {
-      for (auto const &column : validationError.invalidColumns())
-        m_view->showPerAngleOptionsAsInvalid(validationError.row(), column);
-    }
+void ExperimentPresenter::showPerThetaTableErrors(
+    PerThetaDefaultsTableValidationError const &errors) {
+  m_view->showAllPerAngleOptionsAsValid();
+  for (auto const &validationError : errors.errors()) {
+    for (auto const &column : validationError.invalidColumns())
+      m_view->showPerAngleOptionsAsInvalid(validationError.row(), column);
   }
 }
 
 void ExperimentPresenter::showValidationResult(
     ExperimentValidationResult const &result) {
-  showPerThetaDefaultsValidationResult(result.perThetaDefaults());
-  if (result.stitchParametersAreValid())
+  if (result.isValid()) {
+    m_view->showAllPerAngleOptionsAsValid();
     m_view->showStitchParametersValid();
-  else
-    m_view->showStitchParametersInvalid();
+  } else {
+    auto errors = result.assertError();
+    showPerThetaTableErrors(errors.perThetaValidationErrors());
+    if (errors.stitchParametersAreValid())
+      m_view->showStitchParametersValid();
+    else
+      m_view->showStitchParametersInvalid();
+  }
 }
 
 void ExperimentPresenter::notifySummationTypeChanged() {

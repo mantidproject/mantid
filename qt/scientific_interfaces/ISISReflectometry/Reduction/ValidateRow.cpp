@@ -95,7 +95,7 @@ RowValidator<Row>::parseOptions(std::vector<std::string> const &cellText) {
 template <typename Row>
 // cppcheck-suppress syntaxError
 template <typename WorkspaceNamesFactory>
-ValidationResult<boost::variant<SlicedRow, UnslicedRow>> RowValidator<Row>::
+ValidationResult<RowVariant, std::vector<int>> RowValidator<Row>::
 operator()(std::vector<std::string> const &cellText,
            WorkspaceNamesFactory const &workspaceNames) {
   using RowVariant = boost::variant<SlicedRow, UnslicedRow>;
@@ -114,22 +114,22 @@ operator()(std::vector<std::string> const &cellText,
         maybeRunNumbers, maybeTheta, maybeTransmissionRuns, maybeQRange,
         maybeScaleFactor, maybeOptions, wsNames);
     if (maybeRow.is_initialized())
-      return ValidationResult<RowVariant>(maybeRow.get());
+      return RowValidationResult<RowVariant>(maybeRow.get());
     else
-      return ValidationResult<RowVariant>(m_invalidColumns);
+      return RowValidationResult<RowVariant>(m_invalidColumns);
   } else {
-    return ValidationResult<RowVariant>(m_invalidColumns);
+    return RowValidationResult<RowVariant>(m_invalidColumns);
   }
 }
 
-class ValidateRowVisitor
-    : public boost::static_visitor<ValidationResult<RowVariant>> {
+class ValidateRowVisitor : public boost::static_visitor<
+                               ValidationResult<RowVariant, std::vector<int>>> {
 public:
   ValidateRowVisitor(std::vector<std::string> const &cells,
                      WorkspaceNamesFactory const &workspaceNamesFactory)
       : m_cells(cells), m_workspaceNamesFactory(workspaceNamesFactory) {}
 
-  ValidationResult<RowVariant>
+  RowValidationResult<RowVariant>
   operator()(ReductionJobs<SlicedGroup> const &) const {
     auto validate = RowValidator<SlicedRow>();
     return validate(
@@ -143,7 +143,7 @@ public:
             });
   }
 
-  ValidationResult<RowVariant>
+  RowValidationResult<RowVariant>
   operator()(ReductionJobs<UnslicedGroup> const &) const {
     auto validate = RowValidator<UnslicedRow>();
     return validate(
@@ -161,7 +161,7 @@ private:
   WorkspaceNamesFactory const &m_workspaceNamesFactory;
 };
 
-ValidationResult<RowVariant>
+RowValidationResult<RowVariant>
 validateRow(Jobs const &jobs,
             WorkspaceNamesFactory const &workspaceNamesFactory,
             std::vector<std::string> const &cells) {
@@ -176,7 +176,7 @@ validateRowFromRunAndTheta(Jobs const &jobs,
   return boost::apply_visitor(
              ValidateRowVisitor({run, theta, "", "", "", "", "", "", ""},
                                 workspaceNamesFactory),
-             jobs).validRowElseNone();
+             jobs).validElseNone();
 }
 
 template class RowValidator<UnslicedRow>;

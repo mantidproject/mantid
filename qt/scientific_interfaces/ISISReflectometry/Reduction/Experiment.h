@@ -34,12 +34,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 namespace MantidQt {
 namespace CustomInterfaces {
 
-enum class ThetaValuesValidationResult {
-  Ok,
-  MultipleWildcards,
-  NonUniqueTheta
-};
-
 class MANTIDQT_ISISREFLECTOMETRY_DLL Experiment {
 public:
   Experiment(AnalysisMode analysisMode, ReductionType reductionType,
@@ -60,16 +54,7 @@ public:
   PerThetaDefaults const *defaultsForTheta(double thetaAngle,
                                            double tolerance) const;
 
-  static bool
-  containsSingleWildcard(std::vector<PerThetaDefaults> const &perThetaDefaults);
-
-  static ThetaValuesValidationResult
-  validateThetaValues(std::vector<PerThetaDefaults> perThetaDefaults,
-                      double tolerance);
-
 private:
-  static int countWildcards(
-      std::vector<PerThetaDefaults> const &perThetaDefaults) ;
   AnalysisMode m_analysisMode;
   ReductionType m_reductionType;
   SummationType m_summationType;

@@ -88,28 +88,29 @@ PerThetaDefaultsValidator::parseOptions(CellText const &cellText) {
 }
 
 // cppcheck-suppress syntaxError
-ValidationResult<PerThetaDefaults> PerThetaDefaultsValidator::
+ValidationResult<PerThetaDefaults, std::vector<int>> PerThetaDefaultsValidator::
 operator()(CellText const &cellText) {
   auto maybeTheta = parseThetaOrWhitespace(cellText);
   auto maybeTransmissionRuns = parseTransmissionRuns(cellText);
   auto maybeQRange = parseQRange(cellText);
   auto maybeScaleFactor = parseScaleFactor(cellText);
   auto maybeOptions = parseOptions(cellText);
-
   auto maybeDefaults = makeIfAllInitialized<PerThetaDefaults>(
       maybeTheta, maybeTransmissionRuns, maybeQRange, maybeScaleFactor,
       maybeOptions);
+
   if (maybeDefaults.is_initialized())
-    return ValidationResult<PerThetaDefaults>(maybeDefaults.get());
+    return ValidationResult<PerThetaDefaults, std::vector<int>>(
+        maybeDefaults.get());
   else
-    return ValidationResult<PerThetaDefaults>(m_invalidColumns);
+    return ValidationResult<PerThetaDefaults, std::vector<int>>(
+        m_invalidColumns);
 }
 
-ValidationResult<PerThetaDefaults>
+ValidationResult<PerThetaDefaults, std::vector<int>>
 validatePerThetaDefaults(CellText const &cells) {
   auto validate = PerThetaDefaultsValidator();
   return validate(cells);
 }
-
 }
 }

@@ -35,7 +35,7 @@ namespace CustomInterfaces {
 template <typename Row> class MANTIDQT_ISISREFLECTOMETRY_DLL RowValidator {
 public:
   template <typename WorkspaceNamesFactory>
-  ValidationResult<boost::variant<SlicedRow, UnslicedRow>>
+  ValidationResult<RowVariant, std::vector<int>>
   operator()(std::vector<std::string> const &cellText,
              WorkspaceNamesFactory const &workspaceNames);
 
@@ -55,7 +55,10 @@ private:
   std::vector<int> m_invalidColumns;
 };
 
-ValidationResult<RowVariant>
+template <typename Row>
+using RowValidationResult = ValidationResult<Row, std::vector<int>>;
+
+RowValidationResult<RowVariant>
 validateRow(Jobs const &jobs,
             WorkspaceNamesFactory const &workspaceNamesFactory,
             std::vector<std::string> const &cellText);
