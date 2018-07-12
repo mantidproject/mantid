@@ -16769,24 +16769,26 @@ bool ApplicationWindow::saveProjectRecovery(std::string destination) {
 }
 
 void ApplicationWindow::checkForProjectRecovery() {
-	if (!m_projectRecovery.checkForRecovery()) {
-		m_projectRecovery.startProjectSaving();
-		return;
-	}
+  if (!m_projectRecovery.checkForRecovery()) {
+    m_projectRecovery.startProjectSaving();
+    return;
+  }
 
-	// Recovery file present
-	try {
-		m_projectRecovery.attemptRecovery();
-	}
-	catch (std::exception &e) {
-		std::string err{ "Project Recovery failed to recover this checkpoint. Details: " };
-		err.append(e.what());
-	  g_log.error(err);
-	  QMessageBox::information(this, "Could Not Recover",
-		  "We could not fully recover your work.\nMantid will continue to run normally now.", "OK");
+  // Recovery file present
+  try {
+    m_projectRecovery.attemptRecovery();
+  } catch (std::exception &e) {
+    std::string err{
+        "Project Recovery failed to recover this checkpoint. Details: "};
+    err.append(e.what());
+    g_log.error(err);
+    QMessageBox::information(this, "Could Not Recover",
+                             "We could not fully recover your work.\nMantid "
+                             "will continue to run normally now.",
+                             "OK");
 
-	  // Restart project recovery manually
-	  m_projectRecovery.clearAllCheckpoints();
-	  m_projectRecovery.startProjectSaving();
+    // Restart project recovery manually
+    m_projectRecovery.clearAllCheckpoints();
+    m_projectRecovery.startProjectSaving();
   }
 }
