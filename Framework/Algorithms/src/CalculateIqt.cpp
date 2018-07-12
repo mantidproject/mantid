@@ -6,6 +6,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MersenneTwister.h"
 
+#include <boost/numeric_cast.hpp>
 #include <cmath>
 #include <functional>
 
@@ -132,7 +133,7 @@ randomizeWorkspaceWithinError(MatrixWorkspace_sptr workspace, const int seed) {
 double standardDeviation(const std::vector<double> &inputValues) {
   const auto mean =
       std::accumulate(inputValues.begin(), inputValues.end(), 0.0) /
-      inputValues.size();
+      boost::numeric_cast<double>(inputValues.size());
   double sumOfXMinusMeanSquared = 0;
   for (auto &&x : inputValues)
     sumOfXMinusMeanSquared += (x - mean) * (x - mean);
@@ -149,7 +150,7 @@ standardDeviationArray(const std::vector<std::vector<double>> &yValues) {
 }
 
 MatrixWorkspace_sptr removeInvalidData(MatrixWorkspace_sptr workspace) {
-  auto binning = static_cast<int>(std::ceil(workspace->blocksize() / 2.0));
+  auto binning = (workspace->blocksize() + 1) / 2;
   auto binV = workspace->x(0)[binning];
   workspace = cropWorkspace(workspace, binV);
   return replaceSpecialValues(workspace);
