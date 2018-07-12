@@ -1174,8 +1174,8 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
       // add texts
       vector<text> texts = opj.layerTexts(g, l);
       if (style != GraphOptions::Pie) {
-        for (size_t i = 0; i < texts.size(); ++i) {
-          addText(texts[i], graph, nullptr, layerRect, fFontScaleFactor,
+        for (const auto & text : texts) {
+          addText(text, graph, nullptr, layerRect, fFontScaleFactor,
                   fXScale, fYScale);
         }
       }
@@ -1185,20 +1185,20 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
                 fFontScaleFactor, fXScale, fYScale);
 
       vector<line> lines = opj.layerLines(g, l);
-      for (size_t i = 0; i < lines.size(); ++i) {
+      for (auto & line : lines) {
         ArrowMarker mrk;
-        mrk.setStartPoint(lines[i].begin.x, lines[i].begin.y);
-        mrk.setEndPoint(lines[i].end.x, lines[i].end.y);
-        mrk.drawStartArrow(lines[i].begin.shape_type > 0);
-        mrk.drawEndArrow(lines[i].end.shape_type > 0);
-        mrk.setHeadLength(int(lines[i].end.shape_length));
+        mrk.setStartPoint(line.begin.x, line.begin.y);
+        mrk.setEndPoint(line.end.x, line.end.y);
+        mrk.drawStartArrow(line.begin.shape_type > 0);
+        mrk.drawEndArrow(line.end.shape_type > 0);
+        mrk.setHeadLength(int(line.end.shape_length));
         mrk.setHeadAngle(
-            arrowAngle(lines[i].end.shape_length, lines[i].end.shape_width));
-        mrk.setColor(ColorBox::color(lines[i].color));
-        mrk.setWidth((int)lines[i].width);
+            arrowAngle(line.end.shape_length, line.end.shape_width));
+        mrk.setColor(ColorBox::color(line.color));
+        mrk.setWidth((int)line.width);
         Qt::PenStyle s;
 
-        switch (lines[i].line_style) {
+        switch (line.line_style) {
         case OPJFile::Solid:
           s = Qt::SolidLine;
           break;
@@ -1225,9 +1225,9 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
       }
 
       vector<bitmap> bitmaps = opj.layerBitmaps(g, l);
-      for (size_t i = 0; i < bitmaps.size(); ++i) {
+      for (auto & bitmap : bitmaps) {
         QPixmap bmp;
-        bmp.loadFromData(bitmaps[i].data, uint(bitmaps[i].size), "BMP");
+        bmp.loadFromData(bitmap.data, uint(bitmap.size), "BMP");
         QTemporaryFile file;
         file.setFileTemplate(QDir::tempPath() + "/XXXXXX.bmp");
         if (file.open()) {
@@ -1235,44 +1235,44 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
           ImageMarker *mrk = graph->addImage(file.fileName());
           double left, top, right, bottom;
           left = top = right = bottom = 0.0;
-          switch (bitmaps[i].attach) {
+          switch (bitmap.attach) {
           case OPJFile::Scale:
-            left = bitmaps[i].left;
-            top = bitmaps[i].top;
-            right = left + bitmaps[i].width;
-            bottom = top - bitmaps[i].height;
+            left = bitmap.left;
+            top = bitmap.top;
+            right = left + bitmap.width;
+            bottom = top - bitmap.height;
             break;
           case OPJFile::Frame:
-            if (bitmaps[i].width > 0) {
-              left = (rangeX.max - rangeX.min) * bitmaps[i].left + rangeX.min;
-              right = left + bitmaps[i].width;
+            if (bitmap.width > 0) {
+              left = (rangeX.max - rangeX.min) * bitmap.left + rangeX.min;
+              right = left + bitmap.width;
             } else {
-              right = (rangeX.max - rangeX.min) * bitmaps[i].left + rangeX.min;
-              left = right + bitmaps[i].width;
+              right = (rangeX.max - rangeX.min) * bitmap.left + rangeX.min;
+              left = right + bitmap.width;
             }
 
-            if (bitmaps[i].height > 0) {
-              top = rangeY.max - (rangeY.max - rangeY.min) * bitmaps[i].top;
-              bottom = top - bitmaps[i].height;
+            if (bitmap.height > 0) {
+              top = rangeY.max - (rangeY.max - rangeY.min) * bitmap.top;
+              bottom = top - bitmap.height;
             } else {
-              bottom = rangeY.max - (rangeY.max - rangeY.min) * bitmaps[i].top;
-              top = bottom - bitmaps[i].height;
+              bottom = rangeY.max - (rangeY.max - rangeY.min) * bitmap.top;
+              top = bottom - bitmap.height;
             }
             break;
           case OPJFile::Page:
             // rect graphRect = opj.graphRect(g);
             left = (rangeX.max - rangeX.min) *
-                       (bitmaps[i].left -
+                       (bitmap.left -
                         (double)layerRect.left / (double)graphRect.width()) /
                        ((double)layerRect.width() / (double)graphRect.width()) +
                    rangeX.min;
             top = rangeY.max -
                   (rangeY.max - rangeY.min) *
-                      (bitmaps[i].top -
+                      (bitmap.top -
                        (double)layerRect.top / (double)graphRect.height()) /
                       ((double)layerRect.height() / (double)graphRect.height());
-            right = left + bitmaps[i].width;
-            bottom = top - bitmaps[i].height;
+            right = left + bitmap.width;
+            bottom = top - bitmap.height;
             break;
           }
 
@@ -1429,8 +1429,8 @@ QString ImportOPJ::parseOriginTags(const QString &str) {
       }
     }
     flag = false;
-    for (int i = 0; i < 7; ++i) {
-      if (rxtags[i].indexIn(line) > -1) {
+    for (const auto & rxtag : rxtags) {
+      if (rxtag.indexIn(line) > -1) {
         flag = true;
         break;
       }

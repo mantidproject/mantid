@@ -1418,10 +1418,9 @@ void AxesDialog::updateGrid() {
   bool antiAlias = m_chkAntialiseGrid->isChecked();
   switch (m_cmbApplyGridFormat->currentIndex()) {
   case 0: {
-    for (auto gridItr = m_Grid_list.begin(); gridItr != m_Grid_list.end();
-         gridItr++) {
-      if ((*gridItr)->modified()) {
-        (*gridItr)->apply(m_graph->plotWidget()->grid(), antiAlias);
+    for (auto & gridItr : m_Grid_list) {
+      if (gridItr->modified()) {
+        gridItr->apply(m_graph->plotWidget()->grid(), antiAlias);
         m_graph->replot();
         m_graph->notifyChanges();
       }
@@ -1433,14 +1432,13 @@ void AxesDialog::updateGrid() {
     if (!plot) {
       return;
     }
-    for (auto gridItr = m_Grid_list.begin(); gridItr != m_Grid_list.end();
-         gridItr++) {
+    for (auto & gridItr : m_Grid_list) {
       QList<Graph *> layers = plot->layersList();
       foreach (Graph *g, layers) {
         if (g->isPiePlot()) {
           continue;
         }
-        (*gridItr)->apply(g->plotWidget()->grid(), antiAlias);
+        gridItr->apply(g->plotWidget()->grid(), antiAlias);
         g->replot();
       }
     }
@@ -1459,9 +1457,8 @@ void AxesDialog::updateGrid() {
           if (g->isPiePlot()) {
             continue;
           }
-          for (auto gridItr = m_Grid_list.begin(); gridItr != m_Grid_list.end();
-               gridItr++) {
-            (*gridItr)->apply(g->plotWidget()->grid(), antiAlias, true);
+          for (auto & gridItr : m_Grid_list) {
+            gridItr->apply(g->plotWidget()->grid(), antiAlias, true);
             g->replot();
           }
         }
@@ -1478,17 +1475,15 @@ void AxesDialog::updateGrid() {
 */
 bool AxesDialog::pressToGraph() {
   // Check if all tabs and axes are valid first
-  for (auto axisItr = m_Axis_list.begin(); axisItr != m_Axis_list.end();
-       axisItr++) {
-    if (!((*axisItr)->valid())) {
+  for (auto & axisItr : m_Axis_list) {
+    if (!(axisItr->valid())) {
       g_log.warning("Axis options are invalid!");
       return false;
     }
   }
 
-  for (auto scaleItr = m_Scale_list.begin(); scaleItr != m_Scale_list.end();
-       scaleItr++) {
-    if (!((*scaleItr)->valid())) {
+  for (auto & scaleItr : m_Scale_list) {
+    if (!(scaleItr->valid())) {
       g_log.warning("Scale options are invalid!");
       return false;
     }
@@ -1496,14 +1491,12 @@ bool AxesDialog::pressToGraph() {
 
   updateGrid();
 
-  for (auto axisItr = m_Axis_list.begin(); axisItr != m_Axis_list.end();
-       axisItr++) {
-    (*axisItr)->apply();
+  for (auto & axisItr : m_Axis_list) {
+    axisItr->apply();
   }
 
-  for (auto scaleItr = m_Scale_list.begin(); scaleItr != m_Scale_list.end();
-       scaleItr++) {
-    (*scaleItr)->apply();
+  for (auto & scaleItr : m_Scale_list) {
+    scaleItr->apply();
   }
 
   if (m_generalModified) {

@@ -151,55 +151,55 @@ int OPJFile::compareFunctionnames(const char *sname) const {
 
 vector<string> OPJFile::findDataByIndex(int index) const {
   vector<string> str;
-  for (unsigned int spread = 0; spread < SPREADSHEET.size(); spread++)
-    for (unsigned int i = 0; i < SPREADSHEET[spread].column.size(); i++)
-      if (SPREADSHEET[spread].column[i].index == index) {
-        str.push_back(SPREADSHEET[spread].column[i].name);
-        str.emplace_back("T_" + SPREADSHEET[spread].name);
+  for (const auto & spread : SPREADSHEET)
+    for (unsigned int i = 0; i < spread.column.size(); i++)
+      if (spread.column[i].index == index) {
+        str.push_back(spread.column[i].name);
+        str.emplace_back("T_" + spread.name);
         return str;
       }
-  for (unsigned int i = 0; i < MATRIX.size(); i++)
-    if (MATRIX[i].index == index) {
-      str.push_back(MATRIX[i].name);
-      str.emplace_back("M_" + MATRIX[i].name);
+  for (const auto & i : MATRIX)
+    if (i.index == index) {
+      str.push_back(i.name);
+      str.emplace_back("M_" + i.name);
       return str;
     }
-  for (unsigned int i = 0; i < EXCEL.size(); i++)
-    for (unsigned int j = 0; j < EXCEL[i].sheet.size(); j++)
-      for (unsigned int k = 0; k < EXCEL[i].sheet[j].column.size(); k++)
-        if (EXCEL[i].sheet[j].column[k].index == index) {
-          str.push_back(EXCEL[i].sheet[j].column[k].name);
-          str.emplace_back("E_" + EXCEL[i].name);
+  for (const auto & i : EXCEL)
+    for (unsigned int j = 0; j < i.sheet.size(); j++)
+      for (unsigned int k = 0; k < i.sheet[j].column.size(); k++)
+        if (i.sheet[j].column[k].index == index) {
+          str.push_back(i.sheet[j].column[k].name);
+          str.emplace_back("E_" + i.name);
           return str;
         }
-  for (unsigned int i = 0; i < FUNCTION.size(); i++)
-    if (FUNCTION[i].index == index) {
-      str.push_back(FUNCTION[i].name);
-      str.emplace_back("F_" + FUNCTION[i].name);
+  for (const auto & i : FUNCTION)
+    if (i.index == index) {
+      str.push_back(i.name);
+      str.emplace_back("F_" + i.name);
       return str;
     }
   return str;
 }
 
 string OPJFile::findObjectByIndex(int index) {
-  for (unsigned int i = 0; i < SPREADSHEET.size(); i++)
-    if (SPREADSHEET[i].objectID == index) {
-      return SPREADSHEET[i].name;
+  for (auto & i : SPREADSHEET)
+    if (i.objectID == index) {
+      return i.name;
     }
 
-  for (unsigned int i = 0; i < MATRIX.size(); i++)
-    if (MATRIX[i].objectID == index) {
-      return MATRIX[i].name;
+  for (auto & i : MATRIX)
+    if (i.objectID == index) {
+      return i.name;
     }
 
-  for (unsigned int i = 0; i < EXCEL.size(); i++)
-    if (EXCEL[i].objectID == index) {
-      return EXCEL[i].name;
+  for (auto & i : EXCEL)
+    if (i.objectID == index) {
+      return i.name;
     }
 
-  for (unsigned int i = 0; i < GRAPH.size(); i++)
-    if (GRAPH[i].objectID == index) {
-      return GRAPH[i].name;
+  for (auto & i : GRAPH)
+    if (i.objectID == index) {
+      return i.name;
     }
 
   return "";

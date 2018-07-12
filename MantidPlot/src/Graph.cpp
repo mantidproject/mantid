@@ -4379,8 +4379,8 @@ void Graph::copy(Graph *g) {
   setAxisLabelRotation(QwtPlot::xTop, g->labelsRotation(QwtPlot::xTop));
 
   QVector<int> imag = g->imageMarkerKeys();
-  for (int i = 0; i < (int)imag.size(); i++)
-    addImage(dynamic_cast<ImageMarker *>(g->imageMarker(imag[i])));
+  for (int i : imag)
+    addImage(dynamic_cast<ImageMarker *>(g->imageMarker(i)));
 
   QList<LegendWidget *> texts = g->textsList();
   foreach (LegendWidget *t, texts) {
@@ -4397,8 +4397,8 @@ void Graph::copy(Graph *g) {
   }
 
   QVector<int> l = g->lineMarkerKeys();
-  for (int i = 0; i < (int)l.size(); i++) {
-    ArrowMarker *lmrk = dynamic_cast<ArrowMarker *>(g->arrow(l[i]));
+  for (int i : l) {
+    ArrowMarker *lmrk = dynamic_cast<ArrowMarker *>(g->arrow(i));
     if (lmrk)
       addArrow(lmrk);
   }
@@ -5867,8 +5867,8 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   std::vector<std::string> imageSections = tsv.sections("image");
-  for (auto it = imageSections.begin(); it != imageSections.end(); ++it) {
-    QStringList sl = QString::fromUtf8((*it).c_str()).split("\t");
+  for (auto & imageSection : imageSections) {
+    QStringList sl = QString::fromUtf8(imageSection.c_str()).split("\t");
     insertImageMarker(sl, fileVersion);
   }
 
@@ -5887,12 +5887,12 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   std::vector<std::string> legendSections = tsv.sections("legend");
-  for (auto it = legendSections.begin(); it != legendSections.end(); ++it)
-    insertText("legend", *it);
+  for (auto & legendSection : legendSections)
+    insertText("legend", legendSection);
 
   std::vector<std::string> lineSections = tsv.sections("line");
-  for (auto it = lineSections.begin(); it != lineSections.end(); ++it) {
-    QStringList sl = QString::fromUtf8((*it).c_str()).split("\t");
+  for (auto & lineSection : lineSections) {
+    QStringList sl = QString::fromUtf8(lineSection.c_str()).split("\t");
     addArrow(sl, fileVersion);
   }
 
@@ -5959,8 +5959,8 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   std::vector<std::string> pieLabelSections = tsv.sections("PieLabel");
-  for (auto it = pieLabelSections.begin(); it != pieLabelSections.end(); ++it)
-    insertText("PieLabel", *it);
+  for (auto & pieLabelSection : pieLabelSections)
+    insertText("PieLabel", pieLabelSection);
 
   if (tsv.selectLine("PlotTitle")) {
     QString title, color;
@@ -5993,8 +5993,8 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   std::vector<std::string> textSections = tsv.sections("text");
-  for (auto it = textSections.begin(); it != textSections.end(); ++it)
-    insertText("text", *it);
+  for (auto & textSection : textSections)
+    insertText("text", textSection);
 
   if (tsv.selectLine("TitleFont")) {
     QString font;
@@ -6132,10 +6132,9 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
     }
 
     std::vector<std::string> functionSections = tsv.sections("Function");
-    for (auto it = functionSections.begin(); it != functionSections.end();
-         ++it) {
+    for (auto & functionSection : functionSections) {
       curveID++;
-      QStringList sl = QString::fromUtf8((*it).c_str()).split("\n");
+      QStringList sl = QString::fromUtf8(functionSection.c_str()).split("\n");
       restoreFunction(sl);
     }
 
@@ -6219,8 +6218,8 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
     }
 
     std::vector<std::string> specSections = tsv.sections("spectrogram");
-    for (auto it = specSections.begin(); it != specSections.end(); ++it) {
-      MantidQt::API::TSVSerialiser specTSV(*it);
+    for (auto & specSection : specSections) {
+      MantidQt::API::TSVSerialiser specTSV(specSection);
       Spectrogram *s = nullptr;
 
       if (specTSV.selectLine("workspace")) {
@@ -6257,7 +6256,7 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
         continue;
 
       plotSpectrogram(s, GraphOptions::ColorMap);
-      s->loadFromProject(*it);
+      s->loadFromProject(specSection);
       curveID++;
     }
 
@@ -6721,8 +6720,8 @@ std::string Graph::saveScale() {
 
 std::string Graph::saveMarkers() {
   MantidQt::API::TSVSerialiser tsv;
-  for (int i = 0; i < d_images.size(); ++i) {
-    auto mrkI = dynamic_cast<ImageMarker *>(d_plot->marker(d_images[i]));
+  for (int d_image : d_images) {
+    auto mrkI = dynamic_cast<ImageMarker *>(d_plot->marker(d_image));
     if (!mrkI)
       continue;
 
@@ -6736,8 +6735,8 @@ std::string Graph::saveMarkers() {
     tsv.writeRaw(s.toStdString());
   }
 
-  for (int i = 0; i < d_lines.size(); ++i) {
-    auto mrkL = dynamic_cast<ArrowMarker *>(d_plot->marker(d_lines[i]));
+  for (int d_line : d_lines) {
+    auto mrkL = dynamic_cast<ArrowMarker *>(d_plot->marker(d_line));
     if (!mrkL)
       continue;
 

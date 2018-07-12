@@ -46,10 +46,9 @@ void MdPlottingCmapsProvider::getColorMapsForMdPlotting(
   std::vector<int> indexList = getSliceViewerIndicesForCommonColorMaps(
       colorMapNamesSliceViewer, colorMapNamesVsi);
 
-  for (std::vector<int>::iterator it = indexList.begin(); it != indexList.end();
-       ++it) {
-    colorMapNames.append(colorMapNamesSliceViewer[*it]);
-    colorMapFiles.append(colorMapFilesSliceViewer[*it]);
+  for (int & it : indexList) {
+    colorMapNames.append(colorMapNamesSliceViewer[it]);
+    colorMapFiles.append(colorMapFilesSliceViewer[it]);
   }
 }
 
@@ -91,9 +90,9 @@ void MdPlottingCmapsProvider::appendAllFileNamesForFileType(
 
   QFileInfoList info = directory.entryInfoList(filter, QDir::Files);
 
-  for (QFileInfoList::iterator it = info.begin(); it != info.end(); ++it) {
-    colorMapNames.append(it->baseName());
-    colorMapFiles.append(it->absoluteFilePath());
+  for (auto & it : info) {
+    colorMapNames.append(it.baseName());
+    colorMapFiles.append(it.absoluteFilePath());
   }
 }
 
@@ -104,9 +103,8 @@ MdPlottingCmapsProvider::getSliceViewerIndicesForCommonColorMaps(
 
   std::vector<int> indexVector;
 
-  for (QStringList::iterator it = colorMapNamesSliceViewer.begin();
-       it != colorMapNamesSliceViewer.end(); ++it) {
-    if (colorMapNamesVsi.indexOf(*it) != -1) {
+  for (auto & it : colorMapNamesSliceViewer) {
+    if (colorMapNamesVsi.indexOf(it) != -1) {
       indexVector.push_back(index);
     }
 
