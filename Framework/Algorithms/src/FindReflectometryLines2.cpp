@@ -7,6 +7,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Statistics.h"
 
 namespace {
 namespace Prop {
@@ -33,6 +34,12 @@ void clearIntegrationLimits(Mantid::API::MatrixWorkspace &ws) {
 void convertXToWorkspaceIndex(Mantid::API::MatrixWorkspace &ws) {
   auto &xs = ws.mutableX(0);
   std::iota(xs.begin(), xs.end(), 0.);
+}
+
+double median(const Mantid::API::MatrixWorkspace &ws) {
+  using namespace Mantid::Kernel;
+  const auto statistics = getStatistics(ws.y(0).rawData(), StatOptions::Median);
+  return statistics.median;
 }
 
 Mantid::API::MatrixWorkspace_sptr makeOutput(double const x) {
@@ -139,6 +146,7 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
   // histogram. We don't really care but Transpose does.
   clearIntegrationLimits(*integralWS);
   auto transposedWS = transpose(integralWS);
+  auto const medianY = median(*transposedWS);
   convertXToWorkspaceIndex(*transposedWS);
   // determine initial height: maximum value
   auto const &Ys = transposedWS->y(0);
@@ -151,7 +159,8 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
   double const centreByMax = static_cast<double>(startIndex) + centreIndex;
   g_log.debug() << "Peak maximum position: " << centreByMax << '\n';
   // determine sigma
-  auto lessThanHalfMax = [height](double const x) { return x < 0.5 * height; };
+  auto lessThanHalfMax =
+      [height, medianY](double const x) { return x - medianY < 0.5 * (height - medianY); };
   using IterType = HistogramData::HistogramY::const_iterator;
   std::reverse_iterator<IterType> revMaxValueIt{maxValueIt};
   auto revMinFwhmIt = std::find_if(revMaxValueIt, Ys.crend(), lessThanHalfMax);
@@ -176,7 +185,7 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
   gaussian->setFwhm(fwhm);
   sum->addFunction(gaussian);
   func = API::FunctionFactory::Instance().createFunction("LinearBackground");
-  func->setParameter("A0", 0.);
+  func->setParameter("A0", medianY);
   func->setParameter("A1", 0.);
   sum->addFunction(func);
   // call Fit child algorithm
