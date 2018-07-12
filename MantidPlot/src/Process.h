@@ -31,6 +31,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
 namespace Process {
+
+bool isAnotherInstanceRunning();
+
 std::vector<int64_t> otherInstancePIDs();
 }
 #endif // PROCESS_H_

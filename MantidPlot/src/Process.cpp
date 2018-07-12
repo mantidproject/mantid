@@ -18,8 +18,15 @@ public:
   PyObjectNewReference(const PyObjectNewReference &) = delete;
   PyObjectNewReference &operator=(const PyObjectNewReference &) = delete;
 
-  PyObjectNewReference(PyObjectNewReference &&) = default;
-  PyObjectNewReference &operator=(PyObjectNewReference &&) = default;
+  PyObjectNewReference(PyObjectNewReference &&o) {
+	  *this = std::move(o);
+  }
+
+  PyObjectNewReference &operator=(PyObjectNewReference &&other) {
+	  this->m_object = other.m_object;
+	  other.m_object = nullptr;
+	  return *this;
+  }
 
   inline PyObject *ptr() const { return m_object; }
 
@@ -39,7 +46,7 @@ PyObjectNewReference attr(PyObject *source, const char *name) {
   if (attr.ptr()) {
     return attr;
   } else {
-    PyErr_Clear();
+	PyErr_Print();
     throw std::runtime_error(std::string("Process: No attribute ") + name +
                              " found");
   }
@@ -53,11 +60,12 @@ PyObjectNewReference attr(PyObject *source, const char *name) {
  * @throws std::runtime_error if an error occurs retrieving the attribute
  */
 PyObjectNewReference call(PyObject *source, const char *name) {
-  auto result = PyObject_CallFunction(attr(source, name).ptr(), nullptr);
+  auto returnedAttr = attr(source, name);
+  auto result = PyObject_CallFunction(returnedAttr.ptr(), nullptr);
   if (result)
     return PyObjectNewReference(result);
   else {
-    PyErr_Clear();
+	PyErr_Print();
     throw std::runtime_error(std::string("Process: Error calling function ") +
                              name);
   }
@@ -77,6 +85,16 @@ PyObjectNewReference psutil() {
 } // namespace
 
 namespace Process {
+
+/**
+  * Returns true is another instance of Mantid is running
+  * on this machine
+  * @return True if another instance is running
+  * @throws std::runtime_error if the PID list cannot be determined
+  */
+bool isAnotherInstanceRunning() {
+	return !otherInstancePIDs().empty();
+}
 
 /**
  * @brief Return a list of process IDs for other instances of this process.
