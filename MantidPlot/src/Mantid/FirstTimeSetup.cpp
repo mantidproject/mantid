@@ -57,8 +57,8 @@ void FirstTimeSetup::initLayout() {
   // Populate list of facilities
   m_uiForm.cbFacility->clear();
   auto faclist = Mantid::Kernel::ConfigService::Instance().getFacilityNames();
-  for (auto it = faclist.begin(); it != faclist.end(); ++it) {
-    m_uiForm.cbFacility->addItem(QString::fromStdString(*it));
+  for (auto & it : faclist) {
+    m_uiForm.cbFacility->addItem(QString::fromStdString(it));
   }
 
   Mantid::Kernel::ConfigServiceImpl &config =

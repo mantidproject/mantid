@@ -51,8 +51,8 @@ SampleLogDialogBase::SampleLogDialogBase(const QString &wsname,
       m_experimentInfoIndex(experimentInfoIndex), buttonPlot(nullptr),
       buttonClose(nullptr), m_spinNumber(nullptr) {
 
-  for (size_t i = 0; i < NUM_STATS; ++i) {
-    statValues[i] = nullptr;
+  for (auto & statValue : statValues) {
+    statValue = nullptr;
   }
 
   // No further initialisation provided, must be done in derived classes
@@ -109,8 +109,8 @@ void SampleLogDialogBase::showLogStatistics() {
 void SampleLogDialogBase::showLogStatisticsOfItem(
     QTreeWidgetItem *item, const LogFilterGenerator::FilterType filter) {
   // Assume that you can't show the stats
-  for (size_t i = 0; i < NUM_STATS; i++) {
-    statValues[i]->setText(QString(""));
+  for (auto & statValue : statValues) {
+    statValue->setText(QString(""));
   }
 
   // used in numeric time series below, the default filter value

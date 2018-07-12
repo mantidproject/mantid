@@ -221,20 +221,18 @@ void MonitorDlg::update() {
     m_tree->setItemWidget(algItem, 2, cancelButton);
     const std::vector<Mantid::Kernel::Property *> &prop_list =
         alg->getProperties();
-    for (std::vector<Mantid::Kernel::Property *>::const_iterator prop =
-             prop_list.begin();
-         prop != prop_list.end(); ++prop) {
+    for (auto prop : prop_list) {
       QStringList lstr;
       Mantid::Kernel::MaskedProperty<std::string> *maskedProp =
-          dynamic_cast<Mantid::Kernel::MaskedProperty<std::string> *>(*prop);
+          dynamic_cast<Mantid::Kernel::MaskedProperty<std::string> *>(prop);
       if (maskedProp) {
         lstr << QString::fromStdString(maskedProp->name()) + ": "
              << QString::fromStdString(maskedProp->getMaskedValue());
       } else {
-        lstr << QString::fromStdString((**prop).name()) + ": "
-             << QString::fromStdString((**prop).value());
+        lstr << QString::fromStdString((*prop).name()) + ": "
+             << QString::fromStdString((*prop).value());
       }
-      if ((**prop).isDefault())
+      if ((*prop).isDefault())
         lstr << " Default";
       algItem->addChild(new QTreeWidgetItem(lstr));
     }

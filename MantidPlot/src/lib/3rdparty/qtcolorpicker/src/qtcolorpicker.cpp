@@ -551,9 +551,9 @@ ColorPickerPopup::~ColorPickerPopup() {
     pointer to this item; otherwise returns 0.
 */
 ColorPickerItem *ColorPickerPopup::find(const QColor &col) const {
-  for (int i = 0; i < items.size(); ++i) {
-    if (items.at(i) && items.at(i)->color() == col)
-      return items.at(i);
+  for (auto item : items) {
+    if (item && item->color() == col)
+      return item;
   }
 
   return nullptr;
@@ -838,10 +838,10 @@ void ColorPickerPopup::regenerateGrid() {
   grid->setSpacing(0);
 
   int ccol = 0, crow = 0;
-  for (int i = 0; i < items.size(); ++i) {
-    if (items.at(i)) {
-      widgetAt[crow][ccol] = items.at(i);
-      grid->addWidget(items.at(i), crow, ccol++);
+  for (auto item : items) {
+    if (item) {
+      widgetAt[crow][ccol] = item;
+      grid->addWidget(item, crow, ccol++);
       if (ccol == columns) {
         ++crow;
         ccol = 0;
