@@ -215,12 +215,12 @@
         </property>
         <item>
          <property name="text">
-          <string>Custom</string>
+          <string>Individual</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Individual</string>
+          <string>Custom</string>
          </property>
         </item>
         <item>
