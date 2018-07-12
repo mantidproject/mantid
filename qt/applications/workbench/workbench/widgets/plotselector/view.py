@@ -70,7 +70,7 @@ class PlotSelectorView(QWidget):
         self.mutex = QMutex()
 
         self.sort_order = Qt.AscendingOrder
-        self.sort_type = Column.Name
+        self.sort_type = Column.Number
 
         self.show_button = QPushButton('Show')
         self.select_all_button = QPushButton('Select All')
@@ -176,7 +176,10 @@ class PlotSelectorView(QWidget):
         table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         table_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)
         table_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        table_widget.sortItems(self.sort_type, self.sort_order)
         table_widget.setSortingEnabled(True)
+
+        table_widget.horizontalHeader().sectionClicked.connect(self.update_sort_menu_selection)
 
         return table_widget
 
@@ -207,28 +210,28 @@ class PlotSelectorView(QWidget):
 
     # ------------------------ Plot Updates ------------------------
 
-    def append_to_plot_list(self, plot_number, is_shown_by_filter):
+    def append_to_plot_list(self, plot_number):
         """
         Appends to the plot list, if sorting is enabled this should
         automatically go to the correct place, and the flag can be
         set to determine whether it should initially be hidden or not
         :param plot_number: The unique number in GlobalFigureManager
-        :param is_shown_by_filter: If true then show this plot name
-                                   in the list, else hide it
         """
-        # TODO: move is_shown_by_filter to presernter logic
-
         plot_name_widget = PlotNameWidget(self.presenter, plot_number, self, self.is_run_as_unit_test)
 
         number_item = HumanReadableSortItem(str(plot_number))
         number_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
         name_item = HumanReadableSortItem()
+        name_item.set_data_sort_role(Qt.InitialSortOrderRole)
+        plot_name = self.presenter.get_plot_name_from_number(plot_number)
+        name_item.setData(Qt.InitialSortOrderRole, plot_name)
         name_item.setSizeHint(plot_name_widget.sizeHint())
 
-        last_active_item = HumanReadableSortItem()
         last_active_value = self.presenter.get_initial_last_active_value(plot_number)
-        last_active_item.setData(Qt.DisplayRole, last_active_value)
+        last_active_item = HumanReadableSortItem(last_active_value)
+
+        is_shown_by_filter = self.presenter.is_shown_by_filter(plot_number)
 
         with QMutexLocker(self.mutex):
             self.table_widget.setSortingEnabled(False)
@@ -289,7 +292,7 @@ class PlotSelectorView(QWidget):
         plots
         :return: A list of strings with the plot numbers
         """
-        selected = self.table_widget.selectedItems()
+        selected = self.table_widget.selectionModel().selectedRows()
         selected_plots = []
         for item in selected:
             row = item.row()
@@ -340,13 +343,13 @@ class PlotSelectorView(QWidget):
         """
         Given a list of plots numbers, show only the ones in the list,
         hiding the rest
-        :param plot_list: The list of plots to show
+        :param plot_list: The list of plots numbers to show
         """
-        # TODO: work correctly with numbers
         with QMutexLocker(self.mutex):
             for row in range(self.table_widget.rowCount()):
                 widget = self.table_widget.cellWidget(row, Column.Name)
-                self.table_widget.setRowHidden(row, widget.plot_name not in plot_list)
+                is_shown_by_filter = self.presenter.is_shown_by_filter(widget.plot_number)
+                self.table_widget.setRowHidden(row, not is_shown_by_filter)
 
     # ------------------------ Plot Renaming ------------------------
 
@@ -360,9 +363,10 @@ class PlotSelectorView(QWidget):
             row, widget = self._get_row_and_widget_from_plot_number(plot_number)
 
             old_key = self.table_widget.item(row, Column.LastActive).data(Qt.DisplayRole)
-            new_sort_key = self.presenter.get_renamed_last_active_value(plot_number, old_key)
-            self.table_widget.item(row, Column.LastActive).setData(Qt.InitialSortOrderRole, new_sort_key)
+            new_last_active_value = self.presenter.get_renamed_last_active_value(plot_number, old_key)
+            self.table_widget.item(row, Column.LastActive).setData(Qt.DisplayRole, new_last_active_value)
 
+            self.table_widget.item(row, Column.Name).setData(Qt.InitialSortOrderRole, new_name)
             widget.set_plot_name(new_name)
 
     def rename_selected_in_context_menu(self):
@@ -390,7 +394,7 @@ class PlotSelectorView(QWidget):
 
     QTableWidgetItem is subclassed by HumanReadableSortItem to
     override the < operator. This uses the text with the
-    InitialSortOrderRole to sort, and sorts in a human readable way,
+    Qt.DisplayRole to sort, and sorts in a human readable way,
     for example ['Figure 1', 'Figure 2', 'Figure 10'] as opposed to
     the ['Figure 1', 'Figure 10', 'Figure 2'].
     """
@@ -436,6 +440,32 @@ class PlotSelectorView(QWidget):
         sort_button.setMenu(sort_menu)
         return sort_button
 
+    def update_sort_menu_selection(self):
+        """
+        If the sort order is changed by clicking on the column
+        header this keeps the menu in sync.
+        """
+        order = self.table_widget.horizontalHeader().sortIndicatorOrder()
+        column = self.table_widget.horizontalHeader().sortIndicatorSection()
+
+        sort_order_map = {Qt.AscendingOrder: 'Ascending',
+                          Qt.DescendingOrder: 'Descending'}
+
+        sort_type_map = {Column.Number.value: 'Number',
+                         Column.Name.value: 'Name',
+                         Column.LastActive.value: 'Last Active'}
+
+        order_string = sort_order_map.get(order)
+        column_string = sort_type_map.get(column)
+
+        print(order_string + column_string)
+
+        for action in self.sort_button.menu().actions():
+            if action.text() == order_string:
+                action.setChecked(True)
+            if action.text() == column_string:
+                action.setChecked(True)
+
     def sort_ascending(self):
         """
         Set the list to sort ascending
@@ -444,7 +474,7 @@ class PlotSelectorView(QWidget):
         """
         self.sort_order = Qt.AscendingOrder
         with QMutexLocker(self.mutex):
-            self.table_widget.sortItems(Column.Name, self.sort_order)
+            self.table_widget.sortItems(self.sort_type, self.sort_order)
 
     def sort_descending(self):
         """
@@ -454,7 +484,7 @@ class PlotSelectorView(QWidget):
         """
         self.sort_order = Qt.DescendingOrder
         with QMutexLocker(self.mutex):
-            self.table_widget.sortItems(Column.Name, self.sort_order)
+            self.table_widget.sortItems(self.sort_type, self.sort_order)
 
     def set_sort_type(self, sort_type):
         """
@@ -636,6 +666,13 @@ class HumanReadableSortItem(QTableWidgetItem):
       [Figure 1, Figure 2, Figure 20, Figure 3]
     """
 
+    def __init__(self, *args, **kwargs):
+        super(HumanReadableSortItem, self).__init__(*args, **kwargs)
+        self.role = Qt.DisplayRole
+
+    def set_data_sort_role(self, role):
+        self.role = role
+
     def convert(self, text):
         """
         Convert some text for comparison
@@ -653,6 +690,6 @@ class HumanReadableSortItem(QTableWidgetItem):
         then uses Python list comparison to get the result we want.
         :param other: The other HumanReadableSortItem to compare with
         """
-        self_key = [self.convert(c) for c in re.split('([0-9]+)', str(self.data(Qt.InitialSortOrderRole)))]
-        other_key = [self.convert(c) for c in re.split('([0-9]+)', str(other.data(Qt.InitialSortOrderRole)))]
+        self_key = [self.convert(c) for c in re.split('([0-9]+)', self.data(self.role))]
+        other_key = [self.convert(c) for c in re.split('([0-9]+)', other.data(self.role))]
         return self_key < other_key

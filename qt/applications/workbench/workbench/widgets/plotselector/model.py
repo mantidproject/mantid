@@ -153,11 +153,10 @@ class PlotSelectorModel(object):
         """
         figure_manager = self.GlobalFigureManager.figs.get(plot_number)
         if figure_manager is None:
-            raise ValueError('Error closing, could not find a plot with the number {}.'.format(plot_number))
+            raise ValueError('Error exporting, could not find a plot with the number {}.'.format(plot_number))
 
         try:
             figure_manager.canvas.figure.savefig(save_absolute_path)
         except IOError:
-            # TODO: Fix this error message
             raise ValueError("Error, could not save plot with name {} because the filename is invalid. "
                              "Please remove any characters in the plot name that cannot be used in filenames.")

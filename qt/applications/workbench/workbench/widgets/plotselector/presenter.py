@@ -71,8 +71,7 @@ class PlotSelectorPresenter(object):
         :param plot_number: The unique number in GlobalFigureManager
         """
         try:
-            is_shown = self._is_shown_by_filter(self.view.get_filter_text(), plot_number)
-            self.view.append_to_plot_list(plot_number, is_shown)
+            self.view.append_to_plot_list(plot_number)
         except ValueError as e:
             print(e)
 
@@ -105,31 +104,14 @@ class PlotSelectorPresenter(object):
         typing or clearing the text)
         """
         filter_text = self.view.get_filter_text()
-        self._filter_plot_list_by_string(filter_text)
+        self.view.filter_plot_list(filter_text)
 
-    def _filter_plot_list_by_string(self, filter_text):
+    def is_shown_by_filter(self, plot_number):
         """
-        Given a string to filter on this updates the list of plots
-        in the view or shows all plots if the string is empty
-        :param filter_text: A string containing the filter text
-        """
-        if not filter_text:
-            self.view.unhide_all_plots()
-        else:
-            pass
-            # TODO: add filtering
-            # plot_list = []
-            # for plot_name in self.model.plot_list:
-            #     if self._is_shown_by_filter(filter_text, plot_name):
-            #         plot_list.append(plot_name)
-            # self.view.filter_plot_list(plot_list)
-
-    def _is_shown_by_filter(self, filter_text, plot_number):
-        """
-        :param filter_text: The user set filter text
         :param plot_number: The unique number in GlobalFigureManager
         :return: True if shown, or False if filtered out
         """
+        filter_text = self.view.get_filter_text()
         plot_name = self.get_plot_name_from_number(plot_number)
         return filter_text.lower() in plot_name.lower()
 
@@ -250,6 +232,7 @@ class PlotSelectorPresenter(object):
         Gets the initial last active value for a plot just added, in
         this case it is assumed to not have been shown
         :param plot_number: The unique number in GlobalFigureManager
+        :return: A string with the last active value
         """
         return '_' + self.model.get_plot_name_from_number(plot_number)
 
@@ -276,8 +259,8 @@ class PlotSelectorPresenter(object):
         :param extension: The file type extension (must be supported
                           by matplotlib's savefig)
         """
-        for plot_name in self.view.get_all_selected_plot_numbers():
-            self.export_plot(plot_name, dir_name, extension)
+        for plot_number in self.view.get_all_selected_plot_numbers():
+            self.export_plot(plot_number, dir_name, extension)
 
     def export_plot(self, plot_number, dir_name, extension):
         """
@@ -293,6 +276,6 @@ class PlotSelectorPresenter(object):
         if dir_name:
             filename = os.path.join(dir_name, plot_name + extension)
             try:
-                self.model.export_plot(plot_name, filename)
+                self.model.export_plot(plot_number, filename)
             except ValueError as e:
                 print(e)
