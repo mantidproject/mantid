@@ -6,7 +6,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MersenneTwister.h"
 
-#include <boost/numeric_cast.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 #include <cmath>
 #include <functional>
 
