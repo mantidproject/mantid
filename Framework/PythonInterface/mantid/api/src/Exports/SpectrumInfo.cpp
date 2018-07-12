@@ -3,11 +3,25 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/list.hpp>
 #include <boost/python/return_value_policy.hpp>
 
 using Mantid::SpectrumDefinition;
 using Mantid::API::SpectrumInfo;
 using namespace boost::python;
+
+// Helper function to create and return a list of all the spectrum definitions
+boost::python::list getSpectrumDefinitionList(const SpectrumInfo &self) {
+  // Create the list
+  boost::python::list spectrumDefinitionList;
+
+  // Get all the spectrum definitions
+  for (auto i = 0; i < self.size(); i++) {
+    spectrumDefinitionList.append(self.spectrumDefinition(i));
+  }
+
+  return spectrumDefinitionList;
+}
 
 void export_SpectrumInfo() {
   // WARNING SpectrumInfo is work in progress and not ready for exposing more of
@@ -54,7 +68,8 @@ void export_SpectrumInfo() {
       .def("l2", &SpectrumInfo::l2, (arg("self"), arg("index")),
            "Returns the distance from the sample to the spectrum.")
 
-      .def("absolutePosition", &SpectrumInfo::position, (arg("self"), arg("index")),
+      .def("absolutePosition", &SpectrumInfo::position,
+           (arg("self"), arg("index")),
            "Returns the position of the spectrum with the given index.")
 
       .def("absoluteSourcePosition", &SpectrumInfo::sourcePosition, arg("self"),
@@ -63,8 +78,6 @@ void export_SpectrumInfo() {
       .def("absoluteSamplePosition", &SpectrumInfo::samplePosition, arg("self"),
            "Returns the sample position.")
 
-      .def("spectrumDefinition", &SpectrumInfo::spectrumDefinition,
-           (arg("self"), arg("index")),
-           return_value_policy<copy_const_reference>(),
+      .def("getAllSpectrumDefinitions", &getSpectrumDefinitionList, arg("self"),
            "Returns the SpectrumDefinition of the spectrum.");
 }

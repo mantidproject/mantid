@@ -83,64 +83,66 @@ class SpectrumInfoTest(unittest.TestCase):
     def test_position(self):
         """ Test that the spectrum's position is returned. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(type(info.position(1)), V3D)
+        self.assertEquals(type(info.absolutePosition(1)), V3D)
 
     def test_sourcePosition(self):
         """ Test that the source's position is returned. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(type(info.sourcePosition()), V3D)
+        self.assertEquals(type(info.absoluteSourcePosition()), V3D)
 
     def test_samplePosition(self):
         """ Test that the sample's position is returned. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(type(info.samplePosition()), V3D)
+        self.assertEquals(type(info.absoluteSamplePosition()), V3D)
 
     """
     The following are test cases are SpectrumDefintion methods.
     """
 
-    def test_spectrumDefinitionCall(self):
-        """ Get the SpectrumDefintion """
+    def test_getAllSpectrumDefinitionsCall(self):
+        """ Get all the SpectrumDefinitions in a list """
         info = self._ws.spectrumInfo()
-        self.assertEquals(type(info.spectrumDefinition(1)), SpectrumDefinition)
+        spectrumDefinitionList = info.getAllSpectrumDefinitions()
+        self.assertEquals(type(spectrumDefinitionList), list)
+        self.assertEquals(len(spectrumDefinitionList), 2)
 
     def test_spectrumDefintionSize(self):
         """ Check the size of the SpectrumDefinition
         (i.e. number of detectors) """
         info = self._ws.spectrumInfo()
-        spectrumDef = info.spectrumDefinition(1)
-        self.assertEquals(spectrumDef.size(), 1)
+        spectrumDefinitionList = info.getAllSpectrumDefinitions()
+        self.assertEquals(spectrumDefinitionList[0].size(), 0)
+        self.assertEquals(spectrumDefinitionList[1].size(), 1)
 
     def test_spectrumDefintionAdd(self):
         """ Add a pair of detector index and time index """
         info = self._ws.spectrumInfo()
-        spectrumDef = info.spectrumDefinition(1)
-        spectrumDef.add(1, 1)
-        self.assertEquals(spectrumDef.size(), 2)
+        spectrumDefinitionList = info.getAllSpectrumDefinitions()
+        spectrumDefinitionList[1].add(1, 1)
+        self.assertEquals(spectrumDefinitionList[1].size(), 2)
 
     def test_spectrumDefintionEquals(self):
-        """ Check the equality of the SpectrumDefintion """
+        """ Check the equality of the SpectrumDefintions """
         info = self._ws.spectrumInfo()
-        spectrumDef = info.spectrumDefinition(1)
+        spectrumDefinitionList = info.getAllSpectrumDefinitions()
         # Check equality with equals() and == to make sure same result is given
-        self.assertTrue(spectrumDef.equals(spectrumDef))
-        self.assertTrue(spectrumDef == spectrumDef)
+        self.assertTrue(spectrumDefinitionList[0].equals(spectrumDefinitionList[0]))
+        self.assertTrue(spectrumDefinitionList[0] == spectrumDefinitionList[0])
 
     def test_spectrumDefintionNotEquals(self):
-        """ Check the equality of the SpectrumDefintion """
+        """ Check the equality of the SpectrumDefintions """
         info = self._ws.spectrumInfo()
-        spectrumDefZero = info.spectrumDefinition(0)
-        spectrumDefOne = info.spectrumDefinition(1)
+        spectrumDefinitionList = info.getAllSpectrumDefinitions()
         # Check inequality with not (by negating equals())
         # and != to make sure same result is given
-        self.assertTrue(not spectrumDefZero.equals(spectrumDefOne))
-        self.assertTrue(spectrumDefZero != spectrumDefOne)
+        self.assertTrue(not spectrumDefinitionList[0].equals(spectrumDefinitionList[1]))
+        self.assertTrue(spectrumDefinitionList[0] != spectrumDefinitionList[1])
 
     def test_spectrumDefintionGet(self):
         """ See if indexing works """
         info = self._ws.spectrumInfo()
-        spectrumDef = info.spectrumDefinition(1)
-        self.assertEquals(spectrumDef.get(0), (1, 0))
+        spectrumDefinitionList = info.getAllSpectrumDefinitions()
+        self.assertEquals(spectrumDefinitionList[1].get(0), (1, 0))
 
 if __name__ == '__main__':
     unittest.main()
