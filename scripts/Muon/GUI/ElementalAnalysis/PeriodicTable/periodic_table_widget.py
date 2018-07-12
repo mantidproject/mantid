@@ -20,11 +20,17 @@ class PeriodicTable(QtGui.QWidget):
     def widget(self):
         return self._presenter.widget
 
-    def register_table_clicked(self, slot):
-        self._presenter.widget.sig_table_clicked.connect(slot)
+    def register_table_lclicked(self, slot):
+        self._presenter.widget.sig_table_lclicked.connect(slot)
 
-    def unregister_table_clicked(self, slot):
-        self._presenter.widget.sig_table_clicked.disconnect(slot)
+    def unregister_table_lclicked(self, slot):
+        self._presenter.widget.sig_table_lclicked.disconnect(slot)
+
+    def register_table_rclicked(self, slot):
+        self._presenter.widget.sig_table_rclicked.connect(slot)
+
+    def unregister_table_rclicked(self, slot):
+        self._presenter.widget.sig_table_rclicked.disconnect(slot)
 
     def register_table_changed(self, slot):
         self._presenter.widget.sig_table_changed.connect(slot)

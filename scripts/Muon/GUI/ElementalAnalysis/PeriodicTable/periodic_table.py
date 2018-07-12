@@ -254,8 +254,10 @@ class _ElementButton(qt.QPushButton):
     """Signal emitted as the cursor enters the widget"""
     sigElementLeave = QtCore.pyqtSignal(object)
     """Signal emitted as the cursor leaves the widget"""
-    sigElementClicked = QtCore.pyqtSignal(object)
-    """Signal emitted when the widget is clicked"""
+    sigElementLeftClicked = QtCore.pyqtSignal(object)
+    """Signal emitted when the widget is left clicked"""
+    sigElementRightClicked = QtCore.pyqtSignal(object)
+    """Signal emitted when the widget is right clicked"""
 
     def __init__(self, item, parent=None):
         """
@@ -293,7 +295,9 @@ class _ElementButton(qt.QPushButton):
         self.brush = qt.QBrush()
         self.__setBrush()
 
-        self.clicked.connect(self.clickedSlot)
+        self.clicked.connect(self.leftClickedSlot)
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.rightClickedSlot)
 
     def sizeHint(self):
         return QtCore.QSize(40, 40)
@@ -381,10 +385,13 @@ class _ElementButton(qt.QPushButton):
         :class:`PeriodicTableItem` object"""
         self.sigElementLeave.emit(self.item)
 
-    def clickedSlot(self):
+    def leftClickedSlot(self):
         """Emit a :attr:`sigElementClicked` signal and send a
         :class:`PeriodicTableItem` object"""
-        self.sigElementClicked.emit(self.item)
+        self.sigElementLeftClicked.emit(self.item)
+
+    def rightClickedSlot(self):
+        self.sigElementRightClicked.emit(self.item)
 
 
 class PeriodicTable(qt.QWidget):
@@ -413,7 +420,11 @@ class PeriodicTable(qt.QWidget):
         pt.sigElementClicked.connect(my_slot)
 
     """
-    sigElementClicked = QtCore.pyqtSignal(object)
+    sigElementLeftClicked = QtCore.pyqtSignal(object)
+    """When any element is clicked in the table, the widget emits
+    this signal and sends a :class:`PeriodicTableItem` object.
+    """
+    sigElementRightClicked = QtCore.pyqtSignal(object)
     """When any element is clicked in the table, the widget emits
     this signal and sends a :class:`PeriodicTableItem` object.
     """
@@ -489,7 +500,8 @@ class PeriodicTable(qt.QWidget):
 
         b.sigElementEnter.connect(self.elementEnter)
         b.sigElementLeave.connect(self._elementLeave)
-        b.sigElementClicked.connect(self._elementClicked)
+        b.sigElementLeftClicked.connect(self._elementLeftClicked)
+        b.sigElementRightClicked.connect(self._elementRightClicked)
 
     def elementEnter(self, item):
         """Update label with element info (e.g. "Nb(41) - niobium")
@@ -506,7 +518,7 @@ class PeriodicTable(qt.QWidget):
         """
         self.eltLabel.setText("")
 
-    def _elementClicked(self, item):
+    def _elementLeftClicked(self, item):
         """Emit :attr:`sigElementClicked`,
         toggle selected state of element
 
@@ -518,7 +530,15 @@ class PeriodicTable(qt.QWidget):
         self._eltCurrent = self._eltButtons[item.symbol]
         if self.selectable:
             self.elementToggle(item)
-        self.sigElementClicked.emit(item)
+        self.sigElementLeftClicked.emit(item)
+
+    def _elementRightClicked(self, item):
+        """Emit :attr:`sigElementClicked`,
+        toggle selected state of element
+
+        :param PeriodicTableItem item: Element clicked
+        """
+        self.sigElementRightClicked.emit(item)
 
     def getSelection(self):
         """Return a list of selected elements, as a list of :class:`PeriodicTableItem`

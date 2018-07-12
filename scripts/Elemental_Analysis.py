@@ -14,12 +14,16 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
 
         self.ptable = PeriodicTable()
         self.ptable.register_table_changed(self.table_changed)
-        self.ptable.register_table_clicked(self.table_clicked)
+        self.ptable.register_table_lclicked(self.table_left_clicked)
+        self.ptable.register_table_rclicked(self.table_right_clicked)
         self.setCentralWidget(self.ptable.widget)
         self.setWindowTitle("Elemental Analysis")
 
-    def table_clicked(self, item):
-        print("Element Clicked: {}".format(item.symbol))
+    def table_left_clicked(self, item):
+        print("Element Left Clicked: {}".format(item.symbol))
+
+    def table_right_clicked(self, item):
+        print("Element Right Clicked: {}".format(item.symbol))
 
     def table_changed(self, items):
         print("Table Changed: {}".format([i.symbol for i in items]))

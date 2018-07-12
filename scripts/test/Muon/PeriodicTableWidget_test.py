@@ -46,16 +46,27 @@ class PeriodicTableWidgetTest(unittest.TestCase):
             func(args)
         return handler.call_count == 1
 
-    def test_table_clicked(self):
-        assert self.call_event_once(self.widget.register_table_clicked,
-                                    self.view.table_clicked, self.mock_elem)
+    def test_table_lclicked(self):
+        assert self.call_event_once(self.widget.register_table_lclicked,
+                                    self.view.table_left_clicked, self.mock_elem)
 
-    def test_unregister_table_clicked(self):
-        assert self.call_event_once(self.widget.register_table_clicked,
-                                    self.view.table_clicked,
+    def test_unregister_table_lclicked(self):
+        assert self.call_event_once(self.widget.register_table_lclicked,
+                                    self.view.table_left_clicked,
                                     self.mock_elem,
                                     unregister=True,
-                                    unreg_event=self.widget.unregister_table_clicked)
+                                    unreg_event=self.widget.unregister_table_lclicked)
+
+    def test_table_rclicked(self):
+        assert self.call_event_once(self.widget.register_table_rclicked,
+                                    self.view.table_right_clicked, self.mock_elem)
+
+    def test_unregister_table_rclicked(self):
+        assert self.call_event_once(self.widget.register_table_rclicked,
+                                    self.view.table_right_clicked,
+                                    self.mock_elem,
+                                    unregister=True,
+                                    unreg_event=self.widget.unregister_table_rclicked)
 
     def test_register_table_changed(self):
         assert self.call_event_once(self.widget.register_table_changed,
