@@ -67,33 +67,22 @@ std::vector<std::size_t> SortXAxis::createIndexes(const size_t sizeOfX) {
   return workspaceIndicies;
 }
 
-void SortXAxis::sortIndexesByAscendingXValue(
-    std::vector<std::size_t> &workspaceIndicies,
-    MatrixWorkspace_const_sptr inputWorkspace, unsigned int specNum) {
-  std::sort(workspaceIndicies.begin(), workspaceIndicies.end(),
-            [&](std::size_t lhs, std::size_t rhs) -> bool {
-              return inputWorkspace->x(specNum)[lhs] <
-                     inputWorkspace->x(specNum)[rhs];
-            });
-}
-
-void SortXAxis::sortIndexesByDescendingXValue(
-    std::vector<std::size_t> &workspaceIndicies,
-    MatrixWorkspace_const_sptr inputWorkspace, unsigned int specNum) {
-  std::sort(workspaceIndicies.begin(), workspaceIndicies.end(),
-            [&](std::size_t lhs, std::size_t rhs) -> bool {
-              return inputWorkspace->x(specNum)[lhs] >
-                     inputWorkspace->x(specNum)[rhs];
-            });
-}
 void SortXAxis::sortIndicesByX(std::vector<std::size_t> &workspaceIndicies,
                                std::string order,
                                MatrixWorkspace_const_sptr inputWorkspace,
                                unsigned int specNum) {
   if (order == "Ascending") {
-    sortIndexesByAscendingXValue(workspaceIndicies, inputWorkspace, specNum);
+      std::sort(workspaceIndicies.begin(), workspaceIndicies.end(),
+            [&](std::size_t lhs, std::size_t rhs) -> bool {
+              return inputWorkspace->x(specNum)[lhs] <
+                     inputWorkspace->x(specNum)[rhs];
+            });
   } else if (order == "Descending") {
-    sortIndexesByDescendingXValue(workspaceIndicies, inputWorkspace, specNum);
+    std::sort(workspaceIndicies.begin(), workspaceIndicies.end(),
+            [&](std::size_t lhs, std::size_t rhs) -> bool {
+              return inputWorkspace->x(specNum)[lhs] >
+                     inputWorkspace->x(specNum)[rhs];
+            });
   }
 }
 

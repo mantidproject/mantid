@@ -49,16 +49,6 @@ private:
   void exec() override;
   std::vector<std::size_t> createIndexes(const size_t);
 
-  void sortIndexesByAscendingXValue(
-      std::vector<std::size_t> &workspaceIndecies,
-      Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
-      unsigned int specNum);
-
-  void sortIndexesByDescendingXValue(
-      std::vector<std::size_t> &workspaceIndecies,
-      Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
-      unsigned int specNum);
-
   void sortIndicesByX(std::vector<std::size_t> &workspaceIndecies,
                       std::string order,
                       Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
