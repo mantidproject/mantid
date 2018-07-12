@@ -34,20 +34,26 @@ namespace {
  * @param source : Source workspace containing instrument
  * @param target : Target workspace to write instrument to
  */
-void copyInstrument(const API::Workspace *source, API::Workspace &target) {
+void copyInstrument(const API::Workspace *source, API::Workspace *target) {
 
   // Special handling for Worspace Groups.
-  if (auto *sourceGroup = dynamic_cast<const API::WorkspaceGroup *>(source)) {
-    auto &targetGroup = dynamic_cast<API::WorkspaceGroup &>(target);
+  auto *sourceGroup = dynamic_cast<const API::WorkspaceGroup *>(source);
+  auto *targetGroup = dynamic_cast<API::WorkspaceGroup *>(target);
+
+  if (sourceGroup && targetGroup) {
     for (size_t index = 0;
-         index < std::min(sourceGroup->size(), targetGroup.size()); ++index) {
+         index < std::min(sourceGroup->size(), targetGroup->size()); ++index) {
       copyInstrument(sourceGroup->getItem(index).get(),
-                     *targetGroup.getItem(index));
+                     targetGroup->getItem(index).get());
     }
+  } else if (sourceGroup) {
+    copyInstrument(sourceGroup->getItem(0).get(), target);
+  } else if (targetGroup) {
+    copyInstrument(source, targetGroup->getItem(0).get());
   } else {
     if (auto *sourceExpInfo =
             dynamic_cast<const API::ExperimentInfo *>(source)) {
-      dynamic_cast<API::ExperimentInfo &>(target).setInstrument(
+      dynamic_cast<API::ExperimentInfo &>(*target).setInstrument(
           sourceExpInfo->getInstrument());
     }
   }
@@ -314,7 +320,7 @@ void LoadLiveData::replaceChunk(Mantid::API::Workspace_sptr chunkWS) {
   m_accumWS = chunkWS;
   // Put the original instrument back. Otherwise geometry changes will not be
   // persistent
-  copyInstrument(instrumentWS.get(), *m_accumWS);
+  copyInstrument(instrumentWS.get(), m_accumWS.get());
 }
 
 //----------------------------------------------------------------------------------------------
