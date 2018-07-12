@@ -37,6 +37,7 @@ def get3DPeak(peak, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxT
                     plotResults=plotResults, pp_lambda=pp_lambda, neigh_length_m=neigh_length_m, pplmin_frac=pplmin_frac,
                     pplmax_frac=pplmax_frac, mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
                     instrumentName=instrumentName)
+        chiSqTOF = mtd['fit_Parameters'].column(1)[-1]
 
     else:  # we already did I-C profile, so we'll just read the parameters
         pp_lambda = fICCParams[-1]
@@ -51,6 +52,7 @@ def get3DPeak(peak, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxT
         fICC['KConv'] = fICCParams[11]
         goodIDX, _ = ICCFT.getBGRemovedIndices(
             n_events, pp_lambda=pp_lambda, qMask=qMask, instrumentName=instrumentName)
+        chiSqTOF = fICCParams[4] #Last entry
 
         # Get the 3D TOF component, YTOF
         if oldICCFit is not None:
@@ -81,8 +83,6 @@ def get3DPeak(peak, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxT
         nPixels = [255, 255]
     elif instrumentName == 'CORELLI':
         nPixels = [255,16]
-    elif instrumentName == 'WISH':
-        nPixels = [512, 152] #TODO: check with sam or vickie that this makes any sense
     else:
         raise UserWarning('Instrument name {} not found. Assuming a 255*255 detector!'.format(instrumentName))
         nPixels = [255,255]
@@ -129,7 +129,10 @@ def get3DPeak(peak, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxT
     YBVG = bvg(1.0, mu, sigma, XTHETA, XPHI, 0)
 
     # Do scaling to the data
-    Y, redChiSq, scaleFactor = fitScaling(n_events, box, YTOF, YBVG, instrumentName=instrumentName)
+    if instrumentName == 'CORELLI':
+        Y, redChiSq, scaleFactor = fitScaling(n_events, box, YTOF, YBVG, goodIDX=goodIDX, instrumentName=instrumentName)
+    else:
+        Y, redChiSq, scaleFactor = fitScaling(n_events, box, YTOF, YBVG, instrumentName=instrumentName)
     YBVG2 = bvg(1.0, mu, sigma, XTHETA, XPHI, 0)
     YTOF2 = getYTOF(fICC, XTOF, x_lims)
     Y2 = YTOF2 * YBVG2
@@ -155,8 +158,12 @@ def get3DPeak(peak, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxT
     retParams['bgBVG'] = bgBVG
     retParams['scale3d'] = scaleFactor
     retParams['chiSq3d'] = redChiSq
+    retParams['chiSq'] = chiSqTOF
     retParams['dQ'] = np.linalg.norm(newCenter - q0)
     retParams['newQ'] = newCenter
+
+    import pickle
+    pickle.dump([YTOF, YBVG], open('/home/ntv/Desktop/tmp.pkl','wb'))
 
     return Y2, goodIDX, pp_lambda, retParams
 
@@ -195,7 +202,7 @@ def fitScaling(n_events, box, YTOF, YBVG, goodIDX=None, neigh_length_m=3, instru
                 max(fitMaxIDX[1] - dP, 0):min(fitMaxIDX[1] + dP, goodIDX.shape[1]),
                 max(fitMaxIDX[2] - dP, 0):min(fitMaxIDX[2] + dP, goodIDX.shape[2])] = True
     goodIDX = np.logical_and(goodIDX, conv_n_events > 0)
-
+    print(np.sum(goodIDX), '*!*!*!*!**!!')
     # A1 = slope, A0 = offset
     scaleLinear = Polynomial(n=1)
     scaleLinear.constrain("A1>0")
@@ -479,8 +486,13 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         if instrumentName == 'MANDI':
             pass
         if instrumentName == 'TOPAZ':
-            sigX0 = sigX0*2.
-            sigY0 = sigY0*2.
+            sigX0 = sigX0*3.
+            sigY0 = sigY0*3.
+
+        if instrumentName == 'CORELLI':
+            sigX0 = sigX0*3.
+            sigY0 = sigY0*3.
+            print(sigX0, sigY0, '****')
 
         # Set our initial guess
         m = BivariateGaussian.BivariateGaussian()

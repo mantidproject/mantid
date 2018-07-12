@@ -130,7 +130,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         numerrors = 0
 
         # Create the parameters workspace
-        keys =  ['peakNumber','Alpha', 'Beta', 'R', 'T0', 'bgBVG', 'chiSq3d', 'dQ', 'KConv', 'MuPH',
+        keys =  ['peakNumber','Alpha', 'Beta', 'R', 'T0', 'bgBVG', 'chiSq3d', 'chiSq', 'dQ', 'KConv', 'MuPH',
                  'MuTH', 'newQ', 'Scale', 'scale3d', 'SigP', 'SigX', 'SigY', 'Intens3d', 'SigInt3d']
         datatypes = ['float']*len(keys)
         datatypes[np.where(np.array(keys)=='newQ')[0][0]] = 'V3D'
