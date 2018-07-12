@@ -458,6 +458,12 @@ void KafkaEventStreamDecoder::waitForRunEndObservation() {
   m_runStatusSeen = false;
   runStatusLock.unlock();
 
+  // Get new run message now so that new run number is available when
+  // MonitorLiveData queries it
+  RunStartStruct runStartStruct;
+  if (waitForNewRunStartMessage(runStartStruct))
+    return;
+
   // Give time for MonitorLiveData to act on runStatus information
   // and trigger m_interrupt for next loop iteration if user requested
   // LiveData algorithm to stop at the end of the run
@@ -465,9 +471,6 @@ void KafkaEventStreamDecoder::waitForRunEndObservation() {
   if (m_interrupt)
     return;
 
-  RunStartStruct runStartStruct;
-  if (waitForNewRunStartMessage(runStartStruct))
-    return;
   // Rejoin event stream at start of new run
   joinEventStreamAtTime(runStartStruct);
   std::string detSpecMapMsgBuffer = getDetSpecMapForRun(runStartStruct);
@@ -514,6 +517,7 @@ bool KafkaEventStreamDecoder::waitForNewRunStartMessage(
             static_cast<size_t>(runStartData->n_periods()), offset};
         if (runStartStruct.runNumber > m_runNumber) {
           runStartStructOutput = runStartStruct;
+          m_runNumber = runStartStruct.runNumber;
           return false; // not interrupted
         }
       } else {
