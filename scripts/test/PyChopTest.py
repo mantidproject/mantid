@@ -16,9 +16,6 @@ class PyChop2Tests(unittest.TestCase):
         flux = []
         for inc, instname in enumerate(instnames):
             chopobj = PyChop2(instname)
-            # Checks that initialisations instanciates the correct submodule
-            # which does the actual calculations. PyChop2 is just a wrapper.
-            self.assertTrue('ISISFermi' in chopobj.getObject().__module__)
             # Code should give an error if the chopper settings and Ei have
             # not been set.
             self.assertRaises(ValueError, chopobj.getResolution)
@@ -47,9 +44,6 @@ class PyChop2Tests(unittest.TestCase):
         flux = []
         for inc, variant in enumerate(variants):
             chopobj = PyChop2('LET', variant)
-            # Checks that initialisations instanciates the correct submodule
-            # which does the actual calculations. PyChop2 is just a wrapper.
-            self.assertTrue('ISISDisk' in chopobj.getObject().__module__)
             # Checks that it instanciates the correct variant
             self.assertTrue(variant in chopobj.getChopper())
             # Code should give an error if the chopper settings and Ei have

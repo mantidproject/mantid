@@ -15,6 +15,7 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/make_cow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -49,6 +50,7 @@ using Mantid::Types::Core::DateAndTime;
 // Declare into the factory.
 DECLARE_WORKSPACE(WorkspaceTester)
 
+namespace {
 /** Create a workspace with numSpectra, with
  * each spectrum having one detector, at id = workspace index.
  * @param numSpectra
@@ -76,7 +78,6 @@ boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
   return ws2;
 }
 
-namespace {
 void run_legacy_setting_spectrum_numbers_with_MPI(
     const Parallel::Communicator &comm) {
   using namespace Parallel;
@@ -1703,7 +1704,62 @@ public:
         run_legacy_setting_spectrum_numbers_with_MPI);
   }
 
+  void test_detectorSignedTwoTheta() {
+    checkDetectorSignedTwoTheta(Geometry::Y, {{1., 1., -1., -1.}});
+    checkDetectorSignedTwoTheta(Geometry::X, {{1., -1., -1., 1.}});
+  }
+
 private:
+  void checkDetectorSignedTwoTheta(const Geometry::PointingAlong thetaSignAxis,
+                                   const std::array<double, 4> &signs) {
+    constexpr size_t numDets{4};
+    constexpr size_t numBins{1};
+    const auto frameUp = Geometry::Y;
+    const auto frameAlongBeam = Geometry::Z;
+    const auto frameSideways = Geometry::X;
+    const auto frameThetaSign = thetaSignAxis;
+    const auto frameHandedness = Geometry::Right;
+    const std::string frameOrigin{"source"};
+    auto refFrame = boost::make_shared<ReferenceFrame>(
+        frameUp, frameAlongBeam, frameThetaSign, frameHandedness, frameOrigin);
+    boost::shared_ptr<MatrixWorkspace> ws =
+        boost::make_shared<WorkspaceTester>();
+    ws->initialize(numDets, numBins, numBins);
+    // Create instrument with four detectors to play with.
+    auto instrument = boost::make_shared<Instrument>("TestInstrument");
+    instrument->setReferenceFrame(refFrame);
+    constexpr double twoTheta{4.2 / 180. * M_PI};
+    for (size_t i = 0; i < numDets; ++i) {
+      Detector *det =
+          new Detector("pixel", static_cast<detid_t>(i), instrument.get());
+      constexpr double r{1.};
+      const double rotation =
+          (45. + 90. * static_cast<double>(i)) / 180. * M_PI;
+      const double x = r * std::sin(twoTheta) * std::cos(rotation);
+      const double y = r * std::sin(twoTheta) * std::sin(rotation);
+      const double z = r * std::cos(twoTheta);
+      V3D pos;
+      pos[frameUp] = y;
+      pos[frameAlongBeam] = z;
+      pos[frameSideways] = x;
+      det->setShape(ComponentCreationHelper::createSphere(0.01, pos, "1"));
+      det->setPos(pos);
+      instrument->add(det);
+      instrument->markAsDetector(det);
+      ws->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
+    }
+    V3D pos(0., 0., 0.);
+    ComponentCreationHelper::addSampleToInstrument(instrument, pos);
+    pos[frameAlongBeam] = -1.;
+    ComponentCreationHelper::addSourceToInstrument(instrument, pos);
+    ws->setInstrument(instrument);
+    for (detid_t detid = 0; static_cast<size_t>(detid) < numDets; ++detid) {
+      auto det = instrument->getDetector(detid);
+      const auto signedTwoTheta = ws->detectorSignedTwoTheta(*det);
+      TS_ASSERT_DELTA(signedTwoTheta, signs[detid] * twoTheta, 1e-12)
+    }
+  }
+
   Mantid::API::MantidImage_sptr createImage(const size_t width,
                                             const size_t height) {
     auto image =

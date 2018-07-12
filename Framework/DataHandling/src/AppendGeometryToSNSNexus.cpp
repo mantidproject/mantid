@@ -6,8 +6,10 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/System.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <Poco/File.h>
 #include <Poco/Path.h>

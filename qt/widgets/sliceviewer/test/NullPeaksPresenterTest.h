@@ -35,7 +35,7 @@ public:
 
   void test_changeShownDim_does_nothing() {
     NullPeaksPresenter presenter;
-    TS_ASSERT(!presenter.changeShownDim());
+    TS_ASSERT(!presenter.changeShownDim(0, 1));
   }
 
   void test_isLabelOfFreeAxis_always_returns_false() {

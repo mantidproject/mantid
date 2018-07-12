@@ -104,8 +104,13 @@ void ReflSaveTabPresenter::completedGroupReductionSuccessfully(
     MantidWidgets::DataProcessor::GroupData const &group,
     std::string const &workspaceName) {
   UNUSED_ARG(group);
-  if (shouldAutosave())
-    saveWorkspaces(std::vector<std::string>({workspaceName}));
+  if (shouldAutosave()) {
+    try {
+      saveWorkspaces(std::vector<std::string>({workspaceName}));
+    } catch (InvalidWorkspaceName &) {
+      // ignore workspaces that don't exist
+    }
+  }
 }
 
 bool ReflSaveTabPresenter::shouldAutosave() const { return m_shouldAutosave; }
@@ -113,8 +118,14 @@ bool ReflSaveTabPresenter::shouldAutosave() const { return m_shouldAutosave; }
 void ReflSaveTabPresenter::completedRowReductionSuccessfully(
     MantidWidgets::DataProcessor::GroupData const &group,
     std::string const &workspaceName) {
-  if (!MantidWidgets::DataProcessor::canPostprocess(group) && shouldAutosave())
-    saveWorkspaces(std::vector<std::string>({workspaceName}));
+  if (!MantidWidgets::DataProcessor::canPostprocess(group) &&
+      shouldAutosave()) {
+    try {
+      saveWorkspaces(std::vector<std::string>({workspaceName}));
+    } catch (InvalidWorkspaceName &) {
+      // ignore workspaces that don't exist
+    }
+  }
 }
 
 /** Fills the 'List of Workspaces' widget with the names of all available
@@ -249,7 +260,13 @@ void ReflSaveTabPresenter::saveSelectedWorkspaces() {
     error("No workspaces selected", "No workspaces selected. "
                                     "You must select the workspaces to save.");
   } else {
-    saveWorkspaces(workspaceNames);
+    try {
+      saveWorkspaces(workspaceNames);
+    } catch (std::exception &e) {
+      error(e.what(), "Error");
+    } catch (...) {
+      error("Unknown error while saving workspaces", "Error");
+    }
   }
 }
 

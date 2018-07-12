@@ -487,6 +487,89 @@ public:
                             std::string("Range boundaries are reversed: 5-1"));
   }
 
+  void test_parseGroups_emptyString() {
+    std::vector<std::vector<int>> result;
+    TS_ASSERT_THROWS_NOTHING(result = parseGroups<int>(""))
+    TS_ASSERT(result.empty());
+  }
+
+  void test_parseGroups_comma() {
+    std::vector<std::vector<int>> result;
+    TS_ASSERT_THROWS_NOTHING(result = parseGroups<int>("7,13"))
+    std::vector<std::vector<int>> expected{
+        {std::vector<int>(1, 7), std::vector<int>(1, 13)}};
+    TS_ASSERT_EQUALS(result, expected)
+  }
+
+  void test_parseGroups_plus() {
+    std::vector<std::vector<int>> result;
+    TS_ASSERT_THROWS_NOTHING(result = parseGroups<int>("7+13"))
+    std::vector<std::vector<int>> expected{{std::vector<int>()}};
+    expected.front().emplace_back(7);
+    expected.front().emplace_back(13);
+    TS_ASSERT_EQUALS(result, expected)
+  }
+
+  void test_parseGroups_dash() {
+    std::vector<std::vector<int>> result;
+    TS_ASSERT_THROWS_NOTHING(result = parseGroups<int>("7-13"))
+    std::vector<std::vector<int>> expected{{std::vector<int>()}};
+    for (int i = 7; i <= 13; ++i) {
+      expected.front().emplace_back(i);
+    }
+    TS_ASSERT_EQUALS(result, expected)
+  }
+
+  void test_parseGroups_complexExpression() {
+    std::vector<std::vector<int>> result;
+    TS_ASSERT_THROWS_NOTHING(result = parseGroups<int>("1,4+5+8,7-13,1"))
+    std::vector<std::vector<int>> expected;
+    expected.emplace_back(1, 1);
+    expected.emplace_back();
+    expected.back().emplace_back(4);
+    expected.back().emplace_back(5);
+    expected.back().emplace_back(8);
+    expected.emplace_back();
+    for (int i = 7; i <= 13; ++i) {
+      expected.back().emplace_back(i);
+    }
+    expected.emplace_back(1, 1);
+    TS_ASSERT_EQUALS(result, expected)
+  }
+
+  void test_parseGroups_acceptsWhitespace() {
+    std::vector<std::vector<int>> result;
+    TS_ASSERT_THROWS_NOTHING(
+        result = parseGroups<int>(" 1\t, 4 +  5\t+ 8 , 7\t- 13 ,\t1  "))
+    std::vector<std::vector<int>> expected;
+    expected.emplace_back(1, 1);
+    expected.emplace_back();
+    expected.back().emplace_back(4);
+    expected.back().emplace_back(5);
+    expected.back().emplace_back(8);
+    expected.emplace_back();
+    for (int i = 7; i <= 13; ++i) {
+      expected.back().emplace_back(i);
+    }
+    expected.emplace_back(1, 1);
+    TS_ASSERT_EQUALS(result, expected)
+  }
+
+  void test_parseGroups_throwsWhenInputContainsNonnumericCharacters() {
+    TS_ASSERT_THROWS_EQUALS(
+        parseGroups<int>("a"), const std::runtime_error &e, e.what(),
+        std::string("Cannot parse numbers from string: 'a'"))
+  }
+
+  void test_parseGroups_throwsWhenOperationsAreInvalid() {
+    TS_ASSERT_THROWS_EQUALS(parseGroups<int>("-1"), const std::runtime_error &e,
+                            e.what(),
+                            std::string("Malformed range (-) operation."))
+    TS_ASSERT_THROWS_EQUALS(parseGroups<int>(":1"), const std::runtime_error &e,
+                            e.what(),
+                            std::string("Malformed range (:) operation."))
+  }
+
   void test_toString_vector_of_ints() {
     std::vector<int> sortedInts{1, 2, 3, 5, 6, 8};
     auto result = toString(sortedInts);

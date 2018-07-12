@@ -55,8 +55,9 @@ geographicalAngles(const Kernel::V3D &p,
                    const Geometry::ReferenceFrame &refFrame);
 DLLExport std::tuple<double, double>
 extremeWavelengths(const API::MatrixWorkspace &ws);
-HistogramData::Histogram modelHistogram(const API::MatrixWorkspace &modelWS,
-                                        const size_t wavelengthPoints);
+DLLExport HistogramData::Histogram
+modelHistogram(const API::MatrixWorkspace &modelWS,
+               const size_t wavelengthPoints);
 DLLExport API::MatrixWorkspace_uptr
 createSparseWS(const API::MatrixWorkspace &modelWS,
                const Algorithms::DetectorGridDefinition &grid,

@@ -50,12 +50,20 @@ Linux
 
 Red Hat/Cent OS/Fedora
 ~~~~~~~~~~~~~~~~~~~~~~
-Follow the `Red Hat instructions <http://download.mantidproject.org/redhat.html>`_ to add the
-stable release yum repository and then install the ``mantid-developer`` package:
+* Follow the `instructions here <https://fedoraproject.org/wiki/EPEL>`_ to enable the EPEL repository
+  for RHEL7
+* Run the following to install the mantid-developer package
 
 .. code-block:: sh
 
-   yum install mantid-developer
+  # Install copr plugin
+  yum install yum-plugin-copr
+
+  # Enable the mantid repo from copr
+  yum copr enable mantid/mantid
+
+  # Install dependencies 
+  yum install mantid-developer
 
 Ubuntu
 ~~~~~~
@@ -95,3 +103,21 @@ See :ref:`BuildingWithCMake` for information about building Mantid.
 Building VATES
 ##############
 See :ref:`BuildingVATES` for infromation about building VATES.
+
+Archive access
+##############
+
+It is very convenient to be able to access the data archive directly.
+At ISIS, this is automatically done on the Windows machines, however OSX
+requires some extra setup.
+
+OSX
+---
+
+* In Finder "command"+k opens a mounting dialogue
+* For `Server address` enter `smb://isisdatar80/inst$/` hit Connect
+* This should prompt you for federal ID `clrc\....` and password
+* After completing this the drive is now mounted
+* It can be found at `/Volumes/inst$`
+
+**NB** the address in step 2 sometimes changes - if it does not work, replace `80` with `55` or `3`.

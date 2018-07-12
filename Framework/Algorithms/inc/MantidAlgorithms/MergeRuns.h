@@ -8,6 +8,8 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/System.h"
 
+#include <boost/optional.hpp>
+
 namespace Mantid {
 namespace API {
 class WorkspaceGroup;
@@ -92,6 +94,7 @@ private:
   void init() override;
   void exec() override;
   void execEvent();
+  void execHistogram(const std::vector<std::string> &inputs);
   void buildAdditionTables();
   // Overriden MultiPeriodGroupAlgorithm method.
   std::string fetchInputPropertyName() const override;
@@ -128,18 +131,19 @@ private:
   using Mantid::API::Algorithm::validateInputs;
   bool validateInputsForEventWorkspaces(
       const std::vector<std::string> &inputWorkspaces);
-  void calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
-                            const API::MatrixWorkspace_const_sptr &ws2,
-                            std::vector<double> &params) const;
-  void noOverlapParams(const HistogramData::HistogramX &X1,
-                       const HistogramData::HistogramX &X2,
-                       std::vector<double> &params) const;
-  void intersectionParams(const HistogramData::HistogramX &X1, int64_t &i,
-                          const HistogramData::HistogramX &X2,
-                          std::vector<double> &params) const;
-  void inclusionParams(const HistogramData::HistogramX &X1, int64_t &i,
-                       const HistogramData::HistogramX &X2,
-                       std::vector<double> &params) const;
+  boost::optional<std::vector<double>> checkRebinning();
+  static std::vector<double>
+  calculateRebinParams(const std::vector<double> &bins1,
+                       const std::vector<double> &bins2);
+  static void noOverlapParams(const HistogramData::HistogramX &X1,
+                              const HistogramData::HistogramX &X2,
+                              std::vector<double> &params);
+  static void intersectionParams(const HistogramData::HistogramX &X1, size_t &i,
+                                 const HistogramData::HistogramX &X2,
+                                 std::vector<double> &params);
+  static void inclusionParams(const HistogramData::HistogramX &X1, size_t &i,
+                              const HistogramData::HistogramX &X2,
+                              std::vector<double> &params);
   API::MatrixWorkspace_sptr
   rebinInput(const API::MatrixWorkspace_sptr &workspace,
              const std::vector<double> &params);

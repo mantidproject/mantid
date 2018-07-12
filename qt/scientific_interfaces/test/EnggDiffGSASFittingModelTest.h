@@ -3,6 +3,7 @@
 
 #include "../EnggDiffraction/EnggDiffGSASFittingModel.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
@@ -98,8 +99,9 @@ void TestEnggDiffGSASFittingModel::doRefinements(
       WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
   ADS.add("FITTEDPEAKS", ws);
 
-  processRefinementSuccessful(GSASIIRefineFitPeaksOutputProperties(
-      1, 2, 3, ws, latticeParams, params[0].runLabel));
+  processRefinementSuccessful(
+      nullptr, GSASIIRefineFitPeaksOutputProperties(1, 2, 3, ws, latticeParams,
+                                                    params[0].runLabel));
 }
 
 } // Anonymous namespace
