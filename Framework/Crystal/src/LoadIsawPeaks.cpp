@@ -118,6 +118,7 @@ void LoadIsawPeaks::exec() {
  * @param outWS :: the workspace in which to place the information
  * @param in :: stream of the input file
  * @param T0 :: Time offset
+ * @param qSign :: For inelastic this is 1; for crystallography this is -1
  * @return the first word on the next line
  */
 std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,

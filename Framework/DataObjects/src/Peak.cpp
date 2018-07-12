@@ -922,7 +922,7 @@ void Peak::setPeakNumber(int m_peakNumber) {
 
 // -------------------------------------------------------------------------------------
 /** Sets the modulated peak structure number
- * @param m_ModStrur :: modulated peak structure value   */
+ * @param m_ModStru :: modulated peak structure value   */
 void Peak::setModStru(V3D m_ModStru) { this->m_ModStru = m_ModStru; }
 
 // -------------------------------------------------------------------------------------
