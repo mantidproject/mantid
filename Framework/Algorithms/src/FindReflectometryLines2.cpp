@@ -107,7 +107,7 @@ std::map<std::string, std::string> FindReflectometryLines2::validateInputs() {
   std::map<std::string, std::string> issues;
   if (!isDefault(Prop::RANGE_LOWER) && !isDefault(Prop::RANGE_UPPER)) {
     double const lower = getProperty(Prop::RANGE_LOWER);
-    double const upper = getProperty(Prop::RANGE_LOWER);
+    double const upper = getProperty(Prop::RANGE_UPPER);
     if (lower >= upper) {
       issues[Prop::RANGE_UPPER] = "The upper limit is smaller than the lower.";
     }
@@ -157,18 +157,19 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
   double const centreIndex = static_cast<double>(maxIndex);
   int const startIndex = getProperty(Prop::START_INDEX);
   double const centreByMax = static_cast<double>(startIndex) + centreIndex;
-  g_log.debug() << "Peak maximum position: " << centreByMax << '\n';
+  g_log.debug() << "Line maximum position: " << centreByMax << '\n';
   // determine sigma
-  auto lessThanHalfMax =
-      [height, medianY](double const x) { return x - medianY < 0.5 * (height - medianY); };
+  auto lessThanHalfMax = [height, medianY](double const x) {
+    return x - medianY < 0.5 * (height - medianY);
+  };
   using IterType = HistogramData::HistogramY::const_iterator;
   std::reverse_iterator<IterType> revMaxValueIt{maxValueIt};
   auto revMinFwhmIt = std::find_if(revMaxValueIt, Ys.crend(), lessThanHalfMax);
   auto maxFwhmIt = std::find_if(maxValueIt, Ys.cend(), lessThanHalfMax);
   std::reverse_iterator<IterType> revMaxFwhmIt{maxFwhmIt};
   if (revMinFwhmIt == Ys.crend() || maxFwhmIt == Ys.cend()) {
-    g_log.warning() << "Couldn't determine fwhm of beam, using position of max "
-                       "value as beam center.\n";
+    g_log.warning() << "Couldn't determine fwhm of line, using position of max "
+                       "value as line center.\n";
     return centreByMax;
   }
   double const fwhm =
@@ -204,7 +205,7 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
   }
   auto const centreByFit = gaussian->centre() + static_cast<double>(startIndex);
   g_log.debug() << "Sigma: " << gaussian->fwhm() << '\n';
-  g_log.debug() << "Estimated peak position: " << centreByFit << '\n';
+  g_log.debug() << "Estimated line position: " << centreByFit << '\n';
   return centreByFit;
 }
 
