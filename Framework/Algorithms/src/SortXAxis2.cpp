@@ -18,7 +18,7 @@ const std::string SortXAxis::category() const {
 
 const std::string SortXAxis::summary() const {
   return "Clones the input MatrixWorkspace(s) and orders the x-axis in an "
-         "ascending fashion.";
+         "ascending or descending fashion.";
 }
 
 void SortXAxis::init() {
