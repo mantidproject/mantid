@@ -8,6 +8,13 @@ from mantid.api import *
 
 class VesuvioDiffractionReductionTest(unittest.TestCase):
 
+    def setUp(self):
+        self._oldFacility = mantid.config['default.facility']
+        mantid.config.setFacility('ISIS')
+
+    def tearDown(self):
+        mantid.config.setFacility(self._oldFacility)
+
     def test_basic_reduction_completes(self):
         """
         Sanity test to ensure the most basic reduction actually completes.
