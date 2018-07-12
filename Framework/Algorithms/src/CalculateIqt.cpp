@@ -131,10 +131,10 @@ randomizeWorkspaceWithinError(MatrixWorkspace_sptr workspace, const int seed) {
 }
 
 double standardDeviation(const std::vector<double> &inputValues) {
-	const auto inputSize = boost::numeric_cast<double>(inputValues.size())
-  const auto mean =
-      std::accumulate(inputValues.begin(), inputValues.end(), 0.0) /
-      inputSize;
+  const auto inputSize =
+      boost::numeric_cast<double>(inputValues.size()) const auto mean =
+          std::accumulate(inputValues.begin(), inputValues.end(), 0.0) /
+          inputSize;
   double sumOfXMinusMeanSquared = 0;
   for (auto &&x : inputValues)
     sumOfXMinusMeanSquared += (x - mean) * (x - mean);
