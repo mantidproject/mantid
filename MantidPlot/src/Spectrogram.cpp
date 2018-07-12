@@ -719,9 +719,9 @@ void Spectrogram::setContourLinePen(int index, const QPen &pen) {
 
   if (d_pen_list.isEmpty()) {
     QPen p = defaultContourPen();
-    for (int i = 0; i < levels.size(); i++) {
+    for (double level : levels) {
       if (p.style() == Qt::NoPen)
-        d_pen_list << contourPen(levels[i]);
+        d_pen_list << contourPen(level);
       else
         d_pen_list << p;
     }

@@ -1319,10 +1319,10 @@ void MultiLayer::dropOntoMDCurve(Graph *g, MantidMDCurve *originalCurve,
 
   // Loop through all selected workspaces create curves and put them onto the
   // graph
-  for (int i = 0; i < allWsNames.size(); i++) {
+  for (auto & allWsName : allWsNames) {
     // Capability query the candidate workspaces
     Workspace_sptr ws =
-        AnalysisDataService::Instance().retrieve(allWsNames[i].toStdString());
+        AnalysisDataService::Instance().retrieve(allWsName.toStdString());
     IMDWorkspace_sptr imdWS = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
     // Only process IMDWorkspaces
     if (imdWS) {

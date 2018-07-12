@@ -114,9 +114,9 @@ QString FitParameterTie::exprRHS() const {
  *   from i (inclusive) must be incremented.
  */
 void FitParameterTie::functionInserted(int i) {
-  for (int j = 0; j < m_iFunctions.size(); j++) {
-    if (m_iFunctions[j] >= i) {
-      m_iFunctions[j]++;
+  for (int & m_iFunction : m_iFunctions) {
+    if (m_iFunction >= i) {
+      m_iFunction++;
     }
   }
 }
@@ -130,12 +130,12 @@ void FitParameterTie::functionInserted(int i) {
  * @return true if the tie remains valid and false otherwise.
  */
 bool FitParameterTie::functionDeleted(int i) {
-  for (int j = 0; j < m_iFunctions.size(); j++) {
-    if (m_iFunctions[j] == i) {
+  for (int & m_iFunction : m_iFunctions) {
+    if (m_iFunction == i) {
       return false;
     }
-    if (m_iFunctions[j] > i) {
-      m_iFunctions[j]--;
+    if (m_iFunction > i) {
+      m_iFunction--;
     }
   }
   return true;
