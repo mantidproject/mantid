@@ -369,8 +369,8 @@ IndirectFittingModel::createOutputName(const std::string &formatString,
                                        std::size_t dataIndex) const {
   auto name =
       createDisplayName(formatString, rangeDelimiter, dataIndex) + "_Result";
-  std::remove_if(name.begin(), name.end(),
-                 static_cast<int (*)(int)>(std::isspace));
+  name.erase(std::remove_if(name.begin(), name.end(),
+                            static_cast<int (*)(int)>(std::isspace)));
   std::replace(name.begin(), name.end(), ',', '+');
   return name;
 }
