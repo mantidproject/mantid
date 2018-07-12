@@ -42,6 +42,7 @@
 #include <Poco/PipeStream.h>
 #include <Poco/StreamCopier.h>
 
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/regex.hpp>
 #include <boost/optional/optional.hpp>
@@ -1139,12 +1140,16 @@ boost::optional<bool> ConfigServiceImpl::getValue(const std::string &keyName) {
     return boost::none;
   }
 
-  std::transform(returnedValue->begin(), returnedValue->end(),
-                 returnedValue->begin(), ::tolower);
+  auto &configVal = returnedValue.get();
 
-  bool trueString = returnedValue->find("true") != std::string::npos;
-  bool valueOne = returnedValue->find("1") != std::string::npos;
-  bool onOffString = returnedValue->find("on") != std::string::npos;
+  std::transform(configVal.begin(), configVal.end(),
+				 configVal.begin(), ::tolower);
+
+  boost::trim(configVal);
+
+  bool trueString = configVal == "true";
+  bool valueOne = configVal == "1";
+  bool onOffString = configVal == "on";
 
   // A string of 1 or true both count
   return trueString || valueOne || onOffString;

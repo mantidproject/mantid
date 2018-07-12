@@ -19,7 +19,9 @@ AlgorithmManagerImpl::AlgorithmManagerImpl() : m_managed_algs() {
   auto max_no_algs =
       Kernel::ConfigService::Instance().getValue<int>("algorithms.retained");
 
-  if (max_no_algs.get_value_or(0) < 1) {
+  m_max_no_algs = max_no_algs.get_value_or(0);
+
+  if (m_max_no_algs < 1) {
     m_max_no_algs = 100; // Default to keeping 100 algorithms if not specified
   }
 
