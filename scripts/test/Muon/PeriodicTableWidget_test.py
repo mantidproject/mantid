@@ -3,6 +3,7 @@ from __future__ import absolute_import, print_function
 import unittest
 
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_widget import PeriodicTable
+from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table import PeriodicTable as silxPT
 
 from Muon.GUI.Common import mock_widget
@@ -12,14 +13,6 @@ try:
     from unittest import mock
 except ImportError:
     import mock
-
-
-class MockEvent(object):
-    def __init__(self):
-        self.call_count = 0
-
-    def handler(self):
-        self.call_count += 1
 
 
 class PeriodicTableWidgetTest(unittest.TestCase):
@@ -36,60 +29,75 @@ class PeriodicTableWidgetTest(unittest.TestCase):
         self.view.ptable.isElementSelected = mock.Mock(return_value=True)
         self.view.ptable.setElementSelected = mock.Mock()
 
-    def call_event_once(self, reg_event, func, args,
-                        unregister=False, unreg_event=None):
-        handler = MockEvent()
-        reg_event(handler.handler)
-        func(args)
-        if unregister and unreg_event is not None:
-            unreg_event(handler.handler)
-            func(args)
-        return handler.call_count == 1
+    def emit_once(self, reg_func, slot,
+                  unregister=False, unreg_func=None):
+        handler = mock.Mock()
+        reg_func(handler)
+        slot(mock.Mock())
+        if unregister and unreg_func is not None:
+            unreg_func(handler)
+            slot(mock.Mock())
+        handler.assert_called_once()
 
-    def test_table_lclicked(self):
-        assert self.call_event_once(self.widget.register_table_lclicked,
-                                    self.view.table_left_clicked, self.mock_elem)
+    def call_func_once(self, func):
+        self.widget.presenter.view = mock.create_autospec(PeriodicTableView)
+        func = mock.Mock()
+        func(mock.Mock())
+        func.assert_called_once()
+
+    def test_register_table_lclicked(self):
+        self.call_func_once(self.widget.register_table_lclicked)
 
     def test_unregister_table_lclicked(self):
-        assert self.call_event_once(self.widget.register_table_lclicked,
-                                    self.view.table_left_clicked,
-                                    self.mock_elem,
-                                    unregister=True,
-                                    unreg_event=self.widget.unregister_table_lclicked)
+        self.call_func_once(self.widget.unregister_table_lclicked)
 
-    def test_table_rclicked(self):
-        assert self.call_event_once(self.widget.register_table_rclicked,
-                                    self.view.table_right_clicked, self.mock_elem)
+    def test_register_table_rclicked(self):
+        self.call_func_once(self.widget.register_table_rclicked)
 
     def test_unregister_table_rclicked(self):
-        assert self.call_event_once(self.widget.register_table_rclicked,
-                                    self.view.table_right_clicked,
-                                    self.mock_elem,
-                                    unregister=True,
-                                    unreg_event=self.widget.unregister_table_rclicked)
+        self.call_func_once(self.widget.unregister_table_rclicked)
+
+    def test_register_lclicked_emit(self):
+        self.emit_once(self.widget.register_table_lclicked,
+                       self.view.table_left_clicked)
+
+    def test_unregister_lclicked_emit(self):
+        self.emit_once(self.widget.register_table_lclicked,
+                       self.view.table_left_clicked,
+                       unregister=True,
+                       unreg_func=self.widget.unregister_table_lclicked)
+
+    def test_register_rclicked_emit(self):
+        self.emit_once(self.widget.register_table_rclicked,
+                       self.view.table_right_clicked)
+
+    def test_unregister_rclicked_emit(self):
+        self.emit_once(self.widget.register_table_rclicked,
+                       self.view.table_right_clicked,
+                       unregister=True,
+                       unreg_func=self.widget.unregister_table_rclicked)
 
     def test_register_table_changed(self):
-        assert self.call_event_once(self.widget.register_table_changed,
-                                    self.view.table_changed, self.mock_elem)
+        self.emit_once(self.widget.register_table_changed,
+                       self.view.table_changed)
 
     def test_unregister_table_changed(self):
-        assert self.call_event_once(self.widget.register_table_changed,
-                                    self.view.table_changed,
-                                    self.mock_elem,
-                                    unregister=True,
-                                    unreg_event=self.widget.unregister_table_changed)
+        self.emit_once(self.widget.register_table_changed,
+                       self.view.table_changed,
+                       unregister=True,
+                       unreg_func=self.widget.unregister_table_changed)
 
     def test_selection(self):
         assert self.widget.selection == self.mock_elem
 
     def test_is_selected(self):
-        assert self.widget.is_selected(self.mock_elem)
+        self.call_func_once(self.widget.is_selected)
 
     def test_select_element(self):
-        self.widget.select_element(self.mock_elem, deselect=False)
+        self.call_func_once(self.widget.select_element)
 
     def test_add_elements(self):
-        self.widget.add_elements(self.mock_elem)
+        self.call_func_once(self.widget.add_elements)
 
 
 if __name__ == "__main__":
