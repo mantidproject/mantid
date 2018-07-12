@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/SortXAxis.h"
+#include "MantidAlgorithms/SortXAxis2.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
