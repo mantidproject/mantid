@@ -122,7 +122,19 @@ class SpectrumInfoTest(unittest.TestCase):
         """ Check the equality of the SpectrumDefintion """
         info = self._ws.spectrumInfo()
         spectrumDef = info.spectrumDefinition(1)
+        # Check equality with equals() and == to make sure same result is given
         self.assertTrue(spectrumDef.equals(spectrumDef))
+        self.assertTrue(spectrumDef == spectrumDef)
+
+    def test_spectrumDefintionNotEquals(self):
+        """ Check the equality of the SpectrumDefintion """
+        info = self._ws.spectrumInfo()
+        spectrumDefZero = info.spectrumDefinition(0)
+        spectrumDefOne = info.spectrumDefinition(1)
+        # Check inequality with not (by negating equals())
+        # and != to make sure same result is given
+        self.assertTrue(not spectrumDefZero.equals(spectrumDefOne))
+        self.assertTrue(spectrumDefZero != spectrumDefOne)
 
     def test_spectrumDefintionGet(self):
         """ See if indexing works """
