@@ -466,23 +466,18 @@ class PlotSelectorView(QWidget):
             if action.text() == column_string:
                 action.setChecked(True)
 
-    def sort_ascending(self):
+    def set_sort_order(self, is_ascending):
         """
         Set the list to sort ascending
 
         See also HumanReadableSortItem class
+        :param is_ascending: If true sort ascending, else descending
         """
-        self.sort_order = Qt.AscendingOrder
-        with QMutexLocker(self.mutex):
-            self.table_widget.sortItems(self.sort_type, self.sort_order)
+        if is_ascending:
+            self.sort_order = Qt.AscendingOrder
+        else:
+            self.sort_order = Qt.DescendingOrder
 
-    def sort_descending(self):
-        """
-        Set the list to sort descending
-
-        See also HumanReadableSortItem class
-        """
-        self.sort_order = Qt.DescendingOrder
         with QMutexLocker(self.mutex):
             self.table_widget.sortItems(self.sort_type, self.sort_order)
 

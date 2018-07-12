@@ -70,20 +70,14 @@ class PlotSelectorPresenter(object):
         Appends the plot name to the end of the plot list
         :param plot_number: The unique number in GlobalFigureManager
         """
-        try:
-            self.view.append_to_plot_list(plot_number)
-        except ValueError as e:
-            print(e)
+        self.view.append_to_plot_list(plot_number)
 
     def remove_from_plot_list(self, plot_number):
         """
         Removes the plot name from the plot list
         :param plot_number: The unique number in GlobalFigureManager
         """
-        try:
-            self.view.remove_from_plot_list(plot_number)
-        except ValueError as e:
-            print(e)
+        self.view.remove_from_plot_list(plot_number)
 
     def rename_in_plot_list(self, plot_number, new_name):
         """
@@ -91,10 +85,7 @@ class PlotSelectorPresenter(object):
         :param plot_number: The unique number in GlobalFigureManager
         :param new_name: The new name for the plot
         """
-        try:
-            self.view.rename_in_plot_list(plot_number, new_name)
-        except ValueError as e:
-            print(e)
+        self.view.rename_in_plot_list(plot_number, new_name)
 
     # ----------------------- Plot Filtering ------------------------
 
@@ -104,7 +95,10 @@ class PlotSelectorPresenter(object):
         typing or clearing the text)
         """
         filter_text = self.view.get_filter_text()
-        self.view.filter_plot_list(filter_text)
+        if filter_text:
+            self.view.filter_plot_list(filter_text)
+        else:
+            self.view.unhide_all_plots()
 
     def is_shown_by_filter(self, plot_number):
         """
@@ -196,10 +190,7 @@ class PlotSelectorPresenter(object):
         Sets the sort order in the view
         :param is_ascending: If true ascending order, else descending
         """
-        if is_ascending:
-            self.view.sort_ascending()
-        else:
-            self.view.sort_descending()
+        self.view.set_sort_order(is_ascending)
 
     def set_sort_type(self, sort_type):
         """
