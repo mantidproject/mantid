@@ -21,7 +21,7 @@ public:
   void setBetaIsGlobal(bool global);
 
 private:
-  Mantid::API::CompositeFunction_sptr getMultiDomainFunction() const;
+  Mantid::API::CompositeFunction_sptr getMultiDomainFunction() const override;
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
   Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const override;
   std::string sequentialFitOutputName() const override;
