@@ -105,6 +105,7 @@ private:
   double m_sourcePos;    ///< Source Z (for D33 TOF)
 
   void setFinalProperties(const std::string &filename);
+  void setPixelSize();
 };
 
 } // namespace DataHandling

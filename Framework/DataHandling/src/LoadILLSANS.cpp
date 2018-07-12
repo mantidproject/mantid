@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
@@ -133,6 +134,7 @@ void LoadILLSANS::exec() {
 
   progress.report("Setting sample logs");
   setFinalProperties(filename);
+  setPixelSize();
   setProperty("OutputWorkspace", m_localWorkspace);
 }
 
@@ -454,6 +456,9 @@ void LoadILLSANS::moveDetectorsD33(const DetectorPosition &detPos) {
   // Move in Y
   moveDetectorVertical(detPos.shiftUp, "front_detector_top");
   moveDetectorVertical(-detPos.shiftDown, "front_detector_bottom");
+  // Set the sample log
+  API::Run &runDetails = m_localWorkspace->mutableRun();
+  runDetails.addProperty<double>("L2", detPos.distanceSampleRear);
 }
 
 /**
@@ -475,6 +480,8 @@ void LoadILLSANS::moveDetectorDistance(double distance,
   mover->executeAsChildAlg();
   g_log.debug() << "Moving component '" << componentName
                 << "' to Z = " << distance << '\n';
+  API::Run &runDetails = m_localWorkspace->mutableRun();
+  runDetails.addProperty<double>("L2", distance);
 }
 
 /**
@@ -589,6 +596,9 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
     m_defaultBinning[0] = wavelength - wavelengthRes * wavelength * 0.01 / 2;
     m_defaultBinning[1] = wavelength + wavelengthRes * wavelength * 0.01 / 2;
   }
+  // Add a log called timer with the value of duration
+  const double duration = entry.getFloat("duration");
+  runDetails.addProperty<double>("timer", duration);
 }
 
 /**
@@ -660,13 +670,25 @@ void LoadILLSANS::moveSource() {
 }
 
 /**
- * Sets a sample log for L2 distance [mm], needed later for reduction
- * Note, for D33 it is the rear detector
- * @param z : the sample-detector-distance in [m]
+ * Sets the width (x) and height (y) of the pixel
  */
-void LoadILLSANS::setL2SampleLog(const double z) {
-  API::Run &runDetails = m_localWorkspace->mutableRun();
-  runDetails.addProperty<double>("sample_detector_distance", z * 1000);
+void LoadILLSANS::setPixelSize() {
+  const auto &instrument = m_localWorkspace->getInstrument();
+  const std::string component =
+      (m_instrumentName == "D33") ? "back_detector" : "detector";
+  auto detector = instrument->getComponentByName(component);
+  auto rectangle =
+      boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(
+          detector);
+  if (rectangle) {
+    const double dx = rectangle->xstep();
+    const double dy = rectangle->ystep();
+    API::Run &runDetails = m_localWorkspace->mutableRun();
+    runDetails.addProperty<double>("pixel_width", dx);
+    runDetails.addProperty<double>("pixel_height", dy);
+  } else {
+    g_log.debug("No pixel size available");
+  }
 }
 
 } // namespace DataHandling

@@ -1101,7 +1101,7 @@ def _create_algorithm_function(name, version, algm_object):
             else:
                 raise
 
-        return _gather_returns(name, lhs, algm)
+        return _gather_returns(name, lhs, algm, inout=True)
     # enddef
     # Insert definition in to global dict
     algm_wrapper = _customise_func(algorithm_wrapper, name,

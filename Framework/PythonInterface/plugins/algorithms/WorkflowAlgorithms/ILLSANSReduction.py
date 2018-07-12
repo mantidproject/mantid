@@ -48,7 +48,7 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         reference = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Reference')
 
         self.declareProperty(name='NormaliseBy',
-                             defaultValue='None',
+                             defaultValue='Monitor',
                              validator=StringListValidator(['None', 'Timer', 'Monitor']),
                              doc='Choose the normalisation type.')
 
@@ -60,9 +60,14 @@ class ILLSANSReduction(DataProcessorAlgorithm):
 
         self.setPropertySettings('BeamCenterY', not_absorber)
 
-        self.declareProperty('BeamFlux', 1., direction=Direction.InOut, validator=FloatBoundedValidator(lower=0.), doc='Beam flux')
+        self.declareProperty('BeamFluxValue', 1., direction=Direction.InOut, validator=FloatBoundedValidator(lower=0.), doc='Beam flux value')
 
-        self.setPropertySettings('BeamFlux',
+        self.setPropertySettings('BeamFluxValue',
+                                 EnabledWhenProperty(beam, EnabledWhenProperty(beam, reference, LogicOperator.Or), LogicOperator.Or))
+
+        self.declareProperty('BeamFluxError', 0., direction=Direction.InOut, validator=FloatBoundedValidator(lower=0.), doc='Beam flux error')
+
+        self.setPropertySettings('BeamFluxError',
                                  EnabledWhenProperty(beam, EnabledWhenProperty(beam, reference, LogicOperator.Or), LogicOperator.Or))
 
         self.declareProperty('BeamRadius', 0.05, validator=FloatBoundedValidator(lower=0.), doc='Beam raduis [m]')
@@ -151,9 +156,7 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         det_list = FindDetectorsInShape(Workspace=ws, ShapeXML=shapeXML)
         grouped = ws + '_group'
         GroupDetectors(InputWorkspace=ws, OutputWorkspace=grouped, DetectorList=det_list)
-        sum = mtd[grouped].readY(0)[0]
-        DeleteWorkspace(grouped)
-        return sum
+        return grouped
 
     def _normalise(self, ws):
 
@@ -161,8 +164,8 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         if normalise_by == 'Monitor':
             NormaliseToMonitor(InputWorkspace=ws, MonitorID=100000, OutputWorkspace=ws)
         elif normalise_by == 'Timer':
-            if mtd[ws].getRun().hasProperty('Timer'):
-                duration = mtd[ws].getRun().getLogData('Timer').value
+            if mtd[ws].getRun().hasProperty('timer'):
+                duration = mtd[ws].getRun().getLogData('timer').value
                 if duration != 0.:
                     Scale(InputWorkspace=ws, Factor=1./duration, OutputWorkspace=ws)
                 else:
@@ -182,10 +185,17 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         self.setProperty('BeamCenterX', beam_x)
         self.setProperty('BeamCenterY', beam_y)
         DeleteWorkspace(centers)
-        flux = self._integrate_in_radius(ws, radius)
-        att_coeff = mtd[ws].getRun().getLogData('attenuator.attenuation_coefficient').value
-        flux *= att_coeff # * (dx * dy/L)2
-        self.setProperty('BeamFlux', flux)
+        integral = self._integrate_in_radius(ws, radius)
+        run = mtd[ws].getRun()
+        att_coeff = run.getLogData('attenuator.attenuation_coefficient').value
+        l2 = run.getLogData('L2').value
+        dx = run.getLogData('pixel_width').value
+        dy = run.getLogData('pixel_height').value
+        factor = att_coeff * (dx * dy / l2) ** 2
+        Scale(InputWorkspace=integral, Factor=factor, OutputWorkspace=integral)
+        self.setProperty('BeamFluxValue', mtd[integral].readY(0)[0])
+        self.setProperty('BeamFluxError', mtd[integral].readE(0)[0])
+        DeleteWorkspace(integral)
 
     def PyExec(self):
 
@@ -210,10 +220,16 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                     beam = self.getPropertyValue('BeamInputWorkspace')
                     empty = self._integrate_in_radius(beam, radius)
                     scatterer = self._integrate_in_radius(ws, radius)
-                    self.setProperty('TransmissionValue', scatterer/empty)
+                    transmission = ws + '_tr'
+                    Divide(LHSWorkspace=scatterer, RHSWorkspace=empty, OutputWorkspace=transmission)
+                    self.setProperty('TransmissionValue', mtd[transmission].readY(0)[0])
+                    self.setProperty('TransmissionError', mtd[transmission].readE(0)[0])
+                    DeleteWorkspaces([transmission, empty, scatterer])
                 else:
                     transmission = self.getProperty('TransmissionValue').value
-                    ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionValue=transmission, OutputWorkspace=ws)
+                    transmission_err = self.getProperty('TransmissionError').value
+                    ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionValue=transmission,
+                                                TransmissionError=transmission_err, OutputWorkspace=ws)
                     if process != 'Container':
                         container = self.getPropertyValue('ContainerInputWorkspace')
                         if container:
@@ -236,9 +252,13 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                             if reference:
                                 pass
                             else:
-                                flux = self.getProperty('BeamFlux').value
-                                Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1./flux)
+                                flux = self.getProperty('BeamFluxValue').value
+                                ferr = self.getProperty('BeamFluxError').value
+                                flux_ws = ws + '_flux'
+                                CreateSingleValuedWorkspace(DataValue=flux, ErrorValue=ferr, OutputWorkspace=flux_ws)
+                                Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws)
 
+        CalculateQMinMax(Workspace=ws)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
 
