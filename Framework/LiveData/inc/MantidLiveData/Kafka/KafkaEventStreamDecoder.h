@@ -180,11 +180,11 @@ private:
 
   /// Waits until a run start message with higher run number is received
   bool waitForNewRunStartMessage(RunStartStruct &runStartStructOutput);
-
+  /// Subscribe to event stream at the time specified in a run start message
   void joinEventStreamAtTime(const RunStartStruct &runStartData);
-
+  /// Convert a duration in nanoseconds to milliseconds
   int64_t nanosecondsToMilliseconds(uint64_t timeNanoseconds) const;
-
+  /// Get a det-spec map message using the time specified in a run start message
   std::string getDetSpecMapForRun(const RunStartStruct &runStartStruct);
 };
 
