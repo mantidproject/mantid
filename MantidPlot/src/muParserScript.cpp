@@ -488,8 +488,8 @@ QVariant muParserScript::evaluateImpl() {
   double val = 0.0;
   try {
     current = this;
-    for (QStringList::iterator i = muCode.begin(); i != muCode.end(); ++i) {
-      parser.SetExpr(i->toAscii().constData());
+    for (auto & i : muCode) {
+      parser.SetExpr(i.toAscii().constData());
       val = parser.Eval();
     }
   } catch (EmptySourceError &) {
@@ -506,8 +506,8 @@ bool muParserScript::executeImpl() {
     return false;
   try {
     current = this;
-    for (QStringList::iterator i = muCode.begin(); i != muCode.end(); ++i) {
-      parser.SetExpr(i->toAscii().constData());
+    for (auto & i : muCode) {
+      parser.SetExpr(i.toAscii().constData());
       parser.Eval();
     }
   } catch (EmptySourceError &) {

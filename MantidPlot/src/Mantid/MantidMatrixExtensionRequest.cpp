@@ -73,8 +73,8 @@ void MantidMatrixExtensionRequest::setNumberFormat(
 void MantidMatrixExtensionRequest::setNumberFormatForAll(
     MantidMatrixTabExtensionMap &extensions, const QChar &format,
     int precision) {
-  for (auto it = extensions.begin(); it != extensions.end(); ++it) {
-    auto &extension = it->second;
+  for (auto & it : extensions) {
+    auto &extension = it.second;
     m_extensionHandler->setNumberFormat(extension, format, precision);
   }
 }
@@ -146,8 +146,8 @@ int MantidMatrixExtensionRequest::getPrecision(
  */
 void MantidMatrixExtensionRequest::setColumnWidthForAll(
     MantidMatrixTabExtensionMap &extensions, int width, int numberOfColumns) {
-  for (auto it = extensions.begin(); it != extensions.end(); ++it) {
-    auto &extension = it->second;
+  for (auto & it : extensions) {
+    auto &extension = it.second;
     m_extensionHandler->setColumnWidth(extension, width, numberOfColumns);
   }
 }
@@ -219,8 +219,8 @@ int MantidMatrixExtensionRequest::getColumnWidth(
  */
 bool MantidMatrixExtensionRequest::tableViewMatchesObject(
     MantidMatrixTabExtensionMap &extensions, QObject *object) {
-  for (auto it = extensions.begin(); it != extensions.end(); ++it) {
-    auto &extension = it->second;
+  for (auto & it : extensions) {
+    auto &extension = it.second;
     if (extension.tableView.get() == object) {
       return true;
     }

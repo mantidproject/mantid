@@ -329,26 +329,26 @@ void ContourLinesEditor::updatePen() {
   d_pen_list[d_pen_index] = pen;
 
   if (applyAllColorBox->isChecked()) {
-    for (int i = 0; i < d_pen_list.size(); i++) {
-      QPen p = d_pen_list[i];
+    for (auto & i : d_pen_list) {
+      QPen p = i;
       p.setColor(penColorBox->color());
-      d_pen_list[i] = p;
+      i = p;
     }
   }
 
   if (applyAllStyleBox->isChecked()) {
-    for (int i = 0; i < d_pen_list.size(); i++) {
-      QPen p = d_pen_list[i];
+    for (auto & i : d_pen_list) {
+      QPen p = i;
       p.setStyle(penStyleBox->style());
-      d_pen_list[i] = p;
+      i = p;
     }
   }
 
   if (applyAllWidthBox->isChecked()) {
-    for (int i = 0; i < d_pen_list.size(); i++) {
-      QPen p = d_pen_list[i];
+    for (auto & i : d_pen_list) {
+      QPen p = i;
       p.setWidthF(penWidthBox->value());
-      d_pen_list[i] = p;
+      i = p;
     }
   }
 

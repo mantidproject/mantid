@@ -361,14 +361,13 @@ MantidQt::API::IProjectSerialisable *TableStatistics::loadFromProject(
 
   if (tsv.hasSection("com")) {
     std::vector<std::string> sections = tsv.sections("com");
-    for (auto it = sections.begin(); it != sections.end(); ++it) {
+    for (auto lines : sections) {
       /* This is another special case because of legacy.
        * Format: `<col nr="X">\nYYY\n</col>`
        * where X is the row index (0..n), and YYY is the formula.
        * YYY may span multiple lines.
        * There may be multiple <col>s in each com section.
        */
-      const std::string lines = *it;
       std::vector<std::string> valVec;
       boost::split(valVec, lines, boost::is_any_of("\n"));
 
@@ -414,8 +413,8 @@ std::string TableStatistics::saveToProject(ApplicationWindow *app) {
   tsv << birthDate();
 
   tsv.writeLine("Targets");
-  for (auto it = d_targets.begin(); it != d_targets.end(); ++it)
-    tsv << *it;
+  for (int & d_target : d_targets)
+    tsv << d_target;
 
   tsv.writeRaw(app->windowGeometryInfo(this));
 

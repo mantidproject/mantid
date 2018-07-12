@@ -439,11 +439,11 @@ class OPJFile {
 public:
   OPJFile(const char *filename);
   ~OPJFile() {
-    for (unsigned int g = 0; g < GRAPH.size(); ++g)
-      for (unsigned int l = 0; l < GRAPH[g].layer.size(); ++l)
-        for (unsigned int b = 0; b < GRAPH[g].layer[l].bitmaps.size(); ++b)
-          if (GRAPH[g].layer[l].bitmaps[b].size > 0)
-            delete GRAPH[g].layer[l].bitmaps[b].data;
+    for (auto & g : GRAPH)
+      for (unsigned int l = 0; l < g.layer.size(); ++l)
+        for (unsigned int b = 0; b < g.layer[l].bitmaps.size(); ++b)
+          if (g.layer[l].bitmaps[b].size > 0)
+            delete g.layer[l].bitmaps[b].data;
   }
   int Parse();
   double Version() const {

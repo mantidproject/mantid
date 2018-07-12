@@ -352,8 +352,8 @@ void CurvesDialog::setGraph(Graph *graph) {
 void CurvesDialog::addCurves() {
   QStringList emptyColumns;
   QList<QListWidgetItem *> lst = available->selectedItems();
-  for (int i = 0; i < lst.size(); ++i) {
-    QString text = lst.at(i)->text();
+  for (auto i : lst) {
+    QString text = i->text();
     if (contents->findItems(text, Qt::MatchExactly).isEmpty()) {
       if (!addCurve(text))
         emptyColumns << text;
@@ -454,8 +454,7 @@ void CurvesDialog::removeCurves() {
     return;
   }
 
-  for (int i = 0; i < lst.size(); ++i) {
-    QListWidgetItem *it = lst.at(i);
+  for (auto it : lst) {
     QString s = it->text();
     if (boxShowRange->isChecked()) {
       QStringList lst = s.split("[");
