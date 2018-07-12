@@ -56,7 +56,7 @@ public:
    * peak fit windows
    * @brief test_singlePeaksPartialSpectra
    */
-  void New_Test_test_singlePeaksPartialSpectra() {
+  void New_test_singlePeaksPartialSpectra() {
     // Generate input workspace
     std::string data_ws_name("Test1Data");
     createTestData(data_ws_name);
@@ -84,17 +84,11 @@ public:
         fitpeaks.setProperty("InputWorkspace", data_ws_name));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 1));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakFunction", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakCenters", peak_center_ws_name));
-    //    TS_ASSERT_THROWS_NOTHING(
-    //        fitpeaks.setProperty("FitWindowLeftBoundary", "1.05"));
-    //    TS_ASSERT_THROWS_NOTHING(
-    //        fitpeaks.setProperty("FitWindowRightBoundary", "1.15"));
+        fitpeaks.setProperty("PeakCentersWorkspace", peak_center_ws_name));
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("FitPeakWindowWorkspace", fit_window_ws_name))
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakRanges", "0.02"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
 
     fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3");
     fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3");
@@ -780,6 +774,9 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             WorkspaceCreationHelper::create2DWorkspace(
                 3, static_cast<int>(num_peaks)));
+    std::cout << "Center workspace has " << center_ws->readX(0).size()
+              << " bins"
+              << "\n";
     for (size_t i = 0; i < center_ws->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < peak_index_vec.size(); ++j) {
         int peak_index = peak_index_vec[j];
@@ -788,7 +785,7 @@ public:
           peak_center = 5.0;
         else
           peak_center = 10.0;
-        center_ws->dataY(i)[j] = peak_center;
+        center_ws->dataX(i)[j] = peak_center;
       }
     }
 

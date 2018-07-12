@@ -635,7 +635,7 @@ void FitPeaks::processInputFitRanges() {
         errss << "Peak window workspace index " << wi
               << " has incompatible number of fit windows (x2) "
               << m_peakWindowWorkspace->y(wi).size()
-              << "with the number of peaks " << m_numPeaksToFit << " to fit.";
+              << " with the number of peaks " << m_numPeaksToFit << " to fit.";
         throw std::invalid_argument(errss.str());
       }
 
@@ -706,16 +706,37 @@ void FitPeaks::processInputPeakCenters() {
     m_peakCenterWorkspace = getProperty("PeakCentersWorkspace");
     // number of peaks to fit!
     m_numPeaksToFit = m_peakCenterWorkspace->x(0).size();
+    g_log.warning() << "Input peak center workspace: "
+                    << m_peakCenterWorkspace->x(0).size() << ", "
+                    << m_peakCenterWorkspace->y(0).size() << "\n";
 
     // check matrix worksapce for peak positions
-    const size_t numhist = m_peakCenterWorkspace->getNumberHistograms();
-    if (numhist == m_inputMatrixWS->size())
+    const size_t peak_center_ws_spectra_number =
+        m_peakCenterWorkspace->getNumberHistograms();
+    if (peak_center_ws_spectra_number ==
+        m_inputMatrixWS->getNumberHistograms()) {
+      g_log.warning("case 1");
       m_partialSpectra = false;
-    else if (numhist == m_stopWorkspaceIndex - m_startWorkspaceIndex + 1)
+    } else if (peak_center_ws_spectra_number ==
+               m_stopWorkspaceIndex - m_startWorkspaceIndex + 1) {
       m_partialSpectra = true;
-    else
-      throw std::invalid_argument(
-          "Input peak center workspace has wrong number of spectra.");
+    } else {
+      bool equal = peak_center_ws_spectra_number ==
+                   m_inputMatrixWS->getNumberHistograms();
+      g_log.warning()
+          << "peak_center_ws_spectra_number == m_inputMatrixWS->size() = "
+          << equal << "\n";
+      g_log.error() << "Peak center workspace has "
+                    << peak_center_ws_spectra_number << " spectra; "
+                    << "Input workspace has "
+                    << m_inputMatrixWS->getNumberHistograms() << " spectra;"
+                    << "User specifies to fit peaks from "
+                    << m_startWorkspaceIndex << " to " << m_stopWorkspaceIndex
+                    << ".  They are mismatched to each other.\n";
+      throw std::invalid_argument("Input peak center workspace has mismatched "
+                                  "number of spectra to selected spectra to "
+                                  "fit.");
+    }
 
   } else {
     std::stringstream errss;
