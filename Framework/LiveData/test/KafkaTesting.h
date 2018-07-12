@@ -12,8 +12,8 @@ GCC_DIAG_OFF(conversion)
 #include "Kafka/private/Schema/ba57_run_info_generated.h"
 #include "Kafka/private/Schema/df12_det_spec_map_generated.h"
 #include "Kafka/private/Schema/ev42_events_generated.h"
-#include "Kafka/private/Schema/is84_isis_events_generated.h"
 #include "Kafka/private/Schema/f142_logdata_generated.h"
+#include "Kafka/private/Schema/is84_isis_events_generated.h"
 GCC_DIAG_ON(conversion)
 
 #include <ctime>
@@ -135,7 +135,8 @@ void fakeReceiveAnISISEventMessage(std::string *buffer, int32_t nextPeriod) {
       builder.CreateVector(tof), builder.CreateVector(spec),
       FacilityData_ISISData,
       CreateISISData(builder, static_cast<uint32_t>(nextPeriod),
-                     RunState_RUNNING, protonCharge).Union());
+                     RunState_RUNNING, protonCharge)
+          .Union());
   FinishEventMessageBuffer(builder, messageFlatbuf);
 
   // Copy to provided buffer
@@ -182,10 +183,11 @@ void fakeReceiveARunStartMessage(std::string *buffer, int32_t runNumber,
       static_cast<uint64_t>(mantidTime.to_time_t() * 1000000000);
 
   flatbuffers::FlatBufferBuilder builder;
-  auto runInfo = CreateRunInfo(
-      builder, InfoTypes_RunStart,
-      CreateRunStart(builder, startTimestamp, runNumber,
-                     builder.CreateString(instName), nPeriods).Union());
+  auto runInfo =
+      CreateRunInfo(builder, InfoTypes_RunStart,
+                    CreateRunStart(builder, startTimestamp, runNumber,
+                                   builder.CreateString(instName), nPeriods)
+                        .Union());
   FinishRunInfoBuffer(builder, runInfo);
   // Copy to provided buffer
   buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
@@ -358,6 +360,53 @@ public:
     fakeReceiveARunStartMessage(buffer, m_runNumber, m_startTime, m_instName,
                                 m_nperiods);
 
+    m_runNumber++;
+    UNUSED_ARG(offset);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(topic);
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp(int64_t timestamp) override {
+    UNUSED_ARG(timestamp);
+    return {
+        std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getCurrentOffsets() override {
+    std::unordered_map<std::string, std::vector<int64_t>> offsets;
+    return offsets;
+  }
+  void seek(const std::string &topic, uint32_t partition,
+            int64_t offset) override {
+    UNUSED_ARG(topic);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(offset);
+  }
+
+private:
+  std::string m_startTime = "2016-08-31T12:07:42";
+  int32_t m_runNumber = 1000;
+  std::string m_instName = "HRPDTEST";
+  int32_t m_nperiods = 1;
+};
+
+// -----------------------------------------------------------------------------
+// Fake run data stream with incrementing number of periods
+// -----------------------------------------------------------------------------
+class FakeRunInfoStreamSubscriberVaryingNPeriods
+    : public Mantid::LiveData::IKafkaStreamSubscriber {
+public:
+  void subscribe() override {}
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
+                      std::string &topic) override {
+    assert(buffer);
+
+    fakeReceiveARunStartMessage(buffer, m_runNumber, m_startTime, m_instName,
+                                m_nperiods);
+
+    m_nperiods++;
+    m_runNumber++;
     UNUSED_ARG(offset);
     UNUSED_ARG(partition);
     UNUSED_ARG(topic);
@@ -393,8 +442,8 @@ private:
 class FakeVariablePeriodSubscriber
     : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
-  explicit FakeVariablePeriodSubscriber(int64_t stopOffset)
-      : m_stopOffset(stopOffset) {}
+  explicit FakeVariablePeriodSubscriber(uint32_t startOffset)
+      : m_nextOffset(startOffset) {}
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
   void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
@@ -404,10 +453,10 @@ public:
     // Return messages in this order:
     // Run start (with 1 period)
     // Event data
-    // Run stop
     // Run start (with 2 periods)
+    // Run stop
     // Event data
-    // Event data
+    // Event data (data for 2nd period)
     // Run stop
 
     switch (m_nextOffset) {
@@ -438,8 +487,6 @@ public:
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
-    // + 1 because rdkafka::offsetsForTimes returns the first offset _after_ the
-    // given timestamp
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {2})};
   }
   std::unordered_map<std::string, std::vector<int64_t>>
@@ -455,12 +502,11 @@ public:
 
 private:
   const std::string m_topicName = "topic_name";
-  uint32_t m_nextOffset = 0;
+  uint32_t m_nextOffset;
   std::string m_startTime = "2016-08-31T12:07:42";
   std::string m_stopTime = "2016-08-31T12:07:52";
   const std::string m_instName = "HRPDTEST";
   int32_t m_nperiods = 1;
-  int64_t m_stopOffset;
 };
 
 // -----------------------------------------------------------------------------

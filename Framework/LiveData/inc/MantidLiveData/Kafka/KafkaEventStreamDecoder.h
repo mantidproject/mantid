@@ -1,5 +1,5 @@
-#ifndef MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODER_H_
-#define MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODER_H_
+#ifndef MANTID_LIVEDATA_KAFKAEVENTSTREAMDECODER_H_
+#define MANTID_LIVEDATA_KAFKAEVENTSTREAMDECODER_H_
 
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -15,7 +15,7 @@ namespace Mantid {
 namespace LiveData {
 
 /**
-  High-level interface to ISIS Kafka event system. It requires
+  High-level interface to Kafka event system. It requires
   3 topic names of the data streams.
 
   A call to capture() starts the process of capturing the stream on a separate
@@ -95,12 +95,12 @@ private:
   void captureImpl() noexcept;
   void captureImplExcept();
 
-  void initLocalCaches(std::string rawMsgBuffer,
-                       const RunStartStruct runStartData);
-  DataObjects::EventWorkspace_sptr createBufferWorkspace(const size_t nspectra,
+  void initLocalCaches(const std::string &rawMsgBuffer,
+                       const RunStartStruct &runStartData);
+  DataObjects::EventWorkspace_sptr createBufferWorkspace(size_t nspectra,
                                                          const int32_t *spec,
                                                          const int32_t *udet,
-                                                         const uint32_t length);
+                                                         uint32_t length);
   DataObjects::EventWorkspace_sptr
   createBufferWorkspace(const DataObjects::EventWorkspace_sptr &parent);
   void loadInstrument(const std::string &name,
@@ -136,11 +136,6 @@ private:
   std::unique_ptr<IKafkaStreamSubscriber> m_spDetStream;
   /// Run number
   int m_runNumber;
-
-  /// Cached run start message
-  KafkaEventStreamDecoder::RunStartStruct m_cachedRunStartStruct;
-  /// Flag for start message recived
-  bool m_receivedStartMsg;
 
   /// Associated thread running the capture process
   std::thread m_thread;
@@ -182,9 +177,18 @@ private:
   // Callbacks
   CallbackFn m_cbIterationEnd;
   CallbackFn m_cbError;
+
+  /// Waits until a run start message with higher run number is received
+  bool waitForNewRunStartMessage(RunStartStruct &runStartStructOutput);
+
+  void joinEventStreamAtTime(const RunStartStruct &runStartData);
+
+  int64_t nanosecondsToMilliseconds(uint64_t timeNanoseconds) const;
+
+  std::string getDetSpecMapForRun(const RunStartStruct &runStartStruct);
 };
 
 } // namespace LiveData
 } // namespace Mantid
 
-#endif /* MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODER_H_ */
+#endif /* MANTID_LIVEDATA_KAFKAEVENTSTREAMDECODER_H_ */

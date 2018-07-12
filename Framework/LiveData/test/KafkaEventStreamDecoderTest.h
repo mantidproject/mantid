@@ -148,9 +148,15 @@ public:
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
-        .WillOnce(Return(new FakeVariablePeriodSubscriber(5)))
-        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
+        .WillOnce(Return(new FakeVariablePeriodSubscriber(0))) // 1st run
+        .WillOnce(Return(new FakeRunInfoStreamSubscriberVaryingNPeriods))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+    EXPECT_CALL(*mockBroker, subscribe_(_, _, _))
+        .Times(Exactly(2))
+        .WillOnce(Return(new FakeVariablePeriodSubscriber(4))) // 2nd run
+        .WillOnce(
+            Return(new FakeISISSpDetStreamSubscriber)); // det-spec for 2nd run
+
     auto decoder = createTestDecoder(mockBroker);
     TSM_ASSERT("Decoder should not have create data buffers yet",
                !decoder->hasData());
@@ -410,8 +416,9 @@ private:
                       uint8_t maxIterations) {
     // Register callback to know when a whole loop as been iterated through
     m_niterations = 0;
-    auto callback =
-        [this, maxIterations]() { this->iterationCallback(maxIterations); };
+    auto callback = [this, maxIterations]() {
+      this->iterationCallback(maxIterations);
+    };
     decoder.registerIterationEndCb(callback);
     decoder.registerErrorCb(callback);
     TS_ASSERT_THROWS_NOTHING(decoder.startCapture());
@@ -430,8 +437,9 @@ private:
   void continueCapturing(Mantid::LiveData::KafkaEventStreamDecoder &decoder,
                          uint8_t maxIterations) {
     // Re-register callback with the (potentially) new value of maxIterations
-    auto callback =
-        [this, maxIterations]() { this->iterationCallback(maxIterations); };
+    auto callback = [this, maxIterations]() {
+      this->iterationCallback(maxIterations);
+    };
     decoder.registerIterationEndCb(callback);
     decoder.registerErrorCb(callback);
     {

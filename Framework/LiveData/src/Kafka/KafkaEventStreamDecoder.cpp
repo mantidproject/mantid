@@ -18,8 +18,8 @@ GCC_DIAG_OFF(conversion)
 #include "private/Schema/ba57_run_info_generated.h"
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/ev42_events_generated.h"
-#include "private/Schema/is84_isis_events_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
+#include "private/Schema/is84_isis_events_generated.h"
 GCC_DIAG_ON(conversion)
 
 using namespace Mantid::Types;
@@ -107,14 +107,7 @@ void KafkaEventStreamDecoder::startCapture(bool startNow) {
         m_broker->subscribe({m_runInfoTopic}, SubscribeAtOption::LASTTWO);
     std::string rawMsgBuffer;
     auto runStartData = getRunStartMessage(rawMsgBuffer);
-    auto startTimeMilliseconds =
-        runStartData.startTime / 1000000; // nanoseconds to milliseconds
-    m_eventStream = m_broker->subscribe(
-        {m_eventTopic, m_runInfoTopic, m_sampleEnvTopic},
-        static_cast<int64_t>(startTimeMilliseconds), SubscribeAtOption::TIME);
-    // make sure we listen to the run start topic starting from the run start
-    // message we already got the start time from
-    m_eventStream->seek(m_runInfoTopic, 0, runStartData.runStartMsgOffset);
+    joinEventStreamAtTime(runStartData);
   } else {
     m_eventStream =
         m_broker->subscribe({m_eventTopic, m_runInfoTopic, m_sampleEnvTopic},
@@ -129,6 +122,23 @@ void KafkaEventStreamDecoder::startCapture(bool startNow) {
 
   m_thread = std::thread([this]() { this->captureImpl(); });
   m_thread.detach();
+}
+
+void KafkaEventStreamDecoder::joinEventStreamAtTime(
+    const KafkaEventStreamDecoder::RunStartStruct &runStartData) {
+  auto runStartTime = runStartData.startTime;
+  int64_t startTimeMilliseconds = nanosecondsToMilliseconds(runStartTime);
+  m_eventStream =
+      m_broker->subscribe({m_eventTopic, m_runInfoTopic, m_sampleEnvTopic},
+                          startTimeMilliseconds, SubscribeAtOption::TIME);
+  // make sure we listen to the run start topic starting from the run start
+  // message we already got the start time from
+  m_eventStream->seek(m_runInfoTopic, 0, runStartData.runStartMsgOffset);
+}
+
+int64_t KafkaEventStreamDecoder::nanosecondsToMilliseconds(
+    uint64_t timeNanoseconds) const {
+  return static_cast<int64_t>(timeNanoseconds / 1000000);
 }
 
 /**
@@ -255,8 +265,8 @@ void KafkaEventStreamDecoder::captureImplExcept() {
   std::string topicName;
   m_spDetStream->consumeMessage(&buffer, offset, partition, topicName);
 
-  auto runStartData = getRunStartMessage(runBuffer);
-  initLocalCaches(buffer, runStartData);
+  auto runStartStruct = getRunStartMessage(runBuffer);
+  initLocalCaches(buffer, runStartStruct);
 
   m_interrupt = false;
   m_endRun = false;
@@ -269,10 +279,12 @@ void KafkaEventStreamDecoder::captureImplExcept() {
   bool checkOffsets = false;
 
   while (!m_interrupt) {
-    if (m_endRun)
+    if (m_endRun) {
       waitForRunEndObservation();
-    else
+      continue;
+    } else {
       waitForDataExtraction();
+    }
     // Pull in events
     m_eventStream->consumeMessage(&buffer, offset, partition, topicName);
     // No events, wait for some to come along...
@@ -334,18 +346,6 @@ void KafkaEventStreamDecoder::captureImplExcept() {
         stopOffsets = getStopOffsets(stopOffsets, reachedEnd, stopTime);
         checkOffsets = true;
         checkIfAllStopOffsetsReached(reachedEnd, checkOffsets);
-      } else if (runMsg->info_type_type() == InfoTypes_RunStart) {
-        auto runStartMsg = static_cast<const RunStart *>(runMsg->info_type());
-        m_runNumber = runStartMsg->run_number();
-        auto runStartTime =
-            static_cast<time_t>(runStartMsg->start_time() / 1000000000);
-        m_runStart.set_from_time_t(runStartTime);
-        m_cachedRunStartStruct = {runStartMsg->instrument_name()->str(),
-                                  runStartMsg->run_number(),
-                                  runStartMsg->start_time(),
-                                  static_cast<size_t>(runStartMsg->n_periods()),
-                                  getRunInfoMessage(buffer)};
-        m_receivedStartMsg = true;
       }
     }
     m_cbIterationEnd();
@@ -457,23 +457,71 @@ void KafkaEventStreamDecoder::waitForRunEndObservation() {
   m_endRun = false;
   m_runStatusSeen = false;
   runStatusLock.unlock();
+
   // Give time for MonitorLiveData to act on runStatus information
   // and trigger m_interrupt for next loop iteration if user requested
   // LiveData algorithm to stop at the end of the run
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
-  // ToDo:Check if start message flag is recieved
-  if (!m_receivedStartMsg) {
-    // wait for message
-  }
+  if (m_interrupt)
+    return;
+
+  RunStartStruct runStartStruct;
+  if (waitForNewRunStartMessage(runStartStruct))
+    return;
+  // Rejoin event stream at start of new run
+  joinEventStreamAtTime(runStartStruct);
+  std::string detSpecMapMsgBuffer = getDetSpecMapForRun(runStartStruct);
+  initLocalCaches(detSpecMapMsgBuffer, runStartStruct);
+}
+
+std::string KafkaEventStreamDecoder::getDetSpecMapForRun(
+    const KafkaEventStreamDecoder::RunStartStruct &runStartStruct) {
   std::string rawMsgBuffer;
   int64_t offset;
   int32_t partition;
   std::string topicName;
-  m_spDetStream =
-    m_broker->subscribe({m_spDetTopic}, SubscribeAtOption::LASTONE);
+  m_spDetStream = m_broker->subscribe(
+      {m_spDetTopic}, nanosecondsToMilliseconds(runStartStruct.startTime),
+      SubscribeAtOption::TIME);
   m_spDetStream->consumeMessage(&rawMsgBuffer, offset, partition, topicName);
-  initLocalCaches(rawMsgBuffer, m_cachedRunStartStruct);
-  m_receivedStartMsg = false; // reset flag
+  if (rawMsgBuffer.empty()) {
+    std::runtime_error(
+        "No detector-spectrum map message found for run number " +
+        std::to_string(runStartStruct.runNumber));
+  }
+  return rawMsgBuffer;
+}
+
+bool KafkaEventStreamDecoder::waitForNewRunStartMessage(
+    RunStartStruct &runStartStructOutput) {
+  while (!m_interrupt) {
+    std::string runMsgBuffer;
+
+    int64_t offset;
+    int32_t partition;
+    std::string topicName;
+    m_runStream->consumeMessage(&runMsgBuffer, offset, partition, topicName);
+    if (runMsgBuffer.empty()) {
+      continue;
+    } else {
+      auto runMsg =
+          GetRunInfo(reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()));
+      if (runMsg->info_type_type() == InfoTypes_RunStart) {
+        auto runStartData = static_cast<const RunStart *>(runMsg->info_type());
+        KafkaEventStreamDecoder::RunStartStruct runStartStruct = {
+            runStartData->instrument_name()->str(), runStartData->run_number(),
+            runStartData->start_time(),
+            static_cast<size_t>(runStartData->n_periods()), offset};
+        if (runStartStruct.runNumber > m_runNumber) {
+          runStartStructOutput = runStartStruct;
+          return false; // not interrupted
+        }
+      } else {
+        continue;
+      }
+    }
+  }
+  return true; // interrupted
 }
 
 /**
@@ -487,7 +535,7 @@ void KafkaEventStreamDecoder::waitForRunEndObservation() {
 void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
 
   std::lock_guard<std::mutex> lock(m_mutex);
-  // Add sample log values to every the workspace for every period
+  // Add sample log values to every workspace for every period
   for (const auto &periodBuffer : m_localEvents) {
     auto &mutableRunInfo = periodBuffer->mutableRun();
 
@@ -586,7 +634,7 @@ KafkaEventStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
  * events
  */
 void KafkaEventStreamDecoder::initLocalCaches(
-    std::string rawMsgBuffer, const RunStartStruct runStartData) {
+    const std::string &rawMsgBuffer, const RunStartStruct &runStartData) {
 
   if (rawMsgBuffer.empty()) {
     throw std::runtime_error("KafkaEventStreamDecoder::initLocalCaches() - "
@@ -601,9 +649,13 @@ void KafkaEventStreamDecoder::initLocalCaches(
     std::ostringstream os;
     os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
           "spectra/detector mapping. Expected matched length arrays but "
-          "found nspec=" << nspec << ", ndet=" << nudet;
+          "found nspec="
+       << nspec << ", ndet=" << nudet;
     throw std::runtime_error(os.str());
   }
+
+  m_runNumber = runStartData.runNumber;
+
   // Create buffer
   auto eventBuffer = createBufferWorkspace(
       static_cast<size_t>(spDetMsg->n_spectra()), spDetMsg->spectrum()->data(),
@@ -625,8 +677,8 @@ void KafkaEventStreamDecoder::initLocalCaches(
   auto timeString = m_runStart.toISO8601String();
   // Run number
   mutableRun.addProperty(RUN_START_PROPERTY, std::string(timeString));
-  m_runNumber = runStartData.runNumber;
-  mutableRun.addProperty(RUN_NUMBER_PROPERTY, std::to_string(m_runNumber));
+  mutableRun.addProperty(RUN_NUMBER_PROPERTY,
+                         std::to_string(runStartData.runNumber));
   // Create the proton charge property
   mutableRun.addProperty(
       new Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY));
