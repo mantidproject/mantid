@@ -168,12 +168,10 @@ void PeakColumn::print(size_t index, std::ostream &s) const {
  */
 void PeakColumn::eraseSubStr(std::string &str, const std::string &toErase) {
   std::string::size_type n = toErase.length();
-  for (std::string::size_type i = str.find(toErase);
-      i != std::string::npos;
-      i = str.find(toErase))
-      str.erase(i, n);
+  for (std::string::size_type i = str.find(toErase); i != std::string::npos;
+       i = str.find(toErase))
+    str.erase(i, n);
 }
-
 
 //-------------------------------------------------------------------------------------
 /** Read in some text and convert to a number in the PeaksWorkspace

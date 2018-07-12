@@ -121,7 +121,8 @@ void LoadIsawPeaks::exec() {
  * @return the first word on the next line
  */
 std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
-                                      std::ifstream &in, double &T0, double &qSign) {
+                                      std::ifstream &in, double &T0,
+                                      double &qSign) {
   std::string tag;
   std::string r = getWord(in, false);
 
@@ -199,18 +200,21 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     if (s == "5")
       det.push_back(bank);
     if (s == "9") {
-      m_offset1[0] = qSign*std::stod(getWord(in, false), nullptr);
-      m_offset1[1] = qSign*std::stod(getWord(in, false), nullptr);
-      m_offset1[2] = qSign*std::stod(getWord(in, false), nullptr);
-      m_offset2[0] = qSign*std::stod(getWord(in, false), nullptr);
-      m_offset2[1] = qSign*std::stod(getWord(in, false), nullptr);
-      m_offset2[2] = qSign*std::stod(getWord(in, false), nullptr);
-      m_offset3[0] = qSign*std::stod(getWord(in, false), nullptr);
-      m_offset3[1] = qSign*std::stod(getWord(in, false), nullptr);
-      m_offset3[2] = qSign*std::stod(getWord(in, false), nullptr);
-      outWS->mutableRun().addProperty<std::vector<double>>("Offset1", m_offset1, true);
-      outWS->mutableRun().addProperty<std::vector<double>>("Offset2", m_offset2, true);
-      outWS->mutableRun().addProperty<std::vector<double>>("Offset3", m_offset3, true);
+      m_offset1[0] = qSign * std::stod(getWord(in, false), nullptr);
+      m_offset1[1] = qSign * std::stod(getWord(in, false), nullptr);
+      m_offset1[2] = qSign * std::stod(getWord(in, false), nullptr);
+      m_offset2[0] = qSign * std::stod(getWord(in, false), nullptr);
+      m_offset2[1] = qSign * std::stod(getWord(in, false), nullptr);
+      m_offset2[2] = qSign * std::stod(getWord(in, false), nullptr);
+      m_offset3[0] = qSign * std::stod(getWord(in, false), nullptr);
+      m_offset3[1] = qSign * std::stod(getWord(in, false), nullptr);
+      m_offset3[2] = qSign * std::stod(getWord(in, false), nullptr);
+      outWS->mutableRun().addProperty<std::vector<double>>("Offset1", m_offset1,
+                                                           true);
+      outWS->mutableRun().addProperty<std::vector<double>>("Offset2", m_offset2,
+                                                           true);
+      outWS->mutableRun().addProperty<std::vector<double>>("Offset3", m_offset3,
+                                                           true);
     }
   }
   // Find bank numbers in instument that are not in header lines
@@ -317,20 +321,22 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   h = qSign * std::stod(getWord(in, false), nullptr);
   k = qSign * std::stod(getWord(in, false), nullptr);
   l = qSign * std::stod(getWord(in, false), nullptr);
-  V3D mod = V3D(0,0,0);
+  V3D mod = V3D(0, 0, 0);
   if (m_ModStru) {
-      mod[0] = qSign * std::stoi(getWord(in, false), nullptr);
-      mod[1] = qSign * std::stoi(getWord(in, false), nullptr);
-      mod[2] = qSign * std::stoi(getWord(in, false), nullptr);
-              double deltaH = mod[0]*m_offset1[0]+mod[1]*m_offset2[0]+mod[2]*m_offset3[0];
-              double deltaK = mod[0]*m_offset1[1]+mod[1]*m_offset2[1]+mod[2]*m_offset3[1];
-              double deltaL = mod[0]*m_offset1[2]+mod[1]*m_offset2[2]+mod[2]*m_offset3[2];
+    mod[0] = qSign * std::stoi(getWord(in, false), nullptr);
+    mod[1] = qSign * std::stoi(getWord(in, false), nullptr);
+    mod[2] = qSign * std::stoi(getWord(in, false), nullptr);
+    double deltaH =
+        mod[0] * m_offset1[0] + mod[1] * m_offset2[0] + mod[2] * m_offset3[0];
+    double deltaK =
+        mod[0] * m_offset1[1] + mod[1] * m_offset2[1] + mod[2] * m_offset3[1];
+    double deltaL =
+        mod[0] * m_offset1[2] + mod[1] * m_offset2[2] + mod[2] * m_offset3[2];
 
-      h += deltaH;
-      k += deltaK;
-      l += deltaL;
+    h += deltaH;
+    k += deltaK;
+    l += deltaL;
   }
-          
 
   col = std::stod(getWord(in, false), nullptr);
   row = std::stod(getWord(in, false), nullptr);
@@ -363,7 +369,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   Peak peak(outWS->getInstrument(), pixelID, wl);
   peak.setHKL(h, k, l);
   if (m_ModStru) {
-  peak.setModStru(mod);
+    peak.setModStru(mod);
   }
   peak.setIntensity(Inti);
   peak.setSigmaIntensity(SigI);
