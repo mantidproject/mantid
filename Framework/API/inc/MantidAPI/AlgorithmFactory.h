@@ -17,10 +17,10 @@ namespace API {
 /// Structure uniquely describing an algorithm with its name, category and
 /// version.
 struct AlgorithmDescriptor {
-  std::string name;     ///< name
-  std::string alias;    ///< alias
-  std::string category; ///< category
+  std::string name;     ///< Algorithm Name
   int version;          ///< version
+  std::string category; ///< category
+  std::string alias;    ///< alias
 };
 
 //----------------------------------------------------------------------

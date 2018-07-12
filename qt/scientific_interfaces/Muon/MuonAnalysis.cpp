@@ -591,7 +591,7 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
   options.subtractedPeriods = getSubtractedPeriods();
   options.timeZero = timeZero();           // user input
   options.loadedTimeZero = m_dataTimeZero; // from file
-  options.timeLimits.first = startTime();
+  options.timeLimits.first = firstGoodBin();
   options.timeLimits.second = finishTime();
   options.rebinArgs = isRaw ? "" : rebinParams(loadedWS);
   options.plotType = plotType;
@@ -3098,7 +3098,8 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
         m_dataTimeZero); // won't be used, but property is mandatory
     groupAlg->setPropertyValue("DetectorGroupingTable", groupingName);
     groupAlg->setPropertyValue("OutputWorkspace", outputEntry.name());
-    groupAlg->setProperty("xmin", m_dataSelector->getStartTime());
+    // want to remove data before first good data
+    groupAlg->setProperty("xmin", firstGoodBin());
     groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
     groupAlg->execute();
 
