@@ -85,6 +85,39 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
     }
   };
 
+
+  class NewlineAlgorithm : public Algorithm {
+  public:
+	  NewlineAlgorithm() : Algorithm() {}
+	  ~NewlineAlgorithm() override {}
+	  const std::string name() const override { return "Foo\n\rBar"; }
+	  const std::string summary() const override { return "Test"; }
+	  int version() const override { return 1; }
+	  const std::string category() const override { return "Cat;Leopard;Mink"; }
+	  
+	  void afterPropertySet(const std::string &name) override {
+		  if (name == "InputWorkspace")
+			  declareProperty("DynamicInputProperty", "");
+	  }
+
+	  void init() override {
+		  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+			  "InputWorkspace", "", Direction::Input));
+		  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+			  "OutputWorkspace", "", Direction::Output));
+		  declareProperty("PropertyA", "Hello");
+		  declareProperty("PropertyB", "World");
+	  }
+	  void exec() override {
+		  declareProperty("DynamicProperty1", "value", Direction::Output);
+		  setPropertyValue("DynamicProperty1", "outputValue");
+
+		  boost::shared_ptr<MatrixWorkspace> output =
+			  boost::make_shared<WorkspaceTester>();
+		  setProperty("OutputWorkspace", output);
+	  }
+  };
+
   // middle layer algorithm executed by a top level algorithm
   class NestedAlgorithm : public DataProcessorAlgorithm {
   public:
@@ -205,6 +238,7 @@ public:
     Mantid::API::AlgorithmFactory::Instance().subscribe<NestedAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance().subscribe<BasicAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance().subscribe<SubAlgorithm>();
+	Mantid::API::AlgorithmFactory::Instance().subscribe<NewlineAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance()
         .subscribe<AlgorithmWithDynamicProperty>();
   }
@@ -217,6 +251,7 @@ public:
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("SubAlgorithm", 1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe(
         "AlgorithmWithDynamicProperty", 1);
+	Mantid::API::AlgorithmFactory::Instance().unsubscribe("Foo\n\rBar", 1 );
   }
 
   void test_Build_Simple() {
@@ -252,6 +287,41 @@ public:
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
+  }
+
+  void test_newline_chars_removed() {
+	  // Check that any newline chars are removed
+	  std::string result[] = {"FooBar(InputWorkspace='test_input_workspace',"
+							  " OutputWorkspace='test_output_workspace')", ""};
+
+	  boost::shared_ptr<WorkspaceTester> input =
+		  boost::make_shared<WorkspaceTester>();
+	  AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
+
+	  auto alg = AlgorithmFactory::Instance().create("Foo\n\rBar", 1);
+	  alg->initialize();
+	  alg->setRethrows(true);
+	  alg->setProperty("InputWorkspace", input);
+	  alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
+	  alg->execute();
+
+	  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+		  "test_output_workspace");
+	  auto wsHist = ws->getHistory();
+
+	  ScriptBuilder builder(wsHist.createView());
+	  std::string scriptText = builder.build();
+
+	  std::vector<std::string> scriptLines;
+	  boost::split(scriptLines, scriptText, boost::is_any_of("\n"));
+
+	  int i = 0;
+	  for (auto it = scriptLines.begin(); it != scriptLines.end(); ++it, ++i) {
+		  TS_ASSERT_EQUALS(*it, result[i])
+	  }
+
+	  AnalysisDataService::Instance().remove("test_output_workspace");
+	  AnalysisDataService::Instance().remove("test_input_workspace");
   }
 
   void test_Build_Simple_Timestamped() {
