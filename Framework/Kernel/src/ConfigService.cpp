@@ -1142,8 +1142,8 @@ boost::optional<bool> ConfigServiceImpl::getValue(const std::string &keyName) {
 
   auto &configVal = returnedValue.get();
 
-  std::transform(configVal.begin(), configVal.end(),
-				 configVal.begin(), ::tolower);
+  std::transform(configVal.begin(), configVal.end(), configVal.begin(),
+                 ::tolower);
 
   boost::trim(configVal);
 
