@@ -13,6 +13,15 @@ class IndexSatellitePeaks(PythonAlgorithm):
     def category(self):
         return 'Crystal\\Peaks'
 
+    def seeAlso(self):
+        return [ "RefineSatellitePeaks" ]
+
+    def name(self):
+        return "IndexSatellitePeaks"
+
+    def summary(self):
+        return "Algorithm for indexing satellite peaks in superspace"
+
     def PyInit(self):
         self.declareProperty(IPeaksWorkspaceProperty(name="NuclearPeaks",
                                                      defaultValue="",

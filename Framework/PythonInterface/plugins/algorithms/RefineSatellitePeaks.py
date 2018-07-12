@@ -10,6 +10,16 @@ class RefineSatellitePeaks(DataProcessorAlgorithm):
     def category(self):
         return 'Crystal\\Peaks'
 
+    def seeAlso(self):
+        return [ "IndexSatellitePeaks" ]
+
+    def name(self):
+        return "RefineSatellitePeaks"
+
+    def summary(self):
+        return "Algorithm for finding satellite peaks in an MDWorkspace in the HKL frame."
+
+
     def PyInit(self):
         self.declareProperty(PeaksWorkspaceProperty(name="NuclearPeaks",
                                                     defaultValue="",
