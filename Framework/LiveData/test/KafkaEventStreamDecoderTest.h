@@ -416,9 +416,8 @@ private:
                       uint8_t maxIterations) {
     // Register callback to know when a whole loop as been iterated through
     m_niterations = 0;
-    auto callback = [this, maxIterations]() {
-      this->iterationCallback(maxIterations);
-    };
+    auto callback =
+        [this, maxIterations]() { this->iterationCallback(maxIterations); };
     decoder.registerIterationEndCb(callback);
     decoder.registerErrorCb(callback);
     TS_ASSERT_THROWS_NOTHING(decoder.startCapture());
@@ -437,9 +436,8 @@ private:
   void continueCapturing(Mantid::LiveData::KafkaEventStreamDecoder &decoder,
                          uint8_t maxIterations) {
     // Re-register callback with the (potentially) new value of maxIterations
-    auto callback = [this, maxIterations]() {
-      this->iterationCallback(maxIterations);
-    };
+    auto callback =
+        [this, maxIterations]() { this->iterationCallback(maxIterations); };
     decoder.registerIterationEndCb(callback);
     decoder.registerErrorCb(callback);
     {
