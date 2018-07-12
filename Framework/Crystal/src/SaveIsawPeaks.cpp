@@ -53,10 +53,6 @@ void SaveIsawPeaks::exec() {
   std::string header = "2   SEQN    H    K    L     COL      ROW     CHAN      "
                        "  L2   2_THETA        AZ         WL         D      IPK "
                        "      INTI    SIGI  RFLG";
-  header =
-      "2   SEQN    H    K    L ORD1 ORD2 ORD3     COL      ROW     CHAN      "
-      "  L2   2_THETA        AZ         WL         D      IPK "
-      "      INTI    SIGI  RFLG";
 
   std::string filename = getPropertyValue("Filename");
   PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
@@ -121,6 +117,10 @@ void SaveIsawPeaks::exec() {
     // Save in the map
     runMap[run][bank].push_back(i);
   }
+  if (m_ModStru) header =
+      "2   SEQN    H    K    L ORD1 ORD2 ORD3     COL      ROW     CHAN      "
+      "  L2   2_THETA        AZ         WL         D      IPK "
+      "      INTI    SIGI  RFLG";
 
   if (!inst)
     throw std::runtime_error(
