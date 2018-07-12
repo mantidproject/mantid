@@ -11,11 +11,11 @@ from mantid.kernel import config
 class ISISIndirectDiffractionReductionTest(unittest.TestCase):
 
     def setUp(self):
-        self._oldFacility = mantid.config['default.facility']
-        mantid.config.setFacility('ISIS')
+        self._oldFacility = config['default.facility']
+        config.setFacility('ISIS')
 
     def tearDown(self):
-        mantid.config.setFacility(self._oldFacility)
+        config.setFacility(self._oldFacility)
 
     def test_basic_reduction_completes(self):
         """
