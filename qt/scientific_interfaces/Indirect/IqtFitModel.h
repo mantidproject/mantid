@@ -10,13 +10,18 @@ namespace IDA {
 class DLLExport IqtFitModel : public IndirectFittingModel {
 public:
   IqtFitModel();
+
+  Mantid::API::IAlgorithm_sptr getFittingAlgorithm() const override;
+
   void setFitTypeString(const std::string &fitType);
 
   void setFitFunction(Mantid::API::IFunction_sptr function) override;
   bool canConstrainIntensities() const;
   bool setConstrainIntensities(bool constrain);
+  void setBetaIsGlobal(bool global);
 
 private:
+  Mantid::API::CompositeFunction_sptr getMultiDomainFunction() const;
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
   Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const override;
   std::string sequentialFitOutputName() const override;
@@ -25,7 +30,10 @@ private:
                                   std::size_t spectrum) const override;
   std::unordered_map<std::string, ParameterValue>
   createDefaultParameters(std::size_t index) const override;
+  Mantid::API::CompositeFunction_sptr
+  createFunctionWithGlobalBeta(Mantid::API::IFunction_sptr function) const;
 
+  bool m_makeBetaGlobal;
   bool m_constrainIntensities;
   std::string m_fitType;
 };

@@ -8,6 +8,7 @@
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/BoundedValidator.h"
@@ -187,6 +188,34 @@ ITableWorkspace_sptr transposeFitTable(ITableWorkspace_sptr table,
   return transposed;
 }
 
+double getValueFromNumericAxis(MatrixWorkspace_sptr workspace,
+                               std::size_t axisIndex, std::size_t valueIndex) {
+  return dynamic_cast<NumericAxis *>(workspace->getAxis(axisIndex))
+      ->getValue(valueIndex);
+}
+
+void addQValuesToTableColumn(
+    ITableWorkspace &table, const std::vector<MatrixWorkspace_sptr> &workspaces,
+    const Mantid::Kernel::PropertyManagerOwner &indexProperties,
+    std::size_t columnIndex) {
+  if (workspaces.empty())
+    return;
+
+  const auto column = table.getColumn(columnIndex);
+  const std::string prefix = "WorkspaceIndex";
+
+  int index = indexProperties.getProperty(prefix);
+  column->cell<double>(0) = getValueFromNumericAxis(
+      workspaces[0], 1, static_cast<std::size_t>(index));
+
+  for (auto i = 1u; i < workspaces.size(); ++i) {
+    const auto indexName = prefix + "_" + std::to_string(i);
+    index = indexProperties.getProperty(indexName);
+    column->cell<double>(i) = getValueFromNumericAxis(
+        workspaces[i], 1, static_cast<std::size_t>(index));
+  }
+}
+
 std::vector<std::size_t>
 createDatasetGrouping(const std::vector<MatrixWorkspace_sptr> &workspaces) {
   std::vector<std::size_t> grouping;
@@ -243,9 +272,9 @@ const std::vector<std::string> QENSFitSimultaneous::seeAlso() const {
 
 void QENSFitSimultaneous::initConcrete() {
   declareProperty("Ties", "", Kernel::Direction::Input);
-  getPointerToProperty("Ties")
-      ->setDocumentation("Math expressions defining ties between parameters of "
-                         "the fitting function.");
+  getPointerToProperty("Ties")->setDocumentation(
+      "Math expressions defining ties between parameters of "
+      "the fitting function.");
   declareProperty("Constraints", "", Kernel::Direction::Input);
   getPointerToProperty("Constraints")->setDocumentation("List of constraints");
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
@@ -329,8 +358,10 @@ void QENSFitSimultaneous::execConcrete() {
       convertToSingleDomain(getProperty("Function"));
 
   const auto fitResult = performFit(inputWorkspaces, outputBaseName);
-  const auto parameterWs = processParameterTable(
-      transposeFitTable(fitResult.first, singleDomainFunction));
+  auto transposedTable =
+      transposeFitTable(fitResult.first, singleDomainFunction);
+  addQValuesToTableColumn(*transposedTable, workspaces, *this, 0);
+  const auto parameterWs = processParameterTable(transposedTable);
   const auto groupWs = makeGroup(fitResult.second);
   const auto resultWs = processIndirectFitParameters(
       parameterWs, createDatasetGrouping(workspaces));
