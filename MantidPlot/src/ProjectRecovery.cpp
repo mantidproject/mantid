@@ -16,8 +16,10 @@
 #include "boost/range/algorithm_ext/erase.hpp"
 
 #include "Poco/DirectoryIterator.h"
+#include "Poco/Environment.h"
 #include "Poco/NObserver.h"
 #include "Poco/Path.h"
+#include "Poco/Process.h"
 
 #include <QMessageBox>
 #include <QMetaObject>
@@ -62,8 +64,10 @@ boost::optional<bool> getConfigBool(const std::string &key) {
 
 /// Returns a string to the current top level recovery folder
 std::string getRecoveryFolder() {
-  static std::string recoverFolder =
-      Mantid::Kernel::ConfigService::Instance().getAppDataDir() + "/recovery/";
+  static std::string appData = Mantid::Kernel::ConfigService::Instance().getAppDataDir();
+  static std::string hostname = Poco::Environment::nodeName();
+
+  static std::string recoverFolder = appData + "/recovery/" + hostname + '/';
   return recoverFolder;
 }
 

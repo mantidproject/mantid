@@ -91,6 +91,7 @@
 #include "PlotWizard.h"
 #include "PolynomFitDialog.h"
 #include "PolynomialFit.h"
+#include "Process.h"
 #include "ProjectRecovery.h"
 #include "ProjectSerialiser.h"
 #include "QwtErrorPlotCurve.h"
@@ -16638,7 +16639,9 @@ void ApplicationWindow::onAboutToStart() {
   resultsLog->scrollToTop();
 
   // Kick off project recovery
-  checkForProjectRecovery();
+  // but only if we are the only instance currently running
+  if (!Process::isAnotherInstanceRunning())
+	checkForProjectRecovery();
 }
 
 /**
@@ -16768,6 +16771,11 @@ bool ApplicationWindow::saveProjectRecovery(std::string destination) {
   return projectWriter.save(QString::fromStdString(destination));
 }
 
+/**
+  * Checks for any recovery checkpoint and starts project
+  * saving if one doesn't exist. If one does, it prompts
+  * the user whether they would like to recover
+  */
 void ApplicationWindow::checkForProjectRecovery() {
   if (!m_projectRecovery.checkForRecovery()) {
     m_projectRecovery.startProjectSaving();
