@@ -106,7 +106,8 @@ public:
                           std::size_t index);
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
-  template <typename F> void applySpectra(std::size_t index, const F &functor);
+  template <typename F>
+  void applySpectra(std::size_t index, const F &functor) const;
 
   FittingMode getFittingMode() const;
   std::unordered_map<std::string, ParameterValue>
@@ -119,7 +120,7 @@ public:
                                                     std::size_t spectrum) const;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
   Mantid::API::WorkspaceGroup_sptr getResultGroup() const;
-  Mantid::API::IAlgorithm_sptr getFittingAlgorithm() const;
+  virtual Mantid::API::IAlgorithm_sptr getFittingAlgorithm() const;
   Mantid::API::IAlgorithm_sptr getSingleFit(std::size_t dataIndex,
                                             std::size_t spectrum) const;
 
@@ -129,10 +130,13 @@ public:
                             std::size_t index);
 
 protected:
+  Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function) const;
   Mantid::API::IAlgorithm_sptr
   createSimultaneousFit(Mantid::API::IFunction_sptr function) const;
+  Mantid::API::IAlgorithm_sptr createSimultaneousFitWithEqualRange(
+      Mantid::API::IFunction_sptr function) const;
   virtual Mantid::API::CompositeFunction_sptr getMultiDomainFunction() const;
   virtual std::unordered_map<std::string, std::string>
   mapDefaultParameterNames() const;
@@ -207,7 +211,8 @@ private:
 };
 
 template <typename F>
-void IndirectFittingModel::applySpectra(std::size_t index, const F &functor) {
+void IndirectFittingModel::applySpectra(std::size_t index,
+                                        const F &functor) const {
   m_fittingData[index]->applySpectra(functor);
 }
 
