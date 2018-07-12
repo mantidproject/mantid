@@ -37,13 +37,13 @@ class PeriodicTableWidgetTest(unittest.TestCase):
         if unregister and unreg_func is not None:
             unreg_func(handler)
             slot(mock.Mock())
-        handler.assert_called_once()
+        assert handler.call_count == 1
 
     def call_func_once(self, func):
         self.widget.presenter.view = mock.create_autospec(PeriodicTableView)
         func = mock.Mock()
         func(mock.Mock())
-        func.assert_called_once()
+        assert func.call_count == 1
 
     def test_register_table_lclicked(self):
         self.call_func_once(self.widget.register_table_lclicked)
