@@ -331,81 +331,86 @@ public:
   }
 
   void test_getObjectsReturnsConfigOption() {
-	  svc.clear();
+    svc.clear();
 
-	  ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
-		  "0");
-	  auto one = boost::make_shared<int>(1);
-	  auto two = boost::make_shared<int>(2);
-	  auto three = boost::make_shared<int>(3);
-	  svc.add("One", one);
-	  svc.add("Two", two);
-	  svc.add("TwoAgain",
-		  two); // Same pointer again - should appear twice in getObjects()
-	  svc.add("__Three", three);
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
+                                        "0");
+    auto one = boost::make_shared<int>(1);
+    auto two = boost::make_shared<int>(2);
+    auto three = boost::make_shared<int>(3);
+    svc.add("One", one);
+    svc.add("Two", two);
+    svc.add("TwoAgain",
+            two); // Same pointer again - should appear twice in getObjects()
+    svc.add("__Three", three);
 
-	  auto objects = svc.getObjects(DataServiceHidden::Auto);
-	  auto objectsDefaultCall = svc.getObjects();
+    auto objects = svc.getObjects(DataServiceHidden::Auto);
+    auto objectsDefaultCall = svc.getObjects();
 
-	  TSM_ASSERT_EQUALS("Default parameter is not set to auto", objects, objectsDefaultCall);
+    TSM_ASSERT_EQUALS("Default parameter is not set to auto", objects,
+                      objectsDefaultCall);
 
-	  TSM_ASSERT_EQUALS("Hidden entries should not be returned", objects.size(),
-		  3);
-	  // Check the hidden ws isn't present
-	  TS_ASSERT_EQUALS(objects.at(0), one);
-	  TS_ASSERT_EQUALS(objects.at(1), two);
-	  TS_ASSERT_EQUALS(objects.at(2), two);
-	  TSM_ASSERT_EQUALS("Hidden entries should not be returned", std::find(objects.cbegin(), objects.cend(), three),
-		  objects.end());
+    TSM_ASSERT_EQUALS("Hidden entries should not be returned", objects.size(),
+                      3);
+    // Check the hidden ws isn't present
+    TS_ASSERT_EQUALS(objects.at(0), one);
+    TS_ASSERT_EQUALS(objects.at(1), two);
+    TS_ASSERT_EQUALS(objects.at(2), two);
+    TSM_ASSERT_EQUALS("Hidden entries should not be returned",
+                      std::find(objects.cbegin(), objects.cend(), three),
+                      objects.end());
 
-	  ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
-		  "1");
-	  objects = svc.getObjects();
-	  TS_ASSERT_EQUALS(objects.size(), 4);
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
+                                        "1");
+    objects = svc.getObjects();
+    TS_ASSERT_EQUALS(objects.size(), 4);
   }
 
   void test_getObjectsReturnsNoHiddenOption() {
-	  svc.clear();
+    svc.clear();
 
-	  ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
-		  "1");
-	  auto one = boost::make_shared<int>(1);
-	  auto two = boost::make_shared<int>(2);
-	  auto three = boost::make_shared<int>(3);
-	  svc.add("One", one);
-	  svc.add("Two", two);
-	  svc.add("__Three", three);
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
+                                        "1");
+    auto one = boost::make_shared<int>(1);
+    auto two = boost::make_shared<int>(2);
+    auto three = boost::make_shared<int>(3);
+    svc.add("One", one);
+    svc.add("Two", two);
+    svc.add("__Three", three);
 
-	  auto objects = svc.getObjects(DataServiceHidden::Exclude);
-	  TSM_ASSERT_EQUALS("Hidden entries should not be returned", objects.size(),
-		  2);
-	  // Check the hidden ws isn't present
-	  TS_ASSERT_EQUALS(objects.at(0), one);
-	  TS_ASSERT_EQUALS(objects.at(1), two);
-	  TSM_ASSERT_EQUALS("Hidden entries should not be returned", std::find(objects.cbegin(), objects.cend(), three),
-		  objects.end());
+    auto objects = svc.getObjects(DataServiceHidden::Exclude);
+    TSM_ASSERT_EQUALS("Hidden entries should not be returned", objects.size(),
+                      2);
+    // Check the hidden ws isn't present
+    TS_ASSERT_EQUALS(objects.at(0), one);
+    TS_ASSERT_EQUALS(objects.at(1), two);
+    TSM_ASSERT_EQUALS("Hidden entries should not be returned",
+                      std::find(objects.cbegin(), objects.cend(), three),
+                      objects.end());
   }
 
   void test_getObjectsReturnsHiddenOption() {
-	  svc.clear();
+    svc.clear();
 
-	  ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
-		  "0");
-	  auto one = boost::make_shared<int>(1);
-	  auto two = boost::make_shared<int>(2);
-	  auto three = boost::make_shared<int>(3);
-	  svc.add("One", one);
-	  svc.add("Two", two);
-	  svc.add("__Three", three);
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
+                                        "0");
+    auto one = boost::make_shared<int>(1);
+    auto two = boost::make_shared<int>(2);
+    auto three = boost::make_shared<int>(3);
+    svc.add("One", one);
+    svc.add("Two", two);
+    svc.add("__Three", three);
 
-	  auto objects = svc.getObjects(DataServiceHidden::Include);
-	  TSM_ASSERT_EQUALS("Hidden entries should be returned", objects.size(),
-		  3);
-	  // Check the hidden ws isn't present
-	  TS_ASSERT_DIFFERS(std::find(objects.begin(), objects.end(), one), objects.end());
-	  TS_ASSERT_DIFFERS(std::find(objects.begin(), objects.end(), two), objects.end());
-	  TSM_ASSERT_DIFFERS("Hidden entries should be returned", std::find(objects.cbegin(), objects.cend(), three),
-		  objects.end());
+    auto objects = svc.getObjects(DataServiceHidden::Include);
+    TSM_ASSERT_EQUALS("Hidden entries should be returned", objects.size(), 3);
+    // Check the hidden ws isn't present
+    TS_ASSERT_DIFFERS(std::find(objects.begin(), objects.end(), one),
+                      objects.end());
+    TS_ASSERT_DIFFERS(std::find(objects.begin(), objects.end(), two),
+                      objects.end());
+    TSM_ASSERT_DIFFERS("Hidden entries should be returned",
+                       std::find(objects.cbegin(), objects.cend(), three),
+                       objects.end());
   }
 
   void test_sortedAndHiddenGetNames() {

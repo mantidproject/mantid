@@ -482,17 +482,20 @@ public:
   }
 
   /// Get a vector of the pointers to the data objects stored by the service
-  std::vector<boost::shared_ptr<T>> getObjects(DataServiceHidden includeHidden = DataServiceHidden::Auto) const {
+  std::vector<boost::shared_ptr<T>>
+  getObjects(DataServiceHidden includeHidden = DataServiceHidden::Auto) const {
     std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
-	if (includeHidden == DataServiceHidden::Include) {
-		// Return all elements including hidden ones
-	}
+    if (includeHidden == DataServiceHidden::Include) {
+      // Return all elements including hidden ones
+    }
 
-	const bool alwaysIncludeHidden = includeHidden == DataServiceHidden::Include;
-    const bool usingAuto =  includeHidden == DataServiceHidden::Auto && showingHiddenObjects();
-	
-	const bool showingHidden = alwaysIncludeHidden || usingAuto;
+    const bool alwaysIncludeHidden =
+        includeHidden == DataServiceHidden::Include;
+    const bool usingAuto =
+        includeHidden == DataServiceHidden::Auto && showingHiddenObjects();
+
+    const bool showingHidden = alwaysIncludeHidden || usingAuto;
 
     std::vector<boost::shared_ptr<T>> objects;
     objects.reserve(datamap.size());
