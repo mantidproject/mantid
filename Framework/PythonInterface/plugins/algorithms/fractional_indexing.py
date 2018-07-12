@@ -19,7 +19,6 @@ def find_bases(qs, tolerance):
     :return: tuple of (number of dimensions, nx3 matrix of basis vectors)
     """
     qs = list(sort_vectors_by_norm(qs))
-    regenerate_grid = False
     final_qs = [qs.pop(0)]
     refs, hkls = generate_hkl_grid(np.array(final_qs), _MAX_REFLECTIONS)
 
@@ -74,6 +73,7 @@ def find_nearest_hkl(qs, reflections, hkls, tolerance):
 
 def is_indexed(q, reflections, tolerance):
     """Check if a q vector is indexed by a set of reflections
+
     :param q: the q vector to check
     :param reflections: the list of reflections to find if this matches
     :param tolerance: the tolerance on the difference between q and the nearest
@@ -151,7 +151,7 @@ def find_q_vectors(nuclear_hkls, sats_hkls):
     integer HKL.
 
     :param nuclear_hkls: the positions of integer HKL peaks.
-    :param sats_hkl: the positions of fractional "satellite" HKL peaks.
+    :param sats_hkls: the positions of fractional "satellite" HKL peaks.
     :returns: np.ndarray -- array of q vectors.
     """
     peak_map = KDTree(nuclear_hkls)
@@ -159,7 +159,7 @@ def find_q_vectors(nuclear_hkls, sats_hkls):
     for sat in sats_hkls:
         distance, index = peak_map.query(sat, k=1)
         if distance > 2:
-            # peak to far away from satellite ignore
+            # peak too far away from satellite ignore
             continue
         nearest_peak = nuclear_hkls[index]
         qs.append(sat - nearest_peak)
@@ -207,14 +207,14 @@ def get_hkls(peaks_workspace):
                      for peak in peaks_workspace])
 
 
-def remove_noninteger(M):
+def remove_noninteger(matrix):
     """Remove any non integer values from a matrix
 
-    :param M: the matrix to remove non integer values from
-    :return: M with non integer elements set to zero
+    :param matrix: the matrix to remove non integer values from
+    :return: matrix with non integer elements set to zero
     """
-    M[np.absolute(np.mod(M, 1)) > 1e-14] = 0
-    return M
+    matrix[np.absolute(np.mod(matrix, 1)) > 1e-14] = 0
+    return matrix
 
 
 def trunc_decimals(vec, n_decimals=2):
@@ -286,13 +286,13 @@ def kmeans_plus_plus(points, k):
 
         # calculate probability distribution for being picked based on squared
         # distance from each centroid
-        D2 = np.array([norm_along_axis(pts - c, axis=1)**2 for c in centroids])
-        D2 = np.min(D2, axis=0)
-        D2 /= np.sum(D2)
+        distance_squared = np.array([norm_along_axis(pts - c, axis=1)**2 for c in centroids])
+        distance_squared = np.min(distance_squared, axis=0)
+        distance_squared /= np.sum(distance_squared)
 
         # choose a new random centroid weighted by how far it is from the other
         # centroids
-        centroid_index = np.random.choice(mask, p=D2)
+        centroid_index = np.random.choice(mask, p=distance_squared)
         centroid_index = indices[centroid_index]
         centroid = points[centroid_index]
 

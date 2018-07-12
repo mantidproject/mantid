@@ -98,8 +98,8 @@ class FractionIndexingTests(unittest.TestCase):
         self.assertEqual(ndim, 3, "Number of dimensions must be 3")
 
         expected_bases = np.array([
-            [0.  , 0.  , 0.25],
-            [0.,  .5, 0.],
+            [0., 0., 0.25],
+            [0., .5, 0.],
             [0.51521732, 0.11589868, 0.04490415]
         ])
 

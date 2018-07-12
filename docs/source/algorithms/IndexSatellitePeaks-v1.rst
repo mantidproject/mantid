@@ -9,8 +9,9 @@ Description
 
 IndexSatellitePeaks is used to find the higher dimensional miller indices that
 index a collection of "satellite" fractional single crystal peaks. This
-algorithm takes a PeaksWorkspace output from the algorithm RefineSatellitePeaks
-and returns a new table with integer indices for each peak.
+algorithm takes a PeaksWorkspace, output from the algorithm
+RefineSatellitePeaks, and returns a new table with integer indices for each
+peak.
 
 This algorithm works by first attempting to finding the minimum number of
 distinct modulation (`q`) vectors that are required to fully index the
