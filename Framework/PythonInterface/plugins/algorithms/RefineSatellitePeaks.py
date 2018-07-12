@@ -19,7 +19,6 @@ class RefineSatellitePeaks(DataProcessorAlgorithm):
     def summary(self):
         return "Algorithm for finding satellite peaks in an MDWorkspace in the HKL frame."
 
-
     def PyInit(self):
         self.declareProperty(PeaksWorkspaceProperty(name="NuclearPeaks",
                                                     defaultValue="",
