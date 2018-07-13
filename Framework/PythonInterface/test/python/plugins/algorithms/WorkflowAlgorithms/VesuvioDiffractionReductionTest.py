@@ -4,16 +4,17 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.simpleapi import *
 from mantid.api import *
+from mantid.kernel import config
 
 
 class VesuvioDiffractionReductionTest(unittest.TestCase):
 
     def setUp(self):
-        self._oldFacility = mantid.config['default.facility']
-        mantid.config.setFacility('ISIS')
+        self._oldFacility = config['default.facility'].name()
+        config.setFacility('ISIS')
 
     def tearDown(self):
-        mantid.config.setFacility(self._oldFacility)
+        config.setFacility(self._oldFacility)
 
     def test_basic_reduction_completes(self):
         """
