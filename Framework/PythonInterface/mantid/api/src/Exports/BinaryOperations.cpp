@@ -176,10 +176,10 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
   if (alg->isExecuted()) {
     singleValue = alg->getProperty("OutputWorkspace");
 
-	// We must store this in the ADS to force the workspace
-	// to have a name, so that the history entry does not
-	// use a temporary name which changes from time to time
-	ads.add(tmp_name, singleValue);
+    // We must store this in the ADS to force the workspace
+    // to have a name, so that the history entry does not
+    // use a temporary name which changes from time to time
+    ads.add(tmp_name, singleValue);
   } else {
     throw std::runtime_error(
         "performBinaryOp: Error in execution of CreateSingleValuedWorkspace");
