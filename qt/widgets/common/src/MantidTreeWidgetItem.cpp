@@ -63,7 +63,7 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other) const {
   if (m_parent->getSortScheme() == MantidItemSortScheme::ByName) {
     return QString::compare(text(0), other.text(0), Qt::CaseInsensitive) < 0;
   }
-  // If both should eb sorted and the scheme is set to ByMemorySize ...
+  // If both should be sorted and the scheme is set to ByMemorySize ...
   else if (m_parent->getSortScheme() == MantidItemSortScheme::ByMemorySize) {
     auto thisGroupSize = std::size_t(0);
     auto otherGroupSize = std::size_t(0);
