@@ -68,15 +68,15 @@ void export_SpectrumInfo() {
       .def("l2", &SpectrumInfo::l2, (arg("self"), arg("index")),
            "Returns the distance from the sample to the spectrum.")
 
-      .def("absolutePosition", &SpectrumInfo::position,
+      .def("position", &SpectrumInfo::position,
            (arg("self"), arg("index")),
-           "Returns the position of the spectrum with the given index.")
+           "Returns the absolute position of the spectrum with the given index.")
 
-      .def("absoluteSourcePosition", &SpectrumInfo::sourcePosition, arg("self"),
-           "Returns the source position.")
+      .def("sourcePosition", &SpectrumInfo::sourcePosition, arg("self"),
+           "Returns the absolute source position.")
 
-      .def("absoluteSamplePosition", &SpectrumInfo::samplePosition, arg("self"),
-           "Returns the sample position.")
+      .def("samplePosition", &SpectrumInfo::samplePosition, arg("self"),
+           "Returns the absolute sample position.")
 
       .def("getAllSpectrumDefinitions", &getSpectrumDefinitionList, arg("self"),
            "Returns the SpectrumDefinition of the spectrum.");

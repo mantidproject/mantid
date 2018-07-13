@@ -83,17 +83,17 @@ class SpectrumInfoTest(unittest.TestCase):
     def test_position(self):
         """ Test that the spectrum's position is returned. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(type(info.absolutePosition(1)), V3D)
+        self.assertEquals(type(info.position(1)), V3D)
 
     def test_sourcePosition(self):
         """ Test that the source's position is returned. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(type(info.absoluteSourcePosition()), V3D)
+        self.assertEquals(type(info.sourcePosition()), V3D)
 
     def test_samplePosition(self):
         """ Test that the sample's position is returned. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(type(info.absoluteSamplePosition()), V3D)
+        self.assertEquals(type(info.samplePosition()), V3D)
 
     """
     The following are test cases are SpectrumDefintion methods.
