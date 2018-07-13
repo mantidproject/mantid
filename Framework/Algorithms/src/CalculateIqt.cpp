@@ -203,7 +203,9 @@ MatrixWorkspace_sptr setErrorsToStandardDeviation(
     const std::vector<MatrixWorkspace_sptr> &simulatedWorkspaces) {
   auto outputWorkspace = simulatedWorkspaces.front();
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*outputWorkspace))
-  for (int i = 0; i < boost::numeric_cast<int>(outputWorkspace->getNumberHistograms()); ++i)
+  for (int i = 0;
+       i < boost::numeric_cast<int>(outputWorkspace->getNumberHistograms());
+       ++i)
     outputWorkspace->mutableE(i) =
         standardDeviationArray(allYValuesAtIndex(simulatedWorkspaces, i));
   return outputWorkspace;
