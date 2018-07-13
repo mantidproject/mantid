@@ -12,7 +12,7 @@
 namespace Mantid {
 namespace Geometry {
 
-/** IsHKL : TODO: DESCRIPTION
+/** IsHKL :  TODO: DESCRIPTION
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
