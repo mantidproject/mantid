@@ -80,7 +80,7 @@ class FindSatellitePeaks(DataProcessorAlgorithm):
         sats_hkls = indexing.get_hkls(sats)
 
         qs = indexing.find_q_vectors(nuclear_hkls, sats_hkls)
-        clusters, k = indexing.cluster_qs(qs, threshold=cluster_threshold)
+        clusters, k = indexing.cluster_qs(qs, threshold=cluster_threshold, k=k)
         qs = indexing.average_clusters(qs, clusters)
         predicted_satellites = self.create_fractional_peaks_workspace(qs, nuclear)
 
