@@ -20,24 +20,6 @@ class PeriodicTable(QtGui.QWidget):
     def widget(self):
         return self._presenter.widget
 
-    def register_table_lclicked(self, slot):
-        self._presenter.widget.sig_table_lclicked.connect(slot)
-
-    def unregister_table_lclicked(self, slot):
-        self._presenter.widget.sig_table_lclicked.disconnect(slot)
-
-    def register_table_rclicked(self, slot):
-        self._presenter.widget.sig_table_rclicked.connect(slot)
-
-    def unregister_table_rclicked(self, slot):
-        self._presenter.widget.sig_table_rclicked.disconnect(slot)
-
-    def register_table_changed(self, slot):
-        self._presenter.widget.sig_table_changed.connect(slot)
-
-    def unregister_table_changed(self, slot):
-        self._presenter.widget.sig_table_changed.disconnect(slot)
-
     @property
     def selection(self):
         return self.widget.ptable.getSelection()
@@ -50,3 +32,21 @@ class PeriodicTable(QtGui.QWidget):
 
     def add_elements(self, *elements):
         self.widget.ptable.setSelection(elements)
+
+    def register_table_changed(self, slot):
+        self._presenter.widget.sig_table_changed.connect(slot)
+
+    def unregister_table_changed(self, slot):
+        self._presenter.widget.sig_table_changed.disconnect(slot)
+
+    def register_table_lclicked(self, slot):
+        self._presenter.widget.sig_table_lclicked.connect(slot)
+
+    def unregister_table_lclicked(self, slot):
+        self._presenter.widget.sig_table_lclicked.disconnect(slot)
+
+    def register_table_rclicked(self, slot):
+        self._presenter.widget.sig_table_rclicked.connect(slot)
+
+    def unregister_table_rclicked(self, slot):
+        self._presenter.widget.sig_table_rclicked.disconnect(slot)
