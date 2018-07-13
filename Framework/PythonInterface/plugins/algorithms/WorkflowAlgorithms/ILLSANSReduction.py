@@ -191,7 +191,7 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         l2 = run.getLogData('L2').value
         dx = run.getLogData('pixel_width').value
         dy = run.getLogData('pixel_height').value
-        factor = ((dx * dy / l2) ** 2) * att_coeff
+        factor = att_coeff * dx * dy / l2 ** 2 
         Scale(InputWorkspace=integral, Factor=factor, OutputWorkspace=integral)
         self.setProperty('BeamFluxValue', mtd[integral].readY(0)[0])
         self.setProperty('BeamFluxError', mtd[integral].readE(0)[0])
