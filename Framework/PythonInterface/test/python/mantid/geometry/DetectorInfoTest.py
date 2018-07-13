@@ -2,32 +2,95 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from testhelpers import WorkspaceCreationHelper
+from mantid.kernel import V3D
+from mantid.kernel import Quat
 
 class DetectorInfoTest(unittest.TestCase):
 
     _ws = None
 
     def setUp(self):
+        """ Setup Workspace to use"""
         if self.__class__._ws is None:
             self.__class__._ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 1, False) # no monitors
             self.__class__._ws.getSpectrum(0).clearDetectorIDs()
 
     def test_len(self):
+        """ Test return value for number of detectors """
         info = self._ws.detectorInfo()
         self.assertEquals(len(info), 2)
 
     def test_size(self):
+        """ Test return value for number of detectors """
         info = self._ws.detectorInfo()
         self.assertEquals(info.size(), 2)
 
     def test_isMasked(self):
+        """ Check masking of detector """
         info = self._ws.detectorInfo()
         self.assertEquals(info.isMasked(0), False)
         self.assertEquals(info.isMasked(1), False)
 
     def test_isEquivalent(self):
+        """ Check equality of detectors """
         info = self._ws.detectorInfo()
         self.assertTrue(info.isEquivalent(info))
+        self.assertTrue(info == info)
+
+    def test_twoTheta(self):
+        """ See if the returned value is a double (float in Python). """
+        info = self._ws.detectorInfo()
+        self.assertEquals(type(info.twoTheta(0)), float)
+
+    def test_signedTwoTheta(self):
+        """ See if the returned value is a double (float in Python). """
+        info = self._ws.detectorInfo()
+        self.assertEquals(type(info.signedTwoTheta(0)), float)
+
+    def test_setMasked(self):
+        """ Test that the detector's masking can be set to True. """
+        info = self._ws.detectorInfo()
+        info.setMasked(0, True)
+        self.assertTrue(info.isMasked(0))
+
+    def test_clearMaskFlags(self):
+        """ Test that the detector's masking can be cleared. """
+        info = self._ws.detectorInfo()
+        info.setMasked(0, True)
+        self.assertTrue(info.isMasked(0))
+        info.clearMaskFlags()
+        self.assertFalse(info.isMasked(0))
+
+    """
+    The following test cases test for returned objects to do with position
+    and rotation.
+    """
+
+    def test_position(self):
+        """ Test that the detector's position is returned. """
+        info = self._ws.detectorInfo()
+        self.assertEquals(type(info.position(0)), V3D)
+
+    def test_rotation(self):
+        """ Test that the detector's rotation is returned. """
+        info = self._ws.detectorInfo()
+        self.assertEquals(type(info.rotation(0)), Quat)
+
+    def test_setPosition(self):
+        """ Test that the detector's position can be set correctly. """
+        info = self._ws.detectorInfo()
+        pos = V3D(0,0,0)
+        info.setPosition(0, pos)
+        retPos = info.position(0)
+        self.assertEquals(pos, retPos)
+
+    def test_setRotation(self):
+        """ Test that the detector's rotation can be set correctly. """
+        info = self._ws.detectorInfo()
+        quat = Quat(0,0,0,0)
+        info.setRotation(0, quat)
+        retQuat = info.rotation(0)
+        self.assertEquals(quat, retQuat)
 
 if __name__ == '__main__':
     unittest.main()
