@@ -668,6 +668,7 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
   updateParameterValues();
   m_spectrumPresenter->enableView();
   m_plotPresenter->updatePlots();
+  updatePlotOptions();
 
   connect(m_fitPropertyBrowser,
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
@@ -727,43 +728,48 @@ void IndirectFitAnalysisTab::saveResult() { m_fittingModel->saveResult(); }
  * @param plotType    The plot type specifying what to plot.
  */
 void IndirectFitAnalysisTab::plotResult(const QString &plotType) {
-  const auto resultWorkspace = m_fittingModel->getResultWorkspace();
-  if (resultWorkspace) {
-    const auto resultName = QString::fromStdString(resultWorkspace->getName());
-
-    // Handle plot result
-    if (plotType.compare("All") == 0) {
-      const auto specEnd = resultWorkspace->getNumberHistograms();
-      for (auto i = 0u; i < specEnd; ++i)
-        IndirectTab::plotSpectrum(resultName, static_cast<int>(i));
-    } else {
-      const auto labels = IndirectTab::extractAxisLabels(resultWorkspace, 1);
-
-      for (const auto &parameter : m_fittingModel->getFitParameterNames()) {
-        if (boost::contains(parameter, plotType)) {
-          auto it = labels.find(parameter);
-          if (it != labels.end())
-            IndirectTab::plotSpectrum(resultName, static_cast<int>(it->second));
-        }
-      }
-    }
+  const auto resultWorkspaces = m_fittingModel->getResultWorkspace();
+  if (resultWorkspaces) {
+    if (plotType.compare("All") == 0)
+      plotAll(resultWorkspaces);
+    else
+      plotParameter(resultWorkspaces, plotType.toStdString());
   }
 }
 
-/*
- * Fills the specified combo-box, with the possible parameters which
- * can be plot separately.
- *
- * @param comboBox  The combo box to fill.
- */
-void IndirectFitAnalysisTab::fillPlotTypeComboBox(QComboBox *comboBox) {
-  comboBox->clear();
-  comboBox->addItem("All");
+void IndirectFitAnalysisTab::plotAll(
+    Mantid::API::WorkspaceGroup_sptr workspaces) {
+  for (auto &&workspace : *workspaces)
+    plotAll(boost::dynamic_pointer_cast<MatrixWorkspace>(workspace));
+}
 
-  QSet<QString> parameters;
-  for (const auto &parameter : m_fitPropertyBrowser->getParameterNames())
-    parameters.insert(parameter.right(parameter.lastIndexOf('.')));
-  comboBox->addItems(parameters.toList());
+void IndirectFitAnalysisTab::plotParameter(
+    Mantid::API::WorkspaceGroup_sptr workspaces, const std::string &parameter) {
+  for (auto &&workspace : *workspaces)
+    plotParameter(boost::dynamic_pointer_cast<MatrixWorkspace>(workspace),
+                  parameter);
+}
+
+void IndirectFitAnalysisTab::plotAll(
+    Mantid::API::MatrixWorkspace_sptr workspace) {
+  const auto name = QString::fromStdString(workspace->getName());
+  for (auto i = 0u; i < workspace->getNumberHistograms(); ++i)
+    IndirectTab::plotSpectrum(name, static_cast<int>(i));
+}
+
+void IndirectFitAnalysisTab::plotParameter(
+    Mantid::API::MatrixWorkspace_sptr workspace,
+    const std::string &parameterToPlot) {
+  const auto name = QString::fromStdString(workspace->getName());
+  const auto labels = IndirectTab::extractAxisLabels(workspace, 1);
+
+  for (const auto &parameter : m_fittingModel->getFitParameterNames()) {
+    if (boost::contains(parameter, parameterToPlot)) {
+      auto it = labels.find(parameter);
+      if (it != labels.end())
+        IndirectTab::plotSpectrum(name, static_cast<int>(it->second));
+    }
+  }
 }
 
 /**
@@ -868,9 +874,7 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
  * @param cbPlotType  The combo box.
  */
 void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
-  setPlotOptions(
-      cbPlotType,
-      m_fitPropertyBrowser->compositeFunction()->getParameterNames());
+  setPlotOptions(cbPlotType, m_fittingModel->getFitParameterNames());
 }
 
 /**
