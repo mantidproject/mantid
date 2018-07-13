@@ -95,7 +95,8 @@ void IqtFit::customBoolUpdated(const QString &key, bool value) {
   if (key == "Constrain Intensities") {
     if (m_iqtFittingModel->setConstrainIntensities(value))
       updateTies();
-  }
+  } else if (key == "Make Beta Global")
+    m_iqtFittingModel->setBetaIsGlobal(value);
 }
 
 std::string IqtFit::fitTypeString() const {

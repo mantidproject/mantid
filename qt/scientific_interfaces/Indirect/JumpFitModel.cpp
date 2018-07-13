@@ -327,7 +327,7 @@ std::string JumpFitModel::singleFitOutputName(std::size_t, std::size_t) const {
 }
 
 std::string JumpFitModel::constructOutputName() const {
-  auto name = createOutputName("%1%_FofQFit", "", 0);
+  auto name = createOutputName("%1%_FofQFit_" + m_fitType, "", 0);
   auto position = name.find("_Result");
   if (position != std::string::npos)
     return name.substr(0, position) + name.substr(position + 7, name.size());

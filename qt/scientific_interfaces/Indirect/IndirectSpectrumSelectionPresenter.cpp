@@ -39,7 +39,7 @@ std::string NATURAL_NUMBER(std::size_t digits) {
 
 namespace Regexes {
 const std::string EMPTY = "^$";
-const std::string SPACE = "(\\s)*";
+const std::string SPACE = "[ ]*";
 const std::string COMMA = SPACE + "," + SPACE;
 const std::string MINUS = "\\-";
 

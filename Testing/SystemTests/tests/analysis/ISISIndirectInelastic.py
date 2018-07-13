@@ -765,7 +765,7 @@ class ISISIndirectInelasticIqtAndIqtFit(with_metaclass(ABCMeta, ISISIndirectInel
                                                            SpecMin=0, SpecMax=self.spec_max)
 
         self.result_names = [iqt_ws.name(),
-                             iqtfitSeq_ws.name()]
+                             iqtfitSeq_ws[0].name()]
 
         # Remove workspaces from Mantid
         for sample in self.samples:
@@ -994,16 +994,16 @@ class ISISIndirectInelasticConvFit(with_metaclass(ABCMeta, ISISIndirectInelastic
         LoadNexus(self.sample, OutputWorkspace=self.sample)
         LoadNexus(FileFinder.getFullPath(self.resolution), OutputWorkspace=self.resolution)
 
-        ConvolutionFitSequential(
-            InputWorkspace=self.sample,
-            Function=self.func,
-            PassWSIndexToFunction=self.passWSIndexToFunction,
-            StartX=self.startx,
-            EndX=self.endx,
-            SpecMin=self.spectra_min,
-            SpecMax=self.spectra_max,
-            PeakRadius=5,
-            OutputWorkspace=self.result_names[0])
+        convfitSeq_ws, params, fit_group = ConvolutionFitSequential(InputWorkspace=self.sample,
+                                                                    Function=self.func,
+                                                                    PassWSIndexToFunction=self.passWSIndexToFunction,
+                                                                    StartX=self.startx,
+                                                                    EndX=self.endx,
+                                                                    SpecMin=self.spectra_min,
+                                                                    SpecMax=self.spectra_max,
+                                                                    PeakRadius=5)
+
+        self.result_names = [convfitSeq_ws[0].name()]
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
@@ -1045,7 +1045,7 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         self.spectra_max = 41
         self.ties = False
 
-        self.result_names = ['osi97935_graphite002_conv_1LFitL_s0_to_41_Result']
+        self.result_names = ['osi97935_graphite002_conv_1LFitL_s0_to_41_Result_1']
 
     def get_reference_files(self):
         self.tolerance = 0.3
@@ -1072,7 +1072,7 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.spectra_max = 50
         self.ties = False
 
-        self.result_names = ['irs53664_graphite002_conv_1LFitL_s0_to_50_Result']
+        self.result_names = ['irs53664_graphite002_conv_1LFitL_s0_to_50_Result_1']
 
     def get_reference_files(self):
         self.tolerance = 0.2
