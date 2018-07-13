@@ -2,6 +2,7 @@
 #define MANTIDTREEWIDGETITEM_H
 
 #include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include <MantidKernel/DateAndTime.h>
 #include <MantidQtWidgets/Common/WorkspaceObserver.h>
 #include <QTreeWidgetItem>
@@ -26,6 +27,8 @@ private:
   MantidTreeWidget *m_parent;
   static Mantid::Types::Core::DateAndTime
   getLastModified(const QTreeWidgetItem *);
+  std::size_t getMemorySize() const;
+  std::size_t getGroupMemorySize(Mantid::API::WorkspaceGroup_sptr group) const;
   int m_sortPos;
 };
 }

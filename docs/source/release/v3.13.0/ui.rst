@@ -17,6 +17,16 @@ MantidPlot
 
 - MantidPlot's pyplot API has been removed.
 
+Improvements
+############
+
+- Added functionality to sort based on Memory Size of the workspace
+
+.. figure:: ../../images/WorkspaceWidgetSortSize.png
+    :class: screenshot
+    :align: center
+    :figwidth: 70%
+
 Bugfixes
 ########
 
