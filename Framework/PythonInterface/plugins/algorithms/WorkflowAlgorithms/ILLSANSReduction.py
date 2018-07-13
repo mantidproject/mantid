@@ -48,7 +48,7 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         reference = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Reference')
 
         self.declareProperty(name='NormaliseBy',
-                             defaultValue='Monitor',
+                             defaultValue='Timer',
                              validator=StringListValidator(['None', 'Timer', 'Monitor']),
                              doc='Choose the normalisation type.')
 
@@ -63,12 +63,12 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         self.declareProperty('BeamFluxValue', 1., direction=Direction.InOut, validator=FloatBoundedValidator(lower=0.), doc='Beam flux value')
 
         self.setPropertySettings('BeamFluxValue',
-                                 EnabledWhenProperty(beam, EnabledWhenProperty(beam, reference, LogicOperator.Or), LogicOperator.Or))
+                                 EnabledWhenProperty(sample, EnabledWhenProperty(beam, reference, LogicOperator.Or), LogicOperator.Or))
 
         self.declareProperty('BeamFluxError', 0., direction=Direction.InOut, validator=FloatBoundedValidator(lower=0.), doc='Beam flux error')
 
         self.setPropertySettings('BeamFluxError',
-                                 EnabledWhenProperty(beam, EnabledWhenProperty(beam, reference, LogicOperator.Or), LogicOperator.Or))
+                                 EnabledWhenProperty(sample, EnabledWhenProperty(beam, reference, LogicOperator.Or), LogicOperator.Or))
 
         self.declareProperty('BeamRadius', 0.05, validator=FloatBoundedValidator(lower=0.), doc='Beam raduis [m]')
 
@@ -191,7 +191,7 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         l2 = run.getLogData('L2').value
         dx = run.getLogData('pixel_width').value
         dy = run.getLogData('pixel_height').value
-        factor = att_coeff * dx * dy / l2 ** 2 
+        factor = att_coeff * dx * dy / (l2 * l2)
         Scale(InputWorkspace=integral, Factor=factor, OutputWorkspace=integral)
         self.setProperty('BeamFluxValue', mtd[integral].readY(0)[0])
         self.setProperty('BeamFluxError', mtd[integral].readE(0)[0])
@@ -211,23 +211,26 @@ class ILLSANSReduction(DataProcessorAlgorithm):
             if process == 'Beam':
                 self._process_beam(ws)
             else:
-                beam_x = self.getProperty('BeamCenterX').value
-                beam_y = self.getProperty('BeamCenterY').value
-                MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
-                SANSSolidAngleCorrection(InputWorkspace=ws, OutputWorkspace=ws)
                 if process == 'Transmission':
                     radius = self.getProperty('BeamRadius').value
                     beam = self.getPropertyValue('BeamInputWorkspace')
-                    empty = self._integrate_in_radius(beam, radius)
-                    scatterer = self._integrate_in_radius(ws, radius)
+                    ws_rebin = ws + '_rebin'
+                    RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=beam, OutputWorkspace=ws_rebin)
                     transmission = ws + '_tr'
-                    Divide(LHSWorkspace=scatterer, RHSWorkspace=empty, OutputWorkspace=transmission)
+                    shapeXML = self._cylinder(radius)
+                    det_list = FindDetectorsInShape(Workspace=ws, ShapeXML=shapeXML)
+                    CalculateTransmission(SampleRunWorkspace=ws_rebin, DirectRunWorkspace=beam,
+                                          TransmissionROI=det_list, OutputWorkspace=transmission)
                     self.setProperty('TransmissionValue', mtd[transmission].readY(0)[0])
                     self.setProperty('TransmissionError', mtd[transmission].readE(0)[0])
-                    DeleteWorkspaces([transmission, empty, scatterer])
+                    DeleteWorkspaces([transmission, ws_rebin])
                 else:
+                    beam_x = self.getProperty('BeamCenterX').value
+                    beam_y = self.getProperty('BeamCenterY').value
                     transmission = self.getProperty('TransmissionValue').value
                     transmission_err = self.getProperty('TransmissionError').value
+                    MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
+                    SANSSolidAngleCorrection(InputWorkspace=ws, OutputWorkspace=ws)
                     ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionValue=transmission,
                                                 TransmissionError=transmission_err, OutputWorkspace=ws)
                     if process != 'Container':
