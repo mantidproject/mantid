@@ -7,7 +7,6 @@
 #include <Poco/NObserver.h>
 #include <boost/make_shared.hpp>
 
-#include <iostream>
 #include <sstream>
 #include <mutex>
 
