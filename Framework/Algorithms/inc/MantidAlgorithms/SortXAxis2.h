@@ -71,7 +71,7 @@ private:
                         Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
                         Mantid::API::MatrixWorkspace_sptr outputWorkspace,
                         const size_t sizeOfX, const size_t sizeOfY,
-                        unsigned int specNum);
+                        unsigned int specNum);              
 };
 
 } // namespace Algorithms
