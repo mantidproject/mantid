@@ -8,7 +8,7 @@ using namespace boost::python;
 
 // Helper function to convert a std::Pair to a Python tuple
 boost::python::tuple toTuple(const SpectrumDefinition &self,
-                                        const size_t index) {
+                             const size_t index) {
   const std::pair<size_t, size_t> pair = self.operator[](index);
   return make_tuple(pair.first, pair.second);
 }

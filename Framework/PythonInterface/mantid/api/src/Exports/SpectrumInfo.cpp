@@ -68,9 +68,9 @@ void export_SpectrumInfo() {
       .def("l2", &SpectrumInfo::l2, (arg("self"), arg("index")),
            "Returns the distance from the sample to the spectrum.")
 
-      .def("position", &SpectrumInfo::position,
-           (arg("self"), arg("index")),
-           "Returns the absolute position of the spectrum with the given index.")
+      .def("position", &SpectrumInfo::position, (arg("self"), arg("index")),
+           "Returns the absolute position of the spectrum with the given "
+           "index.")
 
       .def("sourcePosition", &SpectrumInfo::sourcePosition, arg("self"),
            "Returns the absolute source position.")
