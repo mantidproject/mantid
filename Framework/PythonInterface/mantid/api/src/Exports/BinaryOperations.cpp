@@ -167,20 +167,28 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
   alg->setAlwaysStoreInADS(false);
   alg->initialize();
   alg->setProperty<double>("DataValue", value);
-  const std::string tmp_name("not_applicable");
+  const std::string tmp_name("__single_value");
   alg->setPropertyValue("OutputWorkspace", tmp_name);
   alg->execute();
+
+  auto &ads = Mantid::API::AnalysisDataService::Instance();
   MatrixWorkspace_sptr singleValue;
   if (alg->isExecuted()) {
     singleValue = alg->getProperty("OutputWorkspace");
+
+	// We must store this in the ADS to force the workspace
+	// to have a name, so that the history entry does not
+	// use a temporary name which changes from time to time
+	ads.add(tmp_name, singleValue);
   } else {
     throw std::runtime_error(
         "performBinaryOp: Error in execution of CreateSingleValuedWorkspace");
   }
-  // Call the function above with the signle-value workspace
+  // Call the function above with the single-value workspace
   ResultType result =
       performBinaryOp<LHSType, MatrixWorkspace_sptr, ResultType>(
           inputWS, singleValue, algoName, name, inplace, reverse);
+  ads.remove(tmp_name);
   return result;
 }
 
