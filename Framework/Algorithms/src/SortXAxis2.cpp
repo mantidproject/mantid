@@ -69,14 +69,13 @@ std::vector<std::size_t> SortXAxis::createIndexes(const size_t sizeOfX) {
 
 template <typename Comparator>
 void sortByXValue(std::vector<std::size_t> &workspaceIndicies,
-                  MatrixWorkspace_const_sptr inputWorkspace, 
-                  unsigned int specNum,
-                  Comparator const& compare) {
-  std::sort(workspaceIndicies.begin(), workspaceIndicies.end(), 
-    [&](std::size_t lhs, std::size_t rhs) -> bool {
-      return compare(inputWorkspace->x(specNum)[lhs], 
-                     inputWorkspace->x(specNum)[rhs]);
-    });
+                  MatrixWorkspace_const_sptr inputWorkspace,
+                  unsigned int specNum, Comparator const &compare) {
+  std::sort(workspaceIndicies.begin(), workspaceIndicies.end(),
+            [&](std::size_t lhs, std::size_t rhs) -> bool {
+              return compare(inputWorkspace->x(specNum)[lhs],
+                             inputWorkspace->x(specNum)[rhs]);
+            });
 }
 
 void SortXAxis::sortIndicesByX(std::vector<std::size_t> &workspaceIndicies,
@@ -84,9 +83,11 @@ void SortXAxis::sortIndicesByX(std::vector<std::size_t> &workspaceIndicies,
                                MatrixWorkspace_const_sptr inputWorkspace,
                                unsigned int specNum) {
   if (order == "Ascending") {
-    sortByXValue(workspaceIndicies, inputWorkspace, specNum, std::less<double>());
+    sortByXValue(workspaceIndicies, inputWorkspace, specNum,
+                 std::less<double>());
   } else if (order == "Descending") {
-    sortByXValue(workspaceIndicies, inputWorkspace, specNum, std::greater<double>());
+    sortByXValue(workspaceIndicies, inputWorkspace, specNum,
+                 std::greater<double>());
   }
 }
 
