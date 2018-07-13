@@ -10,7 +10,7 @@ from mantid.kernel import config
 class VesuvioDiffractionReductionTest(unittest.TestCase):
 
     def setUp(self):
-        self._oldFacility = config['default.facility'].name()
+        self._oldFacility = config['default.facility']
         config.setFacility('ISIS')
 
     def tearDown(self):
