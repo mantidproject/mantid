@@ -6,7 +6,10 @@
 //----------------------------------
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "Script.h"
+
+#include <boost/optional.hpp>
 #include <QMainWindow>
+
 
 //----------------------------------------------------------
 // Forward declarations
@@ -63,6 +66,11 @@ public:
                        const int fileVersion);
   // Loads the scripts from a list of filenames
   void loadFromFileList(const QStringList &files);
+
+  /// Sets a flag which is set to true if synchronous execution fails
+  // We set a flag on failure to avoid problems with Async not returning success
+  bool getSynchronousErrorFlag() { return m_failureFlag;  }
+
 signals:
   /// Show the scripting language dialog
   void chooseScriptingLanguage();
@@ -184,6 +192,8 @@ private:
   QAction *m_scripting_lang;
   /// Flag to define whether we should accept a close event
   bool m_acceptClose;
+
+  bool m_failureFlag{ false };
 };
 
 #endif // SCRIPTINGWINDOW_H_

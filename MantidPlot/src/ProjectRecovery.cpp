@@ -341,16 +341,22 @@ void ProjectRecovery::stopProjectSaving() {
   * to recreate all Qt objects / widgets
   *
   * @param recoveryFolder : The checkpoint folder
-  * @throws : If Qt binding fails to main GUI thread
   */
 void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
   ScriptingWindow *scriptWindow = m_windowPtr->getScriptWindowHandle();
   if (!scriptWindow) {
-    throw std::runtime_error("Could not get handle to scripting window");
+	  throw std::runtime_error("Could not get handle to scripting window");
   }
 
   // Ensure the window repaints so it doesn't appear frozen before exec
   scriptWindow->executeCurrentTab(Script::ExecutionMode::Serialised);
+  if (scriptWindow->getSynchronousErrorFlag()) {
+	  // We failed to run the whole script
+	  // Note: We must NOT throw from the method for excepted failures, 
+	  // since doing so will cause the application to terminate from a uncaught exception
+	  g_log.error("Project recovery script did not finish. Your work has been partially recovered.");
+	  return;
+  }
   g_log.notice("Re-opening GUIs");
 
   auto projectFile = Poco::Path(recoveryFolder).append(OUTPUT_PROJ_NAME);
