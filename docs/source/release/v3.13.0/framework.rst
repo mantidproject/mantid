@@ -113,6 +113,7 @@ Bugfixes
 - Fit functions defined in a python script can be used with the new fit function API right after subscription.
 - Child algorithms now respect their parent algorithm's ``EnableLogging`` setting when invoked using the function-style calling. Previously, some messages could appear in the log even though ``EnableLogging`` was set to ``False``.
 - Fixed a bug in ``detectorSignedTwoTheta`` method in ``MatrixWorkspace`` where the sign of the angle depended on the axis pointing up, not on the actual theta-sing axis defined in the IDF.
+- Fixed a bug where calling ``setCell`` method on a :ref:`PeaksWorkspace <PeaksWorkspace>` did not set the cell value.
 
 
 :ref:`Release 3.13.0 <v3.13.0>`
