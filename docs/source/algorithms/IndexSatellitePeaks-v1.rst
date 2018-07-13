@@ -10,13 +10,13 @@ Description
 IndexSatellitePeaks is used to find the higher dimensional miller indices that
 index a collection of "satellite" fractional single crystal peaks. This
 algorithm takes a PeaksWorkspace, output from the algorithm
-RefineSatellitePeaks, and returns a new table with integer indices for each
+FindSatellitePeaks, and returns a new table with integer indices for each
 peak.
 
 This algorithm works by first attempting to finding the minimum number of
 distinct modulation (`q`) vectors that are required to fully index the
 collection of peaks. The full list of q vectors is found using the same method
-described in the :ref:`RefineSatellitePeaks <algm-RefineSatellitePeaks-v1>`
+described in the :ref:`FindSatellitePeaks <algm-FindSatellitePeaks-v1>`
 algorithm. The basis set is then chosen from this list. If there are multiple
 choices of vectors the algorithm will always choose the smallest one. This
 defines the number of additional dimensions required to index the crystal with
@@ -50,7 +50,7 @@ For more information on superspace crystallography see:
 Related Algorithms
 ------------------
 
-- :ref:`RefineSatellitePeaks <algm-RefineSatellitePeaks-v1>` can be used to
+- :ref:`FindSatellitePeaks <algm-FindSatellitePeaks-v1>` can be used to
   obtain a workspace of satellite peak positions in fractional HKL that is
   required for input to this algorithm.
 

@@ -14,7 +14,7 @@ class IndexSatellitePeaks(PythonAlgorithm):
         return 'Crystal\\Peaks'
 
     def seeAlso(self):
-        return [ "RefineSatellitePeaks" ]
+        return [ "FindSatellitePeaks" ]
 
     def name(self):
         return "IndexSatellitePeaks"

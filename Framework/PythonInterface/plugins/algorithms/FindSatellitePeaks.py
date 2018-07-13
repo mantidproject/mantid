@@ -5,7 +5,7 @@ from mantid.simpleapi import *
 import fractional_indexing as indexing
 
 
-class RefineSatellitePeaks(DataProcessorAlgorithm):
+class FindSatellitePeaks(DataProcessorAlgorithm):
 
     def category(self):
         return 'Crystal\\Peaks'
@@ -14,7 +14,7 @@ class RefineSatellitePeaks(DataProcessorAlgorithm):
         return [ "IndexSatellitePeaks" ]
 
     def name(self):
-        return "RefineSatellitePeaks"
+        return "FindSatellitePeaks"
 
     def summary(self):
         return "Algorithm for finding satellite peaks in an MDWorkspace in the HKL frame."
@@ -117,4 +117,4 @@ class RefineSatellitePeaks(DataProcessorAlgorithm):
         return predicted_satellites
 
 
-AlgorithmFactory.subscribe(RefineSatellitePeaks)
+AlgorithmFactory.subscribe(FindSatellitePeaks)

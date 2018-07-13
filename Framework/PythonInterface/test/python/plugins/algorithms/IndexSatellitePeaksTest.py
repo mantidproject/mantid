@@ -10,8 +10,10 @@ class IndexSatellitePeaksTest(unittest.TestCase):
         # Need to set the random seed because the scipy kmeans algorithm
         # randomly initilizes the starting centroids.
         np.random.seed(100)
-        self._nuclear_peaks = Load("WISH_peak_hkl_small.nxs", OutputWorkspace="nuclear_peaks")
-        self._peaks = Load("refine_satellites_fixed_q_test.nxs", OutputWorkspace="peaks")
+        self._nuclear_peaks = Load(
+            "WISH_peak_hkl_small.nxs", OutputWorkspace="nuclear_peaks")
+        self._peaks = Load(
+            "refine_satellites_fixed_q_test.nxs", OutputWorkspace="peaks")
 
     def tearDown(self):
         mtd.clear()
@@ -34,6 +36,7 @@ class IndexSatellitePeaksTest(unittest.TestCase):
 
         npt.assert_array_equal(index_values, expected_values)
         self.assertRaises(RuntimeError, indexed_peaks.column, "m2")
+
 
 if __name__ == "__main__":
     unittest.main()
