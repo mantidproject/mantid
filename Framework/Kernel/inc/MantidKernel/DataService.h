@@ -486,10 +486,6 @@ public:
   getObjects(DataServiceHidden includeHidden = DataServiceHidden::Auto) const {
     std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
-    if (includeHidden == DataServiceHidden::Include) {
-      // Return all elements including hidden ones
-    }
-
     const bool alwaysIncludeHidden =
         includeHidden == DataServiceHidden::Include;
     const bool usingAuto =
