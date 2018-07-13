@@ -414,9 +414,6 @@ KafkaEventStreamDecoder::getStopOffsets(
       auto &partitionOffsets = topicOffsets.second;
       for (uint32_t partitionNumber = 0;
            partitionNumber < partitionOffsets.size(); partitionNumber++) {
-        // -1 to get last offset _before_ the stop time
-        partitionOffsets[partitionNumber] =
-            partitionOffsets[partitionNumber] - 1;
         auto offset = partitionOffsets[partitionNumber];
         // If the stop offset is negative then there are no messages for us
         // to collect on this topic, so mark reachedEnd as true already
