@@ -680,11 +680,11 @@ public:
 
     // Test some values
     TS_ASSERT_EQUALS(data->y(0).size(), 10);
-    TS_ASSERT_DELTA(data->y(0)[5], 0.251, 0.001);
-    TS_ASSERT_DELTA(data->y(1)[5], 0.249, 0.001);
-    TS_ASSERT_DELTA(data->y(2)[5], 0.247, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[5], -0.720, 0.001);
+    TS_ASSERT_DELTA(data->y(1)[5], -0.742, 0.001);
+    TS_ASSERT_DELTA(data->y(2)[5], -0.766, 0.001);
     TS_ASSERT_EQUALS(data->y(5).size(), 10);
-    TS_ASSERT_DELTA(data->y(5)[5], -0.902, 0.001);
+    TS_ASSERT_DELTA(data->y(5)[5], 0.060, 0.001);
 
     // Test that the algorithm converged
     TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
@@ -697,7 +697,7 @@ public:
 
   void test_three_spectra_apart() {
 
-    auto ws = createWorkspaceComplex(10, 0.0, 3, 0.0);
+    auto ws = createWorkspaceComplex(20, 0.0, 3, 0.0);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -723,12 +723,12 @@ public:
     TS_ASSERT(angle);
 
     // Test some values
-    TS_ASSERT_EQUALS(data->y(0).size(), 10);
-    TS_ASSERT_DELTA(data->y(0)[5], 0.2495, 0.001);
-    TS_ASSERT_DELTA(data->y(1)[5], 0.2495, 0.001);
-    TS_ASSERT_DELTA(data->y(2)[5], 0.2495, 0.001);
-    TS_ASSERT_EQUALS(data->y(5).size(), 10);
-    TS_ASSERT_DELTA(data->y(5)[5], -0.906, 0.001);
+    TS_ASSERT_EQUALS(data->y(0).size(), 20);
+    TS_ASSERT_DELTA(data->y(0)[9], -0.422, 0.001);
+    TS_ASSERT_DELTA(data->y(1)[9], -0.422, 0.001);
+    TS_ASSERT_DELTA(data->y(2)[9], -0.422, 0.001);
+    TS_ASSERT_EQUALS(data->y(5).size(), 20);
+    TS_ASSERT_DELTA(data->y(5)[9], 0.580, 0.001);
 
     // Test that the algorithm converged
     TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
@@ -741,7 +741,7 @@ public:
 
   void test_three_spectra_together() {
 
-    auto ws = createWorkspaceComplex(10, 0.0, 3, 0.0);
+    auto ws = createWorkspaceComplex(20, 0.0, 3, 0.0);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -768,12 +768,12 @@ public:
     TS_ASSERT(angle);
 
     // Test some values
-    TS_ASSERT_EQUALS(data->y(0).size(), 10);
-    TS_ASSERT_DELTA(data->y(0)[5], 0.2495, 0.001);
-    TS_ASSERT_DELTA(data->y(1)[5], 0.2495, 0.001);
-    TS_ASSERT_DELTA(data->y(2)[5], 0.2495, 0.001);
-    TS_ASSERT_EQUALS(data->y(5).size(), 10);
-    TS_ASSERT_DELTA(data->y(5)[5], -0.906, 0.001);
+    TS_ASSERT_EQUALS(data->y(0).size(), 20);
+    TS_ASSERT_DELTA(data->y(0)[9], -0.716, 0.001);
+    TS_ASSERT_DELTA(data->y(1)[9], -0.716, 0.001);
+    TS_ASSERT_DELTA(data->y(2)[9], -0.716, 0.001);
+    TS_ASSERT_EQUALS(data->y(5).size(), 20);
+    TS_ASSERT_DELTA(data->y(5)[9], 0.462, 0.001);
 
     // Test that the algorithm converged
     TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
@@ -784,7 +784,7 @@ public:
 
     auto ws = createWorkspaceReal(10, 0.0, 6);
     auto linAdj = createWorkspaceAdjustments(10, 1.00, 0.00, 0.0, 3);
-    auto constAdj = createWorkspaceAdjustments(10, 0.0, 0.00, 0.0, 3);
+    auto constAdj = createWorkspaceAdjustments(20, 0.0, 0.00, 0.0, 3);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -813,7 +813,7 @@ public:
     TS_ASSERT(angle);
 
     // Test some values
-    TS_ASSERT_EQUALS(data->y(0).size(), 10);
+    TS_ASSERT_EQUALS(data->y(0).size(), 20);
     TS_ASSERT_DELTA(data->y(0)[4], -0.302, 0.003);
     TS_ASSERT_DELTA(data->y(0)[5], -0.346, 0.003);
     TS_ASSERT_DELTA(data->y(0)[6], -0.288, 0.003);
@@ -1089,7 +1089,7 @@ public:
     // Create cosine with phase 'phase'
 
     // Frequency of the oscillations
-    double w = 1.6;
+    double w = 3.0;
 
     size_t nPts = maxt * nSpec;
     MantidVec X(2*nPts);
@@ -1100,10 +1100,10 @@ public:
       for (size_t s = 0; s < nSpec; s++) {
         X[t + s * maxt] = x;
         Y[t + s * maxt] = cos(w * x + phase + static_cast<double>(s) * shift);
-        E[t + s * maxt] = 0.1;
+        E[t + s * maxt] = 0.2;
         X[t + s * maxt + nPts] = x;
         Y[t + s * maxt + nPts] = sin(w * x + phase + static_cast<double>(s) * shift);
-        E[t + s * maxt + nPts] = 0.1;
+        E[t + s * maxt + nPts] = 0.2;
       }
     }
     auto createWS = AlgorithmManager::Instance().create("CreateWorkspace");
