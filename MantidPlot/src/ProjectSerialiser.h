@@ -71,7 +71,7 @@ public:
   bool save(const QString &projectName, bool compress = false,
             bool saveAll = true);
   /// Load a project file from disk
-  void load(std::string filepath, const int fileVersion,
+  bool load(std::string filepath, const int fileVersion,
             const bool isTopLevel = true);
   /// Open the script window and load scripts from string
   void openScriptWindow(const QStringList &files);
