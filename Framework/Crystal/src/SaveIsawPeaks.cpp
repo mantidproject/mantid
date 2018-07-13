@@ -119,7 +119,7 @@ void SaveIsawPeaks::exec() {
   }
   if (m_ModStru)
     header =
-        "2   SEQN    H    K    L ORD1 ORD2 ORD3     COL      ROW     CHAN      "
+        "2   SEQN    H    K    L    M    N    P     COL      ROW     CHAN      "
         "  L2   2_THETA        AZ         WL         D      IPK "
         "      INTI    SIGI  RFLG";
 
@@ -277,7 +277,7 @@ void SaveIsawPeaks::exec() {
     offset1 = run.getPropertyValueAsType<std::vector<double>>("Offset1");
     offset2 = run.getPropertyValueAsType<std::vector<double>>("Offset2");
     offset3 = run.getPropertyValueAsType<std::vector<double>>("Offset3");
-    out << "9  OFFSETS ";
+    out << "9  MODVECTOR ";
     out << std::setw(12) << std::fixed << std::setprecision(6)
         << qSign * offset1[0] << " ";
     out << std::setw(12) << std::fixed << std::setprecision(6)
