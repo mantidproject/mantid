@@ -29,7 +29,8 @@ Peak::Peak()
       m_finalEnergy(0.), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_peakNumber(0), m_ModStru(V3D(0,0,0)),  m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakNumber(0), m_ModStru(V3D(0, 0, 0)),
+      m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
@@ -49,8 +50,8 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0), m_ModStru(V3D(0,0,0)),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
+      m_ModStru(V3D(0, 0, 0)), m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setQLabFrame(QLabFrame, detectorDistance);
@@ -76,8 +77,8 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0), m_ModStru(V3D(0,0,0)),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
+      m_ModStru(V3D(0, 0, 0)), m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
@@ -99,8 +100,8 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0), m_ModStru(V3D(0,0,0)),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
+      m_ModStru(V3D(0, 0, 0)), m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setDetectorID(m_detectorID);
@@ -121,8 +122,8 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
     : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_intensity(0),
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0), m_ModStru(V3D(0,0,0)),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
+      m_ModStru(V3D(0, 0, 0)), m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setDetectorID(m_detectorID);
@@ -145,8 +146,8 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
     : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_intensity(0),
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0), m_ModStru(V3D(0,0,0)),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
+      m_ModStru(V3D(0, 0, 0)), m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
@@ -169,7 +170,8 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_peakNumber(0), m_ModStru(V3D(0,0,0)), m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakNumber(0), m_ModStru(V3D(0, 0, 0)),
+      m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setWavelength(m_Wavelength);
@@ -198,9 +200,8 @@ Peak::Peak(const Peak &other)
       samplePos(other.samplePos), detPos(other.detPos),
       m_orig_H(other.m_orig_H), m_orig_K(other.m_orig_K),
       m_orig_L(other.m_orig_L), m_peakNumber(other.m_peakNumber),
-      m_ModStru(other.m_ModStru),
-      m_detIDs(other.m_detIDs), m_peakShape(other.m_peakShape->clone()),
-      convention(other.convention) {}
+      m_ModStru(other.m_ModStru), m_detIDs(other.m_detIDs),
+      m_peakShape(other.m_peakShape->clone()), convention(other.convention) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a Peak from IPeak interface
@@ -220,8 +221,7 @@ Peak::Peak(const Geometry::IPeak &ipeak)
       m_runNumber(ipeak.getRunNumber()),
       m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
       m_col(ipeak.getCol()), m_orig_H(0.), m_orig_K(0.), m_orig_L(0.),
-      m_peakNumber(ipeak.getPeakNumber()),
-      m_ModStru(ipeak.getModStru()),
+      m_peakNumber(ipeak.getPeakNumber()), m_ModStru(ipeak.getModStru()),
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
@@ -922,10 +922,8 @@ void Peak::setPeakNumber(int m_peakNumber) {
 
 // -------------------------------------------------------------------------------------
 /** Sets the modulated peak structure number
- * @param m_ModStrur :: modulated peak structure value   */
-void Peak::setModStru(V3D m_ModStru) {
-  this->m_ModStru = m_ModStru;
-}
+ * @param m_ModStru :: modulated peak structure value   */
+void Peak::setModStru(V3D m_ModStru) { this->m_ModStru = m_ModStru; }
 
 // -------------------------------------------------------------------------------------
 /** Return the detector position vector */
