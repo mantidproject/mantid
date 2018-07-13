@@ -9,7 +9,6 @@
 #include "MantidAPI/TableRow.h"
 
 #include <algorithm>
-#include <cctype>
 #include <numeric>
 #include <set>
 
@@ -111,8 +110,9 @@ bool equivalentFunctions(IFunction_const_sptr func1,
 std::ostringstream &addInputString(IndirectFitData *fitData,
                                    std::ostringstream &stream) {
   const auto &name = fitData->workspace()->getName();
-  auto addToStream =
-      [&](std::size_t spectrum) { stream << name << ",i" << spectrum << ";"; };
+  auto addToStream = [&](std::size_t spectrum) {
+    stream << name << ",i" << spectrum << ";";
+  };
   fitData->applySpectra(addToStream);
   return stream;
 }
@@ -367,12 +367,7 @@ std::string
 IndirectFittingModel::createOutputName(const std::string &formatString,
                                        const std::string &rangeDelimiter,
                                        std::size_t dataIndex) const {
-  auto name =
-      createDisplayName(formatString, rangeDelimiter, dataIndex) + "_Result";
-  name.erase(std::remove_if(name.begin(), name.end(),
-                            static_cast<int (*)(int)>(std::isspace)));
-  std::replace(name.begin(), name.end(), ',', '+');
-  return name;
+  return createDisplayName(formatString, rangeDelimiter, dataIndex) + "_Result";
 }
 
 bool IndirectFittingModel::isMultiFit() const {
@@ -681,7 +676,7 @@ IndirectFittingModel::mapDefaultParameterNames() const {
 }
 
 std::unordered_map<std::string, ParameterValue>
-    IndirectFittingModel::createDefaultParameters(std::size_t) const {
+IndirectFittingModel::createDefaultParameters(std::size_t) const {
   return std::unordered_map<std::string, ParameterValue>();
 }
 
