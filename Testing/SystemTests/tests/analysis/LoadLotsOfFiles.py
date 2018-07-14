@@ -113,7 +113,8 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'Fe-gamma.cif',
                 'Fe-alpha.cif',
                 'Sm2O3.cif',
-                'template_ENGINX_241391_236516_North_bank.prm'
+                'template_ENGINX_241391_236516_North_bank.prm',
+                'BSS_13387_event.nxs' # bad event_index
                 ]
 
 EXPECTED_EXT = '.expected'

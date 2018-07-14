@@ -10,6 +10,9 @@ from mantid.simpleapi import *
 
 class BASISAutoReductionTest(stresstesting.MantidStressTest):
 
+    def skipTests(self):
+        return True
+
     def requiredFiles(self):
         return ['BSS_13387_event.nxs']
 
