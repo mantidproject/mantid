@@ -1,4 +1,5 @@
 #include "MantidDataHandling/LoadILLSANS.h"
+#include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -11,6 +12,8 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <cmath>
@@ -47,12 +50,12 @@ int LoadILLSANS::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLSANS::category() const {
-  return "DataHandling\\Nexus;ILL\\SANS";
+  return "DataHandling\\Nexus;ILL\\SANS;Workflow\\SANS\\UsesPropertyManager";
 }
 
 /// Algorithm's summary. @see Algorithm::summery
 const std::string LoadILLSANS::summary() const {
-  return "Loads a ILL nexus files for SANS instruments D11, D22, D33.";
+  return "Loads ILL nexus files for SANS instruments D11, D22, D33.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -81,6 +84,8 @@ void LoadILLSANS::init() {
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
       "Name of the nexus file to load");
+  declareProperty("ReductionProperties", "__sans_reduction_properties",
+                  Direction::Input);
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name to use for the output workspace");
@@ -90,12 +95,47 @@ void LoadILLSANS::init() {
 /** Execute the algorithm.
  */
 void LoadILLSANS::exec() {
+  // Reduction property manager
+  const std::string reductionManagerName = getProperty("ReductionProperties");
+  boost::shared_ptr<PropertyManager> reductionManager;
+  if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
+    reductionManager =
+        PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+  } else {
+    reductionManager = boost::make_shared<PropertyManager>();
+    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
+                                                        reductionManager);
+  }
+  // If the load algorithm isn't in the reduction properties, add it
+  if (!reductionManager->existsProperty("LoadAlgorithm")) {
+    auto algProp = make_unique<AlgorithmProperty>("LoadAlgorithm");
+    algProp->setValue(toString());
+    reductionManager->declareProperty(std::move(algProp));
+  }
+
+  bool moveToBeamCenter = false;
+  double center_x = 0., center_y = 0.;
+  if (reductionManager->existsProperty("LatestBeamCenterX") &&
+      reductionManager->existsProperty("LatestBeamCenterY")) {
+    moveToBeamCenter = true;
+    center_x = reductionManager->getProperty("LatestBeamCenterX");
+    center_y = reductionManager->getProperty("LatestBeamCenterY");
+    g_log.debug("Beam center found: X=" + std::to_string(center_x) + "; Y=" +
+                std::to_string(center_y));
+  } else {
+    g_log.debug("No beam center information found in the manager.");
+  }
+
   const std::string filename = getPropertyValue("Filename");
   NXRoot root(filename);
   NXEntry firstEntry = root.openFirstEntry();
   const std::string instrumentPath =
       m_loader.findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
+  if (!reductionManager->existsProperty("InstrumentName"))
+    reductionManager->declareProperty(
+        make_unique<PropertyWithValue<std::string>>("InstrumentName",
+                                                    m_instrumentName));
   Progress progress(this, 0.0, 1.0, 4);
 
   if (m_instrumentName == "D33") {
@@ -107,9 +147,13 @@ void LoadILLSANS::exec() {
         getDetectorPositionD33(firstEntry, instrumentPath);
     progress.report("Moving detectors");
     moveDetectorsD33(std::move(detPos));
+    setL2SampleLog(detPos.distanceSampleRear);
     if (m_isTOF) {
       adjustTOF();
       moveSource();
+    }
+    if (moveToBeamCenter) {
+      // TODO: move all the panels
     }
   } else {
     progress.report("Initializing the workspace for " + m_instrumentName);
@@ -120,6 +164,7 @@ void LoadILLSANS::exec() {
         firstEntry, instrumentPath + "/detector/det_calc");
     progress.report("Moving detectors");
     moveDetectorDistance(distance, "detector");
+    setL2SampleLog(distance);
     if (m_instrumentName == "D22") {
       double offset = m_loader.getDoubleFromNexusPath(
           firstEntry, instrumentPath + "/detector/dtr_actual");
@@ -129,8 +174,10 @@ void LoadILLSANS::exec() {
           firstEntry, instrumentPath + "/detector/dan_actual");
       rotateD22(angle, "detector");*/
     }
+    if (moveToBeamCenter) {
+      moveBeamCenter("detector", center_x, center_y);
+    }
   }
-
   progress.report("Setting sample logs");
   setFinalProperties(filename);
   setProperty("OutputWorkspace", m_localWorkspace);
@@ -589,55 +636,10 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
     m_defaultBinning[0] = wavelength - wavelengthRes * wavelength * 0.01 / 2;
     m_defaultBinning[1] = wavelength + wavelengthRes * wavelength * 0.01 / 2;
   }
-}
 
-/**
- * @param lambda : wavelength in Angstroms
- * @param twoTheta : twoTheta in degreess
- * @return Q : momentum transfer [Aˆ-1]
- */
-double LoadILLSANS::calculateQ(const double lambda,
-                               const double twoTheta) const {
-  return (4 * M_PI * std::sin(twoTheta * (M_PI / 180) / 2)) / (lambda);
-}
-
-/**
- * Calculates the max and min Q
- * @return pair<min, max>
- */
-std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
-  double min = std::numeric_limits<double>::max(),
-         max = std::numeric_limits<double>::min();
-  g_log.debug("Calculating Qmin Qmax...");
-  std::size_t nHist = m_localWorkspace->getNumberHistograms();
-  const auto &spectrumInfo = m_localWorkspace->spectrumInfo();
-  for (std::size_t i = 0; i < nHist; ++i) {
-    if (!spectrumInfo.isMonitor(i)) {
-      const auto &lambdaBinning = m_localWorkspace->x(i);
-      Kernel::V3D detPos = spectrumInfo.position(i);
-      double r, theta, phi;
-      detPos.getSpherical(r, theta, phi);
-      double v1 = calculateQ(*(lambdaBinning.begin()), theta);
-      double v2 = calculateQ(*(lambdaBinning.end() - 1), theta);
-      if (i == 0) {
-        min = v1;
-        max = v1;
-      }
-      if (v1 < min) {
-        min = v1;
-      }
-      if (v2 < min) {
-        min = v2;
-      }
-      if (v1 > max) {
-        max = v1;
-      }
-      if (v2 > max) {
-        max = v2;
-      }
-    }
-  }
-  return std::pair<double, double>(min, max);
+  // Add a log called timer with the value of duration
+  const double duration = entry.getFloat("duration");
+  runDetails.addProperty<double>("timer", duration);
 }
 
 /**
@@ -647,9 +649,6 @@ std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
 void LoadILLSANS::setFinalProperties(const std::string &filename) {
   API::Run &runDetails = m_localWorkspace->mutableRun();
   runDetails.addProperty("is_frame_skipping", 0);
-  std::pair<double, double> minmax = LoadILLSANS::calculateQMaxQMin();
-  runDetails.addProperty("qmin", minmax.first);
-  runDetails.addProperty("qmax", minmax.second);
   NXhandle nxHandle;
   NXstatus nxStat = NXopen(filename.c_str(), NXACC_READ, &nxHandle);
   if (nxStat != NX_ERROR) {
@@ -709,6 +708,45 @@ void LoadILLSANS::moveSource() {
   mover->setProperty("Z", -m_sourcePos);
   mover->setProperty("RelativePosition", false);
   mover->executeAsChildAlg();
+}
+
+/**
+  * Moves the component such that the pixel with center_x, center_y coordinates
+ * moves to
+  * x=0, y=0 (i.e. z axis).
+  * @param component : the name of the instrument component
+  * @param center_x : beam center x coord (in pixels)
+  * @param center_y : beam center y coord (in pixels)
+  */
+void LoadILLSANS::moveBeamCenter(const std::string &component, double center_x,
+                                 double center_y) {
+
+  const auto &instrument = m_localWorkspace->getInstrument();
+  double xPixels = instrument->getNumberParameter("number-of-x-pixels")[0];
+  double yPixels = instrument->getNumberParameter("number-of-y-pixels")[0];
+  double xPixelSize = instrument->getNumberParameter("x-pixel-size")[0];
+  double yPixelSize = instrument->getNumberParameter("y-pixel-size")[0];
+  const double xOffset = -(center_x - (xPixels - 1) / 2.) * xPixelSize;
+  const double yOffset = -(center_y - (yPixels - 1) / 2.) * yPixelSize;
+  IAlgorithm_sptr mvAlg = createChildAlgorithm("MoveInstrumentComponent");
+  mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+  mvAlg->setProperty("ComponentName", component);
+  mvAlg->setProperty("X", xOffset / 1000.);
+  mvAlg->setProperty("Y", yOffset / 1000.);
+  mvAlg->setProperty("RelativePosition", true);
+  mvAlg->executeAsChildAlg();
+  g_log.debug() << "Moved beam center with dX=" << xOffset
+                << "mm; dY=" << yOffset << "mm.\n";
+}
+
+/**
+ * Sets a sample log for L2 distance [mm], needed later for reduction
+ * Note, for D33 it is the rear detector
+ * @param z : the sample-detector-distance in [m]
+ */
+void LoadILLSANS::setL2SampleLog(const double z) {
+  API::Run &runDetails = m_localWorkspace->mutableRun();
+  runDetails.addProperty<double>("sample_detector_distance", z * 1000);
 }
 
 } // namespace DataHandling

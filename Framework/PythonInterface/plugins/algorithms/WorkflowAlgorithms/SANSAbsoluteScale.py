@@ -9,7 +9,7 @@ from reduction_workflow.find_data import find_data
 
 class SANSAbsoluteScale(PythonAlgorithm):
     """
-        Normalise detector counts by the sample thickness
+        Applies absolute scale factor by normalizing with the beam flux
     """
 
     instrument = None
@@ -81,10 +81,10 @@ class SANSAbsoluteScale(PythonAlgorithm):
             self.setProperty("OutputWorkspace", output_ws)
             self.setProperty("OutputMessage", "Applied scaling factor %g" % scaling_factor)
 
-        elif self.instrument.lower() in ['biosans', 'gpsans', 'hfirsans']:
+        elif self.instrument.lower() in ['biosans', 'gpsans', 'hfirsans', 'd11', 'd22', 'd33']:
             self._hfir_scaling(property_manager)
         else:
-            msg = "Absolute scale calculation with a reference is only available for HFIR"
+            msg = "Absolute scale calculation with a reference is only available for HFIR and ILL"
             Logger("SANSAbsoluteScale").error(msg)
             self.setProperty("OutputMessage", msg)
             return
@@ -105,7 +105,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
 
         def _load_data(filename, output_ws):
             if not property_manager.existsProperty("LoadAlgorithm"):
-                Logger("SANSDirectBeamTransmission").error("SANS reduction not set up properly: missing load algorithm")
+                Logger("SANSAbsoluteScale").error("SANS reduction not set up properly: missing load algorithm")
                 raise RuntimeError("SANS reduction not set up properly: missing load algorithm")
             p=property_manager.getProperty("LoadAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)
@@ -179,7 +179,6 @@ class SANSAbsoluteScale(PythonAlgorithm):
         alg.setProperty("Workspace", ref_ws)
         alg.setPropertyValue("ShapeXML", cylXML)
         alg.execute()
-        #det_list = alg.getProperty("DetectorList").value
         det_list_str = alg.getPropertyValue("DetectorList")
 
         det_count_ws_name = "__absolute_scale"
@@ -198,15 +197,31 @@ class SANSAbsoluteScale(PythonAlgorithm):
             Logger("SANSAbsoluteScale").error("Bad reference detector count: check your beam parameters")
 
         # Pixel size, in mm
-        pixel_size_param = ref_ws.getInstrument().getNumberParameter("x-pixel-size")
-        if pixel_size_param is not None:
-            pixel_size = pixel_size_param[0]
+        pixel_size_x_param = ref_ws.getInstrument().getNumberParameter("x-pixel-size")
+        if pixel_size_x_param is not None:
+            pixel_size_x = pixel_size_x_param[0]
         else:
-            raise RuntimeError("AbsoluteScale could not read the pixel size")
+            raise RuntimeError("AbsoluteScale could not read the pixel x size")
+
+        pixel_size_y_param = ref_ws.getInstrument().getNumberParameter("y-pixel-size")
+        if pixel_size_y_param is not None:
+            pixel_size_y = pixel_size_y_param[0]
+        else:
+            raise RuntimeError("AbsoluteScale could not read the pixel y size")
 
         attenuator_trans = self.getProperty("AttenuatorTransmission").value
-        # (detector count rate)/(attenuator transmission)/(monitor rate)*(pixel size/SDD)**2
-        scaling_factor = 1.0/(det_count/attenuator_trans/(monitor_value)*(pixel_size/sdd)*(pixel_size/sdd))
+        if attenuator_trans == 0.:
+            # this is the default at ILL, reading from nexus file
+            if ref_ws.getRun().hasProperty("attenuator.attenuation_coefficient"):
+                attenuator_trans = 1./ref_ws.getRun().getProperty("attenuator.attenuation_coefficient").value
+                Logger("SANSAbsoluteScale").information("No attenuator transmission was specified, '+\
+                'using the value from the nexus file: %g" % attenuator_trans)
+            else:
+                raise RuntimeError("AbsoluteScale could was not provided with correct attenuator transmission.")
+
+        pixel_solid_angle = (pixel_size_x/sdd)*(pixel_size_y/sdd)
+        flux = det_count / (monitor_value * attenuator_trans)
+        scaling_factor = 1./(flux * pixel_solid_angle)
 
         # Apply the scaling factor
         alg = AlgorithmManager.create("Scale")

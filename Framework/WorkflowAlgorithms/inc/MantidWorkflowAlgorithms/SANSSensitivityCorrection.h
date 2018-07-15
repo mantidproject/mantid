@@ -5,6 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/PropertyManager.h"
+
+#include <Poco/Path.h>
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -57,7 +60,15 @@ private:
   void exec() override;
   /// Check whether we have a processed file of not
   bool fileCheck(const std::string &filePath);
-
+  /// Process the flood or it's background
+  void process(API::MatrixWorkspace_sptr rawFloodWS,
+               const std::string reductionManagerName,
+               boost::shared_ptr<Kernel::PropertyManager> reductionManager,
+               const std::string propertyPrefix = "");
+  /// Load the flood or it's background
+  API::MatrixWorkspace_sptr
+  load(boost::shared_ptr<Kernel::PropertyManager> reductionManager,
+       const std::string fileName, Poco::Path path);
   std::string m_output_message;
 };
 

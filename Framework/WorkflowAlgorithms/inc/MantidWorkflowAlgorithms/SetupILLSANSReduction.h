@@ -1,22 +1,22 @@
-#ifndef MANTID_ALGORITHMS_SETUPEQSANSREDUCTION_H_
-#define MANTID_ALGORITHMS_SETUPEQSANSREDUCTION_H_
+#ifndef MANTID_ALGORITHMS_SETUPILLSANSREDUCTION_H_
+#define MANTID_ALGORITHMS_SETUPILLSANSREDUCTION_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
 /**
-    Set up the reduction options for ILL D33 reduction.
+    Set up the reduction options for ILL SANS reduction.
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
+    National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -37,20 +37,20 @@ namespace WorkflowAlgorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport SetupILLD33Reduction : public API::Algorithm,
-                                       public API::DeprecatedAlgorithm {
+class DLLExport SetupILLSANSReduction : public API::Algorithm {
 public:
   /// Algorithm's name
-  const std::string name() const override { return "SetupILLD33Reduction"; }
+  const std::string name() const override { return "SetupILLSANSReduction"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Set up ILL D33 SANS reduction options.";
+    return "Set up ILL SANS reduction options.";
   }
-
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override { return "Workflow\\SANS"; }
+  const std::string category() const override {
+    return "Workflow\\SANS;ILL\\SANS";
+  }
 
 private:
   /// Initialisation code
@@ -69,4 +69,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_SETUPEQSANSREDUCTION_H_*/
+#endif /*MANTID_ALGORITHMS_SETUPILLSANSREDUCTION_H_*/
