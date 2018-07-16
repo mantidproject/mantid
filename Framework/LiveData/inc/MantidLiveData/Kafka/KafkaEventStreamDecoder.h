@@ -93,7 +93,8 @@ private:
     size_t nPeriods;
     int64_t runStartMsgOffset;
   };
-  /// Main loop of listening for data messages and populating the cache workspaces
+  /// Main loop of listening for data messages and populating the cache
+  /// workspaces
   void captureImpl() noexcept;
   void captureImplExcept();
 

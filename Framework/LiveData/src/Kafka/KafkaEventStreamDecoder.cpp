@@ -277,9 +277,9 @@ void KafkaEventStreamDecoder::captureImplExcept() {
   auto runStartStruct = getRunStartMessage(runBuffer);
   initLocalCaches(buffer, runStartStruct);
 
-  m_interrupt = false;  // Allow MonitorLiveData or user to interrupt
-  m_endRun = false;  // Indicates to MonitorLiveData that end of run is reached
-  m_runStatusSeen = false;  // Flag to ensure MonitorLiveData observes end of run
+  m_interrupt = false; // Allow MonitorLiveData or user to interrupt
+  m_endRun = false; // Indicates to MonitorLiveData that end of run is reached
+  m_runStatusSeen = false; // Flag to ensure MonitorLiveData observes end of run
   // Flag to ensure LoadLiveData extracts data before start of next run
   m_extractedEndRunData = true;
 
@@ -530,7 +530,7 @@ bool KafkaEventStreamDecoder::waitForNewRunStartMessage(
     std::string topicName;
     m_runStream->consumeMessage(&runMsgBuffer, offset, partition, topicName);
     if (runMsgBuffer.empty()) {
-      continue;  // no message available, try again
+      continue; // no message available, try again
     } else {
       auto runMsg =
           GetRunInfo(reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()));
@@ -547,7 +547,7 @@ bool KafkaEventStreamDecoder::waitForNewRunStartMessage(
           return false; // not interrupted
         }
       } else {
-        continue;  // received message wasn't a RunStart message, try again
+        continue; // received message wasn't a RunStart message, try again
       }
     }
   }
