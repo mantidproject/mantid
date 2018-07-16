@@ -249,6 +249,8 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
 
     if instrumentName == 'TOPAZ':
         dP = 15
+    if instrumentName == 'CORELLI':
+        dP = 10
     peakMask = qMask.copy()
     peakMask[cX-dP:cX+dP, cY-dP:cY+dP, cZ-dP:cZ+dP] = 0
     neigh_length_m=3
@@ -865,6 +867,19 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
             x0[1] = 0.005
             fICC.setParameter(1, x0[1])
             B0 = [0.001, 0.3]
+        elif instrumentName == 'CORELLI':
+            x0[6] = 100
+            fICC.setParameter(6, x0[6])
+            KConv0 = [10, 800]
+            x0[0] = 0.5
+            fICC.setParameter(0, x0[0])
+            A0 = [0.5*x0[0], 1.5*x0[0]]
+            x0[1] = 0.005
+            fICC.setParameter(1, x0[1])
+            B0 = [0.001, 0.3]
+            x0[2] = 0.1
+            fICC.setParameter(2, x0[2])
+            R0 = [0.5*x0[2], 1.5*x0[2]]
         try:
             fICC.setPenalizedConstraints(A0=A0, B0=B0, R0=R0, T00=T00, KConv0=KConv0, penalty=1.0e10)
         except:
