@@ -84,6 +84,8 @@ public:
   API::Workspace_sptr extractData();
   ///@}
 
+  bool dataReset();
+
 private:
   struct RunStartStruct {
     std::string instrumentName;
@@ -161,6 +163,8 @@ private:
   /// EndRun
   bool m_runStatusSeen;
   std::atomic<bool> m_extractedEndRunData;
+  /// Indicate if the next data to be extracted should replace LoadLiveData's output workspace
+  std::atomic<bool> m_dataReset;
 
   void waitForDataExtraction();
   void waitForRunEndObservation();

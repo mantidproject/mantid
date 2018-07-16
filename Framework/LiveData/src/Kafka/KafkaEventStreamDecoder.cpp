@@ -124,6 +124,15 @@ void KafkaEventStreamDecoder::startCapture(bool startNow) {
   m_thread.detach();
 }
 
+/** Indicate if the next data to be extracted should replace LoadLiveData's output workspace,
+ *  for example the first data of a new run
+ */
+bool KafkaEventStreamDecoder::dataReset() {
+  bool result = (m_dataReset == true); // copy from atomic bool
+  m_dataReset = false; // reset to false
+  return result;
+}
+
 void KafkaEventStreamDecoder::joinEventStreamAtTime(
     const KafkaEventStreamDecoder::RunStartStruct &runStartData) {
   auto runStartTime = runStartData.startTime;
@@ -455,8 +464,12 @@ void KafkaEventStreamDecoder::waitForRunEndObservation() {
   m_runStatusSeen = false;
   runStatusLock.unlock();
 
-  // Get new run message now so that new run number is available when
-  // MonitorLiveData queries it
+  // Set to zero until we have the new run number, MonitorLiveData will
+  // queries before each time it extracts data until it gets non-zero
+  m_runNumber = 0;
+
+  // Get new run message now so that new run number is available for
+  // MonitorLiveData as early as possible
   RunStartStruct runStartStruct;
   if (waitForNewRunStartMessage(runStartStruct))
     return;
@@ -693,13 +706,18 @@ void KafkaEventStreamDecoder::initLocalCaches(
         "KafkaEventStreamDecoder - Message has n_periods==0. This is "
         "an error by the data producer");
   }
-  std::lock_guard<std::mutex> lock(m_mutex);
-  m_localEvents.resize(nperiods);
-  m_localEvents[0] = eventBuffer;
-  for (size_t i = 1; i < nperiods; ++i) {
-    // A clone should be cheap here as there are no events yet
-    m_localEvents[i] = eventBuffer->clone();
+  {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_localEvents.resize(nperiods);
+    m_localEvents[0] = eventBuffer;
+    for (size_t i = 1; i < nperiods; ++i) {
+      // A clone should be cheap here as there are no events yet
+      m_localEvents[i] = eventBuffer->clone();
+    }
   }
+
+  // New caches so LoadLiveData's output workspace needs to be replaced
+  m_dataReset = true;
 }
 
 /**
