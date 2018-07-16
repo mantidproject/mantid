@@ -217,7 +217,7 @@ set ( SRC_FILES
 	src/Pause.cpp
 	src/PerformIndexOperations.cpp
 #	src/PhaseQuadMuon.cpp
-	src/PlotAsymmetryByLogValue.cpp
+#	src/PlotAsymmetryByLogValue.cpp
 	src/Plus.cpp
 	src/PointByPointVCorrection.cpp
 	src/PoissonErrors.cpp
@@ -557,7 +557,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Pause.h
 	inc/MantidAlgorithms/PerformIndexOperations.h
 #	inc/MantidAlgorithms/PhaseQuadMuon.h
-	inc/MantidAlgorithms/PlotAsymmetryByLogValue.h
+#	inc/MantidAlgorithms/PlotAsymmetryByLogValue.h
 	inc/MantidAlgorithms/Plus.h
 	inc/MantidAlgorithms/PointByPointVCorrection.h
 	inc/MantidAlgorithms/PoissonErrors.h
@@ -899,7 +899,7 @@ set ( TEST_FILES
 	PauseTest.h
 	PerformIndexOperationsTest.h
 #	PhaseQuadMuonTest.h
-	PlotAsymmetryByLogValueTest.h
+#	PlotAsymmetryByLogValueTest.h
 	PlusTest.h
 	PointByPointVCorrectionTest.h
 	PoissonErrorsTest.h
