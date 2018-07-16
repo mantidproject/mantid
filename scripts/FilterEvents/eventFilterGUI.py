@@ -806,11 +806,13 @@ class MainWindow(QtGui.QMainWindow):
         run = dataws.getRun()
         plist = run.getProperties()
         for p in plist:
-            pv = p.value
-            if isinstance(pv, numpy.ndarray):
+            try:
                 times = p.times
-                if len(times) > 1:
+                if len(times) > 1 and numpy.isreal(p.value[0]):
                     self._sampleLogNames.append(p.name)
+            # This is here for FloatArrayProperty. If a log value is of this type it does not have times
+            except AttributeError:
+                pass
         # ENDFOR(p)
 
         # Set up sample log

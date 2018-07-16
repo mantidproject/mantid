@@ -166,23 +166,21 @@ public:
     // further testing as this is tested in the ProcessIndirectFitParameters
     // Algorithm
     ITableWorkspace_sptr paramTable;
-    TS_ASSERT_THROWS_NOTHING(
-        paramTable =
-            AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-                "ReductionWs_conv_1LFixF_s0_to_5_Parameters"));
+    TS_ASSERT_THROWS_NOTHING(paramTable = getWorkspaceFromADS<ITableWorkspace>(
+                                 "ReductionWs_conv_1LFixF_s0_to_5_Parameters"));
 
     // Retrieve and analyse results table
+    WorkspaceGroup_sptr resultGroup;
+    TS_ASSERT_THROWS_NOTHING(resultGroup = getWorkspaceFromADS<WorkspaceGroup>(
+                                 "ReductionWs_conv_1LFixF_s0_to_5_Result"));
     MatrixWorkspace_sptr resultWs;
-    TS_ASSERT_THROWS_NOTHING(
-        resultWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "ReductionWs_conv_1LFixF_s0_to_5_Result"));
+    TS_ASSERT_THROWS_NOTHING(resultWs = getMatrixWorkspace(resultGroup, 0));
     TS_ASSERT_EQUALS(resultWs->blocksize(), totalBins);
 
     // Retrieve and analyse group table
     WorkspaceGroup_sptr groupWs;
-    TS_ASSERT_THROWS_NOTHING(
-        groupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            "ReductionWs_conv_1LFixF_s0_to_5_Workspaces"));
+    TS_ASSERT_THROWS_NOTHING(groupWs = getWorkspaceFromADS<WorkspaceGroup>(
+                                 "ReductionWs_conv_1LFixF_s0_to_5_Workspaces"));
 
     // Check number of expected Histograms and Histogram deminsions
     int entities = groupWs->getNumberOfEntries();
@@ -243,17 +241,14 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Assert that output is in ADS
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            "SqwWs_conv_1LFixF_s0_Parameters"));
+    TS_ASSERT_THROWS_NOTHING(getWorkspaceFromADS<ITableWorkspace>(
+        "SqwWs_conv_1LFixF_s0_Parameters"));
 
     TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "SqwWs_conv_1LFixF_s0_Result"));
+        getWorkspaceFromADS<WorkspaceGroup>("SqwWs_conv_1LFixF_s0_Result"));
 
     TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            "SqwWs_conv_1LFixF_s0_Workspaces"));
+        getWorkspaceFromADS<WorkspaceGroup>("SqwWs_conv_1LFixF_s0_Workspaces"));
 
     AnalysisDataService::Instance().clear();
   }
@@ -300,20 +295,17 @@ public:
     // Check members group workspace was created
     WorkspaceGroup_const_sptr membersGroupWs;
     TS_ASSERT_THROWS_NOTHING(
-        membersGroupWs =
-            AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-                runName + "_conv_1LFixF_s" + std::to_string(specMin) + "_to_" +
-                std::to_string(specMax) + "_Members"));
+        membersGroupWs = getWorkspaceFromADS<WorkspaceGroup>(
+            runName + "_conv_1LFixF_s" + std::to_string(specMin) + "_to_" +
+            std::to_string(specMax) + "_Members"));
 
     // Check all members have been extracted into their own workspace and
     // grouped
     // inside the members group workspace.
     std::unordered_set<std::string> members = {
         "Data", "Calc", "Diff", "LinearBackground", "Lorentzian"};
-    for (size_t i = 0; i < membersGroupWs->size(); i++) {
-      MatrixWorkspace_const_sptr ws =
-          boost::dynamic_pointer_cast<const MatrixWorkspace>(
-              membersGroupWs->getItem(i));
+    for (auto i = 0u; i < membersGroupWs->size(); ++i) {
+      MatrixWorkspace_const_sptr ws = getMatrixWorkspace(membersGroupWs, i);
       TS_ASSERT(ws->getNumberHistograms() == specMax - specMin + 1);
       std::string name = ws->getName();
       members.erase(name.substr(name.find_last_of('_') + 1));
@@ -324,6 +316,16 @@ public:
   }
 
   //------------------------ Private Functions---------------------------
+
+  template <typename T = MatrixWorkspace>
+  boost::shared_ptr<T> getWorkspaceFromADS(const std::string &name) {
+    return AnalysisDataService::Instance().retrieveWS<T>(name);
+  }
+
+  MatrixWorkspace_sptr getMatrixWorkspace(WorkspaceGroup_const_sptr group,
+                                          std::size_t index) {
+    return boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(index));
+  }
 
   MatrixWorkspace_sptr loadWorkspace(const std::string &fileName) {
     Mantid::DataHandling::Load loadAlg;
@@ -357,9 +359,7 @@ public:
     createWorkspace->setProperty("NSpec", 1);
     createWorkspace->setPropertyValue("OutputWorkspace", wsName);
     createWorkspace->execute();
-    MatrixWorkspace_sptr sqwWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
-    return sqwWS;
+    return getWorkspaceFromADS(wsName);
   }
 
   MatrixWorkspace_sptr create2DWorkspace(int xlen, int ylen) {

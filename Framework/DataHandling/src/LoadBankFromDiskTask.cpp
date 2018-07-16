@@ -114,8 +114,8 @@ void LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file,
 *the event list for that pulse)
 */
 void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file,
-                                          size_t &start_event,
-                                          size_t &stop_event,
+                                          int64_t &start_event,
+                                          int64_t &stop_event,
                                           std::vector<uint64_t> &event_index) {
   // Get the list of pixel ID's
   if (m_oldNexusFileNames)
@@ -129,17 +129,17 @@ void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file,
   // dims[0] can be negative in ISIS meaning 2^32 + dims[0]. Take that into
   // account
   int64_t dim0 = recalculateDataSize(id_info.dims[0]);
-  stop_event = static_cast<size_t>(dim0);
+  stop_event = dim0;
 
   // Handle the time filtering by changing the start/end offsets.
   for (size_t i = 0; i < thisBankPulseTimes->numPulses; i++) {
     if (thisBankPulseTimes->pulseTimes[i] >= m_loader.alg->filter_time_start) {
-      start_event = event_index[i];
+      start_event = static_cast<int64_t>(event_index[i]);
       break; // stop looking
     }
   }
 
-  if (start_event > static_cast<size_t>(dim0)) {
+  if (start_event > dim0) {
     // If the frame indexes are bad then we can't construct the times of the
     // events properly and filtering by time
     // will not work on this data
@@ -150,7 +150,7 @@ void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file,
         << "All events will appear in the same frame and filtering by time "
            "will not be possible on this data.\n";
     start_event = 0;
-    stop_event = static_cast<size_t>(dim0);
+    stop_event = dim0;
   } else {
     for (size_t i = 0; i < thisBankPulseTimes->numPulses; i++) {
       if (thisBankPulseTimes->pulseTimes[i] > m_loader.alg->filter_time_stop) {
@@ -162,14 +162,16 @@ void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file,
   // We are loading part - work out the event number range
   if (m_loader.chunk != EMPTY_INT()) {
     start_event =
-        (m_loader.chunk - m_loader.firstChunkForBank) * m_loader.eventsPerChunk;
+        static_cast<int64_t>(m_loader.chunk - m_loader.firstChunkForBank) *
+        static_cast<int64_t>(m_loader.eventsPerChunk);
     // Don't change stop_event for the final chunk
-    if (start_event + m_loader.eventsPerChunk < stop_event)
-      stop_event = start_event + m_loader.eventsPerChunk;
+    if (start_event + static_cast<int64_t>(m_loader.eventsPerChunk) <
+        stop_event)
+      stop_event = start_event + static_cast<int64_t>(m_loader.eventsPerChunk);
   }
 
   // Make sure it is within range
-  if (stop_event > static_cast<size_t>(dim0))
+  if (stop_event > dim0)
     stop_event = dim0;
 
   m_loader.alg->getLogger().debug() << entry_name << ": start_event "
@@ -375,19 +377,22 @@ void LoadBankFromDiskTask::run() {
                "and the number of pulse times in event_time_zero.\n";
 
       // Open and validate event_id field.
-      size_t start_event = 0;
-      size_t stop_event = 0;
+      int64_t start_event = 0;
+      int64_t stop_event = 0;
       this->prepareEventId(file, start_event, stop_event, event_index);
 
       // These are the arguments to getSlab()
-      m_loadStart[0] = static_cast<int>(start_event);
-      m_loadSize[0] = static_cast<int>(stop_event - start_event);
+      m_loadStart[0] = start_event;
+      m_loadSize[0] = stop_event - start_event;
 
       if ((m_loadSize[0] > 0) && (m_loadStart[0] >= 0)) {
         // Load pixel IDs
         this->loadEventId(file);
-        if (m_loader.alg->getCancel())
+        if (m_loader.alg->getCancel()) {
+          m_loader.alg->getLogger().error() << "Loading bank " << entry_name
+                                            << " is cancelled.\n";
           m_loadError = true; // To allow cancelling the algorithm
+        }
 
         // And TOF.
         if (!m_loadError) {
@@ -399,6 +404,11 @@ void LoadBankFromDiskTask::run() {
       } // Size is at least 1
       else {
         // Found a size that was 0 or less; stop processing
+        m_loader.alg->getLogger().error()
+            << "Loading bank " << entry_name
+            << " is stopped due to either zero/negative loading size ("
+            << m_loadStart[0] << ") or negative load start index ("
+            << m_loadStart[0] << ")\n";
         m_loadError = true;
       }
 
@@ -470,8 +480,8 @@ void LoadBankFromDiskTask::run() {
     mid_id = (m_max_id + m_min_id) / 2;
 
   // No error? Launch a new task to process that data.
-  size_t numEvents = m_loadSize[0];
-  size_t startAt = m_loadStart[0];
+  size_t numEvents = static_cast<size_t>(m_loadSize[0]);
+  size_t startAt = static_cast<size_t>(m_loadStart[0]);
 
   // convert things to shared_arrays
   boost::shared_array<uint32_t> event_id_shrd(m_event_id);
