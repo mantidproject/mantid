@@ -186,7 +186,7 @@ class PlotSelectorPresenterTest(unittest.TestCase):
         self.view.set_sort_order.assert_called_once_with(False)
 
     def test_set_sort_type_to_name(self):
-        self.view.sort_type = Column.Name
+        self.view.sort_type = mock.Mock(return_value=Column.Name)
         self.presenter.set_sort_type(Column.Name)
         self.view.set_sort_type.assert_called_once_with(Column.Name)
         self.model.last_active_values.assert_not_called()
@@ -194,24 +194,24 @@ class PlotSelectorPresenterTest(unittest.TestCase):
 
     def test_set_sort_type_to_last_active(self):
         self.model.last_active_values = mock.Mock(return_value={0: 1, 1: 2})
-        self.view.sort_type = Column.LastActive
+        self.view.sort_type = mock.Mock(return_value=Column.LastActive)
         self.presenter.set_sort_type(Column.LastActive)
 
         self.view.set_sort_type.assert_called_once_with(Column.LastActive)
         self.view.set_last_active_values.assert_called_once_with({0: 1,
                                                                   1: 2})
 
-    def test_update_last_active_values_with_sorting_by_last_active(self):
+    def test_set_last_active_values_with_sorting_by_last_active(self):
         self.model.last_active_values = mock.Mock(return_value={0: 1, 1: 2})
-        self.view.sort_type = Column.LastActive
+        self.view.sort_type = mock.Mock(return_value=Column.LastActive)
         self.presenter.update_last_active_order()
 
         self.view.set_last_active_values.assert_called_once_with({0: 1,
                                                                   1: 2})
 
-    def test_update_last_active_values_with_sorting_by_name_does_nothing(self):
+    def test_set_last_active_values_with_sorting_by_name_does_nothing(self):
         self.model.last_active_order = mock.Mock(return_value={0: 1, 1: 2})
-        self.view.sort_type = Column.Name
+        self.view.sort_type = mock.Mock(return_value=Column.Name)
         self.presenter.update_last_active_order()
 
         self.model.last_active_order.assert_not_called()
