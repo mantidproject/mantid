@@ -42,6 +42,7 @@ Improvements
 - :ref:`algm-ConvolutionFitSequential` and :ref:`algm-IqtFitSequential` can now accept multiple datasets as input, in
   the same format as that of :ref:`algm-PlotPeakByLogValue`.
 - :ref:`algm-IndirectILLEnergyTransfer` was fixed to have the correct sign for the energy transfer.
+- :ref:`algm-TransformToIqt` now calculates errors using a monte carlo method, and can take a number of iterations as input.
 
 Data Analysis Interfaces
 ------------------------
@@ -54,6 +55,11 @@ New
 - The JumpFit interface now allows masking of energy ranges.
 - The QENS Fitting interfaces can now be provided multiple data-sets as input -- these data-sets can be viewed
   individually within the interface (plot, fit result, etc.)
+
+Improved
+########
+
+- A number of iterations for the new monte carlo error calculation can be specified in the I(Q,t) interface.
 
 Bugfixes
 ########
