@@ -117,6 +117,20 @@ class BeamCentrePresenter(object):
         self._beam_centre_model.update_hab = self._view.update_hab
         self._beam_centre_model.update_lab = self._view.update_lab
 
+    def update_centre_positions(self, state_model):
+        lab_pos_1 = getattr(state_model, 'lab_pos_1')
+        lab_pos_2 = getattr(state_model, 'lab_pos_2')
+
+        hab_pos_1 = getattr(state_model, 'hab_pos_1') if getattr(state_model, 'hab_pos_1') else lab_pos_1
+        hab_pos_2 = getattr(state_model, 'hab_pos_2') if getattr(state_model, 'hab_pos_2') else lab_pos_2
+
+        self._view.lab_pos_1 = lab_pos_1
+        self._view.lab_pos_2 = lab_pos_2
+
+        self._view.hab_pos_1 = hab_pos_1
+        self._view.hab_pos_2 = hab_pos_2
+
+
     def set_on_state_model(self, attribute_name, state_model):
         attribute = getattr(self._view, attribute_name)
         if attribute or isinstance(attribute, bool):

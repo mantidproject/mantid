@@ -73,11 +73,6 @@ class BeamCentreModel(object):
             logger.notice("Have chosen no find direction exiting early")
             return {"pos1": self.lab_pos_1, "pos2": self.lab_pos_2}
 
-        if self.q_min:
-            state.convert_to_q.q_min = self.q_min
-        if self.q_max:
-            state.convert_to_q.q_max = self.q_max
-
         if self.COM:
             centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
                                    max_iter=self.max_iterations,
