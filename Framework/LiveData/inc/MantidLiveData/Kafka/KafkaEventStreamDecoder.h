@@ -69,6 +69,7 @@ public:
   bool hasData() const noexcept;
   int runNumber() const noexcept { return m_runNumber; }
   bool hasReachedEndOfRun() noexcept;
+  bool dataReset();
   ///@}
 
   ///@name Callbacks
@@ -83,8 +84,6 @@ public:
   ///@{
   API::Workspace_sptr extractData();
   ///@}
-
-  bool dataReset();
 
 private:
   struct RunStartStruct {
@@ -170,16 +169,16 @@ private:
   void waitForDataExtraction();
   void waitForRunEndObservation();
 
+  // Methods for checking if the end of a run was reached
   std::unordered_map<std::string, std::vector<int64_t>> getStopOffsets(
       std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
       std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
       uint64_t stopTime) const;
-
   void checkIfAllStopOffsetsReached(
       const std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
       bool &checkOffsets);
 
-  // Callbacks
+  // Callbacks (for unit tests)
   CallbackFn m_cbIterationEnd;
   CallbackFn m_cbError;
 

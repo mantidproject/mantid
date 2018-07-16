@@ -267,25 +267,25 @@ void KafkaEventStreamDecoder::captureImpl() noexcept {
 void KafkaEventStreamDecoder::captureImplExcept() {
   g_log.debug("Event capture starting");
 
-  // Load spectra-detector and runstart struct then initial cache variables
+  // Load spectra-detector and runstart struct then initialise the cache
   std::string buffer;
   std::string runBuffer;
   int64_t offset;
   int32_t partition;
   std::string topicName;
   m_spDetStream->consumeMessage(&buffer, offset, partition, topicName);
-
   auto runStartStruct = getRunStartMessage(runBuffer);
   initLocalCaches(buffer, runStartStruct);
 
-  m_interrupt = false;
-  m_endRun = false;
-  m_runStatusSeen = false;
+  m_interrupt = false;  // Allow MonitorLiveData or user to interrupt
+  m_endRun = false;  // Indicates to MonitorLiveData that end of run is reached
+  m_runStatusSeen = false;  // Flag to ensure MonitorLiveData observes end of run
+  // Flag to ensure LoadLiveData extracts data before start of next run
   m_extractedEndRunData = true;
 
+  // Keep track of whether we've reached the end of a run
   std::unordered_map<std::string, std::vector<int64_t>> stopOffsets;
   std::unordered_map<std::string, std::vector<bool>> reachedEnd;
-  // True when should be checking if run stop offsets have been reached
   bool checkOffsets = false;
 
   while (!m_interrupt) {
@@ -488,6 +488,13 @@ void KafkaEventStreamDecoder::waitForRunEndObservation() {
   initLocalCaches(detSpecMapMsgBuffer, runStartStruct);
 }
 
+/**
+ * Try to find a detector-spectrum map message published after the
+ * current run start time
+ *
+ * @param runStartStruct details of the current run
+ * @return received detector-spectrum map message buffer
+ */
 std::string KafkaEventStreamDecoder::getDetSpecMapForRun(
     const KafkaEventStreamDecoder::RunStartStruct &runStartStruct) {
   std::string rawMsgBuffer;
@@ -506,6 +513,13 @@ std::string KafkaEventStreamDecoder::getDetSpecMapForRun(
   return rawMsgBuffer;
 }
 
+/**
+ * Wait for a run start message until we get one with a higher run number
+ * than the current run or the algorithm is interrupted
+ *
+ * @param runStartStructOutput details of the new run
+ * @return true if interrupted, false if got a new run start message
+ */
 bool KafkaEventStreamDecoder::waitForNewRunStartMessage(
     RunStartStruct &runStartStructOutput) {
   while (!m_interrupt) {
@@ -516,11 +530,12 @@ bool KafkaEventStreamDecoder::waitForNewRunStartMessage(
     std::string topicName;
     m_runStream->consumeMessage(&runMsgBuffer, offset, partition, topicName);
     if (runMsgBuffer.empty()) {
-      continue;
+      continue;  // no message available, try again
     } else {
       auto runMsg =
           GetRunInfo(reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()));
       if (runMsg->info_type_type() == InfoTypes_RunStart) {
+        // We got a run start message, deserialise it
         auto runStartData = static_cast<const RunStart *>(runMsg->info_type());
         KafkaEventStreamDecoder::RunStartStruct runStartStruct = {
             runStartData->instrument_name()->str(), runStartData->run_number(),
@@ -532,7 +547,7 @@ bool KafkaEventStreamDecoder::waitForNewRunStartMessage(
           return false; // not interrupted
         }
       } else {
-        continue;
+        continue;  // received message wasn't a RunStart message, try again
       }
     }
   }

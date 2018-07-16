@@ -644,7 +644,7 @@ public:
     std::unordered_map<std::string, std::vector<int64_t>> offsets;
     return offsets;
   }
-  
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
