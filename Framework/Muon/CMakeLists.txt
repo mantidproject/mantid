@@ -5,6 +5,7 @@ set ( SRC_FILES
         src/ApplyMuonDetectorGroupPairing.cpp
 	src/AsymmetryCalc.cpp
 	src/CalMuonDeadTime.cpp
+	src/CalMuonDetectorPhases.cpp
         src/ConvertFitFunctionForMuonTFAsymmetry.cpp
         src/MuonAlgorithmHelper.cpp
 )
@@ -16,6 +17,7 @@ set ( INC_FILES
         inc/MantidMuon/ApplyMuonDetectorGroupPairing.h
 	inc/MantidMuon/AsymmetryCalc.h
 	inc/MantidMuon/CalMuonDeadTime.h
+	inc/MantidMuon/CalMuonDetectorPhases.h
         inc/MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h
         inc/MantidMuon/MuonAlgorithmHelper.h
 )
@@ -27,6 +29,7 @@ set ( TEST_FILES
         ApplyMuonDetectorGroupPairingTest.h
 	AsymmetryCalcTest.h
 	CalMuonDeadTimeTest.h
+	CalMuonDetectorPhasesTest.h
         ConvertFitFunctionForMuonTFAsymmetryTest.h
         MuonAlgorithmHelperTest.h)
 
