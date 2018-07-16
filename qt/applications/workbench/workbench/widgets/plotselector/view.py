@@ -164,8 +164,9 @@ class PlotSelectorView(QWidget):
         top_header.resizeSection(Column.Number, top_header.sectionSizeHint(Column.Number))
         top_header.setStretchLastSection(True)
 
-        table_widget.horizontalHeaderItem(Column.Number).setToolTip('This is the matplotlib figure number.\n\n'
-                 'From a script use plt.figure(N), where N is this figure number, to get a handle to the plot.')
+        table_widget.horizontalHeaderItem(Column.Number).setToolTip('This is the matplotlib figure number.\n\nFrom a '
+                                                                    'script use plt.figure(N), where N is this figure '
+                                                                    'number, to get a handle to the plot.')
 
         table_widget.horizontalHeaderItem(Column.Name).setToolTip('The plot name, also used  as the file name when '
                                                                   'saving multiple plots.')
@@ -380,7 +381,7 @@ class PlotSelectorView(QWidget):
     # ----------------------- Plot Sorting --------------------------
     """
     How the Sorting Works
-    
+
     Sorting acts on the three columns for plot number, plot name and
     last active order. Last active order is a hidden column, not
     intended for the user to see, but can be set from the sort menu
