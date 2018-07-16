@@ -93,9 +93,11 @@ private:
     size_t nPeriods;
     int64_t runStartMsgOffset;
   };
+  /// Main loop of listening for data messages and populating the cache workspaces
   void captureImpl() noexcept;
   void captureImplExcept();
 
+  /// Create the cache workspaces, LoadLiveData extracts data from these
   void initLocalCaches(const std::string &rawMsgBuffer,
                        const RunStartStruct &runStartData);
   DataObjects::EventWorkspace_sptr createBufferWorkspace(size_t nspectra,
@@ -104,14 +106,22 @@ private:
                                                          uint32_t length);
   DataObjects::EventWorkspace_sptr
   createBufferWorkspace(const DataObjects::EventWorkspace_sptr &parent);
+
+  /// Load a named instrument into a workspace
   void loadInstrument(const std::string &name,
                       DataObjects::EventWorkspace_sptr workspace);
+
+  /// Get an expected message from the run information topic
   int64_t getRunInfoMessage(std::string &rawMsgBuffer);
+
+  /// Get an expected RunStart message
   RunStartStruct getRunStartMessage(std::string &rawMsgBuffer);
 
+  /// Populate cache workspaces with data from messages
   void eventDataFromMessage(const std::string &buffer);
   void sampleDataFromMessage(const std::string &buffer);
 
+  /// For LoadLiveData to extract the cached data
   API::Workspace_sptr extractDataImpl();
 
   /// Broker to use to subscribe to topics
@@ -169,7 +179,7 @@ private:
   void waitForDataExtraction();
   void waitForRunEndObservation();
 
-  // Methods for checking if the end of a run was reached
+  /// Methods for checking if the end of a run was reached
   std::unordered_map<std::string, std::vector<int64_t>> getStopOffsets(
       std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
       std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
@@ -178,7 +188,7 @@ private:
       const std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
       bool &checkOffsets);
 
-  // Callbacks (for unit tests)
+  /// Callbacks for unit tests
   CallbackFn m_cbIterationEnd;
   CallbackFn m_cbError;
 
