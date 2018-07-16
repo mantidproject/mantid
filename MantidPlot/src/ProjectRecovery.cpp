@@ -345,19 +345,21 @@ void ProjectRecovery::stopProjectSaving() {
 void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
   ScriptingWindow *scriptWindow = m_windowPtr->getScriptWindowHandle();
   if (!scriptWindow) {
-	  throw std::runtime_error("Could not get handle to scripting window");
+    throw std::runtime_error("Could not get handle to scripting window");
   }
 
   // Ensure the window repaints so it doesn't appear frozen before exec
   scriptWindow->executeCurrentTab(Script::ExecutionMode::Serialised);
   if (scriptWindow->getSynchronousErrorFlag()) {
-	  // We failed to run the whole script
-	  // Note: We must NOT throw from the method for excepted failures, 
-	  // since doing so will cause the application to terminate from a uncaught exception
-	  g_log.error("Project recovery script did not finish. Your work has been partially recovered.");
+    // We failed to run the whole script
+    // Note: We must NOT throw from the method for excepted failures,
+    // since doing so will cause the application to terminate from a uncaught
+    // exception
+    g_log.error("Project recovery script did not finish. Your work has been "
+                "partially recovered.");
     this->clearAllCheckpoints();
     this->startProjectSaving();
-	  return;
+    return;
   }
   g_log.notice("Re-opening GUIs");
 

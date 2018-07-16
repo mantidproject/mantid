@@ -10,7 +10,6 @@
 #include <boost/optional.hpp>
 #include <QMainWindow>
 
-
 //----------------------------------------------------------
 // Forward declarations
 //---------------------------------------------------------
@@ -69,7 +68,7 @@ public:
 
   /// Sets a flag which is set to true if synchronous execution fails
   // We set a flag on failure to avoid problems with Async not returning success
-  bool getSynchronousErrorFlag() { return m_failureFlag;  }
+  bool getSynchronousErrorFlag() { return m_failureFlag; }
 
 signals:
   /// Show the scripting language dialog
@@ -193,7 +192,7 @@ private:
   /// Flag to define whether we should accept a close event
   bool m_acceptClose;
 
-  bool m_failureFlag{ false };
+  bool m_failureFlag{false};
 };
 
 #endif // SCRIPTINGWINDOW_H_

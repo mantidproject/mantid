@@ -515,21 +515,21 @@ bool ScriptFileInterpreter::executeCode(const ScriptCode &code,
                                         const Script::ExecutionMode mode) {
   if (code.isEmpty())
     // This cannot fail
-	return true;
+    return true;
   if (mode == Script::Asynchronous) {
     try {
       m_runner->executeAsync(code);
-	  // Best attempt at returning a status
-	  return true;
+      // Best attempt at returning a status
+      return true;
     } catch (std::runtime_error &exc) {
       QMessageBox::critical(this, "MantidPlot", exc.what());
-	  return false; // To silence the compiler despite being useless
+      return false; // To silence the compiler despite being useless
     }
   } else if (mode == Script::Serialised) {
     return m_runner->execute(code);
   } else {
     QMessageBox::warning(this, "MantidPlot", "Unknown script execution mode");
-	return false;
+    return false;
   }
 }
 
