@@ -48,7 +48,7 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         reference = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Reference')
 
         self.declareProperty(name='NormaliseBy',
-                             defaultValue='Timer',
+                             defaultValue='Monitor',
                              validator=StringListValidator(['None', 'Timer', 'Monitor']),
                              doc='Choose the normalisation type.')
 
@@ -161,8 +161,13 @@ class ILLSANSReduction(DataProcessorAlgorithm):
     def _normalise(self, ws):
 
         normalise_by = self.getPropertyValue('NormaliseBy')
+        mon = ws + '_mon'
+        ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws, MonitorWorkspace=mon)
         if normalise_by == 'Monitor':
-            NormaliseToMonitor(InputWorkspace=ws, MonitorID=100000, OutputWorkspace=ws)
+            ExtractSingleSpectrum(InputWorkspace=mon, WorkspaceIndex=0, OutputWorkspace=mon)
+            if mtd[mon].readY(0)[0] == 0:
+                raise RuntimeError('Normalise to monitor requested, but monitor has 0 counts.')
+            Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws)
         elif normalise_by == 'Timer':
             if mtd[ws].getRun().hasProperty('timer'):
                 duration = mtd[ws].getRun().getLogData('timer').value
@@ -172,7 +177,7 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                     raise RuntimeError('Unable to normalise to time; duration found is 0 seconds.')
             else:
                 raise RuntimeError('Normalise to timer requested, but timer information is not available.')
-        ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws)
+        DeleteWorkspace(mon)
 
     def _process_beam(self, ws):
 
