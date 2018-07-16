@@ -463,6 +463,23 @@ bool WorkspaceGroup::isInGroup(const Workspace &workspaceToCheck,
   return false;
 }
 
+size_t WorkspaceGroup::getMemorySize(){
+  auto total = std::size_t(0);
+  // Go through each workspace
+  for (auto workspace : workspaces) {
+    // If the workspace is a group
+    if (workspace->getMemorySize() == 0) {
+      total =
+          total + getGroupMemorySize(
+                      boost::dynamic_pointer_cast<WorkspaceGroup>(workspace));
+      continue;
+    }
+    total = total + workspace->getMemorySize();
+  }
+  return total;
+}
+}
+
 } // namespace API
 } // namespace Mantid
 

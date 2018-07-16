@@ -63,7 +63,7 @@ public:
   const std::string toString() const override;
 
   /// The collection itself is considered to take up no space
-  size_t getMemorySize() const override { return 0; }
+  size_t getMemorySize() const override;
   /// Sort the internal data structure according to member name
   void sortMembersByName();
   /// Adds a workspace to the group.
