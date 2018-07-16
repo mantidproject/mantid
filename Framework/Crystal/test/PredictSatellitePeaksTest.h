@@ -71,7 +71,8 @@ public:
     alg.setProperty("Peaks", WSName);
 
     alg.setProperty("SatellitePeaks", std::string("SatellitePeaks"));
-    alg.setProperty("OffsetVector1", "0.5,0,.2,1");
+    alg.setProperty("ModVector1", "0.5,0,.2");
+    alg.setProperty("MaxOrder", "1");
     TS_ASSERT(alg.execute());
     TS_ASSERT(alg.isExecuted());
     alg.setPropertyValue("SatellitePeaks", "SatellitePeaks");

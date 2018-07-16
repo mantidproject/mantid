@@ -354,15 +354,10 @@ void SaveIsawPeaks::exec() {
           // unless Crystallography convention
           if (m_ModStru) {
             V3D mod = p.getModStru();
-            double deltaH =
-                mod[0] * offset1[0] + mod[1] * offset2[0] + mod[2] * offset3[0];
-            double deltaK =
-                mod[0] * offset1[1] + mod[1] * offset2[1] + mod[2] * offset3[1];
-            double deltaL =
-                mod[0] * offset1[2] + mod[1] * offset2[2] + mod[2] * offset3[2];
-            out << std::setw(5) << Utils::round(qSign * (p.getH() - deltaH))
-                << std::setw(5) << Utils::round(qSign * (p.getK() - deltaK))
-                << std::setw(5) << Utils::round(qSign * (p.getL() - deltaL));
+            auto intHKL = p.getIntHKL();
+            out << std::setw(5) << Utils::round(qSign * intHKL.X())
+                << std::setw(5) << Utils::round(qSign * intHKL.Y())
+                << std::setw(5) << Utils::round(qSign * intHKL.Z());
 
             out << std::setw(5) << Utils::round(qSign * mod[0]) << std::setw(5)
                 << Utils::round(qSign * mod[1]) << std::setw(5)

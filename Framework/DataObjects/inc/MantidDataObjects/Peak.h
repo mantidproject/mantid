@@ -98,12 +98,14 @@ public:
   double getK() const override;
   double getL() const override;
   Mantid::Kernel::V3D getHKL() const override;
+  Mantid::Kernel::V3D getIntHKL() const override;
   void setH(double m_H) override;
   void setK(double m_K) override;
   void setL(double m_L) override;
   void setBankName(std::string m_bankName);
   void setHKL(double H, double K, double L) override;
   void setHKL(const Mantid::Kernel::V3D &HKL) override;
+  void setIntHKL(const Mantid::Kernel::V3D &HKL) override;
   void resetHKL();
 
   Mantid::Kernel::V3D getQLabFrame() const override;
@@ -200,6 +202,15 @@ private:
 
   /// L of the peak
   double m_L;
+
+  /// integer H of the peak
+  int m_intH;
+
+  /// integer K of the peak
+  int m_intK;
+
+  /// integer L of the peak
+  int m_intL;
 
   /// Integrated peak intensity
   double m_intensity;

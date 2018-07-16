@@ -244,6 +244,7 @@ void PredictSatellitePeaks::exec() {
             continue;
 
           peak->setHKL(hkl1);
+          peak->setIntHKL(hkl);
           peak->setPeakNumber(seqNum);
           seqNum++;
           peak->setRunNumber(RunNumber);
