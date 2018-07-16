@@ -194,6 +194,10 @@ QString ISISEnergyTransfer::validateDetectorGrouping() {
     if (!m_uiForm.dsMapFile->isValid())
       return "Mapping file is invalid.";
   }
+  if (m_uiForm.cbGroupingOptions->currentText() == "Custom") {
+    if (m_uiForm.leCustomGroups->text() == "")
+      return "Please supply a custom grouping for detectors.";
+  }
   return "";
 }
 

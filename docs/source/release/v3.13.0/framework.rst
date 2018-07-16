@@ -18,7 +18,7 @@ Instrument Definition Updates
 Stability
 ---------
 
-- Mantid now handles poor network stability  better when reading live data from the ISIS DAE.  Mantid will now timeout after a couple of minutes of loss of network connectivity and remains responsive during this time.  You can alter the duration of this timeout by adding a line to the mantid.user.properties file like: 
+- Mantid now handles poor network stability  better when reading live data from the ISIS DAE.  Mantid will now timeout after a couple of minutes of loss of network connectivity and remains responsive during this time.  You can alter the duration of this timeout by adding a line to the mantid.user.properties file like:
 
 ```
 ISISDAE.Timeout = 100 #seconds
@@ -72,6 +72,7 @@ Improvements
 - :ref:`Stitch1D <algm-Stitch1D>` can treat point data.
 - The algorithm :ref:`SortXAxis <algm-SortXAxis>` has a new input option that allows ascending (default) and descending sorting. The documentation needed to be corrected in general.
 - :ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` has changed its properties for clarification. This has also propagated to :ref:`LoadEventNexus <algm-LoadEventNexus>` and :ref:`LoadEventAndCompress <algm-LoadEventAndCompress>`
+- :class:`mantid.kernel.FacilityInfo` has an additional field with the timezone for use in converting ``numpy.datetime64`` values to strings
 
 Bugfixes
 ########
@@ -112,6 +113,7 @@ Bugfixes
 - Fit functions defined in a python script can be used with the new fit function API right after subscription.
 - Child algorithms now respect their parent algorithm's ``EnableLogging`` setting when invoked using the function-style calling. Previously, some messages could appear in the log even though ``EnableLogging`` was set to ``False``.
 - Fixed a bug in ``detectorSignedTwoTheta`` method in ``MatrixWorkspace`` where the sign of the angle depended on the axis pointing up, not on the actual theta-sing axis defined in the IDF.
+- Fixed a bug where calling ``setCell`` method on a :ref:`PeaksWorkspace <PeaksWorkspace>` did not set the cell value.
 
 
 :ref:`Release 3.13.0 <v3.13.0>`

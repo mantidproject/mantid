@@ -16743,6 +16743,19 @@ bool ApplicationWindow::isOfType(const QObject *obj,
 }
 
 /**
+  * Loads a project file as part of project recovery
+  *
+  * @param sourceFile The full path to the .project file
+  * @return True is loading was successful, false otherwise
+  */
+bool ApplicationWindow::loadProjectRecovery(std::string sourceFile) {
+  const bool isRecovery = true;
+  ProjectSerialiser projectWriter(this, isRecovery);
+  // File version is not applicable to project recovery - so set to 0
+  return projectWriter.load(sourceFile, 0);
+}
+
+/**
  * Triggers saving project recovery on behalf of an external thread
  * or caller, such as project recovery.
  *
@@ -16762,8 +16775,19 @@ void ApplicationWindow::checkForProjectRecovery() {
   }
 
   // Recovery file present
-  if (m_projectRecovery.attemptRecovery()) {
-    // If it worked correctly reset project recovery and start saving
+  try {
+    m_projectRecovery.attemptRecovery();
+  } catch (std::exception &e) {
+    std::string err{
+        "Project Recovery failed to recover this checkpoint. Details: "};
+    err.append(e.what());
+    g_log.error(err);
+    QMessageBox::information(this, "Could Not Recover",
+                             "We could not fully recover your work.\nMantid "
+                             "will continue to run normally now.",
+                             "OK");
+
+    // Restart project recovery manually
     m_projectRecovery.clearAllCheckpoints();
     m_projectRecovery.startProjectSaving();
   }

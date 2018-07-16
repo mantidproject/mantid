@@ -56,6 +56,8 @@ public:
 private:
   void init() override;
   void exec() override;
+  // Set default names for output workspaces
+  void setDefaultOutputWorkspaceNames();
   /// Get the name of the detectors of interest based on processing instructions
   std::vector<std::string>
   getDetectorNames(const std::string &instructions,
