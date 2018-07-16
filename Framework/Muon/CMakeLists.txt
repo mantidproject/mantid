@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/EstimateMuonAsymmetryFromCounts.cpp
         src/MuonAlgorithmHelper.cpp
 	src/MuonAsymmetryHelper.cpp
+	src/MuonGroupDetectors.cpp
 )
 
 set ( INC_FILES
@@ -26,6 +27,7 @@ set ( INC_FILES
 	inc/MantidMuon/EstimateMuonAsymmetryFromCounts.h
         inc/MantidMuon/MuonAlgorithmHelper.h
 	inc/MantidMuon/MuonAsymmetryHelper.h
+	inc/MantidMuon/MuonGroupDetectors.h
 )
 
 set ( TEST_FILES
@@ -39,7 +41,9 @@ set ( TEST_FILES
 	CalMuonDetectorPhasesTest.h
         ConvertFitFunctionForMuonTFAsymmetryTest.h
 	EstimateMuonAsymmetryFromCountsTest.h
-        MuonAlgorithmHelperTest.h)
+        MuonAlgorithmHelperTest.h
+	MuonGroupDetectorsTest.h
+)
 
 if (COVERALLS)
     foreach( loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})

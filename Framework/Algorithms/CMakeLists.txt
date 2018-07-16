@@ -203,7 +203,7 @@ set ( SRC_FILES
 	src/Multiply.cpp
 	src/MultiplyRange.cpp
 #	src/MuonAsymmetryHelper.cpp
-	src/MuonGroupDetectors.cpp
+#	src/MuonGroupDetectors.cpp
 	src/NRCalculateSlitResolution.cpp
 	src/NormaliseByCurrent.cpp
 	src/NormaliseByDetector.cpp
@@ -543,7 +543,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Multiply.h
 	inc/MantidAlgorithms/MultiplyRange.h
 #	inc/MantidAlgorithms/MuonAsymmetryHelper.h
-	inc/MantidAlgorithms/MuonGroupDetectors.h
+#	inc/MantidAlgorithms/MuonGroupDetectors.h
 	inc/MantidAlgorithms/NRCalculateSlitResolution.h
 	inc/MantidAlgorithms/NormaliseByCurrent.h
 	inc/MantidAlgorithms/NormaliseByDetector.h
@@ -886,7 +886,7 @@ set ( TEST_FILES
 	MostLikelyMeanTest.h
 	MultiplyRangeTest.h
 	MultiplyTest.h
-	MuonGroupDetectorsTest.h
+#	MuonGroupDetectorsTest.h
 	NRCalculateSlitResolutionTest.h
 	NormaliseByCurrentTest.h
 	NormaliseByDetectorTest.h
