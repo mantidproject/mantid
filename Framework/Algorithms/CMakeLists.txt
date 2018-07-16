@@ -20,7 +20,7 @@ set ( SRC_FILES
 	src/Bin2DPowderDiffraction.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
-	src/CalMuonDeadTime.cpp
+#	src/CalMuonDeadTime.cpp
 	src/CalMuonDetectorPhases.cpp
 	src/CalculateCountRate.cpp
 	src/CalculateDIFC.cpp
@@ -356,7 +356,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
-	inc/MantidAlgorithms/CalMuonDeadTime.h
+#	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalMuonDetectorPhases.h
 	inc/MantidAlgorithms/CalculateCountRate.h
 	inc/MantidAlgorithms/CalculateDIFC.h
@@ -707,7 +707,7 @@ set ( TEST_FILES
 	Bin2DPowderDiffractionTest.h
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
-	CalMuonDeadTimeTest.h
+#	CalMuonDeadTimeTest.h
 	CalMuonDetectorPhasesTest.h
 	CalculateCarpenterSampleCorrectionTest.h
 	CalculateCountRateTest.h
