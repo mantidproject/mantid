@@ -491,8 +491,7 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         if instrumentName == 'CORELLI':
             sigX0 = sigX0*2.
             sigY0 = sigY0*2.
-            print(sigX0, sigY0, '****')
-            neigh_length_m = 3
+            neigh_length_m = 5
             convBox = 1.0*np.ones([neigh_length_m, neigh_length_m]) / neigh_length_m**2
             conv_h = convolve(h, convBox)
             H[:,:,0] = conv_h
@@ -521,7 +520,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
 
         fitResults = Fit(Function=m, InputWorkspace='bvgWS', Output='bvgfit',
                          Minimizer='Levenberg-MarquardtMD')
-        print(m)
 
     elif forceParams is not None:
         p0 = np.zeros(7)
@@ -560,6 +558,15 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         # Here we can make instrument-specific changes to our initial guesses and boundaries
         if instrumentName == 'MANDI':
             pass
+
+        if instrumentName == 'CORELLI':
+            sigX0 = sigX0*2.
+            sigY0 = sigY0*2.
+            neigh_length_m = 5
+            convBox = 1.0*np.ones([neigh_length_m, neigh_length_m]) / neigh_length_m**2
+            conv_h = convolve(h, convBox)
+            H[:,:,0] = conv_h
+            H[:,:,1] = conv_h
 
         # Set our initial guess
         m = BivariateGaussian.BivariateGaussian()
