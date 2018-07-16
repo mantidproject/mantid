@@ -355,6 +355,8 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
 	  // Note: We must NOT throw from the method for excepted failures, 
 	  // since doing so will cause the application to terminate from a uncaught exception
 	  g_log.error("Project recovery script did not finish. Your work has been partially recovered.");
+    this->clearAllCheckpoints();
+    this->startProjectSaving();
 	  return;
   }
   g_log.notice("Re-opening GUIs");
