@@ -202,7 +202,6 @@ def fitScaling(n_events, box, YTOF, YBVG, goodIDX=None, neigh_length_m=3, instru
                 max(fitMaxIDX[1] - dP, 0):min(fitMaxIDX[1] + dP, goodIDX.shape[1]),
                 max(fitMaxIDX[2] - dP, 0):min(fitMaxIDX[2] + dP, goodIDX.shape[2])] = True
     goodIDX = np.logical_and(goodIDX, conv_n_events > 0)
-    print(np.sum(goodIDX), '*!*!*!*!**!!')
     # A1 = slope, A0 = offset
     scaleLinear = Polynomial(n=1)
     scaleLinear.constrain("A1>0")
@@ -490,9 +489,14 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
             sigY0 = sigY0*3.
 
         if instrumentName == 'CORELLI':
-            sigX0 = sigX0*3.
-            sigY0 = sigY0*3.
+            sigX0 = sigX0*2.
+            sigY0 = sigY0*2.
             print(sigX0, sigY0, '****')
+            neigh_length_m = 3
+            convBox = 1.0*np.ones([neigh_length_m, neigh_length_m]) / neigh_length_m**2
+            conv_h = convolve(h, convBox)
+            H[:,:,0] = conv_h
+            H[:,:,1] = conv_h
 
         # Set our initial guess
         m = BivariateGaussian.BivariateGaussian()
@@ -508,7 +512,10 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         m.setAttributeValue('nX', h.shape[0])
         m.setAttributeValue('nY', h.shape[1])
         m.setConstraints(boundsDict)
+        
         # Do the fit
+        #bvgWS = CreateWorkspace(OutputWorkspace='bvgWS', DataX=pos.ravel(
+        #), DataY=H.ravel(), DataE=np.sqrt(H.ravel()))
         bvgWS = CreateWorkspace(OutputWorkspace='bvgWS', DataX=pos.ravel(
         ), DataY=H.ravel(), DataE=np.sqrt(H.ravel()))
 
