@@ -552,10 +552,8 @@ public:
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
-    // + 1 because rdkafka::offsetsForTimes returns the first offset _after_ the
-    // given timestamp
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName,
-                                                         {m_stopOffset + 1})};
+                                                         {m_stopOffset})};
   }
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
