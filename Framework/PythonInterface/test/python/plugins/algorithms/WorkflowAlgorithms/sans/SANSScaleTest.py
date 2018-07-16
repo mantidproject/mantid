@@ -53,7 +53,7 @@ class SANSScaleTest(unittest.TestCase):
         height = 2.0
         scale = 7.2
         state = self._get_sample_state(width=width, height=height, thickness=3.0, scale=scale,
-                                       shape=SampleShape.Cylinder)
+                                       shape=SampleShape.CylinderAxisUp)
         serialized_state = state.property_manager
         scale_name = "SANSScale"
         scale_options = {"SANSState": serialized_state,

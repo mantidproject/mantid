@@ -273,11 +273,11 @@ def convert_to_shape(shape_flag):
     :return: a shape object
     """
     if shape_flag == 1:
-        shape = SampleShape.Cylinder
+        shape = SampleShape.CylinderAxisUp
     elif shape_flag == 2:
-        shape = SampleShape.FlatPlate
+        shape = SampleShape.Cuboid
     elif shape_flag == 3:
-        shape = SampleShape.Disc
+        shape = SampleShape.CylinderAxisAlong
     else:
         shape = None
     return shape
@@ -407,11 +407,11 @@ def get_geometry_information_isis_nexus(file_name):
         thickness = float(sample[THICKNESS][0])
         shape_as_string = sample[SHAPE][0].upper().decode("utf-8")
         if shape_as_string == CYLINDER:
-            shape = SampleShape.Cylinder
+            shape = SampleShape.CylinderAxisUp
         elif shape_as_string == FLAT_PLATE:
-            shape = SampleShape.FlatPlate
+            shape = SampleShape.Cuboid
         elif shape_as_string == DISC:
-            shape = SampleShape.Disc
+            shape = SampleShape.CylinderAxisAlong
         else:
             shape = None
     return height, width, thickness, shape
