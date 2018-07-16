@@ -6,7 +6,7 @@ set ( SRC_FILES
 	src/AddSampleLog.cpp
 	src/AddTimeSeriesLog.cpp
 	src/AlignDetectors.cpp
-	src/AlphaCalc.cpp
+#	src/AlphaCalc.cpp
 	src/AnnularRingAbsorption.cpp
 	src/AnyShapeAbsorption.cpp
 	src/ApodizationFunctions.cpp
@@ -341,7 +341,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AddSampleLog.h
 	inc/MantidAlgorithms/AddTimeSeriesLog.h
 	inc/MantidAlgorithms/AlignDetectors.h
-	inc/MantidAlgorithms/AlphaCalc.h
+#	inc/MantidAlgorithms/AlphaCalc.h
 	inc/MantidAlgorithms/AnnularRingAbsorption.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
 	inc/MantidAlgorithms/ApodizationFunctions.h
@@ -694,7 +694,7 @@ set ( TEST_FILES
 	AddSampleLogTest.h
 	AddTimeSeriesLogTest.h
 	AlignDetectorsTest.h
-	AlphaCalcTest.h
+#	AlphaCalcTest.h
 	AnnularRingAbsorptionTest.h
 	AnyShapeAbsorptionTest.h
 	AppendSpectraTest.h
