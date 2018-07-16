@@ -1,0 +1,47 @@
+digraph Container {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    NormaliseBy
+  }
+
+  subgraph params {
+    $param_style
+    Run
+    TransmissionValue
+    TransmissionError
+    BeamCenterX
+    BeamCenterY
+    AbsorberInputWorkspace
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadAndMerge
+    Divide
+    Minus
+    MoveInstrumentComponent
+    ApplyTransmissionCorrection
+    SANSSolidAngleCorrection
+  }
+
+  Run -> LoadAndMerge
+  LoadAndMerge -> NormaliseBy
+  NormaliseBy -> Divide
+  Divide -> Minus
+  AbsorberInputWorkspace -> Minus
+  Minus -> MoveInstrumentComponent
+  BeamCenterX -> MoveInstrumentComponent
+  BeamCenterY -> MoveInstrumentComponent
+  MoveInstrumentComponent -> SANSSolidAngleCorrection
+  SANSSolidAngleCorrection -> ApplyTransmissionCorrection
+  TransmissionValue -> ApplyTransmissionCorrection
+  TransmissionError -> ApplyTransmissionCorrection
+  ApplyTransmissionCorrection -> OutputWorkspace
+}

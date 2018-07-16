@@ -1,0 +1,41 @@
+digraph Transmission {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    NormaliseBy
+  }
+
+  subgraph params {
+    $param_style
+    Run
+    BeamRadius
+    AbsorberInputWorkspace
+    BeamInputWorkspace
+  }
+
+  subgraph values {
+    $value_style
+    TransmissionValue
+    TransmissionError
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadAndMerge
+    Divide
+    Minus
+    CalculateTransmission
+  }
+
+  Run -> LoadAndMerge
+  LoadAndMerge -> NormaliseBy
+  NormaliseBy -> Divide
+  Divide -> Minus
+  AbsorberInputWorkspace -> Minus
+  Minus -> CalculateTransmission
+  BeamInputWorkspace -> CalculateTransmission
+  BeamRadius -> CalculateTransmission
+  CalculateTransmission -> TransmissionValue
+  CalculateTransmission -> TransmissionError
+}

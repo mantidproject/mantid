@@ -1,0 +1,76 @@
+digraph Sample {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    NormaliseBy
+    AbsoluteScaleBy
+  }
+
+  subgraph params {
+    $param_style
+    Run
+    TransmissionValue
+    TransmissionError
+    BeamCenterX
+    BeamCenterY
+    AbsorberInputWorkspace
+    ContainerInputWorkspace
+    SensitivityInputWorkspace
+    ReferenceInputWorkspace
+    MaskedInputWorkspace
+    SampleThickness
+    BeamFluxValue
+    BeamFluxError
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadAndMerge
+    Divide
+    Minus
+    MoveInstrumentComponent
+    ApplyTransmissionCorrection
+    SANSSolidAngleCorrection
+    Minus2 [label="Minus"]
+    MaskDetectors
+    NormaliseByThickness
+    Divide2 [label="Divide"]
+    Divide3 [label="Divide"]
+    Divide4 [label="Divide"]
+  }
+
+  Run -> LoadAndMerge
+  LoadAndMerge -> NormaliseBy
+  NormaliseBy -> Divide
+  Divide -> Minus
+  AbsorberInputWorkspace -> Minus
+  Minus -> MoveInstrumentComponent
+  BeamCenterX -> MoveInstrumentComponent
+  BeamCenterY -> MoveInstrumentComponent
+  MoveInstrumentComponent -> SANSSolidAngleCorrection
+  SANSSolidAngleCorrection -> ApplyTransmissionCorrection
+  TransmissionValue -> ApplyTransmissionCorrection
+  TransmissionError -> ApplyTransmissionCorrection
+  ApplyTransmissionCorrection -> Minus2
+  ContainerInputWorkspace -> Minus2
+  Minus2 -> MaskDetectors
+  MaskedInputWorkspace -> MaskDetectors
+  MaskDetectors -> NormaliseByThickness
+  SampleThickness -> NormaliseByThickness
+  NormaliseByThickness -> AbsoluteScaleBy
+  AbsoluteScaleBy -> Divide2 [label="Beam Flux"]
+  BeamFluxValue -> Divide2
+  BeamFluxError -> Divide2
+  Divide2 -> Divide3
+  SensitivityInputWorkspace -> Divide3
+  Divide3 -> OutputWorkspace
+  AbsoluteScaleBy -> Divide4 [label="Standard Sample"]
+  ReferenceInputWorkspace -> Divide4
+  Divide4 -> OutputWorkspace
+}

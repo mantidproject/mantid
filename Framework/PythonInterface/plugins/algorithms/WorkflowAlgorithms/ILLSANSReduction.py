@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, MatrixWorkspaceProperty, PropertyMode
-from mantid.kernel import StringListValidator, Direction, EnabledWhenProperty, PropertyCriterion, LogicOperator, FloatBoundedValidator
+from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
+from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, StringListValidator
 from mantid.simpleapi import *
 
 
@@ -121,12 +121,23 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         self.setPropertySettings('ContainerInputWorkspace',
                                  EnabledWhenProperty(sample, reference, LogicOperator.Or))
 
+        self.declareProperty(MatrixWorkspaceProperty('ReferenceInputWorkspace', '',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='The name of the reference workspace.')
+
+        self.setPropertySettings('ReferenceInputWorkspace', sample)
+
         self.declareProperty(MatrixWorkspaceProperty('SensitivityInputWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='The name of the input sensitivity workspace.')
 
-        self.setPropertySettings('SensitivityInputWorkspace', sample)
+        self.setPropertySettings('SensitivityInputWorkspace',
+                                 EnabledWhenProperty(sample,
+                                                     EnabledWhenProperty('ReferenceInputWorkspace',
+                                                                         PropertyCriterion.IsEqualTo, ''),
+                                                     LogicOperator.And))
 
         self.declareProperty(MatrixWorkspaceProperty('SensitivityOutputWorkspace', '',
                                                      direction=Direction.Output,
@@ -135,24 +146,30 @@ class ILLSANSReduction(DataProcessorAlgorithm):
 
         self.setPropertySettings('SensitivityOutputWorkspace', reference)
 
-        self.declareProperty(MatrixWorkspaceProperty('ReferenceInputWorkspace', '',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
-                             doc='The name of the reference workspace.')
-
-        self.setPropertySettings('ReferenceInputWorkspace', sample)
-
         self.declareProperty(MatrixWorkspaceProperty('MaskedInputWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='Workspace to copy the mask from; for example, the beam stop')
 
+        self.setPropertySettings('MaskedInputWorkspace', EnabledWhenProperty(sample, reference, LogicOperator.Or))
+
     def _cylinder(self, radius):
+        """
+            Returns XML for an infinite cylinder with axis of z (beam) and given radius [m]
+            @oaram radius : the radius of the cylinder [m]
+            @return : XML string for the geometry shape
+        """
 
         return '<infinite-cylinder id="flux"><centre x="0.0" y="0.0" z="0.0"/><axis x="0.0" y="0.0" z="1.0"/>' \
                '<radius val="{0}"/></infinite-cylinder>'.format(radius)
 
     def _integrate_in_radius(self, ws, radius):
+        """
+            Sums the detector counts within the given radius around the beam
+            @param ws : the input workspace
+            @param radius : the radius [m]
+            @returns : the workspace with the summed counts
+        """
 
         shapeXML = self._cylinder(radius)
         det_list = FindDetectorsInShape(Workspace=ws, ShapeXML=shapeXML)
@@ -161,6 +178,10 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         return grouped
 
     def _normalise(self, ws):
+        """
+            Normalizes the workspace by time (SampleLog Timer) or Monitor (ID=100000)
+            @param ws : the input workspace
+        """
 
         normalise_by = self.getPropertyValue('NormaliseBy')
         if normalise_by == 'Monitor':
@@ -182,6 +203,10 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                 raise RuntimeError('Normalise to timer requested, but timer information is not available.')
 
     def _process_beam(self, ws):
+        """
+            Calculates the beam center's x,y coordinates, and the beam flux
+            @param ws : the input [empty beam] workspace
+        """
 
         centers = ws + '_centers'
         method = self.getProperty('DirectBeam').value
@@ -255,13 +280,14 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                                 CalculateEfficiency(InputWorkspace=ws, OutputWorkspace=sensitivity_out)
                                 self.setProperty('SensitivityOutputWorkspace', mtd[sensitivity_out])
                         elif process == 'Sample':
-                            sensitivity_in = self.getPropertyValue('SensitivityInputWorkspace')
-                            if sensitivity_in:
-                                Divide(LHSWorkspace=ws, RHSWorkspace=sensitivity_in, OutputWorkspace=ws)
                             reference = self.getPropertyValue('ReferenceInputWorkspace')
                             if reference:
-                                pass
+                                Divide(LHSWorkspace=ws, RHSWorkspace=reference, OutputWorkspace=ws)
+                                ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0., NaNError=0.)
                             else:
+                                sensitivity_in = self.getPropertyValue('SensitivityInputWorkspace')
+                                if sensitivity_in:
+                                    Divide(LHSWorkspace=ws, RHSWorkspace=sensitivity_in, OutputWorkspace=ws)
                                 flux = self.getProperty('BeamFluxValue').value
                                 ferr = self.getProperty('BeamFluxError').value
                                 flux_ws = ws + '_flux'

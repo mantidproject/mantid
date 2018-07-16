@@ -1,0 +1,54 @@
+digraph Beam {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    NormaliseBy
+    DirectBeam
+  }
+
+  subgraph params {
+    $param_style
+    Run
+    BeamRadius
+    AbsorberInputWorkspace
+  }
+
+  subgraph values {
+    $value_style
+    BeamCenterX
+    BeamCenterY
+    BeamFluxValue
+    BeamFluxError
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadAndMerge
+    Divide
+    Minus
+    FindCenterOfMassPosition
+  }
+
+  subgraph process {
+    $process_style
+    IntegrateInRadius
+  }
+
+  Run -> LoadAndMerge
+  LoadAndMerge -> NormaliseBy
+  NormaliseBy -> Divide
+  Divide -> Minus
+  AbsorberInputWorkspace -> Minus
+  Minus -> FindCenterOfMassPosition
+  BeamRadius -> FindCenterOfMassPosition
+  FindCenterOfMassPosition -> DirectBeam
+  DirectBeam -> BeamCenterX
+  DirectBeam -> BeamCenterY
+  BeamRadius -> IntegrateInRadius
+  Minus -> IntegrateInRadius
+  IntegrateInRadius -> BeamFluxValue
+  IntegrateInRadius -> BeamFluxError
+  Minus -> OutputWorkspace
+}

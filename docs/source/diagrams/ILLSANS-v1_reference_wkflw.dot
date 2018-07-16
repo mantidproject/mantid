@@ -1,0 +1,63 @@
+digraph Reference {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    NormaliseBy
+  }
+
+  subgraph params {
+    $param_style
+    Run
+    TransmissionValue
+    TransmissionError
+    BeamCenterX
+    BeamCenterY
+    AbsorberInputWorkspace
+    ContainerInputWorkspace
+    MaskedInputWorkspace
+    SampleThickness
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+    SensitivityOutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadAndMerge
+    Divide
+    Minus
+    MoveInstrumentComponent
+    ApplyTransmissionCorrection
+    SANSSolidAngleCorrection
+    Minus2 [label="Minus"]
+    CalculateEfficiency
+    MaskDetectors
+    NormaliseByThickness
+  }
+
+  Run -> LoadAndMerge
+  LoadAndMerge -> NormaliseBy
+  NormaliseBy -> Divide
+  Divide -> Minus
+  AbsorberInputWorkspace -> Minus
+  Minus -> MoveInstrumentComponent
+  BeamCenterX -> MoveInstrumentComponent
+  BeamCenterY -> MoveInstrumentComponent
+  MoveInstrumentComponent -> SANSSolidAngleCorrection
+  SANSSolidAngleCorrection -> ApplyTransmissionCorrection
+  TransmissionValue -> ApplyTransmissionCorrection
+  TransmissionError -> ApplyTransmissionCorrection
+  ApplyTransmissionCorrection -> Minus2
+  ContainerInputWorkspace -> Minus2
+  Minus2 -> MaskDetectors
+  MaskedInputWorkspace -> MaskDetectors
+  MaskDetectors -> NormaliseByThickness
+  SampleThickness -> NormaliseByThickness
+  NormaliseByThickness -> CalculateEfficiency
+  CalculateEfficiency -> SensitivityOutputWorkspace
+  NormaliseByThickness -> OutputWorkspace
+}
