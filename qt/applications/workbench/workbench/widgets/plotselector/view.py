@@ -69,9 +69,6 @@ class PlotSelectorView(QWidget):
         # same time. Wrap code in - with QMutexLocker(self.mutex):
         self.mutex = QMutex()
 
-        self.sort_order = Qt.AscendingOrder
-        self.sort_type = Column.Number
-
         self.show_button = QPushButton('Show')
         self.select_all_button = QPushButton('Select All')
         self.close_button = QPushButton('Close')
@@ -176,7 +173,7 @@ class PlotSelectorView(QWidget):
         table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         table_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)
         table_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        table_widget.sortItems(self.sort_type, self.sort_order)
+        table_widget.sortItems(Column.Number, Qt.AscendingOrder)
         table_widget.setSortingEnabled(True)
 
         table_widget.horizontalHeader().sectionClicked.connect(self.update_sort_menu_selection)
@@ -260,8 +257,7 @@ class PlotSelectorView(QWidget):
 
         self.filter_box.clear()
         for plot_number in plot_list:
-            plot_name = self.presenter.get_plot_name_from_number(plot_number)
-            self.append_to_plot_list(plot_name, True)
+            self.append_to_plot_list(plot_number)
 
     def _get_row_and_widget_from_plot_number(self, plot_number):
         """
@@ -292,10 +288,10 @@ class PlotSelectorView(QWidget):
         plots
         :return: A list of strings with the plot numbers
         """
-        selected = self.table_widget.selectionModel().selectedRows()
+        selected = set(index.row() for index in self.table_widget.selectedIndexes())
+        print(selected)
         selected_plots = []
-        for item in selected:
-            row = item.row()
+        for row in selected:
             if not self.table_widget.isRowHidden(row):
                 selected_plots.append(self.table_widget.cellWidget(row, Column.Name).plot_number)
         return selected_plots
@@ -307,7 +303,7 @@ class PlotSelectorView(QWidget):
         :return: A string with the plot number
         """
         row = self.table_widget.currentRow()
-        if self.table_widget.isRowHidden(row):
+        if row < 0 or self.table_widget.isRowHidden(row):
             return None
         return self.table_widget.cellWidget(row, Column.Name).plot_number
 
@@ -339,11 +335,9 @@ class PlotSelectorView(QWidget):
             for row in range(self.table_widget.rowCount()):
                 self.table_widget.setRowHidden(row, False)
 
-    def filter_plot_list(self, plot_list):
+    def filter_plot_list(self):
         """
-        Given a list of plots numbers, show only the ones in the list,
-        hiding the rest
-        :param plot_list: The list of plots numbers to show
+        Run through the plot list and show only if matching filter
         """
         with QMutexLocker(self.mutex):
             for row in range(self.table_widget.rowCount()):
@@ -375,6 +369,10 @@ class PlotSelectorView(QWidget):
         makes the plot name directly editable
         """
         plot_number = self.get_currently_selected_plot_number()
+
+        if plot_number is None:
+            return
+
         with QMutexLocker(self.mutex):
             row, widget = self._get_row_and_widget_from_plot_number(plot_number)
         widget.toggle_plot_name_editable(True)
@@ -458,38 +456,49 @@ class PlotSelectorView(QWidget):
         order_string = sort_order_map.get(order)
         column_string = sort_type_map.get(column)
 
-        print(order_string + column_string)
-
         for action in self.sort_button.menu().actions():
             if action.text() == order_string:
                 action.setChecked(True)
             if action.text() == column_string:
                 action.setChecked(True)
 
+    def sort_order(self):
+        """
+        Returns the currently set sort order
+        :return: Either Qt.AscendingOrder or Qt.DescendingOrder
+        """
+        return self.table_widget.horizontalHeader().sortIndicatorOrder()
+
     def set_sort_order(self, is_ascending):
         """
-        Set the list to sort ascending
+        Set the order of the sort list
 
         See also HumanReadableSortItem class
         :param is_ascending: If true sort ascending, else descending
         """
         if is_ascending:
-            self.sort_order = Qt.AscendingOrder
+            sort_order = Qt.AscendingOrder
         else:
-            self.sort_order = Qt.DescendingOrder
+            sort_order = Qt.DescendingOrder
 
         with QMutexLocker(self.mutex):
-            self.table_widget.sortItems(self.sort_type, self.sort_order)
+            self.table_widget.sortItems(self.sort_type(), sort_order)
+
+    def sort_type(self):
+        """
+        Returns the currently set sort type
+        :return: The sort type as a Column enum
+        """
+        column_number = self.table_widget.horizontalHeader().sortIndicatorSection()
+        return Column(column_number)
 
     def set_sort_type(self, sort_type):
         """
-        Set sorting to be by name - note this does not update any
-        sort keys, it just sets the required state
+        Set sorting to be by name
         :param sort_type: A Column enum for the column to sort on
         """
-        self.sort_type = sort_type
         with QMutexLocker(self.mutex):
-            self.table_widget.sortItems(sort_type, self.sort_order)
+            self.table_widget.sortItems(sort_type, self.sort_order())
 
     def set_last_active_values(self, last_active_values):
         """
@@ -510,7 +519,7 @@ class PlotSelectorView(QWidget):
                 if last_active_value:
                     last_active_item.setData(Qt.DisplayRole, str(last_active_value))
 
-            self.table_widget.sortItems(Column.LastActive, self.sort_order)
+            self.table_widget.sortItems(Column.LastActive, self.sort_order())
             self.table_widget.setSortingEnabled(True)
 
     # ---------------------- Plot Exporting -------------------------

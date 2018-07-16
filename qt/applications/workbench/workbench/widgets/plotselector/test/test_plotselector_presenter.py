@@ -31,7 +31,7 @@ except ImportError:
 
 class PlotSelectorPresenterTest(unittest.TestCase):
 
-    def side_effects_plot_name(self, plot_number):
+    def side_effect_plot_name(self, plot_number):
         if plot_number == 0:
             return "Plot1"
         if plot_number == 1:
@@ -48,7 +48,7 @@ class PlotSelectorPresenterTest(unittest.TestCase):
 
         self.model = mock.Mock(spec=PlotSelectorModel)
         self.model.get_plot_list = mock.Mock(return_value=[0, 1, 2, 42])
-        self.model.get_plot_name_from_number = mock.Mock(side_effect=self.side_effects_plot_name)
+        self.model.get_plot_name_from_number = mock.Mock(side_effect=self.side_effect_plot_name)
 
         self.presenter = PlotSelectorPresenter(None, self.view, self.model)
         self.presenter.widget = self.view

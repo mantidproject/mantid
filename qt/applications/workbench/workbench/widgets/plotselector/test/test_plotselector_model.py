@@ -30,7 +30,7 @@ except ImportError:
 
 class PlotSelectorModelTest(unittest.TestCase):
 
-    def side_effects_manager(self, plot_number):
+    def side_effect_manager(self, plot_number):
         if plot_number == 42:
             return self.figure_manager
         return None
@@ -44,7 +44,7 @@ class PlotSelectorModelTest(unittest.TestCase):
 
         self.global_figure_manager = mock.Mock()
         self.global_figure_manager.add_observer = mock.Mock()
-        self.global_figure_manager.figs.get = mock.Mock(side_effect=self.side_effects_manager)
+        self.global_figure_manager.figs.get = mock.Mock(side_effect=self.side_effect_manager)
         self.global_figure_manager.destroy = mock.Mock()
 
         self.model = PlotSelectorModel(self.presenter, self.global_figure_manager)

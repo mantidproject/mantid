@@ -206,7 +206,7 @@ class PlotSelectorPresenter(object):
         changes to the last shown order occur in the model, when
         renaming the key is set already
         """
-        if self.view.sort_type == Column.LastActive:
+        if self.view.sort_type() == Column.LastActive:
             self._set_last_active_order()
 
     def _set_last_active_order(self):
