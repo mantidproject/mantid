@@ -253,7 +253,7 @@ set ( SRC_FILES
 	src/Regroup.cpp
 	src/RemoveBackground.cpp
 	src/RemoveBins.cpp
-	src/RemoveExpDecay.cpp
+#	src/RemoveExpDecay.cpp
 	src/RemoveLowResTOF.cpp
 	src/RemoveMaskedSpectra.cpp
 	src/RemovePromptPulse.cpp
@@ -593,7 +593,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Regroup.h
 	inc/MantidAlgorithms/RemoveBackground.h
 	inc/MantidAlgorithms/RemoveBins.h
-	inc/MantidAlgorithms/RemoveExpDecay.h
+#	inc/MantidAlgorithms/RemoveExpDecay.h
 	inc/MantidAlgorithms/RemoveLowResTOF.h
 	inc/MantidAlgorithms/RemoveMaskedSpectra.h
 	inc/MantidAlgorithms/RemovePromptPulse.h
@@ -931,7 +931,7 @@ set ( TEST_FILES
 	RegroupTest.h
 	RemoveBackgroundTest.h
 	RemoveBinsTest.h
-	RemoveExpDecayTest.h
+#	RemoveExpDecayTest.h
 	RemoveLowResTOFTest.h
 	RemoveMaskedSpectraTest.h
 	RemovePromptPulseTest.h
