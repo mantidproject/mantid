@@ -1,6 +1,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/IDTypes.h"
@@ -86,5 +87,9 @@ void export_ExperimentInfo() {
       .def("spectrumInfo", &ExperimentInfo::spectrumInfo,
            return_value_policy<reference_existing_object>(), args("self"),
            "Return a const reference to the :class:`~mantid.api.SpectrumInfo` "
-           "object.");
+           "object.")
+      .def("componentInfo", &ExperimentInfo::componentInfo,
+        return_value_policy<reference_existing_object>(), args("self"),
+        "Return a const reference to the :class:`~mantid.geometry.ComponentInfo` "
+        "object.");
 }
