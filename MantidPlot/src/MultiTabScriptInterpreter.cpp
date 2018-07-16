@@ -272,8 +272,8 @@ void MultiTabScriptInterpreter::uncomment() { m_current->uncomment(); }
  * Execute the highlighted code from the current tab
  * *@param mode :: The mode used to execute
  */
-void MultiTabScriptInterpreter::executeAll(const Script::ExecutionMode mode) {
-  m_current->executeAll(mode);
+bool MultiTabScriptInterpreter::executeAll(const Script::ExecutionMode mode) {
+  return m_current->executeAll(mode);
 }
 
 /** Execute the highlighted code from the current tab using the
