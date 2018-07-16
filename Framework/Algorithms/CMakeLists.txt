@@ -216,7 +216,7 @@ set ( SRC_FILES
 	src/PaddingAndApodization.cpp
 	src/Pause.cpp
 	src/PerformIndexOperations.cpp
-	src/PhaseQuadMuon.cpp
+#	src/PhaseQuadMuon.cpp
 	src/PlotAsymmetryByLogValue.cpp
 	src/Plus.cpp
 	src/PointByPointVCorrection.cpp
@@ -556,7 +556,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PaddingAndApodization.h
 	inc/MantidAlgorithms/Pause.h
 	inc/MantidAlgorithms/PerformIndexOperations.h
-	inc/MantidAlgorithms/PhaseQuadMuon.h
+#	inc/MantidAlgorithms/PhaseQuadMuon.h
 	inc/MantidAlgorithms/PlotAsymmetryByLogValue.h
 	inc/MantidAlgorithms/Plus.h
 	inc/MantidAlgorithms/PointByPointVCorrection.h
@@ -898,7 +898,7 @@ set ( TEST_FILES
 	PaddingAndApodizationTest.h
 	PauseTest.h
 	PerformIndexOperationsTest.h
-	PhaseQuadMuonTest.h
+#	PhaseQuadMuonTest.h
 	PlotAsymmetryByLogValueTest.h
 	PlusTest.h
 	PointByPointVCorrectionTest.h
