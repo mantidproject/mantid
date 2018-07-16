@@ -46,6 +46,7 @@ set ( SRC_FILES
 	src/LoadDetectorInfo.cpp
 	src/LoadDetectorsGroupingFile.cpp
 	src/LoadDiffCal.cpp
+	src/LoadDNSEvent.cpp
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
 	src/LoadEventNexus.cpp
