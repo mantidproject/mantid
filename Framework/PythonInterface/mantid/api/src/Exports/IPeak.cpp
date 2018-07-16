@@ -88,9 +88,9 @@ void export_IPeak() {
            "Get HKL as a :class:`~mantid.kernel.V3D` object")
       .def("getIntHKL", &IPeak::getIntHKL, arg("self"),
            "Get HKL as a :class:`~mantid.kernel.V3D` object")
-      .def("setIntHKL", (void (IPeak::*)(Mantid::Kernel::V3D)) & IPeak::setIntHKL,
-           (arg("self"), arg("hkl")),
-           "Set the integer HKL values of this peak")
+      .def("setIntHKL",
+           (void (IPeak::*)(Mantid::Kernel::V3D)) & IPeak::setIntHKL,
+           (arg("self"), arg("hkl")), "Set the integer HKL values of this peak")
       .def("setHKL", (void (IPeak::*)(double, double, double)) & IPeak::setHKL,
            (arg("self"), arg("h"), arg("k"), arg("l")),
            "Set the HKL values of this peak")
