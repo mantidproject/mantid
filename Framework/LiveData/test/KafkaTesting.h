@@ -69,17 +69,20 @@ public:
     UNUSED_ARG(topic);
     throw std::runtime_error("FakeExceptionThrowingStreamSubscriber");
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     std::unordered_map<std::string, std::vector<int64_t>> offsets;
     return offsets;
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -103,17 +106,20 @@ public:
     UNUSED_ARG(partition);
     UNUSED_ARG(topic);
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     std::unordered_map<std::string, std::vector<int64_t>> offsets;
     return offsets;
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -229,17 +235,20 @@ public:
     UNUSED_ARG(partition);
     UNUSED_ARG(topic);
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     std::unordered_map<std::string, std::vector<int64_t>> offsets;
     return offsets;
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -281,16 +290,19 @@ public:
     UNUSED_ARG(partition);
     UNUSED_ARG(topic);
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {1})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     std::unordered_map<std::string, std::vector<int64_t>> offsets;
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {1})};
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -322,17 +334,20 @@ public:
     UNUSED_ARG(partition);
     UNUSED_ARG(topic);
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     std::unordered_map<std::string, std::vector<int64_t>> offsets;
     return offsets;
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -363,17 +378,20 @@ public:
     UNUSED_ARG(partition);
     UNUSED_ARG(topic);
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     std::unordered_map<std::string, std::vector<int64_t>> offsets;
     return offsets;
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -409,17 +427,20 @@ public:
     UNUSED_ARG(partition);
     UNUSED_ARG(topic);
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     std::unordered_map<std::string, std::vector<int64_t>> offsets;
     return offsets;
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -482,15 +503,18 @@ public:
     partition = 0;
     m_nextOffset++;
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {2})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {2})};
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -549,17 +573,20 @@ public:
     partition = 0;
     m_nextOffset++;
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName,
                                                          {m_stopOffset})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName,
                                                          {m_nextOffset - 1})};
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -604,17 +631,20 @@ public:
     UNUSED_ARG(partition);
     UNUSED_ARG(topic);
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     std::unordered_map<std::string, std::vector<int64_t>> offsets;
     return offsets;
   }
+  
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
