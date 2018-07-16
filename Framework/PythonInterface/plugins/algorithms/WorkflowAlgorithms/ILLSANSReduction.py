@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, FileProperty, \
-    WorkspaceGroupProperty, FileAction, Progress, MatrixWorkspaceProperty, PropertyMode
+from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, MatrixWorkspaceProperty, PropertyMode
 from mantid.kernel import StringListValidator, Direction, EnabledWhenProperty, PropertyCriterion, LogicOperator, FloatBoundedValidator
 from mantid.simpleapi import *
 
@@ -60,12 +59,14 @@ class ILLSANSReduction(DataProcessorAlgorithm):
 
         self.setPropertySettings('BeamCenterY', not_absorber)
 
-        self.declareProperty('BeamFluxValue', 1., direction=Direction.InOut, validator=FloatBoundedValidator(lower=0.), doc='Beam flux value')
+        self.declareProperty('BeamFluxValue', 1., direction=Direction.InOut,
+                             validator=FloatBoundedValidator(lower=0.), doc='Beam flux value')
 
         self.setPropertySettings('BeamFluxValue',
                                  EnabledWhenProperty(sample, EnabledWhenProperty(beam, reference, LogicOperator.Or), LogicOperator.Or))
 
-        self.declareProperty('BeamFluxError', 0., direction=Direction.InOut, validator=FloatBoundedValidator(lower=0.), doc='Beam flux error')
+        self.declareProperty('BeamFluxError', 0., direction=Direction.InOut,
+                             validator=FloatBoundedValidator(lower=0.), doc='Beam flux error')
 
         self.setPropertySettings('BeamFluxError',
                                  EnabledWhenProperty(sample, EnabledWhenProperty(beam, reference, LogicOperator.Or), LogicOperator.Or))
@@ -148,7 +149,8 @@ class ILLSANSReduction(DataProcessorAlgorithm):
 
     def _cylinder(self, radius):
 
-        return '<infinite-cylinder id="flux"><centre x="0.0" y="0.0" z="0.0"/><axis x="0.0" y="0.0" z="1.0"/><radius val="{0}"/></infinite-cylinder>'.format(radius)
+        return '<infinite-cylinder id="flux"><centre x="0.0" y="0.0" z="0.0"/><axis x="0.0" y="0.0" z="1.0"/>' \
+               '<radius val="{0}"/></infinite-cylinder>'.format(radius)
 
     def _integrate_in_radius(self, ws, radius):
 
@@ -161,13 +163,14 @@ class ILLSANSReduction(DataProcessorAlgorithm):
     def _normalise(self, ws):
 
         normalise_by = self.getPropertyValue('NormaliseBy')
-        mon = ws + '_mon'
-        ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws, MonitorWorkspace=mon)
         if normalise_by == 'Monitor':
-            ExtractSingleSpectrum(InputWorkspace=mon, WorkspaceIndex=0, OutputWorkspace=mon)
+            mon = ws + '_mon'
+            ExtractSpectra(InputWorkspace=ws, DetectorList=100000, OutputWorkspace=mon)
             if mtd[mon].readY(0)[0] == 0:
                 raise RuntimeError('Normalise to monitor requested, but monitor has 0 counts.')
-            Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws)
+            else:
+                Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws)
+                DeleteWorkspace(mon)
         elif normalise_by == 'Timer':
             if mtd[ws].getRun().hasProperty('timer'):
                 duration = mtd[ws].getRun().getLogData('timer').value
@@ -177,7 +180,6 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                     raise RuntimeError('Unable to normalise to time; duration found is 0 seconds.')
             else:
                 raise RuntimeError('Normalise to timer requested, but timer information is not available.')
-        DeleteWorkspace(mon)
 
     def _process_beam(self, ws):
 
@@ -245,6 +247,8 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                         mask = self.getPropertyValue('MaskedInputWorkspace')
                         if mask:
                             MaskDetectors(Workspace=ws, MaskedWorkspace=mask)
+                        thickness = self.getProperty('SampleThickness').value
+                        NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws, SampleThickness=thickness)
                         if process == 'Reference':
                             sensitivity_out = self.getPropertyValue('SensitivityOutputWorkspace')
                             if sensitivity_out:
@@ -254,8 +258,6 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                             sensitivity_in = self.getPropertyValue('SensitivityInputWorkspace')
                             if sensitivity_in:
                                 Divide(LHSWorkspace=ws, RHSWorkspace=sensitivity_in, OutputWorkspace=ws)
-                            thickness = self.getProperty('SampleThickness').value
-                            NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws, SampleThickness=thickness)
                             reference = self.getPropertyValue('ReferenceInputWorkspace')
                             if reference:
                                 pass
