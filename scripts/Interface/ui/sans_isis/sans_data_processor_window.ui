@@ -428,7 +428,7 @@ QGroupBox::title {
           <item>
            <widget class="QTabWidget" name="settings_tab_widget">
             <property name="currentIndex">
-             <number>3</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="general_tab">
              <attribute name="title">
@@ -626,7 +626,7 @@ QGroupBox::title {
                   <item>
                    <widget class="QGroupBox" name="slice_event_group_box">
                     <property name="toolTip">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In the case of data which was measured in event-mode, it is possible to perform time-of-flight slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies time slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a time slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slcie from teh start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications useing comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In the case of data which was measured in event-mode, it is possible to perform time-of-flight slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies time slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a time slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slice from the start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications useing comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="title">
                      <string>Event Slice</string>
@@ -912,7 +912,7 @@ QGroupBox::title {
                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spectrum number of the incident monitor which is used for monitor normalization.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>
                        <property name="text">
-                        <string>Incidient monitor</string>
+                        <string>Incident monitor</string>
                        </property>
                       </widget>
                      </item>
@@ -1879,12 +1879,12 @@ QGroupBox::title {
                      </property>
                      <item>
                       <property name="text">
-                       <string>Circular</string>
+                       <string>Pinhole</string>
                       </property>
                      </item>
                      <item>
                       <property name="text">
-                       <string>Rectangular</string>
+                       <string>Slit</string>
                       </property>
                      </item>
                     </widget>
@@ -1899,7 +1899,7 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="4">
+                   <item row="3" column="2">
                     <widget class="QLabel" name="q_resolution_sample_a_label">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Diameter of a circular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1916,7 +1916,7 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="4">
+                   <item row="2" column="2">
                     <widget class="QLabel" name="q_resolution_sample_w_label">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of a rectangular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1926,14 +1926,14 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="5">
+                   <item row="2" column="3">
                     <widget class="QLineEdit" name="q_resolution_sample_w_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of a rectangular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="6" column="0">
+                   <item row="5" column="0">
                     <widget class="QLabel" name="q_resolution_collimation_length_label">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The collimation length.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1943,7 +1943,7 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="6" column="4">
+                   <item row="5" column="2">
                     <widget class="QLabel" name="q_resolution_delta_r_label">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Delta r.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1953,21 +1953,21 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="7" column="1" colspan="4">
+                   <item row="6" column="1" colspan="2">
                     <widget class="QLineEdit" name="q_resolution_moderator_file_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Path to the moderator file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="7" column="5">
+                   <item row="6" column="3">
                     <widget class="QPushButton" name="q_resolution_moderator_file_push_button">
                      <property name="text">
                       <string>Browse</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="7" column="0">
+                   <item row="6" column="0">
                     <widget class="QLabel" name="q_resolution_moderator_file_label">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Path to the moderator file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1977,24 +1977,24 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="6" column="1">
+                   <item row="5" column="1">
                     <widget class="QLineEdit" name="q_resolution_collimation_length_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The collimation length.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="6" column="5">
+                   <item row="5" column="3">
                     <widget class="QLineEdit" name="q_resolution_delta_r_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Delta r.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="5" column="0" colspan="6">
-                    <widget class="Line" name="line_6">
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
+                   <item row="3" column="3">
+                    <widget class="QLineEdit" name="q_resolution_sample_a_line_edit">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Diameter of a circular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
@@ -2005,10 +2005,10 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="5">
-                    <widget class="QLineEdit" name="q_resolution_sample_a_line_edit">
+                   <item row="2" column="1">
+                    <widget class="QLineEdit" name="q_resolution_source_w_line_edit">
                      <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Diameter of a circular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of a rectangular source aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
@@ -2022,10 +2022,10 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="1">
-                    <widget class="QLineEdit" name="q_resolution_source_w_line_edit">
+                   <item row="1" column="3">
+                    <widget class="QLineEdit" name="q_resolution_sample_h_line_edit">
                      <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of a rectangular source aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Height of a rectangular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
@@ -2039,27 +2039,13 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="5">
-                    <widget class="QLineEdit" name="q_resolution_sample_h_line_edit">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Height of a rectangular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="4">
+                   <item row="1" column="2">
                     <widget class="QLabel" name="q_resolution_sample_h_label">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Height of a rectangular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                      <property name="text">
                       <string>H2 [mm]</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="2" rowspan="3">
-                    <widget class="Line" name="line_7">
-                     <property name="orientation">
-                      <enum>Qt::Vertical</enum>
                      </property>
                     </widget>
                    </item>
