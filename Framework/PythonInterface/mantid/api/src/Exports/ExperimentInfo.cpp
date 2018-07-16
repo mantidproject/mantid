@@ -89,7 +89,8 @@ void export_ExperimentInfo() {
            "Return a const reference to the :class:`~mantid.api.SpectrumInfo` "
            "object.")
       .def("componentInfo", &ExperimentInfo::componentInfo,
-        return_value_policy<reference_existing_object>(), args("self"),
-        "Return a const reference to the :class:`~mantid.geometry.ComponentInfo` "
-        "object.");
+           return_value_policy<reference_existing_object>(), args("self"),
+           "Return a const reference to the "
+           ":class:`~mantid.geometry.ComponentInfo` "
+           "object.");
 }
