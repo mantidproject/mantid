@@ -99,6 +99,18 @@ class PlotSelectorModel(object):
             raise ValueError('Error showing, could not find a plot with the number {}.'.format(plot_number))
         figure_manager.show()
 
+    # ------------------------ Plot Hiding -------------------------
+
+    def hide_plot(self, plot_number):
+        """
+        Hide a plot by calling .window.hide() on the figure manager
+        :param plot_number: The unique number in GlobalFigureManager
+        """
+        figure_manager = self.GlobalFigureManager.figs.get(plot_number)
+        if figure_manager is None:
+            raise ValueError('Error hiding, could not find a plot with the number {}.'.format(plot_number))
+        figure_manager.window.hide()
+
     # ------------------------ Plot Renaming ------------------------
 
     def rename_figure(self, plot_number, new_name):

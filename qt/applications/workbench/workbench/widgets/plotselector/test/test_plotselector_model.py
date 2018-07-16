@@ -81,6 +81,16 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.assertRaises(ValueError, self.model.show_plot, 0)
         self.figure_manager.show.assert_not_called()
 
+    # ------------------------ Plot Hiding -------------------------
+
+    def test_hide_plot_calls_hide_on_the_plot_window(self):
+        self.model.hide_plot(42)
+        self.figure_manager.window.hide.assert_called_once_with()
+
+    def test_hide_plot_for_invalid_name_raises_value_error(self):
+        self.assertRaises(ValueError, self.model.hide_plot, 0)
+        self.figure_manager.window.hide.asser_not_called()
+
     # ------------------------ Plot Renaming ------------------------
 
     def test_renaming_calls_set_window_title(self):

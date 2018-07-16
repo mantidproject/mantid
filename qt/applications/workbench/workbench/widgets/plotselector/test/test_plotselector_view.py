@@ -250,6 +250,12 @@ class PlotSelectorWidgetTest(unittest.TestCase):
 
         self.presenter.show_multiple_selected.assert_called_once_with()
 
+    # ------------------------ Plot Hiding -------------------------
+
+    def test_hide_button_pressed_calls_presenter(self):
+        QTest.mouseClick(self.view.hide_button, Qt.LeftButton)
+        self.assertEquals(self.presenter.hide_selected_plots.call_count, 1)
+
     # ------------------------ Plot Renaming ------------------------
 
     def test_rename_button_pressed_makes_line_editable(self):

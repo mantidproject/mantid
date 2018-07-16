@@ -123,6 +123,14 @@ class PlotSelectorPresenterTest(unittest.TestCase):
         self.assertEqual(self.model.show_plot.mock_calls[0], mock.call(1))
         self.assertEqual(self.model.show_plot.mock_calls[1], mock.call(2))
 
+    # ------------------------ Plot Hiding -------------------------
+
+    def test_hide_multiple_plots_calls_hide_in_model(self):
+        self.view.get_all_selected_plot_numbers = mock.Mock(return_value=[1, 2])
+        self.presenter.hide_selected_plots()
+        self.assertEquals(self.model.hide_plot.mock_calls[0], mock.call(1))
+        self.assertEquals(self.model.hide_plot.mock_calls[1], mock.call(2))
+
     # ------------------------ Plot Renaming ------------------------
 
     def test_rename_figure_calls_rename_in_model(self):

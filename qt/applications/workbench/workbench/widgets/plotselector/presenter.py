@@ -139,6 +139,20 @@ class PlotSelectorPresenter(object):
         except ValueError as e:
             print(e)
 
+    # ------------------------ Plot Hiding -------------------------
+
+    def hide_selected_plots(self):
+        """
+        Hide all plots that are selected in the view
+        """
+        selected_plots = self.view.get_all_selected_plot_numbers()
+
+        for plot_number in selected_plots:
+            try:
+                self.model.hide_plot(plot_number)
+            except ValueError as e:
+                print(e)
+
     # ------------------------ Plot Renaming ------------------------
 
     def rename_figure(self, plot_number, new_name):
@@ -270,3 +284,6 @@ class PlotSelectorPresenter(object):
                 self.model.export_plot(plot_number, filename)
             except ValueError as e:
                 print(e)
+
+    def hide_action_called(self):
+        self.model.hide()

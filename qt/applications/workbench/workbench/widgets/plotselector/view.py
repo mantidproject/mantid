@@ -70,8 +70,9 @@ class PlotSelectorView(QWidget):
         self.mutex = QMutex()
 
         self.show_button = QPushButton('Show')
-        self.select_all_button = QPushButton('Select All')
+        self.hide_button = QPushButton('Hide')
         self.close_button = QPushButton('Close')
+        self.select_all_button = QPushButton('Select All')
         self.sort_button = self._make_sort_button()
         self.export_button = self._make_export_button()
         self.filter_box = self._make_filter_box()
@@ -85,8 +86,9 @@ class PlotSelectorView(QWidget):
         buttons_layout = FlowLayout()
         buttons_layout.setSpacing(1)
         buttons_layout.addWidget(self.show_button)
-        buttons_layout.addWidget(self.select_all_button)
+        buttons_layout.addWidget(self.hide_button)
         buttons_layout.addWidget(self.close_button)
+        buttons_layout.addWidget(self.select_all_button)
         buttons_layout.addWidget(self.sort_button)
         buttons_layout.addWidget(self.export_button)
 
@@ -113,11 +115,12 @@ class PlotSelectorView(QWidget):
         self.rename_in_plot_list = QAppThreadCall(self.rename_in_plot_list_orig)
 
         # Connect presenter methods to things in the view
+        self.show_button.clicked.connect(self.presenter.show_multiple_selected)
+        self.hide_button.clicked.connect(self.presenter.hide_selected_plots)
+        self.close_button.clicked.connect(self.presenter.close_action_called)
+        self.select_all_button.clicked.connect(self.table_widget.selectAll)
         self.table_widget.doubleClicked.connect(self.presenter.show_single_selected)
         self.filter_box.textChanged.connect(self.presenter.filter_text_changed)
-        self.show_button.clicked.connect(self.presenter.show_multiple_selected)
-        self.select_all_button.clicked.connect(self.table_widget.selectAll)
-        self.close_button.clicked.connect(self.presenter.close_action_called)
         self.deleteKeyPressed.connect(self.presenter.close_action_called)
 
         if DEBUG_MODE:
@@ -290,7 +293,6 @@ class PlotSelectorView(QWidget):
         :return: A list of strings with the plot numbers
         """
         selected = set(index.row() for index in self.table_widget.selectedIndexes())
-        print(selected)
         selected_plots = []
         for row in selected:
             if not self.table_widget.isRowHidden(row):
