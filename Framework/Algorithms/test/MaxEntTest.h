@@ -770,7 +770,7 @@ public:
     // Test some values
     TS_ASSERT_EQUALS(data->y(0).size(), 20);
     TS_ASSERT_DELTA(data->y(0)[9], -0.716, 0.001);
-    TS_ASSERT_DELTA(data->y(1)[9], -0.716, 0.001);
+    TS_ASSERT_DELTA(data->y(1)[9], 0.716, 0.001);
     TS_ASSERT_DELTA(data->y(2)[9], -0.716, 0.001);
     TS_ASSERT_EQUALS(data->y(5).size(), 20);
     TS_ASSERT_DELTA(data->y(5)[9], 0.462, 0.001);
@@ -780,11 +780,11 @@ public:
     TS_ASSERT_DELTA(angle->y(0).back(), 0.001, 0.001);
   }
 
-  void xtest_adjustments_three_spectra_together() {
+  void test_adjustments_three_spectra_together() {
 
-    auto ws = createWorkspaceReal(10, 0.0, 6);
-    auto linAdj = createWorkspaceAdjustments(10, 1.00, 0.00, 0.0, 3);
-    auto constAdj = createWorkspaceAdjustments(20, 0.0, 0.00, 0.0, 3);
+    auto ws = createWorkspaceComplex(20, 0.0, 3, 0.0);
+    auto linAdj = createWorkspaceAdjustments(20, 1.00, 0.05, 0.0, 3);
+    auto constAdj = createWorkspaceAdjustments(20, 0.0, 0.10, 0.0, 3);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -814,9 +814,11 @@ public:
 
     // Test some values
     TS_ASSERT_EQUALS(data->y(0).size(), 20);
-    TS_ASSERT_DELTA(data->y(0)[4], -0.302, 0.003);
-    TS_ASSERT_DELTA(data->y(0)[5], -0.346, 0.003);
-    TS_ASSERT_DELTA(data->y(0)[6], -0.288, 0.003);
+    TS_ASSERT_DELTA(data->y(0)[9], -0.811, 0.001);
+    TS_ASSERT_DELTA(data->y(1)[9], 0.786, 0.001);
+    TS_ASSERT_DELTA(data->y(2)[9], -0.772, 0.001);
+    TS_ASSERT_EQUALS(data->y(5).size(), 20);
+    TS_ASSERT_DELTA(data->y(5)[9], 0.534, 0.001);
 
     // Test that the algorithm converged
     TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
