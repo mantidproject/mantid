@@ -91,18 +91,19 @@ class ComponentInfoTest(unittest.TestCase):
         self.assertEquals(type(info.samplePosition()), V3D)
 
     def test_hasSource(self):
-        """ Check that the source position is a V3D object """
+        """ Check if there is a source """
         info = self._ws.componentInfo()
         self.assertEquals(info.hasSource(), True)
 
     def test_hasSample(self):
-        """ Check that the source postition is a V3D object """
+        """ Check if there is a sample """
         info = self._ws.componentInfo()
         self.assertEquals(info.hasSample(), True)
 
     def test_name(self):
         """ Get the name of a component as a string """
         info = self._ws.componentInfo()
+        self.assertEquals(type(info.name(0)), str)
 
 if __name__ == '__main__':
     unittest.main()
