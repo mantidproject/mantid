@@ -163,7 +163,8 @@ private:
   /// EndRun
   bool m_runStatusSeen;
   std::atomic<bool> m_extractedEndRunData;
-  /// Indicate if the next data to be extracted should replace LoadLiveData's output workspace
+  /// Indicate if the next data to be extracted should replace LoadLiveData's
+  /// output workspace
   std::atomic<bool> m_dataReset;
 
   void waitForDataExtraction();

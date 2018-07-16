@@ -124,12 +124,13 @@ void KafkaEventStreamDecoder::startCapture(bool startNow) {
   m_thread.detach();
 }
 
-/** Indicate if the next data to be extracted should replace LoadLiveData's output workspace,
+/** Indicate if the next data to be extracted should replace LoadLiveData's
+ * output workspace,
  *  for example the first data of a new run
  */
 bool KafkaEventStreamDecoder::dataReset() {
   bool result = (m_dataReset == true); // copy from atomic bool
-  m_dataReset = false; // reset to false
+  m_dataReset = false;                 // reset to false
   return result;
 }
 
