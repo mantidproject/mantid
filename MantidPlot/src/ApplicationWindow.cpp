@@ -16638,10 +16638,17 @@ void ApplicationWindow::onAboutToStart() {
   // Make sure we see all of the startup messages
   resultsLog->scrollToTop();
 
-  // Kick off project recovery
-  // but only if we are the only instance currently running
-  if (!Process::isAnotherInstanceRunning())
-	checkForProjectRecovery();
+  // Kick off project recovery iff we are able to determine if we are the only
+  // instance currently running
+  try {
+    if (!Process::isAnotherInstanceRunning()) {
+      checkForProjectRecovery();
+    }
+  } catch (std::runtime_error &exc) {
+    g_log.warning("Unable to determine if other MantidPlot processes are "
+                  "running. Project recovery is disabled. Error msg: " +
+                  std::string(exc.what()));
+  }
 }
 
 /**
