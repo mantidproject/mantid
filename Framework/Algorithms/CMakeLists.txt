@@ -12,7 +12,7 @@ set ( SRC_FILES
 	src/ApodizationFunctions.cpp
 	src/AppendSpectra.cpp
 	src/ApplyCalibration.cpp
-	src/ApplyDeadTimeCorr.cpp
+#	src/ApplyDeadTimeCorr.cpp
 	src/ApplyDetailedBalance.cpp
 	src/ApplyTransmissionCorrection.cpp
 	src/AsymmetryCalc.cpp
@@ -347,7 +347,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ApodizationFunctions.h
 	inc/MantidAlgorithms/AppendSpectra.h
 	inc/MantidAlgorithms/ApplyCalibration.h
-	inc/MantidAlgorithms/ApplyDeadTimeCorr.h
+#	inc/MantidAlgorithms/ApplyDeadTimeCorr.h
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
 	inc/MantidAlgorithms/AsymmetryCalc.h
@@ -699,7 +699,7 @@ set ( TEST_FILES
 	AnyShapeAbsorptionTest.h
 	AppendSpectraTest.h
 	ApplyCalibrationTest.h
-	ApplyDeadTimeCorrTest.h
+#	ApplyDeadTimeCorrTest.h
 	ApplyDetailedBalanceTest.h
 	ApplyTransmissionCorrectionTest.h
 	AsymmetryCalcTest.h

@@ -63,6 +63,7 @@ public:
   /// See also
   const std::vector<std::string> seeAlso() const override {
 	  return{ "AsymmetryCalc", "CalculateMuonAsymmetry" };
+  };
 
 private:
   // Overridden Algorithm methods
