@@ -15,7 +15,7 @@ set ( SRC_FILES
 #	src/ApplyDeadTimeCorr.cpp
 	src/ApplyDetailedBalance.cpp
 	src/ApplyTransmissionCorrection.cpp
-	src/AsymmetryCalc.cpp
+#	src/AsymmetryCalc.cpp
 	src/AverageLogData.cpp
 	src/Bin2DPowderDiffraction.cpp
 	src/BinaryOperateMasks.cpp
@@ -350,7 +350,7 @@ set ( INC_FILES
 #	inc/MantidAlgorithms/ApplyDeadTimeCorr.h
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
-	inc/MantidAlgorithms/AsymmetryCalc.h
+#	inc/MantidAlgorithms/AsymmetryCalc.h
 	inc/MantidAlgorithms/AverageLogData.h
 	inc/MantidAlgorithms/Bin2DPowderDiffraction.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
@@ -702,7 +702,7 @@ set ( TEST_FILES
 #	ApplyDeadTimeCorrTest.h
 	ApplyDetailedBalanceTest.h
 	ApplyTransmissionCorrectionTest.h
-	AsymmetryCalcTest.h
+#	AsymmetryCalcTest.h
 	AverageLogDataTest.h
 	Bin2DPowderDiffractionTest.h
 	BinaryOperateMasksTest.h
