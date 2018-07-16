@@ -9772,10 +9772,12 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     }
   }
 
-  // Stop background saving thread, so it doesn't try to use a destroyed
-  // resource
-  m_projectRecovery.stopProjectSaving();
-  m_projectRecovery.clearAllCheckpoints();
+  if (m_projectRecoveryRunOnStart) {
+    // Stop background saving thread, so it doesn't try to use a destroyed
+    // resource
+    m_projectRecovery.stopProjectSaving();
+    m_projectRecovery.clearAllCheckpoints();
+  }
 
   // Close the remaining MDI windows. The Python API is required to be active
   // when the MDI window destructor is called so that those references can be
@@ -16643,6 +16645,9 @@ void ApplicationWindow::onAboutToStart() {
   try {
     if (!Process::isAnotherInstanceRunning()) {
       checkForProjectRecovery();
+    } else {
+      g_log.debug("Another MantidPlot process is running. Project recovery is "
+                  "disabled.");
     }
   } catch (std::runtime_error &exc) {
     g_log.warning("Unable to determine if other MantidPlot processes are "
@@ -16784,6 +16789,7 @@ bool ApplicationWindow::saveProjectRecovery(std::string destination) {
   * the user whether they would like to recover
   */
 void ApplicationWindow::checkForProjectRecovery() {
+  m_projectRecoveryRunOnStart = true;
   if (!m_projectRecovery.checkForRecovery()) {
     m_projectRecovery.startProjectSaving();
     return;
