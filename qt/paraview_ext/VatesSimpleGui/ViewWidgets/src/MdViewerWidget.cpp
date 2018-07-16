@@ -1054,6 +1054,10 @@ void MdViewerWidget::setActiveObjects(pqView *view, pqPipelineSource *source) {
  */
 std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
   UNUSED_ARG(app);
+  // Early exit if there are no sources
+  auto &activeObjects = pqActiveObjects::instance();
+  if (!activeObjects.activeSource())
+    return "";
   TSVSerialiser tsv, contents;
 
   // save window position & size
@@ -1064,7 +1068,7 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
   auto fileName = workingDir.toStdString() + "/VSI.xml";
 
   // Dump the state of VSI to a XML file
-  auto session = pqActiveObjects::instance().activeServer()->proxyManager();
+  auto session = activeObjects.activeServer()->proxyManager();
   session->SaveXMLState(fileName.c_str());
   contents.writeLine("FileName") << fileName;
 
@@ -1072,7 +1076,6 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
   auto vtype = currentView->getViewType();
   contents.writeLine("ViewType") << static_cast<int>(vtype);
 
-  auto &activeObjects = pqActiveObjects::instance();
   auto proxyManager = activeObjects.activeServer()->proxyManager();
   auto view = activeObjects.activeView()->getProxy();
   auto source = activeObjects.activeSource()->getProxy();
