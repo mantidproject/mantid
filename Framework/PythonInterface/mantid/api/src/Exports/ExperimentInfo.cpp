@@ -81,7 +81,8 @@ void export_ExperimentInfo() {
 
       .def("detectorInfo", &ExperimentInfo::detectorInfo,
            return_value_policy<reference_existing_object>(), args("self"),
-           "Return a const reference to the :class:`~mantid.geometry.DetectorInfo` "
+           "Return a const reference to the "
+           ":class:`~mantid.geometry.DetectorInfo` "
            "object.")
       .def("spectrumInfo", &ExperimentInfo::spectrumInfo,
            return_value_policy<reference_existing_object>(), args("self"),
