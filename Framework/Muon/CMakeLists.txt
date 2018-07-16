@@ -4,10 +4,13 @@ set ( SRC_FILES
         src/ApplyMuonDetectorGrouping.cpp
         src/ApplyMuonDetectorGroupPairing.cpp
 	src/AsymmetryCalc.cpp
+	src/CalculateMuonAsymmetry.cpp
 	src/CalMuonDeadTime.cpp
 	src/CalMuonDetectorPhases.cpp
         src/ConvertFitFunctionForMuonTFAsymmetry.cpp
+	src/EstimateMuonAsymmetryFromCounts.cpp
         src/MuonAlgorithmHelper.cpp
+	src/MuonAsymmetryHelper.cpp
 )
 
 set ( INC_FILES
@@ -16,10 +19,13 @@ set ( INC_FILES
         inc/MantidMuon/ApplyMuonDetectorGrouping.h
         inc/MantidMuon/ApplyMuonDetectorGroupPairing.h
 	inc/MantidMuon/AsymmetryCalc.h
+	inc/MantidMuon/CalculateMuonAsymmetry.h
 	inc/MantidMuon/CalMuonDeadTime.h
 	inc/MantidMuon/CalMuonDetectorPhases.h
         inc/MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h
+	inc/MantidMuon/EstimateMuonAsymmetryFromCounts.h
         inc/MantidMuon/MuonAlgorithmHelper.h
+	inc/MantidMuon/MuonAsymmetryHelper.h
 )
 
 set ( TEST_FILES
@@ -28,9 +34,11 @@ set ( TEST_FILES
         ApplyMuonDetectorGroupingTest.h
         ApplyMuonDetectorGroupPairingTest.h
 	AsymmetryCalcTest.h
+	CalculateMuonAsymmetryTest.h
 	CalMuonDeadTimeTest.h
 	CalMuonDetectorPhasesTest.h
         ConvertFitFunctionForMuonTFAsymmetryTest.h
+	EstimateMuonAsymmetryFromCountsTest.h
         MuonAlgorithmHelperTest.h)
 
 if (COVERALLS)

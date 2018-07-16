@@ -27,7 +27,7 @@ set ( SRC_FILES
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
 	src/CalculateCarpenterSampleCorrection.cpp
-	src/CalculateMuonAsymmetry.cpp
+#	src/CalculateMuonAsymmetry.cpp
 	src/CalculatePolynomialBackground.cpp
 	src/CalculateSlits.cpp
 	src/CalculateTransmission.cpp
@@ -113,7 +113,7 @@ set ( SRC_FILES
 	src/EditInstrumentGeometry.cpp
 	src/ElasticWindow.cpp
 	src/EstimateDivergence.cpp
-	src/EstimateMuonAsymmetryFromCounts.cpp
+#	src/EstimateMuonAsymmetryFromCounts.cpp
 	src/EstimateResolutionDiffraction.cpp
 	src/EventWorkspaceAccess.cpp
 	src/Exponential.cpp
@@ -202,7 +202,7 @@ set ( SRC_FILES
 	src/MostLikelyMean.cpp
 	src/Multiply.cpp
 	src/MultiplyRange.cpp
-	src/MuonAsymmetryHelper.cpp
+#	src/MuonAsymmetryHelper.cpp
 	src/MuonGroupDetectors.cpp
 	src/NRCalculateSlitResolution.cpp
 	src/NormaliseByCurrent.cpp
@@ -363,7 +363,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
 	inc/MantidAlgorithms/CalculateCarpenterSampleCorrection.h
-	inc/MantidAlgorithms/CalculateMuonAsymmetry.h
+#	inc/MantidAlgorithms/CalculateMuonAsymmetry.h
 	inc/MantidAlgorithms/CalculatePolynomialBackground.h
 	inc/MantidAlgorithms/CalculateSlits.h
 	inc/MantidAlgorithms/CalculateTransmission.h
@@ -449,7 +449,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/EditInstrumentGeometry.h
 	inc/MantidAlgorithms/ElasticWindow.h
 	inc/MantidAlgorithms/EstimateDivergence.h
-	inc/MantidAlgorithms/EstimateMuonAsymmetryFromCounts.h
+#	inc/MantidAlgorithms/EstimateMuonAsymmetryFromCounts.h
 	inc/MantidAlgorithms/EstimateResolutionDiffraction.h
 	inc/MantidAlgorithms/EventWorkspaceAccess.h
 	inc/MantidAlgorithms/Exponential.h
@@ -542,7 +542,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MostLikelyMean.h
 	inc/MantidAlgorithms/Multiply.h
 	inc/MantidAlgorithms/MultiplyRange.h
-	inc/MantidAlgorithms/MuonAsymmetryHelper.h
+#	inc/MantidAlgorithms/MuonAsymmetryHelper.h
 	inc/MantidAlgorithms/MuonGroupDetectors.h
 	inc/MantidAlgorithms/NRCalculateSlitResolution.h
 	inc/MantidAlgorithms/NormaliseByCurrent.h
@@ -714,7 +714,7 @@ set ( TEST_FILES
 	CalculateDIFCTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
-	CalculateMuonAsymmetryTest.h
+#	CalculateMuonAsymmetryTest.h
 	CalculatePolynomialBackgroundTest.h
 	CalculateSlitsTest.h
 	CalculateTransmissionBeamSpreaderTest.h
@@ -799,7 +799,7 @@ set ( TEST_FILES
 	EditInstrumentGeometryTest.h
 	ElasticWindowTest.h
 	EstimateDivergenceTest.h
-	EstimateMuonAsymmetryFromCountsTest.h
+#	EstimateMuonAsymmetryFromCountsTest.h
 	EstimateResolutionDiffractionTest.h
 	ExponentialCorrectionTest.h
 	ExponentialTest.h
