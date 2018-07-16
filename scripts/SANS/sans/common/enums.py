@@ -283,7 +283,7 @@ class FitType(object):
 #  SampleShape
 # --------------------------
 @string_convertible
-@serializable_enum("CylinderAxisUp", "Cuboid", "CylinderAxisAlong")
+@serializable_enum("Cylinder", "FlatPlate", "Disk")
 class SampleShape(object):
     """
     Defines the sample shape types
@@ -297,11 +297,11 @@ def convert_int_to_shape(shape_int):
     use the string_convertible decorator.
     """
     if shape_int == 1:
-        as_type = SampleShape.CylinderAxisUp
+        as_type = SampleShape.Cylinder
     elif shape_int == 2:
-        as_type = SampleShape.Cuboid
+        as_type = SampleShape.FlatPlate
     elif shape_int == 3:
-        as_type = SampleShape.CylinderAxisAlong
+        as_type = SampleShape.Disc
     else:
         raise ValueError("SampleShape: Cannot convert unknown sample shape integer: {0}".format(shape_int))
     return as_type
