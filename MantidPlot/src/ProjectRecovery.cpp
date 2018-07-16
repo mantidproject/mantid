@@ -64,7 +64,8 @@ boost::optional<bool> getConfigBool(const std::string &key) {
 
 /// Returns a string to the current top level recovery folder
 std::string getRecoveryFolder() {
-  static std::string appData = Mantid::Kernel::ConfigService::Instance().getAppDataDir();
+  static std::string appData =
+      Mantid::Kernel::ConfigService::Instance().getAppDataDir();
   static std::string hostname = Poco::Environment::nodeName();
 
   static std::string recoverFolder = appData + "/recovery/" + hostname + '/';

@@ -12,20 +12,18 @@ namespace {
 
 class PyObjectNewReference {
 public:
-  PyObjectNewReference(PyObject *object) : m_object(object) {}
+  explicit PyObjectNewReference(PyObject *object) : m_object(object) {}
   ~PyObjectNewReference() { Py_XDECREF(m_object); }
 
   PyObjectNewReference(const PyObjectNewReference &) = delete;
   PyObjectNewReference &operator=(const PyObjectNewReference &) = delete;
 
-  PyObjectNewReference(PyObjectNewReference &&o) {
-	  *this = std::move(o);
-  }
+  PyObjectNewReference(PyObjectNewReference &&o) { *this = std::move(o); }
 
   PyObjectNewReference &operator=(PyObjectNewReference &&other) {
-	  this->m_object = other.m_object;
-	  other.m_object = nullptr;
-	  return *this;
+    this->m_object = other.m_object;
+    other.m_object = nullptr;
+    return *this;
   }
 
   inline PyObject *ptr() const { return m_object; }
@@ -46,7 +44,7 @@ PyObjectNewReference attr(PyObject *source, const char *name) {
   if (attr.ptr()) {
     return attr;
   } else {
-	PyErr_Print();
+    PyErr_Print();
     throw std::runtime_error(std::string("Process: No attribute ") + name +
                              " found");
   }
@@ -65,7 +63,7 @@ PyObjectNewReference call(PyObject *source, const char *name) {
   if (result)
     return PyObjectNewReference(result);
   else {
-	PyErr_Print();
+    PyErr_Print();
     throw std::runtime_error(std::string("Process: Error calling function ") +
                              name);
   }
@@ -92,9 +90,7 @@ namespace Process {
   * @return True if another instance is running
   * @throws std::runtime_error if the PID list cannot be determined
   */
-bool isAnotherInstanceRunning() {
-	return !otherInstancePIDs().empty();
-}
+bool isAnotherInstanceRunning() { return !otherInstancePIDs().empty(); }
 
 /**
  * @brief Return a list of process IDs for other instances of this process.
