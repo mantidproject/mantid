@@ -14,6 +14,7 @@ set ( SRC_FILES
 	src/MuonGroupDetectors.cpp
 	src/PhaseQuadMuon.cpp
 	src/PlotAsymmetryByLogValue.cpp
+	src/RRFMuon.cpp
 )
 
 set ( INC_FILES
@@ -32,6 +33,7 @@ set ( INC_FILES
 	inc/MantidMuon/MuonGroupDetectors.h
 	inc/MantidMuon/PhaseQuadMuon.h
 	inc/MantidMuon/PlotAsymmetryByLogValue.h
+	inc/MantidMuon/RRFMuon.h
 )
 
 set ( TEST_FILES
@@ -49,6 +51,7 @@ set ( TEST_FILES
 	MuonGroupDetectorsTest.h
 	PhaseQuadMuonTest.h
 	PlotAsymmetryByLogValueTest.h
+	RRFMuonTest.h
 )
 
 if (COVERALLS)
