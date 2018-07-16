@@ -88,9 +88,11 @@ New
 
 - New algorithm :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` to integrate peaks using 3D profile fitting in reciprocal space.
 
-- New algorithm :ref:`RefineSatellitePeaks <algm-RefineSatellitePeaks>` to predict the location of fractional satellite peaks using a set of nuclear peaks and a set of seed satellite peaks.
+- New algorithm :ref:`FindSatellitePeaks <algm-FindSatellitePeaks>` to predict the location of fractional satellite peaks using a set of nuclear peaks and a set of seed satellite peaks.
 
 - New TOPAZ instrument geometry for 2018 run cycle
+
+- New algorithm :ref:`IndexSatellitePeaks <algm-IndexSatellitePeaks>` to index satellite peaks found using the :ref:`FindSatellitePeaks <algm-FindSatellitePeaks>` algorithm.
 
 Improvements
 ############

@@ -1,10 +1,11 @@
-from mantid.simpleapi import RefineSatellitePeaks, Load
+from mantid.simpleapi import FindSatellitePeaks, Load
 import unittest
 import stresstesting
 
 
 def load_files():
-    md_workspace = Load(Filename="WISH_md_small.nxs", OutputWorkspace='md_workspace')
+    md_workspace = Load(Filename="WISH_md_small.nxs",
+                        OutputWorkspace='md_workspace')
     main_peaks = Load(Filename="WISH_peak_hkl_small.nxs",
                       OutputWorkspace='main_peaks')
     satellite_peaks = Load(Filename="WISH_peak_hkl_frac_small.nxs",
@@ -12,7 +13,7 @@ def load_files():
     return md_workspace, main_peaks, satellite_peaks
 
 
-class RefineSatellitePeaksTestFixedNumQ(stresstesting.MantidStressTest):
+class FindSatellitePeaksTestFixedNumQ(stresstesting.MantidStressTest):
 
     def requiredFiles(self):
         return ["WISH_md_small.nxs", "WISH_peak_hkl_small.nxs", "WISH_peak_hkl_frac_small.nxs"]
@@ -29,14 +30,14 @@ class RefineSatellitePeaksTestFixedNumQ(stresstesting.MantidStressTest):
 
         k = 2
 
-        self._satellites_refined = RefineSatellitePeaks(NuclearPeaks=main_peaks, SatellitePeaks=satellite_peaks, MDWorkspace=md_workspace,
-                                                        NumOfQs=k, **fixed_params)
+        self._satellites_refined = FindSatellitePeaks(NuclearPeaks=main_peaks, SatellitePeaks=satellite_peaks, MDWorkspace=md_workspace,
+                                                      NumOfQs=k, **fixed_params)
 
     def validate(self):
-        return self._satellites_refined.name(),'refine_satellites_fixed_q_test.nxs'
+        return self._satellites_refined.name(), 'refine_satellites_fixed_q_test.nxs'
 
 
-class RefineSatellitePeaksTestAutoFindQ(stresstesting.MantidStressTest):
+class FindSatellitePeaksTestAutoFindQ(stresstesting.MantidStressTest):
 
     def requiredFiles(self):
         return ["WISH_md_small.nxs", "WISH_peak_hkl_small.nxs", "WISH_peak_hkl_frac_small.nxs"]
@@ -52,11 +53,11 @@ class RefineSatellitePeaksTestAutoFindQ(stresstesting.MantidStressTest):
         }
 
         threshold = 1.0
-        self._satellites_refined = RefineSatellitePeaks(NuclearPeaks=main_peaks, SatellitePeaks=satellite_peaks, MDWorkspace=md_workspace,
-                                                        ClusterThreshold=threshold, **fixed_params)
+        self._satellites_refined = FindSatellitePeaks(NuclearPeaks=main_peaks, SatellitePeaks=satellite_peaks, MDWorkspace=md_workspace,
+                                                      ClusterThreshold=threshold, **fixed_params)
 
     def validate(self):
-        return self._satellites_refined.name(),'refine_satellites_auto_q_test.nxs'
+        return self._satellites_refined.name(), 'refine_satellites_auto_q_test.nxs'
 
 
 if __name__ == "__main__":

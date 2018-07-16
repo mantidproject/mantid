@@ -7,17 +7,17 @@
 Description
 -----------
 
-RefineSatellitePeaks can be used to refine the locations of "satellite" peaks
-occurring at fractional HKL locations in reciprocal space. RefineSatellitePeaks
+FindSatellitePeaks can be used to refine the locations of "satellite" peaks
+occurring at fractional HKL locations in reciprocal space. FindSatellitePeaks
 takes a :ref:`MDWorkspace <MDWorkspace>` of experimental data, a
 :ref:`PeaksWorkspace <PeaksWorkspace>` containing the locations of peaks with
 integer HKL, and another PeaksWorkspace containing a subset of peaks found at
 fractional HKL. 
 
-.. figure:: /images/RefineSatellitePeaks-satellites.png
+.. figure:: ../images/FindSatellitePeaks-satellites.png
    :align: center
    :width: 600px
-   :alt: RefineSatellitePeaks-satellites.png
+   :alt: FindSatellitePeaks-satellites.png
 
    Satellite peaks exist at fractional HKL coordinates. The vector `q` is the
    Euclidean distance from the nearest integer HKL peak to the satellite. A
@@ -33,10 +33,10 @@ this threshold.  The centroid of each cluster calculated for each group and is
 used as the offset to predict the location of fractional peaks everywhere in
 the :ref:`MDWorkspace <MDWorkspace>`.
 
-.. figure:: /images/RefineSatellitePeaks-clustering.png
+.. figure:: ../images/FindSatellitePeaks-clustering.png
    :align: center
    :width: 700px
-   :alt: RefineSatellitePeaks-clustering.png
+   :alt: FindSatellitePeaks-clustering.png
 
    Due to noise in the experimental data the `q` vector for every satellite may
    vary slightly. This algorithm calculates the `q` vectors for all peaks passed
@@ -54,10 +54,10 @@ Finally the found satellite peaks are integerated using the
 `BackgroundInnerRadius`, and `BackgroundOuterRadius`. Satellite peaks are
 discarded if there I/sigma value is less than the parameter `IOverSigma`.
 
-.. figure:: /images/RefineSatellitePeaks-centroids.png
+.. figure:: ../images/FindSatellitePeaks-centroids.png
    :align: center
    :width: 700px
-   :alt: RefineSatellitePeaks-centroid.png
+   :alt: FindSatellitePeaks-centroid.png
 
    Finally, using the predicted satellite peak positions (green) the local
    centroid is found and this is used as the true position of the experimental
@@ -102,15 +102,19 @@ Related Algorithms
 - :ref:`FilterPeaks <algm-FilterPeaks-v1>` is used to remove peaks with zero
   intensity or a I/sigma below the desired threshold.
 
+- :ref:`IndexSatellitePeaks <algm-IndexSatellitePeaks-v1>` can be used to
+  obtain a superspace indexing of the peaks workspace output from this
+  algorithm.
+
 Usage
 -----
 
 .. include:: ../usagedata-note.txt
 
 
-**Example - calling RefineSatellitePeaks:**
+**Example - calling FindSatellitePeaks:**
 
-.. testcode:: RefineSatellitePeaks
+.. testcode:: FindSatellitePeaks
 
     md_workspace = Load(Filename='WISH_md_small.nxs', OutputWorkspace='WISH_md_small')
     satellite_peaks = Load(Filename='WISH_peak_hkl_frac_small.nxs', OutputWorkspace='WISH_peak_hkl_frac_small')
@@ -125,11 +129,11 @@ Usage
     }
 
 
-    satellites_refined = RefineSatellitePeaks(NuclearPeaks=main_peaks, SatellitePeaks=satellite_peaks, MDWorkspace=md_workspace, **params)
+    satellites_refined = FindSatellitePeaks(NuclearPeaks=main_peaks, SatellitePeaks=satellite_peaks, MDWorkspace=md_workspace, **params)
 
     print (len(satellites_refined))
 
-.. testcleanup:: RefineSatellitePeaks
+.. testcleanup:: FindSatellitePeaks
 
    DeleteWorkspace('WISH_md_small')
    DeleteWorkspace('WISH_peak_hkl_small')
@@ -138,7 +142,7 @@ Usage
 
 Output:
 
-.. testoutput:: RefineSatellitePeaks
+.. testoutput:: FindSatellitePeaks
 
     4
 
