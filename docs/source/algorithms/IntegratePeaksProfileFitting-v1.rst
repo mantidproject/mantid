@@ -151,10 +151,9 @@ Usage
     LoadIsawPeaks(Filename='/SNS/MANDI/shared/ProfileFitting/demo_5921.integrate', OutputWorkspace='peaks_ws')
 
     IntegratePeaksProfileFitting(OutputPeaksWorkspace='peaks_ws_out', OutputParamsWorkspace='params_ws',
-            InputWorkspace='MANDI_5921_md', PeaksWorkspace='peaks_ws', RunNumber=5921, DtSpread=0.015,
-            UBFile='/SNS/MANDI/shared/ProfileFitting/demo_5921.mat',
+            InputWorkspace='MANDI_5921_md', PeaksWorkspace='peaks_ws', RunNumber=5921,
+            UBFile='/SNS/MANDI/shared/ProfileFitting/demo_5921.mat', MinpplFrac=0.9, MaxpplFrac=1.1,
             ModeratorCoefficientsFile='/SNS/MANDI/shared/ProfileFitting/franz_coefficients_2017.dat',
-            MinpplFrac=0.9, MaxpplFrac=1.1, MindtBinWidth=15,
             StrongPeakParamsFile='/SNS/MANDI/shared/ProfileFitting/strongPeakParams_beta_lac_mut_mbvg.pkl',
             peakNumber=30)
 
