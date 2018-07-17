@@ -27,6 +27,7 @@ Improvements
 * Improved error messages in the new GUI to be more obvious and clearer.
 * Updated the naming of workspace groups in a sliced reduction.
 * Updated old backend to mask by detector ID rather than spectrum number, improving reliability.
+* NXcanSAS is now saved out with a .h5 extension so it can be read into SASView.
 
 Bugfixes
 ########
