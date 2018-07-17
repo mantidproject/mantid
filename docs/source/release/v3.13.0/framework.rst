@@ -5,10 +5,6 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 Instrument Definition Updates
 -----------------------------
 
@@ -17,7 +13,7 @@ Instrument Definition Updates
 
 Stability
 ---------
-
+- We have introduced a Project Recovery mechanism for Mantidplot in order to be able to recover the lost state of the interface in the event of a crash or unexpected shutdown.  There are more details in the UI section of the release notes.
 - Mantid now handles poor network stability  better when reading live data from the ISIS DAE.  Mantid will now timeout after a couple of minutes of loss of network connectivity and remains responsive during this time.  You can alter the duration of this timeout by adding a line to the mantid.user.properties file like:
 
 ```
@@ -32,10 +28,7 @@ Algorithms
 New
 ###
 
-New Features
-************
-
-- A list of Related Algorithms has been added to each algorithm, and is displayed in the documentation page of each algorithm as part of it's summary.
+- Sometimes the algorithm you are looking at is close to what you want, but not quite, to help you find the right one a list of Related Algorithms has been added to each algorithm, and is displayed in the documentation page of each algorithm as part of it's summary.
 
 New Algorithms
 **************
