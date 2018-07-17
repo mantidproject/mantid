@@ -5,12 +5,18 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
+ILL
+---
+
 * :ref:`LoadILLSANS <algm-LoadILLSANS>` is upgraded to load the modern nexus files from instruments D11, D22 and D33 at the ILL.
+
+SNS
+---
+
 * EQSANS is configured for live data
 
 ISIS SANS Interface
-----------------------------
-
+-------------------
 New
 ###
 * A string of wavelength ranges can now be specified. A reduction is then done for each wavelength range.
