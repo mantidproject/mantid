@@ -770,7 +770,7 @@ public:
     // Test some values
     TS_ASSERT_EQUALS(data->y(0).size(), 20);
     TS_ASSERT_DELTA(data->y(0)[9], -0.716, 0.001);
-    TS_ASSERT_DELTA(data->y(1)[9], 0.716, 0.001);
+    TS_ASSERT_DELTA(data->y(1)[9], -0.716, 0.001);
     TS_ASSERT_DELTA(data->y(2)[9], -0.716, 0.001);
     TS_ASSERT_EQUALS(data->y(5).size(), 20);
     TS_ASSERT_DELTA(data->y(5)[9], 0.462, 0.001);
@@ -815,10 +815,10 @@ public:
     // Test some values
     TS_ASSERT_EQUALS(data->y(0).size(), 20);
     TS_ASSERT_DELTA(data->y(0)[9], -0.811, 0.001);
-    TS_ASSERT_DELTA(data->y(1)[9], 0.786, 0.001);
-    TS_ASSERT_DELTA(data->y(2)[9], -0.772, 0.001);
+    TS_ASSERT_DELTA(data->y(1)[9], -0.772, 0.001);
+    TS_ASSERT_DELTA(data->y(2)[9], -0.690, 0.001);
     TS_ASSERT_EQUALS(data->y(5).size(), 20);
-    TS_ASSERT_DELTA(data->y(5)[9], 0.534, 0.001);
+    TS_ASSERT_DELTA(data->y(5)[9], 0.493, 0.001);
 
     // Test that the algorithm converged
     TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);

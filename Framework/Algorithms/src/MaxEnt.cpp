@@ -973,8 +973,8 @@ void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
       if (concatenated) {
         // note the spec=0, so specA starts from 0 in this case.
         for (size_t i = 0; i < spectrumLength; i++) {
-          YR[i] = result[2 * i + specA*spectrumLength];
-          YI[i] = result[2 * i + 1 + specA*spectrumLength];
+          YR[i] = result[2 * i + 2*specA*spectrumLength];
+          YI[i] = result[2 * i + 1 + 2*specA*spectrumLength];
         }
       }
       else {
