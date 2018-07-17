@@ -183,6 +183,7 @@ bool addColumnPlotType(ITableWorkspace &self, const std::string &type,
   if (column)
     column->setPlotType(plottype);
 
+  self.modified();
   return column != nullptr;
 }
 
@@ -198,6 +199,7 @@ bool addColumnPlotType(ITableWorkspace &self, const std::string &type,
  */
 bool addColumnSimple(ITableWorkspace &self, const std::string &type,
                      const std::string &name) {
+  self.modified();                     
   return self.addColumn(type, name) != nullptr;
 }
 
@@ -235,6 +237,7 @@ void setPlotType(ITableWorkspace &self, const bpl::object &column, int ptype) {
   }
 
   colptr->setPlotType(ptype);
+  self.modified();
 }
 
 /**
@@ -350,6 +353,7 @@ void addRowFromDict(ITableWorkspace &self, const bpl::dict &rowItems) {
     self.removeRow(rowIndex);
     throw;
   }
+  self.modified();
 }
 
 /**
@@ -398,6 +402,7 @@ void addRowFromSequence(ITableWorkspace &self, const bpl::object &rowItems) {
       throw;
     }
   }
+  self.modified();
 }
 
 /**
