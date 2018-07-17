@@ -67,10 +67,10 @@ public:
   MOCK_CONST_METHOD0(getInstrument, Geometry::Instrument_const_sptr());
   MOCK_CONST_METHOD0(getRunNumber, int());
   MOCK_CONST_METHOD0(getPeakNumber, int());
-  MOCK_CONST_METHOD0(getModulationVector, Mantid::Kernel::V3D());
+  MOCK_CONST_METHOD0(getIntMNP, Mantid::Kernel::V3D());
   MOCK_METHOD1(setRunNumber, void(int m_RunNumber));
   MOCK_METHOD1(setPeakNumber, void(int m_PeakNumber));
-  MOCK_METHOD1(setModulationVector, void(const Mantid::Kernel::V3D m_modStru));
+  MOCK_METHOD1(setIntMNP, void(const Mantid::Kernel::V3D m_modStru));
   MOCK_CONST_METHOD0(getMonitorCount, double());
   MOCK_METHOD1(setMonitorCount, void(double m_MonitorCount));
   MOCK_CONST_METHOD0(getH, double());

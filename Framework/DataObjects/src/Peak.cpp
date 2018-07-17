@@ -229,7 +229,7 @@ Peak::Peak(const Geometry::IPeak &ipeak)
       m_runNumber(ipeak.getRunNumber()),
       m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
       m_col(ipeak.getCol()), m_orig_H(0.), m_orig_K(0.), m_orig_L(0.),
-      m_peakNumber(ipeak.getPeakNumber()), m_modStru(ipeak.getModulationVector()),
+      m_peakNumber(ipeak.getPeakNumber()), m_modStru(ipeak.getIntMNP()),
       m_intH(int(ipeak.getIntHKL().X())), m_intK(int(ipeak.getIntHKL().Y())),
       m_intL(int(ipeak.getIntHKL().Z())),
       m_peakShape(boost::make_shared<NoShape>()) {
@@ -924,7 +924,7 @@ int Peak::getPeakNumber() const { return m_peakNumber; }
 // -------------------------------------------------------------------------------------
 /**Returns the unique peak number
  * Returns -1 if it could not find it. */
-V3D Peak::getModulationVector() const { return m_modStru; }
+V3D Peak::getIntMNP() const { return m_modStru; }
 
 // -------------------------------------------------------------------------------------
 /** For RectangularDetectors only, sets the row (y) of the pixel of the
@@ -948,7 +948,7 @@ void Peak::setPeakNumber(int m_peakNumber) {
 // -------------------------------------------------------------------------------------
 /** Sets the modulated peak structure number
  * @param m_modStru :: modulated peak structure value   */
-void Peak::setModulationVector(V3D m_modStru) { this->m_modStru = m_modStru; }
+void Peak::setIntMNP(V3D m_modStru) { this->m_modStru = m_modStru; }
 
 // -------------------------------------------------------------------------------------
 /** Return the detector position vector */

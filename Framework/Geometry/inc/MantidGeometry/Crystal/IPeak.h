@@ -84,8 +84,8 @@ public:
   virtual int getPeakNumber() const = 0;
   virtual void setPeakNumber(int m_PeakNumber) = 0;
 
-  virtual Mantid::Kernel::V3D getModulationVector() const = 0;
-  virtual void setModulationVector(const Mantid::Kernel::V3D m_modStru) = 0;
+  virtual Mantid::Kernel::V3D getIntMNP() const = 0;
+  virtual void setIntMNP(const Mantid::Kernel::V3D m_modStru) = 0;
 
   virtual Mantid::Kernel::Matrix<double> getGoniometerMatrix() const = 0;
   virtual void setGoniometerMatrix(

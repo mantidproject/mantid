@@ -3,6 +3,9 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Crystal/HKLFilterWavelength.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -60,6 +63,7 @@ private:
 
   /// Run the algorithm
   void exec() override;
+  void predictOffsets(DataObjects::PeaksWorkspace_sptr Peaks, boost::shared_ptr<Mantid::API::IPeaksWorkspace>& OutPeaks, std::vector<double> offsets, std::string &label, int &maxOrder, Kernel::V3D &hkl, Kernel::Matrix<double> &goniometer, const Kernel::DblMatrix &UB, Geometry::HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange, bool &includeOrderZero, int &RunNumber, int &seqNum, std::vector<std::vector<int>> &AlreadyDonePeaks);
 };
 
 } // namespace Crystal

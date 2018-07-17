@@ -183,8 +183,8 @@ class IPeakTest(unittest.TestCase):
 
     def test_set_modulation_vector(self):
         testVector = V3D(0.5,0,0.2)
-        self._peak.setModulationVector(testVector)
-        self.assertEqual(self._peak.getModulationVector(), testVector)
+        self._peak.setIntMNP(testVector)
+        self.assertEqual(self._peak.getIntMNP(), testVector)
 
 if __name__ == '__main__':
     unittest.main()

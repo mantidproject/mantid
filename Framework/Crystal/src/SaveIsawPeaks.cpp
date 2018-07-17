@@ -94,7 +94,7 @@ void SaveIsawPeaks::exec() {
   runMap_t runMap;
   for (size_t i = 0; i < peaks.size(); ++i) {
     Peak &p = peaks[i];
-    if (p.getModulationVector() != V3D(0, 0, 0))
+    if (p.getIntMNP() != V3D(0, 0, 0))
       m_isModulatedStructure = true;
     int run = p.getRunNumber();
     int bank = 0;
@@ -353,7 +353,7 @@ void SaveIsawPeaks::exec() {
           // HKL's are flipped by -1 because of the internal Q convention
           // unless Crystallography convention
           if (m_isModulatedStructure) {
-            V3D mod = p.getModulationVector();
+            V3D mod = p.getIntMNP();
             auto intHKL = p.getIntHKL();
             out << std::setw(5) << Utils::round(qSign * intHKL.X())
                 << std::setw(5) << Utils::round(qSign * intHKL.Y())

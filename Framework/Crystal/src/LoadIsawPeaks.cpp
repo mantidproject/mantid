@@ -393,7 +393,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   peak.setHKL(h, k, l);
   peak.setIntHKL(intHKL);
   if (m_isModulatedStructure) {
-    peak.setModulationVector(mod);
+    peak.setIntMNP(mod);
   }
   peak.setIntensity(Inti);
   peak.setSigmaIntensity(SigI);

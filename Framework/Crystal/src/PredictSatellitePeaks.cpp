@@ -15,7 +15,6 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
-#include "MantidGeometry/Crystal/HKLFilterWavelength.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
 #include <boost/math/special_functions/round.hpp>
 
@@ -141,12 +140,6 @@ void PredictSatellitePeaks::exec() {
   auto OutPeaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(
       WorkspaceFactory::Instance().createPeaks());
   OutPeaks->setInstrument(instrument);
-  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset1", offsets1,
-                                                          true);
-  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset2", offsets2,
-                                                          true);
-  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset3", offsets3,
-                                                          true);
 
   V3D hkl;
   int peakNum = 0;
@@ -194,13 +187,48 @@ void PredictSatellitePeaks::exec() {
   Progress prog(this, 0.0, 1.0, N);
   vector<vector<int>> AlreadyDonePeaks;
   bool done = false;
-  int ErrPos = 1; // Used to determine position in code of a throw
-  Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
   DblMatrix orientedUB = goniometer * UB;
   HKLFilterWavelength lambdaFilter(orientedUB, lambdaMin, lambdaMax);
   int seqNum = 0;
   size_t next = 0;
   while (!done) {
+    std::string offsetName = "Offset1";
+    predictOffsets(Peaks, OutPeaks, offsets1, offsetName, maxOrder, hkl, goniometer, UB, lambdaFilter, includePeaksInRange, includeOrderZero, RunNumber, seqNum, AlreadyDonePeaks);
+    offsetName = "Offset2";
+    predictOffsets(Peaks, OutPeaks, offsets2, offsetName, maxOrder, hkl, goniometer, UB, lambdaFilter, includePeaksInRange, includeOrderZero, RunNumber, seqNum, AlreadyDonePeaks);
+    offsetName = "Offset3";
+    predictOffsets(Peaks, OutPeaks, offsets3, offsetName, maxOrder, hkl, goniometer, UB, lambdaFilter, includePeaksInRange, includeOrderZero, RunNumber, seqNum, AlreadyDonePeaks);
+    if (includePeaksInRange) {
+      next++;
+      if (next == possibleHKLs.size())
+        break;
+      hkl = possibleHKLs[next];
+    } else {
+      peakNum++;
+      if (peakNum >= NPeaks)
+        done = true;
+      else { // peak0= Peaks->getPeak(peakNum);
+        IPeak &peak1 = Peaks->getPeak(peakNum);
+        //??? could not assign to peak0 above. Did not work
+        // the peak that peak0 was associated with did NOT change
+        hkl[0] = peak1.getH();
+        hkl[1] = peak1.getK();
+        hkl[2] = peak1.getL();
+        goniometer = peak1.getGoniometerMatrix();
+        RunNumber = peak1.getRunNumber();
+      }
+    }
+    prog.report();
+  }
+
+  setProperty("SatellitePeaks", OutPeaks);
+}
+
+void PredictSatellitePeaks::predictOffsets(DataObjects::PeaksWorkspace_sptr Peaks, boost::shared_ptr<Mantid::API::IPeaksWorkspace>& OutPeaks, std::vector<double> offsets, std::string &label, int &maxOrder, V3D &hkl, Kernel::Matrix<double> &goniometer, const Kernel::DblMatrix &UB, HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange, bool &includeOrderZero, int &RunNumber, int &seqNum, vector<vector<int>> &AlreadyDonePeaks) {
+  OutPeaks->mutableRun().addProperty<std::vector<double>>(label, offsets,
+                                                          true);
+  int ErrPos = 1; // Used to determine position in code of a throw
+  Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
     for (int order = -maxOrder; order <= maxOrder; order++) {
       if (order == 0 && !includeOrderZero)
         continue; // exclude order 0
@@ -208,9 +236,9 @@ void PredictSatellitePeaks::exec() {
         V3D hkl1(hkl);
         ErrPos = 0;
 
-        hkl1[0] += order * offsets1[0];
-        hkl1[1] += order * offsets1[1];
-        hkl1[2] += order * offsets1[2];
+        hkl1[0] += order * offsets[0];
+        hkl1[1] += order * offsets[1];
+        hkl1[2] += order * offsets[2];
         if (!lambdaFilter.isAllowed(hkl1) && includePeaksInRange)
           continue;
 
@@ -245,7 +273,7 @@ void PredictSatellitePeaks::exec() {
           peak->setPeakNumber(seqNum);
           seqNum++;
           peak->setRunNumber(RunNumber);
-          peak->setModulationVector(V3D(order, 0, 0));
+          peak->setIntMNP(V3D(order, 0, 0));
           OutPeaks->addPeak(*peak);
         }
       } catch (std::runtime_error &) {
@@ -253,127 +281,8 @@ void PredictSatellitePeaks::exec() {
           throw std::invalid_argument("Invalid data at this point");
       }
     }
-    for (int order = -maxOrder; order <= maxOrder; order++) {
-      if (order == 0)
-        continue; // already added with 1st vector
-      try {
-        V3D hkl1(hkl);
-        ErrPos = 0;
-
-        hkl1[0] += order * offsets2[0];
-        hkl1[1] += order * offsets2[1];
-        hkl1[2] += order * offsets2[2];
-
-        Kernel::V3D Qs = goniometer * UB * hkl1 * 2.0 * M_PI;
-        if (Qs[2] <= 0)
-          continue;
-
-        ErrPos = 1;
-
-        boost::shared_ptr<IPeak> peak(Peaks->createPeak(Qs, 1));
-
-        peak->setGoniometerMatrix(goniometer);
-
-        if (Qs[2] > 0 && peak->findDetector(tracer)) {
-          ErrPos = 2;
-          vector<int> SavPk{RunNumber, boost::math::iround(1000.0 * hkl1[0]),
-                            boost::math::iround(1000.0 * hkl1[1]),
-                            boost::math::iround(1000.0 * hkl1[2])};
-
-          // TODO keep list sorted so searching is faster?
-          auto it =
-              find(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end(), SavPk);
-
-          if (it == AlreadyDonePeaks.end())
-            AlreadyDonePeaks.push_back(SavPk);
-          else
-            continue;
-
-          peak->setHKL(hkl1);
-          peak->setPeakNumber(seqNum);
-          seqNum++;
-          peak->setRunNumber(RunNumber);
-          peak->setModulationVector(V3D(0, order, 0));
-          OutPeaks->addPeak(*peak);
-        }
-      } catch (std::runtime_error &) {
-        if (ErrPos != 1) // setQLabFrame in createPeak throws exception
-          throw std::invalid_argument("Invalid data at this point");
-      }
-    }
-    for (int order = -maxOrder; order <= maxOrder; order++) {
-      if (order == 0)
-        continue; // already added with 1st vector
-      try {
-        V3D hkl1(hkl);
-        ErrPos = 0;
-
-        hkl1[0] += order * offsets3[0];
-        hkl1[1] += order * offsets3[1];
-        hkl1[2] += order * offsets3[2];
-
-        Kernel::V3D Qs = goniometer * UB * hkl1 * 2.0 * M_PI;
-        if (Qs[2] <= 0)
-          continue;
-
-        ErrPos = 1;
-
-        boost::shared_ptr<IPeak> peak(Peaks->createPeak(Qs, 1));
-
-        peak->setGoniometerMatrix(goniometer);
-
-        if (Qs[2] > 0 && peak->findDetector(tracer)) {
-          ErrPos = 2;
-          vector<int> SavPk{RunNumber, boost::math::iround(1000.0 * hkl1[0]),
-                            boost::math::iround(1000.0 * hkl1[1]),
-                            boost::math::iround(1000.0 * hkl1[2])};
-
-          // TODO keep list sorted so searching is faster?
-          auto it =
-              find(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end(), SavPk);
-
-          if (it == AlreadyDonePeaks.end())
-            AlreadyDonePeaks.push_back(SavPk);
-          else
-            continue;
-
-          peak->setHKL(hkl1);
-          peak->setPeakNumber(seqNum);
-          seqNum++;
-          peak->setRunNumber(RunNumber);
-          peak->setModulationVector(V3D(0, 0, order));
-          OutPeaks->addPeak(*peak);
-        }
-      } catch (std::runtime_error &) {
-        if (ErrPos != 1) // setQLabFrame in createPeak throws exception
-          throw std::invalid_argument("Invalid data at this point");
-      }
-    }
-    if (includePeaksInRange) {
-      next++;
-      if (next == possibleHKLs.size())
-        break;
-      hkl = possibleHKLs[next];
-    } else {
-      peakNum++;
-      if (peakNum >= NPeaks)
-        done = true;
-      else { // peak0= Peaks->getPeak(peakNum);
-        IPeak &peak1 = Peaks->getPeak(peakNum);
-        //??? could not assign to peak0 above. Did not work
-        // the peak that peak0 was associated with did NOT change
-        hkl[0] = peak1.getH();
-        hkl[1] = peak1.getK();
-        hkl[2] = peak1.getL();
-        goniometer = peak1.getGoniometerMatrix();
-        RunNumber = peak1.getRunNumber();
-      }
-    }
-    prog.report();
-  }
-
-  setProperty("SatellitePeaks", OutPeaks);
 }
+
 
 } // namespace Crystal
 } // namespace Mantid

@@ -154,8 +154,8 @@ public:
   void setCol(int m_col);
   void setPeakNumber(int m_peakNumber) override;
   int getPeakNumber() const override;
-  void setModulationVector(const Mantid::Kernel::V3D m_modStru) override;
-  Mantid::Kernel::V3D getModulationVector() const override;
+  void setIntMNP(const Mantid::Kernel::V3D m_modStru) override;
+  Mantid::Kernel::V3D getIntMNP() const override;
 
   virtual Mantid::Kernel::V3D getDetPos() const override;
   double getL1() const override;
