@@ -101,12 +101,19 @@ else ()
     set ( MSVC_IDE_LOCATION "${MSVC_IDE_LOCATION}/Common7/IDE")
 endif()
 
-configure_file ( ${WINDOWS_BUILDCONFIG}/command-prompt.bat ${PROJECT_BINARY_DIR}/command-prompt.bat @ONLY )
+if ( ${CMAKE_SYSTEM_VERSION} MATCHES "^8" )
+  set ( SDK_VERSION ${CMAKE_SYSTEM_VERSION} )
+else ()
+  # append patch version to get SDK version
+  set ( SDK_VERSION ${CMAKE_SYSTEM_VERSION}.0 )
+endif ()
+
+configure_file ( ${WINDOWS_BUILDCONFIG}/command-prompt.bat.in ${PROJECT_BINARY_DIR}/command-prompt.bat @ONLY )
 # The IDE may not be installed as we could be just using the build tools
 if ( EXISTS ${MSVC_IDE_LOCATION}/devenv.exe )
-    configure_file ( ${WINDOWS_BUILDCONFIG}/visual-studio.bat ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY )
+    configure_file ( ${WINDOWS_BUILDCONFIG}/visual-studio.bat.in ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY )
 endif ()
-configure_file ( ${WINDOWS_BUILDCONFIG}/pycharm.bat ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY )
+configure_file ( ${WINDOWS_BUILDCONFIG}/pycharm.bat.in ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY )
 
 ###########################################################################
 # Configure Mantid startup scripts
