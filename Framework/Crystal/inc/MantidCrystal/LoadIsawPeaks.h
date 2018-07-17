@@ -42,7 +42,8 @@ public:
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
-  bool m_ModStru;
+  /// Flag for reading modulated structures
+  bool m_isModulatedStructure;
   std::vector<double> m_offset1 = {0.0, 0.0, 0.0};
   std::vector<double> m_offset2 = {0.0, 0.0, 0.0};
   std::vector<double> m_offset3 = {0.0, 0.0, 0.0};
@@ -86,6 +87,9 @@ private:
   boost::shared_ptr<const Geometry::IComponent> getCachedBankByName(
       std::string bankname,
       const boost::shared_ptr<const Geometry::Instrument> &inst);
+
+  /// Read offsets and add as property
+  void getOffsets(std::ifstream &in, API::Run &run, std::vector<double> m_offset, std::string &label, double &qSign);
 };
 
 } // namespace Mantid

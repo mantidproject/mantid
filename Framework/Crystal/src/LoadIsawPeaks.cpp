@@ -157,10 +157,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   else if (tag == "Date:")
     date = getWord(in, false);
   tag = getWord(in, false);
-  if (tag == "MOD")
-    m_ModStru = true;
-  else
-    m_ModStru = false;
+  m_isModulatedStructure = tag == "MOD";
   readToEndOfLine(in, true);
 
   // Now we load the instrument using the name and date
@@ -201,7 +198,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     if (s == "5")
       det.push_back(bank);
     if (s == "9") {
-      m_offset1[0] = qSign * std::stod(getWord(in, false), nullptr);
+/*      m_offset1[0] = qSign * std::stod(getWord(in, false), nullptr);
       m_offset1[1] = qSign * std::stod(getWord(in, false), nullptr);
       m_offset1[2] = qSign * std::stod(getWord(in, false), nullptr);
       m_offset2[0] = qSign * std::stod(getWord(in, false), nullptr);
@@ -215,7 +212,14 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
       outWS->mutableRun().addProperty<std::vector<double>>("Offset2", m_offset2,
                                                            true);
       outWS->mutableRun().addProperty<std::vector<double>>("Offset3", m_offset3,
-                                                           true);
+                                                           true);*/
+      auto run = outWS->mutableRun();
+      std::string offsetName = "Offset1";
+      getOffsets(in, run, m_offset1, offsetName, qSign);
+      offsetName = "Offset1";
+      getOffsets(in, run, m_offset2, offsetName, qSign);
+      offsetName = "Offset1";
+      getOffsets(in, run, m_offset3, offsetName, qSign);
     }
   }
   // Find bank numbers in instument that are not in header lines
@@ -265,6 +269,23 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     }
   }
   return s;
+}
+
+//-----------------------------------------------------------------------------------------------
+/** Read offsets and add as property
+ *
+ * @param in :: input file stream
+ * @param run :: mutable run of workspace
+ * @param m_offset :: vectors of offsets
+ * @param lablel :: label for property
+ * @param qSign :: For inelastic this is 1; for crystallography this is -1
+ * @return void
+ */
+void LoadIsawPeaks::getOffsets(std::ifstream &in, API::Run &run, std::vector<double> m_offset, std::string &label, double &qSign) {
+      for (int i=0; i<3; i++)     
+      m_offset.push_back(qSign * std::stod(getWord(in, false), nullptr));
+      run.addProperty<std::vector<double>>(label, m_offset,
+                                                           true);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -324,15 +345,15 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   l = qSign * std::stod(getWord(in, false), nullptr);
   V3D mod = V3D(0, 0, 0);
   V3D intHKL = V3D(h, k, l);
-  if (m_ModStru) {
+  if (m_isModulatedStructure) {
     mod[0] = qSign * std::stoi(getWord(in, false), nullptr);
     mod[1] = qSign * std::stoi(getWord(in, false), nullptr);
     mod[2] = qSign * std::stoi(getWord(in, false), nullptr);
-    double deltaH =
+    auto deltaH =
         mod[0] * m_offset1[0] + mod[1] * m_offset2[0] + mod[2] * m_offset3[0];
-    double deltaK =
+    auto deltaK =
         mod[0] * m_offset1[1] + mod[1] * m_offset2[1] + mod[2] * m_offset3[1];
-    double deltaL =
+    auto deltaL =
         mod[0] * m_offset1[2] + mod[1] * m_offset2[2] + mod[2] * m_offset3[2];
 
     h += deltaH;
@@ -371,8 +392,8 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   Peak peak(outWS->getInstrument(), pixelID, wl);
   peak.setHKL(h, k, l);
   peak.setIntHKL(intHKL);
-  if (m_ModStru) {
-    peak.setModStru(mod);
+  if (m_isModulatedStructure) {
+    peak.setModulationVector(mod);
   }
   peak.setIntensity(Inti);
   peak.setSigmaIntensity(SigI);

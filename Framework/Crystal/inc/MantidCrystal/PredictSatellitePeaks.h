@@ -10,8 +10,8 @@ namespace Crystal {
    corresponding
     to fractional h,k,and l values.
 
-    @author Ruth Mikkelson
-    @date   2012-12-05
+    @author Vickie Lynch
+    @date   2018-07-13
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory &
                      NScD Oak Ridge National Laboratory

@@ -289,7 +289,7 @@ namespace Crystal
 
                     if (IndexingUtils::ValidIndex(hkl, tolerance))
                     {
-                        peaks[i].setModStru(V3D(0,0,0));
+                        peaks[i].setModulationVector(V3D(0,0,0));
                         main_indexed++;
                         h_error = fabs(round(hkl[0])-hkl[0]);
                         k_error = fabs(round(hkl[1])-hkl[1]);
@@ -307,7 +307,7 @@ namespace Crystal
                             hkl1[2] -= order * offsets1[2];
                             if (IndexingUtils::ValidIndex(hkl1, satetolerance))
                             {
-                                peaks[i].setModStru(V3D(order,0,0));
+                                peaks[i].setModulationVector(V3D(order,0,0));
                                 sate_indexed++;
                                 h_error = fabs(round(hkl1[0])-hkl1[0]);
                                 k_error = fabs(round(hkl1[1])-hkl1[1]);
@@ -324,7 +324,7 @@ namespace Crystal
                             hkl1[2] -= order * offsets2[2];
                             if (IndexingUtils::ValidIndex(hkl1, satetolerance))
                             {
-                                peaks[i].setModStru(V3D(0,order,0));
+                                peaks[i].setModulationVector(V3D(0,order,0));
                                 sate_indexed++;
                                 h_error = fabs(round(hkl1[0])-hkl1[0]);
                                 k_error = fabs(round(hkl1[1])-hkl1[1]);
@@ -341,7 +341,7 @@ namespace Crystal
                             hkl1[2] -= order * offsets3[2];
                             if (IndexingUtils::ValidIndex(hkl1, satetolerance))
                             {
-                                peaks[i].setModStru(V3D(0,0,order));
+                                peaks[i].setModulationVector(V3D(0,0,order));
                                 sate_indexed++;
                                 h_error = fabs(round(hkl1[0])-hkl1[0]);
                                 k_error = fabs(round(hkl1[1])-hkl1[1]);

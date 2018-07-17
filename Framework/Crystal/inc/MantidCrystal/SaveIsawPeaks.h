@@ -35,7 +35,8 @@ public:
   }
 
 private:
-  bool m_ModStru = false;
+  /// Flag for writing modulated structures
+  bool m_isModulatedStructure = false;
 
   /// Initialise the properties
   void init() override;

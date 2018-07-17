@@ -80,23 +80,20 @@ public:
 
     TS_ASSERT_EQUALS(SatellitePeaks->getNumberPeaks(), 122);
 
-    Peak &peakx = dynamic_cast<Peak &>(SatellitePeaks->getPeak(0));
-    Peak peak = peakx;
-    TS_ASSERT_DELTA(peak.getH(), -5.5, .0001);
-    TS_ASSERT_DELTA(peak.getK(), 7.0, .0001);
-    TS_ASSERT_DELTA(peak.getL(), -4.2, .0001);
+    auto &peak0 = SatellitePeaks->getPeak(0);
+    TS_ASSERT_DELTA(peak0.getH(), -5.5, .0001);
+    TS_ASSERT_DELTA(peak0.getK(), 7.0, .0001);
+    TS_ASSERT_DELTA(peak0.getL(), -4.2, .0001);
 
-    peakx = dynamic_cast<Peak &>(SatellitePeaks->getPeak(3));
-    peak = peakx;
-    TS_ASSERT_DELTA(peak.getH(), -5.5, .0001);
-    TS_ASSERT_DELTA(peak.getK(), 3.0, .0001);
-    TS_ASSERT_DELTA(peak.getL(), -3.2, .0001);
+    auto &peak3 = SatellitePeaks->getPeak(3);
+    TS_ASSERT_DELTA(peak3.getH(), -5.5, .0001);
+    TS_ASSERT_DELTA(peak3.getK(), 3.0, .0001);
+    TS_ASSERT_DELTA(peak3.getL(), -3.2, .0001);
 
-    peakx = dynamic_cast<Peak &>(SatellitePeaks->getPeak(6));
-    peak = peakx;
-    TS_ASSERT_DELTA(peak.getH(), -6.5, .0001);
-    TS_ASSERT_DELTA(peak.getK(), 4.0, .0001);
-    TS_ASSERT_DELTA(peak.getL(), -4.2, .0001);
+    auto &peak6 = SatellitePeaks->getPeak(6);
+    TS_ASSERT_DELTA(peak6.getH(), -6.5, .0001);
+    TS_ASSERT_DELTA(peak6.getK(), 4.0, .0001);
+    TS_ASSERT_DELTA(peak6.getL(), -4.2, .0001);
   }
 };
 

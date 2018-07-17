@@ -94,8 +94,8 @@ void SaveIsawPeaks::exec() {
   runMap_t runMap;
   for (size_t i = 0; i < peaks.size(); ++i) {
     Peak &p = peaks[i];
-    if (p.getModStru() != V3D(0, 0, 0))
-      m_ModStru = true;
+    if (p.getModulationVector() != V3D(0, 0, 0))
+      m_isModulatedStructure = true;
     int run = p.getRunNumber();
     int bank = 0;
     std::string bankName = p.getBankName();
@@ -117,7 +117,7 @@ void SaveIsawPeaks::exec() {
     // Save in the map
     runMap[run][bank].push_back(i);
   }
-  if (m_ModStru)
+  if (m_isModulatedStructure)
     header =
         "2   SEQN    H    K    L    M    N    P     COL      ROW     CHAN      "
         "  L2   2_THETA        AZ         WL         D      IPK "
@@ -160,7 +160,7 @@ void SaveIsawPeaks::exec() {
     // saving.
     Types::Core::DateAndTime expDate = inst->getValidFromDate() + 1.0;
     out << expDate.toISO8601String();
-    if (m_ModStru)
+    if (m_isModulatedStructure)
       out << " MOD";
     out << '\n';
 
@@ -272,7 +272,7 @@ void SaveIsawPeaks::exec() {
 
   // Go in order of run numbers
   std::vector<double> offset1, offset2, offset3;
-  if (m_ModStru) {
+  if (m_isModulatedStructure) {
     auto run = ws->mutableRun();
     offset1 = run.getPropertyValueAsType<std::vector<double>>("Offset1");
     offset2 = run.getPropertyValueAsType<std::vector<double>>("Offset2");
@@ -352,8 +352,8 @@ void SaveIsawPeaks::exec() {
 
           // HKL's are flipped by -1 because of the internal Q convention
           // unless Crystallography convention
-          if (m_ModStru) {
-            V3D mod = p.getModStru();
+          if (m_isModulatedStructure) {
+            V3D mod = p.getModulationVector();
             auto intHKL = p.getIntHKL();
             out << std::setw(5) << Utils::round(qSign * intHKL.X())
                 << std::setw(5) << Utils::round(qSign * intHKL.Y())

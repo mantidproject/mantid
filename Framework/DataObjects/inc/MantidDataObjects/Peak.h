@@ -154,8 +154,8 @@ public:
   void setCol(int m_col);
   void setPeakNumber(int m_peakNumber) override;
   int getPeakNumber() const override;
-  void setModStru(Mantid::Kernel::V3D m_ModStru) override;
-  Mantid::Kernel::V3D getModStru() const override;
+  void setModulationVector(const Mantid::Kernel::V3D m_modStru) override;
+  Mantid::Kernel::V3D getModulationVector() const override;
 
   virtual Mantid::Kernel::V3D getDetPos() const override;
   double getL1() const override;
@@ -202,15 +202,6 @@ private:
 
   /// L of the peak
   double m_L;
-
-  /// integer H of the peak
-  int m_intH;
-
-  /// integer K of the peak
-  int m_intK;
-
-  /// integer L of the peak
-  int m_intL;
 
   /// Integrated peak intensity
   double m_intensity;
@@ -260,7 +251,16 @@ private:
 
   // keep peak number
   int m_peakNumber;
-  Mantid::Kernel::V3D m_ModStru;
+  Mantid::Kernel::V3D m_modStru;
+
+  /// integer H of the peak
+  int m_intH;
+
+  /// integer K of the peak
+  int m_intK;
+
+  /// integer L of the peak
+  int m_intL;
 
   /// List of contributing detectors IDs
   std::set<int> m_detIDs;
