@@ -227,14 +227,11 @@ void PredictSatellitePeaks::exec() {
 void PredictSatellitePeaks::predictOffsets(DataObjects::PeaksWorkspace_sptr Peaks, boost::shared_ptr<Mantid::API::IPeaksWorkspace>& OutPeaks, std::vector<double> offsets, std::string &label, int &maxOrder, V3D &hkl, Kernel::Matrix<double> &goniometer, const Kernel::DblMatrix &UB, HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange, bool &includeOrderZero, int &RunNumber, int &seqNum, vector<vector<int>> &AlreadyDonePeaks) {
   OutPeaks->mutableRun().addProperty<std::vector<double>>(label, offsets,
                                                           true);
-  int ErrPos = 1; // Used to determine position in code of a throw
   Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
     for (int order = -maxOrder; order <= maxOrder; order++) {
       if (order == 0 && !includeOrderZero)
         continue; // exclude order 0
-      try {
         V3D hkl1(hkl);
-        ErrPos = 0;
 
         hkl1[0] += order * offsets[0];
         hkl1[1] += order * offsets[1];
@@ -247,26 +244,25 @@ void PredictSatellitePeaks::predictOffsets(DataObjects::PeaksWorkspace_sptr Peak
         if (Qs[2] <= 0)
           continue;
 
-        ErrPos = 1;
-
+      try {
         auto peak(Peaks->createPeak(Qs, 1));
 
         peak->setGoniometerMatrix(goniometer);
 
-        if (Qs[2] > 0 && peak->findDetector(tracer)) {
-          ErrPos = 2;
+        if (peak->findDetector(tracer)) {
           vector<int> SavPk{RunNumber, boost::math::iround(1000.0 * hkl1[0]),
                             boost::math::iround(1000.0 * hkl1[1]),
                             boost::math::iround(1000.0 * hkl1[2])};
 
-          // TODO keep list sorted so searching is faster?
           auto it =
               find(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end(), SavPk);
 
-          if (it == AlreadyDonePeaks.end())
+          if (it == AlreadyDonePeaks.end()){
             AlreadyDonePeaks.push_back(SavPk);
-          else
+            std::sort(AlreadyDonePeaks.begin(),AlreadyDonePeaks.end());
+          } else {
             continue;
+          }
 
           peak->setHKL(hkl1);
           peak->setIntHKL(hkl);
@@ -277,10 +273,9 @@ void PredictSatellitePeaks::predictOffsets(DataObjects::PeaksWorkspace_sptr Peak
           OutPeaks->addPeak(*peak);
         }
       } catch (std::runtime_error &) {
-        if (ErrPos != 1) // setQLabFrame in createPeak throws exception
-          throw std::invalid_argument("Invalid data at this point");
+          throw std::invalid_argument("Invalid Q vector");
       }
-    }
+  }
 }
 
 
