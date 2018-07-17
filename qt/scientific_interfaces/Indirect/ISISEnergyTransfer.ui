@@ -313,6 +313,13 @@
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="toolTip">
+              <string>, allows you to specify additional indices. 1,2,4 will keep indices 1, 2 and 4 only.
+: indicates a continuous range of indices. For example, 1:5 is the same as 1,2,3,4,5.
++ sums two spectra together. 7+9 will produce a single spectra listing the sum of 7 and 9, ignoring any others.
+- sums a range of spectra together. For example, 3-8 is the same as 3+4+5+6+7+8.
+              </string>
+            </property>
             <property name="maximumSize">
              <size>
               <width>16777215</width>
