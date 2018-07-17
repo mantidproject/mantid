@@ -452,6 +452,7 @@ void setCell(ITableWorkspace &self, const bpl::object &col_or_row,
   int row(-1);
   getCellLoc(self, col_or_row, row_or_col, column, row);
   setValue(column, row, value);
+  self.modified();
 }
 } // namespace
 
