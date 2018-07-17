@@ -23,43 +23,43 @@ Features Removed
 Algorithms
 ----------
 
-* Removed version 1 of ``ReflectometryReductionOne`` and ``ReflectometryReductionOneAuto``.
-* Renamed algorithms ``PolarizationCorrection`` to ``PolarizationCorrectionFredrikze`` and ``PolarizationEfficiencyCor`` to ``PolarizationCorrectionWildes``.
+- Removed version 1 of ``ReflectometryReductionOne`` and ``ReflectometryReductionOneAuto``.
+- Renamed algorithms ``PolarizationCorrection`` to ``PolarizationCorrectionFredrikze`` and ``PolarizationEfficiencyCor`` to ``PolarizationCorrectionWildes``.
 
 New
 ###
 
-* Added algorithm ``PolarizationEfficiencyCor`` which calls ``PolarizationCorrectionFredrikze`` or ``PolarizationCorrectionWildes`` depending on chosen ``Method`` property.
-* Added algorithms that help create a matrix workspace with polarization efficiencies ready to be used with ``PolarizationEfficiencyCor``
+- Added algorithm ``PolarizationEfficiencyCor`` which calls ``PolarizationCorrectionFredrikze`` or ``PolarizationCorrectionWildes`` depending on chosen ``Method`` property.
+- Added algorithms that help create a matrix workspace with polarization efficiencies ready to be used with ``PolarizationEfficiencyCor``
 
   - ``CreatePolarizationEfficiencies`` creates efficiencies from polynomial coefficients
   - ``JoinISISPolarizationEfficiencies`` joins individual efficiencies into one matrix workspace
   - ``LoadISISPolarizationEfficiencies`` loads efficiencies form files
-* The ILL reflectometry loader :ref:`algm-LoadILLReflectometry` implements the NeXus file changes of January 2018 and can load again all valid Nexus files for D17 and FIGARO which are available since 2013 and 2017, respectively.
-* Algorithms for reflectometry reduction at ILL have been added. These handle the basic polarized/unpolarized reduction in SumInLambda or SumInQ modes. Included algorithms:
+- The ILL reflectometry loader :ref:`algm-LoadILLReflectometry` implements the NeXus file changes of January 2018 and can load again all valid Nexus files for D17 and FIGARO which are available since 2013 and 2017, respectively.
+- Algorithms for reflectometry reduction at ILL have been added. These handle the basic polarized/unpolarized reduction in SumInLambda or SumInQ modes. Included algorithms:
     - :ref:`algm-ReflectometryILLPreprocess`
     - :ref:`algm-ReflectometryILLSumForeground`
     - :ref:`algm-ReflectometryILLPolarizationCor`
     - :ref:`algm-ReflectometryILLConvertToQ`
-* A new algorithm :ref:`algm-ReflectometryMomentumTransfer` provides conversion to momentum transfer and :math:`Q_{z}` resolution calculation for reflectivity workspaces.
-* A new algorithm :ref:`ReflectometrySumInQ <algm-ReflectometrySumInQ>` is available for coherent summation of the reflected beam.
+- A new algorithm :ref:`algm-ReflectometryMomentumTransfer` provides conversion to momentum transfer and :math:`Q_{z}` resolution calculation for reflectivity workspaces.
+- A new algorithm :ref:`ReflectometrySumInQ <algm-ReflectometrySumInQ>` is available for coherent summation of the reflected beam.
 
 - :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometryReductionOneAuto` no longer include partial bins by default when summing in Q. A new property, `IncludePartialBins`, has been added to re-enable partial bins.
 
 Bugfixes
 ########
 
-* Correct the angle to the value of ``ThetaIn`` property if summing in lambda in ``ReflectometryReductionOne-v2``.
-* Fixed an incorrectly calculated detector angle when loading FIGARO files using :ref:`algm-LoadILLReflectometry`.
+- Correct the angle to the value of ``ThetaIn`` property if summing in lambda in ``ReflectometryReductionOne-v2``.
+- Fixed an incorrectly calculated detector angle when loading FIGARO files using :ref:`algm-LoadILLReflectometry`.
 
 Liquids Reflectometer
 ---------------------
-* New REF_L instrument geometry for 2018 run cycle.
+- New REF_L instrument geometry for 2018 run cycle.
 
 Magnetism Reflectometer
 -----------------------
-* Added live data information to Facilities.xml
-* Allow for the use of workspace groups as input to the reduction.
-* Added algorithm to compute scattering angle from a workspace.
+- Added live data information to Facilities.xml
+- Allow for the use of workspace groups as input to the reduction.
+- Added algorithm to compute scattering angle from a workspace.
 
 :ref:`Release 3.13.0 <v3.13.0>`
