@@ -87,8 +87,8 @@ private:
   /// Populates the output workspace containing the reconstructed data
   void populateDataWS(API::MatrixWorkspace_const_sptr &inWS, size_t spec,
                       size_t nspec, const std::vector<double> &result,
-                      bool concatenatedSpectra,
-                      bool complex, API::MatrixWorkspace_sptr &outWS);
+                      bool concatenatedSpectra, bool complex,
+                      API::MatrixWorkspace_sptr &outWS);
   /// Populates the output workspace containing the reconstructed image
   void populateImageWS(API::MatrixWorkspace_const_sptr &inWS, size_t spec,
                        size_t nspec, const std::vector<double> &result,

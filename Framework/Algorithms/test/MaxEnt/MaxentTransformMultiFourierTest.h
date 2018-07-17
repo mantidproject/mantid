@@ -24,12 +24,14 @@ public:
   static MaxentTransformMultiFourierTest *createSuite() {
     return new MaxentTransformMultiFourierTest();
   }
-  static void destroySuite(MaxentTransformMultiFourierTest *suite) { delete suite; }
-
+  static void destroySuite(MaxentTransformMultiFourierTest *suite) {
+    delete suite;
+  }
 
   void test_complex_data_to_real_image_against_fourier() {
 
-    MaxentSpaceComplex_sptr dataSpaceMF = boost::make_shared<MaxentSpaceComplex>();
+    MaxentSpaceComplex_sptr dataSpaceMF =
+        boost::make_shared<MaxentSpaceComplex>();
     MaxentSpace_sptr imageSpaceMF = boost::make_shared<MaxentSpaceReal>();
     MaxentTransformMultiFourier transformMF(dataSpaceMF, imageSpaceMF, 3);
     MaxentSpace_sptr dataSpaceF = boost::make_shared<MaxentSpaceComplex>();
@@ -37,10 +39,10 @@ public:
     MaxentTransformFourier transformF(dataSpaceF, imageSpaceF);
 
     // Three square waves that add up to a saw tooth wave
-    std::vector<double> realDataMF = {
-      1, -1, 1, -1, 1, -1, 1, -1, 2, 2, -2, -2, 2, 2, -2, -2, 4, 4, 4, 4, -4, -4, -4, -4 };
-    std::vector<double> realDataF = {
-      7, 5, 3, 1, -1, -3, -5, -7 };
+    std::vector<double> realDataMF = {1, -1, 1,  -1, 1,  -1, 1,  -1,
+                                      2, 2,  -2, -2, 2,  2,  -2, -2,
+                                      4, 4,  4,  4,  -4, -4, -4, -4};
+    std::vector<double> realDataF = {7, 5, 3, 1, -1, -3, -5, -7};
 
     // Perform the transformation
     auto result = transformMF.dataToImage(realDataMF);
@@ -58,17 +60,18 @@ public:
 
   void test_complex_data_to_complex_image_against_fourier() {
 
-    MaxentSpaceComplex_sptr dataSpaceMF = boost::make_shared<MaxentSpaceComplex>();
+    MaxentSpaceComplex_sptr dataSpaceMF =
+        boost::make_shared<MaxentSpaceComplex>();
     MaxentSpace_sptr imageSpaceMF = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformMultiFourier transformMF(dataSpaceMF, imageSpaceMF, 3);
     MaxentSpace_sptr dataSpaceF = boost::make_shared<MaxentSpaceComplex>();
     MaxentSpace_sptr imageSpaceF = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transformF(dataSpaceF, imageSpaceF);
 
-    std::vector<double> realDataMF = {
-      1, -1, 1, -1, 1, -1, 1, -1, 2, 2, -2, -2, 2, 2, -2, -2, 4, 4, 4, 4, -4, -4, -4, -4 };
-    std::vector<double> realDataF = {
-      7, 5, 3, 1, -1, -3, -5, -7 };
+    std::vector<double> realDataMF = {1, -1, 1,  -1, 1,  -1, 1,  -1,
+                                      2, 2,  -2, -2, 2,  2,  -2, -2,
+                                      4, 4,  4,  4,  -4, -4, -4, -4};
+    std::vector<double> realDataF = {7, 5, 3, 1, -1, -3, -5, -7};
 
     // Perform the transformation
     auto result = transformMF.dataToImage(realDataMF);
@@ -82,20 +85,18 @@ public:
         TS_ASSERT_DELTA(result[i], resultF[i], 1e-4);
       }
     }
-
   }
 
-  void test_image_to_data_repeats_fourier()
-  {
-    MaxentSpaceComplex_sptr dataSpaceMF = boost::make_shared<MaxentSpaceComplex>();
+  void test_image_to_data_repeats_fourier() {
+    MaxentSpaceComplex_sptr dataSpaceMF =
+        boost::make_shared<MaxentSpaceComplex>();
     MaxentSpace_sptr imageSpaceMF = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformMultiFourier transformMF(dataSpaceMF, imageSpaceMF, 3);
     MaxentSpace_sptr dataSpaceF = boost::make_shared<MaxentSpaceComplex>();
     MaxentSpace_sptr imageSpaceF = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transformF(dataSpaceF, imageSpaceF);
 
-    std::vector<double> complexImage = {
-      4.0, 3.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0 };
+    std::vector<double> complexImage = {4.0, 3.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0};
 
     // Perform the transformation
     auto result = transformMF.imageToData(complexImage);
@@ -103,37 +104,33 @@ public:
     auto resultF = transformF.imageToData(complexImage);
 
     // Check that result is a triple repetition of fourier
-    TS_ASSERT_EQUALS(result.size(), 3*resultF.size());
-    if (result.size() == 3*resultF.size()) {
+    TS_ASSERT_EQUALS(result.size(), 3 * resultF.size());
+    if (result.size() == 3 * resultF.size()) {
       size_t n = resultF.size();
       for (size_t i = 0; i < n; i++) {
         TS_ASSERT_DELTA(result[i], resultF[i], 1e-4);
         TS_ASSERT_DELTA(result[i + n], resultF[i], 1e-4);
-        TS_ASSERT_DELTA(result[i + 2*n], resultF[i], 1e-4);
+        TS_ASSERT_DELTA(result[i + 2 * n], resultF[i], 1e-4);
       }
     }
-
   }
 
-  void test_image_to_data_with_real_adjustments()
-  {
-    MaxentSpaceComplex_sptr dataSpaceMF = boost::make_shared<MaxentSpaceComplex>();
+  void test_image_to_data_with_real_adjustments() {
+    MaxentSpaceComplex_sptr dataSpaceMF =
+        boost::make_shared<MaxentSpaceComplex>();
     MaxentSpace_sptr imageSpaceMF = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformMultiFourier transformMF(dataSpaceMF, imageSpaceMF, 3);
     MaxentSpace_sptr dataSpaceF = boost::make_shared<MaxentSpaceComplex>();
     MaxentSpace_sptr imageSpaceF = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transformF(dataSpaceF, imageSpaceF);
 
-    std::vector<double> complexImage = {
-      4.0, 3.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0 };
+    std::vector<double> complexImage = {4.0, 3.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0};
     std::vector<double> linearAdjustments = {
-      1.0, 0.0, 2.0, 0.0, 3.0, 0.0, 4.0, 0.0,
-      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-      1.0, 0.0, 2.0, 0.0, 3.0, 0.0, 4.0, 0.0 };
+        1.0, 0.0, 2.0, 0.0, 3.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 2.0, 0.0, 3.0, 0.0, 4.0, 0.0};
     std::vector<double> constAdjustments = {
-      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-      1.0, 0.0, 2.0, 0.0, 3.0, 0.0, 4.0, 0.0,
-      1.0, 0.0, -1.0, 0.0, 1.0, 0.0, -1.0, 0.0 };
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  0.0, 1.0, 0.0, 2.0,  0.0,
+        3.0, 0.0, 4.0, 0.0, 1.0, 0.0, -1.0, 0.0, 1.0, 0.0, -1.0, 0.0};
 
     // Set Adjustments
     transformMF.setAdjustments(linearAdjustments, constAdjustments);
@@ -152,32 +149,37 @@ public:
     if (result.size() == 3 * resultF.size()) {
       size_t n = resultF.size();
       for (size_t i = 0; i < n; i++) {
-        TS_ASSERT_DELTA(result[i], linearAdjustments[i - i % 2] * resultF[i] + constAdjustments[i], 1e-4);
-        TS_ASSERT_DELTA(result[i + n], linearAdjustments[i + n - i % 2] * resultF[i] + constAdjustments[i + n], 1e-4);
-        TS_ASSERT_DELTA(result[i + 2 * n], linearAdjustments[i + 2 * n - i % 2] * resultF[i] + constAdjustments[i + 2 * n], 1e-4);
+        TS_ASSERT_DELTA(result[i], linearAdjustments[i - i % 2] * resultF[i] +
+                                       constAdjustments[i],
+                        1e-4);
+        TS_ASSERT_DELTA(result[i + n],
+                        linearAdjustments[i + n - i % 2] * resultF[i] +
+                            constAdjustments[i + n],
+                        1e-4);
+        TS_ASSERT_DELTA(result[i + 2 * n],
+                        linearAdjustments[i + 2 * n - i % 2] * resultF[i] +
+                            constAdjustments[i + 2 * n],
+                        1e-4);
       }
     }
   }
 
-  void test_image_to_data_with_imaginary_adjustments()
-  {
-    MaxentSpaceComplex_sptr dataSpaceMF = boost::make_shared<MaxentSpaceComplex>();
+  void test_image_to_data_with_imaginary_adjustments() {
+    MaxentSpaceComplex_sptr dataSpaceMF =
+        boost::make_shared<MaxentSpaceComplex>();
     MaxentSpace_sptr imageSpaceMF = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformMultiFourier transformMF(dataSpaceMF, imageSpaceMF, 3);
     MaxentSpace_sptr dataSpaceF = boost::make_shared<MaxentSpaceComplex>();
     MaxentSpace_sptr imageSpaceF = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transformF(dataSpaceF, imageSpaceF);
 
-    std::vector<double> complexImage = {
-      4.0, 3.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0 };
+    std::vector<double> complexImage = {4.0, 3.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0};
     std::vector<double> linearAdjustments = {
-      0.0, 1.0, 0.0, 2.0, 0.0, 3.0, 0.0, 4.0,
-      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-      0.0, 1.0, 0.0, 2.0, 0.0, 3.0, 0.0, 4.0};
+        0.0, 1.0, 0.0, 2.0, 0.0, 3.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 2.0, 0.0, 3.0, 0.0, 4.0};
     std::vector<double> constAdjustments = {
-      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-      0.0, 1.0, 0.0, 2.0, 0.0, 3.0, 0.0, 4.0,
-      0.0, 1.0, 0.0, -1.0, 0.0, 1.0, 0.0, -1.0 };
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  0.0, 1.0, 0.0, 2.0,
+        0.0, 3.0, 0.0, 4.0, 0.0, 1.0, 0.0, -1.0, 0.0, 1.0, 0.0, -1.0};
 
     // Set Adjustments
     transformMF.setAdjustments(linearAdjustments, constAdjustments);
@@ -197,14 +199,30 @@ public:
       size_t n = resultF.size();
       for (size_t i = 0; i < n; i++) {
         if (i % 2 == 0) { // Real part
-          TS_ASSERT_DELTA(result[i], -linearAdjustments[i + 1] * resultF[i + 1] + constAdjustments[i], 1e-4);
-          TS_ASSERT_DELTA(result[i + n], -linearAdjustments[i + n + 1] * resultF[i + 1] + constAdjustments[i + n], 1e-4);
-          TS_ASSERT_DELTA(result[i + 2 * n], -linearAdjustments[i + 2 * n + 1] * resultF[i + 1] + constAdjustments[i + 2 * n], 1e-4);
-        }
-        else { // Imaginary part
-          TS_ASSERT_DELTA(result[i], linearAdjustments[i] * resultF[i - 1] + constAdjustments[i], 1e-4);
-          TS_ASSERT_DELTA(result[i + n], linearAdjustments[i + n] * resultF[i - 1] + constAdjustments[i + n], 1e-4);
-          TS_ASSERT_DELTA(result[i + 2 * n], linearAdjustments[i + 2 * n] * resultF[i - 1] + constAdjustments[i + 2 * n], 1e-4);
+          TS_ASSERT_DELTA(result[i],
+                          -linearAdjustments[i + 1] * resultF[i + 1] +
+                              constAdjustments[i],
+                          1e-4);
+          TS_ASSERT_DELTA(result[i + n],
+                          -linearAdjustments[i + n + 1] * resultF[i + 1] +
+                              constAdjustments[i + n],
+                          1e-4);
+          TS_ASSERT_DELTA(result[i + 2 * n],
+                          -linearAdjustments[i + 2 * n + 1] * resultF[i + 1] +
+                              constAdjustments[i + 2 * n],
+                          1e-4);
+        } else { // Imaginary part
+          TS_ASSERT_DELTA(result[i], linearAdjustments[i] * resultF[i - 1] +
+                                         constAdjustments[i],
+                          1e-4);
+          TS_ASSERT_DELTA(result[i + n],
+                          linearAdjustments[i + n] * resultF[i - 1] +
+                              constAdjustments[i + n],
+                          1e-4);
+          TS_ASSERT_DELTA(result[i + 2 * n],
+                          linearAdjustments[i + 2 * n] * resultF[i - 1] +
+                              constAdjustments[i + 2 * n],
+                          1e-4);
         }
       }
     }

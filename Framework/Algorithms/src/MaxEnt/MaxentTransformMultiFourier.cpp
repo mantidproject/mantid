@@ -5,15 +5,16 @@ namespace Mantid {
 namespace Algorithms {
 
 /** Constructor */
-MaxentTransformMultiFourier::MaxentTransformMultiFourier(MaxentSpaceComplex_sptr dataSpace,
-                                               MaxentSpace_sptr imageSpace,
-                                               size_t numSpec)
-    : MaxentTransformFourier(dataSpace, imageSpace), m_numSpec(numSpec), m_linearAdjustments(), m_constAdjustments() {}
+MaxentTransformMultiFourier::MaxentTransformMultiFourier(
+    MaxentSpaceComplex_sptr dataSpace, MaxentSpace_sptr imageSpace,
+    size_t numSpec)
+    : MaxentTransformFourier(dataSpace, imageSpace), m_numSpec(numSpec),
+      m_linearAdjustments(), m_constAdjustments() {}
 
 /**
 * Transforms a 1D signal from image space to data space, performing an
-* a backward MaxentTransformFourier on it then creating a concatenated 
-* copy of the resulting data for each spectrum and applying the adjustments 
+* a backward MaxentTransformFourier on it then creating a concatenated
+* copy of the resulting data for each spectrum and applying the adjustments
 * to them.
 * Input is assumed real or complex according to the type of image space
 * given to the constructor.
@@ -29,7 +30,7 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
 
   // Create concatenated copies of transformed data (one for each spectrum)
   std::vector<double> data;
-  data.reserve(m_numSpec*size(dataOneSpec));
+  data.reserve(m_numSpec * size(dataOneSpec));
   for (size_t s = 0; s < m_numSpec; s++) {
     for (size_t i = 0; i < size(dataOneSpec); i++) {
       data.emplace_back(dataOneSpec[i]);
@@ -37,35 +38,35 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
   }
 
   // Apply adjustments (we assume there are sufficient adjustments supplied)
-  double dataR = 0.123456789; 
+  double dataR = 0.123456789;
   double dataI = 0.987654321;
-  if(!m_linearAdjustments.empty() && !m_constAdjustments.empty()) {
+  if (!m_linearAdjustments.empty() && !m_constAdjustments.empty()) {
     for (size_t i = 0; i < size(data); i++) {
       if (i % 2 == 0) { // Real part
         dataR = data[i];
         dataI = data[i + 1];
-        data[i] = m_linearAdjustments[i] * dataR - m_linearAdjustments[i + 1] * dataI + m_constAdjustments[i];
-      }
-      else { // Imaginary part
-        data[i] = m_linearAdjustments[i] * dataR + m_linearAdjustments[i - 1] * dataI + m_constAdjustments[i];
+        data[i] = m_linearAdjustments[i] * dataR -
+                  m_linearAdjustments[i + 1] * dataI + m_constAdjustments[i];
+      } else { // Imaginary part
+        data[i] = m_linearAdjustments[i] * dataR +
+                  m_linearAdjustments[i - 1] * dataI + m_constAdjustments[i];
       }
     }
-  }
-  else if (!m_linearAdjustments.empty() && m_constAdjustments.empty()) {
+  } else if (!m_linearAdjustments.empty() && m_constAdjustments.empty()) {
     for (size_t i = 0; i < size(data); i++) {
       if (i % 2 == 0) { // Real part
         dataR = data[i];
         dataI = data[i + 1];
-        data[i] = m_linearAdjustments[i] * dataR - m_linearAdjustments[i + 1] * dataI;
-      }
-      else { // Imaginary part
-        data[i] = m_linearAdjustments[i] * dataR + m_linearAdjustments[i - 1] * dataI;
+        data[i] =
+            m_linearAdjustments[i] * dataR - m_linearAdjustments[i + 1] * dataI;
+      } else { // Imaginary part
+        data[i] =
+            m_linearAdjustments[i] * dataR + m_linearAdjustments[i - 1] * dataI;
       }
     }
-  }
-  else if (m_linearAdjustments.empty() && !m_constAdjustments.empty()) {
+  } else if (m_linearAdjustments.empty() && !m_constAdjustments.empty()) {
     for (size_t i = 0; i < size(data); i++) {
-      data[i] =  data[i] + m_constAdjustments[i];
+      data[i] = data[i] + m_constAdjustments[i];
     }
   }
 
@@ -74,7 +75,7 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
 
 /**
 * Transforms a 1D signal from data space to image space, performing a forward
-* Fast MexentTransformFourier on the sum of the spectra. 
+* Fast MexentTransformFourier on the sum of the spectra.
 * Input is assumed real or complex according to the type of data space
 * given to the constructor.
 * Return value is real or complex according to the type of image space
@@ -87,14 +88,14 @@ MaxentTransformMultiFourier::dataToImage(const std::vector<double> &data) {
 
   if (size(data) % m_numSpec)
     throw std::invalid_argument(
-      "Size of data vector must be a multiple of number of spectra.");
+        "Size of data vector must be a multiple of number of spectra.");
 
   // Sum the concatenated spectra in data
-  size_t nData = size(data) / (m_numSpec );
+  size_t nData = size(data) / (m_numSpec);
   std::vector<double> dataSum(nData, 0.0);
   for (size_t s = 0; s < m_numSpec; s++) {
     for (size_t i = 0; i < nData; i++) {
-      dataSum[i] += data[s*nData + i];
+      dataSum[i] += data[s * nData + i];
     }
   }
   // Then apply forward fourier transform to sum
@@ -105,10 +106,13 @@ MaxentTransformMultiFourier::dataToImage(const std::vector<double> &data) {
 
 /**
 * Sets the adjustments to be applied to the data when converted from image.
-* @param linAdj : [input] Linear adjustments as complex numbers for all spectra concatenated
-* @param constAdj: [input] Constant adjustments as complex numbers for all spectra concatenated
+* @param linAdj : [input] Linear adjustments as complex numbers for all spectra
+* concatenated
+* @param constAdj: [input] Constant adjustments as complex numbers for all
+* spectra concatenated
 */
-void MaxentTransformMultiFourier::setAdjustments(const std::vector<double> &linAdj, const std::vector<double> &constAdj) {
+void MaxentTransformMultiFourier::setAdjustments(
+    const std::vector<double> &linAdj, const std::vector<double> &constAdj) {
   m_linearAdjustments = linAdj;
   m_constAdjustments = constAdj;
 }

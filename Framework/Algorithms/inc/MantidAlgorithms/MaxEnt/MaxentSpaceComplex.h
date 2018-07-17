@@ -38,7 +38,7 @@ public:
 };
 
 using MaxentSpaceComplex_sptr =
-boost::shared_ptr<Mantid::Algorithms::MaxentSpaceComplex>;
+    boost::shared_ptr<Mantid::Algorithms::MaxentSpaceComplex>;
 
 } // namespace Algorithms
 } // namespace Mantid

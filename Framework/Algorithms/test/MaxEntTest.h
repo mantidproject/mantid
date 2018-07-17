@@ -1106,7 +1106,7 @@ public:
   }
 
   MatrixWorkspace_sptr createWorkspaceComplex(size_t maxt, double phase,
-    size_t nSpec, double shift) {
+                                              size_t nSpec, double shift) {
 
     // Create cosine with phase 'phase'
 
@@ -1114,9 +1114,9 @@ public:
     double w = 3.0;
 
     size_t nPts = maxt * nSpec;
-    MantidVec X(2*nPts);
-    MantidVec Y(2*nPts);
-    MantidVec E(2*nPts);
+    MantidVec X(2 * nPts);
+    MantidVec Y(2 * nPts);
+    MantidVec E(2 * nPts);
     for (size_t t = 0; t < maxt; t++) {
       double x = 2. * M_PI * static_cast<double>(t) / static_cast<double>(maxt);
       for (size_t s = 0; s < nSpec; s++) {
@@ -1124,7 +1124,8 @@ public:
         Y[t + s * maxt] = cos(w * x + phase + static_cast<double>(s) * shift);
         E[t + s * maxt] = 0.2;
         X[t + s * maxt + nPts] = x;
-        Y[t + s * maxt + nPts] = sin(w * x + phase + static_cast<double>(s) * shift);
+        Y[t + s * maxt + nPts] =
+            sin(w * x + phase + static_cast<double>(s) * shift);
         E[t + s * maxt + nPts] = 0.2;
       }
     }
@@ -1134,7 +1135,7 @@ public:
     createWS->setProperty("DataX", X);
     createWS->setProperty("DataY", Y);
     createWS->setProperty("DataE", E);
-    createWS->setProperty("NSpec", static_cast<int>(2*nSpec));
+    createWS->setProperty("NSpec", static_cast<int>(2 * nSpec));
     createWS->setPropertyValue("OutputWorkspace", "ws");
     createWS->execute();
     MatrixWorkspace_sptr ws = createWS->getProperty("OutputWorkspace");

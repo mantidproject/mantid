@@ -38,7 +38,7 @@ public:
 };
 
 using MaxentSpaceReal_sptr =
-boost::shared_ptr<Mantid::Algorithms::MaxentSpaceReal>;
+    boost::shared_ptr<Mantid::Algorithms::MaxentSpaceReal>;
 
 } // namespace Algorithms
 } // namespace Mantid
