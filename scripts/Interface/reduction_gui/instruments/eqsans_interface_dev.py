@@ -16,7 +16,6 @@ from reduction_gui.widgets.sans.sans_catalog import SANSCatalogWidget
 from reduction_gui.reduction.sans.eqsans_catalog import DataCatalog
 
 from reduction_gui.reduction.sans.eqsans_data_proxy import DataProxy
-from reduction_gui.widgets.cluster_status import RemoteJobsWidget
 
 IS_IN_MANTIDPLOT = False
 try:
@@ -66,9 +65,6 @@ class EQSANSInterface(InstrumentInterface):
 
         # Tabs that only make sense within MantidPlot
         if IS_IN_MANTIDPLOT:
-            # Remote jobs status
-            if self.remote_resources_available():
-                self.attach(RemoteJobsWidget(settings = self._settings))
 
     def has_advanced_version(self):
         """
@@ -76,8 +72,3 @@ class EQSANSInterface(InstrumentInterface):
         """
         return False
 
-    def is_cluster_enabled(self):
-        """
-            Returns true if the instrument is compatible with remote submission
-        """
-        return True

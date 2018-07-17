@@ -4,7 +4,6 @@ from reduction_gui.widgets.inelastic.dgs_sample_setup import SampleSetupWidget
 from reduction_gui.widgets.inelastic.dgs_data_corrections import DataCorrectionsWidget
 from reduction_gui.widgets.inelastic.dgs_diagnose_detectors import DiagnoseDetectorsWidget
 from reduction_gui.widgets.inelastic.dgs_absolute_units import AbsoluteUnitsWidget
-from reduction_gui.widgets.cluster_status import RemoteJobsWidget
 from reduction_gui.reduction.inelastic.dgs_reduction_script import DgsReductionScripter
 
 
@@ -43,12 +42,4 @@ class DgsInterface(InstrumentInterface):
         #self.attach(PdAndScConversionWidget(settings = self._settings,
         #                                    data_type = self.data_type))
 
-        # Remote jobs status
-        if self.remote_resources_available():
-            self.attach(RemoteJobsWidget(settings = self._settings))
 
-    def is_cluster_enabled(self):
-        """
-            Returns true if the instrument is compatible with remote submission
-        """
-        return True
