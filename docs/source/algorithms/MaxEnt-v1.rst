@@ -720,10 +720,7 @@ This is done by setting the *PerSpectrumImage* property to *false*.
    print("Reconstruction at 05 of third spectrum: {:.3f}".format(data.readY(2)[5]))
    print("Reconstruction at 10 of third spectrum: {:.3f}".format(data.readY(2)[10]))
    print("Reconstruction at 15 of third spectrum: {:.3f}".format(data.readY(2)[15]))
-   print("Number of iterations of first spectrum: "+str( len(evolAngle.readX(0))))
-
-   nIter = len(evolChi.readX(0))
-   print("Number of iterations: "+str( nIter ))
+   print("Number of iterations: "+str( len(evolAngle.readX(0))))
    
 Output:
 
@@ -732,10 +729,9 @@ Output:
    Reconstruction at 05 of first spectrum: 0.971
    Reconstruction at 10 of first spectrum: 0.935
    Reconstruction at 15 of first spectrum: 0.881
-   Reconstruction at 05 of third spectrum: 0.901
-   Reconstruction at 10 of third spectrum: 0.867
-   Reconstruction at 15 of third spectrum: 0.814
-   Number of iterations of first spectrum: 59
+   Reconstruction at 05 of third spectrum: 0.831
+   Reconstruction at 10 of third spectrum: 0.800
+   Reconstruction at 15 of third spectrum: 0.746
    Number of iterations: 59
    
 .. figure:: ../images/MaxEntAdjustTogether.png
