@@ -68,10 +68,13 @@ class PlotSelectorView(QWidget):
         # This mutex prevents multiple operations on the table at the
         # same time. Wrap code in - with QMutexLocker(self.mutex):
         self.mutex = QMutex()
+        self.active_plot_number = -1
 
         self.show_button = QPushButton('Show')
         self.hide_button = QPushButton('Hide')
-        self.close_button = QPushButton('Close')
+        # Note this button is labeled delete, but for consistency
+        # with matplotlib 'close' is used in the code
+        self.close_button = QPushButton('Delete')
         self.select_all_button = QPushButton('Select All')
         self.sort_button = self._make_sort_button()
         self.export_button = self._make_export_button()
@@ -104,7 +107,9 @@ class PlotSelectorView(QWidget):
         layout.sizeHint()
         self.setLayout(layout)
 
-        # These must happen in the main GUI thread, else segfaults
+        # Any updates that originate from the matplotlib figure
+        # windows must be wrapped in a QAppThreadCall. Not doing this
+        # WILL result in segfaults.
         self.set_plot_list_orig = self.set_plot_list
         self.set_plot_list = QAppThreadCall(self.set_plot_list_orig)
         self.append_to_plot_list_orig = self.append_to_plot_list
@@ -113,6 +118,12 @@ class PlotSelectorView(QWidget):
         self.remove_from_plot_list = QAppThreadCall(self.remove_from_plot_list_orig)
         self.rename_in_plot_list_orig = self.rename_in_plot_list
         self.rename_in_plot_list = QAppThreadCall(self.rename_in_plot_list_orig)
+        self.set_active_font_orig = self.set_active_font
+        self.set_active_font = QAppThreadCall(self.set_active_font_orig)
+        self.set_visibility_icon_orig = self.set_visibility_icon
+        self.set_visibility_icon = QAppThreadCall(self.set_visibility_icon_orig)
+        self.set_last_active_values_orig = self.set_last_active_values
+        self.set_last_active_values = QAppThreadCall(self.set_last_active_values_orig)
 
         # Connect presenter methods to things in the view
         self.show_button.clicked.connect(self.presenter.show_multiple_selected)
@@ -192,13 +203,14 @@ class PlotSelectorView(QWidget):
         """
         context_menu = QMenu()
         context_menu.addAction("Show", self.presenter.show_multiple_selected)
+        context_menu.addAction("Hide", self.presenter.hide_selected_plots)
+        context_menu.addAction("Delete", self.presenter.close_action_called)
         context_menu.addAction("Rename", self.rename_selected_in_context_menu)
 
         export_menu = context_menu.addMenu("Export")
         for text, extension in EXPORT_TYPES:
             export_menu.addAction(text, lambda ext=extension: self.export_plots(ext))
 
-        context_menu.addAction("Close", self.presenter.close_action_called)
         return context_menu, export_menu
 
     def context_menu_opened(self, position):
@@ -284,6 +296,23 @@ class PlotSelectorView(QWidget):
             row, widget = self._get_row_and_widget_from_plot_number(plot_number)
             self.table_widget.removeRow(row)
 
+    def set_active_font(self, plot_number, is_active):
+        """
+        Makes the active plot number bold, and makes a previously
+        active bold plot number normal
+        :param plot_number: The unique number in GlobalFigureManager
+        :param is_active: True if plot is the active one or false to
+                          make the plot number not bold
+        """
+        with QMutexLocker(self.mutex):
+            row, widget = self._get_row_and_widget_from_plot_number(plot_number)
+            font = self.table_widget.item(row, Column.Number).font()
+            font.setBold(is_active)
+            self.table_widget.item(row, Column.Number).setFont(font)
+            # Ideally we would do the same to the plot name, but
+            # trying to do so causes a segfault.
+            self.table_widget.cellWidget(row, Column.Name).line_edit.setFont(font)
+
     # ----------------------- Plot Selection ------------------------
 
     def get_all_selected_plot_numbers(self):
@@ -316,6 +345,18 @@ class PlotSelectorView(QWidget):
         :return: A string with current filter text
         """
         return self.filter_box.text()
+
+    # ------------------------ Plot Hiding -------------------------
+
+    def set_visibility_icon(self, plot_number, is_visible):
+        """
+        Toggles the plot name widget icon between visible and hidden
+        :param plot_number: The unique number in GlobalFigureManager
+        :param is_visible: If true set visible, else set hidden
+        """
+        with QMutexLocker(self.mutex):
+            row, widget = self._get_row_and_widget_from_plot_number(plot_number)
+            widget.set_visibility_icon(is_visible)
 
     # ----------------------- Plot Filtering ------------------------
 
@@ -522,7 +563,7 @@ class PlotSelectorView(QWidget):
                 if last_active_value:
                     last_active_item.setData(Qt.DisplayRole, str(last_active_value))
 
-            self.table_widget.sortItems(Column.LastActive, self.sort_order())
+            # self.table_widget.sortItems(Column.LastActive, self.sort_order())
             self.table_widget.setSortingEnabled(True)
 
     # ---------------------- Plot Exporting -------------------------
@@ -568,6 +609,8 @@ class PlotNameWidget(QWidget):
         self.plot_number = plot_number
         self.is_run_as_unit_test = is_run_as_unit_test
 
+        self.mutex = QMutex()
+
         self.line_edit = QLineEdit(self.presenter.get_plot_name_from_number(plot_number))
         self.line_edit.setReadOnly(True)
         self.line_edit.setFrame(False)
@@ -575,18 +618,23 @@ class PlotNameWidget(QWidget):
         self.line_edit.setAttribute(Qt.WA_TransparentForMouseEvents, True)
         self.line_edit.editingFinished.connect(self.rename_plot)
 
+        shown_icon = qta.icon('fa.eye')
+        self.hide_button = QPushButton(shown_icon, "")
+        self.hide_button.setFlat(True)
+        self.hide_button.setMaximumWidth(self.hide_button.iconSize().width() * 5 / 3)
+        self.hide_button.clicked.connect(self.toggle_visibility)
+
         rename_icon = qta.icon('fa.edit')
         self.rename_button = QPushButton(rename_icon, "")
         self.rename_button.setFlat(True)
-        self.rename_button.setMaximumWidth(self.rename_button.iconSize().width() * 2)
+        self.rename_button.setMaximumWidth(self.rename_button.iconSize().width() * 5 / 3)
         self.rename_button.setCheckable(True)
         self.rename_button.toggled.connect(self.rename_button_toggled)
-        self.skip_next_toggle = False
 
         close_icon = qta.icon('fa.close')
         self.close_button = QPushButton(close_icon, "")
         self.close_button.setFlat(True)
-        self.close_button.setMaximumWidth(self.close_button.iconSize().width() * 2)
+        self.close_button.setMaximumWidth(self.close_button.iconSize().width() * 5 / 3)
         self.close_button.clicked.connect(lambda: self.close_pressed(self.plot_number))
 
         self.layout = QHBoxLayout()
@@ -598,6 +646,7 @@ class PlotNameWidget(QWidget):
         self.layout.setSpacing(0)
 
         self.layout.addWidget(self.line_edit)
+        self.layout.addWidget(self.hide_button)
         self.layout.addWidget(self.rename_button)
         self.layout.addWidget(self.close_button)
 
@@ -653,6 +702,22 @@ class PlotNameWidget(QWidget):
             self.line_edit.selectAll()
         else:
             self.line_edit.setSelection(0, 0)
+
+    def toggle_visibility(self):
+        """
+        Calls the presenter to hide the selected plot
+        """
+        self.presenter.toggle_plot_visibility(self.plot_number)
+
+    def set_visibility_icon(self, is_shown):
+        """
+        Change the widget icon between shown and hidden
+        :param is_shown: True if plot is shown, false if hidden
+        """
+        if is_shown:
+            self.hide_button.setIcon(qta.icon('fa.eye'))
+        else:
+            self.hide_button.setIcon(qta.icon('fa.eye', color='lightgrey'))
 
     def rename_plot(self):
         """

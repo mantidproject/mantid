@@ -71,6 +71,7 @@ class PlotSelectorPresenter(object):
         :param plot_number: The unique number in GlobalFigureManager
         """
         self.view.append_to_plot_list(plot_number)
+        self.view.set_visibility_icon(plot_number, self.model.is_visible(plot_number))
 
     def remove_from_plot_list(self, plot_number):
         """
@@ -139,6 +140,22 @@ class PlotSelectorPresenter(object):
         except ValueError as e:
             print(e)
 
+    def set_active_font(self, plot_number):
+        """
+        Set the icon for the active plot to be colored
+        :param plot_number: The unique number in GlobalFigureManager
+        """
+        active_plot_number = self.view.active_plot_number
+        if active_plot_number > 0:
+            try:
+                self.view.set_active_font(active_plot_number, False)
+            except TypeError:
+                pass
+                # The last active plot could have been closed
+                # already, so there is nothing to do
+        self.view.set_active_font(plot_number, True)
+        self.view.active_plot_number = plot_number
+
     # ------------------------ Plot Hiding -------------------------
 
     def hide_selected_plots(self):
@@ -148,10 +165,42 @@ class PlotSelectorPresenter(object):
         selected_plots = self.view.get_all_selected_plot_numbers()
 
         for plot_number in selected_plots:
-            try:
-                self.model.hide_plot(plot_number)
-            except ValueError as e:
-                print(e)
+            self._hide_plot(plot_number)
+
+    def _hide_plot(self, plot_number):
+        """
+        Hides a single plot
+        """
+        try:
+            self.model.hide_plot(plot_number)
+        except ValueError as e:
+            print(e)
+
+    def toggle_plot_visibility(self, plot_number):
+        """
+        Toggles a plot between hidden and shown
+        :param plot_number: The unique number in GlobalFigureManager
+        """
+        if self.model.is_visible(plot_number):
+            self._hide_plot(plot_number)
+        else:
+            self.make_plot_active(plot_number)
+
+        self.update_visibility_icon(plot_number)
+
+    def update_visibility_icon(self, plot_number):
+        """
+        Updates the icon to indicate a plot as hidden or visible
+        :param plot_number: The unique number in GlobalFigureManager
+        """
+        try:
+            is_visible = self.model.is_visible(plot_number)
+            self.view.set_visibility_icon(plot_number, is_visible)
+        except ValueError:
+            # There is a chance the plot was closed, which calls an
+            # update to this method. If we can not get the visibility
+            # status it is safe to assume the plot has been closed.
+            pass
 
     # ------------------------ Plot Renaming ------------------------
 
@@ -284,6 +333,3 @@ class PlotSelectorPresenter(object):
                 self.model.export_plot(plot_number, filename)
             except ValueError as e:
                 print(e)
-
-    def hide_action_called(self):
-        self.model.hide()

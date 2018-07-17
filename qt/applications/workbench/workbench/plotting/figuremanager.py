@@ -34,6 +34,7 @@ from .qappthreadcall import QAppThreadCall
 class MainWindow(QMainWindow):
     activated = Signal()
     closing = Signal()
+    visibility_changed = Signal()
 
     def event(self, event):
         if event.type() == QEvent.WindowActivate:
@@ -43,6 +44,14 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         self.closing.emit()
         QMainWindow.closeEvent(self, event)
+
+    def hideEvent(self, event):
+        self.visibility_changed.emit()
+        QMainWindow.hideEvent(self, event)
+
+    def showEvent(self, event):
+        self.visibility_changed.emit()
+        QMainWindow.showEvent(self, event)
 
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
@@ -78,6 +87,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.activated.connect(self._window_activated)
         self.window.closing.connect(canvas.close_event)
         self.window.closing.connect(self._widgetclosed)
+        self.window.visibility_changed.connect(lambda plot_number=num: Gcf.figure_visibility_changed(plot_number))
 
         self.window.setWindowTitle("Figure %d" % num)
         self.canvas.figure.set_label("Figure %d" % num)

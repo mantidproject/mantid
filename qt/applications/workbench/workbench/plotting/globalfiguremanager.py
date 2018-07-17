@@ -33,6 +33,7 @@ class FigureAction(Enum):
     Closed = 2
     Renamed = 3
     OrderChanged = 4
+    VisibilityChanged = 5
 
 
 class GlobalFigureManagerObserver(object):
@@ -117,7 +118,7 @@ class GlobalFigureManager(object):
         del cls.figs[num]
         manager.destroy()
         gc.collect(1)
-        cls.notify_observers(FigureAction.OrderChanged, "")
+        cls.notify_observers(FigureAction.OrderChanged, -1)
 
     @classmethod
     def destroy_fig(cls, fig):
@@ -186,7 +187,7 @@ class GlobalFigureManager(object):
                 cls._activeQue.append(m)
         cls._activeQue.append(manager)
         cls.figs[manager.num] = manager
-        cls.notify_observers(FigureAction.OrderChanged, "")
+        cls.notify_observers(FigureAction.OrderChanged, manager.num)
 
     @classmethod
     def draw_all(cls, force=False):
@@ -248,6 +249,14 @@ class GlobalFigureManager(object):
         :param figure_number: The unique number in GlobalFigureManager
         """
         cls.notify_observers(FigureAction.Renamed, figure_number)
+
+    @classmethod
+    def figure_visibility_changed(cls, figure_number):
+        """
+        Notify the observers that a figure was shown or hidden
+        :param figure_number: The unique number in GlobalFigureManager
+        """
+        cls.notify_observers(FigureAction.VisibilityChanged, figure_number)
 
 
 atexit.register(GlobalFigureManager.destroy_all)

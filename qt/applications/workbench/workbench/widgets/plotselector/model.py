@@ -68,6 +68,11 @@ class PlotSelectorModel(object):
         or destroyed, renamed or the active order is changed. This
         calls the presenter to update the plot list in the model and
         the view.
+
+        IMPORTANT: Anything called here is not called from the main
+        GUI thread. Changes in the view must be wrapped in a
+        QAppThreadCall!
+
         :param action: A FigureAction corresponding to the event
         :param plot_number: The unique number in GlobalFigureManager
         """
@@ -83,6 +88,10 @@ class PlotSelectorModel(object):
                 self.presenter.rename_in_plot_list(plot_number, figure_manager.get_window_title())
         if action == FigureAction.OrderChanged:
             self.presenter.update_last_active_order()
+            if plot_number >= 0:
+                self.presenter.set_active_font(plot_number)
+        if action == FigureAction.VisibilityChanged:
+            self.presenter.update_visibility_icon(plot_number)
         if action == FigureAction.Unknown:
             self.presenter.update_plot_list()
 
@@ -100,6 +109,17 @@ class PlotSelectorModel(object):
         figure_manager.show()
 
     # ------------------------ Plot Hiding -------------------------
+
+    def is_visible(self, plot_number):
+        """
+        Determines if plot window is visible or hidden
+        :return: True if plot visible (window open), false if hidden
+        """
+        figure_manager = self.GlobalFigureManager.figs.get(plot_number)
+        if figure_manager is None:
+            raise ValueError('Error in is_visible, could not find a plot with the number {}.'.format(plot_number))
+
+        return figure_manager.window.isVisible()
 
     def hide_plot(self, plot_number):
         """

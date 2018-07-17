@@ -273,7 +273,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.view.set_plot_list(plot_numbers)
 
         self.click_to_select_by_row_number(0)
-        self.view.context_menu.actions()[1].trigger()
+        self.view.context_menu.actions()[3].trigger()
 
         name_widget = self.view.table_widget.cellWidget(0, Column.Name)
         self.assertFalse(name_widget.line_edit.isReadOnly())
@@ -345,7 +345,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         plot_numbers = [0, 1, 2]
         self.view.set_plot_list(plot_numbers)
 
-        self.view.context_menu.actions()[3].trigger()
+        self.view.context_menu.actions()[2].trigger()
 
         self.presenter.close_action_called.assert_called_once_with()
 
