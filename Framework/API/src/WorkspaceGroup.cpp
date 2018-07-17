@@ -469,8 +469,9 @@ size_t WorkspaceGroup::getMemorySize() const {
   for (auto workspace : m_workspaces) {
     // If the workspace is a group
     if (workspace->getMemorySize() == 0) {
-      total =
-          total + boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)->getMemorySize();
+      total = total +
+              boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)
+                  ->getMemorySize();
       continue;
     }
     total = total + workspace->getMemorySize();
