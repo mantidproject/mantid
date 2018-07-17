@@ -63,8 +63,7 @@ class EQSANSInterface(InstrumentInterface):
         # Reduction output
         self.attach(OutputWidget(settings = self._settings))
 
-        # Tabs that only make sense within MantidPlot
-        if IS_IN_MANTIDPLOT:
+        return
 
     def has_advanced_version(self):
         """
