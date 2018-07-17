@@ -118,7 +118,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         nTheta = 50
         nPhi = 50
         fracHKL = 0.4
-        DQPixel = 0.003
+        dQPixel = 0.003
         if instrumentName == 'MANDI':
             pass
         elif instrumentName == 'TOPAZ':
@@ -127,14 +127,14 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             nTheta=50
             nPhi = 50
             fracHKL = 0.4
-            DQPixel = 0.006
+            dQPixel = 0.006
         elif instrumentName == 'CORELLI':
             mindtBinWidth = 2
             maxdtBinWidth = 60
             nTheta=50
             nPhi = 50
             fracHKL = 0.4
-            DQPixel = 0.007
+            dQPixel = 0.007
         else:
             logger.warning("Instrument name {} not found! Falling back on default parameters!".format(instrumentName))
 
