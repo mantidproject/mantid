@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File
 see http://www.mantidproject.org/IDF -->
+<!-- IDF configurations can be gound here https://github.com/mantidproject/documents/blob/master/IDF-Configurations/V20_idf_configurations_v05.pptx -->
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
 name="IMAT" valid-from ="1900-01-31 23:59:59"
 valid-to ="2099-12-31 23:59:59"
