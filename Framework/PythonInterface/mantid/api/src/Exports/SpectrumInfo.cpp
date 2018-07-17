@@ -16,7 +16,7 @@ boost::python::list getSpectrumDefinitionList(const SpectrumInfo &self) {
   boost::python::list spectrumDefinitionList;
 
   // Get all the spectrum definitions
-  for (auto i = 0; i < self.size(); i++) {
+  for (size_t i = 0; i < self.size(); i++) {
     spectrumDefinitionList.append(self.spectrumDefinition(i));
   }
 
