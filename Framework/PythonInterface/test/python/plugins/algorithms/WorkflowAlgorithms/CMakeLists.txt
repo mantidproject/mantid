@@ -17,6 +17,7 @@ set ( TEST_PY_FILES
   DirectILLSelfShieldingTest.py
   EnergyWindowScanTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
+  ILLSANSReductionTest.py
   IndirectAnnulusAbsorptionTest.py
   IndirectAnnulusAbsorption2Test.py
   IndirectCalibrationTest.py
