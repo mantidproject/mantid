@@ -147,9 +147,7 @@ public:
     TS_ASSERT_EQUALS(angle->blocksize(), 1);
   }
 
-  void test_complex_data_adjustments_summed() {
-    // THIS TEST NEEDS REWRITING
-    // Run one iteration, we just want to test the output workspaces' dimensions
+  void test_complex_data_adjustments_together() {
     int nHist = 6;
     int nBins = 10;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
@@ -280,7 +278,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
   }
 
-  void test_adjustments_summed_too_few_spectra() {
+  void test_adjustments_together_too_few_spectra() {
 
     auto ws = WorkspaceCreationHelper::create2DWorkspace(6, 10);
     auto ws1 = WorkspaceCreationHelper::create2DWorkspace(2, 10);
@@ -295,6 +293,28 @@ public:
     // in the input workspace even though images are summed.
     alg->setProperty("DataLinearAdj", ws1);
     alg->setProperty("DataConstAdj", ws1);
+    alg->setProperty("perSpectrumReconstruction", false);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+  }
+
+  void test_adjustments_together_real_data() {
+
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(3, 10);
+    auto ws1 = WorkspaceCreationHelper::create2DWorkspace(6, 10);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setProperty("DataLinearAdj", ws1);
+    alg->setProperty("DataConstAdj", ws1);
+    // Complex data needed for this
     alg->setProperty("perSpectrumReconstruction", false);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");

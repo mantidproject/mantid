@@ -447,7 +447,7 @@ void MaxEnt::exec() {
     } else {
       if (!perSpectrumReconstruction) {
         throw std::invalid_argument(
-          "ComplexData must be true, if PerSpectrum is false.");
+          "ComplexData must be true, if PerSpectrumReconstruction is false.");
       } else {
         data = inWS->y(spec).rawData();
         errors = inWS->e(spec).rawData();
