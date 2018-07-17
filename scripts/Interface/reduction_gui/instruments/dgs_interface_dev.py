@@ -38,8 +38,4 @@ class DgsInterface(InstrumentInterface):
         self.attach(AbsoluteUnitsWidget(settings = self._settings,
                                         data_type = self.data_type))
 
-        # Powder and Single Crystal conversion
-        #self.attach(PdAndScConversionWidget(settings = self._settings,
-        #                                    data_type = self.data_type))
-
-
+        return

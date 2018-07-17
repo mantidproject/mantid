@@ -70,4 +70,3 @@ class EQSANSInterface(InstrumentInterface):
             Returns true if the instrument has simple and advanced views
         """
         return False
-

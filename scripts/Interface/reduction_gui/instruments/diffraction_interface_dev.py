@@ -34,4 +34,3 @@ class DiffractionInterface(InstrumentInterface):
         self.attach(FilterSetupWidget(settings = self._settings, data_type = self.data_type))
 
         return
-
