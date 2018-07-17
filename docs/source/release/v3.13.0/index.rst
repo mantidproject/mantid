@@ -40,7 +40,6 @@ Changes
    SANS <sans>
    Direct Inelastic <direct_inelastic>
    Indirect Inelastic <indirect_inelastic>
-   Instrument Visualization <instrument_view>
 
 Full Change Listings
 --------------------

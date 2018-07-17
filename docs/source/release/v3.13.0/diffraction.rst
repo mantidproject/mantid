@@ -5,15 +5,20 @@ Diffraction Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
+:ref:`Release 3.13.0 <v3.13.0>`
 
 Powder Diffraction
 ------------------
 
 New
 ###
+
+.. figure:: ../../images/D2B_calib.png
+    :align: center
+
+    D2B calibration constants generated from PowderDiffILLDetEffCorr
+    :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr-v1>`
+
 
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` is extended to apply vertical and horizontal tube alignment for D2B, based on the IPF.
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` is modified to comply with the U-shape convention for tube numbering for D2B.
@@ -73,19 +78,18 @@ Improvements
 
 - The ``.nxs`` file from the Focus tab is now saved in the Focus directory with all the other focus output
 
-:ref:`Release 3.13.0 <v3.13.0>`
-
 Single Crystal Diffraction
 --------------------------
 
 New
 ###
 
+.. figure:: ../../images/LoadWANDSCD.png
+    :align: center
+
+    Integrated output from LoadWANDSCD :ref:`LoadDNSSCD <algm-LoadWANDSCD-v1>`
+
 - New algorithm :ref:`LoadDNSSCD <algm-LoadDNSSCD>` to load multiple single crystal diffraction data files from the DNS instrument into MDEventWorkspace.
-
-- :ref:`SaveLauenorm <algm-SaveLauenorm>` now has input options for crystal system and reflection condition for lscale output instead of trying to determine from lattice parameters.
-
-- :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` now accepts MD workspaces as input.
 
 - New algorithms :ref:`LoadWANDSCD <algm-LoadWANDSCD>` and :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` to load single crystal HB2C data and convert it to either Q-sample or HKL space.
 
@@ -93,13 +97,19 @@ New
 
 - New algorithm :ref:`FindSatellitePeaks <algm-FindSatellitePeaks>` to predict the location of fractional satellite peaks using a set of nuclear peaks and a set of seed satellite peaks.
 
-- New TOPAZ instrument geometry for 2018 run cycle
-
 - New algorithm :ref:`IndexSatellitePeaks <algm-IndexSatellitePeaks>` to index satellite peaks found using the :ref:`FindSatellitePeaks <algm-FindSatellitePeaks>` algorithm.
+
+- :ref:`SaveLauenorm <algm-SaveLauenorm>` now has input options for crystal system and reflection condition for lscale output instead of trying to determine from lattice parameters.
+
+- New TOPAZ instrument geometry for 2018 run cycle
 
 Improvements
 ############
 
+- :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` now accepts MD workspaces as input.
+
 - PeaksWorkspace has column added for the unique peak number so peaks can be found after sorting or filtering.
 
 - :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` has option to use a weighted Z score for determining which peaks are outliers and has a new output workspace for plotting intensities of equivalent peaks.
+
+
