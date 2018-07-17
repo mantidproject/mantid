@@ -288,17 +288,23 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
       }
     }
   }
-  try {
-    for (auto &itr : dMap) {
+  for (auto &itr : dMap) {
+    try {
       run.addLogData(itr.second.release());
+    } catch (const std::invalid_argument &e) {
+      g_log.warning() << e.what();
+    } catch (const Exception::ExistsError &e) {
+      g_log.warning() << e.what();
     }
-    for (auto &sitr : sMap) {
+  }
+  for (auto &sitr : sMap) {
+    try {
       run.addLogData(sitr.second.release());
+    } catch (const std::invalid_argument &e) {
+      g_log.warning() << e.what();
+    } catch (const Exception::ExistsError &e) {
+      g_log.warning() << e.what();
     }
-  } catch (std::invalid_argument &e) {
-    g_log.warning() << e.what();
-  } catch (Exception::ExistsError &e) {
-    g_log.warning() << e.what();
   }
 }
 
