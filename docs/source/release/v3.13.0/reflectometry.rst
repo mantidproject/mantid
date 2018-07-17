@@ -47,8 +47,10 @@ New
 
 - :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometryReductionOneAuto` no longer include partial bins by default when summing in Q. A new property, `IncludePartialBins`, has been added to re-enable partial bins.
 
-Bugfixes
-########
+- Added a boolean property ``Debug`` to the reflectometry algorithms that controls output of additional and/or intermediate workspaces.
+
+Bug fixes
+#########
 
 - Correct the angle to the value of ``ThetaIn`` property if summing in lambda in ``ReflectometryReductionOne-v2``.
 - Fixed an incorrectly calculated detector angle when loading FIGARO files using :ref:`algm-LoadILLReflectometry`.
