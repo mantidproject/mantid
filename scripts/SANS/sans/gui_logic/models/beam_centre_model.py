@@ -28,7 +28,7 @@ class BeamCentreModel(object):
         self._r_max = r_range["beam_centre_radius_max"] if "beam_centre_radius_max" in r_range else 280
         self._left_right = True
         self._up_down = True
-        self._tolerance = 0.000125
+        self._tolerance = 0.0001251
         self._lab_pos_1 = ''
         self._lab_pos_2 = ''
         self._hab_pos_2 = ''

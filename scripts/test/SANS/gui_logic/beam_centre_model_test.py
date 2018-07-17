@@ -88,9 +88,6 @@ class BeamCentreModelTest(unittest.TestCase):
                                                                    reduction_method=True,
                                                                    verbose=False, component=DetectorType.LAB)
 
-        self.assertEqual(state.convert_to_q.q_min, self.beam_centre_model.q_min)
-        self.assertEqual(state.convert_to_q.q_max, self.beam_centre_model.q_max)
-
     def test_that_find_beam_centre_calls_centre_finder_twice_when_COM_is_TRUE(self):
         state = mock.MagicMock()
         self.beam_centre_model.COM = True
