@@ -124,55 +124,6 @@ Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
 
-MSD Fit
--------
-
-.. interface:: Data Analysis
-  :widget: tabMSD
-
-Given either a saved NeXus file or workspace generated using the ElWin tab, this
-tab fits :math:`log(intensity)` vs. :math:`Q^{2}` with a straight line for each
-run specified to give the Mean Square Displacement (MSD). It then plots the MSD
-as function of run number.
-
-MSDFit searches for the log files named <runnumber>_sample.txt in your chosen
-raw file directory (the name ‘sample’ is for OSIRIS). If they exist the
-temperature is read and the MSD is plotted versus temperature; if they do not
-exist the MSD is plotted versus run number (last 3 digits).
-
-The fitted parameters for all runs are in _msd_Table and the <u2> in _msd. To
-run the Sequential fit a workspace named <inst><first-run>_to_<last-run>_lnI is
-created of :math:`ln(I)` v. :math:`Q^{2}` for all runs. A contour or 3D plot of
-this may be of interest.
-
-A sequential fit is run by clicking the Run button at the bottom of the tab, a
-single fit can be done using the Fit Single Spectrum button underneath the
-preview plot.
-
-Options
-~~~~~~~
-
-Input File
-  A file that has been created using the Elwin tab with an :math:`x` axis of
-  :math:`Q^2`.
-
-StartX & EndX
-  The :math:`x` range to perform fitting over.
-
-Plot Spectrum
-  The spectrum shown in the preview plot and will be fitted by running Fit
-  Single Spectrum.
-
-Spectra Range
-  The spectra range over which to perform sequential fitting.
-
-Plot Result
-  If enabled will plot the result as a spectra plot.
-
-Save Result
-  If enabled the result will be saved as a NeXus file in the default save
-  directory.
-
 I(Q, t)
 -------
 
@@ -207,6 +158,10 @@ Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
 
+Monte Carlo Error Calculation - Number Of Iterations
+  The number of iterations to perform in the Monte Carlo routine for error
+  calculation in I(Q,t)
+
 Binning
 ~~~~~~~
 
@@ -227,8 +182,149 @@ ResolutionBins
   Number of bins in the resolution after rebinning, typically this should be at
   least 5 and a warning will be shown if it is less.
 
+QENS Fitting Interfaces
+-----------------------
+
+Four QENS fitting interfaces (MSD Fit, I(Q,t) Fit, Conv Fit, F(Q) Fit) are provided within Indirect Data Analysis.
+Each of these fitting interfaces share common features, with a few unique options in each.
+
+Single & Multiple Input
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Each interface provides the option to choose between selecting one or multiple data files to be fit.
+The selected mode can be changed by clicking either the 'Single Input' tab or 'Multiple Input' tab at the the top
+of the interface to switch between selecting one or multiple data files respectively.
+Data may either be provided as a file, or selected from workspaces which have already been loaded.
+
+When selecting 'Multiple Input', a table along with two buttons 'Add Workspace' and 'Remove' will be displayed.
+Clicking 'Add Workspace' will allow you to add a new data-set to be fit (this will bring up a menu allowing you
+to select a file/workspace and the spectra to load). Once data has been loaded, it will be displayed in the table.
+Highlighting data in the table and selecting 'Remove' will allow you to remove data from the fit. Above the preview
+plots will be a drop-down menu with which you can select the active data-set, which will be shown in the plots.
+
+Custom Function Groups
+~~~~~~~~~~~~~~~~~~~~~~
+
+Under 'Custom Function Groups', you will find utility options for quick selection of common fit functions, specific
+to each fitting interface.
+
+The 'Fit Type' drop-down menu will be available here in each of the QENS fitting interfaces -- which is useful for
+selecting common fit functions but not mandatory.
+
+Fitting Range
+~~~~~~~~~~~~~
+
+Under 'Fitting Range', you may select the start and end :math:`x`-values ('StartX' and 'EndX') to be used in the fit.
+
+Functions
+~~~~~~~~~
+
+Under 'Functions', you can view the selected model and associated parameters as well as make modifications.
+Right-clicking on 'Functions' and selecting 'Add Function' will allow you to add any function from Mantid's library
+of fitting functions. It is also possible to right-click on a composite function and select 'Add Function' to add a
+function to the composite.
+
+Parameters may be tied by right-clicking on a parameter and selecting either 'Tie > To Function' when creating a tie
+to a parameter of the same name in a different function or by selecting 'Tie > Custom Tie' to tie to parameters of
+different names and for providing mathematical expressions. Parameters can be constrained by right-clicking and
+using the available options under 'Constrain'.
+
+Upon performing a fit, the parameter values will be updated here to display the result of the fit for the selected
+spectrum.
+
+Settings
+~~~~~~~~
+
+Minimizer
+  The minimizer which will be used in the fit (defaults to Levenberg-Marquadt).
+
+Ignore invalid data
+  Whether to ignore invalid (infinity/NaN) values when performing the fit.
+
+Cost function
+  The cost function to be used in the fit (defaults to Least Squares).
+
+Max Iterations
+  The maximum number of iterations used to perform the fit of each spectrum.
+
+Preview Plots
+~~~~~~~~~~~~~
+
+Two preview plots are included in each of the fitting interfaces. The top preview plot displays the sample, guess
+and fit curves. The bottom preview plot displays the difference curve.
+
+The preview plots will display the curves for the selected spectrum ('Plot Spectrum') of the selected data-set
+(when in multiple input mode, a drop-down menu will be available above the plots to select the active data-set).
+
+The 'Plot Spectrum' option can be used to select the active/displayed spectrum.
+
+A button labelled 'Fit Single Spectrum' is found under the preview plots and can be used to perform a fit of the
+selected specturm.
+
+'Plot Current Preview' can be used to plot the sample, fit and difference curves of the selected spectrum in
+a separate plotting window.
+
+The 'Plot Guess' check-box can be used to enable/disable the guess curve in the top preview plot.
+
+
+Spectrum Selection
+~~~~~~~~~~~~~~~~~~
+
+Below the preview plots, the spectra to be fit can be selected. The 'Fit Spectra' drop-down menu allows for
+selecting either 'Range' or 'String'. If 'Range' is selected, you are able to select a range of spectra to fit by
+providing the upper and lower bounds. If 'String' is selected you can provide the spectra to fit in a text form.
+When selecting spectra using text, you can use '-' to identify a range and ',' to separate each spectrum/range.
+
+:math:`X`-Ranges may be excluded from the fit by selecting a spectrum next to the 'Mask Bins of Spectrum' label and
+then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
+
+Output
+~~~~~~
+
+The results of the fit may be plot and saved under the 'Output' section of the fitting interfaces.
+
+Next to the 'Plot Output' label, you can select a parameter to plot and then click 'Plot' to plot it across the
+fit spectra (if multiple data-sets have been used, a separate plot will be produced for each data-set).
+
+Clicking the 'Save Result' button will save the result of the fit to your default save location.
+
+
+MSD Fit
+~~~~~~~
+
+.. interface:: Data Analysis
+  :widget: tabMSD
+
+Given either a saved NeXus file or workspace generated using the Elwin tab, this
+tab fits :math:`log(intensity)` vs. :math:`Q` with a straight line for each
+run specified to give the Mean Square Displacement (MSD). It then plots the MSD
+as function of run number. This is done by means of the
+:ref:`QENSFitSequential <algm-QENSFitSequential>` algorithm.
+
+MSDFit searches for the log files named <runnumber>_sample.txt in your chosen
+raw file directory (the name ‘sample’ is for OSIRIS). If they exist the
+temperature is read and the MSD is plotted versus temperature; if they do not
+exist the MSD is plotted versus run number (last 3 digits).
+
+The fitted parameters for all runs are in _msd_Table and the <u2> in _msd. To
+run the Sequential fit a workspace named <inst><first-run>_to_<last-run>_lnI is
+created of :math:`ln(I)` v. :math:`Q` for all runs. A contour or 3D plot of
+this may be of interest.
+
+A sequential fit is run by clicking the Run button at the bottom of the tab, a
+single fit can be done using the Fit Single Spectrum button underneath the
+preview plot.
+
+Options
+#######
+
+Sample
+  A file that has been created using the Elwin tab with an :math:`x` axis of
+  :math:`Q`. Alternatively, a workspace may be provided.
+
+
 I(Q, t) Fit
------------
+~~~~~~~~~~~
 
 .. interface:: Data Analysis
   :widget: tabIqtFit
@@ -241,76 +337,45 @@ Additionally, in the bottom-right of the interface there are options for doing a
 sequential fit. This is where the program loops through each spectrum in the
 input workspace, using the fitted values from the previous spectrum as input
 values for fitting the next. This is done by means of the
-:ref:`PlotPeakByLogValue <algm-PlotPeakByLogValue>` algorithm.
+:ref:`IqtFitSequential <algm-IqtFitSequential>` algorithm.
 
 A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
 
 Options
-~~~~~~~
+#######
 
 Input
   Either a file (*_iqt.nxs*) or workspace (*_iqt*) that has been created using
-  the Fury tab.
-
-Fit Type
-  The type of fitting to perform.
+  the Iqt tab.
 
 Constrain Intensities
   Check to ensure that the sum of the background and intensities is always equal
   to 1.
 
-Constrain Beta over all Q
+Make Beta Global
   Check to use a multi-domain fitting function with the value of beta
-  constrained.
+  constrained - the :ref:`IqtFitSimultaneous <algm-IqtFitSimultaneous>` will be
+  used to perform this fit.
 
-Plot Guess
-  When checked a curve will be created on the plot window based on the bitting
-  parameters.
+Extract Members
+  If checked, each individual member of the fit (e.g. exponential functions), will
+  be extracted.
 
-Max Iterations
-  The maximum number of iterations that can be carried out by the fitting
-  algorithm (automatically increased when FABADA is enabled).
+Background Options
+##################
 
-StartX & EndX
-  The range of :math:`x` over which the fitting will be applied (blue lines on
-  preview plot).
-
-Use FABADA
-  Select to enable use of the :ref:`FABADA` minimizer when performing the fit.
-
-Linear Background A0
-  The constant amplitude of the background (horizontal green line on the preview
-  plot).
-
-Fitting Parameters
-  Depending on the Fit Type the parameters shown for each of the fit functions
-  will differ, for more information refer to the documentation pages for the fit
-  function in question.
-
-Plot Spectrum
-  The spectrum shown in the preview plot and will be fitted by running Fit
-  Single Spectrum.
-
-Spectra Range
-  The spectra range over which to perform sequential fitting.
-
-Plot Output
-  Allows plotting spectra plots of fitting parameters, the options available
-  will depend on the type of fit chosen.
-
-Save Result
-  If enabled the result will be saved as a NeXus file in the default save
-  directory.
+Linear Background
+  Adds a linear background to the composite fit function.
 
 Conv Fit
---------
+~~~~~~~~
 
 .. interface:: Data Analysis
   :widget: tabConvFit
 
-Similarly to FuryFit, ConvFit provides a simplified interface for controlling
+ConvFit provides a simplified interface for controlling
 various fitting functions (see the :ref:`Fit <algm-Fit>` algorithm for more
 info). The functions are also available via the fit wizard.
 
@@ -318,21 +383,14 @@ Additionally, in the bottom-right of the interface there are options for doing a
 sequential fit. This is where the program loops through each spectrum in the
 input workspace, using the fitted values from the previous spectrum as input
 values for fitting the next. This is done by means of the
-:ref:`PlotPeakByLogValue <algm-PlotPeakByLogValue>` algorithm.
+:ref:`ConvolutionFitSequential <algm-ConvolutionFitSequential>` algorithm.
 
 A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
 
-The 'ExtractMembers' property, found represented as a checkbox in the properties
-table of the ConvFit interface, can be used to extract the members of a fit, each
-into their own workspace, which are subsequently grouped in a GroupWorkspace. Members
-of a fit include the sample, calculated fit, difference, and any peak functions used
-in the convolution fit such as Lorenztian or Delta functions.
-
-
 Fitting Model
-~~~~~~~~~~~~~
+#############
 
 The model used to perform fitting is described in the following tree, note that
 everything under the Model section is optional and determined by the *Fit Type*
@@ -397,7 +455,7 @@ formula :math:`((x * 11.606) / T) / (1 - exp(-((x * 11.606) / T)))` where
 :math:`T` is the temperature in Kelvin.
 
 Options
-~~~~~~~
+#######
 
 Sample
   Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
@@ -407,71 +465,27 @@ Resolution
   Either a resolution file (_res.nxs) or workspace (_res) or an :math:`S(Q,
   \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
-Fit Type
-  The type of fitting to perform.
+Use Delta Function
+  Found under 'Custom Function Groups'. Enables use of a delta function.
 
-Background
-  Select the background type, see options below.
+Extract Members
+  If checked, each individual member of the fit (e.g. exponential functions), will
+  be extracted into a <result_name>_Members group workspace.
 
-Plot Guess
-  When checked a curve will be created on the plot window based on the bitting
-  parameters.
-
-Max Iterations
-  The maximum number of iterations that can be carried out by the fitting
-  algorithm (automatically increased when FABADA is enabled).
-
-StartX & EndX
-  The range of :math:`x` over which the fitting will be applied (blue lines on
-  preview plot).
-
-Use FABADA
-  Select to enable use of the :ref:`FABADA` minimizer when performing the fit.
-
-A0 & A1 (background)
-  The A0 and A1 parameters as they appear in the LinearBackground fir function,
-  depending on the Fit Type selected A1 may not be shown.
-
-Delta Function
-  Enables use of a delta function.
-
-Fitting Parameters
-  Depending on the Fit Type the parameters shown for each of the fit functions
-  will differ, for more information refer to the documentation pages for the fit
-  function in question.
-
-Plot Spectrum
-  The spectrum shown in the preview plot and will be fitted by running Fit
-  Single Spectrum.
-
-Spectra Range
-  The spectra range over which to perform sequential fitting.
-
-Plot Output
-  Allows plotting spectra plots of fitting parameters, the options available
-  will depend on the type of fit chosen.
-
-Save Result
-  If enabled the result will be saved as a NeXus file in the default save
-  directory.
+Use Temperature Correction
+  Adds the custom user function for temperature correction to the fit function.
 
 Background Options
-~~~~~~~~~~~~~~~~~~
+##################
 
-Fixed Flat
-  The A0 parameter is applied to all points in the data.
+Flat Background
+  Adds a flat background to the composite fit function.
 
-Fit Flat
-  Similar to Fixed Flat, however the A0 parameter is treated as an initial guess
-  and will be included as a parameter to the LinearBackground fit function with
-  the coefficient of the linear term fixed to 0.
-
-Fit Linear
-  The A0 and A1 parameters are used as parameters to the LinearBackground fit
-  function and the best possible fit will be used as the background.
+Linear Background
+  Adds a linear background to the composite fit function.
 
 Theory
-~~~~~~
+######
 
 The measured data :math:`I(Q, \omega)` is proportional to the convolution of the
 scattering law :math:`S(Q, \omega)` with the resolution function :math:`R(Q,
@@ -546,40 +560,34 @@ References:
 1. J S Higgins, R E Ghosh, W S Howells & G Allen, `JCS Faraday II 73 40 (1977) <http://dx.doi.org/10.1039/F29777300040>`_
 2. J S Higgins, G Allen, R E Ghosh, W S Howells & B Farnoux, `Chem Phys Lett 49 197 (1977) <http://dx.doi.org/10.1016/0009-2614(77)80569-1>`_
 
-JumpFit
--------
+F(Q) Fit
+~~~~~~~~
 
 .. interface:: Data Analysis
   :widget: tabJumpFit
 
 One of the models used to interpret diffusion is that of jump diffusion in which
 it is assumed that an atom remains at a given site for a time :math:`\tau`; and
-then moves rapidly, that is, in a time negligible compared to :math:`\tau`;
-hence ‘jump’.
+then moves rapidly, that is, in a time negligible compared to :math:`\tau`.
+
+This interface can be used for a jump diffusion fit as well as fitting across
+EISF. This is done by means of the
+:ref:`QENSFitSequential <algm-QENSFitSequential>` algorithm.
+
 
 Options
-~~~~~~~
+#######
 
 Sample
   A sample workspace created with either ConvFit or Quasi.
 
-Fit Funcion
-  Selects the model to be used for fitting.
+Fit Parameter
+  Either 'Width' or 'EISF' can be selected here, determining whether a width or
+  EISF parameter will be fit across.
 
-Width
-  Spectrum in the sample workspace to fit.
+Width/EISF
+  Next to the 'Fit Parameter' menu, will be either a 'Width' or 'EISF' menu, depending on
+  which was selected. This menu can be used to select the specific width/EISF parameter to be fit.
 
-QMin & QMax
-  The Q range to perform fitting within.
-
-Fitting Parameters
-  Provides the option to change the defautl fitting parameters passed to the
-  chosen function.
-
-Plot Result
-  Plots the result workspaces.
-
-Save Result
-  Saves the result in the default save directory.
 
 .. categories:: Interfaces Indirect
