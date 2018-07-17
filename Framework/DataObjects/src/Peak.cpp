@@ -9,6 +9,7 @@
 #include "MantidKernel/System.h"
 
 #include "boost/make_shared.hpp"
+#include <boost/math/special_functions/round.hpp>
 
 #include <algorithm>
 #include <cctype>
@@ -29,7 +30,7 @@ Peak::Peak()
       m_finalEnergy(0.), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_peakNumber(0), m_ModStru(V3D(0, 0, 0)),
+      m_peakNumber(0), m_ModStru(V3D(0, 0, 0)), m_intH(0), m_intK(0), m_intL(0),
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
@@ -51,7 +52,8 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
-      m_ModStru(V3D(0, 0, 0)), m_peakShape(boost::make_shared<NoShape>()) {
+      m_ModStru(V3D(0, 0, 0)), m_intH(0), m_intK(0), m_intL(0),
+      m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setQLabFrame(QLabFrame, detectorDistance);
@@ -78,7 +80,8 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
       m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
-      m_ModStru(V3D(0, 0, 0)), m_peakShape(boost::make_shared<NoShape>()) {
+      m_ModStru(V3D(0, 0, 0)), m_intH(0), m_intK(0), m_intL(0),
+      m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
@@ -101,7 +104,8 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
-      m_ModStru(V3D(0, 0, 0)), m_peakShape(boost::make_shared<NoShape>()) {
+      m_ModStru(V3D(0, 0, 0)), m_intH(0), m_intK(0), m_intL(0),
+      m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setDetectorID(m_detectorID);
@@ -123,7 +127,8 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
-      m_ModStru(V3D(0, 0, 0)), m_peakShape(boost::make_shared<NoShape>()) {
+      m_ModStru(V3D(0, 0, 0)), m_intH(0), m_intK(0), m_intL(0),
+      m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setDetectorID(m_detectorID);
@@ -147,7 +152,8 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
-      m_ModStru(V3D(0, 0, 0)), m_peakShape(boost::make_shared<NoShape>()) {
+      m_ModStru(V3D(0, 0, 0)), m_intH(0), m_intK(0), m_intL(0),
+      m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
@@ -170,7 +176,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_peakNumber(0), m_ModStru(V3D(0, 0, 0)),
+      m_peakNumber(0), m_ModStru(V3D(0, 0, 0)), m_intH(0), m_intK(0), m_intL(0),
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
@@ -201,6 +207,7 @@ Peak::Peak(const Peak &other)
       m_orig_H(other.m_orig_H), m_orig_K(other.m_orig_K),
       m_orig_L(other.m_orig_L), m_peakNumber(other.m_peakNumber),
       m_ModStru(other.m_ModStru), m_detIDs(other.m_detIDs),
+      m_intH(other.m_intH), m_intK(other.m_intK), m_intL(other.m_intL),
       m_peakShape(other.m_peakShape->clone()), convention(other.convention) {}
 
 //----------------------------------------------------------------------------------------------
@@ -222,6 +229,8 @@ Peak::Peak(const Geometry::IPeak &ipeak)
       m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
       m_col(ipeak.getCol()), m_orig_H(0.), m_orig_K(0.), m_orig_L(0.),
       m_peakNumber(ipeak.getPeakNumber()), m_ModStru(ipeak.getModStru()),
+      m_intH(ipeak.getIntHKL().X()), m_intK(ipeak.getIntHKL().Y()),
+      m_intL(ipeak.getIntHKL().Z()),
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
@@ -752,6 +761,11 @@ double Peak::getL() const { return m_L; }
 /** Return the HKL vector */
 Mantid::Kernel::V3D Peak::getHKL() const { return V3D(m_H, m_K, m_L); }
 
+/** Return the int HKL vector */
+Mantid::Kernel::V3D Peak::getIntHKL() const {
+  return V3D(m_intH, m_intK, m_intL);
+}
+
 //----------------------------------------------------------------------------------------------
 /** Set the H index of this peak
  * @param m_H :: index to set   */
@@ -805,6 +819,16 @@ void Peak::setHKL(const Mantid::Kernel::V3D &HKL) {
   m_H = HKL.X();
   m_K = HKL.Y();
   m_L = HKL.Z();
+}
+
+/** Set int HKL
+ *
+ * @param HKL :: vector with integer x,y,z -> h,k,l
+ */
+void Peak::setIntHKL(const Mantid::Kernel::V3D &HKL) {
+  m_intH = boost::math::iround(HKL.X());
+  m_intK = boost::math::iround(HKL.Y());
+  m_intL = boost::math::iround(HKL.Z());
 }
 
 //----------------------------------------------------------------------------------------------

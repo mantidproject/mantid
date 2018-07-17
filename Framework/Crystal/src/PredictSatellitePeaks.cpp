@@ -50,9 +50,9 @@ void PredictSatellitePeaks::init() {
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
                       string("ModVector3"), "0.0,0.0,0.0"),
                   "Offsets for h, k, l directions ");
-  declareProperty(make_unique<PropertyWithValue<int>>("MaxOrder", 0,
-                                                         Direction::Input),
-                  "Maximum order to apply ModVectors. Default = 0");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("MaxOrder", 0, Direction::Input),
+      "Maximum order to apply ModVectors. Default = 0");
 
   declareProperty(
       "IncludeIntegerHKL", true,
@@ -183,8 +183,7 @@ void PredictSatellitePeaks::exec() {
     hkl[2] = peak0.getL();
   }
 
-  size_t N =
-      NPeaks * (1 + 2 * maxOrder);
+  size_t N = NPeaks * (1 + 2 * maxOrder);
   if (includePeaksInRange) {
     N = possibleHKLs.size();
     N = max<size_t>(100, N);
@@ -244,6 +243,7 @@ void PredictSatellitePeaks::exec() {
             continue;
 
           peak->setHKL(hkl1);
+          peak->setIntHKL(hkl);
           peak->setPeakNumber(seqNum);
           seqNum++;
           peak->setRunNumber(RunNumber);
