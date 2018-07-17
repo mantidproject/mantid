@@ -215,6 +215,7 @@ class RunTabPresenter(object):
             self._state_model = StateGuiModel(user_file_items)
             # 5. Update the views.
             self._update_view_from_state_model()
+            self._beam_centre_presenter.update_centre_positions(self._state_model)
 
             # 6. Perform calls on child presenters
             self._masking_table_presenter.on_update_rows()
@@ -587,12 +588,6 @@ class RunTabPresenter(object):
         self._set_on_view("phi_limit_use_mirror")
         self._set_on_view("radius_limit_min")
         self._set_on_view("radius_limit_max")
-
-        # Beam Centre
-        self._beam_centre_presenter.set_on_view('lab_pos_1', self._state_model)
-        self._beam_centre_presenter.set_on_view('lab_pos_2', self._state_model)
-        self._beam_centre_presenter.set_on_view('hab_pos_1', self._state_model)
-        self._beam_centre_presenter.set_on_view('hab_pos_2', self._state_model)
 
     def _set_on_view_transmission_fit_sample_settings(self):
         # Set transmission_sample_use_fit
