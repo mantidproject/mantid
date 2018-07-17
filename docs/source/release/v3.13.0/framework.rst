@@ -10,6 +10,8 @@ Instrument Definition Updates
 
 - The ALF IDF has been updated following a detector array alteration.
 - The LARMOR IDF has been updated following the addition of a new detector to the instrument.
+- Instrument definition for IN4, 5, and 6 at the ILL have been updated
+- REF_L and CNCS has update instrument files and REF_M, ARCS and CNCS are now configured for loading live data.
 
 Stability
 ---------
