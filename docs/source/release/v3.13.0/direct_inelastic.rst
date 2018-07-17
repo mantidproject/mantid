@@ -5,19 +5,13 @@ Direct Inelastic Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 Interfaces
 ----------
-
 
 New
 ###
 
 - Added the ability to manually specify a temperature for a set of runs in the TOFTOF reduction dialog.
-
 
 Improvements
 ############
@@ -25,7 +19,6 @@ Improvements
 - :ref:`PyChop <PyChop>` has been updated to calculate rep-rate multiplication for MAPS and MARI. In addition, it now supports loading instrument parameters from a YAML file, and also plots the Q-E coverage.
 - Workspaces used in MSlice are no longer added to the MantidPlot window automatically, and can be added using the ``Save To MantidPlot`` button.
 - Improved default limits for 2D plots of large datasets in MSlice.
-
 
 Algorithms
 ----------
@@ -60,7 +53,6 @@ Deprecated
 
 Instrument Definitions
 ----------------------
-
 
 - The source component of ILL's IN5 has been moved from :math:`z = -2` to :math:`z = -2.10945` meters and renamed to ``frame-overlap_chopper``.
 - The source component of ILL's IN6 has been moved from :math:`z = -0.395` to :math:`z = -0.595` meters and renamed to ``suppressor_chopper``.

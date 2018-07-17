@@ -5,25 +5,24 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 Instrument Definition Updates
 -----------------------------
 
 - The ALF IDF has been updated following a detector array alteration.
 - The LARMOR IDF has been updated following the addition of a new detector to the instrument.
+- Instrument definition for IN4, 5, and 6 at the ILL have been updated
+- REF_L and CNCS has update instrument files and EQSANS, REF_M, ARCS and CNCS are now configured for loading live data.
 
 Stability
 ---------
 
+- We have introduced a Project Recovery mechanism for Mantidplot in order to be able to recover the lost state of the interface in the event of a crash or unexpected shutdown.  There are more details in the UI section of the release notes.
+- The error reporter can now catches hard crashes to desktop, allowing us to get more information on causes of hangs or crashes in Mantid.  Since the last release error reports sent to us led directly to the identification of and fixes for 3 seperate bugs in Mantid.
 - Mantid now handles poor network stability  better when reading live data from the ISIS DAE.  Mantid will now timeout after a couple of minutes of loss of network connectivity and remains responsive during this time.  You can alter the duration of this timeout by adding a line to the mantid.user.properties file like:
 
 ```
 ISISDAE.Timeout = 100 #seconds
 ```
-- The error reporter now catches hard crashes to desktop.
 
 
 Algorithms
@@ -32,10 +31,7 @@ Algorithms
 New
 ###
 
-New Features
-************
-
-- A list of Related Algorithms has been added to each algorithm, and is displayed in the documentation page of each algorithm as part of it's summary.
+- Sometimes the algorithm you are looking at is close to what you want, but not quite, to help you find the right one a list of Related Algorithms has been added to each algorithm, and is displayed in the documentation page of each algorithm as part of it's summary.
 
 New Algorithms
 **************
