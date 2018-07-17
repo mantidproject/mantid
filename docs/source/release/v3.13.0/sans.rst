@@ -9,6 +9,7 @@ ILL
 ---
 
 * :ref:`LoadILLSANS <algm-LoadILLSANS>` is upgraded to load the modern nexus files from instruments D11, D22 and D33 at the ILL.
+* :ref:`SANSMask <algm-SANSMask>` is extended to have a `MaskedWorkspace` property, to copy the mask from.
 
 SNS
 ---
@@ -17,10 +18,13 @@ SNS
 
 ISIS SANS Interface
 -------------------
+.. image::  ../../images/ISIS_SANS_release313.png
+   :align: right
+   :width: 800px
+
 New
 ###
 * A string of wavelength ranges can now be specified. A reduction is then done for each wavelength range.
-* :ref:`SANSMask <algm-SANSMask>` is extended to have a `MaskedWorkspace` property, to copy the mask from.
 
 Improvements
 ############
