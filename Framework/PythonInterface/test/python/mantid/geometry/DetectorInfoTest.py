@@ -43,11 +43,6 @@ class DetectorInfoTest(unittest.TestCase):
         info = self._ws.detectorInfo()
         self.assertEquals(type(info.twoTheta(0)), float)
 
-    def test_signedTwoTheta(self):
-        """ See if the returned value is a double (float in Python). """
-        info = self._ws.detectorInfo()
-        self.assertEquals(type(info.signedTwoTheta(0)), float)
-
     def test_setMasked(self):
         """ Test that the detector's masking can be set to True. """
         info = self._ws.detectorInfo()
@@ -76,22 +71,6 @@ class DetectorInfoTest(unittest.TestCase):
         """ Test that the detector's rotation is returned. """
         info = self._ws.detectorInfo()
         self.assertEquals(type(info.rotation(0)), Quat)
-
-    def test_setPosition(self):
-        """ Test that the detector's position can be set correctly. """
-        info = self._ws.detectorInfo()
-        pos = V3D(0,0,0)
-        info.setPosition(0, pos)
-        retPos = info.position(0)
-        self.assertEquals(pos, retPos)
-
-    def test_setRotation(self):
-        """ Test that the detector's rotation can be set correctly. """
-        info = self._ws.detectorInfo()
-        quat = Quat(0,0,0,0)
-        info.setRotation(0, quat)
-        retQuat = info.rotation(0)
-        self.assertEquals(quat, retQuat)
 
     def test_createWorkspaceAndDetectorInfo(self):
     	""" Try to create a workspace and see if DetectorInfo object

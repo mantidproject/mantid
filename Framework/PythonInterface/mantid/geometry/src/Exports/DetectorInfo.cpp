@@ -21,9 +21,6 @@ void export_DetectorInfo() {
   double (DetectorInfo::*twoTheta)(const size_t) const =
       &DetectorInfo::twoTheta;
 
-  double (DetectorInfo::*signedTwoTheta)(const size_t) const =
-      &DetectorInfo::signedTwoTheta;
-
   Mantid::Kernel::V3D (DetectorInfo::*position)(const size_t) const =
       &DetectorInfo::position;
 
@@ -32,12 +29,6 @@ void export_DetectorInfo() {
 
   void (DetectorInfo::*setMasked)(const size_t, bool) =
       &DetectorInfo::setMasked;
-
-  void (DetectorInfo::*setPosition)(const size_t, const Mantid::Kernel::V3D &) =
-      &DetectorInfo::setPosition;
-
-  void (DetectorInfo::*setRotation)(
-      const size_t, const Mantid::Kernel::Quat &) = &DetectorInfo::setRotation;
 
   // Export to Python
   class_<DetectorInfo, boost::noncopyable>("DetectorInfo", no_init)
