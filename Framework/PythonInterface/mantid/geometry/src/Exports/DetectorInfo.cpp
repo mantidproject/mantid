@@ -41,37 +41,37 @@ void export_DetectorInfo() {
 
   // Export to Python
   class_<DetectorInfo, boost::noncopyable>("DetectorInfo", no_init)
-    .def("__len__", &DetectorInfo::size, (arg("self")),
-      "Returns the size of the DetectorInfo, i.e., the number of "
-      "detectors in the instrument.")
+      .def("__len__", &DetectorInfo::size, (arg("self")),
+           "Returns the size of the DetectorInfo, i.e., the number of "
+           "detectors in the instrument.")
 
-    .def("size", &DetectorInfo::size, (arg("self")),
-      "Returns the size of the DetectorInfo, i.e., the number of "
-      "detectors in the instrument.")
+      .def("size", &DetectorInfo::size, (arg("self")),
+           "Returns the size of the DetectorInfo, i.e., the number of "
+           "detectors in the instrument.")
 
-    .def("isMonitor", isMonitor, (arg("self"), arg("index")),
-      "Returns True if the detector is a monitor.")
+      .def("isMonitor", isMonitor, (arg("self"), arg("index")),
+           "Returns True if the detector is a monitor.")
 
-    .def("isMasked", isMasked, (arg("self"), arg("index")),
-      "Returns True if the detector is masked.")
+      .def("isMasked", isMasked, (arg("self"), arg("index")),
+           "Returns True if the detector is masked.")
 
-    .def("isEquivalent", &DetectorInfo::isEquivalent,
-    (arg("self"), arg("other")),
-      "Returns true if the content of this is equivalent to the content "
-      "of other.")
+      .def("isEquivalent", &DetectorInfo::isEquivalent,
+           (arg("self"), arg("other")),
+           "Returns true if the content of this is equivalent to the content "
+           "of other.")
 
-    .def("twoTheta", twoTheta, (arg("self"), arg("index")),
-      "Returns 2 theta (scattering angle w.r.t beam direction).")
+      .def("twoTheta", twoTheta, (arg("self"), arg("index")),
+           "Returns 2 theta (scattering angle w.r.t beam direction).")
 
-    .def("position", position, (arg("self"), arg("index")),
-      "Returns the absolute position of the detector with given index.")
+      .def("position", position, (arg("self"), arg("index")),
+           "Returns the absolute position of the detector with given index.")
 
-    .def("rotation", rotation, (arg("self"), arg("index")),
-      "Returns the absolute rotation of the detector with given index.")
+      .def("rotation", rotation, (arg("self"), arg("index")),
+           "Returns the absolute rotation of the detector with given index.")
 
-    .def("setMasked", setMasked, (arg("self"), arg("index"), arg("masked")),
-      "Set the mask flag of the detector with given index.")
+      .def("setMasked", setMasked, (arg("self"), arg("index"), arg("masked")),
+           "Set the mask flag of the detector with given index.")
 
-    .def("clearMaskFlags", &DetectorInfo::clearMaskFlags, (arg("self")),
-      "Sets all mask flags to false (unmasked).");
+      .def("clearMaskFlags", &DetectorInfo::clearMaskFlags, (arg("self")),
+           "Sets all mask flags to false (unmasked).");
 }
