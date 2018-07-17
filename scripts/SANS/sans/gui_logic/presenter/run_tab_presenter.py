@@ -969,7 +969,7 @@ class RunTabPresenter(object):
             row_entry = "SampleScatter:{},ssp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
                         "CanScatter:{},csp:{},CanTrans:{},ctp:{}," \
                         "CanDirect:{},cdp:{},OutputName:{},User File:{}," \
-                        "Sample Thickness:{}".format(sample_scatter,
+                        "Sample Thickness:{:.2f}".format(sample_scatter,
                                                      get_string_period(sample_scatter_period),
                                                      sample_transmission,
                                                      get_string_period(sample_transmission_period),
@@ -985,7 +985,7 @@ class RunTabPresenter(object):
         else:
             row_entry = "SampleScatter:{},SampleTrans:{},SampleDirect:{}," \
                         "CanScatter:{},CanTrans:{}," \
-                        "CanDirect:{},OutputName:{},User File:{},Sample Thickness:{}".format(sample_scatter,
+                        "CanDirect:{},OutputName:{},User File:{},Sample Thickness:{:.2f}".format(sample_scatter,
                                                                                              sample_transmission,
                                                                                              sample_direct,
                                                                                              can_scatter,
