@@ -45,7 +45,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                              doc="Run Number to integrate")
         self.declareProperty(FileProperty(name="UBFile",defaultValue="",action=FileAction.OptionalLoad,
                              extensions=[".mat"]),
-                             doc="File containing the UB Matrix in ISAW format.")
+                             doc="File containing the UB Matrix in ISAW format. Leave blank to use loaded UB Matrix.")
         self.declareProperty(FileProperty(name="ModeratorCoefficientsFile",
                              defaultValue="",action=FileAction.OptionalLoad,
                              extensions=[".dat"]),
@@ -71,7 +71,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         from mantid.simpleapi import LoadIsawUB
         import pickle
         from scipy.ndimage.filters import convolve
-        logger.warning("============================")
         MDdata = self.getProperty('InputWorkspace').value
         peaks_ws = self.getProperty('PeaksWorkspace').value
         fracStop = self.getProperty('FracStop').value
@@ -83,7 +82,11 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         edgeCutoff = self.getProperty('EdgeCutoff').value
         peakNumberToFit = self.getProperty('PeakNumber').value
 
-        LoadIsawUB(InputWorkspace=peaks_ws, FileName=UBFile)
+        if UBFile == '' and peaks_ws.sample().hasOrientedLattice():
+            logger.information("Using UB file already available in PeaksWorkspace")
+        else:
+            LoadIsawUB(InputWorkspace=peaks_ws, FileName=UBFile)
+
         UBMatrix = peaks_ws.sample().getOrientedLattice().getUB()
         dQ = np.abs(ICCFT.getDQFracHKL(UBMatrix, frac=0.5))
         dQ[dQ>dQMax] = dQMax
