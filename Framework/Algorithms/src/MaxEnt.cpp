@@ -575,7 +575,6 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
                                       bool concatSpec) {
   const size_t numBins = inWS->y(0).size();
   size_t nSpec = inWS->getNumberHistograms() / 2;
-  size_t dataLength = concatSpec ? numBins * nSpec : nSpec;
   std::vector<double> result;
   result.reserve(numBins);
 
