@@ -162,9 +162,6 @@ def get3DPeak(peak, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxT
     retParams['dQ'] = np.linalg.norm(newCenter - q0)
     retParams['newQ'] = newCenter
 
-    import pickle
-    pickle.dump([YTOF, YBVG], open('/home/ntv/Desktop/tmp.pkl','wb'))
-
     return Y2, goodIDX, pp_lambda, retParams
 
 
