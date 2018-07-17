@@ -16,6 +16,10 @@ boost::python::tuple toTuple(const SpectrumDefinition &self,
 void export_SpectrumDefinition() {
   class_<SpectrumDefinition>("SpectrumDefinition", no_init)
 
+      .def("__getitem__", &toTuple, (arg("self"), arg("index")),
+           "Returns the pair of detector index and time index at given index "
+           "of spectrum definition.")
+
       .def("size", &SpectrumDefinition::size, arg("self"),
            "Returns the size of the SpectrumDefinition i.e. the number of "
            "detectors for the spectrum.")
@@ -26,10 +30,6 @@ void export_SpectrumDefinition() {
            "definition.")
 
       .def("equals",
-           &SpectrumDefinition::operator==, (arg("self"), arg("other")),
-           "Compare spectrum definitions.")
-
-      .def("get", &toTuple, (arg("self"), arg("index")),
-           "Returns the pair of detector index and time index at given index "
-           "of spectrum definition.");
+           &SpectrumDefinition::operator==,(arg("self"), arg("other")),
+           "Compare spectrum definitions.");
 }

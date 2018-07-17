@@ -142,7 +142,7 @@ class SpectrumInfoTest(unittest.TestCase):
         """ See if indexing works """
         info = self._ws.spectrumInfo()
         spectrumDefinitionList = info.getAllSpectrumDefinitions()
-        self.assertEquals(spectrumDefinitionList[1].get(0), (1, 0))
+        self.assertEquals(spectrumDefinitionList[1][0], (1, 0))
 
 if __name__ == '__main__':
     unittest.main()
