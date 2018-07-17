@@ -638,10 +638,12 @@ Output:
    The first three spectra plotted are the real parts of the 3 spectra
    and the other three spectra are the imaginary parts.
    
-This can also be done with the spectra in the reconstructed data and image summed together. 
+This can also be done with the spectra of the data effectively concatenated and converted into a single image.
+The reconstructed data is then obtained by converting the image back to data copied for each spectrum and applying the adjustments.
+
 This is done by setting the *PerSpectrumImage* property to *false*.
 
-.. testcode:: ExAdjustmentSummed
+.. testcode:: ExAdjustmentTogether
 
    from math import pi, sin, cos
    from random import random, seed
@@ -653,14 +655,23 @@ This is done by setting the *PerSpectrumImage* property to *false*.
    N = 200
    w = 3
    for s in range(0,3):
+      # Real values
       seed(0)
       for i in range(0,N):
         x = 2*pi*i/N
         X.append(x)
         Y.append(cos(w*x)+(random()-0.5)*0.3)
-        E.append(0.2)
-        
-   CreateWorkspace(OutputWorkspace='inputws',DataX=X,DataY=Y,DataE=E,NSpec=3)
+        E.append(0.27)
+     
+   for s in range(0,3):
+      # Imaginary values
+      for i in range(0,N):
+        x = 2*pi*i/N
+        X.append(x)
+        Y.append((random()-0.5)*0.3)
+        E.append(0.27)
+
+   CreateWorkspace(OutputWorkspace='inputws',DataX=X,DataY=Y,DataE=E,NSpec=6)
 
    # Construct linear adjustment workspace (real = 1, imaginary linear)
    # no adjustment on first spectrum, double adjustment on third spectrum.
@@ -668,56 +679,72 @@ This is done by setting the *PerSpectrumImage* property to *false*.
    Xlin = []
    Ylin = []
    Magnitude = - 0.1
-   # Real values
-   for i in range(0,N):
-      Xlin.append(X[i])
-      Ylin.append(1.0)
-      Zeroes.append(0)
-        
-   # Imaginary values
-   for i in range(0,N):
-      Xlin.append(X[i])
-      Ylin.append(Magnitude*X[i])
-      Zeroes.append(0)
-        
-   CreateWorkspace(OutputWorkspace='linadj', DataX=Xlin, DataY=Ylin, DataE=Zeroes, NSpec=2)
+   for s in range(0,3):
+      # Real values
+      for i in range(0,N):
+         Xlin.append(X[i])
+         Ylin.append(1.0)
+         Zeroes.append(0)
 
-   # Construct linear adjustment workspace (real = 0, imaginary linear)
+   for s in range(0,3):
+      # Imaginary values
+      for i in range(0,N):
+         Xlin.append(X[i])
+         Ylin.append(Magnitude*X[i])
+         Zeroes.append(0)
+
+   CreateWorkspace(OutputWorkspace='linadj', DataX=Xlin, DataY=Ylin, DataE=Zeroes, NSpec=6)
+
+   # Construct constant adjustment workspace (real = 0, imaginary linear)
    # no adjustment on first spectrum, double adjustment on third spectrum.
    Yconst = []
    Magnitude = 0.2
    # Real values
-   for i in range(0,N):
-       Yconst.append(0)
-        
+   for s in range(0,3):
+       for i in range(0,N):
+          Yconst.append(0)
+
    # Imaginary values
-   for i in range(0,N):
-       Yconst.append(Magnitude*X[i])
-        
-        
-   CreateWorkspace(OutputWorkspace='constadj',DataX=Xlin, DataY=Yconst, DataE=Zeroes, NSpec=2)
+   for s in range(0,3):
+       for i in range(0,N):
+           Yconst.append(Magnitude*X[i])
 
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', DataLinearAdj='linadj', DataConstAdj='constadj',A=0.001, PerSpectrumImage=False)
 
-   print("Summed Reconstruction at 05: {:.3f}".format(data.readY(0)[5]))
-   print("Summed Reconstruction at 10: {:.3f}".format(data.readY(0)[10]))
-   print("Summed Reconstruction at 15: {:.3f}".format(data.readY(0)[15]))
-   print("Number of iterations of summed spectrum: "+str( len(evolAngle.readX(0))))
+   CreateWorkspace(OutputWorkspace='constadj',DataX=Xlin, DataY=Yconst, DataE=Zeroes, NSpec=6)
+
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', ComplexData=True, DataLinearAdj='linadj', DataConstAdj='constadj',A=0.001, PerSpectrumReconstruction=False)
+
+   print("Reconstruction at 05 of first spectrum: {:.3f}".format(data.readY(0)[5]))
+   print("Reconstruction at 10 of first spectrum: {:.3f}".format(data.readY(0)[10]))
+   print("Reconstruction at 15 of first spectrum: {:.3f}".format(data.readY(0)[15]))
+   print("Reconstruction at 05 of third spectrum: {:.3f}".format(data.readY(2)[5]))
+   print("Reconstruction at 10 of third spectrum: {:.3f}".format(data.readY(2)[10]))
+   print("Reconstruction at 15 of third spectrum: {:.3f}".format(data.readY(2)[15]))
+   print("Number of iterations of first spectrum: "+str( len(evolAngle.readX(0))))
+
+   nIter = len(evolChi.readX(0))
+   print("Number of iterations: "+str( nIter ))
    
 Output:
 
-.. testoutput:: ExAdjustmentSummed
+.. testoutput:: ExAdjustmentTogether
 
-   Summed Reconstruction at 05: 2.211
-   Summed Reconstruction at 10: 1.479
-   Summed Reconstruction at 15: 0.419
-   Number of iterations of summed spectrum: 8
+   Reconstruction at 05 of first spectrum: 0.971
+   Reconstruction at 10 of first spectrum: 0.935
+   Reconstruction at 15 of first spectrum: 0.881
+   Reconstruction at 05 of third spectrum: 0.901
+   Reconstruction at 10 of third spectrum: 0.867
+   Reconstruction at 15 of third spectrum: 0.814
+   Number of iterations of first spectrum: 59
+   Number of iterations: 59
    
-.. figure:: ../images/MaxEntAdjustSummed.png
+.. figure:: ../images/MaxEntAdjustTogether.png
    :align: center
    
    The first plot shows the reconstructed data and the second plot the corresponding image.
-   The first spectrum is the real part and the second spectrum is the imaginary part.
+   In the data, the first three spectra plotted are the real parts of the 3 spectra
+   and the other three spectra are the imaginary parts.
+   In the image, the first spectrum is the real part and the second spectrum is the imaginary part.
 
 References
 ----------
