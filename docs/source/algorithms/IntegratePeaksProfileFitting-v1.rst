@@ -34,6 +34,43 @@ The algorithms takes two input workspaces:
 -  The OutputParamsWorkspace is a TableWorkspace containing the fit parameters.
    Peaks which could not be fit are omitted.
 
+Instrument-Defined Parameters
+-----------------------------
+In addition to the input parameters defined above, there are several other parameters
+to be aware of which are pre-defined for each instrument.  The instrument is determined
+from the instrument that is loaded into PeaksWorkspace. If the instrument name cannot be
+matched with available choices, the algorithm defaults to MaNDi parameters. Default 
+values are below:
+
++--------------+----------------------------+----------+----------+---------+
+| Parameter    |  Description               |  MaNDi   |  TOPAZ   | CORELLI |
++==============+============================+==========+==========+=========+
+| DQPixel      | The side length for each   |          |          |         |
+|              | voxel used for fitting.    | 0.003    | 0.006    | 0.007   |
+|              | Units: 1/Angstrom          |          |          |         |
++--------------+----------------------------+----------+----------+---------+
+| FracHKL      | The distance between peaks |          |          |         |
+|              | (in fraction of hkl) that  | 0.4      | 0.4      | 0.4     |
+|              | is used for fitting.       |          |          |         |
++--------------+----------------------------+----------+----------+---------+
+| MinDtBinWidth| The smallest time bin used |          |          |         |
+|              | for fitting the TOF profile| 15       | 2        | 2       |
+|              | Units: microseconds        |          |          |         |
++--------------+----------------------------+----------+----------+---------+
+| MaxDtBinWidth| The largest time bin used  |          |          |         |
+|              | for fitting the TOF profile| 50       | 15       | 60      |
+|              | Units: microseconds        |          |          |         |
++--------------+----------------------------+----------+----------+---------+
+| NTheta       | The number of bins along   |          |          |         |
+|              | the scattering direction   | 50       | 50       | 50      |
+|              | used for BVG fitting.      |          |          |         |
++--------------+----------------------------+----------+----------+---------+
+| NPhi         | The number of bins along   |          |          |         |
+|              | the azimuthal direction    | 50       | 50       | 50      |
+|              | used for BVG fitting.      |          |          |         |
++--------------+----------------------------+----------+----------+---------+
+
+
 Calculations
 ------------
 This algorithm will fit a set of peaks in a PeaksWorkspace.  The intensity profile

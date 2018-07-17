@@ -111,7 +111,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         # There are a few instrument specific parameters that we define here.  In some cases,
         # it may improve fitting to set tweak these parameters, but for simplicity we define these here
         # The default values are good for MaNDi - new instruments can be added by adding a different elif
-        # statement
+        # statement.
+        # If you change these values or add an instrument, documentation should also be changed.
         instrumentName = peaks_ws.getInstrument().getFullName()
         mindtBinWidth = 15
         maxdtBinWidth = 50
