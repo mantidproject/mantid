@@ -206,9 +206,8 @@ Peak::Peak(const Peak &other)
       samplePos(other.samplePos), detPos(other.detPos),
       m_orig_H(other.m_orig_H), m_orig_K(other.m_orig_K),
       m_orig_L(other.m_orig_L), m_peakNumber(other.m_peakNumber),
-      m_modStru(other.m_modStru), 
-      m_intH(other.m_intH), m_intK(other.m_intK), m_intL(other.m_intL),
-      m_detIDs(other.m_detIDs),
+      m_modStru(other.m_modStru), m_intH(other.m_intH), m_intK(other.m_intK),
+      m_intL(other.m_intL), m_detIDs(other.m_detIDs),
       m_peakShape(other.m_peakShape->clone()), convention(other.convention) {}
 
 //----------------------------------------------------------------------------------------------

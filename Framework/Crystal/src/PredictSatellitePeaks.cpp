@@ -193,11 +193,17 @@ void PredictSatellitePeaks::exec() {
   size_t next = 0;
   while (!done) {
     std::string offsetName = "Offset1";
-    predictOffsets(Peaks, OutPeaks, offsets1, offsetName, maxOrder, hkl, goniometer, UB, lambdaFilter, includePeaksInRange, includeOrderZero, RunNumber, seqNum, AlreadyDonePeaks);
+    predictOffsets(Peaks, OutPeaks, offsets1, offsetName, maxOrder, hkl,
+                   goniometer, UB, lambdaFilter, includePeaksInRange,
+                   includeOrderZero, RunNumber, seqNum, AlreadyDonePeaks);
     offsetName = "Offset2";
-    predictOffsets(Peaks, OutPeaks, offsets2, offsetName, maxOrder, hkl, goniometer, UB, lambdaFilter, includePeaksInRange, includeOrderZero, RunNumber, seqNum, AlreadyDonePeaks);
+    predictOffsets(Peaks, OutPeaks, offsets2, offsetName, maxOrder, hkl,
+                   goniometer, UB, lambdaFilter, includePeaksInRange,
+                   includeOrderZero, RunNumber, seqNum, AlreadyDonePeaks);
     offsetName = "Offset3";
-    predictOffsets(Peaks, OutPeaks, offsets3, offsetName, maxOrder, hkl, goniometer, UB, lambdaFilter, includePeaksInRange, includeOrderZero, RunNumber, seqNum, AlreadyDonePeaks);
+    predictOffsets(Peaks, OutPeaks, offsets3, offsetName, maxOrder, hkl,
+                   goniometer, UB, lambdaFilter, includePeaksInRange,
+                   includeOrderZero, RunNumber, seqNum, AlreadyDonePeaks);
     if (includePeaksInRange) {
       next++;
       if (next == possibleHKLs.size())
@@ -224,60 +230,64 @@ void PredictSatellitePeaks::exec() {
   setProperty("SatellitePeaks", OutPeaks);
 }
 
-void PredictSatellitePeaks::predictOffsets(DataObjects::PeaksWorkspace_sptr Peaks, boost::shared_ptr<Mantid::API::IPeaksWorkspace>& OutPeaks, std::vector<double> offsets, std::string &label, int &maxOrder, V3D &hkl, Kernel::Matrix<double> &goniometer, const Kernel::DblMatrix &UB, HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange, bool &includeOrderZero, int &RunNumber, int &seqNum, vector<vector<int>> &AlreadyDonePeaks) {
-  OutPeaks->mutableRun().addProperty<std::vector<double>>(label, offsets,
-                                                          true);
+void PredictSatellitePeaks::predictOffsets(
+    DataObjects::PeaksWorkspace_sptr Peaks,
+    boost::shared_ptr<Mantid::API::IPeaksWorkspace> &OutPeaks,
+    std::vector<double> offsets, std::string &label, int &maxOrder, V3D &hkl,
+    Kernel::Matrix<double> &goniometer, const Kernel::DblMatrix &UB,
+    HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange,
+    bool &includeOrderZero, int &RunNumber, int &seqNum,
+    vector<vector<int>> &AlreadyDonePeaks) {
+  OutPeaks->mutableRun().addProperty<std::vector<double>>(label, offsets, true);
   Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
-    for (int order = -maxOrder; order <= maxOrder; order++) {
-      if (order == 0 && !includeOrderZero)
-        continue; // exclude order 0
-        V3D hkl1(hkl);
+  for (int order = -maxOrder; order <= maxOrder; order++) {
+    if (order == 0 && !includeOrderZero)
+      continue; // exclude order 0
+    V3D hkl1(hkl);
 
-        hkl1[0] += order * offsets[0];
-        hkl1[1] += order * offsets[1];
-        hkl1[2] += order * offsets[2];
-        if (!lambdaFilter.isAllowed(hkl1) && includePeaksInRange)
+    hkl1[0] += order * offsets[0];
+    hkl1[1] += order * offsets[1];
+    hkl1[2] += order * offsets[2];
+    if (!lambdaFilter.isAllowed(hkl1) && includePeaksInRange)
+      continue;
+
+    Kernel::V3D Qs = goniometer * UB * hkl1 * 2.0 * M_PI;
+
+    if (Qs[2] <= 0)
+      continue;
+
+    try {
+      auto peak(Peaks->createPeak(Qs, 1));
+
+      peak->setGoniometerMatrix(goniometer);
+
+      if (peak->findDetector(tracer)) {
+        vector<int> SavPk{RunNumber, boost::math::iround(1000.0 * hkl1[0]),
+                          boost::math::iround(1000.0 * hkl1[1]),
+                          boost::math::iround(1000.0 * hkl1[2])};
+
+        auto it = find(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end(), SavPk);
+
+        if (it == AlreadyDonePeaks.end()) {
+          AlreadyDonePeaks.push_back(SavPk);
+          std::sort(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end());
+        } else {
           continue;
-
-        Kernel::V3D Qs = goniometer * UB * hkl1 * 2.0 * M_PI;
-
-        if (Qs[2] <= 0)
-          continue;
-
-      try {
-        auto peak(Peaks->createPeak(Qs, 1));
-
-        peak->setGoniometerMatrix(goniometer);
-
-        if (peak->findDetector(tracer)) {
-          vector<int> SavPk{RunNumber, boost::math::iround(1000.0 * hkl1[0]),
-                            boost::math::iround(1000.0 * hkl1[1]),
-                            boost::math::iround(1000.0 * hkl1[2])};
-
-          auto it =
-              find(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end(), SavPk);
-
-          if (it == AlreadyDonePeaks.end()){
-            AlreadyDonePeaks.push_back(SavPk);
-            std::sort(AlreadyDonePeaks.begin(),AlreadyDonePeaks.end());
-          } else {
-            continue;
-          }
-
-          peak->setHKL(hkl1);
-          peak->setIntHKL(hkl);
-          peak->setPeakNumber(seqNum);
-          seqNum++;
-          peak->setRunNumber(RunNumber);
-          peak->setIntMNP(V3D(order, 0, 0));
-          OutPeaks->addPeak(*peak);
         }
-      } catch (std::runtime_error &) {
-          throw std::invalid_argument("Invalid Q vector");
+
+        peak->setHKL(hkl1);
+        peak->setIntHKL(hkl);
+        peak->setPeakNumber(seqNum);
+        seqNum++;
+        peak->setRunNumber(RunNumber);
+        peak->setIntMNP(V3D(order, 0, 0));
+        OutPeaks->addPeak(*peak);
       }
+    } catch (std::runtime_error &) {
+      throw std::invalid_argument("Invalid Q vector");
+    }
   }
 }
-
 
 } // namespace Crystal
 } // namespace Mantid

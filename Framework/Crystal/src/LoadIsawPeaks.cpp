@@ -198,21 +198,24 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     if (s == "5")
       det.push_back(bank);
     if (s == "9") {
-/*      m_offset1[0] = qSign * std::stod(getWord(in, false), nullptr);
-      m_offset1[1] = qSign * std::stod(getWord(in, false), nullptr);
-      m_offset1[2] = qSign * std::stod(getWord(in, false), nullptr);
-      m_offset2[0] = qSign * std::stod(getWord(in, false), nullptr);
-      m_offset2[1] = qSign * std::stod(getWord(in, false), nullptr);
-      m_offset2[2] = qSign * std::stod(getWord(in, false), nullptr);
-      m_offset3[0] = qSign * std::stod(getWord(in, false), nullptr);
-      m_offset3[1] = qSign * std::stod(getWord(in, false), nullptr);
-      m_offset3[2] = qSign * std::stod(getWord(in, false), nullptr);
-      outWS->mutableRun().addProperty<std::vector<double>>("Offset1", m_offset1,
-                                                           true);
-      outWS->mutableRun().addProperty<std::vector<double>>("Offset2", m_offset2,
-                                                           true);
-      outWS->mutableRun().addProperty<std::vector<double>>("Offset3", m_offset3,
-                                                           true);*/
+      /*      m_offset1[0] = qSign * std::stod(getWord(in, false), nullptr);
+            m_offset1[1] = qSign * std::stod(getWord(in, false), nullptr);
+            m_offset1[2] = qSign * std::stod(getWord(in, false), nullptr);
+            m_offset2[0] = qSign * std::stod(getWord(in, false), nullptr);
+            m_offset2[1] = qSign * std::stod(getWord(in, false), nullptr);
+            m_offset2[2] = qSign * std::stod(getWord(in, false), nullptr);
+            m_offset3[0] = qSign * std::stod(getWord(in, false), nullptr);
+            m_offset3[1] = qSign * std::stod(getWord(in, false), nullptr);
+            m_offset3[2] = qSign * std::stod(getWord(in, false), nullptr);
+            outWS->mutableRun().addProperty<std::vector<double>>("Offset1",
+         m_offset1,
+                                                                 true);
+            outWS->mutableRun().addProperty<std::vector<double>>("Offset2",
+         m_offset2,
+                                                                 true);
+            outWS->mutableRun().addProperty<std::vector<double>>("Offset3",
+         m_offset3,
+                                                                 true);*/
       auto run = outWS->mutableRun();
       std::string offsetName = "Offset1";
       getOffsets(in, run, m_offset1, offsetName, qSign);
@@ -281,11 +284,12 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
  * @param qSign :: For inelastic this is 1; for crystallography this is -1
  * @return void
  */
-void LoadIsawPeaks::getOffsets(std::ifstream &in, API::Run &run, std::vector<double> m_offset, std::string &label, double &qSign) {
-      for (int i=0; i<3; i++)     
-      m_offset.push_back(qSign * std::stod(getWord(in, false), nullptr));
-      run.addProperty<std::vector<double>>(label, m_offset,
-                                                           true);
+void LoadIsawPeaks::getOffsets(std::ifstream &in, API::Run &run,
+                               std::vector<double> m_offset, std::string &label,
+                               double &qSign) {
+  for (int i = 0; i < 3; i++)
+    m_offset.push_back(qSign * std::stod(getWord(in, false), nullptr));
+  run.addProperty<std::vector<double>>(label, m_offset, true);
 }
 
 //-----------------------------------------------------------------------------------------------

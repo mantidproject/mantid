@@ -89,7 +89,9 @@ private:
       const boost::shared_ptr<const Geometry::Instrument> &inst);
 
   /// Read offsets and add as property
-  void getOffsets(std::ifstream &in, API::Run &run, std::vector<double> m_offset, std::string &label, double &qSign);
+  void getOffsets(std::ifstream &in, API::Run &run,
+                  std::vector<double> m_offset, std::string &label,
+                  double &qSign);
 };
 
 } // namespace Mantid
