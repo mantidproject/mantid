@@ -40,6 +40,9 @@ Improvements
   - The ``.maud`` calibration file format, for conversion to d-spacing (uses a new algorithm
     :ref:`SaveGEMMAUDParamFile <algm-SaveGEMMAUDParamFile>`
 - :ref:`PDCalibration <algm-PDCalibration>` has major upgrades including making use of :ref:`FitPeaks <algm-FitPeaks>` for the individual peak fitting
+- :ref:`StripPeaks <algm-StripPeaks>` has been adjusted to allow for removing peaks that have only 3 bins across them (decreased from 5 bins)
+- :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` had a bug when binning in time-of-flight without using a property manager to specify the time-of-flight range. In other words: characterization files are no longer necessary.
+
 
 Engineering Diffraction
 -----------------------
@@ -88,9 +91,11 @@ New
 
 - New algorithm :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` to integrate peaks using 3D profile fitting in reciprocal space.
 
-- New algorithm :ref:`RefineSatellitePeaks <algm-RefineSatellitePeaks>` to predict the location of fractional satellite peaks using a set of nuclear peaks and a set of seed satellite peaks.
+- New algorithm :ref:`FindSatellitePeaks <algm-FindSatellitePeaks>` to predict the location of fractional satellite peaks using a set of nuclear peaks and a set of seed satellite peaks.
 
 - New TOPAZ instrument geometry for 2018 run cycle
+
+- New algorithm :ref:`IndexSatellitePeaks <algm-IndexSatellitePeaks>` to index satellite peaks found using the :ref:`FindSatellitePeaks <algm-FindSatellitePeaks>` algorithm.
 
 Improvements
 ############

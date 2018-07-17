@@ -3,6 +3,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -30,6 +31,9 @@ namespace Algorithms {
 
 /*Anonomous namespace */
 namespace {
+
+std::string const OUTPUT_WORKSPACE_DEFAULT_PREFIX("IvsQ");
+std::string const OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX("IvsLam");
 
 /** Get the twoTheta angle for the centre of the detector associated with the
 * given spectrum
@@ -288,7 +292,8 @@ void ReflectometryReductionOne2::init() {
   initDebugProperties();
 
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                   Direction::Output,
+                                                   PropertyMode::Optional),
                   "Output Workspace IvsQ.");
 
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspaceWavelength",
@@ -316,9 +321,26 @@ ReflectometryReductionOne2::validateInputs() {
   return results;
 }
 
+// Set default names for output workspaces
+void ReflectometryReductionOne2::setDefaultOutputWorkspaceNames() {
+  bool const isDebug = getProperty("Debug");
+  MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
+  auto const runNumber = getRunNumber(*ws);
+  if (isDefault("OutputWorkspace")) {
+    setPropertyValue("OutputWorkspace",
+                     OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
+  }
+  if (isDebug && isDefault("OutputWorkspaceWavelength")) {
+    setPropertyValue("OutputWorkspaceWavelength",
+                     OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX + runNumber);
+  }
+}
+
 /** Execute the algorithm.
 */
 void ReflectometryReductionOne2::exec() {
+  setDefaultOutputWorkspaceNames();
+
   // Get input properties
   m_runWS = getProperty("InputWorkspace");
   const auto xUnitID = m_runWS->getAxis(0)->unit()->unitID();
@@ -357,7 +379,9 @@ void ReflectometryReductionOne2::exec() {
   // Convert to Q
   auto IvsQ = convertToQ(IvsLam);
 
-  setProperty("OutputWorkspaceWavelength", IvsLam);
+  if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
+    setProperty("OutputWorkspaceWavelength", IvsLam);
+  }
   setProperty("OutputWorkspace", IvsQ);
 }
 
@@ -632,6 +656,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     alg->setPropertyValue("MonitorIntegrationWavelengthMax",
                           getPropertyValue("MonitorIntegrationWavelengthMax"));
     alg->setProperty("ProcessingInstructions", transmissionCommands);
+    alg->setPropertyValue("Debug", getPropertyValue("Debug"));
     alg->execute();
     transmissionWS = alg->getProperty("OutputWorkspace");
   }

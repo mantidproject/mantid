@@ -130,7 +130,7 @@ private:
             AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
                 outputBaseName + "_Workspaces"));
     TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
             outputBaseName + "_Result"));
 
     TS_ASSERT_EQUALS(groupWorkspace->size(), expectedGroupSize);

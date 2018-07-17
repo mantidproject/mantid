@@ -16,8 +16,10 @@
 #include "boost/range/algorithm_ext/erase.hpp"
 
 #include "Poco/DirectoryIterator.h"
+#include "Poco/Environment.h"
 #include "Poco/NObserver.h"
 #include "Poco/Path.h"
+#include "Poco/Process.h"
 
 #include <QMessageBox>
 #include <QMetaObject>
@@ -62,8 +64,11 @@ boost::optional<bool> getConfigBool(const std::string &key) {
 
 /// Returns a string to the current top level recovery folder
 std::string getRecoveryFolder() {
-  static std::string recoverFolder =
-      Mantid::Kernel::ConfigService::Instance().getAppDataDir() + "/recovery/";
+  static std::string appData =
+      Mantid::Kernel::ConfigService::Instance().getAppDataDir();
+  static std::string hostname = Poco::Environment::nodeName();
+
+  static std::string recoverFolder = appData + "/recovery/" + hostname + '/';
   return recoverFolder;
 }
 
@@ -178,29 +183,42 @@ ProjectRecovery::ProjectRecovery(ApplicationWindow *windowHandle)
 /// Destructor which also stops any background threads currently in progress
 ProjectRecovery::~ProjectRecovery() { stopProjectSaving(); }
 
-bool ProjectRecovery::attemptRecovery() {
+void ProjectRecovery::attemptRecovery() {
   QString recoveryMsg = QObject::tr(
       "Mantid did not close correctly and a recovery"
       " checkpoint has been found. Would you like to attempt recovery?");
 
   int userChoice = QMessageBox::information(
       m_windowPtr, QObject::tr("Project Recovery"), recoveryMsg,
-      QObject::tr("Open in script editor"), QObject::tr("No"), 0, 1);
+      QObject::tr("Yes"), QObject::tr("No"),
+      QObject::tr("Only open script in editor"), 0, 1);
 
   if (userChoice == 1) {
     // User selected no
-    return true;
+    return;
   }
 
   const auto checkpointPaths =
       getRecoveryFolderCheckpoints(getRecoveryFolder());
   auto &mostRecentCheckpoint = checkpointPaths.back();
 
-  // TODO automated recovery
-  switch (userChoice) {
-  case 0:
-    return openInEditor(mostRecentCheckpoint);
-  default:
+  auto destFilename =
+      Poco::Path(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
+  destFilename.append("ordered_recovery.py");
+
+  if (userChoice == 0) {
+    // We have to spin up a new thread so the GUI can continue painting whilst
+    // we exec
+    openInEditor(mostRecentCheckpoint, destFilename);
+    std::thread recoveryThread(
+        [=] { loadRecoveryCheckpoint(mostRecentCheckpoint); });
+    recoveryThread.detach();
+  } else if (userChoice == 2) {
+    openInEditor(mostRecentCheckpoint, destFilename);
+    // Restart project recovery as we stay synchronous
+    clearAllCheckpoints();
+    startProjectSaving();
+  } else {
     throw std::runtime_error("Unknown choice in ProjectRecovery");
   }
 }
@@ -320,11 +338,69 @@ void ProjectRecovery::stopProjectSaving() {
   }
 }
 
-bool ProjectRecovery::openInEditor(const Poco::Path &inputFolder) {
-  auto destFilename =
-      Poco::Path(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
-  destFilename.append("ordered_recovery.py");
-  compileRecoveryScript(inputFolder, destFilename);
+/**
+  * Asynchronously loads a recovery checkpoint by opening
+  * a scripting window to the ordered workspace
+  * history file, then execute it. When this finishes the
+  * project loading mechanism is invoked in the main GUI thread
+  * to recreate all Qt objects / widgets
+  *
+  * @param recoveryFolder : The checkpoint folder
+  */
+void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
+  ScriptingWindow *scriptWindow = m_windowPtr->getScriptWindowHandle();
+  if (!scriptWindow) {
+    throw std::runtime_error("Could not get handle to scripting window");
+  }
+
+  // Ensure the window repaints so it doesn't appear frozen before exec
+  scriptWindow->executeCurrentTab(Script::ExecutionMode::Serialised);
+  if (scriptWindow->getSynchronousErrorFlag()) {
+    // We failed to run the whole script
+    // Note: We must NOT throw from the method for excepted failures,
+    // since doing so will cause the application to terminate from a uncaught
+    // exception
+    g_log.error("Project recovery script did not finish. Your work has been "
+                "partially recovered.");
+    this->clearAllCheckpoints();
+    this->startProjectSaving();
+    return;
+  }
+  g_log.notice("Re-opening GUIs");
+
+  auto projectFile = Poco::Path(recoveryFolder).append(OUTPUT_PROJ_NAME);
+
+  bool loadCompleted = false;
+  if (!QMetaObject::invokeMethod(
+          m_windowPtr, "loadProjectRecovery", Qt::BlockingQueuedConnection,
+          Q_RETURN_ARG(bool, loadCompleted),
+          Q_ARG(const std::string, projectFile.toString()))) {
+    throw std::runtime_error(
+        "Project Recovery: Failed to load project windows - Qt binding failed");
+  }
+
+  if (!loadCompleted) {
+    g_log.warning("Loading failed to recovery everything completely");
+    return;
+  }
+  g_log.notice("Project Recovery finished");
+
+  // Restart project recovery when the async part finishes
+  clearAllCheckpoints();
+  startProjectSaving();
+}
+
+/**
+  * Compiles the project recovery script from a given checkpoint
+  * folder and opens this in the script editor
+  *
+  * @param inputFolder : The folder containing the checkpoint to recover
+  * @param historyDest : Where to save the ordered history
+  * @throws If a handle to the scripting window cannot be obtained
+  */
+void ProjectRecovery::openInEditor(const Poco::Path &inputFolder,
+                                   const Poco::Path &historyDest) {
+  compileRecoveryScript(inputFolder, historyDest);
 
   // Force application window to create the script window first
   const bool forceVisible = true;
@@ -335,8 +411,7 @@ bool ProjectRecovery::openInEditor(const Poco::Path &inputFolder) {
     throw std::runtime_error("Could not get handle to scripting window");
   }
 
-  scriptWindow->open(QString::fromStdString(destFilename.toString()));
-  return true;
+  scriptWindow->open(QString::fromStdString(historyDest.toString()));
 }
 
 /// Top level thread wrapper which catches all exceptions to gracefully handle
@@ -430,7 +505,8 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   const auto &ads = Mantid::API::AnalysisDataService::Instance();
 
   // Hold a copy to the shared pointers so they do not get deleted under us
-  const auto wsHandles = ads.getObjects();
+  const auto wsHandles =
+      ads.getObjects(Mantid::Kernel::DataServiceHidden::Include);
 
   if (wsHandles.empty()) {
     return;

@@ -26,6 +26,7 @@ set ( SRC_FILES
 	src/CalculateDIFC.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
+	src/CalculateIqt.cpp
 	src/CalculateCarpenterSampleCorrection.cpp
 	src/CalculateMuonAsymmetry.cpp
 	src/CalculatePolynomialBackground.cpp
@@ -362,6 +363,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalculateDIFC.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
+	inc/MantidAlgorithms/CalculateIqt.h
 	inc/MantidAlgorithms/CalculateCarpenterSampleCorrection.h
 	inc/MantidAlgorithms/CalculateMuonAsymmetry.h
 	inc/MantidAlgorithms/CalculatePolynomialBackground.h
@@ -714,6 +716,7 @@ set ( TEST_FILES
 	CalculateDIFCTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
+	CalculateIqtTest.h
 	CalculateMuonAsymmetryTest.h
 	CalculatePolynomialBackgroundTest.h
 	CalculateSlitsTest.h

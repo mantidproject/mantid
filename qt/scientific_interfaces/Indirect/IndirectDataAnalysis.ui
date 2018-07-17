@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>757</width>
+    <width>799</width>
     <height>764</height>
    </rect>
   </property>
@@ -83,7 +83,7 @@
       </widget>
       <widget class="QWidget" name="tabJumpFit">
        <attribute name="title">
-        <string>JumpFit</string>
+        <string>F(Q) Fit</string>
        </attribute>
       </widget>
      </widget>

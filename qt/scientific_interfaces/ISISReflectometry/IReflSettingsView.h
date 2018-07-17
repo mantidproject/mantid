@@ -81,6 +81,7 @@ public:
   virtual std::string getDetectorCorrectionType() const = 0;
   virtual std::string getSummationType() const = 0;
   virtual std::string getReductionType() const = 0;
+  virtual bool getDebugOption() const = 0;
   virtual bool getIncludePartialBins() const = 0;
 
   /// Check if settings are enabled

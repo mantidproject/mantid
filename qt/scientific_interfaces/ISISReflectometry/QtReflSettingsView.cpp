@@ -142,6 +142,7 @@ void QtReflSettingsView::registerInstrumentSettingsWidgets(
   registerSettingWidget(*m_ui.includePartialBinsCheckBox, "IncludePartialBins",
                         alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
+  registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
 }
 
 void QtReflSettingsView::registerExperimentSettingsWidgets(
@@ -659,6 +660,10 @@ std::string QtReflSettingsView::getI0MonitorIndex() const {
 
 std::string QtReflSettingsView::getReductionType() const {
   return getText(*m_ui.reductionTypeComboBox);
+}
+
+bool QtReflSettingsView::getDebugOption() const {
+  return m_ui.debugCheckBox->isChecked();
 }
 
 bool QtReflSettingsView::getIncludePartialBins() const {

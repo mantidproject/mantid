@@ -1361,6 +1361,7 @@ void FitPropertyBrowser::doubleChanged(QtProperty *prop) {
   if (prop == m_startX) {
     // call setWorkspace to change maxX in functions
     setWorkspace(m_compositeFunction);
+    m_doubleManager->setMinimum(m_endX, value);
     getHandler()->setAttribute("StartX", value);
     emit startXChanged(startX());
     emit xRangeChanged(startX(), endX());
@@ -1368,6 +1369,7 @@ void FitPropertyBrowser::doubleChanged(QtProperty *prop) {
   } else if (prop == m_endX) {
     // call setWorkspace to change minX in functions
     setWorkspace(m_compositeFunction);
+    m_doubleManager->setMaximum(m_startX, value);
     getHandler()->setAttribute("EndX", value);
     emit endXChanged(endX());
     emit xRangeChanged(startX(), endX());
