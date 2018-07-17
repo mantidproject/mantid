@@ -222,8 +222,8 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
   }
 
   std::string historyEntry = name + "(" + propStr + ")";
-  historyEntry.erase(
-	  boost::remove_if(historyEntry, boost::is_any_of("\n\r")), historyEntry.end());
+  historyEntry.erase(boost::remove_if(historyEntry, boost::is_any_of("\n\r")),
+                     historyEntry.end());
   return historyEntry;
 }
 
