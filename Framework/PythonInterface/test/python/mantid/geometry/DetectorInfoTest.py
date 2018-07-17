@@ -4,6 +4,7 @@ import unittest
 from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
+from mantid.simpleapi import *
 
 class DetectorInfoTest(unittest.TestCase):
 
@@ -91,6 +92,16 @@ class DetectorInfoTest(unittest.TestCase):
         info.setRotation(0, quat)
         retQuat = info.rotation(0)
         self.assertEquals(quat, retQuat)
+
+    def test_createWorkspaceAndDetectorInfo(self):
+    	""" Try to create a workspace and see if DetectorInfo object
+    		is accessable """
+    	dataX = [1,2,3,4,5]
+    	dataY = [1,2,3,4,5]
+    	workspace = CreateWorkspace(DataX=dataX, DataY=dataY)
+    	info = workspace.detectorInfo()
+    	self.assertEquals(info.size(), 0)
+
 
 if __name__ == '__main__':
     unittest.main()

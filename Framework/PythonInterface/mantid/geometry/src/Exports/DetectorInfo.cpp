@@ -41,49 +41,37 @@ void export_DetectorInfo() {
 
   // Export to Python
   class_<DetectorInfo, boost::noncopyable>("DetectorInfo", no_init)
-      .def("__len__", &DetectorInfo::size, (arg("self")),
-           "Returns the size of the DetectorInfo, i.e., the number of "
-           "detectors in the instrument.")
+    .def("__len__", &DetectorInfo::size, (arg("self")),
+      "Returns the size of the DetectorInfo, i.e., the number of "
+      "detectors in the instrument.")
 
-      .def("size", &DetectorInfo::size, (arg("self")),
-           "Returns the size of the DetectorInfo, i.e., the number of "
-           "detectors in the instrument.")
+    .def("size", &DetectorInfo::size, (arg("self")),
+      "Returns the size of the DetectorInfo, i.e., the number of "
+      "detectors in the instrument.")
 
-      .def("isMonitor", isMonitor, (arg("self"), arg("index")),
-           "Returns True if the detector is a monitor.")
+    .def("isMonitor", isMonitor, (arg("self"), arg("index")),
+      "Returns True if the detector is a monitor.")
 
-      .def("isMasked", isMasked, (arg("self"), arg("index")),
-           "Returns True if the detector is masked.")
+    .def("isMasked", isMasked, (arg("self"), arg("index")),
+      "Returns True if the detector is masked.")
 
-      .def("isEquivalent", &DetectorInfo::isEquivalent,
-           (arg("self"), arg("other")),
-           "Returns true if the content of this is equivalent to the content "
-           "of other.")
+    .def("isEquivalent", &DetectorInfo::isEquivalent,
+    (arg("self"), arg("other")),
+      "Returns true if the content of this is equivalent to the content "
+      "of other.")
 
-      .def("twoTheta", twoTheta, (arg("self"), arg("index")),
-           "Returns 2 theta (scattering angle w.r.t.to beam direction).")
+    .def("twoTheta", twoTheta, (arg("self"), arg("index")),
+      "Returns 2 theta (scattering angle w.r.t beam direction).")
 
-      .def("signedTwoTheta", signedTwoTheta, (arg("self"), arg("index")),
-           "Returns signed 2 theta (signed scattering angle w.r.t. to beam "
-           "direction).")
+    .def("position", position, (arg("self"), arg("index")),
+      "Returns the absolute position of the detector with given index.")
 
-      .def("position", position, (arg("self"), arg("index")),
-           "Returns the absolute position of the detector with given index.")
+    .def("rotation", rotation, (arg("self"), arg("index")),
+      "Returns the absolute rotation of the detector with given index.")
 
-      .def("rotation", rotation, (arg("self"), arg("index")),
-           "Returns the absolute rotation of the detector with given index.")
+    .def("setMasked", setMasked, (arg("self"), arg("index"), arg("masked")),
+      "Set the mask flag of the detector with given index.")
 
-      .def("setMasked", setMasked, (arg("self"), arg("index"), arg("masked")),
-           "Set the mask flag of the detector with given index.")
-
-      .def("clearMaskFlags", &DetectorInfo::clearMaskFlags, (arg("self")),
-           "Sets all mask flags to false (unmasked).")
-
-      .def("setPosition", setPosition,
-           (arg("self"), arg("index"), arg("position")),
-           "Set the absolute position of the detector with given index.")
-
-      .def("setRotation", setRotation,
-           (arg("self"), arg("index"), arg("rotation")),
-           "Set the absolute rotation of the detector with given index.");
+    .def("clearMaskFlags", &DetectorInfo::clearMaskFlags, (arg("self")),
+      "Sets all mask flags to false (unmasked).");
 }
