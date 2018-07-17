@@ -25,7 +25,7 @@ from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QFileDialo
 import qtawesome as qta
 
 from mantidqt.utils.flowlayout import FlowLayout
-from mantidqt.py3compat import Enum
+from mantidqt.py3compat.enum import IntEnum
 from workbench.plotting.qappthreadcall import QAppThreadCall
 
 DEBUG_MODE = False
@@ -38,7 +38,7 @@ EXPORT_TYPES = [
 ]
 
 
-class Column(Enum):
+class Column(IntEnum):
     Number = 0
     Name = 1
     LastActive = 2
