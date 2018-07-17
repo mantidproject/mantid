@@ -1,5 +1,5 @@
-#ifndef SINGLETON_HOLDER_H
-#define SINGLETON_HOLDER_H
+#ifndef MANTID_KERNEL_SINGLETON_HOLDER_H
+#define MANTID_KERNEL_SINGLETON_HOLDER_H
 
 ////////////////////////////////////////////////////////////////////////////////
 // The Loki Library
@@ -25,83 +25,66 @@
 #include <MantidKernel/DllConfig.h>
 #include <cassert>
 #include <cstdlib>
-#include <mutex>
-#include <stdexcept>
-#include <string>
-#include <typeinfo>
+#include <functional>
 
 namespace Mantid {
 namespace Kernel {
 
-/// prototype for function passed to atexit()
-using atexit_func_t = void (*)();
+/// Type of deleter function
+using deleter_t = std::function<void()>;
 
-extern MANTID_KERNEL_DLL void CleanupSingletons();
-extern MANTID_KERNEL_DLL void AddSingleton(atexit_func_t func);
+/// Register the given deleter function to be called
+/// at exit
+extern MANTID_KERNEL_DLL void deleteOnExit(deleter_t);
 
-/// class to manage an instance of an object as a singleton
+/// Manage the lifetime of a class intended to be a singleton
 template <typename T> class SingletonHolder {
 public:
-  /// Allow users to access to the type returned by Instance()
   using HeldType = T;
 
+  SingletonHolder() = delete;
+
   static T &Instance();
-
-private:
-  static void DestroySingleton();
-  /// default constructor marked private so only access is via the Instance()
-  /// method
-  SingletonHolder();
-
-  static T *pInstance;
-  static std::once_flag flag;
-  static bool destroyed;
 };
 
-/// Implementation of the SingletonHolder create policy using the new and delete
-/// operators
+/// Policy class controlling creation of the singleton
+/// Implementation classes should mark their default
+/// constructors private and insert a friend declaration
+/// for this class, e.g.:
+///
+///   friend struct Mantid::Kernel::CreateUsingNew<SingletonImplClass>;
+/// 
 template <typename T> struct CreateUsingNew {
   /// create an object using the new operator
   /// @returns New instance
-  static T *Create() { return new T; }
+  static T *create() { return new T; }
   /// delete an object instantiated using Create
   /// @param p :: pointer to instance to destroy
-  static void Destroy(T *p) { delete p; }
+  static void destroy(T *p) { delete p; }
 };
 
 /// Return a reference to the Singleton instance, creating it if it does not
 /// already exist
 /// Creation is done using the CreateUsingNew policy at the moment
 template <typename T> inline T &SingletonHolder<T>::Instance() {
-  if (destroyed) {
-    std::string s("Attempt to use destroyed singleton ");
-    s += typeid(T).name();
-    throw std::runtime_error(s.c_str());
-  }
-  std::call_once(flag, [] {
-    pInstance = CreateUsingNew<T>::Create();
-    AddSingleton(&DestroySingleton);
-  });
-  return *pInstance;
-}
-
-/// Destroy the singleton
-template <typename T> void SingletonHolder<T>::DestroySingleton() {
-  // std::cerr << "destroying singleton " << typeid(T).name() << '\n';
+  // Local static instance initialized by an immediately invoked lambda.
+  // A second nested lambda captures the singleton instance pointer
+  // and forms the deleter function that is registered with
+  // the atexit deleters.
+  static bool destroyed(false);
+  static T *instance = [] {
+    auto *singleton = CreateUsingNew<T>::create();
+    deleteOnExit(deleter_t([singleton]() {
+      destroyed = true;
+      CreateUsingNew<T>::destroy(singleton);
+    }));
+    return singleton;
+  }();
   assert(!destroyed);
-  CreateUsingNew<T>::Destroy(pInstance);
-  pInstance = nullptr;
-  destroyed = true;
+  return *instance;
 }
 
-/// global variable holding pointer to singleton instance
-template <typename T> T *SingletonHolder<T>::pInstance = nullptr;
-
-template <typename T> std::once_flag SingletonHolder<T>::flag;
-
-/// variable to allow trapping of attempts to destroy a singleton more than once
-template <typename T> bool SingletonHolder<T>::destroyed = false;
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif // SINGLETON_HOLDER_H
