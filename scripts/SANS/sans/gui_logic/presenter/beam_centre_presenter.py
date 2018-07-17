@@ -130,7 +130,6 @@ class BeamCentrePresenter(object):
         self._view.hab_pos_1 = hab_pos_1
         self._view.hab_pos_2 = hab_pos_2
 
-
     def set_on_state_model(self, attribute_name, state_model):
         attribute = getattr(self._view, attribute_name)
         if attribute or isinstance(attribute, bool):

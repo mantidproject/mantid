@@ -1150,9 +1150,9 @@ class SetParser(UserFileComponentParser):
                                           "\\s*(" + space_string + float_number + space_string + float_number +
                                           ")?\\s*" + end_string)
         self._centre_pattern_HAB = re.compile(start_string + self._centre + "\\s*(/" + self._hab + space_string +
-                                          ")?\\s*" + float_number + space_string + float_number +
-                                          "\\s*(" + space_string + float_number + space_string + float_number +
-                                          ")?\\s*" + end_string)
+                                              ")?\\s*" + float_number + space_string + float_number +
+                                              "\\s*(" + space_string + float_number + space_string + float_number +
+                                              ")?\\s*" + end_string)
 
     def parse_line(self, line):
         # Get the settings, ie remove command
