@@ -102,8 +102,8 @@ bool isAnotherInstanceRunning() { return !otherInstancePIDs().empty(); }
 std::vector<int64_t> otherInstancePIDs() {
   ScopedPythonGIL lock;
   const int64_t ourPID(QCoreApplication::applicationPid());
-  const PyObjectNewReference ourName(PyString_FromString(
-      QCoreApplication::applicationName().toLatin1().data()));
+  const PyObjectNewReference ourName(
+      FROM_CSTRING(QCoreApplication::applicationName().toLatin1().data()));
   auto psutilModule(psutil());
   auto processIter(call(psutilModule.ptr(), "process_iter"));
 
