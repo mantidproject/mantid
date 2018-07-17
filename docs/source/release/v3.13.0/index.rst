@@ -7,6 +7,8 @@ Mantid 3.13.0 Release Notes
 .. figure:: ../../images/Release3-13.png
    :class: screenshot
    :align: right
+   
+   Mantid introduces project recovery for Mantidplot, Mantid maintains a recovery script while running, in the event of a crash or unexpected shutdown of Mantidplot Mantid will attempt to recover to it's most recent recovery checkpoint.
 
 .. contents:: Table of Contents
    :local:
@@ -14,7 +16,14 @@ Mantid 3.13.0 Release Notes
 
 We are proud to announce version 3.13.0 of Mantid.
 
-Here is a load of stuff we have done.
+This release includes a first implementation of Project Recovery for Mantidplot to allow Mantid to handle scanning workspaces, Mantid maintains a recovery script while running, in the event of a crash or unexpected shutdown of Mantidplot Mantid will attempt to recover to it's most recent recovery checkpoint.  This feature may not fully recover in all situations, but we will continue to improve it in future releases. There have also been some significant performance enhancements in the instrument view.
+
+These are just some of the many improvements in this release, so please take a
+look at the release notes, which are filled with details of the
+important changes and improvements in many areas. The development team
+has put a great effort into making all of these improvements within
+Mantid, and we would like to thank all of our beta testers for their
+time and effort helping us to make this another reliable version of Mantid.
 
 Citation
 --------
