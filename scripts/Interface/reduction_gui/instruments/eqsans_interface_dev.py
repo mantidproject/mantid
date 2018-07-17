@@ -31,7 +31,7 @@ class EQSANSInterface(InstrumentInterface):
     """
         Defines the widgets for EQSANS reduction
     """
-    data_type = "Data files *.nxs *.dat (*.nxs *.dat)"
+    data_type = "Data files *.nxs *.dat *.h5 (*.nxs *.dat *.h5)"
 
     def __init__(self, name, settings):
         super(EQSANSInterface, self).__init__(name, settings)
