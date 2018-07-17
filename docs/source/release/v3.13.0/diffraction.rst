@@ -40,7 +40,9 @@ Improvements
   - The ``.maud`` calibration file format, for conversion to d-spacing (uses a new algorithm
     :ref:`SaveGEMMAUDParamFile <algm-SaveGEMMAUDParamFile>`
 - :ref:`PDCalibration <algm-PDCalibration>` has major upgrades including making use of :ref:`FitPeaks <algm-FitPeaks>` for the individual peak fitting
+- :ref:`StripPeaks <algm-StripPeaks>` has been adjusted to allow for removing peaks that have only 3 bins across them (decreased from 5 bins)
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` had a bug when binning in time-of-flight without using a property manager to specify the time-of-flight range. In other words: characterization files are no longer necessary.
+
 
 Engineering Diffraction
 -----------------------
