@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1015</width>
-    <height>649</height>
+    <height>709</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -310,6 +310,26 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>lab_pos_1_line_edit</tabstop>
+  <tabstop>lab_pos_2_line_edit</tabstop>
+  <tabstop>hab_pos_1_line_edit</tabstop>
+  <tabstop>hab_pos_2_line_edit</tabstop>
+  <tabstop>component_combo_box</tabstop>
+  <tabstop>update_lab_check_box</tabstop>
+  <tabstop>update_hab_check_box</tabstop>
+  <tabstop>r_min_line_edit</tabstop>
+  <tabstop>r_max_line_edit</tabstop>
+  <tabstop>q_min_line_edit</tabstop>
+  <tabstop>q_max_line_edit</tabstop>
+  <tabstop>max_iterations_line_edit</tabstop>
+  <tabstop>tolerance_line_edit</tabstop>
+  <tabstop>verbose_check_box</tabstop>
+  <tabstop>COM_check_box</tabstop>
+  <tabstop>left_right_check_box</tabstop>
+  <tabstop>up_down_check_box</tabstop>
+  <tabstop>run_button</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
