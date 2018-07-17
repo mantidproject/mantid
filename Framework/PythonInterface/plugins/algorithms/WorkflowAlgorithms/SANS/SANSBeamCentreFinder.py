@@ -199,7 +199,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                     position_1_step = - position_1_step / 2
                 if residueTB[j] > residueTB[j-1]:
                     position_2_step = - position_2_step / 2
-                
+
                 logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
                               format(j, self.scale_1 * centre1, self.scale_2 * centre2, residueLR[j], residueTB[j]))
 
