@@ -5,10 +5,6 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 ISIS Reflectometry Interface
 ----------------------------
 
@@ -19,16 +15,10 @@ New
 - A new option has been added to the Settings tab to control whether partial bins should be included when summing in Q.
 - ``ReflectometryReductionOneAuto`` takes the polarization correction properties from the instrument parameter file when ``PolarizationAnalysis`` is set to ``ParameterFile``. The instrument parameter file can store the efficiencies as vectors of doubles.
 
-Improvements
-############
-
-Bugfixes
-########
-
 Features Removed
 ################
 
-* Added deprecation notice to ISIS Reflectometry (Old) due to be removed in March 2019.
+* Added a deprecation notice to the ISIS Reflectometry (Old) interface, this is due to be removed in March 2019. It will be present in releases up until that date, but new features will only be added to the new interface.
 
 Algorithms
 ----------
@@ -55,9 +45,6 @@ New
 * A new algorithm :ref:`ReflectometrySumInQ <algm-ReflectometrySumInQ>` is available for coherent summation of the reflected beam.
 
 - :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometryReductionOneAuto` no longer include partial bins by default when summing in Q. A new property, `IncludePartialBins`, has been added to re-enable partial bins.
-
-Improvements
-############
 
 Bugfixes
 ########
