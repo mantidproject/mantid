@@ -428,7 +428,7 @@ QGroupBox::title {
           <item>
            <widget class="QTabWidget" name="settings_tab_widget">
             <property name="currentIndex">
-             <number>2</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="general_tab">
              <attribute name="title">
@@ -2144,6 +2144,16 @@ QGroupBox::title {
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>instrument_combo_box</tabstop>
+  <tabstop>manage_directories_button</tabstop>
+  <tabstop>user_file_button</tabstop>
+  <tabstop>batch_button</tabstop>
+  <tabstop>process_button</tabstop>
+  <tabstop>multi_period_check_box</tabstop>
+  <tabstop>reduction_dimensionality_1D</tabstop>
+  <tabstop>reduction_dimensionality_2D</tabstop>
+  <tabstop>output_mode_memory_radio_button</tabstop>
+  <tabstop>output_mode_file_radio_button</tabstop>
   <tabstop>output_mode_both_radio_button</tabstop>
   <tabstop>can_sas_checkbox</tabstop>
   <tabstop>nx_can_sas_checkbox</tabstop>
@@ -2151,15 +2161,7 @@ QGroupBox::title {
   <tabstop>save_zero_error_free</tabstop>
   <tabstop>use_optimizations_checkbox</tabstop>
   <tabstop>plot_results_checkbox</tabstop>
-  <tabstop>transmission_interpolating_rebin_check_box</tabstop>
-  <tabstop>transmission_target_combo_box</tabstop>
-  <tabstop>tab_choice_list</tabstop>
-  <tabstop>monitor_normalization_line_edit</tabstop>
-  <tabstop>transmission_line_edit</tabstop>
-  <tabstop>batch_line_edit</tabstop>
-  <tabstop>user_file_line_edit</tabstop>
-  <tabstop>monitor_normalization_interpolating_rebin_check_box</tabstop>
-  <tabstop>settings_tab_widget</tabstop>
+  <tabstop>help_button</tabstop>
   <tabstop>reduction_mode_combo_box</tabstop>
   <tabstop>merged_scale_line_edit</tabstop>
   <tabstop>merged_shift_line_edit</tabstop>
@@ -2173,8 +2175,6 @@ QGroupBox::title {
   <tabstop>slice_event_line_edit</tabstop>
   <tabstop>event_binning_group_box</tabstop>
   <tabstop>event_binning_line_edit</tabstop>
-  <tabstop>wavelength_min_line_edit</tabstop>
-  <tabstop>wavelength_max_line_edit</tabstop>
   <tabstop>absolute_scale_line_edit</tabstop>
   <tabstop>geometry_combo_box</tabstop>
   <tabstop>height_line_edit</tabstop>
@@ -2184,11 +2184,47 @@ QGroupBox::title {
   <tabstop>mask_file_input_line_edit</tabstop>
   <tabstop>mask_file_browse_push_button</tabstop>
   <tabstop>mask_file_add_push_button</tabstop>
+  <tabstop>monitor_normalization_line_edit</tabstop>
+  <tabstop>monitor_normalization_interpolating_rebin_check_box</tabstop>
+  <tabstop>transmission_line_edit</tabstop>
+  <tabstop>transmission_interpolating_rebin_check_box</tabstop>
+  <tabstop>transmission_target_combo_box</tabstop>
+  <tabstop>transmission_monitor_line_edit</tabstop>
+  <tabstop>transmission_mn_shift_line_edit</tabstop>
+  <tabstop>transmission_radius_line_edit</tabstop>
+  <tabstop>transmission_roi_files_line_edit</tabstop>
+  <tabstop>transmission_mask_files_line_edit</tabstop>
+  <tabstop>transmission_roi_files_push_button</tabstop>
+  <tabstop>transmission_mask_files_push_button</tabstop>
+  <tabstop>fit_selection_combo_box</tabstop>
+  <tabstop>fit_sample_use_fit_check_box</tabstop>
+  <tabstop>fit_sample_fit_type_combo_box</tabstop>
+  <tabstop>fit_sample_polynomial_order_spin_box</tabstop>
+  <tabstop>fit_sample_wavelength_combo_box</tabstop>
+  <tabstop>fit_sample_wavelength_min_line_edit</tabstop>
+  <tabstop>fit_sample_wavelength_max_line_edit</tabstop>
+  <tabstop>show_transmission_view</tabstop>
+  <tabstop>fit_can_use_fit_check_box</tabstop>
+  <tabstop>fit_can_fit_type_combo_box</tabstop>
+  <tabstop>fit_can_polynomial_order_spin_box</tabstop>
+  <tabstop>fit_can_wavelength_combo_box</tabstop>
+  <tabstop>fit_can_wavelength_min_line_edit</tabstop>
+  <tabstop>fit_can_wavelength_max_line_edit</tabstop>
+  <tabstop>pixel_adjustment_det_1_line_edit</tabstop>
+  <tabstop>pixel_adjustment_det_1_push_button</tabstop>
+  <tabstop>pixel_adjustment_det_2_line_edit</tabstop>
+  <tabstop>pixel_adjustment_det_2_push_button</tabstop>
+  <tabstop>wavelength_adjustment_det_1_line_edit</tabstop>
+  <tabstop>wavelength_adjustment_det_1_push_button</tabstop>
+  <tabstop>wavelength_adjustment_det_2_line_edit</tabstop>
+  <tabstop>wavelength_adjustment_det_2_push_button</tabstop>
   <tabstop>radius_limit_min_line_edit</tabstop>
   <tabstop>radius_limit_max_line_edit</tabstop>
   <tabstop>phi_limit_min_line_edit</tabstop>
   <tabstop>phi_limit_max_line_edit</tabstop>
   <tabstop>phi_limit_use_mirror_check_box</tabstop>
+  <tabstop>wavelength_min_line_edit</tabstop>
+  <tabstop>wavelength_max_line_edit</tabstop>
   <tabstop>wavelength_slices_line_edit</tabstop>
   <tabstop>wavelength_step_line_edit</tabstop>
   <tabstop>wavelength_step_type_combo_box</tabstop>
@@ -2206,55 +2242,19 @@ QGroupBox::title {
   <tabstop>q_resolution_group_box</tabstop>
   <tabstop>q_resolution_shape_combo_box</tabstop>
   <tabstop>q_resolution_source_h_line_edit</tabstop>
-  <tabstop>q_resolution_sample_h_line_edit</tabstop>
   <tabstop>q_resolution_source_w_line_edit</tabstop>
-  <tabstop>q_resolution_sample_w_line_edit</tabstop>
   <tabstop>q_resolution_source_a_line_edit</tabstop>
+  <tabstop>q_resolution_sample_h_line_edit</tabstop>
+  <tabstop>q_resolution_sample_w_line_edit</tabstop>
   <tabstop>q_resolution_sample_a_line_edit</tabstop>
   <tabstop>q_resolution_collimation_length_line_edit</tabstop>
   <tabstop>q_resolution_delta_r_line_edit</tabstop>
   <tabstop>q_resolution_moderator_file_line_edit</tabstop>
   <tabstop>q_resolution_moderator_file_push_button</tabstop>
-  <tabstop>pixel_adjustment_det_2_line_edit</tabstop>
-  <tabstop>pixel_adjustment_det_1_push_button</tabstop>
-  <tabstop>pixel_adjustment_det_2_push_button</tabstop>
-  <tabstop>wavelength_adjustment_det_1_line_edit</tabstop>
-  <tabstop>wavelength_adjustment_det_2_line_edit</tabstop>
-  <tabstop>wavelength_adjustment_det_1_push_button</tabstop>
-  <tabstop>wavelength_adjustment_det_2_push_button</tabstop>
-  <tabstop>transmission_monitor_line_edit</tabstop>
-  <tabstop>transmission_mn_shift_line_edit</tabstop>
-  <tabstop>transmission_radius_line_edit</tabstop>
-  <tabstop>transmission_roi_files_line_edit</tabstop>
-  <tabstop>transmission_mask_files_line_edit</tabstop>
-  <tabstop>transmission_roi_files_push_button</tabstop>
-  <tabstop>transmission_mask_files_push_button</tabstop>
-  <tabstop>fit_selection_combo_box</tabstop>
-  <tabstop>fit_sample_use_fit_check_box</tabstop>
-  <tabstop>fit_sample_polynomial_order_spin_box</tabstop>
-  <tabstop>fit_sample_fit_type_combo_box</tabstop>
-  <tabstop>fit_sample_wavelength_combo_box</tabstop>
-  <tabstop>fit_sample_wavelength_max_line_edit</tabstop>
-  <tabstop>fit_can_fit_type_combo_box</tabstop>
-  <tabstop>fit_sample_wavelength_min_line_edit</tabstop>
-  <tabstop>fit_can_use_fit_check_box</tabstop>
-  <tabstop>fit_can_polynomial_order_spin_box</tabstop>
-  <tabstop>fit_can_wavelength_combo_box</tabstop>
-  <tabstop>fit_can_wavelength_min_line_edit</tabstop>
-  <tabstop>fit_can_wavelength_max_line_edit</tabstop>
-  <tabstop>pixel_adjustment_det_1_line_edit</tabstop>
-  <tabstop>help_button</tabstop>
-  <tabstop>show_transmission_view</tabstop>
-  <tabstop>instrument_combo_box</tabstop>
-  <tabstop>manage_directories_button</tabstop>
-  <tabstop>user_file_button</tabstop>
-  <tabstop>batch_button</tabstop>
-  <tabstop>process_button</tabstop>
-  <tabstop>multi_period_check_box</tabstop>
-  <tabstop>reduction_dimensionality_1D</tabstop>
-  <tabstop>reduction_dimensionality_2D</tabstop>
-  <tabstop>output_mode_memory_radio_button</tabstop>
-  <tabstop>output_mode_file_radio_button</tabstop>
+  <tabstop>settings_tab_widget</tabstop>
+  <tabstop>user_file_line_edit</tabstop>
+  <tabstop>tab_choice_list</tabstop>
+  <tabstop>batch_line_edit</tabstop>
  </tabstops>
  <resources/>
  <connections/>
