@@ -107,7 +107,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         pplmax_frac = self.getProperty('MaxpplFrac').value
         sampleRun = self.getProperty('RunNumber').value
 
-
         # There are a few instrument specific parameters that we define here.  In some cases,
         # it may improve fitting to set tweak these parameters, but for simplicity we define these here
         # The default values are good for MaNDi - new instruments can be added by adding a different elif
@@ -139,7 +138,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         else:
             logger.warning("Instrument name {} not found! Falling back on default parameters!".format(instrumentName))
 
-
         neigh_length_m=3
         qMask = ICCFT.getHKLMask(UBMatrix, frac=fracHKL, dQPixel=dQPixel,dQ=dQ)
 
@@ -154,7 +152,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         params_ws = CreateEmptyTableWorkspace()
         for key, datatype in zip(keys,datatypes):
             params_ws.addColumn(datatype, key)
-
 
         # Set the peak numbers we're fitting
         if peakNumberToFit < 0:
