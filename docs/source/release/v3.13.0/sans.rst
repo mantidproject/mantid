@@ -37,10 +37,12 @@ Bugfixes
 * Fixed a bug where save_format was not being specified if a user file was entered for a row.
 * Use gravity now defaulting to false. 
 * MASK/TIME and TIME/MASK now both work in new backend.
+* SET Centre/HAB command is now correctly parsed into a seperate variable to SET Centre. 
 
 Features Removed
 ################
 
 * Removed SaveNist as an option from both GUI's
+* The Q range option on the beam centre tab was producing erroneous results so has been removed until it can be improved and fixed.
 
 :ref:`Release 3.13.0 <v3.13.0>`
