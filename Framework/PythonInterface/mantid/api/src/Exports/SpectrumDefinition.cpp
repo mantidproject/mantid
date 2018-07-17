@@ -30,6 +30,6 @@ void export_SpectrumDefinition() {
            "definition.")
 
       .def("equals",
-           &SpectrumDefinition::operator==,(arg("self"), arg("other")),
+           &SpectrumDefinition::operator==, (arg("self"), arg("other")),
            "Compare spectrum definitions.");
 }
