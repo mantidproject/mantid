@@ -17,6 +17,8 @@ Improvements
 ############
 
 - :ref:`PyChop <PyChop>` has been updated to calculate rep-rate multiplication for MAPS and MARI. In addition, it now supports loading instrument parameters from a YAML file, and also plots the Q-E coverage.
+- Workspaces used in MSlice are now not added to the MantidPlot window automatically, and can be added using the ``Save To MantidPlot`` button.
+- Improved default limits for 2D plots of large datasets in MSlice.
 
 Algorithms
 ----------
