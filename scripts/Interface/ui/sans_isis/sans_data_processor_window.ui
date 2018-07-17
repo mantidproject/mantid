@@ -428,7 +428,7 @@ QGroupBox::title {
           <item>
            <widget class="QTabWidget" name="settings_tab_widget">
             <property name="currentIndex">
-             <number>0</number>
+             <number>2</number>
             </property>
             <widget class="QWidget" name="general_tab">
              <attribute name="title">
@@ -1054,7 +1054,7 @@ QGroupBox::title {
                      <item row="4" column="2">
                       <widget class="QLineEdit" name="transmission_mn_shift_line_edit">
                        <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;An option shift of the M4 monitor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Distance between beamstop monitor and detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>
                       </widget>
                      </item>
@@ -1568,7 +1568,7 @@ QGroupBox::title {
                    </sizepolicy>
                   </property>
                   <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings concerning the wavelength binning when dat a is transformed from time-of-flight to wavlength units.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings concerning the wavelength binning when data is transformed from time-of-flight to wavelength units.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                   <property name="title">
                    <string>Wavelength</string>
@@ -2144,21 +2144,21 @@ QGroupBox::title {
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>tab_choice_list</tabstop>
-  <tabstop>batch_button</tabstop>
-  <tabstop>user_file_button</tabstop>
-  <tabstop>batch_line_edit</tabstop>
-  <tabstop>user_file_line_edit</tabstop>
-  <tabstop>reduction_dimensionality_1D</tabstop>
-  <tabstop>reduction_dimensionality_2D</tabstop>
-  <tabstop>output_mode_memory_radio_button</tabstop>
-  <tabstop>output_mode_file_radio_button</tabstop>
   <tabstop>output_mode_both_radio_button</tabstop>
   <tabstop>can_sas_checkbox</tabstop>
   <tabstop>nx_can_sas_checkbox</tabstop>
   <tabstop>rkh_checkbox</tabstop>
   <tabstop>save_zero_error_free</tabstop>
   <tabstop>use_optimizations_checkbox</tabstop>
+  <tabstop>plot_results_checkbox</tabstop>
+  <tabstop>transmission_interpolating_rebin_check_box</tabstop>
+  <tabstop>transmission_target_combo_box</tabstop>
+  <tabstop>tab_choice_list</tabstop>
+  <tabstop>monitor_normalization_line_edit</tabstop>
+  <tabstop>transmission_line_edit</tabstop>
+  <tabstop>batch_line_edit</tabstop>
+  <tabstop>user_file_line_edit</tabstop>
+  <tabstop>monitor_normalization_interpolating_rebin_check_box</tabstop>
   <tabstop>settings_tab_widget</tabstop>
   <tabstop>reduction_mode_combo_box</tabstop>
   <tabstop>merged_scale_line_edit</tabstop>
@@ -2244,17 +2244,17 @@ QGroupBox::title {
   <tabstop>fit_can_wavelength_max_line_edit</tabstop>
   <tabstop>pixel_adjustment_det_1_line_edit</tabstop>
   <tabstop>help_button</tabstop>
-  <tabstop>manage_directories_button</tabstop>
-  <tabstop>instrument_combo_box</tabstop>
-  <tabstop>process_button</tabstop>
-  <tabstop>plot_results_checkbox</tabstop>
-  <tabstop>multi_period_check_box</tabstop>
   <tabstop>show_transmission_view</tabstop>
-  <tabstop>monitor_normalization_line_edit</tabstop>
-  <tabstop>monitor_normalization_interpolating_rebin_check_box</tabstop>
-  <tabstop>transmission_line_edit</tabstop>
-  <tabstop>transmission_interpolating_rebin_check_box</tabstop>
-  <tabstop>transmission_target_combo_box</tabstop>
+  <tabstop>instrument_combo_box</tabstop>
+  <tabstop>manage_directories_button</tabstop>
+  <tabstop>user_file_button</tabstop>
+  <tabstop>batch_button</tabstop>
+  <tabstop>process_button</tabstop>
+  <tabstop>multi_period_check_box</tabstop>
+  <tabstop>reduction_dimensionality_1D</tabstop>
+  <tabstop>reduction_dimensionality_2D</tabstop>
+  <tabstop>output_mode_memory_radio_button</tabstop>
+  <tabstop>output_mode_file_radio_button</tabstop>
  </tabstops>
  <resources/>
  <connections/>
