@@ -199,7 +199,7 @@ bool addColumnPlotType(ITableWorkspace &self, const std::string &type,
  */
 bool addColumnSimple(ITableWorkspace &self, const std::string &type,
                      const std::string &name) {
-  self.modified();                     
+  self.modified();
   return self.addColumn(type, name) != nullptr;
 }
 
