@@ -85,7 +85,10 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         if UBFile == '' and peaks_ws.sample().hasOrientedLattice():
             logger.information("Using UB file already available in PeaksWorkspace")
         else:
-            LoadIsawUB(InputWorkspace=peaks_ws, FileName=UBFile)
+            try:
+                LoadIsawUB(InputWorkspace=peaks_ws, FileName=UBFile)
+            except:
+                logger.error("peaks_ws does not have a UB matrix loaded.  Must provide a file")
 
         UBMatrix = peaks_ws.sample().getOrientedLattice().getUB()
         dQ = np.abs(ICCFT.getDQFracHKL(UBMatrix, frac=0.5))
