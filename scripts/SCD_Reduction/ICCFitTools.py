@@ -898,7 +898,6 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
         bg['A'+str(fitOrder-i)] = bgx0[i]
     bg.constrain('-1.0 < A%i < 1.0' % fitOrder)
     fitFun = f + bg
-    print(fitFun)
     fitResults = Fit(Function=fitFun, InputWorkspace='tofWS',
                      Output=outputWSName)
     return fitResults, fICC
