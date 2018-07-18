@@ -136,8 +136,6 @@ Sample
   :math:`Q`. Alternatively, a workspace may be provided.
 
 
-
-
 I(Q, t)
 -------
 
@@ -255,71 +253,6 @@ values for fitting the next. This is done by means of the
 A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
-
-Fitting Model
-~~~~~~~~~~~~~
-
-The model used to perform fitting is described in the following tree, note that
-everything under the Model section is optional and determined by the *Fit Type*
-and *Use Delta Function* options in the interface.
-
-- :ref:`CompositeFunction <func-CompositeFunction>`
-
-  - :ref:`LinearBackground <func-LinearBackground>`
-
-  - :ref:`Convolution <func-Convolution>`
-
-    - Resolution
-
-    - Model (:ref:`CompositeFunction <func-CompositeFunction>`)
-
-      - DeltaFunction
-
-      - :ref:`ProductFunction <func-ProductFunction>` (One Lorentzian)
-
-        - :ref:`Lorentzian <func-Lorentzian>`
-
-        - Temperature Correction
-
-      - :ref:`ProductFunction <func-ProductFunction>` (Two Lorentzians)
-
-        - :ref:`Lorentzian <func-Lorentzian>`
-
-        - Temperature Correction
-
-      - :ref:`ProductFunction <func-ProductFunction>` (InelasticDiffSphere)
-
-        - :ref:`Inelastic Diff Sphere <func-DiffSphere>`
-
-        - Temperature Correction
-
-      - :ref:`ProductFunction <func-ProductFunction>` (InelasticDiffRotDiscreteCircle)
-
-        - :ref:`Inelastic Diff Rot Discrete Circle <func-DiffRotDiscreteCircle>` 
-
-        - Temperature Correction
-		
-      - :ref:`ProductFunction <func-ProductFunction>` (ElasticDiffSphere)
-
-        - :ref:`Elastic Diff Sphere <func-DiffSphere>`
-
-        - Temperature Correction
-		
-      - :ref:`ProductFunction <func-ProductFunction>` (ElasticDiffRotDiscreteCircle)
-
-        - :ref:`Elastic Diff Rot Discrete Circle <func-DiffRotDiscreteCircle>`
-
-        - Temperature Correction
-		
-      - :ref:`ProductFunction <func-ProductFunction>` (StretchedExpFT)
-
-        - :ref:`StretchedExpFT <func-StretchedExpFT>`
-
-        - Temperature Correction
-
-The Temperature Correction is a :ref:`UserFunction <func-UserFunction>` with the
-formula :math:`((x * 11.606) / T) / (1 - exp(-((x * 11.606) / T)))` where
-:math:`T` is the temperature in Kelvin.
 
 Options
 ~~~~~~~
@@ -629,6 +562,71 @@ When selecting spectra using text, you can use '-' to identify a range and ',' t
 
 :math:`X`-Ranges may be excluded from the fit by selecting a spectrum next to the 'Mask Bins of Spectrum' label and
 then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
+
+ConvFit fitting model
+---------------------
+
+The model used to perform fitting in ConvFit is described in the following tree, note that
+everything under the Model section is optional and determined by the *Fit Type*
+and *Use Delta Function* options in the interface.
+
+- :ref:`CompositeFunction <func-CompositeFunction>`
+
+  - :ref:`LinearBackground <func-LinearBackground>`
+
+  - :ref:`Convolution <func-Convolution>`
+
+    - Resolution
+
+    - Model (:ref:`CompositeFunction <func-CompositeFunction>`)
+
+      - DeltaFunction
+
+      - :ref:`ProductFunction <func-ProductFunction>` (One Lorentzian)
+
+        - :ref:`Lorentzian <func-Lorentzian>`
+
+        - Temperature Correction
+
+      - :ref:`ProductFunction <func-ProductFunction>` (Two Lorentzians)
+
+        - :ref:`Lorentzian <func-Lorentzian>`
+
+        - Temperature Correction
+
+      - :ref:`ProductFunction <func-ProductFunction>` (InelasticDiffSphere)
+
+        - :ref:`Inelastic Diff Sphere <func-DiffSphere>`
+
+        - Temperature Correction
+
+      - :ref:`ProductFunction <func-ProductFunction>` (InelasticDiffRotDiscreteCircle)
+
+        - :ref:`Inelastic Diff Rot Discrete Circle <func-DiffRotDiscreteCircle>` 
+
+        - Temperature Correction
+		
+      - :ref:`ProductFunction <func-ProductFunction>` (ElasticDiffSphere)
+
+        - :ref:`Elastic Diff Sphere <func-DiffSphere>`
+
+        - Temperature Correction
+		
+      - :ref:`ProductFunction <func-ProductFunction>` (ElasticDiffRotDiscreteCircle)
+
+        - :ref:`Elastic Diff Rot Discrete Circle <func-DiffRotDiscreteCircle>`
+
+        - Temperature Correction
+		
+      - :ref:`ProductFunction <func-ProductFunction>` (StretchedExpFT)
+
+        - :ref:`StretchedExpFT <func-StretchedExpFT>`
+
+        - Temperature Correction
+
+The Temperature Correction is a :ref:`UserFunction <func-UserFunction>` with the
+formula :math:`((x * 11.606) / T) / (1 - exp(-((x * 11.606) / T)))` where
+:math:`T` is the temperature in Kelvin.
 
 
 
