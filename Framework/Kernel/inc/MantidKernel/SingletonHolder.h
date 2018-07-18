@@ -67,15 +67,20 @@ template <typename T> struct CreateUsingNew {
 /// already exist
 /// Creation is done using the CreateUsingNew policy at the moment
 template <typename T> inline T &SingletonHolder<T>::Instance() {
-  // Local static instance initialized by an immediately invoked lambda.
-  // A second nested lambda captures the singleton instance pointer
-  // and forms the deleter function that is registered with
-  // the atexit deleters.
+// Local static instance initialized by an immediately invoked lambda.
+// A second nested lambda captures the singleton instance pointer
+// and forms the deleter function that is registered with
+// the atexit deleters.
+
+#ifndef NDEBUG
   static bool destroyed(false);
+#endif
   static T *instance = [] {
     auto *singleton = CreateUsingNew<T>::create();
     deleteOnExit(deleter_t([singleton]() {
+#ifndef NDEBUG
       destroyed = true;
+#endif
       CreateUsingNew<T>::destroy(singleton);
     }));
     return singleton;
