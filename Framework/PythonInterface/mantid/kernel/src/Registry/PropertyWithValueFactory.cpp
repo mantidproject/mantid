@@ -8,8 +8,8 @@
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 
-#include <boost/python.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/python.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/python/list.hpp>
@@ -158,23 +158,25 @@ PropertyWithValueFactory::create(const std::string &name,
  * @returns A pointer to a new Property object
  */
 std::unique_ptr<Mantid::Kernel::Property>
-PropertyWithValueFactory::createTimeSeries(
-    const std::string &name, const boost::python::object &defaultValue) {
-
-  // Take in the object and try to convert it into a list
-  const boost::python::list pyList = extract<boost::python::list>(defaultValue);
+PropertyWithValueFactory::createTimeSeries(const std::string &name,
+                                           const list &defaultValue) {
 
   // Use a PyObject pointer to determine the type stored in the list
-  auto object = boost::python::object(pyList[0]).ptr();
+  auto obj = object(defaultValue[0]).ptr();
+  auto val = defaultValue[0];
 
-  // Decide which kind of TimeSeriesProperty to return
-  if (PyBool_Check(object) == 1) {
+  /**
+   * Decide which kind of TimeSeriesProperty to return
+   * Need to use a different method to check for boolean values
+   * since extract<> seems to get confused sometimes.
+   */
+  if (PyBool_Check(obj)) {
     return Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>(name);
-  } else if (PyInt_Check(object) == 1) {
+  } else if (extract<int>(val).check()) {
     return Mantid::Kernel::make_unique<TimeSeriesProperty<int>>(name);
-  } else if (PyFloat_Check(object) == 1) {
+  } else if (extract<double>(val).check()) {
     return Mantid::Kernel::make_unique<TimeSeriesProperty<double>>(name);
-  } else if (PyString_Check(object) == 1) {
+  } else if (extract<std::string>(val).check()) {
     return Mantid::Kernel::make_unique<TimeSeriesProperty<std::string>>(name);
   }
 

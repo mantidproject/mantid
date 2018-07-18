@@ -19,7 +19,7 @@ namespace propertyFactoryHelper {
 
 // Helper function to remove unique pointer and return a raw pointer
 Property *removeUniquePointer(const std::string &name,
-                              const boost::python::object &defaultValue) {
+                              const boost::python::list &defaultValue) {
 
   // Get the unique pointer from the factory and convert it into a raw pointer
   std::unique_ptr<Property> ptr =
