@@ -979,7 +979,7 @@ void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
 
     // X values
     for (size_t i = 0; i < spectrumLengthX; i++) {
-      X[i] = x0 + i * dx;
+      X[i] = x0 + static_cast<double>(i) * dx;
     }
 
     // Y values

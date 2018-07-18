@@ -30,9 +30,9 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
 
   // Create concatenated copies of transformed data (one for each spectrum)
   std::vector<double> data;
-  data.reserve(m_numSpec * size(dataOneSpec));
+  data.reserve(m_numSpec * dataOneSpec.size());
   for (size_t s = 0; s < m_numSpec; s++) {
-    for (size_t i = 0; i < size(dataOneSpec); i++) {
+    for (size_t i = 0; i < dataOneSpec.size(); i++) {
       data.emplace_back(dataOneSpec[i]);
     }
   }
@@ -41,7 +41,7 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
   double dataR = 0.123456789;
   double dataI = 0.987654321;
   if (!m_linearAdjustments.empty() && !m_constAdjustments.empty()) {
-    for (size_t i = 0; i < size(data); i++) {
+    for (size_t i = 0; i < data.size(); i++) {
       if (i % 2 == 0) { // Real part
         dataR = data[i];
         dataI = data[i + 1];
@@ -53,7 +53,7 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
       }
     }
   } else if (!m_linearAdjustments.empty() && m_constAdjustments.empty()) {
-    for (size_t i = 0; i < size(data); i++) {
+    for (size_t i = 0; i < data.size(); i++) {
       if (i % 2 == 0) { // Real part
         dataR = data[i];
         dataI = data[i + 1];
@@ -65,7 +65,7 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
       }
     }
   } else if (m_linearAdjustments.empty() && !m_constAdjustments.empty()) {
-    for (size_t i = 0; i < size(data); i++) {
+    for (size_t i = 0; i < data.size(); i++) {
       data[i] = data[i] + m_constAdjustments[i];
     }
   }
@@ -86,12 +86,12 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
 std::vector<double>
 MaxentTransformMultiFourier::dataToImage(const std::vector<double> &data) {
 
-  if (size(data) % m_numSpec)
+  if (data.size() % m_numSpec)
     throw std::invalid_argument(
         "Size of data vector must be a multiple of number of spectra.");
 
   // Sum the concatenated spectra in data
-  size_t nData = size(data) / (m_numSpec);
+  size_t nData = data.size() / (m_numSpec);
   std::vector<double> dataSum(nData, 0.0);
   for (size_t s = 0; s < m_numSpec; s++) {
     for (size_t i = 0; i < nData; i++) {
