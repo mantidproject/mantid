@@ -18,9 +18,8 @@ if [ -d $BUILD_DIR ]; then
   git pull --rebase
 else
   echo "$BUILD_DIR does not exist - cloning developer site"
-  git clone git@github.com:mantidproject/developer.git $BUILD_DIR || exit -1
+  git clone -b gh-pages git@github.com-mantid-builder:mantidproject/developer.git $BUILD_DIR || exit -1
   cd $BUILD_DIR
-  git checkout gh-pages
 fi
 
 ###############################################################################
