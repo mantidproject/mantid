@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTablePresenter
+from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
 
 from PyQt4 import QtGui
 
@@ -10,7 +11,8 @@ class PeriodicTable(QtGui.QWidget):
     def __init__(self, parent=None):
         super(PeriodicTable, self).__init__(parent)
         view = PeriodicTableView(parent)
-        self._presenter = PeriodicTablePresenter(view)
+        model = PeriodicTableModel()
+        self._presenter = PeriodicTablePresenter(view, model)
 
     @property
     def presenter(self):
