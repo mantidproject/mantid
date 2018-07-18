@@ -49,10 +49,6 @@ __LOGGING_KEYWORD__ = "EnableLogging"
 __STORE_KEYWORD__ = "StoreInADS"
 # This is the default value for __STORE_KEYWORD__
 __STORE_ADS_DEFAULT__ = True
-# "magic" keyword for returning also InOut properties
-__RETURN_ALL__ = "ReturnAll"
-# The default value of above
-__RETURN_ALL_DEFAULT__ = False
 
 
 def specialization_exists(name):
@@ -1075,11 +1071,6 @@ def _create_algorithm_function(name, version, algm_object):
         _set_logging_option(algm, kwargs)
         _set_store_ads(algm, kwargs)
 
-        return_all = __RETURN_ALL_DEFAULT__
-        if __RETURN_ALL__ in kwargs:
-            return_all = kwargs[__RETURN_ALL__]
-            del kwargs[__RETURN_ALL__]
-
         # Temporary removal of unneeded parameter from user's python scripts
         if "CoordinatesToUse" in kwargs and name in __MDCOORD_FUNCTIONS__:
             del kwargs["CoordinatesToUse"]
@@ -1110,7 +1101,7 @@ def _create_algorithm_function(name, version, algm_object):
             else:
                 raise
 
-        return _gather_returns(name, lhs, algm, inout=return_all)
+        return _gather_returns(name, lhs, algm)
     # enddef
     # Insert definition in to global dict
     algm_wrapper = _customise_func(algorithm_wrapper, name,
