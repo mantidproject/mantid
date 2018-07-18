@@ -53,7 +53,7 @@ public:
 /// for this class, e.g.:
 ///
 ///   friend struct Mantid::Kernel::CreateUsingNew<SingletonImplClass>;
-/// 
+///
 template <typename T> struct CreateUsingNew {
   /// create an object using the new operator
   /// @returns New instance
