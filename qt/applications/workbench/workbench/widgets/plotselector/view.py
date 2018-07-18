@@ -251,6 +251,8 @@ class PlotSelectorView(QWidget):
             self.table_widget.setSortingEnabled(False)
             row_number = self.table_widget.rowCount()
             self.table_widget.insertRow(row_number)
+            # Hide the row early so it does not briefly appear with no filter applied
+            self.table_widget.setRowHidden(row_number, not is_shown_by_filter)
 
             self.table_widget.setItem(row_number, Column.Number, number_item)
 
@@ -259,7 +261,6 @@ class PlotSelectorView(QWidget):
 
             self.table_widget.setItem(row_number, Column.LastActive, last_active_item)
 
-            self.table_widget.setRowHidden(row_number, not is_shown_by_filter)
             self.table_widget.setSortingEnabled(True)
 
     def set_plot_list(self, plot_list):
