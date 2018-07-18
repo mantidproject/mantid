@@ -16,7 +16,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, print_function
 
-import os
+import os, re
 
 from .model import PlotSelectorModel
 from .view import PlotSelectorView, Column
@@ -304,28 +304,105 @@ class PlotSelectorPresenter(object):
 
     # ---------------------- Plot Exporting -------------------------
 
-    def export_plots(self, dir_name, extension):
+    def export_plots_called(self, extension):
         """
-        Export all selected plots given a directory name and file
-        extension
-        :param dir_name: The of the directory to export to
-        :param extension: The file type extension (must be supported
-                          by matplotlib's savefig)
+        Export plots called from the view, then a single or multiple
+        plots exported depending on the number currently selected
+        :param extension: The file extension as a string including
+                          a '.', for example '.png' (must be a type
+                          supported by matplotlib)
         """
-        for plot_number in self.view.get_all_selected_plot_numbers():
-            self.export_plot(plot_number, dir_name, extension)
+        plot_numbers = self.view.get_all_selected_plot_numbers()
 
-    def export_plot(self, plot_number, dir_name, extension):
+        if len(plot_numbers) == 1:
+            self._export_single_plot(plot_numbers[0], extension)
+        elif len(plot_numbers) > 1:
+            self._export_multiple_plots(plot_numbers, extension)
+
+    def _export_single_plot(self, plot_number, extension):
         """
-        Given a directory name, plot name and extension construct
-        the absolute path name and call the model to save the figure
+        Called when a single plot is selected to export - prompts for
+        a filename then tries to save the plot
         :param plot_number: The unique number in GlobalFigureManager
-        :param dir_name: The directory to export to
-        :param extension: The file type extension (must be supported
-                          by matplotlib's savefig)
+        :param extension: The file extension as a string including
+                          a '.', for example '.png' (must be a type
+                          supported by matplotlib)
         """
-        plot_name = self.model.get_plot_name_from_number(plot_number)
+        absolute_path = self.view.get_file_name_for_saving(extension)
 
+        if not absolute_path[-4:] == extension:
+            absolute_path += extension
+
+        try:
+            self.model.export_plot(plot_number, absolute_path)
+        except ValueError as e:
+            print(e)
+
+    def _export_multiple_plots(self, plot_numbers, extension):
+        """
+        Export all selected plots in the plot_numbers list, first
+        prompting for a save directory then sanitising plot names to
+        unique, usable file names
+        :param plot_numbers: A list of plot numbers to export
+        :param extension: The file extension as a string including
+                          a '.', for example '.png' (must be a type
+                          supported by matplotlib)
+        """
+        dir_name = self.view.get_directory_name_for_saving()
+
+        # A temporary dictionary holding plot numbers as keys, plot
+        # names as values
+        plots = {}
+
+        for plot_number in plot_numbers:
+            plot_name = self.model.get_plot_name_from_number(plot_number)
+            plot_name = self._replace_special_characters(plot_name)
+            if plot_name in plots.values():
+                plot_name = self._make_unique_name(plot_name, plots)
+            plots[plot_number] = plot_name
+
+            self._export_plot(plot_number, plot_name, dir_name, extension)
+
+    def _replace_special_characters(self, string):
+        """
+        Removes any characters that are not valid in file names
+        across all operating systems ('/' for Linux/Mac), more for
+        Windows
+        :param string: The string to replace characters in
+        :return: The string with special characters replace by '-'
+        """
+        return re.sub(r'[<>:"/|\\?*]', r'-', string)
+
+    def _make_unique_name(self, name, dictionary):
+        """
+        Given a name and a dictionary, make a unique name that does
+        not already exist in the dictionary values by appending
+        ' (1)', ' (2)', ' (3)' etc. to the end of the name
+        :param name: A string with the non-unique name
+        :param dictionary: A dictionary with string values
+        :return : The unique plot name
+        """
+        i = 1
+        while True:
+            plot_name_attempt = name + ' ({})'.format(str(i))
+            if plot_name_attempt not in dictionary.values():
+                break
+            i += 1
+
+        return plot_name_attempt
+
+    def _export_plot(self, plot_number, plot_name, dir_name, extension):
+        """
+        Given a plot number, plot name, directory and extension
+        construct the absolute path name and call the model to save
+        the figure
+        :param plot_number: The unique number in GlobalFigureManager
+        :param plot_name: The name to use for saving
+        :param dir_name: The directory to save to
+        :param extension: The file extension as a string including
+                          a '.', for example '.png' (must be a type
+                          supported by matplotlib)
+        """
         if dir_name:
             filename = os.path.join(dir_name, plot_name + extension)
             try:

@@ -42,7 +42,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.presenter.get_initial_last_active_value = mock.Mock(side_effect=self.se_get_initial_last_active_value)
         self.presenter.is_shown_by_filter = mock.Mock(side_effect=self.se_is_shown_by_filter)
 
-        self.view = PlotSelectorView(self.presenter, is_run_as_unit_test=True)
+        self.view = PlotSelectorView(self.presenter)
         self.view.table_widget.setSortingEnabled(False)
 
     def se_plot_name(self, plot_number):
@@ -478,8 +478,8 @@ class PlotSelectorWidgetTest(unittest.TestCase):
 
         for i in range(len(EXPORT_TYPES)):
             print(i, EXPORT_TYPES[i][1])
-            self.assertEqual(self.presenter.export_plots.mock_calls[i],
-                             mock.call("", EXPORT_TYPES[i][1]))
+            self.assertEqual(self.presenter.export_plots_called.mock_calls[i],
+                             mock.call(EXPORT_TYPES[i][1]))
 
     def test_export_context_menu(self):
         plot_numbers = [0, 1, 2]
@@ -489,8 +489,8 @@ class PlotSelectorWidgetTest(unittest.TestCase):
             self.view.export_menu.actions()[i].trigger()
 
         for i in range(len(EXPORT_TYPES)):
-            self.assertEqual(self.presenter.export_plots.mock_calls[i],
-                             mock.call("", EXPORT_TYPES[i][1]))
+            self.assertEqual(self.presenter.export_plots_called.mock_calls[i],
+                             mock.call(EXPORT_TYPES[i][1]))
 
 
 if __name__ == '__main__':

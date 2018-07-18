@@ -53,17 +53,15 @@ class PlotSelectorView(QWidget):
     deleteKeyPressed = Signal(int)
     enterKeyPressed = Signal(int)
 
-    def __init__(self, presenter, parent=None, is_run_as_unit_test=False):
+    def __init__(self, presenter, parent=None):
         """
         Initialise a new instance of PlotSelectorWidget
         :param presenter: The presenter controlling this view
         :param parent: Optional - the parent QWidget
-        :param is_run_as_unit_test: Optional - True if this is
         running as a unit test, in which case skip file dialogs
         """
         super(PlotSelectorView, self).__init__(parent)
         self.presenter = presenter
-        self.is_run_as_unit_test = is_run_as_unit_test
 
         # This mutex prevents multiple operations on the table at the
         # same time. Wrap code in - with QMutexLocker(self.mutex):
@@ -212,7 +210,7 @@ class PlotSelectorView(QWidget):
 
         export_menu = context_menu.addMenu("Export")
         for text, extension in EXPORT_TYPES:
-            export_menu.addAction(text, lambda ext=extension: self.export_plots(ext))
+            export_menu.addAction(text, lambda ext=extension: self.presenter.export_plots_called(ext))
 
         return context_menu, export_menu
 
@@ -233,7 +231,7 @@ class PlotSelectorView(QWidget):
         set to determine whether it should initially be hidden or not
         :param plot_number: The unique number in GlobalFigureManager
         """
-        plot_name_widget = PlotNameWidget(self.presenter, plot_number, self, self.is_run_as_unit_test)
+        plot_name_widget = PlotNameWidget(self.presenter, plot_number, self)
 
         number_item = HumanReadableSortItem(str(plot_number))
         number_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -578,23 +576,34 @@ class PlotSelectorView(QWidget):
         export_button = QPushButton("Export")
         export_menu = QMenu()
         for text, extension in EXPORT_TYPES:
-            export_menu.addAction(text, lambda ext=extension: self.export_plots(ext))
+            export_menu.addAction(text, lambda ext=extension: self.presenter.export_plots_called(ext))
         export_button.setMenu(export_menu)
         return export_button
 
-    def export_plots(self, extension):
+    def get_file_name_for_saving(self, extension):
         """
-        Pops up a directory selection dialogue then calls the
-        presenter to do the export - note that if this is run as a
-        unit test this directory selection must be disabled, else it
-        actually appears!
+        Pops up a file selection dialog with the filter set to the
+        extension type
         :param extension: The file extension to use which defines the
                           export type
+        :return absolute_path: The absolute path to save to
         """
-        path = ""
-        if not self.is_run_as_unit_test:
-            path = QFileDialog.getExistingDirectory(None, 'Select folder for exported plots')
-        self.presenter.export_plots(path, extension)
+        # Returns a tuple containing the filename and extension
+        absolute_path = QFileDialog.getSaveFileName(caption='Select filename for exported plot',
+                                                    filter='*{}'.format(extension),
+                                                    options=QFileDialog.DontUseNativeDialog)
+        return absolute_path[0]
+
+    def get_directory_name_for_saving(self):
+        """
+        Pops up a directory selection dialogue
+        :return : The path to the directory
+        """
+        # Note that the native dialog does not always show the files
+        # in the directory, hence using the Qt dialog
+        directory = QFileDialog.getExistingDirectory(caption='Select folder for exported plots',
+                                                     options=QFileDialog.DontUseNativeDialog)
+        return directory
 
 
 class PlotNameWidget(QWidget):
@@ -603,12 +612,11 @@ class PlotNameWidget(QWidget):
     This widget is added to the table widget to support the renaming
     and close buttons, as well as the direct renaming functionality.
     """
-    def __init__(self, presenter, plot_number, parent=None, is_run_as_unit_test=False):
+    def __init__(self, presenter, plot_number, parent=None):
         super(PlotNameWidget, self).__init__(parent)
 
         self.presenter = presenter
         self.plot_number = plot_number
-        self.is_run_as_unit_test = is_run_as_unit_test
 
         self.mutex = QMutex()
 
