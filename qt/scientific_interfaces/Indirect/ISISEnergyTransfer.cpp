@@ -1,13 +1,54 @@
 #include "ISISEnergyTransfer.h"
 
+#include "../General/UserInputValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "../General/UserInputValidator.h"
 
 #include <QFileInfo>
 
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
+
+namespace {
+
+std::string createRangeString(std::size_t from, std::size_t to) {
+  return std::to_string(from) + "-" + std::to_string(to);
+}
+
+std::string createGroupString(std::size_t start, std::size_t size) {
+  return createRangeString(start, start + size - 1);
+}
+
+std::string createGroupingString(std::size_t groupSize,
+                                 std::size_t numberOfGroups) {
+  auto groupingString = createRangeString(0, groupSize - 1);
+  for (auto i = groupSize; i < groupSize * numberOfGroups; i += groupSize)
+    groupingString += "," + createGroupString(i, groupSize);
+  return groupingString;
+}
+
+std::string createDetectorGroupingString(std::size_t groupSize,
+                                         std::size_t numberOfGroups,
+                                         std::size_t numberOfDetectors) {
+  const auto groupingString = createGroupingString(groupSize, numberOfGroups);
+  const auto remainder = numberOfDetectors % numberOfGroups;
+  if (remainder == 0)
+    return groupingString;
+  return groupingString + "," +
+         createRangeString(numberOfDetectors - remainder,
+                           numberOfDetectors - 1);
+}
+
+std::string createDetectorGroupingString(std::size_t numberOfDetectors,
+                                         std::size_t numberOfGroups) {
+  const auto groupSize = numberOfDetectors / numberOfGroups;
+  if (groupSize == 0)
+    return createRangeString(0, numberOfDetectors);
+  return createDetectorGroupingString(groupSize, numberOfGroups,
+                                      numberOfDetectors);
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -457,7 +498,7 @@ ISISEnergyTransfer::createMapFile(const std::string &groupType) {
 
     return std::make_pair("File", groupFile.toStdString());
   } else if (groupType == "Groups")
-    return std::make_pair("Custom", createDetectorGroupingString());
+    return std::make_pair("Custom", getDetectorGroupingString());
   else if (groupType == "Default")
     return std::make_pair("IPF", "");
   else if (groupType == "Custom")
@@ -469,25 +510,12 @@ ISISEnergyTransfer::createMapFile(const std::string &groupType) {
   }
 }
 
-const std::string ISISEnergyTransfer::createDetectorGroupingString() {
-
+std::string ISISEnergyTransfer::getDetectorGroupingString() const {
   const unsigned int nGroups = m_uiForm.spNumberGroups->value();
   const unsigned int nSpectra =
-      m_uiForm.spSpectraMax->value() - m_uiForm.spSpectraMin->value();
-  const unsigned int groupSize = nSpectra / nGroups;
-  auto n = groupSize;
-  std::stringstream groupingString;
-  groupingString << "0-" << std::to_string(n);
-  for (auto i = 1u; i < nGroups; ++i) {
-    groupingString << ", " << std::to_string(n + 1) << "-";
-    n += groupSize;
-    groupingString << std::to_string(n);
-  }
-  if (n != nSpectra) // add remainder as extra group
-    groupingString << ", " << std::to_string(n + 1) << "-"
-                   << std::to_string(nSpectra);
-
-  return groupingString.str();
+      1 + m_uiForm.spSpectraMax->value() - m_uiForm.spSpectraMin->value();
+  return createDetectorGroupingString(static_cast<std::size_t>(nSpectra),
+                                      static_cast<std::size_t>(nGroups));
 }
 
 /**
@@ -575,6 +603,7 @@ void ISISEnergyTransfer::plotRaw() {
   if (m_uiForm.ckBackgroundRemoval->isChecked()) {
     MatrixWorkspace_sptr tempWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+
     const double minBack = tempWs->x(0)[0];
     const double maxBack = tempWs->x(0)[tempWs->blocksize()];
 
@@ -744,4 +773,4 @@ void ISISEnergyTransfer::saveClicked() {
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
