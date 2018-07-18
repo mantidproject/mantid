@@ -180,11 +180,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UserContact", "John Smith"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("Title", "Testing this algorithm"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Separator", "comma"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     m_long_filename = alg.getPropertyValue("Filename");
-    // has the algorithm written a file to disk?
+    // Has the algorithm written a file to disk?
     TS_ASSERT(Poco::File(m_long_filename).exists());
     std::ifstream in(m_long_filename.c_str());
     std::string fullline;

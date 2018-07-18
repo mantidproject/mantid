@@ -54,6 +54,10 @@ void AsciiPointBase::exec() {
     g_log.error("Unable to create file: " + filename);
     throw Exception::FileError("Unable to create file: ", filename);
   }
+  MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
+  if (!ws)
+    throw std::runtime_error("Cannot treat InputWorkspace");
+  m_length = ws->y(0).size();
   extraHeaders(file);
   data(file);
 }
@@ -63,24 +67,21 @@ void AsciiPointBase::exec() {
  *  @param exportDeltaQ :: bool on whether deltaQ column to be printed
  */
 void AsciiPointBase::data(std::ofstream &file, bool exportDeltaQ) {
-  MatrixWorkspace_const_sptr m_ws = getProperty("InputWorkspace");
-  if (!m_ws)
-    throw std::runtime_error("Cannot treat InputWorkspace");
+  MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
   try {
-    m_length = m_ws->y(0).size();
     file << std::scientific;
     // file << std::setprecision(std::numeric_limits<long double>::digits10 +
     // 1);
-    const auto points = m_ws->points(0);
-    const auto &yData = m_ws->y(0);
-    const auto &eData = m_ws->e(0);
+    const auto points = ws->points(0);
+    const auto &yData = ws->y(0);
+    const auto &eData = ws->e(0);
     for (size_t i = 0; i < m_length; ++i) {
       outputval(points[i], file, leadingSep());
       outputval(yData[i], file);
       outputval(eData[i], file);
       if (exportDeltaQ) {
-        if (m_ws->hasDx(0))
-          outputval(m_ws->dx(0)[i], file);
+        if (ws->hasDx(0))
+          outputval(ws->dx(0)[i], file);
         else
           outputval(0., file);
       }
