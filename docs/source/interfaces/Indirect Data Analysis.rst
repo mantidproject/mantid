@@ -160,7 +160,7 @@ ELow, EHigh
   The rebiinning range.
 
 SampleBinning
-  The ratio at which to decrease the number of bins by through merging of
+  The ratio at which to decrease the number of bins by merging of
   intensities from neighbouring bins.
 
 Plot Result
@@ -174,13 +174,10 @@ Monte Carlo Error Calculation - Number Of Iterations
   The number of iterations to perform in the Monte Carlo routine for error
   calculation in I(Q,t)
 
-Binning
-~~~~~~~
-
-As a bin width that is a factor of the binning range is required for this
-analysis the bin width is calculated automatically based on the binning range
-and the number of desired bins in the output which is in turn calculated by
-reducing the number of sample bins by a given factor.
+A note on Binning
+~~~~~~~~~~~~~~~~~
+  
+The bin width is determined by the binning range and the sample binning factor. The number of bins is automatically calculated based on the **SampleBinning** specified. The width is the determined by the width of the range divided by the number of bins.
 
 The calculated binning parameters are displayed alongside the binning options:
 
