@@ -60,10 +60,12 @@ void ConvertToPoleFigure::init() {
                                                    Direction::Input, uv),
                   "Name of input workspace containing peak intensity and "
                   "instrument information.");
+
   declareProperty(
-      make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "Name of the output IEventWorkspace containing pole figure information.");
+      make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+          "IntegratedPeakIntensityWorkspace", "", Direction::Output),
+      "Name of the output MatrixWorkspace containing the events' "
+      "counts in the ROI for each spectrum.");
 
   declareProperty("HROTName", "BL7:Mot:Parker:HROT.RBV",
                   "Log name of HROT in input workspace");
@@ -71,22 +73,22 @@ void ConvertToPoleFigure::init() {
   declareProperty("OmegaName", "BL7:Mot:Sample:Omega.RBV",
                   "Log name of Omega for pole figure.");
 
-  std::vector<std::string> peakcaloptions;
-  peakcaloptions.push_back("SimpleIntegration");
-  // peakcaloptions.push_back("Fit:Peak+Background");
-  declareProperty("PeakIntensityCalculation", "SimpleIntegration",
-                  "Algorithm type to calcualte the peak intensity.");
+  // output MD workspace
+  declareProperty(
+      make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "Name of the output IEventWorkspace containing pole figure information.");
 
   // output vectors
   declareProperty(
       Kernel::make_unique<ArrayProperty<double>>("R_TD", Direction::Output),
-      "Array for R_TD");
+      "Array for R_TD.");
   declareProperty(
       Kernel::make_unique<ArrayProperty<double>>("R_ND", Direction::Output),
-      "Array for R_ND");
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("PoleFigure",
+      "Array for R_ND.");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("PeakIntensity",
                                                              Direction::Output),
-                  "Output 2D vector for calcualted pole figure.");
+                  "Array for peak intensites.");
 
   return;
 }
@@ -95,13 +97,19 @@ void ConvertToPoleFigure::init() {
 /** Process input properties
  */
 void ConvertToPoleFigure::processInputs() {
+  // get input workspaces
+  m_inputWS = getProperty("InputWorkspace");
+  m_countWS = getProperty("IntegratedPeakIntensityWorkspace");
+
+  // check
+  if (m_inputWS->getNumberHistograms() != m_countWS->getNumberHistograms()) {
+    // TODO - A better output error message
+    throw std::runtime_error("");
+  }
 
   // get inputs
   m_nameHROT = getPropertyValue("HROTName");
   m_nameOmega = getPropertyValue("OmegaName");
-
-  //
-  m_inputWS = getProperty("InputWorkspace");
 
   // check whether the log exists
   auto hrot = m_inputWS->run().getProperty(m_nameHROT);
@@ -112,6 +120,8 @@ void ConvertToPoleFigure::processInputs() {
   if (!omega) {
     throw std::invalid_argument("Omega does not exist in sample log!");
   }
+
+  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -167,11 +177,10 @@ void ConvertToPoleFigure::convertToPoleFigure() {
 
     // calcualte pole figure position
     double r_td, r_nd;
-    convertCoordinates(unit_q, hrot, omega, r_td, r_nd);
+    rotateVectorQ(unit_q, hrot, omega, r_td, r_nd);
 
-    // FIXME TODO - shall from input!
     // get peak intensity
-    double peak_intensity_i = 100;
+    double peak_intensity_i = m_countWS->histogram(iws).y()[0];
 
     // set up value
     m_poleFigureRTDVector[iws] = r_td;
@@ -233,7 +242,7 @@ void ConvertToPoleFigure::generateOutputs() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** convert from Q vector to R_TD and R_ND
+/** rotate a vector Q to sample coordinate and project to R_TD and R_ND
  * @brief ConvertToPoleFigure::convertCoordinates
  * @param unitQ
  * @param hrot
@@ -241,10 +250,9 @@ void ConvertToPoleFigure::generateOutputs() {
  * @param r_td
  * @param r_nd
  */
-void ConvertToPoleFigure::convertCoordinates(Kernel::V3D unitQ,
-                                             const double &hrot,
-                                             const double &omega, double &r_td,
-                                             double &r_nd) {
+void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
+                                        const double &omega, double &r_td,
+                                        double &r_nd) {
   // define constants
   const double psi = -45.;
   const double phi = 0;

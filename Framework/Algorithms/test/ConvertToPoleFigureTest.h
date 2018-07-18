@@ -1,31 +1,32 @@
-#ifndef MANTID_ALGORITHMS_ConvertToPoleFigure_H_
-#define MANTID_ALGORITHMS_ConvertToPoleFigure_H_
+#ifndef MANTID_ALGORITHMS_ConvertToPoleFigureTest_H_
+#define MANTID_ALGORITHMS_ConvertToPoleFigureTest_H_
 
-// #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
+
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/ConvertToPoleFigure.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTypes/Core/DateAndTime.h"
+
 #include <cmath>
-#include <cxxtest/TestSuite.h>
 #include <numeric>
 
-#include "MantidAlgorithms/ConvertToPoleFigure.h"
+using Mantid::Algorithms::ConvertToPoleFigure;
 
 using namespace Mantid;
-using namespace Mantid::Algorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid;
@@ -37,11 +38,13 @@ namespace {
  * Each has 100 data points containing a Gaussian peak
  * between d = 1.2 and 1.5
  * More on test case
+ * X    Y           Z
  * 2    -0.16625    -0.3825
-2    0.16625    -0.3825
-2    0    0
-2    -0.16625    0.3825
-2    0.16625    0.3825
+   2    0.16625    -0.3825
+   2    0    0
+   2    -0.16625    0.3825
+   2    0.16625    0.3825
+
 
 Omega = -45    HROT = 30
 TD ND
@@ -56,20 +59,17 @@ TD ND
 Mantid::API::MatrixWorkspace_sptr
 createBraggWorkspace(const std::string &name) {
 
-  // TODO/NOW - Refer to convertUnitsTest for how to build an instrument
-
-  size_t n = 100;
-
   Mantid::API::FrameworkManager::Instance();
+  size_t num_det = 5;
+  size_t n = 100;
   Mantid::DataObjects::Workspace2D_sptr ws =
       boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-          Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 2, n,
-                                                           n));
+          Mantid::API::WorkspaceFactory::Instance().create("Workspace2D",
+                                                           num_det, n, n));
   // create unit
   std::string unitlabel("dSpacing");
   ws->getAxis(0)->unit() =
       Mantid::Kernel::UnitFactory::Instance().create(unitlabel);
-  std::cout << "Do something\n";
 
   // set instrument as reduced VULCAN east and west bank
   Instrument_sptr testInst(new Instrument);
@@ -89,23 +89,30 @@ createBraggWorkspace(const std::string &name) {
   testInst->markAsSamplePos(sample);
 
   // add 5 pixels to simulate VULCAN's east bank's 4 corners and center
-  // pixel 1:  [-2,0,-3.67394e-16]
-  Mantid::Geometry::Detector *physicalPixel =
-      new Detector("pixel", 1, testInst.get());
-  physicalPixel->setPos(-2, 0, 0);
-  testInst->add(physicalPixel);
-  testInst->markAsDetector(physicalPixel);
+  std::vector<std::vector<double>> pixel_pos_vec(num_det);
+  pixel_pos_vec[0] = {2, -0.16625, -0.3825};
+  pixel_pos_vec[1] = {2, 0.16625, -0.3825};
+  pixel_pos_vec[2] = {2, 0, 0};
+  pixel_pos_vec[3] = {2, -0.16625, 0.3825};
+  pixel_pos_vec[4] = {2, 0.16625, 0.3825};
 
-  Mantid::Geometry::Detector *physicalPixel2 =
-      new Detector("pixel", 2, testInst.get());
-  physicalPixel2->setPos(2, 0, 0);
-  testInst->add(physicalPixel2);
-  testInst->markAsDetector(physicalPixel2);
+  std::vector<Mantid::Geometry::Detector *> pixel_vec(num_det);
+  for (size_t i = 0; i < num_det; ++i) {
+    int det_id_i = static_cast<int>(i) + 1;
+    Mantid::Geometry::Detector *physicalPixel_i =
+        new Detector("pixel", det_id_i, testInst.get());
+    physicalPixel_i->setPos(pixel_pos_vec[i][0], pixel_pos_vec[i][1],
+                            pixel_pos_vec[i][2]);
+    testInst->add(physicalPixel_i);
+    testInst->markAsDetector(physicalPixel_i);
+    pixel_vec[i] = physicalPixel_i;
+  }
 
   // set instrument
   ws->setInstrument(testInst);
-  ws->getSpectrum(0).addDetectorID(physicalPixel->getID());
-  ws->getSpectrum(1).addDetectorID(physicalPixel2->getID());
+  for (size_t i = 0; i < num_det; ++i) {
+    ws->getSpectrum(i).addDetectorID(pixel_vec[i]->getID());
+  }
 
   // set data
   auto &X = ws->mutableX(0);
@@ -145,7 +152,7 @@ createBraggWorkspace(const std::string &name) {
 class ConvertToPoleFigureTest : public CxxTest::TestSuite {
 public:
   void test_Init() {
-    ConvertToPoleFigure alg;
+    Mantid::Algorithms::ConvertToPoleFigure alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
@@ -154,18 +161,28 @@ public:
   /**
    * @brief test_Execute
    */
-  void test_Execute() {
+  void New_test_Execute() {
 
-    API::Workspace_sptr ws = createBraggWorkspace("TwoSpecPoleFigure");
+    // about input workspaces
+    std::string peak_intensity_ws_name("TestPeakIntensityWorkspace");
+    std::string input_ws_name("TestWithInstrumentWorkspace");
+
+    API::MatrixWorkspace_sptr dataws = createBraggWorkspace(input_ws_name);
+    // TODO API::MatrixWorkspace_sptr intensityws =
+    // createIntensityWorkspace(peak_intensity_ws_name);
 
     Mantid::Algorithms::ConvertToPoleFigure pfcalculator;
     pfcalculator.initialize();
 
     // set properties
-    pfcalculator.setProperty("InputWorkspace", ws);
+    TS_ASSERT_THROWS_NOTHING(
+        pfcalculator.setProperty("InputWorkspace", input_ws_name));
     pfcalculator.setProperty("OutputWorkspace", "TwoSpecPoleFigure");
-    pfcalculator.setProperty("MinD", 1.3);
-    pfcalculator.setProperty("MaxD", 1.5);
+    pfcalculator.setProperty("IntegratedPeakIntensityWorkspace",
+                             peak_intensity_ws_name);
+    // TODO pfcalculator.setProperty("HROTName", hrot_name);
+    // TODO pfcalculator.setProperty("OmegaName", omega_name);
+
     pfcalculator.execute();
 
     // run
@@ -174,33 +191,25 @@ public:
     // check results
     TS_ASSERT(
         API::AnalysisDataService::Instance().doesExist("TwoSpecPoleFigure"));
-    API::ITableWorkspace_sptr outws =
-        boost::dynamic_pointer_cast<API::ITableWorkspace>(
+    API::IMDEventWorkspace_sptr outws =
+        boost::dynamic_pointer_cast<API::IMDEventWorkspace>(
             API::AnalysisDataService::Instance().retrieve("TwoSpecPoleFigure"));
     TS_ASSERT(outws);
-    if (!outws)
-      return;
 
-    // shall have 2 rows
-    TS_ASSERT_EQUALS(outws->rowCount(), 2);
+    // get the vectors out - TODO
+    std::vector<double> r_td_vector = pfcalculator.getProperty("R_TD");
 
-    // row 0
-    API::TableRow row0 = outws->getRow(0);
-    int wsindex;
-    double r_td, r_nd, intensity;
-    row0 >> wsindex >> r_td >> r_nd >> intensity;
+    // compare the vetors - TODO
 
-    // row 1
-    API::TableRow row1 = outws->getRow(1);
-    int wsindex1;
-    double r_td1, r_nd1, intensity1;
-    row1 >> wsindex1 >> r_td1 >> r_nd1 >> intensity1;
+    // check MDWorkspaces
 
-    TS_ASSERT_EQUALS(wsindex, 0);
-    TS_ASSERT_EQUALS(r_td, r_td1);
+    //    TS_ASSERT_EQUALS(wsindex, 0);
+    //    TS_ASSERT_EQUALS(r_td, r_td1);
+
+    // clean up
 
     return;
   }
 };
 
-#endif /* MANTID_ALGORITHMS_ConvertToPoleFigure_H_ */
+#endif /* MANTID_ALGORITHMS_ConvertToPoleFigureTest_H_ */
