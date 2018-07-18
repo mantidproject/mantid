@@ -312,8 +312,6 @@ class PlotSelectorView(QWidget):
             font = self.table_widget.item(row, Column.Number).font()
             font.setBold(is_active)
             self.table_widget.item(row, Column.Number).setFont(font)
-            # Ideally we would do the same to the plot name, but
-            # trying to do so causes a segfault.
             self.table_widget.cellWidget(row, Column.Name).line_edit.setFont(font)
 
     # ----------------------- Plot Selection ------------------------

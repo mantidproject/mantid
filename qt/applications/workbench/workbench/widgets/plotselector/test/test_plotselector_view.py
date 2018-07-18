@@ -164,6 +164,26 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         # always the first plot.
         self.assertEqual([0], selected_plot_numbers)
 
+    def test_set_active_font_makes_fonts_bold(self):
+        plot_numbers = [0, 1, 2]
+        self.view.set_plot_list(plot_numbers)
+
+        self.view.set_active_font(0, True)
+
+        name_widget = self.view.table_widget.cellWidget(0, Column.Name)
+        self.assertTrue(name_widget.line_edit.font().bold())
+        self.assertTrue(self.view.table_widget.item(0, Column.Number).font().bold())
+
+    def test_unset_active_font_makes_fonts_not_bold(self):
+        plot_numbers = [0, 1, 2]
+        self.view.set_plot_list(plot_numbers)
+
+        self.view.set_active_font(0, False)
+
+        name_widget = self.view.table_widget.cellWidget(0, Column.Name)
+        self.assertFalse(name_widget.line_edit.font().bold())
+        self.assertFalse(self.view.table_widget.item(0, Column.Number).font().bold())
+
     # ----------------------- Plot Filtering ------------------------
 
     def test_filter_text_typing_calls_presenter_and_sets_filter_text(self):
