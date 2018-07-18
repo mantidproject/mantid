@@ -307,16 +307,6 @@ Options
 
 Note: common options are detailled in the :ref:`qens-fitting-features` section.
 
-Sample
-  A sample workspace created with either ConvFit or Quasi.
-
-Fit Parameter
-  Either 'Width' or 'EISF' can be selected here, determining whether a width or
-  EISF parameter will be fit across.
-
-Width/EISF
-  Next to the 'Fit Parameter' menu, will be either a 'Width' or 'EISF' menu, depending on
-  which was selected. This menu can be used to select the specific width/EISF parameter to be fit.
   
  .. _qens-fitting-features:
   
