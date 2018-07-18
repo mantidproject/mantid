@@ -20,7 +20,13 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         return "ILLSANSReduction"
 
     def validateInputs(self):
-        return dict()
+        issues = dict()
+        if 'ProcessAs' == 'Transmission':
+            beam = self.getProperty('BeamInputWorkspace')
+            if not beam:
+                issues['BeamInputWorkspace'] = 'Beam workspace is mandatory for transmission calculation.'
+
+        return issues
 
     def PyInit(self):
 
@@ -34,6 +40,10 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                              validator=StringListValidator(options),
                              doc='Choose the process type.')
 
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
+                                                     direction=Direction.Output),
+                             doc='The output workspace.')
+
         not_absorber = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsNotEqualTo, 'Absorber')
 
         sample = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Sample')
@@ -46,30 +56,12 @@ class ILLSANSReduction(DataProcessorAlgorithm):
 
         reference = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Reference')
 
+        container = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Container')
+
         self.declareProperty(name='NormaliseBy',
-                             defaultValue='Monitor',
+                             defaultValue='Timer',
                              validator=StringListValidator(['None', 'Timer', 'Monitor']),
                              doc='Choose the normalisation type.')
-
-        self.declareProperty('BeamCenterX', 0., direction=Direction.InOut, doc='Beam center X [m]')
-
-        self.declareProperty('BeamCenterY', 0., direction=Direction.InOut, doc='Beam center Y [m]')
-
-        self.setPropertySettings('BeamCenterX', not_absorber)
-
-        self.setPropertySettings('BeamCenterY', not_absorber)
-
-        self.declareProperty('BeamFluxValue', 1., direction=Direction.InOut,
-                             validator=FloatBoundedValidator(lower=0.), doc='Beam flux value')
-
-        self.setPropertySettings('BeamFluxValue',
-                                 EnabledWhenProperty(sample, EnabledWhenProperty(beam, reference, LogicOperator.Or), LogicOperator.Or))
-
-        self.declareProperty('BeamFluxError', 0., direction=Direction.InOut,
-                             validator=FloatBoundedValidator(lower=0.), doc='Beam flux error')
-
-        self.setPropertySettings('BeamFluxError',
-                                 EnabledWhenProperty(sample, EnabledWhenProperty(beam, reference, LogicOperator.Or), LogicOperator.Or))
 
         self.declareProperty('BeamRadius', 0.05, validator=FloatBoundedValidator(lower=0.), doc='Beam raduis [m]')
 
@@ -80,23 +72,9 @@ class ILLSANSReduction(DataProcessorAlgorithm):
 
         self.setPropertySettings('DirectBeam', beam)
 
-        self.declareProperty('TransmissionValue', 1., direction=Direction.InOut, doc='Transmission value')
-
-        self.setPropertySettings('TransmissionValue',
-                                 EnabledWhenProperty(not_absorber, not_beam, LogicOperator.And))
-
-        self.declareProperty('TransmissionError', 0., direction=Direction.InOut, doc='Transmission error')
-
-        self.setPropertySettings('TransmissionError',
-                                 EnabledWhenProperty(not_absorber, not_beam, LogicOperator.And))
-
         self.declareProperty('SampleThickness', 0.1, validator=FloatBoundedValidator(lower=0.), doc='Sample thickness [cm]')
 
         self.setPropertySettings('SampleThickness', EnabledWhenProperty(sample, reference, LogicOperator.Or))
-
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                                                     direction=Direction.Output),
-                             doc='The output workspace.')
 
         self.declareProperty(MatrixWorkspaceProperty('AbsorberInputWorkspace', '',
                                                      direction=Direction.Input,
@@ -108,10 +86,20 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('BeamInputWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
-                             doc='The name of the empty beam workspace.')
+                             doc='The name of the empty beam input workspace.')
 
         self.setPropertySettings('BeamInputWorkspace',
-                                 EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Transmission'))
+                                 EnabledWhenProperty(not_absorber, not_beam, LogicOperator.And))
+
+        self.declareProperty(MatrixWorkspaceProperty('TransmissionInputWorkspace', '',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='The name of the transmission input workspace.')
+
+        self.setPropertySettings('TransmissionInputWorkspace',
+                                 EnabledWhenProperty(container,
+                                                     EnabledWhenProperty(reference, sample, LogicOperator.Or),
+                                                     LogicOperator.Or))
 
         self.declareProperty(MatrixWorkspaceProperty('ContainerInputWorkspace', '',
                                                      direction=Direction.Input,
@@ -214,27 +202,22 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         FindCenterOfMassPosition(InputWorkspace=ws, DirectBeam=method, BeamRadius=radius, Output=centers)
         beam_x = mtd[centers].cell(0,1)
         beam_y = mtd[centers].cell(1,1)
-        self.setProperty('BeamCenterX', beam_x)
-        self.setProperty('BeamCenterY', beam_y)
+        AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number')
+        AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
         DeleteWorkspace(centers)
         integral = self._integrate_in_radius(ws, radius)
         run = mtd[ws].getRun()
         att_coeff = run.getLogData('attenuator.attenuation_coefficient').value
-        l2 = run.getLogData('L2').value
-        dx = run.getLogData('pixel_width').value
-        dy = run.getLogData('pixel_height').value
-        factor = att_coeff * dx * dy / (l2 * l2)
-        Scale(InputWorkspace=integral, Factor=factor, OutputWorkspace=integral)
-        self.setProperty('BeamFluxValue', mtd[integral].readY(0)[0])
-        self.setProperty('BeamFluxError', mtd[integral].readE(0)[0])
+        Scale(InputWorkspace=integral, Factor=att_coeff, OutputWorkspace=integral)
+        AddSampleLog(Workspace=ws, LogName='BeamFluxValue', LogText=str(mtd[integral].readY(0)[0]), LogType='Number')
+        AddSampleLog(Workspace=ws, LogName='BeamFluxError', LogText=str(mtd[integral].readE(0)[0]), LogType='Number')
         DeleteWorkspace(integral)
 
     def PyExec(self):
 
         process = self.getPropertyValue('ProcessAs')
         ws = '__' + self.getPropertyValue('OutputWorkspace')
-        LoadAndMerge(Filename=self.getPropertyValue('Run').replace(',','+'),
-                     LoaderName='LoadILLSANS', OutputWorkspace=ws)
+        LoadAndMerge(Filename=self.getPropertyValue('Run').replace(',','+'), LoaderName='LoadILLSANS', OutputWorkspace=ws)
         self._normalise(ws)
         if process != 'Absorber':
             absorber_ws = self.getPropertyValue('AbsorberInputWorkspace')
@@ -243,28 +226,32 @@ class ILLSANSReduction(DataProcessorAlgorithm):
             if process == 'Beam':
                 self._process_beam(ws)
             else:
+                beam = self.getPropertyValue('BeamInputWorkspace')
                 if process == 'Transmission':
                     radius = self.getProperty('BeamRadius').value
-                    beam = self.getPropertyValue('BeamInputWorkspace')
-                    ws_rebin = ws + '_rebin'
-                    RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=beam, OutputWorkspace=ws_rebin)
-                    transmission = ws + '_tr'
+                    RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=beam, OutputWorkspace=ws)
                     shapeXML = self._cylinder(radius)
                     det_list = FindDetectorsInShape(Workspace=ws, ShapeXML=shapeXML)
-                    CalculateTransmission(SampleRunWorkspace=ws_rebin, DirectRunWorkspace=beam,
-                                          TransmissionROI=det_list, OutputWorkspace=transmission)
-                    self.setProperty('TransmissionValue', mtd[transmission].readY(0)[0])
-                    self.setProperty('TransmissionError', mtd[transmission].readE(0)[0])
-                    DeleteWorkspaces([transmission, ws_rebin])
+                    CalculateTransmission(SampleRunWorkspace=ws, DirectRunWorkspace=beam,
+                                          TransmissionROI=det_list, OutputWorkspace=ws)
                 else:
-                    beam_x = self.getProperty('BeamCenterX').value
-                    beam_y = self.getProperty('BeamCenterY').value
-                    transmission = self.getProperty('TransmissionValue').value
-                    transmission_err = self.getProperty('TransmissionError').value
-                    MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
+                    if beam:
+                        beam_x = mtd[beam].getRun().getLogData('BeamCenterX').value
+                        beam_y = mtd[beam].getRun().getLogData('BeamCenterY').value
+                        MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
+                    transmission_ws = self.getPropertyValue('TransmissionInputWorkspace')
+                    if transmission_ws:
+                        transmission = mtd[transmission_ws].readY(0)[0]
+                        transmission_err = mtd[transmission_ws].readE(0)[0]
+                        ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionValue=transmission,
+                                                    TransmissionError=transmission_err, OutputWorkspace=ws)
                     SANSSolidAngleCorrection(InputWorkspace=ws, OutputWorkspace=ws)
-                    ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionValue=transmission,
-                                                TransmissionError=transmission_err, OutputWorkspace=ws)
+                    # normalise by pixel solid angle, take the D(2t=0)
+                    run = mtd[ws].getRun()
+                    l2 = run.getLogData('L2').value
+                    dx = run.getLogData('pixel_width').value
+                    dy = run.getLogData('pixel_height').value
+                    Scale(InputWorkspace=ws, Factor=(l2 * l2) / (dx * dy), OutputWorkspace=ws)
                     if process != 'Container':
                         container = self.getPropertyValue('ContainerInputWorkspace')
                         if container:
@@ -281,19 +268,30 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                                 self.setProperty('SensitivityOutputWorkspace', mtd[sensitivity_out])
                         elif process == 'Sample':
                             reference = self.getPropertyValue('ReferenceInputWorkspace')
+                            coll_ws = ''
                             if reference:
                                 Divide(LHSWorkspace=ws, RHSWorkspace=reference, OutputWorkspace=ws)
-                                ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0., NaNError=0.)
+                                coll_ws = reference
                             else:
                                 sensitivity_in = self.getPropertyValue('SensitivityInputWorkspace')
                                 if sensitivity_in:
                                     Divide(LHSWorkspace=ws, RHSWorkspace=sensitivity_in, OutputWorkspace=ws)
-                                flux = self.getProperty('BeamFluxValue').value
-                                ferr = self.getProperty('BeamFluxError').value
-                                flux_ws = ws + '_flux'
-                                CreateSingleValuedWorkspace(DataValue=flux, ErrorValue=ferr, OutputWorkspace=flux_ws)
-                                Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws)
-                                DeleteWorkspace(flux_ws)
+                                if beam:
+                                    coll_ws = beam
+                                    flux = mtd[beam].getRun().getLogData('BeamFluxValue').value
+                                    ferr = mtd[beam].getRun().getLogData('BeamFluxError').value
+                                    flux_ws = ws + '_flux'
+                                    CreateSingleValuedWorkspace(DataValue=flux, ErrorValue=ferr, OutputWorkspace=flux_ws)
+                                    Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws)
+                                    DeleteWorkspace(flux_ws)
+                            if coll_ws:
+                                sample_coll = mtd[ws].getRun().getLogData('collimation.actual_position').value
+                                ref_coll = mtd[coll_ws].getRun().getLogData('collimation.actual_position').value
+                                flux_factor = (sample_coll ** 2) / (ref_coll ** 2)
+                                self.log().notice('Flux factor is: ' + str(flux_factor))
+                                Scale(InputWorkspace=ws, Factor=flux_factor, OutputWorkspace=ws)
+                                ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
+                                                     NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
 
         CalculateQMinMax(Workspace=ws)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
