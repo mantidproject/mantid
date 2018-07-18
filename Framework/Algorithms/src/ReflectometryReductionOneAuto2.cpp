@@ -752,7 +752,6 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   alg->setProperty("FirstTransmissionRun", "");
   alg->setProperty("SecondTransmissionRun", "");
   alg->setProperty("CorrectionAlgorithm", "None");
-  alg->setProperty("ThetaIn", Mantid::EMPTY_DBL());
   alg->setProperty("ProcessingInstructions", "0");
   for (size_t i = 0; i < group->size(); ++i) {
     const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);
