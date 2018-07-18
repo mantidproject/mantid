@@ -46,8 +46,9 @@ Caveats
 	* Indirect analysis - project recovery does not work when performing fitting routines within the indirect analysis interface.
 	* SANS - project recovery does not currently work with the SANS interface.
 
-* Multi-line commands
-	* Currently if a workspace history contains any multi-line commands then the recovery script builder will fail.
+* Dictionary properties
+	* Affects: SANS interface, SetSample algorithm
+	* Cause: Currently the history writer does not serialise Python dictionaries correctly. 
 
 * If full project recovery does not work:
 	* If the project recovery process has managed to create a script of the ordered workspace histories, this will appear in MantidPlot, it will have a red arrow beside the line where the process failed. In many cases it is possible to edit the script by hand to get it to run.
