@@ -132,7 +132,7 @@ BANNED_REGEXP = [r'SANS2D\d+.log$',
                  r'.*_pulseid\.dat',
                  r'.*\.phonon']
 
-BANNED_DIRS = ["DocTest", "reference"]
+BANNED_DIRS = ["DocTest", "UnitTest", "reference"]
 
 # This list stores files that will be loaded first.
 # Implemented as simple solution to avoid failures on
