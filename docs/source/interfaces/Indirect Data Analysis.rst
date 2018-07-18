@@ -7,13 +7,13 @@ Indirect Data Analysis
 Overview
 --------
 
-.. interface:: Data Analysis
-  :align: right
-  :width: 350
 
 The Indirect Data Analysis interface is a collection of tools within MantidPlot
 for analysing reduced data from indirect geometry spectrometers, such as IRIS and
 OSIRIS.
+
+.. interface:: Data Analysis
+  :width: 450
 
 The majority of the functions used within this interface can be used with both
 reduced files (*_red.nxs*) and workspaces (*_red*) created using the Indirect Data
@@ -48,8 +48,6 @@ Plot Current Preview
 Elwin
 -----
 
-.. interface:: Data Analysis
-  :widget: tabElwin
 
 Provides an interface for the :ref:`ElasticWindow <algm-ElasticWindow>`
 algorithm, with the option of selecting the range to integrate over as well as
@@ -59,6 +57,10 @@ For workspaces that have a sample log or have a sample log file available in the
 Mantid data search paths that contains the sample environment information the
 ELF workspace can also be normalised to the lowest temperature run in the range
 of input files.
+
+.. interface:: Data Analysis
+  :width: 450
+  :widget: tabElwin
 
 Options
 ~~~~~~~
@@ -101,9 +103,6 @@ Save Result
 MSD Fit
 -------
 
-.. interface:: Data Analysis
-  :widget: tabMSD
-
 Given either a saved NeXus file or workspace generated using the Elwin tab, this
 tab fits :math:`log(intensity)` vs. :math:`Q` with a straight line for each
 run specified to give the Mean Square Displacement (MSD). It then plots the MSD
@@ -124,6 +123,10 @@ A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
 
+.. interface:: Data Analysis
+  :width: 450
+  :widget: tabMSD
+
 Options
 ~~~~~~~
 
@@ -139,11 +142,12 @@ Sample
 I(Q, t)
 -------
 
-.. interface:: Data Analysis
-  :widget: tabIqt
-
 Given sample and resolution inputs, carries out a fit as per the theory detailed
 in the :ref:`TransformToIqt <algm-TransformToIqt>` algorithm.
+
+.. interface:: Data Analysis
+  :width: 450
+  :widget: tabIqt
 
 Options
 ~~~~~~~
@@ -197,12 +201,15 @@ ResolutionBins
 I(Q, t) Fit
 -----------
 
-.. interface:: Data Analysis
-  :widget: tabIqtFit
 
 I(Q, t) Fit provides a simplified interface for controlling various fitting
 functions (see the :ref:`Fit <algm-Fit>` algorithm for more info). The functions
 are also available via the fit wizard.
+
+
+.. interface:: Data Analysis
+  :width: 450
+  :widget: tabIqtFit
 
 Options
 ~~~~~~~
@@ -237,9 +244,6 @@ Linear Background
 Conv Fit
 --------
 
-.. interface:: Data Analysis
-  :widget: tabConvFit
-
 ConvFit provides a simplified interface for controlling
 various fitting functions (see the :ref:`Fit <algm-Fit>` algorithm for more
 info). The functions are also available via the fit wizard.
@@ -253,6 +257,10 @@ values for fitting the next. This is done by means of the
 A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
+
+.. interface:: Data Analysis
+  :width: 450
+  :widget: tabConvFit
 
 Options
 ~~~~~~~
@@ -290,9 +298,6 @@ For more on the theory of Conv Fit see the :ref:`ConvFitConcept` concept page.
 F(Q) Fit
 --------
 
-.. interface:: Data Analysis
-  :widget: tabJumpFit
-
 One of the models used to interpret diffusion is that of jump diffusion in which
 it is assumed that an atom remains at a given site for a time :math:`\tau`; and
 then moves rapidly, that is, in a time negligible compared to :math:`\tau`.
@@ -300,6 +305,10 @@ then moves rapidly, that is, in a time negligible compared to :math:`\tau`.
 This interface can be used for a jump diffusion fit as well as fitting across
 EISF. This is done by means of the
 :ref:`QENSFitSequential <algm-QENSFitSequential>` algorithm.
+
+.. interface:: Data Analysis
+  :width: 450
+  :widget: tabJumpFit
 
 
 Options
