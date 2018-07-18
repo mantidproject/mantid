@@ -118,8 +118,6 @@ class ComponentInfoTest(unittest.TestCase):
         	info.detectorsInSubtree("Error")
         with self.assertRaises(TypeError):
         	info.detectorsInSubtree(10.0)
-        with self.assertRaises(Exception):
-        	info.detectorsInSubtree(100)
 
     def test_componentsInSubtree_exceptional(self):
 	    info = self._ws.componentInfo()
@@ -139,7 +137,6 @@ class ComponentInfoTest(unittest.TestCase):
     		info.isDetector("Error")
     	with self.assertRaises(TypeError):
     		info.isDetector(10.0)
-    	self.assertEquals(info.isDetector(10000), False)
 
     def test_hasDetectorInfo_exceptional(self):
         info = self._ws.componentInfo()
