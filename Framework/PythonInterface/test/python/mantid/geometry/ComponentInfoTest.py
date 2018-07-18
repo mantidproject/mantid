@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
+import argparse
 from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
@@ -104,6 +105,113 @@ class ComponentInfoTest(unittest.TestCase):
         """ Get the name of a component as a string """
         info = self._ws.componentInfo()
         self.assertEquals(type(info.name(0)), str)
+
+
+    """ 
+    The section below is for destructive tests - i.e extreme
+    and exceptional test cases. 
+    """
+
+    def test_detectorsInSubtree_exceptional(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+        	info.detectorsInSubtree("Error")
+        with self.assertRaises(TypeError):
+        	info.detectorsInSubtree(10.0)
+        with self.assertRaises(Exception):
+        	info.detectorsInSubtree(100)
+
+    def test_componentsInSubtree_exceptional(self):
+	    info = self._ws.componentInfo()
+	    with self.assertRaises(TypeError):
+	    	info.componentsInSubtree("Error")
+	    with self.assertRaises(TypeError):
+	    	info.componentsInSubtree(10.0)
+
+    def test_size_exceptional(self):
+    	info = self._ws.componentInfo()
+    	with self.assertRaises(TypeError):
+    		info.size(0)
+
+    def test_isDetector_exceptional(self):
+    	info = self._ws.componentInfo()
+    	with self.assertRaises(TypeError):
+    		info.isDetector("Error")
+    	with self.assertRaises(TypeError):
+    		info.isDetector(10.0)
+    	self.assertEquals(info.isDetector(10000), False)
+
+    def test_hasDetectorInfo_exceptional(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+        	info.hasDetectorInfo(0)
+
+    def test_position_exceptional(self):
+		info = self._ws.componentInfo()
+		with self.assertRaises(TypeError):
+			info.position("Zero")
+		with self.assertRaises(TypeError):
+			info.position(0.0)
+
+    def test_rotation_exceptional(self):
+		info = self._ws.componentInfo()
+		with self.assertRaises(TypeError):
+			info.rotation("Zero")
+		with self.assertRaises(TypeError):
+			info.rotation(0.0)
+
+    def test_relativePosition_exceptional(self):
+		info = self._ws.componentInfo()
+		with self.assertRaises(TypeError):
+			info.relativePosition("Zero")
+		with self.assertRaises(TypeError):
+			info.relativePosition(0.0)
+
+    def test_relativeRotation_exceptional(self):
+		info = self._ws.componentInfo()
+		with self.assertRaises(TypeError):
+			info.relativeRotation("Zero")
+		with self.assertRaises(TypeError):
+			info.relativeRotation(0.0)
+
+    def test_setPosition_exceptional(self):
+        info = self._ws.componentInfo()
+        pos = [0,0,0]
+        with self.assertRaises(TypeError):
+        	info.setPosition(0, pos)
+
+    def test_setRotation_exceptional(self):
+        info = self._ws.componentInfo()
+        rot = [0,0,0,0]
+        with self.assertRaises(TypeError):
+        	info.setRotation(0, rot)
+
+    def test_sourcePosition_exceptional(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+        	info.sourcePosition(0)
+
+    def test_samplePosition_exceptional(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+        	info.samplePosition(0)
+
+    def test_hasSource_exceptional(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+        	info.hasSource(0)
+
+    def test_hasSample_exceptional(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+        	info.hasSample(0)
+
+    def test_name_exceptional(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+        	info.name("Name")
+        with self.assertRaises(TypeError):
+    		info.name(0.12)
 
 if __name__ == '__main__':
     unittest.main()
