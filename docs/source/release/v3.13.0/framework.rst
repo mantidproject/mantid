@@ -31,7 +31,7 @@ Algorithms
 New
 ###
 
-- Sometimes the algorithm you are looking at is close to what you want, but not quite, to help you find the right one a list of Related Algorithms has been added to each algorithm, and is displayed in the documentation page of each algorithm as part of it's summary.
+- Sometimes the algorithm you are looking at is close to what you want, but not quite, to help you find the right one a list of related algorithms has been added to each algorithm, and is displayed in the documentation page of each algorithm as part of it's summary.
 
 New Algorithms
 **************
