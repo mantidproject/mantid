@@ -269,8 +269,18 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_sptr inWS;
   Indexing::SpectrumIndexSet indices;
-  std::tie(inWS, indices) =
-      getWorkspaceAndIndices<API::MatrixWorkspace>(Prop::INPUT_WS);
+
+  // validateInputs is called on the individual workspaces when the algorithm
+  // is executed, it but may get called on a group from AlgorithmDialog. This
+  // isn't handled in getWorkspaceAndIndices. We should fix this properly but
+  // for now skip validation for groups to avoid an exception. See #22933
+  try {
+    std::tie(inWS, indices) =
+        getWorkspaceAndIndices<API::MatrixWorkspace>(Prop::INPUT_WS);
+  } catch (...) {
+    return issues;
+  }
+
   const auto &spectrumInfo = inWS->spectrumInfo();
   const int beamCentre = getProperty(Prop::BEAM_CENTRE);
   bool beamCentreFound{false};
