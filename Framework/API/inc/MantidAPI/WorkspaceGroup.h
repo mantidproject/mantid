@@ -62,7 +62,7 @@ public:
   /// Returns a formatted string detailing the contents of the group
   const std::string toString() const override;
 
-  /// The collection itself is considered to take up no space
+  /// Return the memory size of all workspaces in this group and subgroups
   size_t getMemorySize() const override;
   /// Sort the internal data structure according to member name
   void sortMembersByName();
