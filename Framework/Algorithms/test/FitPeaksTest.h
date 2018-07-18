@@ -56,7 +56,7 @@ public:
    * peak fit windows
    * @brief test_singlePeaksPartialSpectra
    */
-  void New_test_singlePeaksPartialSpectra() {
+  void test_singlePeaksPartialSpectra() {
     // Generate input workspace
     std::string data_ws_name("Test1Data");
     createTestData(data_ws_name);
@@ -127,7 +127,7 @@ public:
   /**
    * @brief test_multiPeaksMultiSpectra
    */
-  void test_multiPeaksMultiSpectra() {
+  void Gtest_multiPeaksMultiSpectra() {
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
@@ -234,7 +234,7 @@ public:
   /** Test output of effective peak parameters
    * @brief test_effectivePeakParameters
    */
-  void test_effectivePeakParameters() {
+  void Gtest_effectivePeakParameters() {
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
@@ -457,7 +457,7 @@ public:
    * 2. no signal with event count workspace
    * @brief test_NoSignaleWorkspace2D
    */
-  void test_NoSignaleWorkspace2D() {
+  void Gtest_NoSignaleWorkspace2D() {
     // load file to workspace
     std::string input_ws_name("PG3_733");
 
@@ -540,7 +540,7 @@ public:
   /** Test fit Gaussian peaks with high background
    * @brief Later_test_HighBackgroundPeaks
    */
-  void test_HighBackgroundPeaks() {
+  void Gtest_HighBackgroundPeaks() {
     // load file to workspace
     std::string input_ws_name("PG3_733");
 
@@ -631,7 +631,7 @@ public:
   /** Test on VULCAN's data including 2 different starting value of peak
    * profiles
     */
-  void test_multiple_peak_profiles() {
+  void Gtest_multiple_peak_profiles() {
     // Generate input workspace
     std::string input_ws_name = loadVulcanHighAngleData();
     API::MatrixWorkspace_sptr input_ws =
@@ -770,10 +770,20 @@ public:
                                      const std::string &workspace_name) {
     // create the empty workspace containing 3 spectrum
     size_t num_peaks = peak_index_vec.size();
-    MatrixWorkspace_sptr center_ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
-            WorkspaceCreationHelper::create2DWorkspace(
-                3, static_cast<int>(num_peaks)));
+//    MatrixWorkspace_sptr center_ws =
+//        boost::dynamic_pointer_cast<MatrixWorkspace>(
+//            WorkspaceCreationHelper::create2DWorkspace(
+//                3, static_cast<int>(num_peaks)));
+
+    int64_t nhist = 3;
+    int64_t nbins = num_peaks;
+    bool ishist = false;
+    double xval(0), yval(0), eval(0), dxval(1);
+    std::set<int64_t> maskedws;
+    MatrixWorkspace_sptr center_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(
+            nhist, nbins, ishist, xval, yval, eval, dxval, maskedws) );
+
     std::cout << "Center workspace has " << center_ws->readX(0).size()
               << " bins"
               << "\n";
@@ -817,8 +827,8 @@ public:
           peak_center = 5.0;
         else
           peak_center = 10.0;
-        center_ws->dataY(i)[j * 2] = peak_center - 2.0;
-        center_ws->dataY(i)[j * 2 + 1] = peak_center + 2.0;
+        center_ws->dataX(i)[j * 2] = peak_center - 2.0;
+        center_ws->dataX(i)[j * 2 + 1] = peak_center + 2.0;
       }
     }
 
