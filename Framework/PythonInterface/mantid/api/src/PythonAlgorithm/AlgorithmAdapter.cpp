@@ -145,19 +145,28 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
     return SuperClass::isRunning();
   } else {
     Environment::GlobalInterpreterLock gil;
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wparentheses-equality"
+#endif
     PyObject *result = PyObject_CallObject(m_isRunningObj, nullptr);
     if (PyErr_Occurred())
       throw Environment::PythonException();
     if (PyBool_Check(result)) {
+
 #if PY_MAJOR_VERSION >= 3
       return static_cast<bool>(PyLong_AsLong(result));
 #else
       return static_cast<bool>(PyInt_AsLong(result));
 #endif
+
     } else
       throw std::runtime_error(
           "Algorithm.isRunning - Expected bool return type.");
   }
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 }
 
 /**
