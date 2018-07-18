@@ -295,8 +295,7 @@ void PlotPeakByLogValue::exec() {
         bool ignoreInvalidData = getProperty("IgnoreInvalidData");
 
         // Fit the function
-        API::IAlgorithm_sptr fit =
-            AlgorithmManager::Instance().createUnmanaged("Fit");
+		auto fit = Algorithm::createChildAlgorithm("Fit");
         fit->initialize();
         fit->setPropertyValue("EvaluationType",
                               getPropertyValue("EvaluationType"));
@@ -320,7 +319,8 @@ void PlotPeakByLogValue::exec() {
           fit->setProperty("Exclude", exclude);
         }
         fit->setProperty("Output", wsBaseName);
-        fit->execute();
+		fit->setAlwaysStoreInADS(true);
+        fit->executeAsChildAlg();
 
         if (!fit->isExecuted()) {
           throw std::runtime_error("Fit child algorithm failed: " +
@@ -374,35 +374,37 @@ void PlotPeakByLogValue::exec() {
 
   if (createFitOutput) {
     // collect output of fit for each spectrum into workspace groups
-    API::IAlgorithm_sptr groupAlg =
-        AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    auto groupAlg =  Algorithm::createChildAlgorithm("GroupWorkspaces");
     groupAlg->initialize();
     groupAlg->setProperty("InputWorkspaces", covariance_workspaces);
     groupAlg->setProperty("OutputWorkspace",
                           m_baseName + "_NormalisedCovarianceMatrices");
-    groupAlg->execute();
+	groupAlg->setAlwaysStoreInADS(true);
+    groupAlg->executeAsChildAlg();
 
-    groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    groupAlg = Algorithm::createChildAlgorithm("GroupWorkspaces");
     groupAlg->initialize();
     groupAlg->setProperty("InputWorkspaces", parameter_workspaces);
     groupAlg->setProperty("OutputWorkspace", m_baseName + "_Parameters");
-    groupAlg->execute();
+	groupAlg->setAlwaysStoreInADS(true);
+	groupAlg->executeAsChildAlg();
 
-    groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+	groupAlg = Algorithm::createChildAlgorithm("GroupWorkspaces");
     groupAlg->initialize();
     groupAlg->setProperty("InputWorkspaces", fit_workspaces);
     groupAlg->setProperty("OutputWorkspace", m_baseName + "_Workspaces");
-    groupAlg->execute();
+	groupAlg->setAlwaysStoreInADS(true);
+	groupAlg->executeAsChildAlg();
   }
 
   for (auto &minimizerWorkspace : m_minimizerWorkspaces) {
     const std::string paramName = minimizerWorkspace.first;
-    API::IAlgorithm_sptr groupAlg =
-        AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+	auto groupAlg = Algorithm::createChildAlgorithm("GroupWorkspaces");
     groupAlg->initialize();
     groupAlg->setProperty("InputWorkspaces", minimizerWorkspace.second);
     groupAlg->setProperty("OutputWorkspace", m_baseName + "_" + paramName);
-    groupAlg->execute();
+	groupAlg->setAlwaysStoreInADS(true);
+	groupAlg->executeAsChildAlg();
   }
 }
 
