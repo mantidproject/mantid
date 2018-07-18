@@ -114,7 +114,6 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'Fe-alpha.cif',
                 'Sm2O3.cif',
                 'template_ENGINX_241391_236516_North_bank.prm',
-                'BSS_13387_event.nxs' # bad event_index
                 ]
 
 EXPECTED_EXT = '.expected'
@@ -133,7 +132,7 @@ BANNED_REGEXP = [r'SANS2D\d+.log$',
                  r'.*_pulseid\.dat',
                  r'.*\.phonon']
 
-BANNED_DIRS = ["DocTest", "reference"]
+BANNED_DIRS = ["DocTest", "UnitTest", "reference"]
 
 # This list stores files that will be loaded first.
 # Implemented as simple solution to avoid failures on

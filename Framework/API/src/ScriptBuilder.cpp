@@ -12,6 +12,8 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyHistory.h"
 
+#include <boost/range/algorithm/remove_if.hpp>
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/utility.hpp>
 #include <set>
 
@@ -219,7 +221,10 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
     propStr.erase(propStr.size() - 1);
   }
 
-  return name + "(" + propStr + ")";
+  std::string historyEntry = name + "(" + propStr + ")";
+  historyEntry.erase(boost::remove_if(historyEntry, boost::is_any_of("\n\r")),
+                     historyEntry.end());
+  return historyEntry;
 }
 
 /**

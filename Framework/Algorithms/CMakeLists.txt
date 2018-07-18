@@ -21,6 +21,7 @@ set ( SRC_FILES
 	src/CalculateDIFC.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
+	src/CalculateIqt.cpp
 	src/CalculateCarpenterSampleCorrection.cpp
 	src/CalculatePolynomialBackground.cpp
 	src/CalculateSlits.cpp
@@ -344,6 +345,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalculateDIFC.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
+	inc/MantidAlgorithms/CalculateIqt.h
 	inc/MantidAlgorithms/CalculateCarpenterSampleCorrection.h
 	inc/MantidAlgorithms/CalculatePolynomialBackground.h
 	inc/MantidAlgorithms/CalculateSlits.h

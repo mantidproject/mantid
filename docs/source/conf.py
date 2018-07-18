@@ -96,8 +96,11 @@ except TypeError:
 
 # Run this after each test group has executed
 doctest_global_cleanup = """
+import time
 from mantid.api import FrameworkManager
 FrameworkManager.Instance().clear()
+# sleep for short period to allow memory to be freed
+time.sleep(2)
 """
 
 # -- Options for pngmath --------------------------------------------------
