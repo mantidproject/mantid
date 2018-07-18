@@ -52,7 +52,7 @@ public:
   const std::string category() const override { return "Muon"; }
   /// See also
   const std::vector<std::string> seeAlso() const override {
-	  return{ "PhaseQuad"};
+    return {"PhaseQuad"};
   };
 
 protected:
