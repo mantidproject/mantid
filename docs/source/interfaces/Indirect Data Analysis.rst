@@ -129,6 +129,8 @@ Options
 
 Note: common options are detailled in the :ref:`qens-fitting-features` section.
 
+Note: sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
+
 Sample
   A file that has been created using the Elwin tab with an :math:`x` axis of
   :math:`Q`. Alternatively, a workspace may be provided.
@@ -169,6 +171,9 @@ Plot Result
 Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
+  
+Tiled Plot
+  Produces a tiled plot of the output workspaces generated.
 
 Monte Carlo Error Calculation - Number Of Iterations
   The number of iterations to perform in the Monte Carlo routine for error
@@ -201,22 +206,14 @@ I(Q, t) Fit provides a simplified interface for controlling various fitting
 functions (see the :ref:`Fit <algm-Fit>` algorithm for more info). The functions
 are also available via the fit wizard.
 
-Additionally, in the bottom-right of the interface there are options for doing a
-sequential fit. This is where the program loops through each spectrum in the
-input workspace, using the fitted values from the previous spectrum as input
-values for fitting the next. This is done by means of the
-:ref:`IqtFitSequential <algm-IqtFitSequential>` algorithm.
-
-A sequential fit is run by clicking the Run button at the bottom of the tab, a
-single fit can be done using the Fit Single Spectrum button underneath the
-preview plot.
-
 Options
 ~~~~~~~
 
 Note: common options are detailled in the :ref:`qens-fitting-features` section.
 
-Input
+Note: sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
+
+Sample
   Either a file (*_iqt.nxs*) or workspace (*_iqt*) that has been created using
   the Iqt tab.
 
@@ -327,7 +324,9 @@ formula :math:`((x * 11.606) / T) / (1 - exp(-((x * 11.606) / T)))` where
 Options
 ~~~~~~~
 
-Note: common options are detailled in the :ref:`qens-fitting-features` section.
+Note: common options are detailed in the :ref:`qens-fitting-features` section.
+
+Note: sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
 
 Sample
   Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
@@ -556,17 +555,6 @@ a separate plotting window.
 The 'Plot Guess' check-box can be used to enable/disable the guess curve in the top preview plot.
 
 
-Spectrum Selection
-~~~~~~~~~~~~~~~~~~
-
-Below the preview plots, the spectra to be fit can be selected. The 'Fit Spectra' drop-down menu allows for
-selecting either 'Range' or 'String'. If 'Range' is selected, you are able to select a range of spectra to fit by
-providing the upper and lower bounds. If 'String' is selected you can provide the spectra to fit in a text form.
-When selecting spectra using text, you can use '-' to identify a range and ',' to separate each spectrum/range.
-
-:math:`X`-Ranges may be excluded from the fit by selecting a spectrum next to the 'Mask Bins of Spectrum' label and
-then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
-
 Output
 ~~~~~~
 
@@ -609,6 +597,40 @@ Convergence Criteria
 Acceptance Rate
   The desired percentage acceptance of new parameters (see *JumpAcceptanceRate*
   in :ref:`FABADA` documentation)
+  
+.. _sequential-fitting-section:
+
+Sequential Fitting
+------------------
+
+Three of the fitting interfaces allow sequential fitting of several spectra:
+
+* MSD Fit
+* I(Q, T) Fit
+* ConvFit
+
+At the bottom of the interface there are options for doing a
+sequential fit. This is where the program loops through each spectrum in the
+input workspace, using the fitted values from the previous spectrum as input
+values for fitting the next. This is done by means of the
+:ref:`IqtFitSequential <algm-IqtFitSequential>` algorithm.
+
+A sequential fit is run by clicking the Run button at the bottom of the tab, a
+single fit can be done using the Fit Single Spectrum button underneath the
+preview plot.
+
+Spectrum Selection
+~~~~~~~~~~~~~~~~~~
+
+Below the preview plots, the spectra to be fit can be selected. The 'Fit Spectra' drop-down menu allows for
+selecting either 'Range' or 'String'. If 'Range' is selected, you are able to select a range of spectra to fit by
+providing the upper and lower bounds. If 'String' is selected you can provide the spectra to fit in a text form.
+When selecting spectra using text, you can use '-' to identify a range and ',' to separate each spectrum/range.
+
+:math:`X`-Ranges may be excluded from the fit by selecting a spectrum next to the 'Mask Bins of Spectrum' label and
+then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
+
+
 
 
 .. categories:: Interfaces Indirect
