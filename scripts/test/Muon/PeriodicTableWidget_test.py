@@ -2,7 +2,7 @@ from __future__ import absolute_import, print_function
 
 import unittest
 
-from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_widget import PeriodicTable
+from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTable
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table import PeriodicTable as silxPT
 
@@ -19,7 +19,7 @@ class PeriodicTableWidgetTest(unittest.TestCase):
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
         self.widget = PeriodicTable()
-        self.view = self.widget.presenter.view
+        self.view = self.widget.view
         self.mock_elem = mock.Mock()
 
         self.view.ptable = mock.create_autospec(silxPT)
@@ -40,7 +40,7 @@ class PeriodicTableWidgetTest(unittest.TestCase):
         assert handler.call_count == 1
 
     def call_func_once(self, func):
-        self.widget.presenter.view = mock.create_autospec(PeriodicTableView)
+        self.widget.view = mock.create_autospec(PeriodicTableView)
         func = mock.Mock()
         func(mock.Mock())
         assert func.call_count == 1

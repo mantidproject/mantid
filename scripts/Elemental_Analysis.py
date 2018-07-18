@@ -4,7 +4,7 @@ from PyQt4 import QtGui
 
 import sys
 
-from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_widget import PeriodicTable
+from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTable
 from Muon.GUI.Common import message_box
 
 
