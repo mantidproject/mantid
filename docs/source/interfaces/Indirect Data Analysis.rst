@@ -39,7 +39,8 @@ Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
 
-
+Plot Current Preview
+  Takes the data currently plotted in the preview plot and puts it in a separate external plot
 
 Elwin
 -----
