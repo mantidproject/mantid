@@ -48,7 +48,7 @@ Caveats
 
 * Dictionary properties
 	* Affects: SANS interface, SetSample algorithm
-	* Currently the history writer does serialise Python dictionaries correctly. 
+	* Cause: Currently the history writer does not serialise Python dictionaries correctly. 
 
 * If full project recovery does not work:
 	* If the project recovery process has managed to create a script of the ordered workspace histories, this will appear in MantidPlot, it will have a red arrow beside the line where the process failed. In many cases it is possible to edit the script by hand to get it to run.
