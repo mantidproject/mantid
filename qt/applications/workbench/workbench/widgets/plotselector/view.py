@@ -591,8 +591,7 @@ class PlotSelectorView(QWidget):
         """
         # Returns a tuple containing the filename and extension
         absolute_path = QFileDialog.getSaveFileName(caption='Select filename for exported plot',
-                                                    filter='*{}'.format(extension),
-                                                    options=QFileDialog.DontUseNativeDialog)
+                                                    filter='*{}'.format(extension))
         return absolute_path[0]
 
     def get_directory_name_for_saving(self):
@@ -601,9 +600,9 @@ class PlotSelectorView(QWidget):
         :return : The path to the directory
         """
         # Note that the native dialog does not always show the files
-        # in the directory, hence using the Qt dialog
-        directory = QFileDialog.getExistingDirectory(caption='Select folder for exported plots',
-                                                     options=QFileDialog.DontUseNativeDialog)
+        # in the directory on Linux, but using the non-native dialog
+        # is not very pleasant on Windows or Mac
+        directory = QFileDialog.getExistingDirectory(caption='Select folder for exported plots')
         return directory
 
 
