@@ -174,7 +174,7 @@ public:
     MatrixWorkspace_sptr angle = alg->getProperty("EvolAngle");
 
     TS_ASSERT_EQUALS(data->getNumberHistograms(), nHist);
-    TS_ASSERT_EQUALS(image->getNumberHistograms(), nHist);
+    TS_ASSERT_EQUALS(image->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(chi->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(angle->getNumberHistograms(), 1);
 
