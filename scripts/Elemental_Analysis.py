@@ -20,7 +20,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.setWindowTitle("Elemental Analysis")
 
     def table_left_clicked(self, item):
-        print("Element Left Clicked: {}".format(item.symbol))
+        print("Element Left Clicked: {}".format(
+            self.ptable.element_data(item.symbol)))
 
     def table_right_clicked(self, item):
         print("Element Right Clicked: {}".format(item.symbol))

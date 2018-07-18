@@ -22,7 +22,7 @@ class PeriodicTableModel(object):
         try:
             with open(self._peak_data_file, "r") as f:
                 try:
-                    self.peak_data = json.load(f)
+                    self._peak_data = json.load(f)
                 except ValueError as error:
                     message_box.warning(error)
         except IOError as error:
@@ -31,11 +31,6 @@ class PeriodicTableModel(object):
     @property
     def peak_data(self):
         return self._peak_data
-
-    @peak_data.setter
-    def peak_data(self, peak_data):
-        self._peak_data = peak_data
-        # leaves room for change event etc.?
 
     @property
     def peak_data_file(self):

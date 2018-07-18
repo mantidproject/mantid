@@ -23,11 +23,18 @@ class PeriodicTable(QtGui.QWidget):
         return self._presenter.widget
 
     @property
+    def peak_data(self):
+        return self._presenter.model.peak_data
+
+    @property
     def selection(self):
         return self.widget.ptable.getSelection()
 
-    def is_selected(self, element):
-        return self.widget.ptable.isElementSelected(element)
+    def element_data(self, element):
+        try:
+            return self.presenter.model.peak_data[element]
+        except KeyError:
+            return None
 
     def select_element(self, element, deselect=False):
         self.widget.ptable.setElementSelected(element, not deselect)

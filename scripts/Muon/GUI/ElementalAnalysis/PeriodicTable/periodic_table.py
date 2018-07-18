@@ -488,6 +488,25 @@ class PeriodicTable(qt.QWidget):
         # fill cells with elements
         for elmt in elements:
             self.__addElement(elmt)
+        self.elements = elements
+
+    def enableElementButton(self, element):
+        try:
+            self._eltButtons[element].setEnabled(True)
+        except KeyError:
+            return
+
+    def disableElementButton(self, element):
+        try:
+            self._eltButtons[element].setEnabled(False)
+        except KeyError:
+            return
+
+    def isElementButtonEnabled(self, element):
+        try:
+            return self._eltButtons[element].isEnabled()
+        except KeyError:
+            return None
 
     def __addElement(self, elmt):
         """Add one :class:`_ElementButton` widget into the grid,
