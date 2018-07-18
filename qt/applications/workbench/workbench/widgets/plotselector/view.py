@@ -167,17 +167,11 @@ class PlotSelectorView(QWidget):
         """
         table_widget = QTableWidget(0, 3, self)
         table_widget.setHorizontalHeaderLabels(['No.', 'Plot Name', 'Last Active Order (hidden)'])
-        if not DEBUG_MODE:
-            # Setting the column to be hidden seems to fail on Mac,
-            # so make double sure and set the column width to 0 here
-            table_widget.setColumnWidth(Column.LastActive, True)
-            table_widget.setColumnHidden(Column.LastActive, True)
+
         table_widget.verticalHeader().setVisible(False)
 
         # Fix the size of 'No.' and let 'Plot Name' fill the space
         top_header = table_widget.horizontalHeader()
-        top_header.resizeSection(Column.Number, top_header.sectionSizeHint(Column.Number))
-        top_header.setSectionResizeMode(Column.Name, QHeaderView.Stretch)
 
         table_widget.horizontalHeaderItem(Column.Number).setToolTip('This is the matplotlib figure number.\n\nFrom a '
                                                                     'script use plt.figure(N), where N is this figure '
@@ -193,6 +187,12 @@ class PlotSelectorView(QWidget):
         table_widget.setSortingEnabled(True)
 
         table_widget.horizontalHeader().sectionClicked.connect(self.update_sort_menu_selection)
+
+        if not DEBUG_MODE:
+            table_widget.setColumnHidden(Column.LastActive, True)
+
+        top_header.resizeSection(Column.Number, top_header.sectionSizeHint(Column.Number))
+        top_header.setSectionResizeMode(Column.Name, QHeaderView.Stretch)
 
         return table_widget
 
