@@ -7,10 +7,10 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAlgorithms/ApplyDeadTimeCorr.h"
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidMuon/ApplyDeadTimeCorr.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <stdexcept>

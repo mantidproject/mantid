@@ -8,11 +8,11 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAlgorithms/AsymmetryCalc.h"
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidMuon/AsymmetryCalc.h"
 #include <algorithm>
 #include <stdexcept>
 
