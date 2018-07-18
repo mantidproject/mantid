@@ -39,37 +39,7 @@ Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
 
-Bayesian
---------
 
-There is the option to perform Bayesian data analysis on the I(Q, t) Fit ConvFit
-tabs on this interface by using the :ref:`FABADA` fitting minimizer, however in
-order to to use this you will need to use better starting parameters than the
-defaults provided by the interface.
-
-You may also experience issues where the starting parameters may give a reliable
-fit on one spectra but not others, in this case the best option is to reduce
-the number of spectra that are fitted in one operation.
-
-In both I(Q, t) Fit and ConvFit the following options are available when fitting
-using FABADA:
-
-Output Chain
-  Select to enable output of the FABADA chain when using FABADA as the fitting
-  minimizer.
-
-Chain Length
-  Number of further steps carried out by fitting algorithm once parameters have
-  converged (see *ChainLength* is :ref:`FABADA` documentation)
-
-Convergence Criteria
-  The minimum variation in the cost function before the parameters are
-  considered to have converged (see *ConvergenceCriteria* in :ref:`FABADA`
-  documentation)
-
-Acceptance Rate
-  The desired percentage acceptance of new parameters (see *JumpAcceptanceRate*
-  in :ref:`FABADA` documentation)
 
 Elwin
 -----
@@ -588,6 +558,38 @@ Fit Parameter
 Width/EISF
   Next to the 'Fit Parameter' menu, will be either a 'Width' or 'EISF' menu, depending on
   which was selected. This menu can be used to select the specific width/EISF parameter to be fit.
+  
+Bayesian (FABADA minimizer)
+---------------------------
+
+There is the option to perform Bayesian data analysis on the I(Q, t) Fit ConvFit
+tabs on this interface by using the :ref:`FABADA` fitting minimizer, however in
+order to to use this you will need to use better starting parameters than the
+defaults provided by the interface.
+
+You may also experience issues where the starting parameters may give a reliable
+fit on one spectra but not others, in this case the best option is to reduce
+the number of spectra that are fitted in one operation.
+
+In both I(Q, t) Fit and ConvFit the following options are available when fitting
+using FABADA:
+
+Output Chain
+  Select to enable output of the FABADA chain when using FABADA as the fitting
+  minimizer.
+
+Chain Length
+  Number of further steps carried out by fitting algorithm once parameters have
+  converged (see *ChainLength* is :ref:`FABADA` documentation)
+
+Convergence Criteria
+  The minimum variation in the cost function before the parameters are
+  considered to have converged (see *ConvergenceCriteria* in :ref:`FABADA`
+  documentation)
+
+Acceptance Rate
+  The desired percentage acceptance of new parameters (see *JumpAcceptanceRate*
+  in :ref:`FABADA` documentation)
 
 
 .. categories:: Interfaces Indirect
