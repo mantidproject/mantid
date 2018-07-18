@@ -1,7 +1,5 @@
 from __future__ import print_function, absolute_import
 
-import mantid.simpleapi as mantid
-
 import os
 import json
 
@@ -12,8 +10,11 @@ from Muon.GUI import ElementalAnalysis
 class PeriodicTableModel(object):
     def __init__(self):
         self._peak_data = {}
-        self._peak_data_file = os.path.join(os.path.dirname(ElementalAnalysis.__file__), "peak_data.json")   
-        self.load_peak_data()  
+        self._peak_data_file = os.path.join(
+            os.path.dirname(
+                ElementalAnalysis.__file__),
+            "peak_data.json")
+        self.load_peak_data()
 
     def load_peak_data(self):
         # using os.path.isfile allows file modifications to take place before opening:
