@@ -16,7 +16,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.ptable.register_table_changed(self.table_changed)
         self.ptable.register_table_lclicked(self.table_left_clicked)
         self.ptable.register_table_rclicked(self.table_right_clicked)
-        self.setCentralWidget(self.ptable.widget)
+        self.setCentralWidget(self.ptable.view)
         self.setWindowTitle("Elemental Analysis")
 
     def table_left_clicked(self, item):

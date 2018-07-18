@@ -11,10 +11,6 @@ class PeriodicTable(object):
         self.set_buttons()
 
     @property
-    def widget(self):
-        return self.view
-
-    @property
     def peak_data(self):
         return self.model.peak_data
 
