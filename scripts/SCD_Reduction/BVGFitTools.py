@@ -190,7 +190,7 @@ def fitScaling(n_events, box, YTOF, YBVG, goodIDX=None, neigh_length_m=3, instru
     QX, QY, QZ = ICCFT.getQXQYQZ(box)
     dP = 8
     if instrumentName == 'TOPAZ':
-        dP = 3
+        dP = 8
     fitMaxIDX = tuple(
         np.array(np.unravel_index(YJOINT.argmax(), YJOINT.shape)))
     if goodIDX is None:
@@ -517,7 +517,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
 
         fitResults = Fit(Function=m, InputWorkspace='bvgWS', Output='bvgfit',
                          Minimizer='Levenberg-MarquardtMD')
-
     elif forceParams is not None:
         p0 = np.zeros(7)
         p0[0] = np.max(h)

@@ -46,7 +46,7 @@ values are below:
 | Parameter    |  Description               |  MaNDi   |  TOPAZ   | CORELLI |
 +==============+============================+==========+==========+=========+
 | DQPixel      | The side length for each   |          |          |         |
-|              | voxel used for fitting.    | 0.003    | 0.006    | 0.007   |
+|              | voxel used for fitting.    | 0.003    | 0.01     | 0.007   |
 |              | Units: 1/Angstrom          |          |          |         |
 +--------------+----------------------------+----------+----------+---------+
 | FracHKL      | The distance between peaks |          |          |         |

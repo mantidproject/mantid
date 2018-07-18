@@ -130,7 +130,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             nTheta=50
             nPhi = 50
             fracHKL = 0.4
-            dQPixel = 0.006
+            dQPixel = 0.01
         elif instrumentName == 'CORELLI':
             mindtBinWidth = 2
             maxdtBinWidth = 60
@@ -232,9 +232,9 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                 peak.setSigmaIntensity(1.0)
 
         # Cleanup
-        for wsName in mtd.getObjectNames():
-            if 'fit_' in wsName or 'bvgWS' in wsName or  'tofWS' in wsName or 'scaleWS' in wsName:
-                mtd.remove(wsName)
+        #for wsName in mtd.getObjectNames():
+         #   if 'fit_' in wsName or 'bvgWS' in wsName or  'tofWS' in wsName or 'scaleWS' in wsName:
+         #       mtd.remove(wsName)
         np.warnings.filterwarnings('default') # Re-enable on exit
         # Set the output
         self.setProperty('OutputPeaksWorkspace', peaks_ws_out)
