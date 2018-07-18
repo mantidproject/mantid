@@ -277,7 +277,7 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
   try {
     std::tie(inWS, indices) =
         getWorkspaceAndIndices<API::MatrixWorkspace>(Prop::INPUT_WS);
-  } catch (...) {
+  } catch (std::runtime_error &) {
     return issues;
   }
 
