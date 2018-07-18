@@ -4,8 +4,6 @@ from mantid.simpleapi import AppendSpectra, CloneWorkspace, ElasticWindow, LoadL
 from mantid.kernel import *
 from mantid.api import *
 
-import numpy as np
-
 
 def _normalize_by_index(workspace, index):
     """
