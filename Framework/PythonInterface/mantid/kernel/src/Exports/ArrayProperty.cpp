@@ -30,7 +30,7 @@ using return_cloned_numpy =
 
 // Call the dtype helper function
 template <typename type> std::string dtype(ArrayProperty<type> &self) {
-  return Mantid::PythonInterface::Converters::dtype(self);
+  return Converters::dtype(self);
 }
 
 #define EXPORT_ARRAY_PROP(type, prefix)                                        \
