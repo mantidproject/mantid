@@ -210,7 +210,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 elt_workspace = CloneWorkspace(InputWorkspace=elf_workspace, OutputWorkspace="__cloned",
                                                StoreInADS=False, EnableLogging=False)
 
-            _normalize_by_index(elt_workspace, np.argmin(sample_param))
+            _normalize_by_index(elt_workspace, 0)
 
             self.setProperty('OutputELT', elt_workspace)
 
