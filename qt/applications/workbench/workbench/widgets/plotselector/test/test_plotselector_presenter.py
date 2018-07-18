@@ -123,6 +123,15 @@ class PlotSelectorPresenterTest(unittest.TestCase):
         self.assertEqual(self.model.show_plot.mock_calls[0], mock.call(1))
         self.assertEqual(self.model.show_plot.mock_calls[1], mock.call(2))
 
+    def test_set_active_font_sets_active_font_in_view(self):
+        self.view.active_plot_number = 1
+        self.presenter.set_active_font(2)
+        # 2 calls, one to set the plot number 1 to normal, one to
+        # set plot number 2 to bold
+        self.assertEqual(self.view.set_active_font.mock_calls[0], mock.call(1, False))
+        self.assertEqual(self.view.set_active_font.mock_calls[1], mock.call(2, True))
+        self.assertEqual(self.view.active_plot_number, 2)
+
     # ------------------------ Plot Hiding -------------------------
 
     def test_hide_multiple_plots_calls_hide_in_model(self):
@@ -130,6 +139,18 @@ class PlotSelectorPresenterTest(unittest.TestCase):
         self.presenter.hide_selected_plots()
         self.assertEquals(self.model.hide_plot.mock_calls[0], mock.call(1))
         self.assertEquals(self.model.hide_plot.mock_calls[1], mock.call(2))
+
+    def test_toggle_plot_visibility_for_visible_plot(self):
+        self.model.is_visible = mock.Mock(return_value=True)
+        self.presenter.toggle_plot_visibility(42)
+        self.model.hide_plot.assert_called_once_with(42)
+        self.view.set_visibility_icon.assert_called_once_with(42, True)
+
+    def test_toggle_plot_visibility_for_hidden_plot(self):
+        self.model.is_visible = mock.Mock(return_value=False)
+        self.presenter.toggle_plot_visibility(42)
+        self.model.show_plot.assert_called_once_with(42)
+        self.view.set_visibility_icon.assert_called_once_with(42, False)
 
     # ------------------------ Plot Renaming ------------------------
 

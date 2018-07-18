@@ -95,9 +95,8 @@ class PlotSelectorPresenter(object):
         Called by the view when the filter text is changed (e.g. by
         typing or clearing the text)
         """
-        filter_text = self.view.get_filter_text()
-        if filter_text:
-            self.view.filter_plot_list(filter_text)
+        if self.view.get_filter_text():
+            self.view.filter_plot_list()
         else:
             self.view.unhide_all_plots()
 
@@ -118,7 +117,7 @@ class PlotSelectorPresenter(object):
         to bring the selected plot to the front
         """
         plot_number = self.view.get_currently_selected_plot_number()
-        self.make_plot_active(plot_number)
+        self._make_plot_active(plot_number)
 
     def show_multiple_selected(self):
         """
@@ -127,9 +126,9 @@ class PlotSelectorPresenter(object):
         """
         selected_plots = self.view.get_all_selected_plot_numbers()
         for plot_number in selected_plots:
-            self.make_plot_active(plot_number)
+            self._make_plot_active(plot_number)
 
-    def make_plot_active(self, plot_number):
+    def _make_plot_active(self, plot_number):
         """
         Make the plot with the given name active - bring it to the
         front and make it the choice for overplotting
@@ -184,7 +183,7 @@ class PlotSelectorPresenter(object):
         if self.model.is_visible(plot_number):
             self._hide_plot(plot_number)
         else:
-            self.make_plot_active(plot_number)
+            self._make_plot_active(plot_number)
 
         self.update_visibility_icon(plot_number)
 

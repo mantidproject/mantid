@@ -41,6 +41,7 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.figure_manager = mock.Mock()
         self.figure_manager.show = mock.Mock()
         self.figure_manager.get_window_title = mock.Mock(return_value="Plot1")
+        self.figure_manager.is_visible = mock.Mock(return_value=True)
 
         self.global_figure_manager = mock.Mock()
         self.global_figure_manager.add_observer = mock.Mock()
@@ -56,19 +57,37 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.assertEqual(self.global_figure_manager.add_observer.call_count, 1)
 
     def test_notify_for_new_plot_calls_append_in_presenter(self):
-        self.model.notify(FigureAction.New, "Plot1")
-        self.presenter.append_to_plot_list.assert_called_once_with("Plot1")
+        self.model.notify(FigureAction.New, 42)
+        self.presenter.append_to_plot_list.assert_called_once_with(42)
 
     def test_notify_for_closed_plot_calls_removed_in_presenter(self):
-        self.model.notify(FigureAction.Closed, "Plot1")
-        self.presenter.remove_from_plot_list.assert_called_once_with("Plot1")
+        self.model.notify(FigureAction.Closed, 42)
+        self.presenter.remove_from_plot_list.assert_called_once_with(42)
 
     def test_notify_for_renamed_plot_calls_rename_in_presenter(self):
         self.model.notify(FigureAction.Renamed, 42)
         self.presenter.rename_in_plot_list.assert_called_once_with(42, "Plot1")
 
+    def test_notify_for_renamed_plot_with_invalid_figure_number_does_nothing(self):
+        self.model.notify(FigureAction.Renamed, 0)
+        self.presenter.rename_in_plot_list.assert_not_called()
+
+    def test_notify_for_order_changed_calls_presenter(self):
+        self.model.notify(FigureAction.OrderChanged, 42)
+        self.presenter.update_last_active_order.assert_called_once_with()
+        self.presenter.set_active_font.assert_called_once_with(42)
+
+    def test_notify_for_order_changed_with_invalid_plot_number(self):
+        self.model.notify(FigureAction.OrderChanged, -1)
+        self.presenter.update_last_active_order.assert_called_once_with()
+        self.presenter.set_active_font.assert_not_called()
+
+    def test_notify_visibility_changed_calls_presesnter(self):
+        self.model.notify(FigureAction.VisibilityChanged, 42)
+        self.presenter.update_visibility_icon.assert_called_once_with(42)
+
     def test_notify_unknwon_updates_plot_list_in_presenter(self):
-        self.model.notify(FigureAction.Unknown, "")
+        self.model.notify(FigureAction.Unknown, -1)
         self.presenter.update_plot_list.assert_called_once_with()
 
     # ------------------------ Plot Showing ------------------------
@@ -82,6 +101,12 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.figure_manager.show.assert_not_called()
 
     # ------------------------ Plot Hiding -------------------------
+
+    def test_is_visible_returns_true_for_visible_window(self):
+        self.assertTrue(self.model.is_visible(42))
+
+    def test_is_visible_for_invalid_number_raises_value_error(self):
+        self.assertRaises(ValueError, self.model.is_visible, 0)
 
     def test_hide_plot_calls_hide_on_the_plot_window(self):
         self.model.hide_plot(42)
