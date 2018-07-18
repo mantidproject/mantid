@@ -40,5 +40,6 @@ Bugfixes
 - :ref:`MuonMaxent <algm-MuonMaxent>` and :ref:`PhaseQuad <algm-PhaseQuad>`  no longer include dead detectors (zero counts) when calculating the frequency spectrum.
 - :ref:`RemoveExpDecay <algm-RemoveExpDecay>` will not alter data from a dead detectors (zero counts).
 - :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` will give an error code for dead detectors (zero counts) in the phase table.
+- :ref:`MuonProcess <algm-MuonProcess>` always crops the data from `Xmin`.
 
 :ref:`Release 3.13.0 <v3.13.0>`
