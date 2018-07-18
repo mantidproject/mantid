@@ -30,6 +30,7 @@ if [[ ! -d $VIRTUAL_ENV ]]; then
     virtualenv --system-site-packages "$VIRTUAL_ENV"
     source $VIRTUAL_ENV/bin/activate
     pip install sphinx
+    pip install sphinx_bootstrap_theme
 else
     source $VIRTUAL_ENV/bin/activate
 fi
