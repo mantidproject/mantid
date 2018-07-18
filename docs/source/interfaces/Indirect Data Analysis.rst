@@ -130,9 +130,9 @@ preview plot.
 Options
 ~~~~~~~
 
-Note: common options are detailled in the :ref:`qens-fitting-features` section.
+.. seealso:: Common options are detailled in the :ref:`qens-fitting-features` section.
 
-Note: sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
+.. seealso:: Sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
 
 Sample
   A file that has been created using the Elwin tab with an :math:`x` axis of
@@ -214,9 +214,9 @@ are also available via the fit wizard.
 Options
 ~~~~~~~
 
-Note: common options are detailled in the :ref:`qens-fitting-features` section.
+.. seealso:: Common options are detailled in the :ref:`qens-fitting-features` section.
 
-Note: sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
+.. seealso:: Sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
 
 Sample
   Either a file (*_iqt.nxs*) or workspace (*_iqt*) that has been created using
@@ -265,9 +265,9 @@ preview plot.
 Options
 ~~~~~~~
 
-Note: common options are detailed in the :ref:`qens-fitting-features` section.
+.. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 
-Note: sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
+.. seealso:: Sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
 
 Sample
   Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
@@ -314,7 +314,7 @@ EISF. This is done by means of the
 Options
 ~~~~~~~
 
-Note: common options are detailled in the :ref:`qens-fitting-features` section.
+.. seealso:: Common options are detailled in the :ref:`qens-fitting-features` section.
 
   
  .. _qens-fitting-features:
