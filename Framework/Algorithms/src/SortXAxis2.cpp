@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/SortXAxis2.h"
+#include <iostream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -211,14 +212,18 @@ void SortXAxis::copyToOutputWorkspace(
  */
 template <typename Comparator>
 bool isItSorted(Comparator const &compare,
-                MatrixWorkspace_const_sptr inputWorkspace,
-                unsigned int specNum) {
-  return std::is_sorted(inputWorkspace->x(specNum).begin(),
+                MatrixWorkspace_const_sptr inputWorkspace) {
+  for (auto specNum = 0u; specNum < inputWorkspace->getNumberHistograms();
+       specNum++) {
+    if (!std::is_sorted(inputWorkspace->x(specNum).begin(),
                         inputWorkspace->x(specNum).end(),
-                        [&](std::size_t lhs, std::size_t rhs) -> bool {
-                          return compare(inputWorkspace->x(specNum)[lhs],
-                                         inputWorkspace->x(specNum)[rhs]);
-                        });
+                        [&](double lhs, double rhs) -> bool {
+                          return compare(lhs, rhs);
+                        })) {
+      return false;
+    }
+  }
+  return true;
 }
 
 /**
@@ -235,23 +240,10 @@ bool SortXAxis::determineIfHistogramIsValid(
   if (inputWorkspace->x(0).size() != inputWorkspace->y(0).size()) {
     // The only way to guarantee that a histogram is a proper histogram, is to
     // check whether each data value is in the correct order.
-    bool ascending = true;
-    for (auto specNum = 0u; specNum < inputWorkspace->getNumberHistograms();
-         specNum++) {
-      if (!isItSorted(std::greater<double>(), inputWorkspace, specNum)) {
-        ascending = false;
-        break;
-      }
-    }
-    if (!ascending) {
-      for (auto specNum = 0u; specNum < inputWorkspace->getNumberHistograms();
-           specNum++) {
-        if (!isItSorted(std::less<double>(), inputWorkspace, specNum)) {
-          // It is not ascending nor descending and is thus not a histogram
-          throw std::runtime_error(
-              "Data entered looks like a histogram, but is "
-              "not a valid histogram");
-        }
+    if (!isItSorted(std::greater<double>(), inputWorkspace)) {
+      if (!isItSorted(std::less<double>(), inputWorkspace)) {
+        throw std::runtime_error("Data entered looks like a histogram, but is "
+                                 "not a valid histogram");
       }
     }
     return true;
