@@ -180,14 +180,14 @@ class ComponentInfoTest(unittest.TestCase):
         self.assertEquals(type(info.name(5)), str)
 
 
-	"""
+    """
     ----------------------------------------------------------------------------
-	Exceptional Tests
-	----------------------------------------------------------------------------
+    Exceptional Tests
+    ----------------------------------------------------------------------------
 
-	Each of the tests below tries to pass invalid parameters to the exposed
+    Each of the tests below tries to pass invalid parameters to the exposed
     methods and expect an error to be thrown.
-	"""
+    """
 
     def test_detectorsInSubtree_exceptional(self):
         info = self._ws.componentInfo()
