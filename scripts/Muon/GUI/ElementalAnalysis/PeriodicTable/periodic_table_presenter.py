@@ -1,13 +1,10 @@
 from __future__ import print_function
 
-from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
-from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
-
 
 class PeriodicTable(object):
-    def __init__(self):
-        self.view = PeriodicTableView()
-        self.model = PeriodicTableModel()
+    def __init__(self, view, model):
+        self.view = view
+        self.model = model
         self.set_buttons()
 
     @property
@@ -41,19 +38,19 @@ class PeriodicTable(object):
         self.view.ptable.setSelection(elements)
 
     def register_table_changed(self, slot):
-        self.view.sig_table_changed.connect(slot)
+        self.view.on_table_changed(slot)
 
     def unregister_table_changed(self, slot):
-        self.view.sig_table_changed.disconnect(slot)
+        self.view.unreg_on_table_changed(slot)
 
     def register_table_lclicked(self, slot):
-        self.view.sig_table_lclicked.connect(slot)
+        self.view.on_table_lclicked(slot)
 
     def unregister_table_lclicked(self, slot):
-        self.view.sig_table_lclicked.disconnect(slot)
+        self.view.unreg_on_table_lclicked(slot)
 
     def register_table_rclicked(self, slot):
-        self.view.sig_table_rclicked.connect(slot)
+        self.view.on_table_rclicked(slot)
 
     def unregister_table_rclicked(self, slot):
-        self.view.sig_table_rclicked.disconnect(slot)
+        self.view.unreg_on_table_rclicked(slot)
