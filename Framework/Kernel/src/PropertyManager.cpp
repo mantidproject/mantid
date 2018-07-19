@@ -389,7 +389,9 @@ void PropertyManager::setPropertyValue(const std::string &name,
                                        const std::string &value) {
   Property *p = getPointerToProperty(
       name); // throws NotFoundError if property not in vector
+
   std::string errorMsg = p->setValue(value);
+
   this->afterPropertySet(name);
   if (!errorMsg.empty()) {
     errorMsg = "Invalid value for property " + p->name() + " (" + p->type() +
