@@ -58,7 +58,7 @@ private:
       std::vector<std::size_t> &workspaceIndecies,
       Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
       Mantid::API::MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfY,
-      unsigned int SpecNum);
+      unsigned int SpecNum, bool isAProperHistogram);
 
   void copyXandDxToOutputWorkspace(
       std::vector<std::size_t> &workspaceIndecies,
@@ -71,7 +71,10 @@ private:
                         Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
                         Mantid::API::MatrixWorkspace_sptr outputWorkspace,
                         const size_t sizeOfX, const size_t sizeOfY,
-                        unsigned int specNum);
+                        unsigned int specNum, bool isAProperHistogram);
+
+  bool determineIfHistogramIsValid(
+      Mantid::API::MatrixWorkspace_const_sptr inputWorkspace);
 };
 
 } // namespace Algorithms

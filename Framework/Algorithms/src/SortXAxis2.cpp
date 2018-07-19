@@ -42,19 +42,30 @@ void SortXAxis::exec() {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWorkspace = inputWorkspace->clone();
 
-  for (auto specNum = 0u; specNum < inputWorkspace->getNumberHistograms();
+  // Check if it is a valid histogram here
+  bool isAProperHistogram = determineIfHistogramIsValid(inputWorkspace);
+
+  // Define everything you can outside of the for loop
+  // Assume that all spec are the same size
+  const auto sizeOfX = inputWorkspace->x(0).size();
+  const auto sizeOfY = inputWorkspace->y(0).size();
+
+  std::string theOrder = getProperty("Ordering");
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
+  for (int specNum = 0u; specNum < (int)inputWorkspace->getNumberHistograms();
        specNum++) {
-
-    const auto sizeOfX = inputWorkspace->x(specNum).size();
-
+    PARALLEL_START_INTERUPT_REGION
     auto workspaceIndicies = createIndexes(sizeOfX);
 
-    sortIndicesByX(workspaceIndicies, getProperty("Ordering"), inputWorkspace,
-                   specNum);
+    sortIndicesByX(workspaceIndicies, theOrder, inputWorkspace, specNum);
 
     copyToOutputWorkspace(workspaceIndicies, inputWorkspace, outputWorkspace,
-                          sizeOfX, inputWorkspace->y(specNum).size(), specNum);
+                          sizeOfX, sizeOfY, specNum, isAProperHistogram);
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
+
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
