@@ -134,11 +134,10 @@ void SampleTransmission::calculate() {
   }
 
   // Set sample material properties
-  try{
-	  transCalcAlg->setProperty("ChemicalFormula",
-                            m_uiForm.leChemicalFormula->text().toStdString());
-  }catch(std::invalid_argument &e){
-
+  try {
+    transCalcAlg->setProperty("ChemicalFormula",
+                              m_uiForm.leChemicalFormula->text().toStdString());
+  } catch (std::invalid_argument &e) {
   }
   transCalcAlg->setProperty("DensityType",
                             m_uiForm.cbDensity->currentText().toStdString());
