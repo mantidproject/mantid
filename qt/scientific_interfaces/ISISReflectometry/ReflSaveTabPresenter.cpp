@@ -217,9 +217,15 @@ void ReflSaveTabPresenter::errorInvalidSaveDirectory() {
 NamedFormat ReflSaveTabPresenter::formatFromIndex(int formatIndex) const {
   switch (formatIndex) {
   case 0:
-    return NamedFormat::MFT;
+    return NamedFormat::Custom;
   case 1:
+    return NamedFormat::ThreeColumn;
+  case 2:
     return NamedFormat::ANSTO;
+  case 3:
+    return NamedFormat::ILLCosmos;
+  case 4:
+    return NamedFormat::MFT;
   default:
     throw std::runtime_error("Unknown save format.");
   }
