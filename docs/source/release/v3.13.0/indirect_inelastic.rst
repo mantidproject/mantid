@@ -69,4 +69,4 @@ Bugfixes
 - The MSDFit algorithm now uses the fully specified model given in the interface; previously MSDFit only used the
   model specified in the 'Fit Type' drop-down menu.
 - Fixed a failure in the wavelength interpolation of :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` which occurred under certain input property combinations.
-
+- The ElasticWindowMultiple algorithm now normalizes the *_elt workspace by the lowest temperature.
