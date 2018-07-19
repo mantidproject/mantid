@@ -123,6 +123,7 @@ Output:
   For transmission calculation, the beam run and the transmission run have to be recorded at the same instrument configuration.
   For beam flux normalisation and beam center movement, the beam run and the sample run have to be recorded at the same configuration.
   For container subtraction, the container and the sample run have to be recorded at the same configuration.
+  Otherwise a warning is logged, but the execution does not stop.
 
 .. categories::
 

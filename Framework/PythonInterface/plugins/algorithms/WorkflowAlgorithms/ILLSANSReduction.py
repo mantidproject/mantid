@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, StringListValidator
 from mantid.simpleapi import *
+from math import fabs
 
 
 class ILLSANSReduction(DataProcessorAlgorithm):
@@ -216,6 +217,12 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         AddSampleLog(Workspace=ws, LogName='BeamFluxError', LogText=str(mtd[integral].readE(0)[0]), LogType='Number')
         DeleteWorkspace(integral)
 
+    def _check_distances_match(self, ws1, ws2):
+        tolerance = 0.01 #m
+        l2_1 = mtd[ws1].getRun().getLogData('L2').value
+        l2_2 = mtd[ws2].getRun().getLogData('L2').value
+        return fabs(l2_1 - l2_2) < tolerance
+
     def PyExec(self):
 
         process = self.getPropertyValue('ProcessAs')
@@ -234,9 +241,13 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                     beam_x = mtd[beam].getRun().getLogData('BeamCenterX').value
                     beam_y = mtd[beam].getRun().getLogData('BeamCenterY').value
                     MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
+                    if not self._check_distances_match(ws, beam):
+                        self.log().warning('Different detector distances found for empty beam and sample runs!')
                 if process == 'Transmission':
-                    radius = self.getProperty('BeamRadius').value
+                    if not self._check_distances_match(ws, beam):
+                        self.log().warning('Different detector distances found for empty beam and transmission runs!')
                     RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=beam, OutputWorkspace=ws)
+                    radius = self.getProperty('BeamRadius').value
                     shapeXML = self._cylinder(radius)
                     det_list = FindDetectorsInShape(Workspace=ws, ShapeXML=shapeXML)
                     CalculateTransmission(SampleRunWorkspace=ws, DirectRunWorkspace=beam,
@@ -258,6 +269,9 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                     if process != 'Container':
                         container = self.getPropertyValue('ContainerInputWorkspace')
                         if container:
+                            if not self._check_distances_match(container, ws):
+                                self.log().warning(
+                                    'Different detector distances found for container and sample runs!')
                             Minus(LHSWorkspace=ws, RHSWorkspace=container, OutputWorkspace=ws)
                         mask = self.getPropertyValue('MaskedInputWorkspace')
                         if mask:
@@ -288,6 +302,9 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                                     Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws)
                                     DeleteWorkspace(flux_ws)
                             if coll_ws:
+                                if not self._check_distances_match(coll_ws, ws):
+                                    self.log().warning(
+                                        'Different detector distances found for the reference/flux and sample runs!')
                                 sample_coll = mtd[ws].getRun().getLogData('collimation.actual_position').value
                                 ref_coll = mtd[coll_ws].getRun().getLogData('collimation.actual_position').value
                                 flux_factor = (sample_coll ** 2) / (ref_coll ** 2)
