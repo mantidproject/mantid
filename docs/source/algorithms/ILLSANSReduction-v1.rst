@@ -52,6 +52,78 @@ Sample
 
 .. diagram:: ILLSANS-v1_sample_wkflw.dot
 
+Full Treatment
+~~~~~~~~~~~~~~
+
+**Example - full treatment of a sample**
+
+.. testsetup:: ExILLSANSReduction
+
+    config['default.facility'] = 'ILL'
+
+.. testcode:: ExILLSANSReduction
+
+    # Process the absorber (dark current, Cd/B4C)
+    ILLSANSReduction(Run='010462', ProcessAs='Absorber', OutputWorkspace='Cd')
+
+    # Process the empty beam
+    ILLSANSReduction(Run='010414', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Db')
+
+    # Calculate water container transmission
+    ILLSANSReduction(Run='010446', ProcessAs='Transmission', AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db', OutputWorkspace='wc_tr')
+    print('Water container transmission is {0:.3f}'.format(mtd['wc_tr'].readY(0)[0]))
+
+    # Process water container
+    ILLSANSReduction(Run='010454', ProcessAs='Container', AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db', TransmissionInputWorkspace='wc_tr', OutputWorkspace='wc')
+
+    # Calculate water transmission
+    ILLSANSReduction(Run='010445', ProcessAs='Transmission', AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db', OutputWorkspace='w_tr')
+    print('Water transmission is {0:.3f}'.format(mtd['w_tr'].readY(0)[0]))
+
+    # Process water, produce sensitivity workspace
+    ILLSANSReduction(Run='010453', ProcessAs='Reference',
+                     AbsorberInputWorkspace='Cd', ContainerInputWorkspace='wc',
+                     BeamInputWorkspace='Db', TransmissionInputWorkspace='wc_tr',
+                     SensitivityOutputWorkspace='sens', OutputWorkspace='water')
+
+    # Calculate sample container transmission
+    ILLSANSReduction(Run='010444', ProcessAs='Transmission', AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db', OutputWorkspace='sc_tr')
+    print('Sample container transmission is {0:.3f}'.format(mtd['sc_tr'].readY(0)[0]))
+
+    # Process sample container
+    ILLSANSReduction(Run='010460', ProcessAs='Container',
+                     AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db',
+                     TransmissionInputWorkspace='sc_tr', OutputWorkspace='sc')
+
+    # Calculate sample transmission
+    ILLSANSReduction(Run='010585', ProcessAs='Transmission', AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db', OutputWorkspace='s_tr')
+    print('Sample transmission is {0:.3f}'.format(mtd['s_tr'].readY(0)[0]))
+
+    # Process sample
+    ILLSANSReduction(Run='010569.nxs', ProcessAs='Sample',
+                     AbsorberInputWorkspace='Cd', ContainerInputWorkspace='sc',
+                     BeamInputWorkspace='Db', SensitivityInputWorkspace='sens',
+                     TransmissionInputWorkspace='s_tr', OutputWorkspace='sample')
+
+Output:
+
+.. testoutput:: ExILLSANSReduction
+
+    Water container transmission is 0.945
+    Water transmission is 0.501
+    Sample container transmission is 0.665
+    Sample transmission is 0.640
+
+.. testcleanup:: ExILLSANSReduction
+
+    mtd.clear()
+
+.. note::
+
+  For transmission calculation, the beam run and the transmission run have to be recorded at the same instrument configuration.
+  For beam flux normalisation and beam center movement, the beam run and the sample run have to be recorded at the same configuration.
+  For container subtraction, the container and the sample run have to be recorded at the same configuration.
+
 .. categories::
 
 .. sourcelink::
