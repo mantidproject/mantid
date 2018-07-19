@@ -145,7 +145,7 @@ def get_md_data(workspace, normalization, withError=False):
 
     :param workspace: :class:`mantid.api.IMDHistoWorkspace` containing data
     :param normalization: if :class:`mantid.api.MDNormalization.NumEventsNormalization`
-    it will divide intensity by the number of corresponding MDEvents
+        it will divide intensity by the number of corresponding MDEvents
     :param withError: flag for if the error is calculated. If False, err is returned as None
 
     returns a tuple containing bin boundaries for each dimension, the (maybe normalized)
