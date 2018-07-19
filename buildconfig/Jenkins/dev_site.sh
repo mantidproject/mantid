@@ -54,7 +54,7 @@ if [ "builder" == "$USER" ]; then
     git config user.email "mantid-buildserver@mantidproject.org"
 fi
 
-if [ $(git diff --quiet) ]; then
+if [ ! $(git diff --quiet) ]; then
     echo "Committing new site"
     git add .
     git commit -m "Automatic update of developer site"
