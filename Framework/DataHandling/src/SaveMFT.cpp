@@ -26,9 +26,9 @@ void SaveMFT::extraProps() {
  *  @param file :: pointer to output file stream
  */
 void SaveMFT::extraHeaders(std::ofstream &file) {
-  API::MatrixWorkspace_const_sptr m_ws = getProperty("InputWorkspace");
-  if (!m_ws)
-    throw std::runtime_error("Cannot treat InputWorkspace");
+  //API::MatrixWorkspace_const_sptr m_ws = getProperty("InputWorkspace");
+  //if (!m_ws)
+  //  throw std::runtime_error("Cannot treat InputWorkspace");
   auto samp = m_ws->run();
   std::string instrument{""};
   std::string user = getProperty("UserContact");

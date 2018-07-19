@@ -68,8 +68,10 @@ public:
     data.reserve(5);
     data.emplace_back("MFT");
     data.emplace_back("q\trefl\trefl_err\tq_res");
-    data.emplace_back("3.300000e-01\t3.000000e+00\t1.732051e+00\t0.000000e+00");
-    data.emplace_back("3.400000e-01\t6.600000e+00\t2.569047e+00\t0.000000e+00");
+    data.emplace_back("3.300000000000000e-01\t3.000000000000000e+00\t1."
+                      "732050807568877e+00\t0.000000000000000e+00");
+    data.emplace_back("3.400000000000000e-01\t6.600000000000000e+00\t2."
+                      "569046515733026e+00\t0.000000000000000e+00");
     std::ifstream in(filename);
     std::string fullline;
     auto it = data.begin();
@@ -110,8 +112,12 @@ public:
     data.reserve(5);
     data.emplace_back("MFT");
     data.emplace_back("q\trefl\trefl_err\tq_res");
-    data.emplace_back("3.050000e+00\t3.000000e+00\t1.732051e+00\t0.000000e+00");
-    data.emplace_back("7.250000e+00\t6.600000e+00\t2.569047e+00\t0.000000e+00");
+    data.emplace_back(
+        "3.050000000000000e+00\t3.000000000000000e+00\t1.732050807568877e+"
+        "00\t0.000000000000000e+00");
+    data.emplace_back(
+        "7.250000000000000e+00\t6.600000000000000e+00\t2.569046515733026e+"
+        "00\t0.000000000000000e+00");
     std::ifstream in(filename);
     std::string fullline;
     auto it = data.begin();
@@ -130,7 +136,7 @@ public:
     AnalysisDataService::Instance().remove(wsname);
   }
 
-  void test_number_of_header_lines_no_data() {
+  void test_header_for_empty_workspace() {
     auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
     std::string wsname = "ws1";
     AnalysisDataService::Instance().addOrReplace(wsname, ws);
@@ -139,8 +145,8 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", wsname));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", wsname));
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
+    TS_ASSERT(!alg.isExecuted());
     std::string filename = alg.getPropertyValue("Filename");
     TS_ASSERT(Poco::File(filename).exists());
     std::ifstream in(filename);

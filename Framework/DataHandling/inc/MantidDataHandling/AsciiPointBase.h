@@ -2,6 +2,7 @@
 #define MANTID_DATAHANDLING_ASCIIPOINTBASE_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -69,6 +70,7 @@ protected:
   /// The separator character
   char m_sep{'\t'};
   size_t m_length{0};
+  API::MatrixWorkspace_const_sptr m_ws;
 };
 
 } // namespace DataHandling
