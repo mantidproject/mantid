@@ -11,8 +11,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** SortXAxis
-
+/**
   Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
@@ -33,9 +32,16 @@ namespace Algorithms {
 
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
-
-  @author Samuel Jones
 */
+
+/**
+ * @brief SortXAxis will take Histogram or Point data and reorder it based on
+ * the X Axis' values, whilst maintaining it's Dx, Y and E axis relative values.
+ * @author Samuel Jones
+ * @version 2.0
+ * @date 07-2018
+ * @copyright GNU General Public License
+ */
 
 class DLLExport SortXAxis : public API::Algorithm {
 public:
@@ -58,7 +64,7 @@ private:
       std::vector<std::size_t> &workspaceIndecies,
       Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
       Mantid::API::MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfY,
-      unsigned int SpecNum/*, bool isAProperHistogram*/);
+      unsigned int SpecNum, bool isAProperHistogram);
 
   void copyXandDxToOutputWorkspace(
       std::vector<std::size_t> &workspaceIndecies,
@@ -71,10 +77,10 @@ private:
                         Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
                         Mantid::API::MatrixWorkspace_sptr outputWorkspace,
                         const size_t sizeOfX, const size_t sizeOfY,
-                        unsigned int specNum/*, bool isAProperHistogram*/);
+                        unsigned int specNum, bool isAProperHistogram);
 
-  /*bool determineIfHistogramIsValid(
-      Mantid::API::MatrixWorkspace_const_sptr inputWorkspace);*/
+  bool determineIfHistogramIsValid(
+      Mantid::API::MatrixWorkspace_const_sptr inputWorkspace);
 };
 
 } // namespace Algorithms

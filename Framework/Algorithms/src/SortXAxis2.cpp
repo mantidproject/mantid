@@ -43,7 +43,7 @@ void SortXAxis::exec() {
   MatrixWorkspace_sptr outputWorkspace = inputWorkspace->clone();
 
   // Check if it is a valid histogram here
-  /*bool isAProperHistogram = determineIfHistogramIsValid(inputWorkspace);*/
+  bool isAProperHistogram = determineIfHistogramIsValid(inputWorkspace);
 
   // Define everything you can outside of the for loop
   // Assume that all spec are the same size
@@ -61,7 +61,7 @@ void SortXAxis::exec() {
     sortIndicesByX(workspaceIndicies, theOrder, inputWorkspace, specNum);
 
     copyToOutputWorkspace(workspaceIndicies, inputWorkspace, outputWorkspace,
-                          sizeOfX, sizeOfY, specNum/*, isAProperHistogram*/);
+                          sizeOfX, sizeOfY, specNum, isAProperHistogram);
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -69,6 +69,12 @@ void SortXAxis::exec() {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
+/**
+ * @brief Gets a vector of numbers from 0 to the sizeOfX-1 and returns it
+ *
+ * @param sizeOfX The size of the Spectrum's X axis
+ * @return std::vector<std::size_t>
+ */
 std::vector<std::size_t> SortXAxis::createIndexes(const size_t sizeOfX) {
   std::vector<std::size_t> workspaceIndicies;
   workspaceIndicies.reserve(sizeOfX);
@@ -78,6 +84,16 @@ std::vector<std::size_t> SortXAxis::createIndexes(const size_t sizeOfX) {
   return workspaceIndicies;
 }
 
+/**
+ * @brief A template for sorting the values given a comparator
+ *
+ * @tparam Comparator
+ * @param workspaceIndicies, the vector of indicies values
+ * @param inputWorkspace, the original workspace
+ * @param specNum, the Spectrum number to be sorted
+ * @param compare, std::less<double> for Ascending order, std::greater<double>
+ * for descending order
+ */
 template <typename Comparator>
 void sortByXValue(std::vector<std::size_t> &workspaceIndicies,
                   MatrixWorkspace_const_sptr inputWorkspace,
@@ -102,6 +118,17 @@ void SortXAxis::sortIndicesByX(std::vector<std::size_t> &workspaceIndicies,
   }
 }
 
+/**
+ * @brief Copies the sorted inputworkspace into the output workspace without
+ * using clone because of how histograms are supported, for the X Axis and the
+ * Dx Axis.
+ *
+ * @param workspaceIndicies the sorted vector of indecies
+ * @param inputWorkspace the unsorted initial workspace
+ * @param outputWorkspace the emptry output workspace
+ * @param sizeOfX the Maximum index of X
+ * @param specNum the Spectrum it is currently copying over
+ */
 void SortXAxis::copyXandDxToOutputWorkspace(
     std::vector<std::size_t> &workspaceIndicies,
     MatrixWorkspace_const_sptr inputWorkspace,
@@ -114,6 +141,7 @@ void SortXAxis::copyXandDxToOutputWorkspace(
   }
 
   // If Dx's are present, move Dx's to the output workspace
+  // If Dx's are present, move Dx's to the output workspace
   if (inputWorkspace->hasDx(specNum)) {
     for (auto workspaceIndex = 0u; workspaceIndex < sizeOfX; workspaceIndex++) {
       outputWorkspace->mutableDx(specNum)[workspaceIndex] =
@@ -122,24 +150,39 @@ void SortXAxis::copyXandDxToOutputWorkspace(
   }
 }
 
+/**
+ * @brief Copies the sorted inputworkspace into the output workspace without
+ * using clone because of how histograms are supported, for the Y Axis and the E
+ * Axis.
+ *
+ * @param workspaceIndicies the sorted vector of indicies
+ * @param inputWorkspace the unsorted input workspaces
+ * @param outputWorkspace the empty output workspace
+ * @param sizeOfY the Maxiumum index of Y
+ * @param specNum the spectrum number being copied into
+ * @param isAProperHistogram whether or not it has been determined to be a valid
+ * histogram earlier on.
+ */
 void SortXAxis::copyYandEToOutputWorkspace(
     std::vector<std::size_t> &workspaceIndicies,
     MatrixWorkspace_const_sptr inputWorkspace,
     MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfY,
-    unsigned int specNum) {
+    unsigned int specNum, bool isAProperHistogram) {
   // If Histogram data find the biggest index value and remove it from
   // workspaceIndicies
-  if (inputWorkspace->isHistogramData()) {
+  if (isAProperHistogram) {
     auto lastIndexIt =
         std::find(workspaceIndicies.begin(), workspaceIndicies.end(), sizeOfY);
     workspaceIndicies.erase(lastIndexIt);
   }
 
+  auto &inSpaceY = inputWorkspace->y(specNum);
+  auto &inSpaceE = inputWorkspace->e(specNum);
   for (auto workspaceIndex = 0u; workspaceIndex < sizeOfY; workspaceIndex++) {
     outputWorkspace->mutableY(specNum)[workspaceIndex] =
-        inputWorkspace->y(specNum)[workspaceIndicies[workspaceIndex]];
+        inSpaceY[workspaceIndicies[workspaceIndex]];
     outputWorkspace->mutableE(specNum)[workspaceIndex] =
-        inputWorkspace->e(specNum)[workspaceIndicies[workspaceIndex]];
+        inSpaceE[workspaceIndicies[workspaceIndex]];
   }
 }
 
@@ -147,11 +190,74 @@ void SortXAxis::copyToOutputWorkspace(
     std::vector<std::size_t> &workspaceIndicies,
     MatrixWorkspace_const_sptr inputWorkspace,
     MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfX,
-    const size_t sizeOfY, unsigned int specNum) {
+    const size_t sizeOfY, unsigned int specNum, bool isAProperHistogram) {
   copyXandDxToOutputWorkspace(workspaceIndicies, inputWorkspace,
                               outputWorkspace, sizeOfX, specNum);
   copyYandEToOutputWorkspace(workspaceIndicies, inputWorkspace, outputWorkspace,
-                             sizeOfY, specNum);
+                             sizeOfY, specNum, isAProperHistogram);
 }
+
+/**
+ * @brief Determines whether it is a valid histogram or not.
+ *
+ * @param inputWorkspace the unsorted input workspace
+ * @return true if it is a valid histogram else produce a runtime_error
+ * @return false if it is not a histogram, and is thus point data
+ */
+bool SortXAxis::determineIfHistogramIsValid(
+    MatrixWorkspace_const_sptr inputWorkspace) {
+  // Assuming all X and Ys are the same, if X is not the same size as y, assume
+  // it is a histogram
+  if (inputWorkspace->x(0).size() != inputWorkspace->y(0).size()) {
+    // The only way to guarantee that a histogram is a proper histogram, is to
+    // check whether each data value is in the correct order.
+    bool ascending = true;
+    for (auto specNum = 0u; specNum < inputWorkspace->getNumberHistograms();
+         specNum++) {
+      if (!isItSorted(std::greater<double>(), inputWorkspace, specNum)) {
+        ascending = false;
+        break;
+      }
+    }
+    if (!ascending) {
+      for (auto specNum = 0u; specNum < inputWorkspace->getNumberHistograms();
+           specNum++) {
+        if (!isItSorted(std::less<double>(), inputWorkspace, specNum)) {
+          // It is not ascending nor descending and is thus not a histogram
+          throw std::runtime_error(
+              "Data entered looks like a histogram, but is "
+              "not a valid histogram");
+        }
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+/**
+ * @brief determines whether or not a given spectrum is sorted based on a passed
+ * comparator
+ *
+ * @tparam Comparator
+ * @param compare std::less<double> for descending, and std::greater<double> for
+ * ascending.
+ * @param inputWorkspace the unsorted input workspace
+ * @param specNum the spectrum number currently being compared
+ * @return true if it is sorted
+ * @return false if it is not sorted
+ */
+template <typename Comparator>
+bool isItSorted(Comparator const &compare,
+                MatrixWorkspace_const_sptr inputWorkspace,
+                unsigned int specNum) {
+  return std::is_sorted(inputWorkspace->x(specNum).begin(),
+                        inputWorkspace->x(specNum).end(),
+                        [&](std::size_t lhs, std::size_t rhs) -> bool {
+                          return compare(inputWorkspace->x(specNum)[lhs],
+                                         inputWorkspace->x(specNum)[rhs]);
+                        });
+}
+
 } // namespace Algorithms
 } // namespace Mantid
