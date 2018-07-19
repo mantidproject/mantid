@@ -53,7 +53,7 @@ createWorkspace(std::vector<double> const &x, std::vector<double> const &y,
                 std::vector<double> const &e = std::vector<double>()) {
   Points xVals(x);
   Counts yVals(y);
-  CountVariances eVals(e.empty() ? std::vector<double>(y.size()) : e);
+  CountStandardDeviations eVals(e.empty() ? std::vector<double>(y.size()) : e);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, Histogram(xVals, yVals, eVals));
   return retVal;
@@ -128,7 +128,7 @@ void ExtractPolarizationEfficiencies::exec() {
   auto alg = createChildAlgorithm("JoinISISPolarizationEfficiencies");
   auto const &efficiencies = EFFICIENCIES.at(method);
   for (auto const &name : efficiencies) {
-    auto const propValue = instrument->getParameterAsString(name);
+    auto propValue = instrument->getParameterAsString(name);
     if (propValue.empty()) {
       throw std::invalid_argument("Parameter " + name +
                                   " is missing from the correction parameters");
@@ -141,7 +141,10 @@ void ExtractPolarizationEfficiencies::exec() {
                                std::to_string(prop.size()) + " != " +
                                std::to_string(lambda.size()));
     }
-    auto ws = createWorkspace(lambda, prop);
+    auto const errorName = name + "_Errors";
+    propValue = instrument->getParameterAsString(errorName);
+    auto const errorProp = propValue.empty() ? std::vector<double>() : parseVector(errorName, propValue);
+    auto ws = createWorkspace(lambda, prop, errorProp);
     alg->setProperty(name, ws);
   }
   alg->execute();
