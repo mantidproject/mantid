@@ -28,7 +28,7 @@ time and effort helping us to make this another reliable version of Mantid.
 Citation
 --------
 
-Please cite any usage of Mantid as follows: **TODO update with current version doi**
+Please cite any usage of Mantid as follows:
 
 - *Mantid 3.13.0: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. `doi: 10.5286/SOFTWARE/MANTID3.13.0 <http://dx.doi.org/10.5286/SOFTWARE/MANTID3.13.0>`_
 
