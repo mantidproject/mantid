@@ -22,15 +22,13 @@ void SaveReflCustomAscii::extraProps() {
       "WriteDeltaQ", false,
       "If true, the error on DeltaQ will be written as the fourth column.");
   declareProperty("Subtitle", false, "If true, subtitle added to header.");
+  appendSeparatorProperty();
 }
 
 /** virtual method to add information to the file before the data
  *  @param file :: pointer to output file stream
  */
 void SaveReflCustomAscii::extraHeaders(std::ofstream &file) {
-    MatrixWorkspace_const_sptr m_ws = getProperty("InputWorkspace");
-    if (!m_ws)
-      throw std::runtime_error("Cannot treat InputWorkspace");
   auto samp = m_ws->run();
   bool subtitle = getProperty("Subtitle");
   std::string subtitleEntry;

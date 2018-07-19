@@ -25,9 +25,6 @@ void SaveReflThreeColumnAscii::extraProps() {
  *  @param file :: pointer to output file stream
  */
 void SaveReflThreeColumnAscii::extraHeaders(std::ofstream &file) {
-    MatrixWorkspace_const_sptr m_ws = getProperty("InputWorkspace");
-    if (!m_ws)
-      throw std::runtime_error("Cannot treat InputWorkspace");
   auto samp = m_ws->run();
   std::string title = getProperty("Title");
 
