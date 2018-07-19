@@ -120,9 +120,8 @@ void IndexPeakswithSatellites::exec() {
   int main_indexed = 0;
   int sate_indexed = 0;
   int total_indexed = 0;
-  double average_error;
-  double main_error;
-  double satellite_error;
+  double main_error = 0.;
+  double satellite_error = 0.;
   double tolerance = getProperty("Tolerance");
   double satetolerance = getProperty("Tolerance for Satellite");
 
@@ -191,7 +190,7 @@ void IndexPeakswithSatellites::exec() {
     IndexingUtils::RoundHKLs(miller_indices); // HKLs must be rounded for
     // Optimize_UB to work
     num_indexed = original_indexed;
-    average_error = original_error;
+    double average_error = original_error;
 
     bool done = false;
     if (num_indexed < 3) // can't optimize without at least 3
