@@ -22,21 +22,22 @@ class ILLSANSReductionTest(unittest.TestCase):
         self._check_output(mtd['Cd'])
 
     def test_beam(self):
-        beam = ILLSANSReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Db', ReturnAll=True)
+        ILLSANSReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Db')
         self._check_output(mtd['Db'])
-        self.assertAlmostEqual(beam.BeamCenterX, -0.0048, delta=1e-4)
-        self.assertAlmostEqual(beam.BeamCenterY, -0.0027, delta=1e-4)
-        self.assertAlmostEqual(beam.BeamFluxValue, 6618861, delta=1)
-        self.assertAlmostEqual(beam.BeamFluxError, 8554, delta=1)
+        run = mtd['Db'].getRun()
+        self.assertAlmostEqual(run.getLogData('BeamCenterX').value, -0.0048, delta=1e-4)
+        self.assertAlmostEqual(run.getLogData('BeamCenterY').value, -0.0027, delta=1e-4)
+        self.assertAlmostEqual(run.getLogData('BeamFluxValue').value, 6618861, delta=1)
+        self.assertAlmostEqual(run.getLogData('BeamFluxError').value, 8554, delta=1)
 
     def test_transmission(self):
-        beam = ILLSANSReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Db', ReturnAll=True)
-        transmission = ILLSANSReduction(Run='010585', ProcessAs='Transmission', BeamInputWorkspace='Db', ReturnAll=True)
-        self.assertAlmostEqual(transmission.TransmissionValue, 0.640, delta=1e-3)
-        self.assertAlmostEqual(transmission.TransmissionError, 0.0019, delta=1e-4)
+        ILLSANSReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Db')
+        ILLSANSReduction(Run='010585', ProcessAs='Transmission', BeamInputWorkspace='Db', OutputWorkspace='Tr')
+        self.assertAlmostEqual(mtd['Tr'].readY(0)[0], 0.640, delta=1e-3)
+        self.assertAlmostEqual(mtd['Tr'].readE(0)[0], 0.0019, delta=1e-4)
 
     def test_container(self):
-        container = ILLSANSReduction(Run='010460', ProcessAs='Container', OutputWorkspace='can')
+        ILLSANSReduction(Run='010460', ProcessAs='Container', OutputWorkspace='can')
         self._check_output(mtd['can'])
 
     def test_reference(self):
@@ -45,7 +46,7 @@ class ILLSANSReductionTest(unittest.TestCase):
         self._check_output(mtd['sens'], logs=False)
 
     def test_sample(self):
-        sample = ILLSANSReduction(Run='010569', ProcessAs='Sample')
+        ILLSANSReduction(Run='010569', ProcessAs='Sample', OutputWorkspace='sample')
         self._check_output(mtd['sample'])
 
     def _check_output(self, ws, logs=True):
