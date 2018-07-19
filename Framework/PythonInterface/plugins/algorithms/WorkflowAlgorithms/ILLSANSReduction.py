@@ -240,6 +240,7 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                         beam_y = mtd[beam].getRun().getLogData('BeamCenterY').value
                         MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
                     transmission_ws = self.getPropertyValue('TransmissionInputWorkspace')
+
                     if transmission_ws:
                         transmission = mtd[transmission_ws].readY(0)[0]
                         transmission_err = mtd[transmission_ws].readE(0)[0]
