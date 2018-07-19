@@ -143,7 +143,9 @@ void ExtractPolarizationEfficiencies::exec() {
     }
     auto const errorName = name + "_Errors";
     propValue = instrument->getParameterAsString(errorName);
-    auto const errorProp = propValue.empty() ? std::vector<double>() : parseVector(errorName, propValue);
+    auto const errorProp = propValue.empty()
+                               ? std::vector<double>()
+                               : parseVector(errorName, propValue);
     auto ws = createWorkspace(lambda, prop, errorProp);
     alg->setProperty(name, ws);
   }

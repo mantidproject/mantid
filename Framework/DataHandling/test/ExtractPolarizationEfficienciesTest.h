@@ -548,11 +548,11 @@ private:
       pmap->addString(instrument.get(), "P2", "0.981 0.982 0.983 0.984");
       pmap->addString(instrument.get(), "F1", "0.971 0.972 0.973 0.974");
       pmap->addString(instrument.get(), "F2", "0.961 0.962 0.963 0.964");
-        if (loadErrors) {
-          pmap->addString(instrument.get(), "P2_Errors", "0.11 0.21 0.31 0.41");
-          pmap->addString(instrument.get(), "F1_Errors", "0.12 0.22 0.32 0.42");
-          pmap->addString(instrument.get(), "F2_Errors", "0.13 0.23 0.33 0.43");
-        }
+      if (loadErrors) {
+        pmap->addString(instrument.get(), "P2_Errors", "0.11 0.21 0.31 0.41");
+        pmap->addString(instrument.get(), "F1_Errors", "0.12 0.22 0.32 0.42");
+        pmap->addString(instrument.get(), "F2_Errors", "0.13 0.23 0.33 0.43");
+      }
     }
 
     instrument = boost::make_shared<Instrument>(instrument, pmap);
