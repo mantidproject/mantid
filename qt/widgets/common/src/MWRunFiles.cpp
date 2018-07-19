@@ -586,13 +586,11 @@ const QString MWRunFiles::findFilesGetSearchText(QString &searchText) {
 * @param searchText :: text to create search parameters from
 */
 void MWRunFiles::runFindFiles(const QString &searchText) {
-  if (!searchText.isEmpty()) {
-    emit findingFiles();
+  emit findingFiles();
 
-    const auto parameters =
-        createFindFilesSearchParameters(searchText.toStdString());
-    m_pool.createWorker(this, parameters);
-  }
+  const auto parameters =
+      createFindFilesSearchParameters(searchText.toStdString());
+  m_pool.createWorker(this, parameters);
 }
 
 /** Calls cancel on a running instance of MonitorLiveData.

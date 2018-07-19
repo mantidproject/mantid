@@ -110,7 +110,7 @@ class StateGuiModel(object):
 
     @property
     def hab_pos_1(self):
-        return self.get_simple_element_with_attribute(element_id=SetId.centre, default_value='', attribute="pos1")
+        return self.get_simple_element_with_attribute(element_id=SetId.centre_HAB, default_value='', attribute="pos1")
 
     @hab_pos_1.setter
     def hab_pos_1(self, value):
@@ -118,7 +118,7 @@ class StateGuiModel(object):
 
     @property
     def hab_pos_2(self):
-        return self.get_simple_element_with_attribute(element_id=SetId.centre, default_value='', attribute="pos2")
+        return self.get_simple_element_with_attribute(element_id=SetId.centre_HAB, default_value='', attribute="pos2")
 
     @hab_pos_2.setter
     def hab_pos_2(self, value):

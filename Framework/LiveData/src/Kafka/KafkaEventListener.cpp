@@ -97,5 +97,10 @@ API::ILiveListener::RunStatus KafkaEventListener::runStatus() {
 int KafkaEventListener::runNumber() const {
   return (m_decoder ? m_decoder->runNumber() : -1);
 }
+
+/// @copydoc ILiveListener::dataReset
+bool KafkaEventListener::dataReset() {
+  return (m_decoder ? m_decoder->dataReset() : false);
+}
 }
 }

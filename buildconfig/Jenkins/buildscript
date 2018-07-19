@@ -257,7 +257,7 @@ cd $BUILD_DIR
 # Clean up any artifacts from last build so that if it fails
 # they don't get archived again
 ###############################################################################
-rm -f -- *.dmg *.rpm *.deb *.tar.gz
+rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 
 ###############################################################################
 # CMake configuration
