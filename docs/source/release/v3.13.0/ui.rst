@@ -11,7 +11,7 @@ MantidPlot
 ----------
 
 - MantidPlot's pyplot API has been removed.
-- 
+
 .. figure:: ../../images/WorkspaceWidgetSortSize.png
     :class: screenshot
     :align: right
@@ -67,6 +67,7 @@ The `Instrument View
 tool in Mantid has undergone some major changes under-the-hood which has
 resulted in a smoother, more responsive interface.  Instruments generally load
 faster as well. Below are a few noteworthy improvements to load times (as tested on Windows 10):
+
 
 +------------+-----------+
 | Instrument | Speedup   |
