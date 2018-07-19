@@ -31,8 +31,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid;
 
-namespace {
-
 //-----------------------------------------------------
 /** create a Bragg workspace containg 2 spectra.
  * Each has 100 data points containing a Gaussian peak
@@ -147,6 +145,44 @@ createBraggWorkspace(const std::string &name) {
 
   return ws;
 }
+
+//---------------------------------------------------------------------------------------
+/** create a MatrixWorkspace containing integrated peak intensities for the 5
+ * spectra
+ *  testing workspace
+ * @brief createIntensityWorkspace
+ * @param name
+ * @return
+ */
+Mantid::API::MatrixWorkspace_sptr
+createIntensityWorkspace(const std::string &name) {
+  Mantid::API::FrameworkManager::Instance();
+  size_t num_det = 5;
+  size_t n = 1;
+  Mantid::DataObjects::Workspace2D_sptr ws =
+      boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+          Mantid::API::WorkspaceFactory::Instance().create("Workspace2D",
+                                                           num_det, n, n));
+  // create unit
+  std::string unitlabel("dSpacing");
+  ws->getAxis(0)->unit() =
+      Mantid::Kernel::UnitFactory::Instance().create(unitlabel);
+
+  // create intensity data
+  for (size_t i = 0; i < num_det; i++) {
+    auto &vec_x_i = ws->mutableX(i);
+    auto &vec_y_i = ws->mutableY(i);
+    auto &vec_e_i = ws->mutableE(i);
+
+    vec_x_i[0] = 1.2;
+    vec_y_i[0] = (static_cast<double>(i) + 10) * 2.5;
+    vec_e_i[0] = sqrt(fabs(vec_y_i[0]));
+  }
+
+  // add to ADS
+  Mantid::API::AnalysisDataService::Instance().add(name, ws);
+
+  return ws;
 }
 
 class ConvertToPoleFigureTest : public CxxTest::TestSuite {
@@ -158,18 +194,24 @@ public:
   }
 
   //-------------------------------------------------------------------------------------------
-  /**
+  /** test on a 5-pixel instrument which corresponds to VULCAN's east bank
+   * (center and 4 corners)
    * @brief test_Execute
    */
-  void New_test_Execute() {
+  void test_Execute() {
 
     // about input workspaces
     std::string peak_intensity_ws_name("TestPeakIntensityWorkspace");
     std::string input_ws_name("TestWithInstrumentWorkspace");
+    std::string out_md_name("FiveEventsMDWorkspace");
+    const std::string hrot_name("HROT");
+    const std::string omega_name("Omega");
 
     API::MatrixWorkspace_sptr dataws = createBraggWorkspace(input_ws_name);
-    // TODO API::MatrixWorkspace_sptr intensityws =
-    // createIntensityWorkspace(peak_intensity_ws_name);
+    API::MatrixWorkspace_sptr intensityws =
+        createIntensityWorkspace(peak_intensity_ws_name);
+    TS_ASSERT_EQUALS(dataws->getNumberHistograms(),
+                     intensityws->getNumberHistograms())
 
     Mantid::Algorithms::ConvertToPoleFigure pfcalculator;
     pfcalculator.initialize();
@@ -177,13 +219,14 @@ public:
     // set properties
     TS_ASSERT_THROWS_NOTHING(
         pfcalculator.setProperty("InputWorkspace", input_ws_name));
-    pfcalculator.setProperty("OutputWorkspace", "TwoSpecPoleFigure");
-    pfcalculator.setProperty("IntegratedPeakIntensityWorkspace",
-                             peak_intensity_ws_name);
-    // TODO pfcalculator.setProperty("HROTName", hrot_name);
-    // TODO pfcalculator.setProperty("OmegaName", omega_name);
+    TS_ASSERT_THROWS_NOTHING(
+        pfcalculator.setProperty("OutputWorkspace", out_md_name));
+    TS_ASSERT_THROWS_NOTHING(pfcalculator.setProperty(
+        "IntegratedPeakIntensityWorkspace", peak_intensity_ws_name));
+    TS_ASSERT_THROWS_NOTHING(pfcalculator.setProperty("HROTName", hrot_name));
+    TS_ASSERT_THROWS_NOTHING(pfcalculator.setProperty("OmegaName", omega_name));
 
-    pfcalculator.execute();
+    TS_ASSERT_THROWS_NOTHING(pfcalculator.execute());
 
     // run
     TS_ASSERT(pfcalculator.isExecuted());
@@ -196,17 +239,52 @@ public:
             API::AnalysisDataService::Instance().retrieve("TwoSpecPoleFigure"));
     TS_ASSERT(outws);
 
-    // get the vectors out - TODO
+    // get the vectors out
     std::vector<double> r_td_vector = pfcalculator.getProperty("R_TD");
+    std::vector<double> r_nd_vector = pfcalculator.getProperty("R_ND");
+    std::vector<double> intensity_vector =
+        pfcalculator.getProperty("PeakIntensity");
 
-    // compare the vetors - TODO
+    // check the vectors' sizes
+    TS_ASSERT_EQUALS(r_td_vector.size(), 5);
+    TS_ASSERT_EQUALS(r_nd_vector.size(), 5);
+    TS_ASSERT_EQUALS(intensity_vector.size(), 5);
+
+    // set the  pre-calculated value
+    std::vector<double> bench_r_td_vec = {};
+    std::vector<double> bench_r_nd_vec = {};
+    std::vector<double> bench_intensity_vec = {};
+
+    // check value of R_TD
+    for (size_t i = 0; i < 5; ++i) {
+      TS_ASSERT_DELTA(r_td_vector[i], bench_r_td_vec[i], 0.0001);
+    }
+
+    // check value of R_ND
+    for (size_t i = 0; i < 5; ++i) {
+      TS_ASSERT_DELTA(r_nd_vector[i], bench_r_nd_vec[i], 0.0001);
+    }
+
+    // check value of R_ND
+    for (size_t i = 0; i < 5; ++i) {
+      TS_ASSERT_DELTA(intensity_vector[i], bench_intensity_vec[i], 0.0001);
+    }
 
     // check MDWorkspaces
+    TS_ASSERT(
+        Mantid::API::AnalysisDataService::Instance().doesExist(out_md_name));
 
-    //    TS_ASSERT_EQUALS(wsindex, 0);
-    //    TS_ASSERT_EQUALS(r_td, r_td1);
+    API::IMDEventWorkspace_sptr out_ws =
+        boost::dynamic_pointer_cast<API::IMDEventWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(out_md_name));
+    TS_ASSERT_EQUALS(out_ws->getNumDims(), 3);
+
+    // TODO - FIGURE OUT HOW TO ACCESS EACH MDEvent!
 
     // clean up
+    Mantid::API::AnalysisDataService::Instance().remove(input_ws_name);
+    Mantid::API::AnalysisDataService::Instance().remove(peak_intensity_ws_name);
+    Mantid::API::AnalysisDataService::Instance().remove(out_md_name);
 
     return;
   }
