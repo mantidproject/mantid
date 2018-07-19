@@ -4,7 +4,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 
-#include <fstream>
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace DataHandling {

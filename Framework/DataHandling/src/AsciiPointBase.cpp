@@ -11,9 +11,9 @@ GUI
 
 #include <boost/make_shared.hpp>
 #include <cmath>
-#include <fstream>
 #include <iomanip>
 #include <limits>
+#include <stdexcept>
 #include <Poco/File.h>
 
 namespace Mantid {
@@ -52,13 +52,13 @@ void AsciiPointBase::exec() {
       Poco::File(filename).remove();
     } catch (...) { // maybe we do not have the permission to delete the file
       g_log.error("Error deleting file " + filename);
-      throw Exception::FileError("Unable to delete existing file: ", filename);
+      throw Kernel::Exception::FileError("Unable to delete existing file: ", filename);
     }
   }
   std::ofstream file(filename.c_str());
   if (!file) {
     g_log.error("Unable to create file: " + filename);
-    throw Exception::FileError("Unable to create file: ", filename);
+    throw Kernel::Exception::FileError("Unable to create file: ", filename);
   }
   m_ws = getProperty("InputWorkspace");
   if (!m_ws)

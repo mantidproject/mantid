@@ -4,6 +4,11 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/AsciiPointBase.h"
 
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+
 namespace Mantid {
 namespace DataHandling {
 /**
