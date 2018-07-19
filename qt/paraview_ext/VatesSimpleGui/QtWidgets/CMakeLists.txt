@@ -52,7 +52,7 @@ mtd_add_qt_library (TARGET_NAME VatesSimpleGuiQtWidgets
     @loader_path/../../Contents/Libraries
     @loader_path/../../Contents/MacOS
   LINUX_INSTALL_RPATH
-    "\$ORIGIN/../${LIB_DIR}"
+    "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../${LIB_DIR}/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}"
 )
 
 # Set the name of the generated library
