@@ -48,7 +48,7 @@ public:
 private:
   /// Return the file extension this algorthm should output.
   virtual std::string ext() = 0;
-  /// return if the line should start with a separator
+  /// Return if the line should start with a separator
   virtual bool leadingSep() { return true; }
   /// Add extra properties
   virtual void extraProps() = 0;

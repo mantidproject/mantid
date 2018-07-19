@@ -10,25 +10,20 @@ namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveMFT)
-using namespace Kernel;
-// using namespace API;
 
 /// virtual method to set the extra properties required for this algorithm
 void SaveMFT::extraProps() {
-  declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to file.");
   declareProperty("UserContact", "",
                   "Text to be written to the User-local contact field");
   declareProperty("Title", "", "Text to be written to the Title field");
 }
 
-/** virtual method to add information to the file before the data
+/** Virtual method to add information to the file before the data
  *  @param file :: pointer to output file stream
  */
 void SaveMFT::extraHeaders(std::ofstream &file) {
-  //API::MatrixWorkspace_const_sptr m_ws = getProperty("InputWorkspace");
-  //if (!m_ws)
-  //  throw std::runtime_error("Cannot treat InputWorkspace");
   auto samp = m_ws->run();
   std::string instrument{""};
   std::string user = getProperty("UserContact");
@@ -58,10 +53,10 @@ void SaveMFT::extraHeaders(std::ofstream &file) {
          << boost::lexical_cast<std::string>(samp.getLogData(log)->value())
          << '\n';
   }
-  file << "Number of file format: 2\n";
+  file << "Number of file format: 12\n";
   file << "Number of data points: " << m_length << '\n';
   file << '\n';
-  file << m_sep << "q" << m_sep << "refl" << m_sep << "refl_err" << m_sep
+  file << std::right << m_sep << "q" << m_sep << "refl" << m_sep << "refl_err" << m_sep
        << "q_res\n";
 }
 } // namespace DataHandling

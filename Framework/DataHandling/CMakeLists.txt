@@ -134,7 +134,6 @@ set ( SRC_FILES
 	src/RotateInstrumentComponent.cpp
 	src/RotateSource.cpp
 	src/SNSDataArchive.cpp
-	src/SaveANSTOAscii.cpp
 	src/SaveAscii.cpp
 	src/SaveAscii2.cpp
 	src/SaveBankScatteringAngles.cpp

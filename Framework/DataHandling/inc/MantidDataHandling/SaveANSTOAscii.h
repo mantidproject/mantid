@@ -1,9 +1,6 @@
 #ifndef MANTID_DATAHANDLING_SAVEANSTOASCII_H_
 #define MANTID_DATAHANDLING_SAVEANSTOASCII_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/AsciiPointBase.h"
 
@@ -41,6 +38,8 @@ class DLLExport SaveANSTOAscii : public DataHandling::AsciiPointBase {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveANSTOAscii"; }
+  /// Lines should not start with a separator
+  bool leadingSep() override { return false; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Saves a 2D workspace to a ascii file.";
@@ -55,13 +54,14 @@ public:
 private:
   /// Return the file extension this algorthm should output.
   std::string ext() override { return ".txt"; }
-  /// return if the line should start with a separator
-  bool leadingSep() override { return false; }
   /// only separator property required, nothing else
   void extraProps() override { appendSeparatorProperty(); }
   /// no extra information required so override blank
-  void extraHeaders(std::ofstream &file) override;
+  void extraHeaders(std::ofstream &file) override { UNUSED_ARG(file); };
 };
+
+// Register the algorithm into the algorithm factory
+DECLARE_ALGORITHM(SaveANSTOAscii)
 
 } // namespace DataHandling
 } // namespace Mantid

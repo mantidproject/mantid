@@ -9,9 +9,6 @@ GUI
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 
-#include <boost/lexical_cast.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/regex.hpp>
 #include <boost/make_shared.hpp>
 #include <cmath>
 #include <fstream>
@@ -112,11 +109,11 @@ void AsciiPointBase::outputval(double val, std::ofstream &file,
   if (leadingSep)
     file << m_sep;
   if (!nancheck && !infcheck)
-    file << val;
+    file << std::right << val;
   else if (infcheck)
-    file << "inf";
+    file << std::right << "inf";
   else
-    file << "nan";
+    file << std::right << "nan";
 }
 
 /// appends the separator property to the algorithm
