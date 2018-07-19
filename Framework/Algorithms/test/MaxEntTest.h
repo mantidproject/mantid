@@ -199,7 +199,7 @@ public:
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
-    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void test_bad_linear_adjustment() {
@@ -218,7 +218,7 @@ public:
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
-    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void test_bad_const_adjustment() {
@@ -237,7 +237,7 @@ public:
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
-    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void test_linear_adjustment_with_too_few_spectra() {
@@ -256,7 +256,7 @@ public:
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
-    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void test_const_adjustment_with_too_few_spectra() {
@@ -275,7 +275,7 @@ public:
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
-    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void test_adjustments_together_too_few_spectra() {
@@ -299,7 +299,7 @@ public:
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
-    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void test_adjustments_together_real_data() {
@@ -321,7 +321,7 @@ public:
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
-    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_cosine() {
