@@ -82,7 +82,7 @@ list getDescriptors(AlgorithmFactoryImpl &self, bool includeHidden) {
 std::recursive_mutex PYALG_REGISTER_MUTEX;
 
 // clang-format off
-GCC_DIAG_OFF(cast-qual)
+DIAG_OFF(cast-qual)
 // clang-format on
 
 /**
@@ -118,24 +118,25 @@ void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
   // from the FileLoaderRegistry
   FileLoaderRegistry::Instance().unsubscribe(descr.first, descr.second);
 }
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+
+// clang-format off
+DIAG_OFF(unknown-pragmas)
+DIAG_OFF(unused-local-typdef)
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+DIAG_OFF(conversion)
+// clang-format on
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(existsOverloader, exists, 1, 2)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+// clang-format off
+DIAG_ON(conversion)
+DIAG_ON(unknown-pragmas)
+DIAG_ON(unused-local-typdef)
+// clang-format on
 
 ///@endcond
 }
 // clang-format off
-GCC_DIAG_ON(cast-qual)
+DIAG_ON(cast-qual)
 // clang-format on
 
 void export_AlgorithmFactory() {

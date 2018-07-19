@@ -9,6 +9,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 using Mantid::MantidVec;
@@ -55,15 +56,13 @@ public:
     MatrixWorkspace_sptr space;
     TS_ASSERT_THROWS_NOTHING(
         space = WorkspaceFactory::Instance().create("work", 1, 1, 1));
-// AppleClang gives warning if the result is unused.
-#if __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-value"
-#endif
+    // clang-format off
+    DIAG_OFF(unused-value)
+    // clang-format on
     TS_ASSERT_THROWS_NOTHING(dynamic_cast<WorkspaceTester *>(space.get()));
-#if __clang__
-#pragma clang diagnostic pop
-#endif
+    // clang-format off
+    DIAG_ON(unused-value)
+    // clang-format on
   }
 
   /** Make a parent, have the child be created with the same sizes */

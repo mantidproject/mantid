@@ -51,7 +51,7 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
 /// Mock data selector widget
 class MockDataSelector : public IMuonFitDataSelector {
 public:
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  DIAG_OFF_SUGGEST_OVERRIDE
 
   MOCK_CONST_METHOD0(getFilenames, QStringList());
   MOCK_CONST_METHOD0(getStartTime, double());
@@ -75,13 +75,13 @@ public:
   MOCK_METHOD1(setDatasetNames, void(const QStringList &));
   MOCK_CONST_METHOD0(getDatasetName, QString());
   MOCK_METHOD0(askUserWhetherToOverwrite, bool());
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  DIAG_ON_SUGGEST_OVERRIDE
 };
 
 /// Mock fit property browser
 class MockFitBrowser : public IWorkspaceFitControl, public IMuonFitDataModel {
 public:
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(setWorkspaceName, void(const QString &));
   MOCK_METHOD1(setStartX, void(double));
   MOCK_METHOD1(setEndX, void(double));
@@ -99,7 +99,7 @@ public:
   void preFitChecksRequested(bool sequential) override {
     UNUSED_ARG(sequential);
   }
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  DIAG_ON_SUGGEST_OVERRIDE
 };
 
 class MuonAnalysisFitDataPresenterTest : public CxxTest::TestSuite {

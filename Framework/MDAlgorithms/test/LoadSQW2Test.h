@@ -8,8 +8,9 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidMDAlgorithms/LoadSQW2.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidMDAlgorithms/LoadSQW2.h"
 
 #include <Poco/TemporaryFile.h>
 
@@ -189,12 +190,9 @@ private:
     }
   }
 
-#ifdef __clang__
-// The missing braces warning is a false positive -
-// https://llvm.org/bugs/show_bug.cgi?id=21629
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-braces"
-#endif
+  // clang-format off
+  DIAG_OFF(missing-braces)
+  // clang-format on
   DimensionProperties getExpectedDimProperties(std::string outputFrame,
                                                DataType dtype) {
     DimensionProperties expected;
@@ -235,9 +233,9 @@ private:
     return expected;
   }
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+  // clang-format off
+  DIAG_ON(missing-braces)
+  // clang-format on
 
   void checkExperimentInfoAsExpected(const IMDEventWorkspace &outputWS) {
     TS_ASSERT_EQUALS(2, outputWS.getNumExperimentInfo());

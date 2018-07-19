@@ -56,24 +56,24 @@ boost::python::list runningInstancesOf(AlgorithmManagerImpl &self,
 
 ///@cond
 //------------------------------------------------------------------------------------------------------
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+// clang-format off
+DIAG_OFF(unknown-pragmas)
+DIAG_OFF(unused-local-typdef)
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+DIAG_OFF(conversion)
+// clang-format on
 /// Define overload generators
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(create_overloads,
                                        AlgorithmManagerImpl::create, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createUnmanaged_overloads,
                                        AlgorithmManagerImpl::createUnmanaged, 1,
                                        2)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+// clang-format off
+DIAG_ON(conversion)
+DIAG_ON(unknown-pragmas)
+DIAG_ON(unused-local-typdef)
+// clang-format on
 ///@endcond
 }
 

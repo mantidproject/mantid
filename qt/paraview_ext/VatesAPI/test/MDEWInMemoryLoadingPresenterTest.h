@@ -26,12 +26,12 @@ private:
   // Helper type. Mocks a Workspace Provider.
   class MockWorkspaceProvider : public Mantid::VATES::WorkspaceProvider {
   public:
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD1(canProvideWorkspace, bool(std::string));
     MOCK_CONST_METHOD1(fetchWorkspace,
                        Mantid::API::Workspace_sptr(std::string));
     MOCK_CONST_METHOD1(disposeWorkspace, void(std::string));
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    DIAG_ON_SUGGEST_OVERRIDE
   };
 
   // Helper method. Generates and returns a valid IMDEventWorkspace

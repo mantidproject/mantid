@@ -24,7 +24,7 @@ using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALCBaselineModellingView : public IALCBaselineModellingView {
 public:
@@ -91,7 +91,7 @@ MATCHER_P3(QwtDataY, i, value, delta, "") {
 MATCHER_P3(VectorValue, i, value, delta, "") {
   return fabs(arg.at(i) - value) < delta;
 }
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+DIAG_ON_SUGGEST_OVERRIDE
 
 class ALCBaselineModellingPresenterTest : public CxxTest::TestSuite {
   MockALCBaselineModellingView *m_view;

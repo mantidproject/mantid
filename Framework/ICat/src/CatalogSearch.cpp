@@ -1,12 +1,12 @@
 #if GCC_VERSION >= 40800 // 4.8.0
 // clang-format off
-GCC_DIAG_OFF(literal-suffix)
+DIAG_OFF(literal-suffix)
 // clang-format on
 #endif
 #include "MantidICat/CatalogSearch.h"
 #if GCC_VERSION >= 40800 // 4.8.0
 // clang-format off
-GCC_DIAG_ON(literal-suffix)
+DIAG_ON(literal-suffix)
 // clang-format on
 #endif
 

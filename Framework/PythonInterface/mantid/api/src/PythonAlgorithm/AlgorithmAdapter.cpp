@@ -1,13 +1,14 @@
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
-#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
-#include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/SerialAlgorithm.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
 #include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidAPI/SerialAlgorithm.h"
-#include "MantidAPI/ParallelAlgorithm.h"
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
+#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/dict.hpp>
@@ -145,10 +146,10 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
     return SuperClass::isRunning();
   } else {
     Environment::GlobalInterpreterLock gil;
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wparentheses-equality"
-#endif
+
+    // clang-format off
+    DIAG_OFF(parentheses-equality)
+    // clang-format on
     PyObject *result = PyObject_CallObject(m_isRunningObj, nullptr);
     if (PyErr_Occurred())
       throw Environment::PythonException();
@@ -164,9 +165,9 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
       throw std::runtime_error(
           "Algorithm.isRunning - Expected bool return type.");
   }
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+  // clang-format off
+  DIAG_ON(parentheses-equality)
+  // clang-format on
 }
 
 /**

@@ -58,14 +58,13 @@ using declarePropertyType3 = void (*)(boost::python::object &,
 using declarePropertyType4 = void (*)(boost::python::object &,
                                       const std::string &,
                                       const boost::python::object &, const int);
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+// clang-format off
+DIAG_OFF(unknown-pragmas)
+DIAG_OFF(unused-local-typdef)
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+DIAG_OFF(conversion)
+// clang-format on
 // Overload types
 BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType1_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 2, 3)
@@ -73,10 +72,11 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType2_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 3, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType3_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 4, 5)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+// clang-format off
+DIAG_ON(conversion)
+DIAG_ON(unknown-pragmas)
+DIAG_ON(unused-local-typdef)
+// clang-format on
 /**
  * Map a CancelException to a Python KeyboardInterupt
  * @param exc A cancel exception to translate. Unused here as the message is

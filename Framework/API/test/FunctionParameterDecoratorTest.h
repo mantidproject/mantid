@@ -443,9 +443,9 @@ private:
   class MockTestableFunctionParameterDecorator
       : public TestableFunctionParameterDecorator {
   public:
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_METHOD1(beforeDecoratedFunctionSet, void(const IFunction_sptr &));
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    DIAG_ON_SUGGEST_OVERRIDE
   };
 };
 

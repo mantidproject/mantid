@@ -23,7 +23,7 @@ using boost::regex;
 
 namespace {
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+DIAG_OFF_SUGGEST_OVERRIDE
 
 /*------------------------------------------------------------
  Mock Peak Transform
@@ -121,5 +121,5 @@ public:
   MOCK_CONST_METHOD0(getPeakShape, const Mantid::Geometry::PeakShape &());
 };
 }
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+DIAG_ON_SUGGEST_OVERRIDE
 #endif /* MANTIDGEOMETRYTEST_MOCKOBJECTS_H_ */

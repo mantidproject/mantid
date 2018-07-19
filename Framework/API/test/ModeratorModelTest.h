@@ -13,13 +13,13 @@ public:
   boost::shared_ptr<ModeratorModel> clone() const override {
     return boost::shared_ptr<MockModerator>();
   }
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_CONST_METHOD0(emissionTimeMean, double());
   MOCK_CONST_METHOD0(emissionTimeVariance, double());
   MOCK_CONST_METHOD1(sampleTimeDistribution, double(const double));
   MOCK_METHOD2(setParameterValue,
                void(const std::string &, const std::string &));
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  DIAG_ON_SUGGEST_OVERRIDE
 };
 
 class ModeratorModelTest : public CxxTest::TestSuite {

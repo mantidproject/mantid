@@ -32,6 +32,7 @@
 #endif
 
 #include "PythonScript.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "PythonScripting.h"
 
 #include "sipAPI_qti.h"
@@ -539,14 +540,13 @@ QVariant PythonScript::evaluateImpl() {
     }
   }
   /* bool */
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wparentheses-equality"
-#endif
+  // clang-format off
+  DIAG_OFF(parentheses-equality)
+  // clang-format on
   else if (PyBool_Check(pyret)) {
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+    // clang-format off
+  DIAG_ON(parentheses-equality)
+    // clang-format on
     qret = QVariant(pyret == Py_True);
   }
   // could handle advanced types (such as PyList->QValueList) here if needed

@@ -269,7 +269,7 @@ pqPipelineRepresentation *ViewBase::getPvActiveRep() {
 }
 
 // clang-format off
-GCC_DIAG_OFF(strict-aliasing)
+DIAG_OFF(strict-aliasing)
 // clang-format on
 /**
  * This function creates a ParaView source from a given plugin name and

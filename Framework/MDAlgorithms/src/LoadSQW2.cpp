@@ -12,12 +12,13 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -482,12 +483,11 @@ std::vector<float> LoadSQW2::calculateDimLimitsFromData() {
   return dimLimits;
 }
 
-#ifdef __clang__
 // The missing braces warning is a false positive -
 // https://llvm.org/bugs/show_bug.cgi?id=21629
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-braces"
-#endif
+// clang-format off
+DIAG_OFF(missing-braces)
+// clang-format on
 /**
  * Create the Q MDHistoDimension for the output frame and given information
  * from the file
@@ -540,9 +540,10 @@ LoadSQW2::createQDimension(size_t index, float dimMin, float dimMax,
 
   return builder.create();
 }
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+
+// clang-format off
+DIAG_ON(missing-braces)
+// clang-format on
 
 /**
  * Create an energy dimension

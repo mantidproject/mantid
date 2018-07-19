@@ -20,7 +20,7 @@
 // Avoid compiler warnings on gcc from unused static constants in
 // isisds_command.h
 // clang-format off
-GCC_DIAG_OFF(unused-variable)
+DIAG_OFF(unused-variable)
 // clang-format on
 #endif
 #include "DAE/idc.h"

@@ -87,7 +87,7 @@ private:
   class MockBeamProfile final : public Mantid::Algorithms::IBeamProfile {
   public:
     using Mantid::Algorithms::IBeamProfile::Ray;
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD1(generatePoint,
                        Ray(Mantid::Kernel::PseudoRandomNumberGenerator &));
     MOCK_CONST_METHOD2(generatePoint,
@@ -95,7 +95,7 @@ private:
                            const Mantid::Geometry::BoundingBox &));
     MOCK_CONST_METHOD1(defineActiveRegion, Mantid::Geometry::BoundingBox(
                                                const Mantid::API::Sample &));
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    DIAG_ON_SUGGEST_OVERRIDE
   };
 };
 

@@ -8,13 +8,17 @@
 #include "MantidTypes/Core/DateAndTime.h"
 #include <gmock/gmock.h>
 
-GCC_DIAG_OFF(conversion)
+// clang-format off
+DIAG_OFF(conversion)
+// clang-format on
 #include "Kafka/private/Schema/ba57_run_info_generated.h"
 #include "Kafka/private/Schema/df12_det_spec_map_generated.h"
 #include "Kafka/private/Schema/ev42_events_generated.h"
 #include "Kafka/private/Schema/f142_logdata_generated.h"
 #include "Kafka/private/Schema/is84_isis_events_generated.h"
-GCC_DIAG_ON(conversion)
+// clang-format off
+DIAG_ON(conversion)
+// clang-format on
 
 #include <ctime>
 
@@ -29,7 +33,7 @@ public:
       std::unique_ptr<Mantid::LiveData::IKafkaStreamSubscriber>;
   using IKafkaStreamSubscriber_ptr = Mantid::LiveData::IKafkaStreamSubscriber *;
 
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  DIAG_OFF_SUGGEST_OVERRIDE
   // GMock cannot mock non-copyable return types so we resort to a small
   // adapter method. Users have to use EXPECT_CALL(subscribe_) instead
   MOCK_CONST_METHOD2(subscribe_, IKafkaStreamSubscriber_ptr(
@@ -50,7 +54,7 @@ public:
     return std::unique_ptr<Mantid::LiveData::IKafkaStreamSubscriber>(
         this->subscribe_(s, offset, option));
   }
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  DIAG_ON_SUGGEST_OVERRIDE
 };
 
 // -----------------------------------------------------------------------------

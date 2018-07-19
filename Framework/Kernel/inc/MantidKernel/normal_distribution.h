@@ -171,9 +171,7 @@ public:
 };
 
 // clang-format off
-#if !defined(__clang__)
-GCC_DIAG_OFF(maybe-uninitialized)
-#endif
+DIAG_OFF(maybe-uninitialized)
 // clang-format on
 template <class _RealType>
 template <class _URNG>
@@ -201,9 +199,7 @@ _RealType normal_distribution<_RealType>::operator()(_URNG &__g,
   return _Up * __p.stddev() + __p.mean();
 }
 // clang-format off
-#if !defined(__clang__)
-GCC_DIAG_ON(maybe-uninitialized)
-#endif
+DIAG_ON(maybe-uninitialized)
 // clang-format on
 
 template <class _CharT, class _Traits, class _RT>

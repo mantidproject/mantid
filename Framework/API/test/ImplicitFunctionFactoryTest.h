@@ -16,7 +16,7 @@
 #include <memory>
 #include <vector>
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+DIAG_OFF_SUGGEST_OVERRIDE
 
 class ImplicitFunctionFactoryTest : public CxxTest::TestSuite {
 private:
@@ -107,7 +107,7 @@ private:
     MOCK_METHOD1(setSuccessorParser,
                  void(Mantid::API::ImplicitFunctionParameterParser *successor));
   };
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  DIAG_ON_SUGGEST_OVERRIDE
 
   class MockImplicitFunctionBuilderA
       : public Mantid::API::ImplicitFunctionBuilder {

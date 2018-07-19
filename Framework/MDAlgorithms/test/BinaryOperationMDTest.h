@@ -19,7 +19,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 using namespace testing;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockBinaryOperationMD : public BinaryOperationMD {
 public:
@@ -35,7 +35,7 @@ public:
            Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar));
   void exec() override { BinaryOperationMD::exec(); }
 };
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+DIAG_ON_SUGGEST_OVERRIDE
 class BinaryOperationMDTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically

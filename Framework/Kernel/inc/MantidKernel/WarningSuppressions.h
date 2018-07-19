@@ -76,30 +76,34 @@
 // define macros for turning the warning suppression on/off for GCC
 // note that we turn off unknown warnings here as well so that we can use the
 // same macro for GCC and clang.
+// clang-format off
 #if GCC_VERSION >= 40600 // GCC 4.6.0
-#define DIAG_OFF(x)                                                         \
-  DIAG_PRAGMA(push)                                                             \
-  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, unknown-warning))                        \
+#define DIAG_OFF(x)                                                          \
+  DIAG_PRAGMA(push)                                                          \
+  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, unknown-warning))                     \
   DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, x))
 #define DIAG_ON(x) DIAG_PRAGMA(pop)
 #else
-#define DIAG_OFF(x)                                                         \
-  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, unknown-warning))                        \
+#define DIAG_OFF(x)                                                          \
+  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, unknown-warning))                     \
   DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, x))
-#define DIAG_ON(x)                                                          \
-  DIAG_PRAGMA(warning DIAG_JOINSTR(-W, unknown-warning))                        \
-  DIAG_PRAGMA(warning DIAG_JOINSTR(-W, x))                                      
+#define DIAG_ON(x)                                                           \
+  DIAG_PRAGMA(warning DIAG_JOINSTR(-W, unknown-warning))                     \
+  DIAG_PRAGMA(warning DIAG_JOINSTR(-W, x))
 #endif
+// clang-format on
 
 #elif defined(CLANG_VERSION) && CLANG_VERSION >= 306
 // define macros for turning the warning suppression on/off for clang
 // note that we turn off unknown warnings here as well so that we can use the
 // same macro for GCC and clang.
-#define DIAG_OFF(x)                                                        \
-  DIAG_PRAGMA(push)                                                            \
-  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, unknown-warning-option))                \
-  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, x))                                       
+// clang-format off
+#define DIAG_OFF(x)                                                         \
+  DIAG_PRAGMA(push)                                                         \
+  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, unknown-warning-option))             \
+  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, x))
 #define DIAG_ON(x) DIAG_PRAGMA(pop)
+// clang-format on
 #else
 // neither clang or GCC
 #define DIAG_OFF(x)
@@ -107,7 +111,6 @@
 #endif
 
 #endif
-
 
 // Defining this macro separately since clang-tidy tries to add spaces around
 // the hyphen and we use it in a lot of test files.
@@ -124,10 +127,10 @@
 #endif
 // clang-format on
 
-#ifdef GCC_VERSION
-#define GCC_UNUSED_FUNCTION __attribute__((unused))
+#if defined(GCC_VERSION) || defined(CLANG_VERSION)
+#define UNUSED_FUNCTION __attribute__((unused))
 #else
-#define GCC_UNUSED_FUNCTION
+#define UNUSED_FUNCTION
 #endif
 
 #endif /*MANTID_KERNEL_WARNINGSUPPRESSIONS_H_*/

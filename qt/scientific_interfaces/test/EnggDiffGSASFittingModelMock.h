@@ -6,7 +6,7 @@
 
 #include <gmock/gmock.h>
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+DIAG_OFF_SUGGEST_OVERRIDE
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -44,6 +44,6 @@ public:
                void(boost::shared_ptr<IEnggDiffGSASFittingObserver> observer));
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTID_CUSTOM_INTERFACES_ENGGDIFFFITTINGMODELMOCK_H_

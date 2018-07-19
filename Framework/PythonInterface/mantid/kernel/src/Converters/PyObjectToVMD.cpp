@@ -16,7 +16,7 @@ using boost::python::object;
 using boost::python::len;
 
 // clang-format off
-GCC_DIAG_OFF(strict-aliasing)
+DIAG_OFF(strict-aliasing)
 // clang-format on
 
 namespace Mantid {

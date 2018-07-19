@@ -5,16 +5,16 @@
 // it is automatically generated code
 //------------------------------------------------------------------------------
 // clang-format off
-GCC_DIAG_OFF(cast-qual)
-GCC_DIAG_OFF(conversion)
-GCC_DIAG_OFF(unused-parameter)
-GCC_DIAG_OFF(strict-aliasing)
+DIAG_OFF(cast-qual)
+DIAG_OFF(conversion)
+DIAG_OFF(unused-parameter)
+DIAG_OFF(strict-aliasing)
+DIAG_OFF(format)
+DIAG_OFF(vla)
 // clang-format on
-GCC_DIAG_OFF(format)
-GCC_DIAG_OFF(vla)
 #if GCC_VERSION >= 40800 // 4.8.0
 // clang-format off
-GCC_DIAG_OFF(literal-suffix)
+DIAG_OFF(literal-suffix)
 // clang-format on
 #endif
 #ifdef _WIN32

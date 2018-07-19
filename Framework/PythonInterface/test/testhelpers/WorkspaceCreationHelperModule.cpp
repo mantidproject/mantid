@@ -22,14 +22,13 @@ using namespace Mantid::DataObjects::MDEventsTestHelper;
 using namespace Mantid::PythonInterface::Policies;
 using namespace WorkspaceCreationHelper;
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+// clang-format off
+DIAG_OFF(unknown-pragmas)
+DIAG_OFF(unused-local-typdef)
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+DIAG_OFF(conversion)
+// clang-format on
 BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithFullInstrument_overloads,
                                 create2DWorkspaceWithFullInstrument, 2, 4)
 
@@ -39,10 +38,11 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(makeFakeMDHistoWorkspace_overloads,
 BOOST_PYTHON_FUNCTION_OVERLOADS(
     create2DWorkspaceWithRectangularInstrument_overloads,
     create2DWorkspaceWithRectangularInstrument, 3, 3)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+// clang-format off
+DIAG_ON(conversion)
+DIAG_ON(unknown-pragmas)
+DIAG_ON(unused-local-typdef)
+// clang-format on
 
 BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
   using namespace boost::python;

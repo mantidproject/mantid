@@ -55,7 +55,7 @@ public:
   }
 
   // clang-format off
-  GCC_DIAG_OFF(strict-aliasing)
+  DIAG_OFF(strict-aliasing)
   // clang-format on
   void test_initial_recursion_depth_is_1_for_MD_Event_w_split() {
     // Arrange

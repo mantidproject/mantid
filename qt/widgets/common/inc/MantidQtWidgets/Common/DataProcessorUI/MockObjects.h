@@ -29,7 +29,7 @@ const int ScaleCol = 7;
 const int OptionsCol = 8;
 const int HiddenOptionsCol = 9;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockDataProcessorView : public DataProcessorView {
 public:
@@ -242,6 +242,6 @@ public:
   };
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /*MANTID_MANTIDWIDGETS_DATAPROCESSORVIEWMOCKOBJECTS_H*/

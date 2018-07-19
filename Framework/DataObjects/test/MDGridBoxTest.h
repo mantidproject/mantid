@@ -47,12 +47,12 @@ private:
     MockMDBox()
         : MDBox<MDLeanEvent<1>, 1>(new API::BoxController(1)),
           pBC(MDBox<MDLeanEvent<1>, 1>::getBoxController()) {}
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(getIsMasked, bool());
     MOCK_METHOD0(mask, void());
     MOCK_METHOD0(unmask, void());
     ~MockMDBox() override { delete pBC; }
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    DIAG_ON_SUGGEST_OVERRIDE
   };
 
   // the sp to a box controller used as general reference to all tested

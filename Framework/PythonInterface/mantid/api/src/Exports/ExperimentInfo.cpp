@@ -18,21 +18,21 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(ExperimentInfo)
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+// clang-format off
+DIAG_OFF(unknown-pragmas)
+DIAG_OFF(unused-local-typdef)
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+DIAG_OFF(conversion)
+// clang-format on
 /// Overload generator for getInstrumentFilename
 BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrumentFilename_Overload,
                                 ExperimentInfo::getInstrumentFilename, 1, 2)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+// clang-format off
+DIAG_ON(conversion)
+DIAG_ON(unknown-pragmas)
+DIAG_ON(unused-local-typdef)
+// clang-format on
 
 void export_ExperimentInfo() {
   register_ptr_to_python<boost::shared_ptr<ExperimentInfo>>();

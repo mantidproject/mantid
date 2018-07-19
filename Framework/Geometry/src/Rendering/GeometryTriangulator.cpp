@@ -23,9 +23,9 @@
 #endif
 #endif
 
-GCC_DIAG_OFF(conversion)
 // clang-format off
-GCC_DIAG_OFF(cast-qual)
+DIAG_OFF(conversion)
+DIAG_OFF(cast-qual)
 // clang-format on
 #include <gp_Trsf.hxx>
 #include <gp_Pnt.hxx>
@@ -39,9 +39,9 @@ GCC_DIAG_OFF(cast-qual)
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRep_Tool.hxx>
 #include <Poly_Triangulation.hxx>
-GCC_DIAG_ON(conversion)
 // clang-format off
-GCC_DIAG_ON(cast-qual)
+DIAG_ON(conversion)
+DIAG_ON(cast-qual)
 // clang-format on
 
 #ifdef __INTEL_COMPILER

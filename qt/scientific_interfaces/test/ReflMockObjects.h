@@ -32,7 +32,7 @@ using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets::DataProcessor;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+DIAG_OFF_SUGGEST_OVERRIDE
 
 /**** Models ****/
 
@@ -385,6 +385,6 @@ public:
   virtual ~MockReflAsciiSaver() = default;
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /*MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H*/

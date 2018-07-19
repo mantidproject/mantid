@@ -1287,7 +1287,7 @@ TMDE(void MDGridBox)::centroidSphere(API::CoordTransform &radiusTransform,
 }
 //-----------------------------------------------------------------------------------------------
 // clang-format off
-GCC_DIAG_OFF(array-bounds)
+DIAG_OFF(array-bounds)
 // clang-format on
 /** Integrate the signal within a sphere; for example, to perform single-crystal
  * peak integration.
@@ -1493,7 +1493,7 @@ TMDE(void MDGridBox)::integrateCylinder(
   delete[] boxMightTouch;
 }
 // clang-format off
-GCC_DIAG_ON(array-bounds)
+DIAG_ON(array-bounds)
 // clang-format on
 
 /**

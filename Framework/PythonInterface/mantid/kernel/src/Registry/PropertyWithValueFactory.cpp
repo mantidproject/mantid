@@ -2,10 +2,11 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
-#include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
-#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
-#include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
+#include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 
 #include <boost/make_shared.hpp>
 
@@ -186,10 +187,9 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
 
     PyObject *item = PySequence_Fast_GET_ITEM(object, 0);
     // Boolean can be cast to int, so check first.
-#if __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wparentheses-equality"
-#endif
+    // clang-format off
+    DIAG_OFF(parentheses-equality)
+    // clang-format on
     if (PyBool_Check(item)) {
       throw std::runtime_error(
           "Unable to support extracting arrays of booleans.");
@@ -197,9 +197,9 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
     if (PyLong_Check(item)) {
       return std::string("LongIntArray");
     }
-#if __clang__
-#pragma clang diagnostic pop
-#endif
+    // clang-format off
+    DIAG_ON(parentheses-equality)
+// clang-format on
 
 #if PY_MAJOR_VERSION < 3
     // In python 2 ints & longs are separate
