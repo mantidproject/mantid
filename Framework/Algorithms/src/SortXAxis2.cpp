@@ -43,7 +43,7 @@ void SortXAxis::exec() {
   MatrixWorkspace_sptr outputWorkspace = inputWorkspace->clone();
 
   // Check if it is a valid histogram here
-  bool isAProperHistogram = determineIfHistogramIsValid(inputWorkspace);
+  /*bool isAProperHistogram = determineIfHistogramIsValid(inputWorkspace);*/
 
   // Define everything you can outside of the for loop
   // Assume that all spec are the same size
@@ -61,7 +61,7 @@ void SortXAxis::exec() {
     sortIndicesByX(workspaceIndicies, theOrder, inputWorkspace, specNum);
 
     copyToOutputWorkspace(workspaceIndicies, inputWorkspace, outputWorkspace,
-                          sizeOfX, sizeOfY, specNum, isAProperHistogram);
+                          sizeOfX, sizeOfY, specNum/*, isAProperHistogram*/);
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
