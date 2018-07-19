@@ -12,7 +12,10 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventInserter.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -22,7 +25,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-
 #include <cmath>
 #include <sstream>
 
@@ -39,6 +41,7 @@ DECLARE_ALGORITHM(ConvertToPoleFigure)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 const std::string ConvertToPoleFigure::name() const {
   return "ConvertToPoleFigure";
@@ -63,7 +66,7 @@ void ConvertToPoleFigure::init() {
 
   declareProperty(
       make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-          "IntegratedPeakIntensityWorkspace", "", Direction::Output),
+          "IntegratedPeakIntensityWorkspace", "", Direction::Input, uv),
       "Name of the output MatrixWorkspace containing the events' "
       "counts in the ROI for each spectrum.");
 
@@ -116,7 +119,7 @@ void ConvertToPoleFigure::processInputs() {
   if (!hrot) {
     throw std::invalid_argument("HROT does not exist in sample log.");
   }
-  auto omega = m_inputWS->run().getProperty("m_nameOmega");
+  auto omega = m_inputWS->run().getProperty(m_nameOmega);
   if (!omega) {
     throw std::invalid_argument("Omega does not exist in sample log!");
   }
@@ -206,9 +209,9 @@ void ConvertToPoleFigure::generateOutputs() {
   std::vector<double> extentMins(2);
   std::vector<double> extentMaxs(2);
 
-  auto unitFactory = makeMDUnitFactoryChain();
-  std::string units("U");
-  auto mdUnit = unitFactory->create(units);
+  //  auto unitFactory = makeMDUnitFactoryChain();
+  //  std::string units("U");
+  //  auto mdUnit = unitFactory->create(units);
 
   // Set up X and Y dimension
   // Extract Dimensions and add to the output workspace.
@@ -217,7 +220,7 @@ void ConvertToPoleFigure::generateOutputs() {
   int xnbins = 100; // FIXME - a better number
   size_t dimx = 0;
   Mantid::Geometry::GeneralFrame xframe(
-      Mantid::Geometry::GeneralFrame::GeneralFrameName, std::move(mdUnit));
+      Mantid::Geometry::GeneralFrame::GeneralFrameName, "U");
   out_event_ws->addDimension(
       Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
           xid, xname, xframe, static_cast<coord_t>(extentMins[dimx]),
@@ -228,11 +231,33 @@ void ConvertToPoleFigure::generateOutputs() {
   int ynbins = 100; // FIXME - a better number
   size_t dimy = 1;
   Mantid::Geometry::GeneralFrame yframe(
-      Mantid::Geometry::GeneralFrame::GeneralFrameName, std::move(mdUnit));
+      Mantid::Geometry::GeneralFrame::GeneralFrameName, "U");
   out_event_ws->addDimension(
       Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
           yid, yname, yframe, static_cast<coord_t>(extentMins[dimy]),
           static_cast<coord_t>(extentMaxs[dimy]), ynbins)));
+
+  // add MDEvents
+  // Creates a new instance of the MDEventInserter.
+  MDEventWorkspace<MDEvent<2>, 2>::sptr MDEW_MDEVENT_2 =
+      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<2>, 2>>(
+          out_event_ws);
+
+  MDEventInserter<MDEventWorkspace<MDEvent<2>, 2>::sptr> inserter(
+      MDEW_MDEVENT_2);
+
+  size_t num_md_events = m_poleFigureRNDVector.size();
+  uint16_t detid = 0;
+  uint16_t run_number = 1;
+  for (size_t ievt = 0; ievt < num_md_events; ++ievt) {
+    Mantid::coord_t data[2] = {static_cast<float>(m_poleFigureRTDVector[ievt]),
+                               static_cast<float>(m_poleFigureRNDVector[ievt])};
+    float signal = static_cast<float>(m_poleFigurePeakIntensityVector[ievt]);
+    if (signal <= 0)
+      throw std::runtime_error("Found negative signal");
+    float error = std::sqrt(signal);
+    inserter.insertMDEvent(signal, error * error, run_number, detid, data);
+  }
 
   // set properties for output
   setProperty("OutputWorkspace", out_event_ws);
@@ -279,13 +304,14 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
   part3 = k2 * (k2.scalar_prod(unitQPrime) * (1 - cos(tau_pp_rad)));
   Kernel::V3D unitQpp = part1 + part2 + part3;
 
-  // project to the pole figure
+  // project to the pole figure by point light
   double sign(1);
   if (unitQpp.Z() < 0)
     sign = -1;
 
-  r_td = unitQpp.Y() * sign;
-  r_nd = -unitQpp.X() * sign;
+  double factor = 1. + sign * unitQpp.Z();
+  r_td = unitQpp.Y() * sign * 2. / factor;
+  r_nd = -unitQpp.X() * sign * 2. / factor;
 
   return;
 }

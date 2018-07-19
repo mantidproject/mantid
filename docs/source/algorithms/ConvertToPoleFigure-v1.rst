@@ -69,8 +69,8 @@ The second rotation is about the Z-axis.
 
 where :math:`\vec{k}_2 = (0, 0, 1)`
 
-Projection to the pole figure
-+++++++++++++++++++++++++++++
+Projection to the pole figure with parallel light
++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The coordinates of pole figure are described by :math:`(R_{TD}'', R_{ND}'')`
 
@@ -85,10 +85,29 @@ where
 * :math:`S(x) = -1`, when :math:`x < 0`
 
 
+Projection to the pole figure with point light
+++++++++++++++++++++++++++++++++++++++++++++++
+
+Per user's request, this type of projection is used for the **final** output of this algorithm.
+
+The coordinates of pole figure are described by :math:`(R_{p, TD}'', R_{p, ND}'')`
+
+Now project the twice rotated :math:`Q` to pole figure plane
+
+* :math:`R_{p, TD}'' =  2\cdot\tilde{Q}_{y}'' \cdot S(\tilde{Q}_z'') /(1 + S(\tilde{Q}_z'')\cdot\tilde{Q}_z'')`
+* :math:`R_{p, ND}'' = -2\cdot\tilde{Q}_{x}'' \cdot S(\tilde{Q}_z'') /(1 + S(\tilde{Q}_z'')\cdot\tilde{Q}_z'')`
+
+where 
+
+* :math:`S(x) = 1`, when :math:`x \leq 0`
+* :math:`S(x) = -1`, when :math:`x < 0`
+
+
 Outputs
 =======
 
 Outputs are designed in order to make it convenient for plotting tool, such as matplotlib, to plot the pole figure outside MantidPlot.
+The output projection per user's request is **point light** projection.
 
 
 

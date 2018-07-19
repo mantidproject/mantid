@@ -176,6 +176,7 @@ createIntensityWorkspace(const std::string &name) {
 
     vec_x_i[0] = 1.2;
     vec_y_i[0] = (static_cast<double>(i) + 10) * 2.5;
+    std::cout << "Y[" << i << "] = " << vec_y_i[0] << "\n";
     vec_e_i[0] = sqrt(fabs(vec_y_i[0]));
   }
 
@@ -232,12 +233,6 @@ public:
     TS_ASSERT(pfcalculator.isExecuted());
 
     // check results
-    TS_ASSERT(
-        API::AnalysisDataService::Instance().doesExist("TwoSpecPoleFigure"));
-    API::IMDEventWorkspace_sptr outws =
-        boost::dynamic_pointer_cast<API::IMDEventWorkspace>(
-            API::AnalysisDataService::Instance().retrieve("TwoSpecPoleFigure"));
-    TS_ASSERT(outws);
 
     // get the vectors out
     std::vector<double> r_td_vector = pfcalculator.getProperty("R_TD");
@@ -251,9 +246,11 @@ public:
     TS_ASSERT_EQUALS(intensity_vector.size(), 5);
 
     // set the  pre-calculated value
-    std::vector<double> bench_r_td_vec = {};
-    std::vector<double> bench_r_nd_vec = {};
-    std::vector<double> bench_intensity_vec = {};
+    std::vector<double> bench_r_td_vec = {0.823814639, 0.990790951, 1,
+                                          -0.808630193, -1.01106895};
+    std::vector<double> bench_r_nd_vec = {1.619696448, 1.523292629, 1.732050808,
+                                          -1.63434472, -1.51746665};
+    std::vector<double> bench_intensity_vec = {25., 27.5, 30., 32.5, 35.};
 
     // check value of R_TD
     for (size_t i = 0; i < 5; ++i) {
@@ -277,9 +274,12 @@ public:
     API::IMDEventWorkspace_sptr out_ws =
         boost::dynamic_pointer_cast<API::IMDEventWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(out_md_name));
-    TS_ASSERT_EQUALS(out_ws->getNumDims(), 3);
+    TS_ASSERT_EQUALS(out_ws->getNumDims(), 2);
 
-    // TODO - FIGURE OUT HOW TO ACCESS EACH MDEvent!
+    // check MD events
+    auto mditer = out_ws->createIterator();
+    size_t num_events = mditer->getNumEvents();
+    TS_ASSERT_EQUALS(num_events, 5);
 
     // clean up
     Mantid::API::AnalysisDataService::Instance().remove(input_ws_name);
