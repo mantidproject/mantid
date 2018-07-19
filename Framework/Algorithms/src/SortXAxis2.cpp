@@ -198,6 +198,30 @@ void SortXAxis::copyToOutputWorkspace(
 }
 
 /**
+ * @brief determines whether or not a given spectrum is sorted based on a passed
+ * comparator
+ *
+ * @tparam Comparator
+ * @param compare std::less<double> for descending, and std::greater<double> for
+ * ascending.
+ * @param inputWorkspace the unsorted input workspace
+ * @param specNum the spectrum number currently being compared
+ * @return true if it is sorted
+ * @return false if it is not sorted
+ */
+template <typename Comparator>
+bool isItSorted(Comparator const &compare,
+                MatrixWorkspace_const_sptr inputWorkspace,
+                unsigned int specNum) {
+  return std::is_sorted(inputWorkspace->x(specNum).begin(),
+                        inputWorkspace->x(specNum).end(),
+                        [&](std::size_t lhs, std::size_t rhs) -> bool {
+                          return compare(inputWorkspace->x(specNum)[lhs],
+                                         inputWorkspace->x(specNum)[rhs]);
+                        });
+}
+
+/**
  * @brief Determines whether it is a valid histogram or not.
  *
  * @param inputWorkspace the unsorted input workspace
@@ -233,30 +257,6 @@ bool SortXAxis::determineIfHistogramIsValid(
     return true;
   }
   return false;
-}
-
-/**
- * @brief determines whether or not a given spectrum is sorted based on a passed
- * comparator
- *
- * @tparam Comparator
- * @param compare std::less<double> for descending, and std::greater<double> for
- * ascending.
- * @param inputWorkspace the unsorted input workspace
- * @param specNum the spectrum number currently being compared
- * @return true if it is sorted
- * @return false if it is not sorted
- */
-template <typename Comparator>
-bool isItSorted(Comparator const &compare,
-                MatrixWorkspace_const_sptr inputWorkspace,
-                unsigned int specNum) {
-  return std::is_sorted(inputWorkspace->x(specNum).begin(),
-                        inputWorkspace->x(specNum).end(),
-                        [&](std::size_t lhs, std::size_t rhs) -> bool {
-                          return compare(inputWorkspace->x(specNum)[lhs],
-                                         inputWorkspace->x(specNum)[rhs]);
-                        });
 }
 
 } // namespace Algorithms
