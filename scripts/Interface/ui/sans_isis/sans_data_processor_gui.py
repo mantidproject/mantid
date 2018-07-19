@@ -102,7 +102,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             pass
 
         @abstractmethod
-        def on_multi_period_selection(self):
+        def on_multi_period_selection(self, show_periods):
             pass
 
         @abstractmethod
@@ -115,6 +115,18 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         @abstractmethod
         def on_instrument_changed(self):
+            pass
+
+        @abstractmethod
+        def on_row_inserted(self):
+            pass
+
+        @abstractmethod
+        def on_rows_removed(self):
+            pass
+
+        @abstractmethod
+        def on_cell_changed(self):
             pass
 
     def __init__(self, main_presenter):
@@ -158,7 +170,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         settings.endGroup()
 
         self.instrument = SANSInstrument.from_string(instrument_name)
-
         # Attach validators
         self._attach_validators()
 
@@ -237,7 +248,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         self.instrument_combo_box.currentIndexChanged.connect(self._instrument_changed)
 
-        self.process_button.clicked.connect(self._on_python_process)
+        self.process_button.clicked.connect(self._processed_clicked)
 
         self.help_button.clicked.connect(self._on_help_button_clicked)
 
@@ -320,44 +331,46 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         if self.data_processor_table:
             self.data_processor_table.setParent(None)
 
-        # Create the white list
-        self._white_list_entries = self._main_presenter.get_white_list(show_periods=show_periods)
+        self.data_processor_table = MantidQt.MantidWidgets.Batch.JobTreeView(
+        ["Sample Scatter", "ssp", "Sample Transmission", "stp", "Sample Direct", "sdp","Can Scatter", "csp",
+         "Can Transmission", "ctp", "Can Direct", "cdp", "Output Name", "User File", "Sample Thickness", "Options"], # The table column headings
+         self.cell(""), # The default style and content for new 'empty' cells.
+         self # The parent QObject.
+         )
 
-        # Setup white list
-        white_list = MantidQt.MantidWidgets.DataProcessor.WhiteList()
-        for entry in self._white_list_entries:
-            # If there is a column name specified, then it is a white list entry.
-            if entry.column_name:
-                white_list.addElement(entry.column_name, entry.algorithm_property, entry.description,
-                                      entry.show_value, entry.prefix)
+        self.table_signals = \
+            MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.data_processor_table, self)
+        # The signal adapter subscribes to events from the table
+        # and emits signals whenever it is notified.
 
-        # Processing algorithm (mandatory)
-        unused_postprocessing_index = 0
-        alg = MantidQt.MantidWidgets.DataProcessor.ProcessingAlgorithm(self._gui_algorithm_name,
-                                                                       'unused_', unused_postprocessing_index, self._black_list)
-
-        self.data_processor_table = MantidQt.MantidWidgets.DataProcessor.QDataProcessorWidget(white_list, alg, self)
-        self.data_processor_table.setForcedReProcessing(True)
-
-        # Add the presenter to the data processor
-        self.data_processor_table.accept(self._main_presenter)
+        if show_periods:
+            self.show_period_columns()
+        else:
+            self.hide_period_columns()
 
         # Set the list of available instruments in the widget and the default instrument
         instrument_name = config.getString("default.instrument")
         instrument_name_enum = get_instrument(instrument_name)
-        self.data_processor_table.setInstrumentList(SANSDataProcessorGui.INSTRUMENTS, instrument_name)
 
         if instrument_name_enum:
             self.set_instrument_settings(instrument_name_enum)
             self._instrument_changed()
 
-        # The widget will emit a 'runAsPythonScript' signal to run python code
-        self.data_processor_table.runAsPythonScript.connect(self._run_python_code)
-        self.data_processor_table.processButtonClicked.connect(self._processed_clicked)
-        self.data_processor_table.processingFinished.connect(self._processing_finished)
         self.data_processor_widget_layout.addWidget(self.data_processor_table)
-        self.data_processor_table.dataChanged.connect(self._data_changed)
-        self.data_processor_table.instrumentHasChanged.connect(self._handle_instrument_change)
+        self.table_signals.cellTextChanged.connect(self._data_changed)
+        self.table_signals.rowInserted.connect(self._row_inserted)
+        self.table_signals.removeRowsRequested.connect(self._remove_rows_requested)
+
+    def cell(self, text):
+        background_color = 'white'
+        border_thickness = 1
+        border_color = "black"
+        border_opacity = 255
+        is_editable = True
+        return MantidQt.MantidWidgets.Batch.Cell(text, background_color, border_thickness, border_color, border_opacity, is_editable)
+
+    def row(self, path):
+        return MantidQt.MantidWidgets.Batch.RowLocation(path)
 
     def _setup_main_tab(self):
         self.user_file_button.clicked.connect(self._on_user_file_load)
@@ -379,8 +392,21 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         """
         self._call_settings_listeners(lambda listener: listener.on_processing_finished())
 
-    def _data_changed(self):
-        self._call_settings_listeners(lambda listener: listener.on_data_changed())
+    def _data_changed(self, row_location, column, old_value, new_value):
+        row = row_location.rowRelativeToParent()
+        self._call_settings_listeners(lambda listener: listener.on_data_changed(row, column, new_value))
+
+    def _row_inserted(self, row_location):
+        if row_location.depth() > 1:
+            self.data_processor_table.removeRowAt(row_location)
+        else:
+            index = row_location.rowRelativeToParent()
+            row = self.get_row(row_location)
+            self._call_settings_listeners(lambda listener: listener.on_row_inserted(index, row))
+
+    def _remove_rows_requested(self, rows):
+        rows = [item.rowRelativeToParent() for item in rows]
+        self._call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
 
     def _instrument_changed(self):
         self._call_settings_listeners(lambda listener: listener.on_instrument_changed())
@@ -422,9 +448,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         instrument_string = str(self.data_processor_table.getCurrentInstrument())
         instrument = get_instrument_from_gui_selection(instrument_string)
         self.instrument = instrument
-
-    def _on_python_process(self):
-        self.data_processor_table.processClicked()
 
     def disable_buttons(self):
         self.process_button.setEnabled(False)
@@ -634,10 +657,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
 
     def _on_multi_period_selection(self):
-        # Check if multi-period should be enabled
-        show_periods = self.multi_period_check_box.isChecked()
-        self.create_data_table(show_periods=show_periods)
-        self._call_settings_listeners(lambda listener: listener.on_multi_period_selection())
+        self._call_settings_listeners(lambda listener: listener.on_multi_period_selection(self.is_multi_period_view()))
 
     def _on_manage_directories(self):
         self._call_settings_listeners(lambda listener: listener.on_manage_directories())
@@ -653,7 +673,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             reduction_mode_list = get_reduction_mode_strings_for_gui(instrument)
             self.set_reduction_modes(reduction_mode_list)
 
-            self.data_processor_table.on_comboProcessInstrument_currentIndexChanged(self.instrument_combo_box.currentIndex())
+            # self.data_processor_table.on_comboProcessInstrument_currentIndexChanged(self.instrument_combo_box.currentIndex())
 
     def update_gui_combo_box(self, value, expected_type, combo_box):
         # There are two types of values that can be passed:
@@ -1759,18 +1779,34 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     # Table interaction
     # ------------------------------------------------------------------------------------------------------------------
     def get_cell(self, row, column, convert_to=None):
-        value = self.data_processor_table.getCell(row, column)
+        row_location = self.row([row])
+        value = self.data_processor_table.cellAt(row_location, column).contentText()
         return value if convert_to is None else convert_to(value)
 
     def set_cell(self, value, row, column):
         value_as_str = str(value)
-        self.data_processor_table.setCell(value_as_str, row, column)
+        cell = self.data_processor_table.cellAt(row, column)
+        cell.setContentText(value_as_str)
+        self.data_processor_table.setCellAt(row, column, cell)
 
     def get_number_of_rows(self):
-        return self.data_processor_table.getNumberOfRows()
+        return 1
+        # return self.data_processor_table.getNumberOfRows()
+
+    def get_selected_rows(self):
+        row_locations = self.data_processor_table.selectedRowLocations()
+        rows = []
+        for row_location in row_locations:
+            cell_contents = self.get_row(row_location)
+            rows.append(cell_contents)
+        return rows
+
+    def get_row(self, row_location):
+        cell_data = self.data_processor_table.cellsAt(row_location)
+        return [str(x.contentText()) for x in cell_data]
 
     def clear_table(self):
-        self.data_processor_table.clearTable()
+        self.data_processor_table.removeAllRows()
 
     def add_row(self, value):
         """
@@ -1780,87 +1816,108 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         are the names of the column
         :param value: the value specifying a row
         """
-        self.data_processor_table.transfer([value])
+        value = [self.cell(x) for x in value]
+        self.data_processor_table.appendChildRowOf(self.row([]), value)
+
+    def remove_rows(self, rows):
+        rows = [self.row([item]) for item in rows]
+        self.data_processor_table.removeRows(rows)
 
     # ------------------------------------------------------------------------------------------------------------------
     # NON-ESSENTIAL (Should we get rid of it?)
     # ------------------------------------------------------------------------------------------------------------------
-    def add_actions_to_menus(self, workspace_list):
-        """
-        Initialize table actions. Some table actions are not shown with the widget but they can be added to
-        external menus.
-        In this interface we have a 'File' menu and an 'Edit' menu
-        """
-        self.menuEdit.clear()
-        self.menuFile.clear()
-
-        # Actions that go in the 'Edit' menu
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.ProcessCommand(self.data_processor_table),
-                            self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.PlotRowCommand(self.data_processor_table),
-                            self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.AppendRowCommand(self.data_processor_table),
-                            self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.CopySelectedCommand(self.data_processor_table),
-                            self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.CutSelectedCommand(self.data_processor_table),
-                            self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.PasteSelectedCommand(self.data_processor_table),
-                            self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.ClearSelectedCommand(self.data_processor_table),
-                            self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.DeleteRowCommand(self.data_processor_table),
-                            self.menuEdit)
-
-        # Actions that go in the 'File' menu
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.OpenTableCommand(self.data_processor_table),
-                            self.menuFile, workspace_list)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.NewTableCommand(self.data_processor_table),
-                            self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.SaveTableCommand(self.data_processor_table),
-                            self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.SaveTableAsCommand(self.data_processor_table),
-                            self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.ImportTableCommand(self.data_processor_table),
-                            self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.ExportTableCommand(self.data_processor_table),
-                            self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.OptionsCommand(self.data_processor_table),
-                            self.menuFile)
-
-    def _create_action(self, command, menu, workspace_list=None):
-        """
-        Create an action from a given DataProcessorCommand and add it to a given menu
-        A 'workspace_list' can be provided but it is only intended to be used with OpenTableCommand.
-        It refers to the list of table workspaces in the ADS that could be loaded into the widget. Note that only
-        table workspaces with an appropriate number of columns and column types can be loaded.
-        """
-        if (workspace_list is not None and command.name() == "Open Table"):
-            submenu = QtGui.QMenu(command.name(), self)
-            submenu.setIcon(QtGui.QIcon(command.icon()))
-
-            for ws in workspace_list:
-                ws_command = MantidQt.MantidWidgets.DataProcessor.WorkspaceCommand(self.data_processor_table, ws)
-                action = QtGui.QAction(QtGui.QIcon(ws_command.icon()), ws_command.name(), self)
-                action.triggered.connect(lambda: self._connect_action(ws_command))
-                submenu.addAction(action)
-
-            menu.addMenu(submenu)
-        else:
-            action = QtGui.QAction(QtGui.QIcon(command.icon()), command.name(), self)
-            action.setShortcut(command.shortcut())
-            action.setStatusTip(command.tooltip())
-            action.triggered.connect(lambda: self._connect_action(command))
-            menu.addAction(action)
-
-    def _connect_action(self, command):
-        """
-        Executes an action
-        """
-        command.execute()
+    # def add_actions_to_menus(self, workspace_list):
+    #     """
+    #     Initialize table actions. Some table actions are not shown with the widget but they can be added to
+    #     external menus.
+    #     In this interface we have a 'File' menu and an 'Edit' menu
+    #     """
+    #     self.menuEdit.clear()
+    #     self.menuFile.clear()
+    #
+    #     # Actions that go in the 'Edit' menu
+    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.ProcessCommand(self.data_processor_table),
+    #                         self.menuEdit)
+    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.PlotRowCommand(self.data_processor_table),
+    #                         self.menuEdit)
+    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.AppendRowCommand(self.data_processor_table),
+    #                         self.menuEdit)
+    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.CopySelectedCommand(self.data_processor_table),
+    #                         self.menuEdit)
+    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.CutSelectedCommand(self.data_processor_table),
+    #                         self.menuEdit)
+    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.PasteSelectedCommand(self.data_processor_table),
+    #                         self.menuEdit)
+    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.ClearSelectedCommand(self.data_processor_table),
+    #                         self.menuEdit)
+    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.DeleteRowCommand(self.data_processor_table),
+    #                         self.menuEdit)
+    #
+    #     # Actions that go in the 'File' menu
+    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.OpenTableCommand(self.data_processor_table),
+    #                         self.menuFile, workspace_list)
+    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.NewTableCommand(self.data_processor_table),
+    #                         self.menuFile)
+    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.SaveTableCommand(self.data_processor_table),
+    #                         self.menuFile)
+    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.SaveTableAsCommand(self.data_processor_table),
+    #                         self.menuFile)
+    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.ImportTableCommand(self.data_processor_table),
+    #                         self.menuFile)
+    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.ExportTableCommand(self.data_processor_table),
+    #                         self.menuFile)
+    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.OptionsCommand(self.data_processor_table),
+    #                         self.menuFile)
+    #
+    # def _create_action(self, command, menu, workspace_list=None):
+    #     """
+    #     Create an action from a given DataProcessorCommand and add it to a given menu
+    #     A 'workspace_list' can be provided but it is only intended to be used with OpenTableCommand.
+    #     It refers to the list of table workspaces in the ADS that could be loaded into the widget. Note that only
+    #     table workspaces with an appropriate number of columns and column types can be loaded.
+    #     """
+    #     if (workspace_list is not None and command.name() == "Open Table"):
+    #         submenu = QtGui.QMenu(command.name(), self)
+    #         submenu.setIcon(QtGui.QIcon(command.icon()))
+    #
+    #         for ws in workspace_list:
+    #             ws_command = MantidQt.MantidWidgets.DataProcessor.WorkspaceCommand(self.data_processor_table, ws)
+    #             action = QtGui.QAction(QtGui.QIcon(ws_command.icon()), ws_command.name(), self)
+    #             action.triggered.connect(lambda: self._connect_action(ws_command))
+    #             submenu.addAction(action)
+    #
+    #         menu.addMenu(submenu)
+    #     else:
+    #         action = QtGui.QAction(QtGui.QIcon(command.icon()), command.name(), self)
+    #         action.setShortcut(command.shortcut())
+    #         action.setStatusTip(command.tooltip())
+    #         action.triggered.connect(lambda: self._connect_action(command))
+    #         menu.addAction(action)
+    #
+    # def _connect_action(self, command):
+    #     """
+    #     Executes an action
+    #     """
+    #     command.execute()
 
     def _run_python_code(self, text):
         """
         Re-emits 'runPytonScript' signal
         """
         mantidplot.runPythonScript(text, True)
+
+    def hide_period_columns(self):
+        self.data_processor_table.hideColumn(1)
+        self.data_processor_table.hideColumn(3)
+        self.data_processor_table.hideColumn(5)
+        self.data_processor_table.hideColumn(7)
+        self.data_processor_table.hideColumn(9)
+        self.data_processor_table.hideColumn(11)
+
+    def show_period_columns(self):
+        self.data_processor_table.showColumn(1)
+        self.data_processor_table.showColumn(3)
+        self.data_processor_table.showColumn(5)
+        self.data_processor_table.showColumn(7)
+        self.data_processor_table.showColumn(9)
+        self.data_processor_table.showColumn(11)

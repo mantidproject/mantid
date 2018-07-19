@@ -326,6 +326,15 @@ void JobTreeView::removeRowAt(RowLocation const &location) {
   m_adaptedMainModel.removeRowFrom(indexToRemove);
 }
 
+void JobTreeView::removeAllRows() {
+  // auto index = m_adaptedMainModel.rootIndex().untyped();
+  // for (auto row = 0; row < m_mainModel.rowCount(index); ++row) {
+  //   auto childIndex = QModelIndexForMainModel(m_mainModel.index(row, 0, index));
+  //   m_adaptedMainModel.removeRowFrom(childIndex);
+  // }
+  m_adaptedMainModel.removeAllRows();
+}
+
 void JobTreeView::insertChildRowOf(RowLocation const &parent, int beforeRow) {
   m_adaptedMainModel.insertEmptyChildRow(rowLocation().indexAt(parent),
                                          beforeRow);

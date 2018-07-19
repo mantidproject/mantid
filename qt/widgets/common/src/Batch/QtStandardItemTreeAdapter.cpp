@@ -3,6 +3,7 @@
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include "MantidQtWidgets/Common/Batch/CellStandardItem.h"
+#include <iostream>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -23,6 +24,24 @@ void QtStandardItemTreeModelAdapter::removeRowFrom(
   } else {
     m_model.removeRows(0, m_model.rowCount());
   }
+}
+
+QStringList QtStandardItemTreeModelAdapter::getHeaderData() const {
+  auto headerData = QStringList();
+  for (auto column=0;column<m_model.columnCount();++column){
+    headerData.append(m_model.headerData(column, Qt::Orientation::Horizontal).value<QString>());
+  }
+  return headerData;
+}
+
+void QtStandardItemTreeModelAdapter::setHeaderData(QStringList const & headerData){
+  m_model.setHorizontalHeaderLabels(headerData);
+}
+
+void QtStandardItemTreeModelAdapter::removeAllRows(){
+  auto storedHeaderData = getHeaderData();
+  m_model.clear();
+  setHeaderData(storedHeaderData);
 }
 
 QModelIndexForMainModel QtStandardItemTreeModelAdapter::appendEmptySiblingRow(

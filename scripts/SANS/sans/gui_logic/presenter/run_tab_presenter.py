@@ -34,6 +34,7 @@ from sans.sans_batch import SANSCentreFinder
 from sans.gui_logic.models.create_state import create_states
 from ui.sans_isis.work_handler import WorkHandler
 from sans.common.file_information import SANSFileInformationFactory
+from sans.sans_batch import SANSBatchReduction
 
 try:
     import mantidplot
@@ -64,8 +65,8 @@ class RunTabPresenter(object):
         def on_processing_finished(self):
             self._presenter.on_processing_finished()
 
-        def on_multi_period_selection(self):
-            self._presenter.on_multi_period_selection()
+        def on_multi_period_selection(self, show_periods):
+            self._presenter.on_multiperiod_changed(show_periods)
 
         def on_data_changed(self):
             self._presenter.on_data_changed()
@@ -75,6 +76,27 @@ class RunTabPresenter(object):
 
         def on_instrument_changed(self):
             self._presenter.on_instrument_changed()
+
+        def on_row_inserted(self, index, row):
+            self._presenter.on_row_inserted(index, row)
+
+        def on_rows_removed(self, rows):
+            self._presenter.on_rows_removed(rows)
+
+        def on_cell_changed(self, row, column, value):
+            self._presenter.on_cell_changed(row, column, value)
+
+
+    class ProcessListener(WorkHandler.WorkListener):
+        def __init__(self, presenter):
+            super(RunTabPresenter.ProcessListener, self).__init__()
+            self._presenter = presenter
+
+        def on_processing_finished(self, result):
+            self._presenter.on_processing_finished(result)
+
+        def on_processing_error(self, error):
+            self._presenter.on_processing_error(error)
 
     def __init__(self, facility, view=None):
         super(RunTabPresenter, self).__init__()
@@ -90,7 +112,7 @@ class RunTabPresenter(object):
 
         # Models that are being used by the presenter
         self._state_model = None
-        self._table_model = None
+        self._table_model = TableModel()
 
         # Due to the nature of the DataProcessorWidget we need to provide an algorithm with at least one input
         # workspace and at least one output workspace. Our SANS state approach is not compatible with this. Hence
@@ -203,7 +225,7 @@ class RunTabPresenter(object):
             if not os.path.exists(user_file_path):
                 raise RuntimeError("The user path {} does not exist. Make sure a valid user file path"
                                    " has been specified.".format(user_file_path))
-
+            self._table_model.user_file = user_file_path
             # Clear out the current view
             self._view.reset_all_fields_to_default()
 
@@ -216,10 +238,10 @@ class RunTabPresenter(object):
             # 5. Update the views.
             self._update_view_from_state_model()
 
-            # 6. Perform calls on child presenters
-            self._masking_table_presenter.on_update_rows()
-            self._beam_centre_presenter.on_update_rows()
-            self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
+            # # 6. Perform calls on child presenters
+            # self._masking_table_presenter.on_update_rows()
+            # self._beam_centre_presenter.on_update_rows()
+            # self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
 
         except Exception as e:
             self.sans_logger.error("Loading of the user file failed. {}".format(str(e)))
@@ -240,6 +262,8 @@ class RunTabPresenter(object):
                 raise RuntimeError("The batch file path {} does not exist. Make sure a valid batch file path"
                                    " has been specified.".format(batch_file_path))
 
+            self._table_model.batch_file = batch_file_path
+
             # 2. Read the batch file
             batch_file_parser = BatchCsvParser(batch_file_path)
             parsed_rows = batch_file_parser.parse_batch_file()
@@ -250,9 +274,9 @@ class RunTabPresenter(object):
             for row in parsed_rows:
                 self._populate_row_in_table(row)
 
-            # 5. Perform calls on child presenters
-            self._masking_table_presenter.on_update_rows()
-            self._beam_centre_presenter.on_update_rows()
+            # # 5. Perform calls on child presenters
+            # self._masking_table_presenter.on_update_rows()
+            # self._beam_centre_presenter.on_update_rows()
 
         except RuntimeError as e:
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
@@ -260,9 +284,10 @@ class RunTabPresenter(object):
 
     def on_data_changed(self):
         if not self._processing:
-            # 1. Perform calls on child presenters
-            self._masking_table_presenter.on_update_rows()
-            self._beam_centre_presenter.on_update_rows()
+            pass
+            # # 1. Perform calls on child presenters
+            # self._masking_table_presenter.on_update_rows()
+            # self._beam_centre_presenter.on_update_rows()
 
     def on_instrument_changed(self):
         self._setup_instrument_specific_settings()
@@ -289,38 +314,67 @@ class RunTabPresenter(object):
             if not states:
                 raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
                                    " has been loaded")
-            property_manager_service = PropertyManagerService()
-            property_manager_service.add_states_to_pmds(states)
-
-            # 2. Add dummy input workspace to Options column
-            self._remove_dummy_workspaces_and_row_index()
-            self._set_dummy_workspace()
-
-            # 3. Add dummy row index to Options column
-            self._set_indices()
 
             # 4. Create the graph if continuous output is specified
             if mantidplot:
                 if self._view.plot_results and not mantidplot.graph(self.output_graph):
                     mantidplot.newGraph(self.output_graph)
 
+            # Check if optimizations should be used
+            use_optimizations = self._view.use_optimizations
+
+            # Get the output mode
+            output_mode = self._view.output_mode
+
+            # Check if results should be plotted
+            plot_results =  self._view.plot_results
+
+            # Get the name of the graph to output to
+            output_graph = self.output_graph
+            work_handler = WorkHandler()
+            sans_batch = SANSBatchReduction()
+            listener = RunTabPresenter.ProcessListener(self)
+
+            work_handler.process(listener, sans_batch, states=states.values(), use_optimizations=use_optimizations, output_mode=output_mode,
+                       plot_results=plot_results
+                       , output_graph=output_graph)
+
         except Exception as e:
-            self._view.halt_process_flag()
             self._view.enable_buttons()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
             self.display_warning_box('Warning', 'Process halted', str(e))
+
+    def on_multiperiod_changed(self, show_periods):
+        if show_periods:
+            self._view.show_period_columns()
+        else:
+            self._view.hide_period_columns()
 
     def display_warning_box(self, title, text, detailed_text):
         self._view.display_message_box(title, text, detailed_text)
 
     def on_processing_finished(self):
-        self._remove_dummy_workspaces_and_row_index()
+        self._view.enable_buttons()
+        self._processing = False
+
+    def on_processing_error(self, error):
         self._view.enable_buttons()
         self._processing = False
 
     def on_multi_period_selection(self):
         multi_period = self._view.is_multi_period_view()
         self.table_index = generate_table_index(multi_period)
+
+    def on_row_inserted(self, index, row):
+        row_table_index = TableIndexModel(*row)
+        self._table_model.add_table_entry(index, row_table_index)
+
+    def on_rows_removed(self, rows):
+        self._view.remove_rows(rows)
+        self._table_model.remove_table_entries(rows)
+
+    def on_cell_changed(self, row, column, value):
+        self._table_model.update_table_entry(row, column, value)
 
     def on_manage_directories(self):
         self._view.show_directory_manager()
@@ -468,11 +522,12 @@ class RunTabPresenter(object):
         # 1. Update the state model
         state_model_with_view_update = self._get_state_model_with_view_update()
         # 2. Update the table model
-        table_model = self._get_table_model()
+        selected_rows = self._view.get_selected_rows()
+        selected_table_model = self._table_model
 
         # 3. Go through each row and construct a state object
-        if table_model and state_model_with_view_update:
-            states = create_states(state_model_with_view_update, table_model, self._view.instrument
+        if selected_table_model and state_model_with_view_update:
+            states = create_states(state_model_with_view_update, selected_table_model, self._view.instrument
                                    , self._facility, row_index, file_lookup=file_lookup)
         else:
             states = None
@@ -876,52 +931,31 @@ class RunTabPresenter(object):
         self.batch_file = batch_file
 
         # 2. Iterate over each row, create a table row model and insert it
-        number_of_rows = self._view.get_number_of_rows()
+        # number_of_rows = self._view.get_number_of_rows()
+        selected_rows = self._view.get_selected_rows()
         is_multi_period_view = self._view.is_multi_period_view()
-        for row in range(number_of_rows):
-            sample_scatter = self.get_cell_value(row, 'SAMPLE_SCATTER_INDEX')
-            sample_transmission = self.get_cell_value(row, 'SAMPLE_TRANSMISSION_INDEX')
-            sample_direct = self.get_cell_value(row, 'SAMPLE_DIRECT_INDEX')
-
-            can_scatter = self.get_cell_value(row, 'CAN_SCATTER_INDEX')
-            can_transmission = self.get_cell_value(row, 'CAN_TRANSMISSION_INDEX')
-            can_direct = self.get_cell_value(row, 'CAN_DIRECT_INDEX')
-
-            sample_scatter_period = self.get_cell_value(row, 'SAMPLE_SCATTER_PERIOD_INDEX')if is_multi_period_view else ""
-            sample_transmission_period = self.get_cell_value(row, 'SAMPLE_TRANSMISSION_PERIOD_INDEX')if is_multi_period_view else ""
-            sample_direct_period = self.get_cell_value(row, 'SAMPLE_DIRECT_PERIOD_INDEX')if is_multi_period_view else ""
-
-            can_scatter_period = self.get_cell_value(row, 'CAN_SCATTER_PERIOD_INDEX') if is_multi_period_view else ""
-            can_transmission_period = self.get_cell_value(row, 'CAN_TRANSMISSION_PERIOD_INDEX') if is_multi_period_view else ""
-            can_direct_period = self.get_cell_value(row, 'CAN_DIRECT_PERIOD_INDEX') if is_multi_period_view else ""
-
-            output_name = self.get_cell_value(row, 'OUTPUT_NAME_INDEX')
-            sample_thickness = self.get_cell_value(row, 'SAMPLE_THICKNESS_INDEX')
-            user_file = self.get_cell_value(row, 'USER_FILE_INDEX')
-
+        for index, row in enumerate(selected_rows):
             # Get the options string
             # We don't have to add the hidden column here, since it only contains information for the SANS
             # workflow to operate properly. It however does not contain information for the
-            options_string = self._get_options(row)
-
-            table_index_model = TableIndexModel(index=row,
-                                                sample_scatter=sample_scatter,
-                                                sample_scatter_period=sample_scatter_period,
-                                                sample_transmission=sample_transmission,
-                                                sample_transmission_period=sample_transmission_period,
-                                                sample_direct=sample_direct,
-                                                sample_direct_period=sample_direct_period,
-                                                can_scatter=can_scatter,
-                                                can_scatter_period=can_scatter_period,
-                                                can_transmission=can_transmission,
-                                                can_transmission_period=can_transmission_period,
-                                                can_direct=can_direct,
-                                                can_direct_period=can_direct_period,
-                                                output_name=output_name,
-                                                user_file = user_file,
-                                                sample_thickness=sample_thickness,
-                                                options_column_string=options_string)
-            table_model.add_table_entry(row, table_index_model)
+            table_index_model = TableIndexModel(index=index,
+                                                sample_scatter=row[0],
+                                                sample_scatter_period="",
+                                                sample_transmission=row[1],
+                                                sample_transmission_period="",
+                                                sample_direct=row[2],
+                                                sample_direct_period="",
+                                                can_scatter=row[3],
+                                                can_scatter_period="",
+                                                can_transmission=row[4],
+                                                can_transmission_period="",
+                                                can_direct=row[5],
+                                                can_direct_period="",
+                                                output_name=row[6],
+                                                user_file = row[7],
+                                                sample_thickness=row[8],
+                                                options_column_string=row[9])
+            table_model.add_table_entry(index, table_index_model)
         return table_model
 
     def get_cell_value(self, row, column):
@@ -964,34 +998,36 @@ class RunTabPresenter(object):
             if not self._view.is_multi_period_view():
                 self._view.set_multi_period_view_mode(True)
 
-        # 2. Create entry that can be understood by table
-        if self._view.is_multi_period_view():
-            row_entry = "SampleScatter:{},ssp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
-                        "CanScatter:{},csp:{},CanTrans:{},ctp:{}," \
-                        "CanDirect:{},cdp:{},OutputName:{},User File:{}," \
-                        "Sample Thickness:{}".format(sample_scatter,
-                                                     get_string_period(sample_scatter_period),
-                                                     sample_transmission,
-                                                     get_string_period(sample_transmission_period),
-                                                     sample_direct,
-                                                     get_string_period(sample_direct_period),
-                                                     can_scatter,
-                                                     get_string_period(can_scatter_period),
-                                                     can_transmission,
-                                                     get_string_period(can_transmission_period),
-                                                     can_direct,
-                                                     get_string_period(can_direct_period),
-                                                     output_name, user_file, sample_thickness)
-        else:
-            row_entry = "SampleScatter:{},SampleTrans:{},SampleDirect:{}," \
-                        "CanScatter:{},CanTrans:{}," \
-                        "CanDirect:{},OutputName:{},User File:{},Sample Thickness:{}".format(sample_scatter,
-                                                                                             sample_transmission,
-                                                                                             sample_direct,
-                                                                                             can_scatter,
-                                                                                             can_transmission,
-                                                                                             can_direct,
-                                                                                             output_name, user_file,sample_thickness)
+        row_entry = [sample_scatter, sample_transmission, sample_direct, can_scatter, can_transmission, can_direct, output_name, user_file, sample_thickness, '']
+        row_entry = [str(x) for x in row_entry]
+        # # 2. Create entry that can be understood by table
+        # if self._view.is_multi_period_view():
+        #     row_entry = "SampleScatter:{},ssp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
+        #                 "CanScatter:{},csp:{},CanTrans:{},ctp:{}," \
+        #                 "CanDirect:{},cdp:{},OutputName:{},User File:{}," \
+        #                 "Sample Thickness:{}".format(sample_scatter,
+        #                                              get_string_period(sample_scatter_period),
+        #                                              sample_transmission,
+        #                                              get_string_period(sample_transmission_period),
+        #                                              sample_direct,
+        #                                              get_string_period(sample_direct_period),
+        #                                              can_scatter,
+        #                                              get_string_period(can_scatter_period),
+        #                                              can_transmission,
+        #                                              get_string_period(can_transmission_period),
+        #                                              can_direct,
+        #                                              get_string_period(can_direct_period),
+        #                                              output_name, user_file, sample_thickness)
+        # else:
+        #     row_entry = "SampleScatter:{},SampleTrans:{},SampleDirect:{}," \
+        #                 "CanScatter:{},CanTrans:{}," \
+        #                 "CanDirect:{},OutputName:{},User File:{},Sample Thickness:{}".format(sample_scatter,
+        #                                                                                      sample_transmission,
+        #                                                                                      sample_direct,
+        #                                                                                      can_scatter,
+        #                                                                                      can_transmission,
+        #                                                                                      can_direct,
+        #                                                                                      output_name, user_file,sample_thickness)
 
         self._view.add_row(row_entry)
 
