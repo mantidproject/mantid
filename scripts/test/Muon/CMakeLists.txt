@@ -9,6 +9,7 @@ set ( TEST_PY_FILES
    MaxEntModel_test.py
    transformWidget_test.py
    PeriodicTableWidget_test.py
+   PeriodicTableModel_test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
