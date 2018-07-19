@@ -31,61 +31,96 @@
  * in a controlled manner. The work is based on
  * http://dbp-consulting.com/tutorials/SuppressingGCCWarnings.html
  */
+#if defined(__clang__)
+#define CLANG_VERSION ((__clang_major__ * 100) + __clang_minor__)
+#endif
+
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !defined(__clang__)
+#define GCC_VERSION                                                            \
+  (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#endif
+
 // Currently this is only defined for gcc
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+#if defined(GCC_VERSION) || defined(CLANG_VERSION)
 // how to use a pragma in a macro
 #define PRAGMA(x) _Pragma(#x)
 
-// convenience for getting gcc version
-#define GCC_VERSION                                                            \
-  (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
-
 // things to make the macros clearer
-#define GCC_DIAG_STR(s) #s
+#define DIAG_STR(s) #s
 // undefine definition from Poco 1.6
-#ifdef GCC_DIAG_JOINSTR
-#undef GCC_DIAG_JOINSTR
+#ifdef DIAG_JOINSTR
+#undef DIAG_JOINSTR
 #endif
-#define GCC_DIAG_JOINSTR(x, y) GCC_DIAG_STR(x##y)
+#define DIAG_JOINSTR(x, y) DIAG_STR(x##y)
 // undefine definition from Poco 1.6
-#ifdef GCC_DIAG_DO_PRAGMA
-#undef GCC_DIAG_DO_PRAGMA
+#ifdef DIAG_DO_PRAGMA
+#undef DIAG_DO_PRAGMA
 #endif
-#define GCC_DIAG_DO_PRAGMA(x) _Pragma(#x)
-#define GCC_DIAG_PRAGMA(x) GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
+#define DIAG_DO_PRAGMA(x) _Pragma(#x)
+
+#if defined(GCC_VERSION)
+#define DIAG_PRAGMA(x) DIAG_DO_PRAGMA(GCC diagnostic x)
+#else
+#define DIAG_PRAGMA(x) DIAG_DO_PRAGMA(clang diagnostic x)
+#endif
 
 // the following were previously defined in Poco/Platform_POSIX.h
-#ifdef GCC_DIAG_ON
-#undef GCC_DIAG_ON
+#ifdef DIAG_ON
+#undef DIAG_ON
 #endif
-#ifdef GCC_DIAG_OFF
-#undef GCC_DIAG_OFF
-#endif
-// define macros for turning the warning suppression on/off
-#if GCC_VERSION >= 40600 // 4.6.0
-#define GCC_DIAG_OFF(x)                                                        \
-  GCC_DIAG_PRAGMA(push)                                                        \
-  GCC_DIAG_PRAGMA(ignored GCC_DIAG_JOINSTR(-W, x))
-#define GCC_DIAG_ON(x) GCC_DIAG_PRAGMA(pop)
-#else
-#define GCC_DIAG_OFF(x) GCC_DIAG_PRAGMA(ignored GCC_DIAG_JOINSTR(-W, x))
-#define GCC_DIAG_ON(x) GCC_DIAG_PRAGMA(warning GCC_DIAG_JOINSTR(-W, x))
+#ifdef DIAG_OFF
+#undef DIAG_OFF
 #endif
 
-#else // anything else - does nothing
-#define GCC_DIAG_OFF(x)
-#define GCC_DIAG_ON(x)
+#if defined(GCC_VERSION)
+// define macros for turning the warning suppression on/off for GCC
+// note that we turn off unknown warnings here as well so that we can use the
+// same macro for GCC and clang.
+#if GCC_VERSION >= 40600 // GCC 4.6.0
+#define DIAG_OFF(x)                                                         \
+  DIAG_PRAGMA(push)                                                             \
+  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, unknown-warning))                        \
+  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, x))
+#define DIAG_ON(x) DIAG_PRAGMA(pop)
+#else
+#define DIAG_OFF(x)                                                         \
+  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, unknown-warning))                        \
+  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, x))
+#define DIAG_ON(x)                                                          \
+  DIAG_PRAGMA(warning DIAG_JOINSTR(-W, unknown-warning))                        \
+  DIAG_PRAGMA(warning DIAG_JOINSTR(-W, x))                                      
 #endif
+
+#elif defined(CLANG_VERSION) && CLANG_VERSION >= 306
+// define macros for turning the warning suppression on/off for clang
+// note that we turn off unknown warnings here as well so that we can use the
+// same macro for GCC and clang.
+#define DIAG_OFF(x)                                                        \
+  DIAG_PRAGMA(push)                                                            \
+  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, unknown-warning-option))                \
+  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, x))                                       
+#define DIAG_ON(x) DIAG_PRAGMA(pop)
+#else
+// neither clang or GCC
+#define DIAG_OFF(x)
+#define DIAG_ON(x)
+#endif
+
+#endif
+
 
 // Defining this macro separately since clang-tidy tries to add spaces around
 // the hyphen and we use it in a lot of test files.
 // clang-format off
 #if defined(__cplusplus) && defined(GCC_VERSION) && GCC_VERSION >= 50000
-#define GCC_DIAG_OFF_SUGGEST_OVERRIDE GCC_DIAG_OFF(suggest-override)
-#define GCC_DIAG_ON_SUGGEST_OVERRIDE GCC_DIAG_ON(suggest-override)
+#define DIAG_OFF_SUGGEST_OVERRIDE DIAG_OFF(suggest-override)
+#define DIAG_ON_SUGGEST_OVERRIDE DIAG_ON(suggest-override)
+#elif defined(__cplusplus) && defined(CLANG_VERSION) && CLANG_VERSION >= 306
+#define DIAG_OFF_SUGGEST_OVERRIDE DIAG_OFF(inconsistent-missing-override)
+#define DIAG_ON_SUGGEST_OVERRIDE DIAG_ON(inconsistent-missing-override)
 #else
-#define GCC_DIAG_OFF_SUGGEST_OVERRIDE
-#define GCC_DIAG_ON_SUGGEST_OVERRIDE
+#define DIAG_OFF_SUGGEST_OVERRIDE
+#define DIAG_ON_SUGGEST_OVERRIDE
 #endif
 // clang-format on
 
