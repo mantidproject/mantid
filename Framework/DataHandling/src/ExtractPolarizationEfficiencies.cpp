@@ -48,12 +48,14 @@ std::vector<double> parseVector(std::string const &name,
   return result;
 }
 
-MatrixWorkspace_sptr createWorkspace(std::vector<double> const &x,
-                                     std::vector<double> const &y) {
+MatrixWorkspace_sptr
+createWorkspace(std::vector<double> const &x, std::vector<double> const &y,
+                std::vector<double> const &e = std::vector<double>()) {
   Points xVals(x);
   Counts yVals(y);
+  CountVariances eVals(e.empty() ? std::vector<double>(y.size()) : e);
   auto retVal = boost::make_shared<Workspace2D>();
-  retVal->initialize(1, Histogram(xVals, yVals));
+  retVal->initialize(1, Histogram(xVals, yVals, eVals));
   return retVal;
 }
 
@@ -134,7 +136,7 @@ void ExtractPolarizationEfficiencies::exec() {
     auto const prop = parseVector(name, propValue);
     if (lambda.size() != prop.size()) {
       throw std::runtime_error("Instrument vector parameter \"" + name +
-                               "\" is expeced to be the same size as \"" +
+                               "\" is expected to be the same size as \"" +
                                LAMBDA_PARAMETER + "\" but " +
                                std::to_string(prop.size()) + " != " +
                                std::to_string(lambda.size()));

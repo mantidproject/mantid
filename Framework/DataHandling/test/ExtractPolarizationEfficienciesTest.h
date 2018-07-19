@@ -210,20 +210,40 @@ public:
     TS_ASSERT_DELTA(outWS->y(0)[2], 0.993, 1e-14);
     TS_ASSERT_DELTA(outWS->y(0)[3], 0.994, 1e-14);
 
+    TS_ASSERT_DELTA(outWS->e(0)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(0)[1], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(0)[2], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(0)[3], 0.0, 1e-14);
+
     TS_ASSERT_DELTA(outWS->y(1)[0], 0.981, 1e-14);
     TS_ASSERT_DELTA(outWS->y(1)[1], 0.982, 1e-14);
     TS_ASSERT_DELTA(outWS->y(1)[2], 0.983, 1e-14);
     TS_ASSERT_DELTA(outWS->y(1)[3], 0.984, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->e(1)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(1)[1], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(1)[2], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(1)[3], 0.0, 1e-14);
 
     TS_ASSERT_DELTA(outWS->y(2)[0], 0.971, 1e-14);
     TS_ASSERT_DELTA(outWS->y(2)[1], 0.972, 1e-14);
     TS_ASSERT_DELTA(outWS->y(2)[2], 0.973, 1e-14);
     TS_ASSERT_DELTA(outWS->y(2)[3], 0.974, 1e-14);
 
+    TS_ASSERT_DELTA(outWS->e(2)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(2)[1], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(2)[2], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(2)[3], 0.0, 1e-14);
+
     TS_ASSERT_DELTA(outWS->y(3)[0], 0.961, 1e-14);
     TS_ASSERT_DELTA(outWS->y(3)[1], 0.962, 1e-14);
     TS_ASSERT_DELTA(outWS->y(3)[2], 0.963, 1e-14);
     TS_ASSERT_DELTA(outWS->y(3)[3], 0.964, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->e(3)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(3)[1], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(3)[2], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(3)[3], 0.0, 1e-14);
   }
 
   void test_Wildes() {
@@ -261,20 +281,40 @@ public:
     TS_ASSERT_DELTA(outWS->y(0)[2], 0.993, 1e-14);
     TS_ASSERT_DELTA(outWS->y(0)[3], 0.994, 1e-14);
 
+    TS_ASSERT_DELTA(outWS->e(0)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(0)[1], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(0)[2], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(0)[3], 0.0, 1e-14);
+
     TS_ASSERT_DELTA(outWS->y(1)[0], 0.981, 1e-14);
     TS_ASSERT_DELTA(outWS->y(1)[1], 0.982, 1e-14);
     TS_ASSERT_DELTA(outWS->y(1)[2], 0.983, 1e-14);
     TS_ASSERT_DELTA(outWS->y(1)[3], 0.984, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->e(1)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(1)[1], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(1)[2], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(1)[3], 0.0, 1e-14);
 
     TS_ASSERT_DELTA(outWS->y(2)[0], 0.971, 1e-14);
     TS_ASSERT_DELTA(outWS->y(2)[1], 0.972, 1e-14);
     TS_ASSERT_DELTA(outWS->y(2)[2], 0.973, 1e-14);
     TS_ASSERT_DELTA(outWS->y(2)[3], 0.974, 1e-14);
 
+    TS_ASSERT_DELTA(outWS->e(2)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(2)[1], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(2)[2], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(2)[3], 0.0, 1e-14);
+
     TS_ASSERT_DELTA(outWS->y(3)[0], 0.961, 1e-14);
     TS_ASSERT_DELTA(outWS->y(3)[1], 0.962, 1e-14);
     TS_ASSERT_DELTA(outWS->y(3)[2], 0.963, 1e-14);
     TS_ASSERT_DELTA(outWS->y(3)[3], 0.964, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->e(3)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(3)[1], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(3)[2], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(3)[3], 0.0, 1e-14);
   }
 
   void test_loading_from_file() {
@@ -392,7 +432,7 @@ public:
     alg.setProperty("OutputWorkspace", "dummy");
     TS_ASSERT_THROWS_EQUALS(
         alg.execute(), std::runtime_error & e, std::string(e.what()),
-        "Instrument vector parameter \"P1\" is expeced to be the same size as "
+        "Instrument vector parameter \"P1\" is expected to be the same size as "
         "\"efficiency_lambda\" but 4 != 3");
   }
 
