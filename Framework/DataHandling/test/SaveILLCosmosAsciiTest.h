@@ -63,10 +63,10 @@ public:
     TS_ASSERT_EQUALS(columns.size(), 5);
     // the first is black due to the leading separator
     TS_ASSERT_EQUALS(columns[0], "");
-    TS_ASSERT_EQUALS(columns[1], "1.500000e+00");
-    TS_ASSERT_EQUALS(columns[2], "1.000000e+00");
-    TS_ASSERT_EQUALS(columns[3], "1.000000e+00");
-    TS_ASSERT_EQUALS(columns[4], "0.000000e+00");
+    TS_ASSERT_EQUALS(columns[1], "1.500000000000000e+00");
+    TS_ASSERT_EQUALS(columns[2], "1.000000000000000e+00");
+    TS_ASSERT_EQUALS(columns[3], "1.000000000000000e+00");
+    TS_ASSERT_EQUALS(columns[4], "0.000000000000000e+00");
     in.close();
 
     cleanupafterwards();
@@ -95,10 +95,10 @@ public:
     TS_ASSERT_EQUALS(columns.size(), 5);
     // the first is black due to the leading separator
     TS_ASSERT_EQUALS(columns[0], "");
-    TS_ASSERT_EQUALS(columns[1], "0.000000e+00");
-    TS_ASSERT_EQUALS(columns[2], "1.000000e+00");
-    TS_ASSERT_EQUALS(columns[3], "1.000000e+00");
-    TS_ASSERT_EQUALS(columns[4], "0.000000e+00");
+    TS_ASSERT_EQUALS(columns[1], "0.000000000000000e+00");
+    TS_ASSERT_EQUALS(columns[2], "1.000000000000000e+00");
+    TS_ASSERT_EQUALS(columns[3], "1.000000000000000e+00");
+    TS_ASSERT_EQUALS(columns[4], "0.000000000000000e+00");
     in.close();
 
     cleanupafterwards();
@@ -127,10 +127,10 @@ public:
     TS_ASSERT_EQUALS(columns.size(), 5);
     // the first is black due to the leading separator
     TS_ASSERT_EQUALS(columns[0], "");
-    TS_ASSERT_EQUALS(columns[1], "1.500000e+00");
-    TS_ASSERT_EQUALS(columns[2], "0.000000e+00");
-    TS_ASSERT_EQUALS(columns[3], "1.000000e+00");
-    TS_ASSERT_EQUALS(columns[4], "0.000000e+00");
+    TS_ASSERT_EQUALS(columns[1], "1.500000000000000e+00");
+    TS_ASSERT_EQUALS(columns[2], "0.000000000000000e+00");
+    TS_ASSERT_EQUALS(columns[3], "1.000000000000000e+00");
+    TS_ASSERT_EQUALS(columns[4], "0.000000000000000e+00");
     in.close();
 
     cleanupafterwards();
@@ -160,10 +160,10 @@ public:
     // the first is black due to the leading separator
     TS_ASSERT(columns.at(0) == "");
     TS_ASSERT_EQUALS(columns[0], "");
-    TS_ASSERT_EQUALS(columns[1], "1.500000e+00");
-    TS_ASSERT_EQUALS(columns[2], "1.000000e+00");
-    TS_ASSERT_EQUALS(columns[3], "0.000000e+00");
-    TS_ASSERT_EQUALS(columns[4], "0.000000e+00");
+    TS_ASSERT_EQUALS(columns[1], "1.500000000000000e+00");
+    TS_ASSERT_EQUALS(columns[2], "1.000000000000000e+00");
+    TS_ASSERT_EQUALS(columns[3], "0.000000000000000e+00");
+    TS_ASSERT_EQUALS(columns[4], "0.000000000000000e+00");
     in.close();
 
     cleanupafterwards();
@@ -180,10 +180,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UserContact", "John Smith"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("Title", "Testing this algorithm"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Separator", "comma"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     m_long_filename = alg.getPropertyValue("Filename");
-    // Has the algorithm written a file to disk?
+    // has the algorithm written a file to disk?
     TS_ASSERT(Poco::File(m_long_filename).exists());
     std::ifstream in(m_long_filename.c_str());
     std::string fullline;
@@ -196,10 +197,10 @@ public:
     TS_ASSERT_EQUALS(columns.size(), 5);
     // the first is black due to the leading separator
     TS_ASSERT_EQUALS(columns[0], "");
-    TS_ASSERT_EQUALS(columns[1], "1.500000e+00");
-    TS_ASSERT_EQUALS(columns[2], "1.000000e+00");
-    TS_ASSERT_EQUALS(columns[3], "1.000000e+00");
-    TS_ASSERT_EQUALS(columns[4], "0.000000e+00");
+    TS_ASSERT_EQUALS(columns[1], "1.500000000000000e+00");
+    TS_ASSERT_EQUALS(columns[2], "1.000000000000000e+00");
+    TS_ASSERT_EQUALS(columns[3], "1.000000000000000e+00");
+    TS_ASSERT_EQUALS(columns[4], "0.000000000000000e+00");
     in.close();
 
     cleanupafterwards();
@@ -254,7 +255,7 @@ private:
     getline(in, fullline);
     std::cout << sep;
     TS_ASSERT_EQUALS(fullline,
-                     "Number of data points:" + sep + std::to_string(m_points));
+                     "Number of data points: " + std::to_string(m_points));
     getline(in, fullline);
     getline(in, fullline);
     TS_ASSERT_EQUALS(fullline, sep + "q" + sep + "refl" + sep + "refl_err" +
