@@ -5,6 +5,7 @@ import argparse
 from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
+from mantid.simpleapi import *
 
 class ComponentInfoTest(unittest.TestCase):
 
@@ -14,6 +15,14 @@ class ComponentInfoTest(unittest.TestCase):
         if self.__class__._ws is None:
             self.__class__._ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 1, False) # no monitors
             self.__class__._ws.getSpectrum(0).clearDetectorIDs()
+
+    """
+    ----------------------------------------------------------------------------
+    Normal Tests
+    ----------------------------------------------------------------------------
+
+    The following test cases test normal usage of the exposed methods.
+    """
 
     def test_detectorsInSubtree(self):
         """ Test that a list of detectors is returned """
@@ -106,11 +115,79 @@ class ComponentInfoTest(unittest.TestCase):
         info = self._ws.componentInfo()
         self.assertEquals(type(info.name(0)), str)
 
+    def test_createWorkspaceAndComponentInfo(self):
+        """ Try to create a workspace and see if ComponentInfo object is accessable """
+        dataX = [1,2,3,4,5]
+        dataY = [1,2,3,4,5]
+        workspace = CreateWorkspace(DataX=dataX, DataY=dataY)
+        info = workspace.componentInfo()
+        self.assertEquals(info.size(), 1)
 
-    """ 
-    The section below is for destructive tests - i.e extreme
-    and exceptional test cases. 
+
     """
+    ----------------------------------------------------------------------------
+    Extreme Tests
+    ----------------------------------------------------------------------------
+
+    The following test cases test around boundary cases for the exposed methods.
+    """
+
+    def test_detectorsInSubtree_extreme(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(OverflowError):
+        	info.detectorsInSubtree(-1)
+        self.assertEquals(type(info.detectorsInSubtree(5)), list)
+
+    def test_componentsInSubtree_extreme(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(OverflowError):
+        	info.componentsInSubtree(-1)
+        self.assertEquals(type(info.componentsInSubtree(5)), list)
+
+    def test_position_extreme(self):
+    	info = self._ws.componentInfo()
+    	with self.assertRaises(OverflowError):
+    		info.position(-1)
+    	self.assertEquals(type(info.position(0)), V3D)
+    	self.assertEquals(type(info.position(5)), V3D)
+
+    def test_rotation_extreme(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(OverflowError):
+            info.rotation(-1)
+        self.assertEquals(type(info.rotation(0)), Quat)
+        self.assertEquals(type(info.rotation(5)), Quat)
+
+    def test_relativePosition_extreme(self):
+    	info = self._ws.componentInfo()
+    	with self.assertRaises(OverflowError):
+    		info.relativePosition(-1)
+    	self.assertEquals(type(info.relativePosition(0)), V3D)
+    	self.assertEquals(type(info.relativePosition(5)), V3D)
+
+    def test_relativeRotation_extreme(self):
+    	info = self._ws.componentInfo()
+    	with self.assertRaises(OverflowError):
+    		info.relativeRotation(-1)
+    	self.assertEquals(type(info.relativeRotation(0)), Quat)
+    	self.assertEquals(type(info.relativeRotation(5)), Quat)
+
+    def test_name_extreme(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(OverflowError):
+            info.name(-1)
+        self.assertEquals(type(info.name(0)), str)
+        self.assertEquals(type(info.name(5)), str)
+
+
+	"""
+    ----------------------------------------------------------------------------
+	Exceptional Tests
+	----------------------------------------------------------------------------
+
+	Each of the tests below tries to pass invalid parameters to the exposed
+    methods and expect an error to be thrown.
+	"""
 
     def test_detectorsInSubtree_exceptional(self):
         info = self._ws.componentInfo()
@@ -144,11 +221,11 @@ class ComponentInfoTest(unittest.TestCase):
         	info.hasDetectorInfo(0)
 
     def test_position_exceptional(self):
-		info = self._ws.componentInfo()
-		with self.assertRaises(TypeError):
-			info.position("Zero")
-		with self.assertRaises(TypeError):
-			info.position(0.0)
+    	info = self._ws.componentInfo()
+    	with self.assertRaises(TypeError):
+    		info.position("Zero")
+    	with self.assertRaises(TypeError):
+    		info.position(0.0)
 
     def test_rotation_exceptional(self):
 		info = self._ws.componentInfo()
