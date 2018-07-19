@@ -10,18 +10,14 @@ digraph Sample {
   subgraph params {
     $param_style
     Run
-    TransmissionValue
-    TransmissionError
-    BeamCenterX
-    BeamCenterY
+    BeamInputWorkspace
+    TransmissionInputWorkspace
     AbsorberInputWorkspace
     ContainerInputWorkspace
     SensitivityInputWorkspace
     ReferenceInputWorkspace
     MaskedInputWorkspace
     SampleThickness
-    BeamFluxValue
-    BeamFluxError
   }
 
   subgraph values {
@@ -45,18 +41,21 @@ digraph Sample {
     Divide4 [label="Divide"]
   }
 
+  subgraph process {
+    $process_style
+    ScaleByFluxFactor
+  }
+
   Run -> LoadAndMerge
   LoadAndMerge -> NormaliseBy
   NormaliseBy -> Divide
   Divide -> Minus
   AbsorberInputWorkspace -> Minus
   Minus -> MoveInstrumentComponent
-  BeamCenterX -> MoveInstrumentComponent
-  BeamCenterY -> MoveInstrumentComponent
+  BeamInputWorkspace -> MoveInstrumentComponent
   MoveInstrumentComponent -> SANSSolidAngleCorrection
   SANSSolidAngleCorrection -> ApplyTransmissionCorrection
-  TransmissionValue -> ApplyTransmissionCorrection
-  TransmissionError -> ApplyTransmissionCorrection
+  TransmissionInputWorkspace -> ApplyTransmissionCorrection
   ApplyTransmissionCorrection -> Minus2
   ContainerInputWorkspace -> Minus2
   Minus2 -> MaskDetectors
@@ -65,12 +64,12 @@ digraph Sample {
   SampleThickness -> NormaliseByThickness
   NormaliseByThickness -> AbsoluteScaleBy
   AbsoluteScaleBy -> Divide2 [label="Beam Flux"]
-  BeamFluxValue -> Divide2
-  BeamFluxError -> Divide2
+  BeamInputWorkspace -> Divide2
   Divide2 -> Divide3
   SensitivityInputWorkspace -> Divide3
-  Divide3 -> OutputWorkspace
+  Divide3 -> ScaleByFluxFactor
   AbsoluteScaleBy -> Divide4 [label="Standard Sample"]
   ReferenceInputWorkspace -> Divide4
-  Divide4 -> OutputWorkspace
+  Divide4 -> ScaleByFluxFactor
+  ScaleByFluxFactor -> OutputWorkspace
 }

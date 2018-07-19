@@ -9,10 +9,8 @@ digraph Container {
   subgraph params {
     $param_style
     Run
-    TransmissionValue
-    TransmissionError
-    BeamCenterX
-    BeamCenterY
+    TransmissionInputWorkspace
+    BeamInputWorkspace
     AbsorberInputWorkspace
   }
 
@@ -37,11 +35,9 @@ digraph Container {
   Divide -> Minus
   AbsorberInputWorkspace -> Minus
   Minus -> MoveInstrumentComponent
-  BeamCenterX -> MoveInstrumentComponent
-  BeamCenterY -> MoveInstrumentComponent
+  BeamInputWorkspace -> MoveInstrumentComponent
   MoveInstrumentComponent -> SANSSolidAngleCorrection
   SANSSolidAngleCorrection -> ApplyTransmissionCorrection
-  TransmissionValue -> ApplyTransmissionCorrection
-  TransmissionError -> ApplyTransmissionCorrection
+  TransmissionInputWorkspace -> ApplyTransmissionCorrection
   ApplyTransmissionCorrection -> OutputWorkspace
 }

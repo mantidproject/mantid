@@ -29,6 +29,7 @@ digraph Beam {
     Divide
     Minus
     FindCenterOfMassPosition
+    MoveInstrumentComponent
   }
 
   subgraph process {
@@ -46,9 +47,12 @@ digraph Beam {
   FindCenterOfMassPosition -> DirectBeam
   DirectBeam -> BeamCenterX
   DirectBeam -> BeamCenterY
+  BeamCenterX -> MoveInstrumentComponent
+  BeamCenterY -> MoveInstrumentComponent
   BeamRadius -> IntegrateInRadius
-  Minus -> IntegrateInRadius
+  MoveInstrumentComponent -> IntegrateInRadius
   IntegrateInRadius -> BeamFluxValue
   IntegrateInRadius -> BeamFluxError
-  Minus -> OutputWorkspace
+  BeamFluxValue -> OutputWorkspace
+  BeamFluxError -> OutputWorkspace
 }

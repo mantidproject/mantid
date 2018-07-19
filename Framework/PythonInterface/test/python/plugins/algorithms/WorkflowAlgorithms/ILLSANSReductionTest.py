@@ -27,7 +27,7 @@ class ILLSANSReductionTest(unittest.TestCase):
         run = mtd['Db'].getRun()
         self.assertAlmostEqual(run.getLogData('BeamCenterX').value, -0.0048, delta=1e-4)
         self.assertAlmostEqual(run.getLogData('BeamCenterY').value, -0.0027, delta=1e-4)
-        self.assertAlmostEqual(run.getLogData('BeamFluxValue').value, 6618861, delta=1)
+        self.assertAlmostEqual(run.getLogData('BeamFluxValue').value, 6618939, delta=1)
         self.assertAlmostEqual(run.getLogData('BeamFluxError').value, 8554, delta=1)
 
     def test_transmission(self):

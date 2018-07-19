@@ -63,12 +63,14 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                              validator=StringListValidator(['None', 'Timer', 'Monitor']),
                              doc='Choose the normalisation type.')
 
-        self.declareProperty('BeamRadius', 0.05, validator=FloatBoundedValidator(lower=0.), doc='Beam raduis [m]')
+        self.declareProperty('BeamRadius', 0.05, validator=FloatBoundedValidator(lower=0.),
+                             doc='Beam raduis [m]; used for beam center finding and transmission calculations.')
 
         self.setPropertySettings('BeamRadius',
                                  EnabledWhenProperty(beam, transmission, LogicOperator.Or))
 
-        self.declareProperty('DirectBeam', True, doc='Use direct beam method of the beam finding.')
+        self.declareProperty('DirectBeam', True,
+                             doc='Use direct beam method of the beam finding, if not, use the scattered beam method.')
 
         self.setPropertySettings('DirectBeam', beam)
 
@@ -205,6 +207,7 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number')
         AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
         DeleteWorkspace(centers)
+        MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
         integral = self._integrate_in_radius(ws, radius)
         run = mtd[ws].getRun()
         att_coeff = run.getLogData('attenuator.attenuation_coefficient').value
@@ -227,6 +230,10 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                 self._process_beam(ws)
             else:
                 beam = self.getPropertyValue('BeamInputWorkspace')
+                if beam:
+                    beam_x = mtd[beam].getRun().getLogData('BeamCenterX').value
+                    beam_y = mtd[beam].getRun().getLogData('BeamCenterY').value
+                    MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
                 if process == 'Transmission':
                     radius = self.getProperty('BeamRadius').value
                     RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=beam, OutputWorkspace=ws)
@@ -235,12 +242,7 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                     CalculateTransmission(SampleRunWorkspace=ws, DirectRunWorkspace=beam,
                                           TransmissionROI=det_list, OutputWorkspace=ws)
                 else:
-                    if beam:
-                        beam_x = mtd[beam].getRun().getLogData('BeamCenterX').value
-                        beam_y = mtd[beam].getRun().getLogData('BeamCenterY').value
-                        MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
                     transmission_ws = self.getPropertyValue('TransmissionInputWorkspace')
-
                     if transmission_ws:
                         transmission = mtd[transmission_ws].readY(0)[0]
                         transmission_err = mtd[transmission_ws].readE(0)[0]

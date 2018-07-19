@@ -18,6 +18,7 @@ digraph Transmission {
     $value_style
     TransmissionValue
     TransmissionError
+    OutputWorkspace
   }
 
   subgraph algorithms {
@@ -26,6 +27,7 @@ digraph Transmission {
     Divide
     Minus
     CalculateTransmission
+    MoveInstrumentComponent
   }
 
   Run -> LoadAndMerge
@@ -33,9 +35,13 @@ digraph Transmission {
   NormaliseBy -> Divide
   Divide -> Minus
   AbsorberInputWorkspace -> Minus
-  Minus -> CalculateTransmission
-  BeamInputWorkspace -> CalculateTransmission
+  Minus -> MoveInstrumentComponent
+  BeamInputWorkspace -> MoveInstrumentComponent
+  MoveInstrumentComponent -> CalculateTransmission
   BeamRadius -> CalculateTransmission
+  BeamInputWorkspace -> CalculateTransmission
   CalculateTransmission -> TransmissionValue
   CalculateTransmission -> TransmissionError
+  TransmissionValue -> OutputWorkspace
+  TransmissionError -> OutputWorkspace
 }
