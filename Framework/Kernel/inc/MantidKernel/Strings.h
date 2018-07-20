@@ -5,12 +5,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/System.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
 #endif
+
+#include "absl/strings/str_join.h"
+
 #include <iosfwd>
 #include <list>
 #include <map>
@@ -65,19 +69,25 @@ namespace Strings {
 template <typename CONTAINER_TYPE>
 DLLExport std::string join(const CONTAINER_TYPE &c,
                            const std::string &separator) {
-  std::ostringstream output;
-  for (auto it = c.begin(); it != c.end();) {
-    output << *it;
-    it++;
-    if (it != c.end())
-      output << separator;
-  }
-  return output.str();
+  return absl::StrJoin(c, separator);
 }
 
+class OptionalBoolFormatter {
+public:
+  void operator()(std::string *out, const OptionalBool &f) {
+    out->append(m_enumToStr[f.getValue()]);
+  }
+
+private:
+  std::map<OptionalBool::Value, std::string> m_enumToStr =
+      OptionalBool::enumToStrMap();
+};
+
 template <>
-DLLExport std::string join(const std::vector<double> &c,
-                           const std::string &separator);
+inline DLLExport std::string join(const std::vector<OptionalBool> &c,
+                                  const std::string &separator) {
+  return absl::StrJoin(c, separator, OptionalBoolFormatter());
+}
 
 //------------------------------------------------------------------------------------------------
 /** Join a set or vector of (something that turns into a string) together

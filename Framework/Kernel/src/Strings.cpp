@@ -8,7 +8,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/spirit/include/karma.hpp>
 
 #include <fstream>
 
@@ -17,20 +16,6 @@ using std::size_t;
 namespace Mantid {
 namespace Kernel {
 namespace Strings {
-
-template <>
-DLLExport std::string join(const std::vector<double> &c,
-                           const std::string &separator) {
-  using boost::spirit::karma::double_;
-  using boost::spirit::karma::generate;
-  using boost::spirit::karma::lit;
-  std::string result;
-  generate(std::back_inserter(result),              // the output
-           double_ << *(lit(separator) << double_), // the generator
-           c                                        // the input
-  );
-  return result;
-}
 
 //------------------------------------------------------------------------------------------------
 /** Loads the entire contents of a text file into a string
