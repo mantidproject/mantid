@@ -17,7 +17,14 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER NullPeaksPresenter
 public:
   void update() override {}
   void updateWithSlicePoint(const PeakBoundingBox &) override {}
-  bool changeShownDim() override { return false; }
+  bool changeShownDim(size_t dimX, size_t dimY) override {
+    (void)dimX;
+    (void)dimY;
+    return false;
+  }
+  void setNonOrthogonal(bool nonOrthogonalEnabled) override {
+    (void)nonOrthogonalEnabled;
+  }
   bool isLabelOfFreeAxis(const std::string &) const override { return false; }
   SetPeaksWorkspaces presentedWorkspaces() const override {
     SetPeaksWorkspaces empty;

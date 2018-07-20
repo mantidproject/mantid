@@ -354,7 +354,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
             compInfo.indexOf(component->getComponentID());
         compInfo.setPosition(componentIndex, pos);
       }
-      m_maxHeight = double(nPixels) * m_pixelHeight / 2 + maxYOffset;
+      m_maxHeight = double(nPixels + 1) * m_pixelHeight / 2 + maxYOffset;
     }
   }
 

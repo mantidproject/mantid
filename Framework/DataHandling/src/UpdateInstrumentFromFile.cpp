@@ -9,12 +9,15 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/NexusDescriptor.h"
+#include <MantidKernel/StringTokenizer.h>
 #include "LoadRaw/isisraw2.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+// clang-format off
+#include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
-#include <MantidKernel/StringTokenizer.h>
+// clang-format on
 
 #include <fstream>
 

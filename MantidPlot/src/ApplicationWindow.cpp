@@ -91,6 +91,7 @@
 #include "PlotWizard.h"
 #include "PolynomFitDialog.h"
 #include "PolynomialFit.h"
+#include "Process.h"
 #include "ProjectRecovery.h"
 #include "ProjectSerialiser.h"
 #include "QwtErrorPlotCurve.h"
@@ -254,7 +255,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings,
                                      const QStringList &args)
     : QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),
       blockWindowActivation(false), m_enableQtiPlotFitting(false),
-      m_ProjectRecovery(this), m_exitCode(0),
+      m_projectRecovery(this), m_exitCode(0),
 #ifdef Q_OS_MAC // Mac
       settings(QSettings::IniFormat, QSettings::UserScope, "Mantid",
                "MantidPlot")
@@ -263,7 +264,6 @@ ApplicationWindow::ApplicationWindow(bool factorySettings,
 #endif
 {
   init(factorySettings, args);
-  m_ProjectRecovery.startProjectSaving();
 }
 
 /**
@@ -9772,9 +9772,12 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     }
   }
 
-  // Stop background saving thread, so it doesn't try to use a destroyed
-  // resource
-  m_ProjectRecovery.stopProjectSaving();
+  if (m_projectRecoveryRunOnStart) {
+    // Stop background saving thread, so it doesn't try to use a destroyed
+    // resource
+    m_projectRecovery.stopProjectSaving();
+    m_projectRecovery.clearAllCheckpoints();
+  }
 
   // Close the remaining MDI windows. The Python API is required to be active
   // when the MDI window destructor is called so that those references can be
@@ -16636,6 +16639,21 @@ void ApplicationWindow::onAboutToStart() {
 
   // Make sure we see all of the startup messages
   resultsLog->scrollToTop();
+
+  // Kick off project recovery iff we are able to determine if we are the only
+  // instance currently running
+  try {
+    if (!Process::isAnotherInstanceRunning()) {
+      checkForProjectRecovery();
+    } else {
+      g_log.debug("Another MantidPlot process is running. Project recovery is "
+                  "disabled.");
+    }
+  } catch (std::runtime_error &exc) {
+    g_log.warning("Unable to determine if other MantidPlot processes are "
+                  "running. Project recovery is disabled. Error msg: " +
+                  std::string(exc.what()));
+  }
 }
 
 /**
@@ -16740,6 +16758,19 @@ bool ApplicationWindow::isOfType(const QObject *obj,
 }
 
 /**
+  * Loads a project file as part of project recovery
+  *
+  * @param sourceFile The full path to the .project file
+  * @return True is loading was successful, false otherwise
+  */
+bool ApplicationWindow::loadProjectRecovery(std::string sourceFile) {
+  const bool isRecovery = true;
+  ProjectSerialiser projectWriter(this, isRecovery);
+  // File version is not applicable to project recovery - so set to 0
+  return projectWriter.load(sourceFile, 0);
+}
+
+/**
  * Triggers saving project recovery on behalf of an external thread
  * or caller, such as project recovery.
  *
@@ -16750,4 +16781,35 @@ bool ApplicationWindow::saveProjectRecovery(std::string destination) {
   const bool isRecovery = true;
   ProjectSerialiser projectWriter(this, isRecovery);
   return projectWriter.save(QString::fromStdString(destination));
+}
+
+/**
+  * Checks for any recovery checkpoint and starts project
+  * saving if one doesn't exist. If one does, it prompts
+  * the user whether they would like to recover
+  */
+void ApplicationWindow::checkForProjectRecovery() {
+  m_projectRecoveryRunOnStart = true;
+  if (!m_projectRecovery.checkForRecovery()) {
+    m_projectRecovery.startProjectSaving();
+    return;
+  }
+
+  // Recovery file present
+  try {
+    m_projectRecovery.attemptRecovery();
+  } catch (std::exception &e) {
+    std::string err{
+        "Project Recovery failed to recover this checkpoint. Details: "};
+    err.append(e.what());
+    g_log.error(err);
+    QMessageBox::information(this, "Could Not Recover",
+                             "We could not fully recover your work.\nMantid "
+                             "will continue to run normally now.",
+                             "OK");
+
+    // Restart project recovery manually
+    m_projectRecovery.clearAllCheckpoints();
+    m_projectRecovery.startProjectSaving();
+  }
 }

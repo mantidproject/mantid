@@ -54,6 +54,14 @@ public:
   /// Destructor the ensures background thread stops
   ~ProjectRecovery();
 
+  /// Attempts recovery of the most recent checkpoint
+  void attemptRecovery();
+  /// Checks if recovery is required
+  bool checkForRecovery() const noexcept;
+
+  /// Clears all checkpoints in the existing folder
+  bool clearAllCheckpoints() const noexcept;
+
   /// Starts the background thread
   void startProjectSaving();
   /// Stops the background thread
@@ -66,18 +74,31 @@ private:
   /// Triggers when the config key is updated to a new value
   void configKeyChanged(Mantid::Kernel::ConfigValChangeNotification_ptr notif);
 
-  /// Deletes oldest checkpoints beyond the maximum number to keep
-  void deleteExistingCheckpoints(size_t checkpointsToKeep);
+  /// Creates a recovery script based on all .py scripts in a folder
+  void compileRecoveryScript(const Poco::Path &inputFolder,
+                             const Poco::Path &outputFile);
 
-  /// Saves a project recovery file in Mantid
-  void saveOpenWindows(const std::string &projectDestFolder);
-  /// Saves the current workspace's histories from Mantid
-  void saveWsHistories(const Poco::Path &projectDestFile);
+  /// Deletes oldest checkpoints beyond the maximum number to keep
+  void deleteExistingCheckpoints(size_t checkpointsToKeep) const;
+
+  /// Loads a recovery checkpoint in the given folder
+  void loadRecoveryCheckpoint(const Poco::Path &path);
+
+  /// Open a recovery checkpoint in the scripting window
+  void openInEditor(const Poco::Path &inputFolder,
+                    const Poco::Path &historyDest);
 
   /// Wraps the thread in a try catch to log any failures
   void projectSavingThreadWrapper();
+
   /// Main body of saving thread
   void projectSavingThread();
+
+  /// Saves a project recovery file in Mantid
+  void saveOpenWindows(const std::string &projectDestFolder);
+
+  /// Saves the current workspace's histories from Mantid
+  void saveWsHistories(const Poco::Path &projectDestFile);
 
   /// Background thread which runs the saving body
   std::thread m_backgroundSavingThread;

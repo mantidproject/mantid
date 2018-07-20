@@ -275,7 +275,7 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False):
 
     if workspace.isHistogramData():
         if not distribution:
-            z = z / (x[:, 1:] - x[:, 0:-1])
+            z /= x[:, 1:] - x[:, 0:-1]
         if histogram2D:
             if len(y) == z.shape[0]:
                 y = boundaries_from_points(y)

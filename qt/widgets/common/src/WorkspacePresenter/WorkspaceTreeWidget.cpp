@@ -335,6 +335,11 @@ void WorkspaceTreeWidget::chooseByLastModified() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
 }
 
+void WorkspaceTreeWidget::chooseByMemorySize() {
+  m_sortCriteria = SortCriteria::ByMemorySize;
+  m_presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
+}
+
 void WorkspaceTreeWidget::excludeItemFromSort(MantidTreeWidgetItem *item) {
   static int counter = 1;
 
@@ -356,13 +361,27 @@ void WorkspaceTreeWidget::sortWorkspaces(SortCriteria criteria,
                                          SortDirection direction) {
   if (isTreeUpdating())
     return;
-  m_tree->setSortScheme(criteria == SortCriteria::ByName
-                            ? MantidItemSortScheme::ByName
-                            : MantidItemSortScheme::ByLastModified);
+  m_tree->setSortScheme(whichCriteria(criteria));
   m_tree->setSortOrder(direction == SortDirection::Ascending
                            ? Qt::AscendingOrder
                            : Qt::DescendingOrder);
   m_tree->sort();
+}
+
+MantidQt::MantidWidgets::MantidItemSortScheme
+WorkspaceTreeWidget::whichCriteria(SortCriteria criteria) {
+  switch (criteria) {
+  case SortCriteria::ByName:
+    return MantidItemSortScheme::ByName;
+  case SortCriteria::ByLastModified:
+    return MantidItemSortScheme::ByLastModified;
+  case SortCriteria::ByMemorySize:
+    return MantidItemSortScheme::ByMemorySize;
+  default:
+    // Handle if someone adds a new Enum and it falls through by defaulting to
+    // name
+    return MantidItemSortScheme::ByName;
+  }
 }
 
 void WorkspaceTreeWidget::saveWorkspaceCollection() {
@@ -676,6 +695,7 @@ void WorkspaceTreeWidget::createSortMenuActions() {
   QAction *m_descendingSortAction = new QAction("Descending", this);
   QAction *m_byNameChoice = new QAction("Name", this);
   QAction *m_byLastModifiedChoice = new QAction("Last Modified", this);
+  QAction *m_byMemorySize = new QAction("Size", this);
 
   m_ascendingSortAction->setCheckable(true);
   m_ascendingSortAction->setEnabled(true);
@@ -695,9 +715,13 @@ void WorkspaceTreeWidget::createSortMenuActions() {
   m_byLastModifiedChoice->setCheckable(true);
   m_byLastModifiedChoice->setEnabled(true);
 
+  m_byMemorySize->setCheckable(true);
+  m_byMemorySize->setEnabled(true);
+
   m_sortChoiceGroup = new QActionGroup(m_sortMenu);
   m_sortChoiceGroup->addAction(m_byNameChoice);
   m_sortChoiceGroup->addAction(m_byLastModifiedChoice);
+  m_sortChoiceGroup->addAction(m_byMemorySize);
   m_sortChoiceGroup->setExclusive(true);
   m_byNameChoice->setChecked(true);
 
@@ -708,6 +732,8 @@ void WorkspaceTreeWidget::createSortMenuActions() {
   connect(m_byNameChoice, SIGNAL(triggered()), this, SLOT(chooseByName()));
   connect(m_byLastModifiedChoice, SIGNAL(triggered()), this,
           SLOT(chooseByLastModified()));
+  connect(m_byMemorySize, SIGNAL(triggered()), this,
+          SLOT(chooseByMemorySize()));
 
   m_sortMenu->addActions(sortDirectionGroup->actions());
   m_sortMenu->addSeparator();
