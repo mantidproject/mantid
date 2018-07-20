@@ -13,7 +13,6 @@ from Muon.GUI.ElementalAnalysis.LoadWidget.load_view import LoadView
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_presenter import LoadPresenter
 
 
-
 class ElementalAnalysisGui(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(ElementalAnalysisGui, self).__init__(parent)
