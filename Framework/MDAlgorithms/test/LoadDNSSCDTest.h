@@ -25,7 +25,8 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 
-bool cmp_Events(const std::vector<coord_t> &ev1, const std::vector<coord_t> &ev2) {
+bool cmp_Events(const std::vector<coord_t> &ev1,
+                const std::vector<coord_t> &ev2) {
   // event1 < event2 if it has smaller det_id and dE
   assert(ev1.size() == 8);
   assert(ev2.size() == 8);
