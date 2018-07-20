@@ -8,11 +8,9 @@ class LoadView(QtGui.QWidget):
         super(LoadView, self).__init__(parent)
 
         self.load_button = QtGui.QPushButton("Browse", self)
-        self.load_button.clicked.connect(self.button_clicked)
 
         self.spinbox = QtGui.QSpinBox(self)
         self.spinbox.setRange(0, 1e7)
-        self.spinbox.valueChanged.connect(self.spinbox_val_changed)
 
         self.grid = QtGui.QHBoxLayout()
         self.grid.addWidget(self.spinbox)
