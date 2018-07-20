@@ -1,9 +1,6 @@
 #ifndef MANTID_DATAHANDLING_SaveILLCosmosAscii_H_
 #define MANTID_DATAHANDLING_SaveILLCosmosAscii_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"

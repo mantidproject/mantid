@@ -2,6 +2,7 @@
 #define MANTID_DATAHANDLING_SAVEANSTOASCII_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidDataHandling/AsciiPointBase.h"
 
 namespace Mantid {
@@ -49,6 +50,11 @@ public:
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
     return {"SaveAscii"};
+  }
+  /// Constructor
+  SaveANSTOAscii() {
+    this->useAlgorithm("SaveMFT");
+    this->deprecatedDate("2018-06-29");
   }
 
 private:

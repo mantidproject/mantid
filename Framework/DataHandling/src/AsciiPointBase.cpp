@@ -109,11 +109,11 @@ void AsciiPointBase::outputval(double val, std::ofstream &file,
   if (leadingSep)
     file << m_sep;
   if (!nancheck && !infcheck)
-    file << std::right << val;
+    file << val;
   else if (infcheck)
-    file << std::right << "inf";
+    file << "inf";
   else
-    file << std::right << "nan";
+    file << "nan";
 }
 
 /// appends the separator property to the algorithm
