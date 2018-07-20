@@ -15964,6 +15964,8 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer *w) {
     return;
   }
 
+  btnMultiPeakPick->setEnabled(w->layers() == 1);
+
   Graph *g = w->activeGraph();
   if (g) {
     PlotToolInterface *tool = g->activeTool();
