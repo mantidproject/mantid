@@ -81,12 +81,12 @@ private:
 
   /// structure for experimental data
   struct ExpData {
-    double deterota;    // detector rotation angle
-    double huber;		// sample rotation angle
+    double deterota; // detector rotation angle
+    double huber;    // sample rotation angle
     double wavelength;
-    double norm;		// normalizarion
-    size_t nchannels;   // TOF channels number
-    double chwidth;     // channel width, microseconds
+    double norm;      // normalizarion
+    size_t nchannels; // TOF channels number
+    double chwidth;   // channel width, microseconds
     std::vector<std::vector<double>> signal;
     std::vector<int> detID;
   };
@@ -96,8 +96,7 @@ private:
   /// Output IMDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr m_OutWS;
 
-  int splitIntoColumns(std::list<std::string> &columns,
-                       std::string &str);
+  int splitIntoColumns(std::list<std::string> &columns, std::string &str);
   void read_data(const std::string fname,
                  std::map<std::string, std::string> &str_metadata,
                  std::map<std::string, double> &num_metadata);
