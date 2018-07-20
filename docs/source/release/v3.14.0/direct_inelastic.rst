@@ -15,4 +15,4 @@ Direct Inelastic Changes
 Improvements
 ############
 
-- :ref:`LoadDNSSCD <LoadDNSSCD>` has been improved to be able to load TOF data.
+- :ref:`LoadDNSSCD <algm-LoadDNSSCD>` has been improved to be able to load TOF data.
