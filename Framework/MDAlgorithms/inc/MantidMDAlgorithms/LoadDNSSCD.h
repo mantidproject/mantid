@@ -68,6 +68,9 @@ private:
   /// Run the algorithm
   void exec() override;
 
+  /// The column separator
+  std::string m_columnSep;
+
   /// number of workspace dimensions
   size_t m_nDims;
 
@@ -78,11 +81,13 @@ private:
 
   /// structure for experimental data
   struct ExpData {
-    double deterota;
-    double huber;
+    double deterota;    // detector rotation angle
+    double huber;		// sample rotation angle
     double wavelength;
-    double norm;
-    std::vector<double> signal;
+    double norm;		// normalizarion
+    size_t nchannels;   // TOF channels number
+    double chwidth;     // channel width, microseconds
+    std::vector<std::vector<double>> signal;
     std::vector<int> detID;
   };
 
@@ -91,6 +96,8 @@ private:
   /// Output IMDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr m_OutWS;
 
+  int splitIntoColumns(std::list<std::string> &columns,
+                       std::string &str);
   void read_data(const std::string fname,
                  std::map<std::string, std::string> &str_metadata,
                  std::map<std::string, double> &num_metadata);

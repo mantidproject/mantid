@@ -33,6 +33,8 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
@@ -95,7 +97,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadDNSSCD)
 //----------------------------------------------------------------------------------------------
 /** Constructor
 */
-LoadDNSSCD::LoadDNSSCD() : m_nDims(3) {}
+LoadDNSSCD::LoadDNSSCD() : m_columnSep("\t, ;"), m_nDims(4) {}
 
 /**
 * Return the confidence with with this algorithm can load the file
@@ -203,6 +205,18 @@ void LoadDNSSCD::init() {
       Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
           "SaveHuberTo", "", Direction::Output, PropertyMode::Optional),
       "A workspace name to save a list of raw sample rotation angles.");
+
+  auto mustBeIntPositive = boost::make_shared<BoundedValidator<int>>();
+  mustBeIntPositive->setLower(0);
+  declareProperty(make_unique<PropertyWithValue<int>>(
+                      "ElasticChannel", 0, mustBeIntPositive, Direction::Input),
+                  "Elastic channel number. Only for TOF data.");
+
+  auto mustBeNegative = boost::make_shared<BoundedValidator<double>>();
+  mustBeNegative->setUpper(0.0);
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "DeltaEmin", -10.0, mustBeNegative, Direction::Input),
+                  "Minimal energy transfer to consider. Should be <=0. Only for TOF data.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -334,6 +348,13 @@ void LoadDNSSCD::exec() {
   setProperty("OutputWorkspace", m_OutWS);
 }
 
+int LoadDNSSCD::splitIntoColumns(std::list<std::string> &columns, std::string &str)
+{
+    boost::split(columns, str, boost::is_any_of(m_columnSep),
+                 boost::token_compress_on);
+    return static_cast<int>(columns.size());
+}
+
 //----------------------------------------------------------------------------------------------
 
 template <class T>
@@ -374,15 +395,17 @@ void LoadDNSSCD::updateProperties(API::Run &run,
 void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
 
   // dimensions
-  std::vector<std::string> vec_ID(3);
+  std::vector<std::string> vec_ID(4);
   vec_ID[0] = "H";
   vec_ID[1] = "K";
   vec_ID[2] = "L";
+  vec_ID[3] = "DeltaE";
 
-  std::vector<std::string> dimensionNames(3);
+  std::vector<std::string> dimensionNames(4);
   dimensionNames[0] = "H";
   dimensionNames[1] = "K";
   dimensionNames[2] = "L";
+  dimensionNames[3] = "DeltaE";
 
   Mantid::Kernel::SpecialCoordinateSystem coordinateSystem =
       Mantid::Kernel::HKL;
@@ -397,10 +420,35 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
   std::vector<double> u = getProperty("HKL1");
   std::vector<double> v = getProperty("HKL2");
 
+  // load empty DNS instrument to access L1 and L2
+  IAlgorithm_sptr loadAlg =
+      AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  loadAlg->setChild(true);
+  loadAlg->setLogging(false);
+  loadAlg->initialize();
+  loadAlg->setProperty("InstrumentName", "DNS");
+  loadAlg->setProperty("OutputWorkspace", "__DNS_Inst");
+  loadAlg->execute();
+  MatrixWorkspace_sptr instWS =
+      loadAlg->getProperty("OutputWorkspace");
+  const auto &instrument = instWS->getInstrument();
+  const auto &samplePosition = instrument->getSample()->getPos();
+  const auto &sourcePosition = instrument->getSource()->getPos();
+  const auto beamVector = samplePosition - sourcePosition;
+  const auto l1 = beamVector.norm();
+  // calculate tof1
+  auto velocity = PhysicalConstants::h/(PhysicalConstants::NeutronMass*wavelength*1e-10); // m/s
+  auto tof1 = 1e+06*l1/velocity;        // microseconds
+  g_log.debug() << "TOF1 = " << tof1 << std::endl;
+  // calculate incident energy
+  auto Ei = 0.5*PhysicalConstants::NeutronMass*velocity*velocity/PhysicalConstants::meV;
+  g_log.debug() << "Ei = " << Ei << std::endl;
+
+  double dEmin = getProperty("DeltaEmin");
   // estimate extents
   double qmax = 4.0 * M_PI / wavelength;
-  std::vector<double> extentMins = {-qmax * a, -qmax * b, -qmax * c};
-  std::vector<double> extentMaxs = {qmax * a, qmax * b, qmax * c};
+  std::vector<double> extentMins = {-qmax * a, -qmax * b, -qmax * c, dEmin};
+  std::vector<double> extentMaxs = {qmax * a, qmax * b, qmax * c, Ei};
 
   // Get MDFrame of HKL type with RLU
   auto unitFactory = makeMDUnitFactoryChain();
@@ -447,52 +495,93 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
   ub_inv.Invert();
 
   // Creates a new instance of the MDEventInserter to output workspace
-  MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(m_OutWS);
-  MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
+  MDEventWorkspace<MDEvent<4>, 4>::sptr mdws_mdevt_4 =
+      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<4>, 4>>(m_OutWS);
+  MDEventInserter<MDEventWorkspace<MDEvent<4>, 4>::sptr> inserter(mdws_mdevt_4);
 
   // create a normalization workspace
   IMDEventWorkspace_sptr normWS = m_OutWS->clone();
 
   // Creates a new instance of the MDEventInserter to norm workspace
-  MDEventWorkspace<MDEvent<3>, 3>::sptr normws_mdevt_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(normWS);
-  MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> norm_inserter(
-      normws_mdevt_3);
+  MDEventWorkspace<MDEvent<4>, 4>::sptr normws_mdevt_4 =
+      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<4>, 4>>(normWS);
+  MDEventInserter<MDEventWorkspace<MDEvent<4>, 4>::sptr> norm_inserter(
+      normws_mdevt_4);
 
   // scattering angle limits
   std::vector<double> tth_limits = getProperty("TwoThetaLimits");
   double theta_min = tth_limits[0] * deg2rad / 2.0;
   double theta_max = tth_limits[1] * deg2rad / 2.0;
 
+  // get elastic channel from the user input
+  int echannel_user = getProperty("ElasticChannel");
+
   // Go though each element of m_data to convert to MDEvent
   for (ExpData ds : m_data) {
     uint16_t runindex = 0;
     signal_t norm_signal(ds.norm);
     signal_t norm_error = std::sqrt(m_normfactor * norm_signal);
-    double k = 2.0 / ds.wavelength;
+    double ki = 2.0*M_PI / ds.wavelength;
     for (size_t i = 0; i < ds.detID.size(); i++) {
-      signal_t signal(ds.signal[i]);
-      signal_t error = std::sqrt(signal);
+      const auto &detector = instWS->getDetector(i);
+      const auto &detectorPosition = detector->getPos();
+      const auto detectorVector = detectorPosition - samplePosition;
+      const auto l2 = detectorVector.norm();
+      auto tof2_elastic = 1e+06*l2/velocity;
+      // geometric elastic channel
+      int echannel_geom = static_cast<int>(std::ceil(tof2_elastic/ds.chwidth));
+      // rotate the signal array to get elastic peak at right position
+      int ch_diff = echannel_geom - echannel_user;
+      if ((echannel_user >0) && (ch_diff < 0)) {
+          std::rotate(ds.signal[i].begin(), ds.signal[i].begin() - ch_diff, ds.signal[i].end());
+      } else if ((echannel_user > 0) && (ch_diff > 0)) {
+          std::rotate(ds.signal[i].rbegin(), ds.signal[i].rbegin() + ch_diff, ds.signal[i].rend());
+      }
       detid_t detid(ds.detID[i]);
       double theta = 0.5 * (ds.detID[i] * 5.0 - ds.deterota) * deg2rad;
+      size_t nchannels = ds.signal[i].size();
       if ((theta > theta_min) && (theta < theta_max)) {
-        double omega = (ds.huber - ds.deterota) * deg2rad - theta;
-        V3D uphi(-cos(omega), 0, -sin(omega));
-        V3D hphi = uphi * k * sin(theta);
-        V3D hkl = ub_inv * hphi;
-        std::vector<Mantid::coord_t> millerindex(3);
-        millerindex[0] = static_cast<float>(hkl.X());
-        millerindex[1] = static_cast<float>(hkl.Y());
-        millerindex[2] = static_cast<float>(hkl.Z());
-        inserter.insertMDEvent(
-            static_cast<float>(signal), static_cast<float>(error * error),
-            static_cast<uint16_t>(runindex), detid, millerindex.data());
+          PARALLEL_FOR_IF(Kernel::threadSafe(*m_OutWS, *normWS))
+          for (size_t channel=0; channel < nchannels; channel++) {
+              PARALLEL_START_INTERUPT_REGION
+              double signal = ds.signal[i][channel];
+              signal_t error = std::sqrt(signal);
+              double tof2 = static_cast<double>(channel)*ds.chwidth + 0.5*ds.chwidth;   // bin centers
+              g_log.debug() << "TOF2 = " << tof2 << std::endl;
+              double dE = 0.0;
+              if (nchannels > 1) {
+                  double v2 = 1e+06*l2/tof2;
+                  dE = Ei - 0.5*PhysicalConstants::NeutronMass*v2*v2/PhysicalConstants::meV;
+              }
+              if (dE > dEmin) {
+                  double kf = std::sqrt(ki*ki - 2.0e-20*PhysicalConstants::NeutronMass*dE*PhysicalConstants::meV/(PhysicalConstants::h_bar*PhysicalConstants::h_bar));
+                  g_log.debug() << "dE = " << dE << std::endl;
+                  double tlab = std::atan2(ki - kf*cos(2.0*theta), kf*sin(2.0*theta));
+                  double omega = (ds.huber - ds.deterota) * deg2rad - tlab;
+                  V3D uphi(-cos(omega), 0, -sin(omega));
+                  double qabs = 0.5*std::sqrt(ki*ki + kf*kf - 2.0*ki*kf*cos(2.0*theta))/M_PI;
+                  V3D hphi = uphi * qabs; // qabs = ki * sin(theta), for elastic case;
+                  V3D hkl = ub_inv * hphi;
+                  std::vector<Mantid::coord_t> millerindex(4);
+                  millerindex[0] = static_cast<float>(hkl.X());
+                  millerindex[1] = static_cast<float>(hkl.Y());
+                  millerindex[2] = static_cast<float>(hkl.Z());
+                  millerindex[3] = static_cast<float>(dE);
+                  PARALLEL_CRITICAL(addValues) {
+                  inserter.insertMDEvent(
+                              static_cast<float>(signal), static_cast<float>(error * error),
+                              static_cast<uint16_t>(runindex), detid, millerindex.data());
 
-        norm_inserter.insertMDEvent(static_cast<float>(norm_signal),
-                                    static_cast<float>(norm_error * norm_error),
-                                    static_cast<uint16_t>(runindex), detid,
-                                    millerindex.data());
+                  norm_inserter.insertMDEvent(static_cast<float>(norm_signal),
+                                              static_cast<float>(norm_error * norm_error),
+                                              static_cast<uint16_t>(runindex), detid,
+                                              millerindex.data());
+                  }
+
+              }
+              PARALLEL_END_INTERUPT_REGION
+          }
+          PARALLEL_CHECK_INTERUPT_REGION
       }
     }
   }
@@ -573,28 +662,45 @@ void LoadDNSSCD::read_data(const std::string fname,
     }
   }
 
-  // the algorithm does not work with TOF data for the moment
   std::map<std::string, double>::const_iterator m =
       num_metadata.lower_bound("TOF");
   g_log.debug() << "TOF Channels number: " << m->second << std::endl;
-  if (m->second != 1)
-    throw std::runtime_error(
-        "Algorithm does not support TOF data. TOF Channels number must be 1.");
+  std::map<std::string, double>::const_iterator w =
+      num_metadata.lower_bound("Time");
+  g_log.debug() << "Channel width: " << w->second << std::endl;
+//  if (m->second != 1)
+//    throw std::runtime_error(
+//        "Algorithm does not support TOF data. TOF Channels number must be 1.");
 
   ExpData ds;
   ds.deterota = num_metadata["DeteRota"];
   ds.huber = num_metadata["Huber"];
   ds.wavelength = 10.0 * num_metadata["Lambda[nm]"];
   ds.norm = num_metadata[m_normtype];
+  ds.chwidth = w->second;
+  ds.nchannels = static_cast<size_t>(std::ceil(m->second));
 
   // read data array
   getline(file, line);
-  int d;
-  double x;
-  while (file) {
-    file >> d >> x;
-    ds.detID.push_back(d);
-    ds.signal.push_back(x);
+
+  std::list<std::string> columns;
+  while(getline(file, line)){
+      boost::trim(line);
+      const int cols = splitIntoColumns(columns, line);
+      if (cols > 0){
+          g_log.debug() << "Number of columns = " << cols << std::endl;
+          g_log.debug() << "Data: " ;
+//          for (std::string s : columns) {
+//              g_log.debug() << s << ",\t";
+//          }
+          g_log.debug() << std::endl;
+          ds.detID.push_back(std::stoi(columns.front()));
+          columns.pop_front();
+          std::vector<double> signal;
+          std::transform(columns.begin(), columns.end(), std::back_inserter(signal),
+                         [](const std::string& s){return std::stod(s);});
+          ds.signal.push_back(signal);
+      }
   }
   // DNS PA detector bank has only 24 detectors
   ds.detID.resize(24);
