@@ -56,7 +56,7 @@ void IndexPeakswithSatellites::init() {
                   "Main Indexing Tolerance (0.15)");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("Tolerance for Satellite", 0.15,
+      make_unique<PropertyWithValue<double>>("ToleranceForSatellite", 0.15,
                                              mustBePositive, Direction::Input),
       "Satellite Indexing Tolerance (0.15)");
 
@@ -123,7 +123,7 @@ void IndexPeakswithSatellites::exec() {
   double main_error = 0.;
   double satellite_error = 0.;
   double tolerance = getProperty("Tolerance");
-  double satetolerance = getProperty("Tolerance for Satellite");
+  double satetolerance = getProperty("ToleranceForSatellite");
 
   vector<double> offsets1 = getProperty("ModVector1");
   vector<double> offsets2 = getProperty("ModVector2");
