@@ -10,7 +10,7 @@ from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import Period
 from Muon.GUI.Common import message_box
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_view import LoadView
-from Muon.GUI.ElementalAnalysis.LoadWidget.load_presenter import LoadWidget
+from Muon.GUI.ElementalAnalysis.LoadWidget.load_presenter import LoadPresenter
 
 
 
@@ -30,9 +30,10 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.ptable.register_table_lclicked(self.table_left_clicked)
         self.ptable.register_table_rclicked(self.table_right_clicked)
 
-        self.load_widget = LoadWidget(LoadView(), LoadModel())
+        self.load_widget = LoadPresenter(LoadView(), LoadModel())
         self.load_widget.register_button_clicked(self.browse_clicked)
         self.load_widget.register_spinbox_val_changed(self.spinbox_changed)
+        self.load_widget.register_spinbox_submit(self.spinbox_submit)
 
         self.box = QtGui.QHBoxLayout()
         self.box.addWidget(self.ptable.view)
