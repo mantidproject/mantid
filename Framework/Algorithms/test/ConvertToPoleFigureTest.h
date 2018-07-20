@@ -125,18 +125,18 @@ createBraggWorkspace(const std::string &name) {
     E[i] = sqrt(fabs(Y[i]));
   }
 
-  // add properties
+  // add properties: Omega = -45    HROT = 30
   // add HROT
   Kernel::TimeSeriesProperty<double> *hrotprop =
       new Kernel::TimeSeriesProperty<double>("HROT");
   Types::Core::DateAndTime time0(1000000);
-  hrotprop->addValue(time0, -0.003857142);
+  hrotprop->addValue(time0, 30.);
   ws->mutableRun().addProperty(hrotprop);
 
   // add Omega
   Kernel::TimeSeriesProperty<double> *omegaprop =
       new Kernel::TimeSeriesProperty<double>("OMEGA");
-  omegaprop->addValue(time0, 89.998);
+  omegaprop->addValue(time0, -45.);
   API::Run &run = ws->mutableRun();
   run.addProperty(omegaprop);
 

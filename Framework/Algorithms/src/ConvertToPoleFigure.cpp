@@ -175,7 +175,7 @@ void ConvertToPoleFigure::convertToPoleFigure() {
     Kernel::V3D detpos = detector->getPos();
     Kernel::V3D k_det_sample = detpos - samplepos;
     Kernel::V3D k_det_sample_unit = k_det_sample / k_det_sample.norm();
-    Kernel::V3D qvector = k_sample_src_unit - k_det_sample_unit;
+    Kernel::V3D qvector = k_det_sample_unit - k_sample_src_unit;
     Kernel::V3D unit_q = qvector / qvector.norm();
 
     // calcualte pole figure position
@@ -285,8 +285,8 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
   double omega_prime = omega - psi + 135.;
   double tau_pp = -hrot - phi;
 
+  g_log.notice() << "\nQ = " << unitQ.toString() << "\n";
   g_log.notice() << "Input: omega = " << omega << ", " << "HROT = " << hrot << "\n";
-  g_log.notice() << "Q = " << unitQ.toString() << "\n";
 
   //
   double omega_prim_rad = omega_prime * M_PI / 180.;
@@ -313,9 +313,14 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
   part3 = k2 * (k2.scalar_prod(unitQPrime) * (1 - cos(tau_pp_rad)));
   Kernel::V3D unitQpp = part1 + part2 + part3;
 
+  g_log.notice() << "Q'' = " << unitQpp.toString() << "\n";
+
   // project to the pole figure by point light
   double sign(1);
-  if (unitQpp.Z() < 0)
+  // Qz with positive and negative zero will render to opposite result though physically
+  // they are same.  Here in order to make the output consistent with considerting numerical
+  // resolution, positive is set to be larger than -1E-10
+  if (unitQpp.Z() < -1.E-10)
     sign = -1;
 
   double factor = 1. + sign * unitQpp.Z();
