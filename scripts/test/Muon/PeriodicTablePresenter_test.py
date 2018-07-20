@@ -2,7 +2,7 @@ from __future__ import absolute_import, print_function
 
 import unittest
 
-from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTable
+from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTablePresenter
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table import PeriodicTable as silxPT
@@ -16,11 +16,11 @@ except ImportError:
     import mock
 
 
-class PeriodicTableWidgetTest(unittest.TestCase):
+class PeriodicTablePresenterTest(unittest.TestCase):
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
         self._model = mock.create_autospec(PeriodicTableModel)
-        self.widget = PeriodicTable(PeriodicTableView(), self._model)
+        self.widget = PeriodicTablePresenter(PeriodicTableView(), self._model)
         self.mock_elem = mock.Mock()
 
         self.widget.view.ptable = mock.create_autospec(silxPT)

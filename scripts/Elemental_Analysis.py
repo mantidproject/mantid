@@ -4,7 +4,7 @@ from PyQt4 import QtGui
 
 import sys
 
-from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTable
+from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTablePresenter
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
 from Muon.GUI.Common import message_box
@@ -17,7 +17,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(ElementalAnalysisGui, self).__init__(parent)
 
-        self.ptable = PeriodicTable(PeriodicTableView(), PeriodicTableModel())
+        self.ptable = PeriodicTablePresenter(
+            PeriodicTableView(), PeriodicTableModel())
         self.ptable.register_table_changed(self.table_changed)
         self.ptable.register_table_lclicked(self.table_left_clicked)
         self.ptable.register_table_rclicked(self.table_right_clicked)

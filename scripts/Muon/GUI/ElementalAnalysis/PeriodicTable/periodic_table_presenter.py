@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 
-class PeriodicTable(object):
+class PeriodicTablePresenter(object):
     def __init__(self, view, model):
         self.view = view
         self.model = model
