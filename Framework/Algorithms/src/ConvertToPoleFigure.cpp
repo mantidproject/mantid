@@ -285,6 +285,9 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
   double omega_prime = omega - psi + 135.;
   double tau_pp = -hrot - phi;
 
+  g_log.notice() << "Input: omega = " << omega << ", " << "HROT = " << hrot << "\n";
+  g_log.notice() << "Q = " << unitQ.toString() << "\n";
+
   //
   double omega_prim_rad = omega_prime * M_PI / 180.;
   double tau_pp_rad = tau_pp * M_PI / 180.;
@@ -292,10 +295,16 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
   // calculate first rotation
   Kernel::V3D k1(0, 1, 0);
   Kernel::V3D part1 = unitQ * cos(omega_prim_rad);
+  g_log.notice() << "Part 1: " << part1.toString() << "\n";
+
   Kernel::V3D part2 = (k1.cross_prod(unitQ)) * sin(omega_prim_rad);
+  g_log.notice() << "Part 2: " << part1.toString() << "\n";
+
   Kernel::V3D part3 =
       k1 * ((1 - cos(omega_prim_rad)) * (k1.scalar_prod(unitQ)));
   Kernel::V3D unitQPrime = part1 + part2 + part3;
+
+  g_log.notice() << "Q' = " << unitQPrime.toString() << "\n";
 
   // calcualte second rotation
   Kernel::V3D k2(0, 0, 1);
