@@ -147,10 +147,10 @@ changes:
 Pull Requests
 -------------
 
-Open pull requests as normal to ask to merge your branch with its
-intended target.
+To merge code with the release branch open a pull request as usual but instead of using the
+default merge target select ``release-next``:
 
-.. image:: images/CodeFreezePR.png
+.. image:: images/release-branch-new-pr.png
 
 Fixing a PR with an Incorrect Base Branch
 -----------------------------------------
@@ -167,14 +167,14 @@ been based off the ``master`` branch as follows::
       |           \
       |            o---o---o  topic
        \
-        o---o---o---o---o  release
+        o---o---o---o---o  release-next
 
-where we actually want the ``topic`` branch based off ``release``
+where we actually want the ``topic`` branch based off ``release-next``
 instead i.e. ::
 
    o---o---o---o---o  master
        \
-        o---o---o---o---o  release
+        o---o---o---o---o  release-next
                                 \
                                  o'---o'---o'  topic
 
@@ -184,4 +184,4 @@ To fix this situation we use the ``rebase`` command, providing the
 .. code-block:: bash
 
     git fetch
-    git rebase --onto origin/release origin/master topic
+    git rebase --onto origin/release-next origin/master topic

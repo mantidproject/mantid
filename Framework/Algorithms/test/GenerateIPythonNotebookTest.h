@@ -148,7 +148,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(powerer.execute());
     TS_ASSERT_EQUALS(powerer.isExecuted(), true);
 
-    // set up history for the algorithn which is presumably removed from Mantid
+    // set up history for the algorithm which is presumably removed from Mantid
     auto ws = API::FrameworkManager::Instance().getWorkspace(wsName);
     API::WorkspaceHistory &history = ws->history();
     auto pAlg = Mantid::Kernel::make_unique<NonExistingAlgorithm>();

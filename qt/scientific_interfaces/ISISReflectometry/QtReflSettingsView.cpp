@@ -52,6 +52,8 @@ void QtReflSettingsView::initLayout() {
           SLOT(addPerAngleOptionsTableRow()));
   connect(m_ui.correctDetectorsCheckBox, SIGNAL(clicked(bool)), this,
           SLOT(setDetectorCorrectionEnabled(bool)));
+  connect(m_ui.polCorrComboBox, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(setPolCorPageForIndex(int)));
 }
 
 void QtReflSettingsView::initOptionsTable() {
@@ -140,6 +142,7 @@ void QtReflSettingsView::registerInstrumentSettingsWidgets(
   registerSettingWidget(*m_ui.includePartialBinsCheckBox, "IncludePartialBins",
                         alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
+  registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
 }
 
 void QtReflSettingsView::registerExperimentSettingsWidgets(
@@ -659,6 +662,10 @@ std::string QtReflSettingsView::getReductionType() const {
   return getText(*m_ui.reductionTypeComboBox);
 }
 
+bool QtReflSettingsView::getDebugOption() const {
+  return m_ui.debugCheckBox->isChecked();
+}
+
 bool QtReflSettingsView::getIncludePartialBins() const {
   return m_ui.includePartialBinsCheckBox->isChecked();
 }
@@ -690,6 +697,19 @@ bool QtReflSettingsView::experimentSettingsEnabled() const {
 */
 bool QtReflSettingsView::instrumentSettingsEnabled() const {
   return m_ui.instSettingsGroup->isChecked();
+}
+
+/**
+  Set the current page index of m_ui.polCorStackedWidget depending on the index
+  of m_ui.polCorrComboBox. They don't match 1-to-1 because PA and PNR options
+  share a page.
+  @param index :: New current index of m_ui.polCorrComboBox.
+ */
+void QtReflSettingsView::setPolCorPageForIndex(int index) {
+  assert(m_ui.polCorrComboBox->count() == 4);
+  assert(m_ui.polCorStackedWidget->count() == 3);
+  static std::array<int, 4> const indexMap = {{0, 1, 1, 2}};
+  m_ui.polCorStackedWidget->setCurrentIndex(indexMap[index]);
 }
 
 } // namespace CustomInterfaces

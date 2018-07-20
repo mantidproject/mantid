@@ -199,7 +199,8 @@ void ScriptingWindow::open(const QString &filename, bool newtab) {
  * @param mode :: The execution type
  * */
 void ScriptingWindow::executeCurrentTab(const Script::ExecutionMode mode) {
-  m_manager->executeAll(mode);
+  // Async will always return true before executing
+  m_failureFlag = !m_manager->executeAll(mode);
 }
 
 //-------------------------------------------

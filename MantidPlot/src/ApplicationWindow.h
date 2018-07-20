@@ -1123,10 +1123,14 @@ public slots:
 
   bool isOfType(const QObject *obj, const char *toCompare) const;
 
-  // Note: The string must be copied from the other thread in
-  // saveProjectRecovery
+  bool loadProjectRecovery(std::string sourceFile);
+
+  // The string must be copied from the other thread in saveProjectRecovery
   /// Saves the current project as part of recovery auto saving
   bool saveProjectRecovery(std::string destination);
+
+  /// Checks for and attempts project recovery if required
+  void checkForProjectRecovery();
 
 signals:
   void modified();
@@ -1637,7 +1641,9 @@ private:
   bool m_shuttingDown{false};
 
   /// Owns a thread which automatically triggers project recovery for the GUI
-  MantidQt::ProjectRecovery m_ProjectRecovery;
+  MantidQt::ProjectRecovery m_projectRecovery;
+  /// True if project recovery was started when MantidPlot started
+  bool m_projectRecoveryRunOnStart{false};
 
 #ifdef SHARED_MENUBAR
   QMenuBar *m_sharedMenuBar; ///< Pointer to the shared menubar

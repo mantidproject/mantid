@@ -113,7 +113,7 @@ ReflGenericDataProcessorPresenterFactory::create(int group) {
 
   return Mantid::Kernel::make_unique<ReflDataProcessorPresenter>(
       whitelist, preprocessMap, processor, postprocessor, group, postprocessMap,
-      "LoadISISNexus");
+      "LoadNexus");
 }
 }
 }

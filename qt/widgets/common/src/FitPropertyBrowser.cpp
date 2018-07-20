@@ -919,7 +919,6 @@ void FitPropertyBrowser::popupMenu(const QPoint &) {
     if (isType) {
       isParameter = false;
     }
-
     if (isTie) {
       action = new QAction("Remove", this);
       connect(action, SIGNAL(triggered()), this, SLOT(deleteTie()));
@@ -1264,6 +1263,7 @@ void FitPropertyBrowser::enumChanged(QtProperty *prop) {
     if (f)
       setCurrentFunction(f);
     emit functionChanged();
+
   } else if (prop == m_minimizer) {
     minimizerChanged();
   } else if (prop == m_evaluationType) {
@@ -1361,6 +1361,7 @@ void FitPropertyBrowser::doubleChanged(QtProperty *prop) {
   if (prop == m_startX) {
     // call setWorkspace to change maxX in functions
     setWorkspace(m_compositeFunction);
+    m_doubleManager->setMinimum(m_endX, value);
     getHandler()->setAttribute("StartX", value);
     emit startXChanged(startX());
     emit xRangeChanged(startX(), endX());
@@ -1368,6 +1369,7 @@ void FitPropertyBrowser::doubleChanged(QtProperty *prop) {
   } else if (prop == m_endX) {
     // call setWorkspace to change minX in functions
     setWorkspace(m_compositeFunction);
+    m_doubleManager->setMaximum(m_startX, value);
     getHandler()->setAttribute("EndX", value);
     emit endXChanged(endX());
     emit xRangeChanged(startX(), endX());

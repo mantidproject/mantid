@@ -1626,44 +1626,67 @@ class TestSelectNewDetector(unittest.TestCase):
 
 
 class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
-    def _create_sample_workspace(self):
+    def _create_sample_workspace(self, name='ws'):
         ws = CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, NumEvents=1,
-                                   XMin=1, XMax=14, BinWidth=2)
+                                   XMin=1, XMax=14, BinWidth=2, OutputWorkspace=name)
+
         return ws
 
     def test_that_SANS2D_workspace_is_renamed_correctly(self):
         workspace = self._create_sample_workspace()
-        out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.LAB, "test", workspace)
+        workspace_name = workspace.getName()
+        out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.LAB, "test", workspace_name)
         self.assertTrue(AnalysisDataService.doesExist("test_rear"))
         self.assertTrue(out_name == "test_rear")
-        out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.HAB, "test", workspace)
+        out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.HAB, "test", out_name)
         self.assertTrue(AnalysisDataService.doesExist("test_front"))
         self.assertTrue(out_name == "test_front")
-        out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.Merged, "test", workspace)
+        out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.Merged, "test", out_name)
         self.assertTrue(AnalysisDataService.doesExist("test_merged"))
         self.assertTrue(out_name == "test_merged")
 
         if AnalysisDataService.doesExist("test_merged"):
             AnalysisDataService.remove("test_merged")
+
+    def test_for_a_group_workspace_renames_entire_group(self):
+        workspace_t0_T1 = CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, NumEvents=1,
+                                   XMin=1, XMax=14, BinWidth=2)
+        workspace_t1_T2 = CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, NumEvents=1,
+                                   XMin=1, XMax=14, BinWidth=2)
+        workspace_name = 'workspace'
+        GroupWorkspaces(InputWorkspaces=['workspace_t0_T1', 'workspace_t1_T2'], OutputWorkspace=workspace_name)
+
+        out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.LAB, "test", workspace_name)
+        self.assertTrue(AnalysisDataService.doesExist("test_rear"))
+        self.assertTrue(AnalysisDataService.doesExist("test_t0_T1_rear"))
+        self.assertTrue(AnalysisDataService.doesExist("test_t1_T2_rear"))
+        self.assertEqual(out_name, "test_rear")
+
+        AnalysisDataService.remove("test_t1_T2_rear")
+        AnalysisDataService.remove("test_t0_T1_rear")
+        AnalysisDataService.remove("test_rear")
 
     def test_that_LOQ_workspace_is_renamed_correctly(self):
         workspace = self._create_sample_workspace()
-        out_name = su.rename_workspace_correctly("LOQ", su.ReducedType.LAB, "test", workspace)
+        workspace_name = workspace.getName()
+        out_name = su.rename_workspace_correctly("LOQ", su.ReducedType.LAB, "test", workspace_name)
         self.assertTrue(AnalysisDataService.doesExist("test_main"))
         self.assertTrue(out_name == "test_main")
-        out_name = su.rename_workspace_correctly("LOQ", su.ReducedType.HAB, "test", workspace)
+        out_name = su.rename_workspace_correctly("LOQ", su.ReducedType.HAB, "test", out_name)
         self.assertTrue(AnalysisDataService.doesExist("test_hab"))
         self.assertTrue(out_name == "test_hab")
-        out_name = su.rename_workspace_correctly("LOQ", su.ReducedType.Merged, "test", workspace)
+        out_name = su.rename_workspace_correctly("LOQ", su.ReducedType.Merged, "test", out_name)
         self.assertTrue(AnalysisDataService.doesExist("test_merged"))
         self.assertTrue(out_name == "test_merged")
 
         if AnalysisDataService.doesExist("test_merged"):
             AnalysisDataService.remove("test_merged")
 
-    def test_that_LAMROR_workspace_is_not_renamed(self):
+    def test_that_LARMOR_workspace_is_not_renamed(self):
         workspace = self._create_sample_workspace()
-        out_name = su.rename_workspace_correctly("LARMOR", su.ReducedType.LAB, "test", workspace)
+        workspace_name = workspace.getName()
+
+        out_name = su.rename_workspace_correctly("LARMOR", su.ReducedType.LAB, "test", workspace_name)
         self.assertTrue(AnalysisDataService.doesExist("test"))
         self.assertTrue(out_name == "test")
 
@@ -1672,9 +1695,41 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
 
     def test_that_raies_for_unkown_reduction_type(self):
         workspace = self._create_sample_workspace()
-        args = ["SANS2D", "jsdlkfsldkfj", "test", workspace]
+        workspace_name = workspace.getName()
+        args = ["SANS2D", "jsdlkfsldkfj", "test", workspace_name]
+
         self.assertRaises(RuntimeError, su.rename_workspace_correctly, *args)
+
         AnalysisDataService.remove("ws")
+
+    def test_run_number_should_be_replaced_if_workspace_starts_with_number(self):
+        workspace = self._create_sample_workspace(name='12345rear_1D_w1_W2_t1_T2')
+        workspace_name = workspace.getName()
+
+        out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.LAB, 'NewName', workspace_name)
+
+        self.assertTrue(AnalysisDataService.doesExist("NewName_rear_1D_w1_W2_t1_T2"))
+        self.assertEqual(out_name, "NewName_rear_1D_w1_W2_t1_T2")
+
+        if AnalysisDataService.doesExist("NewName_rear_1D_w1_W2_t1_T2"):
+            AnalysisDataService.remove("NewName_rear_1D_w1_W2_t1_T2")
+
+    def test_for_a_group_workspace_renames_entire_group_if_starts_with_number(self):
+        workspace_t0_T1 = workspace = self._create_sample_workspace(name='12345rear_1D_w1_W2_t0_T1')
+        workspace_t1_T2 = workspace = self._create_sample_workspace(name='12345rear_1D_w1_W2_t1_T2')
+        workspace_name = '12345rear_1D_w1_W2'
+        GroupWorkspaces(InputWorkspaces=['12345rear_1D_w1_W2_t0_T1', '12345rear_1D_w1_W2_t1_T2'],
+                        OutputWorkspace=workspace_name)
+
+        out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.LAB, "test", workspace_name)
+        self.assertTrue(AnalysisDataService.doesExist("test_rear_1D_w1_W2"))
+        self.assertTrue(AnalysisDataService.doesExist("test_rear_1D_w1_W2_t0_T1"))
+        self.assertTrue(AnalysisDataService.doesExist("test_rear_1D_w1_W2_t1_T2"))
+        self.assertEqual(out_name, "test_rear_1D_w1_W2")
+
+        AnalysisDataService.remove("test_rear_1D_w1_W2_t0_T1")
+        AnalysisDataService.remove("test_rear_1D_w1_W2_t1_T2")
+        AnalysisDataService.remove("test_rear_1D_w1_W2")
 
 
 class TestEventWorkspaceCheck(unittest.TestCase):

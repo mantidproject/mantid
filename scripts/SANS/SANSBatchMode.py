@@ -340,7 +340,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                 rear_reduced = reduced.replace('merged', 'rear')
                 front_reduced = reduced.replace('merged', 'front')
             else:
-                rear_reduced = reduced.replace('_merged', '')
+                rear_reduced = reduced.replace('merged', 'main')
                 front_reduced = rear_reduced.replace('main', 'HAB')
             new_name_Merged = su.rename_workspace_correctly(ins_name, su.ReducedType.Merged, final_name, reduced)
             new_name_LAB = su.rename_workspace_correctly(ins_name, su.ReducedType.LAB, final_name, rear_reduced)

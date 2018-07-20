@@ -45,13 +45,13 @@ protected:
   processParameterTable(API::ITableWorkspace_sptr parameterTable) override;
   std::map<std::string, std::string> getAdditionalLogStrings() const override;
   std::map<std::string, std::string> getAdditionalLogNumbers() const override;
+  std::vector<std::string> getFitParameterNames() const override;
 
 private:
   std::map<std::string, std::string> validateInputs() override;
 
   bool throwIfElasticQConversionFails() const override;
   bool isFitParameter(const std::string &name) const override;
-  void calculateEISF(API::ITableWorkspace_sptr &) const;
 
   bool m_deltaUsed;
 };

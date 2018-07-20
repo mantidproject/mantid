@@ -13,7 +13,7 @@ plt.ion()
 
 def get3DPeak(peak, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxToHistogram=1.0,
               plotResults=False, zBG=1.96, bgPolyOrder=1, fICCParams=None, oldICCFit=None,
-              strongPeakParams=None, forceCutoff=250, edgeCutoff=15, predCoefficients=None,
+              strongPeakParams=None, forceCutoff=250, edgeCutoff=15,
               neigh_length_m=3, q_frame='sample', dtSpread=0.03, pplmin_frac=0.8, pplmax_frac=1.5, mindtBinWidth=1,
               figureNumber=2):
     n_events = box.getNumEventsArray()
@@ -29,7 +29,7 @@ def get3DPeak(peak, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxT
     if fICCParams is None:
         goodIDX, pp_lambda = ICCFT.getBGRemovedIndices(
                     n_events, peak=peak, box=box, qMask=qMask, calc_pp_lambda=True, padeCoefficients=padeCoefficients,
-                    predCoefficients=predCoefficients, neigh_length_m=neigh_length_m, pp_lambda=None, pplmin_frac=pplmin_frac,
+                    neigh_length_m=neigh_length_m, pp_lambda=None, pplmin_frac=pplmin_frac,
                     pplmax_frac=pplmax_frac, mindtBinWidth=mindtBinWidth)
 
         YTOF, fICC, x_lims = fitTOFCoordinate(

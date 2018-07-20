@@ -17,7 +17,7 @@ Mantid::Kernel::Logger g_log("ISISRAW2");
 ISISRAW2::ISISRAW2()
     : ISISRAW(nullptr, false), ndes(0), outbuff(nullptr), m_bufferSize(0) {
   // Determine the size of the output buffer to create from the config service.
-  g_log.debug() << "Determining ioRaw buffer size\n";
+  g_log.debug("Determining ioRaw buffer size\n");
   if (Mantid::Kernel::ConfigService::Instance().getValue(
           "loadraw.readbuffer.size", m_bufferSize) == 0) {
     m_bufferSize = 200000;
