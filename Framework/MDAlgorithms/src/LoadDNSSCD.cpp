@@ -316,6 +316,12 @@ void LoadDNSSCD::exec() {
     throw std::runtime_error(
         "No valid DNS files have been provided. Nothing to load.");
 
+  // merge data with different time channel number is not allowed
+  auto ch_n = m_data.front().nchannels;
+  bool same_channel_number = std::all_of(m_data.begin(), m_data.end(), [ch_n](ExpData &d) {return (d.nchannels==ch_n);});
+  if (!same_channel_number)
+      throw std::runtime_error("Error: cannot merge data with different TOF channel numbers.");
+
   m_OutWS = MDEventFactory::CreateMDWorkspace(m_nDims, "MDEvent");
 
   m_OutWS->addExperimentInfo(expinfo);
@@ -668,9 +674,6 @@ void LoadDNSSCD::read_data(const std::string fname,
   std::map<std::string, double>::const_iterator w =
       num_metadata.lower_bound("Time");
   g_log.debug() << "Channel width: " << w->second << std::endl;
-//  if (m->second != 1)
-//    throw std::runtime_error(
-//        "Algorithm does not support TOF data. TOF Channels number must be 1.");
 
   ExpData ds;
   ds.deterota = num_metadata["DeteRota"];
@@ -689,10 +692,6 @@ void LoadDNSSCD::read_data(const std::string fname,
       const int cols = splitIntoColumns(columns, line);
       if (cols > 0){
           g_log.debug() << "Number of columns = " << cols << std::endl;
-          g_log.debug() << "Data: " ;
-//          for (std::string s : columns) {
-//              g_log.debug() << s << ",\t";
-//          }
           g_log.debug() << std::endl;
           ds.detID.push_back(std::stoi(columns.front()));
           columns.pop_front();

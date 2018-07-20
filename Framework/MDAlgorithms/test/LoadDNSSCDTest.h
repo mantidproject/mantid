@@ -1044,62 +1044,30 @@ public:
 
     AnalysisDataService::Instance().remove(normWSName);
   }
-//  void test_Load2() {
-//    // algorithm should load one file and skip the TOF file
-
-//    std::string outWSName("LoadDNSSCDTest_OutputWS");
-//    std::string normWSName("LoadDNSSCDTest_OutputWS_norm");
-//    std::string filenames = "dn134011vana.d_dat,dnstof.d_dat";
-
-//    LoadDNSSCD alg;
-//    alg.setRethrows(true);
-//    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-//    TS_ASSERT(alg.isInitialized());
-//    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", filenames));
-//    TS_ASSERT_THROWS_NOTHING(
-//        alg.setPropertyValue("OutputWorkspace", outWSName));
-//    TS_ASSERT_THROWS_NOTHING(
-//        alg.setPropertyValue("NormalizationWorkspace", normWSName));
-//    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"));
-
-//    // algorithm should throw only if no valid files is provided
-//    TS_ASSERT_THROWS_NOTHING(alg.execute());
-//    TS_ASSERT(alg.isExecuted());
-
-//    // Retrieve the workspace from data service.
-//    IMDEventWorkspace_sptr iws;
-//    TS_ASSERT_THROWS_NOTHING(
-//        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-//            outWSName));
-//    TS_ASSERT(iws);
-
-//    TS_ASSERT_EQUALS(iws->getNumDims(), 3);
-//    TS_ASSERT_EQUALS(iws->getNPoints(), 24);
-//    AnalysisDataService::Instance().remove(outWSName);
-//  }
 
   //-------------------- Test failure --------------------------------------
-//  void test_failTOF() {
-//    // algorithm does not load TOF files
+  void test_failTOF() {
+    // algorithm does not load files with different number of time channels
 
-//    std::string outWSName("LoadDNSSCDTest_OutputWS");
-//    std::string normWSName("LoadDNSSCDTest_OutputWS_norm");
+    std::string outWSName("LoadDNSSCDTest_OutputWS");
+    std::string normWSName("LoadDNSSCDTest_OutputWS_norm");
+    std::string filenames = "dn134011vana.d_dat,dnstof.d_dat";
 
-//    LoadDNSSCD alg;
-//    alg.setRethrows(true);
-//    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-//    TS_ASSERT(alg.isInitialized());
-//    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", "dnstof.d_dat"));
-//    TS_ASSERT_THROWS_NOTHING(
-//        alg.setPropertyValue("OutputWorkspace", outWSName));
-//    TS_ASSERT_THROWS_NOTHING(
-//        alg.setPropertyValue("NormalizationWorkspace", normWSName));
-//    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"));
+    LoadDNSSCD alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", filenames));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("NormalizationWorkspace", normWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"));
 
-//    // algorithm should throw if no valid files is provided
-//    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
-//    TS_ASSERT(!alg.isExecuted());
-//  }
+    // algorithm should throw if no valid files is provided
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT(!alg.isExecuted());
+  }
 
 private:
   std::string m_fileName;
