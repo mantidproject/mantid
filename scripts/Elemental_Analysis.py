@@ -17,7 +17,6 @@ from Muon.GUI.ElementalAnalysis.Detectors.detectors_view import DetectorsView
 from Muon.GUI.ElementalAnalysis.Peaks.peaks_presenter import PeaksPresenter
 from Muon.GUI.ElementalAnalysis.Peaks.peaks_view import PeaksView
 
-
 class ElementalAnalysisGui(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(ElementalAnalysisGui, self).__init__(parent)
