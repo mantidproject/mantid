@@ -553,7 +553,6 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
               double signal = ds.signal[i][channel];
               signal_t error = std::sqrt(signal);
               double tof2 = static_cast<double>(channel)*ds.chwidth + 0.5*ds.chwidth;   // bin centers
-              g_log.debug() << "TOF2 = " << tof2 << std::endl;
               double dE = 0.0;
               if (nchannels > 1) {
                   double v2 = 1e+06*l2/tof2;
@@ -561,7 +560,6 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
               }
               if (dE > dEmin) {
                   double kf = std::sqrt(ki*ki - 2.0e-20*PhysicalConstants::NeutronMass*dE*PhysicalConstants::meV/(PhysicalConstants::h_bar*PhysicalConstants::h_bar));
-                  g_log.debug() << "dE = " << dE << std::endl;
                   double tlab = std::atan2(ki - kf*cos(2.0*theta), kf*sin(2.0*theta));
                   double omega = (ds.huber - ds.deterota) * deg2rad - tlab;
                   V3D uphi(-cos(omega), 0, -sin(omega));
@@ -691,8 +689,6 @@ void LoadDNSSCD::read_data(const std::string fname,
       boost::trim(line);
       const int cols = splitIntoColumns(columns, line);
       if (cols > 0){
-          g_log.debug() << "Number of columns = " << cols << std::endl;
-          g_log.debug() << std::endl;
           ds.detID.push_back(std::stoi(columns.front()));
           columns.pop_front();
           std::vector<double> signal;
