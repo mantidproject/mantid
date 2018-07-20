@@ -259,7 +259,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
 /** Read offsets and add as property
  *
  * @param in :: input file stream
- * @param run :: mutable run of workspace
+ * @param Peaks :: peaks workspace
  * @param m_offset :: vectors of offsets
  * @param label :: label for property
  * @param qSign :: For inelastic this is 1; for crystallography this is -1
