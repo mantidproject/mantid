@@ -11,3 +11,8 @@ Direct Inelastic Changes
 
 :ref:`Release 3.14.0 <v3.14.0>`
 
+
+Improvements
+############
+
+- :ref:`LoadDNSSCD <LoadDNSSCD>` has been improved to be able to load TOF data.
