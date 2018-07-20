@@ -286,7 +286,8 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
   double tau_pp = -hrot - phi;
 
   g_log.notice() << "\nQ = " << unitQ.toString() << "\n";
-  g_log.notice() << "Input: omega = " << omega << ", " << "HROT = " << hrot << "\n";
+  g_log.notice() << "Input: omega = " << omega << ", "
+                 << "HROT = " << hrot << "\n";
 
   //
   double omega_prim_rad = omega_prime * M_PI / 180.;
@@ -317,8 +318,10 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
 
   // project to the pole figure by point light
   double sign(1);
-  // Qz with positive and negative zero will render to opposite result though physically
-  // they are same.  Here in order to make the output consistent with considerting numerical
+  // Qz with positive and negative zero will render to opposite result though
+  // physically
+  // they are same.  Here in order to make the output consistent with
+  // considerting numerical
   // resolution, positive is set to be larger than -1E-10
   if (unitQpp.Z() < -1.E-10)
     sign = -1;
