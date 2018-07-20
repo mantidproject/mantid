@@ -90,8 +90,8 @@ private:
 
   /// Read offsets and add as property
   void getOffsets(std::ifstream &in, DataObjects::PeaksWorkspace_sptr Peaks,
-      std::vector<double> &m_offset, std::string &label,
-      double &qSign);
+                  std::vector<double> &m_offset, std::string &label,
+                  double &qSign);
 };
 
 } // namespace Mantid

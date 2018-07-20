@@ -265,9 +265,10 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
  * @param qSign :: For inelastic this is 1; for crystallography this is -1
  * @return void
  */
-void LoadIsawPeaks::getOffsets(std::ifstream &in, DataObjects::PeaksWorkspace_sptr Peaks,
-                               std::vector<double> &m_offset, std::string &label,
-                               double &qSign) {
+void LoadIsawPeaks::getOffsets(std::ifstream &in,
+                               DataObjects::PeaksWorkspace_sptr Peaks,
+                               std::vector<double> &m_offset,
+                               std::string &label, double &qSign) {
   for (int i = 0; i < 3; i++) {
     m_offset[i] = qSign * std::stod(getWord(in, false), nullptr);
   }
