@@ -609,4 +609,17 @@ public:
   }
 };
 
+class StringsTestPerformance : public CxxTest::TestSuite {
+public:
+  static StringsTestPerformance *createSuite() {
+    return new StringsTestPerformance();
+  }
+  static void destroySuite(StringsTestPerformance *suite) { delete suite; }
+  void setUp() override { input = std::vector<double>(10000000, 0.123456); }
+  void test_join_double() { auto result = join(input, separator); }
+
+private:
+  std::vector<double> input;
+  std::string separator{","};
+};
 #endif // MANTID_SUPPORTTEST_H_
