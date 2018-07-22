@@ -1,6 +1,7 @@
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/UnitLabel.h"
 
 #include <Poco/Path.h>
 
@@ -16,6 +17,25 @@ using std::size_t;
 namespace Mantid {
 namespace Kernel {
 namespace Strings {
+
+namespace {
+class OptionalBoolFormatter {
+public:
+  void operator()(std::string *out, const OptionalBool &f) {
+    out->append(m_enumToStr[f.getValue()]);
+  }
+
+private:
+  std::map<OptionalBool::Value, std::string> m_enumToStr =
+      OptionalBool::enumToStrMap();
+};
+} // namespace
+
+template <>
+std::string join(const std::vector<OptionalBool> &c,
+                 const std::string &separator) {
+  return absl::StrJoin(c, separator, OptionalBoolFormatter());
+}
 
 //------------------------------------------------------------------------------------------------
 /** Loads the entire contents of a text file into a string

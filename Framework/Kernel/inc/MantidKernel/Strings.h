@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/System.h"
 
@@ -50,6 +49,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
+class OptionalBool;
+
 namespace Strings {
 
 //------------------------------------------------------------------------------------------------
@@ -61,8 +62,7 @@ namespace Strings {
  * For example, join a vector of strings with commas with:
  *  out = join(v, ", ");
  *
- * @param begin :: iterator at the start
- * @param end :: iterator at the end
+ * @param c :: container to be joined.
  * @param separator :: string to append.
  * @return
  */
@@ -72,22 +72,9 @@ DLLExport std::string join(const CONTAINER_TYPE &c,
   return absl::StrJoin(c, separator);
 }
 
-class OptionalBoolFormatter {
-public:
-  void operator()(std::string *out, const OptionalBool &f) {
-    out->append(m_enumToStr[f.getValue()]);
-  }
-
-private:
-  std::map<OptionalBool::Value, std::string> m_enumToStr =
-      OptionalBool::enumToStrMap();
-};
-
 template <>
-inline DLLExport std::string join(const std::vector<OptionalBool> &c,
-                                  const std::string &separator) {
-  return absl::StrJoin(c, separator, OptionalBoolFormatter());
-}
+DLLExport std::string join(const std::vector<OptionalBool> &c,
+                           const std::string &separator);
 
 //------------------------------------------------------------------------------------------------
 /** Join a set or vector of (something that turns into a string) together
