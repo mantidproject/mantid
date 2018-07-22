@@ -283,7 +283,7 @@ public:
     v.push_back(6.0);
 
     out = join(v, ";");
-    TS_ASSERT_EQUALS(out, "0.0;1.0;2.0;3.0;4.0;5.0;6.0");
+    TS_ASSERT_EQUALS(out, "0;1;2;3;4;5;6");
   }
 
   void test_joinCompress() {
