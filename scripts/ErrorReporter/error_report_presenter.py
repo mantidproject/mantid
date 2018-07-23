@@ -8,11 +8,9 @@ class ErrorReporterPresenter(object):
         self._view = view
         self._exit_code = exit_code
         self._view.action.connect(self.error_handler)
-        print('Connected')
         self._view.show()
 
     def error_handler(self, continue_working, share, name, email):
-        print("Recieving signal")
         if share == 0:
             errorReporter = ErrorReporter(
                 "mantidplot", UsageService.getUpTime(), self._exit_code, True, str(name), str(email))
