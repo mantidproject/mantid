@@ -27,6 +27,7 @@ Guides
    BuildingWithCMake
    BuildingVATES
    Standards/index
+   Testing/index
    DoxygenSetup
    Python3
 
@@ -38,6 +39,9 @@ Guides
 
 :doc:`Standards <Standards/index>`
    Details of coding and documentation standards for the project. Includes specifics regarding algorithms.
+
+:doc:`Testing <Testing/index>`
+   Details of unscripted and acceptance testing.
 
 :doc:`DoxygenSetup`
    Configure a doxygen build locally.
