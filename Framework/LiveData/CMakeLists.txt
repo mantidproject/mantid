@@ -71,7 +71,9 @@ if ( LIBRDKAFKA_FOUND )
     inc/MantidLiveData/Kafka/IKafkaBroker.h
     inc/MantidLiveData/Kafka/KafkaBroker.h
     inc/MantidLiveData/Kafka/KafkaTopicSubscriber.h
-    src/Kafka/private/Schema/flatbuffers/flatbuffers.h
+	src/Kafka/private/Schema/flatbuffers/base.h
+	src/Kafka/private/Schema/flatbuffers/flatbuffers.h
+	src/Kafka/private/Schema/flatbuffers/stl_emulation.h
     src/Kafka/private/Schema/df12_det_spec_map_generated.h
     src/Kafka/private/Schema/ev42_events_generated.h
     src/Kafka/private/Schema/f142_logdata_generated.h

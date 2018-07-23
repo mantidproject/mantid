@@ -139,9 +139,9 @@ void fakeReceiveAnISISEventMessage(std::string *buffer, int32_t nextPeriod) {
   auto messageFlatbuf = CreateEventMessage(
       builder, builder.CreateString("KafkaTesting"), 0, frameTime,
       builder.CreateVector(tof), builder.CreateVector(spec),
-      FacilityData_ISISData,
+      FacilityData::ISISData,
       CreateISISData(builder, static_cast<uint32_t>(nextPeriod),
-                     RunState_RUNNING, protonCharge).Union());
+                     RunState::RUNNING, protonCharge).Union());
   FinishEventMessageBuffer(builder, messageFlatbuf);
 
   // Copy to provided buffer
@@ -169,7 +169,7 @@ void fakeReceiveASampleEnvMessage(std::string *buffer) {
   flatbuffers::FlatBufferBuilder builder;
   // Sample environment log
   auto logDataMessage =
-      CreateLogData(builder, builder.CreateString("fake source"), Value_Int,
+      CreateLogData(builder, builder.CreateString("fake source"), Value::Int,
                     CreateInt(builder, 42).Union(), 1495618188000000000L);
   FinishLogDataBuffer(builder, logDataMessage);
 
@@ -189,7 +189,7 @@ void fakeReceiveARunStartMessage(std::string *buffer, int32_t runNumber,
 
   flatbuffers::FlatBufferBuilder builder;
   auto runInfo = CreateRunInfo(
-      builder, InfoTypes_RunStart,
+      builder, InfoTypes::RunStart,
       CreateRunStart(builder, startTimestamp, runNumber,
                      builder.CreateString(instName), nPeriods).Union());
   FinishRunInfoBuffer(builder, runInfo);
@@ -206,7 +206,7 @@ void fakeReceiveARunStopMessage(std::string *buffer,
       static_cast<uint64_t>(mantidTime.to_time_t() * 1000000000);
 
   flatbuffers::FlatBufferBuilder builder;
-  auto runInfo = CreateRunInfo(builder, InfoTypes_RunStop,
+  auto runInfo = CreateRunInfo(builder, InfoTypes::RunStop,
                                CreateRunStop(builder, stopTimestamp).Union());
   FinishRunInfoBuffer(builder, runInfo);
   // Copy to provided buffer

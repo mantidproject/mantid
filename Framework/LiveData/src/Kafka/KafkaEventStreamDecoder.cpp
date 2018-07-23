@@ -348,7 +348,7 @@ void KafkaEventStreamDecoder::captureImplExcept() {
                  RUN_MESSAGE_ID.c_str())) {
       auto runMsg =
           GetRunInfo(reinterpret_cast<const uint8_t *>(buffer.c_str()));
-      if (!checkOffsets && runMsg->info_type_type() == InfoTypes_RunStop) {
+      if (!checkOffsets && runMsg->info_type_type() == InfoTypes::RunStop) {
         auto runStopMsg = static_cast<const RunStop *>(runMsg->info_type());
         auto stopTime = runStopMsg->stop_time();
         g_log.debug() << "Received an end-of-run message with stop time = "
@@ -534,7 +534,7 @@ bool KafkaEventStreamDecoder::waitForNewRunStartMessage(
     } else {
       auto runMsg =
           GetRunInfo(reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()));
-      if (runMsg->info_type_type() == InfoTypes_RunStart) {
+      if (runMsg->info_type_type() == InfoTypes::RunStart) {
         // We got a run start message, deserialise it
         auto runStartData = static_cast<const RunStart *>(runMsg->info_type());
         KafkaEventStreamDecoder::RunStartStruct runStartStruct = {
@@ -582,16 +582,16 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
 
     // If sample log with this name already exists then append to it
     // otherwise create a new log
-    if (seEvent->value_type() == Value_Int) {
+    if (seEvent->value_type() == Value::Int) {
       auto value = static_cast<const Int *>(seEvent->value());
       appendToLog<int32_t>(mutableRunInfo, name, time, value->value());
-    } else if (seEvent->value_type() == Value_Long) {
+    } else if (seEvent->value_type() == Value::Long) {
       auto value = static_cast<const Long *>(seEvent->value());
       appendToLog<int64_t>(mutableRunInfo, name, time, value->value());
-    } else if (seEvent->value_type() == Value_Double) {
+    } else if (seEvent->value_type() == Value::Double) {
       auto value = static_cast<const Double *>(seEvent->value());
       appendToLog<double>(mutableRunInfo, name, time, value->value());
-    } else if (seEvent->value_type() == Value_Float) {
+    } else if (seEvent->value_type() == Value::Float) {
       auto value = static_cast<const Float *>(seEvent->value());
       appendToLog<double>(mutableRunInfo, name, time,
                           static_cast<double>(value->value()));
@@ -613,7 +613,7 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer) {
 
   DataObjects::EventWorkspace_sptr periodBuffer;
   std::lock_guard<std::mutex> lock(m_mutex);
-  if (eventMsg->facility_specific_data_type() == FacilityData_ISISData) {
+  if (eventMsg->facility_specific_data_type() == FacilityData::ISISData) {
     auto ISISMsg =
         static_cast<const ISISData *>(eventMsg->facility_specific_data());
     periodBuffer = m_localEvents[static_cast<size_t>(ISISMsg->period_number())];
@@ -637,12 +637,12 @@ KafkaEventStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
   auto offset = getRunInfoMessage(rawMsgBuffer);
   auto runMsg =
       GetRunInfo(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-  if (runMsg->info_type_type() != InfoTypes_RunStart) {
+  if (runMsg->info_type_type() != InfoTypes::RunStart) {
     // We want a runStart message, try the next one
     offset = getRunInfoMessage(rawMsgBuffer);
     runMsg =
         GetRunInfo(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-    if (runMsg->info_type_type() != InfoTypes_RunStart) {
+    if (runMsg->info_type_type() != InfoTypes::RunStart) {
       throw std::runtime_error("KafkaEventStreamDecoder::initLocalCaches() - "
                                "Could not find a run start message"
                                "in the run info topic. Unable to continue");
