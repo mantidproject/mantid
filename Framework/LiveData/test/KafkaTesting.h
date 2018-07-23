@@ -181,10 +181,10 @@ void fakeReceiveASampleEnvMessage(std::string *buffer) {
 void fakeReceiveAStringSampleEnvMessage(std::string *buffer) {
   flatbuffers::FlatBufferBuilder builder;
   // Sample environment log
-  auto logDataMessage =
-    CreateLogData(builder, builder.CreateString("fake string source"), Value::String,
-                  CreateString(builder, builder.CreateString("test string")).Union(),
-                  1495618188000000000L);
+  auto logDataMessage = CreateLogData(
+      builder, builder.CreateString("fake string source"), Value::String,
+      CreateString(builder, builder.CreateString("test string")).Union(),
+      1495618188000000000L);
   FinishLogDataBuffer(builder, logDataMessage);
 
   // Copy to provided buffer

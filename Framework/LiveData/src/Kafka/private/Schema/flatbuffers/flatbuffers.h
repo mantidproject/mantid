@@ -17,6 +17,7 @@
 #ifndef FLATBUFFERS_H_
 #define FLATBUFFERS_H_
 
+// clang-format off
 #include "base.h"
 
 namespace flatbuffers {

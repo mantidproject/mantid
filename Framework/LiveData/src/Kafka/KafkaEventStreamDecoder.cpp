@@ -570,7 +570,7 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
     auto &mutableRunInfo = periodBuffer->mutableRun();
 
     auto seEvent =
-      GetLogData(reinterpret_cast<const uint8_t *>(buffer.c_str()));
+        GetLogData(reinterpret_cast<const uint8_t *>(buffer.c_str()));
 
     auto name = seEvent->source_name()->str();
 
@@ -597,7 +597,8 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
                           static_cast<double>(value->value()));
     } else if (seEvent->value_type() == Value::String) {
       auto value = seEvent->value_as_String();
-      appendToLog<std::string>(mutableRunInfo, name, time, value->value()->str());
+      appendToLog<std::string>(mutableRunInfo, name, time,
+                               value->value()->str());
     } else {
       g_log.warning() << "Value for sample log named '" << name
                       << "' was not of recognised type" << std::endl;
