@@ -485,8 +485,6 @@ PolarizationCorrectionWildes::validateInputs() {
                                      " is missing from the workspace.";
       }
     }
-  } else {
-    issues[Prop::EFFICIENCIES] = "The input is not a MatrixWorkspace";
   }
   const std::vector<std::string> inputs = getProperty(Prop::INPUT_WS);
   const std::string flipperProperty = getProperty(Prop::FLIPPERS);
