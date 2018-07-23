@@ -89,8 +89,8 @@ std::vector<std::size_t> SortXAxis::createIndexes(const size_t sizeOfX) {
  * @brief A template for sorting the values given a comparator
  *
  * @tparam Comparator
- * @param workspaceIndicies, the vector of indicies values
- * @param inputWorkspace, the original workspace
+ * @param workspaceIndicies the vector of indicies values
+ * @param inputWorkspace the original workspace
  * @param specNum the Spectrum number to be sorted
  * @param compare std::less<double> for Ascending order std::greater<double>
  * for descending order
@@ -203,8 +203,8 @@ void SortXAxis::copyToOutputWorkspace(
  * comparator
  *
  * @tparam Comparator
- * @param compare std::less<double> for descending, and std::greater<double> for
- * ascending.
+ * @param compare std::less<double> for descending and std::greater<double> for
+ * ascending
  * @param inputWorkspace the unsorted input workspace
  * @param specNum the spectrum number currently being compared
  * @return true if it is sorted
