@@ -24,7 +24,6 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.ptable.register_table_rclicked(self.table_right_clicked)
 
         self.load_widget = LoadPresenter(LoadView(), LoadModel())
-        self.load_widget.register_button_clicked(self.browse_clicked)
         self.load_widget.register_spinbox_val_changed(self.spinbox_changed)
         self.load_widget.register_spinbox_submit(self.spinbox_submit)
 
@@ -44,9 +43,6 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
 
     def table_changed(self, items):
         print("Table Changed: {}".format([i.symbol for i in items]))
-
-    def browse_clicked(self):
-        print("Browse Clicked")
 
     def spinbox_changed(self, val):
         print("SpinBox Value Changed: {}".format(val))
