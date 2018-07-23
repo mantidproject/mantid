@@ -178,6 +178,19 @@ void fakeReceiveASampleEnvMessage(std::string *buffer) {
                  builder.GetSize());
 }
 
+void fakeReceiveAStringSampleEnvMessage(std::string *buffer) {
+  flatbuffers::FlatBufferBuilder builder;
+  // Sample environment log
+  auto logDataMessage =
+    CreateLogData(builder, builder.CreateString("fake string source"), Value::String,
+                  builder.CreateString("test_string").Union(), 1495618188000000000L);
+  FinishLogDataBuffer(builder, logDataMessage);
+
+  // Copy to provided buffer
+  buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
+                 builder.GetSize());
+}
+
 void fakeReceiveARunStartMessage(std::string *buffer, int32_t runNumber,
                                  const std::string &startTime,
                                  const std::string &instName,
@@ -328,11 +341,17 @@ public:
                       std::string &topic) override {
     assert(message);
 
-    fakeReceiveASampleEnvMessage(message);
+    if (m_callCount > 0) {
+      fakeReceiveAStringSampleEnvMessage(message);
+    } else {
+      fakeReceiveASampleEnvMessage(message);
+    }
 
     UNUSED_ARG(offset);
     UNUSED_ARG(partition);
     UNUSED_ARG(topic);
+
+    m_callCount++;
   }
 
   std::unordered_map<std::string, std::vector<int64_t>>
@@ -354,6 +373,9 @@ public:
     UNUSED_ARG(partition);
     UNUSED_ARG(offset);
   }
+
+private:
+  uint32_t m_callCount = 0;
 };
 
 // -----------------------------------------------------------------------------

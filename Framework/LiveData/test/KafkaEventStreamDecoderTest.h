@@ -287,7 +287,7 @@ public:
     auto decoder = createTestDecoder(mockBroker);
     TSM_ASSERT("Decoder should not have create data buffers yet",
                !decoder->hasData());
-    startCapturing(*decoder, 1);
+    startCapturing(*decoder, 2);
     Workspace_sptr workspace;
     TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
@@ -491,6 +491,16 @@ private:
       TS_ASSERT_EQUALS(log->firstTime().toISO8601String(),
                        "2017-05-24T09:29:48")
       TS_ASSERT_EQUALS(log->firstValue(), 42)
+    }
+
+    Mantid::Kernel::TimeSeriesProperty<std::string> *stringLog = nullptr;
+    // We should find a sample log with this name
+    TS_ASSERT_THROWS_NOTHING(
+      stringLog = run.getTimeSeriesProperty<std::string>("fake string source"));
+    if (log) {
+      TS_ASSERT_EQUALS(stringLog->firstTime().toISO8601String(),
+                       "2017-05-24T09:29:48")
+      TS_ASSERT_EQUALS(stringLog->firstValue(), "test_string")
     }
   }
 
