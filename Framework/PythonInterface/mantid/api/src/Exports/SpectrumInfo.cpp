@@ -29,6 +29,12 @@ void export_SpectrumInfo() {
   // NOT ADD EXPORTS TO OTHER METHODS without contacting the team working on
   // Instrument-2.0.
   class_<SpectrumInfo, boost::noncopyable>("SpectrumInfo", no_init)
+      .def("__len__", &SpectrumInfo::size, arg("self"),
+           "Returns the number of spectra.")
+
+      .def("size", &SpectrumInfo::size, arg("self"),
+           "Returns the number of spectra.")
+
       .def("isMonitor", &SpectrumInfo::isMonitor, (arg("self"), arg("index")),
            "Returns true if the detector(s) associated with the spectrum are "
            "monitors.")
@@ -41,10 +47,6 @@ void export_SpectrumInfo() {
            (arg("self"), arg("index"), arg("masked")),
            "Set the mask flag of the spectrum with the given index.")
 
-      .def("hasDetectors", &SpectrumInfo::hasDetectors, (arg("self")),
-           "Returns true if the spectrum is associated with detectors in the "
-           "instrument.")
-
       .def("twoTheta", &SpectrumInfo::twoTheta, (arg("self"), arg("index")),
            "Returns the scattering angle 2 theta in radians w.r.t. beam "
            "direction.")
@@ -54,19 +56,20 @@ void export_SpectrumInfo() {
            "Returns the signed scattering angle 2 theta in radians w.r.t. beam "
            "direction.")
 
-      .def("size", &SpectrumInfo::size, arg("self"),
-           "Returns the number of spectra.")
-
-      .def("hasUniqueDetector", &SpectrumInfo::hasUniqueDetector,
-           (arg("self"), arg("index")),
-           "Returns true if the spectrum is associated with exactly one "
-           "detector.")
-
       .def("l1", &SpectrumInfo::l1, arg("self"),
            "Returns the distance from the source to the sample.")
 
       .def("l2", &SpectrumInfo::l2, (arg("self"), arg("index")),
            "Returns the distance from the sample to the spectrum.")
+
+      .def("hasDetectors", &SpectrumInfo::hasDetectors, (arg("self")),
+           "Returns true if the spectrum is associated with detectors in the "
+           "instrument.")
+
+      .def("hasUniqueDetector", &SpectrumInfo::hasUniqueDetector,
+           (arg("self"), arg("index")),
+           "Returns true if the spectrum is associated with exactly one "
+           "detector.")
 
       .def("position", &SpectrumInfo::position, (arg("self"), arg("index")),
            "Returns the absolute position of the spectrum with the given "
