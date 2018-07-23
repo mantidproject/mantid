@@ -310,7 +310,6 @@ void MuonFitPropertyBrowser::generateBtnPressed() { genCombinePeriodWindow(); }
 void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
   m_fitActionFit->setEnabled(yes);
   m_fitActionSeqFit->setEnabled(yes);
-
 }
 
 void MuonFitPropertyBrowser::checkFitEnabled() {
@@ -538,8 +537,7 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
   }
   if (prop == m_TFAsymmMode) {
     const bool val = m_boolManager->value(prop);
-		setTFAsymmMode(val);
-
+    setTFAsymmMode(val);
   }
   if (prop == m_keepNorm) {
     const bool val = m_boolManager->value(prop);
@@ -1192,13 +1190,12 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
     // multiple fit
     if (m_isMultiFittingMode) {
       // update values in browser
-		if (func->getNumberDomains() > 1) {
-			auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(func);
-			old = tmp->getFunction(0);
-		}
-		else {
-			old = func;
-		}
+      if (func->getNumberDomains() > 1) {
+        auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(func);
+        old = tmp->getFunction(0);
+      } else {
+        old = func;
+      }
       m_functionBrowser->setFunction(old);
       // preserve global parameters
       QStringList newGlobals;
@@ -1216,11 +1213,11 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
 
       m_functionBrowser->setGlobalParameters(newGlobals);
       // if multi data set we need to do the fixes manually
-	  // the current domain is automatic
+      // the current domain is automatic
       auto originalNames = func->getParameterNames();
       for (auto name : originalNames) {
         auto index = func->parameterIndex(name);
-        if (func->isFixed(index) && func->getNumberDomains()>1) {
+        if (func->isFixed(index) && func->getNumberDomains() > 1) {
           // get domain
           auto index = name.find_first_of(".");
           std::string domainStr = name.substr(1, index - 1);
@@ -1230,7 +1227,7 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
           // set fix
           m_functionBrowser->setLocalParameterFixed(
               QString::fromStdString(newName), domain, true);
-		}
+        }
       }
     } // single fit
     else {
@@ -1251,31 +1248,28 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
 * @param enabled :: [input] Whether to turn this mode on or off
 */
 void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
-	IFunction_sptr old =
-		boost::dynamic_pointer_cast<IFunction>(m_compositeFunction);
-	if (old->nParams() > 0) {
-		ConvertFitFunctionForMuonTFAsymmetry(enabled);
-	}
-	else if (enabled) {
-		g_log.warning("No fitting function provided. Please add a function");
-		// will update when user clicks elsewhere
-		m_boolManager->setValue(m_TFAsymmMode, false);
-	}
-	else {
+  IFunction_sptr old =
+      boost::dynamic_pointer_cast<IFunction>(m_compositeFunction);
+  if (old->nParams() > 0) {
+    ConvertFitFunctionForMuonTFAsymmetry(enabled);
+  } else if (enabled) {
+    g_log.warning("No fitting function provided. Please add a function");
+    // will update when user clicks elsewhere
+    m_boolManager->setValue(m_TFAsymmMode, false);
+  } else {
 
-		// Show or hide the TFAsymmetry fit
-		if (enabled) {
-			// m_settingsGroup->property()->addSubProperty(m_normalization);
-			// m_multiFitSettingsGroup->property()->addSubProperty(m_normalization);
-			m_settingsGroup->property()->addSubProperty(m_keepNorm);
-			// setNormalization();
-		}
-		else {
-			// m_settingsGroup->property()->removeSubProperty(m_normalization);
-			// m_multiFitSettingsGroup->property()->removeSubProperty(m_normalization);
-			m_settingsGroup->property()->removeSubProperty(m_keepNorm);
-		}
-	}
+    // Show or hide the TFAsymmetry fit
+    if (enabled) {
+      // m_settingsGroup->property()->addSubProperty(m_normalization);
+      // m_multiFitSettingsGroup->property()->addSubProperty(m_normalization);
+      m_settingsGroup->property()->addSubProperty(m_keepNorm);
+      // setNormalization();
+    } else {
+      // m_settingsGroup->property()->removeSubProperty(m_normalization);
+      // m_multiFitSettingsGroup->property()->removeSubProperty(m_normalization);
+      m_settingsGroup->property()->removeSubProperty(m_keepNorm);
+    }
+  }
 }
 std::string MuonFitPropertyBrowser::TFExtension() const {
 
