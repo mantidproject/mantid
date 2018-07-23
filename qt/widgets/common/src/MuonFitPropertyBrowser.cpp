@@ -1185,6 +1185,9 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
     std::string mode = (enabled) ? "Construct" : "Extract";
     alg->setProperty("Mode", mode);
     alg->execute();
+    if (!alg->isExecuted()) {
+      return;
+    }
     IFunction_sptr func = alg->getProperty("OutputFunction");
 
     // multiple fit
