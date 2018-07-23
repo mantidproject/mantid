@@ -79,6 +79,8 @@ package and install it:
 
 where ``X.Y.Z`` should be replaced with the version that was downloaded.
 
+if you wish to setup eclipse for use devolping mantid, then instructions can be found `here.<http://developer.mantidproject.org/Eclipse.html>`_
+
 OSX
 ---
 The build environment on OS X is described here :ref:`BuildingOnOSX`.
