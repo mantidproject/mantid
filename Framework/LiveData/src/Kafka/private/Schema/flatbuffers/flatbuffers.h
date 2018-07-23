@@ -39,7 +39,6 @@ inline void EndianCheck() {
 }
 
 template<typename T> FLATBUFFERS_CONSTEXPR size_t AlignOf() {
-  // clang-format off
   #ifdef _MSC_VER
     return __alignof(T);
   #else
@@ -49,7 +48,6 @@ template<typename T> FLATBUFFERS_CONSTEXPR size_t AlignOf() {
       return alignof(T);
     #endif
   #endif
-  // clang-format on
 }
 
 // When we read serialized data from memory, in the case of most scalars,
@@ -465,7 +463,6 @@ class DetachedBuffer {
 
   size_t size() const { return size_; }
 
-  // clang-format off
   #if 0  // disabled for now due to the ordering of classes in this header
   template <class T>
   bool Verify() const {
@@ -483,7 +480,6 @@ class DetachedBuffer {
     return flatbuffers::GetRoot<T>(data());
   }
   #endif
-  // clang-format on
 
   // These may change access mode, leave these at end of public section
   FLATBUFFERS_DELETE_FUNC(DetachedBuffer(const DetachedBuffer &other))
@@ -1179,7 +1175,6 @@ class FlatBufferBuilder {
     // causing the wrong overload to be selected, remove it.
     AssertScalarT<T>();
     StartVector(len, sizeof(T));
-    // clang-format off
     #if FLATBUFFERS_LITTLEENDIAN
       PushBytes(reinterpret_cast<const uint8_t *>(v), len * sizeof(T));
     #else
@@ -1191,7 +1186,6 @@ class FlatBufferBuilder {
         }
       }
     #endif
-    // clang-format on
     return Offset<Vector<T>>(EndVector(len));
   }
 
@@ -1223,7 +1217,6 @@ class FlatBufferBuilder {
     return Offset<Vector<uint8_t>>(EndVector(v.size()));
   }
 
-  // clang-format off
   #ifndef FLATBUFFERS_CPP98_STL
   /// @brief Serialize values returned by a function into a FlatBuffer `vector`.
   /// This is a convenience function that takes care of iteration for you.
@@ -1239,7 +1232,6 @@ class FlatBufferBuilder {
     return CreateVector(elems);
   }
   #endif
-  // clang-format on
 
   /// @brief Serialize values returned by a function into a FlatBuffer `vector`.
   /// This is a convenience function that takes care of iteration for you.
@@ -1302,7 +1294,6 @@ class FlatBufferBuilder {
     return CreateVectorOfStructs<T>(vv.data(), vv.size());
   }
 
-  // clang-format off
   #ifndef FLATBUFFERS_CPP98_STL
   /// @brief Serialize an array of structs into a FlatBuffer `vector`.
   /// @tparam T The data type of the struct array elements.
@@ -1322,7 +1313,6 @@ class FlatBufferBuilder {
     return EndVectorOfStructs<T>(vector_size);
   }
   #endif
-  // clang-format on
 
   /// @brief Serialize an array of structs into a FlatBuffer `vector`.
   /// @tparam T The data type of the struct array elements.
@@ -1687,17 +1677,14 @@ class Verifier FLATBUFFERS_FINAL_CLASS {
         max_depth_(_max_depth),
         num_tables_(0),
         max_tables_(_max_tables)
-  // clang-format off
     #ifdef FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE
         , upper_bound_(buf)
     #endif
-  // clang-format on
   {
   }
 
   // Central location where any verification failures register.
   bool Check(bool ok) const {
-    // clang-format off
     #ifdef FLATBUFFERS_DEBUG_VERIFICATION_FAILURE
       assert(ok);
     #endif
@@ -1705,19 +1692,16 @@ class Verifier FLATBUFFERS_FINAL_CLASS {
       if (!ok)
         upper_bound_ = buf_;
     #endif
-    // clang-format on
     return ok;
   }
 
   // Verify any range within the buffer.
   bool Verify(const void *elem, size_t elem_len) const {
-    // clang-format off
     #ifdef FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE
       auto upper_bound = reinterpret_cast<const uint8_t *>(elem) + elem_len;
       if (upper_bound_ < upper_bound)
         upper_bound_ =  upper_bound;
     #endif
-    // clang-format on
     return Check(elem_len <= (size_t)(end_ - buf_) && elem >= buf_ &&
                  elem <= end_ - elem_len);
   }
@@ -1842,7 +1826,6 @@ class Verifier FLATBUFFERS_FINAL_CLASS {
     return true;
   }
 
-  // clang-format off
   #ifdef FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE
   // Returns the message size in bytes
   size_t GetComputedSize() const {
@@ -1852,7 +1835,6 @@ class Verifier FLATBUFFERS_FINAL_CLASS {
     return (buf_  + size > end_) ?  0 : size;
   }
   #endif
-  // clang-format on
 
  private:
   const uint8_t *buf_;
@@ -1861,11 +1843,9 @@ class Verifier FLATBUFFERS_FINAL_CLASS {
   uoffset_t max_depth_;
   uoffset_t num_tables_;
   uoffset_t max_tables_;
-  // clang-format off
   #ifdef FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE
     mutable const uint8_t *upper_bound_;
   #endif
-  // clang-format on
 };
 
 // Convenient way to bundle a buffer and its length, to pass it around
@@ -2088,7 +2068,6 @@ struct NativeTable {};
 /// if you wish. The resolver does the opposite lookup, for when the object
 /// is being serialized again.
 typedef uint64_t hash_value_t;
-// clang-format off
 #ifdef FLATBUFFERS_CPP98_STL
   typedef void (*resolver_function_t)(void **pointer_adr, hash_value_t hash);
   typedef hash_value_t (*rehasher_function_t)(void *pointer);
@@ -2097,7 +2076,6 @@ typedef uint64_t hash_value_t;
           resolver_function_t;
   typedef std::function<hash_value_t (void *pointer)> rehasher_function_t;
 #endif
-// clang-format on
 
 // Helper function to test if a field is present, using any of the field
 // enums in the generated code.
@@ -2130,7 +2108,6 @@ inline int LookupEnum(const char **names, const char *name) {
 // by the force_align attribute.
 // These are used in the generated code only.
 
-// clang-format off
 #if defined(_MSC_VER)
   #define MANUALLY_ALIGNED_STRUCT(alignment) \
     __pragma(pack(1)); \
@@ -2148,7 +2125,6 @@ inline int LookupEnum(const char **names, const char *name) {
 #else
   #error Unknown compiler, please define structure alignment macros
 #endif
-// clang-format on
 
 // Minimal reflection via code generation.
 // Besides full-fat reflection (see reflection.h) and parsing/printing by
@@ -2163,7 +2139,6 @@ inline int LookupEnum(const char **names, const char *name) {
 enum SequenceType { ST_TABLE, ST_STRUCT, ST_UNION, ST_ENUM };
 
 // Scalars have the same order as in idl.h
-// clang-format off
 #define FLATBUFFERS_GEN_ELEMENTARY_TYPES(ET) \
   ET(ET_UTYPE) \
   ET(ET_BOOL) \
@@ -2194,7 +2169,6 @@ inline const char * const *ElementaryTypeNames() {
   };
   return names;
 }
-// clang-format on
 
 // Basic type info cost just 16bits per field!
 struct TypeCode {
@@ -2229,7 +2203,6 @@ struct TypeTable {
 // appreciate if you left it in.
 
 // Weak linkage is culled by VS & doesn't work on cygwin.
-// clang-format off
 #if !defined(_WIN32) && !defined(__CYGWIN__)
 
 extern volatile __attribute__((weak)) const char *flatbuffer_version_string;
@@ -2276,6 +2249,5 @@ volatile __attribute__((weak)) const char *flatbuffer_version_string =
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
-// clang-format on
 
 #endif  // FLATBUFFERS_H_
