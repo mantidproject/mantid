@@ -1259,9 +1259,13 @@ void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
       m_settingsGroup->property()->removeSubProperty(m_keepNorm);
     }
   } else if (enabled) {
-	  // will update when user clicks elsewhere
-	  m_boolManager->setValue(m_TFAsymmMode, false);
-    QMessageBox::warning(this, "Muon Analysis", "No fitting function provided. TF Asymmetry mode requires a fitting function to be added before enabling. Please add a fitting function and enable TF Asymmetry Mode again.");
+    // will update when user clicks elsewhere
+    m_boolManager->setValue(m_TFAsymmMode, false);
+    QMessageBox::warning(this, "Muon Analysis",
+                         "No fitting function provided. TF Asymmetry mode "
+                         "requires a fitting function to be added before "
+                         "enabling. Please add a fitting function and enable "
+                         "TF Asymmetry Mode again.");
   }
 }
 std::string MuonFitPropertyBrowser::TFExtension() const {
