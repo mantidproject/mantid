@@ -1190,8 +1190,13 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
     // multiple fit
     if (m_isMultiFittingMode) {
       // update values in browser
-      auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(func);
-      old = tmp->getFunction(0);
+		if (func->getNumberDomains() > 1) {
+			auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(func);
+			old = tmp->getFunction(0);
+		}
+		else {
+			old = func;
+		}
       m_functionBrowser->setFunction(old);
       // preserve global parameters
       QStringList newGlobals;
@@ -1209,10 +1214,11 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
 
       m_functionBrowser->setGlobalParameters(newGlobals);
       // if multi data set we need to do the fixes manually
+	  // the current domain is automatic
       auto originalNames = func->getParameterNames();
       for (auto name : originalNames) {
         auto index = func->parameterIndex(name);
-        if (func->isFixed(index)) {
+        if (func->isFixed(index) && func->getNumberDomains()>1) {
           // get domain
           auto index = name.find_first_of(".");
           std::string domainStr = name.substr(1, index - 1);
@@ -1222,7 +1228,7 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
           // set fix
           m_functionBrowser->setLocalParameterFixed(
               QString::fromStdString(newName), domain, true);
-        }
+		}
       }
     } // single fit
     else {
