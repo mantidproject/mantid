@@ -30,7 +30,8 @@ def main():
         return int(command_line_args.exit_code)
     app = QtGui.QApplication(sys.argv)
     form = CrashReportPage(show_continue_terminate=False)
-    presenter = ErrorReporterPresenter(form, command_line_args.exit_code) # noqa
+    presenter = ErrorReporterPresenter(form, command_line_args.exit_code)
+    presenter.show_view()
     app.exec_()
     return int(command_line_args.exit_code)
 

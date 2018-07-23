@@ -8,7 +8,6 @@ class ErrorReporterPresenter(object):
         self._view = view
         self._exit_code = exit_code
         self._view.action.connect(self.error_handler)
-        self._view.show()
 
     def error_handler(self, continue_working, share, name, email):
         if share == 0:
@@ -25,3 +24,6 @@ class ErrorReporterPresenter(object):
             self._view.quit()
         else:
             self.error_log.error("Continue working.")
+
+    def show_view(self):
+        self._view.show()
