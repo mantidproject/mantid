@@ -12,7 +12,7 @@ using Mantid::Kernel::V3D;
 using namespace boost::python;
 
 // Helper function for converting std::vector<size_t> to a Python list
-boost::python::list createDetectorsInSubtreeList(std::vector<size_t> items) {
+boost::python::list createList(std::vector<size_t> items) {
   // Create the result list
   boost::python::list result;
 
@@ -28,13 +28,19 @@ boost::python::list createDetectorsInSubtreeList(std::vector<size_t> items) {
 // Helper function to call the detectorsInSubtree method
 boost::python::list createListForDetectorsInSubtree(const ComponentInfo &self,
                                                     const size_t index) {
-  return createDetectorsInSubtreeList(self.detectorsInSubtree(index));
+  return createList(self.detectorsInSubtree(index));
 }
 
 // Helper function to call the componentsInSubtree method
 boost::python::list createListForComponentsInSubtree(const ComponentInfo &self,
                                                      const size_t index) {
-  return createDetectorsInSubtreeList(self.componentsInSubtree(index));
+  return createList(self.componentsInSubtree(index));
+}
+
+// Helper function to call the children method
+boost::python::list createListForComponentChildren(const ComponentInfo &self,
+                                                   const size_t index) {
+  return createList(self.children(index));
 }
 
 // Function pointers to help resolve ambiguity
@@ -56,13 +62,9 @@ void export_ComponentInfo() {
   // DO NOT ADD EXPORTS TO OTHER METHODS without contacting the team working on
   // Instrument-2.0.
   class_<ComponentInfo, boost::noncopyable>("ComponentInfo", no_init)
-      .def("detectorsInSubtree", createListForDetectorsInSubtree,
-           (arg("self"), arg("index")),
-           "Returns a list of detectors in the subtree.")
 
-      .def("componentsInSubtree", createListForComponentsInSubtree,
-           (arg("self"), arg("index")),
-           "Returns a list of components in the subtree.")
+      .def("__len__", &ComponentInfo::size, arg("self"),
+           "Returns the number of components.")
 
       .def("size", &ComponentInfo::size, arg("self"),
            "Returns the number of components.")
@@ -71,8 +73,13 @@ void export_ComponentInfo() {
            (arg("self"), arg("index")),
            "Checks if the component is a detector.")
 
-      .def("hasDetectorInfo", &ComponentInfo::hasDetectorInfo, arg("self"),
-           "Checks if the component has a DetectorInfo object.")
+      .def("detectorsInSubtree", createListForDetectorsInSubtree,
+           (arg("self"), arg("index")),
+           "Returns a list of detectors in the subtree.")
+
+      .def("componentsInSubtree", createListForComponentsInSubtree,
+           (arg("self"), arg("index")),
+           "Returns a list of components in the subtree.")
 
       .def("position", position, (arg("self"), arg("index")),
            "Returns the absolute position of the component at the given index.")
@@ -104,11 +111,27 @@ void export_ComponentInfo() {
       .def("hasSample", &ComponentInfo::hasSample, arg("self"),
            "Returns whether a sample is present.")
 
+      .def("source", &ComponentInfo::source, arg("self"),
+           "Returns the source component.")
+
+      .def("sample", &ComponentInfo::source, arg("self"),
+           "Returns the sample component.")
+
       .def("sourcePosition", &ComponentInfo::sourcePosition, arg("self"),
            "Returns the source position.")
 
       .def("samplePosition", &ComponentInfo::samplePosition, arg("self"),
            "Returns the sample position.")
+
+      .def("hasParent", &ComponentInfo::hasParent, (arg("self"), arg("index")),
+           "Returns whether a component with the given index has a parent.")
+
+      .def("parent", &ComponentInfo::parent, (arg("self"), arg("index")),
+           "Returns the parent component of the component with the given index")
+
+      .def("children", createListForComponentChildren,
+           (arg("self"), arg("index")),
+           "Returns a list of children for the component with the given index.")
 
       .def("name", &ComponentInfo::name, (arg("self"), arg("index")),
            return_value_policy<copy_const_reference>(),
