@@ -46,6 +46,12 @@ void export_DetectorInfo() {
       .def("isMasked", isMasked, (arg("self"), arg("index")),
            "Returns True if the detector is masked.")
 
+      .def("setMasked", setMasked, (arg("self"), arg("index"), arg("masked")),
+           "Set the mask flag of the detector with given index.")
+
+      .def("clearMaskFlags", &DetectorInfo::clearMaskFlags, (arg("self")),
+           "Sets all mask flags to false (unmasked).")
+
       .def("isEquivalent", &DetectorInfo::isEquivalent,
            (arg("self"), arg("other")),
            "Returns true if the content of this is equivalent to the content "
@@ -58,11 +64,5 @@ void export_DetectorInfo() {
            "Returns the absolute position of the detector with given index.")
 
       .def("rotation", rotation, (arg("self"), arg("index")),
-           "Returns the absolute rotation of the detector with given index.")
-
-      .def("setMasked", setMasked, (arg("self"), arg("index"), arg("masked")),
-           "Set the mask flag of the detector with given index.")
-
-      .def("clearMaskFlags", &DetectorInfo::clearMaskFlags, (arg("self")),
-           "Sets all mask flags to false (unmasked).");
+           "Returns the absolute rotation of the detector with given index.");
 }

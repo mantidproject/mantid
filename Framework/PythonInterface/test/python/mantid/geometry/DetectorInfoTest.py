@@ -47,17 +47,6 @@ class DetectorInfoTest(unittest.TestCase):
         self.assertEquals(info.isMasked(0), False)
         self.assertEquals(info.isMasked(1), False)
 
-    def test_isEquivalent(self):
-        """ Check equality of detectors """
-        info = self._ws.detectorInfo()
-        self.assertTrue(info.isEquivalent(info))
-        self.assertTrue(info == info)
-
-    def test_twoTheta(self):
-        """ See if the returned value is a double (float in Python). """
-        info = self._ws.detectorInfo()
-        self.assertEquals(type(info.twoTheta(0)), float)
-
     def test_setMasked(self):
         """ Test that the detector's masking can be set to True. """
         info = self._ws.detectorInfo()
@@ -71,7 +60,18 @@ class DetectorInfoTest(unittest.TestCase):
         self.assertTrue(info.isMasked(0))
         info.clearMaskFlags()
         self.assertFalse(info.isMasked(0))
-        
+
+    def test_isEquivalent(self):
+        """ Check equality of detectors """
+        info = self._ws.detectorInfo()
+        self.assertTrue(info.isEquivalent(info))
+        self.assertTrue(info == info)
+
+    def test_twoTheta(self):
+        """ See if the returned value is a double (float in Python). """
+        info = self._ws.detectorInfo()
+        self.assertEquals(type(info.twoTheta(0)), float)
+
     def test_createWorkspaceAndDetectorInfo(self):
     	""" Try to create a workspace and see if DetectorInfo object
     		is accessable """
@@ -156,6 +156,20 @@ class DetectorInfoTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             info.isMasked(10.0)
 
+    def test_setMasked_exceptional(self):
+        info = self._ws.detectorInfo()
+        with self.assertRaises(TypeError):
+            info.setMasked(0, "False")
+        with self.assertRaises(TypeError):
+            info.setMasked("False", True)
+
+    def test_clearMaskFlags_exceptional(self):
+        info = self._ws.detectorInfo()
+        with self.assertRaises(TypeError):
+            info.clearMaskFlags("All")
+        with self.assertRaises(TypeError):
+            info.clearMaskFlags(1.10)
+
     def test_isEquivalent_exceptional(self):
         info = self._ws.detectorInfo()
         with self.assertRaises(TypeError):
@@ -183,20 +197,6 @@ class DetectorInfoTest(unittest.TestCase):
             info.rotation("Zero")
         with self.assertRaises(TypeError):
             info.rotation(0.0)
-
-    def test_setMasked_exceptional(self):
-        info = self._ws.detectorInfo()
-        with self.assertRaises(TypeError):
-            info.setMasked(0, "False")
-        with self.assertRaises(TypeError):
-            info.setMasked("False", True)
-
-    def test_clearMaskFlags_exceptional(self):
-        info = self._ws.detectorInfo()
-        with self.assertRaises(TypeError):
-            info.clearMaskFlags("All")
-        with self.assertRaises(TypeError):
-            info.clearMaskFlags(1.10)
 
 if __name__ == '__main__':
     unittest.main()
