@@ -292,10 +292,6 @@ if ( ENABLE_CPACK )
       include ( WindowsNSIS )
     elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
       include ( CPackLinuxSetup )
-      # let people know what is coming out the other end
-      if (CPACK_GENERATOR STREQUAL "DEB") # rpm filename is not visible?
-        message ( STATUS "CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
-      endif()
 
       # rhel requirements
       set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb,librdkafka" )
@@ -388,4 +384,6 @@ if ( ENABLE_CPACK )
     ENDIF ()
     # run cpack configuration
     include ( CPack )
+    # let people know what is coming out the other end - must be after cpack generates value for rpm
+    message ( STATUS "CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 endif ()
