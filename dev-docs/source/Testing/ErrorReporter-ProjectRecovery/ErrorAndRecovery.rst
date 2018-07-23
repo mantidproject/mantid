@@ -105,7 +105,14 @@ Project Recovery test
 
 *Preparation*
 
+- Before running these tests, set project recovery to run every 2 seconds. The instructions for this
+  are on the `Project Recovery concepts page <http://docs.mantidproject.org/nightly/concepts/ProjectRecovery.html>`_.
+
 
 **Time required XX - YY  minutes**
 
 --------------
+
+1. Open MantidPlot
+- Right-click in the Results Log and set `Log level` to `Debug`
+- 
