@@ -788,13 +788,26 @@ void FitPropertyBrowser::createCompositeFunction(const QString &str) {
   if (str.isEmpty()) {
     createCompositeFunction(Mantid::API::IFunction_sptr());
   } else {
-    auto f = Mantid::API::FunctionFactory::Instance().createInitialized(
-        str.toStdString());
+    auto f = tryCreateFitFunction(str);
     if (f) {
       createCompositeFunction(f);
     } else {
       createCompositeFunction(Mantid::API::IFunction_sptr());
     }
+  }
+}
+
+Mantid::API::IFunction_sptr
+FitPropertyBrowser::tryCreateFitFunction(const QString &str) {
+  try {
+    return Mantid::API::FunctionFactory::Instance().createInitialized(
+        str.toStdString());
+  } catch (const Mantid::Kernel::Exception::NotFoundError &ex) {
+    QMessageBox::critical(
+        this, "Mantid - Error",
+        "A workspace provided in the function does not exist:\n" +
+            QString(ex.what()));
+    return nullptr;
   }
 }
 
@@ -2778,8 +2791,8 @@ void FitPropertyBrowser::setupMultifit() {
           }
         }
         QString wsParam = ",WSParam=(WorkspaceIndex=" + QString::number(i);
-        wsParam += ",StartX=" + QString::number(startX()) + ",EndX=" +
-                   QString::number(endX()) + ")";
+        wsParam += ",StartX=" + QString::number(startX()) +
+                   ",EndX=" + QString::number(endX()) + ")";
         funIni += fun1Ini + ",Workspace=" + wsName + wsParam + ";";
       }
       if (!tieStr.isEmpty()) {
