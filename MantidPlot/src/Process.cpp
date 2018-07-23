@@ -115,7 +115,7 @@ bool isAnotherInstanceRunning() {
 bool isAnotherInstanceRunning() {
   kinfo_proc *processes[] = {nullptr};
   size_t processesLength(0);
-  const int sysctlQuery[3] = {CTL_KERN, KERN_PROC, KERN_PROC_ALL};
+  int sysctlQuery[3] = {CTL_KERN, KERN_PROC, KERN_PROC_ALL};
   /*
    * We start by calling sysctl with ptr == NULL and size == 0.
    * That will succeed, and set size to the appropriate length.
@@ -162,14 +162,15 @@ bool isAnotherInstanceRunning() {
   kinfo_proc *processListBegin = processes[0];
   kinfo_proc *processIter = processListBegin;
   char exePath[PATH_MAX];
+  auto otherIsRunning = false;
   for (size_t i = 0; i < processesLength; ++i) {
     const auto pid = processIter->kp_proc.p_pid;
-    if (proc_pidpath(pid, exePath, PATH_MAX) > 0) {
+    if (proc_pidpath(pid, exePath, PATH_MAX) <= 0) {
       // assume process is dead...
       continue;
     }
     if (isOtherInstance(pid,
-                        QFileInfo(toQStringInternal(exePath)).fileName())) {
+                        QFileInfo(QString::fromAscii(exePath)).fileName())) {
       otherIsRunning = true;
       break;
     }
