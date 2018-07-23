@@ -710,14 +710,14 @@ class MainWindow(QtGui.QMainWindow):
 
         # append 1 more log if original log only has 1 value
         tf = self._dataWS.getRun().getProperty("proton_charge").times[-1]
-        vectimes.append(tf)
+        vectimes = numpy.append(vectimes,tf)
         vecvalue = numpy.append(vecvalue, vecvalue[-1])
 
-        vecreltimes = [float(t - t0) / numpy.timedelta64(1, 's') for t in vectimes]
+        vecreltimes = (vectimes - t0) / numpy.timedelta64(1, 's')
 
         # Set to plot
-        xlim = [min(vecreltimes), max(vecreltimes)]
-        ylim = [min(vecvalue), max(vecvalue)]
+        xlim = [vecreltimes.min(), vecreltimes.max()]
+        ylim = [vecvalue.min(), vecvalue.max()]
         self.ui.mainplot.set_xlim(xlim[0], xlim[1])
         self.ui.mainplot.set_ylim(ylim[0], ylim[1])
 
@@ -806,11 +806,13 @@ class MainWindow(QtGui.QMainWindow):
         run = dataws.getRun()
         plist = run.getProperties()
         for p in plist:
-            pv = p.value
-            if isinstance(pv, numpy.ndarray):
+            try:
                 times = p.times
-                if len(times) > 1:
+                if len(times) > 1 and numpy.isreal(p.value[0]):
                     self._sampleLogNames.append(p.name)
+            # This is here for FloatArrayProperty. If a log value is of this type it does not have times
+            except AttributeError:
+                pass
         # ENDFOR(p)
 
         # Set up sample log

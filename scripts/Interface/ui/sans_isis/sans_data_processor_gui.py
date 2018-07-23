@@ -440,6 +440,21 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.user_file_button.setEnabled(True)
         self.manage_directories_button.setEnabled(True)
 
+    def display_message_box(self, title, message, details):
+        msg = QtGui.QMessageBox()
+        msg.setIcon(QtGui.QMessageBox.Warning)
+
+        message_length = len(message)
+
+        # This is to ensure that the QMessage box if wide enough to display nicely.
+        msg.setText(10 * ' ' + message + ' ' * (30 - message_length))
+        msg.setWindowTitle(title)
+        msg.setDetailedText(details)
+        msg.setStandardButtons(QtGui.QMessageBox.Ok)
+        msg.setDefaultButton(QtGui.QMessageBox.Ok)
+        msg.setEscapeButton(QtGui.QMessageBox.Ok)
+        msg.exec_()
+
     def get_user_file_path(self):
         return str(self.user_file_line_edit.text())
 
@@ -716,8 +731,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             checked_save_types.append(SaveType.NXcanSAS)
         if self.rkh_checkbox.isChecked():
             checked_save_types.append(SaveType.RKH)
-        if self.nist_qxy_checkbox.isChecked():
-            checked_save_types.append(SaveType.NistQxy)
         return checked_save_types
 
     @save_types.setter
@@ -729,8 +742,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
                 self.nx_can_sas_checkbox.setChecked(True)
             elif value is SaveType.RKH:
                 self.rkh_checkbox.setChecked(True)
-            elif value is SaveType.NistQxy:
-                self.nist_qxy_checkbox.setChecked(True)
 
     @property
     def zero_error_free(self):
@@ -1715,6 +1726,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.wavelength_adjustment_det_1_line_edit.setText("")
         self.wavelength_adjustment_det_2_line_edit.setText("")
 
+        self.show_transmission_view.setChecked(True)
+
         # --------------------------------
         # Q tab
         # --------------------------------
@@ -1727,7 +1740,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.q_xy_step_line_edit.setText("")
         self.q_xy_step_type_combo_box.setCurrentIndex(0)
 
-        self.gravity_group_box.setChecked(True)
+        self.gravity_group_box.setChecked(False)
         self.gravity_extra_length_line_edit.setText("")
 
         self.q_resolution_group_box.setChecked(False)

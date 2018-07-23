@@ -2,6 +2,7 @@
 #define MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGET_H
 
 #include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidQtWidgets/Common/MantidTreeWidget.h"
 
 #include <MantidAPI/ExperimentInfo.h>
 #include <MantidAPI/IAlgorithm_fwd.h>
@@ -179,6 +180,9 @@ private:
   void setupLoadButtonMenu();
   void setupConnections();
 
+  MantidQt::MantidWidgets::MantidItemSortScheme
+  whichCriteria(SortCriteria criteria);
+
 public slots:
   void clickedWorkspace(QTreeWidgetItem *, int);
   void saveWorkspaceCollection();
@@ -190,6 +194,7 @@ public slots:
   void sortDescending();
   void chooseByName();
   void chooseByLastModified();
+  void chooseByMemorySize();
   void keyPressEvent(QKeyEvent *) override;
 
 protected slots:

@@ -1785,13 +1785,13 @@ class DataProcessorMainPresenter
 public:
 DataProcessorMainPresenter();
 
-virtual QVariantMap getPreprocessingOptions() const;
-virtual QVariantMap getProcessingOptions() const;
-virtual QString getPostprocessingOptionsAsString() const;
+virtual QVariantMap getPreprocessingOptions(int) const;
+virtual QVariantMap getProcessingOptions(int) const;
+virtual QString getPostprocessingOptionsAsString(int) const;
 virtual void confirmReductionPaused(int);
 virtual void confirmReductionResumed(int);
 
-virtual void notifyADSChanged(const QSet<QString> &);
+virtual void notifyADSChanged(const QSet<QString> &, int);
 };
 
 class AppendRowCommand

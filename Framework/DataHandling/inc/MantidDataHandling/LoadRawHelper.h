@@ -2,12 +2,12 @@
 #define MANTID_DATAHANDLING_LOADRAWHELPER_H_
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
-#include <boost/scoped_ptr.hpp>
+#include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <climits>
+#include <memory>
 
 class ISISRAW;
 class ISISRAW2;
@@ -52,6 +52,9 @@ class DLLExport LoadRawHelper
 public:
   /// Default constructor
   LoadRawHelper();
+  // Define destructor in .cpp as we have unique_ptr to forward declared
+  // ISISRAW2
+  ~LoadRawHelper();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadRawHelper"; }
   /// Algorithm's version for identification overriding a virtual method
@@ -116,10 +119,10 @@ public:
                                    API::Algorithm *const pAlg);
 
   /// Extract the start time from a raw file
-  static Types::Core::DateAndTime extractStartTime(ISISRAW *isisRaw);
+  static Types::Core::DateAndTime extractStartTime(ISISRAW &isisRaw);
 
   /// Extract the end time from a raw file
-  static Types::Core::DateAndTime extractEndTime(ISISRAW *isisRaw);
+  static Types::Core::DateAndTime extractEndTime(ISISRAW &isisRaw);
 
 protected:
   /// Overwrites Algorithm method.
@@ -175,10 +178,6 @@ protected:
       int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes,
       int64_t lengthIn, int64_t binStart);
 
-  /// ISISRAW class instance which does raw file reading. Shared pointer to
-  /// prevent memory leak when an exception is thrown.
-  boost::shared_ptr<ISISRAW2> isisRaw;
-
   /// get proton charge from raw file
   float getProtonCharge() const;
   /// set proton charge
@@ -188,6 +187,8 @@ protected:
 
   /// number of time regimes
   int getNumberofTimeRegimes();
+  /// return an reference to the ISISRAW2 reader
+  ISISRAW2 &isisRaw() const;
   /// resets the isisraw shared pointer
   void reset();
 
@@ -226,6 +227,8 @@ private:
   /// convert month label to int string
   static std::string convertMonthLabelToIntStr(std::string month);
 
+  /// ISISRAW class instance which does raw file reading.
+  mutable std::unique_ptr<ISISRAW2> m_isis_raw;
   /// Allowed values for the cache property
   std::vector<std::string> m_cache_options;
   /// A map for storing the time regime for each spectrum
@@ -246,7 +249,7 @@ private:
   specnum_t m_total_specs;
 
   /// A ptr to the log creator
-  boost::scoped_ptr<ISISRunLogs> m_logCreator;
+  std::unique_ptr<ISISRunLogs> m_logCreator;
 
   /// Search for the log files in the workspace, and output their names as a
   /// set.

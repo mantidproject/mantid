@@ -256,26 +256,35 @@ void AlignAndFocusPowder::exec() {
       dspace = false;
   }
   if (dspace) {
-    if (m_params.size() == 1 && dmax > 0) {
-      double step = m_params[0];
-      m_params.clear();
-      if (step > 0 || dmin > 0) {
+    if (m_params.size() == 1 && (!isEmpty(dmin)) && (!isEmpty(dmax))) {
+      if (dmin > 0. && dmax > dmin) {
+        double step = m_params[0];
+        m_params.clear();
         m_params.push_back(dmin);
         m_params.push_back(step);
         m_params.push_back(dmax);
-        g_log.information() << "d-Spacing Binning: " << m_params[0] << "  "
-                            << m_params[1] << "  " << m_params[2] << "\n";
+        g_log.information() << "d-Spacing binning updated: " << m_params[0]
+                            << "  " << m_params[1] << "  " << m_params[2]
+                            << "\n";
+      } else {
+        g_log.warning() << "something is wrong with dmin (" << dmin
+                        << ") and dmax (" << dmax
+                        << "). They are being ignored.\n";
       }
     }
   } else {
-    if (m_params.size() == 1 && tmax > 0) {
-      double step = m_params[0];
-      if (step > 0 || tmin > 0) {
+    if (m_params.size() == 1 && (!isEmpty(tmin)) && (!isEmpty(tmax))) {
+      if (tmin > 0. && tmax > tmin) {
+        double step = m_params[0];
         m_params[0] = tmin;
         m_params.push_back(step);
         m_params.push_back(tmax);
-        g_log.information() << "TOF Binning: " << m_params[0] << "  "
+        g_log.information() << "TOF binning updated: " << m_params[0] << "  "
                             << m_params[1] << "  " << m_params[2] << "\n";
+      } else {
+        g_log.warning() << "something is wrong with tmin (" << tmin
+                        << ") and tmax (" << tmax
+                        << "). They are being ignored.\n";
       }
     }
   }
@@ -776,6 +785,10 @@ AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws) {
       g_log.information() << param << " ";
     g_log.information() << ") started at "
                         << Types::Core::DateAndTime::getCurrentTime() << "\n";
+    for (double param : m_params)
+      if (isEmpty(param))
+        g_log.warning("encountered empty binning parameter");
+
     API::IAlgorithm_sptr rebin3Alg = createChildAlgorithm("Rebin");
     rebin3Alg->setProperty("InputWorkspace", matrixws);
     rebin3Alg->setProperty("OutputWorkspace", matrixws);

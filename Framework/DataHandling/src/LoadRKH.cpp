@@ -13,8 +13,10 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
+// clang-format off
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/date_parsing.hpp>
+// clang-format on
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <MantidKernel/StringTokenizer.h>

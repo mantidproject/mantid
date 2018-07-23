@@ -43,8 +43,10 @@
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include "MantidDataObjects/Workspace2D.h"
 #include <boost/shared_array.hpp>

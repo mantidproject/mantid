@@ -1,5 +1,6 @@
 #include "ProjectSerialiser.h"
 #include "ApplicationWindow.h"
+#include "Folder.h"
 #include "Graph3D.h"
 #include "Matrix.h"
 #include "Note.h"
@@ -24,29 +25,63 @@
 #include <QTextCodec>
 #include <QTextStream>
 
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
 using namespace Mantid::API;
 using namespace MantidQt::API;
 using Mantid::Kernel::Logger;
 
 namespace {
+std::vector<std::string> splitByDelim(const std::string &s, const char delim) {
+  std::vector<std::string> foundWsNames;
+
+  std::stringstream sstream(s);
+  std::string wsName;
+  // Split by \t char
+  while (std::getline(sstream, wsName, delim)) {
+    if (!wsName.empty()) {
+      foundWsNames.push_back(wsName);
+    }
+  }
+  return foundWsNames;
+}
+
 /// static logger
 Logger g_log("ProjectSerialiser");
-}
+
+/// Keys for parsed workspace names
+const std::string ALL_WS = "";
+const std::string ALL_GROUP_NAMES = "__all_groups";
+
+} // namespace
 
 // This C function is defined in the third party C lib minigzip.c
 extern "C" {
 void file_compress(const char *file, const char *mode);
 }
 
+// We assume any caller which do not explicitly mention the recovery flag
+// do not want it, so set it to false
 ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window)
-    : window(window), m_currentFolder(nullptr), m_windowCount(0),
-      m_saveAll(true) {}
+    : ProjectSerialiser(window, false) {}
 
 ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder)
-    : window(window), m_currentFolder(folder), m_windowCount(0),
-      m_saveAll(true) {}
+    : ProjectSerialiser(window, folder, false) {}
 
-void ProjectSerialiser::save(const QString &projectName,
+ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, bool isRecovery)
+    : window(window), m_currentFolder(nullptr), m_windowCount(0),
+      m_saveAll(true), m_projectRecovery(isRecovery) {}
+
+ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder,
+                                     bool isRecovery)
+    : window(window), m_currentFolder(folder), m_windowCount(0),
+      m_saveAll(true), m_projectRecovery(isRecovery) {}
+
+bool ProjectSerialiser::save(const QString &projectName,
                              const std::vector<std::string> &wsNames,
                              const std::vector<std::string> &windowNames,
                              bool compress) {
@@ -55,7 +90,7 @@ void ProjectSerialiser::save(const QString &projectName,
   window->projectname = projectName;
   QFileInfo fileInfo(projectName);
   window->workingDir = fileInfo.absoluteDir().absolutePath();
-  save(projectName, compress, false);
+  return save(projectName, compress, false);
 }
 
 /**
@@ -65,16 +100,17 @@ void ProjectSerialiser::save(const QString &projectName,
  * @param projectName :: the name of the project to write to
  * @param compress :: whether to compress the project (default false)
  */
-void ProjectSerialiser::save(const QString &projectName, bool compress,
+bool ProjectSerialiser::save(const QString &projectName, bool compress,
                              bool saveAll) {
   m_windowCount = 0;
   m_saveAll = saveAll;
+  auto name = projectName.toStdString();
   QFile fileHandle(projectName);
 
   // attempt to backup project files and check we can write
   if (!canBackupProjectFiles(&fileHandle, projectName) ||
       !canWriteToProject(&fileHandle, projectName)) {
-    return;
+    return false;
   }
 
   if (!m_currentFolder)
@@ -86,18 +122,43 @@ void ProjectSerialiser::save(const QString &projectName, bool compress,
 
   QString text = serialiseProjectState(m_currentFolder);
   saveProjectFile(&fileHandle, projectName, text, compress);
+  return true;
 }
 
 /**
  * Load the state of Mantid from a collection of lines read from a project file
  *
- * @param lines :: string of characters from a project file
+ * @param lines :: filepath to load from
  * @param fileVersion :: project file version used
  * @param isTopLevel :: whether this function is being called on a top level
  * 		folder. (Default True)
+ * @return True is loading was successful, otherwise false
  */
-void ProjectSerialiser::load(std::string lines, const int fileVersion,
+bool ProjectSerialiser::load(std::string filepath, const int fileVersion,
                              const bool isTopLevel) {
+  // We have to accept std::string to maintain Python compatibility
+  auto qfilePath = QString::fromStdString(filepath);
+  QFile file(qfilePath);
+  QFileInfo fileInfo(qfilePath);
+
+  if (!file.open(QIODevice::ReadOnly))
+    throw std::runtime_error("Couldn't open project file");
+
+  QTextStream fileTS(&file);
+  fileTS.setCodec(QTextCodec::codecForName("UTF-8"));
+
+  // Skip mantid version line
+  fileTS.readLine();
+
+  // Skip the <scripting-lang> line. We only really use python now anyway.
+  fileTS.readLine();
+  window->setScriptingLanguage("Python");
+
+  // Skip the <windows> line.
+  fileTS.readLine();
+
+  std::string lines = fileTS.readAll().toUtf8().constData();
+
   // If we're not the top level folder, read the folder settings and create the
   // folder
   // This is a legacy edgecase because folders are written
@@ -144,6 +205,8 @@ void ProjectSerialiser::load(std::string lines, const int fileVersion,
 
   g_log.notice() << "Finished Loading Project: "
                  << window->projectname.toStdString() << "\n";
+
+  return true;
 }
 
 /**
@@ -164,6 +227,7 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
 
   // If this is the top level folder of the project, we'll need to load the
   // workspaces before anything else.
+  // If were recovering projects the workspaces should already be loaded
   if (isTopLevel) {
     loadWorkspaces(tsv);
   }
@@ -186,10 +250,50 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
  * @param tsv :: the TSVserialiser object for the project file
  */
 void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv) {
-  if (tsv.hasSection("mantidworkspaces")) {
-    // There should only be one of these, so we only read the first.
-    std::string workspaces = tsv.sections("mantidworkspaces").front();
-    populateMantidTreeWidget(QString::fromStdString(workspaces));
+  if (!tsv.hasSection("mantidworkspaces")) {
+    return;
+  }
+  // There should only be one of these, so we only read the first.
+  std::string workspacesText = tsv.sections("mantidworkspaces").front();
+
+  const auto parsedNames = parseWsNames(workspacesText);
+
+  if (!m_projectRecovery) {
+    loadWorkspacesIntoMantid(parsedNames);
+  }
+
+  auto &adsInstance = Mantid::API::AnalysisDataService::Instance();
+
+  // Check everything was loaded before continuing, as we might need to open a
+  // window
+  // for a workspace which did not load in
+  if (!adsInstance.doAllWsExist(parsedNames.at(ALL_WS))) {
+    QMessageBox::critical(window, "MantidPlot - Algorithm error",
+                          " The workspaces associated with this project "
+                          "could not be loaded. Aborting project loading.");
+    throw std::runtime_error(
+        "Failed to load all required workspaces. Aborting project loading.");
+  }
+
+  // Check there aren't any unexpected workspaces in project recovery mode
+  if (m_projectRecovery) {
+    // Convert to set for fast lookup
+    std::unordered_set<std::string> allWsNames(parsedNames.at(ALL_WS).begin(),
+                                               parsedNames.at(ALL_WS).end());
+
+    if (parsedNames.find(ALL_GROUP_NAMES) != parsedNames.cend()) {
+      // Add group names to the list of accepted names
+      allWsNames.insert(parsedNames.at(ALL_GROUP_NAMES).begin(),
+                        parsedNames.at(ALL_GROUP_NAMES).end());
+    }
+
+    const auto loadedWs = adsInstance.getObjectNames();
+    for (const std::string &adsWsName : loadedWs) {
+      if (allWsNames.find(adsWsName) == allWsNames.end()) {
+        // Wasn't originally in project recovery, so delete from ADS
+        adsInstance.remove(adsWsName);
+      }
+    }
   }
 }
 
@@ -204,7 +308,7 @@ void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv) {
 void ProjectSerialiser::loadWindows(const TSVSerialiser &tsv,
                                     const int fileVersion) {
   auto keys = WindowFactory::Instance().getKeys();
-  // Work around for graph-table dependance. Graph3D's currently rely on
+  // Work around for graph-table dependence. Graph3D's currently rely on
   // looking up tables. These must be loaded before the graphs, so work around
   // by loading in reverse alphabetical order.
   std::reverse(keys.begin(), keys.end());
@@ -288,9 +392,14 @@ bool ProjectSerialiser::canWriteToProject(QFile *fileHandle,
                                           const QString &projectName) {
   // check if we can write
   if (!fileHandle->open(QIODevice::WriteOnly)) {
-    QMessageBox::about(window, window->tr("MantidPlot - File save error"),
-                       window->tr("The file: <br><b>%1</b> is opened in "
-                                  "read-only mode").arg(projectName)); // Mantid
+    if (m_projectRecovery) {
+      g_log.error("Failed to open file at the following path:\n" +
+                  projectName.toStdString());
+    } else {
+      QMessageBox::about(window, window->tr("MantidPlot - File save error"),
+                         window->tr("The file: <br><b>%1</b> is opened in "
+                                    "read-only mode").arg(projectName));
+    }
     return false;
   }
   return true;
@@ -384,7 +493,8 @@ QString ProjectSerialiser::saveFolderHeader(Folder *folder,
 
 /**
  * Generate the subfolder and subwindow records for the current folder.
- * This method will recursively convert subfolders to their text representation
+ * This method will recursively convert subfolders to their text
+ * representation
  *
  * @param app :: the current application window instance
  * @param folder :: the folder to generate the text for.
@@ -467,8 +577,14 @@ QString ProjectSerialiser::saveWorkspaces() {
 
         wsNames += ",";
         wsNames += QString::fromStdString(secondLevelItems[j]);
-        std::string fileName(workingDir + "//" + secondLevelItems[j] + ".nxs");
-        window->mantidUI->savedatainNexusFormat(fileName, secondLevelItems[j]);
+
+        // Do not save out grouped workspaces in project recovery mode
+        if (!m_projectRecovery) {
+          const std::string fileName(workingDir + "//" + secondLevelItems[j] +
+                                     ".nxs");
+          window->mantidUI->savedatainNexusFormat(fileName,
+                                                  secondLevelItems[j]);
+        }
       }
     } else {
       // check whether the user wants to save this workspace
@@ -478,8 +594,12 @@ QString ProjectSerialiser::saveWorkspaces() {
       wsNames += "\t";
       wsNames += wsName;
 
-      std::string fileName(workingDir + "//" + wsName.toStdString() + ".nxs");
-      window->mantidUI->savedatainNexusFormat(fileName, wsName.toStdString());
+      // Skip saving in project recovery mode
+      if (!m_projectRecovery) {
+        const std::string fileName(workingDir + "//" + wsName.toStdString() +
+                                   ".nxs");
+        window->mantidUI->savedatainNexusFormat(fileName, wsName.toStdString());
+      }
     }
 
     // update listening progress bars
@@ -492,7 +612,8 @@ QString ProjectSerialiser::saveWorkspaces() {
 /**
  * Save additional windows that are not MdiSubWindows
  *
- * This includes windows such as the slice viewer, VSI, and the spectrum viewer
+ * This includes windows such as the slice viewer, VSI, and the spectrum
+ * viewer
  *
  * @return a string representing the sections of the
  */
@@ -637,113 +758,96 @@ void ProjectSerialiser::openScriptWindow(const QStringList &files) {
  *
  * @param s :: the string of characters loaded from a Mantid project file
  */
-void ProjectSerialiser::populateMantidTreeWidget(const QString &lines) {
-  QStringList list = lines.split("\t");
-  QStringList::const_iterator line = list.begin();
+void ProjectSerialiser::loadWorkspacesIntoMantid(
+    const groupNameToWsNamesT &workspaces) {
+  for (auto &allWsNames : workspaces.at(ALL_WS)) {
+    loadWsToMantidTree(allWsNames);
+  }
 
-  std::vector<std::string> expectedWorkspaces;
-
-  for (++line; line != list.end(); ++line) {
-    if ((*line)
-            .contains(',')) // ...it is a group and more work needs to be done
-    {
-      // Format of string is "GroupName, Workspace, Workspace, Workspace, ....
-      // and so on "
-      QStringList groupWorkspaces = (*line).split(',');
-      std::string groupName = groupWorkspaces[0].toStdString();
-      std::vector<std::string> inputWsVec;
-      // Work through workspaces, load into Mantid and then push into
-      // vectorgroup (ignore group name, start at 1)
-      for (int i = 1; i < groupWorkspaces.size(); i++) {
-        std::string wsName = groupWorkspaces[i].toStdString();
-        expectedWorkspaces.push_back(wsName);
-        loadWsToMantidTree(wsName);
-        inputWsVec.push_back(wsName);
-      }
-
-      try {
-        bool smallGroup(inputWsVec.size() < 2);
-        if (smallGroup) // if the group contains less than two items...
-        {
-          // ...create a new workspace and then delete it later on (group
-          // workspace requires two workspaces in order to run the alg)
-          Mantid::API::IAlgorithm_sptr alg =
-              Mantid::API::AlgorithmManager::Instance().create(
-                  "CreateWorkspace", 1);
-          alg->setProperty("OutputWorkspace", "boevsMoreBoevs");
-          alg->setProperty<std::vector<double>>("DataX",
-                                                std::vector<double>(2, 0.0));
-          alg->setProperty<std::vector<double>>("DataY",
-                                                std::vector<double>(2, 0.0));
-          // execute the algorithm
-          alg->execute();
-          // name picked because random and won't ever be used.
-          inputWsVec.emplace_back("boevsMoreBoevs");
-        }
-
-        // Group the workspaces as they were when the project was saved
-        std::string algName("GroupWorkspaces");
-        Mantid::API::IAlgorithm_sptr groupingAlg =
-            Mantid::API::AlgorithmManager::Instance().create(algName, 1);
-        groupingAlg->initialize();
-        groupingAlg->setProperty("InputWorkspaces", inputWsVec);
-        groupingAlg->setPropertyValue("OutputWorkspace", groupName);
-        // execute the algorithm
-        groupingAlg->execute();
-
-        if (smallGroup) {
-          // Delete the temporary workspace used to create a group of 1 or less
-          // (currently can't have group of 0)
-          Mantid::API::AnalysisDataService::Instance().remove("boevsMoreBoevs");
-        }
-      }
-      // Error catching for algorithms
-      catch (std::invalid_argument &) {
-        QMessageBox::critical(window, "MantidPlot - Algorithm error",
-                              " Error in Grouping Workspaces");
-      } catch (Mantid::Kernel::Exception::NotFoundError &) {
-        QMessageBox::critical(window, "MantidPlot - Algorithm error",
-                              " Error in Grouping Workspaces");
-      } catch (std::runtime_error &) {
-        QMessageBox::critical(window, "MantidPlot - Algorithm error",
-                              " Error in Grouping Workspaces");
-      } catch (std::exception &) {
-        QMessageBox::critical(window, "MantidPlot - Algorithm error",
-                              " Error in Grouping Workspaces");
-      }
-    } else // ...not a group so just load the workspace
-    {
-      std::string wsName = line->toStdString();
-      expectedWorkspaces.push_back(wsName);
-      loadWsToMantidTree(wsName);
+  // Next group up the workspaces
+  for (auto &groupNameAndWorkspaces : workspaces) {
+    if (groupNameAndWorkspaces.first == ALL_WS ||
+        groupNameAndWorkspaces.first == ALL_GROUP_NAMES) {
+      // Skip this special key holding all workspaces
+      continue;
     }
 
-    // Check everything was loaded before continuing, as we might need to open a
-    // window
-    // for a workspace which did not load in
-    if (!Mantid::API::AnalysisDataService::Instance().doAllWsExist(
-            expectedWorkspaces)) {
+    // Force a copy so we can append in the case where there is 1 element
+    auto workspaceList = groupNameAndWorkspaces.second;
+
+    // name picked because random and won't ever be used.
+    std::string unusedName = "boevsMoreBoevs";
+
+    try {
+      bool smallGroup(workspaceList.size() < 2);
+
+      if (smallGroup) // if the group contains less than two items...
+      {
+        // ...create a new workspace and then delete it later on (group
+        // workspace requires two workspaces in order to run the alg)
+        Mantid::API::IAlgorithm_sptr alg =
+            Mantid::API::AlgorithmManager::Instance().create("CreateWorkspace",
+                                                             1);
+        alg->setProperty("OutputWorkspace", "boevsMoreBoevs");
+        alg->setProperty<std::vector<double>>("DataX",
+                                              std::vector<double>(2, 0.0));
+        alg->setProperty<std::vector<double>>("DataY",
+                                              std::vector<double>(2, 0.0));
+        // execute the algorithm
+        alg->execute();
+
+        workspaceList.push_back(unusedName);
+      }
+
+      // Group the workspaces as they were when the project was saved
+      std::string algName("GroupWorkspaces");
+      Mantid::API::IAlgorithm_sptr groupingAlg =
+          Mantid::API::AlgorithmManager::Instance().create(algName, 1);
+      groupingAlg->initialize();
+      // This is the workspace list, but we cannot pass in a reference
+      groupingAlg->setProperty("InputWorkspaces", workspaceList);
+      groupingAlg->setPropertyValue("OutputWorkspace",
+                                    groupNameAndWorkspaces.first);
+      // execute the algorithm
+      groupingAlg->execute();
+
+      if (smallGroup) {
+        // Delete the temporary workspace used to create a group of 1 or less
+        // (currently can't have group of 0)
+        Mantid::API::AnalysisDataService::Instance().remove(unusedName);
+      }
+
+    }
+    // Error catching for algorithms
+    catch (std::invalid_argument &) {
       QMessageBox::critical(window, "MantidPlot - Algorithm error",
-                            " The workspaces associated with this project "
-                            "could not be loaded. Aborting project loading.");
-      throw std::runtime_error(
-          "Failed to load all required workspaces. Aborting project loading.");
+                            " Error in Grouping Workspaces");
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
+      QMessageBox::critical(window, "MantidPlot - Algorithm error",
+                            " Error in Grouping Workspaces");
+    } catch (std::runtime_error &) {
+      QMessageBox::critical(window, "MantidPlot - Algorithm error",
+                            " Error in Grouping Workspaces");
+    } catch (std::exception &) {
+      QMessageBox::critical(window, "MantidPlot - Algorithm error",
+                            " Error in Grouping Workspaces");
     }
   }
 }
 
 /**
-   * Load a workspace into Mantid from a project directory
-   *
-   * @param wsName :: the name of the workspace to load
-   */
+ * Load a workspace into Mantid from a project directory
+ *
+ * @param wsName :: the name of the workspace to load
+ */
 void ProjectSerialiser::loadWsToMantidTree(const std::string &wsName) {
   if (wsName.empty()) {
     throw std::runtime_error("Workspace Name not found in project file ");
   }
   std::string fileName(window->workingDir.toStdString() + "/" + wsName);
   fileName.append(".nxs");
-  window->mantidUI->loadWSFromFile(wsName, fileName);
+  if (!m_projectRecovery)
+    window->mantidUI->loadWSFromFile(wsName, fileName);
 }
 
 /**
@@ -801,7 +905,8 @@ void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
 }
 
 /**
- * Create a new QMdiSubWindow which will become the parent of the Vates window.
+ * Create a new QMdiSubWindow which will become the parent of the Vates
+ * window.
  *
  * @return  a new handle to a QMdiSubWindow instance
  */
@@ -823,4 +928,39 @@ QMdiSubWindow *ProjectSerialiser::setupQMdiSubWindow() const {
 bool ProjectSerialiser::contains(const std::vector<std::string> &vec,
                                  const std::string &value) {
   return std::find(vec.cbegin(), vec.cend(), value) != vec.cend();
+}
+
+groupNameToWsNamesT
+MantidQt::API::ProjectSerialiser::parseWsNames(const std::string &wsNames) {
+  groupNameToWsNamesT allWsNames;
+  auto unparsedWorkspaces = splitByDelim(wsNames, '\t');
+
+  // The first element is removed since it says "WorkspaceNames"
+  unparsedWorkspaces.erase(unparsedWorkspaces.begin());
+
+  const char groupWorkspaceChar = ',';
+  for (const auto &workspaceName : unparsedWorkspaces) {
+
+    if (workspaceName.find(groupWorkspaceChar) == std::string::npos) {
+      // Normal workspace
+      allWsNames[ALL_WS].push_back(workspaceName);
+      continue;
+    }
+
+    // Group workspace
+    auto groupWorkspaceElements =
+        splitByDelim(workspaceName, groupWorkspaceChar);
+
+    // First element is the group name
+    auto groupName = groupWorkspaceElements.begin();
+    auto groupMember = groupName + 1;
+
+    for (auto end = groupWorkspaceElements.end(); groupMember != end;
+         ++groupMember) {
+      allWsNames[*groupName].push_back(*groupMember);
+      allWsNames[ALL_GROUP_NAMES].push_back(*groupName);
+    }
+  }
+
+  return allWsNames;
 }

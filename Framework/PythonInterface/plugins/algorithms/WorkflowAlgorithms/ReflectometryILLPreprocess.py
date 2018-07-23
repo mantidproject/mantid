@@ -4,11 +4,11 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, ITableWorkspaceProperty,
                         MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, DeltaEModeType, Direction, FloatArrayBoundedValidator, FloatArrayLengthValidator,
-                           FloatArrayProperty, IntArrayLengthValidator, IntArrayBoundedValidator, IntArrayProperty,
-                           IntBoundedValidator, Property, StringListValidator, UnitConversion)
+from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayLengthValidator,
+                           IntArrayLengthValidator, IntArrayBoundedValidator, IntArrayProperty,
+                           IntBoundedValidator, Property, StringListValidator)
 from mantid.simpleapi import (AddSampleLog, CalculatePolynomialBackground, CloneWorkspace, ConvertUnits,
-                              CreateEmptyTableWorkspace, CropWorkspace, Divide, ExtractMonitors, Fit,
+                              CreateEmptyTableWorkspace, Divide, ExtractMonitors, Fit,
                               Integration, LoadILLReflectometry, MergeRuns, Minus, mtd, NormaliseToMonitor,
                               RebinToWorkspace, Scale, Transpose)
 import numpy
@@ -35,8 +35,7 @@ class Prop:
     RUN = 'Run'
     SLIT_NORM = 'SlitNormalisation'
     SUBALG_LOGGING = 'SubalgorithmLogging'
-    WATER_REFERENCE = 'WaterReference'
-    WAVELENGTH_RANGE = 'WavelengthRange'
+    WATER_REFERENCE = 'WaterWorkspace'
 
 
 class BkgMethod:
@@ -121,7 +120,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         ws = self._subtractFlatBkg(ws, beamPosWS)
 
-        ws = self._applyWavelengthRange(ws, beamPosWS)
         self._cleanup.cleanup(beamPosWS)
 
         ws = self._convertToWavelength(ws)
@@ -193,10 +191,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              defaultValue=FluxNormMethod.TIME,
                              validator=StringListValidator([FluxNormMethod.TIME, FluxNormMethod.MONITOR, FluxNormMethod.OFF]),
                              doc='Neutron flux normalisation method.')
-        self.declareProperty(FloatArrayProperty(Prop.WAVELENGTH_RANGE,
-                                                values=[0, Property.EMPTY_DBL],
-                                                validator=twoNonnegativeFloats),
-                             doc='The wavelength bounds of the output workspace.')
         self.declareProperty(IntArrayProperty(Prop.FOREGROUND_HALF_WIDTH,
                                               validator=maxTwoNonnegativeInts),
                              doc='Number of foreground pixels at lower and higher angles from the centre pixel.')
@@ -234,18 +228,15 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             issues[Prop.RUN] = "Provide at least an input file or alternatively an input workspace."
         if self.getProperty(Prop.BKG_METHOD).value != BkgMethod.OFF:
             if self.getProperty(Prop.LOW_BKG_WIDTH).value == 0 and self.getProperty(Prop.HIGH_BKG_WIDTH).value == 0:
-                issues[Prop.BKG_METHOD] = 'Cannot calculate flat background if both upper and lower background widths are zero.'
+                issues[Prop.BKG_METHOD] = "Cannot calculate flat background if both upper and lower background widths are zero."
             if not self.getProperty(Prop.INPUT_WS).isDefault and self.getProperty(Prop.BEAM_POS_WS).isDefault \
                     and self.getProperty(Prop.BEAM_CENTRE).isDefault:
-                issues[Prop.BEAM_POS_WS] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
-                issues[Prop.BEAM_CENTRE] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
-        wRange = self.getProperty(Prop.WAVELENGTH_RANGE).value
-        if len(wRange) == 2 and wRange[1] < wRange[0]:
-            issues[Prop.WAVELENGTH_RANGE] = 'Upper limit is smaller than the lower limit.'
+                issues[Prop.BEAM_POS_WS] = "Cannot subtract flat background without knowledge of peak position/foreground centre."
+                issues[Prop.BEAM_CENTRE] = "Cannot subtract flat background without knowledge of peak position/foreground centre."
         if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
             beamCentre = self.getProperty(Prop.BEAM_CENTRE).value
             if beamCentre < 0 or beamCentre > 255:
-                issues[Prop.BEAM_CENTRE] = 'Value should be between 0 and 255.'
+                issues[Prop.BEAM_CENTRE] = "Value should be between 0 and 255."
         return issues
 
     def _addForegroundToLogs(self, ws, beamPosWS):
@@ -279,20 +270,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             NumberType='Int',
             EnableLogging=self._subalgLogging)
         return ws
-
-    def _applyWavelengthRange(self, ws, beamPosWS):
-        """Cut wavelengths outside the wavelength range from a TOF workspace."""
-        wRange = self.getProperty(Prop.WAVELENGTH_RANGE).value
-        xMin = self._wavelengthToTOF(wRange[0], ws, self._foregroundCentre(beamPosWS))
-        xMax = self._wavelengthToTOF(wRange[1], ws, self._foregroundCentre(beamPosWS))
-        croppedWSName = self._names.withSuffix('cropped')
-        croppedWS = CropWorkspace(InputWorkspace=ws,
-                                  OutputWorkspace=croppedWSName,
-                                  XMin=xMin,
-                                  XMax=xMax,
-                                  EnableLogging=self._subalgLogging)
-        self._cleanup.cleanup(ws)
-        return croppedWS
 
     def _convertToWavelength(self, ws):
         """Convert the X units of ws to wavelength."""
@@ -455,7 +432,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                      XUnit='TimeOfFlight',
                                      EnableLogging=self._subalgLogging)
                 rawWS = mtd[rawWSName]
-                mergedWS = MergeRuns(InputWorkspace=[mergedWS, rawWS],
+                mergedWS = MergeRuns(InputWorkspaces=[mergedWS, rawWS],
                                      OutputWorkspace=mergedWSName,
                                      EnableLogging=self._subalgLogging)
                 if i == 0:
@@ -591,17 +568,5 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self._cleanup.cleanup(rebinnedWaterWS)
         self._cleanup.cleanup(ws)
         return calibratedWS
-
-    def _wavelengthToTOF(self, x, ws, beamCentreIndex):
-        """Return x converted from wavelength to time of flight units."""
-        instrument = ws.getInstrument()
-        samplePos = instrument.getSample().getPos()
-        sourcePos = instrument.getSource().getPos()
-        l1 = (samplePos - sourcePos).norm()
-        centreDet = ws.getDetector(beamCentreIndex)
-        detPos = centreDet.getPos()
-        l2 = (detPos - samplePos).norm()
-        return UnitConversion.run('Wavelength', 'TOF' , x, l1, l2, 0., DeltaEModeType.Elastic, 0.)
-
 
 AlgorithmFactory.subscribe(ReflectometryILLPreprocess)

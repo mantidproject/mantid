@@ -87,7 +87,7 @@ public:
       }
     }
 
-    // determin tof max supported by the workspace
+    // determine tof max supported by the workspace
     size_t maxIndex = Y.size() - 1;
     for (; maxIndex > minIndex; --maxIndex) {
       if (isNonZero(Y[maxIndex])) {
@@ -100,36 +100,17 @@ public:
   void setPositions(const std::vector<double> &peaksInD,
                     const std::vector<double> &peaksInDWindows,
                     std::function<double(double)> toTof) {
+    // clear out old values
+    inDPos.clear();
+    inTofPos.clear();
+    inTofWindows.clear();
 
-    const std::size_t numOrig = peaksInD.size();
-    for (std::size_t i = 0; i < numOrig; ++i) {
-      const double centre = toTof(peaksInD[i]);
-      if (centre < tofMax && centre > tofMin) {
-        inDPos.push_back(peaksInD[i]);
-        inTofPos.push_back(peaksInD[i]);
-        inTofWindows.push_back(peaksInDWindows[2 * i]);
-        inTofWindows.push_back(peaksInDWindows[2 * i + 1]);
-      }
-    }
-    std::transform(inTofPos.begin(), inTofPos.end(), inTofPos.begin(), toTof);
-    std::transform(inTofWindows.begin(), inTofWindows.end(),
-                   inTofWindows.begin(), toTof);
-  }
+    // assign things
+    inDPos.assign(peaksInD.begin(), peaksInD.end());
+    inTofPos.assign(peaksInD.begin(), peaksInD.end());
+    inTofWindows.assign(peaksInDWindows.begin(), peaksInDWindows.end());
 
-  // (NEW) Pete: I don't need to get rid of peaks out of TOF range because
-  // FitPeaks checks whether a given peak is in range or not.  I'd rather
-  // to have some peaks out of range than a ragged workspace
-  void calculatePositionWindowInTOF(const std::vector<double> &peaksInD,
-                                    const std::vector<double> &peaksInDWindows,
-                                    std::function<double(double)> toTof) {
-    const std::size_t numOrig = peaksInD.size();
-    for (std::size_t i = 0; i < numOrig; ++i) {
-      // const double centre = toTof(peaksInD[i]);
-      inDPos.push_back(peaksInD[i]);
-      inTofPos.push_back(peaksInD[i]);
-      inTofWindows.push_back(peaksInDWindows[2 * i]);
-      inTofWindows.push_back(peaksInDWindows[2 * i + 1]);
-    }
+    // convert the bits that matter to TOF
     std::transform(inTofPos.begin(), inTofPos.end(), inTofPos.begin(), toTof);
     std::transform(inTofWindows.begin(), inTofWindows.end(),
                    inTofWindows.begin(), toTof);
@@ -486,7 +467,7 @@ void PDCalibration::exec() {
 
   // run and get the result
   algFitPeaks->executeAsChildAlg();
-  g_log.information("finished `FitPeaks");
+  g_log.information("finished FitPeaks");
 
   // get the fit result
   API::ITableWorkspace_sptr fittedTable =
@@ -503,7 +484,7 @@ void PDCalibration::exec() {
         "The number of rows in OutputPeakParametersWorkspace is not correct!");
 
   // END-OF (FitPeaks)
-  std::string backgroundType = getProperty("BackgroundType");
+  const std::string backgroundType = getPropertyValue("BackgroundType");
 
   API::Progress prog(this, 0.7, 1.0, NUMHIST);
 
@@ -1226,8 +1207,7 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
     // calculatePositionWindowInTOF
     PDCalibration::FittedPeaks peaks(dataws, static_cast<size_t>(iws));
     auto toTof = getDSpacingToTof(peaks.detid);
-    peaks.calculatePositionWindowInTOF(m_peaksInDspacing, windowsInDSpacing,
-                                       toTof);
+    peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, toTof);
     peak_pos_ws->setPoints(iws, peaks.inTofPos);
     peak_window_ws->setPoints(iws, peaks.inTofWindows);
     prog.report();
