@@ -52,7 +52,6 @@ set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 # Include Eigen as an external project
 ###########################################################################
 include ( Eigen )
-include ( Abseil )
 
 ###########################################################################
 # Bootstrap any dependencies
@@ -86,7 +85,7 @@ endif ()
 # Cross-platform setup
 ###########################################################################
 include ( CommonSetup )
-
+include ( Abseil )
 ###########################################################################
 # Find OpenGL
 ###########################################################################
