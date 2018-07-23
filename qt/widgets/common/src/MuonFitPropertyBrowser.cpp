@@ -1252,18 +1252,17 @@ void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
       boost::dynamic_pointer_cast<IFunction>(m_compositeFunction);
   if (old->nParams() > 0) {
     ConvertFitFunctionForMuonTFAsymmetry(enabled);
-	// Show or hide the TFAsymmetry fit
-	if (enabled) {
-		m_settingsGroup->property()->addSubProperty(m_keepNorm);
-	}
-	else {
-		m_settingsGroup->property()->removeSubProperty(m_keepNorm);
-	}
-  } else if (enabled ) {
+    // Show or hide the TFAsymmetry fit
+    if (enabled) {
+      m_settingsGroup->property()->addSubProperty(m_keepNorm);
+    } else {
+      m_settingsGroup->property()->removeSubProperty(m_keepNorm);
+    }
+  } else if (enabled) {
     g_log.warning("No fitting function provided. Please add a function");
     // will update when user clicks elsewhere
     m_boolManager->setValue(m_TFAsymmMode, false);
-  } 
+  }
 }
 std::string MuonFitPropertyBrowser::TFExtension() const {
 
