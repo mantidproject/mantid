@@ -79,7 +79,7 @@ package and install it:
 
 where ``X.Y.Z`` should be replaced with the version that was downloaded.
 
-if you wish to setup eclipse for use devolping mantid, then instructions can be found here. :ref:`Eclipse`
+if you wish to setup eclipse for use developing mantid, then instructions can be found here. :ref:`Eclipse`
 
 OSX
 ---
