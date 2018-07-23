@@ -75,41 +75,45 @@ void export_ComponentInfo() {
 
       .def("detectorsInSubtree", createListForDetectorsInSubtree,
            (arg("self"), arg("index")),
-           "Returns a list of detectors in the subtree.")
+           "Returns a list of detectors in the subtree for the component "
+           "identified by 'index'.")
 
       .def("componentsInSubtree", createListForComponentsInSubtree,
            (arg("self"), arg("index")),
-           "Returns a list of components in the subtree.")
+           "Returns a list of components in the subtree for the component "
+           "identified by 'index'.")
 
       .def("position", position, (arg("self"), arg("index")),
-           "Returns the absolute position of the component at the given index.")
+           "Returns the absolute position of the component identified by "
+           "'index'.")
 
       .def("rotation", rotation, (arg("self"), arg("index")),
-           "Returns the absolute rotation of the component at the given index.")
+           "Returns the absolute rotation of the component identified by "
+           "'index'.")
 
       .def("relativePosition", &ComponentInfo::relativePosition,
            (arg("self"), arg("index")),
-           "Returns the absolute relative position of the component at the "
-           "given index.")
+           "Returns the absolute relative position of the component identified "
+           "by 'index'.")
 
       .def("relativeRotation", &ComponentInfo::relativeRotation,
            (arg("self"), arg("index")),
-           "Returns the absolute relative rotation of the component at the "
-           "given index.")
+           "Returns the absolute relative rotation of the component identified "
+           "by 'index'.")
 
       .def("setPosition", setPosition,
            (arg("self"), arg("index"), arg("newPosition")),
-           "Set the absolute position of the component at the given index.")
+           "Set the absolute position of the component identified by 'index'.")
 
       .def("setRotation", setRotation,
            (arg("self"), arg("index"), arg("newRotation")),
-           "Set the absolute rotation of the component at the given index.")
+           "Set the absolute rotation of the component identified by 'index'.")
 
       .def("hasSource", &ComponentInfo::hasSource, arg("self"),
-           "Returns whether a source is present.")
+           "Returns True if a source is present.")
 
       .def("hasSample", &ComponentInfo::hasSample, arg("self"),
-           "Returns whether a sample is present.")
+           "Returns True if a sample is present.")
 
       .def("source", &ComponentInfo::source, arg("self"),
            "Returns the source component.")
@@ -124,16 +128,19 @@ void export_ComponentInfo() {
            "Returns the sample position.")
 
       .def("hasParent", &ComponentInfo::hasParent, (arg("self"), arg("index")),
-           "Returns whether a component with the given index has a parent.")
+           "Returns True only if the component identified by 'index' has a "
+           "parent component.")
 
       .def("parent", &ComponentInfo::parent, (arg("self"), arg("index")),
-           "Returns the parent component of the component with the given index")
+           "Returns the parent component of the component identified by "
+           "'index'.")
 
       .def("children", createListForComponentChildren,
            (arg("self"), arg("index")),
-           "Returns a list of children for the component with the given index.")
+           "Returns a list of child components for the component identified by "
+           "'index'.")
 
       .def("name", &ComponentInfo::name, (arg("self"), arg("index")),
            return_value_policy<copy_const_reference>(),
-           "Returns the name of the component at the given index.");
+           "Returns the name of the component identified by 'index'.");
 }
