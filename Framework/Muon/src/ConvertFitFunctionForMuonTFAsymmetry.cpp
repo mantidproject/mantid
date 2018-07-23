@@ -248,15 +248,23 @@ IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::extractUserFunction(
     const IFunction_sptr &TFFuncIn) {
   // N(1+g) + exp
   auto TFFunc = boost::dynamic_pointer_cast<CompositeFunction>(TFFuncIn);
-
+  if (TFFunc == nullptr) {
+	  std::runtime_error("Input function is not of the correct form");
+  }
   // getFunction(0) -> N(1+g)
 
   TFFunc =
       boost::dynamic_pointer_cast<CompositeFunction>(TFFunc->getFunction(0));
+  if (TFFunc == nullptr) {
+	  std::runtime_error("Input function is not of the correct form");
+  }
   // getFunction(1) -> 1+g
 
   TFFunc =
       boost::dynamic_pointer_cast<CompositeFunction>(TFFunc->getFunction(1));
+  if (TFFunc == nullptr) {
+	  std::runtime_error("Input function is not of the correct form");
+  }
   // getFunction(1) -> g
   return TFFunc->getFunction(1);
 }
