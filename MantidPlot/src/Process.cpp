@@ -7,6 +7,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <QCoreApplication>
+#include <QFileInfo>
 
 namespace {
 
@@ -63,7 +64,6 @@ PyObjectNewReference call(PyObject *source, const char *name) {
   if (result)
     return PyObjectNewReference(result);
   else {
-    PyErr_Print();
     throw std::runtime_error(std::string("Process: Error calling function ") +
                              name);
   }
@@ -76,10 +76,11 @@ PyObjectNewReference psutil() {
   if (auto process = PyImport_ImportModule("psutil")) {
     return PyObjectNewReference(process);
   } else {
-    PyErr_Clear();
+    PyErr_Print();
     throw std::runtime_error("Python module psutil cannot be imported.");
   }
 }
+
 } // namespace
 
 namespace Process {
@@ -102,20 +103,28 @@ bool isAnotherInstanceRunning() { return !otherInstancePIDs().empty(); }
 std::vector<int64_t> otherInstancePIDs() {
   ScopedPythonGIL lock;
   const int64_t ourPID(QCoreApplication::applicationPid());
-  const PyObjectNewReference ourName(
-      FROM_CSTRING(QCoreApplication::applicationName().toLatin1().data()));
+  const PyObjectNewReference ourAppFilename(
+      FROM_CSTRING(QFileInfo(QCoreApplication::applicationFilePath())
+                       .fileName()
+                       .toLatin1()
+                       .data()));
   auto psutilModule(psutil());
   auto processIter(call(psutilModule.ptr(), "process_iter"));
 
   std::vector<int64_t> otherPIDs;
   PyObject *item(nullptr);
   while ((item = PyIter_Next(processIter.ptr()))) {
-    auto name = call(item, "name");
-    if (PyObject_RichCompareBool(name.ptr(), ourName.ptr(), Py_EQ)) {
-      auto pid = PyLong_AsLong(attr(item, "pid").ptr());
-      if (pid != ourPID) {
-        otherPIDs.emplace_back(pid);
+    try {
+      auto name = call(item, "name");
+      if (PyObject_RichCompareBool(ourAppFilename.ptr(), name.ptr(), Py_EQ)) {
+        auto pid = PyLong_AsLong(attr(item, "pid").ptr());
+        if (pid != ourPID) {
+          otherPIDs.emplace_back(pid);
+        }
       }
+    } catch (std::runtime_error &) {
+      // zombie processes on macOS can causes issues retrieving the name
+      // skip it
     }
     Py_DECREF(item);
   }

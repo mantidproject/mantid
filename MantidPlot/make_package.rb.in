@@ -326,6 +326,10 @@ end
 path = "/Library/Python/2.7/site-packages"
 directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtawesome", "qtpy",
                "certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile","yaml"]
+
+system("chmod +w #{path}/psutil/_psutil_osx.so")
+system("chmod +w #{path}/psutil/_psutil_posix.so")
+
 directories.each do |directory|
   addPythonLibrary("#{path}/#{directory}","Contents/MacOS/")
 end
