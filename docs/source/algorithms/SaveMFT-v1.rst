@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm saves a workspace containing a single spectrum in ASCII format with .mft file name extension and can be used by software like Motofit.
+This algorithm saves the first spectrum of a workspace in ASCII format with .mft file name extension and can be used by software like Motofit.
 The file contains minimum 21 header lines, an empty line separating the columns of data described by a header line informing about the quantities which are q, refl, refl_error and eventually q_res (FWHM), if present.
 It is especially useful for saving reflectometry reduction data.
 A file can be loaded back into Mantid by SaveAscii, which will not have an instrument defined and `Sample Logs` are missing.
@@ -26,7 +26,7 @@ Usage
 
 **Example - Save a workspace in MFT ASCII**
 
-.. testcode:: SaveMFT_general_usages
+.. testcode:: SaveMFT_general_usage
 
     # import the os path libraries for directory functions
     import os
@@ -50,11 +50,12 @@ Usage
     # Save with mft extension and using the option LogList: Title will be added to an required header line and d will be additionally added which increases the number of lines by 1.
     SaveMFT(InputWorkspace=ws, Filename=file, LogList=['Title', 'd'])
 
+.. testoutput:: SaveMFT_general_usage
     if os.path.exists(file):
       myFile = open(file, 'r')
       print myFile.read()
 
-.. testcleanup:: SaveMFT_general_usages
+.. testcleanup:: SaveMFT_general_usage
 
     # Delete file
     os.remove(file)

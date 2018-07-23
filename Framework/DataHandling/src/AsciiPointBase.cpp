@@ -52,7 +52,8 @@ void AsciiPointBase::exec() {
       Poco::File(filename).remove();
     } catch (...) { // maybe we do not have the permission to delete the file
       g_log.error("Error deleting file " + filename);
-      throw Kernel::Exception::FileError("Unable to delete existing file: ", filename);
+      throw Kernel::Exception::FileError("Unable to delete existing file: ",
+                                         filename);
     }
   }
   std::ofstream file(filename.c_str());

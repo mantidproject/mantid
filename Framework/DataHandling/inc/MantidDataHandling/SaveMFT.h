@@ -35,18 +35,24 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SaveMFT : public API::Algorithm {
 public:
-  /// Algorithm's name
+  /// Algorithm's name. @see Algorithm::name
   const std::string name() const override { return "SaveMFT"; }
-  /// Algorithm's version
+  /// Algorithm's version. @see Algorithm::version
   int version() const override { return 1; }
-  /// Summary of algorithms purpose
+  /// Algorithm's category for identification. @see Algorithm::category
+  const std::string category() const override {
+    return "DataHandling\\Text;ILL\\Reflectometry;Reflectometry";
+  }
+  /// Summary of algorithms purpose. @see Algorithm::summary
   const std::string summary() const override {
     return "Saves a 2D workspace to a ascii file of format mft";
   }
-  /// Algorithm's with similar purpose
+  /// Algorithm's with similar purpose. @see Algorithm::seeAlso
   const std::vector<std::string> seeAlso() const override {
     return {"SaveAscii"};
   }
+  /// Cross-check properties with each other. @see IAlgorithm::validateInputs
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// Algorithm initialisation

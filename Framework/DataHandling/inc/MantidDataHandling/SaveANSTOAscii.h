@@ -35,7 +35,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SaveANSTOAscii : public DataHandling::AsciiPointBase {
+class DLLExport SaveANSTOAscii : public DataHandling::AsciiPointBase,
+                                 public API::DeprecatedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveANSTOAscii"; }

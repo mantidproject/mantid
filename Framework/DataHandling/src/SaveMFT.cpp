@@ -45,6 +45,20 @@ void SaveMFT::init() {
                   "Wether to write header lines.");
 }
 
+/// Input validation
+std::map<std::string, std::string> SaveMFT::validateInputs() {
+  std::map<std::string, std::string> issues;
+  m_ws = getProperty("InputWorkspace");
+  if (!m_ws)
+    issues["InputWorkspace"] = "Cannot treat InputWorkspace";
+  try {
+    m_length = m_ws->y(0).size();
+  } catch (std::range_error) {
+    issues["InputWorkspace"] = "InputWorkspace does not contain data";
+  }
+  return issues;
+}
+
 /// Write data to file
 void SaveMFT::data() {
   m_file << std::scientific;
@@ -127,7 +141,8 @@ void SaveMFT::header() {
   }
   for (auto i = nlogs + 1; i < 10; ++i)
     writeInfo("Parameter ");
-  m_file << "Number of file format : " << "40\n";
+  m_file << "Number of file format : "
+         << "40\n";
   m_file << "Number of data points : " << m_length << '\n';
   m_file << '\n';
   m_file << std::setfill(' ') << std::setw(29) << "q" << std::setfill(' ')
@@ -142,33 +157,23 @@ void SaveMFT::header() {
 /// Execute the algorithm
 void SaveMFT::exec() {
   const std::string filename = getProperty("Filename");
-  g_log.information("Filename: " + filename);
   if (Poco::File(filename).exists()) {
     g_log.warning("File already exists and will be overwritten.");
     try {
       Poco::File(filename).remove();
     } catch (...) { // maybe we do not have the permission to delete the file
       g_log.error("Error deleting file " + filename);
-      throw Exception::FileError("Unable to delete existing m_file: ",
-                                 filename);
     }
   }
   m_file.open(filename);
   if (!m_file.is_open()) {
     g_log.error("Unable to create file: " + filename);
-    throw Exception::FileError("Unable to create file: ", filename);
   }
-  m_ws = getProperty("InputWorkspace");
-  if (!m_ws)
-    throw std::runtime_error("Cannot treat InputWorkspace");
-  try {
-    m_length = m_ws->y(0).size();
-  } catch (std::range_error) {
-    g_log.warning("InputWorkspace does not contain data");
-  }
+  g_log.information("Filename: " + filename);
   if (getPointerToProperty("Header")->isDefault())
     header();
   data();
+  m_file.close();
 }
 
 } // namespace DataHandling
