@@ -28,7 +28,6 @@ private:
   static Mantid::Types::Core::DateAndTime
   getLastModified(const QTreeWidgetItem *);
   std::size_t getMemorySize() const;
-  std::size_t getGroupMemorySize(Mantid::API::WorkspaceGroup_sptr group) const;
   int m_sortPos;
 };
 }
