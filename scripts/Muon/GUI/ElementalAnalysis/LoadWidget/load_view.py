@@ -13,7 +13,8 @@ class LoadView(QtGui.QWidget):
 
         self.spinbox = QtGui.QSpinBox(self)
         self.spinbox.setRange(0, 1e7)
-        self.last_spinbox_val = 0
+        self.spinbox.setValue(1)
+        self.last_spinbox_val = 1
 
         self.on_spinbox_val_changed(self.update_last_spinbox_val)
 
@@ -23,7 +24,7 @@ class LoadView(QtGui.QWidget):
         self.setLayout(self.grid)
 
     def update_last_spinbox_val(self, val):
-        if self.last_spinbox_val == val:
+        if abs(self.last_spinbox_val-val) <= 1:
             self.sig_spinbox_submit.emit(val)
         self.last_spinbox_val = val
 
