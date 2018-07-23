@@ -58,7 +58,7 @@ then scroll to the bottom of the file and add
 
 	export PATH=$PATH:/path/to/eclipse-cpp-folder/
 	
-then save and exit gedit.
+then save and exit gedit, and restart terminal.
 
 type eclipse into command line, it should open.
 
@@ -74,31 +74,26 @@ Building with CMake
 ######################
 1.
 from the pre-requisites section, you should already have installed/setup everything to the point where you are ready to run CMake, create two 
-folders, one will be for running in eclipse and debugging, whereas the other will be a quck test run build. Ensure that you do not name the debug
-folder "debug" as this will prevent eclipse from properly finding files within it.
+folders, one for debugging in eclipse "eclipseDebug" and one for quick test runs EclipseTest
 	
-Enter the debugging folder and run 
+Enter eclipseDebug and run 
 
 
 .. code-block:: sh
 	
-	cmake -G"Eclipse CDT4 - Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE -DMANTID_DATA_STORE=/path/to/MantidExternalData -DCXXTEST_ADD_PERFORMANCE=TRUE -DENABLE_WORKBENCH=TRUE ../mantid 
+	cmake -G"Eclipse CDT4 - Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE -DCXXTEST_ADD_PERFORMANCE=TRUE -DENABLE_WORKBENCH=TRUE /path/to/mantidrepository 
 
-
-
-Where /path/to/MantidExternalData should be a path in a home folder (not that the MantidExternalData folder does not yet have to exist) and 
-../mantid is the path to the git repository, if the git repository root, and the folder you are currently in are in the same directory then leave as is.
 	
-	
-then enter the testing folder and run
+  
+then enter eclipseTest and run
 
 .. code-block:: sh
 	
-	cmake -G"Ninja" -DCMAKE_BUILD_TYPE=Release -DMANTID_DATA_STORE=/users/bush/MantidExternalData -DCXXTEST_ADD_PERFORMANCE=TRUE -DENABLE_WORKBENCH=TRUE ../mantid 
+	cmake -G"Ninja" -DCMAKE_BUILD_TYPE=Release  -DCXXTEST_ADD_PERFORMANCE=TRUE -DENABLE_WORKBENCH=TRUE /path/to/mantidrepository
 	
 2.
 open eclipse, leaving your workspace as it is, then go to ``File>Import>General>Existing Projects into Workspace`` and then click next
-click browse and find your debug folder and then add it to eclipse
+click browse and find eclipseDebug folder and then add it to eclipse
 
 3.
 select ``Project>Build All``
