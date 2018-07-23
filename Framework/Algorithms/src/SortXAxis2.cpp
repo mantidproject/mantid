@@ -206,7 +206,6 @@ void SortXAxis::copyToOutputWorkspace(
  * @param compare std::less<double> for descending and std::greater<double> for
  * ascending
  * @param inputWorkspace the unsorted input workspace
- * @param specNum the spectrum number currently being compared
  * @return true if it is sorted
  * @return false if it is not sorted
  */
