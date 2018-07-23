@@ -1,3 +1,4 @@
+<<<<<<< c59d22493b303d5cda5a4d2e982865ac476fe85c
 from __future__ import print_function
 
 import mantid.simpleapi as mantid
@@ -6,7 +7,17 @@ from Muon.GUI.ElementalAnalysis.LoadWidget import load_utils as lutils
 
 
 class LoadModel(lutils.LModel):
+||||||| merged common ancestors
+class LoadModel(object):
+=======
+import mantid.simpleapi as mantid
+
+from six import iteritems
+
+class LoadModel(object):
+>>>>>>> refs #23023 add load algorithm (threaded) to browse
     def __init__(self):
+<<<<<<< c59d22493b303d5cda5a4d2e982865ac476fe85c
         super(LoadModel, self).__init__()
 
     def execute(self):
@@ -48,3 +59,34 @@ class CoLoadModel(lutils.LModel):
         to_add = [self.add_runs(l, r, run) for l, r in zip(*lutils.flatten_run_data(
             self.workspace, workspace))]
         self.workspace = lutils.group_by_detector(run, to_add)
+||||||| merged common ancestors
+        pass
+=======
+        self.alg = None
+        self.filename = ""
+
+    def cancel(self):
+        if self.alg is not None:
+            self.alg.cancel()
+
+    def output(self):
+        return
+
+    def execute(self):
+        if self.filename == "":
+            self.cancel()
+            return
+        self.alg = mantid.AlgorithmManager.create("Load")   
+        self.alg.initialize()
+        self.alg.setAlwaysStoreInADS(False)
+        self.alg.setProperty("Filename", self.filename)
+        self.alg.setProperty("OutputWorkspace", "WS_{}".format(self.filename))
+
+        self.alg.execute()
+
+    def loadData(self, inputs):
+        self.filename = inputs["Filename"]
+        
+
+    
+>>>>>>> refs #23023 add load algorithm (threaded) to browse
