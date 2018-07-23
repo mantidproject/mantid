@@ -497,10 +497,10 @@ private:
     // We should find a sample log with this name
     TS_ASSERT_THROWS_NOTHING(
       stringLog = run.getTimeSeriesProperty<std::string>("fake string source"));
-    if (log) {
+    if (stringLog) {
       TS_ASSERT_EQUALS(stringLog->firstTime().toISO8601String(),
                        "2017-05-24T09:29:48")
-      TS_ASSERT_EQUALS(stringLog->firstValue(), "test_string")
+      TS_ASSERT_EQUALS(stringLog->firstValue(), "test string")
     }
   }
 

@@ -570,7 +570,7 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
     auto &mutableRunInfo = periodBuffer->mutableRun();
 
     auto seEvent =
-        GetLogData(reinterpret_cast<const uint8_t *>(buffer.c_str()));
+      GetLogData(reinterpret_cast<const uint8_t *>(buffer.c_str()));
 
     auto name = seEvent->source_name()->str();
 
@@ -583,18 +583,21 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
     // If sample log with this name already exists then append to it
     // otherwise create a new log
     if (seEvent->value_type() == Value::Int) {
-      auto value = static_cast<const Int *>(seEvent->value());
+      auto value = seEvent->value_as_Int();
       appendToLog<int32_t>(mutableRunInfo, name, time, value->value());
     } else if (seEvent->value_type() == Value::Long) {
-      auto value = static_cast<const Long *>(seEvent->value());
+      auto value = seEvent->value_as_Long();
       appendToLog<int64_t>(mutableRunInfo, name, time, value->value());
     } else if (seEvent->value_type() == Value::Double) {
-      auto value = static_cast<const Double *>(seEvent->value());
+      auto value = seEvent->value_as_Double();
       appendToLog<double>(mutableRunInfo, name, time, value->value());
     } else if (seEvent->value_type() == Value::Float) {
-      auto value = static_cast<const Float *>(seEvent->value());
+      auto value = seEvent->value_as_Float();
       appendToLog<double>(mutableRunInfo, name, time,
                           static_cast<double>(value->value()));
+    } else if (seEvent->value_type() == Value::String) {
+      auto value = seEvent->value_as_String();
+      appendToLog<std::string>(mutableRunInfo, name, time, value->value()->str());
     } else {
       g_log.warning() << "Value for sample log named '" << name
                       << "' was not of recognised type" << std::endl;

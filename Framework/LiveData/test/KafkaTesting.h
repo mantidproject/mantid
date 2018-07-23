@@ -183,7 +183,8 @@ void fakeReceiveAStringSampleEnvMessage(std::string *buffer) {
   // Sample environment log
   auto logDataMessage =
     CreateLogData(builder, builder.CreateString("fake string source"), Value::String,
-                  builder.CreateString("test_string").Union(), 1495618188000000000L);
+                  CreateString(builder, builder.CreateString("test string")).Union(),
+                  1495618188000000000L);
   FinishLogDataBuffer(builder, logDataMessage);
 
   // Copy to provided buffer
@@ -341,10 +342,10 @@ public:
                       std::string &topic) override {
     assert(message);
 
-    if (m_callCount > 0) {
-      fakeReceiveAStringSampleEnvMessage(message);
-    } else {
+    if (m_callCount == 0) {
       fakeReceiveASampleEnvMessage(message);
+    } else {
+      fakeReceiveAStringSampleEnvMessage(message);
     }
 
     UNUSED_ARG(offset);
