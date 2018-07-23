@@ -310,6 +310,7 @@ void MuonFitPropertyBrowser::generateBtnPressed() { genCombinePeriodWindow(); }
 void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
   m_fitActionFit->setEnabled(yes);
   m_fitActionSeqFit->setEnabled(yes);
+
 }
 
 void MuonFitPropertyBrowser::checkFitEnabled() {
@@ -537,7 +538,8 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
   }
   if (prop == m_TFAsymmMode) {
     const bool val = m_boolManager->value(prop);
-    setTFAsymmMode(val);
+		setTFAsymmMode(val);
+
   }
   if (prop == m_keepNorm) {
     const bool val = m_boolManager->value(prop);
@@ -1249,19 +1251,31 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
 * @param enabled :: [input] Whether to turn this mode on or off
 */
 void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
-  ConvertFitFunctionForMuonTFAsymmetry(enabled);
+	IFunction_sptr old =
+		boost::dynamic_pointer_cast<IFunction>(m_compositeFunction);
+	if (old->nParams() > 0) {
+		ConvertFitFunctionForMuonTFAsymmetry(enabled);
+	}
+	else if (enabled) {
+		g_log.warning("No fitting function provided. Please add a function");
+		// will update when user clicks elsewhere
+		m_boolManager->setValue(m_TFAsymmMode, false);
+	}
+	else {
 
-  // Show or hide the TFAsymmetry fit
-  if (enabled) {
-    // m_settingsGroup->property()->addSubProperty(m_normalization);
-    // m_multiFitSettingsGroup->property()->addSubProperty(m_normalization);
-    m_settingsGroup->property()->addSubProperty(m_keepNorm);
-    // setNormalization();
-  } else {
-    // m_settingsGroup->property()->removeSubProperty(m_normalization);
-    // m_multiFitSettingsGroup->property()->removeSubProperty(m_normalization);
-    m_settingsGroup->property()->removeSubProperty(m_keepNorm);
-  }
+		// Show or hide the TFAsymmetry fit
+		if (enabled) {
+			// m_settingsGroup->property()->addSubProperty(m_normalization);
+			// m_multiFitSettingsGroup->property()->addSubProperty(m_normalization);
+			m_settingsGroup->property()->addSubProperty(m_keepNorm);
+			// setNormalization();
+		}
+		else {
+			// m_settingsGroup->property()->removeSubProperty(m_normalization);
+			// m_multiFitSettingsGroup->property()->removeSubProperty(m_normalization);
+			m_settingsGroup->property()->removeSubProperty(m_keepNorm);
+		}
+	}
 }
 std::string MuonFitPropertyBrowser::TFExtension() const {
 
