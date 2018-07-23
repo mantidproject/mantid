@@ -34,14 +34,15 @@ PerThetaDefaultsTableValidator::validateThetaValues(
   auto ok = Result(boost::blank());
   if (!perThetaDefaults.empty()) {
     auto const wildcardCount = countWildcards(perThetaDefaults);
-    if (wildcardCount <= 1)
+    if (wildcardCount <= 1) {
       if (hasUniqueThetas(std::move(perThetaDefaults), wildcardCount,
                           tolerance))
         return ok;
       else
         return Result(ThetaValuesValidationError::NonUniqueTheta);
-    else
+    } else {
       return Result(ThetaValuesValidationError::MultipleWildcards);
+    }
   } else {
     return ok;
   }

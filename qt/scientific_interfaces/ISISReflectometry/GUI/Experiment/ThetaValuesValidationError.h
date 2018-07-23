@@ -4,7 +4,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 enum class ThetaValuesValidationError {
-  None,
   MultipleWildcards,
   NonUniqueTheta
 };

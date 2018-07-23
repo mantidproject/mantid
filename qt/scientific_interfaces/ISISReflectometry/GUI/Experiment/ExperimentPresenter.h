@@ -65,6 +65,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentPresenter
     : public ExperimentViewSubscriber,
       public IExperimentPresenter {
 public:
+  // TODO Inject the Experiment model into the constructor.
   ExperimentPresenter(IExperimentView *view, double defaultsThetaTolerance);
   void notifySettingsChanged() override;
   void notifySummationTypeChanged() override;

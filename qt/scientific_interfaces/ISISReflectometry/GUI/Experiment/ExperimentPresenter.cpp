@@ -76,9 +76,9 @@ void ExperimentPresenter::notifyPerAngleDefaultsChanged(int, int column) {
   auto validationResult = updateModelFromView();
   showValidationResult(validationResult);
   if (column == 0 && !validationResult.isValid() &&
-      !validationResult.assertError()
-           .perThetaValidationErrors()
-           .hasUniqueThetas())
+      validationResult.assertError()
+              .perThetaValidationErrors()
+              .fullTableError() == ThetaValuesValidationError::NonUniqueTheta)
     m_view->showPerAngleThetasNonUnique(m_thetaTolerance);
 }
 

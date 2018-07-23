@@ -67,7 +67,7 @@ void QtReflMainWindowView::initLayout() {
       std::move(makeRunsPresenter), std::move(makeEventPresenter),
       std::move(makeExperimentPresenter), std::move(makeSettingsPresenter),
       std::move(makeSaveSettingsPresenter));
-      
+
   // Create the presenter
   m_presenter =
       ReflMainWindowPresenter(this, std::move(makeReflBatchPresenter));

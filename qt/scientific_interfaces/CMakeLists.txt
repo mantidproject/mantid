@@ -53,12 +53,14 @@ set ( TEST_FILES
   test/ISISReflectometry/Reduction/GroupTest.h
   test/ISISReflectometry/Reduction/ValidateRowTest.h
   test/ISISReflectometry/Reduction/ReductionJobsMergeTest.h
-
+  test/ISISReflectometry/Reduction/ValidatePerThetaDefaultsTest.h
   test/ISISReflectometry/RunsTable/RunsTablePresenterGroupDeletionTest.h
   test/ISISReflectometry/RunsTable/RunsTablePresenterGroupInsertionTest.h
   test/ISISReflectometry/RunsTable/RunsTablePresenterRowInsertionTest.h
   test/ISISReflectometry/RunsTable/RunsTablePresenterRowDeletionTest.h
   test/ISISReflectometry/Event/EventPresenterTest.h
+  test/ISISReflectometry/Experiment/ExperimentPresenterTest.h
+  test/ISISReflectometry/Experiment/PerThetaDefaultsTableValidatorTest.h
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest

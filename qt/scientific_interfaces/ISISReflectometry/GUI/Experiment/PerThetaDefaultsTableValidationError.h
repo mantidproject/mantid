@@ -13,8 +13,8 @@ public:
   PerThetaDefaultsTableValidationError(
       std::vector<InvalidDefaultsError> validationErrors, boost::optional<ThetaValuesValidationError> fullTableError);
 
-  bool hasUniqueThetas() const;
   std::vector<InvalidDefaultsError> const &errors() const;
+  boost::optional<ThetaValuesValidationError> fullTableError() const;
 
 private:
   std::vector<InvalidDefaultsError> m_validationErrors;

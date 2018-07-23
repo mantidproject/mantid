@@ -14,6 +14,8 @@ public:
   static void destroySuite(ValidateRowTest *suite) { delete suite; }
   static auto constexpr TOLERANCE = 0.000001;
 
+  void test() {}
+  
   void testParsesTriviallyValidDoubles() {
     TS_ASSERT_DELTA(1.0, parseDouble("1.0").get(), TOLERANCE);
     TS_ASSERT_DELTA(6.4, parseDouble("6.4").get(), TOLERANCE);
