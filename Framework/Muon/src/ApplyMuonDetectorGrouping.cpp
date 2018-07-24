@@ -174,12 +174,6 @@ std::map<std::string, std::string> ApplyMuonDetectorGrouping::validateInputs() {
   if (tmin > tmax) {
     errors["TimeMin"] = "TimeMin > TimeMax";
   }
-  if (tmin < 0) {
-    errors["TimeMin"] = "Time values are negative.";
-  }
-  if (tmax < 0) {
-    errors["TimeMax"] = "Time values are negative.";
-  }
 
   WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
   Workspace_sptr inputWS = getProperty("InputWorkspace");

@@ -9,7 +9,6 @@ MuSR Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
-
 Algorithms
 ----------
 
