@@ -589,7 +589,7 @@ the corresponding Y values in the reconstructed data at each iteration.
         
    CreateWorkspace(OutputWorkspace='linadj', DataX=X, DataY=Ylin, DataE=Zeroes, NSpec=6)
 
-   # Construct linear adjustment workspace (real = 0, imaginary linear)
+   # Construct constant adjustment workspace (real = 0, imaginary linear)
    # no adjustment on first spectrum, double adjustment on third spectrum.
    Yconst = []
    Magnitude = 0.2
@@ -639,7 +639,7 @@ Output:
    and the other three spectra are the imaginary parts.
    
 This can also be done with the spectra of the data effectively concatenated and converted into a single image.
-The reconstructed data is then obtained by converting the image back to data copied for each spectrum and applying the adjustments.
+The reconstructed data is then obtained by converting the image back to data, copying for each spectrum and applying the adjustments.
 
 This is done by setting the *PerSpectrumImage* property to *false*.
 
@@ -648,7 +648,7 @@ This is done by setting the *PerSpectrumImage* property to *false*.
    from math import pi, sin, cos
    from random import random, seed
 
-   # Construct workspace (cosine + noise) over 3 spectra
+   # Construct workspace (real cosine + complex noise) over 3 spectra
    X = []
    Y = []
    E = []
