@@ -125,7 +125,6 @@ void SortXAxis::sortIndicesByX(std::vector<std::size_t> &workspaceIndicies,
  * @param workspaceIndicies the sorted vector of indecies
  * @param inputWorkspace the unsorted initial workspace
  * @param outputWorkspace the emptry output workspace
- * @param sizeOfX the Maximum index of X
  * @param specNum the Spectrum it is currently copying over
  */
 void SortXAxis::copyXandDxToOutputWorkspace(
@@ -159,7 +158,6 @@ void SortXAxis::copyXandDxToOutputWorkspace(
  * @param workspaceIndicies the sorted vector of indicies
  * @param inputWorkspace the unsorted input workspaces
  * @param outputWorkspace the empty output workspace
- * @param sizeOfY the Maxiumum index of Y
  * @param specNum the spectrum number being copied into
  * @param isAProperHistogram whether or not it has been determined to be a valid
  * histogram earlier on.
