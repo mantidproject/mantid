@@ -104,7 +104,7 @@ private:
   void CheckValidGroupsAndPairs(const Mantid::API::Grouping &grouping);
 
   void getTimeLimitsFromInputWorkspace(Mantid::API::Workspace_sptr inputWS,
-	  Mantid::Muon::AnalysisOptions &options);
+                                       Mantid::Muon::AnalysisOptions &options);
 };
 
 } // namespace Muon

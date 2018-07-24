@@ -153,31 +153,30 @@ LoadAndApplyMuonDetectorGrouping::validateInputs() {
   return errors;
 }
 
-void LoadAndApplyMuonDetectorGrouping::getTimeLimitsFromInputWorkspace(Workspace_sptr inputWS, AnalysisOptions& options) {
-	MatrixWorkspace_sptr inputMatrixWS =
-		boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
-	WorkspaceGroup_sptr inputGroupWS =
-		boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
-	if (inputMatrixWS) {
-		if (inputMatrixWS->getNumberHistograms() > 0) {
-			double timeMin = inputMatrixWS->mutableX(0)[0];
-			auto sizex = inputMatrixWS->mutableX(0).size();
-			double timeMax = inputMatrixWS->mutableX(0)[sizex - 1];
-			options.timeLimits = std::make_pair(timeMin, timeMax);
-		}
-	}
-	else if (inputGroupWS) {
-		MatrixWorkspace_sptr ws1 =
-			boost::dynamic_pointer_cast<MatrixWorkspace>(inputGroupWS->getItem(0));
-		double timeMin = ws1->mutableX(0)[0];
-		auto sizex = ws1->mutableX(0).size();
-		double timeMax = ws1->mutableX(0)[sizex - 1];
-		options.timeLimits = std::make_pair(timeMin, timeMax);
-	}
-	else {
-		// Use sensible defaults
-		options.timeLimits = std::make_pair(0.1, 32.0);
-	}
+void LoadAndApplyMuonDetectorGrouping::getTimeLimitsFromInputWorkspace(
+    Workspace_sptr inputWS, AnalysisOptions &options) {
+  MatrixWorkspace_sptr inputMatrixWS =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
+  WorkspaceGroup_sptr inputGroupWS =
+      boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
+  if (inputMatrixWS) {
+    if (inputMatrixWS->getNumberHistograms() > 0) {
+      double timeMin = inputMatrixWS->mutableX(0)[0];
+      auto sizex = inputMatrixWS->mutableX(0).size();
+      double timeMax = inputMatrixWS->mutableX(0)[sizex - 1];
+      options.timeLimits = std::make_pair(timeMin, timeMax);
+    }
+  } else if (inputGroupWS) {
+    MatrixWorkspace_sptr ws1 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(inputGroupWS->getItem(0));
+    double timeMin = ws1->mutableX(0)[0];
+    auto sizex = ws1->mutableX(0).size();
+    double timeMax = ws1->mutableX(0)[sizex - 1];
+    options.timeLimits = std::make_pair(timeMin, timeMax);
+  } else {
+    // Use sensible defaults
+    options.timeLimits = std::make_pair(0.1, 32.0);
+  }
 }
 
 void LoadAndApplyMuonDetectorGrouping::exec() {
