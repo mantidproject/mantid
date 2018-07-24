@@ -23,13 +23,13 @@ class PeriodicTablePresenter(object):
                 self.view.ptable.disableElementButton(el.symbol)
 
     def element_data(self, element):
-        try:
-            return self.model.peak_data[element]
-        except KeyError:
-            return None
+        return self.model.peak_data[element]
 
     def select_element(self, element, deselect=False):
-        self.view.ptable.setElementSelected(element, not deselect)
+        self.view.ptable.setElementSelected(element, True)
+
+    def deselect_element(self, element, deselect=False):
+        self.view.ptable.setElementSelected(element, False)
 
     def is_selected(self, element):
         return self.view.ptable.isElementSelected(element)

@@ -20,34 +20,35 @@ class PeriodicTablePresenterTest(unittest.TestCase):
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
         self._model = mock.create_autospec(PeriodicTableModel)
+        self.view = PeriodicTableView()
         self.presenter = PeriodicTablePresenter(
-            PeriodicTableView(), self._model)
+            self.view, self._model)
+        self.presenter.is_selected = mock.Mock()
         self.mock_elem = mock.Mock()
 
-        self.presenter.view.ptable = mock.create_autospec(silxPT)
-        self.presenter.view.ptable.getSelection = mock.Mock(
+        self.view.ptable = mock.create_autospec(silxPT)
+        self.view.ptable.getSelection = mock.Mock(
             return_value=self.mock_elem)
-        self.presenter.view.ptable.isElementSelected = mock.Mock(
+        self.view.ptable.isElementSelected = mock.Mock(
             return_value=True)
-        self.presenter.view.ptable.setSelection = mock.Mock()
-        self.presenter.view.ptable.setElementSelected = mock.Mock()
+        self.view.ptable.setSelection = mock.Mock()
+        self.view.ptable.setElementSelected = mock.Mock()
 
-        self.presenter.is_selected = mock.Mock()
+        self.view.on_table_lclicked = mock.Mock()
+        self.view.on_table_rclicked = mock.Mock()
+        self.view.on_table_changed = mock.Mock()
 
-        self.presenter.view.on_table_lclicked = mock.Mock()
-        self.presenter.view.on_table_rclicked = mock.Mock()
-        self.presenter.view.on_table_changed = mock.Mock()
+        self.view.unreg_on_table_lclicked = mock.Mock()
+        self.view.unreg_on_table_rclicked = mock.Mock()
+        self.view.unreg_on_table_changed = mock.Mock()
 
-        self.presenter.view.unreg_on_table_lclicked = mock.Mock()
-        self.presenter.view.unreg_on_table_rclicked = mock.Mock()
-        self.presenter.view.unreg_on_table_changed = mock.Mock()
-
-        self.view = self.presenter.view
+        self.presenter.view = self.view
 
     # checks if subsequent function is called on func()
-    def check_second_func_called(self, func, sub_func):
-        func(mock.Mock())
-        assert sub_func.call_count == 1
+    def check_second_func_called(self, register_func, signal_func):
+        test_slot = mock.Mock()
+        register_func(test_slot)
+        assert signal_func.call_count == 1
 
     def test_register_table_lclicked(self):
         self.check_second_func_called(

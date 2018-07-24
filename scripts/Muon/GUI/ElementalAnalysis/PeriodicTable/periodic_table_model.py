@@ -21,11 +21,8 @@ class PeriodicTableModel(object):
         # we don't want this.
         try:
             with open(self._peak_data_file, "r") as f:
-                try:
-                    self._peak_data = json.load(f)
-                except ValueError as error:
-                    message_box.warning(error)
-        except IOError as error:
+                self._peak_data = json.load(f)
+        except Exception as error:
             message_box.warning(error)
 
     @property
