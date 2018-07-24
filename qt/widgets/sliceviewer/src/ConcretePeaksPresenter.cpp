@@ -554,7 +554,11 @@ bool ConcretePeaksPresenter::addPeakAt(double plotCoordsPointX,
       boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(this->m_peaksWS);
 
   const auto frame = m_transform->getCoordinateSystem();
-  peaksWS->addPeak(position, frame);
+  try {
+    peaksWS->addPeak(position, frame);
+  } catch (const std::invalid_argument &e) {
+    g_log.warning(e.what());
+  }
 
   // Reproduce the views. Proxy representations recreated for all peaks.
   this->produceViews();
