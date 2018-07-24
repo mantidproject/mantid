@@ -22,9 +22,11 @@ class LoadModel(object):
         self.alg.initialize()
         self.alg.setAlwaysStoreInADS(False)
         self.alg.setProperty("Filename", self.filename)
-        self.alg.setProperty("OutputWorkspace", "WS_{}".format(self.filename))
 
+        #l = lambda x: "WS_{}".format(x)
+        self.alg.setProperty("OutputWorkspace", "WS_{}".format(self.filename))
         self.alg.execute()
+        mantid.AnalysisDataService.addOrReplace("WS_{}".format(self.filename), self.alg.getProperty("OutputWorkspace").value)
 
     def loadData(self, inputs):
         self.filename = inputs["Filename"]
