@@ -33,7 +33,7 @@ New
 Improvements
 ############
 - :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>` now updates a normalization table and produces unnormalized data.
--:ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` now updates a normalization table and can take multiple workspaces.
+- :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` now updates a normalization table and can take multiple workspaces.
 
 Bugfixes
 ########
