@@ -99,15 +99,14 @@ std::string ErrorReporter::generateErrorMessage() {
 
   message["exitCode"] = m_exitCode;
 
-  if(m_share){
+  if (m_share) {
     message["email"] = m_email;
     message["name"] = m_name;
-  }
-  else {
+  } else {
     message["email"] = "";
     message["name"] = "";
   }
-  
+
   ::Json::FastWriter writer;
   return writer.write(message);
 }
