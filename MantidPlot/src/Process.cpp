@@ -11,6 +11,7 @@
 #include <Psapi.h>
 #include "MantidQtWidgets/Common/QStringUtils.h"
 #elif defined(Q_OS_MAC)
+#include <cstdlib>
 #include <libproc.h>
 #include <sys/sysctl.h>
 #endif
