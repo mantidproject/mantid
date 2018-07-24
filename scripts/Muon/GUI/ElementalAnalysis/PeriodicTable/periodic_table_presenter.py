@@ -25,10 +25,10 @@ class PeriodicTablePresenter(object):
     def element_data(self, element):
         return self.model.peak_data[element]
 
-    def select_element(self, element, deselect=False):
+    def select_element(self, element):
         self.view.ptable.setElementSelected(element, True)
 
-    def deselect_element(self, element, deselect=False):
+    def deselect_element(self, element):
         self.view.ptable.setElementSelected(element, False)
 
     def is_selected(self, element):
