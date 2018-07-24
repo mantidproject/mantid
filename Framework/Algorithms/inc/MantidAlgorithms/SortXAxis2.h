@@ -63,20 +63,18 @@ private:
   void copyYandEToOutputWorkspace(
       std::vector<std::size_t> &workspaceIndecies,
       Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
-      Mantid::API::MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfY,
-      unsigned int SpecNum, bool isAProperHistogram);
+      Mantid::API::MatrixWorkspace_sptr outputWorkspace, unsigned int SpecNum,
+      bool isAProperHistogram);
 
   void copyXandDxToOutputWorkspace(
       std::vector<std::size_t> &workspaceIndecies,
       Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
-      Mantid::API::MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfX,
-      unsigned int specNum);
+      Mantid::API::MatrixWorkspace_sptr outputWorkspace, unsigned int specNum);
 
   void
   copyToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies,
                         Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
                         Mantid::API::MatrixWorkspace_sptr outputWorkspace,
-                        const size_t sizeOfX, const size_t sizeOfY,
                         unsigned int specNum, bool isAProperHistogram);
 
   bool determineIfHistogramIsValid(

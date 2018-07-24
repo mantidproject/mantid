@@ -49,9 +49,6 @@ void SortXAxis::exec() {
   // Define everything you can outside of the for loop
   // Assume that all spec are the same size
   const auto sizeOfX = inputWorkspace->x(0).size();
-  const auto sizeOfY = inputWorkspace->y(0).size();
-
-  std::string theOrder = getProperty("Ordering");
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   for (int specNum = 0u; specNum < (int)inputWorkspace->getNumberHistograms();
@@ -59,10 +56,11 @@ void SortXAxis::exec() {
     PARALLEL_START_INTERUPT_REGION
     auto workspaceIndicies = createIndexes(sizeOfX);
 
-    sortIndicesByX(workspaceIndicies, theOrder, inputWorkspace, specNum);
+    sortIndicesByX(workspaceIndicies, getProperty("Ordering"), inputWorkspace,
+                   specNum);
 
     copyToOutputWorkspace(workspaceIndicies, inputWorkspace, outputWorkspace,
-                          sizeOfX, sizeOfY, specNum, isAProperHistogram);
+                          specNum, isAProperHistogram);
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -133,10 +131,10 @@ void SortXAxis::sortIndicesByX(std::vector<std::size_t> &workspaceIndicies,
 void SortXAxis::copyXandDxToOutputWorkspace(
     std::vector<std::size_t> &workspaceIndicies,
     MatrixWorkspace_const_sptr inputWorkspace,
-    MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfX,
-    unsigned int specNum) {
+    MatrixWorkspace_sptr outputWorkspace, unsigned int specNum) {
   // Move an ordered X to the output workspace
-  for (auto workspaceIndex = 0u; workspaceIndex < sizeOfX; workspaceIndex++) {
+  for (auto workspaceIndex = 0u;
+       workspaceIndex < inputWorkspace->x(specNum).size(); workspaceIndex++) {
     outputWorkspace->mutableX(specNum)[workspaceIndex] =
         inputWorkspace->x(specNum)[workspaceIndicies[workspaceIndex]];
   }
@@ -144,7 +142,9 @@ void SortXAxis::copyXandDxToOutputWorkspace(
   // If Dx's are present, move Dx's to the output workspace
   // If Dx's are present, move Dx's to the output workspace
   if (inputWorkspace->hasDx(specNum)) {
-    for (auto workspaceIndex = 0u; workspaceIndex < sizeOfX; workspaceIndex++) {
+    for (auto workspaceIndex = 0u;
+         workspaceIndex < inputWorkspace->dx(specNum).size();
+         workspaceIndex++) {
       outputWorkspace->mutableDx(specNum)[workspaceIndex] =
           inputWorkspace->dx(specNum)[workspaceIndicies[workspaceIndex]];
     }
@@ -167,21 +167,27 @@ void SortXAxis::copyXandDxToOutputWorkspace(
 void SortXAxis::copyYandEToOutputWorkspace(
     std::vector<std::size_t> &workspaceIndicies,
     MatrixWorkspace_const_sptr inputWorkspace,
-    MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfY,
-    unsigned int specNum, bool isAProperHistogram) {
+    MatrixWorkspace_sptr outputWorkspace, unsigned int specNum,
+    bool isAProperHistogram) {
   // If Histogram data find the biggest index value and remove it from
   // workspaceIndicies
   if (isAProperHistogram) {
     auto lastIndexIt =
-        std::find(workspaceIndicies.begin(), workspaceIndicies.end(), sizeOfY);
+        std::find(workspaceIndicies.begin(), workspaceIndicies.end(),
+                  inputWorkspace->y(specNum).size());
     workspaceIndicies.erase(lastIndexIt);
   }
 
   auto &inSpaceY = inputWorkspace->y(specNum);
-  auto &inSpaceE = inputWorkspace->e(specNum);
-  for (auto workspaceIndex = 0u; workspaceIndex < sizeOfY; workspaceIndex++) {
+  for (auto workspaceIndex = 0u;
+       workspaceIndex < inputWorkspace->y(specNum).size(); workspaceIndex++) {
     outputWorkspace->mutableY(specNum)[workspaceIndex] =
         inSpaceY[workspaceIndicies[workspaceIndex]];
+  }
+
+  auto &inSpaceE = inputWorkspace->e(specNum);
+  for (auto workspaceIndex = 0u;
+       workspaceIndex < inputWorkspace->e(specNum).size(); workspaceIndex++) {
     outputWorkspace->mutableE(specNum)[workspaceIndex] =
         inSpaceE[workspaceIndicies[workspaceIndex]];
   }
@@ -190,12 +196,12 @@ void SortXAxis::copyYandEToOutputWorkspace(
 void SortXAxis::copyToOutputWorkspace(
     std::vector<std::size_t> &workspaceIndicies,
     MatrixWorkspace_const_sptr inputWorkspace,
-    MatrixWorkspace_sptr outputWorkspace, const size_t sizeOfX,
-    const size_t sizeOfY, unsigned int specNum, bool isAProperHistogram) {
+    MatrixWorkspace_sptr outputWorkspace, unsigned int specNum,
+    bool isAProperHistogram) {
   copyXandDxToOutputWorkspace(workspaceIndicies, inputWorkspace,
-                              outputWorkspace, sizeOfX, specNum);
+                              outputWorkspace, specNum);
   copyYandEToOutputWorkspace(workspaceIndicies, inputWorkspace, outputWorkspace,
-                             sizeOfY, specNum, isAProperHistogram);
+                             specNum, isAProperHistogram);
 }
 
 /**
