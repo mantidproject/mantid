@@ -226,7 +226,7 @@ const std::map<std::string, std::string> CatalogHelper::validateProperties(
     dateField = "EndDate";
 
     getTimevalue(catalogAlgorithm->getProperty(dateField));
-  } catch (std::invalid_argument) {
+  } catch (std::invalid_argument &) {
     std::string documentation =
         propertyDocumentation(catalogAlgorithm->getProperties(), dateField);
     errors.emplace(dateField + "_err", documentation);
