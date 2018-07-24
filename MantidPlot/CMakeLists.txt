@@ -814,6 +814,10 @@ target_link_libraries ( MantidPlot LINK_PRIVATE
   ${OPENGL_glu_LIBRARY}
   ${OPENGL_gl_LIBRARY}
 )
+if (WIN32)
+  set_target_properties ( MantidPlot PROPERTIES COMPILE_DEFINITIONS "PSAPI_VERSION=1" )
+  target_link_libraries ( MantidPlot PRIVATE Psapi.lib )
+endif ()
 
 if(MAKE_VATES)
   target_include_directories( MantidPlot SYSTEM PRIVATE ${PARAVIEW_INCLUDE_DIRS} )
