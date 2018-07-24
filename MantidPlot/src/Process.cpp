@@ -47,10 +47,10 @@ bool isAnotherInstanceRunning() {
   QDir procfs{"/proc"};
 
   bool otherIsRunning(false);
-  auto entries{procfs.entryList(QDir::Dirs)};
+  const QStringList entries{procfs.entryList(QDir::Dirs)};
   for (const auto &pidStr : entries) {
     bool isDigit(false);
-    auto pid{pidStr.toLongLong(&isDigit)};
+    const long long pid{pidStr.toLongLong(&isDigit)};
     if (!isDigit)
       continue;
 
