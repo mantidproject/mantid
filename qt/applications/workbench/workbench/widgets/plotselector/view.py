@@ -122,6 +122,8 @@ class PlotSelectorView(QWidget):
         self.set_visibility_icon = QAppThreadCall(self.set_visibility_icon_orig)
         self.set_last_active_values_orig = self.set_last_active_values
         self.set_last_active_values = QAppThreadCall(self.set_last_active_values_orig)
+        self.sort_type_orig = self.sort_type
+        self.sort_type = QAppThreadCall(self.sort_type_orig)
 
         # Connect presenter methods to things in the view
         self.show_button.clicked.connect(self.presenter.show_multiple_selected)

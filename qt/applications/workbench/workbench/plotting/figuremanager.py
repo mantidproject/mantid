@@ -81,13 +81,17 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self._window_activated = QAppThreadCall(self._window_activated_orig)
         self._widgetclosed_orig = self._widgetclosed
         self._widgetclosed = QAppThreadCall(self._widgetclosed_orig)
+        self.set_window_title_orig = self.set_window_title
+        self.set_window_title = QAppThreadCall(self.set_window_title_orig)
+        self.fig_visibility_changed_orig = self.fig_visibility_changed
+        self.fig_visibility_changed = QAppThreadCall(self.fig_visibility_changed_orig)
 
         self.canvas = canvas
         self.window = MainWindow()
         self.window.activated.connect(self._window_activated)
         self.window.closing.connect(canvas.close_event)
         self.window.closing.connect(self._widgetclosed)
-        self.window.visibility_changed.connect(lambda plot_number=num: Gcf.figure_visibility_changed(plot_number))
+        self.window.visibility_changed.connect(self.fig_visibility_changed)
 
         self.window.setWindowTitle("Figure %d" % num)
         self.canvas.figure.set_label("Figure %d" % num)
@@ -231,6 +235,14 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # For the workbench we also keep the label in sync, this is
         # to allow getting a handle as plt.figure('Figure Name')
         self.canvas.figure.set_label(title)
+
+    def fig_visibility_changed(self):
+        """
+        Make a notification in the global figure manager that
+        plot visibility was changed. This method is added to this
+        class so that it can be wrapped in a QAppThreadCall.
+        """
+        Gcf.figure_visibility_changed(self.num)
 
     # ------------------------ Interaction events --------------------
     def on_button_press(self, event):
