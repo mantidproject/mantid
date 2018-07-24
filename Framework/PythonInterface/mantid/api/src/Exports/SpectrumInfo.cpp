@@ -36,11 +36,11 @@ void export_SpectrumInfo() {
            "Returns the number of spectra.")
 
       .def("isMonitor", &SpectrumInfo::isMonitor, (arg("self"), arg("index")),
-           "Returns true if the detector(s) associated with the spectrum are "
+           "Returns True if the detector(s) associated with the spectrum are "
            "monitors.")
 
       .def("isMasked", &SpectrumInfo::isMasked, (arg("self"), arg("index")),
-           "Returns true if the detector(s) associated with the spectrum are "
+           "Returns True if the detector(s) associated with the spectrum are "
            "masked.")
 
       .def("setMasked", &SpectrumInfo::setMasked,
@@ -82,5 +82,5 @@ void export_SpectrumInfo() {
            "Returns the absolute sample position.")
 
       .def("getAllSpectrumDefinitions", &getSpectrumDefinitionList, arg("self"),
-           "Returns the SpectrumDefinition of the spectrum.");
+           "Returns all of the SpectrumDefinitions as a list.");
 }
