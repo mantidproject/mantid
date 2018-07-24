@@ -1,8 +1,8 @@
 #ifndef MANTID_PYTHONINTERFACE_CONVERTERS_CONTAINERDTYPE_H_
 #define MANTID_PYTHONINTERFACE_CONVERTERS_CONTAINERDTYPE_H_
 
-#include <string> 
-#include <type_traits> 
+#include <string>
+#include <type_traits>
 
 /**
     ContainerDtype Header File
