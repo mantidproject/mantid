@@ -153,6 +153,33 @@ LoadAndApplyMuonDetectorGrouping::validateInputs() {
   return errors;
 }
 
+void LoadAndApplyMuonDetectorGrouping::getTimeLimitsFromInputWorkspace(Workspace_sptr inputWS, AnalysisOptions& options) {
+	MatrixWorkspace_sptr inputMatrixWS =
+		boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
+	WorkspaceGroup_sptr inputGroupWS =
+		boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
+	if (inputMatrixWS) {
+		if (inputMatrixWS->getNumberHistograms() > 0) {
+			double timeMin = inputMatrixWS->mutableX(0)[0];
+			auto sizex = inputMatrixWS->mutableX(0).size();
+			double timeMax = inputMatrixWS->mutableX(0)[sizex - 1];
+			options.timeLimits = std::make_pair(timeMin, timeMax);
+		}
+	}
+	else if (inputGroupWS) {
+		MatrixWorkspace_sptr ws1 =
+			boost::dynamic_pointer_cast<MatrixWorkspace>(inputGroupWS->getItem(0));
+		double timeMin = ws1->mutableX(0)[0];
+		auto sizex = ws1->mutableX(0).size();
+		double timeMax = ws1->mutableX(0)[sizex - 1];
+		options.timeLimits = std::make_pair(timeMin, timeMax);
+	}
+	else {
+		// Use sensible defaults
+		options.timeLimits = std::make_pair(0.1, 32.0);
+	}
+}
+
 void LoadAndApplyMuonDetectorGrouping::exec() {
   this->setRethrows(true);
 
@@ -160,6 +187,8 @@ void LoadAndApplyMuonDetectorGrouping::exec() {
   options.grouping = loadGroupsAndPairs();
 
   Workspace_sptr inputWS = getProperty("InputWorkspace");
+
+  getTimeLimitsFromInputWorkspace(inputWS, options);
 
   checkDetectorIDsInWorkspace(options.grouping, inputWS);
 
@@ -223,6 +252,7 @@ LoadAndApplyMuonDetectorGrouping::addGroupedWSWithDefaultName(
 // Set the parameters in options to sensible defaults for this algorithm
 AnalysisOptions LoadAndApplyMuonDetectorGrouping::setDefaultOptions() {
   AnalysisOptions options;
+
   options.summedPeriods = this->getPropertyValue("SummedPeriods");
   options.subtractedPeriods = this->getPropertyValue("SubtractedPeriods");
   options.timeZero = 0.0;
@@ -319,6 +349,9 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
     alg->setProperty("Grouping", options.grouping.groups[i]);
     alg->setProperty("AnalysisType", plotTypeToString(options.plotType));
 
+    alg->setProperty("TimeMin", options.timeLimits.first);
+    alg->setProperty("TimeMax", options.timeLimits.second);
+
     // Analysis options
     alg->setProperty("RebinArgs", options.rebinArgs);
     alg->setProperty("TimeOffset", options.loadedTimeZero - options.timeZero);
@@ -353,6 +386,9 @@ void LoadAndApplyMuonDetectorGrouping::addPairingToADS(
     alg->setProperty("InputWorkspaceGroup", wsGrouped->getName());
     alg->setProperty("PairName", options.grouping.pairNames[i]);
     alg->setProperty("Alpha", options.grouping.pairAlphas[i]);
+
+    alg->setProperty("TimeMin", options.timeLimits.first);
+    alg->setProperty("TimeMax", options.timeLimits.second);
 
     std::string group1 =
         options.grouping.groups[options.grouping.pairs[i].first];
