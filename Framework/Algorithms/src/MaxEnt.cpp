@@ -221,6 +221,8 @@ void MaxEnt::init() {
       "value of this workspace. "
       "If DataLinearAdj is also specified, this addition is done after its "
       "multiplication. "
+      "See equation in documentation for how DataLinearAdj and DataConstAdj "
+      "are applied. "
       "The data in this workspace is complex in the same manner as complex "
       "input data.");
   declareProperty(
