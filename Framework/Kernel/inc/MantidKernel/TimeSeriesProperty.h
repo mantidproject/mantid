@@ -182,9 +182,8 @@ public:
   double averageValueInFilter(
       const std::vector<SplittingInterval> &filter) const override;
   /// @copydoc ITimeSeriesPropery::averageAndStdDevInFilter
-  std::pair<double, double>
-  averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const
-      override;
+  std::pair<double, double> averageAndStdDevInFilter(
+      const std::vector<SplittingInterval> &filter) const override;
   /// Calculate the time-weighted average of a property
   double timeAverageValue() const override;
   /// @copydoc ITimeSeriesPropery::timeAverageValueAndStdDev

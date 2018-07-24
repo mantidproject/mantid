@@ -917,8 +917,7 @@ double TimeSeriesProperty<TYPE>::timeAverageValue() const {
   try {
     const auto &filter = getSplittingIntervals();
     retVal = this->averageValueInFilter(filter);
-  }
-  catch (std::exception &) {
+  } catch (std::exception &) {
     // just return nan
     retVal = std::numeric_limits<double>::quiet_NaN();
   }
@@ -991,7 +990,7 @@ double TimeSeriesProperty<std::string>::averageValueInFilter(
 template <typename TYPE>
 std::pair<double, double>
 TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev() const {
-  std::pair<double, double> retVal{ 0., 0. }; // mean and stddev
+  std::pair<double, double> retVal{0., 0.}; // mean and stddev
   try {
     const auto &filter = getSplittingIntervals();
     retVal = this->averageAndStdDevInFilter(filter);
@@ -1012,9 +1011,8 @@ std::pair<double, double> TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(
   // First of all, if the log or the filter is empty or is a single value,
   // return NaN for the uncertainty
   if (realSize() <= 1 || filter.empty()) {
-    return std::pair<double, double>{
-      mean, std::numeric_limits<double>::quiet_NaN()
-    };
+    return std::pair<double, double>{mean,
+                                     std::numeric_limits<double>::quiet_NaN()};
   }
 
   double numerator(0.0), totalTime(0.0);
@@ -1044,7 +1042,7 @@ std::pair<double, double> TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(
   }
 
   // Normalise by the total time
-  return std::pair<double, double>{ mean, std::sqrt(numerator / totalTime) };
+  return std::pair<double, double>{mean, std::sqrt(numerator / totalTime)};
 }
 
 /** Function specialization for TimeSeriesProperty<std::string>

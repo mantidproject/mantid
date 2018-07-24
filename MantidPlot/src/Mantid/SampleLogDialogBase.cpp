@@ -138,7 +138,7 @@ void SampleLogDialogBase::showLogStatisticsOfItem(
         dynamic_cast<TimeSeriesProperty<double> *>(logData);
     Mantid::Kernel::TimeSeriesProperty<int> *tspi =
         dynamic_cast<TimeSeriesProperty<int> *>(logData);
-    std::pair<double, double> timeAvgStdDev{ 0., 0. };
+    std::pair<double, double> timeAvgStdDev{0., 0.};
     LogFilterGenerator generator(filter, m_ei->run());
     const auto &logFilter = generator.generateFilter(logName);
     if (tspd) {
