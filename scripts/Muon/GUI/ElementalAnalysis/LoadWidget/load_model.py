@@ -1,6 +1,7 @@
+import os
+
 import mantid.simpleapi as mantid
 
-from six import iteritems
 
 class LoadModel(object):
     def __init__(self):
@@ -18,18 +19,20 @@ class LoadModel(object):
         if self.filename == "":
             self.cancel()
             return
-        self.alg = mantid.AlgorithmManager.create("Load")   
+        self.alg = mantid.AlgorithmManager.create("Load")
         self.alg.initialize()
         self.alg.setAlwaysStoreInADS(False)
         self.alg.setProperty("Filename", self.filename)
 
-        #l = lambda x: "WS_{}".format(x)
-        self.alg.setProperty("OutputWorkspace", "WS_{}".format(self.filename))
+        file = self._format_path(self.filename)
+        self.alg.setProperty("OutputWorkspace", file)
         self.alg.execute()
-        mantid.AnalysisDataService.addOrReplace("WS_{}".format(self.filename), self.alg.getProperty("OutputWorkspace").value)
+        mantid.AnalysisDataService.addOrReplace(
+            file, self.alg.getProperty("OutputWorkspace").value)
 
     def loadData(self, inputs):
         self.filename = inputs["Filename"]
-        
 
-    
+    def _format_path(self, path):
+        file = "WS_{}".format(os.path.basename(self.filename))
+        return file[:file.rfind(".")]
