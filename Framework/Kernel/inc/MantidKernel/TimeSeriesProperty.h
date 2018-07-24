@@ -181,8 +181,14 @@ public:
   /// Calculate the time-weighted average of a property in a filtered range
   double averageValueInFilter(
       const std::vector<SplittingInterval> &filter) const override;
+  /// @copydoc ITimeSeriesPropery::averageAndStdDevInFilter
+  std::pair<double, double>
+  averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const
+      override;
   /// Calculate the time-weighted average of a property
   double timeAverageValue() const override;
+  /// @copydoc ITimeSeriesPropery::timeAverageValueAndStdDev
+  std::pair<double, double> timeAverageValueAndStdDev() const override;
   /// generate constant time-step histogram from the property values
   void histogramData(const Types::Core::DateAndTime &tMin,
                      const Types::Core::DateAndTime &tMax,
