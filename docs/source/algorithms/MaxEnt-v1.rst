@@ -548,6 +548,8 @@ The reconstructed data can be adjusted by multiplying by the *DataLinearAdj* pro
 Each of these properties is a workspace with complex Y values, just like complex input workspaces. Each Y value is then applied to 
 the corresponding Y values in the reconstructed data at each iteration.
 
+These usage examples merely demonstrate how to use the adjustments and are not realistic use cases.
+
 .. testcode:: ExAdjustment
 
    from math import pi, sin, cos
