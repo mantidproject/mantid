@@ -29,6 +29,7 @@ class LoadModel(object):
         self.alg.execute()
         mantid.AnalysisDataService.addOrReplace(
             file, self.alg.getProperty("OutputWorkspace").value)
+        self.alg = None
 
     def loadData(self, inputs):
         self.filename = inputs["Filename"]
