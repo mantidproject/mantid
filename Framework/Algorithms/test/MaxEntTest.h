@@ -41,7 +41,7 @@ public:
     TS_ASSERT(alg->isInitialized())
   }
 
-  void test_real_data() {
+  void test_sizes_for_real_data() {
     // Run one iteration, we just want to test the output workspaces' dimensions
     int nHist = 5;
     int nBins = 10;
@@ -75,7 +75,7 @@ public:
     TS_ASSERT_EQUALS(angle->blocksize(), 1);
   }
 
-  void test_complex_data() {
+  void test_sizes_for_complex_data() {
     // Run one iteration, we just want to test the output workspaces' dimensions
     int nHist = 6;
     int nBins = 10;
@@ -110,7 +110,7 @@ public:
     TS_ASSERT_EQUALS(angle->blocksize(), 1);
   }
 
-  void test_complex_data_adjustments() {
+  void test_sizes_for_complex_data_adjustments() {
     // Run one iteration, we just want to test the output workspaces' dimensions
     int nHist = 6;
     int nBins = 10;
@@ -147,7 +147,7 @@ public:
     TS_ASSERT_EQUALS(angle->blocksize(), 1);
   }
 
-  void test_complex_data_adjustments_together() {
+  void test_sizes_for_complex_data_adjustments_together() {
     int nHist = 6;
     int nBins = 10;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
@@ -302,7 +302,7 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
-  void test_adjustments_together_real_data() {
+  void test_adjustments_together_real_data_not_supported() {
 
     auto ws = WorkspaceCreationHelper::create2DWorkspace(3, 10);
     auto ws1 = WorkspaceCreationHelper::create2DWorkspace(6, 10);
@@ -996,7 +996,7 @@ public:
                      std::invalid_argument);
   }
 
-  void test_histogram_workspace() {
+  void test_sizes_for_histogram_workspace() {
     const size_t size = 10;
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, size + 1, size));
@@ -1033,7 +1033,7 @@ public:
     TS_ASSERT_EQUALS(data->readX(0), ws->readX(0));
   }
 
-  void test_pointdata_workspace() {
+  void test_sizes_for_pointdata_workspace() {
     const size_t size = 10;
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
