@@ -115,6 +115,7 @@ CollapsibleStack::CollapsibleStack(QWidget *parent) : QWidget(parent) {
 CollapsiblePanel *CollapsibleStack::addPanel(const QString &caption,
                                              QWidget *widget) {
   CollapsiblePanel *panel = new CollapsiblePanel(caption, this);
+  widget->setContentsMargins(0, 0, 0, 0);
   panel->setWidget(widget);
   m_layout->addWidget(panel);
   connect(panel, SIGNAL(collapsed()), this, SLOT(updateStretch()));

@@ -120,11 +120,20 @@ void PeakMarker2D::setPeak(const Mantid::Geometry::IPeak &peak, int row) {
   m_h = peak.getH();
   m_k = peak.getK();
   m_l = peak.getL();
-  m_label = QString("%1 %2 %3")
-                .arg(QString::number(m_h, 'g', 2), QString::number(m_k, 'g', 2),
-                     QString::number(m_l, 'g', 2));
+  m_label = formatLabel(peak);
   m_detID = peak.getDetectorID();
   m_row = row;
+}
+
+/**
+* Format the label string
+* @param peak The peak
+*/
+QString PeakMarker2D::formatLabel(const Mantid::Geometry::IPeak &peak) {
+  return QString("%1 %2 %3")
+      .arg(QString::number(peak.getH(), 'g', 2),
+           QString::number(peak.getK(), 'g', 2),
+           QString::number(peak.getL(), 'g', 2));
 }
 
 /**

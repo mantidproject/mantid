@@ -2,15 +2,19 @@
 #define INSTRUMENTACTOR_H_
 
 #include "DllOption.h"
-#include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "GLColor.h"
+#include "MantidGeometry/Rendering/OpenGL_Headers.h"
+#include "MaskBinsData.h"
+#include "../../../src/qwt/MantidColorMap.h"
+
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
-#include "MaskBinsData.h"
 #include "MantidGeometry/IComponent.h"
+
 #include <boost/weak_ptr.hpp>
 #include <vector>
+
+#include <QObject>
 
 //------------------------------------------------------------------
 // Forward declarations

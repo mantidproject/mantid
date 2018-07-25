@@ -4,7 +4,6 @@
 #include "DllOption.h"
 #include "InstrumentWidgetTypes.h"
 #include "MantidGLWidget.h"
-#include "UnwrappedSurface.h"
 
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IMaskWorkspace.h"
@@ -44,11 +43,11 @@ namespace MantidWidgets {
 class InstrumentActor;
 class InstrumentWidgetTab;
 class InstrumentWidgetRenderTab;
-class OneCurvePlot;
 class CollapsiblePanel;
 class XIntegrationControl;
 class SimpleWidget;
 class ProjectionSurface;
+class UnwrappedSurface;
 
 /**
 \class  InstrumentWidget

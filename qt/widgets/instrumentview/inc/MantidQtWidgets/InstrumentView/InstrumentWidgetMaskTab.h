@@ -4,7 +4,6 @@
 #include <MantidQtWidgets/Common/WidgetDllOption.h>
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
-#include "MantidGeometry/Instrument.h"
 
 #include <QFrame>
 #include <QMap>
@@ -41,7 +40,6 @@ class MatrixWorkspace;
 namespace MantidQt {
 namespace MantidWidgets {
 class CollapsiblePanel;
-class OneCurvePlot;
 class Shape2D;
 
 /**

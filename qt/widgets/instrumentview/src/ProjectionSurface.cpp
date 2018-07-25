@@ -688,7 +688,7 @@ void ProjectionSurface::loadShapesFromTableWorkspace(
 * Return a combined list of peak parkers from all overlays
 * @param detID :: The detector ID of interest
 */
-QList<PeakMarker2D *> ProjectionSurface::getMarkersWithID(int detID) const {
+QList<PeakMarker2D *> ProjectionSurface::getMarkersWithID(size_t detID) const {
   QList<PeakMarker2D *> out;
   for (int i = 0; i < m_peakShapes.size(); ++i) {
     out += m_peakShapes[i]->getMarkersWithID(detID);

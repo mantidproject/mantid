@@ -18,7 +18,8 @@ set ( SRC_FILES
 	src/InstrumentWidgetTreeTab.cpp
 	src/MantidGLWidget.cpp
 	src/MaskBinsData.cpp
-	src/OneCurvePlot.cpp
+	src/MiniPlot.cpp
+	src/MiniPlotController.cpp
 	src/OpenGLError.cpp
 	src/PanelsSurface.cpp
 	src/PeakMarker2D.cpp
@@ -51,7 +52,8 @@ set ( MOC_FILES
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h
   inc/MantidQtWidgets/InstrumentView/ColorMapWidget.h
   inc/MantidQtWidgets/InstrumentView/MantidGLWidget.h
-  inc/MantidQtWidgets/InstrumentView/OneCurvePlot.h
+  inc/MantidQtWidgets/InstrumentView/MiniPlot.h
+  inc/MantidQtWidgets/InstrumentView/MiniPlotController.h
   inc/MantidQtWidgets/InstrumentView/CollapsiblePanel.h
   inc/MantidQtWidgets/InstrumentView/InstrumentActor.h
   inc/MantidQtWidgets/InstrumentView/PeakOverlay.h
@@ -85,7 +87,6 @@ set ( INC_FILES
 	inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTypes.h
 	inc/MantidQtWidgets/InstrumentView/MantidGLWidget.h
 	inc/MantidQtWidgets/InstrumentView/MaskBinsData.h
-	inc/MantidQtWidgets/InstrumentView/OneCurvePlot.h
 	inc/MantidQtWidgets/InstrumentView/OpenGLError.h
 	inc/MantidQtWidgets/InstrumentView/PanelsSurface.h
 	inc/MantidQtWidgets/InstrumentView/PeakMarker2D.h
@@ -110,17 +111,46 @@ set ( UI_FILES
   inc/MantidQtWidgets/InstrumentView/UCorrectionDialog.ui
 )
 
+set (QWT_SRC_FILES
+  src/qwt/MantidColorMap.cpp
+  src/qwt/PowerScaleEngine.cpp
+  src/qwt/ScaleEngine.cpp
+  src/qwt/qwt_abstract_scale.cpp
+  src/qwt/qwt_abstract_scale_draw.cpp
+  src/qwt/qwt_clipper.cpp
+  src/qwt/qwt_color_map.cpp
+  src/qwt/qwt_double_interval.cpp
+  src/qwt/qwt_double_rect.cpp
+  src/qwt/qwt_layout_metrics.cpp
+  src/qwt/qwt_math.cpp
+  src/qwt/qwt_painter.cpp
+  src/qwt/qwt_paint_buffer.cpp
+  src/qwt/qwt_scale_div.cpp
+  src/qwt/qwt_scale_draw.cpp
+  src/qwt/qwt_scale_engine.cpp
+  src/qwt/qwt_scale_map.cpp
+  src/qwt/qwt_scale_widget.cpp
+  src/qwt/qwt_text.cpp
+  src/qwt/qwt_text_engine.cpp
+  src/qwt/qwt_text_label.cpp
+)
+
+set (QWT_MOC_FILES
+  src/qwt/qwt_text_label.h
+  src/qwt/qwt_scale_widget.h
+)
+
 # Target
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
-  QT_VERSION 4
-  SRC ${SRC_FILES}
-  MOC ${MOC_FILES}
+  SRC ${SRC_FILES} ${QWT_SRC_FILES}
+  MOC ${MOC_FILES} ${QWT_MOC_FILES}
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
   DEFS
     IN_MANTIDQT_INSTRUMENTVIEW
   INCLUDE_DIRS
     inc
+    ${CMAKE_CURRENT_LIST_DIR}/../mplcpp/inc
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
@@ -131,10 +161,11 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
     ${OPENGL_glu_LIBRARY}
   QT4_LINK_LIBS
     Qt4::QtOpenGL
-    Qwt5
+  QT5_LINK_LIBS
+    Qt5::OpenGL
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
-    MantidQtWidgetsLegacyQwt
+    MantidQtWidgetsMplCpp
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)

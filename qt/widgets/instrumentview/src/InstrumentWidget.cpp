@@ -18,6 +18,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/InstrumentView/PanelsSurface.h"
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
+#include "MantidQtWidgets/Common/QtCompat.h"
 #include "MantidQtWidgets/InstrumentView/SimpleWidget.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSphere.h"
@@ -43,6 +44,7 @@
 #include <QLineEdit>
 #include <QMenu>
 #include <QMessageBox>
+#include <QMimeData>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QSettings>

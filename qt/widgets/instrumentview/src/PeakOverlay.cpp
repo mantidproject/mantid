@@ -317,7 +317,7 @@ void PeakOverlay::draw(QPainter &painter) const {
 * @param detID :: A detector ID for which markers are to be returned.
 * @return :: A list of zero ot more markers.
 */
-QList<PeakMarker2D *> PeakOverlay::getMarkersWithID(int detID) const {
+QList<PeakMarker2D *> PeakOverlay::getMarkersWithID(size_t detID) const {
   return m_det2marker.values(detID);
 }
 

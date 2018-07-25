@@ -32,7 +32,6 @@ class CollapsiblePanel : public QWidget {
 public:
   CollapsiblePanel(const QString &caption, QWidget *parent);
   void setWidget(QWidget *widget);
-  void setCaption(const QString &caption);
   bool isCollapsed() const;
 signals:
   void collapsed();
@@ -40,6 +39,7 @@ signals:
 public slots:
   void collapse();
   void expand();
+  void setCaption(const QString &caption);
 private slots:
   void collapseOrExpand(bool);
 
