@@ -11,6 +11,9 @@ from Muon.GUI.Common import message_box
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_view import LoadView
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_presenter import LoadPresenter
+from Muon.GUI.ElementalAnalysis.Checkbox.checkbox_model import CheckboxModel
+from Muon.GUI.ElementalAnalysis.Checkbox.checkbox_view import CheckboxView
+from Muon.GUI.ElementalAnalysis.Checkbox.checkbox_presenter import CheckboxPresenter
 
 
 class ElementalAnalysisGui(QtGui.QMainWindow):
@@ -29,13 +32,36 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.ptable.register_table_lclicked(self.table_left_clicked)
         self.ptable.register_table_rclicked(self.table_right_clicked)
 
+        self.widget_list = QtGui.QVBoxLayout()
+
         self.load_widget = LoadPresenter(LoadView(), LoadModel())
         self.load_widget.register_spinbox_val_changed(self.spinbox_changed)
         self.load_widget.register_spinbox_submit(self.spinbox_submit)
 
+        self.peak_types = ["Major", "Minor", "Gamma", "Electron"]
+        self._checkbox_view = CheckboxView(
+            ["{} Peaks".format(x) for x in self.peak_types])
+        self.checkbox = CheckboxPresenter(self._checkbox_view, CheckboxModel())
+        for _, v in self.checkbox.view.checkbox_dict.iteritems():
+            self.checkbox.view.on_checkbox_changed(v, self.checkbox_changed)
+            # test unreg (works now!)
+            self.checkbox.view.unreg_on_checkbox_changed(
+                v, self.checkbox_changed)
+            self.checkbox.view.on_checkbox_changed(v, self.checkbox_changed)
+
+        self.widget_list.addWidget(self.checkbox.view)
+
+        self.detectors = ["GE{}".format(x) for x in range(1, 5)]
+        self.detector_view = CheckboxView(self.detectors, "Detectors:")
+        self.detectors_widget = CheckboxPresenter(
+            self.detector_view, CheckboxModel())
+        self.widget_list.addWidget(self.detectors_widget.view)
+
+        self.widget_list.addWidget(self.load_widget.view)
+
         self.box = QtGui.QHBoxLayout()
         self.box.addWidget(self.ptable.view)
-        self.box.addWidget(self.load_widget.view)
+        self.box.addLayout(self.widget_list)
         self.setCentralWidget(QtGui.QWidget(self))
         self.centralWidget().setLayout(self.box)
         self.setWindowTitle("Elemental Analysis")
@@ -54,6 +80,9 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         filename = str(QtGui.QFileDialog.getOpenFileName())
         if filename:
             self.ptable.set_peak_datafile(filename)
+
+    def checkbox_changed(self, checkbox, state):
+        print("checkbox changed: {} {}".format(checkbox, state))
 
 
 def qapp():
