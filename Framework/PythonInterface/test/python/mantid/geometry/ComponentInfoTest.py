@@ -160,28 +160,28 @@ class ComponentInfoTest(unittest.TestCase):
     """
 
     def test_isDetector_extreme(self):
-    	info = self._ws.componentInfo()
-    	with self.assertRaises(OverflowError):
-    		info.isDetector(-1)
+        info = self._ws.componentInfo()
+        with self.assertRaises(OverflowError):
+            info.isDetector(-1)
 
     def test_detectorsInSubtree_extreme(self):
         info = self._ws.componentInfo()
         with self.assertRaises(OverflowError):
-        	info.detectorsInSubtree(-1)
+            info.detectorsInSubtree(-1)
         self.assertEquals(type(info.detectorsInSubtree(5)), list)
 
     def test_componentsInSubtree_extreme(self):
         info = self._ws.componentInfo()
         with self.assertRaises(OverflowError):
-        	info.componentsInSubtree(-1)
+            info.componentsInSubtree(-1)
         self.assertEquals(type(info.componentsInSubtree(5)), list)
 
     def test_position_extreme(self):
-    	info = self._ws.componentInfo()
-    	with self.assertRaises(OverflowError):
-    		info.position(-1)
-    	self.assertEquals(type(info.position(0)), V3D)
-    	self.assertEquals(type(info.position(5)), V3D)
+        info = self._ws.componentInfo()
+        with self.assertRaises(OverflowError):
+            info.position(-1)
+        self.assertEquals(type(info.position(0)), V3D)
+        self.assertEquals(type(info.position(5)), V3D)
 
     def test_rotation_extreme(self):
         info = self._ws.componentInfo()
@@ -191,18 +191,18 @@ class ComponentInfoTest(unittest.TestCase):
         self.assertEquals(type(info.rotation(5)), Quat)
 
     def test_relativePosition_extreme(self):
-    	info = self._ws.componentInfo()
-    	with self.assertRaises(OverflowError):
-    		info.relativePosition(-1)
-    	self.assertEquals(type(info.relativePosition(0)), V3D)
-    	self.assertEquals(type(info.relativePosition(5)), V3D)
+        info = self._ws.componentInfo()
+        with self.assertRaises(OverflowError):
+            info.relativePosition(-1)
+        self.assertEquals(type(info.relativePosition(0)), V3D)
+        self.assertEquals(type(info.relativePosition(5)), V3D)
 
     def test_relativeRotation_extreme(self):
-    	info = self._ws.componentInfo()
-    	with self.assertRaises(OverflowError):
-    		info.relativeRotation(-1)
-    	self.assertEquals(type(info.relativeRotation(0)), Quat)
-    	self.assertEquals(type(info.relativeRotation(5)), Quat)
+        info = self._ws.componentInfo()
+        with self.assertRaises(OverflowError):
+            info.relativeRotation(-1)
+        self.assertEquals(type(info.relativeRotation(0)), Quat)
+        self.assertEquals(type(info.relativeRotation(5)), Quat)
 
     def test_setPosition_extreme(self):
         info = self._ws.componentInfo()
@@ -255,100 +255,100 @@ class ComponentInfoTest(unittest.TestCase):
     """
 
     def test_size_exceptional(self):
-    	info = self._ws.componentInfo()
-    	with self.assertRaises(TypeError):
-    		info.size(0)
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+            info.size(0)
 
     def test_isDetector_exceptional(self):
-    	info = self._ws.componentInfo()
-    	with self.assertRaises(TypeError):
-    		info.isDetector("Error")
-    	with self.assertRaises(TypeError):
-    		info.isDetector(10.0)
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+            info.isDetector("Error")
+        with self.assertRaises(TypeError):
+            info.isDetector(10.0)
 
     def test_detectorsInSubtree_exceptional(self):
         info = self._ws.componentInfo()
         with self.assertRaises(TypeError):
-        	info.detectorsInSubtree("Error")
+            info.detectorsInSubtree("Error")
         with self.assertRaises(TypeError):
-        	info.detectorsInSubtree(10.0)
+            info.detectorsInSubtree(10.0)
 
     def test_componentsInSubtree_exceptional(self):
-	    info = self._ws.componentInfo()
-	    with self.assertRaises(TypeError):
-	    	info.componentsInSubtree("Error")
-	    with self.assertRaises(TypeError):
-	    	info.componentsInSubtree(10.0)
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+            info.componentsInSubtree("Error")
+        with self.assertRaises(TypeError):
+            info.componentsInSubtree(10.0)
 
     def test_position_exceptional(self):
-    	info = self._ws.componentInfo()
-    	with self.assertRaises(TypeError):
-    		info.position("Zero")
-    	with self.assertRaises(TypeError):
-    		info.position(0.0)
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+            info.position("Zero")
+        with self.assertRaises(TypeError):
+            info.position(0.0)
 
     def test_rotation_exceptional(self):
-		info = self._ws.componentInfo()
-		with self.assertRaises(TypeError):
-			info.rotation("Zero")
-		with self.assertRaises(TypeError):
-			info.rotation(0.0)
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+            info.rotation("Zero")
+        with self.assertRaises(TypeError):
+            info.rotation(0.0)
 
     def test_relativePosition_exceptional(self):
-		info = self._ws.componentInfo()
-		with self.assertRaises(TypeError):
-			info.relativePosition("Zero")
-		with self.assertRaises(TypeError):
-			info.relativePosition(0.0)
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+            info.relativePosition("Zero")
+        with self.assertRaises(TypeError):
+            info.relativePosition(0.0)
 
     def test_relativeRotation_exceptional(self):
-		info = self._ws.componentInfo()
-		with self.assertRaises(TypeError):
-			info.relativeRotation("Zero")
-		with self.assertRaises(TypeError):
-			info.relativeRotation(0.0)
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+            info.relativeRotation("Zero")
+        with self.assertRaises(TypeError):
+            info.relativeRotation(0.0)
 
     def test_setPosition_exceptional(self):
         info = self._ws.componentInfo()
         pos = [0,0,0]
         with self.assertRaises(TypeError):
-        	info.setPosition(0, pos)
+            info.setPosition(0, pos)
 
     def test_setRotation_exceptional(self):
         info = self._ws.componentInfo()
         rot = [0,0,0,0]
         with self.assertRaises(TypeError):
-        	info.setRotation(0, rot)
+            info.setRotation(0, rot)
 
     def test_hasSource_exceptional(self):
         info = self._ws.componentInfo()
         with self.assertRaises(TypeError):
-        	info.hasSource(0)
+            info.hasSource(0)
 
     def test_hasSample_exceptional(self):
         info = self._ws.componentInfo()
         with self.assertRaises(TypeError):
-        	info.hasSample(0)
+            info.hasSample(0)
 
     def test_source_exceptional(self):
         info = self._ws.componentInfo()
         with self.assertRaises(TypeError):
-        	info.source(0)
+            info.source(0)
 
     def test_sample_exceptional(self):
         info = self._ws.componentInfo()
         with self.assertRaises(TypeError):
-        	info.sample(0)
+            info.sample(0)
 
     def test_sourcePosition_exceptional(self):
         info = self._ws.componentInfo()
         with self.assertRaises(TypeError):
-        	info.sourcePosition(0)
+            info.sourcePosition(0)
 
     def test_samplePosition_exceptional(self):
         info = self._ws.componentInfo()
         with self.assertRaises(TypeError):
-        	info.samplePosition(0)
+            info.samplePosition(0)
 
     def test_hasParent_exceptional(self):
         info = self._ws.componentInfo()
@@ -374,9 +374,9 @@ class ComponentInfoTest(unittest.TestCase):
     def test_name_exceptional(self):
         info = self._ws.componentInfo()
         with self.assertRaises(TypeError):
-        	info.name("Name")
+            info.name("Name")
         with self.assertRaises(TypeError):
-    		info.name(0.12)
+            info.name(0.12)
 
 if __name__ == '__main__':
     unittest.main()
