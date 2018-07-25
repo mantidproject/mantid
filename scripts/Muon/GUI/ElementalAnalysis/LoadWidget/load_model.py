@@ -10,7 +10,6 @@ import mantid.simpleapi as mantid
 
 
 class LoadModel(object):
->>>>>>> refs #23023 add load algorithm (threaded) to browse
     def __init__(self):
         super(LoadModel, self).__init__()
 

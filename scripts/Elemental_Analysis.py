@@ -16,6 +16,10 @@ from Muon.GUI.ElementalAnalysis.Detectors.detectors_presenter import DetectorsPr
 from Muon.GUI.ElementalAnalysis.Detectors.detectors_view import DetectorsView
 from Muon.GUI.ElementalAnalysis.Peaks.peaks_presenter import PeaksPresenter
 from Muon.GUI.ElementalAnalysis.Peaks.peaks_view import PeaksView
+from Muon.GUI.ElementalAnalysis.Checkbox.checkbox_model import CheckboxModel
+from Muon.GUI.ElementalAnalysis.Checkbox.checkbox_view import CheckboxView
+from Muon.GUI.ElementalAnalysis.Checkbox.checkbox_presenter import CheckboxPresenter
+
 
 class ElementalAnalysisGui(QtGui.QMainWindow):
     def __init__(self, parent=None):
@@ -62,6 +66,27 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.widget_list.addWidget(self.detectors.view)
         self.widget_list.addWidget(self.load_widget.view)
 
+        self.peak_types = ["Major", "Minor", "Gamma", "Electron"]
+        self._checkbox_view = CheckboxView(
+            ["{} Peaks".format(x) for x in self.peak_types])
+        self.checkbox = CheckboxPresenter(self._checkbox_view, CheckboxModel())
+        for _, v in self.checkbox.view.checkbox_dict.iteritems():
+            self.checkbox.view.on_checkbox_changed(v, self.checkbox_changed)
+            # test unreg (works now!)
+            self.checkbox.view.unreg_on_checkbox_changed(
+                v, self.checkbox_changed)
+            self.checkbox.view.on_checkbox_changed(v, self.checkbox_changed)
+
+        self.widget_list.addWidget(self.checkbox.view)
+
+        self.detectors = ["GE{}".format(x) for x in range(1, 5)]
+        self.detector_view = CheckboxView(self.detectors, "Detectors:")
+        self.detectors_widget = CheckboxPresenter(
+            self.detector_view, CheckboxModel())
+        self.widget_list.addWidget(self.detectors_widget.view)
+
+        self.widget_list.addWidget(self.load_widget.view)
+
         self.box = QtGui.QHBoxLayout()
         self.box.addWidget(self.ptable.view)
         self.box.addLayout(self.widget_list)
@@ -83,6 +108,9 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         filename = str(QtGui.QFileDialog.getOpenFileName())
         if filename:
             self.ptable.set_peak_datafile(filename)
+
+    def checkbox_changed(self, checkbox, state):
+        print("checkbox changed: {} {}".format(checkbox, state))
 
 
 def qapp():
