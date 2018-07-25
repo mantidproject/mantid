@@ -46,7 +46,6 @@ public:
   const std::string summary() const override {
     return "Saves a 2D workspace to a ascii file.";
   }
-
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
@@ -67,10 +66,6 @@ private:
   void extraHeaders(std::ofstream &file) override { UNUSED_ARG(file); };
 };
 
-// Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM(SaveANSTOAscii)
-
 } // namespace DataHandling
 } // namespace Mantid
-
 #endif /*  MANTID_DATAHANDLING_SAVEANSTO_H_  */

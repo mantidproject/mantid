@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/SaveMFT.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -47,13 +46,11 @@ public:
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
     const Workspace_sptr ws = create<Workspace2D>(1, histogram);
-    const auto ws2{boost::dynamic_pointer_cast<Workspace>(ws)};
     const std::string wsname = "ws1";
-    AnalysisDataService::Instance().addOrReplace(wsname, ws2);
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", wsname))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", wsname))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
@@ -83,7 +80,6 @@ public:
     } catch (...) {
       TS_FAIL("Error deleting file " + filename);
     }
-    AnalysisDataService::Instance().remove(wsname);
   }
 
   void test_histogram_data() {
@@ -92,12 +88,10 @@ public:
     Mantid::HistogramData::Histogram histogram(x1, y1);
     Workspace2D_sptr ws = create<Workspace2D>(1, histogram);
     const std::string wsname = "ws1";
-    const auto ws2{boost::dynamic_pointer_cast<Workspace>(ws)};
-    AnalysisDataService::Instance().addOrReplace(wsname, ws2);
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", wsname))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", wsname))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
@@ -129,23 +123,20 @@ public:
     } catch (...) {
       TS_FAIL("Error deleting file " + filename);
     }
-    AnalysisDataService::Instance().remove(wsname);
   }
 
   void test_empty_workspace() {
     auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
     std::string wsname = "ws1";
-    AnalysisDataService::Instance().addOrReplace(wsname, ws);
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", wsname))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", wsname))
     TS_ASSERT_THROWS_ANYTHING(alg.execute())
     TS_ASSERT(!alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
     TS_ASSERT(!Poco::File(filename).exists())
-    AnalysisDataService::Instance().remove(wsname);
   }
 
   void test_number_lines_for_two_data_values() {
@@ -155,11 +146,10 @@ public:
     auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, histogram);
     std::string wsname = "ws1";
-    AnalysisDataService::Instance().addOrReplace(wsname, ws);
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", wsname))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", wsname))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -177,7 +167,6 @@ public:
     } catch (...) {
       TS_FAIL("Error deleting file " + filename);
     }
-    AnalysisDataService::Instance().remove(wsname);
   }
 
   void test_dx_values() {
@@ -186,13 +175,11 @@ public:
     Mantid::HistogramData::Histogram histogram(x1, y1);
     histogram.setPointStandardDeviations(std::vector<double>{1.1, 1.3});
     const Workspace_sptr ws = create<Workspace2D>(1, histogram);
-    const auto ws2{boost::dynamic_pointer_cast<Workspace>(ws)};
     const std::string wsname = "ws1";
-    AnalysisDataService::Instance().addOrReplace(wsname, ws2);
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", wsname))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", wsname))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
@@ -222,7 +209,6 @@ public:
     } catch (...) {
       TS_FAIL("Error deleting file " + filename);
     }
-    AnalysisDataService::Instance().remove(wsname);
   }
 
   void test_no_header() {
@@ -230,13 +216,11 @@ public:
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
     const Workspace_sptr ws = create<Workspace2D>(1, histogram);
-    const auto ws2{boost::dynamic_pointer_cast<Workspace>(ws)};
     const std::string wsname = "ws1";
-    AnalysisDataService::Instance().addOrReplace(wsname, ws2);
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", wsname))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", wsname))
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("Header", "Do not write header lines"))
@@ -263,7 +247,6 @@ public:
     } catch (...) {
       TS_FAIL("Error deleting file " + filename);
     }
-    AnalysisDataService::Instance().remove(wsname);
   }
 
   void test_override_existing_file() {}

@@ -3,8 +3,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidKernel/ArrayProperty.h"
 
-#include <fstream>
-
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the algorithm factory
