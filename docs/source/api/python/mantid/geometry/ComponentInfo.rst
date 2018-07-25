@@ -13,8 +13,8 @@ Many users may need this extra information so that they can have a better unders
 
 ComponentInfo is one of three objects that the user can gain access to from a Workspace. 
 The other two are:
-* SpectrumInfo
-* DetectorInfo
+  * SpectrumInfo
+  * DetectorInfo
 
 -------
 Usage
@@ -33,8 +33,8 @@ The return value is a ``ComponentInfo`` object.
 	info = ws.componentInfo()
 	print(type(info))
 
-**Example 2 - Calling a method on the ComponentInfo Object:**
-This example shows how to call the ``componentsInSubtree`` method.
+**Example 2 - Calling the relativePosition method on the ComponentInfo Object:**
+This example shows how to call the ``relativePosition`` method.
 The method takes in an integer ``index`` parameter which corresponds to a component.
 The return value is a list of integers denoting components.
 
@@ -46,14 +46,19 @@ The return value is a list of integers denoting components.
 	# Get the ComponentInfo object
 	info = ws.componentInfo()
 
-	# Call relativePosition()
+	# Call relativePosition
 	print(type(info.relativePosition(0)))
 
-**Example 3 - Calling a method on the ComponentInfo Object:**
-The ``setRotation()`` method takes in a Quat object which defines a rotation. The rotation is applied to the component. Retriving the roatation after setting it may not always give the same Quat object back - i.e. the values could be changed.
+**Example 3 - Calling the setRotation method on the ComponentInfo Object:**
+The ``setRotation()`` method takes in a Quat object which defines a rotation.
+The rotation is applied to the component. 
+Retriving the rotation after setting it may not always give the same Quat object back - i.e. the values could be changed.
 
 .. testcode:: CallSetRotationMethod
 	
+	# Import Quat
+	from mantid.kernel import Quat
+
 	# Create a workspace to use
 	ws = CreateSampleWorkspace()
 
@@ -65,25 +70,28 @@ The ``setRotation()`` method takes in a Quat object which defines a rotation. Th
 	info.setRotation(0, quat)
 	print(info.rotation(0))
 
-**Example 4 - Calling a method on the ComponentInfo Object:**
-The ``hasParent()`` method takes an ``index`` parameter which represents the component and returns True if the component has a parent component.
+**Example 4 - Calling the hasParent method on the ComponentInfo Object:**
+The ``hasParent()`` method takes an integer ``index`` parameter which represents the component.
+The return value is True if the component has a parent component or False otherwise.
 
-.. testcode:: CallHasParent
+.. testcode:: CallHasParentMethod
 	
 	# Create a workspace to use
 	ws = CreateSampleWorkspace()
 
 	# Get the ComponentInfo object
-	info = ws.spectrumInfo()
+	info = ws.componentInfo()
 
-	# Call the hasParent method
+	# Call hasParent
 	print(info.hasParent(0))
 
 
 **Example 5 - Retrieving a List of Child Components from a ComponentInfo Object:**
-The ``children()`` method does not take in any parameters and returns a list of integers representing the child components. The returned list can then be indexed into to obtain a specific component.
+The ``children()`` method does not take in any parameters.
+The method returns a list of integers representing the child components.
+The returned list can then be indexed into to obtain a specific component.
 
-.. testcode:: CallChildren
+.. testcode:: CallChildrenMethod
 	
 	# Create a workspace to use
 	ws = CreateSampleWorkspace()
@@ -100,7 +108,7 @@ Output:
 
 .. testoutput:: CreateComponentInfoObject
 
-	<class 'mantid.api._api.ComponentInfo'>
+	<class 'mantid.geometry._geometry.ComponentInfo'>
 
 .. testoutput:: CallRelativePositionMethod
 
@@ -111,13 +119,13 @@ Output:
 	[1,0,0,0]
 	[0,0,0,0]
 
-.. testoutput:: CallHasParent
+.. testoutput:: CallHasParentMethod
 
 	True
 
-.. testoutput:: CallChildren
+.. testoutput:: CallChildrenMethod
 
-	<type 'list'>
+	<class 'list'>
 	0
 
 	
