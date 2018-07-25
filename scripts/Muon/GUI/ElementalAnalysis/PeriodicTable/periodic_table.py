@@ -1,3 +1,9 @@
+# This is a modified version of silx.gui.widgets.PeriodicTable
+# It allows the creation of a Periodic Table Qt widget with colouring and buttons for each element
+# Functionality added:
+# - Enabling/Disabling element buttons
+# - Left/Right click independent events
+
 from collections import OrderedDict
 import logging
 from PyQt4 import QtCore
