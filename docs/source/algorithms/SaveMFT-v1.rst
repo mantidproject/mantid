@@ -50,14 +50,17 @@ Usage
     # Save with mft extension and using the option LogList: Title will be added to an required header line and d will be additionally added which increases the number of lines by 1.
     SaveMFT(InputWorkspace=ws, Filename=file, LogList=['Title', 'd'])
 
+.. testoutput:: SaveMFT_general_usage
+
     if os.path.exists(file):
       myFile = open(file, 'r')
-      print myFile.read()
+      print(myFile.read())
 
 .. testcleanup:: SaveMFT_general_usage
 
-    # Delete file
-    os.remove(file)
+    if os.path.exists(file):
+      # Delete file
+      os.remove(file)
 
 .. categories::
 
