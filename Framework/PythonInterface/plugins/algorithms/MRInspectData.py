@@ -13,6 +13,7 @@ DEAD_PIXELS = 10
 NX_PIXELS = 304
 NY_PIXELS = 256
 
+
 class MRInspectData(PythonAlgorithm):
 
     def category(self):
@@ -416,6 +417,7 @@ class DataInfo(object):
         # Write to logs
         self.log()
 
+
 def fit_2d_peak(workspace):
     """
         Fit a 2D Gaussian peak
@@ -498,15 +500,18 @@ def fit_2d_peak(workspace):
 
     return [x_min, x_max], [y_min, y_max]
 
+
 def coord_to_code(x, y):
     """ Utility function to encode pixel coordinates so we can unravel our distribution in a 1D array """
     return 1000 * x + y
+
 
 def code_to_coord(c):
     """ Utility function to decode encoded coordinates """
     i_x = c / 1000
     i_y = c % 1000
     return i_x, i_y
+
 
 def poly_bck(value, *p):
     """
@@ -526,6 +531,7 @@ def poly_bck(value, *p):
     values[coord[1]<DEAD_PIXELS] = 0
     values[coord[1]>=NY_PIXELS-DEAD_PIXELS] = 0
     return values
+
 
 def poly_bck_signal(value, *p):
     """
@@ -551,6 +557,7 @@ def poly_bck_signal(value, *p):
     values[coord[1]>=NY_PIXELS-DEAD_PIXELS] = 0
     return values
 
+
 def gauss_simple(value, *p):
     """
         Gaussian function with threshold background
@@ -571,6 +578,7 @@ def gauss_simple(value, *p):
     values[coord[1]<DEAD_PIXELS] = 0
     values[coord[1]>=NY_PIXELS-DEAD_PIXELS] = 0
     return values
+
 
 def chi2(data, model):
     """ Returns the chi^2 for a data set and model pair """
