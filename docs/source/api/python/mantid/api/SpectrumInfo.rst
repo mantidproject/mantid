@@ -47,7 +47,7 @@ The return value is True or False.
 	info = ws.spectrumInfo()
 
 	# Call hasDetectors()
-	print(info.hasDetectors())
+	print(info.hasDetectors(0))
 
 **Example 3 - Calling a method on the SpectrumInfo Object:**
 The ``l1()`` method does not take in any parameters and returns the distance from the source to the sample.
@@ -80,7 +80,7 @@ The ``sourcePosition()`` method does not take any parameters and returns the abs
 **Example 5 - Retrieving SpectrumDefinition Objects from a SpectrumInfo Object:**
 The ``getAllSpectrumDefinitions()`` method does not take in any parameters and returns a list of ``SpectrumDefinition``s. The returned list can then be indexed into to obtain specific ``SpectrumDefinition`` objects.
 
-.. testcode:: GetAllSpectrumDefintions
+.. testcode:: GetAllSpectrumDefinitions
 	
 	# Create a workspace to use
 	ws = CreateSampleWorkspace()
@@ -101,7 +101,7 @@ Output:
 
 .. testoutput:: CallHasDetectorsMethod
 
-	False
+	True
 
 .. testoutput:: GetL1Value
 
