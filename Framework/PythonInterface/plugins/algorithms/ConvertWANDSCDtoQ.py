@@ -290,7 +290,9 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             createWS_alg.execute()
             mtd.addOrReplace(self.getPropertyValue("OutputWorkspace")+'_normalization', createWS_alg.getProperty("OutputWorkspace").value)
 
-        output /= output_norm
+        old_settings = np.seterr(divide='ignore', invalid='ignore') # Ignore RuntimeWarning: invalid value encountered in true_divide
+        output /= output_norm # We often divide by zero here and we get NaN's, this is desired behaviour
+        np.seterr(**old_settings)
 
         progress.report('Creating MDHistoWorkspace')
         createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)

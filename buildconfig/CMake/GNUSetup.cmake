@@ -49,6 +49,13 @@ add_compile_options ( $<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>
   $<$<COMPILE_LANGUAGE:CXX>:-fno-operator-names>
 )
 
+#Linking errors on Ubuntu 18.04 with --enable-new-dtags 
+if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  string(APPEND CMAKE_MODULE_LINKER_FLAGS " -Wl,--disable-new-dtags" )
+  string(APPEND CMAKE_EXE_LINKER_FLAGS " -Wl,--disable-new-dtags" )
+  string(APPEND CMAKE_SHARED_LINKER_FLAGS " -Wl,--disable-new-dtags" )
+endif ()
+
 # Check if we have a new enough version for these flags
 if ( CMAKE_COMPILER_IS_GNUCXX )
   add_compile_options ( -Wpedantic )

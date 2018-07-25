@@ -176,6 +176,14 @@ void CalculateMuonAsymmetry::exec() {
   // get new norm
   std::vector<double> norms =
       getNormConstants(wsNamesUnNorm); // this will do the fit
+  auto containsZeros = std::any_of(norms.begin(), norms.end(),
+                                   [](double value) { return value == 0.0; });
+  if (containsZeros) {
+
+    setProperty("OutputStatus", "Aborted, a normalization constant was zero");
+    g_log.error("Got a zero for the normalization, aborting algorithm.");
+    return;
+  }
   // update the ws to new norm
   for (size_t j = 0; j < wsNames.size(); j++) {
     API::MatrixWorkspace_sptr ws =
