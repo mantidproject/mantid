@@ -13,8 +13,8 @@ Many users may need this extra information so that they can have a better unders
 
 DetectorInfo is one of three objects that the user can gain access to from a Workspace. 
 The other two are:
-* SpectrumInfo
-* ComponentInfo
+  * SpectrumInfo
+  * ComponentInfo
 
 -------
 Usage
@@ -46,13 +46,14 @@ The method takes in an integer ``index`` parameter which corresponds to a compon
 	info = ws.detectorInfo()
 
 	# Call setMasked
-	print(info.setMasked(0, True))
+	info.setMasked(0, True)
 	print(info.isMasked(0))
-	print(info.setMasked(0, False))
+	info.setMasked(0, False)
 	print(info.isMasked(0))
 
 **Example 3 - Calling the twoTheta method on the DetectorInfo Object:**
-The ``twoTheta()`` method takes in an integer ``index`` parameter which represents a detector index. The return value is a float which represents the scattering angle with respect to the beam direction.
+The ``twoTheta()`` method takes in an integer ``index`` parameter which represents a detector index. 
+The return value is a float which represents the scattering angle with respect to the beam direction.
 
 .. testcode:: CallTwoThetaMethod
 	
@@ -66,7 +67,9 @@ The ``twoTheta()`` method takes in an integer ``index`` parameter which represen
 	print(type(info.twoTheta(0)))
 
 **Example 4 - Calling the position method on the DetectorInfo Object:**
-The ``position()`` method takes an ``index`` parameter which represents a detector index and returns the absolute position of that detector. The returned object is of type V3D which is a essentially 3D vector.
+The ``position()`` method takes an ``index`` parameter which represents a detector index. 
+The method returns the absolute position of that detector. 
+The returned object is of type V3D which is a position in 3D space.
 
 .. testcode:: CallPositionMethod
 	
@@ -81,7 +84,8 @@ The ``position()`` method takes an ``index`` parameter which represents a detect
 
 
 **Example 5 - Calling the size method on the DetectorInfo Object:**
-The ``size()`` method does not take in any parameters and returns a number of detectors in the instrument. One can also use the built in ``__len__`` function to obtain the same result.
+The ``size()`` method does not take in any parameters and returns a number of detectors in the instrument. 
+One can also use the built in ``__len__`` function to obtain the same result.
 
 .. testcode:: CallSizeAndLenMethods
 	
@@ -99,25 +103,25 @@ Output:
 
 .. testoutput:: CreateDetectorInfoObject
 
-<class 'mantid.geometry._geometry.DetectorInfo'>
+	<class 'mantid.geometry._geometry.DetectorInfo'>
 
 .. testoutput:: CallSetMaskedMethod
 
-True
-False
+	True
+	False
 
 .. testoutput:: CallTwoThetaMethod
 
-<type 'float'>
+	<class 'float'>
 
 .. testoutput:: CallPositionMethod
 
-<class 'mantid.kernel._kernel.V3D'>
+	<class 'mantid.kernel._kernel.V3D'>
 
 .. testoutput:: CallSizeAndLenMethods
 
-200
-200
+	200
+	200
 
 
 *bases:* :py:obj:`mantid.geometry.DetectorInfo`
