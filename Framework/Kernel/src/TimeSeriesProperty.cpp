@@ -1024,21 +1024,23 @@ std::pair<double, double> TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(
     // Get the log value and index at the start time of the filter
     int index;
     double value = getSingleValue(time.start(), index);
-    value = (value - mean) * (value - mean);
+    double valuestddev = (value - mean) * (value - mean);
     DateAndTime startTime = time.start();
 
     while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
       ++index;
+
       numerator +=
           DateAndTime::secondsFromDuration(m_values[index].time() - startTime) *
-          value;
+          valuestddev;
       startTime = m_values[index].time();
       value = static_cast<double>(m_values[index].value());
+      valuestddev = (value - mean) * (value - mean);
     }
 
     // Now close off with the end of the current filter range
     numerator +=
-        DateAndTime::secondsFromDuration(time.stop() - startTime) * value;
+        DateAndTime::secondsFromDuration(time.stop() - startTime) * valuestddev;
   }
 
   // Normalise by the total time

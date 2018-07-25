@@ -622,10 +622,10 @@ public:
     // average is unchanged, standard deviation within tolerance
     const auto dblPair = dblLog->timeAverageValueAndStdDev();
     TS_ASSERT_EQUALS(dblPair.first, dblMean);
-    TS_ASSERT_DELTA(dblPair.second, 2.4738, .0001);
+    TS_ASSERT_DELTA(dblPair.second, 1.8156, .0001);
     const auto intPair = intLog->timeAverageValueAndStdDev();
     TS_ASSERT_EQUALS(intPair.first, intMean);
-    TS_ASSERT_DELTA(intPair.second, 1.6771, .0001);
+    TS_ASSERT_DELTA(intPair.second, 1.1180, .0001);
 
     // Clean up
     delete dblLog;
