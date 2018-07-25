@@ -72,9 +72,11 @@ class SampleTest(unittest.TestCase):
         sample = self._ws.sample()
         self.assertEquals(type(sample.getShape()), CSGObject)
 
-    #def test_get_shape_xml(self):
-    #    sample = self._ws.sample()
-    #    self.assertEquals(type(sample.getShapeXML()), str)
+    def test_get_shape_xml(self):
+        sample = self._ws.sample()
+        shape = sample.getShape()
+        xml = shape.getShapeXML()
+        self.assertEquals(type(xml), str)
 
 
 
