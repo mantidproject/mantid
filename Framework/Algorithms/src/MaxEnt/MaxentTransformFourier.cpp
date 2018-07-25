@@ -17,6 +17,8 @@ MaxentTransformFourier::MaxentTransformFourier(MaxentSpace_sptr dataSpace,
 * given to the constructor.
 * Return value is real or complex according to the type of data space
 * given to the constructor.
+* If complex, input & return vectors consist of real part immediately
+* followed by imaginary part of each individual value.
 * @param image : [input] Image as a vector
 * @return : The vector in the data space
 */
@@ -50,6 +52,8 @@ MaxentTransformFourier::imageToData(const std::vector<double> &image) {
 * given to the constructor.
 * Return value is real or complex according to the type of image space
 * given to the constructor.
+* If complex, input & return vectors consist of real part immediately
+* followed by imaginary part of each individual value.
 * @param data : [input] Data as a vector
 * @return : The vector in the image space
 */

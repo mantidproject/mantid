@@ -268,7 +268,8 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
                                  "workspace must be even for complex data";
     if (!complex)
       nHistograms *=
-          2; // Double number of histograms to compare with adjustments.
+          2; // Double number of real histograms to compare with 
+             // adjustments, which are always complex.
   }
 
   // Check linear adjustments, we expect and even number of histograms
@@ -481,7 +482,7 @@ void MaxEnt::exec() {
     Progress progress(this, 0.0, 1.0, nIter);
 
     // Run maxent algorithm
-    bool stop = false;
+    bool converged = false;
     for (size_t it = 0; it < nIter; it++) {
 
       // Iterates one step towards the solution. This means calculating
@@ -506,15 +507,15 @@ void MaxEnt::exec() {
       evolChi[it] = currChisq;
       evolTest[it] = currAngle;
 
-      // Stop condition, solution found
+      // Stop condition for convergence, solution found
       if ((std::abs(currChisq / ChiTargetOverN - 1.) < chiEps) &&
           (currAngle < angle)) {
 
         // it + 1 iterations have been done because we count from zero
-        g_log.information() << "Stopped after " << it + 1 << " iterations"
+        g_log.information() << "Converged after " << it + 1 << " iterations"
                             << std::endl;
         iterationCounts.push_back(it + 1);
-        stop = true;
+        converged = true;
         break;
       }
 
@@ -527,8 +528,8 @@ void MaxEnt::exec() {
 
     } // Next Iteration
 
-    // If we didn't stop, we still need to record the number of iterations
-    if (!stop) {
+    // If we didn't converge, we still need to record the number of iterations
+    if (!converged) {
       iterationCounts.push_back(nIter);
     }
 
@@ -578,7 +579,7 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
   const size_t numBins = inWS->y(0).size();
   size_t nSpec = inWS->getNumberHistograms() / 2;
   std::vector<double> result;
-  result.reserve(numBins);
+  result.reserve(2*numBins);
 
   if (inWS->getNumberHistograms() % 2)
     throw std::invalid_argument(
