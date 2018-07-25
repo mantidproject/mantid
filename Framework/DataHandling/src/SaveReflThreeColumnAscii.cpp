@@ -43,8 +43,6 @@ void SaveReflThreeColumnAscii::extraHeaders(std::ofstream &file) {
 
 /** virtual method to add information to the file before the data
  *  @param file :: pointer to output file stream
- *  @param XData :: pointer to a std::vector<double> containing the point data
- * to be printed
  *  @param exportDeltaQ :: bool on whether deltaQ column to be printed
  * (permanantly false in this case)
  */
