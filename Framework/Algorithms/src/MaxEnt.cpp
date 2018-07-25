@@ -267,9 +267,8 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
       result["InputWorkspace"] = "The number of histograms in the input "
                                  "workspace must be even for complex data";
     if (!complex)
-      nHistograms *=
-          2; // Double number of real histograms to compare with 
-             // adjustments, which are always complex.
+      nHistograms *= 2; // Double number of real histograms to compare with
+                        // adjustments, which are always complex.
   }
 
   // Check linear adjustments, we expect and even number of histograms
@@ -579,7 +578,7 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
   const size_t numBins = inWS->y(0).size();
   size_t nSpec = inWS->getNumberHistograms() / 2;
   std::vector<double> result;
-  result.reserve(2*numBins);
+  result.reserve(2 * numBins);
 
   if (inWS->getNumberHistograms() % 2)
     throw std::invalid_argument(
