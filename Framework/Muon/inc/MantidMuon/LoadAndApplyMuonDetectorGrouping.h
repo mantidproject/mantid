@@ -105,6 +105,8 @@ private:
 
   void getTimeLimitsFromInputWorkspace(Mantid::API::Workspace_sptr inputWS,
                                        Mantid::Muon::AnalysisOptions &options);
+
+  void getTimeLimitsFromInputs(AnalysisOptions &options);
 };
 
 } // namespace Muon

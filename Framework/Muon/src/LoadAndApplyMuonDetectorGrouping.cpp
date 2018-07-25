@@ -2,7 +2,6 @@
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -12,13 +11,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
-
-#include <algorithm>
-#include <cctype>
-#include <string>
-#include <vector>
 
 namespace {
 
@@ -96,6 +89,23 @@ void LoadAndApplyMuonDetectorGrouping::init() {
       "AddGroupingTable", false,
       "Whether to add a TableWorkspace of the groupings to the ADS.");
 
+  // Cropping
+
+  declareProperty("CropWorkspaces", false,
+                  "Whether to crop the x-axis of the output workspaces.");
+
+  declareProperty("TimeMin", 0.0, "Start time for the data in mus.",
+                  Direction::Input);
+  setPropertySettings("TimeMin",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "CropWorkspaces", Kernel::IS_EQUAL_TO, "1"));
+
+  declareProperty("TimeMax", 32.0, "End time for the data in mus.",
+                  Direction::Input);
+  setPropertySettings("TimeMax",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "CropWorkspaces", Kernel::IS_EQUAL_TO, "1"));
+
   // Optional properties
 
   declareProperty("RebinArgs", emptyString,
@@ -129,6 +139,11 @@ void LoadAndApplyMuonDetectorGrouping::init() {
   setPropertyGroup("SummedPeriods", analysisGrp);
   setPropertyGroup("SubtractedPeriods", analysisGrp);
   setPropertyGroup("DeadTimeTable", analysisGrp);
+
+  std::string croppingGrp("Cropping");
+  setPropertyGroup("TimeMin", croppingGrp);
+  setPropertyGroup("TimeMax", croppingGrp);
+  setPropertyGroup("CropWorkspaces", croppingGrp);
 }
 
 /**
@@ -179,6 +194,13 @@ void LoadAndApplyMuonDetectorGrouping::getTimeLimitsFromInputWorkspace(
   }
 }
 
+void LoadAndApplyMuonDetectorGrouping::getTimeLimitsFromInputs(
+    AnalysisOptions &options) {
+  auto timeMin = getProperty("TimeMin");
+  auto timeMax = getProperty("TimeMax");
+  options.timeLimits = std::make_pair(timeMin, timeMax);
+}
+
 void LoadAndApplyMuonDetectorGrouping::exec() {
   this->setRethrows(true);
 
@@ -187,7 +209,11 @@ void LoadAndApplyMuonDetectorGrouping::exec() {
 
   Workspace_sptr inputWS = getProperty("InputWorkspace");
 
-  getTimeLimitsFromInputWorkspace(inputWS, options);
+  if (!getProperty("CropWorkspaces")) {
+    getTimeLimitsFromInputWorkspace(inputWS, options);
+  } else {
+    getTimeLimitsFromInputs(options);
+  }
 
   checkDetectorIDsInWorkspace(options.grouping, inputWS);
 
