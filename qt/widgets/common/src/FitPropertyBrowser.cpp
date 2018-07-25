@@ -808,6 +808,11 @@ FitPropertyBrowser::tryCreateFitFunction(const QString &str) {
         "A workspace provided in the function does not exist:\n" +
             QString(ex.what()));
     return nullptr;
+  } catch (const std::exception &ex) {
+    QMessageBox::critical(this, "Mantid - Error",
+                          "Unexpected exception caught\n\n" +
+                              QString(ex.what()));
+    return nullptr;
   }
 }
 
@@ -1099,8 +1104,8 @@ std::string FitPropertyBrowser::workspaceName() const {
 void FitPropertyBrowser::setWorkspaceName(const QString &wsName) {
   int i = m_workspaceNames.indexOf(wsName);
   if (i < 0) {
-    // workspace may not be found because add notification hasn't been processed
-    // yet
+    // workspace may not be found because add notification hasn't been
+    // processed yet
     populateWorkspaceNames();
     i = m_workspaceNames.indexOf(wsName);
   }
@@ -1458,8 +1463,8 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
                       << parName.toLatin1().constData() << "\n";
     }
     delete tie;
-  } else if (getHandler()->setAttribute(
-                 prop)) { // setting an attribute may change function parameters
+  } else if (getHandler()->setAttribute(prop)) { // setting an attribute may
+                                                 // change function parameters
     emit functionChanged();
     return;
   }
@@ -1719,9 +1724,9 @@ void FitPropertyBrowser::populateWorkspaceNames() {
  */
 void FitPropertyBrowser::showEvent(QShowEvent *e) {
   (void)e;
-  // Observe what workspaces are added and deleted unless it's a custom fitting,
-  // all workspaces for custom fitting (eg muon analysis)
-  // should be manually added.
+  // Observe what workspaces are added and deleted unless it's a custom
+  // fitting, all workspaces for custom fitting (eg muon analysis) should be
+  // manually added.
   setADSObserveEnabled(true);
   populateWorkspaceNames();
 }
@@ -2124,9 +2129,8 @@ void FitPropertyBrowser::deleteTie() {
       if (function->parameterName(
               static_cast<int>(parameterRef.getLocalIndex())) == parName) {
         if (ithParameter == -1 &&
-            function ==
-                h->function()
-                    .get()) // If this is the 'tied from' parameter, remember it
+            function == h->function().get()) // If this is the 'tied from'
+                                             // parameter, remember it
         {
           ithParameter = static_cast<int>(i);
         } else // Otherwise add it to the list of potential 'tyees'
@@ -2251,14 +2255,14 @@ void FitPropertyBrowser::addUpperBound50() { addConstraint(50, false, true); }
 void FitPropertyBrowser::addUpperBound() { addConstraint(0, false, true); }
 
 /**
- * Slot.Sets the lower and upper bounds of the selected parameter to 10% of its
- * value
+ * Slot.Sets the lower and upper bounds of the selected parameter to 10% of
+ * its value
  */
 void FitPropertyBrowser::addBothBounds10() { addConstraint(10, true, true); }
 
 /**
- * Slot.Sets the lower and upper bounds of the selected parameter to 50% of its
- * value
+ * Slot.Sets the lower and upper bounds of the selected parameter to 50% of
+ * its value
  */
 void FitPropertyBrowser::addBothBounds50() { addConstraint(50, true, true); }
 
@@ -2291,7 +2295,8 @@ void FitPropertyBrowser::plotGuessCurrent() { emit plotCurrentGuess(); }
 void FitPropertyBrowser::plotGuessAll() { emit plotGuess(); }
 
 /**
- * Slot. Sends a signal to remove the guess for the current (selected) function
+ * Slot. Sends a signal to remove the guess for the current (selected)
+ * function
  */
 void FitPropertyBrowser::removeGuessCurrent() { emit removeCurrentGuess(); }
 
@@ -2791,8 +2796,8 @@ void FitPropertyBrowser::setupMultifit() {
           }
         }
         QString wsParam = ",WSParam=(WorkspaceIndex=" + QString::number(i);
-        wsParam += ",StartX=" + QString::number(startX()) + ",EndX=" +
-                   QString::number(endX()) + ")";
+        wsParam += ",StartX=" + QString::number(startX()) +
+                   ",EndX=" + QString::number(endX()) + ")";
         funIni += fun1Ini + ",Workspace=" + wsName + wsParam + ";";
       }
       if (!tieStr.isEmpty()) {
@@ -2998,9 +3003,9 @@ void FitPropertyBrowser::addWorkspaceIndexToBrowser() {
 }
 
 /**=================================================================================================
- * Create a MatrixWorkspace from a TableWorkspace. Name of the TableWorkspace is
- * in m_workspace
- * property, column names to use are in m_xColumn, m_yColumn, and m_errColumn.
+ * Create a MatrixWorkspace from a TableWorkspace. Name of the TableWorkspace
+ * is in m_workspace property, column names to use are in m_xColumn,
+ * m_yColumn, and m_errColumn.
  */
 Mantid::API::Workspace_sptr
 FitPropertyBrowser::createMatrixFromTableWorkspace() const {
@@ -3078,8 +3083,8 @@ void FitPropertyBrowser::fit() {
 }
 
 /**=================================================================================================
- * Slot connected to the change signals of properties m_xColumn, m_yColumn, and
- * m_errColumn.
+ * Slot connected to the change signals of properties m_xColumn, m_yColumn,
+ * and m_errColumn.
  * @param prop :: Property that changed.
  */
 void FitPropertyBrowser::columnChanged(QtProperty *prop) {
@@ -3221,7 +3226,8 @@ void FitPropertyBrowser::browserHelp() {
 }
 
 /**=================================================================================================
- * Allow/disallow sequential fits, depending on whether other conditions are met
+ * Allow/disallow sequential fits, depending on whether other conditions are
+ * met
  * @param allow :: [input] Allow or disallow
  */
 void FitPropertyBrowser::allowSequentialFits(bool allow) {
