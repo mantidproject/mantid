@@ -12,8 +12,6 @@
 #include <boost/lexical_cast.hpp>
 #endif
 
-#include "absl/strings/str_join.h"
-
 #include <iosfwd>
 #include <list>
 #include <map>
@@ -68,9 +66,7 @@ namespace Strings {
  */
 template <typename CONTAINER_TYPE>
 DLLExport std::string join(const CONTAINER_TYPE &c,
-                           const std::string &separator) {
-  return absl::StrJoin(c, separator);
-}
+                           const std::string &separator);
 
 template <>
 DLLExport std::string join(const std::vector<OptionalBool> &c,
