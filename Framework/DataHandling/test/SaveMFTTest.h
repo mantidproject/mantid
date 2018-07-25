@@ -195,12 +195,6 @@ public:
       if (fullline.find(" : ") == std::string::npos)
         TS_ASSERT_EQUALS(fullline, *(it++));
     }
-    TS_ASSERT(in.eof())
-    try {
-      Poco::File(filename).remove();
-    } catch (...) {
-      TS_FAIL("Error deleting file " + filename);
-    }
   }
 
   void test_no_header() {

@@ -1,5 +1,4 @@
 #include "MantidDataHandling/SaveILLCosmosAscii.h"
-#include "MantidDataHandling/SaveANSTOAscii.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
@@ -9,8 +8,6 @@ namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveILLCosmosAscii)
-// Since could not be declared in SaveANSTOAscii header only file
-DECLARE_ALGORITHM(SaveANSTOAscii)
 using namespace Kernel;
 using namespace API;
 
