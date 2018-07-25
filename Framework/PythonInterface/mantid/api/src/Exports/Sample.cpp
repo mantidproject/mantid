@@ -69,8 +69,6 @@ void export_Sample() {
       .def("getShape", &Sample::getShape, arg("self"),
            "Returns a shape of a Sample object.",
            return_value_policy<reference_existing_object>())
-      //.def("getShapeXML", &CSGObject::getShapeXML, arg("self"),
-      //     "Returns a shape XML of a Sample object.")
       // -------------------------Operators
       // -------------------------------------
       .def("__len__", &Sample::size, arg("self"),
