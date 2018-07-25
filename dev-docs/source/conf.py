@@ -4,7 +4,6 @@
 # serve to show the default.
 
 import os
-from warnings import warn
 
 from sphinx import __version__ as sphinx_version
 import sphinx_bootstrap_theme
