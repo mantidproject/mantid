@@ -631,12 +631,14 @@ class PlotNameWidget(QWidget):
 
         shown_icon = qta.icon('fa.eye')
         self.hide_button = QPushButton(shown_icon, "")
+        self.hide_button.setToolTip('Hide')
         self.hide_button.setFlat(True)
         self.hide_button.setMaximumWidth(self.hide_button.iconSize().width() * 5 / 3)
         self.hide_button.clicked.connect(self.toggle_visibility)
 
         rename_icon = qta.icon('fa.edit')
         self.rename_button = QPushButton(rename_icon, "")
+        self.rename_button.setToolTip('Rename')
         self.rename_button.setFlat(True)
         self.rename_button.setMaximumWidth(self.rename_button.iconSize().width() * 5 / 3)
         self.rename_button.setCheckable(True)
@@ -644,6 +646,7 @@ class PlotNameWidget(QWidget):
 
         close_icon = qta.icon('fa.close')
         self.close_button = QPushButton(close_icon, "")
+        self.close_button.setToolTip('Delete')
         self.close_button.setFlat(True)
         self.close_button.setMaximumWidth(self.close_button.iconSize().width() * 5 / 3)
         self.close_button.clicked.connect(lambda: self.close_pressed(self.plot_number))
@@ -727,8 +730,10 @@ class PlotNameWidget(QWidget):
         """
         if is_shown:
             self.hide_button.setIcon(qta.icon('fa.eye'))
+            self.hide_button.setToolTip('Hide')
         else:
             self.hide_button.setIcon(qta.icon('fa.eye', color='lightgrey'))
+            self.hide_button.setToolTip('Show')
 
     def rename_plot(self):
         """
