@@ -9,12 +9,12 @@ Purpose
 -------- 
 The purpose of the SpectrumInfo object is to allow the user to access information about the spectra being used in an experiment. The SpectrumInfo object can be used to access information such as the number of spectra, the absolute position of a spectrum as well as the distance from the sample to the source. There are many other methods available as well. 
  
-Many users may need this extra information so that they can have a better understanding of the instrument they are using. This extra information is also easy and fast to access meaning the users can make improvements to their experimental design with ease. 
+Many users may need this extra information so that they can have a better understanding of the beamline they are using. This extra information is also easy and fast to access meaning the users can make improvements to their experimental design with ease. 
 
 SpectrumInfo is one of three objects that the user can gain access to from a Workspace. 
 The other two are:  
-* DetectorInfo 
-* ComponentInfo
+  * DetectorInfo 
+  * ComponentInfo
 
 ------
 Usage
@@ -33,7 +33,7 @@ The return value is a ``SpectrumInfo`` object.
 	info = ws.spectrumInfo()
 	print(type(info))
 
-**Example 2 - Calling a method on the SpectrumInfo Object:**
+**Example 2 - Calling the hasDetectors Method on the SpectrumInfo Object:**
 This example shows how to call the ``hasDetectors`` method.
 The method takes in an integer ``index`` parameter which corresponds to a spectrum.
 The return value is True or False.
@@ -46,13 +46,14 @@ The return value is True or False.
 	# Get the SpectrumInfo object
 	info = ws.spectrumInfo()
 
-	# Call hasDetectors()
+	# Call hasDetectors
 	print(info.hasDetectors(0))
 
-**Example 3 - Calling a method on the SpectrumInfo Object:**
+**Example 3 - Calling the l1 Method on the SpectrumInfo Object:**
 The ``l1()`` method does not take in any parameters and returns the distance from the source to the sample.
+The return value is a float.
 
-.. testcode:: GetL1Value
+.. testcode:: CallL1Method
 	
 	# Create a workspace to use
 	ws = CreateSampleWorkspace()
@@ -60,13 +61,14 @@ The ``l1()`` method does not take in any parameters and returns the distance fro
 	# Get the SpectrumInfo object
 	info = ws.spectrumInfo()
 
-	# Get the l1 value
+	# Call l1
 	print(info.l1())
 
-**Example 4 - Calling a method on the SpectrumInfo Object:**
-The ``sourcePosition()`` method does not take any parameters and returns the absolute source position. The return value is a ``V3D`` object which gives a position in 3D space.
+**Example 4 - Calling the sourcePosition method on the SpectrumInfo Object:**
+The ``sourcePosition()`` method does not take any parameters and returns the absolute source position. 
+The return value is a ``V3D`` object which gives a position in 3D space.
 
-.. testcode:: GetSourcePosition
+.. testcode:: CallSourcePositionMethod
 	
 	# Create a workspace to use
 	ws = CreateSampleWorkspace()
@@ -74,13 +76,14 @@ The ``sourcePosition()`` method does not take any parameters and returns the abs
 	# Get the SpectrumInfo object
 	info = ws.spectrumInfo()
 
-	# Get the source position
+	# Call sourcePosition
 	print(type(info.sourcePosition()))
 
 **Example 5 - Retrieving SpectrumDefinition Objects from a SpectrumInfo Object:**
-The ``getAllSpectrumDefinitions()`` method does not take in any parameters and returns a list of ``SpectrumDefinition``s. The returned list can then be indexed into to obtain specific ``SpectrumDefinition`` objects.
+The ``getAllSpectrumDefinitions()`` method does not take in any parameters and returns a list of ``SpectrumDefinition``s. 
+The returned list can then be indexed into to obtain specific ``SpectrumDefinition`` objects.
 
-.. testcode:: GetAllSpectrumDefinitions
+.. testcode:: CallGetAllSpectrumDefinitionsMethod
 	
 	# Create a workspace to use
 	ws = CreateSampleWorkspace()
@@ -103,17 +106,17 @@ Output:
 
 	True
 
-.. testoutput:: GetL1Value
+.. testoutput:: CallL1Method
 
 	10.0
 
-.. testoutput:: GetSourcePosition
+.. testoutput:: CallSourcePositionMethod
 
 	<class 'mantid.kernel._kernel.V3D'>
 
-.. testoutput:: GetAllSpectrumDefinitions
+.. testoutput:: CallGetAllSpectrumDefinitionsMethod
 
-	<type 'list'>
+	<class 'list'>
 	<class 'mantid.api._api.SpectrumDefinition'>
 
 

@@ -63,12 +63,12 @@ void export_SpectrumInfo() {
            "Returns the distance from the sample to the spectrum.")
 
       .def("hasDetectors", &SpectrumInfo::hasDetectors, (arg("self")),
-           "Returns true if the spectrum is associated with detectors in the "
+           "Returns True if the spectrum is associated with detectors in the "
            "instrument.")
 
       .def("hasUniqueDetector", &SpectrumInfo::hasUniqueDetector,
            (arg("self"), arg("index")),
-           "Returns true if the spectrum is associated with exactly one "
+           "Returns True if the spectrum is associated with exactly one "
            "detector.")
 
       .def("position", &SpectrumInfo::position, (arg("self"), arg("index")),
