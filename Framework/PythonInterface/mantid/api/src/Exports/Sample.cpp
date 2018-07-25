@@ -1,4 +1,5 @@
 #include "MantidAPI/Sample.h"
+
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Material.h"
@@ -9,6 +10,7 @@
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::Sample;
+using Mantid::Geometry::CSGObject;
 using Mantid::Geometry::OrientedLattice;
 using Mantid::Kernel::Material; // NOLINT
 using namespace boost::python;
@@ -65,6 +67,11 @@ void export_Sample() {
            "Set the height in mm.")
       .def("setWidth", &Sample::setWidth, (arg("self"), arg("width")),
            "Set the width in mm.")
+      .def("getShape", &Sample::getShape, arg("self"),
+           "Returns a shape of a Sample object.",
+           return_value_policy<reference_existing_object>())
+      //.def("getShapeXML", &CSGObject::getShapeXML, arg("self"),
+      //     "Returns a shape XML of a Sample object.")
       // -------------------------Operators
       // -------------------------------------
       .def("__len__", &Sample::size, arg("self"),

@@ -5,6 +5,7 @@ from mantid.api import Sample
 from mantid.simpleapi import CreateWorkspace
 from mantid.simpleapi import SetSampleMaterial
 from mantid.geometry import CrystalStructure
+from mantid.geometry import CSGObject
 
 class SampleTest(unittest.TestCase):
 
@@ -66,6 +67,15 @@ class SampleTest(unittest.TestCase):
         xs1 = atoms[1].neutron()
         xs = ( xs0['coh_scatt_xs']*2 + xs1['coh_scatt_xs']*3 ) / 5
         self.assertAlmostEquals(material.cohScatterXSection(), xs, places=4)
+
+    def test_get_shape(self):
+        sample = self._ws.sample()
+        self.assertEquals(type(sample.getShape()), CSGObject)
+
+    #def test_get_shape_xml(self):
+    #    sample = self._ws.sample()
+    #    self.assertEquals(type(sample.getShapeXML()), str)
+
 
 
 
