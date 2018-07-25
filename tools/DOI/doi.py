@@ -80,6 +80,7 @@ INVALID_URL = 'http://www.datacite.org/invalidDOI'
 PLAINTEXT_CONTENT_HEADER = 'Content-Type:text/plain;charset=UTF-8'
 XML_CONTENT_HEADER = 'Content-Type:application/xml;charset=UTF-8'
 
+
 def build_xml_form(doi, relationships, creator_name_list, version_str):
     '''Builds the xml form containing the metadata for the DOI.  Where helpful,
     comments showing the definition / allowed values of the data fields have
