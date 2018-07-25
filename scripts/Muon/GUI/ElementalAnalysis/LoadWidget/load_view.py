@@ -31,10 +31,10 @@ class LoadView(QtGui.QWidget):
         self.sig_file_browser_complete.emit(filename)
 
     def update_last_spinbox_val(self, val):
-        if abs(self.last_spinbox_val-val) <= 1:
+        if abs(self.last_spinbox_val - val) <= 1:
             self.sig_spinbox_submit.emit(val)
         self.last_spinbox_val = val
-        
+
     def on_file_browser_complete(self, slot):
         self.sig_file_browser_complete.connect(slot)
 

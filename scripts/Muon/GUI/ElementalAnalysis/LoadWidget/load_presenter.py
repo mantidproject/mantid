@@ -3,7 +3,6 @@ from __future__ import absolute_import
 from Muon.GUI.Common import thread_model
 
 
-
 class LoadPresenter(object):
     def __init__(self, view, model):
         self.view = view
@@ -55,4 +54,3 @@ class LoadPresenter(object):
 
     def new_thread(self):
         return thread_model.ThreadModel(self.model)
-    
