@@ -802,15 +802,9 @@ FitPropertyBrowser::tryCreateFitFunction(const QString &str) {
   try {
     return Mantid::API::FunctionFactory::Instance().createInitialized(
         str.toStdString());
-  } catch (const Mantid::Kernel::Exception::NotFoundError &ex) {
-    QMessageBox::critical(
-        this, "Mantid - Error",
-        "A workspace provided in the function does not exist:\n" +
-            QString(ex.what()));
-    return nullptr;
   } catch (const std::exception &ex) {
     QMessageBox::critical(this, "Mantid - Error",
-                          "Unexpected exception caught\n\n" +
+                          "Unexpected exception caught:\n\n" +
                               QString(ex.what()));
     return nullptr;
   }
