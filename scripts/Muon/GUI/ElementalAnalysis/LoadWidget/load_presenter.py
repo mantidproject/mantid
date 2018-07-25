@@ -14,7 +14,7 @@ class LoadPresenter(object):
 
     def load_file(self, filename):
         self.thread = self.new_thread()
-        self.thread.threadWrapperSetUp(self.disable_browse, self.end_thread)
+        self.thread.threadWrapperSetUp(self.disable_buttons, self.end_thread)
         self.thread.loadData({"Filename": filename})
         self.thread.start()
 
@@ -36,19 +36,21 @@ class LoadPresenter(object):
     def unregister_spinbox_submit(self, slot):
         self.view.unreg_on_spinbox_submit(slot)
 
-    def disable_browse(self):
+    def disable_buttons(self):
         self.view.load_button.setEnabled(False)
+        self.view.spinbox.setEnabled(False)
 
-    def enable_browse(self):
+    def enable_buttons(self):
         self.view.load_button.setEnabled(True)
+        self.view.spinbox.setEnabled(True)
 
     def cancel(self):
         if self.thread is not None:
             self.thread.cancel()
 
     def end_thread(self):
-        self.enable_browse()
-        self.thread.threadWrapperTearDown(self.disable_browse, self.end_thread)
+        self.enable_buttons()
+        self.thread.threadWrapperTearDown(self.disable_buttons, self.end_thread)
         self.thread.deleteLater()
         self.thread = None
 
