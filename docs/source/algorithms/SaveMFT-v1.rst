@@ -16,7 +16,7 @@ A file can be loaded back into Mantid by SaveAscii, which will not have an instr
 Both, point data and histograms can be saved but note that the resulting file will always contain points for q and not bin edges but instead its bin centre.
 This algorithm writes data in scientific exponential notation (E-notation) of double-precision.
 The header constists of 21 or more, if required and user defined, lines which are as following: Instrument:, User-local contact:, Title:, Subtitle:, Start date + time, End date + time, Theta 1 + dir + ref numbers:, Theta 2 + dir + ref numbers:, Theta 3 + dir + ref numbers:
-, followed by potentially added angle, followed by 9 user defined parameter lines, followed by potentially added user defined parameter lines, Number of file format:, Number of data points:.
+, (foreseen potentially added angle(s),) followed by 9 user defined parameter lines, followed by potentially added user defined parameter lines, Number of file format:, Number of data points:.
 The number of the file format is set randomly to a higher value (40) in order to exceed all ILL Cosmos numbers.
 For the ILL instruments D17 and FIGARO, obligatory header lines will be automatically filled by using the workspaces `Sample Logs` information which can be modified as shown in the example.
 An option exists to only write data with no header lines and column description.
