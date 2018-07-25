@@ -44,23 +44,9 @@ template <template <class> class Container, typename HeldType>
 std::string dtype(const Container<HeldType> &) {
   if (std::is_same<HeldType, bool>::value) {
     return "b";
-  } else if (std::is_same<HeldType, short>::value) {
+  } else if (std::is_integral<HeldType>) {
     return "i";
-  } else if (std::is_same<HeldType, std::int8_t>::value) {
-    return "i";
-  } else if (std::is_same<HeldType, std::int16_t>::value) {
-    return "i";
-  } else if (std::is_same<HeldType, std::int32_t>::value) {
-    return "i";
-  } else if (std::is_same<HeldType, std::int64_t>::value) {
-    return "i";
-  } else if (std::is_same<HeldType, long>::value) {
-    return "i";
-  } else if (std::is_same<HeldType, long long>::value) {
-    return "i";
-  } else if (std::is_same<HeldType, float>::value) {
-    return "f";
-  } else if (std::is_same<HeldType, double>::value) {
+  } else if (std::is_floating_point<HeldType>) {
     return "f";
   } else {
     return "O";

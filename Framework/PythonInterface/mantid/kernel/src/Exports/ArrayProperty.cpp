@@ -39,24 +39,27 @@ template <> std::string dtype(ArrayProperty<std::string> &self) {
   std::vector<std::string> values = self();
 
   // Vector of ints to store the sizes of each of the strings
-  std::vector<size_t> string_sizes;
+  std::vector<size_t> stringSizes;
+
+  // Block allocate memory
+  stringSizes.reserve(self.size);
 
   // Loop for the number of strings
   // For each string store the number of characters
   for (auto val : values) {
     auto size = val.size();
-    string_sizes.push_back(size);
+    stringSizes.emplace_back(size);
   }
 
   // Find the maximum number of characters
   size_t max =
-      *std::max_element(std::begin(string_sizes), std::end(string_sizes));
+      *std::max_element(std::begin(stringSizes), std::end(stringSizes));
 
   // Create the string to return
   std::stringstream ss;
   ss << "S" << max;
-  std::string ret_val = ss.str();
-  return ret_val;
+  std::string retVal = ss.str();
+  return retVal;
 }
 
 #define EXPORT_ARRAY_PROP(type, prefix)                                        \

@@ -22,12 +22,9 @@ Property *removeUniquePointer(const std::string &name,
                               const boost::python::list &defaultValue) {
 
   // Get the unique pointer from the factory and convert it into a raw pointer
-  std::unique_ptr<Property> ptr =
-      PropertyWithValueFactory::createTimeSeries(name, defaultValue);
+  auto ptr = PropertyWithValueFactory::createTimeSeries(name, defaultValue);
 
-  Property *raw_ptr = ptr.release();
-
-  return raw_ptr;
+  return ptr.release();
 }
 } // namespace propertyFactoryHelper
 
