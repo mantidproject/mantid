@@ -47,22 +47,25 @@ void export_DetectorInfo() {
            "Returns True if the detector is masked.")
 
       .def("setMasked", setMasked, (arg("self"), arg("index"), arg("masked")),
-           "Set the mask flag of the detector where the detector is identified by 'index'.")
+           "Set the mask flag of the detector where the detector is identified "
+           "by 'index'.")
 
       .def("clearMaskFlags", &DetectorInfo::clearMaskFlags, (arg("self")),
            "Sets all mask flags to false (unmasked).")
 
       .def("isEquivalent", &DetectorInfo::isEquivalent,
-           (arg("self"), arg("other")),
-           "Returns True if the content of this detector is equivalent to the content "
-           "of the other detector.")
+           (arg("self"), arg("other")), "Returns True if the content of this "
+                                        "detector is equivalent to the content "
+                                        "of the other detector.")
 
       .def("twoTheta", twoTheta, (arg("self"), arg("index")),
            "Returns 2 theta (scattering angle w.r.t beam direction).")
 
       .def("position", position, (arg("self"), arg("index")),
-           "Returns the absolute position of the detector where the detector is identified by 'index'.")
+           "Returns the absolute position of the detector where the detector "
+           "is identified by 'index'.")
 
       .def("rotation", rotation, (arg("self"), arg("index")),
-           "Returns the absolute rotation of the detector where the detector is identified by 'index'.");
+           "Returns the absolute rotation of the detector where the detector "
+           "is identified by 'index'.");
 }
