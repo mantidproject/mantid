@@ -94,7 +94,7 @@ class ConfigServiceTest(unittest.TestCase):
         self._clean_up_test_areas()
             
     def test_setting_log_channel_levels(self):
-        testhelpers.assertRaisesNothing(self, config.setLogLevel, 4)
+        testhelpers.assertRaisesNothing(self, config.setLogLevel, 4, True)
     
     def _setup_test_areas(self):
         """Create a new data search path string
