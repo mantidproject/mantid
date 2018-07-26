@@ -1,5 +1,10 @@
 #include "MantidAlgorithms/SortXAxis2.h"
-#include <iostream>
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/make_unique.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -44,23 +49,24 @@ void SortXAxis::exec() {
   MatrixWorkspace_sptr outputWorkspace = inputWorkspace->clone();
 
   // Check if it is a valid histogram here
-  bool isAProperHistogram = determineIfHistogramIsValid(inputWorkspace);
+  bool isAProperHistogram = determineIfHistogramIsValid(inputWorkspace.get());
 
   // Define everything you can outside of the for loop
   // Assume that all spec are the same size
   const auto sizeOfX = inputWorkspace->x(0).size();
 
-  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
+  PARALLEL_FOR_IF(
+      Kernel::threadSafe(*inputWorkspace.get(), *outputWorkspace.get()))
   for (int specNum = 0u; specNum < (int)inputWorkspace->getNumberHistograms();
        specNum++) {
     PARALLEL_START_INTERUPT_REGION
     auto workspaceIndicies = createIndexes(sizeOfX);
 
-    sortIndicesByX(workspaceIndicies, getProperty("Ordering"), inputWorkspace,
-                   specNum);
+    sortIndicesByX(workspaceIndicies, getProperty("Ordering"),
+                   inputWorkspace.get(), specNum);
 
-    copyToOutputWorkspace(workspaceIndicies, inputWorkspace, outputWorkspace,
-                          specNum, isAProperHistogram);
+    copyToOutputWorkspace(workspaceIndicies, inputWorkspace.get(),
+                          outputWorkspace, specNum, isAProperHistogram);
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -95,7 +101,7 @@ std::vector<std::size_t> SortXAxis::createIndexes(const size_t sizeOfX) {
  */
 template <typename Comparator>
 void sortByXValue(std::vector<std::size_t> &workspaceIndicies,
-                  MatrixWorkspace_const_sptr inputWorkspace,
+                  const Mantid::API::MatrixWorkspace *inputWorkspace,
                   unsigned int specNum, Comparator const &compare) {
   std::sort(workspaceIndicies.begin(), workspaceIndicies.end(),
             [&](std::size_t lhs, std::size_t rhs) -> bool {
@@ -104,10 +110,9 @@ void sortByXValue(std::vector<std::size_t> &workspaceIndicies,
             });
 }
 
-void SortXAxis::sortIndicesByX(std::vector<std::size_t> &workspaceIndicies,
-                               std::string order,
-                               MatrixWorkspace_const_sptr inputWorkspace,
-                               unsigned int specNum) {
+void SortXAxis::sortIndicesByX(
+    std::vector<std::size_t> &workspaceIndicies, std::string order,
+    const Mantid::API::MatrixWorkspace *inputWorkspace, unsigned int specNum) {
   if (order == "Ascending") {
     sortByXValue(workspaceIndicies, inputWorkspace, specNum,
                  std::less<double>());
@@ -129,7 +134,7 @@ void SortXAxis::sortIndicesByX(std::vector<std::size_t> &workspaceIndicies,
  */
 void SortXAxis::copyXandDxToOutputWorkspace(
     std::vector<std::size_t> &workspaceIndicies,
-    MatrixWorkspace_const_sptr inputWorkspace,
+    const Mantid::API::MatrixWorkspace *inputWorkspace,
     MatrixWorkspace_sptr outputWorkspace, unsigned int specNum) {
   // Move an ordered X to the output workspace
   for (auto workspaceIndex = 0u;
@@ -164,7 +169,7 @@ void SortXAxis::copyXandDxToOutputWorkspace(
  */
 void SortXAxis::copyYandEToOutputWorkspace(
     std::vector<std::size_t> &workspaceIndicies,
-    MatrixWorkspace_const_sptr inputWorkspace,
+    const Mantid::API::MatrixWorkspace *inputWorkspace,
     MatrixWorkspace_sptr outputWorkspace, unsigned int specNum,
     bool isAProperHistogram) {
   // If Histogram data find the biggest index value and remove it from
@@ -193,7 +198,7 @@ void SortXAxis::copyYandEToOutputWorkspace(
 
 void SortXAxis::copyToOutputWorkspace(
     std::vector<std::size_t> &workspaceIndicies,
-    MatrixWorkspace_const_sptr inputWorkspace,
+    const Mantid::API::MatrixWorkspace *inputWorkspace,
     MatrixWorkspace_sptr outputWorkspace, unsigned int specNum,
     bool isAProperHistogram) {
   copyXandDxToOutputWorkspace(workspaceIndicies, inputWorkspace,
@@ -215,13 +220,14 @@ void SortXAxis::copyToOutputWorkspace(
  */
 template <typename Comparator>
 bool isItSorted(Comparator const &compare,
-                MatrixWorkspace_const_sptr inputWorkspace) {
+                const Mantid::API::MatrixWorkspace *inputWorkspace) {
   for (auto specNum = 0u; specNum < inputWorkspace->getNumberHistograms();
        specNum++) {
     if (!std::is_sorted(inputWorkspace->x(specNum).begin(),
                         inputWorkspace->x(specNum).end(),
-                        [&](double lhs, double rhs)
-                            -> bool { return compare(lhs, rhs); })) {
+                        [&](double lhs, double rhs) -> bool {
+                          return compare(lhs, rhs);
+                        })) {
       return false;
     }
   }
@@ -236,7 +242,7 @@ bool isItSorted(Comparator const &compare,
  * @return false if it is not a histogram, and is thus point data
  */
 bool SortXAxis::determineIfHistogramIsValid(
-    MatrixWorkspace_const_sptr inputWorkspace) {
+    const Mantid::API::MatrixWorkspace *inputWorkspace) {
   // Assuming all X and Ys are the same, if X is not the same size as y, assume
   // it is a histogram
   if (inputWorkspace->x(0).size() != inputWorkspace->y(0).size()) {

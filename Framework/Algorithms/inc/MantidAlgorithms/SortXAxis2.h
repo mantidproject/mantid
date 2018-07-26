@@ -2,11 +2,6 @@
 #define MANTID_ALGORITHMS_SORTXAXIS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -57,28 +52,27 @@ private:
 
   void sortIndicesByX(std::vector<std::size_t> &workspaceIndecies,
                       std::string order,
-                      Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
+                      const Mantid::API::MatrixWorkspace *inputWorkspace,
                       unsigned int specNum);
 
-  void copyYandEToOutputWorkspace(
-      std::vector<std::size_t> &workspaceIndecies,
-      Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
-      Mantid::API::MatrixWorkspace_sptr outputWorkspace, unsigned int SpecNum,
-      bool isAProperHistogram);
+  void
+  copyYandEToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies,
+                             const Mantid::API::MatrixWorkspace *inputWorkspace,
+                             Mantid::API::MatrixWorkspace_sptr outputWorkspace,
+                             unsigned int SpecNum, bool isAProperHistogram);
 
   void copyXandDxToOutputWorkspace(
       std::vector<std::size_t> &workspaceIndecies,
-      Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
+      const Mantid::API::MatrixWorkspace *inputWorkspace,
       Mantid::API::MatrixWorkspace_sptr outputWorkspace, unsigned int specNum);
 
-  void
-  copyToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies,
-                        Mantid::API::MatrixWorkspace_const_sptr inputWorkspace,
-                        Mantid::API::MatrixWorkspace_sptr outputWorkspace,
-                        unsigned int specNum, bool isAProperHistogram);
+  void copyToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies,
+                             const Mantid::API::MatrixWorkspace *inputWorkspace,
+                             Mantid::API::MatrixWorkspace_sptr outputWorkspace,
+                             unsigned int specNum, bool isAProperHistogram);
 
   bool determineIfHistogramIsValid(
-      Mantid::API::MatrixWorkspace_const_sptr inputWorkspace);
+      const Mantid::API::MatrixWorkspace *inputWorkspace);
 };
 
 } // namespace Algorithms
