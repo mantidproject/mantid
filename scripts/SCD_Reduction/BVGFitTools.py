@@ -15,7 +15,7 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
               plotResults=False, zBG=1.96, bgPolyOrder=1, fICCParams=None, oldICCFit=None,
               strongPeakParams=None, forceCutoff=250, edgeCutoff=15,
               neigh_length_m=3, q_frame='sample', dtSpread=0.03, pplmin_frac=0.8, pplmax_frac=1.5, mindtBinWidth=1,
-              maxdtBinWidth=50, figureNumber=2, instrumentName=None):
+              maxdtBinWidth=50, figureNumber=2):
     n_events = box.getNumEventsArray()
 
     if q_frame == 'lab':
@@ -30,13 +30,11 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
         goodIDX, pp_lambda = ICCFT.getBGRemovedIndices(
                     n_events, peak=peak, box=box, qMask=qMask, calc_pp_lambda=True, padeCoefficients=padeCoefficients,
                     neigh_length_m=neigh_length_m, pp_lambda=None, pplmin_frac=pplmin_frac,
-                    pplmax_frac=pplmax_frac, mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                    instrumentName=instrumentName)
+                    pplmax_frac=pplmax_frac, mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth)
         YTOF, fICC, x_lims = fitTOFCoordinate(
                     box, peak, padeCoefficients, dtSpread=dtSpread, qMask=qMask, bgPolyOrder=bgPolyOrder, zBG=zBG,
                     plotResults=plotResults, pp_lambda=pp_lambda, neigh_length_m=neigh_length_m, pplmin_frac=pplmin_frac,
-                    pplmax_frac=pplmax_frac, mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                    instrumentName=instrumentName)
+                    pplmax_frac=pplmax_frac, mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth)
         chiSqTOF = mtd['fit_Parameters'].column(1)[-1]
 
     else:  # we already did I-C profile, so we'll just read the parameters
@@ -145,7 +143,7 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
     YBVG = bvg(1.0, mu, sigma, XTHETA, XPHI, 0)
 
     # Do scaling to the data
-    if instrumentName == 'CORELLI':
+    if doPeakConvolution: #This means peaks will have gaps, so we only use good data to scale
         Y, redChiSq, scaleFactor = fitScaling(n_events, box, YTOF, YBVG, goodIDX=goodIDX, instrumentName=instrumentName)
     else:
         Y, redChiSq, scaleFactor = fitScaling(n_events, box, YTOF, YBVG, instrumentName=instrumentName)
@@ -564,12 +562,8 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         boundsDict['SigP'] = [bounds[0][5], bounds[1][5]]
 
         # Here we can make instrument-specific changes to our initial guesses and boundaries
-        if instrumentName == 'MANDI':
-            pass
 
-        if instrumentName == 'CORELLI':
-            sigX0 = sigX0*2.
-            sigY0 = sigY0*2.
+        if doPeakConvolution:
             neigh_length_m = 5
             convBox = 1.0*np.ones([neigh_length_m, neigh_length_m]) / neigh_length_m**2
             conv_h = convolve(h, convBox)
