@@ -43,11 +43,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             ["{} Peaks".format(x) for x in self.peak_types])
         self.checkbox = CheckboxPresenter(self._checkbox_view, CheckboxModel())
         for _, v in self.checkbox.view.checkbox_dict.iteritems():
-            self.checkbox.view.on_checkbox_changed(v, self.checkbox_changed)
-            # test unreg (works now!)
-            self.checkbox.view.unreg_on_checkbox_changed(
-                v, self.checkbox_changed)
-            self.checkbox.view.on_checkbox_changed(v, self.checkbox_changed)
+            v.on_checkbox_unchecked(lambda c: print("unchecked: {}".format(c.name)))
+            v.on_checkbox_checked(lambda c: print("checked: {}".format(c.name)))        
 
         self.widget_list.addWidget(self.checkbox.view)
 
