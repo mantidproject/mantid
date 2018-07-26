@@ -429,14 +429,14 @@ void extractFacesAndIDs(const std::vector<uint16_t> &detFaces,
                         std::vector<std::vector<uint16_t>> &detFaceIndices,
                         std::vector<std::vector<uint16_t>> &detWindingOrder,
                         std::vector<int> &detIds) {
-  size_t vertStride = 3;
+  const size_t vertStride = 3;
   size_t detFaceIndex = 1;
   std::fill(detFaceIndices.begin(), detFaceIndices.end(),
             std::vector<uint16_t>(1, 0));
   for (size_t i = 0; i < windingOrder.size(); i += vertsPerFace) {
     auto detFaceId = detFaces[detFaceIndex];
+    // Id -> Index
     auto detIndex = detIdToIndex.at(detFaceId);
-
     auto &detVerts = detFaceVerts[detIndex];
     auto &detIndices = detFaceIndices[detIndex];
     auto &detWinding = detWindingOrder[detIndex];
@@ -445,8 +445,10 @@ void extractFacesAndIDs(const std::vector<uint16_t> &detFaces,
       detVerts.emplace_back(vertices[vi], vertices[vi + 1], vertices[vi + 2]);
       detWinding.push_back(static_cast<uint16_t>(detWinding.size()));
     }
+    // Index -> Id
     detIds[detIndex] = detFaceId;
     detIndices.push_back(static_cast<uint16_t>(detVerts.size()));
+    // Detector faces is 2N detectors
     detFaceIndex += 2;
   }
 }
