@@ -112,12 +112,12 @@ private:
   public:
     MockBraggScatterer() : BraggScattererInCrystalStructure() {}
     ~MockBraggScatterer() override {}
-    DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(name, std::string());
     MOCK_CONST_METHOD0(clone, BraggScatterer_sptr());
     MOCK_CONST_METHOD1(calculateStructureFactor, StructureFactor(const V3D &));
     MOCK_METHOD1(afterScattererPropertySet, void(const std::string &));
-    DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 };
 

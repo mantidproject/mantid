@@ -33,7 +33,7 @@ IPeaksWorkspace_sptr make_peaks_workspace(const V3D &hklPeak) {
   return peakWS;
 }
 
-DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 // Mock Background strategy
 class MockIMDIterator : public IMDIterator {
@@ -68,7 +68,7 @@ public:
   MOCK_CONST_METHOD1(isWithinBounds, bool(size_t));
 };
 }
-DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class PeakBackgroundTest : public CxxTest::TestSuite {
 public:

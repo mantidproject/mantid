@@ -19,15 +19,15 @@ using getParameterType2 =
 
 using setParameterType2 = void (CompositeFunction::*)(const std::string &,
                                                       const double &, bool);
-DIAG_OFF("unknown-pragmas")
-DIAG_OFF("unused-local-typdef")
-DIAG_OFF("conversion")
+GNU_DIAG_OFF("unknown-pragmas")
+GNU_DIAG_OFF("unused-local-typdef")
+GNU_DIAG_OFF("conversion")
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
-DIAG_ON("conversion")
-DIAG_ON("unknown-pragmas")
-DIAG_ON("unused-local-typdef")
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unknown-pragmas")
+GNU_DIAG_ON("unused-local-typdef")
 } // namespace
 
 void export_CompositeFunction() {

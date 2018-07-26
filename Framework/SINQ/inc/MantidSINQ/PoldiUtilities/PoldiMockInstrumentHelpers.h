@@ -53,14 +53,14 @@ public:
   void loadConfiguration(Instrument_const_sptr poldiInstrument) override {
     UNUSED_ARG(poldiInstrument);
   }
-  DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(efficiency, double());
   MOCK_METHOD1(twoTheta, double(int elementIndex));
   MOCK_METHOD1(distanceFromSample, double(int elementIndex));
   MOCK_METHOD0(elementCount, size_t());
   MOCK_METHOD0(centralElement, size_t());
   MOCK_METHOD2(qLimits, DoublePair(double lambdaMin, double lambdaMax));
-  DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 
   const std::vector<int> &availableElements() override {
     return m_availableElements;
@@ -105,14 +105,14 @@ public:
   void loadConfiguration(Instrument_const_sptr poldiInstrument) override {
     UNUSED_ARG(poldiInstrument)
   }
-  DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(rotationSpeed, double());
   MOCK_METHOD0(cycleTime, double());
   MOCK_METHOD0(zeroOffset, double());
   MOCK_METHOD0(distanceFromSample, double());
 
   MOCK_METHOD1(setRotationSpeed, void(double rotationSpeed));
-  DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 
   const std::vector<double> &slitPositions() override {
     return m_slitPositions;

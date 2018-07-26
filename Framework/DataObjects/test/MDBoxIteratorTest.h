@@ -492,9 +492,9 @@ public:
             pBC(MDBox<MDLeanEvent<2>, 2>::getBoxController())
 
       {}
-      DIAG_OFF_SUGGEST_OVERRIDE
+      GNU_DIAG_OFF_SUGGEST_OVERRIDE
       MOCK_CONST_METHOD0(getIsMasked, bool());
-      DIAG_ON_SUGGEST_OVERRIDE
+      GNU_DIAG_ON_SUGGEST_OVERRIDE
       ~MockMDBox() override { delete pBC; }
     };
 
@@ -570,10 +570,10 @@ public:
     /// Mock Skipping Policy Type to inject.
     class MockSkippingPolicy : public SkippingPolicy {
     public:
-      DIAG_OFF_SUGGEST_OVERRIDE
+      GNU_DIAG_OFF_SUGGEST_OVERRIDE
       MOCK_CONST_METHOD0(keepGoing, bool());
       MOCK_METHOD0(Die, void());
-      DIAG_ON_SUGGEST_OVERRIDE
+      GNU_DIAG_ON_SUGGEST_OVERRIDE
       ~MockSkippingPolicy() override { Die(); }
     };
 

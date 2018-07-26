@@ -49,17 +49,17 @@ using return_readwrite_numpy =
     return_value_policy<VectorRefToNumpy<WrapReadWrite>>;
 
 //------------------------------- Overload macros ---------------------------
-DIAG_OFF("unknown-pragmas")
-DIAG_OFF("unused-local-typdef")
+GNU_DIAG_OFF("unknown-pragmas")
+GNU_DIAG_OFF("unused-local-typdef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-DIAG_OFF("conversion")
+GNU_DIAG_OFF("conversion")
 // Overloads for binIndexOf function which has 1 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_binIndexOfOverloads,
                                        MatrixWorkspace::binIndexOf, 1, 2)
-DIAG_ON("conversion")
-DIAG_ON("unknown-pragmas")
-DIAG_ON("unused-local-typdef")
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unknown-pragmas")
+GNU_DIAG_ON("unused-local-typdef")
 
 /**
  * Set the values from an python array-style object into the given spectrum in

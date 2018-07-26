@@ -184,7 +184,7 @@ public:
     TS_ASSERT_EQUALS(orFilterCasted->getLHS(), lhs);
     TS_ASSERT_EQUALS(orFilterCasted->getRHS(), rhs);
   }
-  DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
 private:
   class MockHKLFilter : public HKLFilter {
   public:
@@ -212,5 +212,5 @@ private:
     MOCK_CONST_METHOD1(isAllowed, bool(const V3D &));
   };
 };
-DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 #endif /* MANTID_GEOMETRY_HKLFILTERTEST_H_ */

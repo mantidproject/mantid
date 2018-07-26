@@ -15,7 +15,7 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(IMDDimension)
 
-DIAG_OFF("strict-aliasing")
+GNU_DIAG_OFF("strict-aliasing")
 
 namespace {
 /**

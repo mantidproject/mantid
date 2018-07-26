@@ -3,11 +3,11 @@
 // ignore warnings in gSOAP
 // Long-term solution is to use gSOAP as an external library or external
 // project. see issue #19433
-DIAG_OFF("deprecated-declarations")
-DIAG_OFF("format-overflow")
-DIAG_OFF("format-truncation")
-DIAG_OFF("implicit-fallthrough")
-DIAG_OFF("cast-align")
+GNU_DIAG_OFF("deprecated-declarations")
+GNU_DIAG_OFF("format-overflow")
+GNU_DIAG_OFF("format-truncation")
+GNU_DIAG_OFF("implicit-fallthrough")
+GNU_DIAG_OFF("cast-align")
 
 /*
   stdsoap2.c[pp] 2.8.15
@@ -17014,8 +17014,8 @@ soap::~soap() {
 
 /******************************************************************************/
 
-DIAG_ON("deprecated-declarations")
-DIAG_ON("format-overflow")
-DIAG_ON("format-truncation")
-DIAG_ON("implicit-fallthrough")
-DIAG_ON("cast-align")
+GNU_DIAG_ON("deprecated-declarations")
+GNU_DIAG_ON("format-overflow")
+GNU_DIAG_ON("format-truncation")
+GNU_DIAG_ON("implicit-fallthrough")
+GNU_DIAG_ON("cast-align")

@@ -58,11 +58,11 @@ using declarePropertyType3 = void (*)(boost::python::object &,
 using declarePropertyType4 = void (*)(boost::python::object &,
                                       const std::string &,
                                       const boost::python::object &, const int);
-DIAG_OFF("unknown-pragmas")
-DIAG_OFF("unused-local-typdef")
+GNU_DIAG_OFF("unknown-pragmas")
+GNU_DIAG_OFF("unused-local-typdef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-DIAG_OFF("conversion")
+GNU_DIAG_OFF("conversion")
 // Overload types
 BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType1_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 2, 3)
@@ -70,9 +70,9 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType2_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 3, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType3_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 4, 5)
-DIAG_ON("conversion")
-DIAG_ON("unknown-pragmas")
-DIAG_ON("unused-local-typdef")
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unknown-pragmas")
+GNU_DIAG_ON("unused-local-typdef")
 
 /**
  * Map a CancelException to a Python KeyboardInterupt

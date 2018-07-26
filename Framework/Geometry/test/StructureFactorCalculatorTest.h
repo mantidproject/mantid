@@ -99,11 +99,11 @@ private:
    */
   class MockStructureFactorCalculator : public StructureFactorCalculator {
   public:
-    DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD1(getF, StructureFactor(const V3D &hkl));
     MOCK_METHOD1(crystalStructureSetHook,
                  void(const CrystalStructure &crystalStructure));
-    DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 };
 

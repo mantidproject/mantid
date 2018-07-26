@@ -124,7 +124,7 @@ std::string toPrettyString(
   }
   return Strings::shorten(retVal, maxLength);
 }
-DIAG_OFF("unused-function")
+GNU_DIAG_OFF("unused-function")
 /** Explicit specialization for a property of type std::vector<bool>.
 *   This will catch Vectors of char, double, float etc.
 *   This simply concatenates the values using a delimiter
@@ -139,7 +139,7 @@ std::string toPrettyString(
   return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter),
                           maxLength);
 }
-DIAG_ON("unused-function")
+GNU_DIAG_ON("unused-function")
 
 /// Specialization for a property of type std::vector<std::vector>.
 template <typename T>

@@ -21,7 +21,7 @@
 #ifdef GCC_VERSION
 // Avoid compiler warnings on gcc from unused static constants in
 // isisds_command.h
-DIAG_OFF("unused-variable")
+GNU_DIAG_OFF("unused-variable")
 #endif
 #include "DAE/idc.h"
 

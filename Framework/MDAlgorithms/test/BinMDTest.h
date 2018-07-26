@@ -34,7 +34,7 @@ using namespace Mantid::MDAlgorithms;
 using Mantid::coord_t;
 
 class BinMDTest : public CxxTest::TestSuite {
-  DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
 private:
   // Helper class. Mock Implicit function.
   class MockImplicitFunction : public Mantid::Geometry::MDImplicitFunction {
@@ -45,7 +45,7 @@ private:
     std::string getName() const override { return "MockImplicitFunction"; }
     MOCK_CONST_METHOD0(toXMLString, std::string());
   };
-  DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
   // Helper class. Builds mock implicit functions.
   class MockImplicitFunctionBuilder
       : public Mantid::API::ImplicitFunctionBuilder {

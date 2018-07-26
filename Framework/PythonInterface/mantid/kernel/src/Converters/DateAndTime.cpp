@@ -47,9 +47,9 @@ PyArray_Descr *descr_ns() { return func_PyArray_Descr("M8[ns]"); }
 // internal function that handles raw pointer
 boost::shared_ptr<Types::Core::DateAndTime>
 to_dateandtime(const PyObject *datetime) {
-DIAG_OFF("cast-qual")
+  GNU_DIAG_OFF("cast-qual")
   if (!PyArray_IsScalar(datetime, Datetime)) {
-DIAG_ON("cast-qual")
+    GNU_DIAG_ON("cast-qual")
     throw std::runtime_error("Expected datetime64");
   }
 

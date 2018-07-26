@@ -14,13 +14,13 @@
 #include "MantidLiveData/Exception.h"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 
-DIAG_OFF("conversion")
+GNU_DIAG_OFF("conversion")
 #include "private/Schema/ba57_run_info_generated.h"
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/ev42_events_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
 #include "private/Schema/is84_isis_events_generated.h"
-DIAG_ON("conversion")
+GNU_DIAG_ON("conversion")
 
 using namespace Mantid::Types;
 

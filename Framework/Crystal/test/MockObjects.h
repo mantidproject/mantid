@@ -17,7 +17,7 @@
 namespace Mantid {
 namespace Crystal {
 
-DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 // Mock Background strategy
 class MockBackgroundStrategy : public BackgroundStrategy {
@@ -49,7 +49,7 @@ public:
   }
 };
 
-DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 }
 }
 

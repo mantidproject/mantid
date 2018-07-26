@@ -190,7 +190,7 @@ private:
     }
   }
 
-  DIAG_OFF("missing-braces")
+  GNU_DIAG_OFF("missing-braces")
   DimensionProperties getExpectedDimProperties(std::string outputFrame,
                                                DataType dtype) {
     DimensionProperties expected;
@@ -231,7 +231,7 @@ private:
     return expected;
   }
 
-  DIAG_ON("missing-braces")
+  GNU_DIAG_ON("missing-braces")
 
   void checkExperimentInfoAsExpected(const IMDEventWorkspace &outputWS) {
     TS_ASSERT_EQUALS(2, outputWS.getNumExperimentInfo());

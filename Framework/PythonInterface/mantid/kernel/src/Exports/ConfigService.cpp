@@ -32,20 +32,20 @@ std::string getStringUsingCache(ConfigServiceImpl &self,
   return self.getString(key, true);
 }
 
-DIAG_OFF("unknown-pragmas")
-DIAG_OFF("unused-local-typdef")
+GNU_DIAG_OFF("unknown-pragmas")
+GNU_DIAG_OFF("unused-local-typdef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-DIAG_OFF("conversion")
+GNU_DIAG_OFF("conversion")
 /// Overload generator for getInstrument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getInstrument_Overload, getInstrument, 0,
                                        1)
 /// Overload generator for getString
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getString_Overload, getString, 1, 2)
 
-DIAG_ON("conversion")
-DIAG_ON("unknown-pragmas")
-DIAG_ON("unused-local-typdef")
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unknown-pragmas")
+GNU_DIAG_ON("unused-local-typdef")
 }
 
 void export_ConfigService() {

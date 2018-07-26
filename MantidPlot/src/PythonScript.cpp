@@ -540,9 +540,9 @@ QVariant PythonScript::evaluateImpl() {
     }
   }
   /* bool */
-  DIAG_OFF("parentheses-equality")
+  GNU_DIAG_OFF("parentheses-equality")
   else if (PyBool_Check(pyret)) {
-  DIAG_ON("parentheses-equality")
+    GNU_DIAG_ON("parentheses-equality")
     qret = QVariant(pyret == Py_True);
   }
   // could handle advanced types (such as PyList->QValueList) here if needed

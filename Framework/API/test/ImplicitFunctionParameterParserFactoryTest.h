@@ -17,11 +17,11 @@ private:
   class MockImplicitFunctionParameter
       : public Mantid::API::ImplicitFunctionParameter {
   public:
-    DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(getName, std::string());
     MOCK_CONST_METHOD0(isValid, bool());
     MOCK_CONST_METHOD0(toXMLString, std::string());
-    DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   protected:
     ImplicitFunctionParameter *clone() const override {
       return new MockImplicitFunctionParameter;

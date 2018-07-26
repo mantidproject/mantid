@@ -268,7 +268,7 @@ pqPipelineRepresentation *ViewBase::getPvActiveRep() {
   return qobject_cast<pqPipelineRepresentation *>(drep);
 }
 
-DIAG_OFF("strict-aliasing")
+GNU_DIAG_OFF("strict-aliasing")
 /**
  * This function creates a ParaView source from a given plugin name and
  * workspace name. This is used in the plugin mode of the simple interface.

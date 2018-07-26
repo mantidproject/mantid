@@ -34,14 +34,14 @@
 #endif
 
 #include "MantidKernel/WarningSuppressions.h"
-DIAG_OFF("conversion")
-DIAG_OFF("cast-qual")
+GNU_DIAG_OFF("conversion")
+GNU_DIAG_OFF("cast-qual")
 #include <TopoDS_Shape.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
-DIAG_ON("conversion")
-DIAG_ON("cast-qual")
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("cast-qual")
 #endif
 
 namespace Mantid {

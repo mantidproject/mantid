@@ -18,11 +18,11 @@ using namespace MantidQt::CustomInterfaces;
 class MockReflMeasurementItemSource
     : public MantidQt::CustomInterfaces::ReflMeasurementItemSource {
 public:
-  DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_CONST_METHOD2(obtain, MantidQt::CustomInterfaces::MeasurementItem(
                                  const std::string &, const std::string &));
   MOCK_CONST_METHOD0(clone, MockReflMeasurementItemSource *());
-  DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 class ReflMeasureTransferStrategyTest : public CxxTest::TestSuite {

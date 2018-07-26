@@ -170,7 +170,7 @@ public:
              normal_distribution<_RT> &__x);
 };
 
-DIAG_OFF("maybe-uninitialized")
+GNU_DIAG_OFF("maybe-uninitialized")
 template <class _RealType>
 template <class _URNG>
 _RealType normal_distribution<_RealType>::operator()(_URNG &__g,
@@ -196,7 +196,7 @@ _RealType normal_distribution<_RealType>::operator()(_URNG &__g,
   }
   return _Up * __p.stddev() + __p.mean();
 }
-DIAG_ON("maybe-uninitialized")
+GNU_DIAG_ON("maybe-uninitialized")
 
 template <class _CharT, class _Traits, class _RT>
 std::basic_ostream<_CharT, _Traits> &

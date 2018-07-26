@@ -10,7 +10,7 @@
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 
-DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockProjectSaveView : public IProjectSaveView {
 public:

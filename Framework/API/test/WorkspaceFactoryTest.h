@@ -56,9 +56,9 @@ public:
     MatrixWorkspace_sptr space;
     TS_ASSERT_THROWS_NOTHING(
         space = WorkspaceFactory::Instance().create("work", 1, 1, 1));
-    DIAG_OFF("unused-value")
+    GNU_DIAG_OFF("unused-value")
     TS_ASSERT_THROWS_NOTHING(dynamic_cast<WorkspaceTester *>(space.get()));
-    DIAG_ON("unused-value")
+    GNU_DIAG_ON("unused-value")
   }
 
   /** Make a parent, have the child be created with the same sizes */

@@ -6,7 +6,7 @@
 #include <boost/python/extract.hpp>
 #include <boost/python/list.hpp>
 
-DIAG_OFF("strict-aliasing")
+GNU_DIAG_OFF("strict-aliasing")
 
 using Mantid::API::IMaskWorkspace;
 using namespace Mantid::PythonInterface::Registry;

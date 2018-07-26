@@ -9,7 +9,7 @@
 
 using namespace MantidQt::CustomInterfaces;
 
-DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockEnggDiffMultiRunFittingWidgetPresenter
     : public IEnggDiffMultiRunFittingWidgetPresenter {
@@ -48,6 +48,6 @@ MockEnggDiffMultiRunFittingWidgetPresenter::getWidgetAdder() const {
   return Mantid::Kernel::make_unique<FakeEnggDiffMultiRunFittingWidgetAdder>();
 }
 
-DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETPRESENTERMOCK_H_

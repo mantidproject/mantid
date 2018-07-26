@@ -27,14 +27,14 @@ private:
   /// Mocked helper type
   class MockvtkDataSetFactory : public Mantid::VATES::vtkDataSetFactory {
   public:
-    DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD1(
         create, vtkSmartPointer<vtkDataSet>(Mantid::VATES::ProgressAction &));
     MOCK_METHOD1(initialize,
                  void(const boost::shared_ptr<Mantid::API::Workspace> &));
     MOCK_CONST_METHOD0(validate, void());
     MOCK_CONST_METHOD0(getFactoryTypeName, std::string());
-    DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
     void setSuccessorConcrete(std::unique_ptr<vtkDataSetFactory> pSuccessor) {
       vtkDataSetFactory::setSuccessor(pSuccessor);
     }

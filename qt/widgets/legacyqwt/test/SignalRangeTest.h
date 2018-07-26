@@ -12,7 +12,7 @@
 
 #include "MantidAPI/IMDIterator.h"
 
-DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class SignalRangeTest : public CxxTest::TestSuite {
 private:
@@ -86,7 +86,7 @@ private:
     MOCK_CONST_METHOD0(getLinearIndex, size_t());
     MOCK_CONST_METHOD1(isWithinBounds, bool(size_t));
   };
-  DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
   class NormalizableMockIterator : public MockMDIterator {
   public:
     Mantid::signal_t getNormalizedSignal() const override {

@@ -23,8 +23,8 @@
 #endif
 #endif
 
-DIAG_OFF("conversion")
-DIAG_OFF("cast-qual")
+GNU_DIAG_OFF("conversion")
+GNU_DIAG_OFF("cast-qual")
 
 #include <gp_Trsf.hxx>
 #include <gp_Pnt.hxx>
@@ -38,8 +38,8 @@ DIAG_OFF("cast-qual")
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRep_Tool.hxx>
 #include <Poly_Triangulation.hxx>
-DIAG_ON("conversion")
-DIAG_ON("cast-qual")
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("cast-qual")
 
 #ifdef __INTEL_COMPILER
 #pragma warning enable 191

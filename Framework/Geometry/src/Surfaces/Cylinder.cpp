@@ -16,11 +16,11 @@
 #endif
 
 #include "MantidKernel/WarningSuppressions.h"
-DIAG_OFF("conversion")
-DIAG_OFF("cast-qual")
+GNU_DIAG_OFF("conversion")
+GNU_DIAG_OFF("cast-qual")
 #include <BRepPrimAPI_MakeCylinder.hxx>
-DIAG_ON("conversion")
-DIAG_ON("cast-qual")
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("cast-qual")
 #endif
 
 namespace Mantid {

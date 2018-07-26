@@ -159,7 +159,7 @@ public:
 private:
   class MockSymmetryElement : public SymmetryElement {
     friend class SymmetryElementTest;
-    DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
   public:
     MockSymmetryElement(const std::string &hmSymbol)
         : SymmetryElement(hmSymbol) {}
@@ -175,7 +175,7 @@ private:
         : SymmetryElementWithAxis(symbol, axis, translation) {}
     MOCK_CONST_METHOD0(clone, SymmetryElement_sptr());
   };
-  DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 #endif /* MANTID_GEOMETRY_SYMMETRYELEMENTTEST_H_ */

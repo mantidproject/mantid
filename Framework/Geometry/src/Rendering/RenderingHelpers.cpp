@@ -28,8 +28,8 @@
 #endif
 #endif
 
-DIAG_OFF("conversion")
-DIAG_OFF("cast-qual")
+GNU_DIAG_OFF("conversion")
+GNU_DIAG_OFF("cast-qual")
 
 #include <gp_Pnt.hxx>
 #include <TopoDS.hxx>
@@ -40,8 +40,8 @@ DIAG_OFF("cast-qual")
 #include <Poly_Array1OfTriangle.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <Poly_Triangulation.hxx>
-DIAG_ON("conversion")
-DIAG_ON("cast-qual")
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("cast-qual")
 
 #ifdef __INTEL_COMPILER
 #pragma warning enable 191

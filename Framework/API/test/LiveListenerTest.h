@@ -14,7 +14,7 @@ public:
     // Set this flag to true for testing
     m_dataReset = true;
   }
-  DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_CONST_METHOD0(name, std::string());
   MOCK_CONST_METHOD0(supportsHistory, bool());
   MOCK_CONST_METHOD0(buffersEvents, bool());
@@ -25,7 +25,7 @@ public:
   MOCK_METHOD0(runStatus, RunStatus());
   MOCK_CONST_METHOD0(runNumber, int());
   MOCK_METHOD1(setAlgorithm, void(const Mantid::API::IAlgorithm &));
-  DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 class LiveListenerTest : public CxxTest::TestSuite {

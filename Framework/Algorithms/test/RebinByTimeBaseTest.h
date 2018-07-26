@@ -72,7 +72,7 @@ createEventWorkspace(const int numberspectra, const int nDistrubutedEvents,
   return retVal;
 }
 
-DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /*
  This type is an IEventWorkspace, but not an EventWorkspace.
@@ -115,7 +115,7 @@ private:
 };
 }
 
-DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 //=====================================================================================
 // Functional Tests

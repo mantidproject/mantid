@@ -9,7 +9,7 @@
 
 using namespace Mantid::MDAlgorithms;
 using namespace testing;
-DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockBooleanBinaryOperationMD : public BooleanBinaryOperationMD {
 public:
   MOCK_METHOD0(initExtraProperties, void());
@@ -17,7 +17,7 @@ public:
                void(Mantid::DataObjects::MDHistoWorkspace_sptr,
                     Mantid::DataObjects::MDHistoWorkspace_const_sptr));
 };
-DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 class BooleanBinaryOperationMDTest : public CxxTest::TestSuite {
 public:
   void test_basics() {

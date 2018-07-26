@@ -73,7 +73,7 @@ public:
 
 private:
   std::vector<V3D> getTestHKLs() { return {{1, 1, 0}}; }
-  DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   // Mock function to check whether the correct methods are called
   class MockLatticeFunction : public ILatticeFunction {
   public:
@@ -104,6 +104,6 @@ private:
   };
 };
 
-DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /* MANTID_API_ILATTICEFUNCTIONTEST_H_ */

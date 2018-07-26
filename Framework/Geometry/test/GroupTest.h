@@ -369,10 +369,10 @@ public:
 
     TS_ASSERT_THROWS(null * null, std::invalid_argument);
     // clang gives a warning if we don't use the result
-    DIAG_OFF("unused-comparison")
+    GNU_DIAG_OFF("unused-comparison")
     TS_ASSERT_THROWS(null == null, std::invalid_argument);
     TS_ASSERT_THROWS(null != null, std::invalid_argument);
-    DIAG_ON("unused-comparison")
+    GNU_DIAG_ON("unused-comparison")
     TS_ASSERT_THROWS(three * null, std::invalid_argument);
     TS_ASSERT_THROWS(null * three, std::invalid_argument);
 

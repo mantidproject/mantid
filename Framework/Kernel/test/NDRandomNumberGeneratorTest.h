@@ -17,12 +17,12 @@ private:
   public:
     Mock3DRandomNumberGenerator()
         : Mantid::Kernel::NDRandomNumberGenerator(3) {}
-    DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_METHOD0(generateNextPoint, void());
     MOCK_METHOD0(restart, void());
     MOCK_METHOD0(save, void());
     MOCK_METHOD0(restore, void());
-    DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 
 public:
