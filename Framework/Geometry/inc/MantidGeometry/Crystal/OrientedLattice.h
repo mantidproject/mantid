@@ -58,6 +58,7 @@ public:
   const Kernel::DblMatrix &getUB() const;
   void setU(const Kernel::DblMatrix &newU, const bool force = true);
   void setUB(const Kernel::DblMatrix &newUB);
+  void setModUB(const Kernel::DblMatrix &newModUB);
   // get u and v vectors for Horace/Mslice
   Kernel::V3D getuVector() const;
   Kernel::V3D getvVector() const;
@@ -83,8 +84,9 @@ public:
 private:
   Kernel::DblMatrix U;
   Kernel::DblMatrix UB;
+  Kernel::DblMatrix ModUB;
 
-  /** Make recalculateFromGstar private. */
+  /** Make recalculateFrom private. */
   void recalculateFromGstar(const Kernel::DblMatrix &NewGstar) override {
     UnitCell::recalculateFromGstar(NewGstar);
   }

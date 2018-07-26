@@ -131,15 +131,16 @@ void PredictSatellitePeaks::exec() {
     return;
   }
 
-  API::Sample sample = Peaks->sample();
+  API::Sample sample = Peaks->mutableSample();
 
-  const auto &lattice = sample.getOrientedLattice();
+  OrientedLattice lattice = sample.getOrientedLattice();
 
   const auto instrument = Peaks->getInstrument();
 
   auto OutPeaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(
       WorkspaceFactory::Instance().createPeaks());
   OutPeaks->setInstrument(instrument);
+  OutPeaks->mutableSample().setOrientedLattice(&lattice);
 
   V3D hkl;
   int peakNum = 0;

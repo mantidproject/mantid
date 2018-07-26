@@ -1,12 +1,12 @@
 /*
  * PredictSatellitePeaksTest.h
  *
- *  Created on: Dec 28, 2012
- *      Author: ruth
+ *  Created on: July, 2018
+ *      Author: Vickie Lynch
  */
 
-#ifndef PREDICTFRACTIONALPEAKSTEST_H_
-#define PREDICTFRACTIONALPEAKSTEST_H_
+#ifndef PREDICTSATELLITEPEAKSTEST_H_
+#define PREDICTSATELLITEPEAKSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
@@ -95,4 +95,4 @@ public:
   }
 };
 
-#endif /* PredictFRACTIONALPEAKSTEST_H_ */
+#endif /* PREDICTSATELLITEPEAKSTEST__H_ */
