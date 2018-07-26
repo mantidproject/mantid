@@ -44,7 +44,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.checkbox = CheckboxPresenter(self._checkbox_view, CheckboxModel())
         for _, v in self.checkbox.view.checkbox_dict.iteritems():
             v.on_checkbox_unchecked(lambda c: print("unchecked: {}".format(c.name)))
-            v.on_checkbox_checked(lambda c: print("checked: {}".format(c.name)))        
+            v.on_checkbox_checked(lambda c: print("checked: {}".format(c.name)))
 
         self.widget_list.addWidget(self.checkbox.view)
 
