@@ -367,7 +367,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
   } catch (std::exception &e) {
     // there was a problem loading the file - it probably is not there
     std::cerr << "Problem loading the configuration file " << filename << " "
-              << e.what() << '\n'; 
+              << e.what() << '\n';
     std::cerr << "Mantid is unable to start.\n" << std::endl;
     throw;
   }
