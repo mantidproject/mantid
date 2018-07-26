@@ -1946,9 +1946,8 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
 void ConfigServiceImpl::setLogLevel(int logLevel, bool quiet) {
   Mantid::Kernel::Logger::setLevelForAll(logLevel);
   if (!quiet) {
-    g_log.log("logging set to " +
-      Logger::PriorityNames[logLevel] + " priority",
-      static_cast<Logger::Priority>(logLevel));
+    g_log.log("logging set to " + Logger::PriorityNames[logLevel] + " priority",
+              static_cast<Logger::Priority>(logLevel));
   }
 }
 

@@ -55,8 +55,7 @@ void MessageDisplay::readSettings(const QSettings &storage) {
  */
 void MessageDisplay::writeSettings(QSettings *storage) {
   Q_ASSERT(storage);
-  storage->setValue("MessageDisplayPriority",
-                    Poco::Logger::root().getLevel());
+  storage->setValue("MessageDisplayPriority", Poco::Logger::root().getLevel());
 }
 
 /**

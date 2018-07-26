@@ -337,7 +337,6 @@ private:
   Kernel::ProxyInfo m_proxyInfo;
   /// whether the proxy has been populated yet
   bool m_isProxySet;
-
 };
 
 EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
