@@ -47,7 +47,7 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
   std::vector<size_t> stringSizes;
 
   // Block allocate memory
-  stringSizes.reserve(self.size);
+  stringSizes.reserve(self.size());
 
   // Loop for the number of strings in self
   for (int i = 0; i < self.size(); i++) {

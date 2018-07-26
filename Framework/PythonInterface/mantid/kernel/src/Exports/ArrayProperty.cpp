@@ -42,7 +42,7 @@ template <> std::string dtype(ArrayProperty<std::string> &self) {
   std::vector<size_t> stringSizes;
 
   // Block allocate memory
-  stringSizes.reserve(self.size);
+  stringSizes.reserve(self.size());
 
   // Loop for the number of strings
   // For each string store the number of characters
