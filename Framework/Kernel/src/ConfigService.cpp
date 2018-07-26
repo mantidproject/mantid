@@ -367,11 +367,9 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
   } catch (std::exception &e) {
     // there was a problem loading the file - it probably is not there
     std::cerr << "Problem loading the configuration file " << filename << " "
-              << e.what() << '\n';
-    if (!append) {
-      // if we have no property values then take the default
-      m_PropertyString = defaultConfig();
-    }
+              << e.what() << '\n'; 
+    std::cerr << "Mantid is unable to start.\n" << std::endl;
+    throw;
   }
 
   // use the cached property string to initialise the POCO property file
@@ -655,29 +653,6 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
                     << getUserPropertiesDir() << m_user_properties_file_name
                     << " error: " << ex.what() << '\n';
   }
-}
-
-/**
- * Provides a default Configuration string to use if the config file cannot be
- * loaded.
- * @returns The string value of default properties
- */
-std::string ConfigServiceImpl::defaultConfig() const {
-  std::string propFile =
-      "# logging configuration"
-      "# root level message filter (drop to debug for more messages)"
-      "logging.loggers.root.level = notice"
-      "# splitting the messages to many logging channels"
-      "logging.loggers.root.channel.class = SplitterChannel"
-      "logging.loggers.root.channel.channel1 = consoleChannel"
-      "# output to the console - primarily for console based apps"
-      "logging.channels.consoleChannel.class = ConsoleChannel"
-      "logging.channels.consoleChannel.formatter = f1"
-      "# specfic filter for the file channel raising the level to warning "
-      "logging.formatters.f1.class = PatternFormatter"
-      "logging.formatters.f1.pattern = %s-[%p] %t"
-      "logging.formatters.f1.times = UTC";
-  return propFile;
 }
 
 //-------------------------------

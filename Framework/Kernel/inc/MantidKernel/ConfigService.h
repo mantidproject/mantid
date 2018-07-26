@@ -266,8 +266,6 @@ private:
   /// Read a file and place its contents into the given string
   bool readFile(const std::string &filename, std::string &contents) const;
 
-  /// Provides a string of a default configuration
-  std::string defaultConfig() const;
   /// Writes out a fresh user properties file
   void createUserPropertiesFile() const;
   /// Convert any relative paths to absolute ones and store them locally so that
