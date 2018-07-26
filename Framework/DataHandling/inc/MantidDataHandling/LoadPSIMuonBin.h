@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAHANDLING_LOADPSIMUONBIN_H_
 #define MANTID_DATAHANDLING_LOADPSIMUONBIN_H_
 
+#include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/IFileLoader.h"
 #include <cstdint>
 
 namespace Mantid {
@@ -11,31 +11,17 @@ namespace DataHandling {
 
 class DLLExport LoadPSIMuonBin
     : public API::IFileLoader<Kernel::FileDescriptor> {
+      
 public:
-  /// Default constructor
-  LoadPSIMuonBin();
-  /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override;
-  /// Summary of algorithms purpose
   const std::string summary() const override;
-
-  /// Algorithm's version for identification overriding a virtual method
   int version() const override;
-
-  /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override;
-
-  /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
-
-  /// Returns a value indicating whether or not loader wants to load multiple
-  /// files into a single workspace
   bool loadMutipleAsOne() override;
 
 private:
-  /// Overwrites Algorithm method.
   void init() override;
-  /// Overwrites Algorithm method
   void exec() override;
 
   // Define the variables of the header
@@ -64,17 +50,18 @@ private:
   float histogramBinWidth;
   float temperatures[4];
   float temperatureDeviation[4];
-  float monLow[4]; //No idea what this is
+  float monLow[4]; // No idea what this is
   float monHigh[4];
   int32_t monNumberOfevents;
   char monDeviation[12];
-  int16_t numberOfDataRecordsFile; //numdef
-  int16_t lengthOfDataRecordsBin; //lendef
-  int16_t numberOfDataRecordsHistogram; //kdafhi
-  int16_t numberOfHistogramsPerRecord; //khidaf
+  int16_t numberOfDataRecordsFile;      // numdef
+  int16_t lengthOfDataRecordsBin;       // lendef
+  int16_t numberOfDataRecordsHistogram; // kdafhi
+  int16_t numberOfHistogramsPerRecord;  // khidaf
   int32_t periodOfSave;
   int32_t periodOfMon;
-}
+  
+};
 } // namespace DataHandling
 } // namespace Mantid
 
