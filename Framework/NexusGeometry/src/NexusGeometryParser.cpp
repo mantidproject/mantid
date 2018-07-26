@@ -423,7 +423,8 @@ parseNexusMesh(const Group &detectorGroup, const Group &shapeGroup) {
 void extractFacesAndIDs(const std::vector<uint16_t> &detFaces,
                         const std::vector<uint16_t> &windingOrder,
                         const std::vector<float> &vertices,
-                        const int32_t minDetId, const size_t vertsPerFace,
+                        const std::map<int, uint16_t> &detIdToIndex,
+                        const size_t vertsPerFace,
                         std::vector<std::vector<Eigen::Vector3d>> &detFaceVerts,
                         std::vector<std::vector<uint16_t>> &detFaceIndices,
                         std::vector<std::vector<uint16_t>> &detWindingOrder,
@@ -433,15 +434,18 @@ void extractFacesAndIDs(const std::vector<uint16_t> &detFaces,
   std::fill(detFaceIndices.begin(), detFaceIndices.end(),
             std::vector<uint16_t>(1, 0));
   for (size_t i = 0; i < windingOrder.size(); i += vertsPerFace) {
-    auto &detVerts = detFaceVerts[detFaces[detFaceIndex] - minDetId];
-    auto &detIndices = detFaceIndices[detFaces[detFaceIndex] - minDetId];
-    auto &detWinding = detWindingOrder[detFaces[detFaceIndex] - minDetId];
+    auto detFaceId = detFaces[detFaceIndex];
+    auto detIndex = detIdToIndex.at(detFaceId);
+
+    auto &detVerts = detFaceVerts[detIndex];
+    auto &detIndices = detFaceIndices[detIndex];
+    auto &detWinding = detWindingOrder[detIndex];
     for (size_t v = 0; v < vertsPerFace; ++v) {
       auto vi = windingOrder[i + v] * vertStride;
       detVerts.emplace_back(vertices[vi], vertices[vi + 1], vertices[vi + 2]);
       detWinding.push_back(static_cast<uint16_t>(detWinding.size()));
     }
-    detIds[detFaces[detFaceIndex] - minDetId] = detFaces[detFaceIndex];
+    detIds[detIndex] = detFaceId;
     detIndices.push_back(static_cast<uint16_t>(detVerts.size()));
     detFaceIndex += 2;
   }
@@ -451,7 +455,8 @@ void parseNexusMeshAndAddDetectors(const std::vector<uint16_t> &detFaces,
                                    const std::vector<uint16_t> &faceIndices,
                                    const std::vector<uint16_t> &windingOrder,
                                    const std::vector<float> &vertices,
-                                   const size_t numDets, const int32_t minDetId,
+                                   const size_t numDets,
+                                   const std::map<int, uint16_t> &detIdToIndex,
                                    const std::string &name,
                                    InstrumentBuilder &builder) {
   auto vertsPerFace = windingOrder.size() / faceIndices.size();
@@ -460,8 +465,9 @@ void parseNexusMeshAndAddDetectors(const std::vector<uint16_t> &detFaces,
   std::vector<std::vector<uint16_t>> detWindingOrder(numDets);
   std::vector<int> detIds(numDets);
 
-  extractFacesAndIDs(detFaces, windingOrder, vertices, minDetId, vertsPerFace,
-                     detFaceVerts, detFaceIndices, detWindingOrder, detIds);
+  extractFacesAndIDs(detFaces, windingOrder, vertices, detIdToIndex,
+                     vertsPerFace, detFaceVerts, detFaceIndices,
+                     detWindingOrder, detIds);
 
   for (size_t i = 0; i < numDets; ++i) {
     auto &detVerts = detFaceVerts[i];
@@ -496,10 +502,14 @@ void parseAndAddBank(const Group &shapeGroup, InstrumentBuilder &builder,
       get1DDataset<int32_t>("winding_order", shapeGroup));
   const auto vertices = get1DDataset<float>("vertices", shapeGroup);
 
-  auto minId = std::min(detectorIds.cbegin(), detectorIds.cend());
+  std::map<int, uint16_t> detIdToIndex;
+  for (size_t i = 0; i < detectorIds.size(); ++i) {
+    detIdToIndex.insert(std::make_pair(detectorIds[i], i));
+  }
 
   parseNexusMeshAndAddDetectors(detFaces, faceIndices, windingOrder, vertices,
-                                detectorIds.size(), *minId, bankName, builder);
+                                detectorIds.size(), detIdToIndex, bankName,
+                                builder);
 }
 
 /// Choose what shape type to parse
@@ -508,12 +518,12 @@ parseNexusShape(const Group &detectorGroup) {
   Group shapeGroup;
   try {
     shapeGroup = detectorGroup.openGroup(PIXEL_SHAPE);
-  } catch (...) {
+  } catch (H5::Exception &) {
     // TODO. Current assumption. Can we have pixels without specifying a
     // shape?
     try {
       shapeGroup = detectorGroup.openGroup(SHAPE);
-    } catch (...) {
+    } catch (H5::Exception &) {
       return boost::shared_ptr<const Geometry::IObject>(nullptr);
     }
   }
@@ -604,7 +614,7 @@ extractInstrument(const H5File &file, const Group &root) {
       auto shapeGroup = detectorGroup.openGroup(DETECTOR_SHAPE);
       parseAndAddBank(shapeGroup, builder, detectorIds, bankName);
       continue;
-    } catch (...) { // No detector_shape group
+    } catch (H5::Exception &) { // No detector_shape group
     }
 
     // Get the pixel offsets
