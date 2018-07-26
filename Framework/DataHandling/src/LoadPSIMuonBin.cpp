@@ -32,7 +32,23 @@ LoadPSIMuonBin::LoadPSIMuonBin() {}
  * @param descriptor
  * @return int
  */
-int LoadPSIMuonBin::confidence(DescriptorType &descriptor) const override {}
+int LoadPSIMuonBin::confidence(Kernel::FileDescriptor &descriptor) const override {
+  auto &stream = descriptor.data();
+  // 85th character is a space & 89th character is a ~
+  stream.seekg(0, std::ios::beg);
+  int c = stream.get();
+  int confidence(0);
+  // Checks if postion 0 is a 1
+  if (c == 49) {
+    stream.seekg(1, std::ios::cur);
+    int c = stream.get();
+    // Checks if position 1 is N
+    if (c == 78)
+      confidence = 90;
+  }
+  return confidence;
+}
+}
 
 // version 1 does not however there is an issue open to create a version which
 // handles temperatures aswell
@@ -60,12 +76,13 @@ void LoadPSIMuonBin::exec() {
   std::string binFilename = getPropertyValue("Filename");
   // std::vector<Histogram> readHistogramData;
 
-  // ifstream *binFile;
-  // binFile.open(fileName, ios_base::binary);
+  ifstream binFile(binFileName, ios::in|ios::binary:ios::ate);
+
+  auto size = binFile.tellg();
 
   const int sizeOfHeader = 1024;
   const char binFileHeaderBuffer[sizeofHeader];
-  // binFile.read(binFileHeaderBuffer, sizeOfHeader);
+  binFile.read(binFileHeaderBuffer, sizeOfHeader);
 
   std::string fileFormat(binFileHeaderBuffer, 2);
 

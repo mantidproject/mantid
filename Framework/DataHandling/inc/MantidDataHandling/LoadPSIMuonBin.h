@@ -3,6 +3,7 @@
 
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/IFileLoader.h"
 #include <cstdint>
 
 namespace Mantid {
@@ -25,7 +26,7 @@ public:
   const std::string category() const override;
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Mantid::DescriptorType &descriptor) const override;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
   /// Returns a value indicating whether or not loader wants to load multiple
   /// files into a single workspace
