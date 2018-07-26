@@ -22,19 +22,28 @@ class LoadPresenter(object):
         self.view.on_button_clicked(slot)
 
     def unregister_button_clicked(self, slot):
-        self.view.unreg_on_button_clicked(slot)
+        try:
+            self.view.unreg_on_button_clicked(slot)
+        except TypeError:
+            return
 
     def register_spinbox_val_changed(self, slot):
         self.view.on_spinbox_val_changed(slot)
 
     def unregister_spinbox_val_changed(self, slot):
-        self.view.unreg_on_spinbox_val_changed(slot)
+        try:
+            self.view.unreg_on_spinbox_val_changed(slot)
+        except TypeError:
+            return
 
     def register_spinbox_submit(self, slot):
         self.view.on_spinbox_submit(slot)
 
     def unregister_spinbox_submit(self, slot):
-        self.view.unreg_on_spinbox_submit(slot)
+        try:
+            self.view.unreg_on_spinbox_submit(slot)
+        except TypeError:
+            return
 
     def disable_buttons(self):
         self.view.load_button.setEnabled(False)
