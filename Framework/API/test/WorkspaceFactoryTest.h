@@ -56,13 +56,9 @@ public:
     MatrixWorkspace_sptr space;
     TS_ASSERT_THROWS_NOTHING(
         space = WorkspaceFactory::Instance().create("work", 1, 1, 1));
-    // clang-format off
-    DIAG_OFF(unused-value)
-    // clang-format on
+    DIAG_OFF("unused-value")
     TS_ASSERT_THROWS_NOTHING(dynamic_cast<WorkspaceTester *>(space.get()));
-    // clang-format off
-    DIAG_ON(unused-value)
-    // clang-format on
+    DIAG_ON("unused-value")
   }
 
   /** Make a parent, have the child be created with the same sizes */

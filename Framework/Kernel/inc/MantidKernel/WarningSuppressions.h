@@ -52,6 +52,7 @@
 #undef DIAG_JOINSTR
 #endif
 #define DIAG_JOINSTR(x, y) DIAG_STR(x##y)
+#define DIAG_MAKE_WARNING(x) "-W" x
 // undefine definition from Poco 1.6
 #ifdef DIAG_DO_PRAGMA
 #undef DIAG_DO_PRAGMA
@@ -80,16 +81,16 @@
 #if GCC_VERSION >= 40600 // GCC 4.6.0
 #define DIAG_OFF(x)                                                          \
   DIAG_PRAGMA(push)                                                          \
-  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, unknown-warning))                     \
-  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, x))
+  DIAG_PRAGMA(ignored DIAG_MAKE_WARNING("unknown-warning"))                     \
+  DIAG_PRAGMA(ignored DIAG_MAKE_WARNING(x))
 #define DIAG_ON(x) DIAG_PRAGMA(pop)
 #else
 #define DIAG_OFF(x)                                                          \
-  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, unknown-warning))                     \
-  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, x))
+  DIAG_PRAGMA(ignored DIAG_MAKE_WARNING("unknown-warning"))                     \
+  DIAG_PRAGMA(ignored DIAG_MAKE_WARNING(x))
 #define DIAG_ON(x)                                                           \
-  DIAG_PRAGMA(warning DIAG_JOINSTR(-W, unknown-warning))                     \
-  DIAG_PRAGMA(warning DIAG_JOINSTR(-W, x))
+  DIAG_PRAGMA(warning DIAG_MAKE_WARNING("unknown-warning"))                     \
+  DIAG_PRAGMA(warning DIAG_MAKE_WARNING(x))
 #endif
 // clang-format on
 
@@ -100,8 +101,8 @@
 // clang-format off
 #define DIAG_OFF(x)                                                         \
   DIAG_PRAGMA(push)                                                         \
-  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, unknown-warning-option))             \
-  DIAG_PRAGMA(ignored DIAG_JOINSTR(-W, x))
+  DIAG_PRAGMA(ignored DIAG_MAKE_WARNING("unknown-warning-option"))        \
+  DIAG_PRAGMA(ignored DIAG_MAKE_WARNING(x))
 #define DIAG_ON(x) DIAG_PRAGMA(pop)
 // clang-format on
 #else
@@ -116,11 +117,11 @@
 // the hyphen and we use it in a lot of test files.
 // clang-format off
 #if defined(__cplusplus) && defined(GCC_VERSION) && GCC_VERSION >= 50000
-#define DIAG_OFF_SUGGEST_OVERRIDE DIAG_OFF(suggest-override)
-#define DIAG_ON_SUGGEST_OVERRIDE DIAG_ON(suggest-override)
+#define DIAG_OFF_SUGGEST_OVERRIDE DIAG_OFF("suggest-override")
+#define DIAG_ON_SUGGEST_OVERRIDE DIAG_ON("suggest-override")
 #elif defined(__cplusplus) && defined(CLANG_VERSION) && CLANG_VERSION >= 306
-#define DIAG_OFF_SUGGEST_OVERRIDE DIAG_OFF(inconsistent-missing-override)
-#define DIAG_ON_SUGGEST_OVERRIDE DIAG_ON(inconsistent-missing-override)
+#define DIAG_OFF_SUGGEST_OVERRIDE DIAG_OFF("inconsistent-missing-override")
+#define DIAG_ON_SUGGEST_OVERRIDE DIAG_ON("inconsistent-missing-override")
 #else
 #define DIAG_OFF_SUGGEST_OVERRIDE
 #define DIAG_ON_SUGGEST_OVERRIDE

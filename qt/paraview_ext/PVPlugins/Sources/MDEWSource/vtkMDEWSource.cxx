@@ -185,9 +185,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **,
   return 1;
 }
 
-// clang-format off
-DIAG_OFF(strict-aliasing)
-// clang-format on
+DIAG_OFF("strict-aliasing")
 int vtkMDEWSource::RequestInformation(
     vtkInformation *vtkNotUsed(request),
     vtkInformationVector **vtkNotUsed(inputVector),

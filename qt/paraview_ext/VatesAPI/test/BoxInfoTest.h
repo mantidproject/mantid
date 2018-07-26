@@ -54,9 +54,7 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
-  // clang-format off
-  DIAG_OFF(strict-aliasing)
-  // clang-format on
+  DIAG_OFF("strict-aliasing")
   void test_initial_recursion_depth_is_1_for_MD_Event_w_split() {
     // Arrange
     const std::string wsName = "MD_EVENT_WS_WITH_SPLITTING";

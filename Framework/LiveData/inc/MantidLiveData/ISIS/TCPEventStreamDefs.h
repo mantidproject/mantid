@@ -9,9 +9,7 @@
 #include <vector>
 
 // to ignore warnings when comparing header versions
-// clang-format off
-DIAG_OFF(type-limits)
-// clang-format on
+DIAG_OFF("type-limits")
 #if defined(_WIN32)
 #pragma warning(disable : 4296)
 #endif
@@ -53,9 +51,7 @@ struct TCPStreamEventHeader {
       : marker1(marker), marker2(marker), version(current_version),
         length(sizeof(TCPStreamEventHeader)), type(type_) {}
 
-  // clang-format off
-  DIAG_OFF(autological-compare)
-  // clang-format on
+  DIAG_OFF("tautological-compare")
   bool isValid() const {
     return marker1 == marker && marker2 == marker &&
            length >= sizeof(TCPStreamEventHeader) &&
@@ -63,9 +59,7 @@ struct TCPStreamEventHeader {
            minorVersion() >= TCPStreamEventHeader::minor_version &&
            type != InvalidStream;
   }
-  // clang-format off
-  DIAG_ON(autological-compare)
-  // clang-format on
+  DIAG_ON("tautological-compare")
 
   static const uint32_t major_version =
       1; ///< starts at 1, then incremented whenever layout of this or further
@@ -195,7 +189,5 @@ struct TCPStreamEventDataSE {
 }
 }
 
-// clang-format off
-DIAG_ON(type-limits)
-// clang-format on
+DIAG_ON("type-limits")
 #endif /* TCP_EVENT_STREAM_DEFS_H */

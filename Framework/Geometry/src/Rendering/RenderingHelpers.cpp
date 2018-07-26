@@ -28,10 +28,9 @@
 #endif
 #endif
 
-// clang-format off
-DIAG_OFF(conversion)
-DIAG_OFF(cast-qual)
-// clang-format on
+DIAG_OFF("conversion")
+DIAG_OFF("cast-qual")
+
 #include <gp_Pnt.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
@@ -41,10 +40,8 @@ DIAG_OFF(cast-qual)
 #include <Poly_Array1OfTriangle.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <Poly_Triangulation.hxx>
-// clang-format off
-DIAG_ON(conversion)
-DIAG_ON(cast-qual)
-// clang-format on
+DIAG_ON("conversion")
+DIAG_ON("cast-qual")
 
 #ifdef __INTEL_COMPILER
 #pragma warning enable 191

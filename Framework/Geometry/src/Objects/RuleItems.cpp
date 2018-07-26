@@ -34,18 +34,14 @@
 #endif
 
 #include "MantidKernel/WarningSuppressions.h"
-// clang-format off
-DIAG_OFF(conversion)
-DIAG_OFF(cast-qual)
-// clang-format on
+DIAG_OFF("conversion")
+DIAG_OFF("cast-qual")
 #include <TopoDS_Shape.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
-// clang-format off
-DIAG_ON(conversion)
-DIAG_ON(cast-qual)
-// clang-format on
+DIAG_ON("conversion")
+DIAG_ON("cast-qual")
 #endif
 
 namespace Mantid {

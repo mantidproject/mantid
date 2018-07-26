@@ -17,9 +17,7 @@ namespace {
 
 // The missing braces warning is a false positive -
 // https://llvm.org/bugs/show_bug.cgi?id=21629
-// clang-format off
-DIAG_OFF(missing-braces)
-// clang-format on
+DIAG_OFF("missing-braces")
 
 // Get a complex conjugate of the value returned by
 // ComplexMatrix::operator(i,j)
@@ -636,9 +634,7 @@ void diagonalise(const ComplexFortranMatrix &hamiltonian,
   eigenvalues += -eshift;
 }
 
-// clang-format off
-DIAG_OFF(missing-braces)
-// clang-format on
+DIAG_OFF("missing-braces")
 
 } // anonymous namespace
 

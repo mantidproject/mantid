@@ -8,17 +8,13 @@
 #include "MantidTypes/Core/DateAndTime.h"
 #include <gmock/gmock.h>
 
-// clang-format off
-DIAG_OFF(conversion)
-// clang-format on
+DIAG_OFF("conversion")
 #include "Kafka/private/Schema/ba57_run_info_generated.h"
 #include "Kafka/private/Schema/df12_det_spec_map_generated.h"
 #include "Kafka/private/Schema/ev42_events_generated.h"
 #include "Kafka/private/Schema/f142_logdata_generated.h"
 #include "Kafka/private/Schema/is84_isis_events_generated.h"
-// clang-format off
-DIAG_ON(conversion)
-// clang-format on
+DIAG_ON("conversion")
 
 #include <ctime>
 

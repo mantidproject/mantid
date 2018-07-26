@@ -19,9 +19,7 @@
 #ifdef GCC_VERSION
 // Avoid compiler warnings on gcc from unused static constants in
 // isisds_command.h
-// clang-format off
-DIAG_OFF(unused-variable)
-// clang-format on
+DIAG_OFF("unused-variable")
 #endif
 #include "DAE/idc.h"
 

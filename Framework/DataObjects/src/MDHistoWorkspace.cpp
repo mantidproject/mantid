@@ -1346,9 +1346,7 @@ uint64_t MDHistoWorkspace::sumNContribEvents() const {
 /**
  * Get the Q frame system (if any) to use.
 */
-// clang-format off
-DIAG_OFF(strict-aliasing)
-// clang-format on
+DIAG_OFF("strict-aliasing")
 Kernel::SpecialCoordinateSystem
 MDHistoWorkspace::getSpecialCoordinateSystem() const {
   MDFramesToSpecialCoordinateSystem converter;

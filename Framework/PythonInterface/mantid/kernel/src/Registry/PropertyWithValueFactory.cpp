@@ -187,9 +187,7 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
 
     PyObject *item = PySequence_Fast_GET_ITEM(object, 0);
     // Boolean can be cast to int, so check first.
-    // clang-format off
-    DIAG_OFF(parentheses-equality)
-    // clang-format on
+    DIAG_OFF("parentheses-equality")
     if (PyBool_Check(item)) {
       throw std::runtime_error(
           "Unable to support extracting arrays of booleans.");
@@ -197,9 +195,7 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
     if (PyLong_Check(item)) {
       return std::string("LongIntArray");
     }
-    // clang-format off
-    DIAG_ON(parentheses-equality)
-// clang-format on
+    DIAG_ON("parentheses-equality")
 
 #if PY_MAJOR_VERSION < 3
     // In python 2 ints & longs are separate

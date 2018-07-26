@@ -15,9 +15,7 @@ using boost::python::extract;
 using boost::python::object;
 using boost::python::len;
 
-// clang-format off
-DIAG_OFF(strict-aliasing)
-// clang-format on
+DIAG_OFF("strict-aliasing")
 
 namespace Mantid {
 namespace PythonInterface {

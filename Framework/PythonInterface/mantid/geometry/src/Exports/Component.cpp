@@ -8,14 +8,11 @@ using Mantid::Geometry::IComponent;
 using namespace boost::python;
 
 namespace {
-// clang-format off
-DIAG_OFF(unknown-pragmas)
-DIAG_OFF(unused-local-typdef)
-
+DIAG_OFF("unknown-pragmas")
+DIAG_OFF("unused-local-typdef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-DIAG_OFF(conversion)
-// clang-format on
+DIAG_OFF("conversion")
 
 // Default parameter function overloads
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterNames,
@@ -46,11 +43,9 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamShortDescription,
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamDescription,
                                        Component::getParamDescription, 1, 2)
 
-// clang-format off
-DIAG_ON(conversion)
-DIAG_ON(unknown-pragmas)
-DIAG_ON(unused-local-typdef)
-// clang-format on
+DIAG_ON("conversion")
+DIAG_ON("unknown-pragmas")
+DIAG_ON("unused-local-typdef")
 }
 void export_Component() {
   class_<Component, bases<IComponent>, boost::noncopyable>("Component", no_init)

@@ -24,20 +24,18 @@ using Mantid::PythonInterface::std_vector_exporter;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(Property)
-// clang-format off
-DIAG_OFF(unknown-pragmas)
-DIAG_OFF(unused-local-typdef)
+DIAG_OFF("unknown-pragmas")
+DIAG_OFF("unused-local-typdef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-DIAG_OFF(conversion)
-// clang-format on
+DIAG_OFF("conversion")
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(valueAsPrettyStrOverloader,
+
                                        valueAsPrettyStr, 0, 2)
-// clang-format off
-DIAG_ON(conversion)
-DIAG_ON(unknown-pragmas)
-DIAG_ON(unused-local-typdef)
-// clang-format on
+DIAG_ON("conversion")
+DIAG_ON("unknown-pragmas")
+DIAG_ON("unused-local-typdef")
 
 void export_Property() {
   register_ptr_to_python<Property *>();

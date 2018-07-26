@@ -2,9 +2,7 @@
 // Poco-related compilation error on Windows
 #include "MantidAPI/WorkspaceFactory.h"
 #if GCC_VERSION >= 40800 // 4.8.0
-// clang-format off
-DIAG_OFF(literal-suffix)
-// clang-format on
+DIAG_OFF("literal-suffix")
 #endif
 #include "MantidICat/ICat3/ICat3Helper.h"
 #include "MantidICat/ICat3/ICat3ErrorHandling.h"

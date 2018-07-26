@@ -147,9 +147,7 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
   } else {
     Environment::GlobalInterpreterLock gil;
 
-    // clang-format off
-    DIAG_OFF(parentheses-equality)
-    // clang-format on
+    DIAG_OFF("parentheses-equality")
     PyObject *result = PyObject_CallObject(m_isRunningObj, nullptr);
     if (PyErr_Occurred())
       throw Environment::PythonException();
@@ -165,9 +163,7 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
       throw std::runtime_error(
           "Algorithm.isRunning - Expected bool return type.");
   }
-  // clang-format off
-  DIAG_ON(parentheses-equality)
-  // clang-format on
+  DIAG_ON("parentheses-equality")
 }
 
 /**

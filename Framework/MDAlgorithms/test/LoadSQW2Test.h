@@ -190,9 +190,7 @@ private:
     }
   }
 
-  // clang-format off
-  DIAG_OFF(missing-braces)
-  // clang-format on
+  DIAG_OFF("missing-braces")
   DimensionProperties getExpectedDimProperties(std::string outputFrame,
                                                DataType dtype) {
     DimensionProperties expected;
@@ -233,9 +231,7 @@ private:
     return expected;
   }
 
-  // clang-format off
-  DIAG_ON(missing-braces)
-  // clang-format on
+  DIAG_ON("missing-braces")
 
   void checkExperimentInfoAsExpected(const IMDEventWorkspace &outputWS) {
     TS_ASSERT_EQUALS(2, outputWS.getNumExperimentInfo());

@@ -14,9 +14,8 @@
 using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
-// clang-format off
-DIAG_OFF(strict-aliasing)
-// clang-format on
+
+DIAG_OFF("strict-aliasing")
 
 namespace {
 std::string getUnit(Projection &p, size_t nd) {

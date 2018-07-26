@@ -1286,9 +1286,7 @@ TMDE(void MDGridBox)::centroidSphere(API::CoordTransform &radiusTransform,
   } // (for each box)
 }
 //-----------------------------------------------------------------------------------------------
-// clang-format off
-DIAG_OFF(array-bounds)
-// clang-format on
+DIAG_OFF("array-bounds")
 /** Integrate the signal within a sphere; for example, to perform single-crystal
  * peak integration.
  * The CoordTransform object could be used for more complex shapes, e.g.
@@ -1492,9 +1490,7 @@ TMDE(void MDGridBox)::integrateCylinder(
   delete[] verticesContained;
   delete[] boxMightTouch;
 }
-// clang-format off
-DIAG_ON(array-bounds)
-// clang-format on
+DIAG_ON("array-bounds")
 
 /**
 Getter for the masking status of the gridded box.

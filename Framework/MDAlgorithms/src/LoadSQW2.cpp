@@ -485,9 +485,7 @@ std::vector<float> LoadSQW2::calculateDimLimitsFromData() {
 
 // The missing braces warning is a false positive -
 // https://llvm.org/bugs/show_bug.cgi?id=21629
-// clang-format off
-DIAG_OFF(missing-braces)
-// clang-format on
+DIAG_OFF("missing-braces")
 /**
  * Create the Q MDHistoDimension for the output frame and given information
  * from the file
@@ -541,9 +539,7 @@ LoadSQW2::createQDimension(size_t index, float dimMin, float dimMax,
   return builder.create();
 }
 
-// clang-format off
-DIAG_ON(missing-braces)
-// clang-format on
+DIAG_ON("missing-braces")
 
 /**
  * Create an energy dimension

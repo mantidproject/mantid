@@ -176,9 +176,7 @@ vtkDataSetToPeaksFilteredDataSet::getPeaksInfo(
   return peaksInfo;
 }
 
-// clang-format off
-DIAG_OFF(strict-aliasing)
-// clang-format on
+DIAG_OFF("strict-aliasing")
 /**
  * Get the radius from a PeakShape object.
  * @param shape The PeakShape from which the information will be extracted.
