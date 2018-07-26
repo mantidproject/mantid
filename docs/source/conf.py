@@ -5,6 +5,7 @@
 
 import sys
 import os
+from sphinx import __version__ as sphinx_version
 import sphinx_bootstrap_theme # checked at cmake time
 import mantid
 from mantid import ConfigService
@@ -15,6 +16,13 @@ from mantid import ConfigService
 sys.path.insert(0, os.path.abspath(os.path.join('..', 'sphinxext')))
 
 # -- General configuration ------------------------------------------------
+
+if sphinx_version > "1.6":
+    def setup(app):
+        """Called automatically by Sphinx when starting the build process
+        """
+        app.add_stylesheet("custom.css")
+
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -139,9 +147,12 @@ html_static_path = ['_static']
 # directly to the root of the documentation.
 #html_extra_path = []
 
-# If true, SmartyPants will be used to convert quotes and dashes to
+# If true, Smart Quotes will be used to convert quotes and dashes to
 # typographically correct entities.
-html_use_smartypants = True
+if sphinx_version < "1.7":
+    html_use_smartypants = True
+else:
+    smartquotes = True
 
 # Hide the Sphinx usage as we reference it on github instead.
 html_show_sphinx = False

@@ -133,7 +133,7 @@ bool isAnotherInstanceRunning() {
   void *memory{nullptr};
   while (attempts-- > 0) {
     size_t size = 0;
-    if (sysctl((int *)sysctlQuery, 3, NULL, &size, NULL, 0) == -1) {
+    if (sysctl((int *)sysctlQuery, 3, nullptr, &size, nullptr, 0) == -1) {
       throw std::runtime_error("Unable to retrieve process list");
     }
     const size_t size2 =
@@ -150,7 +150,7 @@ bool isAnotherInstanceRunning() {
     if (memory == nullptr)
       throw std::runtime_error(
           "Unable to allocate memory to retrieve process list");
-    if (sysctl((int *)sysctlQuery, 3, memory, &size, NULL, 0) == -1) {
+    if (sysctl((int *)sysctlQuery, 3, memory, &size, nullptr, 0) == -1) {
       free(memory);
       throw std::runtime_error("Unable to retrieve process list");
     } else {

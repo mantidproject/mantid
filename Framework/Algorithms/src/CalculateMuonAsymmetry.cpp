@@ -29,7 +29,6 @@ namespace Mantid {
 namespace Algorithms {
 
 using namespace Kernel;
-using API::Progress;
 using std::size_t;
 
 // Register the class into the algorithm factory
