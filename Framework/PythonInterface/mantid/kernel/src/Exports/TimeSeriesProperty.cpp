@@ -10,6 +10,7 @@
 #include <boost/python/make_function.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_value_policy.hpp>
+#include <boost/python/tuple.hpp>
 
 using Mantid::Kernel::Property;
 using Mantid::Kernel::TimeSeriesProperty;
@@ -34,6 +35,12 @@ void addPyTimeValue(TimeSeriesProperty<TYPE> &self,
   const auto dateandtime =
       Mantid::PythonInterface::Converters::to_dateandtime(datetime);
   self.addValue(*dateandtime, value);
+}
+
+template <typename TYPE>
+tuple pyTimeAverageValueAndStdDev(const TimeSeriesProperty<TYPE> &self) {
+  const std::pair<double, double> value = self.timeAverageValueAndStdDev();
+  return make_tuple(value.first, value.second);
 }
 
 // Call the dtype helper function
@@ -87,6 +94,8 @@ template <typename TYPE> std::string dtype(TimeSeriesProperty<TYPE> &self) {
            "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")      \
       .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue,    \
            arg("self"))                                                        \
+      .def("timeAverageValueAndStdDev", &pyTimeAverageValueAndStdDev<TYPE>,    \
+           arg("self"), "Time average value and standard deviation")           \
       .def("dtype", &dtype<TYPE>, arg("self"));
 
 } // namespace
