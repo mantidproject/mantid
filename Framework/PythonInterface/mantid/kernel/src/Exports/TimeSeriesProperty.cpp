@@ -1,5 +1,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
+#include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
@@ -7,13 +8,13 @@
 #include <boost/python/implicit.hpp>
 #include <boost/python/init.hpp>
 #include <boost/python/make_function.hpp>
-#include <boost/python/return_value_policy.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/return_value_policy.hpp>
 #include <boost/python/tuple.hpp>
 
-using Mantid::Types::Core::DateAndTime;
-using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Kernel::Property;
+using Mantid::Kernel::TimeSeriesProperty;
+using Mantid::Types::Core::DateAndTime;
 using namespace boost::python;
 using boost::python::arg;
 
@@ -40,6 +41,10 @@ template <typename TYPE>
 tuple pyTimeAverageValueAndStdDev(const TimeSeriesProperty<TYPE> &self) {
   const std::pair<double, double> value = self.timeAverageValueAndStdDev();
   return make_tuple(value.first, value.second);
+
+  // Call the dtype helper function
+template <typename TYPE> std::string dtype(TimeSeriesProperty<TYPE> &self) {
+  return Mantid::PythonInterface::Converters::dtype(self);
 }
 
 // Macro to reduce copy-and-paste
@@ -89,8 +94,10 @@ tuple pyTimeAverageValueAndStdDev(const TimeSeriesProperty<TYPE> &self) {
       .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue,    \
            arg("self"))                                                        \
       .def("timeAverageValueAndStdDev", &pyTimeAverageValueAndStdDev<TYPE>,    \
-           arg("self"), "Time average value and standard deviation");
-}
+           arg("self"), "Time average value and standard deviation")           \
+      .def("dtype", &dtype<TYPE>, arg("self"));
+
+} // namespace
 
 void export_TimeSeriesProperty_Double() {
   EXPORT_TIMESERIES_PROP(double, Float);
