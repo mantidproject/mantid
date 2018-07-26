@@ -230,15 +230,8 @@ public:
   const FacilityInfo &getFacility(const std::string &facilityName) const;
   /// Set the default facility
   void setFacility(const std::string &facilityName);
-
-  /// registers additional logging filter channels
-  void registerLoggingFilterChannel(const std::string &filterChannelName,
-                                    Poco::Channel *pChannel);
-  /// Sets the log level priority for the Console log channel
-  void setConsoleLogLevel(int logLevel);
-  /// Sets the log level priority for the selected Filter log channel
-  void setFilterChannelLogLevel(const std::string &filterChannelName,
-                                int logLevel, bool quiet = false);
+  /// Sets the log level priority for all log channels
+  void setLogLevel(int logLevel, bool quiet = false);
 
   /// Look for an instrument
   const InstrumentInfo &
@@ -303,8 +296,6 @@ private:
   /// Returns a list of all keys under a given root key
   void getKeysRecursive(const std::string &root,
                         std::vector<std::string> &allKeys) const;
-  /// Finds the lowest registered logging filter level
-  int FindLowestFilterLevel() const;
 
   // Forward declaration of inner class
   template <class T> class WrappedObject;
@@ -347,8 +338,6 @@ private:
   /// whether the proxy has been populated yet
   bool m_isProxySet;
 
-  /// store a list of logging FilterChannels
-  std::vector<std::string> m_filterChannels;
 };
 
 EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL

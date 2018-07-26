@@ -6,7 +6,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TestChannel.h"
-#include "MantidKernel/FilterChannel.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/FacilityInfo.h"
 
@@ -117,73 +116,18 @@ public:
         log1.debug("a debug string with offset 999 should be trace"));
   }
 
-  void testLogLevelFiltering() {
-    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setConsoleLogLevel(4));
-    TSM_ASSERT_THROWS(
-        "A false channel name for setFilterChannelLogLevel did not throw",
-        ConfigService::Instance().setFilterChannelLogLevel(
-            "AnIncorrectChannelName", 4),
-        std::invalid_argument);
-    TSM_ASSERT_THROWS(
-        "A correct channel name, but not a filterChannel for "
-        "setFilterChannelLogLevel did not throw",
-        ConfigService::Instance().setFilterChannelLogLevel("consoleChannel", 4),
-        std::invalid_argument);
-  }
-
-  void testLogLevelChangesWithFilteringLevels() {
+  void testLogLevelChanges() {
     Logger log1("testLogLevelChangesWithFilteringLevels");
-    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setConsoleLogLevel(4));
+    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setLogLevel(4));
     TSM_ASSERT("The log level should be 4 after the filters are set to 4",
                log1.is(4));
 
-    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setConsoleLogLevel(3));
+    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setLogLevel(3));
     TSM_ASSERT("The log level should be 3 after the filters are set to 3",
                log1.is(3));
 
     // return back to previous values
-    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setConsoleLogLevel(4));
-  }
-
-  void testRegisteringaNewFilter() {
-    Logger log1("testRegisteringaNewFilter");
-    Poco::FilterChannel *testFilterChannel = new Poco::FilterChannel();
-    std::string m_FilterChannelName = "testRegisteringaNewFilter";
-
-    // Setup logging
-    auto &rootLogger = Poco::Logger::root();
-    auto *rootChannel = Poco::Logger::root().getChannel();
-    // The root channel might be a SplitterChannel
-    if (auto *splitChannel =
-            dynamic_cast<Poco::SplitterChannel *>(rootChannel)) {
-      splitChannel->addChannel(testFilterChannel);
-    } else {
-      Poco::Logger::setChannel(rootLogger.name(), testFilterChannel);
-    }
-
-    auto &configService = ConfigService::Instance();
-    configService.registerLoggingFilterChannel(m_FilterChannelName,
-                                               testFilterChannel);
-
-    int prevLogLevel = log1.getLevel();
-    TSM_ASSERT("The log level start above PRIO_TRACE",
-               log1.getLevel() < Logger::Priority::PRIO_TRACE);
-
-    configService.setFilterChannelLogLevel(m_FilterChannelName,
-                                           Logger::Priority::PRIO_TRACE);
-    TSM_ASSERT("The log level should be PRIO_TRACE",
-               log1.getLevel() == Logger::Priority::PRIO_TRACE);
-    TSM_ASSERT("The log filter priority should be PRIO_TRACE",
-               testFilterChannel->getPriority() ==
-                   Logger::Priority::PRIO_TRACE);
-
-    configService.setFilterChannelLogLevel(m_FilterChannelName, prevLogLevel);
-    TSM_ASSERT("The log level should be " + std::to_string(prevLogLevel),
-               log1.getLevel() == prevLogLevel);
-    TSM_ASSERT("The log filter priority should be " +
-                   std::to_string(prevLogLevel),
-               testFilterChannel->getPriority() ==
-                   static_cast<unsigned int>(prevLogLevel));
+    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setLogLevel(4));
   }
 
   void testDefaultFacility() {

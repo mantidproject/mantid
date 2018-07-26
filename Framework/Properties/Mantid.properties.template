@@ -169,16 +169,11 @@ graph1d.autodistribution = On
 
 # logging configuration
 # root level message filter (This sets a minimal level possible for any channel)
-logging.loggers.root.level = information
+logging.loggers.root.level = notice
 
 # splitting the messages to many logging channels
 logging.loggers.root.channel.class = SplitterChannel
-logging.loggers.root.channel.channel1 = consoleFilterChannel
-
-# specific filter for the console channel raising the level to notice (drop to debug for debugging)
-logging.channels.consoleFilterChannel.class= FilterChannel
-logging.channels.consoleFilterChannel.channel= consoleChannel
-logging.channels.consoleFilterChannel.level= notice
+logging.loggers.root.channel.channel1 = consoleChannel
 
 # output to the console - primarily for console based apps
 logging.channels.consoleChannel.class = @CONSOLECHANNELCLASS@

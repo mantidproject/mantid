@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------
 #include "DllOption.h"
-#include "MantidKernel/FilterChannel.h"
 #include "MantidQtWidgets/Common/Configurable.h"
 #include "MantidQtWidgets/Common/Message.h"
 #include "MantidQtWidgets/Common/QtSignalChannel.h"
@@ -112,8 +111,6 @@ private:
 
   /// A reference to the log channel
   QtSignalChannel *m_logChannel;
-  /// A reference to the log channel
-  Poco::FilterChannel *m_filterChannel;
   /// The actual widget holding the text
   QPlainTextEdit *m_textDisplay;
   /// Map priority to text formatting
@@ -124,8 +121,6 @@ private:
   QSignalMapper *m_logLevelMapping;
   /// Log level actions
   QAction *m_error, *m_warning, *m_notice, *m_information, *m_debug;
-  /// Name of the filter channel registered with Poco
-  std::string m_filterChannelName;
 };
 }
 }
