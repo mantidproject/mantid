@@ -83,6 +83,22 @@ detScale={13:1.046504,14:1.259293,16:1.02449,17:1.18898,18:0.88014,19:0.98665,\
 <parameter name="detScale49">
  <value val="0.79420"/>
 </parameter>
+
+<!-- Need to fill in gaps for peak profile fitting -->
+<parameter name="fitConvolvedPeak" type="bool">
+ <value val="false"/>
+</parameter>
+
+<!-- Multiplier for profile fitting for BVG polar angle -->
+<parameter name="sigX0Scale">
+ <value val="3." />
+</parameter>
+
+<!-- Multiplier for profile fitting for BVG azimuthal angle -->
+<parameter name="sigY0Scale">
+ <value val="3." />
+</parameter>
+
 </component-link>
 
 </parameter-file>

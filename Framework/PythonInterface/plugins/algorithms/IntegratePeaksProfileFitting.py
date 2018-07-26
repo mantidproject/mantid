@@ -174,7 +174,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                     box = ICCFT.getBoxFracHKL(peak, peaks_ws, MDdata, UBMatrix, peakNumber,
                                               dQ, fracHKL=0.5, dQPixel=dQPixel, q_frame=q_frame)
                     # Will force weak peaks to be fit using a neighboring peak profile
-                    Y3D, goodIDX, pp_lambda, params = BVGFT.get3DPeak(peak, box, padeCoefficients,qMask,
+                    Y3D, goodIDX, pp_lambda, params = BVGFT.get3DPeak(peak, peaks_ws, box, padeCoefficients,qMask,
                                                                       nTheta=nTheta, nPhi=nPhi, plotResults=False,
                                                                       zBG=zBG,fracBoxToHistogram=1.0,bgPolyOrder=1,
                                                                       strongPeakParams=strongPeakParams,

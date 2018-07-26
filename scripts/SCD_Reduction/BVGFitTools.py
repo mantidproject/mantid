@@ -11,7 +11,7 @@ import BivariateGaussian as BivariateGaussian
 plt.ion()
 
 
-def get3DPeak(peak, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxToHistogram=1.0,
+def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxToHistogram=1.0,
               plotResults=False, zBG=1.96, bgPolyOrder=1, fICCParams=None, oldICCFit=None,
               strongPeakParams=None, forceCutoff=250, edgeCutoff=15,
               neigh_length_m=3, q_frame='sample', dtSpread=0.03, pplmin_frac=0.8, pplmax_frac=1.5, mindtBinWidth=1,
@@ -89,6 +89,22 @@ def get3DPeak(peak, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxT
 
     useForceParams = peak.getIntensity() < forceCutoff or peak.getRow() <= dEdge or peak.getRow(
     ) >= nPixels[0] - dEdge or peak.getCol() <= dEdge or peak.getCol() >= nPixels[1] - dEdge
+
+
+    #Here we retrieve some instrument specific parameters
+    try:
+        doPeakConvolution = peaks_ws.getInstrument().getBoolParameter("fitConvolvedPeak")[0]
+    except:
+        doPeakConvolution = False
+    try:
+        sigX0Scale = peaks_ws.getInstrument().getNumberParameter("sigX0Scale")[0]
+    except:
+        sigX0Scale = 1.0
+    try:
+        sigY0Scale = peaks_ws.getInstrument().getNumberParameter("sigY0Scale")[0]
+    except:
+        sigY0Scale = 1.0
+
     if strongPeakParams is not None and useForceParams:  # We will force parameters on this fit
         ph = np.arctan2(q0[1], q0[0])
         th = np.arctan2(q0[2], np.hypot(q0[0], q0[1]))
@@ -101,10 +117,12 @@ def get3DPeak(peak, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxT
                                                                                              phthPeak[0],
                                                                                              phthPeak[1]))
         params, h, t, p = doBVGFit(box, nTheta=nTheta, nPhi=nPhi, fracBoxToHistogram=fracBoxToHistogram,
-                                   goodIDX=goodIDX, forceParams=strongPeakParams[nnIDX], instrumentName=instrumentName)
+                                   goodIDX=goodIDX, forceParams=strongPeakParams[nnIDX], instrumentName=instrumentName,
+                                   doPeakConvolution=doPeakConvolution, sigX0Scale=sigX0Scale, sigY0Scale=sigY0Scale)
     else:  # Just do the fit - no nearest neighbor assumptions
         params, h, t, p = doBVGFit(
-            box, nTheta=nTheta, nPhi=nPhi, fracBoxToHistogram=fracBoxToHistogram, goodIDX=goodIDX, instrumentName=instrumentName)
+            box, nTheta=nTheta, nPhi=nPhi, fracBoxToHistogram=fracBoxToHistogram, goodIDX=goodIDX, instrumentName=instrumentName,
+            doPeakConvolution=doPeakConvolution, sigX0Scale=sigX0Scale, sigY0Scale=sigY0Scale)
 
     if plotResults:
         compareBVGFitData(
@@ -189,8 +207,6 @@ def fitScaling(n_events, box, YTOF, YBVG, goodIDX=None, neigh_length_m=3, instru
 
     QX, QY, QZ = ICCFT.getQXQYQZ(box)
     dP = 8
-    if instrumentName == 'TOPAZ':
-        dP = 8
     fitMaxIDX = tuple(
         np.array(np.unravel_index(YJOINT.argmax(), YJOINT.shape)))
     if goodIDX is None:
@@ -415,7 +431,8 @@ def compareBVGFitData(box, params, nTheta=200, nPhi=200, figNumber=2, fracBoxToH
 
 
 def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodIDX=None,
-             forceParams=None, forceTolerance=0.1, dth=10, dph=10, instrumentName=None):
+             forceParams=None, forceTolerance=0.1, dth=10, dph=10, instrumentName=None,
+             doPeakConvolution=False, sigX0Scale=1., sigY0Scale=1.):
     """
     doBVGFit takes a binned MDbox and returns the fit of the peak shape along the non-TOF direction.  This is done in one of two ways:
         1) Standard least squares fit of the 2D histogram.
@@ -432,6 +449,8 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         forceParams: set of parameters to force.  These are the same format as a row in strongPeaksParams
         forceTolerance: the factor we allow sigX, sigY, sigP to change when forcing peaks.  Not used if forceParams is None.
         dth, dph: The peak center may move by (dth, dph) from predicted position (in units of histogram pixels).
+        doPeakConvolution: boolean stating whether we should fit a convolved (smoothed) peak.  This is useful for filling in
+                gaps for 3He detector tube packs.
 
     """
     h, thBins, phBins = getAngularHistogram(
@@ -479,15 +498,10 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         boundsDict['Bg'] = [0, np.inf]
 
         # Here we can make instrument-specific changes to our initial guesses and boundaries
-        if instrumentName == 'MANDI':
-            pass
-        if instrumentName == 'TOPAZ':
-            sigX0 = sigX0*3.
-            sigY0 = sigY0*3.
+        sigX0 = sigX0*sigX0Scale
+        sigY0 = sigY0*sigY0Scale
 
-        if instrumentName == 'CORELLI':
-            sigX0 = sigX0*2.
-            sigY0 = sigY0*2.
+        if doPeakConvolution:
             neigh_length_m = 5
             convBox = 1.0*np.ones([neigh_length_m, neigh_length_m]) / neigh_length_m**2
             conv_h = convolve(h, convBox)

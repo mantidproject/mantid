@@ -14,6 +14,22 @@
       <value val="(101.9 * incidentEnergy^(-0.41) * exp(-incidentEnergy/282.0))" />
     </parameter>
 
+
+    <!-- Need to fill in gaps for peak profile fitting -->
+    <parameter name="fitConvolvedPeak" type="bool">
+     <value val="true"/>
+    </parameter>
+
+    <!-- Multiplier for profile fitting for BVG polar angle -->
+    <parameter name="sigX0Scale">
+     <value val="2." />
+    </parameter>
+
+    <!-- Multiplier for profile fitting for BVG azimuthal angle -->
+    <parameter name="sigY0Scale">
+     <value val="2." />
+    </parameter>
+
   </component-link>
 
 </parameter-file>
