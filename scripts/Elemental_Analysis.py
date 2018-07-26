@@ -66,27 +66,9 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.widget_list.addWidget(self.detectors.view)
         self.widget_list.addWidget(self.load_widget.view)
 
-        self.peak_types = ["Major", "Minor", "Gamma", "Electron"]
-        self._checkbox_view = CheckboxView(
-            ["{} Peaks".format(x) for x in self.peak_types])
-        self.checkbox = CheckboxPresenter(self._checkbox_view, CheckboxModel())
-        for _, v in self.checkbox.view.checkbox_dict.iteritems():
-            v.on_checkbox_unchecked(lambda c: print("unchecked: {}".format(c.name)))
-            v.on_checkbox_checked(lambda c: print("checked: {}".format(c.name)))
-
-        self.widget_list.addWidget(self.checkbox.view)
-
-        self.detectors = ["GE{}".format(x) for x in range(1, 5)]
-        self.detector_view = CheckboxView(self.detectors, "Detectors:")
-        self.detectors_widget = CheckboxPresenter(
-            self.detector_view, CheckboxModel())
-        self.widget_list.addWidget(self.detectors_widget.view)
-
-        self.widget_list.addWidget(self.load_widget.view)
-
         self.box = QtGui.QHBoxLayout()
         self.box.addWidget(self.ptable.view)
-        self.box.addLayout(self.widget_list)
+        self.box.addWidget(self.load_widget.view)
         self.setCentralWidget(QtGui.QWidget(self))
         self.centralWidget().setLayout(self.box)
         self.setWindowTitle("Elemental Analysis")
@@ -105,9 +87,6 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         filename = str(QtGui.QFileDialog.getOpenFileName())
         if filename:
             self.ptable.set_peak_datafile(filename)
-
-    def checkbox_changed(self, checkbox, state):
-        print("checkbox changed: {} {}".format(checkbox, state))
 
 
 def qapp():
