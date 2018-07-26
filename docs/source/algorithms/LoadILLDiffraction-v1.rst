@@ -44,6 +44,19 @@ Logs
 
 The loader creates time series logs for each of the scanned variable in the `.nxs` file.
 
+D2B alignment
+-------------
+
+For D2B, the loader applies tube alignment; first rotating them horizontally around the sample, then translating them vertically.
+This is done based on *tube_centers* and *tube_angles* parameters defined in the Instrument Parameter File.
+
+D2B pixel numbering in tubes
+----------------------------
+
+For D2B it assumes that the counts written in the nexus file follow "U-shape" convention; that is, the first tube counts are written from bottom to top, the second one: from top to bottom, and so on.
+Note that in the IDF of D2B detector IDs grow ascending from bottom to top for all the tubes.
+The loader takes care that the correct counts are attributed to correct pixels.
+
 Usage
 -----
 .. include:: ../usagedata-note.txt

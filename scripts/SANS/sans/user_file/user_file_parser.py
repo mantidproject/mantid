@@ -839,9 +839,10 @@ class MaskParser(UserFileComponentParser):
 
         # Time Mask
         self._time_or_t = "\\s*(TIME|T)\\s*"
-        self._detector_time = "\\s*((" + self._hab + "|" + self._lab + ")"+"\\s*/\\s*)?\\s*"
-        self._time_pattern = re.compile(start_string + self._detector_time + self._time_or_t + space_string +
-                                        self._two_floats + end_string)
+        self._detector_time = "\\s*((" + self._hab + "|" + self._lab + ")"+"\\s*)?\\s*"
+        self._time_pattern = re.compile(start_string + self._detector_time + "/?" + self._time_or_t + space_string +
+                                        self._two_floats + end_string + "|" + start_string + self._time_or_t +
+                                        "/?" + self._detector_time + space_string + self._two_floats + end_string)
 
         # Block mask
         self._v_plus_h = "\\s*" + self._v + integer_number + "\\s*\\+\\s*" + self._h + integer_number
@@ -859,7 +860,6 @@ class MaskParser(UserFileComponentParser):
     def parse_line(self, line):
         # Get the settings, ie remove command
         setting = UserFileComponentParser.get_settings(line, MaskParser.get_type_pattern())
-
         # Determine the qualifier and extract the user setting
         if self._is_block_mask(setting):
             output = self._extract_block_mask(setting)
@@ -983,12 +983,13 @@ class MaskParser(UserFileComponentParser):
         if has_hab is not None or has_lab is not None:
             key = MaskId.time_detector
             detector_type = DetectorType.HAB if has_hab is not None else DetectorType.LAB
-            regex_string = "\s*(" + self._hab + ")\s*/\s*" if has_hab else "\s*(" + self._lab + ")\s*/\s*"
+            regex_string = "\s*(" + self._hab + ")\s*" if has_hab else "\s*(" + self._lab + ")\s*"
             min_and_max_time_range = re.sub(regex_string, "", line)
         else:
             key = MaskId.time
             detector_type = None
             min_and_max_time_range = line
+        min_and_max_time_range = re.sub("\s*/\s*", "", min_and_max_time_range)
         min_and_max_time_range = re.sub(self._time_or_t, "", min_and_max_time_range)
         min_and_max_time = extract_float_range(min_and_max_time_range)
         return {key: range_entry_with_detector(start=min_and_max_time[0], stop=min_and_max_time[1],
@@ -1144,10 +1145,14 @@ class SetParser(UserFileComponentParser):
         self._hab = "\\s*(HAB|FRONT)\\s*"
         self._lab = "\\s*(LAB|REAR|MAIN)\\s*"
         self._hab_or_lab = "\\s*(/" + self._hab + "|/" + self._lab + ")\\s*"
-        self._centre_pattern = re.compile(start_string + self._centre + "\\s*(" + self._hab_or_lab + space_string +
+        self._centre_pattern = re.compile(start_string + self._centre + "\\s*(/" + self._lab + space_string +
                                           ")?\\s*" + float_number + space_string + float_number +
                                           "\\s*(" + space_string + float_number + space_string + float_number +
                                           ")?\\s*" + end_string)
+        self._centre_pattern_HAB = re.compile(start_string + self._centre + "\\s*(/" + self._hab + space_string +
+                                              ")?\\s*" + float_number + space_string + float_number +
+                                              "\\s*(" + space_string + float_number + space_string + float_number +
+                                              ")?\\s*" + end_string)
 
     def parse_line(self, line):
         # Get the settings, ie remove command
@@ -1158,6 +1163,8 @@ class SetParser(UserFileComponentParser):
             output = self._extract_scales(setting)
         elif self._is_centre(setting):
             output = self._extract_centre(setting)
+        elif self._is_centre_HAB(setting):
+            output = self._extract_centre_HAB(setting)
         else:
             raise RuntimeError("SetParser: Unknown command for SET: {0}".format(line))
         return output
@@ -1167,6 +1174,9 @@ class SetParser(UserFileComponentParser):
 
     def _is_centre(self, line):
         return does_pattern_match(self._centre_pattern, line)
+
+    def _is_centre_HAB(self, line):
+        return does_pattern_match(self._centre_pattern_HAB, line)
 
     def _extract_scales(self, line):
         scales_string = re.sub(self._scales, "", line)
@@ -1178,10 +1188,18 @@ class SetParser(UserFileComponentParser):
     def _extract_centre(self, line):
         detector_type = DetectorType.HAB if re.search(self._hab, line) is not None else DetectorType.LAB
         centre_string = re.sub(self._centre, "", line)
-        centre_string = re.sub(self._hab_or_lab, "", centre_string)
+        centre_string = re.sub("/" + self._lab, "", centre_string)
         centre_string = ' '.join(centre_string.split())
         centre = extract_float_list(centre_string, separator=" ")
         return {SetId.centre: position_entry(pos1=centre[0], pos2=centre[1], detector_type=detector_type)}
+
+    def _extract_centre_HAB(self, line):
+        detector_type = DetectorType.HAB if re.search(self._hab, line) is not None else DetectorType.LAB
+        centre_string = re.sub(self._centre, "", line)
+        centre_string = re.sub("/" + self._hab, "", centre_string)
+        centre_string = ' '.join(centre_string.split())
+        centre = extract_float_list(centre_string, separator=" ")
+        return {SetId.centre_HAB: position_entry(pos1=centre[0], pos2=centre[1], detector_type=detector_type)}
 
     @staticmethod
     def get_type():

@@ -56,7 +56,6 @@ Improvements
 - :ref:`SaveVulcanGSS <algm-SaveVulcanGSS>` has been moved to a workflow algorithm and largely rewritten by using recent change in histogram and Workspace2D.  It is also improved such that there is no contraint on the number of spectra and number of various binning parameters on the workspace to be saved to a GSAS file for VULCAN.
 - :ref:`PDLoadCharacterizations <algm-PDLoadCharacterizations>` now allows for the azimuthal angles to be optionally specified in the file.
 
-
 Engineering Diffraction
 -----------------------
 

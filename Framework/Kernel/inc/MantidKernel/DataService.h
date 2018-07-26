@@ -396,6 +396,15 @@ public:
     }
   }
 
+  /// Checks all elements within the specified vector exist in the ADS
+  bool doAllWsExist(const std::vector<std::string> &listOfNames) {
+    for (const auto &wsName : listOfNames) {
+      if (!doesExist(wsName))
+        return false;
+    }
+    return true;
+  }
+
   /// Check to see if a data object exists in the store
   bool doesExist(const std::string &name) const {
     // Make DataService access thread-safe
@@ -473,15 +482,22 @@ public:
   }
 
   /// Get a vector of the pointers to the data objects stored by the service
-  std::vector<boost::shared_ptr<T>> getObjects() const {
+  std::vector<boost::shared_ptr<T>>
+  getObjects(DataServiceHidden includeHidden = DataServiceHidden::Auto) const {
     std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
-    const bool showingHidden = showingHiddenObjects();
+    const bool alwaysIncludeHidden =
+        includeHidden == DataServiceHidden::Include;
+    const bool usingAuto =
+        includeHidden == DataServiceHidden::Auto && showingHiddenObjects();
+
+    const bool showingHidden = alwaysIncludeHidden || usingAuto;
+
     std::vector<boost::shared_ptr<T>> objects;
     objects.reserve(datamap.size());
-    for (auto it = datamap.begin(); it != datamap.end(); ++it) {
-      if (showingHidden || !isHiddenDataServiceObject(it->first)) {
-        objects.push_back(it->second);
+    for (const auto &it : datamap) {
+      if (showingHidden || !isHiddenDataServiceObject(it.first)) {
+        objects.push_back(it.second);
       }
     }
     return objects;

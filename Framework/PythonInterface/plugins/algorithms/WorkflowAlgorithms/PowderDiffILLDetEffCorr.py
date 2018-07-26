@@ -3,11 +3,12 @@ from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np
 import numpy.ma as ma
-from mantid.kernel import StringListValidator, Direction, IntArrayBoundedValidator, IntArrayProperty, \
-    CompositeValidator, IntArrayLengthValidator, IntArrayOrderedPairsValidator, FloatArrayOrderedPairsValidator, \
-    FloatArrayProperty, VisibleWhenProperty, PropertyCriterion, IntBoundedValidator
-from mantid.api import PythonAlgorithm, FileProperty, FileAction, Progress, MatrixWorkspaceProperty, PropertyMode, \
-    MultipleFileProperty
+from mantid.kernel import CompositeValidator, Direction, FloatArrayLengthValidator, FloatArrayOrderedPairsValidator, \
+    FloatArrayProperty, IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, \
+    IntArrayOrderedPairsValidator, IntBoundedValidator, PropertyCriterion, StringListValidator, VisibleWhenProperty
+from mantid.api import FileAction, FileProperty, MatrixWorkspaceProperty, MultipleFileProperty, Progress, \
+    PropertyMode, PythonAlgorithm
+
 from mantid.simpleapi import *
 
 
@@ -65,6 +66,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
     _n_pixels_per_tube = None   # number of pixels per tube in D2B (=128)
     _n_iterations = None        # number of iterations (=1); used for D2B
     _pixels_to_trim = None      # number of pixels to trim from top and bottom of tubes for chi2 calculation (D2B)
+    _mask_criterion = None      # the range of efficiency constant values, outside of which they should be set to 0
 
     def _hide(self, name):
         return '__' + self._out_name + '_' + name
@@ -146,6 +148,16 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
                              validator=IntBoundedValidator(lower=0, upper=10),
                              doc='Number of iterations to perform (D2B only): 0 means auto; that is, the '
                                  'iterations will terminate after reaching some Chi2/NdoF.')
+
+        maskCriterionValidator = CompositeValidator()
+        arrayLengthTwo = FloatArrayLengthValidator()
+        arrayLengthTwo.setLengthMax(2)
+        orderedPairs = FloatArrayOrderedPairsValidator()
+        maskCriterionValidator.add(arrayLengthTwo)
+        maskCriterionValidator.add(orderedPairs)
+
+        self.declareProperty(FloatArrayProperty(name='MaskCriterion', values=[], validator=maskCriterionValidator),
+                             doc='Efficiency constants outside this range will be set to zero.')
 
     def validateInputs(self):
         issues = dict()
@@ -318,6 +330,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         self._out_response = self.getPropertyValue('OutputResponseWorkspace')
         self._out_name = self.getPropertyValue('OutputWorkspace')
         self._n_iterations = self.getProperty('NumberOfIterations').value
+        self._mask_criterion = self.getProperty('MaskCriterion').value
 
     def _configure_sequential(self, raw_ws):
         """
@@ -352,8 +365,10 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         inst = mtd[raw_ws].getInstrument()
         self._n_tubes = inst.getComponentByName('detectors').nelements()
         self._n_pixels_per_tube = inst.getComponentByName('detectors/tube_1').nelements()
-        self._n_scans_per_file = mtd[raw_ws].getRun().getLogData('ScanSteps').value
+        #self._n_scans_per_file = mtd[raw_ws].getRun().getLogData('ScanSteps').value
+        self._n_scans_per_file = 25 # TODO: In v2 this should be freely variable
         self._scan_points = self._n_scans_per_file * self._n_scan_files
+        self.log().information('Number of scan steps is: ' + str(self._scan_points))
         if self._excluded_ranges.any():
             n_excluded_ranges = int(len(self._excluded_ranges) / 2)
             self._excluded_ranges = np.split(self._excluded_ranges, n_excluded_ranges)
@@ -446,6 +461,21 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             if not self._live_pixels[pixel]:
                 mtd[constants_ws].dataY(pixel)[0] = 1.
                 mtd[constants_ws].dataE(pixel)[0] = 0.
+
+    def _mask_outside_range(self, constants_ws):
+        """
+            Sets the efficiencies to zero, if they are outside the given range
+        """
+        y = mtd[constants_ws].extractY()
+        x = mtd[constants_ws].extractX()
+        e = mtd[constants_ws].extractE()
+        lower = self._mask_criterion[0]
+        upper = self._mask_criterion[1]
+        y[y<lower]=0.
+        y[y>upper]=0.
+        self.log().information('Masking pixels with constant outisde ({0},{1})'.format(lower, upper))
+        CreateWorkspace(DataY=y, DataX=x, DataE=e, NSpec=mtd[constants_ws].getNumberHistograms(),
+                        OutputWorkspace=constants_ws, ParentWorkspace=constants_ws)
 
     def _derive_calibration_sequential(self, ws_2d, constants_ws, response_ws):
         """
@@ -575,6 +605,16 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         mtd[constants_ws].getAxis(1).setUnit('Label').setLabel('Cell #', '')
         mtd[constants_ws].setYUnitLabel('Calibration constant')
 
+    def _crop_last_time_index(self, ws, n_scan_points):
+        ws_index_list = ""
+        for pixel in range(self._n_tubes * self._n_pixels_per_tube):
+            start = n_scan_points * pixel
+            end = n_scan_points * (pixel + 1) - 2
+            index_range = str(start)+"-"+str(end)+","
+            ws_index_list += index_range
+        ws_index_list = ws_index_list[:-1]
+        ExtractSpectra(InputWorkspace=ws, OutputWorkspace=ws, WorkspaceIndexList=ws_index_list)
+
     def _process_global(self):
         """
             Performs the global derivation for D2B following the logic:
@@ -590,7 +630,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         self._progress = Progress(self, start=0.0, end=1.0, nreports=self._n_scan_files)
 
         for index, numor in enumerate(self._input_files.split(',')):
-            self._progress.report('Pre-processing detector scan '+numor[-9:-3])
+            self._progress.report('Pre-processing detector scan '+numor[-10:-4])
             ws_name = '__raw_'+str(index)
             numors.append(ws_name)
             LoadILLDiffraction(Filename=numor, OutputWorkspace=ws_name, DataType="Raw")
@@ -605,6 +645,12 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             ConvertSpectrumAxis(InputWorkspace=ws_name, OrderAxis=False, Target="SignedTheta", OutputWorkspace=ws_name)
             if self._calib_file:
                 ApplyDetectorScanEffCorr(InputWorkspace=ws_name, DetectorEfficiencyWorkspace=calib_ws, OutputWorkspace=ws_name)
+
+            n_scan_steps = mtd[ws_name].getRun().getLogData("ScanSteps").value
+            if n_scan_steps != self._n_scans_per_file:
+                self.log().warning("Run {0} has {1} scan points instead of {2}.".
+                                   format(numor[-10:-4], n_scan_steps, self._n_scans_per_file))
+                self._crop_last_time_index(ws_name, n_scan_steps)
 
         if self._calib_file:
             DeleteWorkspace(calib_ws)
@@ -750,6 +796,9 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             if self._n_scan_files < 2:
                 raise RuntimeError('At least two overlapping scan files needed for the global method')
             self._process_global()
+
+        if self._mask_criterion.any():
+            self._mask_outside_range(constants_ws)
 
         # set output workspace[s]
         RenameWorkspace(InputWorkspace=constants_ws, OutputWorkspace=self._out_name)

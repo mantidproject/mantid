@@ -222,20 +222,6 @@ bool WeightedEventNoTime::operator==(const WeightedEventNoTime &rhs) const {
          (this->m_errorSquared == rhs.m_errorSquared);
 }
 
-/** < comparison operator, using the TOF to do the comparison.
- * @param rhs: the other WeightedEventNoTime to compare.
- * @return true if this->m_tof < rhs.m_tof*/
-bool WeightedEventNoTime::operator<(const WeightedEventNoTime &rhs) const {
-  return (this->m_tof < rhs.m_tof);
-}
-
-/** < comparison operator, using the TOF to do the comparison.
- * @param rhs_tof: the other time of flight to compare.
- * @return true if this->m_tof < rhs.m_tof*/
-bool WeightedEventNoTime::operator<(const double rhs_tof) const {
-  return (this->m_tof < rhs_tof);
-}
-
 /**
  * Compare two events within the specified tolerance
  *

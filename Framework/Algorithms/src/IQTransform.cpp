@@ -13,7 +13,6 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
@@ -118,13 +117,13 @@ void IQTransform::exec() {
   outputWS->setYUnit("");
   // Copy the data over. Assume single spectrum input (output will be).
   outputWS->setPoints(0, tmpWS->points(0));
-  MantidVec &Y = outputWS->dataY(0) = tmpWS->dataY(0);
-  outputWS->dataE(0) = tmpWS->dataE(0);
+  outputWS->setSharedY(0, tmpWS->sharedY(0));
+  outputWS->setSharedE(0, tmpWS->sharedE(0));
 
   // Subtract a constant background if requested
   const double background = getProperty("BackgroundValue");
   if (background > 0.0)
-    subtractBackgroundValue(Y, background);
+    outputWS->mutableY(0) -= background;
 
   // Select the desired transformation function and call it
   TransformFunc f = m_transforms.find(getProperty("TransformType"))->second;
@@ -135,17 +134,6 @@ void IQTransform::exec() {
   if (!m_label->caption().empty())
     outputWS->getAxis(0)->unit() = m_label;
   setProperty("OutputWorkspace", outputWS);
-}
-
-/** Subtracts a constant from the data values in the given workspace
- *  @param Y :: The vector from which to subtract
- *  @param value :: The value to subtract from each data point
- */
-void IQTransform::subtractBackgroundValue(MantidVec &Y, const double value) {
-  g_log.debug() << "Subtracting the background value " << value
-                << " from the input workspace.\n";
-  std::transform(Y.begin(), Y.end(), Y.begin(),
-                 std::bind2nd(std::minus<double>(), value));
 }
 
 /** Uses the Minus algorithm to subtract the background workspace from the given
@@ -173,14 +161,14 @@ IQTransform::subtractBackgroundWS(API::MatrixWorkspace_sptr ws,
  * number
  */
 void IQTransform::guinierSpheres(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
-  std::transform(X.begin(), X.end(), X.begin(),
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
+  std::transform(X.cbegin(), X.cend(), X.begin(),
                  VectorHelper::Squares<double>());
-  std::transform(E.begin(), E.end(), Y.begin(), E.begin(),
+  std::transform(E.cbegin(), E.cend(), Y.begin(), E.begin(),
                  std::divides<double>());
-  std::transform(Y.begin(), Y.end(), Y.begin(),
+  std::transform(Y.cbegin(), Y.cend(), Y.begin(),
                  VectorHelper::LogNoThrow<double>());
 
   ws->setYUnitLabel("Ln(I)");
@@ -193,16 +181,17 @@ void IQTransform::guinierSpheres(API::MatrixWorkspace_sptr ws) {
  * number
  */
 void IQTransform::guinierRods(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
-  std::transform(E.begin(), E.end(), Y.begin(), E.begin(),
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
+
+  std::transform(E.cbegin(), E.cend(), Y.begin(), E.begin(),
                  std::divides<double>());
-  std::transform(Y.begin(), Y.end(), X.begin(), Y.begin(),
+  std::transform(Y.cbegin(), Y.cend(), X.begin(), Y.begin(),
                  std::multiplies<double>());
-  std::transform(Y.begin(), Y.end(), Y.begin(),
+  std::transform(Y.cbegin(), Y.cend(), Y.begin(),
                  VectorHelper::LogNoThrow<double>());
-  std::transform(X.begin(), X.end(), X.begin(),
+  std::transform(X.cbegin(), X.cend(), X.begin(),
                  VectorHelper::Squares<double>());
 
   ws->setYUnitLabel("Ln(I x Q)");
@@ -215,16 +204,17 @@ void IQTransform::guinierRods(API::MatrixWorkspace_sptr ws) {
  * number
  */
 void IQTransform::guinierSheets(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
-  std::transform(E.begin(), E.end(), Y.begin(), E.begin(),
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
+
+  std::transform(E.cbegin(), E.cend(), Y.begin(), E.begin(),
                  std::divides<double>());
-  std::transform(X.begin(), X.end(), X.begin(),
+  std::transform(X.cbegin(), X.cend(), X.begin(),
                  VectorHelper::Squares<double>());
-  std::transform(Y.begin(), Y.end(), X.begin(), Y.begin(),
+  std::transform(Y.cbegin(), Y.cend(), X.begin(), Y.begin(),
                  std::multiplies<double>());
-  std::transform(Y.begin(), Y.end(), Y.begin(),
+  std::transform(Y.cbegin(), Y.cend(), Y.begin(),
                  VectorHelper::LogNoThrow<double>());
 
   ws->setYUnitLabel("Ln(I x Q^2)");
@@ -236,10 +226,10 @@ void IQTransform::guinierSheets(API::MatrixWorkspace_sptr ws) {
  *  @param ws The workspace to be transformed
  */
 void IQTransform::zimm(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
-  std::transform(X.begin(), X.end(), X.begin(),
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
+  std::transform(X.cbegin(), X.cend(), X.begin(),
                  VectorHelper::Squares<double>());
   for (size_t i = 0; i < Y.size(); ++i) {
     if (Y[i] > 0.0) {
@@ -260,10 +250,10 @@ void IQTransform::zimm(API::MatrixWorkspace_sptr ws) {
  *  @param ws The workspace to be transformed
  */
 void IQTransform::debyeBueche(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
-  std::transform(X.begin(), X.end(), X.begin(),
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
+  std::transform(X.cbegin(), X.cend(), X.begin(),
                  VectorHelper::Squares<double>());
   for (size_t i = 0; i < Y.size(); ++i) {
     if (Y[i] > 0.0) {
@@ -283,12 +273,12 @@ void IQTransform::debyeBueche(API::MatrixWorkspace_sptr ws) {
  *  @param ws The workspace to be transformed
  */
 void IQTransform::holtzer(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
-  std::transform(Y.begin(), Y.end(), X.begin(), Y.begin(),
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
+  std::transform(Y.cbegin(), Y.cend(), X.begin(), Y.begin(),
                  std::multiplies<double>());
-  std::transform(E.begin(), E.end(), X.begin(), E.begin(),
+  std::transform(E.cbegin(), E.cend(), X.begin(), E.begin(),
                  std::multiplies<double>());
 
   ws->setYUnitLabel("I x Q");
@@ -298,15 +288,15 @@ void IQTransform::holtzer(API::MatrixWorkspace_sptr ws) {
  *  @param ws The workspace to be transformed
  */
 void IQTransform::kratky(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
   MantidVec Q2(X.size());
-  std::transform(X.begin(), X.end(), Q2.begin(),
+  std::transform(X.cbegin(), X.cend(), Q2.begin(),
                  VectorHelper::Squares<double>());
-  std::transform(Y.begin(), Y.end(), Q2.begin(), Y.begin(),
+  std::transform(Y.cbegin(), Y.cend(), Q2.begin(), Y.begin(),
                  std::multiplies<double>());
-  std::transform(E.begin(), E.end(), Q2.begin(), E.begin(),
+  std::transform(E.cbegin(), E.cend(), Q2.begin(), E.begin(),
                  std::multiplies<double>());
 
   ws->setYUnitLabel("I x Q^2");
@@ -316,15 +306,15 @@ void IQTransform::kratky(API::MatrixWorkspace_sptr ws) {
  *  @param ws The workspace to be transformed
  */
 void IQTransform::porod(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
   MantidVec Q4(X.size());
-  std::transform(X.begin(), X.end(), X.begin(), Q4.begin(),
+  std::transform(X.cbegin(), X.cend(), X.cbegin(), Q4.begin(),
                  VectorHelper::TimesSquares<double>());
-  std::transform(Y.begin(), Y.end(), Q4.begin(), Y.begin(),
+  std::transform(Y.cbegin(), Y.cend(), Q4.begin(), Y.begin(),
                  std::multiplies<double>());
-  std::transform(E.begin(), E.end(), Q4.begin(), E.begin(),
+  std::transform(E.cbegin(), E.cend(), Q4.begin(), E.begin(),
                  std::multiplies<double>());
 
   ws->setYUnitLabel("I x Q^4");
@@ -336,13 +326,14 @@ void IQTransform::porod(API::MatrixWorkspace_sptr ws) {
  * number
  */
 void IQTransform::logLog(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
-  std::transform(X.begin(), X.end(), X.begin(), VectorHelper::Log<double>());
-  std::transform(E.begin(), E.end(), Y.begin(), E.begin(),
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
+
+  std::transform(X.cbegin(), X.cend(), X.begin(), VectorHelper::Log<double>());
+  std::transform(E.cbegin(), E.cend(), Y.begin(), E.begin(),
                  std::divides<double>());
-  std::transform(Y.begin(), Y.end(), Y.begin(),
+  std::transform(Y.cbegin(), Y.cend(), Y.begin(),
                  VectorHelper::LogNoThrow<double>());
 
   ws->setYUnitLabel("Ln(I)");
@@ -358,9 +349,9 @@ void IQTransform::logLog(API::MatrixWorkspace_sptr ws) {
  * number
  */
 void IQTransform::general(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
   const std::vector<double> C = getProperty("GeneralFunctionConstants");
   // Check for the correct number of elements
   if (C.size() != 10) {

@@ -80,7 +80,7 @@ class SANSSaveTest(unittest.TestCase):
 
         # Assert
         expected_files = ["sample_sans_save_file.xml", "sample_sans_save_file.txt", "sample_sans_save_file_nistqxy.dat",
-                          "sample_sans_save_file_nxcansas.nxs", "sample_sans_save_file.nxs",
+                          "sample_sans_save_file.h5", "sample_sans_save_file.nxs",
                           "sample_sans_save_file.csv"]
         expected_full_file_names = [os.path.join(mantid.config.getString('defaultsave.directory'), elem)
                                     for elem in expected_files]

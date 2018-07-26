@@ -166,7 +166,7 @@ set ( INC_FILES
 	inc/MantidKernel/ConfigService.h
 	inc/MantidKernel/ConfigObserver.h
 	inc/MantidKernel/ConfigPropertyObserver.h
-  inc/MantidKernel/DateAndTime.h
+        inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTimeHelpers.h
@@ -219,7 +219,6 @@ set ( INC_FILES
 	inc/MantidKernel/Logger.h
 	inc/MantidKernel/MDAxisValidator.h
 	inc/MantidKernel/MDUnit.h
-	inc/MantidKernel/MDUnitFactory.h
 	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MagneticFormFactorTable.h
 	inc/MantidKernel/MagneticIon.h
@@ -247,7 +246,7 @@ set ( INC_FILES
 	inc/MantidKernel/NetworkProxy.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
-  inc/MantidKernel/normal_distribution.h
+        inc/MantidKernel/normal_distribution.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/OptionalBool.h
 	inc/MantidKernel/ParaViewVersion.h
@@ -735,7 +734,7 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
   set ( QT_PLUGINS_DIR "${MANTID_ROOT}/plugins/qt%V" )
-  set ( PV_PLUGINS_DIR "${MANTID_ROOT}/${PLUGINS_DIR}/${PVPLUGINS_SUBDIR}/qt%V" )
+  set ( PV_PLUGINS_DIR "${MANTID_ROOT}/plugins/${PVPLUGINS_SUBDIR}/qt%V" )
   set ( COLORMAPS_FOLDER ${MANTID_ROOT}/colormaps )
 endif ()
 

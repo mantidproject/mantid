@@ -25,20 +25,20 @@ public:
   }
 
   void test_iterator_begin() {
-    Histogram hist(Points{1, 2, 3}, Frequencies{2, 3, 4});
+    Histogram hist(Points{1.1, 1.2, 1.4}, Frequencies{2, 3, 4});
     auto iter = hist.begin();
     TS_ASSERT(iter != hist.end());
     TS_ASSERT_EQUALS(iter->frequency(), 2);
   }
 
   void test_iterator_end() {
-    Histogram hist(Points{1, 2, 3}, Frequencies{2, 3, 4});
+    Histogram hist(Points{1.1, 1.2, 1.4}, Frequencies{2, 3, 4});
     auto iter = hist.end();
     TS_ASSERT(iter != hist.begin());
   }
 
   void test_iterator_increment() {
-    Histogram hist(Points{1, 2, 3}, Frequencies{2, 3, 4});
+    Histogram hist(Points{1.1, 1.2, 1.4}, Frequencies{2, 3, 4});
     auto iter = hist.begin();
     TS_ASSERT(iter != hist.end());
     TS_ASSERT_EQUALS(iter->frequency(), 2);
@@ -53,7 +53,7 @@ public:
   }
 
   void test_iterator_decrement() {
-    Histogram hist(Points{1, 2, 3}, Frequencies{2, 3, 4});
+    Histogram hist(Points{1.1, 1.2, 1.4}, Frequencies{2, 3, 4});
     auto iter = hist.end();
     --iter;
     TS_ASSERT_DIFFERS(iter, hist.begin());
@@ -67,7 +67,7 @@ public:
   }
 
   void test_iterator_advance() {
-    Histogram hist(Points{1, 2, 3}, Frequencies{2, 3, 4});
+    Histogram hist(Points{1.1, 1.2, 1.4}, Frequencies{2, 3, 4});
     auto iter = hist.begin();
 
     std::advance(iter, 2);
@@ -83,7 +83,7 @@ public:
   }
 
   void test_iterator_distance() {
-    Histogram hist(Points{1, 2, 3}, Frequencies{2, 3, 4});
+    Histogram hist(Points{1.1, 1.2, 1.4}, Frequencies{2, 3, 4});
     auto begin = hist.begin();
     auto end = hist.end();
 
@@ -100,7 +100,7 @@ public:
 
   void test_iterate_over_histogram_counts() {
     Counts expectedCounts{2, 3, 4};
-    Histogram hist(Points{1, 2, 3}, expectedCounts);
+    Histogram hist(Points{1.1, 1.2, 1.4}, expectedCounts);
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedCounts.begin(),
                          [](const HistogramItem &item, const double &counts) {
@@ -109,7 +109,7 @@ public:
   }
 
   void test_iterate_over_histogram_counts_when_histogram_has_frequencies() {
-    Histogram hist(Points{1, 2, 3}, Frequencies{2, 3, 4});
+    Histogram hist(BinEdges{1.0, 1.1, 1.2, 1.5}, Frequencies{2, 3, 4});
     Counts expectedCounts = hist.counts();
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedCounts.begin(),
@@ -120,7 +120,7 @@ public:
 
   void test_iterate_over_histogram_frequencies() {
     Frequencies expectedFrequencies{2, 3, 4};
-    Histogram hist(Points{1, 2, 3}, expectedFrequencies);
+    Histogram hist(Points{1.1, 1.2, 1.4}, expectedFrequencies);
 
     TS_ASSERT(
         std::equal(hist.begin(), hist.end(), expectedFrequencies.begin(),
@@ -130,7 +130,7 @@ public:
   }
 
   void test_iterate_over_histogram_frequencies_when_histogram_has_counts() {
-    Histogram hist(Points{1, 2, 3}, Counts{2, 3, 4});
+    Histogram hist(BinEdges{1.1, 1.2, 1.3, 1.5}, Counts{2, 3, 4});
     Frequencies expectedFrequencies = hist.frequencies();
 
     TS_ASSERT(
@@ -141,7 +141,7 @@ public:
   }
 
   void test_iterate_over_histogram_center_when_histogram_has_bins() {
-    Histogram hist(BinEdges{1, 2, 3, 4}, Counts{2, 3, 4});
+    Histogram hist(BinEdges{1.1, 1.2, 1.3, 1.4}, Counts{2, 3, 4});
     Points expectedPoints = hist.points();
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedPoints.begin(),
@@ -151,7 +151,7 @@ public:
   }
 
   void test_iterate_over_histogram_center_when_histogram_has_points() {
-    Histogram hist(Points{1, 2, 3}, Counts{2, 3, 4});
+    Histogram hist(Points{1.1, 1.2, 1.4}, Counts{2, 3, 4});
     Points expectedPoints = hist.points();
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedPoints.begin(),
@@ -301,9 +301,10 @@ public:
 
   void test_convert_counts_to_frequency_for_each_item_sparse() {
     double total = 0;
+    double floor = static_cast<double>(histSize) - 5.0;
     for (size_t i = 0; i < nHists; i++) {
       for (auto &item : m_hist) {
-        if (item.counts() > histSize - 5)
+        if (item.counts() > floor)
           total += item.frequency();
       }
     }
@@ -311,11 +312,12 @@ public:
 
   void test_convert_counts_to_frequency_once_per_histogram_sparse() {
     double total = 0;
+    double floor = static_cast<double>(histSize) - 5.0;
     for (size_t i = 0; i < nHists; i++) {
       const auto &counts = m_hist.counts();
       const auto &frequencies = m_hist.frequencies();
       for (size_t j = 0; j < histSize; ++j)
-        if (counts[j] > histSize - 5)
+        if (counts[j] > floor)
           total += frequencies[j];
     }
   }

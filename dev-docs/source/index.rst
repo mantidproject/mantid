@@ -104,6 +104,7 @@ Tools
    ProfilingWithValgrind
    FlowchartCreation
    VisualStudioBuildImpact
+   Eclipse
 
 :doc:`ToolsOverview`
    Describes ``class_maker``, ``valgrind`` and related tools.
@@ -116,6 +117,9 @@ Tools
 
 :doc:`VisualStudioBuildImpact`
    Provides a script to reduce the impact of Visual Studio on machine performance.
+
+:doc:`Eclipse`
+   Guide to setting up Eclipse on Ubuntu
 
 =======
 Testing
@@ -181,6 +185,8 @@ Component Overviews
    :maxdepth: 1
 
    AlgorithmMPISupport
+   BatchWidget/index
+   EventWorkspaceDev
    HandlingXML
    IndexProperty
    InstrumentViewer
@@ -192,3 +198,4 @@ Component Overviews
    RemoteJobSubmissionAPI
    WritingAnAlgorithm
    WritingCustomConvertToMDTransformation
+

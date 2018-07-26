@@ -140,7 +140,7 @@ Handles attempt to close main window
 void QtReflMainWindowView::closeEvent(QCloseEvent *event) {
 
   // Close only if reduction has been paused
-  if (!m_presenter->checkIfProcessing()) {
+  if (!m_presenter->isProcessing()) {
     event->accept();
   } else {
     event->ignore();

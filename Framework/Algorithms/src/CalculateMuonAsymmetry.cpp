@@ -5,19 +5,20 @@
 #include "MantidAlgorithms/CalculateMuonAsymmetry.h"
 #include "MantidAlgorithms/MuonAsymmetryHelper.h"
 
+#include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/StartsWithValidator.h"
 
 #include <cmath>
@@ -28,40 +29,45 @@ namespace Mantid {
 namespace Algorithms {
 
 using namespace Kernel;
-using API::Progress;
 using std::size_t;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(CalculateMuonAsymmetry)
 
 /** Initialisation method. Declares properties to be used in algorithm.
- *
- */
+*
+*/
 void CalculateMuonAsymmetry::init() {
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
-                  "The name of the input 2D workspace.");
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "The name of the output 2D workspace.");
-  std::vector<int> empty;
+  // norm table to update
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra", empty),
-      "The workspace indices to remove the exponential decay from.");
+      make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "NormalizationTable", "", Direction::Input),
+      "Name of the table containing the normalizations for the asymmetries.");
+  // list of uNonrm workspaces to fit to
+  declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+          "UnNormalizedWorkspaceList", boost::make_shared<API::ADSValidator>()),
+      "An ordered list of workspaces (to get the initial values "
+      "for the normalizations).");
+  // list of workspaces to output renormalized result to
+  declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+          "ReNormalizedWorkspaceList", boost::make_shared<API::ADSValidator>()),
+      "An ordered list of workspaces (to get the initial values "
+      "for the normalizations).");
+
+  declareProperty("OutputFitWorkspace", "fit",
+                  "The name of the output fit workspace.");
+
   declareProperty(
       "StartX", 0.1,
       "The lower limit for calculating the asymmetry (an X value).");
   declareProperty(
       "EndX", 15.0,
       "The upper limit for calculating the asymmetry  (an X value).");
-  declareProperty(
-      "FittingFunction",
-      "name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0",
-      "The additional fitting functions to be used.");
-  declareProperty("InputDataType", "counts",
-                  boost::make_shared<Mantid::Kernel::StringListValidator>(
-                      std::vector<std::string>{"counts", "asymmetry"}),
-                  "If the data is raw counts or asymmetry");
+  declareProperty(make_unique<API::FunctionProperty>("InputFunction"),
+                  "The fitting function to be converted.");
+
   std::vector<std::string> minimizerOptions =
       API::FuncMinimizerFactory::Instance().getKeys();
   Kernel::IValidator_sptr minimizerValidator =
@@ -73,13 +79,10 @@ void CalculateMuonAsymmetry::init() {
   declareProperty(
       "MaxIterations", 500, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
-      "NormalizationConstant", Direction::Output));
-  std::vector<double> emptyDoubles;
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
-                      "PreviousNormalizationConstant", emptyDoubles),
-                  "Normalization constant used"
-                  " to estimate asymmetry");
+  declareProperty("OutputStatus", "", Kernel::Direction::Output);
+  declareProperty(make_unique<API::FunctionProperty>("OutputFunction",
+                                                     Kernel::Direction::Output),
+                  "The fitting function after fit.");
 }
 /*
 * Validate the input parameters
@@ -98,185 +101,198 @@ std::map<std::string, std::string> CalculateMuonAsymmetry::validateInputs() {
     validationOutput["StartX"] = "Start and end times are equal, there is no "
                                  "data to apply the algorithm to.";
   }
-  std::string dataType = getProperty("InputDataType");
-  std::vector<double> oldNorm = getProperty("PreviousNormalizationConstant");
-  std::vector<int> spectra = getProperty("Spectra");
-  if (dataType == "asymmetry" && oldNorm.empty()) {
-    validationOutput["PreviousNormalizationConstant"] =
-        "Asymmetry data has been provided but"
-        " no normalization constants have been provided.";
+  // check inputs
+  std::vector<std::string> unnormWS = getProperty("UnNormalizedWorkspaceList");
+  std::vector<std::string> normWS = getProperty("ReNormalizedWorkspaceList");
+  if (normWS.size() != unnormWS.size()) {
+    validationOutput["ReNormalizedWorkspaceList"] =
+        "The ReNormalizedWorkspaceList and UnNormalizedWorkspaceList must "
+        "contain the same number of workspaces.";
   }
-  if (dataType == "asymmetry" && oldNorm.size() != spectra.size()) {
+  API::IFunction_sptr tmp = getProperty("InputFunction");
+  auto function = boost::dynamic_pointer_cast<API::CompositeFunction>(tmp);
+  if (function->getNumberDomains() != normWS.size()) {
+    validationOutput["InputFunction"] = "The Fitting function does not have "
+                                        "the same number of domains as the "
+                                        "number of domains to fit.";
+  }
 
-    validationOutput["PreviousNormalizationConstant"] =
-        "Number of spectra and the list"
-        " of normalization constants are inconsistant.";
+  // check norm table is correct -> move this to helper when move muon algs to
+  // muon folder
+  API::ITableWorkspace_const_sptr tabWS = getProperty("NormalizationTable");
+
+  if (tabWS->columnCount() == 0) {
+    validationOutput["NormalizationTable"] =
+        "Please provide a non-empty NormalizationTable.";
   }
+  // NormalizationTable should have three columns: (norm, name, method)
+  if (tabWS->columnCount() != 3) {
+    validationOutput["NormalizationTable"] =
+        "NormalizationTable must have three columns";
+  }
+  auto names = tabWS->getColumnNames();
+  int normCount = 0;
+  int wsNamesCount = 0;
+  for (const std::string &name : names) {
+
+    if (name == "norm") {
+      normCount += 1;
+    }
+
+    if (name == "name") {
+      wsNamesCount += 1;
+    }
+  }
+  if (normCount == 0) {
+    validationOutput["NormalizationTable"] =
+        "NormalizationTable needs norm column";
+  }
+  if (wsNamesCount == 0) {
+    validationOutput["NormalizationTable"] =
+        "NormalizationTable needs a name column";
+  }
+  if (normCount > 1) {
+    validationOutput["NormalizationTable"] =
+        "NormalizationTable has " + std::to_string(normCount) + " norm columns";
+  }
+  if (wsNamesCount > 1) {
+    validationOutput["NormalizationTable"] = "NormalizationTable has " +
+                                             std::to_string(wsNamesCount) +
+                                             " name columns";
+  }
+
   return validationOutput;
 }
 /** Executes the algorithm
- *
- */
+*
+*/
 
 void CalculateMuonAsymmetry::exec() {
-  std::vector<int> spectra = getProperty("Spectra");
-  std::vector<double> oldNorm = getProperty("PreviousNormalizationConstant");
-  // Get original workspace
-  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  auto numSpectra = inputWS->getNumberHistograms();
-  // Create output workspace with same dimensions as input
-  API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  if (inputWS != outputWS) {
-    outputWS = API::WorkspaceFactory::Instance().create(inputWS);
+  const std::vector<std::string> wsNamesUnNorm =
+      getProperty("UnNormalizedWorkspaceList");
+  std::vector<std::string> wsNames = getProperty("reNormalizedWorkspaceList");
+
+  // get new norm
+  std::vector<double> norms =
+      getNormConstants(wsNamesUnNorm); // this will do the fit
+  auto containsZeros = std::any_of(norms.begin(), norms.end(),
+                                   [](double value) { return value == 0.0; });
+  if (containsZeros) {
+
+    setProperty("OutputStatus", "Aborted, a normalization constant was zero");
+    g_log.error("Got a zero for the normalization, aborting algorithm.");
+    return;
   }
-  double startX = getProperty("StartX");
-  double endX = getProperty("EndX");
-  auto dataType = getPropertyValue("InputDataType");
+  // update the ws to new norm
+  for (size_t j = 0; j < wsNames.size(); j++) {
+    API::MatrixWorkspace_sptr ws =
+        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
+            wsNamesUnNorm[j]);
+    API::MatrixWorkspace_sptr normWS =
+        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
+            wsNames[j]);
 
-  const Mantid::API::Run &run = inputWS->run();
-  const double numGoodFrames = std::stod(run.getProperty("goodfrm")->value());
-
-  g_log.warning("Assuming that the spectra and normalization constants are in "
-                "the same order");
-
-  // Share the X values
-  for (size_t i = 0; i < static_cast<size_t>(numSpectra); ++i) {
-    outputWS->setSharedX(i, inputWS->sharedX(i));
+    normWS->mutableY(0) = ws->y(0) / norms[j];
+    normWS->mutableY(0) -= 1.0;
+    normWS->mutableE(0) = ws->e(0) / norms[j];
   }
-
-  // No spectra specified = process all spectra
-  if (spectra.empty()) {
-    spectra = std::vector<int>(numSpectra);
-    std::iota(spectra.begin(), spectra.end(), 0);
-  }
-
-  Progress prog(this, 0.0, 1.0, numSpectra + spectra.size());
-  if (inputWS != outputWS) {
-
-    // Copy all the Y and E data
-    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-    for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
-      PARALLEL_START_INTERUPT_REGION
-      const auto index = static_cast<size_t>(i);
-      outputWS->setSharedY(index, inputWS->sharedY(index));
-      outputWS->setSharedE(index, inputWS->sharedE(index));
-      prog.report();
-      PARALLEL_END_INTERUPT_REGION
-    }
-    PARALLEL_CHECK_INTERUPT_REGION
-  }
-
-  // Do the specified spectra only
-  int specLength = static_cast<int>(spectra.size());
-  std::vector<double> norm(specLength, 0.0);
-  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-  for (int i = 0; i < specLength; ++i) {
-    PARALLEL_START_INTERUPT_REGION
-    const auto specNum = static_cast<size_t>(spectra[i]);
-    if (spectra[i] > static_cast<int>(numSpectra)) {
-      g_log.error("The spectral index " + std::to_string(spectra[i]) +
-                  " is greater than the number of spectra!");
-      throw std::invalid_argument("The spectral index " +
-                                  std::to_string(spectra[i]) +
-                                  " is greater than the number of spectra!");
-    }
-    double estNormConst;
-    if (dataType == "counts") {
-      // inital estimate of N0
-      estNormConst = estimateNormalisationConst(inputWS->histogram(specNum),
-                                                numGoodFrames, startX, endX);
-      // Calculate the normalised counts
-      outputWS->setHistogram(
-          specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
-
-    } else {
-      estNormConst = oldNorm[i];
-      outputWS->setHistogram(specNum, inputWS->histogram(specNum));
-      // convert the data back to normalised counts
-      outputWS->mutableY(specNum) += 1.0;
-      outputWS->mutableY(specNum) *= estNormConst;
-      outputWS->mutableE(specNum) *= estNormConst;
-    }
-    // get the normalisation constant
-    const double normConst =
-        getNormConstant(outputWS, spectra[i], estNormConst, startX, endX);
-    // calculate the asymmetry
-    outputWS->mutableY(specNum) /= normConst;
-    outputWS->mutableY(specNum) -= 1.0;
-    outputWS->mutableE(specNum) /= normConst;
-    norm[i] = normConst;
-    prog.report();
-    PARALLEL_END_INTERUPT_REGION
-  }
-  PARALLEL_CHECK_INTERUPT_REGION
-
-  // Update Y axis units
-  outputWS->setYUnit("Asymmetry");
-  setProperty("NormalizationConstant", norm);
-  setProperty("OutputWorkspace", outputWS);
+  // update table with new norm
+  std::vector<std::string> methods(wsNames.size(), "Calculated");
+  API::ITableWorkspace_sptr table = getProperty("NormalizationTable");
+  updateNormalizationTable(table, wsNames, norms, methods);
 }
 
 /**
- * Calculate normalisation constant after the exponential decay has been removed
+ * Calculate normalization constant after the exponential decay has been removed
  * to a linear fitting function
- * @param ws ::  workspace
- * @param wsIndex :: workspace index
- * @param estNormConstant :: estimate of normalisation constant
- * @param startX :: the smallest x value for the fit
- * @param endX :: the largest x value for the fit
- * @return normalisation constant
+ * @param wsNames ::  names of workspaces to fit to
+ * @return normalization constants
 */
 
-double CalculateMuonAsymmetry::getNormConstant(API::MatrixWorkspace_sptr ws,
-                                               int wsIndex,
-                                               const double estNormConstant,
-                                               const double startX,
-                                               const double endX) {
-  double retVal = 1.0;
+std::vector<double> CalculateMuonAsymmetry::getNormConstants(
+    const std::vector<std::string> wsNames) {
+  std::vector<double> norms;
+
+  double startX = getProperty("StartX");
+  double endX = getProperty("EndX");
   int maxIterations = getProperty("MaxIterations");
   auto minimizer = getProperty("Minimizer");
-  API::IAlgorithm_sptr fit;
-  fit = createChildAlgorithm("Fit", -1, -1, true);
-  std::string tmpString = getProperty("FittingFunction");
+  API::IAlgorithm_sptr fit = API::AlgorithmManager::Instance().create("Fit");
+  fit->initialize();
 
-  std::string function;
-  function = "composite=ProductFunction;name=FlatBackground,A0=" +
-             std::to_string(estNormConstant);
-  function += ";(name=FlatBackground,A0=1.0,ties=(A0=1.0);";
-  function += tmpString + ")";
+  API::IFunction_sptr function = getProperty("InputFunction");
+
+  fit->setProperty("Function", function);
 
   fit->setProperty("MaxIterations", maxIterations);
-  fit->setPropertyValue("Function", function);
-  fit->setProperty("InputWorkspace", ws);
-  fit->setProperty("WorkspaceIndex", wsIndex);
+
   fit->setPropertyValue("Minimizer", minimizer);
+
+  std::string output = getPropertyValue("OutputFitWorkspace");
+
+  fit->setProperty("Output", output);
+
+  fit->setProperty("InputWorkspace", wsNames[0]);
   fit->setProperty("StartX", startX);
   fit->setProperty("EndX", endX);
-  fit->execute();
+  fit->setProperty("WorkspaceIndex", 0);
 
-  std::string fitStatus = fit->getProperty("OutputStatus");
-  API::IFunction_sptr result = fit->getProperty("Function");
-  const double A0 = result->getParameter(0);
-  if (fitStatus == "success") { // to be explicit
+  if (wsNames.size() > 1) {
+    for (size_t j = 1; j < wsNames.size(); j++) {
+      std::string suffix = boost::lexical_cast<std::string>(j);
 
-    if (A0 < 0) {
-      g_log.warning() << "When trying to fit Asymmetry normalisation constant "
-                         "this constant comes out negative. For workspace "
-                      << wsIndex << "."
-                      << "To proceed Asym norm constant set to 1.0\n";
-      retVal = 1.0;
-    } else {
-      retVal = A0;
+      fit->setPropertyValue("InputWorkspace_" + suffix, wsNames[j]);
+      fit->setProperty("WorkspaceIndex_" + suffix, 0);
+      fit->setProperty("StartX_" + suffix, startX);
+      fit->setProperty("EndX_" + suffix, endX);
     }
-  } else {
-    g_log.warning() << "Fit falled. Status = " << fitStatus
-                    << "\nFor workspace index " << wsIndex
-                    << "\nAsym norm constant set to 1.0\n";
-    retVal = 1.0;
   }
 
-  return retVal;
-}
+  fit->execute();
+  auto status = fit->getPropertyValue("OutputStatus");
+  setProperty("OutputStatus", status);
 
+  API::IFunction_sptr tmp = fit->getProperty("Function");
+  setProperty("OutputFunction", tmp);
+  try {
+    if (wsNames.size() == 1) {
+      // N(1+g) + exp
+      auto TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(tmp);
+      norms.push_back(getNormValue(TFFunc));
+    } else {
+      auto result = boost::dynamic_pointer_cast<API::MultiDomainFunction>(tmp);
+      for (size_t j = 0; j < wsNames.size(); j++) {
+        // get domain
+        auto TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(
+            result->getFunction(j));
+        // N(1+g) + exp
+        TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc);
+        norms.push_back(getNormValue(TFFunc));
+      }
+    }
+  } catch (...) {
+    throw std::invalid_argument("The fitting function is not of the expected "
+                                "form. Try using "
+                                "ConvertFitFunctionForMuonTFAsymmetry");
+  }
+  return norms;
+}
+/**
+* Gets the normalization from a fitting function
+* @param func ::  fittef function
+* @return normalization constant
+*/
+double CalculateMuonAsymmetry::getNormValue(API::CompositeFunction_sptr &func) {
+
+  // getFunction(0) -> N(1+g)
+  auto TFFunc =
+      boost::dynamic_pointer_cast<API::CompositeFunction>(func->getFunction(0));
+
+  auto fdas = TFFunc->asString();
+  // getFunction(0) -> N
+  auto flat = TFFunc->getFunction(0);
+
+  return flat->getParameter("A0");
+}
 } // namespace Algorithm
 } // namespace Mantid

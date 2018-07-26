@@ -100,7 +100,7 @@ if EXIST %BUILD_DIR% (
   rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData
   for /f %%F in ('dir /b /a-d /S "TEST-*.xml"') do del /Q %%F >/nul
   if "!CLEAN_EXTERNAL_PROJECTS!" == "true" (
-    rmdir /S /Q %BUILD_DIR%\eigen-download %BUILD_DIR%\eigen-src
+    rmdir /S /Q %BUILD_DIR%\eigen-prefix
     rmdir /S /Q %BUILD_DIR%\googletest-download %BUILD_DIR%\googletest-src
     rmdir /S /Q %BUILD_DIR%\python-xmlrunner-download %BUILD_DIR%\python-xmlrunner-src
   )

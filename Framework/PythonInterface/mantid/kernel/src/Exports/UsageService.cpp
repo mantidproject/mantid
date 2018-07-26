@@ -19,6 +19,9 @@ void export_UsageService() {
            "Sends any pending usage information, and disables the usage "
            "service.")
 
+      .def("getUpTime", &UsageServiceImpl::getUpTime, arg("self"),
+           "Returns the time that the instance of mantid has been running")
+
       .def("isEnabled", &UsageServiceImpl::isEnabled, arg("self"),
            "Returns if the usage service is enabled.")
 

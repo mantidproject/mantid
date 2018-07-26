@@ -175,11 +175,11 @@ public:
   };
 
   /// Add a run to the list of run ranges.
-  void addRun(unsigned int run);
+  void addRun(const unsigned int run);
   /// Add a range of runs
-  void addRunRange(unsigned int from, unsigned int to);
+  void addRunRange(const unsigned int from, const unsigned int to);
   /// Add a range of runs
-  void addRunRange(std::pair<unsigned int, unsigned int> range);
+  void addRunRange(const std::pair<unsigned int, unsigned int> &range);
 
 private:
   /// A set of pairs of unsigned ints, where each pair represents a range of

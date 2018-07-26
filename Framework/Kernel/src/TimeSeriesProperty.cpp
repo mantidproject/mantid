@@ -100,7 +100,6 @@ std::unique_ptr<TimeSeriesProperty<double>>
 TimeSeriesProperty<std::string>::getDerivative() const {
   throw std::runtime_error(
       "Time series property derivative is not defined for strings");
-  // return nullptr;
 }
 
 /**
@@ -517,8 +516,6 @@ void TimeSeriesProperty<TYPE>::splitByTime(
         dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
     if (myOutput) {
       myOutput->m_size = myOutput->realSize();
-      // g_log.notice() << "[DB] Final output size = " << myOutput->size() <<
-      // "\n";
     }
   }
 }
@@ -526,11 +523,17 @@ void TimeSeriesProperty<TYPE>::splitByTime(
 /// Split this TimeSeriresProperty by a vector of time with N entries,
 /// and by the target workspace index defined by target_vec
 /// Requirements:
-/// 1. vector outputs must be defined before this method is called;
+/// vector outputs must be defined before this method is called
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::splitByTimeVector(
     std::vector<DateAndTime> &splitter_time_vec, std::vector<int> &target_vec,
     std::vector<TimeSeriesProperty *> outputs) {
+
+  // check target vector to make it a set
+  std::set<int> target_set;
+  for (auto target : target_vec)
+    target_set.insert(target);
+
   // check inputs
   if (splitter_time_vec.size() != target_vec.size() + 1) {
     std::stringstream errss;
@@ -554,6 +557,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   size_t index_splitter = 0;
   size_t index_tsp_time = 0;
 
+  // tsp_time is start time of time series property
   DateAndTime tsp_time = tsp_time_vec[index_tsp_time];
   DateAndTime split_start_time = splitter_time_vec[index_splitter];
   DateAndTime split_stop_time = splitter_time_vec[index_splitter + 1];
@@ -581,10 +585,8 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     split_stop_time = splitter_time_vec[index_splitter + 1];
   }
 
-  g_log.debug() << "TSP entry: " << index_tsp_time
-                << ", Splitter index = " << index_splitter << "\n";
-
   // move along the entries to find the entry inside the current splitter
+  bool first_splitter_after_last_entry(false);
   if (!no_entry_in_range) {
     std::vector<DateAndTime>::iterator tsp_time_iter;
     tsp_time_iter = std::lower_bound(tsp_time_vec.begin(), tsp_time_vec.end(),
@@ -594,17 +596,34 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
       // there won't be any
       // TSP entry to be split into any target splitter.
       no_entry_in_range = true;
+      first_splitter_after_last_entry = true;
     } else {
       // first splitter start time is between tsp_time_iter and the one before
       // it.
       // so the index for tsp_time_iter is the first TSP entry in the splitter
       index_tsp_time = tsp_time_iter - tsp_time_vec.begin();
-      tsp_time = *tsp_time_iter; // tsp_time_vec[index_splitter];
+      tsp_time = *tsp_time_iter;
     }
+  } else {
+    // no entry in range is true, which corresponding to the previous case
+    // "already search to the last splitter which is still earlier than first
+    // TSP
+    // entry"
+    ;
+  }
+
+  if (no_entry_in_range && first_splitter_after_last_entry) {
+    // initialize all the splitters with the last value
+    DateAndTime last_entry_time = this->lastTime();
+    TYPE last_entry_value = this->lastValue();
+    for (size_t i = 0; i < outputs.size(); ++i)
+      outputs[i]->addValue(last_entry_time, last_entry_value);
   }
 
   // now it is the time to put TSP's entries to corresponding
   continue_search = !no_entry_in_range;
+  size_t outer_while_counter = 0;
+  bool partial_target_filled(false);
   while (continue_search) {
     // get next target
     int target = target_vec[index_splitter];
@@ -614,13 +633,15 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
       --index_tsp_time;
 
     // add the continous entries to same target time series property
-    bool continue_add = true;
     const size_t tspTimeVecSize = tsp_time_vec.size();
+    bool continue_add = true;
     while (continue_add) {
+      size_t inner_while_counter = 0;
       if (index_tsp_time == tspTimeVecSize) {
         // last entry. quit all loops
         continue_add = false;
         continue_search = false;
+        partial_target_filled = true;
         break;
       }
 
@@ -645,14 +666,13 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
           // skip the
           // rest without going through the whole sequence
           continue_add = false;
-          // reset time entry as the next splitter will add
-          // --index_tsp_time;
         }
       }
 
       // advance to next entry
       ++index_tsp_time;
 
+      ++inner_while_counter;
     } // END-WHILE continue add
 
     // make splitters to advance to next
@@ -664,7 +684,43 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
       split_start_time = split_stop_time;
       split_stop_time = splitter_time_vec[index_splitter + 1];
     }
+
+    ++outer_while_counter;
   } // END-OF-WHILE
+
+  // Still in 'continue search'-while-loop.  But the TSP runs over before
+  // splitters.
+  // Therefore, the rest of the chopper must have one more entry added!
+  if (partial_target_filled) {
+    // fill the target
+    std::set<int> fill_target_set;
+    for (size_t isplitter = index_splitter;
+         isplitter < splitter_time_vec.size() - 1; ++isplitter) {
+      int target_i = target_vec[isplitter];
+      if (fill_target_set.find(target_i) == fill_target_set.end()) {
+        if (outputs[target_i]->size() == 0 ||
+            outputs[target_i]->lastTime() != m_values.back().time())
+          outputs[target_i]->addValue(m_values.back().time(),
+                                      m_values.back().value());
+        fill_target_set.insert(target_i);
+        // quit loop if it goes over all the targets
+        if (fill_target_set.size() == target_set.size())
+          break;
+      }
+    }
+  }
+
+  // Add a debugging check such that there won't be any time entry with zero log
+  for (size_t i = 0; i < outputs.size(); ++i) {
+    if (outputs[i]->size() == 0) {
+      std::stringstream errss;
+      errss << i << "-th split-out term (out of " << outputs.size()
+            << " total output TSP) of '" << m_name << "'' has "
+            << outputs[i]->size() << " size, whose first entry is at "
+            << this->firstTime().toSimpleString();
+      g_log.debug(errss.str());
+    }
+  }
 
   return;
 }
@@ -852,6 +908,22 @@ void TimeSeriesProperty<std::string>::expandFilterToRange(
                                        "properties");
 }
 
+/** Calculates the time-weighted average of a property.
+ *  @return The time-weighted average value of the log.
+ */
+template <typename TYPE>
+double TimeSeriesProperty<TYPE>::timeAverageValue() const {
+  double retVal = 0.0;
+  try {
+    const auto &filter = getSplittingIntervals();
+    retVal = this->averageValueInFilter(filter);
+  } catch (std::exception &) {
+    // just return nan
+    retVal = std::numeric_limits<double>::quiet_NaN();
+  }
+  return retVal;
+}
+
 /** Calculates the time-weighted average of a property in a filtered range.
  *  This is written for that case of logs whose values start at the times given.
  *  @param filter The splitter/filter restricting the range of values included
@@ -903,21 +975,6 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(
   // 'Normalise' by the total time
   return numerator / totalTime;
 }
-/** Calculates the time-weighted average of a property.
- *  @return The time-weighted average value of the log.
- */
-template <typename TYPE>
-double TimeSeriesProperty<TYPE>::timeAverageValue() const {
-  double retVal = 0.0;
-  try {
-    const auto &filter = getSplittingIntervals();
-    retVal = this->averageValueInFilter(filter);
-  } catch (std::exception &) {
-    // just return nan
-    retVal = std::numeric_limits<double>::quiet_NaN();
-  }
-  return retVal;
-}
 
 /** Function specialization for TimeSeriesProperty<std::string>
  *  @throws Kernel::Exception::NotImplementedError always
@@ -927,6 +984,78 @@ double TimeSeriesProperty<std::string>::averageValueInFilter(
     const TimeSplitterType &) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "averageValueInFilter is not "
+                                       "implemented for string properties");
+}
+
+template <typename TYPE>
+std::pair<double, double>
+TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev() const {
+  std::pair<double, double> retVal{0., 0.}; // mean and stddev
+  try {
+    const auto &filter = getSplittingIntervals();
+    retVal = this->averageAndStdDevInFilter(filter);
+  } catch (std::exception &) {
+    retVal.first = std::numeric_limits<double>::quiet_NaN();
+    retVal.second = std::numeric_limits<double>::quiet_NaN();
+  }
+  return retVal;
+}
+
+template <typename TYPE>
+std::pair<double, double> TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(
+    const std::vector<SplittingInterval> &filter) const {
+  // the mean to calculate the standard deviation about
+  // this will sort the log as necessary as well
+  const double mean = this->averageValueInFilter(filter);
+
+  // First of all, if the log or the filter is empty or is a single value,
+  // return NaN for the uncertainty
+  if (realSize() <= 1 || filter.empty()) {
+    return std::pair<double, double>{mean,
+                                     std::numeric_limits<double>::quiet_NaN()};
+  }
+
+  double numerator(0.0), totalTime(0.0);
+  // Loop through the filter ranges
+  for (const auto &time : filter) {
+    // Calculate the total time duration (in seconds) within by the filter
+    totalTime += time.duration();
+
+    // Get the log value and index at the start time of the filter
+    int index;
+    double value = getSingleValue(time.start(), index);
+    double valuestddev = (value - mean) * (value - mean);
+    DateAndTime startTime = time.start();
+
+    while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
+      ++index;
+
+      numerator +=
+          DateAndTime::secondsFromDuration(m_values[index].time() - startTime) *
+          valuestddev;
+      startTime = m_values[index].time();
+      value = static_cast<double>(m_values[index].value());
+      valuestddev = (value - mean) * (value - mean);
+    }
+
+    // Now close off with the end of the current filter range
+    numerator +=
+        DateAndTime::secondsFromDuration(time.stop() - startTime) * valuestddev;
+  }
+
+  // Normalise by the total time
+  return std::pair<double, double>{mean, std::sqrt(numerator / totalTime)};
+}
+
+/** Function specialization for TimeSeriesProperty<std::string>
+ *  @throws Kernel::Exception::NotImplementedError always
+ */
+template <>
+std::pair<double, double>
+TimeSeriesProperty<std::string>::averageAndStdDevInFilter(
+    const TimeSplitterType &) const {
+  throw Exception::NotImplementedError("TimeSeriesProperty::"
+                                       "averageAndStdDevInFilter is not "
                                        "implemented for string properties");
 }
 

@@ -23,45 +23,45 @@ examples in parallel using 8 cores):
 
 .. code-block:: sh
 
-   make -j8 AllTests
+   make -j8 AllTests
 
 To build only one package of tests (and its dependencies):
 
 .. code-block:: sh
 
-   make -j8 KernelTest
+   make -j8 KernelTest
 
 To run all the tests:
 
 .. code-block:: sh
 
-   ctest -j8
+   ctest -j8
 
 To build and run all the tests in one shot:
 
 .. code-block:: sh
 
-   make -j8 check
+   make -j8 check
 
 To run a specific test or set of tests (will run all those that match
 the search string):
 
 .. code-block:: sh
 
-   ctest -R KernelTest_TimerTest
+   ctest -R KernelTest_TimerTest
 
 So to run all tests in a suite (using a search string):
 
 .. code-block:: sh
 
-   ctest -j8 -R KernelTest
+   ctest -j8 -R KernelTest
 
 To exclude things from your tests (matches the string as with the -R
 option) - useful for those building the performance tests:
 
 .. code-block:: sh
 
-   ctest -j8 -E Performance
+   ctest -j8 -E Performance
 
 Useful CTest Options
 ####################
@@ -103,31 +103,39 @@ Starting in your build folder (e.g. Mantid/Code/debug):
 
    -  Not possible with ctest.
 
-Visual Studio/ XCode note
-#########################
+Running Unit Tests With Visual Studio and ctest
+###############################################
 
-In Visual Studio the user can alter the properties of the subset of
-tests (inside the unitTest directory (e.g. AlgorithmTest). In the
-properties box it is possible to specify a specific test to run by
-typing its name in the TargetName box. Then to execute the test, right
-click the subset of tests and select debug and then start new instance.
+Open the Mantid solution in Visual Studio. To run a subset of tests (for example ``UnitTests/AlgorithmsTest``);
 
-To run the tests under one of these environments then you will need to
-open a command window and change to the build directory. Once there you
-can run the tests by selecting the configuration;
+-  In the Solution Explorer, right click the project for the tests (in this case ``UnitTests/AlgorithmsTest``) and select Properties.
 
-.. code-block:: sh
+-  In the Debugging tab of Properties change the Command Arguments box to the name of the test, for example "AddNoteTest".
 
-   ctest -C Debug -j4
+-  Right click the directory again and select Debug->Start new instance.
 
-This runs all tests in Debug mode (note that this will NOT build any
-outdated libraries). To select a subset use the ``-R`` option:
+-  Once the build has finished, open a file browser and navigate to the mantid build directory, run the command-prompt.bat file to open a command prompt and run 
 
-.. code-block:: sh
+   .. code-block:: sh
 
-   ctest -C Release -R Kernel -j4
+     ctest -C Debug -V -R AddNoteTest
 
-   (-R Kernel), with 4 cores (-j4), in Release mode (-C Release).
+   For this example, there should be several lines of output ending with the time taken and the line
+
+   .. code-block:: sh
+
+     100% tests passed, 0 tests failed out of 1
+
+   Omitting the ``-R AddNoteTest`` option runs all the tests, but note that any tests which were not built according to the above instructions will fail. Adding the ``-V`` increases the output verbosity.
+
+
+Running Unit Tests With Visual Studio
+#####################################
+
+The unit tests can be run from within Visual Studio, following steps 1-3 above, with the addition in step 2 of;
+
+-  Add the name of the test to the Target Name field in the General tab of Properties. Then add a breakpoint somewhere in the test header file.
+
 
 Debugging unit tests
 ####################

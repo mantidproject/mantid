@@ -17,6 +17,7 @@ set ( EXPORT_FILES
   src/Exports/IValidator.cpp
   src/Exports/IPropertySettings.cpp
   src/Exports/EnabledWhenProperty.cpp
+  src/Exports/ErrorReporter.cpp
   src/Exports/VisibleWhenProperty.cpp
   src/Exports/PropertyWithValue.cpp
   src/Exports/ArrayProperty.cpp
@@ -94,6 +95,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/NdArray.h
   ${HEADER_DIR}/kernel/Converters/CArrayToNDArray.h
   ${HEADER_DIR}/kernel/Converters/CloneToNumpy.h
+  ${HEADER_DIR}/kernel/Converters/ContainerDtype.h
   ${HEADER_DIR}/kernel/Converters/DateAndTime.h
   ${HEADER_DIR}/kernel/Converters/MapToPyDictionary.h
   ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h

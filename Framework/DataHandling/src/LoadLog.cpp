@@ -39,6 +39,24 @@ using API::WorkspaceProperty;
 using DataObjects::Workspace2D_sptr;
 using Types::Core::DateAndTime;
 
+namespace {
+
+template <class MapClass, class LoggerType>
+void addLogDataToRun(Mantid::API::Run &run, MapClass &aMap,
+                     LoggerType &logger) {
+  for (auto &itr : aMap) {
+    try {
+      run.addLogData(itr.second.release());
+    } catch (std::invalid_argument &e) {
+      logger.warning() << e.what() << '\n';
+    } catch (Exception::ExistsError &e) {
+      logger.warning() << e.what() << '\n';
+    }
+  }
+}
+
+} // namespace
+
 /// Empty default constructor
 LoadLog::LoadLog() {}
 
@@ -288,18 +306,8 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
       }
     }
   }
-  try {
-    for (auto &itr : dMap) {
-      run.addLogData(itr.second.release());
-    }
-    for (auto &sitr : sMap) {
-      run.addLogData(sitr.second.release());
-    }
-  } catch (std::invalid_argument &e) {
-    g_log.warning() << e.what();
-  } catch (Exception::ExistsError &e) {
-    g_log.warning() << e.what();
-  }
+  addLogDataToRun(run, dMap, g_log);
+  addLogDataToRun(run, sMap, g_log);
 }
 
 /**

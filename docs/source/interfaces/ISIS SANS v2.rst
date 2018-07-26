@@ -94,8 +94,11 @@ Columns
 | **User File**            |   User file to use for this row. If specified it will override any options set in the GUI,      |
 |                          |   otherwise the default file will be used.                                                      |
 +--------------------------+-------------------------------------------------------------------------------------------------+
+| **Sample Thickness**     |   Sets the sample thickness to be used in the reduction.                                        |
+|                          |                                                                                                 |
++--------------------------+-------------------------------------------------------------------------------------------------+
 | **Options**              |   This column allows the user to provide row specific settings. Currently only **WavelengthMin**|
-|                          |   and WavelengthMax can be set here.                                                            |
+|                          |   , **WavelengthMax** and **EventSlices** can be set here.                                      |
 +--------------------------+-------------------------------------------------------------------------------------------------+
 
 Save Options
@@ -196,14 +199,14 @@ Event Slice
 In case of data which was measured in event-mode, it is possible to perform
 time-of-flight slices of the data and reduce these separately. The input can be:
 
-- *start:step:stop* specifies time slices from a *start* value for the *stop* value
-  in steps of *step*.
+- ``start:step:stop`` specifies time slices from a ``start`` value for the ``stop`` value
+  in steps of ``step``.
 
-- *start-stop* which specifies a time slice from the *start* value to the *stop* value.
+- ``start-stop`` which specifies a time slice from the ``start`` value to the ``stop`` value.
 
-- *>start* specifies a slice form the *start* value to the end of the data set.
+- ``>start`` specifies a slice form the ``start`` value to the end of the data set.
 
-- *<stop* specifies a slice form the start of the data set to the *stop* value
+- ``<stop`` specifies a slice form the start of the data set to the ``stop`` value
 
 In addition it is possible to concatenate these specifications using comma-separation.
 An example would be *5-10,12:2:16,20-30*.
@@ -510,6 +513,22 @@ Wavelength
 
 The settings provide the binning for the conversion from
 time-of-flight units to wavelength units. Note that all units are Angstrom.
+Depending on which Step type you have chosen you will be asked to enter either
+a Max and Min wavelength value between which to do the reduction or to specify a
+set of wavelength ranges to reduce between. The syntax for the latter case is the
+same as that used to specify event slices and is 
+
+- ``start:step:stop`` specifies wavelength slices from a ``start`` value for the ``stop`` value
+  in steps of `step`.
+
+- ``start-stop`` which specifies a wavelength slice from the ``start`` value to the ``stop`` value.
+
+- ``>start`` specifies a slice from the ``start`` value to the end of the data set.
+
+- ``<stop`` specifies a slice from the start of the data set to the ``stop`` value
+
+In addition it is possible to concatenate these specifications using comma-separation.
+An example would be ``5-10,12:2:16,20-30``.
 
 +-------+---------------+------------------------------------------+
 | **1** | **Min**       | The lower bound of the wavelength bins.  |
@@ -519,8 +538,26 @@ time-of-flight units to wavelength units. Note that all units are Angstrom.
 | **3** | **Step**      | The step of the wavelength bins.         |
 +-------+---------------+------------------------------------------+
 | **4** | **Step type** | The step type of the wavelength bins,    |
-|       |               | i.e. linear, logarithmic or variable.    |
+|       |               | i.e. linear, logarithmic range linear or |
+|       |               | ranged logarithmic.                      |
 +-------+---------------+------------------------------------------+
+| **5** | **Ranges**    | A set of wavelength ranges. This option  |
+|       |               | only appears if a range step type is     |
+|       |               | selected.                                |
++-------+---------------+------------------------------------------+  
+
+Cuts
+""""
+
+.. _Cuts:
+
+.. image::  ../images/sans_isis_v2_q_tab_cuts.png
+   :align: center
+   :width: 800px
+
+These allow radius and wavelength cuts to be set. They 
+are passed to :ref:`Q1D <algm-Q1D>` as the RadiusCut and
+WaveCut respectively.
 
 Q limits
 """"""""

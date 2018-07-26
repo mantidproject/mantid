@@ -8,7 +8,7 @@ from sans.user_file.user_file_parser import (DetParser, LimitParser, MaskParser,
                                              MaskFileParser, MonParser, PrintParser, BackParser, SANS2DParser, LOQParser,
                                              UserFileParser, LARMORParser, CompatibilityParser)
 from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
-                                          single_entry_with_detector, mask_angle_entry, LimitsId, rebin_string_values,
+                                          single_entry_with_detector, mask_angle_entry, LimitsId,
                                           simple_range, complex_range, MaskId, mask_block, mask_block_cross,
                                           mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
                                           position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
@@ -316,7 +316,11 @@ class MaskParserTest(unittest.TestCase):
                           "MASK/REAR/T 13 35": {MaskId.time_detector: range_entry_with_detector(start=13, stop=35,
                                                 detector_type=DetectorType.LAB)},
                           "MASK/FRONT/TIME 33 35": {MaskId.time_detector: range_entry_with_detector(start=33, stop=35,
-                                                    detector_type=DetectorType.HAB)}
+                                                    detector_type=DetectorType.HAB)},
+                          "MASK/TIME/REAR 13 35": {MaskId.time_detector: range_entry_with_detector(start=13, stop=35,
+                                                   detector_type=DetectorType.LAB)},
+                          "MASK/T/FRONT 33 35": {MaskId.time_detector: range_entry_with_detector(start=33, stop=35,
+                                                 detector_type=DetectorType.HAB)}
                           }
 
         invalid_settings = {"MASK/TIME 12 34 4 ": RuntimeError,
@@ -510,11 +514,11 @@ class SetParserTest(unittest.TestCase):
                                                                                   detector_type=DetectorType.LAB)},
                           "SET centre / lAb 23 45": {SetId.centre: position_entry(pos1=23, pos2=45,
                                                                                   detector_type=DetectorType.LAB)},
-                          "SET centre / hAb 23 45": {SetId.centre: position_entry(pos1=23, pos2=45,
+                          "SET centre / hAb 23 45": {SetId.centre_HAB: position_entry(pos1=23, pos2=45,
                                                                                   detector_type=DetectorType.HAB)},
-                          "SET centre /FRONT 23 45": {SetId.centre: position_entry(pos1=23, pos2=45,
+                          "SET centre /FRONT 23 45": {SetId.centre_HAB: position_entry(pos1=23, pos2=45,
                                                       detector_type=DetectorType.HAB)},
-                          "SET centre /FRONT 23 45 55 67": {SetId.centre: position_entry(pos1=23, pos2=45,
+                          "SET centre /FRONT 23 45 55 67": {SetId.centre_HAB: position_entry(pos1=23, pos2=45,
                                                             detector_type=DetectorType.HAB)},
                           }
 
@@ -1068,6 +1072,7 @@ class UserFileParserTest(unittest.TestCase):
 
         # Act + Assert
         self.assertRaises(ValueError, user_file_parser.parse_line, "DetT/DKDK/ 23 23")
+
 
 if __name__ == "__main__":
     unittest.main()

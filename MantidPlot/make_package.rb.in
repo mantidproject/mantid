@@ -187,6 +187,13 @@ if( "@MAKE_VATES@" == "ON" )
   `install_name_tool -id @rpath/libNonOrthogonalSource.dylib plugins/paraview/qt4/libNonOrthogonalSource.dylib`
 end
 
+# use install_tool_name to add an @rpath for the libraries
+Dir["Contents/MacOS/*.so"].each do |library|
+  dependencies = `otool -L #{library}`
+  print library, "\n"
+  `install_name_tool -add_rpath @loader_path/../MacOS #{library} > /dev/null 2>&1`
+end
+
 #use install_name_tool to change dependencies from /usr/local to libraries in the package.
 search_patterns = ["**/*.dylib","**/*.so","**/MantidPlot"]
 search_patterns.each do |pattern|
@@ -318,7 +325,7 @@ end
 #currently missing epics
 path = "/Library/Python/2.7/site-packages"
 directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtawesome", "qtpy",
-               "certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile","yaml"]
+               "certifi","tornado","markupsafe","jinja2","jsonschema","functools32","ptyprocess","CifFile","yaml"]
 directories.each do |directory|
   addPythonLibrary("#{path}/#{directory}","Contents/MacOS/")
 end
