@@ -7,21 +7,21 @@ This a python binding to the C++ class Mantid::API::SpectrumInfo.
 --------  
 Purpose 
 -------- 
-The purpose of the SpectrumInfo object is to allow the user to access information about the spectra being used in an experiment. The SpectrumInfo object can be used to access information such as the number of spectra, the absolute position of a spectrum as well as the distance from the sample to the source. There are many other methods available as well. 
+The purpose of the ``SpectrumInfo`` object is to allow the user to access information about the spectra being used in an experiment. The ``SpectrumInfo`` object can be used to access information such as the number of spectra, the absolute position of a spectrum as well as the distance from the sample to the source. There are many other methods available as well. 
  
-Many users may need this extra information so that they can have a better understanding of the beamline they are using. This extra information is also easy and fast to access meaning the users can make improvements to their experimental design with ease. 
+Many users may need this extra information so that they can have a better understanding of the beamline they are using. This extra information is easy and fast to access. 
 
-SpectrumInfo is one of three objects that the user can gain access to from a Workspace. 
-The other two are:  
-  * DetectorInfo 
-  * ComponentInfo
+``SpectrumInfo`` is one of three objects that the user can gain access to from a workspace. 
+The other two are:
+  * ``DetectorInfo``
+  * ``ComponentInfo``
 
 ------
 Usage
 ------
 
 **Example 1 - Creating a SpectrumInfo Object:**
-This example shows how to obtain a SpectrumInfo object from a workspace object.
+This example shows how to obtain a ``SpectrumInfo`` object from a workspace object.
 The return value is a ``SpectrumInfo`` object.
 
 .. testcode:: CreateSpectrumInfoObject
@@ -32,6 +32,13 @@ The return value is a ``SpectrumInfo`` object.
 	# Get the SpectrumInfo object
 	info = ws.spectrumInfo()
 	print(type(info))
+
+Output:
+
+.. testoutput:: CreateSpectrumInfoObject
+
+	<class 'mantid.api._api.SpectrumInfo'>
+
 
 **Example 2 - Calling the hasDetectors Method on the SpectrumInfo Object:**
 This example shows how to call the ``hasDetectors`` method.
@@ -49,6 +56,13 @@ The return value is True or False.
 	# Call hasDetectors
 	print(info.hasDetectors(0))
 
+Output:
+
+.. testoutput:: CallHasDetectorsMethod
+
+	True
+
+
 **Example 3 - Calling the l1 Method on the SpectrumInfo Object:**
 The ``l1()`` method does not take in any parameters and returns the distance from the source to the sample.
 The return value is a float.
@@ -64,9 +78,16 @@ The return value is a float.
 	# Call l1
 	print(info.l1())
 
+Output:
+
+.. testoutput:: CallL1Method
+
+	10.0
+
+
 **Example 4 - Calling the sourcePosition method on the SpectrumInfo Object:**
 The ``sourcePosition()`` method does not take any parameters and returns the absolute source position. 
-The return value is a ``V3D`` object which gives a position in 3D space.
+The return value is a ``V3D`` object which is a position in 3D space.
 
 .. testcode:: CallSourcePositionMethod
 	
@@ -77,7 +98,14 @@ The return value is a ``V3D`` object which gives a position in 3D space.
 	info = ws.spectrumInfo()
 
 	# Call sourcePosition
-	print(type(info.sourcePosition()))
+	print(info.sourcePosition())
+
+Output:
+
+.. testoutput:: CallSourcePositionMethod
+
+	[0,0,-10]
+
 
 **Example 5 - Retrieving SpectrumDefinition Objects from a SpectrumInfo Object:**
 The ``getAllSpectrumDefinitions()`` method does not take in any parameters and returns a list of ``SpectrumDefinition``s. 
@@ -93,30 +121,14 @@ The returned list can then be indexed into to obtain specific ``SpectrumDefiniti
 
 	# Get the SpectrumDefinition objects
 	allSpectrumDefinitions = info.getAllSpectrumDefinitions()
-	print(type(allSpectrumDefinitions))
+	print(len(allSpectrumDefinitions))
 	print(type(allSpectrumDefinitions[0]))
 
 Output:
 
-.. testoutput:: CreateSpectrumInfoObject
-
-	<class 'mantid.api._api.SpectrumInfo'>
-
-.. testoutput:: CallHasDetectorsMethod
-
-	True
-
-.. testoutput:: CallL1Method
-
-	10.0
-
-.. testoutput:: CallSourcePositionMethod
-
-	<class 'mantid.kernel._kernel.V3D'>
-
 .. testoutput:: CallGetAllSpectrumDefinitionsMethod
-
-	<class 'list'>
+	
+	200
 	<class 'mantid.api._api.SpectrumDefinition'>
 
 
