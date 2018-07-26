@@ -9,8 +9,8 @@ from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import Periodi
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
 from Muon.GUI.Common import message_box
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel
-from Muon.GUI.ElementalAnalysis.LoadWidget.load_view import LoadView
-from Muon.GUI.ElementalAnalysis.LoadWidget.load_presenter import LoadPresenter
+from Muon.GUI.Common.load_widget.load_view import LoadView
+from Muon.GUI.Common.load_widget.load_presenter import LoadPresenter
 
 
 class ElementalAnalysisGui(QtGui.QMainWindow):

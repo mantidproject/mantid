@@ -50,7 +50,8 @@ class LoadPresenter(object):
 
     def end_thread(self):
         self.enable_buttons()
-        self.thread.threadWrapperTearDown(self.disable_buttons, self.end_thread)
+        self.thread.threadWrapperTearDown(
+            self.disable_buttons, self.end_thread)
         self.thread.deleteLater()
         self.thread = None
 
