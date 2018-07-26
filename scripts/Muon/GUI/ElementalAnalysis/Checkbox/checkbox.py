@@ -1,6 +1,5 @@
-from functools import partial
-
 from PyQt4 import QtCore, QtGui
+
 
 class Checkbox(QtGui.QCheckBox):
     checked = QtCore.pyqtSignal(object)
@@ -15,7 +14,7 @@ class Checkbox(QtGui.QCheckBox):
         if state == 2:
             self.checked.emit(self)
         elif state == 1:
-            pass # partially checked; not implemented, future...?
+            pass  # partially checked; not implemented, future...?
         elif not state:
             self.unchecked.emit(self)
 
@@ -24,7 +23,7 @@ class Checkbox(QtGui.QCheckBox):
 
     def on_checkbox_unchecked(self, slot):
         self.unchecked.connect(slot)
-    
+
     def unreg_on_checkbox_checked(self, slot):
         try:
             self.checked.disconnect(slot)
