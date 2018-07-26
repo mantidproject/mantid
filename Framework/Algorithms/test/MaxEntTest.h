@@ -338,7 +338,7 @@ public:
     linAdjVal[0] = 1.0;
     linAdjVal[1] = 1.0;
     linAdjVal[2] = 1.0;
-    linAdjVal[6] = 1.0;
+    linAdjVal[3] = 1.0;
     linAdjVal[10] = 2.0;
     linAdjVal[11] = 2.0;
     auto linAdj = createWorkspaceWithYValues(4, 3, linAdjVal);
@@ -379,8 +379,8 @@ public:
     TS_ASSERT_DELTA(data->y(1)[1], -2.0*data->y(2)[1], 0.001);
     TS_ASSERT_DELTA(data->y(3)[1],  2.0*data->y(0)[1], 0.001);
     // linear 2i, const 1-i
-    TS_ASSERT_DELTA(data->y(1)[2], data->y(0)[2] + 1.0 - 2.0*data->y(2)[2], 0.001);
-    TS_ASSERT_DELTA(data->y(3)[2], data->y(2)[2] - 1.0 + 2.0*data->y(0)[2], 0.001);
+    TS_ASSERT_DELTA(data->y(1)[2], -2.0*data->y(2)[2] + 1.0, 0.001);
+    TS_ASSERT_DELTA(data->y(3)[2],  2.0*data->y(0)[2] - 1.0, 0.001);
   }
 
   void test_cosine() {
