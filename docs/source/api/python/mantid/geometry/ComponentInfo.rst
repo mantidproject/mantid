@@ -7,14 +7,14 @@ This is a python binding to the C++ class Mantid::Geometry::ComponentInfo.
 --------
 Purpose
 --------
-The purpose of the ``ComponentInfo`` object is to allow the user to access geometric information about the components which are part of a beamline. A component is any physical item or group of items that is registered for the purpose of data reduction. The ``ComponentInfo`` object can be used to access information such as the total number of components in the beamline, the absolute position of a component as well as the absolute rotation of a component.
+The purpose of the ``ComponentInfo`` object is to allow the user to access geometric information about the components which are part of a beamline. A component is any physical item or group of items that is registered for the purpose of data reduction. The ``ComponentInfo`` object can be used to access information such as the total number of components in the beamline, the absolute position of a component as well as the absolute rotation of a component. ``ComponentInfo`` provides tree like access to the beamline including all the detectors.
 
-Many users may need this extra information so that they can have a better understanding of the beamline they are using and the components that make up the beamline - e.g. detectors. This extra information is easy and fast to access.
+Many users may need this extra information so that they can have a better understanding of the beamline they are using and the components that make up the beamline - e.g. detectors, banks, choppers. This extra information is easy and fast to access.
 
 ComponentInfo is one of three objects that the user can gain access to from a workspace. 
 The other two are:
- * ``SpectrumInfo``
- * ``DetectorInfo``
+  * ``SpectrumInfo``
+  * ``DetectorInfo``
 
 ---------
 Indexing 
@@ -30,7 +30,7 @@ Usage
 
 **Example 1 - Creating a ComponentInfo Object:**
 This example shows how to obtain a ``ComponentInfo`` object from a workspace object.
-The return value is a ``ComponentInfo`` object.
+The return value is a ``ComponentInfo`` object. 
 
 .. testcode:: CreateComponentInfoObject
 	
