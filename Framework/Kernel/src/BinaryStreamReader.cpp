@@ -309,5 +309,13 @@ BinaryStreamReader::read(Kernel::Matrix<double> &value,
   return *this;
 }
 
+/**
+ * Will move the stream to the given position 
+ * @param nbytes The number of bytes from position 0 to move
+ */
+void BinaryStreamReader::moveStreamToPosition(size_t nbytes) {
+  m_istrm.seekg(nbytes, std::ios_base::beg);
+}
+
 } // namespace Kernel
 } // namespace Mantid

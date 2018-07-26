@@ -83,6 +83,8 @@ public:
                            MatrixOrdering order);
   /// @}
 
+  /// Move the stream to nbytes past the beginning of the file
+  void moveStreamToPosition(size_t nbytes);
 private:
   /// Reference to the stream being read
   std::istream &m_istrm;
