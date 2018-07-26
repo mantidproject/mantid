@@ -83,7 +83,7 @@ AlgorithmDialog *InterfaceManager::createDialog(
   // Work around to ensure that floating windows remain on top of the main
   // application window, but below other applications on Mac
   // Note: Qt::Tool cannot have both a max and min button on OSX
-  flags = 0;
+  flags = nullptr;
   flags |= Qt::Tool;
   flags |= Qt::CustomizeWindowHint;
   flags |= Qt::WindowMinimizeButtonHint;

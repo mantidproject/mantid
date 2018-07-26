@@ -798,14 +798,14 @@ soap_instantiate_ns1__elementType_(struct soap *, int, const char *,
 
 inline ns1__elementType_ *soap_new_ns1__elementType_(struct soap *soap,
                                                      int n = -1) {
-  return soap_instantiate_ns1__elementType_(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__elementType_(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__elementType_ *
 soap_new_req_ns1__elementType_(struct soap *soap,
                                enum ns1__elementType __item) {
   ns1__elementType_ *_p =
-      soap_instantiate_ns1__elementType_(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__elementType_(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__elementType_::__item = __item;
@@ -817,7 +817,7 @@ inline ns1__elementType_ *
 soap_new_set_ns1__elementType_(struct soap *soap, enum ns1__elementType __item,
                                char *__item1) {
   ns1__elementType_ *_p =
-      soap_instantiate_ns1__elementType_(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__elementType_(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__elementType_::__item = __item;
@@ -873,14 +873,15 @@ soap_instantiate_ns1__parameterType_(struct soap *, int, const char *,
 
 inline ns1__parameterType_ *soap_new_ns1__parameterType_(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__parameterType_(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__parameterType_(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__parameterType_ *
 soap_new_req_ns1__parameterType_(struct soap *soap,
                                  enum ns1__parameterType __item) {
   ns1__parameterType_ *_p =
-      soap_instantiate_ns1__parameterType_(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__parameterType_(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__parameterType_::__item = __item;
@@ -891,7 +892,7 @@ soap_new_req_ns1__parameterType_(struct soap *soap,
 inline ns1__parameterType_ *soap_new_set_ns1__parameterType_(
     struct soap *soap, enum ns1__parameterType __item, char *__item1) {
   ns1__parameterType_ *_p =
-      soap_instantiate_ns1__parameterType_(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__parameterType_(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__parameterType_::__item = __item;
@@ -946,14 +947,14 @@ soap_instantiate_ns1__keywordType_(struct soap *, int, const char *,
 
 inline ns1__keywordType_ *soap_new_ns1__keywordType_(struct soap *soap,
                                                      int n = -1) {
-  return soap_instantiate_ns1__keywordType_(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__keywordType_(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__keywordType_ *
 soap_new_req_ns1__keywordType_(struct soap *soap,
                                enum ns1__keywordType __item) {
   ns1__keywordType_ *_p =
-      soap_instantiate_ns1__keywordType_(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__keywordType_(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__keywordType_::__item = __item;
@@ -965,7 +966,7 @@ inline ns1__keywordType_ *
 soap_new_set_ns1__keywordType_(struct soap *soap, enum ns1__keywordType __item,
                                char *__item1) {
   ns1__keywordType_ *_p =
-      soap_instantiate_ns1__keywordType_(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__keywordType_(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__keywordType_::__item = __item;
@@ -1022,14 +1023,15 @@ soap_instantiate_ns1__comparisonOperator_(struct soap *, int, const char *,
 
 inline ns1__comparisonOperator_ *
 soap_new_ns1__comparisonOperator_(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__comparisonOperator_(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__comparisonOperator_(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__comparisonOperator_ *
 soap_new_req_ns1__comparisonOperator_(struct soap *soap,
                                       enum ns1__comparisonOperator __item) {
-  ns1__comparisonOperator_ *_p =
-      soap_instantiate_ns1__comparisonOperator_(soap, -1, NULL, NULL, NULL);
+  ns1__comparisonOperator_ *_p = soap_instantiate_ns1__comparisonOperator_(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__comparisonOperator_::__item = __item;
@@ -1039,8 +1041,8 @@ soap_new_req_ns1__comparisonOperator_(struct soap *soap,
 
 inline ns1__comparisonOperator_ *soap_new_set_ns1__comparisonOperator_(
     struct soap *soap, enum ns1__comparisonOperator __item, char *__item1) {
-  ns1__comparisonOperator_ *_p =
-      soap_instantiate_ns1__comparisonOperator_(soap, -1, NULL, NULL, NULL);
+  ns1__comparisonOperator_ *_p = soap_instantiate_ns1__comparisonOperator_(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__comparisonOperator_::__item = __item;
@@ -1097,14 +1099,15 @@ soap_instantiate_ns1__parameterValueType_(struct soap *, int, const char *,
 
 inline ns1__parameterValueType_ *
 soap_new_ns1__parameterValueType_(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__parameterValueType_(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__parameterValueType_(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__parameterValueType_ *
 soap_new_req_ns1__parameterValueType_(struct soap *soap,
                                       enum ns1__parameterValueType __item) {
-  ns1__parameterValueType_ *_p =
-      soap_instantiate_ns1__parameterValueType_(soap, -1, NULL, NULL, NULL);
+  ns1__parameterValueType_ *_p = soap_instantiate_ns1__parameterValueType_(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__parameterValueType_::__item = __item;
@@ -1114,8 +1117,8 @@ soap_new_req_ns1__parameterValueType_(struct soap *soap,
 
 inline ns1__parameterValueType_ *soap_new_set_ns1__parameterValueType_(
     struct soap *soap, enum ns1__parameterValueType __item, char *__item1) {
-  ns1__parameterValueType_ *_p =
-      soap_instantiate_ns1__parameterValueType_(soap, -1, NULL, NULL, NULL);
+  ns1__parameterValueType_ *_p = soap_instantiate_ns1__parameterValueType_(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__parameterValueType_::__item = __item;
@@ -1171,14 +1174,15 @@ soap_instantiate_ns1__sampleInclude_(struct soap *, int, const char *,
 
 inline ns1__sampleInclude_ *soap_new_ns1__sampleInclude_(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__sampleInclude_(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__sampleInclude_(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__sampleInclude_ *
 soap_new_req_ns1__sampleInclude_(struct soap *soap,
                                  enum ns1__sampleInclude __item) {
   ns1__sampleInclude_ *_p =
-      soap_instantiate_ns1__sampleInclude_(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__sampleInclude_(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__sampleInclude_::__item = __item;
@@ -1189,7 +1193,7 @@ soap_new_req_ns1__sampleInclude_(struct soap *soap,
 inline ns1__sampleInclude_ *soap_new_set_ns1__sampleInclude_(
     struct soap *soap, enum ns1__sampleInclude __item, char *__item1) {
   ns1__sampleInclude_ *_p =
-      soap_instantiate_ns1__sampleInclude_(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__sampleInclude_(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__sampleInclude_::__item = __item;
@@ -1248,14 +1252,15 @@ soap_instantiate_ns1__restrictionAttributes_(struct soap *, int, const char *,
 
 inline ns1__restrictionAttributes_ *
 soap_new_ns1__restrictionAttributes_(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__restrictionAttributes_(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__restrictionAttributes_(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__restrictionAttributes_ *soap_new_req_ns1__restrictionAttributes_(
     struct soap *soap, enum ns1__restrictionAttributes __item) {
   ns1__restrictionAttributes_ *_p =
-      soap_instantiate_ns1__restrictionAttributes_(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__restrictionAttributes_(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__restrictionAttributes_::__item = __item;
@@ -1266,7 +1271,8 @@ inline ns1__restrictionAttributes_ *soap_new_req_ns1__restrictionAttributes_(
 inline ns1__restrictionAttributes_ *soap_new_set_ns1__restrictionAttributes_(
     struct soap *soap, enum ns1__restrictionAttributes __item, char *__item1) {
   ns1__restrictionAttributes_ *_p =
-      soap_instantiate_ns1__restrictionAttributes_(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__restrictionAttributes_(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__restrictionAttributes_::__item = __item;
@@ -1324,14 +1330,15 @@ soap_instantiate_ns1__investigationInclude_(struct soap *, int, const char *,
 
 inline ns1__investigationInclude_ *
 soap_new_ns1__investigationInclude_(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__investigationInclude_(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__investigationInclude_(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline ns1__investigationInclude_ *
 soap_new_req_ns1__investigationInclude_(struct soap *soap,
                                         enum ns1__investigationInclude __item) {
-  ns1__investigationInclude_ *_p =
-      soap_instantiate_ns1__investigationInclude_(soap, -1, NULL, NULL, NULL);
+  ns1__investigationInclude_ *_p = soap_instantiate_ns1__investigationInclude_(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__investigationInclude_::__item = __item;
@@ -1341,8 +1348,8 @@ soap_new_req_ns1__investigationInclude_(struct soap *soap,
 
 inline ns1__investigationInclude_ *soap_new_set_ns1__investigationInclude_(
     struct soap *soap, enum ns1__investigationInclude __item, char *__item1) {
-  ns1__investigationInclude_ *_p =
-      soap_instantiate_ns1__investigationInclude_(soap, -1, NULL, NULL, NULL);
+  ns1__investigationInclude_ *_p = soap_instantiate_ns1__investigationInclude_(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__investigationInclude_::__item = __item;
@@ -1399,14 +1406,15 @@ soap_instantiate_ns1__datasetInclude_(struct soap *, int, const char *,
 
 inline ns1__datasetInclude_ *soap_new_ns1__datasetInclude_(struct soap *soap,
                                                            int n = -1) {
-  return soap_instantiate_ns1__datasetInclude_(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__datasetInclude_(soap, n, nullptr, nullptr,
+                                               nullptr);
 }
 
 inline ns1__datasetInclude_ *
 soap_new_req_ns1__datasetInclude_(struct soap *soap,
                                   enum ns1__datasetInclude __item) {
-  ns1__datasetInclude_ *_p =
-      soap_instantiate_ns1__datasetInclude_(soap, -1, NULL, NULL, NULL);
+  ns1__datasetInclude_ *_p = soap_instantiate_ns1__datasetInclude_(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__datasetInclude_::__item = __item;
@@ -1416,8 +1424,8 @@ soap_new_req_ns1__datasetInclude_(struct soap *soap,
 
 inline ns1__datasetInclude_ *soap_new_set_ns1__datasetInclude_(
     struct soap *soap, enum ns1__datasetInclude __item, char *__item1) {
-  ns1__datasetInclude_ *_p =
-      soap_instantiate_ns1__datasetInclude_(soap, -1, NULL, NULL, NULL);
+  ns1__datasetInclude_ *_p = soap_instantiate_ns1__datasetInclude_(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__datasetInclude_::__item = __item;
@@ -1473,14 +1481,15 @@ soap_instantiate_ns1__datafileInclude_(struct soap *, int, const char *,
 
 inline ns1__datafileInclude_ *soap_new_ns1__datafileInclude_(struct soap *soap,
                                                              int n = -1) {
-  return soap_instantiate_ns1__datafileInclude_(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__datafileInclude_(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline ns1__datafileInclude_ *
 soap_new_req_ns1__datafileInclude_(struct soap *soap,
                                    enum ns1__datafileInclude __item) {
-  ns1__datafileInclude_ *_p =
-      soap_instantiate_ns1__datafileInclude_(soap, -1, NULL, NULL, NULL);
+  ns1__datafileInclude_ *_p = soap_instantiate_ns1__datafileInclude_(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__datafileInclude_::__item = __item;
@@ -1490,8 +1499,8 @@ soap_new_req_ns1__datafileInclude_(struct soap *soap,
 
 inline ns1__datafileInclude_ *soap_new_set_ns1__datafileInclude_(
     struct soap *soap, enum ns1__datafileInclude __item, char *__item1) {
-  ns1__datafileInclude_ *_p =
-      soap_instantiate_ns1__datafileInclude_(soap, -1, NULL, NULL, NULL);
+  ns1__datafileInclude_ *_p = soap_instantiate_ns1__datafileInclude_(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__datafileInclude_::__item = __item;
@@ -1547,14 +1556,15 @@ soap_instantiate_ns1__logicalOperator_(struct soap *, int, const char *,
 
 inline ns1__logicalOperator_ *soap_new_ns1__logicalOperator_(struct soap *soap,
                                                              int n = -1) {
-  return soap_instantiate_ns1__logicalOperator_(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__logicalOperator_(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline ns1__logicalOperator_ *
 soap_new_req_ns1__logicalOperator_(struct soap *soap,
                                    enum ns1__logicalOperator __item) {
-  ns1__logicalOperator_ *_p =
-      soap_instantiate_ns1__logicalOperator_(soap, -1, NULL, NULL, NULL);
+  ns1__logicalOperator_ *_p = soap_instantiate_ns1__logicalOperator_(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__logicalOperator_::__item = __item;
@@ -1564,8 +1574,8 @@ soap_new_req_ns1__logicalOperator_(struct soap *soap,
 
 inline ns1__logicalOperator_ *soap_new_set_ns1__logicalOperator_(
     struct soap *soap, enum ns1__logicalOperator __item, char *__item1) {
-  ns1__logicalOperator_ *_p =
-      soap_instantiate_ns1__logicalOperator_(soap, -1, NULL, NULL, NULL);
+  ns1__logicalOperator_ *_p = soap_instantiate_ns1__logicalOperator_(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__logicalOperator_::__item = __item;
@@ -1622,13 +1632,14 @@ soap_instantiate_ns3__NoSuchUserException(struct soap *, int, const char *,
 
 inline ns3__NoSuchUserException *
 soap_new_ns3__NoSuchUserException(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns3__NoSuchUserException(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns3__NoSuchUserException(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns3__NoSuchUserException *
 soap_new_req_ns3__NoSuchUserException(struct soap *soap) {
-  ns3__NoSuchUserException *_p =
-      soap_instantiate_ns3__NoSuchUserException(soap, -1, NULL, NULL, NULL);
+  ns3__NoSuchUserException *_p = soap_instantiate_ns3__NoSuchUserException(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -1639,8 +1650,8 @@ inline ns3__NoSuchUserException *
 soap_new_set_ns3__NoSuchUserException(struct soap *soap, std::string *message,
                                       std::string *stackTraceAsString,
                                       std::string *uniqueId, char *__item1) {
-  ns3__NoSuchUserException *_p =
-      soap_instantiate_ns3__NoSuchUserException(soap, -1, NULL, NULL, NULL);
+  ns3__NoSuchUserException *_p = soap_instantiate_ns3__NoSuchUserException(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns3__NoSuchUserException::message = message;
@@ -1701,14 +1712,15 @@ soap_instantiate_ns3__getUserDetailsResponse(struct soap *, int, const char *,
 
 inline ns3__getUserDetailsResponse *
 soap_new_ns3__getUserDetailsResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns3__getUserDetailsResponse(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns3__getUserDetailsResponse(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns3__getUserDetailsResponse *
 soap_new_req_ns3__getUserDetailsResponse(struct soap *soap) {
   ns3__getUserDetailsResponse *_p =
-      soap_instantiate_ns3__getUserDetailsResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns3__getUserDetailsResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -1718,7 +1730,8 @@ soap_new_req_ns3__getUserDetailsResponse(struct soap *soap) {
 inline ns3__getUserDetailsResponse *soap_new_set_ns3__getUserDetailsResponse(
     struct soap *soap, ns1__userDetails *return_, char *__item1) {
   ns3__getUserDetailsResponse *_p =
-      soap_instantiate_ns3__getUserDetailsResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns3__getUserDetailsResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns3__getUserDetailsResponse::return_ = return_;
@@ -1775,13 +1788,14 @@ soap_instantiate_ns3__getUserDetails(struct soap *, int, const char *,
 
 inline ns3__getUserDetails *soap_new_ns3__getUserDetails(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns3__getUserDetails(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns3__getUserDetails(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns3__getUserDetails *
 soap_new_req_ns3__getUserDetails(struct soap *soap) {
   ns3__getUserDetails *_p =
-      soap_instantiate_ns3__getUserDetails(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns3__getUserDetails(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -1792,7 +1806,7 @@ inline ns3__getUserDetails *
 soap_new_set_ns3__getUserDetails(struct soap *soap, std::string *sessionId,
                                  std::string *usersName, char *__item1) {
   ns3__getUserDetails *_p =
-      soap_instantiate_ns3__getUserDetails(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns3__getUserDetails(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns3__getUserDetails::sessionId = sessionId;
@@ -1850,13 +1864,14 @@ soap_instantiate_ns3__ValidationException(struct soap *, int, const char *,
 
 inline ns3__ValidationException *
 soap_new_ns3__ValidationException(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns3__ValidationException(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns3__ValidationException(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns3__ValidationException *
 soap_new_req_ns3__ValidationException(struct soap *soap) {
-  ns3__ValidationException *_p =
-      soap_instantiate_ns3__ValidationException(soap, -1, NULL, NULL, NULL);
+  ns3__ValidationException *_p = soap_instantiate_ns3__ValidationException(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -1867,8 +1882,8 @@ inline ns3__ValidationException *
 soap_new_set_ns3__ValidationException(struct soap *soap, std::string *message,
                                       std::string *stackTraceAsString,
                                       std::string *uniqueId, char *__item1) {
-  ns3__ValidationException *_p =
-      soap_instantiate_ns3__ValidationException(soap, -1, NULL, NULL, NULL);
+  ns3__ValidationException *_p = soap_instantiate_ns3__ValidationException(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns3__ValidationException::message = message;
@@ -1930,15 +1945,15 @@ soap_instantiate_ns3__NoSuchObjectFoundException(struct soap *, int,
 
 inline ns3__NoSuchObjectFoundException *
 soap_new_ns3__NoSuchObjectFoundException(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns3__NoSuchObjectFoundException(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate_ns3__NoSuchObjectFoundException(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline ns3__NoSuchObjectFoundException *
 soap_new_req_ns3__NoSuchObjectFoundException(struct soap *soap) {
   ns3__NoSuchObjectFoundException *_p =
-      soap_instantiate_ns3__NoSuchObjectFoundException(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns3__NoSuchObjectFoundException(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -1952,8 +1967,8 @@ soap_new_set_ns3__NoSuchObjectFoundException(struct soap *soap,
                                              std::string *uniqueId,
                                              char *__item1) {
   ns3__NoSuchObjectFoundException *_p =
-      soap_instantiate_ns3__NoSuchObjectFoundException(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns3__NoSuchObjectFoundException(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns3__NoSuchObjectFoundException::message = message;
@@ -2012,13 +2027,14 @@ soap_instantiate_ns3__SessionException(struct soap *, int, const char *,
 
 inline ns3__SessionException *soap_new_ns3__SessionException(struct soap *soap,
                                                              int n = -1) {
-  return soap_instantiate_ns3__SessionException(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns3__SessionException(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline ns3__SessionException *
 soap_new_req_ns3__SessionException(struct soap *soap) {
-  ns3__SessionException *_p =
-      soap_instantiate_ns3__SessionException(soap, -1, NULL, NULL, NULL);
+  ns3__SessionException *_p = soap_instantiate_ns3__SessionException(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -2029,8 +2045,8 @@ inline ns3__SessionException *
 soap_new_set_ns3__SessionException(struct soap *soap, std::string *message,
                                    std::string *stackTraceAsString,
                                    std::string *uniqueId, char *__item1) {
-  ns3__SessionException *_p =
-      soap_instantiate_ns3__SessionException(soap, -1, NULL, NULL, NULL);
+  ns3__SessionException *_p = soap_instantiate_ns3__SessionException(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns3__SessionException::message = message;
@@ -2101,7 +2117,7 @@ inline ns1__searchInvestigationByRestrictionComparasionResponse *
 soap_new_ns1__searchInvestigationByRestrictionComparasionResponse(
     struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__searchInvestigationByRestrictionComparasionResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchInvestigationByRestrictionComparasionResponse *
@@ -2109,7 +2125,7 @@ soap_new_req_ns1__searchInvestigationByRestrictionComparasionResponse(
     struct soap *soap) {
   ns1__searchInvestigationByRestrictionComparasionResponse *_p =
       soap_instantiate_ns1__searchInvestigationByRestrictionComparasionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -2121,7 +2137,7 @@ soap_new_set_ns1__searchInvestigationByRestrictionComparasionResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchInvestigationByRestrictionComparasionResponse *_p =
       soap_instantiate_ns1__searchInvestigationByRestrictionComparasionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchInvestigationByRestrictionComparasionResponse::return_ =
@@ -2188,7 +2204,7 @@ inline ns1__searchInvestigationByRestrictionComparasion *
 soap_new_ns1__searchInvestigationByRestrictionComparasion(struct soap *soap,
                                                           int n = -1) {
   return soap_instantiate_ns1__searchInvestigationByRestrictionComparasion(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchInvestigationByRestrictionComparasion *
@@ -2196,7 +2212,7 @@ soap_new_req_ns1__searchInvestigationByRestrictionComparasion(
     struct soap *soap) {
   ns1__searchInvestigationByRestrictionComparasion *_p =
       soap_instantiate_ns1__searchInvestigationByRestrictionComparasion(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -2210,7 +2226,7 @@ soap_new_set_ns1__searchInvestigationByRestrictionComparasion(
     char *__item1) {
   ns1__searchInvestigationByRestrictionComparasion *_p =
       soap_instantiate_ns1__searchInvestigationByRestrictionComparasion(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchInvestigationByRestrictionComparasion::sessionId = sessionId;
@@ -2271,13 +2287,14 @@ soap_instantiate_ns1__getDatasetsResponse(struct soap *, int, const char *,
 
 inline ns1__getDatasetsResponse *
 soap_new_ns1__getDatasetsResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getDatasetsResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getDatasetsResponse(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__getDatasetsResponse *
 soap_new_req_ns1__getDatasetsResponse(struct soap *soap) {
-  ns1__getDatasetsResponse *_p =
-      soap_instantiate_ns1__getDatasetsResponse(soap, -1, NULL, NULL, NULL);
+  ns1__getDatasetsResponse *_p = soap_instantiate_ns1__getDatasetsResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -2286,8 +2303,8 @@ soap_new_req_ns1__getDatasetsResponse(struct soap *soap) {
 
 inline ns1__getDatasetsResponse *soap_new_set_ns1__getDatasetsResponse(
     struct soap *soap, std::vector<ns1__dataset *> &return_, char *__item1) {
-  ns1__getDatasetsResponse *_p =
-      soap_instantiate_ns1__getDatasetsResponse(soap, -1, NULL, NULL, NULL);
+  ns1__getDatasetsResponse *_p = soap_instantiate_ns1__getDatasetsResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getDatasetsResponse::return_ = return_;
@@ -2342,12 +2359,12 @@ soap_instantiate_ns1__getDatasets(struct soap *, int, const char *,
 
 inline ns1__getDatasets *soap_new_ns1__getDatasets(struct soap *soap,
                                                    int n = -1) {
-  return soap_instantiate_ns1__getDatasets(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getDatasets(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getDatasets *soap_new_req_ns1__getDatasets(struct soap *soap) {
   ns1__getDatasets *_p =
-      soap_instantiate_ns1__getDatasets(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getDatasets(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -2358,7 +2375,7 @@ inline ns1__getDatasets *
 soap_new_set_ns1__getDatasets(struct soap *soap, std::string *sessionId,
                               std::vector<LONG64> &datasetIds, char *__item1) {
   ns1__getDatasets *_p =
-      soap_instantiate_ns1__getDatasets(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getDatasets(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getDatasets::sessionId = sessionId;
@@ -2419,15 +2436,15 @@ soap_instantiate_ns1__modifyDataFileParameterResponse(struct soap *, int,
 
 inline ns1__modifyDataFileParameterResponse *
 soap_new_ns1__modifyDataFileParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__modifyDataFileParameterResponse(soap, n, NULL,
-                                                               NULL, NULL);
+  return soap_instantiate_ns1__modifyDataFileParameterResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__modifyDataFileParameterResponse *
 soap_new_req_ns1__modifyDataFileParameterResponse(struct soap *soap) {
   ns1__modifyDataFileParameterResponse *_p =
-      soap_instantiate_ns1__modifyDataFileParameterResponse(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__modifyDataFileParameterResponse(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -2438,8 +2455,8 @@ inline ns1__modifyDataFileParameterResponse *
 soap_new_set_ns1__modifyDataFileParameterResponse(struct soap *soap,
                                                   char *__item1) {
   ns1__modifyDataFileParameterResponse *_p =
-      soap_instantiate_ns1__modifyDataFileParameterResponse(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__modifyDataFileParameterResponse(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -2498,14 +2515,15 @@ soap_instantiate_ns1__modifyDataFileParameter(struct soap *, int, const char *,
 
 inline ns1__modifyDataFileParameter *
 soap_new_ns1__modifyDataFileParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__modifyDataFileParameter(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate_ns1__modifyDataFileParameter(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline ns1__modifyDataFileParameter *
 soap_new_req_ns1__modifyDataFileParameter(struct soap *soap) {
   ns1__modifyDataFileParameter *_p =
-      soap_instantiate_ns1__modifyDataFileParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__modifyDataFileParameter(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -2516,7 +2534,8 @@ inline ns1__modifyDataFileParameter *soap_new_set_ns1__modifyDataFileParameter(
     struct soap *soap, std::string *sessionId,
     ns1__datafileParameter *dataFileParameter, char *__item1) {
   ns1__modifyDataFileParameter *_p =
-      soap_instantiate_ns1__modifyDataFileParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__modifyDataFileParameter(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__modifyDataFileParameter::sessionId = sessionId;
@@ -2577,14 +2596,15 @@ soap_instantiate_ns1__listParametersResponse(struct soap *, int, const char *,
 
 inline ns1__listParametersResponse *
 soap_new_ns1__listParametersResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__listParametersResponse(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__listParametersResponse(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__listParametersResponse *
 soap_new_req_ns1__listParametersResponse(struct soap *soap) {
   ns1__listParametersResponse *_p =
-      soap_instantiate_ns1__listParametersResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__listParametersResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -2594,7 +2614,8 @@ soap_new_req_ns1__listParametersResponse(struct soap *soap) {
 inline ns1__listParametersResponse *soap_new_set_ns1__listParametersResponse(
     struct soap *soap, std::vector<ns1__parameter *> &return_, char *__item1) {
   ns1__listParametersResponse *_p =
-      soap_instantiate_ns1__listParametersResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__listParametersResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__listParametersResponse::return_ = return_;
@@ -2651,13 +2672,14 @@ soap_instantiate_ns1__listParameters(struct soap *, int, const char *,
 
 inline ns1__listParameters *soap_new_ns1__listParameters(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__listParameters(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__listParameters(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__listParameters *
 soap_new_req_ns1__listParameters(struct soap *soap) {
   ns1__listParameters *_p =
-      soap_instantiate_ns1__listParameters(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__listParameters(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -2668,7 +2690,7 @@ inline ns1__listParameters *
 soap_new_set_ns1__listParameters(struct soap *soap, std::string *sessionId,
                                  char *__item1) {
   ns1__listParameters *_p =
-      soap_instantiate_ns1__listParameters(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__listParameters(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__listParameters::sessionId = sessionId;
@@ -2731,14 +2753,14 @@ inline ns1__searchSampleByParameterComparisonResponse *
 soap_new_ns1__searchSampleByParameterComparisonResponse(struct soap *soap,
                                                         int n = -1) {
   return soap_instantiate_ns1__searchSampleByParameterComparisonResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchSampleByParameterComparisonResponse *
 soap_new_req_ns1__searchSampleByParameterComparisonResponse(struct soap *soap) {
   ns1__searchSampleByParameterComparisonResponse *_p =
       soap_instantiate_ns1__searchSampleByParameterComparisonResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -2750,7 +2772,7 @@ soap_new_set_ns1__searchSampleByParameterComparisonResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchSampleByParameterComparisonResponse *_p =
       soap_instantiate_ns1__searchSampleByParameterComparisonResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSampleByParameterComparisonResponse::return_ = return_;
@@ -2812,15 +2834,15 @@ soap_instantiate_ns1__searchSampleByParameterComparison(struct soap *, int,
 
 inline ns1__searchSampleByParameterComparison *
 soap_new_ns1__searchSampleByParameterComparison(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchSampleByParameterComparison(soap, n, NULL,
-                                                                 NULL, NULL);
+  return soap_instantiate_ns1__searchSampleByParameterComparison(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchSampleByParameterComparison *
 soap_new_req_ns1__searchSampleByParameterComparison(struct soap *soap) {
   ns1__searchSampleByParameterComparison *_p =
-      soap_instantiate_ns1__searchSampleByParameterComparison(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate_ns1__searchSampleByParameterComparison(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -2833,8 +2855,8 @@ soap_new_set_ns1__searchSampleByParameterComparison(
     std::vector<ns1__parameterComparisonCondition *> &comparison,
     char *__item1) {
   ns1__searchSampleByParameterComparison *_p =
-      soap_instantiate_ns1__searchSampleByParameterComparison(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate_ns1__searchSampleByParameterComparison(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSampleByParameterComparison::sessionId = sessionId;
@@ -2896,15 +2918,15 @@ soap_instantiate_ns1__deleteSampleParameterResponse(struct soap *, int,
 
 inline ns1__deleteSampleParameterResponse *
 soap_new_ns1__deleteSampleParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deleteSampleParameterResponse(soap, n, NULL,
-                                                             NULL, NULL);
+  return soap_instantiate_ns1__deleteSampleParameterResponse(soap, n, nullptr,
+                                                             nullptr, nullptr);
 }
 
 inline ns1__deleteSampleParameterResponse *
 soap_new_req_ns1__deleteSampleParameterResponse(struct soap *soap) {
   ns1__deleteSampleParameterResponse *_p =
-      soap_instantiate_ns1__deleteSampleParameterResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate_ns1__deleteSampleParameterResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -2915,8 +2937,8 @@ inline ns1__deleteSampleParameterResponse *
 soap_new_set_ns1__deleteSampleParameterResponse(struct soap *soap,
                                                 char *__item1) {
   ns1__deleteSampleParameterResponse *_p =
-      soap_instantiate_ns1__deleteSampleParameterResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate_ns1__deleteSampleParameterResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -2972,13 +2994,14 @@ soap_instantiate_ns1__deleteSampleParameter(struct soap *, int, const char *,
 
 inline ns1__deleteSampleParameter *
 soap_new_ns1__deleteSampleParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deleteSampleParameter(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__deleteSampleParameter(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline ns1__deleteSampleParameter *
 soap_new_req_ns1__deleteSampleParameter(struct soap *soap) {
-  ns1__deleteSampleParameter *_p =
-      soap_instantiate_ns1__deleteSampleParameter(soap, -1, NULL, NULL, NULL);
+  ns1__deleteSampleParameter *_p = soap_instantiate_ns1__deleteSampleParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -2988,8 +3011,8 @@ soap_new_req_ns1__deleteSampleParameter(struct soap *soap) {
 inline ns1__deleteSampleParameter *soap_new_set_ns1__deleteSampleParameter(
     struct soap *soap, std::string *sessionId,
     ns1__sampleParameterPK *sampleParameterPK, char *__item1) {
-  ns1__deleteSampleParameter *_p =
-      soap_instantiate_ns1__deleteSampleParameter(soap, -1, NULL, NULL, NULL);
+  ns1__deleteSampleParameter *_p = soap_instantiate_ns1__deleteSampleParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__deleteSampleParameter::sessionId = sessionId;
@@ -3054,14 +3077,14 @@ inline ns1__searchSampleByRestrictionLogicalResponse *
 soap_new_ns1__searchSampleByRestrictionLogicalResponse(struct soap *soap,
                                                        int n = -1) {
   return soap_instantiate_ns1__searchSampleByRestrictionLogicalResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchSampleByRestrictionLogicalResponse *
 soap_new_req_ns1__searchSampleByRestrictionLogicalResponse(struct soap *soap) {
   ns1__searchSampleByRestrictionLogicalResponse *_p =
       soap_instantiate_ns1__searchSampleByRestrictionLogicalResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -3073,7 +3096,7 @@ soap_new_set_ns1__searchSampleByRestrictionLogicalResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchSampleByRestrictionLogicalResponse *_p =
       soap_instantiate_ns1__searchSampleByRestrictionLogicalResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSampleByRestrictionLogicalResponse::return_ = return_;
@@ -3134,15 +3157,15 @@ soap_instantiate_ns1__searchSampleByRestrictionLogical(struct soap *, int,
 
 inline ns1__searchSampleByRestrictionLogical *
 soap_new_ns1__searchSampleByRestrictionLogical(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchSampleByRestrictionLogical(soap, n, NULL,
-                                                                NULL, NULL);
+  return soap_instantiate_ns1__searchSampleByRestrictionLogical(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchSampleByRestrictionLogical *
 soap_new_req_ns1__searchSampleByRestrictionLogical(struct soap *soap) {
   ns1__searchSampleByRestrictionLogical *_p =
-      soap_instantiate_ns1__searchSampleByRestrictionLogical(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate_ns1__searchSampleByRestrictionLogical(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -3154,8 +3177,8 @@ soap_new_set_ns1__searchSampleByRestrictionLogical(
     struct soap *soap, std::string *sessionId,
     ns1__restrictionLogicalCondition *restriction, char *__item1) {
   ns1__searchSampleByRestrictionLogical *_p =
-      soap_instantiate_ns1__searchSampleByRestrictionLogical(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate_ns1__searchSampleByRestrictionLogical(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSampleByRestrictionLogical::sessionId = sessionId;
@@ -3216,15 +3239,15 @@ soap_instantiate_ns1__addDataFileParameterResponse(struct soap *, int,
 
 inline ns1__addDataFileParameterResponse *
 soap_new_ns1__addDataFileParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__addDataFileParameterResponse(soap, n, NULL, NULL,
-                                                            NULL);
+  return soap_instantiate_ns1__addDataFileParameterResponse(soap, n, nullptr,
+                                                            nullptr, nullptr);
 }
 
 inline ns1__addDataFileParameterResponse *
 soap_new_req_ns1__addDataFileParameterResponse(struct soap *soap) {
   ns1__addDataFileParameterResponse *_p =
-      soap_instantiate_ns1__addDataFileParameterResponse(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate_ns1__addDataFileParameterResponse(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -3236,8 +3259,8 @@ soap_new_set_ns1__addDataFileParameterResponse(struct soap *soap,
                                                ns1__datafileParameter *return_,
                                                char *__item1) {
   ns1__addDataFileParameterResponse *_p =
-      soap_instantiate_ns1__addDataFileParameterResponse(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate_ns1__addDataFileParameterResponse(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addDataFileParameterResponse::return_ = return_;
@@ -3294,13 +3317,14 @@ soap_instantiate_ns1__addDataFileParameter(struct soap *, int, const char *,
 
 inline ns1__addDataFileParameter *
 soap_new_ns1__addDataFileParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__addDataFileParameter(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__addDataFileParameter(soap, n, nullptr, nullptr,
+                                                    nullptr);
 }
 
 inline ns1__addDataFileParameter *
 soap_new_req_ns1__addDataFileParameter(struct soap *soap) {
-  ns1__addDataFileParameter *_p =
-      soap_instantiate_ns1__addDataFileParameter(soap, -1, NULL, NULL, NULL);
+  ns1__addDataFileParameter *_p = soap_instantiate_ns1__addDataFileParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -3311,8 +3335,8 @@ inline ns1__addDataFileParameter *soap_new_set_ns1__addDataFileParameter(
     struct soap *soap, std::string *sessionId,
     ns1__datafileParameter *dataFileParameter, LONG64 *datafileId,
     char *__item1) {
-  ns1__addDataFileParameter *_p =
-      soap_instantiate_ns1__addDataFileParameter(soap, -1, NULL, NULL, NULL);
+  ns1__addDataFileParameter *_p = soap_instantiate_ns1__addDataFileParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addDataFileParameter::sessionId = sessionId;
@@ -3375,15 +3399,15 @@ soap_instantiate_ns1__searchDatasetsBySampleResponse(struct soap *, int,
 
 inline ns1__searchDatasetsBySampleResponse *
 soap_new_ns1__searchDatasetsBySampleResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchDatasetsBySampleResponse(soap, n, NULL,
-                                                              NULL, NULL);
+  return soap_instantiate_ns1__searchDatasetsBySampleResponse(soap, n, nullptr,
+                                                              nullptr, nullptr);
 }
 
 inline ns1__searchDatasetsBySampleResponse *
 soap_new_req_ns1__searchDatasetsBySampleResponse(struct soap *soap) {
   ns1__searchDatasetsBySampleResponse *_p =
-      soap_instantiate_ns1__searchDatasetsBySampleResponse(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__searchDatasetsBySampleResponse(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -3394,8 +3418,8 @@ inline ns1__searchDatasetsBySampleResponse *
 soap_new_set_ns1__searchDatasetsBySampleResponse(
     struct soap *soap, std::vector<ns1__dataset *> &return_, char *__item1) {
   ns1__searchDatasetsBySampleResponse *_p =
-      soap_instantiate_ns1__searchDatasetsBySampleResponse(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__searchDatasetsBySampleResponse(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetsBySampleResponse::return_ = return_;
@@ -3454,14 +3478,15 @@ soap_instantiate_ns1__searchDatasetsBySample(struct soap *, int, const char *,
 
 inline ns1__searchDatasetsBySample *
 soap_new_ns1__searchDatasetsBySample(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchDatasetsBySample(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__searchDatasetsBySample(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__searchDatasetsBySample *
 soap_new_req_ns1__searchDatasetsBySample(struct soap *soap) {
   ns1__searchDatasetsBySample *_p =
-      soap_instantiate_ns1__searchDatasetsBySample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__searchDatasetsBySample(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -3473,7 +3498,8 @@ soap_new_set_ns1__searchDatasetsBySample(struct soap *soap,
                                          std::string *sessionId,
                                          ns1__sample *sample, char *__item1) {
   ns1__searchDatasetsBySample *_p =
-      soap_instantiate_ns1__searchDatasetsBySample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__searchDatasetsBySample(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetsBySample::sessionId = sessionId;
@@ -3535,15 +3561,15 @@ soap_instantiate_ns1__createInvestigationResponse(struct soap *, int,
 
 inline ns1__createInvestigationResponse *
 soap_new_ns1__createInvestigationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__createInvestigationResponse(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__createInvestigationResponse(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__createInvestigationResponse *
 soap_new_req_ns1__createInvestigationResponse(struct soap *soap) {
   ns1__createInvestigationResponse *_p =
-      soap_instantiate_ns1__createInvestigationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__createInvestigationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -3555,8 +3581,8 @@ soap_new_set_ns1__createInvestigationResponse(struct soap *soap,
                                               ns1__investigation *return_,
                                               char *__item1) {
   ns1__createInvestigationResponse *_p =
-      soap_instantiate_ns1__createInvestigationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__createInvestigationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__createInvestigationResponse::return_ = return_;
@@ -3613,13 +3639,14 @@ soap_instantiate_ns1__createInvestigation(struct soap *, int, const char *,
 
 inline ns1__createInvestigation *
 soap_new_ns1__createInvestigation(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__createInvestigation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__createInvestigation(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__createInvestigation *
 soap_new_req_ns1__createInvestigation(struct soap *soap) {
-  ns1__createInvestigation *_p =
-      soap_instantiate_ns1__createInvestigation(soap, -1, NULL, NULL, NULL);
+  ns1__createInvestigation *_p = soap_instantiate_ns1__createInvestigation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -3630,8 +3657,8 @@ inline ns1__createInvestigation *
 soap_new_set_ns1__createInvestigation(struct soap *soap, std::string *sessionId,
                                       ns1__investigation *ns1__investigation_,
                                       char *__item1) {
-  ns1__createInvestigation *_p =
-      soap_instantiate_ns1__createInvestigation(soap, -1, NULL, NULL, NULL);
+  ns1__createInvestigation *_p = soap_instantiate_ns1__createInvestigation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__createInvestigation::sessionId = sessionId;
@@ -3691,14 +3718,15 @@ soap_instantiate_ns1__addPublicationResponse(struct soap *, int, const char *,
 
 inline ns1__addPublicationResponse *
 soap_new_ns1__addPublicationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__addPublicationResponse(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__addPublicationResponse(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__addPublicationResponse *
 soap_new_req_ns1__addPublicationResponse(struct soap *soap) {
   ns1__addPublicationResponse *_p =
-      soap_instantiate_ns1__addPublicationResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__addPublicationResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -3708,7 +3736,8 @@ soap_new_req_ns1__addPublicationResponse(struct soap *soap) {
 inline ns1__addPublicationResponse *soap_new_set_ns1__addPublicationResponse(
     struct soap *soap, ns1__publication *return_, char *__item1) {
   ns1__addPublicationResponse *_p =
-      soap_instantiate_ns1__addPublicationResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__addPublicationResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addPublicationResponse::return_ = return_;
@@ -3765,13 +3794,14 @@ soap_instantiate_ns1__addPublication(struct soap *, int, const char *,
 
 inline ns1__addPublication *soap_new_ns1__addPublication(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__addPublication(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__addPublication(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__addPublication *
 soap_new_req_ns1__addPublication(struct soap *soap) {
   ns1__addPublication *_p =
-      soap_instantiate_ns1__addPublication(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__addPublication(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -3783,7 +3813,7 @@ soap_new_set_ns1__addPublication(struct soap *soap, std::string *sessionId,
                                  ns1__publication *publication,
                                  LONG64 *investigationId, char *__item1) {
   ns1__addPublication *_p =
-      soap_instantiate_ns1__addPublication(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__addPublication(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addPublication::sessionId = sessionId;
@@ -3845,15 +3875,15 @@ soap_instantiate_ns1__deleteDataFileParameterResponse(struct soap *, int,
 
 inline ns1__deleteDataFileParameterResponse *
 soap_new_ns1__deleteDataFileParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deleteDataFileParameterResponse(soap, n, NULL,
-                                                               NULL, NULL);
+  return soap_instantiate_ns1__deleteDataFileParameterResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__deleteDataFileParameterResponse *
 soap_new_req_ns1__deleteDataFileParameterResponse(struct soap *soap) {
   ns1__deleteDataFileParameterResponse *_p =
-      soap_instantiate_ns1__deleteDataFileParameterResponse(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__deleteDataFileParameterResponse(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -3864,8 +3894,8 @@ inline ns1__deleteDataFileParameterResponse *
 soap_new_set_ns1__deleteDataFileParameterResponse(struct soap *soap,
                                                   char *__item1) {
   ns1__deleteDataFileParameterResponse *_p =
-      soap_instantiate_ns1__deleteDataFileParameterResponse(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__deleteDataFileParameterResponse(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -3924,14 +3954,15 @@ soap_instantiate_ns1__deleteDataFileParameter(struct soap *, int, const char *,
 
 inline ns1__deleteDataFileParameter *
 soap_new_ns1__deleteDataFileParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deleteDataFileParameter(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate_ns1__deleteDataFileParameter(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline ns1__deleteDataFileParameter *
 soap_new_req_ns1__deleteDataFileParameter(struct soap *soap) {
   ns1__deleteDataFileParameter *_p =
-      soap_instantiate_ns1__deleteDataFileParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__deleteDataFileParameter(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -3942,7 +3973,8 @@ inline ns1__deleteDataFileParameter *soap_new_set_ns1__deleteDataFileParameter(
     struct soap *soap, std::string *sessionId,
     ns1__datafileParameterPK *datafileParameterPK, char *__item1) {
   ns1__deleteDataFileParameter *_p =
-      soap_instantiate_ns1__deleteDataFileParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__deleteDataFileParameter(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__deleteDataFileParameter::sessionId = sessionId;
@@ -4004,15 +4036,15 @@ soap_instantiate_ns1__getInvestigationResponse(struct soap *, int, const char *,
 
 inline ns1__getInvestigationResponse *
 soap_new_ns1__getInvestigationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getInvestigationResponse(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate_ns1__getInvestigationResponse(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline ns1__getInvestigationResponse *
 soap_new_req_ns1__getInvestigationResponse(struct soap *soap) {
   ns1__getInvestigationResponse *_p =
-      soap_instantiate_ns1__getInvestigationResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__getInvestigationResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -4024,8 +4056,8 @@ soap_new_set_ns1__getInvestigationResponse(struct soap *soap,
                                            ns1__investigation *return_,
                                            char *__item1) {
   ns1__getInvestigationResponse *_p =
-      soap_instantiate_ns1__getInvestigationResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__getInvestigationResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getInvestigationResponse::return_ = return_;
@@ -4082,13 +4114,14 @@ soap_instantiate_ns1__getInvestigation(struct soap *, int, const char *,
 
 inline ns1__getInvestigation *soap_new_ns1__getInvestigation(struct soap *soap,
                                                              int n = -1) {
-  return soap_instantiate_ns1__getInvestigation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getInvestigation(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline ns1__getInvestigation *
 soap_new_req_ns1__getInvestigation(struct soap *soap) {
-  ns1__getInvestigation *_p =
-      soap_instantiate_ns1__getInvestigation(soap, -1, NULL, NULL, NULL);
+  ns1__getInvestigation *_p = soap_instantiate_ns1__getInvestigation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -4098,8 +4131,8 @@ soap_new_req_ns1__getInvestigation(struct soap *soap) {
 inline ns1__getInvestigation *
 soap_new_set_ns1__getInvestigation(struct soap *soap, std::string *sessionId,
                                    LONG64 *investigationId, char *__item1) {
-  ns1__getInvestigation *_p =
-      soap_instantiate_ns1__getInvestigation(soap, -1, NULL, NULL, NULL);
+  ns1__getInvestigation *_p = soap_instantiate_ns1__getInvestigation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getInvestigation::sessionId = sessionId;
@@ -4160,15 +4193,15 @@ soap_instantiate_ns1__getInvestigationIncludesResponse(struct soap *, int,
 
 inline ns1__getInvestigationIncludesResponse *
 soap_new_ns1__getInvestigationIncludesResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getInvestigationIncludesResponse(soap, n, NULL,
-                                                                NULL, NULL);
+  return soap_instantiate_ns1__getInvestigationIncludesResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getInvestigationIncludesResponse *
 soap_new_req_ns1__getInvestigationIncludesResponse(struct soap *soap) {
   ns1__getInvestigationIncludesResponse *_p =
-      soap_instantiate_ns1__getInvestigationIncludesResponse(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate_ns1__getInvestigationIncludesResponse(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -4180,8 +4213,8 @@ soap_new_set_ns1__getInvestigationIncludesResponse(struct soap *soap,
                                                    ns1__investigation *return_,
                                                    char *__item1) {
   ns1__getInvestigationIncludesResponse *_p =
-      soap_instantiate_ns1__getInvestigationIncludesResponse(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate_ns1__getInvestigationIncludesResponse(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getInvestigationIncludesResponse::return_ = return_;
@@ -4241,15 +4274,15 @@ soap_instantiate_ns1__getInvestigationIncludes(struct soap *, int, const char *,
 
 inline ns1__getInvestigationIncludes *
 soap_new_ns1__getInvestigationIncludes(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getInvestigationIncludes(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate_ns1__getInvestigationIncludes(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline ns1__getInvestigationIncludes *
 soap_new_req_ns1__getInvestigationIncludes(struct soap *soap) {
   ns1__getInvestigationIncludes *_p =
-      soap_instantiate_ns1__getInvestigationIncludes(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__getInvestigationIncludes(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -4261,8 +4294,8 @@ soap_new_set_ns1__getInvestigationIncludes(
     struct soap *soap, std::string *sessionId, LONG64 *investigationId,
     enum ns1__investigationInclude *investigationInclude, char *__item1) {
   ns1__getInvestigationIncludes *_p =
-      soap_instantiate_ns1__getInvestigationIncludes(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__getInvestigationIncludes(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getInvestigationIncludes::sessionId = sessionId;
@@ -4325,14 +4358,15 @@ soap_instantiate_ns1__modifyDataFileResponse(struct soap *, int, const char *,
 
 inline ns1__modifyDataFileResponse *
 soap_new_ns1__modifyDataFileResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__modifyDataFileResponse(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__modifyDataFileResponse(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__modifyDataFileResponse *
 soap_new_req_ns1__modifyDataFileResponse(struct soap *soap) {
   ns1__modifyDataFileResponse *_p =
-      soap_instantiate_ns1__modifyDataFileResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__modifyDataFileResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -4342,7 +4376,8 @@ soap_new_req_ns1__modifyDataFileResponse(struct soap *soap) {
 inline ns1__modifyDataFileResponse *
 soap_new_set_ns1__modifyDataFileResponse(struct soap *soap, char *__item1) {
   ns1__modifyDataFileResponse *_p =
-      soap_instantiate_ns1__modifyDataFileResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__modifyDataFileResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -4398,13 +4433,14 @@ soap_instantiate_ns1__modifyDataFile(struct soap *, int, const char *,
 
 inline ns1__modifyDataFile *soap_new_ns1__modifyDataFile(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__modifyDataFile(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__modifyDataFile(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__modifyDataFile *
 soap_new_req_ns1__modifyDataFile(struct soap *soap) {
   ns1__modifyDataFile *_p =
-      soap_instantiate_ns1__modifyDataFile(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__modifyDataFile(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -4415,7 +4451,7 @@ inline ns1__modifyDataFile *
 soap_new_set_ns1__modifyDataFile(struct soap *soap, std::string *sessionId,
                                  ns1__datafile *dataFile, char *__item1) {
   ns1__modifyDataFile *_p =
-      soap_instantiate_ns1__modifyDataFile(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__modifyDataFile(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__modifyDataFile::sessionId = sessionId;
@@ -4473,13 +4509,14 @@ soap_instantiate_ns1__getDatafileResponse(struct soap *, int, const char *,
 
 inline ns1__getDatafileResponse *
 soap_new_ns1__getDatafileResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getDatafileResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getDatafileResponse(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__getDatafileResponse *
 soap_new_req_ns1__getDatafileResponse(struct soap *soap) {
-  ns1__getDatafileResponse *_p =
-      soap_instantiate_ns1__getDatafileResponse(soap, -1, NULL, NULL, NULL);
+  ns1__getDatafileResponse *_p = soap_instantiate_ns1__getDatafileResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -4489,8 +4526,8 @@ soap_new_req_ns1__getDatafileResponse(struct soap *soap) {
 inline ns1__getDatafileResponse *
 soap_new_set_ns1__getDatafileResponse(struct soap *soap, ns1__datafile *return_,
                                       char *__item1) {
-  ns1__getDatafileResponse *_p =
-      soap_instantiate_ns1__getDatafileResponse(soap, -1, NULL, NULL, NULL);
+  ns1__getDatafileResponse *_p = soap_instantiate_ns1__getDatafileResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getDatafileResponse::return_ = return_;
@@ -4545,12 +4582,12 @@ soap_instantiate_ns1__getDatafile(struct soap *, int, const char *,
 
 inline ns1__getDatafile *soap_new_ns1__getDatafile(struct soap *soap,
                                                    int n = -1) {
-  return soap_instantiate_ns1__getDatafile(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getDatafile(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getDatafile *soap_new_req_ns1__getDatafile(struct soap *soap) {
   ns1__getDatafile *_p =
-      soap_instantiate_ns1__getDatafile(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getDatafile(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -4562,7 +4599,7 @@ inline ns1__getDatafile *soap_new_set_ns1__getDatafile(struct soap *soap,
                                                        LONG64 *datafileId,
                                                        char *__item1) {
   ns1__getDatafile *_p =
-      soap_instantiate_ns1__getDatafile(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getDatafile(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getDatafile::sessionId = sessionId;
@@ -4619,13 +4656,14 @@ soap_instantiate_ns1__ICATAPIException(struct soap *, int, const char *,
 
 inline ns1__ICATAPIException *soap_new_ns1__ICATAPIException(struct soap *soap,
                                                              int n = -1) {
-  return soap_instantiate_ns1__ICATAPIException(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__ICATAPIException(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline ns1__ICATAPIException *
 soap_new_req_ns1__ICATAPIException(struct soap *soap) {
-  ns1__ICATAPIException *_p =
-      soap_instantiate_ns1__ICATAPIException(soap, -1, NULL, NULL, NULL);
+  ns1__ICATAPIException *_p = soap_instantiate_ns1__ICATAPIException(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -4636,8 +4674,8 @@ inline ns1__ICATAPIException *
 soap_new_set_ns1__ICATAPIException(struct soap *soap, std::string *message,
                                    std::string *stackTraceAsString,
                                    std::string *uniqueId, char *__item1) {
-  ns1__ICATAPIException *_p =
-      soap_instantiate_ns1__ICATAPIException(soap, -1, NULL, NULL, NULL);
+  ns1__ICATAPIException *_p = soap_instantiate_ns1__ICATAPIException(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__ICATAPIException::message = message;
@@ -4698,14 +4736,15 @@ soap_instantiate_ns1__ingestMetadataResponse(struct soap *, int, const char *,
 
 inline ns1__ingestMetadataResponse *
 soap_new_ns1__ingestMetadataResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__ingestMetadataResponse(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__ingestMetadataResponse(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__ingestMetadataResponse *
 soap_new_req_ns1__ingestMetadataResponse(struct soap *soap) {
   ns1__ingestMetadataResponse *_p =
-      soap_instantiate_ns1__ingestMetadataResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__ingestMetadataResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -4715,7 +4754,8 @@ soap_new_req_ns1__ingestMetadataResponse(struct soap *soap) {
 inline ns1__ingestMetadataResponse *soap_new_set_ns1__ingestMetadataResponse(
     struct soap *soap, std::vector<LONG64> &return_, char *__item1) {
   ns1__ingestMetadataResponse *_p =
-      soap_instantiate_ns1__ingestMetadataResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__ingestMetadataResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__ingestMetadataResponse::return_ = return_;
@@ -4772,13 +4812,14 @@ soap_instantiate_ns1__ingestMetadata(struct soap *, int, const char *,
 
 inline ns1__ingestMetadata *soap_new_ns1__ingestMetadata(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__ingestMetadata(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__ingestMetadata(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__ingestMetadata *
 soap_new_req_ns1__ingestMetadata(struct soap *soap) {
   ns1__ingestMetadata *_p =
-      soap_instantiate_ns1__ingestMetadata(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__ingestMetadata(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -4789,7 +4830,7 @@ inline ns1__ingestMetadata *
 soap_new_set_ns1__ingestMetadata(struct soap *soap, std::string *sessionId,
                                  std::string *xml, char *__item1) {
   ns1__ingestMetadata *_p =
-      soap_instantiate_ns1__ingestMetadata(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__ingestMetadata(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__ingestMetadata::sessionId = sessionId;
@@ -4853,15 +4894,15 @@ soap_instantiate_ns1__searchDatasetByRestrictionResponse(struct soap *, int,
 inline ns1__searchDatasetByRestrictionResponse *
 soap_new_ns1__searchDatasetByRestrictionResponse(struct soap *soap,
                                                  int n = -1) {
-  return soap_instantiate_ns1__searchDatasetByRestrictionResponse(soap, n, NULL,
-                                                                  NULL, NULL);
+  return soap_instantiate_ns1__searchDatasetByRestrictionResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatasetByRestrictionResponse *
 soap_new_req_ns1__searchDatasetByRestrictionResponse(struct soap *soap) {
   ns1__searchDatasetByRestrictionResponse *_p =
-      soap_instantiate_ns1__searchDatasetByRestrictionResponse(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate_ns1__searchDatasetByRestrictionResponse(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -4872,8 +4913,8 @@ inline ns1__searchDatasetByRestrictionResponse *
 soap_new_set_ns1__searchDatasetByRestrictionResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchDatasetByRestrictionResponse *_p =
-      soap_instantiate_ns1__searchDatasetByRestrictionResponse(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate_ns1__searchDatasetByRestrictionResponse(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetByRestrictionResponse::return_ = return_;
@@ -4934,15 +4975,15 @@ soap_instantiate_ns1__searchDatasetByRestriction(struct soap *, int,
 
 inline ns1__searchDatasetByRestriction *
 soap_new_ns1__searchDatasetByRestriction(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchDatasetByRestriction(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate_ns1__searchDatasetByRestriction(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline ns1__searchDatasetByRestriction *
 soap_new_req_ns1__searchDatasetByRestriction(struct soap *soap) {
   ns1__searchDatasetByRestriction *_p =
-      soap_instantiate_ns1__searchDatasetByRestriction(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__searchDatasetByRestriction(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -4954,8 +4995,8 @@ soap_new_set_ns1__searchDatasetByRestriction(
     struct soap *soap, std::string *sessionId,
     ns1__restrictionCondition *restriction, char *__item1) {
   ns1__searchDatasetByRestriction *_p =
-      soap_instantiate_ns1__searchDatasetByRestriction(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__searchDatasetByRestriction(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetByRestriction::sessionId = sessionId;
@@ -5012,13 +5053,14 @@ soap_instantiate_ns1__listRolesResponse(struct soap *, int, const char *,
 
 inline ns1__listRolesResponse *
 soap_new_ns1__listRolesResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__listRolesResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__listRolesResponse(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline ns1__listRolesResponse *
 soap_new_req_ns1__listRolesResponse(struct soap *soap) {
-  ns1__listRolesResponse *_p =
-      soap_instantiate_ns1__listRolesResponse(soap, -1, NULL, NULL, NULL);
+  ns1__listRolesResponse *_p = soap_instantiate_ns1__listRolesResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -5027,8 +5069,8 @@ soap_new_req_ns1__listRolesResponse(struct soap *soap) {
 
 inline ns1__listRolesResponse *soap_new_set_ns1__listRolesResponse(
     struct soap *soap, std::vector<ns1__icatRole *> &return_, char *__item1) {
-  ns1__listRolesResponse *_p =
-      soap_instantiate_ns1__listRolesResponse(soap, -1, NULL, NULL, NULL);
+  ns1__listRolesResponse *_p = soap_instantiate_ns1__listRolesResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__listRolesResponse::return_ = return_;
@@ -5082,12 +5124,12 @@ soap_instantiate_ns1__listRoles(struct soap *, int, const char *, const char *,
                                 size_t *);
 
 inline ns1__listRoles *soap_new_ns1__listRoles(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__listRoles(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__listRoles(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__listRoles *soap_new_req_ns1__listRoles(struct soap *soap) {
   ns1__listRoles *_p =
-      soap_instantiate_ns1__listRoles(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__listRoles(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -5098,7 +5140,7 @@ inline ns1__listRoles *soap_new_set_ns1__listRoles(struct soap *soap,
                                                    std::string *sessionId,
                                                    char *__item1) {
   ns1__listRoles *_p =
-      soap_instantiate_ns1__listRoles(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__listRoles(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__listRoles::sessionId = sessionId;
@@ -5157,15 +5199,15 @@ soap_instantiate_ns1__updateAuthorisationResponse(struct soap *, int,
 
 inline ns1__updateAuthorisationResponse *
 soap_new_ns1__updateAuthorisationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__updateAuthorisationResponse(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__updateAuthorisationResponse(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__updateAuthorisationResponse *
 soap_new_req_ns1__updateAuthorisationResponse(struct soap *soap) {
   ns1__updateAuthorisationResponse *_p =
-      soap_instantiate_ns1__updateAuthorisationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__updateAuthorisationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -5176,8 +5218,8 @@ inline ns1__updateAuthorisationResponse *
 soap_new_set_ns1__updateAuthorisationResponse(struct soap *soap,
                                               char *__item1) {
   ns1__updateAuthorisationResponse *_p =
-      soap_instantiate_ns1__updateAuthorisationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__updateAuthorisationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -5233,13 +5275,14 @@ soap_instantiate_ns1__updateAuthorisation(struct soap *, int, const char *,
 
 inline ns1__updateAuthorisation *
 soap_new_ns1__updateAuthorisation(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__updateAuthorisation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__updateAuthorisation(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__updateAuthorisation *
 soap_new_req_ns1__updateAuthorisation(struct soap *soap) {
-  ns1__updateAuthorisation *_p =
-      soap_instantiate_ns1__updateAuthorisation(soap, -1, NULL, NULL, NULL);
+  ns1__updateAuthorisation *_p = soap_instantiate_ns1__updateAuthorisation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -5250,8 +5293,8 @@ inline ns1__updateAuthorisation *
 soap_new_set_ns1__updateAuthorisation(struct soap *soap, std::string *sessionId,
                                       std::string *toChangetoRole,
                                       LONG64 *authorisationId, char *__item1) {
-  ns1__updateAuthorisation *_p =
-      soap_instantiate_ns1__updateAuthorisation(soap, -1, NULL, NULL, NULL);
+  ns1__updateAuthorisation *_p = soap_instantiate_ns1__updateAuthorisation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__updateAuthorisation::sessionId = sessionId;
@@ -5313,15 +5356,15 @@ soap_instantiate_ns1__getDatasetIncludesResponse(struct soap *, int,
 
 inline ns1__getDatasetIncludesResponse *
 soap_new_ns1__getDatasetIncludesResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getDatasetIncludesResponse(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate_ns1__getDatasetIncludesResponse(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline ns1__getDatasetIncludesResponse *
 soap_new_req_ns1__getDatasetIncludesResponse(struct soap *soap) {
   ns1__getDatasetIncludesResponse *_p =
-      soap_instantiate_ns1__getDatasetIncludesResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__getDatasetIncludesResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -5333,8 +5376,8 @@ soap_new_set_ns1__getDatasetIncludesResponse(struct soap *soap,
                                              ns1__dataset *return_,
                                              char *__item1) {
   ns1__getDatasetIncludesResponse *_p =
-      soap_instantiate_ns1__getDatasetIncludesResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__getDatasetIncludesResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getDatasetIncludesResponse::return_ = return_;
@@ -5390,13 +5433,14 @@ soap_instantiate_ns1__getDatasetIncludes(struct soap *, int, const char *,
 
 inline ns1__getDatasetIncludes *
 soap_new_ns1__getDatasetIncludes(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getDatasetIncludes(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getDatasetIncludes(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline ns1__getDatasetIncludes *
 soap_new_req_ns1__getDatasetIncludes(struct soap *soap) {
-  ns1__getDatasetIncludes *_p =
-      soap_instantiate_ns1__getDatasetIncludes(soap, -1, NULL, NULL, NULL);
+  ns1__getDatasetIncludes *_p = soap_instantiate_ns1__getDatasetIncludes(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -5406,8 +5450,8 @@ soap_new_req_ns1__getDatasetIncludes(struct soap *soap) {
 inline ns1__getDatasetIncludes *soap_new_set_ns1__getDatasetIncludes(
     struct soap *soap, std::string *sessionId, LONG64 *datasetId,
     enum ns1__datasetInclude *datasetInclude, char *__item1) {
-  ns1__getDatasetIncludes *_p =
-      soap_instantiate_ns1__getDatasetIncludes(soap, -1, NULL, NULL, NULL);
+  ns1__getDatasetIncludes *_p = soap_instantiate_ns1__getDatasetIncludes(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getDatasetIncludes::sessionId = sessionId;
@@ -5465,13 +5509,14 @@ soap_instantiate_ns1__getDatasetResponse(struct soap *, int, const char *,
 
 inline ns1__getDatasetResponse *
 soap_new_ns1__getDatasetResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getDatasetResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getDatasetResponse(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline ns1__getDatasetResponse *
 soap_new_req_ns1__getDatasetResponse(struct soap *soap) {
-  ns1__getDatasetResponse *_p =
-      soap_instantiate_ns1__getDatasetResponse(soap, -1, NULL, NULL, NULL);
+  ns1__getDatasetResponse *_p = soap_instantiate_ns1__getDatasetResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -5481,8 +5526,8 @@ soap_new_req_ns1__getDatasetResponse(struct soap *soap) {
 inline ns1__getDatasetResponse *
 soap_new_set_ns1__getDatasetResponse(struct soap *soap, ns1__dataset *return_,
                                      char *__item1) {
-  ns1__getDatasetResponse *_p =
-      soap_instantiate_ns1__getDatasetResponse(soap, -1, NULL, NULL, NULL);
+  ns1__getDatasetResponse *_p = soap_instantiate_ns1__getDatasetResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getDatasetResponse::return_ = return_;
@@ -5537,12 +5582,12 @@ soap_instantiate_ns1__getDataset(struct soap *, int, const char *, const char *,
 
 inline ns1__getDataset *soap_new_ns1__getDataset(struct soap *soap,
                                                  int n = -1) {
-  return soap_instantiate_ns1__getDataset(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getDataset(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getDataset *soap_new_req_ns1__getDataset(struct soap *soap) {
   ns1__getDataset *_p =
-      soap_instantiate_ns1__getDataset(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getDataset(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -5554,7 +5599,7 @@ inline ns1__getDataset *soap_new_set_ns1__getDataset(struct soap *soap,
                                                      LONG64 *datasetId,
                                                      char *__item1) {
   ns1__getDataset *_p =
-      soap_instantiate_ns1__getDataset(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getDataset(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getDataset::sessionId = sessionId;
@@ -5614,15 +5659,15 @@ soap_instantiate_ns1__deleteAuthorisationResponse(struct soap *, int,
 
 inline ns1__deleteAuthorisationResponse *
 soap_new_ns1__deleteAuthorisationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deleteAuthorisationResponse(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__deleteAuthorisationResponse(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__deleteAuthorisationResponse *
 soap_new_req_ns1__deleteAuthorisationResponse(struct soap *soap) {
   ns1__deleteAuthorisationResponse *_p =
-      soap_instantiate_ns1__deleteAuthorisationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__deleteAuthorisationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -5633,8 +5678,8 @@ inline ns1__deleteAuthorisationResponse *
 soap_new_set_ns1__deleteAuthorisationResponse(struct soap *soap,
                                               char *__item1) {
   ns1__deleteAuthorisationResponse *_p =
-      soap_instantiate_ns1__deleteAuthorisationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__deleteAuthorisationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -5690,13 +5735,14 @@ soap_instantiate_ns1__deleteAuthorisation(struct soap *, int, const char *,
 
 inline ns1__deleteAuthorisation *
 soap_new_ns1__deleteAuthorisation(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deleteAuthorisation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__deleteAuthorisation(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__deleteAuthorisation *
 soap_new_req_ns1__deleteAuthorisation(struct soap *soap) {
-  ns1__deleteAuthorisation *_p =
-      soap_instantiate_ns1__deleteAuthorisation(soap, -1, NULL, NULL, NULL);
+  ns1__deleteAuthorisation *_p = soap_instantiate_ns1__deleteAuthorisation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -5706,8 +5752,8 @@ soap_new_req_ns1__deleteAuthorisation(struct soap *soap) {
 inline ns1__deleteAuthorisation *
 soap_new_set_ns1__deleteAuthorisation(struct soap *soap, std::string *sessionId,
                                       LONG64 *authorisationId, char *__item1) {
-  ns1__deleteAuthorisation *_p =
-      soap_instantiate_ns1__deleteAuthorisation(soap, -1, NULL, NULL, NULL);
+  ns1__deleteAuthorisation *_p = soap_instantiate_ns1__deleteAuthorisation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__deleteAuthorisation::sessionId = sessionId;
@@ -5769,15 +5815,15 @@ soap_instantiate_ns1__deletePublicationResponse(struct soap *, int,
 
 inline ns1__deletePublicationResponse *
 soap_new_ns1__deletePublicationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deletePublicationResponse(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate_ns1__deletePublicationResponse(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline ns1__deletePublicationResponse *
 soap_new_req_ns1__deletePublicationResponse(struct soap *soap) {
   ns1__deletePublicationResponse *_p =
-      soap_instantiate_ns1__deletePublicationResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__deletePublicationResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -5787,8 +5833,8 @@ soap_new_req_ns1__deletePublicationResponse(struct soap *soap) {
 inline ns1__deletePublicationResponse *
 soap_new_set_ns1__deletePublicationResponse(struct soap *soap, char *__item1) {
   ns1__deletePublicationResponse *_p =
-      soap_instantiate_ns1__deletePublicationResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__deletePublicationResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -5844,13 +5890,14 @@ soap_instantiate_ns1__deletePublication(struct soap *, int, const char *,
 
 inline ns1__deletePublication *
 soap_new_ns1__deletePublication(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deletePublication(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__deletePublication(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline ns1__deletePublication *
 soap_new_req_ns1__deletePublication(struct soap *soap) {
-  ns1__deletePublication *_p =
-      soap_instantiate_ns1__deletePublication(soap, -1, NULL, NULL, NULL);
+  ns1__deletePublication *_p = soap_instantiate_ns1__deletePublication(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -5860,8 +5907,8 @@ soap_new_req_ns1__deletePublication(struct soap *soap) {
 inline ns1__deletePublication *
 soap_new_set_ns1__deletePublication(struct soap *soap, std::string *sessionId,
                                     LONG64 *publicationId, char *__item1) {
-  ns1__deletePublication *_p =
-      soap_instantiate_ns1__deletePublication(soap, -1, NULL, NULL, NULL);
+  ns1__deletePublication *_p = soap_instantiate_ns1__deletePublication(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__deletePublication::sessionId = sessionId;
@@ -5918,12 +5965,13 @@ soap_instantiate_ns1__loginResponse(struct soap *, int, const char *,
 
 inline ns1__loginResponse *soap_new_ns1__loginResponse(struct soap *soap,
                                                        int n = -1) {
-  return soap_instantiate_ns1__loginResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__loginResponse(soap, n, nullptr, nullptr,
+                                             nullptr);
 }
 
 inline ns1__loginResponse *soap_new_req_ns1__loginResponse(struct soap *soap) {
   ns1__loginResponse *_p =
-      soap_instantiate_ns1__loginResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__loginResponse(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -5934,7 +5982,7 @@ inline ns1__loginResponse *soap_new_set_ns1__loginResponse(struct soap *soap,
                                                            std::string *return_,
                                                            char *__item1) {
   ns1__loginResponse *_p =
-      soap_instantiate_ns1__loginResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__loginResponse(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__loginResponse::return_ = return_;
@@ -5985,11 +6033,12 @@ soap_instantiate_ns1__login(struct soap *, int, const char *, const char *,
                             size_t *);
 
 inline ns1__login *soap_new_ns1__login(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__login(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__login(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__login *soap_new_req_ns1__login(struct soap *soap) {
-  ns1__login *_p = soap_instantiate_ns1__login(soap, -1, NULL, NULL, NULL);
+  ns1__login *_p =
+      soap_instantiate_ns1__login(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -6000,7 +6049,8 @@ inline ns1__login *soap_new_set_ns1__login(struct soap *soap,
                                            std::string *username,
                                            std::string *password,
                                            char *__item1) {
-  ns1__login *_p = soap_instantiate_ns1__login(soap, -1, NULL, NULL, NULL);
+  ns1__login *_p =
+      soap_instantiate_ns1__login(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__login::username = username;
@@ -6056,13 +6106,14 @@ soap_instantiate_ns1__loginLifetimeResponse(struct soap *, int, const char *,
 
 inline ns1__loginLifetimeResponse *
 soap_new_ns1__loginLifetimeResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__loginLifetimeResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__loginLifetimeResponse(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline ns1__loginLifetimeResponse *
 soap_new_req_ns1__loginLifetimeResponse(struct soap *soap) {
-  ns1__loginLifetimeResponse *_p =
-      soap_instantiate_ns1__loginLifetimeResponse(soap, -1, NULL, NULL, NULL);
+  ns1__loginLifetimeResponse *_p = soap_instantiate_ns1__loginLifetimeResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -6072,8 +6123,8 @@ soap_new_req_ns1__loginLifetimeResponse(struct soap *soap) {
 inline ns1__loginLifetimeResponse *
 soap_new_set_ns1__loginLifetimeResponse(struct soap *soap, std::string *return_,
                                         char *__item1) {
-  ns1__loginLifetimeResponse *_p =
-      soap_instantiate_ns1__loginLifetimeResponse(soap, -1, NULL, NULL, NULL);
+  ns1__loginLifetimeResponse *_p = soap_instantiate_ns1__loginLifetimeResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__loginLifetimeResponse::return_ = return_;
@@ -6130,13 +6181,14 @@ soap_instantiate_ns1__loginLifetime(struct soap *, int, const char *,
 
 inline ns1__loginLifetime *soap_new_ns1__loginLifetime(struct soap *soap,
                                                        int n = -1) {
-  return soap_instantiate_ns1__loginLifetime(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__loginLifetime(soap, n, nullptr, nullptr,
+                                             nullptr);
 }
 
 inline ns1__loginLifetime *soap_new_req_ns1__loginLifetime(struct soap *soap,
                                                            int lifetime) {
   ns1__loginLifetime *_p =
-      soap_instantiate_ns1__loginLifetime(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__loginLifetime(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__loginLifetime::lifetime = lifetime;
@@ -6149,7 +6201,7 @@ soap_new_set_ns1__loginLifetime(struct soap *soap, std::string *username,
                                 std::string *password, int lifetime,
                                 char *__item1) {
   ns1__loginLifetime *_p =
-      soap_instantiate_ns1__loginLifetime(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__loginLifetime(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__loginLifetime::username = username;
@@ -6211,15 +6263,15 @@ soap_instantiate_ns1__getParameterByUnitsResponse(struct soap *, int,
 
 inline ns1__getParameterByUnitsResponse *
 soap_new_ns1__getParameterByUnitsResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getParameterByUnitsResponse(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__getParameterByUnitsResponse(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__getParameterByUnitsResponse *
 soap_new_req_ns1__getParameterByUnitsResponse(struct soap *soap) {
   ns1__getParameterByUnitsResponse *_p =
-      soap_instantiate_ns1__getParameterByUnitsResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__getParameterByUnitsResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -6230,8 +6282,8 @@ inline ns1__getParameterByUnitsResponse *
 soap_new_set_ns1__getParameterByUnitsResponse(
     struct soap *soap, std::vector<ns1__parameter *> &return_, char *__item1) {
   ns1__getParameterByUnitsResponse *_p =
-      soap_instantiate_ns1__getParameterByUnitsResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__getParameterByUnitsResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getParameterByUnitsResponse::return_ = return_;
@@ -6288,13 +6340,14 @@ soap_instantiate_ns1__getParameterByUnits(struct soap *, int, const char *,
 
 inline ns1__getParameterByUnits *
 soap_new_ns1__getParameterByUnits(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getParameterByUnits(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getParameterByUnits(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__getParameterByUnits *
 soap_new_req_ns1__getParameterByUnits(struct soap *soap) {
-  ns1__getParameterByUnits *_p =
-      soap_instantiate_ns1__getParameterByUnits(soap, -1, NULL, NULL, NULL);
+  ns1__getParameterByUnits *_p = soap_instantiate_ns1__getParameterByUnits(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -6304,8 +6357,8 @@ soap_new_req_ns1__getParameterByUnits(struct soap *soap) {
 inline ns1__getParameterByUnits *
 soap_new_set_ns1__getParameterByUnits(struct soap *soap, std::string *sessionId,
                                       std::string *units, char *__item1) {
-  ns1__getParameterByUnits *_p =
-      soap_instantiate_ns1__getParameterByUnits(soap, -1, NULL, NULL, NULL);
+  ns1__getParameterByUnits *_p = soap_instantiate_ns1__getParameterByUnits(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getParameterByUnits::sessionId = sessionId;
@@ -6362,13 +6415,14 @@ soap_instantiate_ns1__addSampleResponse(struct soap *, int, const char *,
 
 inline ns1__addSampleResponse *
 soap_new_ns1__addSampleResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__addSampleResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__addSampleResponse(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline ns1__addSampleResponse *
 soap_new_req_ns1__addSampleResponse(struct soap *soap) {
-  ns1__addSampleResponse *_p =
-      soap_instantiate_ns1__addSampleResponse(soap, -1, NULL, NULL, NULL);
+  ns1__addSampleResponse *_p = soap_instantiate_ns1__addSampleResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -6378,8 +6432,8 @@ soap_new_req_ns1__addSampleResponse(struct soap *soap) {
 inline ns1__addSampleResponse *
 soap_new_set_ns1__addSampleResponse(struct soap *soap, ns1__sample *return_,
                                     char *__item1) {
-  ns1__addSampleResponse *_p =
-      soap_instantiate_ns1__addSampleResponse(soap, -1, NULL, NULL, NULL);
+  ns1__addSampleResponse *_p = soap_instantiate_ns1__addSampleResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addSampleResponse::return_ = return_;
@@ -6433,12 +6487,12 @@ soap_instantiate_ns1__addSample(struct soap *, int, const char *, const char *,
                                 size_t *);
 
 inline ns1__addSample *soap_new_ns1__addSample(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__addSample(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__addSample(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__addSample *soap_new_req_ns1__addSample(struct soap *soap) {
   ns1__addSample *_p =
-      soap_instantiate_ns1__addSample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__addSample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -6451,7 +6505,7 @@ inline ns1__addSample *soap_new_set_ns1__addSample(struct soap *soap,
                                                    LONG64 *investigationId,
                                                    char *__item1) {
   ns1__addSample *_p =
-      soap_instantiate_ns1__addSample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__addSample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addSample::sessionId = sessionId;
@@ -6512,15 +6566,15 @@ soap_instantiate_ns1__addAuthorisationResponse(struct soap *, int, const char *,
 
 inline ns1__addAuthorisationResponse *
 soap_new_ns1__addAuthorisationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__addAuthorisationResponse(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate_ns1__addAuthorisationResponse(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline ns1__addAuthorisationResponse *
 soap_new_req_ns1__addAuthorisationResponse(struct soap *soap) {
   ns1__addAuthorisationResponse *_p =
-      soap_instantiate_ns1__addAuthorisationResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__addAuthorisationResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -6532,8 +6586,8 @@ soap_new_set_ns1__addAuthorisationResponse(struct soap *soap,
                                            ns1__icatAuthorisation *return_,
                                            char *__item1) {
   ns1__addAuthorisationResponse *_p =
-      soap_instantiate_ns1__addAuthorisationResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__addAuthorisationResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addAuthorisationResponse::return_ = return_;
@@ -6590,13 +6644,14 @@ soap_instantiate_ns1__addAuthorisation(struct soap *, int, const char *,
 
 inline ns1__addAuthorisation *soap_new_ns1__addAuthorisation(struct soap *soap,
                                                              int n = -1) {
-  return soap_instantiate_ns1__addAuthorisation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__addAuthorisation(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline ns1__addAuthorisation *
 soap_new_req_ns1__addAuthorisation(struct soap *soap) {
-  ns1__addAuthorisation *_p =
-      soap_instantiate_ns1__addAuthorisation(soap, -1, NULL, NULL, NULL);
+  ns1__addAuthorisation *_p = soap_instantiate_ns1__addAuthorisation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -6607,8 +6662,8 @@ inline ns1__addAuthorisation *soap_new_set_ns1__addAuthorisation(
     struct soap *soap, std::string *sessionId, std::string *toAddFedId,
     std::string *toAddRole, LONG64 *elementId,
     enum ns1__elementType *elementType, char *__item1) {
-  ns1__addAuthorisation *_p =
-      soap_instantiate_ns1__addAuthorisation(soap, -1, NULL, NULL, NULL);
+  ns1__addAuthorisation *_p = soap_instantiate_ns1__addAuthorisation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addAuthorisation::sessionId = sessionId;
@@ -6672,14 +6727,15 @@ soap_instantiate_ns1__createDataFilesResponse(struct soap *, int, const char *,
 
 inline ns1__createDataFilesResponse *
 soap_new_ns1__createDataFilesResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__createDataFilesResponse(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate_ns1__createDataFilesResponse(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline ns1__createDataFilesResponse *
 soap_new_req_ns1__createDataFilesResponse(struct soap *soap) {
   ns1__createDataFilesResponse *_p =
-      soap_instantiate_ns1__createDataFilesResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__createDataFilesResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -6689,7 +6745,8 @@ soap_new_req_ns1__createDataFilesResponse(struct soap *soap) {
 inline ns1__createDataFilesResponse *soap_new_set_ns1__createDataFilesResponse(
     struct soap *soap, std::vector<ns1__datafile *> &return_, char *__item1) {
   ns1__createDataFilesResponse *_p =
-      soap_instantiate_ns1__createDataFilesResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__createDataFilesResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__createDataFilesResponse::return_ = return_;
@@ -6746,13 +6803,14 @@ soap_instantiate_ns1__createDataFiles(struct soap *, int, const char *,
 
 inline ns1__createDataFiles *soap_new_ns1__createDataFiles(struct soap *soap,
                                                            int n = -1) {
-  return soap_instantiate_ns1__createDataFiles(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__createDataFiles(soap, n, nullptr, nullptr,
+                                               nullptr);
 }
 
 inline ns1__createDataFiles *
 soap_new_req_ns1__createDataFiles(struct soap *soap) {
-  ns1__createDataFiles *_p =
-      soap_instantiate_ns1__createDataFiles(soap, -1, NULL, NULL, NULL);
+  ns1__createDataFiles *_p = soap_instantiate_ns1__createDataFiles(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -6763,8 +6821,8 @@ inline ns1__createDataFiles *
 soap_new_set_ns1__createDataFiles(struct soap *soap, std::string *sessionId,
                                   std::vector<ns1__datafile *> &dataFiles,
                                   LONG64 *datasetId, char *__item1) {
-  ns1__createDataFiles *_p =
-      soap_instantiate_ns1__createDataFiles(soap, -1, NULL, NULL, NULL);
+  ns1__createDataFiles *_p = soap_instantiate_ns1__createDataFiles(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__createDataFiles::sessionId = sessionId;
@@ -6826,15 +6884,15 @@ soap_instantiate_ns1__addDataSetParameterResponse(struct soap *, int,
 
 inline ns1__addDataSetParameterResponse *
 soap_new_ns1__addDataSetParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__addDataSetParameterResponse(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__addDataSetParameterResponse(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__addDataSetParameterResponse *
 soap_new_req_ns1__addDataSetParameterResponse(struct soap *soap) {
   ns1__addDataSetParameterResponse *_p =
-      soap_instantiate_ns1__addDataSetParameterResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__addDataSetParameterResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -6846,8 +6904,8 @@ soap_new_set_ns1__addDataSetParameterResponse(struct soap *soap,
                                               ns1__datasetParameter *return_,
                                               char *__item1) {
   ns1__addDataSetParameterResponse *_p =
-      soap_instantiate_ns1__addDataSetParameterResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__addDataSetParameterResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addDataSetParameterResponse::return_ = return_;
@@ -6904,13 +6962,14 @@ soap_instantiate_ns1__addDataSetParameter(struct soap *, int, const char *,
 
 inline ns1__addDataSetParameter *
 soap_new_ns1__addDataSetParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__addDataSetParameter(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__addDataSetParameter(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__addDataSetParameter *
 soap_new_req_ns1__addDataSetParameter(struct soap *soap) {
-  ns1__addDataSetParameter *_p =
-      soap_instantiate_ns1__addDataSetParameter(soap, -1, NULL, NULL, NULL);
+  ns1__addDataSetParameter *_p = soap_instantiate_ns1__addDataSetParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -6921,8 +6980,8 @@ inline ns1__addDataSetParameter *
 soap_new_set_ns1__addDataSetParameter(struct soap *soap, std::string *sessionId,
                                       ns1__datasetParameter *dataSetParameter,
                                       LONG64 *datasetId, char *__item1) {
-  ns1__addDataSetParameter *_p =
-      soap_instantiate_ns1__addDataSetParameter(soap, -1, NULL, NULL, NULL);
+  ns1__addDataSetParameter *_p = soap_instantiate_ns1__addDataSetParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addDataSetParameter::sessionId = sessionId;
@@ -6984,15 +7043,15 @@ soap_instantiate_ns1__modifyInvestigatorResponse(struct soap *, int,
 
 inline ns1__modifyInvestigatorResponse *
 soap_new_ns1__modifyInvestigatorResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__modifyInvestigatorResponse(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate_ns1__modifyInvestigatorResponse(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline ns1__modifyInvestigatorResponse *
 soap_new_req_ns1__modifyInvestigatorResponse(struct soap *soap) {
   ns1__modifyInvestigatorResponse *_p =
-      soap_instantiate_ns1__modifyInvestigatorResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__modifyInvestigatorResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -7002,8 +7061,8 @@ soap_new_req_ns1__modifyInvestigatorResponse(struct soap *soap) {
 inline ns1__modifyInvestigatorResponse *
 soap_new_set_ns1__modifyInvestigatorResponse(struct soap *soap, char *__item1) {
   ns1__modifyInvestigatorResponse *_p =
-      soap_instantiate_ns1__modifyInvestigatorResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__modifyInvestigatorResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -7058,13 +7117,14 @@ soap_instantiate_ns1__modifyInvestigator(struct soap *, int, const char *,
 
 inline ns1__modifyInvestigator *
 soap_new_ns1__modifyInvestigator(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__modifyInvestigator(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__modifyInvestigator(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline ns1__modifyInvestigator *
 soap_new_req_ns1__modifyInvestigator(struct soap *soap) {
-  ns1__modifyInvestigator *_p =
-      soap_instantiate_ns1__modifyInvestigator(soap, -1, NULL, NULL, NULL);
+  ns1__modifyInvestigator *_p = soap_instantiate_ns1__modifyInvestigator(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -7075,8 +7135,8 @@ inline ns1__modifyInvestigator *
 soap_new_set_ns1__modifyInvestigator(struct soap *soap, std::string *sessionId,
                                      ns1__investigator *ns1__investigator_,
                                      char *__item1) {
-  ns1__modifyInvestigator *_p =
-      soap_instantiate_ns1__modifyInvestigator(soap, -1, NULL, NULL, NULL);
+  ns1__modifyInvestigator *_p = soap_instantiate_ns1__modifyInvestigator(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__modifyInvestigator::sessionId = sessionId;
@@ -7137,15 +7197,15 @@ soap_instantiate_ns1__modifySampleParameterResponse(struct soap *, int,
 
 inline ns1__modifySampleParameterResponse *
 soap_new_ns1__modifySampleParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__modifySampleParameterResponse(soap, n, NULL,
-                                                             NULL, NULL);
+  return soap_instantiate_ns1__modifySampleParameterResponse(soap, n, nullptr,
+                                                             nullptr, nullptr);
 }
 
 inline ns1__modifySampleParameterResponse *
 soap_new_req_ns1__modifySampleParameterResponse(struct soap *soap) {
   ns1__modifySampleParameterResponse *_p =
-      soap_instantiate_ns1__modifySampleParameterResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate_ns1__modifySampleParameterResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -7156,8 +7216,8 @@ inline ns1__modifySampleParameterResponse *
 soap_new_set_ns1__modifySampleParameterResponse(struct soap *soap,
                                                 char *__item1) {
   ns1__modifySampleParameterResponse *_p =
-      soap_instantiate_ns1__modifySampleParameterResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate_ns1__modifySampleParameterResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -7213,13 +7273,14 @@ soap_instantiate_ns1__modifySampleParameter(struct soap *, int, const char *,
 
 inline ns1__modifySampleParameter *
 soap_new_ns1__modifySampleParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__modifySampleParameter(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__modifySampleParameter(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline ns1__modifySampleParameter *
 soap_new_req_ns1__modifySampleParameter(struct soap *soap) {
-  ns1__modifySampleParameter *_p =
-      soap_instantiate_ns1__modifySampleParameter(soap, -1, NULL, NULL, NULL);
+  ns1__modifySampleParameter *_p = soap_instantiate_ns1__modifySampleParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -7229,8 +7290,8 @@ soap_new_req_ns1__modifySampleParameter(struct soap *soap) {
 inline ns1__modifySampleParameter *soap_new_set_ns1__modifySampleParameter(
     struct soap *soap, std::string *sessionId,
     ns1__sampleParameter *sampleParameter, char *__item1) {
-  ns1__modifySampleParameter *_p =
-      soap_instantiate_ns1__modifySampleParameter(soap, -1, NULL, NULL, NULL);
+  ns1__modifySampleParameter *_p = soap_instantiate_ns1__modifySampleParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__modifySampleParameter::sessionId = sessionId;
@@ -7292,15 +7353,15 @@ soap_instantiate_ns1__listDatafileFormatsResponse(struct soap *, int,
 
 inline ns1__listDatafileFormatsResponse *
 soap_new_ns1__listDatafileFormatsResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__listDatafileFormatsResponse(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__listDatafileFormatsResponse(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__listDatafileFormatsResponse *
 soap_new_req_ns1__listDatafileFormatsResponse(struct soap *soap) {
   ns1__listDatafileFormatsResponse *_p =
-      soap_instantiate_ns1__listDatafileFormatsResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__listDatafileFormatsResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -7312,8 +7373,8 @@ soap_new_set_ns1__listDatafileFormatsResponse(
     struct soap *soap, std::vector<ns1__datafileFormat *> &return_,
     char *__item1) {
   ns1__listDatafileFormatsResponse *_p =
-      soap_instantiate_ns1__listDatafileFormatsResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__listDatafileFormatsResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__listDatafileFormatsResponse::return_ = return_;
@@ -7370,13 +7431,14 @@ soap_instantiate_ns1__listDatafileFormats(struct soap *, int, const char *,
 
 inline ns1__listDatafileFormats *
 soap_new_ns1__listDatafileFormats(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__listDatafileFormats(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__listDatafileFormats(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__listDatafileFormats *
 soap_new_req_ns1__listDatafileFormats(struct soap *soap) {
-  ns1__listDatafileFormats *_p =
-      soap_instantiate_ns1__listDatafileFormats(soap, -1, NULL, NULL, NULL);
+  ns1__listDatafileFormats *_p = soap_instantiate_ns1__listDatafileFormats(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -7386,8 +7448,8 @@ soap_new_req_ns1__listDatafileFormats(struct soap *soap) {
 inline ns1__listDatafileFormats *
 soap_new_set_ns1__listDatafileFormats(struct soap *soap, std::string *sessionId,
                                       char *__item1) {
-  ns1__listDatafileFormats *_p =
-      soap_instantiate_ns1__listDatafileFormats(soap, -1, NULL, NULL, NULL);
+  ns1__listDatafileFormats *_p = soap_instantiate_ns1__listDatafileFormats(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__listDatafileFormats::sessionId = sessionId;
@@ -7451,14 +7513,14 @@ inline ns1__searchInvestigationByParameterResponse *
 soap_new_ns1__searchInvestigationByParameterResponse(struct soap *soap,
                                                      int n = -1) {
   return soap_instantiate_ns1__searchInvestigationByParameterResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchInvestigationByParameterResponse *
 soap_new_req_ns1__searchInvestigationByParameterResponse(struct soap *soap) {
   ns1__searchInvestigationByParameterResponse *_p =
       soap_instantiate_ns1__searchInvestigationByParameterResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -7470,7 +7532,7 @@ soap_new_set_ns1__searchInvestigationByParameterResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchInvestigationByParameterResponse *_p =
       soap_instantiate_ns1__searchInvestigationByParameterResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchInvestigationByParameterResponse::return_ = return_;
@@ -7531,15 +7593,15 @@ soap_instantiate_ns1__searchInvestigationByParameter(struct soap *, int,
 
 inline ns1__searchInvestigationByParameter *
 soap_new_ns1__searchInvestigationByParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchInvestigationByParameter(soap, n, NULL,
-                                                              NULL, NULL);
+  return soap_instantiate_ns1__searchInvestigationByParameter(soap, n, nullptr,
+                                                              nullptr, nullptr);
 }
 
 inline ns1__searchInvestigationByParameter *
 soap_new_req_ns1__searchInvestigationByParameter(struct soap *soap) {
   ns1__searchInvestigationByParameter *_p =
-      soap_instantiate_ns1__searchInvestigationByParameter(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__searchInvestigationByParameter(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -7551,8 +7613,8 @@ soap_new_set_ns1__searchInvestigationByParameter(
     struct soap *soap, std::string *sessionId,
     std::vector<ns1__parameterSearch *> &parameters, char *__item1) {
   ns1__searchInvestigationByParameter *_p =
-      soap_instantiate_ns1__searchInvestigationByParameter(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__searchInvestigationByParameter(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchInvestigationByParameter::sessionId = sessionId;
@@ -7613,15 +7675,15 @@ soap_instantiate_ns1__searchByAdvancedResponse(struct soap *, int, const char *,
 
 inline ns1__searchByAdvancedResponse *
 soap_new_ns1__searchByAdvancedResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchByAdvancedResponse(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate_ns1__searchByAdvancedResponse(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline ns1__searchByAdvancedResponse *
 soap_new_req_ns1__searchByAdvancedResponse(struct soap *soap) {
   ns1__searchByAdvancedResponse *_p =
-      soap_instantiate_ns1__searchByAdvancedResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__searchByAdvancedResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -7633,8 +7695,8 @@ soap_new_set_ns1__searchByAdvancedResponse(
     struct soap *soap, std::vector<ns1__investigation *> &return_,
     char *__item1) {
   ns1__searchByAdvancedResponse *_p =
-      soap_instantiate_ns1__searchByAdvancedResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__searchByAdvancedResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByAdvancedResponse::return_ = return_;
@@ -7691,13 +7753,14 @@ soap_instantiate_ns1__searchByAdvanced(struct soap *, int, const char *,
 
 inline ns1__searchByAdvanced *soap_new_ns1__searchByAdvanced(struct soap *soap,
                                                              int n = -1) {
-  return soap_instantiate_ns1__searchByAdvanced(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__searchByAdvanced(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline ns1__searchByAdvanced *
 soap_new_req_ns1__searchByAdvanced(struct soap *soap) {
-  ns1__searchByAdvanced *_p =
-      soap_instantiate_ns1__searchByAdvanced(soap, -1, NULL, NULL, NULL);
+  ns1__searchByAdvanced *_p = soap_instantiate_ns1__searchByAdvanced(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -7707,8 +7770,8 @@ soap_new_req_ns1__searchByAdvanced(struct soap *soap) {
 inline ns1__searchByAdvanced *soap_new_set_ns1__searchByAdvanced(
     struct soap *soap, std::string *sessionId,
     ns1__advancedSearchDetails *advancedSearchDetails, char *__item1) {
-  ns1__searchByAdvanced *_p =
-      soap_instantiate_ns1__searchByAdvanced(soap, -1, NULL, NULL, NULL);
+  ns1__searchByAdvanced *_p = soap_instantiate_ns1__searchByAdvanced(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByAdvanced::sessionId = sessionId;
@@ -7772,15 +7835,15 @@ soap_instantiate_ns1__searchByAdvancedPaginationResponse(struct soap *, int,
 inline ns1__searchByAdvancedPaginationResponse *
 soap_new_ns1__searchByAdvancedPaginationResponse(struct soap *soap,
                                                  int n = -1) {
-  return soap_instantiate_ns1__searchByAdvancedPaginationResponse(soap, n, NULL,
-                                                                  NULL, NULL);
+  return soap_instantiate_ns1__searchByAdvancedPaginationResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchByAdvancedPaginationResponse *
 soap_new_req_ns1__searchByAdvancedPaginationResponse(struct soap *soap) {
   ns1__searchByAdvancedPaginationResponse *_p =
-      soap_instantiate_ns1__searchByAdvancedPaginationResponse(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate_ns1__searchByAdvancedPaginationResponse(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -7792,8 +7855,8 @@ soap_new_set_ns1__searchByAdvancedPaginationResponse(
     struct soap *soap, std::vector<ns1__investigation *> &return_,
     char *__item1) {
   ns1__searchByAdvancedPaginationResponse *_p =
-      soap_instantiate_ns1__searchByAdvancedPaginationResponse(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate_ns1__searchByAdvancedPaginationResponse(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByAdvancedPaginationResponse::return_ = return_;
@@ -7851,13 +7914,14 @@ soap_instantiate_ns1__advancedSearchDetails(struct soap *, int, const char *,
 
 inline ns1__advancedSearchDetails *
 soap_new_ns1__advancedSearchDetails(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__advancedSearchDetails(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__advancedSearchDetails(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline ns1__advancedSearchDetails *
 soap_new_req_ns1__advancedSearchDetails(struct soap *soap, bool caseSensitive) {
-  ns1__advancedSearchDetails *_p =
-      soap_instantiate_ns1__advancedSearchDetails(soap, -1, NULL, NULL, NULL);
+  ns1__advancedSearchDetails *_p = soap_instantiate_ns1__advancedSearchDetails(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__advancedSearchDetails::caseSensitive = caseSensitive;
@@ -7875,8 +7939,8 @@ inline ns1__advancedSearchDetails *soap_new_set_ns1__advancedSearchDetails(
     std::vector<std::string> &investigators, std::vector<std::string> &keywords,
     double *runEnd, double *runStart, std::string *sampleName,
     std::string *visitId, char *__item1) {
-  ns1__advancedSearchDetails *_p =
-      soap_instantiate_ns1__advancedSearchDetails(soap, -1, NULL, NULL, NULL);
+  ns1__advancedSearchDetails *_p = soap_instantiate_ns1__advancedSearchDetails(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__advancedSearchDetails::backCatalogueInvestigatorString =
@@ -7956,16 +8020,16 @@ soap_instantiate_ns1__searchByAdvancedPagination(struct soap *, int,
 
 inline ns1__searchByAdvancedPagination *
 soap_new_ns1__searchByAdvancedPagination(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchByAdvancedPagination(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate_ns1__searchByAdvancedPagination(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline ns1__searchByAdvancedPagination *
 soap_new_req_ns1__searchByAdvancedPagination(struct soap *soap, int startIndex,
                                              int numberOfResults) {
   ns1__searchByAdvancedPagination *_p =
-      soap_instantiate_ns1__searchByAdvancedPagination(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__searchByAdvancedPagination(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByAdvancedPagination::startIndex = startIndex;
@@ -7980,8 +8044,8 @@ soap_new_set_ns1__searchByAdvancedPagination(
     ns1__advancedSearchDetails *advancedSearchDetails, int startIndex,
     int numberOfResults, char *__item1) {
   ns1__searchByAdvancedPagination *_p =
-      soap_instantiate_ns1__searchByAdvancedPagination(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__searchByAdvancedPagination(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByAdvancedPagination::sessionId = sessionId;
@@ -8049,7 +8113,7 @@ inline ns1__searchDatafileByParameterComparisonResponse *
 soap_new_ns1__searchDatafileByParameterComparisonResponse(struct soap *soap,
                                                           int n = -1) {
   return soap_instantiate_ns1__searchDatafileByParameterComparisonResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatafileByParameterComparisonResponse *
@@ -8057,7 +8121,7 @@ soap_new_req_ns1__searchDatafileByParameterComparisonResponse(
     struct soap *soap) {
   ns1__searchDatafileByParameterComparisonResponse *_p =
       soap_instantiate_ns1__searchDatafileByParameterComparisonResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -8069,7 +8133,7 @@ soap_new_set_ns1__searchDatafileByParameterComparisonResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchDatafileByParameterComparisonResponse *_p =
       soap_instantiate_ns1__searchDatafileByParameterComparisonResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatafileByParameterComparisonResponse::return_ = return_;
@@ -8135,14 +8199,14 @@ inline ns1__searchDatafileByParameterComparison *
 soap_new_ns1__searchDatafileByParameterComparison(struct soap *soap,
                                                   int n = -1) {
   return soap_instantiate_ns1__searchDatafileByParameterComparison(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatafileByParameterComparison *
 soap_new_req_ns1__searchDatafileByParameterComparison(struct soap *soap) {
   ns1__searchDatafileByParameterComparison *_p =
-      soap_instantiate_ns1__searchDatafileByParameterComparison(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate_ns1__searchDatafileByParameterComparison(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -8155,8 +8219,8 @@ soap_new_set_ns1__searchDatafileByParameterComparison(
     std::vector<ns1__parameterComparisonCondition *> &comparison,
     char *__item1) {
   ns1__searchDatafileByParameterComparison *_p =
-      soap_instantiate_ns1__searchDatafileByParameterComparison(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate_ns1__searchDatafileByParameterComparison(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatafileByParameterComparison::sessionId = sessionId;
@@ -8219,15 +8283,15 @@ soap_instantiate_ns1__searchByRunNumberResponse(struct soap *, int,
 
 inline ns1__searchByRunNumberResponse *
 soap_new_ns1__searchByRunNumberResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchByRunNumberResponse(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate_ns1__searchByRunNumberResponse(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline ns1__searchByRunNumberResponse *
 soap_new_req_ns1__searchByRunNumberResponse(struct soap *soap) {
   ns1__searchByRunNumberResponse *_p =
-      soap_instantiate_ns1__searchByRunNumberResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__searchByRunNumberResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -8238,8 +8302,8 @@ inline ns1__searchByRunNumberResponse *
 soap_new_set_ns1__searchByRunNumberResponse(
     struct soap *soap, std::vector<ns1__datafile *> &return_, char *__item1) {
   ns1__searchByRunNumberResponse *_p =
-      soap_instantiate_ns1__searchByRunNumberResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__searchByRunNumberResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByRunNumberResponse::return_ = return_;
@@ -8296,14 +8360,15 @@ soap_instantiate_ns1__searchByRunNumber(struct soap *, int, const char *,
 
 inline ns1__searchByRunNumber *
 soap_new_ns1__searchByRunNumber(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchByRunNumber(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__searchByRunNumber(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline ns1__searchByRunNumber *
 soap_new_req_ns1__searchByRunNumber(struct soap *soap, float startRun,
                                     float endRun) {
-  ns1__searchByRunNumber *_p =
-      soap_instantiate_ns1__searchByRunNumber(soap, -1, NULL, NULL, NULL);
+  ns1__searchByRunNumber *_p = soap_instantiate_ns1__searchByRunNumber(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByRunNumber::startRun = startRun;
@@ -8317,8 +8382,8 @@ soap_new_set_ns1__searchByRunNumber(struct soap *soap, std::string *sessionId,
                                     std::vector<std::string> &instruments,
                                     float startRun, float endRun,
                                     char *__item1) {
-  ns1__searchByRunNumber *_p =
-      soap_instantiate_ns1__searchByRunNumber(soap, -1, NULL, NULL, NULL);
+  ns1__searchByRunNumber *_p = soap_instantiate_ns1__searchByRunNumber(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByRunNumber::sessionId = sessionId;
@@ -8385,14 +8450,14 @@ inline ns1__searchByRunNumberPaginationResponse *
 soap_new_ns1__searchByRunNumberPaginationResponse(struct soap *soap,
                                                   int n = -1) {
   return soap_instantiate_ns1__searchByRunNumberPaginationResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchByRunNumberPaginationResponse *
 soap_new_req_ns1__searchByRunNumberPaginationResponse(struct soap *soap) {
   ns1__searchByRunNumberPaginationResponse *_p =
-      soap_instantiate_ns1__searchByRunNumberPaginationResponse(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate_ns1__searchByRunNumberPaginationResponse(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -8403,8 +8468,8 @@ inline ns1__searchByRunNumberPaginationResponse *
 soap_new_set_ns1__searchByRunNumberPaginationResponse(
     struct soap *soap, std::vector<ns1__datafile *> &return_, char *__item1) {
   ns1__searchByRunNumberPaginationResponse *_p =
-      soap_instantiate_ns1__searchByRunNumberPaginationResponse(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate_ns1__searchByRunNumberPaginationResponse(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByRunNumberPaginationResponse::return_ = return_;
@@ -8465,8 +8530,8 @@ soap_instantiate_ns1__searchByRunNumberPagination(struct soap *, int,
 
 inline ns1__searchByRunNumberPagination *
 soap_new_ns1__searchByRunNumberPagination(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchByRunNumberPagination(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__searchByRunNumberPagination(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__searchByRunNumberPagination *
@@ -8474,8 +8539,8 @@ soap_new_req_ns1__searchByRunNumberPagination(struct soap *soap, float startRun,
                                               float endRun, int startIndex,
                                               int numberOfResults) {
   ns1__searchByRunNumberPagination *_p =
-      soap_instantiate_ns1__searchByRunNumberPagination(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__searchByRunNumberPagination(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByRunNumberPagination::startRun = startRun;
@@ -8492,8 +8557,8 @@ soap_new_set_ns1__searchByRunNumberPagination(
     std::vector<std::string> &instruments, float startRun, float endRun,
     int startIndex, int numberOfResults, char *__item1) {
   ns1__searchByRunNumberPagination *_p =
-      soap_instantiate_ns1__searchByRunNumberPagination(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__searchByRunNumberPagination(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByRunNumberPagination::sessionId = sessionId;
@@ -8558,15 +8623,15 @@ soap_instantiate_ns1__addDataSetParametersResponse(struct soap *, int,
 
 inline ns1__addDataSetParametersResponse *
 soap_new_ns1__addDataSetParametersResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__addDataSetParametersResponse(soap, n, NULL, NULL,
-                                                            NULL);
+  return soap_instantiate_ns1__addDataSetParametersResponse(soap, n, nullptr,
+                                                            nullptr, nullptr);
 }
 
 inline ns1__addDataSetParametersResponse *
 soap_new_req_ns1__addDataSetParametersResponse(struct soap *soap) {
   ns1__addDataSetParametersResponse *_p =
-      soap_instantiate_ns1__addDataSetParametersResponse(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate_ns1__addDataSetParametersResponse(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -8578,8 +8643,8 @@ soap_new_set_ns1__addDataSetParametersResponse(
     struct soap *soap, std::vector<ns1__datasetParameter *> &return_,
     char *__item1) {
   ns1__addDataSetParametersResponse *_p =
-      soap_instantiate_ns1__addDataSetParametersResponse(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate_ns1__addDataSetParametersResponse(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addDataSetParametersResponse::return_ = return_;
@@ -8636,13 +8701,14 @@ soap_instantiate_ns1__addDataSetParameters(struct soap *, int, const char *,
 
 inline ns1__addDataSetParameters *
 soap_new_ns1__addDataSetParameters(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__addDataSetParameters(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__addDataSetParameters(soap, n, nullptr, nullptr,
+                                                    nullptr);
 }
 
 inline ns1__addDataSetParameters *
 soap_new_req_ns1__addDataSetParameters(struct soap *soap) {
-  ns1__addDataSetParameters *_p =
-      soap_instantiate_ns1__addDataSetParameters(soap, -1, NULL, NULL, NULL);
+  ns1__addDataSetParameters *_p = soap_instantiate_ns1__addDataSetParameters(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -8653,8 +8719,8 @@ inline ns1__addDataSetParameters *soap_new_set_ns1__addDataSetParameters(
     struct soap *soap, std::string *sessionId,
     std::vector<ns1__datasetParameter *> &dataSetParameters, LONG64 *datasetId,
     char *__item1) {
-  ns1__addDataSetParameters *_p =
-      soap_instantiate_ns1__addDataSetParameters(soap, -1, NULL, NULL, NULL);
+  ns1__addDataSetParameters *_p = soap_instantiate_ns1__addDataSetParameters(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addDataSetParameters::sessionId = sessionId;
@@ -8714,13 +8780,14 @@ soap_instantiate_ns1__deleteKeywordResponse(struct soap *, int, const char *,
 
 inline ns1__deleteKeywordResponse *
 soap_new_ns1__deleteKeywordResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deleteKeywordResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__deleteKeywordResponse(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline ns1__deleteKeywordResponse *
 soap_new_req_ns1__deleteKeywordResponse(struct soap *soap) {
-  ns1__deleteKeywordResponse *_p =
-      soap_instantiate_ns1__deleteKeywordResponse(soap, -1, NULL, NULL, NULL);
+  ns1__deleteKeywordResponse *_p = soap_instantiate_ns1__deleteKeywordResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -8729,8 +8796,8 @@ soap_new_req_ns1__deleteKeywordResponse(struct soap *soap) {
 
 inline ns1__deleteKeywordResponse *
 soap_new_set_ns1__deleteKeywordResponse(struct soap *soap, char *__item1) {
-  ns1__deleteKeywordResponse *_p =
-      soap_instantiate_ns1__deleteKeywordResponse(soap, -1, NULL, NULL, NULL);
+  ns1__deleteKeywordResponse *_p = soap_instantiate_ns1__deleteKeywordResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -8786,12 +8853,13 @@ soap_instantiate_ns1__deleteKeyword(struct soap *, int, const char *,
 
 inline ns1__deleteKeyword *soap_new_ns1__deleteKeyword(struct soap *soap,
                                                        int n = -1) {
-  return soap_instantiate_ns1__deleteKeyword(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__deleteKeyword(soap, n, nullptr, nullptr,
+                                             nullptr);
 }
 
 inline ns1__deleteKeyword *soap_new_req_ns1__deleteKeyword(struct soap *soap) {
   ns1__deleteKeyword *_p =
-      soap_instantiate_ns1__deleteKeyword(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__deleteKeyword(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -8802,7 +8870,7 @@ inline ns1__deleteKeyword *
 soap_new_set_ns1__deleteKeyword(struct soap *soap, std::string *sessionId,
                                 ns1__keywordPK *keywordPK, char *__item1) {
   ns1__deleteKeyword *_p =
-      soap_instantiate_ns1__deleteKeyword(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__deleteKeyword(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__deleteKeyword::sessionId = sessionId;
@@ -8863,15 +8931,15 @@ soap_instantiate_ns1__searchDatasetByParameterResponse(struct soap *, int,
 
 inline ns1__searchDatasetByParameterResponse *
 soap_new_ns1__searchDatasetByParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchDatasetByParameterResponse(soap, n, NULL,
-                                                                NULL, NULL);
+  return soap_instantiate_ns1__searchDatasetByParameterResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatasetByParameterResponse *
 soap_new_req_ns1__searchDatasetByParameterResponse(struct soap *soap) {
   ns1__searchDatasetByParameterResponse *_p =
-      soap_instantiate_ns1__searchDatasetByParameterResponse(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate_ns1__searchDatasetByParameterResponse(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -8882,8 +8950,8 @@ inline ns1__searchDatasetByParameterResponse *
 soap_new_set_ns1__searchDatasetByParameterResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchDatasetByParameterResponse *_p =
-      soap_instantiate_ns1__searchDatasetByParameterResponse(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate_ns1__searchDatasetByParameterResponse(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetByParameterResponse::return_ = return_;
@@ -8943,15 +9011,15 @@ soap_instantiate_ns1__searchDatasetByParameter(struct soap *, int, const char *,
 
 inline ns1__searchDatasetByParameter *
 soap_new_ns1__searchDatasetByParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchDatasetByParameter(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate_ns1__searchDatasetByParameter(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline ns1__searchDatasetByParameter *
 soap_new_req_ns1__searchDatasetByParameter(struct soap *soap) {
   ns1__searchDatasetByParameter *_p =
-      soap_instantiate_ns1__searchDatasetByParameter(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__searchDatasetByParameter(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -8963,8 +9031,8 @@ soap_new_set_ns1__searchDatasetByParameter(
     struct soap *soap, std::string *sessionId,
     std::vector<ns1__parameterSearch *> &parameters, char *__item1) {
   ns1__searchDatasetByParameter *_p =
-      soap_instantiate_ns1__searchDatasetByParameter(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__searchDatasetByParameter(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetByParameter::sessionId = sessionId;
@@ -9023,13 +9091,14 @@ soap_instantiate_ns1__deleteSampleResponse(struct soap *, int, const char *,
 
 inline ns1__deleteSampleResponse *
 soap_new_ns1__deleteSampleResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deleteSampleResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__deleteSampleResponse(soap, n, nullptr, nullptr,
+                                                    nullptr);
 }
 
 inline ns1__deleteSampleResponse *
 soap_new_req_ns1__deleteSampleResponse(struct soap *soap) {
-  ns1__deleteSampleResponse *_p =
-      soap_instantiate_ns1__deleteSampleResponse(soap, -1, NULL, NULL, NULL);
+  ns1__deleteSampleResponse *_p = soap_instantiate_ns1__deleteSampleResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -9038,8 +9107,8 @@ soap_new_req_ns1__deleteSampleResponse(struct soap *soap) {
 
 inline ns1__deleteSampleResponse *
 soap_new_set_ns1__deleteSampleResponse(struct soap *soap, char *__item1) {
-  ns1__deleteSampleResponse *_p =
-      soap_instantiate_ns1__deleteSampleResponse(soap, -1, NULL, NULL, NULL);
+  ns1__deleteSampleResponse *_p = soap_instantiate_ns1__deleteSampleResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -9095,12 +9164,12 @@ soap_instantiate_ns1__deleteSample(struct soap *, int, const char *,
 
 inline ns1__deleteSample *soap_new_ns1__deleteSample(struct soap *soap,
                                                      int n = -1) {
-  return soap_instantiate_ns1__deleteSample(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__deleteSample(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__deleteSample *soap_new_req_ns1__deleteSample(struct soap *soap) {
   ns1__deleteSample *_p =
-      soap_instantiate_ns1__deleteSample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__deleteSample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -9112,7 +9181,7 @@ inline ns1__deleteSample *soap_new_set_ns1__deleteSample(struct soap *soap,
                                                          LONG64 *sampleId,
                                                          char *__item1) {
   ns1__deleteSample *_p =
-      soap_instantiate_ns1__deleteSample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__deleteSample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__deleteSample::sessionId = sessionId;
@@ -9174,15 +9243,15 @@ soap_instantiate_ns1__listDatasetStatusResponse(struct soap *, int,
 
 inline ns1__listDatasetStatusResponse *
 soap_new_ns1__listDatasetStatusResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__listDatasetStatusResponse(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate_ns1__listDatasetStatusResponse(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline ns1__listDatasetStatusResponse *
 soap_new_req_ns1__listDatasetStatusResponse(struct soap *soap) {
   ns1__listDatasetStatusResponse *_p =
-      soap_instantiate_ns1__listDatasetStatusResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__listDatasetStatusResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -9194,8 +9263,8 @@ soap_new_set_ns1__listDatasetStatusResponse(struct soap *soap,
                                             std::vector<std::string> &return_,
                                             char *__item1) {
   ns1__listDatasetStatusResponse *_p =
-      soap_instantiate_ns1__listDatasetStatusResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__listDatasetStatusResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__listDatasetStatusResponse::return_ = return_;
@@ -9252,13 +9321,14 @@ soap_instantiate_ns1__listDatasetStatus(struct soap *, int, const char *,
 
 inline ns1__listDatasetStatus *
 soap_new_ns1__listDatasetStatus(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__listDatasetStatus(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__listDatasetStatus(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline ns1__listDatasetStatus *
 soap_new_req_ns1__listDatasetStatus(struct soap *soap) {
-  ns1__listDatasetStatus *_p =
-      soap_instantiate_ns1__listDatasetStatus(soap, -1, NULL, NULL, NULL);
+  ns1__listDatasetStatus *_p = soap_instantiate_ns1__listDatasetStatus(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -9268,8 +9338,8 @@ soap_new_req_ns1__listDatasetStatus(struct soap *soap) {
 inline ns1__listDatasetStatus *
 soap_new_set_ns1__listDatasetStatus(struct soap *soap, std::string *sessionId,
                                     char *__item1) {
-  ns1__listDatasetStatus *_p =
-      soap_instantiate_ns1__listDatasetStatus(soap, -1, NULL, NULL, NULL);
+  ns1__listDatasetStatus *_p = soap_instantiate_ns1__listDatasetStatus(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__listDatasetStatus::sessionId = sessionId;
@@ -9329,15 +9399,15 @@ soap_instantiate_ns1__modifyInvestigationResponse(struct soap *, int,
 
 inline ns1__modifyInvestigationResponse *
 soap_new_ns1__modifyInvestigationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__modifyInvestigationResponse(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__modifyInvestigationResponse(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__modifyInvestigationResponse *
 soap_new_req_ns1__modifyInvestigationResponse(struct soap *soap) {
   ns1__modifyInvestigationResponse *_p =
-      soap_instantiate_ns1__modifyInvestigationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__modifyInvestigationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -9348,8 +9418,8 @@ inline ns1__modifyInvestigationResponse *
 soap_new_set_ns1__modifyInvestigationResponse(struct soap *soap,
                                               char *__item1) {
   ns1__modifyInvestigationResponse *_p =
-      soap_instantiate_ns1__modifyInvestigationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__modifyInvestigationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -9405,13 +9475,14 @@ soap_instantiate_ns1__modifyInvestigation(struct soap *, int, const char *,
 
 inline ns1__modifyInvestigation *
 soap_new_ns1__modifyInvestigation(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__modifyInvestigation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__modifyInvestigation(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__modifyInvestigation *
 soap_new_req_ns1__modifyInvestigation(struct soap *soap) {
-  ns1__modifyInvestigation *_p =
-      soap_instantiate_ns1__modifyInvestigation(soap, -1, NULL, NULL, NULL);
+  ns1__modifyInvestigation *_p = soap_instantiate_ns1__modifyInvestigation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -9422,8 +9493,8 @@ inline ns1__modifyInvestigation *
 soap_new_set_ns1__modifyInvestigation(struct soap *soap, std::string *sessionId,
                                       ns1__investigation *investigaion,
                                       char *__item1) {
-  ns1__modifyInvestigation *_p =
-      soap_instantiate_ns1__modifyInvestigation(soap, -1, NULL, NULL, NULL);
+  ns1__modifyInvestigation *_p = soap_instantiate_ns1__modifyInvestigation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__modifyInvestigation::sessionId = sessionId;
@@ -9480,13 +9551,14 @@ soap_instantiate_ns1__icatAuthorisation(struct soap *, int, const char *,
 
 inline ns1__icatAuthorisation *
 soap_new_ns1__icatAuthorisation(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__icatAuthorisation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__icatAuthorisation(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline ns1__icatAuthorisation *soap_new_req_ns1__icatAuthorisation(
     struct soap *soap, bool facilityAcquiredData1, bool selected1) {
-  ns1__icatAuthorisation *_p =
-      soap_instantiate_ns1__icatAuthorisation(soap, -1, NULL, NULL, NULL);
+  ns1__icatAuthorisation *_p = soap_instantiate_ns1__icatAuthorisation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -9500,8 +9572,8 @@ inline ns1__icatAuthorisation *soap_new_set_ns1__icatAuthorisation(
     LONG64 *id, ns1__icatRole *role, LONG64 *userChildRecord,
     std::string *userId, bool facilityAcquiredData1, ns1__icatRole *icatRole1,
     bool selected1, std::string *uniqueId1, char *__item2) {
-  ns1__icatAuthorisation *_p =
-      soap_instantiate_ns1__icatAuthorisation(soap, -1, NULL, NULL, NULL);
+  ns1__icatAuthorisation *_p = soap_instantiate_ns1__icatAuthorisation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__icatAuthorisation::elementId = elementId;
@@ -9571,15 +9643,15 @@ soap_instantiate_ns1__getAuthorisationsResponse(struct soap *, int,
 
 inline ns1__getAuthorisationsResponse *
 soap_new_ns1__getAuthorisationsResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getAuthorisationsResponse(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate_ns1__getAuthorisationsResponse(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline ns1__getAuthorisationsResponse *
 soap_new_req_ns1__getAuthorisationsResponse(struct soap *soap) {
   ns1__getAuthorisationsResponse *_p =
-      soap_instantiate_ns1__getAuthorisationsResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__getAuthorisationsResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -9591,8 +9663,8 @@ soap_new_set_ns1__getAuthorisationsResponse(
     struct soap *soap, std::vector<ns1__icatAuthorisation *> &return_,
     char *__item1) {
   ns1__getAuthorisationsResponse *_p =
-      soap_instantiate_ns1__getAuthorisationsResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__getAuthorisationsResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getAuthorisationsResponse::return_ = return_;
@@ -9649,13 +9721,14 @@ soap_instantiate_ns1__getAuthorisations(struct soap *, int, const char *,
 
 inline ns1__getAuthorisations *
 soap_new_ns1__getAuthorisations(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getAuthorisations(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getAuthorisations(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline ns1__getAuthorisations *
 soap_new_req_ns1__getAuthorisations(struct soap *soap) {
-  ns1__getAuthorisations *_p =
-      soap_instantiate_ns1__getAuthorisations(soap, -1, NULL, NULL, NULL);
+  ns1__getAuthorisations *_p = soap_instantiate_ns1__getAuthorisations(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -9665,8 +9738,8 @@ soap_new_req_ns1__getAuthorisations(struct soap *soap) {
 inline ns1__getAuthorisations *soap_new_set_ns1__getAuthorisations(
     struct soap *soap, std::string *sessionId, LONG64 *elementId,
     enum ns1__elementType *elementType, char *__item1) {
-  ns1__getAuthorisations *_p =
-      soap_instantiate_ns1__getAuthorisations(soap, -1, NULL, NULL, NULL);
+  ns1__getAuthorisations *_p = soap_instantiate_ns1__getAuthorisations(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getAuthorisations::sessionId = sessionId;
@@ -9724,13 +9797,14 @@ soap_instantiate_ns1__addKeywordResponse(struct soap *, int, const char *,
 
 inline ns1__addKeywordResponse *
 soap_new_ns1__addKeywordResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__addKeywordResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__addKeywordResponse(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline ns1__addKeywordResponse *
 soap_new_req_ns1__addKeywordResponse(struct soap *soap) {
-  ns1__addKeywordResponse *_p =
-      soap_instantiate_ns1__addKeywordResponse(soap, -1, NULL, NULL, NULL);
+  ns1__addKeywordResponse *_p = soap_instantiate_ns1__addKeywordResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -9740,8 +9814,8 @@ soap_new_req_ns1__addKeywordResponse(struct soap *soap) {
 inline ns1__addKeywordResponse *
 soap_new_set_ns1__addKeywordResponse(struct soap *soap, ns1__keyword *return_,
                                      char *__item1) {
-  ns1__addKeywordResponse *_p =
-      soap_instantiate_ns1__addKeywordResponse(soap, -1, NULL, NULL, NULL);
+  ns1__addKeywordResponse *_p = soap_instantiate_ns1__addKeywordResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addKeywordResponse::return_ = return_;
@@ -9796,12 +9870,12 @@ soap_instantiate_ns1__addKeyword(struct soap *, int, const char *, const char *,
 
 inline ns1__addKeyword *soap_new_ns1__addKeyword(struct soap *soap,
                                                  int n = -1) {
-  return soap_instantiate_ns1__addKeyword(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__addKeyword(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__addKeyword *soap_new_req_ns1__addKeyword(struct soap *soap) {
   ns1__addKeyword *_p =
-      soap_instantiate_ns1__addKeyword(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__addKeyword(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -9814,7 +9888,7 @@ inline ns1__addKeyword *soap_new_set_ns1__addKeyword(struct soap *soap,
                                                      LONG64 *investigationId,
                                                      char *__item1) {
   ns1__addKeyword *_p =
-      soap_instantiate_ns1__addKeyword(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__addKeyword(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addKeyword::sessionId = sessionId;
@@ -9880,7 +9954,7 @@ inline ns1__searchDatasetByRestrictionComparisonResponse *
 soap_new_ns1__searchDatasetByRestrictionComparisonResponse(struct soap *soap,
                                                            int n = -1) {
   return soap_instantiate_ns1__searchDatasetByRestrictionComparisonResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatasetByRestrictionComparisonResponse *
@@ -9888,7 +9962,7 @@ soap_new_req_ns1__searchDatasetByRestrictionComparisonResponse(
     struct soap *soap) {
   ns1__searchDatasetByRestrictionComparisonResponse *_p =
       soap_instantiate_ns1__searchDatasetByRestrictionComparisonResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -9900,7 +9974,7 @@ soap_new_set_ns1__searchDatasetByRestrictionComparisonResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchDatasetByRestrictionComparisonResponse *_p =
       soap_instantiate_ns1__searchDatasetByRestrictionComparisonResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetByRestrictionComparisonResponse::return_ = return_;
@@ -9966,14 +10040,14 @@ inline ns1__searchDatasetByRestrictionComparison *
 soap_new_ns1__searchDatasetByRestrictionComparison(struct soap *soap,
                                                    int n = -1) {
   return soap_instantiate_ns1__searchDatasetByRestrictionComparison(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatasetByRestrictionComparison *
 soap_new_req_ns1__searchDatasetByRestrictionComparison(struct soap *soap) {
   ns1__searchDatasetByRestrictionComparison *_p =
-      soap_instantiate_ns1__searchDatasetByRestrictionComparison(soap, -1, NULL,
-                                                                 NULL, NULL);
+      soap_instantiate_ns1__searchDatasetByRestrictionComparison(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -9986,8 +10060,8 @@ soap_new_set_ns1__searchDatasetByRestrictionComparison(
     std::vector<ns1__restrictionComparisonCondition *> &restriction,
     char *__item1) {
   ns1__searchDatasetByRestrictionComparison *_p =
-      soap_instantiate_ns1__searchDatasetByRestrictionComparison(soap, -1, NULL,
-                                                                 NULL, NULL);
+      soap_instantiate_ns1__searchDatasetByRestrictionComparison(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetByRestrictionComparison::sessionId = sessionId;
@@ -10053,14 +10127,14 @@ inline ns1__searchSampleByParameterLogicalResponse *
 soap_new_ns1__searchSampleByParameterLogicalResponse(struct soap *soap,
                                                      int n = -1) {
   return soap_instantiate_ns1__searchSampleByParameterLogicalResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchSampleByParameterLogicalResponse *
 soap_new_req_ns1__searchSampleByParameterLogicalResponse(struct soap *soap) {
   ns1__searchSampleByParameterLogicalResponse *_p =
       soap_instantiate_ns1__searchSampleByParameterLogicalResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -10072,7 +10146,7 @@ soap_new_set_ns1__searchSampleByParameterLogicalResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchSampleByParameterLogicalResponse *_p =
       soap_instantiate_ns1__searchSampleByParameterLogicalResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSampleByParameterLogicalResponse::return_ = return_;
@@ -10133,15 +10207,15 @@ soap_instantiate_ns1__searchSampleByParameterLogical(struct soap *, int,
 
 inline ns1__searchSampleByParameterLogical *
 soap_new_ns1__searchSampleByParameterLogical(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchSampleByParameterLogical(soap, n, NULL,
-                                                              NULL, NULL);
+  return soap_instantiate_ns1__searchSampleByParameterLogical(soap, n, nullptr,
+                                                              nullptr, nullptr);
 }
 
 inline ns1__searchSampleByParameterLogical *
 soap_new_req_ns1__searchSampleByParameterLogical(struct soap *soap) {
   ns1__searchSampleByParameterLogical *_p =
-      soap_instantiate_ns1__searchSampleByParameterLogical(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__searchSampleByParameterLogical(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -10153,8 +10227,8 @@ soap_new_set_ns1__searchSampleByParameterLogical(
     struct soap *soap, std::string *sessionId,
     ns1__parameterLogicalCondition *logicalCondition, char *__item1) {
   ns1__searchSampleByParameterLogical *_p =
-      soap_instantiate_ns1__searchSampleByParameterLogical(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__searchSampleByParameterLogical(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSampleByParameterLogical::sessionId = sessionId;
@@ -10213,13 +10287,14 @@ soap_instantiate_ns1__removeDataSetResponse(struct soap *, int, const char *,
 
 inline ns1__removeDataSetResponse *
 soap_new_ns1__removeDataSetResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removeDataSetResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__removeDataSetResponse(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline ns1__removeDataSetResponse *
 soap_new_req_ns1__removeDataSetResponse(struct soap *soap) {
-  ns1__removeDataSetResponse *_p =
-      soap_instantiate_ns1__removeDataSetResponse(soap, -1, NULL, NULL, NULL);
+  ns1__removeDataSetResponse *_p = soap_instantiate_ns1__removeDataSetResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -10228,8 +10303,8 @@ soap_new_req_ns1__removeDataSetResponse(struct soap *soap) {
 
 inline ns1__removeDataSetResponse *
 soap_new_set_ns1__removeDataSetResponse(struct soap *soap, char *__item1) {
-  ns1__removeDataSetResponse *_p =
-      soap_instantiate_ns1__removeDataSetResponse(soap, -1, NULL, NULL, NULL);
+  ns1__removeDataSetResponse *_p = soap_instantiate_ns1__removeDataSetResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -10285,12 +10360,13 @@ soap_instantiate_ns1__removeDataSet(struct soap *, int, const char *,
 
 inline ns1__removeDataSet *soap_new_ns1__removeDataSet(struct soap *soap,
                                                        int n = -1) {
-  return soap_instantiate_ns1__removeDataSet(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__removeDataSet(soap, n, nullptr, nullptr,
+                                             nullptr);
 }
 
 inline ns1__removeDataSet *soap_new_req_ns1__removeDataSet(struct soap *soap) {
   ns1__removeDataSet *_p =
-      soap_instantiate_ns1__removeDataSet(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__removeDataSet(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -10301,7 +10377,7 @@ inline ns1__removeDataSet *
 soap_new_set_ns1__removeDataSet(struct soap *soap, std::string *sessionId,
                                 LONG64 *dataSetId, char *__item1) {
   ns1__removeDataSet *_p =
-      soap_instantiate_ns1__removeDataSet(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__removeDataSet(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__removeDataSet::sessionId = sessionId;
@@ -10362,15 +10438,15 @@ soap_instantiate_ns1__modifyDataSetParameterResponse(struct soap *, int,
 
 inline ns1__modifyDataSetParameterResponse *
 soap_new_ns1__modifyDataSetParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__modifyDataSetParameterResponse(soap, n, NULL,
-                                                              NULL, NULL);
+  return soap_instantiate_ns1__modifyDataSetParameterResponse(soap, n, nullptr,
+                                                              nullptr, nullptr);
 }
 
 inline ns1__modifyDataSetParameterResponse *
 soap_new_req_ns1__modifyDataSetParameterResponse(struct soap *soap) {
   ns1__modifyDataSetParameterResponse *_p =
-      soap_instantiate_ns1__modifyDataSetParameterResponse(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__modifyDataSetParameterResponse(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -10381,8 +10457,8 @@ inline ns1__modifyDataSetParameterResponse *
 soap_new_set_ns1__modifyDataSetParameterResponse(struct soap *soap,
                                                  char *__item1) {
   ns1__modifyDataSetParameterResponse *_p =
-      soap_instantiate_ns1__modifyDataSetParameterResponse(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__modifyDataSetParameterResponse(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -10440,14 +10516,15 @@ soap_instantiate_ns1__modifyDataSetParameter(struct soap *, int, const char *,
 
 inline ns1__modifyDataSetParameter *
 soap_new_ns1__modifyDataSetParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__modifyDataSetParameter(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__modifyDataSetParameter(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__modifyDataSetParameter *
 soap_new_req_ns1__modifyDataSetParameter(struct soap *soap) {
   ns1__modifyDataSetParameter *_p =
-      soap_instantiate_ns1__modifyDataSetParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__modifyDataSetParameter(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -10458,7 +10535,8 @@ inline ns1__modifyDataSetParameter *soap_new_set_ns1__modifyDataSetParameter(
     struct soap *soap, std::string *sessionId,
     ns1__datasetParameter *dataSetParameter, char *__item1) {
   ns1__modifyDataSetParameter *_p =
-      soap_instantiate_ns1__modifyDataSetParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__modifyDataSetParameter(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__modifyDataSetParameter::sessionId = sessionId;
@@ -10520,15 +10598,15 @@ soap_instantiate_ns1__listInvestigationTypesResponse(struct soap *, int,
 
 inline ns1__listInvestigationTypesResponse *
 soap_new_ns1__listInvestigationTypesResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__listInvestigationTypesResponse(soap, n, NULL,
-                                                              NULL, NULL);
+  return soap_instantiate_ns1__listInvestigationTypesResponse(soap, n, nullptr,
+                                                              nullptr, nullptr);
 }
 
 inline ns1__listInvestigationTypesResponse *
 soap_new_req_ns1__listInvestigationTypesResponse(struct soap *soap) {
   ns1__listInvestigationTypesResponse *_p =
-      soap_instantiate_ns1__listInvestigationTypesResponse(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__listInvestigationTypesResponse(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -10539,8 +10617,8 @@ inline ns1__listInvestigationTypesResponse *
 soap_new_set_ns1__listInvestigationTypesResponse(
     struct soap *soap, std::vector<std::string> &return_, char *__item1) {
   ns1__listInvestigationTypesResponse *_p =
-      soap_instantiate_ns1__listInvestigationTypesResponse(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__listInvestigationTypesResponse(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__listInvestigationTypesResponse::return_ = return_;
@@ -10599,14 +10677,15 @@ soap_instantiate_ns1__listInvestigationTypes(struct soap *, int, const char *,
 
 inline ns1__listInvestigationTypes *
 soap_new_ns1__listInvestigationTypes(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__listInvestigationTypes(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__listInvestigationTypes(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__listInvestigationTypes *
 soap_new_req_ns1__listInvestigationTypes(struct soap *soap) {
   ns1__listInvestigationTypes *_p =
-      soap_instantiate_ns1__listInvestigationTypes(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__listInvestigationTypes(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -10616,7 +10695,8 @@ soap_new_req_ns1__listInvestigationTypes(struct soap *soap) {
 inline ns1__listInvestigationTypes *soap_new_set_ns1__listInvestigationTypes(
     struct soap *soap, std::string *sessionId, char *__item1) {
   ns1__listInvestigationTypes *_p =
-      soap_instantiate_ns1__listInvestigationTypes(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__listInvestigationTypes(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__listInvestigationTypes::sessionId = sessionId;
@@ -10677,15 +10757,15 @@ soap_instantiate_ns1__getKeywordsForUserResponse(struct soap *, int,
 
 inline ns1__getKeywordsForUserResponse *
 soap_new_ns1__getKeywordsForUserResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getKeywordsForUserResponse(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate_ns1__getKeywordsForUserResponse(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline ns1__getKeywordsForUserResponse *
 soap_new_req_ns1__getKeywordsForUserResponse(struct soap *soap) {
   ns1__getKeywordsForUserResponse *_p =
-      soap_instantiate_ns1__getKeywordsForUserResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__getKeywordsForUserResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -10697,8 +10777,8 @@ soap_new_set_ns1__getKeywordsForUserResponse(struct soap *soap,
                                              std::vector<std::string> &return_,
                                              char *__item1) {
   ns1__getKeywordsForUserResponse *_p =
-      soap_instantiate_ns1__getKeywordsForUserResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__getKeywordsForUserResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getKeywordsForUserResponse::return_ = return_;
@@ -10754,13 +10834,14 @@ soap_instantiate_ns1__getKeywordsForUser(struct soap *, int, const char *,
 
 inline ns1__getKeywordsForUser *
 soap_new_ns1__getKeywordsForUser(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getKeywordsForUser(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getKeywordsForUser(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline ns1__getKeywordsForUser *
 soap_new_req_ns1__getKeywordsForUser(struct soap *soap) {
-  ns1__getKeywordsForUser *_p =
-      soap_instantiate_ns1__getKeywordsForUser(soap, -1, NULL, NULL, NULL);
+  ns1__getKeywordsForUser *_p = soap_instantiate_ns1__getKeywordsForUser(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -10770,8 +10851,8 @@ soap_new_req_ns1__getKeywordsForUser(struct soap *soap) {
 inline ns1__getKeywordsForUser *
 soap_new_set_ns1__getKeywordsForUser(struct soap *soap, std::string *sessionId,
                                      char *__item1) {
-  ns1__getKeywordsForUser *_p =
-      soap_instantiate_ns1__getKeywordsForUser(soap, -1, NULL, NULL, NULL);
+  ns1__getKeywordsForUser *_p = soap_instantiate_ns1__getKeywordsForUser(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getKeywordsForUser::sessionId = sessionId;
@@ -10835,14 +10916,14 @@ inline ns1__getKeywordsForUserStartWithMaxResponse *
 soap_new_ns1__getKeywordsForUserStartWithMaxResponse(struct soap *soap,
                                                      int n = -1) {
   return soap_instantiate_ns1__getKeywordsForUserStartWithMaxResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getKeywordsForUserStartWithMaxResponse *
 soap_new_req_ns1__getKeywordsForUserStartWithMaxResponse(struct soap *soap) {
   ns1__getKeywordsForUserStartWithMaxResponse *_p =
       soap_instantiate_ns1__getKeywordsForUserStartWithMaxResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -10854,7 +10935,7 @@ soap_new_set_ns1__getKeywordsForUserStartWithMaxResponse(
     struct soap *soap, std::vector<std::string> &return_, char *__item1) {
   ns1__getKeywordsForUserStartWithMaxResponse *_p =
       soap_instantiate_ns1__getKeywordsForUserStartWithMaxResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getKeywordsForUserStartWithMaxResponse::return_ = return_;
@@ -10915,16 +10996,16 @@ soap_instantiate_ns1__getKeywordsForUserStartWithMax(struct soap *, int,
 
 inline ns1__getKeywordsForUserStartWithMax *
 soap_new_ns1__getKeywordsForUserStartWithMax(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getKeywordsForUserStartWithMax(soap, n, NULL,
-                                                              NULL, NULL);
+  return soap_instantiate_ns1__getKeywordsForUserStartWithMax(soap, n, nullptr,
+                                                              nullptr, nullptr);
 }
 
 inline ns1__getKeywordsForUserStartWithMax *
 soap_new_req_ns1__getKeywordsForUserStartWithMax(struct soap *soap,
                                                  int numberReturned) {
   ns1__getKeywordsForUserStartWithMax *_p =
-      soap_instantiate_ns1__getKeywordsForUserStartWithMax(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__getKeywordsForUserStartWithMax(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getKeywordsForUserStartWithMax::numberReturned = numberReturned;
@@ -10939,8 +11020,8 @@ soap_new_set_ns1__getKeywordsForUserStartWithMax(struct soap *soap,
                                                  int numberReturned,
                                                  char *__item1) {
   ns1__getKeywordsForUserStartWithMax *_p =
-      soap_instantiate_ns1__getKeywordsForUserStartWithMax(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__getKeywordsForUserStartWithMax(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getKeywordsForUserStartWithMax::sessionId = sessionId;
@@ -11002,15 +11083,15 @@ soap_instantiate_ns1__getKeywordsForUserMaxResponse(struct soap *, int,
 
 inline ns1__getKeywordsForUserMaxResponse *
 soap_new_ns1__getKeywordsForUserMaxResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getKeywordsForUserMaxResponse(soap, n, NULL,
-                                                             NULL, NULL);
+  return soap_instantiate_ns1__getKeywordsForUserMaxResponse(soap, n, nullptr,
+                                                             nullptr, nullptr);
 }
 
 inline ns1__getKeywordsForUserMaxResponse *
 soap_new_req_ns1__getKeywordsForUserMaxResponse(struct soap *soap) {
   ns1__getKeywordsForUserMaxResponse *_p =
-      soap_instantiate_ns1__getKeywordsForUserMaxResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate_ns1__getKeywordsForUserMaxResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -11021,8 +11102,8 @@ inline ns1__getKeywordsForUserMaxResponse *
 soap_new_set_ns1__getKeywordsForUserMaxResponse(
     struct soap *soap, std::vector<std::string> &return_, char *__item1) {
   ns1__getKeywordsForUserMaxResponse *_p =
-      soap_instantiate_ns1__getKeywordsForUserMaxResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate_ns1__getKeywordsForUserMaxResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getKeywordsForUserMaxResponse::return_ = return_;
@@ -11079,13 +11160,14 @@ soap_instantiate_ns1__getKeywordsForUserMax(struct soap *, int, const char *,
 
 inline ns1__getKeywordsForUserMax *
 soap_new_ns1__getKeywordsForUserMax(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getKeywordsForUserMax(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getKeywordsForUserMax(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline ns1__getKeywordsForUserMax *
 soap_new_req_ns1__getKeywordsForUserMax(struct soap *soap, int numberReturned) {
-  ns1__getKeywordsForUserMax *_p =
-      soap_instantiate_ns1__getKeywordsForUserMax(soap, -1, NULL, NULL, NULL);
+  ns1__getKeywordsForUserMax *_p = soap_instantiate_ns1__getKeywordsForUserMax(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getKeywordsForUserMax::numberReturned = numberReturned;
@@ -11097,8 +11179,8 @@ inline ns1__getKeywordsForUserMax *
 soap_new_set_ns1__getKeywordsForUserMax(struct soap *soap,
                                         std::string *sessionId,
                                         int numberReturned, char *__item1) {
-  ns1__getKeywordsForUserMax *_p =
-      soap_instantiate_ns1__getKeywordsForUserMax(soap, -1, NULL, NULL, NULL);
+  ns1__getKeywordsForUserMax *_p = soap_instantiate_ns1__getKeywordsForUserMax(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getKeywordsForUserMax::sessionId = sessionId;
@@ -11160,15 +11242,15 @@ soap_instantiate_ns1__getKeywordsForUserTypeResponse(struct soap *, int,
 
 inline ns1__getKeywordsForUserTypeResponse *
 soap_new_ns1__getKeywordsForUserTypeResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getKeywordsForUserTypeResponse(soap, n, NULL,
-                                                              NULL, NULL);
+  return soap_instantiate_ns1__getKeywordsForUserTypeResponse(soap, n, nullptr,
+                                                              nullptr, nullptr);
 }
 
 inline ns1__getKeywordsForUserTypeResponse *
 soap_new_req_ns1__getKeywordsForUserTypeResponse(struct soap *soap) {
   ns1__getKeywordsForUserTypeResponse *_p =
-      soap_instantiate_ns1__getKeywordsForUserTypeResponse(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__getKeywordsForUserTypeResponse(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -11179,8 +11261,8 @@ inline ns1__getKeywordsForUserTypeResponse *
 soap_new_set_ns1__getKeywordsForUserTypeResponse(
     struct soap *soap, std::vector<std::string> &return_, char *__item1) {
   ns1__getKeywordsForUserTypeResponse *_p =
-      soap_instantiate_ns1__getKeywordsForUserTypeResponse(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__getKeywordsForUserTypeResponse(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getKeywordsForUserTypeResponse::return_ = return_;
@@ -11239,14 +11321,15 @@ soap_instantiate_ns1__getKeywordsForUserType(struct soap *, int, const char *,
 
 inline ns1__getKeywordsForUserType *
 soap_new_ns1__getKeywordsForUserType(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getKeywordsForUserType(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__getKeywordsForUserType(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__getKeywordsForUserType *
 soap_new_req_ns1__getKeywordsForUserType(struct soap *soap) {
   ns1__getKeywordsForUserType *_p =
-      soap_instantiate_ns1__getKeywordsForUserType(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getKeywordsForUserType(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -11257,7 +11340,8 @@ inline ns1__getKeywordsForUserType *soap_new_set_ns1__getKeywordsForUserType(
     struct soap *soap, std::string *sessionId,
     enum ns1__keywordType *keywordType, char *__item1) {
   ns1__getKeywordsForUserType *_p =
-      soap_instantiate_ns1__getKeywordsForUserType(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getKeywordsForUserType(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getKeywordsForUserType::sessionId = sessionId;
@@ -11319,15 +11403,15 @@ soap_instantiate_ns1__getParameterByNameResponse(struct soap *, int,
 
 inline ns1__getParameterByNameResponse *
 soap_new_ns1__getParameterByNameResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getParameterByNameResponse(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate_ns1__getParameterByNameResponse(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline ns1__getParameterByNameResponse *
 soap_new_req_ns1__getParameterByNameResponse(struct soap *soap) {
   ns1__getParameterByNameResponse *_p =
-      soap_instantiate_ns1__getParameterByNameResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__getParameterByNameResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -11338,8 +11422,8 @@ inline ns1__getParameterByNameResponse *
 soap_new_set_ns1__getParameterByNameResponse(
     struct soap *soap, std::vector<ns1__parameter *> &return_, char *__item1) {
   ns1__getParameterByNameResponse *_p =
-      soap_instantiate_ns1__getParameterByNameResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__getParameterByNameResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getParameterByNameResponse::return_ = return_;
@@ -11395,13 +11479,14 @@ soap_instantiate_ns1__getParameterByName(struct soap *, int, const char *,
 
 inline ns1__getParameterByName *
 soap_new_ns1__getParameterByName(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getParameterByName(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getParameterByName(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline ns1__getParameterByName *
 soap_new_req_ns1__getParameterByName(struct soap *soap) {
-  ns1__getParameterByName *_p =
-      soap_instantiate_ns1__getParameterByName(soap, -1, NULL, NULL, NULL);
+  ns1__getParameterByName *_p = soap_instantiate_ns1__getParameterByName(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -11411,8 +11496,8 @@ soap_new_req_ns1__getParameterByName(struct soap *soap) {
 inline ns1__getParameterByName *
 soap_new_set_ns1__getParameterByName(struct soap *soap, std::string *sessionId,
                                      std::string *name, char *__item1) {
-  ns1__getParameterByName *_p =
-      soap_instantiate_ns1__getParameterByName(soap, -1, NULL, NULL, NULL);
+  ns1__getParameterByName *_p = soap_instantiate_ns1__getParameterByName(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getParameterByName::sessionId = sessionId;
@@ -11473,15 +11558,15 @@ soap_instantiate_ns1__downloadDatafileResponse(struct soap *, int, const char *,
 
 inline ns1__downloadDatafileResponse *
 soap_new_ns1__downloadDatafileResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__downloadDatafileResponse(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate_ns1__downloadDatafileResponse(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline ns1__downloadDatafileResponse *
 soap_new_req_ns1__downloadDatafileResponse(struct soap *soap) {
   ns1__downloadDatafileResponse *_p =
-      soap_instantiate_ns1__downloadDatafileResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__downloadDatafileResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -11492,8 +11577,8 @@ inline ns1__downloadDatafileResponse *
 soap_new_set_ns1__downloadDatafileResponse(struct soap *soap, std::string *URL,
                                            char *__item1) {
   ns1__downloadDatafileResponse *_p =
-      soap_instantiate_ns1__downloadDatafileResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__downloadDatafileResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__downloadDatafileResponse::URL = URL;
@@ -11550,13 +11635,14 @@ soap_instantiate_ns1__downloadDatafile(struct soap *, int, const char *,
 
 inline ns1__downloadDatafile *soap_new_ns1__downloadDatafile(struct soap *soap,
                                                              int n = -1) {
-  return soap_instantiate_ns1__downloadDatafile(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__downloadDatafile(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline ns1__downloadDatafile *
 soap_new_req_ns1__downloadDatafile(struct soap *soap) {
-  ns1__downloadDatafile *_p =
-      soap_instantiate_ns1__downloadDatafile(soap, -1, NULL, NULL, NULL);
+  ns1__downloadDatafile *_p = soap_instantiate_ns1__downloadDatafile(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -11566,8 +11652,8 @@ soap_new_req_ns1__downloadDatafile(struct soap *soap) {
 inline ns1__downloadDatafile *
 soap_new_set_ns1__downloadDatafile(struct soap *soap, std::string *sessionId,
                                    LONG64 *datafileId, char *__item1) {
-  ns1__downloadDatafile *_p =
-      soap_instantiate_ns1__downloadDatafile(soap, -1, NULL, NULL, NULL);
+  ns1__downloadDatafile *_p = soap_instantiate_ns1__downloadDatafile(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__downloadDatafile::sessionId = sessionId;
@@ -11628,15 +11714,15 @@ soap_instantiate_ns1__setDataSetSampleResponse(struct soap *, int, const char *,
 
 inline ns1__setDataSetSampleResponse *
 soap_new_ns1__setDataSetSampleResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__setDataSetSampleResponse(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate_ns1__setDataSetSampleResponse(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline ns1__setDataSetSampleResponse *
 soap_new_req_ns1__setDataSetSampleResponse(struct soap *soap) {
   ns1__setDataSetSampleResponse *_p =
-      soap_instantiate_ns1__setDataSetSampleResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__setDataSetSampleResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -11646,8 +11732,8 @@ soap_new_req_ns1__setDataSetSampleResponse(struct soap *soap) {
 inline ns1__setDataSetSampleResponse *
 soap_new_set_ns1__setDataSetSampleResponse(struct soap *soap, char *__item1) {
   ns1__setDataSetSampleResponse *_p =
-      soap_instantiate_ns1__setDataSetSampleResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__setDataSetSampleResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -11703,13 +11789,14 @@ soap_instantiate_ns1__setDataSetSample(struct soap *, int, const char *,
 
 inline ns1__setDataSetSample *soap_new_ns1__setDataSetSample(struct soap *soap,
                                                              int n = -1) {
-  return soap_instantiate_ns1__setDataSetSample(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__setDataSetSample(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline ns1__setDataSetSample *
 soap_new_req_ns1__setDataSetSample(struct soap *soap) {
-  ns1__setDataSetSample *_p =
-      soap_instantiate_ns1__setDataSetSample(soap, -1, NULL, NULL, NULL);
+  ns1__setDataSetSample *_p = soap_instantiate_ns1__setDataSetSample(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -11720,8 +11807,8 @@ inline ns1__setDataSetSample *
 soap_new_set_ns1__setDataSetSample(struct soap *soap, std::string *sessionId,
                                    LONG64 *sampleId, LONG64 *datafileId,
                                    char *__item1) {
-  ns1__setDataSetSample *_p =
-      soap_instantiate_ns1__setDataSetSample(soap, -1, NULL, NULL, NULL);
+  ns1__setDataSetSample *_p = soap_instantiate_ns1__setDataSetSample(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__setDataSetSample::sessionId = sessionId;
@@ -11783,15 +11870,15 @@ soap_instantiate_ns1__deleteDataSetParameterResponse(struct soap *, int,
 
 inline ns1__deleteDataSetParameterResponse *
 soap_new_ns1__deleteDataSetParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deleteDataSetParameterResponse(soap, n, NULL,
-                                                              NULL, NULL);
+  return soap_instantiate_ns1__deleteDataSetParameterResponse(soap, n, nullptr,
+                                                              nullptr, nullptr);
 }
 
 inline ns1__deleteDataSetParameterResponse *
 soap_new_req_ns1__deleteDataSetParameterResponse(struct soap *soap) {
   ns1__deleteDataSetParameterResponse *_p =
-      soap_instantiate_ns1__deleteDataSetParameterResponse(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__deleteDataSetParameterResponse(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -11802,8 +11889,8 @@ inline ns1__deleteDataSetParameterResponse *
 soap_new_set_ns1__deleteDataSetParameterResponse(struct soap *soap,
                                                  char *__item1) {
   ns1__deleteDataSetParameterResponse *_p =
-      soap_instantiate_ns1__deleteDataSetParameterResponse(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__deleteDataSetParameterResponse(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -11861,14 +11948,15 @@ soap_instantiate_ns1__deleteDataSetParameter(struct soap *, int, const char *,
 
 inline ns1__deleteDataSetParameter *
 soap_new_ns1__deleteDataSetParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deleteDataSetParameter(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__deleteDataSetParameter(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__deleteDataSetParameter *
 soap_new_req_ns1__deleteDataSetParameter(struct soap *soap) {
   ns1__deleteDataSetParameter *_p =
-      soap_instantiate_ns1__deleteDataSetParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__deleteDataSetParameter(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -11879,7 +11967,8 @@ inline ns1__deleteDataSetParameter *soap_new_set_ns1__deleteDataSetParameter(
     struct soap *soap, std::string *sessionId,
     ns1__datasetParameterPK *datasetParameterPK, char *__item1) {
   ns1__deleteDataSetParameter *_p =
-      soap_instantiate_ns1__deleteDataSetParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__deleteDataSetParameter(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__deleteDataSetParameter::sessionId = sessionId;
@@ -11941,15 +12030,15 @@ soap_instantiate_ns1__removeSampleParameterResponse(struct soap *, int,
 
 inline ns1__removeSampleParameterResponse *
 soap_new_ns1__removeSampleParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removeSampleParameterResponse(soap, n, NULL,
-                                                             NULL, NULL);
+  return soap_instantiate_ns1__removeSampleParameterResponse(soap, n, nullptr,
+                                                             nullptr, nullptr);
 }
 
 inline ns1__removeSampleParameterResponse *
 soap_new_req_ns1__removeSampleParameterResponse(struct soap *soap) {
   ns1__removeSampleParameterResponse *_p =
-      soap_instantiate_ns1__removeSampleParameterResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate_ns1__removeSampleParameterResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -11960,8 +12049,8 @@ inline ns1__removeSampleParameterResponse *
 soap_new_set_ns1__removeSampleParameterResponse(struct soap *soap,
                                                 char *__item1) {
   ns1__removeSampleParameterResponse *_p =
-      soap_instantiate_ns1__removeSampleParameterResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate_ns1__removeSampleParameterResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -12017,13 +12106,14 @@ soap_instantiate_ns1__removeSampleParameter(struct soap *, int, const char *,
 
 inline ns1__removeSampleParameter *
 soap_new_ns1__removeSampleParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removeSampleParameter(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__removeSampleParameter(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline ns1__removeSampleParameter *
 soap_new_req_ns1__removeSampleParameter(struct soap *soap) {
-  ns1__removeSampleParameter *_p =
-      soap_instantiate_ns1__removeSampleParameter(soap, -1, NULL, NULL, NULL);
+  ns1__removeSampleParameter *_p = soap_instantiate_ns1__removeSampleParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -12033,8 +12123,8 @@ soap_new_req_ns1__removeSampleParameter(struct soap *soap) {
 inline ns1__removeSampleParameter *soap_new_set_ns1__removeSampleParameter(
     struct soap *soap, std::string *sessionId,
     ns1__sampleParameterPK *sampleParameterPK, char *__item1) {
-  ns1__removeSampleParameter *_p =
-      soap_instantiate_ns1__removeSampleParameter(soap, -1, NULL, NULL, NULL);
+  ns1__removeSampleParameter *_p = soap_instantiate_ns1__removeSampleParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__removeSampleParameter::sessionId = sessionId;
@@ -12103,7 +12193,7 @@ inline ns1__searchInvestigationByRestrictionLogicalResponse *
 soap_new_ns1__searchInvestigationByRestrictionLogicalResponse(struct soap *soap,
                                                               int n = -1) {
   return soap_instantiate_ns1__searchInvestigationByRestrictionLogicalResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchInvestigationByRestrictionLogicalResponse *
@@ -12111,7 +12201,7 @@ soap_new_req_ns1__searchInvestigationByRestrictionLogicalResponse(
     struct soap *soap) {
   ns1__searchInvestigationByRestrictionLogicalResponse *_p =
       soap_instantiate_ns1__searchInvestigationByRestrictionLogicalResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -12123,7 +12213,7 @@ soap_new_set_ns1__searchInvestigationByRestrictionLogicalResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchInvestigationByRestrictionLogicalResponse *_p =
       soap_instantiate_ns1__searchInvestigationByRestrictionLogicalResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchInvestigationByRestrictionLogicalResponse::return_ = return_;
@@ -12188,14 +12278,14 @@ inline ns1__searchInvestigationByRestrictionLogical *
 soap_new_ns1__searchInvestigationByRestrictionLogical(struct soap *soap,
                                                       int n = -1) {
   return soap_instantiate_ns1__searchInvestigationByRestrictionLogical(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchInvestigationByRestrictionLogical *
 soap_new_req_ns1__searchInvestigationByRestrictionLogical(struct soap *soap) {
   ns1__searchInvestigationByRestrictionLogical *_p =
       soap_instantiate_ns1__searchInvestigationByRestrictionLogical(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -12208,7 +12298,7 @@ soap_new_set_ns1__searchInvestigationByRestrictionLogical(
     ns1__restrictionLogicalCondition *restriction, char *__item1) {
   ns1__searchInvestigationByRestrictionLogical *_p =
       soap_instantiate_ns1__searchInvestigationByRestrictionLogical(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchInvestigationByRestrictionLogical::sessionId = sessionId;
@@ -12275,7 +12365,7 @@ inline ns1__searchDatafileByParameterRestrictionResponse *
 soap_new_ns1__searchDatafileByParameterRestrictionResponse(struct soap *soap,
                                                            int n = -1) {
   return soap_instantiate_ns1__searchDatafileByParameterRestrictionResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatafileByParameterRestrictionResponse *
@@ -12283,7 +12373,7 @@ soap_new_req_ns1__searchDatafileByParameterRestrictionResponse(
     struct soap *soap) {
   ns1__searchDatafileByParameterRestrictionResponse *_p =
       soap_instantiate_ns1__searchDatafileByParameterRestrictionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -12295,7 +12385,7 @@ soap_new_set_ns1__searchDatafileByParameterRestrictionResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchDatafileByParameterRestrictionResponse *_p =
       soap_instantiate_ns1__searchDatafileByParameterRestrictionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatafileByParameterRestrictionResponse::return_ = return_;
@@ -12361,14 +12451,14 @@ inline ns1__searchDatafileByParameterRestriction *
 soap_new_ns1__searchDatafileByParameterRestriction(struct soap *soap,
                                                    int n = -1) {
   return soap_instantiate_ns1__searchDatafileByParameterRestriction(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatafileByParameterRestriction *
 soap_new_req_ns1__searchDatafileByParameterRestriction(struct soap *soap) {
   ns1__searchDatafileByParameterRestriction *_p =
-      soap_instantiate_ns1__searchDatafileByParameterRestriction(soap, -1, NULL,
-                                                                 NULL, NULL);
+      soap_instantiate_ns1__searchDatafileByParameterRestriction(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -12381,8 +12471,8 @@ soap_new_set_ns1__searchDatafileByParameterRestriction(
     ns1__parameterCondition *parameterCondition,
     ns1__restrictionCondition *restrictions, char *__item1) {
   ns1__searchDatafileByParameterRestriction *_p =
-      soap_instantiate_ns1__searchDatafileByParameterRestriction(soap, -1, NULL,
-                                                                 NULL, NULL);
+      soap_instantiate_ns1__searchDatafileByParameterRestriction(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatafileByParameterRestriction::sessionId = sessionId;
@@ -12443,13 +12533,14 @@ soap_instantiate_ns1__createDataSetResponse(struct soap *, int, const char *,
 
 inline ns1__createDataSetResponse *
 soap_new_ns1__createDataSetResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__createDataSetResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__createDataSetResponse(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline ns1__createDataSetResponse *
 soap_new_req_ns1__createDataSetResponse(struct soap *soap) {
-  ns1__createDataSetResponse *_p =
-      soap_instantiate_ns1__createDataSetResponse(soap, -1, NULL, NULL, NULL);
+  ns1__createDataSetResponse *_p = soap_instantiate_ns1__createDataSetResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -12459,8 +12550,8 @@ soap_new_req_ns1__createDataSetResponse(struct soap *soap) {
 inline ns1__createDataSetResponse *
 soap_new_set_ns1__createDataSetResponse(struct soap *soap,
                                         ns1__dataset *return_, char *__item1) {
-  ns1__createDataSetResponse *_p =
-      soap_instantiate_ns1__createDataSetResponse(soap, -1, NULL, NULL, NULL);
+  ns1__createDataSetResponse *_p = soap_instantiate_ns1__createDataSetResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__createDataSetResponse::return_ = return_;
@@ -12517,12 +12608,13 @@ soap_instantiate_ns1__createDataSet(struct soap *, int, const char *,
 
 inline ns1__createDataSet *soap_new_ns1__createDataSet(struct soap *soap,
                                                        int n = -1) {
-  return soap_instantiate_ns1__createDataSet(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__createDataSet(soap, n, nullptr, nullptr,
+                                             nullptr);
 }
 
 inline ns1__createDataSet *soap_new_req_ns1__createDataSet(struct soap *soap) {
   ns1__createDataSet *_p =
-      soap_instantiate_ns1__createDataSet(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__createDataSet(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -12534,7 +12626,7 @@ soap_new_set_ns1__createDataSet(struct soap *soap, std::string *sessionId,
                                 ns1__dataset *dataSet, LONG64 *investigationId,
                                 char *__item1) {
   ns1__createDataSet *_p =
-      soap_instantiate_ns1__createDataSet(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__createDataSet(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__createDataSet::sessionId = sessionId;
@@ -12599,14 +12691,14 @@ inline ns1__searchDatafileByParameterLogicalResponse *
 soap_new_ns1__searchDatafileByParameterLogicalResponse(struct soap *soap,
                                                        int n = -1) {
   return soap_instantiate_ns1__searchDatafileByParameterLogicalResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatafileByParameterLogicalResponse *
 soap_new_req_ns1__searchDatafileByParameterLogicalResponse(struct soap *soap) {
   ns1__searchDatafileByParameterLogicalResponse *_p =
       soap_instantiate_ns1__searchDatafileByParameterLogicalResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -12618,7 +12710,7 @@ soap_new_set_ns1__searchDatafileByParameterLogicalResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchDatafileByParameterLogicalResponse *_p =
       soap_instantiate_ns1__searchDatafileByParameterLogicalResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatafileByParameterLogicalResponse::return_ = return_;
@@ -12679,15 +12771,15 @@ soap_instantiate_ns1__searchDatafileByParameterLogical(struct soap *, int,
 
 inline ns1__searchDatafileByParameterLogical *
 soap_new_ns1__searchDatafileByParameterLogical(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchDatafileByParameterLogical(soap, n, NULL,
-                                                                NULL, NULL);
+  return soap_instantiate_ns1__searchDatafileByParameterLogical(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatafileByParameterLogical *
 soap_new_req_ns1__searchDatafileByParameterLogical(struct soap *soap) {
   ns1__searchDatafileByParameterLogical *_p =
-      soap_instantiate_ns1__searchDatafileByParameterLogical(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate_ns1__searchDatafileByParameterLogical(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -12699,8 +12791,8 @@ soap_new_set_ns1__searchDatafileByParameterLogical(
     struct soap *soap, std::string *sessionId,
     ns1__parameterLogicalCondition *logicalCondition, char *__item1) {
   ns1__searchDatafileByParameterLogical *_p =
-      soap_instantiate_ns1__searchDatafileByParameterLogical(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate_ns1__searchDatafileByParameterLogical(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatafileByParameterLogical::sessionId = sessionId;
@@ -12762,14 +12854,15 @@ soap_instantiate_ns1__addInvestigatorResponse(struct soap *, int, const char *,
 
 inline ns1__addInvestigatorResponse *
 soap_new_ns1__addInvestigatorResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__addInvestigatorResponse(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate_ns1__addInvestigatorResponse(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline ns1__addInvestigatorResponse *
 soap_new_req_ns1__addInvestigatorResponse(struct soap *soap) {
   ns1__addInvestigatorResponse *_p =
-      soap_instantiate_ns1__addInvestigatorResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__addInvestigatorResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -12779,7 +12872,8 @@ soap_new_req_ns1__addInvestigatorResponse(struct soap *soap) {
 inline ns1__addInvestigatorResponse *soap_new_set_ns1__addInvestigatorResponse(
     struct soap *soap, ns1__investigator *return_, char *__item1) {
   ns1__addInvestigatorResponse *_p =
-      soap_instantiate_ns1__addInvestigatorResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__addInvestigatorResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addInvestigatorResponse::return_ = return_;
@@ -12836,13 +12930,14 @@ soap_instantiate_ns1__addInvestigator(struct soap *, int, const char *,
 
 inline ns1__addInvestigator *soap_new_ns1__addInvestigator(struct soap *soap,
                                                            int n = -1) {
-  return soap_instantiate_ns1__addInvestigator(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__addInvestigator(soap, n, nullptr, nullptr,
+                                               nullptr);
 }
 
 inline ns1__addInvestigator *
 soap_new_req_ns1__addInvestigator(struct soap *soap) {
-  ns1__addInvestigator *_p =
-      soap_instantiate_ns1__addInvestigator(soap, -1, NULL, NULL, NULL);
+  ns1__addInvestigator *_p = soap_instantiate_ns1__addInvestigator(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -12853,8 +12948,8 @@ inline ns1__addInvestigator *
 soap_new_set_ns1__addInvestigator(struct soap *soap, std::string *sessionId,
                                   ns1__investigator *ns1__investigator_,
                                   LONG64 *investigationId, char *__item1) {
-  ns1__addInvestigator *_p =
-      soap_instantiate_ns1__addInvestigator(soap, -1, NULL, NULL, NULL);
+  ns1__addInvestigator *_p = soap_instantiate_ns1__addInvestigator(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addInvestigator::sessionId = sessionId;
@@ -12916,15 +13011,15 @@ soap_instantiate_ns1__deleteInvestigatorResponse(struct soap *, int,
 
 inline ns1__deleteInvestigatorResponse *
 soap_new_ns1__deleteInvestigatorResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deleteInvestigatorResponse(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate_ns1__deleteInvestigatorResponse(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline ns1__deleteInvestigatorResponse *
 soap_new_req_ns1__deleteInvestigatorResponse(struct soap *soap) {
   ns1__deleteInvestigatorResponse *_p =
-      soap_instantiate_ns1__deleteInvestigatorResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__deleteInvestigatorResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -12934,8 +13029,8 @@ soap_new_req_ns1__deleteInvestigatorResponse(struct soap *soap) {
 inline ns1__deleteInvestigatorResponse *
 soap_new_set_ns1__deleteInvestigatorResponse(struct soap *soap, char *__item1) {
   ns1__deleteInvestigatorResponse *_p =
-      soap_instantiate_ns1__deleteInvestigatorResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__deleteInvestigatorResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -12990,13 +13085,14 @@ soap_instantiate_ns1__deleteInvestigator(struct soap *, int, const char *,
 
 inline ns1__deleteInvestigator *
 soap_new_ns1__deleteInvestigator(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deleteInvestigator(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__deleteInvestigator(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline ns1__deleteInvestigator *
 soap_new_req_ns1__deleteInvestigator(struct soap *soap) {
-  ns1__deleteInvestigator *_p =
-      soap_instantiate_ns1__deleteInvestigator(soap, -1, NULL, NULL, NULL);
+  ns1__deleteInvestigator *_p = soap_instantiate_ns1__deleteInvestigator(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -13007,8 +13103,8 @@ inline ns1__deleteInvestigator *
 soap_new_set_ns1__deleteInvestigator(struct soap *soap, std::string *sessionId,
                                      ns1__investigatorPK *investigatorPK,
                                      char *__item1) {
-  ns1__deleteInvestigator *_p =
-      soap_instantiate_ns1__deleteInvestigator(soap, -1, NULL, NULL, NULL);
+  ns1__deleteInvestigator *_p = soap_instantiate_ns1__deleteInvestigator(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__deleteInvestigator::sessionId = sessionId;
@@ -13072,14 +13168,14 @@ inline ns1__searchInvestigationByRestrictionResponse *
 soap_new_ns1__searchInvestigationByRestrictionResponse(struct soap *soap,
                                                        int n = -1) {
   return soap_instantiate_ns1__searchInvestigationByRestrictionResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchInvestigationByRestrictionResponse *
 soap_new_req_ns1__searchInvestigationByRestrictionResponse(struct soap *soap) {
   ns1__searchInvestigationByRestrictionResponse *_p =
       soap_instantiate_ns1__searchInvestigationByRestrictionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -13091,7 +13187,7 @@ soap_new_set_ns1__searchInvestigationByRestrictionResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchInvestigationByRestrictionResponse *_p =
       soap_instantiate_ns1__searchInvestigationByRestrictionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchInvestigationByRestrictionResponse::return_ = return_;
@@ -13152,15 +13248,15 @@ soap_instantiate_ns1__searchInvestigationByRestriction(struct soap *, int,
 
 inline ns1__searchInvestigationByRestriction *
 soap_new_ns1__searchInvestigationByRestriction(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchInvestigationByRestriction(soap, n, NULL,
-                                                                NULL, NULL);
+  return soap_instantiate_ns1__searchInvestigationByRestriction(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchInvestigationByRestriction *
 soap_new_req_ns1__searchInvestigationByRestriction(struct soap *soap) {
   ns1__searchInvestigationByRestriction *_p =
-      soap_instantiate_ns1__searchInvestigationByRestriction(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate_ns1__searchInvestigationByRestriction(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -13172,8 +13268,8 @@ soap_new_set_ns1__searchInvestigationByRestriction(
     struct soap *soap, std::string *sessionId,
     ns1__restrictionCondition *restriction, char *__item1) {
   ns1__searchInvestigationByRestriction *_p =
-      soap_instantiate_ns1__searchInvestigationByRestriction(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate_ns1__searchInvestigationByRestriction(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchInvestigationByRestriction::sessionId = sessionId;
@@ -13235,15 +13331,15 @@ soap_instantiate_ns1__getICATAPIVersionResponse(struct soap *, int,
 
 inline ns1__getICATAPIVersionResponse *
 soap_new_ns1__getICATAPIVersionResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getICATAPIVersionResponse(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate_ns1__getICATAPIVersionResponse(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline ns1__getICATAPIVersionResponse *
 soap_new_req_ns1__getICATAPIVersionResponse(struct soap *soap) {
   ns1__getICATAPIVersionResponse *_p =
-      soap_instantiate_ns1__getICATAPIVersionResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__getICATAPIVersionResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -13255,8 +13351,8 @@ soap_new_set_ns1__getICATAPIVersionResponse(struct soap *soap,
                                             std::string *return_,
                                             char *__item1) {
   ns1__getICATAPIVersionResponse *_p =
-      soap_instantiate_ns1__getICATAPIVersionResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__getICATAPIVersionResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getICATAPIVersionResponse::return_ = return_;
@@ -13313,13 +13409,14 @@ soap_instantiate_ns1__getICATAPIVersion(struct soap *, int, const char *,
 
 inline ns1__getICATAPIVersion *
 soap_new_ns1__getICATAPIVersion(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getICATAPIVersion(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getICATAPIVersion(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline ns1__getICATAPIVersion *
 soap_new_req_ns1__getICATAPIVersion(struct soap *soap) {
-  ns1__getICATAPIVersion *_p =
-      soap_instantiate_ns1__getICATAPIVersion(soap, -1, NULL, NULL, NULL);
+  ns1__getICATAPIVersion *_p = soap_instantiate_ns1__getICATAPIVersion(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -13329,8 +13426,8 @@ soap_new_req_ns1__getICATAPIVersion(struct soap *soap) {
 inline ns1__getICATAPIVersion *
 soap_new_set_ns1__getICATAPIVersion(struct soap *soap, std::string *sessionId,
                                     char *__item1) {
-  ns1__getICATAPIVersion *_p =
-      soap_instantiate_ns1__getICATAPIVersion(soap, -1, NULL, NULL, NULL);
+  ns1__getICATAPIVersion *_p = soap_instantiate_ns1__getICATAPIVersion(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getICATAPIVersion::sessionId = sessionId;
@@ -13387,13 +13484,14 @@ soap_instantiate_ns1__getDatafilesResponse(struct soap *, int, const char *,
 
 inline ns1__getDatafilesResponse *
 soap_new_ns1__getDatafilesResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getDatafilesResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getDatafilesResponse(soap, n, nullptr, nullptr,
+                                                    nullptr);
 }
 
 inline ns1__getDatafilesResponse *
 soap_new_req_ns1__getDatafilesResponse(struct soap *soap) {
-  ns1__getDatafilesResponse *_p =
-      soap_instantiate_ns1__getDatafilesResponse(soap, -1, NULL, NULL, NULL);
+  ns1__getDatafilesResponse *_p = soap_instantiate_ns1__getDatafilesResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -13402,8 +13500,8 @@ soap_new_req_ns1__getDatafilesResponse(struct soap *soap) {
 
 inline ns1__getDatafilesResponse *soap_new_set_ns1__getDatafilesResponse(
     struct soap *soap, std::vector<ns1__datafile *> &return_, char *__item1) {
-  ns1__getDatafilesResponse *_p =
-      soap_instantiate_ns1__getDatafilesResponse(soap, -1, NULL, NULL, NULL);
+  ns1__getDatafilesResponse *_p = soap_instantiate_ns1__getDatafilesResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getDatafilesResponse::return_ = return_;
@@ -13460,12 +13558,12 @@ soap_instantiate_ns1__getDatafiles(struct soap *, int, const char *,
 
 inline ns1__getDatafiles *soap_new_ns1__getDatafiles(struct soap *soap,
                                                      int n = -1) {
-  return soap_instantiate_ns1__getDatafiles(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getDatafiles(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getDatafiles *soap_new_req_ns1__getDatafiles(struct soap *soap) {
   ns1__getDatafiles *_p =
-      soap_instantiate_ns1__getDatafiles(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getDatafiles(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -13477,7 +13575,7 @@ soap_new_set_ns1__getDatafiles(struct soap *soap, std::string *sessionId,
                                std::vector<LONG64> &datafileIds,
                                char *__item1) {
   ns1__getDatafiles *_p =
-      soap_instantiate_ns1__getDatafiles(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getDatafiles(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getDatafiles::sessionId = sessionId;
@@ -13537,14 +13635,15 @@ soap_instantiate_ns1__isSessionValidResponse(struct soap *, int, const char *,
 
 inline ns1__isSessionValidResponse *
 soap_new_ns1__isSessionValidResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__isSessionValidResponse(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__isSessionValidResponse(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__isSessionValidResponse *
 soap_new_req_ns1__isSessionValidResponse(struct soap *soap, bool return_) {
   ns1__isSessionValidResponse *_p =
-      soap_instantiate_ns1__isSessionValidResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__isSessionValidResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__isSessionValidResponse::return_ = return_;
@@ -13556,7 +13655,8 @@ inline ns1__isSessionValidResponse *
 soap_new_set_ns1__isSessionValidResponse(struct soap *soap, bool return_,
                                          char *__item1) {
   ns1__isSessionValidResponse *_p =
-      soap_instantiate_ns1__isSessionValidResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__isSessionValidResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__isSessionValidResponse::return_ = return_;
@@ -13613,13 +13713,14 @@ soap_instantiate_ns1__isSessionValid(struct soap *, int, const char *,
 
 inline ns1__isSessionValid *soap_new_ns1__isSessionValid(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__isSessionValid(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__isSessionValid(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__isSessionValid *
 soap_new_req_ns1__isSessionValid(struct soap *soap) {
   ns1__isSessionValid *_p =
-      soap_instantiate_ns1__isSessionValid(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__isSessionValid(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -13630,7 +13731,7 @@ inline ns1__isSessionValid *
 soap_new_set_ns1__isSessionValid(struct soap *soap, std::string *sessionId,
                                  char *__item1) {
   ns1__isSessionValid *_p =
-      soap_instantiate_ns1__isSessionValid(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__isSessionValid(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__isSessionValid::sessionId = sessionId;
@@ -13698,7 +13799,7 @@ inline ns1__searchInvestigationByParameterComparisonResponse *
 soap_new_ns1__searchInvestigationByParameterComparisonResponse(
     struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__searchInvestigationByParameterComparisonResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchInvestigationByParameterComparisonResponse *
@@ -13706,7 +13807,7 @@ soap_new_req_ns1__searchInvestigationByParameterComparisonResponse(
     struct soap *soap) {
   ns1__searchInvestigationByParameterComparisonResponse *_p =
       soap_instantiate_ns1__searchInvestigationByParameterComparisonResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -13718,7 +13819,7 @@ soap_new_set_ns1__searchInvestigationByParameterComparisonResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchInvestigationByParameterComparisonResponse *_p =
       soap_instantiate_ns1__searchInvestigationByParameterComparisonResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchInvestigationByParameterComparisonResponse::return_ =
@@ -13783,14 +13884,14 @@ inline ns1__searchInvestigationByParameterComparison *
 soap_new_ns1__searchInvestigationByParameterComparison(struct soap *soap,
                                                        int n = -1) {
   return soap_instantiate_ns1__searchInvestigationByParameterComparison(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchInvestigationByParameterComparison *
 soap_new_req_ns1__searchInvestigationByParameterComparison(struct soap *soap) {
   ns1__searchInvestigationByParameterComparison *_p =
       soap_instantiate_ns1__searchInvestigationByParameterComparison(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -13804,7 +13905,7 @@ soap_new_set_ns1__searchInvestigationByParameterComparison(
     char *__item1) {
   ns1__searchInvestigationByParameterComparison *_p =
       soap_instantiate_ns1__searchInvestigationByParameterComparison(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchInvestigationByParameterComparison::sessionId = sessionId;
@@ -13864,13 +13965,14 @@ soap_instantiate_ns1__deleteDataSetResponse(struct soap *, int, const char *,
 
 inline ns1__deleteDataSetResponse *
 soap_new_ns1__deleteDataSetResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deleteDataSetResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__deleteDataSetResponse(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline ns1__deleteDataSetResponse *
 soap_new_req_ns1__deleteDataSetResponse(struct soap *soap) {
-  ns1__deleteDataSetResponse *_p =
-      soap_instantiate_ns1__deleteDataSetResponse(soap, -1, NULL, NULL, NULL);
+  ns1__deleteDataSetResponse *_p = soap_instantiate_ns1__deleteDataSetResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -13879,8 +13981,8 @@ soap_new_req_ns1__deleteDataSetResponse(struct soap *soap) {
 
 inline ns1__deleteDataSetResponse *
 soap_new_set_ns1__deleteDataSetResponse(struct soap *soap, char *__item1) {
-  ns1__deleteDataSetResponse *_p =
-      soap_instantiate_ns1__deleteDataSetResponse(soap, -1, NULL, NULL, NULL);
+  ns1__deleteDataSetResponse *_p = soap_instantiate_ns1__deleteDataSetResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -13936,12 +14038,13 @@ soap_instantiate_ns1__deleteDataSet(struct soap *, int, const char *,
 
 inline ns1__deleteDataSet *soap_new_ns1__deleteDataSet(struct soap *soap,
                                                        int n = -1) {
-  return soap_instantiate_ns1__deleteDataSet(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__deleteDataSet(soap, n, nullptr, nullptr,
+                                             nullptr);
 }
 
 inline ns1__deleteDataSet *soap_new_req_ns1__deleteDataSet(struct soap *soap) {
   ns1__deleteDataSet *_p =
-      soap_instantiate_ns1__deleteDataSet(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__deleteDataSet(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -13952,7 +14055,7 @@ inline ns1__deleteDataSet *
 soap_new_set_ns1__deleteDataSet(struct soap *soap, std::string *sessionId,
                                 LONG64 *dataSetId, char *__item1) {
   ns1__deleteDataSet *_p =
-      soap_instantiate_ns1__deleteDataSet(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__deleteDataSet(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__deleteDataSet::sessionId = sessionId;
@@ -14014,15 +14117,15 @@ soap_instantiate_ns1__getInvestigationsResponse(struct soap *, int,
 
 inline ns1__getInvestigationsResponse *
 soap_new_ns1__getInvestigationsResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getInvestigationsResponse(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate_ns1__getInvestigationsResponse(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline ns1__getInvestigationsResponse *
 soap_new_req_ns1__getInvestigationsResponse(struct soap *soap) {
   ns1__getInvestigationsResponse *_p =
-      soap_instantiate_ns1__getInvestigationsResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__getInvestigationsResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -14034,8 +14137,8 @@ soap_new_set_ns1__getInvestigationsResponse(
     struct soap *soap, std::vector<ns1__investigation *> &return_,
     char *__item1) {
   ns1__getInvestigationsResponse *_p =
-      soap_instantiate_ns1__getInvestigationsResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__getInvestigationsResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getInvestigationsResponse::return_ = return_;
@@ -14092,13 +14195,14 @@ soap_instantiate_ns1__getInvestigations(struct soap *, int, const char *,
 
 inline ns1__getInvestigations *
 soap_new_ns1__getInvestigations(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getInvestigations(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getInvestigations(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline ns1__getInvestigations *
 soap_new_req_ns1__getInvestigations(struct soap *soap) {
-  ns1__getInvestigations *_p =
-      soap_instantiate_ns1__getInvestigations(soap, -1, NULL, NULL, NULL);
+  ns1__getInvestigations *_p = soap_instantiate_ns1__getInvestigations(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -14109,8 +14213,8 @@ inline ns1__getInvestigations *
 soap_new_set_ns1__getInvestigations(struct soap *soap, std::string *userId,
                                     std::vector<LONG64> &investigationIds,
                                     char *__item1) {
-  ns1__getInvestigations *_p =
-      soap_instantiate_ns1__getInvestigations(soap, -1, NULL, NULL, NULL);
+  ns1__getInvestigations *_p = soap_instantiate_ns1__getInvestigations(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getInvestigations::userId = userId;
@@ -14172,15 +14276,15 @@ soap_instantiate_ns1__getInvestigationsIncludesResponse(struct soap *, int,
 
 inline ns1__getInvestigationsIncludesResponse *
 soap_new_ns1__getInvestigationsIncludesResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getInvestigationsIncludesResponse(soap, n, NULL,
-                                                                 NULL, NULL);
+  return soap_instantiate_ns1__getInvestigationsIncludesResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getInvestigationsIncludesResponse *
 soap_new_req_ns1__getInvestigationsIncludesResponse(struct soap *soap) {
   ns1__getInvestigationsIncludesResponse *_p =
-      soap_instantiate_ns1__getInvestigationsIncludesResponse(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate_ns1__getInvestigationsIncludesResponse(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -14192,8 +14296,8 @@ soap_new_set_ns1__getInvestigationsIncludesResponse(
     struct soap *soap, std::vector<ns1__investigation *> &return_,
     char *__item1) {
   ns1__getInvestigationsIncludesResponse *_p =
-      soap_instantiate_ns1__getInvestigationsIncludesResponse(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate_ns1__getInvestigationsIncludesResponse(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getInvestigationsIncludesResponse::return_ = return_;
@@ -14255,15 +14359,15 @@ soap_instantiate_ns1__getInvestigationsIncludes(struct soap *, int,
 
 inline ns1__getInvestigationsIncludes *
 soap_new_ns1__getInvestigationsIncludes(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getInvestigationsIncludes(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate_ns1__getInvestigationsIncludes(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline ns1__getInvestigationsIncludes *
 soap_new_req_ns1__getInvestigationsIncludes(struct soap *soap) {
   ns1__getInvestigationsIncludes *_p =
-      soap_instantiate_ns1__getInvestigationsIncludes(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__getInvestigationsIncludes(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -14276,8 +14380,8 @@ soap_new_set_ns1__getInvestigationsIncludes(
     std::vector<LONG64> &investigationIds,
     enum ns1__investigationInclude *investigationInclude, char *__item1) {
   ns1__getInvestigationsIncludes *_p =
-      soap_instantiate_ns1__getInvestigationsIncludes(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__getInvestigationsIncludes(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getInvestigationsIncludes::userId = userId;
@@ -14341,15 +14445,15 @@ soap_instantiate_ns1__searchSampleByParameterResponse(struct soap *, int,
 
 inline ns1__searchSampleByParameterResponse *
 soap_new_ns1__searchSampleByParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchSampleByParameterResponse(soap, n, NULL,
-                                                               NULL, NULL);
+  return soap_instantiate_ns1__searchSampleByParameterResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchSampleByParameterResponse *
 soap_new_req_ns1__searchSampleByParameterResponse(struct soap *soap) {
   ns1__searchSampleByParameterResponse *_p =
-      soap_instantiate_ns1__searchSampleByParameterResponse(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__searchSampleByParameterResponse(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -14360,8 +14464,8 @@ inline ns1__searchSampleByParameterResponse *
 soap_new_set_ns1__searchSampleByParameterResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchSampleByParameterResponse *_p =
-      soap_instantiate_ns1__searchSampleByParameterResponse(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__searchSampleByParameterResponse(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSampleByParameterResponse::return_ = return_;
@@ -14421,14 +14525,15 @@ soap_instantiate_ns1__searchSampleByParameter(struct soap *, int, const char *,
 
 inline ns1__searchSampleByParameter *
 soap_new_ns1__searchSampleByParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchSampleByParameter(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate_ns1__searchSampleByParameter(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline ns1__searchSampleByParameter *
 soap_new_req_ns1__searchSampleByParameter(struct soap *soap) {
   ns1__searchSampleByParameter *_p =
-      soap_instantiate_ns1__searchSampleByParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__searchSampleByParameter(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -14439,7 +14544,8 @@ inline ns1__searchSampleByParameter *soap_new_set_ns1__searchSampleByParameter(
     struct soap *soap, std::string *sessionId,
     std::vector<ns1__parameterSearch *> &parameters, char *__item1) {
   ns1__searchSampleByParameter *_p =
-      soap_instantiate_ns1__searchSampleByParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__searchSampleByParameter(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSampleByParameter::sessionId = sessionId;
@@ -14504,14 +14610,14 @@ inline ns1__searchDatasetByParameterConditionResponse *
 soap_new_ns1__searchDatasetByParameterConditionResponse(struct soap *soap,
                                                         int n = -1) {
   return soap_instantiate_ns1__searchDatasetByParameterConditionResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatasetByParameterConditionResponse *
 soap_new_req_ns1__searchDatasetByParameterConditionResponse(struct soap *soap) {
   ns1__searchDatasetByParameterConditionResponse *_p =
       soap_instantiate_ns1__searchDatasetByParameterConditionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -14523,7 +14629,7 @@ soap_new_set_ns1__searchDatasetByParameterConditionResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchDatasetByParameterConditionResponse *_p =
       soap_instantiate_ns1__searchDatasetByParameterConditionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetByParameterConditionResponse::return_ = return_;
@@ -14585,15 +14691,15 @@ soap_instantiate_ns1__searchDatasetByParameterCondition(struct soap *, int,
 
 inline ns1__searchDatasetByParameterCondition *
 soap_new_ns1__searchDatasetByParameterCondition(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchDatasetByParameterCondition(soap, n, NULL,
-                                                                 NULL, NULL);
+  return soap_instantiate_ns1__searchDatasetByParameterCondition(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatasetByParameterCondition *
 soap_new_req_ns1__searchDatasetByParameterCondition(struct soap *soap) {
   ns1__searchDatasetByParameterCondition *_p =
-      soap_instantiate_ns1__searchDatasetByParameterCondition(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate_ns1__searchDatasetByParameterCondition(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -14605,8 +14711,8 @@ soap_new_set_ns1__searchDatasetByParameterCondition(
     struct soap *soap, std::string *sessionId,
     ns1__parameterCondition *logicalCondition, char *__item1) {
   ns1__searchDatasetByParameterCondition *_p =
-      soap_instantiate_ns1__searchDatasetByParameterCondition(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate_ns1__searchDatasetByParameterCondition(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetByParameterCondition::sessionId = sessionId;
@@ -14669,15 +14775,15 @@ soap_instantiate_ns1__removeDataFileParameterResponse(struct soap *, int,
 
 inline ns1__removeDataFileParameterResponse *
 soap_new_ns1__removeDataFileParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removeDataFileParameterResponse(soap, n, NULL,
-                                                               NULL, NULL);
+  return soap_instantiate_ns1__removeDataFileParameterResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__removeDataFileParameterResponse *
 soap_new_req_ns1__removeDataFileParameterResponse(struct soap *soap) {
   ns1__removeDataFileParameterResponse *_p =
-      soap_instantiate_ns1__removeDataFileParameterResponse(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__removeDataFileParameterResponse(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -14688,8 +14794,8 @@ inline ns1__removeDataFileParameterResponse *
 soap_new_set_ns1__removeDataFileParameterResponse(struct soap *soap,
                                                   char *__item1) {
   ns1__removeDataFileParameterResponse *_p =
-      soap_instantiate_ns1__removeDataFileParameterResponse(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__removeDataFileParameterResponse(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -14748,14 +14854,15 @@ soap_instantiate_ns1__removeDataFileParameter(struct soap *, int, const char *,
 
 inline ns1__removeDataFileParameter *
 soap_new_ns1__removeDataFileParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removeDataFileParameter(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate_ns1__removeDataFileParameter(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline ns1__removeDataFileParameter *
 soap_new_req_ns1__removeDataFileParameter(struct soap *soap) {
   ns1__removeDataFileParameter *_p =
-      soap_instantiate_ns1__removeDataFileParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__removeDataFileParameter(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -14766,7 +14873,8 @@ inline ns1__removeDataFileParameter *soap_new_set_ns1__removeDataFileParameter(
     struct soap *soap, std::string *sessionId,
     ns1__datafileParameterPK *datafileParameterPK, char *__item1) {
   ns1__removeDataFileParameter *_p =
-      soap_instantiate_ns1__removeDataFileParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__removeDataFileParameter(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__removeDataFileParameter::sessionId = sessionId;
@@ -14832,14 +14940,14 @@ inline ns1__searchDatasetByParameterLogicalResponse *
 soap_new_ns1__searchDatasetByParameterLogicalResponse(struct soap *soap,
                                                       int n = -1) {
   return soap_instantiate_ns1__searchDatasetByParameterLogicalResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatasetByParameterLogicalResponse *
 soap_new_req_ns1__searchDatasetByParameterLogicalResponse(struct soap *soap) {
   ns1__searchDatasetByParameterLogicalResponse *_p =
       soap_instantiate_ns1__searchDatasetByParameterLogicalResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -14851,7 +14959,7 @@ soap_new_set_ns1__searchDatasetByParameterLogicalResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchDatasetByParameterLogicalResponse *_p =
       soap_instantiate_ns1__searchDatasetByParameterLogicalResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetByParameterLogicalResponse::return_ = return_;
@@ -14912,15 +15020,15 @@ soap_instantiate_ns1__searchDatasetByParameterLogical(struct soap *, int,
 
 inline ns1__searchDatasetByParameterLogical *
 soap_new_ns1__searchDatasetByParameterLogical(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchDatasetByParameterLogical(soap, n, NULL,
-                                                               NULL, NULL);
+  return soap_instantiate_ns1__searchDatasetByParameterLogical(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatasetByParameterLogical *
 soap_new_req_ns1__searchDatasetByParameterLogical(struct soap *soap) {
   ns1__searchDatasetByParameterLogical *_p =
-      soap_instantiate_ns1__searchDatasetByParameterLogical(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__searchDatasetByParameterLogical(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -14932,8 +15040,8 @@ soap_new_set_ns1__searchDatasetByParameterLogical(
     struct soap *soap, std::string *sessionId,
     ns1__parameterLogicalCondition *logicalCondition, char *__item1) {
   ns1__searchDatasetByParameterLogical *_p =
-      soap_instantiate_ns1__searchDatasetByParameterLogical(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__searchDatasetByParameterLogical(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetByParameterLogical::sessionId = sessionId;
@@ -14995,15 +15103,15 @@ soap_instantiate_ns1__searchByUserIDPaginationResponse(struct soap *, int,
 
 inline ns1__searchByUserIDPaginationResponse *
 soap_new_ns1__searchByUserIDPaginationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchByUserIDPaginationResponse(soap, n, NULL,
-                                                                NULL, NULL);
+  return soap_instantiate_ns1__searchByUserIDPaginationResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchByUserIDPaginationResponse *
 soap_new_req_ns1__searchByUserIDPaginationResponse(struct soap *soap) {
   ns1__searchByUserIDPaginationResponse *_p =
-      soap_instantiate_ns1__searchByUserIDPaginationResponse(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate_ns1__searchByUserIDPaginationResponse(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -15015,8 +15123,8 @@ soap_new_set_ns1__searchByUserIDPaginationResponse(
     struct soap *soap, std::vector<ns1__investigation *> &return_,
     char *__item1) {
   ns1__searchByUserIDPaginationResponse *_p =
-      soap_instantiate_ns1__searchByUserIDPaginationResponse(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate_ns1__searchByUserIDPaginationResponse(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByUserIDPaginationResponse::return_ = return_;
@@ -15076,16 +15184,16 @@ soap_instantiate_ns1__searchByUserIDPagination(struct soap *, int, const char *,
 
 inline ns1__searchByUserIDPagination *
 soap_new_ns1__searchByUserIDPagination(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchByUserIDPagination(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate_ns1__searchByUserIDPagination(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline ns1__searchByUserIDPagination *
 soap_new_req_ns1__searchByUserIDPagination(struct soap *soap, int startIndex,
                                            int numberOfResults) {
   ns1__searchByUserIDPagination *_p =
-      soap_instantiate_ns1__searchByUserIDPagination(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__searchByUserIDPagination(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByUserIDPagination::startIndex = startIndex;
@@ -15101,8 +15209,8 @@ soap_new_set_ns1__searchByUserIDPagination(struct soap *soap,
                                            int startIndex, int numberOfResults,
                                            char *__item1) {
   ns1__searchByUserIDPagination *_p =
-      soap_instantiate_ns1__searchByUserIDPagination(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__searchByUserIDPagination(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByUserIDPagination::sessionId = sessionId;
@@ -15165,14 +15273,15 @@ soap_instantiate_ns1__searchByUserIDResponse(struct soap *, int, const char *,
 
 inline ns1__searchByUserIDResponse *
 soap_new_ns1__searchByUserIDResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchByUserIDResponse(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__searchByUserIDResponse(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__searchByUserIDResponse *
 soap_new_req_ns1__searchByUserIDResponse(struct soap *soap) {
   ns1__searchByUserIDResponse *_p =
-      soap_instantiate_ns1__searchByUserIDResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__searchByUserIDResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -15183,7 +15292,8 @@ inline ns1__searchByUserIDResponse *soap_new_set_ns1__searchByUserIDResponse(
     struct soap *soap, std::vector<ns1__investigation *> &return_,
     char *__item1) {
   ns1__searchByUserIDResponse *_p =
-      soap_instantiate_ns1__searchByUserIDResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__searchByUserIDResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByUserIDResponse::return_ = return_;
@@ -15240,13 +15350,14 @@ soap_instantiate_ns1__searchByUserID(struct soap *, int, const char *,
 
 inline ns1__searchByUserID *soap_new_ns1__searchByUserID(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__searchByUserID(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__searchByUserID(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__searchByUserID *
 soap_new_req_ns1__searchByUserID(struct soap *soap) {
   ns1__searchByUserID *_p =
-      soap_instantiate_ns1__searchByUserID(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__searchByUserID(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -15257,7 +15368,7 @@ inline ns1__searchByUserID *
 soap_new_set_ns1__searchByUserID(struct soap *soap, std::string *sessionId,
                                  std::string *userSearch, char *__item1) {
   ns1__searchByUserID *_p =
-      soap_instantiate_ns1__searchByUserID(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__searchByUserID(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByUserID::sessionId = sessionId;
@@ -15319,15 +15430,15 @@ soap_instantiate_ns1__modifyPublicationResponse(struct soap *, int,
 
 inline ns1__modifyPublicationResponse *
 soap_new_ns1__modifyPublicationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__modifyPublicationResponse(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate_ns1__modifyPublicationResponse(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline ns1__modifyPublicationResponse *
 soap_new_req_ns1__modifyPublicationResponse(struct soap *soap) {
   ns1__modifyPublicationResponse *_p =
-      soap_instantiate_ns1__modifyPublicationResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__modifyPublicationResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -15337,8 +15448,8 @@ soap_new_req_ns1__modifyPublicationResponse(struct soap *soap) {
 inline ns1__modifyPublicationResponse *
 soap_new_set_ns1__modifyPublicationResponse(struct soap *soap, char *__item1) {
   ns1__modifyPublicationResponse *_p =
-      soap_instantiate_ns1__modifyPublicationResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__modifyPublicationResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -15394,13 +15505,14 @@ soap_instantiate_ns1__modifyPublication(struct soap *, int, const char *,
 
 inline ns1__modifyPublication *
 soap_new_ns1__modifyPublication(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__modifyPublication(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__modifyPublication(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline ns1__modifyPublication *
 soap_new_req_ns1__modifyPublication(struct soap *soap) {
-  ns1__modifyPublication *_p =
-      soap_instantiate_ns1__modifyPublication(soap, -1, NULL, NULL, NULL);
+  ns1__modifyPublication *_p = soap_instantiate_ns1__modifyPublication(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -15411,8 +15523,8 @@ inline ns1__modifyPublication *
 soap_new_set_ns1__modifyPublication(struct soap *soap, std::string *sessionId,
                                     ns1__publication *publication,
                                     char *__item1) {
-  ns1__modifyPublication *_p =
-      soap_instantiate_ns1__modifyPublication(soap, -1, NULL, NULL, NULL);
+  ns1__modifyPublication *_p = soap_instantiate_ns1__modifyPublication(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__modifyPublication::sessionId = sessionId;
@@ -15482,7 +15594,7 @@ inline ns1__searchInvestigationByParameterRestrictionResponse *
 soap_new_ns1__searchInvestigationByParameterRestrictionResponse(
     struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__searchInvestigationByParameterRestrictionResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchInvestigationByParameterRestrictionResponse *
@@ -15490,7 +15602,7 @@ soap_new_req_ns1__searchInvestigationByParameterRestrictionResponse(
     struct soap *soap) {
   ns1__searchInvestigationByParameterRestrictionResponse *_p =
       soap_instantiate_ns1__searchInvestigationByParameterRestrictionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -15502,7 +15614,7 @@ soap_new_set_ns1__searchInvestigationByParameterRestrictionResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchInvestigationByParameterRestrictionResponse *_p =
       soap_instantiate_ns1__searchInvestigationByParameterRestrictionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchInvestigationByParameterRestrictionResponse::return_ =
@@ -15567,14 +15679,14 @@ inline ns1__searchInvestigationByParameterRestriction *
 soap_new_ns1__searchInvestigationByParameterRestriction(struct soap *soap,
                                                         int n = -1) {
   return soap_instantiate_ns1__searchInvestigationByParameterRestriction(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchInvestigationByParameterRestriction *
 soap_new_req_ns1__searchInvestigationByParameterRestriction(struct soap *soap) {
   ns1__searchInvestigationByParameterRestriction *_p =
       soap_instantiate_ns1__searchInvestigationByParameterRestriction(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -15588,7 +15700,7 @@ soap_new_set_ns1__searchInvestigationByParameterRestriction(
     ns1__restrictionCondition *restriction, char *__item1) {
   ns1__searchInvestigationByParameterRestriction *_p =
       soap_instantiate_ns1__searchInvestigationByParameterRestriction(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchInvestigationByParameterRestriction::sessionId = sessionId;
@@ -15656,14 +15768,14 @@ inline ns1__searchSampleByParameterConditionResponse *
 soap_new_ns1__searchSampleByParameterConditionResponse(struct soap *soap,
                                                        int n = -1) {
   return soap_instantiate_ns1__searchSampleByParameterConditionResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchSampleByParameterConditionResponse *
 soap_new_req_ns1__searchSampleByParameterConditionResponse(struct soap *soap) {
   ns1__searchSampleByParameterConditionResponse *_p =
       soap_instantiate_ns1__searchSampleByParameterConditionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -15675,7 +15787,7 @@ soap_new_set_ns1__searchSampleByParameterConditionResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchSampleByParameterConditionResponse *_p =
       soap_instantiate_ns1__searchSampleByParameterConditionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSampleByParameterConditionResponse::return_ = return_;
@@ -15736,15 +15848,15 @@ soap_instantiate_ns1__searchSampleByParameterCondition(struct soap *, int,
 
 inline ns1__searchSampleByParameterCondition *
 soap_new_ns1__searchSampleByParameterCondition(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchSampleByParameterCondition(soap, n, NULL,
-                                                                NULL, NULL);
+  return soap_instantiate_ns1__searchSampleByParameterCondition(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchSampleByParameterCondition *
 soap_new_req_ns1__searchSampleByParameterCondition(struct soap *soap) {
   ns1__searchSampleByParameterCondition *_p =
-      soap_instantiate_ns1__searchSampleByParameterCondition(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate_ns1__searchSampleByParameterCondition(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -15756,8 +15868,8 @@ soap_new_set_ns1__searchSampleByParameterCondition(
     struct soap *soap, std::string *sessionId,
     ns1__parameterCondition *logicalCondition, char *__item1) {
   ns1__searchSampleByParameterCondition *_p =
-      soap_instantiate_ns1__searchSampleByParameterCondition(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate_ns1__searchSampleByParameterCondition(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSampleByParameterCondition::sessionId = sessionId;
@@ -15819,15 +15931,15 @@ soap_instantiate_ns1__removeDataSetParameterResponse(struct soap *, int,
 
 inline ns1__removeDataSetParameterResponse *
 soap_new_ns1__removeDataSetParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removeDataSetParameterResponse(soap, n, NULL,
-                                                              NULL, NULL);
+  return soap_instantiate_ns1__removeDataSetParameterResponse(soap, n, nullptr,
+                                                              nullptr, nullptr);
 }
 
 inline ns1__removeDataSetParameterResponse *
 soap_new_req_ns1__removeDataSetParameterResponse(struct soap *soap) {
   ns1__removeDataSetParameterResponse *_p =
-      soap_instantiate_ns1__removeDataSetParameterResponse(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__removeDataSetParameterResponse(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -15838,8 +15950,8 @@ inline ns1__removeDataSetParameterResponse *
 soap_new_set_ns1__removeDataSetParameterResponse(struct soap *soap,
                                                  char *__item1) {
   ns1__removeDataSetParameterResponse *_p =
-      soap_instantiate_ns1__removeDataSetParameterResponse(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__removeDataSetParameterResponse(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -15897,14 +16009,15 @@ soap_instantiate_ns1__removeDataSetParameter(struct soap *, int, const char *,
 
 inline ns1__removeDataSetParameter *
 soap_new_ns1__removeDataSetParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removeDataSetParameter(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__removeDataSetParameter(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__removeDataSetParameter *
 soap_new_req_ns1__removeDataSetParameter(struct soap *soap) {
   ns1__removeDataSetParameter *_p =
-      soap_instantiate_ns1__removeDataSetParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__removeDataSetParameter(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -15915,7 +16028,8 @@ inline ns1__removeDataSetParameter *soap_new_set_ns1__removeDataSetParameter(
     struct soap *soap, std::string *sessionId,
     ns1__datasetParameterPK *datasetParameterPK, char *__item1) {
   ns1__removeDataSetParameter *_p =
-      soap_instantiate_ns1__removeDataSetParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__removeDataSetParameter(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__removeDataSetParameter::sessionId = sessionId;
@@ -15980,7 +16094,7 @@ inline ns1__searchSampleByParameterRestrictionResponse *
 soap_new_ns1__searchSampleByParameterRestrictionResponse(struct soap *soap,
                                                          int n = -1) {
   return soap_instantiate_ns1__searchSampleByParameterRestrictionResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchSampleByParameterRestrictionResponse *
@@ -15988,7 +16102,7 @@ soap_new_req_ns1__searchSampleByParameterRestrictionResponse(
     struct soap *soap) {
   ns1__searchSampleByParameterRestrictionResponse *_p =
       soap_instantiate_ns1__searchSampleByParameterRestrictionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -16000,7 +16114,7 @@ soap_new_set_ns1__searchSampleByParameterRestrictionResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchSampleByParameterRestrictionResponse *_p =
       soap_instantiate_ns1__searchSampleByParameterRestrictionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSampleByParameterRestrictionResponse::return_ = return_;
@@ -16064,15 +16178,15 @@ soap_instantiate_ns1__searchSampleByParameterRestriction(struct soap *, int,
 inline ns1__searchSampleByParameterRestriction *
 soap_new_ns1__searchSampleByParameterRestriction(struct soap *soap,
                                                  int n = -1) {
-  return soap_instantiate_ns1__searchSampleByParameterRestriction(soap, n, NULL,
-                                                                  NULL, NULL);
+  return soap_instantiate_ns1__searchSampleByParameterRestriction(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchSampleByParameterRestriction *
 soap_new_req_ns1__searchSampleByParameterRestriction(struct soap *soap) {
   ns1__searchSampleByParameterRestriction *_p =
-      soap_instantiate_ns1__searchSampleByParameterRestriction(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate_ns1__searchSampleByParameterRestriction(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -16085,8 +16199,8 @@ soap_new_set_ns1__searchSampleByParameterRestriction(
     ns1__parameterCondition *parameterCondition,
     ns1__restrictionCondition *restrictions, char *__item1) {
   ns1__searchSampleByParameterRestriction *_p =
-      soap_instantiate_ns1__searchSampleByParameterRestriction(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate_ns1__searchSampleByParameterRestriction(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSampleByParameterRestriction::sessionId = sessionId;
@@ -16155,7 +16269,7 @@ inline ns1__getMyInvestigationsIncludesPaginationResponse *
 soap_new_ns1__getMyInvestigationsIncludesPaginationResponse(struct soap *soap,
                                                             int n = -1) {
   return soap_instantiate_ns1__getMyInvestigationsIncludesPaginationResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getMyInvestigationsIncludesPaginationResponse *
@@ -16163,7 +16277,7 @@ soap_new_req_ns1__getMyInvestigationsIncludesPaginationResponse(
     struct soap *soap) {
   ns1__getMyInvestigationsIncludesPaginationResponse *_p =
       soap_instantiate_ns1__getMyInvestigationsIncludesPaginationResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -16176,7 +16290,7 @@ soap_new_set_ns1__getMyInvestigationsIncludesPaginationResponse(
     char *__item1) {
   ns1__getMyInvestigationsIncludesPaginationResponse *_p =
       soap_instantiate_ns1__getMyInvestigationsIncludesPaginationResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getMyInvestigationsIncludesPaginationResponse::return_ = return_;
@@ -16240,7 +16354,7 @@ inline ns1__getMyInvestigationsIncludesPagination *
 soap_new_ns1__getMyInvestigationsIncludesPagination(struct soap *soap,
                                                     int n = -1) {
   return soap_instantiate_ns1__getMyInvestigationsIncludesPagination(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getMyInvestigationsIncludesPagination *
@@ -16249,7 +16363,7 @@ soap_new_req_ns1__getMyInvestigationsIncludesPagination(struct soap *soap,
                                                         int numberOfResults) {
   ns1__getMyInvestigationsIncludesPagination *_p =
       soap_instantiate_ns1__getMyInvestigationsIncludesPagination(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getMyInvestigationsIncludesPagination::startIndex = startIndex;
@@ -16266,7 +16380,7 @@ soap_new_set_ns1__getMyInvestigationsIncludesPagination(
     int numberOfResults, char *__item1) {
   ns1__getMyInvestigationsIncludesPagination *_p =
       soap_instantiate_ns1__getMyInvestigationsIncludesPagination(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getMyInvestigationsIncludesPagination::sessionId = sessionId;
@@ -16336,14 +16450,14 @@ inline ns1__getMyInvestigationsIncludesResponse *
 soap_new_ns1__getMyInvestigationsIncludesResponse(struct soap *soap,
                                                   int n = -1) {
   return soap_instantiate_ns1__getMyInvestigationsIncludesResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getMyInvestigationsIncludesResponse *
 soap_new_req_ns1__getMyInvestigationsIncludesResponse(struct soap *soap) {
   ns1__getMyInvestigationsIncludesResponse *_p =
-      soap_instantiate_ns1__getMyInvestigationsIncludesResponse(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate_ns1__getMyInvestigationsIncludesResponse(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -16355,8 +16469,8 @@ soap_new_set_ns1__getMyInvestigationsIncludesResponse(
     struct soap *soap, std::vector<ns1__investigation *> &return_,
     char *__item1) {
   ns1__getMyInvestigationsIncludesResponse *_p =
-      soap_instantiate_ns1__getMyInvestigationsIncludesResponse(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate_ns1__getMyInvestigationsIncludesResponse(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getMyInvestigationsIncludesResponse::return_ = return_;
@@ -16417,15 +16531,15 @@ soap_instantiate_ns1__getMyInvestigationsIncludes(struct soap *, int,
 
 inline ns1__getMyInvestigationsIncludes *
 soap_new_ns1__getMyInvestigationsIncludes(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getMyInvestigationsIncludes(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__getMyInvestigationsIncludes(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__getMyInvestigationsIncludes *
 soap_new_req_ns1__getMyInvestigationsIncludes(struct soap *soap) {
   ns1__getMyInvestigationsIncludes *_p =
-      soap_instantiate_ns1__getMyInvestigationsIncludes(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__getMyInvestigationsIncludes(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -16437,8 +16551,8 @@ soap_new_set_ns1__getMyInvestigationsIncludes(
     struct soap *soap, std::string *sessionId,
     enum ns1__investigationInclude *investigationInclude, char *__item1) {
   ns1__getMyInvestigationsIncludes *_p =
-      soap_instantiate_ns1__getMyInvestigationsIncludes(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__getMyInvestigationsIncludes(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getMyInvestigationsIncludes::sessionId = sessionId;
@@ -16500,15 +16614,15 @@ soap_instantiate_ns1__getMyInvestigationsResponse(struct soap *, int,
 
 inline ns1__getMyInvestigationsResponse *
 soap_new_ns1__getMyInvestigationsResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getMyInvestigationsResponse(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__getMyInvestigationsResponse(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__getMyInvestigationsResponse *
 soap_new_req_ns1__getMyInvestigationsResponse(struct soap *soap) {
   ns1__getMyInvestigationsResponse *_p =
-      soap_instantiate_ns1__getMyInvestigationsResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__getMyInvestigationsResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -16520,8 +16634,8 @@ soap_new_set_ns1__getMyInvestigationsResponse(
     struct soap *soap, std::vector<ns1__investigation *> &return_,
     char *__item1) {
   ns1__getMyInvestigationsResponse *_p =
-      soap_instantiate_ns1__getMyInvestigationsResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__getMyInvestigationsResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getMyInvestigationsResponse::return_ = return_;
@@ -16578,13 +16692,14 @@ soap_instantiate_ns1__getMyInvestigations(struct soap *, int, const char *,
 
 inline ns1__getMyInvestigations *
 soap_new_ns1__getMyInvestigations(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getMyInvestigations(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getMyInvestigations(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__getMyInvestigations *
 soap_new_req_ns1__getMyInvestigations(struct soap *soap) {
-  ns1__getMyInvestigations *_p =
-      soap_instantiate_ns1__getMyInvestigations(soap, -1, NULL, NULL, NULL);
+  ns1__getMyInvestigations *_p = soap_instantiate_ns1__getMyInvestigations(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -16594,8 +16709,8 @@ soap_new_req_ns1__getMyInvestigations(struct soap *soap) {
 inline ns1__getMyInvestigations *
 soap_new_set_ns1__getMyInvestigations(struct soap *soap, std::string *sessionId,
                                       char *__item1) {
-  ns1__getMyInvestigations *_p =
-      soap_instantiate_ns1__getMyInvestigations(soap, -1, NULL, NULL, NULL);
+  ns1__getMyInvestigations *_p = soap_instantiate_ns1__getMyInvestigations(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getMyInvestigations::sessionId = sessionId;
@@ -16658,7 +16773,7 @@ inline ns1__searchDatafileByRestrictionLogicalResponse *
 soap_new_ns1__searchDatafileByRestrictionLogicalResponse(struct soap *soap,
                                                          int n = -1) {
   return soap_instantiate_ns1__searchDatafileByRestrictionLogicalResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatafileByRestrictionLogicalResponse *
@@ -16666,7 +16781,7 @@ soap_new_req_ns1__searchDatafileByRestrictionLogicalResponse(
     struct soap *soap) {
   ns1__searchDatafileByRestrictionLogicalResponse *_p =
       soap_instantiate_ns1__searchDatafileByRestrictionLogicalResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -16678,7 +16793,7 @@ soap_new_set_ns1__searchDatafileByRestrictionLogicalResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchDatafileByRestrictionLogicalResponse *_p =
       soap_instantiate_ns1__searchDatafileByRestrictionLogicalResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatafileByRestrictionLogicalResponse::return_ = return_;
@@ -16742,15 +16857,15 @@ soap_instantiate_ns1__searchDatafileByRestrictionLogical(struct soap *, int,
 inline ns1__searchDatafileByRestrictionLogical *
 soap_new_ns1__searchDatafileByRestrictionLogical(struct soap *soap,
                                                  int n = -1) {
-  return soap_instantiate_ns1__searchDatafileByRestrictionLogical(soap, n, NULL,
-                                                                  NULL, NULL);
+  return soap_instantiate_ns1__searchDatafileByRestrictionLogical(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatafileByRestrictionLogical *
 soap_new_req_ns1__searchDatafileByRestrictionLogical(struct soap *soap) {
   ns1__searchDatafileByRestrictionLogical *_p =
-      soap_instantiate_ns1__searchDatafileByRestrictionLogical(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate_ns1__searchDatafileByRestrictionLogical(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -16762,8 +16877,8 @@ soap_new_set_ns1__searchDatafileByRestrictionLogical(
     struct soap *soap, std::string *sessionId,
     ns1__restrictionLogicalCondition *restriction, char *__item1) {
   ns1__searchDatafileByRestrictionLogical *_p =
-      soap_instantiate_ns1__searchDatafileByRestrictionLogical(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate_ns1__searchDatafileByRestrictionLogical(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatafileByRestrictionLogical::sessionId = sessionId;
@@ -16826,15 +16941,15 @@ soap_instantiate_ns1__getAllInstrumentsResponse(struct soap *, int,
 
 inline ns1__getAllInstrumentsResponse *
 soap_new_ns1__getAllInstrumentsResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getAllInstrumentsResponse(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate_ns1__getAllInstrumentsResponse(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline ns1__getAllInstrumentsResponse *
 soap_new_req_ns1__getAllInstrumentsResponse(struct soap *soap) {
   ns1__getAllInstrumentsResponse *_p =
-      soap_instantiate_ns1__getAllInstrumentsResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__getAllInstrumentsResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -16845,8 +16960,8 @@ inline ns1__getAllInstrumentsResponse *
 soap_new_set_ns1__getAllInstrumentsResponse(
     struct soap *soap, std::vector<ns1__instrument *> &return_, char *__item1) {
   ns1__getAllInstrumentsResponse *_p =
-      soap_instantiate_ns1__getAllInstrumentsResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__getAllInstrumentsResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getAllInstrumentsResponse::return_ = return_;
@@ -16903,13 +17018,14 @@ soap_instantiate_ns1__getAllInstruments(struct soap *, int, const char *,
 
 inline ns1__getAllInstruments *
 soap_new_ns1__getAllInstruments(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getAllInstruments(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getAllInstruments(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline ns1__getAllInstruments *
 soap_new_req_ns1__getAllInstruments(struct soap *soap) {
-  ns1__getAllInstruments *_p =
-      soap_instantiate_ns1__getAllInstruments(soap, -1, NULL, NULL, NULL);
+  ns1__getAllInstruments *_p = soap_instantiate_ns1__getAllInstruments(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -16919,8 +17035,8 @@ soap_new_req_ns1__getAllInstruments(struct soap *soap) {
 inline ns1__getAllInstruments *
 soap_new_set_ns1__getAllInstruments(struct soap *soap, std::string *sessionId,
                                     char *__item1) {
-  ns1__getAllInstruments *_p =
-      soap_instantiate_ns1__getAllInstruments(soap, -1, NULL, NULL, NULL);
+  ns1__getAllInstruments *_p = soap_instantiate_ns1__getAllInstruments(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getAllInstruments::sessionId = sessionId;
@@ -16980,15 +17096,15 @@ soap_instantiate_ns1__searchByKeywordsAllResponse(struct soap *, int,
 
 inline ns1__searchByKeywordsAllResponse *
 soap_new_ns1__searchByKeywordsAllResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchByKeywordsAllResponse(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__searchByKeywordsAllResponse(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__searchByKeywordsAllResponse *
 soap_new_req_ns1__searchByKeywordsAllResponse(struct soap *soap) {
   ns1__searchByKeywordsAllResponse *_p =
-      soap_instantiate_ns1__searchByKeywordsAllResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__searchByKeywordsAllResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -17000,8 +17116,8 @@ soap_new_set_ns1__searchByKeywordsAllResponse(
     struct soap *soap, std::vector<ns1__investigation *> &return_,
     char *__item1) {
   ns1__searchByKeywordsAllResponse *_p =
-      soap_instantiate_ns1__searchByKeywordsAllResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__searchByKeywordsAllResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByKeywordsAllResponse::return_ = return_;
@@ -17057,13 +17173,14 @@ soap_instantiate_ns1__keywordDetails(struct soap *, int, const char *,
 
 inline ns1__keywordDetails *soap_new_ns1__keywordDetails(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__keywordDetails(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__keywordDetails(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__keywordDetails *
 soap_new_req_ns1__keywordDetails(struct soap *soap, bool caseSensitive) {
   ns1__keywordDetails *_p =
-      soap_instantiate_ns1__keywordDetails(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__keywordDetails(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__keywordDetails::caseSensitive = caseSensitive;
@@ -17076,7 +17193,7 @@ inline ns1__keywordDetails *soap_new_set_ns1__keywordDetails(
     enum ns1__investigationInclude *investigationInclude,
     std::vector<std::string> &keywords, char *__item1) {
   ns1__keywordDetails *_p =
-      soap_instantiate_ns1__keywordDetails(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__keywordDetails(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__keywordDetails::caseSensitive = caseSensitive;
@@ -17135,14 +17252,15 @@ soap_instantiate_ns1__searchByKeywordsAll(struct soap *, int, const char *,
 
 inline ns1__searchByKeywordsAll *
 soap_new_ns1__searchByKeywordsAll(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchByKeywordsAll(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__searchByKeywordsAll(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__searchByKeywordsAll *
 soap_new_req_ns1__searchByKeywordsAll(struct soap *soap, int startIndex,
                                       int numberOfResults) {
-  ns1__searchByKeywordsAll *_p =
-      soap_instantiate_ns1__searchByKeywordsAll(soap, -1, NULL, NULL, NULL);
+  ns1__searchByKeywordsAll *_p = soap_instantiate_ns1__searchByKeywordsAll(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByKeywordsAll::startIndex = startIndex;
@@ -17156,8 +17274,8 @@ soap_new_set_ns1__searchByKeywordsAll(struct soap *soap, std::string *sessionId,
                                       ns1__keywordDetails *keywordDetails,
                                       int startIndex, int numberOfResults,
                                       char *__item1) {
-  ns1__searchByKeywordsAll *_p =
-      soap_instantiate_ns1__searchByKeywordsAll(soap, -1, NULL, NULL, NULL);
+  ns1__searchByKeywordsAll *_p = soap_instantiate_ns1__searchByKeywordsAll(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByKeywordsAll::sessionId = sessionId;
@@ -17220,15 +17338,15 @@ soap_instantiate_ns1__searchByKeywordsResponse(struct soap *, int, const char *,
 
 inline ns1__searchByKeywordsResponse *
 soap_new_ns1__searchByKeywordsResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchByKeywordsResponse(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate_ns1__searchByKeywordsResponse(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline ns1__searchByKeywordsResponse *
 soap_new_req_ns1__searchByKeywordsResponse(struct soap *soap) {
   ns1__searchByKeywordsResponse *_p =
-      soap_instantiate_ns1__searchByKeywordsResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__searchByKeywordsResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -17240,8 +17358,8 @@ soap_new_set_ns1__searchByKeywordsResponse(
     struct soap *soap, std::vector<ns1__investigation *> &return_,
     char *__item1) {
   ns1__searchByKeywordsResponse *_p =
-      soap_instantiate_ns1__searchByKeywordsResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__searchByKeywordsResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByKeywordsResponse::return_ = return_;
@@ -17298,13 +17416,14 @@ soap_instantiate_ns1__searchByKeywords(struct soap *, int, const char *,
 
 inline ns1__searchByKeywords *soap_new_ns1__searchByKeywords(struct soap *soap,
                                                              int n = -1) {
-  return soap_instantiate_ns1__searchByKeywords(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__searchByKeywords(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline ns1__searchByKeywords *
 soap_new_req_ns1__searchByKeywords(struct soap *soap) {
-  ns1__searchByKeywords *_p =
-      soap_instantiate_ns1__searchByKeywords(soap, -1, NULL, NULL, NULL);
+  ns1__searchByKeywords *_p = soap_instantiate_ns1__searchByKeywords(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -17315,8 +17434,8 @@ inline ns1__searchByKeywords *
 soap_new_set_ns1__searchByKeywords(struct soap *soap, std::string *sessionId,
                                    std::vector<std::string> &keywords,
                                    char *__item1) {
-  ns1__searchByKeywords *_p =
-      soap_instantiate_ns1__searchByKeywords(soap, -1, NULL, NULL, NULL);
+  ns1__searchByKeywords *_p = soap_instantiate_ns1__searchByKeywords(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByKeywords::sessionId = sessionId;
@@ -17380,15 +17499,15 @@ soap_instantiate_ns1__checkDatasetDownloadAccessResponse(struct soap *, int,
 inline ns1__checkDatasetDownloadAccessResponse *
 soap_new_ns1__checkDatasetDownloadAccessResponse(struct soap *soap,
                                                  int n = -1) {
-  return soap_instantiate_ns1__checkDatasetDownloadAccessResponse(soap, n, NULL,
-                                                                  NULL, NULL);
+  return soap_instantiate_ns1__checkDatasetDownloadAccessResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__checkDatasetDownloadAccessResponse *
 soap_new_req_ns1__checkDatasetDownloadAccessResponse(struct soap *soap) {
   ns1__checkDatasetDownloadAccessResponse *_p =
-      soap_instantiate_ns1__checkDatasetDownloadAccessResponse(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate_ns1__checkDatasetDownloadAccessResponse(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -17399,8 +17518,8 @@ inline ns1__checkDatasetDownloadAccessResponse *
 soap_new_set_ns1__checkDatasetDownloadAccessResponse(
     struct soap *soap, ns1__downloadInfo *downloadInfo, char *__item1) {
   ns1__checkDatasetDownloadAccessResponse *_p =
-      soap_instantiate_ns1__checkDatasetDownloadAccessResponse(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate_ns1__checkDatasetDownloadAccessResponse(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__checkDatasetDownloadAccessResponse::downloadInfo = downloadInfo;
@@ -17461,15 +17580,15 @@ soap_instantiate_ns1__checkDatasetDownloadAccess(struct soap *, int,
 
 inline ns1__checkDatasetDownloadAccess *
 soap_new_ns1__checkDatasetDownloadAccess(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__checkDatasetDownloadAccess(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate_ns1__checkDatasetDownloadAccess(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline ns1__checkDatasetDownloadAccess *
 soap_new_req_ns1__checkDatasetDownloadAccess(struct soap *soap) {
   ns1__checkDatasetDownloadAccess *_p =
-      soap_instantiate_ns1__checkDatasetDownloadAccess(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__checkDatasetDownloadAccess(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -17481,8 +17600,8 @@ soap_new_set_ns1__checkDatasetDownloadAccess(struct soap *soap,
                                              std::string *sessionId,
                                              LONG64 *datasetId, char *__item1) {
   ns1__checkDatasetDownloadAccess *_p =
-      soap_instantiate_ns1__checkDatasetDownloadAccess(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__checkDatasetDownloadAccess(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__checkDatasetDownloadAccess::sessionId = sessionId;
@@ -17546,7 +17665,7 @@ inline ns1__searchDatafileByParameterConditionResponse *
 soap_new_ns1__searchDatafileByParameterConditionResponse(struct soap *soap,
                                                          int n = -1) {
   return soap_instantiate_ns1__searchDatafileByParameterConditionResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatafileByParameterConditionResponse *
@@ -17554,7 +17673,7 @@ soap_new_req_ns1__searchDatafileByParameterConditionResponse(
     struct soap *soap) {
   ns1__searchDatafileByParameterConditionResponse *_p =
       soap_instantiate_ns1__searchDatafileByParameterConditionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -17566,7 +17685,7 @@ soap_new_set_ns1__searchDatafileByParameterConditionResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchDatafileByParameterConditionResponse *_p =
       soap_instantiate_ns1__searchDatafileByParameterConditionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatafileByParameterConditionResponse::return_ = return_;
@@ -17630,15 +17749,15 @@ soap_instantiate_ns1__searchDatafileByParameterCondition(struct soap *, int,
 inline ns1__searchDatafileByParameterCondition *
 soap_new_ns1__searchDatafileByParameterCondition(struct soap *soap,
                                                  int n = -1) {
-  return soap_instantiate_ns1__searchDatafileByParameterCondition(soap, n, NULL,
-                                                                  NULL, NULL);
+  return soap_instantiate_ns1__searchDatafileByParameterCondition(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatafileByParameterCondition *
 soap_new_req_ns1__searchDatafileByParameterCondition(struct soap *soap) {
   ns1__searchDatafileByParameterCondition *_p =
-      soap_instantiate_ns1__searchDatafileByParameterCondition(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate_ns1__searchDatafileByParameterCondition(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -17650,8 +17769,8 @@ soap_new_set_ns1__searchDatafileByParameterCondition(
     struct soap *soap, std::string *sessionId,
     ns1__parameterCondition *logicalCondition, char *__item1) {
   ns1__searchDatafileByParameterCondition *_p =
-      soap_instantiate_ns1__searchDatafileByParameterCondition(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate_ns1__searchDatafileByParameterCondition(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatafileByParameterCondition::sessionId = sessionId;
@@ -17718,14 +17837,14 @@ inline ns1__searchByUserSurnamePaginationResponse *
 soap_new_ns1__searchByUserSurnamePaginationResponse(struct soap *soap,
                                                     int n = -1) {
   return soap_instantiate_ns1__searchByUserSurnamePaginationResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchByUserSurnamePaginationResponse *
 soap_new_req_ns1__searchByUserSurnamePaginationResponse(struct soap *soap) {
   ns1__searchByUserSurnamePaginationResponse *_p =
       soap_instantiate_ns1__searchByUserSurnamePaginationResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -17738,7 +17857,7 @@ soap_new_set_ns1__searchByUserSurnamePaginationResponse(
     char *__item1) {
   ns1__searchByUserSurnamePaginationResponse *_p =
       soap_instantiate_ns1__searchByUserSurnamePaginationResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByUserSurnamePaginationResponse::return_ = return_;
@@ -17799,8 +17918,8 @@ soap_instantiate_ns1__searchByUserSurnamePagination(struct soap *, int,
 
 inline ns1__searchByUserSurnamePagination *
 soap_new_ns1__searchByUserSurnamePagination(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchByUserSurnamePagination(soap, n, NULL,
-                                                             NULL, NULL);
+  return soap_instantiate_ns1__searchByUserSurnamePagination(soap, n, nullptr,
+                                                             nullptr, nullptr);
 }
 
 inline ns1__searchByUserSurnamePagination *
@@ -17808,8 +17927,8 @@ soap_new_req_ns1__searchByUserSurnamePagination(struct soap *soap,
                                                 int startIndex,
                                                 int numberOfResults) {
   ns1__searchByUserSurnamePagination *_p =
-      soap_instantiate_ns1__searchByUserSurnamePagination(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate_ns1__searchByUserSurnamePagination(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByUserSurnamePagination::startIndex = startIndex;
@@ -17823,8 +17942,8 @@ soap_new_set_ns1__searchByUserSurnamePagination(
     struct soap *soap, std::string *sessionId, std::string *surname,
     int startIndex, int numberOfResults, char *__item1) {
   ns1__searchByUserSurnamePagination *_p =
-      soap_instantiate_ns1__searchByUserSurnamePagination(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate_ns1__searchByUserSurnamePagination(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByUserSurnamePagination::sessionId = sessionId;
@@ -17880,11 +17999,12 @@ soap_instantiate_ns1__shiftPK(struct soap *, int, const char *, const char *,
                               size_t *);
 
 inline ns1__shiftPK *soap_new_ns1__shiftPK(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__shiftPK(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__shiftPK(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__shiftPK *soap_new_req_ns1__shiftPK(struct soap *soap) {
-  ns1__shiftPK *_p = soap_instantiate_ns1__shiftPK(soap, -1, NULL, NULL, NULL);
+  ns1__shiftPK *_p =
+      soap_instantiate_ns1__shiftPK(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -17896,7 +18016,8 @@ inline ns1__shiftPK *soap_new_set_ns1__shiftPK(struct soap *soap,
                                                LONG64 *investigationId,
                                                time_t *startDate,
                                                char *__item2) {
-  ns1__shiftPK *_p = soap_instantiate_ns1__shiftPK(soap, -1, NULL, NULL, NULL);
+  ns1__shiftPK *_p =
+      soap_instantiate_ns1__shiftPK(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__shiftPK::endDate = endDate;
@@ -17948,13 +18069,14 @@ soap_instantiate_ns1__shift(struct soap *, int, const char *, const char *,
                             size_t *);
 
 inline ns1__shift *soap_new_ns1__shift(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__shift(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__shift(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__shift *soap_new_req_ns1__shift(struct soap *soap,
                                            bool facilityAcquiredData1,
                                            bool selected1) {
-  ns1__shift *_p = soap_instantiate_ns1__shift(soap, -1, NULL, NULL, NULL);
+  ns1__shift *_p =
+      soap_instantiate_ns1__shift(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -17968,7 +18090,8 @@ soap_new_set_ns1__shift(struct soap *soap, std::string *shiftComment,
                         ns1__shiftPK *shiftPK, bool facilityAcquiredData1,
                         ns1__icatRole *icatRole1, bool selected1,
                         std::string *uniqueId1, char *__item2) {
-  ns1__shift *_p = soap_instantiate_ns1__shift(soap, -1, NULL, NULL, NULL);
+  ns1__shift *_p =
+      soap_instantiate_ns1__shift(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__shift::shiftComment = shiftComment;
@@ -18026,14 +18149,14 @@ soap_instantiate_ns1__publication(struct soap *, int, const char *,
 
 inline ns1__publication *soap_new_ns1__publication(struct soap *soap,
                                                    int n = -1) {
-  return soap_instantiate_ns1__publication(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__publication(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__publication *
 soap_new_req_ns1__publication(struct soap *soap, bool facilityAcquiredData1,
                               bool selected1) {
   ns1__publication *_p =
-      soap_instantiate_ns1__publication(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__publication(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -18048,7 +18171,7 @@ inline ns1__publication *soap_new_set_ns1__publication(
     bool facilityAcquiredData1, ns1__icatRole *icatRole1, bool selected1,
     std::string *uniqueId1, char *__item2) {
   ns1__publication *_p =
-      soap_instantiate_ns1__publication(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__publication(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__publication::fullReference = fullReference;
@@ -18109,13 +18232,14 @@ soap_instantiate_ns1__keyword(struct soap *, int, const char *, const char *,
                               size_t *);
 
 inline ns1__keyword *soap_new_ns1__keyword(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__keyword(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__keyword(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__keyword *soap_new_req_ns1__keyword(struct soap *soap,
                                                bool facilityAcquiredData1,
                                                bool selected1) {
-  ns1__keyword *_p = soap_instantiate_ns1__keyword(soap, -1, NULL, NULL, NULL);
+  ns1__keyword *_p =
+      soap_instantiate_ns1__keyword(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -18129,7 +18253,8 @@ soap_new_set_ns1__keyword(struct soap *soap, ns1__keywordPK *keywordPK,
                           bool facilityAcquiredData1, ns1__icatRole *icatRole1,
                           bool selected1, std::string *uniqueId1,
                           char *__item2) {
-  ns1__keyword *_p = soap_instantiate_ns1__keyword(soap, -1, NULL, NULL, NULL);
+  ns1__keyword *_p =
+      soap_instantiate_ns1__keyword(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__keyword::keywordPK = keywordPK;
@@ -18188,14 +18313,14 @@ soap_instantiate_ns1__investigator(struct soap *, int, const char *,
 
 inline ns1__investigator *soap_new_ns1__investigator(struct soap *soap,
                                                      int n = -1) {
-  return soap_instantiate_ns1__investigator(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__investigator(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__investigator *
 soap_new_req_ns1__investigator(struct soap *soap, bool facilityAcquiredData1,
                                bool selected1) {
   ns1__investigator *_p =
-      soap_instantiate_ns1__investigator(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__investigator(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -18210,7 +18335,7 @@ inline ns1__investigator *soap_new_set_ns1__investigator(
     bool facilityAcquiredData1, ns1__icatRole *icatRole1, bool selected1,
     std::string *uniqueId1, char *__item2) {
   ns1__investigator *_p =
-      soap_instantiate_ns1__investigator(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__investigator(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__investigator::ns1__facilityUser_ = ns1__facilityUser_;
@@ -18272,14 +18397,15 @@ soap_instantiate_ns1__investigation(struct soap *, int, const char *,
 
 inline ns1__investigation *soap_new_ns1__investigation(struct soap *soap,
                                                        int n = -1) {
-  return soap_instantiate_ns1__investigation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__investigation(soap, n, nullptr, nullptr,
+                                             nullptr);
 }
 
 inline ns1__investigation *
 soap_new_req_ns1__investigation(struct soap *soap, bool facilityAcquiredData1,
                                 bool selected1) {
   ns1__investigation *_p =
-      soap_instantiate_ns1__investigation(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__investigation(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -18303,7 +18429,7 @@ inline ns1__investigation *soap_new_set_ns1__investigation(
     std::string *visitId, bool facilityAcquiredData1, ns1__icatRole *icatRole1,
     bool selected1, std::string *uniqueId1, char *__item2) {
   ns1__investigation *_p =
-      soap_instantiate_ns1__investigation(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__investigation(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__investigation::bcatInvStr = bcatInvStr;
@@ -18389,15 +18515,15 @@ soap_instantiate_ns1__searchByUserSurnameResponse(struct soap *, int,
 
 inline ns1__searchByUserSurnameResponse *
 soap_new_ns1__searchByUserSurnameResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchByUserSurnameResponse(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__searchByUserSurnameResponse(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__searchByUserSurnameResponse *
 soap_new_req_ns1__searchByUserSurnameResponse(struct soap *soap) {
   ns1__searchByUserSurnameResponse *_p =
-      soap_instantiate_ns1__searchByUserSurnameResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__searchByUserSurnameResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -18409,8 +18535,8 @@ soap_new_set_ns1__searchByUserSurnameResponse(
     struct soap *soap, std::vector<ns1__investigation *> &return_,
     char *__item1) {
   ns1__searchByUserSurnameResponse *_p =
-      soap_instantiate_ns1__searchByUserSurnameResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__searchByUserSurnameResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByUserSurnameResponse::return_ = return_;
@@ -18467,13 +18593,14 @@ soap_instantiate_ns1__searchByUserSurname(struct soap *, int, const char *,
 
 inline ns1__searchByUserSurname *
 soap_new_ns1__searchByUserSurname(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchByUserSurname(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__searchByUserSurname(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__searchByUserSurname *
 soap_new_req_ns1__searchByUserSurname(struct soap *soap) {
-  ns1__searchByUserSurname *_p =
-      soap_instantiate_ns1__searchByUserSurname(soap, -1, NULL, NULL, NULL);
+  ns1__searchByUserSurname *_p = soap_instantiate_ns1__searchByUserSurname(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -18483,8 +18610,8 @@ soap_new_req_ns1__searchByUserSurname(struct soap *soap) {
 inline ns1__searchByUserSurname *
 soap_new_set_ns1__searchByUserSurname(struct soap *soap, std::string *sessionId,
                                       std::string *surname, char *__item1) {
-  ns1__searchByUserSurname *_p =
-      soap_instantiate_ns1__searchByUserSurname(soap, -1, NULL, NULL, NULL);
+  ns1__searchByUserSurname *_p = soap_instantiate_ns1__searchByUserSurname(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchByUserSurname::sessionId = sessionId;
@@ -18544,14 +18671,15 @@ soap_instantiate_ns1__deleteDataFileResponse(struct soap *, int, const char *,
 
 inline ns1__deleteDataFileResponse *
 soap_new_ns1__deleteDataFileResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deleteDataFileResponse(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__deleteDataFileResponse(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__deleteDataFileResponse *
 soap_new_req_ns1__deleteDataFileResponse(struct soap *soap) {
   ns1__deleteDataFileResponse *_p =
-      soap_instantiate_ns1__deleteDataFileResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__deleteDataFileResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -18561,7 +18689,8 @@ soap_new_req_ns1__deleteDataFileResponse(struct soap *soap) {
 inline ns1__deleteDataFileResponse *
 soap_new_set_ns1__deleteDataFileResponse(struct soap *soap, char *__item1) {
   ns1__deleteDataFileResponse *_p =
-      soap_instantiate_ns1__deleteDataFileResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__deleteDataFileResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -18617,13 +18746,14 @@ soap_instantiate_ns1__deleteDataFile(struct soap *, int, const char *,
 
 inline ns1__deleteDataFile *soap_new_ns1__deleteDataFile(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__deleteDataFile(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__deleteDataFile(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__deleteDataFile *
 soap_new_req_ns1__deleteDataFile(struct soap *soap) {
   ns1__deleteDataFile *_p =
-      soap_instantiate_ns1__deleteDataFile(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__deleteDataFile(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -18634,7 +18764,7 @@ inline ns1__deleteDataFile *
 soap_new_set_ns1__deleteDataFile(struct soap *soap, std::string *sessionId,
                                  LONG64 *datafileId, char *__item1) {
   ns1__deleteDataFile *_p =
-      soap_instantiate_ns1__deleteDataFile(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__deleteDataFile(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__deleteDataFile::sessionId = sessionId;
@@ -18691,12 +18821,12 @@ soap_instantiate_ns1__downloadInfo(struct soap *, int, const char *,
 
 inline ns1__downloadInfo *soap_new_ns1__downloadInfo(struct soap *soap,
                                                      int n = -1) {
-  return soap_instantiate_ns1__downloadInfo(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__downloadInfo(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__downloadInfo *soap_new_req_ns1__downloadInfo(struct soap *soap) {
   ns1__downloadInfo *_p =
-      soap_instantiate_ns1__downloadInfo(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__downloadInfo(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -18709,7 +18839,7 @@ soap_new_set_ns1__downloadInfo(struct soap *soap, std::string *credential,
                                std::vector<xsd__anyType *> &datafileNames,
                                std::string *userId, char *__item1) {
   ns1__downloadInfo *_p =
-      soap_instantiate_ns1__downloadInfo(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__downloadInfo(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__downloadInfo::credential = credential;
@@ -18776,14 +18906,14 @@ inline ns1__checkDatafileDownloadAccessResponse *
 soap_new_ns1__checkDatafileDownloadAccessResponse(struct soap *soap,
                                                   int n = -1) {
   return soap_instantiate_ns1__checkDatafileDownloadAccessResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__checkDatafileDownloadAccessResponse *
 soap_new_req_ns1__checkDatafileDownloadAccessResponse(struct soap *soap) {
   ns1__checkDatafileDownloadAccessResponse *_p =
-      soap_instantiate_ns1__checkDatafileDownloadAccessResponse(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate_ns1__checkDatafileDownloadAccessResponse(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -18794,8 +18924,8 @@ inline ns1__checkDatafileDownloadAccessResponse *
 soap_new_set_ns1__checkDatafileDownloadAccessResponse(
     struct soap *soap, ns1__downloadInfo *downloadInfo, char *__item1) {
   ns1__checkDatafileDownloadAccessResponse *_p =
-      soap_instantiate_ns1__checkDatafileDownloadAccessResponse(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate_ns1__checkDatafileDownloadAccessResponse(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__checkDatafileDownloadAccessResponse::downloadInfo = downloadInfo;
@@ -18856,15 +18986,15 @@ soap_instantiate_ns1__checkDatafileDownloadAccess(struct soap *, int,
 
 inline ns1__checkDatafileDownloadAccess *
 soap_new_ns1__checkDatafileDownloadAccess(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__checkDatafileDownloadAccess(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__checkDatafileDownloadAccess(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__checkDatafileDownloadAccess *
 soap_new_req_ns1__checkDatafileDownloadAccess(struct soap *soap) {
   ns1__checkDatafileDownloadAccess *_p =
-      soap_instantiate_ns1__checkDatafileDownloadAccess(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__checkDatafileDownloadAccess(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -18877,8 +19007,8 @@ soap_new_set_ns1__checkDatafileDownloadAccess(struct soap *soap,
                                               std::vector<LONG64> &datafileIds,
                                               char *__item1) {
   ns1__checkDatafileDownloadAccess *_p =
-      soap_instantiate_ns1__checkDatafileDownloadAccess(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__checkDatafileDownloadAccess(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__checkDatafileDownloadAccess::sessionId = sessionId;
@@ -18943,14 +19073,14 @@ inline ns1__getFacilityUserByFacilityUserIdResponse *
 soap_new_ns1__getFacilityUserByFacilityUserIdResponse(struct soap *soap,
                                                       int n = -1) {
   return soap_instantiate_ns1__getFacilityUserByFacilityUserIdResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getFacilityUserByFacilityUserIdResponse *
 soap_new_req_ns1__getFacilityUserByFacilityUserIdResponse(struct soap *soap) {
   ns1__getFacilityUserByFacilityUserIdResponse *_p =
       soap_instantiate_ns1__getFacilityUserByFacilityUserIdResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -18962,7 +19092,7 @@ soap_new_set_ns1__getFacilityUserByFacilityUserIdResponse(
     struct soap *soap, ns1__facilityUser *return_, char *__item1) {
   ns1__getFacilityUserByFacilityUserIdResponse *_p =
       soap_instantiate_ns1__getFacilityUserByFacilityUserIdResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getFacilityUserByFacilityUserIdResponse::return_ = return_;
@@ -19023,15 +19153,15 @@ soap_instantiate_ns1__getFacilityUserByFacilityUserId(struct soap *, int,
 
 inline ns1__getFacilityUserByFacilityUserId *
 soap_new_ns1__getFacilityUserByFacilityUserId(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getFacilityUserByFacilityUserId(soap, n, NULL,
-                                                               NULL, NULL);
+  return soap_instantiate_ns1__getFacilityUserByFacilityUserId(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getFacilityUserByFacilityUserId *
 soap_new_req_ns1__getFacilityUserByFacilityUserId(struct soap *soap) {
   ns1__getFacilityUserByFacilityUserId *_p =
-      soap_instantiate_ns1__getFacilityUserByFacilityUserId(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__getFacilityUserByFacilityUserId(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -19044,8 +19174,8 @@ soap_new_set_ns1__getFacilityUserByFacilityUserId(struct soap *soap,
                                                   std::string *facilityUserId,
                                                   char *__item1) {
   ns1__getFacilityUserByFacilityUserId *_p =
-      soap_instantiate_ns1__getFacilityUserByFacilityUserId(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__getFacilityUserByFacilityUserId(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getFacilityUserByFacilityUserId::sessionId = sessionId;
@@ -19113,7 +19243,7 @@ inline ns1__getFacilityCyclesWithDataForInstrumentResponse *
 soap_new_ns1__getFacilityCyclesWithDataForInstrumentResponse(struct soap *soap,
                                                              int n = -1) {
   return soap_instantiate_ns1__getFacilityCyclesWithDataForInstrumentResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getFacilityCyclesWithDataForInstrumentResponse *
@@ -19121,7 +19251,7 @@ soap_new_req_ns1__getFacilityCyclesWithDataForInstrumentResponse(
     struct soap *soap) {
   ns1__getFacilityCyclesWithDataForInstrumentResponse *_p =
       soap_instantiate_ns1__getFacilityCyclesWithDataForInstrumentResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -19134,7 +19264,7 @@ soap_new_set_ns1__getFacilityCyclesWithDataForInstrumentResponse(
     char *__item1) {
   ns1__getFacilityCyclesWithDataForInstrumentResponse *_p =
       soap_instantiate_ns1__getFacilityCyclesWithDataForInstrumentResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getFacilityCyclesWithDataForInstrumentResponse::return_ = return_;
@@ -19198,14 +19328,14 @@ inline ns1__getFacilityCyclesWithDataForInstrument *
 soap_new_ns1__getFacilityCyclesWithDataForInstrument(struct soap *soap,
                                                      int n = -1) {
   return soap_instantiate_ns1__getFacilityCyclesWithDataForInstrument(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getFacilityCyclesWithDataForInstrument *
 soap_new_req_ns1__getFacilityCyclesWithDataForInstrument(struct soap *soap) {
   ns1__getFacilityCyclesWithDataForInstrument *_p =
       soap_instantiate_ns1__getFacilityCyclesWithDataForInstrument(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -19218,7 +19348,7 @@ soap_new_set_ns1__getFacilityCyclesWithDataForInstrument(
     char *__item1) {
   ns1__getFacilityCyclesWithDataForInstrument *_p =
       soap_instantiate_ns1__getFacilityCyclesWithDataForInstrument(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getFacilityCyclesWithDataForInstrument::sessionId = sessionId;
@@ -19280,15 +19410,15 @@ soap_instantiate_ns1__addSampleParameterResponse(struct soap *, int,
 
 inline ns1__addSampleParameterResponse *
 soap_new_ns1__addSampleParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__addSampleParameterResponse(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate_ns1__addSampleParameterResponse(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline ns1__addSampleParameterResponse *
 soap_new_req_ns1__addSampleParameterResponse(struct soap *soap) {
   ns1__addSampleParameterResponse *_p =
-      soap_instantiate_ns1__addSampleParameterResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__addSampleParameterResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -19300,8 +19430,8 @@ soap_new_set_ns1__addSampleParameterResponse(struct soap *soap,
                                              ns1__sampleParameter *return_,
                                              char *__item1) {
   ns1__addSampleParameterResponse *_p =
-      soap_instantiate_ns1__addSampleParameterResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__addSampleParameterResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addSampleParameterResponse::return_ = return_;
@@ -19357,13 +19487,14 @@ soap_instantiate_ns1__addSampleParameter(struct soap *, int, const char *,
 
 inline ns1__addSampleParameter *
 soap_new_ns1__addSampleParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__addSampleParameter(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__addSampleParameter(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline ns1__addSampleParameter *
 soap_new_req_ns1__addSampleParameter(struct soap *soap) {
-  ns1__addSampleParameter *_p =
-      soap_instantiate_ns1__addSampleParameter(soap, -1, NULL, NULL, NULL);
+  ns1__addSampleParameter *_p = soap_instantiate_ns1__addSampleParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -19374,8 +19505,8 @@ inline ns1__addSampleParameter *
 soap_new_set_ns1__addSampleParameter(struct soap *soap, std::string *sessionId,
                                      ns1__sampleParameter *sampleParameter,
                                      LONG64 *investigationId, char *__item1) {
-  ns1__addSampleParameter *_p =
-      soap_instantiate_ns1__addSampleParameter(soap, -1, NULL, NULL, NULL);
+  ns1__addSampleParameter *_p = soap_instantiate_ns1__addSampleParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addSampleParameter::sessionId = sessionId;
@@ -19434,13 +19565,14 @@ soap_instantiate_ns1__modifyDataSetResponse(struct soap *, int, const char *,
 
 inline ns1__modifyDataSetResponse *
 soap_new_ns1__modifyDataSetResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__modifyDataSetResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__modifyDataSetResponse(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline ns1__modifyDataSetResponse *
 soap_new_req_ns1__modifyDataSetResponse(struct soap *soap) {
-  ns1__modifyDataSetResponse *_p =
-      soap_instantiate_ns1__modifyDataSetResponse(soap, -1, NULL, NULL, NULL);
+  ns1__modifyDataSetResponse *_p = soap_instantiate_ns1__modifyDataSetResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -19449,8 +19581,8 @@ soap_new_req_ns1__modifyDataSetResponse(struct soap *soap) {
 
 inline ns1__modifyDataSetResponse *
 soap_new_set_ns1__modifyDataSetResponse(struct soap *soap, char *__item1) {
-  ns1__modifyDataSetResponse *_p =
-      soap_instantiate_ns1__modifyDataSetResponse(soap, -1, NULL, NULL, NULL);
+  ns1__modifyDataSetResponse *_p = soap_instantiate_ns1__modifyDataSetResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -19506,12 +19638,13 @@ soap_instantiate_ns1__modifyDataSet(struct soap *, int, const char *,
 
 inline ns1__modifyDataSet *soap_new_ns1__modifyDataSet(struct soap *soap,
                                                        int n = -1) {
-  return soap_instantiate_ns1__modifyDataSet(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__modifyDataSet(soap, n, nullptr, nullptr,
+                                             nullptr);
 }
 
 inline ns1__modifyDataSet *soap_new_req_ns1__modifyDataSet(struct soap *soap) {
   ns1__modifyDataSet *_p =
-      soap_instantiate_ns1__modifyDataSet(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__modifyDataSet(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -19522,7 +19655,7 @@ inline ns1__modifyDataSet *
 soap_new_set_ns1__modifyDataSet(struct soap *soap, std::string *sessionId,
                                 ns1__dataset *dataSet, char *__item1) {
   ns1__modifyDataSet *_p =
-      soap_instantiate_ns1__modifyDataSet(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__modifyDataSet(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__modifyDataSet::sessionId = sessionId;
@@ -19586,7 +19719,7 @@ inline ns1__searchDatasetByParameterComparisonResponse *
 soap_new_ns1__searchDatasetByParameterComparisonResponse(struct soap *soap,
                                                          int n = -1) {
   return soap_instantiate_ns1__searchDatasetByParameterComparisonResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatasetByParameterComparisonResponse *
@@ -19594,7 +19727,7 @@ soap_new_req_ns1__searchDatasetByParameterComparisonResponse(
     struct soap *soap) {
   ns1__searchDatasetByParameterComparisonResponse *_p =
       soap_instantiate_ns1__searchDatasetByParameterComparisonResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -19606,7 +19739,7 @@ soap_new_set_ns1__searchDatasetByParameterComparisonResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchDatasetByParameterComparisonResponse *_p =
       soap_instantiate_ns1__searchDatasetByParameterComparisonResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetByParameterComparisonResponse::return_ = return_;
@@ -19667,16 +19800,16 @@ soap_instantiate_ns1__parameterComparisonCondition(struct soap *, int,
 
 inline ns1__parameterComparisonCondition *
 soap_new_ns1__parameterComparisonCondition(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__parameterComparisonCondition(soap, n, NULL, NULL,
-                                                            NULL);
+  return soap_instantiate_ns1__parameterComparisonCondition(soap, n, nullptr,
+                                                            nullptr, nullptr);
 }
 
 inline ns1__parameterComparisonCondition *
 soap_new_req_ns1__parameterComparisonCondition(struct soap *soap, bool negate2,
                                                bool sensitive2) {
   ns1__parameterComparisonCondition *_p =
-      soap_instantiate_ns1__parameterComparisonCondition(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate_ns1__parameterComparisonCondition(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__condition::negate = negate2;
@@ -19691,8 +19824,8 @@ soap_new_set_ns1__parameterComparisonCondition(
     ns1__parameterSearch *parameterSearch, xsd__anyType *value,
     xsd__anyType *valueRight, bool negate2, bool sensitive2, char *__item3) {
   ns1__parameterComparisonCondition *_p =
-      soap_instantiate_ns1__parameterComparisonCondition(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate_ns1__parameterComparisonCondition(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__parameterComparisonCondition::comparator = comparator;
@@ -19760,15 +19893,15 @@ soap_instantiate_ns1__searchDatasetByParameterComparison(struct soap *, int,
 inline ns1__searchDatasetByParameterComparison *
 soap_new_ns1__searchDatasetByParameterComparison(struct soap *soap,
                                                  int n = -1) {
-  return soap_instantiate_ns1__searchDatasetByParameterComparison(soap, n, NULL,
-                                                                  NULL, NULL);
+  return soap_instantiate_ns1__searchDatasetByParameterComparison(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatasetByParameterComparison *
 soap_new_req_ns1__searchDatasetByParameterComparison(struct soap *soap) {
   ns1__searchDatasetByParameterComparison *_p =
-      soap_instantiate_ns1__searchDatasetByParameterComparison(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate_ns1__searchDatasetByParameterComparison(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -19781,8 +19914,8 @@ soap_new_set_ns1__searchDatasetByParameterComparison(
     std::vector<ns1__parameterComparisonCondition *> &comparison,
     char *__item1) {
   ns1__searchDatasetByParameterComparison *_p =
-      soap_instantiate_ns1__searchDatasetByParameterComparison(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate_ns1__searchDatasetByParameterComparison(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetByParameterComparison::sessionId = sessionId;
@@ -19845,15 +19978,15 @@ soap_instantiate_ns1__searchSampleByRestrictionResponse(struct soap *, int,
 
 inline ns1__searchSampleByRestrictionResponse *
 soap_new_ns1__searchSampleByRestrictionResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchSampleByRestrictionResponse(soap, n, NULL,
-                                                                 NULL, NULL);
+  return soap_instantiate_ns1__searchSampleByRestrictionResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchSampleByRestrictionResponse *
 soap_new_req_ns1__searchSampleByRestrictionResponse(struct soap *soap) {
   ns1__searchSampleByRestrictionResponse *_p =
-      soap_instantiate_ns1__searchSampleByRestrictionResponse(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate_ns1__searchSampleByRestrictionResponse(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -19864,8 +19997,8 @@ inline ns1__searchSampleByRestrictionResponse *
 soap_new_set_ns1__searchSampleByRestrictionResponse(
     struct soap *soap, std::vector<ns1__sample *> &return_, char *__item1) {
   ns1__searchSampleByRestrictionResponse *_p =
-      soap_instantiate_ns1__searchSampleByRestrictionResponse(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate_ns1__searchSampleByRestrictionResponse(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSampleByRestrictionResponse::return_ = return_;
@@ -19927,15 +20060,15 @@ soap_instantiate_ns1__searchSampleByRestriction(struct soap *, int,
 
 inline ns1__searchSampleByRestriction *
 soap_new_ns1__searchSampleByRestriction(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchSampleByRestriction(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate_ns1__searchSampleByRestriction(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline ns1__searchSampleByRestriction *
 soap_new_req_ns1__searchSampleByRestriction(struct soap *soap) {
   ns1__searchSampleByRestriction *_p =
-      soap_instantiate_ns1__searchSampleByRestriction(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__searchSampleByRestriction(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -19947,8 +20080,8 @@ soap_new_set_ns1__searchSampleByRestriction(
     struct soap *soap, std::string *sessionId,
     ns1__restrictionCondition *restriction, char *__item1) {
   ns1__searchSampleByRestriction *_p =
-      soap_instantiate_ns1__searchSampleByRestriction(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__searchSampleByRestriction(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSampleByRestriction::sessionId = sessionId;
@@ -20011,15 +20144,15 @@ soap_instantiate_ns1__downloadDatafilesResponse(struct soap *, int,
 
 inline ns1__downloadDatafilesResponse *
 soap_new_ns1__downloadDatafilesResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__downloadDatafilesResponse(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate_ns1__downloadDatafilesResponse(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline ns1__downloadDatafilesResponse *
 soap_new_req_ns1__downloadDatafilesResponse(struct soap *soap) {
   ns1__downloadDatafilesResponse *_p =
-      soap_instantiate_ns1__downloadDatafilesResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__downloadDatafilesResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -20030,8 +20163,8 @@ inline ns1__downloadDatafilesResponse *
 soap_new_set_ns1__downloadDatafilesResponse(struct soap *soap, std::string *URL,
                                             char *__item1) {
   ns1__downloadDatafilesResponse *_p =
-      soap_instantiate_ns1__downloadDatafilesResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__downloadDatafilesResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__downloadDatafilesResponse::URL = URL;
@@ -20088,13 +20221,14 @@ soap_instantiate_ns1__downloadDatafiles(struct soap *, int, const char *,
 
 inline ns1__downloadDatafiles *
 soap_new_ns1__downloadDatafiles(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__downloadDatafiles(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__downloadDatafiles(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline ns1__downloadDatafiles *
 soap_new_req_ns1__downloadDatafiles(struct soap *soap) {
-  ns1__downloadDatafiles *_p =
-      soap_instantiate_ns1__downloadDatafiles(soap, -1, NULL, NULL, NULL);
+  ns1__downloadDatafiles *_p = soap_instantiate_ns1__downloadDatafiles(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -20105,8 +20239,8 @@ inline ns1__downloadDatafiles *
 soap_new_set_ns1__downloadDatafiles(struct soap *soap, std::string *sessionId,
                                     std::vector<LONG64> &datafileIds,
                                     char *__item1) {
-  ns1__downloadDatafiles *_p =
-      soap_instantiate_ns1__downloadDatafiles(soap, -1, NULL, NULL, NULL);
+  ns1__downloadDatafiles *_p = soap_instantiate_ns1__downloadDatafiles(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__downloadDatafiles::sessionId = sessionId;
@@ -20174,7 +20308,7 @@ inline ns1__searchInvestigationByParameterConditionResponse *
 soap_new_ns1__searchInvestigationByParameterConditionResponse(struct soap *soap,
                                                               int n = -1) {
   return soap_instantiate_ns1__searchInvestigationByParameterConditionResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchInvestigationByParameterConditionResponse *
@@ -20182,7 +20316,7 @@ soap_new_req_ns1__searchInvestigationByParameterConditionResponse(
     struct soap *soap) {
   ns1__searchInvestigationByParameterConditionResponse *_p =
       soap_instantiate_ns1__searchInvestigationByParameterConditionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -20194,7 +20328,7 @@ soap_new_set_ns1__searchInvestigationByParameterConditionResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchInvestigationByParameterConditionResponse *_p =
       soap_instantiate_ns1__searchInvestigationByParameterConditionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchInvestigationByParameterConditionResponse::return_ = return_;
@@ -20259,14 +20393,14 @@ inline ns1__searchInvestigationByParameterCondition *
 soap_new_ns1__searchInvestigationByParameterCondition(struct soap *soap,
                                                       int n = -1) {
   return soap_instantiate_ns1__searchInvestigationByParameterCondition(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchInvestigationByParameterCondition *
 soap_new_req_ns1__searchInvestigationByParameterCondition(struct soap *soap) {
   ns1__searchInvestigationByParameterCondition *_p =
       soap_instantiate_ns1__searchInvestigationByParameterCondition(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -20279,7 +20413,7 @@ soap_new_set_ns1__searchInvestigationByParameterCondition(
     ns1__parameterCondition *logicalCondition, char *__item1) {
   ns1__searchInvestigationByParameterCondition *_p =
       soap_instantiate_ns1__searchInvestigationByParameterCondition(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchInvestigationByParameterCondition::sessionId = sessionId;
@@ -20343,15 +20477,15 @@ soap_instantiate_ns1__searchDatafileByParameterResponse(struct soap *, int,
 
 inline ns1__searchDatafileByParameterResponse *
 soap_new_ns1__searchDatafileByParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchDatafileByParameterResponse(soap, n, NULL,
-                                                                 NULL, NULL);
+  return soap_instantiate_ns1__searchDatafileByParameterResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatafileByParameterResponse *
 soap_new_req_ns1__searchDatafileByParameterResponse(struct soap *soap) {
   ns1__searchDatafileByParameterResponse *_p =
-      soap_instantiate_ns1__searchDatafileByParameterResponse(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate_ns1__searchDatafileByParameterResponse(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -20362,8 +20496,8 @@ inline ns1__searchDatafileByParameterResponse *
 soap_new_set_ns1__searchDatafileByParameterResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchDatafileByParameterResponse *_p =
-      soap_instantiate_ns1__searchDatafileByParameterResponse(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate_ns1__searchDatafileByParameterResponse(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatafileByParameterResponse::return_ = return_;
@@ -20420,14 +20554,15 @@ soap_instantiate_ns1__parameterSearch(struct soap *, int, const char *,
 
 inline ns1__parameterSearch *soap_new_ns1__parameterSearch(struct soap *soap,
                                                            int n = -1) {
-  return soap_instantiate_ns1__parameterSearch(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__parameterSearch(soap, n, nullptr, nullptr,
+                                               nullptr);
 }
 
 inline ns1__parameterSearch *
 soap_new_req_ns1__parameterSearch(struct soap *soap, bool negate2,
                                   bool sensitive2) {
-  ns1__parameterSearch *_p =
-      soap_instantiate_ns1__parameterSearch(soap, -1, NULL, NULL, NULL);
+  ns1__parameterSearch *_p = soap_instantiate_ns1__parameterSearch(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__condition::negate = negate2;
@@ -20440,8 +20575,8 @@ inline ns1__parameterSearch *
 soap_new_set_ns1__parameterSearch(struct soap *soap, ns1__parameter *param,
                                   enum ns1__parameterType *type, bool negate2,
                                   bool sensitive2, char *__item3) {
-  ns1__parameterSearch *_p =
-      soap_instantiate_ns1__parameterSearch(soap, -1, NULL, NULL, NULL);
+  ns1__parameterSearch *_p = soap_instantiate_ns1__parameterSearch(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__parameterSearch::param = param;
@@ -20505,15 +20640,15 @@ soap_instantiate_ns1__searchDatafileByParameter(struct soap *, int,
 
 inline ns1__searchDatafileByParameter *
 soap_new_ns1__searchDatafileByParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchDatafileByParameter(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate_ns1__searchDatafileByParameter(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline ns1__searchDatafileByParameter *
 soap_new_req_ns1__searchDatafileByParameter(struct soap *soap) {
   ns1__searchDatafileByParameter *_p =
-      soap_instantiate_ns1__searchDatafileByParameter(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__searchDatafileByParameter(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -20525,8 +20660,8 @@ soap_new_set_ns1__searchDatafileByParameter(
     struct soap *soap, std::string *sessionId,
     std::vector<ns1__parameterSearch *> &parameters, char *__item1) {
   ns1__searchDatafileByParameter *_p =
-      soap_instantiate_ns1__searchDatafileByParameter(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__searchDatafileByParameter(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatafileByParameter::sessionId = sessionId;
@@ -20583,12 +20718,12 @@ soap_instantiate_ns1__userDetails(struct soap *, int, const char *,
 
 inline ns1__userDetails *soap_new_ns1__userDetails(struct soap *soap,
                                                    int n = -1) {
-  return soap_instantiate_ns1__userDetails(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__userDetails(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__userDetails *soap_new_req_ns1__userDetails(struct soap *soap) {
   ns1__userDetails *_p =
-      soap_instantiate_ns1__userDetails(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__userDetails(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -20601,7 +20736,7 @@ inline ns1__userDetails *soap_new_set_ns1__userDetails(
     std::string *initial, std::string *institution, std::string *lastName,
     std::string *title, char *__item1) {
   ns1__userDetails *_p =
-      soap_instantiate_ns1__userDetails(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__userDetails(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__userDetails::credential = credential;
@@ -20674,7 +20809,7 @@ inline ns1__searchDatafileByRestrictionComparisonResponse *
 soap_new_ns1__searchDatafileByRestrictionComparisonResponse(struct soap *soap,
                                                             int n = -1) {
   return soap_instantiate_ns1__searchDatafileByRestrictionComparisonResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatafileByRestrictionComparisonResponse *
@@ -20682,7 +20817,7 @@ soap_new_req_ns1__searchDatafileByRestrictionComparisonResponse(
     struct soap *soap) {
   ns1__searchDatafileByRestrictionComparisonResponse *_p =
       soap_instantiate_ns1__searchDatafileByRestrictionComparisonResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -20694,7 +20829,7 @@ soap_new_set_ns1__searchDatafileByRestrictionComparisonResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchDatafileByRestrictionComparisonResponse *_p =
       soap_instantiate_ns1__searchDatafileByRestrictionComparisonResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatafileByRestrictionComparisonResponse::return_ = return_;
@@ -20758,14 +20893,14 @@ inline ns1__searchDatafileByRestrictionComparison *
 soap_new_ns1__searchDatafileByRestrictionComparison(struct soap *soap,
                                                     int n = -1) {
   return soap_instantiate_ns1__searchDatafileByRestrictionComparison(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatafileByRestrictionComparison *
 soap_new_req_ns1__searchDatafileByRestrictionComparison(struct soap *soap) {
   ns1__searchDatafileByRestrictionComparison *_p =
       soap_instantiate_ns1__searchDatafileByRestrictionComparison(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -20779,7 +20914,7 @@ soap_new_set_ns1__searchDatafileByRestrictionComparison(
     char *__item1) {
   ns1__searchDatafileByRestrictionComparison *_p =
       soap_instantiate_ns1__searchDatafileByRestrictionComparison(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatafileByRestrictionComparison::sessionId = sessionId;
@@ -20840,14 +20975,15 @@ soap_instantiate_ns1__getAllKeywordsResponse(struct soap *, int, const char *,
 
 inline ns1__getAllKeywordsResponse *
 soap_new_ns1__getAllKeywordsResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getAllKeywordsResponse(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__getAllKeywordsResponse(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__getAllKeywordsResponse *
 soap_new_req_ns1__getAllKeywordsResponse(struct soap *soap) {
   ns1__getAllKeywordsResponse *_p =
-      soap_instantiate_ns1__getAllKeywordsResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getAllKeywordsResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -20857,7 +20993,8 @@ soap_new_req_ns1__getAllKeywordsResponse(struct soap *soap) {
 inline ns1__getAllKeywordsResponse *soap_new_set_ns1__getAllKeywordsResponse(
     struct soap *soap, std::vector<std::string> &return_, char *__item1) {
   ns1__getAllKeywordsResponse *_p =
-      soap_instantiate_ns1__getAllKeywordsResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getAllKeywordsResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getAllKeywordsResponse::return_ = return_;
@@ -20914,13 +21051,14 @@ soap_instantiate_ns1__getAllKeywords(struct soap *, int, const char *,
 
 inline ns1__getAllKeywords *soap_new_ns1__getAllKeywords(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__getAllKeywords(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__getAllKeywords(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__getAllKeywords *
 soap_new_req_ns1__getAllKeywords(struct soap *soap) {
   ns1__getAllKeywords *_p =
-      soap_instantiate_ns1__getAllKeywords(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getAllKeywords(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -20931,7 +21069,7 @@ inline ns1__getAllKeywords *
 soap_new_set_ns1__getAllKeywords(struct soap *soap, std::string *sessionId,
                                  enum ns1__keywordType *type, char *__item1) {
   ns1__getAllKeywords *_p =
-      soap_instantiate_ns1__getAllKeywords(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getAllKeywords(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getAllKeywords::sessionId = sessionId;
@@ -20993,15 +21131,15 @@ soap_instantiate_ns1__removePublicationResponse(struct soap *, int,
 
 inline ns1__removePublicationResponse *
 soap_new_ns1__removePublicationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removePublicationResponse(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate_ns1__removePublicationResponse(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline ns1__removePublicationResponse *
 soap_new_req_ns1__removePublicationResponse(struct soap *soap) {
   ns1__removePublicationResponse *_p =
-      soap_instantiate_ns1__removePublicationResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__removePublicationResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -21011,8 +21149,8 @@ soap_new_req_ns1__removePublicationResponse(struct soap *soap) {
 inline ns1__removePublicationResponse *
 soap_new_set_ns1__removePublicationResponse(struct soap *soap, char *__item1) {
   ns1__removePublicationResponse *_p =
-      soap_instantiate_ns1__removePublicationResponse(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__removePublicationResponse(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -21068,13 +21206,14 @@ soap_instantiate_ns1__removePublication(struct soap *, int, const char *,
 
 inline ns1__removePublication *
 soap_new_ns1__removePublication(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removePublication(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__removePublication(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline ns1__removePublication *
 soap_new_req_ns1__removePublication(struct soap *soap) {
-  ns1__removePublication *_p =
-      soap_instantiate_ns1__removePublication(soap, -1, NULL, NULL, NULL);
+  ns1__removePublication *_p = soap_instantiate_ns1__removePublication(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -21084,8 +21223,8 @@ soap_new_req_ns1__removePublication(struct soap *soap) {
 inline ns1__removePublication *
 soap_new_set_ns1__removePublication(struct soap *soap, std::string *sessionId,
                                     LONG64 *publicationId, char *__item1) {
-  ns1__removePublication *_p =
-      soap_instantiate_ns1__removePublication(soap, -1, NULL, NULL, NULL);
+  ns1__removePublication *_p = soap_instantiate_ns1__removePublication(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__removePublication::sessionId = sessionId;
@@ -21145,14 +21284,15 @@ soap_instantiate_ns1__createDataSetsResponse(struct soap *, int, const char *,
 
 inline ns1__createDataSetsResponse *
 soap_new_ns1__createDataSetsResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__createDataSetsResponse(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__createDataSetsResponse(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__createDataSetsResponse *
 soap_new_req_ns1__createDataSetsResponse(struct soap *soap) {
   ns1__createDataSetsResponse *_p =
-      soap_instantiate_ns1__createDataSetsResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__createDataSetsResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -21162,7 +21302,8 @@ soap_new_req_ns1__createDataSetsResponse(struct soap *soap) {
 inline ns1__createDataSetsResponse *soap_new_set_ns1__createDataSetsResponse(
     struct soap *soap, std::vector<ns1__dataset *> &return_, char *__item1) {
   ns1__createDataSetsResponse *_p =
-      soap_instantiate_ns1__createDataSetsResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__createDataSetsResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__createDataSetsResponse::return_ = return_;
@@ -21219,13 +21360,14 @@ soap_instantiate_ns1__datasetParameterPK(struct soap *, int, const char *,
 
 inline ns1__datasetParameterPK *
 soap_new_ns1__datasetParameterPK(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__datasetParameterPK(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__datasetParameterPK(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline ns1__datasetParameterPK *
 soap_new_req_ns1__datasetParameterPK(struct soap *soap) {
-  ns1__datasetParameterPK *_p =
-      soap_instantiate_ns1__datasetParameterPK(soap, -1, NULL, NULL, NULL);
+  ns1__datasetParameterPK *_p = soap_instantiate_ns1__datasetParameterPK(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -21236,8 +21378,8 @@ inline ns1__datasetParameterPK *
 soap_new_set_ns1__datasetParameterPK(struct soap *soap, LONG64 *datasetId,
                                      std::string *name, std::string *units,
                                      char *__item2) {
-  ns1__datasetParameterPK *_p =
-      soap_instantiate_ns1__datasetParameterPK(soap, -1, NULL, NULL, NULL);
+  ns1__datasetParameterPK *_p = soap_instantiate_ns1__datasetParameterPK(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__datasetParameterPK::datasetId = datasetId;
@@ -21295,14 +21437,15 @@ soap_instantiate_ns1__datasetParameter(struct soap *, int, const char *,
 
 inline ns1__datasetParameter *soap_new_ns1__datasetParameter(struct soap *soap,
                                                              int n = -1) {
-  return soap_instantiate_ns1__datasetParameter(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__datasetParameter(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline ns1__datasetParameter *
 soap_new_req_ns1__datasetParameter(struct soap *soap,
                                    bool facilityAcquiredData1, bool selected1) {
-  ns1__datasetParameter *_p =
-      soap_instantiate_ns1__datasetParameter(soap, -1, NULL, NULL, NULL);
+  ns1__datasetParameter *_p = soap_instantiate_ns1__datasetParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -21319,8 +21462,8 @@ inline ns1__datasetParameter *soap_new_set_ns1__datasetParameter(
     enum ns1__parameterValueType *valueType, bool facilityAcquiredData1,
     ns1__icatRole *icatRole1, bool selected1, std::string *uniqueId1,
     char *__item2) {
-  ns1__datasetParameter *_p =
-      soap_instantiate_ns1__datasetParameter(soap, -1, NULL, NULL, NULL);
+  ns1__datasetParameter *_p = soap_instantiate_ns1__datasetParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__datasetParameter::datasetParameterPK = datasetParameterPK;
@@ -21386,13 +21529,14 @@ soap_instantiate_ns1__dataset(struct soap *, int, const char *, const char *,
                               size_t *);
 
 inline ns1__dataset *soap_new_ns1__dataset(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__dataset(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__dataset(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__dataset *soap_new_req_ns1__dataset(struct soap *soap,
                                                bool facilityAcquiredData1,
                                                bool selected1) {
-  ns1__dataset *_p = soap_instantiate_ns1__dataset(soap, -1, NULL, NULL, NULL);
+  ns1__dataset *_p =
+      soap_instantiate_ns1__dataset(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -21409,7 +21553,8 @@ inline ns1__dataset *soap_new_set_ns1__dataset(
     std::string *location, std::string *name, LONG64 *sampleId,
     bool facilityAcquiredData1, ns1__icatRole *icatRole1, bool selected1,
     std::string *uniqueId1, char *__item2) {
-  ns1__dataset *_p = soap_instantiate_ns1__dataset(soap, -1, NULL, NULL, NULL);
+  ns1__dataset *_p =
+      soap_instantiate_ns1__dataset(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__dataset::datafileCollection = datafileCollection;
@@ -21477,13 +21622,14 @@ soap_instantiate_ns1__createDataSets(struct soap *, int, const char *,
 
 inline ns1__createDataSets *soap_new_ns1__createDataSets(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__createDataSets(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__createDataSets(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__createDataSets *
 soap_new_req_ns1__createDataSets(struct soap *soap) {
   ns1__createDataSets *_p =
-      soap_instantiate_ns1__createDataSets(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__createDataSets(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -21495,7 +21641,7 @@ soap_new_set_ns1__createDataSets(struct soap *soap, std::string *sessionId,
                                  std::vector<ns1__dataset *> &dataSets,
                                  LONG64 *investigationId, char *__item1) {
   ns1__createDataSets *_p =
-      soap_instantiate_ns1__createDataSets(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__createDataSets(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__createDataSets::sessionId = sessionId;
@@ -21557,15 +21703,15 @@ soap_instantiate_ns1__deleteInvestigationResponse(struct soap *, int,
 
 inline ns1__deleteInvestigationResponse *
 soap_new_ns1__deleteInvestigationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deleteInvestigationResponse(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__deleteInvestigationResponse(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__deleteInvestigationResponse *
 soap_new_req_ns1__deleteInvestigationResponse(struct soap *soap) {
   ns1__deleteInvestigationResponse *_p =
-      soap_instantiate_ns1__deleteInvestigationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__deleteInvestigationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -21576,8 +21722,8 @@ inline ns1__deleteInvestigationResponse *
 soap_new_set_ns1__deleteInvestigationResponse(struct soap *soap,
                                               char *__item1) {
   ns1__deleteInvestigationResponse *_p =
-      soap_instantiate_ns1__deleteInvestigationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__deleteInvestigationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -21633,13 +21779,14 @@ soap_instantiate_ns1__deleteInvestigation(struct soap *, int, const char *,
 
 inline ns1__deleteInvestigation *
 soap_new_ns1__deleteInvestigation(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__deleteInvestigation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__deleteInvestigation(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__deleteInvestigation *
 soap_new_req_ns1__deleteInvestigation(struct soap *soap) {
-  ns1__deleteInvestigation *_p =
-      soap_instantiate_ns1__deleteInvestigation(soap, -1, NULL, NULL, NULL);
+  ns1__deleteInvestigation *_p = soap_instantiate_ns1__deleteInvestigation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -21649,8 +21796,8 @@ soap_new_req_ns1__deleteInvestigation(struct soap *soap) {
 inline ns1__deleteInvestigation *
 soap_new_set_ns1__deleteInvestigation(struct soap *soap, std::string *sessionId,
                                       LONG64 *investigationId, char *__item1) {
-  ns1__deleteInvestigation *_p =
-      soap_instantiate_ns1__deleteInvestigation(soap, -1, NULL, NULL, NULL);
+  ns1__deleteInvestigation *_p = soap_instantiate_ns1__deleteInvestigation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__deleteInvestigation::sessionId = sessionId;
@@ -21708,13 +21855,14 @@ soap_instantiate_ns1__removeKeywordResponse(struct soap *, int, const char *,
 
 inline ns1__removeKeywordResponse *
 soap_new_ns1__removeKeywordResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removeKeywordResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__removeKeywordResponse(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline ns1__removeKeywordResponse *
 soap_new_req_ns1__removeKeywordResponse(struct soap *soap) {
-  ns1__removeKeywordResponse *_p =
-      soap_instantiate_ns1__removeKeywordResponse(soap, -1, NULL, NULL, NULL);
+  ns1__removeKeywordResponse *_p = soap_instantiate_ns1__removeKeywordResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -21723,8 +21871,8 @@ soap_new_req_ns1__removeKeywordResponse(struct soap *soap) {
 
 inline ns1__removeKeywordResponse *
 soap_new_set_ns1__removeKeywordResponse(struct soap *soap, char *__item1) {
-  ns1__removeKeywordResponse *_p =
-      soap_instantiate_ns1__removeKeywordResponse(soap, -1, NULL, NULL, NULL);
+  ns1__removeKeywordResponse *_p = soap_instantiate_ns1__removeKeywordResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -21778,12 +21926,12 @@ soap_instantiate_ns1__keywordPK(struct soap *, int, const char *, const char *,
                                 size_t *);
 
 inline ns1__keywordPK *soap_new_ns1__keywordPK(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__keywordPK(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__keywordPK(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__keywordPK *soap_new_req_ns1__keywordPK(struct soap *soap) {
   ns1__keywordPK *_p =
-      soap_instantiate_ns1__keywordPK(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__keywordPK(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -21795,7 +21943,7 @@ inline ns1__keywordPK *soap_new_set_ns1__keywordPK(struct soap *soap,
                                                    std::string *name,
                                                    char *__item2) {
   ns1__keywordPK *_p =
-      soap_instantiate_ns1__keywordPK(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__keywordPK(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__keywordPK::investigationId = investigationId;
@@ -21851,12 +21999,13 @@ soap_instantiate_ns1__removeKeyword(struct soap *, int, const char *,
 
 inline ns1__removeKeyword *soap_new_ns1__removeKeyword(struct soap *soap,
                                                        int n = -1) {
-  return soap_instantiate_ns1__removeKeyword(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__removeKeyword(soap, n, nullptr, nullptr,
+                                             nullptr);
 }
 
 inline ns1__removeKeyword *soap_new_req_ns1__removeKeyword(struct soap *soap) {
   ns1__removeKeyword *_p =
-      soap_instantiate_ns1__removeKeyword(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__removeKeyword(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -21867,7 +22016,7 @@ inline ns1__removeKeyword *
 soap_new_set_ns1__removeKeyword(struct soap *soap, std::string *sessionId,
                                 ns1__keywordPK *keywordPK, char *__item1) {
   ns1__removeKeyword *_p =
-      soap_instantiate_ns1__removeKeyword(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__removeKeyword(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__removeKeyword::sessionId = sessionId;
@@ -21929,15 +22078,15 @@ soap_instantiate_ns1__getParameterByRestrictionResponse(struct soap *, int,
 
 inline ns1__getParameterByRestrictionResponse *
 soap_new_ns1__getParameterByRestrictionResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getParameterByRestrictionResponse(soap, n, NULL,
-                                                                 NULL, NULL);
+  return soap_instantiate_ns1__getParameterByRestrictionResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getParameterByRestrictionResponse *
 soap_new_req_ns1__getParameterByRestrictionResponse(struct soap *soap) {
   ns1__getParameterByRestrictionResponse *_p =
-      soap_instantiate_ns1__getParameterByRestrictionResponse(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate_ns1__getParameterByRestrictionResponse(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -21948,8 +22097,8 @@ inline ns1__getParameterByRestrictionResponse *
 soap_new_set_ns1__getParameterByRestrictionResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__getParameterByRestrictionResponse *_p =
-      soap_instantiate_ns1__getParameterByRestrictionResponse(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate_ns1__getParameterByRestrictionResponse(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getParameterByRestrictionResponse::return_ = return_;
@@ -22011,15 +22160,15 @@ soap_instantiate_ns1__getParameterByRestriction(struct soap *, int,
 
 inline ns1__getParameterByRestriction *
 soap_new_ns1__getParameterByRestriction(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getParameterByRestriction(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate_ns1__getParameterByRestriction(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline ns1__getParameterByRestriction *
 soap_new_req_ns1__getParameterByRestriction(struct soap *soap) {
   ns1__getParameterByRestriction *_p =
-      soap_instantiate_ns1__getParameterByRestriction(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__getParameterByRestriction(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -22031,8 +22180,8 @@ soap_new_set_ns1__getParameterByRestriction(
     struct soap *soap, std::string *sessionId,
     ns1__restrictionCondition *condition, char *__item1) {
   ns1__getParameterByRestriction *_p =
-      soap_instantiate_ns1__getParameterByRestriction(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__getParameterByRestriction(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getParameterByRestriction::sessionId = sessionId;
@@ -22094,15 +22243,15 @@ soap_instantiate_ns1__removeInvestigatorResponse(struct soap *, int,
 
 inline ns1__removeInvestigatorResponse *
 soap_new_ns1__removeInvestigatorResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removeInvestigatorResponse(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate_ns1__removeInvestigatorResponse(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline ns1__removeInvestigatorResponse *
 soap_new_req_ns1__removeInvestigatorResponse(struct soap *soap) {
   ns1__removeInvestigatorResponse *_p =
-      soap_instantiate_ns1__removeInvestigatorResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__removeInvestigatorResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -22112,8 +22261,8 @@ soap_new_req_ns1__removeInvestigatorResponse(struct soap *soap) {
 inline ns1__removeInvestigatorResponse *
 soap_new_set_ns1__removeInvestigatorResponse(struct soap *soap, char *__item1) {
   ns1__removeInvestigatorResponse *_p =
-      soap_instantiate_ns1__removeInvestigatorResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__removeInvestigatorResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -22168,13 +22317,14 @@ soap_instantiate_ns1__investigatorPK(struct soap *, int, const char *,
 
 inline ns1__investigatorPK *soap_new_ns1__investigatorPK(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__investigatorPK(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__investigatorPK(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__investigatorPK *
 soap_new_req_ns1__investigatorPK(struct soap *soap) {
   ns1__investigatorPK *_p =
-      soap_instantiate_ns1__investigatorPK(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__investigatorPK(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -22185,7 +22335,7 @@ inline ns1__investigatorPK *
 soap_new_set_ns1__investigatorPK(struct soap *soap, std::string *facilityUserId,
                                  LONG64 *investigationId, char *__item2) {
   ns1__investigatorPK *_p =
-      soap_instantiate_ns1__investigatorPK(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__investigatorPK(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__investigatorPK::facilityUserId = facilityUserId;
@@ -22242,13 +22392,14 @@ soap_instantiate_ns1__removeInvestigator(struct soap *, int, const char *,
 
 inline ns1__removeInvestigator *
 soap_new_ns1__removeInvestigator(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removeInvestigator(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__removeInvestigator(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline ns1__removeInvestigator *
 soap_new_req_ns1__removeInvestigator(struct soap *soap) {
-  ns1__removeInvestigator *_p =
-      soap_instantiate_ns1__removeInvestigator(soap, -1, NULL, NULL, NULL);
+  ns1__removeInvestigator *_p = soap_instantiate_ns1__removeInvestigator(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -22259,8 +22410,8 @@ inline ns1__removeInvestigator *
 soap_new_set_ns1__removeInvestigator(struct soap *soap, std::string *sessionId,
                                      ns1__investigatorPK *investigatorPK,
                                      char *__item1) {
-  ns1__removeInvestigator *_p =
-      soap_instantiate_ns1__removeInvestigator(soap, -1, NULL, NULL, NULL);
+  ns1__removeInvestigator *_p = soap_instantiate_ns1__removeInvestigator(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__removeInvestigator::sessionId = sessionId;
@@ -22321,15 +22472,15 @@ soap_instantiate_ns1__removeInvestigationResponse(struct soap *, int,
 
 inline ns1__removeInvestigationResponse *
 soap_new_ns1__removeInvestigationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removeInvestigationResponse(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__removeInvestigationResponse(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__removeInvestigationResponse *
 soap_new_req_ns1__removeInvestigationResponse(struct soap *soap) {
   ns1__removeInvestigationResponse *_p =
-      soap_instantiate_ns1__removeInvestigationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__removeInvestigationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -22340,8 +22491,8 @@ inline ns1__removeInvestigationResponse *
 soap_new_set_ns1__removeInvestigationResponse(struct soap *soap,
                                               char *__item1) {
   ns1__removeInvestigationResponse *_p =
-      soap_instantiate_ns1__removeInvestigationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__removeInvestigationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -22397,13 +22548,14 @@ soap_instantiate_ns1__removeInvestigation(struct soap *, int, const char *,
 
 inline ns1__removeInvestigation *
 soap_new_ns1__removeInvestigation(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removeInvestigation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__removeInvestigation(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__removeInvestigation *
 soap_new_req_ns1__removeInvestigation(struct soap *soap) {
-  ns1__removeInvestigation *_p =
-      soap_instantiate_ns1__removeInvestigation(soap, -1, NULL, NULL, NULL);
+  ns1__removeInvestigation *_p = soap_instantiate_ns1__removeInvestigation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -22413,8 +22565,8 @@ soap_new_req_ns1__removeInvestigation(struct soap *soap) {
 inline ns1__removeInvestigation *
 soap_new_set_ns1__removeInvestigation(struct soap *soap, std::string *sessionId,
                                       LONG64 *investigationId, char *__item1) {
-  ns1__removeInvestigation *_p =
-      soap_instantiate_ns1__removeInvestigation(soap, -1, NULL, NULL, NULL);
+  ns1__removeInvestigation *_p = soap_instantiate_ns1__removeInvestigation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__removeInvestigation::sessionId = sessionId;
@@ -22478,15 +22630,15 @@ soap_instantiate_ns1__getFacilityUserByFederalIdResponse(struct soap *, int,
 inline ns1__getFacilityUserByFederalIdResponse *
 soap_new_ns1__getFacilityUserByFederalIdResponse(struct soap *soap,
                                                  int n = -1) {
-  return soap_instantiate_ns1__getFacilityUserByFederalIdResponse(soap, n, NULL,
-                                                                  NULL, NULL);
+  return soap_instantiate_ns1__getFacilityUserByFederalIdResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getFacilityUserByFederalIdResponse *
 soap_new_req_ns1__getFacilityUserByFederalIdResponse(struct soap *soap) {
   ns1__getFacilityUserByFederalIdResponse *_p =
-      soap_instantiate_ns1__getFacilityUserByFederalIdResponse(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate_ns1__getFacilityUserByFederalIdResponse(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -22498,8 +22650,8 @@ soap_new_set_ns1__getFacilityUserByFederalIdResponse(struct soap *soap,
                                                      ns1__facilityUser *return_,
                                                      char *__item1) {
   ns1__getFacilityUserByFederalIdResponse *_p =
-      soap_instantiate_ns1__getFacilityUserByFederalIdResponse(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate_ns1__getFacilityUserByFederalIdResponse(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getFacilityUserByFederalIdResponse::return_ = return_;
@@ -22560,15 +22712,15 @@ soap_instantiate_ns1__getFacilityUserByFederalId(struct soap *, int,
 
 inline ns1__getFacilityUserByFederalId *
 soap_new_ns1__getFacilityUserByFederalId(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getFacilityUserByFederalId(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate_ns1__getFacilityUserByFederalId(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline ns1__getFacilityUserByFederalId *
 soap_new_req_ns1__getFacilityUserByFederalId(struct soap *soap) {
   ns1__getFacilityUserByFederalId *_p =
-      soap_instantiate_ns1__getFacilityUserByFederalId(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__getFacilityUserByFederalId(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -22581,8 +22733,8 @@ soap_new_set_ns1__getFacilityUserByFederalId(struct soap *soap,
                                              std::string *federalId,
                                              char *__item1) {
   ns1__getFacilityUserByFederalId *_p =
-      soap_instantiate_ns1__getFacilityUserByFederalId(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__getFacilityUserByFederalId(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getFacilityUserByFederalId::sessionId = sessionId;
@@ -22643,14 +22795,15 @@ soap_instantiate_ns1__downloadDatasetResponse(struct soap *, int, const char *,
 
 inline ns1__downloadDatasetResponse *
 soap_new_ns1__downloadDatasetResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__downloadDatasetResponse(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate_ns1__downloadDatasetResponse(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline ns1__downloadDatasetResponse *
 soap_new_req_ns1__downloadDatasetResponse(struct soap *soap) {
   ns1__downloadDatasetResponse *_p =
-      soap_instantiate_ns1__downloadDatasetResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__downloadDatasetResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -22661,7 +22814,8 @@ inline ns1__downloadDatasetResponse *
 soap_new_set_ns1__downloadDatasetResponse(struct soap *soap, std::string *URL,
                                           char *__item1) {
   ns1__downloadDatasetResponse *_p =
-      soap_instantiate_ns1__downloadDatasetResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__downloadDatasetResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__downloadDatasetResponse::URL = URL;
@@ -22718,13 +22872,14 @@ soap_instantiate_ns1__downloadDataset(struct soap *, int, const char *,
 
 inline ns1__downloadDataset *soap_new_ns1__downloadDataset(struct soap *soap,
                                                            int n = -1) {
-  return soap_instantiate_ns1__downloadDataset(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__downloadDataset(soap, n, nullptr, nullptr,
+                                               nullptr);
 }
 
 inline ns1__downloadDataset *
 soap_new_req_ns1__downloadDataset(struct soap *soap) {
-  ns1__downloadDataset *_p =
-      soap_instantiate_ns1__downloadDataset(soap, -1, NULL, NULL, NULL);
+  ns1__downloadDataset *_p = soap_instantiate_ns1__downloadDataset(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -22734,8 +22889,8 @@ soap_new_req_ns1__downloadDataset(struct soap *soap) {
 inline ns1__downloadDataset *
 soap_new_set_ns1__downloadDataset(struct soap *soap, std::string *sessionId,
                                   LONG64 *datasetId, char *__item1) {
-  ns1__downloadDataset *_p =
-      soap_instantiate_ns1__downloadDataset(soap, -1, NULL, NULL, NULL);
+  ns1__downloadDataset *_p = soap_instantiate_ns1__downloadDataset(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__downloadDataset::sessionId = sessionId;
@@ -22791,14 +22946,14 @@ soap_instantiate_ns1__instrument(struct soap *, int, const char *, const char *,
 
 inline ns1__instrument *soap_new_ns1__instrument(struct soap *soap,
                                                  int n = -1) {
-  return soap_instantiate_ns1__instrument(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__instrument(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__instrument *soap_new_req_ns1__instrument(struct soap *soap,
                                                      bool facilityAcquiredData1,
                                                      bool selected1) {
   ns1__instrument *_p =
-      soap_instantiate_ns1__instrument(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__instrument(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -22814,7 +22969,7 @@ soap_new_set_ns1__instrument(struct soap *soap, std::string *description,
                              ns1__icatRole *icatRole1, bool selected1,
                              std::string *uniqueId1, char *__item2) {
   ns1__instrument *_p =
-      soap_instantiate_ns1__instrument(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__instrument(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__instrument::description = description;
@@ -22880,15 +23035,15 @@ soap_instantiate_ns1__getInstrumentsWithDataResponse(struct soap *, int,
 
 inline ns1__getInstrumentsWithDataResponse *
 soap_new_ns1__getInstrumentsWithDataResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getInstrumentsWithDataResponse(soap, n, NULL,
-                                                              NULL, NULL);
+  return soap_instantiate_ns1__getInstrumentsWithDataResponse(soap, n, nullptr,
+                                                              nullptr, nullptr);
 }
 
 inline ns1__getInstrumentsWithDataResponse *
 soap_new_req_ns1__getInstrumentsWithDataResponse(struct soap *soap) {
   ns1__getInstrumentsWithDataResponse *_p =
-      soap_instantiate_ns1__getInstrumentsWithDataResponse(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__getInstrumentsWithDataResponse(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -22899,8 +23054,8 @@ inline ns1__getInstrumentsWithDataResponse *
 soap_new_set_ns1__getInstrumentsWithDataResponse(
     struct soap *soap, std::vector<ns1__instrument *> &return_, char *__item1) {
   ns1__getInstrumentsWithDataResponse *_p =
-      soap_instantiate_ns1__getInstrumentsWithDataResponse(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__getInstrumentsWithDataResponse(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getInstrumentsWithDataResponse::return_ = return_;
@@ -22959,14 +23114,15 @@ soap_instantiate_ns1__getInstrumentsWithData(struct soap *, int, const char *,
 
 inline ns1__getInstrumentsWithData *
 soap_new_ns1__getInstrumentsWithData(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getInstrumentsWithData(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__getInstrumentsWithData(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__getInstrumentsWithData *
 soap_new_req_ns1__getInstrumentsWithData(struct soap *soap) {
   ns1__getInstrumentsWithData *_p =
-      soap_instantiate_ns1__getInstrumentsWithData(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getInstrumentsWithData(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -22976,7 +23132,8 @@ soap_new_req_ns1__getInstrumentsWithData(struct soap *soap) {
 inline ns1__getInstrumentsWithData *soap_new_set_ns1__getInstrumentsWithData(
     struct soap *soap, std::string *sessionId, char *__item1) {
   ns1__getInstrumentsWithData *_p =
-      soap_instantiate_ns1__getInstrumentsWithData(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getInstrumentsWithData(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getInstrumentsWithData::sessionId = sessionId;
@@ -23033,13 +23190,14 @@ soap_instantiate_ns1__logoutResponse(struct soap *, int, const char *,
 
 inline ns1__logoutResponse *soap_new_ns1__logoutResponse(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__logoutResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__logoutResponse(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__logoutResponse *soap_new_req_ns1__logoutResponse(struct soap *soap,
                                                              bool return_) {
   ns1__logoutResponse *_p =
-      soap_instantiate_ns1__logoutResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__logoutResponse(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__logoutResponse::return_ = return_;
@@ -23051,7 +23209,7 @@ inline ns1__logoutResponse *soap_new_set_ns1__logoutResponse(struct soap *soap,
                                                              bool return_,
                                                              char *__item1) {
   ns1__logoutResponse *_p =
-      soap_instantiate_ns1__logoutResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__logoutResponse(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__logoutResponse::return_ = return_;
@@ -23103,11 +23261,12 @@ soap_instantiate_ns1__logout(struct soap *, int, const char *, const char *,
                              size_t *);
 
 inline ns1__logout *soap_new_ns1__logout(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__logout(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__logout(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__logout *soap_new_req_ns1__logout(struct soap *soap) {
-  ns1__logout *_p = soap_instantiate_ns1__logout(soap, -1, NULL, NULL, NULL);
+  ns1__logout *_p =
+      soap_instantiate_ns1__logout(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -23117,7 +23276,8 @@ inline ns1__logout *soap_new_req_ns1__logout(struct soap *soap) {
 inline ns1__logout *soap_new_set_ns1__logout(struct soap *soap,
                                              std::string *sessionId,
                                              char *__item1) {
-  ns1__logout *_p = soap_instantiate_ns1__logout(soap, -1, NULL, NULL, NULL);
+  ns1__logout *_p =
+      soap_instantiate_ns1__logout(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__logout::sessionId = sessionId;
@@ -23176,15 +23336,15 @@ soap_instantiate_ns1__addDataFileParametersResponse(struct soap *, int,
 
 inline ns1__addDataFileParametersResponse *
 soap_new_ns1__addDataFileParametersResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__addDataFileParametersResponse(soap, n, NULL,
-                                                             NULL, NULL);
+  return soap_instantiate_ns1__addDataFileParametersResponse(soap, n, nullptr,
+                                                             nullptr, nullptr);
 }
 
 inline ns1__addDataFileParametersResponse *
 soap_new_req_ns1__addDataFileParametersResponse(struct soap *soap) {
   ns1__addDataFileParametersResponse *_p =
-      soap_instantiate_ns1__addDataFileParametersResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate_ns1__addDataFileParametersResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -23196,8 +23356,8 @@ soap_new_set_ns1__addDataFileParametersResponse(
     struct soap *soap, std::vector<ns1__datafileParameter *> &return_,
     char *__item1) {
   ns1__addDataFileParametersResponse *_p =
-      soap_instantiate_ns1__addDataFileParametersResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate_ns1__addDataFileParametersResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addDataFileParametersResponse::return_ = return_;
@@ -23254,13 +23414,14 @@ soap_instantiate_ns1__addDataFileParameters(struct soap *, int, const char *,
 
 inline ns1__addDataFileParameters *
 soap_new_ns1__addDataFileParameters(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__addDataFileParameters(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__addDataFileParameters(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline ns1__addDataFileParameters *
 soap_new_req_ns1__addDataFileParameters(struct soap *soap) {
-  ns1__addDataFileParameters *_p =
-      soap_instantiate_ns1__addDataFileParameters(soap, -1, NULL, NULL, NULL);
+  ns1__addDataFileParameters *_p = soap_instantiate_ns1__addDataFileParameters(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -23271,8 +23432,8 @@ inline ns1__addDataFileParameters *soap_new_set_ns1__addDataFileParameters(
     struct soap *soap, std::string *sessionId,
     std::vector<ns1__datafileParameter *> &dataFileParameters,
     LONG64 *datafileId, char *__item1) {
-  ns1__addDataFileParameters *_p =
-      soap_instantiate_ns1__addDataFileParameters(soap, -1, NULL, NULL, NULL);
+  ns1__addDataFileParameters *_p = soap_instantiate_ns1__addDataFileParameters(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__addDataFileParameters::sessionId = sessionId;
@@ -23331,14 +23492,15 @@ soap_instantiate_ns1__facilityCycle(struct soap *, int, const char *,
 
 inline ns1__facilityCycle *soap_new_ns1__facilityCycle(struct soap *soap,
                                                        int n = -1) {
-  return soap_instantiate_ns1__facilityCycle(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__facilityCycle(soap, n, nullptr, nullptr,
+                                             nullptr);
 }
 
 inline ns1__facilityCycle *
 soap_new_req_ns1__facilityCycle(struct soap *soap, bool facilityAcquiredData1,
                                 bool selected1) {
   ns1__facilityCycle *_p =
-      soap_instantiate_ns1__facilityCycle(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__facilityCycle(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -23354,7 +23516,7 @@ soap_new_set_ns1__facilityCycle(struct soap *soap, std::string *description,
                                 ns1__icatRole *icatRole1, bool selected1,
                                 std::string *uniqueId1, char *__item2) {
   ns1__facilityCycle *_p =
-      soap_instantiate_ns1__facilityCycle(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__facilityCycle(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__facilityCycle::description = description;
@@ -23421,15 +23583,15 @@ soap_instantiate_ns1__listFacilityCyclesResponse(struct soap *, int,
 
 inline ns1__listFacilityCyclesResponse *
 soap_new_ns1__listFacilityCyclesResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__listFacilityCyclesResponse(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate_ns1__listFacilityCyclesResponse(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline ns1__listFacilityCyclesResponse *
 soap_new_req_ns1__listFacilityCyclesResponse(struct soap *soap) {
   ns1__listFacilityCyclesResponse *_p =
-      soap_instantiate_ns1__listFacilityCyclesResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__listFacilityCyclesResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -23441,8 +23603,8 @@ soap_new_set_ns1__listFacilityCyclesResponse(
     struct soap *soap, std::vector<ns1__facilityCycle *> &return_,
     char *__item1) {
   ns1__listFacilityCyclesResponse *_p =
-      soap_instantiate_ns1__listFacilityCyclesResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate_ns1__listFacilityCyclesResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__listFacilityCyclesResponse::return_ = return_;
@@ -23498,13 +23660,14 @@ soap_instantiate_ns1__listFacilityCycles(struct soap *, int, const char *,
 
 inline ns1__listFacilityCycles *
 soap_new_ns1__listFacilityCycles(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__listFacilityCycles(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__listFacilityCycles(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline ns1__listFacilityCycles *
 soap_new_req_ns1__listFacilityCycles(struct soap *soap) {
-  ns1__listFacilityCycles *_p =
-      soap_instantiate_ns1__listFacilityCycles(soap, -1, NULL, NULL, NULL);
+  ns1__listFacilityCycles *_p = soap_instantiate_ns1__listFacilityCycles(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -23514,8 +23677,8 @@ soap_new_req_ns1__listFacilityCycles(struct soap *soap) {
 inline ns1__listFacilityCycles *
 soap_new_set_ns1__listFacilityCycles(struct soap *soap, std::string *sessionId,
                                      char *__item1) {
-  ns1__listFacilityCycles *_p =
-      soap_instantiate_ns1__listFacilityCycles(soap, -1, NULL, NULL, NULL);
+  ns1__listFacilityCycles *_p = soap_instantiate_ns1__listFacilityCycles(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__listFacilityCycles::sessionId = sessionId;
@@ -23575,15 +23738,15 @@ soap_instantiate_ns1__removeAuthorisationResponse(struct soap *, int,
 
 inline ns1__removeAuthorisationResponse *
 soap_new_ns1__removeAuthorisationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removeAuthorisationResponse(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__removeAuthorisationResponse(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__removeAuthorisationResponse *
 soap_new_req_ns1__removeAuthorisationResponse(struct soap *soap) {
   ns1__removeAuthorisationResponse *_p =
-      soap_instantiate_ns1__removeAuthorisationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__removeAuthorisationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -23594,8 +23757,8 @@ inline ns1__removeAuthorisationResponse *
 soap_new_set_ns1__removeAuthorisationResponse(struct soap *soap,
                                               char *__item1) {
   ns1__removeAuthorisationResponse *_p =
-      soap_instantiate_ns1__removeAuthorisationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__removeAuthorisationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -23651,13 +23814,14 @@ soap_instantiate_ns1__removeAuthorisation(struct soap *, int, const char *,
 
 inline ns1__removeAuthorisation *
 soap_new_ns1__removeAuthorisation(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removeAuthorisation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__removeAuthorisation(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__removeAuthorisation *
 soap_new_req_ns1__removeAuthorisation(struct soap *soap) {
-  ns1__removeAuthorisation *_p =
-      soap_instantiate_ns1__removeAuthorisation(soap, -1, NULL, NULL, NULL);
+  ns1__removeAuthorisation *_p = soap_instantiate_ns1__removeAuthorisation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -23667,8 +23831,8 @@ soap_new_req_ns1__removeAuthorisation(struct soap *soap) {
 inline ns1__removeAuthorisation *
 soap_new_set_ns1__removeAuthorisation(struct soap *soap, std::string *sessionId,
                                       LONG64 *authorisationId, char *__item1) {
-  ns1__removeAuthorisation *_p =
-      soap_instantiate_ns1__removeAuthorisation(soap, -1, NULL, NULL, NULL);
+  ns1__removeAuthorisation *_p = soap_instantiate_ns1__removeAuthorisation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__removeAuthorisation::sessionId = sessionId;
@@ -23728,14 +23892,15 @@ soap_instantiate_ns1__removeDataFileResponse(struct soap *, int, const char *,
 
 inline ns1__removeDataFileResponse *
 soap_new_ns1__removeDataFileResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removeDataFileResponse(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__removeDataFileResponse(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__removeDataFileResponse *
 soap_new_req_ns1__removeDataFileResponse(struct soap *soap) {
   ns1__removeDataFileResponse *_p =
-      soap_instantiate_ns1__removeDataFileResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__removeDataFileResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -23745,7 +23910,8 @@ soap_new_req_ns1__removeDataFileResponse(struct soap *soap) {
 inline ns1__removeDataFileResponse *
 soap_new_set_ns1__removeDataFileResponse(struct soap *soap, char *__item1) {
   ns1__removeDataFileResponse *_p =
-      soap_instantiate_ns1__removeDataFileResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__removeDataFileResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -23801,13 +23967,14 @@ soap_instantiate_ns1__removeDataFile(struct soap *, int, const char *,
 
 inline ns1__removeDataFile *soap_new_ns1__removeDataFile(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__removeDataFile(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__removeDataFile(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__removeDataFile *
 soap_new_req_ns1__removeDataFile(struct soap *soap) {
   ns1__removeDataFile *_p =
-      soap_instantiate_ns1__removeDataFile(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__removeDataFile(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -23818,7 +23985,7 @@ inline ns1__removeDataFile *
 soap_new_set_ns1__removeDataFile(struct soap *soap, std::string *sessionId,
                                  LONG64 *datafileId, char *__item1) {
   ns1__removeDataFile *_p =
-      soap_instantiate_ns1__removeDataFile(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__removeDataFile(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__removeDataFile::sessionId = sessionId;
@@ -23874,12 +24041,12 @@ soap_instantiate_ns1__parameterPK(struct soap *, int, const char *,
 
 inline ns1__parameterPK *soap_new_ns1__parameterPK(struct soap *soap,
                                                    int n = -1) {
-  return soap_instantiate_ns1__parameterPK(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__parameterPK(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__parameterPK *soap_new_req_ns1__parameterPK(struct soap *soap) {
   ns1__parameterPK *_p =
-      soap_instantiate_ns1__parameterPK(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__parameterPK(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -23891,7 +24058,7 @@ inline ns1__parameterPK *soap_new_set_ns1__parameterPK(struct soap *soap,
                                                        std::string *units,
                                                        char *__item2) {
   ns1__parameterPK *_p =
-      soap_instantiate_ns1__parameterPK(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__parameterPK(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__parameterPK::name = name;
@@ -23946,7 +24113,7 @@ soap_instantiate_ns1__parameter(struct soap *, int, const char *, const char *,
                                 size_t *);
 
 inline ns1__parameter *soap_new_ns1__parameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__parameter(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__parameter(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__parameter *
@@ -23955,7 +24122,7 @@ soap_new_req_ns1__parameter(struct soap *soap, bool datafileParameter,
                             bool verified, bool facilityAcquiredData1,
                             bool selected1) {
   ns1__parameter *_p =
-      soap_instantiate_ns1__parameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__parameter(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__parameter::datafileParameter = datafileParameter;
@@ -23977,7 +24144,7 @@ inline ns1__parameter *soap_new_set_ns1__parameter(
     bool facilityAcquiredData1, ns1__icatRole *icatRole1, bool selected1,
     std::string *uniqueId1, char *__item2) {
   ns1__parameter *_p =
-      soap_instantiate_ns1__parameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__parameter(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__parameter::datafileParameter = datafileParameter;
@@ -24049,15 +24216,15 @@ soap_instantiate_ns1__getParameterByNameUnitsResponse(struct soap *, int,
 
 inline ns1__getParameterByNameUnitsResponse *
 soap_new_ns1__getParameterByNameUnitsResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getParameterByNameUnitsResponse(soap, n, NULL,
-                                                               NULL, NULL);
+  return soap_instantiate_ns1__getParameterByNameUnitsResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__getParameterByNameUnitsResponse *
 soap_new_req_ns1__getParameterByNameUnitsResponse(struct soap *soap) {
   ns1__getParameterByNameUnitsResponse *_p =
-      soap_instantiate_ns1__getParameterByNameUnitsResponse(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__getParameterByNameUnitsResponse(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -24068,8 +24235,8 @@ inline ns1__getParameterByNameUnitsResponse *
 soap_new_set_ns1__getParameterByNameUnitsResponse(
     struct soap *soap, std::vector<ns1__parameter *> &return_, char *__item1) {
   ns1__getParameterByNameUnitsResponse *_p =
-      soap_instantiate_ns1__getParameterByNameUnitsResponse(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__getParameterByNameUnitsResponse(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getParameterByNameUnitsResponse::return_ = return_;
@@ -24129,14 +24296,15 @@ soap_instantiate_ns1__getParameterByNameUnits(struct soap *, int, const char *,
 
 inline ns1__getParameterByNameUnits *
 soap_new_ns1__getParameterByNameUnits(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__getParameterByNameUnits(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate_ns1__getParameterByNameUnits(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline ns1__getParameterByNameUnits *
 soap_new_req_ns1__getParameterByNameUnits(struct soap *soap) {
   ns1__getParameterByNameUnits *_p =
-      soap_instantiate_ns1__getParameterByNameUnits(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getParameterByNameUnits(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -24147,7 +24315,8 @@ inline ns1__getParameterByNameUnits *soap_new_set_ns1__getParameterByNameUnits(
     struct soap *soap, std::string *sesssionId, std::string *name,
     std::string *units, char *__item1) {
   ns1__getParameterByNameUnits *_p =
-      soap_instantiate_ns1__getParameterByNameUnits(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__getParameterByNameUnits(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__getParameterByNameUnits::sesssionId = sesssionId;
@@ -24215,7 +24384,7 @@ inline ns1__searchInvestigationByParameterLogicalResponse *
 soap_new_ns1__searchInvestigationByParameterLogicalResponse(struct soap *soap,
                                                             int n = -1) {
   return soap_instantiate_ns1__searchInvestigationByParameterLogicalResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchInvestigationByParameterLogicalResponse *
@@ -24223,7 +24392,7 @@ soap_new_req_ns1__searchInvestigationByParameterLogicalResponse(
     struct soap *soap) {
   ns1__searchInvestigationByParameterLogicalResponse *_p =
       soap_instantiate_ns1__searchInvestigationByParameterLogicalResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -24235,7 +24404,7 @@ soap_new_set_ns1__searchInvestigationByParameterLogicalResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchInvestigationByParameterLogicalResponse *_p =
       soap_instantiate_ns1__searchInvestigationByParameterLogicalResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchInvestigationByParameterLogicalResponse::return_ = return_;
@@ -24296,16 +24465,16 @@ soap_instantiate_ns1__parameterLogicalCondition(struct soap *, int,
 
 inline ns1__parameterLogicalCondition *
 soap_new_ns1__parameterLogicalCondition(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__parameterLogicalCondition(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate_ns1__parameterLogicalCondition(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline ns1__parameterLogicalCondition *
 soap_new_req_ns1__parameterLogicalCondition(struct soap *soap, bool negate2,
                                             bool sensitive2) {
   ns1__parameterLogicalCondition *_p =
-      soap_instantiate_ns1__parameterLogicalCondition(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__parameterLogicalCondition(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__condition::negate = negate2;
@@ -24320,8 +24489,8 @@ soap_new_set_ns1__parameterLogicalCondition(
     enum ns1__logicalOperator *operator_, bool negate2, bool sensitive2,
     char *__item3) {
   ns1__parameterLogicalCondition *_p =
-      soap_instantiate_ns1__parameterLogicalCondition(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__parameterLogicalCondition(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__parameterLogicalCondition::listComparable = listComparable;
@@ -24389,14 +24558,14 @@ inline ns1__searchInvestigationByParameterLogical *
 soap_new_ns1__searchInvestigationByParameterLogical(struct soap *soap,
                                                     int n = -1) {
   return soap_instantiate_ns1__searchInvestigationByParameterLogical(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchInvestigationByParameterLogical *
 soap_new_req_ns1__searchInvestigationByParameterLogical(struct soap *soap) {
   ns1__searchInvestigationByParameterLogical *_p =
       soap_instantiate_ns1__searchInvestigationByParameterLogical(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -24409,7 +24578,7 @@ soap_new_set_ns1__searchInvestigationByParameterLogical(
     ns1__parameterLogicalCondition *logicalCondition, char *__item1) {
   ns1__searchInvestigationByParameterLogical *_p =
       soap_instantiate_ns1__searchInvestigationByParameterLogical(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchInvestigationByParameterLogical::sessionId = sessionId;
@@ -24469,13 +24638,14 @@ soap_instantiate_ns1__modifySampleResponse(struct soap *, int, const char *,
 
 inline ns1__modifySampleResponse *
 soap_new_ns1__modifySampleResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__modifySampleResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__modifySampleResponse(soap, n, nullptr, nullptr,
+                                                    nullptr);
 }
 
 inline ns1__modifySampleResponse *
 soap_new_req_ns1__modifySampleResponse(struct soap *soap) {
-  ns1__modifySampleResponse *_p =
-      soap_instantiate_ns1__modifySampleResponse(soap, -1, NULL, NULL, NULL);
+  ns1__modifySampleResponse *_p = soap_instantiate_ns1__modifySampleResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -24484,8 +24654,8 @@ soap_new_req_ns1__modifySampleResponse(struct soap *soap) {
 
 inline ns1__modifySampleResponse *
 soap_new_set_ns1__modifySampleResponse(struct soap *soap, char *__item1) {
-  ns1__modifySampleResponse *_p =
-      soap_instantiate_ns1__modifySampleResponse(soap, -1, NULL, NULL, NULL);
+  ns1__modifySampleResponse *_p = soap_instantiate_ns1__modifySampleResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -24541,12 +24711,12 @@ soap_instantiate_ns1__modifySample(struct soap *, int, const char *,
 
 inline ns1__modifySample *soap_new_ns1__modifySample(struct soap *soap,
                                                      int n = -1) {
-  return soap_instantiate_ns1__modifySample(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__modifySample(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__modifySample *soap_new_req_ns1__modifySample(struct soap *soap) {
   ns1__modifySample *_p =
-      soap_instantiate_ns1__modifySample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__modifySample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -24558,7 +24728,7 @@ inline ns1__modifySample *soap_new_set_ns1__modifySample(struct soap *soap,
                                                          ns1__sample *sample,
                                                          char *__item1) {
   ns1__modifySample *_p =
-      soap_instantiate_ns1__modifySample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__modifySample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__modifySample::sessionId = sessionId;
@@ -24618,14 +24788,15 @@ soap_instantiate_ns1__createDataFileResponse(struct soap *, int, const char *,
 
 inline ns1__createDataFileResponse *
 soap_new_ns1__createDataFileResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__createDataFileResponse(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_ns1__createDataFileResponse(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline ns1__createDataFileResponse *
 soap_new_req_ns1__createDataFileResponse(struct soap *soap) {
   ns1__createDataFileResponse *_p =
-      soap_instantiate_ns1__createDataFileResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__createDataFileResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -24635,7 +24806,8 @@ soap_new_req_ns1__createDataFileResponse(struct soap *soap) {
 inline ns1__createDataFileResponse *soap_new_set_ns1__createDataFileResponse(
     struct soap *soap, ns1__datafile *return_, char *__item1) {
   ns1__createDataFileResponse *_p =
-      soap_instantiate_ns1__createDataFileResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__createDataFileResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__createDataFileResponse::return_ = return_;
@@ -24692,13 +24864,14 @@ soap_instantiate_ns1__relatedDatafilesPK(struct soap *, int, const char *,
 
 inline ns1__relatedDatafilesPK *
 soap_new_ns1__relatedDatafilesPK(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__relatedDatafilesPK(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__relatedDatafilesPK(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline ns1__relatedDatafilesPK *
 soap_new_req_ns1__relatedDatafilesPK(struct soap *soap) {
-  ns1__relatedDatafilesPK *_p =
-      soap_instantiate_ns1__relatedDatafilesPK(soap, -1, NULL, NULL, NULL);
+  ns1__relatedDatafilesPK *_p = soap_instantiate_ns1__relatedDatafilesPK(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -24708,8 +24881,8 @@ soap_new_req_ns1__relatedDatafilesPK(struct soap *soap) {
 inline ns1__relatedDatafilesPK *
 soap_new_set_ns1__relatedDatafilesPK(struct soap *soap, LONG64 *destDatafileId,
                                      LONG64 *sourceDatafileId, char *__item2) {
-  ns1__relatedDatafilesPK *_p =
-      soap_instantiate_ns1__relatedDatafilesPK(soap, -1, NULL, NULL, NULL);
+  ns1__relatedDatafilesPK *_p = soap_instantiate_ns1__relatedDatafilesPK(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__relatedDatafilesPK::destDatafileId = destDatafileId;
@@ -24766,14 +24939,15 @@ soap_instantiate_ns1__relatedDatafiles(struct soap *, int, const char *,
 
 inline ns1__relatedDatafiles *soap_new_ns1__relatedDatafiles(struct soap *soap,
                                                              int n = -1) {
-  return soap_instantiate_ns1__relatedDatafiles(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__relatedDatafiles(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline ns1__relatedDatafiles *
 soap_new_req_ns1__relatedDatafiles(struct soap *soap,
                                    bool facilityAcquiredData1, bool selected1) {
-  ns1__relatedDatafiles *_p =
-      soap_instantiate_ns1__relatedDatafiles(soap, -1, NULL, NULL, NULL);
+  ns1__relatedDatafiles *_p = soap_instantiate_ns1__relatedDatafiles(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -24786,8 +24960,8 @@ inline ns1__relatedDatafiles *soap_new_set_ns1__relatedDatafiles(
     struct soap *soap, ns1__relatedDatafilesPK *relatedDatafilesPK,
     std::string *relation, bool facilityAcquiredData1, ns1__icatRole *icatRole1,
     bool selected1, std::string *uniqueId1, char *__item2) {
-  ns1__relatedDatafiles *_p =
-      soap_instantiate_ns1__relatedDatafiles(soap, -1, NULL, NULL, NULL);
+  ns1__relatedDatafiles *_p = soap_instantiate_ns1__relatedDatafiles(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__relatedDatafiles::relatedDatafilesPK = relatedDatafilesPK;
@@ -24849,13 +25023,14 @@ soap_instantiate_ns1__datafileParameterPK(struct soap *, int, const char *,
 
 inline ns1__datafileParameterPK *
 soap_new_ns1__datafileParameterPK(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__datafileParameterPK(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__datafileParameterPK(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline ns1__datafileParameterPK *
 soap_new_req_ns1__datafileParameterPK(struct soap *soap) {
-  ns1__datafileParameterPK *_p =
-      soap_instantiate_ns1__datafileParameterPK(soap, -1, NULL, NULL, NULL);
+  ns1__datafileParameterPK *_p = soap_instantiate_ns1__datafileParameterPK(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -24866,8 +25041,8 @@ inline ns1__datafileParameterPK *
 soap_new_set_ns1__datafileParameterPK(struct soap *soap, LONG64 *datafileId,
                                       std::string *name, std::string *units,
                                       char *__item2) {
-  ns1__datafileParameterPK *_p =
-      soap_instantiate_ns1__datafileParameterPK(soap, -1, NULL, NULL, NULL);
+  ns1__datafileParameterPK *_p = soap_instantiate_ns1__datafileParameterPK(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__datafileParameterPK::datafileId = datafileId;
@@ -24925,13 +25100,14 @@ soap_instantiate_ns1__datafileParameter(struct soap *, int, const char *,
 
 inline ns1__datafileParameter *
 soap_new_ns1__datafileParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__datafileParameter(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__datafileParameter(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline ns1__datafileParameter *soap_new_req_ns1__datafileParameter(
     struct soap *soap, bool facilityAcquiredData1, bool selected1) {
-  ns1__datafileParameter *_p =
-      soap_instantiate_ns1__datafileParameter(soap, -1, NULL, NULL, NULL);
+  ns1__datafileParameter *_p = soap_instantiate_ns1__datafileParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -24947,8 +25123,8 @@ inline ns1__datafileParameter *soap_new_set_ns1__datafileParameter(
     std::string *stringValue, enum ns1__parameterValueType *valueType,
     bool facilityAcquiredData1, ns1__icatRole *icatRole1, bool selected1,
     std::string *uniqueId1, char *__item2) {
-  ns1__datafileParameter *_p =
-      soap_instantiate_ns1__datafileParameter(soap, -1, NULL, NULL, NULL);
+  ns1__datafileParameter *_p = soap_instantiate_ns1__datafileParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__datafileParameter::datafileParameterPK = datafileParameterPK;
@@ -25016,13 +25192,14 @@ soap_instantiate_ns1__datafileFormatPK(struct soap *, int, const char *,
 
 inline ns1__datafileFormatPK *soap_new_ns1__datafileFormatPK(struct soap *soap,
                                                              int n = -1) {
-  return soap_instantiate_ns1__datafileFormatPK(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__datafileFormatPK(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline ns1__datafileFormatPK *
 soap_new_req_ns1__datafileFormatPK(struct soap *soap) {
-  ns1__datafileFormatPK *_p =
-      soap_instantiate_ns1__datafileFormatPK(soap, -1, NULL, NULL, NULL);
+  ns1__datafileFormatPK *_p = soap_instantiate_ns1__datafileFormatPK(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -25032,8 +25209,8 @@ soap_new_req_ns1__datafileFormatPK(struct soap *soap) {
 inline ns1__datafileFormatPK *
 soap_new_set_ns1__datafileFormatPK(struct soap *soap, std::string *name,
                                    std::string *version, char *__item2) {
-  ns1__datafileFormatPK *_p =
-      soap_instantiate_ns1__datafileFormatPK(soap, -1, NULL, NULL, NULL);
+  ns1__datafileFormatPK *_p = soap_instantiate_ns1__datafileFormatPK(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__datafileFormatPK::name = name;
@@ -25090,14 +25267,15 @@ soap_instantiate_ns1__datafileFormat(struct soap *, int, const char *,
 
 inline ns1__datafileFormat *soap_new_ns1__datafileFormat(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__datafileFormat(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__datafileFormat(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__datafileFormat *
 soap_new_req_ns1__datafileFormat(struct soap *soap, bool facilityAcquiredData1,
                                  bool selected1) {
   ns1__datafileFormat *_p =
-      soap_instantiate_ns1__datafileFormat(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__datafileFormat(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -25112,7 +25290,7 @@ inline ns1__datafileFormat *soap_new_set_ns1__datafileFormat(
     bool facilityAcquiredData1, ns1__icatRole *icatRole1, bool selected1,
     std::string *uniqueId1, char *__item2) {
   ns1__datafileFormat *_p =
-      soap_instantiate_ns1__datafileFormat(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__datafileFormat(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__datafileFormat::datafileFormatPK = datafileFormatPK;
@@ -25172,14 +25350,14 @@ soap_instantiate_ns1__datafile(struct soap *, int, const char *, const char *,
                                size_t *);
 
 inline ns1__datafile *soap_new_ns1__datafile(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__datafile(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__datafile(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__datafile *soap_new_req_ns1__datafile(struct soap *soap,
                                                  bool facilityAcquiredData1,
                                                  bool selected1) {
   ns1__datafile *_p =
-      soap_instantiate_ns1__datafile(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__datafile(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -25202,7 +25380,7 @@ inline ns1__datafile *soap_new_set_ns1__datafile(
     ns1__icatRole *icatRole1, bool selected1, std::string *uniqueId1,
     char *__item2) {
   ns1__datafile *_p =
-      soap_instantiate_ns1__datafile(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__datafile(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__datafile::checksum = checksum;
@@ -25280,13 +25458,14 @@ soap_instantiate_ns1__createDataFile(struct soap *, int, const char *,
 
 inline ns1__createDataFile *soap_new_ns1__createDataFile(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__createDataFile(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__createDataFile(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__createDataFile *
 soap_new_req_ns1__createDataFile(struct soap *soap) {
   ns1__createDataFile *_p =
-      soap_instantiate_ns1__createDataFile(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__createDataFile(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -25298,7 +25477,7 @@ soap_new_set_ns1__createDataFile(struct soap *soap, std::string *sessionId,
                                  ns1__datafile *dataFile, LONG64 *datasetId,
                                  char *__item1) {
   ns1__createDataFile *_p =
-      soap_instantiate_ns1__createDataFile(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__createDataFile(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__createDataFile::sessionId = sessionId;
@@ -25360,15 +25539,15 @@ soap_instantiate_ns1__InsufficientPrivilegesException(struct soap *, int,
 
 inline ns1__InsufficientPrivilegesException *
 soap_new_ns1__InsufficientPrivilegesException(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__InsufficientPrivilegesException(soap, n, NULL,
-                                                               NULL, NULL);
+  return soap_instantiate_ns1__InsufficientPrivilegesException(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__InsufficientPrivilegesException *
 soap_new_req_ns1__InsufficientPrivilegesException(struct soap *soap) {
   ns1__InsufficientPrivilegesException *_p =
-      soap_instantiate_ns1__InsufficientPrivilegesException(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__InsufficientPrivilegesException(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -25380,8 +25559,8 @@ soap_new_set_ns1__InsufficientPrivilegesException(
     struct soap *soap, std::string *message, std::string *stackTraceAsString,
     std::string *uniqueId, char *__item1) {
   ns1__InsufficientPrivilegesException *_p =
-      soap_instantiate_ns1__InsufficientPrivilegesException(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__InsufficientPrivilegesException(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__InsufficientPrivilegesException::message = message;
@@ -25441,13 +25620,14 @@ soap_instantiate_ns1__removeSampleResponse(struct soap *, int, const char *,
 
 inline ns1__removeSampleResponse *
 soap_new_ns1__removeSampleResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__removeSampleResponse(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__removeSampleResponse(soap, n, nullptr, nullptr,
+                                                    nullptr);
 }
 
 inline ns1__removeSampleResponse *
 soap_new_req_ns1__removeSampleResponse(struct soap *soap) {
-  ns1__removeSampleResponse *_p =
-      soap_instantiate_ns1__removeSampleResponse(soap, -1, NULL, NULL, NULL);
+  ns1__removeSampleResponse *_p = soap_instantiate_ns1__removeSampleResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -25456,8 +25636,8 @@ soap_new_req_ns1__removeSampleResponse(struct soap *soap) {
 
 inline ns1__removeSampleResponse *
 soap_new_set_ns1__removeSampleResponse(struct soap *soap, char *__item1) {
-  ns1__removeSampleResponse *_p =
-      soap_instantiate_ns1__removeSampleResponse(soap, -1, NULL, NULL, NULL);
+  ns1__removeSampleResponse *_p = soap_instantiate_ns1__removeSampleResponse(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -25513,12 +25693,12 @@ soap_instantiate_ns1__removeSample(struct soap *, int, const char *,
 
 inline ns1__removeSample *soap_new_ns1__removeSample(struct soap *soap,
                                                      int n = -1) {
-  return soap_instantiate_ns1__removeSample(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__removeSample(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__removeSample *soap_new_req_ns1__removeSample(struct soap *soap) {
   ns1__removeSample *_p =
-      soap_instantiate_ns1__removeSample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__removeSample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -25530,7 +25710,7 @@ inline ns1__removeSample *soap_new_set_ns1__removeSample(struct soap *soap,
                                                          LONG64 *sampleId,
                                                          char *__item1) {
   ns1__removeSample *_p =
-      soap_instantiate_ns1__removeSample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__removeSample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__removeSample::sessionId = sessionId;
@@ -25591,14 +25771,15 @@ soap_instantiate_ns1__listInstrumentsResponse(struct soap *, int, const char *,
 
 inline ns1__listInstrumentsResponse *
 soap_new_ns1__listInstrumentsResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__listInstrumentsResponse(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate_ns1__listInstrumentsResponse(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline ns1__listInstrumentsResponse *
 soap_new_req_ns1__listInstrumentsResponse(struct soap *soap) {
   ns1__listInstrumentsResponse *_p =
-      soap_instantiate_ns1__listInstrumentsResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__listInstrumentsResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -25608,7 +25789,8 @@ soap_new_req_ns1__listInstrumentsResponse(struct soap *soap) {
 inline ns1__listInstrumentsResponse *soap_new_set_ns1__listInstrumentsResponse(
     struct soap *soap, std::vector<std::string> &return_, char *__item1) {
   ns1__listInstrumentsResponse *_p =
-      soap_instantiate_ns1__listInstrumentsResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__listInstrumentsResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__listInstrumentsResponse::return_ = return_;
@@ -25665,13 +25847,14 @@ soap_instantiate_ns1__listInstruments(struct soap *, int, const char *,
 
 inline ns1__listInstruments *soap_new_ns1__listInstruments(struct soap *soap,
                                                            int n = -1) {
-  return soap_instantiate_ns1__listInstruments(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__listInstruments(soap, n, nullptr, nullptr,
+                                               nullptr);
 }
 
 inline ns1__listInstruments *
 soap_new_req_ns1__listInstruments(struct soap *soap) {
-  ns1__listInstruments *_p =
-      soap_instantiate_ns1__listInstruments(soap, -1, NULL, NULL, NULL);
+  ns1__listInstruments *_p = soap_instantiate_ns1__listInstruments(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -25681,8 +25864,8 @@ soap_new_req_ns1__listInstruments(struct soap *soap) {
 inline ns1__listInstruments *
 soap_new_set_ns1__listInstruments(struct soap *soap, std::string *sessionId,
                                   char *__item1) {
-  ns1__listInstruments *_p =
-      soap_instantiate_ns1__listInstruments(soap, -1, NULL, NULL, NULL);
+  ns1__listInstruments *_p = soap_instantiate_ns1__listInstruments(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__listInstruments::sessionId = sessionId;
@@ -25746,14 +25929,14 @@ inline ns1__searchDatafileByRestrictionResponse *
 soap_new_ns1__searchDatafileByRestrictionResponse(struct soap *soap,
                                                   int n = -1) {
   return soap_instantiate_ns1__searchDatafileByRestrictionResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatafileByRestrictionResponse *
 soap_new_req_ns1__searchDatafileByRestrictionResponse(struct soap *soap) {
   ns1__searchDatafileByRestrictionResponse *_p =
-      soap_instantiate_ns1__searchDatafileByRestrictionResponse(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate_ns1__searchDatafileByRestrictionResponse(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -25764,8 +25947,8 @@ inline ns1__searchDatafileByRestrictionResponse *
 soap_new_set_ns1__searchDatafileByRestrictionResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchDatafileByRestrictionResponse *_p =
-      soap_instantiate_ns1__searchDatafileByRestrictionResponse(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate_ns1__searchDatafileByRestrictionResponse(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatafileByRestrictionResponse::return_ = return_;
@@ -25826,15 +26009,15 @@ soap_instantiate_ns1__searchDatafileByRestriction(struct soap *, int,
 
 inline ns1__searchDatafileByRestriction *
 soap_new_ns1__searchDatafileByRestriction(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchDatafileByRestriction(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__searchDatafileByRestriction(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__searchDatafileByRestriction *
 soap_new_req_ns1__searchDatafileByRestriction(struct soap *soap) {
   ns1__searchDatafileByRestriction *_p =
-      soap_instantiate_ns1__searchDatafileByRestriction(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__searchDatafileByRestriction(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -25846,8 +26029,8 @@ soap_new_set_ns1__searchDatafileByRestriction(
     struct soap *soap, std::string *sessionId,
     ns1__restrictionCondition *restriction, char *__item1) {
   ns1__searchDatafileByRestriction *_p =
-      soap_instantiate_ns1__searchDatafileByRestriction(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__searchDatafileByRestriction(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatafileByRestriction::sessionId = sessionId;
@@ -25912,7 +26095,7 @@ inline ns1__searchSampleByRestrictionComparisonResponse *
 soap_new_ns1__searchSampleByRestrictionComparisonResponse(struct soap *soap,
                                                           int n = -1) {
   return soap_instantiate_ns1__searchSampleByRestrictionComparisonResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchSampleByRestrictionComparisonResponse *
@@ -25920,7 +26103,7 @@ soap_new_req_ns1__searchSampleByRestrictionComparisonResponse(
     struct soap *soap) {
   ns1__searchSampleByRestrictionComparisonResponse *_p =
       soap_instantiate_ns1__searchSampleByRestrictionComparisonResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -25932,7 +26115,7 @@ soap_new_set_ns1__searchSampleByRestrictionComparisonResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchSampleByRestrictionComparisonResponse *_p =
       soap_instantiate_ns1__searchSampleByRestrictionComparisonResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSampleByRestrictionComparisonResponse::return_ = return_;
@@ -25994,8 +26177,8 @@ soap_instantiate_ns1__restrictionComparisonCondition(struct soap *, int,
 
 inline ns1__restrictionComparisonCondition *
 soap_new_ns1__restrictionComparisonCondition(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__restrictionComparisonCondition(soap, n, NULL,
-                                                              NULL, NULL);
+  return soap_instantiate_ns1__restrictionComparisonCondition(soap, n, nullptr,
+                                                              nullptr, nullptr);
 }
 
 inline ns1__restrictionComparisonCondition *
@@ -26003,8 +26186,8 @@ soap_new_req_ns1__restrictionComparisonCondition(
     struct soap *soap, int maxResults1, bool orderByAsc1, bool returnLongId1,
     bool negate2, bool sensitive2) {
   ns1__restrictionComparisonCondition *_p =
-      soap_instantiate_ns1__restrictionComparisonCondition(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__restrictionComparisonCondition(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__restrictionCondition::maxResults = maxResults1;
@@ -26027,8 +26210,8 @@ soap_new_set_ns1__restrictionComparisonCondition(
     bool returnLongId1, enum ns1__sampleInclude *sampleInclude1, bool negate2,
     bool sensitive2, char *__item3) {
   ns1__restrictionComparisonCondition *_p =
-      soap_instantiate_ns1__restrictionComparisonCondition(soap, -1, NULL, NULL,
-                                                           NULL);
+      soap_instantiate_ns1__restrictionComparisonCondition(soap, -1, nullptr,
+                                                           nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__restrictionComparisonCondition::comparisonOperator =
@@ -26108,14 +26291,14 @@ inline ns1__searchSampleByRestrictionComparison *
 soap_new_ns1__searchSampleByRestrictionComparison(struct soap *soap,
                                                   int n = -1) {
   return soap_instantiate_ns1__searchSampleByRestrictionComparison(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchSampleByRestrictionComparison *
 soap_new_req_ns1__searchSampleByRestrictionComparison(struct soap *soap) {
   ns1__searchSampleByRestrictionComparison *_p =
-      soap_instantiate_ns1__searchSampleByRestrictionComparison(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate_ns1__searchSampleByRestrictionComparison(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -26128,8 +26311,8 @@ soap_new_set_ns1__searchSampleByRestrictionComparison(
     std::vector<ns1__restrictionComparisonCondition *> &restriction,
     char *__item1) {
   ns1__searchSampleByRestrictionComparison *_p =
-      soap_instantiate_ns1__searchSampleByRestrictionComparison(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate_ns1__searchSampleByRestrictionComparison(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSampleByRestrictionComparison::sessionId = sessionId;
@@ -26191,15 +26374,15 @@ soap_instantiate_ns1__entityPrimaryKeyBaseBean(struct soap *, int, const char *,
 
 inline ns1__entityPrimaryKeyBaseBean *
 soap_new_ns1__entityPrimaryKeyBaseBean(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__entityPrimaryKeyBaseBean(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate_ns1__entityPrimaryKeyBaseBean(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline ns1__entityPrimaryKeyBaseBean *
 soap_new_req_ns1__entityPrimaryKeyBaseBean(struct soap *soap) {
   ns1__entityPrimaryKeyBaseBean *_p =
-      soap_instantiate_ns1__entityPrimaryKeyBaseBean(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__entityPrimaryKeyBaseBean(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -26209,8 +26392,8 @@ soap_new_req_ns1__entityPrimaryKeyBaseBean(struct soap *soap) {
 inline ns1__entityPrimaryKeyBaseBean *
 soap_new_set_ns1__entityPrimaryKeyBaseBean(struct soap *soap, char *__item1) {
   ns1__entityPrimaryKeyBaseBean *_p =
-      soap_instantiate_ns1__entityPrimaryKeyBaseBean(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__entityPrimaryKeyBaseBean(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item1;
@@ -26266,13 +26449,14 @@ soap_instantiate_ns1__sampleParameterPK(struct soap *, int, const char *,
 
 inline ns1__sampleParameterPK *
 soap_new_ns1__sampleParameterPK(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__sampleParameterPK(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__sampleParameterPK(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline ns1__sampleParameterPK *
 soap_new_req_ns1__sampleParameterPK(struct soap *soap) {
-  ns1__sampleParameterPK *_p =
-      soap_instantiate_ns1__sampleParameterPK(soap, -1, NULL, NULL, NULL);
+  ns1__sampleParameterPK *_p = soap_instantiate_ns1__sampleParameterPK(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -26283,8 +26467,8 @@ inline ns1__sampleParameterPK *
 soap_new_set_ns1__sampleParameterPK(struct soap *soap, std::string *name,
                                     LONG64 *sampleId, std::string *units,
                                     char *__item2) {
-  ns1__sampleParameterPK *_p =
-      soap_instantiate_ns1__sampleParameterPK(soap, -1, NULL, NULL, NULL);
+  ns1__sampleParameterPK *_p = soap_instantiate_ns1__sampleParameterPK(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__sampleParameterPK::name = name;
@@ -26342,14 +26526,15 @@ soap_instantiate_ns1__sampleParameter(struct soap *, int, const char *,
 
 inline ns1__sampleParameter *soap_new_ns1__sampleParameter(struct soap *soap,
                                                            int n = -1) {
-  return soap_instantiate_ns1__sampleParameter(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__sampleParameter(soap, n, nullptr, nullptr,
+                                               nullptr);
 }
 
 inline ns1__sampleParameter *
 soap_new_req_ns1__sampleParameter(struct soap *soap, bool facilityAcquiredData1,
                                   bool selected1) {
-  ns1__sampleParameter *_p =
-      soap_instantiate_ns1__sampleParameter(soap, -1, NULL, NULL, NULL);
+  ns1__sampleParameter *_p = soap_instantiate_ns1__sampleParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -26365,8 +26550,8 @@ inline ns1__sampleParameter *soap_new_set_ns1__sampleParameter(
     std::string *stringValue, enum ns1__parameterValueType *valueType,
     bool facilityAcquiredData1, ns1__icatRole *icatRole1, bool selected1,
     std::string *uniqueId1, char *__item2) {
-  ns1__sampleParameter *_p =
-      soap_instantiate_ns1__sampleParameter(soap, -1, NULL, NULL, NULL);
+  ns1__sampleParameter *_p = soap_instantiate_ns1__sampleParameter(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__sampleParameter::dateTimeValue = dateTimeValue;
@@ -26430,13 +26615,14 @@ soap_instantiate_ns1__sample(struct soap *, int, const char *, const char *,
                              size_t *);
 
 inline ns1__sample *soap_new_ns1__sample(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__sample(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__sample(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__sample *soap_new_req_ns1__sample(struct soap *soap,
                                              bool facilityAcquiredData1,
                                              bool selected1) {
-  ns1__sample *_p = soap_instantiate_ns1__sample(soap, -1, NULL, NULL, NULL);
+  ns1__sample *_p =
+      soap_instantiate_ns1__sample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -26452,7 +26638,8 @@ inline ns1__sample *soap_new_set_ns1__sample(
     std::vector<ns1__sampleParameter *> &sampleParameterCollection,
     bool facilityAcquiredData1, ns1__icatRole *icatRole1, bool selected1,
     std::string *uniqueId1, char *__item2) {
-  ns1__sample *_p = soap_instantiate_ns1__sample(soap, -1, NULL, NULL, NULL);
+  ns1__sample *_p =
+      soap_instantiate_ns1__sample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__sample::chemicalFormula = chemicalFormula;
@@ -26522,15 +26709,15 @@ soap_instantiate_ns1__searchSamplesBySampleNameResponse(struct soap *, int,
 
 inline ns1__searchSamplesBySampleNameResponse *
 soap_new_ns1__searchSamplesBySampleNameResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchSamplesBySampleNameResponse(soap, n, NULL,
-                                                                 NULL, NULL);
+  return soap_instantiate_ns1__searchSamplesBySampleNameResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchSamplesBySampleNameResponse *
 soap_new_req_ns1__searchSamplesBySampleNameResponse(struct soap *soap) {
   ns1__searchSamplesBySampleNameResponse *_p =
-      soap_instantiate_ns1__searchSamplesBySampleNameResponse(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate_ns1__searchSamplesBySampleNameResponse(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -26541,8 +26728,8 @@ inline ns1__searchSamplesBySampleNameResponse *
 soap_new_set_ns1__searchSamplesBySampleNameResponse(
     struct soap *soap, std::vector<ns1__sample *> &return_, char *__item1) {
   ns1__searchSamplesBySampleNameResponse *_p =
-      soap_instantiate_ns1__searchSamplesBySampleNameResponse(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate_ns1__searchSamplesBySampleNameResponse(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSamplesBySampleNameResponse::return_ = return_;
@@ -26604,15 +26791,15 @@ soap_instantiate_ns1__searchSamplesBySampleName(struct soap *, int,
 
 inline ns1__searchSamplesBySampleName *
 soap_new_ns1__searchSamplesBySampleName(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchSamplesBySampleName(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate_ns1__searchSamplesBySampleName(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline ns1__searchSamplesBySampleName *
 soap_new_req_ns1__searchSamplesBySampleName(struct soap *soap) {
   ns1__searchSamplesBySampleName *_p =
-      soap_instantiate_ns1__searchSamplesBySampleName(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__searchSamplesBySampleName(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -26625,8 +26812,8 @@ soap_new_set_ns1__searchSamplesBySampleName(struct soap *soap,
                                             std::string *sampleName,
                                             char *__item1) {
   ns1__searchSamplesBySampleName *_p =
-      soap_instantiate_ns1__searchSamplesBySampleName(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate_ns1__searchSamplesBySampleName(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchSamplesBySampleName::sessionId = sessionId;
@@ -26682,7 +26869,7 @@ soap_instantiate_ns1__icatRole(struct soap *, int, const char *, const char *,
                                size_t *);
 
 inline ns1__icatRole *soap_new_ns1__icatRole(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__icatRole(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__icatRole(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__icatRole *soap_new_req_ns1__icatRole(
@@ -26692,7 +26879,7 @@ inline ns1__icatRole *soap_new_req_ns1__icatRole(
     bool actionSelect, bool actionUpdate, bool facilityAcquiredData1,
     bool selected1) {
   ns1__icatRole *_p =
-      soap_instantiate_ns1__icatRole(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__icatRole(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__icatRole::actionDelete = actionDelete;
@@ -26719,7 +26906,7 @@ inline ns1__icatRole *soap_new_set_ns1__icatRole(
     bool facilityAcquiredData1, ns1__icatRole *icatRole1, bool selected1,
     std::string *uniqueId1, char *__item2) {
   ns1__icatRole *_p =
-      soap_instantiate_ns1__icatRole(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__icatRole(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__icatRole::actionDelete = actionDelete;
@@ -26788,14 +26975,15 @@ soap_instantiate_ns1__entityBaseBean(struct soap *, int, const char *,
 
 inline ns1__entityBaseBean *soap_new_ns1__entityBaseBean(struct soap *soap,
                                                          int n = -1) {
-  return soap_instantiate_ns1__entityBaseBean(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__entityBaseBean(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline ns1__entityBaseBean *
 soap_new_req_ns1__entityBaseBean(struct soap *soap, bool facilityAcquiredData,
                                  bool selected) {
   ns1__entityBaseBean *_p =
-      soap_instantiate_ns1__entityBaseBean(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__entityBaseBean(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData;
@@ -26809,7 +26997,7 @@ soap_new_set_ns1__entityBaseBean(struct soap *soap, bool facilityAcquiredData,
                                  ns1__icatRole *icatRole, bool selected,
                                  std::string *uniqueId, char *__item1) {
   ns1__entityBaseBean *_p =
-      soap_instantiate_ns1__entityBaseBean(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__entityBaseBean(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData;
@@ -26868,14 +27056,14 @@ soap_instantiate_ns1__facilityUser(struct soap *, int, const char *,
 
 inline ns1__facilityUser *soap_new_ns1__facilityUser(struct soap *soap,
                                                      int n = -1) {
-  return soap_instantiate_ns1__facilityUser(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__facilityUser(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__facilityUser *
 soap_new_req_ns1__facilityUser(struct soap *soap, bool facilityAcquiredData1,
                                bool selected1) {
   ns1__facilityUser *_p =
-      soap_instantiate_ns1__facilityUser(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__facilityUser(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__entityBaseBean::facilityAcquiredData = facilityAcquiredData1;
@@ -26891,7 +27079,7 @@ inline ns1__facilityUser *soap_new_set_ns1__facilityUser(
     ns1__icatRole *icatRole1, bool selected1, std::string *uniqueId1,
     char *__item2) {
   ns1__facilityUser *_p =
-      soap_instantiate_ns1__facilityUser(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__facilityUser(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__facilityUser::facilityUserId = facilityUserId;
@@ -26965,14 +27153,14 @@ inline ns1__searchFacilityUserByRestrictionResponse *
 soap_new_ns1__searchFacilityUserByRestrictionResponse(struct soap *soap,
                                                       int n = -1) {
   return soap_instantiate_ns1__searchFacilityUserByRestrictionResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchFacilityUserByRestrictionResponse *
 soap_new_req_ns1__searchFacilityUserByRestrictionResponse(struct soap *soap) {
   ns1__searchFacilityUserByRestrictionResponse *_p =
       soap_instantiate_ns1__searchFacilityUserByRestrictionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -26985,7 +27173,7 @@ soap_new_set_ns1__searchFacilityUserByRestrictionResponse(
     char *__item1) {
   ns1__searchFacilityUserByRestrictionResponse *_p =
       soap_instantiate_ns1__searchFacilityUserByRestrictionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchFacilityUserByRestrictionResponse::return_ = return_;
@@ -27046,15 +27234,15 @@ soap_instantiate_ns1__searchFacilityUserByRestriction(struct soap *, int,
 
 inline ns1__searchFacilityUserByRestriction *
 soap_new_ns1__searchFacilityUserByRestriction(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchFacilityUserByRestriction(soap, n, NULL,
-                                                               NULL, NULL);
+  return soap_instantiate_ns1__searchFacilityUserByRestriction(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchFacilityUserByRestriction *
 soap_new_req_ns1__searchFacilityUserByRestriction(struct soap *soap) {
   ns1__searchFacilityUserByRestriction *_p =
-      soap_instantiate_ns1__searchFacilityUserByRestriction(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__searchFacilityUserByRestriction(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -27066,8 +27254,8 @@ soap_new_set_ns1__searchFacilityUserByRestriction(
     struct soap *soap, std::string *sessionId,
     ns1__restrictionCondition *restriction, char *__item1) {
   ns1__searchFacilityUserByRestriction *_p =
-      soap_instantiate_ns1__searchFacilityUserByRestriction(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate_ns1__searchFacilityUserByRestriction(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchFacilityUserByRestriction::sessionId = sessionId;
@@ -27128,15 +27316,15 @@ soap_instantiate_ns1__listDatasetTypesResponse(struct soap *, int, const char *,
 
 inline ns1__listDatasetTypesResponse *
 soap_new_ns1__listDatasetTypesResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__listDatasetTypesResponse(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate_ns1__listDatasetTypesResponse(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline ns1__listDatasetTypesResponse *
 soap_new_req_ns1__listDatasetTypesResponse(struct soap *soap) {
   ns1__listDatasetTypesResponse *_p =
-      soap_instantiate_ns1__listDatasetTypesResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__listDatasetTypesResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -27148,8 +27336,8 @@ soap_new_set_ns1__listDatasetTypesResponse(struct soap *soap,
                                            std::vector<std::string> &return_,
                                            char *__item1) {
   ns1__listDatasetTypesResponse *_p =
-      soap_instantiate_ns1__listDatasetTypesResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate_ns1__listDatasetTypesResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__listDatasetTypesResponse::return_ = return_;
@@ -27206,13 +27394,14 @@ soap_instantiate_ns1__listDatasetTypes(struct soap *, int, const char *,
 
 inline ns1__listDatasetTypes *soap_new_ns1__listDatasetTypes(struct soap *soap,
                                                              int n = -1) {
-  return soap_instantiate_ns1__listDatasetTypes(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__listDatasetTypes(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline ns1__listDatasetTypes *
 soap_new_req_ns1__listDatasetTypes(struct soap *soap) {
-  ns1__listDatasetTypes *_p =
-      soap_instantiate_ns1__listDatasetTypes(soap, -1, NULL, NULL, NULL);
+  ns1__listDatasetTypes *_p = soap_instantiate_ns1__listDatasetTypes(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -27222,8 +27411,8 @@ soap_new_req_ns1__listDatasetTypes(struct soap *soap) {
 inline ns1__listDatasetTypes *
 soap_new_set_ns1__listDatasetTypes(struct soap *soap, std::string *sessionId,
                                    char *__item1) {
-  ns1__listDatasetTypes *_p =
-      soap_instantiate_ns1__listDatasetTypes(soap, -1, NULL, NULL, NULL);
+  ns1__listDatasetTypes *_p = soap_instantiate_ns1__listDatasetTypes(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__listDatasetTypes::sessionId = sessionId;
@@ -27287,7 +27476,7 @@ inline ns1__searchDatasetByParameterRestrictionResponse *
 soap_new_ns1__searchDatasetByParameterRestrictionResponse(struct soap *soap,
                                                           int n = -1) {
   return soap_instantiate_ns1__searchDatasetByParameterRestrictionResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatasetByParameterRestrictionResponse *
@@ -27295,7 +27484,7 @@ soap_new_req_ns1__searchDatasetByParameterRestrictionResponse(
     struct soap *soap) {
   ns1__searchDatasetByParameterRestrictionResponse *_p =
       soap_instantiate_ns1__searchDatasetByParameterRestrictionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -27307,7 +27496,7 @@ soap_new_set_ns1__searchDatasetByParameterRestrictionResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchDatasetByParameterRestrictionResponse *_p =
       soap_instantiate_ns1__searchDatasetByParameterRestrictionResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetByParameterRestrictionResponse::return_ = return_;
@@ -27365,14 +27554,15 @@ soap_instantiate_ns1__parameterCondition(struct soap *, int, const char *,
 
 inline ns1__parameterCondition *
 soap_new_ns1__parameterCondition(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__parameterCondition(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__parameterCondition(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline ns1__parameterCondition *
 soap_new_req_ns1__parameterCondition(struct soap *soap, bool negate1,
                                      bool sensitive1) {
-  ns1__parameterCondition *_p =
-      soap_instantiate_ns1__parameterCondition(soap, -1, NULL, NULL, NULL);
+  ns1__parameterCondition *_p = soap_instantiate_ns1__parameterCondition(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__condition::negate = negate1;
@@ -27384,8 +27574,8 @@ soap_new_req_ns1__parameterCondition(struct soap *soap, bool negate1,
 inline ns1__parameterCondition *
 soap_new_set_ns1__parameterCondition(struct soap *soap, bool negate1,
                                      bool sensitive1, char *__item2) {
-  ns1__parameterCondition *_p =
-      soap_instantiate_ns1__parameterCondition(soap, -1, NULL, NULL, NULL);
+  ns1__parameterCondition *_p = soap_instantiate_ns1__parameterCondition(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__condition::negate = negate1;
@@ -27450,14 +27640,14 @@ inline ns1__searchDatasetByParameterRestriction *
 soap_new_ns1__searchDatasetByParameterRestriction(struct soap *soap,
                                                   int n = -1) {
   return soap_instantiate_ns1__searchDatasetByParameterRestriction(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatasetByParameterRestriction *
 soap_new_req_ns1__searchDatasetByParameterRestriction(struct soap *soap) {
   ns1__searchDatasetByParameterRestriction *_p =
-      soap_instantiate_ns1__searchDatasetByParameterRestriction(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate_ns1__searchDatasetByParameterRestriction(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -27470,8 +27660,8 @@ soap_new_set_ns1__searchDatasetByParameterRestriction(
     ns1__parameterCondition *parameterCondition,
     ns1__restrictionCondition *restrictions, char *__item1) {
   ns1__searchDatasetByParameterRestriction *_p =
-      soap_instantiate_ns1__searchDatasetByParameterRestriction(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate_ns1__searchDatasetByParameterRestriction(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetByParameterRestriction::sessionId = sessionId;
@@ -27538,14 +27728,14 @@ inline ns1__searchDatasetByRestrictionLogicalResponse *
 soap_new_ns1__searchDatasetByRestrictionLogicalResponse(struct soap *soap,
                                                         int n = -1) {
   return soap_instantiate_ns1__searchDatasetByRestrictionLogicalResponse(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatasetByRestrictionLogicalResponse *
 soap_new_req_ns1__searchDatasetByRestrictionLogicalResponse(struct soap *soap) {
   ns1__searchDatasetByRestrictionLogicalResponse *_p =
       soap_instantiate_ns1__searchDatasetByRestrictionLogicalResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -27557,7 +27747,7 @@ soap_new_set_ns1__searchDatasetByRestrictionLogicalResponse(
     struct soap *soap, std::vector<xsd__anyType *> &return_, char *__item1) {
   ns1__searchDatasetByRestrictionLogicalResponse *_p =
       soap_instantiate_ns1__searchDatasetByRestrictionLogicalResponse(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetByRestrictionLogicalResponse::return_ = return_;
@@ -27612,13 +27802,13 @@ soap_instantiate_ns1__condition(struct soap *, int, const char *, const char *,
                                 size_t *);
 
 inline ns1__condition *soap_new_ns1__condition(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__condition(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__condition(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__condition *
 soap_new_req_ns1__condition(struct soap *soap, bool negate, bool sensitive) {
   ns1__condition *_p =
-      soap_instantiate_ns1__condition(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__condition(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__condition::negate = negate;
@@ -27631,7 +27821,7 @@ inline ns1__condition *soap_new_set_ns1__condition(struct soap *soap,
                                                    bool negate, bool sensitive,
                                                    char *__item1) {
   ns1__condition *_p =
-      soap_instantiate_ns1__condition(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_ns1__condition(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__condition::negate = negate;
@@ -27688,15 +27878,16 @@ soap_instantiate_ns1__restrictionCondition(struct soap *, int, const char *,
 
 inline ns1__restrictionCondition *
 soap_new_ns1__restrictionCondition(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__restrictionCondition(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_ns1__restrictionCondition(soap, n, nullptr, nullptr,
+                                                    nullptr);
 }
 
 inline ns1__restrictionCondition *
 soap_new_req_ns1__restrictionCondition(struct soap *soap, int maxResults,
                                        bool orderByAsc, bool returnLongId,
                                        bool negate1, bool sensitive1) {
-  ns1__restrictionCondition *_p =
-      soap_instantiate_ns1__restrictionCondition(soap, -1, NULL, NULL, NULL);
+  ns1__restrictionCondition *_p = soap_instantiate_ns1__restrictionCondition(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__restrictionCondition::maxResults = maxResults;
@@ -27715,8 +27906,8 @@ inline ns1__restrictionCondition *soap_new_set_ns1__restrictionCondition(
     bool orderByAsc, enum ns1__restrictionAttributes *orderByAttribute,
     bool returnLongId, enum ns1__sampleInclude *sampleInclude, bool negate1,
     bool sensitive1, char *__item2) {
-  ns1__restrictionCondition *_p =
-      soap_instantiate_ns1__restrictionCondition(soap, -1, NULL, NULL, NULL);
+  ns1__restrictionCondition *_p = soap_instantiate_ns1__restrictionCondition(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__restrictionCondition::datafileInclude = datafileInclude;
@@ -27787,8 +27978,8 @@ soap_instantiate_ns1__restrictionLogicalCondition(struct soap *, int,
 
 inline ns1__restrictionLogicalCondition *
 soap_new_ns1__restrictionLogicalCondition(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__restrictionLogicalCondition(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_ns1__restrictionLogicalCondition(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline ns1__restrictionLogicalCondition *
@@ -27797,8 +27988,8 @@ soap_new_req_ns1__restrictionLogicalCondition(struct soap *soap,
                                               bool returnLongId1, bool negate2,
                                               bool sensitive2) {
   ns1__restrictionLogicalCondition *_p =
-      soap_instantiate_ns1__restrictionLogicalCondition(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__restrictionLogicalCondition(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__restrictionCondition::maxResults = maxResults1;
@@ -27821,8 +28012,8 @@ soap_new_set_ns1__restrictionLogicalCondition(
     bool returnLongId1, enum ns1__sampleInclude *sampleInclude1, bool negate2,
     bool sensitive2, char *__item3) {
   ns1__restrictionLogicalCondition *_p =
-      soap_instantiate_ns1__restrictionLogicalCondition(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate_ns1__restrictionLogicalCondition(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__restrictionLogicalCondition::operator_ = operator_;
@@ -27895,15 +28086,15 @@ soap_instantiate_ns1__searchDatasetByRestrictionLogical(struct soap *, int,
 
 inline ns1__searchDatasetByRestrictionLogical *
 soap_new_ns1__searchDatasetByRestrictionLogical(struct soap *soap, int n = -1) {
-  return soap_instantiate_ns1__searchDatasetByRestrictionLogical(soap, n, NULL,
-                                                                 NULL, NULL);
+  return soap_instantiate_ns1__searchDatasetByRestrictionLogical(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline ns1__searchDatasetByRestrictionLogical *
 soap_new_req_ns1__searchDatasetByRestrictionLogical(struct soap *soap) {
   ns1__searchDatasetByRestrictionLogical *_p =
-      soap_instantiate_ns1__searchDatasetByRestrictionLogical(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate_ns1__searchDatasetByRestrictionLogical(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -27915,8 +28106,8 @@ soap_new_set_ns1__searchDatasetByRestrictionLogical(
     struct soap *soap, std::string *sessionId,
     ns1__restrictionLogicalCondition *restriction, char *__item1) {
   ns1__searchDatasetByRestrictionLogical *_p =
-      soap_instantiate_ns1__searchDatasetByRestrictionLogical(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate_ns1__searchDatasetByRestrictionLogical(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->ns1__searchDatasetByRestrictionLogical::sessionId = sessionId;
@@ -27977,11 +28168,12 @@ soap_instantiate_std__string(struct soap *, int, const char *, const char *,
                              size_t *);
 
 inline std::string *soap_new_std__string(struct soap *soap, int n = -1) {
-  return soap_instantiate_std__string(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_std__string(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline std::string *soap_new_req_std__string(struct soap *soap) {
-  std::string *_p = soap_instantiate_std__string(soap, -1, NULL, NULL, NULL);
+  std::string *_p =
+      soap_instantiate_std__string(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default_std__string(soap, _p);
   }
@@ -27989,7 +28181,8 @@ inline std::string *soap_new_req_std__string(struct soap *soap) {
 }
 
 inline std::string *soap_new_set_std__string(struct soap *soap) {
-  std::string *_p = soap_instantiate_std__string(soap, -1, NULL, NULL, NULL);
+  std::string *_p =
+      soap_instantiate_std__string(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default_std__string(soap, _p);
   }
@@ -28038,12 +28231,13 @@ soap_instantiate_xsd__string(struct soap *, int, const char *, const char *,
                              size_t *);
 
 inline xsd__string *soap_new_xsd__string(struct soap *soap, int n = -1) {
-  return soap_instantiate_xsd__string(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_xsd__string(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline xsd__string *soap_new_req_xsd__string(struct soap *soap,
                                              std::string &__item) {
-  xsd__string *_p = soap_instantiate_xsd__string(soap, -1, NULL, NULL, NULL);
+  xsd__string *_p =
+      soap_instantiate_xsd__string(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__string::__item = __item;
@@ -28054,7 +28248,8 @@ inline xsd__string *soap_new_req_xsd__string(struct soap *soap,
 inline xsd__string *soap_new_set_xsd__string(struct soap *soap,
                                              std::string &__item,
                                              char *__item1) {
-  xsd__string *_p = soap_instantiate_xsd__string(soap, -1, NULL, NULL, NULL);
+  xsd__string *_p =
+      soap_instantiate_xsd__string(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__string::__item = __item;
@@ -28104,11 +28299,12 @@ soap_instantiate_xsd__long(struct soap *, int, const char *, const char *,
                            size_t *);
 
 inline xsd__long *soap_new_xsd__long(struct soap *soap, int n = -1) {
-  return soap_instantiate_xsd__long(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_xsd__long(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline xsd__long *soap_new_req_xsd__long(struct soap *soap, LONG64 __item) {
-  xsd__long *_p = soap_instantiate_xsd__long(soap, -1, NULL, NULL, NULL);
+  xsd__long *_p =
+      soap_instantiate_xsd__long(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__long::__item = __item;
@@ -28118,7 +28314,8 @@ inline xsd__long *soap_new_req_xsd__long(struct soap *soap, LONG64 __item) {
 
 inline xsd__long *soap_new_set_xsd__long(struct soap *soap, LONG64 __item,
                                          char *__item1) {
-  xsd__long *_p = soap_instantiate_xsd__long(soap, -1, NULL, NULL, NULL);
+  xsd__long *_p =
+      soap_instantiate_xsd__long(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__long::__item = __item;
@@ -28167,11 +28364,11 @@ soap_instantiate_xsd__int(struct soap *, int, const char *, const char *,
                           size_t *);
 
 inline xsd__int *soap_new_xsd__int(struct soap *soap, int n = -1) {
-  return soap_instantiate_xsd__int(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_xsd__int(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline xsd__int *soap_new_req_xsd__int(struct soap *soap, int __item) {
-  xsd__int *_p = soap_instantiate_xsd__int(soap, -1, NULL, NULL, NULL);
+  xsd__int *_p = soap_instantiate_xsd__int(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__int::__item = __item;
@@ -28181,7 +28378,7 @@ inline xsd__int *soap_new_req_xsd__int(struct soap *soap, int __item) {
 
 inline xsd__int *soap_new_set_xsd__int(struct soap *soap, int __item,
                                        char *__item1) {
-  xsd__int *_p = soap_instantiate_xsd__int(soap, -1, NULL, NULL, NULL);
+  xsd__int *_p = soap_instantiate_xsd__int(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__int::__item = __item;
@@ -28230,11 +28427,12 @@ soap_instantiate_xsd__float(struct soap *, int, const char *, const char *,
                             size_t *);
 
 inline xsd__float *soap_new_xsd__float(struct soap *soap, int n = -1) {
-  return soap_instantiate_xsd__float(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_xsd__float(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline xsd__float *soap_new_req_xsd__float(struct soap *soap, float __item) {
-  xsd__float *_p = soap_instantiate_xsd__float(soap, -1, NULL, NULL, NULL);
+  xsd__float *_p =
+      soap_instantiate_xsd__float(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__float::__item = __item;
@@ -28244,7 +28442,8 @@ inline xsd__float *soap_new_req_xsd__float(struct soap *soap, float __item) {
 
 inline xsd__float *soap_new_set_xsd__float(struct soap *soap, float __item,
                                            char *__item1) {
-  xsd__float *_p = soap_instantiate_xsd__float(soap, -1, NULL, NULL, NULL);
+  xsd__float *_p =
+      soap_instantiate_xsd__float(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__float::__item = __item;
@@ -28294,11 +28493,12 @@ soap_instantiate_xsd__double(struct soap *, int, const char *, const char *,
                              size_t *);
 
 inline xsd__double *soap_new_xsd__double(struct soap *soap, int n = -1) {
-  return soap_instantiate_xsd__double(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_xsd__double(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline xsd__double *soap_new_req_xsd__double(struct soap *soap, double __item) {
-  xsd__double *_p = soap_instantiate_xsd__double(soap, -1, NULL, NULL, NULL);
+  xsd__double *_p =
+      soap_instantiate_xsd__double(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__double::__item = __item;
@@ -28308,7 +28508,8 @@ inline xsd__double *soap_new_req_xsd__double(struct soap *soap, double __item) {
 
 inline xsd__double *soap_new_set_xsd__double(struct soap *soap, double __item,
                                              char *__item1) {
-  xsd__double *_p = soap_instantiate_xsd__double(soap, -1, NULL, NULL, NULL);
+  xsd__double *_p =
+      soap_instantiate_xsd__double(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__double::__item = __item;
@@ -28361,13 +28562,13 @@ soap_instantiate_xsd__dateTime(struct soap *, int, const char *, const char *,
                                size_t *);
 
 inline xsd__dateTime *soap_new_xsd__dateTime(struct soap *soap, int n = -1) {
-  return soap_instantiate_xsd__dateTime(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_xsd__dateTime(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline xsd__dateTime *soap_new_req_xsd__dateTime(struct soap *soap,
                                                  time_t __item) {
   xsd__dateTime *_p =
-      soap_instantiate_xsd__dateTime(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_xsd__dateTime(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__dateTime::__item = __item;
@@ -28378,7 +28579,7 @@ inline xsd__dateTime *soap_new_req_xsd__dateTime(struct soap *soap,
 inline xsd__dateTime *soap_new_set_xsd__dateTime(struct soap *soap,
                                                  time_t __item, char *__item1) {
   xsd__dateTime *_p =
-      soap_instantiate_xsd__dateTime(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_xsd__dateTime(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__dateTime::__item = __item;
@@ -28430,11 +28631,12 @@ soap_instantiate_xsd__boolean(struct soap *, int, const char *, const char *,
                               size_t *);
 
 inline xsd__boolean *soap_new_xsd__boolean(struct soap *soap, int n = -1) {
-  return soap_instantiate_xsd__boolean(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_xsd__boolean(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline xsd__boolean *soap_new_req_xsd__boolean(struct soap *soap, bool __item) {
-  xsd__boolean *_p = soap_instantiate_xsd__boolean(soap, -1, NULL, NULL, NULL);
+  xsd__boolean *_p =
+      soap_instantiate_xsd__boolean(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__boolean::__item = __item;
@@ -28444,7 +28646,8 @@ inline xsd__boolean *soap_new_req_xsd__boolean(struct soap *soap, bool __item) {
 
 inline xsd__boolean *soap_new_set_xsd__boolean(struct soap *soap, bool __item,
                                                char *__item1) {
-  xsd__boolean *_p = soap_instantiate_xsd__boolean(soap, -1, NULL, NULL, NULL);
+  xsd__boolean *_p =
+      soap_instantiate_xsd__boolean(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__boolean::__item = __item;
@@ -28496,11 +28699,12 @@ soap_instantiate_xsd__anyType(struct soap *, int, const char *, const char *,
                               size_t *);
 
 inline xsd__anyType *soap_new_xsd__anyType(struct soap *soap, int n = -1) {
-  return soap_instantiate_xsd__anyType(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_xsd__anyType(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline xsd__anyType *soap_new_req_xsd__anyType(struct soap *soap) {
-  xsd__anyType *_p = soap_instantiate_xsd__anyType(soap, -1, NULL, NULL, NULL);
+  xsd__anyType *_p =
+      soap_instantiate_xsd__anyType(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
   }
@@ -28509,7 +28713,8 @@ inline xsd__anyType *soap_new_req_xsd__anyType(struct soap *soap) {
 
 inline xsd__anyType *soap_new_set_xsd__anyType(struct soap *soap,
                                                char *__item) {
-  xsd__anyType *_p = soap_instantiate_xsd__anyType(soap, -1, NULL, NULL, NULL);
+  xsd__anyType *_p =
+      soap_instantiate_xsd__anyType(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     _p->soap_default(soap);
     _p->xsd__anyType::__item = __item;
@@ -28914,15 +29119,15 @@ soap_instantiate___ns1__searchFacilityUserByRestriction(struct soap *, int,
 
 inline struct __ns1__searchFacilityUserByRestriction *
 soap_new___ns1__searchFacilityUserByRestriction(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchFacilityUserByRestriction(soap, n, NULL,
-                                                                 NULL, NULL);
+  return soap_instantiate___ns1__searchFacilityUserByRestriction(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchFacilityUserByRestriction *
 soap_new_req___ns1__searchFacilityUserByRestriction(struct soap *soap) {
   struct __ns1__searchFacilityUserByRestriction *_p =
-      soap_instantiate___ns1__searchFacilityUserByRestriction(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate___ns1__searchFacilityUserByRestriction(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchFacilityUserByRestriction(soap, _p);
   }
@@ -28934,8 +29139,8 @@ soap_new_set___ns1__searchFacilityUserByRestriction(
     struct soap *soap, ns1__searchFacilityUserByRestriction *
                            ns1__searchFacilityUserByRestriction_) {
   struct __ns1__searchFacilityUserByRestriction *_p =
-      soap_instantiate___ns1__searchFacilityUserByRestriction(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate___ns1__searchFacilityUserByRestriction(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchFacilityUserByRestriction(soap, _p);
     _p->ns1__searchFacilityUserByRestriction_ =
@@ -29004,15 +29209,15 @@ soap_instantiate___ns1__searchSampleByParameterLogical(struct soap *, int,
 
 inline struct __ns1__searchSampleByParameterLogical *
 soap_new___ns1__searchSampleByParameterLogical(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchSampleByParameterLogical(soap, n, NULL,
-                                                                NULL, NULL);
+  return soap_instantiate___ns1__searchSampleByParameterLogical(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchSampleByParameterLogical *
 soap_new_req___ns1__searchSampleByParameterLogical(struct soap *soap) {
   struct __ns1__searchSampleByParameterLogical *_p =
-      soap_instantiate___ns1__searchSampleByParameterLogical(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate___ns1__searchSampleByParameterLogical(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSampleByParameterLogical(soap, _p);
   }
@@ -29024,8 +29229,8 @@ soap_new_set___ns1__searchSampleByParameterLogical(
     struct soap *soap,
     ns1__searchSampleByParameterLogical *ns1__searchSampleByParameterLogical_) {
   struct __ns1__searchSampleByParameterLogical *_p =
-      soap_instantiate___ns1__searchSampleByParameterLogical(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate___ns1__searchSampleByParameterLogical(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSampleByParameterLogical(soap, _p);
     _p->ns1__searchSampleByParameterLogical_ =
@@ -29094,15 +29299,15 @@ soap_instantiate___ns1__searchDatasetByParameterLogical(struct soap *, int,
 
 inline struct __ns1__searchDatasetByParameterLogical *
 soap_new___ns1__searchDatasetByParameterLogical(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchDatasetByParameterLogical(soap, n, NULL,
-                                                                 NULL, NULL);
+  return soap_instantiate___ns1__searchDatasetByParameterLogical(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatasetByParameterLogical *
 soap_new_req___ns1__searchDatasetByParameterLogical(struct soap *soap) {
   struct __ns1__searchDatasetByParameterLogical *_p =
-      soap_instantiate___ns1__searchDatasetByParameterLogical(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate___ns1__searchDatasetByParameterLogical(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetByParameterLogical(soap, _p);
   }
@@ -29114,8 +29319,8 @@ soap_new_set___ns1__searchDatasetByParameterLogical(
     struct soap *soap, ns1__searchDatasetByParameterLogical *
                            ns1__searchDatasetByParameterLogical_) {
   struct __ns1__searchDatasetByParameterLogical *_p =
-      soap_instantiate___ns1__searchDatasetByParameterLogical(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate___ns1__searchDatasetByParameterLogical(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetByParameterLogical(soap, _p);
     _p->ns1__searchDatasetByParameterLogical_ =
@@ -29187,15 +29392,15 @@ soap_instantiate___ns1__searchDatafileByParameterLogical(struct soap *, int,
 inline struct __ns1__searchDatafileByParameterLogical *
 soap_new___ns1__searchDatafileByParameterLogical(struct soap *soap,
                                                  int n = -1) {
-  return soap_instantiate___ns1__searchDatafileByParameterLogical(soap, n, NULL,
-                                                                  NULL, NULL);
+  return soap_instantiate___ns1__searchDatafileByParameterLogical(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatafileByParameterLogical *
 soap_new_req___ns1__searchDatafileByParameterLogical(struct soap *soap) {
   struct __ns1__searchDatafileByParameterLogical *_p =
-      soap_instantiate___ns1__searchDatafileByParameterLogical(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate___ns1__searchDatafileByParameterLogical(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatafileByParameterLogical(soap, _p);
   }
@@ -29207,8 +29412,8 @@ soap_new_set___ns1__searchDatafileByParameterLogical(
     struct soap *soap, ns1__searchDatafileByParameterLogical *
                            ns1__searchDatafileByParameterLogical_) {
   struct __ns1__searchDatafileByParameterLogical *_p =
-      soap_instantiate___ns1__searchDatafileByParameterLogical(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate___ns1__searchDatafileByParameterLogical(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatafileByParameterLogical(soap, _p);
     _p->ns1__searchDatafileByParameterLogical_ =
@@ -29283,14 +29488,14 @@ inline struct __ns1__searchInvestigationByParameterLogical *
 soap_new___ns1__searchInvestigationByParameterLogical(struct soap *soap,
                                                       int n = -1) {
   return soap_instantiate___ns1__searchInvestigationByParameterLogical(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchInvestigationByParameterLogical *
 soap_new_req___ns1__searchInvestigationByParameterLogical(struct soap *soap) {
   struct __ns1__searchInvestigationByParameterLogical *_p =
       soap_instantiate___ns1__searchInvestigationByParameterLogical(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchInvestigationByParameterLogical(soap, _p);
   }
@@ -29303,7 +29508,7 @@ soap_new_set___ns1__searchInvestigationByParameterLogical(
                            ns1__searchInvestigationByParameterLogical_) {
   struct __ns1__searchInvestigationByParameterLogical *_p =
       soap_instantiate___ns1__searchInvestigationByParameterLogical(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchInvestigationByParameterLogical(soap, _p);
     _p->ns1__searchInvestigationByParameterLogical_ =
@@ -29378,14 +29583,14 @@ inline struct __ns1__searchDatafileByRestrictionLogical *
 soap_new___ns1__searchDatafileByRestrictionLogical(struct soap *soap,
                                                    int n = -1) {
   return soap_instantiate___ns1__searchDatafileByRestrictionLogical(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatafileByRestrictionLogical *
 soap_new_req___ns1__searchDatafileByRestrictionLogical(struct soap *soap) {
   struct __ns1__searchDatafileByRestrictionLogical *_p =
-      soap_instantiate___ns1__searchDatafileByRestrictionLogical(soap, -1, NULL,
-                                                                 NULL, NULL);
+      soap_instantiate___ns1__searchDatafileByRestrictionLogical(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatafileByRestrictionLogical(soap, _p);
   }
@@ -29397,8 +29602,8 @@ soap_new_set___ns1__searchDatafileByRestrictionLogical(
     struct soap *soap, ns1__searchDatafileByRestrictionLogical *
                            ns1__searchDatafileByRestrictionLogical_) {
   struct __ns1__searchDatafileByRestrictionLogical *_p =
-      soap_instantiate___ns1__searchDatafileByRestrictionLogical(soap, -1, NULL,
-                                                                 NULL, NULL);
+      soap_instantiate___ns1__searchDatafileByRestrictionLogical(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatafileByRestrictionLogical(soap, _p);
     _p->ns1__searchDatafileByRestrictionLogical_ =
@@ -29477,14 +29682,14 @@ inline struct __ns1__searchInvestigationByRestrictionLogical *
 soap_new___ns1__searchInvestigationByRestrictionLogical(struct soap *soap,
                                                         int n = -1) {
   return soap_instantiate___ns1__searchInvestigationByRestrictionLogical(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchInvestigationByRestrictionLogical *
 soap_new_req___ns1__searchInvestigationByRestrictionLogical(struct soap *soap) {
   struct __ns1__searchInvestigationByRestrictionLogical *_p =
       soap_instantiate___ns1__searchInvestigationByRestrictionLogical(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchInvestigationByRestrictionLogical(soap, _p);
   }
@@ -29497,7 +29702,7 @@ soap_new_set___ns1__searchInvestigationByRestrictionLogical(
                            ns1__searchInvestigationByRestrictionLogical_) {
   struct __ns1__searchInvestigationByRestrictionLogical *_p =
       soap_instantiate___ns1__searchInvestigationByRestrictionLogical(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchInvestigationByRestrictionLogical(soap, _p);
     _p->ns1__searchInvestigationByRestrictionLogical_ =
@@ -29572,14 +29777,14 @@ inline struct __ns1__searchDatasetByRestrictionLogical *
 soap_new___ns1__searchDatasetByRestrictionLogical(struct soap *soap,
                                                   int n = -1) {
   return soap_instantiate___ns1__searchDatasetByRestrictionLogical(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatasetByRestrictionLogical *
 soap_new_req___ns1__searchDatasetByRestrictionLogical(struct soap *soap) {
   struct __ns1__searchDatasetByRestrictionLogical *_p =
-      soap_instantiate___ns1__searchDatasetByRestrictionLogical(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate___ns1__searchDatasetByRestrictionLogical(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetByRestrictionLogical(soap, _p);
   }
@@ -29591,8 +29796,8 @@ soap_new_set___ns1__searchDatasetByRestrictionLogical(
     struct soap *soap, ns1__searchDatasetByRestrictionLogical *
                            ns1__searchDatasetByRestrictionLogical_) {
   struct __ns1__searchDatasetByRestrictionLogical *_p =
-      soap_instantiate___ns1__searchDatasetByRestrictionLogical(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate___ns1__searchDatasetByRestrictionLogical(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetByRestrictionLogical(soap, _p);
     _p->ns1__searchDatasetByRestrictionLogical_ =
@@ -29664,15 +29869,15 @@ soap_instantiate___ns1__searchSampleByRestrictionLogical(struct soap *, int,
 inline struct __ns1__searchSampleByRestrictionLogical *
 soap_new___ns1__searchSampleByRestrictionLogical(struct soap *soap,
                                                  int n = -1) {
-  return soap_instantiate___ns1__searchSampleByRestrictionLogical(soap, n, NULL,
-                                                                  NULL, NULL);
+  return soap_instantiate___ns1__searchSampleByRestrictionLogical(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchSampleByRestrictionLogical *
 soap_new_req___ns1__searchSampleByRestrictionLogical(struct soap *soap) {
   struct __ns1__searchSampleByRestrictionLogical *_p =
-      soap_instantiate___ns1__searchSampleByRestrictionLogical(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate___ns1__searchSampleByRestrictionLogical(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSampleByRestrictionLogical(soap, _p);
   }
@@ -29684,8 +29889,8 @@ soap_new_set___ns1__searchSampleByRestrictionLogical(
     struct soap *soap, ns1__searchSampleByRestrictionLogical *
                            ns1__searchSampleByRestrictionLogical_) {
   struct __ns1__searchSampleByRestrictionLogical *_p =
-      soap_instantiate___ns1__searchSampleByRestrictionLogical(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate___ns1__searchSampleByRestrictionLogical(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSampleByRestrictionLogical(soap, _p);
     _p->ns1__searchSampleByRestrictionLogical_ =
@@ -29760,14 +29965,14 @@ inline struct __ns1__searchSampleByRestrictionComparison *
 soap_new___ns1__searchSampleByRestrictionComparison(struct soap *soap,
                                                     int n = -1) {
   return soap_instantiate___ns1__searchSampleByRestrictionComparison(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchSampleByRestrictionComparison *
 soap_new_req___ns1__searchSampleByRestrictionComparison(struct soap *soap) {
   struct __ns1__searchSampleByRestrictionComparison *_p =
       soap_instantiate___ns1__searchSampleByRestrictionComparison(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSampleByRestrictionComparison(soap, _p);
   }
@@ -29780,7 +29985,7 @@ soap_new_set___ns1__searchSampleByRestrictionComparison(
                            ns1__searchSampleByRestrictionComparison_) {
   struct __ns1__searchSampleByRestrictionComparison *_p =
       soap_instantiate___ns1__searchSampleByRestrictionComparison(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSampleByRestrictionComparison(soap, _p);
     _p->ns1__searchSampleByRestrictionComparison_ =
@@ -29855,14 +30060,14 @@ inline struct __ns1__searchDatafileByRestrictionComparison *
 soap_new___ns1__searchDatafileByRestrictionComparison(struct soap *soap,
                                                       int n = -1) {
   return soap_instantiate___ns1__searchDatafileByRestrictionComparison(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatafileByRestrictionComparison *
 soap_new_req___ns1__searchDatafileByRestrictionComparison(struct soap *soap) {
   struct __ns1__searchDatafileByRestrictionComparison *_p =
       soap_instantiate___ns1__searchDatafileByRestrictionComparison(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatafileByRestrictionComparison(soap, _p);
   }
@@ -29875,7 +30080,7 @@ soap_new_set___ns1__searchDatafileByRestrictionComparison(
                            ns1__searchDatafileByRestrictionComparison_) {
   struct __ns1__searchDatafileByRestrictionComparison *_p =
       soap_instantiate___ns1__searchDatafileByRestrictionComparison(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatafileByRestrictionComparison(soap, _p);
     _p->ns1__searchDatafileByRestrictionComparison_ =
@@ -29950,14 +30155,14 @@ inline struct __ns1__searchDatasetByRestrictionComparison *
 soap_new___ns1__searchDatasetByRestrictionComparison(struct soap *soap,
                                                      int n = -1) {
   return soap_instantiate___ns1__searchDatasetByRestrictionComparison(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatasetByRestrictionComparison *
 soap_new_req___ns1__searchDatasetByRestrictionComparison(struct soap *soap) {
   struct __ns1__searchDatasetByRestrictionComparison *_p =
       soap_instantiate___ns1__searchDatasetByRestrictionComparison(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetByRestrictionComparison(soap, _p);
   }
@@ -29970,7 +30175,7 @@ soap_new_set___ns1__searchDatasetByRestrictionComparison(
                            ns1__searchDatasetByRestrictionComparison_) {
   struct __ns1__searchDatasetByRestrictionComparison *_p =
       soap_instantiate___ns1__searchDatasetByRestrictionComparison(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetByRestrictionComparison(soap, _p);
     _p->ns1__searchDatasetByRestrictionComparison_ =
@@ -30052,7 +30257,7 @@ inline struct __ns1__searchInvestigationByRestrictionComparasion *
 soap_new___ns1__searchInvestigationByRestrictionComparasion(struct soap *soap,
                                                             int n = -1) {
   return soap_instantiate___ns1__searchInvestigationByRestrictionComparasion(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchInvestigationByRestrictionComparasion *
@@ -30060,7 +30265,7 @@ soap_new_req___ns1__searchInvestigationByRestrictionComparasion(
     struct soap *soap) {
   struct __ns1__searchInvestigationByRestrictionComparasion *_p =
       soap_instantiate___ns1__searchInvestigationByRestrictionComparasion(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchInvestigationByRestrictionComparasion(soap, _p);
   }
@@ -30073,7 +30278,7 @@ soap_new_set___ns1__searchInvestigationByRestrictionComparasion(
                            ns1__searchInvestigationByRestrictionComparasion_) {
   struct __ns1__searchInvestigationByRestrictionComparasion *_p =
       soap_instantiate___ns1__searchInvestigationByRestrictionComparasion(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchInvestigationByRestrictionComparasion(soap, _p);
     _p->ns1__searchInvestigationByRestrictionComparasion_ =
@@ -30142,15 +30347,15 @@ soap_instantiate___ns1__searchSampleByRestriction(struct soap *, int,
 
 inline struct __ns1__searchSampleByRestriction *
 soap_new___ns1__searchSampleByRestriction(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchSampleByRestriction(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate___ns1__searchSampleByRestriction(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline struct __ns1__searchSampleByRestriction *
 soap_new_req___ns1__searchSampleByRestriction(struct soap *soap) {
   struct __ns1__searchSampleByRestriction *_p =
-      soap_instantiate___ns1__searchSampleByRestriction(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate___ns1__searchSampleByRestriction(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSampleByRestriction(soap, _p);
   }
@@ -30162,8 +30367,8 @@ soap_new_set___ns1__searchSampleByRestriction(
     struct soap *soap,
     ns1__searchSampleByRestriction *ns1__searchSampleByRestriction_) {
   struct __ns1__searchSampleByRestriction *_p =
-      soap_instantiate___ns1__searchSampleByRestriction(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate___ns1__searchSampleByRestriction(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSampleByRestriction(soap, _p);
     _p->ns1__searchSampleByRestriction_ = ns1__searchSampleByRestriction_;
@@ -30230,15 +30435,15 @@ soap_instantiate___ns1__searchDatafileByRestriction(struct soap *, int,
 
 inline struct __ns1__searchDatafileByRestriction *
 soap_new___ns1__searchDatafileByRestriction(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchDatafileByRestriction(soap, n, NULL,
-                                                             NULL, NULL);
+  return soap_instantiate___ns1__searchDatafileByRestriction(soap, n, nullptr,
+                                                             nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatafileByRestriction *
 soap_new_req___ns1__searchDatafileByRestriction(struct soap *soap) {
   struct __ns1__searchDatafileByRestriction *_p =
-      soap_instantiate___ns1__searchDatafileByRestriction(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__searchDatafileByRestriction(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatafileByRestriction(soap, _p);
   }
@@ -30250,8 +30455,8 @@ soap_new_set___ns1__searchDatafileByRestriction(
     struct soap *soap,
     ns1__searchDatafileByRestriction *ns1__searchDatafileByRestriction_) {
   struct __ns1__searchDatafileByRestriction *_p =
-      soap_instantiate___ns1__searchDatafileByRestriction(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__searchDatafileByRestriction(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatafileByRestriction(soap, _p);
     _p->ns1__searchDatafileByRestriction_ = ns1__searchDatafileByRestriction_;
@@ -30318,15 +30523,15 @@ soap_instantiate___ns1__searchDatasetByRestriction(struct soap *, int,
 
 inline struct __ns1__searchDatasetByRestriction *
 soap_new___ns1__searchDatasetByRestriction(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchDatasetByRestriction(soap, n, NULL, NULL,
-                                                            NULL);
+  return soap_instantiate___ns1__searchDatasetByRestriction(soap, n, nullptr,
+                                                            nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatasetByRestriction *
 soap_new_req___ns1__searchDatasetByRestriction(struct soap *soap) {
   struct __ns1__searchDatasetByRestriction *_p =
-      soap_instantiate___ns1__searchDatasetByRestriction(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate___ns1__searchDatasetByRestriction(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetByRestriction(soap, _p);
   }
@@ -30338,8 +30543,8 @@ soap_new_set___ns1__searchDatasetByRestriction(
     struct soap *soap,
     ns1__searchDatasetByRestriction *ns1__searchDatasetByRestriction_) {
   struct __ns1__searchDatasetByRestriction *_p =
-      soap_instantiate___ns1__searchDatasetByRestriction(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate___ns1__searchDatasetByRestriction(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetByRestriction(soap, _p);
     _p->ns1__searchDatasetByRestriction_ = ns1__searchDatasetByRestriction_;
@@ -30409,15 +30614,15 @@ soap_instantiate___ns1__searchInvestigationByRestriction(struct soap *, int,
 inline struct __ns1__searchInvestigationByRestriction *
 soap_new___ns1__searchInvestigationByRestriction(struct soap *soap,
                                                  int n = -1) {
-  return soap_instantiate___ns1__searchInvestigationByRestriction(soap, n, NULL,
-                                                                  NULL, NULL);
+  return soap_instantiate___ns1__searchInvestigationByRestriction(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchInvestigationByRestriction *
 soap_new_req___ns1__searchInvestigationByRestriction(struct soap *soap) {
   struct __ns1__searchInvestigationByRestriction *_p =
-      soap_instantiate___ns1__searchInvestigationByRestriction(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate___ns1__searchInvestigationByRestriction(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchInvestigationByRestriction(soap, _p);
   }
@@ -30429,8 +30634,8 @@ soap_new_set___ns1__searchInvestigationByRestriction(
     struct soap *soap, ns1__searchInvestigationByRestriction *
                            ns1__searchInvestigationByRestriction_) {
   struct __ns1__searchInvestigationByRestriction *_p =
-      soap_instantiate___ns1__searchInvestigationByRestriction(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate___ns1__searchInvestigationByRestriction(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchInvestigationByRestriction(soap, _p);
     _p->ns1__searchInvestigationByRestriction_ =
@@ -30510,7 +30715,7 @@ inline struct __ns1__searchInvestigationByParameterRestriction *
 soap_new___ns1__searchInvestigationByParameterRestriction(struct soap *soap,
                                                           int n = -1) {
   return soap_instantiate___ns1__searchInvestigationByParameterRestriction(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchInvestigationByParameterRestriction *
@@ -30518,7 +30723,7 @@ soap_new_req___ns1__searchInvestigationByParameterRestriction(
     struct soap *soap) {
   struct __ns1__searchInvestigationByParameterRestriction *_p =
       soap_instantiate___ns1__searchInvestigationByParameterRestriction(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchInvestigationByParameterRestriction(soap, _p);
   }
@@ -30531,7 +30736,7 @@ soap_new_set___ns1__searchInvestigationByParameterRestriction(
                            ns1__searchInvestigationByParameterRestriction_) {
   struct __ns1__searchInvestigationByParameterRestriction *_p =
       soap_instantiate___ns1__searchInvestigationByParameterRestriction(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchInvestigationByParameterRestriction(soap, _p);
     _p->ns1__searchInvestigationByParameterRestriction_ =
@@ -30608,14 +30813,14 @@ inline struct __ns1__searchDatafileByParameterRestriction *
 soap_new___ns1__searchDatafileByParameterRestriction(struct soap *soap,
                                                      int n = -1) {
   return soap_instantiate___ns1__searchDatafileByParameterRestriction(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatafileByParameterRestriction *
 soap_new_req___ns1__searchDatafileByParameterRestriction(struct soap *soap) {
   struct __ns1__searchDatafileByParameterRestriction *_p =
       soap_instantiate___ns1__searchDatafileByParameterRestriction(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatafileByParameterRestriction(soap, _p);
   }
@@ -30628,7 +30833,7 @@ soap_new_set___ns1__searchDatafileByParameterRestriction(
                            ns1__searchDatafileByParameterRestriction_) {
   struct __ns1__searchDatafileByParameterRestriction *_p =
       soap_instantiate___ns1__searchDatafileByParameterRestriction(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatafileByParameterRestriction(soap, _p);
     _p->ns1__searchDatafileByParameterRestriction_ =
@@ -30703,14 +30908,14 @@ inline struct __ns1__searchSampleByParameterRestriction *
 soap_new___ns1__searchSampleByParameterRestriction(struct soap *soap,
                                                    int n = -1) {
   return soap_instantiate___ns1__searchSampleByParameterRestriction(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchSampleByParameterRestriction *
 soap_new_req___ns1__searchSampleByParameterRestriction(struct soap *soap) {
   struct __ns1__searchSampleByParameterRestriction *_p =
-      soap_instantiate___ns1__searchSampleByParameterRestriction(soap, -1, NULL,
-                                                                 NULL, NULL);
+      soap_instantiate___ns1__searchSampleByParameterRestriction(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSampleByParameterRestriction(soap, _p);
   }
@@ -30722,8 +30927,8 @@ soap_new_set___ns1__searchSampleByParameterRestriction(
     struct soap *soap, ns1__searchSampleByParameterRestriction *
                            ns1__searchSampleByParameterRestriction_) {
   struct __ns1__searchSampleByParameterRestriction *_p =
-      soap_instantiate___ns1__searchSampleByParameterRestriction(soap, -1, NULL,
-                                                                 NULL, NULL);
+      soap_instantiate___ns1__searchSampleByParameterRestriction(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSampleByParameterRestriction(soap, _p);
     _p->ns1__searchSampleByParameterRestriction_ =
@@ -30798,14 +31003,14 @@ inline struct __ns1__searchDatasetByParameterRestriction *
 soap_new___ns1__searchDatasetByParameterRestriction(struct soap *soap,
                                                     int n = -1) {
   return soap_instantiate___ns1__searchDatasetByParameterRestriction(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatasetByParameterRestriction *
 soap_new_req___ns1__searchDatasetByParameterRestriction(struct soap *soap) {
   struct __ns1__searchDatasetByParameterRestriction *_p =
       soap_instantiate___ns1__searchDatasetByParameterRestriction(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetByParameterRestriction(soap, _p);
   }
@@ -30818,7 +31023,7 @@ soap_new_set___ns1__searchDatasetByParameterRestriction(
                            ns1__searchDatasetByParameterRestriction_) {
   struct __ns1__searchDatasetByParameterRestriction *_p =
       soap_instantiate___ns1__searchDatasetByParameterRestriction(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetByParameterRestriction(soap, _p);
     _p->ns1__searchDatasetByParameterRestriction_ =
@@ -30888,13 +31093,15 @@ soap_instantiate___ns1__getParameterByUnits(struct soap *, int, const char *,
 
 inline struct __ns1__getParameterByUnits *
 soap_new___ns1__getParameterByUnits(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getParameterByUnits(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__getParameterByUnits(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline struct __ns1__getParameterByUnits *
 soap_new_req___ns1__getParameterByUnits(struct soap *soap) {
   struct __ns1__getParameterByUnits *_p =
-      soap_instantiate___ns1__getParameterByUnits(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getParameterByUnits(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__getParameterByUnits(soap, _p);
   }
@@ -30905,7 +31112,8 @@ inline struct __ns1__getParameterByUnits *
 soap_new_set___ns1__getParameterByUnits(
     struct soap *soap, ns1__getParameterByUnits *ns1__getParameterByUnits_) {
   struct __ns1__getParameterByUnits *_p =
-      soap_instantiate___ns1__getParameterByUnits(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getParameterByUnits(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__getParameterByUnits(soap, _p);
     _p->ns1__getParameterByUnits_ = ns1__getParameterByUnits_;
@@ -30973,15 +31181,15 @@ soap_instantiate___ns1__getParameterByRestriction(struct soap *, int,
 
 inline struct __ns1__getParameterByRestriction *
 soap_new___ns1__getParameterByRestriction(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getParameterByRestriction(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate___ns1__getParameterByRestriction(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline struct __ns1__getParameterByRestriction *
 soap_new_req___ns1__getParameterByRestriction(struct soap *soap) {
   struct __ns1__getParameterByRestriction *_p =
-      soap_instantiate___ns1__getParameterByRestriction(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate___ns1__getParameterByRestriction(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getParameterByRestriction(soap, _p);
   }
@@ -30993,8 +31201,8 @@ soap_new_set___ns1__getParameterByRestriction(
     struct soap *soap,
     ns1__getParameterByRestriction *ns1__getParameterByRestriction_) {
   struct __ns1__getParameterByRestriction *_p =
-      soap_instantiate___ns1__getParameterByRestriction(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate___ns1__getParameterByRestriction(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getParameterByRestriction(soap, _p);
     _p->ns1__getParameterByRestriction_ = ns1__getParameterByRestriction_;
@@ -31062,13 +31270,15 @@ soap_instantiate___ns1__getParameterByName(struct soap *, int, const char *,
 
 inline struct __ns1__getParameterByName *
 soap_new___ns1__getParameterByName(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getParameterByName(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__getParameterByName(soap, n, nullptr, nullptr,
+                                                    nullptr);
 }
 
 inline struct __ns1__getParameterByName *
 soap_new_req___ns1__getParameterByName(struct soap *soap) {
   struct __ns1__getParameterByName *_p =
-      soap_instantiate___ns1__getParameterByName(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getParameterByName(soap, -1, nullptr, nullptr,
+                                                 nullptr);
   if (_p) {
     soap_default___ns1__getParameterByName(soap, _p);
   }
@@ -31078,7 +31288,8 @@ soap_new_req___ns1__getParameterByName(struct soap *soap) {
 inline struct __ns1__getParameterByName *soap_new_set___ns1__getParameterByName(
     struct soap *soap, ns1__getParameterByName *ns1__getParameterByName_) {
   struct __ns1__getParameterByName *_p =
-      soap_instantiate___ns1__getParameterByName(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getParameterByName(soap, -1, nullptr, nullptr,
+                                                 nullptr);
   if (_p) {
     soap_default___ns1__getParameterByName(soap, _p);
     _p->ns1__getParameterByName_ = ns1__getParameterByName_;
@@ -31146,15 +31357,15 @@ soap_instantiate___ns1__getParameterByNameUnits(struct soap *, int,
 
 inline struct __ns1__getParameterByNameUnits *
 soap_new___ns1__getParameterByNameUnits(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getParameterByNameUnits(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate___ns1__getParameterByNameUnits(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline struct __ns1__getParameterByNameUnits *
 soap_new_req___ns1__getParameterByNameUnits(struct soap *soap) {
   struct __ns1__getParameterByNameUnits *_p =
-      soap_instantiate___ns1__getParameterByNameUnits(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate___ns1__getParameterByNameUnits(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getParameterByNameUnits(soap, _p);
   }
@@ -31166,8 +31377,8 @@ soap_new_set___ns1__getParameterByNameUnits(
     struct soap *soap,
     ns1__getParameterByNameUnits *ns1__getParameterByNameUnits_) {
   struct __ns1__getParameterByNameUnits *_p =
-      soap_instantiate___ns1__getParameterByNameUnits(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate___ns1__getParameterByNameUnits(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getParameterByNameUnits(soap, _p);
     _p->ns1__getParameterByNameUnits_ = ns1__getParameterByNameUnits_;
@@ -31234,15 +31445,15 @@ soap_instantiate___ns1__searchSampleByParameter(struct soap *, int,
 
 inline struct __ns1__searchSampleByParameter *
 soap_new___ns1__searchSampleByParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchSampleByParameter(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate___ns1__searchSampleByParameter(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline struct __ns1__searchSampleByParameter *
 soap_new_req___ns1__searchSampleByParameter(struct soap *soap) {
   struct __ns1__searchSampleByParameter *_p =
-      soap_instantiate___ns1__searchSampleByParameter(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate___ns1__searchSampleByParameter(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSampleByParameter(soap, _p);
   }
@@ -31254,8 +31465,8 @@ soap_new_set___ns1__searchSampleByParameter(
     struct soap *soap,
     ns1__searchSampleByParameter *ns1__searchSampleByParameter_) {
   struct __ns1__searchSampleByParameter *_p =
-      soap_instantiate___ns1__searchSampleByParameter(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate___ns1__searchSampleByParameter(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSampleByParameter(soap, _p);
     _p->ns1__searchSampleByParameter_ = ns1__searchSampleByParameter_;
@@ -31322,15 +31533,15 @@ soap_instantiate___ns1__searchDatasetByParameter(struct soap *, int,
 
 inline struct __ns1__searchDatasetByParameter *
 soap_new___ns1__searchDatasetByParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchDatasetByParameter(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate___ns1__searchDatasetByParameter(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatasetByParameter *
 soap_new_req___ns1__searchDatasetByParameter(struct soap *soap) {
   struct __ns1__searchDatasetByParameter *_p =
-      soap_instantiate___ns1__searchDatasetByParameter(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate___ns1__searchDatasetByParameter(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetByParameter(soap, _p);
   }
@@ -31342,8 +31553,8 @@ soap_new_set___ns1__searchDatasetByParameter(
     struct soap *soap,
     ns1__searchDatasetByParameter *ns1__searchDatasetByParameter_) {
   struct __ns1__searchDatasetByParameter *_p =
-      soap_instantiate___ns1__searchDatasetByParameter(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate___ns1__searchDatasetByParameter(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetByParameter(soap, _p);
     _p->ns1__searchDatasetByParameter_ = ns1__searchDatasetByParameter_;
@@ -31410,15 +31621,15 @@ soap_instantiate___ns1__searchDatafileByParameter(struct soap *, int,
 
 inline struct __ns1__searchDatafileByParameter *
 soap_new___ns1__searchDatafileByParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchDatafileByParameter(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate___ns1__searchDatafileByParameter(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatafileByParameter *
 soap_new_req___ns1__searchDatafileByParameter(struct soap *soap) {
   struct __ns1__searchDatafileByParameter *_p =
-      soap_instantiate___ns1__searchDatafileByParameter(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate___ns1__searchDatafileByParameter(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatafileByParameter(soap, _p);
   }
@@ -31430,8 +31641,8 @@ soap_new_set___ns1__searchDatafileByParameter(
     struct soap *soap,
     ns1__searchDatafileByParameter *ns1__searchDatafileByParameter_) {
   struct __ns1__searchDatafileByParameter *_p =
-      soap_instantiate___ns1__searchDatafileByParameter(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate___ns1__searchDatafileByParameter(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatafileByParameter(soap, _p);
     _p->ns1__searchDatafileByParameter_ = ns1__searchDatafileByParameter_;
@@ -31498,15 +31709,15 @@ soap_instantiate___ns1__searchInvestigationByParameter(struct soap *, int,
 
 inline struct __ns1__searchInvestigationByParameter *
 soap_new___ns1__searchInvestigationByParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchInvestigationByParameter(soap, n, NULL,
-                                                                NULL, NULL);
+  return soap_instantiate___ns1__searchInvestigationByParameter(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchInvestigationByParameter *
 soap_new_req___ns1__searchInvestigationByParameter(struct soap *soap) {
   struct __ns1__searchInvestigationByParameter *_p =
-      soap_instantiate___ns1__searchInvestigationByParameter(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate___ns1__searchInvestigationByParameter(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchInvestigationByParameter(soap, _p);
   }
@@ -31518,8 +31729,8 @@ soap_new_set___ns1__searchInvestigationByParameter(
     struct soap *soap,
     ns1__searchInvestigationByParameter *ns1__searchInvestigationByParameter_) {
   struct __ns1__searchInvestigationByParameter *_p =
-      soap_instantiate___ns1__searchInvestigationByParameter(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate___ns1__searchInvestigationByParameter(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchInvestigationByParameter(soap, _p);
     _p->ns1__searchInvestigationByParameter_ =
@@ -31592,14 +31803,14 @@ inline struct __ns1__searchSampleByParameterComparison *
 soap_new___ns1__searchSampleByParameterComparison(struct soap *soap,
                                                   int n = -1) {
   return soap_instantiate___ns1__searchSampleByParameterComparison(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchSampleByParameterComparison *
 soap_new_req___ns1__searchSampleByParameterComparison(struct soap *soap) {
   struct __ns1__searchSampleByParameterComparison *_p =
-      soap_instantiate___ns1__searchSampleByParameterComparison(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate___ns1__searchSampleByParameterComparison(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSampleByParameterComparison(soap, _p);
   }
@@ -31611,8 +31822,8 @@ soap_new_set___ns1__searchSampleByParameterComparison(
     struct soap *soap, ns1__searchSampleByParameterComparison *
                            ns1__searchSampleByParameterComparison_) {
   struct __ns1__searchSampleByParameterComparison *_p =
-      soap_instantiate___ns1__searchSampleByParameterComparison(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate___ns1__searchSampleByParameterComparison(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSampleByParameterComparison(soap, _p);
     _p->ns1__searchSampleByParameterComparison_ =
@@ -31687,14 +31898,14 @@ inline struct __ns1__searchDatasetByParameterComparison *
 soap_new___ns1__searchDatasetByParameterComparison(struct soap *soap,
                                                    int n = -1) {
   return soap_instantiate___ns1__searchDatasetByParameterComparison(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatasetByParameterComparison *
 soap_new_req___ns1__searchDatasetByParameterComparison(struct soap *soap) {
   struct __ns1__searchDatasetByParameterComparison *_p =
-      soap_instantiate___ns1__searchDatasetByParameterComparison(soap, -1, NULL,
-                                                                 NULL, NULL);
+      soap_instantiate___ns1__searchDatasetByParameterComparison(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetByParameterComparison(soap, _p);
   }
@@ -31706,8 +31917,8 @@ soap_new_set___ns1__searchDatasetByParameterComparison(
     struct soap *soap, ns1__searchDatasetByParameterComparison *
                            ns1__searchDatasetByParameterComparison_) {
   struct __ns1__searchDatasetByParameterComparison *_p =
-      soap_instantiate___ns1__searchDatasetByParameterComparison(soap, -1, NULL,
-                                                                 NULL, NULL);
+      soap_instantiate___ns1__searchDatasetByParameterComparison(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetByParameterComparison(soap, _p);
     _p->ns1__searchDatasetByParameterComparison_ =
@@ -31782,14 +31993,14 @@ inline struct __ns1__searchDatafileByParameterComparison *
 soap_new___ns1__searchDatafileByParameterComparison(struct soap *soap,
                                                     int n = -1) {
   return soap_instantiate___ns1__searchDatafileByParameterComparison(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatafileByParameterComparison *
 soap_new_req___ns1__searchDatafileByParameterComparison(struct soap *soap) {
   struct __ns1__searchDatafileByParameterComparison *_p =
       soap_instantiate___ns1__searchDatafileByParameterComparison(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatafileByParameterComparison(soap, _p);
   }
@@ -31802,7 +32013,7 @@ soap_new_set___ns1__searchDatafileByParameterComparison(
                            ns1__searchDatafileByParameterComparison_) {
   struct __ns1__searchDatafileByParameterComparison *_p =
       soap_instantiate___ns1__searchDatafileByParameterComparison(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatafileByParameterComparison(soap, _p);
     _p->ns1__searchDatafileByParameterComparison_ =
@@ -31881,7 +32092,7 @@ inline struct __ns1__searchInvestigationByParameterComparison *
 soap_new___ns1__searchInvestigationByParameterComparison(struct soap *soap,
                                                          int n = -1) {
   return soap_instantiate___ns1__searchInvestigationByParameterComparison(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchInvestigationByParameterComparison *
@@ -31889,7 +32100,7 @@ soap_new_req___ns1__searchInvestigationByParameterComparison(
     struct soap *soap) {
   struct __ns1__searchInvestigationByParameterComparison *_p =
       soap_instantiate___ns1__searchInvestigationByParameterComparison(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchInvestigationByParameterComparison(soap, _p);
   }
@@ -31902,7 +32113,7 @@ soap_new_set___ns1__searchInvestigationByParameterComparison(
                            ns1__searchInvestigationByParameterComparison_) {
   struct __ns1__searchInvestigationByParameterComparison *_p =
       soap_instantiate___ns1__searchInvestigationByParameterComparison(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchInvestigationByParameterComparison(soap, _p);
     _p->ns1__searchInvestigationByParameterComparison_ =
@@ -31975,15 +32186,15 @@ soap_instantiate___ns1__searchSampleByParameterCondition(struct soap *, int,
 inline struct __ns1__searchSampleByParameterCondition *
 soap_new___ns1__searchSampleByParameterCondition(struct soap *soap,
                                                  int n = -1) {
-  return soap_instantiate___ns1__searchSampleByParameterCondition(soap, n, NULL,
-                                                                  NULL, NULL);
+  return soap_instantiate___ns1__searchSampleByParameterCondition(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchSampleByParameterCondition *
 soap_new_req___ns1__searchSampleByParameterCondition(struct soap *soap) {
   struct __ns1__searchSampleByParameterCondition *_p =
-      soap_instantiate___ns1__searchSampleByParameterCondition(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate___ns1__searchSampleByParameterCondition(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSampleByParameterCondition(soap, _p);
   }
@@ -31995,8 +32206,8 @@ soap_new_set___ns1__searchSampleByParameterCondition(
     struct soap *soap, ns1__searchSampleByParameterCondition *
                            ns1__searchSampleByParameterCondition_) {
   struct __ns1__searchSampleByParameterCondition *_p =
-      soap_instantiate___ns1__searchSampleByParameterCondition(soap, -1, NULL,
-                                                               NULL, NULL);
+      soap_instantiate___ns1__searchSampleByParameterCondition(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSampleByParameterCondition(soap, _p);
     _p->ns1__searchSampleByParameterCondition_ =
@@ -32070,14 +32281,14 @@ inline struct __ns1__searchDatasetByParameterCondition *
 soap_new___ns1__searchDatasetByParameterCondition(struct soap *soap,
                                                   int n = -1) {
   return soap_instantiate___ns1__searchDatasetByParameterCondition(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatasetByParameterCondition *
 soap_new_req___ns1__searchDatasetByParameterCondition(struct soap *soap) {
   struct __ns1__searchDatasetByParameterCondition *_p =
-      soap_instantiate___ns1__searchDatasetByParameterCondition(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate___ns1__searchDatasetByParameterCondition(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetByParameterCondition(soap, _p);
   }
@@ -32089,8 +32300,8 @@ soap_new_set___ns1__searchDatasetByParameterCondition(
     struct soap *soap, ns1__searchDatasetByParameterCondition *
                            ns1__searchDatasetByParameterCondition_) {
   struct __ns1__searchDatasetByParameterCondition *_p =
-      soap_instantiate___ns1__searchDatasetByParameterCondition(soap, -1, NULL,
-                                                                NULL, NULL);
+      soap_instantiate___ns1__searchDatasetByParameterCondition(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetByParameterCondition(soap, _p);
     _p->ns1__searchDatasetByParameterCondition_ =
@@ -32165,14 +32376,14 @@ inline struct __ns1__searchDatafileByParameterCondition *
 soap_new___ns1__searchDatafileByParameterCondition(struct soap *soap,
                                                    int n = -1) {
   return soap_instantiate___ns1__searchDatafileByParameterCondition(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatafileByParameterCondition *
 soap_new_req___ns1__searchDatafileByParameterCondition(struct soap *soap) {
   struct __ns1__searchDatafileByParameterCondition *_p =
-      soap_instantiate___ns1__searchDatafileByParameterCondition(soap, -1, NULL,
-                                                                 NULL, NULL);
+      soap_instantiate___ns1__searchDatafileByParameterCondition(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatafileByParameterCondition(soap, _p);
   }
@@ -32184,8 +32395,8 @@ soap_new_set___ns1__searchDatafileByParameterCondition(
     struct soap *soap, ns1__searchDatafileByParameterCondition *
                            ns1__searchDatafileByParameterCondition_) {
   struct __ns1__searchDatafileByParameterCondition *_p =
-      soap_instantiate___ns1__searchDatafileByParameterCondition(soap, -1, NULL,
-                                                                 NULL, NULL);
+      soap_instantiate___ns1__searchDatafileByParameterCondition(
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchDatafileByParameterCondition(soap, _p);
     _p->ns1__searchDatafileByParameterCondition_ =
@@ -32264,14 +32475,14 @@ inline struct __ns1__searchInvestigationByParameterCondition *
 soap_new___ns1__searchInvestigationByParameterCondition(struct soap *soap,
                                                         int n = -1) {
   return soap_instantiate___ns1__searchInvestigationByParameterCondition(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchInvestigationByParameterCondition *
 soap_new_req___ns1__searchInvestigationByParameterCondition(struct soap *soap) {
   struct __ns1__searchInvestigationByParameterCondition *_p =
       soap_instantiate___ns1__searchInvestigationByParameterCondition(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchInvestigationByParameterCondition(soap, _p);
   }
@@ -32284,7 +32495,7 @@ soap_new_set___ns1__searchInvestigationByParameterCondition(
                            ns1__searchInvestigationByParameterCondition_) {
   struct __ns1__searchInvestigationByParameterCondition *_p =
       soap_instantiate___ns1__searchInvestigationByParameterCondition(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchInvestigationByParameterCondition(soap, _p);
     _p->ns1__searchInvestigationByParameterCondition_ =
@@ -32354,15 +32565,15 @@ soap_instantiate___ns1__getFacilityUserByFederalId(struct soap *, int,
 
 inline struct __ns1__getFacilityUserByFederalId *
 soap_new___ns1__getFacilityUserByFederalId(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getFacilityUserByFederalId(soap, n, NULL, NULL,
-                                                            NULL);
+  return soap_instantiate___ns1__getFacilityUserByFederalId(soap, n, nullptr,
+                                                            nullptr, nullptr);
 }
 
 inline struct __ns1__getFacilityUserByFederalId *
 soap_new_req___ns1__getFacilityUserByFederalId(struct soap *soap) {
   struct __ns1__getFacilityUserByFederalId *_p =
-      soap_instantiate___ns1__getFacilityUserByFederalId(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate___ns1__getFacilityUserByFederalId(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getFacilityUserByFederalId(soap, _p);
   }
@@ -32374,8 +32585,8 @@ soap_new_set___ns1__getFacilityUserByFederalId(
     struct soap *soap,
     ns1__getFacilityUserByFederalId *ns1__getFacilityUserByFederalId_) {
   struct __ns1__getFacilityUserByFederalId *_p =
-      soap_instantiate___ns1__getFacilityUserByFederalId(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate___ns1__getFacilityUserByFederalId(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getFacilityUserByFederalId(soap, _p);
     _p->ns1__getFacilityUserByFederalId_ = ns1__getFacilityUserByFederalId_;
@@ -32443,15 +32654,15 @@ soap_instantiate___ns1__getFacilityUserByFacilityUserId(struct soap *, int,
 
 inline struct __ns1__getFacilityUserByFacilityUserId *
 soap_new___ns1__getFacilityUserByFacilityUserId(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getFacilityUserByFacilityUserId(soap, n, NULL,
-                                                                 NULL, NULL);
+  return soap_instantiate___ns1__getFacilityUserByFacilityUserId(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__getFacilityUserByFacilityUserId *
 soap_new_req___ns1__getFacilityUserByFacilityUserId(struct soap *soap) {
   struct __ns1__getFacilityUserByFacilityUserId *_p =
-      soap_instantiate___ns1__getFacilityUserByFacilityUserId(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate___ns1__getFacilityUserByFacilityUserId(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getFacilityUserByFacilityUserId(soap, _p);
   }
@@ -32463,8 +32674,8 @@ soap_new_set___ns1__getFacilityUserByFacilityUserId(
     struct soap *soap, ns1__getFacilityUserByFacilityUserId *
                            ns1__getFacilityUserByFacilityUserId_) {
   struct __ns1__getFacilityUserByFacilityUserId *_p =
-      soap_instantiate___ns1__getFacilityUserByFacilityUserId(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate___ns1__getFacilityUserByFacilityUserId(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getFacilityUserByFacilityUserId(soap, _p);
     _p->ns1__getFacilityUserByFacilityUserId_ =
@@ -32533,13 +32744,15 @@ soap_instantiate___ns1__getICATAPIVersion(struct soap *, int, const char *,
 
 inline struct __ns1__getICATAPIVersion *
 soap_new___ns1__getICATAPIVersion(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getICATAPIVersion(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__getICATAPIVersion(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline struct __ns1__getICATAPIVersion *
 soap_new_req___ns1__getICATAPIVersion(struct soap *soap) {
   struct __ns1__getICATAPIVersion *_p =
-      soap_instantiate___ns1__getICATAPIVersion(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getICATAPIVersion(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__getICATAPIVersion(soap, _p);
   }
@@ -32549,7 +32762,8 @@ soap_new_req___ns1__getICATAPIVersion(struct soap *soap) {
 inline struct __ns1__getICATAPIVersion *soap_new_set___ns1__getICATAPIVersion(
     struct soap *soap, ns1__getICATAPIVersion *ns1__getICATAPIVersion_) {
   struct __ns1__getICATAPIVersion *_p =
-      soap_instantiate___ns1__getICATAPIVersion(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getICATAPIVersion(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__getICATAPIVersion(soap, _p);
     _p->ns1__getICATAPIVersion_ = ns1__getICATAPIVersion_;
@@ -32617,15 +32831,15 @@ soap_instantiate___ns1__checkDatasetDownloadAccess(struct soap *, int,
 
 inline struct __ns1__checkDatasetDownloadAccess *
 soap_new___ns1__checkDatasetDownloadAccess(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__checkDatasetDownloadAccess(soap, n, NULL, NULL,
-                                                            NULL);
+  return soap_instantiate___ns1__checkDatasetDownloadAccess(soap, n, nullptr,
+                                                            nullptr, nullptr);
 }
 
 inline struct __ns1__checkDatasetDownloadAccess *
 soap_new_req___ns1__checkDatasetDownloadAccess(struct soap *soap) {
   struct __ns1__checkDatasetDownloadAccess *_p =
-      soap_instantiate___ns1__checkDatasetDownloadAccess(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate___ns1__checkDatasetDownloadAccess(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     soap_default___ns1__checkDatasetDownloadAccess(soap, _p);
   }
@@ -32637,8 +32851,8 @@ soap_new_set___ns1__checkDatasetDownloadAccess(
     struct soap *soap,
     ns1__checkDatasetDownloadAccess *ns1__checkDatasetDownloadAccess_) {
   struct __ns1__checkDatasetDownloadAccess *_p =
-      soap_instantiate___ns1__checkDatasetDownloadAccess(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate___ns1__checkDatasetDownloadAccess(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     soap_default___ns1__checkDatasetDownloadAccess(soap, _p);
     _p->ns1__checkDatasetDownloadAccess_ = ns1__checkDatasetDownloadAccess_;
@@ -32705,15 +32919,15 @@ soap_instantiate___ns1__checkDatafileDownloadAccess(struct soap *, int,
 
 inline struct __ns1__checkDatafileDownloadAccess *
 soap_new___ns1__checkDatafileDownloadAccess(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__checkDatafileDownloadAccess(soap, n, NULL,
-                                                             NULL, NULL);
+  return soap_instantiate___ns1__checkDatafileDownloadAccess(soap, n, nullptr,
+                                                             nullptr, nullptr);
 }
 
 inline struct __ns1__checkDatafileDownloadAccess *
 soap_new_req___ns1__checkDatafileDownloadAccess(struct soap *soap) {
   struct __ns1__checkDatafileDownloadAccess *_p =
-      soap_instantiate___ns1__checkDatafileDownloadAccess(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__checkDatafileDownloadAccess(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__checkDatafileDownloadAccess(soap, _p);
   }
@@ -32725,8 +32939,8 @@ soap_new_set___ns1__checkDatafileDownloadAccess(
     struct soap *soap,
     ns1__checkDatafileDownloadAccess *ns1__checkDatafileDownloadAccess_) {
   struct __ns1__checkDatafileDownloadAccess *_p =
-      soap_instantiate___ns1__checkDatafileDownloadAccess(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__checkDatafileDownloadAccess(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__checkDatafileDownloadAccess(soap, _p);
     _p->ns1__checkDatafileDownloadAccess_ = ns1__checkDatafileDownloadAccess_;
@@ -32793,13 +33007,15 @@ soap_instantiate___ns1__downloadDatafiles(struct soap *, int, const char *,
 
 inline struct __ns1__downloadDatafiles *
 soap_new___ns1__downloadDatafiles(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__downloadDatafiles(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__downloadDatafiles(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline struct __ns1__downloadDatafiles *
 soap_new_req___ns1__downloadDatafiles(struct soap *soap) {
   struct __ns1__downloadDatafiles *_p =
-      soap_instantiate___ns1__downloadDatafiles(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__downloadDatafiles(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__downloadDatafiles(soap, _p);
   }
@@ -32809,7 +33025,8 @@ soap_new_req___ns1__downloadDatafiles(struct soap *soap) {
 inline struct __ns1__downloadDatafiles *soap_new_set___ns1__downloadDatafiles(
     struct soap *soap, ns1__downloadDatafiles *ns1__downloadDatafiles_) {
   struct __ns1__downloadDatafiles *_p =
-      soap_instantiate___ns1__downloadDatafiles(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__downloadDatafiles(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__downloadDatafiles(soap, _p);
     _p->ns1__downloadDatafiles_ = ns1__downloadDatafiles_;
@@ -32876,13 +33093,14 @@ soap_instantiate___ns1__downloadDataset(struct soap *, int, const char *,
 
 inline struct __ns1__downloadDataset *
 soap_new___ns1__downloadDataset(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__downloadDataset(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__downloadDataset(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline struct __ns1__downloadDataset *
 soap_new_req___ns1__downloadDataset(struct soap *soap) {
-  struct __ns1__downloadDataset *_p =
-      soap_instantiate___ns1__downloadDataset(soap, -1, NULL, NULL, NULL);
+  struct __ns1__downloadDataset *_p = soap_instantiate___ns1__downloadDataset(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__downloadDataset(soap, _p);
   }
@@ -32891,8 +33109,8 @@ soap_new_req___ns1__downloadDataset(struct soap *soap) {
 
 inline struct __ns1__downloadDataset *soap_new_set___ns1__downloadDataset(
     struct soap *soap, ns1__downloadDataset *ns1__downloadDataset_) {
-  struct __ns1__downloadDataset *_p =
-      soap_instantiate___ns1__downloadDataset(soap, -1, NULL, NULL, NULL);
+  struct __ns1__downloadDataset *_p = soap_instantiate___ns1__downloadDataset(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__downloadDataset(soap, _p);
     _p->ns1__downloadDataset_ = ns1__downloadDataset_;
@@ -32960,13 +33178,14 @@ soap_instantiate___ns1__downloadDatafile(struct soap *, int, const char *,
 
 inline struct __ns1__downloadDatafile *
 soap_new___ns1__downloadDatafile(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__downloadDatafile(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__downloadDatafile(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline struct __ns1__downloadDatafile *
 soap_new_req___ns1__downloadDatafile(struct soap *soap) {
-  struct __ns1__downloadDatafile *_p =
-      soap_instantiate___ns1__downloadDatafile(soap, -1, NULL, NULL, NULL);
+  struct __ns1__downloadDatafile *_p = soap_instantiate___ns1__downloadDatafile(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__downloadDatafile(soap, _p);
   }
@@ -32975,8 +33194,8 @@ soap_new_req___ns1__downloadDatafile(struct soap *soap) {
 
 inline struct __ns1__downloadDatafile *soap_new_set___ns1__downloadDatafile(
     struct soap *soap, ns1__downloadDatafile *ns1__downloadDatafile_) {
-  struct __ns1__downloadDatafile *_p =
-      soap_instantiate___ns1__downloadDatafile(soap, -1, NULL, NULL, NULL);
+  struct __ns1__downloadDatafile *_p = soap_instantiate___ns1__downloadDatafile(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__downloadDatafile(soap, _p);
     _p->ns1__downloadDatafile_ = ns1__downloadDatafile_;
@@ -33043,13 +33262,14 @@ soap_instantiate___ns1__ingestMetadata(struct soap *, int, const char *,
 
 inline struct __ns1__ingestMetadata *
 soap_new___ns1__ingestMetadata(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__ingestMetadata(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__ingestMetadata(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline struct __ns1__ingestMetadata *
 soap_new_req___ns1__ingestMetadata(struct soap *soap) {
-  struct __ns1__ingestMetadata *_p =
-      soap_instantiate___ns1__ingestMetadata(soap, -1, NULL, NULL, NULL);
+  struct __ns1__ingestMetadata *_p = soap_instantiate___ns1__ingestMetadata(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__ingestMetadata(soap, _p);
   }
@@ -33059,8 +33279,8 @@ soap_new_req___ns1__ingestMetadata(struct soap *soap) {
 inline struct __ns1__ingestMetadata *
 soap_new_set___ns1__ingestMetadata(struct soap *soap,
                                    ns1__ingestMetadata *ns1__ingestMetadata_) {
-  struct __ns1__ingestMetadata *_p =
-      soap_instantiate___ns1__ingestMetadata(soap, -1, NULL, NULL, NULL);
+  struct __ns1__ingestMetadata *_p = soap_instantiate___ns1__ingestMetadata(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__ingestMetadata(soap, _p);
     _p->ns1__ingestMetadata_ = ns1__ingestMetadata_;
@@ -33128,13 +33348,15 @@ soap_instantiate___ns1__updateAuthorisation(struct soap *, int, const char *,
 
 inline struct __ns1__updateAuthorisation *
 soap_new___ns1__updateAuthorisation(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__updateAuthorisation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__updateAuthorisation(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline struct __ns1__updateAuthorisation *
 soap_new_req___ns1__updateAuthorisation(struct soap *soap) {
   struct __ns1__updateAuthorisation *_p =
-      soap_instantiate___ns1__updateAuthorisation(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__updateAuthorisation(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__updateAuthorisation(soap, _p);
   }
@@ -33145,7 +33367,8 @@ inline struct __ns1__updateAuthorisation *
 soap_new_set___ns1__updateAuthorisation(
     struct soap *soap, ns1__updateAuthorisation *ns1__updateAuthorisation_) {
   struct __ns1__updateAuthorisation *_p =
-      soap_instantiate___ns1__updateAuthorisation(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__updateAuthorisation(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__updateAuthorisation(soap, _p);
     _p->ns1__updateAuthorisation_ = ns1__updateAuthorisation_;
@@ -33213,15 +33436,15 @@ soap_instantiate___ns1__updateAuthorisationResponse(struct soap *, int,
 
 inline struct __ns1__updateAuthorisationResponse *
 soap_new___ns1__updateAuthorisationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__updateAuthorisationResponse(soap, n, NULL,
-                                                             NULL, NULL);
+  return soap_instantiate___ns1__updateAuthorisationResponse(soap, n, nullptr,
+                                                             nullptr, nullptr);
 }
 
 inline struct __ns1__updateAuthorisationResponse *
 soap_new_req___ns1__updateAuthorisationResponse(struct soap *soap) {
   struct __ns1__updateAuthorisationResponse *_p =
-      soap_instantiate___ns1__updateAuthorisationResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__updateAuthorisationResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__updateAuthorisationResponse(soap, _p);
   }
@@ -33233,8 +33456,8 @@ soap_new_set___ns1__updateAuthorisationResponse(
     struct soap *soap,
     ns1__updateAuthorisationResponse *ns1__updateAuthorisationResponse_) {
   struct __ns1__updateAuthorisationResponse *_p =
-      soap_instantiate___ns1__updateAuthorisationResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__updateAuthorisationResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__updateAuthorisationResponse(soap, _p);
     _p->ns1__updateAuthorisationResponse_ = ns1__updateAuthorisationResponse_;
@@ -33302,13 +33525,15 @@ soap_instantiate___ns1__removeAuthorisation(struct soap *, int, const char *,
 
 inline struct __ns1__removeAuthorisation *
 soap_new___ns1__removeAuthorisation(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeAuthorisation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__removeAuthorisation(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline struct __ns1__removeAuthorisation *
 soap_new_req___ns1__removeAuthorisation(struct soap *soap) {
   struct __ns1__removeAuthorisation *_p =
-      soap_instantiate___ns1__removeAuthorisation(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removeAuthorisation(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__removeAuthorisation(soap, _p);
   }
@@ -33319,7 +33544,8 @@ inline struct __ns1__removeAuthorisation *
 soap_new_set___ns1__removeAuthorisation(
     struct soap *soap, ns1__removeAuthorisation *ns1__removeAuthorisation_) {
   struct __ns1__removeAuthorisation *_p =
-      soap_instantiate___ns1__removeAuthorisation(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removeAuthorisation(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__removeAuthorisation(soap, _p);
     _p->ns1__removeAuthorisation_ = ns1__removeAuthorisation_;
@@ -33387,15 +33613,15 @@ soap_instantiate___ns1__removeAuthorisationResponse(struct soap *, int,
 
 inline struct __ns1__removeAuthorisationResponse *
 soap_new___ns1__removeAuthorisationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeAuthorisationResponse(soap, n, NULL,
-                                                             NULL, NULL);
+  return soap_instantiate___ns1__removeAuthorisationResponse(soap, n, nullptr,
+                                                             nullptr, nullptr);
 }
 
 inline struct __ns1__removeAuthorisationResponse *
 soap_new_req___ns1__removeAuthorisationResponse(struct soap *soap) {
   struct __ns1__removeAuthorisationResponse *_p =
-      soap_instantiate___ns1__removeAuthorisationResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__removeAuthorisationResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeAuthorisationResponse(soap, _p);
   }
@@ -33407,8 +33633,8 @@ soap_new_set___ns1__removeAuthorisationResponse(
     struct soap *soap,
     ns1__removeAuthorisationResponse *ns1__removeAuthorisationResponse_) {
   struct __ns1__removeAuthorisationResponse *_p =
-      soap_instantiate___ns1__removeAuthorisationResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__removeAuthorisationResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeAuthorisationResponse(soap, _p);
     _p->ns1__removeAuthorisationResponse_ = ns1__removeAuthorisationResponse_;
@@ -33476,13 +33702,15 @@ soap_instantiate___ns1__deleteAuthorisation(struct soap *, int, const char *,
 
 inline struct __ns1__deleteAuthorisation *
 soap_new___ns1__deleteAuthorisation(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteAuthorisation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__deleteAuthorisation(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline struct __ns1__deleteAuthorisation *
 soap_new_req___ns1__deleteAuthorisation(struct soap *soap) {
   struct __ns1__deleteAuthorisation *_p =
-      soap_instantiate___ns1__deleteAuthorisation(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deleteAuthorisation(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__deleteAuthorisation(soap, _p);
   }
@@ -33493,7 +33721,8 @@ inline struct __ns1__deleteAuthorisation *
 soap_new_set___ns1__deleteAuthorisation(
     struct soap *soap, ns1__deleteAuthorisation *ns1__deleteAuthorisation_) {
   struct __ns1__deleteAuthorisation *_p =
-      soap_instantiate___ns1__deleteAuthorisation(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deleteAuthorisation(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__deleteAuthorisation(soap, _p);
     _p->ns1__deleteAuthorisation_ = ns1__deleteAuthorisation_;
@@ -33561,15 +33790,15 @@ soap_instantiate___ns1__deleteAuthorisationResponse(struct soap *, int,
 
 inline struct __ns1__deleteAuthorisationResponse *
 soap_new___ns1__deleteAuthorisationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteAuthorisationResponse(soap, n, NULL,
-                                                             NULL, NULL);
+  return soap_instantiate___ns1__deleteAuthorisationResponse(soap, n, nullptr,
+                                                             nullptr, nullptr);
 }
 
 inline struct __ns1__deleteAuthorisationResponse *
 soap_new_req___ns1__deleteAuthorisationResponse(struct soap *soap) {
   struct __ns1__deleteAuthorisationResponse *_p =
-      soap_instantiate___ns1__deleteAuthorisationResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__deleteAuthorisationResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteAuthorisationResponse(soap, _p);
   }
@@ -33581,8 +33810,8 @@ soap_new_set___ns1__deleteAuthorisationResponse(
     struct soap *soap,
     ns1__deleteAuthorisationResponse *ns1__deleteAuthorisationResponse_) {
   struct __ns1__deleteAuthorisationResponse *_p =
-      soap_instantiate___ns1__deleteAuthorisationResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__deleteAuthorisationResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteAuthorisationResponse(soap, _p);
     _p->ns1__deleteAuthorisationResponse_ = ns1__deleteAuthorisationResponse_;
@@ -33649,13 +33878,14 @@ soap_instantiate___ns1__addAuthorisation(struct soap *, int, const char *,
 
 inline struct __ns1__addAuthorisation *
 soap_new___ns1__addAuthorisation(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__addAuthorisation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__addAuthorisation(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline struct __ns1__addAuthorisation *
 soap_new_req___ns1__addAuthorisation(struct soap *soap) {
-  struct __ns1__addAuthorisation *_p =
-      soap_instantiate___ns1__addAuthorisation(soap, -1, NULL, NULL, NULL);
+  struct __ns1__addAuthorisation *_p = soap_instantiate___ns1__addAuthorisation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__addAuthorisation(soap, _p);
   }
@@ -33664,8 +33894,8 @@ soap_new_req___ns1__addAuthorisation(struct soap *soap) {
 
 inline struct __ns1__addAuthorisation *soap_new_set___ns1__addAuthorisation(
     struct soap *soap, ns1__addAuthorisation *ns1__addAuthorisation_) {
-  struct __ns1__addAuthorisation *_p =
-      soap_instantiate___ns1__addAuthorisation(soap, -1, NULL, NULL, NULL);
+  struct __ns1__addAuthorisation *_p = soap_instantiate___ns1__addAuthorisation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__addAuthorisation(soap, _p);
     _p->ns1__addAuthorisation_ = ns1__addAuthorisation_;
@@ -33733,13 +33963,15 @@ soap_instantiate___ns1__getAuthorisations(struct soap *, int, const char *,
 
 inline struct __ns1__getAuthorisations *
 soap_new___ns1__getAuthorisations(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getAuthorisations(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__getAuthorisations(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline struct __ns1__getAuthorisations *
 soap_new_req___ns1__getAuthorisations(struct soap *soap) {
   struct __ns1__getAuthorisations *_p =
-      soap_instantiate___ns1__getAuthorisations(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getAuthorisations(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__getAuthorisations(soap, _p);
   }
@@ -33749,7 +33981,8 @@ soap_new_req___ns1__getAuthorisations(struct soap *soap) {
 inline struct __ns1__getAuthorisations *soap_new_set___ns1__getAuthorisations(
     struct soap *soap, ns1__getAuthorisations *ns1__getAuthorisations_) {
   struct __ns1__getAuthorisations *_p =
-      soap_instantiate___ns1__getAuthorisations(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getAuthorisations(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__getAuthorisations(soap, _p);
     _p->ns1__getAuthorisations_ = ns1__getAuthorisations_;
@@ -33817,15 +34050,15 @@ soap_instantiate___ns1__removeDataFileParameter(struct soap *, int,
 
 inline struct __ns1__removeDataFileParameter *
 soap_new___ns1__removeDataFileParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeDataFileParameter(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate___ns1__removeDataFileParameter(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline struct __ns1__removeDataFileParameter *
 soap_new_req___ns1__removeDataFileParameter(struct soap *soap) {
   struct __ns1__removeDataFileParameter *_p =
-      soap_instantiate___ns1__removeDataFileParameter(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate___ns1__removeDataFileParameter(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeDataFileParameter(soap, _p);
   }
@@ -33837,8 +34070,8 @@ soap_new_set___ns1__removeDataFileParameter(
     struct soap *soap,
     ns1__removeDataFileParameter *ns1__removeDataFileParameter_) {
   struct __ns1__removeDataFileParameter *_p =
-      soap_instantiate___ns1__removeDataFileParameter(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate___ns1__removeDataFileParameter(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeDataFileParameter(soap, _p);
     _p->ns1__removeDataFileParameter_ = ns1__removeDataFileParameter_;
@@ -33906,15 +34139,15 @@ soap_instantiate___ns1__removeDataFileParameterResponse(struct soap *, int,
 
 inline struct __ns1__removeDataFileParameterResponse *
 soap_new___ns1__removeDataFileParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeDataFileParameterResponse(soap, n, NULL,
-                                                                 NULL, NULL);
+  return soap_instantiate___ns1__removeDataFileParameterResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__removeDataFileParameterResponse *
 soap_new_req___ns1__removeDataFileParameterResponse(struct soap *soap) {
   struct __ns1__removeDataFileParameterResponse *_p =
-      soap_instantiate___ns1__removeDataFileParameterResponse(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate___ns1__removeDataFileParameterResponse(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeDataFileParameterResponse(soap, _p);
   }
@@ -33926,8 +34159,8 @@ soap_new_set___ns1__removeDataFileParameterResponse(
     struct soap *soap, ns1__removeDataFileParameterResponse *
                            ns1__removeDataFileParameterResponse_) {
   struct __ns1__removeDataFileParameterResponse *_p =
-      soap_instantiate___ns1__removeDataFileParameterResponse(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate___ns1__removeDataFileParameterResponse(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeDataFileParameterResponse(soap, _p);
     _p->ns1__removeDataFileParameterResponse_ =
@@ -33995,13 +34228,14 @@ soap_instantiate___ns1__removeDataFile(struct soap *, int, const char *,
 
 inline struct __ns1__removeDataFile *
 soap_new___ns1__removeDataFile(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeDataFile(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__removeDataFile(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline struct __ns1__removeDataFile *
 soap_new_req___ns1__removeDataFile(struct soap *soap) {
-  struct __ns1__removeDataFile *_p =
-      soap_instantiate___ns1__removeDataFile(soap, -1, NULL, NULL, NULL);
+  struct __ns1__removeDataFile *_p = soap_instantiate___ns1__removeDataFile(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeDataFile(soap, _p);
   }
@@ -34011,8 +34245,8 @@ soap_new_req___ns1__removeDataFile(struct soap *soap) {
 inline struct __ns1__removeDataFile *
 soap_new_set___ns1__removeDataFile(struct soap *soap,
                                    ns1__removeDataFile *ns1__removeDataFile_) {
-  struct __ns1__removeDataFile *_p =
-      soap_instantiate___ns1__removeDataFile(soap, -1, NULL, NULL, NULL);
+  struct __ns1__removeDataFile *_p = soap_instantiate___ns1__removeDataFile(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeDataFile(soap, _p);
     _p->ns1__removeDataFile_ = ns1__removeDataFile_;
@@ -34078,15 +34312,15 @@ soap_instantiate___ns1__removeDataFileResponse(struct soap *, int, const char *,
 
 inline struct __ns1__removeDataFileResponse *
 soap_new___ns1__removeDataFileResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeDataFileResponse(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate___ns1__removeDataFileResponse(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline struct __ns1__removeDataFileResponse *
 soap_new_req___ns1__removeDataFileResponse(struct soap *soap) {
   struct __ns1__removeDataFileResponse *_p =
-      soap_instantiate___ns1__removeDataFileResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__removeDataFileResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__removeDataFileResponse(soap, _p);
   }
@@ -34098,8 +34332,8 @@ soap_new_set___ns1__removeDataFileResponse(
     struct soap *soap,
     ns1__removeDataFileResponse *ns1__removeDataFileResponse_) {
   struct __ns1__removeDataFileResponse *_p =
-      soap_instantiate___ns1__removeDataFileResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__removeDataFileResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__removeDataFileResponse(soap, _p);
     _p->ns1__removeDataFileResponse_ = ns1__removeDataFileResponse_;
@@ -34166,15 +34400,15 @@ soap_instantiate___ns1__deleteDataFileParameter(struct soap *, int,
 
 inline struct __ns1__deleteDataFileParameter *
 soap_new___ns1__deleteDataFileParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteDataFileParameter(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate___ns1__deleteDataFileParameter(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline struct __ns1__deleteDataFileParameter *
 soap_new_req___ns1__deleteDataFileParameter(struct soap *soap) {
   struct __ns1__deleteDataFileParameter *_p =
-      soap_instantiate___ns1__deleteDataFileParameter(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate___ns1__deleteDataFileParameter(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteDataFileParameter(soap, _p);
   }
@@ -34186,8 +34420,8 @@ soap_new_set___ns1__deleteDataFileParameter(
     struct soap *soap,
     ns1__deleteDataFileParameter *ns1__deleteDataFileParameter_) {
   struct __ns1__deleteDataFileParameter *_p =
-      soap_instantiate___ns1__deleteDataFileParameter(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate___ns1__deleteDataFileParameter(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteDataFileParameter(soap, _p);
     _p->ns1__deleteDataFileParameter_ = ns1__deleteDataFileParameter_;
@@ -34255,15 +34489,15 @@ soap_instantiate___ns1__deleteDataFileParameterResponse(struct soap *, int,
 
 inline struct __ns1__deleteDataFileParameterResponse *
 soap_new___ns1__deleteDataFileParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteDataFileParameterResponse(soap, n, NULL,
-                                                                 NULL, NULL);
+  return soap_instantiate___ns1__deleteDataFileParameterResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__deleteDataFileParameterResponse *
 soap_new_req___ns1__deleteDataFileParameterResponse(struct soap *soap) {
   struct __ns1__deleteDataFileParameterResponse *_p =
-      soap_instantiate___ns1__deleteDataFileParameterResponse(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate___ns1__deleteDataFileParameterResponse(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteDataFileParameterResponse(soap, _p);
   }
@@ -34275,8 +34509,8 @@ soap_new_set___ns1__deleteDataFileParameterResponse(
     struct soap *soap, ns1__deleteDataFileParameterResponse *
                            ns1__deleteDataFileParameterResponse_) {
   struct __ns1__deleteDataFileParameterResponse *_p =
-      soap_instantiate___ns1__deleteDataFileParameterResponse(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate___ns1__deleteDataFileParameterResponse(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteDataFileParameterResponse(soap, _p);
     _p->ns1__deleteDataFileParameterResponse_ =
@@ -34345,15 +34579,15 @@ soap_instantiate___ns1__modifyDataFileParameter(struct soap *, int,
 
 inline struct __ns1__modifyDataFileParameter *
 soap_new___ns1__modifyDataFileParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifyDataFileParameter(soap, n, NULL, NULL,
-                                                         NULL);
+  return soap_instantiate___ns1__modifyDataFileParameter(soap, n, nullptr,
+                                                         nullptr, nullptr);
 }
 
 inline struct __ns1__modifyDataFileParameter *
 soap_new_req___ns1__modifyDataFileParameter(struct soap *soap) {
   struct __ns1__modifyDataFileParameter *_p =
-      soap_instantiate___ns1__modifyDataFileParameter(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate___ns1__modifyDataFileParameter(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifyDataFileParameter(soap, _p);
   }
@@ -34365,8 +34599,8 @@ soap_new_set___ns1__modifyDataFileParameter(
     struct soap *soap,
     ns1__modifyDataFileParameter *ns1__modifyDataFileParameter_) {
   struct __ns1__modifyDataFileParameter *_p =
-      soap_instantiate___ns1__modifyDataFileParameter(soap, -1, NULL, NULL,
-                                                      NULL);
+      soap_instantiate___ns1__modifyDataFileParameter(soap, -1, nullptr,
+                                                      nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifyDataFileParameter(soap, _p);
     _p->ns1__modifyDataFileParameter_ = ns1__modifyDataFileParameter_;
@@ -34434,15 +34668,15 @@ soap_instantiate___ns1__modifyDataFileParameterResponse(struct soap *, int,
 
 inline struct __ns1__modifyDataFileParameterResponse *
 soap_new___ns1__modifyDataFileParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifyDataFileParameterResponse(soap, n, NULL,
-                                                                 NULL, NULL);
+  return soap_instantiate___ns1__modifyDataFileParameterResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__modifyDataFileParameterResponse *
 soap_new_req___ns1__modifyDataFileParameterResponse(struct soap *soap) {
   struct __ns1__modifyDataFileParameterResponse *_p =
-      soap_instantiate___ns1__modifyDataFileParameterResponse(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate___ns1__modifyDataFileParameterResponse(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifyDataFileParameterResponse(soap, _p);
   }
@@ -34454,8 +34688,8 @@ soap_new_set___ns1__modifyDataFileParameterResponse(
     struct soap *soap, ns1__modifyDataFileParameterResponse *
                            ns1__modifyDataFileParameterResponse_) {
   struct __ns1__modifyDataFileParameterResponse *_p =
-      soap_instantiate___ns1__modifyDataFileParameterResponse(soap, -1, NULL,
-                                                              NULL, NULL);
+      soap_instantiate___ns1__modifyDataFileParameterResponse(soap, -1, nullptr,
+                                                              nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifyDataFileParameterResponse(soap, _p);
     _p->ns1__modifyDataFileParameterResponse_ =
@@ -34523,14 +34757,15 @@ soap_instantiate___ns1__addDataFileParameters(struct soap *, int, const char *,
 
 inline struct __ns1__addDataFileParameters *
 soap_new___ns1__addDataFileParameters(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__addDataFileParameters(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate___ns1__addDataFileParameters(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline struct __ns1__addDataFileParameters *
 soap_new_req___ns1__addDataFileParameters(struct soap *soap) {
   struct __ns1__addDataFileParameters *_p =
-      soap_instantiate___ns1__addDataFileParameters(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__addDataFileParameters(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__addDataFileParameters(soap, _p);
   }
@@ -34542,7 +34777,8 @@ soap_new_set___ns1__addDataFileParameters(
     struct soap *soap,
     ns1__addDataFileParameters *ns1__addDataFileParameters_) {
   struct __ns1__addDataFileParameters *_p =
-      soap_instantiate___ns1__addDataFileParameters(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__addDataFileParameters(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__addDataFileParameters(soap, _p);
     _p->ns1__addDataFileParameters_ = ns1__addDataFileParameters_;
@@ -34610,14 +34846,15 @@ soap_instantiate___ns1__addDataFileParameter(struct soap *, int, const char *,
 
 inline struct __ns1__addDataFileParameter *
 soap_new___ns1__addDataFileParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__addDataFileParameter(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate___ns1__addDataFileParameter(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline struct __ns1__addDataFileParameter *
 soap_new_req___ns1__addDataFileParameter(struct soap *soap) {
   struct __ns1__addDataFileParameter *_p =
-      soap_instantiate___ns1__addDataFileParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__addDataFileParameter(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     soap_default___ns1__addDataFileParameter(soap, _p);
   }
@@ -34628,7 +34865,8 @@ inline struct __ns1__addDataFileParameter *
 soap_new_set___ns1__addDataFileParameter(
     struct soap *soap, ns1__addDataFileParameter *ns1__addDataFileParameter_) {
   struct __ns1__addDataFileParameter *_p =
-      soap_instantiate___ns1__addDataFileParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__addDataFileParameter(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     soap_default___ns1__addDataFileParameter(soap, _p);
     _p->ns1__addDataFileParameter_ = ns1__addDataFileParameter_;
@@ -34695,13 +34933,14 @@ soap_instantiate___ns1__modifyDataFile(struct soap *, int, const char *,
 
 inline struct __ns1__modifyDataFile *
 soap_new___ns1__modifyDataFile(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifyDataFile(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__modifyDataFile(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline struct __ns1__modifyDataFile *
 soap_new_req___ns1__modifyDataFile(struct soap *soap) {
-  struct __ns1__modifyDataFile *_p =
-      soap_instantiate___ns1__modifyDataFile(soap, -1, NULL, NULL, NULL);
+  struct __ns1__modifyDataFile *_p = soap_instantiate___ns1__modifyDataFile(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifyDataFile(soap, _p);
   }
@@ -34711,8 +34950,8 @@ soap_new_req___ns1__modifyDataFile(struct soap *soap) {
 inline struct __ns1__modifyDataFile *
 soap_new_set___ns1__modifyDataFile(struct soap *soap,
                                    ns1__modifyDataFile *ns1__modifyDataFile_) {
-  struct __ns1__modifyDataFile *_p =
-      soap_instantiate___ns1__modifyDataFile(soap, -1, NULL, NULL, NULL);
+  struct __ns1__modifyDataFile *_p = soap_instantiate___ns1__modifyDataFile(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifyDataFile(soap, _p);
     _p->ns1__modifyDataFile_ = ns1__modifyDataFile_;
@@ -34778,15 +35017,15 @@ soap_instantiate___ns1__modifyDataFileResponse(struct soap *, int, const char *,
 
 inline struct __ns1__modifyDataFileResponse *
 soap_new___ns1__modifyDataFileResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifyDataFileResponse(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate___ns1__modifyDataFileResponse(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline struct __ns1__modifyDataFileResponse *
 soap_new_req___ns1__modifyDataFileResponse(struct soap *soap) {
   struct __ns1__modifyDataFileResponse *_p =
-      soap_instantiate___ns1__modifyDataFileResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__modifyDataFileResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__modifyDataFileResponse(soap, _p);
   }
@@ -34798,8 +35037,8 @@ soap_new_set___ns1__modifyDataFileResponse(
     struct soap *soap,
     ns1__modifyDataFileResponse *ns1__modifyDataFileResponse_) {
   struct __ns1__modifyDataFileResponse *_p =
-      soap_instantiate___ns1__modifyDataFileResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__modifyDataFileResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__modifyDataFileResponse(soap, _p);
     _p->ns1__modifyDataFileResponse_ = ns1__modifyDataFileResponse_;
@@ -34865,13 +35104,14 @@ soap_instantiate___ns1__deleteDataFile(struct soap *, int, const char *,
 
 inline struct __ns1__deleteDataFile *
 soap_new___ns1__deleteDataFile(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteDataFile(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__deleteDataFile(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline struct __ns1__deleteDataFile *
 soap_new_req___ns1__deleteDataFile(struct soap *soap) {
-  struct __ns1__deleteDataFile *_p =
-      soap_instantiate___ns1__deleteDataFile(soap, -1, NULL, NULL, NULL);
+  struct __ns1__deleteDataFile *_p = soap_instantiate___ns1__deleteDataFile(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteDataFile(soap, _p);
   }
@@ -34881,8 +35121,8 @@ soap_new_req___ns1__deleteDataFile(struct soap *soap) {
 inline struct __ns1__deleteDataFile *
 soap_new_set___ns1__deleteDataFile(struct soap *soap,
                                    ns1__deleteDataFile *ns1__deleteDataFile_) {
-  struct __ns1__deleteDataFile *_p =
-      soap_instantiate___ns1__deleteDataFile(soap, -1, NULL, NULL, NULL);
+  struct __ns1__deleteDataFile *_p = soap_instantiate___ns1__deleteDataFile(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteDataFile(soap, _p);
     _p->ns1__deleteDataFile_ = ns1__deleteDataFile_;
@@ -34948,15 +35188,15 @@ soap_instantiate___ns1__deleteDataFileResponse(struct soap *, int, const char *,
 
 inline struct __ns1__deleteDataFileResponse *
 soap_new___ns1__deleteDataFileResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteDataFileResponse(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate___ns1__deleteDataFileResponse(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline struct __ns1__deleteDataFileResponse *
 soap_new_req___ns1__deleteDataFileResponse(struct soap *soap) {
   struct __ns1__deleteDataFileResponse *_p =
-      soap_instantiate___ns1__deleteDataFileResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__deleteDataFileResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__deleteDataFileResponse(soap, _p);
   }
@@ -34968,8 +35208,8 @@ soap_new_set___ns1__deleteDataFileResponse(
     struct soap *soap,
     ns1__deleteDataFileResponse *ns1__deleteDataFileResponse_) {
   struct __ns1__deleteDataFileResponse *_p =
-      soap_instantiate___ns1__deleteDataFileResponse(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__deleteDataFileResponse(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__deleteDataFileResponse(soap, _p);
     _p->ns1__deleteDataFileResponse_ = ns1__deleteDataFileResponse_;
@@ -35035,13 +35275,14 @@ soap_instantiate___ns1__createDataFiles(struct soap *, int, const char *,
 
 inline struct __ns1__createDataFiles *
 soap_new___ns1__createDataFiles(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__createDataFiles(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__createDataFiles(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline struct __ns1__createDataFiles *
 soap_new_req___ns1__createDataFiles(struct soap *soap) {
-  struct __ns1__createDataFiles *_p =
-      soap_instantiate___ns1__createDataFiles(soap, -1, NULL, NULL, NULL);
+  struct __ns1__createDataFiles *_p = soap_instantiate___ns1__createDataFiles(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__createDataFiles(soap, _p);
   }
@@ -35050,8 +35291,8 @@ soap_new_req___ns1__createDataFiles(struct soap *soap) {
 
 inline struct __ns1__createDataFiles *soap_new_set___ns1__createDataFiles(
     struct soap *soap, ns1__createDataFiles *ns1__createDataFiles_) {
-  struct __ns1__createDataFiles *_p =
-      soap_instantiate___ns1__createDataFiles(soap, -1, NULL, NULL, NULL);
+  struct __ns1__createDataFiles *_p = soap_instantiate___ns1__createDataFiles(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__createDataFiles(soap, _p);
     _p->ns1__createDataFiles_ = ns1__createDataFiles_;
@@ -35118,13 +35359,14 @@ soap_instantiate___ns1__createDataFile(struct soap *, int, const char *,
 
 inline struct __ns1__createDataFile *
 soap_new___ns1__createDataFile(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__createDataFile(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__createDataFile(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline struct __ns1__createDataFile *
 soap_new_req___ns1__createDataFile(struct soap *soap) {
-  struct __ns1__createDataFile *_p =
-      soap_instantiate___ns1__createDataFile(soap, -1, NULL, NULL, NULL);
+  struct __ns1__createDataFile *_p = soap_instantiate___ns1__createDataFile(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__createDataFile(soap, _p);
   }
@@ -35134,8 +35376,8 @@ soap_new_req___ns1__createDataFile(struct soap *soap) {
 inline struct __ns1__createDataFile *
 soap_new_set___ns1__createDataFile(struct soap *soap,
                                    ns1__createDataFile *ns1__createDataFile_) {
-  struct __ns1__createDataFile *_p =
-      soap_instantiate___ns1__createDataFile(soap, -1, NULL, NULL, NULL);
+  struct __ns1__createDataFile *_p = soap_instantiate___ns1__createDataFile(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__createDataFile(soap, _p);
     _p->ns1__createDataFile_ = ns1__createDataFile_;
@@ -35198,13 +35440,14 @@ soap_instantiate___ns1__getDatafiles(struct soap *, int, const char *,
 
 inline struct __ns1__getDatafiles *
 soap_new___ns1__getDatafiles(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getDatafiles(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__getDatafiles(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline struct __ns1__getDatafiles *
 soap_new_req___ns1__getDatafiles(struct soap *soap) {
   struct __ns1__getDatafiles *_p =
-      soap_instantiate___ns1__getDatafiles(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getDatafiles(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getDatafiles(soap, _p);
   }
@@ -35215,7 +35458,7 @@ inline struct __ns1__getDatafiles *
 soap_new_set___ns1__getDatafiles(struct soap *soap,
                                  ns1__getDatafiles *ns1__getDatafiles_) {
   struct __ns1__getDatafiles *_p =
-      soap_instantiate___ns1__getDatafiles(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getDatafiles(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getDatafiles(soap, _p);
     _p->ns1__getDatafiles_ = ns1__getDatafiles_;
@@ -35278,13 +35521,14 @@ soap_instantiate___ns1__getDatafile(struct soap *, int, const char *,
 
 inline struct __ns1__getDatafile *soap_new___ns1__getDatafile(struct soap *soap,
                                                               int n = -1) {
-  return soap_instantiate___ns1__getDatafile(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__getDatafile(soap, n, nullptr, nullptr,
+                                             nullptr);
 }
 
 inline struct __ns1__getDatafile *
 soap_new_req___ns1__getDatafile(struct soap *soap) {
   struct __ns1__getDatafile *_p =
-      soap_instantiate___ns1__getDatafile(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getDatafile(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getDatafile(soap, _p);
   }
@@ -35295,7 +35539,7 @@ inline struct __ns1__getDatafile *
 soap_new_set___ns1__getDatafile(struct soap *soap,
                                 ns1__getDatafile *ns1__getDatafile_) {
   struct __ns1__getDatafile *_p =
-      soap_instantiate___ns1__getDatafile(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getDatafile(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getDatafile(soap, _p);
     _p->ns1__getDatafile_ = ns1__getDatafile_;
@@ -35361,15 +35605,15 @@ soap_instantiate___ns1__removeDataSetParameter(struct soap *, int, const char *,
 
 inline struct __ns1__removeDataSetParameter *
 soap_new___ns1__removeDataSetParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeDataSetParameter(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate___ns1__removeDataSetParameter(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline struct __ns1__removeDataSetParameter *
 soap_new_req___ns1__removeDataSetParameter(struct soap *soap) {
   struct __ns1__removeDataSetParameter *_p =
-      soap_instantiate___ns1__removeDataSetParameter(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__removeDataSetParameter(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__removeDataSetParameter(soap, _p);
   }
@@ -35381,8 +35625,8 @@ soap_new_set___ns1__removeDataSetParameter(
     struct soap *soap,
     ns1__removeDataSetParameter *ns1__removeDataSetParameter_) {
   struct __ns1__removeDataSetParameter *_p =
-      soap_instantiate___ns1__removeDataSetParameter(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__removeDataSetParameter(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__removeDataSetParameter(soap, _p);
     _p->ns1__removeDataSetParameter_ = ns1__removeDataSetParameter_;
@@ -35449,15 +35693,15 @@ soap_instantiate___ns1__removeDataSetParameterResponse(struct soap *, int,
 
 inline struct __ns1__removeDataSetParameterResponse *
 soap_new___ns1__removeDataSetParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeDataSetParameterResponse(soap, n, NULL,
-                                                                NULL, NULL);
+  return soap_instantiate___ns1__removeDataSetParameterResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__removeDataSetParameterResponse *
 soap_new_req___ns1__removeDataSetParameterResponse(struct soap *soap) {
   struct __ns1__removeDataSetParameterResponse *_p =
-      soap_instantiate___ns1__removeDataSetParameterResponse(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate___ns1__removeDataSetParameterResponse(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeDataSetParameterResponse(soap, _p);
   }
@@ -35469,8 +35713,8 @@ soap_new_set___ns1__removeDataSetParameterResponse(
     struct soap *soap,
     ns1__removeDataSetParameterResponse *ns1__removeDataSetParameterResponse_) {
   struct __ns1__removeDataSetParameterResponse *_p =
-      soap_instantiate___ns1__removeDataSetParameterResponse(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate___ns1__removeDataSetParameterResponse(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeDataSetParameterResponse(soap, _p);
     _p->ns1__removeDataSetParameterResponse_ =
@@ -35536,13 +35780,14 @@ soap_instantiate___ns1__removeDataSet(struct soap *, int, const char *,
 
 inline struct __ns1__removeDataSet *
 soap_new___ns1__removeDataSet(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeDataSet(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__removeDataSet(soap, n, nullptr, nullptr,
+                                               nullptr);
 }
 
 inline struct __ns1__removeDataSet *
 soap_new_req___ns1__removeDataSet(struct soap *soap) {
-  struct __ns1__removeDataSet *_p =
-      soap_instantiate___ns1__removeDataSet(soap, -1, NULL, NULL, NULL);
+  struct __ns1__removeDataSet *_p = soap_instantiate___ns1__removeDataSet(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeDataSet(soap, _p);
   }
@@ -35552,8 +35797,8 @@ soap_new_req___ns1__removeDataSet(struct soap *soap) {
 inline struct __ns1__removeDataSet *
 soap_new_set___ns1__removeDataSet(struct soap *soap,
                                   ns1__removeDataSet *ns1__removeDataSet_) {
-  struct __ns1__removeDataSet *_p =
-      soap_instantiate___ns1__removeDataSet(soap, -1, NULL, NULL, NULL);
+  struct __ns1__removeDataSet *_p = soap_instantiate___ns1__removeDataSet(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeDataSet(soap, _p);
     _p->ns1__removeDataSet_ = ns1__removeDataSet_;
@@ -35619,14 +35864,15 @@ soap_instantiate___ns1__removeDataSetResponse(struct soap *, int, const char *,
 
 inline struct __ns1__removeDataSetResponse *
 soap_new___ns1__removeDataSetResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeDataSetResponse(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate___ns1__removeDataSetResponse(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline struct __ns1__removeDataSetResponse *
 soap_new_req___ns1__removeDataSetResponse(struct soap *soap) {
   struct __ns1__removeDataSetResponse *_p =
-      soap_instantiate___ns1__removeDataSetResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removeDataSetResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__removeDataSetResponse(soap, _p);
   }
@@ -35638,7 +35884,8 @@ soap_new_set___ns1__removeDataSetResponse(
     struct soap *soap,
     ns1__removeDataSetResponse *ns1__removeDataSetResponse_) {
   struct __ns1__removeDataSetResponse *_p =
-      soap_instantiate___ns1__removeDataSetResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removeDataSetResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__removeDataSetResponse(soap, _p);
     _p->ns1__removeDataSetResponse_ = ns1__removeDataSetResponse_;
@@ -35706,14 +35953,15 @@ soap_instantiate___ns1__addDataSetParameters(struct soap *, int, const char *,
 
 inline struct __ns1__addDataSetParameters *
 soap_new___ns1__addDataSetParameters(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__addDataSetParameters(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate___ns1__addDataSetParameters(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline struct __ns1__addDataSetParameters *
 soap_new_req___ns1__addDataSetParameters(struct soap *soap) {
   struct __ns1__addDataSetParameters *_p =
-      soap_instantiate___ns1__addDataSetParameters(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__addDataSetParameters(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     soap_default___ns1__addDataSetParameters(soap, _p);
   }
@@ -35724,7 +35972,8 @@ inline struct __ns1__addDataSetParameters *
 soap_new_set___ns1__addDataSetParameters(
     struct soap *soap, ns1__addDataSetParameters *ns1__addDataSetParameters_) {
   struct __ns1__addDataSetParameters *_p =
-      soap_instantiate___ns1__addDataSetParameters(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__addDataSetParameters(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     soap_default___ns1__addDataSetParameters(soap, _p);
     _p->ns1__addDataSetParameters_ = ns1__addDataSetParameters_;
@@ -35793,13 +36042,15 @@ soap_instantiate___ns1__addDataSetParameter(struct soap *, int, const char *,
 
 inline struct __ns1__addDataSetParameter *
 soap_new___ns1__addDataSetParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__addDataSetParameter(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__addDataSetParameter(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline struct __ns1__addDataSetParameter *
 soap_new_req___ns1__addDataSetParameter(struct soap *soap) {
   struct __ns1__addDataSetParameter *_p =
-      soap_instantiate___ns1__addDataSetParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__addDataSetParameter(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__addDataSetParameter(soap, _p);
   }
@@ -35810,7 +36061,8 @@ inline struct __ns1__addDataSetParameter *
 soap_new_set___ns1__addDataSetParameter(
     struct soap *soap, ns1__addDataSetParameter *ns1__addDataSetParameter_) {
   struct __ns1__addDataSetParameter *_p =
-      soap_instantiate___ns1__addDataSetParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__addDataSetParameter(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__addDataSetParameter(soap, _p);
     _p->ns1__addDataSetParameter_ = ns1__addDataSetParameter_;
@@ -35878,13 +36130,14 @@ soap_instantiate___ns1__setDataSetSample(struct soap *, int, const char *,
 
 inline struct __ns1__setDataSetSample *
 soap_new___ns1__setDataSetSample(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__setDataSetSample(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__setDataSetSample(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline struct __ns1__setDataSetSample *
 soap_new_req___ns1__setDataSetSample(struct soap *soap) {
-  struct __ns1__setDataSetSample *_p =
-      soap_instantiate___ns1__setDataSetSample(soap, -1, NULL, NULL, NULL);
+  struct __ns1__setDataSetSample *_p = soap_instantiate___ns1__setDataSetSample(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__setDataSetSample(soap, _p);
   }
@@ -35893,8 +36146,8 @@ soap_new_req___ns1__setDataSetSample(struct soap *soap) {
 
 inline struct __ns1__setDataSetSample *soap_new_set___ns1__setDataSetSample(
     struct soap *soap, ns1__setDataSetSample *ns1__setDataSetSample_) {
-  struct __ns1__setDataSetSample *_p =
-      soap_instantiate___ns1__setDataSetSample(soap, -1, NULL, NULL, NULL);
+  struct __ns1__setDataSetSample *_p = soap_instantiate___ns1__setDataSetSample(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__setDataSetSample(soap, _p);
     _p->ns1__setDataSetSample_ = ns1__setDataSetSample_;
@@ -35962,15 +36215,15 @@ soap_instantiate___ns1__setDataSetSampleResponse(struct soap *, int,
 
 inline struct __ns1__setDataSetSampleResponse *
 soap_new___ns1__setDataSetSampleResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__setDataSetSampleResponse(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate___ns1__setDataSetSampleResponse(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline struct __ns1__setDataSetSampleResponse *
 soap_new_req___ns1__setDataSetSampleResponse(struct soap *soap) {
   struct __ns1__setDataSetSampleResponse *_p =
-      soap_instantiate___ns1__setDataSetSampleResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate___ns1__setDataSetSampleResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     soap_default___ns1__setDataSetSampleResponse(soap, _p);
   }
@@ -35982,8 +36235,8 @@ soap_new_set___ns1__setDataSetSampleResponse(
     struct soap *soap,
     ns1__setDataSetSampleResponse *ns1__setDataSetSampleResponse_) {
   struct __ns1__setDataSetSampleResponse *_p =
-      soap_instantiate___ns1__setDataSetSampleResponse(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate___ns1__setDataSetSampleResponse(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     soap_default___ns1__setDataSetSampleResponse(soap, _p);
     _p->ns1__setDataSetSampleResponse_ = ns1__setDataSetSampleResponse_;
@@ -36049,15 +36302,15 @@ soap_instantiate___ns1__modifyDataSetParameter(struct soap *, int, const char *,
 
 inline struct __ns1__modifyDataSetParameter *
 soap_new___ns1__modifyDataSetParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifyDataSetParameter(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate___ns1__modifyDataSetParameter(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline struct __ns1__modifyDataSetParameter *
 soap_new_req___ns1__modifyDataSetParameter(struct soap *soap) {
   struct __ns1__modifyDataSetParameter *_p =
-      soap_instantiate___ns1__modifyDataSetParameter(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__modifyDataSetParameter(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__modifyDataSetParameter(soap, _p);
   }
@@ -36069,8 +36322,8 @@ soap_new_set___ns1__modifyDataSetParameter(
     struct soap *soap,
     ns1__modifyDataSetParameter *ns1__modifyDataSetParameter_) {
   struct __ns1__modifyDataSetParameter *_p =
-      soap_instantiate___ns1__modifyDataSetParameter(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__modifyDataSetParameter(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__modifyDataSetParameter(soap, _p);
     _p->ns1__modifyDataSetParameter_ = ns1__modifyDataSetParameter_;
@@ -36137,15 +36390,15 @@ soap_instantiate___ns1__modifyDataSetParameterResponse(struct soap *, int,
 
 inline struct __ns1__modifyDataSetParameterResponse *
 soap_new___ns1__modifyDataSetParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifyDataSetParameterResponse(soap, n, NULL,
-                                                                NULL, NULL);
+  return soap_instantiate___ns1__modifyDataSetParameterResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__modifyDataSetParameterResponse *
 soap_new_req___ns1__modifyDataSetParameterResponse(struct soap *soap) {
   struct __ns1__modifyDataSetParameterResponse *_p =
-      soap_instantiate___ns1__modifyDataSetParameterResponse(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate___ns1__modifyDataSetParameterResponse(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifyDataSetParameterResponse(soap, _p);
   }
@@ -36157,8 +36410,8 @@ soap_new_set___ns1__modifyDataSetParameterResponse(
     struct soap *soap,
     ns1__modifyDataSetParameterResponse *ns1__modifyDataSetParameterResponse_) {
   struct __ns1__modifyDataSetParameterResponse *_p =
-      soap_instantiate___ns1__modifyDataSetParameterResponse(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate___ns1__modifyDataSetParameterResponse(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifyDataSetParameterResponse(soap, _p);
     _p->ns1__modifyDataSetParameterResponse_ =
@@ -36224,13 +36477,14 @@ soap_instantiate___ns1__modifyDataSet(struct soap *, int, const char *,
 
 inline struct __ns1__modifyDataSet *
 soap_new___ns1__modifyDataSet(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifyDataSet(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__modifyDataSet(soap, n, nullptr, nullptr,
+                                               nullptr);
 }
 
 inline struct __ns1__modifyDataSet *
 soap_new_req___ns1__modifyDataSet(struct soap *soap) {
-  struct __ns1__modifyDataSet *_p =
-      soap_instantiate___ns1__modifyDataSet(soap, -1, NULL, NULL, NULL);
+  struct __ns1__modifyDataSet *_p = soap_instantiate___ns1__modifyDataSet(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifyDataSet(soap, _p);
   }
@@ -36240,8 +36494,8 @@ soap_new_req___ns1__modifyDataSet(struct soap *soap) {
 inline struct __ns1__modifyDataSet *
 soap_new_set___ns1__modifyDataSet(struct soap *soap,
                                   ns1__modifyDataSet *ns1__modifyDataSet_) {
-  struct __ns1__modifyDataSet *_p =
-      soap_instantiate___ns1__modifyDataSet(soap, -1, NULL, NULL, NULL);
+  struct __ns1__modifyDataSet *_p = soap_instantiate___ns1__modifyDataSet(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifyDataSet(soap, _p);
     _p->ns1__modifyDataSet_ = ns1__modifyDataSet_;
@@ -36307,14 +36561,15 @@ soap_instantiate___ns1__modifyDataSetResponse(struct soap *, int, const char *,
 
 inline struct __ns1__modifyDataSetResponse *
 soap_new___ns1__modifyDataSetResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifyDataSetResponse(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate___ns1__modifyDataSetResponse(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline struct __ns1__modifyDataSetResponse *
 soap_new_req___ns1__modifyDataSetResponse(struct soap *soap) {
   struct __ns1__modifyDataSetResponse *_p =
-      soap_instantiate___ns1__modifyDataSetResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__modifyDataSetResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__modifyDataSetResponse(soap, _p);
   }
@@ -36326,7 +36581,8 @@ soap_new_set___ns1__modifyDataSetResponse(
     struct soap *soap,
     ns1__modifyDataSetResponse *ns1__modifyDataSetResponse_) {
   struct __ns1__modifyDataSetResponse *_p =
-      soap_instantiate___ns1__modifyDataSetResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__modifyDataSetResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__modifyDataSetResponse(soap, _p);
     _p->ns1__modifyDataSetResponse_ = ns1__modifyDataSetResponse_;
@@ -36392,15 +36648,15 @@ soap_instantiate___ns1__deleteDataSetParameter(struct soap *, int, const char *,
 
 inline struct __ns1__deleteDataSetParameter *
 soap_new___ns1__deleteDataSetParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteDataSetParameter(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate___ns1__deleteDataSetParameter(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline struct __ns1__deleteDataSetParameter *
 soap_new_req___ns1__deleteDataSetParameter(struct soap *soap) {
   struct __ns1__deleteDataSetParameter *_p =
-      soap_instantiate___ns1__deleteDataSetParameter(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__deleteDataSetParameter(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__deleteDataSetParameter(soap, _p);
   }
@@ -36412,8 +36668,8 @@ soap_new_set___ns1__deleteDataSetParameter(
     struct soap *soap,
     ns1__deleteDataSetParameter *ns1__deleteDataSetParameter_) {
   struct __ns1__deleteDataSetParameter *_p =
-      soap_instantiate___ns1__deleteDataSetParameter(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__deleteDataSetParameter(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__deleteDataSetParameter(soap, _p);
     _p->ns1__deleteDataSetParameter_ = ns1__deleteDataSetParameter_;
@@ -36480,15 +36736,15 @@ soap_instantiate___ns1__deleteDataSetParameterResponse(struct soap *, int,
 
 inline struct __ns1__deleteDataSetParameterResponse *
 soap_new___ns1__deleteDataSetParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteDataSetParameterResponse(soap, n, NULL,
-                                                                NULL, NULL);
+  return soap_instantiate___ns1__deleteDataSetParameterResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__deleteDataSetParameterResponse *
 soap_new_req___ns1__deleteDataSetParameterResponse(struct soap *soap) {
   struct __ns1__deleteDataSetParameterResponse *_p =
-      soap_instantiate___ns1__deleteDataSetParameterResponse(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate___ns1__deleteDataSetParameterResponse(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteDataSetParameterResponse(soap, _p);
   }
@@ -36500,8 +36756,8 @@ soap_new_set___ns1__deleteDataSetParameterResponse(
     struct soap *soap,
     ns1__deleteDataSetParameterResponse *ns1__deleteDataSetParameterResponse_) {
   struct __ns1__deleteDataSetParameterResponse *_p =
-      soap_instantiate___ns1__deleteDataSetParameterResponse(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate___ns1__deleteDataSetParameterResponse(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteDataSetParameterResponse(soap, _p);
     _p->ns1__deleteDataSetParameterResponse_ =
@@ -36567,13 +36823,14 @@ soap_instantiate___ns1__deleteDataSet(struct soap *, int, const char *,
 
 inline struct __ns1__deleteDataSet *
 soap_new___ns1__deleteDataSet(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteDataSet(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__deleteDataSet(soap, n, nullptr, nullptr,
+                                               nullptr);
 }
 
 inline struct __ns1__deleteDataSet *
 soap_new_req___ns1__deleteDataSet(struct soap *soap) {
-  struct __ns1__deleteDataSet *_p =
-      soap_instantiate___ns1__deleteDataSet(soap, -1, NULL, NULL, NULL);
+  struct __ns1__deleteDataSet *_p = soap_instantiate___ns1__deleteDataSet(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteDataSet(soap, _p);
   }
@@ -36583,8 +36840,8 @@ soap_new_req___ns1__deleteDataSet(struct soap *soap) {
 inline struct __ns1__deleteDataSet *
 soap_new_set___ns1__deleteDataSet(struct soap *soap,
                                   ns1__deleteDataSet *ns1__deleteDataSet_) {
-  struct __ns1__deleteDataSet *_p =
-      soap_instantiate___ns1__deleteDataSet(soap, -1, NULL, NULL, NULL);
+  struct __ns1__deleteDataSet *_p = soap_instantiate___ns1__deleteDataSet(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteDataSet(soap, _p);
     _p->ns1__deleteDataSet_ = ns1__deleteDataSet_;
@@ -36650,14 +36907,15 @@ soap_instantiate___ns1__deleteDataSetResponse(struct soap *, int, const char *,
 
 inline struct __ns1__deleteDataSetResponse *
 soap_new___ns1__deleteDataSetResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteDataSetResponse(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate___ns1__deleteDataSetResponse(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline struct __ns1__deleteDataSetResponse *
 soap_new_req___ns1__deleteDataSetResponse(struct soap *soap) {
   struct __ns1__deleteDataSetResponse *_p =
-      soap_instantiate___ns1__deleteDataSetResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deleteDataSetResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__deleteDataSetResponse(soap, _p);
   }
@@ -36669,7 +36927,8 @@ soap_new_set___ns1__deleteDataSetResponse(
     struct soap *soap,
     ns1__deleteDataSetResponse *ns1__deleteDataSetResponse_) {
   struct __ns1__deleteDataSetResponse *_p =
-      soap_instantiate___ns1__deleteDataSetResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deleteDataSetResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__deleteDataSetResponse(soap, _p);
     _p->ns1__deleteDataSetResponse_ = ns1__deleteDataSetResponse_;
@@ -36735,13 +36994,14 @@ soap_instantiate___ns1__createDataSets(struct soap *, int, const char *,
 
 inline struct __ns1__createDataSets *
 soap_new___ns1__createDataSets(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__createDataSets(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__createDataSets(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline struct __ns1__createDataSets *
 soap_new_req___ns1__createDataSets(struct soap *soap) {
-  struct __ns1__createDataSets *_p =
-      soap_instantiate___ns1__createDataSets(soap, -1, NULL, NULL, NULL);
+  struct __ns1__createDataSets *_p = soap_instantiate___ns1__createDataSets(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__createDataSets(soap, _p);
   }
@@ -36751,8 +37011,8 @@ soap_new_req___ns1__createDataSets(struct soap *soap) {
 inline struct __ns1__createDataSets *
 soap_new_set___ns1__createDataSets(struct soap *soap,
                                    ns1__createDataSets *ns1__createDataSets_) {
-  struct __ns1__createDataSets *_p =
-      soap_instantiate___ns1__createDataSets(soap, -1, NULL, NULL, NULL);
+  struct __ns1__createDataSets *_p = soap_instantiate___ns1__createDataSets(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__createDataSets(soap, _p);
     _p->ns1__createDataSets_ = ns1__createDataSets_;
@@ -36817,13 +37077,14 @@ soap_instantiate___ns1__createDataSet(struct soap *, int, const char *,
 
 inline struct __ns1__createDataSet *
 soap_new___ns1__createDataSet(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__createDataSet(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__createDataSet(soap, n, nullptr, nullptr,
+                                               nullptr);
 }
 
 inline struct __ns1__createDataSet *
 soap_new_req___ns1__createDataSet(struct soap *soap) {
-  struct __ns1__createDataSet *_p =
-      soap_instantiate___ns1__createDataSet(soap, -1, NULL, NULL, NULL);
+  struct __ns1__createDataSet *_p = soap_instantiate___ns1__createDataSet(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__createDataSet(soap, _p);
   }
@@ -36833,8 +37094,8 @@ soap_new_req___ns1__createDataSet(struct soap *soap) {
 inline struct __ns1__createDataSet *
 soap_new_set___ns1__createDataSet(struct soap *soap,
                                   ns1__createDataSet *ns1__createDataSet_) {
-  struct __ns1__createDataSet *_p =
-      soap_instantiate___ns1__createDataSet(soap, -1, NULL, NULL, NULL);
+  struct __ns1__createDataSet *_p = soap_instantiate___ns1__createDataSet(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__createDataSet(soap, _p);
     _p->ns1__createDataSet_ = ns1__createDataSet_;
@@ -36897,13 +37158,14 @@ soap_instantiate___ns1__getDatasets(struct soap *, int, const char *,
 
 inline struct __ns1__getDatasets *soap_new___ns1__getDatasets(struct soap *soap,
                                                               int n = -1) {
-  return soap_instantiate___ns1__getDatasets(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__getDatasets(soap, n, nullptr, nullptr,
+                                             nullptr);
 }
 
 inline struct __ns1__getDatasets *
 soap_new_req___ns1__getDatasets(struct soap *soap) {
   struct __ns1__getDatasets *_p =
-      soap_instantiate___ns1__getDatasets(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getDatasets(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getDatasets(soap, _p);
   }
@@ -36914,7 +37176,7 @@ inline struct __ns1__getDatasets *
 soap_new_set___ns1__getDatasets(struct soap *soap,
                                 ns1__getDatasets *ns1__getDatasets_) {
   struct __ns1__getDatasets *_p =
-      soap_instantiate___ns1__getDatasets(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getDatasets(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getDatasets(soap, _p);
     _p->ns1__getDatasets_ = ns1__getDatasets_;
@@ -36982,13 +37244,15 @@ soap_instantiate___ns1__getDatasetIncludes(struct soap *, int, const char *,
 
 inline struct __ns1__getDatasetIncludes *
 soap_new___ns1__getDatasetIncludes(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getDatasetIncludes(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__getDatasetIncludes(soap, n, nullptr, nullptr,
+                                                    nullptr);
 }
 
 inline struct __ns1__getDatasetIncludes *
 soap_new_req___ns1__getDatasetIncludes(struct soap *soap) {
   struct __ns1__getDatasetIncludes *_p =
-      soap_instantiate___ns1__getDatasetIncludes(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getDatasetIncludes(soap, -1, nullptr, nullptr,
+                                                 nullptr);
   if (_p) {
     soap_default___ns1__getDatasetIncludes(soap, _p);
   }
@@ -36998,7 +37262,8 @@ soap_new_req___ns1__getDatasetIncludes(struct soap *soap) {
 inline struct __ns1__getDatasetIncludes *soap_new_set___ns1__getDatasetIncludes(
     struct soap *soap, ns1__getDatasetIncludes *ns1__getDatasetIncludes_) {
   struct __ns1__getDatasetIncludes *_p =
-      soap_instantiate___ns1__getDatasetIncludes(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getDatasetIncludes(soap, -1, nullptr, nullptr,
+                                                 nullptr);
   if (_p) {
     soap_default___ns1__getDatasetIncludes(soap, _p);
     _p->ns1__getDatasetIncludes_ = ns1__getDatasetIncludes_;
@@ -37062,13 +37327,13 @@ soap_instantiate___ns1__getDataset(struct soap *, int, const char *,
 
 inline struct __ns1__getDataset *soap_new___ns1__getDataset(struct soap *soap,
                                                             int n = -1) {
-  return soap_instantiate___ns1__getDataset(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__getDataset(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__getDataset *
 soap_new_req___ns1__getDataset(struct soap *soap) {
   struct __ns1__getDataset *_p =
-      soap_instantiate___ns1__getDataset(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getDataset(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getDataset(soap, _p);
   }
@@ -37079,7 +37344,7 @@ inline struct __ns1__getDataset *
 soap_new_set___ns1__getDataset(struct soap *soap,
                                ns1__getDataset *ns1__getDataset_) {
   struct __ns1__getDataset *_p =
-      soap_instantiate___ns1__getDataset(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getDataset(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getDataset(soap, _p);
     _p->ns1__getDataset_ = ns1__getDataset_;
@@ -37145,14 +37410,15 @@ soap_instantiate___ns1__removeSampleParameter(struct soap *, int, const char *,
 
 inline struct __ns1__removeSampleParameter *
 soap_new___ns1__removeSampleParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeSampleParameter(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate___ns1__removeSampleParameter(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline struct __ns1__removeSampleParameter *
 soap_new_req___ns1__removeSampleParameter(struct soap *soap) {
   struct __ns1__removeSampleParameter *_p =
-      soap_instantiate___ns1__removeSampleParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removeSampleParameter(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__removeSampleParameter(soap, _p);
   }
@@ -37164,7 +37430,8 @@ soap_new_set___ns1__removeSampleParameter(
     struct soap *soap,
     ns1__removeSampleParameter *ns1__removeSampleParameter_) {
   struct __ns1__removeSampleParameter *_p =
-      soap_instantiate___ns1__removeSampleParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removeSampleParameter(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__removeSampleParameter(soap, _p);
     _p->ns1__removeSampleParameter_ = ns1__removeSampleParameter_;
@@ -37231,15 +37498,15 @@ soap_instantiate___ns1__removeSampleParameterResponse(struct soap *, int,
 
 inline struct __ns1__removeSampleParameterResponse *
 soap_new___ns1__removeSampleParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeSampleParameterResponse(soap, n, NULL,
-                                                               NULL, NULL);
+  return soap_instantiate___ns1__removeSampleParameterResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__removeSampleParameterResponse *
 soap_new_req___ns1__removeSampleParameterResponse(struct soap *soap) {
   struct __ns1__removeSampleParameterResponse *_p =
-      soap_instantiate___ns1__removeSampleParameterResponse(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate___ns1__removeSampleParameterResponse(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeSampleParameterResponse(soap, _p);
   }
@@ -37251,8 +37518,8 @@ soap_new_set___ns1__removeSampleParameterResponse(
     struct soap *soap,
     ns1__removeSampleParameterResponse *ns1__removeSampleParameterResponse_) {
   struct __ns1__removeSampleParameterResponse *_p =
-      soap_instantiate___ns1__removeSampleParameterResponse(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate___ns1__removeSampleParameterResponse(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeSampleParameterResponse(soap, _p);
     _p->ns1__removeSampleParameterResponse_ =
@@ -37316,13 +37583,14 @@ soap_instantiate___ns1__removeSample(struct soap *, int, const char *,
 
 inline struct __ns1__removeSample *
 soap_new___ns1__removeSample(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeSample(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__removeSample(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline struct __ns1__removeSample *
 soap_new_req___ns1__removeSample(struct soap *soap) {
   struct __ns1__removeSample *_p =
-      soap_instantiate___ns1__removeSample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removeSample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeSample(soap, _p);
   }
@@ -37333,7 +37601,7 @@ inline struct __ns1__removeSample *
 soap_new_set___ns1__removeSample(struct soap *soap,
                                  ns1__removeSample *ns1__removeSample_) {
   struct __ns1__removeSample *_p =
-      soap_instantiate___ns1__removeSample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removeSample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeSample(soap, _p);
     _p->ns1__removeSample_ = ns1__removeSample_;
@@ -37401,14 +37669,15 @@ soap_instantiate___ns1__removeSampleResponse(struct soap *, int, const char *,
 
 inline struct __ns1__removeSampleResponse *
 soap_new___ns1__removeSampleResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeSampleResponse(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate___ns1__removeSampleResponse(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline struct __ns1__removeSampleResponse *
 soap_new_req___ns1__removeSampleResponse(struct soap *soap) {
   struct __ns1__removeSampleResponse *_p =
-      soap_instantiate___ns1__removeSampleResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removeSampleResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     soap_default___ns1__removeSampleResponse(soap, _p);
   }
@@ -37419,7 +37688,8 @@ inline struct __ns1__removeSampleResponse *
 soap_new_set___ns1__removeSampleResponse(
     struct soap *soap, ns1__removeSampleResponse *ns1__removeSampleResponse_) {
   struct __ns1__removeSampleResponse *_p =
-      soap_instantiate___ns1__removeSampleResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removeSampleResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     soap_default___ns1__removeSampleResponse(soap, _p);
     _p->ns1__removeSampleResponse_ = ns1__removeSampleResponse_;
@@ -37487,13 +37757,15 @@ soap_instantiate___ns1__removePublication(struct soap *, int, const char *,
 
 inline struct __ns1__removePublication *
 soap_new___ns1__removePublication(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removePublication(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__removePublication(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline struct __ns1__removePublication *
 soap_new_req___ns1__removePublication(struct soap *soap) {
   struct __ns1__removePublication *_p =
-      soap_instantiate___ns1__removePublication(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removePublication(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__removePublication(soap, _p);
   }
@@ -37503,7 +37775,8 @@ soap_new_req___ns1__removePublication(struct soap *soap) {
 inline struct __ns1__removePublication *soap_new_set___ns1__removePublication(
     struct soap *soap, ns1__removePublication *ns1__removePublication_) {
   struct __ns1__removePublication *_p =
-      soap_instantiate___ns1__removePublication(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removePublication(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__removePublication(soap, _p);
     _p->ns1__removePublication_ = ns1__removePublication_;
@@ -37571,15 +37844,15 @@ soap_instantiate___ns1__removePublicationResponse(struct soap *, int,
 
 inline struct __ns1__removePublicationResponse *
 soap_new___ns1__removePublicationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removePublicationResponse(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate___ns1__removePublicationResponse(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline struct __ns1__removePublicationResponse *
 soap_new_req___ns1__removePublicationResponse(struct soap *soap) {
   struct __ns1__removePublicationResponse *_p =
-      soap_instantiate___ns1__removePublicationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate___ns1__removePublicationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removePublicationResponse(soap, _p);
   }
@@ -37591,8 +37864,8 @@ soap_new_set___ns1__removePublicationResponse(
     struct soap *soap,
     ns1__removePublicationResponse *ns1__removePublicationResponse_) {
   struct __ns1__removePublicationResponse *_p =
-      soap_instantiate___ns1__removePublicationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate___ns1__removePublicationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removePublicationResponse(soap, _p);
     _p->ns1__removePublicationResponse_ = ns1__removePublicationResponse_;
@@ -37660,13 +37933,15 @@ soap_instantiate___ns1__removeInvestigator(struct soap *, int, const char *,
 
 inline struct __ns1__removeInvestigator *
 soap_new___ns1__removeInvestigator(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeInvestigator(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__removeInvestigator(soap, n, nullptr, nullptr,
+                                                    nullptr);
 }
 
 inline struct __ns1__removeInvestigator *
 soap_new_req___ns1__removeInvestigator(struct soap *soap) {
   struct __ns1__removeInvestigator *_p =
-      soap_instantiate___ns1__removeInvestigator(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removeInvestigator(soap, -1, nullptr, nullptr,
+                                                 nullptr);
   if (_p) {
     soap_default___ns1__removeInvestigator(soap, _p);
   }
@@ -37676,7 +37951,8 @@ soap_new_req___ns1__removeInvestigator(struct soap *soap) {
 inline struct __ns1__removeInvestigator *soap_new_set___ns1__removeInvestigator(
     struct soap *soap, ns1__removeInvestigator *ns1__removeInvestigator_) {
   struct __ns1__removeInvestigator *_p =
-      soap_instantiate___ns1__removeInvestigator(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removeInvestigator(soap, -1, nullptr, nullptr,
+                                                 nullptr);
   if (_p) {
     soap_default___ns1__removeInvestigator(soap, _p);
     _p->ns1__removeInvestigator_ = ns1__removeInvestigator_;
@@ -37744,15 +38020,15 @@ soap_instantiate___ns1__removeInvestigatorResponse(struct soap *, int,
 
 inline struct __ns1__removeInvestigatorResponse *
 soap_new___ns1__removeInvestigatorResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeInvestigatorResponse(soap, n, NULL, NULL,
-                                                            NULL);
+  return soap_instantiate___ns1__removeInvestigatorResponse(soap, n, nullptr,
+                                                            nullptr, nullptr);
 }
 
 inline struct __ns1__removeInvestigatorResponse *
 soap_new_req___ns1__removeInvestigatorResponse(struct soap *soap) {
   struct __ns1__removeInvestigatorResponse *_p =
-      soap_instantiate___ns1__removeInvestigatorResponse(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate___ns1__removeInvestigatorResponse(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeInvestigatorResponse(soap, _p);
   }
@@ -37764,8 +38040,8 @@ soap_new_set___ns1__removeInvestigatorResponse(
     struct soap *soap,
     ns1__removeInvestigatorResponse *ns1__removeInvestigatorResponse_) {
   struct __ns1__removeInvestigatorResponse *_p =
-      soap_instantiate___ns1__removeInvestigatorResponse(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate___ns1__removeInvestigatorResponse(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeInvestigatorResponse(soap, _p);
     _p->ns1__removeInvestigatorResponse_ = ns1__removeInvestigatorResponse_;
@@ -37830,13 +38106,14 @@ soap_instantiate___ns1__removeKeyword(struct soap *, int, const char *,
 
 inline struct __ns1__removeKeyword *
 soap_new___ns1__removeKeyword(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeKeyword(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__removeKeyword(soap, n, nullptr, nullptr,
+                                               nullptr);
 }
 
 inline struct __ns1__removeKeyword *
 soap_new_req___ns1__removeKeyword(struct soap *soap) {
-  struct __ns1__removeKeyword *_p =
-      soap_instantiate___ns1__removeKeyword(soap, -1, NULL, NULL, NULL);
+  struct __ns1__removeKeyword *_p = soap_instantiate___ns1__removeKeyword(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeKeyword(soap, _p);
   }
@@ -37846,8 +38123,8 @@ soap_new_req___ns1__removeKeyword(struct soap *soap) {
 inline struct __ns1__removeKeyword *
 soap_new_set___ns1__removeKeyword(struct soap *soap,
                                   ns1__removeKeyword *ns1__removeKeyword_) {
-  struct __ns1__removeKeyword *_p =
-      soap_instantiate___ns1__removeKeyword(soap, -1, NULL, NULL, NULL);
+  struct __ns1__removeKeyword *_p = soap_instantiate___ns1__removeKeyword(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeKeyword(soap, _p);
     _p->ns1__removeKeyword_ = ns1__removeKeyword_;
@@ -37913,14 +38190,15 @@ soap_instantiate___ns1__removeKeywordResponse(struct soap *, int, const char *,
 
 inline struct __ns1__removeKeywordResponse *
 soap_new___ns1__removeKeywordResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeKeywordResponse(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate___ns1__removeKeywordResponse(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline struct __ns1__removeKeywordResponse *
 soap_new_req___ns1__removeKeywordResponse(struct soap *soap) {
   struct __ns1__removeKeywordResponse *_p =
-      soap_instantiate___ns1__removeKeywordResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removeKeywordResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__removeKeywordResponse(soap, _p);
   }
@@ -37932,7 +38210,8 @@ soap_new_set___ns1__removeKeywordResponse(
     struct soap *soap,
     ns1__removeKeywordResponse *ns1__removeKeywordResponse_) {
   struct __ns1__removeKeywordResponse *_p =
-      soap_instantiate___ns1__removeKeywordResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removeKeywordResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__removeKeywordResponse(soap, _p);
     _p->ns1__removeKeywordResponse_ = ns1__removeKeywordResponse_;
@@ -37998,14 +38277,15 @@ soap_instantiate___ns1__modifySampleParameter(struct soap *, int, const char *,
 
 inline struct __ns1__modifySampleParameter *
 soap_new___ns1__modifySampleParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifySampleParameter(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate___ns1__modifySampleParameter(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline struct __ns1__modifySampleParameter *
 soap_new_req___ns1__modifySampleParameter(struct soap *soap) {
   struct __ns1__modifySampleParameter *_p =
-      soap_instantiate___ns1__modifySampleParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__modifySampleParameter(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__modifySampleParameter(soap, _p);
   }
@@ -38017,7 +38297,8 @@ soap_new_set___ns1__modifySampleParameter(
     struct soap *soap,
     ns1__modifySampleParameter *ns1__modifySampleParameter_) {
   struct __ns1__modifySampleParameter *_p =
-      soap_instantiate___ns1__modifySampleParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__modifySampleParameter(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__modifySampleParameter(soap, _p);
     _p->ns1__modifySampleParameter_ = ns1__modifySampleParameter_;
@@ -38084,15 +38365,15 @@ soap_instantiate___ns1__modifySampleParameterResponse(struct soap *, int,
 
 inline struct __ns1__modifySampleParameterResponse *
 soap_new___ns1__modifySampleParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifySampleParameterResponse(soap, n, NULL,
-                                                               NULL, NULL);
+  return soap_instantiate___ns1__modifySampleParameterResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__modifySampleParameterResponse *
 soap_new_req___ns1__modifySampleParameterResponse(struct soap *soap) {
   struct __ns1__modifySampleParameterResponse *_p =
-      soap_instantiate___ns1__modifySampleParameterResponse(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate___ns1__modifySampleParameterResponse(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifySampleParameterResponse(soap, _p);
   }
@@ -38104,8 +38385,8 @@ soap_new_set___ns1__modifySampleParameterResponse(
     struct soap *soap,
     ns1__modifySampleParameterResponse *ns1__modifySampleParameterResponse_) {
   struct __ns1__modifySampleParameterResponse *_p =
-      soap_instantiate___ns1__modifySampleParameterResponse(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate___ns1__modifySampleParameterResponse(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifySampleParameterResponse(soap, _p);
     _p->ns1__modifySampleParameterResponse_ =
@@ -38173,13 +38454,15 @@ soap_instantiate___ns1__modifyPublication(struct soap *, int, const char *,
 
 inline struct __ns1__modifyPublication *
 soap_new___ns1__modifyPublication(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifyPublication(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__modifyPublication(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline struct __ns1__modifyPublication *
 soap_new_req___ns1__modifyPublication(struct soap *soap) {
   struct __ns1__modifyPublication *_p =
-      soap_instantiate___ns1__modifyPublication(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__modifyPublication(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__modifyPublication(soap, _p);
   }
@@ -38189,7 +38472,8 @@ soap_new_req___ns1__modifyPublication(struct soap *soap) {
 inline struct __ns1__modifyPublication *soap_new_set___ns1__modifyPublication(
     struct soap *soap, ns1__modifyPublication *ns1__modifyPublication_) {
   struct __ns1__modifyPublication *_p =
-      soap_instantiate___ns1__modifyPublication(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__modifyPublication(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__modifyPublication(soap, _p);
     _p->ns1__modifyPublication_ = ns1__modifyPublication_;
@@ -38257,15 +38541,15 @@ soap_instantiate___ns1__modifyPublicationResponse(struct soap *, int,
 
 inline struct __ns1__modifyPublicationResponse *
 soap_new___ns1__modifyPublicationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifyPublicationResponse(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate___ns1__modifyPublicationResponse(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline struct __ns1__modifyPublicationResponse *
 soap_new_req___ns1__modifyPublicationResponse(struct soap *soap) {
   struct __ns1__modifyPublicationResponse *_p =
-      soap_instantiate___ns1__modifyPublicationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate___ns1__modifyPublicationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifyPublicationResponse(soap, _p);
   }
@@ -38277,8 +38561,8 @@ soap_new_set___ns1__modifyPublicationResponse(
     struct soap *soap,
     ns1__modifyPublicationResponse *ns1__modifyPublicationResponse_) {
   struct __ns1__modifyPublicationResponse *_p =
-      soap_instantiate___ns1__modifyPublicationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate___ns1__modifyPublicationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifyPublicationResponse(soap, _p);
     _p->ns1__modifyPublicationResponse_ = ns1__modifyPublicationResponse_;
@@ -38341,13 +38625,14 @@ soap_instantiate___ns1__modifySample(struct soap *, int, const char *,
 
 inline struct __ns1__modifySample *
 soap_new___ns1__modifySample(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifySample(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__modifySample(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline struct __ns1__modifySample *
 soap_new_req___ns1__modifySample(struct soap *soap) {
   struct __ns1__modifySample *_p =
-      soap_instantiate___ns1__modifySample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__modifySample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifySample(soap, _p);
   }
@@ -38358,7 +38643,7 @@ inline struct __ns1__modifySample *
 soap_new_set___ns1__modifySample(struct soap *soap,
                                  ns1__modifySample *ns1__modifySample_) {
   struct __ns1__modifySample *_p =
-      soap_instantiate___ns1__modifySample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__modifySample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifySample(soap, _p);
     _p->ns1__modifySample_ = ns1__modifySample_;
@@ -38426,14 +38711,15 @@ soap_instantiate___ns1__modifySampleResponse(struct soap *, int, const char *,
 
 inline struct __ns1__modifySampleResponse *
 soap_new___ns1__modifySampleResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifySampleResponse(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate___ns1__modifySampleResponse(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline struct __ns1__modifySampleResponse *
 soap_new_req___ns1__modifySampleResponse(struct soap *soap) {
   struct __ns1__modifySampleResponse *_p =
-      soap_instantiate___ns1__modifySampleResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__modifySampleResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     soap_default___ns1__modifySampleResponse(soap, _p);
   }
@@ -38444,7 +38730,8 @@ inline struct __ns1__modifySampleResponse *
 soap_new_set___ns1__modifySampleResponse(
     struct soap *soap, ns1__modifySampleResponse *ns1__modifySampleResponse_) {
   struct __ns1__modifySampleResponse *_p =
-      soap_instantiate___ns1__modifySampleResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__modifySampleResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     soap_default___ns1__modifySampleResponse(soap, _p);
     _p->ns1__modifySampleResponse_ = ns1__modifySampleResponse_;
@@ -38513,13 +38800,15 @@ soap_instantiate___ns1__modifyInvestigator(struct soap *, int, const char *,
 
 inline struct __ns1__modifyInvestigator *
 soap_new___ns1__modifyInvestigator(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifyInvestigator(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__modifyInvestigator(soap, n, nullptr, nullptr,
+                                                    nullptr);
 }
 
 inline struct __ns1__modifyInvestigator *
 soap_new_req___ns1__modifyInvestigator(struct soap *soap) {
   struct __ns1__modifyInvestigator *_p =
-      soap_instantiate___ns1__modifyInvestigator(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__modifyInvestigator(soap, -1, nullptr, nullptr,
+                                                 nullptr);
   if (_p) {
     soap_default___ns1__modifyInvestigator(soap, _p);
   }
@@ -38529,7 +38818,8 @@ soap_new_req___ns1__modifyInvestigator(struct soap *soap) {
 inline struct __ns1__modifyInvestigator *soap_new_set___ns1__modifyInvestigator(
     struct soap *soap, ns1__modifyInvestigator *ns1__modifyInvestigator_) {
   struct __ns1__modifyInvestigator *_p =
-      soap_instantiate___ns1__modifyInvestigator(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__modifyInvestigator(soap, -1, nullptr, nullptr,
+                                                 nullptr);
   if (_p) {
     soap_default___ns1__modifyInvestigator(soap, _p);
     _p->ns1__modifyInvestigator_ = ns1__modifyInvestigator_;
@@ -38597,15 +38887,15 @@ soap_instantiate___ns1__modifyInvestigatorResponse(struct soap *, int,
 
 inline struct __ns1__modifyInvestigatorResponse *
 soap_new___ns1__modifyInvestigatorResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifyInvestigatorResponse(soap, n, NULL, NULL,
-                                                            NULL);
+  return soap_instantiate___ns1__modifyInvestigatorResponse(soap, n, nullptr,
+                                                            nullptr, nullptr);
 }
 
 inline struct __ns1__modifyInvestigatorResponse *
 soap_new_req___ns1__modifyInvestigatorResponse(struct soap *soap) {
   struct __ns1__modifyInvestigatorResponse *_p =
-      soap_instantiate___ns1__modifyInvestigatorResponse(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate___ns1__modifyInvestigatorResponse(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifyInvestigatorResponse(soap, _p);
   }
@@ -38617,8 +38907,8 @@ soap_new_set___ns1__modifyInvestigatorResponse(
     struct soap *soap,
     ns1__modifyInvestigatorResponse *ns1__modifyInvestigatorResponse_) {
   struct __ns1__modifyInvestigatorResponse *_p =
-      soap_instantiate___ns1__modifyInvestigatorResponse(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate___ns1__modifyInvestigatorResponse(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifyInvestigatorResponse(soap, _p);
     _p->ns1__modifyInvestigatorResponse_ = ns1__modifyInvestigatorResponse_;
@@ -38686,13 +38976,15 @@ soap_instantiate___ns1__modifyInvestigation(struct soap *, int, const char *,
 
 inline struct __ns1__modifyInvestigation *
 soap_new___ns1__modifyInvestigation(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifyInvestigation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__modifyInvestigation(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline struct __ns1__modifyInvestigation *
 soap_new_req___ns1__modifyInvestigation(struct soap *soap) {
   struct __ns1__modifyInvestigation *_p =
-      soap_instantiate___ns1__modifyInvestigation(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__modifyInvestigation(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__modifyInvestigation(soap, _p);
   }
@@ -38703,7 +38995,8 @@ inline struct __ns1__modifyInvestigation *
 soap_new_set___ns1__modifyInvestigation(
     struct soap *soap, ns1__modifyInvestigation *ns1__modifyInvestigation_) {
   struct __ns1__modifyInvestigation *_p =
-      soap_instantiate___ns1__modifyInvestigation(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__modifyInvestigation(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__modifyInvestigation(soap, _p);
     _p->ns1__modifyInvestigation_ = ns1__modifyInvestigation_;
@@ -38771,15 +39064,15 @@ soap_instantiate___ns1__modifyInvestigationResponse(struct soap *, int,
 
 inline struct __ns1__modifyInvestigationResponse *
 soap_new___ns1__modifyInvestigationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__modifyInvestigationResponse(soap, n, NULL,
-                                                             NULL, NULL);
+  return soap_instantiate___ns1__modifyInvestigationResponse(soap, n, nullptr,
+                                                             nullptr, nullptr);
 }
 
 inline struct __ns1__modifyInvestigationResponse *
 soap_new_req___ns1__modifyInvestigationResponse(struct soap *soap) {
   struct __ns1__modifyInvestigationResponse *_p =
-      soap_instantiate___ns1__modifyInvestigationResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__modifyInvestigationResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifyInvestigationResponse(soap, _p);
   }
@@ -38791,8 +39084,8 @@ soap_new_set___ns1__modifyInvestigationResponse(
     struct soap *soap,
     ns1__modifyInvestigationResponse *ns1__modifyInvestigationResponse_) {
   struct __ns1__modifyInvestigationResponse *_p =
-      soap_instantiate___ns1__modifyInvestigationResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__modifyInvestigationResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__modifyInvestigationResponse(soap, _p);
     _p->ns1__modifyInvestigationResponse_ = ns1__modifyInvestigationResponse_;
@@ -38858,14 +39151,15 @@ soap_instantiate___ns1__deleteSampleParameter(struct soap *, int, const char *,
 
 inline struct __ns1__deleteSampleParameter *
 soap_new___ns1__deleteSampleParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteSampleParameter(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate___ns1__deleteSampleParameter(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline struct __ns1__deleteSampleParameter *
 soap_new_req___ns1__deleteSampleParameter(struct soap *soap) {
   struct __ns1__deleteSampleParameter *_p =
-      soap_instantiate___ns1__deleteSampleParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deleteSampleParameter(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__deleteSampleParameter(soap, _p);
   }
@@ -38877,7 +39171,8 @@ soap_new_set___ns1__deleteSampleParameter(
     struct soap *soap,
     ns1__deleteSampleParameter *ns1__deleteSampleParameter_) {
   struct __ns1__deleteSampleParameter *_p =
-      soap_instantiate___ns1__deleteSampleParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deleteSampleParameter(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__deleteSampleParameter(soap, _p);
     _p->ns1__deleteSampleParameter_ = ns1__deleteSampleParameter_;
@@ -38944,15 +39239,15 @@ soap_instantiate___ns1__deleteSampleParameterResponse(struct soap *, int,
 
 inline struct __ns1__deleteSampleParameterResponse *
 soap_new___ns1__deleteSampleParameterResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteSampleParameterResponse(soap, n, NULL,
-                                                               NULL, NULL);
+  return soap_instantiate___ns1__deleteSampleParameterResponse(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__deleteSampleParameterResponse *
 soap_new_req___ns1__deleteSampleParameterResponse(struct soap *soap) {
   struct __ns1__deleteSampleParameterResponse *_p =
-      soap_instantiate___ns1__deleteSampleParameterResponse(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate___ns1__deleteSampleParameterResponse(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteSampleParameterResponse(soap, _p);
   }
@@ -38964,8 +39259,8 @@ soap_new_set___ns1__deleteSampleParameterResponse(
     struct soap *soap,
     ns1__deleteSampleParameterResponse *ns1__deleteSampleParameterResponse_) {
   struct __ns1__deleteSampleParameterResponse *_p =
-      soap_instantiate___ns1__deleteSampleParameterResponse(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate___ns1__deleteSampleParameterResponse(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteSampleParameterResponse(soap, _p);
     _p->ns1__deleteSampleParameterResponse_ =
@@ -39029,13 +39324,14 @@ soap_instantiate___ns1__deleteSample(struct soap *, int, const char *,
 
 inline struct __ns1__deleteSample *
 soap_new___ns1__deleteSample(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteSample(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__deleteSample(soap, n, nullptr, nullptr,
+                                              nullptr);
 }
 
 inline struct __ns1__deleteSample *
 soap_new_req___ns1__deleteSample(struct soap *soap) {
   struct __ns1__deleteSample *_p =
-      soap_instantiate___ns1__deleteSample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deleteSample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteSample(soap, _p);
   }
@@ -39046,7 +39342,7 @@ inline struct __ns1__deleteSample *
 soap_new_set___ns1__deleteSample(struct soap *soap,
                                  ns1__deleteSample *ns1__deleteSample_) {
   struct __ns1__deleteSample *_p =
-      soap_instantiate___ns1__deleteSample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deleteSample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteSample(soap, _p);
     _p->ns1__deleteSample_ = ns1__deleteSample_;
@@ -39114,14 +39410,15 @@ soap_instantiate___ns1__deleteSampleResponse(struct soap *, int, const char *,
 
 inline struct __ns1__deleteSampleResponse *
 soap_new___ns1__deleteSampleResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteSampleResponse(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate___ns1__deleteSampleResponse(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline struct __ns1__deleteSampleResponse *
 soap_new_req___ns1__deleteSampleResponse(struct soap *soap) {
   struct __ns1__deleteSampleResponse *_p =
-      soap_instantiate___ns1__deleteSampleResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deleteSampleResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     soap_default___ns1__deleteSampleResponse(soap, _p);
   }
@@ -39132,7 +39429,8 @@ inline struct __ns1__deleteSampleResponse *
 soap_new_set___ns1__deleteSampleResponse(
     struct soap *soap, ns1__deleteSampleResponse *ns1__deleteSampleResponse_) {
   struct __ns1__deleteSampleResponse *_p =
-      soap_instantiate___ns1__deleteSampleResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deleteSampleResponse(soap, -1, nullptr, nullptr,
+                                                   nullptr);
   if (_p) {
     soap_default___ns1__deleteSampleResponse(soap, _p);
     _p->ns1__deleteSampleResponse_ = ns1__deleteSampleResponse_;
@@ -39200,13 +39498,15 @@ soap_instantiate___ns1__deletePublication(struct soap *, int, const char *,
 
 inline struct __ns1__deletePublication *
 soap_new___ns1__deletePublication(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deletePublication(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__deletePublication(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline struct __ns1__deletePublication *
 soap_new_req___ns1__deletePublication(struct soap *soap) {
   struct __ns1__deletePublication *_p =
-      soap_instantiate___ns1__deletePublication(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deletePublication(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__deletePublication(soap, _p);
   }
@@ -39216,7 +39516,8 @@ soap_new_req___ns1__deletePublication(struct soap *soap) {
 inline struct __ns1__deletePublication *soap_new_set___ns1__deletePublication(
     struct soap *soap, ns1__deletePublication *ns1__deletePublication_) {
   struct __ns1__deletePublication *_p =
-      soap_instantiate___ns1__deletePublication(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deletePublication(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__deletePublication(soap, _p);
     _p->ns1__deletePublication_ = ns1__deletePublication_;
@@ -39284,15 +39585,15 @@ soap_instantiate___ns1__deletePublicationResponse(struct soap *, int,
 
 inline struct __ns1__deletePublicationResponse *
 soap_new___ns1__deletePublicationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deletePublicationResponse(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate___ns1__deletePublicationResponse(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline struct __ns1__deletePublicationResponse *
 soap_new_req___ns1__deletePublicationResponse(struct soap *soap) {
   struct __ns1__deletePublicationResponse *_p =
-      soap_instantiate___ns1__deletePublicationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate___ns1__deletePublicationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deletePublicationResponse(soap, _p);
   }
@@ -39304,8 +39605,8 @@ soap_new_set___ns1__deletePublicationResponse(
     struct soap *soap,
     ns1__deletePublicationResponse *ns1__deletePublicationResponse_) {
   struct __ns1__deletePublicationResponse *_p =
-      soap_instantiate___ns1__deletePublicationResponse(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate___ns1__deletePublicationResponse(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deletePublicationResponse(soap, _p);
     _p->ns1__deletePublicationResponse_ = ns1__deletePublicationResponse_;
@@ -39370,13 +39671,14 @@ soap_instantiate___ns1__deleteKeyword(struct soap *, int, const char *,
 
 inline struct __ns1__deleteKeyword *
 soap_new___ns1__deleteKeyword(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteKeyword(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__deleteKeyword(soap, n, nullptr, nullptr,
+                                               nullptr);
 }
 
 inline struct __ns1__deleteKeyword *
 soap_new_req___ns1__deleteKeyword(struct soap *soap) {
-  struct __ns1__deleteKeyword *_p =
-      soap_instantiate___ns1__deleteKeyword(soap, -1, NULL, NULL, NULL);
+  struct __ns1__deleteKeyword *_p = soap_instantiate___ns1__deleteKeyword(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteKeyword(soap, _p);
   }
@@ -39386,8 +39688,8 @@ soap_new_req___ns1__deleteKeyword(struct soap *soap) {
 inline struct __ns1__deleteKeyword *
 soap_new_set___ns1__deleteKeyword(struct soap *soap,
                                   ns1__deleteKeyword *ns1__deleteKeyword_) {
-  struct __ns1__deleteKeyword *_p =
-      soap_instantiate___ns1__deleteKeyword(soap, -1, NULL, NULL, NULL);
+  struct __ns1__deleteKeyword *_p = soap_instantiate___ns1__deleteKeyword(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteKeyword(soap, _p);
     _p->ns1__deleteKeyword_ = ns1__deleteKeyword_;
@@ -39453,14 +39755,15 @@ soap_instantiate___ns1__deleteKeywordResponse(struct soap *, int, const char *,
 
 inline struct __ns1__deleteKeywordResponse *
 soap_new___ns1__deleteKeywordResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteKeywordResponse(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate___ns1__deleteKeywordResponse(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline struct __ns1__deleteKeywordResponse *
 soap_new_req___ns1__deleteKeywordResponse(struct soap *soap) {
   struct __ns1__deleteKeywordResponse *_p =
-      soap_instantiate___ns1__deleteKeywordResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deleteKeywordResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__deleteKeywordResponse(soap, _p);
   }
@@ -39472,7 +39775,8 @@ soap_new_set___ns1__deleteKeywordResponse(
     struct soap *soap,
     ns1__deleteKeywordResponse *ns1__deleteKeywordResponse_) {
   struct __ns1__deleteKeywordResponse *_p =
-      soap_instantiate___ns1__deleteKeywordResponse(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deleteKeywordResponse(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__deleteKeywordResponse(soap, _p);
     _p->ns1__deleteKeywordResponse_ = ns1__deleteKeywordResponse_;
@@ -39540,13 +39844,15 @@ soap_instantiate___ns1__deleteInvestigator(struct soap *, int, const char *,
 
 inline struct __ns1__deleteInvestigator *
 soap_new___ns1__deleteInvestigator(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteInvestigator(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__deleteInvestigator(soap, n, nullptr, nullptr,
+                                                    nullptr);
 }
 
 inline struct __ns1__deleteInvestigator *
 soap_new_req___ns1__deleteInvestigator(struct soap *soap) {
   struct __ns1__deleteInvestigator *_p =
-      soap_instantiate___ns1__deleteInvestigator(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deleteInvestigator(soap, -1, nullptr, nullptr,
+                                                 nullptr);
   if (_p) {
     soap_default___ns1__deleteInvestigator(soap, _p);
   }
@@ -39556,7 +39862,8 @@ soap_new_req___ns1__deleteInvestigator(struct soap *soap) {
 inline struct __ns1__deleteInvestigator *soap_new_set___ns1__deleteInvestigator(
     struct soap *soap, ns1__deleteInvestigator *ns1__deleteInvestigator_) {
   struct __ns1__deleteInvestigator *_p =
-      soap_instantiate___ns1__deleteInvestigator(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deleteInvestigator(soap, -1, nullptr, nullptr,
+                                                 nullptr);
   if (_p) {
     soap_default___ns1__deleteInvestigator(soap, _p);
     _p->ns1__deleteInvestigator_ = ns1__deleteInvestigator_;
@@ -39624,15 +39931,15 @@ soap_instantiate___ns1__deleteInvestigatorResponse(struct soap *, int,
 
 inline struct __ns1__deleteInvestigatorResponse *
 soap_new___ns1__deleteInvestigatorResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteInvestigatorResponse(soap, n, NULL, NULL,
-                                                            NULL);
+  return soap_instantiate___ns1__deleteInvestigatorResponse(soap, n, nullptr,
+                                                            nullptr, nullptr);
 }
 
 inline struct __ns1__deleteInvestigatorResponse *
 soap_new_req___ns1__deleteInvestigatorResponse(struct soap *soap) {
   struct __ns1__deleteInvestigatorResponse *_p =
-      soap_instantiate___ns1__deleteInvestigatorResponse(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate___ns1__deleteInvestigatorResponse(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteInvestigatorResponse(soap, _p);
   }
@@ -39644,8 +39951,8 @@ soap_new_set___ns1__deleteInvestigatorResponse(
     struct soap *soap,
     ns1__deleteInvestigatorResponse *ns1__deleteInvestigatorResponse_) {
   struct __ns1__deleteInvestigatorResponse *_p =
-      soap_instantiate___ns1__deleteInvestigatorResponse(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate___ns1__deleteInvestigatorResponse(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteInvestigatorResponse(soap, _p);
     _p->ns1__deleteInvestigatorResponse_ = ns1__deleteInvestigatorResponse_;
@@ -39713,13 +40020,15 @@ soap_instantiate___ns1__addSampleParameter(struct soap *, int, const char *,
 
 inline struct __ns1__addSampleParameter *
 soap_new___ns1__addSampleParameter(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__addSampleParameter(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__addSampleParameter(soap, n, nullptr, nullptr,
+                                                    nullptr);
 }
 
 inline struct __ns1__addSampleParameter *
 soap_new_req___ns1__addSampleParameter(struct soap *soap) {
   struct __ns1__addSampleParameter *_p =
-      soap_instantiate___ns1__addSampleParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__addSampleParameter(soap, -1, nullptr, nullptr,
+                                                 nullptr);
   if (_p) {
     soap_default___ns1__addSampleParameter(soap, _p);
   }
@@ -39729,7 +40038,8 @@ soap_new_req___ns1__addSampleParameter(struct soap *soap) {
 inline struct __ns1__addSampleParameter *soap_new_set___ns1__addSampleParameter(
     struct soap *soap, ns1__addSampleParameter *ns1__addSampleParameter_) {
   struct __ns1__addSampleParameter *_p =
-      soap_instantiate___ns1__addSampleParameter(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__addSampleParameter(soap, -1, nullptr, nullptr,
+                                                 nullptr);
   if (_p) {
     soap_default___ns1__addSampleParameter(soap, _p);
     _p->ns1__addSampleParameter_ = ns1__addSampleParameter_;
@@ -39796,13 +40106,14 @@ soap_instantiate___ns1__addPublication(struct soap *, int, const char *,
 
 inline struct __ns1__addPublication *
 soap_new___ns1__addPublication(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__addPublication(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__addPublication(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline struct __ns1__addPublication *
 soap_new_req___ns1__addPublication(struct soap *soap) {
-  struct __ns1__addPublication *_p =
-      soap_instantiate___ns1__addPublication(soap, -1, NULL, NULL, NULL);
+  struct __ns1__addPublication *_p = soap_instantiate___ns1__addPublication(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__addPublication(soap, _p);
   }
@@ -39812,8 +40123,8 @@ soap_new_req___ns1__addPublication(struct soap *soap) {
 inline struct __ns1__addPublication *
 soap_new_set___ns1__addPublication(struct soap *soap,
                                    ns1__addPublication *ns1__addPublication_) {
-  struct __ns1__addPublication *_p =
-      soap_instantiate___ns1__addPublication(soap, -1, NULL, NULL, NULL);
+  struct __ns1__addPublication *_p = soap_instantiate___ns1__addPublication(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__addPublication(soap, _p);
     _p->ns1__addPublication_ = ns1__addPublication_;
@@ -39875,13 +40186,13 @@ soap_instantiate___ns1__addSample(struct soap *, int, const char *,
 
 inline struct __ns1__addSample *soap_new___ns1__addSample(struct soap *soap,
                                                           int n = -1) {
-  return soap_instantiate___ns1__addSample(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__addSample(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__addSample *
 soap_new_req___ns1__addSample(struct soap *soap) {
   struct __ns1__addSample *_p =
-      soap_instantiate___ns1__addSample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__addSample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__addSample(soap, _p);
   }
@@ -39892,7 +40203,7 @@ inline struct __ns1__addSample *
 soap_new_set___ns1__addSample(struct soap *soap,
                               ns1__addSample *ns1__addSample_) {
   struct __ns1__addSample *_p =
-      soap_instantiate___ns1__addSample(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__addSample(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__addSample(soap, _p);
     _p->ns1__addSample_ = ns1__addSample_;
@@ -39958,13 +40269,14 @@ soap_instantiate___ns1__addInvestigator(struct soap *, int, const char *,
 
 inline struct __ns1__addInvestigator *
 soap_new___ns1__addInvestigator(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__addInvestigator(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__addInvestigator(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline struct __ns1__addInvestigator *
 soap_new_req___ns1__addInvestigator(struct soap *soap) {
-  struct __ns1__addInvestigator *_p =
-      soap_instantiate___ns1__addInvestigator(soap, -1, NULL, NULL, NULL);
+  struct __ns1__addInvestigator *_p = soap_instantiate___ns1__addInvestigator(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__addInvestigator(soap, _p);
   }
@@ -39973,8 +40285,8 @@ soap_new_req___ns1__addInvestigator(struct soap *soap) {
 
 inline struct __ns1__addInvestigator *soap_new_set___ns1__addInvestigator(
     struct soap *soap, ns1__addInvestigator *ns1__addInvestigator_) {
-  struct __ns1__addInvestigator *_p =
-      soap_instantiate___ns1__addInvestigator(soap, -1, NULL, NULL, NULL);
+  struct __ns1__addInvestigator *_p = soap_instantiate___ns1__addInvestigator(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__addInvestigator(soap, _p);
     _p->ns1__addInvestigator_ = ns1__addInvestigator_;
@@ -40038,13 +40350,13 @@ soap_instantiate___ns1__addKeyword(struct soap *, int, const char *,
 
 inline struct __ns1__addKeyword *soap_new___ns1__addKeyword(struct soap *soap,
                                                             int n = -1) {
-  return soap_instantiate___ns1__addKeyword(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__addKeyword(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__addKeyword *
 soap_new_req___ns1__addKeyword(struct soap *soap) {
   struct __ns1__addKeyword *_p =
-      soap_instantiate___ns1__addKeyword(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__addKeyword(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__addKeyword(soap, _p);
   }
@@ -40055,7 +40367,7 @@ inline struct __ns1__addKeyword *
 soap_new_set___ns1__addKeyword(struct soap *soap,
                                ns1__addKeyword *ns1__addKeyword_) {
   struct __ns1__addKeyword *_p =
-      soap_instantiate___ns1__addKeyword(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__addKeyword(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__addKeyword(soap, _p);
     _p->ns1__addKeyword_ = ns1__addKeyword_;
@@ -40123,13 +40435,15 @@ soap_instantiate___ns1__removeInvestigation(struct soap *, int, const char *,
 
 inline struct __ns1__removeInvestigation *
 soap_new___ns1__removeInvestigation(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeInvestigation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__removeInvestigation(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline struct __ns1__removeInvestigation *
 soap_new_req___ns1__removeInvestigation(struct soap *soap) {
   struct __ns1__removeInvestigation *_p =
-      soap_instantiate___ns1__removeInvestigation(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removeInvestigation(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__removeInvestigation(soap, _p);
   }
@@ -40140,7 +40454,8 @@ inline struct __ns1__removeInvestigation *
 soap_new_set___ns1__removeInvestigation(
     struct soap *soap, ns1__removeInvestigation *ns1__removeInvestigation_) {
   struct __ns1__removeInvestigation *_p =
-      soap_instantiate___ns1__removeInvestigation(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__removeInvestigation(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__removeInvestigation(soap, _p);
     _p->ns1__removeInvestigation_ = ns1__removeInvestigation_;
@@ -40208,15 +40523,15 @@ soap_instantiate___ns1__removeInvestigationResponse(struct soap *, int,
 
 inline struct __ns1__removeInvestigationResponse *
 soap_new___ns1__removeInvestigationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__removeInvestigationResponse(soap, n, NULL,
-                                                             NULL, NULL);
+  return soap_instantiate___ns1__removeInvestigationResponse(soap, n, nullptr,
+                                                             nullptr, nullptr);
 }
 
 inline struct __ns1__removeInvestigationResponse *
 soap_new_req___ns1__removeInvestigationResponse(struct soap *soap) {
   struct __ns1__removeInvestigationResponse *_p =
-      soap_instantiate___ns1__removeInvestigationResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__removeInvestigationResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeInvestigationResponse(soap, _p);
   }
@@ -40228,8 +40543,8 @@ soap_new_set___ns1__removeInvestigationResponse(
     struct soap *soap,
     ns1__removeInvestigationResponse *ns1__removeInvestigationResponse_) {
   struct __ns1__removeInvestigationResponse *_p =
-      soap_instantiate___ns1__removeInvestigationResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__removeInvestigationResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__removeInvestigationResponse(soap, _p);
     _p->ns1__removeInvestigationResponse_ = ns1__removeInvestigationResponse_;
@@ -40297,13 +40612,15 @@ soap_instantiate___ns1__deleteInvestigation(struct soap *, int, const char *,
 
 inline struct __ns1__deleteInvestigation *
 soap_new___ns1__deleteInvestigation(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteInvestigation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__deleteInvestigation(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline struct __ns1__deleteInvestigation *
 soap_new_req___ns1__deleteInvestigation(struct soap *soap) {
   struct __ns1__deleteInvestigation *_p =
-      soap_instantiate___ns1__deleteInvestigation(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deleteInvestigation(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__deleteInvestigation(soap, _p);
   }
@@ -40314,7 +40631,8 @@ inline struct __ns1__deleteInvestigation *
 soap_new_set___ns1__deleteInvestigation(
     struct soap *soap, ns1__deleteInvestigation *ns1__deleteInvestigation_) {
   struct __ns1__deleteInvestigation *_p =
-      soap_instantiate___ns1__deleteInvestigation(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__deleteInvestigation(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__deleteInvestigation(soap, _p);
     _p->ns1__deleteInvestigation_ = ns1__deleteInvestigation_;
@@ -40382,15 +40700,15 @@ soap_instantiate___ns1__deleteInvestigationResponse(struct soap *, int,
 
 inline struct __ns1__deleteInvestigationResponse *
 soap_new___ns1__deleteInvestigationResponse(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__deleteInvestigationResponse(soap, n, NULL,
-                                                             NULL, NULL);
+  return soap_instantiate___ns1__deleteInvestigationResponse(soap, n, nullptr,
+                                                             nullptr, nullptr);
 }
 
 inline struct __ns1__deleteInvestigationResponse *
 soap_new_req___ns1__deleteInvestigationResponse(struct soap *soap) {
   struct __ns1__deleteInvestigationResponse *_p =
-      soap_instantiate___ns1__deleteInvestigationResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__deleteInvestigationResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteInvestigationResponse(soap, _p);
   }
@@ -40402,8 +40720,8 @@ soap_new_set___ns1__deleteInvestigationResponse(
     struct soap *soap,
     ns1__deleteInvestigationResponse *ns1__deleteInvestigationResponse_) {
   struct __ns1__deleteInvestigationResponse *_p =
-      soap_instantiate___ns1__deleteInvestigationResponse(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__deleteInvestigationResponse(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__deleteInvestigationResponse(soap, _p);
     _p->ns1__deleteInvestigationResponse_ = ns1__deleteInvestigationResponse_;
@@ -40471,13 +40789,15 @@ soap_instantiate___ns1__createInvestigation(struct soap *, int, const char *,
 
 inline struct __ns1__createInvestigation *
 soap_new___ns1__createInvestigation(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__createInvestigation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__createInvestigation(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline struct __ns1__createInvestigation *
 soap_new_req___ns1__createInvestigation(struct soap *soap) {
   struct __ns1__createInvestigation *_p =
-      soap_instantiate___ns1__createInvestigation(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__createInvestigation(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__createInvestigation(soap, _p);
   }
@@ -40488,7 +40808,8 @@ inline struct __ns1__createInvestigation *
 soap_new_set___ns1__createInvestigation(
     struct soap *soap, ns1__createInvestigation *ns1__createInvestigation_) {
   struct __ns1__createInvestigation *_p =
-      soap_instantiate___ns1__createInvestigation(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__createInvestigation(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__createInvestigation(soap, _p);
     _p->ns1__createInvestigation_ = ns1__createInvestigation_;
@@ -40556,15 +40877,15 @@ soap_instantiate___ns1__getInvestigationsIncludes(struct soap *, int,
 
 inline struct __ns1__getInvestigationsIncludes *
 soap_new___ns1__getInvestigationsIncludes(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getInvestigationsIncludes(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate___ns1__getInvestigationsIncludes(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline struct __ns1__getInvestigationsIncludes *
 soap_new_req___ns1__getInvestigationsIncludes(struct soap *soap) {
   struct __ns1__getInvestigationsIncludes *_p =
-      soap_instantiate___ns1__getInvestigationsIncludes(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate___ns1__getInvestigationsIncludes(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getInvestigationsIncludes(soap, _p);
   }
@@ -40576,8 +40897,8 @@ soap_new_set___ns1__getInvestigationsIncludes(
     struct soap *soap,
     ns1__getInvestigationsIncludes *ns1__getInvestigationsIncludes_) {
   struct __ns1__getInvestigationsIncludes *_p =
-      soap_instantiate___ns1__getInvestigationsIncludes(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate___ns1__getInvestigationsIncludes(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getInvestigationsIncludes(soap, _p);
     _p->ns1__getInvestigationsIncludes_ = ns1__getInvestigationsIncludes_;
@@ -40644,13 +40965,15 @@ soap_instantiate___ns1__getInvestigations(struct soap *, int, const char *,
 
 inline struct __ns1__getInvestigations *
 soap_new___ns1__getInvestigations(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getInvestigations(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__getInvestigations(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline struct __ns1__getInvestigations *
 soap_new_req___ns1__getInvestigations(struct soap *soap) {
   struct __ns1__getInvestigations *_p =
-      soap_instantiate___ns1__getInvestigations(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getInvestigations(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__getInvestigations(soap, _p);
   }
@@ -40660,7 +40983,8 @@ soap_new_req___ns1__getInvestigations(struct soap *soap) {
 inline struct __ns1__getInvestigations *soap_new_set___ns1__getInvestigations(
     struct soap *soap, ns1__getInvestigations *ns1__getInvestigations_) {
   struct __ns1__getInvestigations *_p =
-      soap_instantiate___ns1__getInvestigations(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getInvestigations(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__getInvestigations(soap, _p);
     _p->ns1__getInvestigations_ = ns1__getInvestigations_;
@@ -40728,15 +41052,15 @@ soap_instantiate___ns1__getInvestigationIncludes(struct soap *, int,
 
 inline struct __ns1__getInvestigationIncludes *
 soap_new___ns1__getInvestigationIncludes(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getInvestigationIncludes(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate___ns1__getInvestigationIncludes(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline struct __ns1__getInvestigationIncludes *
 soap_new_req___ns1__getInvestigationIncludes(struct soap *soap) {
   struct __ns1__getInvestigationIncludes *_p =
-      soap_instantiate___ns1__getInvestigationIncludes(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate___ns1__getInvestigationIncludes(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getInvestigationIncludes(soap, _p);
   }
@@ -40748,8 +41072,8 @@ soap_new_set___ns1__getInvestigationIncludes(
     struct soap *soap,
     ns1__getInvestigationIncludes *ns1__getInvestigationIncludes_) {
   struct __ns1__getInvestigationIncludes *_p =
-      soap_instantiate___ns1__getInvestigationIncludes(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate___ns1__getInvestigationIncludes(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getInvestigationIncludes(soap, _p);
     _p->ns1__getInvestigationIncludes_ = ns1__getInvestigationIncludes_;
@@ -40816,13 +41140,14 @@ soap_instantiate___ns1__getInvestigation(struct soap *, int, const char *,
 
 inline struct __ns1__getInvestigation *
 soap_new___ns1__getInvestigation(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getInvestigation(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__getInvestigation(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline struct __ns1__getInvestigation *
 soap_new_req___ns1__getInvestigation(struct soap *soap) {
-  struct __ns1__getInvestigation *_p =
-      soap_instantiate___ns1__getInvestigation(soap, -1, NULL, NULL, NULL);
+  struct __ns1__getInvestigation *_p = soap_instantiate___ns1__getInvestigation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getInvestigation(soap, _p);
   }
@@ -40831,8 +41156,8 @@ soap_new_req___ns1__getInvestigation(struct soap *soap) {
 
 inline struct __ns1__getInvestigation *soap_new_set___ns1__getInvestigation(
     struct soap *soap, ns1__getInvestigation *ns1__getInvestigation_) {
-  struct __ns1__getInvestigation *_p =
-      soap_instantiate___ns1__getInvestigation(soap, -1, NULL, NULL, NULL);
+  struct __ns1__getInvestigation *_p = soap_instantiate___ns1__getInvestigation(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getInvestigation(soap, _p);
     _p->ns1__getInvestigation_ = ns1__getInvestigation_;
@@ -40901,13 +41226,15 @@ soap_instantiate___ns1__listDatafileFormats(struct soap *, int, const char *,
 
 inline struct __ns1__listDatafileFormats *
 soap_new___ns1__listDatafileFormats(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__listDatafileFormats(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__listDatafileFormats(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline struct __ns1__listDatafileFormats *
 soap_new_req___ns1__listDatafileFormats(struct soap *soap) {
   struct __ns1__listDatafileFormats *_p =
-      soap_instantiate___ns1__listDatafileFormats(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__listDatafileFormats(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__listDatafileFormats(soap, _p);
   }
@@ -40918,7 +41245,8 @@ inline struct __ns1__listDatafileFormats *
 soap_new_set___ns1__listDatafileFormats(
     struct soap *soap, ns1__listDatafileFormats *ns1__listDatafileFormats_) {
   struct __ns1__listDatafileFormats *_p =
-      soap_instantiate___ns1__listDatafileFormats(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__listDatafileFormats(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__listDatafileFormats(soap, _p);
     _p->ns1__listDatafileFormats_ = ns1__listDatafileFormats_;
@@ -40986,15 +41314,15 @@ soap_instantiate___ns1__searchByRunNumberPagination(struct soap *, int,
 
 inline struct __ns1__searchByRunNumberPagination *
 soap_new___ns1__searchByRunNumberPagination(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchByRunNumberPagination(soap, n, NULL,
-                                                             NULL, NULL);
+  return soap_instantiate___ns1__searchByRunNumberPagination(soap, n, nullptr,
+                                                             nullptr, nullptr);
 }
 
 inline struct __ns1__searchByRunNumberPagination *
 soap_new_req___ns1__searchByRunNumberPagination(struct soap *soap) {
   struct __ns1__searchByRunNumberPagination *_p =
-      soap_instantiate___ns1__searchByRunNumberPagination(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__searchByRunNumberPagination(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchByRunNumberPagination(soap, _p);
   }
@@ -41006,8 +41334,8 @@ soap_new_set___ns1__searchByRunNumberPagination(
     struct soap *soap,
     ns1__searchByRunNumberPagination *ns1__searchByRunNumberPagination_) {
   struct __ns1__searchByRunNumberPagination *_p =
-      soap_instantiate___ns1__searchByRunNumberPagination(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__searchByRunNumberPagination(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchByRunNumberPagination(soap, _p);
     _p->ns1__searchByRunNumberPagination_ = ns1__searchByRunNumberPagination_;
@@ -41074,13 +41402,15 @@ soap_instantiate___ns1__searchByRunNumber(struct soap *, int, const char *,
 
 inline struct __ns1__searchByRunNumber *
 soap_new___ns1__searchByRunNumber(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchByRunNumber(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__searchByRunNumber(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline struct __ns1__searchByRunNumber *
 soap_new_req___ns1__searchByRunNumber(struct soap *soap) {
   struct __ns1__searchByRunNumber *_p =
-      soap_instantiate___ns1__searchByRunNumber(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__searchByRunNumber(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__searchByRunNumber(soap, _p);
   }
@@ -41090,7 +41420,8 @@ soap_new_req___ns1__searchByRunNumber(struct soap *soap) {
 inline struct __ns1__searchByRunNumber *soap_new_set___ns1__searchByRunNumber(
     struct soap *soap, ns1__searchByRunNumber *ns1__searchByRunNumber_) {
   struct __ns1__searchByRunNumber *_p =
-      soap_instantiate___ns1__searchByRunNumber(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__searchByRunNumber(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__searchByRunNumber(soap, _p);
     _p->ns1__searchByRunNumber_ = ns1__searchByRunNumber_;
@@ -41158,13 +41489,15 @@ soap_instantiate___ns1__listDatasetStatus(struct soap *, int, const char *,
 
 inline struct __ns1__listDatasetStatus *
 soap_new___ns1__listDatasetStatus(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__listDatasetStatus(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__listDatasetStatus(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline struct __ns1__listDatasetStatus *
 soap_new_req___ns1__listDatasetStatus(struct soap *soap) {
   struct __ns1__listDatasetStatus *_p =
-      soap_instantiate___ns1__listDatasetStatus(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__listDatasetStatus(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__listDatasetStatus(soap, _p);
   }
@@ -41174,7 +41507,8 @@ soap_new_req___ns1__listDatasetStatus(struct soap *soap) {
 inline struct __ns1__listDatasetStatus *soap_new_set___ns1__listDatasetStatus(
     struct soap *soap, ns1__listDatasetStatus *ns1__listDatasetStatus_) {
   struct __ns1__listDatasetStatus *_p =
-      soap_instantiate___ns1__listDatasetStatus(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__listDatasetStatus(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__listDatasetStatus(soap, _p);
     _p->ns1__listDatasetStatus_ = ns1__listDatasetStatus_;
@@ -41242,13 +41576,14 @@ soap_instantiate___ns1__listDatasetTypes(struct soap *, int, const char *,
 
 inline struct __ns1__listDatasetTypes *
 soap_new___ns1__listDatasetTypes(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__listDatasetTypes(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__listDatasetTypes(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline struct __ns1__listDatasetTypes *
 soap_new_req___ns1__listDatasetTypes(struct soap *soap) {
-  struct __ns1__listDatasetTypes *_p =
-      soap_instantiate___ns1__listDatasetTypes(soap, -1, NULL, NULL, NULL);
+  struct __ns1__listDatasetTypes *_p = soap_instantiate___ns1__listDatasetTypes(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__listDatasetTypes(soap, _p);
   }
@@ -41257,8 +41592,8 @@ soap_new_req___ns1__listDatasetTypes(struct soap *soap) {
 
 inline struct __ns1__listDatasetTypes *soap_new_set___ns1__listDatasetTypes(
     struct soap *soap, ns1__listDatasetTypes *ns1__listDatasetTypes_) {
-  struct __ns1__listDatasetTypes *_p =
-      soap_instantiate___ns1__listDatasetTypes(soap, -1, NULL, NULL, NULL);
+  struct __ns1__listDatasetTypes *_p = soap_instantiate___ns1__listDatasetTypes(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__listDatasetTypes(soap, _p);
     _p->ns1__listDatasetTypes_ = ns1__listDatasetTypes_;
@@ -41325,15 +41660,15 @@ soap_instantiate___ns1__searchDatasetsBySample(struct soap *, int, const char *,
 
 inline struct __ns1__searchDatasetsBySample *
 soap_new___ns1__searchDatasetsBySample(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchDatasetsBySample(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate___ns1__searchDatasetsBySample(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline struct __ns1__searchDatasetsBySample *
 soap_new_req___ns1__searchDatasetsBySample(struct soap *soap) {
   struct __ns1__searchDatasetsBySample *_p =
-      soap_instantiate___ns1__searchDatasetsBySample(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__searchDatasetsBySample(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetsBySample(soap, _p);
   }
@@ -41345,8 +41680,8 @@ soap_new_set___ns1__searchDatasetsBySample(
     struct soap *soap,
     ns1__searchDatasetsBySample *ns1__searchDatasetsBySample_) {
   struct __ns1__searchDatasetsBySample *_p =
-      soap_instantiate___ns1__searchDatasetsBySample(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__searchDatasetsBySample(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__searchDatasetsBySample(soap, _p);
     _p->ns1__searchDatasetsBySample_ = ns1__searchDatasetsBySample_;
@@ -41413,15 +41748,15 @@ soap_instantiate___ns1__searchSamplesBySampleName(struct soap *, int,
 
 inline struct __ns1__searchSamplesBySampleName *
 soap_new___ns1__searchSamplesBySampleName(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchSamplesBySampleName(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate___ns1__searchSamplesBySampleName(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline struct __ns1__searchSamplesBySampleName *
 soap_new_req___ns1__searchSamplesBySampleName(struct soap *soap) {
   struct __ns1__searchSamplesBySampleName *_p =
-      soap_instantiate___ns1__searchSamplesBySampleName(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate___ns1__searchSamplesBySampleName(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSamplesBySampleName(soap, _p);
   }
@@ -41433,8 +41768,8 @@ soap_new_set___ns1__searchSamplesBySampleName(
     struct soap *soap,
     ns1__searchSamplesBySampleName *ns1__searchSamplesBySampleName_) {
   struct __ns1__searchSamplesBySampleName *_p =
-      soap_instantiate___ns1__searchSamplesBySampleName(soap, -1, NULL, NULL,
-                                                        NULL);
+      soap_instantiate___ns1__searchSamplesBySampleName(soap, -1, nullptr,
+                                                        nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchSamplesBySampleName(soap, _p);
     _p->ns1__searchSamplesBySampleName_ = ns1__searchSamplesBySampleName_;
@@ -41500,15 +41835,15 @@ soap_instantiate___ns1__listInvestigationTypes(struct soap *, int, const char *,
 
 inline struct __ns1__listInvestigationTypes *
 soap_new___ns1__listInvestigationTypes(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__listInvestigationTypes(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate___ns1__listInvestigationTypes(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline struct __ns1__listInvestigationTypes *
 soap_new_req___ns1__listInvestigationTypes(struct soap *soap) {
   struct __ns1__listInvestigationTypes *_p =
-      soap_instantiate___ns1__listInvestigationTypes(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__listInvestigationTypes(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__listInvestigationTypes(soap, _p);
   }
@@ -41520,8 +41855,8 @@ soap_new_set___ns1__listInvestigationTypes(
     struct soap *soap,
     ns1__listInvestigationTypes *ns1__listInvestigationTypes_) {
   struct __ns1__listInvestigationTypes *_p =
-      soap_instantiate___ns1__listInvestigationTypes(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__listInvestigationTypes(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__listInvestigationTypes(soap, _p);
     _p->ns1__listInvestigationTypes_ = ns1__listInvestigationTypes_;
@@ -41587,15 +41922,15 @@ soap_instantiate___ns1__getInstrumentsWithData(struct soap *, int, const char *,
 
 inline struct __ns1__getInstrumentsWithData *
 soap_new___ns1__getInstrumentsWithData(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getInstrumentsWithData(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate___ns1__getInstrumentsWithData(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline struct __ns1__getInstrumentsWithData *
 soap_new_req___ns1__getInstrumentsWithData(struct soap *soap) {
   struct __ns1__getInstrumentsWithData *_p =
-      soap_instantiate___ns1__getInstrumentsWithData(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__getInstrumentsWithData(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__getInstrumentsWithData(soap, _p);
   }
@@ -41607,8 +41942,8 @@ soap_new_set___ns1__getInstrumentsWithData(
     struct soap *soap,
     ns1__getInstrumentsWithData *ns1__getInstrumentsWithData_) {
   struct __ns1__getInstrumentsWithData *_p =
-      soap_instantiate___ns1__getInstrumentsWithData(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__getInstrumentsWithData(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__getInstrumentsWithData(soap, _p);
     _p->ns1__getInstrumentsWithData_ = ns1__getInstrumentsWithData_;
@@ -41682,14 +42017,14 @@ inline struct __ns1__getFacilityCyclesWithDataForInstrument *
 soap_new___ns1__getFacilityCyclesWithDataForInstrument(struct soap *soap,
                                                        int n = -1) {
   return soap_instantiate___ns1__getFacilityCyclesWithDataForInstrument(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__getFacilityCyclesWithDataForInstrument *
 soap_new_req___ns1__getFacilityCyclesWithDataForInstrument(struct soap *soap) {
   struct __ns1__getFacilityCyclesWithDataForInstrument *_p =
       soap_instantiate___ns1__getFacilityCyclesWithDataForInstrument(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getFacilityCyclesWithDataForInstrument(soap, _p);
   }
@@ -41702,7 +42037,7 @@ soap_new_set___ns1__getFacilityCyclesWithDataForInstrument(
                            ns1__getFacilityCyclesWithDataForInstrument_) {
   struct __ns1__getFacilityCyclesWithDataForInstrument *_p =
       soap_instantiate___ns1__getFacilityCyclesWithDataForInstrument(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getFacilityCyclesWithDataForInstrument(soap, _p);
     _p->ns1__getFacilityCyclesWithDataForInstrument_ =
@@ -41773,13 +42108,15 @@ soap_instantiate___ns1__listFacilityCycles(struct soap *, int, const char *,
 
 inline struct __ns1__listFacilityCycles *
 soap_new___ns1__listFacilityCycles(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__listFacilityCycles(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__listFacilityCycles(soap, n, nullptr, nullptr,
+                                                    nullptr);
 }
 
 inline struct __ns1__listFacilityCycles *
 soap_new_req___ns1__listFacilityCycles(struct soap *soap) {
   struct __ns1__listFacilityCycles *_p =
-      soap_instantiate___ns1__listFacilityCycles(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__listFacilityCycles(soap, -1, nullptr, nullptr,
+                                                 nullptr);
   if (_p) {
     soap_default___ns1__listFacilityCycles(soap, _p);
   }
@@ -41789,7 +42126,8 @@ soap_new_req___ns1__listFacilityCycles(struct soap *soap) {
 inline struct __ns1__listFacilityCycles *soap_new_set___ns1__listFacilityCycles(
     struct soap *soap, ns1__listFacilityCycles *ns1__listFacilityCycles_) {
   struct __ns1__listFacilityCycles *_p =
-      soap_instantiate___ns1__listFacilityCycles(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__listFacilityCycles(soap, -1, nullptr, nullptr,
+                                                 nullptr);
   if (_p) {
     soap_default___ns1__listFacilityCycles(soap, _p);
     _p->ns1__listFacilityCycles_ = ns1__listFacilityCycles_;
@@ -41856,13 +42194,14 @@ soap_instantiate___ns1__listParameters(struct soap *, int, const char *,
 
 inline struct __ns1__listParameters *
 soap_new___ns1__listParameters(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__listParameters(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__listParameters(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline struct __ns1__listParameters *
 soap_new_req___ns1__listParameters(struct soap *soap) {
-  struct __ns1__listParameters *_p =
-      soap_instantiate___ns1__listParameters(soap, -1, NULL, NULL, NULL);
+  struct __ns1__listParameters *_p = soap_instantiate___ns1__listParameters(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__listParameters(soap, _p);
   }
@@ -41872,8 +42211,8 @@ soap_new_req___ns1__listParameters(struct soap *soap) {
 inline struct __ns1__listParameters *
 soap_new_set___ns1__listParameters(struct soap *soap,
                                    ns1__listParameters *ns1__listParameters_) {
-  struct __ns1__listParameters *_p =
-      soap_instantiate___ns1__listParameters(soap, -1, NULL, NULL, NULL);
+  struct __ns1__listParameters *_p = soap_instantiate___ns1__listParameters(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__listParameters(soap, _p);
     _p->ns1__listParameters_ = ns1__listParameters_;
@@ -41935,13 +42274,13 @@ soap_instantiate___ns1__listRoles(struct soap *, int, const char *,
 
 inline struct __ns1__listRoles *soap_new___ns1__listRoles(struct soap *soap,
                                                           int n = -1) {
-  return soap_instantiate___ns1__listRoles(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__listRoles(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__listRoles *
 soap_new_req___ns1__listRoles(struct soap *soap) {
   struct __ns1__listRoles *_p =
-      soap_instantiate___ns1__listRoles(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__listRoles(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__listRoles(soap, _p);
   }
@@ -41952,7 +42291,7 @@ inline struct __ns1__listRoles *
 soap_new_set___ns1__listRoles(struct soap *soap,
                               ns1__listRoles *ns1__listRoles_) {
   struct __ns1__listRoles *_p =
-      soap_instantiate___ns1__listRoles(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__listRoles(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__listRoles(soap, _p);
     _p->ns1__listRoles_ = ns1__listRoles_;
@@ -42019,13 +42358,15 @@ soap_instantiate___ns1__getAllInstruments(struct soap *, int, const char *,
 
 inline struct __ns1__getAllInstruments *
 soap_new___ns1__getAllInstruments(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getAllInstruments(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__getAllInstruments(soap, n, nullptr, nullptr,
+                                                   nullptr);
 }
 
 inline struct __ns1__getAllInstruments *
 soap_new_req___ns1__getAllInstruments(struct soap *soap) {
   struct __ns1__getAllInstruments *_p =
-      soap_instantiate___ns1__getAllInstruments(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getAllInstruments(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__getAllInstruments(soap, _p);
   }
@@ -42035,7 +42376,8 @@ soap_new_req___ns1__getAllInstruments(struct soap *soap) {
 inline struct __ns1__getAllInstruments *soap_new_set___ns1__getAllInstruments(
     struct soap *soap, ns1__getAllInstruments *ns1__getAllInstruments_) {
   struct __ns1__getAllInstruments *_p =
-      soap_instantiate___ns1__getAllInstruments(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getAllInstruments(soap, -1, nullptr, nullptr,
+                                                nullptr);
   if (_p) {
     soap_default___ns1__getAllInstruments(soap, _p);
     _p->ns1__getAllInstruments_ = ns1__getAllInstruments_;
@@ -42102,13 +42444,14 @@ soap_instantiate___ns1__listInstruments(struct soap *, int, const char *,
 
 inline struct __ns1__listInstruments *
 soap_new___ns1__listInstruments(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__listInstruments(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__listInstruments(soap, n, nullptr, nullptr,
+                                                 nullptr);
 }
 
 inline struct __ns1__listInstruments *
 soap_new_req___ns1__listInstruments(struct soap *soap) {
-  struct __ns1__listInstruments *_p =
-      soap_instantiate___ns1__listInstruments(soap, -1, NULL, NULL, NULL);
+  struct __ns1__listInstruments *_p = soap_instantiate___ns1__listInstruments(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__listInstruments(soap, _p);
   }
@@ -42117,8 +42460,8 @@ soap_new_req___ns1__listInstruments(struct soap *soap) {
 
 inline struct __ns1__listInstruments *soap_new_set___ns1__listInstruments(
     struct soap *soap, ns1__listInstruments *ns1__listInstruments_) {
-  struct __ns1__listInstruments *_p =
-      soap_instantiate___ns1__listInstruments(soap, -1, NULL, NULL, NULL);
+  struct __ns1__listInstruments *_p = soap_instantiate___ns1__listInstruments(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__listInstruments(soap, _p);
     _p->ns1__listInstruments_ = ns1__listInstruments_;
@@ -42186,15 +42529,15 @@ soap_instantiate___ns1__searchByUserSurnamePagination(struct soap *, int,
 
 inline struct __ns1__searchByUserSurnamePagination *
 soap_new___ns1__searchByUserSurnamePagination(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchByUserSurnamePagination(soap, n, NULL,
-                                                               NULL, NULL);
+  return soap_instantiate___ns1__searchByUserSurnamePagination(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__searchByUserSurnamePagination *
 soap_new_req___ns1__searchByUserSurnamePagination(struct soap *soap) {
   struct __ns1__searchByUserSurnamePagination *_p =
-      soap_instantiate___ns1__searchByUserSurnamePagination(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate___ns1__searchByUserSurnamePagination(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchByUserSurnamePagination(soap, _p);
   }
@@ -42206,8 +42549,8 @@ soap_new_set___ns1__searchByUserSurnamePagination(
     struct soap *soap,
     ns1__searchByUserSurnamePagination *ns1__searchByUserSurnamePagination_) {
   struct __ns1__searchByUserSurnamePagination *_p =
-      soap_instantiate___ns1__searchByUserSurnamePagination(soap, -1, NULL,
-                                                            NULL, NULL);
+      soap_instantiate___ns1__searchByUserSurnamePagination(soap, -1, nullptr,
+                                                            nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchByUserSurnamePagination(soap, _p);
     _p->ns1__searchByUserSurnamePagination_ =
@@ -42276,13 +42619,15 @@ soap_instantiate___ns1__searchByUserSurname(struct soap *, int, const char *,
 
 inline struct __ns1__searchByUserSurname *
 soap_new___ns1__searchByUserSurname(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchByUserSurname(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__searchByUserSurname(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline struct __ns1__searchByUserSurname *
 soap_new_req___ns1__searchByUserSurname(struct soap *soap) {
   struct __ns1__searchByUserSurname *_p =
-      soap_instantiate___ns1__searchByUserSurname(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__searchByUserSurname(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__searchByUserSurname(soap, _p);
   }
@@ -42293,7 +42638,8 @@ inline struct __ns1__searchByUserSurname *
 soap_new_set___ns1__searchByUserSurname(
     struct soap *soap, ns1__searchByUserSurname *ns1__searchByUserSurname_) {
   struct __ns1__searchByUserSurname *_p =
-      soap_instantiate___ns1__searchByUserSurname(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__searchByUserSurname(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__searchByUserSurname(soap, _p);
     _p->ns1__searchByUserSurname_ = ns1__searchByUserSurname_;
@@ -42361,15 +42707,15 @@ soap_instantiate___ns1__searchByUserIDPagination(struct soap *, int,
 
 inline struct __ns1__searchByUserIDPagination *
 soap_new___ns1__searchByUserIDPagination(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchByUserIDPagination(soap, n, NULL, NULL,
-                                                          NULL);
+  return soap_instantiate___ns1__searchByUserIDPagination(soap, n, nullptr,
+                                                          nullptr, nullptr);
 }
 
 inline struct __ns1__searchByUserIDPagination *
 soap_new_req___ns1__searchByUserIDPagination(struct soap *soap) {
   struct __ns1__searchByUserIDPagination *_p =
-      soap_instantiate___ns1__searchByUserIDPagination(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate___ns1__searchByUserIDPagination(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchByUserIDPagination(soap, _p);
   }
@@ -42381,8 +42727,8 @@ soap_new_set___ns1__searchByUserIDPagination(
     struct soap *soap,
     ns1__searchByUserIDPagination *ns1__searchByUserIDPagination_) {
   struct __ns1__searchByUserIDPagination *_p =
-      soap_instantiate___ns1__searchByUserIDPagination(soap, -1, NULL, NULL,
-                                                       NULL);
+      soap_instantiate___ns1__searchByUserIDPagination(soap, -1, nullptr,
+                                                       nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchByUserIDPagination(soap, _p);
     _p->ns1__searchByUserIDPagination_ = ns1__searchByUserIDPagination_;
@@ -42448,13 +42794,14 @@ soap_instantiate___ns1__searchByUserID(struct soap *, int, const char *,
 
 inline struct __ns1__searchByUserID *
 soap_new___ns1__searchByUserID(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchByUserID(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__searchByUserID(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline struct __ns1__searchByUserID *
 soap_new_req___ns1__searchByUserID(struct soap *soap) {
-  struct __ns1__searchByUserID *_p =
-      soap_instantiate___ns1__searchByUserID(soap, -1, NULL, NULL, NULL);
+  struct __ns1__searchByUserID *_p = soap_instantiate___ns1__searchByUserID(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchByUserID(soap, _p);
   }
@@ -42464,8 +42811,8 @@ soap_new_req___ns1__searchByUserID(struct soap *soap) {
 inline struct __ns1__searchByUserID *
 soap_new_set___ns1__searchByUserID(struct soap *soap,
                                    ns1__searchByUserID *ns1__searchByUserID_) {
-  struct __ns1__searchByUserID *_p =
-      soap_instantiate___ns1__searchByUserID(soap, -1, NULL, NULL, NULL);
+  struct __ns1__searchByUserID *_p = soap_instantiate___ns1__searchByUserID(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchByUserID(soap, _p);
     _p->ns1__searchByUserID_ = ns1__searchByUserID_;
@@ -42538,14 +42885,14 @@ inline struct __ns1__getMyInvestigationsIncludesPagination *
 soap_new___ns1__getMyInvestigationsIncludesPagination(struct soap *soap,
                                                       int n = -1) {
   return soap_instantiate___ns1__getMyInvestigationsIncludesPagination(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__getMyInvestigationsIncludesPagination *
 soap_new_req___ns1__getMyInvestigationsIncludesPagination(struct soap *soap) {
   struct __ns1__getMyInvestigationsIncludesPagination *_p =
       soap_instantiate___ns1__getMyInvestigationsIncludesPagination(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getMyInvestigationsIncludesPagination(soap, _p);
   }
@@ -42558,7 +42905,7 @@ soap_new_set___ns1__getMyInvestigationsIncludesPagination(
                            ns1__getMyInvestigationsIncludesPagination_) {
   struct __ns1__getMyInvestigationsIncludesPagination *_p =
       soap_instantiate___ns1__getMyInvestigationsIncludesPagination(
-          soap, -1, NULL, NULL, NULL);
+          soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getMyInvestigationsIncludesPagination(soap, _p);
     _p->ns1__getMyInvestigationsIncludesPagination_ =
@@ -42627,15 +42974,15 @@ soap_instantiate___ns1__getMyInvestigationsIncludes(struct soap *, int,
 
 inline struct __ns1__getMyInvestigationsIncludes *
 soap_new___ns1__getMyInvestigationsIncludes(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getMyInvestigationsIncludes(soap, n, NULL,
-                                                             NULL, NULL);
+  return soap_instantiate___ns1__getMyInvestigationsIncludes(soap, n, nullptr,
+                                                             nullptr, nullptr);
 }
 
 inline struct __ns1__getMyInvestigationsIncludes *
 soap_new_req___ns1__getMyInvestigationsIncludes(struct soap *soap) {
   struct __ns1__getMyInvestigationsIncludes *_p =
-      soap_instantiate___ns1__getMyInvestigationsIncludes(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__getMyInvestigationsIncludes(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getMyInvestigationsIncludes(soap, _p);
   }
@@ -42647,8 +42994,8 @@ soap_new_set___ns1__getMyInvestigationsIncludes(
     struct soap *soap,
     ns1__getMyInvestigationsIncludes *ns1__getMyInvestigationsIncludes_) {
   struct __ns1__getMyInvestigationsIncludes *_p =
-      soap_instantiate___ns1__getMyInvestigationsIncludes(soap, -1, NULL, NULL,
-                                                          NULL);
+      soap_instantiate___ns1__getMyInvestigationsIncludes(soap, -1, nullptr,
+                                                          nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getMyInvestigationsIncludes(soap, _p);
     _p->ns1__getMyInvestigationsIncludes_ = ns1__getMyInvestigationsIncludes_;
@@ -42716,13 +43063,15 @@ soap_instantiate___ns1__getMyInvestigations(struct soap *, int, const char *,
 
 inline struct __ns1__getMyInvestigations *
 soap_new___ns1__getMyInvestigations(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getMyInvestigations(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__getMyInvestigations(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline struct __ns1__getMyInvestigations *
 soap_new_req___ns1__getMyInvestigations(struct soap *soap) {
   struct __ns1__getMyInvestigations *_p =
-      soap_instantiate___ns1__getMyInvestigations(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getMyInvestigations(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__getMyInvestigations(soap, _p);
   }
@@ -42733,7 +43082,8 @@ inline struct __ns1__getMyInvestigations *
 soap_new_set___ns1__getMyInvestigations(
     struct soap *soap, ns1__getMyInvestigations *ns1__getMyInvestigations_) {
   struct __ns1__getMyInvestigations *_p =
-      soap_instantiate___ns1__getMyInvestigations(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getMyInvestigations(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__getMyInvestigations(soap, _p);
     _p->ns1__getMyInvestigations_ = ns1__getMyInvestigations_;
@@ -42802,13 +43152,15 @@ soap_instantiate___ns1__searchByKeywordsAll(struct soap *, int, const char *,
 
 inline struct __ns1__searchByKeywordsAll *
 soap_new___ns1__searchByKeywordsAll(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchByKeywordsAll(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__searchByKeywordsAll(soap, n, nullptr, nullptr,
+                                                     nullptr);
 }
 
 inline struct __ns1__searchByKeywordsAll *
 soap_new_req___ns1__searchByKeywordsAll(struct soap *soap) {
   struct __ns1__searchByKeywordsAll *_p =
-      soap_instantiate___ns1__searchByKeywordsAll(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__searchByKeywordsAll(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__searchByKeywordsAll(soap, _p);
   }
@@ -42819,7 +43171,8 @@ inline struct __ns1__searchByKeywordsAll *
 soap_new_set___ns1__searchByKeywordsAll(
     struct soap *soap, ns1__searchByKeywordsAll *ns1__searchByKeywordsAll_) {
   struct __ns1__searchByKeywordsAll *_p =
-      soap_instantiate___ns1__searchByKeywordsAll(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__searchByKeywordsAll(soap, -1, nullptr, nullptr,
+                                                  nullptr);
   if (_p) {
     soap_default___ns1__searchByKeywordsAll(soap, _p);
     _p->ns1__searchByKeywordsAll_ = ns1__searchByKeywordsAll_;
@@ -42887,13 +43240,14 @@ soap_instantiate___ns1__searchByKeywords(struct soap *, int, const char *,
 
 inline struct __ns1__searchByKeywords *
 soap_new___ns1__searchByKeywords(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchByKeywords(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__searchByKeywords(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline struct __ns1__searchByKeywords *
 soap_new_req___ns1__searchByKeywords(struct soap *soap) {
-  struct __ns1__searchByKeywords *_p =
-      soap_instantiate___ns1__searchByKeywords(soap, -1, NULL, NULL, NULL);
+  struct __ns1__searchByKeywords *_p = soap_instantiate___ns1__searchByKeywords(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchByKeywords(soap, _p);
   }
@@ -42902,8 +43256,8 @@ soap_new_req___ns1__searchByKeywords(struct soap *soap) {
 
 inline struct __ns1__searchByKeywords *soap_new_set___ns1__searchByKeywords(
     struct soap *soap, ns1__searchByKeywords *ns1__searchByKeywords_) {
-  struct __ns1__searchByKeywords *_p =
-      soap_instantiate___ns1__searchByKeywords(soap, -1, NULL, NULL, NULL);
+  struct __ns1__searchByKeywords *_p = soap_instantiate___ns1__searchByKeywords(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchByKeywords(soap, _p);
     _p->ns1__searchByKeywords_ = ns1__searchByKeywords_;
@@ -42971,15 +43325,15 @@ soap_instantiate___ns1__searchByAdvancedPagination(struct soap *, int,
 
 inline struct __ns1__searchByAdvancedPagination *
 soap_new___ns1__searchByAdvancedPagination(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchByAdvancedPagination(soap, n, NULL, NULL,
-                                                            NULL);
+  return soap_instantiate___ns1__searchByAdvancedPagination(soap, n, nullptr,
+                                                            nullptr, nullptr);
 }
 
 inline struct __ns1__searchByAdvancedPagination *
 soap_new_req___ns1__searchByAdvancedPagination(struct soap *soap) {
   struct __ns1__searchByAdvancedPagination *_p =
-      soap_instantiate___ns1__searchByAdvancedPagination(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate___ns1__searchByAdvancedPagination(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchByAdvancedPagination(soap, _p);
   }
@@ -42991,8 +43345,8 @@ soap_new_set___ns1__searchByAdvancedPagination(
     struct soap *soap,
     ns1__searchByAdvancedPagination *ns1__searchByAdvancedPagination_) {
   struct __ns1__searchByAdvancedPagination *_p =
-      soap_instantiate___ns1__searchByAdvancedPagination(soap, -1, NULL, NULL,
-                                                         NULL);
+      soap_instantiate___ns1__searchByAdvancedPagination(soap, -1, nullptr,
+                                                         nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchByAdvancedPagination(soap, _p);
     _p->ns1__searchByAdvancedPagination_ = ns1__searchByAdvancedPagination_;
@@ -43059,13 +43413,14 @@ soap_instantiate___ns1__searchByAdvanced(struct soap *, int, const char *,
 
 inline struct __ns1__searchByAdvanced *
 soap_new___ns1__searchByAdvanced(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__searchByAdvanced(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__searchByAdvanced(soap, n, nullptr, nullptr,
+                                                  nullptr);
 }
 
 inline struct __ns1__searchByAdvanced *
 soap_new_req___ns1__searchByAdvanced(struct soap *soap) {
-  struct __ns1__searchByAdvanced *_p =
-      soap_instantiate___ns1__searchByAdvanced(soap, -1, NULL, NULL, NULL);
+  struct __ns1__searchByAdvanced *_p = soap_instantiate___ns1__searchByAdvanced(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchByAdvanced(soap, _p);
   }
@@ -43074,8 +43429,8 @@ soap_new_req___ns1__searchByAdvanced(struct soap *soap) {
 
 inline struct __ns1__searchByAdvanced *soap_new_set___ns1__searchByAdvanced(
     struct soap *soap, ns1__searchByAdvanced *ns1__searchByAdvanced_) {
-  struct __ns1__searchByAdvanced *_p =
-      soap_instantiate___ns1__searchByAdvanced(soap, -1, NULL, NULL, NULL);
+  struct __ns1__searchByAdvanced *_p = soap_instantiate___ns1__searchByAdvanced(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__searchByAdvanced(soap, _p);
     _p->ns1__searchByAdvanced_ = ns1__searchByAdvanced_;
@@ -43142,13 +43497,14 @@ soap_instantiate___ns1__getAllKeywords(struct soap *, int, const char *,
 
 inline struct __ns1__getAllKeywords *
 soap_new___ns1__getAllKeywords(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getAllKeywords(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__getAllKeywords(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline struct __ns1__getAllKeywords *
 soap_new_req___ns1__getAllKeywords(struct soap *soap) {
-  struct __ns1__getAllKeywords *_p =
-      soap_instantiate___ns1__getAllKeywords(soap, -1, NULL, NULL, NULL);
+  struct __ns1__getAllKeywords *_p = soap_instantiate___ns1__getAllKeywords(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getAllKeywords(soap, _p);
   }
@@ -43158,8 +43514,8 @@ soap_new_req___ns1__getAllKeywords(struct soap *soap) {
 inline struct __ns1__getAllKeywords *
 soap_new_set___ns1__getAllKeywords(struct soap *soap,
                                    ns1__getAllKeywords *ns1__getAllKeywords_) {
-  struct __ns1__getAllKeywords *_p =
-      soap_instantiate___ns1__getAllKeywords(soap, -1, NULL, NULL, NULL);
+  struct __ns1__getAllKeywords *_p = soap_instantiate___ns1__getAllKeywords(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getAllKeywords(soap, _p);
     _p->ns1__getAllKeywords_ = ns1__getAllKeywords_;
@@ -43225,15 +43581,15 @@ soap_instantiate___ns1__getKeywordsForUserType(struct soap *, int, const char *,
 
 inline struct __ns1__getKeywordsForUserType *
 soap_new___ns1__getKeywordsForUserType(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getKeywordsForUserType(soap, n, NULL, NULL,
-                                                        NULL);
+  return soap_instantiate___ns1__getKeywordsForUserType(soap, n, nullptr,
+                                                        nullptr, nullptr);
 }
 
 inline struct __ns1__getKeywordsForUserType *
 soap_new_req___ns1__getKeywordsForUserType(struct soap *soap) {
   struct __ns1__getKeywordsForUserType *_p =
-      soap_instantiate___ns1__getKeywordsForUserType(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__getKeywordsForUserType(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__getKeywordsForUserType(soap, _p);
   }
@@ -43245,8 +43601,8 @@ soap_new_set___ns1__getKeywordsForUserType(
     struct soap *soap,
     ns1__getKeywordsForUserType *ns1__getKeywordsForUserType_) {
   struct __ns1__getKeywordsForUserType *_p =
-      soap_instantiate___ns1__getKeywordsForUserType(soap, -1, NULL, NULL,
-                                                     NULL);
+      soap_instantiate___ns1__getKeywordsForUserType(soap, -1, nullptr, nullptr,
+                                                     nullptr);
   if (_p) {
     soap_default___ns1__getKeywordsForUserType(soap, _p);
     _p->ns1__getKeywordsForUserType_ = ns1__getKeywordsForUserType_;
@@ -43312,14 +43668,15 @@ soap_instantiate___ns1__getKeywordsForUserMax(struct soap *, int, const char *,
 
 inline struct __ns1__getKeywordsForUserMax *
 soap_new___ns1__getKeywordsForUserMax(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getKeywordsForUserMax(soap, n, NULL, NULL,
-                                                       NULL);
+  return soap_instantiate___ns1__getKeywordsForUserMax(soap, n, nullptr,
+                                                       nullptr, nullptr);
 }
 
 inline struct __ns1__getKeywordsForUserMax *
 soap_new_req___ns1__getKeywordsForUserMax(struct soap *soap) {
   struct __ns1__getKeywordsForUserMax *_p =
-      soap_instantiate___ns1__getKeywordsForUserMax(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getKeywordsForUserMax(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__getKeywordsForUserMax(soap, _p);
   }
@@ -43331,7 +43688,8 @@ soap_new_set___ns1__getKeywordsForUserMax(
     struct soap *soap,
     ns1__getKeywordsForUserMax *ns1__getKeywordsForUserMax_) {
   struct __ns1__getKeywordsForUserMax *_p =
-      soap_instantiate___ns1__getKeywordsForUserMax(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getKeywordsForUserMax(soap, -1, nullptr, nullptr,
+                                                    nullptr);
   if (_p) {
     soap_default___ns1__getKeywordsForUserMax(soap, _p);
     _p->ns1__getKeywordsForUserMax_ = ns1__getKeywordsForUserMax_;
@@ -43398,15 +43756,15 @@ soap_instantiate___ns1__getKeywordsForUserStartWithMax(struct soap *, int,
 
 inline struct __ns1__getKeywordsForUserStartWithMax *
 soap_new___ns1__getKeywordsForUserStartWithMax(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getKeywordsForUserStartWithMax(soap, n, NULL,
-                                                                NULL, NULL);
+  return soap_instantiate___ns1__getKeywordsForUserStartWithMax(
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__getKeywordsForUserStartWithMax *
 soap_new_req___ns1__getKeywordsForUserStartWithMax(struct soap *soap) {
   struct __ns1__getKeywordsForUserStartWithMax *_p =
-      soap_instantiate___ns1__getKeywordsForUserStartWithMax(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate___ns1__getKeywordsForUserStartWithMax(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getKeywordsForUserStartWithMax(soap, _p);
   }
@@ -43418,8 +43776,8 @@ soap_new_set___ns1__getKeywordsForUserStartWithMax(
     struct soap *soap,
     ns1__getKeywordsForUserStartWithMax *ns1__getKeywordsForUserStartWithMax_) {
   struct __ns1__getKeywordsForUserStartWithMax *_p =
-      soap_instantiate___ns1__getKeywordsForUserStartWithMax(soap, -1, NULL,
-                                                             NULL, NULL);
+      soap_instantiate___ns1__getKeywordsForUserStartWithMax(soap, -1, nullptr,
+                                                             nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getKeywordsForUserStartWithMax(soap, _p);
     _p->ns1__getKeywordsForUserStartWithMax_ =
@@ -43488,13 +43846,15 @@ soap_instantiate___ns1__getKeywordsForUser(struct soap *, int, const char *,
 
 inline struct __ns1__getKeywordsForUser *
 soap_new___ns1__getKeywordsForUser(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getKeywordsForUser(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__getKeywordsForUser(soap, n, nullptr, nullptr,
+                                                    nullptr);
 }
 
 inline struct __ns1__getKeywordsForUser *
 soap_new_req___ns1__getKeywordsForUser(struct soap *soap) {
   struct __ns1__getKeywordsForUser *_p =
-      soap_instantiate___ns1__getKeywordsForUser(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getKeywordsForUser(soap, -1, nullptr, nullptr,
+                                                 nullptr);
   if (_p) {
     soap_default___ns1__getKeywordsForUser(soap, _p);
   }
@@ -43504,7 +43864,8 @@ soap_new_req___ns1__getKeywordsForUser(struct soap *soap) {
 inline struct __ns1__getKeywordsForUser *soap_new_set___ns1__getKeywordsForUser(
     struct soap *soap, ns1__getKeywordsForUser *ns1__getKeywordsForUser_) {
   struct __ns1__getKeywordsForUser *_p =
-      soap_instantiate___ns1__getKeywordsForUser(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__getKeywordsForUser(soap, -1, nullptr, nullptr,
+                                                 nullptr);
   if (_p) {
     soap_default___ns1__getKeywordsForUser(soap, _p);
     _p->ns1__getKeywordsForUser_ = ns1__getKeywordsForUser_;
@@ -43571,13 +43932,14 @@ soap_instantiate___ns1__isSessionValid(struct soap *, int, const char *,
 
 inline struct __ns1__isSessionValid *
 soap_new___ns1__isSessionValid(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__isSessionValid(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__isSessionValid(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline struct __ns1__isSessionValid *
 soap_new_req___ns1__isSessionValid(struct soap *soap) {
-  struct __ns1__isSessionValid *_p =
-      soap_instantiate___ns1__isSessionValid(soap, -1, NULL, NULL, NULL);
+  struct __ns1__isSessionValid *_p = soap_instantiate___ns1__isSessionValid(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__isSessionValid(soap, _p);
   }
@@ -43587,8 +43949,8 @@ soap_new_req___ns1__isSessionValid(struct soap *soap) {
 inline struct __ns1__isSessionValid *
 soap_new_set___ns1__isSessionValid(struct soap *soap,
                                    ns1__isSessionValid *ns1__isSessionValid_) {
-  struct __ns1__isSessionValid *_p =
-      soap_instantiate___ns1__isSessionValid(soap, -1, NULL, NULL, NULL);
+  struct __ns1__isSessionValid *_p = soap_instantiate___ns1__isSessionValid(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__isSessionValid(soap, _p);
     _p->ns1__isSessionValid_ = ns1__isSessionValid_;
@@ -43654,13 +44016,14 @@ soap_instantiate___ns1__getUserDetails(struct soap *, int, const char *,
 
 inline struct __ns1__getUserDetails *
 soap_new___ns1__getUserDetails(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__getUserDetails(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__getUserDetails(soap, n, nullptr, nullptr,
+                                                nullptr);
 }
 
 inline struct __ns1__getUserDetails *
 soap_new_req___ns1__getUserDetails(struct soap *soap) {
-  struct __ns1__getUserDetails *_p =
-      soap_instantiate___ns1__getUserDetails(soap, -1, NULL, NULL, NULL);
+  struct __ns1__getUserDetails *_p = soap_instantiate___ns1__getUserDetails(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getUserDetails(soap, _p);
   }
@@ -43670,8 +44033,8 @@ soap_new_req___ns1__getUserDetails(struct soap *soap) {
 inline struct __ns1__getUserDetails *
 soap_new_set___ns1__getUserDetails(struct soap *soap,
                                    ns3__getUserDetails *ns1__getUserDetails) {
-  struct __ns1__getUserDetails *_p =
-      soap_instantiate___ns1__getUserDetails(soap, -1, NULL, NULL, NULL);
+  struct __ns1__getUserDetails *_p = soap_instantiate___ns1__getUserDetails(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__getUserDetails(soap, _p);
     _p->ns1__getUserDetails = ns1__getUserDetails;
@@ -43733,12 +44096,12 @@ soap_instantiate___ns1__logout(struct soap *, int, const char *, const char *,
 
 inline struct __ns1__logout *soap_new___ns1__logout(struct soap *soap,
                                                     int n = -1) {
-  return soap_instantiate___ns1__logout(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__logout(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__logout *soap_new_req___ns1__logout(struct soap *soap) {
   struct __ns1__logout *_p =
-      soap_instantiate___ns1__logout(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__logout(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__logout(soap, _p);
   }
@@ -43748,7 +44111,7 @@ inline struct __ns1__logout *soap_new_req___ns1__logout(struct soap *soap) {
 inline struct __ns1__logout *
 soap_new_set___ns1__logout(struct soap *soap, ns1__logout *ns1__logout_) {
   struct __ns1__logout *_p =
-      soap_instantiate___ns1__logout(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__logout(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__logout(soap, _p);
     _p->ns1__logout_ = ns1__logout_;
@@ -43813,13 +44176,14 @@ soap_instantiate___ns1__loginLifetime(struct soap *, int, const char *,
 
 inline struct __ns1__loginLifetime *
 soap_new___ns1__loginLifetime(struct soap *soap, int n = -1) {
-  return soap_instantiate___ns1__loginLifetime(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__loginLifetime(soap, n, nullptr, nullptr,
+                                               nullptr);
 }
 
 inline struct __ns1__loginLifetime *
 soap_new_req___ns1__loginLifetime(struct soap *soap) {
-  struct __ns1__loginLifetime *_p =
-      soap_instantiate___ns1__loginLifetime(soap, -1, NULL, NULL, NULL);
+  struct __ns1__loginLifetime *_p = soap_instantiate___ns1__loginLifetime(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__loginLifetime(soap, _p);
   }
@@ -43829,8 +44193,8 @@ soap_new_req___ns1__loginLifetime(struct soap *soap) {
 inline struct __ns1__loginLifetime *
 soap_new_set___ns1__loginLifetime(struct soap *soap,
                                   ns1__loginLifetime *ns1__loginLifetime_) {
-  struct __ns1__loginLifetime *_p =
-      soap_instantiate___ns1__loginLifetime(soap, -1, NULL, NULL, NULL);
+  struct __ns1__loginLifetime *_p = soap_instantiate___ns1__loginLifetime(
+      soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__loginLifetime(soap, _p);
     _p->ns1__loginLifetime_ = ns1__loginLifetime_;
@@ -43892,12 +44256,12 @@ soap_instantiate___ns1__login(struct soap *, int, const char *, const char *,
 
 inline struct __ns1__login *soap_new___ns1__login(struct soap *soap,
                                                   int n = -1) {
-  return soap_instantiate___ns1__login(soap, n, NULL, NULL, NULL);
+  return soap_instantiate___ns1__login(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct __ns1__login *soap_new_req___ns1__login(struct soap *soap) {
   struct __ns1__login *_p =
-      soap_instantiate___ns1__login(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__login(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__login(soap, _p);
   }
@@ -43907,7 +44271,7 @@ inline struct __ns1__login *soap_new_req___ns1__login(struct soap *soap) {
 inline struct __ns1__login *soap_new_set___ns1__login(struct soap *soap,
                                                       ns1__login *ns1__login_) {
   struct __ns1__login *_p =
-      soap_instantiate___ns1__login(soap, -1, NULL, NULL, NULL);
+      soap_instantiate___ns1__login(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default___ns1__login(soap, _p);
     _p->ns1__login_ = ns1__login_;
@@ -58578,7 +58942,7 @@ inline std::vector<ns1__parameterCondition *> *
 soap_new_std__vectorTemplateOfPointerTons1__parameterCondition(
     struct soap *soap, int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__parameterCondition(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__parameterCondition(
@@ -58616,7 +58980,7 @@ inline std::vector<ns1__restrictionCondition *> *
 soap_new_std__vectorTemplateOfPointerTons1__restrictionCondition(
     struct soap *soap, int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__restrictionCondition(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__restrictionCondition(
@@ -58654,7 +59018,7 @@ inline std::vector<ns1__shift *> *
 soap_new_std__vectorTemplateOfPointerTons1__shift(struct soap *soap,
                                                   int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__shift(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__shift(
@@ -58692,7 +59056,7 @@ inline std::vector<ns1__publication *> *
 soap_new_std__vectorTemplateOfPointerTons1__publication(struct soap *soap,
                                                         int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__publication(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__publication(
@@ -58730,7 +59094,7 @@ inline std::vector<ns1__keyword *> *
 soap_new_std__vectorTemplateOfPointerTons1__keyword(struct soap *soap,
                                                     int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__keyword(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__keyword(
@@ -58768,7 +59132,7 @@ inline std::vector<ns1__investigator *> *
 soap_new_std__vectorTemplateOfPointerTons1__investigator(struct soap *soap,
                                                          int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__investigator(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__investigator(
@@ -58807,7 +59171,7 @@ inline std::vector<ns1__relatedDatafiles *> *
 soap_new_std__vectorTemplateOfPointerTons1__relatedDatafiles(struct soap *soap,
                                                              int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__relatedDatafiles(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__relatedDatafiles(
@@ -58844,7 +59208,7 @@ inline std::vector<ns1__sampleParameter *> *
 soap_new_std__vectorTemplateOfPointerTons1__sampleParameter(struct soap *soap,
                                                             int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__sampleParameter(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__sampleParameter(
@@ -58881,7 +59245,7 @@ inline std::vector<ns1__icatRole *> *
 soap_new_std__vectorTemplateOfPointerTons1__icatRole(struct soap *soap,
                                                      int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__icatRole(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__icatRole(
@@ -58919,7 +59283,7 @@ inline std::vector<ns1__datafileFormat *> *
 soap_new_std__vectorTemplateOfPointerTons1__datafileFormat(struct soap *soap,
                                                            int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__datafileFormat(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__datafileFormat(
@@ -58959,7 +59323,7 @@ inline std::vector<ns1__datasetParameter *> *
 soap_new_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap *soap,
                                                              int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__datasetParameter(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__datasetParameter(
@@ -58997,7 +59361,7 @@ inline std::vector<ns1__icatAuthorisation *> *
 soap_new_std__vectorTemplateOfPointerTons1__icatAuthorisation(struct soap *soap,
                                                               int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__icatAuthorisation(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__icatAuthorisation(
@@ -59034,7 +59398,7 @@ inline std::vector<ns1__datafile *> *
 soap_new_std__vectorTemplateOfPointerTons1__datafile(struct soap *soap,
                                                      int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__datafile(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__datafile(
@@ -59072,7 +59436,7 @@ inline std::vector<ns1__investigation *> *
 soap_new_std__vectorTemplateOfPointerTons1__investigation(struct soap *soap,
                                                           int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__investigation(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__investigation(
@@ -59112,7 +59476,7 @@ inline std::vector<ns1__parameterComparisonCondition *> *
 soap_new_std__vectorTemplateOfPointerTons1__parameterComparisonCondition(
     struct soap *soap, int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__parameterComparisonCondition(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void
@@ -59145,8 +59509,8 @@ soap_instantiate_std__vectorTemplateOfLONG64(struct soap *, int, const char *,
 
 inline std::vector<LONG64> *
 soap_new_std__vectorTemplateOfLONG64(struct soap *soap, int n = -1) {
-  return soap_instantiate_std__vectorTemplateOfLONG64(soap, n, NULL, NULL,
-                                                      NULL);
+  return soap_instantiate_std__vectorTemplateOfLONG64(soap, n, nullptr, nullptr,
+                                                      nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfLONG64(struct soap *soap,
@@ -59183,7 +59547,7 @@ inline std::vector<ns1__parameterSearch *> *
 soap_new_std__vectorTemplateOfPointerTons1__parameterSearch(struct soap *soap,
                                                             int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__parameterSearch(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__parameterSearch(
@@ -59220,7 +59584,7 @@ inline std::vector<ns1__dataset *> *
 soap_new_std__vectorTemplateOfPointerTons1__dataset(struct soap *soap,
                                                     int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__dataset(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__dataset(
@@ -59258,7 +59622,7 @@ inline std::vector<ns1__instrument *> *
 soap_new_std__vectorTemplateOfPointerTons1__instrument(struct soap *soap,
                                                        int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__instrument(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__instrument(
@@ -59297,7 +59661,7 @@ inline std::vector<ns1__datafileParameter *> *
 soap_new_std__vectorTemplateOfPointerTons1__datafileParameter(struct soap *soap,
                                                               int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__datafileParameter(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__datafileParameter(
@@ -59334,7 +59698,7 @@ inline std::vector<ns1__facilityCycle *> *
 soap_new_std__vectorTemplateOfPointerTons1__facilityCycle(struct soap *soap,
                                                           int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__facilityCycle(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__facilityCycle(
@@ -59373,7 +59737,7 @@ inline std::vector<ns1__parameter *> *
 soap_new_std__vectorTemplateOfPointerTons1__parameter(struct soap *soap,
                                                       int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__parameter(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__parameter(
@@ -59412,7 +59776,7 @@ inline std::vector<ns1__restrictionComparisonCondition *> *
 soap_new_std__vectorTemplateOfPointerTons1__restrictionComparisonCondition(
     struct soap *soap, int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__restrictionComparisonCondition(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void
@@ -59451,7 +59815,7 @@ inline std::vector<ns1__sample *> *
 soap_new_std__vectorTemplateOfPointerTons1__sample(struct soap *soap,
                                                    int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__sample(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__sample(
@@ -59489,7 +59853,7 @@ inline std::vector<ns1__facilityUser *> *
 soap_new_std__vectorTemplateOfPointerTons1__facilityUser(struct soap *soap,
                                                          int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerTons1__facilityUser(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerTons1__facilityUser(
@@ -59525,8 +59889,8 @@ soap_instantiate_std__vectorTemplateOfstd__string(struct soap *, int,
 
 inline std::vector<std::string> *
 soap_new_std__vectorTemplateOfstd__string(struct soap *soap, int n = -1) {
-  return soap_instantiate_std__vectorTemplateOfstd__string(soap, n, NULL, NULL,
-                                                           NULL);
+  return soap_instantiate_std__vectorTemplateOfstd__string(soap, n, nullptr,
+                                                           nullptr, nullptr);
 }
 
 inline void
@@ -59564,7 +59928,7 @@ inline std::vector<xsd__anyType *> *
 soap_new_std__vectorTemplateOfPointerToxsd__anyType(struct soap *soap,
                                                     int n = -1) {
   return soap_instantiate_std__vectorTemplateOfPointerToxsd__anyType(
-      soap, n, NULL, NULL, NULL);
+      soap, n, nullptr, nullptr, nullptr);
 }
 
 inline void soap_delete_std__vectorTemplateOfPointerToxsd__anyType(
