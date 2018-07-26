@@ -996,11 +996,13 @@ public:
                      std::invalid_argument);
   }
 
-  void test_sizes_for_histogram_workspace() {
+  void test_histogram_workspace() {
     const size_t size = 10;
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, size + 1, size));
-    // We don't care about values, we just want to test the number of
+    // We don't care about values, except to check they are transferred
+    // to data after one iteration. 
+    // Otherwise, we just want to test the number of
     // X points in the image.
     // For histogram input workspaces we should get the original number
     // of points minus one.
@@ -1033,11 +1035,13 @@ public:
     TS_ASSERT_EQUALS(data->readX(0), ws->readX(0));
   }
 
-  void test_sizes_for_pointdata_workspace() {
+  void test_pointdata_workspace() {
     const size_t size = 10;
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
-    // We don't care about values, we just want to test the number of
+    // We don't care about values, except to check they are transferred
+    // to data after one iteration. 
+    // Otherwise, we just want to test the number of
     // X points in the image.
     // For pointdata input workspaces we should get the original number
     // of points.
