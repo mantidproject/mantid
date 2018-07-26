@@ -109,6 +109,35 @@ detScale={13:1.046504,14:1.259293,16:1.02449,17:1.18898,18:0.88014,19:0.98665,\
  <value val="255" />
 </parameter>
 
+<!-- Number of polar bins for BVG histogramming when profile fitting -->
+<parameter name="numBinsTheta" type="int">
+ <value val="50" />
+</parameter>
+
+<!-- Number of azimuthal bins for BVG histogramming when profile fitting -->
+<parameter name="numBinsPhi" type="int">
+ <value val="50" />
+</parameter>
+
+<!-- Fraction along (h,k,l) to use for profile fitting. 0.5 is the next peak. -->
+<parameter name="fracHKL">
+ <value val="0.4" />
+</parameter>
+
+<!-- Side length of each voxel for fitting in units of angstrom^-1 -->
+<parameter name="dQPixel">
+ <value val="0.01" />
+</parameter>
+
+<!-- Minimum spacing for profile fitting the TOF profile. Units of microseconds -->
+<parameter name="mindtBinWidth">
+ <value val="2" />
+</parameter>
+
+<!-- Maximum spacing for profile fitting the TOF profile. Units of microseconds -->
+<parameter name="maxdtBinWidth">
+ <value val="15" />
+</parameter>
 
 </component-link>
 

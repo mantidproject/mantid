@@ -197,7 +197,7 @@ def getPoissionGoodIDX(n_events, zBG=1.96, neigh_length_m=3):
 def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, qMask=None,
                         peak=None, box=None, pp_lambda=None, peakNumber=-1, minppl_frac=0.8,
                         maxppl_frac=1.5, mindtBinWidth=1, maxdtBinWidth=50,
-                        constraintScheme=1, instrumentName=None):
+                        constraintScheme=1, instrumentName=None, peakMaskSize=5):
     """
     getOptimizedGoodIDX - returns a numpy arrays which is true if the voxel contains events at
             the zBG z level (1.96=95%CI).  Rather than using Poission statistics, this function
@@ -245,12 +245,12 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
     cX = nX//2
     cY = nY//2
     cZ = nZ//2
-    dP = 5
-
+    dP = peakMaskSize
     if instrumentName == 'TOPAZ':
         dP = 15
-    if instrumentName == 'CORELLI':
+    elif instrumentName == 'CORELLI':
         dP = 10
+
     peakMask = qMask.copy()
     peakMask[cX-dP:cX+dP, cY-dP:cY+dP, cZ-dP:cZ+dP] = 0
     neigh_length_m=3
@@ -318,7 +318,7 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
 def getBGRemovedIndices(n_events, zBG=1.96, calc_pp_lambda=False, neigh_length_m=3, qMask=None,
                         peak=None, box=None, pp_lambda=None, peakNumber=-1, padeCoefficients=None,
                         pplmin_frac=0.8, pplmax_frac=1.5, mindtBinWidth=1, maxdtBinWidth=50,
-                        constraintScheme=1, instrumentName=None):
+                        constraintScheme=1, instrumentName=None, peakMaskSize=5):
     """
     getBGRemovedIndices - A wrapper for getOptimizedGoodIDX
     Input:

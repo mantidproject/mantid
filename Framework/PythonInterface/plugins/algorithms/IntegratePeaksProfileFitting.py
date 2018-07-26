@@ -116,30 +116,18 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         # statement.
         # If you change these values or add an instrument, documentation should also be changed.
         instrumentName = peaks_ws.getInstrument().getFullName()
-        mindtBinWidth = 15
-        maxdtBinWidth = 50
-        nTheta = 50
-        nPhi = 50
-        fracHKL = 0.4
-        dQPixel = 0.003
-        if instrumentName == 'MANDI':
-            pass
-        elif instrumentName == 'TOPAZ':
-            mindtBinWidth = 2
-            maxdtBinWidth = 15
-            nTheta=50
-            nPhi = 50
-            fracHKL = 0.4
-            dQPixel = 0.01
-        elif instrumentName == 'CORELLI':
-            mindtBinWidth = 2
-            maxdtBinWidth = 60
-            nTheta=50
-            nPhi = 50
-            fracHKL = 0.4
-            dQPixel = 0.007
-        else:
-            logger.warning("Instrument name {} not found! Falling back on default parameters!".format(instrumentName))
+        try:
+            nTheta = peaks_ws.getInstrument().getIntParameter("numBinsTheta")[0]
+            nPhi = peaks_ws.getInstrument().getIntParameter("numBinsPhi")[0] 
+            mindtBinWidth = peaks_ws.getInstrument().getNumberParameter("mindtBinWidth")[0]
+            maxdtBinWidth = peaks_ws.getInstrument().getNumberParameter("maxdtBinWidth")[0] 
+            fracHKL = peaks_ws.getInstrument().getNumberParameter("fracHKL")[0] 
+            dQPixel = peaks_ws.getInstrument().getNumberParameter("dQPixel")[0] 
+
+        except:
+            raise
+            logger.error("Cannot find all parameters in instrument parameters file.")
+            sys.exit(1)
 
         neigh_length_m=3
         qMask = ICCFT.getHKLMask(UBMatrix, frac=fracHKL, dQPixel=dQPixel,dQ=dQ)

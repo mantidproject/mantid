@@ -15,7 +15,7 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
               plotResults=False, zBG=1.96, bgPolyOrder=1, fICCParams=None, oldICCFit=None,
               strongPeakParams=None, forceCutoff=250, edgeCutoff=15,
               neigh_length_m=3, q_frame='sample', dtSpread=0.03, pplmin_frac=0.8, pplmax_frac=1.5, mindtBinWidth=1,
-              maxdtBinWidth=50, figureNumber=2):
+              maxdtBinWidth=50, figureNumber=2, instrumentName=None):
     n_events = box.getNumEventsArray()
 
     if q_frame == 'lab':
@@ -30,11 +30,13 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
         goodIDX, pp_lambda = ICCFT.getBGRemovedIndices(
                     n_events, peak=peak, box=box, qMask=qMask, calc_pp_lambda=True, padeCoefficients=padeCoefficients,
                     neigh_length_m=neigh_length_m, pp_lambda=None, pplmin_frac=pplmin_frac,
-                    pplmax_frac=pplmax_frac, mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth)
+                    pplmax_frac=pplmax_frac, mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
+                    instrumentName=instrumentName)
         YTOF, fICC, x_lims = fitTOFCoordinate(
                     box, peak, padeCoefficients, dtSpread=dtSpread, qMask=qMask, bgPolyOrder=bgPolyOrder, zBG=zBG,
                     plotResults=plotResults, pp_lambda=pp_lambda, neigh_length_m=neigh_length_m, pplmin_frac=pplmin_frac,
-                    pplmax_frac=pplmax_frac, mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth)
+                    pplmax_frac=pplmax_frac, mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
+                    instrumentName=instrumentName)
         chiSqTOF = mtd['fit_Parameters'].column(1)[-1]
 
     else:  # we already did I-C profile, so we'll just read the parameters
