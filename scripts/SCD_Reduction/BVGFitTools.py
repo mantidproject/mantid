@@ -77,13 +77,11 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
 
     # This section defines detector size to determine if a peak is too
     # close to the edge.  Order is [NROWS, NCOLS].
-    if   instrumentName == 'MANDI':
-        nPixels = [255, 255]
-    elif instrumentName == 'TOPAZ':
-        nPixels = [255, 255]
-    elif instrumentName == 'CORELLI':
-        nPixels = [255,16]
-    else:
+    try:
+        numDetRows = peaks_ws.getInstrument().getIntParameter("numDetRows")[0]
+        numDetCols = peaks_ws.getInstrument().getIntParameter("numDetCols")[0]
+        nPixels = [numDetRows, numDetCols]
+    except:
         raise UserWarning('Instrument name {} not found. Assuming a 255*255 detector!'.format(instrumentName))
         nPixels = [255,255]
 

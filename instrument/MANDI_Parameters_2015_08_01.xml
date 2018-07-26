@@ -23,6 +23,16 @@
  <value val="2." />
 </parameter>
 
+<!-- Number of rows between detector gaps for profile fitting -->
+<parameter name="numDetRows" type="int">
+ <value val="255" />
+</parameter>
+
+<!-- Number of cols between detector gaps for profile fitting -->
+<parameter name="numDetCols" type="int">
+ <value val="255" />
+</parameter>
+
 
 
 </parameter-file>

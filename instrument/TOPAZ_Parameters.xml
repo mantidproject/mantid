@@ -99,6 +99,17 @@ detScale={13:1.046504,14:1.259293,16:1.02449,17:1.18898,18:0.88014,19:0.98665,\
  <value val="3." />
 </parameter>
 
+<!-- Number of rows between detector gaps for profile fitting -->
+<parameter name="numDetRows" type="int">
+ <value val="255" />
+</parameter>
+
+<!-- Number of cols between detector gaps for profile fitting -->
+<parameter name="numDetCols" type="int">
+ <value val="255" />
+</parameter>
+
+
 </component-link>
 
 </parameter-file>
