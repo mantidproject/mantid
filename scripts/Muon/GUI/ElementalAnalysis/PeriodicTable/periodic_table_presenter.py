@@ -54,3 +54,7 @@ class PeriodicTablePresenter(object):
 
     def unregister_table_rclicked(self, slot):
         self.view.unreg_on_table_rclicked(slot)
+
+    def set_peak_datafile(self, filename):
+        self.model.peak_data_file = filename
+        self.set_buttons()

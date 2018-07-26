@@ -13,6 +13,12 @@ from Muon.GUI.Common import message_box
 class ElementalAnalysisGui(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(ElementalAnalysisGui, self).__init__(parent)
+        self.menu = self.menuBar()
+        self.menu.addAction("File")
+        edit_menu = self.menu.addMenu("Edit")
+        edit_menu.addAction("Change Peak Data file", self.select_data_file)
+        self.menu.addAction("Binning")
+        self.menu.addAction("Normalise")
 
         self.ptable = PeriodicTablePresenter(
             PeriodicTableView(), PeriodicTableModel())
@@ -31,6 +37,18 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
 
     def table_changed(self, items):
         print("Table Changed: {}".format([i.symbol for i in items]))
+
+    def spinbox_changed(self, val):
+        print("SpinBox Value Changed: {}".format(val))
+
+    def spinbox_submit(self, val):
+        print("SpinBox Submitted: {}".format(val))
+
+    def select_data_file(self):
+        filename = str(QtGui.QFileDialog.getOpenFileName())
+        print(filename)
+        if filename != "":
+            self.ptable.set_peak_datafile(str(filename))
 
 
 def qapp():
