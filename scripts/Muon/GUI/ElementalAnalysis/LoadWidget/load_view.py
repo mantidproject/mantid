@@ -16,8 +16,8 @@ class LoadView(QtGui.QWidget):
 
         self.spinbox = QtGui.QSpinBox(self)
         self.spinbox.setRange(0, 1e7)
-        self.spinbox.setValue(1)
-        self.last_spinbox_val = 1
+        self.spinbox.setValue(0)
+        self.last_spinbox_val = 0
 
         self.on_spinbox_val_changed(self.update_last_spinbox_val)
 
