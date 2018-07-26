@@ -11,6 +11,10 @@ from Muon.GUI.Common import message_box
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_view import LoadView
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_presenter import LoadPresenter
+from Muon.GUI.ElementalAnalysis.Detectors.detectors_presenter import DetectorsPresenter
+from Muon.GUI.ElementalAnalysis.Detectors.detectors_view import DetectorsView
+from Muon.GUI.ElementalAnalysis.Peaks.peaks_presenter import PeaksPresenter
+from Muon.GUI.ElementalAnalysis.Peaks.peaks_view import PeaksView
 
 
 class ElementalAnalysisGui(QtGui.QMainWindow):
@@ -23,13 +27,22 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.ptable.register_table_lclicked(self.table_left_clicked)
         self.ptable.register_table_rclicked(self.table_right_clicked)
 
+        self.widget_list = QtGui.QVBoxLayout()
+
         self.load_widget = LoadPresenter(LoadView(), LoadModel())
         self.load_widget.register_spinbox_val_changed(self.spinbox_changed)
         self.load_widget.register_spinbox_submit(self.spinbox_submit)
 
+        self.detectors = DetectorsPresenter(DetectorsView())
+        self.peaks = PeaksPresenter(PeaksView())
+
+        self.widget_list.addWidget(self.peaks.view)
+        self.widget_list.addWidget(self.detectors.view)
+        self.widget_list.addWidget(self.load_widget.view)
+
         self.box = QtGui.QHBoxLayout()
         self.box.addWidget(self.ptable.view)
-        self.box.addWidget(self.load_widget.view)
+        self.box.addLayout(self.widget_list)
         self.setCentralWidget(QtGui.QWidget(self))
         self.centralWidget().setLayout(self.box)
         self.setWindowTitle("Elemental Analysis")
