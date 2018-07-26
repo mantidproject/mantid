@@ -232,9 +232,6 @@ ConfigServiceImpl::ConfigServiceImpl()
                              .toFormattedString("%Y-%m-%dT%H:%MZ") << "\n";
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList
                       << '\n';
-#ifndef MPI_BUILD // There is no logging to file by default in MPI build
-  g_log.information() << "Logging to: " << m_logFilePath << '\n';
-#endif
 
   // Assert that the appdata and the instrument subdirectory exists
   std::string appDataDir = getAppDataDir();
@@ -431,25 +428,6 @@ void ConfigServiceImpl::registerLoggingFilterChannel(
  *
  */
 void ConfigServiceImpl::configureLogging() {
-  // Undocumented way to override the mantid.log path
-  if (Poco::Environment::has("MANTIDLOGPATH")) {
-    auto logpath = Poco::Path(Poco::Environment::get("MANTIDLOGPATH"));
-    logpath = logpath.absolute();
-    m_logFilePath = logpath.toString();
-    // Set the line in the configuration properties.
-    m_pConf->setString("logging.channels.fileChannel.path", m_logFilePath);
-  } else {
-    m_logFilePath = getString("logging.channels.fileChannel.path");
-    if (m_logFilePath.empty()) {
-      // Default to appdata/mantid.log
-      Poco::Path path(getAppDataDir());
-      path.append("mantid.log");
-      m_logFilePath = path.toString();
-      // Set the line in the configuration properties.
-      m_pConf->setString("logging.channels.fileChannel.path", m_logFilePath);
-    }
-  }
-
   try {
     // Configure the logging framework
     Poco::Util::LoggingConfigurator configurator;
@@ -459,7 +437,6 @@ void ConfigServiceImpl::configureLogging() {
               << '\n';
   }
   // register the filter channels - the order here is important
-  registerLoggingFilterChannel("fileFilterChannel", nullptr);
   registerLoggingFilterChannel("consoleFilterChannel", nullptr);
 }
 
@@ -2007,17 +1984,11 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
   return m_proxyInfo;
 }
 
-/** Sets the log level priority for the File log channel
-* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
-*/
-void ConfigServiceImpl::setFileLogLevel(int logLevel) {
-  setFilterChannelLogLevel(m_filterChannels[0], logLevel);
-}
 /** Sets the log level priority for the Console log channel
 * @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
 */
 void ConfigServiceImpl::setConsoleLogLevel(int logLevel) {
-  setFilterChannelLogLevel(m_filterChannels[1], logLevel);
+  setFilterChannelLogLevel(m_filterChannels[0], logLevel);
 }
 
 /** Sets the Log level for a filter channel

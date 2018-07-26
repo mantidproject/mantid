@@ -119,7 +119,6 @@ public:
 
   void testLogLevelFiltering() {
     TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setConsoleLogLevel(4));
-    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setFileLogLevel(4));
     TSM_ASSERT_THROWS(
         "A false channel name for setFilterChannelLogLevel did not throw",
         ConfigService::Instance().setFilterChannelLogLevel(
@@ -135,26 +134,15 @@ public:
   void testLogLevelChangesWithFilteringLevels() {
     Logger log1("testLogLevelChangesWithFilteringLevels");
     TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setConsoleLogLevel(4));
-    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setFileLogLevel(4));
-    TSM_ASSERT("The log level should be 4 after both filters are set to 4",
+    TSM_ASSERT("The log level should be 4 after the filters are set to 4",
                log1.is(4));
 
-    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setFileLogLevel(3));
-    TSM_ASSERT("The log level remain at 4 if any filter is at 4", log1.is(4));
     TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setConsoleLogLevel(3));
-    TSM_ASSERT("The log level should be 3 after both filters are set to 3",
+    TSM_ASSERT("The log level should be 3 after the filters are set to 3",
                log1.is(3));
-
-    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setFileLogLevel(5));
-    TSM_ASSERT("The log level should be at 5 if any filter is at 5",
-               log1.is(5));
-    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setConsoleLogLevel(5));
-    TSM_ASSERT("The log level remain at 5 after both filters are set to 5",
-               log1.is(5));
 
     // return back to previous values
     TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setConsoleLogLevel(4));
-    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setFileLogLevel(4));
   }
 
   void testRegisteringaNewFilter() {
@@ -711,7 +699,7 @@ public:
 
     std::vector<std::string> keys = ConfigService::Instance().keys();
 
-    TS_ASSERT_EQUALS(keys.size(), 18);
+    TS_ASSERT_EQUALS(keys.size(), 9);
   }
 
   void testRemovingProperty() {

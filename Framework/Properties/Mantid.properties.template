@@ -189,24 +189,6 @@ logging.formatters.f1.class = PatternFormatter
 logging.formatters.f1.pattern = @CONSOLEPATTERN@
 logging.formatters.f1.times = local
 
-# specific filter for the file channel raising the level to information (drop to debug for debugging)
-logging.loggers.root.channel.channel2 = @FILELOGGER_CHANNEL@
-logging.channels.fileFilterChannel.class= FilterChannel
-logging.channels.fileFilterChannel.channel= fileChannel
-logging.channels.fileFilterChannel.level= information
-# output to a file (For error capturing and debugging)
-logging.channels.fileChannel.class = FileChannel
-# Blank entry uses default path of HOME/.mantid/mantid.log on Linux/OSX and %APPDATA%\\mantidproject\\mantid
-logging.channels.fileChannel.path =
-# Do not flush file buffers for each newline
-logging.channels.fileChannel.flush = false
-logging.channels.fileChannel.rotation = 1 M
-logging.channels.fileChannel.purgeCount = 9
-logging.channels.fileChannel.formatter.class = PatternFormatter
-logging.channels.fileChannel.formatter.pattern = %Y-%m-%d %H:%M:%S,%i [%I] %p %s - %t
-logging.channels.fileChannel.formatter.times = local
-
-
 workspace.sendto.SansView.arguments=[file]
 workspace.sendto.SansView.saveusing=SaveCanSAS1D
 workspace.sendto.SansView.target=%SANSVIEWPATH%/SansView.exe

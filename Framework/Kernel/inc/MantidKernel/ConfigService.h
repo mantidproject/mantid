@@ -234,8 +234,6 @@ public:
   /// registers additional logging filter channels
   void registerLoggingFilterChannel(const std::string &filterChannelName,
                                     Poco::Channel *pChannel);
-  /// Sets the log level priority for the File log channel
-  void setFileLogLevel(int logLevel);
   /// Sets the log level priority for the Console log channel
   void setConsoleLogLevel(int logLevel);
   /// Sets the log level priority for the selected Filter log channel
@@ -332,8 +330,6 @@ private:
   const std::string m_properties_file_name;
   /// The filename of the Mantid user properties file
   const std::string m_user_properties_file_name;
-  /// The filename where the log ends up
-  std::string m_logFilePath;
   /// Store a list of data search paths
   std::vector<std::string> m_DataSearchDirs;
   /// Store a list of user search paths
