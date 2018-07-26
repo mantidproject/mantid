@@ -13,8 +13,8 @@ Many users may need this extra information so that they can have a better unders
 
 The ``DetectorInfo`` object is one of three objects that the user can gain access to from a workspace. 
 The other two are:
- * ``SpectrumInfo``
- * ``ComponentInfo``
+  * ``SpectrumInfo``
+  * ``ComponentInfo``
 
 ---------
 Indexing
