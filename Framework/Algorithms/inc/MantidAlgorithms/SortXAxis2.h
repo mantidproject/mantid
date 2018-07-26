@@ -52,27 +52,27 @@ private:
 
   void sortIndicesByX(std::vector<std::size_t> &workspaceIndecies,
                       std::string order,
-                      const Mantid::API::MatrixWorkspace *inputWorkspace,
+                      const Mantid::API::MatrixWorkspace &inputWorkspace,
                       unsigned int specNum);
 
   void
   copyYandEToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies,
-                             const Mantid::API::MatrixWorkspace *inputWorkspace,
-                             Mantid::API::MatrixWorkspace_sptr outputWorkspace,
+                             const Mantid::API::MatrixWorkspace &inputWorkspace,
+                             Mantid::API::MatrixWorkspace &outputWorkspace,
                              unsigned int SpecNum, bool isAProperHistogram);
 
   void copyXandDxToOutputWorkspace(
       std::vector<std::size_t> &workspaceIndecies,
-      const Mantid::API::MatrixWorkspace *inputWorkspace,
-      Mantid::API::MatrixWorkspace_sptr outputWorkspace, unsigned int specNum);
+      const Mantid::API::MatrixWorkspace &inputWorkspace,
+      Mantid::API::MatrixWorkspace &outputWorkspace, unsigned int specNum);
 
   void copyToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies,
-                             const Mantid::API::MatrixWorkspace *inputWorkspace,
-                             Mantid::API::MatrixWorkspace_sptr outputWorkspace,
+                             const Mantid::API::MatrixWorkspace &inputWorkspace,
+                             Mantid::API::MatrixWorkspace &outputWorkspace,
                              unsigned int specNum, bool isAProperHistogram);
 
   bool determineIfHistogramIsValid(
-      const Mantid::API::MatrixWorkspace *inputWorkspace);
+      const Mantid::API::MatrixWorkspace &inputWorkspace);
 };
 
 } // namespace Algorithms
