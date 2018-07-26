@@ -12,9 +12,6 @@ from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel, CoLoadMo
 from Muon.GUI.Common.load_widget.load_view import LoadView
 from Muon.GUI.Common.load_widget.load_presenter import LoadPresenter
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_presenter import LoadPresenter
-from Muon.GUI.ElementalAnalysis.Checkbox.checkbox_model import CheckboxModel
-from Muon.GUI.ElementalAnalysis.Checkbox.checkbox_view import CheckboxView
-from Muon.GUI.ElementalAnalysis.Checkbox.checkbox_presenter import CheckboxPresenter
 
 
 class ElementalAnalysisGui(QtGui.QMainWindow):
@@ -57,7 +54,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
 
         self.box = QtGui.QHBoxLayout()
         self.box.addWidget(self.ptable.view)
-        self.box.addLayout(self.widget_list)
+        self.box.addWidget(self.load_widget.view)
         self.setCentralWidget(QtGui.QWidget(self))
         self.centralWidget().setLayout(self.box)
         self.setWindowTitle("Elemental Analysis")
@@ -76,9 +73,6 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         filename = str(QtGui.QFileDialog.getOpenFileName())
         if filename:
             self.ptable.set_peak_datafile(filename)
-
-    def checkbox_changed(self, checkbox, state):
-        print("checkbox changed: {} {}".format(checkbox, state))
 
 
 def qapp():
