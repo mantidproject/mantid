@@ -52,6 +52,7 @@ public:
 
   ///@name Single-value stream operators
   /// @{
+  BinaryStreamReader &operator>>(int16_t &value);
   BinaryStreamReader &operator>>(int32_t &value);
   BinaryStreamReader &operator>>(int64_t &value);
   BinaryStreamReader &operator>>(float &value);
@@ -61,6 +62,7 @@ public:
 
   ///@name 1D methods
   /// @{
+  BinaryStreamReader &read(std::vector<int16_t> &value, const size_t nvals);
   BinaryStreamReader &read(std::vector<int32_t> &value, const size_t nvals);
   BinaryStreamReader &read(std::vector<int64_t> &value, const size_t nvals);
   BinaryStreamReader &read(std::vector<float> &value, const size_t nvals);
