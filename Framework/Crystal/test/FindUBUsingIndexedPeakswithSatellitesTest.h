@@ -106,14 +106,14 @@ public:
     // Check that we set an oriented lattice
     TS_ASSERT(SatellitePeaks->mutableSample().hasOrientedLattice());
 
-    OrientedLattice lattSat = SatellitePeaks->mutableSample().getOrientedLattice();
+    OrientedLattice lattSat =
+        SatellitePeaks->mutableSample().getOrientedLattice();
 
     std::vector<double> UB_calculatedSat = lattSat.getUB().getVector();
 
     for (size_t i = 0; i < 9; i++) {
       TS_ASSERT_DELTA(correct_UB[i], UB_calculatedSat[i], 5e-4);
     }
-
 
     AnalysisDataService::Instance().remove(WSName);
   }
