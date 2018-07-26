@@ -7,21 +7,29 @@ This is a python binding to the C++ class Mantid::Geometry::ComponentInfo.
 --------
 Purpose
 --------
-The purpose of the ComponentInfo object is to allow the user to access geometric information about the components which are part of beamline. A component is any physical item or group of items that is registered for the purpose of data reduction. The ComponentInfo object can be used to access information such as the total number of components in the beamline, the absolute position of a component as well as the absolute rotation of a component.
+The purpose of the ``ComponentInfo`` object is to allow the user to access geometric information about the components which are part of a beamline. A component is any physical item or group of items that is registered for the purpose of data reduction. The ``ComponentInfo`` object can be used to access information such as the total number of components in the beamline, the absolute position of a component as well as the absolute rotation of a component.
 
-Many users may need this extra information so that they can have a better understanding of the beamline they are using and the components that make up the beamline - e.g. detectors. This extra information is also easy and fast to access meaning the users can make improvements to their experimental design with ease.
+Many users may need this extra information so that they can have a better understanding of the beamline they are using and the components that make up the beamline - e.g. detectors. This extra information is easy and fast to access.
 
-ComponentInfo is one of three objects that the user can gain access to from a Workspace. 
+ComponentInfo is one of three objects that the user can gain access to from a workspace. 
 The other two are:
-  * SpectrumInfo
-  * DetectorInfo
+ * ``SpectrumInfo``
+ * ``DetectorInfo``
+
+---------
+Indexing 
+---------
+The ``ComponentInfo`` object is accessed by an index going from 0 to the number of components N. 
+The component index for a detector is EQUAL to the detector index. In other words, a detector with a detector index of 5 when working with a ``DetectorInfo`` object and will have a component index of 5 when working with a ``ComponentInfo`` object. 
+
+Another way to think about this is that the first 0 - n components referenced in ``ComponentInfo`` are detectors, where n is the total number of detectors.
 
 -------
 Usage
 -------
 
 **Example 1 - Creating a ComponentInfo Object:**
-This example shows how to obtain a ComponentInfo object from a workspace object.
+This example shows how to obtain a ``ComponentInfo`` object from a workspace object.
 The return value is a ``ComponentInfo`` object.
 
 .. testcode:: CreateComponentInfoObject
@@ -33,10 +41,17 @@ The return value is a ``ComponentInfo`` object.
 	info = ws.componentInfo()
 	print(type(info))
 
+Output:
+
+.. testoutput:: CreateComponentInfoObject
+
+	<class 'mantid.geometry._geometry.ComponentInfo'>
+
+
 **Example 2 - Calling the relativePosition method on the ComponentInfo Object:**
 This example shows how to call the ``relativePosition`` method.
 The method takes in an integer ``index`` parameter which corresponds to a component.
-The return value is a list of integers denoting components.
+The return value is a V3D object which denotes a point in 3D space.
 
 .. testcode:: CallRelativePositionMethod
 
@@ -47,12 +62,19 @@ The return value is a list of integers denoting components.
 	info = ws.componentInfo()
 
 	# Call relativePosition
-	print(type(info.relativePosition(0)))
+	print(info.relativePosition(0))
+
+Output:
+
+.. testoutput:: CallRelativePositionMethod
+
+	[0,0,0]
+
 
 **Example 3 - Calling the setRotation method on the ComponentInfo Object:**
-The ``setRotation()`` method takes in a Quat object which defines a rotation.
+The ``setRotation()`` method takes in a ``Quat`` object which defines a rotation.
 The rotation is applied to the component. 
-Retriving the rotation after setting it may not always give the same Quat object back - i.e. the values could be changed.
+Retriving the rotation after setting it may not always give the same ``Quat`` object back - i.e. the values could be changed.
 
 .. testcode:: CallSetRotationMethod
 	
@@ -70,6 +92,14 @@ Retriving the rotation after setting it may not always give the same Quat object
 	info.setRotation(0, quat)
 	print(info.rotation(0))
 
+Output:
+
+.. testoutput:: CallSetRotationMethod
+
+	[1,0,0,0]
+	[0,0,0,0]
+
+
 **Example 4 - Calling the hasParent method on the ComponentInfo Object:**
 The ``hasParent()`` method takes an integer ``index`` parameter which represents the component.
 The return value is True if the component has a parent component or False otherwise.
@@ -84,6 +114,12 @@ The return value is True if the component has a parent component or False otherw
 
 	# Call hasParent
 	print(info.hasParent(0))
+
+Output:
+
+.. testoutput:: CallHasParentMethod
+
+	True
 
 
 **Example 5 - Retrieving a List of Child Components from a ComponentInfo Object:**
@@ -101,32 +137,15 @@ The returned list can then be indexed into to obtain a specific component.
 
 	# Get a list of the child components
 	childComponents = info.children(0)
-	print(type(childComponents))
 	print(len(childComponents))
+	print(childComponents)
 
 Output:
 
-.. testoutput:: CreateComponentInfoObject
-
-	<class 'mantid.geometry._geometry.ComponentInfo'>
-
-.. testoutput:: CallRelativePositionMethod
-
-	<class 'mantid.kernel._kernel.V3D'>
-
-.. testoutput:: CallSetRotationMethod
-
-	[1,0,0,0]
-	[0,0,0,0]
-
-.. testoutput:: CallHasParentMethod
-
-	True
-
 .. testoutput:: CallChildrenMethod
 
-	<class 'list'>
 	0
+	[]
 
 	
 *bases:* :py:obj:`mantid.geometry.ComponentInfo`
