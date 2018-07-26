@@ -538,13 +538,13 @@ QVariant PythonScript::evaluateImpl() {
       qret = QVariant(PyFloat_AS_DOUBLE(number));
       Py_DECREF(number);
     }
+    GNU_DIAG_OFF("parentheses-equality")
   }
   /* bool */
-  GNU_DIAG_OFF("parentheses-equality")
   else if (PyBool_Check(pyret)) {
-    GNU_DIAG_ON("parentheses-equality")
     qret = QVariant(pyret == Py_True);
   }
+  GNU_DIAG_ON("parentheses-equality")
   // could handle advanced types (such as PyList->QValueList) here if needed
   /* fallback: try to convert to (unicode) string */
   if (!qret.isValid()) {

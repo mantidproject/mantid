@@ -98,7 +98,7 @@ Statistics getStatisticsNumpy(const NumPy::NdArray &data,
 }
 
 GNU_DIAG_OFF("unknown-pragmas")
-GNU_DIAG_OFF("unused-local-typdef")
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
@@ -108,7 +108,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(getStatisticsOverloads, getStatisticsNumpy, 1,
                                 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unknown-pragmas")
-GNU_DIAG_ON("unused-local-typdef")
+GNU_DIAG_ON("unused-local-typedef")
 //============================ Z score
 //============================================
 
@@ -158,7 +158,7 @@ std::vector<double> getModifiedZscoreNumpy(const NumPy::NdArray &data,
 }
 
 GNU_DIAG_OFF("unknown-pragmas")
-GNU_DIAG_OFF("unused-local-typdef")
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
@@ -168,7 +168,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(getModifiedZscoreOverloads,
                                 getModifiedZscoreNumpy, 1, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unknown-pragmas")
-GNU_DIAG_ON("unused-local-typdef")
+GNU_DIAG_ON("unused-local-typedef")
 
 //============================ getMoments
 //============================================
@@ -220,7 +220,7 @@ std::vector<double> getMomentsAboutOriginNumpy(const NumPy::NdArray &indep,
 }
 
 GNU_DIAG_OFF("unknown-pragmas")
-GNU_DIAG_OFF("unused-local-typdef")
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
@@ -229,7 +229,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutOriginOverloads,
                                 getMomentsAboutOriginNumpy, 2, 3)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unknown-pragmas")
-GNU_DIAG_ON("unused-local-typdef")
+GNU_DIAG_ON("unused-local-typedef")
 /**
  * Proxy for @see Mantid::Kernel::getMomentsAboutMean so that it can accept
  * numpy arrays
@@ -242,7 +242,7 @@ std::vector<double> getMomentsAboutMeanNumpy(const NumPy::NdArray &indep,
 }
 
 GNU_DIAG_OFF("unknown-pragmas")
-GNU_DIAG_OFF("unused-local-typdef")
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
@@ -251,7 +251,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutMeanOverloads,
                                 getMomentsAboutMeanNumpy, 2, 3)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unknown-pragmas")
-GNU_DIAG_ON("unused-local-typdef")
+GNU_DIAG_ON("unused-local-typedef")
 
 ///@endcond
 }

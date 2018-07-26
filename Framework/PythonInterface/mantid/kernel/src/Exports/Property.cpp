@@ -25,7 +25,7 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(Property)
 GNU_DIAG_OFF("unknown-pragmas")
-GNU_DIAG_OFF("unused-local-typdef")
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
@@ -35,7 +35,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(valueAsPrettyStrOverloader,
                                        valueAsPrettyStr, 0, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unknown-pragmas")
-GNU_DIAG_ON("unused-local-typdef")
+GNU_DIAG_ON("unused-local-typedef")
 
 void export_Property() {
   register_ptr_to_python<Property *>();

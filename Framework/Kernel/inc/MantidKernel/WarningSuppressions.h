@@ -44,19 +44,8 @@
 #if defined(GCC_VERSION) || defined(CLANG_VERSION)
 // how to use a pragma in a macro
 #define PRAGMA(x) _Pragma(#x)
-
 // things to make the macros clearer
-#define GNU_DIAG_STR(s) #s
-// undefine definition from Poco 1.6
-#ifdef GNU_DIAG_JOINSTR
-#undef GNU_DIAG_JOINSTR
-#endif
-#define GNU_DIAG_JOINSTR(x, y) GNU_DIAG_STR(x##y)
 #define GNU_DIAG_MAKE_WARNING(x) "-W" x
-// undefine definition from Poco 1.6
-#ifdef GNU_DIAG_DO_PRAGMA
-#undef GNU_DIAG_DO_PRAGMA
-#endif
 #define GNU_DIAG_DO_PRAGMA(x) _Pragma(#x)
 
 #if defined(GCC_VERSION)
@@ -78,20 +67,12 @@
 // note that we turn off unknown warnings here as well so that we can use the
 // same macro for GCC and clang.
 // clang-format off
-#if GCC_VERSION >= 40600 // GCC 4.6.0
 #define GNU_DIAG_OFF(x)                                                          \
   GNU_DIAG_PRAGMA(push)                                                          \
-  GNU_DIAG_PRAGMA(ignored GNU_DIAG_MAKE_WARNING("unknown-warning"))                     \
+  GNU_DIAG_PRAGMA(ignored GNU_DIAG_MAKE_WARNING("pragmas"))                      \
   GNU_DIAG_PRAGMA(ignored GNU_DIAG_MAKE_WARNING(x))
 #define GNU_DIAG_ON(x) GNU_DIAG_PRAGMA(pop)
-#else
-#define GNU_DIAG_OFF(x)                                                          \
-  GNU_DIAG_PRAGMA(ignored GNU_DIAG_MAKE_WARNING("unknown-warning"))                     \
-  GNU_DIAG_PRAGMA(ignored GNU_DIAG_MAKE_WARNING(x))
-#define GNU_DIAG_ON(x)                                                           \
-  GNU_DIAG_PRAGMA(warning GNU_DIAG_MAKE_WARNING("unknown-warning"))                     \
-  GNU_DIAG_PRAGMA(warning GNU_DIAG_MAKE_WARNING(x))
-#endif
+
 // clang-format on
 
 #elif defined(CLANG_VERSION) && CLANG_VERSION >= 306
@@ -101,16 +82,16 @@
 // clang-format off
 #define GNU_DIAG_OFF(x)                                                         \
   GNU_DIAG_PRAGMA(push)                                                         \
-  GNU_DIAG_PRAGMA(ignored GNU_DIAG_MAKE_WARNING("unknown-warning-option"))        \
+  GNU_DIAG_PRAGMA(ignored GNU_DIAG_MAKE_WARNING("unknown-pragmas"))             \
+  GNU_DIAG_PRAGMA(ignored GNU_DIAG_MAKE_WARNING("unknown-warning-option"))      \
   GNU_DIAG_PRAGMA(ignored GNU_DIAG_MAKE_WARNING(x))
 #define GNU_DIAG_ON(x) GNU_DIAG_PRAGMA(pop)
 // clang-format on
+#endif
 #else
 // neither clang or GCC
 #define GNU_DIAG_OFF(x)
 #define GNU_DIAG_ON(x)
-#endif
-
 #endif
 
 // Defining this macro separately since clang-tidy tries to add spaces around

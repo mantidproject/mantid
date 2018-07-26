@@ -57,7 +57,7 @@ boost::python::list runningInstancesOf(AlgorithmManagerImpl &self,
 ///@cond
 //------------------------------------------------------------------------------------------------------
 GNU_DIAG_OFF("unknown-pragmas")
-GNU_DIAG_OFF("unused-local-typdef")
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
@@ -69,7 +69,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createUnmanaged_overloads,
                                        2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unknown-pragmas")
-GNU_DIAG_ON("unused-local-typdef")
+GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
 }
 
