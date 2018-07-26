@@ -37,7 +37,9 @@ namespace Crystal {
 class DLLExport FindUBUsingIndexedPeakswithSatellites : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  const std::string name() const override { return "FindUBUsingIndexedPeakswithSatellites"; };
+  const std::string name() const override {
+    return "FindUBUsingIndexedPeakswithSatellites";
+  };
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
@@ -51,7 +53,8 @@ public:
 
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Calculate the UB matrix and modulation UB from a peaks workspace, containing indexed peaks including satellites.";
+    return "Calculate the UB matrix and modulation UB from a peaks workspace, "
+           "containing indexed peaks including satellites.";
   }
 
 private:
