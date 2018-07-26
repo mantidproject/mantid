@@ -41,11 +41,12 @@ template <typename TYPE>
 tuple pyTimeAverageValueAndStdDev(const TimeSeriesProperty<TYPE> &self) {
   const std::pair<double, double> value = self.timeAverageValueAndStdDev();
   return make_tuple(value.first, value.second);
+}
 
-  // Call the dtype helper function
-  template <typename TYPE> std::string dtype(TimeSeriesProperty<TYPE> & self) {
-    return Mantid::PythonInterface::Converters::dtype(self);
-  }
+// Call the dtype helper function
+template <typename TYPE> std::string dtype(TimeSeriesProperty<TYPE> &self) {
+  return Mantid::PythonInterface::Converters::dtype(self);
+}
 
 // Macro to reduce copy-and-paste
 #define EXPORT_TIMESERIES_PROP(TYPE, Prefix)                                   \
