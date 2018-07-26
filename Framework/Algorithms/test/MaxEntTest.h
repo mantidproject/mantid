@@ -324,6 +324,65 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
+  void test_adjustment_arithmetic() {
+    // Workspace has two spectra of three values all 3+3i
+    std::vector<double> wsVal(12, 3.0);
+    auto ws = createWorkspaceWithYValues(4, 3, wsVal);
+
+    // First spectrum has no adjustments 
+    // Second spectrum has mixed adjustments
+ 
+    // Linear adjustments 2nd spectrum
+    // 1, 2i, 2i
+    std::vector<double> linAdjVal(12, 0.0);
+    linAdjVal[0] = 1.0;
+    linAdjVal[1] = 1.0;
+    linAdjVal[2] = 1.0;
+    linAdjVal[6] = 1.0;
+    linAdjVal[10] = 2.0;
+    linAdjVal[11] = 2.0;
+    auto linAdj = createWorkspaceWithYValues(4, 3, linAdjVal);
+
+    // Const adjustments 2nd spectrum
+    // 1-i, 0, 1-i
+    std::vector<double> constAdjVal(12, 0.0);
+    constAdjVal[3] = 1.0;
+    constAdjVal[9] = -1.0;
+    constAdjVal[5] = 1.0;
+    constAdjVal[11] = -1.0;
+    auto constAdj = createWorkspaceWithYValues(4, 3, constAdjVal);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", true);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setProperty("DataLinearAdj", linAdj);
+    alg->setProperty("DataConstAdj", constAdj);
+    alg->setProperty("perSpectrumReconstruction", false);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+    TS_ASSERT(data);
+
+    // Compare adjusted second spectrum with non-adjust first spectrum
+    // linear 1, const 1-i
+    TS_ASSERT_DELTA(data->y(1)[0], data->y(0)[0] + 1.0, 0.001);
+    TS_ASSERT_DELTA(data->y(3)[0], data->y(2)[0] - 1.0, 0.001);
+    // linear 2i, const 0
+    TS_ASSERT_DELTA(data->y(1)[1], -2.0*data->y(2)[1], 0.001);
+    TS_ASSERT_DELTA(data->y(3)[1],  2.0*data->y(0)[1], 0.001);
+    // linear 2i, const 1-i
+    TS_ASSERT_DELTA(data->y(1)[2], data->y(0)[2] + 1.0 - 2.0*data->y(2)[2], 0.001);
+    TS_ASSERT_DELTA(data->y(3)[2], data->y(2)[2] - 1.0 + 2.0*data->y(0)[2], 0.001);
+  }
+
   void test_cosine() {
 
     auto ws = createWorkspaceReal(50, 0.0, 1);
@@ -1071,6 +1130,35 @@ public:
     TS_ASSERT_EQUALS(image->readX(0).size(), ws->readX(0).size());
     TS_ASSERT_EQUALS(data->readX(0).size(), ws->readX(0).size());
     TS_ASSERT_EQUALS(data->readX(0), ws->readX(0));
+  }
+
+  MatrixWorkspace_sptr createWorkspaceWithYValues(size_t nHist, size_t length, std::vector<double> const &YVal) {
+
+    size_t nPts = length * nHist;
+    TS_ASSERT_EQUALS(nPts, YVal.size());
+    MantidVec X(nPts);
+    MantidVec Y(nPts);
+    MantidVec E(nPts);
+    for (size_t t = 0; t < length; t++) {
+      double x = static_cast<double>(t);
+      for (size_t s = 0; s < nHist; s++) {
+        X[t + s * length] = x;
+        Y[t + s * length] = YVal[t + s * length];
+        E[t + s * length] = 0.1;
+      }
+    }
+    auto createWS = AlgorithmManager::Instance().create("CreateWorkspace");
+    createWS->initialize();
+    createWS->setChild(true);
+    createWS->setProperty("DataX", X);
+    createWS->setProperty("DataY", Y);
+    createWS->setProperty("DataE", E);
+    createWS->setProperty("NSpec", static_cast<int>(nHist));
+    createWS->setPropertyValue("OutputWorkspace", "ws");
+    createWS->execute();
+    MatrixWorkspace_sptr ws = createWS->getProperty("OutputWorkspace");
+
+    return ws;
   }
 
   MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase,
