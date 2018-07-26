@@ -63,15 +63,13 @@ private:
 
   /// Run the algorithm
   void exec() override;
+  Kernel::V3D getOffsetVector(const std::string &label);
   void predictOffsets(DataObjects::PeaksWorkspace_sptr Peaks,
                       boost::shared_ptr<Mantid::API::IPeaksWorkspace> &OutPeaks,
-                      std::vector<double> offsets, std::string &label,
-                      int &maxOrder, Kernel::V3D &hkl,
-                      Kernel::Matrix<double> &goniometer,
-                      const Kernel::DblMatrix &UB,
+                      Kernel::V3D offsets, int &maxOrder, int & peakNum,
                       Geometry::HKLFilterWavelength &lambdaFilter,
                       bool &includePeaksInRange, bool &includeOrderZero,
-                      int &RunNumber, int &seqNum,
+                      int &seqNum,
                       std::vector<std::vector<int>> &AlreadyDonePeaks);
 };
 
