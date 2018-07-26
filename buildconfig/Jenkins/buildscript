@@ -233,8 +233,16 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
       # everything else uses lower-case values
       PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/mantid${PACKAGE_SUFFIX} -DCPACK_PACKAGE_SUFFIX=${PACKAGE_SUFFIX}"
     fi
+
+    if [[ ${ON_RHEL7} == true ]]; then
+      if [[ -n "${RELEASE_NUMBER}" ]]; then
+        RELEASE_NUMBER="1"
+      fi
+      PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_RPM_PACKAGE_RELEASE=${RELEASE_NUMBER}"
+    fi
   fi
 fi
+
 
 ###############################################################################
 # Generator
@@ -257,7 +265,7 @@ cd $BUILD_DIR
 # Clean up any artifacts from last build so that if it fails
 # they don't get archived again
 ###############################################################################
-rm -f -- *.dmg *.rpm *.deb *.tar.gz
+rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 
 ###############################################################################
 # CMake configuration

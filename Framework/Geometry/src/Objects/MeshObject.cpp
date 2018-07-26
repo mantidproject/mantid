@@ -15,7 +15,6 @@ namespace Geometry {
 
 using Kernel::Material;
 using Kernel::V3D;
-using Kernel::Quat;
 
 MeshObject::MeshObject(const std::vector<uint16_t> &faces,
                        const std::vector<V3D> &vertices,

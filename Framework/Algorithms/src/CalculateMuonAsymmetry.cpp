@@ -29,7 +29,6 @@ namespace Mantid {
 namespace Algorithms {
 
 using namespace Kernel;
-using API::Progress;
 using std::size_t;
 
 // Register the class into the algorithm factory
@@ -80,6 +79,10 @@ void CalculateMuonAsymmetry::init() {
   declareProperty(
       "MaxIterations", 500, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found");
+  declareProperty("OutputStatus", "", Kernel::Direction::Output);
+  declareProperty(make_unique<API::FunctionProperty>("OutputFunction",
+                                                     Kernel::Direction::Output),
+                  "The fitting function after fit.");
 }
 /*
 * Validate the input parameters
@@ -172,6 +175,14 @@ void CalculateMuonAsymmetry::exec() {
   // get new norm
   std::vector<double> norms =
       getNormConstants(wsNamesUnNorm); // this will do the fit
+  auto containsZeros = std::any_of(norms.begin(), norms.end(),
+                                   [](double value) { return value == 0.0; });
+  if (containsZeros) {
+
+    setProperty("OutputStatus", "Aborted, a normalization constant was zero");
+    g_log.error("Got a zero for the normalization, aborting algorithm.");
+    return;
+  }
   // update the ws to new norm
   for (size_t j = 0; j < wsNames.size(); j++) {
     API::MatrixWorkspace_sptr ws =
@@ -238,8 +249,11 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(
   }
 
   fit->execute();
+  auto status = fit->getPropertyValue("OutputStatus");
+  setProperty("OutputStatus", status);
 
   API::IFunction_sptr tmp = fit->getProperty("Function");
+  setProperty("OutputFunction", tmp);
   try {
     if (wsNames.size() == 1) {
       // N(1+g) + exp
@@ -274,10 +288,11 @@ double CalculateMuonAsymmetry::getNormValue(API::CompositeFunction_sptr &func) {
   auto TFFunc =
       boost::dynamic_pointer_cast<API::CompositeFunction>(func->getFunction(0));
 
+  auto fdas = TFFunc->asString();
   // getFunction(0) -> N
-  TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(
-      TFFunc->getFunction(0));
-  return TFFunc->getParameter("f0.A0");
+  auto flat = TFFunc->getFunction(0);
+
+  return flat->getParameter("A0");
 }
 } // namespace Algorithm
 } // namespace Mantid

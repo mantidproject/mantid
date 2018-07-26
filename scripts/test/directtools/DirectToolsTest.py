@@ -7,7 +7,8 @@ matplotlib.use('AGG')
 
 import directtools
 from mantid.api import mtd
-from mantid.simpleapi import LoadILLTOF, CreateSampleWorkspace, CreateWorkspace
+from mantid.simpleapi import (CreateSampleWorkspace, CreateWorkspace, DirectILLCollectData, DirectILLReduction,
+                              LoadILLTOF)
 import numpy
 import numpy.testing
 import testhelpers
@@ -246,6 +247,27 @@ class DirectTest(unittest.TestCase):
         figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
         self.assertEquals(axes.get_xscale(), 'log')
         self.assertEquals(axes.get_yscale(), 'log')
+
+    def test_plotconstE_and_plotconstQ_plot_equal_value_at_crossing(self):
+        DirectILLCollectData(
+            Run='ILL/IN4/084447.nxs',
+            OutputWorkspace='sample',
+            IncidentEnergyCalibration='Energy Calibration OFF',
+            FlatBkg='Flat Bkg OFF',
+        )
+        DirectILLReduction(
+            InputWorkspace='sample',
+            OutputWorkspace='reduced'
+        )
+        Q = 2.5
+        figure, axes, cuts = directtools.plotconstQ('reduced', Q, 0.01)
+        lineDataQ = axes.get_lines()[0].get_data()
+        E = 2.2
+        figure, axes, cuts = directtools.plotconstE('reduced', E, 0.01)
+        lineDataE = axes.get_lines()[0].get_data()
+        indexE = numpy.argmin(numpy.abs(lineDataQ[0] - E))
+        indexQ = numpy.argmin(numpy.abs(lineDataE[0] - Q))
+        self.assertEquals(lineDataQ[1][indexE], lineDataE[1][indexQ])
 
     def test_plotcuts_keepCutWorkspaces(self):
         ws = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)

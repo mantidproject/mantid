@@ -8,6 +8,8 @@
 
 #include <Poco/Net/HTTPResponse.h>
 
+#include "MantidKernel/DllConfig.h"
+
 // Forward declarations
 namespace Poco {
 namespace XML {

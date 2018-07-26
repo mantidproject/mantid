@@ -166,7 +166,7 @@ set ( INC_FILES
 	inc/MantidKernel/ConfigService.h
 	inc/MantidKernel/ConfigObserver.h
 	inc/MantidKernel/ConfigPropertyObserver.h
-  inc/MantidKernel/DateAndTime.h
+        inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTimeHelpers.h
@@ -246,7 +246,7 @@ set ( INC_FILES
 	inc/MantidKernel/NetworkProxy.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
-  inc/MantidKernel/normal_distribution.h
+        inc/MantidKernel/normal_distribution.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/OptionalBool.h
 	inc/MantidKernel/ParaViewVersion.h

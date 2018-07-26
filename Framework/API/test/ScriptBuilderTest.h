@@ -11,6 +11,16 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+namespace {
+std::string getAlgTimestamp(Mantid::API::HistoryView &historyView,
+                            size_t index) {
+  auto algList = historyView.getAlgorithmsList();
+  TS_ASSERT(algList.size() >= index + 1);
+  auto executionTime = algList[index].getAlgorithmHistory()->executionDate();
+  return executionTime.toISO8601String();
+}
+}
+
 class ScriptBuilderTest : public CxxTest::TestSuite {
   /// Use a fake algorithm object instead of a dependency on a real one.
   class SubAlgorithm : public Algorithm {
@@ -72,6 +82,38 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
       alg->setProperty("PropertyA", "I Don't exist!");
       alg->execute();
       setProperty("PropertyC", "I have been set!");
+    }
+  };
+
+  class NewlineAlgorithm : public Algorithm {
+  public:
+    NewlineAlgorithm() : Algorithm() {}
+    ~NewlineAlgorithm() override {}
+    const std::string name() const override { return "Foo\n\rBar"; }
+    const std::string summary() const override { return "Test"; }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Cat;Leopard;Mink"; }
+
+    void afterPropertySet(const std::string &name) override {
+      if (name == "InputWorkspace")
+        declareProperty("DynamicInputProperty", "");
+    }
+
+    void init() override {
+      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input));
+      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output));
+      declareProperty("PropertyA", "Hello");
+      declareProperty("PropertyB", "World");
+    }
+    void exec() override {
+      declareProperty("DynamicProperty1", "value", Direction::Output);
+      setPropertyValue("DynamicProperty1", "outputValue");
+
+      boost::shared_ptr<MatrixWorkspace> output =
+          boost::make_shared<WorkspaceTester>();
+      setProperty("OutputWorkspace", output);
     }
   };
 
@@ -165,6 +207,10 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
     const std::string summary() const override {
       return "AlgorithmWithDynamicProperty";
     }
+    void afterPropertySet(const std::string &name) override {
+      if (name == "InputWorkspace")
+        declareProperty("DynamicInputProperty", "");
+    }
 
     void init() override {
       declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -191,6 +237,7 @@ public:
     Mantid::API::AlgorithmFactory::Instance().subscribe<NestedAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance().subscribe<BasicAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance().subscribe<SubAlgorithm>();
+    Mantid::API::AlgorithmFactory::Instance().subscribe<NewlineAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance()
         .subscribe<AlgorithmWithDynamicProperty>();
   }
@@ -203,6 +250,7 @@ public:
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("SubAlgorithm", 1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe(
         "AlgorithmWithDynamicProperty", 1);
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("Foo\n\rBar", 1);
   }
 
   void test_Build_Simple() {
@@ -226,6 +274,84 @@ public:
     auto wsHist = ws->getHistory();
 
     ScriptBuilder builder(wsHist.createView());
+    std::string scriptText = builder.build();
+
+    std::vector<std::string> scriptLines;
+    boost::split(scriptLines, scriptText, boost::is_any_of("\n"));
+
+    int i = 0;
+    for (auto it = scriptLines.begin(); it != scriptLines.end(); ++it, ++i) {
+      TS_ASSERT_EQUALS(*it, result[i])
+    }
+
+    AnalysisDataService::Instance().remove("test_output_workspace");
+    AnalysisDataService::Instance().remove("test_input_workspace");
+  }
+
+  void test_newline_chars_removed() {
+    // Check that any newline chars are removed
+    std::string result[] = {"FooBar(InputWorkspace='test_input_workspace',"
+                            " OutputWorkspace='test_output_workspace')",
+                            ""};
+
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
+    AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
+
+    auto alg = AlgorithmFactory::Instance().create("Foo\n\rBar", 1);
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setProperty("InputWorkspace", input);
+    alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
+    alg->execute();
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "test_output_workspace");
+    auto wsHist = ws->getHistory();
+
+    ScriptBuilder builder(wsHist.createView());
+    std::string scriptText = builder.build();
+
+    std::vector<std::string> scriptLines;
+    boost::split(scriptLines, scriptText, boost::is_any_of("\n"));
+
+    int i = 0;
+    for (auto it = scriptLines.begin(); it != scriptLines.end(); ++it, ++i) {
+      TS_ASSERT_EQUALS(*it, result[i])
+    }
+
+    AnalysisDataService::Instance().remove("test_output_workspace");
+    AnalysisDataService::Instance().remove("test_input_workspace");
+  }
+
+  void test_Build_Simple_Timestamped() {
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
+    AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
+
+    auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setProperty("InputWorkspace", input);
+    alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
+    alg->execute();
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "test_output_workspace");
+
+    const auto wsHistView = ws->getHistory().createView();
+    auto executionTime = getAlgTimestamp(*wsHistView, 0);
+
+    std::string algTimestamp{" # " + executionTime};
+
+    std::string result[] = {"TopLevelAlgorithm(InputWorkspace='test_input_"
+                            "workspace', "
+                            "OutputWorkspace='test_output_workspace')" +
+                                algTimestamp,
+                            ""};
+
+    const bool appendTimestamp = true;
+    ScriptBuilder builder(wsHistView, "old", appendTimestamp);
     std::string scriptText = builder.build();
 
     std::vector<std::string> scriptLines;
@@ -383,7 +509,7 @@ public:
     std::string result =
         "AlgorithmWithDynamicProperty(InputWorkspace='test_input_workspace', "
         "OutputWorkspace='test_output_workspace', PropertyA='A', "
-        "PropertyB='B')\n";
+        "PropertyB='B', DynamicInputProperty='C')\n";
     boost::shared_ptr<WorkspaceTester> input =
         boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
@@ -395,6 +521,7 @@ public:
     alg->setProperty("InputWorkspace", input);
     alg->setProperty("PropertyA", "A");
     alg->setProperty("PropertyB", "B");
+    alg->setProperty("DynamicInputProperty", "C");
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
     alg->execute();
 

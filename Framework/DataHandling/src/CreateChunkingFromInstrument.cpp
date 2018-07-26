@@ -11,8 +11,10 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 namespace Mantid {
 namespace DataHandling {

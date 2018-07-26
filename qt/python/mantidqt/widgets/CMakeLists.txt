@@ -13,7 +13,7 @@ find_package ( BoostPython REQUIRED )
 
 list ( APPEND common_link_libs
   ${TCMALLOC_LIBRARIES_LINKTIME}
-  Kernel
+  ${CORE_MANTIDLIBS}
   ${POCO_LIBRARIES}
   ${PYTHON_LIBRARIES}
 )

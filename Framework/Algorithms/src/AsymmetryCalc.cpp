@@ -132,15 +132,11 @@ void AsymmetryCalc::exec() {
   outputWS->getSpectrum(0).setDetectorID(static_cast<detid_t>(1));
 
   // Calculate asymmetry for each time bin
-  // F-aB / F+aB
+  // asym = (F - a*B) / (F + a*B)
   Progress prog(this, 0.0, 1.0, blocksize);
   for (size_t j = 0; j < blocksize; ++j) {
-    // cal F-aB
     double numerator = tmpWS->y(forward)[j] - alpha * tmpWS->y(backward)[j];
-    // cal F+aB
     double denominator = (tmpWS->y(forward)[j] + alpha * tmpWS->y(backward)[j]);
-
-    // cal F-aB / F+aB
     if (denominator != 0.0) {
       outputWS->mutableY(0)[j] = numerator / denominator;
     } else {
@@ -148,13 +144,14 @@ void AsymmetryCalc::exec() {
     }
 
     // Work out the error (as in 1st attachment of ticket #4188)
+    // using standard error propagation formula and simplifying the result we
+    // get : error_asym =  Sqrt( 1 + asym^2) * Sqrt( error_F^2 + a^2 *
+    // error_B^2) / (F + a) F, B are counts and so using Poisson errors (i.e.
+    // error_F = Sqrt(F) )
     double error = 1.0;
     if (denominator != 0.0) {
-      // cal F + a2B
       double q1 = tmpWS->y(forward)[j] + alpha * alpha * tmpWS->y(backward)[j];
-      // cal 1 + ((f-aB)/(F+aB))2
       double q2 = 1 + numerator * numerator / (denominator * denominator);
-      // cal error
       error = sqrt(q1 * q2) / denominator;
     }
     outputWS->mutableE(0)[j] = error;

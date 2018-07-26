@@ -22,10 +22,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::HistogramData::HistogramE;
-using Mantid::HistogramData::HistogramDx;
-using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::Points;
 
 namespace {
 /// Returns a tuple holding the first and last x value of the first spectrum and

@@ -50,12 +50,20 @@ Linux
 
 Red Hat/Cent OS/Fedora
 ~~~~~~~~~~~~~~~~~~~~~~
-Follow the `Red Hat instructions <http://download.mantidproject.org/redhat.html>`_ to add the
-stable release yum repository and then install the ``mantid-developer`` package:
+* Follow the `instructions here <https://fedoraproject.org/wiki/EPEL>`_ to enable the EPEL repository
+  for RHEL7
+* Run the following to install the mantid-developer package
 
 .. code-block:: sh
 
-   yum install mantid-developer
+  # Install copr plugin
+  yum install yum-plugin-copr
+
+  # Enable the mantid repo from copr
+  yum copr enable mantid/mantid
+
+  # Install dependencies 
+  yum install mantid-developer
 
 Ubuntu
 ~~~~~~
@@ -70,6 +78,8 @@ package and install it:
    apt install ~/Downloads/mantid-developer.X.Y.Z.deb
 
 where ``X.Y.Z`` should be replaced with the version that was downloaded.
+
+if you wish to setup eclipse for use developing mantid, then instructions can be found :ref:`here <Eclipse>`.
 
 OSX
 ---

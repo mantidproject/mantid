@@ -189,7 +189,7 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
     // Get back the gaussian parameters
     const double height = peakslist->getRef<double>("Height", i);
     const double centre = peakslist->getRef<double>("PeakCentre", i);
-    const double width = peakslist->getRef<double>("Sigma", i);
+    const double sigma = peakslist->getRef<double>("Sigma", i);
     const double chisq = peakslist->getRef<double>("chi2", i);
     // These are some heuristic rules to discard bad fits.
     // Hope to be able to remove them when we have better fitting routine
@@ -210,18 +210,25 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
     } else if (chisq < 0.) {
       g_log.warning() << "StripPeaks():  Peak Index = " << i
                       << " @ X = " << centre
-                      << ". Error: Peak fit with too wide peak width" << width
+                      << ". Error: Peak fit with too wide peak width" << sigma
                       << " denoted by chi^2 = " << chisq << " <= 0. \n";
     }
     {
-      auto left = lower_bound(X.begin(), X.end(), centre);
-      double delta_d = (*left) - (*(left - 1));
-      if ((width / delta_d) < 1.) {
+      // find the bin width at the center of the peak - average of the bins on
+      // either side
+      const auto center_iter = lower_bound(X.begin(), X.end(), centre);
+      const double bin_width = .5 * (*(center_iter + 1) - (*(center_iter - 1)));
+
+      // seek wikipedia if you don't believe the conversion factor
+      const double fwhm = sigma * 2. * std::sqrt(2. * std::log(2.));
+
+      if ((fwhm / bin_width) < 1.5) {
         g_log.warning() << "StripPeaks():  Peak Index = " << i
                         << " @ X = " << centre
-                        << "  Error: Peak fit with too narrow of peak "
-                        << "delta_d = " << delta_d
-                        << " sigma/delta_d = " << (width / delta_d) << "\n";
+                        << "  Error: Peak fit with too narrow of peak"
+                        << " fwhm = " << fwhm << " bin size = " << bin_width
+                        << " num bins in peak = " << 2. * (fwhm / bin_width)
+                        << " <3\n";
         continue;
       }
     }
@@ -229,7 +236,7 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
     g_log.information() << "Subtracting peak " << i << " from spectrum "
                         << peakslist->getRef<int>("spectrum", i)
                         << " at x = " << centre << " h = " << height
-                        << " s = " << width << " chi2 = " << chisq << "\n";
+                        << " s = " << sigma << " chi2 = " << chisq << "\n";
 
     { // log the background function
       double a0 = 0.;
@@ -255,12 +262,12 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
     for (int j = 0; j < spectrumLength; ++j) {
       double x = binCenters[j];
       // Skip if not anywhere near this peak
-      if (x < centre - 5.0 * width)
+      if (x < centre - 5.0 * sigma)
         continue;
-      if (x > centre + 5.0 * width)
+      if (x > centre + 5.0 * sigma)
         break;
       // Calculate the value of the Gaussian function at this point
-      const double funcVal = height * exp(-0.5 * pow((x - centre) / width, 2));
+      const double funcVal = height * exp(-0.5 * pow((x - centre) / sigma, 2));
       // Subtract the calculated value from the data
       Y[j] -= funcVal;
     }

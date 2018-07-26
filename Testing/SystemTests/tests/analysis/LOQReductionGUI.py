@@ -26,4 +26,4 @@ class LOQMinimalBatchReduction(stresstesting.MantidStressTest):
         # when overlaying the two options they overlap very well
         self.tolerance = 1.0e+1
         self.disableChecking.append('Instrument')
-        return 'first_time_merged', 'LOQReductionMergedData.nxs'
+        return 'first_time_merged_1D_2.2_10.0', 'LOQReductionMergedData.nxs'
