@@ -16,9 +16,6 @@ from Muon.GUI.ElementalAnalysis.Detectors.detectors_presenter import DetectorsPr
 from Muon.GUI.ElementalAnalysis.Detectors.detectors_view import DetectorsView
 from Muon.GUI.ElementalAnalysis.Peaks.peaks_presenter import PeaksPresenter
 from Muon.GUI.ElementalAnalysis.Peaks.peaks_view import PeaksView
-from Muon.GUI.ElementalAnalysis.Checkbox.checkbox_model import CheckboxModel
-from Muon.GUI.ElementalAnalysis.Checkbox.checkbox_view import CheckboxView
-from Muon.GUI.ElementalAnalysis.Checkbox.checkbox_presenter import CheckboxPresenter
 
 
 class ElementalAnalysisGui(QtGui.QMainWindow):
@@ -41,18 +38,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             LoadView(), LoadModel(), CoLoadModel())
         self.widget_list = QtGui.QVBoxLayout()
 
-        self.peak_types = ["Major", "Minor", "Gamma", "Electron"]
-        self._checkbox_view = CheckboxView(
-            ["{} Peaks".format(x) for x in self.peak_types])
-        self.checkbox = CheckboxPresenter(self._checkbox_view, CheckboxModel())
-        for _, v in self.checkbox.view.checkbox_dict.iteritems():
-            v.on_checkbox_unchecked(lambda c: print("unchecked: {}".format(c.name)))
-            v.on_checkbox_checked(lambda c: print("checked: {}".format(c.name)))
-
         self.widget_list.addWidget(self.checkbox.view)
 
-        self.detectors = ["GE{}".format(x) for x in range(1, 5)]
-        self.detector_view = CheckboxView(self.detectors, "Detectors:")
         self.detectors_widget = CheckboxPresenter(
             self.detector_view, CheckboxModel())
         self.widget_list.addWidget(self.detectors_widget.view)
@@ -66,9 +53,10 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.widget_list.addWidget(self.detectors.view)
         self.widget_list.addWidget(self.load_widget.view)
 
+
         self.box = QtGui.QHBoxLayout()
         self.box.addWidget(self.ptable.view)
-        self.box.addWidget(self.load_widget.view)
+        self.box.addLayout(self.widget_list)
         self.setCentralWidget(QtGui.QWidget(self))
         self.centralWidget().setLayout(self.box)
         self.setWindowTitle("Elemental Analysis")
