@@ -61,7 +61,7 @@ void export_IPeak() {
            "cache values related to it.")
       .def("getRunNumber", &IPeak::getRunNumber, arg("self"),
            "Return the run number this peak was measured at")
-      .def("getModStru", &IPeak::getModStru, arg("self"),
+      .def("getIntMNP", &IPeak::getIntMNP, arg("self"),
            "Return the modulated scructure for this peak")
       .def("getPeakNumber", &IPeak::getPeakNumber, arg("self"),
            "Return the peak number for this peak")
@@ -70,7 +70,7 @@ void export_IPeak() {
       .def("setRunNumber", &IPeak::setRunNumber,
            (arg("self"), arg("run_number")),
            "Set the run number that measured this peak")
-      .def("setModStru", &IPeak::setModStru,
+      .def("setIntMNP", &IPeak::setIntMNP,
            (arg("self"), arg("modulated_structure")),
            "Set the modulated structure for this peak")
       .def("setPeakNumber", &IPeak::setPeakNumber,

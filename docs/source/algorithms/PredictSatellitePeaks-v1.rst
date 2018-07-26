@@ -33,7 +33,7 @@ Usage
    LoadIsawUB(peaks,"TOPAZ_3007.mat")
    IndexPeaks(peaks)
 
-   fractional_peaks = PredictSatellitePeaks(peaks, ModVector1=[-0.5,0,0.0],MaxOrder=1)
+   fractional_peaks = PredictSatellitePeaks(peaks, ModVector1=[-0.5,0,0.0], MaxOrder=1)
    print("Number of fractional peaks: {}".format(fractional_peaks.getNumberPeaks()))
 
 .. testoutput:: TopazExample

@@ -1,28 +1,29 @@
 /*
  * PredictSatellitePeaksTest.h
  *
- *  Created on: Dec 28, 2012
- *      Author: ruth
+ *  Created on: July, 2018
+ *      Author: Vickie Lynch
  */
 
-#ifndef PREDICTFRACTIONALPEAKSTEST_H_
-#define PREDICTFRACTIONALPEAKSTEST_H_
+#ifndef PREDICTSATELLITEPEAKSTEST_H_
+#define PREDICTSATELLITEPEAKSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-
-#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidCrystal/IndexPeaks.h"
 #include "MantidCrystal/PredictSatellitePeaks.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidAPI/Run.h"
+#include "MantidCrystal/CalculateUMatrix.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
 
 class PredictSatellitePeaksTest : public CxxTest::TestSuite {
@@ -35,34 +36,34 @@ public:
   }
 
   void test_exec() {
-    LoadNexusProcessed loader;
-    TS_ASSERT_THROWS_NOTHING(loader.initialize());
-    TS_ASSERT(loader.isInitialized());
-
-    std::string WSName("peaks");
-    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks.nxs");
-    loader.setPropertyValue("OutputWorkspace", WSName);
-    TS_ASSERT(loader.execute());
-    TS_ASSERT(loader.isExecuted());
-
-    LoadIsawUB UBloader;
-    TS_ASSERT_THROWS_NOTHING(UBloader.initialize());
-    TS_ASSERT(UBloader.isInitialized());
-
-    UBloader.setPropertyValue("InputWorkspace", WSName);
-
-    UBloader.setProperty("FileName", "TOPAZ_3007.mat");
-    TS_ASSERT(UBloader.execute());
-    TS_ASSERT(UBloader.isExecuted());
-
-    IndexPeaks indexer;
-    TS_ASSERT_THROWS_NOTHING(indexer.initialize());
-    TS_ASSERT(indexer.isInitialized());
-
-    indexer.setPropertyValue("PeaksWorkspace", WSName);
-
-    TS_ASSERT(indexer.execute());
-    TS_ASSERT(indexer.isExecuted());
+    Mantid::Geometry::Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 100, 10.);
+    inst->setName("SillyInstrument");
+    PeaksWorkspace_sptr pw(new PeaksWorkspace);
+    pw->setInstrument(inst);
+    std::string val = "value";
+    pw->mutableRun().addProperty("TestProp", val);
+    Peak p(inst, 1, 3.0, V3D(1, 0, 0)); // HKL=1,0,0
+    pw->addPeak(p);
+    Peak p1(inst, 10, 3.0, V3D(2, 0, 0)); // HKL=2,0,0
+    Peak p2(inst, 20, 3.0, V3D(2, 2, 0)); // HKL=2,2,0
+    std::string WSName("peaks-fail");
+    AnalysisDataService::Instance().addOrReplace(WSName, pw);
+    pw->addPeak(p1);
+    pw->addPeak(p2);
+    AnalysisDataService::Instance().addOrReplace(WSName, pw);
+    CalculateUMatrix alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize())
+    TS_ASSERT(alg2.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("a", "14.1526"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("b", "19.2903"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("c", "8.5813"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("alpha", "90"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("beta", "105.0738"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("gamma", "90"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("PeaksWorkspace", WSName));
+    TS_ASSERT_THROWS_NOTHING(alg2.execute(););
+    TS_ASSERT(alg2.isExecuted());
 
     PredictSatellitePeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -78,26 +79,20 @@ public:
     alg.setPropertyValue("SatellitePeaks", "SatellitePeaks");
     PeaksWorkspace_sptr SatellitePeaks = alg.getProperty("SatellitePeaks");
 
-    TS_ASSERT_EQUALS(SatellitePeaks->getNumberPeaks(), 122);
+    TS_ASSERT_EQUALS(SatellitePeaks->getNumberPeaks(), 5);
 
-    Peak &peakx = dynamic_cast<Peak &>(SatellitePeaks->getPeak(0));
-    Peak peak = peakx;
-    TS_ASSERT_DELTA(peak.getH(), -5.5, .0001);
-    TS_ASSERT_DELTA(peak.getK(), 7.0, .0001);
-    TS_ASSERT_DELTA(peak.getL(), -4.2, .0001);
+    auto &peak0 = SatellitePeaks->getPeak(0);
+    TS_ASSERT_DELTA(peak0.getH(), 0.5, .0001);
+    TS_ASSERT_DELTA(peak0.getK(), 0.0, .0001);
+    TS_ASSERT_DELTA(peak0.getL(), -0.2, .0001);
 
-    peakx = dynamic_cast<Peak &>(SatellitePeaks->getPeak(3));
-    peak = peakx;
-    TS_ASSERT_DELTA(peak.getH(), -5.5, .0001);
-    TS_ASSERT_DELTA(peak.getK(), 3.0, .0001);
-    TS_ASSERT_DELTA(peak.getL(), -3.2, .0001);
+    auto &peak3 = SatellitePeaks->getPeak(3);
+    TS_ASSERT_DELTA(peak3.getH(), 2.5, .0001);
+    TS_ASSERT_DELTA(peak3.getK(), 0.0, .0001);
+    TS_ASSERT_DELTA(peak3.getL(), 0.2, .0001);
 
-    peakx = dynamic_cast<Peak &>(SatellitePeaks->getPeak(6));
-    peak = peakx;
-    TS_ASSERT_DELTA(peak.getH(), -6.5, .0001);
-    TS_ASSERT_DELTA(peak.getK(), 4.0, .0001);
-    TS_ASSERT_DELTA(peak.getL(), -4.2, .0001);
+    AnalysisDataService::Instance().remove(WSName);
   }
 };
 
-#endif /* PredictFRACTIONALPEAKSTEST_H_ */
+#endif /* PREDICTSATELLITEPEAKSTEST__H_ */

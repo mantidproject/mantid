@@ -6,7 +6,8 @@
 
 namespace Mantid {
 namespace Crystal {
-/** IndexPeakswithSatellites : Algorithm to use the UB saved in the sample associated
+/** IndexPeakswithSatellites : Algorithm to use the UB saved in the sample
+   associated
     with the specified PeaksWorkspace, to index the peaks in the workspace.
 
     @author Dennis Mikkelson
@@ -37,7 +38,9 @@ namespace Crystal {
 class DLLExport IndexPeakswithSatellites : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  const std::string name() const override { return "IndexPeakswithSatellites"; };
+  const std::string name() const override {
+    return "IndexPeakswithSatellites";
+  };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Index the peaks using the UB from the sample.";
