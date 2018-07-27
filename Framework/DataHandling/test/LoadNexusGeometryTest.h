@@ -7,6 +7,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Objects/MeshObject2D.h"
 
 using Mantid::DataHandling::LoadNexusGeometry;
 
@@ -24,25 +26,43 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
-
   void test_output_workspace_contains_instrument_with_expected_name() {
     LoadNexusGeometry alg;
-    const std::string outputWorkspaceName = "LoadNexusGeometryTestWS";
+    alg.setChild(true);
     const std::string inputFile = "SMALLFAKE_example_geometry.hdf5";
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
+    alg.initialize();
     alg.setPropertyValue("FileName", inputFile);
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outputWorkspaceName))
-    TS_ASSERT_THROWS_NOTHING(alg.execute();)
-    TS_ASSERT(alg.isExecuted())
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
 
     Mantid::API::MatrixWorkspace_sptr outputWs =
-        Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::MatrixWorkspace>(outputWorkspaceName);
-    Mantid::Geometry::Instrument_const_sptr instrument;
-    TS_ASSERT_THROWS_NOTHING(instrument = outputWs->getInstrument())
-    TS_ASSERT_EQUALS(instrument->getFullName(), "SmallFakeTubeInstrument")
+        alg.getProperty("OutputWorkspace");
+
+    auto &componentinfo = outputWs->componentInfo();
+    TS_ASSERT_EQUALS(componentinfo.name(componentinfo.root()),
+                     "SmallFakeTubeInstrument");
+  }
+  void test_load_loki() {
+
+    LoadNexusGeometry alg;
+    alg.setChild(true);
+    const std::string outputWorkspaceName = "LoadNexusGeometryTestWS";
+    const std::string inputFile = "LOKI_Definition.hdf5";
+    alg.initialize();
+    alg.setPropertyValue("FileName", inputFile);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+
+    Mantid::API::MatrixWorkspace_sptr outputWs =
+        alg.getProperty("OutputWorkspace");
+
+    auto &componentinfo = outputWs->componentInfo();
+    TS_ASSERT_EQUALS(componentinfo.name(componentinfo.root()), "LOKI");
+
+    // Add detectors are described by a meshobject 2d
+    auto &shape = componentinfo.shape(0);
+    auto *match = dynamic_cast<const Mantid::Geometry::MeshObject2D *>(&shape);
+    TS_ASSERT(match);
   }
 };
 

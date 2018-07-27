@@ -6,12 +6,17 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidDataHandling/LoadNexusGeometry.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
-
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidIndexing/IndexInfo.h"
 namespace Mantid {
 namespace DataHandling {
 
 using namespace API;
 using namespace Kernel;
+using namespace DataObjects;
+using namespace HistogramData;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadNexusGeometry)
@@ -49,7 +54,7 @@ void LoadNexusGeometry::init() {
 
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
-                  "An output workspace.");
+                  "An empty output workspace with an instrument attached.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -57,13 +62,28 @@ void LoadNexusGeometry::init() {
  */
 void LoadNexusGeometry::exec() {
   std::string fileName = getProperty("Filename");
-  auto workspace = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
 
   auto instrument =
       NexusGeometry::NexusGeometryParser::createInstrument(fileName);
+
+  const size_t number_spectra = instrument->getNumberDetectors();
+
+  // Check that we have some spectra for the workspace
+  if (number_spectra == 0) {
+    g_log.error(
+        "Instrument has no detectors, unable to create workspace for it");
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "No detectors found in instrument");
+  }
+
+  Indexing::IndexInfo indexInfo(number_spectra);
+
+  auto workspace =
+      create<Workspace2D>(indexInfo, Histogram(BinEdges{0.0, 1.0}, Counts{},
+                                               CountStandardDeviations{}));
   workspace->setInstrument(std::move(instrument));
-  workspace->populateInstrumentParameters();
-  setProperty("OutputWorkspace", workspace);
+
+  setProperty("OutputWorkspace", std::move(workspace));
 }
 
 } // namespace DataHandling
