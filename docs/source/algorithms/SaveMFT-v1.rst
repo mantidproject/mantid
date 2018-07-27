@@ -47,20 +47,47 @@ Usage
     AddSampleLog(Workspace=ws, LogName='Title', LogText='MyTest', LogType='String')
     AddSampleLog(Workspace=ws, LogName='d', LogText='0.3', LogType='Number', LogUnit='mm', NumberType='Double')
 
-    # Save with mft extension and using the option LogList: Title will be added to an required header line and d will be additionally added which increases the number of lines by 1.
+    # Save with mft extension and using the option LogList: Title will be added to a required header line and d will be additionally added to the first parameter field.
     SaveMFT(InputWorkspace=ws, Filename=file, LogList=['Title', 'd'])
-
-.. testoutput:: SaveMFT_general_usage
 
     if os.path.exists(file):
       myFile = open(file, 'r')
       print(myFile.read())
 
+.. testoutput:: SaveMFT_general_usage
+
+   MFT
+   Instrument : Not defined
+   User-local contact : Not defined
+   Title : MyTest
+   Subtitle : Not defined
+   Start date + time : Not defined
+   End date + time : Not defined
+   Theta 1 + dir + ref numbers : Not defined
+   Theta 2 + dir + ref numbers : Not defined
+   Theta 3 + dir + ref numbers : Not defined
+   d : 0.29999999999999999
+   Parameter  : Not defined
+   Parameter  : Not defined
+   Parameter  : Not defined
+   Parameter  : Not defined
+   Parameter  : Not defined
+   Parameter  : Not defined
+   Parameter  : Not defined
+   Parameter  : Not defined
+   Number of file format : 40
+   Number of data points : 3
+
+                               q                    refl                refl_err            q_res (FWHM)
+           5.000000000000000e-01   0.000000000000000e+00   1.000000000000000e+00   9.500000000000000e+00
+           1.500000000000000e+00   1.000000000000000e+00   1.000000000000000e+00   9.500000000000000e+00
+           2.500000000000000e+00   2.000000000000000e+00   1.000000000000000e+00   9.500000000000000e+00
+
 .. testcleanup:: SaveMFT_general_usage
 
-    if os.path.exists(file):
-      # Delete file
-      os.remove(file)
+   if os.path.exists(file):
+     # Delete file
+     os.remove(file)
 
 .. categories::
 
