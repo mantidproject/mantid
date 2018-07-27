@@ -61,8 +61,10 @@ private:
   void exec() override;
   /// Write the data
   void data();
-  /// Print data to file
+  /// Print a double value to file
   void outputval(double val);
+  /// Print a string value to file
+  void outputval(std::string val);
   /// Retrieve sample log information
   std::string sampleInfo(const std::string &logName);
   /// Write one header line

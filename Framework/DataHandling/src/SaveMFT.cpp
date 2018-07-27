@@ -80,16 +80,19 @@ void SaveMFT::data() {
  *  @param val :: the double value to be written
  */
 void SaveMFT::outputval(double val) {
-  bool nancheck = std::isnan(val);
-  bool infcheck = std::isinf(val);
-  m_file << '\t';
-  if (!nancheck && !infcheck)
+  m_file << std::setw(28);
+  if (!std::isnan(val) && !std::isinf(val))
     m_file << val;
-  else if (infcheck)
+  else if (std::isinf(val))
     m_file << "inf";
   else
     m_file << "nan";
 }
+
+/** Write formatted line of data
+ *  @param val :: a string value to be written
+ */
+void SaveMFT::outputval(std::string val) { m_file << std::setw(28) << val; }
 
 /// Retrieve sample log information
 std::string SaveMFT::sampleInfo(const std::string &logName) {
@@ -111,6 +114,7 @@ void SaveMFT::writeInfo(const std::string logName, const std::string logValue) {
 
 /// Write header lines
 void SaveMFT::header() {
+  m_file << std::setfill(' ');
   m_file << "MFT\n";
   std::map<std::string, std::string> logs;
   logs["Instrument"] = "instrument.name";
@@ -145,13 +149,12 @@ void SaveMFT::header() {
          << "40\n";
   m_file << "Number of data points : " << m_length << '\n';
   m_file << '\n';
-  m_file << std::setfill(' ') << std::setw(29) << "q" << std::setfill(' ')
-         << std::setw(24) << "refl" << std::setfill(' ') << std::setw(24)
-         << "refl_err";
+  outputval("q");
+  outputval("refl");
+  outputval("refl_err");
   if (m_ws->hasDx(0))
-    m_file << std::setw(25) << "q_res (FWHM)\n";
-  else
-    m_file << "\n";
+    outputval("q_res (FWHM)");
+  m_file << "\n";
 }
 
 /// Execute the algorithm
