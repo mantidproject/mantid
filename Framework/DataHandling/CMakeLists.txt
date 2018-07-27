@@ -191,6 +191,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
 	inc/MantidDataHandling/AsciiPointBase.h
 	inc/MantidDataHandling/BankPulseTimes.h
+	inc/MantidDataHandling/BitStream.h
 	inc/MantidDataHandling/CheckMantidVersion.h
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/CreateChopperModel.h
@@ -235,6 +236,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDetectorInfo.h
 	inc/MantidDataHandling/LoadDetectorsGroupingFile.h
 	inc/MantidDataHandling/LoadDiffCal.h
+	inc/MantidDataHandling/LoadDNSEvent.h
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
 	inc/MantidDataHandling/LoadEventNexus.h
