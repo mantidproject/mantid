@@ -306,7 +306,7 @@ class _ElementButton(qt.QPushButton):
         self.customContextMenuRequested.connect(self.rightClickedSlot)
 
     def sizeHint(self):
-        return QtCore.QSize(40, 40)
+        return QtCore.QSize(30, 30)
 
     def setCurrent(self, b):
         """Set this element button as current.
