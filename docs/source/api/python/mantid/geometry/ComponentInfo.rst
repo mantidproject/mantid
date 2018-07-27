@@ -13,8 +13,8 @@ Many users may need this extra information so that they can have a better unders
 
 ComponentInfo is one of three objects that the user can gain access to from a workspace. 
 The other two are:
-  * ``SpectrumInfo``
-  * ``DetectorInfo``
+ * ``SpectrumInfo``
+ * ``DetectorInfo``
 
 ---------
 Indexing 
@@ -96,7 +96,6 @@ Output:
 
 .. testoutput:: CallSetRotationMethod
 
-	[1,0,0,0]
 	[0,0,0,0]
 
 
