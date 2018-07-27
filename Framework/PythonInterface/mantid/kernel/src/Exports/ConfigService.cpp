@@ -163,7 +163,7 @@ void export_ConfigService() {
            "filename")
 
       .def("setLogLevel", &ConfigServiceImpl::setLogLevel,
-           (arg("self"), arg("logLevel"), arg("quiet")),
+           (arg("self"), arg("logLevel"), arg("quiet") = false),
            "Sets the log level priority for all the log channels, logLevel "
            "1 = Fatal, 6 = information, 7 = Debug")
 

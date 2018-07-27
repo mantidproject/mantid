@@ -583,23 +583,21 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
                "installation.\n";
     filestr << "# Any properties found in this file will override any that are "
                "found in the Mantid.Properties file\n";
-    filestr << "# As this file will not be replaced with futher installations "
+    filestr << "# As this file will not be replaced with further installations "
                "of Mantid it is a safe place to put \n";
     filestr << "# properties that suit your particular installation.\n";
     filestr << "#\n";
     filestr << "# See here for a list of possible options:\n";
     filestr << "# "
-               "http://www.mantidproject.org/"
-               "Properties_File#Mantid.User.Properties\n\n";
+               "http://docs.mantidproject.org/nightly/concepts/PropertiesFile.html"
+               "\n\n";
     filestr << "##\n";
     filestr << "## GENERAL\n";
     filestr << "##\n\n";
     filestr << "## Set the number of algorithm properties to retain\n";
     filestr << "#algorithms.retained=90\n\n";
-    filestr << "## Hides catagories from the algorithm list in MantidPlot\n";
-    filestr << "#algorithms.catagories.hidden=Muons,Inelastic\n\n";
     filestr
-        << "## Set the maximum number of coures used to run algorithms over\n";
+        << "## Set the maximum number of cores used to run algorithms over\n";
     filestr << "#MultiThreaded.MaxCores=4\n\n";
     filestr << "##\n";
     filestr << "## FACILITY AND INSTRUMENT\n";
@@ -639,6 +637,8 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "##\n";
     filestr << "## MantidPlot\n";
     filestr << "##\n\n";
+    filestr << "## Hides categories from the algorithm list in MantidPlot\n";
+    filestr << "#algorithms.catagories.hidden=Muons,Inelastic\n\n";
     filestr << "## Show invisible workspaces\n";
     filestr << "#MantidOptions.InvisibleWorkspaces=0\n";
     filestr << "## Re-use plot instances for different plot types\n";
