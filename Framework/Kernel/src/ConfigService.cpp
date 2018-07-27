@@ -588,9 +588,10 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "# properties that suit your particular installation.\n";
     filestr << "#\n";
     filestr << "# See here for a list of possible options:\n";
-    filestr << "# "
-               "http://docs.mantidproject.org/nightly/concepts/PropertiesFile.html"
-               "\n\n";
+    filestr
+        << "# "
+           "http://docs.mantidproject.org/nightly/concepts/PropertiesFile.html"
+           "\n\n";
     filestr << "##\n";
     filestr << "## GENERAL\n";
     filestr << "##\n\n";
