@@ -63,12 +63,12 @@ public:
     data.reserve(5);
     data.emplace_back("MFT");
     data.emplace_back("");
-    data.emplace_back("                            q                    refl   "
-                      "             refl_err");
-    data.emplace_back("\t3.300000000000000e-01\t3.000000000000000e+00\t1."
-                      "732050807568877e+00");
-    data.emplace_back("\t3.400000000000000e-01\t6.600000000000000e+00\t2."
-                      "569046515733026e+00");
+    data.emplace_back("                           q                        "
+                      "refl                    refl_err");
+    data.emplace_back("       3.300000000000000e-01       "
+                      "3.000000000000000e+00       1.732050807568877e+00");
+    data.emplace_back("       3.400000000000000e-01       "
+                      "6.600000000000000e+00       2.569046515733026e+00");
     std::ifstream in(filename);
     TS_ASSERT(not_empty(in))
     std::string fullline;
@@ -100,14 +100,12 @@ public:
     data.reserve(5);
     data.emplace_back("MFT");
     data.emplace_back("");
-    data.emplace_back("                            q                    refl   "
-                      "             refl_err");
-    data.emplace_back(
-        "\t3.050000000000000e+00\t3.000000000000000e+00\t1.732050807568877e+"
-        "00");
-    data.emplace_back(
-        "\t7.250000000000000e+00\t6.600000000000000e+00\t2.569046515733026e+"
-        "00");
+    data.emplace_back("                           q                        "
+                      "refl                    refl_err");
+    data.emplace_back("       3.050000000000000e+00       "
+                      "3.000000000000000e+00       1.732050807568877e+00");
+    data.emplace_back("       7.250000000000000e+00       "
+                      "6.600000000000000e+00       2.569046515733026e+00");
     std::ifstream in(filename);
     std::string fullline;
     auto it = data.begin();
@@ -181,12 +179,15 @@ public:
     data.reserve(5);
     data.emplace_back("MFT");
     data.emplace_back("");
-    data.emplace_back("                            q                    refl   "
-                      "             refl_err            q_res (FWHM)");
-    data.emplace_back("\t3.300000000000000e-01\t3.000000000000000e+00\t1."
-                      "732050807568877e+00\t1.100000000000000e+00");
-    data.emplace_back("\t3.400000000000000e-01\t6.600000000000000e+00\t2."
-                      "569046515733026e+00\t1.300000000000000e+00");
+    data.emplace_back("                           q                        "
+                      "refl                    refl_err                q_res "
+                      "(FWHM)");
+    data.emplace_back("       3.300000000000000e-01       "
+                      "3.000000000000000e+00       1.732050807568877e+00       "
+                      "1.100000000000000e+00");
+    data.emplace_back("       3.400000000000000e-01       "
+                      "6.600000000000000e+00       2.569046515733026e+00       "
+                      "1.300000000000000e+00");
     std::ifstream in(filename);
     TS_ASSERT(not_empty(in))
     std::string fullline;
@@ -217,10 +218,10 @@ public:
     TS_ASSERT(Poco::File(filename).exists())
     std::vector<std::string> data;
     data.reserve(2);
-    data.emplace_back("\t3.300000000000000e-01\t3.000000000000000e+00\t1."
-                      "732050807568877e+00");
-    data.emplace_back("\t3.400000000000000e-01\t6.600000000000000e+00\t2."
-                      "569046515733026e+00");
+    data.emplace_back("       3.300000000000000e-01       "
+                      "3.000000000000000e+00       1.732050807568877e+00");
+    data.emplace_back("       3.400000000000000e-01       "
+                      "6.600000000000000e+00       2.569046515733026e+00");
     std::ifstream in(filename);
     TS_ASSERT(not_empty(in))
     std::string fullline;
@@ -261,10 +262,10 @@ public:
     TS_ASSERT(Poco::File(filename).exists())
     std::vector<std::string> data;
     data.reserve(2);
-    data.emplace_back("\t3.300000000000000e-01\t3.000000000000000e+00\t1."
-                      "732050807568877e+00");
-    data.emplace_back("\t3.400000000000000e-01\t6.600000000000000e+00\t2."
-                      "569046515733026e+00");
+    data.emplace_back("       3.300000000000000e-01       "
+                      "3.000000000000000e+00       1.732050807568877e+00");
+    data.emplace_back("       3.400000000000000e-01       "
+                      "6.600000000000000e+00       2.569046515733026e+00");
     std::ifstream in(filename);
     TS_ASSERT(not_empty(in))
     std::string fullline;
