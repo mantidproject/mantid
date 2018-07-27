@@ -83,7 +83,7 @@
 	src/LoadNXSPE.cpp
 	src/LoadNXcanSAS.cpp
 	src/LoadNexus.cpp
-        src/LoadNexusGeometry.cpp
+        src/LoadEmptyNexusGeometry.cpp
         src/LoadNexusLogs.cpp
 	src/LoadNexusMonitors.cpp
 	src/LoadNexusMonitors2.cpp
@@ -272,7 +272,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNXSPE.h
 	inc/MantidDataHandling/LoadNXcanSAS.h
 	inc/MantidDataHandling/LoadNexus.h
-        inc/MantidDataHandling/LoadNexusGeometry.h
+        inc/MantidDataHandling/LoadEmptyNexusGeometry.h
 	inc/MantidDataHandling/LoadNexusLogs.h
 	inc/MantidDataHandling/LoadNexusMonitors.h
 	inc/MantidDataHandling/LoadNexusMonitors2.h
@@ -451,7 +451,7 @@ set ( TEST_FILES
 	LoadMuonNexus2Test.h
 	LoadNXSPETest.h
 	LoadNXcanSASTest.h
-    LoadNexusGeometryTest.h
+        LoadEmptyNexusGeometryTest.h
 	LoadNexusLogsTest.h
 	LoadNexusMonitorsTest.h
 	LoadNexusProcessedTest.h

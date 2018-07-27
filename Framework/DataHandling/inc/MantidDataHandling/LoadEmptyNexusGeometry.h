@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LOADNEXUSGEOMETRY_H_
-#define MANTID_DATAHANDLING_LOADNEXUSGEOMETRY_H_
+#ifndef MANTID_DATAHANDLING_LOADEMPTYNEXUSGEOMETRY_H_
+#define MANTID_DATAHANDLING_LOADEMPTYNEXUSGEOMETRY_H_
 
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
@@ -7,10 +7,10 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** LoadNexusGeometry : Algorithm to load nexus geometry into an empty
-  workspace, similar to Load Instrument.
+/** LoadEmptyNexusGeometry : Algorithm to load nexus geometry into an empty
+  workspace, similar to LoadEmptyInstrument.
 
-  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -31,7 +31,7 @@ namespace DataHandling {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LoadNexusGeometry : public API::Algorithm {
+class DLLExport LoadEmptyNexusGeometry : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -46,4 +46,4 @@ private:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /* MANTID_DATAHANDLING_LOADNEXUSGEOMETRY_H_ */
+#endif /* MANTID_DATAHANDLING_LOADEMPTYNEXUSGEOMETRY_H_ */

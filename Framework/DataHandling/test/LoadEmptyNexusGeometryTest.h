@@ -1,33 +1,33 @@
-#ifndef MANTID_DATAHANDLING_LOADNEXUSGEOMETRYTEST_H_
-#define MANTID_DATAHANDLING_LOADNEXUSGEOMETRYTEST_H_
+#ifndef MANTID_DATAHANDLING_LOADEMPTYNEXUSGEOMETRYTEST_H_
+#define MANTID_DATAHANDLING_LOADEMPTYNEXUSGEOMETRYTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadNexusGeometry.h"
+#include "MantidDataHandling/LoadEmptyNexusGeometry.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Objects/MeshObject2D.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
-using Mantid::DataHandling::LoadNexusGeometry;
+using Mantid::DataHandling::LoadEmptyNexusGeometry;
 
-class LoadNexusGeometryTest : public CxxTest::TestSuite {
+class LoadEmptyNexusGeometryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadNexusGeometryTest *createSuite() {
-    return new LoadNexusGeometryTest();
+  static LoadEmptyNexusGeometryTest *createSuite() {
+    return new LoadEmptyNexusGeometryTest();
   }
-  static void destroySuite(LoadNexusGeometryTest *suite) { delete suite; }
+  static void destroySuite(LoadEmptyNexusGeometryTest *suite) { delete suite; }
 
   void test_Init() {
-    LoadNexusGeometry alg;
+    LoadEmptyNexusGeometry alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
   void test_output_workspace_contains_instrument_with_expected_name() {
-    LoadNexusGeometry alg;
+    LoadEmptyNexusGeometry alg;
     alg.setChild(true);
     const std::string inputFile = "SMALLFAKE_example_geometry.hdf5";
     alg.initialize();
@@ -38,15 +38,15 @@ public:
     Mantid::API::MatrixWorkspace_sptr outputWs =
         alg.getProperty("OutputWorkspace");
 
-    auto &componentinfo = outputWs->componentInfo();
-    TS_ASSERT_EQUALS(componentinfo.name(componentinfo.root()),
+    auto &componentInfo = outputWs->componentInfo();
+    TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()),
                      "SmallFakeTubeInstrument");
   }
   void test_load_loki() {
 
-    LoadNexusGeometry alg;
+    LoadEmptyNexusGeometry alg;
     alg.setChild(true);
-    const std::string outputWorkspaceName = "LoadNexusGeometryTestWS";
+    const std::string outputWorkspaceName = "LoadEmptyNexusGeometryTestWS";
     const std::string inputFile = "LOKI_Definition.hdf5";
     alg.initialize();
     alg.setPropertyValue("FileName", inputFile);
@@ -56,14 +56,11 @@ public:
     Mantid::API::MatrixWorkspace_sptr outputWs =
         alg.getProperty("OutputWorkspace");
 
-    auto &componentinfo = outputWs->componentInfo();
-    TS_ASSERT_EQUALS(componentinfo.name(componentinfo.root()), "LOKI");
-
-    // Add detectors are described by a meshobject 2d
-    auto &shape = componentinfo.shape(0);
-    auto *match = dynamic_cast<const Mantid::Geometry::MeshObject2D *>(&shape);
-    TS_ASSERT(match);
+    auto &componentInfo = outputWs->componentInfo();
+    auto &detectorInfo = outputWs->detectorInfo();
+    TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "LOKI");
+    TS_ASSERT_EQUALS(detectorInfo.size(), 8000);
   }
 };
 
-#endif /* MANTID_DATAHANDLING_LOADNEXUSGEOMETRYTEST_H_ */
+#endif /* MANTID_DATAHANDLING_LOADEMPTYNEXUSGEOMETRYTEST_H_ */

@@ -1,10 +1,8 @@
-#include <iostream>
-
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidDataHandling/LoadNexusGeometry.h"
+#include "MantidDataHandling/LoadEmptyNexusGeometry.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -19,33 +17,33 @@ using namespace DataObjects;
 using namespace HistogramData;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadNexusGeometry)
+DECLARE_ALGORITHM(LoadEmptyNexusGeometry)
 
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string LoadNexusGeometry::name() const {
-  return "LoadNexusGeometry";
+const std::string LoadEmptyNexusGeometry::name() const {
+  return "LoadEmptyNexusGeometry";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LoadNexusGeometry::version() const { return 1; }
+int LoadEmptyNexusGeometry::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadNexusGeometry::category() const {
+const std::string LoadEmptyNexusGeometry::category() const {
   return "DataHandling\\Nexus";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string LoadNexusGeometry::summary() const {
+const std::string LoadEmptyNexusGeometry::summary() const {
   return "Loads an instrument from OFF nexus geometry file into an empty "
-         "workspace";
+         "workspace. Much like LoadEmptyInstrument.";
 }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void LoadNexusGeometry::init() {
+void LoadEmptyNexusGeometry::init() {
   const std::vector<std::string> extensions{".nxs", ".hdf5"};
   declareProperty(Kernel::make_unique<FileProperty>(
                       "Filename", "", FileProperty::Load, extensions),
@@ -60,7 +58,7 @@ void LoadNexusGeometry::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void LoadNexusGeometry::exec() {
+void LoadEmptyNexusGeometry::exec() {
   std::string fileName = getProperty("Filename");
 
   auto instrument =

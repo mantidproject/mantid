@@ -13,6 +13,7 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/MeshObject2D.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include <string>
 #include <H5Cpp.h>
@@ -231,8 +232,16 @@ public:
     std::cout << "Creating LOKI instrument took: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(
                      stop - start).count() << " ms" << std::endl;
-    auto detInfo = extractDetectorInfo(*sansInstrument);
-    TS_ASSERT_EQUALS(detInfo->size(), 8000); // Sanity check
+
+    auto beamline = extractBeamline(*sansInstrument);
+    auto componentInfo = std::move(std::get<0>(beamline));
+    auto detectorInfo = std::move(std::get<1>(beamline));
+    TS_ASSERT_EQUALS(detectorInfo->size(), 8000); // Sanity check
+
+    // Add detectors are described by a meshobject 2d
+    auto &shape = componentInfo->shape(0);
+    auto *match = dynamic_cast<const Mantid::Geometry::MeshObject2D *>(&shape);
+    TS_ASSERT(match);
   }
 
 private:
