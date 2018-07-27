@@ -108,42 +108,136 @@ void LoadPSIMuonBin::exec() {
   streamReader >> histogramBinWidth;
 
   if(histogramBinWidth == 0){
-    histogramBinWidth = (625.E-6)/8.*pow(static_cast<float>(2.), static_cast<float>(tdcResolution));
+    histogramBinWidth = static_cast<float>((625.E-6)/8.*pow(static_cast<float>(2.), static_cast<float>(tdcResolution)));
   }
 
-  
+  streamReader.moveStreamToPosition(712);
   int32_t monNumberOfevents;
+  streamReader >> monNumberOfevents;
+
+  streamReader.moveStreamToPosition(128);
   int16_t numberOfDataRecordsFile;      // numdef
+  streamReader >> numberOfDataRecordsFile;
+
+  //Should be at 130th byte
   int16_t lengthOfDataRecordsBin;       // lendef
+  streamReader >> lengthOfDataRecordsBin;
+
+  //Should be at 132nd byte
   int16_t numberOfDataRecordsHistogram; // kdafhi
+  streamReader >> numberOfDataRecordsHistogram;
+
+  //Should be at 134th Byte
   int16_t numberOfHistogramsPerRecord;  // khidaf
+  streamReader >> numberOfHistogramsPerRecord;
+
+  streamReader.moveStreamToPosition(654);
   int32_t periodOfSave;
+  streamReader >> periodOfSave;
+
+  //Should be at 658th byte
   int32_t periodOfMon;
+  streamReader >> periodOfMon;
 
   //The strings in the header of the binary file:
+  streamReader.moveStreamToPosition(138);
   std::string sample; // Only pass 10 bytes into the string from stream
+  streamReader.read(sample, 10);
+
+  streamReader.moveStreamToPosition(148);
   std::string temp; // Only pass 10 bytes into the string from stream
+  streamReader.read(temp, 10);
+
+  streamReader.moveStreamToPosition(158);
   std::string field; // Only pass 10 bytes into the string from stream
+  streamReader.read(field, 10);
+
+  streamReader.moveStreamToPosition(168);
   std::string orientation; // Only pass 10 bytes into the string from stream
+  streamReader.read(orientation, 10);
+
+  streamReader.moveStreamToPosition(860);
   std::string comment; // Only pass 62 bytes into the string from stream
+  streamReader.read(comment, 62);
+
+  streamReader.moveStreamToPosition(218);
   std::string dateStart; // Only pass 9 bytes into the string from stream
+  streamReader.read(dateStart, 9);
+
+  streamReader.moveStreamToPosition(227);
   std::string dateEnd; // Only pass 9 bytes into the string from stream
+  streamReader.read(dateEnd, 9);
+
+  streamReader.moveStreamToPosition(236);
   std::string timeStart; // Only pass 8 bytes into the string from stream
+  streamReader.read(timeStart, 8);
+
+  streamReader.moveStreamToPosition(244);
   std::string timeEnd; // Only pass 8 bytes into the string from stream
+  streamReader.read(timeEnd, 8);
+
+  streamReader.moveStreamToPosition(60);
   std::string monDeviation; // Only pass 11 bytes into the string from stream
-  std::string labels_scalars[18]; // 18 Strings with 4 max length
+  streamReader.read(monDeviation, 11)
 
   //The arrays in the header of the binary file:
+  int32_t scalars[18];
+  std::string labels_scalars[18]; // 18 Strings with 4 max length
+  for(auto i = 0u; i <= 5; ++i){
+    streamReader.moveStreamToPosition(924 + (i*4));
+    streamReader.read(labels_scalars[i], 4); 
+
+    streamReader.moveStreamToPosition(670 + (i*4));
+    streamReader >> scalars[i];
+  }
+
+  for(auto i = 6u; i < 18; ++i){
+    streamReader.moveStreamToPosition(554 + ((i-6)*4));
+    streamReader.read(labels_scalars[i], 4);
+
+    streamReader.moveStreamToPosition(360 + ((i-6)*4));
+    streamReader >> scalars[i];
+  }
+
   int32_t labelsOfHistograms[16];
   int16_t integerT0[16];
   int16_t firstGood[16];
   int16_t lastGood[16];
-  float real_t0[16];
-  int32_t scalars[18];
+  float realT0[16];
+  for(auto i = 0u; i <=15; ++i){
+    streamReader.moveStreamToPosition(948 + (i*4));
+    streamReader >> labelsOfHistograms[i];
+
+    streamReader.moveStreamToPosition(458 + (i*2));
+    streamReader >> integerT0[i];
+
+    streamReader.moveStreamToPosition(490 + (i*2));
+    streamReader >> firstGood[i];
+
+    streamReader.moveStreamToPosition(522 + (i*2));
+    streamReader >> lastGood[i];
+
+    streamReader.moveStreamToPosition(792 + (i*4));
+    streamReader >> realT0[i];
+  }
+
   float temperatures[4];
   float temperatureDeviation[4];
   float monLow[4];
   float monHigh[4];
+  for(auto i = 0u; i < 4; ++i){
+    streamReader.moveStreamToPosition(716 + (i*4));
+    streamReader >> temperatures[i];
+
+    streamReader.moveStreamToPosition(738 + (i*4));
+    streamReader >> temperatureDeviation[i];
+
+    streamReader.moveStreamToPosition(72 + (i*4));
+    streamReader >> monLow[i];
+
+    streamReader.moveStreamToPosition(88 + (i*4));
+    streamReader >> monHigh[i];
+  }
 }
 } // namespace DataHandling
 } // namespace Mantid
