@@ -31,7 +31,7 @@ public:
     alg.setChild(true);
     const std::string inputFile = "SMALLFAKE_example_geometry.hdf5";
     alg.initialize();
-    alg.setPropertyValue("FileName", inputFile);
+    alg.setPropertyValue("Filename", inputFile);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
 
@@ -43,13 +43,11 @@ public:
                      "SmallFakeTubeInstrument");
   }
   void test_load_loki() {
-
     LoadEmptyNexusGeometry alg;
     alg.setChild(true);
-    const std::string outputWorkspaceName = "LoadEmptyNexusGeometryTestWS";
     const std::string inputFile = "LOKI_Definition.hdf5";
     alg.initialize();
-    alg.setPropertyValue("FileName", inputFile);
+    alg.setPropertyValue("Filename", inputFile);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
 
