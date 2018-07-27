@@ -17,6 +17,7 @@ class PeriodicTablePresenter(object):
 
     def set_buttons(self):
         for el in self.view.ptable.elements:
+            self.view.ptable.setElementSelected(el.symbol, False)
             if el.symbol in self.model.peak_data:
                 self.view.ptable.enableElementButton(el.symbol)
             else:
