@@ -70,9 +70,9 @@ class MultiPythonFileInterpreter(QWidget):
         interpreter.sig_editor_modified.connect(self.mark_current_tab_modified)
         interpreter.sig_filename_modified.connect(self.on_filename_modified)
 
-        tab_title, tab_toolip = _tab_title_and_toolip(filename)
+        tab_title, tab_tooltip = _tab_title_and_toolip(filename)
         tab_idx = self._tabs.addTab(interpreter, tab_title)
-        self._tabs.setTabToolTip(tab_idx, tab_toolip)
+        self._tabs.setTabToolTip(tab_idx, tab_tooltip)
         self._tabs.setCurrentIndex(tab_idx)
         return tab_idx
 
@@ -99,8 +99,10 @@ class MultiPythonFileInterpreter(QWidget):
         """
         if idx >= self.editor_count:
             return True
-        editor = self.editor_at(idx)
-        if editor.confirm_close():
+        # Make the current tab active so that it is clear what you
+        # are being prompted to save
+        self._tabs.setCurrentIndex(idx)
+        if self.current_editor().confirm_close():
             self._tabs.removeTab(idx)
         else:
             return False
