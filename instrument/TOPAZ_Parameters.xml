@@ -139,6 +139,11 @@ detScale={13:1.046504,14:1.259293,16:1.02449,17:1.18898,18:0.88014,19:0.98665,\
  <value val="15" />
 </parameter>
 
+<!-- Size of peak mask for background calculation in units of dQPixel -->
+<parameter name="peakMaskSize" type="int">
+ <value val="15" />
+</parameter>
+
 </component-link>
 
 </parameter-file>

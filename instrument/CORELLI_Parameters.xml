@@ -70,6 +70,11 @@
      <value val="60" />
     </parameter>
 
+    <!-- Size of peak mask for background calculation in units of dQPixel -->
+    <parameter name="peakMaskSize" type="int">
+     <value val="10" />
+    </parameter>
+
   </component-link>
 
 </parameter-file>

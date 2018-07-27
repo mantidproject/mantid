@@ -15,7 +15,7 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
               plotResults=False, zBG=1.96, bgPolyOrder=1, fICCParams=None, oldICCFit=None,
               strongPeakParams=None, forceCutoff=250, edgeCutoff=15,
               neigh_length_m=3, q_frame='sample', dtSpread=0.03, pplmin_frac=0.8, pplmax_frac=1.5, mindtBinWidth=1,
-              maxdtBinWidth=50, figureNumber=2, instrumentName=None):
+              maxdtBinWidth=50, figureNumber=2, instrumentName=None, peakMaskSize=5):
     n_events = box.getNumEventsArray()
 
     if q_frame == 'lab':
@@ -31,14 +31,13 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
                     n_events, peak=peak, box=box, qMask=qMask, calc_pp_lambda=True, padeCoefficients=padeCoefficients,
                     neigh_length_m=neigh_length_m, pp_lambda=None, pplmin_frac=pplmin_frac,
                     pplmax_frac=pplmax_frac, mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                    instrumentName=instrumentName)
+                    instrumentName=instrumentName, peakMaskSize=peakMaskSize)
         YTOF, fICC, x_lims = fitTOFCoordinate(
                     box, peak, padeCoefficients, dtSpread=dtSpread, qMask=qMask, bgPolyOrder=bgPolyOrder, zBG=zBG,
                     plotResults=plotResults, pp_lambda=pp_lambda, neigh_length_m=neigh_length_m, pplmin_frac=pplmin_frac,
                     pplmax_frac=pplmax_frac, mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                    instrumentName=instrumentName)
+                    instrumentName=instrumentName, peakMaskSize=peakMaskSize)
         chiSqTOF = mtd['fit_Parameters'].column(1)[-1]
-
     else:  # we already did I-C profile, so we'll just read the parameters
         pp_lambda = fICCParams[-1]
         fICC = ICC.IkedaCarpenterConvoluted()
@@ -51,7 +50,7 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
         fICC['HatWidth'] = fICCParams[10]
         fICC['KConv'] = fICCParams[11]
         goodIDX, _ = ICCFT.getBGRemovedIndices(
-            n_events, pp_lambda=pp_lambda, qMask=qMask, instrumentName=instrumentName)
+            n_events, pp_lambda=pp_lambda, qMask=qMask, instrumentName=instrumentName, peakMaskSize=peakMaskSize)
         chiSqTOF = fICCParams[4] #Last entry
 
         # Get the 3D TOF component, YTOF
@@ -87,7 +86,6 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
 
     useForceParams = peak.getIntensity() < forceCutoff or peak.getRow() <= dEdge or peak.getRow(
     ) >= nPixels[0] - dEdge or peak.getCol() <= dEdge or peak.getCol() >= nPixels[1] - dEdge
-
 
     #Here we retrieve some instrument specific parameters
     try:
@@ -253,7 +251,7 @@ def getXTOF(box, peak):
 def fitTOFCoordinate(box, peak, padeCoefficients, dtSpread=0.03, minFracPixels=0.01,
                      neigh_length_m=3, zBG=1.96, bgPolyOrder=1, qMask=None, plotResults=False,
                      fracStop=0.01, pp_lambda=None, pplmin_frac=0.8, pplmax_frac=1.5, mindtBinWidth=1,
-                     maxdtBinWidth=50, instrumentName=None):
+                     maxdtBinWidth=50, instrumentName=None, peakMaskSize=5):
 
     # Get info from the peak
     tof = peak.getTOF()  # in us
@@ -272,7 +270,7 @@ def fitTOFCoordinate(box, peak, padeCoefficients, dtSpread=0.03, minFracPixels=0
                                 neigh_length_m=neigh_length_m, zBG=zBG, pp_lambda=pp_lambda,
                                 pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
                                 mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                                instrumentName=instrumentName)
+                                instrumentName=instrumentName, peakMaskSize=peakMaskSize)
 
     fitResults, fICC = ICCFT.doICCFit(tofWS, energy, flightPath,
                                       padeCoefficients, fitOrder=bgPolyOrder, constraintScheme=1,

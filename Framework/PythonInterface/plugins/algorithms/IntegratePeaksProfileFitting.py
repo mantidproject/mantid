@@ -118,11 +118,12 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         instrumentName = peaks_ws.getInstrument().getFullName()
         try:
             nTheta = peaks_ws.getInstrument().getIntParameter("numBinsTheta")[0]
-            nPhi = peaks_ws.getInstrument().getIntParameter("numBinsPhi")[0] 
+            nPhi = peaks_ws.getInstrument().getIntParameter("numBinsPhi")[0]
             mindtBinWidth = peaks_ws.getInstrument().getNumberParameter("mindtBinWidth")[0]
-            maxdtBinWidth = peaks_ws.getInstrument().getNumberParameter("maxdtBinWidth")[0] 
-            fracHKL = peaks_ws.getInstrument().getNumberParameter("fracHKL")[0] 
-            dQPixel = peaks_ws.getInstrument().getNumberParameter("dQPixel")[0] 
+            maxdtBinWidth = peaks_ws.getInstrument().getNumberParameter("maxdtBinWidth")[0]
+            fracHKL = peaks_ws.getInstrument().getNumberParameter("fracHKL")[0]
+            dQPixel = peaks_ws.getInstrument().getNumberParameter("dQPixel")[0]
+            peakMaskSize = peaks_ws.getInstrument().getIntParameter("peakMaskSize")[0]
 
         except:
             raise
@@ -170,7 +171,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                                                                       maxdtBinWidth=maxdtBinWidth,
                                                                       pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
                                                                       forceCutoff=forceCutoff, edgeCutoff=edgeCutoff,
-                                                                      instrumentName=instrumentName)
+                                                                      instrumentName=instrumentName,
+                                                                      peakMaskSize=peakMaskSize)
 
                     # First we get the peak intensity
                     peakIDX = Y3D/Y3D.max() > fracStop

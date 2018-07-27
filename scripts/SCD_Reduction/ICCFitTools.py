@@ -93,7 +93,7 @@ def getQXQYQZ(box):
 
 def getQuickTOFWS(box, peak, padeCoefficients, goodIDX=None, dtSpread=0.03, qMask=None,
                   pp_lambda=None, minppl_frac=0.8, maxppl_frac=1.5, mindtBinWidth=1, maxdtBinWidth=50,
-                  constraintScheme=1, instrumentName=None):
+                  constraintScheme=1, instrumentName=None, peakMaskSize=5):
     """
     getQuickTOFWS - generates a quick-and-dirty TOFWS.  Useful for determining the background.
     Input:
@@ -130,7 +130,8 @@ def getQuickTOFWS(box, peak, padeCoefficients, goodIDX=None, dtSpread=0.03, qMas
     tofWS, ppl = getTOFWS(box, flightPath, scatteringHalfAngle, tof, peak, qMask, dtSpread=dtSpread,
                           minFracPixels=0.01, neigh_length_m=3, zBG=1.96, pp_lambda=pp_lambda,
                           calc_pp_lambda=calc_pp_lambda, pplmin_frac=minppl_frac, pplmax_frac=minppl_frac,
-                          mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth, instrumentName=instrumentName)
+                          mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth, instrumentName=instrumentName,
+                          peakMaskSize=peakMaskSize)
     fitResults, fICC = doICCFit(
         tofWS, energy, flightPath, padeCoefficients, fitOrder=1, constraintScheme=constraintScheme,
         instrumentName=instrumentName)
@@ -246,10 +247,6 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
     cY = nY//2
     cZ = nZ//2
     dP = peakMaskSize
-    if instrumentName == 'TOPAZ':
-        dP = 15
-    elif instrumentName == 'CORELLI':
-        dP = 10
 
     peakMask = qMask.copy()
     peakMask[cX-dP:cX+dP, cY-dP:cY+dP, cZ-dP:cZ+dP] = 0
@@ -286,7 +283,7 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
                 chiSq, h, intens, sigma = getQuickTOFWS(box, peak, padeCoefficients, goodIDX=goodIDX, qMask=qMask, pp_lambda=pp_lambda,
                                                         minppl_frac=minppl_frac, maxppl_frac=maxppl_frac, mindtBinWidth=mindtBinWidth,
                                                         maxdtBinWidth=maxdtBinWidth, constraintScheme=constraintScheme,
-                                                        instrumentName=instrumentName)
+                                                        instrumentName=instrumentName, peakMaskSize=peakMaskSize)
             except:
                 # raise
                 break
@@ -300,6 +297,7 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
         except RuntimeError:
             # This is caused by there being fewer datapoints remaining than parameters.  For now, we just hope
             # we found a satisfactory answer.
+            raise
             break
         except KeyboardInterrupt:
             sys.exit()
@@ -309,7 +307,7 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
     chiSq, h, intens, sigma = getQuickTOFWS(box, peak, padeCoefficients, goodIDX=goodIDX, qMask=qMask,
                                             pp_lambda=pp_lambda, minppl_frac=minppl_frac, maxppl_frac=maxppl_frac,
                                             mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                                            instrumentName=instrumentName)
+                                            instrumentName=instrumentName, peakMaskSize=peakMaskSize)
     if qMask is not None:
         return goodIDX*qMask, pp_lambda
     return goodIDX, pp_lambda
@@ -375,7 +373,8 @@ def getBGRemovedIndices(n_events, zBG=1.96, calc_pp_lambda=False, neigh_length_m
                                            minppl_frac=pplmin_frac, maxppl_frac=pplmax_frac, qMask=qMask, peak=peak,
                                            box=box, pp_lambda=pp_lambda, peakNumber=peakNumber,
                                            mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                                           constraintScheme=constraintScheme, instrumentName=instrumentName)
+                                           constraintScheme=constraintScheme, instrumentName=instrumentName,
+                                           peakMaskSize=peakMaskSize)
             except KeyboardInterrupt:
                 sys.exit()
             except:
@@ -535,7 +534,7 @@ def get_pp_lambda(n_events, hasEventsIDX):
 
 def getTOFWS(box, flightPath, scatteringHalfAngle, tofPeak, peak, qMask, zBG=-1.0, dtSpread=0.02,
              minFracPixels=0.005, workspaceNumber=None, neigh_length_m=0, pp_lambda=None, calc_pp_lambda=False,
-             padeCoefficients=None, pplmin_frac=0.8, pplmax_frac=1.5,
+             padeCoefficients=None, pplmin_frac=0.8, pplmax_frac=1.5, peakMaskSize=5,
              mindtBinWidth=1, maxdtBinWidth=50, constraintScheme=1, instrumentName=None):
     """
     Builds a TOF profile from the data in box which is nominally centered around a peak.
@@ -580,7 +579,8 @@ def getTOFWS(box, flightPath, scatteringHalfAngle, tofPeak, peak, qMask, zBG=-1.
                                                  calc_pp_lambda=calc_pp_lambda, padeCoefficients=padeCoefficients,
                                                  pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
                                                  mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                                                 constraintScheme=constraintScheme, instrumentName=instrumentName)
+                                                 constraintScheme=constraintScheme, instrumentName=instrumentName,
+                                                 peakMaskSize=peakMaskSize)
         hasEventsIDX = np.logical_and(goodIDX, qMask)
         boxMeanIDX = np.where(hasEventsIDX)
     else:  # don't do background removal - just consider one pixel at a time
@@ -908,7 +908,7 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
                     dQPixel=0.005, p=None, neigh_length_m=0, zBG=-1.0, bgPolyOrder=1,
                     doIterativeBackgroundFitting=False, q_frame='sample',
                     progressFile=None, minpplfrac=0.8, maxpplfrac=1.5, mindtBinWidth=1, maxdtBinWidth=50,
-                    keepFitDict=False, constraintScheme=1):
+                    keepFitDict=False, constraintScheme=1, peakMaskSize=5):
     """
     integrateSample contains the loop that integrates over all of the peaks in a run and saves the results.  Importantly, it also handles
     errors (mostly by passing and recording special values for failed fits.)
@@ -984,7 +984,8 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
                                                          mindtBinWidth=mindtBinWidth,
                                                          maxdtBinWidth=maxdtBinWidth,
                                                          pplmin_frac=minpplfrac, pplmax_frac=maxpplfrac,
-                                                         constraintScheme=constraintScheme, instrumentName=instrumentName)
+                                                         constraintScheme=constraintScheme, instrumentName=instrumentName,
+                                                         peakMaskSize=peakMaskSize)
                 # --IN PRINCIPLE!!! WE CALCULATE THIS BEFORE GETTING HERE
                 tofWS = mtd['tofWS']
 

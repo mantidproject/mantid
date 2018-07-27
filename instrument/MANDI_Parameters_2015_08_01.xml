@@ -63,6 +63,10 @@
  <value val="50" />
 </parameter>
 
+<!-- Size of peak mask for background calculation in units of dQPixel -->
+<parameter name="peakMaskSize" type="int">
+ <value val="5" />
+</parameter>
 
 
 </parameter-file>
