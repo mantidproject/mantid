@@ -112,6 +112,24 @@ class Mpl2dGraphicsView(QtGui.QWidget):
 
         return
 
+    def save_figure(self, file_name):
+        """
+        save the current on-canvas figure to a file
+        :param file_name:
+        :return:
+        """
+        self._myCanvas.fig.savefig(file_name)
+
+        return
+
+    def set_title(self, title):
+        """
+        set title to image
+        :param title:
+        :return:
+        """
+        self._myCanvas.axes.set_title(title)
+
     @property
     def x_min(self):
         """

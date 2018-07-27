@@ -1930,6 +1930,21 @@ class CWSCDReductionControl(object):
 
         return True, out_ws_name
 
+    def remove_pt_xml_workspace(self, exp_no, scan_no, pt_no):
+        """
+        remove the Workspace2D loaded from SPICE XML detector file
+        :param exp_no:
+        :param scan_no:
+        :param pt_no:
+        :return:
+        """
+        pt_ws_name = get_raw_data_workspace_name(exp_no, scan_no, pt_no)
+
+        if AnalysisDataService.doesExist(pt_ws_name):
+            AnalysisDataService.remove(pt_ws_name)
+
+        return
+
     def load_spice_xml_file(self, exp_no, scan_no, pt_no, xml_file_name=None):
         """
         Load SPICE's detector counts XML file from local data directory

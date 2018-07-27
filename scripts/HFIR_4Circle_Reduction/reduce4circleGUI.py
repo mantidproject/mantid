@@ -290,6 +290,7 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_show_single_peak_integration)
         self.connect(self.ui.pushButton_clearPeakIntFigure, QtCore.SIGNAL('clicked()'),
                      self.do_clear_peak_integration_canvas)
+        self.ui.pushButton_exportToMovie.clicked.connect(self.do_export_detector_views_to_movie)
 
         self.ui.comboBox_viewRawDataMasks.currentIndexChanged.connect(self.evt_change_roi)
         self.ui.comboBox_mergePeakNormType.currentIndexChanged.connect(self.evt_change_norm_type)
@@ -329,6 +330,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.actionSort_By_2Theta.triggered.connect(self.menu_sort_survey_2theta)
         #  pop out a general figure plot window
         self.ui.action2theta_Sigma.triggered.connect(self.menu_pop_2theta_sigma_window)
+        # TODO - 20180727 - Implement... refer to menu_pop_2theta_sigma_window: save sorted 2theta/scan/FWHM
+        # self.ui.actionSave_2theta_Sigma.connect(self.menu_save_2theta_sigma)
 
         # Validator ... (NEXT)
         # blabla... ...
@@ -1241,6 +1244,54 @@ class MainWindow(QtGui.QMainWindow):
         # save file
         self._myControl.save_roi_to_file(None, None, mask_name, roi_file_name)
 
+        # TODO - 20180727 - Save these values to a file with proper file format
+        # ... ... ll_corner, ur_corner = self.ui.graphicsView_detector2dPlot.get_roi()
+
+
+        return
+
+    def do_export_detector_views_to_movie(self):
+        """
+        go through all surveyed scans. plot all the measurements from all the scans. record the plot to PNG files,
+        and possibly convert them to movies
+        :return:
+        """
+        scan_list = self.ui.tableWidget_surveyTable.get_scan_numbers(range(self.ui.tableWidget_surveyTable.rowCount()))
+        # roi_name = str(self.ui.comboBox_viewRawDataMasks.currentText())
+        file_name_out = ''
+        for i_scan, scan_number in enumerate(scan_list):
+            # get pt numbers
+            status, pt_number_list = self._myControl.get_pt_numbers(self._current_exp_number, scan_number)
+            # stop this loop if unable to get Pt. numbers
+            if not status:
+                print ('[DB...BAT] Unable to get list of Pt. number from scan {0} due to {1}.'
+                       ''.format(scan_number, pt_number_list))
+                continue
+            # plot
+            for pt_number in pt_number_list:
+                # ROI is set to None because only the ROI rectangular shall appear on the output. But with
+                # a ROI name, the detector is then masked.  It is not the purpose to examine whether all the
+                # peaks are in ROI
+                file_name = self.load_plot_raw_data(self._current_exp_number, scan_number, pt_number, roi_name=None,
+                                                    save=True, remove_workspace=True)
+                file_name_out += file_name + '\n'
+            # END-FOR
+
+            # debug break
+            # if i_scan == 5:
+            #     break
+        # END-FOR
+
+        # write out the file list
+        list_name = os.path.join(self._myControl.get_working_directory(), 'png_exp{0}_list.txt'
+                                                                          ''.format(self._current_exp_number))
+        ofile = open(list_name, 'w')
+        ofile.write(file_name_out)
+        ofile.close()
+
+        message = 'convert -delay 10 -loop 0 @{0} {1}.mpeg'.format(list_name, '[Your Name]')
+        self.pop_one_button_dialog(message)
+
         return
 
     def do_export_selected_peaks_to_integrate(self):
@@ -1322,6 +1373,8 @@ class MainWindow(QtGui.QMainWindow):
             column_name = 'Max Counts'
         elif self.ui.radioButton_sortByTemp.isChecked():
             column_name = 'Sample Temp'
+        elif self.ui.radioButton_sortBy2Theta.isChecked():
+            column_name = '2theta'
         else:
             self.pop_one_button_dialog('No column is selected to sort.')
             return
@@ -4035,13 +4088,15 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def load_plot_raw_data(self, exp_no, scan_no, pt_no, roi_name=None):
+    def load_plot_raw_data(self, exp_no, scan_no, pt_no, roi_name=None, save=False, remove_workspace=False):
         """
         Plot raw workspace from XML file for a measurement/pt.
         :param exp_no:
         :param scan_no:
         :param pt_no:
         :param roi_name: string (mask loaded data) or None (do nothing)
+        :param save: flag to save the ROI
+        :param remove_workspace: Flag to remove the raw data workspace
         :return:
         """
         # check inputs
@@ -4066,7 +4121,14 @@ class MainWindow(QtGui.QMainWindow):
 
         # Get data and plot
         raw_det_data = self._myControl.get_raw_detector_counts(exp_no, scan_no, pt_no)
-        self.ui.graphicsView_detector2dPlot.plot_detector_counts(raw_det_data)
+        this_title = 'Exp {} Scan {} Pt {} ROI {}'.format(exp_no, scan_no, pt_no, roi_name)
+        self.ui.graphicsView_detector2dPlot.plot_detector_counts(raw_det_data, title=this_title)
+        if save:
+            image_file = os.path.join(self.working_directory, 'exp{}_scan{}_pt{}_{}.png'
+                                                              ''.format(exp_no, scan_no, pt_no, roi_name))
+            self.ui.graphicsView_detector2dPlot.save_figure(image_file)
+        else:
+            image_file = None
 
         # Information
         info = '%-10s: %d\n%-10s: %d\n%-10s: %d\n' % ('Exp', exp_no,
@@ -4074,7 +4136,10 @@ class MainWindow(QtGui.QMainWindow):
                                                       'Pt', pt_no)
         self.ui.plainTextEdit_rawDataInformation.setPlainText(info)
 
-        return
+        if remove_workspace:
+            self._myControl.remove_pt_xml_workspace(exp_no, scan_no, pt_no)
+
+        return image_file
 
     def update_adding_peaks_status(self, exp_number, scan_number, progress):
         """

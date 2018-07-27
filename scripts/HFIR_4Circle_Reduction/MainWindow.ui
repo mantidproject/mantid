@@ -213,7 +213,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>5</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1171,7 +1171,7 @@ p, li { white-space: pre-wrap; }
                        </property>
                       </widget>
                      </item>
-                     <item row="3" column="0">
+                     <item row="4" column="0">
                       <widget class="QCheckBox" name="checkBox_sortDescending">
                        <property name="font">
                         <font>
@@ -1192,6 +1192,18 @@ p, li { white-space: pre-wrap; }
                        </property>
                        <property name="text">
                         <string>Sample Temperature</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="3" column="0">
+                      <widget class="QRadioButton" name="radioButton_sortBy2Theta">
+                       <property name="font">
+                        <font>
+                         <pointsize>9</pointsize>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string>2-theta</string>
                        </property>
                       </widget>
                      </item>
@@ -1814,6 +1826,21 @@ p, li { white-space: pre-wrap; }
                       </size>
                      </property>
                     </spacer>
+                   </item>
+                   <item row="8" column="0">
+                    <widget class="QPushButton" name="pushButton_exportToMovie">
+                     <property name="font">
+                      <font>
+                       <pointsize>9</pointsize>
+                      </font>
+                     </property>
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Apply the current ROI to all the listed measurements and make into a movie. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                     <property name="text">
+                      <string>Export Movie</string>
+                     </property>
+                    </widget>
                    </item>
                   </layout>
                  </widget>

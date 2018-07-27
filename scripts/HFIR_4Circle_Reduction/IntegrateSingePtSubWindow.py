@@ -44,10 +44,11 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         self.ui.pushButton_exportIntensityToFile.clicked.connect(self.do_save_intensity)
         self.ui.pushButton_exportIntensityToTable.clicked.connect(self.do_export_intensity_to_parent)
-        self.ui.pushButton_refreshROI.clicked.connect(self.do_refresh_roi)
+        # self.ui.pushButton_refreshROI.clicked.connect(self.do_refresh_roi)
         self.ui.pushButton_retrieveFWHM.clicked.connect(self.do_retrieve_fwhm)
         self.ui.pushButton_integratePeaks.clicked.connect(self.do_integrate_single_pt)
         self.ui.pushButton_plot.clicked.connect(self.do_plot_integrated_pt)
+        self.ui.pushButton_exportToMovie.clicked.connect(self.do_export_to_movie)
 
         # menu bar
         self.ui.menuQuit.triggered.connect(self.do_close)
@@ -55,6 +56,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.ui.actionDe_select_All.triggered.connect(self.menu_table_select_none)
         self.ui.actionLoad_Gaussian_Sigma_File.triggered.connect(self.menu_load_gauss_sigma_file)
         self.ui.actionLoad_Peak_Info_File.triggered.connect(self.do_load_peak_integration_table)
+        self.ui.actionRefresh_ROI_List.triggered.connect(self.do_refresh_roi)
 
         # class variable
         self._working_dir = os.path.expanduser('~')
@@ -85,6 +87,15 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         # add to table including calculate peak center in Q-space
         self.scanIntegratedSignal.emit(intensity_dict)
+
+        return
+
+    def do_export_to_movie(self):
+        """
+        export the complete list of single-pt experiment to a movie
+        :return:
+        """
+        # TODO - 20180727 - Complete it!
 
         return
 
@@ -167,6 +178,17 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         plot integrated Pt with model
         :return:
         """
+        # TODO - 20180727 - Clean this plotting method
+
+        """
+        Note:
+        1. selection include: 2-theta FWHM Model, Summed Single Pt. Counts (horizontal),
+           Summed Single Pt. Counts (vertical) from comboBox_plotType
+        2. ...
+
+        """
+
+        # TODO - 20180727 - refactor with: pushButton_rewindPlot, pushButton_forwardPlot
         # get scan number
         scan_number = int(self.ui.lineEdit_Scan.text())
         roi_name = str(self.ui.comboBox_roiList.currentText())
@@ -178,6 +200,8 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.ui.graphicsView_integration1DView.add_observed_data(vec_x, vec_y, 'counts...')
 
         self.ui.graphicsView_integration1DView.add_fit_data(vec_x, model_y, 'model... ')
+
+        # TODO - 20180727 - Need a title
 
         return
 
