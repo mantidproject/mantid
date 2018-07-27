@@ -194,7 +194,6 @@ void MuonFitDataSelector::setWorkspaceDetails(
  * Defaults copy those previously used in muon fit property browser
  */
 void MuonFitDataSelector::setDefaultValues() {
-  const QChar muMicro{0x03BC}; // mu in Unicode
   this->setStartTime(0.0);
   this->setEndTime(0.0);
   m_ui.txtSimFitLabel->setText("0");
