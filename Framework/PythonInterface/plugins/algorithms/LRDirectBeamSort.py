@@ -46,7 +46,7 @@ class CompareTwoNXSDataForSFcalculator(object):
 
         self.resultComparison = -1 if pcharge1 < pcharge2 else 1
 
-    def compareParameter(self, param, order, tolerance=None):
+    def compareParameter(self, param, order, tolerance=0.0):
         """
             Compare parameters for the two runs
             :param string param: name of the parameter to compare
@@ -59,7 +59,7 @@ class CompareTwoNXSDataForSFcalculator(object):
         _paramNexusToCompareWith = float(_nexusToCompareWithRun.getProperty(param).value[0])
         _paramNexusToPosition = float(_nexusToPositionRun.getProperty(param).value[0])
 
-        if tolerance and abs(_paramNexusToPosition - _paramNexusToCompareWith) <= tolerance:
+        if abs(_paramNexusToPosition - _paramNexusToCompareWith) <= tolerance:
             return 0
 
         if order == 'ascending':
