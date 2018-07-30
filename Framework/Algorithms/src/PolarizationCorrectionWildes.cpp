@@ -460,28 +460,30 @@ std::map<std::string, std::string>
 PolarizationCorrectionWildes::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_const_sptr factorWS = getProperty(Prop::EFFICIENCIES);
-  const auto &factorAxis = factorWS->getAxis(1);
-  if (!factorAxis) {
-    issues[Prop::EFFICIENCIES] = "The workspace is missing a vertical axis.";
-  } else if (!factorAxis->isText()) {
-    issues[Prop::EFFICIENCIES] =
-        "The vertical axis in the workspace is not text axis.";
-  } else if (factorWS->getNumberHistograms() < 4) {
-    issues[Prop::EFFICIENCIES] =
-        "The workspace should contain at least 4 histograms.";
-  } else {
-    std::vector<std::string> tags{{"P1", "P2", "F1", "F2"}};
-    for (size_t i = 0; i != factorAxis->length(); ++i) {
-      const auto label = factorAxis->label(i);
-      auto found = std::find(tags.begin(), tags.end(), label);
-      if (found != tags.cend()) {
-        std::swap(tags.back(), *found);
-        tags.pop_back();
+  if (factorWS) {
+    const auto &factorAxis = factorWS->getAxis(1);
+    if (!factorAxis) {
+      issues[Prop::EFFICIENCIES] = "The workspace is missing a vertical axis.";
+    } else if (!factorAxis->isText()) {
+      issues[Prop::EFFICIENCIES] =
+          "The vertical axis in the workspace is not text axis.";
+    } else if (factorWS->getNumberHistograms() < 4) {
+      issues[Prop::EFFICIENCIES] =
+          "The workspace should contain at least 4 histograms.";
+    } else {
+      std::vector<std::string> tags{{"P1", "P2", "F1", "F2"}};
+      for (size_t i = 0; i != factorAxis->length(); ++i) {
+        const auto label = factorAxis->label(i);
+        auto found = std::find(tags.begin(), tags.end(), label);
+        if (found != tags.cend()) {
+          std::swap(tags.back(), *found);
+          tags.pop_back();
+        }
       }
-    }
-    if (!tags.empty()) {
-      issues[Prop::EFFICIENCIES] = "A histogram labeled " + tags.front() +
-                                   " is missing from the workspace.";
+      if (!tags.empty()) {
+        issues[Prop::EFFICIENCIES] = "A histogram labeled " + tags.front() +
+                                     " is missing from the workspace.";
+      }
     }
   }
   const std::vector<std::string> inputs = getProperty(Prop::INPUT_WS);

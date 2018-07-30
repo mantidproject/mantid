@@ -76,7 +76,7 @@ private:
   std::vector<std::string>
       m_outputWorkspaces; ///< get a vector of workspaces to plot
   QString validateDetectorGrouping();
-  const std::string createDetectorGroupingString();
+  std::string getDetectorGroupingString() const;
 };
 } // namespace CustomInterfaces
 } // namespace Mantid

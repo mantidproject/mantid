@@ -335,14 +335,16 @@ class MainWindow(QMainWindow):
     # ----------------------- Events ---------------------------------
     def closeEvent(self, event):
         # Close editors
-        self.editor.app_closing()
+        if self.editor.app_closing():
+            # Close all open plots
+            # We don't want this at module scope here
+            import matplotlib.pyplot as plt  #noqa
+            plt.close('all')
 
-        # Close all open plots
-        # We don't want this at module scope here
-        import matplotlib.pyplot as plt  #noqa
-        plt.close('all')
-
-        event.accept()
+            event.accept()
+        else:
+            # Cancel was pressed when closing an editor
+            event.ignore()
 
     # ----------------------- Slots ---------------------------------
     def open_file(self):

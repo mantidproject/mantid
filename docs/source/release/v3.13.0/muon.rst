@@ -10,7 +10,7 @@ Interface
 
 Improvements
 ############
-- The updated :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>` is used in Muon Analysis.
+- The updated :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>` and :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` are used in Muon Analysis.
 - TF Asymmetry mode now uses :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` and the fitting function is updated to show the normalization.
 
 Bugfixes
@@ -33,6 +33,7 @@ New
 Improvements
 ############
 - :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>` now updates a normalization table and produces unnormalized data.
+- :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` now updates a normalization table and can take multiple workspaces.
 
 Bugfixes
 ########

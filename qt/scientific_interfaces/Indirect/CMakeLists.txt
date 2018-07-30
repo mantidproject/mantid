@@ -148,7 +148,6 @@ set ( MOC_FILES
     DensityOfStates.h
     Elwin.h
     ILLEnergyTransfer.h
-    IAddWorkspaceDialog.h
     IndirectAddWorkspaceDialog.h
     IndirectBayes.h
     IndirectBayesTab.h

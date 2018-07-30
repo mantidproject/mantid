@@ -528,7 +528,9 @@ for (int64_t i = 0; i < ndets; i++) {
     // Average between two intersections for final position
     std::transform(curIntSec.data(), curIntSec.data() + vmdDims,
                    prevIntSec.data(), pos.begin(),
-                   VectorHelper::SimpleAverage<coord_t>());
+                   [](const double rhs, const double lhs) {
+                     return static_cast<coord_t>(0.5 * (rhs + lhs));
+                   });
 
     // transform kf to energy transfer
     pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
