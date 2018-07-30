@@ -241,11 +241,10 @@ void PredictSatellitePeaks::predictOffsets(
                     boost::math::iround(1000.0 * satelliteHKL[1]),
                     boost::math::iround(1000.0 * satelliteHKL[2])};
 
-    auto it = find(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end(), SavPk);
-
-    if (it == AlreadyDonePeaks.end()) {
+    bool foundPeak = binary_search(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end(), SavPk);
+ 
+    if (!foundPeak) {
       AlreadyDonePeaks.push_back(SavPk);
-      std::sort(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end());
     } else {
       continue;
     }
