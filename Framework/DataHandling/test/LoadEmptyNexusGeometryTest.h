@@ -58,6 +58,9 @@ public:
     auto &detectorInfo = outputWs->detectorInfo();
     TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "LOKI");
     TS_ASSERT_EQUALS(detectorInfo.size(), 8000);
+
+    TS_ASSERT_EQUALS(0, detectorInfo.detectorIDs()[0])
+    TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[1])
   }
 };
 

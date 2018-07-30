@@ -8,6 +8,9 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidTypes/SpectrumDefinition.h"
+#include <algorithm>
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -74,12 +77,20 @@ void LoadEmptyNexusGeometry::exec() {
         "No detectors found in instrument");
   }
 
-  Indexing::IndexInfo indexInfo(number_spectra);
+  std::vector<Mantid::Indexing::SpectrumNumber> spectrumNumbers(number_spectra);
+  std::iota(spectrumNumbers.begin(), spectrumNumbers.end(),
+            0 /*starting spectrum number*/);
+  Indexing::IndexInfo indexInfo(spectrumNumbers);
 
-  auto workspace =
-      create<Workspace2D>(indexInfo, Histogram(BinEdges{0.0, 1.0}, Counts{},
-                                               CountStandardDeviations{}));
-  workspace->setInstrument(std::move(instrument));
+  size_t detIndex = 0;
+  std::vector<SpectrumDefinition> spectrumDefinitions(number_spectra);
+  std::generate(spectrumDefinitions.begin(), spectrumDefinitions.end(),
+                [&]() { return SpectrumDefinition(detIndex++); });
+  indexInfo.setSpectrumDefinitions(spectrumDefinitions);
+
+  auto workspace = create<Workspace2D>(
+      std::move(instrument), indexInfo,
+      Histogram(BinEdges{0.0, 1.0}, Counts{}, CountStandardDeviations{}));
 
   setProperty("OutputWorkspace", std::move(workspace));
 }
