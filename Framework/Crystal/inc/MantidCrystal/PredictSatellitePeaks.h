@@ -58,6 +58,7 @@ public:
   const std::string category() const override { return "Crystal\\Peaks"; }
 
 private:
+  const size_t MAX_NUMBER_HKLS = 10000000000;
   /// Initialise the properties
   void init() override;
 
@@ -66,7 +67,7 @@ private:
   Kernel::V3D getOffsetVector(const std::string &label);
   void predictOffsets(DataObjects::PeaksWorkspace_sptr Peaks,
                       boost::shared_ptr<Mantid::API::IPeaksWorkspace> &OutPeaks,
-                      Kernel::V3D offsets, int &maxOrder, int & peakNum,
+                      Kernel::V3D offsets, int &maxOrder, Kernel::V3D & hkl,
                       Geometry::HKLFilterWavelength &lambdaFilter,
                       bool &includePeaksInRange, bool &includeOrderZero,
                       int &seqNum,
