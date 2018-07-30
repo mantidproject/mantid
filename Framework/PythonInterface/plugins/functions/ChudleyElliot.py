@@ -24,12 +24,15 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
 from __future__ import (absolute_import, division, print_function)
-import math
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
+from scipy import constants
 
 
 class ChudleyElliot(IFunction1D):
+
+    planck_constant = constants.Planck / constants.e * 1E15  # meV*psec
+    hbar = planck_constant / (2 * np.pi)  # meV * ps  = ueV * ns
 
     def category(self):
         return "QuasiElastic"
@@ -42,22 +45,10 @@ class ChudleyElliot(IFunction1D):
     def function1D(self, xvals):
         tau = self.getParameterValue("Tau")
         length = self.getParameterValue("L")
-
         xvals = np.array(xvals)
-        hwhm = (1.0 - np.sin(xvals * length) / (xvals * length)) / tau
+        hwhm = self.hbar*(1.0 - np.sin(xvals * length) / (xvals * length))/tau
 
         return hwhm
-
-    def functionDeriv1D(self, xvals, jacobian):
-        tau = self.getParameterValue("Tau")
-        length = self.getParameterValue("L")
-        i = 0
-        for x in xvals:
-            s = math.sin(x*length)/(x*length)
-            h = (1.0-s)/tau
-            jacobian.set(i,0,-h/tau)
-            jacobian.set(i,1,(math.cos(x*length)-s)/(length*tau))
-            i += 1
 
 
 # Required to have Mantid recognise the new function
