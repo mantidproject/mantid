@@ -21,7 +21,6 @@ import functools
 
 # third-party library imports
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
-from mantid.kernel import Logger
 from mantidqt.dialogs.spectraselectordialog import get_spectra_selection
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from qtpy.QtWidgets import QMessageBox, QVBoxLayout
@@ -31,44 +30,14 @@ from workbench.plugins.base import PluginWidget
 from workbench.plotting.figuretype import figure_type, FigureType
 from workbench.plotting.functions import current_figure_or_none, pcolormesh, plot
 
-LOGGER = Logger(b"workspacewidget")
-
-
-def _workspaces_from_names(names):
-    """
-    Convert a list of workspace names to a list of MatrixWorkspace handles. Any WorkspaceGroup
-    encountered is flattened and its members inserted into the list at this point
-
-    Flattens any workspace groups with the list, preserving the order of the remaining elements
-    :param names: A list of workspace names
-    :return: A list where each element is a single MatrixWorkspace
-    """
-    ads = AnalysisDataService.Instance()
-    flat = []
-    for name in names:
-        try:
-            ws = ads[name.encode('utf-8')]
-        except KeyError:
-            LOGGER.warning("Skipping {} as it does not exist".format(name))
-            continue
-
-        if isinstance(ws, MatrixWorkspace):
-            flat.append(ws)
-        elif isinstance(ws, WorkspaceGroup):
-            group_len = len(ws)
-            for i in range(group_len):
-                flat.append(ws[i])
-        else:
-            LOGGER.warning("{} it is not a MatrixWorkspace or WorkspaceGroup.".format(name))
-
-    return flat
-
 
 class WorkspaceWidget(PluginWidget):
     """Provides a Workspace Widget for workspace manipulation"""
 
     def __init__(self, parent):
         super(WorkspaceWidget, self).__init__(parent)
+
+        self._ads = AnalysisDataService.Instance()
 
         # layout
         self.workspacewidget = WorkspaceTreeWidget()
@@ -116,7 +85,8 @@ class WorkspaceWidget(PluginWidget):
                 return
 
         try:
-            selection = get_spectra_selection(_workspaces_from_names(names), self)
+            workspaces = self._ads.retrieveWorkspaces(names, unrollGroups=True)
+            selection = get_spectra_selection(workspaces, self)
             if selection is not None:
                 plot(selection.workspaces, spectrum_nums=selection.spectra,
                      wksp_indices=selection.wksp_indices,
@@ -132,7 +102,7 @@ class WorkspaceWidget(PluginWidget):
         :param names: A list of workspace names
         """
         try:
-            pcolormesh(_workspaces_from_names(names))
+            pcolormesh(self._ads.retrieveWorkspaces(names, unrollGroups=True))
         except BaseException:
             import traceback
             traceback.print_exc()
