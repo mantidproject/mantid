@@ -59,10 +59,12 @@ API::Column_sptr TableWorkspace::addColumn(const std::string &type,
                                            const std::string &name) {
   API::Column_sptr c;
   if (type.empty()) {
-    throw std::invalid_argument("Empty string passed as type argument of addColumn.");
+    throw std::invalid_argument(
+        "Empty string passed as type argument of addColumn.");
   }
   if (name.empty()) {
-    throw std::invalid_argument("Empty string passed as name argument of addColumn.");
+    throw std::invalid_argument(
+        "Empty string passed as name argument of addColumn.");
     return c;
   }
   // Check that there is no column with the same name.
@@ -80,7 +82,7 @@ API::Column_sptr TableWorkspace::addColumn(const std::string &type,
   } catch (Kernel::Exception::NotFoundError &e) {
     std::stringstream ss;
     ss << "Column of type " << type << " and name " << name
-                  << " has not been added.\n";
+       << " has not been added.\n";
     ss << e.what() << '\n';
     throw std::invalid_argument(ss.str());
   }
@@ -125,7 +127,8 @@ TableWorkspace::getColumn(const std::string &name) const {
 API::Column_sptr TableWorkspace::getColumn(size_t index) {
   if (index >= columnCount()) {
     std::stringstream ss;
-    ss << "Column index is out of range: " << index << "(" << columnCount() << ")\n";
+    ss << "Column index is out of range: " << index << "(" << columnCount()
+       << ")\n";
     throw std::range_error(ss.str());
   }
   return m_columns[index];
@@ -135,7 +138,8 @@ API::Column_sptr TableWorkspace::getColumn(size_t index) {
 API::Column_const_sptr TableWorkspace::getColumn(size_t index) const {
   if (index >= columnCount()) {
     std::stringstream ss;
-    ss << "Column index is out of range: " << index << "(" << columnCount() << ")\n";
+    ss << "Column index is out of range: " << index << "(" << columnCount()
+       << ")\n";
     throw std::range_error(ss.str());
   }
   return m_columns[index];
@@ -189,8 +193,7 @@ void TableWorkspace::addColumn(boost::shared_ptr<API::Column> column) {
                          FindName(column->name()));
   if (ci != m_columns.end()) {
     std::stringstream ss;
-    ss << "Column with name " << column->name()
-      << " already exists.\n";
+    ss << "Column with name " << column->name() << " already exists.\n";
     throw std::invalid_argument(ss.str());
   } else {
     m_columns.push_back(column);
