@@ -45,7 +45,6 @@ if EXIST %WORKSPACE%\external\src\ThirdParty\.git (
   cd %WORKSPACE%
 )
 
-
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up the location for local object store outside of the build and source
 :: tree, which can be shared by multiple builds.
@@ -59,7 +58,7 @@ if NOT DEFINED MANTID_DATA_STORE (
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check job requirements from the name
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set CLEANBUILD=
 set BUILDPKG=
 if not "%JOB_NAME%" == "%JOB_NAME:clean=%" (
@@ -91,8 +90,10 @@ if not "%JOB_NAME%" == "%JOB_NAME:debug=%" (
 ::                            the links helps keep it fresh
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set BUILD_DIR=%WORKSPACE%\build
+call %~dp0setupcompiler.bat %BUILD_DIR%
 
 if "!CLEANBUILD!" == "yes" (
+  echo Removing build directory for a clean build
   rmdir /S /Q %BUILD_DIR%
 )
 
