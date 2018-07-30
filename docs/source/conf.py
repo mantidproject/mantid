@@ -8,7 +8,7 @@ import os
 from sphinx import __version__ as sphinx_version
 import sphinx_bootstrap_theme # checked at cmake time
 import mantid
-from mantid import ConfigService
+from mantid.kernel import ConfigService
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -106,9 +106,13 @@ except TypeError:
 doctest_global_cleanup = """
 import time
 from mantid.api import FrameworkManager
+from mantid.kernel import MemoryStats
+
 FrameworkManager.Instance().clear()
-# sleep for short period to allow memory to be freed
-time.sleep(2)
+if MemoryStats().getFreeRatio() < 0.5:
+    # sleep for short period to allow memory to be freed
+    time.sleep(2)
+
 """
 
 # -- Options for pngmath --------------------------------------------------
