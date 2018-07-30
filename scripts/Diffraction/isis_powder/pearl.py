@@ -141,7 +141,10 @@ class Pearl(AbstractInst):
                                                         run_details=run_details, focus_mode=output_mode,
                                                         attenuation_filepath=attenuation_path)
         group_name = "PEARL" + str(run_details.output_run_string)
-        group_name += '_' + self._inst_settings.tt_mode + "-Results-D-Grp"
+        group_name += '_' + self._inst_settings.tt_mode
+        group_name += "_long" if self._inst_settings.long_mode else ""
+        group_name += "-Results-D-Grp"
+
         grouped_d_spacing = mantid.GroupWorkspaces(InputWorkspaces=output_spectra, OutputWorkspace=group_name)
         return grouped_d_spacing, None
 
