@@ -1,5 +1,5 @@
-#ifndef MANTID_PYTHONINTERFACE_VECTORTONDARRAY_H_
-#define MANTID_PYTHONINTERFACE_VECTORTONDARRAY_H_
+#ifndef MANTID_PYTHONINTERFACE_TOPYLIST_H_
+#define MANTID_PYTHONINTERFACE_TOPYLIST_H_
 /**
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
    National Laboratory & European Spallation Source
@@ -22,9 +22,7 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-#include "MantidKernel/System.h"
-
-#include <boost/python/detail/prefix.hpp>
+#include <boost/python/list.hpp>
 #include <vector>
 
 namespace Mantid {
@@ -34,26 +32,26 @@ namespace Converters {
 // Converter implementation
 //-----------------------------------------------------------------------
 /**
- * Converter that takes a std::vector and converts it into a flat numpy array.
- *
- * The type of conversion is specified by another struct/class that
- * contains a static member create1D.
+ * Converter that takes a std::vector and converts it into a python list.
+ * It is able to convert anything for which a converter is already registered
  */
-template <typename ElementType, typename ConversionPolicy>
-struct VectorToNDArray {
+template <typename ElementType> struct ToPyList {
   /**
    * Converts a cvector to a numpy array
    * @param cdata :: A const reference to a vector
-   * @returns A new PyObject that wraps the vector in a numpy array
+   * @returns A new python list object
    */
-  inline PyObject *operator()(const std::vector<ElementType> &cdata) const {
-    // Hand off the work to the conversion policy
-    using policy = typename ConversionPolicy::template apply<ElementType>;
-    return policy::create1D(cdata);
+  inline boost::python::list
+  operator()(const std::vector<ElementType> &cdata) const {
+    boost::python::list result;
+    for (const auto &item : cdata) {
+      result.append(item);
+    }
+    return result;
   }
 };
 } // namespace Converters
 } // namespace PythonInterface
 } // namespace Mantid
 
-#endif /* MANTID_PYTHONINTERFACE_VECTORTONDARRAY_H_ */
+#endif /* MANTID_PYTHONINTERFACE_TOPYLIST_H_ */
