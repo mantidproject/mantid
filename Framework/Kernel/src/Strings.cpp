@@ -2,8 +2,13 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/WarningSuppressions.h"
 
+GCC_DIAG_OFF(conversion)
+GCC_DIAG_OFF(pedantic)
 #include "absl/strings/str_join.h"
+GCC_DIAG_OFF(pedantic)
+GCC_DIAG_ON(conversion)
 
 #include <Poco/Path.h>
 
