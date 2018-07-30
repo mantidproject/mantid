@@ -55,6 +55,7 @@ Usage
       print(myFile.read())
 
 .. testoutput:: SaveMFT_general_usage
+   :options: +NORMALIZE_WHITESPACE
 
    MFT
    Instrument : Not defined
