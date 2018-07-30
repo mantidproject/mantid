@@ -11,6 +11,8 @@ class VesuvioDiffractionReductionTest(unittest.TestCase):
 
     def setUp(self):
         self._oldFacility = config['default.facility']
+        if self._oldFacility.strip() == '':
+            self._oldFacility = 'TEST_LIVE'
         config.setFacility('ISIS')
 
     def tearDown(self):
