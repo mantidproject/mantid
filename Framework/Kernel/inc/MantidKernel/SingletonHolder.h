@@ -26,16 +26,17 @@
 #include <cassert>
 #include <cstdlib>
 #include <functional>
+#include <mutex>
 
 namespace Mantid {
 namespace Kernel {
 
 /// Type of deleter function
-using deleter_t = std::function<void()>;
+using SingletonDeleterFn = std::function<void()>;
 
 /// Register the given deleter function to be called
 /// at exit
-extern MANTID_KERNEL_DLL void deleteOnExit(deleter_t);
+MANTID_KERNEL_DLL void deleteOnExit(SingletonDeleterFn func);
 
 /// Manage the lifetime of a class intended to be a singleton
 template <typename T> class SingletonHolder {
@@ -45,7 +46,21 @@ public:
   SingletonHolder() = delete;
 
   static T &Instance();
+
+private:
+  static T *instance;
+  static std::once_flag once;
+#ifndef NDEBUG
+  static bool destroyed;
+#endif
 };
+
+// Static field initializers
+template <typename T> T *SingletonHolder<T>::instance = nullptr;
+template <typename T> std::once_flag SingletonHolder<T>::once;
+#ifndef NDEBUG
+template <typename T> bool SingletonHolder<T>::destroyed = false;
+#endif
 
 /// Policy class controlling creation of the singleton
 /// Implementation classes should mark their default
@@ -67,25 +82,18 @@ template <typename T> struct CreateUsingNew {
 /// already exist
 /// Creation is done using the CreateUsingNew policy at the moment
 template <typename T> inline T &SingletonHolder<T>::Instance() {
-// Local static instance initialized by an immediately invoked lambda.
-// A second nested lambda captures the singleton instance pointer
-// and forms the deleter function that is registered with
-// the atexit deleters.
-
-#ifndef NDEBUG
-  static bool destroyed(false);
-#endif
-  static T *instance = [] {
-    auto *singleton = CreateUsingNew<T>::create();
-    deleteOnExit(deleter_t([singleton]() {
+  std::call_once(once, []() {
+    instance = CreateUsingNew<T>::create();
+    deleteOnExit(SingletonDeleterFn([]() {
 #ifndef NDEBUG
       destroyed = true;
 #endif
-      CreateUsingNew<T>::destroy(singleton);
+      CreateUsingNew<T>::destroy(instance);
     }));
-    return singleton;
-  }();
+  });
+#ifndef NDEBUG
   assert(!destroyed);
+#endif
   return *instance;
 }
 
