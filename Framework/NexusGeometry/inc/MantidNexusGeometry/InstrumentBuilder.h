@@ -77,10 +77,14 @@ public:
 private:
   /// Sorts detectors
   void sortDetectors() const;
+  /// Check that this instance is not locked
+  void verifyMutable() const;
   /// product
   mutable std::unique_ptr<Geometry::Instrument> m_instrument;
   /// Last bank added. The instrument is the owner of the bank.
   Geometry::ICompAssembly *m_lastBank = nullptr;
+  /// completed
+  mutable bool m_finalized = false;
 };
 }
 }

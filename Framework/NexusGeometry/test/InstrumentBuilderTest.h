@@ -66,6 +66,22 @@ public:
     TS_ASSERT(iCompInfo->sourcePosition() == this->testPos2);
   }
 
+  void test_cannot_double_create() {
+    InstrumentBuilder builder(this->iTestName);
+    TS_ASSERT_THROWS_NOTHING(builder.createInstrument());
+    TS_ASSERT_THROWS(builder.createInstrument(), std::runtime_error &);
+  }
+
+  void test_cannot_modify_after_create() {
+    InstrumentBuilder builder(this->iTestName);
+    // OK to modify before create
+    builder.addSample(this->sampleName, this->testPos1);
+    TS_ASSERT_THROWS_NOTHING(builder.createInstrument());
+    // Now immutable
+    TS_ASSERT_THROWS(builder.addSample(this->sampleName, this->testPos1),
+                     std::runtime_error &);
+  }
+
 private:
   std::string iTestName = "testInstrument";
   std::string cTestName = "testComponent";
