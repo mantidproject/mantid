@@ -109,10 +109,9 @@ from mantid.api import FrameworkManager
 from mantid.kernel import MemoryStats
 
 FrameworkManager.Instance().clear()
-if MemoryStats().getFreeRatio() < 0.5:
+if MemoryStats().getFreeRatio() < 0.75:
     # sleep for short period to allow memory to be freed
     time.sleep(2)
-
 """
 
 # -- Options for pngmath --------------------------------------------------
