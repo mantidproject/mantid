@@ -68,7 +68,7 @@ private:
   Kernel::V3D getOffsetVector(const std::string &label);
   void predictOffsets(DataObjects::PeaksWorkspace_sptr Peaks,
                       boost::shared_ptr<Mantid::API::IPeaksWorkspace> &OutPeaks,
-                      Kernel::V3D offsets, int &maxOrder, Kernel::V3D & hkl,
+                      Kernel::V3D offsets, int &maxOrder, Kernel::V3D &hkl,
                       Geometry::HKLFilterWavelength &lambdaFilter,
                       bool &includePeaksInRange, bool &includeOrderZero,
                       int &seqNum,

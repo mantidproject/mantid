@@ -58,7 +58,7 @@ public:
     gonio.makeUniversalGoniometer();
     gonio.setRotationAngle(1, 180);
     pw->mutableRun().setGoniometer(gonio, false);
-  
+
     CalculateUMatrix alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize())
     TS_ASSERT(alg2.isInitialized())
