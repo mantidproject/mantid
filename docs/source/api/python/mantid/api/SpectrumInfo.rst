@@ -87,11 +87,19 @@ Output:
 	False
 
 
-**Example 3 - Calling the l1 Method on the SpectrumInfo Object:**
+**Example 3 - Calling Some Methods on the SpectrumInfo Object:**
+This example shows how to call a few different methods on the SpectrumInfo object.
+
 The ``l1()`` method does not take in any parameters and returns the distance from the source to the sample.
 The return value is a float.
 
-.. testcode:: CallL1Method
+The ``sourcePosition()`` method does not take any parameters and returns the absolute source position. 
+The return value is a ``V3D`` object which is a point in 3D space.
+
+The ``getAllSpectrumDefinitions()`` method does not take in any parameters and returns a list of ``SpectrumDefinition``s. 
+The returned list can then be indexed into to obtain specific ``SpectrumDefinition`` objects.
+
+.. testcode:: CallMethods
 	
 	# Create a workspace to use
 	ws = CreateSampleWorkspace()
@@ -102,46 +110,8 @@ The return value is a float.
 	# Call l1
 	print(info.l1())
 
-Output:
-
-.. testoutput:: CallL1Method
-
-	10.0
-
-
-**Example 4 - Calling the sourcePosition method on the SpectrumInfo Object:**
-The ``sourcePosition()`` method does not take any parameters and returns the absolute source position. 
-The return value is a ``V3D`` object which is a position in 3D space.
-
-.. testcode:: CallSourcePositionMethod
-	
-	# Create a workspace to use
-	ws = CreateSampleWorkspace()
-
-	# Get the SpectrumInfo object
-	info = ws.spectrumInfo()
-
 	# Call sourcePosition
 	print(info.sourcePosition())
-
-Output:
-
-.. testoutput:: CallSourcePositionMethod
-
-	[0,0,-10]
-
-
-**Example 5 - Retrieving SpectrumDefinition Objects from a SpectrumInfo Object:**
-The ``getAllSpectrumDefinitions()`` method does not take in any parameters and returns a list of ``SpectrumDefinition``s. 
-The returned list can then be indexed into to obtain specific ``SpectrumDefinition`` objects.
-
-.. testcode:: CallGetAllSpectrumDefinitionsMethod
-	
-	# Create a workspace to use
-	ws = CreateSampleWorkspace()
-
-	# Get the SpectrumInfo object
-	info = ws.spectrumInfo()
 
 	# Get the SpectrumDefinition objects
 	allSpectrumDefinitions = info.getAllSpectrumDefinitions()
@@ -150,8 +120,10 @@ The returned list can then be indexed into to obtain specific ``SpectrumDefiniti
 
 Output:
 
-.. testoutput:: CallGetAllSpectrumDefinitionsMethod
-	
+.. testoutput:: CallMethods
+
+	10.0
+	[0,0,-10]
 	200
 	<class 'mantid.api._api.SpectrumDefinition'>
 
