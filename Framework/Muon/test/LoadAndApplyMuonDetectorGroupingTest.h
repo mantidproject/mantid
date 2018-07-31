@@ -559,10 +559,7 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.65, delta);
   }
 
-  void test_group_asymmetry_range_applied_correctly() {
-  
-  
-  }
+  void test_group_asymmetry_range_applied_correctly() {}
 };
 
 #endif /* MANTID_MUON_LOADANDAPPLYMUONDETECTORGROUPING_H_ */
