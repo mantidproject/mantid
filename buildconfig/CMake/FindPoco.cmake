@@ -19,33 +19,26 @@ find_library ( POCO_LIB_NET_DEBUG NAMES PocoNetd )
 find_library ( POCO_LIB_CRYPTO_DEBUG NAMES PocoCryptod )
 find_library ( POCO_LIB_NETSSL_DEBUG NAMES PocoNetSSLd )
 
-if ( POCO_LIB_FOUNDATION_DEBUG )
+function( add_poco_lib POCO_LIB_MODULE POCO_DEBUG_LIB_MODULE )
+  # Add poco library to list and also the corresponding debug library if it is available
 
-set ( POCO_LIBRARIES optimized ${POCO_LIB_FOUNDATION}
-                     optimized ${POCO_LIB_UTIL}
-                     optimized ${POCO_LIB_XML}
-                     optimized ${POCO_LIB_NET}
-                     optimized ${POCO_LIB_CRYPTO}
-                     optimized ${POCO_LIB_NETSSL}
-                     debug ${POCO_LIB_FOUNDATION_DEBUG}
-                     debug ${POCO_LIB_UTIL_DEBUG}
-                     debug ${POCO_LIB_XML_DEBUG}
-                     debug ${POCO_LIB_NET_DEBUG}
-                     debug ${POCO_LIB_CRYPTO_DEBUG}
-                     debug ${POCO_LIB_NETSSL_DEBUG}
-)
+  if ( POCO_DEBUG_LIB_MODULE )
+    set ( POCO_LIBRARIES ${POCO_LIBRARIES}
+        optimized ${POCO_LIB_MODULE}
+        debug ${POCO_DEBUG_LIB_MODULE}
+        PARENT_SCOPE)
+  else ()
+    set ( POCO_LIBRARIES ${POCO_LIBRARIES} ${POCO_LIB_MODULE} PARENT_SCOPE)
+  endif()
 
-else ()
+endfunction( add_poco_lib )
 
-set ( POCO_LIBRARIES ${POCO_LIB_FOUNDATION}
-                     ${POCO_LIB_UTIL}
-                     ${POCO_LIB_XML}
-                     ${POCO_LIB_NET}
-                     ${POCO_LIB_CRYPTO}
-                     ${POCO_LIB_NETSSL}
-)
-
-endif()
+add_poco_lib( ${POCO_LIB_FOUNDATION} ${POCO_LIB_FOUNDATION_DEBUG} )
+add_poco_lib( ${POCO_LIB_UTIL} ${POCO_LIB_UTIL_DEBUG} )
+add_poco_lib( ${POCO_LIB_XML} ${POCO_LIB_XML_DEBUG} )
+add_poco_lib( ${POCO_LIB_NET} ${POCO_LIB_NET_DEBUG} )
+add_poco_lib( ${POCO_LIB_CRYPTO} ${POCO_LIB_CRYPTO_DEBUG} )
+add_poco_lib( ${POCO_LIB_NETSSL} ${POCO_LIB_NETSSL_DEBUG} )
 
 # Set a version string by examining either the Poco/Version.h header or
 # the Poco/Foundation.h header if Version.h does not exist

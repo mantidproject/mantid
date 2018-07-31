@@ -27,7 +27,6 @@
 #include <boost/shared_ptr.hpp>
 
 using Mantid::Types::Core::DateAndTime;
-using Mantid::Types::Event::TofEvent;
 using std::map;
 using std::string;
 using std::vector;
@@ -44,7 +43,6 @@ using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
 using Types::Core::DateAndTime;
-using Types::Event::TofEvent;
 
 //----------------------------------------------------------------------------------------------
 /** Empty default constructor

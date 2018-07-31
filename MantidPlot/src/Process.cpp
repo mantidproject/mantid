@@ -1,85 +1,36 @@
-// clang-format off
-#include "MantidQtWidgets/Common/PythonThreading.h"
-// clang-format on
-
 #include "Process.h"
 
-#include <iostream>
-#include <stdexcept>
 #include <QCoreApplication>
+#include <QFileInfo>
+
+#if defined(Q_OS_LINUX)
+#include <QDir>
+#include <QFile>
+#elif defined(Q_OS_WIN)
+#define WIN32_LEAN_AND_MEAN
+#include <Psapi.h>
+#include "MantidQtWidgets/Common/QStringUtils.h"
+#elif defined(Q_OS_MAC)
+#include <cstdlib>
+#include <libproc.h>
+#include <sys/sysctl.h>
+#endif
 
 namespace {
 
-class PyObjectNewReference {
-public:
-  explicit PyObjectNewReference(PyObject *object) : m_object(object) {}
-  ~PyObjectNewReference() { Py_XDECREF(m_object); }
+bool isOtherInstance(int64_t otherPID, QString otherExeName) {
+  static const int64_t ourPID(QCoreApplication::applicationPid());
+  if (otherPID == ourPID)
+    return false;
 
-  PyObjectNewReference(const PyObjectNewReference &) = delete;
-  PyObjectNewReference &operator=(const PyObjectNewReference &) = delete;
-
-  PyObjectNewReference(PyObjectNewReference &&o) { *this = std::move(o); }
-
-  PyObjectNewReference &operator=(PyObjectNewReference &&other) {
-    this->m_object = other.m_object;
-    other.m_object = nullptr;
-    return *this;
-  }
-
-  inline PyObject *ptr() const { return m_object; }
-
-private:
-  PyObject *m_object;
-};
-
-/**
- * @brief Retrieve a named attribute
- * @param source The source object
- * @param name The name of the attribute
- * @return The attribute
- * @throws std::runtime_error if an error occurs retrieving the attribute
- */
-PyObjectNewReference attr(PyObject *source, const char *name) {
-  PyObjectNewReference attr(PyObject_GetAttrString(source, name));
-  if (attr.ptr()) {
-    return attr;
-  } else {
-    PyErr_Print();
-    throw std::runtime_error(std::string("Process: No attribute ") + name +
-                             " found");
-  }
+  static const QString ourExeName(
+      QFileInfo(QCoreApplication::applicationFilePath()).fileName());
+  if (ourExeName == otherExeName)
+    return true;
+  else
+    return false;
 }
 
-/**
- * @brief Call a named function with an check for errors
- * @param source The source object
- * @param name The name of the attribute to call
- * @return The return value of the function
- * @throws std::runtime_error if an error occurs retrieving the attribute
- */
-PyObjectNewReference call(PyObject *source, const char *name) {
-  auto returnedAttr = attr(source, name);
-  auto result = PyObject_CallFunction(returnedAttr.ptr(), nullptr);
-  if (result)
-    return PyObjectNewReference(result);
-  else {
-    PyErr_Print();
-    throw std::runtime_error(std::string("Process: Error calling function ") +
-                             name);
-  }
-}
-
-/**
- * @return Return a pointer to the psutil module. A new reference is returned.
- */
-PyObjectNewReference psutil() {
-  if (auto process = PyImport_ImportModule("psutil")) {
-    return PyObjectNewReference(process);
-  } else {
-    PyErr_Clear();
-    throw std::runtime_error("Python module psutil cannot be imported.");
-  }
-}
 } // namespace
 
 namespace Process {
@@ -88,38 +39,148 @@ namespace Process {
   * Returns true is another instance of Mantid is running
   * on this machine
   * @return True if another instance is running
-  * @throws std::runtime_error if the PID list cannot be determined
+  * @throws std::runtime_error if this cannot be determined
   */
-bool isAnotherInstanceRunning() { return !otherInstancePIDs().empty(); }
+#ifdef Q_OS_LINUX
+bool isAnotherInstanceRunning() {
+  // Inspired by psutil._pslinux.Process.exe:
+  // https://github.com/giampaolo/psutil/blob/master/psutil/_pslinux.py
+  QDir procfs{"/proc"};
 
-/**
- * @brief Return a list of process IDs for other instances of this process.
- * @return A list of other processes running. The PID for this process is
- * removed from the list. An empty list is returned
- * if no other processes are running.
- * @throws std::runtime_error if the PID list cannot be determined
- */
-std::vector<int64_t> otherInstancePIDs() {
-  ScopedPythonGIL lock;
-  const int64_t ourPID(QCoreApplication::applicationPid());
-  const PyObjectNewReference ourName(
-      FROM_CSTRING(QCoreApplication::applicationName().toLatin1().data()));
-  auto psutilModule(psutil());
-  auto processIter(call(psutilModule.ptr(), "process_iter"));
+  bool otherIsRunning(false);
+  const QStringList entries{procfs.entryList(QDir::Dirs)};
+  for (const auto &pidStr : entries) {
+    bool isDigit(false);
+    const long long pid{pidStr.toLongLong(&isDigit)};
+    if (!isDigit)
+      continue;
 
-  std::vector<int64_t> otherPIDs;
-  PyObject *item(nullptr);
-  while ((item = PyIter_Next(processIter.ptr()))) {
-    auto name = call(item, "name");
-    if (PyObject_RichCompareBool(name.ptr(), ourName.ptr(), Py_EQ)) {
-      auto pid = PyLong_AsLong(attr(item, "pid").ptr());
-      if (pid != ourPID) {
-        otherPIDs.emplace_back(pid);
-      }
+    // /proc/pid/exe should point to executable
+    QFileInfo exe{"/proc/" + pidStr + "/exe"};
+    if (!exe.exists() || !exe.isSymLink())
+      continue;
+
+    if (isOtherInstance(pid, QFileInfo(exe.symLinkTarget()).fileName())) {
+      otherIsRunning = true;
+      break;
     }
-    Py_DECREF(item);
   }
-  return otherPIDs;
+  return otherIsRunning;
 }
+#elif defined(Q_OS_WIN)
+bool isAnotherInstanceRunning() {
+  using MantidQt::API::toQStringInternal;
+  // Inspired by psutil.psutil_get_pids at
+  // https://github.com/giampaolo/psutil/blob/master/psutil/arch/windows/process_info.c
+
+  // EnumProcesses in Win32 SDK says the only way to know if our process array
+  // wasn't large enough is to check the returned size and make
+  // sure that it doesn't match the size of the array.
+  // If it does we allocate a larger array and try again
+
+  std::vector<DWORD> processes;
+  // Stores the byte size of the returned array from EnumProcesses
+  DWORD enumReturnSz{0};
+  do {
+    processes.resize(processes.size() + 1024);
+    const DWORD procArrayByteSz =
+        static_cast<DWORD>(processes.size()) * sizeof(DWORD);
+    if (!EnumProcesses(processes.data(), procArrayByteSz, &enumReturnSz)) {
+      throw std::runtime_error("Unable to determine running process list");
+    }
+  } while (enumReturnSz == processes.size());
+  // Set the vector back to the appropriate size
+  processes.resize(enumReturnSz / sizeof(DWORD));
+
+  bool otherIsRunning(false);
+  wchar_t exe[MAX_PATH];
+  for (const auto pid : processes) {
+    // system-idle process
+    if (pid == 0)
+      continue;
+    auto procHandle = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+    if (!procHandle)
+      continue;
+    DWORD exeSz = GetProcessImageFileNameW(procHandle, exe, MAX_PATH);
+    CloseHandle(procHandle);
+    if (exeSz > 0 &&
+        isOtherInstance(pid, QFileInfo(toQStringInternal(exe)).fileName())) {
+      otherIsRunning = true;
+      break;
+    }
+  }
+  return otherIsRunning;
+}
+
+#elif defined(Q_OS_MAC)
+bool isAnotherInstanceRunning() {
+  kinfo_proc *processes[] = {nullptr};
+  size_t processesLength(0);
+  int sysctlQuery[3] = {CTL_KERN, KERN_PROC, KERN_PROC_ALL};
+  /*
+   * We start by calling sysctl with ptr == NULL and size == 0.
+   * That will succeed, and set size to the appropriate length.
+   * We then allocate a buffer of at least that size and call
+   * sysctl with that buffer.  If that succeeds, we're done.
+   * If that call fails with ENOMEM, we throw the buffer away
+   * and try again.
+   * Note that the loop calls sysctl with NULL again.  This is
+   * is necessary because the ENOMEM failure case sets size to
+   * the amount of data returned, not the amount of data that
+   * could have been returned.
+   */
+  int attempts = 8; // An arbitrary number of attempts to try
+  void *memory{nullptr};
+  while (attempts-- > 0) {
+    size_t size = 0;
+    if (sysctl((int *)sysctlQuery, 3, nullptr, &size, nullptr, 0) == -1) {
+      throw std::runtime_error("Unable to retrieve process list");
+    }
+    const size_t size2 =
+        size + (size >> 3); // add some to cover more popping in
+    if (size2 > size) {
+      memory = malloc(size2);
+      if (memory == nullptr)
+        memory = malloc(size);
+      else
+        size = size2;
+    } else {
+      memory = malloc(size);
+    }
+    if (memory == nullptr)
+      throw std::runtime_error(
+          "Unable to allocate memory to retrieve process list");
+    if (sysctl((int *)sysctlQuery, 3, memory, &size, nullptr, 0) == -1) {
+      free(memory);
+      throw std::runtime_error("Unable to retrieve process list");
+    } else {
+      *processes = (kinfo_proc *)memory;
+      processesLength = size / sizeof(kinfo_proc);
+      break;
+    }
+  }
+
+  kinfo_proc *processListBegin = processes[0];
+  kinfo_proc *processIter = processListBegin;
+  char exePath[PATH_MAX];
+  auto otherIsRunning = false;
+  for (size_t i = 0; i < processesLength; ++i) {
+    const auto pid = processIter->kp_proc.p_pid;
+    if (proc_pidpath(pid, exePath, PATH_MAX) <= 0) {
+      // assume process is dead...
+      continue;
+    }
+    if (isOtherInstance(pid,
+                        QFileInfo(QString::fromAscii(exePath)).fileName())) {
+      otherIsRunning = true;
+      break;
+    }
+    processIter++;
+  }
+  free(processListBegin);
+
+  return otherIsRunning;
+}
+#endif
 
 } // namespace Process

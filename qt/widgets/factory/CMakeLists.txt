@@ -37,6 +37,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsFactory
     MantidQtWidgetsCommon
     MantidQtWidgetsLegacyQwt
     MantidQtWidgetsSliceViewer
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../${LIB_DIR}"
 )
-
 

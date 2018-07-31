@@ -133,7 +133,7 @@ protected:
   QPushButton *buttonPlot, *buttonClose;
 
   /// Number of statistic values
-  static const std::size_t NUM_STATS = 7;
+  static const std::size_t NUM_STATS = 8;
 
   /// Testboxes with stats data
   QLineEdit *statValues[NUM_STATS];

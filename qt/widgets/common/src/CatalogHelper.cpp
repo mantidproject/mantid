@@ -218,6 +218,19 @@ const std::map<std::string, std::string> CatalogHelper::validateProperties(
       errors.emplace(iter->first + "_err", documentation);
     }
   }
+  // catch invalid date formats
+  std::string dateField = "StartDate";
+  try {
+
+    getTimevalue(catalogAlgorithm->getProperty(dateField));
+    dateField = "EndDate";
+
+    getTimevalue(catalogAlgorithm->getProperty(dateField));
+  } catch (std::invalid_argument &) {
+    std::string documentation =
+        propertyDocumentation(catalogAlgorithm->getProperties(), dateField);
+    errors.emplace(dateField + "_err", documentation);
+  }
   return errors;
 }
 
@@ -238,6 +251,7 @@ time_t CatalogHelper::getTimevalue(const std::string &inputDate) {
   std::string isoDate = dateSegments.at(2) + "-" + dateSegments.at(1) + "-" +
                         dateSegments.at(0) + " 00:00:00.000";
   // Return the date as time_t value.
+
   return Mantid::Types::Core::DateAndTime(isoDate).to_time_t();
 }
 
