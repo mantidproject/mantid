@@ -1,18 +1,18 @@
 #ifndef PLOTASYMMETRYBYLOGVALUTEST_H_
 #define PLOTASYMMETRYBYLOGVALUTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/SaveNexus.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidMuon/PlotAsymmetryByLogValue.h"
+#include <cxxtest/TestSuite.h>
 
 #include <Poco/File.h>
 #include <Poco/NObserver.h>

@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/CalMuonDetectorPhases.h"
+#include "MantidMuon/CalMuonDetectorPhases.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"

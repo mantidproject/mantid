@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/EstimateMuonAsymmetryFromCounts.h"
-#include "MantidAlgorithms/MuonAsymmetryHelper.h"
+#include "MantidMuon/EstimateMuonAsymmetryFromCounts.h"
+#include "MantidMuon/MuonAsymmetryHelper.h"
 
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"

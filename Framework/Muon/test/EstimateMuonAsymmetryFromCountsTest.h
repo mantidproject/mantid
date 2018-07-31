@@ -2,7 +2,7 @@
 #define ESTIMATEMUONASYMMETRYFROMCOUNTSTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/EstimateMuonAsymmetryFromCounts.h"
+#include "MantidMuon/EstimateMuonAsymmetryFromCounts.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/FrameworkManager.h"

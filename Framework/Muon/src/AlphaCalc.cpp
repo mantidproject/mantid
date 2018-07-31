@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/AlphaCalc.h"
+#include "MantidMuon/AlphaCalc.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 

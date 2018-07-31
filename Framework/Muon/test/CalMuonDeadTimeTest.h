@@ -7,7 +7,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/Run.h"
-#include "MantidAlgorithms/CalMuonDeadTime.h"
+#include "MantidMuon/CalMuonDeadTime.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"

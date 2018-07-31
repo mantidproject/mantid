@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/CalMuonDeadTime.h"
+#include "MantidMuon/CalMuonDeadTime.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"

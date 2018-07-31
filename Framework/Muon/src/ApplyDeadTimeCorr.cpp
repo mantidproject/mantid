@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/ApplyDeadTimeCorr.h"
+#include "MantidMuon/ApplyDeadTimeCorr.h"
 #include "MantidAPI/EqualBinSizesValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"

@@ -2,7 +2,7 @@
 #define CALCULATEMUONASYMMETRYTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/CalculateMuonAsymmetry.h"
+#include "MantidMuon/CalculateMuonAsymmetry.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/PhysicalConstants.h"

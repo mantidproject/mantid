@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/MuonAsymmetryHelper.h"
+#include "MantidMuon/MuonAsymmetryHelper.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"

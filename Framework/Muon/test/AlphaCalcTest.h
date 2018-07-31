@@ -7,7 +7,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAlgorithms/AlphaCalc.h"
+#include "MantidMuon/AlphaCalc.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -73,6 +73,20 @@ public:
     double alpha = alphaCalc.getProperty("Alpha");
     TS_ASSERT_DELTA(alpha, 1.6880, 0.0001);
   }
+
+  // These tests need extended names once we decide how the given situation
+  // should be handled.
+  // The tests also need completing
+
+  void test_first_good_value_out_of_range() {}
+
+  void test_last_good_value_out_of_range() {}
+
+  void test_empty_workspace() {}
+
+  void test_workspace_with_all_zeros() {}
+
+  void test_incorrect_spectra_numbers() {}
 
 private:
   AlphaCalc alphaCalc;

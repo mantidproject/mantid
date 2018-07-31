@@ -1,7 +1,6 @@
 #ifndef MANTID_ALGORITHMS_CALMUONDETECTORPHASES_H_
 #define MANTID_ALGORITHMS_CALMUONDETECTORPHASES_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
@@ -51,6 +50,10 @@ public:
   int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Muon"; }
+  /// See also
+  const std::vector<std::string> seeAlso() const override {
+    return {"PhaseQuad"};
+  };
 
 protected:
   /// Validate the inputs

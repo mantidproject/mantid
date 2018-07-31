@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_RRFMUON_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/RRFMuon.h"
+#include "MantidMuon/RRFMuon.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"

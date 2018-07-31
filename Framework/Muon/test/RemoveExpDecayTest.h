@@ -2,7 +2,7 @@
 #define MUONREMOVEEXPDECAYTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/RemoveExpDecay.h"
+#include "MantidMuon/RemoveExpDecay.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"

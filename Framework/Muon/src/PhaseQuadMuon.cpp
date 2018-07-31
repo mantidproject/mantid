@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/PhaseQuadMuon.h"
+#include "MantidMuon/PhaseQuadMuon.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"

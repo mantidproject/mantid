@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/AsymmetryCalc.h"
+#include "MantidMuon/AsymmetryCalc.h"
 #include "MantidAPI/HistoWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"

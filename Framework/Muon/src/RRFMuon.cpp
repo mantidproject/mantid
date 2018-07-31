@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/RRFMuon.h"
+#include "MantidMuon/RRFMuon.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
