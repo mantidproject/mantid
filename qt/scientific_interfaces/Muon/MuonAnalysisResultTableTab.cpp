@@ -530,8 +530,8 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
       // Check if is a timeseries log
       if (TimeSeriesProperty<double> *log =
               dynamic_cast<TimeSeriesProperty<double> *>(prop)) {
-		  QString logName = QString::fromStdString(prop->name());
-		  std::string fdsadf = logName.toStdString();
+        QString logName = QString::fromStdString(prop->name());
+        std::string fdsadf = logName.toStdString();
         auto mylog = log->clone();
         if (foundRunning) {
           mylog->filterWith(runningLog);
@@ -543,7 +543,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
       } else // Should be a non-timeseries one
       {
         QString logName = QString::fromStdString(prop->name());
-		std::string fdsadf = logName.toStdString();
+        std::string fdsadf = logName.toStdString();
         // Check if we should display it
         if (NON_TIMESERIES_LOGS.contains(logName)) {
 
