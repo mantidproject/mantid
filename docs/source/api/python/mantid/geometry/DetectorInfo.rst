@@ -50,12 +50,23 @@ Output:
 	<class 'mantid.geometry._geometry.DetectorInfo'>
 
 
-**Example 2 - Calling the setMasked method on the DetectorInfo Object:**
-This example shows how to call the ``setMasked`` method.
-The method takes in an integer ``index`` parameter which corresponds to a detector and a boolean ``masked`` parameter.
-The user then has the option to set the masking of the detector identified by ``index`` to True or False.
+**Example 2 - Calling Some Methods on the DetectorInfo Object:**
+This example shows how to call a few different methods on the DetectorInfo object. 
 
-.. testcode:: CallSetMaskedMethod
+The ``setMasked`` method takes in an integer ``index`` parameter which corresponds to a detector as well as a boolean ``masked`` parameter.
+The user then has the option to set the masking of the detector identified by ``index`` to ``True`` or ``False``.
+
+The ``twoTheta()`` method takes in an integer ``index`` parameter which represents a detector index. 
+The return value is a float which represents the scattering angle with respect to the beam direction.
+
+The ``position()`` method takes an ``index`` parameter which represents a detector index. 
+The method returns the absolute position of that detector. 
+The returned object is of type ``V3D`` which is a point in 3D space.
+
+The ``size()`` method does not take in any parameters and returns the number of detectors in the instrument. 
+One can also use the built in ``__len__`` function to obtain the same result.
+
+.. testcode:: CallMethods
 
 	# Create a workspace to use
 	ws = CreateSampleWorkspace()
@@ -69,70 +80,11 @@ The user then has the option to set the masking of the detector identified by ``
 	info.setMasked(0, False)
 	print(info.isMasked(0))
 
-Output:
-
-.. testoutput:: CallSetMaskedMethod
-
-	True
-	False
-
-
-**Example 3 - Calling the twoTheta method on the DetectorInfo Object:**
-The ``twoTheta()`` method takes in an integer ``index`` parameter which represents a detector index. 
-The return value is a float which represents the scattering angle with respect to the beam direction.
-
-.. testcode:: CallTwoThetaMethod
-	
-	# Create a workspace to use
-	ws = CreateSampleWorkspace()
-
-	# Get the DetectorInfo object
-	info = ws.detectorInfo()
-
 	# Call twoTheta
 	print(info.twoTheta(0))
 
-Output:
-
-.. testoutput:: CallTwoThetaMethod
-
-	0.0
-
-
-**Example 4 - Calling the position method on the DetectorInfo Object:**
-The ``position()`` method takes an ``index`` parameter which represents a detector index. 
-The method returns the absolute position of that detector. 
-The returned object is of type V3D which is a position in 3D space.
-
-.. testcode:: CallPositionMethod
-	
-	# Create a workspace to use
-	ws = CreateSampleWorkspace()
-
-	# Get the DetectorInfo object
-	info = ws.detectorInfo()
-
 	# Call the position method
 	print(info.position(0))
-
-Output:
-
-.. testoutput:: CallPositionMethod
-
-	[0,0,5]
-
-
-**Example 5 - Calling the size method on the DetectorInfo Object:**
-The ``size()`` method does not take in any parameters and returns a number of detectors in the instrument. 
-One can also use the built in ``__len__`` function to obtain the same result.
-
-.. testcode:: CallSizeAndLenMethods
-	
-	# Create a workspace to use
-	ws = CreateSampleWorkspace()
-
-	# Get the DetectorInfo object
-	info = ws.detectorInfo()
 
 	# Call size and __len__
 	print(info.size())
@@ -140,8 +92,12 @@ One can also use the built in ``__len__`` function to obtain the same result.
 
 Output:
 
-.. testoutput:: CallSizeAndLenMethods
+.. testoutput:: CallMethods
 
+	True
+	False
+	0.0
+	[0,0,5]
 	200
 	200
 
