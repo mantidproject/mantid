@@ -6,19 +6,14 @@ set on the data table. The MainPresenter is required by the DataProcessorWidget 
 
 from __future__ import (absolute_import, division, print_function)
 
-from mantidqtpython import MantidQt
-
-from sans.gui_logic.sans_data_processor_gui_algorithm import (get_gui_algorithm_name, get_white_list,
-                                                              get_black_list)
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-
 
 class PresenterEnum(object):
     class RunTabPresenter(object):
         pass
 
 
-class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresenter):
+class MainPresenter(object):
     """
     Comments below are from Raquel:
 
@@ -33,17 +28,13 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
     This is an intermediate layer needed in python. Ideally our gui class should
     inherit from 'DataProcessorMainPresenter' directly and provide the required implementations,
     but multiple inheritance does not seem to be fully supported, hence we need this extra class.
+
+    This is probably no longer needed but leaving this layer in for now.
     """
 
     def __init__(self, facility):
-        super(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresenter, self).__init__()
-
         self._view = None
 
-        # Algorithm details
-        self._gui_algorithm_name = None
-        self._white_list = None
-        self._black_list = None
         self._facility = facility
 
         # Set of sub presenters
@@ -54,45 +45,3 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
         self._view = view
         for _, presenter in self._presenters.items():
             presenter.set_view(self._view)
-
-    def get_gui_algorithm_name(self):
-        if self._gui_algorithm_name is None:
-            self._gui_algorithm_name = get_gui_algorithm_name(self._facility)
-        return self._gui_algorithm_name
-
-    def get_white_list(self, show_periods=False):
-        self._white_list = get_white_list(show_periods=show_periods)
-        return self._white_list
-
-    def get_number_of_white_list_items(self):
-        return 0 if not self._white_list else len(self._white_list)
-
-    def get_black_list(self):
-        if self._black_list is None:
-            self._black_list = get_black_list()
-        return self._black_list
-
-    def confirmReductionPaused(self, group):
-        self._presenters[PresenterEnum.RunTabPresenter].on_processing_finished()
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Inherited methods
-    # ------------------------------------------------------------------------------------------------------------------
-    def getProcessingOptions(self, group = 0):
-        """
-        Gets the processing options from the run tab presenter
-        """
-        return self._presenters[PresenterEnum.RunTabPresenter].get_processing_options()
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Unused
-    # ------------------------------------------------------------------------------------------------------------------
-    def getPreprocessingOptions(self, group = 0):
-        empty = {}
-        return empty
-
-    def getPostprocessingOptionsAsString(self, group = 0):
-        return ""
-
-    def notifyADSChanged(self, workspace_list, group = 0):
-        self._view.add_actions_to_menus(workspace_list)

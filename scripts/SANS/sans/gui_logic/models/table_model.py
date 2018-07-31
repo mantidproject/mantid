@@ -42,7 +42,7 @@ class TableModel(object):
         self._user_file = value
 
     def get_row_user_file(self, row_index):
-        if row_index in self._table_entries:
+        if row_index < len(self._table_entries):
             return self._table_entries[row_index].user_file
         else:
             raise IndexError("The row {} does not exist.".format(row_index))
@@ -61,6 +61,9 @@ class TableModel(object):
 
     def add_table_entry(self, row, table_index_model):
         self._table_entries.insert(row, table_index_model)
+
+    def append_table_entry(self, table_index_model):
+        self._table_entries.append(table_index_model)
 
     def remove_table_entries(self, rows):
         # For speed rows should be a Set here but don't think it matters for the list sizes involved.
@@ -129,6 +132,16 @@ class TableIndexModel(object):
     def __ne__(self, other):
         return self.__dict__ != other.__dict__
 
+    def toList(self):
+        return [self.sample_scatter, self.sample_scatter_period, self.sample_transmission, self.sample_transmission_period,
+                self.sample_direct, self.sample_direct_period, self.can_scatter, self.can_scatter_period, self.can_transmission,
+                self.can_transmission_period, self.can_direct, self.can_direct_period, self.output_name, self.user_file, self.sample_thickness,
+                self.options_column_model.get_options_string()]
+
+    def isMultiPeriod(self):
+        return (self.sample_scatter_period | self.sample_transmission_period | self.sample_direct_period
+        | self.can_scatter_period | self.can_transmission_period | self.can_direct_period)
+
 
 class OptionsColumnModel(object):
     def __init__(self, options_column_string):
@@ -138,6 +151,9 @@ class OptionsColumnModel(object):
 
     def get_options(self):
         return self._options
+
+    def get_options_string(self):
+        return self._options_column_string
 
     @staticmethod
     def _get_permissible_properties():

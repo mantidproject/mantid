@@ -106,7 +106,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             pass
 
         @abstractmethod
-        def on_data_changed(self):
+        def on_data_changed(self, row, column, new_value, old_value):
             pass
 
         @abstractmethod
@@ -125,9 +125,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         def on_rows_removed(self):
             pass
 
-        @abstractmethod
-        def on_cell_changed(self):
-            pass
 
     def __init__(self, main_presenter):
         """
@@ -138,11 +135,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         # Main presenter
         self._main_presenter = main_presenter
-
-        # Algorithm configuration
-        self._gui_algorithm_name = self._main_presenter.get_gui_algorithm_name()
-        self._white_list_entries = self._main_presenter.get_white_list()
-        self._black_list = self._main_presenter.get_black_list()
 
         # Listeners allow us to to notify all presenters
         self._settings_listeners = []
@@ -338,6 +330,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
          self # The parent QObject.
          )
 
+        self.data_processor_table.setRootIsDecorated(False)
+
         self.table_signals = \
             MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.data_processor_table, self)
         # The signal adapter subscribes to events from the table
@@ -394,7 +388,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def _data_changed(self, row_location, column, old_value, new_value):
         row = row_location.rowRelativeToParent()
-        self._call_settings_listeners(lambda listener: listener.on_data_changed(row, column, new_value))
+        self._call_settings_listeners(lambda listener: listener.on_data_changed(row, column, new_value, old_value))
 
     def _row_inserted(self, row_location):
         if row_location.depth() > 1:
@@ -1788,10 +1782,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         cell = self.data_processor_table.cellAt(row, column)
         cell.setContentText(value_as_str)
         self.data_processor_table.setCellAt(row, column, cell)
-
-    def get_number_of_rows(self):
-        return 1
-        # return self.data_processor_table.getNumberOfRows()
 
     def get_selected_rows(self):
         row_locations = self.data_processor_table.selectedRowLocations()

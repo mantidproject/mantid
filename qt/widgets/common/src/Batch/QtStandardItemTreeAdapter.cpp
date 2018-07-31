@@ -3,7 +3,6 @@
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include "MantidQtWidgets/Common/Batch/CellStandardItem.h"
-#include <iostream>
 
 namespace MantidQt {
 namespace MantidWidgets {
