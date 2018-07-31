@@ -133,6 +133,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         neigh_length_m=3
         qMask = ICCFT.getHKLMask(UBMatrix, frac=fracHKL, dQPixel=dQPixel,dQ=dQ)
 
+        iccFitDict = ICCFT.parseConstraints(peaks_ws) #Contains constraints and guesses for ICC Fitting
+
         numgood = 0
         numerrors = 0
 
@@ -172,7 +174,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                                                                       pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
                                                                       forceCutoff=forceCutoff, edgeCutoff=edgeCutoff,
                                                                       instrumentName=instrumentName,
-                                                                      peakMaskSize=peakMaskSize)
+                                                                      peakMaskSize=peakMaskSize,
+                                                                      iccFitDict=iccFitDict)
 
                     # First we get the peak intensity
                     peakIDX = Y3D/Y3D.max() > fracStop

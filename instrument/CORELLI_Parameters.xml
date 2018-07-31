@@ -75,6 +75,27 @@
      <value val="10" />
     </parameter>
 
+    <!-- Constraints for ICC fitting.  Valid names are iccA, iccB, iccR, iccT0, iccScale0
+         iccHatWidth and iccKConv.  Inputs are strings with values separated by
+         spaces which are prased by the IntegratePeaksProfileFitting algorithm.  
+         If two values are given they are treated as the lower and upper bounds. If 
+         three are given they are the lower bound, upper bound, and initial guess.-->
+    <parameter name="iccA" type="string">
+     <value val="0.25 0.75 0.5" />
+    </parameter>
+
+    <parameter name="iccB" type="string">
+     <value val="0.001 0.3 0.005" />
+    </parameter>
+
+    <parameter name="iccR" type="string">
+     <value val="0.05 0.15 0.1" />
+    </parameter>
+
+    <parameter name="iccKConv" type="string">
+     <value val="10.0 800.0 100.0" />
+    </parameter>
+
   </component-link>
 
 </parameter-file>

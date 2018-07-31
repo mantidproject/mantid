@@ -144,6 +144,18 @@ detScale={13:1.046504,14:1.259293,16:1.02449,17:1.18898,18:0.88014,19:0.98665,\
  <value val="15" />
 </parameter>
 
+<!-- Constraints for ICC fitting.  Valid names are iccA, iccB, iccR, iccT0, iccScale0
+     iccHatWidth and iccKConv.  Inputs are strings with values separated by
+     spaces which are prased by the IntegratePeaksProfileFitting algorithm.  
+     If two values are given they are treated as the lower and upper bounds. If 
+     three are given they are the lower bound, upper bound, and initial guess.-->
+<parameter name="iccB" type="string">
+ <value val="0.001 0.3 0.005" />
+</parameter>
+
+<parameter name="iccKConv" type="string">
+ <value val="10.0 800.0 100.0" />
+</parameter>
 </component-link>
 
 </parameter-file>
