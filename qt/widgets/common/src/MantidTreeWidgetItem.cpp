@@ -65,35 +65,6 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other) const {
   }
   // If both should be sorted and the scheme is set to ByMemorySize ...
   else if (m_parent->getSortScheme() == MantidItemSortScheme::ByMemorySize) {
-    auto thisGroupSize = std::size_t(0);
-    auto otherGroupSize = std::size_t(0);
-    // If workspace parent is a group since groups return 0:
-    if (this->getMemorySize() == 0) {
-      auto theWorkspace = this->data(0, Qt::UserRole).value<Workspace_sptr>();
-      thisGroupSize = getGroupMemorySize(
-          boost::dynamic_pointer_cast<WorkspaceGroup>(theWorkspace));
-    }
-    // If workspace other is a group since groups return 0:
-    if (mantidOther->getMemorySize() == 0) {
-      auto theWorkspace =
-          mantidOther->data(0, Qt::UserRole).value<Workspace_sptr>();
-      otherGroupSize = getGroupMemorySize(
-          boost::dynamic_pointer_cast<WorkspaceGroup>(theWorkspace));
-    }
-    // If either are groups:
-    if (thisGroupSize > 0 || otherGroupSize > 0) {
-      // If this is group and other is not
-      if (thisGroupSize > 0 && otherGroupSize == 0) {
-        return thisGroupSize < mantidOther->getMemorySize();
-      }
-      // If other is group and this iss not
-      if (otherGroupSize > 0 && thisGroupSize == 0) {
-        return this->getMemorySize() < otherGroupSize;
-      }
-      // Both are groups
-      return thisGroupSize < otherGroupSize;
-    }
-    // else return normally:
     return this->getMemorySize() < mantidOther->getMemorySize();
   }
   // ... else both should be sorted and the scheme is set to ByLastModified.
@@ -136,23 +107,6 @@ DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem *item) {
 }
 std::size_t MantidTreeWidgetItem::getMemorySize() const {
   return this->data(0, Qt::UserRole).value<Workspace_sptr>()->getMemorySize();
-}
-std::size_t
-MantidTreeWidgetItem::getGroupMemorySize(WorkspaceGroup_sptr group) const {
-  std::vector<Workspace_sptr> workspaces = group->getAllItems();
-  auto total = std::size_t(0);
-  // Go through each workspace
-  for (auto workspace : workspaces) {
-    // If the workspace is a group
-    if (workspace->getMemorySize() == 0) {
-      total =
-          total + getGroupMemorySize(
-                      boost::dynamic_pointer_cast<WorkspaceGroup>(workspace));
-      continue;
-    }
-    total = total + workspace->getMemorySize();
-  }
-  return total;
 }
 }
 }

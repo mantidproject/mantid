@@ -220,6 +220,7 @@ class RunTabPresenter(object):
             self._state_model = StateGuiModel(user_file_items)
             # 5. Update the views.
             self._update_view_from_state_model()
+            self._beam_centre_presenter.update_centre_positions(self._state_model)
 
         except Exception as e:
             self.sans_logger.error("Loading of the user file failed. {}".format(str(e)))
@@ -583,12 +584,6 @@ class RunTabPresenter(object):
         self._set_on_view("radius_limit_min")
         self._set_on_view("radius_limit_max")
 
-        # Beam Centre
-        self._beam_centre_presenter.set_on_view('lab_pos_1', self._state_model)
-        self._beam_centre_presenter.set_on_view('lab_pos_2', self._state_model)
-        self._beam_centre_presenter.set_on_view('hab_pos_1', self._state_model)
-        self._beam_centre_presenter.set_on_view('hab_pos_2', self._state_model)
-
     def _set_on_view_transmission_fit_sample_settings(self):
         # Set transmission_sample_use_fit
         fit_type = self._state_model.transmission_sample_fit_type
@@ -864,6 +859,75 @@ class RunTabPresenter(object):
     def get_cell_value(self, row, column):
         return self._view.get_cell(row=row, column=self.table_index[column], convert_to=str)
 
+    def _populate_row_in_table(self, row):
+        """
+        Adds a row to the table
+        """
+        def get_string_entry(_tag, _row):
+            _element = ""
+            if _tag in _row:
+                _element = _row[_tag]
+            return _element
+
+        def get_string_period(_tag):
+            return "" if _tag == ALL_PERIODS else str(_tag)
+        # 1. Pull out the entries
+        sample_scatter = get_string_entry(BatchReductionEntry.SampleScatter, row)
+        sample_scatter_period = get_string_entry(BatchReductionEntry.SampleScatterPeriod, row)
+        sample_transmission = get_string_entry(BatchReductionEntry.SampleTransmission, row)
+        sample_transmission_period = get_string_entry(BatchReductionEntry.SampleTransmissionPeriod, row)
+        sample_direct = get_string_entry(BatchReductionEntry.SampleDirect, row)
+        sample_direct_period = get_string_entry(BatchReductionEntry.SampleDirectPeriod, row)
+        can_scatter = get_string_entry(BatchReductionEntry.CanScatter, row)
+        can_scatter_period = get_string_entry(BatchReductionEntry.CanScatterPeriod, row)
+        can_transmission = get_string_entry(BatchReductionEntry.CanTransmission, row)
+        can_transmission_period = get_string_entry(BatchReductionEntry.CanScatterPeriod, row)
+        can_direct = get_string_entry(BatchReductionEntry.CanDirect, row)
+        can_direct_period = get_string_entry(BatchReductionEntry.CanDirectPeriod, row)
+        output_name = get_string_entry(BatchReductionEntry.Output, row)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information(sample_scatter)
+        sample_thickness = file_information._thickness
+        user_file = get_string_entry(BatchReductionEntry.UserFile, row)
+
+        # If one of the periods is not null, then we should switch the view to multi-period view
+        if any ((sample_scatter_period, sample_transmission_period, sample_direct_period, can_scatter_period,
+                can_transmission_period, can_direct_period)):
+            if not self._view.is_multi_period_view():
+                self._view.set_multi_period_view_mode(True)
+
+        # 2. Create entry that can be understood by table
+        if self._view.is_multi_period_view():
+            row_entry = "SampleScatter:{},ssp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
+                        "CanScatter:{},csp:{},CanTrans:{},ctp:{}," \
+                        "CanDirect:{},cdp:{},OutputName:{},User File:{}," \
+                        "Sample Thickness:{:.2f}".format(sample_scatter,
+                                                         get_string_period(sample_scatter_period),
+                                                         sample_transmission,
+                                                         get_string_period(sample_transmission_period),
+                                                         sample_direct,
+                                                         get_string_period(sample_direct_period),
+                                                         can_scatter,
+                                                         get_string_period(can_scatter_period),
+                                                         can_transmission,
+                                                         get_string_period(can_transmission_period),
+                                                         can_direct,
+                                                         get_string_period(can_direct_period),
+                                                         output_name, user_file, sample_thickness)
+        else:
+            row_entry = "SampleScatter:{},SampleTrans:{},SampleDirect:{}," \
+                        "CanScatter:{},CanTrans:{}," \
+                        "CanDirect:{},OutputName:{},User File:{},Sample Thickness:{:.2f}".format(sample_scatter,
+                                                                                                 sample_transmission,
+                                                                                                 sample_direct,
+                                                                                                 can_scatter,
+                                                                                                 can_transmission,
+                                                                                                 can_direct,
+                                                                                                 output_name, user_file,sample_thickness)
+
+        self._view.add_row(row_entry)
+
+>>>>>>> origin/master
     # ------------------------------------------------------------------------------------------------------------------
     # Settings
     # ------------------------------------------------------------------------------------------------------------------

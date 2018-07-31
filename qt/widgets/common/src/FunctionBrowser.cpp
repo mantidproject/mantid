@@ -1857,14 +1857,15 @@ void FunctionBrowser::removeConstraint() {
   QtProperty *prop = item->property();
   if (!isConstraint(prop))
     return;
-  removeProperty(prop);
-  if (isLocalParameterProperty(getParentParameterProperty(prop))) {
-    auto parName = getParameterName(prop);
+  auto paramProp = getParentParameterProperty(prop);
+  if (isLocalParameterProperty(paramProp)) {
+    auto parName = getParameterName(paramProp);
     checkLocalParameter(parName);
     auto &localValue = m_localParameterValues[parName][m_currentDataset];
     localValue.lowerBound = "";
     localValue.upperBound = "";
   }
+  removeProperty(prop);
 }
 
 void FunctionBrowser::updateCurrentFunctionIndex() {

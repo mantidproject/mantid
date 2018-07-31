@@ -7,6 +7,9 @@ Reflectometry Changes
 
 ISIS Reflectometry Interface
 ----------------------------
+.. image::  ../../images/ISIS_reflectometry_release313.png
+   :align: right
+   :width: 800px
 
 New
 ###

@@ -110,8 +110,7 @@ getRecoveryFolderCheckpoints(const std::string &recoveryFolderPath) {
   if (!recoveryPath.tryParse(recoveryFolderPath) ||
       !Poco::File(recoveryPath).exists()) {
     // Folder may not exist yet
-    g_log.debug("Project Saving: Failed to get working folder whilst deleting "
-                "checkpoints");
+    g_log.debug("Project Saving: Working folder does not exist");
     return {};
   }
 

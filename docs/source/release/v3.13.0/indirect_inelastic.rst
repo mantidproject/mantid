@@ -5,10 +5,6 @@ Indirect Inelastic Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 :ref:`Release 3.13.0 <v3.13.0>`
 
 Data Reduction Interfaces
@@ -47,6 +43,12 @@ Improvements
 Data Analysis Interfaces
 ------------------------
 
+.. figure:: ../../images/indirect-data-analysis-multiple-input.png
+    :align: center
+    :width: 700px
+
+    The ConvFit interface with the new multiple input section.
+
 New
 ###
 
@@ -67,4 +69,4 @@ Bugfixes
 - The MSDFit algorithm now uses the fully specified model given in the interface; previously MSDFit only used the
   model specified in the 'Fit Type' drop-down menu.
 - Fixed a failure in the wavelength interpolation of :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` which occurred under certain input property combinations.
-
+- The ElasticWindowMultiple algorithm now normalizes the \*_elt workspace by the lowest temperature.

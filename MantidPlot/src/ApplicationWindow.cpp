@@ -15964,6 +15964,8 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer *w) {
     return;
   }
 
+  btnMultiPeakPick->setEnabled(w->layers() == 1);
+
   Graph *g = w->activeGraph();
   if (g) {
     PlotToolInterface *tool = g->activeTool();
@@ -16644,6 +16646,7 @@ void ApplicationWindow::onAboutToStart() {
   // instance currently running
   try {
     if (!Process::isAnotherInstanceRunning()) {
+      g_log.debug("Starting project autosaving.");
       checkForProjectRecovery();
     } else {
       g_log.debug("Another MantidPlot process is running. Project recovery is "
