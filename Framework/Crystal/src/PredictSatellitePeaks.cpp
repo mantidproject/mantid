@@ -98,6 +98,11 @@ void PredictSatellitePeaks::init() {
 
 /// Run the algorithm
 void PredictSatellitePeaks::exec() {
+  bool includePeaksInRange = getProperty("IncludeAllPeaksInRange");
+  if (!includePeaksInRange) {
+    exec_peaks();
+    return;
+  }
   PeaksWorkspace_sptr Peaks = getProperty("Peaks");
   if (!Peaks)
     throw std::invalid_argument(
@@ -108,7 +113,6 @@ void PredictSatellitePeaks::exec() {
   V3D offsets3 = getOffsetVector("ModVector3");
   int maxOrder = getProperty("MaxOrder");
 
-  bool includePeaksInRange = getProperty("IncludeAllPeaksInRange");
   bool includeOrderZero = getProperty("IncludeIntegerHKL");
 
   if (Peaks->getNumberPeaks() <= 0) {
@@ -127,7 +131,6 @@ void PredictSatellitePeaks::exec() {
   OutPeaks->setInstrument(instrument);
   OutPeaks->mutableSample().setOrientedLattice(&lattice);
 
-  const auto NPeaks = Peaks->getNumberPeaks();
   Kernel::Matrix<double> goniometer;
   goniometer.identityMatrix();
 
@@ -157,22 +160,18 @@ void PredictSatellitePeaks::exec() {
 
   }
 
-  size_t N = NPeaks * (1 + 2 * maxOrder);
-  if (includePeaksInRange) {
-    N = possibleHKLs.size();
-    N = max<size_t>(100, N);
-  }
+  size_t N = possibleHKLs.size();
+  N = max<size_t>(100, N);
   auto &UB = lattice.getUB();
   goniometer = peak0.getGoniometerMatrix();
   Progress prog(this, 0.0, 1.0, N);
   vector<vector<int>> AlreadyDonePeaks;
-  DblMatrix orientedUB = goniometer * UB;
+  auto orientedUB = goniometer * UB;
   HKLFilterWavelength lambdaFilter(orientedUB, lambdaMin, lambdaMax);
   int seqNum = 0;
     OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset1", offsets1, true);
     OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset2", offsets2, true);
     OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset3", offsets3, true);
-  if (includePeaksInRange) {
     for (auto it = possibleHKLs.begin(); it != possibleHKLs.end(); ++it){
     V3D hkl = *it;
     predictOffsets(Peaks, OutPeaks, offsets1, maxOrder, hkl,
@@ -185,7 +184,45 @@ void PredictSatellitePeaks::exec() {
                    lambdaFilter, includePeaksInRange,
                    includeOrderZero, seqNum, AlreadyDonePeaks);
     }
-  } else {
+  setProperty("SatellitePeaks", OutPeaks);
+}
+
+void PredictSatellitePeaks::exec_peaks() {
+  PeaksWorkspace_sptr Peaks = getProperty("Peaks");
+  if (!Peaks)
+    throw std::invalid_argument(
+        "Input workspace is not a PeaksWorkspace. Type=" + Peaks->id());
+
+  V3D offsets1 = getOffsetVector("ModVector1");
+  V3D offsets2 = getOffsetVector("ModVector2");
+  V3D offsets3 = getOffsetVector("ModVector3");
+  int maxOrder = getProperty("MaxOrder");
+
+  bool includePeaksInRange = false;
+  bool includeOrderZero = getProperty("IncludeIntegerHKL");
+
+  if (Peaks->getNumberPeaks() <= 0) {
+    g_log.error() << "There are No peaks in the input PeaksWorkspace\n";
+    return;
+  }
+
+  API::Sample sample = Peaks->mutableSample();
+
+  OrientedLattice lattice = sample.getOrientedLattice();
+
+  const auto instrument = Peaks->getInstrument();
+
+  auto OutPeaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+      WorkspaceFactory::Instance().createPeaks());
+  OutPeaks->setInstrument(instrument);
+  OutPeaks->mutableSample().setOrientedLattice(&lattice);
+
+  vector<vector<int>> AlreadyDonePeaks;
+  int seqNum = 0;
+  HKLFilterWavelength lambdaFilter(DblMatrix(3, 3, true), 0.1, 100.);
+    OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset1", offsets1, true);
+    OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset2", offsets2, true);
+    OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset3", offsets3, true);
 std::vector<Peak> peaks = Peaks->getPeaks();
     for (auto it = peaks.begin(); it != peaks.end(); ++it){
     auto peak = *it;
@@ -200,7 +237,6 @@ std::vector<Peak> peaks = Peaks->getPeaks();
                    lambdaFilter, includePeaksInRange,
                    includeOrderZero, seqNum, AlreadyDonePeaks);
   }
-}
   setProperty("SatellitePeaks", OutPeaks);
 }
 

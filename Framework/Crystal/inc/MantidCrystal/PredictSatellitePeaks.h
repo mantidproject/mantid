@@ -64,6 +64,7 @@ private:
 
   /// Run the algorithm
   void exec() override;
+  void exec_peaks();
   Kernel::V3D getOffsetVector(const std::string &label);
   void predictOffsets(DataObjects::PeaksWorkspace_sptr Peaks,
                       boost::shared_ptr<Mantid::API::IPeaksWorkspace> &OutPeaks,

@@ -161,19 +161,6 @@ void PeakColumn::print(size_t index, std::ostream &s) const {
 }
 
 //-------------------------------------------------------------------------------------
-/** Remove substring from string
- *
- * @param str :: string to modify
- * @param toErase :: substring to erase
- */
-void PeakColumn::eraseSubStr(std::string &str, const std::string &toErase) {
-  std::string::size_type n = toErase.length();
-  for (std::string::size_type i = str.find(toErase); i != std::string::npos;
-       i = str.find(toErase))
-    str.erase(i, n);
-}
-
-//-------------------------------------------------------------------------------------
 /** Read in some text and convert to a number in the PeaksWorkspace
  *
  * @param text :: string to read
@@ -187,11 +174,7 @@ void PeakColumn::read(size_t index, const std::string &text) {
   // Convert to a double
   double val = 0;
 
-  // Table has put comma in run numbers so remove
-  std::string text2 = text;
-  eraseSubStr(text2, ",");
-
-  int success = Strings::convert(text2, val);
+  int success = Strings::convert(text, val);
 
   if (success == 0) {
     g_log.error() << "Could not convert string '" << text << "' to a number.\n";
@@ -224,8 +207,7 @@ void PeakColumn::read(const size_t index, std::istringstream &in) {
 //-------------------------------------------------------------------------------------
 /** @return true if the column is read-only */
 bool PeakColumn::getReadOnly() const {
-  return !((m_name == "h") || (m_name == "k") || (m_name == "l") ||
-           (m_name == "RunNumber"));
+  return !((m_name == "h") || (m_name == "k") || (m_name == "l"));
 }
 
 //-------------------------------------------------------------------------------------
