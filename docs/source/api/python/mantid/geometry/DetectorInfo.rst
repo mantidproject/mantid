@@ -4,6 +4,8 @@
 
 This is a python binding to the C++ class Mantid::Geometry::DetectorInfo.
 
+Most of the information concerning ``DetectorInfo`` can be found in the `Instrument Access Layers <https://github.com/mantidproject/mantid/blob/9e3d799d40fda4a5ca08887e8c47f41c3316da91/docs/source/concepts/InstrumentAccessLayers.rst>`_ document. 
+
 --------
 Purpose
 --------
@@ -13,14 +15,15 @@ Many users may need this extra information so that they can have a better unders
 
 The ``DetectorInfo`` object is one of three objects that the user can gain access to from a workspace. 
 The other two are:
- * ``SpectrumInfo``
- * ``ComponentInfo``
+
+ * SpectrumInfo
+ * ComponentInfo
 
 ---------
 Indexing
 ---------
 The ``DetectorInfo`` object is accessed by an index going from 0 to N-1, where N is the number of detectors.
-A detector index is a way of addressing and enumerating detectors in the beamline.
+It is important to note that the detector index is NOT the detector ID. A detector index is a way of addressing and enumerating detectors in the beamline.
 A detector index can be found from a detector ID using ``indexOf``. 
 
 -------
