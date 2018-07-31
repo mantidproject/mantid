@@ -15,7 +15,7 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
               plotResults=False, zBG=1.96, bgPolyOrder=1, fICCParams=None, oldICCFit=None,
               strongPeakParams=None, forceCutoff=250, edgeCutoff=15,
               neigh_length_m=3, q_frame='sample', dtSpread=0.03, pplmin_frac=0.8, pplmax_frac=1.5, mindtBinWidth=1,
-              maxdtBinWidth=50, figureNumber=2, instrumentName=None, peakMaskSize=5, iccFitDict=None):
+              maxdtBinWidth=50, figureNumber=2, peakMaskSize=5, iccFitDict=None):
     n_events = box.getNumEventsArray()
 
     if q_frame == 'lab':
@@ -31,12 +31,12 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
                     n_events, peak=peak, box=box, qMask=qMask, calc_pp_lambda=True, padeCoefficients=padeCoefficients,
                     neigh_length_m=neigh_length_m, pp_lambda=None, pplmin_frac=pplmin_frac,
                     pplmax_frac=pplmax_frac, mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                    instrumentName=instrumentName, peakMaskSize=peakMaskSize, iccFitDict=iccFitDict)
+                    peakMaskSize=peakMaskSize, iccFitDict=iccFitDict)
         YTOF, fICC, x_lims = fitTOFCoordinate(
                     box, peak, padeCoefficients, dtSpread=dtSpread, qMask=qMask, bgPolyOrder=bgPolyOrder, zBG=zBG,
                     plotResults=plotResults, pp_lambda=pp_lambda, neigh_length_m=neigh_length_m, pplmin_frac=pplmin_frac,
                     pplmax_frac=pplmax_frac, mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                    instrumentName=instrumentName, peakMaskSize=peakMaskSize, iccFitDict=iccFitDict)
+                    peakMaskSize=peakMaskSize, iccFitDict=iccFitDict)
         chiSqTOF = mtd['fit_Parameters'].column(1)[-1]
     else:  # we already did I-C profile, so we'll just read the parameters
         pp_lambda = fICCParams[-1]
@@ -50,7 +50,7 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
         fICC['HatWidth'] = fICCParams[10]
         fICC['KConv'] = fICCParams[11]
         goodIDX, _ = ICCFT.getBGRemovedIndices(
-            n_events, pp_lambda=pp_lambda, qMask=qMask, instrumentName=instrumentName, peakMaskSize=peakMaskSize,
+            n_events, pp_lambda=pp_lambda, qMask=qMask, peakMaskSize=peakMaskSize,
             iccFitDict=iccFitDict)
         chiSqTOF = fICCParams[4] #Last entry
 
@@ -82,7 +82,7 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
         numDetCols = peaks_ws.getInstrument().getIntParameter("numDetCols")[0]
         nPixels = [numDetRows, numDetCols]
     except:
-        UserWarning('Instrument name {} not found. Assuming a 255*255 detector!'.format(instrumentName))
+        UserWarning('Detector size not found in instrument parameters file. Assuming a 255*255 detector!')
         nPixels = [255,255]
 
     useForceParams = peak.getIntensity() < forceCutoff or peak.getRow() <= dEdge or peak.getRow(
@@ -114,11 +114,11 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
                                                                                              phthPeak[0],
                                                                                              phthPeak[1]))
         params, h, t, p = doBVGFit(box, nTheta=nTheta, nPhi=nPhi, fracBoxToHistogram=fracBoxToHistogram,
-                                   goodIDX=goodIDX, forceParams=strongPeakParams[nnIDX], instrumentName=instrumentName,
+                                   goodIDX=goodIDX, forceParams=strongPeakParams[nnIDX],
                                    doPeakConvolution=doPeakConvolution, sigX0Scale=sigX0Scale, sigY0Scale=sigY0Scale)
     else:  # Just do the fit - no nearest neighbor assumptions
         params, h, t, p = doBVGFit(
-            box, nTheta=nTheta, nPhi=nPhi, fracBoxToHistogram=fracBoxToHistogram, goodIDX=goodIDX, instrumentName=instrumentName,
+            box, nTheta=nTheta, nPhi=nPhi, fracBoxToHistogram=fracBoxToHistogram, goodIDX=goodIDX,
             doPeakConvolution=doPeakConvolution, sigX0Scale=sigX0Scale, sigY0Scale=sigY0Scale)
 
     if plotResults:
@@ -145,9 +145,9 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
 
     # Do scaling to the data
     if doPeakConvolution: #This means peaks will have gaps, so we only use good data to scale
-        Y, redChiSq, scaleFactor = fitScaling(n_events, box, YTOF, YBVG, goodIDX=goodIDX, instrumentName=instrumentName)
+        Y, redChiSq, scaleFactor = fitScaling(n_events, box, YTOF, YBVG, goodIDX=goodIDX)
     else:
-        Y, redChiSq, scaleFactor = fitScaling(n_events, box, YTOF, YBVG, instrumentName=instrumentName)
+        Y, redChiSq, scaleFactor = fitScaling(n_events, box, YTOF, YBVG)
     YBVG2 = bvg(1.0, mu, sigma, XTHETA, XPHI, 0)
     YTOF2 = getYTOF(fICC, XTOF, x_lims)
     Y2 = YTOF2 * YBVG2
@@ -193,7 +193,7 @@ def boxToTOFThetaPhi(box, peak):
     return X
 
 
-def fitScaling(n_events, box, YTOF, YBVG, goodIDX=None, neigh_length_m=3, instrumentName=None):
+def fitScaling(n_events, box, YTOF, YBVG, goodIDX=None, neigh_length_m=3):
     YJOINT = 1.0 * YTOF * YBVG
     YJOINT /= 1.0 * YJOINT.max()
 
@@ -252,7 +252,7 @@ def getXTOF(box, peak):
 def fitTOFCoordinate(box, peak, padeCoefficients, dtSpread=0.03, minFracPixels=0.01,
                      neigh_length_m=3, zBG=1.96, bgPolyOrder=1, qMask=None, plotResults=False,
                      fracStop=0.01, pp_lambda=None, pplmin_frac=0.8, pplmax_frac=1.5, mindtBinWidth=1,
-                     maxdtBinWidth=50, instrumentName=None, peakMaskSize=5, iccFitDict=None):
+                     maxdtBinWidth=50, peakMaskSize=5, iccFitDict=None):
 
     # Get info from the peak
     tof = peak.getTOF()  # in us
@@ -271,12 +271,12 @@ def fitTOFCoordinate(box, peak, padeCoefficients, dtSpread=0.03, minFracPixels=0
                                 neigh_length_m=neigh_length_m, zBG=zBG, pp_lambda=pp_lambda,
                                 pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
                                 mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                                instrumentName=instrumentName, peakMaskSize=peakMaskSize,
+                                peakMaskSize=peakMaskSize,
                                 iccFitDict=iccFitDict)
 
     fitResults, fICC = ICCFT.doICCFit(tofWS, energy, flightPath,
                                       padeCoefficients, fitOrder=bgPolyOrder, constraintScheme=1,
-                                      instrumentName=instrumentName, iccFitDict=iccFitDict)
+                                      iccFitDict=iccFitDict)
 
     for i, param in enumerate(['A', 'B', 'R', 'T0', 'Scale', 'HatWidth', 'KConv']):
         fICC[param] = mtd['fit_Parameters'].row(i)['Value']
@@ -429,7 +429,7 @@ def compareBVGFitData(box, params, nTheta=200, nPhi=200, figNumber=2, fracBoxToH
 
 
 def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodIDX=None,
-             forceParams=None, forceTolerance=0.1, dth=10, dph=10, instrumentName=None,
+             forceParams=None, forceTolerance=0.1, dth=10, dph=10,
              doPeakConvolution=False, sigX0Scale=1., sigY0Scale=1.):
     """
     doBVGFit takes a binned MDbox and returns the fit of the peak shape along the non-TOF direction.  This is done in one of two ways:

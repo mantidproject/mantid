@@ -115,7 +115,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         # The default values are good for MaNDi - new instruments can be added by adding a different elif
         # statement.
         # If you change these values or add an instrument, documentation should also be changed.
-        instrumentName = peaks_ws.getInstrument().getFullName()
         try:
             nTheta = peaks_ws.getInstrument().getIntParameter("numBinsTheta")[0]
             nPhi = peaks_ws.getInstrument().getIntParameter("numBinsPhi")[0]
@@ -173,7 +172,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                                                                       maxdtBinWidth=maxdtBinWidth,
                                                                       pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
                                                                       forceCutoff=forceCutoff, edgeCutoff=edgeCutoff,
-                                                                      instrumentName=instrumentName,
                                                                       peakMaskSize=peakMaskSize,
                                                                       iccFitDict=iccFitDict)
 

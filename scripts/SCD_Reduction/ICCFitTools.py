@@ -107,7 +107,7 @@ def getQXQYQZ(box):
 
 def getQuickTOFWS(box, peak, padeCoefficients, goodIDX=None, dtSpread=0.03, qMask=None,
                   pp_lambda=None, minppl_frac=0.8, maxppl_frac=1.5, mindtBinWidth=1, maxdtBinWidth=50,
-                  constraintScheme=1, instrumentName=None, peakMaskSize=5, iccFitDict=None):
+                  constraintScheme=1, peakMaskSize=5, iccFitDict=None):
     """
     getQuickTOFWS - generates a quick-and-dirty TOFWS.  Useful for determining the background.
     Input:
@@ -145,11 +145,11 @@ def getQuickTOFWS(box, peak, padeCoefficients, goodIDX=None, dtSpread=0.03, qMas
     tofWS, ppl = getTOFWS(box, flightPath, scatteringHalfAngle, tof, peak, qMask, dtSpread=dtSpread,
                           minFracPixels=0.01, neigh_length_m=3, zBG=1.96, pp_lambda=pp_lambda,
                           calc_pp_lambda=calc_pp_lambda, pplmin_frac=minppl_frac, pplmax_frac=minppl_frac,
-                          mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth, instrumentName=instrumentName,
+                          mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
                           peakMaskSize=peakMaskSize, iccFitDict=iccFitDict)
     fitResults, fICC = doICCFit(
         tofWS, energy, flightPath, padeCoefficients, fitOrder=1, constraintScheme=constraintScheme,
-        instrumentName=instrumentName, iccFitDict=iccFitDict)
+        iccFitDict=iccFitDict)
     h = [tofWS.readY(0), tofWS.readX(0)]
     chiSq = fitResults.OutputChi2overDoF
 
@@ -213,7 +213,7 @@ def getPoissionGoodIDX(n_events, zBG=1.96, neigh_length_m=3):
 def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, qMask=None,
                         peak=None, box=None, pp_lambda=None, peakNumber=-1, minppl_frac=0.8,
                         maxppl_frac=1.5, mindtBinWidth=1, maxdtBinWidth=50,
-                        constraintScheme=1, instrumentName=None, peakMaskSize=5, iccFitDict=None):
+                        constraintScheme=1, peakMaskSize=5, iccFitDict=None):
     """
     getOptimizedGoodIDX - returns a numpy arrays which is true if the voxel contains events at
             the zBG z level (1.96=95%CI).  Rather than using Poission statistics, this function
@@ -235,7 +235,6 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
         mindtBinWidth - the largest dt (in us) allowed for constructing the TOF profile.
         constraintScheme - sets the constraints for TOF profile fitting.  Leave as 1 if you're
                 not sure how to modify this.
-        instrumentName - string containing the instrument name
         iccFitDict - a dictionary containing ICC fit constraints and possibly initial guesses
 
     Output:
@@ -299,7 +298,7 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
                 chiSq, h, intens, sigma = getQuickTOFWS(box, peak, padeCoefficients, goodIDX=goodIDX, qMask=qMask, pp_lambda=pp_lambda,
                                                         minppl_frac=minppl_frac, maxppl_frac=maxppl_frac, mindtBinWidth=mindtBinWidth,
                                                         maxdtBinWidth=maxdtBinWidth, constraintScheme=constraintScheme,
-                                                        instrumentName=instrumentName, peakMaskSize=peakMaskSize, iccFitDict=iccFitDict)
+                                                        peakMaskSize=peakMaskSize, iccFitDict=iccFitDict)
             except:
                 #raise
                 break
@@ -323,7 +322,7 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
     chiSq, h, intens, sigma = getQuickTOFWS(box, peak, padeCoefficients, goodIDX=goodIDX, qMask=qMask,
                                             pp_lambda=pp_lambda, minppl_frac=minppl_frac, maxppl_frac=maxppl_frac,
                                             mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                                            instrumentName=instrumentName, peakMaskSize=peakMaskSize,
+                                            peakMaskSize=peakMaskSize,
                                             iccFitDict=iccFitDict)
     if qMask is not None:
         return goodIDX*qMask, pp_lambda
@@ -333,7 +332,7 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
 def getBGRemovedIndices(n_events, zBG=1.96, calc_pp_lambda=False, neigh_length_m=3, qMask=None,
                         peak=None, box=None, pp_lambda=None, peakNumber=-1, padeCoefficients=None,
                         pplmin_frac=0.8, pplmax_frac=1.5, mindtBinWidth=1, maxdtBinWidth=50,
-                        constraintScheme=1, instrumentName=None, peakMaskSize=5, iccFitDict=None):
+                        constraintScheme=1, peakMaskSize=5, iccFitDict=None):
     """
     getBGRemovedIndices - A wrapper for getOptimizedGoodIDX
     Input:
@@ -391,7 +390,7 @@ def getBGRemovedIndices(n_events, zBG=1.96, calc_pp_lambda=False, neigh_length_m
                                            minppl_frac=pplmin_frac, maxppl_frac=pplmax_frac, qMask=qMask, peak=peak,
                                            box=box, pp_lambda=pp_lambda, peakNumber=peakNumber,
                                            mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                                           constraintScheme=constraintScheme, instrumentName=instrumentName,
+                                           constraintScheme=constraintScheme, 
                                            peakMaskSize=peakMaskSize, iccFitDict=iccFitDict)
             except KeyboardInterrupt:
                 sys.exit()
@@ -553,7 +552,7 @@ def get_pp_lambda(n_events, hasEventsIDX):
 def getTOFWS(box, flightPath, scatteringHalfAngle, tofPeak, peak, qMask, zBG=-1.0, dtSpread=0.02,
              minFracPixels=0.005, workspaceNumber=None, neigh_length_m=0, pp_lambda=None, calc_pp_lambda=False,
              padeCoefficients=None, pplmin_frac=0.8, pplmax_frac=1.5, peakMaskSize=5,
-             mindtBinWidth=1, maxdtBinWidth=50, constraintScheme=1, instrumentName=None, iccFitDict=None):
+             mindtBinWidth=1, maxdtBinWidth=50, constraintScheme=1, iccFitDict=None):
     """
     Builds a TOF profile from the data in box which is nominally centered around a peak.
     Input:
@@ -579,7 +578,6 @@ def getTOFWS(box, flightPath, scatteringHalfAngle, tofPeak, peak, qMask, zBG=-1.
         maxdtBinWidth - the largest dt (in us) allowed for constructing the TOF profile.
         constraintScheme - sets the constraints for TOF profile fitting.  Leave as 1 if you're
                 not sure how to modify this.
-        instrumentName = string containing instrument name
         iccFitDict - a dictionary containing ICC fit constraints and possibly initial guesses
 
     Output:
@@ -598,7 +596,7 @@ def getTOFWS(box, flightPath, scatteringHalfAngle, tofPeak, peak, qMask, zBG=-1.
                                                  calc_pp_lambda=calc_pp_lambda, padeCoefficients=padeCoefficients,
                                                  pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
                                                  mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                                                 constraintScheme=constraintScheme, instrumentName=instrumentName,
+                                                 constraintScheme=constraintScheme,
                                                  peakMaskSize=peakMaskSize, iccFitDict=iccFitDict)
         hasEventsIDX = np.logical_and(goodIDX, qMask)
         boxMeanIDX = np.where(hasEventsIDX)
@@ -828,7 +826,7 @@ def getBoxFracHKL(peak, peaks_ws, MDdata, UBMatrix, peakNumber, dQ, dQPixel=0.00
 
 
 def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None, outputWSName='fit', fitOrder=1,
-             instrumentName=None, iccFitDict=None):
+             iccFitDict=None):
     """
     doICCFit - Carries out the actual least squares fit for the TOF workspace.
     Intput:
@@ -894,7 +892,6 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
             fICC.setPenalizedConstraints(A0=A0, B0=B0, R0=R0, T00=T00, KConv0=KConv0, penalty=1.0e10)
         except:
             fICC.setPenalizedConstraints(A0=A0, B0=B0, R0=R0, T00=T00, KConv0=KConv0, penalty=None)
-        print(fICC)
     if constraintScheme == 2:
         try:
             fICC.setPenalizedConstraints(A0=[0.0001, 1.0], B0=[0.005, 1.5], R0=[0.00, 1.], Scale0=[
@@ -964,7 +961,6 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
         fitDict - if keepFitDict is False, an empty dictionary.  If keepFitDict is true, a dictionary (integer peak number as key)
             containing the x, yData, yFit for each peak.
     """
-    instrumentName = peaks_ws.getInstrument().getFullName()
     if p is None:
         p = range(peaks_ws.getNumberPeaks())
     fitDict = {}
@@ -996,7 +992,7 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
                                                          mindtBinWidth=mindtBinWidth,
                                                          maxdtBinWidth=maxdtBinWidth,
                                                          pplmin_frac=minpplfrac, pplmax_frac=maxpplfrac,
-                                                         constraintScheme=constraintScheme, instrumentName=instrumentName,
+                                                         constraintScheme=constraintScheme,
                                                          peakMaskSize=peakMaskSize, iccFitDict=iccFitDict)
                 # --IN PRINCIPLE!!! WE CALCULATE THIS BEFORE GETTING HERE
                 tofWS = mtd['tofWS']
