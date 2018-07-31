@@ -24,8 +24,6 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.ptable.register_table_rclicked(self.table_right_clicked)
 
         self.load_widget = LoadPresenter(LoadView(), LoadModel())
-        self.load_widget.register_spinbox_val_changed(self.spinbox_changed)
-        self.load_widget.register_spinbox_submit(self.spinbox_submit)
 
         self.box = QtGui.QHBoxLayout()
         self.box.addWidget(self.ptable.view)
@@ -43,12 +41,6 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
 
     def table_changed(self, items):
         print("Table Changed: {}".format([i.symbol for i in items]))
-
-    def spinbox_changed(self, val):
-        print("SpinBox Value Changed: {}".format(val))
-
-    def spinbox_submit(self, val):
-        print("SpinBox Submitted: {}".format(val))
 
 
 def qapp():

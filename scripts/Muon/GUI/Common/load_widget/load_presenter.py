@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 from Muon.GUI.Common import thread_model
 
@@ -7,51 +7,25 @@ class LoadPresenter(object):
     def __init__(self, view, model):
         self.view = view
         self.model = model
-
         self.thread = None
 
-        self.view.on_file_browser_complete(self.load_file)
+        self.view.on_load_clicked(self.load_run)
+        self.view.on_spinbox_changed(self.model.set_run)
 
-    def load_file(self, filename):
+    def load_run(self):
         self.thread = self.new_thread()
-        self.thread.threadWrapperSetUp(self.disable_buttons, self.end_thread)
-        self.thread.loadData({"Filename": filename})
+        self.thread.threadWrapperSetUp(
+            self.disable_buttons, self.end_thread)
+        self.thread.loadData({})
         self.thread.start()
 
-    def register_button_clicked(self, slot):
-        self.view.on_button_clicked(slot)
-
-    def unregister_button_clicked(self, slot):
-        try:
-            self.view.unreg_on_button_clicked(slot)
-        except TypeError:
-            return
-
-    def register_spinbox_val_changed(self, slot):
-        self.view.on_spinbox_val_changed(slot)
-
-    def unregister_spinbox_val_changed(self, slot):
-        try:
-            self.view.unreg_on_spinbox_val_changed(slot)
-        except TypeError:
-            return
-
-    def register_spinbox_submit(self, slot):
-        self.view.on_spinbox_submit(slot)
-
-    def unregister_spinbox_submit(self, slot):
-        try:
-            self.view.unreg_on_spinbox_submit(slot)
-        except TypeError:
-            return
-
     def disable_buttons(self):
-        self.view.load_button.setEnabled(False)
         self.view.spinbox.setEnabled(False)
+        self.view.load_button.setEnabled(False)
 
     def enable_buttons(self):
-        self.view.load_button.setEnabled(True)
         self.view.spinbox.setEnabled(True)
+        self.view.load_button.setEnabled(True)
 
     def cancel(self):
         if self.thread is not None:
