@@ -4,6 +4,8 @@
 
 This is a python binding to the C++ class Mantid::Geometry::ComponentInfo.
 
+Most of the information concerning ``ComponentInfo`` can be found in the `Instrument Access Layers <https://github.com/mantidproject/mantid/blob/9e3d799d40fda4a5ca08887e8c47f41c3316da91/docs/source/concepts/InstrumentAccessLayers.rst>`_ document. 
+
 --------
 Purpose
 --------
@@ -13,6 +15,7 @@ Many users may need this extra information so that they can have a better unders
 
 ComponentInfo is one of three objects that the user can gain access to from a workspace. 
 The other two are:
+
  * ``SpectrumInfo``
  * ``DetectorInfo``
 
