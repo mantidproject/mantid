@@ -31,7 +31,7 @@ BATCH_FILE_TEST_CONTENT_1 = [{BatchReductionEntry.SampleScatter: 1, BatchReducti
 BATCH_FILE_TEST_CONTENT_2 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
                               BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
                               BatchReductionEntry.SampleDirect: 'SANS2D00022048',
-                              BatchReductionEntry.Output: 'test_file', BatchReductionEntry.UserFile: 'user_test_file'},
+                              BatchReductionEntry.Output: 'test_file'},
                              {BatchReductionEntry.SampleScatter: 'SANS2D00022024', BatchReductionEntry.Output: 'test_file2'}]
 
 BATCH_FILE_TEST_CONTENT_3 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
@@ -136,12 +136,6 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(view.beam_centre.hab_pos_1, 155.45)
         self.assertEqual(view.beam_centre.hab_pos_2, -169.6)
 
-        # Assert certain function calls
-        self.assertEqual(view.get_user_file_path.call_count, 3)
-        self.assertEqual(view.get_batch_file_path.call_count, 2)
-        self.assertEqual(view.get_cell.call_count, 66)
-        self.assertEqual(view.get_number_of_rows.call_count, 3)
-
         # clean up
         remove_file(user_file_path)
 
@@ -171,16 +165,13 @@ class RunTabPresenterTest(unittest.TestCase):
         # Assert
         self.assertEqual(view.add_row.call_count, 2)
         if use_multi_period:
-            expected_first_row = "SampleScatter:SANS2D00022024,ssp:,SampleTrans:SANS2D00022048,stp:,SampleDirect:SANS2D00022048,sdp:," \
-                                 "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file," \
-                                 "User File:user_test_file,Sample Thickness:1.00"
-            expected_second_row = "SampleScatter:SANS2D00022024,ssp:,SampleTrans:,stp:,SampleDirect:,sdp:," \
-                                  "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file2,User File:,Sample Thickness:1.00"
+            expected_first_row = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '',
+                                  '', 'test_file', '', '1.0', '']
+            expected_second_row = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '',
+                                   '1.0', '']
         else:
-            expected_first_row = "SampleScatter:SANS2D00022024,SampleTrans:SANS2D00022048,SampleDirect:SANS2D00022048," \
-                                 "CanScatter:,CanTrans:,CanDirect:,OutputName:test_file,User File:user_test_file,Sample Thickness:1.00"
-            expected_second_row = "SampleScatter:SANS2D00022024,SampleTrans:,SampleDirect:," \
-                                  "CanScatter:,CanTrans:,CanDirect:,OutputName:test_file2,User File:,Sample Thickness:1.00"
+            expected_first_row = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '', 'test_file', '', '1.0', '']
+            expected_second_row = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0', '']
 
         calls = [mock.call(expected_first_row), mock.call(expected_second_row)]
         view.add_row.assert_has_calls(calls)
@@ -211,10 +202,9 @@ class RunTabPresenterTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(view.add_row.call_count, 1)
-        self.assertEqual(view.set_multi_period_view_mode.call_count, 1)
+        self.assertEqual(view.show_period_columns.call_count, 1)
 
-        expected_row = "SampleScatter:SANS2D00022024,ssp:3,SampleTrans:,stp:,SampleDirect:,sdp:," \
-                       "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file,User File:,Sample Thickness:1.00"
+        expected_row = ['SANS2D00022024', '3', '', '', '', '', '', '', '', '', '', '', 'test_file', '', '1.0', '']
 
         calls = [mock.call(expected_row)]
         view.add_row.assert_has_calls(calls)
@@ -284,6 +274,9 @@ class RunTabPresenterTest(unittest.TestCase):
         # Clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
 
+    def test_that_can_get_states_from_row_user_file(self):
+        pass
+
     def test_that_can_get_state_for_index_if_index_exists(self):
         # Arrange
         batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
@@ -305,23 +298,6 @@ class RunTabPresenterTest(unittest.TestCase):
         # Clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
 
-    def test_that_can_get_states_from_row_user_file(self):
-        # Arrange
-        row_user_file_path = create_user_file(sample_user_file_gravity_OFF)
-        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2,
-                                                                                           row_user_file_path = row_user_file_path)
-
-        presenter.on_user_file_load()
-        presenter.on_batch_file_load()
-
-        # Act
-        state = presenter.get_state_for_row(1)
-        state0 = presenter.get_state_for_row(0)
-
-        # Assert
-        self.assertTrue(state.convert_to_q.use_gravity is False)
-        self.assertTrue(state0.convert_to_q.use_gravity is True)
-
     def test_that_returns_none_when_index_does_not_exist(self):
         # Arrange
         batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
@@ -339,85 +315,6 @@ class RunTabPresenterTest(unittest.TestCase):
         # Clean up
         remove_file(batch_file_path)
         remove_file(user_file_path)
-
-    def test_that_populates_the_property_manager_data_service_when_processing_is_called(self):
-        # Arrange
-        self._clear_property_manager_data_service()
-        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
-
-        # This is not the nicest of tests, but better to test this functionality than not
-        presenter.on_user_file_load()
-        presenter.on_batch_file_load()
-
-        # Act
-        presenter.on_processed_clicked()
-
-        # Assert
-        # We should have two states in the PropertyManagerDataService
-        self.assertEqual(len(PropertyManagerDataService.getObjectNames()), 2)
-
-        # clean up
-        self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
-
-        self._clear_property_manager_data_service()
-
-    def test_that_calls_halt_process_flag_if_user_file_has_not_been_loaded_and_process_is_run(self):
-        # Arrange
-        self._clear_property_manager_data_service()
-        batch_file_path, user_file_path, presenter, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
-
-        presenter.on_processed_clicked()
-
-        # Assert
-        # We should have printed an error message to the logs and called halt process flag
-        self.assertTrue(view.halt_process_flag.call_count == 1)
-        # clean up
-        self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
-
-        self._clear_property_manager_data_service()
-
-    def test_that_calls_halt_process_flag_if_state_are_invalid_and_process_is_run(self):
-        # Arrange
-        self._clear_property_manager_data_service()
-        batch_file_path, user_file_path, presenter, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
-
-        presenter.on_batch_file_load()
-        presenter.on_user_file_load()
-
-        # Set invalid state
-        presenter._state_model.event_slices = 'Hello'
-
-        presenter.on_processed_clicked()
-
-        # Assert
-        # We should have printed an error to logs and called halt process flag
-        self.assertTrue(view.halt_process_flag.call_count == 1)
-
-        # clean up
-        self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
-
-        self._clear_property_manager_data_service()
-
-    def test_that_calls_halt_process_flag_if_states_are_not_retrievable_and_process_is_run(self):
-        # Arrange
-        self._clear_property_manager_data_service()
-        batch_file_path, user_file_path, presenter, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
-
-        presenter.on_batch_file_load()
-        presenter.on_user_file_load()
-
-        presenter.get_states = mock.MagicMock(return_value='')
-
-        presenter.on_processed_clicked()
-
-        # Assert
-        # We should have printed an error to logs and called halt process flag
-        self.assertTrue(view.halt_process_flag.call_count == 1)
-
-        # clean up
-        self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
-
-        self._clear_property_manager_data_service()
 
     def test_that_can_add_new_masks(self):
         # Arrange
@@ -439,31 +336,14 @@ class RunTabPresenterTest(unittest.TestCase):
         # clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
 
-    def test_that_get_processing_options_returns_correct_value(self):
-        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_1)
-        expected_result = {'UseOptimizations':'1','OutputMode':'PublishToADS','PlotResults':'1','OutputGraph':'SANS-Latest'}
-
-        result = presenter.get_processing_options()
-
-        self.assertEqual(expected_result, result)
-
-    def test_on_data_changed_does_nothing_during_processing(self):
-        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_1)
-        presenter._masking_table_presenter = mock.MagicMock()
-        presenter._beam_centre_presenter = mock.MagicMock()
-        presenter._processing = True
-
-        presenter.on_data_changed()
-
-        presenter._masking_table_presenter.on_update_rows.assert_not_called()
-        presenter._beam_centre_presenter.on_update_rows.assert_not_called()
-
     def test_on_data_changed_calls_update_rows(self):
         batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_1)
         presenter._masking_table_presenter = mock.MagicMock()
         presenter._beam_centre_presenter = mock.MagicMock()
+        row_entry = [''] * 16
+        presenter.on_row_inserted(0, row_entry)
 
-        presenter.on_data_changed()
+        presenter.on_data_changed(0, 0, '12335', '00000')
 
         presenter._masking_table_presenter.on_update_rows.assert_called_once_with()
         presenter._beam_centre_presenter.on_update_rows.assert_called_once_with()
@@ -502,7 +382,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
         presenter._view.hide_period_columns.assert_called_once_with()
 
-    def test_on_cell_changed_updates_table_model(self):
+    def test_on_data_changed_updates_table_model(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         presenter.set_view(mock.MagicMock())
         row = ['74044', '', '74044', '', '74044', '', '74044', '', '74044', '', '74044', '', 'test_reduction'
@@ -514,7 +394,7 @@ class RunTabPresenterTest(unittest.TestCase):
         column = 2
         value = '74040'
 
-        presenter.on_cell_changed(row, column, value)
+        presenter.on_data_changed(row, column, value, '')
 
         self.assertEqual(presenter._table_model.get_number_of_rows(), 1)
         model_row = presenter._table_model.get_table_entry(0)

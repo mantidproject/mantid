@@ -332,6 +332,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         self.data_processor_table.setRootIsDecorated(False)
 
+        row_entry = [''] * 16
+        self.add_row(row_entry)
+        self._call_settings_listeners(lambda listener: listener.on_row_inserted(0, row_entry))
+
         self.table_signals = \
             MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.data_processor_table, self)
         # The signal adapter subscribes to events from the table

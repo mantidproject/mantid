@@ -10,6 +10,7 @@ import os
 import re
 
 from sans.gui_logic.sans_data_processor_gui_algorithm import create_option_column_properties
+from sans.common.constants import ALL_PERIODS
 
 
 class TableModel(object):
@@ -53,7 +54,7 @@ class TableModel(object):
 
     @batch_file.setter
     def batch_file(self, value):
-        self._validate_file_name(value)
+        # self._validate_file_name(value)
         self._batch_file = value
 
     def get_table_entry(self, index):
@@ -133,15 +134,17 @@ class TableIndexModel(object):
         return self.__dict__ != other.__dict__
 
     def toList(self):
-        return [self.sample_scatter, self.sample_scatter_period, self.sample_transmission, self.sample_transmission_period,
-                self.sample_direct, self.sample_direct_period, self.can_scatter, self.can_scatter_period, self.can_transmission,
-                self.can_transmission_period, self.can_direct, self.can_direct_period, self.output_name, self.user_file, self.sample_thickness,
+        return [self.sample_scatter, self._string_period(self.sample_scatter_period), self.sample_transmission, self._string_period(self.sample_transmission_period),
+                self.sample_direct, self._string_period(self.sample_direct_period), self.can_scatter, self._string_period(self.can_scatter_period), self.can_transmission,
+                self._string_period(self.can_transmission_period), self.can_direct, self._string_period(self.can_direct_period), self.output_name, self.user_file, self.sample_thickness,
                 self.options_column_model.get_options_string()]
 
     def isMultiPeriod(self):
-        return (self.sample_scatter_period | self.sample_transmission_period | self.sample_direct_period
-        | self.can_scatter_period | self.can_transmission_period | self.can_direct_period)
+        return any ((self.sample_scatter_period, self.sample_transmission_period ,self.sample_direct_period
+        ,self.can_scatter_period, self.can_transmission_period, self.can_direct_period))
 
+    def _string_period(self, _tag):
+        return "" if _tag == ALL_PERIODS else str(_tag)
 
 class OptionsColumnModel(object):
     def __init__(self, options_column_string):

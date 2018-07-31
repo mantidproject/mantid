@@ -27,17 +27,19 @@ void QtStandardItemTreeModelAdapter::removeRowFrom(
 
 QStringList QtStandardItemTreeModelAdapter::getHeaderData() const {
   auto headerData = QStringList();
-  for (auto column=0;column<m_model.columnCount();++column){
-    headerData.append(m_model.headerData(column, Qt::Orientation::Horizontal).value<QString>());
+  for (auto column = 0; column < m_model.columnCount(); ++column) {
+    headerData.append(m_model.headerData(column, Qt::Orientation::Horizontal)
+                          .value<QString>());
   }
   return headerData;
 }
 
-void QtStandardItemTreeModelAdapter::setHeaderData(QStringList const & headerData){
+void QtStandardItemTreeModelAdapter::setHeaderData(
+    QStringList const &headerData) {
   m_model.setHorizontalHeaderLabels(headerData);
 }
 
-void QtStandardItemTreeModelAdapter::removeAllRows(){
+void QtStandardItemTreeModelAdapter::removeAllRows() {
   auto storedHeaderData = getHeaderData();
   m_model.clear();
   setHeaderData(storedHeaderData);
