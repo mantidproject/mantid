@@ -27,6 +27,7 @@ def parseConstraints(peaks_ws):
             d[paramName] = vals
     return d
 
+
 def scatFun(x, A, bg):
     """
     scatFun: returns A/x+bg.  Used for background estimation.
@@ -390,7 +391,7 @@ def getBGRemovedIndices(n_events, zBG=1.96, calc_pp_lambda=False, neigh_length_m
                                            minppl_frac=pplmin_frac, maxppl_frac=pplmax_frac, qMask=qMask, peak=peak,
                                            box=box, pp_lambda=pp_lambda, peakNumber=peakNumber,
                                            mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                                           constraintScheme=constraintScheme, 
+                                           constraintScheme=constraintScheme,
                                            peakMaskSize=peakMaskSize, iccFitDict=iccFitDict)
             except KeyboardInterrupt:
                 sys.exit()
