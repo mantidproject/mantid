@@ -21,11 +21,8 @@ in the position given in the data file.
 
 - For diffraction mode data (only one time channel) output is the :ref:`Workspace2D <Workspace2D>` with the X-axis in the wavelength units.
 
-- For TOF data (more than one time channel) output is the :ref:`Workspace2D <Workspace2D>` with the X-axis in TOF units.
-The lower bin boundary for the channel :math:`i`, :math:`t_i` is calculated as :math:`t_i = t_1 + t_{delay} + i*\Delta t`,
-where :math:`\Delta t` is the channel width and :math:`t_1` is the time-of-flight from the source (chopper) to sample.
-Given in the data file channel width is scaled by the *channel_width_factor* which can be set in
-the :ref:`parameter file <InstrumentParameterFile>`.
+- For TOF data (more than one time channel) output is the :ref:`Workspace2D <Workspace2D>` with the X-axis in TOF units. The lower bin boundary for the channel :math:`i`, :math:`t_i` is calculated as :math:`t_i = t_1 + t_{delay} + i*\Delta t`, where :math:`\Delta t` is the channel width and :math:`t_1` is the time-of-flight from the source (chopper) to sample. Given in the data file channel width is scaled by the *channel_width_factor* which can be set in the :ref:`parameter file <InstrumentParameterFile>`.
+
 
 .. note::
 
@@ -70,7 +67,7 @@ Usage
 
 **Example 1 - Load DNS diffraction mode .d_dat file:**
 
-.. code-block:: python
+.. testcode:: LoadDNSLegacyEx1
 
    # data file
    datafile = 'dn134011vana.d_dat'
@@ -80,14 +77,16 @@ Usage
 
    print("This workspace has {} dimensions and has {} histograms.".format(ws.getNumDims(), ws.getNumberHistograms()))
 
-Output:
+**Output:**
+
+.. testoutput:: LoadDNSLegacyEx1
 
    This workspace has 2 dimensions and has 24 histograms.
 
 
 **Example 2 - Load DNS TOF mode .d_dat file and find the elastic channel:**
 
-.. code-block:: python
+.. testcode:: LoadDNSLegacyEx2
 
    # data file
    datafile = 'dnstof.d_dat'
@@ -112,7 +111,9 @@ Output:
    print("The channel width is {} microseconds.".format(channel_width))
    print("The elastic channel number is: {}.".format(epp))
 
-Output:
+**Output:**
+
+.. testoutput:: LoadDNSLegacyEx2
 
    This workspace has 2 dimensions and has 24 histograms.
    Elastic peak center is at 3023 microseconds and has sigma=62.
@@ -122,7 +123,7 @@ Output:
 
 **Example 3 - Load DNS TOF mode .d_dat file and specify the elastic channel:**
 
-.. code-block:: python
+.. testcode:: LoadDNSLegacyEx3
 
    # data file
    datafile = 'dnstof.d_dat'
@@ -158,7 +159,9 @@ Output:
          .format(round(tof_elastic - peak_center), channel_width, round(sigma)))
    channel_width = ws.getRun().getProperty("channel_width").value
 
-Output:
+**Output:**
+
+.. testoutput:: LoadDNSLegacyEx3
 
    Calculated elastic TOF: 1327 microseconds
    Elastic TOF in the workspace: 1299 microseconds
