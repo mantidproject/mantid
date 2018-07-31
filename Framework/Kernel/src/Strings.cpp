@@ -4,11 +4,17 @@
 #include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/WarningSuppressions.h"
 
+// clang doesn't need to suppress -Wconversion
+// Enabling Wconversion also reenables -Wsign-conversion
+#ifndef __clang___
 GCC_DIAG_OFF(conversion)
+#endif
 GCC_DIAG_OFF(pedantic)
 #include "absl/strings/str_join.h"
-GCC_DIAG_OFF(pedantic)
+GCC_DIAG_ON(pedantic)
+#ifndef __clang__
 GCC_DIAG_ON(conversion)
+#endif
 
 #include <Poco/Path.h>
 
