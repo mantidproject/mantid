@@ -174,9 +174,6 @@ void ApplyMuonDetectorGroupPairing::init() {
   setPropertySettings("DeadTimeTable",
                       make_unique<Kernel::EnabledWhenProperty>(
                           "ApplyDeadTimeCorrection", Kernel::IS_EQUAL_TO, "1"));
-  setPropertySettings("DeadTimeTable",
-                      make_unique<Kernel::EnabledWhenProperty>(
-                          "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
 
   // Perform Group Associations.
 

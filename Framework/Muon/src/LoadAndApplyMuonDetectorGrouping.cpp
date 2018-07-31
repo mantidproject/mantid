@@ -82,10 +82,6 @@ void LoadAndApplyMuonDetectorGrouping::init() {
       "group. If not specified will save to \"MuonAnalysisGroup\" ");
 
   declareProperty(
-      "ApplyAsymmetryToGroups", true,
-      "Whether to calculate group asymmetry and store the workspaces.");
-
-  declareProperty(
       "AddGroupingTable", false,
       "Whether to add a TableWorkspace of the groupings to the ADS.");
 
@@ -105,6 +101,28 @@ void LoadAndApplyMuonDetectorGrouping::init() {
   setPropertySettings("TimeMax",
                       make_unique<Kernel::EnabledWhenProperty>(
                           "CropWorkspaces", Kernel::IS_EQUAL_TO, "1"));
+
+  // Group asymmetry range
+
+  declareProperty(
+      "ApplyAsymmetryToGroups", false,
+      "Whether to calculate group asymmetry and store the workspaces.");
+
+  declareProperty(
+      "AsymmetryTimeMin", EMPTY_DBL(),
+      "Start time for the group asymmetry calculation (micro seconds).",
+      Direction::Input);
+  setPropertySettings("AsymmetryTimeMin",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "ApplyAsymmetryToGroups", Kernel::IS_EQUAL_TO, "1"));
+
+  declareProperty(
+      "AsymmetryTimeMax", EMPTY_DBL(),
+      "End time for the group asymmetry calculation (micro seconds).",
+      Direction::Input);
+  setPropertySettings("AsymmetryTimeMax",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "ApplyAsymmetryToGroups", Kernel::IS_EQUAL_TO, "1"));
 
   // Optional properties
 
@@ -144,6 +162,11 @@ void LoadAndApplyMuonDetectorGrouping::init() {
   setPropertyGroup("TimeMin", croppingGrp);
   setPropertyGroup("TimeMax", croppingGrp);
   setPropertyGroup("CropWorkspaces", croppingGrp);
+
+  std::string groupAsymmetryGrp("Asymmetry");
+  setPropertyGroup("AsymmetryTimeMin", groupAsymmetryGrp);
+  setPropertyGroup("AsymmetryTimeMax", groupAsymmetryGrp);
+  setPropertyGroup("ApplyAsymmetryToGroups", groupAsymmetryGrp);
 }
 
 /**
