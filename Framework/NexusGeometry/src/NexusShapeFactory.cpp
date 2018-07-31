@@ -40,6 +40,7 @@ void createTrianglesFromPolygon(const std::vector<uint16_t> &windingOrder,
   int polygonOrder = endOfFace - startOfFace;
   auto first = windingOrder.begin() + startOfFace;
 
+  triangularFaces.reserve(triangularFaces.size() + 3 * polygonOrder);
   for (int polygonVertex = 1; polygonVertex < polygonOrder - 1;
        ++polygonVertex) {
     triangularFaces.push_back(*first);
