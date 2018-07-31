@@ -53,7 +53,6 @@ set ( TEST_FILES
         LoadAndApplyMuonDetectorGroupingTest.h
         MuonAlgorithmHelperTest.h
 	EstimateMuonAsymmetryFromCountsTest.h
-        MuonAlgorithmHelperTest.h
 	MuonGroupDetectorsTest.h
 	PhaseQuadMuonTest.h
 	PlotAsymmetryByLogValueTest.h

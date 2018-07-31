@@ -34,7 +34,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/FileComparisonHelper.cpp
                         ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/MDEventsTestHelper.cpp
-			../../TestHelpers/src/MuonWorkspaceCreationHelper.cpp
+			                  ../../TestHelpers/src/MuonWorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/SANSInstrumentCreationHelper.cpp
                         ../../TestHelpers/src/ScopedFileHelper.cpp
                         ../../TestHelpers/src/TearDownWorld.cpp
