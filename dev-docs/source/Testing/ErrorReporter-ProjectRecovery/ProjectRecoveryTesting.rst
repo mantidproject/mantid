@@ -19,7 +19,7 @@ Project Recovery test
 - Set up a directory to store output for comparison, referred to as ``testing_directory`` below
 
 
-**Time required XX - YY  minutes**
+**Time required 15 - 30  minutes**
 
 --------------
 
@@ -213,12 +213,56 @@ Project Recovery test
 - Choose `Tiled plot`
 - Drag workspace `Rename2` into the main window
 
-.. image::
-
-   ../../images/reporter-test-4.png
+.. image:: ../../images/reporter-test-4.png
 
 
 - Crash Mantid with `Segfault`
 - Reopen Mantid
 - You should be presented with the Project Recovery dialog
 - Choose `Yes`
+- Mantid should reload the workspaces and open windows, so you should see the plots and the data in the main screen.
+
+---------
+
+5. Test multiple instances of Mantid running
+
+- Open MantidPlot - make sure no other instances of MantidPlot are running
+- Run the script:
+
+.. code-block:: python
+
+  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='NewWorkspace1')
+
+- Make sure that Log level is set to `Debug` in the results log
+- Open a second instance of Mantid
+- In the results log it should say ``Another MantidPlot process is running. Project recovery is disabled.`` 
+- Run the script:
+
+.. code-block:: python
+
+  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='NewWorkspace2')
+
+- Crash the first instance of Mantid with `Segfault`; choose `Do not share information` in the error dialog
+- Do not exit the second instance of Mantid
+- Restart Mantid
+- In the results log it should say ``Another MantidPlot process is running. Project recovery is disabled.`` 
+- Close both instances of Mantid
+- Restart Mantid
+- You should be presented with a dialog offering to attempt a recovery - choose `Yes`
+- `NewWorkspace1` should appear in the workspace dialog
+
+---------
+
+6. Opening script only
+
+- Open MantidPlot - make sure no other instances of MantidPlot are running
+- Run the second script from test 1
+- In the workspace window right-click the ``Sequential3`` workspace and choose `Plot spectrum`
+- Choose `Plot All`
+- Crash Mantid with `Segfault`
+- Reopen Mantid
+- You should be presented with the Project Recovery dialog
+- Choose `Only open in script editor`
+- Mantid should open the script editor, with a script named `ordered_recovery.py`
+- Run this script, it should repopulate the workspaces dialog, but not open any figures
+
