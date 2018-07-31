@@ -69,7 +69,7 @@ Ionic Diffusion test
    -  Choose ``1D plot`` and click ``Plot All``
    -  The results should look like the image below:
 
-.. figure:: ../../images/CuResult.png
+.. figure:: ../../images/CuResult.jpg
    :alt: CuResult.png
 
 
