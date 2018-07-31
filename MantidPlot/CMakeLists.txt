@@ -91,6 +91,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/PluginFit.cpp
                    src/PolynomFitDialog.cpp
                    src/PolynomialFit.cpp
+                   src/Process.cpp
                    src/ProjectRecovery.cpp
                    src/ProjectSaveView.cpp
                    src/ProjectSerialiser.cpp
@@ -291,6 +292,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/PluginFit.h
                    src/PolynomFitDialog.h
                    src/PolynomialFit.h
+                   src/Process.h
                    src/ProjectRecovery.h
                    src/ProjectSerialiser.h
                    src/ProjectSaveView.h
@@ -666,6 +668,7 @@ qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/images.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/MantidWidgets.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images//fonts/fonts.qrc )
 qt4_add_resources ( RES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/icons.qrc )
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/scripts/ErrorReporter/errorreporter.qrc )
 
 ###########################################################################
 # Add the dependencies
@@ -812,6 +815,10 @@ target_link_libraries ( MantidPlot LINK_PRIVATE
   ${OPENGL_glu_LIBRARY}
   ${OPENGL_gl_LIBRARY}
 )
+if (WIN32)
+  set_target_properties ( MantidPlot PROPERTIES COMPILE_DEFINITIONS "PSAPI_VERSION=1" )
+  target_link_libraries ( MantidPlot PRIVATE Psapi.lib )
+endif ()
 
 if(MAKE_VATES)
   target_include_directories( MantidPlot SYSTEM PRIVATE ${PARAVIEW_INCLUDE_DIRS} )

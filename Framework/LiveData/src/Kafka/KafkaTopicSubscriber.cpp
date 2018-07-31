@@ -157,6 +157,11 @@ KafkaTopicSubscriber::getCurrentOffsets() {
     throw std::runtime_error("In KafkaTopicSubscriber failed to lookup "
                              "current partition assignment.");
   }
+  error = m_consumer->position(partitions);
+  if (error != RdKafka::ERR_NO_ERROR) {
+    throw std::runtime_error("In KafkaTopicSubscriber failed to lookup "
+                             "current partition positions.");
+  }
   for (auto topicPartition : partitions) {
     std::vector<int64_t> offsetList = {topicPartition->offset()};
     auto result = currentOffsets.emplace(

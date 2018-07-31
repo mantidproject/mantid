@@ -204,7 +204,7 @@ public:
             outWSName));
     TS_ASSERT(iws);
 
-    std::vector<API::IMDNode *> boxes(0, NULL);
+    std::vector<API::IMDNode *> boxes(0, nullptr);
     iws->getBoxes(boxes, 10000, false);
     TSM_ASSERT_EQUALS("Number of boxes", boxes.size(), 1);
     API::IMDNode *box = boxes[0];
@@ -332,7 +332,7 @@ public:
             normWSName));
     TS_ASSERT(nws);
 
-    std::vector<API::IMDNode *> boxes(0, NULL);
+    std::vector<API::IMDNode *> boxes(0, nullptr);
     nws->getBoxes(boxes, 10000, false);
     TSM_ASSERT_EQUALS("Number of boxes", boxes.size(), 1);
     API::IMDNode *box = boxes[0];
@@ -418,7 +418,7 @@ public:
             normWSName));
     TS_ASSERT(nws);
 
-    std::vector<API::IMDNode *> boxes(0, NULL);
+    std::vector<API::IMDNode *> boxes(0, nullptr);
     nws->getBoxes(boxes, 10000, false);
     TSM_ASSERT_EQUALS("Number of boxes", boxes.size(), 1);
     API::IMDNode *box = boxes[0];
@@ -601,7 +601,7 @@ public:
             outWSName));
     TS_ASSERT(iws);
 
-    std::vector<API::IMDNode *> boxes(0, NULL);
+    std::vector<API::IMDNode *> boxes(0, nullptr);
     iws->getBoxes(boxes, 10000, false);
     TSM_ASSERT_EQUALS("Number of boxes", boxes.size(), 1);
     API::IMDNode *box = boxes[0];

@@ -53,10 +53,16 @@ public:
   /// Calculate the time-weighted average of a property in a filtered range
   virtual double
   averageValueInFilter(const std::vector<SplittingInterval> &filter) const = 0;
+  /// Calculate the time-weighted average and standard deviation of a property
+  /// in a filtered range
+  virtual std::pair<double, double> averageAndStdDevInFilter(
+      const std::vector<SplittingInterval> &filter) const = 0;
   /// Return the time series's times as a vector<DateAndTime>
   virtual std::vector<Types::Core::DateAndTime> timesAsVector() const = 0;
   /// Returns the calculated time weighted average value
   virtual double timeAverageValue() const = 0;
+  /// Returns the calculated time weighted average value and standard deviation
+  virtual std::pair<double, double> timeAverageValueAndStdDev() const = 0;
   /// Returns the real size of the time series property map:
   virtual int realSize() const = 0;
   /// Deletes the series of values in the property

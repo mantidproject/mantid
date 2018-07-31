@@ -162,14 +162,9 @@ void export_ConfigService() {
            "Saves the keys that have changed from their default to the given "
            "filename")
 
-      .def("setFileLogLevel", &ConfigServiceImpl::setFileLogLevel,
-           (arg("self"), arg("logLevel")), "Sets the log level priority for "
-                                           "the File log channel, logLevel 1 = "
-                                           "Fatal, 6 = information, 7 = Debug")
-
-      .def("setConsoleLogLevel", &ConfigServiceImpl::setConsoleLogLevel,
-           (arg("self"), arg("logLevel")),
-           "Sets the log level priority for the Console log channel, logLevel "
+      .def("setLogLevel", &ConfigServiceImpl::setLogLevel,
+           (arg("self"), arg("logLevel"), arg("quiet") = false),
+           "Sets the log level priority for all the log channels, logLevel "
            "1 = Fatal, 6 = information, 7 = Debug")
 
       .def("keys", &ConfigServiceImpl::keys, arg("self"))

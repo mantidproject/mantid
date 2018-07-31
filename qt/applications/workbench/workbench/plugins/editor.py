@@ -69,7 +69,11 @@ class MultiFileEditor(PluginWidget):
     # ----------- Plugin API --------------------
 
     def app_closing(self):
-        self.editors.close_all()
+        """
+        Tries to close all editors
+        :return: True if editors can be closed, false if cancelled
+        """
+        return self.editors.close_all()
 
     def get_plugin_title(self):
         return "Editor"

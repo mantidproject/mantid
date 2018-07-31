@@ -173,6 +173,7 @@ public slots:
   void moveCurrentCell();
   bool isEmptyRow(int row);
   bool isEmptyColumn(int col);
+  void onColumnHeaderDoubleClick();
 
   void print() override;
   void print(const QString &fileName);
