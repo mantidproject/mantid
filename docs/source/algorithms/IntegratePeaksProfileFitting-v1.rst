@@ -38,8 +38,8 @@ Instrument-Defined Parameters
 -----------------------------
 In addition to the input parameters defined above, there are several other parameters
 to be aware of which are pre-defined for each instrument.  The instrument is determined
-from the instrument that is loaded into PeaksWorkspace. If the instrument name cannot be
-matched with available choices, the algorithm defaults to MaNDi parameters. Default 
+from the instrument that is loaded into PeaksWorkspace. If the instrument parameters file
+does not contain paramters, the algorithm defaults to MaNDi parameters. Default 
 values are below:
 
 +--------------+----------------------------+----------+----------+---------+
