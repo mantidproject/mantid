@@ -24,10 +24,6 @@ boost::python::list getSpectrumDefinitionList(const SpectrumInfo &self) {
 }
 
 void export_SpectrumInfo() {
-  // WARNING SpectrumInfo is work in progress and not ready for exposing more of
-  // its functionality to Python, and should not yet be used in user scripts. DO
-  // NOT ADD EXPORTS TO OTHER METHODS without contacting the team working on
-  // Instrument-2.0.
   class_<SpectrumInfo, boost::noncopyable>("SpectrumInfo", no_init)
       .def("__len__", &SpectrumInfo::size, arg("self"),
            "Returns the number of spectra.")
