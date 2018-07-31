@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 
+
 class PresenterEnum(object):
     class RunTabPresenter(object):
         pass

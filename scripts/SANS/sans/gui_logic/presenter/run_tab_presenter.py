@@ -10,8 +10,7 @@ import os
 import copy
 import time
 from mantid.kernel import Logger
-from mantid.api import (AnalysisDataService, FileFinder, WorkspaceFactory)
-from mantid.kernel import (Property)
+from mantid.api import (FileFinder)
 
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from sans.gui_logic.models.state_gui_model import StateGuiModel
@@ -19,11 +18,8 @@ from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
-from sans.gui_logic.sans_data_processor_gui_algorithm import SANS_DUMMY_INPUT_ALGORITHM_PROPERTY_NAME
-from sans.gui_logic.presenter.property_manager_service import PropertyManagerService
-from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, generate_table_index, OPTIONS_SEPARATOR,
-                                       OPTIONS_EQUAL, get_instrument_strings_for_gui)
-from sans.common.enums import (BatchReductionEntry, OutputMode, RangeStepType, SampleShape, FitType)
+from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_instrument_strings_for_gui)
+from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
@@ -82,7 +78,6 @@ class RunTabPresenter(object):
 
         def on_rows_removed(self, rows):
             self._presenter.on_rows_removed(rows)
-
 
     class ProcessListener(WorkHandler.WorkListener):
         def __init__(self, presenter):
@@ -361,8 +356,8 @@ class RunTabPresenter(object):
             listener = RunTabPresenter.ProcessListener(self)
 
             work_handler.process(listener, sans_batch, states=states.values(), use_optimizations=use_optimizations, output_mode=output_mode,
-                       plot_results=plot_results
-                       , output_graph=output_graph)
+                                 plot_results=plot_results
+                                 , output_graph=output_graph)
 
         except Exception as e:
             self._view.enable_buttons()
@@ -489,7 +484,6 @@ class RunTabPresenter(object):
         # 1. Update the state model
         state_model_with_view_update = self._get_state_model_with_view_update()
         # 2. Update the table model
-        selected_rows = self._view.get_selected_rows()
         selected_table_model = self._table_model
 
         # 3. Go through each row and construct a state object

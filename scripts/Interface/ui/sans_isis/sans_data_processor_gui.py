@@ -125,7 +125,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         def on_rows_removed(self):
             pass
 
-
     def __init__(self, main_presenter):
         """
         Initialise the interface
@@ -324,11 +323,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             self.data_processor_table.setParent(None)
 
         self.data_processor_table = MantidQt.MantidWidgets.Batch.JobTreeView(
-        ["Sample Scatter", "ssp", "Sample Transmission", "stp", "Sample Direct", "sdp","Can Scatter", "csp",
-         "Can Transmission", "ctp", "Can Direct", "cdp", "Output Name", "User File", "Sample Thickness", "Options"], # The table column headings
-         self.cell(""), # The default style and content for new 'empty' cells.
-         self # The parent QObject.
-         )
+            ["Sample Scatter", "ssp", "Sample Transmission", "stp", "Sample Direct", "sdp","Can Scatter", "csp",
+             "Can Transmission", "ctp", "Can Direct", "cdp", "Output Name", "User File", "Sample Thickness", "Options"]
+            , self.cell(""), self)
 
         self.data_processor_table.setRootIsDecorated(False)
 
