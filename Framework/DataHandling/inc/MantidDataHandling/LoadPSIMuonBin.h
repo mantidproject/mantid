@@ -23,6 +23,7 @@ public:
 private:
   void init() override;
   void exec() override;
+  std::string getFormattedDate(std::string date, std::string time);
 };
 } // namespace DataHandling
 } // namespace Mantid

@@ -7,8 +7,10 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/DateAndTime.h"
 
 #include <fstream>
+#include <map>
 
 namespace Mantid {
 namespace DataHandling {
@@ -284,11 +286,28 @@ void LoadPSIMuonBin::exec() {
   }
 
   //Set axis variables
-  
-  //Set log numbers
+  //outputWorkspace.setYUnit("Counts");
+  //outputWorkspace.setXUnit("μs")
+  //outputWorkspace.setLabel("Time");
+
+  //Set log numbers 
+  Mantid::Types::Core::DateAndTime start(getFormattedDate(dateStart));
+  Mantid::Types::Core::DateAndTime end(getFormattedDate(dateEnd));
+  outputWorkspace->mutableRun().setStartAndEndTime(start, end);
 
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
+std::string LoadPSIMuonBin::getFormattedDateTime(std::string date, std::string time){
+    std::map<std::string, std::string> months{{"JAN", "01"},{"FEB", "02"},{"MAR", "03"},{"APR", "04"},{"MAY", "05"},{"JUN", "06"},{"JUL", "07"},{"AUG", "08"},{"SEP", "09"},{"OCT", "10"},{"NOV", "11"},{"DEC", "12"}};
+    /*
+    std::string day = date.substr(0,2);
+    std::string year = "20" + date.substr(7,2);
+    std::string originalMonth = date.substr(3, 3);
+    std::string month = months.find(originalMonth)->second;
+    std::string validDate = year + "-" + month + "-" + day;
+    */
+    return "20" + date.substr(7,2) + "-" + months.find(date.substr(3, 3))->second + "-" + date.substr(0,2) + "T" + time;
+}
 } // namespace DataHandling
 } // namespace Mantid
