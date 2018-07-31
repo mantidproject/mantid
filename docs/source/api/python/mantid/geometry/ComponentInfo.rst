@@ -51,35 +51,19 @@ Output:
 	<class 'mantid.geometry._geometry.ComponentInfo'>
 
 
-**Example 2 - Calling the relativePosition method on the ComponentInfo Object:**
-This example shows how to call the ``relativePosition`` method.
-The method takes in an integer ``index`` parameter which corresponds to a component.
-The return value is a V3D object which denotes a point in 3D space.
+**Example 2 - Calling Some Methods on the ComponentInfo Object:**
+This example shows how to call a few different methods on the ComponentInfo object.
 
-.. testcode:: CallRelativePositionMethod
+The ``relativePosition`` method takes in an integer ``index`` parameter which corresponds to a component.
+The return value is a ``V3D`` object which denotes a point in 3D space.
 
-	# Create a workspace to use
-	ws = CreateSampleWorkspace()
-
-	# Get the ComponentInfo object
-	info = ws.componentInfo()
-
-	# Call relativePosition
-	print(info.relativePosition(0))
-
-Output:
-
-.. testoutput:: CallRelativePositionMethod
-
-	[0,0,0]
-
-
-**Example 3 - Calling the setRotation method on the ComponentInfo Object:**
-The ``setRotation()`` method takes in a ``Quat`` object which defines a rotation.
-The rotation is applied to the component. 
+The ``setRotation()`` method takes in a ``Quat`` object which defines a rotation. The rotation is applied to the component. 
 Retriving the rotation after setting it may not always give the same ``Quat`` object back - i.e. the values could be changed.
 
-.. testcode:: CallSetRotationMethod
+The ``hasParent()`` method takes an integer ``index`` parameter which corresponds to a component.
+The return value is ``True`` if the component has a parent component or ``False`` otherwise.
+
+.. testcode:: CallMethods
 	
 	# Import Quat
 	from mantid.kernel import Quat
@@ -90,41 +74,27 @@ Retriving the rotation after setting it may not always give the same ``Quat`` ob
 	# Get the ComponentInfo object
 	info = ws.componentInfo()
 
+	# Call relativePosition
+	print(info.relativePosition(0))
+
 	# Create a sample Quat and call setRotation
 	quat = Quat(0, 0, 0, 0)
 	info.setRotation(0, quat)
 	print(info.rotation(0))
-
-Output:
-
-.. testoutput:: CallSetRotationMethod
-
-	[0,0,0,0]
-
-
-**Example 4 - Calling the hasParent method on the ComponentInfo Object:**
-The ``hasParent()`` method takes an integer ``index`` parameter which represents the component.
-The return value is True if the component has a parent component or False otherwise.
-
-.. testcode:: CallHasParentMethod
-	
-	# Create a workspace to use
-	ws = CreateSampleWorkspace()
-
-	# Get the ComponentInfo object
-	info = ws.componentInfo()
 
 	# Call hasParent
 	print(info.hasParent(0))
 
 Output:
 
-.. testoutput:: CallHasParentMethod
+.. testoutput:: CallMethods
 
+	[0,0,0]
+	[0,0,0,0]
 	True
 
 
-**Example 5 - Retrieving a List of Child Components from a ComponentInfo Object:**
+**Example 3 - Retrieving a List of Child Components from a ComponentInfo Object:**
 The ``children()`` method does not take in any parameters.
 The method returns a list of integers representing the child components.
 The returned list can then be indexed into to obtain a specific component.
