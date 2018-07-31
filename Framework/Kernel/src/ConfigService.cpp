@@ -325,6 +325,48 @@ void ConfigServiceImpl::setBaseDirectory() {
 #endif
 }
 
+namespace {
+// look for specific keys and throw an exception if one is found
+std::string checkForBadConfigOptions(const std::string &filename,
+                                     const std::string &propertiesString) {
+  std::stringstream stream(propertiesString);
+  std::stringstream resultPropertiesString;
+  std::string line;
+  int line_num = 0;
+  while (std::getline(stream, line)) {
+    line_num += 1; // increment early
+    bool is_ok = true;
+
+    // Check for common errors. Empty lines are ok, things that are a key
+    // without a value are a critical failure. Forbidden keys are just commented
+    // out.
+    if (line.empty() || (Kernel::Strings::strip(line)[0] == '#')) {
+      // do nothing
+    } else if (line.find("FilterChannel") != std::string::npos) {
+      is_ok = false;
+    }
+
+    // Print warning to error channel and comment out offending line
+    if (!is_ok) {
+      const auto end = line.find("=");
+      std::cerr << "Encontered invalid key \"";
+      if (end != std::string::npos) {
+        std::cerr << Kernel::Strings::strip(line.substr(0, end));
+      } else {
+        std::cerr << Kernel::Strings::strip(line);
+      }
+      std::cerr << "\" in " << filename << " on line " << line_num << std::endl;
+
+      // comment out the property
+      resultPropertiesString << '#';
+    }
+    // copy over the line
+    resultPropertiesString << line << '\n';
+  }
+  return resultPropertiesString.str();
+}
+} // end of anonymous namespace
+
 /** Loads the config file provided.
  *  If the file contains logging setup instructions then these will be used to
  *setup the logging framework.
@@ -357,6 +399,9 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
         throw Exception::FileError("Cannot open file", filename);
       }
     }
+
+    // verify the contents and comment out offending lines
+    temp = checkForBadConfigOptions(filename, temp);
 
     // store the property string
     if ((append) && (!m_PropertyString.empty())) {

@@ -483,6 +483,7 @@ public:
     writer << "\n";
     writer << "mantid.thorax = 10\n";
     writer << "# This comment line\n";
+    writer << " # This is an indented comment line\n";
     writer << "key.withnospace=5\n";
     writer << "key.withnovalue";
     writer.close();
@@ -512,11 +513,12 @@ public:
     }
     reader.close();
 
-    TS_ASSERT_EQUALS(prop_lines.size(), 4);
+    TS_ASSERT_EQUALS(prop_lines.size(), 5);
     TS_ASSERT_EQUALS(prop_lines[0], "mantid.legs=6");
     TS_ASSERT_EQUALS(prop_lines[1], "");
     TS_ASSERT_EQUALS(prop_lines[2], "# This comment line");
-    TS_ASSERT_EQUALS(prop_lines[3], "key.withnospace=5");
+    TS_ASSERT_EQUALS(prop_lines[3], " # This is an indented comment line");
+    TS_ASSERT_EQUALS(prop_lines[4], "key.withnospace=5");
 
     // Clean up
     prop_file.remove();
