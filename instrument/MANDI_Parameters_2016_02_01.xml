@@ -6,7 +6,6 @@
 <parameter name="T0">
  <value val="-1.185000"/>
 </parameter>
-</component-link>
 
 <!-- Need to fill in gaps for peak profile fitting -->
 <parameter name="fitConvolvedPeak" type="bool">
@@ -68,4 +67,5 @@
  <value val="5" />
 </parameter>
 
+</component-link>
 </parameter-file>
