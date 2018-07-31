@@ -37,13 +37,11 @@ bool allCoplanar(const std::vector<Kernel::V3D> &vertices,
   const auto nx = normal[0];
   const auto ny = normal[1];
   const auto nz = normal[2];
-  auto denom = normal.norm2();
   auto k = nx * v0.X() + ny * v0.Y() + nz * v0.Z();
 
   for (size_t i = 0; i < vertices.size(); ++i) {
     auto d = (nx * vertices[i].X() + ny * vertices[i].Y() +
-              nz * vertices[i].Z() - k) /
-             denom; // TODO, division not necessary
+              nz * vertices[i].Z() - k);
     if (d != 0) {
       in_plane = false;
       break;
