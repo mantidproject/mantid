@@ -4,6 +4,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/BinaryStreamReader.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include <fstream>
 
@@ -71,7 +74,7 @@ void LoadPSIMuonBin::exec() {
   std::string binFilename = getPropertyValue("Filename");
   std::vector<Mantid::HistogramData::Histogram> readHistogramData;
 
-  std::ifstream binFile(binFilename, std::ios::in | std::ios::binary | std::ios::ate);
+  std::ifstream binFile(binFilename, std::ios::in | std::ios::binary);
 
   Mantid::Kernel::BinaryStreamReader streamReader(binFile);
   //Read the first two bytes into a string
@@ -85,16 +88,20 @@ void LoadPSIMuonBin::exec() {
   //Should be at 3rd byte
   int16_t tdcResolution;
   streamReader >> tdcResolution;
+
   //Should be at 5th byte
   int16_t tdcOverflow;
   streamReader >> tdcOverflow;
+
   //Should be at 7th byte
   int16_t numberOfRuns;
   streamReader >> numberOfRuns;
 
-  streamReader.moveStreamToPosition(29);
+  //This may be 29 but set to 28
+  streamReader.moveStreamToPosition(28);
   int16_t lengthOfHistograms;
   streamReader >> lengthOfHistograms;
+
   //Should be at 31st byte
   int16_t numberOfHistograms;
   streamReader >> numberOfHistograms;
@@ -120,14 +127,17 @@ void LoadPSIMuonBin::exec() {
   streamReader >> numberOfDataRecordsFile;
 
   //Should be at 130th byte
+  streamReader.moveStreamToPosition(130);
   int16_t lengthOfDataRecordsBin;       // lendef
   streamReader >> lengthOfDataRecordsBin;
 
   //Should be at 132nd byte
+  streamReader.moveStreamToPosition(132);
   int16_t numberOfDataRecordsHistogram; // kdafhi
   streamReader >> numberOfDataRecordsHistogram;
 
   //Should be at 134th Byte
+  streamReader.moveStreamToPosition(134);
   int16_t numberOfHistogramsPerRecord;  // khidaf
   streamReader >> numberOfHistogramsPerRecord;
 
@@ -178,7 +188,7 @@ void LoadPSIMuonBin::exec() {
 
   streamReader.moveStreamToPosition(60);
   std::string monDeviation; // Only pass 11 bytes into the string from stream
-  streamReader.read(monDeviation, 11)
+  streamReader.read(monDeviation, 11);
 
   //The arrays in the header of the binary file:
   int32_t scalars[18];
@@ -238,6 +248,47 @@ void LoadPSIMuonBin::exec() {
     streamReader.moveStreamToPosition(88 + (i*4));
     streamReader >> monHigh[i];
   }
+
+  //Read in the histograms
+  std::vector<std::vector<double>> histograms;
+  for(auto histogramIndex = 0; histogramIndex < numberOfHistograms; ++histogramIndex){
+    std::vector<double> nextHistogram;
+    for(auto rowIndex = 0; rowIndex < lengthOfHistograms; ++rowIndex){
+      //Each histogram bit is 1024 bytes below the file start, and 4 bytes apart, and the HistogramNumber * NumberOfRecordsInEach * LengthOfTheDataRecordBins + PositionInHistogram
+      unsigned long histogramStreamPosition = 1024+(histogramIndex * numberOfDataRecordsFile * lengthOfDataRecordsBin);
+      unsigned long streamPosition = histogramStreamPosition + rowIndex*sizeof(int32_t);
+      streamReader.moveStreamToPosition(streamPosition);
+      int32_t nextReadValue;
+      streamReader >> nextReadValue;
+      nextHistogram.push_back(nextReadValue);
+    }
+    histograms.push_back(nextHistogram);
+  }
+
+  binFile.close();
+
+  //Create the workspace stuff
+  // Create a x axis, assumption that histograms will all be the same size, and that x will be 1 more in size than y
+  std::vector<double> xAxis;
+  for(auto xIndex = 0; static_cast<unsigned int>(xIndex) < histograms[0].size()+1; ++xIndex){
+    xAxis.push_back(static_cast<double>(xIndex) * histogramBinWidth);
+  }
+
+  auto sizeOfXForHistograms = histograms[0].size()+1;
+  DataObjects::Workspace2D_sptr outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(numberOfHistograms, Mantid::HistogramData::Histogram(Mantid::HistogramData::BinEdges(sizeOfXForHistograms)));
+
+  for (auto specNum = 0u; specNum < histograms.size(); ++specNum){
+    outputWorkspace->mutableX(specNum) = xAxis;
+    outputWorkspace->mutableY(specNum) = histograms[specNum];
+    //Add Errors and Dx if nessercary
+  }
+
+  //Set axis variables
+  
+  //Set log numbers
+
+  setProperty("OutputWorkspace", outputWorkspace);
 }
+
 } // namespace DataHandling
 } // namespace Mantid
