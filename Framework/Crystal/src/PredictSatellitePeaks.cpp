@@ -139,27 +139,25 @@ void PredictSatellitePeaks::exec() {
   IPeak &peak0 = Peaks->getPeak(0);
 
   std::vector<V3D> possibleHKLs;
-  if (includePeaksInRange) {
-    const double dMin = getProperty("MinDSpacing");
-    const double dMax = getProperty("MaxDSpacing");
-    Geometry::HKLGenerator gen(lattice, dMin);
-    auto dSpacingFilter =
-        boost::make_shared<HKLFilterDRange>(lattice, dMin, dMax);
+  const double dMin = getProperty("MinDSpacing");
+  const double dMax = getProperty("MaxDSpacing");
+  Geometry::HKLGenerator gen(lattice, dMin);
+  auto dSpacingFilter =
+      boost::make_shared<HKLFilterDRange>(lattice, dMin, dMax);
 
-    V3D hkl = *(gen.begin());
-    g_log.information() << "HKL range for d_min of " << dMin << " to d_max of "
-                        << dMax << " is from " << hkl << " to " << hkl * -1.0
-                        << ", a total of " << gen.size() << " possible HKL's\n";
-    if (gen.size() > MAX_NUMBER_HKLS)
-      throw std::invalid_argument("More than 10 billion HKLs to search. Is "
-                                  "your d_min value too small?");
+  V3D hkl = *(gen.begin());
+  g_log.information() << "HKL range for d_min of " << dMin << " to d_max of "
+                      << dMax << " is from " << hkl << " to " << hkl * -1.0
+                      << ", a total of " << gen.size() << " possible HKL's\n";
+  if (gen.size() > MAX_NUMBER_HKLS)
+    throw std::invalid_argument("More than 10 billion HKLs to search. Is "
+                                "your d_min value too small?");
 
-    possibleHKLs.clear();
-    possibleHKLs.reserve(gen.size());
-    std::remove_copy_if(gen.begin(), gen.end(),
-                        std::back_inserter(possibleHKLs),
-                        (~dSpacingFilter)->fn());
-  }
+  possibleHKLs.clear();
+  possibleHKLs.reserve(gen.size());
+  std::remove_copy_if(gen.begin(), gen.end(),
+                      std::back_inserter(possibleHKLs),
+                      (~dSpacingFilter)->fn());
 
   size_t N = possibleHKLs.size();
   N = max<size_t>(100, N);
@@ -272,8 +270,8 @@ void PredictSatellitePeaks::predictOffsets(
     Kernel::V3D Qs = goniometer * UB * satelliteHKL * 2.0 * M_PI;
 
     // Check if Q is non-physical
-    if (Qs[2] <= 0)
-      continue;
+    if (Qs[2] <= 0) 
+      continue; 
 
     auto peak(Peaks->createPeak(Qs, 1));
 

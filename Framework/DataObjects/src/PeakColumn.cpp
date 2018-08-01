@@ -173,7 +173,6 @@ void PeakColumn::read(size_t index, const std::string &text) {
 
   // Convert to a double
   double val = 0;
-
   int success = Strings::convert(text, val);
 
   if (success == 0) {

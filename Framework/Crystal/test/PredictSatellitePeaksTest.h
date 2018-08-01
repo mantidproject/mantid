@@ -85,6 +85,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     alg.setPropertyValue("SatellitePeaks", "SatellitePeaks");
     PeaksWorkspace_sptr SatellitePeaks = alg.getProperty("SatellitePeaks");
+    TS_ASSERT(SatellitePeaks);
 
     TS_ASSERT_EQUALS(SatellitePeaks->getNumberPeaks(), 5);
 
@@ -98,7 +99,7 @@ public:
     TS_ASSERT_DELTA(peak3.getK(), 0.0, .0001);
     TS_ASSERT_DELTA(peak3.getL(), 0.2, .0001);
 
-    /*PredictSatellitePeaks alg4;
+    PredictSatellitePeaks alg4;
     TS_ASSERT_THROWS_NOTHING(alg4.initialize());
     TS_ASSERT(alg4.isInitialized());
 
@@ -114,9 +115,11 @@ public:
     alg4.setProperty("WavelengthMax", "22");
     TS_ASSERT(alg4.execute())
     TS_ASSERT(alg4.isExecuted());
+    alg4.setPropertyValue("SatellitePeaks", "SatellitePeaks");
     PeaksWorkspace_sptr SatellitePeaks2 = alg4.getProperty("SatellitePeaks");
+    TS_ASSERT(SatellitePeaks2);
 
-    TS_ASSERT_EQUALS(SatellitePeaks2->getNumberPeaks(), 5);*/
+    TS_ASSERT_EQUALS(SatellitePeaks2->getNumberPeaks(), 467);
 
     AnalysisDataService::Instance().remove(WSName);
   }
