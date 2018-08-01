@@ -107,12 +107,14 @@ fi
 # For a clean build the entire thing is removed to guarantee it is clean. All
 # other build types are assumed to be incremental and the following items
 # are removed to ensure stale build objects don't interfere with each other:
+#   - those removed by git clean -fdx --exclude=`basename $BUILD_DIR`
 #   - build/bin/**: if libraries are removed from cmake they are not deleted
 #                   from bin and can cause random failures
 #   - build/ExternalData/**: data files will change over time and removing
 #                            the links helps keep it fresh
 ###############################################################################
-BUILD_DIR=$WORKSPACE/build
+BUILD_DIR_REL=build
+BUILD_DIR=$WORKSPACE/$BUILD_DIR_REL
 if [ -z "$BUILD_DIR" ]; then
   echo "Build directory not set. Cannot continue"
   exit 1
@@ -122,6 +124,7 @@ if [[ "$CLEANBUILD" == true ]]; then
   rm -rf $BUILD_DIR
 fi
 if [ -d $BUILD_DIR ]; then
+  git clean -fdx --exclude=${BUILD_DIR_REL}
   rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData
   find ${BUILD_DIR:?} -name 'TEST-*.xml' -delete
   if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
