@@ -339,7 +339,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   setAttribute(Qt::WA_DeleteOnClose);
 
 #ifdef SHARED_MENUBAR
-  m_sharedMenuBar = new QMenuBar(NULL);
+  m_sharedMenuBar = new QMenuBar(nullptr);
   m_sharedMenuBar->setNativeMenuBar(true);
 #endif
   setWindowTitle(tr("MantidPlot - untitled")); // Mantid
@@ -893,7 +893,7 @@ void ApplicationWindow::initGlobalConstants() {
 
 QMenuBar *ApplicationWindow::myMenuBar() {
 #ifdef SHARED_MENUBAR
-  return m_sharedMenuBar == NULL ? menuBar() : m_sharedMenuBar;
+  return m_sharedMenuBar == nullptr ? menuBar() : m_sharedMenuBar;
 #else
   return menuBar();
 #endif

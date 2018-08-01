@@ -1535,7 +1535,7 @@ void DetectorPlotController::savePlotToWorkspace() {
         actor.sumDetectors(dets, x, y);
         unitX = parentWorkspace->getAxis(0)->unit()->unitID();
       } else {
-        QMessageBox::warning(NULL, "MantidPlot - Warning",
+        QMessageBox::warning(nullptr, "MantidPlot - Warning",
                              "Cannot save the stored curves.\nOnly the current "
                              "curve will be saved.");
       }
@@ -1561,7 +1561,7 @@ void DetectorPlotController::savePlotToWorkspace() {
     }
     if (!x.empty()) {
       if (nbins > 0 && x.size() != nbins) {
-        QMessageBox::critical(NULL, "MantidPlot - Error",
+        QMessageBox::critical(nullptr, "MantidPlot - Error",
                               "Curves have different sizes.");
         return;
       } else {
