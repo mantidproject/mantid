@@ -100,7 +100,7 @@ if "!CLEANBUILD!" == "yes" (
 )
 
 if EXIST %BUILD_DIR% (
-  git clean -fdx --exclude=%BUILD_DIR_REL%
+  git clean -fdx --exclude=external --exclude=%BUILD_DIR_REL%
   rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData
   for /f %%F in ('dir /b /a-d /S "TEST-*.xml"') do del /Q %%F >/nul
   if "!CLEAN_EXTERNAL_PROJECTS!" == "true" (
