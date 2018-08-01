@@ -38,6 +38,12 @@ BATCH_FILE_TEST_CONTENT_3 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024
                               BatchReductionEntry.SampleScatterPeriod: '3',
                               BatchReductionEntry.Output: 'test_file'}]
 
+BATCH_FILE_TEST_CONTENT_4 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
+                              BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
+                              BatchReductionEntry.SampleDirect: 'SANS2D00022048',
+                              BatchReductionEntry.Output: 'test_file'},
+                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024', BatchReductionEntry.Output: 'test_file2'}]
+
 
 class MultiPeriodMock(object):
     def __init__(self, call_pattern):
@@ -56,6 +62,7 @@ class RunTabPresenterTest(unittest.TestCase):
     def setUp(self):
         config.setFacility("ISIS")
         config.setString("default.instrument", "SANS2D")
+
         patcher = mock.patch('sans.gui_logic.presenter.run_tab_presenter.BatchCsvParser')
         self.addCleanup(patcher.stop)
         self.BatchCsvParserMock = patcher.start()
@@ -275,7 +282,18 @@ class RunTabPresenterTest(unittest.TestCase):
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
 
     def test_that_can_get_states_from_row_user_file(self):
-        pass
+        # Arrange
+        row_user_file_path = create_user_file(sample_user_file_gravity_OFF)
+        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_4,
+                                                                                           row_user_file_path = row_user_file_path)
+        presenter.on_user_file_load()
+        presenter.on_batch_file_load()
+        # Act
+        state = presenter.get_state_for_row(1)
+        state0 = presenter.get_state_for_row(0)
+        # Assert
+        self.assertTrue(state.convert_to_q.use_gravity is False)
+        self.assertTrue(state0.convert_to_q.use_gravity is True)
 
     def test_that_can_get_state_for_index_if_index_exists(self):
         # Arrange
@@ -433,10 +451,14 @@ class RunTabPresenterTest(unittest.TestCase):
                 PropertyManagerDataService.remove(element)
 
     def _get_files_and_mock_presenter(self, content, is_multi_period=True, row_user_file_path = ""):
+        if row_user_file_path:
+            content[1].update({BatchReductionEntry.UserFile : row_user_file_path})
+
         batch_parser = mock.MagicMock()
         batch_parser.parse_batch_file = mock.MagicMock(return_value=content)
         self.BatchCsvParserMock.return_value = batch_parser
         batch_file_path = 'batch_file_path'
+
         user_file_path = create_user_file(sample_user_file)
         view, _, _ = create_mock_view(user_file_path, batch_file_path, row_user_file_path)
         # We just use the sample_user_file since it exists.

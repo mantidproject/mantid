@@ -89,6 +89,5 @@ def create_user_file(user_file_content):
 def make_sample_user_file(gravity ='ON'):
     return base_user_file.format(gravity)
 
-
 sample_user_file = make_sample_user_file(gravity ='ON')
 sample_user_file_gravity_OFF = make_sample_user_file(gravity ='OFF')

@@ -58,9 +58,6 @@ class RunTabPresenter(object):
         def on_processed_clicked(self):
             self._presenter.on_processed_clicked()
 
-        def on_processing_finished(self):
-            self._presenter.on_processing_finished()
-
         def on_multi_period_selection(self, show_periods):
             self._presenter.on_multiperiod_changed(show_periods)
 
@@ -101,6 +98,7 @@ class RunTabPresenter(object):
         self._view = None
         self.set_view(view)
         self._processing = False
+        self.work_handler = WorkHandler()
 
         # Models that are being used by the presenter
         self._state_model = None
@@ -217,6 +215,10 @@ class RunTabPresenter(object):
             self._update_view_from_state_model()
             self._beam_centre_presenter.update_centre_positions(self._state_model)
 
+            self._beam_centre_presenter.on_update_rows()
+            self._masking_table_presenter.on_update_rows()
+            self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
+
         except Exception as e:
             self.sans_logger.error("Loading of the user file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the user file failed.', str(e))
@@ -251,6 +253,9 @@ class RunTabPresenter(object):
 
             self.update_view_from_table_model()
 
+            self._beam_centre_presenter.on_update_rows()
+            self._masking_table_presenter.on_update_rows()
+
         except RuntimeError as e:
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
@@ -271,17 +276,18 @@ class RunTabPresenter(object):
 
         # 1. Pull out the entries
         sample_scatter = get_string_entry(BatchReductionEntry.SampleScatter, row)
-        sample_scatter_period = get_string_entry(BatchReductionEntry.SampleScatterPeriod, row)
+        sample_scatter_period = get_string_period(get_string_entry(BatchReductionEntry.SampleScatterPeriod, row))
         sample_transmission = get_string_entry(BatchReductionEntry.SampleTransmission, row)
-        sample_transmission_period = get_string_entry(BatchReductionEntry.SampleTransmissionPeriod, row)
+        sample_transmission_period = \
+            get_string_period(get_string_entry(BatchReductionEntry.SampleTransmissionPeriod, row))
         sample_direct = get_string_entry(BatchReductionEntry.SampleDirect, row)
-        sample_direct_period = get_string_entry(BatchReductionEntry.SampleDirectPeriod, row)
+        sample_direct_period = get_string_period(get_string_entry(BatchReductionEntry.SampleDirectPeriod, row))
         can_scatter = get_string_entry(BatchReductionEntry.CanScatter, row)
-        can_scatter_period = get_string_entry(BatchReductionEntry.CanScatterPeriod, row)
+        can_scatter_period = get_string_period(get_string_entry(BatchReductionEntry.CanScatterPeriod, row))
         can_transmission = get_string_entry(BatchReductionEntry.CanTransmission, row)
-        can_transmission_period = get_string_entry(BatchReductionEntry.CanScatterPeriod, row)
+        can_transmission_period = get_string_period(get_string_entry(BatchReductionEntry.CanScatterPeriod, row))
         can_direct = get_string_entry(BatchReductionEntry.CanDirect, row)
-        can_direct_period = get_string_entry(BatchReductionEntry.CanDirectPeriod, row)
+        can_direct_period = get_string_period(get_string_entry(BatchReductionEntry.CanDirectPeriod, row))
         output_name = get_string_entry(BatchReductionEntry.Output, row)
         file_information_factory = SANSFileInformationFactory()
         file_information = file_information_factory.create_sans_file_information(sample_scatter)
@@ -326,11 +332,11 @@ class RunTabPresenter(object):
             self._view.disable_buttons()
             self._processing = True
             self.sans_logger.information("Starting processing of batch table.")
-            # 0. Validate rows
-            # self._validate_rows()
 
             # 1. Set up the states and convert them into property managers
-            states = self.get_states()
+            selected_rows = self._view.get_selected_rows()
+            selected_rows = selected_rows if selected_rows else range(self._table_model.get_number_of_rows())
+            states = self.get_states(row_index=selected_rows)
             if not states:
                 raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
                                    " has been loaded")
@@ -351,11 +357,10 @@ class RunTabPresenter(object):
 
             # Get the name of the graph to output to
             output_graph = self.output_graph
-            work_handler = WorkHandler()
             sans_batch = SANSBatchReduction()
             listener = RunTabPresenter.ProcessListener(self)
 
-            work_handler.process(listener, sans_batch, states=states.values(), use_optimizations=use_optimizations, output_mode=output_mode,
+            self.work_handler.process(listener, sans_batch, states=states.values(), use_optimizations=use_optimizations, output_mode=output_mode,
                                  plot_results=plot_results
                                  , output_graph=output_graph)
 
@@ -373,7 +378,7 @@ class RunTabPresenter(object):
     def display_warning_box(self, title, text, detailed_text):
         self._view.display_message_box(title, text, detailed_text)
 
-    def on_processing_finished(self):
+    def on_processing_finished(self, result):
         self._view.enable_buttons()
         self._processing = False
 
@@ -432,25 +437,20 @@ class RunTabPresenter(object):
         :param row: the row index
         :return: True if the row is empty.
         """
-        indices = range(17)
-        for index in indices:
-            cell_value = self._view.get_cell(row, index, convert_to=str)
-            if cell_value:
-                return False
-        return True
+        return self._table_model.is_empty_row(row)
 
-    def _validate_rows(self):
-        """
-        Validation of the rows. A minimal setup requires that ScatterSample is set.
-        """
-        # If SampleScatter is empty, then don't run the reduction.
-        # We allow empty rows for now, since we cannot remove them from Python.
-        number_of_rows = self._view.get_number_of_rows()
-        for row in range(number_of_rows):
-            if not self.is_empty_row(row):
-                sample_scatter = self._view.get_cell(row, 0)
-                if not sample_scatter:
-                    raise RuntimeError("Row {} has not SampleScatter specified. Please correct this.".format(row))
+    # def _validate_rows(self):
+    #     """
+    #     Validation of the rows. A minimal setup requires that ScatterSample is set.
+    #     """
+    #     # If SampleScatter is empty, then don't run the reduction.
+    #     # We allow empty rows for now, since we cannot remove them from Python.
+    #     number_of_rows = self._table_model.get_number_of_rows()
+    #     for row in range(number_of_rows):
+    #         if not self.is_empty_row(row):
+    #             sample_scatter = self._view.get_cell(row, 0)
+    #             if not sample_scatter:
+    #                 raise RuntimeError("Row {} has not SampleScatter specified. Please correct this.".format(row))
 
     # ------------------------------------------------------------------------------------------------------------------
     # Controls
@@ -484,12 +484,12 @@ class RunTabPresenter(object):
         # 1. Update the state model
         state_model_with_view_update = self._get_state_model_with_view_update()
         # 2. Update the table model
-        selected_table_model = self._table_model
+        table_model = self._table_model
 
         # 3. Go through each row and construct a state object
-        if selected_table_model and state_model_with_view_update:
-            states = create_states(state_model_with_view_update, selected_table_model, self._view.instrument
-                                   , self._facility, row_index, file_lookup=file_lookup)
+        if table_model and state_model_with_view_update:
+            states = create_states(state_model_with_view_update, table_model, self._view.instrument
+                                   , self._facility, row_index=row_index, file_lookup=file_lookup)
         else:
             states = None
         stop_time_state_generation = time.time()
@@ -503,7 +503,7 @@ class RunTabPresenter(object):
         :param row_index: the row index
         :return: a state if the index is valid and there is a state else None
         """
-        states = self.get_states(row_index=row_index, file_lookup=file_lookup)
+        states = self.get_states(row_index=[row_index], file_lookup=file_lookup)
         if states is None:
             self.sans_logger.warning("There does not seem to be data for a row {}.".format(row_index))
             return None

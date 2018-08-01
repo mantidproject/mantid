@@ -157,7 +157,7 @@ def get_detector_size_from_sans_file(state, detector):
 
 
 def create_state(state_model_with_view_update, file, period, facility):
-    table_row = TableIndexModel(0, file, period, '', '', '', '', '', '', '', '', '', '')
+    table_row = TableIndexModel(file, period, '', '', '', '', '', '', '', '', '', '')
     table = TableModel()
     table.add_table_entry(0, table_row)
 

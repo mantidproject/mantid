@@ -39,7 +39,6 @@ class TableModel(object):
 
     @user_file.setter
     def user_file(self, value):
-        self._validate_file_name(value)
         self._user_file = value
 
     def get_row_user_file(self, row_index):
@@ -54,7 +53,6 @@ class TableModel(object):
 
     @batch_file.setter
     def batch_file(self, value):
-        # self._validate_file_name(value)
         self._batch_file = value
 
     def get_table_entry(self, index):
@@ -78,6 +76,9 @@ class TableModel(object):
 
     def update_table_entry(self, row, column, value):
         self._table_entries[row].update_attribute(self.column_name_converter[column], value)
+
+    def is_empty_row(self, row):
+        return self._table_entries[row].is_empty()
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -145,6 +146,10 @@ class TableIndexModel(object):
     def isMultiPeriod(self):
         return any ((self.sample_scatter_period, self.sample_transmission_period ,self.sample_direct_period,
                      self.can_scatter_period, self.can_transmission_period, self.can_direct_period))
+
+    def is_empty(self):
+        return not any((self.sample_scatter, self.sample_transmission, self.sample_direct, self.can_scatter,
+                        self.can_transmission, self.can_direct))
 
     def _string_period(self, _tag):
         return "" if _tag == ALL_PERIODS else str(_tag)

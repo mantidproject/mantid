@@ -98,10 +98,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             pass
 
         @abstractmethod
-        def on_processing_finished(self):
-            pass
-
-        @abstractmethod
         def on_multi_period_selection(self, show_periods):
             pass
 
@@ -291,13 +287,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Q Resolution
         self.q_resolution_moderator_file_push_button.clicked.connect(self._on_load_moderator_file)
 
-        self.plot_results_checkbox.stateChanged.connect(self._on_plot_results_toggled)
-        self.use_optimizations_checkbox.stateChanged.connect(self._on_use_optimisations_changed)
-
-        self.output_mode_memory_radio_button.toggled.connect(self._on_output_mode_changed)
-        self.output_mode_file_radio_button.toggled.connect(self._on_output_mode_changed)
-        self.output_mode_both_radio_button.toggled.connect(self._on_output_mode_changed)
-
         self.wavelength_stacked_widget.setCurrentIndex(0)
 
         return True
@@ -307,15 +296,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             self.wavelength_stacked_widget.setCurrentIndex(1)
         else:
             self.wavelength_stacked_widget.setCurrentIndex(0)
-
-    def _on_output_mode_changed(self, state):
-        self.data_processor_table.settingsChanged()
-
-    def _on_use_optimisations_changed(self, state):
-        self.data_processor_table.settingsChanged()
-
-    def _on_plot_results_toggled(self, state):
-        self.data_processor_table.settingsChanged()
 
     def create_data_table(self, show_periods):
         # Delete an already existing table
@@ -389,7 +369,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def _data_changed(self, row_location, column, old_value, new_value):
         row = row_location.rowRelativeToParent()
-        self._call_settings_listeners(lambda listener: listener.on_data_changed(row, column, new_value, old_value))
+        self._call_settings_listeners(lambda listener: listener.on_data_changed(row, column, str(new_value), (old_value)))
 
     def _row_inserted(self, row_location):
         if row_location.depth() > 1:
@@ -668,8 +648,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             reduction_mode_list = get_reduction_mode_strings_for_gui(instrument)
             self.set_reduction_modes(reduction_mode_list)
 
-            # self.data_processor_table.on_comboProcessInstrument_currentIndexChanged(self.instrument_combo_box.currentIndex())
-
     def update_gui_combo_box(self, value, expected_type, combo_box):
         # There are two types of values that can be passed:
         # Lists: we set the combo box to the values in the list
@@ -695,9 +673,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
                                                    expected_type=expected_type)
         else:
             gui_element.addItem(element)
-
-    def halt_process_flag(self):
-        self.data_processor_table.skipProcessing()
 
     @staticmethod
     def _set_enum_as_element_in_combo_box(gui_element, element, expected_type):
@@ -1786,10 +1761,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def get_selected_rows(self):
         row_locations = self.data_processor_table.selectedRowLocations()
-        rows = []
-        for row_location in row_locations:
-            cell_contents = self.get_row(row_location)
-            rows.append(cell_contents)
+        rows = [x.rowRelativeToParent() for x in row_locations]
         return rows
 
     def get_row(self, row_location):
