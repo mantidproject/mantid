@@ -5,7 +5,7 @@ import tempfile
 import os
 import unittest
 import warnings
-from six_shim import assertRaisesRegex
+from six import assertRaisesRegex
 
 from isis_powder.routines import yaml_parser
 

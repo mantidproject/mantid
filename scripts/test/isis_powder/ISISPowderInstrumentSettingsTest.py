@@ -4,10 +4,9 @@ import mantid
 import unittest
 import warnings
 
-from six_shim import assertRaisesRegex, assertRegex
+from six import assertRaisesRegex, assertRegex
 
 from isis_powder.routines import instrument_settings, param_map_entry
-from isis_powder import Polaris
 
 
 class ISISPowderInstrumentSettingsTest(unittest.TestCase):

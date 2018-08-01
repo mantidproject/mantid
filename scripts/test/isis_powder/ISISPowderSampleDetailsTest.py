@@ -8,7 +8,7 @@ import unittest
 
 from isis_powder.routines import sample_details
 
-from six_shim import assertRaisesRegex, assertRegex
+from six import assertRaisesRegex, assertRegex
 
 
 class ISISPowderSampleDetailsTest(unittest.TestCase):

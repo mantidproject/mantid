@@ -3,8 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 import unittest
 
-from six import iterkeys
-from six_shim import assertRaisesRegex
+from six import iterkeys,  assertRaisesRegex
 
 from isis_powder.routines import absorb_corrections, SampleDetails
 

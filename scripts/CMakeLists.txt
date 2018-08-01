@@ -60,13 +60,6 @@ set ( TEST_PY_FILES
       test/ErrorReporterPresenterTest.py
       test/IndirectCommonTests.py
       test/ISISDirecInelasticConfigTest.py
-      test/ISISPowderAbsorptionTest.py
-      test/ISISPowderAbstractInstrumentTest.py
-      test/ISISPowderCommonTest.py
-      test/ISISPowderInstrumentSettingsTest.py
-      test/ISISPowderRunDetailsTest.py
-      test/ISISPowderSampleDetailsTest.py
-      test/ISISPowderYamlParserTest.py
       test/PyChopTest.py
       test/ReductionSettingsTest.py
       test/ReductionWrapperTest.py
@@ -91,6 +84,7 @@ set ( TEST_PY_FILES
 
 # Additional tests
 add_subdirectory(test/directtools)
+add_subdirectory(test/isis_powder)
 add_subdirectory(test/Muon)
 add_subdirectory(test/SANS)
 

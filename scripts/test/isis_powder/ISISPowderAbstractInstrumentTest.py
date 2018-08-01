@@ -112,3 +112,6 @@ class _MockInst(AbstractInst):
                                         calibration_dir=self._inst_settings.calibration_dir,
                                         output_dir=self._inst_settings.output_dir,
                                         inst_prefix=self.INST_PREFIX)
+
+if __name__ == '__main__':
+    unittest.main()
