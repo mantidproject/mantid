@@ -4,12 +4,13 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/BinaryStreamReader.h"
 #include <cstdint>
 
 namespace Mantid {
 namespace DataHandling {
 
-struct headerData{
+struct headerData {
   int16_t tdcResolution;
   int16_t tdcOverflow;
   int16_t numberOfRuns;
@@ -61,9 +62,19 @@ private:
   void init() override;
   void exec() override;
   std::string getFormattedDateTime(std::string date, std::string time);
-  void assignOutputWorkspaceParticulars(DataObjects::Workspace2D_sptr &outputWorkspace);
+  void assignOutputWorkspaceParticulars(
+      DataObjects::Workspace2D_sptr &outputWorkspace);
+  void readSingleVariables(Mantid::Kernel::BinaryStreamReader &streamReader);
+  void readStringVariables(Mantid::Kernel::BinaryStreamReader &streamReader);
+  void readArrayVariables(Mantid::Kernel::BinaryStreamReader &streamReader);
+  void readInHeader(Mantid::Kernel::BinaryStreamReader &streamReader);
+  void readInHistograms(Mantid::Kernel::BinaryStreamReader &streamReader);
+  void generateUnknownAxis();
 
+  std::vector<std::vector<double>> m_histograms;
   struct headerData m_header;
+  std::vector<double> m_xAxis;
+  std::vector<std::vector<double>> m_eAxis;
 };
 
 } // namespace DataHandling
