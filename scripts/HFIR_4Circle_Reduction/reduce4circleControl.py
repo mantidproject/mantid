@@ -429,35 +429,30 @@ class CWSCDReductionControl(object):
 
         return peak_intensity
 
-    def get_single_scan_pt_result(self, exp_number, scan_number, pt_number, roi_name):
-        """
-
+    # TESTME - newly improved
+    def get_single_scan_pt_result(self, exp_number, scan_number, pt_number, roi_name, integration_direction):
+        """ get a single scan Pt. 's on-detector in-roi integration result
         :param exp_number:
         :param scan_number:
         :param pt_number:
         :param roi_name:
+        :param integration_direction: vector X, vector Y (raw), vector Y (model)
         :return:
         """
-        # TODO FIXME NOW NOW2 - Need revisit!
+        integration_record = self.get_single_pt_info(exp_number, scan_number, pt_number, roi_name,
+                                                     integration_direction)
 
-        if (exp_number, scan_number, pt_number, roi_name) not in self._single_pt_integration_dict:
-            raise RuntimeError('{0}, {1}, {2}, {3} not in single-pt-scan dict.  Keys are {4}'
-                               ''.format(exp_number, scan_number, pt_number, roi_name,
-                                         self._single_pt_integration_dict.keys()))
-
-        integration_record = self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name]
         vec_x, vec_y = integration_record.get_vec_x_y()
         # calculate model
         x0, sigma, gaussian_a, linear_b = integration_record.get_gaussian_parameters()
 
         model_y = peak_integration_utility.gaussian_linear_background(vec_x, x0, sigma, gaussian_a, linear_b)
-        print ('[DB...BAT] Calculated guassian: {0}'.format(model_y))
+        # print ('[DB...BAT] Calculated guassian: {0}'.format(model_y))
 
         return vec_x, vec_y, model_y
 
-    def get_single_pt_info(self, exp_number, scan_number, pt_number, roi_name):
-        """
-
+    def get_single_pt_info(self, exp_number, scan_number, pt_number, roi_name, integration_direction):
+        """ get the integrated single-pt scan data
         :param exp_number:
         :param scan_number:
         :param pt_number:
@@ -470,6 +465,14 @@ class CWSCDReductionControl(object):
             err_message = 'Exp {0} Scan {1} Pt {2} ROI {3} does not exit in Single-Pt-Integration dictionary ' \
                           'which has keys: {4}'.format(exp_number, scan_number, pt_number, roi_name,
                                                        self._single_pt_integration_dict.keys())
+            raise RuntimeError(err_message)
+        try:
+            peak_info = peak_info[integration_direction]
+        except KeyError:
+            err_message = 'Exp {0} Scan {1} Pt {2} ROI {3} does not have integration direction {4}' \
+                          'in Single-Pt-Integration dictionary which has keys: {5}' \
+                          ''.format(exp_number, scan_number, pt_number, roi_name, integration_direction,
+                                    peak_info.keys())
             raise RuntimeError(err_message)
 
         return peak_info
@@ -888,9 +891,10 @@ class CWSCDReductionControl(object):
 
         return move_tup[1]
 
-    # TEST NOW3 - This need a lot of work because of single-pt scans
+    # TEST Me - This need a lot of work because of single-pt scans
     def export_to_fullprof(self, exp_number, scan_roi_list, user_header,
-                           export_absorption, fullprof_file_name, high_precision):
+                           export_absorption, fullprof_file_name, high_precision,
+                           integration_direction='vertical'):
         """
         Export peak intensities to Fullprof data file
         :param exp_number:
@@ -954,6 +958,7 @@ class CWSCDReductionControl(object):
                 else:
                     pt_number = 1
                     peak_info = self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name]
+                    peak_info = peak_info[integration_direction]
 
                 # get HKL
                 try:
@@ -1772,14 +1777,16 @@ class CWSCDReductionControl(object):
 
         return peak_intensity, gauss_bkgd, info_str
 
-    def integrate_detector_image(self, exp_number, scan_number, pt_number, roi_name, fit_gaussian):
-        """
-
+    def integrate_detector_image(self, exp_number, scan_number, pt_number, roi_name, fit_gaussian,
+                                 integration_direction):
+        """ Integrate detector counts on detector image inside a given ROI.
+        Integration is either along X-direction (summing along rows) or Y-direction (summing along columns)
         :param exp_number:
         :param scan_number:
         :param pt_number:
         :param roi_name:
         :param fit_gaussian:
+        :param integration_direction: horizontal (integrate along X direction) or vertical (integrate along Y direction)
         :return:
         """
         # check data loaded with mask information
@@ -1791,15 +1798,28 @@ class CWSCDReductionControl(object):
             self.load_spice_xml_file(exp_number, scan_number, pt_number)
         # END-IF
 
+        # check integration direction
+        assert isinstance(integration_direction, str) and integration_direction in ['vertical', 'horizontal'],\
+            'Integration direction {} (now of type {}) must be a string equal to eiether vertical or horizontal' \
+            ''.format(integration_direction, type(integration_direction))
+
         # Get data and plot
         raw_det_data = self.get_raw_detector_counts(exp_number, scan_number, pt_number)
         assert isinstance(raw_det_data, numpy.ndarray), 'A matrix must be an ndarray but not {0}.' \
                                                         ''.format(type(raw_det_data))
         roi_lower_left, roi_upper_right = self.get_region_of_interest(roi_name)
 
-        # integrate peak along row
-        vec_x = numpy.array(range(roi_lower_left[1], roi_upper_right[1]))
-        vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[1], roi_lower_left[1]:roi_upper_right[1]].sum(axis=0)
+        if integration_direction == 'horizontal':
+            # integrate peak along row
+            vec_x = numpy.array(range(roi_lower_left[1], roi_upper_right[1]))
+            vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[1], roi_lower_left[1]:roi_upper_right[1]].sum(axis=0)
+        elif integration_direction == 'vertical':
+            # integrate peak along column
+            vec_x = numpy.array(range(roi_lower_left[0], roi_upper_right[0]))
+            vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[1], roi_lower_left[1]:roi_upper_right[1]].sum(axis=1)
+        else:
+            # wrong
+            raise NotImplementedError('It is supposed to be unreachable.')
 
         # create matrix workspace to calculate center peak intensity (by fitting)
         mantidsimple.CreateWorkspace(DataX=vec_x, DataY=vec_y, DataE=numpy.sqrt(vec_y), NSpec=1,
@@ -1820,13 +1840,6 @@ class CWSCDReductionControl(object):
             params = dict()
             integrated_intensity = 0.
 
-        # register
-        # value_list = [None] * 10  # safe mode
-        # value_list[0] = vec_x
-        # value_list[1] = vec_y
-        # value_list[2] = cost
-        # value_list[3] = params  # as x0, sigma, a, b
-
         # get 2theta
         two_theta = self.get_sample_log_value(self._expNumber, scan_number, pt_number, '2theta')
 
@@ -1836,7 +1849,8 @@ class CWSCDReductionControl(object):
         integrate_record.set_fit_cost(cost)
         integrate_record.set_fit_params(x0=params[0], sigma=params[1], a=params[2], b=params[3])
 
-        self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name] = integrate_record
+        self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name][integration_direction] = \
+            integrate_record
 
         return integrated_intensity
 

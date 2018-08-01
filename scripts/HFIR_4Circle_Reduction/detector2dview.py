@@ -6,7 +6,6 @@ import numpy as np
 import os
 
 
-# TODO - 20180727 - remove blabla
 class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
     """
     Customized 2D detector view
@@ -74,17 +73,18 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
         return
 
-    def enter_roi_mode(self, state):
+    def enter_roi_mode(self, roi_state):
         """
         Enter or leave the region of interest (ROI) selection mode
         :return:
         """
-        assert isinstance(state, bool), 'blabla'
+        assert isinstance(roi_state, bool), 'ROI mode state {} must be a boolean but not a {}.' \
+                                        ''.format(roi_state, type(roi_state))
 
         # set
-        self._roiSelectMode = state
+        self._roiSelectMode = roi_state
 
-        if state:
+        if roi_state:
             # new in add-ROI mode
             self.remove_roi()
         else:
@@ -215,9 +215,8 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         :return:
         """
         # check
-        # TODO FIXME - Fill blabla
-        assert self._roiStart is not None, 'blabla'
-        assert self._roiEnd is not None, 'blabla'
+        assert self._roiStart is not None, 'Starting point of region-of-interest cannot be None'
+        assert self._roiEnd is not None, 'Ending point of region-of-interest cannot be None'
 
         # create a vertex list of a rectangular
         vertex_array = np.ndarray(shape=(4, 2))

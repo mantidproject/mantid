@@ -399,6 +399,14 @@ class MplGraphicsView(QtGui.QWidget):
 
         return
 
+    @property
+    def canvas(self):
+        """
+        provide reference to Canvas
+        :return:
+        """
+        return self._myCanvas
+
     def add_arrow(self, start_x, start_y, stop_x, stop_y):
         """
 
@@ -432,7 +440,7 @@ class MplGraphicsView(QtGui.QWidget):
         return key_list
 
     def add_plot_1d(self, vec_x, vec_y, y_err=None, color=None, label='', x_label=None, y_label=None,
-                    marker=None, line_style=None, line_width=1, show_legend=True):
+                    marker=None, line_style=None, line_width=1, show_legend=True, update_plot=True):
         """
         Add a 1-D plot to canvas
         :param vec_x:
@@ -446,6 +454,7 @@ class MplGraphicsView(QtGui.QWidget):
         :param line_style:
         :param line_width:
         :param show_legend:
+        :param update_plot:
         :return: line ID (key to the line)
         """
         line_id = self._myCanvas.add_plot_1d(vec_x, vec_y, y_err, color, label, x_label, y_label, marker, line_style,
@@ -1510,15 +1519,15 @@ class Qt4MplCanvas(FigureCanvas):
 
         return
 
-    def save(self, file_name):
+    def save_figure(self, file_name):
         """ save the current figure to an image file
         save to image
         :param file_name:
         :return:
         """
-        assert isinstance(file_name, str), 'File name must be string.'
+        assert isinstance(file_name, str), 'File name {} must be a string.'.format(file_name)
 
-        # FIXME (Future) many more options for figures to save
+        # TODO - NEXT - Provide many more options for figures to save
         self.fig.savefig(file_name)
 
         return

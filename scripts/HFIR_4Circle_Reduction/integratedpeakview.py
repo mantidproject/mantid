@@ -293,40 +293,43 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
         # class variables
         self._rawDataID = None
         self._fitDataID = None
+        self._2thetaModelID = None
 
         self._parent_window = None
 
         return
 
-    def add_observed_data(self, vec_x, vec_y, label):
+    def add_observed_data(self, vec_x, vec_y, label, update_plot=True):
         """
         add observed data
         :param vec_x:
         :param vec_y:
         :param label:
+        :param update_plot: flag to update the plot (call draw)
         :return:
         """
-        self._rawDataID = self.add_plot_1d(vec_x, vec_y,  color='blue')
+        self._rawDataID = self.add_plot_1d(vec_x, vec_y, xlabel=label,  color='blue', update_plot=update_plot)
         self.set_smart_y_limit(vec_y)
 
         return
 
-    def add_fit_data(self, vec_x, vec_y, label):
+    def add_fit_data(self, vec_x, vec_y, label, update_plot=True):
         """
         add fitted data
         :param vec_x:
         :param vec_y:
         :param label:
+        :param update_plot: flag to update the plot (call draw)
         :return:
         """
-        self._rawDataID = self.add_plot_1d(vec_x, vec_y,  color='red')
+        self._fitDataID = self.add_plot_1d(vec_x, vec_y, xlabel=label, color='red', update_plot=update_plot)
         self.set_smart_y_limit(vec_y)
 
         return
 
     def on_mouse_press_event(self, event):
         """
-        plot the next
+        plot the previous or next scan in the list
         :return:
         """
         if self._parent_window is not None:
@@ -338,8 +341,29 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
             else:
                 scan_index_increment = 0
 
-            print ('[TODO] Supposed to increase or decrease scan number to {0}'.format(scan_index_increment))
+            if scan_index_increment != 0:
+                self._parent_window.change_scan_number(increment=scan_index_increment)
+                self._parent_window.do_plot_integrated_pt(show_plot=True, save_plot_to=None)
+            # END-IF
         # END-IF
+
+        return
+
+    def plot_2theta_model(self, vec_x, vec_y):
+        """
+        plot 2theta model
+        :param vec_x:
+        :param vec_y:
+        :return:
+        """
+        # remove previous plot
+        self.clear_all_lines()
+        self._fitDataID = None
+        self._rawDataID = None
+
+        # add the line
+        self._2thetaModelID = self.add_plot_1d(vec_x, vec_y, xlabel='$2\theta$', ylable='FWHM',
+                                               color='blue', update_plot=True)
 
         return
 

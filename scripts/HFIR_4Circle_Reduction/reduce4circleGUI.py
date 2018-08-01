@@ -744,12 +744,12 @@ class MainWindow(QtGui.QMainWindow):
         # set the button to next mode
         if str(self.ui.pushButton_switchROIMode.text()) == 'Enter ROI-Edit Mode':
             # enter adding ROI mode
-            self.ui.graphicsView_detector2dPlot.enter_roi_mode(state=True)
+            self.ui.graphicsView_detector2dPlot.enter_roi_mode(roi_state=True)
             # rename the button
             self.ui.pushButton_switchROIMode.setText('Quit ROI-Edit Mode')
         else:
             # quit editing ROI mode
-            self.ui.graphicsView_detector2dPlot.enter_roi_mode(state=False)
+            self.ui.graphicsView_detector2dPlot.enter_roi_mode(roi_state=False)
             # rename the button
             self.ui.pushButton_switchROIMode.setText('Enter ROI-Edit Mode')
         # END-IF-ELSE
@@ -1236,7 +1236,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # get the output file name
         roi_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Output mask/ROI file name',
-                                                              self._myControl._workDir,
+                                                              self._myControl.get_working_directory(),
                                                               'XML Files (*.xml);;All Files (*.*)'))
         if len(roi_file_name) == 0:
             return

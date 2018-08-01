@@ -90,12 +90,35 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         return
 
+    # TESTME -  20180727 - Complete it!
     def do_export_to_movie(self):
         """
         export the complete list of single-pt experiment to a movie
         :return:
         """
-        # TODO - 20180727 - Complete it!
+        # find out the directory to save the PNG files for making a move
+        movie_dir = self._controller.get_working_directory()
+        roi_name = str(self.ui.comboBox_roiList.currentText())
+        direction = str(self.ui.comboBox_integrateDirection.currentText()).lower()
+        movie_dir = os.path.join(movie_dir, '{}_{}'.format(roi_name, direction))
+        os.makedirs(movie_dir, exist_ok=True)
+
+        # go through each line to plot and save the data
+        num_rows = self.ui.tableView_summary.rowCount()
+        file_list_str = ''
+        for i_row in range(num_rows):
+            # get run number and set to plot
+            scan_number = self.ui.tableView_summary.get_scan_number(i_row)
+            self.ui.lineEdit_Scan.setText('{}'.format(scan_number))
+            png_file_name = os.path.join(movie_dir, 'Scan{0:04d}_ROI{1}_{2}.png'.format(scan_number, roi_name, direction))
+            self.do_plot_integrated_pt(show_plot=False, save_plot_to=png_file_name)
+            file_list_str += '{}\n'.format(png_file_name)
+        # END-IF
+
+        # write out
+        png_list_file = open(os.path.join(movie_dir, 'MoviePNGList.txt'), 'w')
+        png_list_file.write(file_list_str)
+        png_list_file.close()
 
         return
 
@@ -155,7 +178,8 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         return
 
-    # TEST NOW
+    # TESTME - Load a previously save integrated peaks file
+    # Question: What kind of peak integrtion table??? Need to find out and well documented!
     def do_load_peak_integration_table(self):
         """
         load peak integration table CSV file saved from peak integration table
@@ -173,35 +197,33 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         return
 
-    def do_plot_integrated_pt(self):
-        """
-        plot integrated Pt with model
+    def do_plot_integrated_pt(self, show_plot=True, save_plot_to=None):
+        """ plot integrated Pt with model and raw data
+        1. selection include: 2-theta FWHM Model, Summed Single Pt. Counts (horizontal),
+        Summed Single Pt. Counts (vertical) from comboBox_plotType
         :return:
         """
-        # TODO - 20180727 - Clean this plotting method
-
-        """
-        Note:
-        1. selection include: 2-theta FWHM Model, Summed Single Pt. Counts (horizontal),
-           Summed Single Pt. Counts (vertical) from comboBox_plotType
-        2. ...
-
-        """
-
-        # TODO - 20180727 - refactor with: pushButton_rewindPlot, pushButton_forwardPlot
         # get scan number
         scan_number = int(self.ui.lineEdit_Scan.text())
         roi_name = str(self.ui.comboBox_roiList.currentText())
+        direction = str(self.ui.comboBox_integrateDirection.currentText()).lower()
 
-        # get data
+        # get data: pt number is always 1 as it is a single Pt. measurement
         vec_x, vec_y, model_y = self._controller.get_single_scan_pt_result(self._exp_number, scan_number,
-                                                                           pt_number=1, roi_name=roi_name)
+                                                                           pt_number=1, roi_name=roi_name,
+                                                                           integration_direction=direction)
 
-        self.ui.graphicsView_integration1DView.add_observed_data(vec_x, vec_y, 'counts...')
+        self.ui.graphicsView_integration1DView.add_observed_data(vec_x, vec_y, label='integrated counts',
+                                                                 update_plot=False)
+        self.ui.graphicsView_integration1DView.add_fit_data(vec_x, model_y, label='Gaussian model',
+                                                            update_plot=show_plot)
+        # title
+        self.ui.graphicsView_integration1DView.set_title('Scan {} Pt {} {} Integration.'
+                                                         ''.format(scan_number, 1, direction))
 
-        self.ui.graphicsView_integration1DView.add_fit_data(vec_x, model_y, 'model... ')
-
-        # TODO - 20180727 - Need a title
+        # save plot?
+        if save_plot_to is not None:
+            self.ui.graphicsView_integration1DView.canvas.save_figure(save_plot_to)
 
         return
 
@@ -289,7 +311,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         # set the file to controller
         try:
             vec_x, vec_y = self._controller.import_2theta_gauss_sigma_file(twotheta_sigma_file_name)
-            # TODO NOW2 - show the figure in the general plot window
+            self.ui.graphicsView_integration1DView.plot_2theta_model(vec_x, vec_y)
         except RuntimeError as run_err:
             guiutility.show_message(self, str(run_err))
             return
@@ -316,12 +338,12 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :param scan_pt_list:
         :return:
         """
-        # check ... blabla
-        print('[DB...BAT] Add scan_pt_info: {0}'.format(scan_pt_list))
+        # check input
+        assert isinstance(scan_pt_list, list), 'Scan-Pt-Infos {} must be a list but not a {}.' \
+                                               ''.format(scan_pt_list, type(scan_pt_list))
 
         for scan_pt_info in scan_pt_list:
             scan_number, pt_number, hkl, two_theta = scan_pt_info
-            print ('[DB...BAT] Add scan_pt_info')
             self.ui.tableView_summary.add_scan_pt(scan_number, pt_number, hkl, two_theta)
         # END-FOR
 
@@ -338,14 +360,37 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         """
         self.ui.tableView_summary.add_scan_pt(scan_number, pt_number, hkl_str, two_theta)
 
-    def set_experiment(self, exp_number):
+    def change_scan_number(self, incremental):
         """
-        blabla
+        change the scan number in the
+        :param incremental:
+        :return:
+        """
+        # get the list of scan number from the table, in future, a real-time updated list shall be used.
+        run_number_list = list()
+        for irow in range(self.ui.tableView_summary.rowCount()):
+            run_number_list.append(self.ui.tableView_summary.get_scan_number(irow))
+        curr_scan = int(self.ui.lineEdit_Scan.text())
+        try:
+            curr_scan_index = run_number_list.index(curr_scan)
+        except IndexError:
+            curr_scan_index = 0
+
+        next_scan_index = curr_scan_index + incremental
+        next_scan_index = (next_scan_index + len(run_number_list)) % len(run_number_list)
+
+        # set
+        self.ui.lineEdit_Scan.setText('{}'.format(run_number_list[next_scan_index]))
+
+        return
+
+    def set_experiment(self, exp_number):
+        """ set experiment number to this window for convenience
         :param exp_number:
         :return:
         """
-        # check .. blabla
-
+        assert isinstance(exp_number, int) and exp_number > 0, 'Experiment number {} (of type {} now) must be a ' \
+                                                               'positive integer'.format(exp_number, type(exp_number))
         self._exp_number = exp_number
 
         return
