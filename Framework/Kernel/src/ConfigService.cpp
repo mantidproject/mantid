@@ -939,11 +939,11 @@ std::string ConfigServiceImpl::getString(const std::string &keyName,
     }
   }
   if (m_pConf->hasProperty(keyName)) {
-	  return m_pConf->getString(keyName);
+    return m_pConf->getString(keyName);
   }
 
   g_log.debug() << "Unable to find " << keyName << " in the properties file"
-				<< '\n';
+                << '\n';
   return;
 }
 

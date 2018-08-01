@@ -3822,8 +3822,9 @@ void MantidUI::loadWSFromFile(const std::string &wsName,
 }
 
 bool MantidUI::workspacesDockPlot1To1() {
-  return Mantid::Kernel::ConfigService::Instance().getValue<bool>(
-             "MantidOptions.ReusePlotInstances").get_value_or(false);
+  return Mantid::Kernel::ConfigService::Instance()
+      .getValue<bool>("MantidOptions.ReusePlotInstances")
+      .get_value_or(false);
 }
 
 /**

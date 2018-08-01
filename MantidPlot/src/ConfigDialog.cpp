@@ -962,8 +962,9 @@ void ConfigDialog::initMantidOptionsTab() {
   m_reusePlotInstances->setChecked(false);
   grid->addWidget(m_reusePlotInstances, 0, 0);
 
-  bool setting = Mantid::Kernel::ConfigService::Instance().getValue<bool>(
-	  "MantidOptions.ReusePlotInstances").get_value_or(false);
+  bool setting = Mantid::Kernel::ConfigService::Instance()
+                     .getValue<bool>("MantidOptions.ReusePlotInstances")
+                     .get_value_or(false);
 
   m_reusePlotInstance->setChecked(setting);
   m_reusePlotInstances->setToolTip("If on, the same plot instance will be "
@@ -977,9 +978,10 @@ void ConfigDialog::initMantidOptionsTab() {
   grid->addWidget(m_invisibleWorkspaces, 1, 0);
 
   bool invisibleWsSetting =
-      Mantid::Kernel::ConfigService::Instance().getValue<bool>(
-          "MantidOptions.InvisibleWorkspaces").get_value_or(false);
-  
+      Mantid::Kernel::ConfigService::Instance()
+          .getValue<bool>("MantidOptions.InvisibleWorkspaces")
+          .get_value_or(false);
+
   m_invisibleWorkspaces->setChecked(invisibleWsSetting);
 
   // categories tree widget
@@ -998,9 +1000,11 @@ void ConfigDialog::initMantidOptionsTab() {
   m_useOpenGL->setChecked(true);
   grid->addWidget(m_useOpenGL, 4, 0);
 
-  bool openglSetting = Mantid::Kernel::ConfigService::Instance().getValue<bool>(
-                    "MantidOptions.InstrumentView.UseOpenGL").get_value_or(false);
-  
+  bool openglSetting =
+      Mantid::Kernel::ConfigService::Instance()
+          .getValue<bool>("MantidOptions.InstrumentView.UseOpenGL")
+          .get_value_or(false);
+
   m_useOpenGL->setChecked(openglSetting);
 }
 
