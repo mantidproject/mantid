@@ -680,7 +680,7 @@ This is done by setting the *PerSpectrumImage* property to *false*.
    Zeroes = []
    Xlin = []
    Ylin = []
-   Magnitude = - 0.1
+   Magnitude = - 0.14
    for s in range(0,3):
       # Real values
       for i in range(0,N):
@@ -692,7 +692,7 @@ This is done by setting the *PerSpectrumImage* property to *false*.
       # Imaginary values
       for i in range(0,N):
          Xlin.append(X[i])
-         Ylin.append(Magnitude*X[i])
+         Ylin.append(s*Magnitude*X[i])
          Zeroes.append(0)
 
    CreateWorkspace(OutputWorkspace='linadj', DataX=Xlin, DataY=Ylin, DataE=Zeroes, NSpec=6)
@@ -700,7 +700,7 @@ This is done by setting the *PerSpectrumImage* property to *false*.
    # Construct constant adjustment workspace (real = 0, imaginary linear)
    # no adjustment on first spectrum, double adjustment on third spectrum.
    Yconst = []
-   Magnitude = 0.2
+   Magnitude = -0.05
    # Real values
    for s in range(0,3):
        for i in range(0,N):
@@ -709,13 +709,14 @@ This is done by setting the *PerSpectrumImage* property to *false*.
    # Imaginary values
    for s in range(0,3):
        for i in range(0,N):
-           Yconst.append(Magnitude*X[i])
+           Yconst.append(s*Magnitude*X[i])
 
 
    CreateWorkspace(OutputWorkspace='constadj',DataX=Xlin, DataY=Yconst, DataE=Zeroes, NSpec=6)
 
    evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', ComplexData=True, DataLinearAdj='linadj', DataConstAdj='constadj',A=0.001, PerSpectrumReconstruction=False)
 
+   print("Reconstruction at 05 of first spectrum: {:.3f}".format(data.readY(0)[5]))
    print("Reconstruction at 10 of first spectrum: {:.3f}".format(data.readY(0)[10]))
    print("Reconstruction at 15 of first spectrum: {:.3f}".format(data.readY(0)[15]))
    print("Reconstruction at 05 of third spectrum: {:.3f}".format(data.readY(2)[5]))
@@ -726,12 +727,13 @@ Output:
 
 .. testoutput:: ExAdjustmentTogether
 
-   Reconstruction at 10 of first spectrum: 0.935
-   Reconstruction at 15 of first spectrum: 0.881
-   Reconstruction at 05 of third spectrum: 0.831
-   Reconstruction at 10 of third spectrum: 0.800
-   Reconstruction at 15 of third spectrum: 0.746
-   
+   Reconstruction at 05 of first spectrum: 0.679
+   Reconstruction at 10 of first spectrum: 0.470
+   Reconstruction at 15 of first spectrum: 0.158
+   Reconstruction at 05 of third spectrum: 0.687
+   Reconstruction at 10 of third spectrum: 0.481
+   Reconstruction at 15 of third spectrum: 0.163
+     
 .. figure:: ../images/MaxEntAdjustTogether.png
    :align: center
    
