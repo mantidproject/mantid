@@ -328,6 +328,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.menu_download_data)
         self.ui.actionSingle_Pt_Integration.triggered.connect(self.menu_integrate_peak_single_pt)
         self.ui.actionSort_By_2Theta.triggered.connect(self.menu_sort_survey_2theta)
+        # TODO - 20180801 - Implement: actionSort_by_Pt_with_Max_Counts (sort by Pt)
+
         #  pop out a general figure plot window
         self.ui.action2theta_Sigma.triggered.connect(self.menu_pop_2theta_sigma_window)
         # TODO - 20180727 - Implement... refer to menu_pop_2theta_sigma_window: save sorted 2theta/scan/FWHM

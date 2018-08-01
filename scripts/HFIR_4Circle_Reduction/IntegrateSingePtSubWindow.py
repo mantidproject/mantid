@@ -133,12 +133,20 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             guiutility.show_message('A region-of-interest must be chosen in order to integrate detector counts.')
             return
 
+        # integration direction and fit
+        direction = str(self.ui.comboBox_integrateDirection.currentText()).lower()
+        fit_gaussian = self.ui.checkBox_fitPeaks.isChecked()
+
+        # TODO TODO TODO - 20180801 - In controller, write a wrapper function for these many scans on same
+        # TODO                        ROI and direction
+        # TODO                        A map (dict) is required to map from scan number to workspace index
         for row_number in range(self.ui.tableView_summary.rowCount()):
             # integrate counts on detector
             scan_number = self.ui.tableView_summary.get_scan_number(row_number)
             pt_number = 1
             peak_height = self._controller.integrate_detector_image(self._exp_number, scan_number, pt_number, roi_name,
-                                                                    fit_gaussian=True)
+                                                                    fit_gaussian=fit_gaussian,
+                                                                    integration_direction=direction)
 
             # add to table
             self.ui.tableView_summary.set_peak_height(scan_number, pt_number, peak_height, roi_name)

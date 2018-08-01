@@ -213,7 +213,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1166,8 +1166,11 @@ p, li { white-space: pre-wrap; }
                          <pointsize>9</pointsize>
                         </font>
                        </property>
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Normalized maximum detector counts among all Pts of certain scan.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;It is normalized by collection time.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
                        <property name="text">
-                        <string>Detector Counts</string>
+                        <string>Detector Counts (Rate)</string>
                        </property>
                       </widget>
                      </item>
@@ -5649,6 +5652,7 @@ p, li { white-space: pre-wrap; }
       <string>Plots</string>
      </property>
      <addaction name="action2theta_Sigma"/>
+     <addaction name="actionSave_2theta_Sigma"/>
     </widget>
     <addaction name="actionSingle_Pt_Integration"/>
     <addaction name="menuPlots"/>
@@ -5803,6 +5807,11 @@ p, li { white-space: pre-wrap; }
   <action name="action2theta_Sigma">
    <property name="text">
     <string>2theta-Sigma</string>
+   </property>
+  </action>
+  <action name="actionSave_2theta_Sigma">
+   <property name="text">
+    <string>Save 2theta-Sigma</string>
    </property>
   </action>
  </widget>

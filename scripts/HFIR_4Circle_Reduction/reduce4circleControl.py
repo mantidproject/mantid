@@ -1809,21 +1809,35 @@ class CWSCDReductionControl(object):
                                                         ''.format(type(raw_det_data))
         roi_lower_left, roi_upper_right = self.get_region_of_interest(roi_name)
 
+        data_in_roi = raw_det_data[roi_lower_left[0]:roi_upper_right[0], roi_lower_left[1]:roi_upper_right[1]]
+        print ('IN ROI: Data set shape: {}'.format(data_in_roi.shape))
+
+        # TODO TODO TODO 2018 - 1. check whether the scan has been summed (roi + direction)
+        # TODO                  2. save the summed value to a workspace 2D for convenience data management
+        # TODO                  3.
+
         if integration_direction == 'horizontal':
+            # FIXME - This works!
             # integrate peak along row
+            print (roi_lower_left[1], roi_upper_right[1])
             vec_x = numpy.array(range(roi_lower_left[1], roi_upper_right[1]))
-            vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[1], roi_lower_left[1]:roi_upper_right[1]].sum(axis=0)
+            vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[0], roi_lower_left[1]:roi_upper_right[1]].sum(axis=0)
         elif integration_direction == 'vertical':
             # integrate peak along column
+            # FIXME - This doesn't work!
+            print(roi_lower_left[0], roi_upper_right[0])
             vec_x = numpy.array(range(roi_lower_left[0], roi_upper_right[0]))
-            vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[1], roi_lower_left[1]:roi_upper_right[1]].sum(axis=1)
+            vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[0], roi_lower_left[1]:roi_upper_right[1]].sum(axis=1)
+            print ('[DB...BAT] Vec X shape: {};  Vec Y shape: {}'.format(vec_x.shape, vec_y.shape))
         else:
             # wrong
             raise NotImplementedError('It is supposed to be unreachable.')
 
         # create matrix workspace to calculate center peak intensity (by fitting)
-        mantidsimple.CreateWorkspace(DataX=vec_x, DataY=vec_y, DataE=numpy.sqrt(vec_y), NSpec=1,
-                                     OutputWorkspace='SinglePt_Exp{0}_Scan{1}'.format(exp_number, scan_number))
+        # TODO - why workspace???
+        # mantidsimple.CreateWorkspace(DataX=vec_x, DataY=vec_y, DataE=numpy.sqrt(vec_y), NSpec=1,
+        #                              OutputWorkspace='SinglePt_Exp{0}_Scan{1}_ROI_{2}'
+        #                                              ''.format(exp_number, scan_number, roi_name))
 
         if fit_gaussian:
             cost, params, cov_matrix = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y,
@@ -1849,6 +1863,9 @@ class CWSCDReductionControl(object):
         integrate_record.set_fit_cost(cost)
         integrate_record.set_fit_params(x0=params[0], sigma=params[1], a=params[2], b=params[3])
 
+        # add the _single_pt_integration_dict()
+        if (exp_number, scan_number, pt_number, roi_name) not in self._single_pt_integration_dict:
+            self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name] = dict()
         self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name][integration_direction] = \
             integrate_record
 

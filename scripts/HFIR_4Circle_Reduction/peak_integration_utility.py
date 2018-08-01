@@ -213,6 +213,7 @@ def find_gaussian_start_values_by_observation(vec_x, vec_y):
     return [x0, est_sigma, est_a, est_background]
 
 
+# TODO TODO TODO - 20180801 - Replace the scipy curve fit by Mantid.FitPeaks()!
 def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, find_start_value_by_fit=False):
     """
     Fit a curve with Gaussian + linear background
@@ -250,6 +251,13 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
 
     # do second round fit
     assert isinstance(start_value_list, list) and len(start_value_list) == 4, 'Starting value list must have 4 elements'
+
+    #
+    # print ('Vector X: {0}'.format(vec_x))
+    # print ('Vector Y: {0}'.format(vec_y))
+    # print ('Vector E: {0}'.format(vec_e))
+    # print ('Start Value List: {0}'.format(start_value_list))
+
     fit2_coeff, fit2_cov_matrix = curve_fit(gaussian_linear_background, vec_x, vec_y,  sigma=vec_e, p0=start_value_list)
     # take sigma=vec_e out as it increases unstable
 

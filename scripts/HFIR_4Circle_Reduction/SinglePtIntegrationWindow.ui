@@ -15,9 +15,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="2" column="0">
-     <widget class="SinglePtIntegrationTable" name="tableView_summary"/>
-    </item>
     <item row="2" column="1">
      <widget class="SinglePtIntegrationView" name="graphicsView_integration1DView"/>
     </item>
@@ -134,18 +131,33 @@
     </item>
     <item row="3" column="0">
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="4">
-       <widget class="QPushButton" name="pushButton_integrteDetectorCounts">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>200</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="font">
          <font>
           <pointsize>10</pointsize>
          </font>
         </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Step 1: Integrate detector counts by given ROI for all the (selected) scans in the table above&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
         <property name="text">
-         <string>Sum Counts</string>
+         <string>(Gaussian) Integration</string>
         </property>
        </widget>
       </item>
@@ -161,6 +173,45 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="5">
+       <widget class="QPushButton" name="pushButton_integratePeaks">
+        <property name="minimumSize">
+         <size>
+          <width>130</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Step 4: Estimate/calculate peak intensities with Gaussian model&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Integrate Peaks</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="7">
+       <widget class="QPushButton" name="pushButton_exportIntensityToFile">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Export To File</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="2">
        <widget class="QComboBox" name="comboBox_roiList">
         <property name="sizePolicy">
@@ -170,6 +221,22 @@
          </sizepolicy>
         </property>
        </widget>
+      </item>
+      <item row="1" column="6">
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Preferred</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
       <item row="0" column="0">
        <widget class="QLabel" name="label">
@@ -201,21 +268,20 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="3">
-       <spacer name="horizontalSpacer_5">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+      <item row="1" column="4">
+       <widget class="QPushButton" name="pushButton_retrieveFWHM">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
         </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Ignored</enum>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Step 3: Use the loaded 2theta-sigma curve to calculate FWHM of the peaks in the table by interpolation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
+        <property name="text">
+         <string>Calculate FWHM</string>
         </property>
-       </spacer>
+       </widget>
       </item>
       <item row="1" column="2">
        <widget class="QPushButton" name="pushButton_load2thetaSigmaFile">
@@ -232,55 +298,13 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="4">
-       <widget class="QPushButton" name="pushButton_retrieveFWHM">
-        <property name="font">
-         <font>
-          <pointsize>10</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Step 3: Use the loaded 2theta-sigma curve to calculate FWHM of the peaks in the table by interpolation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string>Calculate FWHM</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="5">
-       <widget class="QPushButton" name="pushButton_integratePeaks">
-        <property name="minimumSize">
-         <size>
-          <width>130</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>100</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>10</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Step 4: Estimate/calculate peak intensities with Gaussian model&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string>Integrate Peaks</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="6">
-       <spacer name="horizontalSpacer_3">
+      <item row="0" column="3">
+       <spacer name="horizontalSpacer_5">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
         <property name="sizeType">
-         <enum>QSizePolicy::Preferred</enum>
+         <enum>QSizePolicy::Ignored</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -289,18 +313,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item row="0" column="7">
-       <widget class="QPushButton" name="pushButton_exportIntensityToFile">
-        <property name="font">
-         <font>
-          <pointsize>10</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Export To File</string>
-        </property>
-       </widget>
       </item>
       <item row="1" column="7">
        <widget class="QPushButton" name="pushButton_exportIntensityToTable">
@@ -314,37 +326,63 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>120</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>200</width>
-          <height>16777215</height>
-         </size>
-        </property>
+      <item row="0" column="4">
+       <widget class="QPushButton" name="pushButton_integrteDetectorCounts">
         <property name="font">
          <font>
           <pointsize>10</pointsize>
          </font>
         </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Step 1: Integrate detector counts by given ROI for all the (selected) scans in the table above&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="text">
-         <string>(Gaussian) Integration</string>
+         <string>Sum Counts</string>
         </property>
        </widget>
       </item>
+      <item row="0" column="5">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QComboBox" name="comboBox_integrateDirection">
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Counts sum/integration direction.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Vertical: detector counts are summed in the vertical direction (along Y-axis).  Output will be x vs counts.&lt;/p&gt;&lt;p&gt;Horizontal: detector counts are summed in the horizontal direction (along X-axis).  Output will be y vs counts.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Vertical</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Horizontal</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBox_fitPeaks">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Fit</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
+    </item>
+    <item row="2" column="0">
+     <widget class="SinglePtIntegrationTable" name="tableView_summary"/>
     </item>
    </layout>
   </widget>
