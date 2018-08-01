@@ -191,7 +191,7 @@ std::vector<Group> openDetectorGroups(const Group &root) {
 
   // Open all instrument groups within rawDataGroups
   std::vector<Group> instrumentGroupPaths;
-  for (auto rawDataGroupPath : rawDataGroupPaths) {
+  for (auto const &rawDataGroupPath : rawDataGroupPaths) {
     std::vector<Group> instrumentGroups =
         openSubGroups(rawDataGroupPath, NX_INSTRUMENT);
     instrumentGroupPaths.insert(instrumentGroupPaths.end(),
@@ -200,7 +200,7 @@ std::vector<Group> openDetectorGroups(const Group &root) {
   }
   // Open all detector groups within instrumentGroups
   std::vector<Group> detectorGroupPaths;
-  for (auto instrumentGroupPath : instrumentGroupPaths) {
+  for (auto const &instrumentGroupPath : instrumentGroupPaths) {
     // Open sub detector groups
     std::vector<Group> detectorGroups =
         openSubGroups(instrumentGroupPath, NX_DETECTOR);
@@ -289,7 +289,7 @@ getTransformations(const H5File &file, const Group &detectorGroup) {
   H5std_string dependency;
   // Get absolute dependency path
   auto status =
-      H5Gget_objinfo(detectorGroup.getId(), DEPENDS_ON.c_str(), 0, NULL);
+      H5Gget_objinfo(detectorGroup.getId(), DEPENDS_ON.c_str(), false, nullptr);
   if (status == 0) {
     dependency = get1DStringDataset(DEPENDS_ON, detectorGroup);
   } else {
@@ -409,13 +409,12 @@ parseNexusCylinder(const Group &shapeGroup) {
 
 // Parse OFF (mesh) nexus geometry
 boost::shared_ptr<const Geometry::IObject>
-parseNexusMesh(const Group &detectorGroup, const Group &shapeGroup) {
+parseNexusMesh(const Group &shapeGroup) {
   const std::vector<uint16_t> faceIndices = convertVector<int32_t, uint16_t>(
       get1DDataset<int32_t>("faces", shapeGroup));
   const std::vector<uint16_t> windingOrder = convertVector<int32_t, uint16_t>(
       get1DDataset<int32_t>("winding_order", shapeGroup));
   const auto vertices = get1DDataset<float>("vertices", shapeGroup);
-  Pixels pixelOffsets = getPixelOffsets(detectorGroup);
   return NexusShapeFactory::createFromOFFMesh(faceIndices, windingOrder,
                                               vertices);
 }
@@ -503,11 +502,11 @@ void parseAndAddBank(const Group &shapeGroup, InstrumentBuilder &builder,
       get1DDataset<int32_t>("winding_order", shapeGroup));
   const auto vertices = get1DDataset<float>("vertices", shapeGroup);
 
-  // Build a map of detector IDs to the index of occurance in the
+  // Build a map of detector IDs to the index of occurrence in the
   // "detector_number" dataset
   std::unordered_map<int, uint32_t> detIdToIndex;
   for (uint32_t i = 0; i < detectorIds.size(); ++i) {
-    detIdToIndex.insert(std::make_pair(detectorIds[i], i));
+    detIdToIndex.emplace(detectorIds[i], i);
   }
 
   parseNexusMeshAndAddDetectors(detFaces, faceIndices, windingOrder, vertices,
@@ -577,7 +576,7 @@ void parseMonitors(const H5::Group &root, InstrumentBuilder &builder) {
   std::vector<Group> rawDataGroupPaths = openSubGroups(root, NX_ENTRY);
 
   // Open all instrument groups within rawDataGroups
-  for (auto rawDataGroupPath : rawDataGroupPaths) {
+  for (auto const &rawDataGroupPath : rawDataGroupPaths) {
     std::vector<Group> instrumentGroups =
         openSubGroups(rawDataGroupPath, NX_INSTRUMENT);
     for (auto &inst : instrumentGroups) {
@@ -607,7 +606,7 @@ extractInstrument(const H5File &file, const Group &root) {
     // Absolute bank position
     Eigen::Vector3d bankPos = transforms * Eigen::Vector3d{0, 0, 0};
     // Absolute bank rotation
-    Eigen::Quaterniond bankRotation = Eigen::Quaterniond(transforms.rotation());
+    auto bankRotation = Eigen::Quaterniond(transforms.rotation());
     auto bankName = get1DStringDataset(BANK_NAME, detectorGroup);
     builder.addBank(bankName, bankPos, bankRotation);
     // Get the pixel detIds
