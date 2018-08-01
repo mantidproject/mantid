@@ -938,15 +938,13 @@ std::string ConfigServiceImpl::getString(const std::string &keyName,
       return (*mitr).second;
     }
   }
-  std::string retVal;
-  try {
-    retVal = m_pConf->getString(keyName);
-  } catch (Poco::NotFoundException &) {
-    g_log.debug() << "Unable to find " << keyName << " in the properties file"
-                  << '\n';
-    retVal = "";
+  if (m_pConf->hasProperty(keyName)) {
+	  return m_pConf->getString(keyName);
   }
-  return retVal;
+
+  g_log.debug() << "Unable to find " << keyName << " in the properties file"
+				<< '\n';
+  return;
 }
 
 /** Searches for keys within the currently loaded configuaration values and

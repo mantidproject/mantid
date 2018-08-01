@@ -62,13 +62,9 @@ FileFinderImpl::FileFinderImpl() {
 #ifdef _WIN32
   m_globOption = Poco::Glob::GLOB_DEFAULT;
 #else
-  std::string casesensitive =
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "filefinder.casesensitive");
-  if (boost::iequals("Off", casesensitive))
-    m_globOption = Poco::Glob::GLOB_CASELESS;
-  else
-    m_globOption = Poco::Glob::GLOB_DEFAULT;
+  m_globOption =
+	  Mantid::Kernel::ConfigService::Instance().getValue<bool>(
+		  "filefinder.casesensitive").get_value_or_default(false);
 #endif
 }
 
