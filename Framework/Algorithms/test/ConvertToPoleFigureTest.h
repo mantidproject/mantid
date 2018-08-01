@@ -13,6 +13,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/ConvertToPoleFigure.h"
+#include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -20,9 +22,9 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTypes/Core/DateAndTime.h"
-
 #include <cmath>
 #include <numeric>
+#include <random>
 
 using Mantid::Algorithms::ConvertToPoleFigure;
 
@@ -30,6 +32,7 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid;
+using Types::Event::TofEvent;
 
 //-----------------------------------------------------
 /** create a Bragg workspace containg 2 spectra.
@@ -186,6 +189,100 @@ createIntensityWorkspace(const std::string &name) {
   return ws;
 }
 
+//----------------------------------------------------------------------------------------------
+/** Fake uniform time data more close to SNS case
+  * A list of 1000 events
+  * Pulse length: 1000000 * nano-second
+  */
+DataObjects::EventList fake_uniform_time_sns_data(int64_t runstart,
+                                                  int64_t pulselength) {
+  // Clear the list
+  DataObjects::EventList el = DataObjects::EventList();
+
+  // Create some mostly-reasonable fake data.
+  unsigned seed1 = 1;
+  std::minstd_rand0 g1(seed1);
+
+  for (int time = 0; time < 1000; time++) {
+    // All pulse times from 0 to 999 in seconds
+    Types::Core::DateAndTime pulsetime(
+        static_cast<int64_t>(time * pulselength + runstart));
+    double tof = static_cast<double>(g1() % 1000);
+    el += TofEvent(tof, pulsetime);
+  }
+
+  return el;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Create an EventWorkspace for a virtual engineering diffractometer
+ * @brief createEventWorkspaceElastic
+ * @param runstart_i64
+ * @param pulsedt
+ * @return
+ */
+Mantid::DataObjects::EventWorkspace_sptr
+createEventWorkspaceElastic(std::string ws_name, int64_t runstart_i64,
+                            int64_t pulsedt) {
+
+  // TODO - Need to synchronize the event wall time and property time
+  TS_ASSERT_EQUALS("Need to ",
+                   "Synchronize wall time of events to time series property")
+
+  // Create an EventWorkspace with 10 banks with 1 detector each.  No events
+  // is generated
+  DataObjects::EventWorkspace_sptr eventWS =
+      WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1,
+                                                                      true);
+
+  Types::Core::DateAndTime runstart(runstart_i64);
+
+  // Create 1000 events
+  DataObjects::EventList fakeevlist =
+      fake_uniform_time_sns_data(runstart_i64, pulsedt);
+
+  // Set properties: (1) run_start time; (2) Ei
+  eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(),
+                                    true);
+
+  // Add evets
+  for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
+    auto &elist = eventWS->getSpectrum(i);
+
+    for (size_t ievent = 0; ievent < fakeevlist.getNumberEvents(); ++ievent) {
+      TofEvent tofevent = fakeevlist.getEvent(ievent);
+      elist.addEventQuickly(tofevent);
+    } // FOR each pulse
+  }   // For each bank
+
+  // add sample logs
+  // add properties: Omega = -45    HROT = 30
+  // create HROT
+  Kernel::TimeSeriesProperty<double> *hrotprop =
+      new Kernel::TimeSeriesProperty<double>("HROT");
+  for (size_t i = 0; i < 5; ++i) {
+    Types::Core::DateAndTime time0(1000000);
+    hrotprop->addValue(time0, 30. + static_cast<float>(i));
+  }
+  // create Omega
+  Kernel::TimeSeriesProperty<double> *omegaprop =
+      new Kernel::TimeSeriesProperty<double>("OMEGA");
+  for (size_t i = 0; i < 7; ++i) {
+    Types::Core::DateAndTime time0(1000000);
+    omegaprop->addValue(time0, -45. + float(i) * 1.3);
+  }
+
+  // add HROR and Omega
+  API::Run &run = eventWS->mutableRun();
+  run.addProperty(hrotprop);
+  run.addProperty(omegaprop);
+
+  // add to analysis data service
+  API::AnalysisDataService::Instance().addOrReplace(ws_name, eventWS);
+
+  return eventWS;
+}
+
 class ConvertToPoleFigureTest : public CxxTest::TestSuite {
 public:
   void test_Init() {
@@ -199,7 +296,7 @@ public:
    * (center and 4 corners)
    * @brief test_Execute
    */
-  void test_Execute() {
+  void test_ConventionalHistogramMode() {
 
     // about input workspaces
     std::string peak_intensity_ws_name("TestPeakIntensityWorkspace");
@@ -287,6 +384,95 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(out_md_name);
 
     return;
+  }
+
+  //-------------------------------------------------------------------------------------------
+  /** Test the workflow on an EventWorkspace in event mode
+   * @brief test_EventMode
+   */
+  void test_EventMode() {
+    // about input workspaces
+    std::string input_ws_name("TestEventWorkspace");
+    std::string out_md_name("FiveEventsMDWorkspace");
+    const std::string hrot_name("HROT");
+    const std::string omega_name("Omega");
+
+    int64_t runstart_i64 = 10000;
+    int64_t pulsedt = 20000;
+    Mantid::DataObjects::EventWorkspace_sptr dataws =
+        createEventWorkspaceElastic(input_ws_name, runstart_i64, pulsedt);
+    Mantid::Algorithms::ConvertToPoleFigure pfcalculator;
+    pfcalculator.initialize();
+
+    // set properties
+    TS_ASSERT_THROWS_NOTHING(
+        pfcalculator.setProperty("InputWorkspace", input_ws_name));
+    TS_ASSERT_THROWS_NOTHING(
+        pfcalculator.setProperty("OutputWorkspace", out_md_name));
+    TS_ASSERT_THROWS_NOTHING(pfcalculator.setProperty("EventMode", true));
+    TS_ASSERT_THROWS_NOTHING(pfcalculator.setProperty("HROTName", hrot_name));
+    TS_ASSERT_THROWS_NOTHING(pfcalculator.setProperty("OmegaName", omega_name));
+
+    TS_ASSERT_THROWS_NOTHING(pfcalculator.setProperty("MinD", 1.4));
+    TS_ASSERT_THROWS_NOTHING(pfcalculator.setProperty("MaxD", 1.7));
+
+    TS_ASSERT_THROWS_NOTHING(pfcalculator.execute());
+
+    // run
+    TS_ASSERT(pfcalculator.isExecuted());
+
+    // check results
+
+    // get the vectors out
+    std::vector<double> r_td_vector = pfcalculator.getProperty("R_TD");
+    std::vector<double> r_nd_vector = pfcalculator.getProperty("R_ND");
+    std::vector<double> intensity_vector =
+        pfcalculator.getProperty("PeakIntensity");
+
+    // check the vectors' sizes
+    TS_ASSERT_EQUALS(r_td_vector.size(), 5);
+    TS_ASSERT_EQUALS(r_nd_vector.size(), 5);
+    TS_ASSERT_EQUALS(intensity_vector.size(), 5);
+
+    // set the  pre-calculated value
+    std::vector<double> bench_r_td_vec = {0.823814639, 0.990790951, 1,
+                                          -0.808630193, -1.01106895};
+    std::vector<double> bench_r_nd_vec = {1.619696448, 1.523292629, 1.732050808,
+                                          -1.63434472, -1.51746665};
+    std::vector<double> bench_intensity_vec = {25., 27.5, 30., 32.5, 35.};
+
+    // check value of R_TD
+    for (size_t i = 0; i < 5; ++i) {
+      TS_ASSERT_DELTA(r_td_vector[i], bench_r_td_vec[i], 0.0001);
+    }
+
+    // check value of R_ND
+    for (size_t i = 0; i < 5; ++i) {
+      TS_ASSERT_DELTA(r_nd_vector[i], bench_r_nd_vec[i], 0.0001);
+    }
+
+    // check value of R_ND
+    for (size_t i = 0; i < 5; ++i) {
+      TS_ASSERT_DELTA(intensity_vector[i], bench_intensity_vec[i], 0.0001);
+    }
+
+    // check MDWorkspaces
+    TS_ASSERT(
+        Mantid::API::AnalysisDataService::Instance().doesExist(out_md_name));
+
+    API::IMDEventWorkspace_sptr out_ws =
+        boost::dynamic_pointer_cast<API::IMDEventWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(out_md_name));
+    TS_ASSERT_EQUALS(out_ws->getNumDims(), 2);
+
+    // check MD events
+    auto mditer = out_ws->createIterator();
+    size_t num_events = mditer->getNumEvents();
+    TS_ASSERT_EQUALS(num_events, 5);
+
+    // clean up
+    Mantid::API::AnalysisDataService::Instance().remove(input_ws_name);
+    Mantid::API::AnalysisDataService::Instance().remove(out_md_name);
   }
 };
 

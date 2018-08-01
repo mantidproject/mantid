@@ -1,21 +1,20 @@
 #include "MantidAlgorithms/ConvertToPoleFigure.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -23,6 +22,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
@@ -64,11 +64,11 @@ void ConvertToPoleFigure::init() {
                   "Name of input workspace containing peak intensity and "
                   "instrument information.");
 
-  declareProperty(
-      make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-          "IntegratedPeakIntensityWorkspace", "", Direction::Input, uv),
-      "Name of the output MatrixWorkspace containing the events' "
-      "counts in the ROI for each spectrum.");
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+                      "IntegratedPeakIntensityWorkspace", "", Direction::Input,
+                      API::PropertyMode::Optional, uv),
+                  "Name of the output MatrixWorkspace containing the events' "
+                  "counts in the ROI for each spectrum.");
 
   declareProperty("HROTName", "BL7:Mot:Parker:HROT.RBV",
                   "Log name of HROT in input workspace");
@@ -81,6 +81,21 @@ void ConvertToPoleFigure::init() {
       make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
           "OutputWorkspace", "", Direction::Output),
       "Name of the output IEventWorkspace containing pole figure information.");
+
+  declareProperty("EventMode", true,
+                  "If True, then the pole figure will be based on each event;"
+                  " and IntegratedPeakIntensityWorkspace is not required. "
+                  "Otherwise, the pole figure "
+                  " will be calculated base on each spectra (hitogram mode) "
+                  "and IntegratedPeakIntensityWorkspace "
+                  " is required.");
+
+  declareProperty("MinD", EMPTY_DBL(),
+                  "Lower boundary of the peak range in dSpacing"
+                  "It must be specified in the EventMode.");
+  declareProperty("MaxD", EMPTY_DBL(),
+                  "Upper boundary of the peak range in dSpacing"
+                  "It must be specified in the EventMode");
 
   // output vectors
   declareProperty(
@@ -102,18 +117,10 @@ void ConvertToPoleFigure::init() {
 void ConvertToPoleFigure::processInputs() {
   // get input workspaces
   m_inputWS = getProperty("InputWorkspace");
-  m_countWS = getProperty("IntegratedPeakIntensityWorkspace");
 
-  // check
-  if (m_inputWS->getNumberHistograms() != m_countWS->getNumberHistograms()) {
-    // TODO - A better output error message
-    throw std::runtime_error("");
-  }
-
-  // get inputs
+  // get inputs for HROT and Omega
   m_nameHROT = getPropertyValue("HROTName");
   m_nameOmega = getPropertyValue("OmegaName");
-
   // check whether the log exists
   auto hrot = m_inputWS->run().getProperty(m_nameHROT);
   if (!hrot) {
@@ -124,27 +131,189 @@ void ConvertToPoleFigure::processInputs() {
     throw std::invalid_argument("Omega does not exist in sample log!");
   }
 
+  // event mode or histogram mode
+  m_inEventMode = getProperty("EventMode");
+  if (m_inEventMode) {
+    processEventModeInputs();
+
+  } else {
+    // histgram mode
+    // get the event count workspace
+    std::string peakwsname =
+        getPropertyValue("IntegratedPeakIntensityWorkspace");
+    if (peakwsname.size() == 0) {
+      // empty due to not given
+      std::stringstream errss;
+      errss << "In histogram mode, IntegratedPeakIntensityWorkspace must be "
+               "given.";
+      g_log.error(errss.str());
+      throw std::invalid_argument(errss.str());
+    }
+    m_peakIntensityWS = getProperty("IntegratedPeakIntensityWorkspace");
+
+    // check
+    if (m_inputWS->getNumberHistograms() !=
+        m_peakIntensityWS->getNumberHistograms()) {
+      // histogram mode
+      throw std::runtime_error("");
+    }
+  }
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
+/** process the input arguments for event mode
+ * @brief ConvertToPoleFigure::processEventModeInputs
+ */
+void ConvertToPoleFigure::processEventModeInputs() {
+  // check whether the input workspace is an EventWorkspace
+  m_eventWS =
+      boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(m_inputWS);
+  if (!m_eventWS) {
+    std::stringstream errss;
+    errss << "Input MatrixWorkspace " << m_inputWS->getName()
+          << " is not an EventWorkspace";
+    g_log.notice(errss.str());
+    throw std::invalid_argument(errss.str());
+  }
+
+  // parsing d-spacing range
+  double min_d = getProperty("MinD");
+  double max_d = getProperty("MaxD");
+  g_log.notice() << "[DB...BAT] EventWorkspace range: "
+                 << m_eventWS->getTofMin() << ", " << m_eventWS->getTofMax()
+                 << "\n";
+  if (isEmpty(min_d) || isEmpty(max_d)) {
+    // minD or maxD is not specified
+    throw std::invalid_argument("Both MinD and MaxD shall be specified.");
+  } else if (min_d >= max_d) {
+    // value not in order
+    std::stringstream errss;
+    errss << "MinD " << min_d << " cannot be larger than or equal to MaxD "
+          << max_d;
+    g_log.notice(errss.str());
+    throw std::invalid_argument(errss.str());
+  } else if (min_d < m_eventWS->getTofMin() || max_d > m_eventWS->getTofMax()) {
+    // value out of range
+    std::stringstream errss;
+    errss << "MinD " << min_d << " and MaxD" << max_d
+          << " cannot be out of input EventWorkspace "
+          << "'s dSpacing range: " << m_eventWS->getTofMin() << ", "
+          << m_eventWS->getTofMax();
+    g_log.notice(errss.str());
+    throw std::invalid_argument(errss.str());
+  } else {
+    m_minD = min_d;
+    m_maxD = max_d;
+  }
+
   return;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+    */
 void ConvertToPoleFigure::exec() {
   // get input data
   processInputs();
 
-  // calcualte pole figure
-  convertToPoleFigure();
+  if (m_inEventMode) {
+    convertToPoleFigureEventMode();
+    ;
+  } else {
+    // calcualte pole figure
+    convertToPoleFigureHistogramMode();
 
-  // construct output
-  generateOutputs();
+    // construct output
+    generateOutputsHistogramMode();
+  }
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
+/** calculate pole figure in the event mode
+ * @brief ConvertToPoleFigure::convertToPoleFigureEventMode
+ */
+void ConvertToPoleFigure::convertToPoleFigureEventMode() {
+  // initialize output:
+  setupOutputVectors();
+
+  // sort events
+  sortEventWS();
+
+  // get hrot and omega series
+  TimeSeriesProperty<double> *hrotprop =
+      dynamic_cast<TimeSeriesProperty<double> *>(
+          m_inputWS->run().getProperty(m_nameHROT));
+
+  TimeSeriesProperty<double> *omegaprop =
+      dynamic_cast<TimeSeriesProperty<double> *>(
+          m_inputWS->run().getProperty(m_nameOmega));
+
+  // get instrument information
+  Kernel::V3D sample_pos, sample_src_unit_k;
+  retrieveInstrumentInfo(sample_pos, sample_src_unit_k);
+
+  // go through spectra
+  // TODO / FIXME - after testing, this loop shall be turned to OpenMP
+  size_t num_spectra = m_eventWS->getNumberHistograms();
+  for (size_t iws = 0; iws < num_spectra; ++iws) {
+    auto events = m_eventWS->getSpectrum(iws).getEvents();
+    Kernel::V3D unit_vec_q = calculateUnitQ(iws, sample_pos, sample_src_unit_k);
+    size_t index_min_d = findDRangeInEventList(events, m_minD, false);
+    size_t index_max_d = findDRangeInEventList(events, m_maxD, true);
+    for (size_t iev = index_min_d; iev < index_max_d; ++iev) {
+      // get event's wall time
+      TofEvent event_i = events[iev];
+      Types::Core::DateAndTime pulsetime = event_i.pulseTime();
+      double tof = event_i.tof();
+      // get hrot and omega
+      double hrot_i = hrotprop->getSingleValue(pulsetime);
+      double omega_i = omegaprop->getSingleValue(pulsetime);
+      // rotation q
+      double r_td_i;
+      double r_nd_i;
+      rotateVectorQ(unit_vec_q, hrot_i, omega_i, r_td_i, r_nd_i);
+      // save.
+    }
+  }
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
+/** For event mode, it is not pratical to output all the MDEvents. It is
+ * required some experiment
+ * to determine how to export the pole figure to python script. And how python
+ * script can hanle
+ * the data size in a reasonable time
+ * @brief ConvertToPoleFigure::setupOutputVectors
+ */
+void ConvertToPoleFigure::setupOutputVectors() {
+  // TODO - TO be determined how to deal with this
+}
+
+//----------------------------------------------------------------------------------------------
+/**  Examine whether any spectrum does not have detector
+ * Warning message will be written out
+ * @brief FilterEvents::examineEventWS
+ */
+void ConvertToPoleFigure::sortEventWS() {
+  // sort events
+  DataObjects::EventSortType sortType = DataObjects::TOF_SORT;
+
+  // This runs the SortEvents algorithm in parallel
+  m_eventWS->sortAll(sortType, nullptr);
+
+  return;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Calcualte pole figure
  */
-void ConvertToPoleFigure::convertToPoleFigure() {
+void ConvertToPoleFigure::convertToPoleFigureHistogramMode() {
   // initialize output
   m_poleFigureRTDVector.resize(m_inputWS->getNumberHistograms());
   m_poleFigureRNDVector.resize(m_inputWS->getNumberHistograms());
@@ -162,28 +331,32 @@ void ConvertToPoleFigure::convertToPoleFigure() {
   double omega = omegaprop->lastValue();
 
   // get source and positons
-  Kernel::V3D srcpos = m_inputWS->getInstrument()->getSource()->getPos();
-  Kernel::V3D samplepos = m_inputWS->getInstrument()->getSample()->getPos();
-  Kernel::V3D k_sample_srcpos = samplepos - srcpos;
-  Kernel::V3D k_sample_src_unit = k_sample_srcpos / k_sample_srcpos.norm();
+  //  Kernel::V3D srcpos = m_inputWS->getInstrument()->getSource()->getPos();
+  //  Kernel::V3D samplepos = m_inputWS->getInstrument()->getSample()->getPos();
+  //  Kernel::V3D k_sample_srcpos = samplepos - srcpos;
+  //  Kernel::V3D k_sample_src_unit = k_sample_srcpos / k_sample_srcpos.norm();
+  Kernel::V3D samplepos, k_sample_src_unit;
+  retrieveInstrumentInfo(samplepos, k_sample_src_unit);
 
-  // TODO/NEXT - After unit test and user test are passed. try to parallelize
+  // TODO/NEXT - After unit test and user test are passed. try to
+  // parallelize
   // this loop by openMP
   for (size_t iws = 0; iws < m_inputWS->getNumberHistograms(); ++iws) {
     // get detector position
-    auto detector = m_inputWS->getDetector(iws);
-    Kernel::V3D detpos = detector->getPos();
-    Kernel::V3D k_det_sample = detpos - samplepos;
-    Kernel::V3D k_det_sample_unit = k_det_sample / k_det_sample.norm();
-    Kernel::V3D qvector = k_det_sample_unit - k_sample_src_unit;
-    Kernel::V3D unit_q = qvector / qvector.norm();
+    //    auto detector = m_inputWS->getDetector(iws);
+    //    Kernel::V3D detpos = detector->getPos();
+    //    Kernel::V3D k_det_sample = detpos - samplepos;
+    //    Kernel::V3D k_det_sample_unit = k_det_sample / k_det_sample.norm();
+    //    Kernel::V3D qvector = k_det_sample_unit - k_sample_src_unit;
+    //    Kernel::V3D unit_q = qvector / qvector.norm();
+    Kernel::V3D unit_q = calculateUnitQ(iws, samplepos, k_sample_src_unit);
 
     // calcualte pole figure position
     double r_td, r_nd;
     rotateVectorQ(unit_q, hrot, omega, r_td, r_nd);
 
     // get peak intensity
-    double peak_intensity_i = m_countWS->histogram(iws).y()[0];
+    double peak_intensity_i = m_peakIntensityWS->histogram(iws).y()[0];
 
     // set up value
     m_poleFigureRTDVector[iws] = r_td;
@@ -194,11 +367,41 @@ void ConvertToPoleFigure::convertToPoleFigure() {
   return;
 }
 
+void ConvertToPoleFigure::retrieveInstrumentInfo(
+    Kernel::V3D &sample_pos, Kernel::V3D &sample_src_unit_k) {
+  Kernel::V3D srcpos = m_inputWS->getInstrument()->getSource()->getPos();
+  sample_pos = m_inputWS->getInstrument()->getSample()->getPos();
+  Kernel::V3D k_sample_srcpos = sample_pos - srcpos;
+  sample_src_unit_k = k_sample_srcpos / k_sample_srcpos.norm();
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
+/** calculate the unit Q value from a detector
+ * @brief calculateUnitQ
+ * @param iws :: workspace index
+ * @param samplepos :: sample position
+ * @param k_sample_src_unit:: unit k vector from source to sample
+ * @return
+ */
+Kernel::V3D ConvertToPoleFigure::calculateUnitQ(size_t iws, V3D samplepos,
+                                                V3D k_sample_src_unit) {
+  auto detector = m_inputWS->getDetector(iws);
+  Kernel::V3D detpos = detector->getPos();
+  Kernel::V3D k_det_sample = detpos - samplepos;
+  Kernel::V3D k_det_sample_unit = k_det_sample / k_det_sample.norm();
+  Kernel::V3D qvector = k_det_sample_unit - k_sample_src_unit;
+  Kernel::V3D unit_q = qvector / qvector.norm();
+
+  return unit_q;
+}
+
 //----------------------------------------------------------------------------------------------
 /** generate output workspaces
  * @brief ConvertToPoleFigure::generateOutputs
  */
-void ConvertToPoleFigure::generateOutputs() {
+void ConvertToPoleFigure::generateOutputsHistogramMode() {
   // create MDEventWorkspace
   // Create a target output workspace.
   // 2D as (x, y) signal error
@@ -269,7 +472,7 @@ void ConvertToPoleFigure::generateOutputs() {
 //----------------------------------------------------------------------------------------------
 /** rotate a vector Q to sample coordinate and project to R_TD and R_ND
  * @brief ConvertToPoleFigure::convertCoordinates
- * @param unitQ
+ * @param unitQ: unit Q value for each individual pixel/detector
  * @param hrot
  * @param omega
  * @param r_td
@@ -318,7 +521,8 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
 
   // project to the pole figure by point light
   double sign(1);
-  // Qz with positive and negative zero will render to opposite result though
+  // Qz with positive and negative zero will render to opposite result
+  // though
   // physically
   // they are same.  Here in order to make the output consistent with
   // considerting numerical
@@ -331,6 +535,61 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
   r_nd = -unitQpp.X() * sign * 2. / factor;
 
   return;
+}
+
+//----------------------------------------------------------------------------------------------
+/**
+ */
+/** find a TOF value's nearest index in a sorted (by tof) vector
+ * a binary search will be used
+ * @brief ConvertToPoleFigure::findDRangeInEventList
+ * @param vector
+ * @param d_value
+ * @param index_to_right :: if true, then the return index is equal to just
+ * larger than the d-value; otherwise, the returned index is equal to just
+ * smaller than d-value
+ * @return
+ */
+size_t ConvertToPoleFigure::findDRangeInEventList(
+    std::vector<Types::Event::TofEvent> vector, double d_value,
+    bool index_to_right) {
+
+  size_t left_index = 0;
+  size_t right_index = vector.size() - 1; // included
+  bool search(false);
+  // extreme condition
+  size_t index = 0;
+  if (d_value < vector.front().tof()) {
+    // d is too small
+    index = 0;
+  } else if (d_value > vector.back().tof()) {
+    // d is too large
+    index = vector.size() - 1;
+  } else {
+    // need to search
+    search = true;
+  }
+
+  while (search) {
+    if (left_index + 1 >= right_index) {
+      // terminate condition such that TOF value resides within left index and
+      // right index
+      search = false;
+      if (index_to_right)
+        index = right_index;
+      else
+        index = left_index;
+    } else {
+      size_t mid_point_index = (left_index + right_index) / 2;
+      if (d_value < vector[left_index].tof()) {
+        right_index = mid_point_index;
+      } else {
+        left_index = mid_point_index;
+      }
+    }
+  } // while
+
+  return index;
 }
 
 } // namespace Mantid

@@ -5,10 +5,16 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
+#include "MantidTypes/Core/DateAndTime.h"
+#include "MantidTypes/Event/TofEvent.h"
 
 namespace Mantid {
 namespace Algorithms {
+
+using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 
 /** ConvertToPoleFigure : Calcualte Pole Figure for engineering material
  */
@@ -32,25 +38,42 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  /// process inputs
+  /// process inputs suite
   void processInputs();
+  void processEventModeInputs();
 
-  /// calculate pole figure
-  void convertToPoleFigure();
-
+  /// general methods used by convertToPoleFigureHistogramMode and
+  /// convertToPoleFigureEventMode
+  void retrieveInstrumentInfo(Kernel::V3D &sample_pos,
+                              Kernel::V3D &sample_src_unit_k);
+  Kernel::V3D calculateUnitQ(size_t iws, Kernel::V3D samplepos,
+                             Kernel::V3D k_sample_src_unit);
   void rotateVectorQ(Kernel::V3D unitQ, const double &hrot, const double &omega,
                      double &r_td, double &r_nd);
 
+  /// calculate pole figure in conventional histogram approach
+  void convertToPoleFigureHistogramMode();
+
+  /// calcualte pole figure in the event ode
+  void convertToPoleFigureEventMode();
+  void sortEventWS();
+  void setupOutputVectors();
+  Types::Event::TofEvent me;
+  size_t findDRangeInEventList(std::vector<Types::Event::TofEvent> vector,
+                               double tof, bool index_to_right);
+
   /// generatae output workspace and set output properties
-  void generateOutputs();
+  void generateOutputsHistogramMode();
 
   /// generate output MDEventWorkspace
   void generateMDEventWS();
 
   /// input workspace
   API::MatrixWorkspace_const_sptr m_inputWS;
-  /// input counts
-  API::MatrixWorkspace_const_sptr m_countWS;
+  DataObjects::EventWorkspace_const_sptr
+      m_eventWS; // same object as m_inputWS if inputWS is EventWorkspace
+  /// input counts: only required for the histogram mode
+  API::MatrixWorkspace_const_sptr m_peakIntensityWS;
 
   /// sample log name
   std::string m_nameHROT;
@@ -60,6 +83,11 @@ private:
   std::vector<double> m_poleFigureRTDVector;
   std::vector<double> m_poleFigureRNDVector;
   std::vector<double> m_poleFigurePeakIntensityVector;
+
+  /// mode
+  bool m_inEventMode;
+  double m_minD;
+  double m_maxD;
 
   ///
 };
