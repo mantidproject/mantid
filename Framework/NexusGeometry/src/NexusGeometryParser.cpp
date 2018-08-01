@@ -543,7 +543,7 @@ parseNexusShape(const Group &detectorGroup) {
   if (shapeType == NX_CYLINDER) {
     return parseNexusCylinder(shapeGroup);
   } else if (shapeType == NX_OFF) {
-    return parseNexusMesh(detectorGroup, shapeGroup);
+    return parseNexusMesh(shapeGroup);
   } else {
     throw std::runtime_error(
         "Shape type not recognised by NexusGeometryParser");

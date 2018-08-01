@@ -44,7 +44,7 @@ namespace NexusGeometry {
 class MANTID_NEXUSGEOMETRY_DLL InstrumentBuilder {
 public:
   /// Constructor creates the instrument
-  InstrumentBuilder(const std::string &instrumentName);
+  explicit InstrumentBuilder(const std::string &instrumentName);
   /// Adds component to instrument
   Geometry::IComponent *addComponent(const std::string &compName,
                                      const Eigen::Vector3d &position);

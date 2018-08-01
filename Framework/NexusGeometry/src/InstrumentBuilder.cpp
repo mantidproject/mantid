@@ -19,7 +19,7 @@ private:
   bool *m_success = nullptr;
 
 public:
-  Transaction(bool *handle) : m_success(handle) { *m_success = false; }
+  explicit Transaction(bool *handle) : m_success(handle) { *m_success = false; }
   ~Transaction() { *m_success = true; }
   Transaction(const Transaction &) = delete;
   Transaction &operator=(const Transaction &) = delete;
@@ -39,7 +39,7 @@ InstrumentBuilder::InstrumentBuilder(const std::string &instrumentName)
   m_instrument->setDefaultViewAxis(defaultViewAxis);
   // Reference frame definitely does not need to be shared, and the copy
   // operations in instrument make a new one anyway, but at present i'm not
-  // chaning the instruemnt API, particularly since getReferenceFrame on
+  // changing the instrument API, particularly since getReferenceFrame on
   // instrument returns the shared pointer
   m_instrument->setReferenceFrame(boost::make_shared<Geometry::ReferenceFrame>(
       pointingUp, alongBeam, thetaSign, handedness, origin));
