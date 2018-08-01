@@ -51,13 +51,13 @@ class MaxEntPresenterTest(unittest.TestCase):
 
     def test_connects(self):
         assert(self.view.cancelSignal.connect.call_count==1)
-        self.view.cancelSignal.connect.called_with(self.presenter.cancel)
+        self.view.cancelSignal.connect.assert_called_with(self.presenter.cancel)
 
         assert(self.view.maxEntButtonSignal.connect.call_count==1)
-        self.view.maxEntButtonSignal.connect.called_with(self.presenter.handleMaxEntButton)
+        self.view.maxEntButtonSignal.connect.assert_called_with(self.presenter.handleMaxEntButton)
 
         assert(self.view.phaseSignal.connect.call_count==1)
-        self.view.phaseSignal.connect.called_with(self.presenter.handlePhase)
+        self.view.phaseSignal.connect.assert_called_with(self.presenter.handlePhase)
 
     def test_button(self):
         self.presenter.createThread = lambda *args:self.thread
