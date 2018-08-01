@@ -152,6 +152,9 @@ Furthermore, to avoid pollution of usage reports, usage reporting should be disa
   CheckMantidVersion.OnStartup = 0
   usagereports.enabled = 0
 
+In addition, Mantid has been found to sometimes hang when trying to execute algorithms on more than 10 ranks. Setting ``logging.channels.fileFilterChannel.level=`` to nothing appears to solve this problem.
+
+
 Writing and running Python scripts
 ----------------------------------
 
