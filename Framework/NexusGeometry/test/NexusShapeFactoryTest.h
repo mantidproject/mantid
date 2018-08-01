@@ -46,3 +46,48 @@ public:
     TS_ASSERT_EQUALS(mesh->numberOfTriangles(), 3); // 4 vertices (3 triangles)
   }
 };
+
+class NexusShapeFactoryTestPerformance : public CxxTest::TestSuite {
+private:
+  std::vector<Eigen::Vector3d> m_vertices;
+  std::vector<uint16_t> m_facesIndices;
+  std::vector<uint16_t> m_windingOrder;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static NexusShapeFactoryTestPerformance *createSuite() {
+    return new NexusShapeFactoryTestPerformance();
+  }
+  static void destroySuite(NexusShapeFactoryTestPerformance *suite) {
+    delete suite;
+  }
+
+  NexusShapeFactoryTestPerformance() {
+    // Make inputs. Repeated squares
+    for (uint16_t i = 0; i < 10000; ++i) {
+      m_vertices.emplace_back(Eigen::Vector3d(0 + i, 1, 0));
+      m_vertices.emplace_back(Eigen::Vector3d(0 + i, 1, 0));
+      /*
+       *     x           x     x
+       *     |           |     |
+       *     |      ->   |     |
+       *     x           x     x
+       */
+
+      m_facesIndices.push_back(i * 4);
+      m_facesIndices.push_back((i + 1) * 4);
+      if (i % 2 != 0) {
+        m_windingOrder.push_back(i * 2);
+        m_windingOrder.push_back(i * 2 + 1);
+        m_windingOrder.push_back(i * 2 + 2);
+        m_windingOrder.push_back(i * 2 + 3);
+      }
+    }
+  }
+
+  void test_createFromOFFMesh() {
+    auto mesh = createFromOFFMesh(m_facesIndices, m_windingOrder, m_vertices);
+    TS_ASSERT(mesh.get() != nullptr)
+  }
+};
