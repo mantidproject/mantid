@@ -39,9 +39,9 @@ bool allCoplanar(const std::vector<Kernel::V3D> &vertices,
   const auto nz = normal[2];
   auto k = nx * v0.X() + ny * v0.Y() + nz * v0.Z();
 
-  for (size_t i = 0; i < vertices.size(); ++i) {
-    auto d = (nx * vertices[i].X() + ny * vertices[i].Y() +
-              nz * vertices[i].Z() - k);
+  for (const auto &vertex : vertices) {
+    auto d = (nx * vertex.X() + ny * vertex.Y() +
+              nz * vertex.Z() - k);
     if (d != 0) {
       in_plane = false;
       break;
@@ -56,7 +56,7 @@ validatePointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices) {
     throw std::invalid_argument("Insufficient vertices to create a plane");
 
   Mantid::Kernel::V3D normal = CoplanarChecks::surfaceNormal(vertices);
-  // Check that a valid normal was found amonst collection of vertices
+  // Check that a valid normal was found amongst collection of vertices
   if (normal.norm2() == 0) {
     // If all points are colinear. Not a plane.
     throw std::invalid_argument(
@@ -157,7 +157,7 @@ bool MeshObject2D::pointsCoplanar(
     return false;
 
   Mantid::Kernel::V3D normal = CoplanarChecks::surfaceNormal(vertices);
-  // Check that a valid normal was found amonst collection of vertices
+  // Check that a valid normal was found amongst collection of vertices
   if (normal.norm2() == 0) {
     // If all points are colinear. Not a plane.
     return false;
@@ -205,7 +205,7 @@ void MeshObject2D::initialize() {
 }
 bool MeshObject2D::hasValidShape() const {
   // 3 or more points define a plane.
-  return (m_triangles.size() >= 1 && m_vertices.size() >= 3);
+  return (!m_triangles.empty() && m_vertices.size() >= 3);
 }
 
 double MeshObject2D::distanceToPlane(const Kernel::V3D &point) const {
@@ -392,7 +392,7 @@ Kernel::V3D
 MeshObject2D::generatePointInObject(Kernel::PseudoRandomNumberGenerator &,
                                     const size_t) const {
   // How this would work for a finite plane is not clear. Points within the
-  // plane can of course be generated, but most implementaitons of this method
+  // plane can of course be generated, but most implementations of this method
   // use the bounding box
   throw std::runtime_error("Not implemented.");
 }
