@@ -6,21 +6,20 @@
 <parameter name="T0">
  <value val="-0.904000"/>
 </parameter>
-</component-link>
 
 <!-- Need to fill in gaps for peak profile fitting -->
 <parameter name="fitConvolvedPeak" type="bool">
- <value val="true"/>
+ <value val="false"/>
 </parameter>
 
 <!-- Multiplier for profile fitting for BVG polar angle -->
 <parameter name="sigX0Scale">
- <value val="2." />
+ <value val="1." />
 </parameter>
 
 <!-- Multiplier for profile fitting for BVG azimuthal angle -->
 <parameter name="sigY0Scale">
- <value val="2." />
+ <value val="1." />
 </parameter>
 
 <!-- Number of rows between detector gaps for profile fitting -->
@@ -69,4 +68,5 @@
 </parameter>
 
 
+</component-link>
 </parameter-file>
