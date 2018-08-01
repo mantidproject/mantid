@@ -14,8 +14,9 @@ Project Recovery test
 - Before running these tests, set project recovery to run every 2 seconds. The instructions for this
   are on the `Project Recovery concepts page <http://docs.mantidproject.org/nightly/concepts/ProjectRecovery.html>`_.
 - Get the ISIS sample dataset from the `Downloads page <http://download.mantidproject.org/>`_.
-- Get the file `TOPAZ_3132_event.nxs`
-- Put the data in a data directory, referred to as ``data_directory`` in the scripts below
+- Get the file `TOPAZ_3132_event.nxs` - availabe from ``Olympic/Babylon5/Scratch/KeithButler/UmscriptedTesting`` 
+- The files `INTER000*` are in the ISIS sample data
+- Make sure that the directory containing the test files is in your User Directories (this can be set on the First Time Startup screen)
 - Set up a directory to store output for comparison, referred to as ``testing_directory`` below
 
 
@@ -39,11 +40,10 @@ Project Recovery test
 
 .. code-block:: python
 
-   data_directory=<path-to-data>
    testing_directory=<path-to-test>
-   Load(Filename=data_directory + '/INTER00013464.nxs', OutputWorkspace='INTER1')
-   Load(Filename=data_directory + '/INTER00013469.nxs', OutputWorkspace='INTER2')  
-   Load(Filename=data_directory + '/INTER00013469.nxs', OutputWorkspace='INTER3')  
+   Load(Filename='INTER00013464.nxs', OutputWorkspace='INTER1')
+   Load(Filename='INTER00013469.nxs', OutputWorkspace='INTER2')  
+   Load(Filename='INTER00013469.nxs', OutputWorkspace='INTER3')  
    RenameWorkspace(InputWorkspace='INTER2', OutputWorkspace='Rename2')  
    RenameWorkspace(InputWorkspace='INTER1', OutputWorkspace='Rename1') 
    RenameWorkspace(InputWorkspace='INTER3', OutputWorkspace='Rename3')  
@@ -69,7 +69,7 @@ Project Recovery test
    SaveCSV(InputWorkspace='Sequential5', Filename=testing_directory + '/Sequence5.csv')
    SaveCSV(InputWorkspace='Sequential6', Filename=testing_directory + '/Sequence6.csv') 
 
-- Wait a few seconds, then provoke a crash by running `Segfault`
+- Wait a few seconds, then provoke a crash by running `Segfault` from the algorithm window
 - Re-start MantidPlot
 - You should be presented with the Project Recovery dialog
 - Choose `Yes`
@@ -102,7 +102,7 @@ Project Recovery test
        CloneWorkspace(InputWorkspace='100Rebinned', OutputWorkspace='%sClone'%str(i))
    SaveCSV(InputWorkspace='2999Clone', Filename=testing_directory + 'Clone.csv')
 
-- Wait a few seconds, then provoke a crash by running `Segfault`
+- Wait a few seconds, then provoke a crash by running `Segfault` from the algorithm window
 - Re-start MantidPlot
 - You should be presented with the Project Recovery dialog
 - Choose `Yes`
@@ -125,9 +125,8 @@ Project Recovery test
 
 .. code-block:: python
 
-   data_directory=<path-to-data>
    testing_directory=<path-to-test>
-   Load(Filename= data_directory + '/TOPAZ_3132_event.nxs', OutputWorkspace='TOPAZ_3132_event', LoadMonitors='1')
+   Load(Filename= 'TOPAZ_3132_event.nxs', OutputWorkspace='TOPAZ_3132_event', LoadMonitors='1')
    ConvertToMD(InputWorkspace='TOPAZ_3132_event', QDimensions='Q3D', dEAnalysisMode='Elastic', Q3DFrames='Q_sample', LorentzCorrection='1', OutputWorkspace='TOPAZ_3132_md',\
    MinValues='-25,-25,-25', MaxValues='25,25,25', SplitInto='2', SplitThreshold='50', MaxRecursionDepth='13', MinRecursionDepth='7')
    DeleteWorkspace("TOPAZ_3132_event")
@@ -148,7 +147,7 @@ Project Recovery test
    ConvertMDHistoToMatrixWorkspace(InputWorkspace='Clone', OutputWorkspace='Clone_matrix')
    SaveCSV('Clone_matrix' , testing_directory + '/method_test.csv')
 
-   DgsReduction(SampleInputFile=data_directory + 'MAR11001.raw', IncidentEnergyGuess=12, OutputWorkspace='ws')
+   DgsReduction(SampleInputFile='MAR11001.raw', IncidentEnergyGuess=12, OutputWorkspace='ws')
    Rebin(InputWorkspace='ws', OutputWorkspace='rebin', Params='0.5')
    Rebin(InputWorkspace='rebin', OutputWorkspace='rebin', Params='0.6')
    Rebin(InputWorkspace='rebin', OutputWorkspace='rebin', Params='0.7')
@@ -162,7 +161,7 @@ Project Recovery test
    ConvertMDHistoToMatrixWorkspace(InputWorkspace='long4', OutputWorkspace='long4_matrix')
    SaveCSV('long4_matrix', testing_directory + '/test_binary_operators.csv')
 
-- Force a crash of Mantid with `Segfault`
+- Force a crash of Mantid with `Segfault` from the algorithm window
 - On re-loading Mantid choose a full recovery
 
 .. code-block:: python
@@ -192,7 +191,7 @@ Project Recovery test
 - Set `Log level` to `Debug`
 - Watch the `Results log` for 30 seconds (or longer than your interval for project recovery saving, see the `Preparation` section)
 - No message about saving should be printed
-- Now, crash the first instance of Mantid with `Segfault`
+- Now, crash the first instance of Mantid with `Segfault` from the algorithm window
 - Start a new instance of Mantid
 - This should also have no messages about saving
 - Close both instances of Mantid gracefully
@@ -216,7 +215,7 @@ Project Recovery test
 .. image:: ../../images/reporter-test-4.png
 
 
-- Crash Mantid with `Segfault`
+- Crash Mantid with `Segfault` from the algorithm window
 - Reopen Mantid
 - You should be presented with the Project Recovery dialog
 - Choose `Yes`
@@ -259,10 +258,44 @@ Project Recovery test
 - Run the second script from test 1
 - In the workspace window right-click the ``Sequential3`` workspace and choose `Plot spectrum`
 - Choose `Plot All`
-- Crash Mantid with `Segfault`
+- Crash Mantid with `Segfault` from the algorithm window
 - Reopen Mantid
 - You should be presented with the Project Recovery dialog
 - Choose `Only open in script editor`
 - Mantid should open the script editor, with a script named `ordered_recovery.py`
 - Run this script, it should repopulate the workspaces dialog, but not open any figures
 
+---------
+
+7. Not attempting recovery
+
+- Open MantidPlot - make sure no other instances of MantidPlot are running
+- Run the second script from test 1
+- In the workspace window right-click the ``Sequential3`` workspace and choose `Plot spectrum`
+- Choose `Plot All`
+- Crash Mantid with `Segfault` from the algorithm window
+- Reopen Mantid
+- You should be presented with the Project Recovery dialog
+- Choose `No`
+- Mantid should open as normal
+- With the Results Log in debug level you should see the project saver starting up again
+
+---------
+
+8. Check old history is purged
+
+- Open MantidPlot - make sure no other instances of MantidPlot are running
+
+.. code-block:: python
+
+  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='NewWorkspace')
+  RenameWorkspace(InputWorkspace='NewWorkspace', OutputWorkspace='Rename2')  
+
+- Save the workspace as a `.nxs` file
+- Delete the workspace
+- Re-open the workspace from the saved `.nxs` file
+- Crash Mantid with `Segfault` from the algorithm window
+- Reopen Mantid
+- Choose `Only open in script editor`
+- Mantid should open the script editor, with a script named `ordered_recovery.py`
+- This file should contain only the ``Load`` command and no previous history
