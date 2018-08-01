@@ -944,7 +944,7 @@ std::string ConfigServiceImpl::getString(const std::string &keyName,
 
   g_log.debug() << "Unable to find " << keyName << " in the properties file"
                 << '\n';
-  return;
+  return {};
 }
 
 /** Searches for keys within the currently loaded configuaration values and
