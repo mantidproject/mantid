@@ -20,6 +20,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidCrystal/CalculateUMatrix.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
@@ -52,6 +53,12 @@ public:
     pw->addPeak(p1);
     pw->addPeak(p2);
     AnalysisDataService::Instance().addOrReplace(WSName, pw);
+    // Set Goniometer to 180 degrees
+    Mantid::Geometry::Goniometer gonio;
+    gonio.makeUniversalGoniometer();
+    gonio.setRotationAngle(1, 180);
+    pw->mutableRun().setGoniometer(gonio, false);
+
     CalculateUMatrix alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize())
     TS_ASSERT(alg2.isInitialized())
@@ -78,6 +85,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     alg.setPropertyValue("SatellitePeaks", "SatellitePeaks");
     PeaksWorkspace_sptr SatellitePeaks = alg.getProperty("SatellitePeaks");
+    TS_ASSERT(SatellitePeaks);
 
     TS_ASSERT_EQUALS(SatellitePeaks->getNumberPeaks(), 5);
 
@@ -90,6 +98,28 @@ public:
     TS_ASSERT_DELTA(peak3.getH(), 2.5, .0001);
     TS_ASSERT_DELTA(peak3.getK(), 0.0, .0001);
     TS_ASSERT_DELTA(peak3.getL(), 0.2, .0001);
+
+    PredictSatellitePeaks alg4;
+    TS_ASSERT_THROWS_NOTHING(alg4.initialize());
+    TS_ASSERT(alg4.isInitialized());
+
+    alg4.setProperty("Peaks", WSName);
+
+    alg4.setProperty("SatellitePeaks", std::string("SatellitePeaks"));
+    alg4.setProperty("ModVector1", "0.5,0,.2");
+    alg4.setProperty("MaxOrder", "1");
+    alg4.setProperty("IncludeAllPeaksInRange", true);
+    alg4.setProperty("MinDSpacing", "3");
+    alg4.setProperty("MaxDSpacing", "16");
+    alg4.setProperty("WavelengthMin", "0.5");
+    alg4.setProperty("WavelengthMax", "22");
+    TS_ASSERT(alg4.execute())
+    TS_ASSERT(alg4.isExecuted());
+    alg4.setPropertyValue("SatellitePeaks", "SatellitePeaks");
+    PeaksWorkspace_sptr SatellitePeaks2 = alg4.getProperty("SatellitePeaks");
+    TS_ASSERT(SatellitePeaks2);
+
+    TS_ASSERT_EQUALS(SatellitePeaks2->getNumberPeaks(), 467);
 
     AnalysisDataService::Instance().remove(WSName);
   }

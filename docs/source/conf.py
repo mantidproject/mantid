@@ -5,9 +5,10 @@
 
 import sys
 import os
+from sphinx import __version__ as sphinx_version
 import sphinx_bootstrap_theme # checked at cmake time
 import mantid
-from mantid import ConfigService
+from mantid.kernel import ConfigService
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -15,6 +16,13 @@ from mantid import ConfigService
 sys.path.insert(0, os.path.abspath(os.path.join('..', 'sphinxext')))
 
 # -- General configuration ------------------------------------------------
+
+if sphinx_version > "1.6":
+    def setup(app):
+        """Called automatically by Sphinx when starting the build process
+        """
+        app.add_stylesheet("custom.css")
+
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -96,8 +104,14 @@ except TypeError:
 
 # Run this after each test group has executed
 doctest_global_cleanup = """
+import time
 from mantid.api import FrameworkManager
+from mantid.kernel import MemoryStats
+
 FrameworkManager.Instance().clear()
+if MemoryStats().getFreeRatio() < 0.75:
+    # sleep for short period to allow memory to be freed
+    time.sleep(2)
 """
 
 # -- Options for pngmath --------------------------------------------------
@@ -136,9 +150,12 @@ html_static_path = ['_static']
 # directly to the root of the documentation.
 #html_extra_path = []
 
-# If true, SmartyPants will be used to convert quotes and dashes to
+# If true, Smart Quotes will be used to convert quotes and dashes to
 # typographically correct entities.
-html_use_smartypants = True
+if sphinx_version < "1.7":
+    html_use_smartypants = True
+else:
+    smartquotes = True
 
 # Hide the Sphinx usage as we reference it on github instead.
 html_show_sphinx = False

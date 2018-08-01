@@ -350,9 +350,9 @@ void ScriptFileInterpreter::showFindReplaceDialog() {
  * Execute the whole script in the editor. Always clears the contents of the
  * local variable dictionary first.
  */
-void ScriptFileInterpreter::executeAll(const Script::ExecutionMode mode) {
+bool ScriptFileInterpreter::executeAll(const Script::ExecutionMode mode) {
   m_runner->clearLocals();
-  executeCode(ScriptCode(m_editor->text()), mode);
+  return executeCode(ScriptCode(m_editor->text()), mode);
 }
 
 /**
@@ -511,20 +511,25 @@ bool ScriptFileInterpreter::readFileIntoEditor(const QString &filename) {
  * Use the current Script object to execute the code asynchronously
  * @param code :: The code string to run
  */
-void ScriptFileInterpreter::executeCode(const ScriptCode &code,
+bool ScriptFileInterpreter::executeCode(const ScriptCode &code,
                                         const Script::ExecutionMode mode) {
   if (code.isEmpty())
-    return;
+    // This cannot fail
+    return true;
   if (mode == Script::Asynchronous) {
     try {
       m_runner->executeAsync(code);
+      // Best attempt at returning a status
+      return true;
     } catch (std::runtime_error &exc) {
       QMessageBox::critical(this, "MantidPlot", exc.what());
+      return false; // To silence the compiler despite being useless
     }
   } else if (mode == Script::Serialised) {
-    m_runner->execute(code);
+    return m_runner->execute(code);
   } else {
     QMessageBox::warning(this, "MantidPlot", "Unknown script execution mode");
+    return false;
   }
 }
 

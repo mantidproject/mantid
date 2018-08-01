@@ -98,18 +98,21 @@ void PredictSatellitePeaks::init() {
 
 /// Run the algorithm
 void PredictSatellitePeaks::exec() {
+  bool includePeaksInRange = getProperty("IncludeAllPeaksInRange");
+  if (!includePeaksInRange) {
+    exec_peaks();
+    return;
+  }
   PeaksWorkspace_sptr Peaks = getProperty("Peaks");
   if (!Peaks)
     throw std::invalid_argument(
         "Input workspace is not a PeaksWorkspace. Type=" + Peaks->id());
 
   V3D offsets1 = getOffsetVector("ModVector1");
-  std::cout << offsets1<<"\n";
   V3D offsets2 = getOffsetVector("ModVector2");
   V3D offsets3 = getOffsetVector("ModVector3");
   int maxOrder = getProperty("MaxOrder");
 
-  bool includePeaksInRange = getProperty("IncludeAllPeaksInRange");
   bool includeOrderZero = getProperty("IncludeIntegerHKL");
 
   if (Peaks->getNumberPeaks() <= 0) {
@@ -128,9 +131,6 @@ void PredictSatellitePeaks::exec() {
   OutPeaks->setInstrument(instrument);
   OutPeaks->mutableSample().setOrientedLattice(&lattice);
 
-  V3D hkl;
-  int peakNum = 0;
-  const auto NPeaks = Peaks->getNumberPeaks();
   Kernel::Matrix<double> goniometer;
   goniometer.identityMatrix();
 
@@ -139,86 +139,121 @@ void PredictSatellitePeaks::exec() {
   IPeak &peak0 = Peaks->getPeak(0);
 
   std::vector<V3D> possibleHKLs;
-  if (includePeaksInRange) {
-    const double dMin = getProperty("MinDSpacing");
-    const double dMax = getProperty("MaxDSpacing");
-    Geometry::HKLGenerator gen(lattice, dMin);
-    auto filter = boost::make_shared<HKLFilterDRange>(lattice, dMin, dMax);
+  const double dMin = getProperty("MinDSpacing");
+  const double dMax = getProperty("MaxDSpacing");
+  Geometry::HKLGenerator gen(lattice, dMin);
+  auto dSpacingFilter =
+      boost::make_shared<HKLFilterDRange>(lattice, dMin, dMax);
 
-    V3D hkl = *(gen.begin());
-    g_log.information() << "HKL range for d_min of " << dMin << " to d_max of "
-                        << dMax << " is from " << hkl << " to " << hkl * -1.0
-                        << ", a total of " << gen.size() << " possible HKL's\n";
-    if (gen.size() > 10000000000)
-      throw std::invalid_argument("More than 10 billion HKLs to search. Is "
-                                  "your d_min value too small?");
+  V3D hkl = *(gen.begin());
+  g_log.information() << "HKL range for d_min of " << dMin << " to d_max of "
+                      << dMax << " is from " << hkl << " to " << hkl * -1.0
+                      << ", a total of " << gen.size() << " possible HKL's\n";
+  if (gen.size() > MAX_NUMBER_HKLS)
+    throw std::invalid_argument("More than 10 billion HKLs to search. Is "
+                                "your d_min value too small?");
 
-    possibleHKLs.clear();
-    possibleHKLs.reserve(gen.size());
-    std::remove_copy_if(gen.begin(), gen.end(),
-                        std::back_inserter(possibleHKLs), (~filter)->fn());
-  } else {
-    hkl[0] = peak0.getH();
-    hkl[1] = peak0.getK();
-    hkl[2] = peak0.getL();
-  }
+  possibleHKLs.clear();
+  possibleHKLs.reserve(gen.size());
+  std::remove_copy_if(gen.begin(), gen.end(), std::back_inserter(possibleHKLs),
+                      (~dSpacingFilter)->fn());
 
-  size_t N = NPeaks * (1 + 2 * maxOrder);
-  if (includePeaksInRange) {
-    N = possibleHKLs.size();
-    N = max<size_t>(100, N);
-  }
+  size_t N = possibleHKLs.size();
+  N = max<size_t>(100, N);
   auto &UB = lattice.getUB();
   goniometer = peak0.getGoniometerMatrix();
   Progress prog(this, 0.0, 1.0, N);
   vector<vector<int>> AlreadyDonePeaks;
-  bool done = false;
-  DblMatrix orientedUB = goniometer * UB;
+  auto orientedUB = goniometer * UB;
   HKLFilterWavelength lambdaFilter(orientedUB, lambdaMin, lambdaMax);
   int seqNum = 0;
-  size_t next = 0;
-  while (!done) {
-    predictOffsets(Peaks, OutPeaks, offsets1, maxOrder, peakNum,
-                   lambdaFilter, includePeaksInRange,
-                   includeOrderZero, seqNum, AlreadyDonePeaks);
-    OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset1", offsets1, true);
-    predictOffsets(Peaks, OutPeaks, offsets2, maxOrder, peakNum,
-                   lambdaFilter, includePeaksInRange,
-                   includeOrderZero, seqNum, AlreadyDonePeaks);
-    OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset2", offsets2, true);
-    predictOffsets(Peaks, OutPeaks, offsets3, maxOrder, peakNum,
-                   lambdaFilter, includePeaksInRange,
-                   includeOrderZero, seqNum, AlreadyDonePeaks);
-    OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset3", offsets3, true);
-    if (includePeaksInRange) {
-      next++;
-      if (next == possibleHKLs.size())
-        break;
-      hkl = possibleHKLs[next];
-    } else {
-      peakNum++;
-      if (peakNum >= NPeaks)
-        done = true;
-    }
-    prog.report();
+  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset1", offsets1,
+                                                          true);
+  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset2", offsets2,
+                                                          true);
+  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset3", offsets3,
+                                                          true);
+  for (auto it = possibleHKLs.begin(); it != possibleHKLs.end(); ++it) {
+    V3D hkl = *it;
+    predictOffsets(Peaks, OutPeaks, offsets1, maxOrder, hkl, lambdaFilter,
+                   includePeaksInRange, includeOrderZero, seqNum,
+                   AlreadyDonePeaks);
+    predictOffsets(Peaks, OutPeaks, offsets2, maxOrder, hkl, lambdaFilter,
+                   includePeaksInRange, includeOrderZero, seqNum,
+                   AlreadyDonePeaks);
+    predictOffsets(Peaks, OutPeaks, offsets3, maxOrder, hkl, lambdaFilter,
+                   includePeaksInRange, includeOrderZero, seqNum,
+                   AlreadyDonePeaks);
+  }
+  setProperty("SatellitePeaks", OutPeaks);
+}
+
+void PredictSatellitePeaks::exec_peaks() {
+  PeaksWorkspace_sptr Peaks = getProperty("Peaks");
+  if (!Peaks)
+    throw std::invalid_argument(
+        "Input workspace is not a PeaksWorkspace. Type=" + Peaks->id());
+
+  V3D offsets1 = getOffsetVector("ModVector1");
+  V3D offsets2 = getOffsetVector("ModVector2");
+  V3D offsets3 = getOffsetVector("ModVector3");
+  int maxOrder = getProperty("MaxOrder");
+
+  bool includePeaksInRange = false;
+  bool includeOrderZero = getProperty("IncludeIntegerHKL");
+
+  if (Peaks->getNumberPeaks() <= 0) {
+    g_log.error() << "There are No peaks in the input PeaksWorkspace\n";
+    return;
   }
 
+  API::Sample sample = Peaks->mutableSample();
+
+  OrientedLattice lattice = sample.getOrientedLattice();
+
+  const auto instrument = Peaks->getInstrument();
+
+  auto OutPeaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+      WorkspaceFactory::Instance().createPeaks());
+  OutPeaks->setInstrument(instrument);
+  OutPeaks->mutableSample().setOrientedLattice(&lattice);
+
+  vector<vector<int>> AlreadyDonePeaks;
+  int seqNum = 0;
+  HKLFilterWavelength lambdaFilter(DblMatrix(3, 3, true), 0.1, 100.);
+  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset1", offsets1,
+                                                          true);
+  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset2", offsets2,
+                                                          true);
+  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset3", offsets3,
+                                                          true);
+  std::vector<Peak> peaks = Peaks->getPeaks();
+  for (auto it = peaks.begin(); it != peaks.end(); ++it) {
+    auto peak = *it;
+    V3D hkl = peak.getHKL();
+    predictOffsets(Peaks, OutPeaks, offsets1, maxOrder, hkl, lambdaFilter,
+                   includePeaksInRange, includeOrderZero, seqNum,
+                   AlreadyDonePeaks);
+    predictOffsets(Peaks, OutPeaks, offsets2, maxOrder, hkl, lambdaFilter,
+                   includePeaksInRange, includeOrderZero, seqNum,
+                   AlreadyDonePeaks);
+    predictOffsets(Peaks, OutPeaks, offsets3, maxOrder, hkl, lambdaFilter,
+                   includePeaksInRange, includeOrderZero, seqNum,
+                   AlreadyDonePeaks);
+  }
   setProperty("SatellitePeaks", OutPeaks);
 }
 
 void PredictSatellitePeaks::predictOffsets(
     DataObjects::PeaksWorkspace_sptr Peaks,
-    boost::shared_ptr<Mantid::API::IPeaksWorkspace> &OutPeaks,
-    V3D offsets, int &maxOrder, int &peakNum,
-    HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange,
-    bool &includeOrderZero, int &seqNum,
+    boost::shared_ptr<Mantid::API::IPeaksWorkspace> &OutPeaks, V3D offsets,
+    int &maxOrder, V3D &hkl, HKLFilterWavelength &lambdaFilter,
+    bool &includePeaksInRange, bool &includeOrderZero, int &seqNum,
     vector<vector<int>> &AlreadyDonePeaks) {
+  if (offsets == V3D(0, 0, 0))
+    return;
   const Kernel::DblMatrix &UB = Peaks->sample().getOrientedLattice().getUB();
-  IPeak &peak1 = Peaks->getPeak(peakNum);
-  V3D hkl;
-  hkl[0] = peak1.getH();
-  hkl[1] = peak1.getK();
-  hkl[2] = peak1.getL();
+  IPeak &peak1 = Peaks->getPeak(0);
   Kernel::Matrix<double> goniometer = peak1.getGoniometerMatrix();
   auto RunNumber = peak1.getRunNumber();
   Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
@@ -241,28 +276,28 @@ void PredictSatellitePeaks::predictOffsets(
 
     peak->setGoniometerMatrix(goniometer);
 
-    if (peak->findDetector(tracer)) {
-      vector<int> SavPk{RunNumber, boost::math::iround(1000.0 * satelliteHKL[0]),
-                        boost::math::iround(1000.0 * satelliteHKL[1]),
-                        boost::math::iround(1000.0 * satelliteHKL[2])};
+    if (!peak->findDetector(tracer))
+      continue;
+    vector<int> SavPk{RunNumber, boost::math::iround(1000.0 * satelliteHKL[0]),
+                      boost::math::iround(1000.0 * satelliteHKL[1]),
+                      boost::math::iround(1000.0 * satelliteHKL[2])};
 
-      auto it = find(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end(), SavPk);
+    bool foundPeak =
+        binary_search(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end(), SavPk);
 
-      if (it == AlreadyDonePeaks.end()) {
-        AlreadyDonePeaks.push_back(SavPk);
-        std::sort(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end());
-      } else {
-        continue;
-      }
-
-      peak->setHKL(satelliteHKL);
-      peak->setIntHKL(hkl);
-      peak->setPeakNumber(seqNum);
-      seqNum++;
-      peak->setRunNumber(RunNumber);
-      peak->setIntMNP(V3D(order, 0, 0));
-      OutPeaks->addPeak(*peak);
+    if (!foundPeak) {
+      AlreadyDonePeaks.push_back(SavPk);
+    } else {
+      continue;
     }
+
+    peak->setHKL(satelliteHKL);
+    peak->setIntHKL(hkl);
+    peak->setPeakNumber(seqNum);
+    seqNum++;
+    peak->setRunNumber(RunNumber);
+    peak->setIntMNP(V3D(order, 0, 0));
+    OutPeaks->addPeak(*peak);
   }
 }
 
@@ -273,7 +308,7 @@ V3D PredictSatellitePeaks::getOffsetVector(const std::string &label) {
     offsets.push_back(0.0);
     offsets.push_back(0.0);
   }
-  V3D offsets1 = V3D(offsets[0],offsets[1], offsets[2]);
+  V3D offsets1 = V3D(offsets[0], offsets[1], offsets[2]);
   return offsets1;
 }
 

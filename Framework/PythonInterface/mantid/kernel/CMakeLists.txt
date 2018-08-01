@@ -95,6 +95,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/NdArray.h
   ${HEADER_DIR}/kernel/Converters/CArrayToNDArray.h
   ${HEADER_DIR}/kernel/Converters/CloneToNumpy.h
+  ${HEADER_DIR}/kernel/Converters/ContainerDtype.h
   ${HEADER_DIR}/kernel/Converters/DateAndTime.h
   ${HEADER_DIR}/kernel/Converters/MapToPyDictionary.h
   ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h

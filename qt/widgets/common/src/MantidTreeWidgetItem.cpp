@@ -61,9 +61,11 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other) const {
 
   // If both should be sorted, and the scheme is set to ByName ...
   if (m_parent->getSortScheme() == MantidItemSortScheme::ByName) {
-    if (QString::compare(text(0), other.text(0), Qt::CaseInsensitive) < 0)
-      return true;
-    return false;
+    return QString::compare(text(0), other.text(0), Qt::CaseInsensitive) < 0;
+  }
+  // If both should be sorted and the scheme is set to ByMemorySize ...
+  else if (m_parent->getSortScheme() == MantidItemSortScheme::ByMemorySize) {
+    return this->getMemorySize() < mantidOther->getMemorySize();
   }
   // ... else both should be sorted and the scheme is set to ByLastModified.
   else {
@@ -102,6 +104,9 @@ DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem *item) {
   const size_t indexOfLast = wsHist.size() - 1;
   const auto lastAlgHist = wsHist.getAlgorithmHistory(indexOfLast);
   return lastAlgHist->executionDate();
+}
+std::size_t MantidTreeWidgetItem::getMemorySize() const {
+  return this->data(0, Qt::UserRole).value<Workspace_sptr>()->getMemorySize();
 }
 }
 }

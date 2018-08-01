@@ -1185,13 +1185,20 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
     std::string mode = (enabled) ? "Construct" : "Extract";
     alg->setProperty("Mode", mode);
     alg->execute();
+    if (!alg->isExecuted()) {
+      return;
+    }
     IFunction_sptr func = alg->getProperty("OutputFunction");
 
     // multiple fit
     if (m_isMultiFittingMode) {
       // update values in browser
-      auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(func);
-      old = tmp->getFunction(0);
+      if (func->getNumberDomains() > 1) {
+        auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(func);
+        old = tmp->getFunction(0);
+      } else {
+        old = func;
+      }
       m_functionBrowser->setFunction(old);
       // preserve global parameters
       QStringList newGlobals;
@@ -1209,10 +1216,11 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
 
       m_functionBrowser->setGlobalParameters(newGlobals);
       // if multi data set we need to do the fixes manually
+      // the current domain is automatic
       auto originalNames = func->getParameterNames();
       for (auto name : originalNames) {
         auto index = func->parameterIndex(name);
-        if (func->isFixed(index)) {
+        if (func->isFixed(index) && func->getNumberDomains() > 1) {
           // get domain
           auto index = name.find_first_of(".");
           std::string domainStr = name.substr(1, index - 1);
@@ -1243,18 +1251,24 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
 * @param enabled :: [input] Whether to turn this mode on or off
 */
 void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
-  ConvertFitFunctionForMuonTFAsymmetry(enabled);
-
-  // Show or hide the TFAsymmetry fit
-  if (enabled) {
-    // m_settingsGroup->property()->addSubProperty(m_normalization);
-    // m_multiFitSettingsGroup->property()->addSubProperty(m_normalization);
-    m_settingsGroup->property()->addSubProperty(m_keepNorm);
-    // setNormalization();
-  } else {
-    // m_settingsGroup->property()->removeSubProperty(m_normalization);
-    // m_multiFitSettingsGroup->property()->removeSubProperty(m_normalization);
-    m_settingsGroup->property()->removeSubProperty(m_keepNorm);
+  IFunction_sptr old =
+      boost::dynamic_pointer_cast<IFunction>(m_compositeFunction);
+  if (old->nParams() > 0) {
+    ConvertFitFunctionForMuonTFAsymmetry(enabled);
+    // Show or hide the TFAsymmetry fit
+    if (enabled) {
+      m_settingsGroup->property()->addSubProperty(m_keepNorm);
+    } else {
+      m_settingsGroup->property()->removeSubProperty(m_keepNorm);
+    }
+  } else if (enabled) {
+    // will update when user clicks elsewhere
+    m_boolManager->setValue(m_TFAsymmMode, false);
+    QMessageBox::warning(this, "Muon Analysis",
+                         "No fitting function provided. TF Asymmetry mode "
+                         "requires a fitting function to be added before "
+                         "enabling. Please add a fitting function and enable "
+                         "TF Asymmetry Mode again.");
   }
 }
 std::string MuonFitPropertyBrowser::TFExtension() const {

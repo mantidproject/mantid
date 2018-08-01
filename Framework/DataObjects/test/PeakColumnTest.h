@@ -119,7 +119,7 @@ public:
 
   void test_read_locale_awerness() {
     const std::vector<std::string> columnNames{"h", "k", "l", "RunNumber"};
-    const std::vector<double> columnValues{-2.0, 5.0, 12.0, 143290.0};
+    const std::vector<double> columnValues{-2.0, 5.0, 12.0, 0.0};
     TestingNumpunctFacet numpunct;
     const std::locale testLocale(std::locale::classic(), &numpunct);
     for (size_t i = 0; i < columnNames.size(); ++i) {
