@@ -10,3 +10,12 @@ Diffraction Changes
     improvements, followed by bug fixes.
 
 :ref:`Release 3.14.0 <v3.14.0>`
+
+
+Single Crystal Diffraction
+--------------------------
+
+Improvements
+############
+
+- :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.
