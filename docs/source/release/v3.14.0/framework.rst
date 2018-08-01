@@ -36,7 +36,7 @@ Algorithms
 
 
 New Algorithms
-**************
+##############
 
 
 
@@ -59,10 +59,12 @@ New
 Improvements
 ############
 
-
+- :ref:`ChudleyElliot <func-ChudleyElliot>` includes hbar in the definition
 
 Bugfixes
 ########
 
 
 :ref:`Release 3.14.0 <v3.14.0>`
+
+
