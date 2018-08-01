@@ -91,6 +91,67 @@ void LoadPSIMuonBin::exec() {
     // Throw Error for file type
   }
 
+  readSingleVariables(&streamReader);
+
+  readStringVariables(&streamReader);
+
+  readArrayVariables(&streamReader);
+
+  //Read in the histograms
+  std::vector<std::vector<double>> histograms;
+  for(auto histogramIndex = 0; histogramIndex < m_header.numberOfHistograms; ++histogramIndex){
+    std::vector<double> nextHistogram;
+    for(auto rowIndex = 0; rowIndex < m_header.lengthOfHistograms; ++rowIndex){
+      //Each histogram bit is 1024 bytes below the file start, and 4 bytes apart, and the HistogramNumber * NumberOfRecordsInEach * LengthOfTheDataRecordBins + PositionInHistogram
+      unsigned long histogramStreamPosition = 1024+(histogramIndex * m_header.numberOfDataRecordsFile * m_header.lengthOfDataRecordsBin);
+      unsigned long streamPosition = histogramStreamPosition + rowIndex*sizeof(int32_t);
+      streamReader.moveStreamToPosition(streamPosition);
+      int32_t nextReadValue;
+      streamReader >> nextReadValue;
+      nextHistogram.push_back(nextReadValue);
+    }
+    histograms.push_back(nextHistogram);
+  }
+
+  binFile.close();
+
+  //Create the workspace stuff
+  // Create a x axis, assumption that histograms will all be the same size, and that x will be 1 more in size than y
+  std::vector<double> xAxis;
+  for(auto xIndex = 0; static_cast<unsigned int>(xIndex) < histograms[0].size()+1; ++xIndex){
+    xAxis.push_back(static_cast<double>(xIndex) * m_header.histogramBinWidth);
+  }
+
+  // Create Errors
+  std::vector<std::vector<double >> eAxis;
+  for(auto histogramIndex = 0u; histogramIndex < histograms.size(); ++histogramIndex){
+    std::vector<double> newEAxis;
+    for(auto eIndex = 0u; eIndex < histograms[0].size(); ++eIndex){
+      newEAxis.push_back(sqrt(histograms[histogramIndex][eIndex]));
+    }
+    eAxis.push_back(newEAxis);
+  }
+
+  auto sizeOfXForHistograms = histograms[0].size()+1;
+  DataObjects::Workspace2D_sptr outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(m_header.numberOfHistograms, Mantid::HistogramData::Histogram(Mantid::HistogramData::BinEdges(sizeOfXForHistograms)));
+
+  for (auto specNum = 0u; specNum < histograms.size(); ++specNum){
+    outputWorkspace->mutableX(specNum) = xAxis;
+    outputWorkspace->mutableY(specNum) = histograms[specNum];
+    outputWorkspace->mutableE(specNum) = eAxis[specNum];
+  }
+
+  assignOutputWorkspaceParticulars(&outputWorkspace);
+
+  setProperty("OutputWorkspace", outputWorkspace);
+}
+
+std::string LoadPSIMuonBin::getFormattedDateTime(std::string date, std::string time){
+    std::map<std::string, std::string> months{{"JAN", "01"},{"FEB", "02"},{"MAR", "03"},{"APR", "04"},{"MAY", "05"},{"JUN", "06"},{"JUL", "07"},{"AUG", "08"},{"SEP", "09"},{"OCT", "10"},{"NOV", "11"},{"DEC", "12"}};
+    return "20" + date.substr(7,2) + "-" + months.find(date.substr(3, 3))->second + "-" + date.substr(0,2) + "T" + time;
+}
+
+void LoadPSIMuonBin::readSingleVariables(Mantid::Kernel::BinaryStreamReader &streamReader){
   //The single variables in the header of the binary file:
   //Should be at 3rd byte
   streamReader >> m_header.tdcResolution;
@@ -141,8 +202,10 @@ void LoadPSIMuonBin::exec() {
 
   //Should be at 658th byte
   streamReader >> m_header.periodOfMon;
+}
 
-  //The strings in the header of the binary file:
+void LoadPSIMuonBin::readStringVariables(Mantid::Kernel::BinaryStreamReader &streamReader){
+    //The strings in the header of the binary file:
   streamReader.moveStreamToPosition(138); // Only pass 10 bytes into the string from stream
   streamReader.read(m_header.sample, 10);
 
@@ -172,7 +235,9 @@ void LoadPSIMuonBin::exec() {
 
   streamReader.moveStreamToPosition(60); // Only pass 11 bytes into the string from stream
   streamReader.read(m_header.monDeviation, 11);
+}
 
+void LoadPSIMuonBin::readArrayVariables(Mantid::Kernel::BinaryStreamReader &streamReader){
   //The arrays in the header of the binary file:
   for(auto i = 0u; i <= 5; ++i){
     streamReader.moveStreamToPosition(924 + (i*4));
@@ -220,52 +285,10 @@ void LoadPSIMuonBin::exec() {
     streamReader.moveStreamToPosition(88 + (i*4));
     streamReader >> m_header.monHigh[i];
   }
+}
 
-  //Read in the histograms
-  std::vector<std::vector<double>> histograms;
-  for(auto histogramIndex = 0; histogramIndex < m_header.numberOfHistograms; ++histogramIndex){
-    std::vector<double> nextHistogram;
-    for(auto rowIndex = 0; rowIndex < m_header.lengthOfHistograms; ++rowIndex){
-      //Each histogram bit is 1024 bytes below the file start, and 4 bytes apart, and the HistogramNumber * NumberOfRecordsInEach * LengthOfTheDataRecordBins + PositionInHistogram
-      unsigned long histogramStreamPosition = 1024+(histogramIndex * m_header.numberOfDataRecordsFile * m_header.lengthOfDataRecordsBin);
-      unsigned long streamPosition = histogramStreamPosition + rowIndex*sizeof(int32_t);
-      streamReader.moveStreamToPosition(streamPosition);
-      int32_t nextReadValue;
-      streamReader >> nextReadValue;
-      nextHistogram.push_back(nextReadValue);
-    }
-    histograms.push_back(nextHistogram);
-  }
-
-  binFile.close();
-
-  //Create the workspace stuff
-  // Create a x axis, assumption that histograms will all be the same size, and that x will be 1 more in size than y
-  std::vector<double> xAxis;
-  for(auto xIndex = 0; static_cast<unsigned int>(xIndex) < histograms[0].size()+1; ++xIndex){
-    xAxis.push_back(static_cast<double>(xIndex) * m_header.histogramBinWidth);
-  }
-
-  // Create Errors
-  std::vector<std::vector<double >> eAxis;
-  for(auto histogramIndex = 0u; histogramIndex < histograms.size(); ++histogramIndex){
-    std::vector<double> newEAxis;
-    for(auto eIndex = 0u; eIndex < histograms[0].size(); ++eIndex){
-      newEAxis.push_back(sqrt(histograms[histogramIndex][eIndex]));
-    }
-    eAxis.push_back(newEAxis);
-  }
-
-  auto sizeOfXForHistograms = histograms[0].size()+1;
-  DataObjects::Workspace2D_sptr outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(m_header.numberOfHistograms, Mantid::HistogramData::Histogram(Mantid::HistogramData::BinEdges(sizeOfXForHistograms)));
-
-  for (auto specNum = 0u; specNum < histograms.size(); ++specNum){
-    outputWorkspace->mutableX(specNum) = xAxis;
-    outputWorkspace->mutableY(specNum) = histograms[specNum];
-    outputWorkspace->mutableE(specNum) = eAxis[specNum];
-  }
-
-  //Sort some workspace particulars
+void LoadPSIMuonBin::assignOutputWorkspaceParticulars(DataObjects::Workspace2D_sptr &outputWorkspace){
+    //Sort some workspace particulars
   outputWorkspace->setTitle(m_header.sample + " - Run:" + std::to_string(m_header.numberOfRuns));
 
   //Set axis variables
@@ -312,7 +335,7 @@ void LoadPSIMuonBin::exec() {
   //Length of run
   logAlg->setProperty("LogType", "String");
   logAlg->setProperty("LogName", "Length of Run");
-  logAlg->setProperty("LogText", std::to_string((static_cast<double>(histograms[0].size())) * m_header.histogramBinWidth) + "μs");
+  logAlg->setProperty("LogText", std::to_string((static_cast<double>(histograms[0].size())) * m_header.histogramBinWidth) + u8"\u03BC" + "s");
   logAlg->executeAsChildAlg();
 
   //Log field
@@ -320,15 +343,9 @@ void LoadPSIMuonBin::exec() {
   logAlg->setProperty("LogName", "Field");
   logAlg->setProperty("LogText", m_header.field);
   logAlg->executeAsChildAlg();
-
-  setProperty("OutputWorkspace", outputWorkspace);
 }
 
-std::string LoadPSIMuonBin::getFormattedDateTime(std::string date, std::string time){
-    std::map<std::string, std::string> months{{"JAN", "01"},{"FEB", "02"},{"MAR", "03"},{"APR", "04"},{"MAY", "05"},{"JUN", "06"},{"JUL", "07"},{"AUG", "08"},{"SEP", "09"},{"OCT", "10"},{"NOV", "11"},{"DEC", "12"}};
-    return "20" + date.substr(7,2) + "-" + months.find(date.substr(3, 3))->second + "-" + date.substr(0,2) + "T" + time;
-}
 
-void LoadPSIMuonBin::assignOutputWorkspaceParticulars(DataObjects::Workspace2D_sptr &outputWorkspace){}
+
 } // namespace DataHandling
 } // namespace Mantid
