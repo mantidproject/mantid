@@ -1,8 +1,8 @@
 #ifndef MANTID_SUPPORTTEST_H_
 #define MANTID_SUPPORTTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <Poco/Path.h>
+#include <cxxtest/TestSuite.h>
 #include <fstream>
 
 #include "MantidKernel/Strings.h"
@@ -616,7 +616,10 @@ public:
   }
   static void destroySuite(StringsTestPerformance *suite) { delete suite; }
   void setUp() override { input = std::vector<double>(10000000, 0.123456); }
-  void test_join_double() { auto result = join(input.begin(), input.end(), separator); }
+  void test_join_double() {
+    auto result = join(input.begin(), input.end(), separator);
+  }
+
 private:
   std::vector<double> input;
   std::string separator{","};
