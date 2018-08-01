@@ -78,13 +78,13 @@ class FFTPresenterTest(unittest.TestCase):
 
     def test_connects(self):
         assert(self.view.tableClickSignal.connect.call_count==1)
-        self.view.tableClickSignal.connect.called_with(self.presenter.tableClicked)
+        self.view.tableClickSignal.connect.assert_called_with(self.presenter.tableClicked)
 
         assert(self.view.buttonSignal.connect.call_count==1)
-        self.view.buttonSignal.connect.called_with(self.presenter.handleButton)
+        self.view.buttonSignal.connect.assert_called_with(self.presenter.handleButton)
 
         assert(self.view.phaseCheckSignal.connect.call_count==1)
-        self.view.phaseCheckSignal.connect.called_with(self.presenter.phaseCheck)
+        self.view.phaseCheckSignal.connect.assert_called_with(self.presenter.phaseCheck)
 
     def test_ImBox(self):
         self.view.tableClickSignal = mock.Mock(return_value=[3, 1])
