@@ -249,7 +249,7 @@ class RunTabPresenter(object):
             # 4. Populate the table
             self._table_model.clear_table_entries()
             for row in parsed_rows:
-                self._update_table_model(row)
+                self._add_row_to_table_model(row)
 
             self.update_view_from_table_model()
 
@@ -260,11 +260,10 @@ class RunTabPresenter(object):
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 
-    def _update_table_model(self,row):
+    def _add_row_to_table_model(self,row):
         """
         Adds a row to the table
         """
-
         def get_string_entry(_tag, _row):
             _element = ""
             if _tag in _row:

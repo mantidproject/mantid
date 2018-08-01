@@ -9,7 +9,7 @@ from mantid.kernel import PropertyManagerDataService
 
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ISISReductionMode,
-                               RangeStepType, FitType)
+                               RangeStepType, FitType, SANSInstrument)
 from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF)
 from sans.test_helper.mock_objects import (create_mock_view)
 from sans.test_helper.common import (remove_file)
@@ -241,7 +241,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.on_batch_file_load()
 
         # Act
-        states = presenter.get_states()
+        states = presenter.get_states(row_index=[0, 1])
 
         # Assert
         self.assertTrue(len(states) == 2)
@@ -443,6 +443,51 @@ class RunTabPresenterTest(unittest.TestCase):
         model_row_1 = presenter._table_model.get_table_entry(1)
         self.assertEqual(model_row_1, TableIndexModel(*row_3))
 
+    def test_add_row_to_table_model_adds_row_to_table_model(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter.set_view(mock.MagicMock())
+        parsed_data = BATCH_FILE_TEST_CONTENT_2
+
+        for row in parsed_data:
+            presenter._add_row_to_table_model(row)
+
+        table_entry_0 = presenter._table_model.get_table_entry(0)
+        self.assertEqual(table_entry_0.output_name, 'test_file')
+        self.assertEqual(table_entry_0.sample_scatter, 'SANS2D00022024')
+        self.assertEqual(table_entry_0.sample_thickness, 1.0)
+
+        table_entry_1 = presenter._table_model.get_table_entry(1)
+        self.assertEqual(table_entry_1.output_name, 'test_file2')
+
+    def test_update_view_from_table_model_updated_view_based_on_model(self):
+        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
+        presenter.set_view(mock.MagicMock())
+        parsed_data = BATCH_FILE_TEST_CONTENT_2
+        for row in parsed_data:
+            presenter._add_row_to_table_model(row)
+        expected_call_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
+                           'test_file', '', '1.0', '']
+        expected_call_1 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0', '']
+
+        presenter.update_view_from_table_model()
+
+        self.assertEqual(presenter._view.add_row.call_count, 2)
+
+        presenter._view.add_row.called_with(expected_call_0)
+        presenter._view.add_row.called_with(expected_call_1)
+
+    def test_setup_instrument_specific_settings(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter.set_view(mock.MagicMock())
+        presenter._beam_centre_presenter = mock.MagicMock()
+        presenter._workspace_diagnostic_presenter = mock.MagicMock()
+        instrument = SANSInstrument.LOQ
+
+        presenter._setup_instrument_specific_settings(SANSInstrument.LOQ)
+
+        presenter._view.set_instrument_settings.called_once_with(instrument)
+        presenter._beam_centre_presenter.on_update_instrument.called_once_with(instrument)
+        presenter._workspace_diagnostic_presenter.called_once_with(instrument)
 
     @staticmethod
     def _clear_property_manager_data_service():
