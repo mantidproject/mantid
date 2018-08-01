@@ -220,7 +220,13 @@ void ConvertToPoleFigure::exec() {
 
   if (m_inEventMode) {
     convertToPoleFigureEventMode();
-    ;
+
+    // initialize output (this is fake) TODO - It is for try-error-develop only
+    m_poleFigureRTDVector.resize(m_inputWS->getNumberHistograms());
+    m_poleFigureRNDVector.resize(m_inputWS->getNumberHistograms());
+    m_poleFigurePeakIntensityVector.resize(m_inputWS->getNumberHistograms());
+    generateOutputsHistogramMode();
+
   } else {
     // calcualte pole figure
     convertToPoleFigureHistogramMode();
@@ -257,18 +263,28 @@ void ConvertToPoleFigure::convertToPoleFigureEventMode() {
   retrieveInstrumentInfo(sample_pos, sample_src_unit_k);
 
   // go through spectra
-  // TODO / FIXME - after testing, this loop shall be turned to OpenMP
+  // TODO / NOW - this loop shall be turned to OpenMP to TEST SPEED
+  // TODO - Need statistic on the number of events falling in range
   size_t num_spectra = m_eventWS->getNumberHistograms();
   for (size_t iws = 0; iws < num_spectra; ++iws) {
     auto events = m_eventWS->getSpectrum(iws).getEvents();
+    if (events.size() == 0)
+      continue;
+    g_log.notice() << "[DB...INFO] working on spectrum " << iws << "\n";
     Kernel::V3D unit_vec_q = calculateUnitQ(iws, sample_pos, sample_src_unit_k);
     size_t index_min_d = findDRangeInEventList(events, m_minD, false);
     size_t index_max_d = findDRangeInEventList(events, m_maxD, true);
+    g_log.notice() << "[DB...INFO] spectrum " << iws
+                   << " in range: " << index_min_d << " --- " << index_max_d
+                   << "\n";
+    // TODO create a vector for rotated Q
     for (size_t iev = index_min_d; iev < index_max_d; ++iev) {
       // get event's wall time
       TofEvent event_i = events[iev];
       Types::Core::DateAndTime pulsetime = event_i.pulseTime();
       double tof = event_i.tof();
+      int64_t tof_ns = static_cast<int64_t>(tof * 1000); // FIXME - really 1000?
+      pulsetime += tof_ns;
       // get hrot and omega
       double hrot_i = hrotprop->getSingleValue(pulsetime);
       double omega_i = omegaprop->getSingleValue(pulsetime);
@@ -488,9 +504,9 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
   double omega_prime = omega - psi + 135.;
   double tau_pp = -hrot - phi;
 
-  g_log.notice() << "\nQ = " << unitQ.toString() << "\n";
-  g_log.notice() << "Input: omega = " << omega << ", "
-                 << "HROT = " << hrot << "\n";
+  //  g_log.notice() << "\nQ = " << unitQ.toString() << "\n";
+  //  g_log.notice() << "Input: omega = " << omega << ", "
+  //                 << "HROT = " << hrot << "\n";
 
   //
   double omega_prim_rad = omega_prime * M_PI / 180.;
@@ -499,16 +515,16 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
   // calculate first rotation
   Kernel::V3D k1(0, 1, 0);
   Kernel::V3D part1 = unitQ * cos(omega_prim_rad);
-  g_log.notice() << "Part 1: " << part1.toString() << "\n";
+  //  g_log.notice() << "Part 1: " << part1.toString() << "\n";
 
   Kernel::V3D part2 = (k1.cross_prod(unitQ)) * sin(omega_prim_rad);
-  g_log.notice() << "Part 2: " << part1.toString() << "\n";
+  //  g_log.notice() << "Part 2: " << part1.toString() << "\n";
 
   Kernel::V3D part3 =
       k1 * ((1 - cos(omega_prim_rad)) * (k1.scalar_prod(unitQ)));
   Kernel::V3D unitQPrime = part1 + part2 + part3;
 
-  g_log.notice() << "Q' = " << unitQPrime.toString() << "\n";
+  //  g_log.notice() << "Q' = " << unitQPrime.toString() << "\n";
 
   // calcualte second rotation
   Kernel::V3D k2(0, 0, 1);
@@ -517,7 +533,7 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
   part3 = k2 * (k2.scalar_prod(unitQPrime) * (1 - cos(tau_pp_rad)));
   Kernel::V3D unitQpp = part1 + part2 + part3;
 
-  g_log.notice() << "Q'' = " << unitQpp.toString() << "\n";
+  //  g_log.notice() << "Q'' = " << unitQpp.toString() << "\n";
 
   // project to the pole figure by point light
   double sign(1);
