@@ -584,17 +584,17 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
     throw std::invalid_argument(
         "Cannot convert input workspace to complex data");
 
-  size_t nSpecOfInterest = (concatSpec ? nSpec: 1);
+  size_t nSpecOfInterest = (concatSpec ? nSpec : 1);
   size_t firstSpecOfInterest = (concatSpec ? 0 : spec);
 
-  for (size_t s = firstSpecOfInterest; s < firstSpecOfInterest + nSpecOfInterest; s++) {
+  for (size_t s = firstSpecOfInterest;
+       s < firstSpecOfInterest + nSpecOfInterest; s++) {
     if (!errors) {
       for (size_t i = 0; i < numBins; i++) {
         result.emplace_back(inWS->y(s)[i]);
         result.emplace_back(inWS->y(s + nSpec)[i]);
       }
-    }
-    else {
+    } else {
       for (size_t i = 0; i < numBins; i++) {
         result.emplace_back(inWS->e(s)[i]);
         result.emplace_back(inWS->e(s + nSpec)[i]);

@@ -329,9 +329,9 @@ public:
     std::vector<double> wsVal(12, 3.0);
     auto ws = createWorkspaceWithYValues(4, 3, wsVal);
 
-    // First spectrum has no adjustments 
+    // First spectrum has no adjustments
     // Second spectrum has mixed adjustments
- 
+
     // Linear adjustments 2nd spectrum
     // 1, 2i, 2i
     std::vector<double> linAdjVal(12, 0.0);
@@ -376,11 +376,11 @@ public:
     TS_ASSERT_DELTA(data->y(1)[0], data->y(0)[0] + 1.0, 0.001);
     TS_ASSERT_DELTA(data->y(3)[0], data->y(2)[0] - 1.0, 0.001);
     // linear 2i, const 0
-    TS_ASSERT_DELTA(data->y(1)[1], -2.0*data->y(2)[1], 0.001);
-    TS_ASSERT_DELTA(data->y(3)[1],  2.0*data->y(0)[1], 0.001);
+    TS_ASSERT_DELTA(data->y(1)[1], -2.0 * data->y(2)[1], 0.001);
+    TS_ASSERT_DELTA(data->y(3)[1], 2.0 * data->y(0)[1], 0.001);
     // linear 2i, const 1-i
-    TS_ASSERT_DELTA(data->y(1)[2], -2.0*data->y(2)[2] + 1.0, 0.001);
-    TS_ASSERT_DELTA(data->y(3)[2],  2.0*data->y(0)[2] - 1.0, 0.001);
+    TS_ASSERT_DELTA(data->y(1)[2], -2.0 * data->y(2)[2] + 1.0, 0.001);
+    TS_ASSERT_DELTA(data->y(3)[2], 2.0 * data->y(0)[2] - 1.0, 0.001);
   }
 
   void test_cosine() {
@@ -1060,7 +1060,7 @@ public:
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, size + 1, size));
     // We don't care about values, except to check they are transferred
-    // to data after one iteration. 
+    // to data after one iteration.
     // Otherwise, we just want to test the number of
     // X points in the image.
     // For histogram input workspaces we should get the original number
@@ -1099,7 +1099,7 @@ public:
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
     // We don't care about values, except to check they are transferred
-    // to data after one iteration. 
+    // to data after one iteration.
     // Otherwise, we just want to test the number of
     // X points in the image.
     // For pointdata input workspaces we should get the original number
@@ -1132,7 +1132,9 @@ public:
     TS_ASSERT_EQUALS(data->readX(0), ws->readX(0));
   }
 
-  MatrixWorkspace_sptr createWorkspaceWithYValues(size_t nHist, size_t length, std::vector<double> const &YVal) {
+  MatrixWorkspace_sptr
+  createWorkspaceWithYValues(size_t nHist, size_t length,
+                             std::vector<double> const &YVal) {
 
     size_t nPts = length * nHist;
     TS_ASSERT_EQUALS(nPts, YVal.size());
