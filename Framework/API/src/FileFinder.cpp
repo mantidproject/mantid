@@ -64,7 +64,7 @@ FileFinderImpl::FileFinderImpl() {
 #else
   m_globOption = Mantid::Kernel::ConfigService::Instance()
                      .getValue<bool>("filefinder.casesensitive")
-                     .get_value_or_default(false);
+                     .get_value_or(false);
 #endif
 }
 
