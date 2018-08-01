@@ -100,7 +100,7 @@ Usage
    # perform fit
    # Warning: this will work only if elastic peak is stronger than the other peaks!
    peak_center, sigma = FitGaussian(ws_sum, 0)
-   print("Elastic peak center is at {} microseconds and has sigma={}.".format(round(peak_center), round(sigma)))
+   print("Elastic peak center is at {:.0f} microseconds and has sigma={:.0f}.".format(round(peak_center), round(sigma)))
 
    # calculate the elastic channel number
    channel_width = ws.getRun().getProperty("channel_width").value
@@ -109,7 +109,7 @@ Usage
    epp = round((peak_center - tof1 - t_delay)/channel_width)
 
    print("The channel width is {} microseconds.".format(channel_width))
-   print("The elastic channel number is: {}.".format(epp))
+   print("The elastic channel number is: {:.0f}.".format(epp))
 
 **Output:**
 
@@ -146,16 +146,16 @@ Usage
    tof1 = ws.getRun().getProperty("TOF1").value
    t_delay = ws.getRun().getProperty("delay_time").value
    tof_elastic = t_delay + tof1 + tof2_elastic
-   print ("Calculated elastic TOF: {} microseconds".format(round(tof_elastic)))
+   print ("Calculated elastic TOF: {:.0f} microseconds".format(round(tof_elastic)))
 
    # get elastic TOF from file
    ws_sum = SumSpectra(ws)
    peak_center, sigma = FitGaussian(ws_sum, 0)
-   print ("Elastic TOF in the workspace: {} microseconds".format(round(peak_center)))
+   print ("Elastic TOF in the workspace: {:.0f} microseconds".format(round(peak_center)))
 
    # compare difference to the channel width
    channel_width = ws.getRun().getProperty("channel_width").value
-   print("Difference = {} microseconds < channel width = {} microseconds."
+   print("Difference = {:.0f} microseconds < channel width = {} microseconds."
          .format(round(tof_elastic - peak_center), channel_width, round(sigma)))
    channel_width = ws.getRun().getProperty("channel_width").value
 
