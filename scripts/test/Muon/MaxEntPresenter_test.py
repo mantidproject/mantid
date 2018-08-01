@@ -49,13 +49,24 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.thread.threadWrapperSetup = mock.Mock()
         self.thread.threadWrapperTearDown = mock.Mock()
 
-        self.presenter.createThread=mock.Mock(return_value=self.thread)
-        self.presenter.createPhaseThread=mock.Mock(return_value=self.thread)
+    def test_connects(self):
+        assert(self.view.cancelSignal.connect.call_count==1)
+        self.view.cancelSignal.connect.called_with(self.presenter.cancel)
+
+        assert(self.view.maxEntButtonSignal.connect.call_count==1)
+        self.view.maxEntButtonSignal.connect.called_with(self.presenter.handleMaxEntButton)
+
+        assert(self.view.phaseSignal.connect.call_count==1)
+        self.view.phaseSignal.connect.called_with(self.presenter.handlePhase)
 
     def test_button(self):
+        self.presenter.createThread = lambda *args:self.thread
+
         self.presenter.handleMaxEntButton()
         assert(self.view.initMaxEntInput.call_count==1)
         assert(self.thread.start.call_count==1)
+
+        assert(self.thread.threadWrapperSetUp.call_count==1)
 
     def test_dataHasChanged(self):
         self.load.hasDataChanged = mock.MagicMock(return_value=True)
