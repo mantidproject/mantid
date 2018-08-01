@@ -38,10 +38,10 @@ def red_asterisk():
     return RED_ASTERISK
 
 
-PlotSelectionDialogUI, PlotSelectionDialogUIBase = load_ui(__file__, 'plotselectiondialog.ui')
+SpectraSelectionDialogUI, SpectraSelectionDialogUIBase = load_ui(__file__, 'spectraselectordialog.ui')
 
 
-class PlotSelection(object):
+class SpectraSelection(object):
 
     Individual = 0
 
@@ -49,14 +49,14 @@ class PlotSelection(object):
         self.workspaces = workspaces
         self.wksp_indices = None
         self.spectra = None
-        self.plot_type = PlotSelection.Individual
+        self.plot_type = SpectraSelection.Individual
 
 
-class PlotSelectionDialog(PlotSelectionDialogUIBase):
+class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
     def __init__(self, workspaces,
                  parent=None):
-        super(PlotSelectionDialog, self).__init__(parent)
+        super(SpectraSelectionDialog, self).__init__(parent)
         # attributes
         self._workspaces = workspaces
         self.spec_min, self.spec_max = None, None
@@ -72,14 +72,14 @@ class PlotSelectionDialog(PlotSelectionDialogUIBase):
         self.accept()
 
     def on_plot_all_clicked(self):
-        selection = PlotSelection(self._workspaces)
+        selection = SpectraSelection(self._workspaces)
         selection.wksp_indices = range(self.wi_min, self.wi_max + 1)
         self.selection = selection
         self.accept()
 
     # ------------------- Private -------------------------
     def _init_ui(self):
-        ui = PlotSelectionDialogUI()
+        ui = SpectraSelectionDialogUI()
         ui.setupUi(self)
         self._ui = ui
         # overwrite the "Yes to All" button text
@@ -142,7 +142,7 @@ class PlotSelectionDialog(PlotSelectionDialogUIBase):
     def _parse_wksp_indices(self):
         wksp_indices = parse_selection_str(self._ui.wkspIndices.text(), self.wi_min, self.wi_max)
         if wksp_indices:
-            selection = PlotSelection(self._workspaces)
+            selection = SpectraSelection(self._workspaces)
             selection.wksp_indices = wksp_indices
         else:
             selection = None
@@ -151,7 +151,7 @@ class PlotSelectionDialog(PlotSelectionDialogUIBase):
     def _parse_spec_nums(self):
         spec_nums = parse_selection_str(self._ui.specNums.text(), self.spec_min, self.spec_max)
         if spec_nums:
-            selection = PlotSelection(self._workspaces)
+            selection = SpectraSelection(self._workspaces)
             selection.spectra = spec_nums
         else:
             selection = None
@@ -161,7 +161,7 @@ class PlotSelectionDialog(PlotSelectionDialogUIBase):
         return self.selection is not None
 
 
-def get_plot_selection(workspaces, parent_widget):
+def get_spectra_selection(workspaces, parent_widget):
     """Decides whether it is necessary to request user input
     when asked to plot a list of workspaces. The input
     dialog will only be shown in the case where all workspaces
@@ -169,20 +169,20 @@ def get_plot_selection(workspaces, parent_widget):
 
     :param workspaces: A list of MatrixWorkspaces that will be plotted
     :param parent_widget: A parent_widget to use for the input selection dialog
-    :returns: Either a PlotSelection object containing the details of workspaces to plot or None indicating
+    :returns: Either a SpectraSelection object containing the details of workspaces to plot or None indicating
     the request was cancelled
     """
     single_spectra_ws = [wksp.getNumberHistograms() for wksp in workspaces if wksp.getNumberHistograms() == 1]
     if len(single_spectra_ws) > 0:
         # At least 1 workspace contains only a single spectrum so this is all
         # that is possible to plot for all of them
-        selection = PlotSelection(workspaces)
+        selection = SpectraSelection(workspaces)
         selection.wksp_indices = [0]
         return selection
     else:
-        selection_dlg = PlotSelectionDialog(workspaces, parent=parent_widget)
+        selection_dlg = SpectraSelectionDialog(workspaces, parent=parent_widget)
         res = selection_dlg.exec_()
-        if res == PlotSelectionDialog.Rejected:
+        if res == SpectraSelectionDialog.Rejected:
             # cancelled
             return None
         else:
