@@ -40,8 +40,7 @@ bool allCoplanar(const std::vector<Kernel::V3D> &vertices,
   auto k = nx * v0.X() + ny * v0.Y() + nz * v0.Z();
 
   for (const auto &vertex : vertices) {
-    auto d = (nx * vertex.X() + ny * vertex.Y() +
-              nz * vertex.Z() - k);
+    auto d = (nx * vertex.X() + ny * vertex.Y() + nz * vertex.Z() - k);
     if (d != 0) {
       in_plane = false;
       break;
