@@ -64,4 +64,31 @@ public:
   }
 };
 
+class LoadEmptyNexusGeometryTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoadEmptyNexusGeometryTestPerformance *createSuite() {
+    return new LoadEmptyNexusGeometryTestPerformance();
+  }
+  static void destroySuite(LoadEmptyNexusGeometryTestPerformance *suite) {
+    delete suite;
+  }
+
+  void test_load_loki() {
+
+    LoadEmptyNexusGeometry alg;
+    alg.setChild(true);
+    const std::string inputFile = "LOKI_Definition.hdf5";
+    alg.initialize();
+    alg.setPropertyValue("Filename", inputFile);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+
+    Mantid::API::MatrixWorkspace_sptr outputWs =
+        alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(outputWs->getNumberHistograms(), 8000);
+  }
+};
+
 #endif /* MANTID_DATAHANDLING_LOADEMPTYNEXUSGEOMETRYTEST_H_ */

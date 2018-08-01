@@ -153,6 +153,19 @@ createFromOFFMesh(const std::vector<uint16_t> &faceIndices,
                                        std::move(vertices));
 }
 
+std::vector<Mantid::Kernel::V3D>
+toVectorV3D(const std::vector<Eigen::Vector3d> &nexusVertices) {
+  std::vector<Mantid::Kernel::V3D> vertices;
+  vertices.reserve(nexusVertices.size());
+
+  std::transform(nexusVertices.cbegin(), nexusVertices.cend(),
+                 std::back_inserter(vertices), [](const Eigen::Vector3d &vert) {
+                   return Kernel::toV3D(vert);
+                 });
+
+  return vertices;
+}
+
 std::unique_ptr<const Geometry::IObject>
 createFromOFFMesh(const std::vector<uint16_t> &faceIndices,
                   const std::vector<uint16_t> &windingOrder,
@@ -160,15 +173,8 @@ createFromOFFMesh(const std::vector<uint16_t> &faceIndices,
   std::vector<uint16_t> triangularFaces =
       createTriangularFaces(faceIndices, windingOrder);
 
-  std::vector<Mantid::Kernel::V3D> vertices;
-  vertices.reserve(nexusVertices.size());
-
-  std::transform(
-      nexusVertices.cbegin(), nexusVertices.cend(), vertices.begin(),
-      [](const Eigen::Vector3d &vert) { return Kernel::toV3D(vert); });
-
   return NexusShapeFactory::createMesh(std::move(triangularFaces),
-                                       std::move(vertices));
+                                       toVectorV3D(nexusVertices));
 }
 
 std::unique_ptr<const Geometry::IObject>
