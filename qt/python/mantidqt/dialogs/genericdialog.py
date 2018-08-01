@@ -16,7 +16,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import)
 
-from mantidqt.utils.qt import import_qtlib
+from mantidqt.utils.qt import import_qt
 
 
-AlgorithmDialog = import_qtlib('_widgetscore', 'mantidqt.widgets', 'AlgorithmDialog')
+GenericDialog = import_qt('.._common', package='mantidqt.dialogs', attr='GenericDialog')
