@@ -155,8 +155,7 @@ void PredictSatellitePeaks::exec() {
 
   possibleHKLs.clear();
   possibleHKLs.reserve(gen.size());
-  std::remove_copy_if(gen.begin(), gen.end(),
-                      std::back_inserter(possibleHKLs),
+  std::remove_copy_if(gen.begin(), gen.end(), std::back_inserter(possibleHKLs),
                       (~dSpacingFilter)->fn());
 
   size_t N = possibleHKLs.size();
@@ -270,8 +269,8 @@ void PredictSatellitePeaks::predictOffsets(
     Kernel::V3D Qs = goniometer * UB * satelliteHKL * 2.0 * M_PI;
 
     // Check if Q is non-physical
-    if (Qs[2] <= 0) 
-      continue; 
+    if (Qs[2] <= 0)
+      continue;
 
     auto peak(Peaks->createPeak(Qs, 1));
 
