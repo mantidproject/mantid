@@ -19,7 +19,7 @@ The Chudley-Elliot Jump diffusion model [1]_ has the form:
 
 Units of :math:`l` are inverse units of :math:`Q`.
 
-Units of :math:`` are :math:`meV` if units of :math:`\tau` are *ps*.
+Units of :math:`HWHM` are :math:`meV` if units of :math:`\tau` are *ps*.
 Alternatively, units of :math:`HWHM` are :math:`\mu eV` if units of
 :math:`\tau` are *ns*.
 

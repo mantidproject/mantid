@@ -46,7 +46,9 @@ class ChudleyElliot(IFunction1D):
         tau = self.getParameterValue("Tau")
         length = self.getParameterValue("L")
         xvals = np.array(xvals)
-        hwhm = self.hbar*(1.0 - np.sin(xvals * length) / (xvals * length))/tau
+        with np.errstate(divide='ignore'):
+            hwhm = self.hbar*(1.0 - np.sin(xvals * length)
+                              / (xvals * length))/tau
 
         return hwhm
 
