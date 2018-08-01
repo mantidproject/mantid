@@ -109,10 +109,10 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
         tmp = strongPeakParams[:, :2] - phthPeak
         distSq = tmp[:, 0]**2 + tmp[:, 1]**2
         nnIDX = np.argmin(distSq)
-        logger.information('Using [ph, th] = [{:2.2f},{:2.2f}] for [{:2.2f},{:2.2f}]'.format(strongPeakParams[nnIDX,0],
-                                                                                             strongPeakParams[nnIDX,1],
-                                                                                             phthPeak[0],
-                                                                                             phthPeak[1]))
+        #logger.information('Using [ph, th] = [{:2.2f},{:2.2f}] for [{:2.2f},{:2.2f}]'.format(strongPeakParams[nnIDX,0],
+        #                                                                                     strongPeakParams[nnIDX,1],
+        #                                                                                     phthPeak[0],
+        #                                                                                     phthPeak[1]))
         params, h, t, p = doBVGFit(box, nTheta=nTheta, nPhi=nPhi, fracBoxToHistogram=fracBoxToHistogram,
                                    goodIDX=goodIDX, forceParams=strongPeakParams[nnIDX],
                                    doPeakConvolution=doPeakConvolution, sigX0Scale=sigX0Scale, sigY0Scale=sigY0Scale)

@@ -68,6 +68,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
     def PyExec(self):
         import ICCFitTools as ICCFT
         import BVGFitTools as BVGFT
+        reload(BVGFT)
+        reload(ICCFT)
         from mantid.simpleapi import LoadIsawUB
         import pickle
         from scipy.ndimage.filters import convolve
@@ -81,7 +83,18 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         forceCutoff = self.getProperty('IntensityCutoff').value
         edgeCutoff = self.getProperty('EdgeCutoff').value
         peakNumberToFit = self.getProperty('PeakNumber').value
+        pplmin_frac = self.getProperty('MinpplFrac').value
+        pplmax_frac = self.getProperty('MaxpplFrac').value
+        sampleRun = self.getProperty('RunNumber').value
 
+        q_frame='lab'
+        mtd['MDdata'] = MDdata
+        zBG = 1.96
+        neigh_length_m=3
+        iccFitDict = ICCFT.parseConstraints(peaks_ws) #Contains constraints and guesses for ICC Fitting
+        padeCoefficients = ICCFT.getModeratorCoefficients(padeFile)
+
+        #UB Matrix
         if UBFile == '' and peaks_ws.sample().hasOrientedLattice():
             logger.information("Using UB file already available in PeaksWorkspace")
         else:
@@ -89,26 +102,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                 LoadIsawUB(InputWorkspace=peaks_ws, FileName=UBFile)
             except:
                 logger.error("peaks_ws does not have a UB matrix loaded.  Must provide a file")
-
         UBMatrix = peaks_ws.sample().getOrientedLattice().getUB()
-        dQ = np.abs(ICCFT.getDQFracHKL(UBMatrix, frac=0.5))
-        dQ[dQ>dQMax] = dQMax
-        q_frame='lab'
-        mtd['MDdata'] = MDdata
-
-        padeCoefficients = ICCFT.getModeratorCoefficients(padeFile)
-        if strongPeaksParamsFile != "":
-            if sys.version_info[0] == 3:
-                strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'),encoding='latin1')
-            else:
-                strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'))
-        else:
-            strongPeakParams = None #This will not force any profiles
-
-        zBG = 1.96
-        pplmin_frac = self.getProperty('MinpplFrac').value
-        pplmax_frac = self.getProperty('MaxpplFrac').value
-        sampleRun = self.getProperty('RunNumber').value
 
         # There are a few instrument specific parameters that we define here.  In some cases,
         # it may improve fitting to set tweak these parameters, but for simplicity we define these here
@@ -116,6 +110,9 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         # statement.
         # If you change these values or add an instrument, documentation should also be changed.
         try:
+            numDetRows = peaks_ws.getInstrument().getIntParameter("numDetRows")[0]
+            numDetCols = peaks_ws.getInstrument().getIntParameter("numDetCols")[0]
+            nPhi = peaks_ws.getInstrument().getIntParameter("numBinsPhi")[0]
             nTheta = peaks_ws.getInstrument().getIntParameter("numBinsTheta")[0]
             nPhi = peaks_ws.getInstrument().getIntParameter("numBinsPhi")[0]
             mindtBinWidth = peaks_ws.getInstrument().getNumberParameter("mindtBinWidth")[0]
@@ -123,19 +120,70 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             fracHKL = peaks_ws.getInstrument().getNumberParameter("fracHKL")[0]
             dQPixel = peaks_ws.getInstrument().getNumberParameter("dQPixel")[0]
             peakMaskSize = peaks_ws.getInstrument().getIntParameter("peakMaskSize")[0]
-
         except:
             raise
             logger.error("Cannot find all parameters in instrument parameters file.")
             sys.exit(1)
 
-        neigh_length_m=3
+
+        dQ = np.abs(ICCFT.getDQFracHKL(UBMatrix, frac=0.5))
+        dQ[dQ>dQMax] = dQMax
         qMask = ICCFT.getHKLMask(UBMatrix, frac=fracHKL, dQPixel=dQPixel,dQ=dQ)
 
-        iccFitDict = ICCFT.parseConstraints(peaks_ws) #Contains constraints and guesses for ICC Fitting
+        # Strong peak profiles - we set up the workspace and determine which peaks we'll fit.
+        strongPeakKeys =  ['Phi', 'Theta', 'Scale3d', 'FitPhi', 'FitTheta', 'SigTheta', 'SigPhi', 'SigP', 'PeakNumber']
+        strongPeakDatatypes = ['float']*len(strongPeakKeys)
+        strongPeakParams_ws = CreateEmptyTableWorkspace() 
+        for key, datatype in zip(strongPeakKeys,strongPeakDatatypes):
+            strongPeakParams_ws.addColumn(datatype, key)
 
-        numgood = 0
-        numerrors = 0
+        # Either load the provided strong peaks file or set the flag to generate it as we go
+        if strongPeaksParamsFile != "":
+            if sys.version_info[0] == 3:
+                strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'),encoding='latin1')
+            else:
+                strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'))
+            generateStrongPeakParams = False
+            # A strong peaks file was provided - we don't need to generate it on the fly so we can fit in order 
+            runNumbers = np.array(peaks_ws.column('RunNumber'))
+            peaksToFit = np.where(runNumbers == sampleRun)[0]
+            numPeaks = np.array(peaks_ws.getNumberPeaks())
+            intensities = np.array(peaks_ws.column('Intens'))
+            rows = np.array(peaks_ws.column('Row'))
+            cols = np.array(peaks_ws.column('Col'))
+            runNumbers = np.array(peaks_ws.column('RunNumber'))
+            intensIDX = intensities < forceCutoff
+            edgeIDX = reduce(np.logical_or, [rows < edgeCutoff, rows > numDetRows - edgeCutoff, 
+                                             cols < edgeCutoff, cols > numDetCols - edgeCutoff])
+            needsForcedProfile = np.logical_and(intensIDX, edgeIDX)
+            # We can populate the strongPeakParams_ws now
+            for row in strongPeakParams:
+                strongPeakParams_ws.addRow(row)
+        else:
+            generateStrongPeakParams = True
+
+        # Set the peak numbers we're fitting
+        if generateStrongPeakParams == True:
+            #Figure out which peaks to fit without forcing a profile and set those to be fit first
+            numPeaks = np.array(peaks_ws.getNumberPeaks())
+            intensities = np.array(peaks_ws.column('Intens'))
+            rows = np.array(peaks_ws.column('Row'))
+            cols = np.array(peaks_ws.column('Col'))
+            runNumbers = np.array(peaks_ws.column('RunNumber'))
+            intensIDX = intensities < forceCutoff
+            edgeIDX = reduce(np.logical_or, [rows < edgeCutoff, rows > numDetRows - edgeCutoff, 
+                                             cols < edgeCutoff, cols > numDetCols - edgeCutoff])
+            needsForcedProfile = np.logical_and(intensIDX, edgeIDX)
+            needsForcedProfileIDX = np.where(needsForcedProfile)[0]
+            canFitProfileIDX = np.where(~needsForcedProfile)[0]
+            numPeaksCanFit = len(canFitProfileIDX)
+            peaksToFit = np.append(canFitProfileIDX, needsForcedProfileIDX) #Will fit in this order
+            peaksToFit = peaksToFit[runNumbers[peaksToFit]==sampleRun]
+            
+            #Initialize our strong peaks dictionary
+            strongPeakParams = np.empty([numPeaksCanFit, 9])
+        if peakNumberToFit>-1:
+            peaksToFit = [peakNumberToFit]
 
         # Create the parameters workspace
         keys =  ['peakNumber','Alpha', 'Beta', 'R', 'T0', 'bgBVG', 'chiSq3d', 'chiSq', 'dQ', 'KConv', 'MuPH',
@@ -146,28 +194,28 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         for key, datatype in zip(keys,datatypes):
             params_ws.addColumn(datatype, key)
 
-        # Set the peak numbers we're fitting
-        if peakNumberToFit < 0:
-            peaksToFit = range(peaks_ws.getNumberPeaks())
-        else:
-            peaksToFit = [peakNumberToFit]
-
         # And we're off!
+        numgood = 0
+        numerrors = 0
         peaks_ws_out = peaks_ws.clone()
         np.warnings.filterwarnings('ignore') # There can be a lot of warnings for bad solutions that get rejected.
         progress = Progress(self, 0.0, 1.0, len(peaksToFit))
-        for peakNumber in peaksToFit:#range(peaks_ws.getNumberPeaks()):
+        for fitNumber, peakNumber in enumerate(peaksToFit):#range(peaks_ws.getNumberPeaks()):
             peak = peaks_ws_out.getPeak(peakNumber)
             progress.report(' ')
             try:
                 if peak.getRunNumber() == sampleRun:
                     box = ICCFT.getBoxFracHKL(peak, peaks_ws, MDdata, UBMatrix, peakNumber,
                                               dQ, fracHKL=0.5, dQPixel=dQPixel, q_frame=q_frame)
-                    # Will force weak peaks to be fit using a neighboring peak profile
+                    if ~needsForcedProfile[peakNumber]:
+                        strongPeakParamsToSend = None
+                    else:
+                        strongPeakParamsToSend = strongPeakParams
+                    # Will allow forced weak and edge peaks to be fit using a neighboring peak profile
                     Y3D, goodIDX, pp_lambda, params = BVGFT.get3DPeak(peak, peaks_ws, box, padeCoefficients,qMask,
                                                                       nTheta=nTheta, nPhi=nPhi, plotResults=False,
                                                                       zBG=zBG,fracBoxToHistogram=1.0,bgPolyOrder=1,
-                                                                      strongPeakParams=strongPeakParams,
+                                                                      strongPeakParams=strongPeakParamsToSend,
                                                                       q_frame=q_frame, mindtBinWidth=mindtBinWidth,
                                                                       maxdtBinWidth=maxdtBinWidth,
                                                                       pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
@@ -212,12 +260,26 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                     peak.setSigmaIntensity(sigma)
                     numgood += 1
 
+                    if generateStrongPeakParams:
+                        if ~needsForcedProfile[peakNumber]:
+                            qPeak = peak.getQLabFrame()
+                            strongPeakParams[fitNumber, 0] = np.arctan2(qPeak[1], qPeak[0]) # phi
+                            strongPeakParams[fitNumber, 1] = np.arctan2(qPeak[2], np.hypot(qPeak[0],qPeak[1])) #2theta
+                            strongPeakParams[fitNumber, 2] = params['scale3d']
+                            strongPeakParams[fitNumber, 3] = params['MuTH']
+                            strongPeakParams[fitNumber, 4] = params['MuPH']
+                            strongPeakParams[fitNumber, 5] = params['SigX']
+                            strongPeakParams[fitNumber, 6] = params['SigY']
+                            strongPeakParams[fitNumber, 7] = params['SigP']
+                            strongPeakParams[fitNumber, 8] = peakNumber
+                            strongPeakParams_ws.addRow(strongPeakParams[fitNumber])
+
             except KeyboardInterrupt:
                 np.warnings.filterwarnings('default') # Re-enable on exit
                 raise
 
             except:
-                #raise
+                raise
                 numerrors += 1
                 peak.setIntensity(0.0)
                 peak.setSigmaIntensity(1.0)
