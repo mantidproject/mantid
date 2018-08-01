@@ -14,7 +14,7 @@ Project Recovery test
 - Before running these tests, set project recovery to run every 2 seconds. The instructions for this
   are on the `Project Recovery concepts page <http://docs.mantidproject.org/nightly/concepts/ProjectRecovery.html>`_.
 - Get the ISIS sample dataset from the `Downloads page <http://download.mantidproject.org/>`_.
-- Get the file `TOPAZ_3132_event.nxs` - availabe from ``Olympic/Babylon5/Scratch/KeithButler/UmscriptedTesting`` 
+- `TOPAZ_3132_event.nxs` - availabe in ``/Testing/Data/SystemTest/``, get this by building the `SystemTestData` target. It should be in ``ExternalData/Testing/Data/SystemTest/``
 - The files `INTER000*` are in the ISIS sample data
 - Make sure that the directory containing the test files is in your User Directories (this can be set on the First Time Startup screen)
 - Set up a directory to store output for comparison, referred to as ``testing_directory`` below
