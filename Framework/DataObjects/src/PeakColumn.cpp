@@ -135,7 +135,7 @@ const std::type_info &PeakColumn::get_pointer_type_info() const {
  */
 void PeakColumn::print(size_t index, std::ostream &s) const {
   Peak &peak = m_peaks[index];
-
+  s.imbue(std::locale("C"));
   std::ios::fmtflags fflags(s.flags());
   if (m_name == "RunNumber")
     s << peak.getRunNumber();
