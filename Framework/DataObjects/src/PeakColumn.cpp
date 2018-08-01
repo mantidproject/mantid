@@ -135,7 +135,7 @@ const std::type_info &PeakColumn::get_pointer_type_info() const {
  */
 void PeakColumn::print(size_t index, std::ostream &s) const {
   Peak &peak = m_peaks[index];
-
+  s.imbue(std::locale("C"));
   std::ios::fmtflags fflags(s.flags());
   if (m_name == "RunNumber")
     s << peak.getRunNumber();
@@ -206,7 +206,8 @@ void PeakColumn::read(const size_t index, std::istringstream &in) {
 //-------------------------------------------------------------------------------------
 /** @return true if the column is read-only */
 bool PeakColumn::getReadOnly() const {
-  return !((m_name == "h") || (m_name == "k") || (m_name == "l"));
+  return !((m_name == "h") || (m_name == "k") || (m_name == "l") ||
+           (m_name == "RunNumber"));
 }
 
 //-------------------------------------------------------------------------------------
