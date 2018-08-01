@@ -139,14 +139,14 @@ createFromOFFMesh(const std::vector<uint16_t> &faceIndices,
   std::vector<uint16_t> triangularFaces =
       createTriangularFaces(faceIndices, windingOrder);
 
-  std::vector<Mantid::Kernel::V3D> vertices(nexusVertices.size() / 3);
+  std::vector<Mantid::Kernel::V3D> vertices;
+  vertices.reserve(nexusVertices.size() / 3);
 
   for (size_t vertexNumber = 0; vertexNumber < nexusVertices.size();
        vertexNumber += 3) {
-    auto &vertex = vertices[vertexNumber / 3];
-    vertex = Mantid::Kernel::V3D(nexusVertices[vertexNumber],
-                                 nexusVertices[vertexNumber + 1],
-                                 nexusVertices[vertexNumber + 2]);
+    vertices.emplace_back(nexusVertices[vertexNumber],
+                          nexusVertices[vertexNumber + 1],
+                          nexusVertices[vertexNumber + 2]);
   }
 
   return NexusShapeFactory::createMesh(std::move(triangularFaces),
@@ -160,7 +160,8 @@ createFromOFFMesh(const std::vector<uint16_t> &faceIndices,
   std::vector<uint16_t> triangularFaces =
       createTriangularFaces(faceIndices, windingOrder);
 
-  std::vector<Mantid::Kernel::V3D> vertices(nexusVertices.size());
+  std::vector<Mantid::Kernel::V3D> vertices;
+  vertices.reserve(nexusVertices.size());
 
   std::transform(
       nexusVertices.cbegin(), nexusVertices.cend(), vertices.begin(),
