@@ -50,7 +50,7 @@ std::string InstrumentValidator::checkValidity(
   else {
     return "The instrument is missing the following "
            "components: " +
-           join(missing.begin(), missing.end(), ",");
+           join(missing, ",");
   }
 }
 

@@ -48,7 +48,7 @@ SampleValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
     return "";
   else {
     return "The sample is missing the following properties: " +
-           join(missing.begin(), missing.end(), ",");
+           join(missing, ",");
   }
 }
 

@@ -97,8 +97,7 @@ std::string toPrettyString(
         nullptr) {
   UNUSED_ARG(unusedDelimiter);
   UNUSED_ARG(collapseLists);
-  return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter),
-                          maxLength);
+  return Strings::shorten(Strings::join(value, delimiter), maxLength);
 }
 
 /** Specialization for a property of type std::vector of integral types.
@@ -120,7 +119,7 @@ std::string toPrettyString(
     retVal = Strings::joinCompress(value.begin(), value.end(), delimiter,
                                    listDelimiter);
   } else {
-    retVal = Strings::join(value.begin(), value.end(), delimiter);
+    retVal = Strings::join(value, delimiter);
   }
   return Strings::shorten(retVal, maxLength);
 }
@@ -144,8 +143,7 @@ std::string toPrettyString(
     typename std::enable_if<std::is_same<bool, bool>::value>::type *) {
   UNUSED_ARG(unusedDelimiter);
   UNUSED_ARG(collapseLists);
-  return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter),
-                          maxLength);
+  return Strings::shorten(Strings::join(value, delimiter), maxLength);
 }
 // clang-format off
 GCC_DIAG_ON(unused-function)

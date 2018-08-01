@@ -1,0 +1,27 @@
+diff --git a/CMake/AbseilHelpers.cmake b/CMake/AbseilHelpers.cmake
+index e4eafe4..fb71fb1 100644
+--- a/CMake/AbseilHelpers.cmake
++++ b/CMake/AbseilHelpers.cmake
+@@ -48,7 +48,8 @@ function(absl_library)
+ 
+   add_library(${_NAME} STATIC ${ABSL_LIB_SOURCES})
+ 
+-  target_compile_options(${_NAME} PRIVATE ${ABSL_COMPILE_CXXFLAGS} ${ABSL_LIB_PRIVATE_COMPILE_FLAGS})
++  #Avoid global FLAGS.
++  set_target_properties(${_NAME} PROPERTIES COMPILE_OPTIONS "${ABSL_COMPILE_CXXFLAGS};${ABSL_LIB_PRIVATE_COMPILE_FLAGS}")
+   target_link_libraries(${_NAME} PUBLIC ${ABSL_LIB_PUBLIC_LIBRARIES})
+   target_include_directories(${_NAME}
+     PUBLIC ${ABSL_COMMON_INCLUDE_DIRS} ${ABSL_LIB_PUBLIC_INCLUDE_DIRS}
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 89a3386..5ca5c15 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -17,6 +17,8 @@
+ # We require 3.0 for modern, target-based CMake.  We require 3.1 for the use of
+ # CXX_STANDARD in our targets.
+ cmake_minimum_required(VERSION 3.1)
++#Supress CMAKE policy warning
++cmake_policy(SET CMP0063 NEW)
+ project(absl)
+ 
+ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)

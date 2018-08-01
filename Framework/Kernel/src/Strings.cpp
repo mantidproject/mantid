@@ -1,13 +1,27 @@
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/WarningSuppressions.h"
+
+// clang doesn't need to suppress -Wconversion
+// Enabling Wconversion also reenables -Wsign-conversion
+#ifndef __clang___
+GCC_DIAG_OFF(conversion)
+#endif
+GCC_DIAG_OFF(pedantic)
+#include "absl/strings/str_join.h"
+GCC_DIAG_ON(pedantic)
+#ifndef __clang__
+GCC_DIAG_ON(conversion)
+#endif
 
 #include <Poco/Path.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <fstream>
 
@@ -16,6 +30,30 @@ using std::size_t;
 namespace Mantid {
 namespace Kernel {
 namespace Strings {
+
+namespace {
+class OptionalBoolFormatter {
+public:
+  void operator()(std::string *out, const OptionalBool &f) {
+    out->append(m_enumToStr[f.getValue()]);
+  }
+
+private:
+  std::map<OptionalBool::Value, std::string> m_enumToStr =
+      OptionalBool::enumToStrMap();
+};
+} // namespace
+
+template <typename CONTAINER_TYPE>
+std::string join(const CONTAINER_TYPE &c, const std::string &separator) {
+  return absl::StrJoin(c, separator);
+}
+
+template <>
+std::string join(const std::vector<OptionalBool> &c,
+                 const std::string &separator) {
+  return absl::StrJoin(c, separator, OptionalBoolFormatter());
+}
 
 //------------------------------------------------------------------------------------------------
 /** Loads the entire contents of a text file into a string
@@ -1082,8 +1120,7 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
     // it is allowed to have element separator inside a range, e.g. "4 - 5", but
     // not "4,-5"
     Tokenizer ranges(str, rangeSep, Tokenizer::TOK_TRIM);
-    std::string new_str =
-        join(ranges.begin(), ranges.end(), rangeSep.substr(0, 1));
+    std::string new_str = join(ranges.asVector(), rangeSep.substr(0, 1));
     elements = Tokenizer(new_str, elemSep,
                          Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
   } else {
@@ -1168,6 +1205,34 @@ std::istream &extractToEOL(std::istream &is, std::string &str) {
 }
 
 /// \cond TEMPLATE
+
+template MANTID_KERNEL_DLL std::string join(const std::vector<std::string> &c,
+                                            const std::string &separator);
+template MANTID_KERNEL_DLL std::string join(const std::list<std::string> &c,
+                                            const std::string &separator);
+template MANTID_KERNEL_DLL std::string join(const std::set<std::string> &c,
+                                            const std::string &separator);
+template MANTID_KERNEL_DLL std::string join(const std::vector<double> &c,
+                                            const std::string &separator);
+template MANTID_KERNEL_DLL std::string join(const std::vector<float> &c,
+                                            const std::string &separator);
+template MANTID_KERNEL_DLL std::string join(const std::vector<int> &c,
+                                            const std::string &separator);
+template MANTID_KERNEL_DLL std::string join(const std::vector<long> &c,
+                                            const std::string &separator);
+template MANTID_KERNEL_DLL std::string join(const std::vector<long long> &c,
+                                            const std::string &separator);
+template MANTID_KERNEL_DLL std::string join(const std::vector<bool> &c,
+                                            const std::string &separator);
+template MANTID_KERNEL_DLL std::string join(const std::vector<unsigned int> &c,
+                                            const std::string &separator);
+template MANTID_KERNEL_DLL std::string join(const std::vector<unsigned long> &c,
+                                            const std::string &separator);
+template MANTID_KERNEL_DLL std::string
+join(const std::vector<unsigned long long> &c, const std::string &separator);
+template MANTID_KERNEL_DLL std::string
+join(const std::vector<unsigned short> &c, const std::string &separator);
+
 template MANTID_KERNEL_DLL int section(std::string &, double &);
 template MANTID_KERNEL_DLL int section(std::string &, float &);
 template MANTID_KERNEL_DLL int section(std::string &, int &);

@@ -446,8 +446,7 @@ IFunction::writeToString(const std::string &parentLocalAttributesStr) const {
   }
   // print the ties
   if (!ties.empty()) {
-    ostr << ",ties=(" << Kernel::Strings::join(ties.begin(), ties.end(), ",")
-         << ")";
+    ostr << ",ties=(" << Kernel::Strings::join(ties, ",") << ")";
   }
   // "local" attributes of a parent composite function
   ostr << parentLocalAttributesStr;

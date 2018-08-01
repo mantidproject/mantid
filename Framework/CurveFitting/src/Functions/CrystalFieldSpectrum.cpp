@@ -159,8 +159,7 @@ std::string CrystalFieldSpectrum::writeToString(
   }
   // print the ties
   if (!ties.empty()) {
-    ostr << ",ties=(" << Kernel::Strings::join(ties.begin(), ties.end(), ",")
-         << ")";
+    ostr << ",ties=(" << Kernel::Strings::join(ties, ",") << ")";
   }
 
   return ostr.str();

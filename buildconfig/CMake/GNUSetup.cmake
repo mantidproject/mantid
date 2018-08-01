@@ -15,6 +15,8 @@ if ( USE_CCACHE )
   endif()
 endif()
 
+set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
+
 # Set our own compiler version flag from the cmake one and export it globally
 if ( CMAKE_COMPILER_IS_GNUCXX )
   if ( NOT CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL CMAKE_C_COMPILER_VERSION )

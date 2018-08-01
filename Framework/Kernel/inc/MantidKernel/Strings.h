@@ -11,7 +11,9 @@
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
 #endif
+
 #include <iosfwd>
+#include <list>
 #include <map>
 #include <set>
 #include <sstream>
@@ -45,6 +47,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
+class OptionalBool;
+
 namespace Strings {
 
 //------------------------------------------------------------------------------------------------
@@ -54,26 +58,19 @@ namespace Strings {
  * Does not add the separator after the LAST item.
  *
  * For example, join a vector of strings with commas with:
- *  out = join(v.begin(), v.end(), ", ");
+ *  out = join(v, ", ");
  *
- * @param begin :: iterator at the start
- * @param end :: iterator at the end
+ * @param c :: container to be joined.
  * @param separator :: string to append.
  * @return
  */
-template <typename ITERATOR_TYPE>
-DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
-                           const std::string &separator) {
-  std::ostringstream output;
-  ITERATOR_TYPE it;
-  for (it = begin; it != end;) {
-    output << *it;
-    it++;
-    if (it != end)
-      output << separator;
-  }
-  return output.str();
-}
+template <typename CONTAINER_TYPE>
+DLLExport std::string join(const CONTAINER_TYPE &c,
+                           const std::string &separator);
+
+template <>
+DLLExport std::string join(const std::vector<OptionalBool> &c,
+                           const std::string &separator);
 
 //------------------------------------------------------------------------------------------------
 /** Join a set or vector of (something that turns into a string) together

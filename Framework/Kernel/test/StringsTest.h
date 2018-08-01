@@ -252,7 +252,7 @@ public:
     std::vector<std::string> v;
     std::string out;
 
-    out = join(v.begin(), v.end(), ",");
+    out = join(v, ",");
     TS_ASSERT_EQUALS(out, "");
 
     v.emplace_back("Help");
@@ -263,8 +263,27 @@ public:
     v.emplace_back("A");
     v.emplace_back("Test");
 
-    out = join(v.begin(), v.end(), ",");
+    out = join(v, ",");
     TS_ASSERT_EQUALS(out, "Help,Me,I'm,Stuck,Inside,A,Test");
+  }
+
+  void test_join_double() {
+    std::vector<double> v;
+    std::string out;
+
+    out = join(v, ",");
+    TS_ASSERT_EQUALS(out, "");
+
+    v.push_back(0.0);
+    v.push_back(1.0);
+    v.push_back(2.0);
+    v.push_back(3.0);
+    v.push_back(4.0);
+    v.push_back(5.0);
+    v.push_back(6.0);
+
+    out = join(v, ";");
+    TS_ASSERT_EQUALS(out, "0;1;2;3;4;5;6");
   }
 
   void test_joinCompress() {
@@ -590,4 +609,17 @@ public:
   }
 };
 
+class StringsTestPerformance : public CxxTest::TestSuite {
+public:
+  static StringsTestPerformance *createSuite() {
+    return new StringsTestPerformance();
+  }
+  static void destroySuite(StringsTestPerformance *suite) { delete suite; }
+  void setUp() override { input = std::vector<double>(10000000, 0.123456); }
+  void test_join_double() { auto result = join(input, separator); }
+
+private:
+  std::vector<double> input;
+  std::string separator{","};
+};
 #endif // MANTID_SUPPORTTEST_H_

@@ -161,16 +161,14 @@ std::string BoxController::toXMLString() const {
   pBoxElement->appendChild(element);
 
   element = pDoc->createElement("SplitInto");
-  vecStr = Kernel::Strings::join(this->m_splitInto.begin(),
-                                 this->m_splitInto.end(), ",");
+  vecStr = Kernel::Strings::join(this->m_splitInto, ",");
   text = pDoc->createTextNode(vecStr);
   element->appendChild(text);
   pBoxElement->appendChild(element);
 
   element = pDoc->createElement("SplitTopInto");
   if (m_splitTopInto) {
-    vecStr = Kernel::Strings::join(this->m_splitTopInto.get().begin(),
-                                   this->m_splitTopInto.get().end(), ",");
+    vecStr = Kernel::Strings::join(this->m_splitTopInto.get(), ",");
   } else {
     vecStr = "";
   }
@@ -179,15 +177,13 @@ std::string BoxController::toXMLString() const {
   pBoxElement->appendChild(element);
 
   element = pDoc->createElement("NumMDBoxes");
-  vecStr = Kernel::Strings::join(this->m_numMDBoxes.begin(),
-                                 this->m_numMDBoxes.end(), ",");
+  vecStr = Kernel::Strings::join(this->m_numMDBoxes, ",");
   text = pDoc->createTextNode(vecStr);
   element->appendChild(text);
   pBoxElement->appendChild(element);
 
   element = pDoc->createElement("NumMDGridBoxes");
-  vecStr = Kernel::Strings::join(this->m_numMDGridBoxes.begin(),
-                                 this->m_numMDGridBoxes.end(), ",");
+  vecStr = Kernel::Strings::join(this->m_numMDGridBoxes, ",");
   text = pDoc->createTextNode(vecStr);
   element->appendChild(text);
   pBoxElement->appendChild(element);
