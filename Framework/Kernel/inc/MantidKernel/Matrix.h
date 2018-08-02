@@ -18,29 +18,23 @@ class V3D;
 /**  Numerical Matrix class.     Holds a matrix of variable type and size.
 Should work for real and complex objects. Carries out eigenvalue
 and inversion if the matrix is square
-
 Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
-
 This file is part of Mantid.
-
 Mantid is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
-
 Mantid is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <typename T> class DLLExport Matrix {
+template <typename T> class Matrix {
 public:
   /// Enable users to retrieve the element type
   using value_type = T;
@@ -190,27 +184,31 @@ private:
                              const char);
 };
 
+// Explicit declarations. Symbols provided by matching explicit
+// instantiations in source file
+extern template class Matrix<double>;
+extern template class Matrix<int>;
+extern template class Matrix<float>;
+
 //-------------------------------------------------------------------------
 // Typedefs
 //-------------------------------------------------------------------------
-/// A matrix of doubles
 using DblMatrix = Mantid::Kernel::Matrix<double>;
-/// A matrix of ints
 using IntMatrix = Mantid::Kernel::Matrix<int>;
+using FloatMatrix = Mantid::Kernel::Matrix<float>;
 
 //-------------------------------------------------------------------------
 // Utility methods
 //-------------------------------------------------------------------------
 template <typename T>
-DLLExport std::ostream &operator<<(std::ostream &, const Kernel::Matrix<T> &);
+std::ostream &operator<<(std::ostream &, const Kernel::Matrix<T> &);
 template <typename T>
-DLLExport void dumpToStream(std::ostream &, const Kernel::Matrix<T> &,
-                            const char);
+void dumpToStream(std::ostream &, const Kernel::Matrix<T> &, const char);
 
 template <typename T>
-DLLExport std::istream &operator>>(std::istream &, Kernel::Matrix<T> &);
+std::istream &operator>>(std::istream &, Kernel::Matrix<T> &);
 template <typename T>
-DLLExport void fillFromStream(std::istream &, Kernel::Matrix<T> &, const char);
+void fillFromStream(std::istream &, Kernel::Matrix<T> &, const char);
 } // namespace Kernel
 } // namespace Mantid
 #endif // MANTID_KERNEL_MATRIX_H_

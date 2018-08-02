@@ -8,8 +8,16 @@
 #include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
 
+#if defined(_MSC_VER)
+#pragma warning(push, 0)
+#endif
+#include <nexus/NeXusFile.hpp>
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
+
 //----------------------------------------------------------------------------------------------
-/** Constructor.
+/** structor.
  * */
 NexusTestHelper::NexusTestHelper(bool deleteFile)
     : file(nullptr), deleteFile(deleteFile) {}

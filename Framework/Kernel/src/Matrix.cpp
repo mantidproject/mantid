@@ -88,10 +88,10 @@ template <typename T>
 Matrix<T>::Matrix(const size_t nrow, const size_t ncol, const bool makeIdentity)
     : m_numRows(0), m_numColumns(0)
 /**
-  Constructor with pre-set sizes. Matrix is zeroed
-  @param nrow :: number of rows
-  @param ncol :: number of columns
-  @param makeIdentity :: flag for the constructor to return an identity matrix
+Constructor with pre-set sizes. Matrix is zeroed
+@param nrow :: number of rows
+@param ncol :: number of columns
+@param makeIdentity :: flag for the constructor to return an identity matrix
 */
 {
   // Note:: m_numRows, m_numColumns zeroed so setMem always works
@@ -105,11 +105,11 @@ template <typename T>
 Matrix<T>::Matrix(const std::vector<T> &A, const std::vector<T> &B)
     : m_numRows(0), m_numColumns(0)
 /**
-  Constructor to take two vectors and multiply them to
-  construct a matrix. (assuming that we have columns x row
-  vector.
-  @param A :: Column vector to multiply
-  @param B :: Row vector to multiply
+Constructor to take two vectors and multiply them to
+construct a matrix. (assuming that we have columns x row
+vector.
+@param A :: Column vector to multiply
+@param B :: Row vector to multiply
 */
 {
   // Note:: m_numRows,m_numColumns zeroed so setMem always works
@@ -169,10 +169,10 @@ template <typename T>
 Matrix<T>::Matrix(const Matrix<T> &A, const size_t nrow, const size_t ncol)
     : m_numRows(A.m_numRows - 1), m_numColumns(A.m_numColumns - 1)
 /**
-  Constructor with for a missing row/column.
-  @param A :: The input matrix
-  @param nrow :: number of row to miss
-  @param ncol :: number of column to miss
+Constructor with for a missing row/column.
+@param A :: The input matrix
+@param nrow :: number of row to miss
+@param ncol :: number of column to miss
 */
 {
   if (nrow > m_numRows)
@@ -201,8 +201,8 @@ template <typename T>
 Matrix<T>::Matrix(const Matrix<T> &A)
     : m_numRows(0), m_numColumns(0)
 /**
-  Simple copy constructor
-  @param A :: Object to copy
+Simple copy constructor
+@param A :: Object to copy
 */
 {
   // Note:: m_numRows,m_numColumns zeroed so setMem always works
@@ -219,9 +219,9 @@ Matrix<T>::Matrix(const Matrix<T> &A)
 template <typename T>
 Matrix<T> &Matrix<T>::operator=(const Matrix<T> &A)
 /**
-  Simple assignment operator
-  @param A :: Object to copy
-  @return the copied object
+Simple assignment operator
+@param A :: Object to copy
+@return the copied object
 */
 {
   if (&A != this) {
@@ -262,11 +262,11 @@ Matrix<T> &Matrix<T>::operator=(Matrix<T> &&other) noexcept {
 template <typename T>
 Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &A)
 /**
-  Matrix addition THIS + A
-  If the size is different then 0 is added where appropiate
-  Matrix A is not expanded.
-  @param A :: Matrix to add
-  @return Matrix(this + A)
+Matrix addition THIS + A
+If the size is different then 0 is added where appropiate
+Matrix A is not expanded.
+@param A :: Matrix to add
+@return Matrix(this + A)
 */
 {
   const size_t Xpt((m_numRows > A.m_numRows) ? A.m_numRows : m_numRows);
@@ -284,11 +284,11 @@ Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &A)
 template <typename T>
 Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &A)
 /**
-  Matrix subtractoin THIS - A
-  If the size is different then 0 is added where appropiate
-  Matrix A is not expanded.
-  @param A :: Matrix to add
-  @return Ma
+Matrix subtractoin THIS - A
+If the size is different then 0 is added where appropiate
+Matrix A is not expanded.
+@param A :: Matrix to add
+@return Ma
 */
 {
   const size_t Xpt((m_numRows > A.m_numRows) ? A.m_numRows : m_numRows);
@@ -306,11 +306,11 @@ Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &A)
 template <typename T>
 Matrix<T> Matrix<T>::operator+(const Matrix<T> &A) const
 /**
-  Matrix addition THIS + A
-  If the size is different then 0 is added where appropiate
-  Matrix A is not expanded.
-  @param A :: Matrix to add
-  @return Matrix(this + A)
+Matrix addition THIS + A
+If the size is different then 0 is added where appropiate
+Matrix A is not expanded.
+@param A :: Matrix to add
+@return Matrix(this + A)
 */
 {
   Matrix<T> X(*this);
@@ -320,11 +320,11 @@ Matrix<T> Matrix<T>::operator+(const Matrix<T> &A) const
 template <typename T>
 Matrix<T> Matrix<T>::operator-(const Matrix<T> &A) const
 /**
-  Matrix subtraction THIS - A
-  If the size is different then 0 is subtracted where
-  appropiate. This matrix determines the size
-  @param A :: Matrix to add
-  @return Matrix(this + A)
+Matrix subtraction THIS - A
+If the size is different then 0 is subtracted where
+appropiate. This matrix determines the size
+@param A :: Matrix to add
+@return Matrix(this + A)
 */
 {
   Matrix<T> X(*this);
@@ -334,10 +334,10 @@ Matrix<T> Matrix<T>::operator-(const Matrix<T> &A) const
 template <typename T>
 Matrix<T> Matrix<T>::operator*(const Matrix<T> &A) const
 /**
-  Matrix multiplication THIS * A
-  @param A :: Matrix to multiply by  (this->row must == A->columns)
-  @throw MisMatch<size_t> if there is a size mismatch.
-  @return Matrix(This * A)
+Matrix multiplication THIS * A
+@param A :: Matrix to multiply by  (this->row must == A->columns)
+@throw MisMatch<size_t> if there is a size mismatch.
+@return Matrix(This * A)
 */
 {
   if (m_numColumns != A.m_numRows)
@@ -357,10 +357,10 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T> &A) const
 template <typename T>
 std::vector<T> Matrix<T>::operator*(const std::vector<T> &Vec) const
 /**
-  Matrix multiplication THIS * Vec to produce a vec
-  @param Vec :: size of vector > this->nrows
-  @throw MisMatch<size_t> if there is a size mismatch.
-  @return Matrix(This * Vec)
+Matrix multiplication THIS * Vec to produce a vec
+@param Vec :: size of vector > this->nrows
+@throw MisMatch<size_t> if there is a size mismatch.
+@return Matrix(This * Vec)
 */
 {
   if (m_numColumns > Vec.size())
@@ -377,10 +377,10 @@ std::vector<T> Matrix<T>::operator*(const std::vector<T> &Vec) const
 }
 
 /**
-  Matrix multiplication THIS * Vec to produce a vec
-  @param in :: size of vector > this->nrows
-  @param out :: result of Matrix(This * Vec)
-  @throw MisMatch<size_t> if there is a size mismatch.
+Matrix multiplication THIS * Vec to produce a vec
+@param in :: size of vector > this->nrows
+@param out :: result of Matrix(This * Vec)
+@throw MisMatch<size_t> if there is a size mismatch.
 */
 template <typename T>
 void Matrix<T>::multiplyPoint(const std::vector<T> &in,
@@ -400,10 +400,10 @@ void Matrix<T>::multiplyPoint(const std::vector<T> &in,
 template <typename T>
 V3D Matrix<T>::operator*(const V3D &Vx) const
 /**
-  Matrix multiplication THIS * V
-  @param Vx :: Colunm vector to multiply by
-  @throw MisMatch<size_t> if there is a size mismatch.
-  @return Matrix(This * A)
+Matrix multiplication THIS * V
+@param Vx :: Colunm vector to multiply by
+@throw MisMatch<size_t> if there is a size mismatch.
+@return Matrix(This * A)
 */
 {
   if (m_numColumns != 3 || m_numRows > 3)
@@ -422,9 +422,9 @@ V3D Matrix<T>::operator*(const V3D &Vx) const
 template <typename T>
 Matrix<T> Matrix<T>::operator*(const T &Value) const
 /**
-  Matrix multiplication THIS * Value
-  @param Value :: Scalar to multiply by
-  @return V * (this)
+Matrix multiplication THIS * Value
+@param Value :: Scalar to multiply by
+@return V * (this)
 */
 {
   Matrix<T> X(*this);
@@ -437,11 +437,11 @@ Matrix<T> Matrix<T>::operator*(const T &Value) const
 }
 
 /**
-  Matrix multiplication THIS *= A
-  Note that we call operator* to avoid the problem
-  of changing matrix size.
- @param A :: Matrix to multiply by  (this->row must == A->columns)
- @return This *= A
+Matrix multiplication THIS *= A
+Note that we call operator* to avoid the problem
+of changing matrix size.
+@param A :: Matrix to multiply by  (this->row must == A->columns)
+@return This *= A
 */
 template <typename T> Matrix<T> &Matrix<T>::operator*=(const Matrix<T> &A) {
   if (m_numColumns != A.m_numRows)
@@ -455,9 +455,9 @@ template <typename T> Matrix<T> &Matrix<T>::operator*=(const Matrix<T> &A) {
 template <typename T>
 Matrix<T> &Matrix<T>::operator*=(const T &Value)
 /**
-  Matrix multiplication THIS * Value
-  @param Value :: Scalar to multiply matrix by
-  @return *this
+Matrix multiplication THIS * Value
+@param Value :: Scalar to multiply matrix by
+@return *this
 */
 {
   for (size_t i = 0; i < m_numRows; i++) {
@@ -471,9 +471,9 @@ Matrix<T> &Matrix<T>::operator*=(const T &Value)
 template <typename T>
 Matrix<T> &Matrix<T>::operator/=(const T &Value)
 /**
-  Matrix divishio THIS / Value
-  @param Value :: Scalar to multiply matrix by
-  @return *this
+Matrix divishio THIS / Value
+@param Value :: Scalar to multiply matrix by
+@return *this
 */
 {
   for (size_t i = 0; i < m_numRows; i++) {
@@ -502,7 +502,6 @@ bool Matrix<T>::operator==(const Matrix<T> &A) const
 Element by element comparison within tolerance.
 Tolerance means that the value must be > tolerance
 and less than (diff/max)>tolerance
-
 Always returns 0 if the Matrix have different sizes
 @param A :: matrix to check.
 @return true on success
@@ -518,7 +517,6 @@ bool Matrix<T>::equals(const Matrix<T> &A, const double Tolerance) const
 Element by element comparison within tolerance.
 Tolerance means that the value must be > tolerance
 and less than (diff/max)>tolerance
-
 Always returns 0 if the Matrix have different sizes
 @param A :: matrix to check.
 @param Tolerance :: tolerance in comparing elements
@@ -593,9 +591,9 @@ template <typename T> bool Matrix<T>::operator>=(const Matrix<T> &A) const {
 }
 
 /**
-  Sets the memory held in matrix
-  @param a :: number of rows
-  @param b :: number of columns
+Sets the memory held in matrix
+@param a :: number of rows
+@param b :: number of columns
 */
 template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
   if (a == m_numRows && b == m_numColumns && m_rawData != nullptr)
@@ -627,9 +625,9 @@ template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
 }
 
 /**
-  Swap rows I and J
-  @param RowI :: row I to swap
-  @param RowJ :: row J to swap
+Swap rows I and J
+@param RowI :: row I to swap
+@param RowJ :: row J to swap
 */
 template <typename T>
 void Matrix<T>::swapRows(const size_t RowI, const size_t RowJ) {
@@ -644,9 +642,9 @@ void Matrix<T>::swapRows(const size_t RowI, const size_t RowJ) {
 }
 
 /**
-  Swap columns I and J
-  @param colI :: col I to swap
-  @param colJ :: col J to swap
+Swap columns I and J
+@param colI :: col I to swap
+@param colJ :: col J to swap
 */
 template <typename T>
 void Matrix<T>::swapCols(const size_t colI, const size_t colJ) {
@@ -663,7 +661,7 @@ void Matrix<T>::swapCols(const size_t colI, const size_t colJ) {
 template <typename T>
 void Matrix<T>::zeroMatrix()
 /**
-  Zeros all elements of the matrix
+Zeros all elements of the matrix
 */
 {
   if ((m_numRows * m_numColumns) > 0) {
@@ -678,8 +676,8 @@ void Matrix<T>::zeroMatrix()
 template <typename T>
 void Matrix<T>::identityMatrix()
 /**
-  Makes the matrix an idenity matrix.
-  Zeros all the terms outside of the square
+Makes the matrix an idenity matrix.
+Zeros all the terms outside of the square
 */
 {
   if ((m_numRows * m_numColumns) > 0) {
@@ -719,16 +717,16 @@ template <typename T>
 void Matrix<T>::rotate(const double tau, const double s, const int i,
                        const int j, const int k, const int m)
 /**
-  Applies a rotation to a particular point of tan(theta)=tau.
-  Note that you need both sin(theta) and tan(theta) because of
-  sign preservation.
-  @param tau :: tan(theta)
-  @param s :: sin(theta)
-  @param i ::  first index (xpos)
-  @param j ::  first index (ypos)
-  @param k ::  second index (xpos)
-  @param m ::  second index (ypos)
- */
+Applies a rotation to a particular point of tan(theta)=tau.
+Note that you need both sin(theta) and tan(theta) because of
+sign preservation.
+@param tau :: tan(theta)
+@param s :: sin(theta)
+@param i ::  first index (xpos)
+@param j ::  first index (ypos)
+@param k ::  second index (xpos)
+@param m ::  second index (ypos)
+*/
 {
   const T gg = m_rawData[i][j];
   const T hh = m_rawData[k][m];
@@ -739,10 +737,10 @@ void Matrix<T>::rotate(const double tau, const double s, const int i,
 template <typename T>
 Matrix<T> Matrix<T>::preMultiplyByDiagonal(const std::vector<T> &Dvec) const
 /**
-  Creates a diagonal matrix D from the given vector Dvec and
-  PRE-multiplies the matrix by it (i.e. D * M).
-  @param Dvec :: diagonal matrix (just centre points)
-  @return D*this
+Creates a diagonal matrix D from the given vector Dvec and
+PRE-multiplies the matrix by it (i.e. D * M).
+@param Dvec :: diagonal matrix (just centre points)
+@return D*this
 */
 {
   if (Dvec.size() != m_numRows) {
@@ -763,10 +761,10 @@ Matrix<T> Matrix<T>::preMultiplyByDiagonal(const std::vector<T> &Dvec) const
 template <typename T>
 Matrix<T> Matrix<T>::postMultiplyByDiagonal(const std::vector<T> &Dvec) const
 /**
-  Creates a diagonal matrix D from the given vector Dvec and
-  POST-multiplies the matrix by it (i.e. M * D).
-  @param Dvec :: diagonal matrix (just centre points)
-  @return this*D
+Creates a diagonal matrix D from the given vector Dvec and
+POST-multiplies the matrix by it (i.e. M * D).
+@param Dvec :: diagonal matrix (just centre points)
+@return this*D
 */
 {
   if (Dvec.size() != m_numColumns) {
@@ -788,9 +786,9 @@ Matrix<T> Matrix<T>::postMultiplyByDiagonal(const std::vector<T> &Dvec) const
 template <typename T>
 Matrix<T> Matrix<T>::Tprime() const
 /**
-  Transpose the matrix :
-  Has transpose for a square matrix case.
-  @return M^T
+Transpose the matrix :
+Has transpose for a square matrix case.
+@return M^T
 */
 {
   if ((m_numRows * m_numColumns) == 0)
@@ -861,8 +859,8 @@ Has a in place transpose for a square matrix case.
 template <>
 void Matrix<int>::GaussJordan(Kernel::Matrix<int> &)
 /**
-  Not valid for Integer
-  @throw std::invalid_argument
+Not valid for Integer
+@throw std::invalid_argument
 */
 {
   throw std::invalid_argument(
@@ -872,13 +870,13 @@ void Matrix<int>::GaussJordan(Kernel::Matrix<int> &)
 template <typename T>
 void Matrix<T>::GaussJordan(Matrix<T> &B)
 /**
-  Invert this matrix in place using Gauss-Jordan elimination.
-  Matrix will be replaced by its inverse.
-  @param B :: [input, output] Must have same dimensions as A. Returned as
-  identity matrix. (?)
-  @throw std::invalid_argument on input error
-  @throw std::runtime_error if singular
- */
+Invert this matrix in place using Gauss-Jordan elimination.
+Matrix will be replaced by its inverse.
+@param B :: [input, output] Must have same dimensions as A. Returned as
+identity matrix. (?)
+@throw std::invalid_argument on input error
+@throw std::runtime_error if singular
+*/
 {
   // check for input errors
   if (m_numRows != m_numColumns || B.m_numRows != m_numRows) {
@@ -960,9 +958,9 @@ void Matrix<T>::GaussJordan(Matrix<T> &B)
 template <typename T>
 T Matrix<T>::Invert()
 /**
-  If the Matrix is square then invert the matrix
-  using LU decomposition
-  @return Determinant (0 if the matrix is singular)
+If the Matrix is square then invert the matrix
+using LU decomposition
+@return Determinant (0 if the matrix is singular)
 */
 {
   if (m_numRows != m_numColumns && m_numRows < 1)
@@ -999,8 +997,8 @@ T Matrix<T>::Invert()
 template <typename T>
 T Matrix<T>::determinant() const
 /**
-  Calculate the derminant of the matrix
-  @return Determinant of matrix.
+Calculate the derminant of the matrix
+@return Determinant of matrix.
 */
 {
   if (m_numRows != m_numColumns)
@@ -1015,10 +1013,10 @@ T Matrix<T>::determinant() const
 template <typename T>
 T Matrix<T>::factor()
 /**
-   Gauss jordan diagonal factorisation
-   The diagonal is left as the values,
-   the lower part is zero.
-   @return the factored matrix
+Gauss jordan diagonal factorisation
+The diagonal is left as the values,
+the lower part is zero.
+@return the factored matrix
 */
 {
   if (m_numRows != m_numColumns || m_numRows < 1)
@@ -1066,8 +1064,8 @@ T Matrix<T>::factor()
 template <typename T>
 void Matrix<T>::normVert()
 /**
-  Normalise EigenVectors
-  Assumes that they have already been calculated
+Normalise EigenVectors
+Assumes that they have already been calculated
 */
 {
   for (size_t i = 0; i < m_numRows; i++) {
@@ -1085,9 +1083,9 @@ void Matrix<T>::normVert()
 template <typename T>
 T Matrix<T>::compSum() const
 /**
-  Add up each component sums for the matrix
-  @return \f$ \sum_i \sum_j V_{ij}^2 \f$
- */
+Add up each component sums for the matrix
+@return \f$ \sum_i \sum_j V_{ij}^2 \f$
+*/
 {
   T sum(0);
   for (size_t i = 0; i < m_numRows; i++) {
@@ -1175,8 +1173,8 @@ divide by pivot.
 template <typename T>
 void Matrix<T>::lubksb(const int *rowperm, double *b)
 /**
-  Implements a separation of the Matrix
-  into a triangular matrix
+Implements a separation of the Matrix
+into a triangular matrix
 */
 {
   int ii = -1;
@@ -1204,8 +1202,8 @@ void Matrix<T>::lubksb(const int *rowperm, double *b)
 template <typename T>
 void Matrix<T>::averSymmetric()
 /**
-  Simple function to create an average symmetric matrix
-  out of the Matrix
+Simple function to create an average symmetric matrix
+out of the Matrix
 */
 {
   const size_t minSize = (m_numRows > m_numColumns) ? m_numColumns : m_numRows;
@@ -1220,8 +1218,8 @@ void Matrix<T>::averSymmetric()
 template <typename T>
 std::vector<T> Matrix<T>::Diagonal() const
 /**
-  Returns the diagonal form as a vector
-  @return Diagonal elements
+Returns the diagonal form as a vector
+@return Diagonal elements
 */
 {
   const size_t Msize = (m_numColumns > m_numRows) ? m_numRows : m_numColumns;
@@ -1235,8 +1233,8 @@ std::vector<T> Matrix<T>::Diagonal() const
 template <typename T>
 T Matrix<T>::Trace() const
 /**
-  Calculates the trace of the matrix
-  @return Trace of matrix
+Calculates the trace of the matrix
+@return Trace of matrix
 */
 {
   const size_t Msize = (m_numColumns > m_numRows) ? m_numRows : m_numColumns;
@@ -1250,9 +1248,9 @@ T Matrix<T>::Trace() const
 template <typename T>
 void Matrix<T>::sortEigen(Matrix<T> &DiagMatrix)
 /**
-  Sorts the eigenvalues into increasing
-  size. Moves the EigenVectors correspondingly
-  @param DiagMatrix :: matrix of the EigenValues
+Sorts the eigenvalues into increasing
+size. Moves the EigenVectors correspondingly
+@param DiagMatrix :: matrix of the EigenValues
 */
 {
   if (m_numColumns != m_numRows || m_numRows != DiagMatrix.m_numRows ||
@@ -1275,10 +1273,10 @@ void Matrix<T>::sortEigen(Matrix<T> &DiagMatrix)
 template <typename T>
 int Matrix<T>::Diagonalise(Matrix<T> &EigenVec, Matrix<T> &DiagMatrix) const
 /**
-  Attempt to diagonalise the matrix IF symmetric
-  @param EigenVec :: (output) the Eigenvectors matrix
-  @param DiagMatrix :: the diagonal matrix of eigenvalues
-  @return :: 1  on success 0 on failure
+Attempt to diagonalise the matrix IF symmetric
+@param EigenVec :: (output) the Eigenvectors matrix
+@param DiagMatrix :: the diagonal matrix of eigenvalues
+@return :: 1  on success 0 on failure
 */
 {
   if (m_numRows != m_numColumns || m_numRows < 1) {
@@ -1427,10 +1425,10 @@ to be -1
 template <typename T>
 std::vector<T> Matrix<T>::toRotation()
 /**
-  Transform the matrix to a rotation matrix, by normalizing each column to 1
-  @return :: a vector of scaling factors
-  @throw :: std::invalid_argument if the absolute value of the determinant is
-  less then 1e-10 or not square matrix
+Transform the matrix to a rotation matrix, by normalizing each column to 1
+@return :: a vector of scaling factors
+@throw :: std::invalid_argument if the absolute value of the determinant is
+less then 1e-10 or not square matrix
 */
 {
   if (this->m_numRows != this->m_numColumns)
@@ -1477,8 +1475,8 @@ std::vector<T> Matrix<T>::toRotation()
 template <typename T>
 void Matrix<T>::print() const
 /**
-  Simple print out routine
- */
+Simple print out routine
+*/
 {
   write(std::cout, 10);
 }
@@ -1498,9 +1496,9 @@ void Matrix<T>::setRandom(size_t seed, double rMin, double rMax) {
 template <typename T>
 void Matrix<T>::write(std::ostream &Fh, const int blockCnt) const
 /**
-  Write out function for blocks of 10 Columns
-  @param Fh :: file stream for output
-  @param blockCnt :: number of columns per line (0 == full)
+Write out function for blocks of 10 Columns
+@param Fh :: file stream for output
+@param blockCnt :: number of columns per line (0 == full)
 */
 {
   std::ios::fmtflags oldFlags = Fh.flags();
@@ -1531,8 +1529,8 @@ void Matrix<T>::write(std::ostream &Fh, const int blockCnt) const
 template <typename T>
 std::string Matrix<T>::str() const
 /**
-  Convert the matrix into a simple linear string expression
-  @return String value of output
+Convert the matrix into a simple linear string expression
+@return String value of output
 */
 {
   std::ostringstream cx;
@@ -1657,15 +1655,11 @@ void fillFromStream(std::istream &is, Kernel::Matrix<T> &in,
 
 ///\cond TEMPLATE
 
-// Symbol definitions for common types
+// Explicit instatiations. Avoid duplicate symbol definitions in
+// client libraries. This must match the explicit declaration list
+// in the header
 template class MANTID_KERNEL_DLL Matrix<double>;
-// The explicit template instantiation for int does not have an export macro
-// since this produces a warning on "gcc: warning: type attributes ignored after
-// type is already define" The reason for this is the use of Matrix<int>
-// in a template specialization above, causing an implicit sepcialization.
-// This, most likely, obtains a visibility setting from the general template
-// definition.
-template class Matrix<int>;
+template class MANTID_KERNEL_DLL Matrix<int>;
 template class MANTID_KERNEL_DLL Matrix<float>;
 
 template MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
