@@ -111,7 +111,6 @@ class DPDFreduction(api.PythonAlgorithm):
             issues['EnergyBins'] = 'Energy bins is a list of either one or three values'
         # check momentum transfer bins
         qbins = self.getProperty('MomentumTransferBins').value
-        print(type(qbins))
         if len(qbins) not in (0, 1, 3):
             issues['MomentumTransferBins'] =\
                 'Momentum transfer bins is a list of zero (empty list), one, or three values'
