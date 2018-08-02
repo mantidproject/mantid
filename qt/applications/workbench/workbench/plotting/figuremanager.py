@@ -22,36 +22,14 @@ from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg, backend_version, draw_if_interactive, show)  # noqa
 from matplotlib._pylab_helpers import Gcf
 from qtpy.QtCore import Qt, QEvent, QObject, Signal
-from qtpy.QtWidgets import QApplication, QLabel, QMainWindow
+from qtpy.QtWidgets import QApplication, QLabel
 from six import text_type
 
 # local imports
-from .propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
-from .toolbar import WorkbenchNavigationToolbar
-from .qappthreadcall import QAppThreadCall
-
-
-class MainWindow(QMainWindow):
-    activated = Signal()
-    closing = Signal()
-    visibility_changed = Signal()
-
-    def event(self, event):
-        if event.type() == QEvent.WindowActivate:
-            self.activated.emit()
-        return QMainWindow.event(self, event)
-
-    def closeEvent(self, event):
-        self.closing.emit()
-        QMainWindow.closeEvent(self, event)
-
-    def hideEvent(self, event):
-        self.visibility_changed.emit()
-        QMainWindow.hideEvent(self, event)
-
-    def showEvent(self, event):
-        self.visibility_changed.emit()
-        QMainWindow.showEvent(self, event)
+from workbench.plotting.figurewindow import FigureWindow
+from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
+from workbench.plotting.toolbar import WorkbenchNavigationToolbar
+from workbench.plotting.qappthreadcall import QAppThreadCall
 
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
@@ -86,15 +64,14 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.fig_visibility_changed_orig = self.fig_visibility_changed
         self.fig_visibility_changed = QAppThreadCall(self.fig_visibility_changed_orig)
 
-        self.canvas = canvas
-        self.window = MainWindow()
+        self.window = FigureWindow(canvas)
         self.window.activated.connect(self._window_activated)
         self.window.closing.connect(canvas.close_event)
         self.window.closing.connect(self._widgetclosed)
         self.window.visibility_changed.connect(self.fig_visibility_changed)
 
         self.window.setWindowTitle("Figure %d" % num)
-        self.canvas.figure.set_label("Figure %d" % num)
+        canvas.figure.set_label("Figure %d" % num)
 
         # Give the keyboard focus to the figure instead of the
         # manager; StrongFocus accepts both tab and click to focus and
@@ -103,8 +80,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # clicked
         # on. http://qt-project.org/doc/qt-4.8/qt.html#FocusPolicy-enum or
         # http://doc.qt.digia.com/qt/qt.html#FocusPolicy-enum
-        self.canvas.setFocusPolicy(Qt.StrongFocus)
-        self.canvas.setFocus()
+        canvas.setFocusPolicy(Qt.StrongFocus)
+        canvas.setFocus()
 
         self.window._destroying = False
 
@@ -112,7 +89,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.statusbar_label = QLabel()
         self.window.statusBar().addWidget(self.statusbar_label)
 
-        self.toolbar = self._get_toolbar(self.canvas, self.window)
+        self.toolbar = self._get_toolbar(canvas, self.window)
         if self.toolbar is not None:
             self.window.addToolBar(self.toolbar)
             self.toolbar.message.connect(self.statusbar_label.setText)
@@ -129,17 +106,17 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         height = cs.height() + self._status_and_tool_height
         self.window.resize(cs.width(), height)
 
-        self.window.setCentralWidget(self.canvas)
+        self.window.setCentralWidget(canvas)
 
         if matplotlib.is_interactive():
             self.window.show()
-            self.canvas.draw_idle()
+            canvas.draw_idle()
 
         def notify_axes_change(fig):
             # This will be called whenever the current axes is changed
             if self.toolbar is not None:
                 self.toolbar.update()
-        self.canvas.figure.add_axobserver(notify_axes_change)
+        canvas.figure.add_axobserver(notify_axes_change)
 
         # Register canvas observers
         self._cids = []
