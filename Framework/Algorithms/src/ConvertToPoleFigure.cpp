@@ -1,7 +1,6 @@
 #include "MantidAlgorithms/ConvertToPoleFigure.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -218,21 +217,29 @@ void ConvertToPoleFigure::exec() {
   // get input data
   processInputs();
 
+  // create output
+  API::IMDEventWorkspace_sptr out_ws = initOutputMDEventWorkspace();
+
   if (m_inEventMode) {
     convertToPoleFigureEventMode();
 
     // initialize output (this is fake) TODO - It is for try-error-develop only
-    m_poleFigureRTDVector.resize(m_inputWS->getNumberHistograms());
-    m_poleFigureRNDVector.resize(m_inputWS->getNumberHistograms());
-    m_poleFigurePeakIntensityVector.resize(m_inputWS->getNumberHistograms());
-    generateOutputsHistogramMode();
+    if (true) {
+      m_poleFigureRTDVector.resize(m_inputWS->getNumberHistograms());
+      m_poleFigureRNDVector.resize(m_inputWS->getNumberHistograms());
+      m_poleFigurePeakIntensityVector.resize(m_inputWS->getNumberHistograms());
+      generateOutputsHistogramMode(out_ws);
+    } else {
+      // real mode to implement
+      generateOutputsEventMode(out_ws);
+    }
 
   } else {
     // calcualte pole figure
     convertToPoleFigureHistogramMode();
 
     // construct output
-    generateOutputsHistogramMode();
+    generateOutputsHistogramMode(out_ws);
   }
 
   return;
@@ -265,19 +272,38 @@ void ConvertToPoleFigure::convertToPoleFigureEventMode() {
   // go through spectra
   // TODO / NOW - this loop shall be turned to OpenMP to TEST SPEED
   // TODO - Need statistic on the number of events falling in range
+
+  size_t num_events_in_range = 0;
   size_t num_spectra = m_eventWS->getNumberHistograms();
+
+  PARALLEL_FOR_NO_WSP_CHECK()
   for (size_t iws = 0; iws < num_spectra; ++iws) {
+    PARALLEL_START_INTERUPT_REGION
+
     auto events = m_eventWS->getSpectrum(iws).getEvents();
     if (events.size() == 0)
       continue;
-    g_log.notice() << "[DB...INFO] working on spectrum " << iws << "\n";
+
+    g_log.debug() << "[DB...INFO] working on spectrum " << iws << "\n";
     Kernel::V3D unit_vec_q = calculateUnitQ(iws, sample_pos, sample_src_unit_k);
     size_t index_min_d = findDRangeInEventList(events, m_minD, false);
     size_t index_max_d = findDRangeInEventList(events, m_maxD, true);
-    g_log.notice() << "[DB...INFO] spectrum " << iws
-                   << " in range: " << index_min_d << " --- " << index_max_d
-                   << "\n";
-    // TODO create a vector for rotated Q
+    if (index_min_d == index_max_d) {
+      g_log.warning() << "Spectrum " << iws << " has min D and max D same as "
+                      << index_max_d
+                      << ".  Total number of events in this spectrum is "
+                      << events.size() << "\n";
+      continue;
+    }
+
+    g_log.debug() << "[DB...INFO] spectrum " << iws
+                  << " in range: " << index_min_d << " --- " << index_max_d
+                  << "\n";
+    // create a vector for rotated Q
+    size_t num_events = index_max_d - index_min_d;
+    std::vector<double> vec_td(num_events);
+    std::vector<double> vec_nd(num_events);
+
     for (size_t iev = index_min_d; iev < index_max_d; ++iev) {
       // get event's wall time
       TofEvent event_i = events[iev];
@@ -292,9 +318,24 @@ void ConvertToPoleFigure::convertToPoleFigureEventMode() {
       double r_td_i;
       double r_nd_i;
       rotateVectorQ(unit_vec_q, hrot_i, omega_i, r_td_i, r_nd_i);
-      // save.
+      // save to vector
+      vec_td[iev - index_min_d] = r_td_i;
+      vec_nd[iev - index_min_d] = r_nd_i;
     }
+
+    PARALLEL_CRITICAL(event_pf) {
+      num_events_in_range += index_max_d - index_min_d;
+    }
+
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
+
+  g_log.notice() << "There are " << num_events_in_range
+                 << " events falling in the given d-range "
+                    "out of "
+                 << m_eventWS->getNumberEvents() << " events in total"
+                 << "\n";
 
   return;
 }
@@ -347,24 +388,16 @@ void ConvertToPoleFigure::convertToPoleFigureHistogramMode() {
   double omega = omegaprop->lastValue();
 
   // get source and positons
-  //  Kernel::V3D srcpos = m_inputWS->getInstrument()->getSource()->getPos();
-  //  Kernel::V3D samplepos = m_inputWS->getInstrument()->getSample()->getPos();
-  //  Kernel::V3D k_sample_srcpos = samplepos - srcpos;
-  //  Kernel::V3D k_sample_src_unit = k_sample_srcpos / k_sample_srcpos.norm();
   Kernel::V3D samplepos, k_sample_src_unit;
   retrieveInstrumentInfo(samplepos, k_sample_src_unit);
 
   // TODO/NEXT - After unit test and user test are passed. try to
   // parallelize
   // this loop by openMP
+  PARALLEL_FOR_NO_WSP_CHECK()
   for (size_t iws = 0; iws < m_inputWS->getNumberHistograms(); ++iws) {
+    PARALLEL_START_INTERUPT_REGION
     // get detector position
-    //    auto detector = m_inputWS->getDetector(iws);
-    //    Kernel::V3D detpos = detector->getPos();
-    //    Kernel::V3D k_det_sample = detpos - samplepos;
-    //    Kernel::V3D k_det_sample_unit = k_det_sample / k_det_sample.norm();
-    //    Kernel::V3D qvector = k_det_sample_unit - k_sample_src_unit;
-    //    Kernel::V3D unit_q = qvector / qvector.norm();
     Kernel::V3D unit_q = calculateUnitQ(iws, samplepos, k_sample_src_unit);
 
     // calcualte pole figure position
@@ -375,10 +408,15 @@ void ConvertToPoleFigure::convertToPoleFigureHistogramMode() {
     double peak_intensity_i = m_peakIntensityWS->histogram(iws).y()[0];
 
     // set up value
-    m_poleFigureRTDVector[iws] = r_td;
-    m_poleFigureRNDVector[iws] = r_nd;
-    m_poleFigurePeakIntensityVector[iws] = peak_intensity_i;
+    PARALLEL_CRITICAL(add_histogram_pf) {
+      m_poleFigureRTDVector[iws] = r_td;
+      m_poleFigureRNDVector[iws] = r_nd;
+      m_poleFigurePeakIntensityVector[iws] = peak_intensity_i;
+    }
+
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   return;
 }
@@ -413,11 +451,7 @@ Kernel::V3D ConvertToPoleFigure::calculateUnitQ(size_t iws, V3D samplepos,
   return unit_q;
 }
 
-//----------------------------------------------------------------------------------------------
-/** generate output workspaces
- * @brief ConvertToPoleFigure::generateOutputs
- */
-void ConvertToPoleFigure::generateOutputsHistogramMode() {
+API::IMDEventWorkspace_sptr ConvertToPoleFigure::initOutputMDEventWorkspace() {
   // create MDEventWorkspace
   // Create a target output workspace.
   // 2D as (x, y) signal error
@@ -455,6 +489,23 @@ void ConvertToPoleFigure::generateOutputsHistogramMode() {
       Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
           yid, yname, yframe, static_cast<coord_t>(extentMins[dimy]),
           static_cast<coord_t>(extentMaxs[dimy]), ynbins)));
+
+  return out_event_ws;
+}
+
+//----------------------------------------------------------------------------------------------
+/** create the output MDEventWorkspace for EventMode
+ * @brief ConvertToPoleFigure::generateOutputsEventMode
+ */
+void ConvertToPoleFigure::generateOutputsEventMode(
+    Mantid::API::IMDEventWorkspace_sptr out_event_ws) {}
+
+//----------------------------------------------------------------------------------------------
+/** generate output workspaces
+ * @brief ConvertToPoleFigure::generateOutputs
+ */
+void ConvertToPoleFigure::generateOutputsHistogramMode(
+    API::IMDEventWorkspace_sptr out_event_ws) {
 
   // add MDEvents
   // Creates a new instance of the MDEventInserter.
@@ -504,9 +555,9 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
   double omega_prime = omega - psi + 135.;
   double tau_pp = -hrot - phi;
 
-  //  g_log.notice() << "\nQ = " << unitQ.toString() << "\n";
-  //  g_log.notice() << "Input: omega = " << omega << ", "
-  //                 << "HROT = " << hrot << "\n";
+  g_log.debug() << "\nQ = " << unitQ.toString() << "\n";
+  g_log.debug() << "Input: omega = " << omega << ", "
+                << "HROT = " << hrot << "\n";
 
   //
   double omega_prim_rad = omega_prime * M_PI / 180.;
@@ -515,16 +566,16 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
   // calculate first rotation
   Kernel::V3D k1(0, 1, 0);
   Kernel::V3D part1 = unitQ * cos(omega_prim_rad);
-  //  g_log.notice() << "Part 1: " << part1.toString() << "\n";
+  g_log.debug() << "Part 1: " << part1.toString() << "\n";
 
   Kernel::V3D part2 = (k1.cross_prod(unitQ)) * sin(omega_prim_rad);
-  //  g_log.notice() << "Part 2: " << part1.toString() << "\n";
+  g_log.debug() << "Part 2: " << part1.toString() << "\n";
 
   Kernel::V3D part3 =
       k1 * ((1 - cos(omega_prim_rad)) * (k1.scalar_prod(unitQ)));
   Kernel::V3D unitQPrime = part1 + part2 + part3;
 
-  //  g_log.notice() << "Q' = " << unitQPrime.toString() << "\n";
+  g_log.debug() << "Q' = " << unitQPrime.toString() << "\n";
 
   // calcualte second rotation
   Kernel::V3D k2(0, 0, 1);
@@ -533,7 +584,7 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
   part3 = k2 * (k2.scalar_prod(unitQPrime) * (1 - cos(tau_pp_rad)));
   Kernel::V3D unitQpp = part1 + part2 + part3;
 
-  //  g_log.notice() << "Q'' = " << unitQpp.toString() << "\n";
+  g_log.debug() << "Q'' = " << unitQpp.toString() << "\n";
 
   // project to the pole figure by point light
   double sign(1);

@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_ConvertToPoleFigure_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -63,7 +64,11 @@ private:
                                double tof, bool index_to_right);
 
   /// generatae output workspace and set output properties
-  void generateOutputsHistogramMode();
+  API::IMDEventWorkspace_sptr initOutputMDEventWorkspace();
+  void generateOutputsHistogramMode(
+      Mantid::API::IMDEventWorkspace_sptr out_event_ws);
+  void
+  generateOutputsEventMode(Mantid::API::IMDEventWorkspace_sptr out_event_ws);
 
   /// generate output MDEventWorkspace
   void generateMDEventWS();
