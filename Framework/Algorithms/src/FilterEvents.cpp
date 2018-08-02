@@ -736,6 +736,7 @@ void FilterEvents::splitTimeSeriesProperty(
       // add property to the associated workspace
       DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
       ws_i->mutableRun().addProperty(output_vector[tindex], true);
+      ws_i->mutableRun().setGoniometer(m_eventWS->run().getGoniometer(), false);
     }
   }
 
