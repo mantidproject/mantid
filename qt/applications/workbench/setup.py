@@ -16,12 +16,14 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 # The most basic setup possible to be able to use setup.py develop
 setup(
-    name="workbench",
+    name="Mantid Workbench",
+    version='3.14.20180801', # cmake variable
     install_requires=['mantidqt'],
+    packages=find_packages(exclude=['*.test']),
     entry_points={
         'gui_scripts': [
             'workbench = workbench.app.mainwindow:main'

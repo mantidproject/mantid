@@ -16,9 +16,11 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 # The most basic setup possible to be able to use setup.py develop
 setup(
-    name="mantidqt",
+    name="Mantid qt",
+    version='3.14.20180801', # cmake variable
+    packages=find_packages(exclude=['*.test'])
 )
