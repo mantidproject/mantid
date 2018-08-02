@@ -114,7 +114,7 @@ IAlgorithm_sptr loadParameterFileAlgorithm(MatrixWorkspace_sptr workspace,
                                            const std::string &filename) {
   IAlgorithm_sptr loadParamFile =
       AlgorithmManager::Instance().create("LoadParameterFile");
-  loadParamFile->setChild(true);
+  loadParamFile->setAlwaysStoreInADS(false);
   loadParamFile->initialize();
   loadParamFile->setProperty("Workspace", workspace);
   loadParamFile->setProperty("Filename", filename);
@@ -174,7 +174,7 @@ MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWS) {
   IAlgorithm_sptr cloneAlg =
       AlgorithmManager::Instance().create("CloneWorkspace");
   cloneAlg->setLogging(false);
-  cloneAlg->setChild(true);
+  cloneAlg->setAlwaysStoreInADS(false);
   cloneAlg->initialize();
   cloneAlg->setProperty("InputWorkspace", inputWS);
   cloneAlg->setProperty("OutputWorkspace", "__cloned");
@@ -189,7 +189,7 @@ MatrixWorkspace_sptr appendWorkspace(MatrixWorkspace_sptr leftWS,
   IAlgorithm_sptr appendAlg =
       AlgorithmManager::Instance().create("AppendSpectra");
   appendAlg->setLogging(false);
-  appendAlg->setChild(true);
+  appendAlg->setAlwaysStoreInADS(false);
   appendAlg->initialize();
   appendAlg->setProperty("InputWorkspace1", leftWS);
   appendAlg->setProperty("InputWorkspace2", rightWS);
