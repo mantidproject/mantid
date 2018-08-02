@@ -177,8 +177,10 @@ class RunTabPresenterTest(unittest.TestCase):
             expected_second_row = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '',
                                    '1.0', '']
         else:
-            expected_first_row = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '', 'test_file', '', '1.0', '']
-            expected_second_row = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0', '']
+            expected_first_row = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '',
+                                  '', 'test_file', '', '1.0', '']
+            expected_second_row = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0'
+                                   , '']
 
         calls = [mock.call(expected_first_row), mock.call(expected_second_row)]
         view.add_row.assert_has_calls(calls)
@@ -404,9 +406,9 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         presenter.set_view(mock.MagicMock())
         row = ['74044', '', '74044', '', '74044', '', '74044', '', '74044', '', '74044', '', 'test_reduction'
-            , 'user_file', '1.2', '']
+               , 'user_file', '1.2', '']
         expected_row = ['74044', '', '74040', '', '74044', '', '74044', '', '74044', '', '74044', '', 'test_reduction'
-            , 'user_file', '1.2', '']
+                        , 'user_file', '1.2', '']
         presenter._table_model.add_table_entry(0, TableIndexModel(*row))
         row = 0
         column = 2
@@ -422,13 +424,13 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         presenter.set_view(mock.MagicMock())
         row_0 = ['74040', '', '74040', '', '74040', '', '74040', '', '74040', '', '74040', '', 'test_reduction'
-            , 'user_file', '1.2', '']
+                 , 'user_file', '1.2', '']
         row_1 = ['74041', '', '74041', '', '74041', '', '74041', '', '74041', '', '74041', '', 'test_reduction'
-            , 'user_file', '1.2', '']
+                 , 'user_file', '1.2', '']
         row_2 = ['74042', '', '74042', '', '74042', '', '74042', '', '74042', '', '74042', '', 'test_reduction'
-            , 'user_file', '1.2', '']
+                 , 'user_file', '1.2', '']
         row_3 = ['74043', '', '74043', '', '74043', '', '74043', '', '74043', '', '74043', '', 'test_reduction'
-            , 'user_file', '1.2', '']
+                 , 'user_file', '1.2', '']
         presenter._table_model.add_table_entry(0, TableIndexModel(*row_0))
         presenter._table_model.add_table_entry(1, TableIndexModel(*row_1))
         presenter._table_model.add_table_entry(2, TableIndexModel(*row_2))
@@ -495,7 +497,7 @@ class RunTabPresenterTest(unittest.TestCase):
         view.get_selected_rows = mock.MagicMock(return_value=[0])
         presenter.set_view(view)
         test_row = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                           'test_file', '', '1.0', '']
+                    'test_file', '', '1.0', '']
 
         presenter.on_row_inserted(0, test_row)
 
@@ -509,7 +511,7 @@ class RunTabPresenterTest(unittest.TestCase):
         view.get_selected_rows = mock.MagicMock(return_value=[])
         presenter.set_view(view)
         test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                    'test_file', '', '1.0', '']
+                      'test_file', '', '1.0', '']
         test_row_1 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0', '']
         presenter.on_row_inserted(0, test_row_0)
         presenter.on_row_inserted(1, test_row_1)
@@ -526,7 +528,7 @@ class RunTabPresenterTest(unittest.TestCase):
         view.get_selected_rows = mock.MagicMock(return_value=[1])
         presenter.set_view(view)
         test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                    'test_file', '', '1.0', '']
+                      'test_file', '', '1.0', '']
         test_row_1 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0', '']
         presenter.on_row_inserted(0, test_row_0)
         presenter.on_row_inserted(1, test_row_1)
@@ -544,7 +546,7 @@ class RunTabPresenterTest(unittest.TestCase):
         view.get_selected_rows = mock.MagicMock(return_value=[0, 2])
         presenter.set_view(view)
         test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                    'test_file', '', '1.0', '']
+                      'test_file', '', '1.0', '']
         test_row_1 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0', '']
         test_row_2 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file3', '', '1.0', '']
         presenter.on_row_inserted(0, test_row_0)
