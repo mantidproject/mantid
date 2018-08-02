@@ -20,8 +20,8 @@ from setuptools import find_packages, setup
 
 # The most basic setup possible to be able to use setup.py develop
 setup(
-    name="Mantid Workbench",
-    version='3.14.20180801', # cmake variable
+    name='Mantid Workbench',
+    version='@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@',
     install_requires=['mantidqt'],
     packages=find_packages(exclude=['*.test']),
     entry_points={

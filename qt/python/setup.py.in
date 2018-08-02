@@ -20,7 +20,7 @@ from setuptools import find_packages, setup
 
 # The most basic setup possible to be able to use setup.py develop
 setup(
-    name="Mantid qt",
-    version='3.14.20180801', # cmake variable
+    name='Mantid qt',
+    version='@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@',
     packages=find_packages(exclude=['*.test'])
 )
