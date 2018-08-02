@@ -4,10 +4,10 @@
 #include "MantidMuon/RemoveExpDecay.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/PhysicalConstants.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <cmath>
 #include <numeric>
@@ -19,7 +19,7 @@ constexpr double MICROSECONDS_PER_SECOND{1000000.0};
 /// Muon lifetime in microseconds
 constexpr double MUON_LIFETIME_MICROSECONDS{
     Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND};
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -169,7 +169,7 @@ HistogramData::Histogram MuonRemoveExpDecay::removeDecay(
  * @param ws ::  workspace
  * @param wsIndex :: workspace index
  * @return normalisation constant
-*/
+ */
 double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws,
                                                  int wsIndex) {
   double retVal = 1.0;
@@ -226,5 +226,5 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws,
   return retVal;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

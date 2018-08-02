@@ -12,19 +12,19 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FunctionTask.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/ConfigService.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -604,5 +604,5 @@ void ConvertToDiffractionMDWorkspace::exec() {
   delete[] m_extentsMax;
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

@@ -1,13 +1,13 @@
 #ifndef MANTID_PARALLEL_THREADINGBACKEND_H_
 #define MANTID_PARALLEL_THREADINGBACKEND_H_
 
+#include "MantidKernel/make_unique.h"
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/Request.h"
 #include "MantidParallel/Status.h"
-#include "MantidKernel/make_unique.h"
 
-#include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 
 #include <chrono>
 #include <functional>
@@ -77,7 +77,8 @@ public:
 private:
   int m_size{1};
   std::map<std::tuple<int, int, int>,
-           std::vector<std::unique_ptr<std::stringbuf>>> m_buffer;
+           std::vector<std::unique_ptr<std::stringbuf>>>
+      m_buffer;
   std::mutex m_mutex;
 };
 
@@ -121,7 +122,7 @@ size_t loadFromStream(boost::archive::binary_iarchive &ia, T *data,
   }
   return count * sizeof(T);
 }
-}
+} // namespace detail
 
 template <typename... T>
 void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {

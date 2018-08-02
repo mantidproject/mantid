@@ -81,6 +81,6 @@ std::vector<Cell> paddedCellsToWidth(std::vector<Cell> const &cells,
     paddedCells.emplace_back(paddingCell);
   return paddedCells;
 }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -72,8 +72,9 @@ public:
       : m_loadedCount(0), m_foundCount(0),
         m_observer(*this, &ProgressWatcher::handleProgress) {}
   /// Add a notification to the count
-  void handleProgress(const Poco::AutoPtr<
-      Mantid::API::Algorithm::ProgressNotification> &notification) {
+  void handleProgress(
+      const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>
+          &notification) {
     const auto &message = notification->message;
     if (0 == message.compare(0, 5, "Found")) {
       ++m_foundCount;

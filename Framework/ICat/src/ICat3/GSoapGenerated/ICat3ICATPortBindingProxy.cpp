@@ -431,8 +431,8 @@ int ICATPortBindingProxy::getKeywordsForUser(
 int ICATPortBindingProxy::getKeywordsForUserStartWithMax(
     const char *endpoint, const char *soap_action,
     ns1__getKeywordsForUserStartWithMax *ns1__getKeywordsForUserStartWithMax_,
-    ns1__getKeywordsForUserStartWithMaxResponse *
-        ns1__getKeywordsForUserStartWithMaxResponse_) {
+    ns1__getKeywordsForUserStartWithMaxResponse
+        *ns1__getKeywordsForUserStartWithMaxResponse_) {
   struct soap *soap = this;
   struct __ns1__getKeywordsForUserStartWithMax
       soap_tmp___ns1__getKeywordsForUserStartWithMax;
@@ -717,8 +717,8 @@ int ICATPortBindingProxy::searchByAdvanced(
 int ICATPortBindingProxy::searchByAdvancedPagination(
     const char *endpoint, const char *soap_action,
     ns1__searchByAdvancedPagination *ns1__searchByAdvancedPagination_,
-    ns1__searchByAdvancedPaginationResponse *
-        ns1__searchByAdvancedPaginationResponse_) {
+    ns1__searchByAdvancedPaginationResponse
+        *ns1__searchByAdvancedPaginationResponse_) {
   struct soap *soap = this;
   struct __ns1__searchByAdvancedPagination
       soap_tmp___ns1__searchByAdvancedPagination;
@@ -949,8 +949,8 @@ int ICATPortBindingProxy::getMyInvestigations(
 int ICATPortBindingProxy::getMyInvestigationsIncludes(
     const char *endpoint, const char *soap_action,
     ns1__getMyInvestigationsIncludes *ns1__getMyInvestigationsIncludes_,
-    ns1__getMyInvestigationsIncludesResponse *
-        ns1__getMyInvestigationsIncludesResponse_) {
+    ns1__getMyInvestigationsIncludesResponse
+        *ns1__getMyInvestigationsIncludesResponse_) {
   struct soap *soap = this;
   struct __ns1__getMyInvestigationsIncludes
       soap_tmp___ns1__getMyInvestigationsIncludes;
@@ -1008,10 +1008,10 @@ int ICATPortBindingProxy::getMyInvestigationsIncludes(
 
 int ICATPortBindingProxy::getMyInvestigationsIncludesPagination(
     const char *endpoint, const char *soap_action,
-    ns1__getMyInvestigationsIncludesPagination *
-        ns1__getMyInvestigationsIncludesPagination_,
-    ns1__getMyInvestigationsIncludesPaginationResponse *
-        ns1__getMyInvestigationsIncludesPaginationResponse_) {
+    ns1__getMyInvestigationsIncludesPagination
+        *ns1__getMyInvestigationsIncludesPagination_,
+    ns1__getMyInvestigationsIncludesPaginationResponse
+        *ns1__getMyInvestigationsIncludesPaginationResponse_) {
   struct soap *soap = this;
   struct __ns1__getMyInvestigationsIncludesPagination
       soap_tmp___ns1__getMyInvestigationsIncludesPagination;
@@ -1125,8 +1125,8 @@ int ICATPortBindingProxy::searchByUserID(
 int ICATPortBindingProxy::searchByUserIDPagination(
     const char *endpoint, const char *soap_action,
     ns1__searchByUserIDPagination *ns1__searchByUserIDPagination_,
-    ns1__searchByUserIDPaginationResponse *
-        ns1__searchByUserIDPaginationResponse_) {
+    ns1__searchByUserIDPaginationResponse
+        *ns1__searchByUserIDPaginationResponse_) {
   struct soap *soap = this;
   struct __ns1__searchByUserIDPagination
       soap_tmp___ns1__searchByUserIDPagination;
@@ -1243,8 +1243,8 @@ int ICATPortBindingProxy::searchByUserSurname(
 int ICATPortBindingProxy::searchByUserSurnamePagination(
     const char *endpoint, const char *soap_action,
     ns1__searchByUserSurnamePagination *ns1__searchByUserSurnamePagination_,
-    ns1__searchByUserSurnamePaginationResponse *
-        ns1__searchByUserSurnamePaginationResponse_) {
+    ns1__searchByUserSurnamePaginationResponse
+        *ns1__searchByUserSurnamePaginationResponse_) {
   struct soap *soap = this;
   struct __ns1__searchByUserSurnamePagination
       soap_tmp___ns1__searchByUserSurnamePagination;
@@ -1388,9 +1388,10 @@ int ICATPortBindingProxy::getAllInstruments(
     return soap->error;
   if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
-      soap_body_begin_out(soap) || soap_put___ns1__getAllInstruments(
-                                       soap, &soap_tmp___ns1__getAllInstruments,
-                                       "-ns1:getAllInstruments", nullptr) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getAllInstruments(soap,
+                                        &soap_tmp___ns1__getAllInstruments,
+                                        "-ns1:getAllInstruments", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -1575,10 +1576,10 @@ int ICATPortBindingProxy::listFacilityCycles(
 
 int ICATPortBindingProxy::getFacilityCyclesWithDataForInstrument(
     const char *endpoint, const char *soap_action,
-    ns1__getFacilityCyclesWithDataForInstrument *
-        ns1__getFacilityCyclesWithDataForInstrument_,
-    ns1__getFacilityCyclesWithDataForInstrumentResponse *
-        ns1__getFacilityCyclesWithDataForInstrumentResponse_) {
+    ns1__getFacilityCyclesWithDataForInstrument
+        *ns1__getFacilityCyclesWithDataForInstrument_,
+    ns1__getFacilityCyclesWithDataForInstrumentResponse
+        *ns1__getFacilityCyclesWithDataForInstrumentResponse_) {
   struct soap *soap = this;
   struct __ns1__getFacilityCyclesWithDataForInstrument
       soap_tmp___ns1__getFacilityCyclesWithDataForInstrument;
@@ -1755,8 +1756,8 @@ int ICATPortBindingProxy::listInvestigationTypes(
 int ICATPortBindingProxy::searchSamplesBySampleName(
     const char *endpoint, const char *soap_action,
     ns1__searchSamplesBySampleName *ns1__searchSamplesBySampleName_,
-    ns1__searchSamplesBySampleNameResponse *
-        ns1__searchSamplesBySampleNameResponse_) {
+    ns1__searchSamplesBySampleNameResponse
+        *ns1__searchSamplesBySampleNameResponse_) {
   struct soap *soap = this;
   struct __ns1__searchSamplesBySampleName
       soap_tmp___ns1__searchSamplesBySampleName;
@@ -1960,9 +1961,10 @@ int ICATPortBindingProxy::listDatasetStatus(
     return soap->error;
   if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
-      soap_body_begin_out(soap) || soap_put___ns1__listDatasetStatus(
-                                       soap, &soap_tmp___ns1__listDatasetStatus,
-                                       "-ns1:listDatasetStatus", nullptr) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__listDatasetStatus(soap,
+                                        &soap_tmp___ns1__listDatasetStatus,
+                                        "-ns1:listDatasetStatus", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -2016,9 +2018,10 @@ int ICATPortBindingProxy::searchByRunNumber(
     return soap->error;
   if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
-      soap_body_begin_out(soap) || soap_put___ns1__searchByRunNumber(
-                                       soap, &soap_tmp___ns1__searchByRunNumber,
-                                       "-ns1:searchByRunNumber", nullptr) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchByRunNumber(soap,
+                                        &soap_tmp___ns1__searchByRunNumber,
+                                        "-ns1:searchByRunNumber", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -2041,8 +2044,8 @@ int ICATPortBindingProxy::searchByRunNumber(
 int ICATPortBindingProxy::searchByRunNumberPagination(
     const char *endpoint, const char *soap_action,
     ns1__searchByRunNumberPagination *ns1__searchByRunNumberPagination_,
-    ns1__searchByRunNumberPaginationResponse *
-        ns1__searchByRunNumberPaginationResponse_) {
+    ns1__searchByRunNumberPaginationResponse
+        *ns1__searchByRunNumberPaginationResponse_) {
   struct soap *soap = this;
   struct __ns1__searchByRunNumberPagination
       soap_tmp___ns1__searchByRunNumberPagination;
@@ -2215,8 +2218,8 @@ int ICATPortBindingProxy::getInvestigation(
 int ICATPortBindingProxy::getInvestigationIncludes(
     const char *endpoint, const char *soap_action,
     ns1__getInvestigationIncludes *ns1__getInvestigationIncludes_,
-    ns1__getInvestigationIncludesResponse *
-        ns1__getInvestigationIncludesResponse_) {
+    ns1__getInvestigationIncludesResponse
+        *ns1__getInvestigationIncludesResponse_) {
   struct soap *soap = this;
   struct __ns1__getInvestigationIncludes
       soap_tmp___ns1__getInvestigationIncludes;
@@ -2306,9 +2309,10 @@ int ICATPortBindingProxy::getInvestigations(
     return soap->error;
   if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
-      soap_body_begin_out(soap) || soap_put___ns1__getInvestigations(
-                                       soap, &soap_tmp___ns1__getInvestigations,
-                                       "-ns1:getInvestigations", nullptr) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getInvestigations(soap,
+                                        &soap_tmp___ns1__getInvestigations,
+                                        "-ns1:getInvestigations", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -2331,8 +2335,8 @@ int ICATPortBindingProxy::getInvestigations(
 int ICATPortBindingProxy::getInvestigationsIncludes(
     const char *endpoint, const char *soap_action,
     ns1__getInvestigationsIncludes *ns1__getInvestigationsIncludes_,
-    ns1__getInvestigationsIncludesResponse *
-        ns1__getInvestigationsIncludesResponse_) {
+    ns1__getInvestigationsIncludesResponse
+        *ns1__getInvestigationsIncludesResponse_) {
   struct soap *soap = this;
   struct __ns1__getInvestigationsIncludes
       soap_tmp___ns1__getInvestigationsIncludes;
@@ -2452,8 +2456,8 @@ int ICATPortBindingProxy::deleteInvestigation(
     ns1__deleteInvestigationResponse *ns1__deleteInvestigationResponse_) {
   struct soap *soap = this;
   struct __ns1__deleteInvestigation soap_tmp___ns1__deleteInvestigation;
-  struct __ns1__deleteInvestigationResponse *
-      soap_tmp___ns1__deleteInvestigationResponse;
+  struct __ns1__deleteInvestigationResponse
+      *soap_tmp___ns1__deleteInvestigationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -2519,8 +2523,8 @@ int ICATPortBindingProxy::removeInvestigation(
     ns1__removeInvestigationResponse *ns1__removeInvestigationResponse_) {
   struct soap *soap = this;
   struct __ns1__removeInvestigation soap_tmp___ns1__removeInvestigation;
-  struct __ns1__removeInvestigationResponse *
-      soap_tmp___ns1__removeInvestigationResponse;
+  struct __ns1__removeInvestigationResponse
+      *soap_tmp___ns1__removeInvestigationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -2855,8 +2859,8 @@ int ICATPortBindingProxy::deleteInvestigator(
     ns1__deleteInvestigatorResponse *ns1__deleteInvestigatorResponse_) {
   struct soap *soap = this;
   struct __ns1__deleteInvestigator soap_tmp___ns1__deleteInvestigator;
-  struct __ns1__deleteInvestigatorResponse *
-      soap_tmp___ns1__deleteInvestigatorResponse;
+  struct __ns1__deleteInvestigatorResponse
+      *soap_tmp___ns1__deleteInvestigatorResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -2980,8 +2984,8 @@ int ICATPortBindingProxy::deletePublication(
     ns1__deletePublicationResponse *ns1__deletePublicationResponse_) {
   struct soap *soap = this;
   struct __ns1__deletePublication soap_tmp___ns1__deletePublication;
-  struct __ns1__deletePublicationResponse *
-      soap_tmp___ns1__deletePublicationResponse;
+  struct __ns1__deletePublicationResponse
+      *soap_tmp___ns1__deletePublicationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -3010,9 +3014,10 @@ int ICATPortBindingProxy::deletePublication(
     return soap->error;
   if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
-      soap_body_begin_out(soap) || soap_put___ns1__deletePublication(
-                                       soap, &soap_tmp___ns1__deletePublication,
-                                       "-ns1:deletePublication", nullptr) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__deletePublication(soap,
+                                        &soap_tmp___ns1__deletePublication,
+                                        "-ns1:deletePublication", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -3104,8 +3109,8 @@ int ICATPortBindingProxy::deleteSampleParameter(
     ns1__deleteSampleParameterResponse *ns1__deleteSampleParameterResponse_) {
   struct soap *soap = this;
   struct __ns1__deleteSampleParameter soap_tmp___ns1__deleteSampleParameter;
-  struct __ns1__deleteSampleParameterResponse *
-      soap_tmp___ns1__deleteSampleParameterResponse;
+  struct __ns1__deleteSampleParameterResponse
+      *soap_tmp___ns1__deleteSampleParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -3171,8 +3176,8 @@ int ICATPortBindingProxy::modifyInvestigation(
     ns1__modifyInvestigationResponse *ns1__modifyInvestigationResponse_) {
   struct soap *soap = this;
   struct __ns1__modifyInvestigation soap_tmp___ns1__modifyInvestigation;
-  struct __ns1__modifyInvestigationResponse *
-      soap_tmp___ns1__modifyInvestigationResponse;
+  struct __ns1__modifyInvestigationResponse
+      *soap_tmp___ns1__modifyInvestigationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -3238,8 +3243,8 @@ int ICATPortBindingProxy::modifyInvestigator(
     ns1__modifyInvestigatorResponse *ns1__modifyInvestigatorResponse_) {
   struct soap *soap = this;
   struct __ns1__modifyInvestigator soap_tmp___ns1__modifyInvestigator;
-  struct __ns1__modifyInvestigatorResponse *
-      soap_tmp___ns1__modifyInvestigatorResponse;
+  struct __ns1__modifyInvestigatorResponse
+      *soap_tmp___ns1__modifyInvestigatorResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -3363,8 +3368,8 @@ int ICATPortBindingProxy::modifyPublication(
     ns1__modifyPublicationResponse *ns1__modifyPublicationResponse_) {
   struct soap *soap = this;
   struct __ns1__modifyPublication soap_tmp___ns1__modifyPublication;
-  struct __ns1__modifyPublicationResponse *
-      soap_tmp___ns1__modifyPublicationResponse;
+  struct __ns1__modifyPublicationResponse
+      *soap_tmp___ns1__modifyPublicationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -3393,9 +3398,10 @@ int ICATPortBindingProxy::modifyPublication(
     return soap->error;
   if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
-      soap_body_begin_out(soap) || soap_put___ns1__modifyPublication(
-                                       soap, &soap_tmp___ns1__modifyPublication,
-                                       "-ns1:modifyPublication", nullptr) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__modifyPublication(soap,
+                                        &soap_tmp___ns1__modifyPublication,
+                                        "-ns1:modifyPublication", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -3429,8 +3435,8 @@ int ICATPortBindingProxy::modifySampleParameter(
     ns1__modifySampleParameterResponse *ns1__modifySampleParameterResponse_) {
   struct soap *soap = this;
   struct __ns1__modifySampleParameter soap_tmp___ns1__modifySampleParameter;
-  struct __ns1__modifySampleParameterResponse *
-      soap_tmp___ns1__modifySampleParameterResponse;
+  struct __ns1__modifySampleParameterResponse
+      *soap_tmp___ns1__modifySampleParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -3554,8 +3560,8 @@ int ICATPortBindingProxy::removeInvestigator(
     ns1__removeInvestigatorResponse *ns1__removeInvestigatorResponse_) {
   struct soap *soap = this;
   struct __ns1__removeInvestigator soap_tmp___ns1__removeInvestigator;
-  struct __ns1__removeInvestigatorResponse *
-      soap_tmp___ns1__removeInvestigatorResponse;
+  struct __ns1__removeInvestigatorResponse
+      *soap_tmp___ns1__removeInvestigatorResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -3621,8 +3627,8 @@ int ICATPortBindingProxy::removePublication(
     ns1__removePublicationResponse *ns1__removePublicationResponse_) {
   struct soap *soap = this;
   struct __ns1__removePublication soap_tmp___ns1__removePublication;
-  struct __ns1__removePublicationResponse *
-      soap_tmp___ns1__removePublicationResponse;
+  struct __ns1__removePublicationResponse
+      *soap_tmp___ns1__removePublicationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -3651,9 +3657,10 @@ int ICATPortBindingProxy::removePublication(
     return soap->error;
   if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
-      soap_body_begin_out(soap) || soap_put___ns1__removePublication(
-                                       soap, &soap_tmp___ns1__removePublication,
-                                       "-ns1:removePublication", nullptr) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__removePublication(soap,
+                                        &soap_tmp___ns1__removePublication,
+                                        "-ns1:removePublication", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -3745,8 +3752,8 @@ int ICATPortBindingProxy::removeSampleParameter(
     ns1__removeSampleParameterResponse *ns1__removeSampleParameterResponse_) {
   struct soap *soap = this;
   struct __ns1__removeSampleParameter soap_tmp___ns1__removeSampleParameter;
-  struct __ns1__removeSampleParameterResponse *
-      soap_tmp___ns1__removeSampleParameterResponse;
+  struct __ns1__removeSampleParameterResponse
+      *soap_tmp___ns1__removeSampleParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -4139,8 +4146,8 @@ int ICATPortBindingProxy::deleteDataSetParameter(
     ns1__deleteDataSetParameterResponse *ns1__deleteDataSetParameterResponse_) {
   struct soap *soap = this;
   struct __ns1__deleteDataSetParameter soap_tmp___ns1__deleteDataSetParameter;
-  struct __ns1__deleteDataSetParameterResponse *
-      soap_tmp___ns1__deleteDataSetParameterResponse;
+  struct __ns1__deleteDataSetParameterResponse
+      *soap_tmp___ns1__deleteDataSetParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -4264,8 +4271,8 @@ int ICATPortBindingProxy::modifyDataSetParameter(
     ns1__modifyDataSetParameterResponse *ns1__modifyDataSetParameterResponse_) {
   struct soap *soap = this;
   struct __ns1__modifyDataSetParameter soap_tmp___ns1__modifyDataSetParameter;
-  struct __ns1__modifyDataSetParameterResponse *
-      soap_tmp___ns1__modifyDataSetParameterResponse;
+  struct __ns1__modifyDataSetParameterResponse
+      *soap_tmp___ns1__modifyDataSetParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -4331,8 +4338,8 @@ int ICATPortBindingProxy::setDataSetSample(
     ns1__setDataSetSampleResponse *ns1__setDataSetSampleResponse_) {
   struct soap *soap = this;
   struct __ns1__setDataSetSample soap_tmp___ns1__setDataSetSample;
-  struct __ns1__setDataSetSampleResponse *
-      soap_tmp___ns1__setDataSetSampleResponse;
+  struct __ns1__setDataSetSampleResponse
+      *soap_tmp___ns1__setDataSetSampleResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -4569,8 +4576,8 @@ int ICATPortBindingProxy::removeDataSetParameter(
     ns1__removeDataSetParameterResponse *ns1__removeDataSetParameterResponse_) {
   struct soap *soap = this;
   struct __ns1__removeDataSetParameter soap_tmp___ns1__removeDataSetParameter;
-  struct __ns1__removeDataSetParameterResponse *
-      soap_tmp___ns1__removeDataSetParameterResponse;
+  struct __ns1__removeDataSetParameterResponse
+      *soap_tmp___ns1__removeDataSetParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -5081,12 +5088,12 @@ int ICATPortBindingProxy::addDataFileParameters(
 int ICATPortBindingProxy::modifyDataFileParameter(
     const char *endpoint, const char *soap_action,
     ns1__modifyDataFileParameter *ns1__modifyDataFileParameter_,
-    ns1__modifyDataFileParameterResponse *
-        ns1__modifyDataFileParameterResponse_) {
+    ns1__modifyDataFileParameterResponse
+        *ns1__modifyDataFileParameterResponse_) {
   struct soap *soap = this;
   struct __ns1__modifyDataFileParameter soap_tmp___ns1__modifyDataFileParameter;
-  struct __ns1__modifyDataFileParameterResponse *
-      soap_tmp___ns1__modifyDataFileParameterResponse;
+  struct __ns1__modifyDataFileParameterResponse
+      *soap_tmp___ns1__modifyDataFileParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -5149,12 +5156,12 @@ int ICATPortBindingProxy::modifyDataFileParameter(
 int ICATPortBindingProxy::deleteDataFileParameter(
     const char *endpoint, const char *soap_action,
     ns1__deleteDataFileParameter *ns1__deleteDataFileParameter_,
-    ns1__deleteDataFileParameterResponse *
-        ns1__deleteDataFileParameterResponse_) {
+    ns1__deleteDataFileParameterResponse
+        *ns1__deleteDataFileParameterResponse_) {
   struct soap *soap = this;
   struct __ns1__deleteDataFileParameter soap_tmp___ns1__deleteDataFileParameter;
-  struct __ns1__deleteDataFileParameterResponse *
-      soap_tmp___ns1__deleteDataFileParameterResponse;
+  struct __ns1__deleteDataFileParameterResponse
+      *soap_tmp___ns1__deleteDataFileParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -5277,12 +5284,12 @@ int ICATPortBindingProxy::removeDataFile(
 int ICATPortBindingProxy::removeDataFileParameter(
     const char *endpoint, const char *soap_action,
     ns1__removeDataFileParameter *ns1__removeDataFileParameter_,
-    ns1__removeDataFileParameterResponse *
-        ns1__removeDataFileParameterResponse_) {
+    ns1__removeDataFileParameterResponse
+        *ns1__removeDataFileParameterResponse_) {
   struct soap *soap = this;
   struct __ns1__removeDataFileParameter soap_tmp___ns1__removeDataFileParameter;
-  struct __ns1__removeDataFileParameterResponse *
-      soap_tmp___ns1__removeDataFileParameterResponse;
+  struct __ns1__removeDataFileParameterResponse
+      *soap_tmp___ns1__removeDataFileParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -5376,9 +5383,10 @@ int ICATPortBindingProxy::getAuthorisations(
     return soap->error;
   if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
-      soap_body_begin_out(soap) || soap_put___ns1__getAuthorisations(
-                                       soap, &soap_tmp___ns1__getAuthorisations,
-                                       "-ns1:getAuthorisations", nullptr) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getAuthorisations(soap,
+                                        &soap_tmp___ns1__getAuthorisations,
+                                        "-ns1:getAuthorisations", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -5460,8 +5468,8 @@ int ICATPortBindingProxy::deleteAuthorisation(
     ns1__deleteAuthorisationResponse *ns1__deleteAuthorisationResponse_) {
   struct soap *soap = this;
   struct __ns1__deleteAuthorisation soap_tmp___ns1__deleteAuthorisation;
-  struct __ns1__deleteAuthorisationResponse *
-      soap_tmp___ns1__deleteAuthorisationResponse;
+  struct __ns1__deleteAuthorisationResponse
+      *soap_tmp___ns1__deleteAuthorisationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -5527,8 +5535,8 @@ int ICATPortBindingProxy::removeAuthorisation(
     ns1__removeAuthorisationResponse *ns1__removeAuthorisationResponse_) {
   struct soap *soap = this;
   struct __ns1__removeAuthorisation soap_tmp___ns1__removeAuthorisation;
-  struct __ns1__removeAuthorisationResponse *
-      soap_tmp___ns1__removeAuthorisationResponse;
+  struct __ns1__removeAuthorisationResponse
+      *soap_tmp___ns1__removeAuthorisationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -5594,8 +5602,8 @@ int ICATPortBindingProxy::updateAuthorisation(
     ns1__updateAuthorisationResponse *ns1__updateAuthorisationResponse_) {
   struct soap *soap = this;
   struct __ns1__updateAuthorisation soap_tmp___ns1__updateAuthorisation;
-  struct __ns1__updateAuthorisationResponse *
-      soap_tmp___ns1__updateAuthorisationResponse;
+  struct __ns1__updateAuthorisationResponse
+      *soap_tmp___ns1__updateAuthorisationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == nullptr)
@@ -5851,9 +5859,10 @@ int ICATPortBindingProxy::downloadDatafiles(
     return soap->error;
   if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
-      soap_body_begin_out(soap) || soap_put___ns1__downloadDatafiles(
-                                       soap, &soap_tmp___ns1__downloadDatafiles,
-                                       "-ns1:downloadDatafiles", nullptr) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__downloadDatafiles(soap,
+                                        &soap_tmp___ns1__downloadDatafiles,
+                                        "-ns1:downloadDatafiles", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -5876,8 +5885,8 @@ int ICATPortBindingProxy::downloadDatafiles(
 int ICATPortBindingProxy::checkDatafileDownloadAccess(
     const char *endpoint, const char *soap_action,
     ns1__checkDatafileDownloadAccess *ns1__checkDatafileDownloadAccess_,
-    ns1__checkDatafileDownloadAccessResponse *
-        ns1__checkDatafileDownloadAccessResponse_) {
+    ns1__checkDatafileDownloadAccessResponse
+        *ns1__checkDatafileDownloadAccessResponse_) {
   struct soap *soap = this;
   struct __ns1__checkDatafileDownloadAccess
       soap_tmp___ns1__checkDatafileDownloadAccess;
@@ -5936,8 +5945,8 @@ int ICATPortBindingProxy::checkDatafileDownloadAccess(
 int ICATPortBindingProxy::checkDatasetDownloadAccess(
     const char *endpoint, const char *soap_action,
     ns1__checkDatasetDownloadAccess *ns1__checkDatasetDownloadAccess_,
-    ns1__checkDatasetDownloadAccessResponse *
-        ns1__checkDatasetDownloadAccessResponse_) {
+    ns1__checkDatasetDownloadAccessResponse
+        *ns1__checkDatasetDownloadAccessResponse_) {
   struct soap *soap = this;
   struct __ns1__checkDatasetDownloadAccess
       soap_tmp___ns1__checkDatasetDownloadAccess;
@@ -6027,9 +6036,10 @@ int ICATPortBindingProxy::getICATAPIVersion(
     return soap->error;
   if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
-      soap_body_begin_out(soap) || soap_put___ns1__getICATAPIVersion(
-                                       soap, &soap_tmp___ns1__getICATAPIVersion,
-                                       "-ns1:getICATAPIVersion", nullptr) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getICATAPIVersion(soap,
+                                        &soap_tmp___ns1__getICATAPIVersion,
+                                        "-ns1:getICATAPIVersion", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -6052,8 +6062,8 @@ int ICATPortBindingProxy::getICATAPIVersion(
 int ICATPortBindingProxy::getFacilityUserByFacilityUserId(
     const char *endpoint, const char *soap_action,
     ns1__getFacilityUserByFacilityUserId *ns1__getFacilityUserByFacilityUserId_,
-    ns1__getFacilityUserByFacilityUserIdResponse *
-        ns1__getFacilityUserByFacilityUserIdResponse_) {
+    ns1__getFacilityUserByFacilityUserIdResponse
+        *ns1__getFacilityUserByFacilityUserIdResponse_) {
   struct soap *soap = this;
   struct __ns1__getFacilityUserByFacilityUserId
       soap_tmp___ns1__getFacilityUserByFacilityUserId;
@@ -6113,8 +6123,8 @@ int ICATPortBindingProxy::getFacilityUserByFacilityUserId(
 int ICATPortBindingProxy::getFacilityUserByFederalId(
     const char *endpoint, const char *soap_action,
     ns1__getFacilityUserByFederalId *ns1__getFacilityUserByFederalId_,
-    ns1__getFacilityUserByFederalIdResponse *
-        ns1__getFacilityUserByFederalIdResponse_) {
+    ns1__getFacilityUserByFederalIdResponse
+        *ns1__getFacilityUserByFederalIdResponse_) {
   struct soap *soap = this;
   struct __ns1__getFacilityUserByFederalId
       soap_tmp___ns1__getFacilityUserByFederalId;
@@ -6172,10 +6182,10 @@ int ICATPortBindingProxy::getFacilityUserByFederalId(
 
 int ICATPortBindingProxy::searchInvestigationByParameterCondition(
     const char *endpoint, const char *soap_action,
-    ns1__searchInvestigationByParameterCondition *
-        ns1__searchInvestigationByParameterCondition_,
-    ns1__searchInvestigationByParameterConditionResponse *
-        ns1__searchInvestigationByParameterConditionResponse_) {
+    ns1__searchInvestigationByParameterCondition
+        *ns1__searchInvestigationByParameterCondition_,
+    ns1__searchInvestigationByParameterConditionResponse
+        *ns1__searchInvestigationByParameterConditionResponse_) {
   struct soap *soap = this;
   struct __ns1__searchInvestigationByParameterCondition
       soap_tmp___ns1__searchInvestigationByParameterCondition;
@@ -6235,10 +6245,10 @@ int ICATPortBindingProxy::searchInvestigationByParameterCondition(
 
 int ICATPortBindingProxy::searchDatafileByParameterCondition(
     const char *endpoint, const char *soap_action,
-    ns1__searchDatafileByParameterCondition *
-        ns1__searchDatafileByParameterCondition_,
-    ns1__searchDatafileByParameterConditionResponse *
-        ns1__searchDatafileByParameterConditionResponse_) {
+    ns1__searchDatafileByParameterCondition
+        *ns1__searchDatafileByParameterCondition_,
+    ns1__searchDatafileByParameterConditionResponse
+        *ns1__searchDatafileByParameterConditionResponse_) {
   struct soap *soap = this;
   struct __ns1__searchDatafileByParameterCondition
       soap_tmp___ns1__searchDatafileByParameterCondition;
@@ -6298,10 +6308,10 @@ int ICATPortBindingProxy::searchDatafileByParameterCondition(
 
 int ICATPortBindingProxy::searchDatasetByParameterCondition(
     const char *endpoint, const char *soap_action,
-    ns1__searchDatasetByParameterCondition *
-        ns1__searchDatasetByParameterCondition_,
-    ns1__searchDatasetByParameterConditionResponse *
-        ns1__searchDatasetByParameterConditionResponse_) {
+    ns1__searchDatasetByParameterCondition
+        *ns1__searchDatasetByParameterCondition_,
+    ns1__searchDatasetByParameterConditionResponse
+        *ns1__searchDatasetByParameterConditionResponse_) {
   struct soap *soap = this;
   struct __ns1__searchDatasetByParameterCondition
       soap_tmp___ns1__searchDatasetByParameterCondition;
@@ -6361,10 +6371,10 @@ int ICATPortBindingProxy::searchDatasetByParameterCondition(
 
 int ICATPortBindingProxy::searchSampleByParameterCondition(
     const char *endpoint, const char *soap_action,
-    ns1__searchSampleByParameterCondition *
-        ns1__searchSampleByParameterCondition_,
-    ns1__searchSampleByParameterConditionResponse *
-        ns1__searchSampleByParameterConditionResponse_) {
+    ns1__searchSampleByParameterCondition
+        *ns1__searchSampleByParameterCondition_,
+    ns1__searchSampleByParameterConditionResponse
+        *ns1__searchSampleByParameterConditionResponse_) {
   struct soap *soap = this;
   struct __ns1__searchSampleByParameterCondition
       soap_tmp___ns1__searchSampleByParameterCondition;
@@ -6424,10 +6434,10 @@ int ICATPortBindingProxy::searchSampleByParameterCondition(
 
 int ICATPortBindingProxy::searchInvestigationByParameterComparison(
     const char *endpoint, const char *soap_action,
-    ns1__searchInvestigationByParameterComparison *
-        ns1__searchInvestigationByParameterComparison_,
-    ns1__searchInvestigationByParameterComparisonResponse *
-        ns1__searchInvestigationByParameterComparisonResponse_) {
+    ns1__searchInvestigationByParameterComparison
+        *ns1__searchInvestigationByParameterComparison_,
+    ns1__searchInvestigationByParameterComparisonResponse
+        *ns1__searchInvestigationByParameterComparisonResponse_) {
   struct soap *soap = this;
   struct __ns1__searchInvestigationByParameterComparison
       soap_tmp___ns1__searchInvestigationByParameterComparison;
@@ -6487,10 +6497,10 @@ int ICATPortBindingProxy::searchInvestigationByParameterComparison(
 
 int ICATPortBindingProxy::searchDatafileByParameterComparison(
     const char *endpoint, const char *soap_action,
-    ns1__searchDatafileByParameterComparison *
-        ns1__searchDatafileByParameterComparison_,
-    ns1__searchDatafileByParameterComparisonResponse *
-        ns1__searchDatafileByParameterComparisonResponse_) {
+    ns1__searchDatafileByParameterComparison
+        *ns1__searchDatafileByParameterComparison_,
+    ns1__searchDatafileByParameterComparisonResponse
+        *ns1__searchDatafileByParameterComparisonResponse_) {
   struct soap *soap = this;
   struct __ns1__searchDatafileByParameterComparison
       soap_tmp___ns1__searchDatafileByParameterComparison;
@@ -6550,10 +6560,10 @@ int ICATPortBindingProxy::searchDatafileByParameterComparison(
 
 int ICATPortBindingProxy::searchDatasetByParameterComparison(
     const char *endpoint, const char *soap_action,
-    ns1__searchDatasetByParameterComparison *
-        ns1__searchDatasetByParameterComparison_,
-    ns1__searchDatasetByParameterComparisonResponse *
-        ns1__searchDatasetByParameterComparisonResponse_) {
+    ns1__searchDatasetByParameterComparison
+        *ns1__searchDatasetByParameterComparison_,
+    ns1__searchDatasetByParameterComparisonResponse
+        *ns1__searchDatasetByParameterComparisonResponse_) {
   struct soap *soap = this;
   struct __ns1__searchDatasetByParameterComparison
       soap_tmp___ns1__searchDatasetByParameterComparison;
@@ -6613,10 +6623,10 @@ int ICATPortBindingProxy::searchDatasetByParameterComparison(
 
 int ICATPortBindingProxy::searchSampleByParameterComparison(
     const char *endpoint, const char *soap_action,
-    ns1__searchSampleByParameterComparison *
-        ns1__searchSampleByParameterComparison_,
-    ns1__searchSampleByParameterComparisonResponse *
-        ns1__searchSampleByParameterComparisonResponse_) {
+    ns1__searchSampleByParameterComparison
+        *ns1__searchSampleByParameterComparison_,
+    ns1__searchSampleByParameterComparisonResponse
+        *ns1__searchSampleByParameterComparisonResponse_) {
   struct soap *soap = this;
   struct __ns1__searchSampleByParameterComparison
       soap_tmp___ns1__searchSampleByParameterComparison;
@@ -6677,8 +6687,8 @@ int ICATPortBindingProxy::searchSampleByParameterComparison(
 int ICATPortBindingProxy::searchInvestigationByParameter(
     const char *endpoint, const char *soap_action,
     ns1__searchInvestigationByParameter *ns1__searchInvestigationByParameter_,
-    ns1__searchInvestigationByParameterResponse *
-        ns1__searchInvestigationByParameterResponse_) {
+    ns1__searchInvestigationByParameterResponse
+        *ns1__searchInvestigationByParameterResponse_) {
   struct soap *soap = this;
   struct __ns1__searchInvestigationByParameter
       soap_tmp___ns1__searchInvestigationByParameter;
@@ -6738,8 +6748,8 @@ int ICATPortBindingProxy::searchInvestigationByParameter(
 int ICATPortBindingProxy::searchDatafileByParameter(
     const char *endpoint, const char *soap_action,
     ns1__searchDatafileByParameter *ns1__searchDatafileByParameter_,
-    ns1__searchDatafileByParameterResponse *
-        ns1__searchDatafileByParameterResponse_) {
+    ns1__searchDatafileByParameterResponse
+        *ns1__searchDatafileByParameterResponse_) {
   struct soap *soap = this;
   struct __ns1__searchDatafileByParameter
       soap_tmp___ns1__searchDatafileByParameter;
@@ -6798,8 +6808,8 @@ int ICATPortBindingProxy::searchDatafileByParameter(
 int ICATPortBindingProxy::searchDatasetByParameter(
     const char *endpoint, const char *soap_action,
     ns1__searchDatasetByParameter *ns1__searchDatasetByParameter_,
-    ns1__searchDatasetByParameterResponse *
-        ns1__searchDatasetByParameterResponse_) {
+    ns1__searchDatasetByParameterResponse
+        *ns1__searchDatasetByParameterResponse_) {
   struct soap *soap = this;
   struct __ns1__searchDatasetByParameter
       soap_tmp___ns1__searchDatasetByParameter;
@@ -6858,8 +6868,8 @@ int ICATPortBindingProxy::searchDatasetByParameter(
 int ICATPortBindingProxy::searchSampleByParameter(
     const char *endpoint, const char *soap_action,
     ns1__searchSampleByParameter *ns1__searchSampleByParameter_,
-    ns1__searchSampleByParameterResponse *
-        ns1__searchSampleByParameterResponse_) {
+    ns1__searchSampleByParameterResponse
+        *ns1__searchSampleByParameterResponse_) {
   struct soap *soap = this;
   struct __ns1__searchSampleByParameter soap_tmp___ns1__searchSampleByParameter;
   if (endpoint)
@@ -6917,8 +6927,8 @@ int ICATPortBindingProxy::searchSampleByParameter(
 int ICATPortBindingProxy::getParameterByNameUnits(
     const char *endpoint, const char *soap_action,
     ns1__getParameterByNameUnits *ns1__getParameterByNameUnits_,
-    ns1__getParameterByNameUnitsResponse *
-        ns1__getParameterByNameUnitsResponse_) {
+    ns1__getParameterByNameUnitsResponse
+        *ns1__getParameterByNameUnitsResponse_) {
   struct soap *soap = this;
   struct __ns1__getParameterByNameUnits soap_tmp___ns1__getParameterByNameUnits;
   if (endpoint)
@@ -7033,8 +7043,8 @@ int ICATPortBindingProxy::getParameterByName(
 int ICATPortBindingProxy::getParameterByRestriction(
     const char *endpoint, const char *soap_action,
     ns1__getParameterByRestriction *ns1__getParameterByRestriction_,
-    ns1__getParameterByRestrictionResponse *
-        ns1__getParameterByRestrictionResponse_) {
+    ns1__getParameterByRestrictionResponse
+        *ns1__getParameterByRestrictionResponse_) {
   struct soap *soap = this;
   struct __ns1__getParameterByRestriction
       soap_tmp___ns1__getParameterByRestriction;
@@ -7150,10 +7160,10 @@ int ICATPortBindingProxy::getParameterByUnits(
 
 int ICATPortBindingProxy::searchDatasetByParameterRestriction(
     const char *endpoint, const char *soap_action,
-    ns1__searchDatasetByParameterRestriction *
-        ns1__searchDatasetByParameterRestriction_,
-    ns1__searchDatasetByParameterRestrictionResponse *
-        ns1__searchDatasetByParameterRestrictionResponse_) {
+    ns1__searchDatasetByParameterRestriction
+        *ns1__searchDatasetByParameterRestriction_,
+    ns1__searchDatasetByParameterRestrictionResponse
+        *ns1__searchDatasetByParameterRestrictionResponse_) {
   struct soap *soap = this;
   struct __ns1__searchDatasetByParameterRestriction
       soap_tmp___ns1__searchDatasetByParameterRestriction;
@@ -7213,10 +7223,10 @@ int ICATPortBindingProxy::searchDatasetByParameterRestriction(
 
 int ICATPortBindingProxy::searchSampleByParameterRestriction(
     const char *endpoint, const char *soap_action,
-    ns1__searchSampleByParameterRestriction *
-        ns1__searchSampleByParameterRestriction_,
-    ns1__searchSampleByParameterRestrictionResponse *
-        ns1__searchSampleByParameterRestrictionResponse_) {
+    ns1__searchSampleByParameterRestriction
+        *ns1__searchSampleByParameterRestriction_,
+    ns1__searchSampleByParameterRestrictionResponse
+        *ns1__searchSampleByParameterRestrictionResponse_) {
   struct soap *soap = this;
   struct __ns1__searchSampleByParameterRestriction
       soap_tmp___ns1__searchSampleByParameterRestriction;
@@ -7276,10 +7286,10 @@ int ICATPortBindingProxy::searchSampleByParameterRestriction(
 
 int ICATPortBindingProxy::searchDatafileByParameterRestriction(
     const char *endpoint, const char *soap_action,
-    ns1__searchDatafileByParameterRestriction *
-        ns1__searchDatafileByParameterRestriction_,
-    ns1__searchDatafileByParameterRestrictionResponse *
-        ns1__searchDatafileByParameterRestrictionResponse_) {
+    ns1__searchDatafileByParameterRestriction
+        *ns1__searchDatafileByParameterRestriction_,
+    ns1__searchDatafileByParameterRestrictionResponse
+        *ns1__searchDatafileByParameterRestrictionResponse_) {
   struct soap *soap = this;
   struct __ns1__searchDatafileByParameterRestriction
       soap_tmp___ns1__searchDatafileByParameterRestriction;
@@ -7339,10 +7349,10 @@ int ICATPortBindingProxy::searchDatafileByParameterRestriction(
 
 int ICATPortBindingProxy::searchInvestigationByParameterRestriction(
     const char *endpoint, const char *soap_action,
-    ns1__searchInvestigationByParameterRestriction *
-        ns1__searchInvestigationByParameterRestriction_,
-    ns1__searchInvestigationByParameterRestrictionResponse *
-        ns1__searchInvestigationByParameterRestrictionResponse_) {
+    ns1__searchInvestigationByParameterRestriction
+        *ns1__searchInvestigationByParameterRestriction_,
+    ns1__searchInvestigationByParameterRestrictionResponse
+        *ns1__searchInvestigationByParameterRestrictionResponse_) {
   struct soap *soap = this;
   struct __ns1__searchInvestigationByParameterRestriction
       soap_tmp___ns1__searchInvestigationByParameterRestriction;
@@ -7402,10 +7412,10 @@ int ICATPortBindingProxy::searchInvestigationByParameterRestriction(
 
 int ICATPortBindingProxy::searchInvestigationByRestriction(
     const char *endpoint, const char *soap_action,
-    ns1__searchInvestigationByRestriction *
-        ns1__searchInvestigationByRestriction_,
-    ns1__searchInvestigationByRestrictionResponse *
-        ns1__searchInvestigationByRestrictionResponse_) {
+    ns1__searchInvestigationByRestriction
+        *ns1__searchInvestigationByRestriction_,
+    ns1__searchInvestigationByRestrictionResponse
+        *ns1__searchInvestigationByRestrictionResponse_) {
   struct soap *soap = this;
   struct __ns1__searchInvestigationByRestriction
       soap_tmp___ns1__searchInvestigationByRestriction;
@@ -7466,8 +7476,8 @@ int ICATPortBindingProxy::searchInvestigationByRestriction(
 int ICATPortBindingProxy::searchDatasetByRestriction(
     const char *endpoint, const char *soap_action,
     ns1__searchDatasetByRestriction *ns1__searchDatasetByRestriction_,
-    ns1__searchDatasetByRestrictionResponse *
-        ns1__searchDatasetByRestrictionResponse_) {
+    ns1__searchDatasetByRestrictionResponse
+        *ns1__searchDatasetByRestrictionResponse_) {
   struct soap *soap = this;
   struct __ns1__searchDatasetByRestriction
       soap_tmp___ns1__searchDatasetByRestriction;
@@ -7526,8 +7536,8 @@ int ICATPortBindingProxy::searchDatasetByRestriction(
 int ICATPortBindingProxy::searchDatafileByRestriction(
     const char *endpoint, const char *soap_action,
     ns1__searchDatafileByRestriction *ns1__searchDatafileByRestriction_,
-    ns1__searchDatafileByRestrictionResponse *
-        ns1__searchDatafileByRestrictionResponse_) {
+    ns1__searchDatafileByRestrictionResponse
+        *ns1__searchDatafileByRestrictionResponse_) {
   struct soap *soap = this;
   struct __ns1__searchDatafileByRestriction
       soap_tmp___ns1__searchDatafileByRestriction;
@@ -7586,8 +7596,8 @@ int ICATPortBindingProxy::searchDatafileByRestriction(
 int ICATPortBindingProxy::searchSampleByRestriction(
     const char *endpoint, const char *soap_action,
     ns1__searchSampleByRestriction *ns1__searchSampleByRestriction_,
-    ns1__searchSampleByRestrictionResponse *
-        ns1__searchSampleByRestrictionResponse_) {
+    ns1__searchSampleByRestrictionResponse
+        *ns1__searchSampleByRestrictionResponse_) {
   struct soap *soap = this;
   struct __ns1__searchSampleByRestriction
       soap_tmp___ns1__searchSampleByRestriction;
@@ -7645,10 +7655,10 @@ int ICATPortBindingProxy::searchSampleByRestriction(
 
 int ICATPortBindingProxy::searchInvestigationByRestrictionComparasion(
     const char *endpoint, const char *soap_action,
-    ns1__searchInvestigationByRestrictionComparasion *
-        ns1__searchInvestigationByRestrictionComparasion_,
-    ns1__searchInvestigationByRestrictionComparasionResponse *
-        ns1__searchInvestigationByRestrictionComparasionResponse_) {
+    ns1__searchInvestigationByRestrictionComparasion
+        *ns1__searchInvestigationByRestrictionComparasion_,
+    ns1__searchInvestigationByRestrictionComparasionResponse
+        *ns1__searchInvestigationByRestrictionComparasionResponse_) {
   struct soap *soap = this;
   struct __ns1__searchInvestigationByRestrictionComparasion
       soap_tmp___ns1__searchInvestigationByRestrictionComparasion;
@@ -7708,10 +7718,10 @@ int ICATPortBindingProxy::searchInvestigationByRestrictionComparasion(
 
 int ICATPortBindingProxy::searchDatasetByRestrictionComparison(
     const char *endpoint, const char *soap_action,
-    ns1__searchDatasetByRestrictionComparison *
-        ns1__searchDatasetByRestrictionComparison_,
-    ns1__searchDatasetByRestrictionComparisonResponse *
-        ns1__searchDatasetByRestrictionComparisonResponse_) {
+    ns1__searchDatasetByRestrictionComparison
+        *ns1__searchDatasetByRestrictionComparison_,
+    ns1__searchDatasetByRestrictionComparisonResponse
+        *ns1__searchDatasetByRestrictionComparisonResponse_) {
   struct soap *soap = this;
   struct __ns1__searchDatasetByRestrictionComparison
       soap_tmp___ns1__searchDatasetByRestrictionComparison;
@@ -7771,10 +7781,10 @@ int ICATPortBindingProxy::searchDatasetByRestrictionComparison(
 
 int ICATPortBindingProxy::searchDatafileByRestrictionComparison(
     const char *endpoint, const char *soap_action,
-    ns1__searchDatafileByRestrictionComparison *
-        ns1__searchDatafileByRestrictionComparison_,
-    ns1__searchDatafileByRestrictionComparisonResponse *
-        ns1__searchDatafileByRestrictionComparisonResponse_) {
+    ns1__searchDatafileByRestrictionComparison
+        *ns1__searchDatafileByRestrictionComparison_,
+    ns1__searchDatafileByRestrictionComparisonResponse
+        *ns1__searchDatafileByRestrictionComparisonResponse_) {
   struct soap *soap = this;
   struct __ns1__searchDatafileByRestrictionComparison
       soap_tmp___ns1__searchDatafileByRestrictionComparison;
@@ -7834,10 +7844,10 @@ int ICATPortBindingProxy::searchDatafileByRestrictionComparison(
 
 int ICATPortBindingProxy::searchSampleByRestrictionComparison(
     const char *endpoint, const char *soap_action,
-    ns1__searchSampleByRestrictionComparison *
-        ns1__searchSampleByRestrictionComparison_,
-    ns1__searchSampleByRestrictionComparisonResponse *
-        ns1__searchSampleByRestrictionComparisonResponse_) {
+    ns1__searchSampleByRestrictionComparison
+        *ns1__searchSampleByRestrictionComparison_,
+    ns1__searchSampleByRestrictionComparisonResponse
+        *ns1__searchSampleByRestrictionComparisonResponse_) {
   struct soap *soap = this;
   struct __ns1__searchSampleByRestrictionComparison
       soap_tmp___ns1__searchSampleByRestrictionComparison;
@@ -7897,10 +7907,10 @@ int ICATPortBindingProxy::searchSampleByRestrictionComparison(
 
 int ICATPortBindingProxy::searchSampleByRestrictionLogical(
     const char *endpoint, const char *soap_action,
-    ns1__searchSampleByRestrictionLogical *
-        ns1__searchSampleByRestrictionLogical_,
-    ns1__searchSampleByRestrictionLogicalResponse *
-        ns1__searchSampleByRestrictionLogicalResponse_) {
+    ns1__searchSampleByRestrictionLogical
+        *ns1__searchSampleByRestrictionLogical_,
+    ns1__searchSampleByRestrictionLogicalResponse
+        *ns1__searchSampleByRestrictionLogicalResponse_) {
   struct soap *soap = this;
   struct __ns1__searchSampleByRestrictionLogical
       soap_tmp___ns1__searchSampleByRestrictionLogical;
@@ -7960,10 +7970,10 @@ int ICATPortBindingProxy::searchSampleByRestrictionLogical(
 
 int ICATPortBindingProxy::searchDatasetByRestrictionLogical(
     const char *endpoint, const char *soap_action,
-    ns1__searchDatasetByRestrictionLogical *
-        ns1__searchDatasetByRestrictionLogical_,
-    ns1__searchDatasetByRestrictionLogicalResponse *
-        ns1__searchDatasetByRestrictionLogicalResponse_) {
+    ns1__searchDatasetByRestrictionLogical
+        *ns1__searchDatasetByRestrictionLogical_,
+    ns1__searchDatasetByRestrictionLogicalResponse
+        *ns1__searchDatasetByRestrictionLogicalResponse_) {
   struct soap *soap = this;
   struct __ns1__searchDatasetByRestrictionLogical
       soap_tmp___ns1__searchDatasetByRestrictionLogical;
@@ -8023,10 +8033,10 @@ int ICATPortBindingProxy::searchDatasetByRestrictionLogical(
 
 int ICATPortBindingProxy::searchInvestigationByRestrictionLogical(
     const char *endpoint, const char *soap_action,
-    ns1__searchInvestigationByRestrictionLogical *
-        ns1__searchInvestigationByRestrictionLogical_,
-    ns1__searchInvestigationByRestrictionLogicalResponse *
-        ns1__searchInvestigationByRestrictionLogicalResponse_) {
+    ns1__searchInvestigationByRestrictionLogical
+        *ns1__searchInvestigationByRestrictionLogical_,
+    ns1__searchInvestigationByRestrictionLogicalResponse
+        *ns1__searchInvestigationByRestrictionLogicalResponse_) {
   struct soap *soap = this;
   struct __ns1__searchInvestigationByRestrictionLogical
       soap_tmp___ns1__searchInvestigationByRestrictionLogical;
@@ -8086,10 +8096,10 @@ int ICATPortBindingProxy::searchInvestigationByRestrictionLogical(
 
 int ICATPortBindingProxy::searchDatafileByRestrictionLogical(
     const char *endpoint, const char *soap_action,
-    ns1__searchDatafileByRestrictionLogical *
-        ns1__searchDatafileByRestrictionLogical_,
-    ns1__searchDatafileByRestrictionLogicalResponse *
-        ns1__searchDatafileByRestrictionLogicalResponse_) {
+    ns1__searchDatafileByRestrictionLogical
+        *ns1__searchDatafileByRestrictionLogical_,
+    ns1__searchDatafileByRestrictionLogicalResponse
+        *ns1__searchDatafileByRestrictionLogicalResponse_) {
   struct soap *soap = this;
   struct __ns1__searchDatafileByRestrictionLogical
       soap_tmp___ns1__searchDatafileByRestrictionLogical;
@@ -8149,10 +8159,10 @@ int ICATPortBindingProxy::searchDatafileByRestrictionLogical(
 
 int ICATPortBindingProxy::searchInvestigationByParameterLogical(
     const char *endpoint, const char *soap_action,
-    ns1__searchInvestigationByParameterLogical *
-        ns1__searchInvestigationByParameterLogical_,
-    ns1__searchInvestigationByParameterLogicalResponse *
-        ns1__searchInvestigationByParameterLogicalResponse_) {
+    ns1__searchInvestigationByParameterLogical
+        *ns1__searchInvestigationByParameterLogical_,
+    ns1__searchInvestigationByParameterLogicalResponse
+        *ns1__searchInvestigationByParameterLogicalResponse_) {
   struct soap *soap = this;
   struct __ns1__searchInvestigationByParameterLogical
       soap_tmp___ns1__searchInvestigationByParameterLogical;
@@ -8212,10 +8222,10 @@ int ICATPortBindingProxy::searchInvestigationByParameterLogical(
 
 int ICATPortBindingProxy::searchDatafileByParameterLogical(
     const char *endpoint, const char *soap_action,
-    ns1__searchDatafileByParameterLogical *
-        ns1__searchDatafileByParameterLogical_,
-    ns1__searchDatafileByParameterLogicalResponse *
-        ns1__searchDatafileByParameterLogicalResponse_) {
+    ns1__searchDatafileByParameterLogical
+        *ns1__searchDatafileByParameterLogical_,
+    ns1__searchDatafileByParameterLogicalResponse
+        *ns1__searchDatafileByParameterLogicalResponse_) {
   struct soap *soap = this;
   struct __ns1__searchDatafileByParameterLogical
       soap_tmp___ns1__searchDatafileByParameterLogical;
@@ -8276,8 +8286,8 @@ int ICATPortBindingProxy::searchDatafileByParameterLogical(
 int ICATPortBindingProxy::searchDatasetByParameterLogical(
     const char *endpoint, const char *soap_action,
     ns1__searchDatasetByParameterLogical *ns1__searchDatasetByParameterLogical_,
-    ns1__searchDatasetByParameterLogicalResponse *
-        ns1__searchDatasetByParameterLogicalResponse_) {
+    ns1__searchDatasetByParameterLogicalResponse
+        *ns1__searchDatasetByParameterLogicalResponse_) {
   struct soap *soap = this;
   struct __ns1__searchDatasetByParameterLogical
       soap_tmp___ns1__searchDatasetByParameterLogical;
@@ -8337,8 +8347,8 @@ int ICATPortBindingProxy::searchDatasetByParameterLogical(
 int ICATPortBindingProxy::searchSampleByParameterLogical(
     const char *endpoint, const char *soap_action,
     ns1__searchSampleByParameterLogical *ns1__searchSampleByParameterLogical_,
-    ns1__searchSampleByParameterLogicalResponse *
-        ns1__searchSampleByParameterLogicalResponse_) {
+    ns1__searchSampleByParameterLogicalResponse
+        *ns1__searchSampleByParameterLogicalResponse_) {
   struct soap *soap = this;
   struct __ns1__searchSampleByParameterLogical
       soap_tmp___ns1__searchSampleByParameterLogical;
@@ -8398,8 +8408,8 @@ int ICATPortBindingProxy::searchSampleByParameterLogical(
 int ICATPortBindingProxy::searchFacilityUserByRestriction(
     const char *endpoint, const char *soap_action,
     ns1__searchFacilityUserByRestriction *ns1__searchFacilityUserByRestriction_,
-    ns1__searchFacilityUserByRestrictionResponse *
-        ns1__searchFacilityUserByRestrictionResponse_) {
+    ns1__searchFacilityUserByRestrictionResponse
+        *ns1__searchFacilityUserByRestrictionResponse_) {
   struct soap *soap = this;
   struct __ns1__searchFacilityUserByRestriction
       soap_tmp___ns1__searchFacilityUserByRestriction;

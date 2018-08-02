@@ -1,16 +1,16 @@
 #ifndef MANTID_CRYSTAL_LOADISAWUBTEST_H_
 #define MANTID_CRYSTAL_LOADISAWUBTEST_H_
 
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Sample.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/Sample.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Crystal;

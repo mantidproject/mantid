@@ -1,10 +1,10 @@
 #ifndef MANTID_ALGORITHMS_REBIN2DTEST_H_
 #define MANTID_ALGORITHMS_REBIN2DTEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAlgorithms/Rebin2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/NumericAxis.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/Timer.h"
 
@@ -77,7 +77,7 @@ MatrixWorkspace_sptr runAlgorithm(MatrixWorkspace_sptr inputWS,
   TS_ASSERT(outputWS);
   return outputWS;
 }
-}
+} // namespace
 
 class Rebin2DTest : public CxxTest::TestSuite {
 public:

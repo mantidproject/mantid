@@ -2,9 +2,9 @@
 #define MANTID_ALGORITHM_GROUP_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -77,7 +77,7 @@ private:
   API::WorkspaceGroup_sptr m_group;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_REGROUP_H_*/

@@ -269,5 +269,5 @@ TimeSplitterType operator~(const TimeSplitterType &a) {
   }
   return out;
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

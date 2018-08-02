@@ -1,8 +1,8 @@
 #ifndef MDHW_IN_MEMORY_LOADING_PRESENTER_TEST_H
 #define MDHW_IN_MEMORY_LOADING_PRESENTER_TEST_H
 
-#include <cxxtest/TestSuite.h>
 #include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"

@@ -1,9 +1,9 @@
 #include "MantidAlgorithms/ExtractMaskToTable.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
@@ -20,7 +20,7 @@ DECLARE_ALGORITHM(ExtractMaskToTable)
 
 //----------------------------------------------------------------------------------------------
 /** Declare properties
-  */
+ */
 void ExtractMaskToTable::init() {
   declareProperty(
       make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
@@ -45,7 +45,7 @@ void ExtractMaskToTable::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Main execution body
-  */
+ */
 void ExtractMaskToTable::exec() {
   // Get input properties
   m_dataWS = getProperty("InputWorkspace");
@@ -114,9 +114,9 @@ void ExtractMaskToTable::exec() {
 //----------------------------------------------------------------------------------------------
 /** Parse input TableWorkspace to get a list of detectors IDs of which detector
  * are already masked
-  * @param masktablews :: TableWorkspace containing masking information
-  * @returns :: vector of detector IDs that are masked
-  */
+ * @param masktablews :: TableWorkspace containing masking information
+ * @returns :: vector of detector IDs that are masked
+ */
 std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
     DataObjects::TableWorkspace_sptr masktablews) {
   // Output vector
@@ -164,9 +164,9 @@ std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
 //----------------------------------------------------------------------------------------------
 /** Parse a string containing list in format (x, xx-yy, x, x, ...) to a vector
  * of detid_t
-  * @param liststr :: string containing list to parse
-  * @returns :: vector genrated from input string containing the list
-  */
+ * @param liststr :: string containing list to parse
+ * @returns :: vector genrated from input string containing the list
+ */
 std::vector<detid_t>
 ExtractMaskToTable::parseStringToVector(std::string liststr) {
   std::vector<detid_t> detidvec;
@@ -196,8 +196,8 @@ ExtractMaskToTable::parseStringToVector(std::string liststr) {
 
 //----------------------------------------------------------------------------------------------
 /** Extract mask information from a workspace containing instrument
-  * @return vector of detector IDs of detectors that are masked
-  */
+ * @return vector of detector IDs of detectors that are masked
+ */
 std::vector<detid_t> ExtractMaskToTable::extractMaskFromMatrixWorkspace() {
   // Clear input
   std::vector<detid_t> maskeddetids;
@@ -229,9 +229,9 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMatrixWorkspace() {
 
 //----------------------------------------------------------------------------------------------
 /** Extract masked detectors from a MaskWorkspace
-  * @return vector of detector IDs of the detectors that are
-  * masked
-  */
+ * @return vector of detector IDs of the detectors that are
+ * masked
+ */
 std::vector<detid_t> ExtractMaskToTable::extractMaskFromMaskWorkspace() {
   // output vector
   std::vector<detid_t> maskeddetids;
@@ -254,9 +254,9 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMaskWorkspace() {
 
 //----------------------------------------------------------------------------------------------
 /** Copy table workspace content from one workspace to another
-  * @param sourceWS :: table workspace from which the content is copied;
-  * @param targetWS :: table workspace to which the content is copied;
-  */
+ * @param sourceWS :: table workspace from which the content is copied;
+ * @param targetWS :: table workspace to which the content is copied;
+ */
 void ExtractMaskToTable::copyTableWorkspaceContent(
     TableWorkspace_sptr sourceWS, TableWorkspace_sptr targetWS) {
   // Compare the column names.  They must be exactly the same
@@ -296,14 +296,14 @@ void ExtractMaskToTable::copyTableWorkspaceContent(
 
 //----------------------------------------------------------------------------------------------
 /** Add a list of spectra (detector IDs) to the output table workspace.
-  * If a detector is masked in input MaskTableWorkspace, then it will not be
+ * If a detector is masked in input MaskTableWorkspace, then it will not be
  * added to a new row
-  * @param outws :: table workspace to write
-  * @param maskeddetids :: vector of detector IDs of which detectors masked
-  * @param xmin :: minumim x
-  * @param xmax :: maximum x
-  * @param prevmaskedids :: vector of previous masked detector IDs
-  */
+ * @param outws :: table workspace to write
+ * @param maskeddetids :: vector of detector IDs of which detectors masked
+ * @param xmin :: minumim x
+ * @param xmax :: maximum x
+ * @param prevmaskedids :: vector of previous masked detector IDs
+ */
 void ExtractMaskToTable::addToTableWorkspace(TableWorkspace_sptr outws,
                                              vector<detid_t> maskeddetids,
                                              double xmin, double xmax,
@@ -378,9 +378,9 @@ void ExtractMaskToTable::addToTableWorkspace(TableWorkspace_sptr outws,
 
 //----------------------------------------------------------------------------------------------
 /** Remove the detector IDs of one vector that appear in another vector
-  * @param minuend :: vector with items to be removed from
-  * @param subtrahend :: vector containing the items to be removed from minuend
-  */
+ * @param minuend :: vector with items to be removed from
+ * @param subtrahend :: vector containing the items to be removed from minuend
+ */
 std::vector<detid_t>
 ExtractMaskToTable::subtractVector(std::vector<detid_t> minuend,
                                    std::vector<detid_t> subtrahend) {

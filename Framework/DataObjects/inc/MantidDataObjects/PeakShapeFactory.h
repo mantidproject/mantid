@@ -8,7 +8,7 @@ namespace Mantid {
 namespace Geometry {
 // Forward declaration
 class PeakShape;
-}
+} // namespace Geometry
 namespace DataObjects {
 
 /** PeakShapeFactory : Factory for creating peak shapes

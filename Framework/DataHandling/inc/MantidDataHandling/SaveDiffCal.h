@@ -1,10 +1,10 @@
 #ifndef MANTID_DATAHANDLING_SAVEDIFFCAL_H_
 #define MANTID_DATAHANDLING_SAVEDIFFCAL_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidKernel/System.h"
 
 namespace H5 {
 class Group;

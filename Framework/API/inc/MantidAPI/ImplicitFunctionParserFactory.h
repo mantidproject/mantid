@@ -33,11 +33,11 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
+#include "ImplicitFunctionParameterParserFactory.h"
+#include "ImplicitFunctionParser.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
-#include "ImplicitFunctionParser.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "ImplicitFunctionParameterParserFactory.h"
 
 namespace Mantid {
 namespace API {
@@ -68,14 +68,14 @@ private:
 
 using ImplicitFunctionParserFactory =
     Mantid::Kernel::SingletonHolder<ImplicitFunctionParserFactoryImpl>;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<
     Mantid::API::ImplicitFunctionParserFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif

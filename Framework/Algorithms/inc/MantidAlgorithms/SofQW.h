@@ -6,9 +6,9 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DataProcessorAlgorithm.h"
 
-#include "MantidAlgorithms/SofQCommon.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/SofQCommon.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"

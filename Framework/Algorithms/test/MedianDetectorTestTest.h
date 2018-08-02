@@ -21,8 +21,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 
 const int THEMASKED(40);
 const int SAVEDBYERRORBAR(143);

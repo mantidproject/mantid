@@ -1,15 +1,15 @@
 #include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
 
-#include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidHistogramData/HistogramIterator.h"
@@ -34,7 +34,7 @@ bool constantIndirectEFixed(const Mantid::API::ExperimentInfo &info,
   }
   return true;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -360,6 +360,6 @@ createDetectorGridDefinition(const API::MatrixWorkspace &modelWS,
   return Kernel::make_unique<Algorithms::DetectorGridDefinition>(
       minLat, maxLat, rows, minLong, maxLong, columns);
 }
-}
-}
-}
+} // namespace SparseInstrument
+} // namespace Algorithms
+} // namespace Mantid

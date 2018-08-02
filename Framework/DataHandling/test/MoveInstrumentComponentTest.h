@@ -3,17 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/MoveInstrumentComponent.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/MoveInstrumentComponent.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidKernel/Exception.h"
 #include <vector>
 
 using namespace Mantid::API;
@@ -66,7 +66,7 @@ public:
     // get pointer to the first detector in the bank
     boost::shared_ptr<const IComponent> comp =
         (*boost::dynamic_pointer_cast<const ICompAssembly>(
-             (*boost::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
+            (*boost::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
 
     V3D pos = comp->getPos();
     TS_ASSERT_EQUALS(pos, det1->getPos() + V3D(10, 20, 30))
@@ -87,7 +87,7 @@ public:
     // get pointer to the first detector in the bank
     boost::shared_ptr<const IComponent> comp =
         (*boost::dynamic_pointer_cast<const ICompAssembly>(
-             (*boost::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
+            (*boost::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
 
     V3D pos = comp->getPos();
     TS_ASSERT_EQUALS(pos, V3D(10, 20, 30))
@@ -108,7 +108,7 @@ public:
     // get pointer to the first detector in the bank
     boost::shared_ptr<const IComponent> comp =
         (*boost::dynamic_pointer_cast<const ICompAssembly>(
-             (*boost::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
+            (*boost::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
 
     V3D pos = comp->getPos();
     TS_ASSERT_EQUALS(pos, V3D(10, 20, 30))
@@ -129,7 +129,7 @@ public:
     // get pointer to the first detector in the bank
     boost::shared_ptr<const IComponent> comp =
         (*boost::dynamic_pointer_cast<const ICompAssembly>(
-             (*boost::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
+            (*boost::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
 
     V3D pos = comp->getPos();
     TS_ASSERT_EQUALS(pos, V3D(10, 20, 30))

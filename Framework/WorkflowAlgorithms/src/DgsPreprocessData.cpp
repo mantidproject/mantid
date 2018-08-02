@@ -6,12 +6,12 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
@@ -151,5 +151,5 @@ void DgsPreprocessData::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Mantid
 } // namespace WorkflowAlgorithms
+} // namespace Mantid

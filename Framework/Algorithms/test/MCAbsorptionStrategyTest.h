@@ -5,8 +5,8 @@
 
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MonteCarloTesting.h"
 

@@ -59,5 +59,5 @@ void BooleanBinaryOperationMD::execHistoScalar(
                            " operation on a WorkspaceSingleValue.");
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

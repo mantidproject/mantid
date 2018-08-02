@@ -13,7 +13,7 @@ void addEventToEventList(EventList &self, double tof,
                          Mantid::Types::Core::DateAndTime pulsetime) {
   self.addEventQuickly(Mantid::Types::Event::TofEvent(tof, pulsetime));
 }
-}
+} // namespace
 
 void export_EventList() {
   register_ptr_to_python<EventList *>();

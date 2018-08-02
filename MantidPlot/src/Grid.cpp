@@ -26,15 +26,15 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "Plot.h"
-#include "Graph.h"
 #include "Grid.h"
 #include "ColorBox.h"
+#include "Graph.h"
+#include "Plot.h"
 
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 
-#include <qwt_plot_canvas.h>
 #include <qwt_painter.h>
+#include <qwt_plot_canvas.h>
 
 #include <QPainter>
 

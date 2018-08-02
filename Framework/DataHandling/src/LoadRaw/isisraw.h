@@ -8,10 +8,10 @@
  */
 
 struct ISISCRPT_STRUCT;
+#include "MantidKernel/System.h"
 #include "item_struct.h"
 #include <cstdlib>
 #include <cstring>
-#include "MantidKernel/System.h"
 
 /// Run header (80 bytes)
 struct HDR_STRUCT {
@@ -304,8 +304,8 @@ public:
   int ver4;       ///< SE section version number (=2)
   SPB_STRUCT spb; ///< sample parameter block (64*4 bytes)
   int e_nse;      ///< number of controlled SEPs NSEP
-  SE_STRUCT *
-      e_seblock; ///< NSEP SE parameter blocks (total size NSEP*32*4 bytes)
+  SE_STRUCT
+      *e_seblock; ///< NSEP SE parameter blocks (total size NSEP*32*4 bytes)
   // section 5
   int ver5;         ///< DAE section version number (=2)
   DAEP_STRUCT daep; ///< DAE parameter block (size 64*4 bytes)
@@ -336,8 +336,8 @@ public:
   int ver8;         ///< data version number (=2)
   DHDR_STRUCT dhdr; ///< size 32*4 bytes
   // D_DATA points at ddes
-  DDES_STRUCT *
-      ddes;       ///< (NSP1+1)*NPER items, totoal size (NSP1+1)*NPER*2*4 bytes
+  DDES_STRUCT
+      *ddes;      ///< (NSP1+1)*NPER items, totoal size (NSP1+1)*NPER*2*4 bytes
   uint32_t *dat1; ///< compressed data for (NTC1+1)*(NSP1+1)*NPER values
   LOG_STRUCT logsect; ///< log section
 

@@ -4,28 +4,28 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/MantidVersion.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/StdoutChannel.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/NetworkProxy.h"
+#include "MantidKernel/StdoutChannel.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
-#include <Poco/Util/LoggingConfigurator.h>
-#include <Poco/Util/SystemConfiguration.h>
-#include <Poco/Util/PropertyFileConfiguration.h>
-#include <Poco/LoggingFactory.h>
-#include <Poco/Path.h>
-#include <Poco/File.h>
 #include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/Environment.h>
+#include <Poco/File.h>
+#include <Poco/LoggingFactory.h>
+#include <Poco/Path.h>
 #include <Poco/Process.h>
 #include <Poco/URI.h>
+#include <Poco/Util/LoggingConfigurator.h>
+#include <Poco/Util/PropertyFileConfiguration.h>
+#include <Poco/Util/SystemConfiguration.h>
 
 #include <Poco/AutoPtr.h>
 #include <Poco/Channel.h>
@@ -33,13 +33,13 @@
 #include <Poco/DOM/Node.h>
 #include <Poco/Exception.h>
 #include <Poco/Instantiator.h>
-#include <Poco/Pipe.h>
-#include <Poco/Platform.h>
-#include <Poco/String.h>
 #include <Poco/Logger.h>
 #include <Poco/LoggingRegistry.h>
+#include <Poco/Pipe.h>
 #include <Poco/PipeStream.h>
+#include <Poco/Platform.h>
 #include <Poco/StreamCopier.h>
+#include <Poco/String.h>
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/regex.hpp>
@@ -223,7 +223,8 @@ ConfigServiceImpl::ConfigServiceImpl()
                       << " revision " << MantidVersion::revision() << '\n';
   g_log.information() << "running on " << getComputerName() << " starting "
                       << Types::Core::DateAndTime::getCurrentTime()
-                             .toFormattedString("%Y-%m-%dT%H:%MZ") << "\n";
+                             .toFormattedString("%Y-%m-%dT%H:%MZ")
+                      << "\n";
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList
                       << '\n';
 
@@ -941,13 +942,13 @@ void ConfigServiceImpl::getKeysRecursive(
 }
 
 /**
-* Recursively gets a list of all config options.
-*
-* This function is needed as Boost Python does not like calling function with
-* default arguments.
-*
-* @return Vector containing all config options
-*/
+ * Recursively gets a list of all config options.
+ *
+ * This function is needed as Boost Python does not like calling function with
+ * default arguments.
+ *
+ * @return Vector containing all config options
+ */
 std::vector<std::string> ConfigServiceImpl::keys() const {
   std::vector<std::string> allKeys;
   getKeysRecursive("", allKeys);
@@ -1326,9 +1327,9 @@ std::string ConfigServiceImpl::getTempDir() {
 }
 
 /** Gets the absolute path of the appdata directory
-*
-* @returns The absolute path of the appdata directory
-*/
+ *
+ * @returns The absolute path of the appdata directory
+ */
 std::string ConfigServiceImpl::getAppDataDir() {
   const std::string applicationName = "mantid";
 #if POCO_OS == POCO_OS_WINDOWS_NT
@@ -1356,10 +1357,10 @@ std::string ConfigServiceImpl::getDirectoryOfExecutable() const {
 }
 
 /**
-  * Get the full path to the executing program (i.e. whatever Mantid is embedded
+ * Get the full path to the executing program (i.e. whatever Mantid is embedded
  * in)
-  * @returns A string containing the full path the the executable
-  */
+ * @returns A string containing the full path the the executable
+ */
 std::string ConfigServiceImpl::getPathToExecutable() const {
   std::string execpath;
   const size_t LEN(1024);
@@ -1596,9 +1597,9 @@ const std::vector<std::string> &ConfigServiceImpl::getUserSearchDirs() const {
 }
 
 /**
-* Sets the search directories for XML instrument definition files (IDFs)
-* @param directories An ordered list of paths for instrument searching
-*/
+ * Sets the search directories for XML instrument definition files (IDFs)
+ * @param directories An ordered list of paths for instrument searching
+ */
 void ConfigServiceImpl::setInstrumentDirectories(
     const std::vector<std::string> &directories) {
   m_InstrumentDirs = directories;
@@ -1961,9 +1962,10 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
 }
 
 /** Sets the log level priority for all logging channels
-* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
-* @param quiet If true then no message regarding the level change is emitted
-*/
+ * @param logLevel the integer value of the log level to set, 1=Critical,
+ * 7=Debug
+ * @param quiet If true then no message regarding the level change is emitted
+ */
 void ConfigServiceImpl::setLogLevel(int logLevel, bool quiet) {
   Mantid::Kernel::Logger::setLevelForAll(logLevel);
   if (!quiet) {

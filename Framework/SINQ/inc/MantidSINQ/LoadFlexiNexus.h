@@ -40,8 +40,8 @@
 #ifndef FLEXINEXUSLOADER_H_
 #define FLEXINEXUSLOADER_H_
 
-#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidSINQ/DllConfig.h"
 
 // clang-format off
 #include <nexus/NeXusFile.hpp>

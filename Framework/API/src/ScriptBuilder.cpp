@@ -12,8 +12,8 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyHistory.h"
 
-#include <boost/range/algorithm/remove_if.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/range/algorithm/remove_if.hpp>
 #include <boost/utility.hpp>
 #include <set>
 

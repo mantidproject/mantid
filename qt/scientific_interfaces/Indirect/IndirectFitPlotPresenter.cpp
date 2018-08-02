@@ -3,8 +3,8 @@
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 namespace {
-using MantidQt::CustomInterfaces::IDA::IndirectFitPlotView;
 using MantidQt::CustomInterfaces::IDA::DiscontinuousSpectra;
+using MantidQt::CustomInterfaces::IDA::IndirectFitPlotView;
 
 std::string createPlotString(const std::string &workspaceName,
                              const std::string &spectra) {

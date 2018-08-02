@@ -1,8 +1,8 @@
 #ifndef MDFITTINGTESTHELPERS_H_
 #define MDFITTINGTESTHELPERS_H_
 
-#include "MantidMDAlgorithms/Quantification/ForegroundModelFactory.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
+#include "MantidMDAlgorithms/Quantification/ForegroundModelFactory.h"
 #include "MantidMDAlgorithms/Quantification/MDResolutionConvolution.h"
 
 #include "MantidAPI/IFunction1D.h"

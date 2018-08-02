@@ -138,5 +138,5 @@ void CompositeCatalog::keepAlive() {
     catalog->keepAlive();
   }
 }
-}
-}
+} // namespace API
+} // namespace Mantid

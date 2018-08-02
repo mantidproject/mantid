@@ -1,10 +1,10 @@
 #ifndef INSTRUMENTWIDGETMASKTAB_H_
 #define INSTRUMENTWIDGETMASKTAB_H_
 
-#include <MantidQtWidgets/Common/WidgetDllOption.h>
+#include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
-#include "MantidGeometry/Instrument.h"
+#include <MantidQtWidgets/Common/WidgetDllOption.h>
 
 #include <QFrame>
 #include <QMap>
@@ -36,7 +36,7 @@ namespace Mantid {
 namespace API {
 class MatrixWorkspace;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -45,12 +45,12 @@ class OneCurvePlot;
 class Shape2D;
 
 /**
-* Implements the Mask/Group tab in InstrumentWidget.
-*
-* Contains controls to create, manipulate and apply masking and grouping to
-*underlying workspace.
-*
-*/
+ * Implements the Mask/Group tab in InstrumentWidget.
+ *
+ * Contains controls to create, manipulate and apply masking and grouping to
+ *underlying workspace.
+ *
+ */
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetMaskTab
     : public InstrumentWidgetTab {
   Q_OBJECT
@@ -204,7 +204,7 @@ protected:
   QMap<QString, QtProperty *> m_pointPropertyMap;
   QMap<QtProperty *, QString> m_pointComponentsMap;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*INSTRUMENTWIDGETMASKTAB_H_*/

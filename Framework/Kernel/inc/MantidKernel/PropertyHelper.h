@@ -7,8 +7,8 @@
 #endif
 
 #include "MantidKernel/OptionalBool.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 #include <type_traits>
@@ -84,9 +84,9 @@ std::string toPrettyString(const boost::shared_ptr<T> &value,
 }
 
 /** Specialization for a property of type std::vector of non integral types.
-*   This will catch Vectors of char, double, float etc.
-*   This simply concatenates the values using a delimiter
-*/
+ *   This will catch Vectors of char, double, float etc.
+ *   This simply concatenates the values using a delimiter
+ */
 template <typename T>
 std::string toPrettyString(
     const std::vector<T> &value, size_t maxLength = 0,
@@ -102,12 +102,12 @@ std::string toPrettyString(
 }
 
 /** Specialization for a property of type std::vector of integral types.
-*   This will catch Vectors of int, long, long long etc
-*   including signed and unsigned types of these.
-*   This concatenates the values using a delimiter,
-*   adjacent items that are precisely 1 away from each other
-*   will be compressed into a list syntax e.g. 1-5.
-*/
+ *   This will catch Vectors of int, long, long long etc
+ *   including signed and unsigned types of these.
+ *   This concatenates the values using a delimiter,
+ *   adjacent items that are precisely 1 away from each other
+ *   will be compressed into a list syntax e.g. 1-5.
+ */
 template <typename T>
 std::string toPrettyString(
     const std::vector<T> &value, size_t maxLength = 0,
@@ -134,9 +134,9 @@ std::string toPrettyString(
 GCC_DIAG_OFF(unused-function)
 // clang-format on
 /** Explicit specialization for a property of type std::vector<bool>.
-*   This will catch Vectors of char, double, float etc.
-*   This simply concatenates the values using a delimiter
-*/
+ *   This will catch Vectors of char, double, float etc.
+ *   This simply concatenates the values using a delimiter
+ */
 template <>
 std::string toPrettyString(
     const std::vector<bool> &value, size_t maxLength, bool collapseLists,
@@ -253,7 +253,7 @@ template <> struct is_range_type<short> : public std::true_type {};
 template <> struct is_range_type<int> : public std::true_type {};
 template <> struct is_range_type<long> : public std::true_type {};
 template <> struct is_range_type<long long> : public std::true_type {};
-}
+} // namespace detail
 template <typename T>
 void toValue(const std::string &strvalue, std::vector<T> &value) {
   detail::toValue(strvalue, value, detail::is_range_type<T>());
@@ -349,7 +349,7 @@ inline std::vector<std::string> determineAllowedValues(const OptionalBool &,
                  });
   return values;
 }
-}
+} // namespace
 
 } // namespace Kernel
 } // namespace Mantid

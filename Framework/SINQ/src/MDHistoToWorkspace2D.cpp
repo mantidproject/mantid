@@ -26,8 +26,8 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid;
-using Mantid::HistogramData::Points;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Points;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages

@@ -186,8 +186,8 @@ private:
     for (auto i = 0u; i < members.size(); ++i) {
       auto memberWS = createGenericWorkspace(
           dataX, randomDataVector<double>(dataX.size() - 1, 0.0, 10.0));
-      memberWS->getAxis(0)
-          ->setUnit(resultWorkspace->getAxis(0)->unit()->unitID());
+      memberWS->getAxis(0)->setUnit(
+          resultWorkspace->getAxis(0)->unit()->unitID());
       resultWorkspace = appendSpectra(resultWorkspace, memberWS);
       axis->setLabel(i, members[i]);
     }

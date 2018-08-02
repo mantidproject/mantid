@@ -38,7 +38,7 @@ namespace Impl {
 template <typename ElementType>
 PyObject *wrapWithNDArray(const ElementType *, const int ndims,
                           Py_intptr_t *dims, const NumpyWrapMode);
-}
+} // namespace Impl
 
 /**
  * WrapReadOnly is a policy for VectorToNDArray
@@ -109,8 +109,8 @@ struct WrapReadWrite {
     }
   };
 };
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif

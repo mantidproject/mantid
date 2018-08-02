@@ -7,9 +7,9 @@
 #include "SampleLogDialogBase.h"
 
 // Qt
-#include <QTextEdit>
-#include <QLineEdit>
 #include <QDoubleSpinBox>
+#include <QLineEdit>
+#include <QTextEdit>
 
 //----------------------------------
 // Forward declarations

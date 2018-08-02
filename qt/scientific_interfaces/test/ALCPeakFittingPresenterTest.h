@@ -10,9 +10,9 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-#include "../Muon/IALCPeakFittingView.h"
-#include "../Muon/IALCPeakFittingModel.h"
 #include "../Muon/ALCPeakFittingPresenter.h"
+#include "../Muon/IALCPeakFittingModel.h"
+#include "../Muon/IALCPeakFittingView.h"
 
 #include <qwt_data.h>
 
@@ -30,7 +30,7 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
     out << maybe->toStdString();
   return out;
 }
-}
+} // namespace boost
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 

@@ -1,9 +1,9 @@
 #ifndef MANTID_KERNEL_DATEANDTIMEHELPERSTEST_H_
 #define MANTID_KERNEL_DATEANDTIMEHELPERSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidTypes/Core/DateAndTime.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidTypes/Core/DateAndTime.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel::DateAndTimeHelpers;
 using Mantid::Types::Core::DateAndTime;

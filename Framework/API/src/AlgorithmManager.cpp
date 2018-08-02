@@ -2,9 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmProxy.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidKernel/ConfigService.h"
 
 namespace Mantid {
@@ -12,7 +12,7 @@ namespace API {
 namespace {
 /// static logger
 Kernel::Logger g_log("AlgorithmManager");
-}
+} // namespace
 
 /// Private Constructor for singleton class
 AlgorithmManagerImpl::AlgorithmManagerImpl() : m_managed_algs() {
@@ -26,19 +26,19 @@ AlgorithmManagerImpl::AlgorithmManagerImpl() : m_managed_algs() {
 }
 
 /** Private destructor
-*  Prevents client from calling 'delete' on the pointer handed
-*  out by Instance
-*/
+ *  Prevents client from calling 'delete' on the pointer handed
+ *  out by Instance
+ */
 AlgorithmManagerImpl::~AlgorithmManagerImpl() = default;
 
 /** Creates an instance of an algorithm, but does not own that instance
-*
-*  @param  algName The name of the algorithm required
-*  @param  version The version of the algorithm required, if not defined most
-*recent version is used -> version =-1
-*  @return A pointer to the created algorithm
-*  @throw  NotFoundError Thrown if algorithm requested is not registered
-*/
+ *
+ *  @param  algName The name of the algorithm required
+ *  @param  version The version of the algorithm required, if not defined most
+ *recent version is used -> version =-1
+ *  @return A pointer to the created algorithm
+ *  @throw  NotFoundError Thrown if algorithm requested is not registered
+ */
 Algorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string &algName,
                                                      const int &version) const {
   return AlgorithmFactory::Instance().create(algName,
@@ -59,7 +59,7 @@ Algorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string &algName,
  * @return A pointer to the created algorithm
  * @throw  NotFoundError Thrown if algorithm requested is not registered
  * @throw  std::runtime_error Thrown if properties string is ill-formed
-*/
+ */
 IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
                                              const int &version,
                                              bool makeProxy) {

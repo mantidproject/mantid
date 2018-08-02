@@ -1,15 +1,15 @@
 #ifndef Q1D2Test_H_
 #define Q1D2Test_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/Q1D2.h"
-#include "MantidAlgorithms/Rebin.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CropWorkspace.h"
-#include "MantidAPI/Axis.h"
-#include "MantidDataHandling/LoadRaw3.h"
+#include "MantidAlgorithms/Q1D2.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidDataHandling/LoadRKH.h"
+#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/MaskDetectors.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

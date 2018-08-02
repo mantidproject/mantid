@@ -83,5 +83,5 @@ template <typename TYPE> void MaskedProperty<TYPE>::doMasking() const {
 template class MANTID_KERNEL_DLL Mantid::Kernel::MaskedProperty<std::string>;
 ///@endcond TEMPLATE
 
-} // namespace API
+} // namespace Kernel
 } // namespace Mantid

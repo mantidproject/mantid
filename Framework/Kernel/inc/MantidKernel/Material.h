@@ -196,7 +196,7 @@ private:
 using Material_sptr = boost::shared_ptr<Material>;
 /// Typedef for a shared pointer to a const object
 using Material_const_sptr = boost::shared_ptr<const Material>;
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif // MANTID_GEOMETRY_MATERIAL_H_

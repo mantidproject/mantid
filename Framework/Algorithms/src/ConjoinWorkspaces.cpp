@@ -137,7 +137,7 @@ void ConjoinWorkspaces::checkForOverlap(const MatrixWorkspace &ws1,
  * @param ws1:: The first workspace
  * @param ws2:: The second workspace
  * @return :: A new workspace containing the conjoined workspaces
-*/
+ */
 API::MatrixWorkspace_sptr
 ConjoinWorkspaces::conjoinEvents(const DataObjects::EventWorkspace &ws1,
                                  const DataObjects::EventWorkspace &ws2) {
@@ -158,12 +158,12 @@ ConjoinWorkspaces::conjoinEvents(const DataObjects::EventWorkspace &ws1,
 }
 
 /**
-* Conjoin two histogram workspaces together, including the history
-*
-* @param ws1:: The first workspace
-* @param ws2:: The second workspace
-* @return :: A new workspace containing the conjoined workspaces
-*/
+ * Conjoin two histogram workspaces together, including the history
+ *
+ * @param ws1:: The first workspace
+ * @param ws2:: The second workspace
+ * @return :: A new workspace containing the conjoined workspaces
+ */
 API::MatrixWorkspace_sptr
 ConjoinWorkspaces::conjoinHistograms(const API::MatrixWorkspace &ws1,
                                      const API::MatrixWorkspace &ws2) {
@@ -253,5 +253,5 @@ void ConjoinWorkspaces::setYUnitAndLabel(API::MatrixWorkspace &ws) const {
     ws.setYUnitLabel(yLabel);
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
