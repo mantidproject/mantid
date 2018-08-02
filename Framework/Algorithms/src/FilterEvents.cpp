@@ -23,6 +23,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 
 #include <memory>
 #include <sstream>
@@ -736,7 +737,8 @@ void FilterEvents::splitTimeSeriesProperty(
       // add property to the associated workspace
       DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
       ws_i->mutableRun().addProperty(output_vector[tindex], true);
-      ws_i->mutableRun().setGoniometer(m_eventWS->run().getGoniometer(), false);
+      Mantid::Geometry::Goniometer uniGonio = m_eventWS->run().getGoniometer();
+      ws_i->mutableRun().setGoniometer(uniGonio, false);
     }
   }
 
