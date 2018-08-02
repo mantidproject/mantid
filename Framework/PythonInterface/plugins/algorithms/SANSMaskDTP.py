@@ -10,7 +10,7 @@ from mantid.simpleapi import MaskDetectors
 
 
 class SANSMaskDTP(PythonAlgorithm):
-    """
+    """ 
     Class to generate grouping file
     """
 
@@ -27,7 +27,7 @@ class SANSMaskDTP(PythonAlgorithm):
                 "pixels": 256
             },
         ],
-        'CG2': [
+        'GPSANS': [
             {
                 "name": "detector1",
                 "tubes": 192,
@@ -199,7 +199,7 @@ class SANSMaskDTP(PythonAlgorithm):
             tube_component = detector[t-1]
             for p in pixels:
                 # EQSANS needs an extra array !!! pixel128 = tube0[0][128]
-                if tube_component.nelements() == 1:
+                if tube_component.nelements() <= 1:
                     tube_component = tube_component[0]
                 pixel_component = tube_component[p-1]
                 detectors_to_mask.append(pixel_component.getID())
