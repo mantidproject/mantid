@@ -100,7 +100,7 @@ public:
 
     Poco::TemporaryFile tempFile;
     const std::string &tempFileName = tempFile.path();
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", tempFileName));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputFilename", tempFileName));
 
     TS_ASSERT_THROWS_ANYTHING(testAlg.execute());
   }
@@ -118,7 +118,7 @@ public:
 
     Poco::TemporaryFile tempFile;
     const std::string &tempFileName = tempFile.path();
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", tempFileName));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputFilename", tempFileName));
 
     TS_ASSERT_THROWS_NOTHING(testAlg.execute());
     TS_ASSERT(testAlg.isExecuted());
@@ -135,7 +135,7 @@ public:
     testAlg.setProperty("GroupingScheme", std::vector<int>({2, 3}));
     Poco::TemporaryFile tempFile;
     const std::string &tempFileName = tempFile.path();
-    testAlg.setProperty("Filename", tempFileName);
+    testAlg.setProperty("OutputFilename", tempFileName);
     testAlg.execute();
 
     std::ifstream file(tempFileName);
@@ -196,7 +196,7 @@ public:
     testAlg.setProperty("GroupingScheme", std::vector<int>({2, 3}));
     Poco::TemporaryFile tempFile;
     const std::string &tempFileName = tempFile.path();
-    testAlg.setProperty("Filename", tempFileName);
+    testAlg.setProperty("OutputFilename", tempFileName);
     testAlg.execute();
 
     std::ifstream file(tempFileName);

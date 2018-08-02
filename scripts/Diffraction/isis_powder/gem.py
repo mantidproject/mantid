@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 
 from isis_powder.abstract_inst import AbstractInst
-from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping
+from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping, gem_output
 from isis_powder.routines import absorb_corrections, common, instrument_settings
 
 
@@ -77,6 +77,10 @@ class Gem(AbstractInst):
             maud_calib_filename = filename_stub + ".maud"
             out_file_names["maud_calib_filename"] = maud_calib_filename
 
+        if self._inst_settings.save_gda:
+            gda_filename = filename_stub +".gda"
+            out_file_names["gda_filename"] = gda_filename
+
         return out_file_names
 
     def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
@@ -90,27 +94,45 @@ class Gem(AbstractInst):
         d_spacing_group, tof_group = super(Gem, self)._output_focused_ws(processed_spectra=processed_spectra,
                                                                          run_details=run_details,
                                                                          output_mode=output_mode)
+        if self._is_vanadium:
+            return d_spacing_group, tof_group
 
         output_paths = self._generate_out_file_paths(run_details=run_details)
         if "maud_filename" in output_paths:
-            gem_algs.save_maud(d_spacing_group, output_paths["maud_filename"])
+            gem_output.save_maud(d_spacing_group, output_paths["maud_filename"])
 
         if "angles_filename" in output_paths:
-            gem_algs.save_angles(d_spacing_group, output_paths["angles_filename"])
+            gem_output.save_angles(d_spacing_group, output_paths["angles_filename"])
+        self._save_gsas_req_files(d_spacing_group, output_paths)
 
+        return d_spacing_group, tof_group
+
+    def _save_gsas_req_files(self, d_spacing_group, output_paths):
+        gsas_calib_file_path = os.path.join(self._inst_settings.calibration_dir,
+                                            self._inst_settings.gsas_calib_filename)
+        raise_warning = False
+        if not os.path.exists(gsas_calib_file_path):
+            raise_warning = True
         if "maud_calib_filename" in output_paths:
-            gsas_calib_file_path = os.path.join(self._inst_settings.calibration_dir,
-                                                self._inst_settings.gsas_calib_filename)
-            if not os.path.exists(gsas_calib_file_path):
-                raise RuntimeWarning("Could not save MAUD calibration file, as GSAS calibration file was not found. "
-                                     "It should be present at " + gsas_calib_file_path)
+
+            if raise_warning:
+                raise RuntimeWarning("Could not save MAUD calibration file, as GSAS calibration file was not found."
+                                     " It should be present at " + gsas_calib_file_path)
             else:
-                gem_algs.save_maud_calib(d_spacing_group=d_spacing_group,
+                gem_output.save_maud_calib(d_spacing_group=d_spacing_group,
                                          output_path=output_paths["maud_calib_filename"],
                                          gsas_calib_filename=gsas_calib_file_path,
                                          grouping_scheme=self._inst_settings.maud_grouping_scheme)
+        if "gda_filename" in output_paths:
 
-        return d_spacing_group, tof_group
+            if raise_warning:
+                raise RuntimeWarning("Could not save gda file, as GSAS calibration file was not found. "
+                                     "It should be present at " + gsas_calib_file_path)
+            else:
+                gem_output.save_gda(d_spacing_group=d_spacing_group,
+                                    output_path=output_paths["gda_filename"],
+                                    gsas_calib_filename=gsas_calib_file_path,
+                                    grouping_scheme=self._inst_settings.maud_grouping_scheme)
 
     @staticmethod
     def _generate_input_file_name(run_number):

@@ -105,7 +105,7 @@ const std::string SaveGDA::category() const {
   return "DataHandling\\Text;Diffraction\\DataHandling";
 }
 
-const std::string SaveGDA::PROP_OUTPUT_FILENAME = "Filename";
+const std::string SaveGDA::PROP_OUTPUT_FILENAME = "OutputFilename";
 
 const std::string SaveGDA::PROP_INPUT_WS = "InputWorkspace";
 
