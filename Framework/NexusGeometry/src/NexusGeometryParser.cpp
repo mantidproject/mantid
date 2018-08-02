@@ -439,6 +439,8 @@ void extractFacesAndIDs(const std::vector<uint16_t> &detFaces,
     auto &detVerts = detFaceVerts[detIndex];
     auto &detIndices = detFaceIndices[detIndex];
     auto &detWinding = detWindingOrder[detIndex];
+    detVerts.reserve(vertsPerFace);
+    detWinding.reserve(vertsPerFace);
     for (size_t v = 0; v < vertsPerFace; ++v) {
       auto vi = windingOrder[i + v] * vertStride;
       detVerts.emplace_back(vertices[vi], vertices[vi + 1], vertices[vi + 2]);
