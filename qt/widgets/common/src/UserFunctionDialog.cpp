@@ -383,9 +383,11 @@ void UserFunctionDialog::saveToFile() {
  */
 void UserFunctionDialog::removeCurrentFunction() {
   QString cat = m_uiForm.lstCategory->currentItem()->text();
-  if (isBuiltin(cat)) {
+  if (isBuiltin(cat) || 
+    (m_uiForm.lstFunction->currentItem() == nullptr)) {
     return;
   }
+
   QString fun = m_uiForm.lstFunction->currentItem()->text();
   if (QMessageBox::question(
           this, "Mantid",
