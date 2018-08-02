@@ -40,10 +40,7 @@
   (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 #endif
 
-// Currently this is only defined for gcc
 #if defined(GCC_VERSION) || defined(CLANG_VERSION)
-// how to use a pragma in a macro
-#define PRAGMA(x) _Pragma(#x)
 // things to make the macros clearer
 #define GNU_DIAG_MAKE_WARNING(x) "-W" x
 #define GNU_DIAG_DO_PRAGMA(x) _Pragma(#x)
