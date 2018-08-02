@@ -27,14 +27,16 @@ class GuiCommonTest(unittest.TestCase):
 
     @mock.patch('sans.gui_logic.models.create_state.__create_row_state')
     def test_create_states_returns_correct_number_of_states(self, create_row_state_mock):
-        states = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS)
+        states = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
+                               row_index=[0,1])
 
         self.assertEqual(len(states), 2)
 
     @mock.patch('sans.gui_logic.models.create_state.__create_row_state')
     def test_create_states_returns_correct_number_of_states_for_specified_row_index(self, create_row_state_mock):
 
-        states = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS, row_index=1)
+        states = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
+                               row_index=[1])
 
         self.assertEqual(len(states), 1)
 
@@ -43,7 +45,8 @@ class GuiCommonTest(unittest.TestCase):
         table_index_model = TableIndexModel('', '', '', '', '', '', '', '', '', '', '', '')
         self.table_model.add_table_entry(1, table_index_model)
 
-        states = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS)
+        states = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
+                               row_index=[0,1, 2])
 
         self.assertEqual(len(states), 2)
 
@@ -56,7 +59,8 @@ class GuiCommonTest(unittest.TestCase):
         table_model = TableModel()
         table_model.add_table_entry(0, table_index_model)
 
-        states = create_states(self.state_gui_model, table_model, SANSInstrument.LOQ, SANSFacility.ISIS)
+        states = create_states(self.state_gui_model, table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
+                               row_index=[0,1, 2])
 
         self.assertEqual(len(states), 1)
         create_gui_state_mock.assert_called_once_with('MaskLOQData.txt', self.state_gui_model)
