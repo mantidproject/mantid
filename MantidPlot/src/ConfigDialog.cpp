@@ -966,7 +966,7 @@ void ConfigDialog::initMantidOptionsTab() {
                      .getValue<bool>("MantidOptions.ReusePlotInstances")
                      .get_value_or(false);
 
-  m_reusePlotInstance->setChecked(setting);
+  m_reusePlotInstances->setChecked(setting);
   m_reusePlotInstances->setToolTip("If on, the same plot instance will be "
                                    "re-used for every of the different plots "
                                    "available in the workspaces window "
