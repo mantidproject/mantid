@@ -28,7 +28,9 @@ import numpy
 
 from HFIR_4Circle_Reduction.fourcircle_utility import *
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
-from HFIR_4Circle_Reduction.peakprocesshelper import PeakProcessRecord, SinglePointPeakIntegration
+from HFIR_4Circle_Reduction.peakprocesshelper import PeakProcessRecord
+from HFIR_4Circle_Reduction.peakprocesshelper import SinglePointPeakIntegration
+from HFIR_4Circle_Reduction.peakprocesshelper import SinglePtIntegrationWorkspace
 from HFIR_4Circle_Reduction import fputility
 from HFIR_4Circle_Reduction import project_manager
 from HFIR_4Circle_Reduction import peak_integration_utility
@@ -160,9 +162,11 @@ class CWSCDReductionControl(object):
         # Flag for data storage
         self._cacheDataOnly = False
         # Single PT scan integration:
-        # example:  key = exp_number, scan_number, pt_number, roi_name]
+        # example:  key = exp_number, scan_number, pt_number, roi_name][integration direction]
         #           value = vec_x, vec_y, cost, params
         self._single_pt_integration_dict = dict()
+        # workspace for a exp, scan_numbers, roi_name
+        self._single_pt_matrix_dict = dict()
 
         # Dictionary to store survey information
         self._scanSummaryList = list()
@@ -258,6 +262,26 @@ class CWSCDReductionControl(object):
         self._mergedWSManager.sort()
 
         return
+
+    @staticmethod
+    def generate_single_pt_scans_key(exp_number, scan_number_list, roi_name, integration_direction):
+        """
+        generate a unique but repeatable key for multiple single-pt scans
+        :param exp_number:
+        :param scan_number_list:
+        :param roi_name:
+        :param integration_direction:
+        :return:
+        """
+        # do some math to scan numbers
+        check_list('Scan numbers', scan_number_list)
+        scan_number_vec = numpy.array(scan_number_list)
+        unique = numpy.sum(scan_number_vec, axis=0)
+
+        ws_key = 'e{}_s{}-{}:{}_{}_{}'.format(exp_number, scan_number_list[0], scan_number_list[-1], unique,
+                                              roi_name, integration_direction)
+
+        return ws_key
 
     def add_k_shift_vector(self, k_x, k_y, k_z):
         """
@@ -1777,6 +1801,104 @@ class CWSCDReductionControl(object):
 
         return peak_intensity, gauss_bkgd, info_str
 
+    def integrate_single_pt_scans_detectors_counts(self, exp_number, scan_number_list, roi_name, integration_direction,
+                                                   fit_gaussian):
+        """
+        integrate a list of single-pt scans detector counts with fit with Gaussian function as an option
+        :param exp_number:
+        :param scan_number_list:
+        :param roi_name:
+        :param integration_direction:
+        :param fit_gaussian:
+        :return: a dictionary of peak height
+        """
+        # check inputs
+        check_list('Scan numbers', scan_number_list)
+
+        # get the workspace key.  if it does exist, it means there is no need to sum the data but just get from dict
+        ws_record_key = self.generate_single_pt_scans_key(exp_number, scan_number_list, roi_name,
+                                                          integration_direction)
+
+        if ws_record_key in self._single_pt_matrix_dict:
+            # it does exist.  get the workspace name
+            ws_record = self._single_pt_matrix_dict[ws_record_key]
+            out_ws_name = ws_record.get_workspace()
+        else:
+            # it does not exist.  sum over all the scans and create the workspace
+            # initialize the vectors to form a Mantid Workspace2D
+            appended_vec_x = None
+            appended_vec_y = None
+            appended_vec_e = None
+
+            peak_height_dict = dict()
+            scan_spectrum_map = dict()
+            spectrum_scan_map = dict()
+
+            for ws_index, scan_number in enumerate(scan_number_list):
+
+                scan_spectrum_map[scan_number] = ws_index
+                spectrum_scan_map[ws_index] = scan_number
+
+                pt_number = 1
+                peak_height = self.integrate_detector_image(exp_number, scan_number, pt_number, roi_name,
+                                                            integration_direction=integration_direction,
+                                                            fit_gaussian=fit_gaussian)
+                peak_height_dict[scan_number] = peak_height
+
+                # create a workspace
+                det_integration_info = \
+                    self._single_pt_integration_dict[(exp_number, scan_number, pt_number, roi_name)][
+                        integration_direction]
+                vec_x, vec_y = det_integration_info.get_vec_x_y()
+                if appended_vec_x is None:
+                    appended_vec_x = vec_x
+                    appended_vec_y = vec_y
+                    appended_vec_e = numpy.sqrt(vec_y)
+                else:
+                    appended_vec_x = numpy.concatenate((appended_vec_x, vec_x), axis=0)
+                    appended_vec_y = numpy.concatenate((appended_vec_y, vec_y), axis=0)
+                    appended_vec_e = numpy.concatenate((appended_vec_e, numpy.sqrt(vec_y)), axis=0)
+                # END-IF
+            # END-FOR
+
+            # create workspace
+            out_ws_name = 'Exp{}_Scan{}_{}_{}_{}'.format(exp_number, scan_number_list[0], scan_number_list[-1],
+                                                         roi_name, integration_direction)
+            mantidsimple.CreateWorkspace(DataX=appended_vec_x, DataY=appended_vec_y,
+                                         DataE=appended_vec_e, NSpec=len(scan_number_list),
+                                         OutputWorkspace=out_ws_name)
+
+            # record the workspace
+            ws_record = SinglePtIntegrationWorkspace(exp_number, scan_number_list, out_ws_name,
+                                                     scan_spectrum_map, spectrum_scan_map)
+
+            self._single_pt_matrix_dict[ws_record_key] = ws_record
+
+        # END-IF-ELSE
+
+        # about result
+        peak_height_dict = dict()
+        for scan_number in scan_number_list:
+            peak_height_dict[scan_number] = 0.
+
+        # fit gaussian
+        if fit_gaussian:
+            fit_result_dict = peak_integration_utility.fit_gaussian_linear_background_mtd(out_ws_name)
+            for ws_index in fit_result_dict:
+                scan_number = ws_record.get_scan_number(ws_index, from_zero=True)
+                integrate_record_i = \
+                    self._single_pt_integration_dict[(exp_number, scan_number, 1, roi_name)][integration_direction]
+                integrate_record_i.set_fit_cost(cost)
+                integrate_record_i.set_fit_params(x0=params[0], sigma=params[1], a=params[2], b=params[3])
+                peak_height_dict[scan_number] = height
+            # END-FOR
+
+            print ('[DB..BAT] SinglePt-Scan: cost = {0}, params = {1}, integrated = {2} +/- {3}'
+                   ''.format(cost, params, integrated_intensity, intensity_error))
+        # END-IF
+
+        return peak_height_dict
+
     def integrate_detector_image(self, exp_number, scan_number, pt_number, roi_name, fit_gaussian,
                                  integration_direction):
         """ Integrate detector counts on detector image inside a given ROI.
@@ -1803,71 +1925,78 @@ class CWSCDReductionControl(object):
             'Integration direction {} (now of type {}) must be a string equal to eiether vertical or horizontal' \
             ''.format(integration_direction, type(integration_direction))
 
+        # check whether the first step integration been done
+        roi_key = exp_number, scan_number, pt_number, roi_name
+        if roi_key in self._single_pt_integration_dict\
+                and integration_direction in self._single_pt_integration_dict[roi_key]:
+            sum_counts = False
+        else:
+            sum_counts = True
+
         # Get data and plot
-        raw_det_data = self.get_raw_detector_counts(exp_number, scan_number, pt_number)
-        assert isinstance(raw_det_data, numpy.ndarray), 'A matrix must be an ndarray but not {0}.' \
-                                                        ''.format(type(raw_det_data))
-        roi_lower_left, roi_upper_right = self.get_region_of_interest(roi_name)
+        if sum_counts:
+            raw_det_data = self.get_raw_detector_counts(exp_number, scan_number, pt_number)
+            assert isinstance(raw_det_data, numpy.ndarray), 'A matrix must be an ndarray but not {0}.' \
+                                                            ''.format(type(raw_det_data))
+            roi_lower_left, roi_upper_right = self.get_region_of_interest(roi_name)
 
-        data_in_roi = raw_det_data[roi_lower_left[0]:roi_upper_right[0], roi_lower_left[1]:roi_upper_right[1]]
-        print ('IN ROI: Data set shape: {}'.format(data_in_roi.shape))
+            data_in_roi = raw_det_data[roi_lower_left[0]:roi_upper_right[0], roi_lower_left[1]:roi_upper_right[1]]
+            print('IN ROI: Data set shape: {}'.format(data_in_roi.shape))
 
-        # TODO TODO TODO 2018 - 1. check whether the scan has been summed (roi + direction)
-        # TODO                  2. save the summed value to a workspace 2D for convenience data management
-        # TODO                  3.
+            if integration_direction == 'horizontal':
+                # FIXME - This works!
+                # integrate peak along row
+                print(roi_lower_left[1], roi_upper_right[1])
+                vec_x = numpy.array(range(roi_lower_left[1], roi_upper_right[1]))
+                vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[0], roi_lower_left[1]:roi_upper_right[1]].sum(
+                    axis=0)
+            elif integration_direction == 'vertical':
+                # integrate peak along column
+                # FIXME - This doesn't work!
+                print(roi_lower_left[0], roi_upper_right[0])
+                vec_x = numpy.array(range(roi_lower_left[0], roi_upper_right[0]))
+                vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[0], roi_lower_left[1]:roi_upper_right[1]].sum(
+                    axis=1)
+                print('[DB...BAT] Vec X shape: {};  Vec Y shape: {}'.format(vec_x.shape, vec_y.shape))
+            else:
+                # wrong
+                raise NotImplementedError('It is supposed to be unreachable.')
+            # END-IF-ELSE
 
-        if integration_direction == 'horizontal':
-            # FIXME - This works!
-            # integrate peak along row
-            print (roi_lower_left[1], roi_upper_right[1])
-            vec_x = numpy.array(range(roi_lower_left[1], roi_upper_right[1]))
-            vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[0], roi_lower_left[1]:roi_upper_right[1]].sum(axis=0)
-        elif integration_direction == 'vertical':
-            # integrate peak along column
-            # FIXME - This doesn't work!
-            print(roi_lower_left[0], roi_upper_right[0])
-            vec_x = numpy.array(range(roi_lower_left[0], roi_upper_right[0]))
-            vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[0], roi_lower_left[1]:roi_upper_right[1]].sum(axis=1)
-            print ('[DB...BAT] Vec X shape: {};  Vec Y shape: {}'.format(vec_x.shape, vec_y.shape))
+            # initialize integration record
+            # get 2theta
+            two_theta = self.get_sample_log_value(self._expNumber, scan_number, pt_number, '2theta')
+            # create SinglePointPeakIntegration
+            integrate_record = SinglePointPeakIntegration(exp_number, scan_number, roi_name, pt_number, two_theta)
+            integrate_record.set_xy_vector(vec_x, vec_y, peak_integration_utility)
+            # add the _single_pt_integration_dict()
+            if (exp_number, scan_number, pt_number, roi_name) not in self._single_pt_integration_dict:
+                self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name] = dict()
+            self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name][integration_direction] = \
+                integrate_record
         else:
-            # wrong
-            raise NotImplementedError('It is supposed to be unreachable.')
+            # retrieve the integration record from previously saved
+            integrate_record = self._single_pt_integration_dict[roi_key][integration_direction]
+            # vec_x, vec_y = integrate_record.get_vec_x_y()
+        # END-IF
 
-        # create matrix workspace to calculate center peak intensity (by fitting)
-        # TODO - why workspace???
-        # mantidsimple.CreateWorkspace(DataX=vec_x, DataY=vec_y, DataE=numpy.sqrt(vec_y), NSpec=1,
-        #                              OutputWorkspace='SinglePt_Exp{0}_Scan{1}_ROI_{2}'
-        #                                              ''.format(exp_number, scan_number, roi_name))
-
-        if fit_gaussian:
-            cost, params, cov_matrix = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y,
-                                                                                               numpy.sqrt(vec_y))
-            gaussian_a = params[2]
-            gaussian_sigma = params[1]
-            integrated_intensity, intensity_error = \
-                peak_integration_utility.calculate_peak_intensity_gauss(gaussian_a, gaussian_sigma)
-            print ('[DB..BAT] SinglePt-Scan: cost = {0}, params = {1}, integrated = {2} +/- {3}'
-                   ''.format(cost, params, integrated_intensity, intensity_error))
-
-        else:
-            cost = -1
-            params = dict()
-            integrated_intensity = 0.
-
-        # get 2theta
-        two_theta = self.get_sample_log_value(self._expNumber, scan_number, pt_number, '2theta')
-
-        # create SinglePointPeakIntegration
-        integrate_record = SinglePointPeakIntegration(exp_number, scan_number, roi_name, pt_number, two_theta)
-        integrate_record.set_xy_vector(vec_x, vec_y)
-        integrate_record.set_fit_cost(cost)
-        integrate_record.set_fit_params(x0=params[0], sigma=params[1], a=params[2], b=params[3])
-
-        # add the _single_pt_integration_dict()
-        if (exp_number, scan_number, pt_number, roi_name) not in self._single_pt_integration_dict:
-            self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name] = dict()
-        self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name][integration_direction] = \
-            integrate_record
+        # if fit_gaussian:
+        #     cost, params, cov_matrix = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y,
+        #                                                                                        numpy.sqrt(vec_y))
+        #     gaussian_a = params[2]
+        #     gaussian_sigma = params[1]
+        #     integrated_intensity, intensity_error = \
+        #         peak_integration_utility.calculate_peak_intensity_gauss(gaussian_a, gaussian_sigma)
+        #     print ('[DB..BAT] SinglePt-Scan: cost = {0}, params = {1}, integrated = {2} +/- {3}'
+        #            ''.format(cost, params, integrated_intensity, intensity_error))
+        #
+        # else:
+        #     cost = -1
+        #     params = dict()
+        #     integrated_intensity = 0.
+        #
+        # integrate_record.set_fit_cost(cost)
+        # integrate_record.set_fit_params(x0=params[0], sigma=params[1], a=params[2], b=params[3])
 
         return integrated_intensity
 

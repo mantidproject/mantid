@@ -213,6 +213,31 @@ def find_gaussian_start_values_by_observation(vec_x, vec_y):
     return [x0, est_sigma, est_a, est_background]
 
 
+def fit_gaussian_linear_backgroud_mtd(matrix_ws_name):
+    """
+    fit Gaussian with linear background by calling Mantid's FitPeaks
+    :param matrix_ws_name:
+    :return:
+    """
+    # check!
+    check_string('MatrixWorkspace name', matrix_ws_name)
+    if not AnalysisDataService.doesExist(matrix_ws_name):
+        raise RuntimeError('Workspace {} does not exist in Mantid ADS.'.format(matrix_ws_name))
+
+    # fit peaks
+    out_ws_name = '{}_fit_positions'.format(matrix_ws_name)
+    fit_param_table_name = '{}_params_table'.format(matrix_ws_name)
+    mantidsimple.FitPeaks(InputWorkspace=matrix_ws_name,
+                          PeakFunction='Gaussian',
+                          BackgroundType='Linear',
+                          OutputWorkspace=out_ws_name,
+                          ParameterWorkspace=fit_param_table_name)
+
+    # process output and set to a dictionary
+
+    return
+
+
 # TODO TODO TODO - 20180801 - Replace the scipy curve fit by Mantid.FitPeaks()!
 def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, find_start_value_by_fit=False):
     """

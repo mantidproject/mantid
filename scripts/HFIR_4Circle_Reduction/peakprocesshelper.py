@@ -637,6 +637,8 @@ class SinglePointPeakIntegration(object):
         self._pt_number = pt_number
         self._two_theta = two_theta
 
+        self._integral_direction = None
+
         self._pt_intensity = None
         self._peak_intensity = None
 
@@ -712,6 +714,19 @@ class SinglePointPeakIntegration(object):
 
         return intensity, std_dev
 
+    def get_vec_x_y(self):
+        """
+        get single Pt processed intensity
+        :return:
+        """
+        return self._vec_x, self._vec_y
+
+    def has_fit_result(self):
+        """
+        check whether this single pt scan has Gassian function fit for the summed counts
+        :return:
+        """
+
     # TODO NOW3 Code Quality: this has a duplicate in the same file!
     def retrieve_hkl_from_spice_table(self):
         """ Get averaged HKL from SPICE table
@@ -745,20 +760,26 @@ class SinglePointPeakIntegration(object):
 
         return
 
-    def set_xy_vector(self, vec_x, vec_y):
+    def set_xy_vector(self, vec_x, vec_y, integral_direction):
         """
         set the X and Y vector
         :param vec_x:
         :param vec_y:
+        :param counts integration direction
         :return:
         """
         #  check input
         assert isinstance(vec_x, numpy.ndarray), 'X vector must be a numpy array'
         assert isinstance(vec_y, numpy.ndarray), 'Y vector must be a numpy array'
+        assert integral_direction in ['vertical', 'horizontal'], 'Peak integration direction {} must be a string ' \
+                                                                 '(now a {}) being either vertical or horizontal' \
+                                                                 ''.format(integral_direction, type(integral_direction))
 
-        #
+        # set
         self._vec_x = vec_x
         self._vec_y = vec_y
+        self._integral_direction = integral_direction
+
         return
 
     def set_fit_cost(self, cost):
@@ -795,7 +816,9 @@ class SinglePointPeakIntegration(object):
         self._pt_intensity = a
         self._gauss_x0 = x0
         self._gauss_sigma = sigma
-        self._flag_b = b
+        self._flat_b = b
+
+        return
 
     def set_ref_fwhm(self, ref_fwhm, is_fwhm):
         """
@@ -811,13 +834,98 @@ class SinglePointPeakIntegration(object):
             self._ref_peak_sigma /= 2.355
 
         return
+# END-CLASS
 
-    def get_vec_x_y(self):
+
+class SinglePtIntegrationWorkspace(object):
+    """
+    a class to handle and manage Mantid Workspace2D instance created from integrated single pt-scan peaks
+    along either vertical direction or horizontal direction
+    """
+    def __init__(self, exp_number, scan_number_list, matrix_ws_name, scan_spectrum_map, spectrum_scan_map):
         """
-        get single Pt processed intensity
+        initialization
+        :param exp_number:
+        :param scan_number_list:
+        :param matrix_ws_name:
+        :param scan_spectrum_map:
+        :param spectrum_scan_map:
+        """
+        # check input
+        check_integer('Experiment number', exp_number)
+        check_list('Scan numbers', scan_number_list)
+        heck_string('Workspace2D name', matrix_ws_name)
+        check_dictionary('Scan number spectrum number mapping', scan_spectrum_map)
+        check_dictionary('Spectrum number scan number mapping', spectrum_scan_map)
+
+        if AnalysisDataService.doesExist(matrix_ws_name) is False:
+            raise RuntimeError('Workspace {} does not exist.'.format(matrix_ws_name))
+
+        # store
+        self._exp_number = exp_number
+        self._scan_number_list = scan_number_list[:]
+        self._matrix_ws_name = matrix_ws_name
+        self._scan_spectrum_map = scan_spectrum_map
+        self._spectrum_scan_map = spectrum_scan_map
+
+        return
+
+    def check_scan_numbers_same(self, scans_to_check):
+        """
+        check whether the scan numbers are same or not
+        :param scans_to_check:
         :return:
         """
-        return self._vec_x, self._vec_y
+        check_list('Scan numbers to check with', scans_to_check)
+
+        if len(scans_to_check) != len(self._scan_number_list):
+            return False
+
+        scans_to_check_set = set(scans_to_check)
+        my_scans_set = set(self._scan_number_list)
+
+        return scans_to_check_set == my_scans_set
+
+    def get_workspace(self):
+        """ get workspace name
+        :return:
+        """
+        return self._matrix_ws_name
+
+    def get_scan_number(self, spectrum_number, from_zero=True):
+        """
+        get the scan number of a spectrum
+        :param spectrum_number:
+        :param from_zero:
+        :return:
+        """
+        if not from_zero:
+            spectrum_number -= 1
+
+        if spectrum_number not in self._spectrum_scan_map:
+            raise RuntimeError('Spectrum  number {} of type {} cannot be found in spectrum-scan map'
+                               ''.format(spectrum_number, type(spectrum_number)))
+
+        return self._spectrum_scan_map[spectrum_number]
+
+    def get_spectrum_number(self, scan_number, from_zero=True):
+        """
+        get the spectrum number of a scan
+        :param scan_number:
+        :param from_zero:
+        :return:
+        """
+        if scan_number not in self._scan_spectrum_map:
+            raise RuntimeError('Scan  number {} of type {} cannot be found in spectrum-scan map'
+                               ''.format(scan_number, type(scan_number)))
+
+        spectrum_number = self._spectrum_scan_map[scan_number]
+
+        if not from_zero:
+            spectrum_number += 1
+
+        return spectrum_number
+# END-CLASS
 
 
 def build_pt_spice_table_row_map(spice_table_ws):

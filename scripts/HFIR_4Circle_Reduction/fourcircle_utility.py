@@ -768,6 +768,17 @@ def convert_hkl_to_integer(index_h, index_k, index_l, magnetic_tolerance=0.2):
     return (index_h_r, index_k_r, index_l_r), round_error
 
 
+def check_dictionary(var_name, var_value):
+    """
+    check whether an input variable is a dictionary.
+    :param var_name:
+    :param var_value:
+    :return:
+    """
+    assert isinstance(var_value, dict), \
+        '{0} {1} must be a dictionary but not a {2}'.format(var_name, var_value, type(var_value))
+
+
 def check_integer(var_name, var_value):
     """
     check whether an input variable is an integer.
@@ -789,6 +800,17 @@ def check_float(var_name, var_value):
     """
     assert isinstance(var_value, int) or isinstance(var_value, float), \
         '{0} {1} must be a float but not a {2}'.format(var_name, var_value, type(var_value))
+
+
+def check_list(var_name, var_value):
+    """
+    check whether an input variable is a list
+    :param var_name:
+    :param var_value:
+    :return:
+    """
+    assert isinstance(var_value, list), \
+        '{0} {1} must be a list but not a {2}'.format(var_name, var_value, type(var_value))
 
 
 def check_string(var_name, var_value):

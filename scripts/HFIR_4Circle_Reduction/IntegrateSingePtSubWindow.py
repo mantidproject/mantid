@@ -137,21 +137,24 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         direction = str(self.ui.comboBox_integrateDirection.currentText()).lower()
         fit_gaussian = self.ui.checkBox_fitPeaks.isChecked()
 
-        # TODO TODO TODO - 20180801 - In controller, write a wrapper function for these many scans on same
-        # TODO                        ROI and direction
-        # TODO                        A map (dict) is required to map from scan number to workspace index
+        scan_number_list = list()
         for row_number in range(self.ui.tableView_summary.rowCount()):
             # integrate counts on detector
             scan_number = self.ui.tableView_summary.get_scan_number(row_number)
+            scan_number_list.append(scan_number)
+        # END-FOR
+
+        peak_height_dict = self._controller.integrate_single_pt_scans_detectors_counts(self._exp_number,
+                                                                                       scan_number_list,
+                                                                                       roi_name, direction,
+                                                                                       fit_gaussian)
+
+        # set the value to the row  to table
+        for row_number in range(self.ui.tableView_summary.rowCount()):
+            scan_number = self.ui.tableView_summary.get_scan_number(row_number)
             pt_number = 1
-            peak_height = self._controller.integrate_detector_image(self._exp_number, scan_number, pt_number, roi_name,
-                                                                    fit_gaussian=fit_gaussian,
-                                                                    integration_direction=direction)
-
-            # add to table
+            peak_height = peak_height_dict[scan_number]
             self.ui.tableView_summary.set_peak_height(scan_number, pt_number, peak_height, roi_name)
-            # print ('[DB...BAT] SinglePt-Gaussian-Intensity = {0}'.format(peak_height))
-
         # END-FOR (row_number)
 
         return
