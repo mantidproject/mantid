@@ -37,12 +37,6 @@ void addPyTimeValue(TimeSeriesProperty<TYPE> &self,
   self.addValue(*dateandtime, value);
 }
 
-template <typename TYPE>
-tuple pyTimeAverageValueAndStdDev(const TimeSeriesProperty<TYPE> &self) {
-  const std::pair<double, double> value = self.timeAverageValueAndStdDev();
-  return make_tuple(value.first, value.second);
-}
-
 // Call the dtype helper function
 template <typename TYPE> std::string dtype(TimeSeriesProperty<TYPE> &self) {
   return Mantid::PythonInterface::Converters::dtype(self);
@@ -94,8 +88,6 @@ template <typename TYPE> std::string dtype(TimeSeriesProperty<TYPE> &self) {
            "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")      \
       .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue,    \
            arg("self"))                                                        \
-      .def("timeAverageValueAndStdDev", &pyTimeAverageValueAndStdDev<TYPE>,    \
-           arg("self"), "Time average value and standard deviation")           \
       .def("dtype", &dtype<TYPE>, arg("self"));
 
 } // namespace
@@ -131,6 +123,11 @@ void export_TimeSeriesPropertyStatistics() {
       .add_property(
            "standard_deviation",
            &Mantid::Kernel::TimeSeriesPropertyStatistics::standard_deviation)
+      .add_property("time_mean",
+                    &Mantid::Kernel::TimeSeriesPropertyStatistics::time_mean)
+      .add_property("time_standard_deviation",
+                    &Mantid::Kernel::TimeSeriesPropertyStatistics::
+                        time_standard_deviation)
       .add_property("duration",
                     &Mantid::Kernel::TimeSeriesPropertyStatistics::duration);
 }
