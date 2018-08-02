@@ -815,6 +815,14 @@
     <technique>Single Crystal Diffraction</technique>
   </instrument>
 
+  <instrument name="DNS-PSD">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Direct Geometry Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
+    <technique>Single Crystal Diffraction</technique>
+  </instrument>
+
   <instrument name="TOFTOF">
     <zeropadding size="8" startRunNumber="69750"/>
     <technique>Neutron Spectroscopy</technique>
