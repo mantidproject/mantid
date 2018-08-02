@@ -81,7 +81,6 @@ void LoadPSIMuonBin::exec() {
   }
 
   std::string binFilename = getPropertyValue("Filename");
-  std::vector<Mantid::HistogramData::Histogram> readHistogramData;
 
   std::ifstream binFile(binFilename, std::ios::in | std::ios::binary);
 
