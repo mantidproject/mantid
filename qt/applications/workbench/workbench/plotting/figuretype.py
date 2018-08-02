@@ -32,7 +32,7 @@ class FigureType(Enum):
     Line = 1
     # Line plot with error bars
     Errorbar = 2
-    # An image plot from imshow, pcolor
+    # An image plot from imshow, pcolor, pcolormesh
     Image = 3
     # Any other type of plot
     Other = 100
@@ -53,23 +53,17 @@ def axes_type(ax):
     if nrows == 1 and ncols == 1:
         if len(ax.lines) > 0:
             axtype = FigureType.Line
-        elif len(ax.images) > 0:
+        elif len(ax.images) > 0 or len(ax.collections) > 0:
             axtype = FigureType.Image
 
     return axtype
 
 
 def figure_type(fig):
-    """Return the type of the figure
+    """Return the type of the figure. It inspects the axes
+    return by fig.gca()
 
     :param fig: A matplotlib figure instance
     :return: An enumeration defining the plot type
     """
-    all_axes = fig.axes
-    all_axes_length = len(all_axes)
-    if all_axes_length == 0:
-        return FigureType.Empty
-    elif all_axes_length == 1:
-        return axes_type(all_axes[0])
-    else:
-        return FigureType.Other
+    return axes_type(fig.gca())
