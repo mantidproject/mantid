@@ -439,9 +439,9 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   logAlg->executeAsChildAlg();
 
   // first good and last good
-  for (auto i = 0u;
+  for (size_t i = 0;
        i < sizeof(m_header.firstGood) / sizeof(*m_header.firstGood); ++i) {
-    if (m_header.firstGood != 0) {
+    if (m_header.firstGood[i] != 0) {
       logAlg->setProperty("LogType", "String");
       logAlg->setProperty("LogName", "Spectra" + std::to_string(i) +
                                          "first and last good");
