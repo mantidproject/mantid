@@ -305,7 +305,7 @@ public:
   SPB_STRUCT spb; ///< sample parameter block (64*4 bytes)
   int e_nse;      ///< number of controlled SEPs NSEP
   SE_STRUCT
-      *e_seblock; ///< NSEP SE parameter blocks (total size NSEP*32*4 bytes)
+  *e_seblock; ///< NSEP SE parameter blocks (total size NSEP*32*4 bytes)
   // section 5
   int ver5;         ///< DAE section version number (=2)
   DAEP_STRUCT daep; ///< DAE parameter block (size 64*4 bytes)
@@ -337,7 +337,7 @@ public:
   DHDR_STRUCT dhdr; ///< size 32*4 bytes
   // D_DATA points at ddes
   DDES_STRUCT
-      *ddes;      ///< (NSP1+1)*NPER items, totoal size (NSP1+1)*NPER*2*4 bytes
+  *ddes;          ///< (NSP1+1)*NPER items, totoal size (NSP1+1)*NPER*2*4 bytes
   uint32_t *dat1; ///< compressed data for (NTC1+1)*(NSP1+1)*NPER values
   LOG_STRUCT logsect; ///< log section
 

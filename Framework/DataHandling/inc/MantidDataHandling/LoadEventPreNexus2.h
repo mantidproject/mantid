@@ -152,7 +152,7 @@ private:
   std::size_t num_good_events;  ///< The number of good events loaded
   std::size_t num_error_events; ///< The number of error events encountered
   std::size_t num_bad_events;   ///< The number of bad events. Part of error
-                              ///< events
+                                ///< events
   std::size_t num_wrongdetid_events; ///< The number of events with wrong
   /// detector IDs. Part of error events.
   std::set<PixelType> wrongdetids; ///< set of all wrong detector IDs

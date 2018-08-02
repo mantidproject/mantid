@@ -75,7 +75,8 @@ void QtReflRunsTabView::initLayout() {
   // Create the presenter
   m_presenter = std::make_shared<ReflRunsTabPresenter>(
       this /* main view */,
-      this /* Currently this concrete view is also responsible for prog reporting */
+      this /* Currently this concrete view is also responsible for prog
+              reporting */
       ,
       processingWidgets /* The data processor presenters */);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
