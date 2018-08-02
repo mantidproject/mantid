@@ -50,7 +50,6 @@ double getError(IFunction &self, std::string const &name) {
 // -- Set property overloads --
 // setProperty(index,value,explicit)
 using setParameterType1 = void (IFunction::*)(size_t, const double &, bool);
-GNU_DIAG_OFF("unknown-pragmas")
 GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
@@ -73,7 +72,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixAll_Overloads, fixAll, 0, 1)
 using removeTieByName = void (IFunction::*)(const std::string &);
 
 GNU_DIAG_ON("conversion")
-GNU_DIAG_ON("unknown-pragmas")
 GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
 }

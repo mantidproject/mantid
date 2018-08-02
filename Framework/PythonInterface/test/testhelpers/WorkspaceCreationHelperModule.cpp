@@ -22,7 +22,6 @@ using namespace Mantid::DataObjects::MDEventsTestHelper;
 using namespace Mantid::PythonInterface::Policies;
 using namespace WorkspaceCreationHelper;
 
-GNU_DIAG_OFF("unknown-pragmas")
 GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
@@ -37,7 +36,6 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(
     create2DWorkspaceWithRectangularInstrument_overloads,
     create2DWorkspaceWithRectangularInstrument, 3, 3)
 GNU_DIAG_ON("conversion")
-GNU_DIAG_ON("unknown-pragmas")
 GNU_DIAG_ON("unused-local-typedef")
 
 BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {

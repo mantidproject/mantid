@@ -58,7 +58,6 @@ using declarePropertyType3 = void (*)(boost::python::object &,
 using declarePropertyType4 = void (*)(boost::python::object &,
                                       const std::string &,
                                       const boost::python::object &, const int);
-GNU_DIAG_OFF("unknown-pragmas")
 GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
@@ -71,7 +70,6 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType2_Overload,
 BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType3_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 4, 5)
 GNU_DIAG_ON("conversion")
-GNU_DIAG_ON("unknown-pragmas")
 GNU_DIAG_ON("unused-local-typedef")
 
 /**

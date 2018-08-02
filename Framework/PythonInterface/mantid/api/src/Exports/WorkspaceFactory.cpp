@@ -46,7 +46,6 @@ Workspace_sptr createFromParentPtr(WorkspaceFactoryImpl &self,
 }
 
 /// Overload generator for create
-GNU_DIAG_OFF("unknown-pragmas")
 GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
@@ -58,7 +57,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createTable_Overload, createTable, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createPeaks_Overload, createPeaks, 0, 1)
 
 GNU_DIAG_ON("conversion")
-GNU_DIAG_ON("unknown-pragmas")
 GNU_DIAG_ON("unused-local-typedef")
 }
 

@@ -49,7 +49,6 @@ using return_readwrite_numpy =
     return_value_policy<VectorRefToNumpy<WrapReadWrite>>;
 
 //------------------------------- Overload macros ---------------------------
-GNU_DIAG_OFF("unknown-pragmas")
 GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
@@ -58,7 +57,6 @@ GNU_DIAG_OFF("conversion")
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_binIndexOfOverloads,
                                        MatrixWorkspace::binIndexOf, 1, 2)
 GNU_DIAG_ON("conversion")
-GNU_DIAG_ON("unknown-pragmas")
 GNU_DIAG_ON("unused-local-typedef")
 
 /**
