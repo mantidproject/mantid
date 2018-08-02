@@ -383,8 +383,7 @@ void UserFunctionDialog::saveToFile() {
  */
 void UserFunctionDialog::removeCurrentFunction() {
   QString cat = m_uiForm.lstCategory->currentItem()->text();
-  if (isBuiltin(cat) || 
-    (m_uiForm.lstFunction->currentItem() == nullptr)) {
+  if (isBuiltin(cat) || (m_uiForm.lstFunction->currentItem() == nullptr)) {
     return;
   }
 
