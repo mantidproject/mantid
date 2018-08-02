@@ -419,7 +419,7 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   logAlg->executeAsChildAlg();
 
   // get scalar labels and set spectra accordingly
-  for (auto i = 0u; i < sizeof(m_header.scalars) / sizeof(*m_header.scalars; ++i) {
+  for (auto i = 0u; i < sizeof(m_header.scalars) / sizeof(*m_header.scalars); ++i) {
     if (m_header.labels_scalars[i] != "NONE") {
       logAlg->setProperty("LogType", "String");
       logAlg->setProperty("LogName",
