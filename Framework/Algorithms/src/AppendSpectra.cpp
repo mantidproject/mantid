@@ -60,8 +60,8 @@ void AppendSpectra::exec() {
   // Retrieve the input workspaces
   MatrixWorkspace_const_sptr ws1 = getProperty("InputWorkspace1");
   MatrixWorkspace_const_sptr ws2 = getProperty("InputWorkspace2");
-  event_ws1 = boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
-  event_ws2 = boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
+  DataObjects::EventWorkspace_const_sptr event_ws1 = boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
+  DataObjects::EventWorkspace_const_sptr event_ws2 = boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
 
   // Make sure that we are not mis-matching EventWorkspaces and other types of
   // workspaces
@@ -85,7 +85,7 @@ void AppendSpectra::exec() {
 
   if (event_ws1 && event_ws2) {
     // Both are event workspaces. Use the special method
-    MatrixWorkspace_sptr output = this->execEvent();
+    MatrixWorkspace_sptr output = this->execEvent(*event_ws1, *event_ws2);
     if (number > 1)
       g_log.warning("Number property is ignored for event workspaces");
     if (mergeLogs)

@@ -118,30 +118,31 @@ MatrixWorkspace_sptr WorkspaceJoiners::execWS2D(const MatrixWorkspace &ws1,
  *  @throw std::invalid_argument If the input workspaces do not meet the
  * requirements of this algorithm
  */
-MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
+MatrixWorkspace_sptr WorkspaceJoiners::execEvent(const DataObjects::EventWorkspace &event_ws1,
+                                                 const DataObjects::EventWorkspace &event_ws2) {
   // Create the output workspace
   const size_t totalHists =
-      event_ws1->getNumberHistograms() + event_ws2->getNumberHistograms();
+      event_ws1.getNumberHistograms() + event_ws2.getNumberHistograms();
   auto output =
-      create<EventWorkspace>(*event_ws1, totalHists, event_ws1->binEdges(0));
+      create<EventWorkspace>(event_ws1, totalHists, event_ws1.binEdges(0));
 
   // Initialize the progress reporting object
   m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
 
-  const int64_t &nhist1 = event_ws1->getNumberHistograms();
+  const int64_t &nhist1 = event_ws1.getNumberHistograms();
   for (int64_t i = 0; i < nhist1; ++i) {
-    output->getSpectrum(i) = event_ws1->getSpectrum(i);
+    output->getSpectrum(i) = event_ws1.getSpectrum(i);
     m_progress->report();
   }
 
   // For second loop we use the offset from the first
-  const int64_t &nhist2 = event_ws2->getNumberHistograms();
-  const auto &spectrumInfo = event_ws2->spectrumInfo();
+  const int64_t &nhist2 = event_ws2.getNumberHistograms();
+  const auto &spectrumInfo = event_ws2.spectrumInfo();
   auto &outSpectrumInfo = output->mutableSpectrumInfo();
   for (int64_t j = 0; j < nhist2; ++j) {
     // This is the workspace index at which we assign in the output
     int64_t output_wi = j + nhist1;
-    output->getSpectrum(output_wi) = event_ws2->getSpectrum(j);
+    output->getSpectrum(output_wi) = event_ws2.getSpectrum(j);
 
     // Propagate spectrum masking. First workspace will have been done by the
     // factory
@@ -155,7 +156,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
     m_progress->report();
   }
 
-  fixSpectrumNumbers(*event_ws1, *event_ws2, *output);
+  fixSpectrumNumbers(event_ws1, event_ws2, *output);
 
   return std::move(output);
 }
