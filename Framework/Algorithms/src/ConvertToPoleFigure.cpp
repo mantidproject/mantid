@@ -280,25 +280,37 @@ void ConvertToPoleFigure::convertToPoleFigureEventMode() {
   for (size_t iws = 0; iws < num_spectra; ++iws) {
     PARALLEL_START_INTERUPT_REGION
 
+    // check the events with d-range.
     auto events = m_eventWS->getSpectrum(iws).getEvents();
     if (events.size() == 0)
       continue;
+    else if (m_minD > events.back().tof())
+      continue;
+    else if (m_maxD < events.front().tof())
+      continue;
 
-    g_log.debug() << "[DB...INFO] working on spectrum " << iws << "\n";
+    // g_log.debug() << "[DB...INFO] working on spectrum " << iws << "\n";
     Kernel::V3D unit_vec_q = calculateUnitQ(iws, sample_pos, sample_src_unit_k);
     size_t index_min_d = findDRangeInEventList(events, m_minD, false);
     size_t index_max_d = findDRangeInEventList(events, m_maxD, true);
     if (index_min_d == index_max_d) {
+      ++index_max_d;
+      // FIXME - The following is just for debugging purpose.  Before merging to
+      //         master, they shall be removed.
       g_log.warning() << "Spectrum " << iws << " has min D and max D same as "
-                      << index_max_d
+                      << index_max_d << "(d = " << events[index_min_d].tof()
+                      << ")"
                       << ".  Total number of events in this spectrum is "
                       << events.size() << "\n";
-      continue;
+      if (index_min_d != events.size() - 1)
+        g_log.error("Bug!");
+      //      continue;
     }
 
-    g_log.debug() << "[DB...INFO] spectrum " << iws
-                  << " in range: " << index_min_d << " --- " << index_max_d
-                  << "\n";
+    //    g_log.debug() << "[DB...INFO] spectrum " << iws
+    //                  << " in range: " << index_min_d << " --- " <<
+    //                  index_max_d
+    //                  << "\n";
     // create a vector for rotated Q
     size_t num_events = index_max_d - index_min_d;
     std::vector<double> vec_td(num_events);
@@ -309,7 +321,7 @@ void ConvertToPoleFigure::convertToPoleFigureEventMode() {
       TofEvent event_i = events[iev];
       Types::Core::DateAndTime pulsetime = event_i.pulseTime();
       double tof = event_i.tof();
-      int64_t tof_ns = static_cast<int64_t>(tof * 1000); // FIXME - really 1000?
+      int64_t tof_ns = static_cast<int64_t>(tof * 100.); // FIXME - really 1000?
       pulsetime += tof_ns;
       // get hrot and omega
       double hrot_i = hrotprop->getSingleValue(pulsetime);
@@ -325,6 +337,7 @@ void ConvertToPoleFigure::convertToPoleFigureEventMode() {
 
     PARALLEL_CRITICAL(event_pf) {
       num_events_in_range += index_max_d - index_min_d;
+      // TODO - Next : add these events to MDEventWorkspace!
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -555,9 +568,9 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
   double omega_prime = omega - psi + 135.;
   double tau_pp = -hrot - phi;
 
-  g_log.debug() << "\nQ = " << unitQ.toString() << "\n";
-  g_log.debug() << "Input: omega = " << omega << ", "
-                << "HROT = " << hrot << "\n";
+  //  g_log.debug() << "\nQ = " << unitQ.toString() << "\n";
+  //  g_log.debug() << "Input: omega = " << omega << ", "
+  //                << "HROT = " << hrot << "\n";
 
   //
   double omega_prim_rad = omega_prime * M_PI / 180.;
@@ -566,16 +579,16 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
   // calculate first rotation
   Kernel::V3D k1(0, 1, 0);
   Kernel::V3D part1 = unitQ * cos(omega_prim_rad);
-  g_log.debug() << "Part 1: " << part1.toString() << "\n";
+  //  g_log.debug() << "Part 1: " << part1.toString() << "\n";
 
   Kernel::V3D part2 = (k1.cross_prod(unitQ)) * sin(omega_prim_rad);
-  g_log.debug() << "Part 2: " << part1.toString() << "\n";
+  //  g_log.debug() << "Part 2: " << part1.toString() << "\n";
 
   Kernel::V3D part3 =
       k1 * ((1 - cos(omega_prim_rad)) * (k1.scalar_prod(unitQ)));
   Kernel::V3D unitQPrime = part1 + part2 + part3;
 
-  g_log.debug() << "Q' = " << unitQPrime.toString() << "\n";
+  //  g_log.debug() << "Q' = " << unitQPrime.toString() << "\n";
 
   // calcualte second rotation
   Kernel::V3D k2(0, 0, 1);
@@ -584,7 +597,7 @@ void ConvertToPoleFigure::rotateVectorQ(Kernel::V3D unitQ, const double &hrot,
   part3 = k2 * (k2.scalar_prod(unitQPrime) * (1 - cos(tau_pp_rad)));
   Kernel::V3D unitQpp = part1 + part2 + part3;
 
-  g_log.debug() << "Q'' = " << unitQpp.toString() << "\n";
+  //  g_log.debug() << "Q'' = " << unitQpp.toString() << "\n";
 
   // project to the pole figure by point light
   double sign(1);
