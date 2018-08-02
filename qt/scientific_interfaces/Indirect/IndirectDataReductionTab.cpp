@@ -158,7 +158,7 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
 
   IAlgorithm_sptr createWsAlg =
       AlgorithmManager::Instance().create("CreateWorkspace");
-  createWsAlg->setChild(true);
+  createWsAlg->setAlwaysStoreInADS(false);
   createWsAlg->initialize();
   createWsAlg->setProperty("OutputWorkspace", "__energy");
   createWsAlg->setProperty("DataX", x);
@@ -171,7 +171,7 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
 
   IAlgorithm_sptr convertHistAlg =
       AlgorithmManager::Instance().create("ConvertToHistogram");
-  convertHistAlg->setChild(true);
+  convertHistAlg->setAlwaysStoreInADS(false);
   convertHistAlg->initialize();
   convertHistAlg->setProperty("InputWorkspace", energyWs);
   convertHistAlg->setProperty("OutputWorkspace", "__energy");
@@ -180,7 +180,7 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
 
   IAlgorithm_sptr loadInstAlg =
       AlgorithmManager::Instance().create("LoadInstrument");
-  loadInstAlg->setChild(true);
+  loadInstAlg->setAlwaysStoreInADS(false);
   loadInstAlg->initialize();
   loadInstAlg->setProperty("Workspace", energyWs);
   loadInstAlg->setProperty("InstrumentName", instName.toStdString());
@@ -196,7 +196,7 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
 
   IAlgorithm_sptr loadParamAlg =
       AlgorithmManager::Instance().create("LoadParameterFile");
-  loadParamAlg->setChild(true);
+  loadParamAlg->setAlwaysStoreInADS(false);
   loadParamAlg->initialize();
   loadParamAlg->setProperty("Workspace", energyWs);
   loadParamAlg->setProperty("Filename", ipfFilename.toStdString());
@@ -216,7 +216,7 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
 
   IAlgorithm_sptr convUnitsAlg =
       AlgorithmManager::Instance().create("ConvertUnits");
-  convUnitsAlg->setChild(true);
+  convUnitsAlg->setAlwaysStoreInADS(false);
   convUnitsAlg->initialize();
   convUnitsAlg->setProperty("InputWorkspace", energyWs);
   convUnitsAlg->setProperty("OutputWorkspace", "__tof");
