@@ -1,6 +1,6 @@
 """ The run tab presenter.
 
-This presenter is essentially the brain of the reduction gui. It controlls other presenters and is mainly responsible
+This presenter is essentially the brain of the reduction gui. It controls other presenters and is mainly responsible
 for presenting and generating the reduction settings.
 """
 
@@ -359,9 +359,8 @@ class RunTabPresenter(object):
             sans_batch = SANSBatchReduction()
             listener = RunTabPresenter.ProcessListener(self)
 
-            self.work_handler.process(listener, sans_batch, states=states.values(), use_optimizations=use_optimizations, output_mode=output_mode,
-                                 plot_results=plot_results
-                                 , output_graph=output_graph)
+            self.work_handler.process(listener, sans_batch, states=states.values(), use_optimizations=use_optimizations,
+                                      output_mode=output_mode, plot_results=plot_results, output_graph=output_graph)
 
         except Exception as e:
             self._view.enable_buttons()

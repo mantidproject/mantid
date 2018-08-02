@@ -365,7 +365,7 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
     this->startProjectSaving();
     return;
   }
-  
+
   g_log.notice("Re-opening GUIs");
 
   auto projectFile = Poco::Path(recoveryFolder).append(OUTPUT_PROJ_NAME);
