@@ -25,7 +25,7 @@ from qtpy.QtCore import QEvent, Signal
 from qtpy.QtWidgets import QMainWindow
 
 # local imports
-from .figuretype import axes_type, figure_type, FigureType
+from .figuretype import figure_type, FigureType
 
 
 class FigureWindow(QMainWindow):

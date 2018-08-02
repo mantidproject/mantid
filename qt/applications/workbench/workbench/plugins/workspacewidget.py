@@ -20,15 +20,13 @@ from __future__ import (absolute_import, unicode_literals)
 import functools
 
 # third-party library imports
-from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
-from mantidqt.dialogs.spectraselectordialog import get_spectra_selection
+from mantid.api import AnalysisDataService
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
-from workbench.plotting.figuretype import figure_type, FigureType
-from workbench.plotting.functions import current_figure_or_none, pcolormesh, plot
+from workbench.plotting.functions import can_overplot, pcolormesh, plot_from_names
 
 
 class WorkspaceWidget(PluginWidget):
@@ -79,21 +77,12 @@ class WorkspaceWidget(PluginWidget):
                          exists and it is a compatible figure
         """
         if overplot:
-            compatible, error_msg = self._can_overplot()
+            compatible, error_msg = can_overplot()
             if not compatible:
                 QMessageBox.warning(self, "", error_msg)
                 return
 
-        try:
-            workspaces = self._ads.retrieveWorkspaces(names, unrollGroups=True)
-            selection = get_spectra_selection(workspaces, self)
-            if selection is not None:
-                plot(selection.workspaces, spectrum_nums=selection.spectra,
-                     wksp_indices=selection.wksp_indices,
-                     errors=errors, overplot=overplot)
-        except BaseException:
-            import traceback
-            traceback.print_exc()
+        plot_from_names(names, errors, overplot)
 
     def _do_plot_colorfill(self, names):
         """
@@ -106,22 +95,3 @@ class WorkspaceWidget(PluginWidget):
         except BaseException:
             import traceback
             traceback.print_exc()
-
-    def _can_overplot(self):
-        """
-        Checks if overplotting can proceed with the given options
-
-        :return: A 2-tuple of boolean indicating compatability and
-        a string containing an error message if the current figure is not
-        compatible.
-        """
-        compatible = False
-        msg = "Unable to overplot on currently active plot type.\n" \
-              "Please select another plot."
-        fig = current_figure_or_none()
-        if fig is not None:
-            figtype = figure_type(fig)
-            if figtype is FigureType.Line or figtype is FigureType.Errorbar:
-                compatible, msg = True, None
-
-        return compatible, msg

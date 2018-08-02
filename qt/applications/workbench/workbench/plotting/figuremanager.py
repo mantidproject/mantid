@@ -21,7 +21,7 @@ import matplotlib
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg, backend_version, draw_if_interactive, show)  # noqa
 from matplotlib._pylab_helpers import Gcf
-from qtpy.QtCore import Qt, QEvent, QObject, Signal
+from qtpy.QtCore import Qt, QObject
 from qtpy.QtWidgets import QApplication, QLabel
 from six import text_type
 

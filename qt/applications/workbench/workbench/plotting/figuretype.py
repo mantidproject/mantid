@@ -22,6 +22,7 @@ from __future__ import absolute_import
 from mantidqt.py3compat import Enum
 
 
+
 class FigureType(Enum):
     """Enumerate possible types of Figure"""
     # The values are irrelevant

@@ -161,14 +161,14 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         return self.selection is not None
 
 
-def get_spectra_selection(workspaces, parent_widget):
+def get_spectra_selection(workspaces, parent_widget=None):
     """Decides whether it is necessary to request user input
     when asked to plot a list of workspaces. The input
     dialog will only be shown in the case where all workspaces
     have more than 1 spectrum
 
     :param workspaces: A list of MatrixWorkspaces that will be plotted
-    :param parent_widget: A parent_widget to use for the input selection dialog
+    :param parent_widget: An optional parent_widget to use for the input selection dialog
     :returns: Either a SpectraSelection object containing the details of workspaces to plot or None indicating
     the request was cancelled
     """
