@@ -248,15 +248,23 @@ IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::extractUserFunction(
     const IFunction_sptr &TFFuncIn) {
   // N(1+g) + exp
   auto TFFunc = boost::dynamic_pointer_cast<CompositeFunction>(TFFuncIn);
-
+  if (TFFunc == nullptr) {
+    throw std::runtime_error("Input function is not of the correct form");
+  }
   // getFunction(0) -> N(1+g)
+
   TFFunc =
       boost::dynamic_pointer_cast<CompositeFunction>(TFFunc->getFunction(0));
-
+  if (TFFunc == nullptr) {
+    throw std::runtime_error("Input function is not of the correct form");
+  }
   // getFunction(1) -> 1+g
+
   TFFunc =
       boost::dynamic_pointer_cast<CompositeFunction>(TFFunc->getFunction(1));
-
+  if (TFFunc == nullptr) {
+    throw std::runtime_error("Input function is not of the correct form");
+  }
   // getFunction(1) -> g
   return TFFunc->getFunction(1);
 }
@@ -301,7 +309,7 @@ ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
   for (size_t j = 0; j < numDomains; j++) {
     IFunction_sptr userFunc;
     auto constant = FunctionFactory::Instance().createInitialized(
-        "name = FlatBackground, A0 = 1.0; ties=(f0.A0=1)");
+        "name = FlatBackground, A0 = 1.0, ties=(A0=1)");
     if (numDomains == 1) {
       userFunc = original;
     } else {
@@ -312,7 +320,7 @@ ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
     inBrace->addFunction(constant);
     inBrace->addFunction(userFunc);
     auto norm = FunctionFactory::Instance().createInitialized(
-        "composite=CompositeFunction,NumDeriv=true;name = FlatBackground, A0 "
+        "name = FlatBackground, A0 "
         "=" +
         std::to_string(norms[j]));
     auto product = boost::dynamic_pointer_cast<CompositeFunction>(
@@ -324,7 +332,7 @@ ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
     constant = FunctionFactory::Instance().createInitialized(
         "name = ExpDecayMuon, A = 0.0, Lambda = -" +
         std::to_string(MUON_LIFETIME_MICROSECONDS) +
-        ";ties = (f0.A = 0.0, f0.Lambda = -" +
+        ",ties = (A = 0.0, Lambda = -" +
         std::to_string(MUON_LIFETIME_MICROSECONDS) + ")");
     composite->addFunction(product);
     composite->addFunction(constant);

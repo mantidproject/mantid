@@ -1655,7 +1655,7 @@ void SliceViewer::updateDisplay(bool resetAxes) {
     // peaks.
     enablePeakOverlaysIfAppropriate();
     // Transform the peak overlays according to the new plotting.
-    m_peaksPresenter->changeShownDim();
+    m_peaksPresenter->changeShownDim(m_dimX, m_dimY);
 
     // Update the pointer to the slider widget.
     updatePeakOverlaySliderWidget();
@@ -2438,19 +2438,16 @@ void SliceViewer::setNonOrthogonalbtn() {
     ui.btnNonOrthogonalToggle->toggle();
     m_oldDimNonOrthogonal = false;
   }
-  if (ui.btnPeakOverlay->isChecked()) {
-    ui.btnNonOrthogonalToggle->setDisabled(true);
-    ui.btnNonOrthogonalToggle->setToolTip(
-        QString("NonOrthogonal view disabled when peakview enabled"));
+
+  ui.btnNonOrthogonalToggle->setDisabled(!canShowSkewedWS);
+  if (canShowSkewedWS) {
+    ui.btnNonOrthogonalToggle->setToolTip(QString("NonOrthogonal axes view"));
   } else {
-    ui.btnNonOrthogonalToggle->setDisabled(!canShowSkewedWS);
-    if (canShowSkewedWS) {
-      ui.btnNonOrthogonalToggle->setToolTip(QString("NonOrthogonal axes view"));
-    } else {
-      ui.btnNonOrthogonalToggle->setToolTip(
-          QString("NonOrthogonal view requires HKL axes"));
-    }
-  };
+    ui.btnNonOrthogonalToggle->setToolTip(
+        QString("NonOrthogonal view requires HKL axes"));
+  }
+
+  m_peaksPresenter->setNonOrthogonal(ui.btnNonOrthogonalToggle->isChecked());
 
   // temporary to disable if peak overlay is on
   disableOrthogonalAnalysisTools(ui.btnNonOrthogonalToggle->isChecked());

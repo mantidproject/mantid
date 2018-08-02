@@ -120,6 +120,7 @@ public:
 
   /// Get a list of names of global parameters
   QStringList getGlobalParameters() const;
+  void setGlobalParameters(QStringList &globals);
   /// Get a list of names of local parameters
   QStringList getLocalParameters() const;
   /// Get the number of datasets

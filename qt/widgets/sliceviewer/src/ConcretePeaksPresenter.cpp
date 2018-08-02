@@ -135,7 +135,22 @@ ConcretePeaksPresenter::ConcretePeaksPresenter(
       m_transformFactory(transformFactory),
       m_transform(transformFactory->createDefaultTransform()), m_slicePoint(),
       m_owningPresenter(nullptr), m_isHidden(false),
-      m_editMode(SliceViewer::None) {
+      m_editMode(SliceViewer::None), m_nonOrthogonalMode(false) {
+
+  m_axisData.dimX = 0;
+  m_axisData.dimY = 1;
+  m_axisData.dimMissing = 2;
+
+  m_axisData.fromHklToXyz[0] = 1.0;
+  m_axisData.fromHklToXyz[1] = 0.0;
+  m_axisData.fromHklToXyz[2] = 0.0;
+  m_axisData.fromHklToXyz[3] = 0.0;
+  m_axisData.fromHklToXyz[4] = 1.0;
+  m_axisData.fromHklToXyz[5] = 0.0;
+  m_axisData.fromHklToXyz[6] = 0.0;
+  m_axisData.fromHklToXyz[7] = 0.0;
+  m_axisData.fromHklToXyz[8] = 1.0;
+
   // Check that the workspaces appear to be compatible. Log if otherwise.
   checkWorkspaceCompatibilities(mdWS);
   this->initialize();
@@ -165,8 +180,9 @@ void ConcretePeaksPresenter::initialize() {
 
   // Make and register each peak widget.
   produceViews();
-  changeShownDim(); // in case dimensions shown are not those expected by
-                    // default transformation
+  // in case dimensions shown are not those expected by
+  // default transformation
+  changeShownDim(m_axisData.dimX, m_axisData.dimY);
 }
 
 /**
@@ -228,15 +244,31 @@ ConcretePeaksPresenter::~ConcretePeaksPresenter() { hideAll(); }
  Respond to changes in the shown dimension.
  @ return True only if this succeeds.
  */
-bool ConcretePeaksPresenter::changeShownDim() {
+bool ConcretePeaksPresenter::changeShownDim(size_t dimX, size_t dimY) {
+  m_axisData.dimX = dimX;
+  m_axisData.dimY = dimY;
+
   // Reconfigure the mapping tranform.
   const bool transformSucceeded = this->configureMappingTransform();
   // Apply the mapping tranform to move each peak overlay object.
 
   if (transformSucceeded) {
-    m_viewPeaks->movePosition(m_transform);
+    if (m_nonOrthogonalMode) {
+      m_viewFactory->getNonOrthogonalInfo(m_axisData);
+      m_viewPeaks->movePositionNonOrthogonal(m_transform, m_axisData);
+    } else {
+      m_viewPeaks->movePosition(m_transform);
+    }
   }
   return transformSucceeded;
+}
+
+void ConcretePeaksPresenter::setNonOrthogonal(bool nonOrthogonalEnabled) {
+  m_nonOrthogonalMode = nonOrthogonalEnabled;
+  if (m_nonOrthogonalMode) {
+    m_viewFactory->getNonOrthogonalInfo(m_axisData);
+    changeShownDim(m_axisData.dimX, m_axisData.dimY);
+  }
 }
 
 /**
@@ -522,7 +554,11 @@ bool ConcretePeaksPresenter::addPeakAt(double plotCoordsPointX,
       boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(this->m_peaksWS);
 
   const auto frame = m_transform->getCoordinateSystem();
-  peaksWS->addPeak(position, frame);
+  try {
+    peaksWS->addPeak(position, frame);
+  } catch (const std::invalid_argument &e) {
+    g_log.warning(e.what());
+  }
 
   // Reproduce the views. Proxy representations recreated for all peaks.
   this->produceViews();

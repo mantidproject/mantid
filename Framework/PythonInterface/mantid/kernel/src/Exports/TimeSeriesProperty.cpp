@@ -1,5 +1,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
+#include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
@@ -7,12 +8,13 @@
 #include <boost/python/implicit.hpp>
 #include <boost/python/init.hpp>
 #include <boost/python/make_function.hpp>
-#include <boost/python/return_value_policy.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/return_value_policy.hpp>
+#include <boost/python/tuple.hpp>
 
-using Mantid::Types::Core::DateAndTime;
-using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Kernel::Property;
+using Mantid::Kernel::TimeSeriesProperty;
+using Mantid::Types::Core::DateAndTime;
 using namespace boost::python;
 using boost::python::arg;
 
@@ -33,6 +35,11 @@ void addPyTimeValue(TimeSeriesProperty<TYPE> &self,
   const auto dateandtime =
       Mantid::PythonInterface::Converters::to_dateandtime(datetime);
   self.addValue(*dateandtime, value);
+}
+
+// Call the dtype helper function
+template <typename TYPE> std::string dtype(TimeSeriesProperty<TYPE> &self) {
+  return Mantid::PythonInterface::Converters::dtype(self);
 }
 
 // Macro to reduce copy-and-paste
@@ -80,8 +87,10 @@ void addPyTimeValue(TimeSeriesProperty<TYPE> &self,
            arg("self"),                                                        \
            "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")      \
       .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue,    \
-           arg("self"));
-}
+           arg("self"))                                                        \
+      .def("dtype", &dtype<TYPE>, arg("self"));
+
+} // namespace
 
 void export_TimeSeriesProperty_Double() {
   EXPORT_TIMESERIES_PROP(double, Float);
@@ -114,6 +123,11 @@ void export_TimeSeriesPropertyStatistics() {
       .add_property(
            "standard_deviation",
            &Mantid::Kernel::TimeSeriesPropertyStatistics::standard_deviation)
+      .add_property("time_mean",
+                    &Mantid::Kernel::TimeSeriesPropertyStatistics::time_mean)
+      .add_property("time_standard_deviation",
+                    &Mantid::Kernel::TimeSeriesPropertyStatistics::
+                        time_standard_deviation)
       .add_property("duration",
                     &Mantid::Kernel::TimeSeriesPropertyStatistics::duration);
 }

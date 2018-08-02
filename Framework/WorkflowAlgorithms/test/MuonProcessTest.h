@@ -191,9 +191,9 @@ public:
     if (ws) {
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
 
-      TS_ASSERT_DELTA(ws->readX(0)[0], -0.254, 0.001);
-      TS_ASSERT_DELTA(ws->readX(0)[1000], 15.746, 0.001);
-      TS_ASSERT_DELTA(ws->readX(0)[1752], 27.778, 0.001);
+      TS_ASSERT_DELTA(ws->readX(0)[0], 3.010, 0.001);
+      TS_ASSERT_DELTA(ws->readX(0)[1000], 19.010, 0.001);
+      TS_ASSERT_DELTA(ws->readX(0)[1752], 31.042, 0.001);
     }
   }
 

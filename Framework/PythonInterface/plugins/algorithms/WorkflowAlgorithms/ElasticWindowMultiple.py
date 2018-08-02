@@ -4,8 +4,6 @@ from mantid.simpleapi import AppendSpectra, CloneWorkspace, ElasticWindow, LoadL
 from mantid.kernel import *
 from mantid.api import *
 
-import numpy as np
-
 
 def _normalize_by_index(workspace, index):
     """
@@ -210,7 +208,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 elt_workspace = CloneWorkspace(InputWorkspace=elf_workspace, OutputWorkspace="__cloned",
                                                StoreInADS=False, EnableLogging=False)
 
-            _normalize_by_index(elt_workspace, np.argmin(sample_param))
+            _normalize_by_index(elt_workspace, 0)
 
             self.setProperty('OutputELT', elt_workspace)
 
@@ -229,8 +227,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         instr, run_number = getInstrRun(workspace.getName())
 
-        instrument = config.getFacility().instrument(instr)
-        pad_num = instrument.zeroPadding(int(run_number))
+        pad_num = config.getInstrument(instr).zeroPadding(int(run_number))
         zero_padding = '0' * (pad_num - len(run_number))
 
         run_name = instr + zero_padding + run_number

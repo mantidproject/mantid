@@ -1,6 +1,7 @@
 #ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_CROSS_H
 #define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_CROSS_H
 
+#include "MantidQtWidgets/SliceViewer/NonOrthogonalAxis.h"
 #include "MantidQtWidgets/SliceViewer/PeakRepresentation.h"
 
 namespace {
@@ -51,6 +52,9 @@ public:
   /// Transform the coordinates.
   void
   movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
+  void
+  movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform,
+                            NonOrthogonalAxis &info) override;
   /// Get the bounding box.
   PeakBoundingBox getBoundingBox() const override;
   /// Set the size of the cross peak in the viewing plane

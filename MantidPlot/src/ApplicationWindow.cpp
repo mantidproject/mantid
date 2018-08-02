@@ -91,6 +91,8 @@
 #include "PlotWizard.h"
 #include "PolynomFitDialog.h"
 #include "PolynomialFit.h"
+#include "Process.h"
+#include "ProjectRecovery.h"
 #include "ProjectSerialiser.h"
 #include "QwtErrorPlotCurve.h"
 #include "QwtHistogram.h"
@@ -246,25 +248,14 @@ void file_uncompress(const char *file);
 }
 
 ApplicationWindow::ApplicationWindow(bool factorySettings)
-    : QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),
-      blockWindowActivation(false), m_enableQtiPlotFitting(false),
-      m_exitCode(0),
-#ifdef Q_OS_MAC // Mac
-      settings(QSettings::IniFormat, QSettings::UserScope, "Mantid",
-               "MantidPlot")
-#else
-      settings("Mantid", "MantidPlot")
-#endif
-{
-  QStringList empty;
-  init(factorySettings, empty);
-}
+    // Delegate with an empty string list for the arguments
+    : ApplicationWindow(factorySettings, QStringList{}) {}
 
 ApplicationWindow::ApplicationWindow(bool factorySettings,
                                      const QStringList &args)
     : QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),
       blockWindowActivation(false), m_enableQtiPlotFitting(false),
-      m_exitCode(0),
+      m_projectRecovery(this), m_exitCode(0),
 #ifdef Q_OS_MAC // Mac
       settings(QSettings::IniFormat, QSettings::UserScope, "Mantid",
                "MantidPlot")
@@ -278,7 +269,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings,
 /**
  * This function is responsible for copying the old configuration
  * information from the ISIS\MantidPlot area to the new Mantid\MantidPlot
- * area. The old area is deleted once the trnasfer is complete. On subsequent
+ * area. The old area is deleted once the transfer is complete. On subsequent
  * runs, if the old configuration area is missing or empty, the copying
  * is ignored.
  */
@@ -348,7 +339,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   setAttribute(Qt::WA_DeleteOnClose);
 
 #ifdef SHARED_MENUBAR
-  m_sharedMenuBar = new QMenuBar(NULL);
+  m_sharedMenuBar = new QMenuBar(nullptr);
   m_sharedMenuBar->setNativeMenuBar(true);
 #endif
   setWindowTitle(tr("MantidPlot - untitled")); // Mantid
@@ -902,7 +893,7 @@ void ApplicationWindow::initGlobalConstants() {
 
 QMenuBar *ApplicationWindow::myMenuBar() {
 #ifdef SHARED_MENUBAR
-  return m_sharedMenuBar == NULL ? menuBar() : m_sharedMenuBar;
+  return m_sharedMenuBar == nullptr ? menuBar() : m_sharedMenuBar;
 #else
   return menuBar();
 #endif
@@ -4628,29 +4619,21 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
 
   d_opening_file = true;
 
-  QFile file(filename);
-  QFileInfo fileInfo(filename);
-
-  if (!file.open(QIODevice::ReadOnly))
-    throw std::runtime_error("Couldn't open project file");
-
-  QTextStream fileTS(&file);
-  fileTS.setCodec(QTextCodec::codecForName("UTF-8"));
-
-  QString baseName = fileInfo.fileName();
-
-  // Skip mantid version line
-  fileTS.readLine();
-
-  // Skip the <scripting-lang> line. We only really use python now anyway.
-  fileTS.readLine();
-  setScriptingLanguage("Python");
-
-  // Skip the <windows> line.
-  fileTS.readLine();
-
   folders->blockSignals(true);
   blockSignals(true);
+
+  // Open as a top level folder
+  ProjectSerialiser serialiser(this);
+  try {
+    serialiser.load(filename.toStdString(), fileVersion);
+  } catch (std::runtime_error &e) {
+    g_log.error(e.what());
+    // We failed to load - reset and bail out
+    d_opening_file = false;
+    folders->blockSignals(false);
+    blockSignals(false);
+    return this;
+  }
 
   Folder *curFolder = projectFolder();
 
@@ -4659,35 +4642,21 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
   if (!item)
     throw std::runtime_error("Couldn't retrieve folder list items.");
 
+  QFile file(filename);
+  QFileInfo fileInfo(filename);
+  QString baseName = fileInfo.fileName();
   item->setText(0, fileInfo.baseName());
   item->folder()->setObjectName(fileInfo.baseName());
 
-  // Read the rest of the project file in for parsing
-  std::string lines = fileTS.readAll().toUtf8().constData();
-
   d_loaded_current = nullptr;
-
-  // Open as a top level folder
-  ProjectSerialiser serialiser(this);
-  try {
-    serialiser.load(lines, fileVersion);
-  } catch (std::runtime_error &e) {
-    g_log.error(e.what());
-    // We failed to load - bail out
-    return this;
-  }
 
   if (d_loaded_current)
     curFolder = d_loaded_current;
 
-  {
-    // WHY use another fileinfo?
-    QFileInfo fi2(file);
-    QString fileName = fi2.absoluteFilePath();
-    recentProjects.removeAll(filename);
-    recentProjects.push_front(filename);
-    updateRecentProjectsList();
-  }
+  QString fileName = fileInfo.absoluteFilePath();
+  recentProjects.removeAll(filename);
+  recentProjects.push_front(filename);
+  updateRecentProjectsList();
 
   folders->setCurrentItem(curFolder->folderListItem());
   folders->blockSignals(false);
@@ -4707,6 +4676,7 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
 
   return this;
 }
+
 bool ApplicationWindow::setScriptingLanguage(const QString &lang) {
   if (lang.isEmpty())
     return false;
@@ -6024,7 +5994,6 @@ bool ApplicationWindow::saveProject(bool compress) {
       projectname.endsWith(".ogg", Qt::CaseInsensitive)) {
     saveProjectAs();
     return true;
-    ;
   }
 
   ProjectSerialiser serialiser(this);
@@ -9803,11 +9772,20 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     }
   }
 
+  if (m_projectRecoveryRunOnStart) {
+    // Stop background saving thread, so it doesn't try to use a destroyed
+    // resource
+    m_projectRecovery.stopProjectSaving();
+    m_projectRecovery.clearAllCheckpoints();
+  }
+
   // Close the remaining MDI windows. The Python API is required to be active
   // when the MDI window destructor is called so that those references can be
   // cleaned up meaning we cannot rely on the deleteLater functionality to
   // work correctly as this will happen in the next iteration of the event loop,
   // i.e after the python shutdown code has been run below.
+  m_shuttingDown = true;
+
   MDIWindowList windows = getAllWindows();
   for (auto &win : windows) {
     win->confirmClose(false);
@@ -15108,7 +15086,7 @@ void ApplicationWindow::onScriptExecuteError(const QString &message,
  */
 bool ApplicationWindow::runPythonScript(const QString &code, bool async,
                                         bool quiet, bool redirect) {
-  if (code.isEmpty())
+  if (code.isEmpty() || m_shuttingDown)
     return false;
   if (!m_iface_script) {
     if (setScriptingLanguage("Python")) {
@@ -15986,6 +15964,8 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer *w) {
     return;
   }
 
+  btnMultiPeakPick->setEnabled(w->layers() == 1);
+
   Graph *g = w->activeGraph();
   if (g) {
     PlotToolInterface *tool = g->activeTool();
@@ -16661,6 +16641,22 @@ void ApplicationWindow::onAboutToStart() {
 
   // Make sure we see all of the startup messages
   resultsLog->scrollToTop();
+
+  // Kick off project recovery iff we are able to determine if we are the only
+  // instance currently running
+  try {
+    if (!Process::isAnotherInstanceRunning()) {
+      g_log.debug("Starting project autosaving.");
+      checkForProjectRecovery();
+    } else {
+      g_log.debug("Another MantidPlot process is running. Project recovery is "
+                  "disabled.");
+    }
+  } catch (std::runtime_error &exc) {
+    g_log.warning("Unable to determine if other MantidPlot processes are "
+                  "running. Project recovery is disabled. Error msg: " +
+                  std::string(exc.what()));
+  }
 }
 
 /**
@@ -16762,4 +16758,61 @@ void ApplicationWindow::dropInTiledWindow(MdiSubWindow *w, QPoint pos) {
 bool ApplicationWindow::isOfType(const QObject *obj,
                                  const char *toCompare) const {
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
+}
+
+/**
+  * Loads a project file as part of project recovery
+  *
+  * @param sourceFile The full path to the .project file
+  * @return True is loading was successful, false otherwise
+  */
+bool ApplicationWindow::loadProjectRecovery(std::string sourceFile) {
+  const bool isRecovery = true;
+  ProjectSerialiser projectWriter(this, isRecovery);
+  // File version is not applicable to project recovery - so set to 0
+  return projectWriter.load(sourceFile, 0);
+}
+
+/**
+ * Triggers saving project recovery on behalf of an external thread
+ * or caller, such as project recovery.
+ *
+ * @param destination:: The full path to write the recovery file to
+ * @return True if saving is successful, false otherwise
+ */
+bool ApplicationWindow::saveProjectRecovery(std::string destination) {
+  const bool isRecovery = true;
+  ProjectSerialiser projectWriter(this, isRecovery);
+  return projectWriter.save(QString::fromStdString(destination));
+}
+
+/**
+  * Checks for any recovery checkpoint and starts project
+  * saving if one doesn't exist. If one does, it prompts
+  * the user whether they would like to recover
+  */
+void ApplicationWindow::checkForProjectRecovery() {
+  m_projectRecoveryRunOnStart = true;
+  if (!m_projectRecovery.checkForRecovery()) {
+    m_projectRecovery.startProjectSaving();
+    return;
+  }
+
+  // Recovery file present
+  try {
+    m_projectRecovery.attemptRecovery();
+  } catch (std::exception &e) {
+    std::string err{
+        "Project Recovery failed to recover this checkpoint. Details: "};
+    err.append(e.what());
+    g_log.error(err);
+    QMessageBox::information(this, "Could Not Recover",
+                             "We could not fully recover your work.\nMantid "
+                             "will continue to run normally now.",
+                             "OK");
+
+    // Restart project recovery manually
+    m_projectRecovery.clearAllCheckpoints();
+    m_projectRecovery.startProjectSaving();
+  }
 }

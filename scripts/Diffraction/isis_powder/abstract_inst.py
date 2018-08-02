@@ -61,6 +61,13 @@ class AbstractInst(object):
         return focus.focus(run_number_string=run_number_string, perform_vanadium_norm=do_van_normalisation,
                            instrument=self, absorb=do_absorb_corrections, sample_details=sample_details)
 
+    def mask_prompt_pulses_if_necessary(self, ws_list):
+        """
+        Mask prompt pulses in a list of input workspaces,
+        disabled for all instrument except HRPD
+        """
+        pass
+
     def set_beam_parameters(self, height, width):
         """
         Set the height and width of the beam. Currently only supports rectangular (or square) beam shapes.
@@ -79,6 +86,12 @@ class AbstractInst(object):
         else:
             self._beam_parameters = {'height': height,
                                      'width': width}
+
+    def should_subtract_empty_inst(self):
+        """
+        :return: Whether the empty run should be subtracted from a run being focused
+        """
+        return True
 
     # Mandatory overrides
 

@@ -2,7 +2,9 @@
 #define MANTID_DATAHANDLING_LOADILLREFLECTOMETRY_H_
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -50,14 +52,16 @@ public:
   /// Algorithm's summary. @see Algorithm::summary
   const std::string summary() const override {
     return "Loads an ILL reflectometry Nexus file (instrument D17 or "
-           "Figaro).";
+           "FIGARO).";
   }
-  /// Cross-check properties with each other @see IAlgorithm::validateInputs
-  std::map<std::string, std::string> validateInputs() override;
+  double doubleFromRun(const std::string &entryName) const;
+  double sampleDetectorDistance() const;
+  double sampleHorizontalOffset() const;
+  double sourceSampleDistance() const;
 
 private:
   /// ID tags for supported instruments.
-  enum class Supported { D17, Figaro };
+  enum class Supported { D17, FIGARO };
 
   void init() override;
   void exec() override;
@@ -66,7 +70,6 @@ private:
   void initNames(NeXus::NXEntry &entry);
   void initPixelWidth();
   void loadDataDetails(NeXus::NXEntry &entry);
-  double doubleFromRun(const std::string &entryName) const;
   std::vector<double> getXValues();
   void convertTofToWavelength();
   double reflectometryPeak();
@@ -87,9 +90,6 @@ private:
   double detectorAngle() const;
   double offsetAngle(const double peakCentre, const double detectorCentre,
                      const double detectorDistance) const;
-  double sampleDetectorDistance() const;
-  double sampleHorizontalOffset() const;
-  double sourceSampleDistance() const;
   API::MatrixWorkspace_sptr m_localWorkspace;
 
   Supported m_instrument{Supported::D17}; ///< Name of the instrument
@@ -98,7 +98,6 @@ private:
   double m_tofDelay{0.0};
   size_t m_numberOfHistograms{0};
   double m_channelWidth{0.0};
-  std::string m_detectorDistanceName;
   std::string m_detectorAngleName;
   std::string m_sampleAngleName;
   std::string m_offsetName;

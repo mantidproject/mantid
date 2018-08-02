@@ -139,9 +139,10 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
             plot_fn(ws, **{kw: num})
 
     ax.legend()
-    title = workspaces[0].name()
-    ax.set_title(title)
-    fig.canvas.set_window_title(figure_title(workspaces, fig.number))
+    if not overplot:
+        title = workspaces[0].name()
+        ax.set_title(title)
+        fig.canvas.set_window_title(figure_title(workspaces, fig.number))
     fig.canvas.draw()
     fig.show()
     return fig

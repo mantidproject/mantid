@@ -51,7 +51,16 @@ private:
 
   /// Normalize by monitors
   API::MatrixWorkspace_sptr
-  normalizeDetectorsByMonitors(API::MatrixWorkspace_sptr IvsLam);
+  normalizeDetectorsByMonitors(API::MatrixWorkspace_sptr IvsTOF);
+  /// Get the run numbers of the input workspaces
+  void getRunNumbers();
+  /// Store a transition run in ADS
+  void storeTransitionRun(int which, API::MatrixWorkspace_sptr ws);
+  /// Store the stitched transition workspace run in ADS
+  void storeOutputWorkspace(API::MatrixWorkspace_sptr ws);
+
+  std::string m_firstTransmissionRunNumber;
+  std::string m_secondTransmissionRunNumber;
 };
 
 } // namespace Algorithms

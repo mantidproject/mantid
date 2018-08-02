@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/MultiFileNameParser.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 
 #include <Poco/Path.h>
@@ -201,6 +202,115 @@ public:
     TS_ASSERT_EQUALS(result[0][2], 4);
     TS_ASSERT_EQUALS(result[0][3], 5);
     TS_ASSERT_EQUALS(result[0][4], 6);
+  }
+
+  void test_sumMultipleAddRanges() {
+    ParsedRuns result = parseMultiRunString("1-2+4-6+8-10");
+
+    TS_ASSERT_EQUALS(result.size(), 1)
+    TS_ASSERT_EQUALS(result.front().size(), 8)
+    TS_ASSERT_EQUALS(result[0][0], 1);
+    TS_ASSERT_EQUALS(result[0][1], 2);
+    TS_ASSERT_EQUALS(result[0][2], 4);
+    TS_ASSERT_EQUALS(result[0][3], 5);
+    TS_ASSERT_EQUALS(result[0][4], 6);
+    TS_ASSERT_EQUALS(result[0][5], 8);
+    TS_ASSERT_EQUALS(result[0][6], 9);
+    TS_ASSERT_EQUALS(result[0][7], 10);
+  }
+
+  void test_multipleAddRangesAndSinge() {
+    ParsedRuns result = parseMultiRunString("1-2+4-6+8-10+15");
+
+    TS_ASSERT_EQUALS(result.size(), 1)
+    TS_ASSERT_EQUALS(result.front().size(), 9)
+    TS_ASSERT_EQUALS(result[0][0], 1);
+    TS_ASSERT_EQUALS(result[0][1], 2);
+    TS_ASSERT_EQUALS(result[0][2], 4);
+    TS_ASSERT_EQUALS(result[0][3], 5);
+    TS_ASSERT_EQUALS(result[0][4], 6);
+    TS_ASSERT_EQUALS(result[0][5], 8);
+    TS_ASSERT_EQUALS(result[0][6], 9);
+    TS_ASSERT_EQUALS(result[0][7], 10);
+    TS_ASSERT_EQUALS(result[0][8], 15);
+  }
+
+  void test_multipleAddRangesAndSingle() {
+    ParsedRuns result = parseMultiRunString("1-2+4-6+8-10+15");
+
+    TS_ASSERT_EQUALS(result.size(), 1)
+    TS_ASSERT_EQUALS(result.front().size(), 9)
+    TS_ASSERT_EQUALS(result[0][0], 1);
+    TS_ASSERT_EQUALS(result[0][1], 2);
+    TS_ASSERT_EQUALS(result[0][2], 4);
+    TS_ASSERT_EQUALS(result[0][3], 5);
+    TS_ASSERT_EQUALS(result[0][4], 6);
+    TS_ASSERT_EQUALS(result[0][5], 8);
+    TS_ASSERT_EQUALS(result[0][6], 9);
+    TS_ASSERT_EQUALS(result[0][7], 10);
+    TS_ASSERT_EQUALS(result[0][8], 15);
+  }
+
+  void test_singleAndMultipleAddRanges() {
+    ParsedRuns result = parseMultiRunString("1+3-4+6-9+11-12");
+
+    TS_ASSERT_EQUALS(result.size(), 1)
+    TS_ASSERT_EQUALS(result.front().size(), 9)
+    TS_ASSERT_EQUALS(result[0][0], 1);
+    TS_ASSERT_EQUALS(result[0][1], 3);
+    TS_ASSERT_EQUALS(result[0][2], 4);
+    TS_ASSERT_EQUALS(result[0][3], 6);
+    TS_ASSERT_EQUALS(result[0][4], 7);
+    TS_ASSERT_EQUALS(result[0][5], 8);
+    TS_ASSERT_EQUALS(result[0][6], 9);
+    TS_ASSERT_EQUALS(result[0][7], 11);
+    TS_ASSERT_EQUALS(result[0][8], 12);
+  }
+
+  void test_singleWithinMultipleAddRanges() {
+    ParsedRuns result = parseMultiRunString("1-2+4+6-9+11-12");
+
+    TS_ASSERT_EQUALS(result.size(), 1)
+    TS_ASSERT_EQUALS(result.front().size(), 9)
+    TS_ASSERT_EQUALS(result[0][0], 1);
+    TS_ASSERT_EQUALS(result[0][1], 2);
+    TS_ASSERT_EQUALS(result[0][2], 4);
+    TS_ASSERT_EQUALS(result[0][3], 6);
+    TS_ASSERT_EQUALS(result[0][4], 7);
+    TS_ASSERT_EQUALS(result[0][5], 8);
+    TS_ASSERT_EQUALS(result[0][6], 9);
+    TS_ASSERT_EQUALS(result[0][7], 11);
+    TS_ASSERT_EQUALS(result[0][8], 12);
+  }
+
+  void test_steppedRangeWithinMultipleAddRanges() {
+    ParsedRuns result = parseMultiRunString("1-2+4-8:2+10-11");
+
+    TS_ASSERT_EQUALS(result.size(), 1)
+    TS_ASSERT_EQUALS(result.front().size(), 7)
+    TS_ASSERT_EQUALS(result[0][0], 1);
+    TS_ASSERT_EQUALS(result[0][1], 2);
+    TS_ASSERT_EQUALS(result[0][2], 4);
+    TS_ASSERT_EQUALS(result[0][3], 6);
+    TS_ASSERT_EQUALS(result[0][4], 8);
+    TS_ASSERT_EQUALS(result[0][5], 10);
+    TS_ASSERT_EQUALS(result[0][6], 11);
+  }
+
+  void test_allAddRangeVariantsTogether() {
+    ParsedRuns result = parseMultiRunString("1+2-3+4-6:1+7+8-9+10");
+    TS_ASSERT_EQUALS(result.size(), 1)
+    TS_ASSERT_EQUALS(result.front().size(), 10)
+    TS_ASSERT_EQUALS(result[0][0], 1);
+    TS_ASSERT_EQUALS(result[0][1], 2);
+    TS_ASSERT_EQUALS(result[0][2], 3);
+    TS_ASSERT_EQUALS(result[0][3], 4);
+    TS_ASSERT_EQUALS(result[0][4], 5);
+    TS_ASSERT_EQUALS(result[0][5], 6);
+    TS_ASSERT_EQUALS(result[0][6], 7);
+    TS_ASSERT_EQUALS(result[0][7], 8);
+    TS_ASSERT_EQUALS(result[0][8], 9);
+    TS_ASSERT_EQUALS(result[0][9], 10);
   }
 
   void test_errorThrownWhenPassedUnexpectedChar() {

@@ -44,3 +44,20 @@ def _get_current_mode_dictionary(run_number_string, inst_settings):
     mapping_dict = get_cal_mapping_dict(run_number_string, inst_settings.cal_mapping_path)
     # Get the current mode "Rietveld" or "PDF" run numbers
     return common.cal_map_dictionary_key_helper(mapping_dict, inst_settings.mode)
+
+
+def save_maud(d_spacing_group, output_path):
+    for i, ws in enumerate(d_spacing_group):
+        mantid.SaveFocusedXYE(InputWorkspace=ws, Filename=output_path, SplitFiles=False, StartAtBankNumber=i,
+                              Append=i > 0, IncludeHeader=True, Format="MAUD")
+
+
+def save_angles(d_spacing_group, output_path):
+    mantid.SaveBankScatteringAngles(InputWorkspace=d_spacing_group, Filename=output_path)
+
+
+def save_maud_calib(d_spacing_group, output_path, gsas_calib_filename, grouping_scheme):
+    mantid.SaveGEMMAUDParamFile(InputWorkspace=d_spacing_group,
+                                GSASParamFile=gsas_calib_filename,
+                                GroupingScheme=grouping_scheme,
+                                OutputFilename=output_path)
