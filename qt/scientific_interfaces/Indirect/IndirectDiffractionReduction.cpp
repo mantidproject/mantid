@@ -616,8 +616,8 @@ IndirectDiffractionReduction::loadInstrument(const std::string &instrumentName,
                               reflection + "_Parameters.xml";
     IAlgorithm_sptr loadParamAlg =
         AlgorithmManager::Instance().create("LoadParameterFile");
-	loadParamAlg->setAlwaysStoreInADS(false);
-	loadParamAlg->initialize();
+    loadParamAlg->setAlwaysStoreInADS(false);
+    loadParamAlg->initialize();
     loadParamAlg->setProperty("Filename", ipfFilename);
     loadParamAlg->setProperty("Workspace", instWorkspace);
     loadParamAlg->execute();

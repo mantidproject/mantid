@@ -217,8 +217,8 @@ IndirectDataReduction::loadInstrumentIfNotExist(std::string instrumentName,
                                 "_" + reflection + "_Parameters.xml";
       IAlgorithm_sptr loadParamAlg =
           AlgorithmManager::Instance().create("LoadParameterFile");
-	  loadParamAlg->setAlwaysStoreInADS(false);
-	  loadParamAlg->setLogging(false);
+      loadParamAlg->setAlwaysStoreInADS(false);
+      loadParamAlg->setLogging(false);
       loadParamAlg->initialize();
       loadParamAlg->setProperty("Filename", ipfFilename);
       loadParamAlg->setProperty("Workspace", instWorkspace);
