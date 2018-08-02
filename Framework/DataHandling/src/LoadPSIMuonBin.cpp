@@ -198,44 +198,44 @@ void LoadPSIMuonBin::readSingleVariables(
 void LoadPSIMuonBin::readStringVariables(
     Mantid::Kernel::BinaryStreamReader &streamReader) {
   // The strings in the header of the binary file:
-  streamReader.moveStreamToPosition(
-      138); // Only pass 10 bytes into the string from stream
+  streamReader.moveStreamToPosition(138); 
+  // Only pass 10 bytes into the string from stream
   streamReader.read(m_header.sample, 10);
 
-  streamReader.moveStreamToPosition(
-      148); // Only pass 10 bytes into the string from stream
+  streamReader.moveStreamToPosition(148); 
+  // Only pass 10 bytes into the string from stream
   streamReader.read(m_header.temp, 10);
 
-  streamReader.moveStreamToPosition(
-      158); // Only pass 10 bytes into the string from stream
+  streamReader.moveStreamToPosition(158); 
+  // Only pass 10 bytes into the string from stream
   streamReader.read(m_header.field, 10);
 
-  streamReader.moveStreamToPosition(
-      168); // Only pass 10 bytes into the string from stream
+  streamReader.moveStreamToPosition(168); 
+  // Only pass 10 bytes into the string from stream
   streamReader.read(m_header.orientation, 10);
 
-  streamReader.moveStreamToPosition(
-      860); // Only pass 62 bytes into the string from stream
+  streamReader.moveStreamToPosition(860); 
+  // Only pass 62 bytes into the string from stream
   streamReader.read(m_header.comment, 62);
 
-  streamReader.moveStreamToPosition(
-      218); // Only pass 9 bytes into the string from stream
+  streamReader.moveStreamToPosition(218); 
+  // Only pass 9 bytes into the string from stream
   streamReader.read(m_header.dateStart, 9);
 
-  streamReader.moveStreamToPosition(
-      227); // Only pass 9 bytes into the string from stream
+  streamReader.moveStreamToPosition(227); 
+  // Only pass 9 bytes into the string from stream
   streamReader.read(m_header.dateEnd, 9);
 
-  streamReader.moveStreamToPosition(
-      236); // Only pass 8 bytes into the string from stream
+  streamReader.moveStreamToPosition(236); 
+  // Only pass 8 bytes into the string from stream
   streamReader.read(m_header.timeStart, 8);
 
-  streamReader.moveStreamToPosition(
-      244); // Only pass 8 bytes into the string from stream
+  streamReader.moveStreamToPosition(244); 
+  // Only pass 8 bytes into the string from stream
   streamReader.read(m_header.timeEnd, 8);
 
-  streamReader.moveStreamToPosition(
-      60); // Only pass 11 bytes into the string from stream
+  streamReader.moveStreamToPosition(60); 
+  // Only pass 11 bytes into the string from stream
   streamReader.read(m_header.monDeviation, 11);
 }
 
@@ -383,6 +383,13 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
                           "Actual Temperature" + std::to_string(tempNum));
       logAlg->setProperty("LogText", std::to_string(m_header.temperatures[tempNum - 1]));
       logAlg->executeAsChildAlg();
+
+      //Temperature deviation
+      logAlg->setProperty("LogType", "Number");
+      logAlg->setProperty("LogName",
+                          "Temperature Deviation" + std::to_string(tempNum));
+      logAlg->setProperty("LogText", std::to_string(m_header.temperatureDeviation[tempNum - 1]));
+      logAlg->executeAsChildAlg();
     }
   }
 
@@ -409,15 +416,39 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   logAlg->executeAsChildAlg();
 
   // get scalar labels and set spectra accordingly
-  for (auto i = 0u; i < 18; ++i) {
+  for (auto i = 0u; i < sizeof(m_header.scalars) / sizeof(*m_header.scalars; ++i) {
     if (m_header.labels_scalars[i] != "NONE") {
       logAlg->setProperty("LogType", "String");
       logAlg->setProperty("LogName", "Spectra" + std::to_string(i) + " label and scalar");
       logAlg->setProperty("LogText",
                           m_header.labels_scalars[i] + " - " + std::to_string(m_header.scalars[i]));
       logAlg->executeAsChildAlg();                    
+    } else {
+      break;
     }
   }
+
+  //Orientation
+  logAlg->setProperty("LogType", "String");
+  logAlg->setProperty("LogName", "Orientation");
+  logAlg->setProperty("LogText", m_header.orientation);
+  logAlg->executeAsChildAlg();
+
+  //first good and last good
+  for(auto i = 0u; i < sizeof(m_header.firstGood) / sizeof(*m_header.firstGood); ++i){
+    if (m_header.firstGood != 0) {
+      logAlg->setProperty("LogType", "String");
+      logAlg->setProperty("LogName", "Spectra" + std::to_string(i) + "first and last good");
+      logAlg->setProperty("LogText", std::to_string(m_header.firstGood[i]) + " - " + std::to_string(m_header.lastGood[i]));
+      logAlg->executeAsChildAlg();                    
+    }
+  }
+
+  //total events
+  logAlg->setProperty("LogType", "Number");
+  logAlg->setProperty("LogName", "Total Number of Events");
+  logAlg->setProperty("LogText", m_header.totalEvents);
+  logAlg->executeAsChildAlg();
 }
 
 } // namespace DataHandling
