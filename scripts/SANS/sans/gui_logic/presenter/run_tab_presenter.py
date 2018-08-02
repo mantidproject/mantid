@@ -76,6 +76,12 @@ class RunTabPresenter(object):
         def on_rows_removed(self, rows):
             self._presenter.on_rows_removed(rows)
 
+        def on_copy_rows_requested(self):
+            self._presenter.on_copy_rows_requested()
+
+        def on_paste_rows_requested(self):
+            self._presenter.on_paste_rows_requested()
+
     class ProcessListener(WorkHandler.WorkListener):
         def __init__(self, presenter):
             super(RunTabPresenter.ProcessListener, self).__init__()
@@ -303,9 +309,10 @@ class RunTabPresenter(object):
         self._table_model.append_table_entry(table_index_model)
 
     def update_view_from_table_model(self):
+        self._view.clear_table()
         self._view.hide_period_columns()
         for row in self._table_model._table_entries:
-            row_entry = [str(x) for x in row.toList()]
+            row_entry = [str(x) for x in row.to_list()]
             self._view.add_row(row_entry)
             if row.isMultiPeriod():
                 self._view.show_period_columns()
@@ -391,6 +398,19 @@ class RunTabPresenter(object):
     def on_rows_removed(self, rows):
         self._view.remove_rows(rows)
         self._table_model.remove_table_entries(rows)
+
+    def on_copy_rows_requested(self):
+        selected_rows = self._view.get_selected_rows()
+        self._clipboard = []
+        for row in selected_rows:
+            data_from_table_model = self._table_model.get_table_entry(row).to_list()
+            self._clipboard.append(data_from_table_model)
+
+    def on_paste_rows_requested(self):
+        selected_rows = self._view.get_selected_rows()
+        selected_rows = selected_rows if selected_rows else [self._table_model.get_number_of_rows()]
+        self._table_model.replace_table_entries(selected_rows, self._clipboard)
+        self.update_view_from_table_model()
 
     def on_manage_directories(self):
         self._view.show_directory_manager()

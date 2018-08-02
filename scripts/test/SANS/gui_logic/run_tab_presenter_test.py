@@ -489,6 +489,92 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter._beam_centre_presenter.on_update_instrument.called_once_with(instrument)
         presenter._workspace_diagnostic_presenter.called_once_with(instrument)
 
+    def test_on_copy_rows_requested_adds_correct_rows_to_clipboard(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[0])
+        presenter.set_view(view)
+        test_row = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
+                           'test_file', '', '1.0', '']
+
+        presenter.on_row_inserted(0, test_row)
+
+        presenter.on_copy_rows_requested()
+
+        self.assertEqual(presenter._clipboard, [test_row])
+
+    def test_on_paste_rows_requested_appends_new_row_if_no_row_selected(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[])
+        presenter.set_view(view)
+        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
+                    'test_file', '', '1.0', '']
+        test_row_1 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0', '']
+        presenter.on_row_inserted(0, test_row_0)
+        presenter.on_row_inserted(1, test_row_1)
+        presenter._clipboard = [test_row_0]
+
+        presenter.on_paste_rows_requested()
+
+        self.assertEqual(presenter._table_model.get_number_of_rows(), 3)
+        self.assertEqual(presenter._table_model.get_table_entry(2).to_list(), test_row_0)
+
+    def test_on_paste_rows_requested_replaces_row_if_one_row_is_selected(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[1])
+        presenter.set_view(view)
+        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
+                    'test_file', '', '1.0', '']
+        test_row_1 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0', '']
+        presenter.on_row_inserted(0, test_row_0)
+        presenter.on_row_inserted(1, test_row_1)
+        presenter.on_row_inserted(2, test_row_0)
+        presenter._clipboard = [test_row_0]
+
+        presenter.on_paste_rows_requested()
+
+        self.assertEqual(presenter._table_model.get_number_of_rows(), 3)
+        self.assertEqual(presenter._table_model.get_table_entry(1).to_list(), test_row_0)
+
+    def test_on_paste_rows_requested_replaces_first_row_and_removes_rest_if_multiple_rows_selected(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[0, 2])
+        presenter.set_view(view)
+        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
+                    'test_file', '', '1.0', '']
+        test_row_1 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0', '']
+        test_row_2 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file3', '', '1.0', '']
+        presenter.on_row_inserted(0, test_row_0)
+        presenter.on_row_inserted(1, test_row_1)
+        presenter.on_row_inserted(2, test_row_2)
+        presenter._clipboard = [test_row_2]
+
+        presenter.on_paste_rows_requested()
+
+        self.assertEqual(presenter._table_model.get_number_of_rows(), 2)
+        self.assertEqual(presenter._table_model.get_table_entry(0).to_list(), test_row_2)
+        self.assertEqual(presenter._table_model.get_table_entry(1).to_list(), test_row_1)
+
+    def test_on_paste_rows_updates_table_in_view(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[])
+        presenter.set_view(view)
+        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
+                      'test_file', '', '1.0', '']
+        test_row_1 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0', '']
+        presenter.on_row_inserted(0, test_row_0)
+        presenter.on_row_inserted(1, test_row_1)
+        presenter._clipboard = [test_row_0]
+        presenter.update_view_from_table_model = mock.MagicMock()
+
+        presenter.on_paste_rows_requested()
+
+        presenter.update_view_from_table_model.assert_called_once_with()
+
     @staticmethod
     def _clear_property_manager_data_service():
         for element in PropertyManagerDataService.getObjectNames():

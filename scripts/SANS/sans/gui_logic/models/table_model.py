@@ -68,6 +68,12 @@ class TableModel(object):
         # For speed rows should be a Set here but don't think it matters for the list sizes involved.
         self._table_entries[:] = [item for i,item in enumerate(self._table_entries) if i not in rows]
 
+    def replace_table_entries(self, row_to_replace_index, rows_to_insert):
+        self.remove_table_entries(row_to_replace_index)
+        for row in reversed(rows_to_insert):
+            row_entry = TableIndexModel(*row)
+            self.add_table_entry(row_to_replace_index[0], row_entry)
+
     def clear_table_entries(self):
         self._table_entries = []
 
@@ -134,7 +140,7 @@ class TableIndexModel(object):
     def __ne__(self, other):
         return self.__dict__ != other.__dict__
 
-    def toList(self):
+    def to_list(self):
         return [self.sample_scatter, self._string_period(self.sample_scatter_period), self.sample_transmission,
                 self._string_period(self.sample_transmission_period),self.sample_direct,
                 self._string_period(self.sample_direct_period), self.can_scatter,

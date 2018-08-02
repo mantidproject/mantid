@@ -121,6 +121,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         def on_rows_removed(self):
             pass
 
+        @abstractmethod
+        def on_copy_rows_requested(self):
+            pass
+
+        @abstractmethod
+        def on_paste_rows_requested(self):
+            pass
+
     def __init__(self, main_presenter):
         """
         Initialise the interface
@@ -335,6 +343,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.table_signals.cellTextChanged.connect(self._data_changed)
         self.table_signals.rowInserted.connect(self._row_inserted)
         self.table_signals.removeRowsRequested.connect(self._remove_rows_requested)
+        self.table_signals.copyRowsRequested.connect(self._copy_rows_requested)
+        self.table_signals.pasteRowsRequested.connect(self._paste_rows_requested)
 
     def cell(self, text):
         background_color = 'white'
@@ -382,6 +392,12 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def _remove_rows_requested(self, rows):
         rows = [item.rowRelativeToParent() for item in rows]
         self._call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
+
+    def _copy_rows_requested(self):
+        self._call_settings_listeners(lambda listener: listener.on_copy_rows_requested())
+
+    def _paste_rows_requested(self):
+        self._call_settings_listeners(lambda listener: listener.on_paste_rows_requested())
 
     def _instrument_changed(self):
         self._call_settings_listeners(lambda listener: listener.on_instrument_changed())
