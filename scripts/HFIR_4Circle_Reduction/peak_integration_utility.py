@@ -227,11 +227,21 @@ def fit_gaussian_linear_backgroud_mtd(matrix_ws_name):
     # fit peaks
     out_ws_name = '{}_fit_positions'.format(matrix_ws_name)
     fit_param_table_name = '{}_params_table'.format(matrix_ws_name)
+    # TODO - usually peak center shall be around the center of ROI
     mantidsimple.FitPeaks(InputWorkspace=matrix_ws_name,
                           PeakFunction='Gaussian',
                           BackgroundType='Linear',
                           OutputWorkspace=out_ws_name,
                           ParameterWorkspace=fit_param_table_name)
+
+    # TODO - 20180801 - Fix issue by following example
+    """
+    FitPeaks(InputWorkspace='Exp668_Scan320_430_roi322_horizontal', OutputWorkspace='fittedpeaks',
+        PeakCenters='120', FitWindowBoundaryList='60,160', FitFromRight=False,
+        Minimizer='Levenberg-MarquardtMD', HighBackground=False, ConstrainPeakPositions=False,
+        FittedPeaksWorkspace='voigtmodel', OutputPeakParametersWorkspace='voigtparams')
+
+    """
 
     # process output and set to a dictionary
 

@@ -101,7 +101,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         roi_name = str(self.ui.comboBox_roiList.currentText())
         direction = str(self.ui.comboBox_integrateDirection.currentText()).lower()
         movie_dir = os.path.join(movie_dir, '{}_{}'.format(roi_name, direction))
-        os.makedirs(movie_dir, exist_ok=True)
+        os.mkdir(movie_dir)
 
         # go through each line to plot and save the data
         num_rows = self.ui.tableView_summary.rowCount()
@@ -215,6 +215,8 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :return:
         """
         # get scan number
+        # TODO TODO TODO - 20180801 - Start from here
+        # TODO  - 20180801 - If line edit empty, then use the first scan in the table
         scan_number = int(self.ui.lineEdit_Scan.text())
         roi_name = str(self.ui.comboBox_roiList.currentText())
         direction = str(self.ui.comboBox_integrateDirection.currentText()).lower()
@@ -226,6 +228,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         self.ui.graphicsView_integration1DView.add_observed_data(vec_x, vec_y, label='integrated counts',
                                                                  update_plot=False)
+        # TODO - 20180801 - Model might be an option
         self.ui.graphicsView_integration1DView.add_fit_data(vec_x, model_y, label='Gaussian model',
                                                             update_plot=show_plot)
         # title

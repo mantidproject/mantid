@@ -1903,6 +1903,7 @@ class CWSCDReductionControl(object):
                                  integration_direction):
         """ Integrate detector counts on detector image inside a given ROI.
         Integration is either along X-direction (summing along rows) or Y-direction (summing along columns)
+        Peak fitting is removed from this method
         :param exp_number:
         :param scan_number:
         :param pt_number:
@@ -1968,16 +1969,16 @@ class CWSCDReductionControl(object):
             two_theta = self.get_sample_log_value(self._expNumber, scan_number, pt_number, '2theta')
             # create SinglePointPeakIntegration
             integrate_record = SinglePointPeakIntegration(exp_number, scan_number, roi_name, pt_number, two_theta)
-            integrate_record.set_xy_vector(vec_x, vec_y, peak_integration_utility)
+            integrate_record.set_xy_vector(vec_x, vec_y, integration_direction)
             # add the _single_pt_integration_dict()
             if (exp_number, scan_number, pt_number, roi_name) not in self._single_pt_integration_dict:
                 self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name] = dict()
             self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name][integration_direction] = \
                 integrate_record
-        else:
-            # retrieve the integration record from previously saved
-            integrate_record = self._single_pt_integration_dict[roi_key][integration_direction]
-            # vec_x, vec_y = integrate_record.get_vec_x_y()
+        # else:
+        #     # retrieve the integration record from previously saved
+        #     integrate_record = self._single_pt_integration_dict[roi_key][integration_direction]
+        #     # vec_x, vec_y = integrate_record.get_vec_x_y()
         # END-IF
 
         # if fit_gaussian:
@@ -1998,7 +1999,7 @@ class CWSCDReductionControl(object):
         # integrate_record.set_fit_cost(cost)
         # integrate_record.set_fit_params(x0=params[0], sigma=params[1], a=params[2], b=params[3])
 
-        return integrated_intensity
+        return
 
     @staticmethod
     def load_scan_survey_file(csv_file_name):

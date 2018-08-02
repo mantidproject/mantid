@@ -765,7 +765,7 @@ class SinglePointPeakIntegration(object):
         set the X and Y vector
         :param vec_x:
         :param vec_y:
-        :param counts integration direction
+        :param integral_direction: integration direction
         :return:
         """
         #  check input
@@ -854,7 +854,7 @@ class SinglePtIntegrationWorkspace(object):
         # check input
         check_integer('Experiment number', exp_number)
         check_list('Scan numbers', scan_number_list)
-        heck_string('Workspace2D name', matrix_ws_name)
+        check_string('Workspace2D name', matrix_ws_name)
         check_dictionary('Scan number spectrum number mapping', scan_spectrum_map)
         check_dictionary('Spectrum number scan number mapping', spectrum_scan_map)
 
