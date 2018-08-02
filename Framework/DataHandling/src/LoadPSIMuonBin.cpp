@@ -122,10 +122,18 @@ void LoadPSIMuonBin::exec() {
 
 std::string LoadPSIMuonBin::getFormattedDateTime(std::string date,
                                                  std::string time) {
-  std::map<std::string, std::string> months{
-      {"JAN", "01"}, {"FEB", "02"}, {"MAR", "03"}, {"APR", "04"},
-      {"MAY", "05"}, {"JUN", "06"}, {"JUL", "07"}, {"AUG", "08"},
-      {"SEP", "09"}, {"OCT", "10"}, {"NOV", "11"}, {"DEC", "12"}};
+  std::map<std::string, std::string> months{{"JAN", "01"},
+                                            {"FEB", "02"},
+                                            {"MAR", "03"},
+                                            {"APR", "04"},
+                                            {"MAY", "05"},
+                                            {"JUN", "06"},
+                                            {"JUL", "07"},
+                                            {"AUG", "08"},
+                                            {"SEP", "09"},
+                                            {"OCT", "10"},
+                                            {"NOV", "11"},
+                                            {"DEC", "12"}};
   return "20" + date.substr(7, 2) + "-" +
          months.find(date.substr(3, 3))->second + "-" + date.substr(0, 2) +
          "T" + time;
@@ -157,10 +165,9 @@ void LoadPSIMuonBin::readSingleVariables(
   streamReader >> m_header.histogramBinWidth;
 
   if (m_header.histogramBinWidth == 0) {
-    m_header.histogramBinWidth =
-        static_cast<float>((625.E-6) / 8. *
-                           pow(static_cast<float>(2.),
-                               static_cast<float>(m_header.tdcResolution)));
+    m_header.histogramBinWidth = static_cast<float>(
+        (625.E-6) / 8. * pow(static_cast<float>(2.),
+                             static_cast<float>(m_header.tdcResolution)));
   }
 
   streamReader.moveStreamToPosition(712);
@@ -338,8 +345,8 @@ void LoadPSIMuonBin::generateUnknownAxis() {
 void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     DataObjects::Workspace2D_sptr &outputWorkspace) {
   // Sort some workspace particulars
-  outputWorkspace->setTitle(m_header.sample +
-                            " - Run:" + std::to_string(m_header.numberOfRuns));
+  outputWorkspace->setTitle(m_header.sample + " - Run:" +
+                            std::to_string(m_header.numberOfRuns));
 
   // Set axis variables
   outputWorkspace->setYUnit("Counts");

@@ -100,9 +100,9 @@ BinaryStreamReader::BinaryStreamReader(std::istream &istrm)
 /**
  * Read a int16_t from the stream
  * @param value the value is stored in the given stream
- * @return BinaryStreamReader& 
+ * @return BinaryStreamReader&
  */
-BinaryStreamReader &BinaryStreamReader::operator>>(int16_t &value){
+BinaryStreamReader &BinaryStreamReader::operator>>(int16_t &value) {
   readFromStream(m_istrm, value);
   return *this;
 }
@@ -169,7 +169,7 @@ BinaryStreamReader &BinaryStreamReader::operator>>(std::string &value) {
  * Read an array of int16_t into the given vector.
  * @param value The array to fille. Its size is increased if necessary
  * @param nvals The number values to attempt to read from the stream
- * @return A reference to the BinaryStreamReader object 
+ * @return A reference to the BinaryStreamReader object
  */
 BinaryStreamReader &BinaryStreamReader::read(std::vector<int16_t> &value,
                                              const size_t nvals) {
@@ -310,7 +310,7 @@ BinaryStreamReader::read(Kernel::Matrix<double> &value,
 }
 
 /**
- * Will move the stream to the given position 
+ * Will move the stream to the given position
  * @param nbytes The number of bytes from position 0 to move
  */
 void BinaryStreamReader::moveStreamToPosition(size_t nbytes) {

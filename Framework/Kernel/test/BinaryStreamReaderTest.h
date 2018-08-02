@@ -35,7 +35,7 @@ public:
     TS_ASSERT_EQUALS(std::ios_base::beg, m_bytes.tellg());
   }
 
-  void test_Read_int16_t_Gives_Correct_Value(){
+  void test_Read_int16_t_Gives_Correct_Value() {
     doReadSingleValueTest<int16_t>(6, sizeof(int16_t));
   }
 
@@ -65,7 +65,7 @@ public:
     doReadSingleValueTest<std::string>("mantid", offset);
   }
 
-  void test_Read_Vector_int16_t(){
+  void test_Read_Vector_int16_t() {
     moveStreamToPosition(30);
     const size_t nvals(3);
     std::vector<int16_t> expectedValue{2, 0, 4};
