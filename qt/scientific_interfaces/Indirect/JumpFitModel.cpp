@@ -85,7 +85,7 @@ MatrixWorkspace_sptr scaleWorkspace(MatrixWorkspace_sptr workspace,
   auto scaleAlg = AlgorithmManager::Instance().create("Scale");
   scaleAlg->initialize();
   scaleAlg->setLogging(false);
-  scaleAlg->setChild(true);
+  scaleAlg->setAlwaysStoreInADS(false);
   scaleAlg->setProperty("InputWorkspace", workspace);
   scaleAlg->setProperty("OutputWorkspace", "__scaled");
   scaleAlg->setProperty("Factor", factor);
@@ -97,7 +97,7 @@ MatrixWorkspace_sptr extractSpectra(MatrixWorkspace_sptr workspace,
                                     int startIndex, int endIndex) {
   auto extractAlg = AlgorithmManager::Instance().create("ExtractSpectra");
   extractAlg->initialize();
-  extractAlg->setChild(true);
+  extractAlg->setAlwaysStoreInADS(false);
   extractAlg->setLogging(false);
   extractAlg->setProperty("InputWorkspace", workspace);
   extractAlg->setProperty("StartWorkspaceIndex", startIndex);
@@ -121,7 +121,7 @@ MatrixWorkspace_sptr appendWorkspace(MatrixWorkspace_sptr lhs,
                                      MatrixWorkspace_sptr rhs) {
   auto appendAlg = AlgorithmManager::Instance().create("AppendSpectra");
   appendAlg->initialize();
-  appendAlg->setChild(true);
+  appendAlg->setAlwaysStoreInADS(false);
   appendAlg->setLogging(false);
   appendAlg->setProperty("InputWorkspace1", lhs);
   appendAlg->setProperty("InputWorkspace2", rhs);
