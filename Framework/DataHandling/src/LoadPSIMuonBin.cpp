@@ -381,7 +381,7 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
       logAlg->setProperty("LogType", "Number");
       logAlg->setProperty("LogName",
                           "Actual Temperature" + std::to_string(tempNum));
-      logAlg->setProperty("LogText", m_header.temperatures[tempNum - 1]);
+      logAlg->setProperty("LogText", std::to_string(m_header.temperatures[tempNum - 1]));
       logAlg->executeAsChildAlg();
     }
   }
@@ -409,12 +409,13 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   logAlg->executeAsChildAlg();
 
   // get scalar labels and set spectra accordingly
-  for (auto i = 0u; i < 18 : ++i) {
+  for (auto i = 0u; i < 18; ++i) {
     if (m_header.labels_scalars[i] != "NONE") {
       logAlg->setProperty("LogType", "String");
-      logAlg->setProperty("LogName", "Spectra" + i + " label and scalar");
+      logAlg->setProperty("LogName", "Spectra" + std::to_string(i) + " label and scalar");
       logAlg->setProperty("LogText",
-                          m_header.label_scalars[i] + " - " + m_scalars[i]);
+                          m_header.labels_scalars[i] + " - " + std::to_string(m_header.scalars[i]));
+      logAlg->executeAsChildAlg();                    
     }
   }
 }
