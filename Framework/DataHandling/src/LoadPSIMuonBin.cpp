@@ -419,7 +419,8 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   logAlg->executeAsChildAlg();
 
   // get scalar labels and set spectra accordingly
-  for (auto i = 0u; i < sizeof(m_header.scalars) / sizeof(*m_header.scalars); ++i) {
+  for (auto i = 0u; i < sizeof(m_header.scalars) / sizeof(*m_header.scalars);
+       ++i) {
     if (m_header.labels_scalars[i] != "NONE") {
       logAlg->setProperty("LogType", "String");
       logAlg->setProperty("LogName",
@@ -432,14 +433,15 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     }
   }
 
-  //Orientation
+  // Orientation
   logAlg->setProperty("LogType", "String");
   logAlg->setProperty("LogName", "Orientation");
   logAlg->setProperty("LogText", m_header.orientation);
   logAlg->executeAsChildAlg();
 
-  //first good and last good
-  for(auto i = 0u; i < sizeof(m_header.firstGood) / sizeof(*m_header.firstGood); ++i){
+  // first good and last good
+  for (auto i = 0u;
+       i < sizeof(m_header.firstGood) / sizeof(*m_header.firstGood); ++i) {
     if (m_header.firstGood != 0) {
       logAlg->setProperty("LogType", "String");
       logAlg->setProperty("LogName", "Spectra" + std::to_string(i) +
@@ -451,7 +453,7 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     }
   }
 
-  //total events
+  // total events
   logAlg->setProperty("LogType", "Number");
   logAlg->setProperty("LogName", "Total Number of Events");
   logAlg->setProperty("LogText", m_header.totalEvents);
