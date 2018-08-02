@@ -855,18 +855,6 @@ Has a in place transpose for a square matrix case.
 
   return *this;
 }
-
-template <>
-void Matrix<int>::GaussJordan(Kernel::Matrix<int> &)
-/**
-Not valid for Integer
-@throw std::invalid_argument
-*/
-{
-  throw std::invalid_argument(
-      "Gauss-Jordan inversion not valid for integer matrix");
-}
-
 template <typename T>
 void Matrix<T>::GaussJordan(Matrix<T> &B)
 /**
@@ -1657,10 +1645,16 @@ void fillFromStream(std::istream &is, Kernel::Matrix<T> &in,
 
 // Explicit instatiations. Avoid duplicate symbol definitions in
 // client libraries. This must match the explicit declaration list
-// in the header
-template class MANTID_KERNEL_DLL Matrix<double>;
-template class MANTID_KERNEL_DLL Matrix<int>;
-template class MANTID_KERNEL_DLL Matrix<float>;
+// in the header. MSVC/gcc differ in whether these symbols need to be
+// marked as exported
+#if defined(_MSC_VER)
+#define KERNEL_MATRIX_SYMBOL_DLL MANTID_KERNEL_DLL
+#else
+#define KERNEL_MATRIX_SYMBOL_DLL
+#endif
+template class KERNEL_MATRIX_SYMBOL_DLL Matrix<double>;
+template class KERNEL_MATRIX_SYMBOL_DLL Matrix<int>;
+template class KERNEL_MATRIX_SYMBOL_DLL Matrix<float>;
 
 template MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
                                                     const DblMatrix &);

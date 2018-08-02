@@ -7,6 +7,19 @@
 #include <memory>
 #include <vector>
 
+// Our aim with Matrix is to provide the definition for
+// predefined types and avoid multiple copies of the same
+// definition in multiple shared libraries.
+// On MSVC template declarations cannot have
+// both extern and __declspec(dllexport) but gcc
+// requires the __attribute__((visibility("default")))
+// attribute on the class definition.
+#if defined(_MSC_VER)
+#define KERNEL_MATRIX_CLASS_DLL
+#else
+#define KERNEL_MATRIX_CLASS_DLL MANTID_KERNEL_DLL
+#endif
+
 namespace Mantid {
 
 namespace Kernel {
@@ -34,7 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <typename T> class Matrix {
+template <typename T> class KERNEL_MATRIX_CLASS_DLL Matrix {
 public:
   /// Enable users to retrieve the element type
   using value_type = T;
@@ -184,11 +197,27 @@ private:
                              const char);
 };
 
-// Explicit declarations. Symbols provided by matching explicit
-// instantiations in source file
+template <>
+inline void Matrix<int>::GaussJordan(Kernel::Matrix<int> &)
+/**
+Not valid for Integer
+@throw std::invalid_argument
+*/
+{
+  throw std::invalid_argument(
+      "Gauss-Jordan inversion not valid for integer matrix");
+}
+
+// Explicit declarations required by Visual C++. Symbols provided by matching
+// explicit instantiations in source file
+#if defined(_MSC_VER)
 extern template class Matrix<double>;
 extern template class Matrix<int>;
 extern template class Matrix<float>;
+#endif
+
+// clean up
+#undef KERNEL_MATRIX_CLASS_DLL
 
 //-------------------------------------------------------------------------
 // Typedefs
