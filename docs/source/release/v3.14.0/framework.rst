@@ -47,7 +47,7 @@ Improvements
 Bugfixes
 ########
 
-
+- :ref:`SaveGDA <algm-SaveGDA>` Now takes a parameter of OutputFilename instead of Filename to better match with similar algorithms.
 
 Python
 ------
