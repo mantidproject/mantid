@@ -119,22 +119,14 @@ public:
 
   const Kernel::V3D getModVec(int j) const;
   const Kernel::V3D getVecErr(int j) const;
-  //            const Kernel::V3D &getModVec2() const;
-  //            const Kernel::V3D &getModVec3() const;
   const Kernel::DblMatrix &getModHKL() const;
-  double getdh(int j) const;
-  double getdk(int j) const;
-  double getdl(int j) const;
+  double getDh(int j) const;
+  double getDk(int j) const;
+  double getDl(int j) const;
 
-  double getdherr(int j) const;
-  double getdkerr(int j) const;
-  double getdlerr(int j) const;
-  //            double getdh2() const;
-  //            double getdk2() const;
-  //            double getdl2() const;
-  //            double getdh3() const;
-  //            double getdk3() const;
-  //            double getdl3() const;
+  double getDhErr(int j) const;
+  double getDkErr(int j) const;
+  double getDlErr(int j) const;
 
   void set(double _a, double _b, double _c, double _alpha, double _beta,
            double _gamma, const int angleunit = angDegrees);

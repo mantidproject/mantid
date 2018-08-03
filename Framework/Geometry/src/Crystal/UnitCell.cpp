@@ -427,59 +427,26 @@ void UnitCell::setModerr3(double _dh3err, double _dk3err, double _dl3err) {
 }
 
 const Kernel::V3D UnitCell::getModVec(int j) const {
-  return V3D(getdh(j), getdk(j), getdl(j));
+  return V3D(getDh(j), getDk(j), getDl(j));
 }
 
 const Kernel::V3D UnitCell::getVecErr(int j) const {
-  return V3D(getdherr(j), getdkerr(j), getdlerr(j));
+  return V3D(getDhErr(j), getDkErr(j), getDlErr(j));
 }
-
-/*
-const Kernel::V3D &UnitCell::getModVec2() const
-{
-    return V3D (getdh2(),getdk2(),getdl2());
-}
-
-const Kernel::V3D &UnitCell::getModVec3() const
-{
-    return V3D (getdh3(),getdk3(),getdl3());
-}
-*/
 
 const Kernel::DblMatrix &UnitCell::getModHKL() const { return ModHKL; }
 
-double UnitCell::getdh(int j) const { return ModHKL[0][j - 1]; }
+double UnitCell::getDh(int j) const { return ModHKL[0][j - 1]; }
 
-double UnitCell::getdk(int j) const { return ModHKL[1][j - 1]; }
+double UnitCell::getDk(int j) const { return ModHKL[1][j - 1]; }
 
-double UnitCell::getdl(int j) const { return ModHKL[2][j - 1]; }
+double UnitCell::getDl(int j) const { return ModHKL[2][j - 1]; }
 
-double UnitCell::getdherr(int j) const { return errorModHKL[0][j - 1]; }
+double UnitCell::getDhErr(int j) const { return errorModHKL[0][j - 1]; }
 
-double UnitCell::getdkerr(int j) const { return errorModHKL[1][j - 1]; }
+double UnitCell::getDkErr(int j) const { return errorModHKL[1][j - 1]; }
 
-double UnitCell::getdlerr(int j) const { return errorModHKL[2][j - 1]; }
-
-/*
-int UnitCell::getModDim()
-{
-    if (getdh(1)==0 && getdk(1)==0 && getdl(1)==0)
-}
-*/
-
-/*
-double UnitCell::getdh2() const { return ModHKL[0][1]; }
-
-double UnitCell::getdk2() const { return ModHKL[1][1]; }
-
-double UnitCell::getdl2() const { return ModHKL[2][1]; }
-
-double UnitCell::getdh3() const { return ModHKL[0][2]; }
-
-double UnitCell::getdk3() const { return ModHKL[1][2]; }
-
-double UnitCell::getdl3() const { return ModHKL[2][2]; }
-*/
+double UnitCell::getDlErr(int j) const { return errorModHKL[2][j - 1]; }
 
 /** Set lattice parameter
  @param _a :: lattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )*/
