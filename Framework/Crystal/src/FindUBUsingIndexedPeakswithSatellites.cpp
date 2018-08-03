@@ -85,7 +85,6 @@ void FindUBUsingIndexedPeakswithSatellites::exec() {
                              "FindUBUsingIndexedPeaks");
   }
 
-
   if (indexed_count < 4) {
     throw std::runtime_error(
         "At least four linearly independent indexed peaks are needed.");

@@ -884,7 +884,7 @@ double IndexingUtils::Optimize_6dUB(DblMatrix &UB, DblMatrix &ModUB,
       sigq[i] = sqrt(delta) * latOrig[i];
     }
     for (size_t i = 3; i < 6; i++) {
-      sigq[i] = sqrt(delta) * latOrig[i-3];
+      sigq[i] = sqrt(delta) * latOrig[i - 3];
     }
     for (size_t i = 6; i < 9; i++) {
       sigq[i] = 0;
@@ -896,10 +896,10 @@ double IndexingUtils::Optimize_6dUB(DblMatrix &UB, DblMatrix &ModUB,
       sigq[i] = sqrt(delta) * latOrig[i];
     }
     for (size_t i = 3; i < 6; i++) {
-      sigq[i] = sqrt(delta) * latOrig[i-3];
+      sigq[i] = sqrt(delta) * latOrig[i - 3];
     }
     for (size_t i = 6; i < 9; i++) {
-      sigq[i] = sqrt(delta) * latOrig[i-6];
+      sigq[i] = sqrt(delta) * latOrig[i - 6];
     }
   }
 
