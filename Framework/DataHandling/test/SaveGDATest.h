@@ -100,7 +100,8 @@ public:
 
     Poco::TemporaryFile tempFile;
     const std::string &tempFileName = tempFile.path();
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputFilename", tempFileName));
+    TS_ASSERT_THROWS_NOTHING(
+        testAlg.setProperty("OutputFilename", tempFileName));
 
     TS_ASSERT_THROWS_ANYTHING(testAlg.execute());
   }
@@ -118,7 +119,8 @@ public:
 
     Poco::TemporaryFile tempFile;
     const std::string &tempFileName = tempFile.path();
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputFilename", tempFileName));
+    TS_ASSERT_THROWS_NOTHING(
+        testAlg.setProperty("OutputFilename", tempFileName));
 
     TS_ASSERT_THROWS_NOTHING(testAlg.execute());
     TS_ASSERT(testAlg.isExecuted());
