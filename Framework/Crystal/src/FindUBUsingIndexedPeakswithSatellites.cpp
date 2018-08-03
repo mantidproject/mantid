@@ -85,7 +85,6 @@ void FindUBUsingIndexedPeakswithSatellites::exec() {
                              "FindUBUsingIndexedPeaks");
   }
 
-  //            g_log.notice() << "Modulation Dimension is: " << ModDim << "\n";
 
   if (indexed_count < 4) {
     throw std::runtime_error(

@@ -871,39 +871,36 @@ double IndexingUtils::Optimize_6dUB(DblMatrix &UB, DblMatrix &ModUB,
   UBinv.Invert();
 
   if (ModDim == 1) {
-    sigq[0] = sqrt(delta) * latOrig[0];
-    sigq[1] = sqrt(delta) * latOrig[1];
-    sigq[2] = sqrt(delta) * latOrig[2];
-    sigq[3] = 0;
-    sigq[4] = 0;
-    sigq[5] = 0;
-    sigq[6] = 0;
-    sigq[7] = 0;
-    sigq[8] = 0;
+    for (size_t i = 0; i < 3; i++) {
+      sigq[i] = sqrt(delta) * latOrig[i];
+    }
+    for (size_t i = 3; i < 9; i++) {
+      sigq[i] = 0;
+    }
   }
 
   if (ModDim == 2) {
-    sigq[0] = sqrt(delta) * latOrig[0];
-    sigq[1] = sqrt(delta) * latOrig[1];
-    sigq[2] = sqrt(delta) * latOrig[2];
-    sigq[3] = sqrt(delta) * latOrig[0];
-    sigq[4] = sqrt(delta) * latOrig[1];
-    sigq[5] = sqrt(delta) * latOrig[2];
-    sigq[6] = 0;
-    sigq[7] = 0;
-    sigq[8] = 0;
+    for (size_t i = 0; i < 3; i++) {
+      sigq[i] = sqrt(delta) * latOrig[i];
+    }
+    for (size_t i = 3; i < 6; i++) {
+      sigq[i] = sqrt(delta) * latOrig[i-3];
+    }
+    for (size_t i = 6; i < 9; i++) {
+      sigq[i] = 0;
+    }
   }
 
   if (ModDim == 3) {
-    sigq[0] = sqrt(delta) * latOrig[0];
-    sigq[1] = sqrt(delta) * latOrig[1];
-    sigq[2] = sqrt(delta) * latOrig[2];
-    sigq[3] = sqrt(delta) * latOrig[0];
-    sigq[4] = sqrt(delta) * latOrig[1];
-    sigq[5] = sqrt(delta) * latOrig[2];
-    sigq[6] = sqrt(delta) * latOrig[0];
-    sigq[7] = sqrt(delta) * latOrig[1];
-    sigq[8] = sqrt(delta) * latOrig[2];
+    for (size_t i = 0; i < 3; i++) {
+      sigq[i] = sqrt(delta) * latOrig[i];
+    }
+    for (size_t i = 3; i < 6; i++) {
+      sigq[i] = sqrt(delta) * latOrig[i-3];
+    }
+    for (size_t i = 6; i < 9; i++) {
+      sigq[i] = sqrt(delta) * latOrig[i-6];
+    }
   }
 
   return delta;
