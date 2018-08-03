@@ -123,10 +123,6 @@ void export_TimeSeriesPropertyStatistics() {
       .add_property("median",
                     &Mantid::Kernel::TimeSeriesPropertyStatistics::median)
       .add_property(
-<<<<<<< HEAD
-          "standard_deviation",
-          &Mantid::Kernel::TimeSeriesPropertyStatistics::standard_deviation)
-=======
           "standard_deviation",
           &Mantid::Kernel::TimeSeriesPropertyStatistics::standard_deviation)
       .add_property("time_mean",
@@ -134,7 +130,6 @@ void export_TimeSeriesPropertyStatistics() {
       .add_property("time_standard_deviation",
                     &Mantid::Kernel::TimeSeriesPropertyStatistics::
                         time_standard_deviation)
->>>>>>> origin/master
       .add_property("duration",
                     &Mantid::Kernel::TimeSeriesPropertyStatistics::duration);
 }
