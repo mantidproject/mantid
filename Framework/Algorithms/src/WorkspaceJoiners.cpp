@@ -118,7 +118,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execWS2D(const MatrixWorkspace &ws1,
  *  @throw std::invalid_argument If the input workspaces do not meet the
  * requirements of this algorithm
  */
-MatrixWorkspace_sptr
+DataObjects::EventWorkspace_sptr
 WorkspaceJoiners::execEvent(const DataObjects::EventWorkspace &event_ws1,
                             const DataObjects::EventWorkspace &event_ws2) {
   // Create the output workspace
