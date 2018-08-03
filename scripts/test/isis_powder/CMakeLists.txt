@@ -8,6 +8,7 @@ set ( TEST_PY_FILES
     ISISPowderAbsorptionTest.py
     ISISPowderAbstractInstrumentTest.py
     ISISPowderCommonTest.py
+    ISISPowderGemOutputTest.py
     ISISPowderInstrumentSettingsTest.py
     ISISPowderRunDetailsTest.py
     ISISPowderSampleDetailsTest.py
