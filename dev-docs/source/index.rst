@@ -104,6 +104,7 @@ Tools
    ProfilingWithValgrind
    FlowchartCreation
    VisualStudioBuildImpact
+   GettingStartedWithPyCharm
 
 :doc:`ToolsOverview`
    Describes ``class_maker``, ``valgrind`` and related tools.
@@ -116,6 +117,9 @@ Tools
 
 :doc:`VisualStudioBuildImpact`
    Provides a script to reduce the impact of Visual Studio on machine performance.
+
+:doc:`GettingStartedWithPyCharm`
+   Describes how to set up the PyCharm interpreter, and debug python code (Windows/Linux only).
 
 =======
 Testing
