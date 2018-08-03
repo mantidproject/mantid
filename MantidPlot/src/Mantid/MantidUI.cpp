@@ -4,7 +4,6 @@
 // clang-format on
 #include "MantidQtWidgets/Common/DropEventHelper.h"
 
-
 #include "AlgorithmDockWidget.h"
 #include "AlgorithmHistoryWindow.h"
 #include "AlgorithmMonitor.h"
