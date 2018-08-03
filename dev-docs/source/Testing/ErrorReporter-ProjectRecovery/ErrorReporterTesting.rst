@@ -12,7 +12,7 @@ Error Reporter test
 *Preparation*
 
 -  Ensure that `Report usage data` is checked in the First Time Setup screen
--  Files ``SANS2D00005512.nxs``
+-  Files ``SANS2D00005512.nxs``; availabe in ``/Testing/Data/SystemTest/SANS2D``, get this by building the `SystemTestData` target. It should be in in ``ExternalData/Testing/Data/SystemTest/SANS2D/``
 -  Make sure the location of these files is included in your search
    directories. Full instructions `are available
    online <http://www.mantidproject.org/MBC_Getting_set_up#MantidPlot_First-Time_Setup>`__.
@@ -30,6 +30,7 @@ Error Reporter test
 - Enter some text in the `Name` box; make sure the `Share non-identifiable information` button gets greyed out
 - In the `Name` box enter `Private` and in the `Email` box enter `private`
 - Click the `Don't share any information` box
+- Check with the database admin
 
 ---------------
 
@@ -39,6 +40,7 @@ Error Reporter test
 - The error report dialog should pop up
 - In the `Name` box enter `Public` and in the `Email` box enter `public`
 - Click the `Yes, share information` box
+- Check with the database admin
 
 ---------------
 
@@ -54,6 +56,7 @@ Error Reporter test
 - Make sure the `Continue` radio button is checked
 - Click the `Don't share any information` box
 - You should be returned to the main Mantid window
+- Check with the database admin
 
 ---------------
 
@@ -66,6 +69,7 @@ Error Reporter test
 - Make sure the `Continue` radio button is checked
 - Click the `Share non-identifiable information` box
 - You should be returned to the main Mantid window
+- Check with the database admin
 
 ---------------
 
@@ -81,6 +85,7 @@ Error Reporter test
 - Make sure the `Continue` radio button is checked
 - Click the `Yes, share information` box
 - You should be returned to the main Mantid window
+- Check with the database admin
 
 ---------------
 
@@ -96,5 +101,6 @@ Error Reporter test
 - Make sure the `Terminate` radio button is checked
 - Click the `Yes, share information` box
 - Mantid should shut down
+- Check with the database admin
 
 ---------------
