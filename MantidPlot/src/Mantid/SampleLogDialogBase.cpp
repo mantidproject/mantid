@@ -138,17 +138,14 @@ void SampleLogDialogBase::showLogStatisticsOfItem(
         dynamic_cast<TimeSeriesProperty<double> *>(logData);
     Mantid::Kernel::TimeSeriesProperty<int> *tspi =
         dynamic_cast<TimeSeriesProperty<int> *>(logData);
-    std::pair<double, double> timeAvgStdDev{0., 0.};
     LogFilterGenerator generator(filter, m_ei->run());
     const auto &logFilter = generator.generateFilter(logName);
     if (tspd) {
       ScopedFilter<double> applyFilter(tspd, std::move(logFilter));
       stats = tspd->getStatistics();
-      timeAvgStdDev = tspd->timeAverageValueAndStdDev();
     } else if (tspi) {
       ScopedFilter<int> applyFilter(tspi, std::move(logFilter));
       stats = tspi->getStatistics();
-      timeAvgStdDev = tspi->timeAverageValueAndStdDev();
     } else
       return;
 
@@ -158,8 +155,8 @@ void SampleLogDialogBase::showLogStatisticsOfItem(
     statValues[2]->setText(QString::number(stats.mean));
     statValues[3]->setText(QString::number(stats.median));
     statValues[4]->setText(QString::number(stats.standard_deviation));
-    statValues[5]->setText(QString::number(timeAvgStdDev.first));
-    statValues[6]->setText(QString::number(timeAvgStdDev.second));
+    statValues[5]->setText(QString::number(stats.time_mean));
+    statValues[6]->setText(QString::number(stats.time_standard_deviation));
     statValues[7]->setText(QString::number(stats.duration));
     return;
     break;

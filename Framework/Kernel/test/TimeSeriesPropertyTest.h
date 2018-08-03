@@ -619,14 +619,6 @@ public:
     const double intMean = intLog->timeAverageValue();
     TS_ASSERT_DELTA(intMean, 2.5, .0001);
 
-    // average is unchanged, standard deviation within tolerance
-    const auto dblPair = dblLog->timeAverageValueAndStdDev();
-    TS_ASSERT_EQUALS(dblPair.first, dblMean);
-    TS_ASSERT_DELTA(dblPair.second, 1.8156, .0001);
-    const auto intPair = intLog->timeAverageValueAndStdDev();
-    TS_ASSERT_EQUALS(intPair.first, intMean);
-    TS_ASSERT_DELTA(intPair.second, 1.1180, .0001);
-
     // Clean up
     delete dblLog;
     delete intLog;
@@ -1055,6 +1047,8 @@ public:
     TS_ASSERT_DELTA(stats.duration, 100.0, 1e-3);
     TS_ASSERT_DELTA(stats.standard_deviation, 3.1622, 1e-3);
     TS_ASSERT_DELTA(log->timeAverageValue(), 5.5, 1e-3);
+    TS_ASSERT_DELTA(stats.time_mean, 5.5, 1e-3);
+    TS_ASSERT_DELTA(stats.time_standard_deviation, 2.872, 1e-3);
 
     delete log;
   }
@@ -1068,6 +1062,8 @@ public:
     TS_ASSERT(std::isnan(stats.median));
     TS_ASSERT(std::isnan(stats.mean));
     TS_ASSERT(std::isnan(stats.standard_deviation));
+    TS_ASSERT(std::isnan(stats.time_mean));
+    TS_ASSERT(std::isnan(stats.time_standard_deviation));
     TS_ASSERT(std::isnan(stats.duration));
 
     delete log;

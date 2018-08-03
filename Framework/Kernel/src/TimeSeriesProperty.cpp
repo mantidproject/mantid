@@ -2004,7 +2004,12 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
       duration_sec += interval.duration();
     }
     out.duration = duration_sec;
+    const auto time_weighted = this->timeAverageValueAndStdDev();
+    out.time_mean = time_weighted.first;
+    out.time_standard_deviation = time_weighted.second;
   } else {
+    out.time_mean = std::numeric_limits<double>::quiet_NaN();
+    out.time_standard_deviation = std::numeric_limits<double>::quiet_NaN();
     out.duration = std::numeric_limits<double>::quiet_NaN();
   }
 

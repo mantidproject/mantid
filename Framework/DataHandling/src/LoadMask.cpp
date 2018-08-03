@@ -569,9 +569,9 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
  */
 void LoadMask::initializeXMLParser(const std::string &filename) {
   // const std::string instName
-  std::cout << "Load File " << filename << '\n';
+  g_log.information() << "Load File " << filename << '\n';
   const std::string xmlText = Kernel::Strings::loadFile(filename);
-  std::cout << "Successfully Load XML File \n";
+  g_log.information("Successfully Load XML File");
 
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
