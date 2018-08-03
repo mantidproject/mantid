@@ -46,7 +46,7 @@ Improvements
 
 Bugfixes
 ########
-
+- :ref:`FilterEvents <algm-FilterEvents-v1>` output workspaces now contain the goniometer.
 
 
 Python
