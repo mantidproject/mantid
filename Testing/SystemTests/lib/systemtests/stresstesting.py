@@ -778,7 +778,7 @@ class TestManager(object):
         for suite in self._tests[self._lastTestRun:]:
             suite.setOutputMsg(reason)
             suite.reportResults(self._reporters) # just let people know you were skipped
-         
+
     def loadTestsFromDir(self, test_dir):
         ''' Load all of the tests defined in the given directory'''
         entries = os.listdir(test_dir)
@@ -945,7 +945,7 @@ class MantidFrameworkConfig:
 
         # Do not update instrument definitions
         config['UpdateInstrumentDefinitions.OnStartup'] = "0"
-        
+
         # Do not perform a version check
         config['CheckMantidVersion.OnStartup'] = "0"
 
@@ -954,10 +954,11 @@ class MantidFrameworkConfig:
 
         # Case insensitive
         config['filefinder.casesensitive'] = 'Off'
-        
+
         # datasearch
         if self.__datasearch:
-            config["datasearch.searcharchive"] = 'On'
+            # turn on for 'all' facilties, 'on' is only for default facility
+            config["datasearch.searcharchive"] = 'all'
             config['network.default.timeout'] = '5'
 
         # Save this configuration

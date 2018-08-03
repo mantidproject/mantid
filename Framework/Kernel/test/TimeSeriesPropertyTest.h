@@ -613,8 +613,11 @@ public:
     auto dblLog = createDoubleTSP();
     auto intLog = createIntegerTSP(5);
 
-    TS_ASSERT_DELTA(dblLog->timeAverageValue(), 7.6966, .0001);
-    TS_ASSERT_DELTA(intLog->timeAverageValue(), 2.5, .0001);
+    // average values
+    const double dblMean = dblLog->timeAverageValue();
+    TS_ASSERT_DELTA(dblMean, 7.6966, .0001);
+    const double intMean = intLog->timeAverageValue();
+    TS_ASSERT_DELTA(intMean, 2.5, .0001);
 
     // Clean up
     delete dblLog;
@@ -624,6 +627,8 @@ public:
   void test_averageValueInFilter_throws_for_string_property() {
     TimeSplitterType splitter;
     TS_ASSERT_THROWS(sProp->averageValueInFilter(splitter),
+                     Exception::NotImplementedError);
+    TS_ASSERT_THROWS(sProp->averageAndStdDevInFilter(splitter),
                      Exception::NotImplementedError);
   }
 
@@ -1042,6 +1047,8 @@ public:
     TS_ASSERT_DELTA(stats.duration, 100.0, 1e-3);
     TS_ASSERT_DELTA(stats.standard_deviation, 3.1622, 1e-3);
     TS_ASSERT_DELTA(log->timeAverageValue(), 5.5, 1e-3);
+    TS_ASSERT_DELTA(stats.time_mean, 5.5, 1e-3);
+    TS_ASSERT_DELTA(stats.time_standard_deviation, 2.872, 1e-3);
 
     delete log;
   }
@@ -1055,6 +1062,8 @@ public:
     TS_ASSERT(std::isnan(stats.median));
     TS_ASSERT(std::isnan(stats.mean));
     TS_ASSERT(std::isnan(stats.standard_deviation));
+    TS_ASSERT(std::isnan(stats.time_mean));
+    TS_ASSERT(std::isnan(stats.time_standard_deviation));
     TS_ASSERT(std::isnan(stats.duration));
 
     delete log;

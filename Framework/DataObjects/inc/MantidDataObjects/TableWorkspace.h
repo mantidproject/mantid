@@ -337,7 +337,7 @@ private:
     }
   }
 
-  bool addColumn(boost::shared_ptr<API::Column> column);
+  void addColumn(boost::shared_ptr<API::Column> column);
 
   /** This method finds the row and column index of an integer cell value in a
   * table workspace

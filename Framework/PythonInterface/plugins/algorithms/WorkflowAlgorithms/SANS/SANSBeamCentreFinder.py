@@ -187,8 +187,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             residueTB.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.Top],
                                                        sample_quartiles[MaskingQuadrant.Bottom]))
             if(j == 0):
-                logger.notice("Itr " + str(j) + ": (" + str(self.scale_1 * centre1) + ", " + str(self.scale_2 * centre2) + ")  SX="
-                              + str(residueLR[j]) + "  SY=" + str(residueTB[j]))
+                logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
+                              format(j, self.scale_1 * centre1, self.scale_2 * centre2, residueLR[j], residueTB[j]))
                 if mantidplot:
                     self._plot_quartiles(output_workspaces, state.data.sample_scatter)
 
@@ -200,8 +200,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 if residueTB[j] > residueTB[j-1]:
                     position_2_step = - position_2_step / 2
 
-                logger.notice("Itr " + str(j) + ": (" + str(self.scale_1 * centre1) + ", " + str(self.scale_2 * centre2) + ")  SX="
-                              + str(residueLR[j]) + "  SY=" + str(residueTB[j]))
+                logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
+                              format(j, self.scale_1 * centre1, self.scale_2 * centre2, residueLR[j], residueTB[j]))
 
                 if (residueLR[j]+residueTB[j]) < (residueLR[j-1]+residueTB[j-1]) or state.compatibility.use_compatibility_mode:
                     centre_1_hold = centre1

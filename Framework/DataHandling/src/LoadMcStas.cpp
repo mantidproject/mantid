@@ -14,8 +14,10 @@
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
 #include <boost/algorithm/string.hpp>
-#include <nexus/NeXusException.hpp>
+// clang-format off
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
+// clang-format on
 
 namespace Mantid {
 namespace DataHandling {
@@ -50,12 +52,19 @@ void LoadMcStas::init() {
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
-  // added to allow control of errorbars
+
   declareProperty(
       "ErrorBarsSetTo1", false,
       "When this property is set to false errors are set equal to data values, "
       "and when set to true all errors are set equal to one. This property "
       "defaults to false");
+
+  declareProperty(
+      "OutputOnlySummedEventWorkspace", true,
+      "When true the algorithm only outputs the sum of all event data into "
+      "one eventworkspace EventData + _ + name of the OutputWorkspace. "
+      "If false eventworkspaces are also returned for each individual "
+      "McStas components storing event data");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -173,7 +182,8 @@ std::vector<std::string> LoadMcStas::readEventData(
 
   std::string filename = getPropertyValue("Filename");
   auto entries = nxFile.getEntries();
-  bool errorBarsSetTo1 = getProperty("ErrorBarsSetTo1");
+  const bool errorBarsSetTo1 = getProperty("ErrorBarsSetTo1");
+
   // will assume that each top level entry contain one mcstas
   // generated IDF and any event data entries within this top level
   // entry are data collected for that instrument
@@ -269,25 +279,33 @@ std::vector<std::string> LoadMcStas::readEventData(
   double shortestTOF(0.0);
   double longestTOF(0.0);
 
+  // create vector container all the event output workspaces needed
   const size_t numEventEntries = eventEntries.size();
   std::string nameOfGroupWS = getProperty("OutputWorkspace");
-  const auto eventDataTotalName = std::string("EventData_") + nameOfGroupWS;
+  const auto eventDataTotalName = "EventData_" + nameOfGroupWS;
   std::vector<std::pair<EventWorkspace_sptr, std::string>> allEventWS = {
       {eventWS, eventDataTotalName}};
+  // if numEventEntries > 1 also create separate event workspaces
+  const bool onlySummedEventWorkspace =
+      getProperty("OutputOnlySummedEventWorkspace");
+  if (!onlySummedEventWorkspace && numEventEntries > 1) {
+    for (const auto &eventEntry : eventEntries) {
+      const std::string &dataName = eventEntry.first;
+      // create container to hold partial event data
+      // plus the name users will see for it
+      const auto ws_name = dataName + "_" + nameOfGroupWS;
+      allEventWS.emplace_back(eventWS->clone(), ws_name);
+    }
+  }
 
   Progress progEntries(this, progressFractionInitial, 1.0, numEventEntries * 2);
-  auto eventWSIndex = 1; // Starts at the first non-sum workspace
+
+  // Refer to entry in allEventWS. The first non-summed workspace index is 1
+  auto eventWSIndex = 1u;
+  // Loop over McStas event data components
   for (const auto &eventEntry : eventEntries) {
     const std::string &dataName = eventEntry.first;
     const std::string &dataType = eventEntry.second;
-    if (numEventEntries > 1) {
-      for (auto i = 1u; i <= numEventEntries; i++) {
-        allEventWS.emplace_back(eventWS->clone(),
-                                "partial_event_data_workspace");
-      }
-      allEventWS[eventWSIndex].second =
-          dataName + std::string("_") + nameOfGroupWS;
-    }
 
     // open second level entry
     nxFile.openGroup(dataName, dataType);
@@ -386,13 +404,6 @@ std::vector<std::string> LoadMcStas::readEventData(
             detIDtoWSindex_map.find(detectorID)->second;
 
         int64_t pulse_time = 0;
-        // eventWS->getSpectrum(workspaceIndex) +=
-        // TofEvent(detector_time,pulse_time);
-        // eventWS->getSpectrum(workspaceIndex) += TofEvent(detector_time);
-        // The following line puts the events into the weighted event instance
-        // Originally this was coded so the error squared is 1 it should be
-        // data[numberOfDataColumn * in]*data[numberOfDataColumn * in]
-        // introduced flag to allow old usage
         auto weightedEvent = WeightedEvent();
         if (errorBarsSetTo1) {
           weightedEvent = WeightedEvent(detector_time, pulse_time,
@@ -403,7 +414,7 @@ std::vector<std::string> LoadMcStas::readEventData(
               data[numberOfDataColumn * in] * data[numberOfDataColumn * in]);
         }
         allEventWS[0].first->getSpectrum(workspaceIndex) += weightedEvent;
-        if (numEventEntries > 1) {
+        if (!onlySummedEventWorkspace && numEventEntries > 1) {
           allEventWS[eventWSIndex].first->getSpectrum(workspaceIndex) +=
               weightedEvent;
         }
@@ -411,7 +422,6 @@ std::vector<std::string> LoadMcStas::readEventData(
       eventWSIndex++;
     } // end reading over number of blocks of an event dataset
 
-    // nxFile.getData(data);
     nxFile.closeData();
     nxFile.closeGroup();
 
@@ -427,12 +437,10 @@ std::vector<std::string> LoadMcStas::readEventData(
   // ensure that specified name is given to workspace (eventWS) when added to
   // outputGroup
   for (auto eventWS : allEventWS) {
-    if (eventWS.second != "partial_event_data_workspace") {
-      auto ws = eventWS.first;
-      ws->setAllX(axis);
-      AnalysisDataService::Instance().addOrReplace(eventWS.second, ws);
-      scatteringWSNames.emplace_back(eventWS.second);
-    }
+    const auto ws = eventWS.first;
+    ws->setAllX(axis);
+    AnalysisDataService::Instance().addOrReplace(eventWS.second, ws);
+    scatteringWSNames.emplace_back(eventWS.second);
   }
   return scatteringWSNames;
 }
@@ -565,9 +573,8 @@ std::vector<std::string> LoadMcStas::readHistogramData(
 
     // ensure that specified name is given to workspace (eventWS) when added to
     // outputGroup
-    std::string nameUserSee = std::string(nameAttrValueTITLE)
-                                  .append("_")
-                                  .append(getProperty("OutputWorkspace"));
+    const std::string outputWS = getProperty("OutputWorkspace");
+    const std::string nameUserSee = nameAttrValueTITLE + "_" + outputWS;
     AnalysisDataService::Instance().addOrReplace(nameUserSee, ws);
 
     histoWSNames.emplace_back(ws->getName());

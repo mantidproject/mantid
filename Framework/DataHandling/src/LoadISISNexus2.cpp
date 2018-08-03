@@ -23,8 +23,10 @@
 
 #include <boost/lexical_cast.hpp>
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <Poco/Path.h>
 #include <Poco/DateTimeFormatter.h>

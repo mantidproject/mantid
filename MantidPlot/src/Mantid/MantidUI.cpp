@@ -1270,6 +1270,11 @@ Table *MantidUI::createDetectorTable(
     const std::vector<int> &indices, bool include_data) {
   using namespace Mantid::Geometry;
 
+  IComponent_const_sptr sample = ws->getInstrument()->getSample();
+  if (!sample) {
+    return nullptr;
+  }
+
   // check if efixed value is available
   bool calcQ(true);
 
@@ -1330,7 +1335,6 @@ Table *MantidUI::createDetectorTable(
   t->setTextFormat(ncols - 1);
 
   // Cache some frequently used values
-  IComponent_const_sptr sample = ws->getInstrument()->getSample();
   const auto beamAxisIndex =
       ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
   const auto sampleDist = sample->getPos()[beamAxisIndex];

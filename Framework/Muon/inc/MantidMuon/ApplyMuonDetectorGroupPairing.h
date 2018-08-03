@@ -56,8 +56,7 @@ public:
   }
   /// See also
   const std::vector<std::string> seeAlso() const override {
-    return {"MuonProcess", "ApplyMuonDetectorGrouping",
-            "LoadAndApplyMuonDetectorGrouping"};
+    return {"MuonProcess", "ApplyMuonDetectorGrouping"};
   }
   /// Perform validation of inputs to the algorithm
   std::map<std::string, std::string> validateInputs() override;

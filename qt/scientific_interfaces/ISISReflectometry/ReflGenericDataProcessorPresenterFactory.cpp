@@ -35,7 +35,8 @@ ReflGenericDataProcessorPresenterFactory::create(int group) {
       "degrees<br />If left blank, this is set to the last value for 'THETA' "
       "in the run's sample log. If multiple runs were given in the Run(s) "
       "column, the first listed run's sample log will be used. <br /><br "
-      "/><b>Example:</b> <samp>0.7</samp>");
+      "/><b>Example:</b> <samp>0.7</samp>",
+      false, "", true);
   whitelist.addElement(
       "Transmission Run(s)", "FirstTransmissionRun",
       "<b>Transmission run(s) to use to normalise the sample runs.</b><br "
@@ -112,7 +113,7 @@ ReflGenericDataProcessorPresenterFactory::create(int group) {
 
   return Mantid::Kernel::make_unique<ReflDataProcessorPresenter>(
       whitelist, preprocessMap, processor, postprocessor, group, postprocessMap,
-      "LoadISISNexus");
+      "LoadNexus");
 }
 }
 }
