@@ -1,8 +1,8 @@
 .. _algorithms workspaces and history:
 
-==================================
-Algorithms, workspaces and history
-==================================
+================================================
+Understanding algorithms, workspaces and history
+================================================
 
 Introduction
 ============
@@ -35,7 +35,7 @@ Event Workspace
 An EventWorkspace stores information about each individual event observation in detectors. More specifically, at a neutron
 spallation source, this means that the time of arrival and detector ID of each individual neutron is recorded.
 
-Event workspaces have two importnat properties:
+Event workspaces have two important properties:
 
 * Pulse time – when the proton pulse happened in absolute time.
 * Time-of-flight – time for the neutron to travel from moderator to the detector
