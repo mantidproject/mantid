@@ -52,7 +52,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                              doc="File containing the Pade coefficients describing moderator emission versus energy.")
         self.declareProperty(FileProperty("StrongPeakParamsFile",defaultValue="",action=FileAction.OptionalLoad,
                              extensions=[".pkl"]),
-                             doc="File containing strong peaks profiles.  If left blank, strong peaks will be fit first and their profiles used.")
+                             doc="File containing strong peaks profiles.  If left blank, strong peaks will be fit first.")
         self.declareProperty("IntensityCutoff", defaultValue=0., doc="Minimum number of counts to force a profile")
         edgeDocString = 'Pixels within EdgeCutoff from a detector edge will be have a profile forced.'
         self.declareProperty("EdgeCutoff", defaultValue=0., doc=edgeDocString)
@@ -151,8 +151,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             cols = np.array(peaks_ws.column('Col'))
             runNumbers = np.array(peaks_ws.column('RunNumber'))
             intensIDX = intensities < forceCutoff
-            edgeIDX = reduce(np.logical_or, [rows < edgeCutoff, rows > numDetRows - edgeCutoff,
-                                             cols < edgeCutoff, cols > numDetCols - edgeCutoff])
+            edgeIDX = np.logical_or.reduce(np.array([rows < edgeCutoff, rows > numDetRows - edgeCutoff,
+                                           cols < edgeCutoff, cols > numDetCols - edgeCutoff]))
             # We can populate the strongPeakParams_ws now
             for row in strongPeakParams:
                 strongPeakParams_ws.addRow(row)
@@ -164,8 +164,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             cols = np.array(peaks_ws.column('Col'))
             runNumbers = np.array(peaks_ws.column('RunNumber'))
             intensIDX = intensities < forceCutoff
-            edgeIDX = reduce(np.logical_or, [rows < edgeCutoff, rows > numDetRows - edgeCutoff,
-                                             cols < edgeCutoff, cols > numDetCols - edgeCutoff])
+            edgeIDX = np.logical_or.reduce(np.array( [rows < edgeCutoff, rows > numDetRows - edgeCutoff,
+                                           cols < edgeCutoff, cols > numDetCols - edgeCutoff]))
             needsForcedProfile = np.logical_or(intensIDX, edgeIDX)
             needsForcedProfileIDX = np.where(needsForcedProfile)[0]
             canFitProfileIDX = np.where(~needsForcedProfile)[0]
@@ -173,7 +173,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             peaksToFit = np.append(canFitProfileIDX, needsForcedProfileIDX) #Will fit in this order
             peaksToFit = peaksToFit[runNumbers[peaksToFit]==sampleRun]
 
-            
             #Initialize our strong peaks dictionary
             strongPeakParams = np.empty([numPeaksCanFit, 9])
 
@@ -225,7 +224,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                 n_events = box.getNumEventsArray()
                 convBox = 1.0*np.ones([neigh_length_m, neigh_length_m,neigh_length_m]) / neigh_length_m**3
                 conv_n_events = convolve(n_events,convBox)
-                bgIDX = reduce(np.logical_and,[~goodIDX, qMask, conv_n_events>0])
+                bgIDX = np.logical_and.reduce(np.array([~goodIDX, qMask, conv_n_events>0]))
                 bgEvents = np.mean(n_events[bgIDX])*np.sum(peakIDX)
 
                 # Now we consider the variation of the fit.  These are done as three independent fits.  So we need to consider
