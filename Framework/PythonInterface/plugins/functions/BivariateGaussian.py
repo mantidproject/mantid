@@ -128,7 +128,7 @@ class BivariateGaussian(IFunction1D):
             except ValueError:
                 raise
                 raise UserWarning("Cannot set parameter {:s} for mbvg.  Valid choices are " +
-                                   "('A', 'MuX', 'MuY', 'SigX', 'SigY', 'SigP', 'Bg')".format(param))
+                                  "('A', 'MuX', 'MuY', 'SigX', 'SigY', 'SigP', 'Bg')".format(param))
 
     def function2D(self, t):
         """
