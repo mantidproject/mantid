@@ -35,27 +35,20 @@ class ISISPowderGemOutputTest(unittest.TestCase):
         path_to_ipf = self._find_file_or_die(self.IPF_FILE)
         temp_file_path = tempfile.mkdtemp()
         self._folders_to_remove.add(temp_file_path)
+        wsgroup =[]
+        for i in range(2):
+            wsgroup.append(mantid.CreateSampleWorkspace(OutputWorkspace=str(i),
+                                                        NumBanks=1,
+                                                        BankPixelWidth=1,
+                                                        XMin=-0.5,
+                                                        XMax=0.5,
+                                                        BinWidth=0.01,
+                                                        XUnit='DSpacing',
+                                                        StoreInADS=True))
 
-        gem_output_test_ws1 = mantid.CreateSampleWorkspace(OutputWorkspace='123',
-                                                           NumBanks=1,
-                                                           BankPixelWidth=1,
-                                                           XMin=-0.5,
-                                                           XMax=0.5,
-                                                           BinWidth=0.01,
-                                                           XUnit='DSpacing',
-                                                           StoreInADS=True)
 
-        gem_output_test_ws2 = mantid.CreateSampleWorkspace(OutputWorkspace='456',
-                                                           NumBanks=1,
-                                                           BankPixelWidth=1,
-                                                           XMin=-0.5,
-                                                           XMax=0.5,
-                                                           BinWidth=0.01,
-                                                           XUnit='DSpacing',
-                                                           StoreInADS=True)
 
-        gem_output_test_ws_group = mantid.GroupWorkspaces(['123',
-                                                           '456'])
+        gem_output_test_ws_group = mantid.GroupWorkspaces(wsgroup)
 
         gem_output.save_gda(d_spacing_group=gem_output_test_ws_group,
                             gsas_calib_filename=path_to_ipf,
