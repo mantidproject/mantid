@@ -273,8 +273,15 @@ void FilterEvents::exec() {
   // Form the names of output workspaces
   std::vector<std::string> outputwsnames;
   std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
+  Goniometer inputGonio = m_eventWS->run().getGoniometer();
   for (miter = m_outputWorkspacesMap.begin();
        miter != m_outputWorkspacesMap.end(); ++miter) {
+    try {
+      DataObjects::EventWorkspace_sptr ws_i = miter->second;
+      ws_i->mutableRun().setGoniometer(inputGonio, true);
+    } catch (std::runtime_error &) {
+      g_log.warning("Cannot set goniometer.");
+    }
     outputwsnames.push_back(miter->second->getName());
   }
   setProperty("OutputWorkspaceNames", outputwsnames);
@@ -737,8 +744,6 @@ void FilterEvents::splitTimeSeriesProperty(
       // add property to the associated workspace
       DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
       ws_i->mutableRun().addProperty(output_vector[tindex], true);
-      Mantid::Geometry::Goniometer uniGonio = m_eventWS->run().getGoniometer();
-      ws_i->mutableRun().setGoniometer(uniGonio, false);
     }
   }
 
