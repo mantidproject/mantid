@@ -214,12 +214,10 @@ function (mtd_add_qt_target)
       _append_qt_suffix (AS_DIR VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _install_dir
                          ${PARSED_INSTALL_DIR_BASE})
     else()
-      set ( _install_dir ${LIB_DIR} )
+      set ( _install_dir "" )
+      message ( FATAL_ERROR "Target: ${_target} is configured to build but has no install destination" )
     endif()
-    # Hack: Only install Qt4 to packages for now...
-    if (${PARSED_QT_VERSION} EQUAL 4)
-      install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${_install_dir} )
-    endif()
+    install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${_install_dir} )
   endif()
 
   # Group into folder for VS

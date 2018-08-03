@@ -17,6 +17,7 @@ include ( QtTargetFunctions )
 # keyword: LINK_LIBS A list of additional target_link_libraries
 # keyword: PYQT_VERSION A single value indicating the version of PyQt
 #                       to compile against
+# keyword: INSTALL_DIR The target location for installing this library
 function ( mtd_add_sip_module )
   find_file ( _sipmodule_template_path NAME sipqtmodule_template.sip.in
     PATHS ${CMAKE_MODULE_PATH} )
@@ -27,7 +28,7 @@ function ( mtd_add_sip_module )
   set ( options )
   set ( oneValueArgs MODULE_NAME TARGET_NAME MODULE_OUTPUT_DIR
                      PYQT_VERSION FOLDER )
-  set ( multiValueArgs SIP_SRCS HEADER_DEPS INCLUDE_DIRS LINK_LIBS OSX_INSTALL_RPATH LINUX_INSTALL_RPATH )
+  set ( multiValueArgs SIP_SRCS HEADER_DEPS INCLUDE_DIRS LINK_LIBS INSTALL_DIR OSX_INSTALL_RPATH LINUX_INSTALL_RPATH )
   cmake_parse_arguments ( PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN} )
 
@@ -104,6 +105,10 @@ function ( mtd_add_sip_module )
     if (PARSED_LINUX_INSTALL_RPATH)
       set_target_properties ( ${PARSED_TARGET_NAME} PROPERTIES INSTALL_RPATH  "${PARSED_LINUX_INSTALL_RPATH}" )
     endif ()
+  endif ()
+
+  if (PARSED_INSTALL_DIR)
+    install ( TARGETS ${PARSED_TARGET_NAME} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PARSED_INSTALL_DIR} )
   endif ()
 
   if ( WIN32 )

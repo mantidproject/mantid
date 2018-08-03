@@ -531,6 +531,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     Qt5::PrintSupport
     ${_webwidgets_tgt}
     Qt5::Qscintilla
+  INSTALL_DIR
+    ${LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
     @loader_path/../Libraries
