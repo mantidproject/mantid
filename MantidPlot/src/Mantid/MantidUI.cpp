@@ -1,6 +1,9 @@
 // Python header must go first
-#include "MantidQtWidgets/Common/DropEventHelper.h"
+// clang-format off
 #include "MantidQtWidgets/Common/PythonThreading.h"
+// clang-format on
+#include "MantidQtWidgets/Common/DropEventHelper.h"
+
 
 #include "AlgorithmDockWidget.h"
 #include "AlgorithmHistoryWindow.h"
