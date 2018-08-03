@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/SortXAxis2.h"
+#include "MantidAlgorithms/SortXAxis.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -16,7 +16,7 @@ DECLARE_ALGORITHM(SortXAxis)
 
 const std::string SortXAxis::name() const { return "SortXAxis"; }
 
-int SortXAxis::version() const { return 2; }
+int SortXAxis::version() const { return 1; }
 
 const std::string SortXAxis::category() const {
   return "Transforms\\Axes;Utility\\Sorting";
