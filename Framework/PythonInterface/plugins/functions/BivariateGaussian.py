@@ -124,10 +124,10 @@ class BivariateGaussian(IFunction1D):
                     constraintString = "{:4.4e} < {:s} < {:4.4e}".format(boundsDict[param][0], param, boundsDict[param][1])
                     self.addConstraints(constraintString)
                 else:
-                    self.log().information('Setting constraints on mbvg; reversing bounds')
                     self.addConstraints("{:4.4e} < A < {:4.4e}".format(boundsDict[param][1], boundsDict[param][0]))
             except ValueError:
-                self.log().warning("Cannot set parameter {:s} for mbvg.  Valid choices are " +
+                raise
+                raise UserWarning("Cannot set parameter {:s} for mbvg.  Valid choices are " +
                                    "('A', 'MuX', 'MuY', 'SigX', 'SigY', 'SigP', 'Bg')".format(param))
 
     def function2D(self, t):
