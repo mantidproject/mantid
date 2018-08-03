@@ -81,9 +81,7 @@ list getDescriptors(AlgorithmFactoryImpl &self, bool includeHidden) {
 // Python algorithm registration mutex in anonymous namespace (aka static)
 std::recursive_mutex PYALG_REGISTER_MUTEX;
 
-// clang-format off
-GCC_DIAG_OFF(cast-qual)
-// clang-format on
+GNU_DIAG_OFF("cast-qual")
 
 /**
  * A free function to subscribe a Python algorithm into the factory
@@ -118,25 +116,20 @@ void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
   // from the FileLoaderRegistry
   FileLoaderRegistry::Instance().unsubscribe(descr.first, descr.second);
 }
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(existsOverloader, exists, 1, 2)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 
 ///@endcond
 }
-// clang-format off
-GCC_DIAG_ON(cast-qual)
-// clang-format on
+GNU_DIAG_ON("cast-qual")
 
 void export_AlgorithmFactory() {
 

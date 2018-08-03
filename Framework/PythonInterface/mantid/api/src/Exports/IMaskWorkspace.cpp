@@ -6,9 +6,7 @@
 #include <boost/python/extract.hpp>
 #include <boost/python/list.hpp>
 
-// clang-format off
-GCC_DIAG_OFF(strict-aliasing)
-// clang-format on
+GNU_DIAG_OFF("strict-aliasing")
 
 using Mantid::API::IMaskWorkspace;
 using namespace Mantid::PythonInterface::Registry;

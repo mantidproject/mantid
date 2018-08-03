@@ -25,7 +25,7 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
 }
 }
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALCDataLoadingView : public IALCDataLoadingView {
   // XXX: A workaround, needed because of the way the comma is treated in a
@@ -78,7 +78,7 @@ MATCHER_P3(VectorValue, i, value, delta, "") {
   return fabs(arg.at(i) - value) < delta;
 }
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class ALCDataLoadingPresenterTest : public CxxTest::TestSuite {
   MockALCDataLoadingView *m_view;
