@@ -171,22 +171,6 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="cluster_button">
-          <property name="minimumSize">
-           <size>
-            <width>95</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Click to send the reduction job to a remote compute resource</string>
-          </property>
-          <property name="text">
-           <string>Send cluster</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QPushButton" name="save_button">
           <property name="enabled">
            <bool>true</bool>
@@ -236,7 +220,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>1033</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="file_menu">

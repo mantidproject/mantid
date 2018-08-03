@@ -176,9 +176,7 @@ vtkDataSetToPeaksFilteredDataSet::getPeaksInfo(
   return peaksInfo;
 }
 
-// clang-format off
-GCC_DIAG_OFF(strict-aliasing)
-// clang-format on
+GNU_DIAG_OFF("strict-aliasing")
 /**
  * Get the radius from a PeakShape object.
  * @param shape The PeakShape from which the information will be extracted.
@@ -225,7 +223,6 @@ Kernel::V3D vtkDataSetToPeaksFilteredDataSet::getPeakPosition(
   return position;
 }
 
-// GCC_DIAG_ON(strict-aliasing)
 /**
  * Get the radius for no shape
  * @returns The shape of the radius.

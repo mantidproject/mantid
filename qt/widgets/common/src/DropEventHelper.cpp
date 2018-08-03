@@ -34,7 +34,7 @@ QUrl fixupURL(const QUrl &url) {
         kCFAllocatorDefault, relCFStringRef, kCFURLPOSIXPathStyle,
         false // isDirectory
         );
-    CFErrorRef error = 0;
+    CFErrorRef error = nullptr;
     CFURLRef absCFURL =
         CFURLCreateFilePathURL(kCFAllocatorDefault, relCFURL, &error);
     if (!error) {

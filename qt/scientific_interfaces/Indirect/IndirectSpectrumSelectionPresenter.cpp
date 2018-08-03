@@ -29,12 +29,6 @@ private:
   IndirectSpectrumSelectionView *m_view;
 };
 
-} // namespace
-
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
-
 std::string OR(const std::string &lhs, const std::string &rhs) {
   return "(" + lhs + "|" + rhs + ")";
 }
@@ -45,9 +39,9 @@ std::string NATURAL_NUMBER(std::size_t digits) {
 
 namespace Regexes {
 const std::string EMPTY = "^$";
-const std::string SPACE = "(\\s)*";
+const std::string SPACE = "[ ]*";
 const std::string COMMA = SPACE + "," + SPACE;
-const std::string MINUS = SPACE + "\\-" + SPACE;
+const std::string MINUS = "\\-";
 
 const std::string NUMBER = NATURAL_NUMBER(4);
 const std::string NATURAL_RANGE = "(" + NUMBER + MINUS + NUMBER + ")";
@@ -60,6 +54,11 @@ const std::string REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
 const std::string MASK_LIST =
     "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
 } // namespace Regexes
+} // namespace
+
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace IDA {
 
 IndirectSpectrumSelectionPresenter::IndirectSpectrumSelectionPresenter(
     IndirectFittingModel *model, IndirectSpectrumSelectionView *view)
@@ -104,7 +103,6 @@ void IndirectSpectrumSelectionPresenter::setActiveIndexToZero() {
 
 void IndirectSpectrumSelectionPresenter::updateSpectra() {
   const auto workspace = m_model->getWorkspace(m_activeIndex);
-  MantidQt::API::SignalBlocker<QObject> blocker(m_view.get());
   if (workspace) {
     setSpectraRange(0, workspace->getNumberHistograms() - 1);
     const auto spectra = m_model->getSpectra(m_activeIndex);
@@ -126,10 +124,7 @@ void IndirectSpectrumSelectionPresenter::setSpectraRange(std::size_t minimum,
                                                          std::size_t maximum) {
   int minimumInt = boost::numeric_cast<int>(minimum);
   int maximumInt = boost::numeric_cast<int>(maximum);
-
-  MantidQt::API::SignalBlocker<QObject> blocker(m_view.get());
   m_view->setSpectraRange(minimumInt, maximumInt);
-  m_view->setMaskSpectraRange(minimumInt, maximumInt);
 }
 
 void IndirectSpectrumSelectionPresenter::setModelSpectra(

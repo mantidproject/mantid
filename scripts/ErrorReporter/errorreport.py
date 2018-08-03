@@ -39,9 +39,6 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
     def quit (self):
         self.quit_signal.emit()
 
-    def connect_signal(self, slot):
-        self.action.connect(slot)
-
     def fullShare(self):
         self.action.emit(self.continue_working, 0, self.input_name, self.input_email)
         self.close()

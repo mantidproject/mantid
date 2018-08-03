@@ -697,7 +697,8 @@ bool ReflDataProcessorPresenter::parseUniform(TimeSlicingInfo &slicing,
   if (mws != nullptr) {
     const auto run = mws->run();
     const auto totalDuration = run.endTime() - run.startTime();
-    double totalDurationSec = totalDuration.total_seconds();
+    double totalDurationSec =
+        static_cast<double>(totalDuration.total_seconds());
     double sliceDuration = .0;
     size_t numSlices = 0;
 

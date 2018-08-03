@@ -7,7 +7,6 @@
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/FilterChannel.h"
 #include "MantidKernel/StdoutChannel.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
@@ -160,16 +159,11 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_user_properties_file_name("Mantid.user.properties"),
 #endif
       m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(),
-      m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false),
-      m_filterChannels() {
+      m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false) {
   // getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
   m_pConf = nullptr;
 
-  // Register the FilterChannel with the Poco logging factory
-  Poco::LoggingFactory::defaultFactory().registerChannelClass(
-      "FilterChannel",
-      new Poco::Instantiator<Poco::FilterChannel, Poco::Channel>);
   // Register StdChannel with Poco
   Poco::LoggingFactory::defaultFactory().registerChannelClass(
       "StdoutChannel",
@@ -232,9 +226,6 @@ ConfigServiceImpl::ConfigServiceImpl()
                              .toFormattedString("%Y-%m-%dT%H:%MZ") << "\n";
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList
                       << '\n';
-#ifndef MPI_BUILD // There is no logging to file by default in MPI build
-  g_log.information() << "Logging to: " << m_logFilePath << '\n';
-#endif
 
   // Assert that the appdata and the instrument subdirectory exists
   std::string appDataDir = getAppDataDir();
@@ -334,6 +325,48 @@ void ConfigServiceImpl::setBaseDirectory() {
 #endif
 }
 
+namespace {
+// look for specific keys and throw an exception if one is found
+std::string checkForBadConfigOptions(const std::string &filename,
+                                     const std::string &propertiesString) {
+  std::stringstream stream(propertiesString);
+  std::stringstream resultPropertiesString;
+  std::string line;
+  int line_num = 0;
+  while (std::getline(stream, line)) {
+    line_num += 1; // increment early
+    bool is_ok = true;
+
+    // Check for common errors. Empty lines are ok, things that are a key
+    // without a value are a critical failure. Forbidden keys are just commented
+    // out.
+    if (line.empty() || (Kernel::Strings::strip(line)[0] == '#')) {
+      // do nothing
+    } else if (line.find("FilterChannel") != std::string::npos) {
+      is_ok = false;
+    }
+
+    // Print warning to error channel and comment out offending line
+    if (!is_ok) {
+      const auto end = line.find("=");
+      std::cerr << "Encontered invalid key \"";
+      if (end != std::string::npos) {
+        std::cerr << Kernel::Strings::strip(line.substr(0, end));
+      } else {
+        std::cerr << Kernel::Strings::strip(line);
+      }
+      std::cerr << "\" in " << filename << " on line " << line_num << std::endl;
+
+      // comment out the property
+      resultPropertiesString << '#';
+    }
+    // copy over the line
+    resultPropertiesString << line << '\n';
+  }
+  return resultPropertiesString.str();
+}
+} // end of anonymous namespace
+
 /** Loads the config file provided.
  *  If the file contains logging setup instructions then these will be used to
  *setup the logging framework.
@@ -367,6 +400,9 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
       }
     }
 
+    // verify the contents and comment out offending lines
+    temp = checkForBadConfigOptions(filename, temp);
+
     // store the property string
     if ((append) && (!m_PropertyString.empty())) {
       m_PropertyString = m_PropertyString + "\n" + temp;
@@ -377,10 +413,8 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
     // there was a problem loading the file - it probably is not there
     std::cerr << "Problem loading the configuration file " << filename << " "
               << e.what() << '\n';
-    if (!append) {
-      // if we have no property values then take the default
-      m_PropertyString = defaultConfig();
-    }
+    std::cerr << "Mantid is unable to start.\n" << std::endl;
+    throw;
   }
 
   // use the cached property string to initialise the POCO property file
@@ -412,44 +446,10 @@ bool ConfigServiceImpl::readFile(const std::string &filename,
   return good;
 }
 
-/** Registers additional logging filter channels
-* @param filterChannelName The name to refer to the filter channel, this should
-* be unique
-* @param pChannel a pointer to the channel to be registered, if blank, then the
-* channel must already be registered with the logging registry in Poco
-*/
-void ConfigServiceImpl::registerLoggingFilterChannel(
-    const std::string &filterChannelName, Poco::Channel *pChannel) {
-  m_filterChannels.push_back(filterChannelName);
-  if (pChannel) {
-    Poco::LoggingRegistry::defaultRegistry().registerChannel(filterChannelName,
-                                                             pChannel);
-  }
-}
-
 /** Configures the Poco logging and starts it up
  *
  */
 void ConfigServiceImpl::configureLogging() {
-  // Undocumented way to override the mantid.log path
-  if (Poco::Environment::has("MANTIDLOGPATH")) {
-    auto logpath = Poco::Path(Poco::Environment::get("MANTIDLOGPATH"));
-    logpath = logpath.absolute();
-    m_logFilePath = logpath.toString();
-    // Set the line in the configuration properties.
-    m_pConf->setString("logging.channels.fileChannel.path", m_logFilePath);
-  } else {
-    m_logFilePath = getString("logging.channels.fileChannel.path");
-    if (m_logFilePath.empty()) {
-      // Default to appdata/mantid.log
-      Poco::Path path(getAppDataDir());
-      path.append("mantid.log");
-      m_logFilePath = path.toString();
-      // Set the line in the configuration properties.
-      m_pConf->setString("logging.channels.fileChannel.path", m_logFilePath);
-    }
-  }
-
   try {
     // Configure the logging framework
     Poco::Util::LoggingConfigurator configurator;
@@ -458,9 +458,6 @@ void ConfigServiceImpl::configureLogging() {
     std::cerr << "Trouble configuring the logging framework " << e.what()
               << '\n';
   }
-  // register the filter channels - the order here is important
-  registerLoggingFilterChannel("fileFilterChannel", nullptr);
-  registerLoggingFilterChannel("consoleFilterChannel", nullptr);
 }
 
 /**
@@ -631,23 +628,22 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
                "installation.\n";
     filestr << "# Any properties found in this file will override any that are "
                "found in the Mantid.Properties file\n";
-    filestr << "# As this file will not be replaced with futher installations "
+    filestr << "# As this file will not be replaced with further installations "
                "of Mantid it is a safe place to put \n";
     filestr << "# properties that suit your particular installation.\n";
     filestr << "#\n";
     filestr << "# See here for a list of possible options:\n";
-    filestr << "# "
-               "http://www.mantidproject.org/"
-               "Properties_File#Mantid.User.Properties\n\n";
+    filestr
+        << "# "
+           "http://docs.mantidproject.org/nightly/concepts/PropertiesFile.html"
+           "\n\n";
     filestr << "##\n";
     filestr << "## GENERAL\n";
     filestr << "##\n\n";
     filestr << "## Set the number of algorithm properties to retain\n";
     filestr << "#algorithms.retained=90\n\n";
-    filestr << "## Hides catagories from the algorithm list in MantidPlot\n";
-    filestr << "#algorithms.catagories.hidden=Muons,Inelastic\n\n";
     filestr
-        << "## Set the maximum number of coures used to run algorithms over\n";
+        << "## Set the maximum number of cores used to run algorithms over\n";
     filestr << "#MultiThreaded.MaxCores=4\n\n";
     filestr << "##\n";
     filestr << "## FACILITY AND INSTRUMENT\n";
@@ -684,20 +680,11 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr
         << "## Valid values are: error, warning, notice, information, debug\n";
     filestr << "#logging.loggers.root.level=information\n\n";
-    filestr << "## Sets the lowest level messages to be logged to file\n";
-    filestr << "## Default is warning\n";
-    filestr
-        << "## Valid values are: error, warning, notice, information, debug\n";
-    filestr << "#logging.channels.fileFilterChannel.level=debug\n\n";
-    filestr << "## Sets the file to write logs to\n";
-    filestr << "#logging.channels.fileChannel.path=../mantid.log\n";
-    filestr << "## Uncomment the following line to flush log messages to disk "
-               "immediately.\n";
-    filestr << "## Useful for debugging crashes but it will hurt performance\n";
-    filestr << "#logging.channels.fileChannel.flush = true\n\n";
     filestr << "##\n";
     filestr << "## MantidPlot\n";
     filestr << "##\n\n";
+    filestr << "## Hides categories from the algorithm list in MantidPlot\n";
+    filestr << "#algorithms.catagories.hidden=Muons,Inelastic\n\n";
     filestr << "## Show invisible workspaces\n";
     filestr << "#MantidOptions.InvisibleWorkspaces=0\n";
     filestr << "## Re-use plot instances for different plot types\n";
@@ -712,40 +699,6 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
                     << getUserPropertiesDir() << m_user_properties_file_name
                     << " error: " << ex.what() << '\n';
   }
-}
-
-/**
- * Provides a default Configuration string to use if the config file cannot be
- * loaded.
- * @returns The string value of default properties
- */
-std::string ConfigServiceImpl::defaultConfig() const {
-  std::string propFile =
-      "# logging configuration"
-      "# root level message filter (drop to debug for more messages)"
-      "logging.loggers.root.level = debug"
-      "# splitting the messages to many logging channels"
-      "logging.loggers.root.channel.class = SplitterChannel"
-      "logging.loggers.root.channel.channel1 = consoleChannel"
-      "logging.loggers.root.channel.channel2 = fileFilterChannel"
-      "# output to the console - primarily for console based apps"
-      "logging.channels.consoleChannel.class = ConsoleChannel"
-      "logging.channels.consoleChannel.formatter = f1"
-      "# specfic filter for the file channel raising the level to warning "
-      "(drop to debug for debugging)"
-      "logging.channels.fileFilterChannel.class= FilterChannel"
-      "logging.channels.fileFilterChannel.channel= fileChannel"
-      "logging.channels.fileFilterChannel.level= warning"
-      "# output to a file (For error capturing and debugging)"
-      "logging.channels.fileChannel.class = debug"
-      "logging.channels.fileChannel.path = ../logs/mantid.log"
-      "logging.channels.fileChannel.formatter.class = PatternFormatter"
-      "logging.channels.fileChannel.formatter.pattern = %Y-%m-%d %H:%M:%S,%i "
-      "[%I] %p %s - %t"
-      "logging.formatters.f1.class = PatternFormatter"
-      "logging.formatters.f1.pattern = %s-[%p] %t"
-      "logging.formatters.f1.times = UTC";
-  return propFile;
 }
 
 //-------------------------------
@@ -2007,80 +1960,16 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
   return m_proxyInfo;
 }
 
-/** Sets the log level priority for the File log channel
-* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
-*/
-void ConfigServiceImpl::setFileLogLevel(int logLevel) {
-  setFilterChannelLogLevel(m_filterChannels[0], logLevel);
-}
-/** Sets the log level priority for the Console log channel
-* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
-*/
-void ConfigServiceImpl::setConsoleLogLevel(int logLevel) {
-  setFilterChannelLogLevel(m_filterChannels[1], logLevel);
-}
-
-/** Sets the Log level for a filter channel
-* @param filterChannelName the channel name of the filter channel to change
+/** Sets the log level priority for all logging channels
 * @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
 * @param quiet If true then no message regarding the level change is emitted
-* @throws std::invalid_argument if the channel name is incorrect or it is not a
-* filterChannel
 */
-void ConfigServiceImpl::setFilterChannelLogLevel(
-    const std::string &filterChannelName, int logLevel, bool quiet) {
-  Poco::Channel *channel = nullptr;
-  try {
-    channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
-        filterChannelName);
-  } catch (Poco::NotFoundException &) {
-    throw std::invalid_argument(filterChannelName +
-                                " not found in the Logging Registry");
+void ConfigServiceImpl::setLogLevel(int logLevel, bool quiet) {
+  Mantid::Kernel::Logger::setLevelForAll(logLevel);
+  if (!quiet) {
+    g_log.log("logging set to " + Logger::PriorityNames[logLevel] + " priority",
+              static_cast<Logger::Priority>(logLevel));
   }
-
-  auto *filterChannel = dynamic_cast<Poco::FilterChannel *>(channel);
-  if (filterChannel) {
-    filterChannel->setPriority(logLevel);
-    int lowestLogLevel = FindLowestFilterLevel();
-    // set root level if required
-    int rootLevel = Poco::Logger::root().getLevel();
-    if (rootLevel != lowestLogLevel) {
-      Mantid::Kernel::Logger::setLevelForAll(lowestLogLevel);
-    }
-    if (!quiet) {
-      g_log.log(filterChannelName + " log channel set to " +
-                    Logger::PriorityNames[logLevel] + " priority",
-                static_cast<Logger::Priority>(logLevel));
-    }
-  } else {
-    throw std::invalid_argument(filterChannelName +
-                                " was not a filter channel");
-  }
-}
-
-/** Finds the lowest Log level for all registered filter channels
-*/
-int ConfigServiceImpl::FindLowestFilterLevel() const {
-  int lowestPriority = Logger::Priority::PRIO_FATAL;
-  // Find the lowest level of all of the filter channels
-  for (const auto &filterChannelName : m_filterChannels) {
-    try {
-      auto *channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
-          filterChannelName);
-      auto *filterChannel = dynamic_cast<Poco::FilterChannel *>(channel);
-      if (filterChannel) {
-        int filterPriority = filterChannel->getPriority();
-        if (filterPriority > lowestPriority) {
-          lowestPriority = filterPriority;
-        }
-      }
-    } catch (Poco::NotFoundException &) {
-      g_log.warning(filterChannelName +
-                    " registered log filter channel not found");
-    }
-  }
-
-  return lowestPriority;
 }
 
 /// \cond TEMPLATE

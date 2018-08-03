@@ -591,7 +591,7 @@ soap_in_SOAP_ENV__Fault(struct soap *soap, const char *tag,
     return nullptr;
   a = (struct SOAP_ENV__Fault *)soap_id_enter(
       soap, soap->id, a, SOAP_TYPE_SOAP_ENV__Fault,
-      sizeof(struct SOAP_ENV__Fault), 0, nullptr, NULL, NULL);
+      sizeof(struct SOAP_ENV__Fault), 0, nullptr, nullptr, nullptr);
   if (!a)
     return nullptr;
   soap_default_SOAP_ENV__Fault(soap, a);
@@ -779,7 +779,7 @@ soap_in_SOAP_ENV__Reason(struct soap *soap, const char *tag,
     return nullptr;
   a = (struct SOAP_ENV__Reason *)soap_id_enter(
       soap, soap->id, a, SOAP_TYPE_SOAP_ENV__Reason,
-      sizeof(struct SOAP_ENV__Reason), 0, nullptr, NULL, NULL);
+      sizeof(struct SOAP_ENV__Reason), 0, nullptr, nullptr, nullptr);
   if (!a)
     return nullptr;
   soap_default_SOAP_ENV__Reason(soap, a);
@@ -921,7 +921,7 @@ soap_in_SOAP_ENV__Detail(struct soap *soap, const char *tag,
     return nullptr;
   a = (struct SOAP_ENV__Detail *)soap_id_enter(
       soap, soap->id, a, SOAP_TYPE_SOAP_ENV__Detail,
-      sizeof(struct SOAP_ENV__Detail), 0, nullptr, NULL, NULL);
+      sizeof(struct SOAP_ENV__Detail), 0, nullptr, nullptr, nullptr);
   if (!a)
     return nullptr;
   soap_default_SOAP_ENV__Detail(soap, a);
@@ -1071,7 +1071,7 @@ soap_in_SOAP_ENV__Code(struct soap *soap, const char *tag,
     return nullptr;
   a = (struct SOAP_ENV__Code *)soap_id_enter(
       soap, soap->id, a, SOAP_TYPE_SOAP_ENV__Code,
-      sizeof(struct SOAP_ENV__Code), 0, nullptr, NULL, NULL);
+      sizeof(struct SOAP_ENV__Code), 0, nullptr, nullptr, nullptr);
   if (!a)
     return nullptr;
   soap_default_SOAP_ENV__Code(soap, a);
@@ -1208,7 +1208,7 @@ soap_in_SOAP_ENV__Header(struct soap *soap, const char *tag,
     return nullptr;
   a = (struct SOAP_ENV__Header *)soap_id_enter(
       soap, soap->id, a, SOAP_TYPE_SOAP_ENV__Header,
-      sizeof(struct SOAP_ENV__Header), 0, nullptr, NULL, NULL);
+      sizeof(struct SOAP_ENV__Header), 0, nullptr, nullptr, nullptr);
   if (!a)
     return nullptr;
   soap_default_SOAP_ENV__Header(soap, a);

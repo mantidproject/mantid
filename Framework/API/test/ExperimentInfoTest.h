@@ -156,14 +156,12 @@ public:
 
   void test_GetSetSample() {
     ExperimentInfo ws;
-    TS_ASSERT(&ws.sample());
     ws.mutableSample().setName("test");
     TS_ASSERT_EQUALS(ws.sample().getName(), "test");
   }
 
   void test_GetSetRun() {
     ExperimentInfo ws;
-    TS_ASSERT(&ws.run());
     ws.mutableRun().setProtonCharge(1.234);
     TS_ASSERT_DELTA(ws.run().getProtonCharge(), 1.234, 0.001);
   }

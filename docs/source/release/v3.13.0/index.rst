@@ -7,6 +7,8 @@ Mantid 3.13.0 Release Notes
 .. figure:: ../../images/Release3-13.png
    :class: screenshot
    :align: right
+   
+   Mantid introduces project recovery for Mantidplot.
 
 .. contents:: Table of Contents
    :local:
@@ -14,14 +16,21 @@ Mantid 3.13.0 Release Notes
 
 We are proud to announce version 3.13.0 of Mantid.
 
-Here is a load of stuff we have done.
+This release includes a first implementation of Project Recovery for Mantidplot, Mantid maintains a recovery script while running, in the event of a crash or unexpected shutdown of Mantidplot Mantid will attempt to recover to it's most recent recovery checkpoint.  This feature may not fully recover in all situations, but we will continue to improve it in future releases. There have also been some significant performance enhancements in the instrument view, improvements in error reporting, and the peaks view within the slice viewer now handles non-orthogonal axes.
+
+These are just some of the many improvements in this release, so please take a
+look at the release notes, which are filled with details of the
+important changes and improvements in many areas. The development team
+has put a great effort into making all of these improvements within
+Mantid, and we would like to thank all of our beta testers for their
+time and effort helping us to make this another reliable version of Mantid.
 
 Citation
 --------
 
-Please cite any usage of Mantid as follows: **TODO update with current version doi**
+Please cite any usage of Mantid as follows:
 
-- *Mantid 3.13.0: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. `doi: 10.5286/SOFTWARE/MANTID3.13.0 <http://dx.doi.org/10.5286/SOFTWARE/MANTID3.13.0>`_
+- *Mantid 3.13.0: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. `doi: 10.5286/SOFTWARE/MANTID3.13 <http://dx.doi.org/10.5286/SOFTWARE/MANTID3.13>`_
 
 - Arnold, O. et al. *Mantid-Data Analysis and Visualization Package for Neutron Scattering and mu-SR Experiments.* Nuclear Instruments and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors and Associated Equipment 764 (2014): 156-166 `doi: 10.1016/j.nima.2014.07.029 <https://doi.org/10.1016/j.nima.2014.07.029>`_ (`download bibtex <https://raw.githubusercontent.com/mantidproject/mantid/master/docs/source/mantid.bib>`_)
 
@@ -40,7 +49,6 @@ Changes
    SANS <sans>
    Direct Inelastic <direct_inelastic>
    Indirect Inelastic <indirect_inelastic>
-   Instrument Visualization <instrument_view>
 
 Full Change Listings
 --------------------

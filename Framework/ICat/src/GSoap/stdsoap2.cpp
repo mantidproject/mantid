@@ -1,20 +1,13 @@
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-align"
-#endif
 
 #include "MantidKernel/WarningSuppressions.h"
 // ignore warnings in gSOAP
 // Long-term solution is to use gSOAP as an external library or external
 // project. see issue #19433
-// clang-format off
-#if defined(__GNUC__) && __GNUC__ >= 7
-GCC_DIAG_OFF(deprecated-declarations)
-GCC_DIAG_OFF(format-overflow)
-GCC_DIAG_OFF(format-truncation)
-GCC_DIAG_OFF(implicit-fallthrough)
-#endif
-// clang-format on
+GNU_DIAG_OFF("deprecated-declarations")
+GNU_DIAG_OFF("format-overflow")
+GNU_DIAG_OFF("format-truncation")
+GNU_DIAG_OFF("implicit-fallthrough")
+GNU_DIAG_OFF("cast-align")
 
 /*
   stdsoap2.c[pp] 2.8.15
@@ -4533,7 +4526,7 @@ again:
         }
 #else
         names = (GENERAL_NAMES *)X509_get_ext_d2i(peer, NID_subject_alt_name,
-                                                  nullptr, NULL);
+                                                  nullptr, nullptr);
         if (names) {
           val = i2v_GENERAL_NAMES(nullptr, names, val);
           sk_GENERAL_NAME_pop_free(names, GENERAL_NAME_free);
@@ -12002,7 +11995,7 @@ end:
     soap->error = SOAP_LENGTH;
     return nullptr;
   }
-  s = (wchar_t *)soap_save_block(soap, nullptr, NULL, 0);
+  s = (wchar_t *)soap_save_block(soap, nullptr, nullptr, 0);
 #ifdef WITH_DOM
   if ((soap->mode & SOAP_XML_DOM) && soap->dom)
     soap->dom->wide = s;
@@ -12080,8 +12073,8 @@ int *SOAP_FMAC2 soap_inint(struct soap *soap, const char *tag, int *p,
     return nullptr;
   }
 #endif
-  p = (int *)soap_id_enter(soap, soap->id, p, t, sizeof(int), 0, nullptr, NULL,
-                           NULL);
+  p = (int *)soap_id_enter(soap, soap->id, p, t, sizeof(int), 0, nullptr,
+                           nullptr, nullptr);
   if (*soap->href)
     p = (int *)soap_id_forward(soap, soap->href, p, 0, t, 0, sizeof(int), 0,
                                nullptr);
@@ -12160,7 +12153,7 @@ long *SOAP_FMAC2 soap_inlong(struct soap *soap, const char *tag, long *p,
   }
 #endif
   p = (long *)soap_id_enter(soap, soap->id, p, t, sizeof(long), 0, nullptr,
-                            NULL, NULL);
+                            nullptr, nullptr);
   if (*soap->href)
     p = (long *)soap_id_forward(soap, soap->href, p, 0, t, 0, sizeof(long), 0,
                                 nullptr);
@@ -12251,7 +12244,7 @@ LONG64 *SOAP_FMAC2 soap_inLONG64(struct soap *soap, const char *tag, LONG64 *p,
   }
 #endif
   p = (LONG64 *)soap_id_enter(soap, soap->id, p, t, sizeof(LONG64), 0, nullptr,
-                              NULL, NULL);
+                              nullptr, nullptr);
   if (*soap->href)
     p = (LONG64 *)soap_id_forward(soap, soap->href, p, 0, t, 0, sizeof(LONG64),
                                   0, nullptr);
@@ -12318,7 +12311,7 @@ char *SOAP_FMAC2 soap_inbyte(struct soap *soap, const char *tag, char *p,
   }
 #endif
   p = (char *)soap_id_enter(soap, soap->id, p, t, sizeof(char), 0, nullptr,
-                            NULL, NULL);
+                            nullptr, nullptr);
   if (*soap->href)
     p = (char *)soap_id_forward(soap, soap->href, p, 0, t, 0, sizeof(char), 0,
                                 nullptr);
@@ -12386,7 +12379,7 @@ short *SOAP_FMAC2 soap_inshort(struct soap *soap, const char *tag, short *p,
   }
 #endif
   p = (short *)soap_id_enter(soap, soap->id, p, t, sizeof(short), 0, nullptr,
-                             NULL, NULL);
+                             nullptr, nullptr);
   if (*soap->href)
     p = (short *)soap_id_forward(soap, soap->href, p, 0, t, 0, sizeof(short), 0,
                                  nullptr);
@@ -12538,7 +12531,7 @@ float *SOAP_FMAC2 soap_infloat(struct soap *soap, const char *tag, float *p,
     return nullptr;
 #endif
   p = (float *)soap_id_enter(soap, soap->id, p, t, sizeof(float), 0, nullptr,
-                             NULL, NULL);
+                             nullptr, nullptr);
   if (*soap->href)
     p = (float *)soap_id_forward(soap, soap->href, p, 0, t, 0, sizeof(float), 0,
                                  nullptr);
@@ -12652,7 +12645,7 @@ double *SOAP_FMAC2 soap_indouble(struct soap *soap, const char *tag, double *p,
     return nullptr;
 #endif
   p = (double *)soap_id_enter(soap, soap->id, p, t, sizeof(double), 0, nullptr,
-                              NULL, NULL);
+                              nullptr, nullptr);
   if (*soap->href)
     p = (double *)soap_id_forward(soap, soap->href, p, 0, t, 0, sizeof(double),
                                   0, nullptr);
@@ -12721,8 +12714,9 @@ unsigned char *SOAP_FMAC2 soap_inunsignedByte(struct soap *soap,
     return nullptr;
   }
 #endif
-  p = (unsigned char *)soap_id_enter(
-      soap, soap->id, p, t, sizeof(unsigned char), 0, nullptr, NULL, NULL);
+  p = (unsigned char *)soap_id_enter(soap, soap->id, p, t,
+                                     sizeof(unsigned char), 0, nullptr, nullptr,
+                                     nullptr);
   if (*soap->href)
     p = (unsigned char *)soap_id_forward(soap, soap->href, p, 0, t, 0,
                                          sizeof(unsigned char), 0, nullptr);
@@ -12793,8 +12787,9 @@ soap_inunsignedShort(struct soap *soap, const char *tag, unsigned short *p,
     return nullptr;
   }
 #endif
-  p = (unsigned short *)soap_id_enter(
-      soap, soap->id, p, t, sizeof(unsigned short), 0, nullptr, NULL, NULL);
+  p = (unsigned short *)soap_id_enter(soap, soap->id, p, t,
+                                      sizeof(unsigned short), 0, nullptr,
+                                      nullptr, nullptr);
   if (*soap->href)
     p = (unsigned short *)soap_id_forward(soap, soap->href, p, 0, t, 0,
                                           sizeof(unsigned short), 0, nullptr);
@@ -12875,7 +12870,7 @@ unsigned int *SOAP_FMAC2 soap_inunsignedInt(struct soap *soap, const char *tag,
   }
 #endif
   p = (unsigned int *)soap_id_enter(soap, soap->id, p, t, sizeof(unsigned int),
-                                    0, nullptr, NULL, NULL);
+                                    0, nullptr, nullptr, nullptr);
   if (*soap->href)
     p = (unsigned int *)soap_id_forward(soap, soap->href, p, 0, t, 0,
                                         sizeof(unsigned int), 0, nullptr);
@@ -12956,8 +12951,9 @@ unsigned long *SOAP_FMAC2 soap_inunsignedLong(struct soap *soap,
     return nullptr;
   }
 #endif
-  p = (unsigned long *)soap_id_enter(
-      soap, soap->id, p, t, sizeof(unsigned long), 0, nullptr, NULL, NULL);
+  p = (unsigned long *)soap_id_enter(soap, soap->id, p, t,
+                                     sizeof(unsigned long), 0, nullptr, nullptr,
+                                     nullptr);
   if (*soap->href)
     p = (unsigned long *)soap_id_forward(soap, soap->href, p, 0, t, 0,
                                          sizeof(unsigned long), 0, nullptr);
@@ -13043,7 +13039,7 @@ ULONG64 *SOAP_FMAC2 soap_inULONG64(struct soap *soap, const char *tag,
     return nullptr;
   }
   p = (ULONG64 *)soap_id_enter(soap, soap->id, p, t, sizeof(ULONG64), 0,
-                               nullptr, NULL, NULL);
+                               nullptr, nullptr, nullptr);
   if (*soap->href)
     p = (ULONG64 *)soap_id_forward(soap, soap->href, p, 0, t, 0,
                                    sizeof(ULONG64), 0, nullptr);
@@ -13404,7 +13400,7 @@ char **SOAP_FMAC2 soap_instring(struct soap *soap, const char *tag, char **p,
     *p = soap_string_in(soap, flag, minlen, maxlen);
     if (!*p ||
         !(char *)soap_id_enter(soap, soap->id, *p, t, sizeof(char *), 0,
-                               nullptr, NULL, NULL))
+                               nullptr, nullptr, nullptr))
       return nullptr;
     if (!**p && tag && *tag == '-') {
       soap->error = SOAP_NO_TAG;
@@ -13467,7 +13463,7 @@ wchar_t **SOAP_FMAC2 soap_inwstring(struct soap *soap, const char *tag,
     *p = soap_wstring_in(soap, 1, minlen, maxlen);
     if (!*p ||
         !(wchar_t *)soap_id_enter(soap, soap->id, *p, t, sizeof(wchar_t *), 0,
-                                  nullptr, NULL, NULL))
+                                  nullptr, nullptr, nullptr))
       return nullptr;
     if (!**p && tag && *tag == '-') {
       soap->error = SOAP_NO_TAG;
@@ -13689,7 +13685,7 @@ time_t *SOAP_FMAC2 soap_indateTime(struct soap *soap, const char *tag,
     return nullptr;
   }
   p = (time_t *)soap_id_enter(soap, soap->id, p, t, sizeof(time_t), 0, nullptr,
-                              NULL, NULL);
+                              nullptr, nullptr);
   if (*soap->href)
     p = (time_t *)soap_id_forward(soap, soap->href, p, 0, t, 0, sizeof(time_t),
                                   0, nullptr);
@@ -17021,15 +17017,8 @@ soap::~soap() {
 
 /******************************************************************************/
 
-// clang-format off
-#if defined(__GNUC__) && __GNUC__ >= 7
-GCC_DIAG_ON(deprecated-declarations)
-GCC_DIAG_ON(format-overflow)
-GCC_DIAG_ON(format-truncation)
-GCC_DIAG_ON(implicit-fallthrough)
-#endif
-// clang-format on
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("deprecated-declarations")
+GNU_DIAG_ON("format-overflow")
+GNU_DIAG_ON("format-truncation")
+GNU_DIAG_ON("implicit-fallthrough")
+GNU_DIAG_ON("cast-align")
