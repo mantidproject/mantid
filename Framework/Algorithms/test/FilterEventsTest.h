@@ -317,8 +317,6 @@ public:
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
-    // Check to see if output contains goniometer
-    TS_ASSERT_EQUALS(filteredws0->mutableRun().getGoniometer().getNumberAxes(), 0);
 
     // 4.2 Workspace group 1
     EventWorkspace_sptr filteredws1 =
