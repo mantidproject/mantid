@@ -130,6 +130,7 @@ class SNAPReduce(DataProcessorAlgorithm):
                              doc="The type of conversion to d_spacing to be used.")
 
         self.declareProperty(FileProperty(name="CalibrationFilename", defaultValue="",
+                                          extensions=['.h5', '.cal'],
                                           direction=Direction.Input,
                                           action=FileAction.OptionalLoad),
                              doc="The calibration file to convert to d_spacing.")
