@@ -80,9 +80,9 @@ Constructing the Measured Intensity Distribution
 ##################################################
 To construct the measured distribution to be fit, a histogram of events is made around the peak.
 This histogram is in (q\ :sub:`x`\ ,  q\ :sub:`y`\, q\ :sub:`z`\) and composed of voxels of side
-length **dQPixel**.  To minimize the effect of neighboring peaks on profile fitting, the variable 
+length **DQPixel**.  To minimize the effect of neighboring peaks on profile fitting, the variable 
 **qMask** is used to only consider a region around the peak in (h,k,l) space.  It will filter voxels
-outside of (h ± **fracHKL**, k ± **fracHKL**, l ± **fracHKL**) from calculations used for profile
+outside of (h ± **FracHKL**, k ± **FracHKL**, l ± **FracHKL**) from calculations used for profile
 fitting. In practice, values of 0.35 < **fracHKL** < 0.5 seem to work best. 
 
 Fitting the Time-of-Flight Coordinate
@@ -95,7 +95,7 @@ The time-of-flight (TOF), t, of each voxel is determined as:
 The events are histogrammed by their `t` values to create a TOF profile.  This profile can then be fit 
 to the Ikeda Carpenter function.  To separate the peak and background, different levels of intensity are
 filtered out.  The predicted background level is determined as the average background not near the peak or off the edge
-and values within **minppl_frac** and **maxppl_frac** times the predicted value are tried.  The best fit to the expected 
+and values within **Minppl_frac** and **Maxppl_frac** times the predicted value are tried.  The best fit to the expected 
 moderator emission (determined by the moderator coefficients defined in **ModeratorCoefficientsFile**) is
 taken and these voxels are considered to be signal.
 
@@ -104,13 +104,18 @@ Fitting the Non-TOF Coordinate
 TOF goes as :math:`1/|\vec{q}|` and so it is natural to use spherical coordinate.  In that sense, the other two coordinates
 are  :math:`(q_{\theta} ,  q_{\phi_az})` - along the scattering angle and azimuthal angle, respectively.  From the
 MDHisto Workspace (filtered by **qMask** and using only the signal voxels from the TOF fight), a 2D histogram is constructed
-which is fit to a bivariate normal distribution.  The histogram has **nTheta** :math:`\times` **nPhi** bins.
+which is fit to a bivariate normal distribution.  The histogram has **NTheta** :math:`\times` **NPhi** bins.
 
 For weak peaks or peaks near detector edges, the 2D histogram likely does not reflect the full profile.  To address this, the
 profile of the nearest strong peaks is forced when doing the BVG fit.  The profile is fit (allowed to vary 10% in
 :math:`\sigma_x, \sigma_y, \rho` ) and location and amplitude are not fixed.  Weak peaks are defined as peaks with fewer 
-than **forceCutoff** counts from peak-minus-background integration or within **dEdge** pixels of the detector edge.
+than **IntensityCutoff** counts from peak-minus-background integration or within **EdgeCutoff** pixels of the detector edge.
 
+The strong peaks library can be generated in two ways.  First, it can be provided as an input file through **StrongPeakParamsFile**.
+The **StrongPeakParamsFile** should be a .pkl file which contains a Numpy array containing the parameters used for strong peaks.
+Alternatively, if no file is provided, the algorithm will go through and fit strong peaks first, building the strong peaks library
+as it goes.  After fitting all of the strong peaks, defined as peaks with spherical intensities above **IntensityCutoff** and further 
+than **EdgeCutoff** pixels from the edge, it will fit weak peaks using those profiles. 
 
 Integrating the Model
 #####################

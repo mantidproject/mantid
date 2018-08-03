@@ -489,8 +489,8 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
                              thBins[thBins.size // 2 + dth]]
         boundsDict['MuY'] = [phBins[phBins.size // 2 - dph],
                              phBins[phBins.size // 2 + dph]]
-        # boundsDict['sigX'] = [0.7*sigX0, 1.3*sigX0]
-        boundsDict['SigX'] = [0., 0.02]
+        boundsDict['SigX'] = [0.5*sigX0, 1.5*sigX0]
+        #boundsDict['SigX'] = [0., 0.02]
         boundsDict['SigY'] = [0., 0.02]
         boundsDict['SigP'] = [-1., 1.]
         boundsDict['Bg'] = [0, np.inf]
@@ -520,7 +520,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         m.setAttributeValue('nX', h.shape[0])
         m.setAttributeValue('nY', h.shape[1])
         m.setConstraints(boundsDict)
-
         # Do the fit
         #bvgWS = CreateWorkspace(OutputWorkspace='bvgWS', DataX=pos.ravel(
         #), DataY=H.ravel(), DataE=np.sqrt(H.ravel()))

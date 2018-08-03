@@ -52,9 +52,9 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                              doc="File containing the Pade coefficients describing moderator emission versus energy.")
         self.declareProperty(FileProperty("StrongPeakParamsFile",defaultValue="",action=FileAction.OptionalLoad,
                              extensions=[".pkl"]),
-                             doc="File containing strong peaks profiles.  If left blank, no profiles will be enforced.")
+                             doc="File containing strong peaks profiles.  If left blank, strong peaks will be fit first and their profiles used.")
         self.declareProperty("IntensityCutoff", defaultValue=0., doc="Minimum number of counts to force a profile")
-        edgeDocString = 'Pixels within EdgeCutoff from a detector edge will be have a profile forced.  Currently for 256x256 cameras only.'
+        edgeDocString = 'Pixels within EdgeCutoff from a detector edge will be have a profile forced.'
         self.declareProperty("EdgeCutoff", defaultValue=0., doc=edgeDocString)
         self.declareProperty("FracStop", defaultValue=0.05, validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Fraction of max counts to include in peak selection.")
@@ -272,7 +272,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                 raise
 
             except:
-                # raise
+                raise
                 numerrors += 1
                 peak.setIntensity(0.0)
                 peak.setSigmaIntensity(1.0)
