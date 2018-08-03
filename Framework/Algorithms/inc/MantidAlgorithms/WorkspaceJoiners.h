@@ -52,8 +52,9 @@ public:
 protected:
   API::MatrixWorkspace_sptr execWS2D(const API::MatrixWorkspace &ws1,
                                      const API::MatrixWorkspace &ws2);
-  API::MatrixWorkspace_sptr execEvent(const DataObjects::EventWorkspace &event_ws1,
-                                      const DataObjects::EventWorkspace &event_ws2);
+  API::MatrixWorkspace_sptr
+  execEvent(const DataObjects::EventWorkspace &event_ws1,
+            const DataObjects::EventWorkspace &event_ws2);
 
   using Mantid::API::Algorithm::validateInputs;
   void validateInputs(const API::MatrixWorkspace &ws1,

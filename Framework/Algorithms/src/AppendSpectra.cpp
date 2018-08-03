@@ -60,8 +60,10 @@ void AppendSpectra::exec() {
   // Retrieve the input workspaces
   MatrixWorkspace_const_sptr ws1 = getProperty("InputWorkspace1");
   MatrixWorkspace_const_sptr ws2 = getProperty("InputWorkspace2");
-  DataObjects::EventWorkspace_const_sptr event_ws1 = boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
-  DataObjects::EventWorkspace_const_sptr event_ws2 = boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
+  DataObjects::EventWorkspace_const_sptr event_ws1 =
+      boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
+  DataObjects::EventWorkspace_const_sptr event_ws2 =
+      boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
 
   // Make sure that we are not mis-matching EventWorkspaces and other types of
   // workspaces

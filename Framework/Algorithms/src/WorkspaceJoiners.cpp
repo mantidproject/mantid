@@ -118,8 +118,9 @@ MatrixWorkspace_sptr WorkspaceJoiners::execWS2D(const MatrixWorkspace &ws1,
  *  @throw std::invalid_argument If the input workspaces do not meet the
  * requirements of this algorithm
  */
-MatrixWorkspace_sptr WorkspaceJoiners::execEvent(const DataObjects::EventWorkspace &event_ws1,
-                                                 const DataObjects::EventWorkspace &event_ws2) {
+MatrixWorkspace_sptr
+WorkspaceJoiners::execEvent(const DataObjects::EventWorkspace &event_ws1,
+                            const DataObjects::EventWorkspace &event_ws2) {
   // Create the output workspace
   const size_t totalHists =
       event_ws1.getNumberHistograms() + event_ws2.getNumberHistograms();
