@@ -43,7 +43,7 @@ int LoadPSIMuonBin::confidence(Kernel::FileDescriptor &descriptor) const {
   Mantid::Kernel::BinaryStreamReader streamReader(stream);
   std::string fileFormat;
   streamReader.read(fileFormat, 2);
-  if (fileFormat != "1N"){
+  if (fileFormat != "1N") {
     return 0;
   }
   return 90;

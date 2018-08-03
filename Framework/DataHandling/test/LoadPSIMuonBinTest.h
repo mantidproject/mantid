@@ -11,7 +11,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/FileDescriptor.h"
 
-
 using namespace Mantid;
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
@@ -44,20 +43,19 @@ public:
         "Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
-    
+
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "ws"));
+        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws"));
     TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->getTitle(), "BNFSO      - Run:1529");
     TS_ASSERT_EQUALS(ws->getLog("Field")->value(), "0.000G");
-    TS_ASSERT_EQUALS(ws->getComment(), "Ba3NbFe3Si2O14, crystal                                       ");
-    TS_ASSERT_EQUALS(ws->getLog("Actual Temperature1")->value(),
-                     "4.999610");
-    TS_ASSERT_EQUALS(ws->getLog("Actual Temperature2")->value(),
-                     "5.197690");
+    TS_ASSERT_EQUALS(
+        ws->getComment(),
+        "Ba3NbFe3Si2O14, crystal                                       ");
+    TS_ASSERT_EQUALS(ws->getLog("Actual Temperature1")->value(), "4.999610");
+    TS_ASSERT_EQUALS(ws->getLog("Actual Temperature2")->value(), "5.197690");
     TS_ASSERT_EQUALS(ws->getLog("end_time")->value(), "2011-07-04T11:56:24");
     TS_ASSERT_EQUALS(ws->getLog("start_time")->value(), "2011-07-04T10:40:23");
     TS_ASSERT_EQUALS(ws->getLog("Spectra0 label and scalar")->value(),
@@ -94,14 +92,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    // If algorithm was successful there will be one, we are assuming it won't have been
-    TS_ASSERT_THROWS_ANYTHING(MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "ws"));
+    // If algorithm was successful there will be one, we are assuming it won't
+    // have been
+    TS_ASSERT_THROWS_ANYTHING(
+        MatrixWorkspace_sptr ws =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws"));
 
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove("ws"));    
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove("ws"));
   }
 
-  void test_confidence(){
+  void test_confidence() {
     LoadPSIMuonBin alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
@@ -109,11 +109,12 @@ public:
     FileDescriptor descriptor(getTestFilePath("deltat_tdc_dolly_1529.bin"));
     TS_ASSERT_EQUALS(alg.confidence(descriptor), 90);
 
-    FileDescriptor descriptor1(getTestFilePath("pid_offset_vulcan_new.dat.bin"));
+    FileDescriptor descriptor1(
+        getTestFilePath("pid_offset_vulcan_new.dat.bin"));
     TS_ASSERT_EQUALS(alg.confidence(descriptor1), 0);
   }
 
-  private:
+private:
   std::string getTestFilePath(const std::string &filename) {
     const std::string filepath =
         Mantid::API::FileFinder::Instance().getFullPath(filename);
