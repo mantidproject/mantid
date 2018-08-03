@@ -53,7 +53,7 @@ Running python code from within PyCharm which depends on the python API, or PyQt
 
 As an example, create a new file in ``<Mantid Source Directory>/scripts/`` called ``test.py``. Copy into it the Python code below.
 
-4. To edit the configurations go to ``Run->Run...`` and select ``Edit Configurations``. This should open up a sub window. In order to tell PyCharm where to look for python modules and libraries we need to add some folders to the ``PATH`` environment variable. Click on the ``...`` next to the *Environment Variables* box, and hit the ``+`` icon. In the Name column enter "PATH", in the value column enter the following;
+4. To edit the configurations go to ``Run->Run...`` and select ``Edit Configurations``. This should open up a sub window. Hit the green ``+`` in the top left to create a new configuration and name it. In order to tell PyCharm where to look for python modules and libraries we need to add some folders to the ``PATH`` environment variable. Click on the ``...`` next to the *Environment Variables* box, and hit the ``+`` icon. In the Name column enter "PATH", in the value column enter the following;
 
     .. code-block:: sh
 
@@ -65,7 +65,7 @@ As an example, create a new file in ``<Mantid Source Directory>/scripts/`` calle
 
    The semi-colon delimited list of paths should end in ``;%PATH%`` so that we prepend to the existing list of paths rather than overwriting them. The last two lines will allow imports of PyQt4 and PyQt5 modules.
 
-You should now be able to run and debug the scripts using the newly created configuration.
+You should now be able to run and debug the scripts using the newly created configuration, by adding the full path of the file in the ``Script path`` box at the top of the configuration window.
 
 
 Testing using PyQt
