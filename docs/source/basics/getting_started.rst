@@ -1,8 +1,8 @@
 .. _getting started:
 
-===============
-Getting started
-===============
+==============================
+Setting up and getting started
+==============================
 
 
 Installing Mantid
@@ -17,7 +17,7 @@ features, it is less tested and comes with much less guarantee.
 
 You will also find detailed instructions for installing Mantid on any of the above mentioned operating systems.
 
-.. image:: ../../_images/images/MantidDownload_3121.png
+.. figure:: /images/MantidDownload_3121.png
    :width: 500px
    :alt: Download page
 
@@ -35,7 +35,7 @@ Mantid, you can check the "Do not show again until next release"
 box. You can re-access this screen from the main MantidPlot GUI 
 at any time by going to "Help > First Time Setup".
 
-.. image:: ../../_images/images/FirstTimeStartup.png
+.. figure:: /images/FirstTimeStartup.png
    :width: 500px
    :alt: First-time setup screen
 

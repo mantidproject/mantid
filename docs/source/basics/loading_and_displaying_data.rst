@@ -1,4 +1,4 @@
-.. |load_symbol| image:: ../../_images/images/LoadFileToolbar.png
+.. |load_symbol| image:: /images/LoadFileToolbar.png
 
 .. _loading and displaying:
                  
