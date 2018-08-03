@@ -153,7 +153,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             intensIDX = intensities < forceCutoff
             edgeIDX = reduce(np.logical_or, [rows < edgeCutoff, rows > numDetRows - edgeCutoff,
                                              cols < edgeCutoff, cols > numDetCols - edgeCutoff])
-            needsForcedProfile = np.logical_and(intensIDX, edgeIDX)
             # We can populate the strongPeakParams_ws now
             for row in strongPeakParams:
                 strongPeakParams_ws.addRow(row)
@@ -167,13 +166,14 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             intensIDX = intensities < forceCutoff
             edgeIDX = reduce(np.logical_or, [rows < edgeCutoff, rows > numDetRows - edgeCutoff,
                                              cols < edgeCutoff, cols > numDetCols - edgeCutoff])
-            needsForcedProfile = np.logical_and(intensIDX, edgeIDX)
+            needsForcedProfile = np.logical_or(intensIDX, edgeIDX)
             needsForcedProfileIDX = np.where(needsForcedProfile)[0]
             canFitProfileIDX = np.where(~needsForcedProfile)[0]
             numPeaksCanFit = len(canFitProfileIDX)
             peaksToFit = np.append(canFitProfileIDX, needsForcedProfileIDX) #Will fit in this order
             peaksToFit = peaksToFit[runNumbers[peaksToFit]==sampleRun]
 
+            
             #Initialize our strong peaks dictionary
             strongPeakParams = np.empty([numPeaksCanFit, 9])
 
