@@ -459,6 +459,7 @@ set ( TEST_FILES
 	LoadParameterFileTest.h
 	LoadPreNexusMonitorsTest.h
 	LoadPreNexusTest.h
+	LoadPSIMuonBinTest.h
 	LoadQKKTest.h
 	LoadRKHTest.h
 	LoadRaw3Test.h

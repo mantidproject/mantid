@@ -40,19 +40,13 @@ const std::string LoadPSIMuonBin::category() const {
 
 int LoadPSIMuonBin::confidence(Kernel::FileDescriptor &descriptor) const {
   auto &stream = descriptor.data();
-  // 85th character is a space & 89th character is a ~
-  stream.seekg(0, std::ios::beg);
-  int c = stream.get();
-  int confidence(0);
-  // Checks if postion 0 is a 1
-  if (c == 49) {
-    stream.seekg(1, std::ios::cur);
-    int c = stream.get();
-    // Checks if position 1 is N
-    if (c == 78)
-      confidence = 90;
+  Mantid::Kernel::BinaryStreamReader streamReader(stream);
+  std::string fileFormat;
+  streamReader.read(fileFormat, 2);
+  if (fileFormat != "1N"){
+    return 0;
   }
-  return confidence;
+  return 90;
 }
 
 // version 1 however there is an issue open to create a version which
@@ -377,7 +371,7 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
       sizeof(m_header.temperatures) / sizeof(*m_header.temperatures);
   for (auto tempNum = 1u; tempNum < sizeOfTemps + 1; ++tempNum) {
     if (m_header.temperatures[tempNum - 1] != 0) {
-      logAlg->setProperty("LogType", "Number");
+      logAlg->setProperty("LogType", "String");
       logAlg->setProperty("LogName",
                           "Actual Temperature" + std::to_string(tempNum));
       logAlg->setProperty("LogText",
@@ -385,7 +379,7 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
       logAlg->executeAsChildAlg();
 
       // Temperature deviation
-      logAlg->setProperty("LogType", "Number");
+      logAlg->setProperty("LogType", "String");
       logAlg->setProperty("LogName",
                           "Temperature Deviation" + std::to_string(tempNum));
       logAlg->setProperty(
@@ -453,9 +447,9 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   }
 
   // total events
-  logAlg->setProperty("LogType", "Number");
+  logAlg->setProperty("LogType", "String");
   logAlg->setProperty("LogName", "Total Number of Events");
-  logAlg->setProperty("LogText", m_header.totalEvents);
+  logAlg->setProperty("LogText", std::to_string(m_header.totalEvents));
   logAlg->executeAsChildAlg();
 }
 
