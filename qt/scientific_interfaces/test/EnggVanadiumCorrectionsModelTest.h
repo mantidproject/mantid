@@ -100,6 +100,12 @@ public:
     calibSettings.m_inputDirCalib = m_inputDir.path();
     calibSettings.m_forceRecalcOverwrite = false;
 
+    if (m_inputDir.exists()) {
+      // Make sure that m_inputDir doesn't exist, as if a previous test exited
+      // abnormally tearDown() may not have been called
+      m_inputDir.remove(true);
+    }
+
     TestEnggVanadiumCorrectionsModel model(calibSettings, CURRENT_INSTRUMENT);
     std::pair<Mantid::API::ITableWorkspace_sptr,
               Mantid::API::MatrixWorkspace_sptr> correctionWorkspaces;

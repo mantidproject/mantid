@@ -3,6 +3,7 @@
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include <QFileInfo>
 
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitDataSelector");
@@ -193,7 +194,6 @@ void MuonFitDataSelector::setWorkspaceDetails(
  * Defaults copy those previously used in muon fit property browser
  */
 void MuonFitDataSelector::setDefaultValues() {
-  const QChar muMicro{0x03BC}; // mu in Unicode
   this->setStartTime(0.0);
   this->setEndTime(0.0);
   m_ui.txtSimFitLabel->setText("0");
@@ -356,7 +356,18 @@ QString MuonFitDataSelector::getSimultaneousFitLabel() const {
  * @param label :: [input] Text to set as label
  */
 void MuonFitDataSelector::setSimultaneousFitLabel(const QString &label) {
-  m_ui.txtSimFitLabel->setText(label);
+  // do some checks that it is valid
+  auto safeLabel = label;
+  if (label.indexOf(".") >= 0) {
+    QFileInfo file(label);
+    safeLabel = file.baseName();
+    // trim instrument name
+    auto index = safeLabel.indexOf("0");
+    safeLabel = safeLabel.mid(index);
+    // trim leading zeros
+    safeLabel = safeLabel.remove(QRegExp("^[0]*"));
+  }
+  m_ui.txtSimFitLabel->setText(safeLabel);
 }
 
 /**

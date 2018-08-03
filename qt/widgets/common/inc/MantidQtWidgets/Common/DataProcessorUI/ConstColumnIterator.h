@@ -48,7 +48,7 @@ public:
   using difference_type = typename QStringIterator::difference_type;
   ConstColumnIterator(QStringIterator names, QStringIterator descriptions,
                       QStringIterator algorithmProperties, BoolIterator isShown,
-                      QStringIterator prefixes);
+                      QStringIterator prefixes, BoolIterator isKey);
 
   ConstColumnIterator &operator++();
   ConstColumnIterator operator++(int);
@@ -64,6 +64,7 @@ private:
   QStringIterator m_algorithmProperties;
   BoolIterator m_isShown;
   QStringIterator m_prefixes;
+  BoolIterator m_isKey;
 };
 
 ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON

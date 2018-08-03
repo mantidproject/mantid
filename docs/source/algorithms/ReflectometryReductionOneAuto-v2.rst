@@ -106,7 +106,7 @@ Polarization Analysis On
 If :literal:`PolarizationAnalysis` is set to :literal:`PA` or :literal:`PNR`
 the reduction continues and polarization corrections will be applied to
 the output workspace in wavelength. The algorithm will use the properties :literal:`PolarizationAnalysis`,
-:literal:`CPp`, :literal:`CAp`, :literal:`CRho` and :literal:`CAlpha` to run :ref:`algm-PolarizationCorrection`.
+:literal:`Pp`, :literal:`Ap`, :literal:`Rho` and :literal:`Alpha` to run :ref:`algm-PolarizationCorrectionFredrikze`.
 The result will be a new workspace in wavelength, which will override the previous one, that will
 be used as input to :ref:`algm-ReflectometryReductionOne` to calculate the new output workspaces in Q, which
 in turn will override the existing workspaces in Q. Note that if transmission runs are provided in the form of workspace
@@ -132,10 +132,8 @@ Usage
 .. testcode:: ExReflRedOneAutoSimple
 
     run = Load(Filename='INTER00013460.nxs')
-    IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7)
+    IvsQ, IvsQ_unbinned = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7)
 
-    print("{:.5f}".format(IvsLam.readY(0)[175]))
-    print("{:.5f}".format(IvsLam.readY(0)[176]))
     print("{:.5f}".format(IvsQ_unbinned.readY(0)[106]))
     print("{:.5f}".format(IvsQ_unbinned.readY(0)[107]))
     print("{:.5f}".format(IvsQ.readY(0)[13]))
@@ -145,8 +143,6 @@ Output:
 
 .. testoutput:: ExReflRedOneAutoSimple
 
-    0.00441
-    0.00462
     0.63441
     0.41079
     0.44792
@@ -158,10 +154,8 @@ Output:
 
     run = Load(Filename='INTER00013460.nxs')
     trans = Load(Filename='INTER00013463.nxs')
-    IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)
+    IvsQ, IvsQ_unbinned = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)
 
-    print("{:.5f}".format(IvsLam.readY(0)[164]))
-    print("{:.5f}".format(IvsLam.readY(0)[164]))
     print("{:.5f}".format(IvsQ_unbinned.readY(0)[96]))
     print("{:.5f}".format(IvsQ_unbinned.readY(0)[97]))
     print("{:.5f}".format(IvsQ.readY(0)[5]))
@@ -171,8 +165,6 @@ Output:
 
 .. testoutput:: ExReflRedOneAutoTrans
 
-    0.00338
-    0.00338
     1.16756
     0.89144
     1.46655
@@ -183,10 +175,8 @@ Output:
 .. testcode:: ExReflRedOneAutoOverload
 
     run = Load(Filename='INTER00013460.nxs')
-    IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, DetectorCorrectionType="RotateAroundSample", MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
+    IvsQ, IvsQ_unbinned = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, DetectorCorrectionType="RotateAroundSample", MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
 
-    print("{:.5f}".format(IvsLam.readY(0)[175]))
-    print("{:.5f}".format(IvsLam.readY(0)[176]))
     print("{:.5f}".format(IvsQ_unbinned.readY(0)[106]))
     print("{:.5f}".format(IvsQ_unbinned.readY(0)[107]))
     print("{:.5f}".format(IvsQ.readY(0)[5]))
@@ -196,8 +186,6 @@ Output:
 
 .. testoutput:: ExReflRedOneAutoOverload
 
-    0.00441
-    0.00462
     0.64231
     0.41456
     0.51029

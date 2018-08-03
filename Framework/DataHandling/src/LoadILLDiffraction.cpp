@@ -48,6 +48,8 @@ constexpr double D20_PIXEL_SIZE = 0.1;
 constexpr double RAD_TO_DEG = 180. / M_PI;
 // A factor to compute E from lambda: E (mev) = waveToE/lambda(A)
 constexpr double WAVE_TO_E = 81.8;
+// Number of pixels in the tubes for D2B
+constexpr size_t D2B_NUMBER_PIXELS_IN_TUBES = 128;
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -352,7 +354,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
             compInfo.indexOf(component->getComponentID());
         compInfo.setPosition(componentIndex, pos);
       }
-      m_maxHeight = double(nPixels) * m_pixelHeight / 2 + maxYOffset;
+      m_maxHeight = double(nPixels + 1) * m_pixelHeight / 2 + maxYOffset;
     }
   }
 
@@ -474,7 +476,10 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
        i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
       const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
-      const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
+      auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
+      if (m_instName == "D2B" && tubeNumber % 2 == 1) {
+        pixelInTubeNumber = D2B_NUMBER_PIXELS_IN_TUBES - 1 - pixelInTubeNumber;
+      }
       unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
                             static_cast<int>(pixelInTubeNumber));
       const auto wsIndex = j + i * m_numberScanPoints;
@@ -513,7 +518,10 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
     auto &spectrum = m_outWorkspace->mutableY(i);
     auto &errors = m_outWorkspace->mutableE(i);
     const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
-    const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
+    auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
+    if (m_instName == "D2B" && tubeNumber % 2 == 1) {
+      pixelInTubeNumber = D2B_NUMBER_PIXELS_IN_TUBES - 1 - pixelInTubeNumber;
+    }
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
       unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
                             static_cast<int>(pixelInTubeNumber));

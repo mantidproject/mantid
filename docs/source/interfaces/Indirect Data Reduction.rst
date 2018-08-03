@@ -135,16 +135,19 @@ Grouping
 
 The following options are available for grouping output data:
 
-Default
-  The data will be grouped according to the Workflow.GroupingMethod parameter in
-  the instrument's parameter file. If this value is not set then Individual is
-  used.
+Custom
+  Follows the same grouping patterns used in the :ref:`GroupDetectors <algm-GroupDetectors>` algorithm.
+  An example of the syntax is 1,2+3,4-6,7-10
+
+  This would produce spectra for: spectra 1, the sum of spectra 2 and 3, the sum of spectra 4-6 (4+5+6)
+  and individual spectra from 7 to 10 (7,8,9,10)
 
 Individual
   All detectors will remain on individual spectra.
 
 Groups
-  The detectors will automatically be divided into a given number of gorups.
+  The detectors will automatically be divided into a given number of equal size groups. Any
+  left over will be added as an additional group.
 
 All
   All detectors will be grouped into a single spectra.
@@ -165,7 +168,7 @@ Single
 .. interface:: Data Reduction
   :widget: pgSingleRebin
 
-In this mode only a single binning range is defined as  a range and width.
+In this mode only a single binning range is defined as a range and width.
 
 Multiple
 ########
@@ -173,7 +176,7 @@ Multiple
 .. interface:: Data Reduction
   :widget: pgMultipleRebin
 
-In this mode multiple binning ranges can be defined using he rebin string syntax
+In this mode multiple binning ranges can be defined using the rebin string syntax
 used by the :ref:`Rebin <algm-Rebin>` algorithm.
 
 ILL Energy Transfer

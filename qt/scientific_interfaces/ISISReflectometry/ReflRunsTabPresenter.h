@@ -1,12 +1,16 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H
 
-#include "MantidAPI/IAlgorithm.h"
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include "ReflAutoreduction.h"
+#include "ReflTransferStrategy.h"
 #include <boost/shared_ptr.hpp>
+
+class ProgressPresenter;
 
 namespace MantidQt {
 
@@ -68,25 +72,24 @@ public:
   ~ReflRunsTabPresenter() override;
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
-  void notifyADSChanged(const QSet<QString> &workspaceList) override;
+  void notifyADSChanged(const QSet<QString> &workspaceList, int group) override;
   /// Handle data reduction paused/resumed
   /// Global options (inherited from DataProcessorMainPresenter)
   MantidWidgets::DataProcessor::ColumnOptionsQMap
-  getPreprocessingOptions() const override;
+  getPreprocessingOptions(int group) const override;
   MantidWidgets::DataProcessor::OptionsQMap
-  getProcessingOptions() const override;
-  QString getPostprocessingOptionsAsString() const override;
-  QString getTimeSlicingValues() const override;
-  QString getTimeSlicingType() const override;
+  getProcessingOptions(int group) const override;
+  QString getPostprocessingOptionsAsString(int group) const override;
+  QString getTimeSlicingValues(int group) const override;
+  QString getTimeSlicingType(int group) const override;
   MantidWidgets::DataProcessor::OptionsQMap
-  getOptionsForAngle(const double angle) const override;
-  bool hasPerAngleOptions() const override;
+  getOptionsForAngle(const double angle, int group) const override;
+  bool hasPerAngleOptions(int group) const override;
   /// Handle data reduction paused/resumed
-  void pause() const override;
-  void resume() const override;
-  /// Determine whether to start a new autoreduction
-  bool startNewAutoreduction() const override;
-  /// Reduction paused/resumed confirmation handler
+  void pause(int group) override;
+  void resume(int group) const override;
+  /// Reduction finished/paused/resumed confirmation handler
+  void confirmReductionCompleted(int group) override;
   void confirmReductionPaused(int group) override;
   void confirmReductionResumed(int group) override;
   void settingsChanged(int group) override;
@@ -97,9 +100,16 @@ public:
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceNames) override;
 
-private:
+protected:
+  /// Information about the autoreduction process
+  ReflAutoreduction m_autoreduction;
+  void startNewAutoreduction();
   /// The search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
+  /// The current transfer method
+  std::string m_currentTransferMethod;
+
+private:
   /// The main view we're managing
   IReflRunsTabView *m_view;
   /// The progress view
@@ -110,29 +120,53 @@ private:
   IReflMainWindowPresenter *m_mainPresenter;
   /// The search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
-  /// The current transfer method
-  std::string m_currentTransferMethod;
   /// Legacy transfer method
   static const std::string LegacyTransferMethod;
   /// Measure transfer method
   static const std::string MeasureTransferMethod;
-  /// The current search string used for autoreduction
-  std::string m_autoSearchString;
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
 
   /// searching
-  void search();
+  bool search();
+  void icatSearchComplete();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
-  void autoreduce(bool startNew);
-  void transfer();
-  void pushCommands();
-  /// transfer strategy
+  /// autoreduction
+  bool requireNewAutoreduction() const;
+  bool setupNewAutoreduction(int group, const std::string &searchString);
+  void checkForNewRuns();
+  void autoreduceNewRuns();
+  void pauseAutoreduction();
+  void stopAutoreduction();
+  int selectedGroup() const;
+  int autoreductionGroup() const;
+  bool shouldUpdateExistingSearchResults() const;
+  bool isAutoreducing(int group) const override;
+  bool isAutoreducing() const override;
+  // processing
+  bool isProcessing(int group) const override;
+  bool isProcessing() const override;
+
+  ProgressPresenter setupProgressBar(const std::set<int> &rowsToTransfer);
+  void transfer(const std::set<int> &rowsToTransfer, int group,
+                const TransferMatch matchType = TransferMatch::Any);
+  void pushCommands(int group);
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
-  /// change the instrument
   void changeInstrument();
-  /// enable/disable widgets on the view
-  void updateWidgetEnabledState(const bool isProcessing) const;
+  void changeGroup();
+  void updateWidgetEnabledState() const;
+  DataProcessorPresenter *getTablePresenter(int group) const;
+  /// Check that a given set of row indices are valid to transfer
+  bool validateRowsToTransfer(const std::set<int> &rowsToTransfer);
+  /// Get runs to transfer from row indices
+  SearchResultMap
+  getSearchResultRunDetails(const std::set<int> &rowsToTransfer);
+  /// Deal with rows that are invalid for transfer
+  void updateErrorStateInSearchModel(
+      const std::set<int> &rowsToTransfer,
+      const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns);
+  /// Get the data for a cell in the search results table as a string
+  std::string searchModelData(const int row, const int column);
 };
 }
 }

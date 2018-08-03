@@ -62,7 +62,8 @@ public:
       boost::shared_ptr<IEnggDiffractionSettings> mainSettings,
       boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
       boost::shared_ptr<IEnggDiffractionParam> mainParam,
-      boost::shared_ptr<IEnggDiffractionPythonRunner> mainPyhonRunner);
+      boost::shared_ptr<IEnggDiffractionPythonRunner> mainPyhonRunner,
+      boost::shared_ptr<IEnggDiffractionParam> fileSettings);
   ~EnggDiffFittingViewQtWidget() override;
 
   /// From the IEnggDiffractionUserMsg interface
@@ -77,8 +78,6 @@ public:
 
   /// From the IEnggDiffractionSettings interface
   EnggDiffCalibSettings currentCalibSettings() const override;
-
-  std::string focusingDir() const override;
 
   /// From the IEnggDiffractionPythonRunner interface
   virtual std::string enggRunPythonCode(const std::string &pyCode) override;
@@ -216,6 +215,9 @@ private:
 
   /// zoom-in/zoom-out tool for fitting
   QwtPlotZoomer *m_zoomTool = nullptr;
+
+  /// where to go and look for, in particular, focused runs to do fitting on
+  boost::shared_ptr<IEnggDiffractionParam> m_fileSettings;
 
   /// user messages interface provided by a main view/widget
   boost::shared_ptr<IEnggDiffractionUserMsg> m_mainMsgProvider;

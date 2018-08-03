@@ -149,7 +149,7 @@ public slots:
   /** @name Execute members.*/
   //@{
   /// Execute all using the given mode
-  void executeAll(const Script::ExecutionMode mode);
+  bool executeAll(const Script::ExecutionMode mode);
   /// Execute selection using the given mode
   void executeSelection(const Script::ExecutionMode mode);
   /// Abort the current script

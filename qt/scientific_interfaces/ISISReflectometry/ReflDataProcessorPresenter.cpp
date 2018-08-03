@@ -259,7 +259,8 @@ ReflDataProcessorPresenter::ReflDataProcessorPresenter(
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
                                     postprocessor, group, postprocessMap,
-                                    loader) {}
+                                    loader),
+      m_processingAsEventData(false) {}
 
 /**
 * Destructor
@@ -269,45 +270,49 @@ ReflDataProcessorPresenter::~ReflDataProcessorPresenter() {}
 /**
  Process selected data
 */
-void ReflDataProcessorPresenter::process() {
+void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
 
-  // Get selected runs
-  const auto newSelected = m_manager->selectedData(true);
+  m_itemsToProcess = itemsToProcess;
+  m_processingAsEventData = false;
 
   // Don't continue if there are no items to process
-  if (newSelected.empty())
+  if (m_itemsToProcess.empty()) {
+    endReduction(false);
     return;
+  }
 
   // If slicing is not specified, process normally, delegating to
   // GenericDataProcessorPresenter
   std::unique_ptr<TimeSlicingInfo> slicing;
   try {
     slicing = Mantid::Kernel::make_unique<TimeSlicingInfo>(
-        m_mainPresenter->getTimeSlicingType(),
-        m_mainPresenter->getTimeSlicingValues());
+        m_mainPresenter->getTimeSlicingType(m_group),
+        m_mainPresenter->getTimeSlicingValues(m_group));
   } catch (const std::runtime_error &ex) {
     m_view->giveUserWarning(ex.what(), "Error");
+    endReduction(false);
     return;
   }
 
   if (!slicing->hasSlicing()) {
     // Check if any input event workspaces still exist in ADS
-    if (proceedIfWSTypeInADS(newSelected, true)) {
-      setPromptUser(false); // Prevent prompting user twice
-      GenericDataProcessorPresenter::process();
+    if (proceedIfWSTypeInADS(m_itemsToProcess, true)) {
+      GenericDataProcessorPresenter::process(m_itemsToProcess);
+    } else {
+      endReduction(false);
     }
     return;
   }
 
-  m_selectedData = newSelected;
-
   // Check if any input non-event workspaces exist in ADS
-  if (!proceedIfWSTypeInADS(m_selectedData, false))
+  if (!proceedIfWSTypeInADS(m_itemsToProcess, false)) {
+    endReduction(false);
     return;
+  }
 
   // Progress report
   int progress = 0;
-  int maxProgress = static_cast<int>(m_selectedData.size());
+  int maxProgress = static_cast<int>(m_itemsToProcess.size());
   ProgressPresenter progressReporter(progress, maxProgress, maxProgress,
                                      m_progressView);
 
@@ -316,60 +321,56 @@ void ReflDataProcessorPresenter::process() {
   // True if errors where encountered when reducing table
   bool errors = false;
 
-  // Loop in groups
-  for (const auto &item : m_selectedData) {
+  setReductionResumed();
 
-    // Group of runs
-    GroupData group = item.second;
+  // Loop in groups
+  for (const auto &item : m_itemsToProcess) {
+    auto const groupIndex = item.first;
+    if (!groupNeedsProcessing(groupIndex))
+      continue;
+
+    resetProcessedState(groupIndex);
 
     try {
       // First load the runs.
-      bool allEventWS = loadGroup(group);
+      GroupData groupData = item.second;
+      bool allEventWS = loadGroup(groupData);
 
       if (allEventWS) {
+        m_processingAsEventData = true;
         // Process the group
-        if (processGroupAsEventWS(item.first, group, *slicing.get()))
+        if (processGroupAsEventWS(groupIndex, groupData, *slicing.get()))
           errors = true;
-
-        // Notebook not implemented yet
-        if (m_view->getEnableNotebook()) {
-          /// @todo Implement save notebook for event-sliced workspaces.
-          // The per-slice input properties are stored in the RowData but
-          // at the moment GenerateNotebook just uses the parent row
-          // saveNotebook(m_selectedData);
-          GenericDataProcessorPresenter::giveUserWarning(
-              "Notebook not implemented for sliced data yet",
-              "Notebook will not be generated");
-        }
 
       } else {
         // Process the group
-        if (processGroupAsNonEventWS(item.first, group))
+        if (processGroupAsNonEventWS(groupIndex, groupData))
           errors = true;
-        // Notebook
-        if (m_view->getEnableNotebook())
-          saveNotebook(m_selectedData);
       }
 
       if (!allEventWS)
         allGroupsWereEvent = false;
-
+    } catch (std::exception &e) {
+      handleError(groupIndex, e.what());
+      errors = true;
     } catch (...) {
+      handleError(groupIndex, "Unknown error");
       errors = true;
     }
     progressReporter.report();
   }
 
-  if (!allGroupsWereEvent)
+  if (!allGroupsWereEvent && promptUser())
     m_view->giveUserWarning(
         "Some groups could not be processed as event workspaces", "Warning");
-  if (errors)
+  if (errors && promptUser())
     m_view->giveUserWarning("Some errors were encountered when "
                             "reducing table. Some groups may not have "
                             "been fully processed.",
                             "Warning");
 
   progressReporter.clear();
+  endReduction(true);
 }
 
 /** Loads a group of runs. Tries loading runs as event workspaces. If any of the
@@ -386,28 +387,33 @@ bool ReflDataProcessorPresenter::loadGroup(const GroupData &group) {
   std::set<QString> loadedRuns;
 
   for (const auto &row : group) {
-
-    // The run number
-    auto runNo = row.second->value(0);
-    // Try loading as event workspace
-    bool eventWS = loadEventRun(runNo);
-    if (!eventWS) {
-      // This run could not be loaded as event workspace. We need to load and
-      // process the whole group as non-event data.
-      for (const auto &rowNew : group) {
-        // The run number
-        auto runNo = rowNew.second->value(0);
-        // Load as non-event workspace
-        loadNonEventRun(runNo);
+    try {
+      // The run number
+      auto runNo = row.second->value(0);
+      // Try loading as event workspace
+      bool eventWS = loadEventRun(runNo);
+      if (!eventWS) {
+        // This run could not be loaded as event workspace. We need to load and
+        // process the whole group as non-event data.
+        for (const auto &rowNew : group) {
+          // The run number
+          auto runNo = rowNew.second->value(0);
+          // Load as non-event workspace
+          loadNonEventRun(runNo);
+        }
+        // Remove monitors which were loaded as separate workspaces
+        for (const auto &run : loadedRuns) {
+          AnalysisDataService::Instance().remove(
+              ("TOF_" + run + "_monitors").toStdString());
+        }
+        return false;
       }
-      // Remove monitors which were loaded as separate workspaces
-      for (const auto &run : loadedRuns) {
-        AnalysisDataService::Instance().remove(
-            ("TOF_" + run + "_monitors").toStdString());
-      }
-      return false;
+      loadedRuns.insert(runNo);
+    } catch (std::exception &e) {
+      handleError(row.second, e.what());
+    } catch (...) {
+      handleError(row.second, "Unknown error");
     }
-    loadedRuns.insert(runNo);
   }
   return true;
 }
@@ -450,7 +456,10 @@ bool ReflDataProcessorPresenter::reduceRowAsEventWS(RowData_sptr rowData,
   // the start/stop times of the current input workspace
   if (slicing.isUniform() || slicing.isUniformEven()) {
     slicing.clearSlices();
-    parseUniform(slicing, runName);
+    if (!parseUniform(slicing, runName)) {
+      handleError(rowData, "Failed to parse slices for workspace");
+      return false;
+    }
   }
 
   const auto slicedWorkspaceProperties = getSlicedWorkspacePropertyNames();
@@ -460,25 +469,44 @@ bool ReflDataProcessorPresenter::reduceRowAsEventWS(RowData_sptr rowData,
   rowData->clearSlices();
 
   for (size_t i = 0; i < slicing.numberOfSlices(); i++) {
+    RowData_sptr slice;
     try {
       // Create the slice
       QString sliceSuffix = takeSlice(runName, slicing, i);
-      auto slice = rowData->addSlice(sliceSuffix, slicedWorkspaceProperties);
+      slice = rowData->addSlice(sliceSuffix, slicedWorkspaceProperties);
       // Run the algorithm
       const auto alg = createAndRunAlgorithm(slice->preprocessedOptions());
-
       // Populate any empty values in the row with output from the algorithm.
       // Note that this overwrites the data each time with the results
       // from the latest slice. It would be good to do some validation
       // that the results are the same for each slice e.g. the resolution
       // should always be the same.
       updateModelFromResults(alg, rowData);
+    } catch (std::runtime_error &e) {
+      handleError(rowData, e.what());
+      return false;
     } catch (...) {
+      handleError(rowData, "Unexpected error while reducing slice");
       return false;
     }
+
+    slice->setProcessed(true);
   }
 
+  setRowIsProcessed(rowData, true);
   return true;
+}
+
+void ReflDataProcessorPresenter::handleError(RowData_sptr rowData,
+                                             const std::string &error) {
+  setRowIsProcessed(rowData, true);
+  setRowError(rowData, error);
+}
+
+void ReflDataProcessorPresenter::handleError(const int groupIndex,
+                                             const std::string &error) {
+  setGroupIsProcessed(groupIndex, true);
+  setGroupError(groupIndex, error);
 }
 
 /** Processes a group of runs
@@ -500,15 +528,22 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     const auto rowData = row.second;   // data values for this row
     auto runNo = row.second->value(0); // The run number
 
+    if (!rowNeedsProcessing(rowData))
+      continue;
+
     // Set up all data required for processing the row
     if (!initRowForProcessing(rowData))
-      return true;
+      continue;
 
     if (!reduceRowAsEventWS(rowData, slicing))
-      return true;
+      continue;
 
     // Update the model with the results
     m_manager->update(groupID, rowID, rowData->data());
+
+    // Need to set the processed state as the last step because the table
+    // update resets it
+    setRowIsProcessed(rowData, true);
   }
 
   // Post-process (if needed)
@@ -530,7 +565,12 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
       // Post process the group of slices
       try {
         postProcessGroup(sliceGroup);
+        setGroupIsProcessed(groupID, true);
+      } catch (std::exception &e) {
+        handleError(groupID, e.what());
+        errors = true;
       } catch (...) {
+        handleError(groupID, "Unexpected error while post-processing group");
         errors = true;
       }
     }
@@ -565,20 +605,40 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
 
   for (auto &row : group) {
     auto rowData = row.second;
+    if (!rowNeedsProcessing(rowData))
+      continue;
     // Set up all data required for processing the row
     if (!initRowForProcessing(rowData))
-      return true;
+      continue;
     // Do the reduction
-    reduceRow(rowData);
+    try {
+      reduceRow(rowData);
+    } catch (std::exception &e) {
+      handleError(rowData, e.what());
+      errors = true;
+      continue;
+    } catch (...) {
+      handleError(rowData, "Unknown error");
+      errors = true;
+      continue;
+    }
     // Update the tree
     m_manager->update(groupID, row.first, rowData->data());
+    // Need to update the state as the last step because the table update
+    // resets it
+    setRowIsProcessed(rowData, true);
   }
 
   // Post-process (if needed)
   if (group.size() > 1) {
     try {
       postProcessGroup(group);
+      setGroupIsProcessed(groupID, true);
+    } catch (std::exception &e) {
+      handleError(groupID, e.what());
+      errors = true;
     } catch (...) {
+      handleError(groupID, "Unexpected error while post-processing group");
       errors = true;
     }
   }
@@ -606,16 +666,20 @@ ReflDataProcessorPresenter::retrieveWorkspaceOrCritical(
   if (workspaceExists(name)) {
     auto mws = retrieveWorkspace(name);
     if (mws == nullptr) {
-      m_view->giveUserCritical("Workspace to slice " + name +
-                                   " is not an event workspace!",
-                               "Time slicing error");
+      if (promptUser()) {
+        m_view->giveUserCritical("Workspace to slice " + name +
+                                     " is not an event workspace!",
+                                 "Time slicing error");
+      }
       return nullptr;
     } else {
       return mws;
     }
   } else {
-    m_view->giveUserCritical("Workspace to slice not found: " + name,
-                             "Time slicing error");
+    if (promptUser()) {
+      m_view->giveUserCritical("Workspace to slice not found: " + name,
+                               "Time slicing error");
+    }
     return nullptr;
   }
 }
@@ -624,15 +688,17 @@ ReflDataProcessorPresenter::retrieveWorkspaceOrCritical(
  *
  * @param slicing :: Info about how time slicing should be performed
  * @param wsName :: The name of the workspace to be sliced
+ * @return :: true if successfull
  */
-void ReflDataProcessorPresenter::parseUniform(TimeSlicingInfo &slicing,
+bool ReflDataProcessorPresenter::parseUniform(TimeSlicingInfo &slicing,
                                               const QString &wsName) {
 
   IEventWorkspace_sptr mws = retrieveWorkspaceOrCritical(wsName);
   if (mws != nullptr) {
     const auto run = mws->run();
     const auto totalDuration = run.endTime() - run.startTime();
-    double totalDurationSec = totalDuration.total_seconds();
+    double totalDurationSec =
+        static_cast<double>(totalDuration.total_seconds());
     double sliceDuration = .0;
     size_t numSlices = 0;
 
@@ -650,7 +716,10 @@ void ReflDataProcessorPresenter::parseUniform(TimeSlicingInfo &slicing,
       slicing.addSlice(sliceDuration * indexAsDouble,
                        sliceDuration * (indexAsDouble + 1));
     }
+    return true;
   }
+
+  return false;
 }
 
 bool ReflDataProcessorPresenter::workspaceExists(
@@ -820,7 +889,7 @@ void ReflDataProcessorPresenter::plotRow() {
 
   // If slicing values are empty plot normally
   auto timeSlicingValues =
-      m_mainPresenter->getTimeSlicingValues().toStdString();
+      m_mainPresenter->getTimeSlicingValues(m_group).toStdString();
   if (timeSlicingValues.empty()) {
     GenericDataProcessorPresenter::plotRow();
     return;
@@ -868,7 +937,7 @@ void ReflDataProcessorPresenter::plotGroup() {
     return;
 
   // If slicing values are empty plot normally
-  auto timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
+  auto timeSlicingValues = m_mainPresenter->getTimeSlicingValues(m_group);
   if (timeSlicingValues.isEmpty()) {
     GenericDataProcessorPresenter::plotGroup();
     return;
@@ -987,7 +1056,7 @@ OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData_sptr data) {
 
   // Get the angle for the current row. The angle is the second data item
   if (!hasAngle(data)) {
-    if (m_mainPresenter->hasPerAngleOptions()) {
+    if (m_mainPresenter->hasPerAngleOptions(m_group)) {
       // The user has specified per-angle transmission runs on the settings
       // tab. In theory this is fine, but it could cause confusion when the
       // angle is not available in the data processor table because the
@@ -1008,12 +1077,115 @@ OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData_sptr data) {
   }
 
   // Get the options for this angle
-  auto optionsForAngle =
-      convertOptionsFromQMap(m_mainPresenter->getOptionsForAngle(angle(data)));
+  auto optionsForAngle = convertOptionsFromQMap(
+      m_mainPresenter->getOptionsForAngle(angle(data), m_group));
   // Add the default options (only added if per-angle options don't exist)
   optionsForAngle.insert(options.begin(), options.end());
 
   return optionsForAngle;
+}
+
+/** Update state to indicate reduction is in progress
+ */
+void ReflDataProcessorPresenter::setReductionResumed() {
+  m_pauseReduction = false;
+  m_reductionPaused = false;
+  updateWidgetEnabledState(true);
+  m_mainPresenter->resume(m_group);
+  m_mainPresenter->confirmReductionResumed(m_group);
+}
+
+/** This override does not update the widget state yet because this is done via
+ * a call back from the main presenter, taking autoreduction into account
+ */
+void ReflDataProcessorPresenter::setReductionPaused() {
+  m_reductionPaused = true;
+  m_mainPresenter->confirmReductionPaused(m_group);
+}
+
+/** This override does not update the widget state yet because this is done via
+ * a call back from the main presenter, taking autoreduction into account
+ */
+void ReflDataProcessorPresenter::setReductionCompleted() {
+  m_reductionPaused = true;
+  m_mainPresenter->confirmReductionCompleted(m_group);
+}
+
+/**
+End reduction
+*
+* @param reductionSuccessful : true if the reduction completed successfully,
+* false if there were any errors
+*/
+void ReflDataProcessorPresenter::endReduction(const bool reductionSuccessful) {
+
+  // Create an ipython notebook if "Output Notebook" is checked.
+  if (reductionSuccessful && m_view->getEnableNotebook()) {
+    if (m_processingAsEventData) {
+      /// @todo Implement save notebook for event-sliced workspaces.
+      // The per-slice input properties are stored in the RowData but
+      // at the moment GenerateNotebook just uses the parent row
+      GenericDataProcessorPresenter::giveUserWarning(
+          "Notebook not implemented for sliced data yet",
+          "Notebook will not be generated");
+    } else {
+      saveNotebook(m_itemsToProcess);
+    }
+  }
+
+  if (m_mainPresenter->isAutoreducing(m_group) && !m_pauseReduction) {
+    // Just signal that the reduction has completed
+    setReductionCompleted();
+  } else {
+    // Stop all processing
+    pause();
+    setReductionPaused();
+  }
+}
+
+/**
+Handle thread completion
+*/
+void ReflDataProcessorPresenter::threadFinished(const int exitCode) {
+  m_workerThread->exit();
+  m_workerThread.release();
+
+  // We continue regardless of errors if autoreducing
+  if (m_mainPresenter->isAutoreducing(m_group) || exitCode == 0) {
+    m_progressReporter->report();
+    processNextItem();
+  } else { // Error and not autoreducing
+    m_progressReporter->clear();
+    endReduction(false);
+  }
+}
+
+/** Check whether the given workspace name is an output of the given
+ * group. This override checks all child slices if time slicing data or calls
+ * the base class if not.
+ */
+bool ReflDataProcessorPresenter::workspaceIsOutputOfGroup(
+    const GroupData &groupData, const std::string &workspaceName) const {
+  if (groupData.size() == 0)
+    return false;
+
+  // If not time slicing, call base class
+  if (!m_processingAsEventData) {
+    return GenericDataProcessorPresenter::workspaceIsOutputOfGroup(
+        groupData, workspaceName);
+  }
+
+  if (!hasPostprocessing())
+    return false;
+
+  auto const numberOfSlices = getMinimumSlicesForGroup(groupData);
+  for (size_t sliceIndex = 0; sliceIndex < numberOfSlices; ++sliceIndex) {
+    if (getPostprocessedWorkspaceName(groupData, sliceIndex).toStdString() ==
+        workspaceName)
+      return true;
+  }
+
+  return false;
 }
 }
 }
