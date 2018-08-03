@@ -20,8 +20,6 @@ if ( ENABLE_WORKBENCH )
       ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt/utils/qt/plugins.py
   )
 
-  # Create egg link to binary output directory for mantidqt
-  configure_file ( setup.py.in ${CMAKE_CURRENT_SOURCE_DIR}/setup.py @ONLY)
   add_python_package ( mantidqt )
 
   # Configure resources data in place for ease of development. The output

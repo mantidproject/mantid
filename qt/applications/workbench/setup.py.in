@@ -18,6 +18,8 @@
 
 from setuptools import find_packages, setup
 
+@SETUPTOOLS_BUILD_COMMANDS_DEF@
+
 # The most basic setup possible to be able to use setup.py develop
 setup(
     name='MantidWorkbench', # probaly the wrong name if someone wants to include it
@@ -29,4 +31,5 @@ setup(
             'workbench = workbench.app.mainwindow:main'
         ]
     },
+    @SETUPTOOLS_BUILD_COMMANDS_USE@
 )

@@ -7,8 +7,34 @@ include ( QtTargetFunctions )
 # If the EXECUTABLE option is provided then it additional build rules are
 # defined to ensure startup scripts are regenerated appropriately
 function ( add_python_package pkg_name )
-  # Create a setup.py file
+  # Create a setup.py file if necessary
   set ( _setup_py ${CMAKE_CURRENT_SOURCE_DIR}/setup.py )
+  set ( _setup_py_build_root ${CMAKE_CURRENT_BINARY_DIR} )
+  if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in" )
+    set ( SETUPTOOLS_BUILD_COMMANDS_DEF
+"def patch_setuptools_command(cmd_cls_name):
+    import importlib
+    cmd_module = importlib.import_module('setuptools.command.' + cmd_cls_name)
+    setuptools_command_cls = getattr(cmd_module, cmd_cls_name)
+
+    class CustomCommand(setuptools_command_cls):
+        user_options = setuptools_command_cls.user_options[:]
+        boolean_options = setuptools_command_cls.boolean_options[:]
+        def finalize_options(self):
+            build_cmd = self.get_finalized_command('build')
+            self.build_lib = '${_setup_py_build_root}/build'
+            setuptools_command_cls.finalize_options(self)
+
+    return CustomCommand
+
+CustomBuildPy = patch_setuptools_command('build_py')
+CustomInstall = patch_setuptools_command('install')
+CustomInstallLib = patch_setuptools_command('install_lib')
+" )
+    set ( SETUPTOOLS_BUILD_COMMANDS_USE "cmdclass={'build_py': CustomBuildPy, 'install': CustomInstall, 'install-lib': CustomInstallLib }" )
+    configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in ${_setup_py} @ONLY )
+  endif ()
+
   set ( _egg_link_dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
   set ( _egg_link ${_egg_link_dir}/${pkg_name}.egg-link )
 
@@ -36,19 +62,19 @@ function ( add_python_package pkg_name )
     DEPENDS ${_outputs}
   )
 
-  ##### rpms are normally built using - taken from rebuild of plotly
-  #/usr/bin/python2 setup.py build '--executable=/usr/bin/python2 -s'
-  #/usr/bin/python2 setup.py install -O1 --skip-build --root ${HOME}/rpmbuild/BUILDROOT/python-plotly-1.12.12-1.el7.x86_64
-  # following this recipe leaves a "build" tree next to the source tree so just do it all in one step until out of source python builds can be figured out
-  install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} ${_setup_py} install -O1 --root ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})")
+  # setuptools by default wants to build into a directory called 'build' relative the to the working directory. We have overridden
+  # commands in setup.py.in to force the build directory to take place out of source. The install directory is specified here and then
+  # --install-scripts=bin --install-lib=lib removes any of the plaform/distribution specific install directories so we can have a flat
+  # structure
+  install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})")
   # register the "installed" components with cmake so it will carry them over
-  install(DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/usr/lib/
-          DESTINATION lib
+  install(DIRECTORY ${_setup_py_build_root}/install/lib
+          DESTINATION .
           PATTERN "test" EXCLUDE )
 
   # install the generated executable - only tested with "workbench"
   if ( ARGC GREATER 1 AND "${ARGN}" STREQUAL "EXECUTABLE" )
-    install(PROGRAMS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/usr/bin/${pkg_name}
+    install(PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name}
       DESTINATION bin)
   endif()
 

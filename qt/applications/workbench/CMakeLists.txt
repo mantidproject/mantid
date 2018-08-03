@@ -1,5 +1,3 @@
-configure_file ( setup.py.in ${CMAKE_CURRENT_SOURCE_DIR}/setup.py @ONLY)
-
 # Create egg link to binary output directory
 add_python_package ( workbench EXECUTABLE )
 
