@@ -127,8 +127,8 @@ void export_TimeSeriesPropertyStatistics() {
           "standard_deviation",
           &Mantid::Kernel::TimeSeriesPropertyStatistics::standard_deviation)
 =======
-           "standard_deviation",
-           &Mantid::Kernel::TimeSeriesPropertyStatistics::standard_deviation)
+          "standard_deviation",
+          &Mantid::Kernel::TimeSeriesPropertyStatistics::standard_deviation)
       .add_property("time_mean",
                     &Mantid::Kernel::TimeSeriesPropertyStatistics::time_mean)
       .add_property("time_standard_deviation",
