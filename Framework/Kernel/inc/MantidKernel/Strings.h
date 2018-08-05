@@ -108,15 +108,15 @@ join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
   int dist = static_cast<int>(std::distance(begin, end));
 
   // Get max number of threads and allocate vector speace
-  int nmaxThreads = PARALLEL_GET_MAX_THREADS;
+  int nmaxThreads = static_cast<int>(PARALLEL_GET_MAX_THREADS);
   std::vector<std::ostringstream> output(nmaxThreads);
 
   // Actual number of threads in the current region
   int nThreads = 1;
 #pragma omp parallel
   {
-    nThreads = PARALLEL_NUMBER_OF_THREADS;
-    int idThread = PARALLEL_THREAD_NUMBER;
+    nThreads = static_cast<int>(PARALLEL_NUMBER_OF_THREADS);
+    int idThread = static_cast<int>(PARALLEL_THREAD_NUMBER);
     ITERATOR_TYPE it;
 
 #pragma omp for
