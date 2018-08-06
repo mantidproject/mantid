@@ -24,6 +24,9 @@ The Properties
 .. note:: Use forward slash (``/``) or double up on the number of backslash (``\``) characters for all paths
 
 
+.. note:: Boolean properties evaluate ``true``, ``1``, and ``on`` (case insensitive) as ``true``, all other values as ``false``.
+
+
 General properties
 ******************
 
@@ -69,6 +72,8 @@ Directory Properties
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
 |Property                              |Description                                        |Example value                        |
 +======================================+===================================================+=====================================+
+| ``colormaps.directory``              | The directory where colormaps are located         | ``/opt/mantid/colormaps``           |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
 | ``datasearch.directories``           | A semi-colon(``;``) separated list of directories | ``../data;\\\\isis\\isis$\\ndxgem`` |
 |                                      | to use to search for data.                        |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
@@ -152,6 +157,11 @@ MantidPlot Properties
 | ``MantidOptions.InstrumentView.UseOpenGL`` |Controls the use of OpenGL in rendering the        | ``On``, ``Off`` |
 |                                            |"unwrapped" (flat) instrument views.               |                 |
 +--------------------------------------------+---------------------------------------------------+-----------------+
+| ``PeakColumn.hklPrec``                     |Precision of hkl values shown in tables            | ``2``           |
++--------------------------------------------+---------------------------------------------------+-----------------+
+| ``cluster.submission``                     |Enable cluster submission elements in GUIs         | ``On``, ``Off`` |
++--------------------------------------------+---------------------------------------------------+-----------------+
+
 
 Network Properties
 ******************
@@ -159,8 +169,13 @@ Network Properties
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
 |Property                                   |Description                                        |Example value                    |
 +===========================================+===================================================+=================================+
+| ``catalog.timeout.value``                 | Network timeout for ICAT4 requests                | ``30``                          |
++-------------------------------------------+---------------------------------------------------+---------------------------------+
 | ``CheckMantidVersion.OnStartup``          | Check if there is a newer version available and   |                                 |
 |                                           | logs a message at ``information`` level           | ``1``                           |
++-------------------------------------------+---------------------------------------------------+---------------------------------+
+| ``ISISDAE.Timeout``                       | Timeout for network requests when reading live    |  ``100``                        |
+|                                           | data from ISIS (in seconds)                       |                                 |
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
 | ``network.default.timeout``               |Defines the default timeout for all network        | ``30``                          |
 |                                           |operations (in seconds).                           |                                 |
@@ -186,6 +201,7 @@ Network Properties
 | ``usagereports.enabled``                  | Enable usage reporting                            | ``1``                           |
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
 
+                           '', # partially documented in docs/source/release/v3.13.0/framework.rst
 
 
 
