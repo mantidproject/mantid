@@ -84,29 +84,27 @@ void AppendSpectra::exec() {
 
   const bool mergeLogs = getProperty("MergeLogs");
   const int number = getProperty("Number");
+  MatrixWorkspace_sptr output;
 
   if (event_ws1 && event_ws2) {
-      // Both are event workspaces. Use the special method
-      DataObjects::EventWorkspace_sptr output = this->execEvent(*event_ws1, *event_ws2);
-      for (int i = 1; i < number; i++) {
-          output = this->execEvent(*output, *event_ws2);
-      }
-      if (mergeLogs)
-          combineLogs(ws1->run(), ws2->run(), output->mutableRun());
-      // Set the output workspace
-      setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(output));
-      return;
+    // Both are event workspaces. Use the special method
+    DataObjects::EventWorkspace_sptr e_output = this->execEvent(*event_ws1, *event_ws2);
+    for (int i = 1; i < number; i++) {
+      e_output = this->execEvent(*e_output, *event_ws2);
+    }
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(e_output);
   }
-  // So it is a workspace 2D.
+  else {// So it is a workspace 2D.
+    // The only restriction, even with ValidateInputs=false
+    if (ws1->blocksize() != ws2->blocksize())
+      throw std::runtime_error( "Workspace2D's must have the same number of bins.");
 
-  // The only restriction, even with ValidateInputs=false
-  if (ws1->blocksize() != ws2->blocksize())
-    throw std::runtime_error(
-        "Workspace2D's must have the same number of bins.");
+    output = execWS2D(*ws1, *ws2);
+    for (int i = 1; i < number; i++) {
+        output = execWS2D(*output, *ws2);
+    }
+  }
 
-  MatrixWorkspace_sptr output = execWS2D(*ws1, *ws2);
-  for (int i = 1; i < number; i++)
-    output = execWS2D(*output, *ws2);
   if (mergeLogs)
     combineLogs(ws1->run(), ws2->run(), output->mutableRun());
 
@@ -114,6 +112,7 @@ void AppendSpectra::exec() {
   setProperty("OutputWorkspace",
               boost::dynamic_pointer_cast<MatrixWorkspace>(output));
 }
+
 
 /** If there is an overlap in spectrum numbers between ws1 and ws2,
  * then the spectrum numbers are reset as a simple 1-1 correspondence
