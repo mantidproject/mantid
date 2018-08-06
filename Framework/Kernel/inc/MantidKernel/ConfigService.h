@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ProxyInfo.h"
+#include "MantidKernel/SingletonHolder.h"
 
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
