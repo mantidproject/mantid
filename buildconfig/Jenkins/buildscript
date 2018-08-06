@@ -131,7 +131,7 @@ if [[ "$CLEANBUILD" == true ]]; then
   rm -rf $BUILD_DIR
 fi
 if [ -d $BUILD_DIR ]; then
-  git clean -fdx --exclude=${BUILD_DIR_REL}
+  git clean -fdx --exclude=${BUILD_DIR_REL} --exclude=".Xauthority-*"
   rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData
   find ${BUILD_DIR:?} -name 'TEST-*.xml' -delete
   if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
