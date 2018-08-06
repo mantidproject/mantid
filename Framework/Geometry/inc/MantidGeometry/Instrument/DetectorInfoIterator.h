@@ -2,11 +2,10 @@
 #ifndef MANTID_GEOMETRY_DETECTORINFOITERATOR_H_
 #define MANTID_GEOMETRY_DETECTORINFOITERATOR_H_
 
-//#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfoItem.h"
-
 #include <boost/iterator/iterator_facade.hpp>
 #include <memory>
+
+#include "MantidGeometry/Instrument/DetectorInfoItem.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -20,10 +19,13 @@ class MANTID_GEOMETRY_DLL DetectorInfoIterator
 
 public:
   DetectorInfoIterator(const DetectorInfo &detectorInfo, const size_t index)
-    : m_item(detectorInfo, index), m_detectorInfo(detectorInfo), m_index(index) {}
+      : m_item(detectorInfo, index) {
+  } // m_detectorInfo(detectorInfo), m_index(index) {}
 
-  DetectorInfoIterator(const DetectorInfoIterator&detInfoIterator) : 
-    m_index(detInfoIterator.m_index), m_detectorInfo(detInfoIterator.m_detectorInfo), m_item(detInfoIterator.m_detectorInfo, detInfoIterator.m_index) {}
+  DetectorInfoIterator(const DetectorInfoIterator &detInfoIterator)
+      : m_item(detInfoIterator.m_item) {
+  } // m_detectorInfo(detInfoIterator.m_detectorInfo),
+    // m_item(detInfoIterator.m_detectorInfo, detInfoIterator.m_index) {}
 
 private:
   friend class boost::iterator_core_access;
@@ -46,11 +48,11 @@ private:
   }
 
   DetectorInfoItem m_item;
-  DetectorInfo m_detectorInfo;
-  size_t m_index;
+  // DetectorInfo m_detectorInfo;
+  // size_t m_index;
 };
 
 } // namespace Geometry
 } // namespace Mantid
 
-#endif
+#endif /* MANTID_GEOMETRY_DETECTORINFOITERATOR_H_ */

@@ -1,22 +1,21 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
+#include <boost/iterator/iterator_facade.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/copy_non_const_reference.hpp>
+#include <boost/python/iterator.hpp>
 #include <boost/python/return_by_value.hpp>
 #include <boost/python/return_value_policy.hpp>
-#include <boost/python/iterator.hpp>
-#include <boost/iterator/iterator_facade.hpp>
-
-#include <Python.h>
-#include <boost/python.hpp>
+#include <iterator>
 
 #include "MantidGeometry/Instrument/DetectorInfoItem.h"
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
-using Mantid::Geometry::DetectorInfoItem;
-using Mantid::Geometry::DetectorInfoIterator;
 
 using Mantid::Geometry::DetectorInfo;
+using Mantid::Geometry::DetectorInfoItem;
+using Mantid::Geometry::DetectorInfoIterator;
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
 using namespace boost::python;
@@ -41,10 +40,20 @@ void export_DetectorInfo() {
   void (DetectorInfo::*setMasked)(const size_t, bool) =
       &DetectorInfo::setMasked;
 
+  /*
+  Mantid::Geometry::DetectorInfoIterator group_begin(DetectorInfo &self) {
+    return self.begin();
+  }
+
+  Mantid::Geometry::DetectorInfoIterator group_end(DetectorInfo &self) {
+    return self.end();
+  }*/
+
   // Export to Python
   class_<DetectorInfo, boost::noncopyable>("DetectorInfo", no_init)
 
-      .def("__iter__", range(&DetectorInfo::begin, &DetectorInfo::end))
+      .def("__iter__", range<return_value_policy<copy_const_reference>>(
+                           &DetectorInfo::begin, &DetectorInfo::end))
 
       .def("__len__", &DetectorInfo::size, (arg("self")),
            "Returns the size of the DetectorInfo, i.e., the number of "
@@ -68,9 +77,10 @@ void export_DetectorInfo() {
            "Sets all mask flags to false (unmasked).")
 
       .def("isEquivalent", &DetectorInfo::isEquivalent,
-           (arg("self"), arg("other")), "Returns True if the content of this "
-                                        "detector is equivalent to the content "
-                                        "of the other detector.")
+           (arg("self"), arg("other")),
+           "Returns True if the content of this "
+           "detector is equivalent to the content "
+           "of the other detector.")
 
       .def("twoTheta", twoTheta, (arg("self"), arg("index")),
            "Returns 2 theta (scattering angle w.r.t beam direction).")

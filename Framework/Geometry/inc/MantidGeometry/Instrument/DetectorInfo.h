@@ -1,18 +1,15 @@
 #ifndef MANTID_GEOMETRY_DETECTORINFO_H_
 #define MANTID_GEOMETRY_DETECTORINFO_H_
 
+#include <boost/shared_ptr.hpp>
+#include <mutex>
+#include <unordered_map>
+#include <vector>
+
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
-
-//#include "MantidGeometry/Instrument/DetectorInfoIterator.h"
-
-#include <boost/shared_ptr.hpp>
-
-#include <mutex>
-#include <unordered_map>
-#include <vector>
 
 namespace Mantid {
 using detid_t = int32_t;

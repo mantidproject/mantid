@@ -164,7 +164,7 @@ public:
     auto iter = detectorInfo.begin();
 
     auto iterCopy = DetectorInfoIterator(iter);
-    
+
     TS_ASSERT_EQUALS(iter->getIndex(), 0);
     TS_ASSERT_EQUALS(iterCopy->getIndex(), 0);
 
@@ -178,8 +178,8 @@ public:
     TS_ASSERT_EQUALS(iterCopy->getIndex(), 1);
 
     TS_ASSERT_EQUALS(iter->position(), 1);
-    TS_ASSERT_EQUALS(iterCopy->position(),1);
+    TS_ASSERT_EQUALS(iterCopy->position(), 1);
   }
 };
 
-#endif /* MANTID_HISTOGRAMDATA_HISTOGRAMITERATORTEST_H_ */
+#endif /* MANTID_GEOMETRY_DETECTORINFOITERATORTEST_H_ */
