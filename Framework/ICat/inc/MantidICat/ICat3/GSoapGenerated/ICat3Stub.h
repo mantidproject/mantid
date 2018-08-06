@@ -710,9 +710,9 @@ public:
 class SOAP_CMAC ns1__searchDatasetByRestrictionLogical : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  class ns1__restrictionLogicalCondition *
-      restriction; /* optional element of type ns1:restrictionLogicalCondition
-                      */
+  class ns1__restrictionLogicalCondition
+      *restriction; /* optional element of type ns1:restrictionLogicalCondition
+                     */
 public:
   virtual int soap_type() const {
     return 23;
@@ -788,10 +788,10 @@ public:
 class SOAP_CMAC ns1__searchDatasetByParameterRestriction : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  class ns1__parameterCondition *
-      parameterCondition; /* optional element of type ns1:parameterCondition */
-  class ns1__restrictionCondition *
-      restrictions; /* optional element of type ns1:restrictionCondition */
+  class ns1__parameterCondition
+      *parameterCondition; /* optional element of type ns1:parameterCondition */
+  class ns1__restrictionCondition
+      *restrictions; /* optional element of type ns1:restrictionCondition */
 public:
   virtual int soap_type() const {
     return 28;
@@ -894,8 +894,8 @@ public:
 class SOAP_CMAC ns1__searchFacilityUserByRestriction : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__restrictionCondition *
-      restriction; /* optional element of type ns1:restrictionCondition */
+  ns1__restrictionCondition
+      *restriction; /* optional element of type ns1:restrictionCondition */
 public:
   virtual int soap_type() const {
     return 33;
@@ -929,7 +929,7 @@ public:
   virtual int soap_type() const {
     return 34;
   } /* = unique id SOAP_TYPE_ICat3_ns1__searchFacilityUserByRestrictionResponse
-       */
+     */
   virtual void soap_default(struct soap *);
   virtual void soap_serialize(struct soap *) const;
   virtual int soap_put(struct soap *, const char *, const char *) const;
@@ -1102,8 +1102,8 @@ public:
 class SOAP_CMAC ns1__searchDatafileByRestriction : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__restrictionCondition *
-      restriction; /* optional element of type ns1:restrictionCondition */
+  ns1__restrictionCondition
+      *restriction; /* optional element of type ns1:restrictionCondition */
 public:
   virtual int soap_type() const {
     return 47;
@@ -1367,9 +1367,9 @@ class SOAP_CMAC ns1__searchInvestigationByParameterLogical
     : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  class ns1__parameterLogicalCondition *
-      logicalCondition; /* optional element of type
-                           ns1:parameterLogicalCondition */
+  class ns1__parameterLogicalCondition
+      *logicalCondition; /* optional element of type
+                            ns1:parameterLogicalCondition */
 public:
   virtual int soap_type() const {
     return 65;
@@ -1912,8 +1912,8 @@ public:
 class SOAP_CMAC ns1__removeInvestigator : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  class ns1__investigatorPK *
-      investigatorPK; /* optional element of type ns1:investigatorPK */
+  class ns1__investigatorPK
+      *investigatorPK; /* optional element of type ns1:investigatorPK */
 public:
   virtual int soap_type() const {
     return 92;
@@ -1956,8 +1956,8 @@ public:
 class SOAP_CMAC ns1__getParameterByRestriction : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__restrictionCondition *
-      condition; /* optional element of type ns1:restrictionCondition */
+  ns1__restrictionCondition
+      *condition; /* optional element of type ns1:restrictionCondition */
 public:
   virtual int soap_type() const {
     return 95;
@@ -2382,13 +2382,13 @@ class SOAP_CMAC ns1__searchInvestigationByParameterCondition
     : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__parameterCondition *
-      logicalCondition; /* optional element of type ns1:parameterCondition */
+  ns1__parameterCondition
+      *logicalCondition; /* optional element of type ns1:parameterCondition */
 public:
   virtual int soap_type() const {
     return 117;
   } /* = unique id SOAP_TYPE_ICat3_ns1__searchInvestigationByParameterCondition
-       */
+     */
   virtual void soap_default(struct soap *);
   virtual void soap_serialize(struct soap *) const;
   virtual int soap_put(struct soap *, const char *, const char *) const;
@@ -2489,8 +2489,8 @@ public:
 class SOAP_CMAC ns1__searchSampleByRestriction : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__restrictionCondition *
-      restriction; /* optional element of type ns1:restrictionCondition */
+  ns1__restrictionCondition
+      *restriction; /* optional element of type ns1:restrictionCondition */
 public:
   virtual int soap_type() const {
     return 121;
@@ -2544,7 +2544,7 @@ public:
   std::string *sessionId; /* optional element of type xsd:string */
   std::vector<class ns1__parameterComparisonCondition *>
       comparison; /* optional element of type ns1:parameterComparisonCondition
-                     */
+                   */
 public:
   virtual int soap_type() const {
     return 123;
@@ -2641,8 +2641,8 @@ public:
 class SOAP_CMAC ns1__addSampleParameter : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  class ns1__sampleParameter *
-      sampleParameter;     /* optional element of type ns1:sampleParameter */
+  class ns1__sampleParameter
+      *sampleParameter;    /* optional element of type ns1:sampleParameter */
   LONG64 *investigationId; /* optional element of type xsd:long */
 public:
   virtual int soap_type() const {
@@ -2699,7 +2699,7 @@ public:
   virtual int soap_type() const {
     return 130;
   } /* = unique id SOAP_TYPE_ICat3_ns1__getFacilityCyclesWithDataForInstrument
-       */
+     */
   virtual void soap_default(struct soap *);
   virtual void soap_serialize(struct soap *) const;
   virtual int soap_put(struct soap *, const char *, const char *) const;
@@ -2784,7 +2784,7 @@ public:
   virtual int soap_type() const {
     return 133;
   } /* = unique id SOAP_TYPE_ICat3_ns1__getFacilityUserByFacilityUserIdResponse
-       */
+     */
   virtual void soap_default(struct soap *);
   virtual void soap_serialize(struct soap *) const;
   virtual int soap_put(struct soap *, const char *, const char *) const;
@@ -3032,8 +3032,8 @@ public:
 class SOAP_CMAC ns1__searchDatafileByParameterCondition : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__parameterCondition *
-      logicalCondition; /* optional element of type ns1:parameterCondition */
+  ns1__parameterCondition
+      *logicalCondition; /* optional element of type ns1:parameterCondition */
 public:
   virtual int soap_type() const {
     return 149;
@@ -3189,8 +3189,8 @@ public:
 class SOAP_CMAC ns1__searchByKeywordsAll : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  class ns1__keywordDetails *
-      keywordDetails;  /* optional element of type ns1:keywordDetails */
+  class ns1__keywordDetails
+      *keywordDetails; /* optional element of type ns1:keywordDetails */
   int startIndex;      /* required element of type xsd:int */
   int numberOfResults; /* required element of type xsd:int */
 public:
@@ -3218,7 +3218,7 @@ public:
   bool caseSensitive; /* required element of type xsd:boolean */
   enum ns1__investigationInclude *
       investigationInclude; /* optional element of type ns1:investigationInclude
-                               */
+                             */
   std::vector<std::string> keywords; /* optional element of type xsd:string */
 public:
   virtual int soap_type() const {
@@ -3318,9 +3318,9 @@ public:
 class SOAP_CMAC ns1__searchDatafileByRestrictionLogical : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__restrictionLogicalCondition *
-      restriction; /* optional element of type ns1:restrictionLogicalCondition
-                      */
+  ns1__restrictionLogicalCondition
+      *restriction; /* optional element of type ns1:restrictionLogicalCondition
+                     */
 public:
   virtual int soap_type() const {
     return 160;
@@ -3427,7 +3427,7 @@ public:
   std::string *sessionId; /* optional element of type xsd:string */
   enum ns1__investigationInclude *
       investigationInclude; /* optional element of type ns1:investigationInclude
-                               */
+                             */
 public:
   virtual int soap_type() const {
     return 164;
@@ -3482,7 +3482,7 @@ public:
   std::string *sessionId; /* optional element of type xsd:string */
   enum ns1__investigationInclude *
       investigationInclude; /* optional element of type ns1:investigationInclude
-                               */
+                             */
   int startIndex;           /* required element of type xsd:int */
   int numberOfResults;      /* required element of type xsd:int */
 public:
@@ -3538,10 +3538,10 @@ public:
 class SOAP_CMAC ns1__searchSampleByParameterRestriction : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__parameterCondition *
-      parameterCondition; /* optional element of type ns1:parameterCondition */
-  ns1__restrictionCondition *
-      restrictions; /* optional element of type ns1:restrictionCondition */
+  ns1__parameterCondition
+      *parameterCondition; /* optional element of type ns1:parameterCondition */
+  ns1__restrictionCondition
+      *restrictions; /* optional element of type ns1:restrictionCondition */
 public:
   virtual int soap_type() const {
     return 168;
@@ -3595,8 +3595,8 @@ public:
 class SOAP_CMAC ns1__removeDataSetParameter : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  class ns1__datasetParameterPK *
-      datasetParameterPK; /* optional element of type ns1:datasetParameterPK */
+  class ns1__datasetParameterPK
+      *datasetParameterPK; /* optional element of type ns1:datasetParameterPK */
 public:
   virtual int soap_type() const {
     return 170;
@@ -3641,8 +3641,8 @@ public:
 class SOAP_CMAC ns1__searchSampleByParameterCondition : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__parameterCondition *
-      logicalCondition; /* optional element of type ns1:parameterCondition */
+  ns1__parameterCondition
+      *logicalCondition; /* optional element of type ns1:parameterCondition */
 public:
   virtual int soap_type() const {
     return 172;
@@ -3676,7 +3676,7 @@ public:
   virtual int soap_type() const {
     return 173;
   } /* = unique id SOAP_TYPE_ICat3_ns1__searchSampleByParameterConditionResponse
-       */
+     */
   virtual void soap_default(struct soap *);
   virtual void soap_serialize(struct soap *) const;
   virtual int soap_put(struct soap *, const char *, const char *) const;
@@ -3697,10 +3697,10 @@ class SOAP_CMAC ns1__searchInvestigationByParameterRestriction
     : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__parameterCondition *
-      parameterCondition; /* optional element of type ns1:parameterCondition */
-  ns1__restrictionCondition *
-      restriction; /* optional element of type ns1:restrictionCondition */
+  ns1__parameterCondition
+      *parameterCondition; /* optional element of type ns1:parameterCondition */
+  ns1__restrictionCondition
+      *restriction; /* optional element of type ns1:restrictionCondition */
 public:
   virtual int soap_type() const {
     return 174;
@@ -3757,8 +3757,8 @@ public:
 class SOAP_CMAC ns1__modifyPublication : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  class ns1__publication *
-      publication; /* optional element of type ns1:publication */
+  class ns1__publication
+      *publication; /* optional element of type ns1:publication */
 public:
   virtual int soap_type() const {
     return 176;
@@ -3905,9 +3905,9 @@ public:
 class SOAP_CMAC ns1__searchDatasetByParameterLogical : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__parameterLogicalCondition *
-      logicalCondition; /* optional element of type
-                           ns1:parameterLogicalCondition */
+  ns1__parameterLogicalCondition
+      *logicalCondition; /* optional element of type
+                            ns1:parameterLogicalCondition */
 public:
   virtual int soap_type() const {
     return 182;
@@ -3941,7 +3941,7 @@ public:
   virtual int soap_type() const {
     return 183;
   } /* = unique id SOAP_TYPE_ICat3_ns1__searchDatasetByParameterLogicalResponse
-       */
+     */
   virtual void soap_default(struct soap *);
   virtual void soap_serialize(struct soap *) const;
   virtual int soap_put(struct soap *, const char *, const char *) const;
@@ -3961,9 +3961,9 @@ public:
 class SOAP_CMAC ns1__removeDataFileParameter : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  class ns1__datafileParameterPK *
-      datafileParameterPK; /* optional element of type ns1:datafileParameterPK
-                              */
+  class ns1__datafileParameterPK
+      *datafileParameterPK; /* optional element of type ns1:datafileParameterPK
+                             */
 public:
   virtual int soap_type() const {
     return 184;
@@ -4008,8 +4008,8 @@ public:
 class SOAP_CMAC ns1__searchDatasetByParameterCondition : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__parameterCondition *
-      logicalCondition; /* optional element of type ns1:parameterCondition */
+  ns1__parameterCondition
+      *logicalCondition; /* optional element of type ns1:parameterCondition */
 public:
   virtual int soap_type() const {
     return 186;
@@ -4119,7 +4119,7 @@ public:
   std::vector<LONG64> investigationIds; /* optional element of type xsd:long */
   enum ns1__investigationInclude *
       investigationInclude; /* optional element of type ns1:investigationInclude
-                               */
+                             */
 public:
   virtual int soap_type() const {
     return 190;
@@ -4272,7 +4272,7 @@ public:
   virtual int soap_type() const {
     return 196;
   } /* = unique id SOAP_TYPE_ICat3_ns1__searchInvestigationByParameterComparison
-       */
+     */
   virtual void soap_default(struct soap *);
   virtual void soap_serialize(struct soap *) const;
   virtual int soap_put(struct soap *, const char *, const char *) const;
@@ -4472,8 +4472,8 @@ public:
 class SOAP_CMAC ns1__searchInvestigationByRestriction : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__restrictionCondition *
-      restriction; /* optional element of type ns1:restrictionCondition */
+  ns1__restrictionCondition
+      *restriction; /* optional element of type ns1:restrictionCondition */
 public:
   virtual int soap_type() const {
     return 204;
@@ -4507,7 +4507,7 @@ public:
   virtual int soap_type() const {
     return 205;
   } /* = unique id SOAP_TYPE_ICat3_ns1__searchInvestigationByRestrictionResponse
-       */
+     */
   virtual void soap_default(struct soap *);
   virtual void soap_serialize(struct soap *) const;
   virtual int soap_put(struct soap *, const char *, const char *) const;
@@ -4527,8 +4527,8 @@ public:
 class SOAP_CMAC ns1__deleteInvestigator : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__investigatorPK *
-      investigatorPK; /* optional element of type ns1:investigatorPK */
+  ns1__investigatorPK
+      *investigatorPK; /* optional element of type ns1:investigatorPK */
 public:
   virtual int soap_type() const {
     return 206;
@@ -4571,8 +4571,8 @@ public:
 class SOAP_CMAC ns1__addInvestigator : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  class ns1__investigator *
-      ns1__investigator_;  /* optional element of type ns1:investigator */
+  class ns1__investigator
+      *ns1__investigator_; /* optional element of type ns1:investigator */
   LONG64 *investigationId; /* optional element of type xsd:long */
 public:
   virtual int soap_type() const {
@@ -4623,9 +4623,9 @@ public:
 class SOAP_CMAC ns1__searchDatafileByParameterLogical : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__parameterLogicalCondition *
-      logicalCondition; /* optional element of type
-                           ns1:parameterLogicalCondition */
+  ns1__parameterLogicalCondition
+      *logicalCondition; /* optional element of type
+                            ns1:parameterLogicalCondition */
 public:
   virtual int soap_type() const {
     return 210;
@@ -4659,7 +4659,7 @@ public:
   virtual int soap_type() const {
     return 211;
   } /* = unique id SOAP_TYPE_ICat3_ns1__searchDatafileByParameterLogicalResponse
-       */
+     */
   virtual void soap_default(struct soap *);
   virtual void soap_serialize(struct soap *) const;
   virtual int soap_put(struct soap *, const char *, const char *) const;
@@ -4731,10 +4731,10 @@ class SOAP_CMAC ns1__searchDatafileByParameterRestriction
     : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__parameterCondition *
-      parameterCondition; /* optional element of type ns1:parameterCondition */
-  ns1__restrictionCondition *
-      restrictions; /* optional element of type ns1:restrictionCondition */
+  ns1__parameterCondition
+      *parameterCondition; /* optional element of type ns1:parameterCondition */
+  ns1__restrictionCondition
+      *restrictions; /* optional element of type ns1:restrictionCondition */
 public:
   virtual int soap_type() const {
     return 214;
@@ -4789,14 +4789,14 @@ class SOAP_CMAC ns1__searchInvestigationByRestrictionLogical
     : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__restrictionLogicalCondition *
-      restriction; /* optional element of type ns1:restrictionLogicalCondition
-                      */
+  ns1__restrictionLogicalCondition
+      *restriction; /* optional element of type ns1:restrictionLogicalCondition
+                     */
 public:
   virtual int soap_type() const {
     return 216;
   } /* = unique id SOAP_TYPE_ICat3_ns1__searchInvestigationByRestrictionLogical
-       */
+     */
   virtual void soap_default(struct soap *);
   virtual void soap_serialize(struct soap *) const;
   virtual int soap_put(struct soap *, const char *, const char *) const;
@@ -4847,8 +4847,8 @@ public:
 class SOAP_CMAC ns1__removeSampleParameter : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  class ns1__sampleParameterPK *
-      sampleParameterPK; /* optional element of type ns1:sampleParameterPK */
+  class ns1__sampleParameterPK
+      *sampleParameterPK; /* optional element of type ns1:sampleParameterPK */
 public:
   virtual int soap_type() const {
     return 218;
@@ -4893,8 +4893,8 @@ public:
 class SOAP_CMAC ns1__deleteDataSetParameter : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__datasetParameterPK *
-      datasetParameterPK; /* optional element of type ns1:datasetParameterPK */
+  ns1__datasetParameterPK
+      *datasetParameterPK; /* optional element of type ns1:datasetParameterPK */
 public:
   virtual int soap_type() const {
     return 220;
@@ -5083,8 +5083,8 @@ public:
 class SOAP_CMAC ns1__getKeywordsForUserType : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  enum ns1__keywordType *
-      keywordType; /* optional element of type ns1:keywordType */
+  enum ns1__keywordType
+      *keywordType; /* optional element of type ns1:keywordType */
 public:
   virtual int soap_type() const {
     return 228;
@@ -5223,7 +5223,7 @@ public:
   virtual int soap_type() const {
     return 233;
   } /* = unique id SOAP_TYPE_ICat3_ns1__getKeywordsForUserStartWithMaxResponse
-       */
+     */
   virtual void soap_default(struct soap *);
   virtual void soap_serialize(struct soap *) const;
   virtual int soap_put(struct soap *, const char *, const char *) const;
@@ -5343,8 +5343,8 @@ public:
 class SOAP_CMAC ns1__modifyDataSetParameter : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  class ns1__datasetParameter *
-      dataSetParameter; /* optional element of type ns1:datasetParameter */
+  class ns1__datasetParameter
+      *dataSetParameter; /* optional element of type ns1:datasetParameter */
 public:
   virtual int soap_type() const {
     return 238;
@@ -5432,9 +5432,9 @@ public:
 class SOAP_CMAC ns1__searchSampleByParameterLogical : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__parameterLogicalCondition *
-      logicalCondition; /* optional element of type
-                           ns1:parameterLogicalCondition */
+  ns1__parameterLogicalCondition
+      *logicalCondition; /* optional element of type
+                            ns1:parameterLogicalCondition */
 public:
   virtual int soap_type() const {
     return 242;
@@ -5468,7 +5468,7 @@ public:
   virtual int soap_type() const {
     return 243;
   } /* = unique id SOAP_TYPE_ICat3_ns1__searchSampleByParameterLogicalResponse
-       */
+     */
   virtual void soap_default(struct soap *);
   virtual void soap_serialize(struct soap *) const;
   virtual int soap_put(struct soap *, const char *, const char *) const;
@@ -5595,8 +5595,8 @@ class SOAP_CMAC ns1__getAuthorisations : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
   LONG64 *elementId;      /* optional element of type xsd:long */
-  enum ns1__elementType *
-      elementType; /* optional element of type ns1:elementType */
+  enum ns1__elementType
+      *elementType; /* optional element of type ns1:elementType */
 public:
   virtual int soap_type() const {
     return 248;
@@ -5646,8 +5646,8 @@ public:
 class SOAP_CMAC ns1__modifyInvestigation : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__investigation *
-      investigaion; /* optional element of type ns1:investigation */
+  ns1__investigation
+      *investigaion; /* optional element of type ns1:investigation */
 public:
   virtual int soap_type() const {
     return 251;
@@ -6046,7 +6046,7 @@ public:
   std::string *sessionId; /* optional element of type xsd:string */
   std::vector<ns1__parameterComparisonCondition *>
       comparison; /* optional element of type ns1:parameterComparisonCondition
-                     */
+                   */
 public:
   virtual int soap_type() const {
     return 267;
@@ -6100,11 +6100,11 @@ public:
 class SOAP_CMAC ns1__searchByAdvancedPagination : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  class ns1__advancedSearchDetails *
-      advancedSearchDetails; /* optional element of type
-                                ns1:advancedSearchDetails */
-  int startIndex;            /* required element of type xsd:int */
-  int numberOfResults;       /* required element of type xsd:int */
+  class ns1__advancedSearchDetails
+      *advancedSearchDetails; /* optional element of type
+                                 ns1:advancedSearchDetails */
+  int startIndex;             /* required element of type xsd:int */
+  int numberOfResults;        /* required element of type xsd:int */
 public:
   virtual int soap_type() const {
     return 269;
@@ -6140,7 +6140,7 @@ public:
   std::string *investigationAbstract; /* optional element of type xsd:string */
   enum ns1__investigationInclude *
       investigationInclude; /* optional element of type ns1:investigationInclude
-                               */
+                             */
   std::string *investigationName; /* optional element of type xsd:string */
   std::string *investigationType; /* optional element of type xsd:string */
   std::vector<std::string>
@@ -6201,9 +6201,9 @@ public:
 class SOAP_CMAC ns1__searchByAdvanced : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__advancedSearchDetails *
-      advancedSearchDetails; /* optional element of type
-                                ns1:advancedSearchDetails */
+  ns1__advancedSearchDetails
+      *advancedSearchDetails; /* optional element of type
+                                 ns1:advancedSearchDetails */
 public:
   virtual int soap_type() const {
     return 272;
@@ -6288,7 +6288,7 @@ public:
   virtual int soap_type() const {
     return 275;
   } /* = unique id SOAP_TYPE_ICat3_ns1__searchInvestigationByParameterResponse
-       */
+     */
   virtual void soap_default(struct soap *);
   virtual void soap_serialize(struct soap *) const;
   virtual int soap_put(struct soap *, const char *, const char *) const;
@@ -6359,8 +6359,8 @@ public:
 class SOAP_CMAC ns1__modifySampleParameter : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__sampleParameter *
-      sampleParameter; /* optional element of type ns1:sampleParameter */
+  ns1__sampleParameter
+      *sampleParameter; /* optional element of type ns1:sampleParameter */
 public:
   virtual int soap_type() const {
     return 278;
@@ -6405,8 +6405,8 @@ public:
 class SOAP_CMAC ns1__modifyInvestigator : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__investigator *
-      ns1__investigator_; /* optional element of type ns1:investigator */
+  ns1__investigator
+      *ns1__investigator_; /* optional element of type ns1:investigator */
 public:
   virtual int soap_type() const {
     return 280;
@@ -6449,9 +6449,9 @@ public:
 class SOAP_CMAC ns1__addDataSetParameter : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__datasetParameter *
-      dataSetParameter; /* optional element of type ns1:datasetParameter */
-  LONG64 *datasetId;    /* optional element of type xsd:long */
+  ns1__datasetParameter
+      *dataSetParameter; /* optional element of type ns1:datasetParameter */
+  LONG64 *datasetId;     /* optional element of type xsd:long */
 public:
   virtual int soap_type() const {
     return 282;
@@ -6558,8 +6558,8 @@ public:
   std::string *toAddFedId; /* optional element of type xsd:string */
   std::string *toAddRole;  /* optional element of type xsd:string */
   LONG64 *elementId;       /* optional element of type xsd:long */
-  enum ns1__elementType *
-      elementType; /* optional element of type ns1:elementType */
+  enum ns1__elementType
+      *elementType; /* optional element of type ns1:elementType */
 public:
   virtual int soap_type() const {
     return 286;
@@ -6946,8 +6946,8 @@ class SOAP_CMAC ns1__getDatasetIncludes : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
   LONG64 *datasetId;      /* optional element of type xsd:long */
-  enum ns1__datasetInclude *
-      datasetInclude; /* optional element of type ns1:datasetInclude */
+  enum ns1__datasetInclude
+      *datasetInclude; /* optional element of type ns1:datasetInclude */
 public:
   virtual int soap_type() const {
     return 302;
@@ -7090,8 +7090,8 @@ public:
 class SOAP_CMAC ns1__searchDatasetByRestriction : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__restrictionCondition *
-      restriction; /* optional element of type ns1:restrictionCondition */
+  ns1__restrictionCondition
+      *restriction; /* optional element of type ns1:restrictionCondition */
 public:
   virtual int soap_type() const {
     return 308;
@@ -7312,7 +7312,7 @@ public:
   LONG64 *investigationId; /* optional element of type xsd:long */
   enum ns1__investigationInclude *
       investigationInclude; /* optional element of type ns1:investigationInclude
-                               */
+                             */
 public:
   virtual int soap_type() const {
     return 317;
@@ -7511,8 +7511,8 @@ public:
 class SOAP_CMAC ns1__createInvestigation : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__investigation *
-      ns1__investigation_; /* optional element of type ns1:investigation */
+  ns1__investigation
+      *ns1__investigation_; /* optional element of type ns1:investigation */
 public:
   virtual int soap_type() const {
     return 325;
@@ -7616,9 +7616,9 @@ public:
 class SOAP_CMAC ns1__addDataFileParameter : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__datafileParameter *
-      dataFileParameter; /* optional element of type ns1:datafileParameter */
-  LONG64 *datafileId;    /* optional element of type xsd:long */
+  ns1__datafileParameter
+      *dataFileParameter; /* optional element of type ns1:datafileParameter */
+  LONG64 *datafileId;     /* optional element of type xsd:long */
 public:
   virtual int soap_type() const {
     return 329;
@@ -7670,9 +7670,9 @@ public:
 class SOAP_CMAC ns1__searchSampleByRestrictionLogical : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__restrictionLogicalCondition *
-      restriction; /* optional element of type ns1:restrictionLogicalCondition
-                      */
+  ns1__restrictionLogicalCondition
+      *restriction; /* optional element of type ns1:restrictionLogicalCondition
+                     */
 public:
   virtual int soap_type() const {
     return 331;
@@ -7706,7 +7706,7 @@ public:
   virtual int soap_type() const {
     return 332;
   } /* = unique id SOAP_TYPE_ICat3_ns1__searchSampleByRestrictionLogicalResponse
-       */
+     */
   virtual void soap_default(struct soap *);
   virtual void soap_serialize(struct soap *) const;
   virtual int soap_put(struct soap *, const char *, const char *) const;
@@ -7726,8 +7726,8 @@ public:
 class SOAP_CMAC ns1__deleteSampleParameter : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__sampleParameterPK *
-      sampleParameterPK; /* optional element of type ns1:sampleParameterPK */
+  ns1__sampleParameterPK
+      *sampleParameterPK; /* optional element of type ns1:sampleParameterPK */
 public:
   virtual int soap_type() const {
     return 333;
@@ -7774,7 +7774,7 @@ public:
   std::string *sessionId; /* optional element of type xsd:string */
   std::vector<ns1__parameterComparisonCondition *>
       comparison; /* optional element of type ns1:parameterComparisonCondition
-                     */
+                   */
 public:
   virtual int soap_type() const {
     return 335;
@@ -7877,8 +7877,8 @@ public:
 class SOAP_CMAC ns1__modifyDataFileParameter : public xsd__anyType {
 public:
   std::string *sessionId; /* optional element of type xsd:string */
-  ns1__datafileParameter *
-      dataFileParameter; /* optional element of type ns1:datafileParameter */
+  ns1__datafileParameter
+      *dataFileParameter; /* optional element of type ns1:datafileParameter */
 public:
   virtual int soap_type() const {
     return 339;
@@ -8181,21 +8181,21 @@ public:
 /* ns1:restrictionCondition */
 class SOAP_CMAC ns1__restrictionCondition : public ns1__condition {
 public:
-  enum ns1__datafileInclude *
-      datafileInclude; /* optional element of type ns1:datafileInclude */
-  enum ns1__datasetInclude *
-      datasetInclude; /* optional element of type ns1:datasetInclude */
-  int *firstResult;   /* optional element of type xsd:int */
+  enum ns1__datafileInclude
+      *datafileInclude; /* optional element of type ns1:datafileInclude */
+  enum ns1__datasetInclude
+      *datasetInclude; /* optional element of type ns1:datasetInclude */
+  int *firstResult;    /* optional element of type xsd:int */
   enum ns1__investigationInclude *
       investigationInclude; /* optional element of type ns1:investigationInclude
-                               */
+                             */
   int maxResults;           /* required element of type xsd:int */
   bool orderByAsc;          /* required element of type xsd:boolean */
   enum ns1__restrictionAttributes *
       orderByAttribute; /* optional element of type ns1:restrictionAttributes */
   bool returnLongId;    /* required element of type xsd:boolean */
-  enum ns1__sampleInclude *
-      sampleInclude; /* optional element of type ns1:sampleInclude */
+  enum ns1__sampleInclude
+      *sampleInclude; /* optional element of type ns1:sampleInclude */
 public:
   virtual int soap_type() const {
     return 25;
@@ -8330,11 +8330,11 @@ public:
   double *numericValue;     /* optional element of type xsd:double */
   std::string *rangeBottom; /* optional element of type xsd:string */
   std::string *rangeTop;    /* optional element of type xsd:string */
-  ns1__sampleParameterPK *
-      sampleParameterPK;    /* optional element of type ns1:sampleParameterPK */
+  ns1__sampleParameterPK
+      *sampleParameterPK;   /* optional element of type ns1:sampleParameterPK */
   std::string *stringValue; /* optional element of type xsd:string */
-  enum ns1__parameterValueType *
-      valueType; /* optional element of type ns1:parameterValueType */
+  enum ns1__parameterValueType
+      *valueType; /* optional element of type ns1:parameterValueType */
 public:
   virtual int soap_type() const {
     return 41;
@@ -8381,10 +8381,10 @@ public:
   std::string *checksum;      /* optional element of type xsd:string */
   std::string *command;       /* optional element of type xsd:string */
   time_t *datafileCreateTime; /* optional element of type xsd:dateTime */
-  ns1__datafileFormat *
-      datafileFormat; /* optional element of type ns1:datafileFormat */
-  enum ns1__datafileInclude *
-      datafileInclude;        /* optional element of type ns1:datafileInclude */
+  ns1__datafileFormat
+      *datafileFormat; /* optional element of type ns1:datafileFormat */
+  enum ns1__datafileInclude
+      *datafileInclude;       /* optional element of type ns1:datafileInclude */
   time_t *datafileModifyTime; /* optional element of type xsd:dateTime */
   std::vector<ns1__datafileParameter *>
       datafileParameterCollection;     /* optional element of type
@@ -8424,8 +8424,8 @@ public:
 /* ns1:datafileFormat */
 class SOAP_CMAC ns1__datafileFormat : public ns1__entityBaseBean {
 public:
-  class ns1__datafileFormatPK *
-      datafileFormatPK;     /* optional element of type ns1:datafileFormatPK */
+  class ns1__datafileFormatPK
+      *datafileFormatPK;    /* optional element of type ns1:datafileFormatPK */
   std::string *description; /* optional element of type xsd:string */
   std::string *formatType;  /* optional element of type xsd:string */
 public:
@@ -8479,8 +8479,8 @@ public:
   std::string *rangeBottom; /* optional element of type xsd:string */
   std::string *rangeTop;    /* optional element of type xsd:string */
   std::string *stringValue; /* optional element of type xsd:string */
-  enum ns1__parameterValueType *
-      valueType; /* optional element of type ns1:parameterValueType */
+  enum ns1__parameterValueType
+      *valueType; /* optional element of type ns1:parameterValueType */
 public:
   virtual int soap_type() const {
     return 58;
@@ -8527,9 +8527,9 @@ public:
 /* ns1:relatedDatafiles */
 class SOAP_CMAC ns1__relatedDatafiles : public ns1__entityBaseBean {
 public:
-  class ns1__relatedDatafilesPK *
-      relatedDatafilesPK; /* optional element of type ns1:relatedDatafilesPK */
-  std::string *relation;  /* optional element of type xsd:string */
+  class ns1__relatedDatafilesPK
+      *relatedDatafilesPK; /* optional element of type ns1:relatedDatafilesPK */
+  std::string *relation;   /* optional element of type xsd:string */
 public:
   virtual int soap_type() const {
     return 60;
@@ -8576,14 +8576,14 @@ public:
   bool datasetParameter;              /* required element of type xsd:boolean */
   std::string *description;           /* optional element of type xsd:string */
   std::string *nonNumericValueFormat; /* optional element of type xsd:string */
-  class ns1__parameterPK *
-      parameterPK;               /* optional element of type ns1:parameterPK */
+  class ns1__parameterPK
+      *parameterPK;              /* optional element of type ns1:parameterPK */
   bool sampleParameter;          /* required element of type xsd:boolean */
   std::string *searchable;       /* optional element of type xsd:string */
   std::string *unitsLongVersion; /* optional element of type xsd:string */
-  enum ns1__parameterValueType *
-      valueType; /* optional element of type ns1:parameterValueType */
-  bool verified; /* required element of type xsd:boolean */
+  enum ns1__parameterValueType
+      *valueType; /* optional element of type ns1:parameterValueType */
+  bool verified;  /* required element of type xsd:boolean */
 public:
   virtual int soap_type() const {
     return 70;
@@ -8751,9 +8751,9 @@ public:
 /* ns1:datasetParameter */
 class SOAP_CMAC ns1__datasetParameter : public ns1__entityBaseBean {
 public:
-  ns1__datasetParameterPK *
-      datasetParameterPK; /* optional element of type ns1:datasetParameterPK */
-  time_t *dateTimeValue;  /* optional element of type xsd:dateTime */
+  ns1__datasetParameterPK
+      *datasetParameterPK; /* optional element of type ns1:datasetParameterPK */
+  time_t *dateTimeValue;   /* optional element of type xsd:dateTime */
   std::string *description;  /* optional element of type xsd:string */
   std::string *error;        /* optional element of type xsd:string */
   double *numericValue;      /* optional element of type xsd:double */
@@ -8761,8 +8761,8 @@ public:
   std::string *rangeBottom;  /* optional element of type xsd:string */
   std::string *rangeTop;     /* optional element of type xsd:string */
   std::string *stringValue;  /* optional element of type xsd:string */
-  enum ns1__parameterValueType *
-      valueType; /* optional element of type ns1:parameterValueType */
+  enum ns1__parameterValueType
+      *valueType; /* optional element of type ns1:parameterValueType */
 public:
   virtual int soap_type() const {
     return 104;
@@ -8810,8 +8810,8 @@ public:
   std::vector<ns1__dataset *>
       datasetCollection; /* optional element of type ns1:dataset */
   std::string *facility; /* optional element of type xsd:string */
-  ns1__facilityCycle *
-      facilityCycle;          /* optional element of type ns1:facilityCycle */
+  ns1__facilityCycle
+      *facilityCycle;         /* optional element of type ns1:facilityCycle */
   LONG64 *grantId;            /* optional element of type xsd:long */
   LONG64 *id;                 /* optional element of type xsd:long */
   std::string *instrument;    /* optional element of type xsd:string */
@@ -8856,11 +8856,11 @@ public:
 /* ns1:investigator */
 class SOAP_CMAC ns1__investigator : public ns1__entityBaseBean {
 public:
-  ns1__facilityUser *
-      ns1__facilityUser_; /* optional element of type ns1:facilityUser */
-  ns1__investigatorPK *
-      investigatorPK; /* optional element of type ns1:investigatorPK */
-  std::string *role;  /* optional element of type xsd:string */
+  ns1__facilityUser
+      *ns1__facilityUser_; /* optional element of type ns1:facilityUser */
+  ns1__investigatorPK
+      *investigatorPK; /* optional element of type ns1:investigatorPK */
+  std::string *role;   /* optional element of type xsd:string */
 public:
   virtual int soap_type() const {
     return 142;
@@ -8973,8 +8973,8 @@ public:
 class SOAP_CMAC ns1__icatAuthorisation : public ns1__entityBaseBean {
 public:
   LONG64 *elementId; /* optional element of type xsd:long */
-  enum ns1__elementType *
-      elementType;         /* optional element of type ns1:elementType */
+  enum ns1__elementType
+      *elementType;        /* optional element of type ns1:elementType */
   LONG64 *id;              /* optional element of type xsd:long */
   ns1__icatRole *role;     /* optional element of type ns1:icatRole */
   LONG64 *userChildRecord; /* optional element of type xsd:long */
@@ -9000,8 +9000,8 @@ public:
 class SOAP_CMAC ns1__restrictionLogicalCondition
     : public ns1__restrictionCondition {
 public:
-  enum ns1__logicalOperator *
-      operator_; /* optional element of type ns1:logicalOperator */
+  enum ns1__logicalOperator
+      *operator_; /* optional element of type ns1:logicalOperator */
   std::vector<ns1__restrictionCondition *>
       restConditions; /* optional element of type ns1:restrictionCondition */
 public:
@@ -9027,13 +9027,13 @@ public:
 class SOAP_CMAC ns1__restrictionComparisonCondition
     : public ns1__restrictionCondition {
 public:
-  enum ns1__comparisonOperator *
-      comparisonOperator; /* optional element of type ns1:comparisonOperator */
-  enum ns1__restrictionAttributes *
-      restrictionAttribute; /* optional element of type
-                               ns1:restrictionAttributes */
-  xsd__anyType *value;      /* optional element of type xsd:anyType */
-  xsd__anyType *valueRight; /* optional element of type xsd:anyType */
+  enum ns1__comparisonOperator
+      *comparisonOperator; /* optional element of type ns1:comparisonOperator */
+  enum ns1__restrictionAttributes
+      *restrictionAttribute; /* optional element of type
+                                ns1:restrictionAttributes */
+  xsd__anyType *value;       /* optional element of type xsd:anyType */
+  xsd__anyType *valueRight;  /* optional element of type xsd:anyType */
 public:
   virtual int soap_type() const {
     return 45;
@@ -9059,8 +9059,8 @@ class SOAP_CMAC ns1__parameterLogicalCondition
 public:
   std::vector<ns1__parameterCondition *>
       listComparable; /* optional element of type ns1:parameterCondition */
-  enum ns1__logicalOperator *
-      operator_; /* optional element of type ns1:logicalOperator */
+  enum ns1__logicalOperator
+      *operator_; /* optional element of type ns1:logicalOperator */
 public:
   virtual int soap_type() const {
     return 66;
@@ -9084,8 +9084,8 @@ public:
 class SOAP_CMAC ns1__parameterSearch : public ns1__parameterCondition {
 public:
   ns1__parameter *param; /* optional element of type ns1:parameter */
-  enum ns1__parameterType *
-      type; /* optional element of type ns1:parameterType */
+  enum ns1__parameterType
+      *type; /* optional element of type ns1:parameterType */
 public:
   virtual int soap_type() const {
     return 115;
@@ -9107,10 +9107,10 @@ public:
 class SOAP_CMAC ns1__parameterComparisonCondition
     : public ns1__parameterCondition {
 public:
-  enum ns1__comparisonOperator *
-      comparator; /* optional element of type ns1:comparisonOperator */
-  ns1__parameterSearch *
-      parameterSearch;      /* optional element of type ns1:parameterSearch */
+  enum ns1__comparisonOperator
+      *comparator; /* optional element of type ns1:comparisonOperator */
+  ns1__parameterSearch
+      *parameterSearch;     /* optional element of type ns1:parameterSearch */
   xsd__anyType *value;      /* optional element of type xsd:anyType */
   xsd__anyType *valueRight; /* optional element of type xsd:anyType */
 public:
@@ -9144,17 +9144,17 @@ public:
       ns1__InsufficientPrivilegesException_; /* optional element of type
                                                 ns1:InsufficientPrivilegesException
                                                 */
-  ns3__NoSuchObjectFoundException *
-      ns1__NoSuchObjectFoundException; /* optional element of type
-                                          ns3:NoSuchObjectFoundException */
-  ns3__NoSuchUserException *
-      ns1__NoSuchUserException; /* optional element of type
-                                   ns3:NoSuchUserException */
+  ns3__NoSuchObjectFoundException
+      *ns1__NoSuchObjectFoundException; /* optional element of type
+                                           ns3:NoSuchObjectFoundException */
+  ns3__NoSuchUserException
+      *ns1__NoSuchUserException; /* optional element of type
+                                    ns3:NoSuchUserException */
   ns3__SessionException *
       ns1__SessionException; /* optional element of type ns3:SessionException */
-  ns3__ValidationException *
-      ns1__ValidationException; /* optional element of type
-                                   ns3:ValidationException */
+  ns3__ValidationException
+      *ns1__ValidationException; /* optional element of type
+                                    ns3:ValidationException */
   int __type;  /* any type of element <fault> (defined below) */
   void *fault; /* transient */
 public:
@@ -9184,8 +9184,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__loginLifetime {
 public:
-  ns1__loginLifetime *
-      ns1__loginLifetime_; /* optional element of type ns1:loginLifetime */
+  ns1__loginLifetime
+      *ns1__loginLifetime_; /* optional element of type ns1:loginLifetime */
 public:
   int soap_type() const {
     return 472;
@@ -9211,8 +9211,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__getUserDetails {
 public:
-  ns3__getUserDetails *
-      ns1__getUserDetails; /* optional element of type ns3:getUserDetails */
+  ns3__getUserDetails
+      *ns1__getUserDetails; /* optional element of type ns3:getUserDetails */
 public:
   int soap_type() const {
     return 480;
@@ -9225,8 +9225,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__isSessionValid {
 public:
-  ns1__isSessionValid *
-      ns1__isSessionValid_; /* optional element of type ns1:isSessionValid */
+  ns1__isSessionValid
+      *ns1__isSessionValid_; /* optional element of type ns1:isSessionValid */
 public:
   int soap_type() const {
     return 484;
@@ -9239,9 +9239,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__getKeywordsForUser {
 public:
-  ns1__getKeywordsForUser *
-      ns1__getKeywordsForUser_; /* optional element of type
-                                   ns1:getKeywordsForUser */
+  ns1__getKeywordsForUser
+      *ns1__getKeywordsForUser_; /* optional element of type
+                                    ns1:getKeywordsForUser */
 public:
   int soap_type() const {
     return 488;
@@ -9270,9 +9270,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__getKeywordsForUserMax {
 public:
-  ns1__getKeywordsForUserMax *
-      ns1__getKeywordsForUserMax_; /* optional element of type
-                                      ns1:getKeywordsForUserMax */
+  ns1__getKeywordsForUserMax
+      *ns1__getKeywordsForUserMax_; /* optional element of type
+                                       ns1:getKeywordsForUserMax */
 public:
   int soap_type() const {
     return 496;
@@ -9285,9 +9285,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__getKeywordsForUserType {
 public:
-  ns1__getKeywordsForUserType *
-      ns1__getKeywordsForUserType_; /* optional element of type
-                                       ns1:getKeywordsForUserType */
+  ns1__getKeywordsForUserType
+      *ns1__getKeywordsForUserType_; /* optional element of type
+                                        ns1:getKeywordsForUserType */
 public:
   int soap_type() const {
     return 500;
@@ -9300,8 +9300,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__getAllKeywords {
 public:
-  ns1__getAllKeywords *
-      ns1__getAllKeywords_; /* optional element of type ns1:getAllKeywords */
+  ns1__getAllKeywords
+      *ns1__getAllKeywords_; /* optional element of type ns1:getAllKeywords */
 public:
   int soap_type() const {
     return 504;
@@ -9328,9 +9328,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__searchByAdvancedPagination {
 public:
-  ns1__searchByAdvancedPagination *
-      ns1__searchByAdvancedPagination_; /* optional element of type
-                                           ns1:searchByAdvancedPagination */
+  ns1__searchByAdvancedPagination
+      *ns1__searchByAdvancedPagination_; /* optional element of type
+                                            ns1:searchByAdvancedPagination */
 public:
   int soap_type() const {
     return 512;
@@ -9357,9 +9357,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__searchByKeywordsAll {
 public:
-  ns1__searchByKeywordsAll *
-      ns1__searchByKeywordsAll_; /* optional element of type
-                                    ns1:searchByKeywordsAll */
+  ns1__searchByKeywordsAll
+      *ns1__searchByKeywordsAll_; /* optional element of type
+                                     ns1:searchByKeywordsAll */
 public:
   int soap_type() const {
     return 520;
@@ -9372,9 +9372,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__getMyInvestigations {
 public:
-  ns1__getMyInvestigations *
-      ns1__getMyInvestigations_; /* optional element of type
-                                    ns1:getMyInvestigations */
+  ns1__getMyInvestigations
+      *ns1__getMyInvestigations_; /* optional element of type
+                                     ns1:getMyInvestigations */
 public:
   int soap_type() const {
     return 524;
@@ -9387,9 +9387,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__getMyInvestigationsIncludes {
 public:
-  ns1__getMyInvestigationsIncludes *
-      ns1__getMyInvestigationsIncludes_; /* optional element of type
-                                            ns1:getMyInvestigationsIncludes */
+  ns1__getMyInvestigationsIncludes
+      *ns1__getMyInvestigationsIncludes_; /* optional element of type
+                                             ns1:getMyInvestigationsIncludes */
 public:
   int soap_type() const {
     return 528;
@@ -9410,7 +9410,7 @@ public:
   int soap_type() const {
     return 532;
   } /* = unique id SOAP_TYPE_ICat3___ns1__getMyInvestigationsIncludesPagination
-       */
+     */
 };
 #endif
 
@@ -9419,8 +9419,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__searchByUserID {
 public:
-  ns1__searchByUserID *
-      ns1__searchByUserID_; /* optional element of type ns1:searchByUserID */
+  ns1__searchByUserID
+      *ns1__searchByUserID_; /* optional element of type ns1:searchByUserID */
 public:
   int soap_type() const {
     return 536;
@@ -9433,9 +9433,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__searchByUserIDPagination {
 public:
-  ns1__searchByUserIDPagination *
-      ns1__searchByUserIDPagination_; /* optional element of type
-                                         ns1:searchByUserIDPagination */
+  ns1__searchByUserIDPagination
+      *ns1__searchByUserIDPagination_; /* optional element of type
+                                          ns1:searchByUserIDPagination */
 public:
   int soap_type() const {
     return 540;
@@ -9448,9 +9448,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__searchByUserSurname {
 public:
-  ns1__searchByUserSurname *
-      ns1__searchByUserSurname_; /* optional element of type
-                                    ns1:searchByUserSurname */
+  ns1__searchByUserSurname
+      *ns1__searchByUserSurname_; /* optional element of type
+                                     ns1:searchByUserSurname */
 public:
   int soap_type() const {
     return 544;
@@ -9463,10 +9463,10 @@ public:
 /* Operation wrapper: */
 struct __ns1__searchByUserSurnamePagination {
 public:
-  ns1__searchByUserSurnamePagination *
-      ns1__searchByUserSurnamePagination_; /* optional element of type
-                                              ns1:searchByUserSurnamePagination
-                                              */
+  ns1__searchByUserSurnamePagination
+      *ns1__searchByUserSurnamePagination_; /* optional element of type
+                                               ns1:searchByUserSurnamePagination
+                                               */
 public:
   int soap_type() const {
     return 548;
@@ -9479,8 +9479,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__listInstruments {
 public:
-  ns1__listInstruments *
-      ns1__listInstruments_; /* optional element of type ns1:listInstruments */
+  ns1__listInstruments
+      *ns1__listInstruments_; /* optional element of type ns1:listInstruments */
 public:
   int soap_type() const {
     return 552;
@@ -9520,8 +9520,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__listParameters {
 public:
-  ns1__listParameters *
-      ns1__listParameters_; /* optional element of type ns1:listParameters */
+  ns1__listParameters
+      *ns1__listParameters_; /* optional element of type ns1:listParameters */
 public:
   int soap_type() const {
     return 564;
@@ -9534,9 +9534,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__listFacilityCycles {
 public:
-  ns1__listFacilityCycles *
-      ns1__listFacilityCycles_; /* optional element of type
-                                   ns1:listFacilityCycles */
+  ns1__listFacilityCycles
+      *ns1__listFacilityCycles_; /* optional element of type
+                                    ns1:listFacilityCycles */
 public:
   int soap_type() const {
     return 568;
@@ -9557,7 +9557,7 @@ public:
   int soap_type() const {
     return 572;
   } /* = unique id SOAP_TYPE_ICat3___ns1__getFacilityCyclesWithDataForInstrument
-       */
+     */
 };
 #endif
 
@@ -9566,9 +9566,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__getInstrumentsWithData {
 public:
-  ns1__getInstrumentsWithData *
-      ns1__getInstrumentsWithData_; /* optional element of type
-                                       ns1:getInstrumentsWithData */
+  ns1__getInstrumentsWithData
+      *ns1__getInstrumentsWithData_; /* optional element of type
+                                        ns1:getInstrumentsWithData */
 public:
   int soap_type() const {
     return 576;
@@ -9581,9 +9581,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__listInvestigationTypes {
 public:
-  ns1__listInvestigationTypes *
-      ns1__listInvestigationTypes_; /* optional element of type
-                                       ns1:listInvestigationTypes */
+  ns1__listInvestigationTypes
+      *ns1__listInvestigationTypes_; /* optional element of type
+                                        ns1:listInvestigationTypes */
 public:
   int soap_type() const {
     return 580;
@@ -9596,9 +9596,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__searchSamplesBySampleName {
 public:
-  ns1__searchSamplesBySampleName *
-      ns1__searchSamplesBySampleName_; /* optional element of type
-                                          ns1:searchSamplesBySampleName */
+  ns1__searchSamplesBySampleName
+      *ns1__searchSamplesBySampleName_; /* optional element of type
+                                           ns1:searchSamplesBySampleName */
 public:
   int soap_type() const {
     return 584;
@@ -9611,9 +9611,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__searchDatasetsBySample {
 public:
-  ns1__searchDatasetsBySample *
-      ns1__searchDatasetsBySample_; /* optional element of type
-                                       ns1:searchDatasetsBySample */
+  ns1__searchDatasetsBySample
+      *ns1__searchDatasetsBySample_; /* optional element of type
+                                        ns1:searchDatasetsBySample */
 public:
   int soap_type() const {
     return 588;
@@ -9668,9 +9668,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__searchByRunNumberPagination {
 public:
-  ns1__searchByRunNumberPagination *
-      ns1__searchByRunNumberPagination_; /* optional element of type
-                                            ns1:searchByRunNumberPagination */
+  ns1__searchByRunNumberPagination
+      *ns1__searchByRunNumberPagination_; /* optional element of type
+                                             ns1:searchByRunNumberPagination */
 public:
   int soap_type() const {
     return 604;
@@ -9683,9 +9683,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__listDatafileFormats {
 public:
-  ns1__listDatafileFormats *
-      ns1__listDatafileFormats_; /* optional element of type
-                                    ns1:listDatafileFormats */
+  ns1__listDatafileFormats
+      *ns1__listDatafileFormats_; /* optional element of type
+                                     ns1:listDatafileFormats */
 public:
   int soap_type() const {
     return 608;
@@ -9712,9 +9712,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__getInvestigationIncludes {
 public:
-  ns1__getInvestigationIncludes *
-      ns1__getInvestigationIncludes_; /* optional element of type
-                                         ns1:getInvestigationIncludes */
+  ns1__getInvestigationIncludes
+      *ns1__getInvestigationIncludes_; /* optional element of type
+                                          ns1:getInvestigationIncludes */
 public:
   int soap_type() const {
     return 616;
@@ -9741,9 +9741,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__getInvestigationsIncludes {
 public:
-  ns1__getInvestigationsIncludes *
-      ns1__getInvestigationsIncludes_; /* optional element of type
-                                          ns1:getInvestigationsIncludes */
+  ns1__getInvestigationsIncludes
+      *ns1__getInvestigationsIncludes_; /* optional element of type
+                                           ns1:getInvestigationsIncludes */
 public:
   int soap_type() const {
     return 624;
@@ -9756,9 +9756,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__createInvestigation {
 public:
-  ns1__createInvestigation *
-      ns1__createInvestigation_; /* optional element of type
-                                    ns1:createInvestigation */
+  ns1__createInvestigation
+      *ns1__createInvestigation_; /* optional element of type
+                                     ns1:createInvestigation */
 public:
   int soap_type() const {
     return 628;
@@ -9789,9 +9789,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__deleteInvestigation {
 public:
-  ns1__deleteInvestigation *
-      ns1__deleteInvestigation_; /* optional element of type
-                                    ns1:deleteInvestigation */
+  ns1__deleteInvestigation
+      *ns1__deleteInvestigation_; /* optional element of type
+                                     ns1:deleteInvestigation */
 public:
   int soap_type() const {
     return 633;
@@ -9822,9 +9822,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__removeInvestigation {
 public:
-  ns1__removeInvestigation *
-      ns1__removeInvestigation_; /* optional element of type
-                                    ns1:removeInvestigation */
+  ns1__removeInvestigation
+      *ns1__removeInvestigation_; /* optional element of type
+                                     ns1:removeInvestigation */
 public:
   int soap_type() const {
     return 638;
@@ -9837,8 +9837,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__addKeyword {
 public:
-  ns1__addKeyword *
-      ns1__addKeyword_; /* optional element of type ns1:addKeyword */
+  ns1__addKeyword
+      *ns1__addKeyword_; /* optional element of type ns1:addKeyword */
 public:
   int soap_type() const {
     return 642;
@@ -9851,8 +9851,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__addInvestigator {
 public:
-  ns1__addInvestigator *
-      ns1__addInvestigator_; /* optional element of type ns1:addInvestigator */
+  ns1__addInvestigator
+      *ns1__addInvestigator_; /* optional element of type ns1:addInvestigator */
 public:
   int soap_type() const {
     return 646;
@@ -9878,8 +9878,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__addPublication {
 public:
-  ns1__addPublication *
-      ns1__addPublication_; /* optional element of type ns1:addPublication */
+  ns1__addPublication
+      *ns1__addPublication_; /* optional element of type ns1:addPublication */
 public:
   int soap_type() const {
     return 654;
@@ -9892,9 +9892,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__addSampleParameter {
 public:
-  ns1__addSampleParameter *
-      ns1__addSampleParameter_; /* optional element of type
-                                   ns1:addSampleParameter */
+  ns1__addSampleParameter
+      *ns1__addSampleParameter_; /* optional element of type
+                                    ns1:addSampleParameter */
 public:
   int soap_type() const {
     return 658;
@@ -9925,9 +9925,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__deleteInvestigator {
 public:
-  ns1__deleteInvestigator *
-      ns1__deleteInvestigator_; /* optional element of type
-                                   ns1:deleteInvestigator */
+  ns1__deleteInvestigator
+      *ns1__deleteInvestigator_; /* optional element of type
+                                    ns1:deleteInvestigator */
 public:
   int soap_type() const {
     return 663;
@@ -9958,8 +9958,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__deleteKeyword {
 public:
-  ns1__deleteKeyword *
-      ns1__deleteKeyword_; /* optional element of type ns1:deleteKeyword */
+  ns1__deleteKeyword
+      *ns1__deleteKeyword_; /* optional element of type ns1:deleteKeyword */
 public:
   int soap_type() const {
     return 668;
@@ -10022,8 +10022,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__deleteSample {
 public:
-  ns1__deleteSample *
-      ns1__deleteSample_; /* optional element of type ns1:deleteSample */
+  ns1__deleteSample
+      *ns1__deleteSample_; /* optional element of type ns1:deleteSample */
 public:
   int soap_type() const {
     return 678;
@@ -10054,9 +10054,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__deleteSampleParameter {
 public:
-  ns1__deleteSampleParameter *
-      ns1__deleteSampleParameter_; /* optional element of type
-                                      ns1:deleteSampleParameter */
+  ns1__deleteSampleParameter
+      *ns1__deleteSampleParameter_; /* optional element of type
+                                       ns1:deleteSampleParameter */
 public:
   int soap_type() const {
     return 683;
@@ -10087,9 +10087,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__modifyInvestigation {
 public:
-  ns1__modifyInvestigation *
-      ns1__modifyInvestigation_; /* optional element of type
-                                    ns1:modifyInvestigation */
+  ns1__modifyInvestigation
+      *ns1__modifyInvestigation_; /* optional element of type
+                                     ns1:modifyInvestigation */
 public:
   int soap_type() const {
     return 688;
@@ -10120,9 +10120,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__modifyInvestigator {
 public:
-  ns1__modifyInvestigator *
-      ns1__modifyInvestigator_; /* optional element of type
-                                   ns1:modifyInvestigator */
+  ns1__modifyInvestigator
+      *ns1__modifyInvestigator_; /* optional element of type
+                                    ns1:modifyInvestigator */
 public:
   int soap_type() const {
     return 693;
@@ -10153,8 +10153,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__modifySample {
 public:
-  ns1__modifySample *
-      ns1__modifySample_; /* optional element of type ns1:modifySample */
+  ns1__modifySample
+      *ns1__modifySample_; /* optional element of type ns1:modifySample */
 public:
   int soap_type() const {
     return 698;
@@ -10217,9 +10217,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__modifySampleParameter {
 public:
-  ns1__modifySampleParameter *
-      ns1__modifySampleParameter_; /* optional element of type
-                                      ns1:modifySampleParameter */
+  ns1__modifySampleParameter
+      *ns1__modifySampleParameter_; /* optional element of type
+                                       ns1:modifySampleParameter */
 public:
   int soap_type() const {
     return 708;
@@ -10250,8 +10250,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__removeKeyword {
 public:
-  ns1__removeKeyword *
-      ns1__removeKeyword_; /* optional element of type ns1:removeKeyword */
+  ns1__removeKeyword
+      *ns1__removeKeyword_; /* optional element of type ns1:removeKeyword */
 public:
   int soap_type() const {
     return 713;
@@ -10282,9 +10282,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__removeInvestigator {
 public:
-  ns1__removeInvestigator *
-      ns1__removeInvestigator_; /* optional element of type
-                                   ns1:removeInvestigator */
+  ns1__removeInvestigator
+      *ns1__removeInvestigator_; /* optional element of type
+                                    ns1:removeInvestigator */
 public:
   int soap_type() const {
     return 718;
@@ -10347,8 +10347,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__removeSample {
 public:
-  ns1__removeSample *
-      ns1__removeSample_; /* optional element of type ns1:removeSample */
+  ns1__removeSample
+      *ns1__removeSample_; /* optional element of type ns1:removeSample */
 public:
   int soap_type() const {
     return 728;
@@ -10379,9 +10379,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__removeSampleParameter {
 public:
-  ns1__removeSampleParameter *
-      ns1__removeSampleParameter_; /* optional element of type
-                                      ns1:removeSampleParameter */
+  ns1__removeSampleParameter
+      *ns1__removeSampleParameter_; /* optional element of type
+                                       ns1:removeSampleParameter */
 public:
   int soap_type() const {
     return 733;
@@ -10394,8 +10394,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__getDataset {
 public:
-  ns1__getDataset *
-      ns1__getDataset_; /* optional element of type ns1:getDataset */
+  ns1__getDataset
+      *ns1__getDataset_; /* optional element of type ns1:getDataset */
 public:
   int soap_type() const {
     return 737;
@@ -10408,9 +10408,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__getDatasetIncludes {
 public:
-  ns1__getDatasetIncludes *
-      ns1__getDatasetIncludes_; /* optional element of type
-                                   ns1:getDatasetIncludes */
+  ns1__getDatasetIncludes
+      *ns1__getDatasetIncludes_; /* optional element of type
+                                    ns1:getDatasetIncludes */
 public:
   int soap_type() const {
     return 741;
@@ -10423,8 +10423,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__getDatasets {
 public:
-  ns1__getDatasets *
-      ns1__getDatasets_; /* optional element of type ns1:getDatasets */
+  ns1__getDatasets
+      *ns1__getDatasets_; /* optional element of type ns1:getDatasets */
 public:
   int soap_type() const {
     return 745;
@@ -10437,8 +10437,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__createDataSet {
 public:
-  ns1__createDataSet *
-      ns1__createDataSet_; /* optional element of type ns1:createDataSet */
+  ns1__createDataSet
+      *ns1__createDataSet_; /* optional element of type ns1:createDataSet */
 public:
   int soap_type() const {
     return 749;
@@ -10451,8 +10451,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__createDataSets {
 public:
-  ns1__createDataSets *
-      ns1__createDataSets_; /* optional element of type ns1:createDataSets */
+  ns1__createDataSets
+      *ns1__createDataSets_; /* optional element of type ns1:createDataSets */
 public:
   int soap_type() const {
     return 753;
@@ -10483,8 +10483,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__deleteDataSet {
 public:
-  ns1__deleteDataSet *
-      ns1__deleteDataSet_; /* optional element of type ns1:deleteDataSet */
+  ns1__deleteDataSet
+      *ns1__deleteDataSet_; /* optional element of type ns1:deleteDataSet */
 public:
   int soap_type() const {
     return 758;
@@ -10515,9 +10515,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__deleteDataSetParameter {
 public:
-  ns1__deleteDataSetParameter *
-      ns1__deleteDataSetParameter_; /* optional element of type
-                                       ns1:deleteDataSetParameter */
+  ns1__deleteDataSetParameter
+      *ns1__deleteDataSetParameter_; /* optional element of type
+                                        ns1:deleteDataSetParameter */
 public:
   int soap_type() const {
     return 763;
@@ -10548,8 +10548,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__modifyDataSet {
 public:
-  ns1__modifyDataSet *
-      ns1__modifyDataSet_; /* optional element of type ns1:modifyDataSet */
+  ns1__modifyDataSet
+      *ns1__modifyDataSet_; /* optional element of type ns1:modifyDataSet */
 public:
   int soap_type() const {
     return 768;
@@ -10580,9 +10580,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__modifyDataSetParameter {
 public:
-  ns1__modifyDataSetParameter *
-      ns1__modifyDataSetParameter_; /* optional element of type
-                                       ns1:modifyDataSetParameter */
+  ns1__modifyDataSetParameter
+      *ns1__modifyDataSetParameter_; /* optional element of type
+                                        ns1:modifyDataSetParameter */
 public:
   int soap_type() const {
     return 773;
@@ -10627,9 +10627,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__addDataSetParameter {
 public:
-  ns1__addDataSetParameter *
-      ns1__addDataSetParameter_; /* optional element of type
-                                    ns1:addDataSetParameter */
+  ns1__addDataSetParameter
+      *ns1__addDataSetParameter_; /* optional element of type
+                                     ns1:addDataSetParameter */
 public:
   int soap_type() const {
     return 782;
@@ -10642,9 +10642,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__addDataSetParameters {
 public:
-  ns1__addDataSetParameters *
-      ns1__addDataSetParameters_; /* optional element of type
-                                     ns1:addDataSetParameters */
+  ns1__addDataSetParameters
+      *ns1__addDataSetParameters_; /* optional element of type
+                                      ns1:addDataSetParameters */
 public:
   int soap_type() const {
     return 786;
@@ -10675,8 +10675,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__removeDataSet {
 public:
-  ns1__removeDataSet *
-      ns1__removeDataSet_; /* optional element of type ns1:removeDataSet */
+  ns1__removeDataSet
+      *ns1__removeDataSet_; /* optional element of type ns1:removeDataSet */
 public:
   int soap_type() const {
     return 791;
@@ -10707,9 +10707,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__removeDataSetParameter {
 public:
-  ns1__removeDataSetParameter *
-      ns1__removeDataSetParameter_; /* optional element of type
-                                       ns1:removeDataSetParameter */
+  ns1__removeDataSetParameter
+      *ns1__removeDataSetParameter_; /* optional element of type
+                                        ns1:removeDataSetParameter */
 public:
   int soap_type() const {
     return 796;
@@ -10722,8 +10722,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__getDatafile {
 public:
-  ns1__getDatafile *
-      ns1__getDatafile_; /* optional element of type ns1:getDatafile */
+  ns1__getDatafile
+      *ns1__getDatafile_; /* optional element of type ns1:getDatafile */
 public:
   int soap_type() const {
     return 800;
@@ -10736,8 +10736,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__getDatafiles {
 public:
-  ns1__getDatafiles *
-      ns1__getDatafiles_; /* optional element of type ns1:getDatafiles */
+  ns1__getDatafiles
+      *ns1__getDatafiles_; /* optional element of type ns1:getDatafiles */
 public:
   int soap_type() const {
     return 804;
@@ -10750,8 +10750,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__createDataFile {
 public:
-  ns1__createDataFile *
-      ns1__createDataFile_; /* optional element of type ns1:createDataFile */
+  ns1__createDataFile
+      *ns1__createDataFile_; /* optional element of type ns1:createDataFile */
 public:
   int soap_type() const {
     return 808;
@@ -10764,8 +10764,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__createDataFiles {
 public:
-  ns1__createDataFiles *
-      ns1__createDataFiles_; /* optional element of type ns1:createDataFiles */
+  ns1__createDataFiles
+      *ns1__createDataFiles_; /* optional element of type ns1:createDataFiles */
 public:
   int soap_type() const {
     return 812;
@@ -10796,8 +10796,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__deleteDataFile {
 public:
-  ns1__deleteDataFile *
-      ns1__deleteDataFile_; /* optional element of type ns1:deleteDataFile */
+  ns1__deleteDataFile
+      *ns1__deleteDataFile_; /* optional element of type ns1:deleteDataFile */
 public:
   int soap_type() const {
     return 817;
@@ -10828,8 +10828,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__modifyDataFile {
 public:
-  ns1__modifyDataFile *
-      ns1__modifyDataFile_; /* optional element of type ns1:modifyDataFile */
+  ns1__modifyDataFile
+      *ns1__modifyDataFile_; /* optional element of type ns1:modifyDataFile */
 public:
   int soap_type() const {
     return 822;
@@ -10842,9 +10842,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__addDataFileParameter {
 public:
-  ns1__addDataFileParameter *
-      ns1__addDataFileParameter_; /* optional element of type
-                                     ns1:addDataFileParameter */
+  ns1__addDataFileParameter
+      *ns1__addDataFileParameter_; /* optional element of type
+                                      ns1:addDataFileParameter */
 public:
   int soap_type() const {
     return 826;
@@ -10857,9 +10857,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__addDataFileParameters {
 public:
-  ns1__addDataFileParameters *
-      ns1__addDataFileParameters_; /* optional element of type
-                                      ns1:addDataFileParameters */
+  ns1__addDataFileParameters
+      *ns1__addDataFileParameters_; /* optional element of type
+                                       ns1:addDataFileParameters */
 public:
   int soap_type() const {
     return 830;
@@ -10890,9 +10890,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__modifyDataFileParameter {
 public:
-  ns1__modifyDataFileParameter *
-      ns1__modifyDataFileParameter_; /* optional element of type
-                                        ns1:modifyDataFileParameter */
+  ns1__modifyDataFileParameter
+      *ns1__modifyDataFileParameter_; /* optional element of type
+                                         ns1:modifyDataFileParameter */
 public:
   int soap_type() const {
     return 835;
@@ -10923,9 +10923,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__deleteDataFileParameter {
 public:
-  ns1__deleteDataFileParameter *
-      ns1__deleteDataFileParameter_; /* optional element of type
-                                        ns1:deleteDataFileParameter */
+  ns1__deleteDataFileParameter
+      *ns1__deleteDataFileParameter_; /* optional element of type
+                                         ns1:deleteDataFileParameter */
 public:
   int soap_type() const {
     return 840;
@@ -10956,8 +10956,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__removeDataFile {
 public:
-  ns1__removeDataFile *
-      ns1__removeDataFile_; /* optional element of type ns1:removeDataFile */
+  ns1__removeDataFile
+      *ns1__removeDataFile_; /* optional element of type ns1:removeDataFile */
 public:
   int soap_type() const {
     return 845;
@@ -10988,9 +10988,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__removeDataFileParameter {
 public:
-  ns1__removeDataFileParameter *
-      ns1__removeDataFileParameter_; /* optional element of type
-                                        ns1:removeDataFileParameter */
+  ns1__removeDataFileParameter
+      *ns1__removeDataFileParameter_; /* optional element of type
+                                         ns1:removeDataFileParameter */
 public:
   int soap_type() const {
     return 850;
@@ -11049,9 +11049,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__deleteAuthorisation {
 public:
-  ns1__deleteAuthorisation *
-      ns1__deleteAuthorisation_; /* optional element of type
-                                    ns1:deleteAuthorisation */
+  ns1__deleteAuthorisation
+      *ns1__deleteAuthorisation_; /* optional element of type
+                                     ns1:deleteAuthorisation */
 public:
   int soap_type() const {
     return 863;
@@ -11082,9 +11082,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__removeAuthorisation {
 public:
-  ns1__removeAuthorisation *
-      ns1__removeAuthorisation_; /* optional element of type
-                                    ns1:removeAuthorisation */
+  ns1__removeAuthorisation
+      *ns1__removeAuthorisation_; /* optional element of type
+                                     ns1:removeAuthorisation */
 public:
   int soap_type() const {
     return 868;
@@ -11115,9 +11115,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__updateAuthorisation {
 public:
-  ns1__updateAuthorisation *
-      ns1__updateAuthorisation_; /* optional element of type
-                                    ns1:updateAuthorisation */
+  ns1__updateAuthorisation
+      *ns1__updateAuthorisation_; /* optional element of type
+                                     ns1:updateAuthorisation */
 public:
   int soap_type() const {
     return 873;
@@ -11130,8 +11130,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__ingestMetadata {
 public:
-  ns1__ingestMetadata *
-      ns1__ingestMetadata_; /* optional element of type ns1:ingestMetadata */
+  ns1__ingestMetadata
+      *ns1__ingestMetadata_; /* optional element of type ns1:ingestMetadata */
 public:
   int soap_type() const {
     return 877;
@@ -11158,8 +11158,8 @@ public:
 /* Operation wrapper: */
 struct __ns1__downloadDataset {
 public:
-  ns1__downloadDataset *
-      ns1__downloadDataset_; /* optional element of type ns1:downloadDataset */
+  ns1__downloadDataset
+      *ns1__downloadDataset_; /* optional element of type ns1:downloadDataset */
 public:
   int soap_type() const {
     return 885;
@@ -11186,9 +11186,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__checkDatafileDownloadAccess {
 public:
-  ns1__checkDatafileDownloadAccess *
-      ns1__checkDatafileDownloadAccess_; /* optional element of type
-                                            ns1:checkDatafileDownloadAccess */
+  ns1__checkDatafileDownloadAccess
+      *ns1__checkDatafileDownloadAccess_; /* optional element of type
+                                             ns1:checkDatafileDownloadAccess */
 public:
   int soap_type() const {
     return 893;
@@ -11201,9 +11201,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__checkDatasetDownloadAccess {
 public:
-  ns1__checkDatasetDownloadAccess *
-      ns1__checkDatasetDownloadAccess_; /* optional element of type
-                                           ns1:checkDatasetDownloadAccess */
+  ns1__checkDatasetDownloadAccess
+      *ns1__checkDatasetDownloadAccess_; /* optional element of type
+                                            ns1:checkDatasetDownloadAccess */
 public:
   int soap_type() const {
     return 897;
@@ -11246,9 +11246,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__getFacilityUserByFederalId {
 public:
-  ns1__getFacilityUserByFederalId *
-      ns1__getFacilityUserByFederalId_; /* optional element of type
-                                           ns1:getFacilityUserByFederalId */
+  ns1__getFacilityUserByFederalId
+      *ns1__getFacilityUserByFederalId_; /* optional element of type
+                                            ns1:getFacilityUserByFederalId */
 public:
   int soap_type() const {
     return 909;
@@ -11408,9 +11408,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__searchDatafileByParameter {
 public:
-  ns1__searchDatafileByParameter *
-      ns1__searchDatafileByParameter_; /* optional element of type
-                                          ns1:searchDatafileByParameter */
+  ns1__searchDatafileByParameter
+      *ns1__searchDatafileByParameter_; /* optional element of type
+                                           ns1:searchDatafileByParameter */
 public:
   int soap_type() const {
     return 949;
@@ -11423,9 +11423,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__searchDatasetByParameter {
 public:
-  ns1__searchDatasetByParameter *
-      ns1__searchDatasetByParameter_; /* optional element of type
-                                         ns1:searchDatasetByParameter */
+  ns1__searchDatasetByParameter
+      *ns1__searchDatasetByParameter_; /* optional element of type
+                                          ns1:searchDatasetByParameter */
 public:
   int soap_type() const {
     return 953;
@@ -11438,9 +11438,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__searchSampleByParameter {
 public:
-  ns1__searchSampleByParameter *
-      ns1__searchSampleByParameter_; /* optional element of type
-                                        ns1:searchSampleByParameter */
+  ns1__searchSampleByParameter
+      *ns1__searchSampleByParameter_; /* optional element of type
+                                         ns1:searchSampleByParameter */
 public:
   int soap_type() const {
     return 957;
@@ -11453,9 +11453,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__getParameterByNameUnits {
 public:
-  ns1__getParameterByNameUnits *
-      ns1__getParameterByNameUnits_; /* optional element of type
-                                        ns1:getParameterByNameUnits */
+  ns1__getParameterByNameUnits
+      *ns1__getParameterByNameUnits_; /* optional element of type
+                                         ns1:getParameterByNameUnits */
 public:
   int soap_type() const {
     return 961;
@@ -11468,9 +11468,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__getParameterByName {
 public:
-  ns1__getParameterByName *
-      ns1__getParameterByName_; /* optional element of type
-                                   ns1:getParameterByName */
+  ns1__getParameterByName
+      *ns1__getParameterByName_; /* optional element of type
+                                    ns1:getParameterByName */
 public:
   int soap_type() const {
     return 965;
@@ -11483,9 +11483,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__getParameterByRestriction {
 public:
-  ns1__getParameterByRestriction *
-      ns1__getParameterByRestriction_; /* optional element of type
-                                          ns1:getParameterByRestriction */
+  ns1__getParameterByRestriction
+      *ns1__getParameterByRestriction_; /* optional element of type
+                                           ns1:getParameterByRestriction */
 public:
   int soap_type() const {
     return 969;
@@ -11498,9 +11498,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__getParameterByUnits {
 public:
-  ns1__getParameterByUnits *
-      ns1__getParameterByUnits_; /* optional element of type
-                                    ns1:getParameterByUnits */
+  ns1__getParameterByUnits
+      *ns1__getParameterByUnits_; /* optional element of type
+                                     ns1:getParameterByUnits */
 public:
   int soap_type() const {
     return 973;
@@ -11553,7 +11553,7 @@ public:
   int soap_type() const {
     return 985;
   } /* = unique id SOAP_TYPE_ICat3___ns1__searchDatafileByParameterRestriction
-       */
+     */
 };
 #endif
 
@@ -11596,9 +11596,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__searchDatasetByRestriction {
 public:
-  ns1__searchDatasetByRestriction *
-      ns1__searchDatasetByRestriction_; /* optional element of type
-                                           ns1:searchDatasetByRestriction */
+  ns1__searchDatasetByRestriction
+      *ns1__searchDatasetByRestriction_; /* optional element of type
+                                            ns1:searchDatasetByRestriction */
 public:
   int soap_type() const {
     return 997;
@@ -11611,9 +11611,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__searchDatafileByRestriction {
 public:
-  ns1__searchDatafileByRestriction *
-      ns1__searchDatafileByRestriction_; /* optional element of type
-                                            ns1:searchDatafileByRestriction */
+  ns1__searchDatafileByRestriction
+      *ns1__searchDatafileByRestriction_; /* optional element of type
+                                             ns1:searchDatafileByRestriction */
 public:
   int soap_type() const {
     return 1001;
@@ -11626,9 +11626,9 @@ public:
 /* Operation wrapper: */
 struct __ns1__searchSampleByRestriction {
 public:
-  ns1__searchSampleByRestriction *
-      ns1__searchSampleByRestriction_; /* optional element of type
-                                          ns1:searchSampleByRestriction */
+  ns1__searchSampleByRestriction
+      *ns1__searchSampleByRestriction_; /* optional element of type
+                                           ns1:searchSampleByRestriction */
 public:
   int soap_type() const {
     return 1005;
@@ -11668,7 +11668,7 @@ public:
   int soap_type() const {
     return 1013;
   } /* = unique id SOAP_TYPE_ICat3___ns1__searchDatasetByRestrictionComparison
-       */
+     */
 };
 #endif
 
@@ -11685,7 +11685,7 @@ public:
   int soap_type() const {
     return 1017;
   } /* = unique id SOAP_TYPE_ICat3___ns1__searchDatafileByRestrictionComparison
-       */
+     */
 };
 #endif
 
@@ -11783,7 +11783,7 @@ public:
   int soap_type() const {
     return 1041;
   } /* = unique id SOAP_TYPE_ICat3___ns1__searchInvestigationByParameterLogical
-       */
+     */
 };
 #endif
 
@@ -11878,8 +11878,8 @@ private:
 struct SOAP_ENV__Code {
 public:
   char *SOAP_ENV__Value; /* optional element of type xsd:QName */
-  struct SOAP_ENV__Code *
-      SOAP_ENV__Subcode; /* optional element of type SOAP-ENV:Code */
+  struct SOAP_ENV__Code
+      *SOAP_ENV__Subcode; /* optional element of type SOAP-ENV:Code */
 public:
   int soap_type() const {
     return 1059;
@@ -11916,16 +11916,16 @@ public:
   char *faultcode;   /* optional element of type xsd:QName */
   char *faultstring; /* optional element of type xsd:string */
   char *faultactor;  /* optional element of type xsd:string */
-  struct SOAP_ENV__Detail *
-      detail; /* optional element of type SOAP-ENV:Detail */
-  struct SOAP_ENV__Code *
-      SOAP_ENV__Code; /* optional element of type SOAP-ENV:Code */
-  struct SOAP_ENV__Reason *
-      SOAP_ENV__Reason; /* optional element of type SOAP-ENV:Reason */
-  char *SOAP_ENV__Node; /* optional element of type xsd:string */
-  char *SOAP_ENV__Role; /* optional element of type xsd:string */
-  struct SOAP_ENV__Detail *
-      SOAP_ENV__Detail; /* optional element of type SOAP-ENV:Detail */
+  struct SOAP_ENV__Detail
+      *detail; /* optional element of type SOAP-ENV:Detail */
+  struct SOAP_ENV__Code
+      *SOAP_ENV__Code; /* optional element of type SOAP-ENV:Code */
+  struct SOAP_ENV__Reason
+      *SOAP_ENV__Reason; /* optional element of type SOAP-ENV:Reason */
+  char *SOAP_ENV__Node;  /* optional element of type xsd:string */
+  char *SOAP_ENV__Role;  /* optional element of type xsd:string */
+  struct SOAP_ENV__Detail
+      *SOAP_ENV__Detail; /* optional element of type SOAP-ENV:Detail */
 public:
   int soap_type() const {
     return 1062;

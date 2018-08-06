@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/ExtractSpectra2.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidIndexing/IndexInfo.h"
 
 #include "MantidTestHelpers/FakeObjects.h"
@@ -46,7 +46,7 @@ boost::shared_ptr<Workspace2D> createWorkspace() {
   ws->setHistogram(4, Points{4.0}, Counts{1.0});
   return std::move(ws);
 }
-}
+} // namespace
 
 class ExtractSpectra2Test : public CxxTest::TestSuite {
 public:

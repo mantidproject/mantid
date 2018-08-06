@@ -34,7 +34,7 @@ DECLARE_LISTENER(ISISLiveEventDataListener)
 namespace {
 /// static logger
 Kernel::Logger g_log("ISISLiveEventDataListener");
-}
+} // namespace
 
 /**
  * The constructor
@@ -397,8 +397,8 @@ void ISISLiveEventDataListener::saveEvents(
 }
 
 /**
-  * Set the spectra-detector map to the buffer workspace.
-  */
+ * Set the spectra-detector map to the buffer workspace.
+ */
 void ISISLiveEventDataListener::loadSpectraMap() {
   // Read in the number of detectors
   int ndet = getInt("NDET");
@@ -413,9 +413,9 @@ void ISISLiveEventDataListener::loadSpectraMap() {
 }
 
 /**
-  * Load the instrument
-  * @param instrName :: Instrument name
-  */
+ * Load the instrument
+ * @param instrName :: Instrument name
+ */
 void ISISLiveEventDataListener::loadInstrument(const std::string &instrName) {
   // try to load the instrument. if it doesn't load give a warning and carry on
   if (instrName.empty()) {
@@ -465,16 +465,16 @@ void ISISLiveEventDataListener::getIntArray(const std::string &par,
 }
 
 /** Function called by IDC routines to report an error. Passes the error through
-* to the logger
-* @param status ::  The status code of the error (disregarded)
-* @param code ::    The error code (disregarded)
-* @param message :: The error message - passed to the logger at error level
-*/
+ * to the logger
+ * @param status ::  The status code of the error (disregarded)
+ * @param code ::    The error code (disregarded)
+ * @param message :: The error message - passed to the logger at error level
+ */
 void ISISLiveEventDataListener::IDCReporter(int status, int code,
                                             const char *message) {
   (void)status;
   (void)code; // Avoid compiler warning
   g_log.error(message);
 }
-}
-}
+} // namespace LiveData
+} // namespace Mantid

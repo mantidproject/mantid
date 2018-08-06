@@ -1,17 +1,19 @@
 #include "MantidVatesAPI/vtkDataSetToPeaksFilteredDataSet.h"
-#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidDataObjects/NoShape.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidKernel/ReadLock.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/ReadLock.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidVatesAPI/ProgressAction.h"
 
 #include <vtkExtractSelection.h>
+#include <vtkFieldData.h>
+#include <vtkIdList.h>
 #include <vtkIdTypeArray.h>
 #include <vtkNew.h>
 #include <vtkPoints.h>
@@ -19,9 +21,6 @@
 #include <vtkSelectionNode.h>
 #include <vtkSmartPointer.h>
 #include <vtkUnstructuredGrid.h>
-#include <vtkFieldData.h>
-#include <vtkIdList.h>
-#include <vtkFieldData.h>
 
 #include <boost/shared_ptr.hpp>
 
@@ -35,10 +34,10 @@
 namespace Mantid {
 namespace VATES {
 /**
-  * Standard constructor for object.
-  * @param input : The dataset to peaks filter
-  * @param output : The resulting peaks filtered dataset
-  */
+ * Standard constructor for object.
+ * @param input : The dataset to peaks filter
+ * @param output : The resulting peaks filtered dataset
+ */
 vtkDataSetToPeaksFilteredDataSet::vtkDataSetToPeaksFilteredDataSet(
     vtkSmartPointer<vtkUnstructuredGrid> input,
     vtkSmartPointer<vtkUnstructuredGrid> output)
@@ -62,13 +61,13 @@ vtkDataSetToPeaksFilteredDataSet::vtkDataSetToPeaksFilteredDataSet(
 vtkDataSetToPeaksFilteredDataSet::~vtkDataSetToPeaksFilteredDataSet() {}
 
 /**
-  * Set the value for the underlying peaks workspace
-  * @param peaksWorkspaces : A list of peak workspace names.
-  * @param radiusNoShape : The peak radius for no shape.
-  * @param radiusType : The type of the radius: Radius(0), Outer Radius(10,
+ * Set the value for the underlying peaks workspace
+ * @param peaksWorkspaces : A list of peak workspace names.
+ * @param radiusNoShape : The peak radius for no shape.
+ * @param radiusType : The type of the radius: Radius(0), Outer Radius(10,
  * Inner Radius(1)
-  * @param coordinateSystem: A coordinate system.
-  */
+ * @param coordinateSystem: A coordinate system.
+ */
 void vtkDataSetToPeaksFilteredDataSet::initialize(
     const std::vector<Mantid::API::IPeaksWorkspace_sptr> &peaksWorkspaces,
     double radiusNoShape, Geometry::PeakShape::RadiusType radiusType,
@@ -82,14 +81,14 @@ void vtkDataSetToPeaksFilteredDataSet::initialize(
 }
 
 /**
-  * Process the input data. First, get all the peaks and their associated
-  * geometry. Then filter
-  * through the input to find the peaks which lie within a peak. Then apply then
-  * to the output data.
-  * Then update the metadata. See
-  * http://www.vtk.org/Wiki/VTK/Examples/Cxx/PolyData/ExtractSelection
-  * @param progressUpdating The handle for the progress bar.
-  */
+ * Process the input data. First, get all the peaks and their associated
+ * geometry. Then filter
+ * through the input to find the peaks which lie within a peak. Then apply then
+ * to the output data.
+ * Then update the metadata. See
+ * http://www.vtk.org/Wiki/VTK/Examples/Cxx/PolyData/ExtractSelection
+ * @param progressUpdating The handle for the progress bar.
+ */
 void vtkDataSetToPeaksFilteredDataSet::execute(
     ProgressAction &progressUpdating) {
   if (!m_isInitialised) {
@@ -240,5 +239,5 @@ double vtkDataSetToPeaksFilteredDataSet::getRadiusNoShape() {
 double vtkDataSetToPeaksFilteredDataSet::getRadiusFactor() {
   return m_radiusFactor;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

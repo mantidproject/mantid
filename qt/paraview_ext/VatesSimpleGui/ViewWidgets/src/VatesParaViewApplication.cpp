@@ -2,25 +2,25 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/PluginLibraries.h"
 
-#include "pqPVApplicationCore.h"
+#include "pqAlwaysConnectedBehavior.h"
+#include "pqAutoLoadPluginXMLBehavior.h"
+#include "pqCollaborationBehavior.h"
+#include "pqCommandLineOptionsBehavior.h"
+#include "pqCrashRecoveryBehavior.h"
+#include "pqDataTimeStepBehavior.h"
+#include "pqDefaultViewBehavior.h"
 #include "pqInterfaceTracker.h"
+#include "pqModelTransformSupportBehavior.h"
+#include "pqObjectPickingBehavior.h"
+#include "pqPVApplicationCore.h"
+#include "pqPipelineContextMenuBehavior.h"
+#include "pqPluginSettingsBehavior.h"
+#include "pqSpreadSheetVisibilityBehavior.h"
 #include "pqStandardPropertyWidgetInterface.h"
 #include "pqStandardViewFrameActionsImplementation.h"
-#include "pqDataTimeStepBehavior.h"
-#include "pqSpreadSheetVisibilityBehavior.h"
-#include "pqPipelineContextMenuBehavior.h"
-#include "pqObjectPickingBehavior.h"
-#include "pqDefaultViewBehavior.h"
 #include "pqUndoRedoBehavior.h"
-#include "pqAlwaysConnectedBehavior.h"
-#include "pqCrashRecoveryBehavior.h"
-#include "pqAutoLoadPluginXMLBehavior.h"
 #include "pqVerifyRequiredPluginBehavior.h"
-#include "pqCommandLineOptionsBehavior.h"
-#include "pqCollaborationBehavior.h"
 #include "pqViewStreamingBehavior.h"
-#include "pqPluginSettingsBehavior.h"
-#include "pqModelTransformSupportBehavior.h"
 
 #include <Poco/Path.h>
 
@@ -111,6 +111,6 @@ VatesParaViewApplication *VatesParaViewApplication::instance() {
   return arg;
 }
 
-} // SimpleGui
-} // Vates
-} // Mantid
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

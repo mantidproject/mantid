@@ -1,17 +1,17 @@
 #include <iomanip>
 #include <limits>
 
-#include "MantidTable.h"
 #include "../ApplicationWindow.h"
 #include "../Mantid/MantidUI.h"
-#include "MantidAPI/Column.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Column.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidTable.h"
 
 #include <QApplication>
-#include <QMessageBox>
 #include <QHash>
+#include <QMessageBox>
 #include <limits>
 #include <qfontmetrics.h>
 
@@ -31,8 +31,9 @@ MantidTable::MantidTable(ScriptingEnv *env,
                          Mantid::API::ITableWorkspace_sptr ws,
                          const QString &label, ApplicationWindow *parent,
                          bool transpose)
-    : Table(env, transpose ? static_cast<int>(ws->columnCount())
-                           : static_cast<int>(ws->rowCount()),
+    : Table(env,
+            transpose ? static_cast<int>(ws->columnCount())
+                      : static_cast<int>(ws->rowCount()),
             transpose ? static_cast<int>(ws->rowCount() + 1)
                       : static_cast<int>(ws->columnCount()),
             label, parent, "", nullptr),
@@ -313,7 +314,8 @@ void MantidTable::cellEdited(int row, int col) {
     // type of the number.
     std::stringstream textStream;
     textStream << std::setprecision(std::numeric_limits<long double>::digits10 +
-                                    1) << number;
+                                    1)
+               << number;
     std::istringstream stream(textStream.str());
     c->read(index, stream);
   } else {

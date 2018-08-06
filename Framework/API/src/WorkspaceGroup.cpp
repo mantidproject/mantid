@@ -1,9 +1,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
 namespace Mantid {
@@ -13,7 +13,7 @@ namespace {
 size_t MAXIMUM_DEPTH = 100;
 /// static logger object
 Kernel::Logger g_log("WorkspaceGroup");
-}
+} // namespace
 
 WorkspaceGroup::WorkspaceGroup(const Parallel::StorageMode storageMode)
     : Workspace(storageMode),
@@ -469,9 +469,8 @@ size_t WorkspaceGroup::getMemorySize() const {
   for (auto workspace : m_workspaces) {
     // If the workspace is a group
     if (workspace->getMemorySize() == 0) {
-      total = total +
-              boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)
-                  ->getMemorySize();
+      total = total + boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)
+                          ->getMemorySize();
       continue;
     }
     total = total + workspace->getMemorySize();

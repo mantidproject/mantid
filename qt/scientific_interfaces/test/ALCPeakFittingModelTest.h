@@ -15,9 +15,9 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Points;
 
 class ALCPeakFittingModelTest : public CxxTest::TestSuite {
   ALCPeakFittingModel *m_model;

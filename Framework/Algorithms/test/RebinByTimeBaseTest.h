@@ -113,7 +113,7 @@ private:
         "Cloning of MockIEventWorkspace is not implemented.");
   }
 };
-}
+} // namespace
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 

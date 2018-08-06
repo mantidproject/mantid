@@ -32,7 +32,7 @@ public:
     return boost::make_shared<PeakTransformProduct>();
   }
 };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif

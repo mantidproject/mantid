@@ -1,25 +1,25 @@
 #include "MantidQtWidgets/Common/MWRunFiles.h"
 #include "MantidQtWidgets/Common/DropEventHelper.h"
 
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/MultipleFileProperty.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/VectorHelper.h"
 
-#include <QStringList>
+#include <Poco/File.h>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QHash>
-#include <QDropEvent>
-#include <QDragEnterEvent>
 #include <QMimeData>
+#include <QStringList>
 #include <QUrl>
 #include <QtConcurrentRun>
-#include <Poco/File.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
@@ -87,7 +87,8 @@ MWRunFiles::MWRunFiles(QWidget *parent)
     QStringList dataDirs =
         QString::fromStdString(
             Mantid::Kernel::ConfigService::Instance().getString(
-                "datasearch.directories")).split(";", QString::SkipEmptyParts);
+                "datasearch.directories"))
+            .split(";", QString::SkipEmptyParts);
 
     if (!dataDirs.isEmpty())
       m_lastDir = dataDirs[0];
@@ -99,15 +100,15 @@ MWRunFiles::MWRunFiles(QWidget *parent)
 }
 
 /**
-* Returns if this widget is for run file searching or not
-* @returns True if this widget searches for run files, false otherwise
-*/
+ * Returns if this widget is for run file searching or not
+ * @returns True if this widget searches for run files, false otherwise
+ */
 bool MWRunFiles::isForRunFiles() const { return m_findRunFiles; }
 
 /**
-* Sets whether this widget is for run file searching or not
-* @param mode :: True if this widget searches for run files, false otherwise
-*/
+ * Sets whether this widget is for run file searching or not
+ * @param mode :: True if this widget searches for run files, false otherwise
+ */
 void MWRunFiles::isForRunFiles(const bool mode) { m_findRunFiles = mode; }
 
 /**
@@ -126,15 +127,15 @@ void MWRunFiles::isForDirectory(const bool mode) {
 }
 
 /**
-* Return the label text on the widget
-* @returns The current value of the text on the label
-*/
+ * Return the label text on the widget
+ * @returns The current value of the text on the label
+ */
 QString MWRunFiles::getLabelText() const { return m_uiForm.textLabel->text(); }
 
 /**
-* Set the text on the label
-* @param text :: A string giving the label to use for the text
-*/
+ * Set the text on the label
+ * @param text :: A string giving the label to use for the text
+ */
 void MWRunFiles::setLabelText(const QString &text) {
   m_uiForm.textLabel->setText(text);
   m_uiForm.textLabel->setVisible(!text.isEmpty());
@@ -148,47 +149,47 @@ void MWRunFiles::setLabelMinWidth(const int width) {
 }
 
 /**
-* Return whether this widget allows multiple files to be specified within the
-* edit box
-* @returns True if multiple files can be specified, false otherwise
-*/
+ * Return whether this widget allows multiple files to be specified within the
+ * edit box
+ * @returns True if multiple files can be specified, false otherwise
+ */
 bool MWRunFiles::allowMultipleFiles() const { return m_allowMultipleFiles; }
 
 /**
-* Set whether this widget allows multiple files to be specifed or not
-* @param allow :: If true then the widget will accept multiple files else only a
-* single file may be specified
-*/
+ * Set whether this widget allows multiple files to be specifed or not
+ * @param allow :: If true then the widget will accept multiple files else only
+ * a single file may be specified
+ */
 void MWRunFiles::allowMultipleFiles(const bool allow) {
   m_allowMultipleFiles = allow;
   findFiles();
 }
 
 /**
-* Return whether empty input is allowed
-*/
+ * Return whether empty input is allowed
+ */
 bool MWRunFiles::isOptional() const { return m_isOptional; }
 
 /**
-* Sets if the text field is optional
-* @param optional :: Set the optional status of the text field
-*/
+ * Sets if the text field is optional
+ * @param optional :: Set the optional status of the text field
+ */
 void MWRunFiles::isOptional(const bool optional) {
   m_isOptional = optional;
   findFiles();
 }
 
 /**
-* Returns the preference for how the dialog control should be
-* @return the setting
-*/
+ * Returns the preference for how the dialog control should be
+ * @return the setting
+ */
 MWRunFiles::ButtonOpts MWRunFiles::doButtonOpt() const { return m_buttonOpt; }
 
 /**
-* Set how the browse should appear
-* @param buttonOpt the preference for the control, if there will be one, to
-* activate the dialog box
-*/
+ * Set how the browse should appear
+ * @param buttonOpt the preference for the control, if there will be one, to
+ * activate the dialog box
+ */
 void MWRunFiles::doButtonOpt(const MWRunFiles::ButtonOpts buttonOpt) {
   m_buttonOpt = buttonOpt;
   if (buttonOpt == None) {
@@ -204,16 +205,16 @@ void MWRunFiles::doButtonOpt(const MWRunFiles::ButtonOpts buttonOpt) {
 }
 
 /**
-* Whether to find the number of entries in the file or assume (the
-* normal situation) of one entry
-* @return true if the widget is to look for multiple entries
-*/
+ * Whether to find the number of entries in the file or assume (the
+ * normal situation) of one entry
+ * @return true if the widget is to look for multiple entries
+ */
 bool MWRunFiles::doMultiEntry() const { return m_multiEntry; }
 
 /**
-* Set to true to enable the period number box
-* @param multiEntry whether to show the multiperiod box
-*/
+ * Set to true to enable the period number box
+ * @param multiEntry whether to show the multiperiod box
+ */
 void MWRunFiles::doMultiEntry(const bool multiEntry) {
   m_multiEntry = multiEntry;
   if (m_multiEntry) {
@@ -227,29 +228,29 @@ void MWRunFiles::doMultiEntry(const bool multiEntry) {
 }
 
 /**
-* Returns the algorithm name
-* @returns The algorithm name
-*/
+ * Returns the algorithm name
+ * @returns The algorithm name
+ */
 QString MWRunFiles::getAlgorithmProperty() const { return m_algorithmProperty; }
 
 /**
-* Sets an algorithm name that can be tied to this widget
-* @param text :: The name of the algorithm and property in the form
-* [AlgorithmName|PropertyName]
-*/
+ * Sets an algorithm name that can be tied to this widget
+ * @param text :: The name of the algorithm and property in the form
+ * [AlgorithmName|PropertyName]
+ */
 void MWRunFiles::setAlgorithmProperty(const QString &text) {
   m_algorithmProperty = text;
 }
 /**
-* Returns the list of file extensions the widget will search for.
-* @return list of file extensions
-*/
+ * Returns the list of file extensions the widget will search for.
+ * @return list of file extensions
+ */
 QStringList MWRunFiles::getFileExtensions() const { return m_fileExtensions; }
 /**
-* Sets the list of file extensions the dialog will search for. Only taken notice
-* of if AlgorithmProperty not set.
-* @param extensions :: list of file extensions
-*/
+ * Sets the list of file extensions the dialog will search for. Only taken
+ * notice of if AlgorithmProperty not set.
+ * @param extensions :: list of file extensions
+ */
 void MWRunFiles::setFileExtensions(const QStringList &extensions) {
   m_fileExtensions = extensions;
   m_fileFilter.clear();
@@ -295,9 +296,9 @@ bool MWRunFiles::liveButtonIsChecked() const {
 }
 
 /**
-* Is the input within the widget valid?
-* @returns True of the file names within the widget are valid, false otherwise
-*/
+ * Is the input within the widget valid?
+ * @returns True of the file names within the widget are valid, false otherwise
+ */
 bool MWRunFiles::isValid() const { return m_uiForm.valid->isHidden(); }
 
 /**
@@ -307,18 +308,18 @@ bool MWRunFiles::isValid() const { return m_uiForm.valid->isHidden(); }
 bool MWRunFiles::isSearching() const { return m_pool.isSearchRunning(); }
 
 /**
-* Returns the names of the files found
-* @return an array of filenames entered in the box
-*/
+ * Returns the names of the files found
+ * @return an array of filenames entered in the box
+ */
 QStringList MWRunFiles::getFilenames() const { return m_foundFiles; }
 
 /** Safer than using getRunFiles()[0] in the situation were there are no files
-*  @return an empty string is returned if no input files have been defined or
-* one of the files can't be found, otherwise it's the name of the first input
-* file
-*  @throw invalid_argument if one of the files couldn't be found it then no
-* filenames are returned
-*/
+ *  @return an empty string is returned if no input files have been defined or
+ * one of the files can't be found, otherwise it's the name of the first input
+ * file
+ *  @throw invalid_argument if one of the files couldn't be found it then no
+ * filenames are returned
+ */
 QString MWRunFiles::getFirstFilename() const {
   if (m_foundFiles.isEmpty())
     return "";
@@ -327,21 +328,21 @@ QString MWRunFiles::getFirstFilename() const {
 }
 
 /** Check if any text, valid or not, has been entered into the line edit
-*  @return true if no text has been entered
-*/
+ *  @return true if no text has been entered
+ */
 bool MWRunFiles::isEmpty() const {
   return m_uiForm.fileEditor->text().isEmpty();
 }
 
 /** The verbatum, unexpanded text, that was entered into the box
-*  @return the contents shown in the Line Edit
-*/
+ *  @return the contents shown in the Line Edit
+ */
 QString MWRunFiles::getText() const { return m_uiForm.fileEditor->text(); }
 
 /** The number the user entered into the entryNum lineEdit
-* or NO_ENTRY_NUM on error. Checking if isValid is true should
-* eliminate the possiblity of getting NO_ENTRY_NUM
-*/
+ * or NO_ENTRY_NUM on error. Checking if isValid is true should
+ * eliminate the possiblity of getting NO_ENTRY_NUM
+ */
 int MWRunFiles::getEntryNum() const {
   if (m_uiForm.entryNum->text().isEmpty() || (!m_multiEntry)) {
     return ALL_ENTRIES;
@@ -357,8 +358,8 @@ int MWRunFiles::getEntryNum() const {
 }
 
 /** Set the entry displayed in the box to this value
-* @param num the period number to use
-*/
+ * @param num the period number to use
+ */
 void MWRunFiles::setEntryNum(const int num) {
   m_uiForm.entryNum->setText(QString::number(num));
 }
@@ -415,15 +416,15 @@ void MWRunFiles::setFileProblem(const QString &message) {
 }
 
 /**
-* Return the error.
-* @returns A string explaining the error.
-*/
+ * Return the error.
+ * @returns A string explaining the error.
+ */
 QString MWRunFiles::getFileProblem() { return m_fileProblem; }
 
 /**
-* Save settings to the given group
-* @param group :: The name of the group key to save to
-*/
+ * Save settings to the given group
+ * @param group :: The name of the group key to save to
+ */
 void MWRunFiles::saveSettings(const QString &group) {
   QSettings settings;
   settings.beginGroup(group);
@@ -434,10 +435,10 @@ void MWRunFiles::saveSettings(const QString &group) {
 }
 
 /** Writes the total number of periods in a file to the NumEntries
-*  Qlabel
-*  @param number the number to write, if this is < 1 a ? will be displayed in
-* it's place
-*/
+ *  Qlabel
+ *  @param number the number to write, if this is < 1 a ? will be displayed in
+ * it's place
+ */
 void MWRunFiles::setNumberOfEntries(const int number) {
   const QString total = number > 0 ? QString::number(number) : "?";
   { m_uiForm.numEntries->setText("/" + total); }
@@ -482,22 +483,22 @@ void MWRunFiles::setInstrumentOverride(const QString &instName) {
 }
 
 /**
-* Set the file text.  This is different to setText in that it emits findFiles,
-*as well
-* changing the state of the text box widget to "modified = true" which is a
-*prerequisite
-* of findFiles.
-*
-* @param text :: The text string to set
-*/
+ * Set the file text.  This is different to setText in that it emits findFiles,
+ *as well
+ * changing the state of the text box widget to "modified = true" which is a
+ *prerequisite
+ * of findFiles.
+ *
+ * @param text :: The text string to set
+ */
 void MWRunFiles::setFileTextWithSearch(const QString &text) {
   setFileTextWithoutSearch(text);
   findFiles();
 }
 /**
-* Set the file text but do not search
-* @param text :: The text string to set
-*/
+ * Set the file text but do not search
+ * @param text :: The text string to set
+ */
 void MWRunFiles::setFileTextWithoutSearch(const QString &text) {
   m_uiForm.fileEditor->setText(text);
   m_uiForm.fileEditor->setModified(true);
@@ -512,13 +513,13 @@ void MWRunFiles::clear() {
 }
 
 /**
-* Finds the files if the user has changed the parameter text.
-*/
+ * Finds the files if the user has changed the parameter text.
+ */
 void MWRunFiles::findFiles() { findFiles(m_uiForm.fileEditor->isModified()); }
 
 /**
-* Finds the files specified by the user in a background thread.
-*/
+ * Finds the files specified by the user in a background thread.
+ */
 void MWRunFiles::findFiles(bool isModified) {
   auto searchText = m_uiForm.fileEditor->text();
 
@@ -545,10 +546,10 @@ void MWRunFiles::findFiles(bool isModified) {
 }
 
 /**
-* Gets the search text to find files with.
-* @param searchText :: text entered by user
-* @return search text to create search params with
-*/
+ * Gets the search text to find files with.
+ * @param searchText :: text entered by user
+ * @return search text to create search params with
+ */
 const QString MWRunFiles::findFilesGetSearchText(QString &searchText) {
   // If we have an override instrument then add it in appropriate places to
   // the search text
@@ -582,9 +583,9 @@ const QString MWRunFiles::findFilesGetSearchText(QString &searchText) {
 }
 
 /**
-* creates background thread for find files
-* @param searchText :: text to create search parameters from
-*/
+ * creates background thread for find files
+ * @param searchText :: text to create search parameters from
+ */
 void MWRunFiles::runFindFiles(const QString &searchText) {
   emit findingFiles();
 
@@ -648,9 +649,9 @@ void MWRunFiles::inspectThreadResult(const FindFilesSearchResults &results) {
 }
 
 /**
-* Read settings from the given group
-* @param group :: The name of the group key to retrieve data from
-*/
+ * Read settings from the given group
+ * @param group :: The name of the group key to retrieve data from
+ */
 void MWRunFiles::readSettings(const QString &group) {
   QSettings settings;
   settings.beginGroup(group);
@@ -660,7 +661,8 @@ void MWRunFiles::readSettings(const QString &group) {
     QStringList datadirs =
         QString::fromStdString(
             Mantid::Kernel::ConfigService::Instance().getString(
-                "datasearch.directories")).split(";", QString::SkipEmptyParts);
+                "datasearch.directories"))
+            .split(";", QString::SkipEmptyParts);
     if (!datadirs.isEmpty())
       m_lastDir = datadirs[0];
   }
@@ -669,9 +671,9 @@ void MWRunFiles::readSettings(const QString &group) {
 }
 
 /**
-* Set a new file filter for the file dialog based on the given extensions
-* @returns A string containing the file filter
-*/
+ * Set a new file filter for the file dialog based on the given extensions
+ * @returns A string containing the file filter
+ */
 QString MWRunFiles::createFileFilter() {
   QStringList fileExts;
   if (m_algorithmProperty.isEmpty()) {
@@ -752,11 +754,11 @@ QString MWRunFiles::createFileFilter() {
 }
 
 /**
-* Create a list of file extensions from the given algorithm
-* @param algName :: The name of the algorithm
-* @param propName :: The name of the property
-* @returns A list of file extensions
-*/
+ * Create a list of file extensions from the given algorithm
+ * @param algName :: The name of the algorithm
+ * @param propName :: The name of the property
+ * @returns A list of file extensions
+ */
 QStringList
 MWRunFiles::getFileExtensionsFromAlgorithm(const QString &algName,
                                            const QString &propName) {
@@ -803,9 +805,9 @@ MWRunFiles::getFileExtensionsFromAlgorithm(const QString &algName,
 }
 
 /** Lauches a load file browser allowing a user to select multiple
-*  files
-*  @return the names of the selected files as a comma separated list
-*/
+ *  files
+ *  @return the names of the selected files as a comma separated list
+ */
 QString MWRunFiles::openFileDialog() {
   QStringList filenames;
   QString dir = m_lastDir;
@@ -839,19 +841,19 @@ QString MWRunFiles::openFileDialog() {
 }
 
 /** flag a problem with the supplied entry number, an empty string means no
-* error.
-*  file errors take precedence of these errors
-*  @param message the message to display
-*/
+ * error.
+ *  file errors take precedence of these errors
+ *  @param message the message to display
+ */
 void MWRunFiles::setEntryNumProblem(const QString &message) {
   m_entryNumProblem = message;
   refreshValidator();
 }
 
 /** Checks the data m_fileProblem and m_entryNumProblem to see if the validator
-* label needs to be displayed. Validator always hidden if m_showValidator set
-* false.
-*/
+ * label needs to be displayed. Validator always hidden if m_showValidator set
+ * false.
+ */
 void MWRunFiles::refreshValidator() {
   if (m_showValidator) {
     if (!m_fileProblem.isEmpty()) {
@@ -869,7 +871,7 @@ void MWRunFiles::refreshValidator() {
 }
 
 /** This slot opens a file browser
-*/
+ */
 void MWRunFiles::browseClicked() {
   QString uFile = openFileDialog();
   if (uFile.trimmed().isEmpty())
@@ -882,8 +884,8 @@ void MWRunFiles::browseClicked() {
 }
 
 /** Currently just checks that entryNum contains an int > 0 and hence might be a
-*  valid entry number
-*/
+ *  valid entry number
+ */
 void MWRunFiles::checkEntry() {
   if (m_uiForm.entryNum->text().isEmpty()) {
     setEntryNumProblem("");
@@ -905,9 +907,9 @@ void MWRunFiles::checkEntry() {
 }
 
 /**
-  * Called when an item is dropped
-  * @param de :: the drop event data package
-  */
+ * Called when an item is dropped
+ * @param de :: the drop event data package
+ */
 void MWRunFiles::dropEvent(QDropEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   const auto filenames = DropEventHelper::getFileNames(de);
@@ -922,9 +924,9 @@ void MWRunFiles::dropEvent(QDropEvent *de) {
 }
 
 /**
-  * Called when an item is dragged onto a control
-  * @param de :: the drag event data package
-  */
+ * Called when an item is dragged onto a control
+ * @param de :: the drag event data package
+ */
 void MWRunFiles::dragEnterEvent(QDragEnterEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   if (mimeData->hasUrls()) {

@@ -40,9 +40,9 @@ DECLARE_ALGORITHM(SaveCSV)
 
 using namespace Kernel;
 using namespace API;
-using API::WorkspaceProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
+using API::WorkspaceProperty;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 

@@ -158,8 +158,9 @@ public:
 
     const std::string l2JsonStr = R"({"v1": "[1, a, 3]",")" + errName +
                                   "\":\"" + errVal + "\", \"" + versName +
-                                  "\": \"" + versVal + "\" }"
-                                                       "\"}";
+                                  "\": \"" + versVal +
+                                  "\" }"
+                                  "\"}";
     std::istringstream inputL2(l2JsonStr);
 
     TS_ASSERT_THROWS_NOTHING(initFromStream(ol, inputL2));
@@ -175,8 +176,9 @@ public:
     const std::string l3JsonStr = "{ \"" + impName + "\": \"" + impVal +
                                   R"(", "v1": "[1, a, longer str, a4]",")" +
                                   errName + "\":\"" + errVal + "\", \"" +
-                                  versName + "\": \"" + versVal + "\" }"
-                                                                  "\"}";
+                                  versName + "\": \"" + versVal +
+                                  "\" }"
+                                  "\"}";
     std::istringstream inputL3(l3JsonStr);
 
     TS_ASSERT_THROWS_NOTHING(initFromStream(ol, inputL3));

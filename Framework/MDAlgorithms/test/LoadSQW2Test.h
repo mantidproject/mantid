@@ -24,8 +24,8 @@ using Mantid::API::IMDEventWorkspace_sptr;
 using Mantid::API::IMDIterator;
 using Mantid::API::Run;
 using Mantid::API::Sample;
-using Mantid::MDAlgorithms::LoadSQW2;
 using Mantid::Kernel::V3D;
+using Mantid::MDAlgorithms::LoadSQW2;
 
 class LoadSQW2Test : public CxxTest::TestSuite {
 public:

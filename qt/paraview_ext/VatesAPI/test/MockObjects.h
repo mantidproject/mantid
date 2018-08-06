@@ -17,7 +17,6 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/MDLoadingView.h"
-#include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"

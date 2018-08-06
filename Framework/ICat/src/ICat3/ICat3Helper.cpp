@@ -4,13 +4,13 @@
 #if GCC_VERSION >= 40800 // 4.8.0
 GNU_DIAG_OFF("literal-suffix")
 #endif
-#include "MantidICat/ICat3/ICat3Helper.h"
-#include "MantidICat/ICat3/ICat3ErrorHandling.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidICat/ICat3/ICat3ErrorHandling.h"
+#include "MantidICat/ICat3/ICat3Helper.h"
 #include "MantidKernel/Logger.h"
-#include <iomanip>
-#include <ctime>
 #include <boost/lexical_cast.hpp>
+#include <ctime>
+#include <iomanip>
 
 namespace Mantid {
 namespace ICat {
@@ -21,7 +21,7 @@ using namespace ICat3;
 namespace {
 /// static logger
 Kernel::Logger g_log("CICatHelper");
-}
+} // namespace
 
 CICatHelper::CICatHelper() : m_session() {}
 
@@ -584,7 +584,8 @@ CICatHelper::getNumberOfSearchResults(const CatalogSearchParam &inputs) {
   }
 
   g_log.debug() << "CICatHelper::getNumberOfSearchResults -> Number of results "
-                   "returned is: { " << numOfResults << " }\n";
+                   "returned is: { "
+                << numOfResults << " }\n";
 
   return numOfResults;
 }
@@ -704,5 +705,5 @@ void CICatHelper::setSSLContext(ICat3::ICATPortBindingProxy &icat) {
     CErrorHandling::throwErrorMessages(icat);
   }
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

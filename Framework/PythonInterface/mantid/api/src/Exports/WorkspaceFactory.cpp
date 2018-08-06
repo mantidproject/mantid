@@ -58,7 +58,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createPeaks_Overload, createPeaks, 0, 1)
 
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
-}
+} // namespace
 
 void export_WorkspaceFactory() {
   const char *createFromParentDoc = "Create a workspace based on the given "
@@ -69,9 +69,9 @@ void export_WorkspaceFactory() {
 
   const char *createFromScratchDoc =
       "Create a clean new worksapce of the given size.";
-  using createFromScratchPtr = MatrixWorkspace_sptr (
-      WorkspaceFactoryImpl::*)(const std::string &, const size_t &,
-                               const size_t &, const size_t &) const;
+  using createFromScratchPtr = MatrixWorkspace_sptr (WorkspaceFactoryImpl::*)(
+      const std::string &, const size_t &, const size_t &, const size_t &)
+      const;
 
   class_<WorkspaceFactoryImpl, boost::noncopyable>("WorkspaceFactoryImpl",
                                                    no_init)

@@ -1,17 +1,17 @@
 #ifndef WORKSPACE2DTEST_H_
 #define WORKSPACE2DTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "PropertyManagerHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace std;
 using namespace Mantid;
@@ -20,8 +20,8 @@ using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using HistogramData::Counts;
 using HistogramData::CountStandardDeviations;
+using HistogramData::Counts;
 using HistogramData::LinearGenerator;
 using WorkspaceCreationHelper::create2DWorkspaceBinned;
 

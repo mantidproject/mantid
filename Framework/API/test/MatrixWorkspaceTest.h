@@ -12,21 +12,21 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/make_cow.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
-#include "MantidTypes/SpectrumDefinition.h"
-#include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/make_cow.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "MantidTestHelpers/ParallelRunner.h"
+#include "MantidTypes/SpectrumDefinition.h"
 #include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -103,7 +103,7 @@ void run_legacy_setting_spectrum_numbers_with_MPI(
     }
   }
 }
-}
+} // namespace
 
 class MatrixWorkspaceTest : public CxxTest::TestSuite {
 public:
@@ -1557,8 +1557,8 @@ public:
   }
 
   /**
-  * Test declaring an input workspace and retrieving as const_sptr or sptr
-  */
+   * Test declaring an input workspace and retrieving as const_sptr or sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     MatrixWorkspace_sptr wsInput = boost::make_shared<WorkspaceTester>();
@@ -1613,8 +1613,9 @@ public:
     ws.setSharedDx(workspaceIndexWithDx[2], dxSpec2);
 
     // Assert
-    auto compareValue =
-        [&values](double data, size_t index) { return data == values[index]; };
+    auto compareValue = [&values](double data, size_t index) {
+      return data == values[index];
+    };
     for (auto &index : workspaceIndexWithDx) {
       TSM_ASSERT("Should have x resolution values", ws.hasDx(index));
       TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(index).size(),

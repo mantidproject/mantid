@@ -5,9 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 
-#include <unordered_map>
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include <unordered_map>
 
 namespace Mantid {
 namespace Algorithms {

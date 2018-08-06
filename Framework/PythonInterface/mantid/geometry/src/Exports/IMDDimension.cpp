@@ -1,14 +1,14 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include <boost/shared_ptr.hpp>
 
 #include <boost/python/class.hpp>
+#include <boost/python/copy_const_reference.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_internal_reference.hpp>
-#include <boost/python/copy_const_reference.hpp>
 
 using namespace Mantid::Geometry;
 using namespace boost::python;
@@ -34,7 +34,7 @@ std::string getUnitsAsStr(IMDDimension &self) {
 boost::shared_ptr<MDFrame> getMDFrame(const IMDDimension &self) {
   return boost::shared_ptr<MDFrame>(self.getMDFrame().clone());
 }
-}
+} // namespace
 
 //--------------------------------------------------------------------------------------
 // Deprecated function
@@ -53,9 +53,10 @@ void export_IMDDimension() {
   register_ptr_to_python<boost::shared_ptr<IMDDimension>>();
 
   class_<IMDDimension, boost::noncopyable>("IMDDimension", no_init)
-      .def("getName", &getName, arg("self"), "Return the name of the dimension "
-                                             "as can be displayed along the "
-                                             "axis")
+      .def("getName", &getName, arg("self"),
+           "Return the name of the dimension "
+           "as can be displayed along the "
+           "axis")
       .add_property("name", &IMDDimension::getName,
                     "Return the name of the dimension as can be displayed "
                     "along the axis")

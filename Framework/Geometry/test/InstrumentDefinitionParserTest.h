@@ -12,8 +12,8 @@
 #include "MantidTestHelpers/ScopedFileHelper.h"
 #include <cxxtest/TestSuite.h>
 
-#include <gmock/gmock.h>
 #include <boost/algorithm/string/replace.hpp>
+#include <gmock/gmock.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

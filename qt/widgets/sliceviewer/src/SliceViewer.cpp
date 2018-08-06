@@ -1,50 +1,56 @@
-#include <iosfwd>
-#include <limits>
-#include <sstream>
-#include <vector>
-#include <boost/make_shared.hpp>
-#include "MantidKernel/Strings.h"
-#include <boost/math/special_functions/fpclassify.hpp>
-#include "MantidKernel/UsageService.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewer.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CoordTransform.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Crystal/PeakTransformHKL.h"
-#include "MantidGeometry/Crystal/PeakTransformQSample.h"
 #include "MantidGeometry/Crystal/PeakTransformQLab.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidGeometry/Crystal/PeakTransformQSample.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/ReadLock.h"
-#include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/UsageService.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
+#include "MantidQtWidgets/Common/NonOrthogonal.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidQtWidgets/Common/SelectWorkspacesDialog.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
-#include "MantidQtWidgets/Common/NonOrthogonal.h"
-#include "MantidQtWidgets/LegacyQwt/SignalRange.h"
 #include "MantidQtWidgets/LegacyQwt/QwtRasterDataMDNonOrthogonal.h"
-#include "MantidQtWidgets/SliceViewer/SliceViewer.h"
+#include "MantidQtWidgets/LegacyQwt/SignalRange.h"
+#include "MantidQtWidgets/SliceViewer/CompositePeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtWidgets/SliceViewer/CustomTools.h"
 #include "MantidQtWidgets/SliceViewer/DimensionSliceWidget.h"
 #include "MantidQtWidgets/SliceViewer/LineOverlay.h"
+#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
+#include "MantidQtWidgets/SliceViewer/PeakViewFactory.h"
+#include "MantidQtWidgets/SliceViewer/PeaksViewerOverlayDialog.h"
+#include "MantidQtWidgets/SliceViewer/ProxyCompositePeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewerFunctions.h"
 #include "MantidQtWidgets/SliceViewer/SnapToGridDialog.h"
 #include "MantidQtWidgets/SliceViewer/XYLimitsDialog.h"
-#include "MantidQtWidgets/SliceViewer/ConcretePeaksPresenter.h"
-#include "MantidQtWidgets/SliceViewer/CompositePeaksPresenter.h"
-#include "MantidQtWidgets/SliceViewer/ProxyCompositePeaksPresenter.h"
-#include "MantidQtWidgets/SliceViewer/PeakViewFactory.h"
-#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
-#include "MantidQtWidgets/SliceViewer/PeaksViewerOverlayDialog.h"
-#include "MantidQtWidgets/SliceViewer/SliceViewerFunctions.h"
-#include "MantidQtWidgets/Common/SelectWorkspacesDialog.h"
+#include <boost/make_shared.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <iosfwd>
+#include <limits>
+#include <sstream>
+#include <vector>
 
+#include <Poco/AutoPtr.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/Exception.h>
 #include <QClipboard>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -56,26 +62,20 @@
 #include <QUrl>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_rescaler.h>
-#include <Poco/AutoPtr.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/Exception.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+using MantidQt::API::AlgorithmRunner;
 using MantidQt::API::MantidDesktopServices;
-using MantidQt::API::SyncedCheckboxes;
 using MantidQt::API::SignalBlocker;
+using MantidQt::API::SyncedCheckboxes;
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;
-using MantidQt::API::AlgorithmRunner;
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -215,10 +215,10 @@ void SliceViewer::updateAspectRatios() {
 
   if (m_aspectRatioType == Guess) {
     /* Lock aspect ratios, if that feature has been enabled, and if the plot x
-    * and
-    * y units
-    * are suitable.
-    */
+     * and
+     * y units
+     * are suitable.
+     */
     lockAspectRatios =
         m_X->getMDUnits().isQUnit() && m_Y->getMDUnits().isQUnit();
 
@@ -301,11 +301,11 @@ void SliceViewer::saveSettings() {
 }
 //------------------------------------------------------------------------------
 /** set an icon given the control and a string.
-* @param btn the widget to give the new icon
-* @param iconName the path of the new icon
-* @param mode the mode of the icon
-* @param state on or off state of the icon
-*/
+ * @param btn the widget to give the new icon
+ * @param iconName the path of the new icon
+ * @param mode the mode of the icon
+ * @param state on or off state of the icon
+ */
 void SliceViewer::setIconFromString(QAbstractButton *btn,
                                     const std::string &iconName,
                                     QIcon::Mode mode = QIcon::Mode::Normal,
@@ -315,11 +315,11 @@ void SliceViewer::setIconFromString(QAbstractButton *btn,
   btn->setIcon(icon);
 }
 /** set an icon given the control and a string.
-* @param action the menu action to give the new icon
-* @param iconName the path of the new icon
-* @param mode the mode of the icon
-* @param state on or off state of the icon
-*/
+ * @param action the menu action to give the new icon
+ * @param iconName the path of the new icon
+ * @param mode the mode of the icon
+ * @param state on or off state of the icon
+ */
 void SliceViewer::setIconFromString(QAction *action,
                                     const std::string &iconName,
                                     QIcon::Mode mode = QIcon::Mode::Normal,
@@ -611,9 +611,9 @@ void SliceViewer::initZoomer() {
 
 //------------------------------------------------------------------------------
 /** Programmatically show/hide the controls (sliders etc)
-*
-* @param visible :: true if you want to show the controls.
-*/
+ *
+ * @param visible :: true if you want to show the controls.
+ */
 void SliceViewer::showControls(bool visible) {
   ui.frmControls->setVisible(visible);
 }
@@ -743,9 +743,9 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
 
 //------------------------------------------------------------------------------
 /** Set the displayed workspace. Updates UI.
-*
-* @param ws :: IMDWorkspace to show.
-*/
+ *
+ * @param ws :: IMDWorkspace to show.
+ */
 void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   struct ScopedFlag {
     explicit ScopedFlag(bool &b) : m_flag(b) { m_flag = true; }
@@ -881,13 +881,13 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
 
 //------------------------------------------------------------------------------
 /** Set the workspace to view using its name.
-* The workspace should be a MDHistoWorkspace or a MDEventWorkspace,
-* with at least 2 dimensions.
-*
-* @param wsName :: name of the MDWorkspace to look for
-* @throw std::runtime_error if the workspace is not found or is a
-*MatrixWorkspace
-*/
+ * The workspace should be a MDHistoWorkspace or a MDEventWorkspace,
+ * with at least 2 dimensions.
+ *
+ * @param wsName :: name of the MDWorkspace to look for
+ * @throw std::runtime_error if the workspace is not found or is a
+ *MatrixWorkspace
+ */
 void SliceViewer::setWorkspace(const QString &wsName) {
   IMDWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDWorkspace>(
       AnalysisDataService::Instance().retrieve(wsName.toStdString()));
@@ -906,9 +906,9 @@ Mantid::API::IMDWorkspace_sptr SliceViewer::getWorkspace() { return m_ws; }
 
 //------------------------------------------------------------------------------
 /** Load a color map from a file
-*
-* @param filename :: file to open; empty to ask via a dialog box.
-*/
+ *
+ * @param filename :: file to open; empty to ask via a dialog box.
+ */
 void SliceViewer::loadColorMap(QString filename) {
   QString fileselection;
   if (filename.isEmpty()) {
@@ -933,9 +933,9 @@ void SliceViewer::loadColorMap(QString filename) {
 
 //------------------------------------------------------------------------------
 /** Automatically sets the min/max of the color scale,
-* using the limits in the entire data set of the workspace
-* (every bin, even those not currently visible).
-*/
+ * using the limits in the entire data set of the workspace
+ * (every bin, even those not currently visible).
+ */
 void SliceViewer::setColorScaleAutoFull() {
   this->findRangeFull();
   m_colorBar->setViewRange(m_colorRangeFull);
@@ -944,10 +944,10 @@ void SliceViewer::setColorScaleAutoFull() {
 
 //------------------------------------------------------------------------------
 /** Automatically sets the min/max of the color scale,
-* using the limits in the data that is currently visible
-* in the plot (only the bins in this slice and within the
-* view limits)
-*/
+ * using the limits in the data that is currently visible
+ * in the plot (only the bins in this slice and within the
+ * view limits)
+ */
 void SliceViewer::setColorScaleAutoSlice() {
   this->findRangeSlice();
   m_colorBar->setViewRange(m_colorRangeSlice);
@@ -984,9 +984,9 @@ void SliceViewer::colorRangeChanged() {
 
 //------------------------------------------------------------------------------
 /** Set whether to display 0 signal as "transparent" color.
-*
-* @param transparent :: true if you want zeros to be transparent.
-*/
+ *
+ * @param transparent :: true if you want zeros to be transparent.
+ */
 void SliceViewer::setTransparentZeros(bool transparent) {
   SignalBlocker<QAction> transparentZeros(m_actionTransparentZeros);
   transparentZeros->setChecked(transparent);
@@ -1010,9 +1010,9 @@ void SliceViewer::changeNormalizationNumEvents() {
 }
 
 /**
-* @brief Slot to handle change in normalization kicked-off from the combo box.
-* @param normalizationKey : Text key for type of normalization switched to.
-*/
+ * @brief Slot to handle change in normalization kicked-off from the combo box.
+ * @param normalizationKey : Text key for type of normalization switched to.
+ */
 void SliceViewer::onNormalizationChanged(const QString &normalizationKey) {
   if (normalizationKey == SliceViewer::NoNormalizationKey) {
     changeNormalizationNone();
@@ -1025,11 +1025,11 @@ void SliceViewer::onNormalizationChanged(const QString &normalizationKey) {
 
 //------------------------------------------------------------------------------
 /** Set the normalization mode for viewing the data
-*
-* @param norm :: MDNormalization enum. 0=none; 1=volume; 2=# of events
-* @param update :: update the displayed image. If false, just sets it and shows
-*the checkboxes.
-*/
+ *
+ * @param norm :: MDNormalization enum. 0=none; 1=volume; 2=# of events
+ * @param update :: update the displayed image. If false, just sets it and shows
+ *the checkboxes.
+ */
 void SliceViewer::setNormalization(Mantid::API::MDNormalization norm,
                                    bool update) {
 
@@ -1068,12 +1068,12 @@ Mantid::API::MDNormalization SliceViewer::getNormalization() const {
 
 //------------------------------------------------------------------------------
 /** Set the thickness (above and below the plane) for dynamic rebinning.
-*
-* @param dim :: index of the dimension to adjust
-* @param thickness :: thickness to set, in units of the dimension.
-* @throw runtime_error if the dimension index is invalid or the thickness is <=
-*0.0.
-*/
+ *
+ * @param dim :: index of the dimension to adjust
+ * @param thickness :: thickness to set, in units of the dimension.
+ * @throw runtime_error if the dimension index is invalid or the thickness is <=
+ *0.0.
+ */
 void SliceViewer::setRebinThickness(int dim, double thickness) {
   if (dim < 0 || dim >= static_cast<int>(m_dimWidgets.size()))
     throw std::runtime_error(
@@ -1086,11 +1086,11 @@ void SliceViewer::setRebinThickness(int dim, double thickness) {
 
 //------------------------------------------------------------------------------
 /** Set the number of bins for dynamic rebinning.
-*
-* @param xBins :: number of bins in the viewed X direction
-* @param yBins :: number of bins in the viewed Y direction
-* @throw runtime_error if the number of bins is < 1
-*/
+ *
+ * @param xBins :: number of bins in the viewed X direction
+ * @param yBins :: number of bins in the viewed Y direction
+ * @throw runtime_error if the number of bins is < 1
+ */
 void SliceViewer::setRebinNumBins(int xBins, int yBins) {
   if (xBins < 1 || yBins < 1)
     throw std::runtime_error(
@@ -1101,13 +1101,13 @@ void SliceViewer::setRebinNumBins(int xBins, int yBins) {
 
 //------------------------------------------------------------------------------
 /** Sets the SliceViewer in dynamic rebin mode.
-* In this mode, the current view area (see setXYLimits()) is used as the
-* limits to rebin.
-* See setRebinNumBins() to adjust the number of bins in the X/Y dimensions.
-* See setRebinThickness() to adjust the thickness in other dimensions.
-*
-* @param mode :: true for rebinning mode
-*/
+ * In this mode, the current view area (see setXYLimits()) is used as the
+ * limits to rebin.
+ * See setRebinNumBins() to adjust the number of bins in the X/Y dimensions.
+ * See setRebinThickness() to adjust the thickness in other dimensions.
+ *
+ * @param mode :: true for rebinning mode
+ */
 void SliceViewer::setRebinMode(bool mode) {
   // The events associated with these controls will trigger a re-draw
   m_syncRebinMode->toggle(mode);
@@ -1115,9 +1115,9 @@ void SliceViewer::setRebinMode(bool mode) {
 
 //------------------------------------------------------------------------------
 /** When in dynamic rebinning mode, this refreshes the rebinned area to be the
-* currently viewed area. See setXYLimits(), setRebinNumBins(),
-* setRebinThickness()
-*/
+ * currently viewed area. See setXYLimits(), setRebinNumBins(),
+ * setRebinThickness()
+ */
 void SliceViewer::refreshRebin() { this->rebinParamsChanged(); }
 
 //------------------------------------------------------------------------------
@@ -1147,9 +1147,9 @@ void SliceViewer::LineMode_toggled(bool checked) {
 
 //------------------------------------------------------------------------------
 /** Toggle "line-drawing" mode (to draw 1D lines using the mouse)
-*
-* @param lineMode :: True to go into line mode, False to exit it.
-*/
+ *
+ * @param lineMode :: True to go into line mode, False to exit it.
+ */
 void SliceViewer::toggleLineMode(bool lineMode) {
   // This should send events to start line mode
   m_syncLineMode->toggle(lineMode);
@@ -1225,9 +1225,9 @@ void SliceViewer::zoomInSlot() { this->zoomBy(1.1); }
 void SliceViewer::zoomOutSlot() { this->zoomBy(1.0 / 1.1); }
 
 /** Slot called when zooming using QwtPlotZoomer (rubber-band method)
-*
-* @param rect :: rectangle to zoom to
-*/
+ *
+ * @param rect :: rectangle to zoom to
+ */
 void SliceViewer::zoomRectSlot(const QwtDoubleRect &rect) {
   if ((rect.width() == 0) || (rect.height() == 0))
     return;
@@ -1260,10 +1260,10 @@ void SliceViewer::helpPeaksViewer() {
 
 //------------------------------------------------------------------------------
 /** Automatically resets the zoom view to full axes.
-* This will reset the XY limits to the full range of the workspace.
-* Use zoomBy() or setXYLimits() to modify the view range.
-* This corresponds to the "View Extents" button.
-*/
+ * This will reset the XY limits to the full range of the workspace.
+ * Use zoomBy() or setXYLimits() to modify the view range.
+ * This corresponds to the "View Extents" button.
+ */
 void SliceViewer::resetZoom() {
   // Reset the 2 axes to full scale
   resetAxis(m_spect->xAxis(), m_X);
@@ -1315,12 +1315,12 @@ void SliceViewer::loadColorMapSlot() { this->loadColorMap(QString()); }
 
 //------------------------------------------------------------------------------
 /** Grab the 2D view as an image. The image is rendered at the current window
-* size, with the color scale but without the text boxes for changing them.
-*
-* See also saveImage() and copyImageToClipboard()
-*
-* @return QPixmap containing the image.
-*/
+ * size, with the color scale but without the text boxes for changing them.
+ *
+ * See also saveImage() and copyImageToClipboard()
+ *
+ * @return QPixmap containing the image.
+ */
 QPixmap SliceViewer::getImage() {
 
   // Switch to full resolution rendering
@@ -1351,7 +1351,7 @@ QPixmap SliceViewer::getImage() {
 
 //------------------------------------------------------------------------------
 /** Copy the rendered 2D image to the clipboard
-*/
+ */
 void SliceViewer::copyImageToClipboard() {
   // Create the image
   QPixmap pix = this->getImage();
@@ -1360,11 +1360,11 @@ void SliceViewer::copyImageToClipboard() {
 }
 
 /**
-* Adds .png extension if not already included
-*
-* @param fname :: a file name to save an (png) image
-* @return input file name with '.png' appended if needed
-**/
+ * Adds .png extension if not already included
+ *
+ * @param fname :: a file name to save an (png) image
+ * @return input file name with '.png' appended if needed
+ **/
 QString SliceViewer::ensurePngExtension(const QString &fname) const {
   const QString goodExt = "png";
 
@@ -1377,11 +1377,11 @@ QString SliceViewer::ensurePngExtension(const QString &fname) const {
 
 //------------------------------------------------------------------------------
 /** Save the rendered 2D slice to an image file.
-*
-* @param filename :: full path to the file to save, including extension
-*        (e.g. .png). If not specified or empty, then a dialog will prompt
-*        the user to pick a file.
-*/
+ *
+ * @param filename :: full path to the file to save, including extension
+ *        (e.g. .png). If not specified or empty, then a dialog will prompt
+ *        the user to pick a file.
+ */
 void SliceViewer::saveImage(const QString &filename) {
   QString fileselection;
   if (filename.isEmpty()) {
@@ -1409,10 +1409,10 @@ void SliceViewer::saveImage(const QString &filename) {
 //==============================================================================
 //==============================================================================
 /** Zoom in or out, keeping the center of the plot in the same position.
-*
-* @param factor :: double, if > 1 : zoom in by this factor.
-*                  if < 1 : it will zoom out.
-*/
+ *
+ * @param factor :: double, if > 1 : zoom in by this factor.
+ *                  if < 1 : it will zoom out.
+ */
 void SliceViewer::zoomBy(double factor) {
   QwtDoubleInterval xint = this->getXLimits();
   QwtDoubleInterval yint = this->getYLimits();
@@ -1436,13 +1436,13 @@ void SliceViewer::zoomBy(double factor) {
 
 //------------------------------------------------------------------------------
 /** Manually set the center of the plot, in X Y coordinates.
-* This keeps the plot the same size as previously.
-* Use setXYLimits() to modify the size of the plot by setting the X/Y edges,
-* or you can use zoomBy() to zoom in/out
-*
-* @param x :: new position of the center in X
-* @param y :: new position of the center in Y
-*/
+ * This keeps the plot the same size as previously.
+ * Use setXYLimits() to modify the size of the plot by setting the X/Y edges,
+ * or you can use zoomBy() to zoom in/out
+ *
+ * @param x :: new position of the center in X
+ * @param y :: new position of the center in Y
+ */
 void SliceViewer::setXYCenter(double x, double y) {
   QwtDoubleInterval xint = this->getXLimits();
   QwtDoubleInterval yint = this->getYLimits();
@@ -1455,10 +1455,10 @@ void SliceViewer::setXYCenter(double x, double y) {
 
 //------------------------------------------------------------------------------
 /** Reset the axis and scale it
-*
-* @param axis :: int for X or Y
-* @param dim :: dimension to show
-*/
+ *
+ * @param axis :: int for X or Y
+ * @param dim :: dimension to show
+ */
 void SliceViewer::resetAxis(int axis, const IMDDimension_const_sptr &dim) {
   m_plot->setAxisScale(axis, dim->getMinimum(), dim->getMaximum());
   m_plot->setAxisTitle(axis, API::PlotAxis(*dim).title());
@@ -1549,8 +1549,9 @@ void SliceViewer::findRangeSlice() {
     MDBoxImplicitFunction *function = new MDBoxImplicitFunction(min, max);
 
     // Iterate through the slice
-    m_colorRangeSlice = API::SignalRange(*workspace_used, *function,
-                                         this->getNormalization()).interval();
+    m_colorRangeSlice =
+        API::SignalRange(*workspace_used, *function, this->getNormalization())
+            .interval();
     delete function;
 
     // In case of failure, use the full range instead
@@ -1566,10 +1567,10 @@ void SliceViewer::findRangeSlice() {
 
 //------------------------------------------------------------------------------
 /** Slot to show the mouse info at the mouse position
-*
-* @param x :: position of the mouse in plot coords
-* @param y :: position of the mouse in plot coords
-*/
+ *
+ * @param x :: position of the mouse in plot coords
+ * @param y :: position of the mouse in plot coords
+ */
 void SliceViewer::showInfoAt(double x, double y) {
   // Show the coordinates in the viewed workspace
   if (!m_ws)
@@ -1699,11 +1700,11 @@ void SliceViewer::updateDisplay(bool resetAxes) {
 
 //------------------------------------------------------------------------------
 /** The user changed the shown dimension somewhere.
-*
-* @param index :: index of the dimension
-* @param dim :: shown dimension, 0=X, 1=Y, -1 sliced
-* @param oldDim :: previous shown dimension, 0=X, 1=Y, -1 sliced
-*/
+ *
+ * @param index :: index of the dimension
+ * @param dim :: shown dimension, 0=X, 1=Y, -1 sliced
+ * @param oldDim :: previous shown dimension, 0=X, 1=Y, -1 sliced
+ */
 void SliceViewer::changedShownDim(int index, int dim, int oldDim) {
   if (dim >= 0) {
     // Swap from X to Y
@@ -1761,8 +1762,8 @@ void SliceViewer::checkForHKLDimension() {
 //==============================================================================
 
 /** @return the name of the workspace selected, or a blank string
-* if no workspace is set.
-*/
+ * if no workspace is set.
+ */
 QString SliceViewer::getWorkspaceName() const {
   if (m_ws)
     return QString::fromStdString(m_ws->getName());
@@ -1772,26 +1773,26 @@ QString SliceViewer::getWorkspaceName() const {
 
 //------------------------------------------------------------------------------
 /** @return the index of the dimension that is currently
-* being shown as the X axis of the plot.
-*/
+ * being shown as the X axis of the plot.
+ */
 int SliceViewer::getDimX() const { return int(m_dimX); }
 
 /** @return the index of the dimension that is currently
-* being shown as the Y axis of the plot.
-*/
+ * being shown as the Y axis of the plot.
+ */
 int SliceViewer::getDimY() const { return int(m_dimY); }
 
 //------------------------------------------------------------------------------
 /** Set the index of the dimensions that will be shown as
-* the X and Y axis of the plot.
-* You cannot set both axes to be the same.
-*
-* To be called from Python, primarily.
-*
-* @param indexX :: index of the X dimension, from 0 to NDims-1.
-* @param indexY :: index of the Y dimension, from 0 to NDims-1.
-* @throw std::invalid_argument if an index is invalid or repeated.
-*/
+ * the X and Y axis of the plot.
+ * You cannot set both axes to be the same.
+ *
+ * To be called from Python, primarily.
+ *
+ * @param indexX :: index of the X dimension, from 0 to NDims-1.
+ * @param indexY :: index of the Y dimension, from 0 to NDims-1.
+ * @throw std::invalid_argument if an index is invalid or repeated.
+ */
 void SliceViewer::setXYDim(int indexX, int indexY) {
   if (indexX >= int(m_dimWidgets.size()) || indexX < 0)
     throw std::invalid_argument("There is no dimension # " +
@@ -1821,13 +1822,13 @@ void SliceViewer::setXYDim(int indexX, int indexY) {
 
 //------------------------------------------------------------------------------
 /** Set the dimensions that will be shown as the X and Y axes
-*
-* @param dimX :: name of the X dimension. Must match the workspace dimension
-*names.
-* @param dimY :: name of the Y dimension. Must match the workspace dimension
-*names.
-* @throw std::runtime_error if the dimension name is not found.
-*/
+ *
+ * @param dimX :: name of the X dimension. Must match the workspace dimension
+ *names.
+ * @param dimY :: name of the Y dimension. Must match the workspace dimension
+ *names.
+ * @throw std::runtime_error if the dimension name is not found.
+ */
 void SliceViewer::setXYDim(const QString &dimX, const QString &dimY) {
   if (!m_ws)
     return;
@@ -1838,14 +1839,14 @@ void SliceViewer::setXYDim(const QString &dimX, const QString &dimY) {
 
 //------------------------------------------------------------------------------
 /** Sets the slice point in the given dimension:
-* that is, what is the position of the plane in that dimension
-*
-* @param dim :: index of the dimension to change
-* @param value :: value of the slice point, in the units of the given
-*dimension.
-*        This should be within the range of min/max for that dimension.
-* @throw std::invalid_argument if the index is invalid
-*/
+ * that is, what is the position of the plane in that dimension
+ *
+ * @param dim :: index of the dimension to change
+ * @param value :: value of the slice point, in the units of the given
+ *dimension.
+ *        This should be within the range of min/max for that dimension.
+ * @throw std::invalid_argument if the index is invalid
+ */
 void SliceViewer::setSlicePoint(int dim, double value) {
   if (dim >= int(m_dimWidgets.size()) || dim < 0)
     throw std::invalid_argument("There is no dimension # " +
@@ -1855,12 +1856,12 @@ void SliceViewer::setSlicePoint(int dim, double value) {
 
 //------------------------------------------------------------------------------
 /** Returns the slice point in the given dimension
-*
-* @param dim :: index of the dimension
-* @return slice point for that dimension. Value has no significance for the
-*         X or Y display dimensions.
-* @throw std::invalid_argument if the index is invalid
-*/
+ *
+ * @param dim :: index of the dimension
+ * @return slice point for that dimension. Value has no significance for the
+ *         X or Y display dimensions.
+ * @throw std::invalid_argument if the index is invalid
+ */
 double SliceViewer::getSlicePoint(int dim) const {
   if (dim >= int(m_dimWidgets.size()) || dim < 0)
     throw std::invalid_argument("There is no dimension # " +
@@ -1870,14 +1871,14 @@ double SliceViewer::getSlicePoint(int dim) const {
 
 //------------------------------------------------------------------------------
 /** Sets the slice point in the given dimension:
-* that is, what is the position of the plane in that dimension
-*
-* @param dim :: name of the dimension to change
-* @param value :: value of the slice point, in the units of the given
-*dimension.
-*        This should be within the range of min/max for that dimension.
-* @throw std::runtime_error if the name is not found in the workspace
-*/
+ * that is, what is the position of the plane in that dimension
+ *
+ * @param dim :: name of the dimension to change
+ * @param value :: value of the slice point, in the units of the given
+ *dimension.
+ *        This should be within the range of min/max for that dimension.
+ * @throw std::runtime_error if the name is not found in the workspace
+ */
 void SliceViewer::setSlicePoint(const QString &dim, double value) {
   if (!m_ws)
     return;
@@ -1887,12 +1888,12 @@ void SliceViewer::setSlicePoint(const QString &dim, double value) {
 
 //------------------------------------------------------------------------------
 /** Returns the slice point in the given dimension
-*
-* @param dim :: name of the dimension
-* @return slice point for that dimension. Value has no significance for the
-*         X or Y display dimensions.
-* @throw std::runtime_error if the name is not found in the workspace
-*/
+ *
+ * @param dim :: name of the dimension
+ * @return slice point for that dimension. Value has no significance for the
+ *         X or Y display dimensions.
+ * @throw std::runtime_error if the name is not found in the workspace
+ */
 double SliceViewer::getSlicePoint(const QString &dim) const {
   if (!m_ws)
     return 0;
@@ -1902,16 +1903,16 @@ double SliceViewer::getSlicePoint(const QString &dim) const {
 
 //------------------------------------------------------------------------------
 /** Set the color scale limits and log mode via a method call.
-*  Here for backwards compatibility, setColorScale(double min, double max, int
-*type)
-*  should be used instead.
-*
-* @param min :: minimum value corresponding to the lowest color on the map
-* @param max :: maximum value corresponding to the highest color on the map
-* @param log :: true for a log color scale, false for linear
-* @throw std::invalid_argument if max < min or if the values are
-*        inconsistent with a log color scale
-*/
+ *  Here for backwards compatibility, setColorScale(double min, double max, int
+ *type)
+ *  should be used instead.
+ *
+ * @param min :: minimum value corresponding to the lowest color on the map
+ * @param max :: maximum value corresponding to the highest color on the map
+ * @param log :: true for a log color scale, false for linear
+ * @throw std::invalid_argument if max < min or if the values are
+ *        inconsistent with a log color scale
+ */
 void SliceViewer::setColorScale(double min, double max, bool log) {
   if (max <= min)
     throw std::invalid_argument("Color scale maximum must be > minimum.");
@@ -1925,13 +1926,13 @@ void SliceViewer::setColorScale(double min, double max, bool log) {
 
 //------------------------------------------------------------------------------
 /** Set the color scale limits and type via a method call.
-*
-* @param min :: minimum value corresponding to the lowest color on the map
-* @param max :: maximum value corresponding to the highest color on the map
-* @param type :: 0 for linear, 1 for log, 2 for power
-* @throw std::invalid_argument if max < min or if the values are
-*        inconsistent with a log color scale
-*/
+ *
+ * @param min :: minimum value corresponding to the lowest color on the map
+ * @param max :: maximum value corresponding to the highest color on the map
+ * @param type :: 0 for linear, 1 for log, 2 for power
+ * @throw std::invalid_argument if max < min or if the values are
+ *        inconsistent with a log color scale
+ */
 void SliceViewer::setColorScale(double min, double max, int type) {
   if (max <= min)
     throw std::invalid_argument("Color scale maximum must be > minimum.");
@@ -1945,18 +1946,18 @@ void SliceViewer::setColorScale(double min, double max, int type) {
 
 //------------------------------------------------------------------------------
 /** Set the "background" color to use in the color map. Default is white.
-*
-* This is the color that is shown when:
-*
-*  - The coordinate is out of bounds of the workspace.
-*  - When a signal is NAN (not-a-number).
-*  - When the signal is Zero, if that option is selected using
-*setTransparentZeros()
-*
-* @param r :: red component, from 0-255
-* @param g :: green component, from 0-255
-* @param b :: blue component, from 0-255
-*/
+ *
+ * This is the color that is shown when:
+ *
+ *  - The coordinate is out of bounds of the workspace.
+ *  - When a signal is NAN (not-a-number).
+ *  - When the signal is Zero, if that option is selected using
+ *setTransparentZeros()
+ *
+ * @param r :: red component, from 0-255
+ * @param g :: green component, from 0-255
+ * @param b :: blue component, from 0-255
+ */
 void SliceViewer::setColorMapBackground(int r, int g, int b) {
   m_colorBar->getColorMap().setNanColor(r, g, b);
   this->colorRangeChanged();
@@ -1964,40 +1965,40 @@ void SliceViewer::setColorMapBackground(int r, int g, int b) {
 
 //------------------------------------------------------------------------------
 /** Set the minimum value corresponding to the lowest color on the map
-*
-* @param min :: minimum value corresponding to the lowest color on the map
-* @throw std::invalid_argument if max < min or if the values are
-*        inconsistent with a log color scale
-*/
+ *
+ * @param min :: minimum value corresponding to the lowest color on the map
+ * @throw std::invalid_argument if max < min or if the values are
+ *        inconsistent with a log color scale
+ */
 void SliceViewer::setColorScaleMin(double min) {
   this->setColorScale(min, this->getColorScaleMax(), this->getColorScaleType());
 }
 
 //------------------------------------------------------------------------------
 /** Get the colormap scale type
-*
-* @return int corresponding to the selected scale type
-*/
+ *
+ * @return int corresponding to the selected scale type
+ */
 int SliceViewer::getColorScaleType() { return m_colorBar->getScale(); }
 
 //------------------------------------------------------------------------------
 /** Set the maximum value corresponding to the lowest color on the map
-*
-* @param max :: maximum value corresponding to the lowest color on the map
-* @throw std::invalid_argument if max < min or if the values are
-*        inconsistent with a log color scale
-*/
+ *
+ * @param max :: maximum value corresponding to the lowest color on the map
+ * @throw std::invalid_argument if max < min or if the values are
+ *        inconsistent with a log color scale
+ */
 void SliceViewer::setColorScaleMax(double max) {
   this->setColorScale(this->getColorScaleMin(), max, this->getColorScaleType());
 }
 
 //------------------------------------------------------------------------------
 /** Set whether the color scale is logarithmic
-*
-* @param log :: true for a log color scale, false for linear
-* @throw std::invalid_argument if the min/max values are inconsistent
-*        with a log color scale
-*/
+ *
+ * @param log :: true for a log color scale, false for linear
+ * @throw std::invalid_argument if the min/max values are inconsistent
+ *        with a log color scale
+ */
 void SliceViewer::setColorScaleLog(bool log) {
   this->setColorScale(this->getColorScaleMin(), this->getColorScaleMax(),
                       (int)log);
@@ -2019,15 +2020,15 @@ bool SliceViewer::getColorScaleLog() const { return m_colorBar->getLog(); }
 
 //------------------------------------------------------------------------------
 /** Sets whether the image should be rendered in "fast" mode, where
-* the workspace's resolution is used to guess how many pixels to render.
-*
-* If false, each pixel on screen will be rendered. This is the most
-* accurate view but the slowest.
-*
-* This redraws the screen.
-*
-* @param fast :: true to use "fast" rendering mode.
-*/
+ * the workspace's resolution is used to guess how many pixels to render.
+ *
+ * If false, each pixel on screen will be rendered. This is the most
+ * accurate view but the slowest.
+ *
+ * This redraws the screen.
+ *
+ * @param fast :: true to use "fast" rendering mode.
+ */
 void SliceViewer::setFastRender(bool fast) {
   m_fastRender = fast;
   m_data->setFastMode(m_fastRender);
@@ -2035,29 +2036,29 @@ void SliceViewer::setFastRender(bool fast) {
 }
 
 /** Return true if the image is in "fast" rendering mode.
-*
-* In "fast" mode, the workspace's resolution is used to guess how many
-* pixels to render. If false, each pixel on screen will be rendered.
-* This is the most accurate view but the slowest.
-*
-* @return True if the image is in "fast" rendering mode.
-*/
+ *
+ * In "fast" mode, the workspace's resolution is used to guess how many
+ * pixels to render. If false, each pixel on screen will be rendered.
+ * This is the most accurate view but the slowest.
+ *
+ * @return True if the image is in "fast" rendering mode.
+ */
 bool SliceViewer::getFastRender() const { return m_fastRender; }
 
 //------------------------------------------------------------------------------
 /** Set the limits in X and Y to be shown in the plot.
-* The X and Y values are in the units of their respective dimensions.
-* You can change the mapping from X/Y in the plot to specific
-* dimensions in the displayed workspace using setXYDim().
-*
-* You can flip the direction of the scale if you specify,
-* e.g., xleft > xright.
-*
-* @param xleft   :: x-value on the left side of the graph
-* @param xright  :: x-value on the right side of the graph
-* @param ybottom :: y-value on the bottom of the graph
-* @param ytop    :: y-value on the top of the graph
-*/
+ * The X and Y values are in the units of their respective dimensions.
+ * You can change the mapping from X/Y in the plot to specific
+ * dimensions in the displayed workspace using setXYDim().
+ *
+ * You can flip the direction of the scale if you specify,
+ * e.g., xleft > xright.
+ *
+ * @param xleft   :: x-value on the left side of the graph
+ * @param xright  :: x-value on the right side of the graph
+ * @param ybottom :: y-value on the bottom of the graph
+ * @param ytop    :: y-value on the top of the graph
+ */
 void SliceViewer::setXYLimits(double xleft, double xright, double ybottom,
                               double ytop) {
   // Set the limits in X and Y
@@ -2081,11 +2082,11 @@ QwtDoubleInterval SliceViewer::getYLimits() const {
 
 //------------------------------------------------------------------------------
 /** Opens a workspace and sets the view and slice points
-* given the XML from the MultiSlice view in XML format.
-*
-* @param xml :: string describing workspace, slice point, etc.
-* @throw std::runtime_error if error in parsing XML
-*/
+ * given the XML from the MultiSlice view in XML format.
+ *
+ * @param xml :: string describing workspace, slice point, etc.
+ * @throw std::runtime_error if error in parsing XML
+ */
 void SliceViewer::openFromXML(const QString &xml) {
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
@@ -2264,8 +2265,8 @@ void SliceViewer::openFromXML(const QString &xml) {
 
 //------------------------------------------------------------------------------
 /** This slot is called when the dynamic rebinning parameters are changed.
-* It recalculates the dynamically rebinned workspace and plots it
-*/
+ * It recalculates the dynamically rebinned workspace and plots it
+ */
 void SliceViewer::rebinParamsChanged() {
   if (!m_ws)
     return;
@@ -2343,10 +2344,10 @@ void SliceViewer::rebinParamsChanged() {
 
 //------------------------------------------------------------------------------
 /** Slot called by the observer when the BinMD call has completed.
-* This returns the execution to the main GUI thread, and
-* so can update the GUI.
-* @param error :: true if the algorithm died with an error.
-*/
+ * This returns the execution to the main GUI thread, and
+ * so can update the GUI.
+ * @param error :: true if the algorithm died with an error.
+ */
 void SliceViewer::dynamicRebinComplete(bool error) {
   // If there was an error, clear the workspace
   m_overlayWS.reset();
@@ -2531,13 +2532,13 @@ void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
 }
 
 /**
-* Convenience function for removing all displayed peaks workspaces.
-*/
+ * Convenience function for removing all displayed peaks workspaces.
+ */
 void SliceViewer::clearPeaksWorkspaces() { this->disablePeakOverlays(); }
 
 /**
-* Helper function to rest the SliceViewer into a no-peak overlay mode.
-*/
+ * Helper function to rest the SliceViewer into a no-peak overlay mode.
+ */
 void SliceViewer::disablePeakOverlays() {
   // Un-check the button for consistency.
   m_peaksPresenter->clear();
@@ -2550,9 +2551,9 @@ void SliceViewer::disablePeakOverlays() {
 }
 
 /**
-* Show a collection of peaks workspaces as overplots
-* @param list : List of peak workspace names to show.
-*/
+ * Show a collection of peaks workspaces as overplots
+ * @param list : List of peak workspace names to show.
+ */
 ProxyCompositePeaksPresenter *
 SliceViewer::setPeaksWorkspaces(const QStringList &list) {
 
@@ -2676,9 +2677,9 @@ void SliceViewer::updatePeakOverlaySliderWidget() {
 }
 
 /**
-* Update the peaks presenter. Use the slice position as well as the plot region
-* to update the collection of peaks presetners.
-*/
+ * Update the peaks presenter. Use the slice position as well as the plot region
+ * to update the collection of peaks presetners.
+ */
 void SliceViewer::updatePeaksOverlay() {
   if (m_peaksSliderWidget != nullptr) {
     auto xInterval = getXLimits();
@@ -2747,13 +2748,13 @@ void SliceViewer::zoomToRectangle(const PeakBoundingBox &boundingBox) {
 }
 
 /**
-* Reset the original view.
-*/
+ * Reset the original view.
+ */
 void SliceViewer::resetView() { this->resetZoom(); }
 
 /**
-* @brief Detach this sliceviewer from the peaksviewer
-*/
+ * @brief Detach this sliceviewer from the peaksviewer
+ */
 void SliceViewer::detach() { this->disablePeakOverlays(); }
 
 void SliceViewer::peakWorkspaceChanged(
@@ -2804,17 +2805,17 @@ void SliceViewer::dropEvent(QDropEvent *e) {
 }
 
 /**
-* Set autoscaling for the color bar on or off
-* @param autoscale :: [input] On/off status for autoscaling
-*/
+ * Set autoscaling for the color bar on or off
+ * @param autoscale :: [input] On/off status for autoscaling
+ */
 void SliceViewer::setColorBarAutoScale(bool autoscale) {
   m_colorBar->setAutoScale(autoscale);
 }
 
 /**
-* Apply the color scaling for the current slice. This will
-* be applied only if it is explicitly requested
-*/
+ * Apply the color scaling for the current slice. This will
+ * be applied only if it is explicitly requested
+ */
 void SliceViewer::applyColorScalingForCurrentSliceIfRequired() {
   auto useAutoColorScaleforCurrentSlice =
       m_colorBar->getAutoScaleforCurrentSlice();
@@ -2824,9 +2825,9 @@ void SliceViewer::applyColorScalingForCurrentSliceIfRequired() {
 }
 
 /**
-* Load the state of the slice viewer from a Mantid project file
-* @param lines :: lines from the project file to load state from
-*/
+ * Load the state of the slice viewer from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ */
 void SliceViewer::loadFromProject(const std::string &lines) {
   API::TSVSerialiser tsv(lines);
 
@@ -2923,8 +2924,8 @@ void SliceViewer::loadFromProject(const std::string &lines) {
 }
 
 /** Load the current state of the dimension widgets from a string
-* @param lines :: a string containing the state of the widgets
-*/
+ * @param lines :: a string containing the state of the widgets
+ */
 void SliceViewer::loadDimensionWidgets(const std::string &lines) {
   API::TSVSerialiser tsv(lines);
 
@@ -2946,9 +2947,9 @@ void SliceViewer::loadDimensionWidgets(const std::string &lines) {
 }
 
 /**
-* Save the state of th slice viewer to a Mantid project file
-* @return a string representing the current state
-*/
+ * Save the state of th slice viewer to a Mantid project file
+ * @return a string representing the current state
+ */
 std::string SliceViewer::saveToProject() const {
   API::TSVSerialiser tsv;
 
@@ -2979,8 +2980,8 @@ std::string SliceViewer::saveToProject() const {
 }
 
 /** Save the current state of the dimension widgets to string
-* @return a string containing the state of the widgets
-*/
+ * @return a string containing the state of the widgets
+ */
 std::string SliceViewer::saveDimensionWidgets() const {
   API::TSVSerialiser tsv;
   tsv.writeLine("NumDimensions") << m_dimWidgets.size();
@@ -3033,5 +3034,5 @@ void SliceViewer::transferSettings(const API::QwtRasterDataMD *const from,
   from->transferSettingsTo(to);
 }
 
-} // namespace
-}
+} // namespace SliceViewer
+} // namespace MantidQt

@@ -43,7 +43,7 @@ DECLARE_LISTENER(ISISHistoDataListener)
 namespace {
 /// static logger
 Kernel::Logger g_log("ISISHistoDataListener");
-}
+} // namespace
 
 /// Constructor
 ISISHistoDataListener::ISISHistoDataListener()
@@ -70,11 +70,11 @@ ISISHistoDataListener::~ISISHistoDataListener() {
 }
 
 /** Function called by IDC routines to report an error. Passes the error through
-* to the logger
-* @param status ::  The status code of the error (disregarded)
-* @param code ::    The error code (disregarded)
-* @param message :: The error message - passed to the logger at error level
-*/
+ * to the logger
+ * @param status ::  The status code of the error (disregarded)
+ * @param code ::    The error code (disregarded)
+ * @param message :: The error message - passed to the logger at error level
+ */
 void ISISHistoDataListener::IDCReporter(int status, int code,
                                         const char *message) {
   (void)status;
@@ -83,11 +83,11 @@ void ISISHistoDataListener::IDCReporter(int status, int code,
 }
 
 /** Connect to the specified address and checks that is valid
-  *  @param address   The IP address and port to contact (port is ignored).
-  * @param args A ConnectionArgs object used to supply additional arguments
-  * required for the connection
-  *  @return True if the connection was successfully established
-  */
+ *  @param address   The IP address and port to contact (port is ignored).
+ * @param args A ConnectionArgs object used to supply additional arguments
+ * required for the connection
+ *  @return True if the connection was successfully established
+ */
 bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
 
   m_daeName = address.toString();
@@ -287,8 +287,8 @@ std::string ISISHistoDataListener::getString(const std::string &par) const {
 
 /** Sets a list of spectra to be extracted. Default is reading all available
  * spectra.
-  * @param specList :: A vector with spectra indices.
-  */
+ * @param specList :: A vector with spectra indices.
+ */
 void ISISHistoDataListener::setSpectra(const std::vector<specnum_t> &specList) {
   // after listener has created its first workspace the spectra numbers cannot
   // be changed
@@ -299,8 +299,8 @@ void ISISHistoDataListener::setSpectra(const std::vector<specnum_t> &specList) {
 
 /** Sets a list of periods to be extracted. Default is reading all available
  * periods.
-  * @param periodList :: A vector with period numbers.
-  */
+ * @param periodList :: A vector with period numbers.
+ */
 void ISISHistoDataListener::setPeriods(
     const std::vector<specnum_t> &periodList) {
   // after listener has created its first workspace the period numbers cannot be

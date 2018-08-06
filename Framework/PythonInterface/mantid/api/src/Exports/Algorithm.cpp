@@ -3,10 +3,10 @@
                                 // dominance, we have no way around it with the
                                 // design
 #endif
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidAPI/SerialAlgorithm.h"
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/SerialAlgorithm.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 #ifdef _MSC_VER
 #pragma warning(default : 4250)
@@ -21,11 +21,11 @@
 #include <boost/python/scope.hpp>
 
 using Mantid::API::Algorithm;
-using Mantid::API::SerialAlgorithm;
-using Mantid::API::ParallelAlgorithm;
 using Mantid::API::DistributedAlgorithm;
-using Mantid::PythonInterface::AlgorithmAdapter;
+using Mantid::API::ParallelAlgorithm;
+using Mantid::API::SerialAlgorithm;
 using Mantid::Kernel::Direction;
+using Mantid::PythonInterface::AlgorithmAdapter;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(Algorithm)
@@ -81,7 +81,7 @@ void translateCancel(const Algorithm::CancelException &exc) {
   UNUSED_ARG(exc);
   PyErr_SetString(PyExc_KeyboardInterrupt, "");
 }
-}
+} // namespace
 
 void export_leaf_classes() {
   register_ptr_to_python<boost::shared_ptr<Algorithm>>();

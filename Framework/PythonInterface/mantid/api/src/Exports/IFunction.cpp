@@ -1,9 +1,9 @@
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -74,7 +74,7 @@ using removeTieByName = void (IFunction::*)(const std::string &);
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
-}
+} // namespace
 
 void export_IFunction() {
 
@@ -129,8 +129,9 @@ void export_IFunction() {
                IFunction::getParameter,
            (arg("self"), arg("name")), "Get the value of the named parameter")
 
-      .def("__getitem__", (double (IFunction::*)(const std::string &) const) &
-                              IFunction::getParameter,
+      .def("__getitem__",
+           (double (IFunction::*)(const std::string &) const) &
+               IFunction::getParameter,
            (arg("self"), arg("name")), "Get the value of the named parameter")
 
       .def("setParameter", (setParameterType1)&IFunction::setParameter,

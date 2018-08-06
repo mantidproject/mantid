@@ -13,8 +13,8 @@ using ::testing::Return;
 #include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Matrix;
+using Mantid::Kernel::V3D;
 
 class SpaceGroupFactoryTest : public CxxTest::TestSuite {
 public:

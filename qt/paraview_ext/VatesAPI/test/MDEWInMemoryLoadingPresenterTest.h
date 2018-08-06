@@ -1,9 +1,9 @@
 #ifndef MDEW_IN_MEMORY_LOADING_PRESENTER_TEST_H
 #define MDEW_IN_MEMORY_LOADING_PRESENTER_TEST_H
 
-#include <cxxtest/TestSuite.h>
-#include "MockObjects.h"
 #include "MantidAPI/FileFinder.h"
+#include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"

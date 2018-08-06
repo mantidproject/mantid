@@ -1,12 +1,12 @@
 #ifndef MANTID_MDALGORITHMS_CONVERTCWSDEXPTOMOMENTUM_H_
 #define MANTID_MDALGORITHMS_CONVERTCWSDEXPTOMOMENTUM_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/MDEventInserter.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

@@ -2,9 +2,9 @@
 #define MULTISLICEVIEW_H_
 
 #include "MantidKernel/VMD.h"
-#include "ui_MultisliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "ui_MultisliceView.h"
 
 #include <QPointer>
 #include <QWidget>
@@ -121,8 +121,8 @@ private:
   int m_axisIndex;
   double m_sliceOffsetOnAxis;
 };
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif // MULTISLICEVIEW_H_

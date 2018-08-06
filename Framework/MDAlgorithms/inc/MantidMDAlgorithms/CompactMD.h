@@ -29,10 +29,10 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/CutMD.h"
-#include "MantidAPI/Algorithm.h"
 #include "boost/shared_ptr.hpp"
 namespace Mantid {
 namespace MDAlgorithms {
@@ -58,7 +58,7 @@ public:
                                 std::vector<Mantid::coord_t> &minVec,
                                 std::vector<Mantid::coord_t> &maxVec);
 };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif // MANTID_MDALGORITHMS_COMPACTMD_H_

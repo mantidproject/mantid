@@ -128,7 +128,7 @@ GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
 ///@endcond
-}
+} // namespace
 GNU_DIAG_ON("cast-qual")
 
 void export_AlgorithmFactory() {

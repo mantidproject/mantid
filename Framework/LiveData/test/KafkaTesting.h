@@ -141,7 +141,8 @@ void fakeReceiveAnISISEventMessage(std::string *buffer, int32_t nextPeriod) {
       builder.CreateVector(tof), builder.CreateVector(spec),
       FacilityData_ISISData,
       CreateISISData(builder, static_cast<uint32_t>(nextPeriod),
-                     RunState_RUNNING, protonCharge).Union());
+                     RunState_RUNNING, protonCharge)
+          .Union());
   FinishEventMessageBuffer(builder, messageFlatbuf);
 
   // Copy to provided buffer
@@ -188,10 +189,11 @@ void fakeReceiveARunStartMessage(std::string *buffer, int32_t runNumber,
       static_cast<uint64_t>(mantidTime.to_time_t() * 1000000000);
 
   flatbuffers::FlatBufferBuilder builder;
-  auto runInfo = CreateRunInfo(
-      builder, InfoTypes_RunStart,
-      CreateRunStart(builder, startTimestamp, runNumber,
-                     builder.CreateString(instName), nPeriods).Union());
+  auto runInfo =
+      CreateRunInfo(builder, InfoTypes_RunStart,
+                    CreateRunStart(builder, startTimestamp, runNumber,
+                                   builder.CreateString(instName), nPeriods)
+                        .Union());
   FinishRunInfoBuffer(builder, runInfo);
   // Copy to provided buffer
   buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),

@@ -11,8 +11,8 @@ namespace API {
 
 using tokenizer = Mantid::Kernel::StringTokenizer;
 
-const std::string DEFAULT_OPS_STR[] = {";", ",", "=", "== != > < <= >=",
-                                       "&& || ^^", "+ -", "* /", "^"};
+const std::string DEFAULT_OPS_STR[] = {
+    ";", ",", "=", "== != > < <= >=", "&& || ^^", "+ -", "* /", "^"};
 
 const std::string EMPTY_EXPRESSION_NAME = "EMPTY";
 
@@ -99,8 +99,8 @@ Expression::Expression(const std::vector<std::string> &binary,
 Expression::Expression(const Expression &expr)
     : // m_tokens(expr.m_tokens),
       // m_expr(expr.m_expr),
-      m_funct(expr.m_funct),
-      m_op(expr.m_op), m_terms(expr.m_terms), m_operators(expr.m_operators) {}
+      m_funct(expr.m_funct), m_op(expr.m_op), m_terms(expr.m_terms),
+      m_operators(expr.m_operators) {}
 Expression::Expression(const Expression *pexpr)
     : m_operators(pexpr->m_operators) {}
 
@@ -589,5 +589,5 @@ void Expression::toList(const std::string &sep) {
   setFunct(sep);
 }
 
-} // API
-} // Mantid
+} // namespace API
+} // namespace Mantid

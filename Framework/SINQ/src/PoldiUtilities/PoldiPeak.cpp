@@ -1,8 +1,8 @@
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 
+#include "boost/bind.hpp"
 #include <cmath>
 #include <stdexcept>
-#include "boost/bind.hpp"
 
 namespace Mantid {
 namespace Poldi {
@@ -143,5 +143,5 @@ PoldiPeak::PoldiPeak(UncertainValue d, UncertainValue intensity,
   setD(d);
   setFwhm(fwhm, Relative);
 }
-}
-}
+} // namespace Poldi
+} // namespace Mantid

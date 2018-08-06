@@ -89,7 +89,7 @@ private:
   double getNormValue(API::CompositeFunction_sptr &func);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_CALCULATEMUONASYMMETRY_H_*/

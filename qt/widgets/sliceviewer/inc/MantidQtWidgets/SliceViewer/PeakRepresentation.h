@@ -89,7 +89,7 @@ protected:
 
 using PeakRepresentation_sptr = std::shared_ptr<PeakRepresentation>;
 using VecPeakRepresentation = std::vector<PeakRepresentation_sptr>;
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif

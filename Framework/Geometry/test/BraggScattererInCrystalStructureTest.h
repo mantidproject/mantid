@@ -11,8 +11,8 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-using ::testing::Return;
 using ::testing::A;
+using ::testing::Return;
 
 class BraggScattererInCrystalStructureTest : public CxxTest::TestSuite {
 public:

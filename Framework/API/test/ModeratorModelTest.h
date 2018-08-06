@@ -4,9 +4,9 @@
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidKernel/WarningSuppressions.h"
 
+#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
-#include <boost/make_shared.hpp>
 
 class MockModerator : public Mantid::API::ModeratorModel {
 public:

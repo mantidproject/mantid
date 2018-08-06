@@ -1,7 +1,7 @@
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
+#include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
 #include <boost/python/class.hpp>
@@ -83,9 +83,9 @@ public:
  */
 Statistics getStatisticsNumpy(const NumPy::NdArray &data,
                               const bool sorted = false) {
-  using Mantid::Kernel::getStatistics;
-  using Mantid::Kernel::StatOptions;
   using Converters::NDArrayToVector;
+  using Mantid::Kernel::StatOptions;
+  using Mantid::Kernel::getStatistics;
 
   if (isFloatArray(data.ptr())) {
     unsigned int flags = StatOptions::AllStats;
@@ -145,8 +145,8 @@ std::vector<double> getZscoreNumpyDeprecated(const NumPy::NdArray &data,
  */
 std::vector<double> getModifiedZscoreNumpy(const NumPy::NdArray &data,
                                            const bool sorted = false) {
-  using Mantid::Kernel::getModifiedZscore;
   using Converters::NDArrayToVector;
+  using Mantid::Kernel::getModifiedZscore;
 
   if (isFloatArray(data.ptr())) {
     return getModifiedZscore(NDArrayToVector<double>(data)(), sorted);
@@ -170,9 +170,9 @@ GNU_DIAG_ON("unused-local-typedef")
 //============================================
 
 // Function pointer to real implementation of getMoments
-using MomentsFunction = std::vector<double>(*)(const std::vector<double> &,
-                                               const std::vector<double> &,
-                                               const int);
+using MomentsFunction = std::vector<double> (*)(const std::vector<double> &,
+                                                const std::vector<double> &,
+                                                const int);
 
 /**
  * The implementation for getMomentsAboutOrigin & getMomentsAboutOriginMean for
@@ -246,7 +246,7 @@ GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
 ///@endcond
-}
+} // namespace
 
 // -------------------------------------- Exports start here
 // --------------------------------------

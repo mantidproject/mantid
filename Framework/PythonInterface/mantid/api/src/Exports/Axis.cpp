@@ -78,7 +78,7 @@ PyObject *extractAxisValues(Axis &self) {
   }
   return array;
 }
-}
+} // namespace
 
 void export_Axis() {
   register_ptr_to_python<Axis *>();
@@ -126,10 +126,10 @@ void export_Axis() {
 // SpectraAxis
 // --------------------------------------------------------------------------------------------
 /**
-* Creates a SpectraAxis referencing a given workspace
-* @param ws A pointer to the parent workspace
-* @return pointer to the axis object
-*/
+ * Creates a SpectraAxis referencing a given workspace
+ * @param ws A pointer to the parent workspace
+ * @return pointer to the axis object
+ */
 Axis *createSpectraAxis(const MatrixWorkspace *const ws) {
   return new SpectraAxis(ws);
 }
@@ -148,10 +148,10 @@ void export_SpectraAxis() {
 // NumericAxis
 // --------------------------------------------------------------------------------------------
 /**
-* Creates a NumericAxis
-* @param length The length of the new axis
-* @return pointer to the axis object
-*/
+ * Creates a NumericAxis
+ * @param length The length of the new axis
+ * @return pointer to the axis object
+ */
 Axis *createNumericAxis(int length) { return new NumericAxis(length); }
 
 void export_NumericAxis() {
@@ -169,10 +169,10 @@ void export_NumericAxis() {
 // --------------------------------------------------------------------------------------------
 
 /**
-* Creates a BinEdgeAxis
-* @param length The length of the new axis
-* @return pointer to the axis object
-*/
+ * Creates a BinEdgeAxis
+ * @param length The length of the new axis
+ * @return pointer to the axis object
+ */
 Axis *createBinEdgeAxis(int length) { return new BinEdgeAxis(length); }
 
 void export_BinEdgeAxis() {
@@ -191,10 +191,10 @@ void export_BinEdgeAxis() {
 // --------------------------------------------------------------------------------------------
 
 /**
-* Creates a TextAxis
-* @param length The length of the new axis
-* @return pointer to the axis object
-*/
+ * Creates a TextAxis
+ * @param length The length of the new axis
+ * @return pointer to the axis object
+ */
 Axis *createTextAxis(int length) { return new TextAxis(length); }
 
 void export_TextAxis() {

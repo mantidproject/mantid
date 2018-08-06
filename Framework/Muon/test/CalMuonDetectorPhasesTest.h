@@ -3,18 +3,18 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMuon/CalMuonDetectorPhases.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/cow_ptr.h"
+#include "MantidMuon/CalMuonDetectorPhases.h"
 
 using namespace Mantid::API;
 using Mantid::MantidVec;
@@ -144,9 +144,9 @@ private:
         double x = static_cast<double>(t) / static_cast<double>(maxt);
         double e = exp(-x / tau);
         X.push_back(x);
-        Y.push_back(a * sin(w * x +
-                            static_cast<double>(s) * M_PI /
-                                static_cast<double>(nspec)) *
+        Y.push_back(a *
+                        sin(w * x + static_cast<double>(s) * M_PI /
+                                        static_cast<double>(nspec)) *
                         e +
                     e);
         E.push_back(0.005);

@@ -1,21 +1,21 @@
+#include <algorithm>
+#include <complex>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <sstream>
-#include <complex>
 #include <list>
-#include <vector>
 #include <map>
+#include <sstream>
 #include <stack>
-#include <algorithm>
+#include <vector>
 
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Math/mathSupport.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/V3D.h"
 
 #ifdef ENABLE_OPENCASCADE
 // Opencascade defines _USE_MATH_DEFINES without checking whether it is already

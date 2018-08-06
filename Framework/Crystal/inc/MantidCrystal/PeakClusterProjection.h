@@ -1,20 +1,20 @@
 #ifndef MANTID_CRYSTAL_PEAKCLUSTERPROJECTION_H_
 #define MANTID_CRYSTAL_PEAKCLUSTERPROJECTION_H_
 
-#include "MantidKernel/System.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace Geometry {
 class IPeak;
 class PeakTransform;
-}
+} // namespace Geometry
 namespace API {
 class IMDHistoWorkspace;
 class IMDEventWorkspace;
-}
+} // namespace API
 namespace Crystal {
 
 /** PeakClusterProjection : Maps peaks onto IMDHistoWorkspaces and returns the

@@ -55,6 +55,6 @@ QModelIndexForMainModel RowLocationAdapter::indexAt(RowLocation const &location,
                              "row location which does not exist.");
   }
 }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

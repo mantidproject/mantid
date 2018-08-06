@@ -93,7 +93,7 @@ private:
   std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
       m_calculator;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif

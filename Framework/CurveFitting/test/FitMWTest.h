@@ -17,12 +17,12 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -201,7 +201,7 @@ void doTestExecHistogramData(API::MatrixWorkspace_sptr ws2,
     TS_ASSERT_DELTA(fun->getParameter("Lifetime"), 1.0, 1e-4);
   }
 }
-}
+} // namespace
 
 class FitMWTest : public CxxTest::TestSuite {
 public:

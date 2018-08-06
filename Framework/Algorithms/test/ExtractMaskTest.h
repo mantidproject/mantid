@@ -1,12 +1,11 @@
 #ifndef EXTRACTMASKINGTEST_H_
 #define EXTRACTMASKINGTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ExtractMask.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/SpectrumInfo.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

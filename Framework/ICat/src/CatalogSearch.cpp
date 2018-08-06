@@ -8,11 +8,11 @@ GNU_DIAG_ON("literal-suffix")
 
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 #include <boost/algorithm/string/regex.hpp>
 #include <limits>
@@ -31,15 +31,18 @@ void CatalogSearch::init() {
                   "The name of the investigation to search for.");
   declareProperty("Instrument", "",
                   "The name of the instrument used in the investigation.");
-  declareProperty("RunRange", "", "The range of runs to search for related "
-                                  "investigations. Must be in the format "
-                                  "0000-0000 or 0000:0000.");
-  declareProperty("StartDate", "", isDate, "The start date for the range of "
-                                           "investigations to be searched. The "
-                                           "format must be DD/MM/YYYY.");
-  declareProperty("EndDate", "", isDate, "The end date for the range of "
-                                         "investigations to be searched. The "
-                                         "format must be DD/MM/YYYY.");
+  declareProperty("RunRange", "",
+                  "The range of runs to search for related "
+                  "investigations. Must be in the format "
+                  "0000-0000 or 0000:0000.");
+  declareProperty("StartDate", "", isDate,
+                  "The start date for the range of "
+                  "investigations to be searched. The "
+                  "format must be DD/MM/YYYY.");
+  declareProperty("EndDate", "", isDate,
+                  "The end date for the range of "
+                  "investigations to be searched. The "
+                  "format must be DD/MM/YYYY.");
   declareProperty(
       "Keywords", "",
       "A comma separated list of words to search for in the investigation.");
@@ -52,18 +55,20 @@ void CatalogSearch::init() {
   declareProperty("DataFileName", "",
                   "The name of the data file in the investigation.");
   declareProperty("InvestigationType", "", "The type of the investigation.");
-  declareProperty("MyData", false, "If set to true, only search in "
-                                   "investigations of which you are an "
-                                   "investigator, e.g. 'My Data'.");
+  declareProperty("MyData", false,
+                  "If set to true, only search in "
+                  "investigations of which you are an "
+                  "investigator, e.g. 'My Data'.");
 
   // These are needed for paging on the interface, and to minimise the amount of
   // results returned by the query.
   declareProperty(
       "CountOnly", false,
       "Boolean option to perform COUNT search only. This is used for paging.");
-  declareProperty<int>("Limit", 100, "The maximum amount of search results to "
-                                     "return. Adds a LIMIT clause to the "
-                                     "query. This is used for paging.");
+  declareProperty<int>("Limit", 100,
+                       "The maximum amount of search results to "
+                       "return. Adds a LIMIT clause to the "
+                       "query. This is used for paging.");
   declareProperty<int>(
       "Offset", 0,
       "The location to begin returning results from. This is used for paging.");
@@ -176,5 +181,5 @@ void CatalogSearch::setRunRanges(std::string &runRange,
   params.setRunStart(startRange);
   params.setRunEnd(endRange);
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

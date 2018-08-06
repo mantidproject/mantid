@@ -3,25 +3,25 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MuonAnalysisHelper.h"
 #include "MuonAnalysisResultTableCreator.h"
 #include "MuonSequentialFitDialog.h"
 
-#include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <QFileInfo>
-#include <QLineEdit>
 #include <QHash>
+#include <QLineEdit>
 #include <QMessageBox>
 
 #include <algorithm>
@@ -46,12 +46,17 @@ const QString MuonAnalysisResultTableTab::RUN_NUMBER_LOG("run_number");
 const QString MuonAnalysisResultTableTab::RUN_START_LOG("run_start");
 const QString MuonAnalysisResultTableTab::RUN_END_LOG("run_end");
 const QStringList MuonAnalysisResultTableTab::NON_TIMESERIES_LOGS{
-    MuonAnalysisResultTableTab::RUN_NUMBER_LOG, "group", "period",
-    RUN_START_LOG, RUN_END_LOG, "sample_temp", "sample_magn_field"};
+    MuonAnalysisResultTableTab::RUN_NUMBER_LOG,
+    "group",
+    "period",
+    RUN_START_LOG,
+    RUN_END_LOG,
+    "sample_temp",
+    "sample_magn_field"};
 
 /**
-* Constructor
-*/
+ * Constructor
+ */
 MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis &uiForm)
     : m_uiForm(uiForm), m_savedLogsState(), m_unselectedFittings() {
   // Connect the help button to the wiki page.
@@ -87,16 +92,16 @@ MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis &uiForm)
 }
 
 /**
-* Muon Analysis Results Table Help (slot)
-*/
+ * Muon Analysis Results Table Help (slot)
+ */
 void MuonAnalysisResultTableTab::helpResultsClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
       nullptr, QString("Muon Analysis"), QString("results-table"));
 }
 
 /**
-* Select/Deselect all log values to be included in the table
-*/
+ * Select/Deselect all log values to be included in the table
+ */
 void MuonAnalysisResultTableTab::selectAllLogs(bool state) {
   if (state) {
     for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++) {
@@ -119,8 +124,8 @@ void MuonAnalysisResultTableTab::selectAllLogs(bool state) {
 }
 
 /**
-* Select/Deselect all fitting results to be included in the table
-*/
+ * Select/Deselect all fitting results to be included in the table
+ */
 void MuonAnalysisResultTableTab::selectAllFittings(bool state) {
   if (state) {
     for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++) {
@@ -496,12 +501,12 @@ void MuonAnalysisResultTableTab::populateTables() {
 }
 
 /**
-* Populates the items (log values) into their table.
-*
-* @param fittedWsList :: a workspace list containing ONLY the workspaces that
-* have parameter
-*                   tables associated with it.
-*/
+ * Populates the items (log values) into their table.
+ *
+ * @param fittedWsList :: a workspace list containing ONLY the workspaces that
+ * have parameter
+ *                   tables associated with it.
+ */
 void MuonAnalysisResultTableTab::populateLogsAndValues(
     const QStringList &fittedWsList) {
   // A set of all the logs we've met in the workspaces
@@ -551,9 +556,10 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
           } else if (logName == RUN_START_LOG || logName == RUN_END_LOG) {
             wsLogValues[logName + " (text)"] =
                 QString::fromStdString(prop->value());
-            const auto seconds = static_cast<double>(DateAndTime(prop->value())
-                                                         .totalNanoseconds()) *
-                                 1.e-9;
+            const auto seconds =
+                static_cast<double>(
+                    DateAndTime(prop->value()).totalNanoseconds()) *
+                1.e-9;
             wsLogValues[logName + " (s)"] = seconds;
           } else if (auto stringProp =
                          dynamic_cast<PropertyWithValue<std::string> *>(prop)) {
@@ -719,10 +725,10 @@ void MuonAnalysisResultTableTab::onCreateTableClicked() {
 }
 
 /**
-* Creates the table using the information selected by the user in the tables
-* @param multipleFits :: [input] Whether table is for multiple fits or one
-* single fit
-*/
+ * Creates the table using the information selected by the user in the tables
+ * @param multipleFits :: [input] Whether table is for multiple fits or one
+ * single fit
+ */
 void MuonAnalysisResultTableTab::createTable(bool multipleFits) {
   if (m_logValues.size() == 0) {
     QMessageBox::information(this, "Mantid - Muon Analysis",
@@ -777,11 +783,11 @@ QStringList MuonAnalysisResultTableTab::getSelectedItemsToFit() {
 }
 
 /**
-* Get the user selected log file
-*
-* @return logsSelected :: A vector of QString's containing the logs that are
-* selected.
-*/
+ * Get the user selected log file
+ *
+ * @return logsSelected :: A vector of QString's containing the logs that are
+ * selected.
+ */
 QStringList MuonAnalysisResultTableTab::getSelectedLogs() {
   QStringList logsSelected;
   for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++) {
@@ -797,12 +803,12 @@ QStringList MuonAnalysisResultTableTab::getSelectedLogs() {
 }
 
 /**
-* Checks that the file name isn't been used, displays the appropriate message
-* and
-* then returns the name in which to save.
-*
-* @return name :: The name the results table should be created with.
-*/
+ * Checks that the file name isn't been used, displays the appropriate message
+ * and
+ * then returns the name in which to save.
+ *
+ * @return name :: The name the results table should be created with.
+ */
 std::string MuonAnalysisResultTableTab::getFileName() {
   std::string fileName(m_uiForm.tableName->text().toStdString());
 
@@ -825,6 +831,6 @@ std::string MuonAnalysisResultTableTab::getFileName() {
   }
   return fileName;
 }
-}
-}
-}
+} // namespace Muon
+} // namespace CustomInterfaces
+} // namespace MantidQt

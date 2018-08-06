@@ -149,7 +149,7 @@ protected:
   Kernel::Unit_sptr m_outputUnit;      ///< The unit we're going to
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_CONVERTUNITS_H_*/

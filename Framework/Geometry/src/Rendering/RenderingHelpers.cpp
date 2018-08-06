@@ -31,15 +31,15 @@
 GNU_DIAG_OFF("conversion")
 GNU_DIAG_OFF("cast-qual")
 
-#include <gp_Pnt.hxx>
-#include <TopoDS.hxx>
-#include <TopoDS_Shape.hxx>
-#include <TopoDS_Face.hxx>
 #include <BRep_Tool.hxx>
-#include <TopExp_Explorer.hxx>
 #include <Poly_Array1OfTriangle.hxx>
-#include <TColgp_Array1OfPnt.hxx>
 #include <Poly_Triangulation.hxx>
+#include <TColgp_Array1OfPnt.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shape.hxx>
+#include <gp_Pnt.hxx>
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("cast-qual")
 
