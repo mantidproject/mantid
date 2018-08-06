@@ -82,6 +82,15 @@ class RunTabPresenter(object):
         def on_paste_rows_requested(self):
             self._presenter.on_paste_rows_requested()
 
+        def on_insert_row(self):
+            self._presenter.on_insert_row()
+
+        def on_erase_rows(self):
+            self._presenter.on_erase_rows()
+
+        def on_cut_rows(self):
+            self._presenter.on_cut_rows_requested()
+
     class ProcessListener(WorkHandler.WorkListener):
         def __init__(self, presenter):
             super(RunTabPresenter.ProcessListener, self).__init__()
@@ -249,13 +258,11 @@ class RunTabPresenter(object):
             # 2. Read the batch file
             batch_file_parser = BatchCsvParser(batch_file_path)
             parsed_rows = batch_file_parser.parse_batch_file()
-            # 3. Clear the table
-            self._view.clear_table()
 
-            # 4. Populate the table
+            # 3. Populate the table
             self._table_model.clear_table_entries()
-            for row in parsed_rows:
-                self._add_row_to_table_model(row)
+            for index, row in enumerate(parsed_rows):
+                self._add_row_to_table_model(row, index)
 
             self.update_view_from_table_model()
 
@@ -266,7 +273,7 @@ class RunTabPresenter(object):
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 
-    def _add_row_to_table_model(self,row):
+    def _add_row_to_table_model(self,row, index):
         """
         Adds a row to the table
         """
@@ -306,7 +313,7 @@ class RunTabPresenter(object):
 
         table_index_model = TableIndexModel(*row_entry)
 
-        self._table_model.append_table_entry(table_index_model)
+        self._table_model.add_table_entry(index, table_index_model)
 
     def update_view_from_table_model(self):
         self._view.clear_table()
@@ -395,9 +402,23 @@ class RunTabPresenter(object):
         row_table_index = TableIndexModel(*row)
         self._table_model.add_table_entry(index, row_table_index)
 
+    def on_insert_row(self):
+        selected_rows = self._view.get_selected_rows()
+        selected_row = selected_rows[0] + 1 if selected_rows else self._table_model.get_number_of_rows()
+        table_entry_row = self._table_model.create_empty_row()
+        self._table_model.add_table_entry(selected_row, table_entry_row)
+        self.update_view_from_table_model()
+
+    def on_erase_rows(self):
+        selected_rows = self._view.get_selected_rows()
+        empty_row = TableModel.create_empty_row()
+        for row in selected_rows:
+            self._table_model.replace_table_entries([row], [empty_row])
+        self.update_view_from_table_model()
+
     def on_rows_removed(self, rows):
-        self._view.remove_rows(rows)
         self._table_model.remove_table_entries(rows)
+        self.update_view_from_table_model()
 
     def on_copy_rows_requested(self):
         selected_rows = self._view.get_selected_rows()
@@ -406,10 +427,16 @@ class RunTabPresenter(object):
             data_from_table_model = self._table_model.get_table_entry(row).to_list()
             self._clipboard.append(data_from_table_model)
 
+    def on_cut_rows_requested(self):
+        self.on_copy_rows_requested()
+        rows = self._view.get_selected_rows()
+        self.on_rows_removed(rows)
+
     def on_paste_rows_requested(self):
         selected_rows = self._view.get_selected_rows()
         selected_rows = selected_rows if selected_rows else [self._table_model.get_number_of_rows()]
-        self._table_model.replace_table_entries(selected_rows, self._clipboard)
+        replacement_table_index_models = [TableIndexModel(*x) for x in self._clipboard]
+        self._table_model.replace_table_entries(selected_rows, replacement_table_index_models)
         self.update_view_from_table_model()
 
     def on_manage_directories(self):

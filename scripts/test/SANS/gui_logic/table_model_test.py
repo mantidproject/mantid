@@ -85,6 +85,36 @@ class TableModelTest(unittest.TestCase):
 
         self.assertEqual(number_of_rows, 2)
 
+    def test_when_table_is_cleared_is_left_with_one_empty_row(self):
+        table_model = TableModel()
+        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+        table_index_model = TableIndexModel(1, "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(1, table_index_model)
+        empty_row = table_model.create_empty_row()
+
+        table_model.clear_table_entries()
+
+        self.assertEqual(table_model.get_number_of_rows(), 1)
+        self.assertEqual(table_model.get_table_entry(0), empty_row)
+
+    def test_when_last_row_is_removed_table_is_left_with_one_empty_row(self):
+        table_model = TableModel()
+        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+        table_index_model = TableIndexModel(1, "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(1, table_index_model)
+        empty_row = table_model.create_empty_row()
+
+        table_model.remove_table_entries([0, 1])
+
+        self.assertEqual(table_model.get_number_of_rows(), 1)
+        self.assertEqual(table_model.get_table_entry(0), empty_row)
+
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string
         table_model = TableModel()
