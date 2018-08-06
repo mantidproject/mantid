@@ -3,7 +3,18 @@
 #include "MantidKernel/V3D.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/return_by_value.hpp>
 #include <boost/python/return_value_policy.hpp>
+#include <boost/python/iterator.hpp>
+#include <boost/iterator/iterator_facade.hpp>
+
+#include <Python.h>
+#include <boost/python.hpp>
+
+#include "MantidGeometry/Instrument/DetectorInfoItem.h"
+#include "MantidGeometry/Instrument/DetectorInfoIterator.h"
+using Mantid::Geometry::DetectorInfoItem;
+using Mantid::Geometry::DetectorInfoIterator;
 
 using Mantid::Geometry::DetectorInfo;
 using Mantid::Kernel::Quat;
@@ -32,6 +43,9 @@ void export_DetectorInfo() {
 
   // Export to Python
   class_<DetectorInfo, boost::noncopyable>("DetectorInfo", no_init)
+
+      .def("__iter__", range(&DetectorInfo::begin, &DetectorInfo::end))
+
       .def("__len__", &DetectorInfo::size, (arg("self")),
            "Returns the size of the DetectorInfo, i.e., the number of "
            "detectors in the instrument.")

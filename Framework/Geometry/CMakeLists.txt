@@ -413,6 +413,7 @@ set ( TEST_FILES
 	UnitCellTest.h
 	V3RTest.h
 	XMLInstrumentParameterTest.h
+	DetectorInfoIteratorTest.h
 )
 
 set ( GMOCK_TEST_FILES

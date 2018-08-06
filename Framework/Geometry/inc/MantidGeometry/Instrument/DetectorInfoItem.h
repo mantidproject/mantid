@@ -2,34 +2,37 @@
 #define MANTID_GEOMETRY_DETECTORINFOITEM_H_
 
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfoIterator.h"
+#include "MantidKernel/V3D.h"
 
 #include <utility>
+using Mantid::Kernel::V3D;
 
 namespace Mantid {
 namespace Geometry {
-namespace Iterators {
 
-class DetectorInfoItem {
-
-private:
-  friend class DetectorInfoIterator;
-
-  // Variables to hold data
-  const DetectorInfo &m_detectorInfo;
-  size_t m_index;
-
-  // Private constructor, can only be created by DetectorInfoIterator
-  DetectorInfoItem(const DetectorInfo &detectorInfo, const size_t index)
-      : m_detectorInfo(detectorInfo), m_index(index) {}
+class MANTID_GEOMETRY_DLL DetectorInfoItem {
 
 public:
+  
+  DetectorInfoItem(const DetectorInfoItem &copy)
+      : m_detectorInfo(copy.m_detectorInfo) {
+    this->m_index = copy.m_index;
+  }
+
+  DetectorInfoItem& operator=(const DetectorInfoItem &rhs) {
+    this->m_index = rhs.m_index;
+    return *this;
+  }
+
+  size_t position() const { return m_index; }
+
   void advance(int64_t delta) {
     if (delta < 0) {
-      std::max(static_cast<uint64_t>(0),
-               static_cast<uint64_t>(m_index) + delta);
+      m_index = std::max(static_cast<uint64_t>(0),
+                         static_cast<uint64_t>(m_index) + delta);
     } else {
-      std::min(m_detectorInfo.size(), m_index + static_cast<size_t>(delta));
+      m_index =
+          std::min(m_detectorInfo.size(), m_index + static_cast<size_t>(delta));
     }
   }
 
@@ -48,9 +51,21 @@ public:
   size_t getIndex() const { return m_index; }
 
   void setIndex(const size_t index) { m_index = index; }
+
+private:
+  friend class DetectorInfoIterator;
+
+  // Private constructor, can only be created by DetectorInfoIterator
+  DetectorInfoItem(const DetectorInfo &detectorInfo, const size_t index)
+      : m_detectorInfo(detectorInfo), m_index(index) {}
+
+  // DetectorInfoItem& operator=(const DetectorInfoItem &) = delete;
+
+  // Variables to hold data
+  const DetectorInfo &m_detectorInfo;
+  size_t m_index = 0;
 };
 
-} // namespace Iterators
 } // namespace Geometry
 } // namespace Mantid
 

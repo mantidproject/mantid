@@ -4,6 +4,7 @@ import unittest
 from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
+from mantid.geometry import DetectorInfoItem
 from mantid.simpleapi import *
 
 
@@ -97,6 +98,23 @@ class DetectorInfoTest(unittest.TestCase):
         info = self._ws.detectorInfo()
         self.assertEquals(type(info.rotation(0)), Quat)
         self.assertEquals(type(info.rotation(1)), Quat)
+
+
+    """
+    ---------------
+    Iteration
+    ---------------
+    """
+
+    def test_iteration(self):
+        info = self._ws.detectorInfo()
+        #self.assertEquals(len(info), 0)
+        #self.assertEquals(info.size(), 0)
+        for a in info:
+            #self.assertEquals(type(a), DetectorInfoItem)
+            #self.assertEquals(info.position(0), "")
+            self.assertEquals(a.position, 100)
+
 
 
     """

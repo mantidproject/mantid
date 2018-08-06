@@ -8,6 +8,8 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/make_unique.h"
 
+#include "MantidGeometry/Instrument/DetectorInfoIterator.h"
+
 namespace Mantid {
 namespace Geometry {
 
@@ -385,6 +387,14 @@ DetectorInfo::getDetectorPtr(const size_t index) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   static_cast<void>(getDetector(index));
   return m_lastDetector[thread];
+}
+
+DetectorInfoIterator DetectorInfo::begin() const {
+  return DetectorInfoIterator(*this, 0);
+}
+
+DetectorInfoIterator DetectorInfo::end() const {
+  return DetectorInfoIterator(*this, size());
 }
 
 } // namespace Geometry
