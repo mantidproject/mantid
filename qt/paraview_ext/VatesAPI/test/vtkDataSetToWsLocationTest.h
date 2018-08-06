@@ -1,11 +1,11 @@
 #ifndef VTK_DATASET_TO_WS_LOCATION_TEST
 #define VTK_DATASET_TO_WS_LOCATION_TEST
 
-#include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/vtkDataSetToWsLocation.h"
-#include <vtkDataSet.h>
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 #include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
+#include <vtkDataSet.h>
 #include <vtkNew.h>
 
 using namespace Mantid::VATES;

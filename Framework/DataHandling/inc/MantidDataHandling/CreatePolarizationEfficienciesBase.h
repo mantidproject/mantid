@@ -1,11 +1,11 @@
 #ifndef MANTID_DATAHANDLING_CREATEPOLARIZATIONEFFICIENCIESBASE_H_
 #define MANTID_DATAHANDLING_CREATEPOLARIZATIONEFFICIENCIESBASE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidKernel/System.h"
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace DataHandling {

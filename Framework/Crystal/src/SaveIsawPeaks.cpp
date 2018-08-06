@@ -1,17 +1,17 @@
+#include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
-#include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Utils.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include <fstream>
 #include <Poco/File.h>
 #include <boost/algorithm/string/trim.hpp>
+#include <fstream>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -32,8 +32,9 @@ void SaveIsawPeaks::init() {
                       boost::make_shared<InstrumentValidator>()),
                   "An input PeaksWorkspace with an instrument.");
 
-  declareProperty("AppendFile", false, "Append to file if true.\n"
-                                       "If false, new file (default).");
+  declareProperty("AppendFile", false,
+                  "Append to file if true.\n"
+                  "If false, new file (default).");
 
   const std::vector<std::string> exts{".peaks", ".integrate"};
   declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
@@ -550,5 +551,5 @@ void SaveIsawPeaks::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

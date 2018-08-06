@@ -1,10 +1,10 @@
 #ifndef MANTID_CRYSTAL_LOADISAWPEAKS_H_
 #define MANTID_CRYSTAL_LOADISAWPEAKS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -94,7 +94,7 @@ private:
                   double &qSign);
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_LOADISAWPEAKS_H_ */

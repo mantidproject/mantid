@@ -13,7 +13,7 @@ namespace API {
 namespace {
 /// static logger
 Kernel::Logger g_log("LogarithmScale");
-}
+} // namespace
 
 DECLARE_TRANSFORMSCALE(LogarithmScale)
 

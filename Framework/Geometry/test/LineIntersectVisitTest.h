@@ -1,15 +1,15 @@
 #ifndef MANTID_LINEINTERSECTVISITTEST__
 #define MANTID_LINEINTERSECTVISITTEST__
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/V3D.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Line.h"
 #include "MantidGeometry/Surfaces/LineIntersectVisit.h"
 #include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidKernel/V3D.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Geometry;

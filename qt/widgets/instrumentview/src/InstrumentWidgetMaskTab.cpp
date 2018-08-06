@@ -15,8 +15,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
 #pragma warning disable 1125
@@ -26,8 +26,8 @@
 #endif
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1125
 #elif defined(__GNUC__)
@@ -55,10 +55,10 @@
 
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 
-#include <numeric>
-#include <cfloat>
 #include <algorithm>
+#include <cfloat>
 #include <fstream>
+#include <numeric>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -337,8 +337,8 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
 }
 
 /**
-* Initialize the tab when new projection surface is created.
-*/
+ * Initialize the tab when new projection surface is created.
+ */
 void InstrumentWidgetMaskTab::initSurface() {
   connect(m_instrWidget->getSurface().get(), SIGNAL(shapeCreated()), this,
           SLOT(shapeCreated()));
@@ -354,9 +354,9 @@ void InstrumentWidgetMaskTab::initSurface() {
 }
 
 /**
-* Selects between masking/grouping
-* @param mode The required mode, @see Mode
-*/
+ * Selects between masking/grouping
+ * @param mode The required mode, @see Mode
+ */
 void InstrumentWidgetMaskTab::setMode(Mode mode) {
   switch (mode) {
   case Mask:
@@ -404,8 +404,8 @@ void InstrumentWidgetMaskTab::selectTool(Activity tool) {
 }
 
 /**
-* Set tab's activity based on the currently selected tool button.
-*/
+ * Set tab's activity based on the currently selected tool button.
+ */
 void InstrumentWidgetMaskTab::setActivity() {
   const QColor borderColor = getShapeBorderColor();
   const QColor fillColor = getShapeFillColor();
@@ -461,8 +461,8 @@ void InstrumentWidgetMaskTab::setActivity() {
 }
 
 /**
-* Slot responding on creation of a new masking shape.
-*/
+ * Slot responding on creation of a new masking shape.
+ */
 void InstrumentWidgetMaskTab::shapeCreated() {
   if (!isVisible())
     return;
@@ -473,18 +473,18 @@ void InstrumentWidgetMaskTab::shapeCreated() {
 }
 
 /**
-* Slot responding on selection of a new masking shape.
-*/
+ * Slot responding on selection of a new masking shape.
+ */
 void InstrumentWidgetMaskTab::shapeSelected() { setProperties(); }
 
 /**
-* Slot responding on deselecting all masking shapes.
-*/
+ * Slot responding on deselecting all masking shapes.
+ */
 void InstrumentWidgetMaskTab::shapesDeselected() { clearProperties(); }
 
 /**
-* Slot responding on a change of a masking shape.
-*/
+ * Slot responding on a change of a masking shape.
+ */
 void InstrumentWidgetMaskTab::shapeChanged() {
   if (!m_left)
     return; // check that everything is ok
@@ -514,13 +514,13 @@ void InstrumentWidgetMaskTab::shapeChanged() {
 }
 
 /**
-* Slot responding on removing all masking shapes.
-*/
+ * Slot responding on removing all masking shapes.
+ */
 void InstrumentWidgetMaskTab::shapesCleared() { enableApplyButtons(); }
 
 /**
-* Removes the mask shapes from the screen.
-*/
+ * Removes the mask shapes from the screen.
+ */
 void InstrumentWidgetMaskTab::clearShapes() {
   m_instrWidget->getSurface()->clearMask();
   setSelectActivity();
@@ -626,9 +626,9 @@ void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
 }
 
 /**
-* Apply the constructed mask to the data workspace. This operation cannot be
-* reverted.
-*/
+ * Apply the constructed mask to the data workspace. This operation cannot be
+ * reverted.
+ */
 void InstrumentWidgetMaskTab::applyMask() {
   storeMask();
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -638,16 +638,16 @@ void InstrumentWidgetMaskTab::applyMask() {
 }
 
 /**
-* Apply the constructed mask to the view only.
-*/
+ * Apply the constructed mask to the view only.
+ */
 void InstrumentWidgetMaskTab::applyMaskToView() {
   storeMask();
   enableApplyButtons();
 }
 
 /**
-* Remove all masking that has not been applied to the data workspace.
-*/
+ * Remove all masking that has not been applied to the data workspace.
+ */
 void InstrumentWidgetMaskTab::clearMask() {
   clearShapes();
   m_instrWidget->getInstrumentActor().clearMasks();
@@ -656,12 +656,12 @@ void InstrumentWidgetMaskTab::clearMask() {
 }
 
 /**
-* Create a MaskWorkspace from the mask defined in this tab.
-* @param invertMask ::  if true, the selected mask will be inverted; if false,
-* the mask will be used as is
-* @param temp :: Set true to create a temporary workspace with a fixed name. If
-* false the name will be unique.
-*/
+ * Create a MaskWorkspace from the mask defined in this tab.
+ * @param invertMask ::  if true, the selected mask will be inverted; if false,
+ * the mask will be used as is
+ * @param temp :: Set true to create a temporary workspace with a fixed name. If
+ * false the name will be unique.
+ */
 Mantid::API::MatrixWorkspace_sptr
 InstrumentWidgetMaskTab::createMaskWorkspace(bool invertMask, bool temp) const {
   m_instrWidget->updateInstrumentView(); // to refresh the pick image
@@ -725,8 +725,8 @@ void InstrumentWidgetMaskTab::saveMaskToTable() {
 }
 
 /**
-* Extract selected detectors to a new workspace
-*/
+ * Extract selected detectors to a new workspace
+ */
 void InstrumentWidgetMaskTab::extractDetsToWorkspace() {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   std::vector<size_t> dets;
@@ -748,8 +748,8 @@ void InstrumentWidgetMaskTab::extractDetsToWorkspace() {
 }
 
 /**
-* Sum selected detectors to a new workspace
-*/
+ * Sum selected detectors to a new workspace
+ */
 void InstrumentWidgetMaskTab::sumDetsToWorkspace() {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   std::vector<size_t> dets;
@@ -798,9 +798,9 @@ void InstrumentWidgetMaskTab::showSaveMenuTooltip(QAction *action) {
 }
 
 /**
-* Toggle between different modes
-*
-*/
+ * Toggle between different modes
+ *
+ */
 void InstrumentWidgetMaskTab::toggleMaskGroup() {
   Mode mode = getMode();
 
@@ -820,12 +820,12 @@ void InstrumentWidgetMaskTab::toggleMaskGroup() {
 }
 
 /**
-* Save the constructed mask to a workspace with unique name of type
-* "MaskWorkspace_#".
-* The mask is not applied to the data workspace being displayed.
-* @param invertMask ::  if true, the selected mask will be inverted; if false,
-* the mask will be used as is
-*/
+ * Save the constructed mask to a workspace with unique name of type
+ * "MaskWorkspace_#".
+ * The mask is not applied to the data workspace being displayed.
+ * @param invertMask ::  if true, the selected mask will be inverted; if false,
+ * the mask will be used as is
+ */
 void InstrumentWidgetMaskTab::saveMaskingToWorkspace(bool invertMask) {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   // Make sure we have stored the Mask in the helper MaskWorkspace
@@ -846,11 +846,11 @@ void InstrumentWidgetMaskTab::saveMaskingToWorkspace(bool invertMask) {
 }
 
 /**
-* Save the constructed mask to a file.
-* The mask is not applied to the data workspace being displayed.
-* @param invertMask ::  if true, the selected mask will be inverted; if false,
-* the mask will be used as is
-*/
+ * Save the constructed mask to a file.
+ * The mask is not applied to the data workspace being displayed.
+ * @param invertMask ::  if true, the selected mask will be inverted; if false,
+ * the mask will be used as is
+ */
 void InstrumentWidgetMaskTab::saveMaskingToFile(bool invertMask) {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -885,11 +885,11 @@ void InstrumentWidgetMaskTab::saveMaskingToFile(bool invertMask) {
 }
 
 /**
-* Save the constructed mask to a cal file.
-* The mask is not applied to the data workspace being displayed.
-* @param invertMask ::  if true, the selected mask will be inverted; if false,
-* the mask will be used as is
-*/
+ * Save the constructed mask to a cal file.
+ * The mask is not applied to the data workspace being displayed.
+ * @param invertMask ::  if true, the selected mask will be inverted; if false,
+ * the mask will be used as is
+ */
 void InstrumentWidgetMaskTab::saveMaskingToCalFile(bool invertMask) {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -918,10 +918,10 @@ void InstrumentWidgetMaskTab::saveMaskingToCalFile(bool invertMask) {
 }
 
 /**
-* Apply and save the mask to a TableWorkspace with X-range
-* @param invertMask :: if true, the selected mask will be inverted; if false,
-* the mask will be used as is
-*/
+ * Apply and save the mask to a TableWorkspace with X-range
+ * @param invertMask :: if true, the selected mask will be inverted; if false,
+ * the mask will be used as is
+ */
 void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
   UNUSED_ARG(invertMask);
 
@@ -993,9 +993,9 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
 }
 
 /**
-* Generate a unique name for the mask worspace which will be saved in the ADS.
-* It will have a form MaskWorkspace[_#]
-*/
+ * Generate a unique name for the mask worspace which will be saved in the ADS.
+ * It will have a form MaskWorkspace[_#]
+ */
 std::string
 InstrumentWidgetMaskTab::generateMaskWorkspaceName(bool temp) const {
   if (temp)
@@ -1019,9 +1019,9 @@ InstrumentWidgetMaskTab::generateMaskWorkspaceName(bool temp) const {
 }
 
 /**
-* Sets the m_hasMaskToApply flag and
-* enables/disables the apply and clear buttons.
-*/
+ * Sets the m_hasMaskToApply flag and
+ * enables/disables the apply and clear buttons.
+ */
 void InstrumentWidgetMaskTab::enableApplyButtons() {
   const auto &instrActor = m_instrWidget->getInstrumentActor();
   auto mode = getMode();
@@ -1056,16 +1056,16 @@ void InstrumentWidgetMaskTab::enableApplyButtons() {
 }
 
 /**
-* Sets tab activity to Select: select and modify shapes.
-*/
+ * Sets tab activity to Select: select and modify shapes.
+ */
 void InstrumentWidgetMaskTab::setSelectActivity() {
   m_pointer->setChecked(true);
   setActivity();
 }
 
 /**
-* It tab in masking, ROI or grouping mode?
-*/
+ * It tab in masking, ROI or grouping mode?
+ */
 InstrumentWidgetMaskTab::Mode InstrumentWidgetMaskTab::getMode() const {
   if (m_masking_on->isChecked())
     return Mode::Mask;
@@ -1078,8 +1078,8 @@ InstrumentWidgetMaskTab::Mode InstrumentWidgetMaskTab::getMode() const {
 }
 
 /**
-* Border color.
-*/
+ * Border color.
+ */
 QColor InstrumentWidgetMaskTab::getShapeBorderColor() const {
   if (getMode() == Mode::Mask)
     return Qt::red;
@@ -1089,8 +1089,8 @@ QColor InstrumentWidgetMaskTab::getShapeBorderColor() const {
 }
 
 /**
-* Shape fill color.
-*/
+ * Shape fill color.
+ */
 QColor InstrumentWidgetMaskTab::getShapeFillColor() const {
   return QColor(255, 255, 255, 100);
 }
@@ -1103,8 +1103,8 @@ InstrumentWidgetMaskTab::addDoubleProperty(const QString &name) const {
 }
 
 /**
-* Store the mask defined by the shape tools to the helper m_maskWorkspace.
-*/
+ * Store the mask defined by the shape tools to the helper m_maskWorkspace.
+ */
 void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   m_pointer->setChecked(true);
@@ -1376,5 +1376,5 @@ bool InstrumentWidgetMaskTab::saveMaskViewToProject(
   return true;
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

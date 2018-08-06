@@ -131,8 +131,8 @@ public:
     std::string name() const override;
     double progress;       ///< Current progress. Value must be between 0 and 1.
     std::string message;   ///< Message sent with notification
-    double estimatedTime;  ///<Estimated time to completion
-    int progressPrecision; ///<Digits of precision to the progress (after the
+    double estimatedTime;  ///< Estimated time to completion
+    int progressPrecision; ///< Digits of precision to the progress (after the
                            /// decimal).
   };
 

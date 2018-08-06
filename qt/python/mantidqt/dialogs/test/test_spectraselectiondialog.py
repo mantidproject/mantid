@@ -25,27 +25,27 @@ from qtpy.QtWidgets import QDialogButtonBox
 
 # local imports
 from mantidqt.utils.qt.testing import requires_qapp
-from mantidqt.widgets.workspacewidget.plotselectiondialog import parse_selection_str, PlotSelectionDialog
+from mantidqt.dialogs.spectraselectordialog import parse_selection_str, SpectraSelectionDialog
 
 
 @requires_qapp
-class PlotSelectionDialogTest(unittest.TestCase):
+class SpectraSelectionDialogTest(unittest.TestCase):
 
     def test_initial_dialog_setup(self):
         workspaces = [CreateSampleWorkspace(OutputWorkspace='ws', StoreInADS=False)]
-        dlg = PlotSelectionDialog(workspaces)
+        dlg = SpectraSelectionDialog(workspaces)
         self.assertFalse(dlg._ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled())
 
     def test_filling_workspace_details_single_workspace(self):
         workspaces = [CreateSampleWorkspace(OutputWorkspace='ws', StoreInADS=False)]
-        dlg = PlotSelectionDialog(workspaces)
+        dlg = SpectraSelectionDialog(workspaces)
         self.assertEqual("valid range: 1-200", dlg._ui.specNums.placeholderText())
         self.assertEqual("valid range: 0-199", dlg._ui.wkspIndices.placeholderText())
 
     def test_filling_workspace_details_multiple_workspaces_of_same_size(self):
         workspaces = [CreateSampleWorkspace(OutputWorkspace='ws', StoreInADS=False),
                       CreateSampleWorkspace(OutputWorkspace='ws2', StoreInADS=False)]
-        dlg = PlotSelectionDialog(workspaces)
+        dlg = SpectraSelectionDialog(workspaces)
         self.assertEqual("valid range: 1-200", dlg._ui.specNums.placeholderText())
         self.assertEqual("valid range: 0-199", dlg._ui.wkspIndices.placeholderText())
 
@@ -54,13 +54,13 @@ class PlotSelectionDialogTest(unittest.TestCase):
         ws1 = CropWorkspace(ws1, StartWorkspaceIndex=50)
         ws2 = CreateSampleWorkspace(OutputWorkspace='ws', StoreInADS=False)
 
-        dlg = PlotSelectionDialog([ws1, ws2])
+        dlg = SpectraSelectionDialog([ws1, ws2])
         self.assertEqual("valid range: 51-100", dlg._ui.specNums.placeholderText())
         self.assertEqual("valid range: 0-49", dlg._ui.wkspIndices.placeholderText())
 
     def test_valid_text_in_boxes_activates_ok(self):
         workspaces = [CreateSampleWorkspace(OutputWorkspace='ws', StoreInADS=False)]
-        dlg = PlotSelectionDialog(workspaces)
+        dlg = SpectraSelectionDialog(workspaces)
 
         def do_test(input_box):
             input_box.setText("1")
@@ -73,7 +73,7 @@ class PlotSelectionDialogTest(unittest.TestCase):
 
     def test_plot_all_gives_only_workspaces_indices(self):
         ws = CreateSampleWorkspace(OutputWorkspace='ws', StoreInADS=False)
-        dlg = PlotSelectionDialog([ws])
+        dlg = SpectraSelectionDialog([ws])
         dlg._ui.buttonBox.button(QDialogButtonBox.YesToAll).click()
         self.assertTrue(dlg.selection is not None)
         self.assertTrue(dlg.selection.spectra is None)

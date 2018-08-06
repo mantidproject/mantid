@@ -88,7 +88,7 @@ extra_columns(const std::vector<std::string> &filenames) {
 
   return columnnames;
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

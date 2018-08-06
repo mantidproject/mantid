@@ -4,8 +4,8 @@
 #include <cstddef>
 
 #include "MantidQtWidgets/SpectrumViewer/DataArray.h"
-#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
@@ -13,11 +13,11 @@ namespace Mantid {
 namespace Geometry {
 class IComponent;
 class Instrument;
-}
+} // namespace Geometry
 namespace API {
 class SpectrumInfo;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace SpectrumView {

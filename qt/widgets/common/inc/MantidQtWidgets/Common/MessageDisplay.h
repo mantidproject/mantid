@@ -122,7 +122,7 @@ private:
   /// Log level actions
   QAction *m_error, *m_warning, *m_notice, *m_information, *m_debug;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MESSAGEDISPLAY_H_

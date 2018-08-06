@@ -156,8 +156,8 @@ public:
     TS_ASSERT_DELTA(R[249], 2.5, 0.0001);
     // make sure that nan didn' slip in
     TS_ASSERT(std::find_if(GofR.begin(), GofR.end(), [](const double d) {
-      return std::isnan(d);
-    }) == GofR.end());
+                return std::isnan(d);
+              }) == GofR.end());
   }
 
   void test_filter() {

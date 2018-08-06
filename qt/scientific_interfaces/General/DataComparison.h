@@ -4,10 +4,10 @@
 //----------------------
 // Includes
 //----------------------
-#include "ui_DataComparison.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "ui_DataComparison.h"
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
@@ -103,7 +103,7 @@ private:
   // The two workspaces that are currently being diffed
   QPair<QString, QString> m_diffWorkspaceNames;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_DATACOMPARISON_H_

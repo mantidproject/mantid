@@ -118,8 +118,9 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
 
     /** Draw plots **/
 
-    notebook->codeCell(plotsString(rowMap, boost::get<1>(postProcessString),
-                                   m_processor).toStdString());
+    notebook->codeCell(
+        plotsString(rowMap, boost::get<1>(postProcessString), m_processor)
+            .toStdString());
   }
 
   return QString::fromStdString(notebook->writeNotebook());
@@ -578,10 +579,11 @@ boost::tuple<QString, QString> loadRunString(const QString &run,
 }
 
 /** Given an algorithm's name, completes the list of output properties
-* @param algName : The name of the algorithm
-* @param currentProperties : The number of output properties that are workspaces
-* @return : The list of output properties as a string
-*/
+ * @param algName : The name of the algorithm
+ * @param currentProperties : The number of output properties that are
+ * workspaces
+ * @return : The list of output properties as a string
+ */
 QString completeOutputProperties(const QString &algName,
                                  size_t currentProperties) {
 
@@ -606,6 +608,6 @@ QString completeOutputProperties(const QString &algName,
 
   return outString;
 }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

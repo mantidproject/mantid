@@ -8,13 +8,13 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidHistogramData/QuadraticGenerator.h"
 
-using Mantid::HistogramData::estimateBackground;
-using Mantid::HistogramData::estimatePolynomial;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::LinearGenerator;
 using Mantid::HistogramData::Points;
 using Mantid::HistogramData::QuadraticGenerator;
+using Mantid::HistogramData::estimateBackground;
+using Mantid::HistogramData::estimatePolynomial;
 
 class EstimatePolynomialTest : public CxxTest::TestSuite {
 public:

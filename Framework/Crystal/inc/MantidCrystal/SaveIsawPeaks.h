@@ -1,10 +1,10 @@
 #ifndef MANTID_CRYSTAL_SAVEISAWPEAKS_H_
 #define MANTID_CRYSTAL_SAVEISAWPEAKS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 
@@ -51,7 +51,7 @@ private:
   Geometry::Instrument_const_sptr inst;
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_SAVEISAWPEAKS_H_ */

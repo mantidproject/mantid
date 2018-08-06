@@ -1,22 +1,22 @@
 #include "MantidCrystal/LoadIsawPeaks.h"
-#include "MantidCrystal/SCDCalibratePanels.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/CalibrationHelpers.h"
+#include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include <boost/algorithm/string/trim.hpp>
 
-using Mantid::Kernel::Strings::readToEndOfLine;
 using Mantid::Kernel::Strings::getWord;
+using Mantid::Kernel::Strings::readToEndOfLine;
 using Mantid::Kernel::Units::Wavelength;
 
 namespace Mantid {
@@ -621,5 +621,5 @@ boost::shared_ptr<const IComponent> LoadIsawPeaks::getCachedBankByName(
   return m_banks[bankname];
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

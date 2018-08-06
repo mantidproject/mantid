@@ -1,8 +1,8 @@
 #ifndef QT_UTILS_H
 #define QT_UTILS_H
 
-#include <QTableWidget>
 #include <QLineEdit>
+#include <QTableWidget>
 
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
 

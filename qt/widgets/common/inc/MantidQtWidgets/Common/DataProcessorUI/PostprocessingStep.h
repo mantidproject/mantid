@@ -37,7 +37,7 @@ private:
   void ensureRowSizeMatchesColumnCount(const WhiteList &columns,
                                        const QStringList &row);
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTWIDGETS_POSTPROCESSINGSTEP

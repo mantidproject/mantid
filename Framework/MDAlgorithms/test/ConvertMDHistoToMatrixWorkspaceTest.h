@@ -8,14 +8,14 @@
 #ifndef CONVERTMDHISTOTOMATRIXWORKSPACETEST_H_
 #define CONVERTMDHISTOTOMATRIXWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidMDAlgorithms/ConvertMDHistoToMatrixWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidMDAlgorithms/ConvertMDHistoToMatrixWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -58,13 +58,13 @@ public:
   }
 
   /**
-    * Test convesion of a MD workspace to a 2D MatrixWorkspace.
-    *
-    * @param ndims :: Number of dimensions in the input MDHistoWorkspace. ndims
-    *>= 2.
-    * @param nonIntegr :: Indices of the non-integrated dimensions. There must
-    *be 2 of them to pass the test.
-    */
+   * Test convesion of a MD workspace to a 2D MatrixWorkspace.
+   *
+   * @param ndims :: Number of dimensions in the input MDHistoWorkspace. ndims
+   *>= 2.
+   * @param nonIntegr :: Indices of the non-integrated dimensions. There must
+   *be 2 of them to pass the test.
+   */
   void do_test_2D_slice(size_t ndims, std::vector<size_t> nonIntegr) {
     // create an MD histo workspace
     size_t size = 1;

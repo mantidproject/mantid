@@ -151,7 +151,7 @@ private:
   std::unique_ptr<API::Progress> m_progress = nullptr; ///< Progress reporting
 };
 
-} // namespace WorkflowAlgorithm
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_AlignAndFocusPowder_H_*/

@@ -4,15 +4,15 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
-#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidGeometry/MDGeometry/UnknownFrame.h"
 #include "MantidKernel/MDUnit.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 #include "boost/make_shared.hpp"
 

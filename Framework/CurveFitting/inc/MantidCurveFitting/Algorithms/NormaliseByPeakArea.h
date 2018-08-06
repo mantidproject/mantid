@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_NORMALISEBYPEAKAREA_H_
 #define MANTID_CURVEFITTING_NORMALISEBYPEAKAREA_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -10,7 +10,7 @@ namespace Mantid {
 namespace HistogramData {
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 
 namespace CurveFitting {
 namespace Algorithms {

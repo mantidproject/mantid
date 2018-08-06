@@ -19,7 +19,7 @@ const ComplexType v22{333, 0.333};
 
 const ComplexType v30{1, 0.1};
 const ComplexType v31{11, 0.11};
-}
+} // namespace
 
 class ComplexVectorTest : public CxxTest::TestSuite {
 public:

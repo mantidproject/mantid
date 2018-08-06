@@ -20,9 +20,9 @@ list ( APPEND common_link_libs
 
 # Wrapper module linked against Qt4
 mtd_add_sip_module (
-  MODULE_NAME _widgetscoreqt4
-  TARGET_NAME mantidqt_widgetscoreqt4
-  SIP_SRCS src/_widgetscore.sip
+  MODULE_NAME _commonqt4
+  TARGET_NAME mantidqt_commonqt4
+  SIP_SRCS _common.sip
   HEADER_DEPS ${HEADER_DEPENDS}
   PYQT_VERSION 4
   LINK_LIBS
@@ -43,9 +43,9 @@ endif()
 
 # Wrapper module linked against Qt5
 mtd_add_sip_module (
-  MODULE_NAME _widgetscoreqt5
-  TARGET_NAME mantidqt_widgetscoreqt5
-  SIP_SRCS src/_widgetscore.sip
+  MODULE_NAME _commonqt5
+  TARGET_NAME mantidqt_commonqt5
+  SIP_SRCS _common.sip
   HEADER_DEPS ${HEADER_DEPENDS}
   PYQT_VERSION 5
   LINK_LIBS
